@@ -13,7 +13,6 @@
 	<arg value="ps"/>
 	<arg name="extensions" value="php"/>
 
-	<file>./admin</file>
 	<file>./load.php</file>
 	<file>./modules</file>
 	<file>./tests</file>
