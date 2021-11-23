@@ -1,0 +1,61 @@
+############
+## IDEs
+############
+
+*.pydevproject
+.project
+.metadata
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+.externalToolBuilders/
+*.launch
+.cproject
+.buildpath
+nbproject/
+
+############
+## Build
+############
+
+build
+
+############
+## Vendor
+############
+
+node_modules/
+vendor/
+
+############
+## OSes
+############
+
+[Tt]humbs.db
+[Dd]esktop.ini
+*.DS_store
+.DS_store?
+
+############
+## Misc
+############
+
+tests/logs
+bin/
+tmp/
+*.tmp
+*.bak
+*.log
+*.[Cc]ache
+*.cpr
+*.orig
+*.php.in
+.idea/
+.sass-cache/*
+temp/
+._*
+.Trashes
+.svn
