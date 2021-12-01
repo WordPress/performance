@@ -2,7 +2,7 @@
 /**
  * PHPUnit bootstrap file
  *
- * @package TODO-SLUG
+ * @package performance-lab
  */
 
 define( 'TESTS_PLUGIN_DIR', dirname( __DIR__ ) );
