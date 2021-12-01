@@ -1,3 +1,5 @@
+[Back to overview](./README.md)
+
 # Writing a module
 
 Modules in the performance plugin share various similarities with WordPress plugins:
