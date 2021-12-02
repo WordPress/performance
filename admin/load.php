@@ -13,7 +13,7 @@
 function perflab_add_modules_page() {
 	$hook_suffix = add_options_page(
 		__( 'Performance Modules', 'performance-lab' ),
-		__( 'Performance Modules', 'performance-lab' ),
+		__( 'Performance', 'performance-lab' ),
 		'manage_options',
 		PERFLAB_MODULES_SCREEN,
 		'perflab_render_modules_page'
