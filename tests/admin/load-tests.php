@@ -136,4 +136,41 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$this->assertContains( '<div class="wrap">', $output );
 		$this->assertContains( "<input type='hidden' name='option_page' value='" . PERFLAB_MODULES_SCREEN . "' />", $output );
 	}
+
+	public function test_perflab_render_modules_page_field() {
+		$module_slug     = 'demo-module-1';
+		$module_data     = self::$demo_modules[ $module_slug ];
+		$module_settings = array( 'enabled' => false );
+
+		// Assert correct 'id' and 'name' attributes, label, and unchecked checkbox.
+		ob_start();
+		perflab_render_modules_page_field( $module_slug, $module_data, $module_settings );
+		$output = ob_get_clean();
+		$this->assertContains( ' id="module_' . $module_slug . '_enabled"', $output );
+		$this->assertContains( ' name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
+		$this->assertContains( 'Enable ' . $module_data['name'] . '?', $output );
+		$this->assertNotContains( ' checked', $output );
+
+		// Assert correct 'id' and 'name' attributes, experimental label, and checked checkbox.
+		$module_data['experimental'] = true;
+		$module_settings['enabled']  = true;
+		ob_start();
+		perflab_render_modules_page_field( $module_slug, $module_data, $module_settings );
+		$output = ob_get_clean();
+		$this->assertContains( ' id="module_' . $module_slug . '_enabled"', $output );
+		$this->assertContains( ' name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
+		$this->assertContains( 'Enable ' . $module_data['name'] . ' <strong>(experimental)</strong>?', $output );
+		$this->assertContains( " checked='checked'", $output );
+	}
+
+	public function test_perflab_get_focus_areas() {
+		$expected_focus_areas = array(
+			'images',
+			'javascript',
+			'site-health',
+			'measurement',
+			'object-caching',
+		);
+		$this->assertSame( $expected_focus_areas, array_keys( perflab_get_focus_areas() ) );
+	}
 }
