@@ -117,3 +117,5 @@ function perflab_load_active_modules() {
 }
 
 perflab_load_active_modules();
+
+require_once plugin_dir_path( __FILE__ ) . 'admin/load.php';
