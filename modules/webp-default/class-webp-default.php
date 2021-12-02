@@ -6,13 +6,13 @@
  * @since 1.0.0
  */
 
- /**
-  * WebP-Default Module
-  *
-  * Switches the default sub sized output format for images to WebP when supported.
-  *
-  * @since 1.0.0
-  */
+/**
+ * WebP-Default Module
+ *
+ * Switches the default sub sized output format for images to WebP when supported.
+ *
+ * @since 1.0.0
+ */
 class WebP_Default {
 
 	/**
@@ -36,13 +36,15 @@ class WebP_Default {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $format The image editor default output format mapping.
+	 * @param string $output_format The image editor default output format mapping.
+	 * @param string $filename      Path to the image.
+	 * @param string $mime_type     The source image mime type.
 	 * @return string The new output format mapping.
 	 */
 	public function webp_default_filter_image_editor_output_format( $output_format, $filename, $mime_type ) {
 
 		// WebP lossless support is still limited on servers, so only apply to JPEGs.
-		if ( 'image/jpeg' !== $mime_type) {
+		if ( 'image/jpeg' !== $mime_type ) {
 			return $output_format;
 		}
 

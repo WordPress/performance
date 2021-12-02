@@ -2,9 +2,9 @@
 /**
  * Module Name: WebP default.
  * Description: Use WebP as the default sub sized image format.
- * 				This module changes the default format WordPress uses for
- * 				generating sub sized images from JPEG to WebP. Requires that the
- * 				server supports WebP and only acts on JPEG image uploads.
+ *              This module changes the default format WordPress uses for
+ *              generating sub sized images from JPEG to WebP. Requires that the
+ *              server supports WebP and only acts on JPEG image uploads.
  * Focus: images
  * Experimental: No
  *
