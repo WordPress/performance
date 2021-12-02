@@ -1,5 +1,12 @@
 <?php
 /**
+ * WebP-Default Module
+ *
+ * @package performance-lab
+ * @since 1.0.0
+ */
+
+/**
  * Module Name: WebP default.
  * Description: Use WebP as the default sub sized image format.
  *              This module changes the default format WordPress uses for
@@ -7,8 +14,6 @@
  *              server supports WebP and only acts on JPEG image uploads.
  * Focus: images
  * Experimental: No
- *
- * @package performance-lab
  */
 require_once( plugin_dir_path( __FILE__ ) . 'class-webp-default.php' );
 
