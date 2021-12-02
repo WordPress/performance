@@ -37,5 +37,14 @@ $GLOBALS['wp_tests_options'] = array(
 	'active_plugins' => array( basename( TESTS_PLUGIN_DIR ) . '/load.php' ),
 );
 
+// Add filter to ensure the plugin's admin integration is loaded for tests although not in admin.
+require_once $_test_root . '/includes/functions.php';
+tests_add_filter(
+	'plugins_loaded',
+	function() {
+		require_once TESTS_PLUGIN_DIR . '/admin/load.php';
+	}
+);
+
 // Start up the WP testing environment.
 require $_test_root . '/includes/bootstrap.php';
