@@ -182,33 +182,114 @@ function perflab_get_focus_areas() {
  * Gets all available modules.
  *
  * This function iterates through the modules directory and therefore should only be called on the modules page.
- * It parses each module's data, similar to how plugin data is parsed in WordPress core.
+ * It searches all modules, similar to how plugins are searched in the WordPress core function `get_plugins()`.
  *
  * @since 1.0.0
  *
+ * @param string $modules_root Modules root directory to look for modules in. Default is the `/modules` directory
+ *                                  in the plugin's root.
  * @return array Associative array of parsed module data, keyed by module slug. Fields for every module include
  *               'name', 'description', 'focus', and 'experimental'.
  */
-function perflab_get_modules() {
-	// TODO: Implement dynamic module data parsing. Depends on https://github.com/WordPress/performance/issues/2.
-	return array(
-		'demo-module-1' => array(
-			'name'         => 'Demo Module 1',
-			'description'  => 'This is the description for demo module 1.',
-			'focus'        => 'javascript',
-			'experimental' => false,
-		),
-		'demo-module-2' => array(
-			'name'         => 'Demo Module 2',
-			'description'  => 'This is the description for demo module 2.',
-			'focus'        => 'something',
-			'experimental' => true,
-		),
-		'demo-module-3' => array(
-			'name'         => 'Demo Module 3',
-			'description'  => 'This is the description for demo module 3.',
-			'focus'        => 'images',
-			'experimental' => false,
-		),
+function perflab_get_modules( $modules_root = null ) {
+	if ( null === $modules_root ) {
+		$modules_root = dirname( __DIR__ ) . '/modules';
+	}
+
+	$modules      = array();
+	$module_files = array();
+	$modules_dir  = @opendir( $modules_root );
+
+	if ( $modules_dir ) {
+		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+		while ( ( $file = readdir( $modules_dir ) ) !== false ) {
+			if ( '.' === substr( $file, 0, 1 ) ) {
+				continue;
+			}
+
+			// Unlike plugins, modules must be in a directory.
+			if ( ! is_dir( $modules_root . '/' . $file ) ) {
+				continue;
+			}
+
+			$module_dir = @opendir( $modules_root . '/' . $file );
+			if ( $module_dir ) {
+				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+				while ( ( $subfile = readdir( $module_dir ) ) !== false ) {
+					if ( '.' === substr( $subfile, 0, 1 ) ) {
+						continue;
+					}
+
+					// Unlike plugins, module main files must be called `load.php`.
+					if ( 'load.php' !== $subfile ) {
+						continue;
+					}
+
+					$module_files[] = "$file/$subfile";
+				}
+
+				closedir( $module_dir );
+			}
+		}
+
+		closedir( $modules_dir );
+	}
+
+	foreach ( $module_files as $module_file ) {
+		if ( ! is_readable( "$modules_root/$module_file" ) ) {
+			continue;
+		}
+
+		$module_data = perflab_get_module_data( "$modules_root/$module_file" );
+		if ( ! $module_data ) {
+			continue;
+		}
+
+		$modules[ dirname( $module_file ) ] = $module_data;
+	}
+
+	uasort(
+		$modules,
+		function( $a, $b ) {
+			return strnatcasecmp( $a['name'], $b['name'] );
+		}
 	);
+
+	return $modules;
+}
+
+/**
+ * Parses the module main file to get the module's metadata.
+ *
+ * This is similar to how plugin data is parsed in the WordPress core function `get_plugin_data()`.
+ *
+ * @since 1.0.0
+ *
+ * @param string $module_file Absolute path to the main module file.
+ * @return array|bool Associative array of parsed module data, or false on failure. Fields for every module include
+ *                    'name', 'description', 'focus', and 'experimental'.
+ */
+function perflab_get_module_data( $module_file ) {
+	$default_headers = array(
+		'name'         => 'Module Name',
+		'description'  => 'Description',
+		'focus'        => 'Focus',
+		'experimental' => 'Experimental',
+	);
+
+	$module_data = get_file_data( $module_file, $default_headers, 'perflab_module' );
+
+	// Module name and description are the minimum requirements.
+	if ( ! $module_data['name'] || ! $module_data['description'] ) {
+		return false;
+	}
+
+	// Experimental should be a boolean.
+	if ( 'yes' === strtolower( trim( $module_data['experimental'] ) ) ) {
+		$module_data['experimental'] = true;
+	} else {
+		$module_data['experimental'] = false;
+	}
+
+	return $module_data;
 }

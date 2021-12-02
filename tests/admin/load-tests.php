@@ -173,4 +173,18 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		);
 		$this->assertSame( $expected_focus_areas, array_keys( perflab_get_focus_areas() ) );
 	}
+
+	public function test_perflab_get_modules() {
+		// Use test data directory with demo modules that match the modules declared on top of this file.
+		$modules = perflab_get_modules( TESTS_PLUGIN_DIR . '/tests/testdata/modules' );
+		$this->assertSame( self::$demo_modules, $modules );
+	}
+
+	public function test_perflab_get_module_data() {
+		// Use test data directory with demo modules that match the modules declared on top of this file.
+		foreach ( self::$demo_modules as $module_slug => $expected_module_data ) {
+			$module_data = perflab_get_module_data( TESTS_PLUGIN_DIR . '/tests/testdata/modules/' . $module_slug . '/load.php' );
+			$this->assertSame( $expected_module_data, $module_data );
+		}
+	}
 }
