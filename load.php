@@ -59,7 +59,11 @@ function perflab_sanitize_modules_setting( $value ) {
  * @return array Associative array of module settings keyed by module slug.
  */
 function perflab_get_module_settings() {
-	return (array) get_option( PERFLAB_MODULES_SETTING, array() );
+	return (array) get_option( PERFLAB_MODULES_SETTING, array(
+		'webp-default' => array(
+			'enabled' => true,
+		)
+	) );
 }
 
 /**
