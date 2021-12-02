@@ -4,7 +4,7 @@ Monorepo for the [WordPress Performance Group](https://make.wordpress.org/core/t
 
 ## Useful commands
 
-In order to run the following commands, you need to have [Node.js](https://nodejs.org) (including `npm`) and [Docker](https://www.docker.com) installed, and Docker needs to be up and running.
+In order to run the following commands, you need to have [Node.js](https://nodejs.org) (including `npm`) and [Docker](https://www.docker.com) installed, and Docker needs to be up and running. The Docker configuration used relies on the [`@wordpress/env` package](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/).
 
 * `npm install`: Installs local development dependencies.
 * `npm run wp-env start`: Starts the local development environment.
