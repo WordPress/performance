@@ -12,9 +12,7 @@
  */
 
 // Only enable if the server supports WebP.
-if ( wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
-	add_filter( 'image_editor_output_format', 'webp_default_filter_image_editor_output_format', 10, 3 );
-}
+add_filter( 'image_editor_output_format', 'webp_default_filter_image_editor_output_format', 10, 3 );
 
 /**
  * Filter the image editor default output format mapping.
@@ -29,6 +27,9 @@ if ( wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
  * @return string The new output format mapping.
  */
 function webp_default_filter_image_editor_output_format( $output_format, $filename, $mime_type ) {
+	if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+		return $output_format;
+	}
 
 	// WebP lossless support is still limited on servers, so only apply to JPEGs.
 	if ( 'image/jpeg' !== $mime_type ) {
