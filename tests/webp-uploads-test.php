@@ -17,16 +17,16 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		// Activate the module.
 		$new_value = array(
-			'webp-uploads' => array( 'enabled' => true, ),
+			'webp-uploads' => array( 'enabled' => true ),
 		);
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
 		perflab_load_active_modules();
 
- 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$expect = array();
 		} else {
 			$expect = array(
-				'image/jpeg' => 'image/webp'
+				'image/jpeg' => 'image/webp',
 			);
 		}
 
