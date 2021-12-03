@@ -39,7 +39,6 @@ $GLOBALS['wp_tests_options'] = array(
 
 // Add filter to ensure the plugin's admin integration and all modules are loaded for tests.
 require_once $_test_root . '/includes/functions.php';
-require_once TESTS_PLUGIN_DIR . '/tests/testdata/class-wp-image-supports-webp.php';
 tests_add_filter(
 	'plugins_loaded',
 	function() {
