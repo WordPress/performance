@@ -6,7 +6,7 @@
  * @since 1.0.0
  *
  * Module Name: WebP uploads.
- * Description: Use WebP as the default sub sized image format when uploading images.
+ * Description: Uses WebP as the default format for new JPEG image uploads if the server supports it.
  * Focus: images
  * Experimental: No
  */
