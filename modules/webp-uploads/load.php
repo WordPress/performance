@@ -5,14 +5,11 @@
  * @package performance-lab
  * @since 1.0.0
  *
- * Module Name: WebP uploads.
+ * Module Name: WebP Uploads.
  * Description: Uses WebP as the default format for new JPEG image uploads if the server supports it.
  * Focus: images
  * Experimental: No
  */
-
-// Only enable if the server supports WebP.
-add_filter( 'image_editor_output_format', 'webp_default_filter_image_editor_output_format', 10, 3 );
 
 /**
  * Filter the image editor default output format mapping.
@@ -26,7 +23,8 @@ add_filter( 'image_editor_output_format', 'webp_default_filter_image_editor_outp
  * @param string $mime_type     The source image mime type.
  * @return string The new output format mapping.
  */
-function webp_default_filter_image_editor_output_format( $output_format, $filename, $mime_type ) {
+function webp_uploads_filter_image_editor_output_format( $output_format, $filename, $mime_type ) {
+	// Only enable if the server supports WebP.
 	if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 		return $output_format;
 	}
@@ -40,4 +38,5 @@ function webp_default_filter_image_editor_output_format( $output_format, $filena
 
 	return $output_format;
 }
+add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 
