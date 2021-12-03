@@ -43,12 +43,25 @@ add_action( 'init', 'perflab_register_modules_setting' );
  * @return array Sanitized modules setting value.
  */
 function perflab_sanitize_modules_setting( $value ) {
-	// TODO: Make this more error-proof.
 	if ( ! is_array( $value ) ) {
 		return array();
 	}
 
-	return $value;
+	// Ensure that every element is an array with an 'enabled' key.
+	return array_filter(
+		array_map(
+			function( $module_settings ) {
+				if ( ! is_array( $module_settings ) ) {
+					return array();
+				}
+				return array_merge(
+					array( 'enabled' => false ),
+					$module_settings
+				);
+			},
+			$value
+		)
+	);
 }
 
 /**
