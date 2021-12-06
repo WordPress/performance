@@ -176,14 +176,14 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 
 	public function test_perflab_get_modules() {
 		// Use test data directory with demo modules that match the modules declared on top of this file.
-		$modules = perflab_get_modules( TESTS_PLUGIN_DIR . '/tests/testdata/modules' );
+		$modules = perflab_get_modules( TESTS_PLUGIN_DIR . '/tests/testdata/demo-modules' );
 		$this->assertSame( self::$demo_modules, $modules );
 	}
 
 	public function test_perflab_get_module_data() {
 		// Use test data directory with demo modules that match the modules declared on top of this file.
 		foreach ( self::$demo_modules as $module_slug => $expected_module_data ) {
-			$module_data = perflab_get_module_data( TESTS_PLUGIN_DIR . '/tests/testdata/modules/' . $module_slug . '/load.php' );
+			$module_data = perflab_get_module_data( TESTS_PLUGIN_DIR . '/tests/testdata/demo-modules/' . $module_slug . '/load.php' );
 			$this->assertSame( $expected_module_data, $module_data );
 		}
 	}
