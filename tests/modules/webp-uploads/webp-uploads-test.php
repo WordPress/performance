@@ -30,7 +30,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		add_filter( 'wp_image_editors', array( $this, 'mock_wp_image_editor_supports' ) );
 		$output_format = webp_uploads_filter_image_editor_output_format( array(), '', 'image/jpeg' );
 		$this->assertEquals( array( 'image/jpeg' => 'image/webp' ), $output_format );
-		remove_filter( 'wp_image_editors', array( $this, 'mock_wp_image_editor_supports' ) );
 	}
 
 	/**
@@ -41,7 +40,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		add_filter( 'wp_image_editors', array( $this, 'mock_wp_image_editor_doesnt_support' ) );
 		$output_format = webp_uploads_filter_image_editor_output_format( array(), '', 'image/jpeg' );
 		$this->assertEquals( array(), $output_format );
-		remove_filter( 'wp_image_editors', array( $this, 'mock_wp_image_editor_doesnt_support' ) );
 	}
 
 	/**
