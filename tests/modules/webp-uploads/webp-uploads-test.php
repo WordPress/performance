@@ -28,7 +28,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	function test_webp_uploads_applies_filter_when_system_supports() {
 		// Mock a system that supports WebP.
 		add_filter( 'wp_image_editors', array( $this, 'mock_wp_image_editor_supports' ) );
-		$output_format = apply_filters( 'image_editor_output_format', array(), '', 'image/jpeg' );
+		$output_format = webp_uploads_filter_image_editor_output_format( array(), '', 'image/jpeg' );
 		$this->assertEquals( array( 'image/jpeg' => 'image/webp' ), $output_format );
 		remove_filter( 'wp_image_editors', array( $this, 'mock_wp_image_editor_supports' ) );
 	}
