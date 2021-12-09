@@ -59,7 +59,7 @@ add_action( 'wp_print_styles', 'aea_audit_enqueued_styles' );
  *
  * @since 1.0.0
  *
- * @return int Number of total scripts.
+ * @return int|false Number of total scripts or false if transient hasn't been set.
  */
 function aea_get_total_enqueued_scripts() {
 	$enqueued_scripts = false;
@@ -74,6 +74,8 @@ function aea_get_total_enqueued_scripts() {
  * Gets total of enqueued styles.
  *
  * @since 1.0.0
+ *
+ * @return int|false Number of total styles or false if transient hasn't been set.
  */
 function aea_get_total_enqueued_styles() {
 	$enqueued_styles = false;
