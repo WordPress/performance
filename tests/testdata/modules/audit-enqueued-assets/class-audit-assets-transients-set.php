@@ -15,28 +15,13 @@ class Audit_Assets_Transients_Set {
 	const STYLES_TRANSIENT = 'aea_enqueued_styles';
 
 	/**
-	 * Script Transient example.
-	 */
-	const MOCK_SCRIPTS_TRANSIENT_CONTENT = array(
-		'script1.js',
-		'script3.js',
-		'script3.js',
-	);
-
-	/**
-	 * Style Transient example.
-	 */
-	const MOCK_STYLES_TRANSIENT_CONTENT = array(
-		'style1.css',
-		'style3.css',
-		'style4.css',
-	);
-
-	/**
 	 * Setting up the Script transient.
+	 *
+	 * @param int $number_of_assets Number of assets to mock.
 	 */
-	public static function set_script_transient_with_data() {
-		set_transient( self::SCRIPT_TRANSIENT, self::MOCK_SCRIPTS_TRANSIENT_CONTENT );
+	public static function set_script_transient_with_data( $number_of_assets = 5 ) {
+		$scripts = array_fill( 0, $number_of_assets, 'script.js' );
+		set_transient( self::SCRIPT_TRANSIENT, $scripts );
 	}
 
 	/**
@@ -48,9 +33,12 @@ class Audit_Assets_Transients_Set {
 
 	/**
 	 * Setting up the Styles transient.
+	 *
+	 * @param int $number_of_assets Number of assets to mock.
 	 */
-	public static function set_style_transient_with_data() {
-		set_transient( self::STYLES_TRANSIENT, self::MOCK_STYLES_TRANSIENT_CONTENT );
+	public static function set_style_transient_with_data( $number_of_assets = 5 ) {
+		$styles = array_fill( 0, $number_of_assets, 'style.css' );
+		set_transient( self::STYLES_TRANSIENT, $styles );
 	}
 
 	/**
