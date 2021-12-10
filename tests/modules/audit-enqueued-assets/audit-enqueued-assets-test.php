@@ -13,16 +13,85 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	const WARNING_ASSETS_LIMIT = 11;
 
 	/**
-	 * Tests aea_get_total_enqueued_scripts() no data.
+	 * Tests aea_audit_enqueued_scripts() when transient is already set.
+	 */
+	public function test_aea_audit_enqueued_scripts_transient_already_set() {
+		$this->mock_set_script_transient_with_data( 3 );
+		aea_audit_enqueued_scripts();
+		$transient = get_transient( 'aea_enqueued_scripts' );
+		$this->assertIsArray( $transient );
+		$this->assertEquals( 3, count( $transient ) );
+		$this->assertEqualSets(
+			array(
+				'script.js',
+				'script.js',
+				'script.js',
+			),
+			$transient
+		);
+	}
+
+	/**
+	 * Tests aea_audit_enqueued_scripts() with no transient.
+	 * Enqueued scripts ( not belonging to core /wp-includes/ ) will be saved in transient.
+	 */
+	public function test_aea_audit_enqueued_scripts() {
+		wp_enqueue_script( 'script1', 'example1.com', array() );
+		wp_enqueue_script( 'script_to_be_discarded', '/wp-includes/example2.com', array() );
+		wp_enqueue_script( 'script3', 'example3.com', array() );
+		wp_dequeue_script( 'script3' );
+
+		aea_audit_enqueued_scripts();
+		$transient = get_transient( 'aea_enqueued_scripts' );
+		$this->assertNotEmpty( $transient );
+		$this->assertEqualSets( array( 'example1.com' ), $transient );
+	}
+
+	/**
+	 * Tests aea_audit_enqueued_styles() when transient is already set.
+	 */
+	public function test_aea_audit_enqueued_styles_transient_already_set() {
+		$this->mock_set_style_transient_with_data( 3 );
+		aea_audit_enqueued_styles();
+		$transient = get_transient( 'aea_enqueued_styles' );
+		$this->assertIsArray( $transient );
+		$this->assertEquals( 3, count( $transient ) );
+		$this->assertEqualSets(
+			array(
+				'style.css',
+				'style.css',
+				'style.css',
+			),
+			$transient
+		);
+	}
+
+	/**
+	 * Tests aea_audit_enqueued_styles() with no transient.
+	 * Enqueued styles ( not belonging to core /wp-includes/ ) will be saved in transient.
+	 */
+	public function test_aea_audit_enqueued_styles() {
+		wp_enqueue_style( 'style1', 'example1.com', array() );
+		wp_enqueue_style( 'style_to_be_discarded', '/wp-includes/example2.com', array() );
+		wp_enqueue_style( 'style3', 'example3.com', array() );
+		wp_dequeue_style( 'style3' );
+
+		aea_audit_enqueued_styles();
+		$transient = get_transient( 'aea_enqueued_styles' );
+		$this->assertNotEmpty( $transient );
+		$this->assertEqualSets( array( 'example1.com' ), $transient );
+	}
+
+	/**
+	 * Tests aea_get_total_enqueued_scripts() no transient saved.
 	 */
 	public function test_aea_get_total_enqueued_scripts_no_transient() {
-		$this->mock_set_script_transient_with_no_data();
 		$total_enqueued_scripts = aea_get_total_enqueued_scripts();
 		$this->assertFalse( $total_enqueued_scripts );
 	}
 
 	/**
-	 * Tests aea_get_total_enqueued_scripts() with data.
+	 * Tests aea_get_total_enqueued_scripts() with transient saved.
 	 */
 	public function test_aea_get_total_enqueued_scripts_transient() {
 		$this->mock_set_script_transient_with_data();
@@ -31,16 +100,15 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests aea_get_total_enqueued_styles() no data.
+	 * Tests aea_get_total_enqueued_styles() no transient saved.
 	 */
 	public function test_aea_get_total_enqueued_styles_no_transient() {
-		$this->mock_set_style_transient_with_no_data();
 		$total_enqueued_styles = aea_get_total_enqueued_styles();
 		$this->assertFalse( $total_enqueued_styles );
 	}
 
 	/**
-	 * Tests mock_set_style_transient_with_data() with data.
+	 * Tests mock_set_style_transient_with_data() with transient saved.
 	 */
 	public function test_aea_get_total_enqueued_styles_transient() {
 		$this->mock_set_style_transient_with_data();
@@ -60,10 +128,9 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test aea_enqueued_js_assets_test() no data in transient set.
+	 * Test aea_enqueued_js_assets_test() no transient saved.
 	 */
 	public function test_aea_enqueued_js_assets_test_no_transient() {
-		$this->mock_set_script_transient_with_no_data();
 		$this->assertEqualSets( array(), aea_enqueued_js_assets_test() );
 	}
 
@@ -86,10 +153,9 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test aea_enqueued_js_assets_test() no data in transient set.
+	 * Test aea_enqueued_js_assets_test() no transient saved.
 	 */
 	public function test_aea_enqueued_css_assets_test_no_transient() {
-		$this->mock_set_style_transient_with_no_data();
 		$this->assertEqualSets( array(), aea_enqueued_css_assets_test() );
 	}
 
