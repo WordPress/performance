@@ -28,7 +28,7 @@ The following command will stop the WordPress environment:
 ## Create a pull request
 A pull request must be created to submit changes to the Performance plugin. Pull requests should refer to an issue in the [repository issue tracker](https://github.com/WordPress/performance).
 
-For better triaging, it is recommended that each pull request receive a `[Type] xyz` and `[Focus] xyz` or `[Infrastructure]` labels.
+For better triaging, it is recommended that each pull request receive a `[Type] xyz`, `[Focus] xyz` or `[Infrastructure]` labels.
 
 ## Coding standards
 In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). For a complete documentation about Performance plugin modules specifications, read this [documentation](./Writing-a-module.md).
