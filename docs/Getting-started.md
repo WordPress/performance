@@ -1,9 +1,9 @@
 # Start contributing to the Performance plugin
-This guide is intended to give details on how to contribute to the Performance plugin. From setting up the development environment to creating pull requests.
+This guide focuses on how to contribute to the Performance plugin, from setting up the development environment to creating pull requests.
 
 ## Prerequisites
-- Node.js
-- Docker
+- [Node.js](https://nodejs.org)
+- [Docker](https://www.docker.com/products/docker-desktop)
 - [Git](https://git-scm.com)
 
 ## Setup the development environment
@@ -17,7 +17,7 @@ To install the local development dependencies, run the following command in your
 `npm install`
 
 ### Start the local WordPress environment
-The Performance plugin uses Docker and `[wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env) to start a local WordPress environment.
+The Performance plugin uses Docker and [the wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env) to start a local WordPress environment.
 
 First, make sure Docker is installed, up and running on your machine. Then, run `npm run wp-env start` to start the WordPress environment. The WordPress development site will be available at `http://localhost:8080`.
 
@@ -26,7 +26,7 @@ The following command will stop the WordPress environment:
 `npm run wp-env stop`
 
 ## Create a pull request
-A pull request must be created to submit changes to the Performance plugin. Pull requests should refer to an issue in the [repository issue tracker](https://github.com/WordPress/performance).
+A pull request must be created to submit changes to the Performance plugin. Pull requests should refer to an issue in the [repository issue tracker](https://github.com/WordPress/performance/issues).
 
 For better triaging, it is recommended that each pull request receive a `[Type] xyz`, `[Focus] xyz` or `[Infrastructure]` labels.
 
