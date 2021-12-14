@@ -25,6 +25,11 @@ First, make sure Docker is installed, up and running on your machine. Then, run 
 The following command will stop the WordPress environment:
 `npm run wp-env stop`
 
+## Open an issue
+Opening an issue is the first step to contributing to the Performance plugin. This allows to discuss, review or validate an idea before implementation. Opening an issue is not strict requirement, but it is highly recommended in most cases, unless the change you are trying to make is really minor or is already covered by an existing issue.
+
+Issues should be labeled to facilitate browsing and filtering. Here are some common labels: `[Type] Feature`, `[Type] Discussion`, `Needs Decision`, `[Focus] Images`. The full list of labels can be found [here](https://github.com/WordPress/performance/labels).
+
 ## Create a pull request
 A pull request must be created to submit changes to the Performance plugin. Pull requests should refer to an issue in the [repository issue tracker](https://github.com/WordPress/performance/issues).
 
