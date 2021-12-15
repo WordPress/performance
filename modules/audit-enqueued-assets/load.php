@@ -62,10 +62,10 @@ add_action( 'wp_print_styles', 'aea_audit_enqueued_styles' );
  * @return int|false Number of total scripts or false if transient hasn't been set.
  */
 function aea_get_total_enqueued_scripts() {
-	$enqueued_scripts = false;
-	if ( get_transient( 'aea_enqueued_scripts' ) ) {
-		$list_enqueued_scripts = get_transient( 'aea_enqueued_scripts' );
-		$enqueued_scripts      = count( $list_enqueued_scripts );
+	$enqueued_scripts      = false;
+	$list_enqueued_scripts = get_transient( 'aea_enqueued_scripts' );
+	if ( $list_enqueued_scripts ) {
+		$enqueued_scripts = count( $list_enqueued_scripts );
 	}
 	return $enqueued_scripts;
 }
@@ -78,10 +78,10 @@ function aea_get_total_enqueued_scripts() {
  * @return int|false Number of total styles or false if transient hasn't been set.
  */
 function aea_get_total_enqueued_styles() {
-	$enqueued_styles = false;
-	if ( get_transient( 'aea_enqueued_styles' ) ) {
-		$list_enqueued_styles = get_transient( 'aea_enqueued_styles' );
-		$enqueued_styles      = count( $list_enqueued_styles );
+	$enqueued_styles      = false;
+	$list_enqueued_styles = get_transient( 'aea_enqueued_styles' );
+	if ( $list_enqueued_styles ) {
+		$enqueued_styles = count( $list_enqueued_styles );
 	}
 	return $enqueued_styles;
 }
