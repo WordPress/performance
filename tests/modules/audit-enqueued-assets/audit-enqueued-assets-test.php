@@ -189,6 +189,19 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests clean_aea_audit_action() functionality.
+	 */
+	public function test_clean_aea_audit_action() {
+		$this->mock_set_script_transient_with_data();
+		$this->mock_set_style_transient_with_data();
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'clean_aea_audit' );
+		$_GET['action']       = 'clean_aea_audit';
+		clean_aea_audit_action();
+		$this->assertFalse( get_transient( 'aea_enqueued_scripts' ) );
+		$this->assertFalse( get_transient( 'aea_enqueued_styles' ) );
+	}
+
+	/**
 	 * Mocks Script transient with data.
 	 *
 	 * @param int $number_of_assets Number of assets to mock.

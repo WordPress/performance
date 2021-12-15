@@ -69,10 +69,12 @@ class Site_Health_Mock_Responses {
 			$enqueued_scripts
 		);
 		$result['actions'] .= sprintf(
-			/* translators: 1: HelpHub URL. 2: Link description. */
-			'<p><a target="_blank" href="%1$s">%2$s</a></p>',
+			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
+			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
 			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
-			esc_html__( 'More info about performance optimization', 'performance-lab' )
+			esc_html__( 'More info about performance optimization', 'performance-lab' ),
+			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
+			esc_html__( 'Clean Test Cache', 'performance-lab' )
 		);
 		return $result;
 	}
@@ -117,10 +119,12 @@ class Site_Health_Mock_Responses {
 			$enqueued_styles
 		);
 		$result['actions'] .= sprintf(
-			/* translators: 1: HelpHub URL. 2: Link description. */
-			'<p><a target="_blank" href="%1$s">%2$s</a></p>',
+			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
+			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
 			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
-			esc_html__( 'More info about performance optimization', 'performance-lab' )
+			esc_html__( 'More info about performance optimization', 'performance-lab' ),
+			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
+			esc_html__( 'Clean Test Cache', 'performance-lab' )
 		);
 		return $result;
 	}

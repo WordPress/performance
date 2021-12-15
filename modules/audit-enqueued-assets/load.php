@@ -111,19 +111,6 @@ function aea_add_enqueued_assets_test( $tests ) {
 add_filter( 'site_status_tests', 'aea_add_enqueued_assets_test' );
 
 /**
- * Invalidate both transients/cache.
- *
- * @since 1.0.0
- */
-function invalidate_cache_transients() {
-	delete_transient( 'aea_enqueued_scripts' );
-	delete_transient( 'aea_enqueued_styles' );
-}
-add_action( 'switch_theme', 'invalidate_cache_transients' );
-add_action( 'activated_plugin', 'invalidate_cache_transients' );
-add_action( 'deactivated_plugin', 'invalidate_cache_transients' );
-
-/**
  * Callback for enqueued_js_assets test.
  *
  * @since 1.0.0
@@ -163,10 +150,12 @@ function aea_enqueued_js_assets_test() {
 			$enqueued_scripts
 		);
 		$result['actions'] .= sprintf(
-			/* translators: 1: HelpHub URL. 2: Link description. */
-			'<p><a target="_blank" href="%1$s">%2$s</a></p>',
+			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
+			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
 			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
-			esc_html__( 'More info about performance optimization', 'performance-lab' )
+			esc_html__( 'More info about performance optimization', 'performance-lab' ),
+			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
+			esc_html__( 'Clean Test Cache', 'performance-lab' )
 		);
 	}
 
@@ -188,7 +177,6 @@ function aea_enqueued_css_assets_test() {
 	if ( false === $enqueued_styles ) {
 		return array();
 	}
-
 	$result = array(
 		'label'       => esc_html__( 'Enqueued CSS assets', 'performance-lab' ),
 		'status'      => 'good',
@@ -212,14 +200,43 @@ function aea_enqueued_css_assets_test() {
 			esc_html__( 'Your website enqueues %s styles. Try to reduce the number of CSS assets, or to concatenate them.', 'performance-lab' ),
 			$enqueued_styles
 		);
+
 		$result['actions'] .= sprintf(
-			/* translators: 1: HelpHub URL. 2: Link description. */
-			'<p><a target="_blank" href="%1$s">%2$s</a></p>',
+			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
+			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
 			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
-			esc_html__( 'More info about performance optimization', 'performance-lab' )
+			esc_html__( 'More info about performance optimization', 'performance-lab' ),
+			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
+			esc_html__( 'Clean Test Cache', 'performance-lab' )
 		);
 	}
 
 	return $result;
 }
+
+/**
+ * Invalidate both transients/cache on user clean_aea_audit action.
+ *
+ * @since 1.0.0
+ */
+function clean_aea_audit_action() {
+	if ( isset( $_GET['action'] ) && 'clean_aea_audit' === $_GET['action'] ) {
+		check_admin_referer( 'clean_aea_audit' );
+		invalidate_cache_transients();
+	}
+}
+add_action( 'admin_init', 'clean_aea_audit_action' );
+
+/**
+ * Invalidate both transients/cache.
+ *
+ * @since 1.0.0
+ */
+function invalidate_cache_transients() {
+	delete_transient( 'aea_enqueued_scripts' );
+	delete_transient( 'aea_enqueued_styles' );
+}
+add_action( 'switch_theme', 'invalidate_cache_transients' );
+add_action( 'activated_plugin', 'invalidate_cache_transients' );
+add_action( 'deactivated_plugin', 'invalidate_cache_transients' );
 
