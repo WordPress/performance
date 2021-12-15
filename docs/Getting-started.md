@@ -39,7 +39,7 @@ Issues should be labeled to facilitate browsing and filtering. Here are some com
 ## Create a pull request
 A pull request must be created to submit changes to the Performance plugin. Pull requests should refer to an issue in the [repository issue tracker](https://github.com/WordPress/performance/issues).
 
-For better triaging, it is recommended that each pull request receive a `[Type] xyz`, `[Focus] xyz` or `[Infrastructure]` labels.
+Every pull-request should receive both a `[Type] xyz` label and either a `[Focus] xyz` or `Infrastructure` label.
 
 ## Coding standards
 In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). For a complete documentation about Performance plugin modules specifications, read this [documentation](./Writing-a-module.md).
