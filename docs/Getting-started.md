@@ -10,11 +10,15 @@ This guide focuses on how to contribute to the Performance plugin, from setting 
 
 ### Clone the repository
 Start by cloning the repository into your local machine. To do this, run the following command in your terminal:
-`git clone https://github.com/WordPress/performance.git`
+```
+git clone https://github.com/WordPress/performance.git
+```
 
 ### Install the local development dependencies
 To install the local development dependencies, run the following command in your terminal:
-`npm install`
+```
+npm install
+```
 
 ### Start the local WordPress environment
 The Performance plugin uses Docker and [the wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env) to start a local WordPress environment.
@@ -23,7 +27,9 @@ First, make sure Docker is installed, up and running on your machine. Then, run 
 
 ### Stop the local WordPress environment
 The following command will stop the WordPress environment:
-`npm run wp-env stop`
+```
+npm run wp-env stop
+```
 
 ## Open an issue
 Opening an issue is the first step to contributing to the Performance plugin. This allows to discuss, review or validate an idea before implementation. It is not a strict requirement, but it is highly recommended in most cases, unless the change you are trying to make is really minor or is already covered by an existing issue.
@@ -51,7 +57,12 @@ npms run format-php
 ```
 
 ## PHPUnit tests
-To execute PHPUnit tests, run the `npm run test-php` in your terminal.
+To execute PHPUnit tests, run this in your terminal:
+```
+npm run test-php
+```
 
 And to execute the tests in multisite, run:
-`npm run test-php-multisite`
+```
+npm run test-php-multisite
+```
