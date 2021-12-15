@@ -178,6 +178,17 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests invalidate_cache_transients() functionality.
+	 */
+	public function test_invalidate_cache_transients() {
+		$this->mock_set_script_transient_with_data();
+		$this->mock_set_style_transient_with_data();
+		invalidate_cache_transients();
+		$this->assertFalse( get_transient( 'aea_enqueued_scripts' ) );
+		$this->assertFalse( get_transient( 'aea_enqueued_styles' ) );
+	}
+
+	/**
 	 * Mocks Script transient with data.
 	 *
 	 * @param int $number_of_assets Number of assets to mock.

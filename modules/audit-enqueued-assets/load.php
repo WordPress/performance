@@ -27,7 +27,8 @@ function aea_audit_enqueued_scripts() {
 				$enqueued_scripts[] = $src;
 			}
 		}
-		set_transient( 'aea_enqueued_scripts', $enqueued_scripts, 12 * HOUR_IN_SECONDS );
+		$expiration = apply_filters( 'aea_audit_enqueued_scripts_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
+		set_transient( 'aea_enqueued_scripts', $enqueued_scripts, $expiration );
 	}
 }
 add_action( 'wp_print_scripts', 'aea_audit_enqueued_scripts' );
@@ -49,7 +50,8 @@ function aea_audit_enqueued_styles() {
 				$enqueued_styles[] = $src;
 			}
 		}
-		set_transient( 'aea_enqueued_styles', $enqueued_styles, 12 * HOUR_IN_SECONDS );
+		$expiration = apply_filters( 'aea_audit_enqueued_styles_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
+		set_transient( 'aea_enqueued_styles', $enqueued_styles, $expiration );
 	}
 }
 add_action( 'wp_print_styles', 'aea_audit_enqueued_styles' );
@@ -107,6 +109,19 @@ function aea_add_enqueued_assets_test( $tests ) {
 	return $tests;
 }
 add_filter( 'site_status_tests', 'aea_add_enqueued_assets_test' );
+
+/**
+ * Invalidate both transients/cache.
+ *
+ * @since 1.0.0
+ */
+function invalidate_cache_transients() {
+	delete_transient( 'aea_enqueued_scripts' );
+	delete_transient( 'aea_enqueued_styles' );
+}
+add_action( 'switch_theme', 'invalidate_cache_transients' );
+add_action( 'activated_plugin', 'invalidate_cache_transients' );
+add_action( 'deactivated_plugin', 'invalidate_cache_transients' );
 
 /**
  * Callback for enqueued_js_assets test.
