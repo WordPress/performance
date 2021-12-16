@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Check Type Labels
         run: |
-          if: "! contains( github.event.pull_request.labels.*.name, '[Type] ' )"
+          if: "!contains( github.event.pull_request.labels.*.name, '[Type] ' )"
             echo "Cancelling workflow: pull request does not have a [Type] label"
       - name: Check Focus or Infrastructure Labels
         run: |
