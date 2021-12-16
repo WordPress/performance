@@ -28,8 +28,8 @@
   },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
-    "format-js": "wp-scripts format",
-    "lint-js": "wp-scripts lint-js",
+    "format-js": "wp-scripts format ./bin",
+    "lint-js": "wp-scripts lint-js ./bin",
     "format-php": "wp-env run composer run-script format",
     "prelint-php": "wp-env run composer 'install --no-interaction'",
     "lint-php": "wp-env run composer run-script lint",
