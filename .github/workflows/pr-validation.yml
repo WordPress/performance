@@ -38,7 +38,7 @@ jobs:
             !contains( github.event.pull_request.labels.*.name, '[Focus] Measurement' ) &&
             !contains( github.event.pull_request.labels.*.name, '[Focus] Object caching' ) &&
             !contains( github.event.pull_request.labels.*.name, '[Focus] Site Health' ) &&
-            !contains( github.event.pull_request.labels.*.name, '[Infrastructure]' )
+            !contains( github.event.pull_request.labels.*.name, 'Infrastructure' )
           )
         uses: actions/github-script@v5
         with:
