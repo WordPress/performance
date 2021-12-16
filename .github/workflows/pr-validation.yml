@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Check Type Labels
-        if: "!contains( github.event.pull_request.labels.*.name, '[Type] ' )"
+        if: '!contains( github.event.pull_request.labels.*.name, "\[Type\] [a-zA-Z]*" )'
         uses: actions/github-script@v5
         with:
           script: |
