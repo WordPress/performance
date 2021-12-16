@@ -16,7 +16,7 @@
  *
  * @since 1.0.0
  */
-function aea_audit_enqueued_scripts() {
+function perflab_aea_audit_enqueued_scripts() {
 	if ( ! is_admin() && ! get_transient( 'aea_enqueued_scripts' ) ) {
 		global $wp_scripts;
 		$enqueued_scripts = array();
@@ -27,11 +27,11 @@ function aea_audit_enqueued_scripts() {
 				$enqueued_scripts[] = $src;
 			}
 		}
-		$expiration = apply_filters( 'aea_audit_enqueued_scripts_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
+		$expiration = apply_filters( 'perflab_aea_audit_enqueued_scripts_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
 		set_transient( 'aea_enqueued_scripts', $enqueued_scripts, $expiration );
 	}
 }
-add_action( 'wp_print_scripts', 'aea_audit_enqueued_scripts' );
+add_action( 'wp_print_scripts', 'perflab_aea_audit_enqueued_scripts' );
 
 /**
  * Audit enqueued styles in the frontend. Ignore /wp-includes styles.
@@ -40,7 +40,7 @@ add_action( 'wp_print_scripts', 'aea_audit_enqueued_scripts' );
  *
  * @since 1.0.0
  */
-function aea_audit_enqueued_styles() {
+function perflab_aea_audit_enqueued_styles() {
 	if ( ! is_admin() && ! get_transient( 'aea_enqueued_styles' ) ) {
 		global $wp_styles;
 		$enqueued_styles = array();
@@ -50,11 +50,11 @@ function aea_audit_enqueued_styles() {
 				$enqueued_styles[] = $src;
 			}
 		}
-		$expiration = apply_filters( 'aea_audit_enqueued_styles_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
+		$expiration = apply_filters( 'perflab_aea_audit_enqueued_styles_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
 		set_transient( 'aea_enqueued_styles', $enqueued_styles, $expiration );
 	}
 }
-add_action( 'wp_print_styles', 'aea_audit_enqueued_styles' );
+add_action( 'wp_print_styles', 'perflab_aea_audit_enqueued_styles' );
 
 /**
  * Gets total of enqueued scripts.
@@ -63,7 +63,7 @@ add_action( 'wp_print_styles', 'aea_audit_enqueued_styles' );
  *
  * @return int|false Number of total scripts or false if transient hasn't been set.
  */
-function aea_get_total_enqueued_scripts() {
+function perflab_aea_get_total_enqueued_scripts() {
 	$enqueued_scripts      = false;
 	$list_enqueued_scripts = get_transient( 'aea_enqueued_scripts' );
 	if ( $list_enqueued_scripts ) {
@@ -79,7 +79,7 @@ function aea_get_total_enqueued_scripts() {
  *
  * @return int|false Number of total styles or false if transient hasn't been set.
  */
-function aea_get_total_enqueued_styles() {
+function perflab_aea_get_total_enqueued_styles() {
 	$enqueued_styles      = false;
 	$list_enqueued_styles = get_transient( 'aea_enqueued_styles' );
 	if ( $list_enqueued_styles ) {
@@ -96,19 +96,19 @@ function aea_get_total_enqueued_styles() {
  * @param array $tests Site Health Tests.
  * @return array
  */
-function aea_add_enqueued_assets_test( $tests ) {
+function perflab_aea_add_enqueued_assets_test( $tests ) {
 	$tests['direct']['enqueued_js_assets']  = array(
 		'label' => esc_html__( 'JS assets', 'performance-lab' ),
-		'test'  => 'aea_enqueued_js_assets_test',
+		'test'  => 'perflab_aea_enqueued_js_assets_test',
 	);
 	$tests['direct']['enqueued_css_assets'] = array(
 		'label' => esc_html__( 'CSS assets', 'performance-lab' ),
-		'test'  => 'aea_enqueued_css_assets_test',
+		'test'  => 'perflab_aea_enqueued_css_assets_test',
 	);
 
 	return $tests;
 }
-add_filter( 'site_status_tests', 'aea_add_enqueued_assets_test' );
+add_filter( 'site_status_tests', 'perflab_aea_add_enqueued_assets_test' );
 
 /**
  * Callback for enqueued_js_assets test.
@@ -117,11 +117,11 @@ add_filter( 'site_status_tests', 'aea_add_enqueued_assets_test' );
  *
  * @return array
  */
-function aea_enqueued_js_assets_test() {
+function perflab_aea_enqueued_js_assets_test() {
 	/**
 	 * If the test didn't run yet, deactivate.
 	 */
-	$enqueued_scripts = aea_get_total_enqueued_scripts();
+	$enqueued_scripts = perflab_aea_get_total_enqueued_scripts();
 	if ( false === $enqueued_scripts ) {
 		return array();
 	}
@@ -169,11 +169,11 @@ function aea_enqueued_js_assets_test() {
  *
  * @return array
  */
-function aea_enqueued_css_assets_test() {
+function perflab_aea_enqueued_css_assets_test() {
 	/**
 	 * If the test didn't run yet, deactivate.
 	 */
-	$enqueued_styles = aea_get_total_enqueued_styles();
+	$enqueued_styles = perflab_aea_get_total_enqueued_styles();
 	if ( false === $enqueued_styles ) {
 		return array();
 	}
@@ -220,25 +220,25 @@ function aea_enqueued_css_assets_test() {
  *
  * @since 1.0.0
  */
-function clean_aea_audit_action() {
+function perflab_clean_aea_audit_action() {
 	if ( isset( $_GET['action'] ) && 'clean_aea_audit' === $_GET['action'] ) {
 		check_admin_referer( 'clean_aea_audit' );
-		invalidate_cache_transients();
+		perflab_invalidate_cache_transients();
 		wp_safe_redirect( remove_query_arg( array( 'action', '_wpnonce' ), wp_get_referer() ) );
 	}
 }
-add_action( 'admin_init', 'clean_aea_audit_action' );
+add_action( 'admin_init', 'perflab_clean_aea_audit_action' );
 
 /**
  * Invalidate both transients/cache.
  *
  * @since 1.0.0
  */
-function invalidate_cache_transients() {
+function perflab_invalidate_cache_transients() {
 	delete_transient( 'aea_enqueued_scripts' );
 	delete_transient( 'aea_enqueued_styles' );
 }
-add_action( 'switch_theme', 'invalidate_cache_transients' );
-add_action( 'activated_plugin', 'invalidate_cache_transients' );
-add_action( 'deactivated_plugin', 'invalidate_cache_transients' );
+add_action( 'switch_theme', 'perflab_invalidate_cache_transients' );
+add_action( 'activated_plugin', 'perflab_invalidate_cache_transients' );
+add_action( 'deactivated_plugin', 'perflab_invalidate_cache_transients' );
 

@@ -20,11 +20,11 @@ class Site_Health_Mock_Responses {
 		$added_tests                                  = array();
 		$added_tests['direct']['enqueued_js_assets']  = array(
 			'label' => esc_html__( 'JS assets', 'performance-lab' ),
-			'test'  => 'aea_enqueued_js_assets_test',
+			'test'  => 'perflab_aea_enqueued_js_assets_test',
 		);
 		$added_tests['direct']['enqueued_css_assets'] = array(
 			'label' => esc_html__( 'CSS assets', 'performance-lab' ),
-			'test'  => 'aea_enqueued_css_assets_test',
+			'test'  => 'perflab_aea_enqueued_css_assets_test',
 		);
 		return $added_tests;
 	}
