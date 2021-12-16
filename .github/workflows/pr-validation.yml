@@ -1,0 +1,18 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches:
+      - trunk
+
+jobs:
+  check-type-label:
+    name: Check Type Label
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check Type Label
+        run: |
+          if ! grep -qE '^\[Type\] Bug$|^\[Type\] Feature$|^\[Type\] Documentation$|^\[Type\] Discussion$|^\[Type\] Enhancement$' .github/PULL_REQUEST_BODY; then
+            echo "##[cancel]##[error] Every pull request must have one of the [Type] xyz labels."
+          fi
