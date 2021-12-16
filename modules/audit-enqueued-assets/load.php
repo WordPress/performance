@@ -216,6 +216,7 @@ function aea_enqueued_css_assets_test() {
 
 /**
  * Invalidate both transients/cache on user clean_aea_audit action.
+ * Redirects to site-health.php screen adter clean up.
  *
  * @since 1.0.0
  */
@@ -223,6 +224,7 @@ function clean_aea_audit_action() {
 	if ( isset( $_GET['action'] ) && 'clean_aea_audit' === $_GET['action'] ) {
 		check_admin_referer( 'clean_aea_audit' );
 		invalidate_cache_transients();
+		wp_safe_redirect( remove_query_arg( array( 'action', '_wpnonce' ), wp_get_referer() ) );
 	}
 }
 add_action( 'admin_init', 'clean_aea_audit_action' );
