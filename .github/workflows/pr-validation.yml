@@ -21,12 +21,26 @@ jobs:
         if: |
           !contains( github.event.pull_request.labels.*.name, '[Type] Bug' ) &&
           (
-          !contains( github.event.pull_request.labels.*.name, '[Type] Feature' ) &&
-          !contains( github.event.pull_request.labels.*.name, '[Type] Documentation' ) &&
-          !contains( github.event.pull_request.labels.*.name, '[Type] Discussion' ) &&
-          !contains( github.event.pull_request.labels.*.name, '[Type] Enhancement' )
+            !contains( github.event.pull_request.labels.*.name, '[Type] Feature' ) &&
+            !contains( github.event.pull_request.labels.*.name, '[Type] Documentation' ) &&
+            !contains( github.event.pull_request.labels.*.name, '[Type] Discussion' ) &&
+            !contains( github.event.pull_request.labels.*.name, '[Type] Enhancement' )
           )
         uses: actions/github-script@v5
         with:
           script: |
             core.setFailed( 'Pull request must have a [Type] label.' )
+      - name: Check Focus or Infrastructure Labels
+        if: |
+          !contains( github.event.pull_request.labels.*.name, '[Focus] Images' ) &&
+          (
+            !contains( github.event.pull_request.labels.*.name, '[Focus] JavaScript' ) &&
+            !contains( github.event.pull_request.labels.*.name, '[Focus] Measurement' ) &&
+            !contains( github.event.pull_request.labels.*.name, '[Focus] Object caching' ) &&
+            !contains( github.event.pull_request.labels.*.name, '[Focus] Site Health' ) &&
+            !contains( github.event.pull_request.labels.*.name, '[Infrastructure]' )
+          )
+        uses: actions/github-script@v5
+        with:
+          script: |
+            core.setFailed( 'Pull request must have a [Focus] or [Infrastructure] label.' )
