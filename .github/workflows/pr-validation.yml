@@ -4,15 +4,30 @@ on:
   pull_request:
     branches:
       - trunk
-
+    types:
+      - "labeled"
+      - "unlabeled"
+      - "opened"
+      - "reopened"
+      - "synchronize"
 jobs:
-  check-type-label:
-    name: Check Type Label
+  check-labels:
+    name: Check Labels
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Check Type Label
+      - name: Check Type Labels
         run: |
-          if ! grep -qE '^\[Type\] Bug$|^\[Type\] Feature$|^\[Type\] Documentation$|^\[Type\] Discussion$|^\[Type\] Enhancement$' .github/PULL_REQUEST_BODY; then
-            echo "##[cancel]##[error] Every pull request must have one of the [Type] xyz labels."
+          if ! contains( github.event.pull_request.labels.*.name, "[Type] " ) {
+            echo "Cancelling workflow: pull request does not have a [Type] label"
+          fi
+      - name: Check Focus or Infrastructure Labels
+        run: |
+          if ! contains( github.event.pull_request.labels.*.name, "[Focus] " ) && ! contains( github.event.pull_request.labels.*.name, "[Infrastructure]" ) {
+            echo "Cancelling workflow: pull request does not have a [Focus] or [Infrastructure] label"
+          fi
+      - name: Check Milestone
+        run: |
+          if github.event.pull_request.milestone == null && ! contains( github.event.pull_request.labels.*.name, "no milestone" ) 
+            echo "Cancelling workflow: pull request does not have a milestone set"
           fi
