@@ -202,6 +202,29 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests perflab_get_path_from_resource_url() functionality.
+	 */
+	public function test_perflab_get_path_from_resource_url() {
+		$test_url      = 'https://example.com/wp-content/themes/test-theme/style.css';
+		$expected_path = ABSPATH . '/wp-content/themes/test-theme/style.css';
+		$this->assertSame( $expected_path, perflab_get_path_from_resource_url( $test_url ) );
+	}
+
+	/**
+	 * Tests perflab_get_resource_file_size() functionality.
+	 */
+	public function test_perflab_get_resource_file_size_file() {
+		$non_existing_resource = ABSPATH . '/wp-content/themes/test-theme/style.css';
+		$this->assertEquals( 0, perflab_get_resource_file_size( $non_existing_resource ) );
+
+		// Upload a fake resource file.
+		$filename = __FUNCTION__ . '.css';
+		$contents = __FUNCTION__ . '_contents';
+		$file     = wp_upload_bits( $filename, null, $contents );
+		$this->assertEquals( filesize( $file['file'] ), perflab_get_resource_file_size( $file['file'] ) );
+	}
+
+	/**
 	 * Mocks Script transient with data.
 	 *
 	 * @param int $number_of_assets Number of assets to mock.

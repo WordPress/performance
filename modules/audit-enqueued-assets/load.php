@@ -242,3 +242,29 @@ add_action( 'switch_theme', 'perflab_invalidate_cache_transients' );
 add_action( 'activated_plugin', 'perflab_invalidate_cache_transients' );
 add_action( 'deactivated_plugin', 'perflab_invalidate_cache_transients' );
 
+
+
+/**
+ * Convert full URL paths to absolute paths.
+ *
+ * @since 1.0.0
+ *
+ * @param string $resource_url URl resource link.
+ * @return string Returns abosulte path to the resource.
+ */
+function perflab_get_path_from_resource_url( $resource_url ) {
+	return ABSPATH . wp_make_link_relative( $resource_url );
+}
+
+/**
+ * If file exists, returns its size.
+ *
+ * @since 1.0.0
+ *
+ * @param string $file_src Path to the file.
+ * @return int Returns size if file exists, 0 if it doesn't.
+ */
+function perflab_get_resource_file_size( $file_src ) {
+	return file_exists( $file_src ) ? filesize( $file_src ) : 0;
+}
+
