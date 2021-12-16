@@ -10,6 +10,7 @@ on:
       - "opened"
       - "reopened"
       - "synchronize"
+
 jobs:
   check-labels:
     name: Check Labels and Milestone
@@ -17,14 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Check Type Labels
-        run: |
-          if: "!contains( github.event.pull_request.labels.*.name, '[Type] ' )"
-            echo "Cancelling workflow: pull request does not have a [Type] label"
-      - name: Check Focus or Infrastructure Labels
-        run: |
-          if: ( ! contains( github.event.pull_request.labels.*.name, "[Focus] " ) && ! contains( github.event.pull_request.labels.*.name, "[Infrastructure]" ) )
-            echo "Cancelling workflow: pull request does not have a [Focus] or [Infrastructure] label"
-      - name: Check Milestone
-        run: |
-          if: ( github.event.pull_request.milestone == null && ! contains( github.event.pull_request.labels.*.name, "no milestone" ) )
-            echo "Cancelling workflow: pull request does not have a milestone set"
+        if: "!contains( github.event.pull_request.labels.*.name, '[Type] ' )"
+        uses: actions/github-script@v5
+        with:
+          script: |
+            core.setFailed( 'Pull request must have a [Type] label.' )
