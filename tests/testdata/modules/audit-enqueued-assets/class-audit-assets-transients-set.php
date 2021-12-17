@@ -20,7 +20,14 @@ class Audit_Assets_Transients_Set {
 	 * @param int $number_of_assets Number of assets to mock.
 	 */
 	public static function set_script_transient_with_data( $number_of_assets = 5 ) {
-		$scripts = array_fill( 0, $number_of_assets, 'script.js' );
+		$scripts = array_fill(
+			0,
+			$number_of_assets,
+			array(
+				'src'  => 'script.js',
+				'size' => 1000,
+			)
+		);
 		set_transient( self::SCRIPT_TRANSIENT, $scripts );
 	}
 
@@ -37,7 +44,14 @@ class Audit_Assets_Transients_Set {
 	 * @param int $number_of_assets Number of assets to mock.
 	 */
 	public static function set_style_transient_with_data( $number_of_assets = 5 ) {
-		$styles = array_fill( 0, $number_of_assets, 'style.css' );
+		$styles = array_fill(
+			0,
+			$number_of_assets,
+			array(
+				'src'  => 'style.css',
+				'size' => 1000,
+			)
+		);
 		set_transient( self::STYLES_TRANSIENT, $styles );
 	}
 

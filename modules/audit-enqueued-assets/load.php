@@ -24,7 +24,10 @@ function perflab_aea_audit_enqueued_scripts() {
 		foreach ( $wp_scripts->queue as $handle ) {
 			$src = $wp_scripts->registered[ $handle ]->src;
 			if ( $src && ! strpos( $src, 'wp-includes' ) ) {
-				$enqueued_scripts[] = $src;
+				$enqueued_scripts[] = array(
+					'src'  => $src,
+					'size' => perflab_get_resource_file_size( perflab_get_path_from_resource_url( $src ) ),
+				);
 			}
 		}
 		$expiration = apply_filters( 'perflab_aea_audit_enqueued_scripts_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
@@ -47,7 +50,10 @@ function perflab_aea_audit_enqueued_styles() {
 		foreach ( $wp_styles->queue as $handle ) {
 			$src = $wp_styles->registered[ $handle ]->src;
 			if ( $src && ! strpos( $src, 'wp-includes' ) ) {
-				$enqueued_styles[] = $src;
+				$enqueued_styles[] = array(
+					'src'  => $src,
+					'size' => perflab_get_resource_file_size( perflab_get_path_from_resource_url( $src ) ),
+				);
 			}
 		}
 		$expiration = apply_filters( 'perflab_aea_audit_enqueued_styles_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
@@ -73,6 +79,24 @@ function perflab_aea_get_total_enqueued_scripts() {
 }
 
 /**
+ * Gets total size in bytes of Enqueued Scripts.
+ *
+ * @since 1.0.0
+ *
+ * @return int Byte Total size.
+ */
+function perflab_aea_get_total_size_bytes_enqueued_scripts() {
+	$total_size            = 0;
+	$list_enqueued_scripts = get_transient( 'aea_enqueued_scripts' );
+	if ( $list_enqueued_scripts ) {
+		foreach ( $list_enqueued_scripts as $enqueued_script ) {
+			$total_size += $enqueued_script['size'];
+		}
+	}
+	return $total_size;
+}
+
+/**
  * Gets total of enqueued styles.
  *
  * @since 1.0.0
@@ -86,6 +110,24 @@ function perflab_aea_get_total_enqueued_styles() {
 		$enqueued_styles = count( $list_enqueued_styles );
 	}
 	return $enqueued_styles;
+}
+
+/**
+ * Gets total size in bytes of Enqueued Styles.
+ *
+ * @since 1.0.0
+ *
+ * @return int Byte Total size.
+ */
+function perflab_aea_get_total_size_bytes_enqueued_styles() {
+	$total_size           = 0;
+	$list_enqueued_styles = get_transient( 'aea_enqueued_styles' );
+	if ( $list_enqueued_styles ) {
+		foreach ( $list_enqueued_styles as $enqueued_style ) {
+			$total_size += $enqueued_style['size'];
+		}
+	}
+	return $total_size;
 }
 
 /**
