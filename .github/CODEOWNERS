@@ -1,10 +1,9 @@
-# Documentation
-/docs
-
-# Infrastructure
+# Documentation/Infrastructure
+/docs										@justinahinon @felixarntz	
 
 # Module: Images
-/modules/webp-uploads
+/modules/webp-uploads						@adamsilverstein
+/tests/modules/webp-uploads					@adamsilverstein
 
 # Module: JavaScript
 
@@ -13,3 +12,5 @@
 # Module: Measurement
 
 # Module: Site Health
+/modules/audit-enqueued-assets				@manuelRod @audrasjb
+/tests/modules/audit-enqueued-assets		@manuelRod @audrasjb
