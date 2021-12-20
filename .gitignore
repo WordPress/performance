@@ -44,7 +44,6 @@ vendor/
 ############
 
 tests/logs
-bin/
 tmp/
 *.tmp
 *.bak

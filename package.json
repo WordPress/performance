@@ -19,9 +19,17 @@
     "npm": ">=6.9.0"
   },
   "devDependencies": {
-    "@wordpress/env": "^4.1"
+    "@octokit/rest": "16.26.0",
+    "@wordpress/env": "^4.1",
+    "@wordpress/scripts": "^19.0",
+    "chalk": "4.1.1",
+    "commander": "4.1.0",
+    "lodash": "4.17.21"
   },
   "scripts": {
+    "changelog": "./bin/plugin/cli.js changelog",
+    "format-js": "wp-scripts format ./bin",
+    "lint-js": "wp-scripts lint-js ./bin",
     "format-php": "wp-env run composer run-script format",
     "prelint-php": "wp-env run composer 'install --no-interaction'",
     "lint-php": "wp-env run composer run-script lint",
