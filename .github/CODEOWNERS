@@ -1,16 +1,19 @@
 # Documentation/Infrastructure
-/docs										@justinahinon @felixarntz	
+/docs                                       @justinahinon @felixarntz
+/admin                                      @justinahinon @felixarntz
+/bin                                        @justinahinon @felixarntz
+/.github                                    @justinahinon @felixarntz
 
-# Module: Images
-/modules/webp-uploads						@adamsilverstein
-/tests/modules/webp-uploads					@adamsilverstein
+# Focus: Images
+/modules/webp-uploads                       @adamsilverstein
+/tests/modules/webp-uploads                 @adamsilverstein
 
-# Module: JavaScript
+# Focus: JavaScript
 
-# Module: Object Caching
+# Focus: Object Caching
 
-# Module: Measurement
+# Focus: Measurement
 
-# Module: Site Health
+# Focus: Site Health
 /modules/audit-enqueued-assets				@manuelRod @audrasjb
 /tests/modules/audit-enqueued-assets		@manuelRod @audrasjb
