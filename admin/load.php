@@ -302,7 +302,7 @@ function perflab_get_module_data( $module_file ) {
 
 	// Extract the module focus from its filename.
 	preg_match( '/.*\/modules\/([^\/]*)\/.*/', $module_file, $matches );
-	if (isset( $matches[1] ) ) {
+	if ( isset( $matches[1] ) ) {
 		$module_data['focus'] = $matches[1];
 	}
 
