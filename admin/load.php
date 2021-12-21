@@ -262,6 +262,7 @@ function perflab_get_modules( $modules_root = null ) {
  * Parses the module main file to get the module's metadata.
  *
  * This is similar to how plugin data is parsed in the WordPress core function `get_plugin_data()`.
+ * The user-facing strings will be translated.
  *
  * @since 1.0.0
  *
@@ -289,6 +290,14 @@ function perflab_get_module_data( $module_file ) {
 		$module_data['experimental'] = true;
 	} else {
 		$module_data['experimental'] = false;
+	}
+
+	// Translate fields using low-level function since they come from PHP comments.
+	// See the generated `/module-i18n.php` file.
+	$translatable_fields = array( 'name', 'description' );
+	foreach ( $translatable_fields as $field ) {
+		// phpcs:ignore WordPress.WP.I18n.LowLevelTranslationFunction,WordPress.WP.I18n.NonSingularStringLiteralText
+		$module_data[ $field ] = translate( $module_data[ $field ], 'performance-lab' );
 	}
 
 	return $module_data;
