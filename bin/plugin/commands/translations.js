@@ -11,19 +11,21 @@ const readline = require( 'readline' );
  * Internal dependencies
  */
 const { log, formats } = require( '../lib/logger' );
+const config = require( '../config' );
 
 /**
  * @typedef WPTranslationsCommandOptions
  *
  * @property {string=} directory Optional directory, default is the root `/modules` directory.
- * @property {string=} output    Optional output file, default is the root `/module-i18n.php` file.
+ * @property {string=} output    Optional output PHP file, default is the root `/module-i18n.php` file.
  */
 
 /**
  * @typedef WPTranslationsSettings
  *
- * @property {string=} directory Optional directory, default is the root `/modules` directory.
- * @property {string=} output    Optional output file, default is the root `/module-i18n.php` file.
+ * @property {string} textdomain Plugin textdomain.
+ * @property {string} directory  Modules directory.
+ * @property {string} output     Output PHP file.
  */
 
 const options = [
@@ -44,7 +46,9 @@ const options = [
  */
 async function handler( opt ) {
 	await createTranslations( {
-		directory: opt.directory,
+		textdomain: config.textdomain,
+		directory: opt.directory || 'modules',
+		output: opt.output || 'module-i18n.php',
 	} );
 }
 
@@ -52,6 +56,19 @@ module.exports = {
 	options,
 	handler,
 };
+
+const TAB = '\t';
+const NEWLINE = '\n';
+const FILE_HEADER =
+	[
+		'<?php',
+		'/* THIS IS A GENERATED FILE. DO NOT EDIT DIRECTLY. */',
+		'$generated_i18n_strings = array(',
+	].join( NEWLINE ) + NEWLINE;
+const FILE_FOOTER =
+	NEWLINE +
+	[ ');', '/* THIS IS THE END OF THE GENERATED FILE */' ].join( NEWLINE ) +
+	NEWLINE;
 
 /**
  * Parses module header translation strings.
@@ -103,26 +120,41 @@ async function getTranslations( settings ) {
 }
 
 /**
+ * Parses module header translation strings.
+ *
+ * @param {[]string}               translations List of translation strings.
+ * @param {WPTranslationsSettings} settings     Translations settings.
+ */
+function createTranslationsPHPFile( translations, settings ) {
+	const output = translations.map( ( translation ) => {
+		// Escape single quotes.
+		return (
+			TAB +
+			`__( '${ translation.replace( /'/g, "\\'" ) }', '${
+				settings.textdomain
+			}' ),`
+		);
+	} );
+
+	const fileOutput = FILE_HEADER + output.join( NEWLINE ) + FILE_FOOTER;
+	fs.writeFileSync( path.join( '.', settings.output ), fileOutput );
+}
+
+/**
  * Parses module header translation strings and generates a PHP file with them.
  *
  * @param {WPTranslationsSettings} settings Translations settings.
  */
 async function createTranslations( settings ) {
-	const fullSettings = {
-		...settings,
-		directory: settings.directory || 'modules',
-		output: settings.output || 'module-i18n.php',
-	};
-
 	log(
 		formats.title(
-			`\n💃Preparing module translations for "${ fullSettings.directory }" in "${ fullSettings.output }"\n\n`
+			`\n💃Preparing module translations for "${ settings.directory }" in "${ settings.output }"\n\n`
 		)
 	);
 
 	try {
-		const translations = await getTranslations( fullSettings );
-		log( translations );
+		const translations = await getTranslations( settings );
+		createTranslationsPHPFile( translations, settings );
 	} catch ( error ) {
 		if ( error instanceof Error ) {
 			log( formats.error( error.stack ) );
@@ -131,7 +163,7 @@ async function createTranslations( settings ) {
 
 	log(
 		formats.success(
-			`\n💃Module translations successfully set in "${ fullSettings.output }"\n\n`
+			`\n💃Module translations successfully set in "${ settings.output }"\n\n`
 		)
 	);
 }
