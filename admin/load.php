@@ -306,9 +306,10 @@ function perflab_get_module_data( $module_file, $module_dir ) {
 	}
 
 	// Extract the module focus from the module directory.
-	list( $focus, $slug ) = explode( '/', $module_dir );
-	if ( $focus ) {
+	if ( strpos( $module_dir, '/' ) ) {
+		list( $focus, $slug ) = explode( '/', $module_dir );
 		$module_data['focus'] = $focus;
+		$module_data['slug'] = $slug;
 	}
 
 	return $module_data;
