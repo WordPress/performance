@@ -13,12 +13,11 @@ Every module surfaces on the admin settings page of the performance plugin, wher
 
 ## Module requirements
 
-* The production code for a module must all be located in a directory `/modules/{module-slug}` where `{module-slug}` is the module's slug.
-* The entry point file must be called `load.php` and per the above be located at `/modules/{module-slug}/load.php`.
+* The production code for a module must all be located in a directory `/modules/{focus}/{module-slug}` where `{module-slug}` is the module's slug and `{focus}` is the focus area, an identifier of a single focus area (e.g. `images`). This should correspond to a section on the performance plugin's settings page. [See the `perflab_get_focus_areas()` function for the currently available focus areas.](../admin/load.php#L161)
+* The entry point file must be called `load.php` and per the above be located at `/modules/{focus}/{module-slug}/load.php`.
 * The `load.php` entry point file must contain a module header with the following fields:
     * `Module Name`: Name of the module (comparable to `Plugin Name` for plugins). It will be displayed on the performance plugin's settings page.
     * `Description`: Brief description of the module (comparable to `Description` for plugins). It will be displayed next to the module name on the performance plugin's settings page.
-    * `Focus`: Identifier of a single focus area (e.g. `images`). This should correspond to a section on the performance plugin's settings page. [See the `perflab_get_focus_areas()` function for the currently available focus areas.](../admin/load.php#L161)
     * `Experimental`: Either `Yes` or `No`. If `Yes`, the module will be marked as explicitly experimental on the performance plugin's settings page. While all modules are somewhat experimental (similar to feature plugins), for some that may apply more than for others. For example, certain modules we would encourage limited testing in production for, where we've already established a certain level of reliability/quality, in other cases modules shouldn't be used in production at all.
 * The module must neither rely on any PHP code from outside its directory nor on any external PHP code. If relying on an external PHP dependency is essential for a module, the approach should be evaluated and discussed with the wider team.
 * The module must use the `performance-lab` text domain for all of its localizable strings.
