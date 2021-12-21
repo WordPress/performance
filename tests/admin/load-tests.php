@@ -8,23 +8,26 @@
 class Admin_Load_Tests extends WP_UnitTestCase {
 
 	private static $demo_modules = array(
-		'demo-module-1' => array(
+		'javascript/demo-module-1' => array(
 			'name'         => 'Demo Module 1',
 			'description'  => 'This is the description for demo module 1.',
 			'focus'        => 'javascript',
 			'experimental' => false,
+			'slug'         => 'demo-module-1',
 		),
-		'demo-module-2' => array(
+		'something/demo-module-2'  => array(
 			'name'         => 'Demo Module 2',
 			'description'  => 'This is the description for demo module 2.',
 			'focus'        => 'something',
 			'experimental' => true,
+			'slug'         => 'demo-module-2',
 		),
-		'demo-module-3' => array(
+		'images/demo-module-3'     => array(
 			'name'         => 'Demo Module 3',
 			'description'  => 'This is the description for demo module 3.',
 			'focus'        => 'images',
 			'experimental' => false,
+			'slug'         => 'demo-module-3',
 		),
 	);
 
@@ -116,15 +119,15 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ] )
 		);
 		$this->assertEqualSets(
-			array( 'demo-module-3' ),
+			array( 'images/demo-module-3' ),
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['images'] )
 		);
 		$this->assertEqualSets(
-			array( 'demo-module-1' ),
+			array( 'javascript/demo-module-1' ),
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['javascript'] )
 		);
 		$this->assertEqualSets(
-			array( 'demo-module-2' ),
+			array( 'something/demo-module-2' ),
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['other'] )
 		);
 	}
@@ -138,7 +141,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_perflab_render_modules_page_field() {
-		$module_slug     = 'demo-module-1';
+		$module_slug     = 'javascript/demo-module-1';
 		$module_data     = self::$demo_modules[ $module_slug ];
 		$module_settings = array( 'enabled' => false );
 
@@ -183,7 +186,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_get_module_data() {
 		// Use test data directory with demo modules that match the modules declared on top of this file.
 		foreach ( self::$demo_modules as $module_slug => $expected_module_data ) {
-			$module_data = perflab_get_module_data( TESTS_PLUGIN_DIR . '/tests/testdata/demo-modules/' . $module_slug . '/load.php' );
+			$module_data = perflab_get_module_data( TESTS_PLUGIN_DIR . '/tests/testdata/demo-modules/' . $module_slug . '/load.php', $module_slug );
 			$this->assertSame( $expected_module_data, $module_data );
 		}
 	}
