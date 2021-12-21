@@ -200,35 +200,48 @@ function perflab_get_modules( $modules_root = null ) {
 	$module_files = array();
 	$modules_dir  = @opendir( $modules_root );
 
+	// Modules are organized as {focus}/{module-slug} in the modules folder.
 	if ( $modules_dir ) {
 		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-		while ( ( $file = readdir( $modules_dir ) ) !== false ) {
-			if ( '.' === substr( $file, 0, 1 ) ) {
+		while ( ( $focus = readdir( $modules_dir ) ) !== false ) {
+			if ( '.' === substr( $focus, 0, 1 ) ) {
 				continue;
 			}
 
-			// Unlike plugins, modules must be in a directory.
-			if ( ! is_dir( $modules_root . '/' . $file ) ) {
+			// Each focus area must be a directory.
+			if ( ! is_dir( $modules_root . '/' . $focus ) ) {
 				continue;
 			}
 
-			$module_dir = @opendir( $modules_root . '/' . $file );
-			if ( $module_dir ) {
-				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-				while ( ( $subfile = readdir( $module_dir ) ) !== false ) {
-					if ( '.' === substr( $subfile, 0, 1 ) ) {
+			$focus_dir = @opendir( $modules_root . '/' . $focus );
+			if ( $focus_dir ) {
+				while ( ( $file = readdir( $focus_dir ) ) !== false ) {
+					// Unlike plugins, modules must be in a directory.
+					if ( ! is_dir( $modules_root . '/' . $focus . '/' . $file ) ) {
 						continue;
 					}
 
-					// Unlike plugins, module main files must be called `load.php`.
-					if ( 'load.php' !== $subfile ) {
-						continue;
-					}
+					$module_dir = @opendir( $modules_root . '/' . $focus . '/' . $file );
+					if ( $module_dir ) {
+						// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+						while ( ( $subfile = readdir( $module_dir ) ) !== false ) {
+							if ( '.' === substr( $subfile, 0, 1 ) ) {
+								continue;
+							}
 
-					$module_files[] = "$file/$subfile";
+							// Unlike plugins, module main files must be called `load.php`.
+							if ( 'load.php' !== $subfile ) {
+								continue;
+							}
+
+							$module_files[] = "$focus/$file/$subfile";
+						}
+
+						closedir( $module_dir );
+					}
 				}
 
-				closedir( $module_dir );
+				closedir( $focus_dir );
 			}
 		}
 
