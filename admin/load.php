@@ -202,11 +202,9 @@ function perflab_get_modules( $modules_root = null ) {
 
 	// Modules are organized as {focus}/{module-slug} in the modules folder.
 	if ( $modules_dir ) {
-		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-		while ( ( $focus = readdir( $modules_dir ) ) !== false ) {
-			if ( '.' === substr( $focus, 0, 1 ) ) {
-				continue;
-			}
+		// Load modules from each focus area folder.
+		$focus_areas = perflab_get_focus_areas();
+		foreach ( array_keys( $focus_areas ) as $focus ) {
 
 			// Each focus area must be a directory.
 			if ( ! is_dir( $modules_root . '/' . $focus ) ) {
@@ -215,6 +213,7 @@ function perflab_get_modules( $modules_root = null ) {
 
 			$focus_dir = @opendir( $modules_root . '/' . $focus );
 			if ( $focus_dir ) {
+				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				while ( ( $file = readdir( $focus_dir ) ) !== false ) {
 					// Unlike plugins, modules must be in a directory.
 					if ( ! is_dir( $modules_root . '/' . $focus . '/' . $file ) ) {
@@ -244,8 +243,6 @@ function perflab_get_modules( $modules_root = null ) {
 				closedir( $focus_dir );
 			}
 		}
-
-		closedir( $modules_dir );
 	}
 
 	foreach ( $module_files as $module_file ) {
@@ -286,7 +283,6 @@ function perflab_get_module_data( $module_file ) {
 	$default_headers = array(
 		'name'         => 'Module Name',
 		'description'  => 'Description',
-		'focus'        => 'Focus',
 		'experimental' => 'Experimental',
 	);
 
@@ -302,6 +298,12 @@ function perflab_get_module_data( $module_file ) {
 		$module_data['experimental'] = true;
 	} else {
 		$module_data['experimental'] = false;
+	}
+
+	// Extract the module focus from its filename.
+	preg_match( '/.*\/modules\/([^\/]*)\/.*/', $module_file, $matches );
+	if (isset( $matches[1] ) ) {
+		$module_data['focus'] = $matches[1];
 	}
 
 	return $module_data;
