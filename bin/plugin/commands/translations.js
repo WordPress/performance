@@ -62,9 +62,7 @@ module.exports = {
  */
 async function getTranslations( settings ) {
 	const moduleFilePattern = path.join( settings.directory, '*/load.php' );
-	const moduleFiles = await glob(
-		path.resolve( '../../..', moduleFilePattern )
-	);
+	const moduleFiles = await glob( path.resolve( '.', moduleFilePattern ) );
 
 	const moduleTranslations = await Promise.all(
 		moduleFiles.map( async ( moduleFile ) => {
@@ -110,17 +108,20 @@ async function getTranslations( settings ) {
  * @param {WPTranslationsSettings} settings Translations settings.
  */
 async function createTranslations( settings ) {
-	const directory = settings.directory || 'modules';
-	const output = settings.output || 'module-i18n.php';
+	const fullSettings = {
+		...settings,
+		directory: settings.directory || 'modules',
+		output: settings.output || 'module-i18n.php',
+	};
 
 	log(
 		formats.title(
-			`\n💃Preparing module translations for "${ directory }" in "${ output }"\n\n`
+			`\n💃Preparing module translations for "${ fullSettings.directory }" in "${ fullSettings.output }"\n\n`
 		)
 	);
 
 	try {
-		const translations = await getTranslations( settings );
+		const translations = await getTranslations( fullSettings );
 		log( translations );
 	} catch ( error ) {
 		if ( error instanceof Error ) {
@@ -130,7 +131,7 @@ async function createTranslations( settings ) {
 
 	log(
 		formats.success(
-			`\n💃Module translations successfully set in "${ output }"\n\n`
+			`\n💃Module translations successfully set in "${ fullSettings.output }"\n\n`
 		)
 	);
 }
