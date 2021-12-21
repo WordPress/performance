@@ -252,13 +252,13 @@ function perflab_get_modules( $modules_root = null ) {
 		if ( ! is_readable( "$modules_root/$module_file" ) ) {
 			continue;
 		}
-
-		$module_data = perflab_get_module_data( "$modules_root/$module_file" );
+		$module_dir = dirname( $module_file );
+		$module_data = perflab_get_module_data( "$modules_root/$module_file", $module_dir );
 		if ( ! $module_data ) {
 			continue;
 		}
 
-		$modules[ dirname( $module_file ) ] = $module_data;
+		$modules[ $module_dir ] = $module_data;
 	}
 
 	uasort(
@@ -279,10 +279,11 @@ function perflab_get_modules( $modules_root = null ) {
  * @since 1.0.0
  *
  * @param string $module_file Absolute path to the main module file.
+ * @param string $module_dir  The module directory ({focus}/{module-slug}).
  * @return array|bool Associative array of parsed module data, or false on failure. Fields for every module include
  *                    'name', 'description', 'focus', and 'experimental'.
  */
-function perflab_get_module_data( $module_file ) {
+function perflab_get_module_data( $module_file, $module_dir ) {
 	$default_headers = array(
 		'name'         => 'Module Name',
 		'description'  => 'Description',
@@ -304,10 +305,10 @@ function perflab_get_module_data( $module_file ) {
 		$module_data['experimental'] = false;
 	}
 
-	// Extract the module focus from its filename.
-	preg_match( '/.*\/modules\/([^\/]*)\/.*/', $module_file, $matches );
-	if ( isset( $matches[1] ) ) {
-		$module_data['focus'] = $matches[1];
+	// Extract the module focus from the module directory.
+	list( $focus, $slug ) = explode( '/', $module_dir );
+	if ( $focus ) {
+		$module_data['focus'] = $focus;
 	}
 
 	return $module_data;
