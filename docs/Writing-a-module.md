@@ -13,7 +13,7 @@ Every module surfaces on the admin settings page of the performance plugin, wher
 
 ## Module requirements
 
-* The production code for a module must all be located in a directory `/modules/{focus}/{module-slug}` where `{module-slug}` is the module's slug and `{focus}` is the focus area, an identifier of a single focus area (e.g. `images`). This should correspond to a section on the performance plugin's settings page. [See the `perflab_get_focus_areas()` function for the currently available focus areas.](../admin/load.php#L161)
+* The production code for a module must all be located in a directory `/modules/{focus}/{module-slug}` where `{module-slug}` is the module's slug and `{focus}` is the focus area: an identifier of a single focus (e.g. `images`). This should correspond to a section on the performance plugin's settings page. [See the `perflab_get_focus_areas()` function for the currently available focus areas.](../admin/load.php#L161)
 * The entry point file must be called `load.php` and per the above be located at `/modules/{focus}/{module-slug}/load.php`.
 * The `load.php` entry point file must contain a module header with the following fields:
     * `Module Name`: Name of the module (comparable to `Plugin Name` for plugins). It will be displayed on the performance plugin's settings page.
@@ -41,7 +41,6 @@ The following is a minimum module entry point file `/modules/my-module/load.php`
 /**
  * Module Name: My Module
  * Description: Enhances performance for something.
- * Focus: images
  * Experimental: No
  *
  * @package performance-lab
