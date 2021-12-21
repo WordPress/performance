@@ -22,8 +22,8 @@ Every module surfaces on the admin settings page of the performance plugin, wher
 * The module must neither rely on any PHP code from outside its directory nor on any external PHP code. If relying on an external PHP dependency is essential for a module, the approach should be evaluated and discussed with the wider team.
 * The module must use the `performance-lab` text domain for all of its localizable strings.
 * All global code structures in the module PHP codebase must be prefixed (e.g. with a string based on the module slug) to avoid conflicts with other modules or plugins.
-* All test code for a module (e.g. PHPUnit tests) must be located in a directory `/tests/modules/{module-slug}` where `{module-slug}` is the module's slug (i.e. the same folder name used above).
-    * If tests require some test-specific structures (e.g. dummy data or mock classes), those should be implemented in a directory `/tests/testdata/modules/{module-slug}`.
+* All test code for a module (e.g. PHPUnit tests) must be located in a directory `/tests/modules/{focus}/{module-slug}` where `{module-slug}` is the module's slug (i.e. the same folder name used above).
+    * If tests require some test-specific structures (e.g. dummy data or mock classes), those should be implemented in a directory `/tests/testdata/modules/{focus}/{module-slug}`.
 * The module must adhere to the WordPress coding and documentation standards.
 
 ## Module recommendations
@@ -34,7 +34,7 @@ Every module surfaces on the admin settings page of the performance plugin, wher
 
 ## Example
 
-The following is a minimum module entry point file `/modules/my-module/load.php` (i.e. the module slug is "my-module"):
+The following is a minimum module entry point file `/modules/focus/my-module/load.php` (i.e. the module slug is "my-module"):
 
 ```php
 <?php

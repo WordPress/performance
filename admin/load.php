@@ -215,6 +215,7 @@ function perflab_get_modules( $modules_root = null ) {
 
 			$focus_dir = @opendir( $modules_root . '/' . $focus );
 			if ( $focus_dir ) {
+				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				while ( ( $file = readdir( $focus_dir ) ) !== false ) {
 					// Unlike plugins, modules must be in a directory.
 					if ( ! is_dir( $modules_root . '/' . $focus . '/' . $file ) ) {
@@ -252,7 +253,7 @@ function perflab_get_modules( $modules_root = null ) {
 		if ( ! is_readable( "$modules_root/$module_file" ) ) {
 			continue;
 		}
-		$module_dir = dirname( $module_file );
+		$module_dir  = dirname( $module_file );
 		$module_data = perflab_get_module_data( "$modules_root/$module_file", $module_dir );
 		if ( ! $module_data ) {
 			continue;
@@ -309,7 +310,7 @@ function perflab_get_module_data( $module_file, $module_dir ) {
 	if ( strpos( $module_dir, '/' ) ) {
 		list( $focus, $slug ) = explode( '/', $module_dir );
 		$module_data['focus'] = $focus;
-		$module_data['slug'] = $slug;
+		$module_data['slug']  = $slug;
 	}
 
 	return $module_data;
