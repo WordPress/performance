@@ -5,6 +5,7 @@ const path = require( 'path' );
 const glob = require( 'fast-glob' );
 const fs = require( 'fs' );
 const readline = require( 'readline' );
+const { EOL } = require( 'os' );
 
 /**
  * Internal dependencies
@@ -13,7 +14,7 @@ const { log, formats } = require( '../lib/logger' );
 const config = require( '../config' );
 
 const TAB = '\t';
-const NEWLINE = '\n';
+const NEWLINE = EOL;
 const FILE_HEADER = `<?php
 /* THIS IS A GENERATED FILE. DO NOT EDIT DIRECTLY. */
 $generated_i18n_strings = array(
