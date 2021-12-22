@@ -32,9 +32,9 @@ jobs:
 
       - name: Echo some variables
         run: |
-          echo "${{ env.pr_labels }}"
-          echo "${{ env.pr_labels }}" | grep -E '.*\[Type\]\s.*'
-          echo "${{ steps.match-labels.output.first_match }}'
+          echo '${{ env.pr_labels }}'
+          echo '${{ env.pr_labels }}" | grep -E '.*\[Type\]\s.*'
+          echo '${{ steps.match-labels.output.first_match }}'
 
       - name: Check Type Labels
         if: ${{ steps.match-labels.output.first_match == '' }}
