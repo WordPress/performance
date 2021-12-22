@@ -12,7 +12,7 @@ on:
       - "synchronize"
 
 env:
-  pr_labels: "${{ github.event.pull_request.labels.*.name }}"
+  pr_labels: ${{ github.event.pull_request.labels.*.name }}
 
 jobs:
   check-labels:
