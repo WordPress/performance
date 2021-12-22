@@ -18,10 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions-ecosystem/action-regex-match@v2
-        id: label-match
+        id: regex-match
         with:
-          text: ${{ github.event.pull_request.labels.*.name }}
-          regex: '.*\[Type\]\s.*'
+          text: ${{ github.event.comment.body }}
+          regex: '^/label\s*(.*?)\s*$'
 
       - name: Check Type Labels
         if: ${{ steps.label-match.output.match != '' }}
