@@ -27,7 +27,7 @@ const config = require( '../config' );
  * @property {string} output     Output PHP file.
  */
 
-const options = [
+exports.options = [
 	{
 		argname: '-d, --directory <directory>',
 		description: 'Modules directory',
@@ -43,17 +43,12 @@ const options = [
  *
  * @param {WPTranslationsCommandOptions} opt
  */
-async function handler( opt ) {
+exports.handler = async ( opt ) => {
 	await createTranslations( {
 		textDomain: config.textDomain,
 		directory: opt.directory || 'modules',
 		output: opt.output || 'module-i18n.php',
 	} );
-}
-
-module.exports = {
-	options,
-	handler,
 };
 
 const TAB = '\t';

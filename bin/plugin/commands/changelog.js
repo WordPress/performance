@@ -33,7 +33,7 @@ const config = require( '../config' );
  * @property {string=} token     Optional personal access token.
  */
 
-const options = [
+exports.options = [
 	{
 		argname: '-m, --milestone <milestone>',
 		description: 'Milestone',
@@ -49,18 +49,13 @@ const options = [
  *
  * @param {WPChangelogCommandOptions} opt
  */
-async function handler( opt ) {
+exports.handler = async ( opt ) => {
 	await createChangelog( {
 		owner: config.githubRepositoryOwner,
 		repo: config.githubRepositoryName,
 		milestone: opt.milestone,
 		token: opt.token,
 	} );
-}
-
-module.exports = {
-	options,
-	handler,
 };
 
 const MISSING_TYPE = 'MISSING_TYPE';
