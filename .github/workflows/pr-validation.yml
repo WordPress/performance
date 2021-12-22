@@ -29,6 +29,8 @@ jobs:
           regex_pattern: '.*\[Type\]\s.*'
           regex_flags: 'gm'
           search_string: '${{ env.pr_labels }}'
+
+      - name: Echo some variables
         run: |
           echo "${{ env.pr_labels }}"
           echo "${{ env.pr_labels }}" | grep -E '.*\[Type\]\s.*'
