@@ -59,16 +59,13 @@ module.exports = {
 
 const TAB = '\t';
 const NEWLINE = '\n';
-const FILE_HEADER =
-	[
-		'<?php',
-		'/* THIS IS A GENERATED FILE. DO NOT EDIT DIRECTLY. */',
-		'$generated_i18n_strings = array(',
-	].join( NEWLINE ) + NEWLINE;
-const FILE_FOOTER =
-	NEWLINE +
-	[ ');', '/* THIS IS THE END OF THE GENERATED FILE */' ].join( NEWLINE ) +
-	NEWLINE;
+const FILE_HEADER = `<?php
+/* THIS IS A GENERATED FILE. DO NOT EDIT DIRECTLY. */
+$generated_i18n_strings = array(
+`;
+const FILE_FOOTER = `
+'/* THIS IS THE END OF THE GENERATED FILE */'
+`;
 
 /**
  * Parses module header translation strings.
