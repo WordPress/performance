@@ -14,6 +14,18 @@ const {
 } = require( '../lib/milestone' );
 const config = require( '../config' );
 
+const MISSING_TYPE = 'MISSING_TYPE';
+const MISSING_FOCUS = 'MISSING_FOCUS';
+const TYPE_PREFIX = '[Type] ';
+const FOCUS_PREFIX = '[Focus] ';
+const INFRASTRUCTURE_LABEL = 'Infrastructure';
+const PRIMARY_TYPE_LABELS = {
+	'[Type] Feature': 'Features',
+	'[Type] Enhancement': 'Enhancements',
+	'[Type] Bug': 'Bug Fixes',
+};
+const PRIMARY_TYPE_ORDER = Object.values( PRIMARY_TYPE_LABELS );
+
 /** @typedef {import('@octokit/rest')} GitHub */
 /** @typedef {import('@octokit/rest').IssuesListForRepoResponseItem} IssuesListForRepoResponseItem */
 
@@ -57,18 +69,6 @@ exports.handler = async ( opt ) => {
 		token: opt.token,
 	} );
 };
-
-const MISSING_TYPE = 'MISSING_TYPE';
-const MISSING_FOCUS = 'MISSING_FOCUS';
-const TYPE_PREFIX = '[Type] ';
-const FOCUS_PREFIX = '[Focus] ';
-const INFRASTRUCTURE_LABEL = 'Infrastructure';
-const PRIMARY_TYPE_LABELS = {
-	'[Type] Feature': 'Features',
-	'[Type] Enhancement': 'Enhancements',
-	'[Type] Bug': 'Bug Fixes',
-};
-const PRIMARY_TYPE_ORDER = Object.values( PRIMARY_TYPE_LABELS );
 
 /**
  * Returns a promise resolving to an array of pull requests associated with the

@@ -12,6 +12,17 @@ const readline = require( 'readline' );
 const { log, formats } = require( '../lib/logger' );
 const config = require( '../config' );
 
+const TAB = '\t';
+const NEWLINE = '\n';
+const FILE_HEADER = `<?php
+/* THIS IS A GENERATED FILE. DO NOT EDIT DIRECTLY. */
+$generated_i18n_strings = array(
+`;
+const FILE_FOOTER = `
+);
+/* THIS IS THE END OF THE GENERATED FILE */
+`;
+
 /**
  * @typedef WPTranslationsCommandOptions
  *
@@ -50,17 +61,6 @@ exports.handler = async ( opt ) => {
 		output: opt.output || 'module-i18n.php',
 	} );
 };
-
-const TAB = '\t';
-const NEWLINE = '\n';
-const FILE_HEADER = `<?php
-/* THIS IS A GENERATED FILE. DO NOT EDIT DIRECTLY. */
-$generated_i18n_strings = array(
-`;
-const FILE_FOOTER = `
-);
-/* THIS IS THE END OF THE GENERATED FILE */
-`;
 
 /**
  * Parses module header translation strings.
