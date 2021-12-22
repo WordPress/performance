@@ -16,10 +16,12 @@ jobs:
     name: Check Labels and Milestone
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
       - name: Match the PR labels
-      - id: match-labels
-      - uses: actions/checkout@v2
-      - uses: AsasInnab/regex-action@v1
+        id: match-labels
+        uses: AsasInnab/regex-action@v1
         with:
           regex_pattern: '.*\[Type\]\s.*'
           regex_flags: 'gm'
