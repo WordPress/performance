@@ -11,9 +11,6 @@ on:
       - "reopened"
       - "synchronize"
 
-env:
-  pr_labels: ${{ github.event.pull_request.labels.*.name }}
-
 jobs:
   check-labels:
     name: Check Labels and Milestone
@@ -22,19 +19,17 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
+      - name: Get PR labels
+        id: pr-labels
+        uses: joerick/pr-labels-action@v1.0.6
+
       - name: Match the PR labels
         id: match-labels
         uses: AsasInnab/regex-action@v1
         with:
           regex_pattern: '.*\[Type\]\s.*'
           regex_flags: 'gm'
-          search_string: '${{ env.pr_labels }}'
-
-      - name: Echo some variables
-        run: |
-          echo '${{ env.pr_labels }}'
-          echo '${{ env.pr_labels }}" | grep -E '.*\[Type\]\s.*'
-          echo '${{ steps.match-labels.output.first_match }}'
+          search_string: '${{ env.steps.pr-labels.outputs.labels }}'
 
       - name: Check Type Labels
         if: ${{ steps.match-labels.output.first_match == '' }}
