@@ -74,40 +74,28 @@ async function getTranslations( settings ) {
 	const moduleFilePattern = path.join( settings.directory, '*/load.php' );
 	const moduleFiles = await glob( path.resolve( '.', moduleFilePattern ) );
 
-	const moduleTranslations = await Promise.all(
-		moduleFiles.map( async ( moduleFile ) => {
-			const fileStream = fs.createReadStream( moduleFile );
-
-			const rl = readline.createInterface( {
-				input: fileStream,
-			} );
-
+	const moduleTranslations = moduleFiles
+		.map( ( moduleFile ) => {
 			const headers = [ 'Module Name', 'Description' ];
 			const translationStrings = [];
 
-			for await ( const line of rl ) {
-				headers.forEach( ( header, index ) => {
-					const regex = new RegExp(
-						'^(?:[ \t]*<?php)?[ \t/*#@]*' + header + ':(.*)$',
-						'i'
-					);
-					const match = regex.exec( line );
-
-					if ( match ) {
-						const headerValue = match[ 1 ]
-							.replace( /\s*(?:\*\/|\?>).*/, '' )
-							.trim();
-						if ( headerValue ) {
-							headers.splice( index, 1 );
-							translationStrings.push( headerValue );
-						}
-					}
-				} );
+			const fileContent = fs.readFileSync( moduleFile, 'utf8' );
+			const regex = new RegExp(
+				`^(?:[ \t]*<?php)?[ \t/*#@]*(${ headers.join( '|' ) }):(.*)$`,
+				'gmi'
+			);
+			let match = regex.exec( fileContent );
+			while ( match ) {
+				const value = match[ 2 ].trim();
+				if ( value ) {
+					translationStrings.push( value );
+				}
+				match = regex.exec( fileContent );
 			}
 
 			return translationStrings;
 		} )
-	);
+		.filter( ( translations ) => !! translations.length );
 
 	return moduleTranslations.flat();
 }
