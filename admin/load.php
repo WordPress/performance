@@ -292,12 +292,15 @@ function perflab_get_module_data( $module_file ) {
 		$module_data['experimental'] = false;
 	}
 
-	// Translate fields using low-level function since they come from PHP comments.
-	// See the generated `/module-i18n.php` file.
-	$translatable_fields = array( 'name', 'description' );
-	foreach ( $translatable_fields as $field ) {
-		// phpcs:ignore WordPress.WP.I18n.LowLevelTranslationFunction,WordPress.WP.I18n.NonSingularStringLiteralText
-		$module_data[ $field ] = translate( $module_data[ $field ], 'performance-lab' );
+	// Translate fields using low-level function since they come from PHP comments, including the necessary context for
+	// `_x()`. This must match how these are translated in the generated `/module-i18n.php` file.
+	$translatable_fields = array(
+		'name'        => 'module name',
+		'description' => 'module description',
+	);
+	foreach ( $translatable_fields as $field => $context ) {
+		// phpcs:ignore WordPress.WP.I18n.LowLevelTranslationFunction,WordPress.WP.I18n.NonSingularStringLiteralContext,WordPress.WP.I18n.NonSingularStringLiteralText
+		$module_data[ $field ] = translate_with_gettext_context( $module_data[ $field ], $context, 'performance-lab' );
 	}
 
 	return $module_data;
