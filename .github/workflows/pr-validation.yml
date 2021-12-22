@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Check Type Labels
         if: |
-          !contains( github.event.pull_request.labels.*.name, '^[Type] ' )
+          !contains( github.event.pull_request.labels.*.name, regexp .*\[Type\]\s.* )
         uses: actions/github-script@v5
         with:
           script: |
