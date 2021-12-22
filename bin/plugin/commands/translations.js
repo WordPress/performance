@@ -133,7 +133,9 @@ function createTranslationsPHPFile( translations, settings ) {
 		);
 	} );
 
-	const fileOutput = `${ FILE_HEADER }${ output.join( NEWLINE ) }${ FILE_FOOTER }`;
+	const fileOutput = `${ FILE_HEADER }${ output.join(
+		NEWLINE
+	) }${ FILE_FOOTER }`;
 	fs.writeFileSync( path.join( '.', settings.output ), fileOutput );
 }
 
