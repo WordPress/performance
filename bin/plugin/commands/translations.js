@@ -155,6 +155,7 @@ async function createTranslations( settings ) {
 	} catch ( error ) {
 		if ( error instanceof Error ) {
 			log( formats.error( error.stack ) );
+			return;
 		}
 	}
 
