@@ -63,7 +63,8 @@ const FILE_HEADER = `<?php
 $generated_i18n_strings = array(
 `;
 const FILE_FOOTER = `
-'/* THIS IS THE END OF THE GENERATED FILE */'
+);
+/* THIS IS THE END OF THE GENERATED FILE */
 `;
 
 /**
