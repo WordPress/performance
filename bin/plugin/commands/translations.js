@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-const { flatten } = require( 'lodash' );
 const path = require( 'path' );
 const glob = require( 'fast-glob' );
 const fs = require( 'fs' );
@@ -113,7 +112,7 @@ async function getTranslations( settings ) {
 		} )
 	);
 
-	return flatten( moduleTranslations );
+	return moduleTranslations.flat();
 }
 
 /**
