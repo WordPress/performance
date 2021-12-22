@@ -23,7 +23,7 @@ const config = require( '../config' );
 /**
  * @typedef WPTranslationsSettings
  *
- * @property {string} textdomain Plugin textdomain.
+ * @property {string} textDomain Plugin text domain.
  * @property {string} directory  Modules directory.
  * @property {string} output     Output PHP file.
  */
@@ -46,7 +46,7 @@ const options = [
  */
 async function handler( opt ) {
 	await createTranslations( {
-		textdomain: config.textdomain,
+		textDomain: config.textDomain,
 		directory: opt.directory || 'modules',
 		output: opt.output || 'module-i18n.php',
 	} );
@@ -131,7 +131,7 @@ function createTranslationsPHPFile( translations, settings ) {
 		return (
 			TAB +
 			`__( '${ translation.replace( /'/g, "\\'" ) }', '${
-				settings.textdomain
+				settings.textDomain
 			}' ),`
 		);
 	} );
