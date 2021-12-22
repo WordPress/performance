@@ -16,15 +16,16 @@ jobs:
     name: Check Labels and Milestone
     runs-on: ubuntu-latest
     steps:
+      - id: match-labels
       - uses: actions/checkout@v2
-      - uses: actions-ecosystem/action-regex-match@v2
-        id: regex-match
+      - uses: AsasInnab/regex-action@v1
         with:
-          text: ${{ github.event.pull_request.labels.*.name }}
-          regex: '.*\[Type\]\s.*'
+          regex_pattern: '.*\[Type\]\s.*'
+          regex_flags: 'gm'
+          search_string: ${{ github.event.pull_request.labels.*.name }}
 
       - name: Check Type Labels
-        if: ${{ steps.regex-match.output.match != '' }}
+        if: ${{ steps.match-labels.output.first_match == '' }}
         uses: actions/github-script@v5
         with:
           script: |
