@@ -39,6 +39,13 @@ const FILE_FOOTER = `
  * @property {string} output     Output PHP file.
  */
 
+/**
+ * @typedef WPTranslationEntry
+ *
+ * @property {string} text    String to translate.
+ * @property {string} context Context for translators.
+ */
+
 exports.options = [
 	{
 		argname: '-d, --directory <directory>',
@@ -68,7 +75,7 @@ exports.handler = async ( opt ) => {
  *
  * @param {WPTranslationsSettings} settings Translations settings.
  *
- * @return {[]string} List of translation strings.
+ * @return {[]WPTranslationEntry} List of translation entries.
  */
 async function getTranslations( settings ) {
 	const moduleFilePattern = path.join( settings.directory, '*/load.php' );
@@ -76,24 +83,34 @@ async function getTranslations( settings ) {
 
 	const moduleTranslations = moduleFiles
 		.map( ( moduleFile ) => {
-			const headers = [ 'Module Name', 'Description' ];
-			const translationStrings = [];
+			// Map of module header => translator context.
+			const headers = {
+				'Module Name': 'module name',
+				Description: 'module description',
+			};
+			const translationEntries = [];
 
 			const fileContent = fs.readFileSync( moduleFile, 'utf8' );
 			const regex = new RegExp(
-				`^(?:[ \t]*<?php)?[ \t/*#@]*(${ headers.join( '|' ) }):(.*)$`,
+				`^(?:[ \t]*<?php)?[ \t/*#@]*(${ Object.keys( headers ).join(
+					'|'
+				) }):(.*)$`,
 				'gmi'
 			);
 			let match = regex.exec( fileContent );
 			while ( match ) {
-				const value = match[ 2 ].trim();
-				if ( value ) {
-					translationStrings.push( value );
+				const text = match[ 2 ].trim();
+				const context = headers[ match[ 1 ] ];
+				if ( text && context ) {
+					translationEntries.push( {
+						text,
+						context,
+					} );
 				}
 				match = regex.exec( fileContent );
 			}
 
-			return translationStrings;
+			return translationEntries;
 		} )
 		.filter( ( translations ) => !! translations.length );
 
@@ -103,18 +120,15 @@ async function getTranslations( settings ) {
 /**
  * Parses module header translation strings.
  *
- * @param {[]string}               translations List of translation strings.
+ * @param {[]WPTranslationEntry}   translations List of translation entries.
  * @param {WPTranslationsSettings} settings     Translations settings.
  */
 function createTranslationsPHPFile( translations, settings ) {
 	const output = translations.map( ( translation ) => {
 		// Escape single quotes.
-		return (
-			TAB +
-			`__( '${ translation.replace( /'/g, "\\'" ) }', '${
-				settings.textDomain
-			}' ),`
-		);
+		return `${ TAB }_x( '${ translation.text.replace( /'/g, "\\'" ) }', '${
+			translation.context
+		}', '${ settings.textDomain }' ),`;
 	} );
 
 	const fileOutput = `${ FILE_HEADER }${ output.join(
