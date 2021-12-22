@@ -4,7 +4,6 @@
 const path = require( 'path' );
 const glob = require( 'fast-glob' );
 const fs = require( 'fs' );
-const readline = require( 'readline' );
 const { EOL } = require( 'os' );
 
 /**
