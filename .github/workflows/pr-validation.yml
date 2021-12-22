@@ -11,6 +11,9 @@ on:
       - "reopened"
       - "synchronize"
 
+env:
+  pr_labels: "{{ github.event.pull_request.labels.*.name }}"
+
 jobs:
   check-labels:
     name: Check Labels and Milestone
@@ -25,7 +28,7 @@ jobs:
         with:
           regex_pattern: '.*\[Type\]\s.*'
           regex_flags: 'gm'
-          search_string: ${{ github.event.pull_request.labels.*.name }}
+          search_string: '${{ env.pr_labels }}'
 
       - name: Check Type Labels
         if: ${{ steps.match-labels.output.first_match == '' }}
