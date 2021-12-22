@@ -23,9 +23,7 @@ jobs:
           regex_pattern: '.*\[Type\]\s.*'
           regex_flags: 'gm'
           search_string: ${{ github.event.pull_request.labels.*.name }}
-
-      - name: Check Type Labels
-        if: ${{ steps.match-labels.output.first_match == '' }}
+      - if: ${{ steps.match-labels.output.first_match == '' }}
         uses: actions/github-script@v5
         with:
           script: |
