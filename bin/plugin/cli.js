@@ -30,10 +30,21 @@ const {
 	handler: changelogHandler,
 	options: changelogOptions,
 } = require( './commands/changelog' );
+const {
+	handler: translationsHandler,
+	options: translationsOptions,
+} = require( './commands/translations' );
 
 withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 	.alias( 'changelog' )
 	.description( 'Generates a changelog from merged pull requests' )
 	.action( catchException( changelogHandler ) );
+
+withOptions( program.command( 'module-translations' ), translationsOptions )
+	.alias( 'translations' )
+	.description(
+		'Generates a PHP file from module header translation strings'
+	)
+	.action( catchException( translationsHandler ) );
 
 program.parse( process.argv );
