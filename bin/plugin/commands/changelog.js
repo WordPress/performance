@@ -14,6 +14,18 @@ const {
 } = require( '../lib/milestone' );
 const config = require( '../config' );
 
+const MISSING_TYPE = 'MISSING_TYPE';
+const MISSING_FOCUS = 'MISSING_FOCUS';
+const TYPE_PREFIX = '[Type] ';
+const FOCUS_PREFIX = '[Focus] ';
+const INFRASTRUCTURE_LABEL = 'Infrastructure';
+const PRIMARY_TYPE_LABELS = {
+	'[Type] Feature': 'Features',
+	'[Type] Enhancement': 'Enhancements',
+	'[Type] Bug': 'Bug Fixes',
+};
+const PRIMARY_TYPE_ORDER = Object.values( PRIMARY_TYPE_LABELS );
+
 /** @typedef {import('@octokit/rest')} GitHub */
 /** @typedef {import('@octokit/rest').IssuesListForRepoResponseItem} IssuesListForRepoResponseItem */
 
@@ -33,7 +45,7 @@ const config = require( '../config' );
  * @property {string=} token     Optional personal access token.
  */
 
-const options = [
+exports.options = [
 	{
 		argname: '-m, --milestone <milestone>',
 		description: 'Milestone',
@@ -49,31 +61,14 @@ const options = [
  *
  * @param {WPChangelogCommandOptions} opt
  */
-async function handler( opt ) {
+exports.handler = async ( opt ) => {
 	await createChangelog( {
 		owner: config.githubRepositoryOwner,
 		repo: config.githubRepositoryName,
 		milestone: opt.milestone,
 		token: opt.token,
 	} );
-}
-
-module.exports = {
-	options,
-	handler,
 };
-
-const MISSING_TYPE = 'MISSING_TYPE';
-const MISSING_FOCUS = 'MISSING_FOCUS';
-const TYPE_PREFIX = '[Type] ';
-const FOCUS_PREFIX = '[Focus] ';
-const INFRASTRUCTURE_LABEL = 'Infrastructure';
-const PRIMARY_TYPE_LABELS = {
-	'[Type] Feature': 'Features',
-	'[Type] Enhancement': 'Enhancements',
-	'[Type] Bug': 'Bug Fixes',
-};
-const PRIMARY_TYPE_ORDER = Object.values( PRIMARY_TYPE_LABELS );
 
 /**
  * Returns a promise resolving to an array of pull requests associated with the
