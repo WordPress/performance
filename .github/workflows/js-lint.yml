@@ -55,4 +55,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-cache-
       - name: JS Lint
-        run: npm run lint:js
+        run: npm run lint-js
