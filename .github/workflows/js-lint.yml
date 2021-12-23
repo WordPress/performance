@@ -54,5 +54,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-cache-
+      - name: npm install
+        run: npm ci
       - name: JS Lint
         run: npm run lint-js
