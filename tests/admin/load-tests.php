@@ -11,22 +11,22 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		'javascript/demo-module-1' => array(
 			'name'         => 'Demo Module 1',
 			'description'  => 'This is the description for demo module 1.',
-			'focus'        => 'javascript',
 			'experimental' => false,
+			'focus'        => 'javascript',
 			'slug'         => 'demo-module-1',
 		),
 		'something/demo-module-2'  => array(
 			'name'         => 'Demo Module 2',
 			'description'  => 'This is the description for demo module 2.',
-			'focus'        => 'something',
 			'experimental' => true,
+			'focus'        => 'something',
 			'slug'         => 'demo-module-2',
 		),
 		'images/demo-module-3'     => array(
 			'name'         => 'Demo Module 3',
 			'description'  => 'This is the description for demo module 3.',
-			'focus'        => 'images',
 			'experimental' => false,
+			'focus'        => 'images',
 			'slug'         => 'demo-module-3',
 		),
 	);
