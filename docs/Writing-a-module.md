@@ -34,7 +34,7 @@ Every module surfaces on the admin settings page of the performance plugin, wher
 
 ## Example
 
-The following is a minimum module entry point file `/modules/focus/my-module/load.php` (i.e. the module slug is "my-module"):
+The following is a minimum module entry point file `/modules/images/my-module/load.php` (i.e. the module slug is "my-module", and the focus is "images"):
 
 ```php
 <?php
