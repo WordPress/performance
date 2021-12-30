@@ -254,7 +254,7 @@ function perflab_get_modules( $modules_root = null ) {
 			continue;
 		}
 		$module_dir  = dirname( $module_file );
-		$module_data = perflab_get_module_data( "$modules_root/$module_file", $module_dir );
+		$module_data = perflab_get_module_data( "$modules_root/$module_file" );
 		if ( ! $module_data ) {
 			continue;
 		}
@@ -281,11 +281,14 @@ function perflab_get_modules( $modules_root = null ) {
  * @since 1.0.0
  *
  * @param string $module_file Absolute path to the main module file.
- * @param string $module_dir  The module directory ({focus}/{module-slug}).
  * @return array|bool Associative array of parsed module data, or false on failure. Fields for every module include
  *                    'name', 'description', 'focus', and 'experimental'.
  */
-function perflab_get_module_data( $module_file, $module_dir ) {
+function perflab_get_module_data( $module_file ) {
+	// Extract the module dir in the form {focus}/{module-slug}.
+	preg_match( '/.*\/(.*\/.*)\/load\.php$/i', $module_file, $matches );
+	$module_dir = $matches[1];
+
 	$default_headers = array(
 		'name'         => 'Module Name',
 		'description'  => 'Description',
