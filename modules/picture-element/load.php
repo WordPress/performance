@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: Picture Element
- * Description: Replaces default image tags with <picture> elements supporting a primary and fallback image.
+ * Description: Use <picture> element when image has more than one mime type.
  * Focus: images
  * Experimental: No
  *
@@ -61,14 +61,16 @@ function wrap_image_in_picture( $image, $attachment_id ) {
 	$sub_size_mime_types = array_keys( $sub_size_mime_types_heap );
 
 	/**
-	 * Filter the image mime types that can used for the <picture> element.
+	 * Filter the image mime types that can be used for the <picture> element.
 	 *
-	 * The mime types will be used in the order they are provided.
+	 * Default is: ['image/webp']. Returning an empty array will skip using the picture element.
+	 *
+	 * The mime types will output in the picture element in the order they are provided.
 	 * The original image will be used as the fallback.
 	 *
-	 * Returning an empty array will prevent the picture element from being applied.
-	 *
-	 * The image being evaluated's attachment_id is provided for context.
+	 * @since n.e.x.t
+	 * @param string[] mime types than can be used.
+	 * @param int $attachment_id The id of the image being evaluated.
 	 */
 	$enabled_mime_types = apply_filters(
 		'wp_picture_element_mime_types',
@@ -85,6 +87,7 @@ function wrap_image_in_picture( $image, $attachment_id ) {
 		}
 	);
 
+	// No eligible mime types.
 	if ( ! $mime_types ) {
 		return false;
 	}
@@ -94,25 +97,33 @@ function wrap_image_in_picture( $image, $attachment_id ) {
 		return false;
 	}
 
-	// Add each mime type to the sources.
-	$sources = '';
+	// Add each mime type to the picture's sources.
+	$picture_sources = '';
+	$image = wp_get_attachment_image_src( $attachment_id, 'full', false );
+	list( $src, $width, $height ) = $image;
+	$size_array = array( absint( $width ), absint( $height ) );
+
 	foreach ( $mime_types as $image_mime_type ) {
-		$image_srcset = wp_get_attachment_image_srcset( $attachment_id );
-		$sources .= sprintf(
-			'<source type="%s" srcset="%s">',
+		// @TODO limit by mime type when multiple mime types are supported.
+		// @TODO use sizes array, not medium.
+		$sizes            = wp_calculate_image_sizes( $size_array, $src, $image_meta, $attachment_id );
+		$image_srcset     = wp_get_attachment_image_srcset( $attachment_id, $size_array, $image_meta );
+		$picture_sources .= sprintf(
+			'<source type="%s" srcset="%s" sizes="%s">',
 			$image_mime_type,
-			$image_srcset
+			$image_srcset,
+			$sizes
 		);
 	}
 
-	// Fall back to the original image.
+	// Fall back to the original image without a srcset.
 	add_filter( 'wp_calculate_image_srcset_meta', '__return_false' );
 	$original_image_without_srcset = wp_get_attachment_image( $attachment_id, 'full' );
 	remove_filter( 'wp_calculate_image_srcset_meta', '__return_false' );
 
 	return sprintf(
 		'<picture>%s %s</picture>',
-		$sources,
+		$picture_sources,
 		$original_image_without_srcset
 	);
 }
