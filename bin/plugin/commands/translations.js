@@ -77,7 +77,7 @@ exports.handler = async ( opt ) => {
  * @return {[]WPTranslationEntry} List of translation entries.
  */
 async function getTranslations( settings ) {
-	const moduleFilePattern = path.join( settings.directory, '*/load.php' );
+	const moduleFilePattern = path.join( settings.directory, '*/*/load.php' );
 	const moduleFiles = await glob( path.resolve( '.', moduleFilePattern ) );
 
 	const moduleTranslations = moduleFiles

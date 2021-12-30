@@ -200,35 +200,49 @@ function perflab_get_modules( $modules_root = null ) {
 	$module_files = array();
 	$modules_dir  = @opendir( $modules_root );
 
+	// Modules are organized as {focus}/{module-slug} in the modules folder.
 	if ( $modules_dir ) {
 		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-		while ( ( $file = readdir( $modules_dir ) ) !== false ) {
-			if ( '.' === substr( $file, 0, 1 ) ) {
+		while ( ( $focus = readdir( $modules_dir ) ) !== false ) {
+			if ( '.' === substr( $focus, 0, 1 ) ) {
 				continue;
 			}
 
-			// Unlike plugins, modules must be in a directory.
-			if ( ! is_dir( $modules_root . '/' . $file ) ) {
+			// Each focus area must be a directory.
+			if ( ! is_dir( $modules_root . '/' . $focus ) ) {
 				continue;
 			}
 
-			$module_dir = @opendir( $modules_root . '/' . $file );
-			if ( $module_dir ) {
+			$focus_dir = @opendir( $modules_root . '/' . $focus );
+			if ( $focus_dir ) {
 				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-				while ( ( $subfile = readdir( $module_dir ) ) !== false ) {
-					if ( '.' === substr( $subfile, 0, 1 ) ) {
+				while ( ( $file = readdir( $focus_dir ) ) !== false ) {
+					// Unlike plugins, modules must be in a directory.
+					if ( ! is_dir( $modules_root . '/' . $focus . '/' . $file ) ) {
 						continue;
 					}
 
-					// Unlike plugins, module main files must be called `load.php`.
-					if ( 'load.php' !== $subfile ) {
-						continue;
-					}
+					$module_dir = @opendir( $modules_root . '/' . $focus . '/' . $file );
+					if ( $module_dir ) {
+						// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+						while ( ( $subfile = readdir( $module_dir ) ) !== false ) {
+							if ( '.' === substr( $subfile, 0, 1 ) ) {
+								continue;
+							}
 
-					$module_files[] = "$file/$subfile";
+							// Unlike plugins, module main files must be called `load.php`.
+							if ( 'load.php' !== $subfile ) {
+								continue;
+							}
+
+							$module_files[] = "$focus/$file/$subfile";
+						}
+
+						closedir( $module_dir );
+					}
 				}
 
-				closedir( $module_dir );
+				closedir( $focus_dir );
 			}
 		}
 
@@ -239,13 +253,13 @@ function perflab_get_modules( $modules_root = null ) {
 		if ( ! is_readable( "$modules_root/$module_file" ) ) {
 			continue;
 		}
-
+		$module_dir  = dirname( $module_file );
 		$module_data = perflab_get_module_data( "$modules_root/$module_file" );
 		if ( ! $module_data ) {
 			continue;
 		}
 
-		$modules[ dirname( $module_file ) ] = $module_data;
+		$modules[ $module_dir ] = $module_data;
 	}
 
 	uasort(
@@ -271,10 +285,13 @@ function perflab_get_modules( $modules_root = null ) {
  *                    'name', 'description', 'focus', and 'experimental'.
  */
 function perflab_get_module_data( $module_file ) {
+	// Extract the module dir in the form {focus}/{module-slug}.
+	preg_match( '/.*\/(.*\/.*)\/load\.php$/i', $module_file, $matches );
+	$module_dir = $matches[1];
+
 	$default_headers = array(
 		'name'         => 'Module Name',
 		'description'  => 'Description',
-		'focus'        => 'Focus',
 		'experimental' => 'Experimental',
 	);
 
@@ -290,6 +307,13 @@ function perflab_get_module_data( $module_file ) {
 		$module_data['experimental'] = true;
 	} else {
 		$module_data['experimental'] = false;
+	}
+
+	// Extract the module focus from the module directory.
+	if ( strpos( $module_dir, '/' ) ) {
+		list( $focus, $slug ) = explode( '/', $module_dir );
+		$module_data['focus'] = $focus;
+		$module_data['slug']  = $slug;
 	}
 
 	// Translate fields using low-level function since they come from PHP comments, including the necessary context for

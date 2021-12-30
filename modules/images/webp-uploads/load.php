@@ -2,7 +2,6 @@
 /**
  * Module Name: WebP Uploads
  * Description: Uses WebP as the default format for new JPEG image uploads if the server supports it.
- * Focus: images
  * Experimental: No
  *
  * @package performance-lab
