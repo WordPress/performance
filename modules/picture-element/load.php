@@ -65,12 +65,17 @@ function wrap_image_in_picture( $image, $attachment_id ) {
 	 *
 	 * The mime types will be used in the order they are provided.
 	 * The original image will be used as the fallback.
+	 *
+	 * Returning an empty array will prevent the picture element from being applied.
+	 *
+	 * The image being evaluated's attachment_id is provided for context.
 	 */
 	$enabled_mime_types = apply_filters(
 		'wp_picture_element_mime_types',
 		array(
 			'image/webp',
-		)
+		),
+		$attachment_id
 	);
 
 	$mime_types = array_filter(
@@ -89,23 +94,21 @@ function wrap_image_in_picture( $image, $attachment_id ) {
 		return false;
 	}
 
-	add_filter( 'wp_calculate_image_srcset_meta', '__return_false' );
-	$original_image_without_srcset = wp_get_attachment_image( $attachment_id, 'full' );
-	remove_filter( 'wp_calculate_image_srcset_meta', '__return_false' );
-
-	// Add each mime type, falling back to the original image.
+	// Add each mime type to the sources.
 	$sources = '';
-
 	foreach ( $mime_types as $image_mime_type ) {
-
 		$image_srcset = wp_get_attachment_image_srcset( $attachment_id );
-
 		$sources .= sprintf(
 			'<source type="%s" srcset="%s">',
 			$image_mime_type,
 			$image_srcset
 		);
 	}
+
+	// Fall back to the original image.
+	add_filter( 'wp_calculate_image_srcset_meta', '__return_false' );
+	$original_image_without_srcset = wp_get_attachment_image( $attachment_id, 'full' );
+	remove_filter( 'wp_calculate_image_srcset_meta', '__return_false' );
 
 	return sprintf(
 		'<picture>%s %s</picture>',
