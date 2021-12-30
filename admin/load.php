@@ -292,7 +292,6 @@ function perflab_get_module_data( $module_file ) {
 	$default_headers = array(
 		'name'         => 'Module Name',
 		'description'  => 'Description',
-		'focus'        => 'Focus',
 		'experimental' => 'Experimental',
 	);
 
