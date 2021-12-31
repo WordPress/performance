@@ -97,10 +97,10 @@ function wrap_image_in_picture( $image, $attachment_id ) {
 	}
 
 	// Add each mime type to the picture's sources.
-	$picture_sources = '';
-	$image = wp_get_attachment_image_src( $attachment_id, 'full', false );
+	$picture_sources              = '';
+	$image                        = wp_get_attachment_image_src( $attachment_id, 'full', false );
 	list( $src, $width, $height ) = $image;
-	$size_array = array( absint( $width ), absint( $height ) );
+	$size_array                   = array( absint( $width ), absint( $height ) );
 
 	foreach ( $mime_types as $image_mime_type ) {
 		// @TODO limit by mime type when multiple mime types are supported.
