@@ -2,7 +2,6 @@
 /**
  * Module Name: Picture Element
  * Description: Use <picture> element when image has more than one mime type.
- * Focus: images
  * Experimental: No
  *
  * @package performance-lab
