@@ -116,8 +116,10 @@ function wrap_image_in_picture( $image, $attachment_id ) {
 	}
 
 	// Fall back to the original image without a srcset.
+	$original_sizes = array( $image[1], $image[2] );
+	$original_image = wp_get_original_image_url( $attachment_id );
 	add_filter( 'wp_calculate_image_srcset_meta', '__return_false' );
-	$original_image_without_srcset = wp_get_attachment_image( $attachment_id, 'full' );
+	$original_image_without_srcset = wp_get_attachment_image( $attachment_id, $original_sizes, false, array( 'src' => $original_image ) );
 	remove_filter( 'wp_calculate_image_srcset_meta', '__return_false' );
 
 	return sprintf(
