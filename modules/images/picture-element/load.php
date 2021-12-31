@@ -62,7 +62,7 @@ function wrap_image_in_picture( $image, $attachment_id ) {
 	/**
 	 * Filter the image mime types that can be used for the <picture> element.
 	 *
-	 * Default is: ['image/webp']. Returning an empty array will skip using the picture element.
+	 * Default is: ['image/webp'] for testing. Returning an empty array will skip using the picture element.
 	 *
 	 * The mime types will output in the picture element in the order they are provided.
 	 * The original image will be used as the fallback.
