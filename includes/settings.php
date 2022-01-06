@@ -179,162 +179,60 @@ function perflab_get_focus_areas() {
 }
 
 /**
- * Gets all available modules.
+ * Registers the performance modules setting.
  *
- * This function iterates through the modules directory and therefore should only be called on the modules page.
- * It searches all modules, similar to how plugins are searched in the WordPress core function `get_plugins()`.
+ * @since 1.0.0
+ */
+function perflab_register_modules_setting() {
+	register_setting(
+		PERFLAB_MODULES_SCREEN,
+		PERFLAB_MODULES_SETTING,
+		array(
+			'type'              => 'object',
+			'sanitize_callback' => 'perflab_sanitize_modules_setting',
+			'default'           => array(),
+		)
+	);
+}
+add_action( 'init', 'perflab_register_modules_setting' );
+
+/**
+ * Sanitizes the performance modules setting.
  *
  * @since 1.0.0
  *
- * @param string $modules_root Modules root directory to look for modules in. Default is the `/modules` directory
- *                                  in the plugin's root.
- * @return array Associative array of parsed module data, keyed by module slug. Fields for every module include
- *               'name', 'description', 'focus', and 'experimental'.
+ * @param mixed $value Modules setting value.
+ * @return array Sanitized modules setting value.
  */
-function perflab_get_modules( $modules_root = null ) {
-	static $modules = array();
-
-	if ( null === $modules_root ) {
-		$modules_root = PERFLAB_ABSPATH . '/modules';
+function perflab_sanitize_modules_setting( $value ) {
+	if ( ! is_array( $value ) ) {
+		return array();
 	}
 
-	if ( isset( $modules[ $modules_root ] ) ) {
-		return $modules[ $modules_root ];
-	}
-
-	$module_files = array();
-	$modules_dir  = @opendir( $modules_root );
-
-	// Modules are organized as {focus}/{module-slug} in the modules folder.
-	if ( $modules_dir ) {
-		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-		while ( ( $focus = readdir( $modules_dir ) ) !== false ) {
-			if ( '.' === substr( $focus, 0, 1 ) ) {
-				continue;
-			}
-
-			// Each focus area must be a directory.
-			if ( ! is_dir( $modules_root . '/' . $focus ) ) {
-				continue;
-			}
-
-			$focus_dir = @opendir( $modules_root . '/' . $focus );
-			if ( $focus_dir ) {
-				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-				while ( ( $file = readdir( $focus_dir ) ) !== false ) {
-					// Unlike plugins, modules must be in a directory.
-					if ( ! is_dir( $modules_root . '/' . $focus . '/' . $file ) ) {
-						continue;
-					}
-
-					$module_dir = @opendir( $modules_root . '/' . $focus . '/' . $file );
-					if ( $module_dir ) {
-						// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-						while ( ( $subfile = readdir( $module_dir ) ) !== false ) {
-							if ( '.' === substr( $subfile, 0, 1 ) ) {
-								continue;
-							}
-
-							// Unlike plugins, module main files must be called `load.php`.
-							if ( 'load.php' !== $subfile ) {
-								continue;
-							}
-
-							$module_files[] = "$focus/$file/$subfile";
-						}
-
-						closedir( $module_dir );
-					}
+	// Ensure that every element is an array with an 'enabled' key.
+	return array_filter(
+		array_map(
+			function( $module_settings ) {
+				if ( ! is_array( $module_settings ) ) {
+					return array();
 				}
-
-				closedir( $focus_dir );
-			}
-		}
-
-		closedir( $modules_dir );
-	}
-
-	$found_modules = array();
-	foreach ( $module_files as $module_file ) {
-		if ( ! is_readable( "$modules_root/$module_file" ) ) {
-			continue;
-		}
-
-		$module_dir  = dirname( $module_file );
-		$module_data = perflab_get_module_data( "$modules_root/$module_file" );
-		if ( ! $module_data ) {
-			continue;
-		}
-
-		$found_modules[ $module_dir ] = $module_data;
-	}
-
-	uasort(
-		$found_modules,
-		function( $a, $b ) {
-			return strnatcasecmp( $a['name'], $b['name'] );
-		}
+				return array_merge(
+					array( 'enabled' => false ),
+					$module_settings
+				);
+			},
+			$value
+		)
 	);
-
-	$modules[ $modules_root ] = $found_modules;
-
-	return $modules[ $modules_root ];
 }
 
 /**
- * Parses the module main file to get the module's metadata.
- *
- * This is similar to how plugin data is parsed in the WordPress core function `get_plugin_data()`.
- * The user-facing strings will be translated.
+ * Gets the performance module settings.
  *
  * @since 1.0.0
  *
- * @param string $module_file Absolute path to the main module file.
- * @return array|bool Associative array of parsed module data, or false on failure. Fields for every module include
- *                    'name', 'description', 'focus', and 'experimental'.
+ * @return array Associative array of module settings keyed by module slug.
  */
-function perflab_get_module_data( $module_file ) {
-	// Extract the module dir in the form {focus}/{module-slug}.
-	preg_match( '/.*\/(.*\/.*)\/load\.php$/i', $module_file, $matches );
-	$module_dir = $matches[1];
-
-	$default_headers = array(
-		'name'         => 'Module Name',
-		'description'  => 'Description',
-		'experimental' => 'Experimental',
-	);
-
-	$module_data = get_file_data( $module_file, $default_headers, 'perflab_module' );
-
-	// Module name and description are the minimum requirements.
-	if ( ! $module_data['name'] || ! $module_data['description'] ) {
-		return false;
-	}
-
-	// Experimental should be a boolean.
-	if ( 'yes' === strtolower( trim( $module_data['experimental'] ) ) ) {
-		$module_data['experimental'] = true;
-	} else {
-		$module_data['experimental'] = false;
-	}
-
-	// Extract the module focus from the module directory.
-	if ( strpos( $module_dir, '/' ) ) {
-		list( $focus, $slug ) = explode( '/', $module_dir );
-		$module_data['focus'] = $focus;
-		$module_data['slug']  = $slug;
-	}
-
-	// Translate fields using low-level function since they come from PHP comments, including the necessary context for
-	// `_x()`. This must match how these are translated in the generated `/module-i18n.php` file.
-	$translatable_fields = array(
-		'name'        => 'module name',
-		'description' => 'module description',
-	);
-	foreach ( $translatable_fields as $field => $context ) {
-		// phpcs:ignore WordPress.WP.I18n.LowLevelTranslationFunction,WordPress.WP.I18n.NonSingularStringLiteralContext,WordPress.WP.I18n.NonSingularStringLiteralText
-		$module_data[ $field ] = translate_with_gettext_context( $module_data[ $field ], $context, 'performance-lab' );
-	}
-
-	return $module_data;
+function perflab_get_module_settings() {
+	return (array) get_option( PERFLAB_MODULES_SETTING, array() );
 }
