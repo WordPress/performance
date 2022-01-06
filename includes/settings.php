@@ -120,13 +120,28 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 	$base_id   = sprintf( 'module_%s', $module_slug );
 	$base_name = sprintf( '%1$s[%2$s]', PERFLAB_MODULES_SETTING, $module_slug );
 	$enabled   = isset( $module_settings['enabled'] ) && $module_settings['enabled'];
+	$disabled  = false;
+	if ( current_theme_supports( $module_data['slug'] ) ) {
+		$enabled  = true;
+		$disabled = true;
+	}
+
 	?>
 	<fieldset>
 		<legend class="screen-reader-text">
 			<?php echo esc_html( $module_data['name'] ); ?>
 		</legend>
 		<label for="<?php echo esc_attr( "{$base_id}_enabled" ); ?>">
-			<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" value="1"<?php checked( $enabled ); ?>>
+			<input
+				type="checkbox"
+				id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>"
+				name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>"
+				aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>"
+				value="1"
+				<?php echo $disabled ? 'disabled' : '' ?>
+				<?php checked( $enabled ); ?>
+			>
+
 			<?php
 			if ( $module_data['experimental'] ) {
 				printf(
