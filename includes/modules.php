@@ -176,15 +176,18 @@ function perflab_get_module_data( $module_file ) {
 function perflab_get_active_modules() {
 	$module_settings = perflab_get_module_settings();
 	$all_modules     = perflab_get_modules();
-
 	$enabled_modules = array();
+
 	foreach ( $all_modules as $module_key => $module_details ) {
+		if ( current_theme_supports( $module_details['slug'] ) ) {
+			$enabled_modules[] = $module_key;
+		}
+	}
+
+	foreach ( $module_settings as $module_key => $module_details ) {
 		if (
-			current_theme_supports( $module_details['slug'] ) ||
-			(
-				isset( $module_settings[ $module_key ]['enabled'] ) &&
-				filter_var( $module_settings[ $module_key ]['enabled'], FILTER_VALIDATE_BOOLEAN )
-			)
+			isset( $module_settings[ $module_key ]['enabled'] ) &&
+			filter_var( $module_settings[ $module_key ]['enabled'], FILTER_VALIDATE_BOOLEAN )
 		) {
 			$enabled_modules[] = $module_key;
 		}

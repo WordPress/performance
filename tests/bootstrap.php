@@ -42,7 +42,6 @@ require_once $_test_root . '/includes/functions.php';
 tests_add_filter(
 	'plugins_loaded',
 	function() {
-		require_once TESTS_PLUGIN_DIR . '/admin/load.php';
 		$module_files = glob( TESTS_PLUGIN_DIR . '/modules/*/*/load.php' );
 		if ( $module_files ) {
 			foreach ( $module_files as $module_file ) {
