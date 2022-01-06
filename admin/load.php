@@ -192,11 +192,16 @@ function perflab_get_focus_areas() {
  *               'name', 'description', 'focus', and 'experimental'.
  */
 function perflab_get_modules( $modules_root = null ) {
+	static $modules = array();
+
 	if ( null === $modules_root ) {
-		$modules_root = dirname( __DIR__ ) . '/modules';
+		$modules_root = PERFLAB_ABSPATH . '/modules';
 	}
 
-	$modules      = array();
+	if ( isset( $modules[ $modules_root ] ) ) {
+		return $modules[ $modules_root ];
+	}
+
 	$module_files = array();
 	$modules_dir  = @opendir( $modules_root );
 
@@ -249,27 +254,31 @@ function perflab_get_modules( $modules_root = null ) {
 		closedir( $modules_dir );
 	}
 
+	$found_modules = array();
 	foreach ( $module_files as $module_file ) {
 		if ( ! is_readable( "$modules_root/$module_file" ) ) {
 			continue;
 		}
+
 		$module_dir  = dirname( $module_file );
 		$module_data = perflab_get_module_data( "$modules_root/$module_file" );
 		if ( ! $module_data ) {
 			continue;
 		}
 
-		$modules[ $module_dir ] = $module_data;
+		$found_modules[ $module_dir ] = $module_data;
 	}
 
 	uasort(
-		$modules,
+		$found_modules,
 		function( $a, $b ) {
 			return strnatcasecmp( $a['name'], $b['name'] );
 		}
 	);
 
-	return $modules;
+	$modules[ $modules_root ] = $found_modules;
+
+	return $modules[ $modules_root ];
 }
 
 /**
