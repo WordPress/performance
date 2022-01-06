@@ -13,10 +13,10 @@
 	<arg value="ps"/>
 	<arg name="extensions" value="php"/>
 
-	<file>./admin</file>
-	<file>./load.php</file>
+	<file>./includes</file>
 	<file>./modules</file>
 	<file>./tests</file>
+	<file>./load.php</file>
 
 	<!-- Do not require docblocks for unit tests -->
 	<rule ref="Squiz.Commenting.FunctionComment.Missing">
