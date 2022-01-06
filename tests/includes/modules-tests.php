@@ -52,12 +52,26 @@ class Modules_Tests extends WP_UnitTestCase {
 
 		// Assert that option updates affect the active modules correctly.
 		$new_value = array(
-			'inactive-module' => array( 'enabled' => false ),
-			'active-module'   => array( 'enabled' => true ),
+			'javascript/demo-module-1' => array( 'enabled' => false ),
+			'something/demo-module-2'  => array( 'enabled' => true ),
+			'images/demo-module-3'     => array( 'enabled' => false ),
 		);
+
+		$GLOBALS['perflab_modules'] = array(
+			PERFLAB_MODULES_PATH => self::$demo_modules,
+		);
+
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
+		add_theme_support( 'demo-module-3' );
+
 		$active_modules = perflab_get_active_modules();
-		$this->assertSame( array( 'active-module' ), $active_modules );
+		$this->assertSame(
+			array(
+				'something/demo-module-2',
+				'images/demo-module-3',
+			),
+			$active_modules
+		);
 	}
 
 }

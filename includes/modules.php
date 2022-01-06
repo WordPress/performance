@@ -19,14 +19,18 @@
  *               'name', 'description', 'focus', and 'experimental'.
  */
 function perflab_get_modules( $modules_root = null ) {
-	static $modules = array();
+	global $perflab_modules;
 
-	if ( null === $modules_root ) {
-		$modules_root = PERFLAB_ABSPATH . '/modules';
+	if ( ! is_array( $perflab_modules ) ) {
+		$perflab_modules = array();
 	}
 
-	if ( isset( $modules[ $modules_root ] ) ) {
-		return $modules[ $modules_root ];
+	if ( null === $modules_root ) {
+		$modules_root = PERFLAB_MODULES_PATH;
+	}
+
+	if ( isset( $perflab_modules[ $modules_root ] ) ) {
+		return $perflab_modules[ $modules_root ];
 	}
 
 	$module_files = array();
@@ -103,9 +107,9 @@ function perflab_get_modules( $modules_root = null ) {
 		}
 	);
 
-	$modules[ $modules_root ] = $found_modules;
+	$perflab_modules[ $modules_root ] = $found_modules;
 
-	return $modules[ $modules_root ];
+	return $perflab_modules[ $modules_root ];
 }
 
 /**
@@ -179,15 +183,12 @@ function perflab_get_active_modules() {
 	$enabled_modules = array();
 
 	foreach ( $all_modules as $module_key => $module_details ) {
-		if ( current_theme_supports( $module_details['slug'] ) ) {
-			$enabled_modules[] = $module_key;
-		}
-	}
-
-	foreach ( $module_settings as $module_key => $module_details ) {
 		if (
-			isset( $module_settings[ $module_key ]['enabled'] ) &&
-			filter_var( $module_settings[ $module_key ]['enabled'], FILTER_VALIDATE_BOOLEAN )
+			current_theme_supports( $module_details['slug'] ) ||
+			(
+				isset( $module_settings[ $module_key ]['enabled'] ) &&
+				filter_var( $module_settings[ $module_key ]['enabled'], FILTER_VALIDATE_BOOLEAN )
+			)
 		) {
 			$enabled_modules[] = $module_key;
 		}

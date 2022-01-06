@@ -149,10 +149,10 @@ class Settings_Tests extends WP_UnitTestCase {
 		ob_start();
 		perflab_render_modules_page_field( $module_slug, $module_data, $module_settings );
 		$output = ob_get_clean();
-		$this->assertContains( ' id="module_' . $module_slug . '_enabled"', $output );
-		$this->assertContains( ' name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
+		$this->assertContains( 'id="module_' . $module_slug . '_enabled"', $output );
+		$this->assertContains( 'name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
 		$this->assertContains( 'Enable ' . $module_data['name'] . '?', $output );
-		$this->assertNotContains( ' checked', $output );
+		$this->assertNotContains( 'checked', $output );
 
 		// Assert correct 'id' and 'name' attributes, experimental label, and checked checkbox.
 		$module_data['experimental'] = true;
@@ -160,10 +160,10 @@ class Settings_Tests extends WP_UnitTestCase {
 		ob_start();
 		perflab_render_modules_page_field( $module_slug, $module_data, $module_settings );
 		$output = ob_get_clean();
-		$this->assertContains( ' id="module_' . $module_slug . '_enabled"', $output );
-		$this->assertContains( ' name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
+		$this->assertContains( 'id="module_' . $module_slug . '_enabled"', $output );
+		$this->assertContains( 'name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
 		$this->assertContains( 'Enable ' . $module_data['name'] . ' <strong>(experimental)</strong>?', $output );
-		$this->assertContains( " checked='checked'", $output );
+		$this->assertContains( "checked='checked'", $output );
 	}
 
 	public function test_perflab_get_focus_areas() {

@@ -14,6 +14,7 @@
 
 define( 'PERFLAB_VERSION', '1.0.0' );
 define( 'PERFLAB_ABSPATH', __DIR__ . DIRECTORY_SEPARATOR );
+define( 'PERFLAB_MODULES_PATH', PERFLAB_ABSPATH . 'modules' . DIRECTORY_SEPARATOR );
 
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
