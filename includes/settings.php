@@ -138,7 +138,7 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>"
 				aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>"
 				value="1"
-				<?php echo $disabled ? 'disabled' : '' ?>
+				<?php echo $disabled ? 'disabled' : ''; ?>
 				<?php checked( $enabled ); ?>
 			>
 
