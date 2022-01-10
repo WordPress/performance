@@ -14,14 +14,14 @@
 require_once __DIR__ . '/helper.php';
 
 /**
- * Audit enqueued scripts in the frontend. Ignore /wp-includes scripts.
+ * Audit enqueued scripts in is_front_page(). Ignore /wp-includes scripts.
  *
  * It will save information in a transient for 12 hours.
  *
  * @since 1.0.0
  */
 function perflab_aea_audit_enqueued_scripts() {
-	if ( ! is_admin() && ! get_transient( 'aea_enqueued_scripts' ) ) {
+	if ( ! is_admin() && is_front_page() && current_user_can( 'view_site_health_checks' ) && false === get_transient( 'aea_enqueued_front_page_scripts' ) ) {
 		global $wp_scripts;
 		$enqueued_scripts = array();
 
@@ -34,8 +34,8 @@ function perflab_aea_audit_enqueued_scripts() {
 				);
 			}
 		}
-		$expiration = apply_filters( 'perflab_aea_audit_enqueued_scripts_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
-		set_transient( 'aea_enqueued_scripts', $enqueued_scripts, $expiration );
+		$expiration = apply_filters( 'perflab_aea_enqueued_front_page_scripts_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
+		set_transient( 'aea_enqueued_front_page_scripts', $enqueued_scripts, $expiration );
 	}
 }
 add_action( 'wp_print_scripts', 'perflab_aea_audit_enqueued_scripts' );
@@ -48,7 +48,7 @@ add_action( 'wp_print_scripts', 'perflab_aea_audit_enqueued_scripts' );
  * @since 1.0.0
  */
 function perflab_aea_audit_enqueued_styles() {
-	if ( ! is_admin() && ! get_transient( 'aea_enqueued_styles' ) ) {
+	if ( ! is_admin() && is_front_page() && current_user_can( 'view_site_health_checks' ) && false === get_transient( 'aea_enqueued_front_page_styles' ) ) {
 		global $wp_styles;
 		$enqueued_styles = array();
 		foreach ( $wp_styles->queue as $handle ) {
@@ -60,8 +60,8 @@ function perflab_aea_audit_enqueued_styles() {
 				);
 			}
 		}
-		$expiration = apply_filters( 'perflab_aea_audit_enqueued_styles_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
-		set_transient( 'aea_enqueued_styles', $enqueued_styles, $expiration );
+		$expiration = apply_filters( 'perflab_aea_enqueued_front_page_styles_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
+		set_transient( 'aea_enqueued_front_page_styles', $enqueued_styles, $expiration );
 	}
 }
 add_action( 'wp_print_styles', 'perflab_aea_audit_enqueued_styles' );
@@ -199,7 +199,7 @@ function perflab_aea_enqueued_css_assets_test() {
  * @since 1.0.0
  */
 function perflab_aea_clean_aea_audit_action() {
-	if ( isset( $_GET['action'] ) && 'clean_aea_audit' === $_GET['action'] ) {
+	if ( isset( $_GET['action'] ) && 'clean_aea_audit' === $_GET['action'] && current_user_can( 'view_site_health_checks' ) ) {
 		check_admin_referer( 'clean_aea_audit' );
 		perflab_aea_invalidate_cache_transients();
 		wp_safe_redirect( remove_query_arg( array( 'action', '_wpnonce' ), wp_get_referer() ) );
@@ -213,8 +213,8 @@ add_action( 'admin_init', 'perflab_aea_clean_aea_audit_action' );
  * @since 1.0.0
  */
 function perflab_aea_invalidate_cache_transients() {
-	delete_transient( 'aea_enqueued_scripts' );
-	delete_transient( 'aea_enqueued_styles' );
+	delete_transient( 'aea_enqueued_front_page_scripts' );
+	delete_transient( 'aea_enqueued_front_page_styles' );
 }
 add_action( 'switch_theme', 'perflab_aea_invalidate_cache_transients' );
 add_action( 'activated_plugin', 'perflab_aea_invalidate_cache_transients' );

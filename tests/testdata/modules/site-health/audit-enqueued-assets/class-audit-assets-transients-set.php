@@ -11,8 +11,8 @@
  */
 class Audit_Assets_Transients_Set {
 
-	const SCRIPT_TRANSIENT = 'aea_enqueued_scripts';
-	const STYLES_TRANSIENT = 'aea_enqueued_styles';
+	const SCRIPT_TRANSIENT = 'aea_enqueued_front_page_scripts';
+	const STYLES_TRANSIENT = 'aea_enqueued_front_page_styles';
 
 	/**
 	 * Setting up the Script transient.

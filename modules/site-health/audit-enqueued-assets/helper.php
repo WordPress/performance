@@ -15,7 +15,7 @@
  */
 function perflab_aea_get_total_enqueued_scripts() {
 	$enqueued_scripts      = false;
-	$list_enqueued_scripts = get_transient( 'aea_enqueued_scripts' );
+	$list_enqueued_scripts = get_transient( 'aea_enqueued_front_page_scripts' );
 	if ( $list_enqueued_scripts ) {
 		$enqueued_scripts = count( $list_enqueued_scripts );
 	}
@@ -27,11 +27,11 @@ function perflab_aea_get_total_enqueued_scripts() {
  *
  * @since 1.0.0
  *
- * @return int Byte Total size.
+ * @return int|false Byte Total size or false if transient hasn't been set.
  */
 function perflab_aea_get_total_size_bytes_enqueued_scripts() {
-	$total_size            = 0;
-	$list_enqueued_scripts = get_transient( 'aea_enqueued_scripts' );
+	$total_size            = false;
+	$list_enqueued_scripts = get_transient( 'aea_enqueued_front_page_scripts' );
 	if ( $list_enqueued_scripts ) {
 		foreach ( $list_enqueued_scripts as $enqueued_script ) {
 			$total_size += $enqueued_script['size'];
@@ -49,7 +49,7 @@ function perflab_aea_get_total_size_bytes_enqueued_scripts() {
  */
 function perflab_aea_get_total_enqueued_styles() {
 	$enqueued_styles      = false;
-	$list_enqueued_styles = get_transient( 'aea_enqueued_styles' );
+	$list_enqueued_styles = get_transient( 'aea_enqueued_front_page_styles' );
 	if ( $list_enqueued_styles ) {
 		$enqueued_styles = count( $list_enqueued_styles );
 	}
@@ -61,11 +61,11 @@ function perflab_aea_get_total_enqueued_styles() {
  *
  * @since 1.0.0
  *
- * @return int Byte Total size.
+ * @return int|false Byte Total size or false if transient hasn't been set.
  */
 function perflab_aea_get_total_size_bytes_enqueued_styles() {
-	$total_size           = 0;
-	$list_enqueued_styles = get_transient( 'aea_enqueued_styles' );
+	$total_size           = false;
+	$list_enqueued_styles = get_transient( 'aea_enqueued_front_page_styles' );
 	if ( $list_enqueued_styles ) {
 		foreach ( $list_enqueued_styles as $enqueued_style ) {
 			$total_size += $enqueued_style['size'];

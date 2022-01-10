@@ -33,7 +33,7 @@ class Audit_Enqueued_Assets_Helper_Tests extends WP_UnitTestCase {
 	 */
 	public function test_perflab_aea_get_total_size_bytes_enqueued_scripts() {
 		$size_enqueued_scripts = perflab_aea_get_total_size_bytes_enqueued_scripts();
-		$this->assertEquals( 0, $size_enqueued_scripts );
+		$this->assertFalse( $size_enqueued_scripts );
 
 		Audit_Assets_Transients_Set::set_script_transient_with_data( 5 );
 		$total_enqueued_scripts = perflab_aea_get_total_size_bytes_enqueued_scripts();
@@ -58,7 +58,7 @@ class Audit_Enqueued_Assets_Helper_Tests extends WP_UnitTestCase {
 	 */
 	public function test_perflab_aea_get_total_size_bytes_enqueued_styles() {
 		$size_enqueued_scripts = perflab_aea_get_total_size_bytes_enqueued_styles();
-		$this->assertEquals( 0, $size_enqueued_scripts );
+		$this->assertFalse( $size_enqueued_scripts );
 
 		Audit_Assets_Transients_Set::set_style_transient_with_data( 5 );
 		$total_enqueued_styles = perflab_aea_get_total_size_bytes_enqueued_styles();

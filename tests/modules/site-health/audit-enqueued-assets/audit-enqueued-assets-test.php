@@ -16,9 +16,15 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Tests perflab_aea_audit_enqueued_scripts() when transient is already set.
 	 */
 	public function test_perflab_aea_audit_enqueued_scripts_transient_already_set() {
+		/**
+		 * Prepare scenario for test.
+		 */
+		$this->mock_is_front_page();
+		$this->current_user_can_view_site_health_checks_cap();
+
 		Audit_Assets_Transients_Set::set_script_transient_with_data( 3 );
 		perflab_aea_audit_enqueued_scripts();
-		$transient = get_transient( 'aea_enqueued_scripts' );
+		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
 		$this->assertIsArray( $transient );
 		$this->assertEquals( 3, count( $transient ) );
 		$this->assertEqualSets(
@@ -45,13 +51,19 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Enqueued scripts ( not belonging to core /wp-includes/ ) will be saved in transient.
 	 */
 	public function test_perflab_aea_audit_enqueued_scripts() {
+		/**
+		 * Prepare scenario for test.
+		 */
+		$this->mock_is_front_page();
+		$this->current_user_can_view_site_health_checks_cap();
+
 		wp_enqueue_script( 'script1', 'example1.com', array() );
 		wp_enqueue_script( 'script_to_be_discarded', '/wp-includes/example2.com', array() );
 		wp_enqueue_script( 'script3', 'example3.com', array() );
 		wp_dequeue_script( 'script3' );
 
 		perflab_aea_audit_enqueued_scripts();
-		$transient = get_transient( 'aea_enqueued_scripts' );
+		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
 		$this->assertNotEmpty( $transient );
 		$this->assertEquals( 1, count( $transient ) );
 		$this->assertEqualSets(
@@ -70,9 +82,15 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Tests perflab_aea_audit_enqueued_styles() when transient is already set.
 	 */
 	public function test_perflab_aea_audit_enqueued_styles_transient_already_set() {
+		/**
+		 * Prepare scenario for test.
+		 */
+		$this->mock_is_front_page();
+		$this->current_user_can_view_site_health_checks_cap();
+
 		Audit_Assets_Transients_Set::set_style_transient_with_data( 3 );
 		perflab_aea_audit_enqueued_styles();
-		$transient = get_transient( 'aea_enqueued_styles' );
+		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertIsArray( $transient );
 		$this->assertEquals( 3, count( $transient ) );
 		$this->assertEqualSets(
@@ -99,13 +117,19 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Enqueued styles ( not belonging to core /wp-includes/ ) will be saved in transient.
 	 */
 	public function test_perflab_aea_audit_enqueued_styles() {
+		/**
+		 * Prepare scenario for test.
+		 */
+		$this->mock_is_front_page();
+		$this->current_user_can_view_site_health_checks_cap();
+
 		wp_enqueue_style( 'style1', 'example1.com', array() );
 		wp_enqueue_style( 'style_to_be_discarded', '/wp-includes/example2.com', array() );
 		wp_enqueue_style( 'style3', 'example3.com', array() );
 		wp_dequeue_style( 'style3' );
 
 		perflab_aea_audit_enqueued_styles();
-		$transient = get_transient( 'aea_enqueued_styles' );
+		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertNotEmpty( $transient );
 		$this->assertEquals( 1, count( $transient ) );
 		$this->assertEqualSets(
@@ -187,8 +211,8 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		Audit_Assets_Transients_Set::set_script_transient_with_data();
 		Audit_Assets_Transients_Set::set_style_transient_with_data();
 		perflab_aea_invalidate_cache_transients();
-		$this->assertFalse( get_transient( 'aea_enqueued_scripts' ) );
-		$this->assertFalse( get_transient( 'aea_enqueued_styles' ) );
+		$this->assertFalse( get_transient( 'aea_enqueued_front_page_scripts' ) );
+		$this->assertFalse( get_transient( 'aea_enqueued_front_page_styles' ) );
 	}
 
 	/**
@@ -199,9 +223,26 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		Audit_Assets_Transients_Set::set_style_transient_with_data();
 		$_REQUEST['_wpnonce'] = wp_create_nonce( 'clean_aea_audit' );
 		$_GET['action']       = 'clean_aea_audit';
+		$this->current_user_can_view_site_health_checks_cap();
 		perflab_aea_clean_aea_audit_action();
-		$this->assertFalse( get_transient( 'aea_enqueued_scripts' ) );
-		$this->assertFalse( get_transient( 'aea_enqueued_styles' ) );
+		$this->assertFalse( get_transient( 'aea_enqueued_front_page_scripts' ) );
+		$this->assertFalse( get_transient( 'aea_enqueued_front_page_styles' ) );
+	}
+
+	/**
+	 * Mock is_home in $wp_query.
+	 */
+	public function mock_is_front_page() {
+		global $wp_query;
+		$wp_query->is_home = true;
+	}
+
+	/**
+	 * Adds view_site_health_checks capability to current user.
+	 */
+	public function current_user_can_view_site_health_checks_cap() {
+		$current_user = wp_get_current_user();
+		$current_user->add_cap( 'view_site_health_checks' );
 	}
 
 	/**
