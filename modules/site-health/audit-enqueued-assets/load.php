@@ -30,7 +30,7 @@ function perflab_aea_audit_enqueued_scripts() {
 			if ( $src && ! strpos( $src, 'wp-includes' ) ) {
 				$enqueued_scripts[] = array(
 					'src'  => $src,
-					'size' => perflab_get_resource_file_size( perflab_get_path_from_resource_url( $src ) ),
+					'size' => perflab_aea_get_resource_file_size( perflab_aea_get_path_from_resource_url( $src ) ),
 				);
 			}
 		}
@@ -56,7 +56,7 @@ function perflab_aea_audit_enqueued_styles() {
 			if ( $src && ! strpos( $src, 'wp-includes' ) ) {
 				$enqueued_styles[] = array(
 					'src'  => $src,
-					'size' => perflab_get_resource_file_size( perflab_get_path_from_resource_url( $src ) ),
+					'size' => perflab_aea_get_resource_file_size( perflab_aea_get_path_from_resource_url( $src ) ),
 				);
 			}
 		}
@@ -198,25 +198,25 @@ function perflab_aea_enqueued_css_assets_test() {
  *
  * @since 1.0.0
  */
-function perflab_clean_aea_audit_action() {
+function perflab_aea_clean_aea_audit_action() {
 	if ( isset( $_GET['action'] ) && 'clean_aea_audit' === $_GET['action'] ) {
 		check_admin_referer( 'clean_aea_audit' );
-		perflab_invalidate_cache_transients();
+		perflab_aea_invalidate_cache_transients();
 		wp_safe_redirect( remove_query_arg( array( 'action', '_wpnonce' ), wp_get_referer() ) );
 	}
 }
-add_action( 'admin_init', 'perflab_clean_aea_audit_action' );
+add_action( 'admin_init', 'perflab_aea_clean_aea_audit_action' );
 
 /**
  * Invalidate both transients/cache.
  *
  * @since 1.0.0
  */
-function perflab_invalidate_cache_transients() {
+function perflab_aea_invalidate_cache_transients() {
 	delete_transient( 'aea_enqueued_scripts' );
 	delete_transient( 'aea_enqueued_styles' );
 }
-add_action( 'switch_theme', 'perflab_invalidate_cache_transients' );
-add_action( 'activated_plugin', 'perflab_invalidate_cache_transients' );
-add_action( 'deactivated_plugin', 'perflab_invalidate_cache_transients' );
+add_action( 'switch_theme', 'perflab_aea_invalidate_cache_transients' );
+add_action( 'activated_plugin', 'perflab_aea_invalidate_cache_transients' );
+add_action( 'deactivated_plugin', 'perflab_aea_invalidate_cache_transients' );
 

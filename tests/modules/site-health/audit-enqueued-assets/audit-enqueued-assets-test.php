@@ -181,25 +181,25 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests perflab_invalidate_cache_transients() functionality.
+	 * Tests perflab_aea_invalidate_cache_transients() functionality.
 	 */
-	public function test_perflab_invalidate_cache_transients() {
+	public function test_perflab_aea_invalidate_cache_transients() {
 		Audit_Assets_Transients_Set::set_script_transient_with_data();
 		Audit_Assets_Transients_Set::set_style_transient_with_data();
-		perflab_invalidate_cache_transients();
+		perflab_aea_invalidate_cache_transients();
 		$this->assertFalse( get_transient( 'aea_enqueued_scripts' ) );
 		$this->assertFalse( get_transient( 'aea_enqueued_styles' ) );
 	}
 
 	/**
-	 * Tests perflab_clean_aea_audit_action() functionality.
+	 * Tests perflab_aea_clean_aea_audit_action() functionality.
 	 */
-	public function test_perflab_clean_aea_audit_action() {
+	public function test_perflab_aea_clean_aea_audit_action() {
 		Audit_Assets_Transients_Set::set_script_transient_with_data();
 		Audit_Assets_Transients_Set::set_style_transient_with_data();
 		$_REQUEST['_wpnonce'] = wp_create_nonce( 'clean_aea_audit' );
 		$_GET['action']       = 'clean_aea_audit';
-		perflab_clean_aea_audit_action();
+		perflab_aea_clean_aea_audit_action();
 		$this->assertFalse( get_transient( 'aea_enqueued_scripts' ) );
 		$this->assertFalse( get_transient( 'aea_enqueued_styles' ) );
 	}

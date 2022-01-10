@@ -80,9 +80,9 @@ function perflab_aea_get_total_size_bytes_enqueued_styles() {
  * @since 1.0.0
  *
  * @param string $resource_url URl resource link.
- * @return string Returns abosulte path to the resource.
+ * @return string Returns absolute path to the resource.
  */
-function perflab_get_path_from_resource_url( $resource_url ) {
+function perflab_aea_get_path_from_resource_url( $resource_url ) {
 	return ABSPATH . wp_make_link_relative( $resource_url );
 }
 
@@ -94,7 +94,7 @@ function perflab_get_path_from_resource_url( $resource_url ) {
  * @param string $file_src Path to the file.
  * @return int Returns size if file exists, 0 if it doesn't.
  */
-function perflab_get_resource_file_size( $file_src ) {
+function perflab_aea_get_resource_file_size( $file_src ) {
 	return file_exists( $file_src ) ? filesize( $file_src ) : 0;
 }
 
