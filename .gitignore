@@ -22,6 +22,7 @@ nbproject/
 ############
 
 build
+module-i18n.php
 
 ############
 ## Vendor
@@ -44,7 +45,6 @@ vendor/
 ############
 
 tests/logs
-bin/
 tmp/
 *.tmp
 *.bak

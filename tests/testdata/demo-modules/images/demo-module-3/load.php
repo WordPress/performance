@@ -2,7 +2,6 @@
 /**
  * Module Name: Demo Module 3
  * Description: This is the description for demo module 3.
- * Focus: images
  * Experimental: No
  *
  * @package performance-lab

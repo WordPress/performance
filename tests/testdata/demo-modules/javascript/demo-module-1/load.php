@@ -2,7 +2,6 @@
 /**
  * Module Name: Demo Module 1
  * Description: This is the description for demo module 1.
- * Focus: javascript
  * Experimental: No
  *
  * @package performance-lab
