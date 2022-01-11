@@ -1,0 +1,58 @@
+name: JS Code Linting
+
+on:
+  push:
+    branches:
+      - trunk
+    # Only run if JS/JSON/Lint/NVM files changed.
+    paths:
+      - '.github/workflows/js-lint.yml'
+      - '**.js'
+      - '**.json'
+      - '.eslint*'
+      - '.nvmrc'
+      - '**/package.json'
+      - 'package-lock.json'
+  pull_request:
+    branches:
+      - trunk
+    # Only run if JS/JSON/Lint/NVM files changed.
+    paths:
+      - '.github/workflows/js-lint.yml'
+      - '**.js'
+      - '**.json'
+      - '.eslint*'
+      - '.nvmrc'
+      - '**/package.json'
+      - 'package-lock.json'
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  js-lint:
+    name: JS Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: styfle/cancel-workflow-action@0.8.0
+      - uses: actions/checkout@v2
+      - name: Read .nvmrc
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvm
+      - name: Setup Node.js (via .nvmrc)
+        uses: actions/setup-node@v1
+        with:
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
+      - name: Cache `node_modules`
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-cache-
+      - name: npm install
+        run: npm ci
+      - name: JS Lint
+        run: npm run lint-js
