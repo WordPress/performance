@@ -1,0 +1,28 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches:
+      - trunk
+    types:
+      - labeled
+      - unlabeled
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  check-labels:
+    name: Check Labels and Milestone
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Type Labels
+        uses: docker://agilepathway/pull-request-label-checker:latest
+        with:
+          any_of: [Type] Bug,[Type] Feature,[Type] Documentation,[Type] Discussion,[Type] Enhancement
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check Focus or Infrastructure Labels
+        uses: docker://agilepathway/pull-request-label-checker:latest
+        with:
+          any_of: [Focus] Images,[Focus] JavaScript,[Focus] Measurement,[Focus] Object caching,[Focus] Site Health,Infrastructure
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
