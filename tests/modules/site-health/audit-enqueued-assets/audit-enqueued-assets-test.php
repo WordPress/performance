@@ -165,8 +165,8 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Test perflab_aea_enqueued_js_assets_test() with data in transient ( less than WARNING_ASSETS_LIMIT ).
 	 */
 	public function test_perflab_aea_enqueued_js_assets_test_with_assets_less_than_limit() {
-		Audit_Assets_Transients_Set::set_script_transient_with_data();
-		$mocked_data = $this->mock_data_perflab_aea_enqueued_js_assets_test_callback();
+		Audit_Assets_Transients_Set::set_script_transient_with_data( 1 );
+		$mocked_data = $this->mock_data_perflab_aea_enqueued_js_assets_test_callback( 1 );
 		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_js_assets_test() );
 	}
 
@@ -190,8 +190,8 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Test perflab_aea_enqueued_css_assets_test() with data in transient ( less than WARNING_ASSETS_LIMIT ).
 	 */
 	public function test_perflab_aea_enqueued_css_assets_test_with_assets_less_than_limit() {
-		Audit_Assets_Transients_Set::set_style_transient_with_data();
-		$mocked_data = $this->mock_data_perflab_aea_enqueued_css_assets_test_callback();
+		Audit_Assets_Transients_Set::set_style_transient_with_data( 1 );
+		$mocked_data = $this->mock_data_perflab_aea_enqueued_css_assets_test_callback( 1 );
 		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_css_assets_test() );
 	}
 
@@ -252,7 +252,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 */
 	public function mock_data_perflab_aea_enqueued_js_assets_test_callback( $number_of_assets = 5 ) {
 		if ( $number_of_assets < self::WARNING_ASSETS_LIMIT ) {
-			return Site_Health_Mock_Responses::return_aea_enqueued_js_assets_test_callback_less_than_limit();
+			return Site_Health_Mock_Responses::return_aea_enqueued_js_assets_test_callback_less_than_limit( $number_of_assets );
 		}
 		return Site_Health_Mock_Responses::return_aea_enqueued_js_assets_test_callback_more_than_limit( $number_of_assets );
 	}
@@ -264,7 +264,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 */
 	public function mock_data_perflab_aea_enqueued_css_assets_test_callback( $number_of_assets = 5 ) {
 		if ( $number_of_assets < self::WARNING_ASSETS_LIMIT ) {
-			return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_less_than_limit();
+			return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_less_than_limit( $number_of_assets );
 		}
 		return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_more_than_limit( $number_of_assets );
 	}

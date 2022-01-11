@@ -32,19 +32,24 @@ class Site_Health_Mock_Responses {
 	/**
 	 * Callback response for aea_enqueued_js_assets_test if assets are less than the limit.
 	 *
+	 * @param int $enqueued_scripts Number of scripts enqueued.
+	 *
 	 * @return array
 	 */
-	public static function return_aea_enqueued_js_assets_test_callback_less_than_limit() {
+	public static function return_aea_enqueued_js_assets_test_callback_less_than_limit( $enqueued_scripts = 1 ) {
 		$result = array(
-			'label'       => esc_html__( 'Enqueued JS assets', 'performance-lab' ),
+			'label'       => esc_html__( 'Enqueued scripts', 'performance-lab' ),
 			'status'      => 'good',
 			'badge'       => array(
 				'label' => esc_html__( 'Performance', 'performance-lab' ),
 				'color' => 'blue',
 			),
 			'description' => sprintf(
-				'<p>%s</p>',
-				esc_html__( 'The amount of enqueued JS assets is acceptable.', 'performance-lab' )
+			/* translators: 1: Number of enqueued scripts. 2: "script" word. 3.Scripts size. */
+				'<p>' . esc_html__( 'The amount of %1$s enqueued %2$s (size: %3$s) is acceptable.', 'performance-lab' ) . '</p>',
+				$enqueued_scripts,
+				_n( 'script', 'scripts', $enqueued_scripts, 'performance-lab' ),
+				size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
 			),
 			'actions'     => '',
 			'test'        => 'enqueued_js_assets',
@@ -82,19 +87,24 @@ class Site_Health_Mock_Responses {
 	/**
 	 * Callback response for aea_enqueued_css_assets_test if assets are less than the limit.
 	 *
+	 * @param int $enqueued_styles Number of styles enqueued.
+	 *
 	 * @return array
 	 */
-	public static function return_aea_enqueued_css_assets_test_callback_less_than_limit() {
+	public static function return_aea_enqueued_css_assets_test_callback_less_than_limit( $enqueued_styles = 1 ) {
 		$result = array(
-			'label'       => esc_html__( 'Enqueued CSS assets', 'performance-lab' ),
+			'label'       => esc_html__( 'Enqueued styles', 'performance-lab' ),
 			'status'      => 'good',
 			'badge'       => array(
 				'label' => esc_html__( 'Performance', 'performance-lab' ),
 				'color' => 'blue',
 			),
 			'description' => sprintf(
-				'<p>%s</p>',
-				esc_html__( 'The amount of enqueued CSS assets is acceptable.', 'performance-lab' )
+			/* translators: 1: Number of enqueued styles. 2: "styles" word. 3.Styles size. */
+				'<p>' . esc_html__( 'The amount of %1$s enqueued %2$s (size: %3$s) is acceptable.', 'performance-lab' ) . '</p>',
+				$enqueued_styles,
+				_n( 'style', 'styles', $enqueued_styles, 'performance-lab' ),
+				size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
 			),
 			'actions'     => '',
 			'test'        => 'enqueued_css_assets',
