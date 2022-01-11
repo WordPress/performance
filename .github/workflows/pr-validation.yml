@@ -13,7 +13,7 @@ on:
       - edited
 
 jobs:
-  check-labels:
+  check-type-label:
     name: Check Labels and Milestone
     runs-on: ubuntu-latest
     steps:
@@ -22,11 +22,19 @@ jobs:
         with:
           any_of: "[Type] Bug,[Type] Feature,[Type] Documentation,[Type] Discussion,[Type] Enhancement"
           repo_token: ${{ secrets.GITHUB_TOKEN }}
+  check-focus-label:
+    name: Check Labels and Milestone
+    runs-on: ubuntu-latest
+    steps:
       - name: Check Focus or Infrastructure Labels
         uses: docker://agilepathway/pull-request-label-checker:latest
         with:
           any_of: "[Focus] Images,[Focus] JavaScript,[Focus] Measurement,[Focus] Object caching,[Focus] Site Health,Infrastructure"
           repo_token: ${{ secrets.GITHUB_TOKEN }}
+  check-milestone:
+    name: Check Labels and Milestone
+    runs-on: ubuntu-latest
+    steps:
       - name: Check Milestone
         if: github.event.pull_request.milestone == null
         uses: docker://agilepathway/pull-request-label-checker:latest
