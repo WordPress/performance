@@ -69,9 +69,11 @@ class Site_Health_Mock_Responses {
 		$result['status']         = 'recommended';
 		$result['badge']['color'] = 'orange';
 		$result['description']    = sprintf(
-		/* translators: %s: Number of enqueued scripts */
-			esc_html__( 'Your website enqueues %s scripts. Try to reduce the number of JS assets, or to concatenate them.', 'performance-lab' ),
-			$enqueued_scripts
+		/* translators: 1: Number of enqueued scripts. 2: "script" word. 3.Scripts size. */
+			'<p>' . esc_html__( 'Your website enqueues %1$s %2$s (size: %3$s). Try to reduce the number or to concatenate them.', 'performance-lab' ) . '</p>',
+			$enqueued_scripts,
+			_n( 'script', 'scripts', $enqueued_scripts, 'performance-lab' ),
+			size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
 		);
 		$result['actions'] .= sprintf(
 			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
@@ -124,9 +126,11 @@ class Site_Health_Mock_Responses {
 		$result['status']         = 'recommended';
 		$result['badge']['color'] = 'orange';
 		$result['description']    = sprintf(
-		/* translators: %s: Number of enqueued styles */
-			esc_html__( 'Your website enqueues %s styles. Try to reduce the number of CSS assets, or to concatenate them.', 'performance-lab' ),
-			$enqueued_styles
+		/* translators: 1: Number of enqueued styles. 2: "style" word. 3.Styles size. */
+			'<p>' . esc_html__( 'Your website enqueues %1$s %2$s (size: %3$s). Try to reduce the number or to concatenate them.', 'performance-lab' ) . '</p>',
+			$enqueued_styles,
+			_n( 'style', 'styles', $enqueued_styles, 'performance-lab' ),
+			size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
 		);
 		$result['actions'] .= sprintf(
 			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
