@@ -21,9 +21,7 @@ jobs:
         uses: docker://agilepathway/pull-request-label-checker:latest
         with:
           any_of: "[Type] Bug,[Type] Feature,[Type] Documentation,[Type] Discussion,[Type] Enhancement"
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Check Focus or Infrastructure Labels
         uses: docker://agilepathway/pull-request-label-checker:latest
         with:
           any_of: "[Focus] Images,[Focus] JavaScript,[Focus] Measurement,[Focus] Object caching,[Focus] Site Health,Infrastructure"
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
