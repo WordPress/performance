@@ -13,42 +13,41 @@ on:
 
 jobs:
   check-labels:
-    name: Check Labels and Milestone
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Check Type Labels
-        if: |
-          !contains( github.event.pull_request.labels.*.name, '[Type] Bug' ) &&
-          (
-            !contains( github.event.pull_request.labels.*.name, '[Type] Feature' ) &&
-            !contains( github.event.pull_request.labels.*.name, '[Type] Documentation' ) &&
-            !contains( github.event.pull_request.labels.*.name, '[Type] Discussion' ) &&
-            !contains( github.event.pull_request.labels.*.name, '[Type] Enhancement' )
-          )
-        uses: actions/github-script@v5
+      - name: Match Type labels
+        uses: actions-ecosystem/action-regex-match@v2
+        id: type-label-match
         with:
-          script: |
-            core.setFailed( 'Pull request must have a [Type] label.' )
+          text: "${{ toJson(github.event.pull_request.labels.*.name) }}"
+          regex: '\[Type\] [A-Za-z]*'
+          flags: "gm"
 
-      - name: Check Focus or Infrastructure Labels
-        if: |
-          !contains( github.event.pull_request.labels.*.name, '[Focus] Images' ) &&
-          (
-            !contains( github.event.pull_request.labels.*.name, '[Focus] JavaScript' ) &&
-            !contains( github.event.pull_request.labels.*.name, '[Focus] Measurement' ) &&
-            !contains( github.event.pull_request.labels.*.name, '[Focus] Object caching' ) &&
-            !contains( github.event.pull_request.labels.*.name, '[Focus] Site Health' ) &&
-            !contains( github.event.pull_request.labels.*.name, 'Infrastructure' )
-          )
+      - name: Validation for Type labels
+        if: ${{ steps.type-label-match.outputs.match == '' }}
         uses: actions/github-script@v5
         with:
           script: |
-            core.setFailed( 'Pull request must have a [Focus] or [Infrastructure] label.' )
+            core.setFailed( '❌ Pull request must have a [Type] Label.' )
 
-      - name: Check Milestone
-        if: github.event.pull_request.milestone == null && !contains( github.event.pull_request.labels.*.name, 'no milestone' )
+      - name: Match Focus or Infrastructure labels
+        uses: actions-ecosystem/action-regex-match@v2
+        id: focus-infrastructure-labels-match
+        with:
+          text: "${{ toJson(github.event.pull_request.labels.*.name) }}"
+          regex: '\[Focus\] .*|Infrastructure'
+          flags: "gm"
+
+      - name: Validation for Focus/Infrastructure labels
+        if: ${{ steps.focus-infrastructure-labels-match.outputs.match == '' }}
         uses: actions/github-script@v5
         with:
           script: |
-            core.setFailed( 'Pull request must have a milestone or be labeled "no milestone".' )
+            core.setFailed( '❌ Pull request must have a [Focus] or Infrastructure Label.' )
+
+      - name: Validation for Milestone
+        if: ${{ github.event.pull_request.milestone == null }}
+        uses: actions/github-script@v5
+        with:
+          script: |
+            core.setFailed( '❌ Pull request must have a Milestone.' )
