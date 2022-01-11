@@ -11,5 +11,5 @@ Addresses issue:
 
 ## Checklist
 
-- [ ] `[Focus]` and `[Type]` labels are added.
-- [ ] A milestone has been assigned.
+- [ ] PR has `[Focus]` and `[Type]` labels.
+- [ ] PR has a milestone.
