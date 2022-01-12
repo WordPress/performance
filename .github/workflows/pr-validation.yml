@@ -13,7 +13,7 @@ on:
       - edited
 
 env:
-  PR_LABELS: ${{ join( github.event.issue.labels.*.name, ' ' ) }}
+  PR_LABELS: ${{ join( github.event.pull_request.labels.*.name, ' ' ) }}
 
 jobs:
   check-type-label:
@@ -21,21 +21,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          [[ "$PR_LABELS" == *"[Type]"* ]] || { echo "❌ Pull request must have a [Type] Label."; exit 1; }
+          [[ "$PR_LABELS" == *"[Type]"* ]] || exit 1
   check-focus-label:
     name: Check [Focus] Label
     runs-on: ubuntu-latest
     steps:
-      - uses: docker://agilepathway/pull-request-label-checker:latest
-        with:
-          any_of: "[Focus] Images,[Focus] JavaScript,[Focus] Measurement,[Focus] Object caching,[Focus] Site Health,Infrastructure"
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          [[ "$PR_LABELS" == *"[Focus]"* ]] || exit 1
   check-milestone:
     name: Check Milestone
     runs-on: ubuntu-latest
     steps:
       - if: github.event.pull_request.milestone == null
-        uses: docker://agilepathway/pull-request-label-checker:latest
-        with:
-          one_of: no milestone
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          [[ "$PR_LABELS" == *"no milestone"* ]] || exit 1
