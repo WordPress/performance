@@ -83,7 +83,7 @@ function perflab_get_module_settings() {
  * @return array List of active module slugs.
  */
 function perflab_get_active_modules() {
-	return array_keys(
+	$modules = array_keys(
 		array_filter(
 			perflab_get_module_settings(),
 			function( $module_settings ) {
@@ -91,6 +91,10 @@ function perflab_get_active_modules() {
 			}
 		)
 	);
+
+	$modules = apply_filters( 'perflab_active_modules', $modules );
+
+	return $modules;
 }
 
 /**
