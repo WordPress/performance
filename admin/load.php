@@ -24,7 +24,7 @@ function perflab_add_modules_page() {
 		'perflab_render_modules_page'
 	);
 
-	if ( $hook_suffix !== false ) {
+	if ( false !== $hook_suffix ) {
 		add_action( "load-{$hook_suffix}", 'perflab_load_modules_page', 10, 0 );
 	}
 
