@@ -12,7 +12,7 @@ on:
       - "synchronize"
 
 jobs:
-  check-labels:
+  pr-validation:
     runs-on: ubuntu-latest
     steps:
       - name: Match Type labels
@@ -50,4 +50,4 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            core.setFailed( '❌ Pull request must have a Milestone.' )
+            core.setFailed( '❌ Pull request must have a Milestone or a no milestone label' )
