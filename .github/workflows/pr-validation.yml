@@ -12,13 +12,16 @@ on:
       - synchronize
       - edited
 
+env:
+  PR_LABELS: ${{ join( github.event.issue.labels.*.name, ' ' ) }}
+
 jobs:
   check-type-label:
     name: Check [Type] Label
     runs-on: ubuntu-latest
     steps:
       - run: |
-          [[ '${{ join( github.event.issue.labels.*.name, ' ' ) }}' == *'[Type]'* ]] || { echo '❌ Pull request must have a [Type] Label.'; exit 1; }
+          [[ $PR_LABELS == *'[Type]'* ]] || { echo '❌ Pull request must have a [Type] Label.'; exit 1; }
   check-focus-label:
     name: Check [Focus] Label
     runs-on: ubuntu-latest
