@@ -17,8 +17,8 @@ jobs:
     name: Check [Type] Label
     runs-on: ubuntu-latest
     steps:
-      - if: contains( join( github.event.issue.labels.*.name, ' ' ), '[Type]' ) == false
-        run: echo "❌ Pull request must have a [Type] Label." && exit 1
+      - run: |
+          [[ '${{ join( github.event.issue.labels.*.name, ' ' ) }}' == *'[Type]'* ]] || { echo '❌ Pull request must have a [Type] Label.'; exit 1; }
   check-focus-label:
     name: Check [Focus] Label
     runs-on: ubuntu-latest
