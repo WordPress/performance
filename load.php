@@ -92,6 +92,13 @@ function perflab_get_active_modules() {
 		)
 	);
 
+	/**
+	 * Filters active modules to allow programmatically control which modules are active.
+	 * 
+	 * @since n.e.x.t
+	 * 
+	 * @param array An array of the currently active modules.
+	 */
 	$modules = apply_filters( 'perflab_active_modules', $modules );
 
 	return $modules;
