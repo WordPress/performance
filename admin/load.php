@@ -11,6 +11,11 @@
  * @since 1.0.0
  */
 function perflab_add_modules_page() {
+	// Don't add a page if active modules are controlled programmatically.
+	if ( has_filter( 'perflab_active_modules' ) ) {
+		return false;
+	}
+
 	$hook_suffix = add_options_page(
 		__( 'Performance Modules', 'performance-lab' ),
 		__( 'Performance', 'performance-lab' ),
@@ -19,7 +24,9 @@ function perflab_add_modules_page() {
 		'perflab_render_modules_page'
 	);
 
-	add_action( "load-{$hook_suffix}", 'perflab_load_modules_page', 10, 0 );
+	if ( $hook_suffix !== false ) {
+		add_action( "load-{$hook_suffix}", 'perflab_load_modules_page', 10, 0 );
+	}
 
 	return $hook_suffix;
 }
