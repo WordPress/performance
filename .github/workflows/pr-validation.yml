@@ -17,10 +17,8 @@ jobs:
     name: Check [Type] Label
     runs-on: ubuntu-latest
     steps:
-      - uses: docker://agilepathway/pull-request-label-checker:latest
-        with:
-          any_of: "[Type] Bug,[Type] Feature,[Type] Documentation,[Type] Discussion,[Type] Enhancement"
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - if: contains( join( github.event.issue.labels.*.name, ' ' ), '[Type]' ) == false
+        run: echo "❌ Pull request must have a [Type] Label." && exit 1
   check-focus-label:
     name: Check [Focus] Label
     runs-on: ubuntu-latest
