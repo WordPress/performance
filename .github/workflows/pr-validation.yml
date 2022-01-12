@@ -13,25 +13,24 @@ on:
       - edited
 
 env:
-  PR_LABELS: ${{ join( github.event.pull_request.labels.*.name, ' ' ) }}
+  LABELS: ${{ join( github.event.pull_request.labels.*.name, ' ' ) }}
 
 jobs:
   check-type-label:
     name: Check [Type] Label
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          [[ "$PR_LABELS" == *"[Type]"* ]] || exit 1
+      - if: contains( env.LABELS, '[Type]' ) == false
+        run: exit 1
   check-focus-label:
     name: Check [Focus] Label
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          [[ "$PR_LABELS" == *"[Focus]"* ]] || exit 1
+      - if: contains( env.LABELS, '[Focus]' ) == false && contains( env.LABELS, 'Infrastructure' ) == false
+        run: exit 1
   check-milestone:
     name: Check Milestone
     runs-on: ubuntu-latest
     steps:
-      - if: github.event.pull_request.milestone == null
-        run: |
-          [[ "$PR_LABELS" == *"no milestone"* ]] || exit 1
+      - if: github.event.pull_request.milestone == null && contains( env.LABELS, 'no milestone' ) == false
+        run: exit 1
