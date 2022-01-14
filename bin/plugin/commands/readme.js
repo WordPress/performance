@@ -73,9 +73,10 @@ async function getModuleDescriptionList( settings ) {
 	);
 
 	return moduleDescriptions
-		.map( ( moduleData ) => {
-			return `* **${ moduleData.name }:** ${ moduleData.description }`;
-		} )
+		.map(
+			( moduleData ) =>
+				`* **${ moduleData.name }:** ${ moduleData.description }`
+		)
 		.join( '\n' )
 		.concat( '\n' );
 }
@@ -90,9 +91,7 @@ function updateReadmeModuleDescriptionList( moduleList ) {
 	const fileContent = fs.readFileSync( readmeFile, 'utf8' );
 	const newContent = fileContent.replace(
 		/(the following performance modules:\s+)((\*.*\n)+)/,
-		( match, prefix ) => {
-			return `${ prefix }${ moduleList }`;
-		}
+		( match, prefix ) => `${ prefix }${ moduleList }`
 	);
 	fs.writeFileSync( readmeFile, newContent );
 }
@@ -132,16 +131,16 @@ function updateReadmeChangelog( changelog, settings ) {
  * @param {WPReadmeSettings} settings Readme settings.
  */
 async function updateReadme( settings ) {
-	if ( ! settings.milestone ) {
+	if ( settings.milestone ) {
 		log(
 			formats.title(
-				`\n💃Updating readme.txt for "${ settings.directory }"\n\n`
+				`\n💃Updating readme.txt for "${ settings.directory }" and changelog for milestone "${ settings.milestone }"\n\n`
 			)
 		);
 	} else {
 		log(
 			formats.title(
-				`\n💃Updating readme.txt for "${ settings.directory }" and changelog for milestone "${ settings.milestone }"\n\n`
+				`\n💃Updating readme.txt for "${ settings.directory }"\n\n`
 			)
 		);
 	}
