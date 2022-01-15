@@ -2,7 +2,6 @@
  * External dependencies
  */
 const path = require( 'path' );
-const glob = require( 'fast-glob' );
 const fs = require( 'fs' );
 const { EOL } = require( 'os' );
 
@@ -11,6 +10,7 @@ const { EOL } = require( 'os' );
  */
 const { log, formats } = require( '../lib/logger' );
 const config = require( '../config' );
+const { getModuleDescriptions } = require( './common' );
 
 const TAB = '\t';
 const NEWLINE = EOL;
@@ -77,41 +77,21 @@ exports.handler = async ( opt ) => {
  * @return {[]WPTranslationEntry} List of translation entries.
  */
 async function getTranslations( settings ) {
-	const moduleFilePattern = path.join( settings.directory, '*/*/load.php' );
-	const moduleFiles = await glob( path.resolve( '.', moduleFilePattern ) );
-
-	const moduleTranslations = moduleFiles
-		.map( ( moduleFile ) => {
-			// Map of module header => translator context.
-			const headers = {
-				'Module Name': 'module name',
-				Description: 'module description',
-			};
-			const translationEntries = [];
-
-			const fileContent = fs.readFileSync( moduleFile, 'utf8' );
-			const regex = new RegExp(
-				`^(?:[ \t]*<?php)?[ \t/*#@]*(${ Object.keys( headers ).join(
-					'|'
-				) }):(.*)$`,
-				'gmi'
-			);
-			let match = regex.exec( fileContent );
-			while ( match ) {
-				const text = match[ 2 ].trim();
-				const context = headers[ match[ 1 ] ];
-				if ( text && context ) {
-					translationEntries.push( {
-						text,
-						context,
-					} );
-				}
-				match = regex.exec( fileContent );
-			}
-
-			return translationEntries;
-		} )
-		.filter( ( translations ) => !! translations.length );
+	const moduleDescriptions = await getModuleDescriptions(
+		settings.directory
+	);
+	const moduleTranslations = moduleDescriptions.map( ( moduleData ) => {
+		return [
+			{
+				text: moduleData.name,
+				context: 'module name',
+			},
+			{
+				text: moduleData.description,
+				context: 'module description',
+			},
+		];
+	} );
 
 	return moduleTranslations.flat();
 }
