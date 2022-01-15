@@ -1,0 +1,19 @@
+# Documentation/Infrastructure
+/docs                                       @justinahinon @felixarntz
+/admin                                      @justinahinon @felixarntz
+/bin                                        @justinahinon @felixarntz
+/.github                                    @justinahinon @felixarntz
+
+# Focus: Images
+/modules/webp-uploads                       @adamsilverstein
+/tests/modules/webp-uploads                 @adamsilverstein
+
+# Focus: JavaScript
+
+# Focus: Object Caching
+
+# Focus: Measurement
+
+# Focus: Site Health
+/modules/audit-enqueued-assets              @manuelRod @audrasjb
+/tests/modules/audit-enqueued-assets        @manuelRod @audrasjb
