@@ -1,9 +1,7 @@
 ## Summary
 
-<!-- Please reference the issue this PR addresses in the following list. -->
-Addresses issue:
-
-- #
+<!-- Please reference the issue this PR fixes. If this PR does not fix the entire issue, change this to Addresses #... instead. -->
+Fixes #
 
 ## Relevant technical choices
 
@@ -11,5 +9,6 @@ Addresses issue:
 
 ## Checklist
 
-- [ ] PR has `[Focus]` and `[Type]` labels.
-- [ ] PR has a milestone.
+- [ ] PR has either `[Focus]` or `Infrastructure` label.
+- [ ] PR has a `[Type]` label.
+- [ ] PR has a milestone or the `no milestone` label.
