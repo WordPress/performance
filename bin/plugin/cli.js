@@ -31,6 +31,10 @@ const {
 	options: changelogOptions,
 } = require( './commands/changelog' );
 const {
+	handler: readmeHandler,
+	options: readmeOptions,
+} = require( './commands/readme' );
+const {
 	handler: translationsHandler,
 	options: translationsOptions,
 } = require( './commands/translations' );
@@ -39,6 +43,11 @@ withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 	.alias( 'changelog' )
 	.description( 'Generates a changelog from merged pull requests' )
 	.action( catchException( changelogHandler ) );
+
+withOptions( program.command( 'plugin-readme' ), readmeOptions )
+	.alias( 'readme' )
+	.description( 'Updates the readme.txt file' )
+	.action( catchException( readmeHandler ) );
 
 withOptions( program.command( 'module-translations' ), translationsOptions )
 	.alias( 'translations' )
