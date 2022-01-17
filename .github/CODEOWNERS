@@ -5,15 +5,21 @@
 /.github                                    @justinahinon @felixarntz
 
 # Focus: Images
-/modules/webp-uploads                       @adamsilverstein
-/tests/modules/webp-uploads                 @adamsilverstein
+/modules/images                             @adamsilverstein
+/tests/modules/images                       @adamsilverstein
 
 # Focus: JavaScript
+/modules/javascript                         @aristath @gziolo
+/tests/modules/javascript                   @aristath @gziolo
 
 # Focus: Object Caching
+/modules/object-caching                     @tillkruss @dustinrue
+/tests/modules/object-caching               @tillkruss @dustinrue
 
 # Focus: Measurement
+/modules/measurement                        @AymenLoukil @josephscott
+/tests/modules/measurement                  @AymenLoukil @josephscott
 
 # Focus: Site Health
-/modules/audit-enqueued-assets              @manuelRod @audrasjb
-/tests/modules/audit-enqueued-assets        @manuelRod @audrasjb
+/modules/site-health                        @audrasjb
+/tests/modules/site-health                  @audrasjb
