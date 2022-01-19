@@ -15,10 +15,10 @@
 /tests/modules/javascript                   @aristath @gziolo
 /tests/testdata/modules/javascript          @aristath @gziolo
 
-# Focus: Object Caching
-/modules/object-caching                     @tillkruss @dustinrue
-/tests/modules/object-caching               @tillkruss @dustinrue
-/tests/testdata/modules/object-caching      @tillkruss @dustinrue
+# Focus: Object Cache
+/modules/object-cache                       @tillkruss @spacedmonkey
+/tests/modules/object-cache                 @tillkruss @spacedmonkey
+/tests/testdata/modules/object-cache        @tillkruss @spacedmonkey
 
 # Focus: Measurement
 /modules/measurement                        @AymenLoukil @josephscott
