@@ -32,16 +32,16 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 	);
 
 	private static $demo_focus_areas = array(
-		'images'         => array(
+		'images'       => array(
 			'name' => 'Images',
 		),
-		'javascript'     => array(
+		'javascript'   => array(
 			'name' => 'JavaScript',
 		),
-		'site-health'    => array(
+		'site-health'  => array(
 			'name' => 'Site Health',
 		),
-		'measurement'    => array(
+		'measurement'  => array(
 			'name' => 'Measurement',
 		),
 		'object-cache' => array(
