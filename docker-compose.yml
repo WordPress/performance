@@ -1,0 +1,34 @@
+version: "3.7"
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - 8080:80
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/templates/default.conf.template:ro
+    volumes_from:
+      - wordpress
+    environment:
+      PHPFPM_HOST: wordpress
+      PHPFPM_PORT: 9000
+  wordpress:
+    build:
+      context: ./docker/wordpress
+    volumes:
+      - .:/var/www/html/wp-content/plugins/performance-lab
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: password
+      WORDPRESS_DB_NAME: wordpress
+  db:
+    image: mariadb:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: wordpress
+    volumes:
+      - mysql:/var/lib/mysql
+  memcached:
+    image: memcached:alpine
+volumes:
+  mysql:
