@@ -6,9 +6,9 @@
 /.github                                    @justinahinon @felixarntz
 
 # Focus: Images
-/modules/images                             @adamsilverstein
-/tests/modules/images                       @adamsilverstein
-/tests/testdata/modules/images              @adamsilverstein
+/modules/images                             @adamsilverstein @getsource
+/tests/modules/images                       @adamsilverstein @getsource
+/tests/testdata/modules/images              @adamsilverstein @getsource
 
 # Focus: JavaScript
 /modules/javascript                         @aristath @gziolo
