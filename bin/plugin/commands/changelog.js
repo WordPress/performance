@@ -311,3 +311,6 @@ async function createChangelog( settings ) {
 
 	log( changelog );
 }
+
+// Export getChangelog function to reuse in `readme` command.
+exports.getChangelog = getChangelog;
