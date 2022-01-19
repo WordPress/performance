@@ -7,23 +7,24 @@
 /docs
 /tests
 
-*.DS_store
-.DS_store?
+/*.DS_store
+/.DS_store?
 
-.editorconfig
-.eslintrc.js
-.nvmrc
-.wp-env.json
-composer.json
-composer.lock
-package.json
-package-lock.json
-phpcs.xml.dist
-phpunit.xml.dist
+/.editorconfig
+/.eslintrc.js
+/.nvmrc
+/.wp-env.json
+/composer.json
+/composer.lock
+/package.json
+/package-lock.json
+/phpcs.xml.dist
+/phpunit.xml.dist
 
-CODE_OF_CONDUCT.md
-CONTRIBUTING.md
-SECURITY.md
+/CODE_OF_CONDUCT.md
+/CONTRIBUTING.md
+/SECURITY.md
+/LICENSE
 
-.distignore
-.gitignore
+/.distignore
+/.gitignore
