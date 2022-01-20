@@ -5,14 +5,14 @@
  * Description: Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.
  * Requires at least: 5.8
  * Requires PHP: 5.6
- * Version: 1.0.0
+ * Version: 1.0.0-beta.1
  * Author: WordPress Performance Group
  * Text Domain: performance-lab
  *
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.0.0' );
+define( 'PERFLAB_VERSION', '1.0.0-beta.1' );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
 
@@ -83,7 +83,7 @@ function perflab_get_module_settings() {
  * @return array List of active module slugs.
  */
 function perflab_get_active_modules() {
-	return array_keys(
+	$modules = array_keys(
 		array_filter(
 			perflab_get_module_settings(),
 			function( $module_settings ) {
@@ -91,6 +91,17 @@ function perflab_get_active_modules() {
 			}
 		)
 	);
+
+	/**
+	 * Filters active modules to allow programmatically control which modules are active.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array An array of the currently active modules.
+	 */
+	$modules = apply_filters( 'perflab_active_modules', $modules );
+
+	return $modules;
 }
 
 /**

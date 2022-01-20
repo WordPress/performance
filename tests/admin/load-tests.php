@@ -69,6 +69,15 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$hook_suffix = perflab_add_modules_page();
 		$this->assertSame( get_plugin_page_hookname( PERFLAB_MODULES_SCREEN, 'options-general.php' ), $hook_suffix );
 		$this->assertFalse( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_MODULES_SCREEN ] ) );
+
+		// Reset relevant globals.
+		$_wp_submenu_nopriv = array();
+
+		// Does not register the page if the perflab_active_modules filter is used.
+		add_filter( 'perflab_active_modules', function() {} );
+		$hook_suffix = perflab_add_modules_page();
+		$this->assertFalse( $hook_suffix );
+		$this->assertFalse( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_MODULES_SCREEN ] ) );
 	}
 
 	public function test_perflab_load_modules_page() {
@@ -151,7 +160,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertContains( ' id="module_' . $module_slug . '_enabled"', $output );
 		$this->assertContains( ' name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
-		$this->assertContains( 'Enable ' . $module_data['name'] . '?', $output );
+		$this->assertContains( 'Enable ' . $module_data['name'], $output );
 		$this->assertNotContains( ' checked', $output );
 
 		// Assert correct 'id' and 'name' attributes, experimental label, and checked checkbox.
@@ -162,7 +171,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertContains( ' id="module_' . $module_slug . '_enabled"', $output );
 		$this->assertContains( ' name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
-		$this->assertContains( 'Enable ' . $module_data['name'] . ' <strong>(experimental)</strong>?', $output );
+		$this->assertContains( 'Enable ' . $module_data['name'] . ' <strong>(experimental)</strong>', $output );
 		$this->assertContains( " checked='checked'", $output );
 	}
 
