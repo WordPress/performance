@@ -74,18 +74,22 @@ function oc_health_persistent_object_cache() {
 	 *
 	 * @param bool $suggest
 	 */
-	if ( apply_filters( 'site_status_persistent_object_cache', false ) ) {
-		$result['status']       = 'recommended';
-		$result['label']        = __( 'You should use a persistent object cache', 'performance-lab' );
-		$result['description'] .= sprintf(
-			'<p>%s</p>',
-			__( '...', 'performance-lab' )
-		);
+	if ( ! apply_filters( 'site_status_persistent_object_cache', false ) ) {
+		$result['label'] = __( 'A persistent object cache is not required', 'performance-lab' );
 
 		return $result;
 	}
 
-	$result['label'] = __( 'A persistent object cache is not required', 'performance-lab' );
+	$available_services = oc_health_available_persistent_object_cache_services();
+
+	$description = sprintf(
+		__( 'Your host appears to support the following object cache services: %s. Speak to your web host about what persistent object cache services are available and how to enable them.', 'performance-lab' ),
+		implode( ', ', $available_services )
+	);
+
+	$result['status']       = 'recommended';
+	$result['label']        = __( 'You should use a persistent object cache', 'performance-lab' );
+	$result['description'] .= sprintf( '<p>%s</p>', $description );
 
 	return $result;
 }
@@ -159,4 +163,27 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 	}
 
 	return false;
+}
+
+/**
+ * Returns a list of available persistent object cache services.
+ *
+ * @return array The list of available persistent object cache services.
+ */
+function oc_health_available_persistent_object_cache_services() {
+	$extensions = array_map( 'extension_loaded', array(
+		'Redis' => 'redis',
+		'Relay' => 'relay',
+		'Memcached' => 'memcache', // The `memcached` extension seems unmaintained
+		'APCu' => 'apcu',
+	) );
+
+	$services = array_keys( array_filter( $extensions ) );
+
+	/**
+	 * Filter the persistent object cache services available to the user.
+	 *
+	 * @param array $suggest
+	 */
+	return apply_filters( 'site_status_available_object_cache_services', $services );
 }
