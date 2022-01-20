@@ -17,13 +17,26 @@ services:
     volumes:
       - wordpress:/var/www/html
       - .:/var/www/html/wp-content/plugins/performance-lab
+      - ./vendor:/var/www/html/vendor
     environment:
+      LIVE_PROFILER_CONNECTION_URL: mysql://root:password@db:3306/wordpress?charset=utf8
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: root
       WORDPRESS_DB_PASSWORD: password
       WORDPRESS_DB_NAME: wordpress
-      # WORDPRESS_CONFIG_EXTRA: |
-      #   $memcached_servers = array( 'default' => array( 'memcached:11211' ) );
+      WORDPRESS_CONFIG_EXTRA: |
+        include 'vendor/autoload.php';
+
+        \Badoo\LiveProfiler\LiveProfiler::getInstance()
+          ->createTable();
+
+        \Badoo\LiveProfiler\LiveProfiler::getInstance()
+          ->setMode( \Badoo\LiveProfiler\LiveProfiler::MODE_DB )
+          ->setDivider( 1 )
+          ->useXhprof()
+          ->start();
+
+        $$memcached_servers = array( 'default' => array( 'memcached:11211' ) );
   db:
     image: mariadb:latest
     environment:
@@ -31,6 +44,14 @@ services:
       MYSQL_DATABASE: wordpress
     volumes:
       - mysql:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin:apache
+    ports:
+      - 8081:80
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: password
   memcached:
     image: memcached:alpine
 volumes:
