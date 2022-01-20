@@ -40,7 +40,7 @@ function oc_health_persistent_object_cache() {
 	$action_url = apply_filters(
 		'site_status_persistent_object_cache_url',
 		/* translators: Localized Support reference. */
-		__( 'https://wordpress.org/support/article/object-cache/', 'performance-lab' )
+		__( 'https://wordpress.org/support/article/optimization/#object-caching', 'performance-lab' )
 	);
 
 	$result = array(
