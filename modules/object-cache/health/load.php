@@ -123,16 +123,16 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 
 	$table_names = implode( "','", array( $wpdb->comments, $wpdb->options, $wpdb->posts, $wpdb->terms, $wpdb->users ) );
 
-	// With InnoDB the `TABLE_ROWS` are estimates, which are accurate enough
-	// and faster to retrieve than individual `COUNT()` queries
+	// With InnoDB the `TABLE_ROWS` are estimates, which are accurate enough and faster to retrieve than individual `COUNT()` queries.
 	$results = $wpdb->get_results(
 		$wpdb->prepare(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"SELECT TABLE_NAME AS 'table', TABLE_ROWS AS 'rows', SUM(data_length + index_length) as 'bytes'
 			FROM information_schema.TABLES
 			WHERE TABLE_SCHEMA = %s
 			AND TABLE_NAME IN ('$table_names')
-			GROUP BY TABLE_NAME;
-			",
+			GROUP BY TABLE_NAME;",
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			DB_NAME
 		),
 		OBJECT_K
