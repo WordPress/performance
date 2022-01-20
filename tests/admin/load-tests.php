@@ -160,7 +160,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertContains( ' id="module_' . $module_slug . '_enabled"', $output );
 		$this->assertContains( ' name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
-		$this->assertContains( 'Enable ' . $module_data['name'] . '?', $output );
+		$this->assertContains( 'Enable ' . $module_data['name'], $output );
 		$this->assertNotContains( ' checked', $output );
 
 		// Assert correct 'id' and 'name' attributes, experimental label, and checked checkbox.
@@ -171,7 +171,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertContains( ' id="module_' . $module_slug . '_enabled"', $output );
 		$this->assertContains( ' name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
-		$this->assertContains( 'Enable ' . $module_data['name'] . ' <strong>(experimental)</strong>?', $output );
+		$this->assertContains( 'Enable ' . $module_data['name'] . ' <strong>(experimental)</strong>', $output );
 		$this->assertContains( " checked='checked'", $output );
 	}
 
