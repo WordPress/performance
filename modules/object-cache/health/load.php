@@ -83,7 +83,8 @@ function oc_health_persistent_object_cache() {
 	$available_services = oc_health_available_persistent_object_cache_services();
 
 	$description = sprintf(
-		__( 'Your host appears to support the following object cache services: %s. Speak to your web host about what persistent object cache services are available and how to enable them.', 'performance-lab' ),
+		/* translators: Available object caching services. */
+		__( 'Your host appears to support the following object caching services: %s. Speak to your web host about what persistent object caches are available and how to enable them.', 'performance-lab' ),
 		implode( ', ', $available_services )
 	);
 
@@ -171,12 +172,15 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
  * @return array The list of available persistent object cache services.
  */
 function oc_health_available_persistent_object_cache_services() {
-	$extensions = array_map( 'extension_loaded', array(
-		'Redis' => 'redis',
-		'Relay' => 'relay',
-		'Memcached' => 'memcache', // The `memcached` extension seems unmaintained
-		'APCu' => 'apcu',
-	) );
+	$extensions = array_map(
+		'extension_loaded',
+		array(
+			'Redis'     => 'redis',
+			'Relay'     => 'relay',
+			'Memcached' => 'memcache', // The `memcached` extension seems unmaintained.
+			'APCu'      => 'apcu',
+		)
+	);
 
 	$services = array_keys( array_filter( $extensions ) );
 
