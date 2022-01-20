@@ -99,5 +99,62 @@ function oc_health_persistent_object_cache() {
  * @return bool
  */
 function oc_health_should_persistent_object_cache( $should_suggest ) {
-	return true;
+	global $wpdb;
+
+	$threshold_alloptions_count = 500;
+	$threshold_alloptions_bytes = 100000;
+	$threshold_comments_count   = 1000;
+	$threshold_options_count    = 1000;
+	$threshold_posts_count      = 1000;
+	$threshold_terms_count      = 1000;
+	$threshold_users_count      = 1000;
+
+	$alloptions = wp_load_alloptions();
+
+	if ( $threshold_alloptions_count < count( $alloptions ) ) {
+		return true;
+	}
+
+	if ( $threshold_alloptions_bytes < strlen( serialize( wp_load_alloptions() ) ) ) {
+		return true;
+	}
+
+	$table_names = implode( "','", array( $wpdb->comments, $wpdb->options, $wpdb->posts, $wpdb->terms, $wpdb->users ) );
+
+	// With InnoDB the `TABLE_ROWS` are estimates, which are accurate enough
+	// and faster to retrieve than individual `COUNT()` queries
+	$results = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT TABLE_NAME AS 'table', TABLE_ROWS AS 'rows', SUM(data_length + index_length) as 'bytes'
+			FROM information_schema.TABLES
+			WHERE TABLE_SCHEMA = %s
+			AND TABLE_NAME IN ('$table_names')
+			GROUP BY TABLE_NAME;
+			",
+			DB_NAME
+		),
+		OBJECT_K
+	);
+
+	if ( $threshold_comments_count < $results[ $wpdb->comments ]->rows ) {
+		return true;
+	}
+
+	if ( $threshold_options_count < $results[ $wpdb->options ]->rows ) {
+		return true;
+	}
+
+	if ( $threshold_posts_count < $results[ $wpdb->posts ]->rows ) {
+		return true;
+	}
+
+	if ( $threshold_terms_count < $results[ $wpdb->terms ]->rows ) {
+		return true;
+	}
+
+	if ( $threshold_users_count < $results[ $wpdb->users ]->rows ) {
+		return true;
+	}
+
+	return false;
 }
