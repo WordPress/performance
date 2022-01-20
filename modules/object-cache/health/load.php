@@ -101,21 +101,23 @@ function oc_health_persistent_object_cache() {
 function oc_health_should_persistent_object_cache( $should_suggest ) {
 	global $wpdb;
 
-	$threshold_alloptions_count = 500;
-	$threshold_alloptions_bytes = 100000;
-	$threshold_comments_count   = 1000;
-	$threshold_options_count    = 1000;
-	$threshold_posts_count      = 1000;
-	$threshold_terms_count      = 1000;
-	$threshold_users_count      = 1000;
+	$thresholds = array(
+		'alloptions_count' => 1,
+		'alloptions_bytes' => 100000,
+		'comments_count'   => 1000,
+		'options_count'    => 1000,
+		'posts_count'      => 1000,
+		'terms_count'      => 1000,
+		'users_count'      => 1000,
+	);
 
 	$alloptions = wp_load_alloptions();
 
-	if ( $threshold_alloptions_count < count( $alloptions ) ) {
+	if ( $thresholds['alloptions_count'] < count( $alloptions ) ) {
 		return true;
 	}
 
-	if ( $threshold_alloptions_bytes < strlen( serialize( wp_load_alloptions() ) ) ) {
+	if ( $thresholds['alloptions_bytes'] < strlen( serialize( wp_load_alloptions() ) ) ) {
 		return true;
 	}
 
@@ -136,23 +138,23 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 		OBJECT_K
 	);
 
-	if ( $threshold_comments_count < $results[ $wpdb->comments ]->rows ) {
+	if ( $thresholds['comments_count'] < $results[ $wpdb->comments ]->rows ) {
 		return true;
 	}
 
-	if ( $threshold_options_count < $results[ $wpdb->options ]->rows ) {
+	if ( $thresholds['options_count'] < $results[ $wpdb->options ]->rows ) {
 		return true;
 	}
 
-	if ( $threshold_posts_count < $results[ $wpdb->posts ]->rows ) {
+	if ( $thresholds['posts_count'] < $results[ $wpdb->posts ]->rows ) {
 		return true;
 	}
 
-	if ( $threshold_terms_count < $results[ $wpdb->terms ]->rows ) {
+	if ( $thresholds['terms_count'] < $results[ $wpdb->terms ]->rows ) {
 		return true;
 	}
 
-	if ( $threshold_users_count < $results[ $wpdb->users ]->rows ) {
+	if ( $thresholds['users_count'] < $results[ $wpdb->users ]->rows ) {
 		return true;
 	}
 
