@@ -11,9 +11,9 @@
 /tests/testdata/modules/images              @adamsilverstein @getsource
 
 # Focus: JavaScript
-/modules/javascript                         @aristath @gziolo
-/tests/modules/javascript                   @aristath @gziolo
-/tests/testdata/modules/javascript          @aristath @gziolo
+/modules/javascript                         @aristath @sgomes
+/tests/modules/javascript                   @aristath @sgomes
+/tests/testdata/modules/javascript          @aristath @sgomes
 
 # Focus: Object Caching
 /modules/object-caching                     @tillkruss @dustinrue
