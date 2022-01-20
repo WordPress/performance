@@ -57,7 +57,7 @@ function perflab_aao_autoloaded_options_test() {
 	/**
 	 * Hostings can modify its limits depending on their own requirements.
 	 */
-	$limit = apply_filters( 'perflab_aao_autoloaded_options_limit_size_in_bytes', 100000 );
+	$limit = apply_filters( 'perflab_aao_autoloaded_options_limit_size_in_bytes', 800000 );
 
 	if ( $autoloaded_options_size > $limit ) {
 		$result['status']         = 'critical';
