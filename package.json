@@ -28,6 +28,8 @@
     "lodash": "4.17.21"
   },
   "scripts": {
+    "start": "./bin/docker/start.sh",
+    "stop": "./bin/docker/stop.sh",
     "changelog": "./bin/plugin/cli.js changelog",
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",

@@ -6,18 +6,21 @@ services:
       - 8080:80
     volumes:
       - wordpress:/var/www/html
-      - .:/var/www/html/wp-content/plugins/performance-lab
-      - ./docker/nginx/default.conf:/etc/nginx/templates/default.conf.template:ro
+      - ../../:/var/www/html/wp-content/plugins/performance-lab
+      - ./nginx/default.conf:/etc/nginx/templates/default.conf.template:ro
     environment:
       PHPFPM_HOST: wordpress
       PHPFPM_PORT: 9000
+    depends_on:
+      - wordpress
   wordpress:
+    image: wordpress:performance
     build:
-      context: ./docker/wordpress
+      context: ./wordpress
     volumes:
       - wordpress:/var/www/html
-      - .:/var/www/html/wp-content/plugins/performance-lab
-      - ./vendor:/var/www/html/vendor
+      - ../../:/var/www/html/wp-content/plugins/performance-lab
+      - ../../vendor:/var/www/html/vendor
     environment:
       LIVE_PROFILER_CONNECTION_URL: mysql://root:password@db:3306/wordpress?charset=utf8
       WORDPRESS_DB_HOST: db
@@ -26,9 +29,6 @@ services:
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_CONFIG_EXTRA: |
         include 'vendor/autoload.php';
-
-        \Badoo\LiveProfiler\LiveProfiler::getInstance()
-          ->createTable();
 
         \Badoo\LiveProfiler\LiveProfiler::getInstance()
           ->setMode( \Badoo\LiveProfiler\LiveProfiler::MODE_DB )
@@ -44,6 +44,11 @@ services:
       MYSQL_DATABASE: wordpress
     volumes:
       - mysql:/var/lib/mysql
+      - ../../vendor/badoo/liveprof/bin/install_data/pdo_mysql/source.sql:/docker-entrypoint-initdb.d/01-install-liveprof-tables.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
   phpmyadmin:
     image: phpmyadmin:apache
     ports:
