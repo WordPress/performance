@@ -152,7 +152,7 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 		return true;
 	}
 
-	if ( $thresholds['alloptions_bytes'] < strlen( serialize( wp_load_alloptions() ) ) ) {
+	if ( $thresholds['alloptions_bytes'] < strlen( serialize( $alloptions ) ) ) {
 		return true;
 	}
 
