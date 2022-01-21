@@ -84,15 +84,43 @@ function oc_health_persistent_object_cache() {
 
 	$available_services = oc_health_available_persistent_object_cache_services();
 
-	$description = sprintf(
-		/* translators: Available object caching services. */
-		__( 'Your host appears to support the following object caching services: %s. Speak to your web host about what persistent object caches are available and how to enable them.', 'performance-lab' ),
-		implode( ', ', $available_services )
-	);
+	$notes = __( 'Speak to your web host about what persistent object caches are available and how to enable them.', 'performance-lab' );
+
+	if ( ! empty( $available_services ) ) {
+		$notes .= sprintf(
+			/* translators: Available object caching services. */
+			__( ' Your host appears to support the following object caching services: %s.', 'performance-lab' ),
+			implode( ', ', $available_services )
+		);
+	}
+
+	/**
+	 * Filter the second paragraph of the health check's description
+	 * when suggesting the use of a persistent object cache.
+	 *
+	 * Hosts may want to replace the notes to recommend their preferred object caching solution.
+	 *
+	 * Plugin authors may want to append notes (not replace) on why object caching is recommended for their plugin.
+	 *
+	 * @param string $description
+	 * @param array $available_services
+	 */
+	$notes = apply_filter( 'site_status_persistent_object_cache_notes', $notes, $available_services );
 
 	$result['status']       = 'recommended';
 	$result['label']        = __( 'You should use a persistent object cache', 'performance-lab' );
-	$result['description'] .= sprintf( '<p>%s</p>', $description );
+	$result['description'] .= sprintf(
+		'<p>%s</p>',
+		wp_kses(
+			$notes,
+			array(
+				'a'      => array( 'href' => true ),
+				'code'   => true,
+				'em'     => true,
+				'strong' => true,
+			)
+		)
+	);
 
 	return $result;
 }
