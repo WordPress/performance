@@ -33,7 +33,7 @@ services:
         \Badoo\LiveProfiler\LiveProfiler::getInstance()
           ->setMode( \Badoo\LiveProfiler\LiveProfiler::MODE_DB )
           ->setDivider( 1 )
-          ->useXhprof()
+          ->useTidyWays()
           ->start();
 
         $$memcached_servers = array( 'default' => array( 'memcached:11211' ) );
