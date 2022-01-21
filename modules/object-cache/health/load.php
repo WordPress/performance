@@ -72,9 +72,11 @@ function oc_health_persistent_object_cache() {
 	/**
 	 * Filter whether to suggest using a persistent object cache.
 	 *
+	 * Plugin and theme authors should NOT use this filter to discourage the use of an object cache.
+	 *
 	 * @param bool $suggest
 	 */
-	if ( ! apply_filters( 'site_status_persistent_object_cache', false ) ) {
+	if ( ! apply_filters( 'site_status_suggest_persistent_object_cache', false ) ) {
 		$result['label'] = __( 'A persistent object cache is not required', 'performance-lab' );
 
 		return $result;
@@ -186,6 +188,8 @@ function oc_health_available_persistent_object_cache_services() {
 
 	/**
 	 * Filter the persistent object cache services available to the user.
+	 *
+	 * This can be useful to hide or add services not included in the defaults.
 	 *
 	 * @param array $suggest
 	 */
