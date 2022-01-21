@@ -30,11 +30,14 @@ services:
       WORDPRESS_CONFIG_EXTRA: |
         include 'vendor/autoload.php';
 
-        \Badoo\LiveProfiler\LiveProfiler::getInstance()
-          ->setMode( \Badoo\LiveProfiler\LiveProfiler::MODE_DB )
-          ->setDivider( 1 )
-          ->useTidyWays()
-          ->start();
+        // Don't start liveprof for CLI scripts.
+        if ( php_sapi_name() != 'cli' ) {
+          \Badoo\LiveProfiler\LiveProfiler::getInstance()
+            ->setMode( \Badoo\LiveProfiler\LiveProfiler::MODE_DB )
+            ->setDivider( 1 )
+            ->useTidyWays()
+            ->start();
+        }
 
         $$memcached_servers = array( 'default' => array( 'memcached:11211' ) );
   db:

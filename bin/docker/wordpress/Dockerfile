@@ -16,4 +16,4 @@ RUN apk add $PHPIZE_DEPS \
     && rm -r /tmp/xhprof
 
 RUN chmod +x wp-cli-$WPCLI_VERSION.phar \
-    && mv wp-cli-$WPCLI_VERSION.phar /usr/local/bin/wp
+    && mv wp-cli-$WPCLI_VERSION.phar /usr/bin/wp

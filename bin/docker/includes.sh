@@ -28,5 +28,5 @@ dc() {
 # Executes a WP CLI request in the wordpress container.
 ##
 wp() {
-	dc exec $COMPOSE_EXEC_ARGS wordpress wp "$@"
+	dc exec $COMPOSE_EXEC_ARGS wordpress wp --allow-root "$@"
 }
