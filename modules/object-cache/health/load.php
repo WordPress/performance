@@ -137,7 +137,7 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 	global $wpdb;
 
 	$thresholds = array(
-		'alloptions_count' => 1,
+		'alloptions_count' => 500,
 		'alloptions_bytes' => 100000,
 		'comments_count'   => 1000,
 		'options_count'    => 1000,
