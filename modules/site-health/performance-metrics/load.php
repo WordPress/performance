@@ -9,7 +9,18 @@
  */
 
 /**
+ * Require helper functions.
+ */
+require_once __DIR__ . '/helper.php';
+
+/**
  * Add a new tab to the Site Health page with key performance metrics.
+ *
+ * @since 1.0.0
+ *
+ * @param array $tabs The array of site health tabs.
+ *
+ * @return array The updated array of site health tabs.
  */
 function performance_lab_pm_add_site_health_metrics_tab( $tabs ) {
 	$tabs['performance-metrics-tab'] = esc_html_x( 'Performance Metrics', 'Site Health', 'performance-lab' );
@@ -20,28 +31,33 @@ add_filter( 'site_health_navigation_tabs', 'performance_lab_pm_add_site_health_m
 
 /**
  * Gathering the performance metrics.
+ *
+ * @since 1.0.0
+ *
+ * @return array The array of performance metrics.
  */
 function performance_lab_pm_get_site_health_metrics() {
 	$metrics = array();
+	$assets  = performance_lab_pm_get_loaded_assets();
 
 	$metrics['loaded-assets'] = array(
 		'label'  => esc_html__( 'Loaded Assets', 'performance-lab' ),
 		'fields' => array(
 			'scripts-number' => array(
 				'label' => esc_html__( 'Number of loaded scripts', 'performance-lab' ),
-				'value' => 0,
+				'value' => $assets ? $assets['total_scripts_number'] : 'N.A.',
 			),
 			'scripts-size'   => array(
 				'label' => esc_html__( 'Total size of loaded scripts', 'performance-lab' ),
-				'value' => 0,
+				'value' => $assets ? size_format( $assets['total_scripts_size'] ) : 'N.A.',
 			),
 			'styles-number'  => array(
 				'label' => esc_html__( 'Number of loaded styles', 'performance-lab' ),
-				'value' => 0,
+				'value' => $assets ? $assets['total_styles_number'] : 'N.A.',
 			),
 			'styles-size'    => array(
 				'label' => esc_html__( 'Total size of loaded styles', 'performance-lab' ),
-				'value' => 0,
+				'value' => $assets ? size_format( $assets['total_styles_size'] ) : 'N.A.',
 			),
 		),
 	);
@@ -61,6 +77,12 @@ function performance_lab_pm_get_site_health_metrics() {
 
 /**
  * Add the content for the new tab.
+ *
+ * @since 1.0.0
+ *
+ * @param string $tab The slug of the current tab.
+ *
+ * @return void
  */
 function performance_lab_pm_add_site_health_metrics_tab_content( $tab ) {
 	if ( 'performance-metrics-tab' !== $tab ) {
