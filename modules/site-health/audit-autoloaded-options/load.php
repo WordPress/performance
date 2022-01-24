@@ -70,10 +70,16 @@ function perflab_aao_autoloaded_options_test() {
 		);
 		$result['description'] = apply_filters( 'perflab_aao_autoloaded_options_limit_description', $result['description'] );
 
+		$result['actions'] = sprintf(
+		/* translators: 1: HelpHub URL. 2: Link description. */
+			'<p><a target="_blank" href="%1$s">%2$s</a></p>',
+			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
+			esc_html__( 'More info about performance optimization', 'performance-lab' )
+		);
 		/**
 		 * Hostings can add actions to take to reduce size of autoloaded options linking to their own guides.
 		 */
-		$result['actions'] = apply_filters( 'perflab_aao_autoloaded_options_action_to_perform', 'How to solve it' );
+		$result['actions'] = apply_filters( 'perflab_aao_autoloaded_options_action_to_perform', $result['actions'] );
 	}
 
 	return $result;
