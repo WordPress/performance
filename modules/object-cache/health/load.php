@@ -82,7 +82,7 @@ function oc_health_persistent_object_cache() {
 		return $result;
 	}
 
-	$available_services = oc_health_available_persistent_object_cache_services();
+	$available_services = oc_health_available_object_cache_services();
 
 	$notes = __( 'Speak to your web host about what persistent object caches are available and how to enable them.', 'performance-lab' );
 
@@ -201,7 +201,7 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
  *
  * @return array The list of available persistent object cache services.
  */
-function oc_health_available_persistent_object_cache_services() {
+function oc_health_available_object_cache_services() {
 	$extensions = array_map(
 		'extension_loaded',
 		array(
