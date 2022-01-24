@@ -11,17 +11,17 @@
 /**
  * Add a new tab to the Site Health page with key performance metrics.
  */
-function performance_lab_add_site_health_metrics_tab( $tabs ) {
+function performance_lab_pm_add_site_health_metrics_tab( $tabs ) {
 	$tabs['performance-metrics-tab'] = esc_html_x( 'Performance Metrics', 'Site Health', 'performance-lab' );
 
 	return $tabs;
 }
-add_filter( 'site_health_navigation_tabs', 'performance_lab_add_site_health_metrics_tab' );
+add_filter( 'site_health_navigation_tabs', 'performance_lab_pm_add_site_health_metrics_tab' );
 
 /**
  * Gathering the performance metrics.
  */
-function performance_lab_get_site_health_metrics() {
+function performance_lab_pm_get_site_health_metrics() {
 	$metrics = array();
 
 	$metrics['loaded-assets'] = array(
@@ -62,7 +62,7 @@ function performance_lab_get_site_health_metrics() {
 /**
  * Add the content for the new tab.
  */
-function performance_lab_add_site_health_metrics_tab_content( $tab ) {
+function performance_lab_pm_add_site_health_metrics_tab_content( $tab ) {
 	if ( 'performance-metrics-tab' !== $tab ) {
 		return;
 	}
@@ -70,5 +70,5 @@ function performance_lab_add_site_health_metrics_tab_content( $tab ) {
 	// Include the view.
 	include trailingslashit( plugin_dir_path( __FILE__ ) ) . 'performance-metrics-view.php';
 }
-add_filter( 'site_health_tab_content', 'performance_lab_add_site_health_metrics_tab_content' );
+add_filter( 'site_health_tab_content', 'performance_lab_pm_add_site_health_metrics_tab_content' );
 

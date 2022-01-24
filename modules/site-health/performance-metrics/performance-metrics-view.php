@@ -1,5 +1,5 @@
 <?php
-$metrics = performance_lab_get_site_health_metrics();
+$metrics = performance_lab_pm_get_site_health_metrics();
 ?>
 
 <div class="health-check-body health-check-debug-tab hide-if-no-js">
@@ -13,7 +13,7 @@ $metrics = performance_lab_get_site_health_metrics();
 	<p>
 		<?php _e( 'If you want to export a handy list of all the information on this page, you can use the button below to copy it to the clipboard. You can then paste it in a text file and save it to your device, or paste it in an email exchange with a support engineer or theme/plugin developer for example.' ); ?>
 	</p>
-	
+
 
 	<?php
 	// The formatting helper still needs to be implemented.
