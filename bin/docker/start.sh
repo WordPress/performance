@@ -22,10 +22,21 @@ if ! wp core is-installed; then
     wp core install \
         --title="WordPress Performance Lab" \
         --url="http://localhost:8080" \
-        --admin_user=admin \
-        --admin_password=password \
-        --admin_email=test@test.com \
+        --admin_user="admin" \
+        --admin_password="password" \
+        --admin_email="test@test.com" \
         --skip-email
 
+    # Configure WordPress
+    wp rewrite structure "/%postname%/"
+
+    # Activate required plugins.
+    wp plugin activate performance-lab
+
     # ...
+fi
+
+# Install liveprof-ui tables
+if ! mysql -e "DESCRIBE aggregator_snapshots" > /dev/null; then
+    liveprofui aggregator:install
 fi

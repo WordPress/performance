@@ -30,3 +30,17 @@ dc() {
 wp() {
 	dc exec $COMPOSE_EXEC_ARGS wordpress wp --allow-root "$@"
 }
+
+##
+# Executes a MySQL query.
+##
+mysql() {
+	dc exec $COMPOSE_EXEC_ARGS db mysql -u root -ppassword -D wordpress -h 127.0.0.1 --wait "$@"
+}
+
+##
+# Runs a CLI command in the liveprof-ui container.
+##
+liveprofui() {
+	dc exec $COMPOSE_EXEC_ARGS liveprofui php bin/cli.php "$@"
+}

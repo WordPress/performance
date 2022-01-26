@@ -17,6 +17,9 @@ services:
     image: wordpress:performance
     build:
       context: ./wordpress
+      args:
+        - TIDEWAYS_VERSION=5.0.4
+        - WPCLI_VERSION=2.5.0
     volumes:
       - wordpress:/var/www/html
       - ../../:/var/www/html/wp-content/plugins/performance-lab
@@ -62,6 +65,14 @@ services:
       PMA_PASSWORD: password
   memcached:
     image: memcached:alpine
+  liveprofui:
+    image: liveprof-ui
+    build:
+      context: ./liveprof-ui
+      args:
+        - LIVEPROFUI_VERSION=1.2.19
+    ports:
+      - 8082:80
 volumes:
   wordpress:
   mysql:

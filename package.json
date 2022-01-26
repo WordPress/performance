@@ -30,6 +30,8 @@
   "scripts": {
     "start": "./bin/docker/start.sh",
     "stop": "./bin/docker/stop.sh",
+    "build-images": "./bin/docker/build.sh",
+    "aggregate": "./bin/docker/aggregate.sh",
     "changelog": "./bin/plugin/cli.js changelog",
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",

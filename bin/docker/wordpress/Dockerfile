@@ -1,7 +1,7 @@
 FROM wordpress:fpm-alpine
 
-ENV TIDEWAYS_VERSION 5.0.4
-ENV WPCLI_VERSION 2.5.0
+ARG TIDEWAYS_VERSION
+ARG WPCLI_VERSION
 
 ADD https://github.com/tideways/php-xhprof-extension/archive/refs/tags/v$TIDEWAYS_VERSION.tar.gz .
 ADD https://github.com/wp-cli/wp-cli/releases/download/v$WPCLI_VERSION/wp-cli-$WPCLI_VERSION.phar .
