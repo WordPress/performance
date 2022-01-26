@@ -34,8 +34,7 @@ function perflab_aea_audit_enqueued_scripts() {
 				);
 			}
 		}
-		$expiration = apply_filters( 'perflab_aea_enqueued_front_page_scripts_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
-		set_transient( 'aea_enqueued_front_page_scripts', $enqueued_scripts, $expiration );
+		set_transient( 'aea_enqueued_front_page_scripts', $enqueued_scripts, 12 * HOUR_IN_SECONDS );
 	}
 }
 add_action( 'wp_print_scripts', 'perflab_aea_audit_enqueued_scripts' );
@@ -60,8 +59,7 @@ function perflab_aea_audit_enqueued_styles() {
 				);
 			}
 		}
-		$expiration = apply_filters( 'perflab_aea_enqueued_front_page_styles_expiration_in_seconds', 12 * HOUR_IN_SECONDS );
-		set_transient( 'aea_enqueued_front_page_styles', $enqueued_styles, $expiration );
+		set_transient( 'aea_enqueued_front_page_styles', $enqueued_styles, 12 * HOUR_IN_SECONDS );
 	}
 }
 add_action( 'wp_print_styles', 'perflab_aea_audit_enqueued_styles' );
@@ -112,27 +110,65 @@ function perflab_aea_enqueued_js_assets_test() {
 			'color' => 'blue',
 		),
 		'description' => sprintf(
-		/* translators: 1: Number of enqueued scripts. 2: "script" word. 3.Scripts size. */
-			'<p>' . esc_html__( 'The amount of %1$s enqueued %2$s (size: %3$s) is acceptable.', 'performance-lab' ) . '</p>',
-			$enqueued_scripts,
-			_n( 'script', 'scripts', $enqueued_scripts, 'performance-lab' ),
-			size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+			'<p>%s</p>',
+			esc_html(
+				sprintf(
+				/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					_n(
+						'The amount of %1$s enqueued script (size: %2$s) is acceptable.',
+						'The amount of %1$s enqueued scripts (size: %2$s) is acceptable.',
+						$enqueued_scripts,
+						'performance-lab'
+					),
+					$enqueued_scripts,
+					size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+				)
+			)
 		),
 		'actions'     => '',
 		'test'        => 'enqueued_js_assets',
 	);
 
-	if ( $enqueued_scripts > 30 || perflab_aea_get_total_size_bytes_enqueued_scripts() > 300000 ) {
+	/**
+	 * Filters number of enqueued scripts to trigger warning.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $scripts_limit Scripts limit number. Default '30'.
+	 */
+	$scripts_limit = apply_filters( 'perflab_aea_enqueued_scripts_limit', 30 );
+
+	/**
+	 * Filters size of enqueued scripts to trigger warning.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $scripts_size_limit Enqueued Scripts size (in bytes) limit. Default '300000'.
+	 */
+	$scripts_size_limit = apply_filters( 'perflab_aea_enqueued_scripts_byte_size_limit', 300000 );
+
+	if ( $enqueued_scripts > $scripts_limit || perflab_aea_get_total_size_bytes_enqueued_scripts() > $scripts_size_limit ) {
 		$result['status']         = 'recommended';
 		$result['badge']['color'] = 'orange';
-		$result['description']    = sprintf(
-		/* translators: 1: Number of enqueued scripts. 2: "script" word. 3.Scripts size. */
-			'<p>' . esc_html__( 'Your website enqueues %1$s %2$s (size: %3$s). Try to reduce the number or to concatenate them.', 'performance-lab' ) . '</p>',
-			$enqueued_scripts,
-			_n( 'script', 'scripts', $enqueued_scripts, 'performance-lab' ),
-			size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+
+		$result['description'] = sprintf(
+			'<p>%s</p>',
+			esc_html(
+				sprintf(
+				/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					_n(
+						'Your website enqueues %1$s script (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website enqueues %1$s scripts (size: %2$s). Try to reduce the number or to concatenate them.',
+						$enqueued_scripts,
+						'performance-lab'
+					),
+					$enqueued_scripts,
+					size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+				)
+			)
 		);
-		$result['actions'] .= sprintf(
+
+		$result['actions'] = sprintf(
 			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
 			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
 			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
@@ -168,28 +204,64 @@ function perflab_aea_enqueued_css_assets_test() {
 			'color' => 'blue',
 		),
 		'description' => sprintf(
-		/* translators: 1: Number of enqueued styles. 2: "styles" word. 3.Styles size. */
-			'<p>' . esc_html__( 'The amount of %1$s enqueued %2$s (size: %3$s) is acceptable.', 'performance-lab' ) . '</p>',
-			$enqueued_styles,
-			_n( 'style', 'styles', $enqueued_styles, 'performance-lab' ),
-			size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+			'<p>%s</p>',
+			esc_html(
+				sprintf(
+				/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					_n(
+						'The amount of %1$s enqueued style (size: %2$s) is acceptable.',
+						'The amount of %1$s enqueued styles (size: %2$s) is acceptable.',
+						$enqueued_styles,
+						'performance-lab'
+					),
+					$enqueued_styles,
+					size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+				)
+			)
 		),
 		'actions'     => '',
 		'test'        => 'enqueued_css_assets',
 	);
 
-	if ( $enqueued_styles > 10 || perflab_aea_get_total_size_bytes_enqueued_styles() > 100000 ) {
+	/**
+	 * Filters number of enqueued styles to trigger warning.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $styles_limit Styles limit number. Default 10.
+	 */
+	$styles_limit = apply_filters( 'perflab_aea_enqueued_styles_limit', 10 );
+
+	/**
+	 * Filters size of enqueued styles to trigger warning.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $styles_size_limit Enqueued styles size (in bytes) limit. Default 100000.
+	 */
+	$styles_size_limit = apply_filters( 'perflab_aea_enqueued_styles_byte_size_limit', 100000 );
+	if ( $enqueued_styles > $styles_limit || perflab_aea_get_total_size_bytes_enqueued_styles() > $styles_size_limit ) {
 		$result['status']         = 'recommended';
 		$result['badge']['color'] = 'orange';
-		$result['description']    = sprintf(
-		/* translators: 1: Number of enqueued styles. 2: "style" word. 3.Styles size. */
-			'<p>' . esc_html__( 'Your website enqueues %1$s %2$s (size: %3$s). Try to reduce the number or to concatenate them.', 'performance-lab' ) . '</p>',
-			$enqueued_styles,
-			_n( 'style', 'styles', $enqueued_styles, 'performance-lab' ),
-			size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+
+		$result['description'] = sprintf(
+			'<p>%s</p>',
+			esc_html(
+				sprintf(
+				/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					_n(
+						'Your website enqueues %1$s style (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website enqueues %1$s styles (size: %2$s). Try to reduce the number or to concatenate them.',
+						$enqueued_styles,
+						'performance-lab'
+					),
+					$enqueued_styles,
+					size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+				)
+			)
 		);
 
-		$result['actions'] .= sprintf(
+		$result['actions'] = sprintf(
 			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
 			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
 			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),

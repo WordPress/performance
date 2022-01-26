@@ -33,6 +33,7 @@ function perflab_aea_get_total_size_bytes_enqueued_scripts() {
 	$total_size            = false;
 	$list_enqueued_scripts = get_transient( 'aea_enqueued_front_page_scripts' );
 	if ( $list_enqueued_scripts ) {
+		$total_size = 0;
 		foreach ( $list_enqueued_scripts as $enqueued_script ) {
 			$total_size += $enqueued_script['size'];
 		}
@@ -67,6 +68,7 @@ function perflab_aea_get_total_size_bytes_enqueued_styles() {
 	$total_size           = false;
 	$list_enqueued_styles = get_transient( 'aea_enqueued_front_page_styles' );
 	if ( $list_enqueued_styles ) {
+		$total_size = 0;
 		foreach ( $list_enqueued_styles as $enqueued_style ) {
 			$total_size += $enqueued_style['size'];
 		}
