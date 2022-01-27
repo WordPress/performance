@@ -113,7 +113,7 @@ function perflab_aea_enqueued_js_assets_test() {
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-				/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					/* translators: 1: Number of enqueued styles. 2.Styles size. */
 					_n(
 						'The amount of %1$s enqueued script (size: %2$s) is acceptable.',
 						'The amount of %1$s enqueued scripts (size: %2$s) is acceptable.',
@@ -134,20 +134,20 @@ function perflab_aea_enqueued_js_assets_test() {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $scripts_limit Scripts limit number. Default '30'.
+	 * @param int $scripts_treshold Scripts threshold number. Default 30.
 	 */
-	$scripts_limit = apply_filters( 'perflab_aea_enqueued_scripts_limit', 30 );
+	$scripts_treshold = apply_filters( 'perflab_aea_enqueued_scripts_threshold', 30 );
 
 	/**
 	 * Filters size of enqueued scripts to trigger warning.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $scripts_size_limit Enqueued Scripts size (in bytes) limit. Default '300000'.
+	 * @param int $scripts_size_treshold Enqueued Scripts size (in bytes) threshold. Default 300000.
 	 */
-	$scripts_size_limit = apply_filters( 'perflab_aea_enqueued_scripts_byte_size_limit', 300000 );
+	$scripts_size_treshold = apply_filters( 'perflab_aea_enqueued_scripts_byte_size_threshold', 300000 );
 
-	if ( $enqueued_scripts > $scripts_limit || perflab_aea_get_total_size_bytes_enqueued_scripts() > $scripts_size_limit ) {
+	if ( $enqueued_scripts > $scripts_treshold || perflab_aea_get_total_size_bytes_enqueued_scripts() > $scripts_size_treshold ) {
 		$result['status']         = 'recommended';
 		$result['badge']['color'] = 'orange';
 
@@ -155,7 +155,7 @@ function perflab_aea_enqueued_js_assets_test() {
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-				/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					/* translators: 1: Number of enqueued styles. 2.Styles size. */
 					_n(
 						'Your website enqueues %1$s script (size: %2$s). Try to reduce the number or to concatenate them.',
 						'Your website enqueues %1$s scripts (size: %2$s). Try to reduce the number or to concatenate them.',
@@ -207,7 +207,7 @@ function perflab_aea_enqueued_css_assets_test() {
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-				/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					/* translators: 1: Number of enqueued styles. 2.Styles size. */
 					_n(
 						'The amount of %1$s enqueued style (size: %2$s) is acceptable.',
 						'The amount of %1$s enqueued styles (size: %2$s) is acceptable.',
@@ -228,19 +228,19 @@ function perflab_aea_enqueued_css_assets_test() {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $styles_limit Styles limit number. Default 10.
+	 * @param int $styles_threshold Styles threshold number. Default 10.
 	 */
-	$styles_limit = apply_filters( 'perflab_aea_enqueued_styles_limit', 10 );
+	$styles_threshold = apply_filters( 'perflab_aea_enqueued_styles_threshold', 10 );
 
 	/**
 	 * Filters size of enqueued styles to trigger warning.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $styles_size_limit Enqueued styles size (in bytes) limit. Default 100000.
+	 * @param int $styles_size_threshold Enqueued styles size (in bytes) threshold. Default 100000.
 	 */
-	$styles_size_limit = apply_filters( 'perflab_aea_enqueued_styles_byte_size_limit', 100000 );
-	if ( $enqueued_styles > $styles_limit || perflab_aea_get_total_size_bytes_enqueued_styles() > $styles_size_limit ) {
+	$styles_size_threshold = apply_filters( 'perflab_aea_enqueued_styles_byte_size_threshold', 100000 );
+	if ( $enqueued_styles > $styles_threshold || perflab_aea_get_total_size_bytes_enqueued_styles() > $styles_size_threshold ) {
 		$result['status']         = 'recommended';
 		$result['badge']['color'] = 'orange';
 
@@ -248,7 +248,7 @@ function perflab_aea_enqueued_css_assets_test() {
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-				/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					/* translators: 1: Number of enqueued styles. 2.Styles size. */
 					_n(
 						'Your website enqueues %1$s style (size: %2$s). Try to reduce the number or to concatenate them.',
 						'Your website enqueues %1$s styles (size: %2$s). Try to reduce the number or to concatenate them.',

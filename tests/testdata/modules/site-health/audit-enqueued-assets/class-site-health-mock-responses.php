@@ -30,13 +30,13 @@ class Site_Health_Mock_Responses {
 	}
 
 	/**
-	 * Callback response for aea_enqueued_js_assets_test if assets are less than the limit.
+	 * Callback response for aea_enqueued_js_assets_test if assets are less than the threshold.
 	 *
 	 * @param int $enqueued_scripts Number of scripts enqueued.
 	 *
 	 * @return array
 	 */
-	public static function return_aea_enqueued_js_assets_test_callback_less_than_limit( $enqueued_scripts = 1 ) {
+	public static function return_aea_enqueued_js_assets_test_callback_less_than_threshold( $enqueued_scripts = 1 ) {
 		$result = array(
 			'label'       => esc_html__( 'Enqueued scripts', 'performance-lab' ),
 			'status'      => 'good',
@@ -48,7 +48,7 @@ class Site_Health_Mock_Responses {
 				'<p>%s</p>',
 				esc_html(
 					sprintf(
-					/* translators: 1: Number of enqueued styles. 2.Styles size. */
+						/* translators: 1: Number of enqueued styles. 2.Styles size. */
 						_n(
 							'The amount of %1$s enqueued script (size: %2$s) is acceptable.',
 							'The amount of %1$s enqueued scripts (size: %2$s) is acceptable.',
@@ -67,21 +67,21 @@ class Site_Health_Mock_Responses {
 	}
 
 	/**
-	 * Callback response for aea_enqueued_js_assets_test if assets are more than the limit.
+	 * Callback response for aea_enqueued_js_assets_test if assets are more than the threshold.
 	 *
 	 * @param int $enqueued_scripts Number of scripts enqueued.
 	 *
 	 * @return array
 	 */
-	public static function return_aea_enqueued_js_assets_test_callback_more_than_limit( $enqueued_scripts ) {
-		$result                   = self::return_aea_enqueued_js_assets_test_callback_less_than_limit();
+	public static function return_aea_enqueued_js_assets_test_callback_more_than_threshold( $enqueued_scripts ) {
+		$result                   = self::return_aea_enqueued_js_assets_test_callback_less_than_threshold();
 		$result['status']         = 'recommended';
 		$result['badge']['color'] = 'orange';
 		$result['description']    = sprintf(
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-				/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					/* translators: 1: Number of enqueued styles. 2.Styles size. */
 					_n(
 						'Your website enqueues %1$s script (size: %2$s). Try to reduce the number or to concatenate them.',
 						'Your website enqueues %1$s scripts (size: %2$s). Try to reduce the number or to concatenate them.',
@@ -105,13 +105,13 @@ class Site_Health_Mock_Responses {
 	}
 
 	/**
-	 * Callback response for aea_enqueued_css_assets_test if assets are less than the limit.
+	 * Callback response for aea_enqueued_css_assets_test if assets are less than the threshold.
 	 *
 	 * @param int $enqueued_styles Number of styles enqueued.
 	 *
 	 * @return array
 	 */
-	public static function return_aea_enqueued_css_assets_test_callback_less_than_limit( $enqueued_styles = 1 ) {
+	public static function return_aea_enqueued_css_assets_test_callback_less_than_threshold( $enqueued_styles = 1 ) {
 		$result = array(
 			'label'       => esc_html__( 'Enqueued styles', 'performance-lab' ),
 			'status'      => 'good',
@@ -123,7 +123,7 @@ class Site_Health_Mock_Responses {
 				'<p>%s</p>',
 				esc_html(
 					sprintf(
-					/* translators: 1: Number of enqueued styles. 2.Styles size. */
+						/* translators: 1: Number of enqueued styles. 2.Styles size. */
 						_n(
 							'The amount of %1$s enqueued style (size: %2$s) is acceptable.',
 							'The amount of %1$s enqueued styles (size: %2$s) is acceptable.',
@@ -142,21 +142,21 @@ class Site_Health_Mock_Responses {
 	}
 
 	/**
-	 * Callback response for aea_enqueued_css_assets_test if assets are more than the limit.
+	 * Callback response for aea_enqueued_css_assets_test if assets are more than the threshold.
 	 *
 	 * @param int $enqueued_styles Number of styles enqueued.
 	 *
 	 * @return array
 	 */
-	public static function return_aea_enqueued_css_assets_test_callback_more_than_limit( $enqueued_styles ) {
-		$result                   = self::return_aea_enqueued_css_assets_test_callback_less_than_limit();
+	public static function return_aea_enqueued_css_assets_test_callback_more_than_threshold( $enqueued_styles ) {
+		$result                   = self::return_aea_enqueued_css_assets_test_callback_less_than_threshold();
 		$result['status']         = 'recommended';
 		$result['badge']['color'] = 'orange';
 		$result['description']    = sprintf(
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
-				/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					/* translators: 1: Number of enqueued styles. 2.Styles size. */
 					_n(
 						'Your website enqueues %1$s style (size: %2$s). Try to reduce the number or to concatenate them.',
 						'Your website enqueues %1$s styles (size: %2$s). Try to reduce the number or to concatenate them.',
