@@ -167,20 +167,20 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
  */
 function perflab_get_focus_areas() {
 	return array(
-		'images'         => array(
+		'images'       => array(
 			'name' => __( 'Images', 'performance-lab' ),
 		),
-		'javascript'     => array(
+		'javascript'   => array(
 			'name' => __( 'JavaScript', 'performance-lab' ),
 		),
-		'site-health'    => array(
+		'site-health'  => array(
 			'name' => __( 'Site Health', 'performance-lab' ),
 		),
-		'measurement'    => array(
+		'measurement'  => array(
 			'name' => __( 'Measurement', 'performance-lab' ),
 		),
-		'object-caching' => array(
-			'name' => __( 'Object caching', 'performance-lab' ),
+		'object-cache' => array(
+			'name' => __( 'Object Cache', 'performance-lab' ),
 		),
 	);
 }
