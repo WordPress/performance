@@ -28,6 +28,12 @@ Run `npm run readme -- -m "{milestoneName}"` to update the readme.txt file with 
 
 After running the command, check the readme.txt file to ensure the new changelog for the release has been added. Also review its changelog entries for whether they make sense and are understandable.
 
+### Open a pull request
+
+Push your local release branch to the GitHub repository and open a pull request against `trunk`. Make sure to tag at least 2 plugin maintainers to request a review. Once the pull request is approved by at least 2 plugin maintainers, the pull request can be merged.
+
+If this is a major or minor release, please keep the release branch around since that branch can be used to later create patch releases from the same state of the codebase.
+
 ## Create a new GitHub release
 
 Go to https://github.com/WordPress/performance/releases/new to create a new release for the plugin. The release tag should be in the format `X.Y.Z`. Finally, add the changelog (it can be found in the readme.txt file) to the release description and create the release.
