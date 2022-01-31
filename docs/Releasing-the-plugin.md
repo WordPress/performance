@@ -18,8 +18,8 @@ The version number needs to be updated in the following files:
 
 Run `npm run readme -- -m "X.Y.Z"` to update the readme.txt file with the release changelog, with X.Y.Z as the release milestone name.
 
-### Create a new GitHub release
+## Create a new GitHub release
 
 Go to https://github.com/WordPress/performance/releases/new to create a new release for the plugin. The release tag should be in the format `X.Y.Z`. Finally, add the changelog (it can be found in the readme.txt file) to the release description and create the release.
 
-## Post-release steps
+Once a new version is released on GitHub, the plugin will be deployed to the WordPress.org repository using this [action](../.github/workflows/deploy-dotorg.yml).
