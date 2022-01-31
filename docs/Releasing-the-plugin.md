@@ -34,7 +34,7 @@ Push your local release branch to the GitHub repository and open a pull request 
 
 If this is a major or minor release, please keep the release branch around since that branch can be used to later create patch releases from the same state of the codebase.
 
-## Create a new GitHub release
+## Publishing the release
 
 Once the above pull request has been merged, let the other maintainers know on [Slack](https://wordpress.slack.com/archives/performance) that no new commits or pull requests must be added to the branch due to the release process. Then, make sure that all GitHub actions successfully pass for the target branch (e.g. [for `trunk`](https://github.com/WordPress/performance/actions?query=branch%3Atrunk)).
 
