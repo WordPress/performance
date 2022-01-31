@@ -20,7 +20,9 @@ The module headers from the plugin have to be translated using a separate `modul
 
 ### Update readme.txt
 
-Run `npm run readme -- -m "X.Y.Z"` to update the readme.txt file with the release changelog, with X.Y.Z as the release milestone name.
+Run `npm run readme -- -m "{milestoneName}"` to update the readme.txt file with the release changelog, where `{milestoneName}` is the name of the milestone. For example, if the milestone is `1.2.0`, the command needs to be `npm run readme -- -m "1.2.0"`.
+
+After running the command, check the readme.txt file to ensure the new changelog for the release has been added. Also review its changelog entries for whether they make sense and are understandable.
 
 ## Create a new GitHub release
 
