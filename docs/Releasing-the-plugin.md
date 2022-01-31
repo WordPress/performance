@@ -16,6 +16,8 @@ The version number needs to be updated in the following files:
 - load.php
 - readme.txt
 
+In addition to those locations, do a global search and replace across the entire codebase to replace any occurrence of `n.e.x.t` with the version number. This ensures any code annotated with the "next" release will now have its proper version number on it.
+
 ### Update translation strings
 
 The module headers from the plugin have to be translated using a separate `module-i18n.php` file which can be automatically generated and updated. Run `npm run translations` to update the file to reflect the latest available modules.
