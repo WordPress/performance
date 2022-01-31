@@ -4,7 +4,9 @@ This document describes the steps to release the Performance plugin.
 
 ## Preparing the release
 
-> The following changes need to be made through a pull request.
+### Create a local release branch
+
+Before making any changes, create a local branch `release/{milestoneName}` from latest `trunk`, where `{milestoneName}` is the name of the milestone (which should match the release version). For example, if the milestone is `1.2.0`, name the branch `release/1.2.0`.
 
 ### Update the version number
 
