@@ -1,6 +1,6 @@
 === Performance Lab ===
 
-Contributors:      wordpressdotorg
+Contributors:      performanceteam
 Requires at least: 5.8
 Tested up to:      5.9
 Requires PHP:      5.6
