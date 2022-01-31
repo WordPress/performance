@@ -30,4 +30,6 @@ After running the command, check the readme.txt file to ensure the new changelog
 
 Go to https://github.com/WordPress/performance/releases/new to create a new release for the plugin. The release tag should be in the format `X.Y.Z`. Finally, add the changelog (it can be found in the readme.txt file) to the release description and create the release.
 
-Once a new version is released on GitHub, the plugin will be deployed to the WordPress.org repository using this [action](../.github/workflows/deploy-dotorg.yml).
+Once a new version is released on GitHub, the plugin will be deployed to the [WordPress.org repository](https://wordpress.org/plugins/performance-lab/) using [this action](../.github/workflows/deploy-dotorg.yml).
+
+At this point, test the update process from your WordPress site, getting the plugin from wordpress.org. You can then share on [Slack](https://wordpress.slack.com/archives/performance) that the new release has been published and that committing may continue.
