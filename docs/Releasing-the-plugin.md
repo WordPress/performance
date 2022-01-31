@@ -14,6 +14,10 @@ The version number needs to be updated in the following files:
 - load.php
 - readme.txt
 
+### Update translation strings
+
+The module headers from the plugin have to be translated using a separate `module-i18n.php` file which can be automatically generated and updated. Run `npm run translations` to update the file to reflect the latest available modules.
+
 ### Update readme.txt
 
 Run `npm run readme -- -m "X.Y.Z"` to update the readme.txt file with the release changelog, with X.Y.Z as the release milestone name.
