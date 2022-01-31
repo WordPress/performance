@@ -36,7 +36,9 @@ If this is a major or minor release, please keep the release branch around since
 
 ## Create a new GitHub release
 
-Go to https://github.com/WordPress/performance/releases/new to create a new release for the plugin. The release tag should be in the format `X.Y.Z`. Finally, add the changelog (it can be found in the readme.txt file) to the release description and create the release.
+Once the above pull request has been merged, let the other maintainers know on [Slack](https://wordpress.slack.com/archives/performance) that no new commits or pull requests must be added to the branch due to the release process. Then, make sure that all GitHub actions successfully pass for the target branch (e.g. [for `trunk`](https://github.com/WordPress/performance/actions?query=branch%3Atrunk)).
+
+After that, [create a new release tag for the plugin on GitHub](https://github.com/WordPress/performance/releases/new). The release tag should have the same name as the corresponding milestone used earlier, and it should be created from the `trunk` branch (unless this is for a patch release, in which case it should be created from the corresponding `release/...` branch). Finally, add the changelog (it can be found in the readme.txt file) to the release description and create the release.
 
 Once a new version is released on GitHub, the plugin will be deployed to the [WordPress.org repository](https://wordpress.org/plugins/performance-lab/) using [this action](../.github/workflows/deploy-dotorg.yml).
 
