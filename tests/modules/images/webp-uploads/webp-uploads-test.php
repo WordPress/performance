@@ -8,11 +8,6 @@
 
 class WebP_Uploads_Tests extends WP_UnitTestCase {
 
-	// Filter callback to limit output to WebP for the single output type tests.
-	function return_webp_array() {
-		return array( 'image/webp' );
-	}
-
 	/**
 	 * Test if webp-uploads applies filter based on system support of WebP.
 	 */
@@ -23,9 +18,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		} else {
 			$expect = array( 'image/jpeg' => 'image/webp' );
 		}
-		// The image_editor_output_format filter is only applied if image_editor_output_format
-		// has fewer than two types.
-		add_filter( 'image_editor_output_formats', array( $this, 'return_webp_array' ) );
 		$output_format = apply_filters( 'image_editor_output_format', array(), '', 'image/jpeg' );
 		$this->assertEquals( $expect, $output_format );
 	}
@@ -36,7 +28,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	function test_webp_uploads_filter_image_editor_output_format_with_support() {
 		// Mock a system that supports WebP.
 		add_filter( 'wp_image_editors', array( $this, 'mock_wp_image_editor_supports' ) );
-		add_filter( 'image_editor_output_formats', array( $this, 'return_webp_array' ) );
 		$output_format = webp_uploads_filter_image_editor_output_format( array(), '', 'image/jpeg' );
 		$this->assertEquals( array( 'image/jpeg' => 'image/webp' ), $output_format );
 	}
