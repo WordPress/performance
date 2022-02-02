@@ -18,6 +18,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		} else {
 			$expect = array( 'image/jpeg' => 'image/webp' );
 		}
+
 		$output_format = apply_filters( 'image_editor_output_format', array(), '', 'image/jpeg' );
 		$this->assertEquals( $expect, $output_format );
 	}
