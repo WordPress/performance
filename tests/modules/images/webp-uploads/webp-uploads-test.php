@@ -7,8 +7,11 @@
  */
 
 class WebP_Uploads_Tests extends WP_UnitTestCase {
+
+	// Filter callback to limit output to WebP for the single output type tests.
 	function return_webp_array() {
-		return array( 'image/webp' ); }
+		return array( 'image/webp' );
+	}
 
 	/**
 	 * Test if webp-uploads applies filter based on system support of WebP.
@@ -85,8 +88,9 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			// Jpeg images are converted to WebP by default.
 			array( 'image.jpg', 'image/jpeg', array( 'image/jpeg' => 'image/webp' ) ),
 			array( 'another-test-image.jpg', 'image/jpeg', array( 'image/jpeg' => 'image/webp' ) ),
+			array( 'previously-scaled-image.jpg', 'image/jpeg', array( 'image/jpeg' => 'image/webp' ) ),
 
-			// Scaled images are not converted to WebP.
+			// Images with filenames ending in `-scaled.{extension}.` are not converted to WebP.
 			array( 'image-scaled.jpg', 'image/jpeg', array() ),
 			array( 'image-scaled.jpeg', 'image/jpeg', array() ),
 
