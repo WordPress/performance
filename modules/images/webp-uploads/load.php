@@ -46,11 +46,11 @@ function webp_uploads_filter_image_editor_output_format( $output_format, $filena
  *
  * @since n.e.x.t
  *
- * @see wp_generate_attachment_metadata
- * @see webp_uploads_valid_image_mime_types
+ * @see   wp_generate_attachment_metadata
+ * @see   webp_uploads_valid_image_mime_types
  *
- * @param array $metadata An array with the metadata from this attachment.
- * @param int $attachment_id The ID of the attachment where the hook was dispatched.
+ * @param array $metadata      An array with the metadata from this attachment.
+ * @param int   $attachment_id The ID of the attachment where the hook was dispatched.
  *
  * @return array An array with the updated structure for the metadata before is stored in the database.
  */
@@ -66,7 +66,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	// All subsizes are created out of the original image.
 	$file = wp_get_original_image_path( $attachment_id, true );
 
-	// File does not exist
+	// File does not exist.
 	if ( ! file_exists( $file ) ) {
 		return $metadata;
 	}
@@ -76,8 +76,8 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 	$sizes = array();
 	foreach ( webp_uploads_get_image_sizes() as $size => $properties ) {
-		$image_sizes  = array();
-		if ( array_key_exists( 'sizes', $metadata ) && is_array( $metadata['sizes'] ) ){
+		$image_sizes = array();
+		if ( array_key_exists( 'sizes', $metadata ) && is_array( $metadata['sizes'] ) ) {
 			$image_sizes = $metadata['sizes'];
 		}
 
@@ -87,20 +87,20 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		}
 
 		$sources = array();
-		if ( array_key_exists( 'sources', $current_size ) && is_array( $current_size[ 'sources' ] ) ) {
+		if ( array_key_exists( 'sources', $current_size ) && is_array( $current_size['sources'] ) ) {
 			$sources = $current_size['sources'];
 		}
 
 		// Try to find the mime type of the image size.
-		if ( array_key_exists('mime-type', $current_size ) ) {
+		if ( array_key_exists( 'mime-type', $current_size ) ) {
 			$current_mime = $current_size['mime-type'];
-		} else if ( array_key_exists( 'file', $current_size ) ){
+		} elseif ( array_key_exists( 'file', $current_size ) ) {
 			$current_mime = wp_check_filetype( $current_size['file'] )['type'];
 		} else {
 			$current_mime = '';
 		}
 
-		// The mime for this file couldn't be determined
+		// The mime for this file couldn't be determined.
 		if ( empty( $current_mime ) ) {
 			continue;
 		}
@@ -112,10 +112,10 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 		$sources[ $current_mime ] = array(
 			'file' => array_key_exists( 'file', $current_size ) ? $current_size['file'] : '',
-			// TOOD: Add filesize from the original version of this iamge.
+			// TOOD: Add filesize from the original version of this image.
 		);
 
-		$formats = array_diff_assoc( $valid_mime_types, array( $current_mime =>  $valid_mime_types[ $current_mime ] ) );
+		$formats = array_diff_assoc( $valid_mime_types, array( $current_mime => $valid_mime_types[ $current_mime ] ) );
 
 		foreach ( $formats as $mime => $extension ) {
 			// Editor needs to be recreated every time as there is not flush() or clear() function that can be used after we created an image.
@@ -127,7 +127,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 			$editor->resize( (int) $properties['width'], (int) $properties['height'], $properties['crop'] );
 			$filename = $editor->generate_filename( null, null, $extension );
-			$image = $editor->save( $filename, $mime );
+			$image    = $editor->save( $filename, $mime );
 
 			if ( is_wp_error( $image ) ) {
 				continue;
@@ -142,7 +142,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		}
 
 		$current_size['sources'] = $sources;
-		$sizes[] = $current_size;
+		$sizes[]                 = $current_size;
 	}
 
 	$metadata['sizes'] = $sizes;
@@ -157,20 +157,19 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
  * sizes. Each property uses the default for each property `null` for height and width and `false`
  * for crop the same way as `make_subsize` the editor image.
  *
- * @see WP_Image_Editor_GD::make_subsize()
- * @see WP_Image_Editor_Imagick::make_subsize()
- *
  * @since n.e.x.t
  *
+ * @see   WP_Image_Editor_Imagick::make_subsize()
+ * @see   WP_Image_Editor_GD::make_subsize()
  * @return array An array with the details of all available image sizes: width, height and crop.
  */
 function webp_uploads_get_image_sizes() {
 	$wp_image_sizes = wp_get_additional_image_sizes();
 	$sizes          = array();
 
-	// Create the full array with sizes and crop info
+	// Create the full array with sizes and crop info.
 	foreach ( get_intermediate_image_sizes() as $size ) {
-		// Set the default values similar to `make_subsize`
+		// Set the default values similar to `make_subsize`.
 		$width  = null;
 		$height = null;
 		$crop   = false;
@@ -183,7 +182,7 @@ function webp_uploads_get_image_sizes() {
 				$height = (int) $wp_image_sizes[ $size ]['height'];
 			}
 			if ( array_key_exists( 'crop', $wp_image_sizes[ $size ] ) ) {
-				$crop   = (bool) $wp_image_sizes[ $size ]['crop'];
+				$crop = (bool) $wp_image_sizes[ $size ]['crop'];
 			}
 		}
 
