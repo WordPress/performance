@@ -142,7 +142,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		}
 
 		$current_size['sources'] = $sources;
-		$sizes[]                 = $current_size;
+		$sizes[ $size ]          = $current_size;
 	}
 
 	$metadata['sizes'] = $sizes;
