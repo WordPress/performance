@@ -73,24 +73,16 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 	// Prevent to convert JPEG to WebP if we are creating JPEG versions of the image.
 	remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format' );
+	$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+	$backup_sizes = is_array( $backup_sizes ) ? $backup_sizes : array();
 
-	$sizes = array();
 	foreach ( webp_uploads_get_image_sizes() as $size => $properties ) {
-		$image_sizes = array();
-		if ( array_key_exists( 'sizes', $metadata ) && is_array( $metadata['sizes'] ) ) {
-			$image_sizes = $metadata['sizes'];
+		// No need to create a backup for a size that does not exists on the main image.
+		if ( empty( $metadata['sizes'][ $size ] ) || ! is_array(  $metadata['sizes'][ $size ]) ) {
+			continue;
 		}
 
-		$current_size = array();
-		if ( array_key_exists( $size, $image_sizes ) && is_array( $image_sizes[ $size ] ) ) {
-			$current_size = $image_sizes[ $size ];
-		}
-
-		$sources = array();
-		if ( array_key_exists( 'sources', $current_size ) && is_array( $current_size['sources'] ) ) {
-			$sources = $current_size['sources'];
-		}
-
+		$current_size = $metadata['sizes'][ $size ];
 		// Try to find the mime type of the image size.
 		if ( array_key_exists( 'mime-type', $current_size ) ) {
 			$current_mime = $current_size['mime-type'];
@@ -110,11 +102,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			continue;
 		}
 
-		$sources[ $current_mime ] = array(
-			'file' => array_key_exists( 'file', $current_size ) ? $current_size['file'] : '',
-			// TOOD: Add filesize from the original version of this image.
-		);
-
+		// Generate backups only for the missing mime types.
 		$formats = array_diff_assoc( $valid_mime_types, array( $current_mime => $valid_mime_types[ $current_mime ] ) );
 
 		foreach ( $formats as $mime => $extension ) {
@@ -135,17 +123,14 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 			// TODO: Store the file size of the created image.
 			// $image['filesize'] = filesize( $image['path'] );
-			// Remove duplicated properties from the size image.
-			unset( $image['path'], $image['height'], $image['width'], $image['mime-type'] );
+			// Remove the path of the image to follow the same pattern as core.
+			unset( $image['path'] );
 
-			$sources[ $mime ] = $image;
+			$backup_sizes[ $size . '_' . $extension ] = $image;
 		}
-
-		$current_size['sources'] = $sources;
-		$sizes[ $size ]          = $current_size;
 	}
 
-	$metadata['sizes'] = $sizes;
+	update_post_meta( $attachment_id, '_wp_attachment_backup_sizes', $backup_sizes );
 
 	return $metadata;
 }
