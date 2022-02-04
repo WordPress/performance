@@ -216,5 +216,172 @@ function webp_uploads_valid_image_mime_types() {
 	);
 }
 
+/**
+ * Filters on `the_content` to update the references for supported mime of images into the
+ * `webp_uploads_preferred_mime_type()` for the most part `image/webp` if the current
+ * attachment contains the targeted mime type.
+ *
+ * @since n.e.x.t
+ *
+ * @see the_content
+ *
+ * @param string $content The content of the current post.
+ * @return string The content with the updated references to the images.
+ */
+function webp_uploads_update_image_references( $content ) {
+	// This content does not have any tag on it, move forward.
+	if ( ! preg_match_all( '/<(img)\s[^>]+>/', $content, $tags, PREG_SET_ORDER ) ) {
+		return $content;
+	}
+
+	$images = array();
+	foreach ( $tags as list( $tag ) ) {
+		// Find the ID of each image by the class.
+		if ( ! preg_match( '/wp-image-([\d]+)/i', $tag, $class_id ) ) {
+			continue;
+		}
+
+		if ( empty( $class_id ) ) {
+			continue;
+		}
+
+		$attachment_id = (int) end( $class_id );
+
+		if ( ! $attachment_id ) {
+			continue;
+		}
+
+		// Create an array if attachment_id has not been added to the images array.
+		if ( empty( $images[ $attachment_id ] ) ) {
+			$images[ $attachment_id ] = array();
+		}
+
+		// TODO: Possible a filter can be added here in order to detect the image extensions supported.
+		$target_extensions = array(
+			'jpeg',
+			'jpg',
+			'webp',
+		);
+
+		// Creates a regular extension to find all the files with the provided extensions above.
+		preg_match_all( '/[^\s"]+\.(?:' . implode( '|', $target_extensions ) . ')/i', $tag, $matches );
+
+		$urls = empty( $matches ) ? array() : reset( $matches );
+
+		foreach ( $urls as $url ) {
+			$images[ $attachment_id ][ $url ] = true;
+		}
+	}
+
+	$target_mime = webp_uploads_preferred_mime_type();
+	$replacement = array();
+	foreach ( $images as $attachment_id => $urls ) {
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		if ( empty( $metadata['file'] ) ) {
+			continue;
+		}
+
+		$basename = wp_basename( $metadata['file'] );
+
+		foreach ( $urls as $url => $exists ) {
+
+			if ( isset( $metadata['file'] ) && strpos( $url, $basename ) !== false ) {
+				// TODO: we don't have a replacement for full image yet.
+				continue;
+			}
+
+			if ( empty( $metadata['sizes'] ) ) {
+				continue;
+			}
+
+			$src_filename = wp_basename( $url );
+			$extension    = wp_check_filetype( $src_filename );
+
+			// Extension was not set properly no action possible.
+			if ( empty( $extension['type'] ) || $extension['type'] === $target_mime ) {
+				continue;
+			}
+
+			foreach ( $metadata['sizes'] as $name => $size_data ) {
+
+				// Not the size we are looking for.
+				if ( $src_filename !== $size_data['file'] ) {
+					continue;
+				}
+
+				if ( empty( $size_data['sources'] ) ) {
+					continue;
+				}
+
+				if ( empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
+					continue;
+				}
+
+				$replacement[ $src_filename ] = $size_data['sources'][ $target_mime ]['file'];
+			}
+		}
+	}
+
+	// Replacement of URLs where the keys are the searched value and the values of each key the value to replace with.
+	return str_replace( array_keys( $replacement ), array_values( $replacement ), $content );
+}
+
+/**
+ * Function to get access to the desired mime type of image to be used in specifc areas
+ * like the content of a blog post, this function uses `webp_uploads_webp_is_supported`
+ * in order to make sure WebP is supported before deciding with WebP as WebP would be
+ * the default if is supported.
+ *
+ * @since n.e.x.t
+ *
+ * @return string The prefered mime type for images `image/webp` by default if WebP is supported.
+ */
+function webp_uploads_preferred_mime_type() {
+	$preferred_mime = 'image/jpeg';
+
+	if ( webp_uploads_webp_is_supported() ) {
+		$preferred_mime = 'image/webp';
+	}
+
+	/**
+	 * The preferred mime type for the images to be rendered.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string The preferred mime type for images.
+	 *
+	 * @return string The preferred mime type, image/webp by default if supported.
+	 */
+	return (string) apply_filters( 'wp_preferred_image_mime', $preferred_mime );
+}
+
+/**
+ * Client in this context means the Browser making the request for a particular page
+ * if the browser supports WebP the mime would be present in the `HTTP_ACCEPT` header.
+ *
+ * @since n.e.x.t
+ *
+ * @see https://developers.google.com/speed/webp/faq#server-side_content_negotiation_via_accept_headers
+ *
+ * @return bool If WebP is supported or not by the current client.
+ */
+function webp_uploads_webp_is_supported() {
+	$webp_is_accepted = array_key_exists( 'HTTP_ACCEPT', $_SERVER ) && false !== strpos( $_SERVER['HTTP_ACCEPT'], 'image/webp' );
+
+	/**
+	 * Add a filter to bypass the detection of WebP in the client via HTTP_ACCEPT headers
+	 * useful if a cache mechanism is storing the full HTML of the page.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $webp_is_accepted If WebP is accepted by the client requesting the page.
+	 *
+	 * @return bool If WebP is accepted or not on the current request.
+	 */
+	return (bool) apply_filters( 'webp_is_accepted', $webp_is_accepted );
+}
+
 add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_property', 10, 2 );
+add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
