@@ -78,7 +78,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 	foreach ( webp_uploads_get_image_sizes() as $size => $properties ) {
 		// No need to create a backup for a size that does not exists on the main image.
-		if ( empty( $metadata['sizes'][ $size ] ) || ! is_array(  $metadata['sizes'][ $size ]) ) {
+		if ( empty( $metadata['sizes'][ $size ] ) || ! is_array( $metadata['sizes'][ $size ] ) ) {
 			continue;
 		}
 
@@ -200,6 +200,5 @@ function webp_uploads_valid_image_mime_types() {
 		'image/webp' => 'wepb',
 	);
 }
-
 add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_property', 10, 2 );
