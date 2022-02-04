@@ -29,7 +29,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	function test_webp_uploads_filter_image_editor_output_format_with_support() {
 		// Mock a system that supports WebP.
 		add_filter( 'wp_image_editors', array( $this, 'mock_wp_image_editor_supports' ) );
-		$output_format = webp_uploads_filter_image_editor_output_format( array(), '', 'image/jpeg' );
+		$output_format = filter_image_editor_output_format( array(), '', 'image/jpeg' );
 		$this->assertEquals( array( 'image/jpeg' => 'image/webp' ), $output_format );
 	}
 
@@ -39,7 +39,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	function test_webp_uploads_filter_image_editor_output_format_without_support() {
 		// Mock a system that doesn't support WebP.
 		add_filter( 'wp_image_editors', array( $this, 'mock_wp_image_editor_doesnt_support' ) );
-		$output_format = webp_uploads_filter_image_editor_output_format( array(), '', 'image/jpeg' );
+		$output_format = filter_image_editor_output_format( array(), '', 'image/jpeg' );
 		$this->assertEquals( array(), $output_format );
 	}
 
@@ -60,7 +60,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the webp_uploads_filter_image_editor_output_format callback
+	 * Test that the filter_image_editor_output_format callback
 	 * properly catches filenames ending in `-scaled.{extension}.`.
 	 *
 	 * @dataProvider data_provider_webp_uploads_filter_image_editor_output_format_with_scaled_filename
@@ -68,7 +68,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	function test_webp_uploads_filter_image_editor_output_format_with_scaled_filename( $filename, $mime_type, $expect ) {
 		// Mock a system that supports WebP.
 		add_filter( 'wp_image_editors', array( $this, 'mock_wp_image_editor_supports' ) );
-		$output_format = webp_uploads_filter_image_editor_output_format( array(), $filename, $mime_type );
+		$output_format = filter_image_editor_output_format( array(), $filename, $mime_type );
 		$this->assertEquals( $expect, $output_format );
 	}
 
