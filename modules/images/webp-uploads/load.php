@@ -63,8 +63,8 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		return $metadata;
 	}
 
-	// All subsizes are created out of the original image.
-	$file = wp_get_original_image_path( $attachment_id, true );
+	// All subsizes are created out of the `file` property.
+	$file = get_attached_file( $attachment_id, true );
 
 	// File does not exist.
 	if ( ! file_exists( $file ) ) {
