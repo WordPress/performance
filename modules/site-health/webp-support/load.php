@@ -48,7 +48,7 @@ function webp_uploads_check_webp_supported_test() {
 		'test'        => 'is_webp_uploads_enabled',
 	);
 
-	$webp_supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ;
+	$webp_supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) );
 
 	if ( ! $webp_supported ) {
 		$result['status']  = 'critical';
