@@ -16,9 +16,8 @@
  * @param array $tests Site Health Tests.
  * @return array
  */
-function webp_uploads_add_is_webp_supported_test( $tests )
-{
-	$tests['direct']['webp_supported']  = array(
+function webp_uploads_add_is_webp_supported_test( $tests ) {
+	$tests['direct']['webp_supported'] = array(
 		'label' => esc_html__( 'WebP Support', 'performance-lab' ),
 		'test'  => 'webp_uploads_check_webp_supported_test',
 	);
@@ -35,15 +34,15 @@ add_filter( 'site_status_tests', 'webp_uploads_add_is_webp_supported_test' );
  */
 function webp_uploads_check_webp_supported_test() {
 	$result = array(
-		'label'       => __( 'Your site supports WebP' ),
+		'label'       => __( 'Your site supports WebP', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
-			'label' => __( 'Performance' ),
+			'label' => __( 'Performance', 'performance-lab' ),
 			'color' => 'blue',
 		),
 		'description' => sprintf(
 			'<p>%s</p>',
-			__( 'WebP image format is used by WordPress to boost performance of your site by generating smaller images than it usually could with default JPEG format. This means your pages will load faster and consume less data from users.' )
+			__( 'WebP image format is used by WordPress to boost performance of your site by generating smaller images than it usually could with default JPEG format. This means your pages will load faster and consume less data from users.', 'performance-lab' )
 		),
 		'actions'     => '',
 		'test'        => 'is_webp_uploads_enabled',
@@ -52,7 +51,7 @@ function webp_uploads_check_webp_supported_test() {
 	$gd_supported = false;
 	if ( function_exists( 'gd_info' ) ) {
 		$gd = gd_info();
-		if ( isset( $gd[ 'WebP Support' ] ) && $gd[ 'WebP Support' ] ) {
+		if ( isset( $gd['WebP Support'] ) && $gd['WebP Support'] ) {
 			$gd_supported = true;
 		}
 	}
@@ -60,19 +59,19 @@ function webp_uploads_check_webp_supported_test() {
 	try {
 		$formats = Imagick::queryFormats( '*' );
 
-		if( in_array('WEBP', $formats ) ) {
+		if ( in_array( 'WEBP', $formats ) ) {
 			$gd_supported = true;
 		}
-	} catch (Exception $e) {
+	} catch ( Exception $e ) {
 	}
 
-	if ( ! $gd_supported ) {
-		$result['status'] = 'critical';
-		$result['label']  = __( 'Your site does not support WebP' );
+	if ( $gd_supported ) {
+		$result['status']  = 'critical';
+		$result['label']   = __( 'Your site does not support WebP', 'performance-lab' );
 		$result['actions'] = sprintf(
 			'<p>%s</p>',
 			/* translators: Accessibility text. */
-			__( 'Please contact your host and ask them to add WebP support' )
+			__( 'Please contact your host and ask them to add WebP support', 'performance-lab' )
 		);
 	}
 
