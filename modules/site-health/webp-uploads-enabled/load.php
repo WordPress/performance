@@ -48,24 +48,9 @@ function webp_uploads_check_webp_supported_test() {
 		'test'        => 'is_webp_uploads_enabled',
 	);
 
-	$gd_supported = false;
-	if ( function_exists( 'gd_info' ) ) {
-		$gd = gd_info();
-		if ( isset( $gd['WebP Support'] ) && $gd['WebP Support'] ) {
-			$gd_supported = true;
-		}
-	}
+	$webp_supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ;
 
-	try {
-		$formats = Imagick::queryFormats( '*' );
-
-		if ( in_array( 'WEBP', $formats ) ) {
-			$gd_supported = true;
-		}
-	} catch ( Exception $e ) {
-	}
-
-	if ( $gd_supported ) {
+	if ( ! $webp_supported ) {
 		$result['status']  = 'critical';
 		$result['label']   = __( 'Your site does not support WebP', 'performance-lab' );
 		$result['actions'] = sprintf(
