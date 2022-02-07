@@ -1,6 +1,6 @@
 <?php
 /**
- * Module Name: Web Uploads Support
+ * Module Name: Web Support
  * Description: Add WebP support check in Site Health checks.
  * Experimental: No
  *
