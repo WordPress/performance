@@ -32,20 +32,20 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 	);
 
 	private static $demo_focus_areas = array(
-		'images'         => array(
+		'images'       => array(
 			'name' => 'Images',
 		),
-		'javascript'     => array(
+		'javascript'   => array(
 			'name' => 'JavaScript',
 		),
-		'site-health'    => array(
+		'site-health'  => array(
 			'name' => 'Site Health',
 		),
-		'measurement'    => array(
+		'measurement'  => array(
 			'name' => 'Measurement',
 		),
-		'object-caching' => array(
-			'name' => 'Object caching',
+		'object-cache' => array(
+			'name' => 'Object Cache',
 		),
 	);
 
@@ -68,6 +68,15 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		wp_set_current_user( $user_id );
 		$hook_suffix = perflab_add_modules_page();
 		$this->assertSame( get_plugin_page_hookname( PERFLAB_MODULES_SCREEN, 'options-general.php' ), $hook_suffix );
+		$this->assertFalse( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_MODULES_SCREEN ] ) );
+
+		// Reset relevant globals.
+		$_wp_submenu_nopriv = array();
+
+		// Does not register the page if the perflab_active_modules filter is used.
+		add_filter( 'perflab_active_modules', function() {} );
+		$hook_suffix = perflab_add_modules_page();
+		$this->assertFalse( $hook_suffix );
 		$this->assertFalse( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_MODULES_SCREEN ] ) );
 	}
 
@@ -151,7 +160,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertContains( ' id="module_' . $module_slug . '_enabled"', $output );
 		$this->assertContains( ' name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
-		$this->assertContains( 'Enable ' . $module_data['name'] . '?', $output );
+		$this->assertContains( 'Enable ' . $module_data['name'], $output );
 		$this->assertNotContains( ' checked', $output );
 
 		// Assert correct 'id' and 'name' attributes, experimental label, and checked checkbox.
@@ -162,7 +171,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertContains( ' id="module_' . $module_slug . '_enabled"', $output );
 		$this->assertContains( ' name="' . PERFLAB_MODULES_SETTING . '[' . $module_slug . '][enabled]"', $output );
-		$this->assertContains( 'Enable ' . $module_data['name'] . ' <strong>(experimental)</strong>?', $output );
+		$this->assertContains( 'Enable ' . $module_data['name'] . ' <strong>(experimental)</strong>', $output );
 		$this->assertContains( " checked='checked'", $output );
 	}
 
@@ -172,7 +181,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 			'javascript',
 			'site-health',
 			'measurement',
-			'object-caching',
+			'object-cache',
 		);
 		$this->assertSame( $expected_focus_areas, array_keys( perflab_get_focus_areas() ) );
 	}

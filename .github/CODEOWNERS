@@ -1,19 +1,31 @@
 # Documentation/Infrastructure
 /docs                                       @justinahinon @felixarntz
 /admin                                      @justinahinon @felixarntz
+/tests/admin                                @justinahinon @felixarntz
 /bin                                        @justinahinon @felixarntz
 /.github                                    @justinahinon @felixarntz
 
 # Focus: Images
-/modules/webp-uploads                       @adamsilverstein
-/tests/modules/webp-uploads                 @adamsilverstein
+/modules/images                             @adamsilverstein @getsource
+/tests/modules/images                       @adamsilverstein @getsource
+/tests/testdata/modules/images              @adamsilverstein @getsource
 
 # Focus: JavaScript
+/modules/javascript                         @aristath @sgomes
+/tests/modules/javascript                   @aristath @sgomes
+/tests/testdata/modules/javascript          @aristath @sgomes
 
-# Focus: Object Caching
+# Focus: Object Cache
+/modules/object-cache                       @tillkruss @spacedmonkey
+/tests/modules/object-cache                 @tillkruss @spacedmonkey
+/tests/testdata/modules/object-cache        @tillkruss @spacedmonkey
 
 # Focus: Measurement
+/modules/measurement                        @AymenLoukil @josephscott
+/tests/modules/measurement                  @AymenLoukil @josephscott
+/tests/testdata/modules/measurement         @AymenLoukil @josephscott
 
 # Focus: Site Health
-/modules/audit-enqueued-assets              @manuelRod @audrasjb
-/tests/modules/audit-enqueued-assets        @manuelRod @audrasjb
+/modules/site-health                        @audrasjb
+/tests/modules/site-health                  @audrasjb
+/tests/testdata/modules/site-health         @audrasjb

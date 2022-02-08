@@ -11,6 +11,11 @@
  * @since 1.0.0
  */
 function perflab_add_modules_page() {
+	// Don't add a page if active modules are controlled programmatically.
+	if ( has_filter( 'perflab_active_modules' ) ) {
+		return false;
+	}
+
 	$hook_suffix = add_options_page(
 		__( 'Performance Modules', 'performance-lab' ),
 		__( 'Performance', 'performance-lab' ),
@@ -19,7 +24,9 @@ function perflab_add_modules_page() {
 		'perflab_render_modules_page'
 	);
 
-	add_action( "load-{$hook_suffix}", 'perflab_load_modules_page', 10, 0 );
+	if ( false !== $hook_suffix ) {
+		add_action( "load-{$hook_suffix}", 'perflab_load_modules_page', 10, 0 );
+	}
 
 	return $hook_suffix;
 }
@@ -131,13 +138,13 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 			if ( $module_data['experimental'] ) {
 				printf(
 					/* translators: %s: module name */
-					__( 'Enable %s <strong>(experimental)</strong>?', 'performance-lab' ),
+					__( 'Enable %s <strong>(experimental)</strong>', 'performance-lab' ),
 					esc_html( $module_data['name'] )
 				);
 			} else {
 				printf(
 					/* translators: %s: module name */
-					__( 'Enable %s?', 'performance-lab' ),
+					__( 'Enable %s', 'performance-lab' ),
 					esc_html( $module_data['name'] )
 				);
 			}
@@ -160,20 +167,20 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
  */
 function perflab_get_focus_areas() {
 	return array(
-		'images'         => array(
+		'images'       => array(
 			'name' => __( 'Images', 'performance-lab' ),
 		),
-		'javascript'     => array(
+		'javascript'   => array(
 			'name' => __( 'JavaScript', 'performance-lab' ),
 		),
-		'site-health'    => array(
+		'site-health'  => array(
 			'name' => __( 'Site Health', 'performance-lab' ),
 		),
-		'measurement'    => array(
+		'measurement'  => array(
 			'name' => __( 'Measurement', 'performance-lab' ),
 		),
-		'object-caching' => array(
-			'name' => __( 'Object caching', 'performance-lab' ),
+		'object-cache' => array(
+			'name' => __( 'Object Cache', 'performance-lab' ),
 		),
 	);
 }
