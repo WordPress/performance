@@ -20,7 +20,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	 */
 	public function test_perflab_aao_autoloaded_options_test_no_warning() {
 		$autoloaded_options_size  = perflab_aao_autoloaded_options_size();
-		$autoloaded_options_count = perflab_aao_autoloaded_options_count();
+		$autoloaded_options_count = count( wp_load_alloptions() );
 
 		if ( $autoloaded_options_size < self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES ) {
 			$this->assertEqualSets(
@@ -39,7 +39,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	public function test_perflab_aao_autoloaded_options_test_warning() {
 		Autoloaded_Options_Set::set_autoloaded_option( self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES );
 		$autoloaded_options_size  = perflab_aao_autoloaded_options_size();
-		$autoloaded_options_count = perflab_aao_autoloaded_options_count();
+		$autoloaded_options_count = count( wp_load_alloptions() );
 
 		if ( $autoloaded_options_size > self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES ) {
 			$this->assertEqualSets(
@@ -50,19 +50,6 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 				)
 			);
 		}
-	}
-
-	/**
-	 * Tests perflab_aao_autoloaded_options_count()
-	 */
-	public function test_perflab_aao_autoloaded_options_count() {
-		$autoloaded_options_count = count( wp_load_alloptions() );
-		$this->assertEquals( $autoloaded_options_count, perflab_aao_autoloaded_options_count() );
-
-		// Add autoload option.
-		Autoloaded_Options_Set::set_autoloaded_option( 5 );
-		// We expect one more autoloaded option in the results.
-		$this->assertEquals( $autoloaded_options_count + 1, perflab_aao_autoloaded_options_count() );
 	}
 
 	/**

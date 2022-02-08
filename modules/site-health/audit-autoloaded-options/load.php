@@ -35,7 +35,7 @@ add_filter( 'site_status_tests', 'perflab_aao_add_autoloaded_options_test' );
 function perflab_aao_autoloaded_options_test() {
 
 	$autoloaded_options_size  = perflab_aao_autoloaded_options_size();
-	$autoloaded_options_count = perflab_aao_autoloaded_options_count();
+	$autoloaded_options_count = count( wp_load_alloptions() );
 
 	$result = array(
 		'label'       => esc_html__( 'Autoloaded options', 'performance-lab' ),
@@ -83,17 +83,6 @@ function perflab_aao_autoloaded_options_test() {
 	}
 
 	return $result;
-}
-
-/**
- * Autoloaded options counter.
- *
- * @since 1.0.0
- *
- * @return int
- */
-function perflab_aao_autoloaded_options_count() {
-	return count( wp_load_alloptions() );
 }
 
 /**
