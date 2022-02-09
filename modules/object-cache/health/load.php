@@ -8,9 +8,6 @@
  * @since 1.0.0
  */
 
-add_filter( 'site_status_tests', 'oc_health_add_tests' );
-add_filter( 'site_status_persistent_object_cache', 'oc_health_should_persistent_object_cache' );
-
 /**
  * Adds a health check testing for and suggesting a persistent object cache backend.
  *
@@ -25,6 +22,7 @@ function oc_health_add_tests( $tests ) {
 
 	return $tests;
 }
+add_filter( 'site_status_tests', 'oc_health_add_tests' );
 
 /**
  * Callback for `persistent_object_cache` health check.
@@ -102,7 +100,9 @@ function oc_health_persistent_object_cache() {
 	 *
 	 * Plugin authors may want to append notes (not replace) on why object caching is recommended for their plugin.
 	 *
-	 * @param string $description
+	 * @since 1.0.0
+	 *
+	 * @param string $notes
 	 * @param array $available_services
 	 */
 	$notes = apply_filter( 'site_status_persistent_object_cache_notes', $notes, $available_services );
@@ -195,6 +195,7 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 
 	return false;
 }
+add_filter( 'site_status_persistent_object_cache', 'oc_health_should_persistent_object_cache' );
 
 /**
  * Returns a list of available persistent object cache services.
@@ -219,7 +220,9 @@ function oc_health_available_object_cache_services() {
 	 *
 	 * This can be useful to hide or add services not included in the defaults.
 	 *
-	 * @param array $suggest
+	 * @since 1.0.0
+	 *
+	 * @param array $services The list of available persistent object cache services.
 	 */
 	return apply_filters( 'site_status_available_object_cache_services', $services );
 }
