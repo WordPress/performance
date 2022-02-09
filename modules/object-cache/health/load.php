@@ -195,7 +195,7 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 
 	return false;
 }
-add_filter( 'site_status_persistent_object_cache', 'oc_health_should_persistent_object_cache' );
+add_filter( 'site_status_suggest_persistent_object_cache', 'oc_health_should_persistent_object_cache' );
 
 /**
  * Returns a list of available persistent object cache services.
