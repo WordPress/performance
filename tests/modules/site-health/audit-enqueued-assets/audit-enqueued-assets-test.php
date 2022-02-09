@@ -3,6 +3,7 @@
  * Tests for audit-enqueued-assets module.
  *
  * @package performance-lab
+ * @group audit-enqueued-assets
  */
 
 class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
