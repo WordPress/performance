@@ -11,6 +11,8 @@
 /**
  * Adds a health check testing for and suggesting a persistent object cache backend.
  *
+ * @since 1.0.0
+ *
  * @param array $tests An associative array of direct and asynchronous tests.
  * @return array
  */
@@ -26,6 +28,8 @@ add_filter( 'site_status_tests', 'oc_health_add_tests' );
 
 /**
  * Callback for `persistent_object_cache` health check.
+ *
+ * @since 1.0.0
  *
  * @return array
  */
@@ -129,6 +133,8 @@ function oc_health_persistent_object_cache() {
  * Callback for `site_status_persistent_object_cache` filter.
  *
  * Determines whether to suggest using a persistent object cache.
+ *
+ * @since 1.0.0
  *
  * @param mixed $should_suggest Whether to suggest using a persistent object cache.
  * @return bool
