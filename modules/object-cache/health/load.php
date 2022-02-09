@@ -54,7 +54,7 @@ function oc_health_persistent_object_cache() {
 		),
 		'description' => sprintf(
 			'<p>%s</p>',
-			__( "WordPress performs at its best when a persistent object cache is used. Persistent object caching helps to reduce load on your SQL server and allows WordPress to retrieve your site's content and settings much faster.", 'performance-lab' )
+			__( "WordPress performs at its best when a persistent object cache is used. A persistent object cache helps to reduce load on your SQL server significantly and allows WordPress to retrieve your site's content and settings much faster.", 'performance-lab' )
 		),
 		'actions'     => sprintf(
 			'<p><a href="%s" target="_blank" rel="noopener">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
