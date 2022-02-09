@@ -65,6 +65,9 @@ function oc_health_persistent_object_cache() {
 		),
 	);
 
+	global $_wp_using_ext_object_cache;
+	$_wp_using_ext_object_cache = false;
+
 	if ( wp_using_ext_object_cache() ) {
 		$result['label'] = __( 'A persistent object cache is being used', 'performance-lab' );
 
@@ -147,7 +150,14 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 		return true;
 	}
 
-	$thresholds = array(
+	/**
+	 * Filter the thresholds used to determine whether to suggest the use of a persistent object cache.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $thresholds The list of threshold names and numbers.
+	 */
+	$thresholds = apply_filters( 'site_status_persistent_object_cache_thresholds', array(
 		'alloptions_count' => 500,
 		'alloptions_bytes' => 100000,
 		'comments_count'   => 1000,
@@ -155,7 +165,7 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 		'posts_count'      => 1000,
 		'terms_count'      => 1000,
 		'users_count'      => 1000,
-	);
+	) );
 
 	$alloptions = wp_load_alloptions();
 
