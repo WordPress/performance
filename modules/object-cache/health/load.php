@@ -109,7 +109,7 @@ function oc_health_persistent_object_cache() {
 	 * @param string $notes The notes appended to the health check description.
 	 * @param array $available_services The list of available persistent object cache services.
 	 */
-	$notes = apply_filter( 'site_status_persistent_object_cache_notes', $notes, $available_services );
+	$notes = apply_filters( 'site_status_persistent_object_cache_notes', $notes, $available_services );
 
 	$result['status']       = 'recommended';
 	$result['label']        = __( 'You should use a persistent object cache', 'performance-lab' );
