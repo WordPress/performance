@@ -145,7 +145,7 @@ function oc_health_persistent_object_cache() {
 function oc_health_should_persistent_object_cache( $should_suggest ) {
 	global $wpdb;
 
-	// Bypass expensive calls if `$should_suggest` was already set truthy
+	// Bypass expensive calls if `$should_suggest` was already set truthy.
 	if ( $should_suggest ) {
 		return true;
 	}
@@ -157,15 +157,18 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 	 *
 	 * @param array $thresholds The list of threshold names and numbers.
 	 */
-	$thresholds = apply_filters( 'site_status_persistent_object_cache_thresholds', array(
-		'alloptions_count' => 500,
-		'alloptions_bytes' => 100000,
-		'comments_count'   => 1000,
-		'options_count'    => 1000,
-		'posts_count'      => 1000,
-		'terms_count'      => 1000,
-		'users_count'      => 1000,
-	) );
+	$thresholds = apply_filters(
+		'site_status_persistent_object_cache_thresholds',
+		array(
+			'alloptions_count' => 500,
+			'alloptions_bytes' => 100000,
+			'comments_count'   => 1000,
+			'options_count'    => 1000,
+			'posts_count'      => 1000,
+			'terms_count'      => 1000,
+			'users_count'      => 1000,
+		)
+	);
 
 	$alloptions = wp_load_alloptions();
 
@@ -196,10 +199,10 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 
 	$threshold_map = array(
 		'comments_count' => $wpdb->comments,
-		'options_count' => $wpdb->options,
-		'posts_count' => $wpdb->posts,
-		'terms_count' => $wpdb->terms,
-		'users_count' => $wpdb->users,
+		'options_count'  => $wpdb->options,
+		'posts_count'    => $wpdb->posts,
+		'terms_count'    => $wpdb->terms,
+		'users_count'    => $wpdb->users,
 	);
 
 	foreach ( $threshold_map as $threshold => $table ) {
