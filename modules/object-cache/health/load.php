@@ -179,24 +179,18 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 		OBJECT_K
 	);
 
-	if ( $thresholds['comments_count'] < $results[ $wpdb->comments ]->rows ) {
-		return true;
-	}
+	$threshold_map = array(
+		'comments_count' => $wpdb->comments,
+		'options_count' => $wpdb->options,
+		'posts_count' => $wpdb->posts,
+		'terms_count' => $wpdb->terms,
+		'users_count' => $wpdb->users,
+	);
 
-	if ( $thresholds['options_count'] < $results[ $wpdb->options ]->rows ) {
-		return true;
-	}
-
-	if ( $thresholds['posts_count'] < $results[ $wpdb->posts ]->rows ) {
-		return true;
-	}
-
-	if ( $thresholds['terms_count'] < $results[ $wpdb->terms ]->rows ) {
-		return true;
-	}
-
-	if ( $thresholds['users_count'] < $results[ $wpdb->users ]->rows ) {
-		return true;
+	foreach ( $threshold_map as $threshold => $table ) {
+		if ( $thresholds[ $threshold ] < $results[ $table ]->rows ) {
+			return true;
+		}
 	}
 
 	return false;
