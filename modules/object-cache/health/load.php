@@ -221,10 +221,10 @@ function oc_health_available_object_cache_services() {
 	$extensions = array_map(
 		'extension_loaded',
 		array(
+			'APCu'      => 'apcu',
 			'Redis'     => 'redis',
 			'Relay'     => 'relay',
 			'Memcached' => 'memcache', // The `memcached` extension seems unmaintained.
-			'APCu'      => 'apcu',
 		)
 	);
 
