@@ -142,6 +142,11 @@ function oc_health_persistent_object_cache() {
 function oc_health_should_persistent_object_cache( $should_suggest ) {
 	global $wpdb;
 
+	// Bypass expensive calls if `$should_suggest` was already set truthy
+	if ( $should_suggest ) {
+		return true;
+	}
+
 	$thresholds = array(
 		'alloptions_count' => 500,
 		'alloptions_bytes' => 100000,
@@ -195,7 +200,7 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 
 	return false;
 }
-add_filter( 'site_status_suggest_persistent_object_cache', 'oc_health_should_persistent_object_cache' );
+add_filter( 'site_status_suggest_persistent_object_cache', 'oc_health_should_persistent_object_cache', 20 );
 
 /**
  * Returns a list of available persistent object cache services.
