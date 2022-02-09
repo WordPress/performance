@@ -9,20 +9,19 @@
 function perflab_should_debug_performance() {
 	static $debug_performance = false;
 
-	if( $debug_performance ) {
+	if ( $debug_performance ) {
 		return $debug_performance;
 	}
 
 	if ( function_exists( 'getenv' ) ) {
-        $has_env = getenv( 'WP_DEBUG_PERFORMANCE' );
-        if ( false !== $has_env ) {
-            $debug_performance = $has_env;
-        }
+        return (bool) getenv( 'WP_DEBUG_PERFORMANCE' );
     }
 
 	if ( defined( 'WP_DEBUG_PERFORMANCE' ) ) {
-        $debug_performance = WP_DEBUG_PERFORMANCE;
+        return (bool) WP_DEBUG_PERFORMANCE;
     }
 
-	return $debug_performance;
+	return (bool) $debug_performance;
 }
+
+add_filter( 'perflab_debug_performance_ct', 'perflab_should_debug_performance', 0 );
