@@ -126,7 +126,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			// Remove the path of the image to follow the same pattern as core.
 			unset( $image['path'] );
 
-			$backup_sizes[ $size . '_' . $extension ] = $image;
+			$backup_sizes[ $size . '-' . $extension ] = $image;
 		}
 	}
 
