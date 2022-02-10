@@ -111,9 +111,10 @@ function oc_health_persistent_object_cache() {
 	 */
 	$notes = apply_filters( 'site_status_persistent_object_cache_notes', $notes, $available_services );
 
-	$result['status']       = 'recommended';
-	$result['label']        = __( 'You should use a persistent object cache', 'performance-lab' );
-	$result['description'] .= sprintf(
+	$result['status']         = 'recommended';
+	$result['label']          = __( 'You should use a persistent object cache', 'performance-lab' );
+	$result['badge']['color'] = 'orange';
+	$result['description']   .= sprintf(
 		'<p>%s</p>',
 		wp_kses(
 			$notes,
