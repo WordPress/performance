@@ -65,9 +65,6 @@ function oc_health_persistent_object_cache() {
 		),
 	);
 
-	global $_wp_using_ext_object_cache;
-	$_wp_using_ext_object_cache = false;
-
 	if ( wp_using_ext_object_cache() ) {
 		$result['label'] = __( 'A persistent object cache is being used', 'performance-lab' );
 
