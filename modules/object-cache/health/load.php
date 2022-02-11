@@ -204,7 +204,7 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 	);
 
 	foreach ( $threshold_map as $threshold => $table ) {
-		if ( $thresholds[ $threshold ] < $results[ $table ]->rows ) {
+		if ( $thresholds[ $threshold ] <= $results[ $table ]->rows ) {
 			return true;
 		}
 	}
