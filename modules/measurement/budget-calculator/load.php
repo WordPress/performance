@@ -48,19 +48,31 @@ add_action( 'admin_menu', 'budget_calc_menu_page' );
  * @since 1.0.0
  */
 function budget_calc_register_settings() {
-	register_setting( 'budget_calc_settings', 'html_range', 'absint' );
+	register_setting( 'budget_calc_settings', 'budget_calc_options' );
 	add_settings_section( 'budget_calc_settings_id', 'Budget Calculator Metrics', '', 'budget-calculator' );
 
-	add_settings_field(
-		'html_range',
-		'HTML',
-		function () {
-			budget_calc_render_range_field( 'html_range', 300 );
-		},
-		'budget-calculator',
-		'budget_calc_settings_id'
+	$options        = get_option( 'budget_calc_options', array() );
+	$range_settings = array(
+		'HTML'       => 300,
+		'CSS'        => 200,
+		'Font'       => 200,
+		'Images'     => 3000,
+		'JavaScript' => 750,
 	);
 
+	foreach ( $range_settings as $title => $max ) {
+		$id = strtolower( $title ) . '_range';
+
+		add_settings_field(
+			$id,
+			$title,
+			function () use ( $options, $id, $max ) {
+				budget_calc_render_range_field( $options, $id, $max );
+			},
+			'budget-calculator',
+			'budget_calc_settings_id'
+		);
+	}
 }
 add_action( 'admin_init', 'budget_calc_register_settings' );
 
@@ -69,15 +81,14 @@ add_action( 'admin_init', 'budget_calc_register_settings' );
  *
  * @since 1.0.0
  *
+ * @param array  $options  The settings value already set in the database, if any.
  * @param string $field_id The ID of the field in the database.
  * @param int    $max      The maximum value that can be set on the range input.
- * @param int    $step     The value by which we increment when moving the range slider.
  */
-function budget_calc_render_range_field( $field_id, $max, $step = 10 ) {
+function budget_calc_render_range_field( $options, $field_id, $max ) {
+	$text     = isset( $options[ $field_id ] ) ? esc_attr( $options[ $field_id ] ) : 0;
 	$field_id = esc_attr( $field_id );
-	$text     = esc_attr( get_option( $field_id ) );
 	$max      = esc_attr( $max );
-	$step     = esc_attr( $step );
 
-	echo "<input type='range' id='$field_id' name='$field_id' min='0' max='$max' step='$step' value='$text' />";
+	echo "<input type='range' id='$field_id' name='budget_calc_options[$field_id]' min='0' max='$max' step='10' value='$text' />";
 }
