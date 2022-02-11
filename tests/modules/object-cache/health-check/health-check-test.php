@@ -98,7 +98,37 @@ class Object_Cache_Health_Check_Tests extends WP_UnitTestCase {
 		add_filter(
 			'site_status_persistent_object_cache_thresholds',
 			function ( $thresholds ) {
-				return array_merge( $thresholds, array( 'users_count' => 1 ) );
+				return array_merge( $thresholds, array( 'users_count' => 0 ) );
+			}
+		);
+
+		$result = oc_health_should_persistent_object_cache( false );
+
+		$this->assertTrue( $result );
+
+		remove_all_filters( 'site_status_persistent_object_cache_thresholds' );
+	}
+
+	function test_object_cache_alloptions_count_threshold() {
+		add_filter(
+			'site_status_persistent_object_cache_thresholds',
+			function ( $thresholds ) {
+				return array_merge( $thresholds, array( 'alloptions_count' => 100 ) );
+			}
+		);
+
+		$result = oc_health_should_persistent_object_cache( false );
+
+		$this->assertTrue( $result );
+
+		remove_all_filters( 'site_status_persistent_object_cache_thresholds' );
+	}
+
+	function test_object_cache_alloptions_bytes_threshold() {
+		add_filter(
+			'site_status_persistent_object_cache_thresholds',
+			function ( $thresholds ) {
+				return array_merge( $thresholds, array( 'alloptions_bytes' => 1000 ) );
 			}
 		);
 
