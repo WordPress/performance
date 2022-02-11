@@ -90,5 +90,7 @@ function budget_calc_render_range_field( $options, $field_id, $max ) {
 	$field_id = esc_attr( $field_id );
 	$max      = esc_attr( $max );
 
-	echo "<input type='range' id='$field_id' name='budget_calc_options[$field_id]' min='0' max='$max' step='10' value='$text' />";
+	echo "<input type='range' id='$field_id' name='budget_calc_options[$field_id]' min='0' max='$max' step='10'
+		value='$text' oninput='document.getElementById(\"${field_id}_output\").value = this.value'/>
+		<output id='${field_id}_output' for='budget_calc_options[$field_id]'>${text}</output><span>KB</span>";
 }
