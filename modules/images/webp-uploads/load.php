@@ -69,7 +69,7 @@ function webp_uploads_create_images_with_additional_mime_types( array $metadata,
 
 	foreach ( webp_uploads_get_image_sizes() as $size => $properties ) {
 		// Generate backups only for the missing mime types.
-		$formats = get_remaining_image_mimes( $metadata, $size );
+		$formats = webp_uploads_get_remaining_image_mimes( $metadata, $size );
 
 		foreach ( $formats as $mime => $extension ) {
 			$key = $extension . '-' . $size;
@@ -354,7 +354,7 @@ function webp_uploads_restore_image_from_backup( $attachment_id ) {
 	$dirname      = pathinfo( $file, PATHINFO_DIRNAME );
 	foreach ( webp_uploads_get_image_sizes() as $size => $properties ) {
 		// Generate backups only for the missing mime types.
-		$formats = get_remaining_image_mimes( $metadata, $size );
+		$formats = webp_uploads_get_remaining_image_mimes( $metadata, $size );
 
 		foreach ( $formats as $mime => $extension ) {
 			$key = $extension . '-' . $size;
@@ -404,7 +404,7 @@ function webp_uploads_restore_image_from_backup( $attachment_id ) {
  * @param string $size     The size name we are looking for.
  * @return array|string[] An array with the remaining mime types for the specified size.
  */
-function get_remaining_image_mimes( array $metadata, $size ) {
+function webp_uploads_get_remaining_image_mimes( array $metadata, $size ) {
 	// No need to create a backup for a size that does not exist on the main image.
 	if ( empty( $metadata['sizes'][ $size ] ) || ! is_array( $metadata['sizes'][ $size ] ) ) {
 		return array();
