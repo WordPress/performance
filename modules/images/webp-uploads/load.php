@@ -72,7 +72,7 @@ function webp_uploads_create_images_with_additional_mime_types( array $metadata,
 		$formats = get_remaining_image_mimes( $metadata, $size );
 
 		foreach ( $formats as $mime => $extension ) {
-			$key = $size . '-' . $extension;
+			$key = $extension . '-' . $size;
 
 			// The file already exists as part of the backup sizes in the same key.
 			if ( array_key_exists( $key, $backup_sizes ) ) {
@@ -357,7 +357,7 @@ function webp_uploads_restore_image_from_backup( $attachment_id ) {
 		$formats = get_remaining_image_mimes( $metadata, $size );
 
 		foreach ( $formats as $mime => $extension ) {
-			$key = $size . '-' . $extension;
+			$key = $extension . '-' . $size;
 
 			// The original values for this mime type does not exist.
 			if ( ! array_key_exists( "{$key}-orig", $backup_sizes ) ) {
