@@ -100,15 +100,9 @@ function budget_calc_render_range_field( $options, $field_id, $max ) {
  *
  * @since 1.0.0
  *
- * @param string $option    The name of the option that has been updated.
- * @param array  $old_value The previously set value for this option.
- * @param array  $value     The newly set value for this option.
+ * @param array $value The newly set value for this option.
  */
-function budget_calc_render_json( $option, $old_value, $value ) {
-	if ( 'budget_calc_options' !== $option ) {
-		return;
-	}
-
+function budget_calc_render_json( $value ) {
 	$resource_sizes = array();
 	$type_mapping   = array(
 		'html_range'       => 'document',
@@ -134,4 +128,38 @@ function budget_calc_render_json( $option, $old_value, $value ) {
 	echo wp_json_encode( $data );
 	die;
 }
-add_action( 'updated_option', 'budget_calc_render_json', 10, 3 );
+
+/**
+ * Callback for the option page updated event.
+ *
+ * @since 1.0.0
+ *
+ * @param string $option    The name of the option that has been updated.
+ * @param array  $old_value The previously set value for this option.
+ * @param array  $value     The newly set value for this option.
+ */
+function budget_calc_updated_option_callback( $option, $old_value, $value ) {
+	if ( 'budget_calc_options' !== $option ) {
+		return;
+	}
+
+	budget_calc_render_json( $value );
+}
+add_action( 'updated_option', 'budget_calc_updated_option_callback', 10, 3 );
+
+/**
+ * Callback for the option page added event.
+ *
+ * @since 1.0.0
+ *
+ * @param string $option The name of the option that has been updated.
+ * @param array  $value The newly set value for this option.
+ */
+function budget_calc_added_option_callback( $option, $value ) {
+	if ( 'budget_calc_options' !== $option ) {
+		return;
+	}
+
+	budget_calc_render_json( $value );
+}
+add_action( 'added_option', 'budget_calc_added_option_callback', 10, 2 );
