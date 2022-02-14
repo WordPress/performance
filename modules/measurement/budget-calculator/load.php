@@ -20,7 +20,7 @@ function budget_calc_page_content() {
 
 	settings_fields( 'budget_calc_settings' );
 	do_settings_sections( 'budget-calculator' );
-	submit_button();
+	submit_button( __( 'Download budget.json', 'performance-lab' ) );
 
 	echo '</form></div>';
 }
@@ -94,3 +94,44 @@ function budget_calc_render_range_field( $options, $field_id, $max ) {
 		value='$text' oninput='document.getElementById(\"${field_id}_output\").value = this.value'/>
 		<output id='${field_id}_output' for='budget_calc_options[$field_id]'>${text}</output><span>KB</span>";
 }
+
+/**
+ * Render the budget.json file after saving the options page.
+ *
+ * @since 1.0.0
+ *
+ * @param string $option    The name of the option that has been updated.
+ * @param array  $old_value The previously set value for this option.
+ * @param array  $value     The newly set value for this option.
+ */
+function budget_calc_render_json( $option, $old_value, $value ) {
+	if ( 'budget_calc_options' !== $option ) {
+		return;
+	}
+
+	$resource_sizes = array();
+	$type_mapping   = array(
+		'html_range'       => 'document',
+		'css_range'        => 'stylesheet',
+		'font_range'       => 'font',
+		'images_range'     => 'image',
+		'javascript_range' => 'script',
+	);
+
+	foreach ( $type_mapping as $range => $type ) {
+		if ( isset( $value[ $range ] ) ) {
+			$resource_sizes[] = array(
+				'resourceType' => $type,
+				'budget'       => $value[ $range ],
+			);
+		}
+	}
+
+	$data = array( array( 'resourceSizes' => $resource_sizes ) );
+
+	header( 'Content-disposition: attachment; filename=budget.json' );
+	header( 'Content-type: application/json' );
+	echo wp_json_encode( $data );
+	die;
+}
+add_action( 'updated_option', 'budget_calc_render_json', 10, 3 );
