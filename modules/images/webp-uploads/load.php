@@ -197,119 +197,26 @@ function webp_uploads_valid_image_mime_types() {
 }
 
 /**
- * Fires immediately after updating a post's metadata. Used to detect
- * when `_wp_attachment_backup_sizes` is updated. In order to perform updates
- * to the additional mime types, as this meta is updated when an edit happens to the
- * original image.
- *
- * @since n.e.x.t
- *
- * @see   webp_uploads_create_images_with_additional_mime_types
- *
- * @see   updated_postmeta
- * @param int    $meta_id       ID of updated metadata entry.
- * @param int    $attachment_id The ID of the attachment.
- * @param string $meta_key      The name of the metadata entry.
- * @param string $backup_sizes  A serialized string with the value of the metadata entry.
- */
-function webp_uploads_backup_sizes_creation( $meta_id, $attachment_id, $meta_key, $backup_sizes ) {
-	if ( '_wp_attachment_backup_sizes' !== $meta_key ) {
-		return;
-	}
-
-	// Prevent an infinite loop, remove it self from the next update call.
-	remove_action( 'updated_postmeta', 'webp_uploads_backup_sizes_creation' );
-
-	// This should take place only on the JPEG image.
-	$valid_mime_types = webp_uploads_valid_image_mime_types();
-
-	// Not a supported mime type to create the sources property.
-	if ( ! array_key_exists( get_post_mime_type( $attachment_id ), $valid_mime_types ) ) {
-		return;
-	}
-
-	// All subsizes are created out of the `file` property and not the original image.
-	$file = get_attached_file( $attachment_id, true );
-
-	// File does not exist.
-	if ( ! file_exists( $file ) ) {
-		// TODO: Handle the scenario when the file was deleted.
-		return;
-	}
-
-	$backup_sizes = maybe_unserialize( $backup_sizes );
-	$backup_sizes = is_array( $backup_sizes ) ? $backup_sizes : array();
-	$metadata     = wp_get_attachment_metadata( $attachment_id );
-
-	// Backup current sizes into "-orig" size.
-	foreach ( webp_uploads_get_image_sizes() as $size => $properties ) {
-		// Generate backups only for the missing mime types.
-		$formats = get_remaining_image_mimes( $metadata, $size );
-
-		foreach ( $formats as $mime => $extension ) {
-			$key = $size . '-' . $extension;
-			if ( ! array_key_exists( $key, $backup_sizes ) ) {
-				// The backup image not even exists yet, so we can't back up a non-existing image.
-				continue;
-			}
-
-			// The actual original image has been backup already nothing to do for us here.
-			if ( array_key_exists( "{$key}-orig", $backup_sizes ) ) {
-				continue;
-			}
-			$backup_sizes[ $key . '-orig' ] = $backup_sizes[ $key ];
-			unset( $backup_sizes[ $key ] );
-		}
-	}
-
-	webp_uploads_create_images_with_additional_mime_types( $metadata, $attachment_id, $backup_sizes );
-
-	/**
-	 * The only reason to trigger this filter at this point is to indicate plugins that the metadata
-	 * of the main image was updated, in this case it was the backup sizes structure, which allows
-	 * external plugins an opportunity to process the newly created images for each additional mime type.
-	 */
-	apply_filters( 'wp_update_attachment_metadata', $metadata, $attachment_id );
-}
-
-/**
  * Callback used to return a callback used by `webp_uploads_ajax_wp_die_handler` filter.
- *
- * @see webp_uploads_ajax_wp_die_handler
- *
- * @return string A function that would be used as a callback.
- */
-function webp_uploads_wp_die_ajax_handler() {
-	return 'webp_uploads_ajax_wp_die_handler';
-}
-
-/**
- * Callback used to inject an action to restore the image, this is required due the
- * meta for backup images is not updated everytime and can't be reliable be used to
- * adjust the values inside the meta `_wp_attachment_backup_sizes`.
  *
  * @since n.e.x.t
  *
  * @see   wp_die_ajax_handler
- * @see   webp_uploads_wp_die_ajax_handler
- * @see   _ajax_wp_die_handler
  *
- * @param string       $message Error message.
- * @param string       $title   Optional. Error title (unused). Default empty.
- * @param string|array $args    Optional. Arguments to control behavior. Default empty array.
+ * @param callable $callback A callback executed after the images operation (restore, creation).
+ *
+ * @return callback A function that would be used as a callback.
  */
-function webp_uploads_ajax_wp_die_handler( $message, $title = '', $args = array() ) {
+function webp_uploads_wp_die_ajax_handler( $callback ) {
 	if (
 		isset( $_REQUEST['action'], $_REQUEST['do'], $_REQUEST['postid'] )
 		&& 'image-editor' === $_REQUEST['action']
 		&& is_numeric( $_REQUEST['postid'] )
-		&& 'restore' === $_REQUEST['do']
 	) {
 		webp_uploads_restore_image_from_backup( absint( $_REQUEST['postid'] ) );
 	}
 
-	// Execute the default callback.
-	_ajax_wp_die_handler( $message, $title, $args );
+	return $callback;
 }
 
 /**
