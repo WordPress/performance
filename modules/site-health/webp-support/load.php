@@ -56,7 +56,7 @@ function webp_uploads_check_webp_supported_test() {
 		$result['actions'] = sprintf(
 			'<p>%s</p>',
 			/* translators: Accessibility text. */
-			__( 'Please contact your host and ask them to add WebP support', 'performance-lab' )
+			__( 'Please contact your host and ask them to add WebP support.', 'performance-lab' )
 		);
 	}
 
