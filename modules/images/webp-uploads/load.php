@@ -9,7 +9,6 @@
  */
 
 add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_images_with_additional_mime_types', 10, 3 );
-add_action( 'updated_postmeta', 'webp_uploads_backup_sizes_creation', 10, 4 );
 add_filter( 'wp_die_ajax_handler', 'webp_uploads_wp_die_ajax_handler' );
 
 /**
@@ -21,7 +20,6 @@ add_filter( 'wp_die_ajax_handler', 'webp_uploads_wp_die_ajax_handler' );
  *
  * @see   wp_generate_attachment_metadata
  * @see   webp_uploads_valid_image_mime_types
- * @see   webp_uploads_backup_sizes_creation
  *
  * @param array      $metadata      An array with the metadata from this attachment.
  * @param int        $attachment_id The ID of the attachment where the hook was dispatched.
@@ -86,7 +84,7 @@ function webp_uploads_create_images_with_additional_mime_types( array $metadata,
 						wp_delete_file( $file_location );
 					}
 				} else {
-					$backup_sizes["{$key}-{$hash}"] = $backup_sizes[ $key ];
+					$backup_sizes[ "{$key}-{$hash}" ] = $backup_sizes[ $key ];
 				}
 				// Clear the key, so the subsequent section can add the new image there.
 				unset( $backup_sizes[ $key ] );
@@ -193,7 +191,7 @@ function webp_uploads_valid_image_mime_types() {
 	 * @param array<string, string> $valid_formats array with the mime type as the key and extension as the value.
 	 * @return array<string, string> array with the mime type as the key and extension as the value.
 	 */
-	return apply_filters( 'webp_uploads_images_with_multiple_mime_types', (array) $valid_formats );
+	return (array) apply_filters( 'webp_uploads_images_with_multiple_mime_types', $valid_formats );
 }
 
 /**
@@ -213,7 +211,15 @@ function webp_uploads_wp_die_ajax_handler( $callback ) {
 		&& 'image-editor' === $_REQUEST['action']
 		&& is_numeric( $_REQUEST['postid'] )
 	) {
-		webp_uploads_restore_image_from_backup( absint( $_REQUEST['postid'] ) );
+		$attachment_id = absint( $_REQUEST['postid'] );
+		switch ( $_REQUEST['do'] ) {
+			case 'restore':
+				webp_uploads_restore_image_from_backup( $attachment_id );
+				break;
+			case 'save':
+				webp_uploads_update_background_sizes( $attachment_id );
+				break;
+		}
 	}
 
 	return $callback;
@@ -287,7 +293,7 @@ function webp_uploads_restore_image_from_backup( $attachment_id ) {
 			}
 
 			// Restore properties from -orig to the original key value.
-			foreach ( $backup_sizes["{$key}-orig"] as $property => $value ) {
+			foreach ( $backup_sizes[ "{$key}-orig" ] as $property => $value ) {
 				$backup_sizes[ $key ][ $property ] = $value;
 			}
 
@@ -298,6 +304,73 @@ function webp_uploads_restore_image_from_backup( $attachment_id ) {
 	}
 
 	update_post_meta( $attachment_id, '_wp_attachment_backup_sizes', $backup_sizes );
+}
+
+/**
+ * Function that would backup the current sizes and then create the sizes based on the new
+ * image edited.
+ *
+ * @param int        $attachment_id The ID of the attachment being updated.
+ * @param array|null $backup_sizes  An array with the current backup sizes if `null` it would be queried from the meta table.
+ * @return void
+ */
+function webp_uploads_update_background_sizes( $attachment_id, $backup_sizes = null ) {
+	// This should take place only on the JPEG image.
+	$valid_mime_types = webp_uploads_valid_image_mime_types();
+
+	// Not a supported mime type to create the sources' property.
+	if ( ! array_key_exists( get_post_mime_type( $attachment_id ), $valid_mime_types ) ) {
+		return;
+	}
+
+	// All subsizes are created out of the `file` property and not the original image.
+	$file = get_attached_file( $attachment_id, true );
+
+	// File does not exist.
+	if ( ! file_exists( $file ) ) {
+		// TODO: Handle the scenario when the file was deleted, maybe delete the meta could be an option?
+		return;
+	}
+
+	if ( null === $backup_sizes ) {
+		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+	}
+
+	if ( ! is_array( $backup_sizes ) ) {
+		$backup_sizes = array();
+	}
+
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+
+	// Backup current sizes into "-orig" size.
+	foreach ( webp_uploads_get_image_sizes() as $size => $properties ) {
+		// Generate backups only for the missing mime types.
+		$formats = webp_uploads_get_remaining_image_mimes( $metadata, $size );
+
+		foreach ( $formats as $mime => $extension ) {
+			$key = $extension . '-' . $size;
+			if ( ! array_key_exists( $key, $backup_sizes ) ) {
+				// The backup image not even exists yet, so we can't back up a non-existing image.
+				continue;
+			}
+
+			// The actual original image has been backup already nothing to do for us here.
+			if ( array_key_exists( "{$key}-orig", $backup_sizes ) ) {
+				continue;
+			}
+			$backup_sizes[ $key . '-orig' ] = $backup_sizes[ $key ];
+			unset( $backup_sizes[ $key ] );
+		}
+	}
+
+	webp_uploads_create_images_with_additional_mime_types( $metadata, $attachment_id, $backup_sizes );
+
+	/**
+	 * The only reason to trigger this filter at this point is to indicate plugins that the metadata
+	 * of the main image was updated, in this case it was the backup sizes structure, which allows
+	 * external plugins an opportunity to process the newly created images for each additional mime type.
+	 */
+	apply_filters( 'wp_update_attachment_metadata', $metadata, $attachment_id );
 }
 
 /**
