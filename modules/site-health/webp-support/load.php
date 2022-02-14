@@ -51,7 +51,7 @@ function webp_uploads_check_webp_supported_test() {
 	$webp_supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) );
 
 	if ( ! $webp_supported ) {
-		$result['status']  = 'critical';
+		$result['status']  = 'recommended';
 		$result['label']   = __( 'Your site does not support WebP', 'performance-lab' );
 		$result['actions'] = sprintf(
 			'<p>%s</p>',
