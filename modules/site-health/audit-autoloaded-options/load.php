@@ -56,6 +56,10 @@ function perflab_aao_autoloaded_options_test() {
 
 	/**
 	 * Hostings can modify its limits depending on their own requirements.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $limit Autoloaded options threshold size. Default 800000.
 	 */
 	$limit = apply_filters( 'perflab_aao_autoloaded_options_limit_size_in_bytes', 800000 );
 
@@ -68,6 +72,14 @@ function perflab_aao_autoloaded_options_test() {
 			$autoloaded_options_count,
 			size_format( $autoloaded_options_size )
 		);
+
+		/**
+		 * Hostings can modify description to be shown on site health screen.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $description Description message when autoloaded options bigger than treshold.
+		 */
 		$result['description'] = apply_filters( 'perflab_aao_autoloaded_options_limit_description', $result['description'] );
 
 		$result['actions'] = sprintf(
@@ -76,8 +88,13 @@ function perflab_aao_autoloaded_options_test() {
 			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
 			esc_html__( 'More info about performance optimization', 'performance-lab' )
 		);
+
 		/**
 		 * Hostings can add actions to take to reduce size of autoloaded options linking to their own guides.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param string $actions Call to Action to be used to point to the right direction to solve the issue.
 		 */
 		$result['actions'] = apply_filters( 'perflab_aao_autoloaded_options_action_to_perform', $result['actions'] );
 	}
@@ -94,6 +111,6 @@ function perflab_aao_autoloaded_options_test() {
  */
 function perflab_aao_autoloaded_options_size() {
 	global $wpdb;
-	$autoloaded_options_size = $wpdb->get_row( 'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload = \'yes\'', ARRAY_N );
-	return current( $autoloaded_options_size );
+	$autoloaded_options_size = $wpdb->get_var( 'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload = \'yes\'' );
+	return $autoloaded_options_size;
 }

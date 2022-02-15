@@ -22,34 +22,30 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 		$autoloaded_options_size  = perflab_aao_autoloaded_options_size();
 		$autoloaded_options_count = count( wp_load_alloptions() );
 
-		if ( $autoloaded_options_size < self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES ) {
-			$this->assertEqualSets(
-				perflab_aao_autoloaded_options_test(),
-				Autoloaded_Options_Mock_Responses::return_perflab_aao_autoloaded_options_test_less_than_limit(
-					$autoloaded_options_size,
-					$autoloaded_options_count
-				)
-			);
-		}
+		$this->assertEqualSets(
+			perflab_aao_autoloaded_options_test(),
+			Autoloaded_Options_Mock_Responses::return_perflab_aao_autoloaded_options_test_less_than_limit(
+				$autoloaded_options_size,
+				$autoloaded_options_count
+			)
+		);
 	}
 
 	/**
 	 * Tests perflab_aao_autoloaded_options_test() when autoloaded options more than warning size.
 	 */
 	public function test_perflab_aao_autoloaded_options_test_warning() {
-		Autoloaded_Options_Set::set_autoloaded_option( self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES );
+		self::set_autoloaded_option( self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES );
 		$autoloaded_options_size  = perflab_aao_autoloaded_options_size();
 		$autoloaded_options_count = count( wp_load_alloptions() );
 
-		if ( $autoloaded_options_size > self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES ) {
-			$this->assertEqualSets(
-				perflab_aao_autoloaded_options_test(),
-				Autoloaded_Options_Mock_Responses::return_perflab_aao_autoloaded_options_test_bigger_than_limit(
-					$autoloaded_options_size,
-					$autoloaded_options_count
-				)
-			);
-		}
+		$this->assertEqualSets(
+			perflab_aao_autoloaded_options_test(),
+			Autoloaded_Options_Mock_Responses::return_perflab_aao_autoloaded_options_test_bigger_than_limit(
+				$autoloaded_options_size,
+				$autoloaded_options_count
+			)
+		);
 	}
 
 	/**
@@ -57,15 +53,40 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	 */
 	public function test_perflab_aao_autoloaded_options_size() {
 		global $wpdb;
-		$autoloaded_options_size = $wpdb->get_row( 'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload = \'yes\'', ARRAY_N );
-		$autoloaded_options_size = current( $autoloaded_options_size );
+		$autoloaded_options_size = $wpdb->get_var( 'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload = \'yes\'' );
 		$this->assertEquals( $autoloaded_options_size, perflab_aao_autoloaded_options_size() );
 
 		// Add autoload option.
 		$test_option_string       = 'test';
 		$test_option_string_bytes = mb_strlen( $test_option_string, '8bit' );
-		Autoloaded_Options_Set::set_autoloaded_option( $test_option_string_bytes );
+		self::set_autoloaded_option( $test_option_string_bytes );
 		$this->assertEquals( $autoloaded_options_size + $test_option_string_bytes, perflab_aao_autoloaded_options_size() );
+	}
+
+	/**
+	 * Sets an autoloaded option.
+	 *
+	 * @param int $bytes bytes to load in options.
+	 */
+	public static function set_autoloaded_option( $bytes = 800000 ) {
+		$heavy_option_string = self::random_string_generator( $bytes );
+		add_option( 'test_set_autoloaded_option', $heavy_option_string );
+	}
+
+	/**
+	 * Generate random string with certain $length.
+	 *
+	 * @param int $length Length of string to create.
+	 * @return string
+	 */
+	protected static function random_string_generator( $length ) {
+		$seed        = 'abcd123';
+		$length_seed = strlen( $seed );
+		$string      = '';
+		for ( $x = 0; $x < $length; $x++ ) {
+			$string .= $seed[ rand( 0, $length_seed - 1 ) ];
+		}
+		return $string;
 	}
 
 }
