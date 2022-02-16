@@ -242,7 +242,7 @@ function webp_uploads_restore_image_from_backup( $attachment_id ) {
 	// This should take place only on the JPEG image.
 	$valid_mime_types = webp_uploads_valid_image_mime_types();
 
-	// Not a supported mime type to create the sources' property.
+	// Not a supported mime type to create the sources property.
 	if ( ! array_key_exists( get_post_mime_type( $attachment_id ), $valid_mime_types ) ) {
 		return;
 	}
