@@ -55,13 +55,8 @@ function webp_uploads_create_images_with_additional_mime_types( array $metadata,
 	}
 
 	$dirname = pathinfo( $file, PATHINFO_DIRNAME );
-	// Find the hash of the file name to use it as a identifier if present.
-	preg_match( '/-e([\d]{13})\./', $file, $matches );
-
-	// $matches would have at least 2 values if the regex above matches.
-	if ( count( $matches ) >= 2 ) {
-		$hash = $matches[1];
-	} else {
+	$hash    = webp_uploads_get_hash_from_edited_file( $file );
+	if ( empty( $hash ) ) {
 		$hash = time() + mt_rand( 100, 999 );
 	}
 
@@ -78,9 +73,8 @@ function webp_uploads_create_images_with_additional_mime_types( array $metadata,
 				if ( defined( 'IMAGE_EDIT_OVERWRITE' ) && IMAGE_EDIT_OVERWRITE ) {
 					$file_name     = empty( $backup_sizes[ $key ]['file'] ) ? '' : $backup_sizes[ $key ]['file'];
 					$file_location = path_join( $dirname, $file_name );
-					// Test to make sure this is an edited version, if so we can remove it safely.
-					preg_match( '/-e[\d]{13}-/', $file_name, $matches );
-					if ( ! empty( $matches ) && file_exists( $file_location ) ) {
+					$hash          = webp_uploads_get_hash_from_edited_file( $file_name );
+					if ( ! empty( $hash ) && file_exists( $file_location ) ) {
 						wp_delete_file( $file_location );
 					}
 				} else {
@@ -414,4 +408,30 @@ function webp_uploads_get_remaining_image_mimes( array $metadata, $size ) {
 
 	// If the mime is not valid return an empty array.
 	return array();
+}
+
+/**
+ * An edited image in WordPress would contain a hash of type `e-{digits}` where
+ * `digits` is number with 13 digits on it, if this is present on the file name we can
+ * infer that this file has been edited.
+ *
+ * @since n.e.x.t
+ *
+ * @see wp_restore_image
+ * @see wp_save_image
+ *
+ * @param string $file The file name where we are looking for a hash.
+ *
+ * @return string The hash if present empty string if not.
+ */
+function webp_uploads_get_hash_from_edited_file( $file ) {
+	$file_name_when_edited = '/-e([\d]{13})\./';
+	preg_match( $file_name_when_edited, $file, $matches );
+
+	// $matches would have at least 2 values if the regex above matches.
+	if ( count( $matches ) >= 2 ) {
+		return $matches[1];
+	}
+
+	return '';
 }
