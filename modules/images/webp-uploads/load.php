@@ -60,6 +60,7 @@ function webp_uploads_create_images_with_additional_mime_types( array $metadata,
 		$hash = time() + mt_rand( 100, 999 );
 	}
 
+	$prefix_in_file_name = '/-(scaled|rotated|imagifyresized)/';
 	foreach ( webp_uploads_get_image_sizes() as $size => $properties ) {
 		// Generate backups only for the missing mime types.
 		$formats = webp_uploads_get_remaining_image_mimes( $metadata, $size );
@@ -93,7 +94,9 @@ function webp_uploads_create_images_with_additional_mime_types( array $metadata,
 
 			$editor->resize( (int) $properties['width'], (int) $properties['height'], $properties['crop'] );
 			// TODO: handle the case when the file already exists in location.
-			$image = $editor->save( null, $mime );
+			$filename = $editor->generate_filename( null, null, $extension );
+			$filename = preg_replace( $prefix_in_file_name, '', $filename );
+			$image    = $editor->save( $filename, $mime );
 
 			if ( is_wp_error( $image ) ) {
 				continue;
