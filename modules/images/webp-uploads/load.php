@@ -9,25 +9,94 @@
  */
 
 add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_images_with_additional_mime_types', 10, 3 );
-add_filter( 'wp_die_ajax_handler', 'webp_uploads_wp_die_ajax_handler' );
+add_action( 'webp_uploads_create_additional_mime_types', 'webp_uploads_create_additional_mime_types', 10, 1 );
+add_action( 'plugins_loaded', 'webp_uploads_setup_initial_image_format' );
 
 /**
- * Function used to create / update the additional images for each mime type. Each image information is
- * stored in the `_wp_attachment_backup_sizes` meta. The function mimics the same behavior as
- * WordPress core when dealing with existing images in the same meta key.
+ * Function used to customize the filters applied by this plugin, once all the plugins have
+ * been loaded and if customization has been applied to define which image formats are supported
+ * certain plugins are removed or added.
+ *
+ * If only 1 image type is supported additional mime types generation is removed.
+ * If only WebP format is supported a new filter is added to only generate WebP on uploads instead of JPEG
  *
  * @since n.e.x.t
  *
- * @see   wp_generate_attachment_metadata
- * @see   webp_uploads_valid_image_mime_types
+ * @see plugins_loaded
  *
- * @param array      $metadata      An array with the metadata from this attachment.
- * @param int        $attachment_id The ID of the attachment where the hook was dispatched.
- * @param array|null $backup_sizes  An array with the current backup sizes, if not provided it would be queried against the meta data.
- *
- * @return array An array with the updated structure for the metadata before is stored in the database.
+ * @return void
  */
-function webp_uploads_create_images_with_additional_mime_types( array $metadata, $attachment_id, $backup_sizes = null ) {
+function webp_uploads_setup_initial_image_format() {
+	$formats = webp_uploads_valid_image_mime_types();
+	$total   = count( $formats );
+
+	// If we are targeting more or 2 mime types the logic can remain as it is.
+	if ( $total >= 2 ) {
+		return;
+	}
+
+	if ( 1 === $total ) {
+		// No need to generate backup sizes if we are only supporting 1 size.
+		remove_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_images_with_additional_mime_types' );
+		// If the only supported format is webp make sure JPEG are uploaded as webp instead.
+		if ( reset( $formats ) === 'webp' ) {
+			add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
+		}
+	}
+
+	// TODO: Handle the case when no image format is allowed, in this case should we not generate any image size or fallback to a default mime type ?
+}
+
+/**
+ * Filter the image editor default output format mapping.
+ *
+ * For uploaded JPEG images, map the default output format to WebP.
+ *
+ * @since 1.0.0
+ *
+ * @param array<string> $output_format The image editor default output format mapping.
+ * @param string        $filename      Path to the image.
+ * @param string        $mime_type     The source image mime type.
+ *
+ * @return array<string> The new output format mapping.
+ */
+function webp_uploads_filter_image_editor_output_format( $output_format, $filename, $mime_type ) {
+	// Only enable if the server supports WebP.
+	if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+		return $output_format;
+	}
+
+	// WebP lossless support is still limited on servers, so only apply to JPEGs.
+	if ( 'image/jpeg' !== $mime_type ) {
+		return $output_format;
+	}
+
+	// Skip conversion when creating the `-scaled` image (for large image uploads).
+	if ( preg_match( '/-scaled\..{3}.?$/', $filename ) ) {
+		return $output_format;
+	}
+
+	$output_format['image/jpeg'] = 'image/webp';
+
+	return $output_format;
+}
+
+/**
+ * As soon as a new image has been uploaded into the media library a new event is schedule to
+ * trigger the additional mime type generation of images. This would defer the generation of
+ * additional images when the cron is executed.
+ *
+ * @see wp_generate_attachment_metadata
+ * @see webp_uploads_valid_image_mime_types
+ * @see wp_schedule_single_event
+ * @see webp_uploads_create_additional_mime_types
+ *
+ * @param array<string, mixed> $metadata      An array with the metadata from this attachment.
+ * @param int                  $attachment_id The ID of the attachment where the hook was dispatched.
+ *
+ * @return array<string, mixed>
+ */
+function webp_uploads_create_images_with_additional_mime_types( array $metadata, $attachment_id ) {
 	// This should take place only on the JPEG image.
 	$valid_mime_types = webp_uploads_valid_image_mime_types();
 
@@ -36,9 +105,32 @@ function webp_uploads_create_images_with_additional_mime_types( array $metadata,
 		return $metadata;
 	}
 
+	// Move the additional image generations into a cron call.
+	wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'webp_uploads_create_additional_mime_types', array( $attachment_id ) );
+
+	return $metadata;
+}
+
+/**
+ * Function used to create / update the additional images for each mime type. Each image information is
+ * stored in the `_wp_attachment_backup_sizes` meta. The function mimics the same behavior as
+ * WordPress core when dealing with existing images in the same meta key.
+ *
+ * @since n.e.x.t
+ *
+ * @see   webp_uploads_create_images_with_additional_mime_types
+ *
+ * @param int        $attachment_id The ID of the attachment being processed.
+ * @param array|null $backup_sizes  An array of the current backup sizes, when `null` the metadata would be fetch from the DB.
+ *
+ * @return void
+ */
+function webp_uploads_create_additional_mime_types( $attachment_id, $backup_sizes = null ) {
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+
 	// If no size is present there's no need to generate any additional image as a backup.
 	if ( empty( $metadata['sizes'] ) ) {
-		return $metadata;
+		return;
 	}
 
 	// All subsizes are created out of the `file` property and not the original image.
@@ -46,7 +138,7 @@ function webp_uploads_create_images_with_additional_mime_types( array $metadata,
 
 	// File does not exist.
 	if ( ! file_exists( $file ) ) {
-		return $metadata;
+		return;
 	}
 
 	if ( ! is_array( $backup_sizes ) ) {
@@ -112,8 +204,6 @@ function webp_uploads_create_images_with_additional_mime_types( array $metadata,
 	}
 
 	update_post_meta( $attachment_id, '_wp_attachment_backup_sizes', $backup_sizes );
-
-	return $metadata;
 }
 
 /**
