@@ -23,7 +23,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			'webp_uploads_images_with_multiple_mime_types',
 			function () {
 				return array(
-					'image/webp' => 'webp'
+					'image/webp' => 'webp',
 				);
 			}
 		);
@@ -103,7 +103,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * add filter to create additional mime types by default
+	 * Add filter to create additional mime types by default
 	 *
 	 * @test
 	 */
@@ -112,11 +112,11 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		do_action( 'plugins_loaded' );
 
 		$this->assertSame( 10, has_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_images_with_additional_mime_types' ) );
-		$this->assertFalse( has_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format'  ) );
+		$this->assertFalse( has_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format' ) );
 	}
 
 	/**
-	 * disable additional mime generation if only a single image format is valid
+	 * Disable additional mime generation if only a single image format is valid
 	 *
 	 * @test
 	 */
@@ -125,7 +125,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			'webp_uploads_images_with_multiple_mime_types',
 			function () {
 				return array(
-					'image/webp' => 'webp'
+					'image/webp' => 'webp',
 				);
 			}
 		);
@@ -134,11 +134,11 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		do_action( 'plugins_loaded' );
 
 		$this->assertFalse( has_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_images_with_additional_mime_types' ) );
-		$this->assertSame( 10, has_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format'  ) );
+		$this->assertSame( 10, has_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format' ) );
 	}
 
 	/**
-	 * not registered a webp conversion if only JPEG is supported
+	 * Not registered a webp conversion if only JPEG is supported
 	 *
 	 * @test
 	 */
@@ -147,7 +147,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			'webp_uploads_images_with_multiple_mime_types',
 			function () {
 				return array(
-					'image/jpeg' => 'jpg'
+					'image/jpeg' => 'jpg',
 				);
 			}
 		);
@@ -160,18 +160,18 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * return the registerd image sizes by default
+	 * Return the registered image sizes by default
 	 *
 	 * @test
 	 */
-	function it_should_return_the_registerd_image_sizes_by_default() {
+	function it_should_return_the_registered_image_sizes_by_default() {
 		$expected = array(
-			'thumbnail' => array(
+			'thumbnail'    => array(
 				'width'  => 150,
 				'height' => 150,
 				'crop'   => true,
 			),
-			'medium' => array(
+			'medium'       => array(
 				'width'  => 300,
 				'height' => 300,
 				'crop'   => false,
@@ -181,17 +181,17 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 				'height' => 0,
 				'crop'   => false,
 			),
-			'large' => array(
+			'large'        => array(
 				'width'  => 1024,
 				'height' => 1024,
 				'crop'   => false,
 			),
-			'1536x1536' => array(
+			'1536x1536'    => array(
 				'width'  => 1536,
 				'height' => 1536,
 				'crop'   => false,
 			),
-			'2048x2048' => array(
+			'2048x2048'    => array(
 				'width'  => 2048,
 				'height' => 2048,
 				'crop'   => false,
@@ -201,7 +201,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * select the remaining mime types
+	 * Select the remaining mime types
 	 *
 	 * @dataProvider provider_remaining_mime_types
 	 *
@@ -218,15 +218,15 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 					'width'     => 150,
 					'height'    => 150,
 					'file'      => ' YspbwVyNkys-unsplash.jpg',
-					'mime-type' => 'image/jpeg'
-				)
-			)
+					'mime-type' => 'image/jpeg',
+				),
+			),
 		);
 
 		yield 'not existing image size' => array(
 			array(),
 			$metadata,
-			'full-size'
+			'full-size',
 		);
 
 		yield 'image present with invalid format' => array(
@@ -249,7 +249,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		yield 'WebP mime type is returned if the provided image is a JPEG' => array(
 			array(
-				'image/webp' => 'webp'
+				'image/webp' => 'webp',
 			),
 			$metadata,
 			'thumbnail',
@@ -257,7 +257,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		yield 'JPEG mime type is returned if the provided image is a WebP' => array(
 			array(
-				'image/jpeg' => 'jpg'
+				'image/jpeg' => 'jpg',
 			),
 			array_merge(
 				$metadata,
@@ -267,9 +267,9 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 							'width'     => 1024,
 							'height'    => 600,
 							'file'      => ' YspbwVyNkys-unsplash.webp',
-							'mime-type' => 'image/webp'
-						)
-					)
+							'mime-type' => 'image/webp',
+						),
+					),
 				)
 			),
 			'fullsize',
@@ -285,9 +285,9 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 							'width'     => 1024,
 							'height'    => 600,
 							'file'      => ' YspbwVyNkys-unsplash.avif',
-							'mime-type' => 'image/avif'
-						)
-					)
+							'mime-type' => 'image/avif',
+						),
+					),
 				)
 			),
 			'fullsize',
@@ -295,7 +295,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * generate a hash name for the provided input
+	 * Generate a hash name for the provided input
 	 *
 	 * @dataProvider provider_file_names_to_extract_hash
 	 *
