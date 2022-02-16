@@ -127,7 +127,7 @@ function webp_uploads_create_images_with_additional_mime_types( array $metadata,
  *
  * @see   WP_Image_Editor_Imagick::make_subsize()
  * @see   WP_Image_Editor_GD::make_subsize()
- * @return array An array with the details of all available image sizes: width, height and crop.
+ * @return array<string, array> An array with the details of all available image sizes: width, height and crop.
  */
 function webp_uploads_get_image_sizes() {
 	$wp_image_sizes = wp_get_additional_image_sizes();
@@ -186,6 +186,7 @@ function webp_uploads_valid_image_mime_types() {
 	 * @since n.e.x.t
 	 *
 	 * @param array<string, string> $valid_formats array with the mime type as the key and extension as the value.
+	 *
 	 * @return array<string, string> array with the mime type as the key and extension as the value.
 	 */
 	return (array) apply_filters( 'webp_uploads_images_with_multiple_mime_types', $valid_formats );
@@ -200,6 +201,7 @@ function webp_uploads_valid_image_mime_types() {
  *
  * @param array  $metadata An array with the metadata of the attachment.
  * @param string $size     The size name we are looking for.
+ *
  * @return array|string[] An array with the remaining mime types for the specified size.
  */
 function webp_uploads_get_remaining_image_mimes( array $metadata, $size ) {
@@ -241,8 +243,8 @@ function webp_uploads_get_remaining_image_mimes( array $metadata, $size ) {
  *
  * @since n.e.x.t
  *
- * @see wp_restore_image
- * @see wp_save_image
+ * @see   wp_restore_image
+ * @see   wp_save_image
  *
  * @param string $file The file name where we are looking for a hash.
  *
