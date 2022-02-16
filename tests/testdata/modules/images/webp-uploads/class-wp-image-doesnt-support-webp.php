@@ -19,10 +19,7 @@ class WP_Image_Doesnt_Support_WebP {
 	 * @return bool
 	 */
 	public static function supports_mime_type( $mime_type ) {
-		if ( 'image/webp' === $mime_type ) {
-			return false;
-		}
-		return true;
+		return 'image/webp' !== $mime_type;
 	}
 
 	/**
