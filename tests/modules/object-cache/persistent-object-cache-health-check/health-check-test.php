@@ -29,7 +29,7 @@ class Object_Cache_Health_Check_Tests extends WP_UnitTestCase {
 	}
 
 	function test_object_cache_default_thresholds() {
-		$result = oc_health_should_persistent_object_cache( false );
+		$result = perflab_oc_health_should_persistent_object_cache( false );
 
 		$this->assertFalse( $result );
 	}
