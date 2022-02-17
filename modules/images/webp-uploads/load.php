@@ -15,10 +15,11 @@
  *
  * @since 1.0.0
  *
- * @param string $output_format The image editor default output format mapping.
- * @param string $filename      Path to the image.
- * @param string $mime_type     The source image mime type.
- * @return string The new output format mapping.
+ * @param string[] $output_format The image editor default output format mapping.
+ * @param string   $filename      Path to the image.
+ * @param string   $mime_type     The source image mime type.
+ *
+ * @return string[] The new output format mapping.
  */
 function webp_uploads_filter_image_editor_output_format( $output_format, $filename, $mime_type ) {
 	// Only enable if the server supports WebP.
