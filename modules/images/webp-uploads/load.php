@@ -160,7 +160,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_property', 10, 2 );
 
 /**
- * Return an array with the list of valid mime types for a sources' property.
+ * Returns an array with the list of valid mime types for a sources' property.
  *
  * @since n.e.x.t
  *
