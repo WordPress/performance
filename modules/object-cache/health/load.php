@@ -14,7 +14,7 @@
  * @since 1.0.0
  *
  * @param array $tests An associative array of direct and asynchronous tests.
- * @return array
+ * @return array An associative array of direct and asynchronous tests.
  */
 function oc_health_add_tests( $tests ) {
 	if ( wp_get_environment_type() === 'production' ) {
@@ -33,7 +33,7 @@ add_filter( 'site_status_tests', 'oc_health_add_tests' );
  *
  * @since 1.0.0
  *
- * @return array
+ * @return array The health check result suggesting persistent object caching.
  */
 function oc_health_persistent_object_cache() {
 	/**
@@ -144,7 +144,7 @@ function oc_health_persistent_object_cache() {
  * @since 1.0.0
  *
  * @param mixed $should_suggest Whether to suggest using a persistent object cache.
- * @return bool
+ * @return bool Whether to suggest using a persistent object cache.
  */
 function oc_health_should_persistent_object_cache( $should_suggest ) {
 	global $wpdb;
