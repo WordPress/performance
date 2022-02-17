@@ -38,6 +38,10 @@ const {
 	handler: translationsHandler,
 	options: translationsOptions,
 } = require( './commands/translations' );
+const {
+	handler: sinceHandler,
+	options: sinceOptions,
+} = require( './commands/since' );
 
 withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 	.alias( 'changelog' )
@@ -55,5 +59,10 @@ withOptions( program.command( 'module-translations' ), translationsOptions )
 		'Generates a PHP file from module header translation strings'
 	)
 	.action( catchException( translationsHandler ) );
+
+withOptions( program.command( 'release-plugin-since' ), sinceOptions )
+	.alias( 'since' )
+	.description( 'Updates "@since n.e.x.t" tags with the current release version' )
+	.action( catchException( sinceHandler ) );
 
 program.parse( process.argv );
