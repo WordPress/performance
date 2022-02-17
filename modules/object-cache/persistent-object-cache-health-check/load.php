@@ -16,17 +16,17 @@
  * @param array $tests An associative array of direct and asynchronous tests.
  * @return array An associative array of direct and asynchronous tests.
  */
-function oc_health_add_tests( $tests ) {
+function perflab_oc_health_add_tests( $tests ) {
 	if ( wp_get_environment_type() === 'production' ) {
 		$tests['direct']['persistent_object_cache'] = array(
 			'label' => 'persistent_object_cache',
-			'test'  => 'oc_health_persistent_object_cache',
+			'test'  => 'perflab_oc_health_persistent_object_cache',
 		);
 	}
 
 	return $tests;
 }
-add_filter( 'site_status_tests', 'oc_health_add_tests' );
+add_filter( 'site_status_tests', 'perflab_oc_health_add_tests' );
 
 /**
  * Callback for `persistent_object_cache` health check.
@@ -35,7 +35,7 @@ add_filter( 'site_status_tests', 'oc_health_add_tests' );
  *
  * @return array The health check result suggesting persistent object caching.
  */
-function oc_health_persistent_object_cache() {
+function perflab_oc_health_persistent_object_cache() {
 	/**
 	 * Filter the action URL for the persistent object cache health check.
 	 *
@@ -90,7 +90,7 @@ function oc_health_persistent_object_cache() {
 		return $result;
 	}
 
-	$available_services = oc_health_available_object_cache_services();
+	$available_services = perflab_oc_health_available_object_cache_services();
 
 	$notes = __( 'Speak to your web host about what persistent object caches are available and how to enable them.', 'performance-lab' );
 
@@ -146,7 +146,7 @@ function oc_health_persistent_object_cache() {
  * @param mixed $should_suggest Whether to suggest using a persistent object cache.
  * @return bool Whether to suggest using a persistent object cache.
  */
-function oc_health_should_persistent_object_cache( $should_suggest ) {
+function perflab_oc_health_should_persistent_object_cache( $should_suggest ) {
 	global $wpdb;
 
 	// Bypass expensive calls if `$should_suggest` was already set truthy.
@@ -217,7 +217,7 @@ function oc_health_should_persistent_object_cache( $should_suggest ) {
 
 	return false;
 }
-add_filter( 'site_status_suggest_persistent_object_cache', 'oc_health_should_persistent_object_cache', 20 );
+add_filter( 'site_status_suggest_persistent_object_cache', 'perflab_oc_health_should_persistent_object_cache', 20 );
 
 /**
  * Returns a list of available persistent object cache services.
@@ -226,7 +226,7 @@ add_filter( 'site_status_suggest_persistent_object_cache', 'oc_health_should_per
  *
  * @return array The list of available persistent object cache services.
  */
-function oc_health_available_object_cache_services() {
+function perflab_oc_health_available_object_cache_services() {
 	$extensions = array_map(
 		'extension_loaded',
 		array(
