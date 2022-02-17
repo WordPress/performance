@@ -39,6 +39,8 @@ function oc_health_persistent_object_cache() {
 	/**
 	 * Filter the action URL for the persistent object cache health check.
 	 *
+	 * @since 1.0.0
+	 *
 	 * @param string $action_url Learn more link for persistent object cache health check.
 	 */
 	$action_url = apply_filters(
@@ -77,6 +79,8 @@ function oc_health_persistent_object_cache() {
 	 * Filter whether to suggest using a persistent object cache.
 	 *
 	 * Plugin and theme authors should NOT use this filter to discourage the use of an object cache.
+	 *
+	 * @since 1.0.0
 	 *
 	 * @param bool $suggest Whether to suggest using a persistent object cache.
 	 */
@@ -217,6 +221,8 @@ add_filter( 'site_status_suggest_persistent_object_cache', 'oc_health_should_per
 
 /**
  * Returns a list of available persistent object cache services.
+ *
+ * @since 1.0.0
  *
  * @return array The list of available persistent object cache services.
  */
