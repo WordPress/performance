@@ -41,6 +41,8 @@ function webp_uploads_filter_image_editor_output_format( $output_format, $filena
 	return $output_format;
 }
 
+add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
+
 /**
  * Hook called by `wp_generate_attachment_metadata` to create the `sources` property for every image
  * size, the sources' property would create a new image size with all the mime types specified in
@@ -155,6 +157,8 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	return $metadata;
 }
 
+add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_property', 10, 2 );
+
 /**
  * Return an array with the list of valid mime types for a sources' property.
  *
@@ -170,6 +174,3 @@ function webp_uploads_valid_image_mime_types() {
 		'image/webp' => 'wepb',
 	);
 }
-
-add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
-add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_property', 10, 2 );
