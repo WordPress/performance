@@ -29,6 +29,7 @@
   },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
+    "since": "./bin/plugin/cli.js since",
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
     "format-js": "wp-scripts format ./bin",
