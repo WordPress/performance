@@ -17,10 +17,12 @@
  * @return array
  */
 function oc_health_add_tests( $tests ) {
-	$tests['direct']['persistent_object_cache'] = array(
-		'label' => 'persistent_object_cache',
-		'test'  => 'oc_health_persistent_object_cache',
-	);
+	if ( wp_get_environment_type() === 'production' ) {
+		$tests['direct']['persistent_object_cache'] = array(
+			'label' => 'persistent_object_cache',
+			'test'  => 'oc_health_persistent_object_cache',
+		);
+	}
 
 	return $tests;
 }
