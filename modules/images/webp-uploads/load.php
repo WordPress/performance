@@ -83,7 +83,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format' );
 
 	$sizes = array();
-	foreach ( wp_get_registered_image_subsizes()() as $size => $properties ) {
+	foreach ( wp_get_registered_image_subsizes() as $size => $properties ) {
 		$image_sizes = array();
 		if ( array_key_exists( 'sizes', $metadata ) && is_array( $metadata['sizes'] ) ) {
 			$image_sizes = $metadata['sizes'];
