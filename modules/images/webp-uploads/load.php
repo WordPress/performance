@@ -171,6 +171,6 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
 function webp_uploads_valid_image_mime_types() {
 	return array(
 		'image/jpeg' => 'jpg',
-		'image/webp' => 'wepb',
+		'image/webp' => 'webp',
 	);
 }
