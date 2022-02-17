@@ -80,7 +80,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format' );
 
 	$sizes = array();
-	foreach ( webp_uploads_get_image_sizes() as $size => $properties ) {
+	foreach ( wp_get_registered_image_subsizes()() as $size => $properties ) {
 		$image_sizes = array();
 		if ( array_key_exists( 'sizes', $metadata ) && is_array( $metadata['sizes'] ) ) {
 			$image_sizes = $metadata['sizes'];
@@ -153,56 +153,6 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	$metadata['sizes'] = $sizes;
 
 	return $metadata;
-}
-
-/**
- * List all the available image sizes as well with the properties for each, the properties included
- * are: width, height and crop. The logic behind this function tries to use the defined sizes by
- * WordPress if the values is not found on the options it would fallback to the user defined
- * sizes. Each property uses the default for each property `null` for height and width and `false`
- * for crop the same way as `make_subsize` the editor image.
- *
- * @since n.e.x.t
- *
- * @see   WP_Image_Editor_Imagick::make_subsize()
- * @see   WP_Image_Editor_GD::make_subsize()
- * @return array An array with the details of all available image sizes: width, height and crop.
- */
-function webp_uploads_get_image_sizes() {
-	$wp_image_sizes = wp_get_additional_image_sizes();
-	$sizes          = array();
-
-	// Create the full array with sizes and crop info.
-	foreach ( get_intermediate_image_sizes() as $size ) {
-		// Set the default values similar to `make_subsize`.
-		$width  = null;
-		$height = null;
-		$crop   = false;
-
-		if ( array_key_exists( $size, $wp_image_sizes ) ) {
-			if ( array_key_exists( 'width', $wp_image_sizes[ $size ] ) ) {
-				$width = (int) $wp_image_sizes[ $size ]['width'];
-			}
-			if ( array_key_exists( 'height', $wp_image_sizes[ $size ] ) ) {
-				$height = (int) $wp_image_sizes[ $size ]['height'];
-			}
-			if ( array_key_exists( 'crop', $wp_image_sizes[ $size ] ) ) {
-				$crop = (bool) $wp_image_sizes[ $size ]['crop'];
-			}
-		}
-
-		/**
-		 * Get the values from the option if is not present on the options' fallback to the
-		 * defined image sizes instead due if the option is not present it means is a custom image size.
-		 */
-		$sizes[ $size ] = array(
-			'width'  => get_option( $size . '_size_w', $width ),
-			'height' => get_option( $size . '_size_h', $height ),
-			'crop'   => (bool) get_option( $size . '_crop', $crop ),
-		);
-	}
-
-	return $sizes;
 }
 
 /**
