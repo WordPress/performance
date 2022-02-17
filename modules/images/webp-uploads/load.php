@@ -31,6 +31,11 @@ function webp_uploads_filter_image_editor_output_format( $output_format, $filena
 		return $output_format;
 	}
 
+	// Skip conversion when creating the `-scaled` image (for large image uploads).
+	if ( preg_match( '/-scaled\..{3}.?$/', $filename ) ) {
+		return $output_format;
+	}
+
 	$output_format['image/jpeg'] = 'image/webp';
 
 	return $output_format;
