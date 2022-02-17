@@ -1,9 +1,9 @@
 <?php
 /**
- * Tests for webp-uploads module.
+ * Tests for persistent-object-cache-health-check module.
  *
  * @package performance-lab
- * @group webp-uploads
+ * @group persistent-object-cache-health-check
  */
 
 class Object_Cache_Health_Check_Tests extends WP_UnitTestCase {
