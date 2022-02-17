@@ -1,6 +1,6 @@
 <?php
 /**
- * Module Name: Health Check
+ * Module Name: Persistent Object Cache Health Check
  * Description: Recommend a persistent object cache for sites with non-trivial amounts of data.
  * Experimental: No
  *
