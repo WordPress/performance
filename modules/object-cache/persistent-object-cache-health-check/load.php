@@ -44,7 +44,7 @@ function perflab_oc_health_persistent_object_cache() {
 	 * @param string $action_url Learn more link for persistent object cache health check.
 	 */
 	$action_url = apply_filters(
-		'site_status_persistent_object_cache_url',
+		'perflab_oc_site_status_persistent_object_cache_url',
 		/* translators: Localized Support reference. */
 		__( 'https://wordpress.org/support/article/optimization/#object-caching', 'performance-lab' )
 	);
@@ -84,7 +84,7 @@ function perflab_oc_health_persistent_object_cache() {
 	 *
 	 * @param bool $suggest Whether to suggest using a persistent object cache.
 	 */
-	if ( ! apply_filters( 'site_status_suggest_persistent_object_cache', false ) ) {
+	if ( ! apply_filters( 'perflab_oc_site_status_suggest_persistent_object_cache', false ) ) {
 		$result['label'] = __( 'A persistent object cache is not required', 'performance-lab' );
 
 		return $result;
@@ -115,7 +115,7 @@ function perflab_oc_health_persistent_object_cache() {
 	 * @param string $notes The notes appended to the health check description.
 	 * @param array $available_services The list of available persistent object cache services.
 	 */
-	$notes = apply_filters( 'site_status_persistent_object_cache_notes', $notes, $available_services );
+	$notes = apply_filters( 'perflab_oc_site_status_persistent_object_cache_notes', $notes, $available_services );
 
 	$result['status']         = 'recommended';
 	$result['label']          = __( 'You should use a persistent object cache', 'performance-lab' );
@@ -162,7 +162,7 @@ function perflab_oc_health_should_persistent_object_cache( $should_suggest ) {
 	 * @param array $thresholds The list of threshold names and numbers.
 	 */
 	$thresholds = apply_filters(
-		'site_status_persistent_object_cache_thresholds',
+		'perflab_oc_site_status_persistent_object_cache_thresholds',
 		array(
 			'alloptions_count' => 500,
 			'alloptions_bytes' => 100000,
@@ -217,7 +217,7 @@ function perflab_oc_health_should_persistent_object_cache( $should_suggest ) {
 
 	return false;
 }
-add_filter( 'site_status_suggest_persistent_object_cache', 'perflab_oc_health_should_persistent_object_cache', 20 );
+add_filter( 'perflab_oc_site_status_suggest_persistent_object_cache', 'perflab_oc_health_should_persistent_object_cache', 20 );
 
 /**
  * Returns a list of available persistent object cache services.
@@ -248,5 +248,5 @@ function perflab_oc_health_available_object_cache_services() {
 	 *
 	 * @param array $services The list of available persistent object cache services.
 	 */
-	return apply_filters( 'site_status_available_object_cache_services', $services );
+	return apply_filters( 'perflab_oc_site_status_available_object_cache_services', $services );
 }
