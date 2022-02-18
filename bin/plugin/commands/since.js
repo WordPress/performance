@@ -1,4 +1,11 @@
 /**
+ * External dependencies
+ */
+const path = require( 'path' );
+const glob = require( 'fast-glob' );
+const fs = require( 'fs' );
+
+/**
  * Internal dependencies
  */
 const { log, formats } = require( '../lib/logger' );
@@ -30,4 +37,25 @@ exports.handler = async ( opt ) => {
 		);
 		return;
 	}
+
+	const patterns = [
+		path.resolve( __dirname, '../../../**/*.php' ),
+		path.resolve( __dirname, '../../../**/*.js' ),
+	];
+
+	const files = await glob( patterns, {
+		ignore: [
+			__filename,
+			'**/node_modules',
+			'**/vendor',
+		],
+	} );
+
+	const regexp = new RegExp( '@since n.e.x.t' );
+	files.forEach( ( file ) => {
+		const content = fs.readFileSync( file, 'utf-8' );
+		if ( regexp.test( content ) ) {
+			fs.writeFileSync( file, content.replace( regexp, `@since ${ opt.release }` ) );
+		}
+	} );
 };
