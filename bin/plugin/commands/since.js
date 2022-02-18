@@ -25,7 +25,7 @@ exports.options = [
 
 /**
  * Replaces "@since n.e.x.t" tags in the code with the current release version.
- * 
+ *
  * @param {WPSinceCommandOptions} opt Command options.
  */
 exports.handler = async ( opt ) => {
@@ -44,18 +44,17 @@ exports.handler = async ( opt ) => {
 	];
 
 	const files = await glob( patterns, {
-		ignore: [
-			__filename,
-			'**/node_modules',
-			'**/vendor',
-		],
+		ignore: [ __filename, '**/node_modules', '**/vendor' ],
 	} );
 
 	const regexp = new RegExp( '@since n.e.x.t' );
 	files.forEach( ( file ) => {
 		const content = fs.readFileSync( file, 'utf-8' );
 		if ( regexp.test( content ) ) {
-			fs.writeFileSync( file, content.replace( regexp, `@since ${ opt.release }` ) );
+			fs.writeFileSync(
+				file,
+				content.replace( regexp, `@since ${ opt.release }` )
+			);
 		}
 	} );
 };
