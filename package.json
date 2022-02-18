@@ -25,6 +25,8 @@
     "chalk": "4.1.1",
     "commander": "4.1.0",
     "fast-glob": "^3.2.7",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.4",
     "lodash": "4.17.21"
   },
   "scripts": {
@@ -40,6 +42,13 @@
     "test-php": "wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/performance/phpunit.xml.dist --verbose'",
     "pretest-php-multisite": "wp-env run composer 'install --no-interaction'",
     "test-php-multisite": "wp-env run phpunit 'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/performance/tests/multisite.xml --verbose'",
-    "wp-env": "wp-env"
+    "wp-env": "wp-env",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.php": [
+      "phpcbf --standard=phpcs.xml.dist",
+      "phpcs --standard=phpcs.xml.dist"
+    ]
   }
 }
