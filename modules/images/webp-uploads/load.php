@@ -246,7 +246,7 @@ function webp_uploads_get_supported_image_mime_transforms() {
  *
  * @return void
  */
-function remove_sources_files( $attachment_id ) {
+function webp_uploads_remove_sources_files( $attachment_id ) {
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 
 	if (
@@ -295,4 +295,4 @@ function remove_sources_files( $attachment_id ) {
 	}
 }
 
-add_action( 'delete_attachment', 'remove_sources_files', 10, 1 );
+add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
