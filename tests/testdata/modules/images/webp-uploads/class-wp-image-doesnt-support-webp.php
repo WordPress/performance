@@ -30,7 +30,11 @@ class WP_Image_Doesnt_Support_WebP {
 	 *
 	 * @return bool
 	 */
-	public static function test() {
+	public static function test( $args = array() ) {
 		return true;
+	}
+
+	public function load() {
+		// TODO: Implement load() method.
 	}
 }
