@@ -6,6 +6,13 @@
  * @since 1.0.0
  */
 
+/**
+ * Gets total of enqueued scripts.
+ *
+ * @since 1.0.0
+ *
+ * @return bool|false whether we should display debugging or not.
+ */
 function perflab_should_debug_performance() {
 	static $debug_performance = false;
 
@@ -14,12 +21,12 @@ function perflab_should_debug_performance() {
 	}
 
 	if ( function_exists( 'getenv' ) ) {
-        return (bool) getenv( 'WP_DEBUG_PERFORMANCE' );
-    }
+		return (bool) getenv( 'WP_DEBUG_PERFORMANCE' );
+	}
 
 	if ( defined( 'WP_DEBUG_PERFORMANCE' ) ) {
-        return (bool) WP_DEBUG_PERFORMANCE;
-    }
+		return (bool) WP_DEBUG_PERFORMANCE;
+	}
 
 	return (bool) $debug_performance;
 }
