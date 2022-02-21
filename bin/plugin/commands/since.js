@@ -47,7 +47,7 @@ exports.handler = async ( opt ) => {
 		ignore: [ __filename, '**/node_modules', '**/vendor' ],
 	} );
 
-	const regexp = new RegExp( '@since n.e.x.t' );
+	const regexp = new RegExp( '@since n.e.x.t', 'g' );
 	files.forEach( ( file ) => {
 		const content = fs.readFileSync( file, 'utf-8' );
 		if ( regexp.test( content ) ) {
