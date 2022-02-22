@@ -42,7 +42,16 @@ function webp_uploads_filter_image_editor_output_format( $output_format, $filena
 }
 add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 
-function webp_uploads_update_images_on_page( $dom, $xpath ) {
+/**
+ * Updates images on the page to use webp version by default and fallback to the original
+ * src if webp one can't be used.
+ *
+ * @since n.e.x.t
+ *
+ * @param DOMDocument $doc DOMDocument instance with the current page content.
+ * @param DOMXpath    $xpath DOMXpath instance for the current document.
+ */
+function webp_uploads_update_images_on_page( $doc, $xpath ) {
 	$images = $xpath->query( '//img[contains(@class, "wp-image-")]' );
 	if ( empty( $images ) ) {
 		return;

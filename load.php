@@ -135,34 +135,39 @@ if ( is_admin() ) {
 }
 
 // TODO: find a better place for this hook.
-add_action( 'template_redirect', function() {
-	ob_start( function( $buffer ) {
-		// Don't do anything if we don't have hooks for the perflab_page_content action.
-		if ( ! has_action( 'perflab_page_content' ) ) {
-			return $buffer;
-		}
+add_action(
+	'template_redirect',
+	function() {
+		ob_start(
+			function( $buffer ) {
+				// Don't do anything if we don't have hooks for the perflab_page_content action.
+				if ( ! has_action( 'perflab_page_content' ) ) {
+					return $buffer;
+				}
 
-		// Also return if the DOMDocument doesn't exist.
-		if ( ! class_exists( 'DOMDocument' ) ) {
-			return $buffer;
-		}
+				// Also return if the DOMDocument doesn't exist.
+				if ( ! class_exists( 'DOMDocument' ) ) {
+					return $buffer;
+				}
 
-		$doc = new DOMDocument();
-		$doc->loadHtml( $buffer );
+				$doc = new DOMDocument();
+				$doc->loadHtml( $buffer );
 
-		$xpath = new DOMXpath( $doc );
+				$xpath = new DOMXpath( $doc );
 
-		/**
-		 * The action that allows developers to perform modifications on the current page content.
-		 *
-		 * @since n.e.x.t
-		 *
-		 * @param DOMDocument $doc DOMDocument instance with the current page content.
-		 * @param DOMXpath $xpath DOMXpath instance for the current document.
-		 * @param string $buffer The original page content.
-		 */
-		do_action( 'perflab_page_content', $doc, $xpath, $buffer );
+				/**
+				 * The action that allows developers to perform modifications on the current page content.
+				 *
+				 * @since n.e.x.t
+				 *
+				 * @param DOMDocument $doc DOMDocument instance with the current page content.
+				 * @param DOMXpath $xpath DOMXpath instance for the current document.
+				 * @param string $buffer The original page content.
+				 */
+				do_action( 'perflab_page_content', $doc, $xpath, $buffer );
 
-		return $doc->saveHTML();
-	} );
-} );
+				return $doc->saveHTML();
+			}
+		);
+	}
+);
