@@ -133,3 +133,30 @@ perflab_load_active_modules();
 if ( is_admin() ) {
 	require_once plugin_dir_path( __FILE__ ) . 'admin/load.php';
 }
+
+// TODO: find a better place for this hook.
+add_action( 'template_redirect', function() {
+	ob_start( function( $buffer ) {
+		if ( ! has_action( 'perflab_page_content' ) ) {
+			return $buffer;
+		}
+
+		$doc = new DOMDocument();
+		$doc->loadHtml( $buffer );
+
+		$xpath = new DOMXpath( $doc );
+
+		/**
+		 * The action that allows developers to perform modifications on the current page content.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param DOMDocument $doc DOMDocument instance with the current page content.
+		 * @param DOMXpath $xpath DOMXpath instance for the current document.
+		 * @param string $buffer The original page content.
+		 */
+		do_action( 'perflab_page_content', $doc, $xpath, $buffer );
+
+		return $doc->saveHTML();
+	} );
+} );
