@@ -42,3 +42,24 @@ function webp_uploads_filter_image_editor_output_format( $output_format, $filena
 }
 add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 
+function webp_uploads_update_images_on_page( $dom, $xpath ) {
+	$images = $xpath->query( '//img[contains(@class, "wp-image-")]' );
+	if ( empty( $images ) ) {
+		return;
+	}
+
+	foreach ( $images as $image ) {
+		$src       = $image->getAttribute( 'src' );
+		$src_parts = pathinfo( $src );
+
+		$webp_src = sprintf(
+			'%s/%s.webp',
+			$src_parts['dirname'],
+			$src_parts['filename']
+		);
+
+		$image->setAttribute( 'src', $webp_src );
+		$image->setAttribute( 'onerror', "this.onerror=null;this.src='{$src}';" );
+	}
+}
+add_action( 'perflab_page_content', 'webp_uploads_update_images_on_page', 10, 2 );

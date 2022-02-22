@@ -137,7 +137,13 @@ if ( is_admin() ) {
 // TODO: find a better place for this hook.
 add_action( 'template_redirect', function() {
 	ob_start( function( $buffer ) {
+		// Don't do anything if we don't have hooks for the perflab_page_content action.
 		if ( ! has_action( 'perflab_page_content' ) ) {
+			return $buffer;
+		}
+
+		// Also return if the DOMDocument doesn't exist.
+		if ( ! class_exists( 'DOMDocument' ) ) {
 			return $buffer;
 		}
 
