@@ -87,9 +87,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			$sources[ $current_mime ]['filesize'] = filesize( $file_location );
 		}
 
-		$formats = array_key_exists( $current_mime, $valid_mime_transforms )
-			? $valid_mime_transforms[ $current_mime ]
-			: array();
+		$formats = isset( $valid_mime_transforms[ $current_mime ] ) ? $valid_mime_transforms[ $current_mime ] : array();
 
 		foreach ( $formats as $mime ) {
 			wp_schedule_single_event( time(), 'webp_uploads_create_image', array( $attachment_id, $size_name, $mime ) );
