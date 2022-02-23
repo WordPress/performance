@@ -58,10 +58,15 @@ function webp_uploads_update_images_on_page( $doc, $xpath ) {
 	}
 
 	foreach ( $images as $image ) {
+		$matches = array();
+		$class = $image->getAttribute( 'class' );
+		if ( ! preg_match( '/\bwp-image-(\d+)\b/i', $class, $matches ) ) {
+			continue;
+		}
+
 		$src       = $image->getAttribute( 'src' );
 		$src_parts = pathinfo( $src );
-
-		$webp_src = sprintf(
+		$webp_src  = sprintf(
 			'%s/%s.webp',
 			$src_parts['dirname'],
 			$src_parts['filename']
