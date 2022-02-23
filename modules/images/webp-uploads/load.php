@@ -233,7 +233,7 @@ function webp_uploads_get_supported_image_mime_transforms() {
  *
  * @since n.e.x.t
  *
- * @see wp_delete_attachment
+ * @see wp_delete_attachment()
  *
  * @param int $attachment_id The ID of the attachment the sources are going to be deleted.
  */
