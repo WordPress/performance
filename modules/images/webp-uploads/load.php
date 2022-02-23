@@ -4,8 +4,8 @@
  * Description: Uses WebP as the default format for new JPEG image uploads if the server supports it.
  * Experimental: No
  *
- * @package performance-lab
  * @since   1.0.0
+ * @package performance-lab
  */
 
 /**
@@ -255,8 +255,8 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 		return;
 	}
 
-	$file_directory = dirname( $file );
-	$directory      = path_join( $upload_path['basedir'], $file_directory );
+	$intermediate_dir = path_join( $upload_path['basedir'], dirname( $file ) );
+	$basename = wp_basename( $file );
 
 	foreach ( $metadata['sizes'] as $size ) {
 		if ( ! isset( $size['sources'] ) || ! is_array( $size['sources'] ) ) {
@@ -281,9 +281,11 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 				continue;
 			}
 
-			$file_deletion = path_join( $file_directory, $properties['file'] );
-			$file_deletion = path_join( $upload_path['basedir'], $file_deletion );
-			wp_delete_file_from_directory( $file_deletion, $directory );
+			$intermediate_file = str_replace( $basename, $properties['file'], $file );
+			if ( ! empty( $intermediate_file ) ) {
+				$intermediate_file = path_join( $upload_path['basedir'], $intermediate_file );
+				wp_delete_file_from_directory( $intermediate_file, $intermediate_dir );
+			}
 		}
 	}
 }
