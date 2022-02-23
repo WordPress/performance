@@ -31,7 +31,8 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
 
 	// Not a supported mime type to create the sources property.
-	if ( ! array_key_exists( get_post_mime_type( $attachment_id ), $valid_mime_transforms ) ) {
+	$mime_type = get_post_mime_type( $attachment_id );
+	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
 		return $metadata;
 	}
 
