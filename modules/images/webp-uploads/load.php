@@ -49,8 +49,6 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		$image_sizes = $metadata['sizes'];
 	}
 
-	$sizes = array();
-
 	foreach ( wp_get_registered_image_subsizes() as $size_name => $properties ) {
 		// This image size does not exist on the defined sizes.
 		if ( ! isset( $image_sizes[ $size_name ] ) || ! is_array( $image_sizes[ $size_name ] ) ) {
@@ -72,7 +70,6 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		}
 
 		if ( empty( $current_mime ) ) {
-			$sizes[ $size_name ] = $current_size;
 			continue;
 		}
 
@@ -94,10 +91,8 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		}
 
 		$current_size['sources'] = $sources;
-		$sizes[ $size_name ]     = $current_size;
+		$metadata['sizes'][ $size_name ]     = $current_size;
 	}
-
-	$metadata['sizes'] = $sizes;
 
 	return $metadata;
 }
@@ -242,15 +237,14 @@ function webp_uploads_get_supported_image_mime_transforms() {
  * @see wp_delete_attachment
  *
  * @param int $attachment_id The ID of the attachment the sources are going to be deleted.
- *
- * @return void
  */
 function webp_uploads_remove_sources_files( $attachment_id ) {
 	$metadata = wp_get_attachment_metadata( $attachment_id );
+	$file = get_attached_file( $attachment_id );
 
 	if (
-		! isset( $metadata['sizes'], $metadata['file'] )
-		|| empty( $metadata['file'] )
+		! isset( $metadata['sizes'] )
+		|| empty( $file )
 		|| ! is_array( $metadata['sizes'] )
 	) {
 		return;
@@ -261,7 +255,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 		return;
 	}
 
-	$file_directory = dirname( $metadata['file'] );
+	$file_directory = dirname( $file );
 	$directory      = path_join( $upload_path['basedir'], $file_directory );
 
 	foreach ( $metadata['sizes'] as $size ) {
