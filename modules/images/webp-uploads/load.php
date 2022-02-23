@@ -59,7 +59,7 @@ function webp_uploads_update_images_on_page( $doc, $xpath ) {
 
 	foreach ( $images as $image ) {
 		$matches = array();
-		$class = $image->getAttribute( 'class' );
+		$class   = $image->getAttribute( 'class' );
 		if ( ! preg_match( '/\bwp-image-(\d+)\b/i', $class, $matches ) ) {
 			continue;
 		}
@@ -76,4 +76,21 @@ function webp_uploads_update_images_on_page( $doc, $xpath ) {
 		$image->setAttribute( 'onerror', "this.onerror=null;this.src='{$src}';" );
 	}
 }
-add_action( 'perflab_page_content', 'webp_uploads_update_images_on_page', 10, 2 );
+
+add_action(
+	'init',
+	function() {
+		/**
+		 * Allows to control whether or not to replace update on the page to use webp format.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param bool $update TRUE to update images, otherwise FALSE.
+		 */
+		$update_images = apply_filters( 'perflab_update_images', true );
+
+		if ( $update_images ) {
+			add_action( 'perflab_page_content', 'webp_uploads_update_images_on_page', 10, 2 );
+		}
+	}
+);
