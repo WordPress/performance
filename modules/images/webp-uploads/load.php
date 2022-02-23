@@ -65,7 +65,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 		// Try to find the mime type of the image size.
 		$current_mime = '';
-		if ( array_key_exists( 'mime-type', $current_size ) ) {
+		if ( isset( $current_size['mime-type'] ) ) {
 			$current_mime = $current_size['mime-type'];
 		} elseif ( array_key_exists( 'file', $current_size ) ) {
 			$current_mime = wp_check_filetype( $current_size['file'] )['type'];
