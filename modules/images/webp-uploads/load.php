@@ -256,7 +256,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 	}
 
 	$intermediate_dir = path_join( $upload_path['basedir'], dirname( $file ) );
-	$basename = wp_basename( $file );
+	$basename         = wp_basename( $file );
 
 	foreach ( $metadata['sizes'] as $size ) {
 		if ( ! isset( $size['sources'] ) || ! is_array( $size['sources'] ) ) {
