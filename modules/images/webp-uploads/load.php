@@ -18,8 +18,8 @@
  *
  * @since n.e.x.t
  *
- * @see   wp_generate_attachment_metadata
- * @see   webp_uploads_valid_image_mime_types
+ * @see   wp_generate_attachment_metadata()
+ * @see   webp_uploads_valid_image_mime_types()
  *
  * @param array $metadata      An array with the metadata from this attachment.
  * @param int   $attachment_id The ID of the attachment where the hook was dispatched.
