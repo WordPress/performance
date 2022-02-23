@@ -217,9 +217,7 @@ function webp_uploads_get_supported_image_mime_transforms() {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param array<string, array<string>> An array with the valid mime transforms.
-	 *
-	 * @return array<string, array<string>> An array with the valid mime transformation
+	 * @param array $image_mime_transforms A map with the valid mime transforms.
 	 */
 	return (array) apply_filters( 'webp_uploads_supported_image_mime_transforms', $image_mime_transforms );
 }
