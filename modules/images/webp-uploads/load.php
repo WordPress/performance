@@ -90,8 +90,8 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			wp_schedule_single_event( time(), 'webp_uploads_create_image', array( $attachment_id, $size_name, $mime ) );
 		}
 
-		$current_size['sources'] = $sources;
-		$metadata['sizes'][ $size_name ]     = $current_size;
+		$current_size['sources']         = $sources;
+		$metadata['sizes'][ $size_name ] = $current_size;
 	}
 
 	return $metadata;
@@ -240,7 +240,7 @@ function webp_uploads_get_supported_image_mime_transforms() {
  */
 function webp_uploads_remove_sources_files( $attachment_id ) {
 	$metadata = wp_get_attachment_metadata( $attachment_id );
-	$file = get_attached_file( $attachment_id );
+	$file     = get_attached_file( $attachment_id );
 
 	if (
 		! isset( $metadata['sizes'] )
