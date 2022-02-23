@@ -47,8 +47,7 @@
   },
   "lint-staged": {
     "*.php": [
-      "phpcbf --standard=phpcs.xml.dist",
-      "phpcs --standard=phpcs.xml.dist"
+      "npm run lint-php"
     ]
   }
 }
