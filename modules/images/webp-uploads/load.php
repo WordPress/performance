@@ -59,7 +59,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 		$current_size = $image_sizes[ $size_name ];
 		$sources      = array();
-		if ( array_key_exists( 'sources', $current_size ) && is_array( $current_size['sources'] ) ) {
+		if ( isset( $current_size['sources'] ) && is_array( $current_size['sources'] ) ) {
 			$sources = $current_size['sources'];
 		}
 
