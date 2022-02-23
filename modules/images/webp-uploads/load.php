@@ -53,7 +53,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 	foreach ( wp_get_registered_image_subsizes() as $size_name => $properties ) {
 		// This image size does not exist on the defined sizes.
-		if ( ! array_key_exists( $size_name, $image_sizes ) || ! is_array( $image_sizes[ $size_name ] ) ) {
+		if ( ! isset( $image_sizes[ $size_name ] ) || ! is_array( $image_sizes[ $size_name ] ) ) {
 			continue;
 		}
 
