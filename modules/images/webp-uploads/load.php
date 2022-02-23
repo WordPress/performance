@@ -23,7 +23,6 @@
  *
  * @param array $metadata      An array with the metadata from this attachment.
  * @param int   $attachment_id The ID of the attachment where the hook was dispatched.
- *
  * @return array An array with the updated structure for the metadata before is stored in the database.
  */
 function webp_uploads_create_sources_property( array $metadata, $attachment_id ) {
