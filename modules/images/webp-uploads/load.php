@@ -86,7 +86,12 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		$formats = isset( $valid_mime_transforms[ $current_mime ] ) ? $valid_mime_transforms[ $current_mime ] : array();
 
 		foreach ( $formats as $mime ) {
-			wp_schedule_single_event( time(), 'webp_uploads_create_image', array( $attachment_id, $size_name, $mime ) );
+			if ( empty( $sources[ $mime ] ) ) {
+				$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
+				if ( is_array( $source ) ) {
+					$sources[ $mime ] = $source;
+				}
+			}
 		}
 
 		$current_size['sources']         = $sources;
@@ -109,7 +114,7 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
  * @param string $size          The size name that would be used to create this image, out of the registered subsizes.
  * @param string $mime          A mime type we are looking to use to create this image.
  *
- * @return bool|int|WP_Error
+ * @return array|WP_Error
  */
 function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 	$sizes    = wp_get_registered_image_subsizes();
@@ -183,19 +188,11 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 		return new WP_Error( 'image_file_not_present', __( 'The file key is not present on the image data', 'performance-lab' ) );
 	}
 
-	if ( ! isset( $metadata['sizes'][ $size ]['sources'] ) || ! is_array( $metadata['sizes'][ $size ]['sources'] ) ) {
-		$metadata['sizes'][ $size ]['sources'] = array();
-	}
-
-	$metadata['sizes'][ $size ]['sources'][ $mime ] = array(
+	return array(
 		'file'     => $image['file'],
 		'filesize' => array_key_exists( 'path', $image ) ? filesize( $image['path'] ) : 0,
 	);
-
-	return wp_update_attachment_metadata( $attachment_id, $metadata );
 }
-
-add_action( 'webp_uploads_create_image', 'webp_uploads_generate_image_size', 10, 3 );
 
 /**
  * Returns an array with the list of valid mime types that a specific mime type can be converted into it,

@@ -14,11 +14,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_create_the_original_image_mime_type_when_the_image_is_uploaded(
-		$file_location,
-		$expected_mime,
-		$targeted_mime
-	) {
+	public function it_should_create_the_original_image_mime_type_when_the_image_is_uploaded( $file_location, $expected_mime, $targeted_mime ) {
 		$attachment_id = $this->factory->attachment->create_upload_object( $file_location );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -30,17 +26,9 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			$this->assertArrayHasKey( $expected_mime, $properties['sources'] );
 			$this->assertArrayHasKey( 'filesize', $properties['sources'][ $expected_mime ] );
 			$this->assertArrayHasKey( 'file', $properties['sources'][ $expected_mime ] );
-			$this->assertGreaterThan(
-				0,
-				wp_next_scheduled(
-					'webp_uploads_create_image',
-					array(
-						$attachment_id,
-						$size_name,
-						$targeted_mime,
-					)
-				)
-			);
+			$this->assertArrayHasKey( $targeted_mime, $properties['sources'] );
+			$this->assertArrayHasKey( 'filesize', $properties['sources'][ $targeted_mime ] );
+			$this->assertArrayHasKey( 'file', $properties['sources'][ $targeted_mime ] );
 		}
 	}
 
@@ -75,16 +63,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$this->assertIsArray( $metadata );
 		foreach ( $metadata['sizes'] as $size_name => $properties ) {
 			$this->assertArrayNotHasKey( 'sources', $properties );
-			$this->assertFalse(
-				wp_next_scheduled(
-					'webp_uploads_create_image',
-					array(
-						$attachment_id,
-						$size_name,
-						'image/webp',
-					)
-				)
-			);
 		}
 	}
 
@@ -114,16 +92,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			$this->assertArrayHasKey( 'image/jpeg', $properties['sources'] );
 			$this->assertArrayHasKey( 'filesize', $properties['sources']['image/jpeg'] );
 			$this->assertArrayHasKey( 'file', $properties['sources']['image/jpeg'] );
-			$this->assertFalse(
-				wp_next_scheduled(
-					'webp_uploads_create_image',
-					array(
-						$attachment_id,
-						$size_name,
-						'image/webp',
-					)
-				)
-			);
+			$this->assertArrayNotHasKey( 'image/webp', $properties['sources']);
 		}
 	}
 
@@ -149,16 +118,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$this->assertIsArray( $metadata );
 		foreach ( $metadata['sizes'] as $size_name => $properties ) {
 			$this->assertArrayNotHasKey( 'sources', $properties );
-			$this->assertFalse(
-				wp_next_scheduled(
-					'webp_uploads_create_image',
-					array(
-						$attachment_id,
-						$size_name,
-						'image/webp',
-					)
-				)
-			);
 		}
 	}
 
@@ -169,10 +128,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_prevent_processing_an_image_with_corrupted_metadata(
-		callable $callback,
-		$size
-	) {
+	public function it_should_prevent_processing_an_image_with_corrupted_metadata( callable $callback, $size ) {
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/ballons.webp'
 		);
@@ -300,65 +256,11 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'image/jpeg', $metadata['sizes']['thumbnail']['sources'] );
 		$this->assertArrayHasKey( 'filesize', $metadata['sizes']['thumbnail']['sources']['image/jpeg'] );
 		$this->assertArrayHasKey( 'file', $metadata['sizes']['thumbnail']['sources']['image/jpeg'] );
-		$this->assertArrayNotHasKey( 'image/webp', $metadata['sizes']['medium']['sources'] );
-
-		$this->assertTrue( webp_uploads_generate_image_size( $attachment_id, 'thumbnail', 'image/webp' ) );
-
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-
 		$this->assertArrayHasKey( 'image/webp', $metadata['sizes']['thumbnail']['sources'] );
 		$this->assertArrayHasKey( 'filesize', $metadata['sizes']['thumbnail']['sources']['image/webp'] );
 		$this->assertArrayHasKey( 'file', $metadata['sizes']['thumbnail']['sources']['image/webp'] );
-		$file = $metadata['sizes']['thumbnail']['sources']['image/jpeg']['file'];
 		$this->assertStringEndsNotWith( '.jpeg', $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] );
 		$this->assertStringEndsWith( '.webp', $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] );
-	}
-
-	/**
-	 * Create the sources property when the property does not exists
-	 *
-	 * @test
-	 */
-	public function it_should_create_the_sources_property_when_the_property_does_not_exists() {
-		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
-		);
-
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-		unset( $metadata['sizes']['medium']['sources'] );
-		wp_update_attachment_metadata( $attachment_id, $metadata );
-
-		$this->assertArrayNotHasKey( 'sources', $metadata['sizes']['medium'] );
-		$this->assertTrue( webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' ) );
-
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-
-		$this->assertArrayHasKey( 'sources', $metadata['sizes']['medium'] );
-		$this->assertArrayNotHasKey( 'image/jpeg', $metadata['sizes']['medium']['sources'] );
-		$this->assertArrayHasKey( 'image/webp', $metadata['sizes']['medium']['sources'] );
-		$this->assertArrayHasKey( 'filesize', $metadata['sizes']['medium']['sources']['image/webp'] );
-		$this->assertArrayHasKey( 'file', $metadata['sizes']['medium']['sources']['image/webp'] );
-	}
-
-	/**
-	 * Create an image with the dimensions from the metadata instead of the dimensions of the sizes
-	 *
-	 * @test
-	 */
-	public function it_should_create_an_image_with_the_dimensions_from_the_metadata_instead_of_the_dimensions_of_the_sizes() {
-		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
-		);
-
-		$metadata                                 = wp_get_attachment_metadata( $attachment_id );
-		$metadata['sizes']['thumbnail']['width']  = 200;
-		$metadata['sizes']['thumbnail']['height'] = 200;
-		wp_update_attachment_metadata( $attachment_id, $metadata );
-
-		$this->assertTrue( webp_uploads_generate_image_size( $attachment_id, 'thumbnail', 'image/webp' ) );
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-		$this->assertArrayHasKey( 'image/webp', $metadata['sizes']['thumbnail']['sources'] );
-		$this->assertStringEndsWith( '200x200.webp', $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] );
 	}
 
 	/**
@@ -378,11 +280,8 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
-		$this->assertStringEndsWith( '-scaled.jpg', get_attached_file( $attachment_id ) );
-
-		$this->assertTrue( webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' ) );
-
 		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$this->assertStringEndsWith( '-scaled.jpg', get_attached_file( $attachment_id ) );
 		$this->assertArrayHasKey( 'image/webp', $metadata['sizes']['medium']['sources'] );
 		$this->assertStringEndsNotWith( '-scaled.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
 		$this->assertStringEndsWith( '-300x200.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
@@ -404,9 +303,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$this->assertIsString( $file );
 		$this->assertFileExists( $file );
-
-		$this->assertTrue( webp_uploads_generate_image_size( $attachment_id, 'thumbnail', 'image/webp' ) );
-		$this->assertTrue( webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' ) );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$sizes    = array( 'thumbnail', 'medium' );
@@ -445,8 +341,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$this->assertIsString( $file );
 		$this->assertFileExists( $file );
 
-		$this->assertTrue( webp_uploads_generate_image_size( $attachment_id, 'thumbnail', 'image/webp' ) );
-
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertFileExists(
@@ -476,8 +370,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$this->assertIsString( $file );
 		$this->assertFileExists( $file );
-
-		$this->assertTrue( webp_uploads_generate_image_size( $attachment_id, 'thumbnail', 'image/webp' ) );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
