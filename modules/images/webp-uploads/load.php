@@ -44,7 +44,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 	$dirname     = pathinfo( $file, PATHINFO_DIRNAME );
 	$image_sizes = array();
-	if ( array_key_exists( 'sizes', $metadata ) && is_array( $metadata['sizes'] ) ) {
+	if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
 		$image_sizes = $metadata['sizes'];
 	}
 
@@ -73,7 +73,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		}
 
 		$sources[ $current_mime ] = array(
-			'file'     => array_key_exists( 'file', $current_size ) ? $current_size['file'] : '',
+			'file'     => isset( $current_size['file'] ) ? $current_size['file'] : '',
 			'filesize' => 0,
 		);
 
@@ -144,7 +144,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 	}
 
 	$allowed_mimes = array_flip( wp_get_mime_types() );
-	if ( ! array_key_exists( $mime, $allowed_mimes ) || ! is_string( $allowed_mimes[ $mime ] ) ) {
+	if ( ! isset( $allowed_mimes[ $mime ] ) || ! is_string( $allowed_mimes[ $mime ] ) ) {
 		return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'performance-lab' ) );
 	}
 
@@ -159,19 +159,19 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 	$height = null;
 	$crop   = false;
 
-	if ( array_key_exists( 'width', $metadata['sizes'][ $size ] ) ) {
+	if ( isset( $metadata['sizes'][ $size ]['width'] ) ) {
 		$width = $metadata['sizes'][ $size ]['width'];
-	} elseif ( array_key_exists( 'width', $sizes[ $size ] ) ) {
+	} elseif ( isset( $sizes[ $size ]['widht'] ) ) {
 		$width = $sizes[ $size ];
 	}
 
-	if ( array_key_exists( 'height', $metadata['sizes'][ $size ] ) ) {
+	if ( isset( $metadata['sizes'][ $size ]['height'] ) ) {
 		$height = $metadata['sizes'][ $size ]['height'];
-	} elseif ( array_key_exists( 'width', $sizes[ $size ] ) ) {
+	} elseif ( isset( $sizes[ $size ]['width'] ) ) {
 		$height = $sizes[ $size ];
 	}
 
-	if ( array_key_exists( 'crop', $sizes[ $size ] ) ) {
+	if ( isset( $sizes[ $size ]['crop'] ) ) {
 		$crop = (bool) $sizes[ $size ]['crop'];
 	}
 
@@ -190,7 +190,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 
 	return array(
 		'file'     => $image['file'],
-		'filesize' => array_key_exists( 'path', $image ) ? filesize( $image['path'] ) : 0,
+		'filesize' => isset( $image['path'] ) ? filesize( $image['path'] ) : 0,
 	);
 }
 
