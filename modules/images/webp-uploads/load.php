@@ -284,3 +284,53 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 }
 
 add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
+
+/**
+ * Filter on `wp_get_missing_image_subsizes` acting as an action for the logic of the plugin
+ * to determine if additional mime types still need to be created.
+ *
+ * @since n.e.x.t
+ *
+ * @see   wp_get_missing_image_subsizes()
+ *
+ * @param array[] $missing_sizes Associative array of arrays of image sub-size.
+ * @param array   $image_meta    The metadata from the image.
+ * @param int     $attachment_id The ID of the attachment.
+ *
+ * @return array[] $missing_sizes Associative array of arrays of image sub-size.
+ */
+function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta, $attachment_id ) {
+	if ( _webp_uploads_is_valid_ajax_for_image_sizes() || _webp_uploads_is_valid_rest_for_post_process( file_get_contents( 'php://input' ) ) ) {
+		webp_uploads_create_sources_property( $image_meta, $attachment_id );
+	}
+
+	return $missing_sizes;
+}
+
+/**
+ * Determine if the current request is a valid request to process missing image sizes, executed
+ * via ajax.
+ *
+ * @return bool `true` if the current request is a valid ajax request to recreate missing image sizes.
+ */
+function _webp_uploads_is_valid_ajax_for_image_sizes() {
+	return wp_doing_ajax() && isset( $_REQUEST['action'], $_REQUEST['attachment_id'] ) && 'media-create-image-subsizes' === $_REQUEST['action'] && $_REQUEST['attachment_id'] > 0;
+}
+
+/**
+ * Determine if the provided REST request goes to the appropriate endpoint with the right action.
+ *
+ * @param string $body The body from the request.
+ *
+ * @return bool `true` if the current request is a valid REST request to process
+ */
+function _webp_uploads_is_valid_rest_for_post_process( $body = '' ) {
+	$matches     = array();
+	$body        = json_decode( $body, true );
+	$valid_rest  = defined( 'REST_REQUEST' ) && REST_REQUEST;
+	$valid_route = $valid_rest && isset( $GLOBALS['wp'], $GLOBALS['wp']->query_vars['rest_route'] ) && preg_match( '/media\/\d+\/post-process/', $GLOBALS['wp']->query_vars['rest_route'], $matches );
+
+	return $valid_route && ! empty( $matches ) && ! empty( $body['action'] ) && $body['action'] === 'create-image-subsizes';
+}
+
+add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_subsizes', 10, 3 );
