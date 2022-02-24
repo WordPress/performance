@@ -26,6 +26,10 @@
  * @return array An array with the updated structure for the metadata before is stored in the database.
  */
 function webp_uploads_create_sources_property( array $metadata, $attachment_id ) {
+	// Make sure we have some sizes to work with, otherwise avoid any work.
+	if ( empty( $metadata['sizes'] ) || ! is_array( $metadata['sizes'] ) ) {
+		return $metadata;
+	}
 	// This should take place only on the JPEG image.
 	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
 
@@ -42,60 +46,55 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		return $metadata;
 	}
 
-	$dirname     = pathinfo( $file, PATHINFO_DIRNAME );
-	$image_sizes = array();
-	if ( array_key_exists( 'sizes', $metadata ) && is_array( $metadata['sizes'] ) ) {
-		$image_sizes = $metadata['sizes'];
-	}
-
-	foreach ( wp_get_registered_image_subsizes() as $size_name => $properties ) {
-		// This image size does not exist on the defined sizes.
-		if ( ! isset( $image_sizes[ $size_name ] ) || ! is_array( $image_sizes[ $size_name ] ) ) {
+	$dirname = pathinfo( $file, PATHINFO_DIRNAME );
+	foreach ( $metadata['sizes'] as $size_name => $properties ) {
+		// This image size is not defined or not an array.
+		if ( ! isset( $metadata['sizes'][ $size_name ] ) || ! is_array( $metadata['sizes'][ $size_name ] ) ) {
 			continue;
 		}
 
-		$current_size = $image_sizes[ $size_name ];
-		$sources      = array();
-		if ( isset( $current_size['sources'] ) && is_array( $current_size['sources'] ) ) {
-			$sources = $current_size['sources'];
+		// Ensure a `sources` property exists on the existing size.
+		if ( empty( $metadata['sizes'][ $size_name ]['sources'] ) || ! is_array( $metadata['sizes'][ $size_name ]['sources'] ) ) {
+			$metadata['sizes'][ $size_name ]['sources'] = array();
 		}
 
 		// Try to find the mime type of the image size.
 		$current_mime = '';
-		if ( isset( $current_size['mime-type'] ) ) {
-			$current_mime = $current_size['mime-type'];
-		} elseif ( isset( $current_size['file'] ) ) {
-			$current_mime = wp_check_filetype( $current_size['file'] )['type'];
+		if ( isset( $properties['mime-type'] ) ) {
+			$current_mime = $properties['mime-type'];
+		} elseif ( isset( $properties['file'] ) ) {
+			$current_mime = wp_check_filetype( $properties['file'] )['type'];
 		}
 
+		// The mime type can't be determined.
 		if ( empty( $current_mime ) ) {
 			continue;
 		}
 
-		$sources[ $current_mime ] = array(
-			'file'     => array_key_exists( 'file', $current_size ) ? $current_size['file'] : '',
-			'filesize' => 0,
-		);
-
-		// Set the filesize from the current mime image.
-		$file_location = path_join( $dirname, $sources[ $current_mime ]['file'] );
-		if ( file_exists( $file_location ) ) {
-			$sources[ $current_mime ]['filesize'] = filesize( $file_location );
+		if ( empty( $metadata['sizes'][ $size_name ]['sources'][ $current_mime ] ) ) {
+			$metadata['sizes'][ $size_name ]['sources'][ $current_mime ] = array(
+				'file'     => array_key_exists( 'file', $properties ) ? $properties['file'] : '',
+				'filesize' => 0,
+			);
+			// Set the filesize from the current mime image.
+			$file_location = path_join( $dirname, $properties['file'] );
+			if ( file_exists( $file_location ) ) {
+				$metadata['sizes'][ $size_name ]['sources'][ $current_mime ]['filesize'] = filesize( $file_location );
+			}
+			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
 
 		$formats = isset( $valid_mime_transforms[ $current_mime ] ) ? $valid_mime_transforms[ $current_mime ] : array();
 
 		foreach ( $formats as $mime ) {
-			if ( empty( $sources[ $mime ] ) ) {
+			if ( empty( $metadata['sizes'][ $size_name ]['sources'][ $mime ] ) ) {
 				$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
 				if ( is_array( $source ) ) {
-					$sources[ $mime ] = $source;
+					$metadata['sizes'][ $size_name ]['sources'][ $mime ] = $source;
+					wp_update_attachment_metadata( $attachment_id, $metadata );
 				}
 			}
 		}
-
-		$current_size['sources']         = $sources;
-		$metadata['sizes'][ $size_name ] = $current_size;
 	}
 
 	return $metadata;
@@ -284,6 +283,56 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 	}
 }
 add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
+
+/**
+ * Filter on `wp_get_missing_image_subsizes` acting as an action for the logic of the plugin
+ * to determine if additional mime types still need to be created.
+ *
+ * @since n.e.x.t
+ *
+ * @see   wp_get_missing_image_subsizes()
+ *
+ * @param array[] $missing_sizes Associative array of arrays of image sub-size.
+ * @param array   $image_meta    The metadata from the image.
+ * @param int     $attachment_id The ID of the attachment.
+ *
+ * @return array[] $missing_sizes Associative array of arrays of image sub-size.
+ */
+function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta, $attachment_id ) {
+	if ( _webp_uploads_is_valid_ajax_for_image_sizes() || _webp_uploads_is_valid_rest_for_post_process( file_get_contents( 'php://input' ) ) ) {
+		webp_uploads_create_sources_property( $image_meta, $attachment_id );
+	}
+
+	return $missing_sizes;
+}
+
+/**
+ * Determine if the current request is a valid request to process missing image sizes, executed
+ * via ajax.
+ *
+ * @return bool `true` if the current request is a valid ajax request to recreate missing image sizes.
+ */
+function _webp_uploads_is_valid_ajax_for_image_sizes() {
+	return wp_doing_ajax() && isset( $_REQUEST['action'], $_REQUEST['attachment_id'] ) && 'media-create-image-subsizes' === $_REQUEST['action'] && $_REQUEST['attachment_id'] > 0;
+}
+
+/**
+ * Determine if the provided REST request goes to the appropriate endpoint with the right action.
+ *
+ * @param string $body The body from the request.
+ *
+ * @return bool `true` if the current request is a valid REST request to process
+ */
+function _webp_uploads_is_valid_rest_for_post_process( $body = '' ) {
+	$matches     = array();
+	$body        = json_decode( $body, true );
+	$valid_rest  = defined( 'REST_REQUEST' ) && REST_REQUEST;
+	$valid_route = $valid_rest && isset( $GLOBALS['wp'], $GLOBALS['wp']->query_vars['rest_route'] ) && preg_match( '/media\/\d+\/post-process/', $GLOBALS['wp']->query_vars['rest_route'], $matches );
+
+	return $valid_route && ! empty( $matches ) && ! empty( $body['action'] ) && 'create-image-subsizes' === $body['action'];
+}
+
+add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_subsizes', 10, 3 );
 
 /**
  * Filters on `the_content` to update the references for supported mime of images into the

@@ -385,4 +385,184 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] )
 		);
 	}
+
+	/**
+	 * Process a request where ajax is not defined
+	 *
+	 * @test
+	 */
+	public function it_should_process_a_request_where_ajax_is_not_defined() {
+		add_filter( 'wp_doing_ajax', '__return_false' );
+		$this->assertFalse( _webp_uploads_is_valid_ajax_for_image_sizes() );
+	}
+
+	/**
+	 * Process an ajax request with no additional parameters
+	 *
+	 * @test
+	 */
+	public function it_should_process_an_ajax_request_with_no_additional_parameters() {
+		// Simulate ajax request.
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		$this->assertFalse( _webp_uploads_is_valid_ajax_for_image_sizes() );
+	}
+
+	/**
+	 * Process an ajax request with invalid action
+	 *
+	 * @test
+	 */
+	public function it_should_process_an_ajax_request_with_invalid_action() {
+		// Simulate ajax request.
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		$_REQUEST['action'] = 'invalid-action';
+		$this->assertFalse( _webp_uploads_is_valid_ajax_for_image_sizes() );
+	}
+
+	/**
+	 * Process an ajax request with only the attachment id is included in the request
+	 *
+	 * @test
+	 */
+	public function it_should_process_an_ajax_request_with_only_the_attachment_id_is_included_in_the_request() {
+		// Simulate ajax request.
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		$_REQUEST['attachment_id'] = 1;
+		$this->assertFalse( _webp_uploads_is_valid_ajax_for_image_sizes() );
+	}
+
+	/**
+	 * Process an ajax request with invalid attachment id
+	 *
+	 * @test
+	 */
+	public function it_should_process_an_ajax_request_with_invalid_attachment_id() {
+		// Simulate ajax request.
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		$_REQUEST['action']        = 'media-create-image-subsizes';
+		$_REQUEST['attachment_id'] = 0;
+		$this->assertFalse( _webp_uploads_is_valid_ajax_for_image_sizes() );
+	}
+
+	/**
+	 * Process an ajax request with valid request parameters
+	 *
+	 * @test
+	 */
+	public function it_should_process_an_ajax_request_with_valid_request_parameters() {
+		// Simulate ajax request.
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		$_REQUEST['action']        = 'media-create-image-subsizes';
+		$_REQUEST['attachment_id'] = 1;
+		$this->assertTrue( _webp_uploads_is_valid_ajax_for_image_sizes() );
+	}
+
+	/**
+	 * Process a rest request when rest is not defined
+	 *
+	 * @test
+	 */
+	public function it_should_process_a_rest_request_when_rest_is_not_defined() {
+		$this->assertFalse( _webp_uploads_is_valid_rest_for_post_process() );
+	}
+
+	/**
+	 * Process a REST request when the global wp is not defined
+	 *
+	 * @test
+	 */
+	public function it_should_process_a_rest_request_when_the_global_wp_is_not_defined() {
+		define( 'REST_REQUEST', true );
+		rest_get_server()->dispatch( new WP_REST_Request() );
+		unset( $GLOBALS['wp'] );
+		$this->assertFalse( _webp_uploads_is_valid_rest_for_post_process() );
+	}
+
+	/**
+	 * Process a REST request when the rest route query variable is not set
+	 *
+	 * @test
+	 */
+	public function it_should_process_a_rest_request_when_the_rest_route_query_variable_is_not_set() {
+		define( 'REST_REQUEST', true );
+		$GLOBALS['wp'] = new WP();
+
+		$this->assertFalse( _webp_uploads_is_valid_rest_for_post_process() );
+	}
+
+	/**
+	 * Process a REST request when the query vars is set to a different route
+	 *
+	 * @dataProvider provider_rest_route
+	 *
+	 * @test
+	 */
+	public function it_should_process_a_rest_request_when_the_query_vars_is_set_to_a_different_route( $route ) {
+		define( 'REST_REQUEST', true );
+		$GLOBALS['wp']                           = new WP();
+		$GLOBALS['wp']->query_vars['rest_route'] = $route;
+
+		$this->assertFalse( _webp_uploads_is_valid_rest_for_post_process() );
+	}
+
+	public function provider_rest_route() {
+		yield 'media route' => array( '/wp/v2/media' );
+		yield 'single attachment route' => array( '/wp/v2/media/1' );
+		yield 'edit attachment route' => array( '/wp/v2/media/1/edit' );
+	}
+
+	/**
+	 * Process a REST request when dispatched to the right endpoint
+	 *
+	 * @test
+	 */
+	public function it_should_process_a_rest_request_when_dispatched_to_the_right_endpoint() {
+		define( 'REST_REQUEST', true );
+		$GLOBALS['wp']                           = new WP();
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wp/v2/media/1/post-process';
+
+		$this->assertFalse( _webp_uploads_is_valid_rest_for_post_process() );
+	}
+
+	/**
+	 * Process a REST request when an action is provided
+	 *
+	 * @test
+	 */
+	public function it_should_process_a_rest_request_when_an_action_is_provided() {
+		define( 'REST_REQUEST', true );
+		$GLOBALS['wp']                           = new WP();
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wp/v2/media/1/post-process';
+		$body                                    = wp_json_encode( array( 'action' => 'subsizes' ) );
+
+		$this->assertFalse( _webp_uploads_is_valid_rest_for_post_process( $body ) );
+	}
+
+	/**
+	 * Process a REST request with invalid JSON payload
+	 *
+	 * @test
+	 */
+	public function it_should_process_a_rest_request_with_invalid_json_payload() {
+		define( 'REST_REQUEST', true );
+		$GLOBALS['wp']                           = new WP();
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wp/v2/media/1/post-process';
+		$body                                    = ']]]]]][[][][]';
+
+		$this->assertFalse( _webp_uploads_is_valid_rest_for_post_process( $body ) );
+	}
+
+	/**
+	 * Process a REST request when the right action is provided
+	 *
+	 * @test
+	 */
+	public function it_should_process_a_rest_request_when_the_right_action_is_provided() {
+		define( 'REST_REQUEST', true );
+		$GLOBALS['wp']                           = new WP();
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wp/v2/media/1/post-process';
+		$body                                    = wp_json_encode( array( 'action' => 'create-image-subsizes' ) );
+
+		$this->assertTrue( _webp_uploads_is_valid_rest_for_post_process( $body ) );
+	}
 }
