@@ -73,7 +73,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 		if ( empty( $metadata['sizes'][ $size_name ]['sources'][ $current_mime ] ) ) {
 			$metadata['sizes'][ $size_name ]['sources'][ $current_mime ] = array(
-				'file'     => array_key_exists( 'file', $properties ) ? $properties['file'] : '',
+				'file'     => isset( $properties['file'] ) ? $properties['file'] : '',
 				'filesize' => 0,
 			);
 			// Set the filesize from the current mime image.
