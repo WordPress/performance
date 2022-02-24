@@ -330,7 +330,7 @@ function _webp_uploads_is_valid_rest_for_post_process( $body = '' ) {
 	$valid_rest  = defined( 'REST_REQUEST' ) && REST_REQUEST;
 	$valid_route = $valid_rest && isset( $GLOBALS['wp'], $GLOBALS['wp']->query_vars['rest_route'] ) && preg_match( '/media\/\d+\/post-process/', $GLOBALS['wp']->query_vars['rest_route'], $matches );
 
-	return $valid_route && ! empty( $matches ) && ! empty( $body['action'] ) && $body['action'] === 'create-image-subsizes';
+	return $valid_route && ! empty( $matches ) && ! empty( $body['action'] ) && 'create-image-subsizes' === $body['action'];
 }
 
 add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_subsizes', 10, 3 );
