@@ -379,10 +379,6 @@ function webp_uploads_update_image_references( $content ) {
 					continue;
 				}
 
-				if ( empty( $size_data['sources'] ) ) {
-					continue;
-				}
-
 				if ( empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
 					continue;
 				}
