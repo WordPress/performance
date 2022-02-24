@@ -92,7 +92,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			$this->assertArrayHasKey( 'image/jpeg', $properties['sources'] );
 			$this->assertArrayHasKey( 'filesize', $properties['sources']['image/jpeg'] );
 			$this->assertArrayHasKey( 'file', $properties['sources']['image/jpeg'] );
-			$this->assertArrayNotHasKey( 'image/webp', $properties['sources']);
+			$this->assertArrayNotHasKey( 'image/webp', $properties['sources'] );
 		}
 	}
 
@@ -280,7 +280,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
-		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$this->assertStringEndsWith( '-scaled.jpg', get_attached_file( $attachment_id ) );
 		$this->assertArrayHasKey( 'image/webp', $metadata['sizes']['medium']['sources'] );
 		$this->assertStringEndsNotWith( '-scaled.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
