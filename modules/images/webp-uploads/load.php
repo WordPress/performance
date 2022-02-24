@@ -46,60 +46,55 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		return $metadata;
 	}
 
-	$dirname     = pathinfo( $file, PATHINFO_DIRNAME );
-	$image_sizes = array();
-	if ( array_key_exists( 'sizes', $metadata ) && is_array( $metadata['sizes'] ) ) {
-		$image_sizes = $metadata['sizes'];
-	}
-
-	foreach ( wp_get_registered_image_subsizes() as $size_name => $properties ) {
-		// This image size does not exist on the defined sizes.
-		if ( ! isset( $image_sizes[ $size_name ] ) || ! is_array( $image_sizes[ $size_name ] ) ) {
+	$dirname = pathinfo( $file, PATHINFO_DIRNAME );
+	foreach ( $metadata['sizes'] as $size_name => $properties ) {
+		// This image size is not defined or not an array.
+		if ( ! isset( $metadata['sizes'][ $size_name ] ) || ! is_array( $metadata['sizes'][ $size_name ] ) ) {
 			continue;
 		}
 
-		$current_size = $image_sizes[ $size_name ];
-		$sources      = array();
-		if ( isset( $current_size['sources'] ) && is_array( $current_size['sources'] ) ) {
-			$sources = $current_size['sources'];
+		// Ensure a `sources` property exists on the existing size.
+		if ( empty( $metadata['sizes'][ $size_name ]['sources'] ) || ! is_array( $metadata['sizes'][ $size_name ]['sources'] ) ) {
+			$metadata['sizes'][ $size_name ]['sources'] = array();
 		}
 
 		// Try to find the mime type of the image size.
 		$current_mime = '';
-		if ( isset( $current_size['mime-type'] ) ) {
-			$current_mime = $current_size['mime-type'];
-		} elseif ( isset( $current_size['file'] ) ) {
-			$current_mime = wp_check_filetype( $current_size['file'] )['type'];
+		if ( isset( $properties['mime-type'] ) ) {
+			$current_mime = $properties['mime-type'];
+		} elseif ( isset( $properties['file'] ) ) {
+			$current_mime = wp_check_filetype( $properties['file'] )['type'];
 		}
 
+		// The mime type can't be determined.
 		if ( empty( $current_mime ) ) {
 			continue;
 		}
 
-		$sources[ $current_mime ] = array(
-			'file'     => array_key_exists( 'file', $current_size ) ? $current_size['file'] : '',
-			'filesize' => 0,
-		);
-
-		// Set the filesize from the current mime image.
-		$file_location = path_join( $dirname, $sources[ $current_mime ]['file'] );
-		if ( file_exists( $file_location ) ) {
-			$sources[ $current_mime ]['filesize'] = filesize( $file_location );
+		if ( empty( $metadata['sizes'][ $size_name ]['sources'][ $current_mime ] ) ) {
+			$metadata['sizes'][ $size_name ]['sources'][ $current_mime ] = array(
+				'file'     => array_key_exists( 'file', $properties ) ? $properties['file'] : '',
+				'filesize' => 0,
+			);
+			// Set the filesize from the current mime image.
+			$file_location = path_join( $dirname, $properties['file'] );
+			if ( file_exists( $file_location ) ) {
+				$metadata['sizes'][ $size_name ]['sources'][ $current_mime ]['filesize'] = filesize( $file_location );
+			}
+			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
 
 		$formats = isset( $valid_mime_transforms[ $current_mime ] ) ? $valid_mime_transforms[ $current_mime ] : array();
 
 		foreach ( $formats as $mime ) {
-			if ( empty( $sources[ $mime ] ) ) {
+			if ( empty( $metadata['sizes'][ $size_name ]['sources'][ $mime ] ) ) {
 				$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
 				if ( is_array( $source ) ) {
-					$sources[ $mime ] = $source;
+					$metadata['sizes'][ $size_name ]['sources'][ $mime ] = $source;
+					wp_update_attachment_metadata( $attachment_id, $metadata );
 				}
 			}
 		}
-
-		$current_size['sources']         = $sources;
-		$metadata['sizes'][ $size_name ] = $current_size;
 	}
 
 	return $metadata;
