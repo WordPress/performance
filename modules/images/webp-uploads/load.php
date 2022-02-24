@@ -391,7 +391,8 @@ function webp_uploads_update_image_references( $content ) {
 		}
 	}
 
-	$target_mime = webp_uploads_preferred_mime_type();
+	// TODO: Add a filterable option to change the selected mime type.
+	$target_mime = 'image/webp';
 	$replacement = array();
 	foreach ( $images as $attachment_id => $urls ) {
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -442,58 +443,3 @@ function webp_uploads_update_image_references( $content ) {
 }
 
 add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
-
-/**
- * Function to get access to the desired mime type of image to be used in specifc areas
- * like the content of a blog post, this function uses `webp_uploads_webp_is_supported`
- * in order to make sure WebP is supported before deciding with WebP as WebP would be
- * the default if is supported.
- *
- * @since n.e.x.t
- *
- * @return string The prefered mime type for images `image/webp` by default if WebP is supported.
- */
-function webp_uploads_preferred_mime_type() {
-	$preferred_mime = 'image/jpeg';
-
-	if ( webp_uploads_webp_is_supported() ) {
-		$preferred_mime = 'image/webp';
-	}
-
-	/**
-	 * The preferred mime type for the images to be rendered.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param string The preferred mime type for images.
-	 *
-	 * @return string The preferred mime type, image/webp by default if supported.
-	 */
-	return (string) apply_filters( 'wp_preferred_image_mime', $preferred_mime );
-}
-
-/**
- * Client in this context means the Browser making the request for a particular page
- * if the browser supports WebP the mime would be present in the `HTTP_ACCEPT` header.
- *
- * @since n.e.x.t
- *
- * @see https://developers.google.com/speed/webp/faq#server-side_content_negotiation_via_accept_headers
- *
- * @return bool If WebP is supported or not by the current client.
- */
-function webp_uploads_webp_is_supported() {
-	$webp_is_accepted = array_key_exists( 'HTTP_ACCEPT', $_SERVER ) && false !== strpos( $_SERVER['HTTP_ACCEPT'], 'image/webp' );
-
-	/**
-	 * Add a filter to bypass the detection of WebP in the client via HTTP_ACCEPT headers
-	 * useful if a cache mechanism is storing the full HTML of the page.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param bool $webp_is_accepted If WebP is accepted by the client requesting the page.
-	 *
-	 * @return bool If WebP is accepted or not on the current request.
-	 */
-	return (bool) apply_filters( 'webp_is_accepted', $webp_is_accepted );
-}
