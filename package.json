@@ -27,7 +27,8 @@
     "fast-glob": "^3.2.7",
     "husky": "^7.0.4",
     "lint-staged": "^12.3.4",
-    "lodash": "4.17.21"
+    "lodash": "4.17.21",
+    "prettier": "npm:wp-prettier@^2.2.1-beta-1"
   },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
