@@ -305,8 +305,19 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  */
 function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta, $attachment_id ) {
 	$trace = array();
-	// Only setup the trace if we no longer have more sizes.
+	// Only setup the trace array if we no longer have more sizes.
 	if ( empty( $missing_sizes ) ) {
+		/**
+		 * The usage of `debug_backtrace` in this particular case is mainly to ensure the call to this
+		 * filter was originated from `wp_update_image_subsizes()` due this function will call
+		 * `wp_get_missing_image_subsizes` at some point but this function can be called from other places
+		 * as well without having to pass from `wp_update_image_subsizes` in an ideal world an action would
+		 * exist in `wp_update_image_subsizes`, in the meantime, this is a workaround for that scenario. The
+		 * limit to 10 is to have a buffer as in an ideal scenario the function would be index 5 on the array.
+		 *
+		 * @see wp_update_image_subsizes()
+		 * @see wp_get_missing_image_subsizes()
+		 */
 		$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
 	}
 
