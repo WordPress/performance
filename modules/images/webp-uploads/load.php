@@ -26,6 +26,10 @@
  * @return array An array with the updated structure for the metadata before is stored in the database.
  */
 function webp_uploads_create_sources_property( array $metadata, $attachment_id ) {
+	// Make sure we have some sizes to work with, otherwise avoid any work.
+	if ( empty( $metadata['sizes'] ) || ! is_array( $metadata['sizes'] ) ) {
+		return $metadata;
+	}
 	// This should take place only on the JPEG image.
 	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
 
@@ -42,60 +46,64 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		return $metadata;
 	}
 
-	$dirname     = pathinfo( $file, PATHINFO_DIRNAME );
-	$image_sizes = array();
-	if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
-		$image_sizes = $metadata['sizes'];
-	}
-
-	foreach ( wp_get_registered_image_subsizes() as $size_name => $properties ) {
-		// This image size does not exist on the defined sizes.
-		if ( ! isset( $image_sizes[ $size_name ] ) || ! is_array( $image_sizes[ $size_name ] ) ) {
+	$dirname = pathinfo( $file, PATHINFO_DIRNAME );
+	foreach ( $metadata['sizes'] as $size_name => $properties ) {
+		// This image size is not defined or not an array.
+		if ( ! is_array( $properties ) ) {
 			continue;
-		}
-
-		$current_size = $image_sizes[ $size_name ];
-		$sources      = array();
-		if ( isset( $current_size['sources'] ) && is_array( $current_size['sources'] ) ) {
-			$sources = $current_size['sources'];
 		}
 
 		// Try to find the mime type of the image size.
 		$current_mime = '';
-		if ( isset( $current_size['mime-type'] ) ) {
-			$current_mime = $current_size['mime-type'];
-		} elseif ( isset( $current_size['file'] ) ) {
-			$current_mime = wp_check_filetype( $current_size['file'] )['type'];
+		if ( isset( $properties['mime-type'] ) ) {
+			$current_mime = $properties['mime-type'];
+		} elseif ( isset( $properties['file'] ) ) {
+			$current_mime = wp_check_filetype( $properties['file'] )['type'];
 		}
 
+		// The mime type can't be determined.
 		if ( empty( $current_mime ) ) {
 			continue;
 		}
 
-		$sources[ $current_mime ] = array(
-			'file'     => isset( $current_size['file'] ) ? $current_size['file'] : '',
-			'filesize' => 0,
-		);
+		// Ensure a `sources` property exists on the existing size.
+		if ( empty( $properties['sources'] ) || ! is_array( $properties['sources'] ) ) {
+			$properties['sources'] = array();
+		}
 
-		// Set the filesize from the current mime image.
-		$file_location = path_join( $dirname, $sources[ $current_mime ]['file'] );
-		if ( file_exists( $file_location ) ) {
-			$sources[ $current_mime ]['filesize'] = filesize( $file_location );
+		if ( empty( $properties['sources'][ $current_mime ] ) ) {
+			$properties['sources'][ $current_mime ] = array(
+				'file'     => isset( $properties['file'] ) ? $properties['file'] : '',
+				'filesize' => 0,
+			);
+			// Set the filesize from the current mime image.
+			$file_location = path_join( $dirname, $properties['file'] );
+			if ( file_exists( $file_location ) ) {
+				$properties['sources'][ $current_mime ]['filesize'] = filesize( $file_location );
+			}
+			$metadata['sizes'][ $size_name ] = $properties;
+			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
 
 		$formats = isset( $valid_mime_transforms[ $current_mime ] ) ? $valid_mime_transforms[ $current_mime ] : array();
 
 		foreach ( $formats as $mime ) {
-			if ( empty( $sources[ $mime ] ) ) {
-				$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
-				if ( is_array( $source ) ) {
-					$sources[ $mime ] = $source;
-				}
+			// If this property exists no need to create the image again.
+			if ( ! empty( $properties['sources'][ $mime ] ) ) {
+				continue;
 			}
+
+			$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
+			if ( is_wp_error( $source ) ) {
+				continue;
+			}
+
+			$properties['sources'][ $mime ]  = $source;
+			$metadata['sizes'][ $size_name ] = $properties;
+			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
 
-		$current_size['sources']         = $sources;
-		$metadata['sizes'][ $size_name ] = $current_size;
+		$metadata['sizes'][ $size_name ] = $properties;
 	}
 
 	return $metadata;
@@ -285,3 +293,50 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 }
 
 add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
+
+/**
+ * Filter on `wp_get_missing_image_subsizes` acting as an action for the logic of the plugin
+ * to determine if additional mime types still need to be created.
+ *
+ * @since n.e.x.t
+ *
+ * @see wp_get_missing_image_subsizes()
+ *
+ * @param array $missing_sizes Associative array of arrays of image sub-sizes.
+ * @param array $image_meta The metadata from the image.
+ * @param int   $attachment_id The ID of the attachment.
+ * @return array Associative array of arrays of image sub-sizes.
+ */
+function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta, $attachment_id ) {
+	// Only setup the trace array if we no longer have more sizes.
+	if ( ! empty( $missing_sizes ) ) {
+		return $missing_sizes;
+	}
+
+	/**
+	 * The usage of `debug_backtrace` in this particular case is mainly to ensure the call to
+	 * `wp_get_missing_image_subsizes()` originated from `wp_update_image_subsizes()`, since only then the
+	 * additional image sizes should be generated. `wp_get_missing_image_subsizes()` could also be called
+	 * from other places in which case the custom logic should not trigger. In an ideal world an action
+	 * would exist in `wp_update_image_subsizes` that runs any time, but the current
+	 * `wp_generate_attachment_metadata` filter is skipped when all core sub-sizes have been generated.
+	 * An eventual core implementation will not require this workaround. The limit of 10 is used to allow
+	 * for some flexibility. While by default the function would be on index 5, other custom code may
+	 * cause the index to be slightly higher.
+	 *
+	 * @see wp_update_image_subsizes()
+	 * @see wp_get_missing_image_subsizes()
+	 */
+	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
+
+	foreach ( $trace as $element ) {
+		if ( isset( $element['function'] ) && 'wp_update_image_subsizes' === $element['function'] ) {
+			webp_uploads_create_sources_property( $image_meta, $attachment_id );
+			break;
+		}
+	}
+
+	return array();
+}
+
+add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_subsizes', 10, 3 );
