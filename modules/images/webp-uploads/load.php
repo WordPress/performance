@@ -297,11 +297,10 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  *
  * @see wp_get_missing_image_subsizes()
  *
- * @param array[] $missing_sizes Associative array of arrays of image sub-size.
+ * @param array   $missing_sizes Associative array of arrays of image sub-sizes.
  * @param array   $image_meta    The metadata from the image.
  * @param int     $attachment_id The ID of the attachment.
- *
- * @return array[] $missing_sizes Associative array of arrays of image sub-size.
+ * @return array Associative array of arrays of image sub-sizes.
  */
 function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta, $attachment_id ) {
 	$trace = array();
