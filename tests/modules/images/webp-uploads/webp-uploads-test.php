@@ -40,7 +40,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		);
 
 		yield 'WebP image' => array(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/ballons.webp',
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp',
 			'image/webp',
 			'image/jpeg',
 		);
@@ -110,7 +110,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		);
 
 		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/ballons.webp'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
 		);
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -130,7 +130,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 */
 	public function it_should_prevent_processing_an_image_with_corrupted_metadata( callable $callback, $size ) {
 		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/ballons.webp'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
 		);
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		wp_update_attachment_metadata( $attachment_id, $callback( $metadata ) );
