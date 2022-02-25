@@ -88,14 +88,19 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		$formats = isset( $valid_mime_transforms[ $current_mime ] ) ? $valid_mime_transforms[ $current_mime ] : array();
 
 		foreach ( $formats as $mime ) {
-			if ( empty( $properties['sources'][ $mime ] ) ) {
-				$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
-				if ( is_array( $source ) ) {
-					$properties['sources'][ $mime ]  = $source;
-					$metadata['sizes'][ $size_name ] = $properties;
-					wp_update_attachment_metadata( $attachment_id, $metadata );
-				}
+			// If this property exists no need to create the image again.
+			if ( ! empty( $properties['sources'][ $mime ] ) ) {
+				continue;
 			}
+
+			$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
+			if ( is_wp_error( $source ) ) {
+				continue;
+			}
+
+			$properties['sources'][ $mime ]  = $source;
+			$metadata['sizes'][ $size_name ] = $properties;
+			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
 
 		$metadata['sizes'][ $size_name ] = $properties;
@@ -297,31 +302,32 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  *
  * @see wp_get_missing_image_subsizes()
  *
- * @param array   $missing_sizes Associative array of arrays of image sub-sizes.
- * @param array   $image_meta    The metadata from the image.
- * @param int     $attachment_id The ID of the attachment.
+ * @param array $missing_sizes Associative array of arrays of image sub-sizes.
+ * @param array $image_meta The metadata from the image.
+ * @param int   $attachment_id The ID of the attachment.
  * @return array Associative array of arrays of image sub-sizes.
  */
 function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta, $attachment_id ) {
-	$trace = array();
 	// Only setup the trace array if we no longer have more sizes.
-	if ( empty( $missing_sizes ) ) {
-		/**
-		 * The usage of `debug_backtrace` in this particular case is mainly to ensure the call to
-		 * `wp_get_missing_image_subsizes()` originated from `wp_update_image_subsizes()`, since only then the
-		 * additional image sizes should be generated. `wp_get_missing_image_subsizes()` could also be called
-		 * from other places in which case the custom logic should not trigger. In an ideal world an action
-		 * would exist in `wp_update_image_subsizes` that runs any time, but the current
-		 * `wp_generate_attachment_metadata` filter is skipped when all core sub-sizes have been generated.
-		 * An eventual core implementation will not require this workaround. The limit of 10 is used to allow
-		 * for some flexibility. While by default the function would be on index 5, other custom code may
-		 * cause the index to be slightly higher.
-		 *
-		 * @see wp_update_image_subsizes()
-		 * @see wp_get_missing_image_subsizes()
-		 */
-		$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
+	if ( ! empty( $missing_sizes ) ) {
+		return $missing_sizes;
 	}
+
+	/**
+	 * The usage of `debug_backtrace` in this particular case is mainly to ensure the call to
+	 * `wp_get_missing_image_subsizes()` originated from `wp_update_image_subsizes()`, since only then the
+	 * additional image sizes should be generated. `wp_get_missing_image_subsizes()` could also be called
+	 * from other places in which case the custom logic should not trigger. In an ideal world an action
+	 * would exist in `wp_update_image_subsizes` that runs any time, but the current
+	 * `wp_generate_attachment_metadata` filter is skipped when all core sub-sizes have been generated.
+	 * An eventual core implementation will not require this workaround. The limit of 10 is used to allow
+	 * for some flexibility. While by default the function would be on index 5, other custom code may
+	 * cause the index to be slightly higher.
+	 *
+	 * @see wp_update_image_subsizes()
+	 * @see wp_get_missing_image_subsizes()
+	 */
+	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
 
 	foreach ( $trace as $element ) {
 		if ( isset( $element['function'] ) && 'wp_update_image_subsizes' === $element['function'] ) {
@@ -330,7 +336,7 @@ function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta
 		}
 	}
 
-	return $missing_sizes;
+	return array();
 }
 
 add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_subsizes', 10, 3 );
