@@ -308,12 +308,15 @@ function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta
 	// Only setup the trace array if we no longer have more sizes.
 	if ( empty( $missing_sizes ) ) {
 		/**
-		 * The usage of `debug_backtrace` in this particular case is mainly to ensure the call to this
-		 * filter was originated from `wp_update_image_subsizes()` due this function will call
-		 * `wp_get_missing_image_subsizes` at some point but this function can be called from other places
-		 * as well without having to pass from `wp_update_image_subsizes` in an ideal world an action would
-		 * exist in `wp_update_image_subsizes`, in the meantime, this is a workaround for that scenario. The
-		 * limit to 10 is to have a buffer as in an ideal scenario the function would be index 5 on the array.
+		 * The usage of `debug_backtrace` in this particular case is mainly to ensure the call to
+		 * `wp_get_missing_image_subsizes()` originated from `wp_update_image_subsizes()`, since only then the
+		 * additional image sizes should be generated. `wp_get_missing_image_subsizes()` could also be called
+		 * from other places in which case the custom logic should not trigger. In an ideal world an action
+		 * would exist in `wp_update_image_subsizes` that runs any time, but the current
+		 * `wp_generate_attachment_metadata` filter is skipped when all core sub-sizes have been generated.
+		 * An eventual core implementation will not require this workaround. The limit of 10 is used to allow
+		 * for some flexibility. While by default the function would be on index 5, other custom code may
+		 * cause the index to be slightly higher.
 		 *
 		 * @see wp_update_image_subsizes()
 		 * @see wp_get_missing_image_subsizes()
