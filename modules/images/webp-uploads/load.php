@@ -342,9 +342,13 @@ function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta
 add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_subsizes', 10, 3 );
 
 /**
- * Filters on `the_content` to update the references for supported mime of images into the
- * `webp_uploads_preferred_mime_type()` for the most part `image/webp` if the current
- * attachment contains the targeted mime type.
+ * Filters `the_content` to update images so that they use the preferred MIME type where possible.
+ *
+ * By default, this is `image/webp`, if the current attachment contains the targeted MIME
+ * type. In the near future this will be filterable.
+ *
+ * Note that most of this function will not be needed for an eventual core implementation as it
+ * would rely on `wp_filter_content_tags()`.
  *
  * @since n.e.x.t
  *
