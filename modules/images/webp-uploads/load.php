@@ -300,6 +300,10 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  * @return array[] $missing_sizes Associative array of arrays of image sub-size.
  */
 function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta, $attachment_id ) {
+	if ( ! empty( $missing_sizes ) ) {
+		return $missing_sizes;
+	}
+
 	if ( _webp_uploads_is_valid_ajax_for_image_sizes() || _webp_uploads_is_valid_rest_for_post_process( file_get_contents( 'php://input' ) ) ) {
 		webp_uploads_create_sources_property( $image_meta, $attachment_id );
 	}
