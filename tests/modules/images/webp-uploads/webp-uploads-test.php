@@ -459,10 +459,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$expected_tag = $tag;
 		$metadata     = wp_get_attachment_metadata( $attachment_id );
 		foreach ( $metadata['sizes'] as $size => $properties ) {
-			$this->assertArrayHasKey( 'image/jpeg', $properties['sources'] );
-			$this->assertArrayHasKey( 'file', $properties['sources']['image/jpeg'] );
-			$this->assertArrayHasKey( 'image/webp', $properties['sources'] );
-			$this->assertArrayHasKey( 'file', $properties['sources']['image/webp'] );
 			$expected_tag = str_replace( $properties['sources']['image/jpeg']['file'], $properties['sources']['image/webp']['file'], $expected_tag );
 		}
 
@@ -511,11 +507,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
 		$tag      = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-		foreach ( $metadata['sizes'] as $size => $properties ) {
-			$this->assertArrayNotHasKey( 'sources', $properties );
-		}
-
 		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
 	}
 
@@ -532,10 +523,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$this->assertIsNumeric( $attachment_id );
 		$tag      = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-		foreach ( $metadata['sizes'] as $size => $properties ) {
-			$this->assertArrayNotHasKey( 'sources', $properties );
-		}
 
 		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
 	}
