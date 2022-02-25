@@ -295,7 +295,7 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  *
  * @since n.e.x.t
  *
- * @see   wp_get_missing_image_subsizes()
+ * @see wp_get_missing_image_subsizes()
  *
  * @param array[] $missing_sizes Associative array of arrays of image sub-size.
  * @param array   $image_meta    The metadata from the image.
