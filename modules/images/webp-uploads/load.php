@@ -352,7 +352,7 @@ add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_
  *
  * @since n.e.x.t
  *
- * @see the_content
+ * @see wp_filter_content_tags()
  *
  * @param string $content The content of the current post.
  * @return string The content with the updated references to the images.
