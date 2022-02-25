@@ -53,11 +53,6 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			continue;
 		}
 
-		// Ensure a `sources` property exists on the existing size.
-		if ( empty( $metadata['sizes'][ $size_name ]['sources'] ) || ! is_array( $metadata['sizes'][ $size_name ]['sources'] ) ) {
-			$metadata['sizes'][ $size_name ]['sources'] = array();
-		}
-
 		// Try to find the mime type of the image size.
 		$current_mime = '';
 		if ( isset( $properties['mime-type'] ) ) {
@@ -71,30 +66,39 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			continue;
 		}
 
-		if ( empty( $metadata['sizes'][ $size_name ]['sources'][ $current_mime ] ) ) {
-			$metadata['sizes'][ $size_name ]['sources'][ $current_mime ] = array(
+		// Ensure a `sources` property exists on the existing size.
+		if ( empty( $properties['sources'] ) || ! is_array( $properties['sources'] ) ) {
+			$properties['sources'] = array();
+		}
+
+		if ( empty( $properties['sources'][ $current_mime ] ) ) {
+			$properties['sources'][ $current_mime ] = array(
 				'file'     => isset( $properties['file'] ) ? $properties['file'] : '',
 				'filesize' => 0,
 			);
 			// Set the filesize from the current mime image.
 			$file_location = path_join( $dirname, $properties['file'] );
 			if ( file_exists( $file_location ) ) {
-				$metadata['sizes'][ $size_name ]['sources'][ $current_mime ]['filesize'] = filesize( $file_location );
+				$properties['sources'][ $current_mime ]['filesize'] = filesize( $file_location );
 			}
+			$metadata['sizes'][ $size_name ] = $properties;
 			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
 
 		$formats = isset( $valid_mime_transforms[ $current_mime ] ) ? $valid_mime_transforms[ $current_mime ] : array();
 
 		foreach ( $formats as $mime ) {
-			if ( empty( $metadata['sizes'][ $size_name ]['sources'][ $mime ] ) ) {
+			if ( empty( $properties['sources'][ $mime ] ) ) {
 				$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
 				if ( is_array( $source ) ) {
-					$metadata['sizes'][ $size_name ]['sources'][ $mime ] = $source;
+					$properties['sources'][ $mime ] = $source;
+					$metadata['sizes'][ $size_name ] = $properties;
 					wp_update_attachment_metadata( $attachment_id, $metadata );
 				}
 			}
 		}
+
+		$metadata['sizes'][ $size_name ] = $properties;
 	}
 
 	return $metadata;
