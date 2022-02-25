@@ -286,6 +286,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 		}
 	}
 }
+
 add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
 
 /**
@@ -314,6 +315,8 @@ function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta
 	return $missing_sizes;
 }
 
+add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_subsizes', 10, 3 );
+
 /**
  * Determine if the current request is a valid request to process missing image sizes, executed
  * via ajax.
@@ -339,8 +342,6 @@ function _webp_uploads_is_valid_rest_for_post_process( $body = '' ) {
 
 	return $valid_route && ! empty( $matches ) && ! empty( $body['action'] ) && 'create-image-subsizes' === $body['action'];
 }
-
-add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_subsizes', 10, 3 );
 
 /**
  * Filters on `the_content` to update the references for supported mime of images into the
