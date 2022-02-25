@@ -393,7 +393,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_avoid_the_change_of_ur_ls_of_images_that_are_not_part_of_the_media_library() {
+	public function it_should_avoid_the_change_of_urls_of_images_that_are_not_part_of_the_media_library() {
 		$paragraph = '<p>Donec accumsan, sapien et <img src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">, id commodo nisi sapien et est. Mauris nisl odio, iaculis vitae pellentesque nec.</p>';
 
 		$this->assertSame( $paragraph, webp_uploads_update_image_references( $paragraph ) );
