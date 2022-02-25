@@ -506,7 +506,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
-		$tag      = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
 	}
 
@@ -522,7 +522,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 
 		$this->assertIsNumeric( $attachment_id );
-		$tag      = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 
 		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
 	}
