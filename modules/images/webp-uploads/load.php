@@ -336,22 +336,23 @@ add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_
  */
 function webp_uploads_update_image_references( $content ) {
 	// This content does not have any tag on it, move forward.
-	if ( ! preg_match_all( '/<(img)\s[^>]+>/', $content, $tags, PREG_SET_ORDER ) ) {
+	if ( ! preg_match_all( '/<(img)\s[^>]+>/', $content, $img_tags, PREG_SET_ORDER ) ) {
 		return $content;
 	}
 
 	$images = array();
-	foreach ( $tags as list( $tag ) ) {
+	foreach ( $img_tags as list( $img ) ) {
 		// Find the ID of each image by the class.
-		if ( ! preg_match( '/wp-image-([\d]+)/i', $tag, $class_id ) ) {
+		if ( ! preg_match( '/wp-image-([\d]+)/i', $img, $class_name ) ) {
 			continue;
 		}
 
-		if ( empty( $class_id ) ) {
+		if ( empty( $class_name ) ) {
 			continue;
 		}
 
-		$attachment_id = (int) end( $class_id );
+		// Make sure we use the last item on the list of matches.
+		$attachment_id = (int) end( $class_name );
 
 		if ( ! $attachment_id ) {
 			continue;
@@ -362,15 +363,13 @@ function webp_uploads_update_image_references( $content ) {
 			$images[ $attachment_id ] = array();
 		}
 
-		// TODO: Possible a filter can be added here in order to detect the image extensions supported.
 		$target_extensions = array(
 			'jpeg',
 			'jpg',
-			'webp',
 		);
 
-		// Creates a regular extension to find all the files with the provided extensions above.
-		preg_match_all( '/[^\s"]+\.(?:' . implode( '|', $target_extensions ) . ')/i', $tag, $matches );
+		// Creates a regular extension to find all the URLS with the provided extension for img tag.
+		preg_match_all( '/[^\s"]+\.(?:' . implode( '|', $target_extensions ) . ')/i', $img, $matches );
 
 		$urls = empty( $matches ) ? array() : reset( $matches );
 
@@ -379,7 +378,7 @@ function webp_uploads_update_image_references( $content ) {
 		}
 	}
 
-	// TODO: Add a filterable option to change the selected mime type.
+	// TODO: Add a filterable option to change the selected mime type. See https://github.com/WordPress/performance/issues/187.
 	$target_mime = 'image/webp';
 	$replacement = array();
 	foreach ( $images as $attachment_id => $urls ) {
@@ -394,7 +393,7 @@ function webp_uploads_update_image_references( $content ) {
 		foreach ( $urls as $url => $exists ) {
 
 			if ( isset( $metadata['file'] ) && strpos( $url, $basename ) !== false ) {
-				// TODO: we don't have a replacement for full image yet.
+				// TODO: we don't have a replacement for full image yet, issue. See: https://github.com/WordPress/performance/issues/174.
 				continue;
 			}
 
@@ -405,19 +404,19 @@ function webp_uploads_update_image_references( $content ) {
 			$src_filename = wp_basename( $url );
 			$extension    = wp_check_filetype( $src_filename );
 
-			// Extension was not set properly no action possible.
+			// Extension was not set properly no action possible or extension is already in the expected mime.
 			if ( empty( $extension['type'] ) || $extension['type'] === $target_mime ) {
 				continue;
 			}
 
+			// Find the appropriate size for the provided URL.
 			foreach ( $metadata['sizes'] as $name => $size_data ) {
-
 				// Not the size we are looking for.
 				if ( $src_filename !== $size_data['file'] ) {
 					continue;
 				}
 
-				if ( empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
+				if ( empty( $size_data['sources'][ $target_mime ] ) || empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
 					continue;
 				}
 
