@@ -49,7 +49,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	$dirname = pathinfo( $file, PATHINFO_DIRNAME );
 	foreach ( $metadata['sizes'] as $size_name => $properties ) {
 		// This image size is not defined or not an array.
-		if ( ! isset( $metadata['sizes'][ $size_name ] ) || ! is_array( $metadata['sizes'][ $size_name ] ) ) {
+		if ( ! is_array( $properties ) ) {
 			continue;
 		}
 
