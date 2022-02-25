@@ -91,7 +91,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			if ( empty( $properties['sources'][ $mime ] ) ) {
 				$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
 				if ( is_array( $source ) ) {
-					$properties['sources'][ $mime ] = $source;
+					$properties['sources'][ $mime ]  = $source;
 					$metadata['sizes'][ $size_name ] = $properties;
 					wp_update_attachment_metadata( $attachment_id, $metadata );
 				}
