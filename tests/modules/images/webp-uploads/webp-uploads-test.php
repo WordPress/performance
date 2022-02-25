@@ -467,6 +467,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		}
 
 		$this->assertNotEmpty( $expected_tag );
+		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, webp_uploads_update_image_references( $tag ) );
 	}
 
