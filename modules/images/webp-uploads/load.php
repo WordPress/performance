@@ -49,13 +49,8 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	$dirname = pathinfo( $file, PATHINFO_DIRNAME );
 	foreach ( $metadata['sizes'] as $size_name => $properties ) {
 		// This image size is not defined or not an array.
-		if ( ! isset( $metadata['sizes'][ $size_name ] ) || ! is_array( $metadata['sizes'][ $size_name ] ) ) {
+		if ( ! is_array( $properties ) ) {
 			continue;
-		}
-
-		// Ensure a `sources` property exists on the existing size.
-		if ( empty( $metadata['sizes'][ $size_name ]['sources'] ) || ! is_array( $metadata['sizes'][ $size_name ]['sources'] ) ) {
-			$metadata['sizes'][ $size_name ]['sources'] = array();
 		}
 
 		// Try to find the mime type of the image size.
@@ -71,30 +66,39 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			continue;
 		}
 
-		if ( empty( $metadata['sizes'][ $size_name ]['sources'][ $current_mime ] ) ) {
-			$metadata['sizes'][ $size_name ]['sources'][ $current_mime ] = array(
-				'file'     => array_key_exists( 'file', $properties ) ? $properties['file'] : '',
+		// Ensure a `sources` property exists on the existing size.
+		if ( empty( $properties['sources'] ) || ! is_array( $properties['sources'] ) ) {
+			$properties['sources'] = array();
+		}
+
+		if ( empty( $properties['sources'][ $current_mime ] ) ) {
+			$properties['sources'][ $current_mime ] = array(
+				'file'     => isset( $properties['file'] ) ? $properties['file'] : '',
 				'filesize' => 0,
 			);
 			// Set the filesize from the current mime image.
 			$file_location = path_join( $dirname, $properties['file'] );
 			if ( file_exists( $file_location ) ) {
-				$metadata['sizes'][ $size_name ]['sources'][ $current_mime ]['filesize'] = filesize( $file_location );
+				$properties['sources'][ $current_mime ]['filesize'] = filesize( $file_location );
 			}
+			$metadata['sizes'][ $size_name ] = $properties;
 			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
 
 		$formats = isset( $valid_mime_transforms[ $current_mime ] ) ? $valid_mime_transforms[ $current_mime ] : array();
 
 		foreach ( $formats as $mime ) {
-			if ( empty( $metadata['sizes'][ $size_name ]['sources'][ $mime ] ) ) {
+			if ( empty( $properties['sources'][ $mime ] ) ) {
 				$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
 				if ( is_array( $source ) ) {
-					$metadata['sizes'][ $size_name ]['sources'][ $mime ] = $source;
+					$properties['sources'][ $mime ]  = $source;
+					$metadata['sizes'][ $size_name ] = $properties;
 					wp_update_attachment_metadata( $attachment_id, $metadata );
 				}
 			}
 		}
+
+		$metadata['sizes'][ $size_name ] = $properties;
 	}
 
 	return $metadata;
@@ -143,7 +147,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 	}
 
 	$allowed_mimes = array_flip( wp_get_mime_types() );
-	if ( ! array_key_exists( $mime, $allowed_mimes ) || ! is_string( $allowed_mimes[ $mime ] ) ) {
+	if ( ! isset( $allowed_mimes[ $mime ] ) || ! is_string( $allowed_mimes[ $mime ] ) ) {
 		return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'performance-lab' ) );
 	}
 
@@ -158,19 +162,19 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 	$height = null;
 	$crop   = false;
 
-	if ( array_key_exists( 'width', $metadata['sizes'][ $size ] ) ) {
+	if ( isset( $metadata['sizes'][ $size ]['width'] ) ) {
 		$width = $metadata['sizes'][ $size ]['width'];
-	} elseif ( array_key_exists( 'width', $sizes[ $size ] ) ) {
+	} elseif ( isset( $sizes[ $size ]['widht'] ) ) {
 		$width = $sizes[ $size ];
 	}
 
-	if ( array_key_exists( 'height', $metadata['sizes'][ $size ] ) ) {
+	if ( isset( $metadata['sizes'][ $size ]['height'] ) ) {
 		$height = $metadata['sizes'][ $size ]['height'];
-	} elseif ( array_key_exists( 'width', $sizes[ $size ] ) ) {
+	} elseif ( isset( $sizes[ $size ]['width'] ) ) {
 		$height = $sizes[ $size ];
 	}
 
-	if ( array_key_exists( 'crop', $sizes[ $size ] ) ) {
+	if ( isset( $sizes[ $size ]['crop'] ) ) {
 		$crop = (bool) $sizes[ $size ]['crop'];
 	}
 
@@ -189,7 +193,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 
 	return array(
 		'file'     => $image['file'],
-		'filesize' => array_key_exists( 'path', $image ) ? filesize( $image['path'] ) : 0,
+		'filesize' => isset( $image['path'] ) ? filesize( $image['path'] ) : 0,
 	);
 }
 
@@ -299,6 +303,10 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  * @return array[] $missing_sizes Associative array of arrays of image sub-size.
  */
 function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta, $attachment_id ) {
+	if ( ! empty( $missing_sizes ) ) {
+		return $missing_sizes;
+	}
+
 	if ( _webp_uploads_is_valid_ajax_for_image_sizes() || _webp_uploads_is_valid_rest_for_post_process( file_get_contents( 'php://input' ) ) ) {
 		webp_uploads_create_sources_property( $image_meta, $attachment_id );
 	}
