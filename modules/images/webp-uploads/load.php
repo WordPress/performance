@@ -390,7 +390,7 @@ function webp_uploads_update_image_references( $content ) {
 	}
 
 	if ( count( $images ) > 1 ) {
-		/*
+		/**
 		 * Warm the object cache with post and meta information for all found
 		 * images to avoid making individual database calls.
 		 */
