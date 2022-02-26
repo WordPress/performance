@@ -375,7 +375,7 @@ function webp_uploads_update_image_references( $content ) {
 		}
 
 		// Make sure we use the last item on the list of matches.
-		$attachment_id = (int) end( $class_name );
+		$attachment_id = (int) $class_name[1];
 
 		if ( ! $attachment_id ) {
 			continue;
