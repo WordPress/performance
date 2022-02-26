@@ -56,6 +56,7 @@ function perflab_oc_health_persistent_object_cache() {
 			'label' => __( 'Performance', 'performance-lab' ),
 			'color' => 'blue',
 		),
+		'label'       => __( 'A persistent object cache is being used', 'performance-lab' ),
 		'description' => sprintf(
 			'<p>%s</p>',
 			__( "WordPress performs at its best when a persistent object cache is used. A persistent object cache helps to reduce load on your SQL server significantly and allows WordPress to retrieve your site's content and settings much faster.", 'performance-lab' )
@@ -70,8 +71,6 @@ function perflab_oc_health_persistent_object_cache() {
 	);
 
 	if ( wp_using_ext_object_cache() ) {
-		$result['label'] = __( 'A persistent object cache is being used', 'performance-lab' );
-
 		return $result;
 	}
 
