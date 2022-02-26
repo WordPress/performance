@@ -111,8 +111,8 @@ function perflab_oc_health_persistent_object_cache() {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $notes The notes appended to the health check description.
-	 * @param array $available_services The list of available persistent object cache services.
+	 * @param string $notes              The notes appended to the health check description.
+	 * @param array  $available_services The list of available persistent object cache services.
 	 */
 	$notes = apply_filters( 'perflab_oc_site_status_persistent_object_cache_notes', $notes, $available_services );
 
