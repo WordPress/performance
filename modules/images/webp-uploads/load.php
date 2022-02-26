@@ -386,70 +386,84 @@ function webp_uploads_update_image_references( $content ) {
 			$images[ $attachment_id ] = array();
 		}
 
-		$target_extensions = array(
-			'jpeg',
-			'jpg',
-		);
+		$images[ $attachment_id ][] = $img;
+	}
 
-		// Creates a regular extension to find all the URLS with the provided extension for img tag.
-		preg_match_all( '/[^\s"]+\.(?:' . implode( '|', $target_extensions ) . ')/i', $img, $matches );
+	foreach ( $images as $attachment_id => $images_tag ) {
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
-		$urls = empty( $matches ) ? array() : reset( $matches );
-
-		foreach ( $urls as $url ) {
-			$images[ $attachment_id ][ $url ] = true;
+		foreach ( $images_tag as $img ) {
+			$content = str_replace( $img, webp_uploads_img_tag_update_mime_type( $img, $metadata ), $content );
 		}
 	}
 
+	return $content;
+}
+
+/**
+ * Finds all the urls with *.jpg and *.jpeg extension and updates with *.webp version for the provided image
+ * for the specified image sizes, the *.webp references are stored inside of each size.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $image An <img> tag where the urls would be updated.
+ * @param array  $metadata An associative array with the metadata for the image.
+ * @return string The updated img tag.
+ */
+function webp_uploads_img_tag_update_mime_type( $image, array $metadata ) {
+	if ( empty($metadata['file'] ) ) {
+		return $image;
+	}
+
+	// Creates a regular extension to find all the URLS with the provided extension for img tag.
+	preg_match_all( '/[^\s"]+\.jpe?g/i', $image, $matches );
+	if ( empty( $matches ) ) {
+		return $image;
+	}
+
+	$urls = reset( $matches );
 	// TODO: Add a filterable option to change the selected mime type. See https://github.com/WordPress/performance/issues/187.
 	$target_mime = 'image/webp';
-	$replacement = array();
-	foreach ( $images as $attachment_id => $urls ) {
-		$metadata = wp_get_attachment_metadata( $attachment_id );
 
-		if ( empty( $metadata['file'] ) ) {
+	$basename = wp_basename( $metadata['file'] );
+	foreach ( $urls as $url ) {
+		if ( isset( $metadata['file'] ) && strpos( $url, $basename ) !== false ) {
+			// TODO: we don't have a replacement for full image yet, issue. See: https://github.com/WordPress/performance/issues/174.
 			continue;
 		}
 
-		$basename = wp_basename( $metadata['file'] );
+		if ( empty( $metadata['sizes'] ) ) {
+			continue;
+		}
 
-		foreach ( $urls as $url => $exists ) {
+		$src_filename = wp_basename( $url );
+		$extension    = wp_check_filetype( $src_filename );
+		// Extension was not set properly no action possible or extension is already in the expected mime.
+		if ( empty( $extension['type'] ) || $extension['type'] === $target_mime ) {
+			continue;
+		}
 
-			if ( isset( $metadata['file'] ) && strpos( $url, $basename ) !== false ) {
-				// TODO: we don't have a replacement for full image yet, issue. See: https://github.com/WordPress/performance/issues/174.
+		// Find the appropriate size for the provided URL.
+		foreach ( $metadata['sizes'] as $name => $size_data ) {
+			// Not the size we are looking for.
+			if ( empty( $size_data['file'] ) || $src_filename !== $size_data['file'] ) {
 				continue;
 			}
 
-			if ( empty( $metadata['sizes'] ) ) {
+			if ( empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
 				continue;
 			}
 
-			$src_filename = wp_basename( $url );
-			$extension    = wp_check_filetype( $src_filename );
-
-			// Extension was not set properly no action possible or extension is already in the expected mime.
-			if ( empty( $extension['type'] ) || $extension['type'] === $target_mime ) {
+			// This is the same as the file we want to replace nothing to do here.
+			if ( $size_data['sources'][ $target_mime ]['file'] === $src_filename ) {
 				continue;
 			}
 
-			// Find the appropriate size for the provided URL.
-			foreach ( $metadata['sizes'] as $name => $size_data ) {
-				// Not the size we are looking for.
-				if ( $src_filename !== $size_data['file'] ) {
-					continue;
-				}
-
-				if ( empty( $size_data['sources'][ $target_mime ] ) || empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
-					continue;
-				}
-
-				$replacement[ $src_filename ] = $size_data['sources'][ $target_mime ]['file'];
-			}
+			$image = str_replace( $src_filename, $size_data['sources'][ $target_mime ]['file'], $image );
 		}
 	}
 
-	// Replacement of URLs where the keys are the searched value and the values of each key the value to replace with.
-	return str_replace( array_keys( $replacement ), array_values( $replacement ), $content );
+	return $image;
 }
 
 add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
