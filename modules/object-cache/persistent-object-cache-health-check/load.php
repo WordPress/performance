@@ -94,9 +94,9 @@ function perflab_oc_health_persistent_object_cache() {
 	$notes = __( 'Speak to your web host about what persistent object caches are available and how to enable them.', 'performance-lab' );
 
 	if ( ! empty( $available_services ) ) {
-		$notes .= sprintf(
+		$notes .= ' ' . sprintf(
 			/* translators: Available object caching services. */
-			__( ' Your host appears to support the following object caching services: %s.', 'performance-lab' ),
+			__( 'Your host appears to support the following object caching services: %s.', 'performance-lab' ),
 			implode( ', ', $available_services )
 		);
 	}
