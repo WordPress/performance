@@ -421,7 +421,7 @@ function webp_uploads_img_tag_update_mime_type( $image, array $metadata ) {
 		return $image;
 	}
 
-	$urls = reset( $matches );
+	$urls = $matches[0];
 	// TODO: Add a filterable option to change the selected mime type. See https://github.com/WordPress/performance/issues/187.
 	$target_mime = 'image/webp';
 
