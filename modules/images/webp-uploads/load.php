@@ -411,7 +411,7 @@ function webp_uploads_update_image_references( $content ) {
  * @return string The updated img tag.
  */
 function webp_uploads_img_tag_update_mime_type( $image, array $metadata ) {
-	if ( empty($metadata['file'] ) ) {
+	if ( empty( $metadata['file'] ) ) {
 		return $image;
 	}
 
