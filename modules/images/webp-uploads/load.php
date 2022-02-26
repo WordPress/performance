@@ -389,6 +389,13 @@ function webp_uploads_update_image_references( $content ) {
 		$images[ $attachment_id ][] = $img;
 	}
 
+	if ( count( $images ) > 1 ) {
+		/*
+		 * Warm the object cache with post and meta information for all found
+		 * images to avoid making individual database calls.
+		 */
+		_prime_post_caches( array_keys( $images ), false, true );
+	}
 	foreach ( $images as $attachment_id => $images_tag ) {
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
