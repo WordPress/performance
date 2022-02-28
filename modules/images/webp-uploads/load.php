@@ -340,3 +340,138 @@ function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta
 }
 
 add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_subsizes', 10, 3 );
+
+/**
+ * Filters `the_content` to update images so that they use the preferred MIME type where possible.
+ *
+ * By default, this is `image/webp`, if the current attachment contains the targeted MIME
+ * type. In the near future this will be filterable.
+ *
+ * Note that most of this function will not be needed for an eventual core implementation as it
+ * would rely on `wp_filter_content_tags()`.
+ *
+ * @since n.e.x.t
+ *
+ * @see wp_filter_content_tags()
+ *
+ * @param string $content The content of the current post.
+ * @return string The content with the updated references to the images.
+ */
+function webp_uploads_update_image_references( $content ) {
+	// This content does not have any tag on it, move forward.
+	if ( ! preg_match_all( '/<(img)\s[^>]+>/', $content, $img_tags, PREG_SET_ORDER ) ) {
+		return $content;
+	}
+
+	$images = array();
+	foreach ( $img_tags as list( $img ) ) {
+		// Find the ID of each image by the class.
+		if ( ! preg_match( '/wp-image-([\d]+)/i', $img, $class_name ) ) {
+			continue;
+		}
+
+		if ( empty( $class_name ) ) {
+			continue;
+		}
+
+		// Make sure we use the last item on the list of matches.
+		$attachment_id = (int) $class_name[1];
+
+		if ( ! $attachment_id ) {
+			continue;
+		}
+
+		$images[ $img ] = $attachment_id;
+	}
+
+	$attachment_ids = array_unique( array_filter( array_values( $images ) ) );
+	if ( count( $attachment_ids ) > 1 ) {
+		/**
+		 * Warm the object cache with post and meta information for all found
+		 * images to avoid making individual database calls.
+		 */
+		_prime_post_caches( $attachment_ids, false, true );
+	}
+
+	foreach ( $images as $img => $attachment_id ) {
+		$content = str_replace( $img, webp_uploads_img_tag_update_mime_type( $img, 'the_content', $attachment_id ), $content );
+	}
+
+	return $content;
+}
+
+/**
+ * Finds all the urls with *.jpg and *.jpeg extension and updates with *.webp version for the provided image
+ * for the specified image sizes, the *.webp references are stored inside of each size.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $image         An <img> tag where the urls would be updated.
+ * @param string $context       The context where this is function is being used.
+ * @param int    $attachment_id The ID of the attachment being modified.
+ * @return string The updated img tag.
+ */
+function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id ) {
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+	if ( empty( $metadata['file'] ) ) {
+		return $image;
+	}
+
+	// TODO: Add a filterable option to determine image extensions, see https://github.com/WordPress/performance/issues/187 for more details.
+	$target_image_extensions = array(
+		'jpg',
+		'jpeg',
+	);
+
+	// Creates a regular extension to find all the URLS with the provided extension for img tag.
+	preg_match_all( '/[^\s"]+\.(?:' . implode( '|', $target_image_extensions ) . ')/i', $image, $matches );
+	if ( empty( $matches ) ) {
+		return $image;
+	}
+
+	$urls = $matches[0];
+	// TODO: Add a filterable option to change the selected mime type. See https://github.com/WordPress/performance/issues/187.
+	$target_mime = 'image/webp';
+
+	$basename = wp_basename( $metadata['file'] );
+	foreach ( $urls as $url ) {
+		if ( isset( $metadata['file'] ) && strpos( $url, $basename ) !== false ) {
+			// TODO: we don't have a replacement for full image yet, issue. See: https://github.com/WordPress/performance/issues/174.
+			continue;
+		}
+
+		if ( empty( $metadata['sizes'] ) ) {
+			continue;
+		}
+
+		$src_filename = wp_basename( $url );
+		$extension    = wp_check_filetype( $src_filename );
+		// Extension was not set properly no action possible or extension is already in the expected mime.
+		if ( empty( $extension['type'] ) || $extension['type'] === $target_mime ) {
+			continue;
+		}
+
+		// Find the appropriate size for the provided URL.
+		foreach ( $metadata['sizes'] as $name => $size_data ) {
+			// Not the size we are looking for.
+			if ( empty( $size_data['file'] ) || $src_filename !== $size_data['file'] ) {
+				continue;
+			}
+
+			if ( empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
+				continue;
+			}
+
+			// This is the same as the file we want to replace nothing to do here.
+			if ( $size_data['sources'][ $target_mime ]['file'] === $src_filename ) {
+				continue;
+			}
+
+			$image = str_replace( $src_filename, $size_data['sources'][ $target_mime ]['file'], $image );
+		}
+	}
+
+	return $image;
+}
+
+add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );

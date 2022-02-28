@@ -40,7 +40,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		);
 
 		yield 'WebP image' => array(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/ballons.webp',
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp',
 			'image/webp',
 			'image/jpeg',
 		);
@@ -110,7 +110,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		);
 
 		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/ballons.webp'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
 		);
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -130,7 +130,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 */
 	public function it_should_prevent_processing_an_image_with_corrupted_metadata( callable $callback, $size ) {
 		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/ballons.webp'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
 		);
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		wp_update_attachment_metadata( $attachment_id, $callback( $metadata ) );
@@ -384,5 +384,151 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$this->assertFileDoesNotExist(
 			path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] )
 		);
+	}
+
+	/**
+	 * Avoid the change of URLs of images that are not part of the media library
+	 *
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_avoid_the_change_of_urls_of_images_that_are_not_part_of_the_media_library() {
+		$paragraph = '<p>Donec accumsan, sapien et <img src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">, id commodo nisi sapien et est. Mauris nisl odio, iaculis vitae pellentesque nec.</p>';
+
+		$this->assertSame( $paragraph, webp_uploads_update_image_references( $paragraph ) );
+	}
+
+	/**
+	 * Avoid replacing not existing attachment IDs
+	 *
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_avoid_replacing_not_existing_attachment_i_ds() {
+		$paragraph = '<p>Donec accumsan, sapien et <img class="wp-image-0" src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">, id commodo nisi sapien et est. Mauris nisl odio, iaculis vitae pellentesque nec.</p>';
+
+		$this->assertSame( $paragraph, webp_uploads_update_image_references( $paragraph ) );
+	}
+
+	/**
+	 * Prevent replacing a WebP image
+	 *
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_prevent_replacing_a_webp_image() {
+		$attachment_id = $this->factory->attachment->create_upload_object(
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
+		);
+
+		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
+
+	/**
+	 * Prevent replacing a jpg image if the image does not have the target class name
+	 *
+	 * @test
+	 */
+	public function it_should_prevent_replacing_a_jpg_image_if_the_image_does_not_have_the_target_class_name() {
+		$attachment_id = $this->factory->attachment->create_upload_object(
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+		);
+
+		$tag = wp_get_attachment_image( $attachment_id, 'medium' );
+
+		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
+	}
+
+	/**
+	 * Replace the references to a JPG image to a WebP version
+	 *
+	 * @dataProvider provider_replace_images_with_different_extensions
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_replace_the_references_to_a_jpg_image_to_a_webp_version( $image_path ) {
+		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+
+		$tag          = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$expected_tag = $tag;
+		$metadata     = wp_get_attachment_metadata( $attachment_id );
+		foreach ( $metadata['sizes'] as $size => $properties ) {
+			$expected_tag = str_replace( $properties['sources']['image/jpeg']['file'], $properties['sources']['image/webp']['file'], $expected_tag );
+		}
+
+		$this->assertNotEmpty( $expected_tag );
+		$this->assertNotSame( $tag, $expected_tag );
+		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
+
+	public function provider_replace_images_with_different_extensions() {
+		yield 'An image with a .jpg extension' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		yield 'An image with a .jpeg extension' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+	}
+
+	/**
+	 * Contain the full image size from the original mime
+	 *
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_contain_the_full_image_size_from_the_original_mime() {
+		$attachment_id = $this->factory->attachment->create_upload_object(
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+		);
+
+		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$expected = array(
+			'ext'  => 'jpg',
+			'type' => 'image/jpeg',
+		);
+		$this->assertSame( $expected, wp_check_filetype( get_attached_file( $attachment_id ) ) );
+		$this->assertContains( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
+
+	/**
+	 * Prevent replacing an image with no available sources
+	 *
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_prevent_replacing_an_image_with_no_available_sources() {
+		add_filter( 'webp_uploads_supported_image_mime_transforms', '__return_empty_array' );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
+
+	/**
+	 * Prevent update not supported images with no available sources
+	 *
+	 * @dataProvider data_provider_not_supported_webp_images
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_prevent_update_not_supported_images_with_no_available_sources( $image_path ) {
+		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+
+		$this->assertIsNumeric( $attachment_id );
+		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
+
+	public function data_provider_not_supported_webp_images() {
+		yield 'PNG image' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dice.png' );
+		yield 'GIFT image' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/earth.gif' );
 	}
 }
