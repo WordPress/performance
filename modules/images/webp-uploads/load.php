@@ -536,8 +536,8 @@ function webp_uploads_update_image_references( $content ) {
  *
  * @since n.e.x.t
  *
- * @param string $image An <img> tag where the urls would be updated.
- * @param string $context The context where this is function is being used.
+ * @param string $image         An <img> tag where the urls would be updated.
+ * @param string $context       The context where this is function is being used.
  * @param int    $attachment_id The ID of the attachment being modified.
  * @return string The updated img tag.
  */
