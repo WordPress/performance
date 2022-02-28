@@ -15,7 +15,7 @@ class Object_Cache_Health_Check_Tests extends WP_UnitTestCase {
 	}
 
 	function test_object_cache_thresholds_check_can_be_bypassed() {
-		add_filter('perflab_oc_site_status_persistent_object_cache_thresholds', '__return_true');
+		add_filter( 'perflab_oc_site_status_persistent_object_cache_thresholds', '__return_true' );
 
 		$result = perflab_oc_health_should_persistent_object_cache();
 
