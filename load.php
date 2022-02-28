@@ -8,6 +8,8 @@
  * Version: 1.0.0-beta.1
  * Author: WordPress Performance Group
  * Author URI: https://make.wordpress.org/core/tag/performance/
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * Text Domain: performance-lab
  *
  * @package performance-lab
