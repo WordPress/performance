@@ -23,7 +23,6 @@ class Object_Cache_Health_Check_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 *
 	 * @dataProvider thresholds
 	 */
 	function test_object_cache_thresholds( $threshold, $count ) {
