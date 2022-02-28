@@ -124,9 +124,7 @@ function budget_calc_render_json( $value ) {
 	$data = array( array( 'resourceSizes' => $resource_sizes ) );
 
 	header( 'Content-disposition: attachment; filename=budget.json' );
-	header( 'Content-type: application/json' );
-	echo wp_json_encode( $data );
-	die;
+	wp_send_json( $data );
 }
 
 /**
