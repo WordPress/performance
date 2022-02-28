@@ -336,3 +336,23 @@ function perflab_get_module_data( $module_file ) {
 
 	return $module_data;
 }
+
+/**
+ * Enable all non-experimental modules on plugin activation.
+ *
+ * @since 1.0.0
+ */
+function perflab_activation_hook() {
+	$modules          = perflab_get_modules();
+	$modules_settings = perflab_get_module_settings();
+
+	foreach ( $modules as $module_name => $module_data ) {
+		if ( ! $module_data['experimental'] ) {
+			$modules_settings[ $module_name ]['enabled'] = true;
+		}
+	}
+
+	update_option( PERFLAB_MODULES_SETTING, $modules_settings );
+}
+
+register_activation_hook( __FILE__, 'perflab_activation_hook' );
