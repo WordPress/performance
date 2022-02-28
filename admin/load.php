@@ -348,11 +348,11 @@ function perflab_activation_hook() {
 
 	foreach ( $modules as $module_name => $module_data ) {
 		if ( ! $module_data['experimental'] ) {
-			$modules_settings[ $module_name ]['enabled'] = true;
+			$modules_settings[ $module_name ] = array( 'enabled' => true );
 		}
 	}
 
 	update_option( PERFLAB_MODULES_SETTING, $modules_settings );
 }
 
-register_activation_hook( __FILE__, 'perflab_activation_hook' );
+register_activation_hook( dirname( __DIR__ ) . '/load.php', 'perflab_activation_hook' );
