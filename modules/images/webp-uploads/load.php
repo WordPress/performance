@@ -576,7 +576,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 			continue;
 		}
 
-		$extension    = wp_check_filetype( $src_filename );
+		$extension = wp_check_filetype( $src_filename );
 		// Extension was not set properly no action possible or extension is already in the expected mime.
 		if ( empty( $extension['type'] ) || $extension['type'] === $target_mime ) {
 			continue;
