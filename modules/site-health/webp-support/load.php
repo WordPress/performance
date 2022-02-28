@@ -1,6 +1,6 @@
 <?php
 /**
- * Module Name: Web Support
+ * Module Name: WebP Support
  * Description: Adds a WebP support check in Site Health status.
  * Experimental: No
  *
