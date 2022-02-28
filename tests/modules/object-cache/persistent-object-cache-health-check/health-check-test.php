@@ -9,17 +9,17 @@
 class Object_Cache_Health_Check_Tests extends WP_UnitTestCase {
 
 	function test_object_cache_default_thresholds() {
-		$result = perflab_oc_health_should_persistent_object_cache();
-
-		$this->assertFalse( $result );
+		$this->assertFalse(
+			perflab_oc_health_should_persistent_object_cache()
+		);
 	}
 
 	function test_object_cache_thresholds_check_can_be_bypassed() {
 		add_filter( 'perflab_oc_site_status_suggest_persistent_object_cache', '__return_true' );
 
-		$result = perflab_oc_health_should_persistent_object_cache();
-
-		$this->assertTrue( $result );
+		$this->assertTrue(
+			perflab_oc_health_should_persistent_object_cache()
+		);
 	}
 
 	/**
@@ -33,9 +33,9 @@ class Object_Cache_Health_Check_Tests extends WP_UnitTestCase {
 			}
 		);
 
-		$result = perflab_oc_health_should_persistent_object_cache();
-
-		$this->assertTrue( $result );
+		$this->assertTrue(
+			perflab_oc_health_should_persistent_object_cache()
+		);
 	}
 
 	function thresholds() {
