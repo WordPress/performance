@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: WebP Uploads
- * Description: Uses WebP as the default format for new JPEG image uploads if the server supports it.
+ * Description: Creates WebP versions for new JPEG image uploads if supported by the server.
  * Experimental: No
  *
  * @since   1.0.0

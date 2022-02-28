@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: Persistent Object Cache Health Check
- * Description: Recommend a persistent object cache for sites with non-trivial amounts of data.
+ * Description: Adds a persistent object cache check for sites with non-trivial amounts of data in Site Health status.
  * Experimental: No
  *
  * @package performance-lab
