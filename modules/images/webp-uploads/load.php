@@ -398,7 +398,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 	$original_mime_from_post = get_post_mime_type( $attachment_id );
 	$original_mime_from_file = wp_check_filetype( $file )['type'];
 
-	// Delete of full sizes mime types.
+	// Delete full sizes mime types.
 	foreach ( $metadata['sources'] as $mime => $properties ) {
 		// Don't remove the image with the same mime type as the original image as this would be removed by WordPress.
 		if ( $mime === $original_mime_from_post || $mime === $original_mime_from_file ) {
