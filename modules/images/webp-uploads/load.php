@@ -381,25 +381,20 @@ function webp_uploads_update_image_references( $content ) {
 			continue;
 		}
 
-		// Create an array if attachment_id has not been added to the images array.
-		if ( empty( $images[ $attachment_id ] ) ) {
-			$images[ $attachment_id ] = array();
-		}
-
-		$images[ $attachment_id ][] = $img;
+		$images[ $img ] = $attachment_id;
 	}
 
-	if ( count( $images ) > 1 ) {
+	$attachment_ids = array_unique( array_filter( array_values( $images ) ) );
+	if ( count( $attachment_ids ) > 1 ) {
 		/**
 		 * Warm the object cache with post and meta information for all found
 		 * images to avoid making individual database calls.
 		 */
-		_prime_post_caches( array_keys( $images ), false, true );
+		_prime_post_caches( $attachment_ids, false, true );
 	}
-	foreach ( $images as $attachment_id => $images_tag ) {
-		foreach ( $images_tag as $img ) {
-			$content = str_replace( $img, webp_uploads_img_tag_update_mime_type( $img, 'the_content', $attachment_id ), $content );
-		}
+
+	foreach ( $images as $img => $attachment_id ) {
+		$content = str_replace( $img, webp_uploads_img_tag_update_mime_type( $img, 'the_content', $attachment_id ), $content );
 	}
 
 	return $content;
