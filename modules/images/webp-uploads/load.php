@@ -160,9 +160,6 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 		return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'performance-lab' ) );
 	}
 
-	$extension = explode( '|', $allowed_mimes[ $mime ] );
-	$extension = reset( $extension );
-
 	$width  = null;
 	$height = null;
 	$crop   = false;
@@ -183,10 +180,12 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 		$crop = (bool) $sizes[ $size ]['crop'];
 	}
 
+	$extension = explode( '|', $allowed_mimes[ $mime ] );
+	$extension = reset( $extension );
 	$editor->resize( $width, $height, $crop );
-	$filename = $editor->generate_filename( null, null, $extension );
-	$filename = preg_replace( '/-(scaled|rotated|imagifyresized)/', '', $filename );
-	$image    = $editor->save( $filename, $mime );
+	$filename  = $editor->generate_filename( null, null, $extension );
+	$filename  = preg_replace( '/-(scaled|rotated|imagifyresized)/', '', $filename );
+	$image     = $editor->save( $filename, $mime );
 
 	if ( is_wp_error( $image ) ) {
 		return $image;
