@@ -118,7 +118,7 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
  * @since n.e.x.t
  *
  * @param array $metadata The current metadta of the modified image.
- * @param int $attachment_id The ID of the attachment being modified.
+ * @param int   $attachment_id The ID of the attachment being modified.
  * @return array The metadata modified of the image.
  */
 function webp_uploads_create_sources_property_for_full_image( $metadata, $attachment_id ) {
@@ -154,9 +154,10 @@ function webp_uploads_create_sources_property_for_full_image( $metadata, $attach
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 	}
 
-	$allowed_mimes = array_flip( wp_get_mime_types() );
+	$allowed_mimes      = array_flip( wp_get_mime_types() );
 	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
 	$original_extension = pathinfo( $file, PATHINFO_EXTENSION );
+
 	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
 		// If this property exists no need to create the image again.
 		if ( ! empty( $metadata['sources'][ $targeted_mime ] ) ) {
@@ -185,9 +186,9 @@ function webp_uploads_create_sources_property_for_full_image( $metadata, $attach
 			continue;
 		}
 
-		$filename = wp_basename( $file, ".{$original_extension}" );
+		$filename         = wp_basename( $file, ".{$original_extension}" );
 		$target_file_name = trailingslashit( $original_directory ) . "{$filename}.{$extension}";
-		$image = $editor->save(  $target_file_name, $targeted_mime );
+		$image            = $editor->save( $target_file_name, $targeted_mime );
 
 		if ( is_wp_error( $image ) ) {
 			continue;
@@ -278,9 +279,9 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 	$extension = explode( '|', $allowed_mimes[ $mime ] );
 	$extension = reset( $extension );
 	$editor->resize( $width, $height, $crop );
-	$filename  = $editor->generate_filename( null, null, $extension );
-	$filename  = preg_replace( '/-(scaled|rotated|imagifyresized)/', '', $filename );
-	$image     = $editor->save( $filename, $mime );
+	$filename = $editor->generate_filename( null, null, $extension );
+	$filename = preg_replace( '/-(scaled|rotated|imagifyresized)/', '', $filename );
+	$image    = $editor->save( $filename, $mime );
 
 	if ( is_wp_error( $image ) ) {
 		return $image;

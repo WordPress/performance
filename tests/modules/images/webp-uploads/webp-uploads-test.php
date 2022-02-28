@@ -285,17 +285,17 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$this->assertIsArray( $metadata['sources']['image/jpeg'] );
 		$this->assertArrayHasKey( 'file', $metadata['sources']['image/jpeg'] );
 		$this->assertArrayHasKey( 'filesize', $metadata['sources']['image/jpeg'] );
-		$this->assertStringEndsWith(  $metadata['sources']['image/jpeg']['file'], $file );
+		$this->assertStringEndsWith( $metadata['sources']['image/jpeg']['file'], $file );
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) );
-		$this->assertSame( $metadata['sources']['image/jpeg']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) )  );
+		$this->assertSame( $metadata['sources']['image/jpeg']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) ) );
 
 		$this->assertArrayHasKey( 'image/webp', $metadata['sources'] );
 		$this->assertIsArray( $metadata['sources']['image/webp'] );
 		$this->assertArrayHasKey( 'file', $metadata['sources']['image/webp'] );
 		$this->assertArrayHasKey( 'filesize', $metadata['sources']['image/webp'] );
-		$this->assertStringEndsWith(  '.webp', $metadata['sources']['image/webp']['file'] );
+		$this->assertStringEndsWith( '.webp', $metadata['sources']['image/webp']['file'] );
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
-		$this->assertSame( $metadata['sources']['image/webp']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) )  );
+		$this->assertSame( $metadata['sources']['image/webp']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) ) );
 
 		$this->assertArrayHasKey( 'sources', $metadata['sizes']['thumbnail'] );
 		$this->assertArrayHasKey( 'image/jpeg', $metadata['sizes']['thumbnail']['sources'] );
