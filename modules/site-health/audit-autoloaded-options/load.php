@@ -111,6 +111,5 @@ function perflab_aao_autoloaded_options_test() {
  */
 function perflab_aao_autoloaded_options_size() {
 	global $wpdb;
-	$autoloaded_options_size = $wpdb->get_var( 'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload = \'yes\'' );
-	return $autoloaded_options_size;
+	return $wpdb->get_var( 'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload = \'yes\'' );
 }
