@@ -215,11 +215,11 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_to_create_a_subsize_if_the_image_editor_does_not_exists() {
-		// Make sure no editor is available.
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
 
+		// Make sure no editor is available.
 		add_filter( 'wp_image_editors', '__return_empty_array' );
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
 		$this->assertTrue( is_wp_error( $result ) );
@@ -232,7 +232,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_to_upload_a_mime_that_is_not_supported_by_wordpress() {
-		// Make sure no editor is available.
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
@@ -309,6 +308,27 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Create the full size images when no size is available
+	 *
+	 * @test
+	 */
+	public function it_should_create_the_full_size_images_when_no_size_is_available() {
+		add_filter( 'intermediate_image_sizes', '__return_empty_array' );
+		add_filter( 'fallback_intermediate_image_sizes', '__return_empty_array' );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertEmpty( $metadata['sizes'] );
+		$this->assertArrayHasKey( 'sources', $metadata );
+		$this->assertArrayHasKey( 'image/jpeg', $metadata['sources'] );
+
+		$this->assertIsArray( $metadata['sources']['image/jpeg'] );
+		$this->assertIsArray( $metadata['sources']['image/webp'] );
+	}
+
+	/**
 	 * Remove `scaled` suffix from the generated filename
 	 *
 	 * @test
@@ -338,7 +358,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_remove_the_generated_webp_images_when_the_attachment_is_deleted() {
-		// Make sure no editor is available.
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
@@ -375,7 +394,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_remove_the_attached_webp_version_if_the_attachment_is_force_deleted_but_empty_trash_day_is_not_defined() {
-		// Make sure no editor is available.
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
@@ -403,7 +421,6 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_remove_the_webp_version_of_the_image_if_the_image_is_force_deleted_and_empty_trash_days_is_set_to_zero() {
-		// Make sure no editor is available.
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
@@ -425,5 +442,32 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] ) );
 		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
+	}
+
+	/**
+	 * Remove full size images when no size image exists
+	 *
+	 * @test
+	 */
+	public function it_should_remove_full_size_images_when_no_size_image_exists() {
+		add_filter( 'intermediate_image_sizes', '__return_empty_array' );
+		add_filter( 'fallback_intermediate_image_sizes', '__return_empty_array' );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+
+		$file    = get_attached_file( $attachment_id, true );
+		$dirname = pathinfo( $file, PATHINFO_DIRNAME );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertEmpty( $metadata['sizes'] );
+		$this->assertFileExists( $file );
+		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
+		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) );
+
+		wp_delete_attachment( $attachment_id );
+
+		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
+		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) );
 	}
 }

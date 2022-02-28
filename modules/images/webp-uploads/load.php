@@ -336,16 +336,15 @@ function webp_uploads_get_supported_image_mime_transforms() {
  * @param int $attachment_id The ID of the attachment the sources are going to be deleted.
  */
 function webp_uploads_remove_sources_files( $attachment_id ) {
-	$metadata = wp_get_attachment_metadata( $attachment_id );
-	$file     = get_attached_file( $attachment_id );
+	$file = get_attached_file( $attachment_id );
 
-	if (
-		! isset( $metadata['sizes'] )
-		|| empty( $file )
-		|| ! is_array( $metadata['sizes'] )
-	) {
+	if ( empty( $file ) ) {
 		return;
 	}
+
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+	// Make sure $sizes is always defined to allow the removal of original images after the first foreach loop.
+	$sizes = ! isset( $metadata['sizes'] ) || ! is_array( $metadata['sizes'] ) ? array() : $metadata['sizes'];
 
 	$upload_path = wp_get_upload_dir();
 	if ( empty( $upload_path['basedir'] ) ) {
@@ -355,7 +354,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 	$intermediate_dir = path_join( $upload_path['basedir'], dirname( $file ) );
 	$basename         = wp_basename( $file );
 
-	foreach ( $metadata['sizes'] as $size ) {
+	foreach ( $sizes as $size ) {
 		if ( ! isset( $size['sources'] ) || ! is_array( $size['sources'] ) ) {
 			continue;
 		}
