@@ -74,16 +74,7 @@ function perflab_oc_health_persistent_object_cache() {
 		return $result;
 	}
 
-	/**
-	 * Filter whether to suggest using a persistent object cache.
-	 *
-	 * Plugin and theme authors should NOT use this filter to discourage the use of an object cache.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param bool $suggest Whether to suggest using a persistent object cache.
-	 */
-	if ( ! apply_filters( 'perflab_oc_site_status_suggest_persistent_object_cache', false ) ) {
+	if ( ! perflab_oc_health_should_persistent_object_cache() ) {
 		$result['label'] = __( 'A persistent object cache is not required', 'performance-lab' );
 
 		return $result;
@@ -142,14 +133,21 @@ function perflab_oc_health_persistent_object_cache() {
  *
  * @since 1.0.0
  *
- * @param mixed $should_suggest Whether to suggest using a persistent object cache.
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
  * @return bool Whether to suggest using a persistent object cache.
  */
-function perflab_oc_health_should_persistent_object_cache( $should_suggest ) {
+function perflab_oc_health_should_persistent_object_cache() {
 	global $wpdb;
 
-	// Bypass expensive calls if `$should_suggest` was already set truthy.
-	if ( $should_suggest ) {
+	/**
+	 * Filter to force suggestion to use a persistent object cache and bypass threshold checks.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param bool $suggest Whether to suggest using a persistent object cache.
+	 */
+	if ( apply_filters( 'perflab_oc_site_status_suggest_persistent_object_cache', false ) ) {
 		return true;
 	}
 
@@ -216,7 +214,6 @@ function perflab_oc_health_should_persistent_object_cache( $should_suggest ) {
 
 	return false;
 }
-add_filter( 'perflab_oc_site_status_suggest_persistent_object_cache', 'perflab_oc_health_should_persistent_object_cache', 20 );
 
 /**
  * Returns a list of available persistent object cache services.
