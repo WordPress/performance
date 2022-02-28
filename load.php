@@ -7,6 +7,7 @@
  * Requires PHP: 5.6
  * Version: 1.0.0-beta.1
  * Author: WordPress Performance Group
+ * Author URI: https://make.wordpress.org/core/tag/performance/
  * Text Domain: performance-lab
  *
  * @package performance-lab
