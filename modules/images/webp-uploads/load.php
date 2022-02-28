@@ -565,16 +565,17 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 
 	$basename = wp_basename( $metadata['file'] );
 	foreach ( $urls as $url ) {
-		if ( isset( $metadata['file'] ) && strpos( $url, $basename ) !== false ) {
-			// TODO: we don't have a replacement for full image yet, issue. See: https://github.com/WordPress/performance/issues/174.
-			continue;
+		$src_filename = wp_basename( $url );
+
+		// Replace the full size image if present.
+		if ( isset( $metadata['file'], $metadata['sources'][ $target_mime ]['file'] ) && strpos( $url, $basename ) !== false ) {
+			$image = str_replace( $src_filename, $metadata['sources'][ $target_mime ]['file'], $image );
 		}
 
 		if ( empty( $metadata['sizes'] ) ) {
 			continue;
 		}
 
-		$src_filename = wp_basename( $url );
 		$extension    = wp_check_filetype( $src_filename );
 		// Extension was not set properly no action possible or extension is already in the expected mime.
 		if ( empty( $extension['type'] ) || $extension['type'] === $target_mime ) {
