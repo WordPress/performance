@@ -379,11 +379,47 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 			}
 
 			$intermediate_file = str_replace( $basename, $properties['file'], $file );
-			if ( ! empty( $intermediate_file ) ) {
-				$intermediate_file = path_join( $upload_path['basedir'], $intermediate_file );
-				wp_delete_file_from_directory( $intermediate_file, $intermediate_dir );
+			if ( empty( $intermediate_file ) ) {
+				continue;
 			}
+
+			$intermediate_file = path_join( $upload_path['basedir'], $intermediate_file );
+			if ( ! file_exists( $intermediate_file ) ) {
+				continue;
+			}
+
+			wp_delete_file_from_directory( $intermediate_file, $intermediate_dir );
 		}
+	}
+
+	if ( ! isset( $metadata['sources'] ) || ! is_array( $metadata['sources'] ) ) {
+		return;
+	}
+
+	$original_mime_from_post = get_post_mime_type( $attachment_id );
+	$original_mime_from_file = wp_check_filetype( $file )['type'];
+
+	// Delete of full sizes mime types.
+	foreach ( $metadata['sources'] as $mime => $properties ) {
+		// Don't remove the image with the same mime type as the original image as this would be removed by WordPress.
+		if ( $mime === $original_mime_from_post || $mime === $original_mime_from_file ) {
+			continue;
+		}
+
+		if ( ! is_array( $properties ) || empty( $properties['file'] ) ) {
+			continue;
+		}
+
+		$full_size = str_replace( $basename, $properties['file'], $file );
+		if ( empty( $full_size ) ) {
+			continue;
+		}
+
+		$full_size_file = path_join( $upload_path['basedir'], $full_size );
+		if ( ! file_exists( $full_size_file ) ) {
+			continue;
+		}
+		wp_delete_file_from_directory( $full_size_file, $intermediate_dir );
 	}
 }
 

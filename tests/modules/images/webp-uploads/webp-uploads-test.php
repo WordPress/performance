@@ -8,7 +8,7 @@
 
 class WebP_Uploads_Tests extends WP_UnitTestCase {
 	/**
-	 * create the original mime type as well with all the available sources for the specified mime
+	 * Create the original mime type as well with all the available sources for the specified mime
 	 *
 	 * @dataProvider provider_image_with_default_behaviors_during_upload
 	 *
@@ -352,21 +352,21 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$sizes    = array( 'thumbnail', 'medium' );
 
+		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
+
 		foreach ( $sizes as $size_name ) {
 			$this->assertArrayHasKey( 'image/webp', $metadata['sizes'][ $size_name ]['sources'] );
 			$this->assertArrayHasKey( 'file', $metadata['sizes'][ $size_name ]['sources']['image/webp'] );
-			$this->assertFileExists(
-				path_join( $dirname, $metadata['sizes'][ $size_name ]['sources']['image/webp']['file'] )
-			);
+			$this->assertFileExists( path_join( $dirname, $metadata['sizes'][ $size_name ]['sources']['image/webp']['file'] ) );
 		}
 
 		wp_delete_attachment( $attachment_id );
 
 		foreach ( $sizes as $size_name ) {
-			$this->assertFileDoesNotExist(
-				path_join( $dirname, $metadata['sizes'][ $size_name ]['sources']['image/webp']['file'] )
-			);
+			$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sizes'][ $size_name ]['sources']['image/webp']['file'] ) );
 		}
+
+		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 	}
 
 	/**
@@ -388,15 +388,13 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
-		$this->assertFileExists(
-			path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] )
-		);
+		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
+		$this->assertFileExists( path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] ) );
 
 		wp_delete_attachment( $attachment_id, true );
 
-		$this->assertFileDoesNotExist(
-			path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] )
-		);
+		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] ) );
+		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 	}
 
 	/**
@@ -418,16 +416,14 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
-		$this->assertFileExists(
-			path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] )
-		);
+		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
+		$this->assertFileExists( path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] ) );
 
 		define( 'EMPTY_TRASH_DAYS', 0 );
 
 		wp_delete_attachment( $attachment_id, true );
 
-		$this->assertFileDoesNotExist(
-			path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] )
-		);
+		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] ) );
+		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 	}
 }
