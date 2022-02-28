@@ -426,7 +426,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 
-		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, wp_get_attachment_metadata( $attachment_id ) ) );
+		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
@@ -464,7 +464,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$this->assertNotEmpty( $expected_tag );
 		$this->assertNotSame( $tag, $expected_tag );
-		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, $metadata ) );
+		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
 	public function provider_replace_images_with_different_extensions() {
@@ -491,7 +491,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			'type' => 'image/jpeg',
 		);
 		$this->assertSame( $expected, wp_check_filetype( get_attached_file( $attachment_id ) ) );
-		$this->assertContains( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_img_tag_update_mime_type( $tag, wp_get_attachment_metadata( $attachment_id ) ) );
+		$this->assertContains( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
@@ -507,7 +507,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
 		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
-		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, wp_get_attachment_metadata( $attachment_id ) ) );
+		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
@@ -524,7 +524,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$this->assertIsNumeric( $attachment_id );
 		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 
-		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, wp_get_attachment_metadata( $attachment_id ) ) );
+		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
 	public function data_provider_not_supported_webp_images() {

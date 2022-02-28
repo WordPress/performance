@@ -397,10 +397,8 @@ function webp_uploads_update_image_references( $content ) {
 		_prime_post_caches( array_keys( $images ), false, true );
 	}
 	foreach ( $images as $attachment_id => $images_tag ) {
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-
 		foreach ( $images_tag as $img ) {
-			$content = str_replace( $img, webp_uploads_img_tag_update_mime_type( $img, $metadata ), $content );
+			$content = str_replace( $img, webp_uploads_img_tag_update_mime_type( $img, 'the_content', $attachment_id ), $content );
 		}
 	}
 
@@ -414,10 +412,12 @@ function webp_uploads_update_image_references( $content ) {
  * @since n.e.x.t
  *
  * @param string $image An <img> tag where the urls would be updated.
- * @param array  $metadata An associative array with the metadata for the image.
+ * @param string $context The context where this is function is being used.
+ * @param int    $attachment_id The ID of the attachment being modified.
  * @return string The updated img tag.
  */
-function webp_uploads_img_tag_update_mime_type( $image, array $metadata ) {
+function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id ) {
+	$metadata = wp_get_attachment_metadata( $attachment_id );
 	if ( empty( $metadata['file'] ) ) {
 		return $image;
 	}
