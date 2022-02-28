@@ -127,8 +127,6 @@ function perflab_oc_health_persistent_object_cache() {
 }
 
 /**
- * Callback for `site_status_persistent_object_cache` filter.
- *
  * Determines whether to suggest using a persistent object cache.
  *
  * @since 1.0.0
