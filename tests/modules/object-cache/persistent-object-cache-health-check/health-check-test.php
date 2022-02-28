@@ -15,118 +15,39 @@ class Object_Cache_Health_Check_Tests extends WP_UnitTestCase {
 	}
 
 	function test_object_cache_thresholds_check_can_be_bypassed() {
-		add_filter( 'perflab_oc_site_status_persistent_object_cache_thresholds', '__return_true' );
+		add_filter( 'perflab_oc_site_status_suggest_persistent_object_cache', '__return_true' );
 
 		$result = perflab_oc_health_should_persistent_object_cache();
 
 		$this->assertTrue( $result );
-
-		remove_all_filters( 'perflab_oc_site_status_persistent_object_cache_thresholds' );
 	}
 
-	function test_object_cache_comments_threshold() {
+	/**
+	 *
+	 * @dataProvider thresholds
+	 */
+	function test_object_cache_thresholds( $threshold, $count ) {
 		add_filter(
 			'perflab_oc_site_status_persistent_object_cache_thresholds',
-			function ( $thresholds ) {
-				return array_merge( $thresholds, array( 'comments_count' => 0 ) );
+			function ( $thresholds ) use ( $threshold, $count ) {
+				return array_merge( $thresholds, array( $threshold => $count ) );
 			}
 		);
 
 		$result = perflab_oc_health_should_persistent_object_cache();
 
 		$this->assertTrue( $result );
-
-		remove_all_filters( 'perflab_oc_site_status_persistent_object_cache_thresholds' );
 	}
 
-	function test_object_cache_posts_threshold() {
-		add_filter(
-			'perflab_oc_site_status_persistent_object_cache_thresholds',
-			function ( $thresholds ) {
-				return array_merge( $thresholds, array( 'posts_count' => 0 ) );
-			}
+	function thresholds() {
+		return array(
+			array( 'comments_count', 0 ),
+			array( 'posts_count', 0 ),
+			array( 'terms_count', 1 ),
+			array( 'options_count', 100 ),
+			array( 'users_count', 0 ),
+			array( 'alloptions_count', 100 ),
+			array( 'alloptions_bytes', 1000 ),
 		);
-
-		$result = perflab_oc_health_should_persistent_object_cache();
-
-		$this->assertTrue( $result );
-
-		remove_all_filters( 'perflab_oc_site_status_persistent_object_cache_thresholds' );
 	}
-
-	function test_object_cache_terms_threshold() {
-		add_filter(
-			'perflab_oc_site_status_persistent_object_cache_thresholds',
-			function ( $thresholds ) {
-				return array_merge( $thresholds, array( 'terms_count' => 1 ) );
-			}
-		);
-
-		$result = perflab_oc_health_should_persistent_object_cache();
-
-		$this->assertTrue( $result );
-
-		remove_all_filters( 'perflab_oc_site_status_persistent_object_cache_thresholds' );
-	}
-
-	function test_object_cache_options_threshold() {
-		add_filter(
-			'perflab_oc_site_status_persistent_object_cache_thresholds',
-			function ( $thresholds ) {
-				return array_merge( $thresholds, array( 'options_count' => 100 ) );
-			}
-		);
-
-		$result = perflab_oc_health_should_persistent_object_cache();
-
-		$this->assertTrue( $result );
-
-		remove_all_filters( 'perflab_oc_site_status_persistent_object_cache_thresholds' );
-	}
-
-	function test_object_cache_users_threshold() {
-		add_filter(
-			'perflab_oc_site_status_persistent_object_cache_thresholds',
-			function ( $thresholds ) {
-				return array_merge( $thresholds, array( 'users_count' => 0 ) );
-			}
-		);
-
-		$result = perflab_oc_health_should_persistent_object_cache();
-
-		$this->assertTrue( $result );
-
-		remove_all_filters( 'perflab_oc_site_status_persistent_object_cache_thresholds' );
-	}
-
-	function test_object_cache_alloptions_count_threshold() {
-		add_filter(
-			'perflab_oc_site_status_persistent_object_cache_thresholds',
-			function ( $thresholds ) {
-				return array_merge( $thresholds, array( 'alloptions_count' => 100 ) );
-			}
-		);
-
-		$result = perflab_oc_health_should_persistent_object_cache();
-
-		$this->assertTrue( $result );
-
-		remove_all_filters( 'perflab_oc_site_status_persistent_object_cache_thresholds' );
-	}
-
-	function test_object_cache_alloptions_bytes_threshold() {
-		add_filter(
-			'perflab_oc_site_status_persistent_object_cache_thresholds',
-			function ( $thresholds ) {
-				return array_merge( $thresholds, array( 'alloptions_bytes' => 1000 ) );
-			}
-		);
-
-		$result = perflab_oc_health_should_persistent_object_cache();
-
-		$this->assertTrue( $result );
-
-		remove_all_filters( 'perflab_oc_site_status_persistent_object_cache_thresholds' );
-	}
-
 }
