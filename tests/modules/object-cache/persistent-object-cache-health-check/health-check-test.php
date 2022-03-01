@@ -8,8 +8,20 @@
 
 class Object_Cache_Health_Check_Tests extends WP_UnitTestCase {
 
+	/**
+	 * @group ms-excluded
+	 */
 	function test_object_cache_default_thresholds() {
 		$this->assertFalse(
+			perflab_oc_health_should_persistent_object_cache()
+		);
+	}
+
+	/**
+	 * @group ms-required
+	 */
+	function test_object_cache_default_thresholds() {
+		$this->assertTrue(
 			perflab_oc_health_should_persistent_object_cache()
 		);
 	}
