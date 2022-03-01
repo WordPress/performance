@@ -337,18 +337,29 @@ function perflab_get_module_data( $module_file ) {
 	return $module_data;
 }
 
+/**
+ * Initialise Admin Pointer
+ *
+ * Handles the bootstrapping of the admin pointer.
+ * Mainly jQuery code that is self-initialising.
+ *
+ * @since 1.0.0
+ * @return void
+ */
 function perflab_admin_pointer() {
 
-    wp_enqueue_style( 'wp-pointer' );
-    wp_enqueue_script( 'wp-pointer', false, array( 'jquery' ) );
+	wp_enqueue_style( 'wp-pointer' );
+	wp_enqueue_script( 'wp-pointer', false, array( 'jquery' ) );
 
 	$current_user = get_current_user_id();
-	$meta_key = 'my-pointer-slug-dismissed';
+	$meta_key     = 'my-pointer-slug-dismissed';
 
 	$heading = __( 'Performance Lab', 'performance-lab' );
-	$content = sprintf(__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ), '<a href="'. esc_url( admin_url( '/options-general.php?page=perflab-modules' ) ) .'">'. __( 'Settings > Performance', 'performance-lab' ) .'</a>');
+	/* translators: %s: settings page link */
+	$content = sprintf( __( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ), '<a href="' . esc_url( admin_url( '/options-general.php?page=perflab-modules' ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>' );
 
-	if ( ! get_user_meta( $current_user, $meta_key, true ) ) : ?>
+	if ( ! get_user_meta( $current_user, $meta_key, true ) ) :
+		?>
 		<script type="text/javascript">
 
 			jQuery(function() {
@@ -378,17 +389,27 @@ function perflab_admin_pointer() {
 
 			});
 		</script>
-	<?php endif;
+		<?php
+	endif;
 }
 
 add_action( 'in_admin_header', 'perflab_admin_pointer' );
 
-function  perflab_update_pointer_meta() {
+/**
+ * Update Pointer User Meta
+ *
+ * Checks if the action $_POST index is set and if it is, it will update the user meta.
+ * This prevents the pointer from showing on refresh.
+ *
+ * @since 1.0.0
+ * @return void
+ */
+function perflab_update_pointer_meta() {
 
 	$current_user = get_current_user_id();
-	$meta_key = 'my-pointer-slug-dismissed';
+	$meta_key     = 'my-pointer-slug-dismissed';
 
-	if ( isset( $_POST['action'] ) && 'dismiss-wp-pointer' == $_POST['action'] ) {
+	if ( isset( $_POST['action'] ) && 'dismiss-wp-pointer' === $_POST['action'] ) {
 		update_user_meta(
 			$current_user,
 			$meta_key,
