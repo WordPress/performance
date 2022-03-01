@@ -74,7 +74,7 @@ function perflab_oc_health_persistent_object_cache() {
 		return $result;
 	}
 
-	if ( ! perflab_oc_health_should_persistent_object_cache() ) {
+	if ( ! perflab_oc_health_should_suggest_persistent_object_cache() ) {
 		$result['label'] = __( 'A persistent object cache is not required', 'performance-lab' );
 
 		return $result;
@@ -135,8 +135,12 @@ function perflab_oc_health_persistent_object_cache() {
  *
  * @return bool Whether to suggest using a persistent object cache.
  */
-function perflab_oc_health_should_persistent_object_cache() {
+function perflab_oc_health_should_suggest_persistent_object_cache() {
 	global $wpdb;
+
+	if ( is_multisite() ) {
+		return true;
+	}
 
 	/**
 	 * Filter to force suggestion to use a persistent object cache and bypass threshold checks.
