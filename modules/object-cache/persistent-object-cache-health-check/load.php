@@ -138,6 +138,10 @@ function perflab_oc_health_persistent_object_cache() {
 function perflab_oc_health_should_persistent_object_cache() {
 	global $wpdb;
 
+	if ( is_multisite() ) {
+		return true;
+	}
+
 	/**
 	 * Filter to force suggestion to use a persistent object cache and bypass threshold checks.
 	 *
