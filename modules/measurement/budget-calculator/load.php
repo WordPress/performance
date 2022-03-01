@@ -77,8 +77,32 @@ function budget_calc_register_settings() {
 			'budget_calc_settings_id'
 		);
 	}
+
+	add_settings_field(
+		'updated',
+		'',
+		'budget_calc_render_hidden_updated_field',
+		'budget-calculator',
+		'budget_calc_settings_id',
+		array(
+			'class' => 'hidden',
+		)
+	);
 }
 add_action( 'admin_init', 'budget_calc_register_settings' );
+
+/**
+ * Callback to render an updated hidden field.
+ * This field saves a timestamp of the current time.
+ * Its purpose is to still trigger an update event to download the budget.json file in case nothing was modified.
+ *
+ * @since n.e.x.t
+ */
+function budget_calc_render_hidden_updated_field() {
+	?>
+		<input type="hidden" value="<?php echo time(); ?>" name="budget_calc_options[updated]">
+	<?php
+}
 
 /**
  * Render a range input field for the budget calculator options page.
