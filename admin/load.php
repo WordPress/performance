@@ -344,7 +344,7 @@ function perflab_get_module_data( $module_file ) {
  */
 function perflab_activation_hook() {
 	// Bail if option is already set with any value.
-	if ( false !== get_option( PERFLAB_MODULES_SETTING, false ) ) {
+	if ( get_option( PERFLAB_MODULES_SETTING, false ) ) {
 		return;
 	}
 
