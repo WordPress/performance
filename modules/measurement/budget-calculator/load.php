@@ -88,13 +88,27 @@ add_action( 'admin_init', 'budget_calc_register_settings' );
  * @param int    $max      The maximum value that can be set on the range input.
  */
 function budget_calc_render_range_field( $options, $field_id, $max ) {
-	$text     = isset( $options[ $field_id ] ) ? (int) $options[ $field_id ] : 0;
-	$field_id = esc_attr( $field_id );
-	$max      = esc_attr( $max );
+	$text = isset( $options[ $field_id ] ) ? (int) $options[ $field_id ] : 0;
 
-	echo "<input type='range' id='$field_id' name='budget_calc_options[$field_id]' min='0' max='$max' step='10'
-		value='$text' oninput='document.getElementById(\"${field_id}_output\").value = this.value'/>
-		<output id='${field_id}_output' for='budget_calc_options[$field_id]'>${text}</output><span>KB</span>";
+	?>
+		<input
+			type="range"
+			id="<?php echo esc_attr( $field_id ); ?>"
+			name="budget_calc_options[<?php echo esc_attr( $field_id ); ?>]"
+			min="0"
+			max="<?php echo esc_attr( $max ); ?>"
+			step="10"
+			value="<?php echo esc_attr( $text ); ?>"
+			oninput="document.getElementById('<?php echo esc_attr( $field_id ) . '_output'; ?>').value = this.value"
+		/>
+		<output
+			id="<?php echo esc_attr( $field_id ) . '_output'; ?>"
+			for="budget_calc_options[<?php echo esc_attr( $field_id ); ?>]"
+		>
+			<?php echo esc_html( $text ); ?>
+		</output>
+		<span>KB</span>
+	<?php
 }
 
 /**
