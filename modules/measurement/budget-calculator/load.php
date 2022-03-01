@@ -86,7 +86,7 @@ add_action( 'admin_init', 'budget_calc_register_settings' );
  * @param int    $max      The maximum value that can be set on the range input.
  */
 function budget_calc_render_range_field( $options, $field_id, $max ) {
-	$text     = isset( $options[ $field_id ] ) ? esc_attr( $options[ $field_id ] ) : 0;
+	$text     = isset( $options[ $field_id ] ) ? *(int) $options[ $field_id ]  : 0;
 	$field_id = esc_attr( $field_id );
 	$max      = esc_attr( $max );
 
