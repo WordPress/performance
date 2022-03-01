@@ -14,9 +14,11 @@
  * @since n.e.x.t
  */
 function budget_calc_page_content() {
-	echo '<div class="wrap">
+?>
+	<div class="wrap">
 	<h1>Budget Calculator</h1>
-	<form method="post" action="options.php">';
+	<form method="post" action="options.php">
+<?php
 
 	settings_fields( 'budget_calc_settings' );
 	do_settings_sections( 'budget-calculator' );
