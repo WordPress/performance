@@ -336,3 +336,67 @@ function perflab_get_module_data( $module_file ) {
 
 	return $module_data;
 }
+
+function perflab_admin_pointer() {
+
+    wp_enqueue_style( 'wp-pointer' );
+    wp_enqueue_script( 'wp-pointer', false, array( 'jquery' ) );
+
+	$current_user = get_current_user_id();
+	$meta_key = 'my-pointer-slug-dismissed';
+
+	$heading = __( 'Performance Lab', 'performance-lab' );
+	$content = sprintf(__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ), '<a href="'. esc_url( admin_url( '/options-general.php?page=perflab-modules' ) ) .'">'. __( 'Settings > Performance', 'performance-lab' ) .'</a>');
+
+	if ( ! get_user_meta( $current_user, $meta_key, true ) ) : ?>
+		<script type="text/javascript">
+
+			jQuery(function() {
+
+				var ajaxURL = '<?php echo admin_url( 'admin-ajax.php' ); ?>';
+				// Pointer Options
+				var options = {
+					content: '<h3><?php echo $heading; ?></h3>' + '<p><?php echo $content; ?></p>',
+					position: {
+						edge:  'left',
+						align: 'right',
+					},
+					pointerClass: 'wp-pointer arrow-top',
+					pointerWidth: 420,
+					close: function() {
+						jQuery.post(
+							ajaxURL,
+							{
+								pointer: 'my-pointer-slug-dismissed',
+								action: 'dismiss-wp-pointer',
+							}
+						);
+					}
+				};
+
+				jQuery('#menu-settings').pointer(options).pointer('open');
+
+			});
+		</script>
+	<?php endif;
+}
+
+add_action( 'in_admin_header', 'perflab_admin_pointer' );
+
+function  perflab_update_pointer_meta() {
+
+	$current_user = get_current_user_id();
+	$meta_key = 'my-pointer-slug-dismissed';
+
+	if ( isset( $_POST['action'] ) && 'dismiss-wp-pointer' == $_POST['action'] ) {
+		update_user_meta(
+			$current_user,
+			$meta_key,
+			$_POST['pointer'],
+			true
+		);
+	}
+
+}
+
+add_action( 'admin_init', 'perflab_update_pointer_meta' );
