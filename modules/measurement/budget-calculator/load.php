@@ -14,11 +14,11 @@
  * @since n.e.x.t
  */
 function budget_calc_page_content() {
-?>
+	?>
 	<div class="wrap">
 	<h1>Budget Calculator</h1>
 	<form method="post" action="options.php">
-<?php
+	<?php
 
 	settings_fields( 'budget_calc_settings' );
 	do_settings_sections( 'budget-calculator' );
@@ -88,7 +88,7 @@ add_action( 'admin_init', 'budget_calc_register_settings' );
  * @param int    $max      The maximum value that can be set on the range input.
  */
 function budget_calc_render_range_field( $options, $field_id, $max ) {
-	$text     = isset( $options[ $field_id ] ) ? *(int) $options[ $field_id ]  : 0;
+	$text     = isset( $options[ $field_id ] ) ? (int) $options[ $field_id ] : 0;
 	$field_id = esc_attr( $field_id );
 	$max      = esc_attr( $max );
 
