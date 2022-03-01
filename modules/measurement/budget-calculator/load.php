@@ -24,7 +24,9 @@ function budget_calc_page_content() {
 	do_settings_sections( 'budget-calculator' );
 	submit_button( __( 'Download budget.json', 'performance-lab' ) );
 
-	echo '</form></div>';
+	?>
+	</form></div>
+	<?php
 }
 
 /**
