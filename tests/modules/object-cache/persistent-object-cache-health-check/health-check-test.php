@@ -20,7 +20,7 @@ class Object_Cache_Health_Check_Tests extends WP_UnitTestCase {
 	/**
 	 * @group ms-required
 	 */
-	function test_object_cache_default_thresholds() {
+	function test_object_cache_default_thresholds_on_multisite() {
 		$this->assertTrue(
 			perflab_oc_health_should_persistent_object_cache()
 		);
