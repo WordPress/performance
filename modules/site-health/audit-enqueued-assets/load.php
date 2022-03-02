@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: Audit Enqueued Assets
- * Description: Adds a CSS and JS resource checker in Site Health checks.
+ * Description: Adds a CSS and JS resource check in Site Health status.
  * Experimental: No
  *
  * @package performance-lab
