@@ -24,8 +24,10 @@ function perflab_add_modules_page() {
 		'perflab_render_modules_page'
 	);
 
+	// Add the following hooks only if the screen was successfully added.
 	if ( false !== $hook_suffix ) {
 		add_action( "load-{$hook_suffix}", 'perflab_load_modules_page', 10, 0 );
+		add_action( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' );
 	}
 
 	return $hook_suffix;
@@ -338,7 +340,30 @@ function perflab_get_module_data( $module_file ) {
 }
 
 /**
- * Enable all non-experimental modules on plugin activation.
+ * Adds a link to the modules page to the plugin's entry in the plugins list table.
+ *
+ * This function is only used if the modules page exists and is accessible.
+ *
+ * @since 1.0.0
+ * @see perflab_add_modules_page()
+ *
+ * @param array $links List of plugin action links HTML.
+ * @return array Modified list of plugin action links HTML.
+ */
+function perflab_plugin_action_links_add_settings( $links ) {
+	// Add link as the first plugin action link.
+	$settings_link = sprintf(
+		'<a href="%s">%s</a>',
+		esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ),
+		esc_html__( 'Settings', 'performance-lab' )
+	);
+	array_unshift( $links, $settings_link );
+
+	return $links;
+}
+
+/**
+ * Enables all non-experimental modules on plugin activation.
  *
  * @since 1.0.0
  */
@@ -359,5 +384,4 @@ function perflab_activation_hook() {
 
 	update_option( PERFLAB_MODULES_SETTING, $modules_settings );
 }
-
-register_activation_hook( dirname( __DIR__ ) . '/load.php', 'perflab_activation_hook' );
+register_activation_hook( PERFLAB_MAIN_FILE, 'perflab_activation_hook' );
