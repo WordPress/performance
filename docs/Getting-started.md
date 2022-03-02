@@ -1,3 +1,5 @@
+[Back to overview](./README.md)
+
 # Start contributing to the Performance plugin
 This guide focuses on how to contribute to the Performance plugin, from setting up the development environment to creating pull requests.
 
