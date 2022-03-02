@@ -138,13 +138,14 @@ function budget_calc_render_range_field( $options, $field_id, $max ) {
 }
 
 /**
- * Render the budget.json file after saving the options page.
+ * Format data to the budget.json expected formatting.
  *
  * @since n.e.x.t
  *
- * @param array $value The newly set value for this option.
+ * @param array $value The value of the options from the database.
+ * @return array The formatted data,
  */
-function budget_calc_render_json( $value ) {
+function budget_calc_format_for_budget_json( $value ) {
 	$resource_sizes = array();
 	$type_mapping   = array(
 		'html_range'       => 'document',
@@ -163,10 +164,7 @@ function budget_calc_render_json( $value ) {
 		}
 	}
 
-	$data = array( array( 'resourceSizes' => $resource_sizes ) );
-
-	header( 'Content-disposition: attachment; filename=budget.json' );
-	wp_send_json( $data );
+	return array( array( 'resourceSizes' => $resource_sizes ) );
 }
 
 /**
@@ -183,7 +181,10 @@ function budget_calc_updated_option_callback( $option, $old_value, $value ) {
 		return;
 	}
 
-	budget_calc_render_json( $value );
+	$data = budget_calc_format_for_budget_json( $value );
+
+	header( 'Content-disposition: attachment; filename=budget.json' );
+	wp_send_json( $data );
 }
 add_action( 'updated_option', 'budget_calc_updated_option_callback', 10, 3 );
 
@@ -200,6 +201,9 @@ function budget_calc_added_option_callback( $option, $value ) {
 		return;
 	}
 
-	budget_calc_render_json( $value );
+	$data = budget_calc_format_for_budget_json( $value );
+
+	header( 'Content-disposition: attachment; filename=budget.json' );
+	wp_send_json( $data );
 }
 add_action( 'added_option', 'budget_calc_added_option_callback', 10, 2 );
