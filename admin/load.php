@@ -5,6 +5,8 @@
  * @package performance-lab
  */
 
+define( 'PERLAB_ADMIN_POINTER', 'perflab-admin-pointer' );
+
 /**
  * Adds the modules page to the Settings menu.
  *
@@ -343,81 +345,79 @@ function perflab_get_module_data( $module_file ) {
  * Handles the bootstrapping of the admin pointer.
  * Mainly jQuery code that is self-initialising.
  *
+ * @param string $hook_suffix The current admin page.
  * @since 1.0.0
- * @return void
  */
-function perflab_admin_pointer() {
+function perflab_admin_pointer( $hook_suffix ) {
 
-	wp_enqueue_style( 'wp-pointer' );
-	wp_enqueue_script( 'wp-pointer', false, array( 'jquery' ) );
-
-	$current_user = get_current_user_id();
-	$meta_key     = 'my-pointer-slug-dismissed';
-
-	$heading = __( 'Performance Lab', 'performance-lab' );
-	/* translators: %s: settings page link */
-	$content = sprintf( __( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ), '<a href="' . esc_url( admin_url( '/options-general.php?page=perflab-modules' ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>' );
-
-	if ( ! get_user_meta( $current_user, $meta_key, true ) ) :
-		?>
-		<script type="text/javascript">
-
-			jQuery(function() {
-
-				var ajaxURL = '<?php echo admin_url( 'admin-ajax.php' ); ?>';
-				// Pointer Options
-				var options = {
-					content: '<h3><?php echo $heading; ?></h3>' + '<p><?php echo $content; ?></p>',
-					position: {
-						edge:  'left',
-						align: 'right',
-					},
-					pointerClass: 'wp-pointer arrow-top',
-					pointerWidth: 420,
-					close: function() {
-						jQuery.post(
-							ajaxURL,
-							{
-								pointer: 'my-pointer-slug-dismissed',
-								action: 'dismiss-wp-pointer',
-							}
-						);
-					}
-				};
-
-				jQuery('#menu-settings').pointer(options).pointer('open');
-
-			});
-		</script>
-		<?php
-	endif;
-}
-
-add_action( 'in_admin_header', 'perflab_admin_pointer' );
-
-/**
- * Update Pointer User Meta
- *
- * Checks if the action $_POST index is set and if it is, it will update the user meta.
- * This prevents the pointer from showing on refresh.
- *
- * @since 1.0.0
- * @return void
- */
-function perflab_update_pointer_meta() {
-
-	$current_user = get_current_user_id();
-	$meta_key     = 'my-pointer-slug-dismissed';
-
-	if ( isset( $_POST['action'] ) && 'dismiss-wp-pointer' === $_POST['action'] ) {
-		update_user_meta(
-			$current_user,
-			$meta_key,
-			$_POST['pointer'],
-			true
-		);
+	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
+		return;
 	}
 
+	$current_user = get_current_user_id();
+	$dismissed    = explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) );
+
+	if ( in_array( PERLAB_ADMIN_POINTER, $dismissed, true ) ) {
+		return;
+	}
+
+	// Enqueue pointer CSS and JS.
+	wp_enqueue_style( 'wp-pointer' );
+	wp_enqueue_script( 'wp-pointer' );
 }
 
-add_action( 'admin_init', 'perflab_update_pointer_meta' );
+add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
+
+/**
+ * Renders the Admin Pointer
+ *
+ * Handles the rendering of the admin pointer.
+ *
+ * @since 1.0.0
+ */
+function perflab_render_pointer() {
+
+	$heading         = __( 'Performance Lab', 'performance-lab' );
+	$wp_kses_options = array(
+		'a' => array(
+			'href' => array(),
+		),
+	);
+
+	$content = sprintf(
+		/* translators: %s: settings page link */
+		__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ),
+		'<a href="' . esc_url( admin_url( '/options-general.php?page=perflab-modules' ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
+	);
+
+	?>
+	<script id="perflab-admin-pointer" type="text/javascript">
+		jQuery( function() {
+			// Pointer Options
+			var options = {
+				content: '<h3><?php echo esc_js( $heading ); ?></h3>' + '<p><?php echo wp_kses( $content, $wp_kses_options ); ?></p>',
+				position: {
+					edge:  'left',
+					align: 'right',
+				},
+				pointerClass: 'wp-pointer arrow-top',
+				pointerWidth: 420,
+				close: function() {
+					jQuery.post(
+						window.ajaxurl,
+						{
+							pointer: '<?php echo esc_js( PERLAB_ADMIN_POINTER ); ?>',
+							action: 'dismiss-wp-pointer',
+						}
+					);
+				}
+			};
+
+			jQuery( '#menu-settings' ).pointer( options ).pointer( 'open' );
+
+			} );
+	</script>
+	<?php
+}
+
+add_action( 'admin_print_footer_scripts', 'perflab_render_pointer' );
