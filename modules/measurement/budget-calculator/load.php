@@ -52,7 +52,14 @@ add_action( 'admin_menu', 'budget_calc_menu_page' );
  * @since n.e.x.t
  */
 function budget_calc_register_settings() {
-	register_setting( 'budget_calc_settings', 'budget_calc_options' );
+	register_setting(
+		'budget_calc_settings',
+		'budget_calc_options',
+		array(
+			'sanitize_callback' => 'budget_calc_sanitize_settings',
+		)
+	);
+
 	add_settings_section( 'budget_calc_settings_id', 'Budget Calculator Metrics', '', 'budget-calculator' );
 
 	$options        = get_option( 'budget_calc_options', array() );
@@ -90,6 +97,31 @@ function budget_calc_register_settings() {
 	);
 }
 add_action( 'admin_init', 'budget_calc_register_settings' );
+
+/**
+ * Callback to sanitize the input from the settings form.
+ *
+ * @param array $input The raw submitted input.
+ * @return array The sanitized input.
+ */
+function budget_calc_sanitize_settings( $input ) {
+	$number_fields = array(
+		'html_range',
+		'css_range',
+		'font_range',
+		'images_range',
+		'javascript_range',
+		'updated',
+	);
+
+	foreach ( $number_fields as $field ) {
+		if ( isset( $input[ $field ] ) ) {
+			$input[ $field ] = (int) $input[ $field ];
+		}
+	}
+
+	return $input;
+}
 
 /**
  * Callback to render an updated hidden field.
