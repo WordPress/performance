@@ -4,9 +4,6 @@
  *
  * @package performance-lab
  */
-
-define( 'PERLAB_ADMIN_POINTER', 'perflab-admin-pointer' );
-
 /**
  * Adds the modules page to the Settings menu.
  *
