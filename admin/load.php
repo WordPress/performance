@@ -4,6 +4,7 @@
  *
  * @package performance-lab
  */
+
 /**
  * Adds the modules page to the Settings menu.
  *
