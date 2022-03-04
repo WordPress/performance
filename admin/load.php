@@ -405,7 +405,7 @@ function perflab_render_pointer() {
 						window.ajaxurl,
 						{
 							pointer: 'perflab-admin-pointer',
-							action: 'dismiss-wp-pointer',
+							action:  'dismiss-wp-pointer',
 						}
 					);
 				}
