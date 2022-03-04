@@ -18,7 +18,8 @@
     "squizlabs/php_codesniffer": "^3.5",
     "wp-coding-standards/wpcs": "^2.2",
     "wp-phpunit/wp-phpunit": "^5.8",
-    "yoast/phpunit-polyfills": "^1.0"
+    "yoast/phpunit-polyfills": "^1.0",
+    "ext-dom": "*"
   },
   "require": {
     "composer/installers": "~1.0"

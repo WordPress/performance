@@ -29,6 +29,60 @@ class Budget_Calculator_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests budget_calc_sanitize_settings() to verify that data input is properly sanitized before DB insertion.
+	 */
+	public function test_budget_calc_sanitize_settings() {
+		$raw_input = array(
+			'html_range'       => '100',
+			'css_range'        => '200',
+			'font_range'       => '300',
+			'images_range'     => '400',
+			'javascript_range' => '500',
+			'updated'          => '1646294902',
+		);
+
+		$sanitized_input = budget_calc_sanitize_settings( $raw_input );
+
+		$this->assertCount( 6, $sanitized_input );
+		foreach ( array_keys( $raw_input ) as $input_name ) {
+			$this->assertArrayHasKey( $input_name, $sanitized_input );
+			$this->assertIsInt( $sanitized_input[ $input_name ] );
+		}
+	}
+
+	/**
+	 * Tests budget_calc_render_range_field() will output an HTML range field.
+	 */
+	public function test_budget_calc_render_range_field_output_html() {
+		$options  = array( 'html_range' => '100' );
+		$field_id = 'html_range';
+		$max      = 1000;
+
+		ob_start();
+		budget_calc_render_range_field( $options, $field_id, $max );
+
+		$output = ob_get_clean();
+		$html   = new DOMDocument();
+		$html->loadHTML( $output );
+
+		$this->assert_html_element(
+			$html,
+			'html_range',
+			'input',
+			array(
+				'type'  => 'range',
+				'name'  => 'budget_calc_options[html_range]',
+				'min'   => '0',
+				'max'   => '1000',
+				'step'  => '10',
+				'value' => '100',
+			)
+		);
+
+		$this->assert_html_element( $html, 'html_range_output', 'span' );
+	}
+
+	/**
 	 * Tests budget_calc_format_for_budget_json() will format the data according to budget.json specification.
 	 */
 	public function test_budget_calc_format_for_budget_json() {
@@ -70,5 +124,25 @@ class Budget_Calculator_Tests extends WP_UnitTestCase {
 		$formatted_data = budget_calc_format_for_budget_json( $db_data );
 
 		$this->assertSame( $expected_data, $formatted_data );
+	}
+
+	/**
+	 * Assert that an HTML element is rendered as we expect.
+	 *
+	 * @param DOMDocument $html       The parsed HTML containing the HTML element.
+	 * @param string      $element_id The ID of the element to assert.
+	 * @param string      $tag_name   The tag name of the element to assert.
+	 * @param array       $attributes Any element attribute we want to validate.
+	 */
+	protected function assert_html_element( $html, $element_id, $tag_name, $attributes = array() ) {
+		$element = $html->getElementById( $element_id );
+		$this->assertNotNull( $element );
+
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		$this->assertSame( $tag_name, $element->tagName );
+
+		foreach ( $attributes as $attribute_name => $attribute_value ) {
+			$this->assertSame( $attribute_value, $element->getAttribute( $attribute_name ) );
+		}
 	}
 }
