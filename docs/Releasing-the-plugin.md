@@ -1,3 +1,5 @@
+[Back to overview](./README.md)
+
 # Releasing the performance plugin
 
 This document describes the steps to release the Performance plugin.
@@ -16,7 +18,7 @@ The version number needs to be updated in the following files:
 - load.php
 - readme.txt
 
-In addition to those locations, do a global search and replace across the entire codebase to replace any occurrence of `n.e.x.t` with the version number. This ensures any code annotated with the "next" release will now have its proper version number on it. The only exception to this are pre-releases, such as a beta or RC: For those, the stable version number should be used. For example, if the milestone is `1.2.0-beta.2`, the version in e.g. `@since` annotations in the codebase should still be `1.2.0`.
+In addition to those locations, run the `npm run since -- -r {version}` command to replace any occurrence of `@since n.e.x.t` with the version number. This ensures any code annotated with the "next" release will now have its proper version number on it. The only exception to this are pre-releases, such as a beta or RC: For those, the stable version number should be used. For example, if the milestone is `1.2.0-beta.2`, the version in e.g. `@since` annotations in the codebase should still be `1.2.0`.
 
 ### Update translation strings
 

@@ -38,11 +38,20 @@ const {
 	handler: translationsHandler,
 	options: translationsOptions,
 } = require( './commands/translations' );
+const {
+	handler: sinceHandler,
+	options: sinceOptions,
+} = require( './commands/since' );
 
 withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 	.alias( 'changelog' )
 	.description( 'Generates a changelog from merged pull requests' )
 	.action( catchException( changelogHandler ) );
+
+withOptions( program.command( 'release-plugin-since' ), sinceOptions )
+	.alias( 'since' )
+	.description( 'Updates "n.e.x.t" tags with the current release version' )
+	.action( catchException( sinceHandler ) );
 
 withOptions( program.command( 'plugin-readme' ), readmeOptions )
 	.alias( 'readme' )
