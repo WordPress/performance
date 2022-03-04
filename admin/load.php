@@ -348,7 +348,6 @@ function perflab_get_module_data( $module_file ) {
  * @since 1.0.0
  */
 function perflab_admin_pointer( $hook_suffix ) {
-
 	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
 		return;
 	}
