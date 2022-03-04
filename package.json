@@ -49,7 +49,7 @@
   },
   "lint-staged": {
     "*.php": [
-      "npm run lint-php"
+      "composer run-script lint"
     ]
   }
 }
