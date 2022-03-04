@@ -392,7 +392,7 @@ function perflab_render_pointer() {
 		jQuery( function() {
 			// Pointer Options
 			var options = {
-				content: '<h3><?php echo esc_js( $heading ); ?></h3>' + '<p><?php echo wp_kses( $content, $wp_kses_options ); ?></p>',
+				content: '<h3><?php echo esc_js( $heading ); ?></h3><p><?php echo wp_kses( $content, $wp_kses_options ); ?></p>',
 				position: {
 					edge:  'left',
 					align: 'right',
