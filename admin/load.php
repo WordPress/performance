@@ -359,7 +359,7 @@ function perflab_admin_pointer( $hook_suffix ) {
 	$current_user = get_current_user_id();
 	$dismissed    = explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) );
 
-	if ( in_array( PERLAB_ADMIN_POINTER, $dismissed, true ) ) {
+	if ( in_array( 'perflab-admin-pointer', $dismissed, true ) ) {
 		return;
 	}
 
