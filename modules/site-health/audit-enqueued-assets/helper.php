@@ -87,6 +87,9 @@ function perflab_aea_get_total_size_bytes_enqueued_styles() {
  * @return string Returns absolute path to the resource.
  */
 function perflab_aea_get_path_from_resource_url( $resource_url ) {
+	if ( ! $resource_url ) {
+		return '';
+	}
 
 	// Different content folder ex. /content/.
 	if ( 0 === strpos( $resource_url, content_url() ) ) {

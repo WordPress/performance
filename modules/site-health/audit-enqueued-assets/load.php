@@ -28,22 +28,24 @@ function perflab_aea_audit_enqueued_scripts() {
 		foreach ( $wp_scripts->done as $handle ) {
 			$script = $wp_scripts->registered[ $handle ];
 
-			if ( $script->src && ! strpos( $script->src, 'wp-includes' ) ) {
-
-				// Add any extra data (inlined) that was passed with the script.
-				$inline_size = 0;
-				if ( ! empty( $script->extra ) && ! empty( $script->extra['after'] ) ) {
-					foreach ( $script->extra['after'] as $extra ) {
-						$inline_size += ( is_string( $extra ) ) ? mb_strlen( $extra, '8bit' ) : 0;
-					}
-				}
-
-				$path               = perflab_aea_get_path_from_resource_url( $script->src );
-				$enqueued_scripts[] = array(
-					'src'  => $script->src,
-					'size' => perflab_aea_get_resource_file_size( $path ) + $inline_size,
-				);
+			if ( ! $script->src || false !== strpos( $script->src, 'wp-includes' ) ) {
+				continue;
 			}
+
+			// Add any extra data (inlined) that was passed with the script.
+			$inline_size = 0;
+			if ( ! empty( $script->extra ) && ! empty( $script->extra['after'] ) ) {
+				foreach ( $script->extra['after'] as $extra ) {
+					$inline_size += ( is_string( $extra ) ) ? mb_strlen( $extra, '8bit' ) : 0;
+				}
+			}
+
+			$path               = perflab_aea_get_path_from_resource_url( $script->src );
+			$enqueued_scripts[] = array(
+				'src'  => $script->src,
+				'size' => perflab_aea_get_resource_file_size( $path ) + $inline_size,
+			);
+
 		}
 		set_transient( 'aea_enqueued_front_page_scripts', $enqueued_scripts, 12 * HOUR_IN_SECONDS );
 	}
@@ -63,28 +65,30 @@ function perflab_aea_audit_enqueued_styles() {
 		$enqueued_styles = array();
 		foreach ( $wp_styles->done as $handle ) {
 			$style = $wp_styles->registered[ $handle ];
-			if ( $style->src && ! strpos( $style->src, 'wp-includes' ) ) {
 
-				// Check if we already have the style's path ( part of a refactor for block styles from 5.9 ).
-				if ( ! empty( $style->extra ) && ! empty( $style->extra['path'] ) ) {
-					$path = $style->extra['path'];
-				} else { // Fallback to getting the path from the style's src.
-					$path = perflab_aea_get_path_from_resource_url( $style->src );
-				}
-
-				// Add any extra data (inlined) that was passed with the style.
-				$inline_size = 0;
-				if ( ! empty( $style->extra ) && ! empty( $style->extra['after'] ) ) {
-					foreach ( $style->extra['after'] as $extra ) {
-						$inline_size += ( is_string( $extra ) ) ? mb_strlen( $extra, '8bit' ) : 0;
-					}
-				}
-
-				$enqueued_styles[] = array(
-					'src'  => $style->src,
-					'size' => perflab_aea_get_resource_file_size( $path ) + $inline_size,
-				);
+			if ( ! $style->src || false !== strpos( $style->src, 'wp-includes' ) ) {
+				continue;
 			}
+
+			// Check if we already have the style's path ( part of a refactor for block styles from 5.9 ).
+			if ( ! empty( $style->extra ) && ! empty( $style->extra['path'] ) ) {
+				$path = $style->extra['path'];
+			} else { // Fallback to getting the path from the style's src.
+				$path = perflab_aea_get_path_from_resource_url( $style->src );
+			}
+
+			// Add any extra data (inlined) that was passed with the style.
+			$inline_size = 0;
+			if ( ! empty( $style->extra ) && ! empty( $style->extra['after'] ) ) {
+				foreach ( $style->extra['after'] as $extra ) {
+					$inline_size += ( is_string( $extra ) ) ? mb_strlen( $extra, '8bit' ) : 0;
+				}
+			}
+
+			$enqueued_styles[] = array(
+				'src'  => $style->src,
+				'size' => perflab_aea_get_resource_file_size( $path ) + $inline_size,
+			);
 		}
 		set_transient( 'aea_enqueued_front_page_styles', $enqueued_styles, 12 * HOUR_IN_SECONDS );
 	}
