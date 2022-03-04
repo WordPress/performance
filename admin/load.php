@@ -416,7 +416,7 @@ function perflab_render_pointer() {
 
 			jQuery( '#menu-settings' ).pointer( options ).pointer( 'open' );
 
-			} );
+		} );
 	</script>
 	<?php
 }
