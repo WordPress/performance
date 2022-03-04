@@ -29,6 +29,49 @@ class Budget_Calculator_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests budget_calc_page_content() displays the settings form.
+	 */
+	public function test_budget_calc_page_content_displays_settings_form() {
+		// Register the settings fields first.
+		budget_calc_register_settings();
+
+		ob_start();
+		budget_calc_page_content();
+
+		$output = ob_get_clean();
+		$html   = new DOMDocument();
+		$html->loadHTML( $output );
+
+		// Assert the form exists and has the right method & action set.
+		$this->assert_html_element_by_tag(
+			$html,
+			'form',
+			array(
+				'method' => 'post',
+				'action' => 'options.php',
+			)
+		);
+
+		// Assert all range fields are added to the form.
+		$this->assert_html_element_by_id( $html, 'html_range', 'input' );
+		$this->assert_html_element_by_id( $html, 'css_range', 'input' );
+		$this->assert_html_element_by_id( $html, 'font_range', 'input' );
+		$this->assert_html_element_by_id( $html, 'images_range', 'input' );
+		$this->assert_html_element_by_id( $html, 'javascript_range', 'input' );
+
+		// Assert a nonce field has been added.
+		$this->assert_html_element_by_id(
+			$html,
+			'_wpnonce',
+			'input',
+			array(
+				'type' => 'hidden',
+				'name' => '_wpnonce',
+			)
+		);
+	}
+
+	/**
 	 * Tests budget_calc_sanitize_settings() to verify that data input is properly sanitized before DB insertion.
 	 */
 	public function test_budget_calc_sanitize_settings() {
@@ -51,7 +94,7 @@ class Budget_Calculator_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests budget_calc_render_range_field() will output an HTML range field.
+	 * Tests budget_calc_render_range_field() will output an HTML range field with all its expected attributes.
 	 */
 	public function test_budget_calc_render_range_field_output_html() {
 		$options  = array( 'html_range' => '100' );
@@ -65,21 +108,22 @@ class Budget_Calculator_Tests extends WP_UnitTestCase {
 		$html   = new DOMDocument();
 		$html->loadHTML( $output );
 
-		$this->assert_html_element(
+		$this->assert_html_element_by_id(
 			$html,
 			'html_range',
 			'input',
 			array(
-				'type'  => 'range',
-				'name'  => 'budget_calc_options[html_range]',
-				'min'   => '0',
-				'max'   => '1000',
-				'step'  => '10',
-				'value' => '100',
+				'type'    => 'range',
+				'name'    => 'budget_calc_options[html_range]',
+				'min'     => '0',
+				'max'     => '1000',
+				'step'    => '10',
+				'value'   => '100',
+				'oninput' => "document.getElementById('html_range_output').textContent=this.value+'KB'",
 			)
 		);
 
-		$this->assert_html_element( $html, 'html_range_output', 'span' );
+		$this->assert_html_element_by_id( $html, 'html_range_output', 'span' );
 	}
 
 	/**
@@ -127,19 +171,38 @@ class Budget_Calculator_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Assert that an HTML element is rendered as we expect.
+	 * Look for an HTML element by ID and assert it is rendered as we expect.
 	 *
 	 * @param DOMDocument $html       The parsed HTML containing the HTML element.
 	 * @param string      $element_id The ID of the element to assert.
 	 * @param string      $tag_name   The tag name of the element to assert.
 	 * @param array       $attributes Any element attribute we want to validate.
 	 */
-	protected function assert_html_element( $html, $element_id, $tag_name, $attributes = array() ) {
+	protected function assert_html_element_by_id( $html, $element_id, $tag_name, $attributes = array() ) {
 		$element = $html->getElementById( $element_id );
 		$this->assertNotNull( $element );
 
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$this->assertSame( $tag_name, $element->tagName );
+
+		foreach ( $attributes as $attribute_name => $attribute_value ) {
+			$this->assertSame( $attribute_value, $element->getAttribute( $attribute_name ) );
+		}
+	}
+
+	/**
+	 * Look for an HTML element by tag name and assert it is rendered as we expect.
+	 *
+	 * @param DOMDocument $html       The parsed HTML containing the HTML element.
+	 * @param string      $tag_name   The tag name of the element to assert.
+	 * @param array       $attributes Any element attribute we want to validate.
+	 */
+	protected function assert_html_element_by_tag( $html, $tag_name, $attributes = array() ) {
+		$elements = $html->getElementsByTagName( $tag_name );
+
+		$this->assertNotEmpty( $elements );
+		// There could be more than one element with a specific tag name, assume we want to check the first one.
+		$element = $elements->item( 0 );
 
 		foreach ( $attributes as $attribute_name => $attribute_value ) {
 			$this->assertSame( $attribute_value, $element->getAttribute( $attribute_name ) );

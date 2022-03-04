@@ -157,7 +157,7 @@ function budget_calc_render_range_field( $options, $field_id, $max ) {
 		max="<?php echo esc_attr( $max ); ?>"
 		step="10"
 		value="<?php echo esc_attr( $range_value ); ?>"
-		oninput="document.getElementById('<?php echo esc_attr( $field_id ) . '_output'; ?>').textContent = this.value + 'KB'"
+		oninput="document.getElementById('<?php echo esc_attr( $field_id ) . '_output'; ?>').textContent=this.value+'KB'"
 	>
 	<span id="<?php echo esc_attr( $field_id ) . '_output'; ?>">
 		<?php echo esc_html( $range_value ) . 'KB'; ?>
