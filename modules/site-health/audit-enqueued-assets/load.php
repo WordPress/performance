@@ -40,7 +40,11 @@ function perflab_aea_audit_enqueued_scripts() {
 				}
 			}
 
-			$path               = perflab_aea_get_path_from_resource_url( $script->src );
+			$path = perflab_aea_get_path_from_resource_url( $script->src );
+			if ( ! $path ) {
+				continue;
+			}
+
 			$enqueued_scripts[] = array(
 				'src'  => $script->src,
 				'size' => perflab_aea_get_resource_file_size( $path ) + $inline_size,
@@ -75,6 +79,9 @@ function perflab_aea_audit_enqueued_styles() {
 				$path = $style->extra['path'];
 			} else { // Fallback to getting the path from the style's src.
 				$path = perflab_aea_get_path_from_resource_url( $style->src );
+				if ( ! $path ) {
+					continue;
+				}
 			}
 
 			// Add any extra data (inlined) that was passed with the style.
