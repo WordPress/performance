@@ -407,7 +407,7 @@ function perflab_render_pointer() {
 					jQuery.post(
 						window.ajaxurl,
 						{
-							pointer: '<?php echo esc_js( PERLAB_ADMIN_POINTER ); ?>',
+							pointer: 'perflab-admin-pointer',
 							action: 'dismiss-wp-pointer',
 						}
 					);
