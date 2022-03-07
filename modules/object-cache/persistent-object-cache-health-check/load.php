@@ -231,7 +231,8 @@ function perflab_oc_health_available_object_cache_services() {
 			'APCu'      => 'apcu',
 			'Redis'     => 'redis',
 			'Relay'     => 'relay',
-			'Memcached' => 'memcache', // The `memcached` extension seems unmaintained.
+			'Memcache'  => 'memcache',
+			'Memcached' => 'memcached',
 		)
 	);
 
