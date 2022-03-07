@@ -39,7 +39,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		return $metadata;
 	}
 
-	$file = get_attached_file( $attachment_id, true );
+	$file = wp_get_original_image_path( $attachment_id, true );
 
 	// File does not exist.
 	if ( ! file_exists( $file ) ) {
@@ -137,7 +137,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 	}
 
 	// All subsizes are created out of the attached file.
-	$file = get_attached_file( $attachment_id );
+	$file = wp_get_original_image_path( $attachment_id );
 
 	// File does not exist.
 	if ( ! file_exists( $file ) ) {
@@ -167,16 +167,16 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 	$height = null;
 	$crop   = false;
 
-	if ( isset( $metadata['sizes'][ $size ]['width'] ) ) {
+	if ( isset( $sizes[ $size ]['width'] ) ) {
+		$width = $sizes[ $size ]['width'];
+	} elseif ( isset( $metadata['sizes'][ $size ]['width'] ) ) {
 		$width = $metadata['sizes'][ $size ]['width'];
-	} elseif ( isset( $sizes[ $size ]['widht'] ) ) {
-		$width = $sizes[ $size ];
 	}
 
-	if ( isset( $metadata['sizes'][ $size ]['height'] ) ) {
+	if ( isset( $sizes[ $size ]['height'] ) ) {
+		$height = $sizes[ $size ]['height'];
+	} elseif ( isset( $metadata['sizes'][ $size ]['height'] ) ) {
 		$height = $metadata['sizes'][ $size ]['height'];
-	} elseif ( isset( $sizes[ $size ]['width'] ) ) {
-		$height = $sizes[ $size ];
 	}
 
 	if ( isset( $sizes[ $size ]['crop'] ) ) {

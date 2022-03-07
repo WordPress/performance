@@ -531,4 +531,33 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		yield 'PNG image' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dice.png' );
 		yield 'GIFT image' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/earth.gif' );
 	}
+
+	/**
+	 * Use the original image to generate all the image sizes
+	 *
+	 * @test
+	 */
+	public function it_should_use_the_original_image_to_generate_all_the_image_sizes() {
+		// Use a 1500 threshold.
+		add_filter(
+			'big_image_size_threshold',
+			function () {
+				return 1500;
+			}
+		);
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertArrayHasKey( '1536x1536', $metadata['sizes'] );
+		foreach ( $metadata['sizes'] as $size ) {
+			$this->assertStringContainsString( $size['width'], $size['sources']['image/webp']['file'] );
+			$this->assertStringContainsString( $size['height'], $size['sources']['image/webp']['file'] );
+			$this->assertStringContainsString(
+				// Remove the extension ouf of the file.
+				substr( $size['sources']['image/webp']['file'], 0, -4 ),
+				$size['sources']['image/jpeg']['file']
+			);
+		}
+	}
 }
