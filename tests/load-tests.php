@@ -28,7 +28,7 @@ class Load_Tests extends WP_UnitTestCase {
 		}
 
 		// Assert that registered default works correctly.
-		$this->assertSame( array(), get_option( PERFLAB_MODULES_SETTING ) );
+		$this->assertSame( $this->get_expected_default_option(), get_option( PERFLAB_MODULES_SETTING ) );
 
 		// Assert that most basic sanitization works correctly (an array is required).
 		update_option( PERFLAB_MODULES_SETTING, 'invalid' );
@@ -59,7 +59,7 @@ class Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_get_module_settings() {
 		// Assert that by default the settings are an empty array.
 		$settings = perflab_get_module_settings();
-		$this->assertSame( array(), $settings );
+		$this->assertSame( $this->get_expected_default_option(), $settings );
 
 		// Assert that option updates are reflected in the settings correctly.
 		$new_value = array( 'my-module' => array( 'enabled' => true ) );
@@ -70,8 +70,16 @@ class Load_Tests extends WP_UnitTestCase {
 
 	public function test_perflab_get_active_modules() {
 		// Assert that by default there are no active modules.
-		$active_modules = perflab_get_active_modules();
-		$this->assertSame( array(), $active_modules );
+		$active_modules          = perflab_get_active_modules();
+		$expected_active_modules = array_keys(
+			array_filter(
+				$this->get_expected_default_option(),
+				function( $module_settings ) {
+					return $module_settings['enabled'];
+				}
+			)
+		);
+		$this->assertSame( $expected_active_modules, $active_modules );
 
 		// Assert that option updates affect the active modules correctly.
 		$new_value = array(
@@ -81,5 +89,18 @@ class Load_Tests extends WP_UnitTestCase {
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
 		$active_modules = perflab_get_active_modules();
 		$this->assertSame( array( 'active-module' ), $active_modules );
+	}
+
+	private function get_expected_default_option() {
+		// This code is essentially copied over from the perflab_register_modules_setting() function.
+		$default_enabled_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
+		return array_reduce(
+			$default_enabled_modules,
+			function( $module_settings, $module_dir ) {
+				$module_settings[ $module_dir ] = array( 'enabled' => true );
+				return $module_settings;
+			},
+			array()
+		);
 	}
 }
