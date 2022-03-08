@@ -39,6 +39,10 @@ const {
 	options: translationsOptions,
 } = require( './commands/translations' );
 const {
+	handler: enabledModulesHandler,
+	options: enabledModulesOptions,
+} = require( './commands/enabled-modules' );
+const {
 	handler: sinceHandler,
 	options: sinceOptions,
 } = require( './commands/since' );
@@ -64,5 +68,13 @@ withOptions( program.command( 'module-translations' ), translationsOptions )
 		'Generates a PHP file from module header translation strings'
 	)
 	.action( catchException( translationsHandler ) );
+
+withOptions(
+	program.command( 'default-enabled-modules' ),
+	enabledModulesOptions
+)
+	.alias( 'enabled-modules' )
+	.description( 'Generates a PHP file with non-experimental module slugs' )
+	.action( catchException( enabledModulesHandler ) );
 
 program.parse( process.argv );
