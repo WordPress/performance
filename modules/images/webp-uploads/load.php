@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: WebP Uploads
- * Description: Uses WebP as the default format for new JPEG image uploads if the server supports it.
+ * Description: Creates WebP versions for new JPEG image uploads if supported by the server.
  * Experimental: No
  *
  * @since   1.0.0
@@ -18,7 +18,7 @@
  * top level of the image metadata to store the references for all the mime types for the `full` size image of the
  * attachment.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @see   wp_generate_attachment_metadata()
  * @see   webp_uploads_get_supported_image_mime_transforms()
@@ -180,7 +180,7 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
  * this image would be stored in the same place as the provided size name inside the
  * metadata of the attachment.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param int    $attachment_id The ID of the attachment we are going to use as a reference to create the image.
  * @param string $size          The size name that would be used to create this image, out of the registered subsizes.
@@ -230,14 +230,14 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 
 	if ( isset( $metadata['sizes'][ $size ]['width'] ) ) {
 		$width = $metadata['sizes'][ $size ]['width'];
-	} elseif ( isset( $sizes[ $size ]['widht'] ) ) {
-		$width = $sizes[ $size ];
+	} elseif ( isset( $sizes[ $size ]['width'] ) ) {
+		$width = $sizes[ $size ]['width'];
 	}
 
 	if ( isset( $metadata['sizes'][ $size ]['height'] ) ) {
 		$height = $metadata['sizes'][ $size ]['height'];
-	} elseif ( isset( $sizes[ $size ]['width'] ) ) {
-		$height = $sizes[ $size ];
+	} elseif ( isset( $sizes[ $size ]['height'] ) ) {
+		$height = $sizes[ $size ]['height'];
 	}
 
 	if ( isset( $sizes[ $size ]['crop'] ) ) {
@@ -269,7 +269,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
  * Returns an array with the list of valid mime types that a specific mime type can be converted into it,
  * for example an image/jpeg can be converted into an image/webp.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
@@ -283,7 +283,7 @@ function webp_uploads_get_supported_image_mime_transforms() {
 	 * Filter to allow the definition of a custom mime types, in which a defined mime type
 	 * can be transformed and provide a wide range of mime types.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param array $image_mime_transforms A map with the valid mime transforms.
 	 */
@@ -297,7 +297,7 @@ function webp_uploads_get_supported_image_mime_transforms() {
  * be removed by WordPress when the attachment is deleted, usually this happens after this
  * hook is executed.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @see wp_delete_attachment()
  *
@@ -396,7 +396,7 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  * Filter on `wp_get_missing_image_subsizes` acting as an action for the logic of the plugin
  * to determine if additional mime types still need to be created.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @see wp_get_missing_image_subsizes()
  *
@@ -448,7 +448,7 @@ add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_
  * Note that most of this function will not be needed for an eventual core implementation as it
  * would rely on `wp_filter_content_tags()`.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @see wp_filter_content_tags()
  *
@@ -502,7 +502,7 @@ function webp_uploads_update_image_references( $content ) {
  * Finds all the urls with *.jpg and *.jpeg extension and updates with *.webp version for the provided image
  * for the specified image sizes, the *.webp references are stored inside of each size.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param string $image         An <img> tag where the urls would be updated.
  * @param string $context       The context where this is function is being used.
