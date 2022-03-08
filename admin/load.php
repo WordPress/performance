@@ -439,27 +439,3 @@ function perflab_plugin_action_links_add_settings( $links ) {
 
 	return $links;
 }
-
-/**
- * Enables all non-experimental modules on plugin activation.
- *
- * @since 1.0.0
- */
-function perflab_activation_hook() {
-	// Bail if option is already set with any value.
-	if ( false !== get_option( PERFLAB_MODULES_SETTING, false ) ) {
-		return;
-	}
-
-	$modules          = perflab_get_modules();
-	$modules_settings = perflab_get_module_settings();
-
-	foreach ( $modules as $module_name => $module_data ) {
-		if ( ! $module_data['experimental'] ) {
-			$modules_settings[ $module_name ] = array( 'enabled' => true );
-		}
-	}
-
-	update_option( PERFLAB_MODULES_SETTING, $modules_settings );
-}
-register_activation_hook( PERFLAB_MAIN_FILE, 'perflab_activation_hook' );
