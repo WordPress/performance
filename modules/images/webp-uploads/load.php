@@ -12,7 +12,7 @@
  * Hook called by `wp_generate_attachment_metadata` to create the `sources` property for every image
  * size, the sources' property would create a new image size with all the mime types specified in
  * `webp_uploads_get_supported_image_mime_transforms`. If the original image is one of the mimes from
- * `webp_uploads_get_supported_image_mime_transforms` the image is just added to the `sources` property and  not
+ * `webp_uploads_get_supported_image_mime_transforms` the image is just added to the `sources` property and not
  * created again. If the uploaded attachment is not a supported mime by this function, the hook does not alter the
  * metadata of the attachment. In addition to every single size the `sources` property is added at the
  * top level of the image metadata to store the references for all the mime types for the `full` size image of the
@@ -84,7 +84,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 		$editor->resize( $metadata['width'], $metadata['height'], false );
 		$extension = explode( '|', $allowed_mimes[ $targeted_mime ] );
-		$extension = reset( $extension );
+		$extension = $extension[0];
 
 		if ( empty( $extension ) || empty( $original_extension ) ) {
 			continue;
