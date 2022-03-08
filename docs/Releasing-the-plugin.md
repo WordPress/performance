@@ -76,7 +76,9 @@ After successful testing, inform the other maintainers on [Slack](https://wordpr
 
 ### Update `trunk`
 
-In case any additional code has landed in the release branch after it was branched off the main branch `trunk`, the latter needs to be updated to include these changes. To do that, open a pull request from the release branch to `trunk` (can be done via GitHub UI) and ask two maintainers to approve it. The code in this pull request does not need to be closely reviewed since it was already approved prior, so this is mostly a formal approval.
+Since the release branch was branched off the main branch `trunk`, the latter now needs to be updated to include any additional changes made to the release branch since.
+
+To do that, open a pull request from the release branch to `trunk` (can be done via GitHub UI) and ask two maintainers to approve it. The code in this pull request does not need to be closely reviewed since it was already approved prior, so this is mostly a formal approval.
 
 ### Close the release
 
