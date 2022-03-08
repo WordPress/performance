@@ -85,11 +85,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		$editor->resize( $metadata['width'], $metadata['height'], false );
 		$extension = explode( '|', $allowed_mimes[ $targeted_mime ] );
 		$extension = $extension[0];
-
-		if ( empty( $extension ) || empty( $original_extension ) ) {
-			continue;
-		}
-
+		
 		$filename         = wp_basename( $file, ".{$original_extension}" );
 		$target_file_name = trailingslashit( $original_directory ) . "{$filename}.{$extension}";
 		$image            = $editor->save( $target_file_name, $targeted_mime );
