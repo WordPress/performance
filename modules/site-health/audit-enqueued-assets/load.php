@@ -2,7 +2,7 @@
 /**
  * Module Name: Audit Enqueued Assets
  * Description: Adds a CSS and JS resource check in Site Health status.
- * Experimental: No
+ * Experimental: Yes
  *
  * @package performance-lab
  * @since 1.0.0
@@ -14,7 +14,7 @@
 require_once __DIR__ . '/helper.php';
 
 /**
- * Audit enqueued scripts in is_front_page(). Ignore /wp-includes scripts.
+ * Audit enqueued and printed scripts in is_front_page(). Ignore /wp-includes scripts.
  *
  * It will save information in a transient for 12 hours.
  *
@@ -25,22 +25,39 @@ function perflab_aea_audit_enqueued_scripts() {
 		global $wp_scripts;
 		$enqueued_scripts = array();
 
-		foreach ( $wp_scripts->queue as $handle ) {
-			$src = $wp_scripts->registered[ $handle ]->src;
-			if ( $src && ! strpos( $src, 'wp-includes' ) ) {
-				$enqueued_scripts[] = array(
-					'src'  => $src,
-					'size' => perflab_aea_get_resource_file_size( perflab_aea_get_path_from_resource_url( $src ) ),
-				);
+		foreach ( $wp_scripts->done as $handle ) {
+			$script = $wp_scripts->registered[ $handle ];
+
+			if ( ! $script->src || false !== strpos( $script->src, 'wp-includes' ) ) {
+				continue;
 			}
+
+			// Add any extra data (inlined) that was passed with the script.
+			$inline_size = 0;
+			if ( ! empty( $script->extra ) && ! empty( $script->extra['after'] ) ) {
+				foreach ( $script->extra['after'] as $extra ) {
+					$inline_size += ( is_string( $extra ) ) ? mb_strlen( $extra, '8bit' ) : 0;
+				}
+			}
+
+			$path = perflab_aea_get_path_from_resource_url( $script->src );
+			if ( ! $path ) {
+				continue;
+			}
+
+			$enqueued_scripts[] = array(
+				'src'  => $script->src,
+				'size' => perflab_aea_get_resource_file_size( $path ) + $inline_size,
+			);
+
 		}
 		set_transient( 'aea_enqueued_front_page_scripts', $enqueued_scripts, 12 * HOUR_IN_SECONDS );
 	}
 }
-add_action( 'wp_print_scripts', 'perflab_aea_audit_enqueued_scripts' );
+add_action( 'wp_footer', 'perflab_aea_audit_enqueued_scripts', PHP_INT_MAX );
 
 /**
- * Audit enqueued styles in the frontend. Ignore /wp-includes styles.
+ * Audit enqueued and printed styles in the frontend. Ignore /wp-includes styles.
  *
  * It will save information in a transient for 12 hours.
  *
@@ -50,19 +67,40 @@ function perflab_aea_audit_enqueued_styles() {
 	if ( ! is_admin() && is_front_page() && current_user_can( 'view_site_health_checks' ) && false === get_transient( 'aea_enqueued_front_page_styles' ) ) {
 		global $wp_styles;
 		$enqueued_styles = array();
-		foreach ( $wp_styles->queue as $handle ) {
-			$src = $wp_styles->registered[ $handle ]->src;
-			if ( $src && ! strpos( $src, 'wp-includes' ) ) {
-				$enqueued_styles[] = array(
-					'src'  => $src,
-					'size' => perflab_aea_get_resource_file_size( perflab_aea_get_path_from_resource_url( $src ) ),
-				);
+		foreach ( $wp_styles->done as $handle ) {
+			$style = $wp_styles->registered[ $handle ];
+
+			if ( ! $style->src || false !== strpos( $style->src, 'wp-includes' ) ) {
+				continue;
 			}
+
+			// Check if we already have the style's path ( part of a refactor for block styles from 5.9 ).
+			if ( ! empty( $style->extra ) && ! empty( $style->extra['path'] ) ) {
+				$path = $style->extra['path'];
+			} else { // Fallback to getting the path from the style's src.
+				$path = perflab_aea_get_path_from_resource_url( $style->src );
+				if ( ! $path ) {
+					continue;
+				}
+			}
+
+			// Add any extra data (inlined) that was passed with the style.
+			$inline_size = 0;
+			if ( ! empty( $style->extra ) && ! empty( $style->extra['after'] ) ) {
+				foreach ( $style->extra['after'] as $extra ) {
+					$inline_size += ( is_string( $extra ) ) ? mb_strlen( $extra, '8bit' ) : 0;
+				}
+			}
+
+			$enqueued_styles[] = array(
+				'src'  => $style->src,
+				'size' => perflab_aea_get_resource_file_size( $path ) + $inline_size,
+			);
 		}
 		set_transient( 'aea_enqueued_front_page_styles', $enqueued_styles, 12 * HOUR_IN_SECONDS );
 	}
 }
-add_action( 'wp_print_styles', 'perflab_aea_audit_enqueued_styles' );
+add_action( 'wp_footer', 'perflab_aea_audit_enqueued_styles', PHP_INT_MAX );
 
 /**
  * Adds tests to site health.

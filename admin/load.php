@@ -340,6 +340,84 @@ function perflab_get_module_data( $module_file ) {
 }
 
 /**
+ * Initialise Admin Pointer
+ *
+ * Handles the bootstrapping of the admin pointer.
+ * Mainly jQuery code that is self-initialising.
+ *
+ * @param string $hook_suffix The current admin page.
+ * @since 1.0.0
+ */
+function perflab_admin_pointer( $hook_suffix ) {
+	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
+		return;
+	}
+
+	$current_user = get_current_user_id();
+	$dismissed    = explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) );
+
+	if ( in_array( 'perflab-admin-pointer', $dismissed, true ) ) {
+		return;
+	}
+
+	// Enqueue pointer CSS and JS.
+	wp_enqueue_style( 'wp-pointer' );
+	wp_enqueue_script( 'wp-pointer' );
+	add_action( 'admin_print_footer_scripts', 'perflab_render_pointer' );
+}
+add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
+
+/**
+ * Renders the Admin Pointer
+ *
+ * Handles the rendering of the admin pointer.
+ *
+ * @since 1.0.0
+ */
+function perflab_render_pointer() {
+	$heading         = __( 'Performance Lab', 'performance-lab' );
+	$wp_kses_options = array(
+		'a' => array(
+			'href' => array(),
+		),
+	);
+
+	$content = sprintf(
+		/* translators: %s: settings page link */
+		__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ),
+		'<a href="' . esc_url( add_query_arg( 'page', 'perflab-modules', admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
+	);
+
+	?>
+	<script id="perflab-admin-pointer" type="text/javascript">
+		jQuery( function() {
+			// Pointer Options
+			var options = {
+				content: '<h3><?php echo esc_js( $heading ); ?></h3><p><?php echo wp_kses( $content, $wp_kses_options ); ?></p>',
+				position: {
+					edge:  'left',
+					align: 'right',
+				},
+				pointerClass: 'wp-pointer arrow-top',
+				pointerWidth: 420,
+				close: function() {
+					jQuery.post(
+						window.ajaxurl,
+						{
+							pointer: 'perflab-admin-pointer',
+							action:  'dismiss-wp-pointer',
+						}
+					);
+				}
+			};
+
+			jQuery( '#menu-settings' ).pointer( options ).pointer( 'open' );
+		} );
+	</script>
+	<?php
+}
+
+/**
  * Adds a link to the modules page to the plugin's entry in the plugins list table.
  *
  * This function is only used if the modules page exists and is accessible.
