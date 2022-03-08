@@ -1,7 +1,7 @@
 <?php
 /**
- * Module Name: Web Support
- * Description: Add WebP support check in Site Health checks.
+ * Module Name: WebP Support
+ * Description: Adds a WebP support check in Site Health status.
  * Experimental: No
  *
  * @package performance-lab

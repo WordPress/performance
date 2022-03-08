@@ -52,16 +52,20 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_add_modules_page() {
 		global $_wp_submenu_nopriv;
 
-		// Reset relevant globals.
+		// Reset relevant globals and filters.
 		$_wp_submenu_nopriv = array();
+		remove_all_filters( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ) );
 
 		// The default user does not have the 'manage_options' capability.
 		$hook_suffix = perflab_add_modules_page();
 		$this->assertFalse( $hook_suffix );
 		$this->assertTrue( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_MODULES_SCREEN ] ) );
+		// Ensure plugin action link is not added.
+		$this->assertFalse( (bool) has_action( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' ) );
 
-		// Reset relevant globals.
+		// Reset relevant globals and filters.
 		$_wp_submenu_nopriv = array();
+		remove_all_filters( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ) );
 
 		// Rely on current user to be an administrator (with 'manage_options' capability).
 		$user_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
@@ -69,15 +73,20 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$hook_suffix = perflab_add_modules_page();
 		$this->assertSame( get_plugin_page_hookname( PERFLAB_MODULES_SCREEN, 'options-general.php' ), $hook_suffix );
 		$this->assertFalse( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_MODULES_SCREEN ] ) );
+		// Ensure plugin action link is added.
+		$this->assertTrue( (bool) has_action( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' ) );
 
-		// Reset relevant globals.
+		// Reset relevant globals and filters.
 		$_wp_submenu_nopriv = array();
+		remove_all_filters( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ) );
 
 		// Does not register the page if the perflab_active_modules filter is used.
 		add_filter( 'perflab_active_modules', function() {} );
 		$hook_suffix = perflab_add_modules_page();
 		$this->assertFalse( $hook_suffix );
 		$this->assertFalse( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_MODULES_SCREEN ] ) );
+		// Ensure plugin action link is not added.
+		$this->assertFalse( (bool) has_action( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' ) );
 	}
 
 	public function test_perflab_load_modules_page() {
@@ -198,5 +207,16 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 			$module_data = perflab_get_module_data( TESTS_PLUGIN_DIR . '/tests/testdata/demo-modules/' . $module_slug . '/load.php' );
 			$this->assertSame( $expected_module_data, $module_data );
 		}
+	}
+
+	public function test_perflab_plugin_action_links_add_settings() {
+		$original_links = array( '<a href="https://wordpress.org">wordpress.org</a>' );
+		$expected_links = array(
+			'<a href="' . admin_url( '/' ) . 'options-general.php?page=' . PERFLAB_MODULES_SCREEN . '">Settings</a>',
+			$original_links[0],
+		);
+
+		$actual_links = perflab_plugin_action_links_add_settings( $original_links );
+		$this->assertSame( $expected_links, $actual_links );
 	}
 }
