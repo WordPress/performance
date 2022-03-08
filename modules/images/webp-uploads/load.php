@@ -84,7 +84,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 		$editor->resize( $metadata['width'], $metadata['height'], false );
 		$extension = explode( '|', $allowed_mimes[ $targeted_mime ] );
-		$extension = reset( $extension );
+		$extension = $extension[0];
 
 		if ( empty( $extension ) || empty( $original_extension ) ) {
 			continue;
