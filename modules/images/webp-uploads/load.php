@@ -185,7 +185,6 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 
 	$editor->resize( $width, $height, $crop );
 	$filename = $editor->generate_filename( null, null, $extension );
-	$filename = preg_replace( '/-(scaled|rotated|imagifyresized)/', '', $filename );
 	$image    = $editor->save( $filename, $mime );
 
 	if ( is_wp_error( $image ) ) {
