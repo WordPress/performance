@@ -275,6 +275,10 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 	$width  = isset( $size_data['width'] ) ? (int) $size_data['width'] : 0;
 	$crop   = isset( $size_data['crop'] ) && $size_data['crop'];
 
+	if ( $width <= 0 && $height <= 0 ) {
+		return new WP_Error( 'image_wrong_dimensions', __( 'At least one of the dimensions must be a positive number.', 'performance-lab' ) );
+	}
+
 	$editor->resize( $width, $height, $crop );
 
 	if ( null === $destination_file_name ) {
