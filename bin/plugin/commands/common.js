@@ -62,11 +62,8 @@ exports.getModuleData = async ( modulesDir ) => {
 
 			// Parse experimental field into a boolean.
 			if ( typeof moduleData.experimental === 'string' ) {
-				if ( moduleData.experimental.toLowerCase() === 'yes' ) {
-					moduleData.experimental = true;
-				} else {
-					moduleData.experimental = false;
-				}
+				moduleData.experimental =
+					moduleData.experimental.toLowerCase() === 'yes';
 			}
 
 			return moduleData;
