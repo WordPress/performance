@@ -195,16 +195,16 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 		'crop'   => false,
 	);
 
-	if ( isset( $metadata['sizes'][ $size ]['width'] ) ) {
-		$size_data['width'] = $metadata['sizes'][ $size ]['width'];
-	} elseif ( isset( $sizes[ $size ]['width'] ) ) {
+	if ( isset( $sizes[ $size ]['width'] ) ) {
 		$size_data['width'] = $sizes[ $size ]['width'];
+	} elseif ( isset( $metadata['sizes'][ $size ]['width'] ) ) {
+		$size_data['width'] = $metadata['sizes'][ $size ]['width'];
 	}
 
-	if ( isset( $metadata['sizes'][ $size ]['height'] ) ) {
-		$size_data['height'] = $metadata['sizes'][ $size ]['height'];
-	} elseif ( isset( $sizes[ $size ]['height'] ) ) {
+	if ( isset( $sizes[ $size ]['height'] ) ) {
 		$size_data['height'] = $sizes[ $size ]['height'];
+	} elseif ( isset( $metadata['sizes'][ $size ]['height'] ) ) {
+		$size_data['height'] = $metadata['sizes'][ $size ]['height'];
 	}
 
 	if ( isset( $sizes[ $size ]['crop'] ) ) {
