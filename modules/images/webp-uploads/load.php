@@ -62,12 +62,8 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	);
 
 	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
-	if ( isset( $metadata['file'] ) ) {
-		$filename = pathinfo( $metadata['file'], PATHINFO_FILENAME );
-	} else {
-		$filename = pathinfo( $file, PATHINFO_FILENAME );
-	}
-	$allowed_mimes = array_flip( wp_get_mime_types() );
+	$filename           = pathinfo( $file, PATHINFO_FILENAME );
+	$allowed_mimes      = array_flip( wp_get_mime_types() );
 	// Create the sources for the full sized image.
 	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
 		// If this property exists no need to create the image again.
