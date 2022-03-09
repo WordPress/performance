@@ -25,5 +25,4 @@
 /CONTRIBUTING.md export-ignore
 /SECURITY.md export-ignore
 
-/.distignore export-ignore
 /.gitignore export-ignore
