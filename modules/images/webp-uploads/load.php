@@ -251,7 +251,7 @@ function webp_uploads_get_supported_image_mime_transforms() {
  * @param string|null $destination_file_name The path where the file would be stored, it should include the extension, when null would use `generate_filename` to create a destination.
  * @return array|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
  */
-function webp_uploads_generate_additional_image_source( $attachment_id, array $size_data = array(), $mime = '', $destination_file_name = null ) {
+function webp_uploads_generate_additional_image_source( $attachment_id, array $size_data, $mime, $destination_file_name = null ) {
 	$image_path = get_attached_file( $attachment_id );
 
 	// File does not exist.
