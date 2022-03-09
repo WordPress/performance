@@ -549,6 +549,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		// Replace the full size image if present.
 		if ( isset( $metadata['file'], $metadata['sources'][ $target_mime ]['file'] ) && strpos( $url, $basename ) !== false ) {
 			$image = str_replace( $src_filename, $metadata['sources'][ $target_mime ]['file'], $image );
+			continue;
 		}
 
 		if ( empty( $metadata['sizes'] ) ) {
