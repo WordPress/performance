@@ -475,3 +475,19 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 }
 
 add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
+
+/**
+ * Updates the response for an attachment to include sources for additional mime types available the image.
+ *
+ * @since n.e.x.t
+ *
+ * @param WP_REST_Response $response The original response object.
+ * @param WP_Post $post              The post object.
+ * @param WP_REST_Request $request   The request object.
+ * @return WP_REST_Response Updated attachment response.
+ */
+function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Post $post, WP_REST_Request $request ) {
+	return $response;
+}
+
+add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 3 );
