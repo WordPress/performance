@@ -32,7 +32,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
 	// Not a supported mime type to create the sources property.
 	$mime_type = get_post_mime_type( $attachment_id );
-	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) || ! is_array( $valid_mime_transforms[ $mime_type ] ) ) {
+	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
 		return $metadata;
 	}
 
@@ -223,6 +223,7 @@ function webp_uploads_get_supported_image_mime_transforms() {
 		'image/webp' => array( 'image/jpeg' ),
 	);
 
+	$valid_transforms = array();
 	/**
 	 * Filter to allow the definition of a custom mime types, in which a defined mime type
 	 * can be transformed and provide a wide range of mime types.
@@ -231,7 +232,15 @@ function webp_uploads_get_supported_image_mime_transforms() {
 	 *
 	 * @param array $image_mime_transforms A map with the valid mime transforms.
 	 */
-	return (array) apply_filters( 'webp_uploads_supported_image_mime_transforms', $image_mime_transforms );
+	$transforms = (array) apply_filters( 'webp_uploads_supported_image_mime_transforms', $image_mime_transforms );
+	// Remove any invalid transform, by making sure all the transform values are arrays.
+	foreach ( $transforms as $mime => $list_transforms ) {
+		if ( ! is_array( $list_transforms ) ) {
+			continue;
+		}
+		$valid_transforms[ $mime ] = $list_transforms;
+	}
+	return $valid_transforms;
 }
 
 /**
