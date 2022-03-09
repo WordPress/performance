@@ -244,6 +244,7 @@ function webp_uploads_get_supported_image_mime_transforms() {
  * a WP_Error would be returned otherwise an array with the file and filesize properties.
  *
  * @since n.e.xt
+ * @private
  * @param int         $attachment_id The ID of the attachment from where this image would be created.
  * @param array       $size_data An array with the dimensions of the image: height, width and crop.
  * @param string      $mime The target mime in which the image should be created.
