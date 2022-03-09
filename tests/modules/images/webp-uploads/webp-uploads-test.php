@@ -616,4 +616,109 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		yield 'PNG image' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dice.png' );
 		yield 'GIFT image' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/earth.gif' );
 	}
+
+	/**
+	 * Return an error when creating an additional image source with invalid parameters
+	 *
+	 * @dataProvider data_provider_invalid_arguments_for_webp_uploads_generate_additional_image_source
+	 *
+	 * @test
+	 */
+	public function it_should_return_an_error_when_creating_an_additional_image_source_with_invalid_parameters( $attachment_id, $size_data, $mime, $destination_file = null ) {
+		$this->assertInstanceOf( WP_Error::class, webp_uploads_generate_additional_image_source( $attachment_id, $size_data, $mime, $destination_file ) );
+	}
+
+	public function data_provider_invalid_arguments_for_webp_uploads_generate_additional_image_source() {
+		yield 'when trying to use an attachment ID that does not exists' => array(
+			PHP_INT_MAX,
+			array(),
+			'image/webp'
+		);
+
+
+		add_filter( 'wp_image_editors', '__return_empty_array' );
+		yield 'when no editor is present' => array(
+			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			array(),
+			'image/avif'
+		);
+
+		remove_filter( 'wp_image_editors', '__return_empty_array' );
+		yield 'when using a mime that is not supported' => array(
+			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			array(),
+			'image/avif'
+		);
+
+		yield 'when no dimension is provided' => array(
+			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			array(),
+			'image/webp'
+		);
+
+		yield 'when both dimensions are negative numbers' => array(
+			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			array(
+				'width' => -10,
+				'height' => -20,
+			),
+			'image/webp'
+		);
+
+		yield 'when both dimensions are zero' => array(
+			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			array(
+				'width' => 0,
+				'height' => 0,
+			),
+			'image/webp'
+		);
+	}
+
+	/**
+	 * Create an image with the default suffix in the same location when no destination is specified
+	 *
+	 * @test
+	 */
+	public function it_should_create_an_image_with_the_default_suffix_in_the_same_location_when_no_destination_is_specified() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+		$size_data = array(
+			'width' => 300,
+			'height' => 300,
+			'crop' => true,
+		);
+
+		$result    = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp' );
+		$file      = get_attached_file( $attachment_id );
+		$directory = trailingslashit( pathinfo( $file, PATHINFO_DIRNAME ) );
+		$name = pathinfo( $file, PATHINFO_FILENAME );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'filesize', $result );
+		$this->assertArrayHasKey( 'file', $result );
+		$this->assertStringEndsWith( '300x300.webp', $result['file'] );
+		$this->assertFileExists( "{$directory}{$name}-300x300.webp" );
+	}
+
+	/**
+	 * Create a file in the specified location with the specified name
+	 *
+	 * @test
+	 */
+	public function it_should_create_a_file_in_the_specified_location_with_the_specified_name() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+		$size_data = array(
+			'width' => 300,
+			'height' => 300,
+			'crop' => true,
+		);
+
+		$result    = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp', '/tmp/image.jpg' );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'filesize', $result );
+		$this->assertArrayHasKey( 'file', $result );
+		$this->assertStringEndsWith( 'image.webp', $result['file'] );
+		$this->assertFileExists( '/tmp/image.webp' );
+	}
 }
