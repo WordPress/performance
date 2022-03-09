@@ -482,8 +482,8 @@ add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
  * @since n.e.x.t
  *
  * @param WP_REST_Response $response The original response object.
- * @param WP_Post $post              The post object.
- * @param WP_REST_Request $request   The request object.
+ * @param WP_Post          $post     The post object.
+ * @param WP_REST_Request  $request  The request object.
  * @return WP_REST_Response A new response object for the attachment with additional sources.
  */
 function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Post $post, WP_REST_Request $request ) {
