@@ -47,7 +47,7 @@ After running the command, check the `readme.txt` file to ensure the new changel
 
 ### Open a pull request
 
-Push your local branch to the GitHub repository and open a pull request against the release branch `release/{milestoneName}`. Make sure to tag at least 2 plugin maintainers to request a review, as usual. Once the pull request is approved by at least 2 plugin maintainers, the pull request can be merged.
+Push your local branch to the GitHub repository and open a pull request against the release branch `release/{milestoneName}`. As usual, make sure to request a review from at least 2 plugin maintainers. Once approved, the pull request can be merged.
 
 ## Publishing the release
 
