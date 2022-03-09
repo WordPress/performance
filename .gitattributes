@@ -26,4 +26,5 @@
 /SECURITY.md export-ignore
 /README.md export-ignore
 
+/.gitattributes export-ignore
 /.gitignore export-ignore
