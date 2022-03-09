@@ -579,6 +579,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 			}
 
 			$image = str_replace( $src_filename, $size_data['sources'][ $target_mime ]['file'], $image );
+			break;
 		}
 	}
 
