@@ -24,5 +24,6 @@
 /CODE_OF_CONDUCT.md export-ignore
 /CONTRIBUTING.md export-ignore
 /SECURITY.md export-ignore
+/README.md export-ignore
 
 /.gitignore export-ignore
