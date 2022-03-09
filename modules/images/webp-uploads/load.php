@@ -245,10 +245,11 @@ function webp_uploads_get_supported_image_mime_transforms() {
  *
  * @since n.e.xt
  * @private
- * @param int         $attachment_id The ID of the attachment from where this image would be created.
- * @param array       $size_data An array with the dimensions of the image: height, width and crop.
- * @param string      $mime The target mime in which the image should be created.
- * @param string|null $destination_file_name The path where the file would be stored, it should include the extension, when null would use `generate_filename` to create a destination.
+ *
+ * @param int    $attachment_id         The ID of the attachment from where this image would be created.
+ * @param array  $size_data             An array with the dimensions of the image: height, width and crop.
+ * @param string $mime                  The target mime in which the image should be created.
+ * @param string $destination_file_name The path where the file would be stored, including the extension. If empty, `generate_filename` is used to create the destination file name.
  * @return array|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
  */
 function webp_uploads_generate_additional_image_source( $attachment_id, array $size_data = array(), $mime = '', $destination_file_name = null ) {
