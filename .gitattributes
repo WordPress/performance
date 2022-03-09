@@ -1,29 +1,29 @@
-/.git
-/.github
-/node_modules
-/vendor
+/.git export-ignore
+/.github export-ignore
+/node_modules export-ignore
+/vendor export-ignore
 
-/bin
-/docs
-/tests
+/bin export-ignore
+/docs export-ignore
+/tests export-ignore
 
-/*.DS_store
-/.DS_store?
+/*.DS_store export-ignore
+/.DS_store? export-ignore
 
-/.editorconfig
-/.eslintrc.js
-/.nvmrc
-/.wp-env.json
-/composer.json
-/composer.lock
-/package.json
-/package-lock.json
-/phpcs.xml.dist
-/phpunit.xml.dist
+/.editorconfig export-ignore
+/.eslintrc.js export-ignore
+/.nvmrc export-ignore
+/.wp-env.json export-ignore
+/composer.json export-ignore
+/composer.lock export-ignore
+/package.json export-ignore
+/package-lock.json export-ignore
+/phpcs.xml.dist export-ignore
+/phpunit.xml.dist export-ignore
 
-/CODE_OF_CONDUCT.md
-/CONTRIBUTING.md
-/SECURITY.md
+/CODE_OF_CONDUCT.md export-ignore
+/CONTRIBUTING.md export-ignore
+/SECURITY.md export-ignore
 
-/.distignore
-/.gitignore
+/.distignore export-ignore
+/.gitignore export-ignore
