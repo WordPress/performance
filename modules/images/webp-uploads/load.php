@@ -279,6 +279,12 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 	$width  = isset( $size_data['width'] ) ? (int) $size_data['width'] : 0;
 	$crop   = isset( $size_data['crop'] ) && $size_data['crop'];
 
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
+	// If stored EXIF data exists, rotate the source image before creating sub-sizes.
+	if ( ! empty( $image_meta['image_meta'] ) ) {
+		$editor->maybe_exif_rotate();
+	}
+
 	$editor->resize( $width, $height, $crop );
 
 	if ( null === $destination_file_name ) {
