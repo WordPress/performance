@@ -609,16 +609,12 @@ add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
  * @return WP_REST_Response A new response object for the attachment with additional sources.
  */
 function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Post $post, WP_REST_Request $request ) {
-	$metadata = wp_get_attachment_metadata( $post->ID );
-	if ( empty( $metadata['file'] ) ) {
-		return $response;
-	}
-
 	$data = $response->get_data();
 	if ( ! isset( $data['media_details']['sizes'] ) || ! is_array( $data['media_details']['sizes'] ) ) {
 		return $response;
 	}
 
+	$metadata = wp_get_attachment_metadata( $post->ID );
 	foreach ( $data['media_details']['sizes'] as $size => $details ) {
 		if ( empty( $metadata['sizes'][ $size ]['sources'] ) || ! is_array( $metadata['sizes'][ $size ]['sources'] ) ) {
 			continue;
