@@ -32,12 +32,11 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
 	// Not a supported mime type to create the sources property.
 	$mime_type = get_post_mime_type( $attachment_id );
-	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) || ! is_array( $valid_mime_transforms[ $mime_type ] ) ) {
+	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
 		return $metadata;
 	}
 
 	$file = get_attached_file( $attachment_id, true );
-
 	// File does not exist.
 	if ( ! file_exists( $file ) ) {
 		return $metadata;
@@ -63,12 +62,8 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	);
 
 	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
-	if ( isset( $metadata['file'] ) ) {
-		$filename = pathinfo( $metadata['file'], PATHINFO_FILENAME );
-	} else {
-		$filename = pathinfo( $file, PATHINFO_FILENAME );
-	}
-	$allowed_mimes = array_flip( wp_get_mime_types() );
+	$filename           = pathinfo( $file, PATHINFO_FILENAME );
+	$allowed_mimes      = array_flip( wp_get_mime_types() );
 	// Create the sources for the full sized image.
 	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
 		// If this property exists no need to create the image again.
@@ -228,6 +223,7 @@ function webp_uploads_get_supported_image_mime_transforms() {
 		'image/webp' => array( 'image/jpeg' ),
 	);
 
+	$valid_transforms = array();
 	/**
 	 * Filter to allow the definition of a custom mime types, in which a defined mime type
 	 * can be transformed and provide a wide range of mime types.
@@ -236,7 +232,15 @@ function webp_uploads_get_supported_image_mime_transforms() {
 	 *
 	 * @param array $image_mime_transforms A map with the valid mime transforms.
 	 */
-	return (array) apply_filters( 'webp_uploads_supported_image_mime_transforms', $image_mime_transforms );
+	$transforms = (array) apply_filters( 'webp_uploads_supported_image_mime_transforms', $image_mime_transforms );
+	// Remove any invalid transform, by making sure all the transform values are arrays.
+	foreach ( $transforms as $mime => $list_transforms ) {
+		if ( ! is_array( $list_transforms ) ) {
+			continue;
+		}
+		$valid_transforms[ $mime ] = $list_transforms;
+	}
+	return $valid_transforms;
 }
 
 /**
@@ -279,6 +283,10 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 	$height = isset( $size_data['height'] ) ? (int) $size_data['height'] : 0;
 	$width  = isset( $size_data['width'] ) ? (int) $size_data['width'] : 0;
 	$crop   = isset( $size_data['crop'] ) && $size_data['crop'];
+
+	if ( $width <= 0 && $height <= 0 ) {
+		return new WP_Error( 'image_wrong_dimensions', __( 'At least one of the dimensions must be a positive number.', 'performance-lab' ) );
+	}
 
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	// If stored EXIF data exists, rotate the source image before creating sub-sizes.
@@ -552,8 +560,11 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 
 	$basename = wp_basename( $metadata['file'] );
 	foreach ( $urls as $url ) {
-		if ( isset( $metadata['file'] ) && strpos( $url, $basename ) !== false ) {
-			// TODO: we don't have a replacement for full image yet, issue. See: https://github.com/WordPress/performance/issues/174.
+		$src_filename = wp_basename( $url );
+
+		// Replace the full size image if present.
+		if ( isset( $metadata['sources'][ $target_mime ]['file'] ) && strpos( $url, $basename ) !== false ) {
+			$image = str_replace( $src_filename, $metadata['sources'][ $target_mime ]['file'], $image );
 			continue;
 		}
 
@@ -561,8 +572,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 			continue;
 		}
 
-		$src_filename = wp_basename( $url );
-		$extension    = wp_check_filetype( $src_filename );
+		$extension = wp_check_filetype( $src_filename );
 		// Extension was not set properly no action possible or extension is already in the expected mime.
 		if ( empty( $extension['type'] ) || $extension['type'] === $target_mime ) {
 			continue;
@@ -585,6 +595,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 			}
 
 			$image = str_replace( $src_filename, $size_data['sources'][ $target_mime ]['file'], $image );
+			break;
 		}
 	}
 
