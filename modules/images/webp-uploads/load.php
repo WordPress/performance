@@ -624,12 +624,12 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 			continue;
 		}
 
-		$sources = array();
+		$sources   = array();
 		$directory = dirname( $data['media_details']['sizes'][ $size ]['source_url'] );
 		foreach ( $metadata['sizes'][ $size ]['sources'] as $mime => $mime_details ) {
-			$source_url       = "{$directory}/{$mime_details['file']}";
+			$source_url                 = "{$directory}/{$mime_details['file']}";
 			$mime_details['source_url'] = $source_url;
-			$sources[ $mime ] = $mime_details;
+			$sources[ $mime ]           = $mime_details;
 		}
 
 		$data['media_details']['sizes'][ $size ]['sources'] = $sources;
