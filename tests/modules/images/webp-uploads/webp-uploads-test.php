@@ -564,14 +564,14 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			$this->assertArrayHasKey( 'sources', $properties );
 			$this->assertIsArray( $properties['sources'] );
 
-			foreach ( $mime_types as $mie_type ) {
-				$this->assertArrayHasKey( $mie_type, $properties['sources'] );
+			foreach ( $mime_types as $mime_type ) {
+				$this->assertArrayHasKey( $mime_type, $properties['sources'] );
 
-				$this->assertArrayHasKey( 'filesize', $properties['sources'][ $mie_type ] );
-				$this->assertArrayHasKey( 'file', $properties['sources'][ $mie_type ] );
-				$this->assertArrayHasKey( 'source_url', $properties['sources'][ $mie_type ] );
+				$this->assertArrayHasKey( 'filesize', $properties['sources'][ $mime_type ] );
+				$this->assertArrayHasKey( 'file', $properties['sources'][ $mime_type ] );
+				$this->assertArrayHasKey( 'source_url', $properties['sources'][ $mime_type ] );
 
-				$this->assertNotFalse( filter_var( $properties['sources'][ $mie_type ]['source_url'], FILTER_VALIDATE_URL ) );
+				$this->assertNotFalse( filter_var( $properties['sources'][ $mime_type ]['source_url'], FILTER_VALIDATE_URL ) );
 			}
 		}
 	}
