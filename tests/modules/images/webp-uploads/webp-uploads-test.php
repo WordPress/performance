@@ -206,7 +206,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
 		$this->assertTrue( is_wp_error( $result ) );
-		$this->assertSame( 'image_file_size_not_found', $result->get_error_code() );
+		$this->assertSame( 'original_image_file_not_found', $result->get_error_code() );
 	}
 
 	/**
