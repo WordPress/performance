@@ -547,6 +547,8 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			$expected_tag = str_replace( $properties['sources']['image/jpeg']['file'], $properties['sources']['image/webp']['file'], $expected_tag );
 		}
 
+		$expected_tag = str_replace( $metadata['sources']['image/jpeg']['file'], $metadata['sources']['image/webp']['file'], $expected_tag );
+
 		$this->assertNotEmpty( $expected_tag );
 		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
@@ -558,13 +560,11 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Contain the full image size from the original mime
-	 *
-	 * @group webp_uploads_update_image_references
+	 * Replace all the images including the full size image
 	 *
 	 * @test
 	 */
-	public function it_should_contain_the_full_image_size_from_the_original_mime() {
+	public function it_should_replace_all_the_images_including_the_full_size_image() {
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
@@ -575,8 +575,10 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			'ext'  => 'jpg',
 			'type' => 'image/jpeg',
 		);
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertSame( $expected, wp_check_filetype( get_attached_file( $attachment_id ) ) );
-		$this->assertContains( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->assertNotContains( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->assertContains( $metadata['sources']['image/webp']['file'], webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
