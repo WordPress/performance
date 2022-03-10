@@ -2,9 +2,7 @@ name: Deploy to WordPress.org
 
 on:
   release:
-    types:
-      - released
-      - prereleased
+    types: [published]
 
 jobs:
   release:
