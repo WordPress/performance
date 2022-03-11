@@ -223,7 +223,6 @@ function webp_uploads_get_supported_image_mime_transforms() {
 		'image/webp' => array( 'image/jpeg' ),
 	);
 
-	$valid_transforms = array();
 	/**
 	 * Filter to allow the definition of a custom mime types, in which a defined mime type
 	 * can be transformed and provide a wide range of mime types.
@@ -232,15 +231,9 @@ function webp_uploads_get_supported_image_mime_transforms() {
 	 *
 	 * @param array $image_mime_transforms A map with the valid mime transforms.
 	 */
-	$transforms = (array) apply_filters( 'webp_uploads_supported_image_mime_transforms', $image_mime_transforms );
-	// Remove any invalid transform, by making sure all the transform values are arrays.
-	foreach ( $transforms as $mime => $list_transforms ) {
-		if ( ! is_array( $list_transforms ) ) {
-			continue;
-		}
-		$valid_transforms[ $mime ] = $list_transforms;
-	}
-	return $valid_transforms;
+	$transforms = (array) apply_filters( 'webp_uploads_upload_image_mime_transforms', $image_mime_transforms );
+
+	return array_filter( $transforms, 'is_array' );
 }
 
 /**

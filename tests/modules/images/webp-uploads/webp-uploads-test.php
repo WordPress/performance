@@ -66,7 +66,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_not_create_the_sources_property_if_no_transform_is_provided() {
-		add_filter( 'webp_uploads_supported_image_mime_transforms', '__return_empty_array' );
+		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
@@ -88,7 +88,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 */
 	public function it_should_create_the_sources_property_when_no_transform_is_available() {
 		add_filter(
-			'webp_uploads_supported_image_mime_transforms',
+			'webp_uploads_upload_image_mime_transforms',
 			function () {
 				return array( 'image/jpeg' => array() );
 			}
@@ -124,7 +124,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 */
 	public function it_should_not_create_the_sources_property_if_the_mime_is_not_specified_on_the_transforms_images() {
 		add_filter(
-			'webp_uploads_supported_image_mime_transforms',
+			'webp_uploads_upload_image_mime_transforms',
 			function () {
 				return array( 'image/jpeg' => array() );
 			}
@@ -589,7 +589,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_replacing_an_image_with_no_available_sources() {
-		add_filter( 'webp_uploads_supported_image_mime_transforms', '__return_empty_array' );
+		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
