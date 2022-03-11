@@ -167,6 +167,56 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_property', 10, 2 );
 
 /**
+ * Filter the image editor default output format mapping to select the most appropriate
+ * output format depending on desired output formats and supported mime types by the image
+ * editor.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $output_format The image editor default output format mapping.
+ * @param string $filename      Path to the image.
+ * @param string $mime_type     The source image mime type.
+ * @return string The new output format mapping.
+ */
+function webp_uploads_filter_image_editor_output_format( $output_format, $filename, $mime_type ) {
+	// Skip conversion when creating the `-scaled` image (for large image uploads).
+	if ( preg_match( '/-scaled\..{3}.?$/', $filename ) ) {
+		return $output_format;
+	}
+
+	// Use the original mime type if this type is allowed.
+	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
+	if (
+		! isset( $valid_mime_transforms[ $mime_type ] ) ||
+		! is_array( $valid_mime_transforms[ $mime_type ] ) ||
+		in_array( $mime_type, $valid_mime_transforms[ $mime_type ] )
+	) {
+		return $output_format;
+	}
+
+	$new_mime_type = null;
+
+	// Find the first supported mime type by the image editor to use it as the default one.
+	foreach ( $valid_mime_transforms[ $mime_type ] as $target_mime ) {
+		if ( wp_image_editor_supports( array( 'mime_type' => $target_mime ) ) ) {
+			$new_mime_type = $target_mime;
+			break;
+		}
+	}
+
+	// Leave the original mime type if there is no other mime type supported by the image editor.
+	if ( empty( $new_mime_type ) ) {
+		return $output_format;
+	}
+
+	$output_format[ $mime_type ] = $new_mime_type;
+
+	return $output_format;
+}
+
+add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
+
+/**
  * Creates a new image based of the specified attachment with a defined mime type
  * this image would be stored in the same place as the provided size name inside the
  * metadata of the attachment.
