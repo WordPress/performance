@@ -189,7 +189,7 @@ function webp_uploads_filter_image_editor_output_format( $output_format, $filena
 	if (
 		! isset( $valid_mime_transforms[ $mime_type ] ) ||
 		! is_array( $valid_mime_transforms[ $mime_type ] ) ||
-		in_array( $mime_type, $valid_mime_transforms[ $mime_type ] )
+		in_array( $mime_type, $valid_mime_transforms[ $mime_type ], true )
 	) {
 		return $output_format;
 	}
