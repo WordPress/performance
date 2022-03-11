@@ -60,7 +60,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 		$test_option_string       = 'test';
 		$test_option_string_bytes = mb_strlen( $test_option_string, '8bit' );
 		self::set_autoloaded_option( $test_option_string_bytes );
-		$this->assertEquals( $autoloaded_options_size + $test_option_string_bytes, perflab_aao_autoloaded_options_size() );
+		$this->assertSame( $autoloaded_options_size + $test_option_string_bytes, perflab_aao_autoloaded_options_size() );
 	}
 
 	/**
@@ -76,7 +76,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	/**
 	 * Generate random string with certain $length.
 	 *
-	 * @param int $length Length of string to create.
+	 * @param int $length Length ( in bytes ) of string to create.
 	 * @return string
 	 */
 	protected static function random_string_generator( $length ) {
