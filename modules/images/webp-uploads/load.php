@@ -30,9 +30,18 @@
 function webp_uploads_create_sources_property( array $metadata, $attachment_id ) {
 	// This should take place only on the JPEG image.
 	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
+
 	// Not a supported mime type to create the sources property.
 	$mime_type = get_post_mime_type( $attachment_id );
-	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
+	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) || ! is_array( $valid_mime_transforms[ $mime_type ] ) ) {
+		return $metadata;
+	}
+
+	// Don't do anything if only the original mime type is needed.
+	if (
+		1 === count( $valid_mime_transforms[ $mime_type ] ) &&
+		current( $valid_mime_transforms[ $mime_type ] ) === $mime_type
+	) {
 		return $metadata;
 	}
 
@@ -219,8 +228,8 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
  */
 function webp_uploads_get_supported_image_mime_transforms() {
 	$image_mime_transforms = array(
-		'image/jpeg' => array( 'image/webp' ),
-		'image/webp' => array( 'image/jpeg' ),
+		'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
+		'image/webp' => array( 'image/webp', 'image/jpeg' ),
 	);
 
 	/**
