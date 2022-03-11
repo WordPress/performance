@@ -285,6 +285,10 @@ function webp_uploads_get_supported_image_mime_transforms() {
 	/**
 	 * Filter to allow the definition of a custom mime types, in which a defined mime type
 	 * can be transformed and provide a wide range of mime types.
+	 * 
+	 * The order of supported mime types matters. If the original mime type of the uploaded image
+	 * is not needed, then the first mime type in the list supported by the image editor will be
+	 * selected for the default subsizes.
 	 *
 	 * @since 1.0.0
 	 *
