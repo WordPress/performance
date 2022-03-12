@@ -179,11 +179,6 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
  * @return string The new output format mapping.
  */
 function webp_uploads_filter_image_editor_output_format( $output_format, $filename, $mime_type ) {
-	// Skip conversion when creating the `-scaled` image (for large image uploads).
-	if ( preg_match( '/-scaled\..{3}.?$/', $filename ) ) {
-		return $output_format;
-	}
-
 	// Use the original mime type if this type is allowed.
 	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
 	if (
