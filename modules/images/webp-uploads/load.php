@@ -205,7 +205,7 @@ function webp_uploads_filter_image_editor_output_format( $output_format, $filena
 	}
 
 	// Leave the original mime type if there is no other mime type supported by the image editor.
-	if ( empty( $new_mime_type ) ) {
+	if ( null === $new_mime_type ) {
 		return $output_format;
 	}
 
