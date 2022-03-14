@@ -745,7 +745,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			$this->assertStringContainsString( $size['width'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString( $size['height'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString(
-				// Remove the extension ouf of the file.
+				// Remove the extension from the file.
 				substr( $size['sources']['image/webp']['file'], 0, -4 ),
 				$size['sources']['image/jpeg']['file']
 			);
