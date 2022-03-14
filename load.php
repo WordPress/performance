@@ -26,13 +26,24 @@ define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
  * @since 1.0.0
  */
 function perflab_register_modules_setting() {
+	// To set the default value for which modules are enabled, rely on this generated file.
+	$default_enabled_modules = require plugin_dir_path( __FILE__ ) . 'default-enabled-modules.php';
+	$default_option          = array_reduce(
+		$default_enabled_modules,
+		function( $module_settings, $module_dir ) {
+			$module_settings[ $module_dir ] = array( 'enabled' => true );
+			return $module_settings;
+		},
+		array()
+	);
+
 	register_setting(
 		PERFLAB_MODULES_SCREEN,
 		PERFLAB_MODULES_SETTING,
 		array(
 			'type'              => 'object',
 			'sanitize_callback' => 'perflab_sanitize_modules_setting',
-			'default'           => array(),
+			'default'           => $default_option,
 		)
 	);
 }
@@ -76,7 +87,7 @@ function perflab_sanitize_modules_setting( $value ) {
  * @return array Associative array of module settings keyed by module slug.
  */
 function perflab_get_module_settings() {
-	return (array) get_option( PERFLAB_MODULES_SETTING, array() );
+	return (array) get_option( PERFLAB_MODULES_SETTING );
 }
 
 /**

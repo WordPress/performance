@@ -10,7 +10,7 @@ const { EOL } = require( 'os' );
  */
 const { log, formats } = require( '../lib/logger' );
 const config = require( '../config' );
-const { getModuleDescriptions } = require( './common' );
+const { getModuleData } = require( './common' );
 
 const TAB = '\t';
 const NEWLINE = EOL;
@@ -77,10 +77,8 @@ exports.handler = async ( opt ) => {
  * @return {[]WPTranslationEntry} List of translation entries.
  */
 async function getTranslations( settings ) {
-	const moduleDescriptions = await getModuleDescriptions(
-		settings.directory
-	);
-	const moduleTranslations = moduleDescriptions.map( ( moduleData ) => {
+	const modulesData = await getModuleData( settings.directory );
+	const moduleTranslations = modulesData.map( ( moduleData ) => {
 		return [
 			{
 				text: moduleData.name,

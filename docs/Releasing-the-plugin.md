@@ -20,6 +20,10 @@ The version number needs to be updated in the following files:
 
 In addition to those locations, run the `npm run since -- -r {version}` command to replace any occurrence of `@since n.e.x.t` with the version number. This ensures any code annotated with the "next" release will now have its proper version number on it. The only exception to this are pre-releases, such as a beta or RC: For those, the stable version number should be used. For example, if the milestone is `1.2.0-beta.2`, the version in e.g. `@since` annotations in the codebase should still be `1.2.0`.
 
+### Update list of default enabled modules
+
+The default enabled modules are defined in a separate `default-enabled-modules.php` file which can be automatically generated and updated. Run `npm run enabled-modules` to update the file based on the latest available non-experimental modules.
+
 ### Update translation strings
 
 The module headers from the plugin have to be translated using a separate `module-i18n.php` file which can be automatically generated and updated. Run `npm run translations` to update the file to reflect the latest available modules.
