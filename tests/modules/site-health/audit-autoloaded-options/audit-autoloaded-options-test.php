@@ -7,44 +7,39 @@
 class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 
 	const WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES = 800000;
+	const AUTOLOADED_OPTION_KEY                  = 'test_set_autoloaded_option';
 
 	/**
+	 * @dataProvider provider_added_test_info_site_health
+	 *
 	 * Tests perflab_aao_add_autoloaded_options_test()
 	 */
-	public function test_perflab_aao_add_autoloaded_options_test() {
-		$this->assertEqualSets( Autoloaded_Options_Mock_Responses::return_added_test_info_site_health(), perflab_aao_add_autoloaded_options_test( array() ) );
+	public function test_perflab_aao_add_autoloaded_options_test( $provider_added_test_info_site_health ) {
+		$this->assertEqualSets( $provider_added_test_info_site_health, perflab_aao_add_autoloaded_options_test( array() ) );
 	}
 
 	/**
+	 * @dataProvider provider_autoloaded_options_less_than_limit
+	 *
 	 * Tests perflab_aao_autoloaded_options_test() when autoloaded options less than warning size.
 	 */
-	public function test_perflab_aao_autoloaded_options_test_no_warning() {
-		$autoloaded_options_size  = perflab_aao_autoloaded_options_size();
-		$autoloaded_options_count = count( wp_load_alloptions() );
-
+	public function test_perflab_aao_autoloaded_options_test_no_warning( $provider_autoloaded_options_less_than_limit ) {
 		$this->assertEqualSets(
 			perflab_aao_autoloaded_options_test(),
-			Autoloaded_Options_Mock_Responses::return_perflab_aao_autoloaded_options_test_less_than_limit(
-				$autoloaded_options_size,
-				$autoloaded_options_count
-			)
+			$provider_autoloaded_options_less_than_limit
 		);
 	}
 
 	/**
+	 * @dataProvider provider_autoloaded_options_bigger_than_limit
+	 *
 	 * Tests perflab_aao_autoloaded_options_test() when autoloaded options more than warning size.
 	 */
-	public function test_perflab_aao_autoloaded_options_test_warning() {
+	public function test_perflab_aao_autoloaded_options_test_warning( $provider_autoloaded_options_bigger_than_limit ) {
 		self::set_autoloaded_option( self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES );
-		$autoloaded_options_size  = perflab_aao_autoloaded_options_size();
-		$autoloaded_options_count = count( wp_load_alloptions() );
-
 		$this->assertEqualSets(
 			perflab_aao_autoloaded_options_test(),
-			Autoloaded_Options_Mock_Responses::return_perflab_aao_autoloaded_options_test_bigger_than_limit(
-				$autoloaded_options_size,
-				$autoloaded_options_count
-			)
+			$provider_autoloaded_options_bigger_than_limit
 		);
 	}
 
@@ -64,13 +59,20 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Sets an autoloaded option.
+	 * Sets a test autoloaded option.
 	 *
 	 * @param int $bytes bytes to load in options.
 	 */
 	public static function set_autoloaded_option( $bytes = 800000 ) {
 		$heavy_option_string = self::random_string_generator( $bytes );
-		add_option( 'test_set_autoloaded_option', $heavy_option_string );
+		add_option( self::AUTOLOADED_OPTION_KEY, $heavy_option_string );
+	}
+
+	/**
+	 * Deletes test autoloaded option.
+	 */
+	public static function delete_autoloaded_option() {
+		delete_option( self::AUTOLOADED_OPTION_KEY );
 	}
 
 	/**
@@ -88,6 +90,81 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 		}
 		return $string;
 	}
+
+	/**
+	 * This is the information we are adding into site_status_tests hook.
+	 *
+	 * @return array
+	 */
+	function provider_added_test_info_site_health() {
+		$added_tests                                 = array();
+		$added_tests['direct']['autoloaded_options'] = array(
+			'label' => esc_html__( 'Autoloaded options', 'performance-lab' ),
+			'test'  => 'perflab_aao_autoloaded_options_test',
+		);
+		return array( array( $added_tests ) );
+	}
+
+	/**
+	 * Data provider for perflab_aao_autoloaded_options_test if autoloaded options are less than the limit.
+	 *
+	 * @return array
+	 */
+	public function provider_autoloaded_options_less_than_limit() {
+		$autoloaded_options_size  = perflab_aao_autoloaded_options_size();
+		$autoloaded_options_count = count( wp_load_alloptions() );
+
+		$result = array(
+			'label'       => esc_html__( 'Autoloaded options', 'performance-lab' ),
+			'status'      => 'good',
+			'badge'       => array(
+				'label' => esc_html__( 'Performance', 'performance-lab' ),
+				'color' => 'blue',
+			),
+			'description' => sprintf(
+			/* translators: 1: Number of autoloaded options. 2.Autoloaded options size. */
+				'<p>' . esc_html__( 'The amount of %1$s autoloaded options (size: %2$s) in options table is acceptable.', 'performance-lab' ) . '</p>',
+				$autoloaded_options_count,
+				size_format( $autoloaded_options_size )
+			),
+			'actions'     => '',
+			'test'        => 'autoloaded_options',
+		);
+		return array( array( $result ) );
+	}
+
+	/**
+	 * Data provider for perflab_aao_autoloaded_options_test if autoloaded options are more than the limit.
+	 *
+	 * @return array
+	 */
+	public function provider_autoloaded_options_bigger_than_limit() {
+		$result = perflab_aao_autoloaded_options_test();
+
+		self::set_autoloaded_option( self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES );
+		$autoloaded_options_size  = perflab_aao_autoloaded_options_size();
+		$autoloaded_options_count = count( wp_load_alloptions() );
+		self::delete_autoloaded_option();
+
+		$result['status']         = 'critical';
+		$result['badge']['color'] = 'red';
+		$result['description']    = sprintf(
+		/* translators: 1: Number of autoloaded options. 2.Autoloaded options size. */
+			'<p>' . esc_html__( 'Your website uses %1$s autoloaded options (size: %2$s). Try to reduce the number of autoloaded options or performance will be affected.', 'performance-lab' ) . '</p>',
+			$autoloaded_options_count,
+			size_format( $autoloaded_options_size )
+		);
+
+		$result['actions'] = sprintf(
+		/* translators: 1: HelpHub URL. 2: Link description. */
+			'<p><a target="_blank" href="%1$s">%2$s</a></p>',
+			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
+			esc_html__( 'More info about performance optimization', 'performance-lab' )
+		);
+
+		return array( array( $result ) );
+	}
+
 
 }
 
