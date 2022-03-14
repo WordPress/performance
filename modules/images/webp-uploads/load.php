@@ -548,11 +548,30 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		return $image;
 	}
 
-	$urls = $matches[0];
-	// TODO: Add a filterable option to change the selected mime type. See https://github.com/WordPress/performance/issues/187.
-	$target_mime = 'image/webp';
+	/**
+	 * Filters mime types that should be used to update all images in the content. The order of
+	 * mime types matters. The last mime type in the list will be used if it is supported by an image.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param array The list of mime types that can be used to update images in the content.
+	 */
+	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/jpeg', 'image/webp' ) );
+
+	$target_mime  = null;
+	$target_mimes = array_reverse( $target_mimes );
+	foreach ( $target_mimes as $mime ) {
+		if ( isset( $metadata['sources'][ $target_mime ] ) ) {
+			$target_mime = $mime;
+		}
+	}
+
+	if ( null === $target_mime ) {
+		return $image;
+	}
 
 	$basename = wp_basename( $metadata['file'] );
+	$urls     = $matches[0];
 	foreach ( $urls as $url ) {
 		$src_filename = wp_basename( $url );
 
