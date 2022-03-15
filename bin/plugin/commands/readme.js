@@ -9,7 +9,7 @@ const fs = require( 'fs' );
  */
 const { log, formats } = require( '../lib/logger' );
 const config = require( '../config' );
-const { getModuleDescriptions } = require( './common' );
+const { getModuleData } = require( './common' );
 const { getChangelog } = require( './changelog' );
 
 /**
@@ -68,11 +68,9 @@ exports.handler = async ( opt ) => {
  * @return {Promise<string>} Promise resolving to module description list in markdown, with trailing newline.
  */
 async function getModuleDescriptionList( settings ) {
-	const moduleDescriptions = await getModuleDescriptions(
-		settings.directory
-	);
+	const modulesData = await getModuleData( settings.directory );
 
-	return moduleDescriptions
+	return modulesData
 		.map(
 			( moduleData ) =>
 				`* **${ moduleData.name }:** ${ moduleData.description }`

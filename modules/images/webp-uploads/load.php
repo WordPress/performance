@@ -190,16 +190,16 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 		'crop'   => false,
 	);
 
-	if ( isset( $metadata['sizes'][ $size ]['width'] ) ) {
-		$size_data['width'] = $metadata['sizes'][ $size ]['width'];
-	} elseif ( isset( $sizes[ $size ]['width'] ) ) {
+	if ( isset( $sizes[ $size ]['width'] ) ) {
 		$size_data['width'] = $sizes[ $size ]['width'];
+	} elseif ( isset( $metadata['sizes'][ $size ]['width'] ) ) {
+		$size_data['width'] = $metadata['sizes'][ $size ]['width'];
 	}
 
-	if ( isset( $metadata['sizes'][ $size ]['height'] ) ) {
-		$size_data['height'] = $metadata['sizes'][ $size ]['height'];
-	} elseif ( isset( $sizes[ $size ]['height'] ) ) {
+	if ( isset( $sizes[ $size ]['height'] ) ) {
 		$size_data['height'] = $sizes[ $size ]['height'];
+	} elseif ( isset( $metadata['sizes'][ $size ]['height'] ) ) {
+		$size_data['height'] = $metadata['sizes'][ $size ]['height'];
 	}
 
 	if ( isset( $sizes[ $size ]['crop'] ) ) {
@@ -258,11 +258,11 @@ function webp_uploads_get_supported_image_mime_transforms() {
  * @return array|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
  */
 function webp_uploads_generate_additional_image_source( $attachment_id, array $size_data, $mime, $destination_file_name = null ) {
-	$image_path = get_attached_file( $attachment_id );
+	$image_path = wp_get_original_image_path( $attachment_id );
 
 	// File does not exist.
 	if ( ! file_exists( $image_path ) ) {
-		return new WP_Error( 'image_file_size_not_found', __( 'The provided size does not have a valid image file.', 'performance-lab' ) );
+		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'performance-lab' ) );
 	}
 
 	$editor = wp_get_image_editor( $image_path );
@@ -286,6 +286,12 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 
 	if ( $width <= 0 && $height <= 0 ) {
 		return new WP_Error( 'image_wrong_dimensions', __( 'At least one of the dimensions must be a positive number.', 'performance-lab' ) );
+	}
+
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
+	// If stored EXIF data exists, rotate the source image before creating sub-sizes.
+	if ( ! empty( $image_meta['image_meta'] ) ) {
+		$editor->maybe_exif_rotate();
 	}
 
 	$editor->resize( $width, $height, $crop );
