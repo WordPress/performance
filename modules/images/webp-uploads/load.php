@@ -11,8 +11,8 @@
 /**
  * Hook called by `wp_generate_attachment_metadata` to create the `sources` property for every image
  * size, the sources' property would create a new image size with all the mime types specified in
- * `webp_uploads_get_supported_image_mime_transforms`. If the original image is one of the mimes from
- * `webp_uploads_get_supported_image_mime_transforms` the image is just added to the `sources` property and not
+ * `webp_uploads_get_upload_image_mime_transforms`. If the original image is one of the mimes from
+ * `webp_uploads_get_upload_image_mime_transforms` the image is just added to the `sources` property and not
  * created again. If the uploaded attachment is not a supported mime by this function, the hook does not alter the
  * metadata of the attachment. In addition to every single size the `sources` property is added at the
  * top level of the image metadata to store the references for all the mime types for the `full` size image of the
@@ -21,7 +21,7 @@
  * @since 1.0.0
  *
  * @see   wp_generate_attachment_metadata()
- * @see   webp_uploads_get_supported_image_mime_transforms()
+ * @see   webp_uploads_get_upload_image_mime_transforms()
  *
  * @param array $metadata      An array with the metadata from this attachment.
  * @param int   $attachment_id The ID of the attachment where the hook was dispatched.
@@ -29,19 +29,11 @@
  */
 function webp_uploads_create_sources_property( array $metadata, $attachment_id ) {
 	// This should take place only on the JPEG image.
-	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
+	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
 
 	// Not a supported mime type to create the sources property.
 	$mime_type = get_post_mime_type( $attachment_id );
 	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
-		return $metadata;
-	}
-
-	// Don't do anything if only the original mime type is needed.
-	if (
-		1 === count( $valid_mime_transforms[ $mime_type ] ) &&
-		current( $valid_mime_transforms[ $mime_type ] ) === $mime_type
-	) {
 		return $metadata;
 	}
 
@@ -180,7 +172,7 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
  */
 function webp_uploads_filter_image_editor_output_format( $output_format, $filename, $mime_type ) {
 	// Use the original mime type if this type is allowed.
-	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
+	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
 	if (
 		! isset( $valid_mime_transforms[ $mime_type ] ) ||
 		in_array( $mime_type, $valid_mime_transforms[ $mime_type ], true )
@@ -188,22 +180,13 @@ function webp_uploads_filter_image_editor_output_format( $output_format, $filena
 		return $output_format;
 	}
 
-	$new_mime_type = null;
-
 	// Find the first supported mime type by the image editor to use it as the default one.
 	foreach ( $valid_mime_transforms[ $mime_type ] as $target_mime ) {
 		if ( wp_image_editor_supports( array( 'mime_type' => $target_mime ) ) ) {
-			$new_mime_type = $target_mime;
+			$output_format[ $mime_type ] = $target_mime;
 			break;
 		}
 	}
-
-	// Leave the original mime type if there is no other mime type supported by the image editor.
-	if ( null === $new_mime_type ) {
-		return $output_format;
-	}
-
-	$output_format[ $mime_type ] = $new_mime_type;
 
 	return $output_format;
 }
@@ -270,8 +253,8 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
  *
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
-function webp_uploads_get_supported_image_mime_transforms() {
-	$image_mime_transforms = array(
+function webp_uploads_get_upload_image_mime_transforms() {
+	$default_transforms = array(
 		'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
 		'image/webp' => array( 'image/webp', 'image/jpeg' ),
 	);
@@ -286,13 +269,13 @@ function webp_uploads_get_supported_image_mime_transforms() {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $image_mime_transforms A map with the valid mime transforms.
+	 * @param array $default_transforms A map with the valid mime transforms.
 	 */
-	$transforms = (array) apply_filters( 'webp_uploads_upload_image_mime_transforms', $image_mime_transforms );
+	$transforms = (array) apply_filters( 'webp_uploads_upload_image_mime_transforms', $default_transforms );
 
-	// Return an empty array if non-array result is returned from the filter.
+	// Return the default mime transforms if a non-array result is returned from the filter.
 	if ( ! is_array( $transforms ) ) {
-		return array();
+		return $default_transforms;
 	}
 
 	return array_filter( $transforms, 'is_array' );
