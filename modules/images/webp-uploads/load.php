@@ -567,8 +567,9 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	$target_mime  = null;
 	$target_mimes = array_reverse( $target_mimes );
 	foreach ( $target_mimes as $mime ) {
-		if ( isset( $metadata['sources'][ $target_mime ] ) ) {
+		if ( isset( $metadata['sources'][ $mime ] ) ) {
 			$target_mime = $mime;
+			break;
 		}
 	}
 
