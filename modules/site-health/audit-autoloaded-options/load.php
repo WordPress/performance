@@ -55,7 +55,7 @@ function perflab_aao_autoloaded_options_test() {
 	);
 
 	/**
-	 * Hostings can modify its limits depending on their own requirements.
+	 * Filters max bytes threshold to trigger warning in Site Health.
 	 *
 	 * @since 1.0.0
 	 *
@@ -77,11 +77,11 @@ function perflab_aao_autoloaded_options_test() {
 	);
 
 	/**
-	 * Hostings can modify description to be shown on site health screen.
+	 * Filters description to be shown on Site Health warning when threshold is met.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $description Description message when autoloaded options bigger than treshold.
+	 * @param string $description Description message when autoloaded options bigger than threshold.
 	 */
 	$result['description'] = apply_filters( 'perflab_aao_autoloaded_options_limit_description', $result['description'] );
 
@@ -93,7 +93,7 @@ function perflab_aao_autoloaded_options_test() {
 	);
 
 	/**
-	 * Hostings can add actions to take to reduce size of autoloaded options linking to their own guides.
+	 * Filters actionable information to tackle the problem. It can be a link to an external guide.
 	 *
 	 * @since 1.0.0
 	 *

@@ -96,7 +96,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array
 	 */
-	function provider_added_test_info_site_health() {
+	public function provider_added_test_info_site_health() {
 		$added_tests                                 = array();
 		$added_tests['direct']['autoloaded_options'] = array(
 			'label' => esc_html__( 'Autoloaded options', 'performance-lab' ),
