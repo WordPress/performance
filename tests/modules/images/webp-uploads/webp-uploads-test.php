@@ -764,11 +764,14 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 	public function it_should_transofrm_jpeg_to_webp_subsizes_using_transform_filter() {
 		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
 
-		add_filter( 'webp_uploads_upload_image_mime_transforms', function( $transforms ) {
-			// Unset "image/jpeg" mime type for jpeg images.
-			unset( $transforms['image/jpeg'][ array_search( 'image/jpeg', $transforms['image/jpeg'] ) ] );
-			return $transforms;
-		} );
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function( $transforms ) {
+				// Unset "image/jpeg" mime type for jpeg images.
+				unset( $transforms['image/jpeg'][ array_search( 'image/jpeg', $transforms['image/jpeg'], true ) ] );
+				return $transforms;
+			}
+		);
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
