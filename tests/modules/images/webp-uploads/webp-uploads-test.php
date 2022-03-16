@@ -761,7 +761,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_transofrm_jpeg_to_webp_subsizes_using_transform_filter() {
+	public function it_should_transform_jpeg_to_webp_subsizes_using_transform_filter() {
 		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
 
 		add_filter(
