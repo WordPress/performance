@@ -155,7 +155,6 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 	return $metadata;
 }
-
 add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_property', 10, 2 );
 
 /**
@@ -190,7 +189,6 @@ function webp_uploads_filter_image_editor_output_format( $output_format, $filena
 
 	return $output_format;
 }
-
 add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 
 /**
@@ -454,7 +452,6 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 		wp_delete_file_from_directory( $full_size_file, $intermediate_dir );
 	}
 }
-
 add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
 
 /**
@@ -501,7 +498,6 @@ function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta
 
 	return array();
 }
-
 add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_subsizes', 10, 3 );
 
 /**
@@ -562,6 +558,7 @@ function webp_uploads_update_image_references( $content ) {
 
 	return $content;
 }
+add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
 
 /**
  * Finds all the urls with *.jpg and *.jpeg extension and updates with *.webp version for the provided image
@@ -639,5 +636,3 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 
 	return $image;
 }
-
-add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
