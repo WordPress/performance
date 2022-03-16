@@ -603,3 +603,66 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 }
 
 add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
+
+/**
+ * Returns the attachment sources array ordered by filesize.
+ *
+ * @since n.e.xt
+ * @private
+ *
+ * @param int    $attachment_id The attachment ID.
+ * @param string $size          The attachment size.
+ * 
+ * @return array The attachment sources array.
+ */
+function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail' ) {
+	// Check for the sources attribute in attachment metadata.
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+
+	// Return full image size sources.
+	if ( 'full' === $size && ! empty( $metadata['sources'] ) ) {
+		return $metadata['sources'];
+	}
+
+	// Return the resized image sources.
+	if ( isset( $metadata['sizes'][ $size ]['sources'] ) && ! empty( $metadata['sizes'][ $size ]['sources'] ) ) {
+		return $metadata['sizes'][ $size ]['sources'];	
+	}
+
+	// Return an empty array if no sources found.
+	return [];
+}
+
+/**
+* Returns the attachment smallest filesize source.
+ *
+ * @since n.e.xt
+ * @private
+ *
+ * @param int    $attachment_id The attachment ID.
+ * @param string $size          The attachment size.
+ * 
+ * @return string The attachment source filename.
+ */
+function webp_uploads_get_smallest_file_src( $attachment_id, $size = 'thumbnail' ) {
+	$sources = webp_uploads_get_attachment_sources( $attachment_id, $size );
+
+	// TODO: Filter out unsupported mime types.
+
+	// Order sources on fileszie in ascending order.
+	uasort(
+		$sources,
+		function( $a, $b ) {
+			if ( $a['filesize'] === $b['filesize'] ) {
+				return 0;
+			}
+
+			return ($a['filesize'] < $b['filesize']) ? -1 : 1;
+		}
+	);
+
+	// Get the smallest file size source.
+	$source = array_shift( $sources );
+
+	return $source['file'];
+}
