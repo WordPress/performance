@@ -64,7 +64,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	 * @param int $bytes bytes to load in options.
 	 */
 	public static function set_autoloaded_option( $bytes = 800000 ) {
-		$heavy_option_string = self::random_string_generator( $bytes );
+		$heavy_option_string = wp_generate_password( $bytes );
 		add_option( self::AUTOLOADED_OPTION_KEY, $heavy_option_string );
 	}
 
@@ -73,22 +73,6 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	 */
 	public static function delete_autoloaded_option() {
 		delete_option( self::AUTOLOADED_OPTION_KEY );
-	}
-
-	/**
-	 * Generate random string with certain $length.
-	 *
-	 * @param int $length Length ( in bytes ) of string to create.
-	 * @return string
-	 */
-	protected static function random_string_generator( $length ) {
-		$seed        = 'abcd123';
-		$length_seed = strlen( $seed );
-		$string      = '';
-		for ( $x = 0; $x < $length; $x++ ) {
-			$string .= $seed[ rand( 0, $length_seed - 1 ) ];
-		}
-		return $string;
 	}
 
 	/**
