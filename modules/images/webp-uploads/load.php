@@ -48,7 +48,10 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		$metadata['sources'] = array();
 	}
 
-	if ( empty( $metadata['sources'][ $mime_type ] ) ) {
+	if (
+		empty( $metadata['sources'][ $mime_type ] ) &&
+		in_array( $mime_type, $valid_mime_transforms[ $mime_type ], true )
+	) {
 		$metadata['sources'][ $mime_type ] = array(
 			'file'     => wp_basename( $file ),
 			'filesize' => filesize( $file ),
@@ -65,6 +68,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
 	$filename           = pathinfo( $file, PATHINFO_FILENAME );
 	$allowed_mimes      = array_flip( wp_get_mime_types() );
+
 	// Create the sources for the full sized image.
 	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
 		// If this property exists no need to create the image again.
@@ -132,9 +136,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
 
-		$formats = isset( $valid_mime_transforms[ $current_mime ] ) ? $valid_mime_transforms[ $current_mime ] : array();
-
-		foreach ( $formats as $mime ) {
+		foreach ( $valid_mime_transforms[ $mime_type ] as $mime ) {
 			// If this property exists no need to create the image again.
 			if ( ! empty( $properties['sources'][ $mime ] ) ) {
 				continue;
@@ -276,7 +278,15 @@ function webp_uploads_get_upload_image_mime_transforms() {
 		return $default_transforms;
 	}
 
-	return array_filter( $transforms, 'is_array' );
+	// Ensure that all mime types have correct transforms. If a mime type has invalid transforms array,
+	// then fallback to the original mime type to make sure that the correct subsizes are created.
+	foreach ( $transforms as $mime_type => $transform_types ) {
+		if ( ! is_array( $transform_types ) || empty( $transform_types ) ) {
+			$transforms[ $mime_type ] = array( $mime_type );
+		}
+	}
+
+	return $transforms;
 }
 
 /**
