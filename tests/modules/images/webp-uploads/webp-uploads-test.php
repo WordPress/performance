@@ -62,7 +62,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		$this->assertIsArray( $metadata );
 		$this->assertArrayNotHasKey( 'sources', $metadata );
-		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+		foreach ( $metadata['sizes'] as $properties ) {
 			$this->assertArrayNotHasKey( 'sources', $properties );
 		}
 	}
@@ -88,7 +88,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$this->assertImageNotHasSource( 'image/webp', $attachment_id );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
 			$this->assertImageHasSizeSource( 'image/jpeg', $size_name, $attachment_id );
 			$this->assertImageNotHasSizeSource( 'image/webp', $size_name, $attachment_id );
 		}
@@ -115,7 +115,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		$this->assertIsArray( $metadata );
 		$this->assertArrayNotHasKey( 'sources', $metadata );
-		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+		foreach ( $metadata['sizes'] as $properties ) {
 			$this->assertArrayNotHasKey( 'sources', $properties );
 		}
 	}
