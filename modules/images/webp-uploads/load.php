@@ -556,7 +556,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 
 	$urls = $matches[0];
 	// TODO: Add a filterable option to change the selected mime type. See https://github.com/WordPress/performance/issues/187.
-	$target_mime = 'image/webp';
+	$target_mime = webp_uploads_get_attachment_best_mime_type( $attachment_id );
 
 	$basename = wp_basename( $metadata['file'] );
 	foreach ( $urls as $url ) {
@@ -612,7 +612,7 @@ add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $size          The attachment size.
- * 
+ *
  * @return array The attachment sources array.
  */
 function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail' ) {
@@ -626,7 +626,7 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 
 	// Return the resized image sources.
 	if ( isset( $metadata['sizes'][ $size ]['sources'] ) && ! empty( $metadata['sizes'][ $size ]['sources'] ) ) {
-		return $metadata['sizes'][ $size ]['sources'];	
+		return $metadata['sizes'][ $size ]['sources'];
 	}
 
 	// Return an empty array if no sources found.
@@ -641,15 +641,21 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $size          The attachment size.
- * 
+ *
  * @return string The attachment source filename.
  */
-function webp_uploads_get_smallest_file_src( $attachment_id, $size = 'thumbnail' ) {
+function webp_uploads_get_attachment_best_mime_type( $attachment_id, $size = 'thumbnail' ) {
 	$sources = webp_uploads_get_attachment_sources( $attachment_id, $size );
 
-	// TODO: Filter out unsupported mime types.
+	// Remove mime types with filesize of 0.
+	$sources = array_filter(
+		$sources,
+		function( $source ) {
+			return $source['filesize'] > 0;
+		}
+	);
 
-	// Order sources on fileszie in ascending order.
+	// Order sources on filesize in ascending order.
 	uasort(
 		$sources,
 		function( $a, $b ) {
@@ -661,8 +667,14 @@ function webp_uploads_get_smallest_file_src( $attachment_id, $size = 'thumbnail'
 		}
 	);
 
-	// Get the smallest file size source.
-	$source = array_shift( $sources );
+	// Create an array available mime types ordered by smallest filesize.
+	$mime_types = array_values( array_keys( $sources ) );
 
-	return $source['file'];
+	// TODO: Filter out unsupported mime types.
+
+	// Select the best mime type to use for the frontend image.
+	$mime_type = $mime_types[0];
+
+	// TODO: Filter to allow developers to decide the order of mime types to retrieve?
+	return apply_filters( 'webp_uploads_get_attachment_best_mime_type', $mime_type, $mime_types, $attachment_id, $size );
 }
