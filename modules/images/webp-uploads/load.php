@@ -641,3 +641,35 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 }
 
 add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 3 );
+
+function webp_uploads_update_image_onchange( $override, $file, $image, $mime_type, $post_id ) {
+	if ( $override !== null ) {
+		return $override;
+	}
+	// This should take place only on the JPEG image.
+	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
+	// Not a supported mime type to create the sources property.
+	// $mime_type = get_post_mime_type( $post_id );
+	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
+
+		$allowed_mimes = array_flip( wp_get_mime_types() );
+
+		if ( ! isset( $allowed_mimes[ $targeted_mime ] ) || ! is_string( $allowed_mimes[ $targeted_mime ] ) ) {
+			return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'performance-lab' ) );
+		}
+
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $targeted_mime ) ) ) {
+			return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'performance-lab' ) );
+		}
+
+		$extension = explode( '|', $allowed_mimes[ $targeted_mime ] );
+
+		$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
+		$filename           = pathinfo( $file, PATHINFO_FILENAME );
+		$destination        = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
+
+		$image->save( $destination, $targeted_mime );
+	}
+}
+
+add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 10, 5 );
