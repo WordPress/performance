@@ -554,6 +554,31 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
+	/**
+	 * Should not replace jpeg images in the content if other mime types are disabled via filter.
+	 *
+	 * @dataProvider provider_replace_images_with_different_extensions
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_not_replace_the_references_to_a_jpg_image_when_disabled_via_filter( $image_path ) {
+		remove_all_filters( 'webp_uploads_content_image_mimes' );
+
+		add_filter(
+			'webp_uploads_content_image_mimes',
+			function( $mime_types ) {
+				unset( $mime_types[ array_search( 'image/webp', $mime_types, true ) ] );
+				return $mime_types;
+			}
+		);
+
+		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$tag           = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
+
 	public function provider_replace_images_with_different_extensions() {
 		yield 'An image with a .jpg extension' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 		yield 'An image with a .jpeg extension' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
