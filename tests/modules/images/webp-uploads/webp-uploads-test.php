@@ -263,7 +263,6 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$this->assertSame( $metadata['sources']['image/jpeg']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) ) );
 
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
-		$this->assertStringEndsWith( '.webp', $metadata['sources']['image/webp']['file'] );
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 		$this->assertSame( $metadata['sources']['image/webp']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) ) );
 

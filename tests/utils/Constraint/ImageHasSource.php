@@ -106,6 +106,16 @@ class ImageHasSource extends Constraint {
 			return false;
 		}
 
+		// Fail if the file has wrong extension.
+		$allowed_mimes = array_flip( wp_get_mime_types() );
+		if ( isset( $allowed_mimes[ $this->mime_type ] ) ) {
+			$extensions = explode( '|', $allowed_mimes[ $this->mime_type ] );
+			$extension  = pathinfo( $sources[ $this->mime_type ]['file'], PATHINFO_EXTENSION );
+			if ( ! in_array( strtolower( $extension ), $extensions, true ) ) {
+				return false;
+			}
+		}
+
 		// Fail if the filesize property is not set or it is not a number.
 		if (
 			! isset( $sources[ $this->mime_type ]['filesize'] ) ||
