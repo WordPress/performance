@@ -565,6 +565,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/jpeg', 'image/webp' ) );
 
 	$target_mime  = null;
+	// Look for the most progressive image format first.
 	$target_mimes = array_reverse( $target_mimes );
 	foreach ( $target_mimes as $mime ) {
 		if ( isset( $metadata['sources'][ $mime ] ) ) {
