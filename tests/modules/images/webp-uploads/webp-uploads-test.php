@@ -19,16 +19,16 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 	public function it_should_create_the_original_mime_type_as_well_with_all_the_available_sources_for_the_specified_mime( $file_location, $expected_mime, $targeted_mime ) {
 		$attachment_id = $this->factory->attachment->create_upload_object( $file_location );
 
-		$this->assertImageHasSource( $targeted_mime, $attachment_id );
-		$this->assertImageHasSource( $expected_mime, $attachment_id );
+		$this->assertImageHasSource( $attachment_id, $targeted_mime );
+		$this->assertImageHasSource( $attachment_id, $expected_mime );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertArrayHasKey( 'file', $metadata );
 		$this->assertStringEndsWith( $metadata['sources'][ $expected_mime ]['file'], $metadata['file'] );
 
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
-			$this->assertImageHasSizeSource( $targeted_mime, $size_name, $attachment_id );
-			$this->assertImageHasSizeSource( $expected_mime, $size_name, $attachment_id );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, $targeted_mime );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, $expected_mime );
 		}
 	}
 
@@ -84,13 +84,13 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
 
-		$this->assertImageHasSource( 'image/jpeg', $attachment_id );
-		$this->assertImageNotHasSource( 'image/webp', $attachment_id );
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageNotHasSource( $attachment_id, 'image/webp' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
-			$this->assertImageHasSizeSource( 'image/jpeg', $size_name, $attachment_id );
-			$this->assertImageNotHasSizeSource( 'image/webp', $size_name, $attachment_id );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/webp' );
 		}
 	}
 
@@ -257,18 +257,18 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$file    = get_attached_file( $attachment_id, true );
 		$dirname = pathinfo( $file, PATHINFO_DIRNAME );
 
-		$this->assertImageHasSource( 'image/jpeg', $attachment_id );
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertStringEndsWith( $metadata['sources']['image/jpeg']['file'], $file );
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) );
 		$this->assertSame( $metadata['sources']['image/jpeg']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) ) );
 
-		$this->assertImageHasSource( 'image/webp', $attachment_id );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertStringEndsWith( '.webp', $metadata['sources']['image/webp']['file'] );
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 		$this->assertSame( $metadata['sources']['image/webp']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) ) );
 
-		$this->assertImageHasSizeSource( 'image/jpeg', 'thumbnail', $attachment_id );
-		$this->assertImageHasSizeSource( 'image/webp', 'thumbnail', $attachment_id );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
 	}
 
 	/**
@@ -285,8 +285,8 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertEmpty( $metadata['sizes'] );
 
-		$this->assertImageHasSource( 'image/jpeg', $attachment_id );
-		$this->assertImageHasSource( 'image/webp', $attachment_id );
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 	}
 
 	/**
@@ -308,7 +308,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		);
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$this->assertStringEndsWith( '-scaled.jpg', get_attached_file( $attachment_id ) );
-		$this->assertImageHasSizeSource( 'image/webp', 'medium', $attachment_id );
+		$this->assertImageHasSizeSource( $attachment_id, 'medium', 'image/webp' );
 		$this->assertStringEndsNotWith( '-scaled.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
 		$this->assertStringEndsWith( '-300x200.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
 	}
@@ -335,7 +335,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 
 		foreach ( $sizes as $size_name ) {
-			$this->assertImageHasSizeSource( 'image/webp', $size_name, $attachment_id );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
 			$this->assertFileExists( path_join( $dirname, $metadata['sizes'][ $size_name ]['sources']['image/webp']['file'] ) );
 		}
 
@@ -775,13 +775,13 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
-		$this->assertImageHasSource( 'image/webp', $attachment_id );
-		$this->assertImageNotHasSource( 'image/jpeg', $attachment_id );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
-			$this->assertImageHasSizeSource( 'image/webp', $size_name, $attachment_id );
-			$this->assertImageNotHasSizeSource( 'image/jpeg', $size_name, $attachment_id );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 		}
 	}
 }
