@@ -706,3 +706,78 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 	return rest_ensure_response( $data );
 }
 add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 3 );
+
+/**
+ * Returns the attachment sources array ordered by filesize.
+ *
+ * @since n.e.xt
+ * @private
+ *
+ * @param int    $attachment_id The attachment ID.
+ * @param string $size          The attachment size.
+ *
+ * @return array The attachment sources array.
+ */
+function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail' ) {
+	// Check for the sources attribute in attachment metadata.
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+
+	// Return full image size sources.
+	if ( 'full' === $size && ! empty( $metadata['sources'] ) ) {
+		return $metadata['sources'];
+	}
+
+	// Return the resized image sources.
+	if ( ! empty( $metadata['sizes'][ $size ]['sources'] ) ) {
+		return $metadata['sizes'][ $size ]['sources'];
+	}
+
+	// Return an empty array if no sources found.
+	return array();
+}
+
+/**
+* Returns the attachment smallest filesize source.
+ *
+ * @since n.e.xt
+ * @private
+ *
+ * @param array  $mime_types    The list of mime types that can be used to update images in the content.
+ * @param int    $attachment_id The attachment ID.
+ * @param string $context       The current context.
+ *
+ * @return array Array of mime types ordered by filesize.
+ */
+function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id, $context ) {
+	$sources = webp_uploads_get_attachment_sources( $attachment_id, 'full' );
+
+	if ( empty( $sources ) ) {
+		return $mime_types;
+	}
+
+	// Remove mime types with filesize of 0.
+	$sources = array_filter(
+		$sources,
+		function( $source ) {
+			return $source['filesize'] > 0;
+		}
+	);
+
+	// Order sources on filesize in ascending order.
+	uasort(
+		$sources,
+		function( $a, $b ) {
+			if ( $a['filesize'] === $b['filesize'] ) {
+				return 0;
+			}
+
+			return ($a['filesize'] < $b['filesize']) ? -1 : 1;
+		}
+	);
+
+	// Create an array available mime types ordered by smallest filesize.
+	$mime_types = array_values( array_keys( $sources ) );
+
+	return $mime_types;
+}
+add_filter( 'webp_uploads_content_image_mimes', 'webp_uploads_get_mime_types_by_filesize', 10, 3 );
