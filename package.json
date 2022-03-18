@@ -1,6 +1,6 @@
 {
   "name": "performance",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.1",
   "private": true,
   "description": "Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.",
   "author": "The WordPress Contributors",
@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@octokit/rest": "16.26.0",
-    "@wordpress/env": "^4.1",
+    "@wordpress/env": "^4.2.2",
     "@wordpress/scripts": "^19.0",
     "chalk": "4.1.1",
     "commander": "4.1.0",
@@ -29,8 +29,10 @@
   },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
+    "since": "./bin/plugin/cli.js since",
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
+    "enabled-modules": "./bin/plugin/cli.js enabled-modules",
     "format-js": "wp-scripts format ./bin",
     "lint-js": "wp-scripts lint-js ./bin",
     "format-php": "wp-env run composer run-script format",

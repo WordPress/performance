@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - trunk
+      - 'release/**'
     # Only run if JS/JSON/Lint/NVM files changed.
     paths:
       - '.github/workflows/js-lint.yml'
@@ -16,6 +17,7 @@ on:
   pull_request:
     branches:
       - trunk
+      - 'release/**'
     # Only run if JS/JSON/Lint/NVM files changed.
     paths:
       - '.github/workflows/js-lint.yml'

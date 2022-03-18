@@ -24,8 +24,10 @@ function perflab_add_modules_page() {
 		'perflab_render_modules_page'
 	);
 
+	// Add the following hooks only if the screen was successfully added.
 	if ( false !== $hook_suffix ) {
 		add_action( "load-{$hook_suffix}", 'perflab_load_modules_page', 10, 0 );
+		add_action( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' );
 	}
 
 	return $hook_suffix;
@@ -167,20 +169,20 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
  */
 function perflab_get_focus_areas() {
 	return array(
-		'images'         => array(
+		'images'       => array(
 			'name' => __( 'Images', 'performance-lab' ),
 		),
-		'javascript'     => array(
+		'javascript'   => array(
 			'name' => __( 'JavaScript', 'performance-lab' ),
 		),
-		'site-health'    => array(
+		'site-health'  => array(
 			'name' => __( 'Site Health', 'performance-lab' ),
 		),
-		'measurement'    => array(
+		'measurement'  => array(
 			'name' => __( 'Measurement', 'performance-lab' ),
 		),
-		'object-caching' => array(
-			'name' => __( 'Object caching', 'performance-lab' ),
+		'object-cache' => array(
+			'name' => __( 'Object Cache', 'performance-lab' ),
 		),
 	);
 }
@@ -335,4 +337,105 @@ function perflab_get_module_data( $module_file ) {
 	}
 
 	return $module_data;
+}
+
+/**
+ * Initialise Admin Pointer
+ *
+ * Handles the bootstrapping of the admin pointer.
+ * Mainly jQuery code that is self-initialising.
+ *
+ * @param string $hook_suffix The current admin page.
+ * @since 1.0.0
+ */
+function perflab_admin_pointer( $hook_suffix ) {
+	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
+		return;
+	}
+
+	$current_user = get_current_user_id();
+	$dismissed    = explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) );
+
+	if ( in_array( 'perflab-admin-pointer', $dismissed, true ) ) {
+		return;
+	}
+
+	// Enqueue pointer CSS and JS.
+	wp_enqueue_style( 'wp-pointer' );
+	wp_enqueue_script( 'wp-pointer' );
+	add_action( 'admin_print_footer_scripts', 'perflab_render_pointer' );
+}
+add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
+
+/**
+ * Renders the Admin Pointer
+ *
+ * Handles the rendering of the admin pointer.
+ *
+ * @since 1.0.0
+ */
+function perflab_render_pointer() {
+	$heading         = __( 'Performance Lab', 'performance-lab' );
+	$wp_kses_options = array(
+		'a' => array(
+			'href' => array(),
+		),
+	);
+
+	$content = sprintf(
+		/* translators: %s: settings page link */
+		__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ),
+		'<a href="' . esc_url( add_query_arg( 'page', 'perflab-modules', admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
+	);
+
+	?>
+	<script id="perflab-admin-pointer" type="text/javascript">
+		jQuery( function() {
+			// Pointer Options
+			var options = {
+				content: '<h3><?php echo esc_js( $heading ); ?></h3><p><?php echo wp_kses( $content, $wp_kses_options ); ?></p>',
+				position: {
+					edge:  'left',
+					align: 'right',
+				},
+				pointerClass: 'wp-pointer arrow-top',
+				pointerWidth: 420,
+				close: function() {
+					jQuery.post(
+						window.ajaxurl,
+						{
+							pointer: 'perflab-admin-pointer',
+							action:  'dismiss-wp-pointer',
+						}
+					);
+				}
+			};
+
+			jQuery( '#menu-settings' ).pointer( options ).pointer( 'open' );
+		} );
+	</script>
+	<?php
+}
+
+/**
+ * Adds a link to the modules page to the plugin's entry in the plugins list table.
+ *
+ * This function is only used if the modules page exists and is accessible.
+ *
+ * @since 1.0.0
+ * @see perflab_add_modules_page()
+ *
+ * @param array $links List of plugin action links HTML.
+ * @return array Modified list of plugin action links HTML.
+ */
+function perflab_plugin_action_links_add_settings( $links ) {
+	// Add link as the first plugin action link.
+	$settings_link = sprintf(
+		'<a href="%s">%s</a>',
+		esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ),
+		esc_html__( 'Settings', 'performance-lab' )
+	);
+	array_unshift( $links, $settings_link );
+
+	return $links;
 }
