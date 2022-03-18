@@ -84,7 +84,7 @@ function perflab_aea_add_enqueued_assets_test( $tests ) {
 
 	return $tests;
 }
-add_filter( 'site_status_tests', 'perflab_aea_add_enqueued_assets_test' );
+add_filter( 'site_status_tests', 'perflab_afpc_add_fullpage_cache_test' );
 
 /**
  * Callback for enqueued_js_assets test.
