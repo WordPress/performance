@@ -1,6 +1,6 @@
-# WordPress Performance
+# Performance Lab
 
-Monorepo for the [WordPress Performance Group](https://make.wordpress.org/core/tag/performance/), primarily for the overall performance plugin, which is a collection of standalone performance modules.
+Monorepo for the [WordPress Performance Group](https://make.wordpress.org/core/tag/performance/), primarily for the Performance Lab plugin, which is a collection of standalone performance modules.
 
 ## Useful commands
 
