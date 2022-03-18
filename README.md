@@ -2,6 +2,8 @@
 
 Monorepo for the [WordPress Performance Group](https://make.wordpress.org/core/tag/performance/), primarily for the Performance Lab plugin, which is a collection of standalone performance modules.
 
+[Learn more about the Performance Lab plugin.](https://make.wordpress.org/core/2022/03/07/the-performance-lab-plugin-has-been-released/)
+
 ## Useful commands
 
 In order to run the following commands, you need to have [Node.js](https://nodejs.org) (including `npm`) and [Docker](https://www.docker.com) installed, and Docker needs to be up and running. The Docker configuration used relies on the [`@wordpress/env` package](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/).
