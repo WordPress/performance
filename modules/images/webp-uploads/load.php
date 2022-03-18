@@ -646,13 +646,18 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 	if ( $override !== null ) {
 		return $override;
 	}
-	// This should take place only on the JPEG image.
-	$valid_mime_transforms = webp_uploads_get_supported_image_mime_transforms();
-	// Not a supported mime type to create the sources property.
-	// $mime_type = get_post_mime_type( $post_id );
+
+	$valid_mime_transforms      = webp_uploads_get_supported_image_mime_transforms();
+	$original_directory         = pathinfo( $file, PATHINFO_DIRNAME );
+	$filename                   = pathinfo( $file, PATHINFO_FILENAME );
+	$sizes                      = get_intermediate_image_sizes();
+	$_wp_additional_image_sizes = wp_get_additional_image_sizes();
+	$target                     = ! empty( $_REQUEST['target'] ) ? preg_replace( '/[^a-z0-9_-]+/i', '', $_REQUEST['target'] ) : '';
+	$nocrop                     = false;
+
 	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
 
-		$allowed_mimes = array_flip( wp_get_mime_types() );
+		$allowed_mimes = wp_get_mime_types();
 
 		if ( ! isset( $allowed_mimes[ $targeted_mime ] ) || ! is_string( $allowed_mimes[ $targeted_mime ] ) ) {
 			return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'performance-lab' ) );
@@ -662,13 +667,41 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 			return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'performance-lab' ) );
 		}
 
-		$extension = explode( '|', $allowed_mimes[ $targeted_mime ] );
-
-		$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
-		$filename           = pathinfo( $file, PATHINFO_FILENAME );
-		$destination        = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
+		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
+		$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
 
 		$image->save( $destination, $targeted_mime );
+
+		$new_image = wp_get_image_editor( $destination );
+
+		if ( 'thumbnail' === $target ) {
+			$nocrop = true;
+		}
+
+		if ( isset( $sizes ) ) {
+			$_sizes = array();
+
+			foreach ( $sizes as $size ) {
+
+				if ( isset( $_wp_additional_image_sizes[ $size ] ) ) {
+					$width  = (int) $_wp_additional_image_sizes[ $size ]['width'];
+					$height = (int) $_wp_additional_image_sizes[ $size ]['height'];
+					$crop   = ( $nocrop ) ? false : $_wp_additional_image_sizes[ $size ]['crop'];
+				} else {
+					$height = get_option( "{$size}_size_h" );
+					$width  = get_option( "{$size}_size_w" );
+					$crop   = ( $nocrop ) ? false : get_option( "{$size}_crop" );
+				}
+
+				$_sizes[ $size ] = array(
+					'width'  => $width,
+					'height' => $height,
+					'crop'   => $crop,
+				);
+			}
+
+			$new_image->multi_resize( $_sizes );
+		}
 	}
 }
 
