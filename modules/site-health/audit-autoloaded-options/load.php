@@ -2,7 +2,7 @@
 /**
  * Module Name: Audit Autoloaded Options
  * Description: Adds Autoloaded options checker in Site Health checks.
- * Experimental: No
+ * Experimental: Yes
  *
  * @package performance-lab
  * @since 1.0.0
