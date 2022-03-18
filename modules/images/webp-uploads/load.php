@@ -701,17 +701,21 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 		return $override;
 	}
 
-	$valid_mime_transforms      = webp_uploads_get_supported_image_mime_transforms();
+	$valid_mime_transforms      = webp_uploads_get_upload_image_mime_transforms();
 	$original_directory         = pathinfo( $file, PATHINFO_DIRNAME );
 	$filename                   = pathinfo( $file, PATHINFO_FILENAME );
 	$sizes                      = get_intermediate_image_sizes();
 	$_wp_additional_image_sizes = wp_get_additional_image_sizes();
 	$target                     = ! empty( $_REQUEST['target'] ) ? preg_replace( '/[^a-z0-9_-]+/i', '', $_REQUEST['target'] ) : '';
 	$nocrop                     = false;
+	$current_mime_type          = get_post_mime_type( $post_id );
 
 	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
+		if ( $targeted_mime === $current_mime_type ) {
+			continue;
+		}
 
-		$allowed_mimes = wp_get_mime_types();
+		$allowed_mimes = array_flip( wp_get_mime_types() );
 
 		if ( ! isset( $allowed_mimes[ $targeted_mime ] ) || ! is_string( $allowed_mimes[ $targeted_mime ] ) ) {
 			return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'performance-lab' ) );
