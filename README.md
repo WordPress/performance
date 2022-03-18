@@ -1,4 +1,5 @@
 # Performance Lab
+![banner-1544x500](https://user-images.githubusercontent.com/3531426/159084476-af352db4-192e-4927-a383-7f76bb3641df.png)
 
 Monorepo for the [WordPress Performance Group](https://make.wordpress.org/core/tag/performance/), primarily for the Performance Lab plugin, which is a collection of standalone performance modules.
 
