@@ -684,6 +684,18 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 }
 add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 3 );
 
+/**
+ *
+ * Updates webp image when original image is edited
+ *
+ * @since n.e.x.t
+ *
+ * @param bool|null       $override  Value to return instead of saving. Default null.
+ * @param string          $file      Name of the file to be saved.
+ * @param WP_Image_Editor $image     The image editor instance.
+ * @param string          $mime_type The mime type of the image.
+ * @param int             $post_id   Attachment post ID.
+ */
 function webp_uploads_update_image_onchange( $override, $file, $image, $mime_type, $post_id ) {
 	if ( $override !== null ) {
 		return $override;
