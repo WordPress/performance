@@ -6,7 +6,9 @@
  * @group   webp-uploads
  */
 
-class WebP_Uploads_Tests extends WP_UnitTestCase {
+use PerformanceLab\Tests\TestCase\ImagesTestCase;
+
+class WebP_Uploads_Tests extends ImagesTestCase {
 	/**
 	 * Create the original mime type as well with all the available sources for the specified mime
 	 *
@@ -17,32 +19,16 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	public function it_should_create_the_original_mime_type_as_well_with_all_the_available_sources_for_the_specified_mime( $file_location, $expected_mime, $targeted_mime ) {
 		$attachment_id = $this->factory->attachment->create_upload_object( $file_location );
 
+		$this->assertImageHasSource( $attachment_id, $targeted_mime );
+		$this->assertImageHasSource( $attachment_id, $expected_mime );
+
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-
-		$this->assertIsArray( $metadata );
-		$this->assertArrayHasKey( 'sources', $metadata );
-		$this->assertIsArray( $metadata['sources'] );
-		$this->assertArrayHasKey( $targeted_mime, $metadata['sources'] );
-		$this->assertIsArray( $metadata['sources'][ $targeted_mime ] );
-		$this->assertArrayHasKey( $expected_mime, $metadata['sources'] );
-		$this->assertIsArray( $metadata['sources'][ $expected_mime ] );
-		$this->assertArrayHasKey( 'file', $metadata['sources'][ $targeted_mime ] );
-		$this->assertArrayHasKey( 'filesize', $metadata['sources'][ $targeted_mime ] );
-		$this->assertArrayHasKey( 'file', $metadata['sources'][ $expected_mime ] );
-		$this->assertArrayHasKey( 'filesize', $metadata['sources'][ $expected_mime ] );
-
 		$this->assertArrayHasKey( 'file', $metadata );
 		$this->assertStringEndsWith( $metadata['sources'][ $expected_mime ]['file'], $metadata['file'] );
 
-		foreach ( $metadata['sizes'] as $size_name => $properties ) {
-			$this->assertArrayHasKey( 'sources', $properties );
-			$this->assertIsArray( $properties['sources'] );
-			$this->assertArrayHasKey( $expected_mime, $properties['sources'] );
-			$this->assertArrayHasKey( 'filesize', $properties['sources'][ $expected_mime ] );
-			$this->assertArrayHasKey( 'file', $properties['sources'][ $expected_mime ] );
-			$this->assertArrayHasKey( $targeted_mime, $properties['sources'] );
-			$this->assertArrayHasKey( 'filesize', $properties['sources'][ $targeted_mime ] );
-			$this->assertArrayHasKey( 'file', $properties['sources'][ $targeted_mime ] );
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, $targeted_mime );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, $expected_mime );
 		}
 	}
 
@@ -66,7 +52,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_not_create_the_sources_property_if_no_transform_is_provided() {
-		add_filter( 'webp_uploads_supported_image_mime_transforms', '__return_empty_array' );
+		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
@@ -76,7 +62,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$this->assertIsArray( $metadata );
 		$this->assertArrayNotHasKey( 'sources', $metadata );
-		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+		foreach ( $metadata['sizes'] as $properties ) {
 			$this->assertArrayNotHasKey( 'sources', $properties );
 		}
 	}
@@ -88,7 +74,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 */
 	public function it_should_create_the_sources_property_when_no_transform_is_available() {
 		add_filter(
-			'webp_uploads_supported_image_mime_transforms',
+			'webp_uploads_upload_image_mime_transforms',
 			function () {
 				return array( 'image/jpeg' => array() );
 			}
@@ -98,22 +84,13 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
 
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageNotHasSource( $attachment_id, 'image/webp' );
+
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-
-		$this->assertIsArray( $metadata );
-		$this->assertArrayHasKey( 'sources', $metadata );
-		$this->assertIsArray( $metadata['sources'] );
-		$this->assertArrayHasKey( 'image/jpeg', $metadata['sources'] );
-		$this->assertIsArray( $metadata['sources']['image/jpeg'] );
-		$this->assertArrayNotHasKey( 'image/webp', $metadata['sources'] );
-
-		foreach ( $metadata['sizes'] as $size_name => $properties ) {
-			$this->assertArrayHasKey( 'sources', $properties );
-			$this->assertIsArray( $properties['sources'] );
-			$this->assertArrayHasKey( 'image/jpeg', $properties['sources'] );
-			$this->assertArrayHasKey( 'filesize', $properties['sources']['image/jpeg'] );
-			$this->assertArrayHasKey( 'file', $properties['sources']['image/jpeg'] );
-			$this->assertArrayNotHasKey( 'image/webp', $properties['sources'] );
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/webp' );
 		}
 	}
 
@@ -124,7 +101,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 */
 	public function it_should_not_create_the_sources_property_if_the_mime_is_not_specified_on_the_transforms_images() {
 		add_filter(
-			'webp_uploads_supported_image_mime_transforms',
+			'webp_uploads_upload_image_mime_transforms',
 			function () {
 				return array( 'image/jpeg' => array() );
 			}
@@ -138,7 +115,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 
 		$this->assertIsArray( $metadata );
 		$this->assertArrayNotHasKey( 'sources', $metadata );
-		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+		foreach ( $metadata['sizes'] as $properties ) {
 			$this->assertArrayNotHasKey( 'sources', $properties );
 		}
 	}
@@ -280,31 +257,17 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$file    = get_attached_file( $attachment_id, true );
 		$dirname = pathinfo( $file, PATHINFO_DIRNAME );
 
-		$this->assertArrayHasKey( 'image/jpeg', $metadata['sources'] );
-		$this->assertIsArray( $metadata['sources']['image/jpeg'] );
-		$this->assertArrayHasKey( 'file', $metadata['sources']['image/jpeg'] );
-		$this->assertArrayHasKey( 'filesize', $metadata['sources']['image/jpeg'] );
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertStringEndsWith( $metadata['sources']['image/jpeg']['file'], $file );
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) );
 		$this->assertSame( $metadata['sources']['image/jpeg']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) ) );
 
-		$this->assertArrayHasKey( 'image/webp', $metadata['sources'] );
-		$this->assertIsArray( $metadata['sources']['image/webp'] );
-		$this->assertArrayHasKey( 'file', $metadata['sources']['image/webp'] );
-		$this->assertArrayHasKey( 'filesize', $metadata['sources']['image/webp'] );
-		$this->assertStringEndsWith( '.webp', $metadata['sources']['image/webp']['file'] );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 		$this->assertSame( $metadata['sources']['image/webp']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) ) );
 
-		$this->assertArrayHasKey( 'sources', $metadata['sizes']['thumbnail'] );
-		$this->assertArrayHasKey( 'image/jpeg', $metadata['sizes']['thumbnail']['sources'] );
-		$this->assertArrayHasKey( 'filesize', $metadata['sizes']['thumbnail']['sources']['image/jpeg'] );
-		$this->assertArrayHasKey( 'file', $metadata['sizes']['thumbnail']['sources']['image/jpeg'] );
-		$this->assertArrayHasKey( 'image/webp', $metadata['sizes']['thumbnail']['sources'] );
-		$this->assertArrayHasKey( 'filesize', $metadata['sizes']['thumbnail']['sources']['image/webp'] );
-		$this->assertArrayHasKey( 'file', $metadata['sizes']['thumbnail']['sources']['image/webp'] );
-		$this->assertStringEndsNotWith( '.jpeg', $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] );
-		$this->assertStringEndsWith( '.webp', $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
 	}
 
 	/**
@@ -319,13 +282,10 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-
 		$this->assertEmpty( $metadata['sizes'] );
-		$this->assertArrayHasKey( 'sources', $metadata );
-		$this->assertArrayHasKey( 'image/jpeg', $metadata['sources'] );
 
-		$this->assertIsArray( $metadata['sources']['image/jpeg'] );
-		$this->assertIsArray( $metadata['sources']['image/webp'] );
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 	}
 
 	/**
@@ -347,7 +307,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		);
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$this->assertStringEndsWith( '-scaled.jpg', get_attached_file( $attachment_id ) );
-		$this->assertArrayHasKey( 'image/webp', $metadata['sizes']['medium']['sources'] );
+		$this->assertImageHasSizeSource( $attachment_id, 'medium', 'image/webp' );
 		$this->assertStringEndsNotWith( '-scaled.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
 		$this->assertStringEndsWith( '-300x200.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
 	}
@@ -374,8 +334,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 
 		foreach ( $sizes as $size_name ) {
-			$this->assertArrayHasKey( 'image/webp', $metadata['sizes'][ $size_name ]['sources'] );
-			$this->assertArrayHasKey( 'file', $metadata['sizes'][ $size_name ]['sources']['image/webp'] );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
 			$this->assertFileExists( path_join( $dirname, $metadata['sizes'][ $size_name ]['sources']['image/webp']['file'] ) );
 		}
 
@@ -589,7 +548,7 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_replacing_an_image_with_no_available_sources() {
-		add_filter( 'webp_uploads_supported_image_mime_transforms', '__return_empty_array' );
+		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
@@ -793,6 +752,35 @@ class WebP_Uploads_Tests extends WP_UnitTestCase {
 				substr( $size['sources']['image/webp']['file'], 0, -4 ),
 				$size['sources']['image/jpeg']['file']
 			);
+		}
+	}
+
+	/**
+	 * Tests that we can force transformation from jpeg to webp by using the webp_uploads_upload_image_mime_transforms filter.
+	 *
+	 * @test
+	 */
+	public function it_should_transform_jpeg_to_webp_subsizes_using_transform_filter() {
+		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
+
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function( $transforms ) {
+				// Unset "image/jpeg" mime type for jpeg images.
+				unset( $transforms['image/jpeg'][ array_search( 'image/jpeg', $transforms['image/jpeg'], true ) ] );
+				return $transforms;
+			}
+		);
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 		}
 	}
 }

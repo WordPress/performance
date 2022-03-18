@@ -34,5 +34,10 @@
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "composer/installers": true
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "PerformanceLab\\Tests\\": "tests/utils"
+    }
   }
 }
