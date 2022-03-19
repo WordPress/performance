@@ -683,3 +683,190 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 	return rest_ensure_response( $data );
 }
 add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 3 );
+
+/**
+ * Inspect if the current call to `wp_update_attachment_metadata()` was done from within the context
+ * of an edit to an attachment either restore or other type of edit, in that case we perform operations
+ * to save the sources properties, specifically for the `full` size image due this is a virtual image size.
+ *
+ * @since n.e.x.t
+ *
+ * @see wp_update_attachment_metadata()
+ *
+ * @param array $data The current metadata of the attachment.
+ * @param int   $attachment_id The ID of the current attachment.
+ * @return array The updated metadata for the attachment to be stored in the meta table.
+ */
+function webp_wp_update_attachment_metadata( $data, $attachment_id ) {
+
+	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
+
+	foreach ( $trace as $element ) {
+		if ( ! isset( $element['function'] ) ) {
+			continue;
+		}
+
+		switch ( $element['function'] ) {
+			case 'wp_save_image':
+				// Right after an image has been edited.
+				return webp_uploads_backup_sources( $attachment_id, $data );
+			case 'wp_restore_image':
+				// When an image has been restored.
+				return webp_uploads_restore_image( $attachment_id, $data );
+		}
+	}
+
+	return $data;
+}
+
+add_filter( 'wp_update_attachment_metadata', 'webp_wp_update_attachment_metadata', 10, 2 );
+
+/**
+ * Before saving the metadata of the image store a backup values for the sources and file property
+ * those files would be used and deleted by the backup mechanism, right after the metadata has
+ * been updated. It removes the current sources property due once this function is executed
+ * right after an edit has taken place and the current sources are no longer accurate.
+ *
+ * @since n.e.x.t
+ *
+ * @param int   $attachment_id The ID representing the attachment.
+ * @param array $data The current metadata of the attachment.
+ * @return array The updated metadata for the attachment.
+ */
+function webp_uploads_backup_sources( $attachment_id, $data ) {
+	if ( ! isset( $data['sources'] ) ) {
+		return $data;
+	}
+
+	$data['_sources'] = $data['sources'];
+	// Remove the current sources as at this point the current values are no longer accurate.
+	unset( $data['sources'] );
+
+	return $data;
+}
+
+/**
+ * Restore an image from the backup sizes, the current hook moves the `sources` from the `full-orig` key into
+ * the top level `sources` into the metadata, in order to ensure the restore process has a reference to the right
+ * images. When `IMAGE_EDIT_OVERWRITE` is defined and is truthy the function would loop into the sources array
+ * and remove any sources that was created as an edited version, the filenames for those cases are constructed out
+ * of `e-{digits}` where `{digits}` is a number of length 13.
+ *
+ * @param int   $attachment_id The ID of the attachment.
+ * @param array $data The current metadata to be stored in the attachment.
+ * @return array The updated metadata of the attachment.
+ */
+function webp_uploads_restore_image( $attachment_id, $data ) {
+	$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+
+	if ( ! is_array( $backup_sizes ) ) {
+		return $data;
+	}
+
+	// If `IMAGE_EDIT_OVERWRITE` is defined and is truthy remove any edited images if present before replacing the metadata.
+	if ( defined( 'IMAGE_EDIT_OVERWRITE' ) && IMAGE_EDIT_OVERWRITE ) {
+		$file     = get_attached_file( $attachment_id );
+		$dirname  = pathinfo( $file, PATHINFO_DIRNAME );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		$sources = isset( $metadata['sources'] ) && is_array( $metadata['sources'] ) ? $metadata['sources'] : array();
+
+		foreach ( $sources as $mime => $properties ) {
+			if ( empty( $properties['file'] ) ) {
+				continue;
+			}
+
+			// Delete only if it's an edited image.
+			if ( preg_match( '/-e\d{13}/', $properties['file'] ) ) {
+				$delete_file = path_join( $dirname, $properties['file'] );
+				wp_delete_file( $delete_file );
+			}
+		}
+
+		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+			if ( ! isset( $properties['sources'] ) || ! is_array( $properties['sources'] ) ) {
+				continue;
+			}
+
+			foreach ( $properties['sources'] as $mime => $source_properties ) {
+				if ( empty( $source_properties['file'] ) ) {
+					continue;
+				}
+
+				// Delete only if it's an edited image.
+				if ( preg_match( '/-e\d{13}/', $source_properties['file'] ) ) {
+					$delete_file = path_join( $dirname, $source_properties['file'] );
+					wp_delete_file( $delete_file );
+				}
+			}
+		}
+	}
+
+	if ( isset( $backup_sizes['full-orig']['sources'] ) ) {
+		$data['sources'] = $backup_sizes['full-orig']['sources'];
+	}
+
+	return $data;
+}
+
+/**
+ * Hook fired right after a metadata has been created or updated, this function would look
+ * specifically only for the key: `_wp_attachment_backup_sizes` which is the one used to
+ * store all the backup sizes. This hook is in charge of cleaning up the additional meta
+ * keys stored in the metadata of the attachment and storing the `sources` property in the
+ * previous full size image due this is not a size we need to move the `sources` from the
+ * metadata back into the full size similar as how it's done on the rest of the sizes.
+ *
+ * @since n.e.x.t
+ *
+ * @param int    $meta_id The ID of the meta value stored in the DB.
+ * @param int    $attachment_id The ID of the post used for this meta, in our case the attachment ID.
+ * @param string $meta_name The name of the metadata to be updated.
+ * @param array  $backup_sizes An array with the metadata value in this case the backup sizes.
+ */
+function webp_updated_postmeta( $meta_id, $attachment_id, $meta_name, $backup_sizes ) {
+	if ( '_wp_attachment_backup_sizes' !== $meta_name ) {
+		return;
+	}
+
+	if ( ! is_array( $backup_sizes ) ) {
+		return;
+	}
+
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+	// No backup sources exists for the full size.
+	if ( ! isset( $metadata['_sources'] ) ) {
+		return;
+	}
+
+	$target = null;
+	foreach ( array_keys( $backup_sizes ) as $size_name ) {
+		// We are only interested in the `full-` sizes.
+		if ( strpos( $size_name, 'full-' ) === false ) {
+			continue;
+		}
+		// If the target already has the sources attributes find the next one.
+		if ( isset( $backup_sizes[ $size_name ]['sources'] ) ) {
+			continue;
+		}
+
+		$target = $size_name;
+	}
+
+	if ( null === $target || ! isset( $backup_sizes[ $target ] ) ) {
+		return;
+	}
+
+	$updated_backup_sizes                       = $backup_sizes;
+	$updated_backup_sizes[ $target ]['sources'] = $metadata['_sources'];
+	// Prevent infinite loop.
+	remove_action( 'update_post_meta', 'webp_updated_postmeta' );
+	// Store the `sources` property into the full size if present.
+	update_post_meta( $attachment_id, '_wp_attachment_backup_sizes', $updated_backup_sizes, $backup_sizes );
+	// Make sure the metadata no longer has a reference to the _sources property once has been stored.
+	unset( $metadata['_sources'] );
+	wp_update_attachment_metadata( $attachment_id, $metadata );
+}
+
+add_action( 'added_post_meta', 'webp_updated_postmeta', 10, 4 );
+add_action( 'updated_post_meta', 'webp_updated_postmeta', 10, 4 );

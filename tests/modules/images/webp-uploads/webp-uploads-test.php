@@ -234,6 +234,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 				return array( 'WP_Image_Doesnt_Support_WebP' );
 			}
 		);
+
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
 		$this->assertTrue( is_wp_error( $result ) );
 		$this->assertSame( 'image_mime_type_not_supported', $result->get_error_code() );
@@ -748,7 +749,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 			$this->assertStringContainsString( $size['width'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString( $size['height'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString(
-				// Remove the extension from the file.
+			// Remove the extension from the file.
 				substr( $size['sources']['image/webp']['file'], 0, -4 ),
 				$size['sources']['image/jpeg']['file']
 			);
@@ -765,9 +766,10 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
+			function ( $transforms ) {
 				// Unset "image/jpeg" mime type for jpeg images.
 				unset( $transforms['image/jpeg'][ array_search( 'image/jpeg', $transforms['image/jpeg'], true ) ] );
+
 				return $transforms;
 			}
 		);
@@ -781,6 +783,276 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
 			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+		}
+	}
+
+	/**
+	 * Backup the sources structure alongside the full size
+	 *
+	 * @test
+	 */
+	public function it_should_backup_the_sources_structure_alongside_the_full_size() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$this->assertEmpty( get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true ) );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->rotate_right()->save();
+
+		// Having a thumbnail ensures the process finished correctly.
+		$this->assertTrue( $editor->success() );
+
+		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+
+		$this->assertNotEmpty( $backup_sizes );
+		$this->assertIsArray( $backup_sizes );
+
+		foreach ( $backup_sizes as $size => $properties ) {
+			$size_name = str_replace( '-orig', '', $size );
+			$this->assertArrayHasKey( 'sources', $properties );
+
+			if ( 'full-orig' === $size ) {
+				$this->assertSame( $metadata['sources'], $properties['sources'] );
+			} else {
+				$this->assertSame( $metadata['sizes'][ $size_name ]['sources'], $properties['sources'] );
+			}
+		}
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertArrayNotHasKey( '_sources', $metadata );
+		$this->assertArrayNotHasKey( '_file', $metadata );
+	}
+
+	/**
+	 * Backup sources from edited images
+	 *
+	 * @test
+	 */
+	public function it_should_backup_sources_from_edited_images() {
+		$attachment_id     = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$original_metadata = wp_get_attachment_metadata( $attachment_id );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->rotate_right()->save();
+		$this->assertTrue( $editor->success() );
+
+		$metadata         = wp_get_attachment_metadata( $attachment_id );
+		$updated_metadata = $metadata;
+		$backup_sizes     = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+		$filename         = pathinfo( $updated_metadata['file'], PATHINFO_FILENAME );
+
+		$this->assertArrayHasKey( 'sources', $backup_sizes['full-orig'] );
+		$this->assertMatchesRegularExpression( '/-e\d{13}/', $filename );
+		// Fake the creation of sources array to the existing metadata.
+		$updated_metadata['sources'] = array(
+			get_post_mime_type( $attachment_id ) => $filename,
+		);
+
+		foreach ( $updated_metadata['sizes'] as $size_name => $props ) {
+			$updated_metadata['sizes'][ $size_name ]['sources'] = array(
+				$props['mime-type'] => $props['file'],
+			);
+		}
+
+		wp_update_attachment_metadata( $attachment_id, $updated_metadata );
+
+		$editor->rotate_left()->save();
+		$this->assertTrue( $editor->success() );
+
+		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+
+		// Make sure the original images were stored in the backup.
+		foreach ( $backup_sizes as $size_name => $properties ) {
+			if ( preg_match( '/-\d{13}/', $size_name ) ) {
+				continue;
+			}
+
+			$real_name = str_replace( '-orig', '', $size_name );
+			if ( 'full' === $real_name ) {
+				$sources = $original_metadata['sources'];
+			} else {
+				$sources = $original_metadata['sizes'][ $real_name ]['sources'];
+			}
+
+			$this->assertArrayHasKey( 'sources', $properties, "Sources not present in '{$size_name}'" );
+			$this->assertSame( $sources, $properties['sources'], "The '{$size_name} is not identical.'" );
+		}
+
+		// Make sure that the edited images were stored correctly in the backup.
+		foreach ( $backup_sizes as $size_name => $properties ) {
+			// Test only the edited names.
+			if ( ! preg_match( '/-\d{13}/', $size_name ) ) {
+				continue;
+			}
+
+			$real_name = preg_replace( '/-\d{13}/', '', $size_name );
+			if ( 'full' === $real_name ) {
+				$sources = $updated_metadata['sources'];
+			} else {
+				$sources = $updated_metadata['sizes'][ $real_name ]['sources'];
+			}
+
+			$this->assertArrayHasKey( 'sources', $properties, "Sources not present in '{$size_name}'" );
+			$this->assertSame( $sources, $properties['sources'], "The '{$size_name} is not identical.'" );
+		}
+	}
+
+	/**
+	 * Store all the information on the original backup key when image edit overwrite is defined
+	 *
+	 * @test
+	 */
+	public function it_should_store_all_the_information_on_the_original_backup_key_when_image_edit_overwrite_is_defined() {
+		define( 'IMAGE_EDIT_OVERWRITE', true );
+
+		$attachment_id     = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$original_metadata = wp_get_attachment_metadata( $attachment_id );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->rotate_right()->save();
+		$this->assertTrue( $editor->success() );
+
+		$metadata         = wp_get_attachment_metadata( $attachment_id );
+		$updated_metadata = $metadata;
+
+		// Fake the creation of sources array to the existing metadata.
+		$updated_metadata['sources'] = array(
+			get_post_mime_type( $attachment_id ) => pathinfo( $updated_metadata['file'], PATHINFO_FILENAME ),
+		);
+
+		foreach ( $updated_metadata['sizes'] as $size_name => $props ) {
+			$updated_metadata['sizes'][ $size_name ]['sources'] = array(
+				$props['mime-type'] => $props['file'],
+			);
+		}
+
+		wp_update_attachment_metadata( $attachment_id, $updated_metadata );
+
+		$editor->rotate_left()->save();
+		$this->assertTrue( $editor->success() );
+
+		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+
+		// Make sure the original images were stored in the backup.
+		foreach ( $backup_sizes as $size_name => $properties ) {
+			$this->assertDoesNotMatchRegularExpression( '/-\d{13}/', $size_name );
+			$this->assertMatchesRegularExpression( '/-orig/', $size_name );
+			$this->assertArrayHasKey( 'sources', $properties, "Sources not present in '{$size_name}'" );
+
+			if ( 'full-orig' === $size_name ) {
+				$sources = $original_metadata['sources'];
+			} else {
+				$name    = str_replace( '-orig', '', $size_name );
+				$sources = $original_metadata['sizes'][ $name ]['sources'];
+			}
+
+			$this->assertSame( $sources, $properties['sources'], "The '{$size_name} is not identical.'" );
+		}
+	}
+
+	/**
+	 * Restore the sources array from the backup when an image is edited
+	 *
+	 * @test
+	 */
+	public function it_should_restore_the_sources_array_from_the_backup_when_an_image_is_edited() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$editor        = new WP_Image_Edit( $attachment_id );
+		$editor->rotate_right()->save();
+		$this->assertTrue( $editor->success() );
+
+		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+		$this->assertArrayHasKey( 'full-orig', $backup_sizes );
+		$this->assertArrayHasKey( 'sources', $backup_sizes['full-orig'] );
+		$this->assertIsArray( $backup_sizes['full-orig']['sources'] );
+
+		wp_restore_image( $attachment_id );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$this->assertArrayHasKey( 'sources', $metadata );
+		$this->assertSame( $backup_sizes['full-orig']['sources'], $metadata['sources'] );
+
+		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+			$this->assertArrayHasKey( 'sources', $backup_sizes[ $size_name . '-orig' ] );
+			$this->assertSame( $backup_sizes[ $size_name . '-orig' ]['sources'], $properties['sources'] );
+		}
+	}
+
+	/**
+	 * Delete edited images when image edit overwrite is defined
+	 *
+	 * @test
+	 */
+	public function it_should_delete_edited_images_when_image_edit_overwrite_is_defined() {
+		define( 'IMAGE_EDIT_OVERWRITE', true );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$editor        = new WP_Image_Edit( $attachment_id );
+		$editor->flip_vertical()->save();
+		$this->assertTrue( $editor->success() );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$file     = get_attached_file( $attachment_id );
+
+		// Populate the sources array due this one requires: https://github.com/WordPress/performance/issues/158.
+		$metadata['sources'] = array(
+			'image/jpeg' => array(
+				'file'     => pathinfo( $file, PATHINFO_FILENAME ),
+				'filesize' => filesize( $file ),
+			),
+			'image/webp' => webp_uploads_generate_additional_image_source(
+				$attachment_id,
+				array(
+					'width'  => $metadata['width'],
+					'height' => $metadata['height'],
+					'crop'   => false,
+				),
+				'image/webp',
+				str_replace( '.jpeg', '.webp', $file )
+			),
+		);
+
+		$directory = pathinfo( $file, PATHINFO_DIRNAME );
+		foreach ( wp_get_registered_image_subsizes() as $size_name => $props ) {
+			if ( ! isset( $metadata['sizes'][ $size_name ] ) ) {
+				continue;
+			}
+
+			$metadata['sizes'][ $size_name ]['sources'] = array(
+				$metadata['sizes'][ $size_name ]['mime-type'] => array(
+					'file'     => $metadata['sizes'][ $size_name ]['file'],
+					'filesize' => filesize( $directory . DIRECTORY_SEPARATOR . $metadata['sizes'][ $size_name ]['file'] ),
+				),
+				'image/webp' => webp_uploads_generate_additional_image_source(
+					$attachment_id,
+					array(
+						'width'  => $props['width'],
+						'height' => $props['height'],
+						'crop'   => $props['crop'],
+					),
+					'image/webp'
+				),
+			);
+		}
+
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		$metadata_before_restore = wp_get_attachment_metadata( $attachment_id );
+
+		wp_restore_image( $attachment_id );
+
+		$this->assertFileDoesNotExist( $metadata_before_restore['file'] );
+		$this->assertFileDoesNotExist( $directory . DIRECTORY_SEPARATOR . $metadata_before_restore['sources']['image/jpeg']['file'] );
+		$this->assertFileDoesNotExist( $directory . DIRECTORY_SEPARATOR . $metadata_before_restore['sources']['image/webp']['file'] );
+
+		$this->assertArrayHasKey( 'sizes', $metadata_before_restore );
+		foreach ( $metadata_before_restore['sizes'] as $size_name => $properties ) {
+			$this->assertArrayHasKey( 'sources', $properties );
+			foreach ( $properties['sources'] as $mime => $values ) {
+				$this->assertFileDoesNotExist( $directory . DIRECTORY_SEPARATOR . $values['file'] );
+			}
 		}
 	}
 }
