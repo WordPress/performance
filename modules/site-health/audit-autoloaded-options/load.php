@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: Audit Autoloaded Options
- * Description: Adds Autoloaded options checker in Site Health checks.
+ * Description: Adds a check for autoloaded options in Site Health status.
  * Experimental: Yes
  *
  * @package performance-lab
