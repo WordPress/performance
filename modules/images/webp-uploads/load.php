@@ -771,7 +771,7 @@ function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id, $
 				return 0;
 			}
 
-			return ($a['filesize'] < $b['filesize']) ? -1 : 1;
+			return ( $a['filesize'] < $b['filesize'] ) ? -1 : 1;
 		}
 	);
 
