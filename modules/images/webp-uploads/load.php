@@ -613,7 +613,6 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 
 	$target_mime = null;
 	// Look for the most progressive image format first.
-	$target_mimes = array_reverse( $target_mimes );
 	foreach ( $target_mimes as $mime ) {
 		if ( isset( $metadata['sources'][ $mime ] ) ) {
 			$target_mime = $mime;
@@ -737,7 +736,8 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 }
 
 /**
-* Returns the attachment smallest filesize source.
+ * Filters on `webp_uploads_content_image_mimes` to generate the available mime types for an attachment
+ * and orders them by the smallest filesize first.
  *
  * @since n.e.xt
  * @private
@@ -746,7 +746,7 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
  * @param int    $attachment_id The attachment ID.
  * @param string $context       The current context.
  *
- * @return array Array of mime types ordered by filesize.
+ * @return array Array of available mime types ordered by filesize.
  */
 function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id, $context ) {
 	$sources = webp_uploads_get_attachment_sources( $attachment_id, 'full' );
@@ -763,7 +763,7 @@ function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id, $
 		}
 	);
 
-	// Order sources on filesize in ascending order.
+	// Order sources by filesize in ascending order.
 	uasort(
 		$sources,
 		function( $a, $b ) {
@@ -775,7 +775,7 @@ function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id, $
 		}
 	);
 
-	// Create an array available mime types ordered by smallest filesize.
+	// Create an array of available mime types ordered by smallest filesize.
 	$mime_types = array_values( array_keys( $sources ) );
 
 	return $mime_types;
