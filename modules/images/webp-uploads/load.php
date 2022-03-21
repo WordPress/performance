@@ -746,8 +746,8 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 					$height = (int) $_wp_additional_image_sizes[ $size ]['height'];
 					$crop   = ( $nocrop ) ? false : $_wp_additional_image_sizes[ $size ]['crop'];
 				} else {
-					$height = get_option( "{$size}_size_h" );
-					$width  = get_option( "{$size}_size_w" );
+					$height = (int) get_option( "{$size}_size_h" );
+					$width  = (int) get_option( "{$size}_size_w" );
 					$crop   = ( $nocrop ) ? false : get_option( "{$size}_crop" );
 				}
 
