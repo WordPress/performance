@@ -736,7 +736,9 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 			$nocrop = true;
 		}
 
-		if ( isset( $sizes ) ) {
+		if ( ! isset( $sizes ) ) {
+		  continue;
+		}
 			$_sizes = array();
 
 			foreach ( $sizes as $size ) {
