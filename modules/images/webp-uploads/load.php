@@ -695,6 +695,8 @@ add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10
  * @param WP_Image_Editor $image     The image editor instance.
  * @param string          $mime_type The mime type of the image.
  * @param int             $post_id   Attachment post ID.
+ *
+ * @return bool|null
  */
 function webp_uploads_update_image_onchange( $override, $file, $image, $mime_type, $post_id ) {
 	if ( $override !== null ) {
@@ -709,13 +711,12 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 	$target                     = ! empty( $_REQUEST['target'] ) ? preg_replace( '/[^a-z0-9_-]+/i', '', $_REQUEST['target'] ) : '';
 	$nocrop                     = false;
 	$current_mime_type          = get_post_mime_type( $post_id );
+	$allowed_mimes              = array_flip( wp_get_mime_types() );
 
 	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
 		if ( $targeted_mime === $current_mime_type ) {
 			continue;
 		}
-
-		$allowed_mimes = array_flip( wp_get_mime_types() );
 
 		if ( ! isset( $allowed_mimes[ $targeted_mime ] ) || ! is_string( $allowed_mimes[ $targeted_mime ] ) ) {
 			return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'performance-lab' ) );
@@ -732,6 +733,10 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 
 		$new_image = wp_get_image_editor( $destination );
 
+		if ( is_wp_error( $new_image ) ) {
+			return $new_image;
+		}
+
 		if ( 'thumbnail' === $target ) {
 			$nocrop = true;
 		}
@@ -739,29 +744,29 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 		if ( ! isset( $sizes ) ) {
 		  continue;
 		}
-			$_sizes = array();
 
-			foreach ( $sizes as $size ) {
+		$_sizes = array();
 
-				if ( isset( $_wp_additional_image_sizes[ $size ] ) ) {
-					$width  = (int) $_wp_additional_image_sizes[ $size ]['width'];
-					$height = (int) $_wp_additional_image_sizes[ $size ]['height'];
-					$crop   = ( $nocrop ) ? false : $_wp_additional_image_sizes[ $size ]['crop'];
-				} else {
-					$height = (int) get_option( "{$size}_size_h" );
-					$width  = (int) get_option( "{$size}_size_w" );
-					$crop   = ( $nocrop ) ? false : get_option( "{$size}_crop" );
-				}
+		foreach ( $sizes as $size ) {
 
-				$_sizes[ $size ] = array(
-					'width'  => $width,
-					'height' => $height,
-					'crop'   => $crop,
-				);
+			if ( isset( $_wp_additional_image_sizes[ $size ] ) ) {
+				$width  = (int) $_wp_additional_image_sizes[ $size ]['width'];
+				$height = (int) $_wp_additional_image_sizes[ $size ]['height'];
+				$crop   = ( $nocrop ) ? false : $_wp_additional_image_sizes[ $size ]['crop'];
+			} else {
+				$height = (int) get_option( "{$size}_size_h" );
+				$width  = (int) get_option( "{$size}_size_w" );
+				$crop   = ( $nocrop ) ? false : get_option( "{$size}_crop" );
 			}
 
-			$new_image->multi_resize( $_sizes );
+			$_sizes[ $size ] = array(
+				'width'  => $width,
+				'height' => $height,
+				'crop'   => $crop,
+			);
 		}
+
+		$new_image->multi_resize( $_sizes );
 	}
 }
 
