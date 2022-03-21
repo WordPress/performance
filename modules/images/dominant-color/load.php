@@ -19,7 +19,6 @@ class wp_Dominant_Color {
 	public function __construct() {
 
 		add_filter( 'wp_print_scripts', [ $this, 'add_styles' ] );
-		add_filter( 'wp_footer', [ $this, 'add_scripts' ] );
 
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'dominant_color_metadata' ], 10, 2 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'has_transparency_metadata' ], 10, 2 );
@@ -95,9 +94,9 @@ class wp_Dominant_Color {
 			$extra_class = '';
 
 			if ( ! isset( $image_meta['has_transparency'] ) ) {
-				$data        .= ' data-hasTransparency="false"';
+				$data        .= ' data-has-transparency="false"';
 			} else {
-				$data .= ' data-hasTransparency="true"';
+				$data .= ' data-has-transparency="true"';
 				$extra_class = ' has-transparency ';
 			}
 
@@ -125,28 +124,6 @@ class wp_Dominant_Color {
 		<?php
 	}
 
-	public function add_scripts() {
-		?>
-<script>
-	(function (window, document) {
-		'use strict';
-		document.querySelector('img[data-dominantcolor]').addEventListener('load', (event) => {
-			var image = event.target;
-			image.style.setProperty('--dominant-color', '');
-			});
-	})(window, document);
-</script>
-		<?php
-	}
-
-
-
-	/**
-	 * @return void
-	 */
-//	public function enqueue_plugin_scripts() {
-//		wp_enqueue_script( 'blurhash', plugin_dir_url( __FILE__ ) . 'dist/blurhash.js' );
-//	}
 
 	/**
 	 * @param $content
