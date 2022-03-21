@@ -164,7 +164,7 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
  * output format depending on desired output formats and supported mime types by the image
  * editor.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param string $output_format The image editor default output format mapping.
  * @param string $filename      Path to the image.
@@ -599,11 +599,34 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		return $image;
 	}
 
-	$urls = $matches[0];
-	// TODO: Add a filterable option to change the selected mime type. See https://github.com/WordPress/performance/issues/187.
-	$target_mime = 'image/webp';
+	/**
+	 * Filters mime types that should be used to update all images in the content. The order of
+	 * mime types matters. The last mime type in the list will be used if it is supported by an image.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array  $target_mimes  The list of mime types that can be used to update images in the content.
+	 * @param int    $attachment_id The attachment ID.
+	 * @param string $context       The current context.
+	 */
+	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/jpeg', 'image/webp' ), $attachment_id, $context );
+
+	$target_mime = null;
+	// Look for the most progressive image format first.
+	$target_mimes = array_reverse( $target_mimes );
+	foreach ( $target_mimes as $mime ) {
+		if ( isset( $metadata['sources'][ $mime ] ) ) {
+			$target_mime = $mime;
+			break;
+		}
+	}
+
+	if ( null === $target_mime ) {
+		return $image;
+	}
 
 	$basename = wp_basename( $metadata['file'] );
+	$urls     = $matches[0];
 	foreach ( $urls as $url ) {
 		$src_filename = wp_basename( $url );
 
@@ -650,7 +673,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 /**
  * Updates the response for an attachment to include sources for additional mime types available the image.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param WP_REST_Response $response The original response object.
  * @param WP_Post          $post     The post object.
