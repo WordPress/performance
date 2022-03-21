@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 5.8
 Tested up to:      5.9
 Requires PHP:      5.6
-Stable tag:        1.0.0-beta.1
+Stable tag:        1.0.0-beta.2
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -21,6 +21,7 @@ Currently the plugin includes the following performance modules:
 * **WebP Support:** Adds a WebP support check in Site Health status.
 * **Persistent Object Cache Health Check:** Adds a persistent object cache check for sites with non-trivial amounts of data in Site Health status.
 * **Audit Enqueued Assets:** Adds a CSS and JS resource check in Site Health status.
+* **Audit Autoloaded Options:** Adds a check for autoloaded options in Site Health status.
 
 == Installation ==
 
@@ -64,6 +65,32 @@ Contributions welcome! There are several ways to contribute:
 * Join the weekly chat (Tuesdays at 16:00 UTC) in the [#performance channel on Slack](https://wordpress.slack.com/archives/performance)
 
 == Changelog ==
+
+= 1.0.0-beta.2 =
+
+**Features**
+
+* Images: Create additional MIME types for the full size image. ([194](https://github.com/WordPress/performance/pull/194))
+* Site Health: Add module to warn about excessive amount of autoloaded options. ([124](https://github.com/WordPress/performance/pull/124))
+
+**Enhancements**
+
+* Images: Adds sources information to the attachment media details of the REST response. ([224](https://github.com/WordPress/performance/pull/224))
+* Images: Allow developers to select which image format to use for images in the content. ([230](https://github.com/WordPress/performance/pull/230))
+* Images: Allow developers to tweak which image formats to generate on upload. ([227](https://github.com/WordPress/performance/pull/227))
+* Images: Replace the full size image in `the_content` with additional MIME type if available. ([195](https://github.com/WordPress/performance/pull/195))
+* Object Cache: Include `memcached` extension in checks for object cache support. ([206](https://github.com/WordPress/performance/pull/206))
+* Infrastructure: Add plugin banner and icon assets. ([231](https://github.com/WordPress/performance/pull/231))
+* Infrastructure: Use `.gitattributes` instead of `.distignore` to better support ZIP creation. ([223](https://github.com/WordPress/performance/pull/223))
+
+**Bug Fixes**
+
+* Images: Use `original` image to generate all additional image format sub-sizes. ([207](https://github.com/WordPress/performance/pull/207))
+* Infrastructure: Replace unreliable activation hook with default value for enabled modules. ([222](https://github.com/WordPress/performance/pull/222))
+
+**Documentation**
+
+* Infrastructure: Update release instructions to include proper branching strategy and protect release branches. ([221](https://github.com/WordPress/performance/pull/221))
 
 = 1.0.0-beta.1 =
 
