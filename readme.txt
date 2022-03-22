@@ -66,6 +66,12 @@ Contributions welcome! There are several ways to contribute:
 
 == Changelog ==
 
+= 1.0.0-beta.3 =
+
+**Bug Fixes**
+
+* Infrastructure: Ensure default modules are loaded regardless of setting registration. ([248](https://github.com/WordPress/performance/pull/248))
+
 = 1.0.0-beta.2 =
 
 **Features**
