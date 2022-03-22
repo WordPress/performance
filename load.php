@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.
  * Requires at least: 5.8
  * Requires PHP: 5.6
- * Version: 1.0.0-beta.2
+ * Version: 1.0.0-beta.3
  * Author: WordPress Performance Group
  * Author URI: https://make.wordpress.org/core/tag/performance/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.0.0-beta.2' );
+define( 'PERFLAB_VERSION', '1.0.0-beta.3' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
@@ -41,7 +41,7 @@ add_action( 'init', 'perflab_register_modules_setting' );
 /**
  * Gets the default value for the performance modules setting.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  */
 function perflab_get_modules_setting_default() {
 	// Since the default relies on some minimal logic that includes requiring an additional file,
