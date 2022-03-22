@@ -6,24 +6,22 @@
  * @since 1.0.0
  */
 
-
-function get_good_response_time_threshold() {
-	/**
-	 * Filters the threshold below which a response time is considered good.
-	 *
-	 * @since 2.2.1
-	 * @param int $threshold Threshold in milliseconds.
-	 */
-	return (int) apply_filters( 'amp_page_cache_good_response_time_threshold', 600 );
-}
-
-function get_page_cache_headers() {
+/**
+ * List of header ,and it's verification callback to verify if page cache is enabled or not.
+ *
+ * Note: key is header name and value could be callable function to verify header value.
+ * Empty value mean existence of header detect page cache is enable.
+ *
+ * @return array List of client caching headers and their (optional) verification callbacks.
+ * @since 1.0.0
+ */
+function perflab_afpc_get_page_cache_headers() {
 
 	$cache_hit_callback = static function ( $header_value ) {
 		return false !== strpos( strtolower( $header_value ), 'hit' );
 	};
 
-	return [
+	return array(
 		'cache-control'          => static function ( $header_value ) {
 			return (bool) preg_match( '/max-age=[1-9]/', $header_value );
 		},
@@ -53,15 +51,27 @@ function get_page_cache_headers() {
 		'cf-edge-cache'          => static function ( $header_value ) {
 			return false !== strpos( strtolower( $header_value ), 'cache' );
 		},
-	];
+	);
 }
 
-function check_for_page_caching() {
+/**
+ * Check if site has page cache enable or not.
+ *
+ * @since 1.0.0
+ * @return WP_Error|array {
+ *     Page caching detection details or else error information.
+ *
+ *     @type bool    $advanced_cache_present        Whether a page caching plugin is present.
+ *     @type array[] $page_caching_response_headers Sets of client caching headers for the responses.
+ *     @type float[] $response_timing               Response timings.
+ * }
+ */
+function perflab_afpc_check_for_page_caching() {
 
 	/** This filter is documented in wp-includes/class-wp-http-streams.php */
 	$sslverify = apply_filters( 'https_local_ssl_verify', false );
 
-	$headers = [];
+	$headers = array();
 
 	// Include basic auth in loopback requests. Note that this will only pass along basic auth when user is
 	// initiating the test. If a site requires basic auth, the test will fail when it runs in WP Cron as part of
@@ -71,11 +81,9 @@ function check_for_page_caching() {
 		$headers['Authorization'] = 'Basic ' . base64_encode( wp_unslash( $_SERVER['PHP_AUTH_USER'] ) . ':' . wp_unslash( $_SERVER['PHP_AUTH_PW'] ) );
 	}
 
-	$caching_headers               = get_page_cache_headers();
-	$page_caching_response_headers = [];
-	$response_timing               = [];
-
-	//add_filter( 'home_url', function(){ return 'https://abf8-139-47-117-177.ngrok.io/';} );
+	$caching_headers               = perflab_afpc_get_page_cache_headers();
+	$page_caching_response_headers = array();
+	$response_timing               = array();
 
 	for ( $i = 1; $i <= 3; $i++ ) {
 		$start_time    = microtime( true );
@@ -92,7 +100,7 @@ function check_for_page_caching() {
 			);
 		}
 
-		$response_headers = [];
+		$response_headers = array();
 
 		foreach ( $caching_headers as $header => $callback ) {
 			$header_value = wp_remote_retrieve_header( $http_response, $header );
@@ -113,7 +121,7 @@ function check_for_page_caching() {
 		$response_timing[]               = ( $end_time - $start_time ) * 1000;
 	}
 
-	return [
+	return array(
 		'advanced_cache_present'        => (
 			file_exists( WP_CONTENT_DIR . '/advanced-cache.php' )
 			&&
@@ -124,17 +132,32 @@ function check_for_page_caching() {
 		),
 		'page_caching_response_headers' => $page_caching_response_headers,
 		'response_timing'               => $response_timing,
-	];
+	);
 }
 
-function get_page_cache_detail( $use_previous_result = false ) {
+/**
+ * Get page caching result from cache.
+ *
+ * @param bool $use_previous_result Whether to use previous result or not.
+ * @since 1.0.0
+ *
+ * @return WP_Error|array {
+ *    Page cache detail or else a WP_Error if unable to determine.
+ *
+ *    @type string   $status                 Page cache status. Good, Recommended or Critical.
+ *    @type bool     $advanced_cache_present Whether page cache plugin is available or not.
+ *    @type string[] $headers                Client caching response headers detected.
+ *    @type float    $response_time          Response time of site.
+ * }
+ */
+function perflab_afpc_get_page_cache_detail( $use_previous_result = false ) {
 
 	if ( $use_previous_result ) {
 		$page_cache_detail = get_transient( 'perflab_has_page_caching' );
 	}
 
 	if ( ! $use_previous_result || empty( $page_cache_detail ) ) {
-		$page_cache_detail = check_for_page_caching();
+		$page_cache_detail = perflab_afpc_check_for_page_caching();
 		if ( is_wp_error( $page_cache_detail ) ) {
 			set_transient( 'perflab_has_page_caching', $page_cache_detail, DAY_IN_SECONDS );
 		} else {
@@ -152,7 +175,7 @@ function get_page_cache_detail( $use_previous_result = false ) {
 	$page_speed = $response_timings[ floor( count( $response_timings ) / 2 ) ];
 
 	// Obtain unique set of all client caching response headers.
-	$headers = [];
+	$headers = array();
 	foreach ( $page_cache_detail['page_caching_response_headers'] as $page_caching_response_headers ) {
 		$headers = array_merge( $headers, array_keys( $page_caching_response_headers ) );
 	}
@@ -161,16 +184,33 @@ function get_page_cache_detail( $use_previous_result = false ) {
 	// Page caching is detected if there are response headers or a page caching plugin is present.
 	$has_page_caching = ( count( $headers ) > 0 || $page_cache_detail['advanced_cache_present'] );
 
-	if ( $page_speed && $page_speed < get_good_response_time_threshold() ) {
+	if ( $page_speed && $page_speed < perflab_afpc_get_good_response_time_threshold() ) {
 		$result = $has_page_caching ? 'good' : 'recommended';
 	} else {
 		$result = 'critical';
 	}
 
-	return [
+	return array(
 		'status'                 => $result,
 		'advanced_cache_present' => $page_cache_detail['advanced_cache_present'],
 		'headers'                => $headers,
 		'response_time'          => $page_speed,
-	];
+	);
+}
+
+/**
+ * Get the threshold below which a response time is considered good.
+ *
+ * @since 1.0.0
+ *
+ * @return int Threshold in milliseconds.
+ */
+function perflab_afpc_get_good_response_time_threshold() {
+	/**
+	 * Filters the threshold below which a response time is considered good.
+	 *
+	 * @since 1.0.0
+	 * @param int $threshold Threshold in milliseconds. Default 600.
+	 */
+	return (int) apply_filters( 'perflab_afpc_page_cache_good_response_time_threshold', 600 );
 }

@@ -42,7 +42,7 @@ add_filter( 'site_status_tests', 'perflab_afpc_add_full_page_cache_test' );
 function perflab_afpc_page_cache_test() {
 	$description  = '<p>' . esc_html__( 'WordPress performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'performance-lab' ) . '</p>';
 	$description .= '<p>' . esc_html__( 'Page caching is detected by looking for an active page caching plugin as well as making three requests to the homepage and looking for one or more of the following HTTP client caching response headers:', 'performance-lab' )
-					. ' <code>' . implode( '</code>, <code>', array_keys( get_page_cache_headers() ) ) . '.</code>';
+					. ' <code>' . implode( '</code>, <code>', array_keys( perflab_afpc_get_page_cache_headers() ) ) . '.</code>';
 
 	$result = array(
 		'badge'       => array(
@@ -62,7 +62,7 @@ function perflab_afpc_page_cache_test() {
 		),
 	);
 
-	$page_cache_detail = get_page_cache_detail();
+	$page_cache_detail = perflab_afpc_get_page_cache_detail();
 
 	if ( is_wp_error( $page_cache_detail ) ) {
 		return perflab_afpc_page_cache_unable_detect_cache_test( $result, $page_cache_detail );
@@ -130,14 +130,7 @@ function perflab_afpc_page_cache_detected_test( $default_response, $page_cache_d
 		$page_cache_test_summary[] = '<span class="dashicons dashicons-dismiss"></span> ' . esc_html__( 'Server response time could not be determined. Verify that loopback requests are working.', 'performance-lab' );
 	} else {
 
-		/**
-		 * Filters the threshold below which a response time is considered good.
-		 *
-		 * @since 1.0.0
-		 * @param int $threshold Threshold in milliseconds. Default 600.
-		 */
-		$threshold = (int) apply_filters( 'perflab_afpc_page_cache_good_response_time_threshold', 600 );
-
+		$threshold = perflab_afpc_get_good_response_time_threshold();
 		if ( $page_cache_detail['response_time'] < $threshold ) {
 			$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt"></span> ' . sprintf(
 				/* translators: %d is the response time in milliseconds */
