@@ -1,6 +1,6 @@
 {
   "name": "performance",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "private": true,
   "description": "Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.",
   "author": "The WordPress Contributors",
@@ -27,14 +27,22 @@
     "fast-glob": "^3.2.7",
     "husky": "^7.0.4",
     "lint-staged": "^12.3.4",
-    "lodash": "4.17.21",
-    "prettier": "npm:wp-prettier@^2.2.1-beta-1"
+    "lodash": "4.17.21"
+  },
+  "peerDependencies": {
+    "prettier": ">=2"
+  },
+  "peerDependenciesMeta": {
+    "prettier": {
+      "optional": true
+    }
   },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
     "since": "./bin/plugin/cli.js since",
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
+    "enabled-modules": "./bin/plugin/cli.js enabled-modules",
     "format-js": "wp-scripts format ./bin",
     "lint-js": "wp-scripts lint-js ./bin",
     "format-php": "wp-env run composer run-script format",
