@@ -28,7 +28,7 @@ class Load_Tests extends WP_UnitTestCase {
 		}
 
 		// Assert that registered default works correctly.
-		$this->assertSame( $this->get_expected_default_option(), get_option( PERFLAB_MODULES_SETTING ) );
+		$this->assertSame( perflab_get_modules_setting_default(), get_option( PERFLAB_MODULES_SETTING ) );
 
 		// Assert that most basic sanitization works correctly (an array is required).
 		update_option( PERFLAB_MODULES_SETTING, 'invalid' );
@@ -56,10 +56,39 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( array( 'my-module' => array( 'enabled' => false ) ), $sanitized );
 	}
 
+	public function test_perflab_get_modules_setting_default() {
+		$default_enabled_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
+		$expected                = array();
+		foreach ( $default_enabled_modules as $default_enabled_module ) {
+			$expected[ $default_enabled_module ] = array( 'enabled' => true );
+		}
+
+		$this->assertSame( $expected, perflab_get_modules_setting_default() );
+	}
+
 	public function test_perflab_get_module_settings() {
-		// Assert that by default the settings are an empty array.
+		// Assert that by default the settings are using the same value as the registered default.
 		$settings = perflab_get_module_settings();
-		$this->assertSame( $this->get_expected_default_option(), $settings );
+		$this->assertSame( perflab_get_modules_setting_default(), $settings );
+
+		// More specifically though, assert that the default is also passed through to the
+		// get_option() call, to support scenarios where the function is called before 'init'.
+		// Unhook the registered default logic to verify the default comes from the passed value.
+		remove_all_filters( 'default_option_' . PERFLAB_MODULES_SETTING );
+		$has_passed_default = false;
+		add_filter(
+			'default_option_' . PERFLAB_MODULES_SETTING,
+			function( $default, $option, $passed_default ) use ( &$has_passed_default ) {
+				// This callback just records whether there is a default value being passed.
+				$has_passed_default = $passed_default;
+				return $default;
+			},
+			10,
+			3
+		);
+		$settings = perflab_get_module_settings();
+		$this->assertTrue( $has_passed_default );
+		$this->assertSame( perflab_get_modules_setting_default(), $settings );
 
 		// Assert that option updates are reflected in the settings correctly.
 		$new_value = array( 'my-module' => array( 'enabled' => true ) );
@@ -73,7 +102,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$active_modules          = perflab_get_active_modules();
 		$expected_active_modules = array_keys(
 			array_filter(
-				$this->get_expected_default_option(),
+				perflab_get_modules_setting_default(),
 				function( $module_settings ) {
 					return $module_settings['enabled'];
 				}
