@@ -41,7 +41,7 @@ add_action( 'init', 'perflab_register_modules_setting' );
 /**
  * Gets the default value for the performance modules setting.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  */
 function perflab_get_modules_setting_default() {
 	// Since the default relies on some minimal logic that includes requiring an additional file,
