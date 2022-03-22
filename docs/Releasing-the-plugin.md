@@ -1,8 +1,8 @@
 [Back to overview](./README.md)
 
-# Releasing the performance plugin
+# Releasing the Performance Lab plugin
 
-This document describes the steps to release the Performance plugin.
+This document describes the steps to release the Performance Lab plugin.
 
 ## Branching off `trunk`
 
