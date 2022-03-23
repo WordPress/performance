@@ -601,7 +601,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 
 	/**
 	 * Filters mime types that should be used to update all images in the content. The order of
-	 * mime types matters. The last mime type in the list will be used if it is supported by an image.
+	 * mime types matters. The first mime type in the list will be used if it is supported by an image.
 	 *
 	 * @since 1.0.0
 	 *
@@ -609,11 +609,9 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	 * @param int    $attachment_id The attachment ID.
 	 * @param string $context       The current context.
 	 */
-	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/jpeg', 'image/webp' ), $attachment_id, $context );
+	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/webp', 'image/jpeg' ), $attachment_id, $context );
 
 	$target_mime = null;
-	// Look for the most progressive image format first.
-	$target_mimes = array_reverse( $target_mimes );
 	foreach ( $target_mimes as $mime ) {
 		if ( isset( $metadata['sources'][ $mime ] ) ) {
 			$target_mime = $mime;
