@@ -818,7 +818,7 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
  * @param string $meta_name The name of the metadata to be updated.
  * @param array  $backup_sizes An array with the metadata value in this case the backup sizes.
  */
-function webp_updated_postmeta( $meta_id, $attachment_id, $meta_name, $backup_sizes ) {
+function webp_uploads_updated_postmeta( $meta_id, $attachment_id, $meta_name, $backup_sizes ) {
 	// The backup sources array.
 	if ( '_wp_attachment_backup_sizes' !== $meta_name ) {
 		return;
