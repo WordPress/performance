@@ -784,30 +784,8 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
 		return $data;
 	}
 
-	// If `IMAGE_EDIT_OVERWRITE` is defined and is truthy remove any edited images if present before replacing the metadata.
-	if ( defined( 'IMAGE_EDIT_OVERWRITE' ) && IMAGE_EDIT_OVERWRITE ) {
-		$file     = get_attached_file( $attachment_id );
-		$dirname  = pathinfo( $file, PATHINFO_DIRNAME );
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-
-		$sources = isset( $metadata['sources'] ) && is_array( $metadata['sources'] ) ? $metadata['sources'] : array();
-
-		foreach ( $sources as $mime => $properties ) {
-			if ( empty( $properties['file'] ) ) {
-				continue;
-			}
-
-			// Delete only if it's an edited image.
-			if ( preg_match( '/-e\d{13}/', $properties['file'] ) ) {
-				$delete_file = path_join( $dirname, $properties['file'] );
-				wp_delete_file( $delete_file );
-			}
-		}
-
-		foreach ( $metadata['sizes'] as $size_name => $properties ) {
-			if ( ! isset( $properties['sources'] ) || ! is_array( $properties['sources'] ) ) {
-				continue;
-			}
+	// TODO: Handle the case If `IMAGE_EDIT_OVERWRITE` is defined and is truthy remove any edited images if present before replacing the metadata.
+	// See: https://github.com/WordPress/performance/issues/158.
 
 			foreach ( $properties['sources'] as $mime => $source_properties ) {
 				if ( empty( $source_properties['file'] ) ) {
