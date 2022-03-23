@@ -739,7 +739,6 @@ function webp_wp_update_attachment_metadata( $data, $attachment_id ) {
 
 	return $data;
 }
-
 add_filter( 'wp_update_attachment_metadata', 'webp_wp_update_attachment_metadata', 10, 2 );
 
 /**
