@@ -136,15 +136,12 @@ class wp_Dominant_Color {
 			$context = current_filter();
 		}
 
-		if ( ! preg_match_all( '/<(img|iframe)\s[^>]+>/', $content, $matches, PREG_SET_ORDER ) ) {
+		if ( ! preg_match_all( '/<(img)\s[^>]+>/', $content, $matches, PREG_SET_ORDER ) ) {
 			return $content;
 		}
 
 		// List of the unique `img` tags found in $content.
 		$images = array();
-
-		// List of the unique `iframe` tags found in $content.
-		$iframes = array();
 
 		foreach ( $matches as $match ) {
 			list( $tag, $tag_name ) = $match;
@@ -207,7 +204,7 @@ class wp_Dominant_Color {
 	}
 
 	/**
-	 * Add checkbox setting to enable/disable blurhash for a given media.
+	 * Add checkbox setting to enable/disable dominant color for a given media.
 	 *
 	 * @param array $form_fields
 	 * @param WP_Post $post
@@ -246,13 +243,13 @@ class wp_Dominant_Color {
 
 		if ( isset( $attachment['show_dominant_color'] ) ) {
 			if ( ! isset( $image_meta['show_dominant_color'] ) ) {
-				// If enabling blurhash from media setting and image meta doesn't have any, generate a new one.
+				// If enabling dominant color from media setting and image meta doesn't have any, generate a new one.
 				$image_meta                        = $this->dominant_color_metadata( $image_meta, $attachment_id );
 				$image_meta['show_dominant_color'] = $attachment['show_dominant_color'] ? '1' : '0';
 				wp_update_attachment_metadata( $attachment_id, $image_meta );
 			}
 		} elseif ( isset( $image_meta['dominant_color'] ) ) {
-			// If disabling blurhash from media setting and blurhash set in image meta, unset it.
+			// If disabling dominant color from media setting and dominant color set in image meta, unset it.
 			unset( $image_meta['show_dominant_color'] );
 			wp_update_attachment_metadata( $attachment_id, $image_meta );
 		}
