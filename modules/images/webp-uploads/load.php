@@ -856,6 +856,5 @@ function webp_uploads_updated_postmeta( $meta_id, $attachment_id, $meta_name, $b
 	// Store the `sources` property into the full size if present.
 	update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $backup_sources );
 }
-
 add_action( 'added_post_meta', 'webp_updated_postmeta', 10, 4 );
 add_action( 'updated_post_meta', 'webp_updated_postmeta', 10, 4 );
