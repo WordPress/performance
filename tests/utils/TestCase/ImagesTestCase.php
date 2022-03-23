@@ -19,7 +19,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	/**
 	 * Asserts that an image has a source with the specific mime type.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param int    $attachment_id The attachment ID.
 	 * @param string $mime_type The mime type of the source.
@@ -33,7 +33,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	/**
 	 * Asserts that an image doesn't have a source with the specific mime type.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param int    $attachment_id The attachment ID.
 	 * @param string $mime_type The mime type of the source.
@@ -48,7 +48,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	/**
 	 * Asserts that an image has a source with the specific mime type for a subsize.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param int    $attachment_id The attachment ID.
 	 * @param string $size The subsize name.
@@ -63,7 +63,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	/**
 	 * Asserts that an image doesn't have a source with the specific mime type for a subsize.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param int    $attachment_id The attachment ID.
 	 * @param string $size The subsize name.
