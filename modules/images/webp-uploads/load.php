@@ -718,7 +718,7 @@ add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10
  * @param int   $attachment_id The ID of the current attachment.
  * @return array The updated metadata for the attachment to be stored in the meta table.
  */
-function webp_wp_update_attachment_metadata( $data, $attachment_id ) {
+function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
 
 	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
 
