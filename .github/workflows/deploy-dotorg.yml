@@ -3,13 +3,15 @@ name: Deploy to WordPress.org
 on:
   release:
     types:
-      - released
+      - published
 
 jobs:
   release:
     name: New Release
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: WordPress plugin deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
         env:

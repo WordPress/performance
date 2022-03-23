@@ -3,6 +3,7 @@
  * Tests for audit-enqueued-assets module.
  *
  * @package performance-lab
+ * @group audit-enqueued-assets
  */
 
 class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
@@ -60,6 +61,10 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		wp_enqueue_script( 'script3', 'example3.com', array() );
 		wp_dequeue_script( 'script3' );
 
+		$inline_script = 'console.log("after");';
+		wp_add_inline_script( 'script1', $inline_script );
+
+		get_echo( 'wp_print_scripts' );
 		perflab_aea_audit_enqueued_scripts();
 		$transient = get_transient( 'aea_enqueued_front_page_scripts' );
 		$this->assertNotEmpty( $transient );
@@ -68,7 +73,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 			array(
 				array(
 					'src'  => 'example1.com',
-					'size' => 0,
+					'size' => 0 + mb_strlen( $inline_script, '8bit' ),
 				),
 			),
 			$transient
@@ -87,6 +92,9 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		$this->current_user_can_view_site_health_checks_cap();
 
 		Audit_Assets_Transients_Set::set_style_transient_with_data( 3 );
+
+		// Avoids echoing styles.
+		get_echo( 'wp_print_styles' );
 		perflab_aea_audit_enqueued_styles();
 		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertIsArray( $transient );
@@ -126,6 +134,13 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		wp_enqueue_style( 'style3', 'example3.com', array() );
 		wp_dequeue_style( 'style3' );
 
+		// Adding inline style to style1.
+		$style  = ".test {\n";
+		$style .= "\tbackground: red;\n";
+		$style .= '}';
+		wp_add_inline_style( 'style1', $style );
+		get_echo( 'wp_print_styles' );
+
 		perflab_aea_audit_enqueued_styles();
 		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertNotEmpty( $transient );
@@ -134,7 +149,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 			array(
 				array(
 					'src'  => 'example1.com',
-					'size' => 0,
+					'size' => 0 + mb_strlen( $style, '8bit' ),
 				),
 			),
 			$transient
