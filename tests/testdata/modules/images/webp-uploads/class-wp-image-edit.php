@@ -162,6 +162,16 @@ class WP_Image_Edit {
 	 * @return bool whether the operation to save the image was succesfully or not.
 	 */
 	public function success() {
-		return is_object( $this->result ) && property_exists( $this->result, 'msg' ) && property_exists( $this->result, 'thumbnail' ) && 'Image saved' === $this->result->msg;
+		if ( ! is_object( $this->result ) ) {
+			return false;
+		}
+
+		$valid_target = true;
+		// The thumbnail property is only set in `all` and `thumbnail` target.
+		if ( 'all' === $this->target || 'thumbnail' === $this->target ) {
+			$valid_target = property_exists( $this->result, 'thumbnail' );
+		}
+
+		return property_exists( $this->result, 'msg' ) && $valid_target && 'Image saved' === $this->result->msg;
 	}
 }
