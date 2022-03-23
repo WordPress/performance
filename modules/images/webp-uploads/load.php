@@ -739,7 +739,7 @@ function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
 
 	return $data;
 }
-add_filter( 'wp_update_attachment_metadata', 'webp_wp_update_attachment_metadata', 10, 2 );
+add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata', 10, 2 );
 
 /**
  * Before saving the metadata of the image store a backup values for the sources and file property
@@ -856,5 +856,5 @@ function webp_uploads_updated_postmeta( $meta_id, $attachment_id, $meta_name, $b
 	// Store the `sources` property into the full size if present.
 	update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $backup_sources );
 }
-add_action( 'added_post_meta', 'webp_updated_postmeta', 10, 4 );
-add_action( 'updated_post_meta', 'webp_updated_postmeta', 10, 4 );
+add_action( 'added_post_meta', 'webp_uploads_updated_postmeta', 10, 4 );
+add_action( 'updated_post_meta', 'webp_uploads_updated_postmeta', 10, 4 );
