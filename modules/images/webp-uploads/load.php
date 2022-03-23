@@ -754,7 +754,9 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  * @return array The updated metadata for the attachment.
  */
 function webp_uploads_backup_sources( $attachment_id, $data ) {
-	if ( ! isset( $data['sources'] ) ) {
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+	// Nothing to back up.
+	if ( ! isset( $metadata['sources'] ) ) {
 		return $data;
 	}
 
@@ -768,7 +770,7 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
 	// Store the current sources before the current metadata is overwritten.
 	$sources             = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 	$sources             = is_array( $sources ) ? $sources : array();
-	$sources['_sources'] = $data['sources'];
+	$sources['_sources'] = $metadata['sources'];
 	update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $sources );
 	// Remove the current sources as at this point the current values are no longer accurate.
 	// TODO: Requires to be updated from https://github.com/WordPress/performance/issues/158.
