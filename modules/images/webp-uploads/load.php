@@ -587,18 +587,6 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		return $image;
 	}
 
-	// TODO: Add a filterable option to determine image extensions, see https://github.com/WordPress/performance/issues/187 for more details.
-	$target_image_extensions = array(
-		'jpg',
-		'jpeg',
-	);
-
-	// Creates a regular extension to find all the URLS with the provided extension for img tag.
-	preg_match_all( '/[^\s"]+\.(?:' . implode( '|', $target_image_extensions ) . ')/i', $image, $matches );
-	if ( empty( $matches ) ) {
-		return $image;
-	}
-
 	/**
 	 * Filters mime types that should be used to update all images in the content. The order of
 	 * mime types matters. The first mime type in the list will be used if it is supported by an image.
