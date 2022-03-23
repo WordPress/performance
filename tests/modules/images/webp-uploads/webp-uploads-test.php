@@ -821,6 +821,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertEmpty( get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true ) );
+		$this->assertEmpty( get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
 
 		$editor = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
@@ -833,15 +834,21 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$this->assertNotEmpty( $backup_sizes );
 		$this->assertIsArray( $backup_sizes );
 
+		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+		$this->assertIsArray( $backup_sources );
+		$this->assertArrayHasKey( 'full-orig', $backup_sources );
+		$this->assertSame( $metadata['sources'], $backup_sources['full-orig'] );
+		$this->assertArrayNotHasKey( '_sources', $backup_sources );
+
 		foreach ( $backup_sizes as $size => $properties ) {
 			$size_name = str_replace( '-orig', '', $size );
-			$this->assertArrayHasKey( 'sources', $properties );
 
 			if ( 'full-orig' === $size ) {
-				$this->assertSame( $metadata['sources'], $properties['sources'] );
-			} else {
-				$this->assertSame( $metadata['sizes'][ $size_name ]['sources'], $properties['sources'] );
+				continue;
 			}
+
+			$this->assertArrayHasKey( 'sources', $properties );
+			$this->assertSame( $metadata['sizes'][ $size_name ]['sources'], $properties['sources'] );
 		}
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -851,83 +858,122 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Store all the information on the original backup key when image edit overwrite is defined
-	 *
-	 * @test
-	 */
-	public function it_should_store_all_the_information_on_the_original_backup_key_when_image_edit_overwrite_is_defined() {
-		define( 'IMAGE_EDIT_OVERWRITE', true );
-
-		$attachment_id     = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
-		$original_metadata = wp_get_attachment_metadata( $attachment_id );
-
-		$editor = new WP_Image_Edit( $attachment_id );
-		$editor->rotate_right()->save();
-		$this->assertTrue( $editor->success() );
-
-		$metadata         = wp_get_attachment_metadata( $attachment_id );
-		$updated_metadata = $metadata;
-
-		// Fake the creation of sources array to the existing metadata.
-		$updated_metadata['sources'] = array(
-			get_post_mime_type( $attachment_id ) => pathinfo( $updated_metadata['file'], PATHINFO_FILENAME ),
-		);
-
-		foreach ( $updated_metadata['sizes'] as $size_name => $props ) {
-			$updated_metadata['sizes'][ $size_name ]['sources'] = array(
-				$props['mime-type'] => $props['file'],
-			);
-		}
-
-		wp_update_attachment_metadata( $attachment_id, $updated_metadata );
-
-		$editor->rotate_left()->save();
-		$this->assertTrue( $editor->success() );
-
-		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
-
-		// Make sure the original images were stored in the backup.
-		foreach ( $backup_sizes as $size_name => $properties ) {
-			$this->assertDoesNotMatchRegularExpression( '/-\d{13}/', $size_name );
-			$this->assertMatchesRegularExpression( '/-orig/', $size_name );
-			$this->assertArrayHasKey( 'sources', $properties, "Sources not present in '{$size_name}'" );
-
-			if ( 'full-orig' === $size_name ) {
-				$sources = $original_metadata['sources'];
-			} else {
-				$name    = str_replace( '-orig', '', $size_name );
-				$sources = $original_metadata['sizes'][ $name ]['sources'];
-			}
-
-			$this->assertSame( $sources, $properties['sources'], "The '{$size_name} is not identical.'" );
-		}
-	}
-
-	/**
 	 * Restore the sources array from the backup when an image is edited
 	 *
 	 * @test
 	 */
 	public function it_should_restore_the_sources_array_from_the_backup_when_an_image_is_edited() {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$editor        = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
 		$this->assertTrue( $editor->success() );
 
-		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
-		$this->assertArrayHasKey( 'full-orig', $backup_sizes );
-		$this->assertArrayHasKey( 'sources', $backup_sizes['full-orig'] );
-		$this->assertIsArray( $backup_sizes['full-orig']['sources'] );
+		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+		$this->assertArrayHasKey( 'full-orig', $backup_sources );
+		$this->assertIsArray( $backup_sources['full-orig'] );
+		$this->assertSame( $metadata['sources'], $backup_sources['full-orig'] );
+		$this->assertArrayNotHasKey( '_sources', $backup_sources['full-orig'] );
 
 		wp_restore_image( $attachment_id );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertArrayHasKey( 'sources', $metadata );
-		$this->assertSame( $backup_sizes['full-orig']['sources'], $metadata['sources'] );
+		$this->assertSame( $backup_sources['full-orig'], $metadata['sources'] );
+		$this->assertSame( $backup_sources, get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
 
+		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 		foreach ( $metadata['sizes'] as $size_name => $properties ) {
 			$this->assertArrayHasKey( 'sources', $backup_sizes[ $size_name . '-orig' ] );
 			$this->assertSame( $backup_sizes[ $size_name . '-orig' ]['sources'], $properties['sources'] );
+		}
+	}
+
+	/**
+	 * Prevent to back up the sources when the sources attributes does not exists
+	 *
+	 * @test
+	 */
+	public function it_should_prevent_to_back_up_the_sources_when_the_sources_attributes_does_not_exists() {
+		// Disable the generation of the sources attributes.
+		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertArrayNotHasKey( 'sources', $metadata );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->flip_vertical()->save();
+		$this->assertTrue( $editor->success() );
+
+		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+		$this->assertEmpty( $backup_sources );
+
+		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+		$this->assertIsArray( $backup_sizes );
+
+		foreach ( $backup_sizes as $size_name => $properties ) {
+			$this->assertArrayNotHasKey( 'sources', $properties );
+		}
+	}
+
+	/**
+	 * Prevent to backup the full size image if only the thumbnail is edited
+	 *
+	 * @test
+	 */
+	public function it_should_prevent_to_backup_the_full_size_image_if_only_the_thumbnail_is_edited() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+		$this->assertArrayHasKey( 'sources', $metadata );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->flip_vertical()->only_thumbnail()->save();
+		$this->assertTrue( $editor->success() );
+
+		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+		$this->assertEmpty( $backup_sources );
+
+		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+		$this->assertIsArray( $backup_sizes );
+		$this->assertCount( 1, $backup_sizes );
+		$this->assertArrayHasKey( 'thumbnail-orig', $backup_sizes );
+		$this->assertArrayHasKey( 'sources', $backup_sizes['thumbnail-orig'] );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$this->assertArrayHasKey( 'sources', $metadata );
+	}
+
+	/**
+	 * Backup the image when all images except the thumbnail are updated
+	 *
+	 * @test
+	 */
+	public function it_should_backup_the_image_when_all_images_except_the_thumbnail_are_updated() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->rotate_left()->all_except_thumbnail()->save();
+		$this->assertTrue( $editor->success() );
+
+		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+		$this->assertIsArray( $backup_sources );
+		$this->assertArrayHasKey( 'full-orig', $backup_sources );
+		$this->assertSame( $metadata['sources'], $backup_sources['full-orig'] );
+
+		$this->assertArrayNotHasKey( 'sources', wp_get_attachment_metadata( $attachment_id ), 'The sources attributes was not removed from the metadata.' );
+
+		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+		$this->assertIsArray( $backup_sizes );
+		$this->assertArrayNotHasKey( 'thumbnail-orig', $backup_sizes, 'The thumbnail-orig was stored in the back up' );
+
+		foreach ( $backup_sizes as $size_name => $properties ) {
+			if ( 'full-orig' === $size_name ) {
+				continue;
+			}
+			$this->assertArrayHasKey( 'sources', $properties, "The '{$size_name}' does not have the sources." );
 		}
 	}
 }

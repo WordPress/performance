@@ -759,8 +759,20 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
 		return $data;
 	}
 
-	$data['_sources'] = $data['sources'];
+	$target = isset( $_REQUEST['target'] ) ? sanitize_text_field( $_REQUEST['target'] ) : 'all';
+
+	// When an edit to an image is only applied to a thumbnail there's nothing we need to backu up.
+	if ( 'thumbnail' === $target ) {
+		return $data;
+	}
+
+	// Store the current sources before the current metadata is overwritten.
+	$sources             = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+	$sources             = is_array( $sources ) ? $sources : array();
+	$sources['_sources'] = $data['sources'];
+	update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $sources );
 	// Remove the current sources as at this point the current values are no longer accurate.
+	// TODO: Requires to be updated from https://github.com/WordPress/performance/issues/158.
 	unset( $data['sources'] );
 
 	return $data;
@@ -778,32 +790,16 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
  * @return array The updated metadata of the attachment.
  */
 function webp_uploads_restore_image( $attachment_id, $data ) {
-	$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 
-	if ( ! is_array( $backup_sizes ) ) {
+	if ( ! is_array( $backup_sources ) || ! isset( $backup_sources['full-orig'] ) || ! is_array( $backup_sources['full-orig'] ) ) {
 		return $data;
 	}
 
 	// TODO: Handle the case If `IMAGE_EDIT_OVERWRITE` is defined and is truthy remove any edited images if present before replacing the metadata.
 	// See: https://github.com/WordPress/performance/issues/158.
 
-			foreach ( $properties['sources'] as $mime => $source_properties ) {
-				if ( empty( $source_properties['file'] ) ) {
-					continue;
-				}
-
-				// Delete only if it's an edited image.
-				if ( preg_match( '/-e\d{13}/', $source_properties['file'] ) ) {
-					$delete_file = path_join( $dirname, $source_properties['file'] );
-					wp_delete_file( $delete_file );
-				}
-			}
-		}
-	}
-
-	if ( isset( $backup_sizes['full-orig']['sources'] ) ) {
-		$data['sources'] = $backup_sizes['full-orig']['sources'];
-	}
+	$data['sources'] = $backup_sources['full-orig'];
 
 	return $data;
 }
@@ -824,17 +820,15 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
  * @param array  $backup_sizes An array with the metadata value in this case the backup sizes.
  */
 function webp_updated_postmeta( $meta_id, $attachment_id, $meta_name, $backup_sizes ) {
+	// The backup sources array.
 	if ( '_wp_attachment_backup_sizes' !== $meta_name ) {
 		return;
 	}
 
-	if ( ! is_array( $backup_sizes ) ) {
-		return;
-	}
+	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+	$backup_sources = is_array( $backup_sources ) ? $backup_sources : array();
 
-	$metadata = wp_get_attachment_metadata( $attachment_id );
-	// No backup sources exists for the full size.
-	if ( ! isset( $metadata['_sources'] ) ) {
+	if ( ! isset( $backup_sources['_sources'] ) ) {
 		return;
 	}
 
@@ -845,26 +839,23 @@ function webp_updated_postmeta( $meta_id, $attachment_id, $meta_name, $backup_si
 			continue;
 		}
 		// If the target already has the sources attributes find the next one.
-		if ( isset( $backup_sizes[ $size_name ]['sources'] ) ) {
+		if ( isset( $backup_sources[ $size_name ] ) ) {
 			continue;
 		}
 
 		$target = $size_name;
+		break;
 	}
 
-	if ( null === $target || ! isset( $backup_sizes[ $target ] ) ) {
+	if ( null === $target ) {
 		return;
 	}
 
-	$updated_backup_sizes                       = $backup_sizes;
-	$updated_backup_sizes[ $target ]['sources'] = $metadata['_sources'];
-	// Prevent infinite loop.
-	remove_action( 'update_post_meta', 'webp_updated_postmeta' );
+	$backup_sources[ $target ] = $backup_sources['_sources'];
+	// Remove the temporary used space.
+	unset( $backup_sources['_sources'] );
 	// Store the `sources` property into the full size if present.
-	update_post_meta( $attachment_id, '_wp_attachment_backup_sizes', $updated_backup_sizes, $backup_sizes );
-	// Make sure the metadata no longer has a reference to the _sources property once has been stored.
-	unset( $metadata['_sources'] );
-	wp_update_attachment_metadata( $attachment_id, $metadata );
+	update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $backup_sources );
 }
 
 add_action( 'added_post_meta', 'webp_updated_postmeta', 10, 4 );
