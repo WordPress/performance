@@ -136,11 +136,9 @@ function perflab_afpc_check_for_page_caching() {
 }
 
 /**
- * Get page caching result from cache.
+ * Get page cache details.
  *
- * @param bool $use_previous_result Whether to use previous result or not.
  * @since 1.0.0
- *
  * @return WP_Error|array {
  *    Page cache detail or else a WP_Error if unable to determine.
  *
@@ -150,21 +148,9 @@ function perflab_afpc_check_for_page_caching() {
  *    @type float    $response_time          Response time of site.
  * }
  */
-function perflab_afpc_get_page_cache_detail( $use_previous_result = false ) {
-
-	if ( $use_previous_result ) {
-		$page_cache_detail = get_transient( 'perflab_has_page_caching' );
-	}
-
-	if ( ! $use_previous_result || empty( $page_cache_detail ) ) {
-		$page_cache_detail = perflab_afpc_check_for_page_caching();
-		if ( is_wp_error( $page_cache_detail ) ) {
-			set_transient( 'perflab_has_page_caching', $page_cache_detail, DAY_IN_SECONDS );
-		} else {
-			set_transient( 'perflab_has_page_caching', $page_cache_detail, MONTH_IN_SECONDS );
-		}
-	}
-
+function perflab_afpc_get_page_cache_detail() {
+	$page_cache_detail = perflab_afpc_check_for_page_caching();
+	error_log( print_r( $page_cache_detail, true ) );
 	if ( is_wp_error( $page_cache_detail ) ) {
 		return $page_cache_detail;
 	}

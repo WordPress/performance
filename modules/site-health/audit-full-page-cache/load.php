@@ -188,11 +188,8 @@ function perflab_afpc_register_async_test_endpoints() {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => 'perflab_afpc_page_cache_test',
-				/**'permission_callback' => static function() {
-					return current_user_can( 'view_site_health_checks' );
-				},*/
 				'permission_callback' => static function() {
-					return true;
+					return current_user_can( 'view_site_health_checks' );
 				},
 			),
 		)
