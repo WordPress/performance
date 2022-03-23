@@ -808,4 +808,95 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 		}
 	}
+
+	/**
+	 * Test webp_uploads_get_mime_types_by_filesize returns smallest filesize, in this case webp.
+	 *
+	 * @test
+	 */
+	public function it_should_return_smaller_webp_mime_type() {
+		// File should generate smallest webp image size.
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		$mime_types = webp_uploads_get_mime_types_by_filesize( array( 'image/jpeg', 'image/webp' ), $attachment_id, 'the_content' );
+
+		$this->assertIsArray( $mime_types );
+		$this->assertSame( 'image/webp', $mime_types[0] );
+		$this->assertSame( 'image/jpeg', $mime_types[1] );
+	}
+
+	/**
+	 * Test webp_uploads_get_mime_types_by_filesize returns smallest filesize, in this case jpeg.
+	 *
+	 * @test
+	 */
+	public function it_should_return_smaller_jpeg_mime_type() {
+		// File should generate smallest jpeg image size.
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
+
+		// Mock attachment meta data to test when jpeg image is smaller.
+		add_filter(
+			'wp_get_attachment_metadata',
+			function( $data, $attachment_id ) {
+				$data['sources'] = array(
+					'image/jpeg' => array(
+						'file'     => 'paint.jpeg',
+						'filesize' => 1000,
+					),
+					'image/webp' => array(
+						'file'     => 'paint.webp',
+						'filesize' => 2000,
+					),
+				);
+			},
+			10,
+			2
+		);
+
+		$mime_types = webp_uploads_get_mime_types_by_filesize( array( 'image/jpeg', 'image/webp' ), $attachment_id, 'the_content' );
+
+		$this->assertIsArray( $mime_types );
+		$this->assertSame( 'image/jpeg', $mime_types[0] );
+		$this->assertSame( 'image/webp', $mime_types[1] );
+	}
+
+	/**
+	 * Test webp_uploads_get_mime_types_by_filesize removes invalid mime types with zero filesize.
+	 *
+	 * @test
+	 */
+	public function it_should_remove_mime_types_with_zero_filesize() {
+		// File should generate smallest jpeg image size.
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
+
+		// Mock attachment meta data to test mime type with zero filesize.
+		add_filter(
+			'wp_get_attachment_metadata',
+			function( $data, $attachment_id ) {
+				$data['sources'] = array(
+					'image/jpeg' => array(
+						'file'     => 'paint.jpeg',
+						'filesize' => 1000,
+					),
+					'image/webp' => array(
+						'file'     => 'paint.webp',
+						'filesize' => 2000,
+					),
+					'image/invalid' => array(
+						'file'     => 'paint.avif',
+						'filesize' => 0,
+					),
+				);
+			},
+			10,
+			2
+		);
+
+		$mime_types = webp_uploads_get_mime_types_by_filesize( array( 'image/jpeg', 'image/webp' ), $attachment_id, 'the_content' );
+
+		$this->assertIsArray( $mime_types );
+		$this->assertNotContains( 'image/invalid', $mime_types );
+		$this->assertSame( 'image/jpeg', $mime_types[0] );
+		$this->assertSame( 'image/webp', $mime_types[1] );
+	}
 }
