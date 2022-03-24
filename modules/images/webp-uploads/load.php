@@ -727,7 +727,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowe
  * @return bool|null
  */
 function webp_uploads_update_image_onchange( $override, $file, $image, $mime_type, $post_id ) {
-	if ( $override !== null ) {
+	if ( null !== $override ) {
 		return $override;
 	}
 
