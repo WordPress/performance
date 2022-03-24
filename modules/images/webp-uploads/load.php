@@ -703,17 +703,13 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 		return $override;
 	}
 
-	$valid_mime_transforms      = webp_uploads_get_upload_image_mime_transforms();
-	$original_directory         = pathinfo( $file, PATHINFO_DIRNAME );
-	$filename                   = pathinfo( $file, PATHINFO_FILENAME );
-	$sizes                      = get_intermediate_image_sizes();
-	$_wp_additional_image_sizes = wp_get_additional_image_sizes();
-	$target                     = ! empty( $_REQUEST['target'] ) ? preg_replace( '/[^a-z0-9_-]+/i', '', $_REQUEST['target'] ) : '';
-	$nocrop                     = false;
-	$current_mime_type          = get_post_mime_type( $post_id );
-	$allowed_mimes              = array_flip( wp_get_mime_types() );
+	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms()[ $mime_type ];
+	$original_directory    = pathinfo( $file, PATHINFO_DIRNAME );
+	$filename              = pathinfo( $file, PATHINFO_FILENAME );
+	$sizes                 = wp_get_registered_image_subsizes();
+	$allowed_mimes         = array_flip( wp_get_mime_types() );
 
-	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
+	foreach ( $valid_mime_transforms as $targeted_mime ) {
 		if ( $targeted_mime === $mime_type ) {
 			continue;
 		}
@@ -737,33 +733,10 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 			return $new_image;
 		}
 
-		if ( 'thumbnail' === $target ) {
-			$nocrop = true;
-		}
-
-		if ( ! isset( $sizes ) ) {
-		  continue;
-		}
-
 		$_sizes = array();
 
-		foreach ( $sizes as $size ) {
-
-			if ( isset( $_wp_additional_image_sizes[ $size ] ) ) {
-				$width  = (int) $_wp_additional_image_sizes[ $size ]['width'];
-				$height = (int) $_wp_additional_image_sizes[ $size ]['height'];
-				$crop   = ( $nocrop ) ? false : $_wp_additional_image_sizes[ $size ]['crop'];
-			} else {
-				$height = (int) get_option( "{$size}_size_h" );
-				$width  = (int) get_option( "{$size}_size_w" );
-				$crop   = ( $nocrop ) ? false : get_option( "{$size}_crop" );
-			}
-
-			$_sizes[ $size ] = array(
-				'width'  => $width,
-				'height' => $height,
-				'crop'   => $crop,
-			);
+		foreach ( $sizes as $size => $size_details ) {
+			$_sizes[ $size ] = $size_details;
 		}
 
 		$new_image->multi_resize( $_sizes );
