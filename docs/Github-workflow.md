@@ -1,4 +1,4 @@
-[Back to overview](https://github.com/WordPress/performance/blob/trunk/docs/README.md)
+[Back to overview](./README.md)
 
 # GitHub workflow for the Performance Lab plugin
 
