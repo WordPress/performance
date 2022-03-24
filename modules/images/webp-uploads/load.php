@@ -614,14 +614,21 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	// Replace the full size image if present.
 	if ( isset( $metadata['sources'][ $target_mime ]['file'] ) ) {
 		$basename = wp_basename( $metadata['file'] );
-		$image    = str_replace( $basename, $metadata['sources'][ $target_mime ]['file'], $image );
+		if ( $basename !== $metadata['sources'][ $target_mime ]['file'] ) {
+			$image = str_replace(
+				$basename,
+				$metadata['sources'][ $target_mime ]['file'],
+				$image
+			);
+		}
 	}
 
 	// Replace sub sizes for the image if present.
 	foreach ( $metadata['sizes'] as $name => $size_data ) {
 		if (
 			! empty( $size_data['file'] ) &&
-			! empty( $size_data['sources'][ $target_mime ]['file'] )
+			! empty( $size_data['sources'][ $target_mime ]['file'] ) &&
+			$size_data['file'] !== $size_data['sources'][ $target_mime ]['file']
 		) {
 			$image = str_replace(
 				$size_data['file'],
