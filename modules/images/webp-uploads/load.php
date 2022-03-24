@@ -712,7 +712,6 @@ add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $size          The attachment size.
- *
  * @return array The attachment sources array.
  */
 function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail' ) {
@@ -741,11 +740,9 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
  *
  * @param array  $mime_types    The list of mime types that can be used to update images in the content.
  * @param int    $attachment_id The attachment ID.
- * @param string $context       The current context.
- *
  * @return array Array of available mime types ordered by filesize.
  */
-function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id, $context ) {
+function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id ) {
 	$sources = webp_uploads_get_attachment_sources( $attachment_id, 'full' );
 
 	if ( empty( $sources ) ) {
@@ -771,4 +768,4 @@ function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id, $
 	// Create an array of available mime types ordered by smallest filesize.
 	return array_keys( $sources );
 }
-add_filter( 'webp_uploads_content_image_mimes', 'webp_uploads_get_mime_types_by_filesize', 10, 3 );
+add_filter( 'webp_uploads_content_image_mimes', 'webp_uploads_get_mime_types_by_filesize', 10, 2 );
