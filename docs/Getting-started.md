@@ -63,4 +63,10 @@ npm run test-php-multisite
 ```
 
 ## Other ways to contribute
-Not a developer? You can still help! We’re always looking for people to assist with support on our WordPress.org support forum. Please reach out in the #performance Slack channel for more details.
+Not a developer? You can still help! 
+
+### Support
+We’re always looking for people to assist with support on our [WordPress.org support forum](https://wordpress.org/support/plugin/performance-lab/). Please reach out in the #performance Slack channel for more details.
+
+### Translations
+Speak another language? Help out by [translating the Performance Lab plugin](https://translate.wordpress.org/projects/wp-plugins/performance-lab/).
