@@ -1,4 +1,6 @@
 {
+  "license": "GPL-2.0-or-later",
+  "repository": "git+https://github.com/WordPress/performance.git",
   "devDependencies": {
     "@octokit/rest": "16.26.0",
     "@wordpress/env": "^4.2.2",
