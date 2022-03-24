@@ -304,19 +304,6 @@ function webp_uploads_get_upload_image_mime_transforms() {
  * @return array|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
  */
 function webp_uploads_generate_additional_image_source( $attachment_id, array $size_data, $mime, $destination_file_name = null ) {
-	$image_path = wp_get_original_image_path( $attachment_id );
-
-	// File does not exist.
-	if ( ! file_exists( $image_path ) ) {
-		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'performance-lab' ) );
-	}
-
-	$editor = wp_get_image_editor( $image_path );
-
-	if ( is_wp_error( $editor ) ) {
-		return $editor;
-	}
-
 	$allowed_mimes = array_flip( wp_get_mime_types() );
 	if ( ! isset( $allowed_mimes[ $mime ] ) || ! is_string( $allowed_mimes[ $mime ] ) ) {
 		return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'performance-lab' ) );
@@ -324,6 +311,19 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 
 	if ( ! wp_image_editor_supports( array( 'mime_type' => $mime ) ) ) {
 		return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'performance-lab' ) );
+	}
+
+	$image_path = wp_get_original_image_path( $attachment_id );
+
+	// File does not exist.
+	if ( ! file_exists( $image_path ) ) {
+		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'performance-lab' ) );
+	}
+
+	$editor = wp_get_image_editor( $image_path, array( 'mime_type' => $mime ) );
+
+	if ( is_wp_error( $editor ) ) {
+		return $editor;
 	}
 
 	$height = isset( $size_data['height'] ) ? (int) $size_data['height'] : 0;
