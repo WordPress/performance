@@ -49,7 +49,7 @@ Reviewers will be auto-assigned based upon the issue’s assigned Project. Note 
 
 While the Performance team’s focus is on the work in the GitHub repo, the community is welcome to consult with the team on performance-related Trac issues. There may also be issues in Trac that are duplicates of planned work in the GitHub repo, or warrant further discussion for inclusion in the plugin.
 
-Initial discussion on performance-related Trac issues should take place in the Trac issue. When an issue is ready to begin development:
+Initial discussion on performance-related Trac tickets should take place in the Trac ticket. When an issue is ready to begin development:
 
 In GitHub:
 - If it is a smaller issue or patch, no need to add to GitHub; manage in Trac
