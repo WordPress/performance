@@ -686,7 +686,7 @@ add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10
 
 /**
  *
- * Updates webp image when original image is edited
+ * Creates additional image formats when original image is edited.
  *
  * @since n.e.x.t
  *
