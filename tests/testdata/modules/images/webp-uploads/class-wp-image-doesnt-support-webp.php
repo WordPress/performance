@@ -21,17 +21,4 @@ class WP_Image_Doesnt_Support_WebP extends WP_Image_Editor_Imagick {
 	public static function supports_mime_type( $mime_type ) {
 		return 'image/webp' !== $mime_type;
 	}
-
-	/**
-	 * Set support true.
-	 *
-	 * @return bool
-	 */
-	public static function test( $args = array() ) {
-		return true;
-	}
-
-	public function load() {
-		// TODO: Implement load() method.
-	}
 }
