@@ -13,7 +13,7 @@ When [opening a new issue](https://github.com/WordPress/performance/issues/new/c
 
 In addition, the new issue should be assigned to an appropriate Project. By default, new issues will automatically be added to the Backlog column within its project. This is intended for tracking any future work that is not currently a high priority as defined by the project’s point(s) of contact (POCs). Contributors are welcome to work on issues in the Backlog, but response rates may be slower than they are on prioritized issues.
 
-## Working on an issue
+### Working on an issue
 If you’re interested in working on an issue, it's helpful to  notify the POC for the issue’s focus area by tagging them on the issue and/or notifying them in the [weekly performance chat](https://make.wordpress.org/core/tag/performance/) so that everyone is aware that someone is working on it and effort is not duplicated. For an updated list of POCs, please [see the `CODEOWNERS` file](https://github.com/WordPress/performance/blob/trunk/.github/CODEOWNERS).
 
 When you’re ready to begin work on an issue:
@@ -23,16 +23,16 @@ When you’re ready to begin work on an issue:
 
 In addition, there are several **Needs** labels that can be used to clarify next steps on an issue.
 
-### Needs Discussion
+#### Needs Discussion
 Many issues require discussion and definition before development begins. For example, multiple approaches may be considered and the community should discuss them before a contributor proceeds with development. For those issues, add the **Needs Discussion** label and raise the issue in the weekly performance chat.
 
-### Needs Decision
+#### Needs Decision
 After discussion, a formal vote may be needed to determine how to proceed. If that’s the case, please tag @WordPress/perfromance-admins in the issue for assistance with setting up a vote via GitHub comment. [An example vote can be found here](https://github.com/WordPress/performance/issues/92#issuecomment-1068215411).
 
-### Needs Dev
+#### Needs Dev
 If an issue requires (more) development and you are unable to complete it yourself, remove yourself as the assignee and add a **Needs Dev** label.
 
-### Needs Testing
+#### Needs Testing
 If you have completed initial engineering and want community members to test prior to merge, add the Needs Testing label.
 
 ## Pull requests
