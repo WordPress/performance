@@ -753,9 +753,7 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
 		$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
 
-		$image->save( $destination, $targeted_mime );
-
-		if ( is_wp_error( $image ) ) {
+		if ( is_wp_error( $image->save( $destination, $targeted_mime ) ) ) {
 			return $override;
 		}
 
