@@ -23,6 +23,7 @@ function perflab_afpc_get_page_cache_headers() {
 
 	return array(
 		'cache-control'          => static function ( $header_value ) {
+			$header_value = ( is_array( $header_value ) ) ? implode( ',', $header_value ) : $header_value;
 			return (bool) preg_match( '/max-age=[1-9]/', $header_value );
 		},
 		'expires'                => static function ( $header_value ) {
@@ -150,7 +151,6 @@ function perflab_afpc_check_for_page_caching() {
  */
 function perflab_afpc_get_page_cache_detail() {
 	$page_cache_detail = perflab_afpc_check_for_page_caching();
-	error_log( print_r( $page_cache_detail, true ) );
 	if ( is_wp_error( $page_cache_detail ) ) {
 		return $page_cache_detail;
 	}

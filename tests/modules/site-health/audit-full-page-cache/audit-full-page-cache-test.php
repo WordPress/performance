@@ -31,28 +31,17 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests perflab_afpc_page_cache_test() when unable to detect the presence of page caching.
-	 * perflab_afpc_get_page_cache_detail() will throw a WP_Error.
+	 * Tests all possible scenarios given by dataProvider.
 	 *
-	 * @covers ::perflab_afpc_get_page_cache_detail()
-	 * @covers ::perflab_afpc_page_cache_unable_detect_cache_test()
-	 *
-	 * @dataProvider provider_perflab_afpc_page_cache_test_cache_not_detected
-	 *
-	public function test_perflab_afpc_page_cache_test_unable_detect_cache( $response ) {
-		$return = perflab_afpc_page_cache_test();
-		// Check for proper error.
-		$this->assertContains( 'Unable to detect page caching', $return['description'] );
-		// Unset description, since it contains error details ( depending on environment ), for test simplicity.
-		unset( $return['description'] );
-		$this->assertEqualSets( $response, $return );
-	}**/
-
-	/**
 	 * @dataProvider provider_perflab_afpc_page_cache_test
+	 * @covers ::perflab_afpc_page_cache_test()
+	 * @covers ::perflab_afpc_get_page_cache_detail()
+	 * @covers ::perflab_afpc_page_cache_detected_test()
+	 * @covers ::perflab_afpc_get_page_cache_detail()
+	 * @covers ::perflab_afpc_get_page_cache_headers()
+	 * @covers ::perflab_afpc_check_for_page_caching()
 	 */
 	public function test_perflab_afpc_page_cache_test( $responses, $expected_status, $expected_label, $good_basic_auth = null, $delay_the_response = false ) {
-		// var_dump($responses, $expected_status, $expected_label, $good_basic_auth, $delay_the_response);die;
 		$badge_color = array(
 			'critical'    => 'red',
 			'recommended' => 'orange',
@@ -126,10 +115,7 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 			2
 		);
 
-		// var_dump($responses, $expected_status, $expected_label, $good_basic_auth, $delay_the_response);
 		$actual = perflab_afpc_page_cache_test();
-		// var_dump($actual);die;
-
 		$this->assertArrayHasKey( 'description', $actual );
 		$this->assertArrayHasKey( 'actions', $actual );
 		if ( $is_unauthorized ) {
@@ -137,8 +123,6 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 		} else {
 			$this->assertStringNotContainsString( 'Unauthorized', $actual['description'] );
 		}
-
-		// var_dump($expected_props, wp_array_slice_assoc( $actual, array_keys( $expected_props ) ));die;
 
 		$this->assertEquals(
 			$expected_props,
@@ -175,32 +159,7 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Gets response data for test_perflab_afpc_page_cache_test_unable_detect_cache().
-	 *
-	 * @return array[][] Test data.
-	 */
-	public function provider_perflab_afpc_page_cache_test_cache_not_detected() {
-		$result = array(
-			'badge'   => array(
-				'label' => esc_html__( 'Performance', 'performance-lab' ),
-				'color' => 'red',
-			),
-			'test'    => 'perflab_page_cache',
-			'status'  => 'critical',
-			'label'   => esc_html__( 'Unable to detect the presence of page caching', 'performance-lab' ),
-			'actions' => sprintf(
-				'<p><a href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
-				esc_url( 'https://wordpress.org/support/article/optimization/#Caching' ),
-				esc_html__( 'Learn more about page caching', 'performance-lab' ),
-				/* translators: The accessibility text. */
-				esc_html__( '(opens in a new tab)', 'performance-lab' )
-			),
-		);
-
-		return array( array( $result ) );
-	}
-
-	/**
+	 * Gets response data for test_perflab_afpc_page_cache_test().
 	 *
 	 * @return array[]
 	 */
@@ -231,11 +190,11 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 				'expected_status' => 'recommended',
 				'expected_label'  => $recommended_label,
 			),
-			/**'no-cache-arrays'                          => [
-				'responses'       => array_fill( 0, 3, [ 'cache-control' => [ 'no-cache', 'no-store' ] ] ),
+			'no-cache-arrays'                          => array(
+				'responses'       => array_fill( 0, 3, array( 'cache-control' => array( 'no-cache', 'no-store' ) ) ),
 				'expected_status' => 'recommended',
 				'expected_label'  => $recommended_label,
-			],*/
+			),
 			'no-cache-with-delayed-response'           => array(
 				'responses'          => array_fill( 0, 3, array( 'cache-control' => 'no-cache' ) ),
 				'expected_status'    => 'critical',
@@ -389,9 +348,5 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 			),
 		);
 	}
-
-
-
-
 }
 
