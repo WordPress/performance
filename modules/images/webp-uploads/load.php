@@ -743,11 +743,11 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 		}
 
 		if ( ! isset( $allowed_mimes[ $targeted_mime ] ) || ! is_string( $allowed_mimes[ $targeted_mime ] ) ) {
-			return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'performance-lab' ) );
+			return $override;
 		}
 
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $targeted_mime ) ) ) {
-			return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'performance-lab' ) );
+			return $override;
 		}
 
 		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
@@ -755,10 +755,8 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 
 		$image->save( $destination, $targeted_mime );
 
-		$new_image = wp_get_image_editor( $destination );
-
-		if ( is_wp_error( $new_image ) ) {
-			return $new_image;
+		if ( is_wp_error( $image ) ) {
+			return $override;
 		}
 
 		$_sizes = array();
@@ -767,7 +765,7 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 			$_sizes[ $size ] = $size_details;
 		}
 
-		$new_image->multi_resize( $_sizes );
+		$image->multi_resize( $_sizes );
 	}
 	add_filter(
 		'wp_update_attachment_metadata',
