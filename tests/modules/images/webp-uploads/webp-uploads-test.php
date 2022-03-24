@@ -821,8 +821,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$mime_types = webp_uploads_get_mime_types_by_filesize( array( 'image/jpeg', 'image/webp' ), $attachment_id, 'the_content' );
 
 		$this->assertIsArray( $mime_types );
-		$this->assertSame( 'image/webp', $mime_types[0] );
-		$this->assertSame( 'image/jpeg', $mime_types[1] );
+		$this->assertSame( array( 'image/webp', 'image/jpeg' ), $mime_types );
 	}
 
 	/**
@@ -848,6 +847,8 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 						'filesize' => 2000,
 					),
 				);
+
+				return $data;
 			},
 			10,
 			2
@@ -856,8 +857,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$mime_types = webp_uploads_get_mime_types_by_filesize( array( 'image/jpeg', 'image/webp' ), $attachment_id, 'the_content' );
 
 		$this->assertIsArray( $mime_types );
-		$this->assertSame( 'image/jpeg', $mime_types[0] );
-		$this->assertSame( 'image/webp', $mime_types[1] );
+		$this->assertSame( array( 'image/jpeg', 'image/webp' ), $mime_types );
 	}
 
 	/**
@@ -887,6 +887,8 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 						'filesize' => 0,
 					),
 				);
+
+				return $data;
 			},
 			10,
 			2
@@ -896,7 +898,6 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		$this->assertIsArray( $mime_types );
 		$this->assertNotContains( 'image/invalid', $mime_types );
-		$this->assertSame( 'image/jpeg', $mime_types[0] );
-		$this->assertSame( 'image/webp', $mime_types[1] );
+		$this->assertSame( array( 'image/jpeg', 'image/webp' ), $mime_types );
 	}
 }
