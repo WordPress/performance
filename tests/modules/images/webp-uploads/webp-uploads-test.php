@@ -200,7 +200,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		add_filter( 'wp_image_editors', '__return_empty_array' );
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
 		$this->assertTrue( is_wp_error( $result ) );
-		$this->assertSame( 'image_no_editor', $result->get_error_code() );
+		$this->assertSame( 'image_mime_type_not_supported', $result->get_error_code() );
 	}
 
 	/**
@@ -774,7 +774,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 			$this->assertStringContainsString( $size['width'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString( $size['height'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString(
-			// Remove the extension from the file.
+				// Remove the extension from the file.
 				substr( $size['sources']['image/webp']['file'], 0, -4 ),
 				$size['sources']['image/jpeg']['file']
 			);
@@ -791,7 +791,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
-			function ( $transforms ) {
+			function( $transforms ) {
 				// Unset "image/jpeg" mime type for jpeg images.
 				unset( $transforms['image/jpeg'][ array_search( 'image/jpeg', $transforms['image/jpeg'], true ) ] );
 
@@ -975,5 +975,33 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 			}
 			$this->assertArrayHasKey( 'sources', $properties, "The '{$size_name}' does not have the sources." );
 		}
+	}
+
+	/**
+	 * Allow the upload of a WebP image if at least one editor supports the format
+	 *
+	 * @test
+	 */
+	public function it_should_allow_the_upload_of_a_web_p_image_if_at_least_one_editor_supports_the_format() {
+		add_filter(
+			'wp_image_editors',
+			function () {
+				return array( 'WP_Image_Doesnt_Support_WebP', 'WP_Image_Editor_GD' );
+			}
+		);
+
+		$this->assertTrue( wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertArrayHasKey( 'sources', $metadata );
+		$this->assertIsArray( $metadata['sources'] );
+
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
 	}
 }
