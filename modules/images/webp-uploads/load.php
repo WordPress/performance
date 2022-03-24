@@ -714,7 +714,7 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 	$allowed_mimes              = array_flip( wp_get_mime_types() );
 
 	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
-		if ( $targeted_mime === $current_mime_type ) {
+		if ( $targeted_mime === $mime_type ) {
 			continue;
 		}
 
