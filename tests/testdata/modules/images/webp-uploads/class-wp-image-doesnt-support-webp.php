@@ -11,7 +11,7 @@
  *
  * @since 1.0.0
  */
-class WP_Image_Doesnt_Support_WebP {
+class WP_Image_Doesnt_Support_WebP extends WP_Image_Editor_Imagick {
 	/**
 	 * Checks to see if editor supports the mime-type specified.
 	 *
