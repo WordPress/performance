@@ -9,10 +9,10 @@ use WP_UnitTestCase;
 /**
  * A test case for image attachments.
  *
- * @method void assertImageHasSource( $attachment_id, $mime_type, $message ) Asserts that the image has the appropriate source.
- * @method void assertImageHasSizeSource( $attachment_id, $size, $mime_type, $message ) Asserts that the image has the appropriate source for the subsize.
- * @method void assertImageNotHasSource( $attachment_id, $mime_type, $message ) Asserts that the image doesn't have the appropriate source.
- * @method void assertImageNotHasSizeSource( $attachment_id, $size, $mime_type, $message ) Asserts that the image doesn't have the appropriate source for the subsize.
+ * @method void assertImageHasSource( int $attachment_id, string $mime_type, string $message = '' ) Asserts that the image has the appropriate source.
+ * @method void assertImageHasSizeSource( int $attachment_id, string $size_name, string $mime_type, string $message = '' ) Asserts that the image has the appropriate source for the subsize.
+ * @method void assertImageNotHasSource( int $attachment_id, string $mime_type, string $message ) Asserts that the image doesn't have the appropriate source.
+ * @method void assertImageNotHasSizeSource( int $attachment_id, string $size_name, string $mime_type, string $message = '' ) Asserts that the image doesn't have the appropriate source for the subsize.
  */
 abstract class ImagesTestCase extends WP_UnitTestCase {
 
