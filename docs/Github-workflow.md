@@ -17,7 +17,7 @@ In addition, the new issue should be assigned to an appropriate Project. By defa
 If you’re interested in working on an issue, it's helpful to  notify the POC for the issue’s focus area by tagging them on the issue and/or notifying them in the [weekly performance chat](https://make.wordpress.org/core/tag/performance/) so that everyone is aware that someone is working on it and effort is not duplicated. For an updated list of POCs, please [see the `CODEOWNERS` file](https://github.com/WordPress/performance/blob/trunk/.github/CODEOWNERS).
 
 When you’re ready to begin work on an issue:
-- Assign it to yourself – Depending on your permissions levels, you may not be able to self-assign an issue. Please tag @bethanylang on an issue if you need assistance with permissions. Please only assign an issue if you plan to work on it within a reasonable time frame, i.e. within the next 2 weeks. 
+- Assign it to yourself – Depending on your permissions levels, you may not be able to self-assign an issue. Please tag @WordPress/performance-admins on an issue if you need assistance with permissions. Please only assign an issue if you plan to work on it within a reasonable time frame, i.e. within the next 2 weeks. 
 - Change the Project column to **In Progress**
 - Remove the **Needs Dev** label, if applicable
 
