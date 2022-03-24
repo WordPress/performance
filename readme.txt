@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 5.8
 Tested up to:      5.9
 Requires PHP:      5.6
-Stable tag:        1.0.0-beta.2
+Stable tag:        1.0.0-beta.3
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -65,6 +65,12 @@ Contributions welcome! There are several ways to contribute:
 * Join the weekly chat (Tuesdays at 16:00 UTC) in the [#performance channel on Slack](https://wordpress.slack.com/archives/performance)
 
 == Changelog ==
+
+= 1.0.0-beta.3 =
+
+**Bug Fixes**
+
+* Infrastructure: Ensure default modules are loaded regardless of setting registration. ([248](https://github.com/WordPress/performance/pull/248))
 
 = 1.0.0-beta.2 =
 
