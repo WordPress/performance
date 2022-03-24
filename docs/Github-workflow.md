@@ -27,7 +27,7 @@ In addition, there are several **Needs** labels that can be used to clarify next
 Many issues require discussion and definition before development begins. For example, multiple approaches may be considered and the community should discuss them before a contributor proceeds with development. For those issues, add the **Needs Discussion** label and raise the issue in the weekly performance chat.
 
 #### Needs Decision
-After discussion, a formal vote may be needed to determine how to proceed. If that’s the case, please tag @WordPress/perfromance-admins in the issue for assistance with setting up a vote via GitHub comment. [An example vote can be found here](https://github.com/WordPress/performance/issues/92#issuecomment-1068215411).
+After discussion, a formal vote may be needed to determine how to proceed. If that’s the case, please tag @WordPress/performance-admins in the issue for assistance with setting up a vote via GitHub comment. [An example vote can be found here](https://github.com/WordPress/performance/issues/92#issuecomment-1068215411).
 
 #### Needs Dev
 If an issue requires (more) development and you are unable to complete it yourself, remove yourself as the assignee and add a **Needs Dev** label.
