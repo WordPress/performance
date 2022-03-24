@@ -685,6 +685,34 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 3 );
 
 /**
+ * Adds sources to metadata for an attachment.
+ *
+ * @param array  $metadata              Metadata of the attachment.
+ * @param array  $valid_mime_transforms List of valid mime transforms for current image mime type.
+ * @param array  $allowed_mimes         Allowed mime types.
+ * @param string $file                  Path to original file.
+ * @return array                        Metadata with sources added.
+ */
+function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowed_mimes, $file ) {
+	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
+
+	foreach ( $metadata['sizes'] as $size => $size_details ) {
+		foreach ( $valid_mime_transforms as $targeted_mime ) {
+			$extension            = explode( '|', $allowed_mimes[ $targeted_mime ] );
+			$filename_without_ext = implode( explode( '.', $size_details['file'], -1 ) );
+			$newfile              = trailingslashit( $original_directory ) . $filename_without_ext . ".{$extension[0]}";
+
+			$metadata['sizes'][ $size ]['sources'][ $targeted_mime ] = array(
+				'file'     => $newfile,
+				'filesize' => filesize( $newfile ),
+			);
+		}
+	}
+
+	return $metadata;
+}
+
+/**
  *
  * Creates additional image formats when original image is edited.
  *
@@ -741,5 +769,17 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 
 		$new_image->multi_resize( $_sizes );
 	}
+	add_filter(
+		'wp_update_attachment_metadata',
+		function ( $metadata, $post_meta_id ) use ( $post_id, $valid_mime_transforms, $allowed_mimes, $file ) {
+			if ( $post_meta_id !== $post_id ) {
+				return $metadata;
+			}
+
+			return webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowed_mimes, $file );
+		},
+		10,
+		2
+	);
 }
 add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 10, 5 );
