@@ -1,7 +1,7 @@
 The Performance team uses GitHub to manage all code and related discussions for the Performance Lab plugin. Please follow the workflow below to ensure that all issues are properly tracked.
 
 ## Opening an issue
-When opening a new issue, use the appropriate template: Bug report, Feature request, or Report a security vulnerability. All new issues should include the following labels:
+When [opening a new issue](https://github.com/WordPress/performance/issues/new/choose), use the appropriate template: Bug report, Feature request, or Report a security vulnerability. All new issues should include the following labels:
 
 - A [Focus] label, or Infrastructure if the issue relates to the plugin infrastructure. The [Focus] labels are aligned with the Performance team's [focus areas](https://docs.google.com/spreadsheets/d/16N5oZ9wE6AkiqMz7b_707eh24vvpjMwsEG67XFAbxy8/edit#gid=0) and [GitHub Projects](https://github.com/WordPress/performance/projects).
 - A [Type] label
