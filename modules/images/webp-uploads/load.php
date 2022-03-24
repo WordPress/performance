@@ -611,45 +611,23 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		return $image;
 	}
 
-	$basename = wp_basename( $metadata['file'] );
-	$urls     = $matches[0];
-	foreach ( $urls as $url ) {
-		$src_filename = wp_basename( $url );
+	// Replace the full size image if present.
+	if ( isset( $metadata['sources'][ $target_mime ]['file'] ) ) {
+		$basename = wp_basename( $metadata['file'] );
+		$image    = str_replace( $basename, $metadata['sources'][ $target_mime ]['file'], $image );
+	}
 
-		// Replace the full size image if present.
-		if ( isset( $metadata['sources'][ $target_mime ]['file'] ) && strpos( $url, $basename ) !== false ) {
-			$image = str_replace( $src_filename, $metadata['sources'][ $target_mime ]['file'], $image );
-			continue;
-		}
-
-		if ( empty( $metadata['sizes'] ) ) {
-			continue;
-		}
-
-		$extension = wp_check_filetype( $src_filename );
-		// Extension was not set properly no action possible or extension is already in the expected mime.
-		if ( empty( $extension['type'] ) || $extension['type'] === $target_mime ) {
-			continue;
-		}
-
-		// Find the appropriate size for the provided URL.
-		foreach ( $metadata['sizes'] as $name => $size_data ) {
-			// Not the size we are looking for.
-			if ( empty( $size_data['file'] ) || $src_filename !== $size_data['file'] ) {
-				continue;
-			}
-
-			if ( empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
-				continue;
-			}
-
-			// This is the same as the file we want to replace nothing to do here.
-			if ( $size_data['sources'][ $target_mime ]['file'] === $src_filename ) {
-				continue;
-			}
-
-			$image = str_replace( $src_filename, $size_data['sources'][ $target_mime ]['file'], $image );
-			break;
+	// Replace sub sizes for the image if present.
+	foreach ( $metadata['sizes'] as $name => $size_data ) {
+		if (
+			! empty( $size_data['file'] ) &&
+			! empty( $size_data['sources'][ $target_mime ]['file'] )
+		) {
+			$image = str_replace(
+				$size_data['file'],
+				$size_data['sources'][ $target_mime ]['file'],
+				$image
+			);
 		}
 	}
 
