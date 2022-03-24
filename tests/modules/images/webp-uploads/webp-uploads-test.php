@@ -3,7 +3,7 @@
  * Tests for webp-uploads module.
  *
  * @package performance-lab
- * @group   webp-uploads
+ * @group   performance-lab
  */
 
 class WebP_Uploads_Tests extends WP_UnitTestCase {

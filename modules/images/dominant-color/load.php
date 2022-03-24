@@ -11,35 +11,40 @@
 /**
  * Add Dominant Color preload support to WordPress.
  *
- * TODO: Add tests
+ * @since 1.0.0
  */
 class wp_Dominant_Color {
 
 
+	/**
+	 * Class constructor.
+	 */
 	public function __construct() {
 
-		add_filter( 'wp_print_scripts', [ $this, 'add_styles' ] );
+		add_filter( 'wp_print_scripts', array( $this, 'add_styles' ) );
 
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'dominant_color_metadata' ], 10, 2 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'has_transparency_metadata' ], 10, 2 );
+		add_filter( 'wp_generate_attachment_metadata', array( $this, 'dominant_color_metadata' ), 10, 2 );
+		add_filter( 'wp_generate_attachment_metadata', array( $this, 'has_transparency_metadata' ), 10, 2 );
 
 		// do we have the new filter or are duplicating core the functions?
 		if ( has_filter( 'wp_img_tag_add_adjust' ) ) {
-			add_filter( 'wp_img_tag_add_adjust', [ $this, 'tag_add_adjust' ], 20, 3 );
+			add_filter( 'wp_img_tag_add_adjust', array( $this, 'tag_add_adjust' ), 20, 3 );
 		} else {
-			add_filter( 'the_content', [ $this, 'filter_content_tags' ], 20 );
-			add_filter( 'wp_dominant_color_img_tag_add_adjust', [ $this, 'tag_add_adjust' ], 10, 3 );
+			add_filter( 'the_content', array( $this, 'filter_content_tags' ), 20 );
+			add_filter( 'the_excerpt', array( $this, 'filter_content_tags' ), 20 );
+			add_filter( 'widget_text_content ', array( $this, 'filter_content_tags' ), 20 );
+			add_filter( 'widget_block_content', array( $this, 'filter_content_tags' ), 20 );
+			add_filter( 'wp_dominant_color_img_tag_add_adjust', array( $this, 'tag_add_adjust' ), 10, 3 );
 		}
 
-		add_filter( 'attachment_fields_to_edit', [ $this, 'add_dominant_color_media_setting' ], 10, 2 );
-		add_filter( 'attachment_fields_to_save', [ $this, 'save_dominant_color_media_setting' ], 10, 2 );
+		add_filter( 'wp_get_attachment_image_attributes', array( $this, 'tag_add_adjust_to_image_attributes' ), 10, 2 );
 	}
 
 	/**
 	 * Add the dominant color metadata to the attachment.
 	 *
 	 * @param array $metadata
-	 * @param int $attachment_id
+	 * @param int   $attachment_id
 	 *
 	 * @return array $metadata
 	 */
@@ -58,7 +63,7 @@ class wp_Dominant_Color {
 	 * Add the dominant color metadata to the attachment.
 	 *
 	 * @param array $metadata
-	 * @param int $attachment_id
+	 * @param int   $attachment_id
 	 *
 	 * @return array $metadata
 	 */
@@ -74,6 +79,53 @@ class wp_Dominant_Color {
 	}
 
 	/**
+	 * filter various image attributes to add the dominant color to the image
+	 *
+	 * @param $attr
+	 * @param $attachment
+	 *
+	 * @return mixed
+	 */
+	public function tag_add_adjust_to_image_attributes( $attr, $attachment ) {
+
+		$image_meta = wp_get_attachment_metadata( $attachment->ID );
+
+		$has_transparency = false;
+		if ( isset( $image_meta['has_transparency'] ) ) {
+			$has_transparency = $image_meta['has_transparency'];
+		}
+
+		$extra_class = '';
+		if ( ! isset( $attr['style'] ) ) {
+			$attr['style'] = ' --has-transparency: ' . $has_transparency . '; ';
+		} else {
+			$attr['style'] .= ' --has-transparency: ' . $has_transparency . '; ';
+			$extra_class    = ' has-transparency ';
+		}
+
+		if ( isset( $image_meta['dominant_color'] ) ) {
+			if ( ! isset( $attr['style'] ) ) {
+				$attr['style'] = '--dominant-color: #' . $image_meta['dominant_color'] . ';';
+			} else {
+				$attr['style'] .= '--dominant-color: #' . $image_meta['dominant_color'] . ';';
+			}
+			$attr['data-dominant-color'] = $image_meta['dominant_color'];
+
+			$extra_class .= ( $this->colorislight( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
+
+			if ( isset( $attr['class'] ) && ! array_intersect( explode( ' ', $attr['class'] ), explode( ' ', $extra_class ) ) ) {
+				$attr['class'] = $extra_class . ' ' . $attr['class'];
+			} else {
+				$attr['class'] = $extra_class;
+			}
+		}
+
+		return $attr;
+	}
+
+	/**
+	 * filter image tags in content to add the dominant color to the image.
+	 *
 	 * @param $filtered_image
 	 * @param $context
 	 * @param $attachment_id
@@ -94,15 +146,15 @@ class wp_Dominant_Color {
 			$extra_class = '';
 
 			if ( ! isset( $image_meta['has_transparency'] ) ) {
-				$data        .= ' data-has-transparency="false"';
+				$data .= ' data-has-transparency="false"';
 			} else {
-				$data .= ' data-has-transparency="true"';
+				$data       .= ' data-has-transparency="true"';
 				$extra_class = ' has-transparency ';
 			}
 
 			$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
 
-			$extra_class    .= ( $this->colorislight( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
+			$extra_class   .= ( $this->colorislight( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 			$filtered_image = str_replace( 'class="', 'class="' . $extra_class . ' ', $filtered_image );
 		}
 
@@ -111,6 +163,8 @@ class wp_Dominant_Color {
 
 
 	/**
+	 * Add Css needed for to show the dominant color as an image background.
+	 *
 	 * @return void
 	 */
 	public function add_styles() {
@@ -126,6 +180,8 @@ class wp_Dominant_Color {
 
 
 	/**
+	 * filter the content to allow us to filter the image tags
+	 *
 	 * @param $content
 	 * @param $context
 	 *
@@ -190,7 +246,6 @@ class wp_Dominant_Color {
 				 * @param int $attachment_id the ID of the image attachment.
 				 *
 				 * @since 1.0.0
-				 *
 				 */
 				$filtered_image = apply_filters( 'wp_dominant_color_img_tag_add_adjust', $filtered_image, $context, $attachment_id );
 
@@ -203,178 +258,140 @@ class wp_Dominant_Color {
 		return $content;
 	}
 
-	/**
-	 * Add checkbox setting to enable/disable dominant color for a given media.
-	 *
-	 * @param array $form_fields
-	 * @param WP_Post $post
-	 *
-	 * @return array
-	 */
-	public function add_dominant_color_media_setting( array $form_fields, WP_Post $post ) {
-		$image_meta     = wp_get_attachment_metadata( $post->ID );
-		$checked_text   = isset( $image_meta['show_dominant_color'] ) ? 'checked' : '';
-		$dominant_color = isset( $image_meta['dominant_color'] ) ? $image_meta['dominant_color'] : '';
-		$contrast_color = $this->getContrastYIQ( $dominant_color );
-		$html_input     = "<input type='checkbox' $checked_text value='1'
-			name='attachments[{$post->ID}][show_dominant_color]' id='attachments[{$post->ID}][show_dominant_color]'/>
-			<span style='background-color: #{$dominant_color}; color: {$contrast_color}; padding: 3px 6px; margin-top: 3px;vertical-align: middle;display: inline-block; '>#{$dominant_color}</span>";
+	public function set_wp_image_editors() {
 
-		$form_fields['show_dominant_color'] = array(
-			'label' => __( 'Show Dominant color as a preload placeholder', 'wp-dominant-color' ),
-			'input' => 'html',
-			'html'  => $html_input,
-		);
+		require_once 'WP_Image_Editor_GD_With_Color.php';
+		require_once 'WP_Image_Editor_Imagick_With_Color.php';
 
-		return $form_fields;
+		return array( 'WP_Image_Editor_GD_With_Color', 'WP_Image_Editor_Imagick_With_Color' );
 	}
 
 	/**
-	 * Save dominant color setting value for a media post.
+	 * Get dominant color of image
 	 *
-	 * @param array $post
-	 * @param array $attachment
-	 *
-	 * @return array
-	 */
-	public function save_dominant_color_media_setting( array $post, array $attachment ) {
-		$attachment_id = $post['ID'];
-		$image_meta    = wp_get_attachment_metadata( $attachment_id );
-
-		if ( isset( $attachment['show_dominant_color'] ) ) {
-			if ( ! isset( $image_meta['show_dominant_color'] ) ) {
-				// If enabling dominant color from media setting and image meta doesn't have any, generate a new one.
-				$image_meta                        = $this->dominant_color_metadata( $image_meta, $attachment_id );
-				$image_meta['show_dominant_color'] = $attachment['show_dominant_color'] ? '1' : '0';
-				wp_update_attachment_metadata( $attachment_id, $image_meta );
-			}
-		} elseif ( isset( $image_meta['dominant_color'] ) ) {
-			// If disabling dominant color from media setting and dominant color set in image meta, unset it.
-			unset( $image_meta['show_dominant_color'] );
-			wp_update_attachment_metadata( $attachment_id, $image_meta );
-		}
-
-		return $post;
-	}
-
-	/**
-	 * @param $id
-	 * @param $default_color
+	 * @param integer $id
+	 * @param string  $default_color
 	 *
 	 * @return string
 	 */
 	public function get_dominant_color( $id, $default_color = 'eee' ) {
-		$file         = get_attached_file( $id );
-		$image_editor = _wp_image_editor_choose( $file );
-		if ( $image_editor === 'WP_Image_Editor_GD' ) {
-			return $this->get_dominant_color_GD( $file, $default_color );
-		} elseif ( $image_editor === 'WP_Image_Editor_Imagick' ) {
-			return $this->get_dominant_color_Imagick( $file, $default_color );
-		}
 
-		return $default_color;
+		add_filter( 'wp_image_editors', array( $this, 'set_wp_image_editors' ) );
+
+		$file = get_attached_file( $id );
+
+		$dominant_color = wp_get_image_editor( $file )->get_dominant_color( $default_color );
+
+		remove_filter( 'wp_image_editors', array( $this, 'set_wp_image_editors' ) );
+
+		return $dominant_color;
+
 	}
 
+
 	/**
-	 * @param $file
-	 * @param $default_color
+	 * Works out if color has transparency
 	 *
-	 * @return string
-	 */
-	private function get_dominant_color_GD( $file, $default_color = 'eee' ) {
-
-		wp_raise_memory_limit( 'image' );
-		if ( $original_image = @imagecreatefromstring( @file_get_contents( $file ) ) ) {
-			$shortend_image = imagecreatetruecolor( 1, 1 );
-			imagecopyresampled( $shortend_image, $original_image, 0, 0, 0, 0, 1, 1, imagesx( $original_image ), imagesy( $original_image ) );
-
-			return dechex( imagecolorat( $shortend_image, 0, 0 ) );
-		} else {
-			return $default_color;
-		}
-	}
-
-	/**
-	 * @param $file
-	 * @param $default_color
-	 *
-	 * @return string
-	 */
-	private function get_dominant_color_Imagick( $file, $default_color = 'eee' ) {
-
-		wp_raise_memory_limit( 'image' );
-		try {
-			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-			if ( $original_image = new Imagick( $file ) ) {
-
-				$original_image->setImageColorspace( Imagick::COLORSPACE_RGB );
-				$original_image->setImageFormat( 'RGB' );
-				$original_image->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
-				$pixel = $original_image->getImagePixelColor( 0, 0 );
-				$color = $pixel->getColor();
-
-				return dechex( $color['r'] ) . dechex( $color['g'] ) . dechex( $color['b'] );
-			} else {
-				return $default_color;
-			}
-		} catch ( Exception $e ) {
-			return $default_color;
-		}
-	}
-
-	/**
-	 * @param $id
+	 * @param integer $id
 	 *
 	 * @return bool
 	 */
 	public function get_has_transparency( $id ) {
-		$file         = get_attached_file( $id );
-		$image_editor = _wp_image_editor_choose( $file );
-		if ( $image_editor === 'WP_Image_Editor_GD' ) {
-			return $this->get_has_transparency_GD( $file );
-		} elseif ( $image_editor === 'WP_Image_Editor_Imagick' ) {
-			return $this->get_has_transparency_Imagick( $file );
+
+		add_filter( 'wp_image_editors', array( $this, 'set_wp_image_editors' ) );
+
+		$file = get_attached_file( $id );
+		if ( wp_get_image_mime( $file ) === 'image/webp' ) {
+			$webpinfo = $this->webpinfo( $file );
+
+			return $webpinfo['Alpha'];
 		}
 
-		return false;
+		$has_transparency = wp_get_image_editor( $file )->get_has_transparency();
+
+		remove_filter( 'wp_image_editors', array( $this, 'set_wp_image_editors' ) );
+
+		return $has_transparency;
 	}
 
 	/**
-	 * @param $file
+	 * Get WebP file info.
 	 *
-	 * @return bool
+	 * @link https://www.php.net/manual/en/function.pack.php unpack format reference.
+	 * @link https://developers.google.com/speed/webp/docs/riff_container WebP document.
+	 *
+	 * @param string $file
+	 *
+	 * @return array|false Return associative array if success, return `false` for otherwise.
 	 */
-	function get_has_transparency_GD( $file ) {
-		wp_raise_memory_limit( 'image' );
-		if ( $original_image = @imagecreatefromstring( @file_get_contents( $file ) ) ) {
-			return imageistruecolor( $original_image ) ? imagecolortransparent( $original_image ) > 0 : imagecolorsforindex( $original_image, imagecolortransparent( $original_image ) )['alpha'] > 0;
+	private function webpinfo( $file ) {
+		if ( ! is_file( $file ) ) {
+			return false;
 		} else {
+			$file = realpath( $file );
+		}
+
+		$fp = fopen( $file, 'rb' );
+		if ( ! $fp ) {
 			return false;
 		}
 
-	}
+		$data = fread( $fp, 90 );
 
-	/**
-	 * @param $file
-	 *
-	 * @return bool
-	 * @throws ImagickException
-	 */
-	function get_has_transparency_Imagick( $file ) {
-		wp_raise_memory_limit( 'image' );
-		if ( $original_image = new Imagick( $file ) ) {
+		fclose( $fp );
+		unset( $fp );
 
-			try {
-				// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-				return (bool) @$original_image->getImageAlphaChannel() == Imagick::ALPHACHANNEL_TRANSPARENT;
-			} catch ( Exception $e ) {
-				return false;
+		$header_format = 'A4Riff/' . // get n string
+						 'I1Filesize/' . // get integer (file size but not actual size)
+						 'A4Webp/' . // get n string
+						 'A4Vp/' . // get n string
+						 'A74Chunk';
+		$header        = unpack( $header_format, $data );
+		unset( $data, $header_format );
+
+		if ( ! isset( $header['Riff'] ) || strtoupper( $header['Riff'] ) !== 'RIFF' ) {
+			return false;
+		}
+		if ( ! isset( $header['Webp'] ) || strtoupper( $header['Webp'] ) !== 'WEBP' ) {
+			return false;
+		}
+		if ( ! isset( $header['Vp'] ) || strpos( strtoupper( $header['Vp'] ), 'VP8' ) === false ) {
+			return false;
+		}
+
+		if (
+			strpos( strtoupper( $header['Chunk'] ), 'ANIM' ) !== false ||
+			strpos( strtoupper( $header['Chunk'] ), 'ANMF' ) !== false
+		) {
+			$header['Animation'] = true;
+		} else {
+			$header['Animation'] = false;
+		}
+
+		if ( strpos( strtoupper( $header['Chunk'] ), 'ALPH' ) !== false ) {
+			$header['Alpha'] = true;
+		} else {
+			if ( strpos( strtoupper( $header['Vp'] ), 'VP8L' ) !== false ) {
+				// if it is VP8L, I assume that this image will be transparency
+				// as described in https://developers.google.com/speed/webp/docs/riff_container#simple_file_format_lossless
+				$header['Alpha'] = true;
+			} else {
+				$header['Alpha'] = false;
 			}
-		} else {
-			return false;
 		}
-	}
 
+		unset( $header['Chunk'] );
+
+		return $header;
+	}//end webpinfo()
+
+	/**
+	 * works out if the color is dark or light
+	 *
+	 * @param $hex
+	 *
+	 * @return bool
+	 */
 	function colorislight( $hex ) {
 		$hex       = str_replace( '#', '', $hex );
 		$r         = ( hexdec( substr( $hex, 0, 2 ) ) / 255 );
@@ -383,15 +400,6 @@ class wp_Dominant_Color {
 		$lightness = round( ( ( ( max( $r, $g, $b ) + min( $r, $g, $b ) ) / 2 ) * 100 ) );
 
 		return ( $lightness >= 50 ? true : false );
-	}
-
-	function getContrastYIQ( $hexcolor ) {
-		$r   = hexdec( substr( $hexcolor, 0, 2 ) );
-		$g   = hexdec( substr( $hexcolor, 2, 2 ) );
-		$b   = hexdec( substr( $hexcolor, 4, 2 ) );
-		$yiq = ( ( $r * 299 ) + ( $g * 587 ) + ( $b * 114 ) ) / 1000;
-
-		return ( $yiq >= 128 ) ? 'black' : 'white';
 	}
 
 }
