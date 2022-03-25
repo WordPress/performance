@@ -155,7 +155,17 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 		);
 
 		$this->assertIsCallable( $route['permission_callback'] );
+
+		if ( current_user_can( 'view_site_health_checks' ) ) {
+			$this->assertTrue( call_user_func( $route['permission_callback'] ) );
+		} else {
+			$this->assertFalse( call_user_func( $route['permission_callback'] ) );
+		}
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
 		$this->assertFalse( call_user_func( $route['permission_callback'] ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertTrue( call_user_func( $route['permission_callback'] ) );
 	}
 
 	/**
