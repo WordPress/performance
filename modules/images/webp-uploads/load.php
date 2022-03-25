@@ -731,6 +731,10 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 		return $override;
 	}
 
+    if ( empty( webp_uploads_get_upload_image_mime_transforms()[ $mime_type ] ) {
+      return $overrride;
+    }
+
 	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms()[ $mime_type ];
 	$original_directory    = pathinfo( $file, PATHINFO_DIRNAME );
 	$filename              = pathinfo( $file, PATHINFO_FILENAME );
