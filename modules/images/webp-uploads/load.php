@@ -696,9 +696,23 @@ add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10
 function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowed_mimes, $file ) {
 	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
 
-	foreach ( $metadata['sizes'] as $size => $size_details ) {
-		foreach ( $valid_mime_transforms as $targeted_mime ) {
-			$extension            = explode( '|', $allowed_mimes[ $targeted_mime ] );
+	foreach ( $valid_mime_transforms as $targeted_mime ) {
+		// Add sources to original image metadata.
+		$extension            = explode( '|', $allowed_mimes[ $targeted_mime ] );
+		$filename_without_ext = implode( explode( '.', $file, -1 ) );
+		$image_file           = $filename_without_ext . ".{$extension[0]}";
+
+		if ( ! file_exists( $image_file ) ) {
+			continue;
+		}
+
+		$metadata['sources'][ $targeted_mime ] = array(
+			'file'     => wp_basename( $image_file ),
+			'filesize' => filesize( $image_file ),
+		);
+
+		foreach ( $metadata['sizes'] as $size => $size_details ) {
+			// Add sources to resized image metadata.
 			$filename_without_ext = implode( explode( '.', $size_details['file'], -1 ) );
 			$image_file           = trailingslashit( $original_directory ) . $filename_without_ext . ".{$extension[0]}";
 			if ( ! file_exists( $image_file ) ) {
