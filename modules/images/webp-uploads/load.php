@@ -700,7 +700,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowe
 		foreach ( $valid_mime_transforms as $targeted_mime ) {
 			$extension            = explode( '|', $allowed_mimes[ $targeted_mime ] );
 			$filename_without_ext = implode( explode( '.', $size_details['file'], -1 ) );
-			$newfile              = trailingslashit( $original_directory ) . $filename_without_ext . ".{$extension[0]}";
+			$image_file           = trailingslashit( $original_directory ) . $filename_without_ext . ".{$extension[0]}";
 			if ( ! file_exists( $newfile ) {
 			    continue;
 			}
