@@ -701,13 +701,13 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowe
 			$extension            = explode( '|', $allowed_mimes[ $targeted_mime ] );
 			$filename_without_ext = implode( explode( '.', $size_details['file'], -1 ) );
 			$image_file           = trailingslashit( $original_directory ) . $filename_without_ext . ".{$extension[0]}";
-			if ( ! file_exists( $newfile ) {
-			    continue;
+			if ( ! file_exists( $image_file ) ) {
+				continue;
 			}
 
 			$metadata['sizes'][ $size ]['sources'][ $targeted_mime ] = array(
-				'file'     => wp_basename( $newfile ),
-				'filesize' => filesize( $newfile ),
+				'file'     => wp_basename( $image_file ),
+				'filesize' => filesize( $image_file ),
 			);
 		}
 	}
@@ -734,9 +734,9 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 		return $override;
 	}
 
-    if ( empty( webp_uploads_get_upload_image_mime_transforms()[ $mime_type ] ) {
-      return $overrride;
-    }
+	if ( empty( webp_uploads_get_upload_image_mime_transforms()[ $mime_type ] ) ) {
+		return $override;
+	}
 
 	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms()[ $mime_type ];
 	$original_directory    = pathinfo( $file, PATHINFO_DIRNAME );
