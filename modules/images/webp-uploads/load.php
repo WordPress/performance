@@ -783,7 +783,6 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 		},
 		10,
 		2
-      return $override;
 	);
 }
 add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 10, 5 );
