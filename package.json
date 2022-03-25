@@ -1,4 +1,5 @@
 {
+  "name": "performance",
   "license": "GPL-2.0-or-later",
   "repository": "git+https://github.com/WordPress/performance.git",
   "devDependencies": {
