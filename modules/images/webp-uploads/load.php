@@ -703,7 +703,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowe
 			$newfile              = trailingslashit( $original_directory ) . $filename_without_ext . ".{$extension[0]}";
 
 			$metadata['sizes'][ $size ]['sources'][ $targeted_mime ] = array(
-				'file'     => $newfile,
+				'file'     => wp_basename( $newfile ),
 				'filesize' => filesize( $newfile ),
 			);
 		}
