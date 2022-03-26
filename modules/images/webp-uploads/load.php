@@ -762,21 +762,105 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
 
 	$target = isset( $_REQUEST['target'] ) ? sanitize_text_field( $_REQUEST['target'] ) : 'all';
 
-	// When an edit to an image is only applied to a thumbnail there's nothing we need to backu up.
+	// When an edit to an image is only applied to a thumbnail there's nothing we need to back up.
 	if ( 'thumbnail' === $target ) {
 		return $data;
 	}
 
-	// Store the current sources before the current metadata is overwritten.
-	$sources             = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
-	$sources             = is_array( $sources ) ? $sources : array();
-	$sources['_sources'] = $metadata['sources'];
-	update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $sources );
+	$sources = $metadata['sources'];
+	// Prevent execution of the callbacks more than once if the callback was already executed.
+	$executed = false;
+
+	add_action(
+		'added_post_meta',
+		function ( $meta_id, $attachment_id, $meta_name, $backup_sizes ) use ( $sources, &$executed ) {
+			// The backup sources array.
+			if ( '_wp_attachment_backup_sizes' !== $meta_name || $executed ) {
+				return;
+			}
+
+			$executed = true;
+			webp_uploads_backup_full_image_sources( $attachment_id, $sources );
+		},
+		10,
+		4
+	);
+
+	add_action(
+		'updated_post_meta',
+		function ( $meta_id, $attachment_id, $meta_name, $backup_sizes ) use ( $sources, &$executed ) {
+			// The backup sources array.
+			if ( '_wp_attachment_backup_sizes' !== $meta_name || $executed ) {
+				return;
+			}
+			$executed = true;
+			webp_uploads_backup_full_image_sources( $attachment_id, $sources );
+		},
+		10,
+		4
+	);
+
 	// Remove the current sources as at this point the current values are no longer accurate.
 	// TODO: Requires to be updated from https://github.com/WordPress/performance/issues/158.
 	unset( $data['sources'] );
 
 	return $data;
+}
+
+/**
+ * Stores the provided sources for the attachment ID in the `_wp_attachment_backup_sources`  with
+ * the next available target if target is `null` no source would be stored.
+ *
+ * @param int   $attachment_id The ID of the attachment.
+ * @param array $sources An array with the full sources to be stored on the next available key.
+ */
+function webp_uploads_backup_full_image_sources( $attachment_id, $sources ) {
+	$target = webp_uploads_get_next_full_size_key_from_backup( $attachment_id );
+
+	if ( null === $target || empty( $sources ) ) {
+		return;
+	}
+
+	$backup_sources            = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+	$backup_sources            = is_array( $backup_sources ) ? $backup_sources : array();
+	$backup_sources[ $target ] = $sources;
+	// Store the `sources` property into the full size if present.
+	update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $backup_sources );
+}
+
+/**
+ * It finds the next available `full-{orig or hash}` key on the images if the name
+ * has not been used as part of the backup sources it would be used if no size is
+ * found or backup exists `null` would be returned instead.
+ *
+ * @param int $attachment_id The ID of the attachment.
+ * @return null|string The next available full size name.
+ */
+function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) {
+	$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+	$backup_sizes = is_array( $backup_sizes ) ? $backup_sizes : array();
+
+	if ( empty( $backup_sizes ) ) {
+		return null;
+	}
+
+	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+	$backup_sources = is_array( $backup_sources ) ? $backup_sources : array();
+	foreach ( array_keys( $backup_sizes ) as $size_name ) {
+		// We are only interested in the `full-` sizes.
+		if ( strpos( $size_name, 'full-' ) === false ) {
+			continue;
+		}
+
+		// If the target already has the sources attributes find the next one.
+		if ( isset( $backup_sources[ $size_name ] ) ) {
+			continue;
+		}
+
+		return $size_name;
+	}
+
+	return null;
 }
 
 /**
@@ -804,59 +888,3 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
 
 	return $data;
 }
-
-/**
- * Hook fired right after a metadata has been created or updated, this function would look
- * specifically only for the key: `_wp_attachment_backup_sizes` which is the one used to
- * store all the backup sizes. This hook is in charge of cleaning up the additional meta
- * keys stored in the metadata of the attachment and storing the `sources` property in the
- * previous full size image due this is not a size we need to move the `sources` from the
- * metadata back into the full size similar as how it's done on the rest of the sizes.
- *
- * @since n.e.x.t
- *
- * @param int    $meta_id The ID of the meta value stored in the DB.
- * @param int    $attachment_id The ID of the post used for this meta, in our case the attachment ID.
- * @param string $meta_name The name of the metadata to be updated.
- * @param array  $backup_sizes An array with the metadata value in this case the backup sizes.
- */
-function webp_uploads_updated_postmeta( $meta_id, $attachment_id, $meta_name, $backup_sizes ) {
-	// The backup sources array.
-	if ( '_wp_attachment_backup_sizes' !== $meta_name ) {
-		return;
-	}
-
-	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
-	$backup_sources = is_array( $backup_sources ) ? $backup_sources : array();
-
-	if ( ! isset( $backup_sources['_sources'] ) ) {
-		return;
-	}
-
-	$target = null;
-	foreach ( array_keys( $backup_sizes ) as $size_name ) {
-		// We are only interested in the `full-` sizes.
-		if ( strpos( $size_name, 'full-' ) === false ) {
-			continue;
-		}
-		// If the target already has the sources attributes find the next one.
-		if ( isset( $backup_sources[ $size_name ] ) ) {
-			continue;
-		}
-
-		$target = $size_name;
-		break;
-	}
-
-	if ( null === $target ) {
-		return;
-	}
-
-	$backup_sources[ $target ] = $backup_sources['_sources'];
-	// Remove the temporary used space.
-	unset( $backup_sources['_sources'] );
-	// Store the `sources` property into the full size if present.
-	update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $backup_sources );
-}
-add_action( 'added_post_meta', 'webp_uploads_updated_postmeta', 10, 4 );
-add_action( 'updated_post_meta', 'webp_uploads_updated_postmeta', 10, 4 );
