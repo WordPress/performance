@@ -45,5 +45,8 @@
     "*.js": [
       "npm run lint-js"
     ]
+  },
+  "dependencies": {
+    "@builder.io/partytown": "^0.5.1"
   }
 }
