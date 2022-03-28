@@ -38,7 +38,7 @@ function perflab_aao_autoloaded_options_test() {
 	$autoloaded_options_count = count( wp_load_alloptions() );
 
 	$result = array(
-		'label'       => esc_html__( 'Autoloaded options', 'performance-lab' ),
+		'label'       => esc_html__( 'Autoloaded options are acceptable', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
 			'label' => esc_html__( 'Performance', 'performance-lab' ),
@@ -46,7 +46,7 @@ function perflab_aao_autoloaded_options_test() {
 		),
 		'description' => sprintf(
 		/* translators: 1: Number of autoloaded options. 2.Autoloaded options size. */
-			'<p>' . esc_html__( 'The amount of %1$s autoloaded options (size: %2$s) in options table is acceptable.', 'performance-lab' ) . '</p>',
+			'<p>' . esc_html__( 'Autoloaded options are configuration settings for plugins and themes that are automatically loaded with every page load in WordPress. Having too many autoloaded options can slow down your site. Your site has %1$s autoloaded options (size: %2$s) in the options table, which is acceptable.', 'performance-lab' ) . '</p>',
 			$autoloaded_options_count,
 			size_format( $autoloaded_options_size )
 		),
@@ -69,9 +69,10 @@ function perflab_aao_autoloaded_options_test() {
 
 	$result['status']         = 'critical';
 	$result['badge']['color'] = 'red';
+	$result['label'] 		  = esc_html__( 'Autoloaded options could affect performance', 'performance-lab' );
 	$result['description']    = sprintf(
 	/* translators: 1: Number of autoloaded options. 2.Autoloaded options size. */
-		'<p>' . esc_html__( 'Your website uses %1$s autoloaded options (size: %2$s). Try to reduce the number of autoloaded options or performance will be affected.', 'performance-lab' ) . '</p>',
+		'<p>' . esc_html__( 'Autoloaded options are configuration settings for plugins and themes that are automatically loaded with every page load in WordPress. Your site has %1$s autoloaded options (size: %2$s) in the options table, which could cause your site to be slow. You can reduce the number of autoloaded options by cleaning up your site\'s options table.', 'performance-lab' ) . '</p>',
 		$autoloaded_options_count,
 		size_format( $autoloaded_options_size )
 	);
