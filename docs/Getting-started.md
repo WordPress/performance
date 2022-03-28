@@ -41,7 +41,7 @@ Issues should be labeled to facilitate browsing and filtering. Here are some com
 ## Create a pull request
 A pull request must be created to submit changes to the Performance Lab plugin. Pull requests should refer to an issue in the [repository issue tracker](https://github.com/WordPress/performance/issues).
 
-Every pull-request should receive both a `[Type] xyz` label and either a `[Focus] xyz` or `Infrastructure` label.
+Every pull request should receive both a `[Type] xyz` label and either a `[Focus] xyz` or `Infrastructure` label.
 
 ## Coding standards
 In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). For a complete documentation about Performance Lab plugin modules specifications, read this [documentation](./Writing-a-module.md).
@@ -55,7 +55,7 @@ All code in the Performance Lab plugin must follow theses requirements:
 After adding new code to the repository, make sure to run this command to lint and format PHP code:
 ```
 npm run lint-php
-npms run format-php
+npm run format-php
 ```
 
 ## PHPUnit tests
