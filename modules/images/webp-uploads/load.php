@@ -835,6 +835,8 @@ function webp_uploads_backup_full_image_sources( $attachment_id, $sources ) {
  * has not been used as part of the backup sources it would be used if no size is
  * found or backup exists `null` would be returned instead.
  *
+ * @since n.e.x.t
+ *
  * @param int $attachment_id The ID of the attachment.
  * @return null|string The next available full size name.
  */
@@ -868,9 +870,9 @@ function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) {
 /**
  * Restore an image from the backup sizes, the current hook moves the `sources` from the `full-orig` key into
  * the top level `sources` into the metadata, in order to ensure the restore process has a reference to the right
- * images. When `IMAGE_EDIT_OVERWRITE` is defined and is truthy the function would loop into the sources array
- * and remove any sources that was created as an edited version, the filenames for those cases are constructed out
- * of `e-{digits}` where `{digits}` is a number of length 13.
+ * images.
+ *
+ * @since n.e.x.t
  *
  * @param int   $attachment_id The ID of the attachment.
  * @param array $data          The current metadata to be stored in the attachment.
