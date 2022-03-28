@@ -44,7 +44,7 @@ A pull request must be created to submit changes to the Performance Lab plugin. 
 Every pull request should receive both a `[Type] xyz` label and either a `[Focus] xyz` or `Infrastructure` label.
 
 ## Coding standards
-In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). For a complete documentation about Performance Lab plugin modules specifications, read this [documentation](./Writing-a-module.md).
+In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). For complete documentation about Performance Lab plugin modules specifications, read this [documentation](./Writing-a-module.md).
 
 ### WordPress and PHP compatibility
 All code in the Performance Lab plugin must follow theses requirements:
