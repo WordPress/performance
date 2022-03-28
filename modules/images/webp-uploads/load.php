@@ -769,36 +769,29 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
 
 	$sources = $metadata['sources'];
 	// Prevent execution of the callbacks more than once if the callback was already executed.
-	$executed = false;
+	$has_been_processed = false;
 
-	add_action(
-		'added_post_meta',
-		function ( $meta_id, $attachment_id, $meta_name ) use ( $sources, &$executed ) {
-			// The backup sources array.
-			if ( '_wp_attachment_backup_sizes' !== $meta_name || $executed ) {
-				return;
-			}
+	$hook = function ( $meta_id, $post_id, $meta_name ) use ( $attachment_id, $sources, &$has_been_processed ) {
+		// Make sure this hook is only executed in the same context for the provided $attachment_id.
+		if ( $post_id !== $attachment_id ) {
+			return;
+		}
 
-			$executed = true;
-			webp_uploads_backup_full_image_sources( $attachment_id, $sources );
-		},
-		10,
-		3
-	);
+		// This logic should work only if we are looking at the meta key: `_wp_attachment_backup_sizes`.
+		if ( '_wp_attachment_backup_sizes' !== $meta_name ) {
+			return;
+		}
 
-	add_action(
-		'updated_post_meta',
-		function ( $meta_id, $attachment_id, $meta_name ) use ( $sources, &$executed ) {
-			// The backup sources array.
-			if ( '_wp_attachment_backup_sizes' !== $meta_name || $executed ) {
-				return;
-			}
-			$executed = true;
-			webp_uploads_backup_full_image_sources( $attachment_id, $sources );
-		},
-		10,
-		3
-	);
+		if ( $has_been_processed ) {
+			return;
+		}
+
+		$has_been_processed = true;
+		webp_uploads_backup_full_image_sources( $post_id, $sources );
+	};
+
+	add_action( 'added_post_meta', $hook, 10, 3 );
+	add_action( 'updated_post_meta', $hook, 10, 3 );
 
 	// Remove the current sources as at this point the current values are no longer accurate.
 	// TODO: Requires to be updated from https://github.com/WordPress/performance/issues/158.
