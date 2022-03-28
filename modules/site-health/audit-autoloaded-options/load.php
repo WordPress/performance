@@ -69,7 +69,7 @@ function perflab_aao_autoloaded_options_test() {
 
 	$result['status']         = 'critical';
 	$result['badge']['color'] = 'red';
-	$result['label'] 		  = esc_html__( 'Autoloaded options could affect performance', 'performance-lab' );
+	$result['label']          = esc_html__( 'Autoloaded options could affect performance', 'performance-lab' );
 	$result['description']    = sprintf(
 	/* translators: 1: Number of autoloaded options. 2.Autoloaded options size. */
 		'<p>' . esc_html__( 'Autoloaded options are configuration settings for plugins and themes that are automatically loaded with every page load in WordPress. Your site has %1$s autoloaded options (size: %2$s) in the options table, which could cause your site to be slow. You can reduce the number of autoloaded options by cleaning up your site\'s options table.', 'performance-lab' ) . '</p>',
