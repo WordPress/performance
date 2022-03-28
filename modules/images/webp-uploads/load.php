@@ -773,7 +773,7 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
 
 	add_action(
 		'added_post_meta',
-		function ( $meta_id, $attachment_id, $meta_name, $backup_sizes ) use ( $sources, &$executed ) {
+		function ( $meta_id, $attachment_id, $meta_name ) use ( $sources, &$executed ) {
 			// The backup sources array.
 			if ( '_wp_attachment_backup_sizes' !== $meta_name || $executed ) {
 				return;
@@ -783,12 +783,12 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
 			webp_uploads_backup_full_image_sources( $attachment_id, $sources );
 		},
 		10,
-		4
+		3
 	);
 
 	add_action(
 		'updated_post_meta',
-		function ( $meta_id, $attachment_id, $meta_name, $backup_sizes ) use ( $sources, &$executed ) {
+		function ( $meta_id, $attachment_id, $meta_name ) use ( $sources, &$executed ) {
 			// The backup sources array.
 			if ( '_wp_attachment_backup_sizes' !== $meta_name || $executed ) {
 				return;
@@ -797,7 +797,7 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
 			webp_uploads_backup_full_image_sources( $attachment_id, $sources );
 		},
 		10,
-		4
+		3
 	);
 
 	// Remove the current sources as at this point the current values are no longer accurate.
