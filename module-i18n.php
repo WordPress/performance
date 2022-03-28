@@ -7,9 +7,11 @@ $generated_i18n_strings = array(
 	_x( 'Adds a WebP support check in Site Health status.', 'module description', 'performance-lab' ),
 	_x( 'WebP Uploads', 'module name', 'performance-lab' ),
 	_x( 'Creates WebP versions for new JPEG image uploads if supported by the server.', 'module description', 'performance-lab' ),
-	_x( 'Enqueued Assets Health Check', 'module name', 'performance-lab' ),
-	_x( 'Adds a CSS and JS resource check in Site Health status.', 'module description', 'performance-lab' ),
 	_x( 'Autoloaded Options Health Check', 'module name', 'performance-lab' ),
 	_x( 'Adds a check for autoloaded options in Site Health status.', 'module description', 'performance-lab' ),
+	_x( 'Web Worker', 'module name', 'performance-lab' ),
+	_x( 'Run JavaScript in a separate Web Worker with the help of Partytown library.', 'module description', 'performance-lab' ),
+	_x( 'Enqueued Assets Health Check', 'module name', 'performance-lab' ),
+	_x( 'Adds a CSS and JS resource check in Site Health status.', 'module description', 'performance-lab' ),
 );
 /* THIS IS THE END OF THE GENERATED FILE */
