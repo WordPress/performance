@@ -132,6 +132,12 @@ class Web_Worker_Test extends WP_UnitTestCase {
 		foreach ( $remove_scripts as $handle ) {
 			wp_dequeue_script( $handle );
 		}
+
+		/*
+		 * Unset $wp_scripts->done as it get saved into transients of enqueued_scripts.
+		 * @see perflab_aea_audit_enqueued_scripts()
+		 */
+		$wp_scripts->done = array();
 	}
 
 	/**
