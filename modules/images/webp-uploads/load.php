@@ -699,7 +699,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowe
 	foreach ( $valid_mime_transforms as $targeted_mime ) {
 		// Add sources to original image metadata.
 		$extension            = explode( '|', $allowed_mimes[ $targeted_mime ] );
-		$filename_without_ext = implode( explode( '.', $file, -1 ) );
+		$filename_without_ext = pathinfo( $file, PATHINFO_FILENAME );
 		$image_file           = $filename_without_ext . ".{$extension[0]}";
 
 		if ( ! file_exists( $image_file ) ) {
