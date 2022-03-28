@@ -714,7 +714,7 @@ add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10
  *
  * @see wp_update_attachment_metadata()
  *
- * @param array $data The current metadata of the attachment.
+ * @param array $data          The current metadata of the attachment.
  * @param int   $attachment_id The ID of the current attachment.
  * @return array The updated metadata for the attachment to be stored in the meta table.
  */
