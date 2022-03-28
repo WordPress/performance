@@ -714,7 +714,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowe
 		foreach ( $metadata['sizes'] as $size => $size_details ) {
 			// Add sources to resized image metadata.
 			$filename_without_ext = implode( explode( '.', $size_details['file'], -1 ) );
-			$image_file           = trailingslashit( $original_directory ) . $filename_without_ext . ".{$extension[0]}";
+			$image_file           = path_join( $original_directory, "$filename_without_ex.{$extension[0]}" )
 			if ( ! file_exists( $image_file ) ) {
 				continue;
 			}
