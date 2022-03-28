@@ -811,6 +811,8 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
  * Stores the provided sources for the attachment ID in the `_wp_attachment_backup_sources`  with
  * the next available target if target is `null` no source would be stored.
  *
+ * @since n.e.x.t
+ *
  * @param int   $attachment_id The ID of the attachment.
  * @param array $sources An array with the full sources to be stored on the next available key.
  */
