@@ -750,7 +750,7 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  * @since n.e.x.t
  *
  * @param int   $attachment_id The ID representing the attachment.
- * @param array $data The current metadata of the attachment.
+ * @param array $data          The current metadata of the attachment.
  * @return array The updated metadata for the attachment.
  */
 function webp_uploads_backup_sources( $attachment_id, $data ) {
@@ -814,7 +814,7 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
  * @since n.e.x.t
  *
  * @param int   $attachment_id The ID of the attachment.
- * @param array $sources An array with the full sources to be stored on the next available key.
+ * @param array $sources       An array with the full sources to be stored on the next available key.
  */
 function webp_uploads_backup_full_image_sources( $attachment_id, $sources ) {
 	$target = webp_uploads_get_next_full_size_key_from_backup( $attachment_id );
@@ -873,7 +873,7 @@ function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) {
  * of `e-{digits}` where `{digits}` is a number of length 13.
  *
  * @param int   $attachment_id The ID of the attachment.
- * @param array $data The current metadata to be stored in the attachment.
+ * @param array $data          The current metadata to be stored in the attachment.
  * @return array The updated metadata of the attachment.
  */
 function webp_uploads_restore_image( $attachment_id, $data ) {
