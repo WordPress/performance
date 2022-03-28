@@ -698,9 +698,9 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowe
 
 	foreach ( $valid_mime_transforms as $targeted_mime ) {
 		// Add sources to original image metadata.
-		$extension            = explode( '|', $allowed_mimes[ $targeted_mime ] );
-		$filename_without_ext = pathinfo( $file, PATHINFO_FILENAME );
-		$image_file           = $filename_without_ext . ".{$extension[0]}";
+		$extension                  = explode( '|', $allowed_mimes[ $targeted_mime ] );
+		$filename_without_extension = pathinfo( $file, PATHINFO_FILENAME );
+		$image_file                 = path_join( $original_directory, "$filename_without_extension.{$extension[0]}" );
 
 		if ( ! file_exists( $image_file ) ) {
 			continue;
@@ -713,8 +713,9 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowe
 
 		foreach ( $metadata['sizes'] as $size => $size_details ) {
 			// Add sources to resized image metadata.
-			$filename_without_ext = implode( explode( '.', $size_details['file'], -1 ) );
-			$image_file           = path_join( $original_directory, "$filename_without_ex.{$extension[0]}" )
+			$filename_without_extension = pathinfo( $size_details['file'], PATHINFO_FILENAME );
+			$image_file                 = path_join( $original_directory, "$filename_without_extension.{$extension[0]}" );
+
 			if ( ! file_exists( $image_file ) ) {
 				continue;
 			}
