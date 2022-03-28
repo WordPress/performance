@@ -15,9 +15,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 			has_action( 'wp_head', 'web_worker_partytown_configuration' )
 		);
 
-		ob_start();
-		web_worker_partytown_configuration();
-		$config_output = ob_get_clean();
+		$config_output = get_echo( 'web_worker_partytown_configuration' );
 
 		$desired_output_string_chunks = array(
 			'<script>',
@@ -40,9 +38,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 			}
 		);
 
-		ob_start();
-		web_worker_partytown_configuration();
-		$config_output = ob_get_clean();
+		$config_output = get_echo( 'web_worker_partytown_configuration' );
 
 		$desired_output_string_chunks = array(
 			'<script>',
@@ -78,6 +74,8 @@ class Web_Worker_Test extends WP_UnitTestCase {
 	 * @covers ::web_worker_partytown_worker_scripts
 	 */
 	function test_web_worker_partytown_worker_scripts() {
+		global $wp_scripts;
+
 		$this->assertEquals(
 			10,
 			has_action( 'wp_print_scripts', 'web_worker_partytown_worker_scripts' )
@@ -92,9 +90,11 @@ class Web_Worker_Test extends WP_UnitTestCase {
 			'third-party-js',
 		);
 
+		$store_src = array();
 		foreach ( $script_handles as $handle ) {
-			$src  = plugin_dir_url( __FILE__ ) . 'assets/js/' . $handle . '.js';
-			$deps = array( 'partytown' );
+			$src                  = plugin_dir_url( __FILE__ ) . 'assets/js/' . $handle . '.js';
+			$store_src[ $handle ] = $src;
+			$deps                 = array( 'partytown' );
 			wp_enqueue_script( $handle, $src, $deps, PERFLAB_VERSION, false );
 		}
 
@@ -110,17 +110,28 @@ class Web_Worker_Test extends WP_UnitTestCase {
 			$this->get_partytown_handles()
 		);
 
-		$expected_scripts_chunk = '<script type="text/partytown" src="http://example.org/wp-content/plugins/performance/tests/modules/javascript/web-worker/assets/js/non-critical-js.js?ver=1.0.0-beta.3" id="non-critical-js-js"></script><script type="text/partytown" src="http://example.org/wp-content/plugins/performance/tests/modules/javascript/web-worker/assets/js/analytics-js.js?ver=1.0.0-beta.3" id="analytics-js-js"></script><script type="text/partytown" src="http://example.org/wp-content/plugins/performance/tests/modules/javascript/web-worker/assets/js/third-party-js.js?ver=1.0.0-beta.3" id="third-party-js-js"></script>';
+		$expected_scripts_chunk = '';
+		foreach ( $script_handles as $handle ) {
+			$expected_scripts_chunk .= sprintf(
+				'<script type="text/partytown" src="%1$s" id="%2$s"></script>',
+				$store_src[ $handle ] . '?ver=' . PERFLAB_VERSION,
+				$handle . '-js'
+			);
+		}
 
-		ob_start();
-		wp_print_scripts();
-		$scripts_output = ob_get_clean();
+		$scripts_output = get_echo( 'wp_print_scripts' );
 
 		/*
 		 * $scripts_output also contains the script tag for the partytown.js, so only check for such scripts
 		 * which have `partytown` as a dependency.
 		 */
 		$this->assertStringContainsString( $expected_scripts_chunk, $scripts_output );
+
+		// Remove scripts.
+		$remove_scripts = array_merge( $script_handles, array( 'partytown' ) );
+		foreach ( $remove_scripts as $handle ) {
+			wp_dequeue_script( $handle );
+		}
 	}
 
 	/**
