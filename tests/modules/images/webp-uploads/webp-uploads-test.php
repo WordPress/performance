@@ -783,4 +783,27 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 		}
 	}
+
+	/**
+	 * Update source attributes when webp is edited.
+	 *
+	 * @test
+	 */
+	public function it_should_validate_source_attribute_update_when_webp_edited() {
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->crop( 10, 10, 0, 0 )->save();
+		$this->assertTrue( $editor->success() );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertArrayHasKey( 'sources', $metadata );
+		$this->assertArrayHasKey( 'sizes', $metadata );
+
+		foreach ( $metadata['sizes'] as $properties ) {
+			$this->assertArrayHasKey( 'sources', $properties );
+		}
+	}
 }
