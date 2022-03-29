@@ -44,7 +44,9 @@ class wp_Dominant_Color {
 	 * @return array $metadata
 	 */
 	public function dominant_color_metadata( $metadata, $attachment_id ) {
-
+          if( !wp_attachment_is_image( $attachment_id ) ) {
+               return $metadata;
+          }
 		$dominant_color = $this->get_dominant_color( $attachment_id );
 
 		if ( ! empty( $dominant_color ) ) {
