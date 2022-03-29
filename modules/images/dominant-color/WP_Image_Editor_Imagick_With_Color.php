@@ -4,9 +4,9 @@ class WP_Image_Editor_Imagick_With_Color extends WP_Image_Editor_Imagick {
 
 	/**
 
-	 * @param $default_color
+	 * @param string $default_color default is light grey
 	 *
-	 * @return string
+	 * @return string hex color
 	 */
 	public function get_dominant_color(  $default_color = 'eee' ) {
 
@@ -22,11 +22,12 @@ class WP_Image_Editor_Imagick_With_Color extends WP_Image_Editor_Imagick {
 
 				return dechex( $color['r'] ) . dechex( $color['g'] ) . dechex( $color['b'] );
 			} else {
+
 				return $default_color;
 			}
 		} catch ( Exception $e ) {
-			return new WP_Error( 'get_dominant_color', $e->getMessage() );
 
+			return $default_color;
 		}
 	}
 
@@ -41,13 +42,14 @@ class WP_Image_Editor_Imagick_With_Color extends WP_Image_Editor_Imagick {
 		if ( $this->image ) {
 
 			try {
-				$colorspace = $this->image->getColorspace();
 				// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-				return (bool) @$this->image->getImageAlphaChannel() == Imagick::$colorspace;
+				return (bool) @$this->image->getImageAlphaChannel();
 			} catch ( Exception $e ) {
-				return new WP_Error( 'get_has_transparency', $e->getMessage() );
+
+				return true;
 			}
 		} else {
+
 			return false;
 		}
 	}

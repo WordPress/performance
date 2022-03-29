@@ -97,7 +97,7 @@ class get_dominant_color_Imagick_Tests extends WP_UnitTestCase {
 			),
 			'trans_png'   => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.png',
-				'expected_color' => array( 'ffffff' ),
+				'expected_color' => array( 'eee' ),
 			),
 			'trans4_png'  => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.png',
@@ -118,7 +118,7 @@ class get_dominant_color_Imagick_Tests extends WP_UnitTestCase {
 			),
 			'trans_webp'  => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.webp',
-				'expected_color' => array( '0' ),
+				'expected_color' => array( 'eee' ),
 			),
 			'trans4_webp' => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.webp',
