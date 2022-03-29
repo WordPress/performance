@@ -1,9 +1,9 @@
 # Documentation/Infrastructure
-/docs                                       @justinahinon @felixarntz
-/admin                                      @justinahinon @felixarntz
-/tests/admin                                @justinahinon @felixarntz
-/bin                                        @justinahinon @felixarntz
-/.github                                    @justinahinon @felixarntz
+/docs                                       @JustinyAhin @felixarntz
+/admin                                      @JustinyAhin @felixarntz
+/tests/admin                                @JustinyAhin @felixarntz
+/bin                                        @JustinyAhin @felixarntz
+/.github                                    @JustinyAhin @felixarntz
 
 # Focus: Images
 /modules/images                             @adamsilverstein @getsource
@@ -26,6 +26,6 @@
 /tests/testdata/modules/measurement         @AymenLoukil @josephscott
 
 # Focus: Site Health
-/modules/site-health                        @audrasjb
-/tests/modules/site-health                  @audrasjb
-/tests/testdata/modules/site-health         @audrasjb
+/modules/site-health                        
+/tests/modules/site-health                  
+/tests/testdata/modules/site-health         
