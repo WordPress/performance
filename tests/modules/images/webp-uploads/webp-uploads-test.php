@@ -200,7 +200,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		add_filter( 'wp_image_editors', '__return_empty_array' );
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
 		$this->assertTrue( is_wp_error( $result ) );
-		$this->assertSame( 'image_no_editor', $result->get_error_code() );
+		$this->assertSame( 'image_mime_type_not_supported', $result->get_error_code() );
 	}
 
 	/**
@@ -513,6 +513,31 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
+	/**
+	 * Should not replace jpeg images in the content if other mime types are disabled via filter.
+	 *
+	 * @dataProvider provider_replace_images_with_different_extensions
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_not_replace_the_references_to_a_jpg_image_when_disabled_via_filter( $image_path ) {
+		remove_all_filters( 'webp_uploads_content_image_mimes' );
+
+		add_filter(
+			'webp_uploads_content_image_mimes',
+			function( $mime_types ) {
+				unset( $mime_types[ array_search( 'image/webp', $mime_types, true ) ] );
+				return $mime_types;
+			}
+		);
+
+		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$tag           = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
+
 	public function provider_replace_images_with_different_extensions() {
 		yield 'An image with a .jpg extension' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 		yield 'An image with a .jpeg extension' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
@@ -789,21 +814,50 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_validate_source_attribute_update_when_webp_edited() {
+	public function it_should_validate_source_attribute_update_when_webp_edited()
+	{
+
+		$attachment_id = $this->factory->attachment->create_upload_object(TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg');
+
+		$editor = new WP_Image_Edit($attachment_id);
+		$editor->crop(10, 10, 0, 0)->save();
+		$this->assertTrue($editor->success());
+
+		$metadata = wp_get_attachment_metadata($attachment_id);
+
+		$this->assertArrayHasKey('sources', $metadata);
+		$this->assertArrayHasKey('sizes', $metadata);
+
+		foreach ($metadata['sizes'] as $properties) {
+			$this->assertArrayHasKey('sources', $properties);
+		}
+	}
+
+	/**
+	 * Allow the upload of a WebP image if at least one editor supports the format
+	 *
+	 * @test
+	 */
+	public function it_should_allow_the_upload_of_a_web_p_image_if_at_least_one_editor_supports_the_format() {
+		add_filter(
+			'wp_image_editors',
+			function () {
+				return array( 'WP_Image_Doesnt_Support_WebP', 'WP_Image_Editor_GD' );
+			}
+		);
+
+		$this->assertTrue( wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) );
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
-
-		$editor = new WP_Image_Edit( $attachment_id );
-		$editor->crop( 10, 10, 0, 0 )->save();
-		$this->assertTrue( $editor->success() );
-
-		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertArrayHasKey( 'sources', $metadata );
-		$this->assertArrayHasKey( 'sizes', $metadata );
+		$this->assertIsArray( $metadata['sources'] );
 
-		foreach ( $metadata['sizes'] as $properties ) {
-			$this->assertArrayHasKey( 'sources', $properties );
-		}
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
 	}
 }

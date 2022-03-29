@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.
  * Requires at least: 5.8
  * Requires PHP: 5.6
- * Version: 1.0.0-beta.1
+ * Version: 1.0.0-beta.3
  * Author: WordPress Performance Group
  * Author URI: https://make.wordpress.org/core/tag/performance/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.0.0-beta.1' );
+define( 'PERFLAB_VERSION', '1.0.0-beta.3' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
@@ -26,28 +26,43 @@ define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
  * @since 1.0.0
  */
 function perflab_register_modules_setting() {
-	// To set the default value for which modules are enabled, rely on this generated file.
-	$default_enabled_modules = require plugin_dir_path( __FILE__ ) . 'default-enabled-modules.php';
-	$default_option          = array_reduce(
-		$default_enabled_modules,
-		function( $module_settings, $module_dir ) {
-			$module_settings[ $module_dir ] = array( 'enabled' => true );
-			return $module_settings;
-		},
-		array()
-	);
-
 	register_setting(
 		PERFLAB_MODULES_SCREEN,
 		PERFLAB_MODULES_SETTING,
 		array(
 			'type'              => 'object',
 			'sanitize_callback' => 'perflab_sanitize_modules_setting',
-			'default'           => $default_option,
+			'default'           => perflab_get_modules_setting_default(),
 		)
 	);
 }
 add_action( 'init', 'perflab_register_modules_setting' );
+
+/**
+ * Gets the default value for the performance modules setting.
+ *
+ * @since 1.0.0
+ */
+function perflab_get_modules_setting_default() {
+	// Since the default relies on some minimal logic that includes requiring an additional file,
+	// the result is "cached" in a static variable.
+	static $default_option = null;
+
+	if ( null === $default_option ) {
+		// To set the default value for which modules are enabled, rely on this generated file.
+		$default_enabled_modules = require plugin_dir_path( __FILE__ ) . 'default-enabled-modules.php';
+		$default_option          = array_reduce(
+			$default_enabled_modules,
+			function( $module_settings, $module_dir ) {
+				$module_settings[ $module_dir ] = array( 'enabled' => true );
+				return $module_settings;
+			},
+			array()
+		);
+	}
+
+	return $default_option;
+}
 
 /**
  * Sanitizes the performance modules setting.
@@ -87,7 +102,10 @@ function perflab_sanitize_modules_setting( $value ) {
  * @return array Associative array of module settings keyed by module slug.
  */
 function perflab_get_module_settings() {
-	return (array) get_option( PERFLAB_MODULES_SETTING );
+	// Even though a default value is registered for this setting, the default must be explicitly
+	// passed here, to support scenarios where this function is called before the 'init' action,
+	// for example when loading the active modules.
+	return (array) get_option( PERFLAB_MODULES_SETTING, perflab_get_modules_setting_default() );
 }
 
 /**

@@ -164,7 +164,7 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
  * output format depending on desired output formats and supported mime types by the image
  * editor.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param string $output_format The image editor default output format mapping.
  * @param string $filename      Path to the image.
@@ -304,19 +304,6 @@ function webp_uploads_get_upload_image_mime_transforms() {
  * @return array|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
  */
 function webp_uploads_generate_additional_image_source( $attachment_id, array $size_data, $mime, $destination_file_name = null ) {
-	$image_path = wp_get_original_image_path( $attachment_id );
-
-	// File does not exist.
-	if ( ! file_exists( $image_path ) ) {
-		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'performance-lab' ) );
-	}
-
-	$editor = wp_get_image_editor( $image_path );
-
-	if ( is_wp_error( $editor ) ) {
-		return $editor;
-	}
-
 	$allowed_mimes = array_flip( wp_get_mime_types() );
 	if ( ! isset( $allowed_mimes[ $mime ] ) || ! is_string( $allowed_mimes[ $mime ] ) ) {
 		return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'performance-lab' ) );
@@ -324,6 +311,19 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 
 	if ( ! wp_image_editor_supports( array( 'mime_type' => $mime ) ) ) {
 		return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'performance-lab' ) );
+	}
+
+	$image_path = wp_get_original_image_path( $attachment_id );
+
+	// File does not exist.
+	if ( ! file_exists( $image_path ) ) {
+		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'performance-lab' ) );
+	}
+
+	$editor = wp_get_image_editor( $image_path, array( 'mime_type' => $mime ) );
+
+	if ( is_wp_error( $editor ) ) {
+		return $editor;
 	}
 
 	$height = isset( $size_data['height'] ) ? (int) $size_data['height'] : 0;
@@ -587,61 +587,61 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		return $image;
 	}
 
-	// TODO: Add a filterable option to determine image extensions, see https://github.com/WordPress/performance/issues/187 for more details.
-	$target_image_extensions = array(
-		'jpg',
-		'jpeg',
-	);
+	/**
+	 * Filters mime types that should be used to update all images in the content. The order of
+	 * mime types matters. The first mime type in the list will be used if it is supported by an image.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array  $target_mimes  The list of mime types that can be used to update images in the content.
+	 * @param int    $attachment_id The attachment ID.
+	 * @param string $context       The current context.
+	 */
+	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/webp', 'image/jpeg' ), $attachment_id, $context );
 
-	// Creates a regular extension to find all the URLS with the provided extension for img tag.
-	preg_match_all( '/[^\s"]+\.(?:' . implode( '|', $target_image_extensions ) . ')/i', $image, $matches );
-	if ( empty( $matches ) ) {
+	$target_mime = null;
+	foreach ( $target_mimes as $mime ) {
+		if ( isset( $metadata['sources'][ $mime ] ) ) {
+			$target_mime = $mime;
+			break;
+		}
+	}
+
+	if ( null === $target_mime ) {
 		return $image;
 	}
 
-	$urls = $matches[0];
-	// TODO: Add a filterable option to change the selected mime type. See https://github.com/WordPress/performance/issues/187.
-	$target_mime = 'image/webp';
+	// Replace the full size image if present.
+	if ( isset( $metadata['sources'][ $target_mime ]['file'] ) ) {
+		$basename = wp_basename( $metadata['file'] );
+		if ( $basename !== $metadata['sources'][ $target_mime ]['file'] ) {
+			$image = str_replace(
+				$basename,
+				$metadata['sources'][ $target_mime ]['file'],
+				$image
+			);
+		}
+	}
 
-	$basename = wp_basename( $metadata['file'] );
-	foreach ( $urls as $url ) {
-		$src_filename = wp_basename( $url );
-
-		// Replace the full size image if present.
-		if ( isset( $metadata['sources'][ $target_mime ]['file'] ) && strpos( $url, $basename ) !== false ) {
-			$image = str_replace( $src_filename, $metadata['sources'][ $target_mime ]['file'], $image );
+	// Replace sub sizes for the image if present.
+	foreach ( $metadata['sizes'] as $name => $size_data ) {
+		if ( empty( $size_data['file'] ) ) {
 			continue;
 		}
 
-		if ( empty( $metadata['sizes'] ) ) {
+		if ( empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
 			continue;
 		}
 
-		$extension = wp_check_filetype( $src_filename );
-		// Extension was not set properly no action possible or extension is already in the expected mime.
-		if ( empty( $extension['type'] ) || $extension['type'] === $target_mime ) {
+		if ( $size_data['file'] === $size_data['sources'][ $target_mime ]['file'] ) {
 			continue;
 		}
 
-		// Find the appropriate size for the provided URL.
-		foreach ( $metadata['sizes'] as $name => $size_data ) {
-			// Not the size we are looking for.
-			if ( empty( $size_data['file'] ) || $src_filename !== $size_data['file'] ) {
-				continue;
-			}
-
-			if ( empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
-				continue;
-			}
-
-			// This is the same as the file we want to replace nothing to do here.
-			if ( $size_data['sources'][ $target_mime ]['file'] === $src_filename ) {
-				continue;
-			}
-
-			$image = str_replace( $src_filename, $size_data['sources'][ $target_mime ]['file'], $image );
-			break;
-		}
+		$image = str_replace(
+			$size_data['file'],
+			$size_data['sources'][ $target_mime ]['file'],
+			$image
+		);
 	}
 
 	return $image;
@@ -650,7 +650,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 /**
  * Updates the response for an attachment to include sources for additional mime types available the image.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param WP_REST_Response $response The original response object.
  * @param WP_Post          $post     The post object.

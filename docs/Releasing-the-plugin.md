@@ -1,8 +1,8 @@
 [Back to overview](./README.md)
 
-# Releasing the performance plugin
+# Releasing the Performance Lab plugin
 
-This document describes the steps to release the Performance plugin.
+This document describes the steps to release the Performance Lab plugin.
 
 ## Branching off `trunk`
 
@@ -28,8 +28,6 @@ Before making any changes, create a new local branch based on the remote release
 
 The version number needs to be updated in the following files:
 
-- package.json
-- package-lock.json
 - load.php
 - readme.txt
 
