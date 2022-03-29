@@ -1,5 +1,12 @@
 <?php
-
+/**
+ * WordPress Image Editor Class for Image Manipulation through Imagick
+ * with dominant color detection
+ *
+ * @since 6.0.0
+ *
+ * @see WP_Image_Editor
+ */
 class WP_Image_Editor_Imagick_With_Color extends WP_Image_Editor_Imagick {
 
 	/**

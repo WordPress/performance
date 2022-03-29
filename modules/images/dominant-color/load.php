@@ -13,8 +13,7 @@
  *
  * @since 1.0.0
  */
-class wp_Dominant_Color {
-
+class WP_Dominant_Color {
 
 	/**
 	 * Class constructor.
@@ -30,7 +29,7 @@ class wp_Dominant_Color {
 
 		$filters = array( 'the_content', 'the_excerpt', 'widget_text_content', 'widget_block_content' );
 		foreach ( $filters as $filter ) {
-			   add_filter( $filter, array( $this, 'filter_content_tags' ), 20 );
+			add_filter( $filter, array( $this, 'filter_content_tags' ), 20 );
 		}
 
 		add_filter( 'wp_get_attachment_image_attributes', array( $this, 'tag_add_adjust_to_image_attributes' ), 10, 2 );
@@ -185,7 +184,7 @@ class wp_Dominant_Color {
 
 
 	/**
-	 * Filter the content to allow us to filter the image tags
+	 * Filter the content to allow us to filter the image tags.
 	 *
 	 * @param string $content the content to filter.
 	 * @param string $context the context of the content.
@@ -229,7 +228,7 @@ class wp_Dominant_Color {
 
 		if ( count( $attachment_ids ) > 1 ) {
 			/*
-			 * Warm the object cache with post and meta information for all found
+			 * Warm the object cache with post and meta information for all found.
 			 * images to avoid making individual database calls.
 			 */
 			_prime_post_caches( $attachment_ids, false, true );
@@ -270,8 +269,8 @@ class wp_Dominant_Color {
 	 */
 	public function set_wp_image_editors() {
 
-		require_once 'WP_Image_Editor_GD_With_Color.php';
-		require_once 'WP_Image_Editor_Imagick_With_Color.php';
+		require_once 'class-wp-image-editor-gd-with-color.php';
+		require_once 'class-wp-image-editor-imagick-with-color.php';
 
 		return array( 'WP_Image_Editor_GD_With_Color', 'WP_Image_Editor_Imagick_With_Color' );
 	}
@@ -313,9 +312,9 @@ class wp_Dominant_Color {
 		$file = get_attached_file( $id );
 
 		$editor = wp_get_image_editor( $file );
-		if( is_wp_error( $editor ) ){
+		if ( is_wp_error( $editor ) ) {
 
-			return true; // safer to set to trans than not
+			return true; // safer to set to trans than not.
 		}
 		$has_transparency = wp_get_image_editor( $file )->get_has_transparency();
 
@@ -344,4 +343,4 @@ class wp_Dominant_Color {
 
 }
 
-new wp_Dominant_Color();
+new WP_Dominant_Color();
