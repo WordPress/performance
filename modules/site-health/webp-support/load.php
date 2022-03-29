@@ -42,7 +42,7 @@ function webp_uploads_check_webp_supported_test() {
 		),
 		'description' => sprintf(
 			'<p>%s</p>',
-			__( 'WebP image format is used by WordPress to improve the performance of your site by generating smaller images than it usually could with the JPEG format. This means your pages will load faster and consume less bandwidth.', 'performance-lab' )
+			__( 'The WebP image format produces images that are usually smaller in size than JPEG images, which can reduce page load time and consume less bandwidth.', 'performance-lab' )
 		),
 		'actions'     => '',
 		'test'        => 'is_webp_uploads_enabled',
@@ -56,7 +56,7 @@ function webp_uploads_check_webp_supported_test() {
 		$result['actions'] = sprintf(
 			'<p>%s</p>',
 			/* translators: Accessibility text. */
-			__( 'Please contact your host and ask them to add WebP support.', 'performance-lab' )
+			__( 'WebP support can only be enabled by your hosting provider, so contact them for more information.', 'performance-lab' )
 		);
 	}
 
