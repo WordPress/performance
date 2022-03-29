@@ -64,6 +64,10 @@ class wp_Dominant_Color {
 	 */
 	public function has_transparency_metadata( $metadata, $attachment_id ) {
 
+          if( !wp_attachment_is_image( $attachment_id ) ) {
+               return $metadata;
+          }
+
 		$has_transparency = $this->get_has_transparency( $attachment_id );
 
 		if ( ! empty( $has_transparency ) ) {
