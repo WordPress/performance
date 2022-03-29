@@ -25,12 +25,13 @@ class wp_Dominant_Color {
 
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'dominant_color_metadata' ), 10, 2 );
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'has_transparency_metadata' ), 10, 2 );
-	add_filter( 'wp_content_img_tag', array( $this, 'tag_add_adjust' ), 20, 3 );
-	add_filter( 'wp_dominant_color_img_tag_add_adjust', array( $this, 'tag_add_adjust' ), 10, 3 );
-	$filters = array( 'the_content', 'the_excerpt', 'widget_text_content', 'widget_block_content' );
-	foreach( $filters as $filter ) {
-	       add_filter( $filter, array( $this, 'filter_content_tags' ), 20 );
-	}	
+		add_filter( 'wp_content_img_tag', array( $this, 'tag_add_adjust' ), 20, 3 );
+		add_filter( 'wp_dominant_color_img_tag_add_adjust', array( $this, 'tag_add_adjust' ), 10, 3 );
+
+		$filters = array( 'the_content', 'the_excerpt', 'widget_text_content', 'widget_block_content' );
+		foreach ( $filters as $filter ) {
+			   add_filter( $filter, array( $this, 'filter_content_tags' ), 20 );
+		}
 
 		add_filter( 'wp_get_attachment_image_attributes', array( $this, 'tag_add_adjust_to_image_attributes' ), 10, 2 );
 	}
@@ -38,15 +39,16 @@ class wp_Dominant_Color {
 	/**
 	 * Add the dominant color metadata to the attachment.
 	 *
-	 * @param array $metadata
-	 * @param int   $attachment_id
+	 * @param array $metadata The attachment metadata.
+	 * @param int   $attachment_id The attachment ID.
 	 *
 	 * @return array $metadata
 	 */
 	public function dominant_color_metadata( $metadata, $attachment_id ) {
-          if( !wp_attachment_is_image( $attachment_id ) ) {
-               return $metadata;
-          }
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+
+			return $metadata;
+		}
 		$dominant_color = $this->get_dominant_color( $attachment_id );
 
 		if ( ! empty( $dominant_color ) ) {
@@ -59,16 +61,17 @@ class wp_Dominant_Color {
 	/**
 	 * Add the dominant color metadata to the attachment.
 	 *
-	 * @param array $metadata
-	 * @param int   $attachment_id
+	 * @param array $metadata Metadata for the attachment.
+	 * @param int   $attachment_id attachement id.
 	 *
 	 * @return array $metadata
 	 */
 	public function has_transparency_metadata( $metadata, $attachment_id ) {
 
-          if( !wp_attachment_is_image( $attachment_id ) ) {
-               return $metadata;
-          }
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+
+			return $metadata;
+		}
 
 		$has_transparency = $this->get_has_transparency( $attachment_id );
 
@@ -80,16 +83,20 @@ class wp_Dominant_Color {
 	}
 
 	/**
-	 * filter various image attributes to add the dominant color to the image
+	 * Filter various image attributes to add the dominant color to the image
 	 *
-	 * @param $attr
-	 * @param $attachment
+	 * @param array  $attr        Attributes for the image markup.
+	 * @param object $attachment Image attachment post.
 	 *
 	 * @return mixed
 	 */
 	public function tag_add_adjust_to_image_attributes( $attr, $attachment ) {
 
 		$image_meta = wp_get_attachment_metadata( $attachment->ID );
+		if ( ! is_array( $image_meta ) ) {
+
+			return $attr;
+		}
 
 		$has_transparency = isset( $image_meta['has_transparency'] ) ? $image_meta['has_transparency'] : false;
 
@@ -109,7 +116,7 @@ class wp_Dominant_Color {
 			}
 			$attr['data-dominant-color'] = $image_meta['dominant_color'];
 
-			$extra_class .= ( $this->colorislight( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
+			$extra_class .= ( $this->color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 
 			if ( isset( $attr['class'] ) && ! array_intersect( explode( ' ', $attr['class'] ), explode( ' ', $extra_class ) ) ) {
 				$attr['class'] = $extra_class . ' ' . $attr['class'];
@@ -122,11 +129,11 @@ class wp_Dominant_Color {
 	}
 
 	/**
-	 * filter image tags in content to add the dominant color to the image.
+	 * Filter image tags in content to add the dominant color to the image.
 	 *
-	 * @param $filtered_image
-	 * @param $context
-	 * @param $attachment_id
+	 * @param string $filtered_image The filtered image.
+	 * @param string $context        The context of the image.
+	 * @param int    $attachment_id  The attachment ID.
 	 *
 	 * @return string image tag
 	 */
@@ -152,7 +159,7 @@ class wp_Dominant_Color {
 
 			$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
 
-			$extra_class   .= ( $this->colorislight( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
+			$extra_class   .= ( $this->color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 			$filtered_image = str_replace( 'class="', 'class="' . $extra_class . ' ', $filtered_image );
 		}
 
@@ -178,10 +185,10 @@ class wp_Dominant_Color {
 
 
 	/**
-	 * filter the content to allow us to filter the image tags
+	 * Filter the content to allow us to filter the image tags
 	 *
-	 * @param $content
-	 * @param $context
+	 * @param string $content the content to filter.
+	 * @param string $context the context of the content.
 	 *
 	 * @return string content
 	 */
@@ -256,6 +263,11 @@ class wp_Dominant_Color {
 		return $content;
 	}
 
+	/**
+	 * Overloads wp_image_editors() to load the extended classes.
+	 *
+	 * @return string[]
+	 */
 	public function set_wp_image_editors() {
 
 		require_once 'WP_Image_Editor_GD_With_Color.php';
@@ -267,8 +279,8 @@ class wp_Dominant_Color {
 	/**
 	 * Get dominant color of image
 	 *
-	 * @param integer $id
-	 * @param string  $default_color
+	 * @param integer $id the image id
+	 * @param string  $default_color default color
 	 *
 	 * @return string
 	 */
@@ -290,7 +302,7 @@ class wp_Dominant_Color {
 	/**
 	 * Works out if color has transparency
 	 *
-	 * @param integer $id
+	 * @param integer $id the attachment id.
 	 *
 	 * @return bool
 	 */
@@ -299,12 +311,12 @@ class wp_Dominant_Color {
 		add_filter( 'wp_image_editors', array( $this, 'set_wp_image_editors' ) );
 
 		$file = get_attached_file( $id );
-		if ( wp_get_image_mime( $file ) === 'image/webp' ) {
-			$webpinfo = $this->webpinfo( $file );
 
-			return $webpinfo['Alpha'];
+		$editor = wp_get_image_editor( $file );
+		if( is_wp_error( $editor ) ){
+
+			return true; // safer to set to trans than not
 		}
-
 		$has_transparency = wp_get_image_editor( $file )->get_has_transparency();
 
 		remove_filter( 'wp_image_editors', array( $this, 'set_wp_image_editors' ) );
@@ -312,85 +324,15 @@ class wp_Dominant_Color {
 		return $has_transparency;
 	}
 
-	/**
-	 * Get WebP file info.
-	 *
-	 * @link https://www.php.net/manual/en/function.pack.php unpack format reference.
-	 * @link https://developers.google.com/speed/webp/docs/riff_container WebP document.
-	 *
-	 * @param string $file
-	 *
-	 * @return array|false Return associative array if success, return `false` for otherwise.
-	 */
-	private function webpinfo( $file ) {
-		if ( ! is_file( $file ) ) {
-			return false;
-		} else {
-			$file = realpath( $file );
-		}
-
-		$fp = fopen( $file, 'rb' );
-		if ( ! $fp ) {
-			return false;
-		}
-
-		$data = fread( $fp, 90 );
-
-		fclose( $fp );
-		unset( $fp );
-
-		$header_format = 'A4Riff/' . // get n string
-						 'I1Filesize/' . // get integer (file size but not actual size)
-						 'A4Webp/' . // get n string
-						 'A4Vp/' . // get n string
-						 'A74Chunk';
-		$header        = unpack( $header_format, $data );
-		unset( $data, $header_format );
-
-		if ( ! isset( $header['Riff'] ) || strtoupper( $header['Riff'] ) !== 'RIFF' ) {
-			return false;
-		}
-		if ( ! isset( $header['Webp'] ) || strtoupper( $header['Webp'] ) !== 'WEBP' ) {
-			return false;
-		}
-		if ( ! isset( $header['Vp'] ) || strpos( strtoupper( $header['Vp'] ), 'VP8' ) === false ) {
-			return false;
-		}
-
-		if (
-			strpos( strtoupper( $header['Chunk'] ), 'ANIM' ) !== false ||
-			strpos( strtoupper( $header['Chunk'] ), 'ANMF' ) !== false
-		) {
-			$header['Animation'] = true;
-		} else {
-			$header['Animation'] = false;
-		}
-
-		if ( strpos( strtoupper( $header['Chunk'] ), 'ALPH' ) !== false ) {
-			$header['Alpha'] = true;
-		} else {
-			if ( strpos( strtoupper( $header['Vp'] ), 'VP8L' ) !== false ) {
-				// if it is VP8L, I assume that this image will be transparency
-				// as described in https://developers.google.com/speed/webp/docs/riff_container#simple_file_format_lossless
-				$header['Alpha'] = true;
-			} else {
-				$header['Alpha'] = false;
-			}
-		}
-
-		unset( $header['Chunk'] );
-
-		return $header;
-	}//end webpinfo()
 
 	/**
-	 * works out if the color is dark or light
+	 * Works out if the color is dark or light.
 	 *
-	 * @param $hex
+	 * @param string $hex color in hex.
 	 *
 	 * @return bool
 	 */
-	function colorislight( $hex ) {
+	function color_is_light( $hex ) {
 		$hex       = str_replace( '#', '', $hex );
 		$r         = ( hexdec( substr( $hex, 0, 2 ) ) / 255 );
 		$g         = ( hexdec( substr( $hex, 2, 2 ) ) / 255 );
