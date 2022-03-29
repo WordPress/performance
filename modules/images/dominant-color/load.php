@@ -27,8 +27,8 @@ class wp_Dominant_Color {
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'has_transparency_metadata' ), 10, 2 );
 
 		// do we have the new filter or are duplicating core the functions?
-		if ( has_filter( 'wp_img_tag_add_adjust' ) ) {
-			add_filter( 'wp_img_tag_add_adjust', array( $this, 'tag_add_adjust' ), 20, 3 );
+		if ( has_filter( 'wp_content_img_tag' ) ) {
+			add_filter( 'wp_content_img_tag', array( $this, 'tag_add_adjust' ), 20, 3 );
 		} else {
 			add_filter( 'the_content', array( $this, 'filter_content_tags' ), 20 );
 			add_filter( 'the_excerpt', array( $this, 'filter_content_tags' ), 20 );
