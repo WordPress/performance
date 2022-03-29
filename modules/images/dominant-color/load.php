@@ -90,10 +90,7 @@ class wp_Dominant_Color {
 
 		$image_meta = wp_get_attachment_metadata( $attachment->ID );
 
-		$has_transparency = false;
-		if ( isset( $image_meta['has_transparency'] ) ) {
-			$has_transparency = $image_meta['has_transparency'];
-		}
+		$has_transparency = isset( $image_meta['has_transparency'] ) ? $image_meta['has_transparency'] : false;
 
 		$extra_class = '';
 		if ( ! isset( $attr['style'] ) ) {
