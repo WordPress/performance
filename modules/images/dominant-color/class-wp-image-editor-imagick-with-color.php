@@ -8,7 +8,7 @@ class WP_Image_Editor_Imagick_With_Color extends WP_Image_Editor_Imagick {
 	 *
 	 * @return string hex color
 	 */
-	public function get_dominant_color(  $default_color = 'eee' ) {
+	public function get_dominant_color( $default_color = 'eee' ) {
 
 		try {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
