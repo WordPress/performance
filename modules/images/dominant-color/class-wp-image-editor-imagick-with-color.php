@@ -10,8 +10,7 @@
 class WP_Image_Editor_Imagick_With_Color extends WP_Image_Editor_Imagick {
 
 	/**
-
-	 * @param string $default_color default is light grey
+	 * @param string $default_color default is light grey.
 	 *
 	 * @return string hex color
 	 */
