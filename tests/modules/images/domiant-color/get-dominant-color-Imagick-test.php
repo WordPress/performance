@@ -182,15 +182,15 @@ class get_dominant_color_Imagick_Tests extends WP_UnitTestCase {
 			),
 
 			'white_png'   => array(
-				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/white.gif',
+				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/white.png',
 				'expected_transparency' => false,
 			),
 			'trans_png'   => array(
-				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.gif',
+				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.png',
 				'expected_transparency' => true,
 			),
 			'trans4_png'  => array(
-				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.gif',
+				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.png',
 				'expected_transparency' => true,
 			),
 
