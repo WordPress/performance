@@ -21,10 +21,9 @@ class WP_Image_Editor_Imagick_With_Color extends WP_Image_Editor_Imagick {
 				$color = $pixel->getColor();
 
 				return dechex( $color['r'] ) . dechex( $color['g'] ) . dechex( $color['b'] );
-			} else {
-
-				return $default_color;
 			}
+
+			return $default_color;
 		} catch ( Exception $e ) {
 
 			return $default_color;
@@ -32,12 +31,12 @@ class WP_Image_Editor_Imagick_With_Color extends WP_Image_Editor_Imagick {
 	}
 
 	/**
-	 * @param $file
+	 * Looks for transparent pixels in the image.
+	 * If there are none, it returns false.
 	 *
 	 * @return bool
-	 * @throws ImagickException
 	 */
-	public function get_has_transparency( $file ) {
+	public function get_has_transparency() {
 
 		if ( $this->image ) {
 

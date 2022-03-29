@@ -16,14 +16,15 @@ class WP_Image_Editor_GD_With_Color extends WP_Image_Editor_GD {
 			$hex = dechex( imagecolorat( $shortend_image, 0, 0 ) );
 
 			return ( '0' === $hex ) ? $default_color : $hex;
-		} else {
-			return $default_color;
 		}
+
+		return $default_color;
 	}
 
 
 	/**
-	 * @param $file
+	 * Looks for transparent pixels in the image.
+	 * If there are none, it returns false.
 	 *
 	 * @return bool
 	 */
