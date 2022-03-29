@@ -278,8 +278,8 @@ class WP_Dominant_Color {
 	/**
 	 * Get dominant color of image
 	 *
-	 * @param integer $id the image id
-	 * @param string  $default_color default color
+	 * @param integer $id the image id.
+	 * @param string  $default_color default color.
 	 *
 	 * @return string
 	 */
