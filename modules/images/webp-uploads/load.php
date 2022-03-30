@@ -758,16 +758,16 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  * @return array The updated metadata for the attachment.
  */
 function webp_uploads_backup_sources( $attachment_id, $data ) {
-	$metadata = wp_get_attachment_metadata( $attachment_id );
-	// Nothing to back up.
-	if ( ! isset( $metadata['sources'] ) ) {
-		return $data;
-	}
-
 	$target = isset( $_REQUEST['target'] ) ? $_REQUEST['target'] : 'all';
 
 	// When an edit to an image is only applied to a thumbnail there's nothing we need to back up.
 	if ( 'thumbnail' === $target ) {
+		return $data;
+	}
+
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+	// Nothing to back up.
+	if ( ! isset( $metadata['sources'] ) ) {
 		return $data;
 	}
 
@@ -814,9 +814,12 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
  * @param array $sources       An array with the full sources to be stored on the next available key.
  */
 function webp_uploads_backup_full_image_sources( $attachment_id, $sources ) {
-	$target = webp_uploads_get_next_full_size_key_from_backup( $attachment_id );
+	if ( empty( $sources ) ) {
+		return;
+	}
 
-	if ( null === $target || empty( $sources ) ) {
+	$target = webp_uploads_get_next_full_size_key_from_backup( $attachment_id );
+	if ( null === $target ) {
 		return;
 	}
 
@@ -848,13 +851,13 @@ function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) {
 	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 	$backup_sources = is_array( $backup_sources ) ? $backup_sources : array();
 	foreach ( array_keys( $backup_sizes ) as $size_name ) {
-		// We are only interested in the `full-` sizes.
-		if ( strpos( $size_name, 'full-' ) === false ) {
+		// If the target already has the sources attributes find the next one.
+		if ( isset( $backup_sources[ $size_name ] ) ) {
 			continue;
 		}
 
-		// If the target already has the sources attributes find the next one.
-		if ( isset( $backup_sources[ $size_name ] ) ) {
+		// We are only interested in the `full-` sizes.
+		if ( strpos( $size_name, 'full-' ) === false ) {
 			continue;
 		}
 
@@ -884,7 +887,6 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
 
 	// TODO: Handle the case If `IMAGE_EDIT_OVERWRITE` is defined and is truthy remove any edited images if present before replacing the metadata.
 	// See: https://github.com/WordPress/performance/issues/158.
-
 	$data['sources'] = $backup_sources['full-orig'];
 
 	return $data;
