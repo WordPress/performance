@@ -1088,9 +1088,11 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 	 */
 	public function it_should_store_the_metadata_on_the_next_available_hash() {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
-		$editor        = new WP_Image_Edit( $attachment_id );
+
+		$editor = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
 		$this->assertTrue( $editor->success() );
+
 		// Remove the filter to prevent the usage of the next target.
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 		$editor->rotate_right()->save();
