@@ -881,7 +881,11 @@ function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) {
 function webp_uploads_restore_image( $attachment_id, $data ) {
 	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 
-	if ( ! is_array( $backup_sources ) || ! isset( $backup_sources['full-orig'] ) || ! is_array( $backup_sources['full-orig'] ) ) {
+	if ( ! is_array( $backup_sources ) ) {
+		return $data;
+	}
+
+	if ( ! isset( $backup_sources['full-orig'] ) || ! is_array( $backup_sources['full-orig'] ) ) {
 		return $data;
 	}
 
