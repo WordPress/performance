@@ -760,7 +760,7 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
 		return $data;
 	}
 
-	$target = isset( $_REQUEST['target'] ) ? sanitize_text_field( $_REQUEST['target'] ) : 'all';
+	$target = isset( $_REQUEST['target'] ) ? $_REQUEST['target'] : 'all';
 
 	// When an edit to an image is only applied to a thumbnail there's nothing we need to back up.
 	if ( 'thumbnail' === $target ) {
