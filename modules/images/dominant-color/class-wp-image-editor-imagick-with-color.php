@@ -1,14 +1,20 @@
 <?php
-
+/**
+ * WordPress Image Editor Class for Image Manipulation through Imagick
+ * with dominant color detection
+ *
+ * @since 6.0.0
+ *
+ * @see WP_Image_Editor
+ */
 class WP_Image_Editor_Imagick_With_Color extends WP_Image_Editor_Imagick {
 
 	/**
-
-	 * @param string $default_color default is light grey
+	 * @param string $default_color default is light grey.
 	 *
 	 * @return string hex color
 	 */
-	public function get_dominant_color(  $default_color = 'eee' ) {
+	public function get_dominant_color( $default_color = 'eee' ) {
 
 		try {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged

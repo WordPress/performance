@@ -1,9 +1,16 @@
 <?php
-
+/**
+ * WordPress Image Editor Class for Image Manipulation through GD
+ * with dominant color detection
+ *
+ * @since 6.0.0
+ *
+ * @see WP_Image_Editor
+ */
 class WP_Image_Editor_GD_With_Color extends WP_Image_Editor_GD {
 
 	/**
-	 * @param string $default_color default is light grey
+	 * @param string $default_color default is light grey.
 	 *
 	 * @return string
 	 */
@@ -31,7 +38,7 @@ class WP_Image_Editor_GD_With_Color extends WP_Image_Editor_GD {
 	public function get_has_transparency() {
 
 		if ( $this->image ) {
-			// walk through the pixels
+			// walk through the pixels.
 			$w = imagesx( $this->image );
 			$h = imagesy( $this->image );
 			for ( $x = 0; $x < $w; $x ++ ) {
