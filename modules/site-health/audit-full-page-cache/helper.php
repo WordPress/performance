@@ -23,7 +23,6 @@ function perflab_afpc_get_page_cache_headers() {
 
 	return array(
 		'cache-control'          => static function ( $header_value ) {
-			$header_value = ( is_array( $header_value ) ) ? implode( ',', $header_value ) : $header_value;
 			return (bool) preg_match( '/max-age=[1-9]/', $header_value );
 		},
 		'expires'                => static function ( $header_value ) {
@@ -104,17 +103,21 @@ function perflab_afpc_check_for_page_caching() {
 		$response_headers = array();
 
 		foreach ( $caching_headers as $header => $callback ) {
-			$header_value = wp_remote_retrieve_header( $http_response, $header );
+			$header_values = wp_remote_retrieve_header( $http_response, $header );
+			if ( empty( $header_values ) ) {
+				continue;
+			}
+			$header_values = (array) $header_values;
 			if (
-				$header_value
-				&&
+				empty( $callback )
+				||
 				(
-					empty( $callback )
-					||
-					( is_callable( $callback ) && true === $callback( $header_value ) )
+					is_callable( $callback )
+					&&
+					count( array_filter( $header_values, $callback ) ) > 0
 				)
 			) {
-				$response_headers[ $header ] = $header_value;
+				$response_headers[ $header ] = $header_values;
 			}
 		}
 
