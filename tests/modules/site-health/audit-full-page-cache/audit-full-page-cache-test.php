@@ -164,7 +164,12 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
 		$this->assertFalse( call_user_func( $route['permission_callback'] ) );
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$user = wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		if ( is_multisite() ) {
+			// Site health cap is only available for super admins in Multi sites.
+			grant_super_admin( $user->ID );
+		}
 		$this->assertTrue( call_user_func( $route['permission_callback'] ) );
 	}
 
