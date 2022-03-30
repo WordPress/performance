@@ -902,11 +902,11 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 			'wp_get_attachment_metadata',
 			function( $data, $attachment_id ) {
 				$data['sources'] = array(
-					'image/jpeg' => array(
+					'image/jpeg'    => array(
 						'file'     => 'paint.jpeg',
 						'filesize' => 1000,
 					),
-					'image/webp' => array(
+					'image/webp'    => array(
 						'file'     => 'paint.webp',
 						'filesize' => 2000,
 					),

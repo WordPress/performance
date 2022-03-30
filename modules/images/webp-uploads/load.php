@@ -738,8 +738,8 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
  *
  * @since n.e.x.t
  *
- * @param array  $mime_types    The list of mime types that can be used to update images in the content.
- * @param int    $attachment_id The attachment ID.
+ * @param array $mime_types    The list of mime types that can be used to update images in the content.
+ * @param int   $attachment_id The attachment ID.
  * @return array Array of available mime types ordered by filesize.
  */
 function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id ) {
