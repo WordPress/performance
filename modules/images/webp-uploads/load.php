@@ -719,11 +719,6 @@ add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10
  * @return array The updated metadata for the attachment to be stored in the meta table.
  */
 function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
-
-	if ( ! doing_action( 'wp_ajax_image-editor' ) ) {
-		return;
-	}
-
 	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
 
 	foreach ( $trace as $element ) {
