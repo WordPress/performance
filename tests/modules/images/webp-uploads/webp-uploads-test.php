@@ -818,16 +818,27 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 
 		$editor = new WP_Image_Edit( $attachment_id );
-		$editor->crop( 10, 10, 0, 0 )->save();
+		$editor->crop( 1000, 200, 0, 0 )->save();
 		$this->assertTrue( $editor->success() );
 
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+
 		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertRegExp( '/e\d{13}/', $metadata['sources']['image/webp']['file'] );
+		$this->assertRegExp( '/e\d{13}/', $metadata['sources']['image/jpeg']['file'] );
 
 		$this->assertArrayHasKey( 'sources', $metadata );
 		$this->assertArrayHasKey( 'sizes', $metadata );
 
-		foreach ( $metadata['sizes'] as $properties ) {
+		foreach ( $metadata['sizes'] as $size_name => $properties ) {
 			$this->assertArrayHasKey( 'sources', $properties );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+
+			$this->assertRegExp( '/e\d{13}/', $properties['sources']['image/webp']['file'] );
+			$this->assertRegExp( '/e\d{13}/', $properties['sources']['image/jpeg']['file'] );
 		}
 	}
 
