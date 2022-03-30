@@ -861,9 +861,11 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 	public function it_should_restore_the_sources_array_from_the_backup_when_an_image_is_edited() {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
-		$editor        = new WP_Image_Edit( $attachment_id );
+
+		$editor = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
 		$this->assertTrue( $editor->success() );
+
 		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 		$this->assertArrayHasKey( 'full-orig', $backup_sources );
 		$this->assertIsArray( $backup_sources['full-orig'] );
