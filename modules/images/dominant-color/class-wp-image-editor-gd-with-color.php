@@ -10,6 +10,8 @@
 class WP_Image_Editor_GD_With_Color extends WP_Image_Editor_GD {
 
 	/**
+	 * Get dominant color from a file.
+	 *
 	 * @param string $default_color default is light grey.
 	 *
 	 * @return string
