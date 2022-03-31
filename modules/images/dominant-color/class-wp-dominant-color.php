@@ -132,8 +132,17 @@ class WP_Dominant_Color {
 	public function tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 
 		$image_meta = wp_get_attachment_metadata( $attachment_id );
-
-		if ( isset( $image_meta['dominant_color'] ) ) {
+		/**
+		 * Allow developers to filter the contol the adding of dominant color to the image.
+		 * set to false inorder disable adding the dominant color to the image.
+		 *
+		 * @param bool $add_dominant_color_to_image
+		 * @param int  $attachment_id
+		 * @param array $image_meta
+		 * @param string $filtered_image
+		 * @param string $context
+		 */
+		if ( apply_filters( 'enable_dominant_color_for_image', isset( $image_meta['dominant_color'] ), $attachment_id, $image_meta, $filtered_image, $context ) ) {
 			$data  = sprintf( 'data-dominantColor="%s"', $image_meta['dominant_color'] );
 			$style = '';
 			if ( strpos( $filtered_image, 'loading="lazy"' ) !== false ) {
