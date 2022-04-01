@@ -752,7 +752,7 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 	}
 
 	if ( empty( webp_uploads_get_upload_image_mime_transforms()[ $mime_type ] ) ) {
-		return $override;
+		return null;
 	}
 
 	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms()[ $mime_type ];
@@ -767,18 +767,18 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 		}
 
 		if ( ! isset( $allowed_mimes[ $targeted_mime ] ) || ! is_string( $allowed_mimes[ $targeted_mime ] ) ) {
-			return $override;
+			return null;
 		}
 
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $targeted_mime ) ) ) {
-			return $override;
+			return null;
 		}
 
 		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
 		$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
 
 		if ( is_wp_error( $image->save( $destination, $targeted_mime ) ) ) {
-			return $override;
+			return null;
 		}
 
 		$_sizes = array();
@@ -803,6 +803,6 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 		2
 	);
 
-	return $override;
+	return null;
 }
 add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 10, 5 );
