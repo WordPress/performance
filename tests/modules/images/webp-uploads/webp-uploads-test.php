@@ -990,8 +990,8 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
-		$this->assertRegExp( '/e\d{13}/', $metadata['sources']['image/webp']['file'] );
-		$this->assertRegExp( '/e\d{13}/', $metadata['sources']['image/jpeg']['file'] );
+		$this->assertFileNameIsEdited( $metadata['sources']['image/webp']['file'] );
+		$this->assertFileNameIsEdited( $metadata['sources']['image/jpeg']['file'] );
 
 		$this->assertArrayHasKey( 'sources', $metadata );
 		$this->assertArrayHasKey( 'sizes', $metadata );
@@ -1001,8 +1001,8 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 
-			$this->assertRegExp( '/e\d{13}/', $properties['sources']['image/webp']['file'] );
-			$this->assertRegExp( '/e\d{13}/', $properties['sources']['image/jpeg']['file'] );
+			$this->assertFileNameIsEdited( $properties['sources']['image/webp']['file'] );
+			$this->assertFileNameIsEdited( $properties['sources']['image/jpeg']['file'] );
 		}
 	}
 
@@ -1091,7 +1091,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
 		$editor->rotate_right()->save();
-		$this->assertRegExp( '/full-\d{13}/', webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) );
+		$this->assertSizeNameIsHashed( 'full', webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) );
 	}
 
 	/**
@@ -1139,7 +1139,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		$backup_sources_keys = array_keys( $backup_sources );
 		$this->assertSame( 'full-orig', reset( $backup_sources_keys ) );
-		$this->assertRegExp( '/full-\d{13}/', end( $backup_sources_keys ) );
+		$this->assertSizeNameIsHashed( 'full', end( $backup_sources_keys ) );
 		$this->assertSame( $sources, end( $backup_sources ) );
 	}
 
