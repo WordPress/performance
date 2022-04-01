@@ -82,7 +82,7 @@ function perflab_oc_health_persistent_object_cache() {
 
 	$available_services = perflab_oc_health_available_object_cache_services();
 
-	$notes = __( 'Your hosting provider can tell you if persistent objects caches are able to be enabled on your site.', 'performance-lab' );
+	$notes = __( 'Your hosting provider can tell you if persistent object caches are able to be enabled on your site.', 'performance-lab' );
 
 	if ( ! empty( $available_services ) ) {
 		$notes .= ' ' . sprintf(
