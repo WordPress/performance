@@ -8,5 +8,8 @@
  * @since 1.0.0
  */
 
+/**
+ * Module class.
+ */
 include 'class-wp-dominant-color.php';
 new WP_Dominant_Color();
