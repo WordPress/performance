@@ -687,6 +687,8 @@ add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10
 /**
  * Adds sources to metadata for an attachment.
  *
+ * @since n.e.x.t
+ *
  * @param array  $metadata              Metadata of the attachment.
  * @param array  $valid_mime_transforms List of valid mime transforms for current image mime type.
  * @param array  $allowed_mimes         Allowed mime types.
