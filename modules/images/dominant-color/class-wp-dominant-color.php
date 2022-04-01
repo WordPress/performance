@@ -146,7 +146,7 @@ class WP_Dominant_Color {
 			$data  = sprintf( 'data-dominantColor="%s"', $image_meta['dominant_color'] );
 			$style = '';
 			if ( strpos( $filtered_image, 'loading="lazy"' ) !== false ) {
-				$style = ' style="--dominant-color: #' . $image_meta['dominant_color'] . '; " ';
+				$style = ' style="--dominant-color: #' . $image_meta['dominant_color'] . ';" ';
 			}
 
 			$extra_class = '';
