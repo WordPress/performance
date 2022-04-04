@@ -733,7 +733,6 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $allowe
 }
 
 /**
- *
  * Creates additional image formats when original image is edited.
  *
  * @since n.e.x.t
