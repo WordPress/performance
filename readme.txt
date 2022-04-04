@@ -18,10 +18,10 @@ The Performance Lab plugin is a collection of modules focused on enhancing perfo
 Currently the plugin includes the following performance modules:
 
 * **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
-* **WebP Support:** Adds a WebP support check in Site Health status.
 * **Persistent Object Cache Health Check:** Adds a persistent object cache check for sites with non-trivial amounts of data in Site Health status.
-* **Audit Enqueued Assets:** Adds a CSS and JS resource check in Site Health status.
 * **Audit Autoloaded Options:** Adds a check for autoloaded options in Site Health status.
+* **Audit Enqueued Assets:** Adds a CSS and JS resource check in Site Health status.
+* **WebP Support:** Adds a WebP support check in Site Health status.
 
 == Installation ==
 
@@ -65,6 +65,18 @@ Contributions welcome! There are several ways to contribute:
 * Join the weekly chat (Tuesdays at 16:00 UTC) in the [#performance channel on Slack](https://wordpress.slack.com/archives/performance)
 
 == Changelog ==
+
+= 1.0.0-rc.1 =
+
+**Enhancements**
+
+* Images: Change expected order of items in the `webp_uploads_content_image_mimes` filter. ([250](https://github.com/WordPress/performance/pull/250))
+* Images: Replace images in frontend content without using an additional regular expression. ([262](https://github.com/WordPress/performance/pull/262))
+* Images: Restore and backup image sizes alongside the sources properties. ([242](https://github.com/WordPress/performance/pull/242))
+
+**Bug Fixes**
+
+* Images: Select image editor based on WebP support instead of always using the default one. ([259](https://github.com/WordPress/performance/pull/259))
 
 = 1.0.0-beta.3 =
 
