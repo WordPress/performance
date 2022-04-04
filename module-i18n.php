@@ -7,9 +7,9 @@ $generated_i18n_strings = array(
 	_x( 'Adds a persistent object cache check for sites with non-trivial amounts of data in Site Health status.', 'module description', 'performance-lab' ),
 	_x( 'Audit Autoloaded Options', 'module name', 'performance-lab' ),
 	_x( 'Adds a check for autoloaded options in Site Health status.', 'module description', 'performance-lab' ),
-	_x( 'Audit Enqueued Assets', 'module name', 'performance-lab' ),
-	_x( 'Adds a CSS and JS resource check in Site Health status.', 'module description', 'performance-lab' ),
 	_x( 'WebP Support', 'module name', 'performance-lab' ),
 	_x( 'Adds a WebP support check in Site Health status.', 'module description', 'performance-lab' ),
+	_x( 'Audit Enqueued Assets', 'module name', 'performance-lab' ),
+	_x( 'Adds a CSS and JS resource check in Site Health status.', 'module description', 'performance-lab' ),
 );
 /* THIS IS THE END OF THE GENERATED FILE */
