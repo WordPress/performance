@@ -10,7 +10,7 @@
  * Class WP_Image_Edit to handle the image edits that take place from the image editor
  * from within the admin dashboard to remove complexity around changes for an image.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  */
 class WP_Image_Edit {
 	protected $changes       = array();
