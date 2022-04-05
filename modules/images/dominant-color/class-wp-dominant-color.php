@@ -1,5 +1,10 @@
 <?php
-
+/**
+ *  Add Dominant Color preload support to WordPress.
+ *
+ * @package performance-lab
+ * @since 1.0.0
+ */
 
 /**
  * Add Dominant Color preload support to WordPress.
@@ -344,4 +349,3 @@ class WP_Dominant_Color {
 	}
 
 }
-
