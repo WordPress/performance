@@ -6,9 +6,10 @@
  * @group dominant-color
  */
 class Dominant_Color_Test extends WP_UnitTestCase {
+	protected $dominant_color;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		$this->dominant_color = new WP_Dominant_Color();
 	}

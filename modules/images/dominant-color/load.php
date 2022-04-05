@@ -8,8 +8,10 @@
  * @since 1.0.0
  */
 
+
+include_once 'class-wp-dominant-color.php';
+
 /**
  * Module class.
  */
-include_once 'class-wp-dominant-color.php';
 new WP_Dominant_Color();
