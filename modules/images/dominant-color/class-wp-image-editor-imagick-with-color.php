@@ -4,6 +4,8 @@
  * with dominant color detection
  *
  * @package performance-lab
+ * @group dominant-color
+ *
  * @since 1.0.0
  */
 
@@ -11,7 +13,7 @@
  * WordPress Image Editor Class for Image Manipulation through Imagick
  * with dominant color detection
  *
- * @since 6.0.0
+ * @since 6.x
  *
  * @see WP_Image_Editor
  */
