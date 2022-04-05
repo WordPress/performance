@@ -11,5 +11,5 @@
 /**
  * Module class.
  */
-include 'class-wp-dominant-color.php';
+include_once 'class-wp-dominant-color.php';
 new WP_Dominant_Color();
