@@ -37,7 +37,7 @@ npm run wp-env stop
 We use GitHub Projects as well as a few different sets of labels to ensure that issues are properly tracked and able to be easily managed by contributors. For details, please refer to our [GitHub workflow documentation](./Github-workflow.md).
 
 ## Coding standards
-In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). For a complete documentation about Performance Lab plugin modules specifications, read this [documentation](./Writing-a-module.md).
+In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). For complete documentation about Performance Lab plugin modules specifications, read this [documentation](./Writing-a-module.md).
 
 ### WordPress and PHP compatibility
 All code in the Performance Lab plugin must follow theses requirements:
@@ -48,7 +48,7 @@ All code in the Performance Lab plugin must follow theses requirements:
 After adding new code to the repository, make sure to run this command to lint and format PHP code:
 ```
 npm run lint-php
-npms run format-php
+npm run format-php
 ```
 
 ## PHPUnit tests

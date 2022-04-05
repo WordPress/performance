@@ -819,7 +819,7 @@ add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 1
  * of an edit to an attachment either restore or other type of edit, in that case we perform operations
  * to save the sources properties, specifically for the `full` size image due this is a virtual image size.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @see wp_update_attachment_metadata()
  *
@@ -855,7 +855,7 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  * been updated. It removes the current sources property due once this function is executed
  * right after an edit has taken place and the current sources are no longer accurate.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param int   $attachment_id The ID representing the attachment.
  * @param array $data          The current metadata of the attachment.
@@ -912,7 +912,7 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
  * Stores the provided sources for the attachment ID in the `_wp_attachment_backup_sources`  with
  * the next available target if target is `null` no source would be stored.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param int   $attachment_id The ID of the attachment.
  * @param array $sources       An array with the full sources to be stored on the next available key.
@@ -939,7 +939,7 @@ function webp_uploads_backup_full_image_sources( $attachment_id, $sources ) {
  * has not been used as part of the backup sources it would be used if no size is
  * found or backup exists `null` would be returned instead.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param int $attachment_id The ID of the attachment.
  * @return null|string The next available full size name.
@@ -976,7 +976,7 @@ function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) {
  * the top level `sources` into the metadata, in order to ensure the restore process has a reference to the right
  * images.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param int   $attachment_id The ID of the attachment.
  * @param array $data          The current metadata to be stored in the attachment.
@@ -999,3 +999,68 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
 
 	return $data;
 }
+
+/**
+ * Returns the attachment sources array ordered by filesize.
+ *
+ * @since n.e.x.t
+ *
+ * @param int    $attachment_id The attachment ID.
+ * @param string $size          The attachment size.
+ * @return array The attachment sources array.
+ */
+function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail' ) {
+	// Check for the sources attribute in attachment metadata.
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+
+	// Return full image size sources.
+	if ( 'full' === $size && ! empty( $metadata['sources'] ) ) {
+		return $metadata['sources'];
+	}
+
+	// Return the resized image sources.
+	if ( ! empty( $metadata['sizes'][ $size ]['sources'] ) ) {
+		return $metadata['sizes'][ $size ]['sources'];
+	}
+
+	// Return an empty array if no sources found.
+	return array();
+}
+
+/**
+ * Filters on `webp_uploads_content_image_mimes` to generate the available mime types for an attachment
+ * and orders them by the smallest filesize first.
+ *
+ * @since n.e.x.t
+ *
+ * @param array $mime_types    The list of mime types that can be used to update images in the content.
+ * @param int   $attachment_id The attachment ID.
+ * @return array Array of available mime types ordered by filesize.
+ */
+function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id ) {
+	$sources = webp_uploads_get_attachment_sources( $attachment_id, 'full' );
+
+	if ( empty( $sources ) ) {
+		return $mime_types;
+	}
+
+	// Remove mime types with filesize of 0.
+	$sources = array_filter(
+		$sources,
+		function( $source ) {
+			return isset( $source['filesize'] ) && $source['filesize'] > 0;
+		}
+	);
+
+	// Order sources by filesize in ascending order.
+	uasort(
+		$sources,
+		function( $a, $b ) {
+			return $a['filesize'] - $b['filesize'];
+		}
+	);
+
+	// Create an array of available mime types ordered by smallest filesize.
+	return array_keys( $sources );
+}
+add_filter( 'webp_uploads_content_image_mimes', 'webp_uploads_get_mime_types_by_filesize', 10, 2 );

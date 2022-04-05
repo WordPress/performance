@@ -812,39 +812,6 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Update source attributes when webp is edited.
-	 *
-	 * @test
-	 */
-	public function it_should_validate_source_attribute_update_when_webp_edited() {
-		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
-
-		$editor = new WP_Image_Edit( $attachment_id );
-		$editor->crop( 1000, 200, 0, 0 )->save();
-		$this->assertTrue( $editor->success() );
-
-		$this->assertImageHasSource( $attachment_id, 'image/webp' );
-		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
-
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-
-		$this->assertRegExp( '/e\d{13}/', $metadata['sources']['image/webp']['file'] );
-		$this->assertRegExp( '/e\d{13}/', $metadata['sources']['image/jpeg']['file'] );
-
-		$this->assertArrayHasKey( 'sources', $metadata );
-		$this->assertArrayHasKey( 'sizes', $metadata );
-
-		foreach ( $metadata['sizes'] as $size_name => $properties ) {
-			$this->assertArrayHasKey( 'sources', $properties );
-			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
-			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
-
-			$this->assertRegExp( '/e\d{13}/', $properties['sources']['image/webp']['file'] );
-			$this->assertRegExp( '/e\d{13}/', $properties['sources']['image/jpeg']['file'] );
-		}
-	}
-
-	/**
 	 * Backup the sources structure alongside the full size
 	 *
 	 * @test
@@ -1007,6 +974,39 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 	}
 
 	/**
+	 * Update source attributes when webp is edited.
+	 *
+	 * @test
+	 */
+	public function it_should_validate_source_attribute_update_when_webp_edited() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->crop( 1000, 200, 0, 0 )->save();
+		$this->assertTrue( $editor->success() );
+
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertFileNameIsEdited( $metadata['sources']['image/webp']['file'] );
+		$this->assertFileNameIsEdited( $metadata['sources']['image/jpeg']['file'] );
+
+		$this->assertArrayHasKey( 'sources', $metadata );
+		$this->assertArrayHasKey( 'sizes', $metadata );
+
+		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+			$this->assertArrayHasKey( 'sources', $properties );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+
+			$this->assertFileNameIsEdited( $properties['sources']['image/webp']['file'] );
+			$this->assertFileNameIsEdited( $properties['sources']['image/jpeg']['file'] );
+		}
+	}
+
+	/**
 	 * Allow the upload of a WebP image if at least one editor supports the format
 	 *
 	 * @test
@@ -1091,7 +1091,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
 		$editor->rotate_right()->save();
-		$this->assertRegExp( '/full-\d{13}/', webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) );
+		$this->assertSizeNameIsHashed( 'full', webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) );
 	}
 
 	/**
@@ -1139,7 +1139,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		$backup_sources_keys = array_keys( $backup_sources );
 		$this->assertSame( 'full-orig', reset( $backup_sources_keys ) );
-		$this->assertRegExp( '/full-\d{13}/', end( $backup_sources_keys ) );
+		$this->assertSizeNameIsHashed( 'full', end( $backup_sources_keys ) );
 		$this->assertSame( $sources, end( $backup_sources ) );
 	}
 
@@ -1160,5 +1160,97 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		$this->assertTrue( $editor->success() );
 		$this->assertEmpty( get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
+	}
+
+	/**
+	 * Test webp_uploads_get_mime_types_by_filesize returns smallest filesize, in this case webp.
+	 *
+	 * @test
+	 */
+	public function it_should_return_smaller_webp_mime_type() {
+		// File should generate smallest webp image size.
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		$mime_types = webp_uploads_get_mime_types_by_filesize( array( 'image/jpeg', 'image/webp' ), $attachment_id, 'the_content' );
+
+		$this->assertIsArray( $mime_types );
+		$this->assertSame( array( 'image/webp', 'image/jpeg' ), $mime_types );
+	}
+
+	/**
+	 * Test webp_uploads_get_mime_types_by_filesize returns smallest filesize, in this case jpeg.
+	 *
+	 * @test
+	 */
+	public function it_should_return_smaller_jpeg_mime_type() {
+		// File should generate smallest jpeg image size.
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
+
+		// Mock attachment meta data to test when jpeg image is smaller.
+		add_filter(
+			'wp_get_attachment_metadata',
+			function( $data, $attachment_id ) {
+				$data['sources'] = array(
+					'image/jpeg' => array(
+						'file'     => 'paint.jpeg',
+						'filesize' => 1000,
+					),
+					'image/webp' => array(
+						'file'     => 'paint.webp',
+						'filesize' => 2000,
+					),
+				);
+
+				return $data;
+			},
+			10,
+			2
+		);
+
+		$mime_types = webp_uploads_get_mime_types_by_filesize( array( 'image/jpeg', 'image/webp' ), $attachment_id, 'the_content' );
+
+		$this->assertIsArray( $mime_types );
+		$this->assertSame( array( 'image/jpeg', 'image/webp' ), $mime_types );
+	}
+
+	/**
+	 * Test webp_uploads_get_mime_types_by_filesize removes invalid mime types with zero filesize.
+	 *
+	 * @test
+	 */
+	public function it_should_remove_mime_types_with_zero_filesize() {
+		// File should generate smallest jpeg image size.
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
+
+		// Mock attachment meta data to test mime type with zero filesize.
+		add_filter(
+			'wp_get_attachment_metadata',
+			function( $data, $attachment_id ) {
+				$data['sources'] = array(
+					'image/jpeg'    => array(
+						'file'     => 'paint.jpeg',
+						'filesize' => 1000,
+					),
+					'image/webp'    => array(
+						'file'     => 'paint.webp',
+						'filesize' => 2000,
+					),
+					'image/invalid' => array(
+						'file'     => 'paint.avif',
+						'filesize' => 0,
+					),
+				);
+
+				return $data;
+			},
+			10,
+			2
+		);
+
+		$mime_types = webp_uploads_get_mime_types_by_filesize( array( 'image/jpeg', 'image/webp' ), $attachment_id, 'the_content' );
+
+		$this->assertIsArray( $mime_types );
+		$this->assertNotContains( 'image/invalid', $mime_types );
+		$this->assertSame( array( 'image/jpeg', 'image/webp' ), $mime_types );
 	}
 }

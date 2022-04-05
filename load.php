@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.
  * Requires at least: 5.8
  * Requires PHP: 5.6
- * Version: 1.0.0-beta.3
+ * Version: 1.0.0-rc.1
  * Author: WordPress Performance Group
  * Author URI: https://make.wordpress.org/core/tag/performance/
  * License: GPLv2 or later
