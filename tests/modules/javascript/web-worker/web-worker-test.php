@@ -10,8 +10,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 	 * @covers ::web_worker_partytown_configuration
 	 */
 	function test_web_worker_partytown_configuration() {
-		$this->assertEquals(
-			1,
+		$this->assertNotFalse(
 			has_action( 'wp_head', 'web_worker_partytown_configuration' )
 		);
 
@@ -58,8 +57,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 	 * @covers ::web_worker_partytown_init
 	 */
 	function test_web_worker_partytown_init() {
-		$this->assertEquals(
-			1,
+		$this->assertNotFalse(
 			has_action(
 				'wp_enqueue_scripts',
 				'web_worker_partytown_init'
@@ -76,8 +74,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 	function test_web_worker_partytown_worker_scripts() {
 		global $wp_scripts;
 
-		$this->assertEquals(
-			10,
+		$this->assertNotFalse(
 			has_action( 'wp_print_scripts', 'web_worker_partytown_worker_scripts' )
 		);
 
