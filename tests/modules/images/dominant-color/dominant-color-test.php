@@ -10,7 +10,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		$this->dominant_color = new Dominant_Color();
+		$this->dominant_color = new WP_Dominant_Color();
 	}
 
 	/**
