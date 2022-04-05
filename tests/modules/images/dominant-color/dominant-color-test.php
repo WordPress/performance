@@ -3,8 +3,15 @@
  * Tests for dominant-color module.
  *
  * @package performance-lab
+ * @group dominant-color
  */
 class Dominant_Color_Test extends WP_UnitTestCase {
+
+	public function setUp() {
+		parent::setUp();
+
+		$this->dominant_color = new Dominant_Color();
+	}
 
 	/**
 	 * Tests dominant_color_metadata().
@@ -13,12 +20,12 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 	 */
 	public function test_dominant_color_metadata( $image_path, $expected_color, $expected_transparency, $color_is_light ) {
 		// Non existing attachment.
-		$dominant_color_metadata = ( new WP_Dominant_Color() )->dominant_color_metadata( array(), 1 );
+		$dominant_color_metadata = $this->dominant_color->dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $dominant_color_metadata );
 
 		// Creating attachment.
 		$attachment_id           = $this->factory->attachment->create_upload_object( $image_path );
-		$dominant_color_metadata = ( new WP_Dominant_Color() )->dominant_color_metadata( array(), $attachment_id );
+		$dominant_color_metadata = $this->dominant_color->dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'dominant_color', $dominant_color_metadata );
 		$this->assertNotEmpty( $dominant_color_metadata['dominant_color'] );
 		$this->assertStringContainsString( $expected_color, $dominant_color_metadata['dominant_color'] );
@@ -31,11 +38,11 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 	 */
 	public function test_has_transparency_metadata( $image_path, $expected_color, $expected_transparency, $color_is_light ) {
 		// Non existing attachment.
-		$transparency_metadata = ( new WP_Dominant_Color() )->has_transparency_metadata( array(), 1 );
+		$transparency_metadata = $this->dominant_color->has_transparency_metadata( array(), 1 );
 		$this->assertEmpty( $transparency_metadata );
 
 		$attachment_id         = $this->factory->attachment->create_upload_object( $image_path );
-		$transparency_metadata = ( new WP_Dominant_Color() )->has_transparency_metadata( array(), $attachment_id );
+		$transparency_metadata = $this->dominant_color->has_transparency_metadata( array(), $attachment_id );
 		if ( $expected_transparency ) {
 			$this->assertArrayHasKey( 'has_transparency', $transparency_metadata );
 			$this->assertNotEmpty( $transparency_metadata['has_transparency'] );
@@ -57,7 +64,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 		$filtered_image_mock_lazy_load = '<img loading="lazy" width="1024" height="727" class="test" src="http://localhost:8888/wp-content/uploads/2022/03/test.png" />';
 
 		if ( isset( $image_meta['dominant_color'] ) ) {
-			$filtered_image_tags_added = ( new WP_Dominant_Color() )->tag_add_adjust( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
+			$filtered_image_tags_added = $this->dominant_color->tag_add_adjust( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
 			$this->assertStringContainsString( 'data-dominantColor="' . $expected_color . '"', $filtered_image_tags_added );
 			$this->assertStringContainsString( 'data-has-transparency="' . json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
 			$this->assertStringContainsString( 'style="--dominant-color: #' . $expected_color . ';"', $filtered_image_tags_added );
@@ -68,7 +75,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 
 			// Testing tag_add_adjust() without lazy load.
 			$filtered_image_mock_not_lazy_load = '<img width="1024" height="727" src="http://localhost:8888/wp-content/uploads/2022/03/test.png" />';
-			$filtered_image_tags_added         = ( new WP_Dominant_Color() )->tag_add_adjust( $filtered_image_mock_not_lazy_load, 'the_content', $attachment_id );
+			$filtered_image_tags_added         = $this->dominant_color->tag_add_adjust( $filtered_image_mock_not_lazy_load, 'the_content', $attachment_id );
 			$this->assertStringContainsString( 'data-dominantColor="' . $expected_color . '"', $filtered_image_tags_added );
 			$this->assertStringContainsString( 'data-has-transparency="' . json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
 			$this->assertStringNotContainsString( 'style="--dominant-color:', $filtered_image_tags_added );
@@ -81,7 +88,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 				return false;
 			}
 		);
-		$filtered_image_tags_not_added = ( new WP_Dominant_Color() )->tag_add_adjust( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
+		$filtered_image_tags_not_added = $this->dominant_color->tag_add_adjust( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
 		$this->assertEquals( $filtered_image_mock_lazy_load, $filtered_image_tags_not_added );
 	}
 
