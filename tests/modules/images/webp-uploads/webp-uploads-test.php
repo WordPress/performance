@@ -3,7 +3,7 @@
  * Tests for webp-uploads module.
  *
  * @package performance-lab
- * @group   performance-lab
+ * @group   webp-uploads
  */
 
 use PerformanceLab\Tests\TestCase\ImagesTestCase;
