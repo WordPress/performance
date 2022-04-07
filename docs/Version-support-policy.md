@@ -16,7 +16,7 @@ It needs to be clarified though that **the Performance Lab plugin will never req
 
 ## Removal of modules
 
-Once a module has been merged into WordPress core, there are two potential options for how to proceed with the module:
+Once a module has been merged and shipped in a WordPress release, there are two potential options for how to proceed with the module:
 * If module development is considered completed and continuing development within WordPress core is preferred, the module should be removed from the plugin eventually.
 * If module development can continue in the plugin based on the parts that have already been merged into WordPress core, only the parts of the module that were merged should be removed from the plugin eventually.
 
@@ -24,7 +24,7 @@ Whichever of the two options applies to a module, (critical functionality of) st
 
 Therefore, **the Performance Lab plugin commits to only removing a module in combination with bumping the minimum WordPress version requirement to the same stable core release that the merged module code was published with**. This is best clarified with an example:
 * If a module gets merged during development of WordPress 6.0, the module will not be removed from the plugin immediately.
-* Only after WordPress 6.0 has been released, the module can be removed from the plugin.
+* Only after WordPress 6.0 has been released, can the module be removed from the plugin.
 * The first plugin version in which the module is no longer present **must** bump the minimum WordPress version requirement to 6.0.
 
 The above policy ensures that sites which rely on the feature will never see that feature removed, even if they do not update to the latest WordPress core release. Because the Performance Lab plugin limits removing merged modules to bumping the WordPress core version requirement, plugin versions without the module would then no longer surface to sites on outdated WordPress core versions, keeping their behavior intact.
