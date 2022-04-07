@@ -721,7 +721,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, 
 			}
 
 			$metadata['sizes'][ $size ]['sources'][ $targeted_mime ] = array(
-				'file'     => wp_basename( $image_file ),
+				'file'     => $subsized_images[ $targeted_mime ][ $size ]['file'],
 				'filesize' => filesize( $image_file ),
 			);
 		}
