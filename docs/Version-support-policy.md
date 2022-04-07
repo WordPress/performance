@@ -8,7 +8,7 @@ All modules bundled in the Performance Lab plugin are at different stages of dev
 
 ## WordPress core versions
 
-**The Performance Lab plugin commits to supporting the latest stable version of WordPress core.** With that said, the minimum WordPress version requirement will not be bumped unnecessarily, so realistically the plugin will usually support the latest _two_ stable versions of WordPress core. If or once a feature that is only available in the latest WordPress core stable release is required for a plugin module, the minimum requirement of the plugin will be bumped to that version.
+**The Performance Lab plugin commits to supporting the latest stable version of WordPress core.** With that said, the minimum WordPress version requirement will not be bumped unnecessarily, so realistically the plugin _may_ support additional versions of WordPress core. If or once a feature that is only available in the latest WordPress core stable release is required for a plugin module, the minimum requirement of the plugin will be bumped to that version.
 
 Supporting a greater array of older WordPress core versions would be detrimental for the plugin, as it is primarily intended for beta testing and often requires using features that have only been introduced in a recent WordPress core version.
 
