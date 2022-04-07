@@ -694,8 +694,7 @@ add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10
  * @param string $file                  Path to original file.
  * @param array  $main_images           Path of all main image files of all mime types.
  * @param array  $subsized_images       Path of all subsized image file of all mime types.
- *
- * @return array                        Metadata with sources added.
+ * @return array Metadata with sources added.
  */
 function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, $main_images, $subsized_images ) {
 	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
