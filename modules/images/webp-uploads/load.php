@@ -782,11 +782,11 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 				}
 
 				if ( ! isset( $allowed_mimes[ $targeted_mime ] ) || ! is_string( $allowed_mimes[ $targeted_mime ] ) ) {
-					return null;
+					continue;
 				}
 
 				if ( ! wp_image_editor_supports( array( 'mime_type' => $targeted_mime ) ) ) {
-					return null;
+					continue;
 				}
 
 				$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
@@ -795,7 +795,7 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 				$main_images[ $targeted_mime ] = $image->save( $destination, $targeted_mime );
 
 				if ( is_wp_error( $main_images[ $targeted_mime ] ) ) {
-					return null;
+					continue;
 				}
 
 				$subsized_images[ $targeted_mime ] = $image->multi_resize( $resize_sizes );
