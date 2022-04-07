@@ -747,13 +747,15 @@ function webp_uploads_update_image_onchange( $override, $file, $editor, $mime_ty
 		return $override;
 	}
 
-	if ( empty( webp_uploads_get_upload_image_mime_transforms()[ $mime_type ] ) ) {
+	$transforms = webp_uploads_get_upload_image_mime_transforms();
+	if ( empty( $transforms[ $mime_type ] ) ) {
 		return null;
 	}
 
+	$mime_transforms = $transforms[ $mime_type ];
 	add_filter(
 		'wp_update_attachment_metadata',
-		function ( $metadata, $post_meta_id ) use ( $post_id, $file, $mime_type, $editor ) {
+		function ( $metadata, $post_meta_id ) use ( $post_id, $file, $mime_type, $editor, $mime_transforms ) {
 			if ( $post_meta_id !== $post_id ) {
 				return $metadata;
 			}
@@ -773,13 +775,12 @@ function webp_uploads_update_image_onchange( $override, $file, $editor, $mime_ty
 				}
 			}
 
-			$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms()[ $mime_type ];
-			$allowed_mimes         = array_flip( wp_get_mime_types() );
-			$original_directory    = pathinfo( $file, PATHINFO_DIRNAME );
-			$filename              = pathinfo( $file, PATHINFO_FILENAME );
-			$main_images           = array();
-			$subsized_images       = array();
-			foreach ( $valid_mime_transforms as $targeted_mime ) {
+			$allowed_mimes      = array_flip( wp_get_mime_types() );
+			$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
+			$filename           = pathinfo( $file, PATHINFO_FILENAME );
+			$main_images        = array();
+			$subsized_images    = array();
+			foreach ( $mime_transforms as $targeted_mime ) {
 				if ( $targeted_mime === $mime_type ) {
 					$main_images[ $targeted_mime ]     = array( 'path' => $file );
 					$subsized_images[ $targeted_mime ] = $metadata['sizes'];
@@ -806,7 +807,7 @@ function webp_uploads_update_image_onchange( $override, $file, $editor, $mime_ty
 				$subsized_images[ $targeted_mime ] = $editor->multi_resize( $resize_sizes );
 			}
 
-			return webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, $main_images, $subsized_images );
+			return webp_uploads_update_sources( $metadata, $mime_transforms, $file, $main_images, $subsized_images );
 		},
 		10,
 		2
