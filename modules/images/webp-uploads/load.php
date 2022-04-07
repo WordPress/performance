@@ -737,12 +737,12 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, 
  *
  * @param bool|null       $override  Value to return instead of saving. Default null.
  * @param string          $file      Name of the file to be saved.
- * @param WP_Image_Editor $image     The image editor instance.
+ * @param WP_Image_Editor $editor    The image editor instance.
  * @param string          $mime_type The mime type of the image.
  * @param int             $post_id   Attachment post ID.
  * @return bool|null Potentially modified $override value.
  */
-function webp_uploads_update_image_onchange( $override, $file, $image, $mime_type, $post_id ) {
+function webp_uploads_update_image_onchange( $override, $file, $editor, $mime_type, $post_id ) {
 	if ( null !== $override ) {
 		return $override;
 	}
@@ -753,19 +753,18 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 
 	add_filter(
 		'wp_update_attachment_metadata',
-		function ( $metadata, $post_meta_id ) use ( $post_id, $file, $mime_type, $image ) {
+		function ( $metadata, $post_meta_id ) use ( $post_id, $file, $mime_type, $editor ) {
 			if ( $post_meta_id !== $post_id ) {
 				return $metadata;
 			}
 
-			$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms()[ $mime_type ];
-			$original_directory    = pathinfo( $file, PATHINFO_DIRNAME );
-			$filename              = pathinfo( $file, PATHINFO_FILENAME );
-			$allowed_mimes         = array_flip( wp_get_mime_types() );
-			$old_metadata          = wp_get_attachment_metadata( $post_id );
-			$resize_sizes          = array();
-			$main_images           = array();
-			$subsized_images       = array();
+			// No sizes to be created.
+			if ( empty( $metadata['sizes'] ) ) {
+				return $metadata;
+			}
+
+			$old_metadata = wp_get_attachment_metadata( $post_id );
+			$resize_sizes = array();
 
 			foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
 				if ( isset( $metadata['sizes'][ $size_name ] ) && ! empty( $metadata['sizes'][ $size_name ] ) &&
@@ -774,6 +773,12 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 				}
 			}
 
+			$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms()[ $mime_type ];
+			$allowed_mimes         = array_flip( wp_get_mime_types() );
+			$original_directory    = pathinfo( $file, PATHINFO_DIRNAME );
+			$filename              = pathinfo( $file, PATHINFO_FILENAME );
+			$main_images           = array();
+			$subsized_images       = array();
 			foreach ( $valid_mime_transforms as $targeted_mime ) {
 				if ( $targeted_mime === $mime_type ) {
 					$main_images[ $targeted_mime ]     = array( 'path' => $file );
@@ -785,20 +790,20 @@ function webp_uploads_update_image_onchange( $override, $file, $image, $mime_typ
 					continue;
 				}
 
-				if ( ! wp_image_editor_supports( array( 'mime_type' => $targeted_mime ) ) ) {
+				if ( ! $editor::supports_mime_type( $targeted_mime ) ) {
 					continue;
 				}
 
 				$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
 				$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
 
-				$main_images[ $targeted_mime ] = $image->save( $destination, $targeted_mime );
+				$result = $editor->save( $destination, $targeted_mime );
 
-				if ( is_wp_error( $main_images[ $targeted_mime ] ) ) {
+				if ( is_wp_error( $result ) ) {
 					continue;
 				}
 
-				$subsized_images[ $targeted_mime ] = $image->multi_resize( $resize_sizes );
+				$subsized_images[ $targeted_mime ] = $editor->multi_resize( $resize_sizes );
 			}
 
 			return webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, $main_images, $subsized_images );
