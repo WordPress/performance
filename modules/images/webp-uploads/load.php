@@ -740,8 +740,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, 
  * @param WP_Image_Editor $image     The image editor instance.
  * @param string          $mime_type The mime type of the image.
  * @param int             $post_id   Attachment post ID.
- *
- * @return bool|null
+ * @return bool|null Potentially modified $override value.
  */
 function webp_uploads_update_image_onchange( $override, $file, $image, $mime_type, $post_id ) {
 	if ( null !== $override ) {
