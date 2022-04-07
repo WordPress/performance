@@ -587,18 +587,6 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		return $image;
 	}
 
-	// TODO: Add a filterable option to determine image extensions, see https://github.com/WordPress/performance/issues/187 for more details.
-	$target_image_extensions = array(
-		'jpg',
-		'jpeg',
-	);
-
-	// Creates a regular extension to find all the URLS with the provided extension for img tag.
-	preg_match_all( '/[^\s"]+\.(?:' . implode( '|', $target_image_extensions ) . ')/i', $image, $matches );
-	if ( empty( $matches ) ) {
-		return $image;
-	}
-
 	/**
 	 * Filters mime types that should be used to update all images in the content. The order of
 	 * mime types matters. The first mime type in the list will be used if it is supported by an image.
@@ -623,46 +611,37 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		return $image;
 	}
 
-	$basename = wp_basename( $metadata['file'] );
-	$urls     = $matches[0];
-	foreach ( $urls as $url ) {
-		$src_filename = wp_basename( $url );
+	// Replace the full size image if present.
+	if ( isset( $metadata['sources'][ $target_mime ]['file'] ) ) {
+		$basename = wp_basename( $metadata['file'] );
+		if ( $basename !== $metadata['sources'][ $target_mime ]['file'] ) {
+			$image = str_replace(
+				$basename,
+				$metadata['sources'][ $target_mime ]['file'],
+				$image
+			);
+		}
+	}
 
-		// Replace the full size image if present.
-		if ( isset( $metadata['sources'][ $target_mime ]['file'] ) && strpos( $url, $basename ) !== false ) {
-			$image = str_replace( $src_filename, $metadata['sources'][ $target_mime ]['file'], $image );
+	// Replace sub sizes for the image if present.
+	foreach ( $metadata['sizes'] as $name => $size_data ) {
+		if ( empty( $size_data['file'] ) ) {
 			continue;
 		}
 
-		if ( empty( $metadata['sizes'] ) ) {
+		if ( empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
 			continue;
 		}
 
-		$extension = wp_check_filetype( $src_filename );
-		// Extension was not set properly no action possible or extension is already in the expected mime.
-		if ( empty( $extension['type'] ) || $extension['type'] === $target_mime ) {
+		if ( $size_data['file'] === $size_data['sources'][ $target_mime ]['file'] ) {
 			continue;
 		}
 
-		// Find the appropriate size for the provided URL.
-		foreach ( $metadata['sizes'] as $name => $size_data ) {
-			// Not the size we are looking for.
-			if ( empty( $size_data['file'] ) || $src_filename !== $size_data['file'] ) {
-				continue;
-			}
-
-			if ( empty( $size_data['sources'][ $target_mime ]['file'] ) ) {
-				continue;
-			}
-
-			// This is the same as the file we want to replace nothing to do here.
-			if ( $size_data['sources'][ $target_mime ]['file'] === $src_filename ) {
-				continue;
-			}
-
-			$image = str_replace( $src_filename, $size_data['sources'][ $target_mime ]['file'], $image );
-			break;
-		}
+		$image = str_replace(
+			$size_data['file'],
+			$size_data['sources'][ $target_mime ]['file'],
+			$image
+		);
 	}
 
 	return $image;
@@ -704,3 +683,254 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 	return rest_ensure_response( $data );
 }
 add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 3 );
+
+/**
+ * Inspect if the current call to `wp_update_attachment_metadata()` was done from within the context
+ * of an edit to an attachment either restore or other type of edit, in that case we perform operations
+ * to save the sources properties, specifically for the `full` size image due this is a virtual image size.
+ *
+ * @since 1.0.0
+ *
+ * @see wp_update_attachment_metadata()
+ *
+ * @param array $data          The current metadata of the attachment.
+ * @param int   $attachment_id The ID of the current attachment.
+ * @return array The updated metadata for the attachment to be stored in the meta table.
+ */
+function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
+	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
+
+	foreach ( $trace as $element ) {
+		if ( ! isset( $element['function'] ) ) {
+			continue;
+		}
+
+		switch ( $element['function'] ) {
+			case 'wp_save_image':
+				// Right after an image has been edited.
+				return webp_uploads_backup_sources( $attachment_id, $data );
+			case 'wp_restore_image':
+				// When an image has been restored.
+				return webp_uploads_restore_image( $attachment_id, $data );
+		}
+	}
+
+	return $data;
+}
+add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata', 10, 2 );
+
+/**
+ * Before saving the metadata of the image store a backup values for the sources and file property
+ * those files would be used and deleted by the backup mechanism, right after the metadata has
+ * been updated. It removes the current sources property due once this function is executed
+ * right after an edit has taken place and the current sources are no longer accurate.
+ *
+ * @since 1.0.0
+ *
+ * @param int   $attachment_id The ID representing the attachment.
+ * @param array $data          The current metadata of the attachment.
+ * @return array The updated metadata for the attachment.
+ */
+function webp_uploads_backup_sources( $attachment_id, $data ) {
+	$target = isset( $_REQUEST['target'] ) ? $_REQUEST['target'] : 'all';
+
+	// When an edit to an image is only applied to a thumbnail there's nothing we need to back up.
+	if ( 'thumbnail' === $target ) {
+		return $data;
+	}
+
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+	// Nothing to back up.
+	if ( ! isset( $metadata['sources'] ) ) {
+		return $data;
+	}
+
+	$sources = $metadata['sources'];
+	// Prevent execution of the callbacks more than once if the callback was already executed.
+	$has_been_processed = false;
+
+	$hook = function ( $meta_id, $post_id, $meta_name ) use ( $attachment_id, $sources, &$has_been_processed ) {
+		// Make sure this hook is only executed in the same context for the provided $attachment_id.
+		if ( $post_id !== $attachment_id ) {
+			return;
+		}
+
+		// This logic should work only if we are looking at the meta key: `_wp_attachment_backup_sizes`.
+		if ( '_wp_attachment_backup_sizes' !== $meta_name ) {
+			return;
+		}
+
+		if ( $has_been_processed ) {
+			return;
+		}
+
+		$has_been_processed = true;
+		webp_uploads_backup_full_image_sources( $post_id, $sources );
+	};
+
+	add_action( 'added_post_meta', $hook, 10, 3 );
+	add_action( 'updated_post_meta', $hook, 10, 3 );
+
+	// Remove the current sources as at this point the current values are no longer accurate.
+	// TODO: Requires to be updated from https://github.com/WordPress/performance/issues/158.
+	unset( $data['sources'] );
+
+	return $data;
+}
+
+/**
+ * Stores the provided sources for the attachment ID in the `_wp_attachment_backup_sources`  with
+ * the next available target if target is `null` no source would be stored.
+ *
+ * @since 1.0.0
+ *
+ * @param int   $attachment_id The ID of the attachment.
+ * @param array $sources       An array with the full sources to be stored on the next available key.
+ */
+function webp_uploads_backup_full_image_sources( $attachment_id, $sources ) {
+	if ( empty( $sources ) ) {
+		return;
+	}
+
+	$target = webp_uploads_get_next_full_size_key_from_backup( $attachment_id );
+	if ( null === $target ) {
+		return;
+	}
+
+	$backup_sources            = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+	$backup_sources            = is_array( $backup_sources ) ? $backup_sources : array();
+	$backup_sources[ $target ] = $sources;
+	// Store the `sources` property into the full size if present.
+	update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $backup_sources );
+}
+
+/**
+ * It finds the next available `full-{orig or hash}` key on the images if the name
+ * has not been used as part of the backup sources it would be used if no size is
+ * found or backup exists `null` would be returned instead.
+ *
+ * @since 1.0.0
+ *
+ * @param int $attachment_id The ID of the attachment.
+ * @return null|string The next available full size name.
+ */
+function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) {
+	$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+	$backup_sizes = is_array( $backup_sizes ) ? $backup_sizes : array();
+
+	if ( empty( $backup_sizes ) ) {
+		return null;
+	}
+
+	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+	$backup_sources = is_array( $backup_sources ) ? $backup_sources : array();
+	foreach ( array_keys( $backup_sizes ) as $size_name ) {
+		// If the target already has the sources attributes find the next one.
+		if ( isset( $backup_sources[ $size_name ] ) ) {
+			continue;
+		}
+
+		// We are only interested in the `full-` sizes.
+		if ( strpos( $size_name, 'full-' ) === false ) {
+			continue;
+		}
+
+		return $size_name;
+	}
+
+	return null;
+}
+
+/**
+ * Restore an image from the backup sizes, the current hook moves the `sources` from the `full-orig` key into
+ * the top level `sources` into the metadata, in order to ensure the restore process has a reference to the right
+ * images.
+ *
+ * @since 1.0.0
+ *
+ * @param int   $attachment_id The ID of the attachment.
+ * @param array $data          The current metadata to be stored in the attachment.
+ * @return array The updated metadata of the attachment.
+ */
+function webp_uploads_restore_image( $attachment_id, $data ) {
+	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+
+	if ( ! is_array( $backup_sources ) ) {
+		return $data;
+	}
+
+	if ( ! isset( $backup_sources['full-orig'] ) || ! is_array( $backup_sources['full-orig'] ) ) {
+		return $data;
+	}
+
+	// TODO: Handle the case If `IMAGE_EDIT_OVERWRITE` is defined and is truthy remove any edited images if present before replacing the metadata.
+	// See: https://github.com/WordPress/performance/issues/158.
+	$data['sources'] = $backup_sources['full-orig'];
+
+	return $data;
+}
+
+/**
+ * Returns the attachment sources array ordered by filesize.
+ *
+ * @since n.e.x.t
+ *
+ * @param int    $attachment_id The attachment ID.
+ * @param string $size          The attachment size.
+ * @return array The attachment sources array.
+ */
+function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail' ) {
+	// Check for the sources attribute in attachment metadata.
+	$metadata = wp_get_attachment_metadata( $attachment_id );
+
+	// Return full image size sources.
+	if ( 'full' === $size && ! empty( $metadata['sources'] ) ) {
+		return $metadata['sources'];
+	}
+
+	// Return the resized image sources.
+	if ( ! empty( $metadata['sizes'][ $size ]['sources'] ) ) {
+		return $metadata['sizes'][ $size ]['sources'];
+	}
+
+	// Return an empty array if no sources found.
+	return array();
+}
+
+/**
+ * Filters on `webp_uploads_content_image_mimes` to generate the available mime types for an attachment
+ * and orders them by the smallest filesize first.
+ *
+ * @since n.e.x.t
+ *
+ * @param array $mime_types    The list of mime types that can be used to update images in the content.
+ * @param int   $attachment_id The attachment ID.
+ * @return array Array of available mime types ordered by filesize.
+ */
+function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id ) {
+	$sources = webp_uploads_get_attachment_sources( $attachment_id, 'full' );
+
+	if ( empty( $sources ) ) {
+		return $mime_types;
+	}
+
+	// Remove mime types with filesize of 0.
+	$sources = array_filter(
+		$sources,
+		function( $source ) {
+			return isset( $source['filesize'] ) && $source['filesize'] > 0;
+		}
+	);
+
+	// Order sources by filesize in ascending order.
+	uasort(
+		$sources,
+		function( $a, $b ) {
+			return $a['filesize'] - $b['filesize'];
+		}
+	);
+
+	// Create an array of available mime types ordered by smallest filesize.
+	return array_keys( $sources );
+}
+add_filter( 'webp_uploads_content_image_mimes', 'webp_uploads_get_mime_types_by_filesize', 10, 2 );
