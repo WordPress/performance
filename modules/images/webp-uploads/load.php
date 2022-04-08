@@ -599,6 +599,23 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	 */
 	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/webp', 'image/jpeg' ), $attachment_id, $context );
 
+	/**
+	 * Filters whether the smaller image should be used regardless of which MIME type is preferred overall.
+	 *
+	 * This is disabled by default only because it is not part of the current WordPress core feature proposal, as it
+	 * requires storing the file sizes, which the plugin implementation does but the core implementation does not.
+	 *
+	 * By enabling this, the plugin will compare the image file sizes and prefer the smaller file regardless of MIME
+	 * type.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $prefer_smaller_image_file Whether to prefer the smaller image file.
+	 */
+	if ( apply_filters( 'webp_uploads_prefer_smaller_image_file', false ) ) {
+		$target_mimes = webp_uploads_get_mime_types_by_filesize( $target_mimes, $attachment_id );
+	}
+
 	$target_mime = null;
 	foreach ( $target_mimes as $mime ) {
 		if ( isset( $metadata['sources'][ $mime ] ) ) {
@@ -933,4 +950,3 @@ function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id ) 
 	// Create an array of available mime types ordered by smallest filesize.
 	return array_keys( $sources );
 }
-add_filter( 'webp_uploads_content_image_mimes', 'webp_uploads_get_mime_types_by_filesize', 10, 2 );
