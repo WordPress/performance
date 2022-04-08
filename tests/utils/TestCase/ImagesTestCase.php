@@ -13,8 +13,8 @@ use WP_UnitTestCase;
  * @method void assertImageHasSizeSource( $attachment_id, $size, $mime_type, $message ) Asserts that the image has the appropriate source for the subsize.
  * @method void assertImageNotHasSource( $attachment_id, $mime_type, $message ) Asserts that the image doesn't have the appropriate source.
  * @method void assertImageNotHasSizeSource( $attachment_id, $size, $mime_type, $message ) Asserts that the image doesn't have the appropriate source for the subsize.
- * @method void assertFileNameIsEdited( string $filename ) Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
- * @method void assertSizeNameIsHashed( string $size_name, string $hashed_size_name ) Asserts that the provided size name is an edited name that contains a hash with digits.
+ * @method void assertFileNameIsEdited( string $filename, string $message = '' ) Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
+ * @method void assertSizeNameIsHashed( string $size_name, string $hashed_size_name, string $message = '' ) Asserts that the provided size name is an edited name that contains a hash with digits.
  */
 abstract class ImagesTestCase extends WP_UnitTestCase {
 
@@ -82,10 +82,11 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
 	 *
 	 * @param string $filename The name of the filename to be asserted.
+	 * @param string $message  The Error message used to display when the assertion fails.
 	 * @return void
 	 */
-	public static function assertFileNameIsEdited( $filename ) {
-		self::assertRegExp( '/e\d{13}/', $filename );
+	public static function assertFileNameIsEdited( $filename, $message = '' ) {
+		self::assertRegExp( '/e\d{13}/', $filename, $message );
 	}
 
 	/**
@@ -93,9 +94,10 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 *
 	 * @param string $size_name        The size name we are looking for.
 	 * @param string $hashed_size_name The current size name we are comparing against.
+	 * @param string $message The Error message used to display when the assertion fails.
 	 * @return void
 	 */
-	public static function assertSizeNameIsHashed( $size_name, $hashed_size_name ) {
-		self::assertRegExp( "/{$size_name}-\d{13}/", $hashed_size_name );
+	public static function assertSizeNameIsHashed( $size_name, $hashed_size_name, $message = '' ) {
+		self::assertRegExp( "/{$size_name}-\d{13}/", $hashed_size_name, $message );
 	}
 }
