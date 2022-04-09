@@ -39,6 +39,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 	}
 
 	$is_update = 'update' === $context;
+	$target    = isset( $_REQUEST['target'] ) ? $_REQUEST['target'] : 'all';
 	if ( $is_update ) {
 		if ( empty( $metadata['file'] ) ) {
 			return $metadata;
@@ -53,8 +54,8 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 		$file = get_attached_file( $attachment_id, true );
 	}
 
-	// File does not exist.
-	if ( ! file_exists( $file ) ) {
+	// File does not exist and we are not editing only the thumbnail.
+	if ( 'thumbnail' !== $target && ! file_exists( $file ) ) {
 		return $metadata;
 	}
 
@@ -68,7 +69,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 	}
 
 	if ( in_array( $mime_type, $valid_mime_transforms[ $mime_type ], true ) ) {
-		if ( empty( $metadata['sources'][ $mime_type ] ) || $is_update ) {
+		if ( empty( $metadata['sources'][ $mime_type ] ) || ( $is_update && 'thumbnail' !== $target ) ) {
 			$metadata['sources'][ $mime_type ] = array(
 				'file'     => wp_basename( $file ),
 				'filesize' => filesize( $file ),
@@ -87,28 +88,30 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 	$filename           = pathinfo( $file, PATHINFO_FILENAME );
 	$allowed_mimes      = array_flip( wp_get_mime_types() );
 
-	// Create the sources for the full sized image.
-	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
-		// If this property exists no need to create the image again unless is an update.
-		if ( ! empty( $metadata['sources'][ $targeted_mime ] ) && ! $is_update ) {
-			continue;
+	// Create the sources for the full sized image only if the target is not the thumbnail only.
+	if ( 'thumbnail' !== $target ) {
+		foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
+			// If this property exists no need to create the image again unless is an update.
+			if ( ! empty( $metadata['sources'][ $targeted_mime ] ) && ! $is_update ) {
+				continue;
+			}
+
+			// The targeted mime is not allowed in the current installation.
+			if ( empty( $allowed_mimes[ $targeted_mime ] ) ) {
+				continue;
+			}
+
+			$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
+			$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
+			$image       = webp_uploads_generate_additional_image_source( $attachment_id, $original_size_data, $targeted_mime, $destination );
+
+			if ( is_wp_error( $image ) ) {
+				continue;
+			}
+
+			$metadata['sources'][ $targeted_mime ] = $image;
+			wp_update_attachment_metadata( $attachment_id, $metadata );
 		}
-
-		// The targeted mime is not allowed in the current installation.
-		if ( empty( $allowed_mimes[ $targeted_mime ] ) ) {
-			continue;
-		}
-
-		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
-		$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
-		$image       = webp_uploads_generate_additional_image_source( $attachment_id, $original_size_data, $targeted_mime, $destination );
-
-		if ( is_wp_error( $image ) ) {
-			continue;
-		}
-
-		$metadata['sources'][ $targeted_mime ] = $image;
-		wp_update_attachment_metadata( $attachment_id, $metadata );
 	}
 
 	// Make sure we have some sizes to work with, otherwise avoid any work.
@@ -122,6 +125,11 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 	}
 
 	foreach ( $metadata['sizes'] as $size_name => $properties ) {
+
+		if ( 'thumbnail' === $target && 'thumbnail' !== $size_name ) {
+			continue;
+		}
+
 		// This image size is not defined or not an array.
 		if ( ! is_array( $properties ) ) {
 			continue;
@@ -160,12 +168,32 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 		}
 
 		foreach ( $valid_mime_transforms[ $mime_type ] as $mime ) {
-			// If this property exists no need to create the image again.
+			// If this property exists no need to create the image again unless is an update with a different mime.
 			if ( ! empty( $properties['sources'][ $mime ] ) && ! $is_update ) {
 				continue;
 			}
 
-			$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
+			if ( $mime === $current_mime ) {
+				continue;
+			}
+
+			if ( 'update' === $context && 'thumbnail' === $target ) {
+				/**
+				 * When only the thumbnail requires additional image, make sure that the base image to create additional
+				 * mime types is the thumbnail with the original mime type due this image is the only one that was modified
+				 * using the attached image or original image would be. The filename should match the original image with
+				 * the only difference of the extension on the filename instead, so the new created image does not have multiple
+				 * suffix like filename-150x150-150x150.webp and instead matches filename-150x150.webp
+				 */
+				$original_extension = explode( '|', $allowed_mimes[ $current_mime ] );
+				$target_extension   = explode( '|', $allowed_mimes[ $mime ] );
+				$file_path          = path_join( $original_directory, $properties['file'] );
+				$destination        = preg_replace( "/\.{$original_extension[0]}$/", ".{$target_extension[0]}", $file_path );
+				$source             = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime, $file_path, $destination );
+			} else {
+				$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
+			}
+
 			if ( is_wp_error( $source ) ) {
 				continue;
 			}
@@ -229,13 +257,15 @@ add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_outp
  *
  * @see wp_create_image_subsizes()
  *
- * @param int    $attachment_id The ID of the attachment we are going to use as a reference to create the image.
- * @param string $size          The size name that would be used to create this image, out of the registered subsizes.
- * @param string $mime          A mime type we are looking to use to create this image.
+ * @param int    $attachment_id         The ID of the attachment we are going to use as a reference to create the image.
+ * @param string $size                  The size name that would be used to create this image, out of the registered subsizes.
+ * @param string $mime                  A mime type we are looking to use to create this image.
+ * @param string $file_path             The path to the file used to create the image with.
+ * @param string $destination_file_name The name used to store the created file it should include the full path.
  *
  * @return array|WP_Error
  */
-function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
+function webp_uploads_generate_image_size( $attachment_id, $size, $mime, $file_path = null, $destination_file_name = null ) {
 	$sizes    = wp_get_registered_image_subsizes();
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 
@@ -251,6 +281,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 		'width'  => 0,
 		'height' => 0,
 		'crop'   => false,
+		'file'   => $file_path,
 	);
 
 	if ( isset( $sizes[ $size ]['width'] ) ) {
@@ -269,7 +300,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 		$size_data['crop'] = (bool) $sizes[ $size ]['crop'];
 	}
 
-	return webp_uploads_generate_additional_image_source( $attachment_id, $size_data, $mime );
+	return webp_uploads_generate_additional_image_source( $attachment_id, $size_data, $mime, $destination_file_name );
 }
 
 /**
@@ -340,7 +371,11 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 		return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'performance-lab' ) );
 	}
 
-	$image_path = wp_get_original_image_path( $attachment_id );
+	if ( empty( $size_data['file'] ) ) {
+		$image_path = wp_get_original_image_path( $attachment_id );
+	} else {
+		$image_path = $size_data['file'];
+	}
 
 	// File does not exist.
 	if ( ! file_exists( $image_path ) ) {

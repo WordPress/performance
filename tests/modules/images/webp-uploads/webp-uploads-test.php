@@ -954,7 +954,30 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$this->assertArrayHasKey( 'sources', $backup_sizes['thumbnail-orig'] );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-		$this->assertArrayHasKey( 'sources', $metadata );
+
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
+
+		$this->assertFileNameIsNotEdited( $metadata['sources']['image/jpeg']['file'] );
+		$this->assertFileNameIsNotEdited( $metadata['sources']['image/webp']['file'] );
+
+		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+
+			if ( 'thumbnail' === $size_name ) {
+				$this->assertSame( $properties['file'], $properties['sources']['image/jpeg']['file'] );
+				$this->assertSame( str_replace( '.jpg', '.webp', $properties['file'] ), $properties['sources']['image/webp']['file'] );
+				$this->assertFileNameIsEdited( $properties['sources']['image/jpeg']['file'] );
+				$this->assertFileNameIsEdited( $properties['sources']['image/webp']['file'] );
+			} else {
+				$this->assertFileNameIsNotEdited( $properties['sources']['image/jpeg']['file'] );
+				$this->assertFileNameIsNotEdited( $properties['sources']['image/webp']['file'] );
+			}
+		}
 	}
 
 	/**
