@@ -137,8 +137,21 @@ class WP_Dominant_Color {
 	public function tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 
 		$image_meta = wp_get_attachment_metadata( $attachment_id );
+
 		/**
-		 * Allow developers to filter the contol the adding of dominant color to the image.
+		 * Controls if the dominant color code should update image meta if not set.
+		 * When an image shown on the site and the meta is not set, the meta will be updated.
+		 *
+		 * @param bool $add_dominant_color_to_image true to add the dominant color to the image: default true.
+		 * @param int  $attachment_id
+		 */
+		if ( ! isset( $image_meta['dominant_color'] ) && apply_filters( 'enable_dominant_color_back_fill', true, $attachment_id ) ) {
+
+			$image_meta = $this->back_fill_dominant_color( $attachment_id, $image_meta );
+		}
+
+		/**
+		 * Allow developers to filter the control the adding of dominant color to the image.
 		 * set to false inorder disable adding the dominant color to the image.
 		 *
 		 * @param bool $add_dominant_color_to_image
@@ -343,6 +356,28 @@ class WP_Dominant_Color {
 		$lightness = round( ( ( ( max( $r, $g, $b ) + min( $r, $g, $b ) ) / 2 ) * 100 ) );
 
 		return ( $lightness >= 50 ? true : false );
+	}
+
+
+	/**
+	 * get dominant color and adds it to the image meta and saves it for next time.
+	 *
+	 * @param int $attachment_id the attachment id.
+	 * @param array $image_meta the current image meta.
+	 *
+	 * @return array the updated image meta.
+	 */
+	private function back_fill_dominant_color( $attachment_id, $image_meta ) {
+
+		$dominant_color = $this->get_dominant_color( $attachment_id );
+		if ( $dominant_color ) {
+			$image_meta['dominant_color'] = $dominant_color;
+			$image_meta['has_transparency'] = $this->get_has_transparency( $attachment_id );
+			$image_meta['is_light'] = $this->color_is_light( $dominant_color );
+			wp_update_attachment_metadata( $attachment_id, $image_meta );
+		}
+
+		return $image_meta;
 	}
 
 }
