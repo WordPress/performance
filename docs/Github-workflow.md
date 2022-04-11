@@ -32,6 +32,9 @@ After discussion, a formal vote may be needed to determine how to proceed. If th
 #### Needs Dev
 If an issue requires (more) development and you are unable to complete it yourself, remove yourself as the assignee and add a **Needs Dev** label.
 
+#### Needs Triage
+If you believe you may have discovered a possible bug or have an engineering-related question about the plugin, add the **Needs Triage** label.
+
 #### Needs Testing
 If you have completed initial engineering and want community members to test prior to merge, add the Needs Testing label.
 
