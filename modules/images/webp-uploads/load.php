@@ -38,8 +38,9 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 		return $metadata;
 	}
 
-	$is_update = 'update' === $context;
-	$target    = isset( $_REQUEST['target'] ) ? $_REQUEST['target'] : 'all';
+	$is_update     = 'update' === $context;
+	$target        = isset( $_REQUEST['target'] ) ? $_REQUEST['target'] : 'all';
+	$attached_file = get_attached_file( $attachment_id, true );
 	if ( $is_update ) {
 		if ( empty( $metadata['file'] ) ) {
 			return $metadata;
@@ -51,7 +52,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 			return $metadata;
 		}
 	} else {
-		$file = get_attached_file( $attachment_id, true );
+		$file = $attached_file;
 	}
 
 	// File does not exist and we are not editing only the thumbnail.
@@ -125,8 +126,13 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 	}
 
 	foreach ( $metadata['sizes'] as $size_name => $properties ) {
-
+		// WHen only the thumbnail is selected to be edited any other size is dismissed.
 		if ( 'thumbnail' === $target && 'thumbnail' !== $size_name ) {
+			continue;
+		}
+
+		// When all the sizes except the thumbnail are edited the thumbnail is dismissed.
+		if ( 'nothumb' === $target && 'thumbnail' === $size_name ) {
 			continue;
 		}
 
@@ -177,19 +183,23 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 				continue;
 			}
 
-			if ( 'update' === $context && 'thumbnail' === $target ) {
-				/**
-				 * When only the thumbnail requires additional image, make sure that the base image to create additional
-				 * mime types is the thumbnail with the original mime type due this image is the only one that was modified
-				 * using the attached image or original image would be. The filename should match the original image with
-				 * the only difference of the extension on the filename instead, so the new created image does not have multiple
-				 * suffix like filename-150x150-150x150.webp and instead matches filename-150x150.webp
-				 */
-				$original_extension = explode( '|', $allowed_mimes[ $current_mime ] );
-				$target_extension   = explode( '|', $allowed_mimes[ $mime ] );
-				$file_path          = path_join( $original_directory, $properties['file'] );
-				$destination        = preg_replace( "/\.{$original_extension[0]}$/", ".{$target_extension[0]}", $file_path );
-				$source             = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime, $file_path, $destination );
+			if ( 'update' === $context ) {
+				if ( 'thumbnail' === $target ) {
+					/**
+					 * When only the thumbnail requires additional image, make sure that the base image to create additional
+					 * mime types is the thumbnail with the original mime type due this image is the only one that was modified
+					 * using the attached image or original image would be. The filename should match the original image with
+					 * the only difference of the extension on the filename instead, so the new created image does not have multiple
+					 * suffix like filename-150x150-150x150.webp and instead matches filename-150x150.webp
+					 */
+					$original_extension = explode( '|', $allowed_mimes[ $current_mime ] );
+					$target_extension   = explode( '|', $allowed_mimes[ $mime ] );
+					$file_path          = path_join( $original_directory, $properties['file'] );
+					$destination        = preg_replace( "/\.{$original_extension[0]}$/", ".{$target_extension[0]}", $file_path );
+					$source             = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime, $file_path, $destination );
+				} else {
+					$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime, $attached_file );
+				}
 			} else {
 				$source = webp_uploads_generate_image_size( $attachment_id, $size_name, $mime );
 			}
