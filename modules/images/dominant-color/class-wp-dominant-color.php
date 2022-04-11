@@ -18,7 +18,7 @@ class WP_Dominant_Color {
 	 */
 	public function __construct() {
 
-		add_filter( 'wp_print_scripts', array( $this, 'add_styles' ) );
+		add_filter( 'wp_enqueue_scripts', array( $this, 'add_inline_style' ) );
 
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'dominant_color_metadata' ), 10, 2 );
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'has_transparency_metadata' ), 10, 2 );
@@ -174,19 +174,16 @@ class WP_Dominant_Color {
 
 
 	/**
-	 * Add Css needed for to show the dominant color as an image background.
+	 * Add CSS needed for to show the dominant color as an image background.
 	 *
 	 * @return void
 	 */
-	public function add_styles() {
-		?>
-		<style>
-			img[data-dominantcolor]:not(.has-transparency) {
-				background-color: var(--dominant-color);
-				background-clip: content-box, padding-box;
-			}
-		</style>
-		<?php
+	public function add_inline_style() {
+		$handle = 'dominant-color-styles';
+		wp_register_style( $handle, false );
+		wp_enqueue_style( $handle );
+		$custom_css = 'img[data-dominantcolor]:not(.has-transparency) { background-color: var(--dominant-color); background-clip: content-box, padding-box; }';
+		wp_add_inline_style( $handle, $custom_css );
 	}
 
 
