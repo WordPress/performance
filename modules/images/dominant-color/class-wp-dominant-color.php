@@ -348,21 +348,21 @@ class WP_Dominant_Color {
 	 *
 	 * @return bool
 	 */
-	function color_is_light( $hex ) {
+	public function color_is_light( $hex ) {
 		$hex       = str_replace( '#', '', $hex );
 		$r         = ( hexdec( substr( $hex, 0, 2 ) ) / 255 );
 		$g         = ( hexdec( substr( $hex, 2, 2 ) ) / 255 );
 		$b         = ( hexdec( substr( $hex, 4, 2 ) ) / 255 );
 		$lightness = round( ( ( ( max( $r, $g, $b ) + min( $r, $g, $b ) ) / 2 ) * 100 ) );
 
-		return ( $lightness >= 50 ? true : false );
+		return $lightness >= 50;
 	}
 
 
 	/**
 	 * get dominant color and adds it to the image meta and saves it for next time.
 	 *
-	 * @param int $attachment_id the attachment id.
+	 * @param int   $attachment_id the attachment id.
 	 * @param array $image_meta the current image meta.
 	 *
 	 * @return array the updated image meta.
@@ -371,9 +371,9 @@ class WP_Dominant_Color {
 
 		$dominant_color = $this->get_dominant_color( $attachment_id );
 		if ( $dominant_color ) {
-			$image_meta['dominant_color'] = $dominant_color;
+			$image_meta['dominant_color']   = $dominant_color;
 			$image_meta['has_transparency'] = $this->get_has_transparency( $attachment_id );
-			$image_meta['is_light'] = $this->color_is_light( $dominant_color );
+			$image_meta['is_light']         = $this->color_is_light( $dominant_color );
 			wp_update_attachment_metadata( $attachment_id, $image_meta );
 		}
 
