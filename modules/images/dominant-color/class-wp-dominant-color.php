@@ -360,7 +360,7 @@ class WP_Dominant_Color {
 
 
 	/**
-	 * get dominant color and adds it to the image meta and saves it for next time.
+	 * Get dominant color and adds it to the image meta and saves it for next time.
 	 *
 	 * @param int   $attachment_id the attachment id.
 	 * @param array $image_meta the current image meta.
