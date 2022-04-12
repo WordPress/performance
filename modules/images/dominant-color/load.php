@@ -248,7 +248,7 @@ function wp_dominant_color_filter_content_tags( $content, $context = null ) {
 	return $content;
 }
 // we don't need to use this filter anymore as the filter wp_content_img_tag is used instead.
-if( version_compare( $GLOBALS['wp_version'], '6', '<' ) ) {
+if ( version_compare( $GLOBALS['wp_version'], '6', '<' ) ) {
 	$filters = array( 'the_content', 'the_excerpt', 'widget_text_content', 'widget_block_content' );
 	foreach ( $filters as $filter ) {
 		add_filter( $filter, 'wp_dominant_color_filter_content_tags', 20 );
