@@ -19,7 +19,7 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 			array(
 				'async' => array(
 					'perflab_page_cache' => array(
-						'label'             => esc_html__( 'Page caching', 'performance-lab' ),
+						'label'             => __( 'Page caching', 'performance-lab' ),
 						'test'              => rest_url( 'performance-lab/v1/tests/page-cache' ),
 						'has_rest'          => true,
 						'async_direct_test' => 'perflab_afpc_page_cache_test',
@@ -50,7 +50,7 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 
 		$expected_props = array(
 			'badge'  => array(
-				'label' => esc_html__( 'Performance', 'performance-lab' ),
+				'label' => __( 'Performance', 'performance-lab' ),
 				'color' => $badge_color[ $expected_status ],
 			),
 			'test'   => 'perflab_page_cache',
