@@ -164,8 +164,9 @@ function wp_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 
 	return $filtered_image;
 }
+
+
 add_filter( 'wp_content_img_tag', 'wp_tag_add_adjust', 20, 3 );
-add_filter( 'wp_dominant_color_img_tag_add_adjust', 'wp_tag_add_adjust', 10, 3 );
 
 
 /**
@@ -246,9 +247,14 @@ function wp_dominant_color_filter_content_tags( $content, $context = null ) {
 
 	return $content;
 }
-$filters = array( 'the_content', 'the_excerpt', 'widget_text_content', 'widget_block_content' );
-foreach ( $filters as $filter ) {
-	add_filter( $filter, 'wp_dominant_color_filter_content_tags', 20 );
+// we don't need to use this filter anymore as the filter wp_content_img_tag is used instead.
+if( version_compare( $GLOBALS['wp_version'], '6', '<' ) ) {
+	$filters = array( 'the_content', 'the_excerpt', 'widget_text_content', 'widget_block_content' );
+	foreach ( $filters as $filter ) {
+		add_filter( $filter, 'wp_dominant_color_filter_content_tags', 20 );
+	}
+
+	add_filter( 'wp_dominant_color_img_tag_add_adjust', 'wp_tag_add_adjust', 10, 3 );
 }
 
 /**
