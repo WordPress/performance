@@ -356,7 +356,7 @@ function wp_color_is_light( $hex ) {
  */
 function wp_back_fill_dominant_color( $attachment_id, $image_meta ) {
 
-	$dominant_color = $this->get_dominant_color( $attachment_id );
+	$dominant_color = wp_get_dominant_color( $attachment_id );
 	if ( $dominant_color ) {
 		$image_meta['dominant_color']   = $dominant_color;
 		$image_meta['has_transparency'] = wp_get_has_transparency( $attachment_id );
