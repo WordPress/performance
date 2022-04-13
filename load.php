@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.0.0-beta.3' );
+define( 'PERFLAB_VERSION', '1.0.0-rc.1' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
