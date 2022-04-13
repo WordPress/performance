@@ -14,7 +14,6 @@ use WP_UnitTestCase;
  * @method void assertImageNotHasSource( $attachment_id, $mime_type, $message ) Asserts that the image doesn't have the appropriate source.
  * @method void assertImageNotHasSizeSource( $attachment_id, $size, $mime_type, $message ) Asserts that the image doesn't have the appropriate source for the subsize.
  * @method void assertFileNameIsEdited( string $filename, string $message = '' ) Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
- * @method void assertFileNameIsNotEdited( string $filename, string $message = '' ) Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
  * @method void assertSizeNameIsHashed( string $size_name, string $hashed_size_name, string $message = '' ) Asserts that the provided size name is an edited name that contains a hash with digits.
  */
 abstract class ImagesTestCase extends WP_UnitTestCase {
@@ -88,17 +87,6 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 */
 	public static function assertFileNameIsEdited( $filename, $message = '' ) {
 		self::assertRegExp( '/e\d{13}/', $filename, $message );
-	}
-
-	/**
-	 * Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
-	 *
-	 * @param string $filename The name of the filename to be asserted.
-	 * @param string $message  The Error message used to display when the assertion fails.
-	 * @return void
-	 */
-	public static function assertFileNameIsNotEdited( $filename, $message = '' ) {
-		self::assertNotRegExp( '/e\d{13}/', $filename, $message );
 	}
 
 	/**
