@@ -700,6 +700,11 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, 
 	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
 
 	foreach ( $valid_mime_transforms as $targeted_mime ) {
+		// Make sure the path and file exists as those values are being accessed.
+		if ( empty( $main_images[ $targeted_mime ]['path'] ) || empty( $main_images[ $targeted_mime ]['file'] ) ) {
+			continue;
+		}
+
 		// Add sources to original image metadata.
 		$image_file = $main_images[ $targeted_mime ]['path'];
 
@@ -708,20 +713,24 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, 
 		}
 
 		$metadata['sources'][ $targeted_mime ] = array(
-			'file'     => wp_basename( $image_file ),
+			'file'     => $main_images[ $targeted_mime ]['file'],
 			'filesize' => filesize( $image_file ),
 		);
 
-		foreach ( $metadata['sizes'] as $size => $size_details ) {
+		foreach ( $metadata['sizes'] as $size_name => $size_details ) {
+			if ( empty( $subsized_images[ $targeted_mime ][ $size_name ]['file'] ) ) {
+				continue;
+			}
+
 			// Add sources to resized image metadata.
-			$image_file = $original_directory . '/' . $subsized_images[ $targeted_mime ][ $size ]['file'];
+			$image_file = path_join( $original_directory, $subsized_images[ $targeted_mime ][ $size_name ]['file'] );
 
 			if ( ! file_exists( $image_file ) ) {
 				continue;
 			}
 
-			$metadata['sizes'][ $size ]['sources'][ $targeted_mime ] = array(
-				'file'     => $subsized_images[ $targeted_mime ][ $size ]['file'],
+			$metadata['sizes'][ $size_name ]['sources'][ $targeted_mime ] = array(
+				'file'     => $subsized_images[ $targeted_mime ][ $size_name ]['file'],
 				'filesize' => filesize( $image_file ),
 			);
 		}
@@ -736,13 +745,13 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, 
  * @since n.e.x.t
  *
  * @param bool|null       $override  Value to return instead of saving. Default null.
- * @param string          $file      Name of the file to be saved.
+ * @param string          $file_path Name of the file to be saved.
  * @param WP_Image_Editor $editor    The image editor instance.
  * @param string          $mime_type The mime type of the image.
  * @param int             $post_id   Attachment post ID.
  * @return bool|null Potentially modified $override value.
  */
-function webp_uploads_update_image_onchange( $override, $file, $editor, $mime_type, $post_id ) {
+function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mime_type, $post_id ) {
 	if ( null !== $override ) {
 		return $override;
 	}
@@ -755,7 +764,7 @@ function webp_uploads_update_image_onchange( $override, $file, $editor, $mime_ty
 	$mime_transforms = $transforms[ $mime_type ];
 	add_filter(
 		'wp_update_attachment_metadata',
-		function ( $metadata, $post_meta_id ) use ( $post_id, $file, $mime_type, $editor, $mime_transforms ) {
+		function ( $metadata, $post_meta_id ) use ( $post_id, $file_path, $mime_type, $editor, $mime_transforms ) {
 			if ( $post_meta_id !== $post_id ) {
 				return $metadata;
 			}
@@ -776,13 +785,16 @@ function webp_uploads_update_image_onchange( $override, $file, $editor, $mime_ty
 			}
 
 			$allowed_mimes      = array_flip( wp_get_mime_types() );
-			$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
-			$filename           = pathinfo( $file, PATHINFO_FILENAME );
+			$original_directory = pathinfo( $file_path, PATHINFO_DIRNAME );
+			$filename           = pathinfo( $file_path, PATHINFO_FILENAME );
 			$main_images        = array();
 			$subsized_images    = array();
 			foreach ( $mime_transforms as $targeted_mime ) {
 				if ( $targeted_mime === $mime_type ) {
-					$main_images[ $targeted_mime ]     = array( 'path' => $file );
+					$main_images[ $targeted_mime ]     = array(
+						'path' => $file_path,
+						'file' => pathinfo( $file_path, PATHINFO_BASENAME ),
+					);
 					$subsized_images[ $targeted_mime ] = $metadata['sizes'];
 					continue;
 				}
@@ -804,10 +816,11 @@ function webp_uploads_update_image_onchange( $override, $file, $editor, $mime_ty
 					continue;
 				}
 
+				$main_images[ $targeted_mime ]     = $result;
 				$subsized_images[ $targeted_mime ] = $editor->multi_resize( $resize_sizes );
 			}
 
-			return webp_uploads_update_sources( $metadata, $mime_transforms, $file, $main_images, $subsized_images );
+			return webp_uploads_update_sources( $metadata, $mime_transforms, $file_path, $main_images, $subsized_images );
 		},
 		10,
 		2
