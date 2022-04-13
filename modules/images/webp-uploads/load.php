@@ -23,12 +23,11 @@
  * @see   wp_generate_attachment_metadata()
  * @see   webp_uploads_get_upload_image_mime_transforms()
  *
- * @param array  $metadata      An array with the metadata from this attachment.
- * @param int    $attachment_id The ID of the attachment where the hook was dispatched.
- * @param string $context       The context of the current operation either: create or update.
+ * @param array $metadata      An array with the metadata from this attachment.
+ * @param int   $attachment_id The ID of the attachment where the hook was dispatched.
  * @return array An array with the updated structure for the metadata before is stored in the database.
  */
-function webp_uploads_create_sources_property( array $metadata, $attachment_id, $context = 'create' ) {
+function webp_uploads_create_sources_property( array $metadata, $attachment_id ) {
 	// This should take place only on the JPEG image.
 	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
 
@@ -38,21 +37,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 		return $metadata;
 	}
 
-	$is_update = 'update' === $context;
-	if ( $is_update ) {
-		if ( empty( $metadata['file'] ) ) {
-			return $metadata;
-		}
-		$uploads = wp_get_upload_dir();
-		if ( isset( $uploads['basedir'] ) ) {
-			$file = path_join( $uploads['basedir'], $metadata['file'] );
-		} else {
-			return $metadata;
-		}
-	} else {
-		$file = get_attached_file( $attachment_id, true );
-	}
-
+	$file = get_attached_file( $attachment_id, true );
 	// File does not exist.
 	if ( ! file_exists( $file ) ) {
 		return $metadata;
@@ -63,18 +48,15 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 		$metadata['sources'] = array();
 	}
 
-	if ( $is_update && has_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' ) ) {
-		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
-	}
-
-	if ( in_array( $mime_type, $valid_mime_transforms[ $mime_type ], true ) ) {
-		if ( empty( $metadata['sources'][ $mime_type ] ) || $is_update ) {
-			$metadata['sources'][ $mime_type ] = array(
-				'file'     => wp_basename( $file ),
-				'filesize' => filesize( $file ),
-			);
-			wp_update_attachment_metadata( $attachment_id, $metadata );
-		}
+	if (
+		empty( $metadata['sources'][ $mime_type ] ) &&
+		in_array( $mime_type, $valid_mime_transforms[ $mime_type ], true )
+	) {
+		$metadata['sources'][ $mime_type ] = array(
+			'file'     => wp_basename( $file ),
+			'filesize' => filesize( $file ),
+		);
+		wp_update_attachment_metadata( $attachment_id, $metadata );
 	}
 
 	$original_size_data = array(
@@ -89,8 +71,8 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 
 	// Create the sources for the full sized image.
 	foreach ( $valid_mime_transforms[ $mime_type ] as $targeted_mime ) {
-		// If this property exists no need to create the image again unless is an update.
-		if ( ! empty( $metadata['sources'][ $targeted_mime ] ) && ! $is_update ) {
+		// If this property exists no need to create the image again.
+		if ( ! empty( $metadata['sources'][ $targeted_mime ] ) ) {
 			continue;
 		}
 
@@ -113,11 +95,6 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 
 	// Make sure we have some sizes to work with, otherwise avoid any work.
 	if ( empty( $metadata['sizes'] ) || ! is_array( $metadata['sizes'] ) ) {
-
-		if ( $is_update && ! has_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' ) ) {
-			add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata', 10, 3 );
-		}
-
 		return $metadata;
 	}
 
@@ -145,7 +122,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 			$properties['sources'] = array();
 		}
 
-		if ( empty( $properties['sources'][ $current_mime ] ) || $is_update ) {
+		if ( empty( $properties['sources'][ $current_mime ] ) ) {
 			$properties['sources'][ $current_mime ] = array(
 				'file'     => isset( $properties['file'] ) ? $properties['file'] : '',
 				'filesize' => 0,
@@ -161,7 +138,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 
 		foreach ( $valid_mime_transforms[ $mime_type ] as $mime ) {
 			// If this property exists no need to create the image again.
-			if ( ! empty( $properties['sources'][ $mime ] ) && ! $is_update ) {
+			if ( ! empty( $properties['sources'][ $mime ] ) ) {
 				continue;
 			}
 
@@ -178,13 +155,9 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id, 
 		$metadata['sizes'][ $size_name ] = $properties;
 	}
 
-	if ( $is_update && ! has_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' ) ) {
-		add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata', 10, 3 );
-	}
-
 	return $metadata;
 }
-add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_property', 10, 3 );
+add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_property', 10, 2 );
 
 /**
  * Filter the image editor default output format mapping to select the most appropriate
@@ -712,6 +685,139 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 3 );
 
 /**
+ * Adds sources to metadata for an attachment.
+ *
+ * @since n.e.x.t
+ *
+ * @param array  $metadata              Metadata of the attachment.
+ * @param array  $valid_mime_transforms List of valid mime transforms for current image mime type.
+ * @param string $file                  Path to original file.
+ * @param array  $main_images           Path of all main image files of all mime types.
+ * @param array  $subsized_images       Path of all subsized image file of all mime types.
+ * @return array Metadata with sources added.
+ */
+function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, $main_images, $subsized_images ) {
+	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
+
+	foreach ( $valid_mime_transforms as $targeted_mime ) {
+		// Add sources to original image metadata.
+		$image_file = $main_images[ $targeted_mime ]['path'];
+
+		if ( ! file_exists( $image_file ) ) {
+			continue;
+		}
+
+		$metadata['sources'][ $targeted_mime ] = array(
+			'file'     => wp_basename( $image_file ),
+			'filesize' => filesize( $image_file ),
+		);
+
+		foreach ( $metadata['sizes'] as $size => $size_details ) {
+			// Add sources to resized image metadata.
+			$image_file = $original_directory . '/' . $subsized_images[ $targeted_mime ][ $size ]['file'];
+
+			if ( ! file_exists( $image_file ) ) {
+				continue;
+			}
+
+			$metadata['sizes'][ $size ]['sources'][ $targeted_mime ] = array(
+				'file'     => $subsized_images[ $targeted_mime ][ $size ]['file'],
+				'filesize' => filesize( $image_file ),
+			);
+		}
+	}
+
+	return $metadata;
+}
+
+/**
+ * Creates additional image formats when original image is edited.
+ *
+ * @since n.e.x.t
+ *
+ * @param bool|null       $override  Value to return instead of saving. Default null.
+ * @param string          $file      Name of the file to be saved.
+ * @param WP_Image_Editor $editor    The image editor instance.
+ * @param string          $mime_type The mime type of the image.
+ * @param int             $post_id   Attachment post ID.
+ * @return bool|null Potentially modified $override value.
+ */
+function webp_uploads_update_image_onchange( $override, $file, $editor, $mime_type, $post_id ) {
+	if ( null !== $override ) {
+		return $override;
+	}
+
+	$transforms = webp_uploads_get_upload_image_mime_transforms();
+	if ( empty( $transforms[ $mime_type ] ) ) {
+		return null;
+	}
+
+	$mime_transforms = $transforms[ $mime_type ];
+	add_filter(
+		'wp_update_attachment_metadata',
+		function ( $metadata, $post_meta_id ) use ( $post_id, $file, $mime_type, $editor, $mime_transforms ) {
+			if ( $post_meta_id !== $post_id ) {
+				return $metadata;
+			}
+
+			// No sizes to be created.
+			if ( empty( $metadata['sizes'] ) ) {
+				return $metadata;
+			}
+
+			$old_metadata = wp_get_attachment_metadata( $post_id );
+			$resize_sizes = array();
+
+			foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
+				if ( isset( $metadata['sizes'][ $size_name ] ) && ! empty( $metadata['sizes'][ $size_name ] ) &&
+					$metadata['sizes'][ $size_name ]['file'] !== $old_metadata['sizes'][ $size_name ]['file'] ) {
+					$resize_sizes[ $size_name ] = $metadata['sizes'][ $size_name ];
+				}
+			}
+
+			$allowed_mimes      = array_flip( wp_get_mime_types() );
+			$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
+			$filename           = pathinfo( $file, PATHINFO_FILENAME );
+			$main_images        = array();
+			$subsized_images    = array();
+			foreach ( $mime_transforms as $targeted_mime ) {
+				if ( $targeted_mime === $mime_type ) {
+					$main_images[ $targeted_mime ]     = array( 'path' => $file );
+					$subsized_images[ $targeted_mime ] = $metadata['sizes'];
+					continue;
+				}
+
+				if ( ! isset( $allowed_mimes[ $targeted_mime ] ) || ! is_string( $allowed_mimes[ $targeted_mime ] ) ) {
+					continue;
+				}
+
+				if ( ! $editor::supports_mime_type( $targeted_mime ) ) {
+					continue;
+				}
+
+				$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
+				$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
+
+				$result = $editor->save( $destination, $targeted_mime );
+
+				if ( is_wp_error( $result ) ) {
+					continue;
+				}
+
+				$subsized_images[ $targeted_mime ] = $editor->multi_resize( $resize_sizes );
+			}
+
+			return webp_uploads_update_sources( $metadata, $mime_transforms, $file, $main_images, $subsized_images );
+		},
+		10,
+		2
+	);
+
+	return null;
+}
+add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 10, 7 );
+
+/**
  * Inspect if the current call to `wp_update_attachment_metadata()` was done from within the context
  * of an edit to an attachment either restore or other type of edit, in that case we perform operations
  * to save the sources properties, specifically for the `full` size image due this is a virtual image size.
@@ -735,7 +841,7 @@ function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
 		switch ( $element['function'] ) {
 			case 'wp_save_image':
 				// Right after an image has been edited.
-				return webp_uploads_create_sources_property( webp_uploads_backup_sources( $attachment_id, $data ), $attachment_id, 'update' );
+				return webp_uploads_backup_sources( $attachment_id, $data );
 			case 'wp_restore_image':
 				// When an image has been restored.
 				return webp_uploads_restore_image( $attachment_id, $data );
