@@ -602,8 +602,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	/**
 	 * Filters whether the smaller image should be used regardless of which MIME type is preferred overall.
 	 *
-	 * This is disabled by default only because it is not part of the current WordPress core feature proposal, as it
-	 * requires storing the file sizes, which the plugin implementation does but the core implementation does not.
+	 * This is disabled by default only because it is not part of the current WordPress core feature proposal.
 	 *
 	 * By enabling this, the plugin will compare the image file sizes and prefer the smaller file regardless of MIME
 	 * type.
