@@ -689,29 +689,26 @@ add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10
  *
  * @since n.e.x.t
  *
- * @param array  $metadata              Metadata of the attachment.
- * @param array  $valid_mime_transforms List of valid mime transforms for current image mime type.
- * @param string $file                  Path to original file.
- * @param array  $main_images           Path of all main image files of all mime types.
- * @param array  $subsized_images       Path of all subsized image file of all mime types.
+ * @param array $metadata              Metadata of the attachment.
+ * @param array $valid_mime_transforms List of valid mime transforms for current image mime type.
+ * @param array $main_images           Path of all main image files of all mime types.
+ * @param array $subsized_images       Path of all subsized image file of all mime types.
  * @return array Metadata with sources added.
  */
-function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, $main_images, $subsized_images ) {
-	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
-
+function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_images, $subsized_images ) {
 	foreach ( $valid_mime_transforms as $targeted_mime ) {
 		// Make sure the path and file exists as those values are being accessed.
-		if ( isset( $main_images[ $targeted_mime ]['path'], $main_images[ $targeted_mime ]['file'] ) ) {
-			if ( ! file_exists( $main_images[ $targeted_mime ]['path'] ) ) {
-				continue;
-			}
-
-			// Add sources to original image metadata.
-			$metadata['sources'][ $targeted_mime ] = array(
-				'file'     => $main_images[ $targeted_mime ]['file'],
-				'filesize' => filesize( $main_images[ $targeted_mime ]['path'] ),
-			);
+		if ( ! isset( $main_images[ $targeted_mime ]['path'], $main_images[ $targeted_mime ]['file'] ) || ! file_exists( $main_images[ $targeted_mime ]['path'] ) ) {
+			continue;
 		}
+
+		$image_directory = pathinfo( $main_images[ $targeted_mime ]['path'], PATHINFO_DIRNAME );
+
+		// Add sources to original image metadata.
+		$metadata['sources'][ $targeted_mime ] = array(
+			'file'     => $main_images[ $targeted_mime ]['file'],
+			'filesize' => filesize( $main_images[ $targeted_mime ]['path'] ),
+		);
 
 		foreach ( $metadata['sizes'] as $size_name => $size_details ) {
 			if ( empty( $subsized_images[ $targeted_mime ][ $size_name ]['file'] ) ) {
@@ -719,7 +716,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, 
 			}
 
 			// Add sources to resized image metadata.
-			$subsize_path = path_join( $original_directory, $subsized_images[ $targeted_mime ][ $size_name ]['file'] );
+			$subsize_path = path_join( $image_directory, $subsized_images[ $targeted_mime ][ $size_name ]['file'] );
 
 			if ( ! file_exists( $subsize_path ) ) {
 				continue;
@@ -771,8 +768,8 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 			if ( $callback_executed ) {
 				return $metadata;
 			}
-
 			$callback_executed = true;
+
 			// No sizes to be created.
 			if ( empty( $metadata['sizes'] ) ) {
 				return $metadata;
@@ -822,7 +819,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 				$subsized_images[ $targeted_mime ] = $editor->multi_resize( $resize_sizes );
 			}
 
-			return webp_uploads_update_sources( $metadata, $mime_transforms, $file_path, $main_images, $subsized_images );
+			return webp_uploads_update_sources( $metadata, $mime_transforms, $main_images, $subsized_images );
 		},
 		10,
 		2
