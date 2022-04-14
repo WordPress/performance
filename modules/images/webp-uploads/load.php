@@ -701,21 +701,17 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, 
 
 	foreach ( $valid_mime_transforms as $targeted_mime ) {
 		// Make sure the path and file exists as those values are being accessed.
-		if ( empty( $main_images[ $targeted_mime ]['path'] ) || empty( $main_images[ $targeted_mime ]['file'] ) ) {
-			continue;
+		if ( isset( $main_images[ $targeted_mime ]['path'], $main_images[ $targeted_mime ]['file'] ) ) {
+			if ( ! file_exists( $main_images[ $targeted_mime ]['path'] ) ) {
+				continue;
+			}
+
+			// Add sources to original image metadata.
+			$metadata['sources'][ $targeted_mime ] = array(
+				'file'     => $main_images[ $targeted_mime ]['file'],
+				'filesize' => filesize( $main_images[ $targeted_mime ]['path'] ),
+			);
 		}
-
-		// Add sources to original image metadata.
-		$image_file = $main_images[ $targeted_mime ]['path'];
-
-		if ( ! file_exists( $image_file ) ) {
-			continue;
-		}
-
-		$metadata['sources'][ $targeted_mime ] = array(
-			'file'     => $main_images[ $targeted_mime ]['file'],
-			'filesize' => filesize( $image_file ),
-		);
 
 		foreach ( $metadata['sizes'] as $size_name => $size_details ) {
 			if ( empty( $subsized_images[ $targeted_mime ][ $size_name ]['file'] ) ) {
@@ -723,15 +719,15 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, 
 			}
 
 			// Add sources to resized image metadata.
-			$image_file = path_join( $original_directory, $subsized_images[ $targeted_mime ][ $size_name ]['file'] );
+			$subsize_path = path_join( $original_directory, $subsized_images[ $targeted_mime ][ $size_name ]['file'] );
 
-			if ( ! file_exists( $image_file ) ) {
+			if ( ! file_exists( $subsize_path ) ) {
 				continue;
 			}
 
 			$metadata['sizes'][ $size_name ]['sources'][ $targeted_mime ] = array(
 				'file'     => $subsized_images[ $targeted_mime ][ $size_name ]['file'],
-				'filesize' => filesize( $image_file ),
+				'filesize' => filesize( $subsize_path ),
 			);
 		}
 	}
@@ -762,13 +758,21 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 	}
 
 	$mime_transforms = $transforms[ $mime_type ];
+	// This variable allows to unhook the logic from within the closure without the need fo a function name.
+	$callback_executed = false;
 	add_filter(
 		'wp_update_attachment_metadata',
-		function ( $metadata, $post_meta_id ) use ( $post_id, $file_path, $mime_type, $editor, $mime_transforms ) {
+		function ( $metadata, $post_meta_id ) use ( $post_id, $file_path, $mime_type, $editor, $mime_transforms, &$callback_executed ) {
 			if ( $post_meta_id !== $post_id ) {
 				return $metadata;
 			}
 
+			// This callback was already executed for this post, nothing to do at this point.
+			if ( $callback_executed ) {
+				return $metadata;
+			}
+
+			$callback_executed = true;
 			// No sizes to be created.
 			if ( empty( $metadata['sizes'] ) ) {
 				return $metadata;
@@ -776,7 +780,6 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 			$old_metadata = wp_get_attachment_metadata( $post_id );
 			$resize_sizes = array();
-
 			foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
 				if ( isset( $metadata['sizes'][ $size_name ] ) && ! empty( $metadata['sizes'][ $size_name ] ) &&
 					$metadata['sizes'][ $size_name ]['file'] !== $old_metadata['sizes'][ $size_name ]['file'] ) {
@@ -809,8 +812,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 				$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
 				$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
-
-				$result = $editor->save( $destination, $targeted_mime );
+				$result      = $editor->save( $destination, $targeted_mime );
 
 				if ( is_wp_error( $result ) ) {
 					continue;

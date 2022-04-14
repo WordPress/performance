@@ -873,15 +873,31 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 
 		wp_restore_image( $attachment_id );
 
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-		$this->assertArrayHasKey( 'sources', $metadata );
+
 		$this->assertSame( $backup_sources['full-orig'], $metadata['sources'] );
 		$this->assertSame( $backup_sources, get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
 
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
-		foreach ( $metadata['sizes'] as $size_name => $properties ) {
-			$this->assertArrayHasKey( 'sources', $backup_sizes[ $size_name . '-orig' ] );
-			$this->assertSame( $backup_sizes[ $size_name . '-orig' ]['sources'], $properties['sources'] );
+		foreach ( $backup_sizes as $size_name => $properties ) {
+			// We are only interested in the original filenames to be compared against the backup and restored values.
+			if ( false === strpos( $size_name, '-orig' ) ) {
+				$this->assertSizeNameIsHashed( '', $size_name, "{$size_name} is not a valid edited name" );
+				continue;
+			}
+
+			$size_name = str_replace( '-orig', '', $size_name );
+			// Full name is verified above.
+			if ( 'full' === $size_name ) {
+				continue;
+			}
+
+			$this->assertArrayHasKey( $size_name, $metadata['sizes'] );
+			$this->assertArrayHasKey( 'sources', $metadata['sizes'][ $size_name ] );
+			$this->assertSame( $properties['sources'], $metadata['sizes'][ $size_name ]['sources'] );
 		}
 	}
 
@@ -938,7 +954,17 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$this->assertArrayHasKey( 'sources', $backup_sizes['thumbnail-orig'] );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-		$this->assertArrayHasKey( 'sources', $metadata );
+
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
+
+		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+		}
 	}
 
 	/**
@@ -959,7 +985,12 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		$this->assertArrayHasKey( 'full-orig', $backup_sources );
 		$this->assertSame( $metadata['sources'], $backup_sources['full-orig'] );
 
-		$this->assertArrayNotHasKey( 'sources', wp_get_attachment_metadata( $attachment_id ), 'The sources attributes was not removed from the metadata.' );
+		$updated_metadata = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertArrayHasKey( 'sources', $updated_metadata );
+		$this->assertNotSame( $metadata['sources'], $updated_metadata['sources'] );
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 		$this->assertIsArray( $backup_sizes );
