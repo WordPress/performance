@@ -754,7 +754,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 	$transforms = webp_uploads_get_upload_image_mime_transforms();
 	if ( empty( $transforms[ $mime_type ] ) ) {
-		return null;
+		return $override;
 	}
 
 	$mime_transforms = $transforms[ $mime_type ];
@@ -828,7 +828,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 		2
 	);
 
-	return null;
+	return $override;
 }
 add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 10, 7 );
 
