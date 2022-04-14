@@ -701,6 +701,151 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 3 );
 
 /**
+ * Adds sources to metadata for an attachment.
+ *
+ * @since n.e.x.t
+ *
+ * @param array $metadata              Metadata of the attachment.
+ * @param array $valid_mime_transforms List of valid mime transforms for current image mime type.
+ * @param array $main_images           Path of all main image files of all mime types.
+ * @param array $subsized_images       Path of all subsized image file of all mime types.
+ * @return array Metadata with sources added.
+ */
+function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_images, $subsized_images ) {
+	foreach ( $valid_mime_transforms as $targeted_mime ) {
+		// Make sure the path and file exists as those values are being accessed.
+		if ( ! isset( $main_images[ $targeted_mime ]['path'], $main_images[ $targeted_mime ]['file'] ) || ! file_exists( $main_images[ $targeted_mime ]['path'] ) ) {
+			continue;
+		}
+
+		$image_directory = pathinfo( $main_images[ $targeted_mime ]['path'], PATHINFO_DIRNAME );
+
+		// Add sources to original image metadata.
+		$metadata['sources'][ $targeted_mime ] = array(
+			'file'     => $main_images[ $targeted_mime ]['file'],
+			'filesize' => filesize( $main_images[ $targeted_mime ]['path'] ),
+		);
+
+		foreach ( $metadata['sizes'] as $size_name => $size_details ) {
+			if ( empty( $subsized_images[ $targeted_mime ][ $size_name ]['file'] ) ) {
+				continue;
+			}
+
+			// Add sources to resized image metadata.
+			$subsize_path = path_join( $image_directory, $subsized_images[ $targeted_mime ][ $size_name ]['file'] );
+
+			if ( ! file_exists( $subsize_path ) ) {
+				continue;
+			}
+
+			$metadata['sizes'][ $size_name ]['sources'][ $targeted_mime ] = array(
+				'file'     => $subsized_images[ $targeted_mime ][ $size_name ]['file'],
+				'filesize' => filesize( $subsize_path ),
+			);
+		}
+	}
+
+	return $metadata;
+}
+
+/**
+ * Creates additional image formats when original image is edited.
+ *
+ * @since n.e.x.t
+ *
+ * @param bool|null       $override  Value to return instead of saving. Default null.
+ * @param string          $file_path Name of the file to be saved.
+ * @param WP_Image_Editor $editor    The image editor instance.
+ * @param string          $mime_type The mime type of the image.
+ * @param int             $post_id   Attachment post ID.
+ * @return bool|null Potentially modified $override value.
+ */
+function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mime_type, $post_id ) {
+	if ( null !== $override ) {
+		return $override;
+	}
+
+	$transforms = webp_uploads_get_upload_image_mime_transforms();
+	if ( empty( $transforms[ $mime_type ] ) ) {
+		return $override;
+	}
+
+	$mime_transforms = $transforms[ $mime_type ];
+	// This variable allows to unhook the logic from within the closure without the need fo a function name.
+	$callback_executed = false;
+	add_filter(
+		'wp_update_attachment_metadata',
+		function ( $metadata, $post_meta_id ) use ( $post_id, $file_path, $mime_type, $editor, $mime_transforms, &$callback_executed ) {
+			if ( $post_meta_id !== $post_id ) {
+				return $metadata;
+			}
+
+			// This callback was already executed for this post, nothing to do at this point.
+			if ( $callback_executed ) {
+				return $metadata;
+			}
+			$callback_executed = true;
+
+			// No sizes to be created.
+			if ( empty( $metadata['sizes'] ) ) {
+				return $metadata;
+			}
+
+			$old_metadata = wp_get_attachment_metadata( $post_id );
+			$resize_sizes = array();
+			foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
+				if ( isset( $metadata['sizes'][ $size_name ] ) && ! empty( $metadata['sizes'][ $size_name ] ) &&
+					$metadata['sizes'][ $size_name ]['file'] !== $old_metadata['sizes'][ $size_name ]['file'] ) {
+					$resize_sizes[ $size_name ] = $metadata['sizes'][ $size_name ];
+				}
+			}
+
+			$allowed_mimes      = array_flip( wp_get_mime_types() );
+			$original_directory = pathinfo( $file_path, PATHINFO_DIRNAME );
+			$filename           = pathinfo( $file_path, PATHINFO_FILENAME );
+			$main_images        = array();
+			$subsized_images    = array();
+			foreach ( $mime_transforms as $targeted_mime ) {
+				if ( $targeted_mime === $mime_type ) {
+					$main_images[ $targeted_mime ]     = array(
+						'path' => $file_path,
+						'file' => pathinfo( $file_path, PATHINFO_BASENAME ),
+					);
+					$subsized_images[ $targeted_mime ] = $metadata['sizes'];
+					continue;
+				}
+
+				if ( ! isset( $allowed_mimes[ $targeted_mime ] ) || ! is_string( $allowed_mimes[ $targeted_mime ] ) ) {
+					continue;
+				}
+
+				if ( ! $editor::supports_mime_type( $targeted_mime ) ) {
+					continue;
+				}
+
+				$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
+				$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
+				$result      = $editor->save( $destination, $targeted_mime );
+
+				if ( is_wp_error( $result ) ) {
+					continue;
+				}
+
+				$main_images[ $targeted_mime ]     = $result;
+				$subsized_images[ $targeted_mime ] = $editor->multi_resize( $resize_sizes );
+			}
+
+			return webp_uploads_update_sources( $metadata, $mime_transforms, $main_images, $subsized_images );
+		},
+		10,
+		2
+	);
+
+	return $override;
+}
+add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 10, 7 );
+
+/**
  * Inspect if the current call to `wp_update_attachment_metadata()` was done from within the context
  * of an edit to an attachment either restore or other type of edit, in that case we perform operations
  * to save the sources properties, specifically for the `full` size image due this is a virtual image size.
