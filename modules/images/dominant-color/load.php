@@ -127,7 +127,20 @@ function wp_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 	 */
 	if ( ! isset( $image_meta['dominant_color'] ) && apply_filters( 'enable_dominant_color_back_fill', true, $attachment_id ) ) {
 
-		$image_meta = wp_back_fill_dominant_color( $attachment_id, $image_meta );
+		/**
+		 * Controls if the dominant color code should update image meta if not set.
+		 * When an image shown on the site and the meta is not set, the meta will be updated.
+		 *
+		 * @param bool $add_dominant_color_on_pageload
+		 * set to true save dominant color on the fly as part of the page load.
+		 * Set to false schedule the missing color to be set via cron.
+		 * @param int  $attachment_id
+		 */
+		if( apply_filters( 'enable_dominant_color_back_fill_realtime', false, $attachment_id ) ){
+			$image_meta = wp_back_fill_dominant_color( $attachment_id, $image_meta );
+		} else {
+			wp_schedule_single_event( time(), 'wp_back_fill_dominant_color', array( $attachment_id ) );
+		}
 	}
 
 	/**
@@ -372,3 +385,24 @@ function wp_back_fill_dominant_color( $attachment_id, $image_meta ) {
 
 	return $image_meta;
 }
+
+/**
+ * Get dominant color and saves it to the image meta for next time.
+ * called by cron task
+ *
+ * @param int   $attachment_id the attachment id.
+ *
+ * @return void.
+ */
+function wp_cron_back_fill_dominant_color( $attachment_id ) {
+
+	$dominant_color = wp_get_dominant_color( $attachment_id );
+	if ( $dominant_color ) {
+		$image_meta = wp_get_attachment_metadata( $attachment_id );
+		$image_meta['dominant_color']   = $dominant_color;
+		$image_meta['has_transparency'] = wp_get_has_transparency( $attachment_id );
+		$image_meta['is_light']         = wp_color_is_light( $dominant_color );
+		wp_update_attachment_metadata( $attachment_id, $image_meta );
+	}
+}
+add_action( 'wp_back_fill_dominant_color', 'wp_cron_back_fill_dominant_color', 10, 2 );
