@@ -6,9 +6,7 @@
  * @group   webp-uploads
  */
 
-use PerformanceLab\Tests\TestCase\ImagesTestCase;
-
-class WebP_Uploads_Helper_Tests extends ImagesTestCase {
+class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Return an error when creating an additional image source with invalid parameters

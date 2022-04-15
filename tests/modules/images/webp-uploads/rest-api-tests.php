@@ -6,9 +6,7 @@
  * @group   webp-uploads
  */
 
-use PerformanceLab\Tests\TestCase\ImagesTestCase;
-
-class WebP_Uploads_REST_API_Tests extends ImagesTestCase {
+class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Checks whether the sources information is added to image sizes details of the REST response object.
