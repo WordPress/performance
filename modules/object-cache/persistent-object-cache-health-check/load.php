@@ -59,7 +59,7 @@ function perflab_oc_health_persistent_object_cache() {
 		'label'       => __( 'A persistent object cache is being used', 'performance-lab' ),
 		'description' => sprintf(
 			'<p>%s</p>',
-			__( "WordPress performs at its best when a persistent object cache is used. A persistent object cache helps to reduce load on your SQL server significantly and allows WordPress to retrieve your site's content and settings much faster.", 'performance-lab' )
+			__( "A persistent object cache makes your site's database more efficient, resulting in faster load times because WordPress can retrieve your site's content and settings much more quickly.", 'performance-lab' )
 		),
 		'actions'     => sprintf(
 			'<p><a href="%s" target="_blank" rel="noopener">%s <span class="screen-reader-text">%s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></p>',
@@ -82,7 +82,7 @@ function perflab_oc_health_persistent_object_cache() {
 
 	$available_services = perflab_oc_health_available_object_cache_services();
 
-	$notes = __( 'Speak to your web host about what persistent object caches are available and how to enable them.', 'performance-lab' );
+	$notes = __( 'Your hosting provider can tell you if persistent object caches are able to be enabled on your site.', 'performance-lab' );
 
 	if ( ! empty( $available_services ) ) {
 		$notes .= ' ' . sprintf(

@@ -599,6 +599,22 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	 */
 	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/webp', 'image/jpeg' ), $attachment_id, $context );
 
+	/**
+	 * Filters whether the smaller image should be used regardless of which MIME type is preferred overall.
+	 *
+	 * This is disabled by default only because it is not part of the current WordPress core feature proposal.
+	 *
+	 * By enabling this, the plugin will compare the image file sizes and prefer the smaller file regardless of MIME
+	 * type.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $prefer_smaller_image_file Whether to prefer the smaller image file.
+	 */
+	if ( apply_filters( 'webp_uploads_prefer_smaller_image_file', false ) ) {
+		$target_mimes = webp_uploads_get_mime_types_by_filesize( $target_mimes, $attachment_id );
+	}
+
 	$target_mime = null;
 	foreach ( $target_mimes as $mime ) {
 		if ( isset( $metadata['sources'][ $mime ] ) ) {
@@ -689,29 +705,26 @@ add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10
  *
  * @since n.e.x.t
  *
- * @param array  $metadata              Metadata of the attachment.
- * @param array  $valid_mime_transforms List of valid mime transforms for current image mime type.
- * @param string $file                  Path to original file.
- * @param array  $main_images           Path of all main image files of all mime types.
- * @param array  $subsized_images       Path of all subsized image file of all mime types.
+ * @param array $metadata              Metadata of the attachment.
+ * @param array $valid_mime_transforms List of valid mime transforms for current image mime type.
+ * @param array $main_images           Path of all main image files of all mime types.
+ * @param array $subsized_images       Path of all subsized image file of all mime types.
  * @return array Metadata with sources added.
  */
-function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, $main_images, $subsized_images ) {
-	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
-
+function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_images, $subsized_images ) {
 	foreach ( $valid_mime_transforms as $targeted_mime ) {
 		// Make sure the path and file exists as those values are being accessed.
-		if ( isset( $main_images[ $targeted_mime ]['path'], $main_images[ $targeted_mime ]['file'] ) ) {
-			if ( ! file_exists( $main_images[ $targeted_mime ]['path'] ) ) {
-				continue;
-			}
-
-			// Add sources to original image metadata.
-			$metadata['sources'][ $targeted_mime ] = array(
-				'file'     => $main_images[ $targeted_mime ]['file'],
-				'filesize' => filesize( $main_images[ $targeted_mime ]['path'] ),
-			);
+		if ( ! isset( $main_images[ $targeted_mime ]['path'], $main_images[ $targeted_mime ]['file'] ) || ! file_exists( $main_images[ $targeted_mime ]['path'] ) ) {
+			continue;
 		}
+
+		$image_directory = pathinfo( $main_images[ $targeted_mime ]['path'], PATHINFO_DIRNAME );
+
+		// Add sources to original image metadata.
+		$metadata['sources'][ $targeted_mime ] = array(
+			'file'     => $main_images[ $targeted_mime ]['file'],
+			'filesize' => filesize( $main_images[ $targeted_mime ]['path'] ),
+		);
 
 		foreach ( $metadata['sizes'] as $size_name => $size_details ) {
 			if ( empty( $subsized_images[ $targeted_mime ][ $size_name ]['file'] ) ) {
@@ -719,7 +732,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $file, 
 			}
 
 			// Add sources to resized image metadata.
-			$subsize_path = path_join( $original_directory, $subsized_images[ $targeted_mime ][ $size_name ]['file'] );
+			$subsize_path = path_join( $image_directory, $subsized_images[ $targeted_mime ][ $size_name ]['file'] );
 
 			if ( ! file_exists( $subsize_path ) ) {
 				continue;
@@ -754,7 +767,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 	$transforms = webp_uploads_get_upload_image_mime_transforms();
 	if ( empty( $transforms[ $mime_type ] ) ) {
-		return null;
+		return $override;
 	}
 
 	$mime_transforms = $transforms[ $mime_type ];
@@ -771,8 +784,8 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 			if ( $callback_executed ) {
 				return $metadata;
 			}
-
 			$callback_executed = true;
+
 			// No sizes to be created.
 			if ( empty( $metadata['sizes'] ) ) {
 				return $metadata;
@@ -822,13 +835,13 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 				$subsized_images[ $targeted_mime ] = $editor->multi_resize( $resize_sizes );
 			}
 
-			return webp_uploads_update_sources( $metadata, $mime_transforms, $file_path, $main_images, $subsized_images );
+			return webp_uploads_update_sources( $metadata, $mime_transforms, $main_images, $subsized_images );
 		},
 		10,
 		2
 	);
 
-	return null;
+	return $override;
 }
 add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 10, 7 );
 
@@ -1081,4 +1094,3 @@ function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id ) 
 	// Create an array of available mime types ordered by smallest filesize.
 	return array_keys( $sources );
 }
-add_filter( 'webp_uploads_content_image_mimes', 'webp_uploads_get_mime_types_by_filesize', 10, 2 );
