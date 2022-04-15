@@ -22,9 +22,10 @@ class WP_Image_Editor_GD_With_Color extends WP_Image_Editor_GD {
 	/**
 	 * Get dominant color from a file.
 	 *
-	 * @param string $default_color default is light grey.
+	 * @since n.e.x.t
 	 *
-	 * @return string
+	 * @param string $default_color Optional. Hex color string, without leading #. Default is light grey.
+	 * @return string Dominant hex color string.
 	 */
 	public function get_dominant_color( $default_color = 'eee' ) {
 
