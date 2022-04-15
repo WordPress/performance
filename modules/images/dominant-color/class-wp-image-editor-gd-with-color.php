@@ -6,7 +6,7 @@
  * @package performance-lab
  * @group dominant-color
  *
- * @since 1.0.0
+ * @since n.e.x.t
  */
 
 /**
