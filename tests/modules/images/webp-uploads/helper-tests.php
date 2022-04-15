@@ -127,7 +127,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		wp_update_attachment_metadata( $attachment_id, $callback( $metadata ) );
 		$result = webp_uploads_generate_image_size( $attachment_id, $size, 'image/webp' );
 
-		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertWPError( $result );
 		$this->assertSame( 'image_mime_type_invalid_metadata', $result->get_error_code() );
 	}
 
@@ -174,7 +174,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertFileDoesNotExist( $file );
 
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
-		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertWPError( $result );
 		$this->assertSame( 'original_image_file_not_found', $result->get_error_code() );
 	}
 
@@ -191,7 +191,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		// Make sure no editor is available.
 		add_filter( 'wp_image_editors', '__return_empty_array' );
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
-		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertWPError( $result );
 		$this->assertSame( 'image_mime_type_not_supported', $result->get_error_code() );
 	}
 
@@ -205,7 +205,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
 		$result        = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/avif' );
-		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertWPError( $result );
 		$this->assertSame( 'image_mime_type_invalid', $result->get_error_code() );
 	}
 
@@ -228,7 +228,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		);
 
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
-		$this->assertTrue( is_wp_error( $result ) );
+		$this->assertWPError( $result );
 		$this->assertSame( 'image_mime_type_not_supported', $result->get_error_code() );
 	}
 }
