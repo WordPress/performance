@@ -177,8 +177,6 @@ function wp_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 
 	return $filtered_image;
 }
-
-
 add_filter( 'wp_content_img_tag', 'wp_tag_add_adjust', 20, 3 );
 
 
