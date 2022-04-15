@@ -144,7 +144,7 @@ function wp_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 	}
 
 	/**
-	 * Allow developers to filter the control the adding of dominant color to the image.
+	 * Filters whether dominant color is added to the image.
 	 * set to false inorder disable adding the dominant color to the image.
 	 *
 	 * @param bool $add_dominant_color_to_image
