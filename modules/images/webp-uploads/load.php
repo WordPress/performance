@@ -451,7 +451,9 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	 *
 	 * @param bool $prefer_smaller_image_file Whether to prefer the smaller image file.
 	 */
-	if ( apply_filters( 'webp_uploads_prefer_smaller_image_file', false ) ) {
+	$prefer_smaller_image_file = apply_filters( 'webp_uploads_prefer_smaller_image_file', false );
+
+	if ( true === $prefer_smaller_image_file ) {
 		$target_mimes = webp_uploads_get_mime_types_by_filesize( $target_mimes, $attachment_id );
 	}
 
@@ -490,6 +492,14 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		}
 
 		if ( $size_data['file'] === $size_data['sources'][ $target_mime ]['file'] ) {
+			continue;
+		}
+
+		// If smaller image file is preferred, and the target mime type is a larger file size, do not update.
+		if (
+			true === $prefer_smaller_image_file &&
+			$size_data['sources'][ $size_data['mime-type'] ]['filesize'] < $size_data['sources'][ $target_mime ]['filesize']
+		) {
 			continue;
 		}
 
