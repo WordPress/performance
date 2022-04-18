@@ -52,6 +52,8 @@ function dominant_color_has_transparency_metadata( $metadata, $attachment_id ) {
 
 	if ( ! empty( $has_transparency ) ) {
 		$metadata['has_transparency'] = $has_transparency;
+	} else {
+		$metadata['has_transparency'] = false;
 	}
 
 	return $metadata;
@@ -160,7 +162,8 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 add_filter( 'wp_content_img_tag', 'dominant_color_tag_add_adjust', 20, 3 );
 
 // we don't need to use this filter anymore as the filter wp_content_img_tag is used instead.
-if ( version_compare( $GLOBALS['wp_version'], '6', '<' ) ) {
+if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
+
 	/**
 	 * Filter the content to allow us to filter the image tags.
 	 *
