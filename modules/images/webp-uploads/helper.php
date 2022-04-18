@@ -179,7 +179,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 /**
  * Returns the attachment sources array ordered by filesize.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $size          The attachment size.
@@ -207,7 +207,7 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
  * Filters on `webp_uploads_content_image_mimes` to generate the available mime types for an attachment
  * and orders them by the smallest filesize first.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param array $mime_types    The list of mime types that can be used to update images in the content.
  * @param int   $attachment_id The attachment ID.
