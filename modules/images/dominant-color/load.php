@@ -291,7 +291,6 @@ function dominant_color_get( $id, $default_color = 'eee' ) {
 	return $dominant_color;
 }
 
-
 /**
  * Works out if color has transparency
  *
