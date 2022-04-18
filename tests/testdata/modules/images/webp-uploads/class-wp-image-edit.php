@@ -2,7 +2,6 @@
 /**
  * A WP_Image_Edit class to avoid abstraction to handle image edits.
  *
- * @since   n.e.x.t
  * @package performance-lab
  */
 
