@@ -5,7 +5,7 @@
  * Experimental: Yes
  *
  * @package performance-lab
- * @since 1.0.0
+ * @since n.e.x.t
  */
 
 /**
@@ -16,12 +16,12 @@
  *
  * @return array $metadata
  */
-function wp_dominant_color_metadata( $metadata, $attachment_id ) {
+function dominant_color_metadata( $metadata, $attachment_id ) {
 	if ( ! wp_attachment_is_image( $attachment_id ) ) {
 
 		return $metadata;
 	}
-	$dominant_color = wp_get_dominant_color( $attachment_id );
+	$dominant_color = dominant_color_get( $attachment_id );
 
 	if ( ! empty( $dominant_color ) ) {
 		$metadata['dominant_color'] = $dominant_color;
@@ -29,7 +29,7 @@ function wp_dominant_color_metadata( $metadata, $attachment_id ) {
 
 	return $metadata;
 }
-add_filter( 'wp_generate_attachment_metadata', 'wp_dominant_color_metadata', 10, 2 );
+add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 );
 
 
 
@@ -41,14 +41,14 @@ add_filter( 'wp_generate_attachment_metadata', 'wp_dominant_color_metadata', 10,
  *
  * @return array $metadata
  */
-function wp_has_transparency_metadata( $metadata, $attachment_id ) {
+function dominant_color_has_transparency_metadata( $metadata, $attachment_id ) {
 
 	if ( ! wp_attachment_is_image( $attachment_id ) ) {
 
 		return $metadata;
 	}
 
-	$has_transparency = wp_get_has_transparency( $attachment_id );
+	$has_transparency = dominant_color_get_has_transparency( $attachment_id );
 
 	if ( ! empty( $has_transparency ) ) {
 		$metadata['has_transparency'] = $has_transparency;
@@ -56,7 +56,7 @@ function wp_has_transparency_metadata( $metadata, $attachment_id ) {
 
 	return $metadata;
 }
-add_filter( 'wp_generate_attachment_metadata', 'wp_has_transparency_metadata', 10, 2 );
+add_filter( 'wp_generate_attachment_metadata', 'dominant_color_has_transparency_metadata', 10, 2 );
 
 /**
  * Filter various image attributes to add the dominant color to the image
@@ -66,7 +66,7 @@ add_filter( 'wp_generate_attachment_metadata', 'wp_has_transparency_metadata', 1
  *
  * @return mixed
  */
-function wp_tag_add_adjust_to_image_attributes( $attr, $attachment ) {
+function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment ) {
 
 	$image_meta = wp_get_attachment_metadata( $attachment->ID );
 	if ( ! is_array( $image_meta ) ) {
@@ -92,7 +92,7 @@ function wp_tag_add_adjust_to_image_attributes( $attr, $attachment ) {
 		}
 		$attr['data-dominant-color'] = $image_meta['dominant_color'];
 
-		$extra_class .= ( wp_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
+		$extra_class .= ( dominant_color_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 
 		if ( isset( $attr['class'] ) && ! array_intersect( explode( ' ', $attr['class'] ), explode( ' ', $extra_class ) ) ) {
 			$attr['class'] = $extra_class . ' ' . $attr['class'];
@@ -103,7 +103,7 @@ function wp_tag_add_adjust_to_image_attributes( $attr, $attachment ) {
 
 	return $attr;
 }
-add_filter( 'wp_get_attachment_image_attributes', 'wp_tag_add_adjust_to_image_attributes', 10, 2 );
+add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_tag_add_adjust_to_image_attributes', 10, 2 );
 
 /**
  * Filter image tags in content to add the dominant color to the image.
@@ -114,7 +114,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'wp_tag_add_adjust_to_image_at
  *
  * @return string image tag
  */
-function wp_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
+function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 
@@ -125,7 +125,7 @@ function wp_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 	 * @param bool $add_dominant_color_to_image true to add the dominant color to the image: default true.
 	 * @param int  $attachment_id
 	 */
-	if ( ! isset( $image_meta['dominant_color'] ) && apply_filters( 'enable_dominant_color_back_fill', true, $attachment_id ) ) {
+	if ( ! isset( $image_meta['dominant_color'] ) && apply_filters( 'dominant_color_enable_back_fill', true, $attachment_id ) ) {
 
 		/**
 		 * Controls if the dominant color code should update image meta if not set.
@@ -136,10 +136,10 @@ function wp_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 		 * Set to false schedule the missing color to be set via cron.
 		 * @param int  $attachment_id
 		 */
-		if ( apply_filters( 'enable_dominant_color_back_fill_realtime', false, $attachment_id ) ) {
-			$image_meta = wp_back_fill_dominant_color( $attachment_id, $image_meta );
+		if ( apply_filters( 'dominant_color_enable_back_fill_realtime', false, $attachment_id ) ) {
+			$image_meta = dominant_color_back_fill( $attachment_id, $image_meta );
 		} else {
-			wp_schedule_single_event( time(), 'wp_back_fill_dominant_color', array( $attachment_id ) );
+			wp_schedule_single_event( time(), 'dominant_color_back_fill', array( $attachment_id ) );
 		}
 	}
 
@@ -156,7 +156,7 @@ function wp_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 	if ( apply_filters( 'enable_dominant_color_for_image', isset( $image_meta['dominant_color'] ), $attachment_id, $image_meta, $filtered_image, $context ) ) {
 		$data  = sprintf( 'data-dominantColor="%s"', $image_meta['dominant_color'] );
 		$style = '';
-		if ( strpos( $filtered_image, 'loading="lazy"' ) !== false ) {
+		if ( str_contains( $filtered_image, 'loading="lazy"' ) ) {
 			$style = ' style="--dominant-color: #' . $image_meta['dominant_color'] . ';" ';
 		}
 
@@ -171,15 +171,16 @@ function wp_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 
 		$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
 
-		$extra_class   .= ( wp_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
+		$extra_class   .= ( dominant_color_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 		$filtered_image = str_replace( 'class="', 'class="' . $extra_class . ' ', $filtered_image );
 	}
 
 	return $filtered_image;
 }
-add_filter( 'wp_content_img_tag', 'wp_tag_add_adjust', 20, 3 );
+add_filter( 'wp_content_img_tag', 'dominant_color_tag_add_adjust', 20, 3 );
 
-
+// we don't need to use this filter anymore as the filter wp_content_img_tag is used instead.
+if ( version_compare( $GLOBALS['wp_version'], '6', '<' ) ) {
 /**
  * Filter the content to allow us to filter the image tags.
  *
@@ -188,7 +189,7 @@ add_filter( 'wp_content_img_tag', 'wp_tag_add_adjust', 20, 3 );
  *
  * @return string content
  */
-function wp_dominant_color_filter_content_tags( $content, $context = null ) {
+function dominant_color_filter_content_tags( $content, $context = null ) {
 	if ( null === $context ) {
 		$context = current_filter();
 	}
@@ -248,7 +249,7 @@ function wp_dominant_color_filter_content_tags( $content, $context = null ) {
 			 *
 			 * @since 1.0.0
 			 */
-			$filtered_image = apply_filters( 'wp_dominant_color_img_tag_add_adjust', $filtered_image, $context, $attachment_id );
+			$filtered_image = apply_filters( 'dominant_color_img_tag_add_adjust', $filtered_image, $context, $attachment_id );
 
 			if ( $filtered_image !== $match[0] ) {
 				$content = str_replace( $match[0], $filtered_image, $content );
@@ -258,29 +259,27 @@ function wp_dominant_color_filter_content_tags( $content, $context = null ) {
 
 	return $content;
 }
-// we don't need to use this filter anymore as the filter wp_content_img_tag is used instead.
-if ( version_compare( $GLOBALS['wp_version'], '6', '<' ) ) {
+
 	$filters = array( 'the_content', 'the_excerpt', 'widget_text_content', 'widget_block_content' );
 	foreach ( $filters as $filter ) {
-		add_filter( $filter, 'wp_dominant_color_filter_content_tags', 20 );
+		add_filter( $filter, 'dominant_color_filter_content_tags', 20 );
 	}
 
-	add_filter( 'wp_dominant_color_img_tag_add_adjust', 'wp_tag_add_adjust', 10, 3 );
+	add_filter( 'dominant_color_img_tag_add_adjust', 'dominant_color_tag_add_adjust', 10, 3 );
 }
 
 /**
  * Add CSS needed for to show the dominant color as an image background.
  *
- * @return void
  */
-function wp_dominant_color_add_inline_style() {
+function dominant_color_add_inline_style() {
 	$handle = 'dominant-color-styles';
 	wp_register_style( $handle, false );
 	wp_enqueue_style( $handle );
 	$custom_css = 'img[data-dominantcolor]:not(.has-transparency) { background-color: var(--dominant-color); background-clip: content-box, padding-box; }';
 	wp_add_inline_style( $handle, $custom_css );
 }
-add_filter( 'wp_enqueue_scripts', 'wp_dominant_color_add_inline_style' );
+add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
 
 
 /**
@@ -288,12 +287,12 @@ add_filter( 'wp_enqueue_scripts', 'wp_dominant_color_add_inline_style' );
  *
  * @return string[]
  */
-function wp_dominant_color_set_image_editors() {
+function dominant_color_set_image_editors() {
 
-	require_once 'class-wp-image-editor-gd-with-color.php';
-	require_once 'class-wp-image-editor-imagick-with-color.php';
+	require_once 'class-dominant-color-image-editor-gd.php';
+	require_once 'class-dominant-color-image-editor-imagick.php';
 
-	return array( 'WP_Image_Editor_GD_With_Color', 'WP_Image_Editor_Imagick_With_Color' );
+	return array( 'Dominant_Color_Image_Editor_GD', 'Dominant_Color_Image_Editor_Imagick' );
 }
 
 /**
@@ -304,18 +303,17 @@ function wp_dominant_color_set_image_editors() {
  *
  * @return string
  */
-function wp_get_dominant_color( $id, $default_color = 'eee' ) {
+function dominant_color_get( $id, $default_color = 'eee' ) {
 
-	add_filter( 'wp_image_editors', 'wp_dominant_color_set_image_editors' );
+	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	$file = get_attached_file( $id );
 
 	$dominant_color = wp_get_image_editor( $file )->get_dominant_color( $default_color );
 
-	remove_filter( 'wp_image_editors', 'wp_dominant_color_set_image_editors' );
+	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	return $dominant_color;
-
 }
 
 
@@ -326,9 +324,9 @@ function wp_get_dominant_color( $id, $default_color = 'eee' ) {
  *
  * @return bool
  */
-function wp_get_has_transparency( $id ) {
+function dominant_color_get_has_transparency( $id ) {
 
-	add_filter( 'wp_image_editors', 'wp_dominant_color_set_image_editors' );
+	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	$file = get_attached_file( $id );
 
@@ -339,7 +337,7 @@ function wp_get_has_transparency( $id ) {
 	}
 	$has_transparency = wp_get_image_editor( $file )->get_has_transparency();
 
-	remove_filter( 'wp_image_editors', 'wp_dominant_color_set_image_editors' );
+	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	return $has_transparency;
 }
@@ -352,7 +350,7 @@ function wp_get_has_transparency( $id ) {
  *
  * @return bool
  */
-function wp_color_is_light( $hex ) {
+function dominant_color_color_is_light( $hex ) {
 	$hex       = str_replace( '#', '', $hex );
 	$r         = ( hexdec( substr( $hex, 0, 2 ) ) / 255 );
 	$g         = ( hexdec( substr( $hex, 2, 2 ) ) / 255 );
@@ -371,13 +369,13 @@ function wp_color_is_light( $hex ) {
  *
  * @return array the updated image meta.
  */
-function wp_back_fill_dominant_color( $attachment_id, $image_meta ) {
+function dominant_color_back_fill( $attachment_id, $image_meta ) {
 
-	$dominant_color = wp_get_dominant_color( $attachment_id );
+	$dominant_color = dominant_color_get( $attachment_id );
 	if ( $dominant_color ) {
 		$image_meta['dominant_color']   = $dominant_color;
-		$image_meta['has_transparency'] = wp_get_has_transparency( $attachment_id );
-		$image_meta['is_light']         = wp_color_is_light( $dominant_color );
+		$image_meta['has_transparency'] = dominant_color_get_has_transparency( $attachment_id );
+		$image_meta['is_light']         = dominant_color_color_is_light( $dominant_color );
 		wp_update_attachment_metadata( $attachment_id, $image_meta );
 	}
 
@@ -390,17 +388,16 @@ function wp_back_fill_dominant_color( $attachment_id, $image_meta ) {
  *
  * @param int $attachment_id the attachment id.
  *
- * @return void.
  */
-function wp_cron_back_fill_dominant_color( $attachment_id ) {
+function dominant_color_cron_back_fill( $attachment_id ) {
 
-	$dominant_color = wp_get_dominant_color( $attachment_id );
+	$dominant_color = dominant_color_get( $attachment_id );
 	if ( $dominant_color ) {
 		$image_meta                     = wp_get_attachment_metadata( $attachment_id );
 		$image_meta['dominant_color']   = $dominant_color;
-		$image_meta['has_transparency'] = wp_get_has_transparency( $attachment_id );
-		$image_meta['is_light']         = wp_color_is_light( $dominant_color );
+		$image_meta['has_transparency'] = dominant_color_get_has_transparency( $attachment_id );
+		$image_meta['is_light']         = dominant_color_color_is_light( $dominant_color );
 		wp_update_attachment_metadata( $attachment_id, $image_meta );
 	}
 }
-add_action( 'wp_back_fill_dominant_color', 'wp_cron_back_fill_dominant_color', 10, 2 );
+add_action( 'dominant_color_back_fill', 'dominant_color_cron_back_fill', 10, 2 );

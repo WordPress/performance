@@ -17,12 +17,14 @@
  *
  * @see WP_Image_Editor
  */
-class WP_Image_Editor_Imagick_With_Color extends WP_Image_Editor_Imagick {
+class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 
 	/**
 	 * Get dominant color from a file.
 	 *
 	 * @param string $default_color default is light grey.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @return string hex color
 	 */
@@ -51,6 +53,8 @@ class WP_Image_Editor_Imagick_With_Color extends WP_Image_Editor_Imagick {
 	/**
 	 * Looks for transparent pixels in the image.
 	 * If there are none, it returns false.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @return bool
 	 */

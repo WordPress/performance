@@ -17,7 +17,7 @@
  *
  * @see WP_Image_Editor
  */
-class WP_Image_Editor_GD_With_Color extends WP_Image_Editor_GD {
+class shortened_image extends WP_Image_Editor_GD {
 
 	/**
 	 * Get dominant color from a file.
@@ -30,10 +30,10 @@ class WP_Image_Editor_GD_With_Color extends WP_Image_Editor_GD {
 	public function get_dominant_color( $default_color = 'eee' ) {
 
 		if ( $this->image ) {
-			$shortend_image = imagecreatetruecolor( 1, 1 );
-			imagecopyresampled( $shortend_image, $this->image, 0, 0, 0, 0, 1, 1, imagesx( $this->image ), imagesy( $this->image ) );
+			$shorted_image = imagecreatetruecolor( 1, 1 );
+			imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, imagesx( $this->image ), imagesy( $this->image ) );
 
-			$hex = dechex( imagecolorat( $shortend_image, 0, 0 ) );
+			$hex = dechex( imagecolorat( $shorted_image, 0, 0 ) );
 
 			return ( '0' === $hex ) ? $default_color : $hex;
 		}
@@ -45,6 +45,8 @@ class WP_Image_Editor_GD_With_Color extends WP_Image_Editor_GD {
 	/**
 	 * Looks for transparent pixels in the image.
 	 * If there are none, it returns false.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @return bool
 	 */
