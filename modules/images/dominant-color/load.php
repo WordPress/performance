@@ -144,11 +144,11 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 
 		$extra_class = '';
 
-		if ( ! isset( $image_meta['has_transparency'] ) ) {
-			$data .= ' data-has-transparency="false"';
-		} else {
+		if ( $image_meta['has_transparency'] === true ) {
 			$data       .= ' data-has-transparency="true"';
 			$extra_class = ' has-transparency ';
+		} else {
+			$data .= ' data-has-transparency="false"';
 		}
 
 		$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
