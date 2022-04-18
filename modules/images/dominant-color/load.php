@@ -156,84 +156,84 @@ add_filter( 'wp_content_img_tag', 'dominant_color_tag_add_adjust', 20, 3 );
 
 // we don't need to use this filter anymore as the filter wp_content_img_tag is used instead.
 if ( version_compare( $GLOBALS['wp_version'], '6', '<' ) ) {
-/**
- * Filter the content to allow us to filter the image tags.
- *
- * @param string $content the content to filter.
- * @param string $context the context of the content.
- *
- * @return string content
- */
-function dominant_color_filter_content_tags( $content, $context = null ) {
-	if ( null === $context ) {
-		$context = current_filter();
-	}
-
-	if ( ! preg_match_all( '/<(img)\s[^>]+>/', $content, $matches, PREG_SET_ORDER ) ) {
-		return $content;
-	}
-
-	// List of the unique `img` tags found in $content.
-	$images = array();
-
-	foreach ( $matches as $match ) {
-		list( $tag, $tag_name ) = $match;
-
-		switch ( $tag_name ) {
-			case 'img':
-				if ( preg_match( '/wp-image-([0-9]+)/i', $tag, $class_id ) ) {
-					$attachment_id = absint( $class_id[1] );
-
-					if ( $attachment_id ) {
-						// If exactly the same image tag is used more than once, overwrite it.
-						// All identical tags will be replaced later with 'str_replace()'.
-						$images[ $tag ] = $attachment_id;
-						break;
-					}
-				}
-				$images[ $tag ] = 0;
-				break;
+	/**
+	 * Filter the content to allow us to filter the image tags.
+	 *
+	 * @param string $content the content to filter.
+	 * @param string $context the context of the content.
+	 *
+	 * @return string content
+	 */
+	function dominant_color_filter_content_tags( $content, $context = null ) {
+		if ( null === $context ) {
+			$context = current_filter();
 		}
-	}
 
-	// Reduce the array to unique attachment IDs.
-	$attachment_ids = array_unique( array_filter( array_values( $images ) ) );
+		if ( ! preg_match_all( '/<(img)\s[^>]+>/', $content, $matches, PREG_SET_ORDER ) ) {
+			return $content;
+		}
 
-	if ( count( $attachment_ids ) > 1 ) {
-		/*
-		 * Warm the object cache with post and meta information for all found.
-		 * images to avoid making individual database calls.
-		 */
-		_prime_post_caches( $attachment_ids, false, true );
-	}
+		// List of the unique `img` tags found in $content.
+		$images = array();
 
-	// Iterate through the matches in order of occurrence as it is relevant for whether or not to lazy-load.
-	foreach ( $matches as $match ) {
-		// Filter an image match.
-		if ( isset( $images[ $match[0] ] ) ) {
-			$filtered_image = $match[0];
-			$attachment_id  = $images[ $match[0] ];
-			/**
-			 * Filters img tag that will be injected into the content.
-			 *
-			 * @param string $filtered_image the img tag with attributes being created that will
-			 *                                    replace the source img tag in the content.
-			 * @param string $context Optional. Additional context to pass to the filters.
-			 *                        Defaults to `current_filter()` when not set.
-			 * @param int $attachment_id the ID of the image attachment.
-			 *
-			 * @since 1.0.0
-			 */
-			$filtered_image = apply_filters( 'dominant_color_img_tag_add_adjust', $filtered_image, $context, $attachment_id );
+		foreach ( $matches as $match ) {
+			list( $tag, $tag_name ) = $match;
 
-			if ( $filtered_image !== $match[0] ) {
-				$content = str_replace( $match[0], $filtered_image, $content );
+			switch ( $tag_name ) {
+				case 'img':
+					if ( preg_match( '/wp-image-([0-9]+)/i', $tag, $class_id ) ) {
+						$attachment_id = absint( $class_id[1] );
+
+						if ( $attachment_id ) {
+							// If exactly the same image tag is used more than once, overwrite it.
+							// All identical tags will be replaced later with 'str_replace()'.
+							$images[ $tag ] = $attachment_id;
+							break;
+						}
+					}
+					$images[ $tag ] = 0;
+					break;
 			}
 		}
-	}
 
-	return $content;
-}
+		// Reduce the array to unique attachment IDs.
+		$attachment_ids = array_unique( array_filter( array_values( $images ) ) );
+
+		if ( count( $attachment_ids ) > 1 ) {
+			/*
+			 * Warm the object cache with post and meta information for all found.
+			 * images to avoid making individual database calls.
+			 */
+			_prime_post_caches( $attachment_ids, false, true );
+		}
+
+		// Iterate through the matches in order of occurrence as it is relevant for whether or not to lazy-load.
+		foreach ( $matches as $match ) {
+			// Filter an image match.
+			if ( isset( $images[ $match[0] ] ) ) {
+				$filtered_image = $match[0];
+				$attachment_id  = $images[ $match[0] ];
+				/**
+				 * Filters img tag that will be injected into the content.
+				 *
+				 * @param string $filtered_image the img tag with attributes being created that will
+				 *                                    replace the source img tag in the content.
+				 * @param string $context Optional. Additional context to pass to the filters.
+				 *                        Defaults to `current_filter()` when not set.
+				 * @param int $attachment_id the ID of the image attachment.
+				 *
+				 * @since 1.0.0
+				 */
+				$filtered_image = apply_filters( 'dominant_color_img_tag_add_adjust', $filtered_image, $context, $attachment_id );
+
+				if ( $filtered_image !== $match[0] ) {
+					$content = str_replace( $match[0], $filtered_image, $content );
+				}
+			}
+		}
+
+		return $content;
+	}
 
 	$filters = array( 'the_content', 'the_excerpt', 'widget_text_content', 'widget_block_content' );
 	foreach ( $filters as $filter ) {

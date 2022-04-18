@@ -17,7 +17,7 @@
  *
  * @see WP_Image_Editor
  */
-class shortened_image extends WP_Image_Editor_GD {
+class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 
 	/**
 	 * Get dominant color from a file.
