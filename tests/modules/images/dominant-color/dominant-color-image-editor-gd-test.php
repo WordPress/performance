@@ -14,7 +14,7 @@ class Dominant_Color_Image_Editor_GD_Test extends WP_UnitTestCase {
 		add_filter(
 			'wp_image_editors',
 			static function () {
-				return array( 'WP_Image_Editor_Imagick_With_Color' );
+				return array( 'Dominant_Color_Image_Editor_GD' );
 			}
 		);
 	}
