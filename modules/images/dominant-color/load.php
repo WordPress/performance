@@ -316,7 +316,6 @@ function dominant_color_get_has_transparency( $id ) {
 	return $has_transparency;
 }
 
-
 /**
  * Works out if the color is dark or light.
  *
