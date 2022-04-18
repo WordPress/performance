@@ -144,7 +144,7 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 
 		$extra_class = '';
 
-		if ( $image_meta['has_transparency'] === true ) {
+		if ( true === $image_meta['has_transparency'] ) {
 			$data       .= ' data-has-transparency="true"';
 			$extra_class = ' has-transparency ';
 		} else {
