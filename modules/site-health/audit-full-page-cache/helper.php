@@ -7,10 +7,10 @@
  */
 
 /**
- * List of header ,and it's verification callback to verify if page cache is enabled or not.
+ * Returns a list of headers and its verification callback to verify if page cache is enabled or not.
  *
  * Note: key is header name and value could be callable function to verify header value.
- * Empty value mean existence of header detect page cache is enable.
+ * Empty value mean existence of header detect page cache is enabled.
  *
  * @return array List of client caching headers and their (optional) verification callbacks.
  * @since 1.0.0
@@ -56,7 +56,7 @@ function perflab_afpc_get_page_cache_headers() {
 }
 
 /**
- * Check if site has page cache enable or not.
+ * Checks if site has page cache enabled or not.
  *
  * @since 1.0.0
  * @return WP_Error|array {
@@ -144,6 +144,7 @@ function perflab_afpc_check_for_page_caching() {
  * Get page cache details.
  *
  * @since 1.0.0
+ *
  * @return WP_Error|array {
  *    Page cache detail or else a WP_Error if unable to determine.
  *

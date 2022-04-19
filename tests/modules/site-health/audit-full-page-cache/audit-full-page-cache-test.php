@@ -3,6 +3,7 @@
  * Tests for audit-full-page-cache module.
  *
  * @package performance-lab
+ * @group audit-full-page-cache
  */
 
 class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
@@ -36,7 +37,6 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 	 * @dataProvider provider_perflab_afpc_page_cache_test
 	 * @covers ::perflab_afpc_page_cache_test()
 	 * @covers ::perflab_afpc_get_page_cache_detail()
-	 * @covers ::perflab_afpc_page_cache_detected_test()
 	 * @covers ::perflab_afpc_get_page_cache_detail()
 	 * @covers ::perflab_afpc_get_page_cache_headers()
 	 * @covers ::perflab_afpc_check_for_page_caching()

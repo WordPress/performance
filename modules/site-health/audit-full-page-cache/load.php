@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: Audit Full Page Cache
- * Description: Adds a Full page Cache checker in Site Health checks.
+ * Description: Adds a check for full page cache in Site Health status.
  * Experimental: No
  *
  * @package performance-lab
@@ -40,9 +40,9 @@ add_filter( 'site_status_tests', 'perflab_afpc_add_full_page_cache_test' );
  * @return array
  */
 function perflab_afpc_page_cache_test() {
-	$description  = '<p>' . __( 'WordPress performs at its best when page caching is enabled. This is because the additional optimizations performed require additional server processing time, and page caching ensures that responses are served quickly.', 'performance-lab' ) . '</p>';
-	$description .= '<p>' . __( 'Page caching is detected by looking for an active page caching plugin as well as making three requests to the homepage and looking for one or more of the following HTTP client caching response headers:', 'performance-lab' )
-					. ' <code>' . implode( '</code>, <code>', array_keys( perflab_afpc_get_page_cache_headers() ) ) . '.</code>';
+	$description  = '<p>' . __( 'Page caching enhances the speed and performance of your site by saving and serving static pages instead of calling for a page every time a user visits.', 'performance-lab' ) . '</p>';
+	$description .= '<p>' . __( 'Page caching is detected by looking for an active page caching plugin as well as making three requests to the homepage and looking for one or more of the following HTTP client caching response headers:', 'performance-lab' ) . '</p>';
+	$description .= '<code>' . implode( '</code>, <code>', array_keys( perflab_afpc_get_page_cache_headers() ) ) . '.</code>';
 
 	$result = array(
 		'badge'       => array(
@@ -65,62 +65,36 @@ function perflab_afpc_page_cache_test() {
 	$page_cache_detail = perflab_afpc_get_page_cache_detail();
 
 	if ( is_wp_error( $page_cache_detail ) ) {
-		return perflab_afpc_page_cache_unable_detect_cache_test( $result, $page_cache_detail );
+		$result['badge']['color'] = 'red';
+		$result['label']          = __( 'Unable to detect the presence of page caching', 'performance-lab' );
+		$result['status']         = 'critical';
+		$error_info                         = sprintf(
+		/* translators: 1 is error message, 2 is error code */
+			__( 'Unable to detect page caching due to possible loopback request problem. Please verify that the loopback request test is passing. Error: %1$s (Code: %2$s)', 'performance-lab' ),
+			$page_cache_detail->get_error_message(),
+			$page_cache_detail->get_error_code()
+		);
+		$result['description'] = wp_kses_post( "<p>$error_info</p>" ) . $result['description'];
+		return $result;
 	}
 
-	return perflab_afpc_page_cache_detected_test( $result, $page_cache_detail );
-}
-
-/**
- * Response when unable to detect the presence of page caching.
- *
- * @param array    $default_response Default perflab_page_cache callback response.
- * @param WP_Error $page_cache_detail_error get_page_cache_detail() response.
- *
- * @return array
- * @since 1.0.0
- */
-function perflab_afpc_page_cache_unable_detect_cache_test( $default_response, $page_cache_detail_error ) {
-	$default_response['badge']['color'] = 'red';
-	$default_response['label']          = __( 'Unable to detect the presence of page caching', 'performance-lab' );
-	$default_response['status']         = 'critical';
-	$error_info                         = sprintf(
-	/* translators: 1 is error message, 2 is error code */
-		__( 'Unable to detect page caching due to possible loopback request problem. Please verify that the loopback request test is passing. Error: %1$s (Code: %2$s)', 'performance-lab' ),
-		$page_cache_detail_error->get_error_message(),
-		$page_cache_detail_error->get_error_code()
-	);
-	$default_response['description'] = wp_kses_post( "<p>$error_info</p>" ) . $default_response['description'];
-	return $default_response;
-}
-
-/**
- * Response when page cache detected.
- *
- * @param array $default_response Default perflab_page_cache callback response.
- * @param array $page_cache_detail get_page_cache_detail() response.
- *
- * @return array
- * @since 1.0.0
- */
-function perflab_afpc_page_cache_detected_test( $default_response, $page_cache_detail ) {
-
-	$default_response['status'] = $page_cache_detail['status'];
+	$result['status'] = $page_cache_detail['status'];
 
 	switch ( $page_cache_detail['status'] ) {
 		case 'recommended':
-			$default_response['badge']['color'] = 'orange';
-			$default_response['label']          = __( 'Page caching is not detected but the server response time is OK', 'performance-lab' );
+			$result['badge']['color'] = 'orange';
+			$result['label']          = __( 'Page caching is not detected but the server response time is OK', 'performance-lab' );
 			break;
 		case 'good':
-			$default_response['badge']['color'] = 'green';
-			$default_response['label']          = __( 'Page caching is detected and the server response time is good', 'performance-lab' );
+			$result['badge']['color'] = 'green';
+			$result['label']          = __( 'Page caching is detected and the server response time is good', 'performance-lab' );
 			break;
 		default:
-			$default_response['badge']['color'] = 'red';
-			$default_response['label']          = __( 'Page caching is detected but the server response time is still slow', 'performance-lab' );
+			$result['badge']['color'] = 'red';
 			if ( empty( $page_cache_detail['headers'] ) && ! $page_cache_detail['advanced_cache_present'] ) {
-				$default_response['label'] = __( 'Page caching is not detected and the server response time is slow', 'performance-lab' );
+				$result['label'] = __( 'Page caching is not detected and the server response time is slow', 'performance-lab' );
+			} else {
+				$result['label'] = __( 'Page caching is detected but the server response time is still slow', 'performance-lab' );
 			}
 	}
 
@@ -134,14 +108,14 @@ function perflab_afpc_page_cache_detected_test( $default_response, $page_cache_d
 		if ( $page_cache_detail['response_time'] < $threshold ) {
 			$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt"></span> ' . sprintf(
 				/* translators: %d is the response time in milliseconds */
-				__( 'Median server response time was %1$s milliseconds. This is less than the %2$s millisecond threshold.', 'performance-lab' ),
+				__( 'Median server response time was %1$s milliseconds. This is less than the recommended %2$s millisecond threshold.', 'performance-lab' ),
 				number_format_i18n( $page_cache_detail['response_time'] ),
 				number_format_i18n( $threshold )
 			);
 		} else {
 			$page_cache_test_summary[] = '<span class="dashicons dashicons-warning"></span> ' . sprintf(
 				/* translators: %d is the response time in milliseconds */
-				__( 'Median server response time was %1$s milliseconds. It should be less than %2$s milliseconds.', 'performance-lab' ),
+				__( 'Median server response time was %1$s milliseconds. It should be less than the recommended %2$s milliseconds threshold.', 'performance-lab' ),
 				number_format_i18n( $page_cache_detail['response_time'] ),
 				number_format_i18n( $threshold )
 			);
@@ -150,17 +124,19 @@ function perflab_afpc_page_cache_detected_test( $default_response, $page_cache_d
 		if ( empty( $page_cache_detail['headers'] ) ) {
 			$page_cache_test_summary[] = '<span class="dashicons dashicons-warning"></span> ' . __( 'No client caching response headers were detected.', 'performance-lab' );
 		} else {
-			$page_cache_test_summary[] = '<span class="dashicons dashicons-yes-alt"></span> ' .
-										sprintf(
-										/* translators: Placeholder is number of caching headers */
-											_n(
-												'There was %d client caching response header detected:',
-												'There were %d client caching response headers detected:',
-												count( $page_cache_detail['headers'] ),
-												'performance-lab'
-											),
-											count( $page_cache_detail['headers'] )
-										) . ' <code>' . implode( '</code>, <code>', $page_cache_detail['headers'] ) . '</code>.';
+			$headers_summary  = '<span class="dashicons dashicons-yes-alt"></span>';
+			$headers_summary .= sprintf(
+			/* translators: Placeholder is number of caching headers */
+				_n(
+					' There was %d client caching response header detected: ',
+					' There were %d client caching response headers detected: ',
+					count( $page_cache_detail['headers'] ),
+					'performance-lab'
+				),
+				count( $page_cache_detail['headers'] )
+			);
+			$headers_summary          .= '<code>' . implode( '</code>, <code>', $page_cache_detail['headers'] ) . '</code>.';
+			$page_cache_test_summary[] = $headers_summary;
 		}
 	}
 
@@ -171,8 +147,8 @@ function perflab_afpc_page_cache_detected_test( $default_response, $page_cache_d
 		$page_cache_test_summary[] = '<span class="dashicons dashicons-warning"></span> ' . __( 'A page caching plugin was not detected.', 'performance-lab' );
 	}
 
-	$default_response['description'] .= '<ul><li>' . implode( '</li><li>', $page_cache_test_summary ) . '</li></ul>';
-	return $default_response;
+	$result['description'] .= '<ul><li>' . implode( '</li><li>', $page_cache_test_summary ) . '</li></ul>';
+	return $result;
 }
 
 /**
