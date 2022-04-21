@@ -331,7 +331,7 @@ function dominant_color_get_has_transparency( $id ) {
 	$file = get_attached_file( $id );
 
 	$editor = wp_get_image_editor( $file );
-	if ( is_wp_error( $editor ) && ! method_exists( $editor, 'get_has_transparency' ) ) {
+	if ( is_wp_error( $editor ) || ! method_exists( $editor, 'get_has_transparency' ) ) {
 
 		return true; // safer to set to trans than not.
 	}
