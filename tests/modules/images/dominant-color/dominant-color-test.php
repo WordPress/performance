@@ -119,9 +119,46 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * Tests dominant_color_color_is_light().
+	 *
+	 * @dataProvider provider_set_of_colors
+	 *
+	 * @covers ::dominant_color_color_is_light
+	 */
+	public function test_color_is_light( $color, $expected_result ) {
+		$this->assertEquals( $expected_result, dominant_color_color_is_light( $color ) );
+	}
 
-
-
+	/**
+	 * Data provider for dominant_color_color_is_light.
+	 *
+	 * @return array
+	 */
+	function provider_set_of_colors() {
+		return array(
+			'ccc'  => array(
+				'color' => '#ccc',
+				'result' => true,
+			),
+			'white'  => array(
+				'color' => '#ffffff',
+				'result' => true,
+			),
+			'black'  => array(
+				'color' => '#000000',
+				'result' => false,
+			),
+			'white_transparent'  => array(
+				'color' => '#ffffff00',
+				'result' => true,
+			),
+			'black_transparent'  => array(
+				'color' => '#000000ff',
+				'result' => false,
+			),
+		);
+	}
 
 }
 

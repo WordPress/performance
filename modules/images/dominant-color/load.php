@@ -253,6 +253,7 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 
 /**
  * Add CSS needed for to show the dominant color as an image background.
+ * @since n.e.x.t
  */
 function dominant_color_add_inline_style() {
 	$handle = 'dominant-color-styles';
@@ -280,6 +281,7 @@ function dominant_color_set_image_editors() {
 /**
  * Get dominant color of image
  *
+ * @since n.e.x.t
  * @param integer $id the image id.
  * @param string  $default_color default color.
  *
@@ -301,6 +303,7 @@ function dominant_color_get( $id, $default_color = 'eee' ) {
 /**
  * Works out if color has transparency
  *
+ * @since n.e.x.t
  * @param integer $id the attachment id.
  *
  * @return bool
@@ -324,14 +327,23 @@ function dominant_color_get_has_transparency( $id ) {
 }
 
 /**
- * Works out if the color is dark or light.
+ * Works out if the color is dark or light from a give hex color.
  *
+ * @since n.e.x.t
  * @param string $hex color in hex.
  *
  * @return bool
  */
 function dominant_color_color_is_light( $hex ) {
 	$hex       = str_replace( '#', '', $hex );
+	if ( 3 === strlen( $hex ) ) {
+		$hex[5] = $hex[2];
+		$hex[4] = $hex[2];
+		$hex[3] = $hex[1];
+		$hex[2] = $hex[1];
+		$hex[1] = $hex[0];
+	}
+
 	$r         = ( hexdec( substr( $hex, 0, 2 ) ) / 255 );
 	$g         = ( hexdec( substr( $hex, 2, 2 ) ) / 255 );
 	$b         = ( hexdec( substr( $hex, 4, 2 ) ) / 255 );
