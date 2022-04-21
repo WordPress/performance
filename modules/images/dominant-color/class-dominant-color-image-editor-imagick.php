@@ -71,7 +71,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			return (bool) @$this->image->getImageAlphaChannel();
 		} catch ( Exception $e ) {
 
-			return true;
+			return false;
 		}
 
 		return false;
