@@ -22,6 +22,7 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 
 		return $metadata;
 	}
+
 	$dominant_color = dominant_color_get( $attachment_id );
 
 	if ( ! empty( $dominant_color ) ) {
