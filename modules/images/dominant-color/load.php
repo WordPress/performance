@@ -11,6 +11,7 @@
 /**
  * Add the dominant color metadata to the attachment.
  *
+ * @since n.e.x.t
  * @param array $metadata The attachment metadata.
  * @param int   $attachment_id The attachment ID.
  *
@@ -36,6 +37,7 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
 /**
  * Add the dominant color metadata to the attachment.
  *
+ * @since n.e.x.t
  * @param array $metadata Metadata for the attachment.
  * @param int   $attachment_id attachement id.
  *
@@ -63,6 +65,7 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_has_transparency_
 /**
  * Filter various image attributes to add the dominant color to the image
  *
+ * @since n.e.x.t
  * @param array  $attr        Attributes for the image markup.
  * @param object $attachment Image attachment post.
  *
@@ -110,6 +113,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_tag_add_adjust
 /**
  * Filter image tags in content to add the dominant color to the image.
  *
+ * @since n.e.x.t
  * @param string $filtered_image The filtered image.
  * @param string $context        The context of the image.
  * @param int    $attachment_id  The attachment ID.
@@ -167,6 +171,7 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 	/**
 	 * Filter the content to allow us to filter the image tags.
 	 *
+	 * @since n.e.x.t
 	 * @param string $content the content to filter.
 	 * @param string $context the context of the content.
 	 *
@@ -319,7 +324,7 @@ function dominant_color_get_has_transparency( $id ) {
 
 		return true; // safer to set to trans than not.
 	}
-	$has_transparency = wp_get_image_editor( $file )->get_has_transparency();
+	$has_transparency = $editor->get_has_transparency();
 
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
