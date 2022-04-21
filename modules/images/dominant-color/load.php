@@ -299,8 +299,11 @@ function dominant_color_get( $id, $default_color = 'eee' ) {
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	$file = get_attached_file( $id );
-
-	$dominant_color = wp_get_image_editor( $file )->get_dominant_color( $default_color );
+	if( method_exists( 'WP_Image_Editor', 'get_dominant_color' ) ) {
+		$dominant_color = wp_get_image_editor( $file )->get_dominant_color( $default_color );;
+	} else {
+		$dominant_color = $default_color;
+	}
 
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
@@ -322,7 +325,7 @@ function dominant_color_get_has_transparency( $id ) {
 	$file = get_attached_file( $id );
 
 	$editor = wp_get_image_editor( $file );
-	if ( is_wp_error( $editor ) ) {
+	if ( is_wp_error( $editor ) && ! method_exists( $editor, 'get_has_transparency' ) ) {
 
 		return true; // safer to set to trans than not.
 	}
