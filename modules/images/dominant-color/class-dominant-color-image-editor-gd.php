@@ -29,16 +29,18 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 */
 	public function get_dominant_color( $default_color = 'eee' ) {
 
-		if ( $this->image ) {
-			$shorted_image = imagecreatetruecolor( 1, 1 );
-			imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, imagesx( $this->image ), imagesy( $this->image ) );
+		if ( ! $this->image ) {
 
-			$hex = dechex( imagecolorat( $shorted_image, 0, 0 ) );
-
-			return ( '0' === $hex ) ? $default_color : $hex;
+			return $default_color;
 		}
 
-		return $default_color;
+		$shorted_image = imagecreatetruecolor( 1, 1 );
+		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, imagesx( $this->image ), imagesy( $this->image ) );
+
+		$hex = dechex( imagecolorat( $shorted_image, 0, 0 ) );
+
+		return ( '0' === $hex ) ? $default_color : $hex;
+
 	}
 
 
@@ -52,17 +54,20 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 */
 	public function get_has_transparency() {
 
-		if ( $this->image ) {
-			// walk through the pixels.
-			$w = imagesx( $this->image );
-			$h = imagesy( $this->image );
-			for ( $x = 0; $x < $w; $x ++ ) {
-				for ( $y = 0; $y < $h; $y ++ ) {
-					$rgb  = imagecolorat( $this->image, $x, $y );
-					$rgba = imagecolorsforindex( $this->image, $rgb );
-					if ( $rgba['alpha'] > 0 ) {
-						return true;
-					}
+		if ( ! $this->image ) {
+
+			return false;
+		}
+
+		// walk through the pixels.
+		$w = imagesx( $this->image );
+		$h = imagesy( $this->image );
+		for ( $x = 0; $x < $w; $x ++ ) {
+			for ( $y = 0; $y < $h; $y ++ ) {
+				$rgb  = imagecolorat( $this->image, $x, $y );
+				$rgba = imagecolorsforindex( $this->image, $rgb );
+				if ( $rgba['alpha'] > 0 ) {
+					return true;
 				}
 			}
 		}

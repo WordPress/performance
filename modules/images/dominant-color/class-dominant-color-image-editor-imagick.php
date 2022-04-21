@@ -30,20 +30,21 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 */
 	public function get_dominant_color( $default_color = 'eee' ) {
 
-		try {
-			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-			if ( $this->image ) {
-
-				$this->image->setImageColorspace( Imagick::COLORSPACE_RGB );
-				$this->image->setImageFormat( 'RGB' );
-				$this->image->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
-				$pixel = $this->image->getImagePixelColor( 0, 0 );
-				$color = $pixel->getColor();
-
-				return dechex( $color['r'] ) . dechex( $color['g'] ) . dechex( $color['b'] );
-			}
+		if ( ! $this->image ) {
 
 			return $default_color;
+		}
+
+		try {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+			$this->image->setImageColorspace( Imagick::COLORSPACE_RGB );
+			$this->image->setImageFormat( 'RGB' );
+			$this->image->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
+			$pixel = $this->image->getImagePixelColor( 0, 0 );
+			$color = $pixel->getColor();
+
+			return dechex( $color['r'] ) . dechex( $color['g'] ) . dechex( $color['b'] );
 		} catch ( Exception $e ) {
 
 			return $default_color;
@@ -60,18 +61,19 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 */
 	public function get_has_transparency() {
 
-		if ( $this->image ) {
-
-			try {
-				// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-				return (bool) @$this->image->getImageAlphaChannel();
-			} catch ( Exception $e ) {
-
-				return true;
-			}
-		} else {
+		if ( ! $this->image ) {
 
 			return false;
 		}
+
+		try {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			return (bool) @$this->image->getImageAlphaChannel();
+		} catch ( Exception $e ) {
+
+			return true;
+		}
+
+		return false;
 	}
 }
