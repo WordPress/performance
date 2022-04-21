@@ -19,11 +19,10 @@
  */
 function dominant_color_metadata( $metadata, $attachment_id ) {
 	if ( ! wp_attachment_is_image( $attachment_id ) ) {
-
 		return $metadata;
 	}
-	$dominant_color = dominant_color_get( $attachment_id );
 
+	$dominant_color = dominant_color_get( $attachment_id );
 	if ( ! empty( $dominant_color ) ) {
 		$metadata['dominant_color'] = $dominant_color;
 	}
