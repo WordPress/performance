@@ -88,7 +88,7 @@ function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment )
 		$attr['style'] = ' --has-transparency: ' . $has_transparency . '; ';
 	} else {
 		$attr['style'] .= ' --has-transparency: ' . $has_transparency . '; ';
-		$extra_class   = ' has-transparency ';
+		$extra_class    = ' has-transparency ';
 	}
 
 	if ( isset( $image_meta['dominant_color'] ) ) {
