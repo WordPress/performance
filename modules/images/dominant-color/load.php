@@ -12,7 +12,7 @@
  * Add the dominant color metadata to the attachment.
  *
  * @param array $metadata The attachment metadata.
- * @param int $attachment_id The attachment ID.
+ * @param int   $attachment_id The attachment ID.
  *
  * @return array $metadata
  * @since n.e.x.t
@@ -39,7 +39,7 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
  * Add the dominant color metadata to the attachment.
  *
  * @param array $metadata Metadata for the attachment.
- * @param int $attachment_id attachement id.
+ * @param int   $attachment_id attachement id.
  *
  * @return array $metadata
  * @since n.e.x.t
@@ -67,7 +67,7 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_has_transparency_
 /**
  * Filter various image attributes to add the dominant color to the image
  *
- * @param array $attr Attributes for the image markup.
+ * @param array  $attr Attributes for the image markup.
  * @param object $attachment Image attachment post.
  *
  * @return mixed
@@ -118,7 +118,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_tag_add_adjust
  *
  * @param string $filtered_image The filtered image.
  * @param string $context The context of the image.
- * @param int $attachment_id The attachment ID.
+ * @param int    $attachment_id The attachment ID.
  *
  * @return string image tag
  * @since n.e.x.t
@@ -136,9 +136,9 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 	 * Filters whether dominant color is added to the image.
 	 * set to false inorder disable adding the dominant color to the image.
 	 *
-	 * @param bool $add_dominant_color_to_image
-	 * @param int $attachment_id
-	 * @param array $image_meta
+	 * @param bool   $add_dominant_color_to_image
+	 * @param int    $attachment_id
+	 * @param array  $image_meta
 	 * @param string $filtered_image
 	 * @param string $context
 	 */
@@ -152,7 +152,7 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 		$extra_class = '';
 
 		if ( true === $image_meta['has_transparency'] ) {
-			$data        .= ' data-has-transparency="true"';
+			$data       .= ' data-has-transparency="true"';
 			$extra_class = ' has-transparency ';
 		} else {
 			$data .= ' data-has-transparency="false"';
@@ -160,7 +160,7 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 
 		$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
 
-		$extra_class    .= ( dominant_color_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
+		$extra_class   .= ( dominant_color_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 		$filtered_image = str_replace( 'class="', 'class="' . $extra_class . ' ', $filtered_image );
 	}
 
@@ -293,7 +293,7 @@ function dominant_color_set_image_editors() {
  * Get dominant color of image
  *
  * @param integer $id the image id.
- * @param string $default_color default color.
+ * @param string  $default_color default color.
  *
  * @return string
  * @since n.e.x.t
