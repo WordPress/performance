@@ -259,6 +259,7 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 
 /**
  * Add CSS needed for to show the dominant color as an image background.
+ *
  * @since n.e.x.t
  */
 function dominant_color_add_inline_style() {
@@ -341,7 +342,7 @@ function dominant_color_get_has_transparency( $id ) {
  * @return bool
  */
 function dominant_color_color_is_light( $hex ) {
-	$hex       = str_replace( '#', '', $hex );
+	$hex = str_replace( '#', '', $hex );
 	if ( 3 === strlen( $hex ) ) {
 		$hex[5] = $hex[2];
 		$hex[4] = $hex[2];

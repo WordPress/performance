@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for dominant-color module.
  *
@@ -89,7 +90,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 		// Deactivate filter.
 		add_filter(
 			'enable_dominant_color_for_image',
-			function() {
+			function () {
 				return false;
 			}
 		);
@@ -137,24 +138,24 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 	 */
 	function provider_set_of_colors() {
 		return array(
-			'ccc'  => array(
-				'color' => '#ccc',
+			'ccc'               => array(
+				'color'  => '#ccc',
 				'result' => true,
 			),
-			'white'  => array(
-				'color' => '#ffffff',
+			'white'             => array(
+				'color'  => '#ffffff',
 				'result' => true,
 			),
-			'black'  => array(
-				'color' => '#000000',
+			'black'             => array(
+				'color'  => '#000000',
 				'result' => false,
 			),
-			'white_transparent'  => array(
-				'color' => '#ffffff00',
+			'white_transparent' => array(
+				'color'  => '#ffffff00',
 				'result' => true,
 			),
-			'black_transparent'  => array(
-				'color' => '#000000ff',
+			'black_transparent' => array(
+				'color'  => '#000000ff',
 				'result' => false,
 			),
 		);
