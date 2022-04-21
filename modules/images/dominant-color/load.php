@@ -299,7 +299,7 @@ function dominant_color_get( $id, $default_color = 'eee' ) {
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	$file = get_attached_file( $id );
-	if( method_exists( 'WP_Image_Editor', 'get_dominant_color' ) ) {
+	if ( method_exists( 'WP_Image_Editor', 'get_dominant_color' ) ) {
 		$dominant_color = wp_get_image_editor( $file )->get_dominant_color( $default_color );;
 	} else {
 		$dominant_color = $default_color;
