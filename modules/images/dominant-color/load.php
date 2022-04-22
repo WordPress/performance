@@ -331,13 +331,13 @@ function dominant_color_get_has_transparency( $id ) {
 	$file = get_attached_file( $id );
 
 	$editor = wp_get_image_editor( $file );
-	if ( is_wp_error( $editor ) || ! method_exists( $editor, 'get_has_transparency' ) ) {
+	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
+	if ( is_wp_error( $editor ) || ! method_exists( $editor, 'get_has_transparency' ) ) {
 		return true; // safer to set to trans than not.
 	}
-	$has_transparency = $editor->get_has_transparency();
 
-	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
+	$has_transparency = $editor->get_has_transparency();
 
 	return $has_transparency;
 }
