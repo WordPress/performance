@@ -9,7 +9,7 @@
 /**
  * Adds sources to metadata for an attachment.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param array $metadata              Metadata of the attachment.
  * @param array $valid_mime_transforms List of valid mime transforms for current image mime type.
@@ -79,7 +79,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_i
 /**
  * Creates additional image formats when original image is edited.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param bool|null       $override           Value to return instead of saving. Default null.
  * @param string          $file_path          Name of the file to be saved.
