@@ -40,7 +40,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_i
 			null === $image_directory
 			&& isset( $metadata['file'] )
 			&& 0 !== strpos( $metadata['file'], '/' )
-			&& ':\' !== substr( $metadata['file'], 1, 2 )
+			&& ':\\' !== substr( $metadata['file'], 1, 2 )
 		) {
 			$uploads = wp_get_upload_dir();
 			if ( false === $uploads['error'] && isset( $uploads['basedir'] ) ) {
