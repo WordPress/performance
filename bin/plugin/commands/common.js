@@ -16,6 +16,18 @@ const fs = require( 'fs' );
  */
 
 /**
+ * Definition of the groups areas as an object with a number to specify the order priority of each,
+ * with increments of 10 between each module, in order to allow space for any change down the road.
+ */
+const FOCUS_AREAS = {
+	images: 10,
+	javascript: 20,
+	'site-health': 30,
+	measurement: 40,
+	'object-cache': 50,
+};
+
+/**
  * Returns a promise resolving to the list of data for all modules.
  *
  * @param {string} modulesDir Modules directory.
@@ -33,6 +45,8 @@ exports.getModuleData = async ( modulesDir ) => {
 			const moduleData = {
 				slug: path.basename( moduleDir ),
 				focus: path.basename( path.dirname( moduleDir ) ),
+				// Set default values, in order to allow to avoid errors when ordering, if set property would be override.
+				experimental: false,
 			};
 
 			// Map of module header => object property.
@@ -68,5 +82,26 @@ exports.getModuleData = async ( modulesDir ) => {
 
 			return moduleData;
 		} )
-		.filter( ( moduleData ) => moduleData.name && moduleData.description );
+		.filter( ( moduleData ) => moduleData.name && moduleData.description )
+		.sort( ( firstModule, secondModule ) => {
+			// Not the same focus group.
+			if ( firstModule.focus !== secondModule.focus ) {
+				return FOCUS_AREAS[ firstModule.focus ] >
+					FOCUS_AREAS[ secondModule.focus ]
+					? 1
+					: -1;
+			}
+
+			const bothModulesAreExperimental =
+				firstModule.experimental && secondModule.experimental;
+			if (
+				! bothModulesAreExperimental &&
+				( firstModule.experimental || secondModule.experimental )
+			) {
+				return firstModule.experimental ? 1 : -1;
+			}
+
+			// Lastly order alphabetically.
+			return firstModule.slug.localeCompare( secondModule.slug );
+		} );
 };
