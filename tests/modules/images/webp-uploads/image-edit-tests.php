@@ -75,10 +75,13 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 
-		$metadata = wp_get_attachment_metadata( $attachment_id );
+		$metadata               = wp_get_attachment_metadata( $attachment_id );
+		$updated_backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 
 		$this->assertSame( $backup_sources['full-orig'], $metadata['sources'] );
-		$this->assertSame( $backup_sources, get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
+		$this->assertNotSame( $backup_sources, $updated_backup_sources );
+		$this->assertCount( 1, $backup_sources );
+		$this->assertCount( 2, $updated_backup_sources );
 
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 		foreach ( $backup_sizes as $size_name => $properties ) {
@@ -362,5 +365,31 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 		$this->assertTrue( $editor->success() );
 		$this->assertEmpty( get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
+	}
+
+	/**
+	 * Store the next image hash on the backup sources
+	 *
+	 * @test
+	 */
+	public function it_should_store_the_next_image_hash_on_the_backup_sources() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$editor        = new WP_Image_Edit( $attachment_id );
+		// Edit the image.
+		$editor->rotate_right()->save();
+		// Restore the image.
+		wp_restore_image( $attachment_id );
+
+		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+
+		$this->assertIsArray( $backup_sources );
+		$this->assertCount( 2, $backup_sources );
+		foreach ( array_keys( $backup_sources ) as $name ) {
+			if ( 'full-orig' === $name ) {
+				$this->assertSame( 'full-orig', $name );
+			} else {
+				$this->assertSizeNameIsHashed( '', $name );
+			}
+		}
 	}
 }
