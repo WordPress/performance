@@ -664,6 +664,23 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
+	 * Replace the featured image to WebP when requesting the featured image
+	 *
+	 * @test
+	 */
+	public function it_should_replace_the_featured_image_to_web_p_when_requesting_the_featured_image() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
+		$post_id       = $this->factory()->post->create();
+		set_post_thumbnail( $post_id, $attachment_id );
+
+		$featured_image = get_the_post_thumbnail( $post_id );
+
+		$this->assertTrue( has_post_thumbnail( $post_id ) );
+		$this->assertStringContainsString( '.webp', $featured_image );
+		$this->assertStringNotContainsString( '.jpeg', $featured_image );
+	}
+
+	/**
 	 * Prevent replacing an image if image was uploaded via external source or plugin.
 	 *
 	 * @group webp_uploads_update_image_references
