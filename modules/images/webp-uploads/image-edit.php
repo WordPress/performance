@@ -320,10 +320,39 @@ function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) {
  * @return array The updated metadata of the attachment.
  */
 function webp_uploads_restore_image( $attachment_id, $data ) {
-	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
-
-	if ( ! is_array( $backup_sources ) ) {
+	if ( empty( $data['sources'] ) ) {
 		return $data;
+	}
+
+	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+	if ( ! is_array( $backup_sources ) ) {
+		$backup_sources = array();
+	}
+
+	if ( ! defined( 'IMAGE_EDIT_OVERWRITE' ) || ! IMAGE_EDIT_OVERWRITE ) {
+		$target = null;
+		foreach ( $data['sources'] as $mime_type => $properties ) {
+			if ( empty( $properties['file'] ) ) {
+				continue;
+			}
+
+			preg_match( '/-e(\d{13})/', $properties['file'], $matches );
+			if ( empty( $matches ) || count( $matches ) < 2 || empty( $matches[1] ) ) {
+				continue;
+			}
+
+			$target = $matches[1];
+			break;
+		}
+
+		if ( null === $target ) {
+			$target = 'orig';
+		}
+
+		if ( empty( $backup_sources[ "full-{$target}" ] ) ) {
+			$backup_sources[ "full-{$target}" ] = $data['sources'];
+			update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $backup_sources );
+		}
 	}
 
 	if ( ! isset( $backup_sources['full-orig'] ) || ! is_array( $backup_sources['full-orig'] ) ) {
