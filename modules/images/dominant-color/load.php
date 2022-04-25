@@ -92,11 +92,10 @@ function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment )
 	}
 
 	if ( isset( $image_meta['dominant_color'] ) ) {
-		if ( ! isset( $attr['style'] ) ) {
-			$attr['style'] = '--dominant-color: #' . $image_meta['dominant_color'] . ';';
-		} else {
-			$attr['style'] .= '--dominant-color: #' . $image_meta['dominant_color'] . ';';
+		if ( empty( $attr['style'] ) ) {
+			$attr['style'] = '';
 		}
+		$attr['style'] .= '--dominant-color: #' . $image_meta['dominant_color'] . ';';
 		$attr['data-dominant-color'] = $image_meta['dominant_color'];
 
 		$extra_class .= ( dominant_color_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
