@@ -341,6 +341,7 @@ function dominant_color_get_has_transparency( $id ) {
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	if ( is_wp_error( $editor ) || ! method_exists( $editor, 'get_has_transparency' ) ) {
+
 		return true; // safer to set to trans than not.
 	}
 
