@@ -22,13 +22,13 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	/**
 	 * Get dominant color from a file.
 	 *
-	 * @param string $default_color default is light grey.
+	 * @param string $default_color Hex color string, without leading #.
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @return string hex color
 	 */
-	public function get_dominant_color( $default_color = 'eee' ) {
+	public function get_dominant_color( $default_color ) {
 
 		if ( ! $this->image ) {
 

@@ -24,10 +24,10 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param string $default_color Optional. Hex color string, without leading #. Default is light grey.
+	 * @param string $default_color Hex color string, without leading #.
 	 * @return string Dominant hex color string.
 	 */
-	public function get_dominant_color( $default_color = 'eee' ) {
+	public function get_dominant_color( $default_color ) {
 
 		if ( ! $this->image ) {
 
@@ -62,8 +62,8 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		// walk through the pixels.
 		$w = imagesx( $this->image );
 		$h = imagesy( $this->image );
-		for ( $x = 0; $x < $w; $x ++ ) {
-			for ( $y = 0; $y < $h; $y ++ ) {
+		for ( $x = 0; $x < $w; $x++ ) {
+			for ( $y = 0; $y < $h; $y++ ) {
 				$rgb  = imagecolorat( $this->image, $x, $y );
 				$rgba = imagecolorsforindex( $this->image, $rgb );
 				if ( $rgba['alpha'] > 0 ) {

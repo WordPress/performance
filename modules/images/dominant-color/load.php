@@ -298,7 +298,15 @@ function dominant_color_set_image_editors() {
  * @return string
  * @since n.e.x.t
  */
-function dominant_color_get( $id, $default_color = 'eee' ) {
+function dominant_color_get( $id, $default_color = 'eeeeee' ) {
+	/**
+	 * Filters the default color to use when no dominant color is found.
+	 *
+	 * @param string $default_color The default color.
+	 *
+	 * @since n.e.x.t
+	 */
+	$default_color =  apply_filters( 'dominant_color_default_color', $default_color );
 
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
