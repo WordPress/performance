@@ -100,10 +100,9 @@ function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment )
 
 		$extra_class .= ( dominant_color_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 
+                $attr['class'] = $extra_class;
 		if ( isset( $attr['class'] ) && ! array_intersect( explode( ' ', $attr['class'] ), explode( ' ', $extra_class ) ) ) {
-			$attr['class'] = $extra_class . ' ' . $attr['class'];
-		} else {
-			$attr['class'] = $extra_class;
+			$attr['class'] .= ' ' . $attr['class'];
 		}
 	}
 
