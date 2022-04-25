@@ -90,15 +90,18 @@ function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment )
 	}
 
 	if ( isset( $image_meta['dominant_color'] ) ) {
+
+		$attr['data-dominant-color'] = $image_meta['dominant_color'];
+
 		if ( empty( $attr['style'] ) ) {
 			$attr['style'] = '';
 		}
 		$attr['style'] .= '--dominant-color: #' . $image_meta['dominant_color'] . ';';
-		$attr['data-dominant-color'] = $image_meta['dominant_color'];
 
 		$extra_class .= ( dominant_color_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
-
-                $attr['class'] = $extra_class;
+		if ( empty( $attr['class'] ) ) {
+			$attr['class'] = '';
+		}
 		if ( isset( $attr['class'] ) && ! array_intersect( explode( ' ', $attr['class'] ), explode( ' ', $extra_class ) ) ) {
 			$attr['class'] .= ' ' . $attr['class'];
 		}
@@ -302,7 +305,7 @@ function dominant_color_get( $id, $default_color = 'eeeeee' ) {
 	 *
 	 * @since n.e.x.t
 	 */
-	$default_color =  apply_filters( 'dominant_color_default_color', $default_color );
+	$default_color = apply_filters( 'dominant_color_default_color', $default_color );
 
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
@@ -341,9 +344,7 @@ function dominant_color_get_has_transparency( $id ) {
 		return true; // safer to set to trans than not.
 	}
 
-	$has_transparency = $editor->get_has_transparency();
-
-	return $has_transparency;
+	return $editor->get_has_transparency();
 }
 
 /**
