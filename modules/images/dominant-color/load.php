@@ -47,7 +47,6 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
 function dominant_color_has_transparency_metadata( $metadata, $attachment_id ) {
 
 	if ( ! wp_attachment_is_image( $attachment_id ) ) {
-
 		return $metadata;
 	}
 
