@@ -77,7 +77,6 @@ function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment )
 
 	$image_meta = wp_get_attachment_metadata( $attachment->ID );
 	if ( ! is_array( $image_meta ) ) {
-
 		return $attr;
 	}
 
