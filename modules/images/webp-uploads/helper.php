@@ -179,7 +179,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 /**
  * Returns the attachment sources array ordered by filesize.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $size          The attachment size.

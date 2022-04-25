@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 5.8
 Tested up to:      5.9
 Requires PHP:      5.6
-Stable tag:        1.0.0-rc.1
+Stable tag:        1.0.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -65,6 +65,22 @@ Contributions welcome! There are several ways to contribute:
 * Join the weekly chat (Tuesdays at 16:00 UTC) in the [#performance channel on Slack](https://wordpress.slack.com/archives/performance)
 
 == Changelog ==
+
+= 1.0.0 =
+
+**Features**
+
+* Images: Generate secondary image MIME types when editing original image. ([235](https://github.com/WordPress/performance/pull/235))
+
+**Enhancements**
+
+* Images: Introduce `webp_uploads_prefer_smaller_image_file` filter allowing to opt in to preferring the smaller image file. ([287](https://github.com/WordPress/performance/pull/287))
+* Images: Select MIME type to use in frontend content based on file size. ([243](https://github.com/WordPress/performance/pull/243))
+* Site Health: Update Site Health reports copy for more clarity and consistency. ([272](https://github.com/WordPress/performance/pull/272))
+
+**Documentation**
+
+* Infrastructure: Define the plugin's version support and backward compatibility policy. ([240](https://github.com/WordPress/performance/pull/240))
 
 = 1.0.0-rc.1 =
 
