@@ -31,14 +31,14 @@
 /tests/testdata/modules/object-cache        @tillkruss @spacedmonkey
 
 # Module: WebP Uploads
-/modules/images/webp-uploads                                                @adamsilverstein @felixarntz
-/tests/modules/images/webp-uploads                                          @adamsilverstein @felixarntz
-/tests/testdata/modules/images/webp-uploads                                 @adamsilverstein @felixarntz
+/modules/images/webp-uploads                                                @adamsilverstein @felixarntz @mitogh
+/tests/modules/images/webp-uploads                                          @adamsilverstein @felixarntz @mitogh
+/tests/testdata/modules/images/webp-uploads                                 @adamsilverstein @felixarntz @mitogh
 
 # Module: WebP Support
-/modules/site-health/webp-support                                           @adamsilverstein @kirtangajjar
-/tests/modules/site-health/webp-support                                     @adamsilverstein @kirtangajjar
-/tests/testdata/modules/site-health/webp-support                            @adamsilverstein @kirtangajjar
+/modules/site-health/webp-support                                           @adamsilverstein @kirtangajjar @mitogh
+/tests/modules/site-health/webp-support                                     @adamsilverstein @kirtangajjar @mitogh
+/tests/testdata/modules/site-health/webp-support                            @adamsilverstein @kirtangajjar @mitogh
 
 # Module: Audit Autoloaded Options
 /modules/site-health/audit-autoloaded-options                               @manuelRod
