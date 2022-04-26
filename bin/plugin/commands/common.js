@@ -82,7 +82,7 @@ exports.getModuleData = async ( modulesDir ) => {
 
 			return moduleData;
 		} )
-		.filter( ( moduleData ) => moduleData.name && moduleData.description )
+		.filter( ( moduleData ) => moduleData.name && moduleData.description && typeof moduleData.experimental !== undefined )
 		.sort( ( firstModule, secondModule ) => {
 			// Not the same focus group.
 			if ( firstModule.focus !== secondModule.focus ) {
