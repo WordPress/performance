@@ -92,12 +92,7 @@ exports.getModuleData = async ( modulesDir ) => {
 					: -1;
 			}
 
-			const bothModulesAreExperimental =
-				firstModule.experimental && secondModule.experimental;
-			if (
-				! bothModulesAreExperimental &&
-				( firstModule.experimental || secondModule.experimental )
-			) {
+			if ( firstModule.experimental !== secondModule.experimental ) {
 				return firstModule.experimental ? 1 : -1;
 			}
 
