@@ -24,14 +24,13 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param string $default_color Hex color string, without leading #.
-	 * @return string Dominant hex color string.
+	 * @return string|WP_Error Dominant hex color string.
 	 */
-	public function get_dominant_color( $default_color ) {
+	public function get_dominant_color() {
 
 		if ( ! $this->image ) {
 
-			return $default_color;
+			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'performance-lab' ) );
 		}
 
 		$shorted_image = imagecreatetruecolor( 1, 1 );
@@ -39,7 +38,12 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 
 		$hex = dechex( imagecolorat( $shorted_image, 0, 0 ) );
 
-		return ( '0' === $hex ) ? $default_color : $hex;
+		if ( strlen( $hex ) < 6 ) {
+
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'performance-lab' ) );
+		}
+
+		return $hex;
 
 	}
 

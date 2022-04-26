@@ -11,11 +11,12 @@
 /**
  * Add the dominant color metadata to the attachment.
  *
+ * @since n.e.x.t
+ *
  * @param array $metadata The attachment metadata.
  * @param int   $attachment_id The attachment ID.
  *
  * @return array $metadata
- * @since n.e.x.t
  */
 function dominant_color_metadata( $metadata, $attachment_id ) {
 	if ( ! wp_attachment_is_image( $attachment_id ) ) {
@@ -31,18 +32,18 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 
 	return $metadata;
 }
-
 add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 );
 
 
 /**
  * Add the dominant color metadata to the attachment.
  *
+ * @since n.e.x.t
+ *
  * @param array $metadata Metadata for the attachment.
  * @param int   $attachment_id attachement id.
  *
  * @return array $metadata
- * @since n.e.x.t
  */
 function dominant_color_has_transparency_metadata( $metadata, $attachment_id ) {
 
@@ -60,17 +61,17 @@ function dominant_color_has_transparency_metadata( $metadata, $attachment_id ) {
 
 	return $metadata;
 }
-
 add_filter( 'wp_generate_attachment_metadata', 'dominant_color_has_transparency_metadata', 10, 2 );
 
 /**
  * Filter various image attributes to add the dominant color to the image
  *
+ * @since n.e.x.t
+ *
  * @param array  $attr Attributes for the image markup.
  * @param object $attachment Image attachment post.
  *
  * @return mixed
- * @since n.e.x.t
  */
 function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment ) {
 
@@ -90,8 +91,21 @@ function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment )
 	}
 
 	if ( isset( $image_meta['dominant_color'] ) ) {
+		$dominant_color = $image_meta['dominant_color'];
+	} else {
+		/**
+		 * Filters the default color to use when no dominant color is found.
+		 *
+		 * @param string $default_color The default color 'cccccc'.
+		 *
+		 * @since n.e.x.t
+		 */
+		$dominant_color = apply_filters( 'dominant_color_default_color', 'cccccc' );
+	}
 
-		$attr['data-dominant-color'] = $image_meta['dominant_color'];
+	if ( ! empty( $dominant_color ) ) {
+
+		$attr['data-dominant-color'] = $dominant_color;
 
 		if ( empty( $attr['style'] ) ) {
 			$attr['style'] = '';
@@ -115,18 +129,37 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_tag_add_adjust
 /**
  * Filter image tags in content to add the dominant color to the image.
  *
+ * @since n.e.x.t
+ *
  * @param string $filtered_image The filtered image.
  * @param string $context The context of the image.
  * @param int    $attachment_id The attachment ID.
  *
  * @return string image tag
- * @since n.e.x.t
  */
 function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
 
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 
-	if ( ! is_array( $image_meta ) || ! isset( $image_meta['dominant_color'], $image_meta['has_transparency'] ) ) {
+	if ( ! is_array( $image_meta ) || ! isset( $image_meta['has_transparency'] ) ) {
+
+		return $filtered_image;
+	}
+
+	if ( isset( $image_meta['dominant_color'] ) ) {
+		$dominant_color = $image_meta['dominant_color'];
+	} else {
+		/**
+		 * Filters the default color to use when no dominant color is found.
+		 *
+		 * @param string $default_color The default color 'cccccc'.
+		 *
+		 * @since n.e.x.t
+		 */
+		$dominant_color = apply_filters( 'dominant_color_default_color', 'cccccc' );
+	}
+
+	if( empty( $dominant_color ) ) {
 
 		return $filtered_image;
 	}
@@ -167,10 +200,10 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 	 * @param string $context
 	 */
 	if ( apply_filters( 'enable_dominant_color_for_image', true, $attachment_id, $image_meta, $filtered_image, $context ) ) {
-		$data  = sprintf( 'data-dominantColor="%s"', $image_meta['dominant_color'] );
+		$data  = sprintf( 'data-dominantColor="%s"', $dominant_color );
 		$style = '';
 		if ( str_contains( $filtered_image, 'loading="lazy"' ) ) {
-			$style = ' style="--dominant-color: #' . $image_meta['dominant_color'] . ';" ';
+			$style = ' style="--dominant-color: #' . $dominant_color . ';" ';
 		}
 
 		$extra_class = '';
@@ -184,7 +217,7 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 
 		$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
 
-		$extra_class   .= ( dominant_color_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
+		$extra_class   .= ( dominant_color_color_is_light( $dominant_color ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 		$filtered_image = str_replace( 'class="', 'class="' . $extra_class . ' ', $filtered_image );
 	}
 
@@ -199,11 +232,12 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 	/**
 	 * Filter the content to allow us to filter the image tags.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @param string $content the content to filter.
 	 * @param string $context the context of the content.
 	 *
 	 * @return string content
-	 * @since n.e.x.t
 	 */
 	function dominant_color_filter_content_tags( $content, $context = null ) {
 		if ( null === $context ) {
@@ -303,6 +337,8 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
 /**
  * Overloads wp_image_editors() to load the extended classes.
  *
+ * @since n.e.x.t
+ *
  * @return string[]
  */
 function dominant_color_set_image_editors() {
@@ -316,21 +352,13 @@ function dominant_color_set_image_editors() {
 /**
  * Get dominant color of image
  *
- * @param integer $id the image id.
- * @param string  $default_color default color.
- *
- * @return string
  * @since n.e.x.t
+ *
+ * @param integer $id the image id.
+ *
+ * @return string|null
  */
-function dominant_color_get( $id, $default_color = 'eeeeee' ) {
-	/**
-	 * Filters the default color to use when no dominant color is found.
-	 *
-	 * @param string $default_color The default color.
-	 *
-	 * @since n.e.x.t
-	 */
-	$default_color = apply_filters( 'dominant_color_default_color', $default_color );
+function dominant_color_get( $id ) {
 
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
@@ -338,23 +366,27 @@ function dominant_color_get( $id, $default_color = 'eeeeee' ) {
 	$editor = wp_get_image_editor( $file );
 
 	if ( method_exists( $editor, 'get_dominant_color' ) ) {
-		$dominant_color = $editor->get_dominant_color( $default_color );
-	} else {
-		$dominant_color = $default_color;
+		$dominant_color = $editor->get_dominant_color();
+
+		if ( ! is_wp_error( $dominant_color ) ) {
+
+			return $dominant_color;
+		}
 	}
 
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
-	return $dominant_color;
+	return null;
 }
 
 /**
  * Works out if color has transparency
  *
+ * @since n.e.x.t
+ *
  * @param integer $id the attachment id.
  *
  * @return bool
- * @since n.e.x.t
  */
 function dominant_color_get_has_transparency( $id ) {
 
@@ -376,10 +408,11 @@ function dominant_color_get_has_transparency( $id ) {
 /**
  * Works out if the color is dark or light from a give hex color.
  *
+ * @since n.e.x.t
+ *
  * @param string $hex color in hex.
  *
  * @return bool
- * @since n.e.x.t
  */
 function dominant_color_color_is_light( $hex ) {
 	$hex = str_replace( '#', '', $hex );
