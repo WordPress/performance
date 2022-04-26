@@ -159,7 +159,7 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 		$dominant_color = apply_filters( 'dominant_color_default_color', 'cccccc' );
 	}
 
-	if( empty( $dominant_color ) ) {
+	if ( empty( $dominant_color ) ) {
 
 		return $filtered_image;
 	}
