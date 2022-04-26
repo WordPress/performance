@@ -22,17 +22,15 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	/**
 	 * Get dominant color from a file.
 	 *
-	 * @param string $default_color Hex color string, without leading #.
-	 *
 	 * @since n.e.x.t
 	 *
-	 * @return string hex color
+	 * @return string|WP_Error hex color
 	 */
-	public function get_dominant_color( $default_color ) {
+	public function get_dominant_color() {
 
 		if ( ! $this->image ) {
 
-			return $default_color;
+			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'performance-lab' ) );
 		}
 
 		try {
@@ -47,7 +45,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			return dechex( $color['r'] ) . dechex( $color['g'] ) . dechex( $color['b'] );
 		} catch ( Exception $e ) {
 
-			return $default_color;
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'performance-lab' ) );
 		}
 	}
 
@@ -73,7 +71,5 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 
 			return false;
 		}
-
-		return false;
 	}
 }

@@ -2,6 +2,8 @@
 /**
  * Tests for dominant-color module.
  *
+ * @since n.e.x.t
+ *
  * @package performance-lab
  * @group   dominant-color
  */
@@ -97,7 +99,7 @@ class Dominant_Color_Image_Editor_Imageick_Test extends WP_UnitTestCase {
 			),
 			'trans_png'   => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.png',
-				'expected_color' => array( 'eeeeee' ),
+				'expected_color' => array( '' ),
 			),
 			'trans4_png'  => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.png',
@@ -118,7 +120,7 @@ class Dominant_Color_Image_Editor_Imageick_Test extends WP_UnitTestCase {
 			),
 			'trans_webp'  => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.webp',
-				'expected_color' => array( 'eeeeee' ),
+				'expected_color' => array( '' ),
 			),
 			'trans4_webp' => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.webp',
