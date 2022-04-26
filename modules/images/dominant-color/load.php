@@ -458,8 +458,7 @@ function dominant_color_back_fill( $attachment_id, $image_meta ) {
  * Get dominant color and saves it to the image meta for next time.
  * called by cron task
  *
- * @param int $attachment_id the attachment id.
- *
+ * @param int $attachment_id the attachment id. *
  */
 function dominant_color_cron_back_fill( $attachment_id ) {
 
