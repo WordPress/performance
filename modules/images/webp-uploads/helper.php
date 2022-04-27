@@ -68,7 +68,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 
 	/**
 	 * Filter to allow the generation of additional image sources, in which a defined mime type
-	 * can be transformed and provide a wide range of mime types.
+	 * can be transformed and create additional mime types for the file.
 	 *
 	 * @since n.e.xt
 	 *
