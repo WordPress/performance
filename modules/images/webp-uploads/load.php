@@ -428,6 +428,20 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	}
 
 	/**
+	 * Filters whether the smaller image should be used regardless of which MIME type is preferred overall.
+	 *
+	 * This is disabled by default only because it is not part of the current WordPress core feature proposal.
+	 *
+	 * By enabling this, the plugin will compare the image file sizes and prefer the smaller file regardless of MIME
+	 * type.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $prefer_smaller_image_file Whether to prefer the smaller image file.
+	 */
+	$prefer_smaller_image_file = apply_filters( 'webp_uploads_prefer_smaller_image_file', false );
+
+	/**
 	 * Filters mime types that should be used to update all images in the content. The order of
 	 * mime types matters. The first mime type in the list will be used if it is supported by an image.
 	 *
@@ -477,19 +491,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 			continue;
 		}
 
-		/**
-		 * Filters whether the smaller image should be used regardless of which MIME type is preferred overall.
-		 *
-		 * This is disabled by default only because it is not part of the current WordPress core feature proposal.
-		 *
-		 * By enabling this, the plugin will compare the image file sizes and prefer the smaller file regardless of MIME
-		 * type.
-		 *
-		 * @since n.e.x.t
-		 *
-		 * @param bool $prefer_smaller_image_file Whether to prefer the smaller image file.
-		 */
-		if ( apply_filters( 'webp_uploads_prefer_smaller_image_file', false ) ) {
+		if ( $prefer_smaller_image_file ) {
 			// Do not update image URL if the target image is larger than the original.
 			if (
 				! empty( $size_data['sources'][ $target_mime ]['filesize'] ) &&
