@@ -453,6 +453,9 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	 */
 	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/webp', 'image/jpeg' ), $attachment_id, $context );
 
+	// Get the original mime type for comparison.
+	$original_mime = get_post_mime_type( $attachment_id );
+
 	$target_mime = null;
 	foreach ( $target_mimes as $mime ) {
 		if ( isset( $metadata['sources'][ $mime ] ) ) {
@@ -467,11 +470,25 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 
 	// Replace the full size image if present.
 	if ( isset( $metadata['sources'][ $target_mime ]['file'] ) ) {
+		// Initially set the target mime as the replacement source.
+		$replacement_source = $metadata['sources'][ $target_mime ]['file'];
+
+		// Check for the smaller image file.
+		if (
+			$prefer_smaller_image_file &&
+			! empty( $metadata['sources'][ $target_mime ]['filesize'] ) &&
+			! empty( $metadata['sources'][ $original_mime ]['filesize'] ) &&
+			$metadata['sources'][ $original_mime ]['filesize'] < $metadata['sources'][ $target_mime ]['filesize']
+		) {
+			// Set the original source file as the replacement if smaller.
+			$replacement_source = $size_data['sources'][ $original_mime ]['file'];
+		}
+
 		$basename = wp_basename( $metadata['file'] );
-		if ( $basename !== $metadata['sources'][ $target_mime ]['file'] ) {
+		if ( $basename !== $replacement_source ) {
 			$image = str_replace(
 				$basename,
-				$metadata['sources'][ $target_mime ]['file'],
+				$replacement_source,
 				$image
 			);
 		}
@@ -491,15 +508,14 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 			continue;
 		}
 
-		if ( $prefer_smaller_image_file ) {
-			// Do not update image URL if the target image is larger than the original.
-			if (
-				! empty( $size_data['sources'][ $target_mime ]['filesize'] ) &&
-				! empty( $size_data['sources'][ $size_data['mime-type'] ]['filesize'] ) &&
-				$size_data['sources'][ $size_data['mime-type'] ]['filesize'] < $size_data['sources'][ $target_mime ]['filesize']
-			) {
-				continue;
-			}
+		// Do not update image URL if the target image is larger than the original.
+		if (
+			$prefer_smaller_image_file &&
+			! empty( $size_data['sources'][ $target_mime ]['filesize'] ) &&
+			! empty( $size_data['sources'][ $original_mime ]['filesize'] ) &&
+			$size_data['sources'][ $original_mime ]['filesize'] < $size_data['sources'][ $target_mime ]['filesize']
+		) {
+			continue;
 		}
 
 		$image = str_replace(
