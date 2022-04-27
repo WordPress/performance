@@ -4,6 +4,7 @@
 const path = require( 'path' );
 const glob = require( 'fast-glob' );
 const fs = require( 'fs' );
+const { log, formats } = require( '../lib/logger' );
 
 /**
  * @typedef WPModuleData
@@ -45,8 +46,6 @@ exports.getModuleData = async ( modulesDir ) => {
 			const moduleData = {
 				slug: path.basename( moduleDir ),
 				focus: path.basename( path.dirname( moduleDir ) ),
-				// Set default values, in order to allow to avoid errors when ordering, if set property would be override.
-				experimental: false,
 			};
 
 			// Map of module header => object property.
@@ -82,7 +81,38 @@ exports.getModuleData = async ( modulesDir ) => {
 
 			return moduleData;
 		} )
-		.filter( ( moduleData ) => moduleData.name && moduleData.description && typeof moduleData.experimental !== undefined )
+		.filter( ( moduleData ) => {
+			const moduleDetails = JSON.stringify( moduleData );
+			if ( ! moduleData.name ) {
+				log(
+					formats.warning(
+						`This module was not included due is missing a required property 'name', Details: ${ moduleDetails }`
+					)
+				);
+			}
+
+			if ( ! moduleData.description ) {
+				log(
+					formats.warning(
+						`This module was not included due is missing a required property 'description', Details: ${ moduleDetails }`
+					)
+				);
+			}
+
+			if ( typeof moduleData.experimental === 'undefined' ) {
+				log(
+					formats.warning(
+						`This module was not included due is missing a required property 'experimental', Details: ${ moduleDetails }`
+					)
+				);
+			}
+
+			return (
+				moduleData.name &&
+				moduleData.description &&
+				typeof moduleData.experimental !== 'undefined'
+			);
+		} )
 		.sort( ( firstModule, secondModule ) => {
 			// Not the same focus group.
 			if ( firstModule.focus !== secondModule.focus ) {
