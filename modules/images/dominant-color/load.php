@@ -75,9 +75,9 @@ function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment )
 		/**
 		 * Filters the default color to use when no dominant color is found.
 		 *
-		 * @param string $default_color The default color 'cccccc'.
-		 *
 		 * @since n.e.x.t
+		 *
+		 * @param string $default_color The default color 'cccccc'.
 		 */
 		$dominant_color = apply_filters( 'dominant_color_default_color', 'cccccc' );
 	}
@@ -102,7 +102,6 @@ function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment )
 
 	return $attr;
 }
-
 add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_tag_add_adjust_to_image_attributes', 10, 2 );
 
 /**
@@ -116,7 +115,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_tag_add_adjust
  *
  * @return string image tag
  */
-function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_id ) {
+function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id ) {
 
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 
@@ -131,9 +130,9 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 		/**
 		 * Filters the default color to use when no dominant color is found.
 		 *
-		 * @param string $default_color The default color 'cccccc'.
-		 *
 		 * @since n.e.x.t
+		 *
+		 * @param string $default_color The default color 'cccccc'.
 		 */
 		$dominant_color = apply_filters( 'dominant_color_default_color', 'cccccc' );
 	}
@@ -147,13 +146,15 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 	 * Filters whether dominant color is added to the image.
 	 * set to false inorder disable adding the dominant color to the image.
 	 *
-	 * @param bool   $add_dominant_color_to_image
-	 * @param int    $attachment_id
-	 * @param array  $image_meta
-	 * @param string $filtered_image
-	 * @param string $context
+	 * @since n.e.x.t
+	 *
+	 * @param bool   $add_dominant_color_to_image Whether to add the dominant color to the image. default true.
+	 * @param int    $attachment_id The image attachment ID.
+	 * @param array  $image_meta The image meta data all ready set.
+	 * @param string $filtered_image The filtered image. html including img tag
+	 * @param string $context The context of the image.
 	 */
-	if ( apply_filters( 'enable_dominant_color_for_image', true, $attachment_id, $image_meta, $filtered_image, $context ) ) {
+	if ( apply_filters( 'dominant_color_img_tag_add_dominant_color', true, $attachment_id, $image_meta, $filtered_image, $context ) ) {
 		$data  = sprintf( 'data-dominantColor="%s"', $dominant_color );
 		$style = '';
 		if ( str_contains( $filtered_image, 'loading="lazy"' ) ) {
@@ -177,10 +178,9 @@ function dominant_color_tag_add_adjust( $filtered_image, $context, $attachment_i
 
 	return $filtered_image;
 }
+add_filter( 'wp_content_img_tag', 'dominant_color_img_tag_add_dominant_color', 20, 3 );
 
-add_filter( 'wp_content_img_tag', 'dominant_color_tag_add_adjust', 20, 3 );
-
-// we don't need to use this filter anymore as the filter wp_content_img_tag is used instead.
+// We don't need to use this filter anymore as the filter wp_content_img_tag is used instead.
 if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 
 	/**
@@ -242,18 +242,7 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 			if ( isset( $images[ $match[0] ] ) ) {
 				$filtered_image = $match[0];
 				$attachment_id  = $images[ $match[0] ];
-				/**
-				 * Filters img tag that will be injected into the content.
-				 *
-				 * @param string $filtered_image the img tag with attributes being created that will
-				 *                                    replace the source img tag in the content.
-				 * @param string $context Optional. Additional context to pass to the filters.
-				 *                        Defaults to `current_filter()` when not set.
-				 * @param int $attachment_id the ID of the image attachment.
-				 *
-				 * @since 1.0.0
-				 */
-				$filtered_image = apply_filters( 'dominant_color_img_tag_add_adjust', $filtered_image, $context, $attachment_id );
+				$filtered_image = dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id );
 
 				if ( $filtered_image !== $match[0] ) {
 					$content = str_replace( $match[0], $filtered_image, $content );
@@ -268,8 +257,6 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 	foreach ( $filters as $filter ) {
 		add_filter( $filter, 'dominant_color_filter_content_tags', 20 );
 	}
-
-	add_filter( 'dominant_color_img_tag_add_adjust', 'dominant_color_tag_add_adjust', 10, 3 );
 }
 
 /**
@@ -284,7 +271,6 @@ function dominant_color_add_inline_style() {
 	$custom_css = 'img[data-dominantcolor]:not(.has-transparency) { background-color: var(--dominant-color); background-clip: content-box, padding-box; }';
 	wp_add_inline_style( $handle, $custom_css );
 }
-
 add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
 
 
@@ -306,20 +292,20 @@ function dominant_color_set_image_editors() {
 /**
  * Get dominant color of image
  *
- * @since n.e.x.t
+ *@since n.e.x.t
  *
- * @param integer $id the image id.
+ * @param integer $attachment_id the image id.
  *
  * @return string|null
  */
-function dominant_color_get( $id ) {
+function dominant_color_get( $attachment_id ) {
 
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
-	$file   = get_attached_file( $id );
+	$file   = get_attached_file( $attachment_id );
 	$editor = wp_get_image_editor( $file );
 
-	if ( method_exists( $editor, 'get_dominant_color' ) ) {
+	if ( ! is_wp_error( $editor ) && method_exists( $editor, 'get_dominant_color' ) ) {
 		$dominant_color = $editor->get_dominant_color();
 
 		if ( ! is_wp_error( $dominant_color ) ) {
@@ -362,25 +348,25 @@ function dominant_color_get_has_transparency( $id ) {
 /**
  * Works out if the color is dark or light from a give hex color.
  *
- * @since n.e.x.t
- *
- * @param string $hex color in hex.
+ * @param string $hexadecimal_color color in hex.
  *
  * @return bool
+ *@since n.e.x.t
+ *
  */
-function dominant_color_color_is_light( $hex ) {
-	$hex = str_replace( '#', '', $hex );
-	if ( 3 === strlen( $hex ) ) {
-		$hex[5] = $hex[2];
-		$hex[4] = $hex[2];
-		$hex[3] = $hex[1];
-		$hex[2] = $hex[1];
-		$hex[1] = $hex[0];
+function dominant_color_color_is_light( $hexadecimal_color ) {
+	$hexadecimal_color = str_replace( '#', '', $hexadecimal_color );
+	if ( 3 === strlen( $hexadecimal_color ) ) {
+		$hexadecimal_color[5] = $hexadecimal_color[2];
+		$hexadecimal_color[4] = $hexadecimal_color[2];
+		$hexadecimal_color[3] = $hexadecimal_color[1];
+		$hexadecimal_color[2] = $hexadecimal_color[1];
+		$hexadecimal_color[1] = $hexadecimal_color[0];
 	}
 
-	$r         = ( hexdec( substr( $hex, 0, 2 ) ) / 255 );
-	$g         = ( hexdec( substr( $hex, 2, 2 ) ) / 255 );
-	$b         = ( hexdec( substr( $hex, 4, 2 ) ) / 255 );
+	$r         = ( hexdec( substr( $hexadecimal_color, 0, 2 ) ) / 255 );
+	$g         = ( hexdec( substr( $hexadecimal_color, 2, 2 ) ) / 255 );
+	$b         = ( hexdec( substr( $hexadecimal_color, 4, 2 ) ) / 255 );
 	$lightness = round( ( ( ( max( $r, $g, $b ) + min( $r, $g, $b ) ) / 2 ) * 100 ) );
 
 	return $lightness >= 50;
