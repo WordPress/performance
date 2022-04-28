@@ -30,27 +30,6 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 		$metadata['dominant_color'] = $dominant_color;
 	}
 
-	return $metadata;
-}
-add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 );
-
-
-/**
- * Add the dominant color metadata to the attachment.
- *
- * @since n.e.x.t
- *
- * @param array $metadata Metadata for the attachment.
- * @param int   $attachment_id attachement id.
- *
- * @return array $metadata
- */
-function dominant_color_has_transparency_metadata( $metadata, $attachment_id ) {
-
-	if ( ! wp_attachment_is_image( $attachment_id ) ) {
-		return $metadata;
-	}
-
 	$has_transparency = dominant_color_get_has_transparency( $attachment_id );
 
 	if ( ! empty( $has_transparency ) ) {
@@ -61,7 +40,7 @@ function dominant_color_has_transparency_metadata( $metadata, $attachment_id ) {
 
 	return $metadata;
 }
-add_filter( 'wp_generate_attachment_metadata', 'dominant_color_has_transparency_metadata', 10, 2 );
+add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 );
 
 /**
  * Filter various image attributes to add the dominant color to the image
