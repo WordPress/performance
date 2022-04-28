@@ -436,6 +436,8 @@ function dominant_color_color_is_light( $hex ) {
 /**
  * Get dominant color and adds it to the image meta and saves it for next time.
  *
+ * @since n.e.x.t
+ *
  * @param int   $attachment_id the attachment id.
  * @param array $image_meta the current image meta.
  *
@@ -457,6 +459,8 @@ function dominant_color_back_fill( $attachment_id, $image_meta ) {
 /**
  * Get dominant color and saves it to the image meta for next time.
  * called by cron task
+ *
+ * @since n.e.x.t
  *
  * @param int $attachment_id the attachment id. *
  */
