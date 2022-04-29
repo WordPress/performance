@@ -231,4 +231,37 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertWPError( $result );
 		$this->assertSame( 'image_mime_type_not_supported', $result->get_error_code() );
 	}
+
+	/**
+	 * Create an image with the filter webp_uploads_pre_generate_additional_image_source added.
+	 *
+	 * @test
+	 */
+	public function it_should_create_an_image_with_filter_webp_uploads_pre_generate_additional_image_source() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		add_filter(
+			'webp_uploads_pre_generate_additional_image_source',
+			function () {
+				return array(
+					'file' => 'image.webp',
+					'path' => '/tmp/image.webp',
+				);
+			}
+		);
+
+		$size_data = array(
+			'width'  => 300,
+			'height' => 300,
+			'crop'   => true,
+		);
+
+		$result = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp', '/tmp/image.jpg' );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'filesize', $result );
+		$this->assertArrayHasKey( 'file', $result );
+		$this->assertStringEndsWith( 'image.webp', $result['file'] );
+		$this->assertFileExists( '/tmp/image.webp' );
+	}
 }
