@@ -435,7 +435,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	 * By enabling this, the plugin will compare the image file sizes and prefer the smaller file regardless of MIME
 	 * type.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param bool $prefer_smaller_image_file Whether to prefer the smaller image file.
 	 */
