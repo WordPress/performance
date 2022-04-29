@@ -662,4 +662,25 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertNotContains( 'image/invalid', $mime_types );
 		$this->assertSame( array( 'image/jpeg', 'image/webp' ), $mime_types );
 	}
+
+	/**
+	 * Prevent replacing an image if image was uploaded via external source or plugin.
+	 *
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_prevent_replacing_an_image_uploaded_via_external_source() {
+		add_filter(
+			'webp_uploads_pre_replace_additional_image_source',
+			function() {
+				return TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg';
+			}
+		);
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
 }
