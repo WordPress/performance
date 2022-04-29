@@ -72,15 +72,20 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 	 *
 	 * @since n.e.xt
 	 *
-	 * @param array  $image         Image data {'path'=>string, 'file'=>string, 'width'=>int, 'height'=>int, 'mime-type'=>string} or empty array.
+	 * @param array  $image         Image data {'path'=>string, 'file'=>string, 'width'=>int, 'height'=>int, 'mime-type'=>string} or null or WP_Error.
 	 * @param int    $attachment_id The ID of the attachment from where this image would be created.
-	 * @param string $size          The size name that would be used to create this image, out of the registered subsizes.
+	 * @param string $image_size    The size name that would be used to create this image, out of the registered subsizes.
 	 * @param array  $size_data     An array with the dimensions of the image: height, width and crop {'height'=>int, 'width'=>int, 'crop'}.
 	 * @param string $mime          The target mime in which the image should be created.
+	 *
+	 * @return array|null|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
 	 */
-	$image = (array) apply_filters( 'webp_uploads_pre_generate_additional_image_source', array(), $attachment_id, 'full', $size_data, $mime );
+	$image = apply_filters( 'webp_uploads_pre_generate_additional_image_source', null, $attachment_id, 'full', $size_data, $mime );
 
-	if ( ! is_wp_error( $image ) && ! empty( $image['file'] ) && ! empty( $image['path'] ) ) {
+	if ( ! is_wp_error( $image )
+		&& ! empty( $image['file'] )
+		&& ! empty( $image['path'] )
+	) {
 		return array(
 			'file'     => $image['file'],
 			'filesize' => filesize( $image['path'] ),
