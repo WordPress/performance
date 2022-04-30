@@ -11,9 +11,10 @@
 /**
  * Require helper functions and specific integrations.
  */
+require_once __DIR__ . '/generation.php';
 require_once __DIR__ . '/helper.php';
-require_once __DIR__ . '/rest-api.php';
 require_once __DIR__ . '/image-edit.php';
+require_once __DIR__ . '/rest-api.php';
 
 /**
  * Hook called by `wp_generate_attachment_metadata` to create the `sources` property for every image
@@ -379,13 +380,8 @@ function webp_uploads_update_image_references( $content ) {
 			continue;
 		}
 
-		if ( empty( $class_name ) ) {
-			continue;
-		}
-
 		// Make sure we use the last item on the list of matches.
 		$attachment_id = (int) $class_name[1];
-
 		if ( ! $attachment_id ) {
 			continue;
 		}
@@ -403,7 +399,11 @@ function webp_uploads_update_image_references( $content ) {
 	}
 
 	foreach ( $images as $img => $attachment_id ) {
-		$content = str_replace( $img, webp_uploads_img_tag_update_mime_type( $img, 'the_content', $attachment_id ), $content );
+		$content = str_replace(
+			$img,
+			webp_uploads_img_tag_update_mime_type( $img, 'the_content', $attachment_id ),
+			$content
+		);
 	}
 
 	return $content;
