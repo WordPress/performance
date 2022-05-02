@@ -175,7 +175,6 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 		}
 
 		$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
-
 		$extra_class   .= ( dominant_color_color_is_light( $dominant_color ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 		$filtered_image = str_replace( 'class="', 'class="' . $extra_class . ' ', $filtered_image );
 	}
