@@ -198,3 +198,28 @@ function webp_uploads_generate_image_srcset( $sources, $size_array, $image_src, 
 	return $sources;
 }
 add_filter( 'wp_calculate_image_srcset', 'webp_uploads_generate_image_srcset', 10, 5 );
+
+/**
+ * Updates the srcset attribute for images in the content. Adds missing sizes to the image.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $img           An <img> tag.
+ * @param string $context       The context where this is function is being used.
+ * @param int    $attachment_id The ID of the attachment being modified.
+ * @return string The updated img tag.
+ */
+function webp_uploads_update_img_tag_srcset( $img, $context, $attachment_id ) {
+	list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id, 'large', false );
+
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
+	$srcset     = wp_calculate_image_srcset( array( $width, $height ), $src, $image_meta, $attachment_id );
+	if ( empty( $srcset ) ) {
+		return $img;
+	}
+
+	return stripos( $img, 'srcset=' ) > 0
+		? preg_replace( '#srcset=[\'"].*?[\'"]#', "srcset=\"{$srcset}\"", $img )
+		: str_replace( '<img ', "<img srcset=\"{$srcset}\" ", $img );
+}
+add_filter( 'webp_uploads_update_img_tag', 'webp_uploads_update_img_tag_srcset', 5, 3 );

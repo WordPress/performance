@@ -399,11 +399,18 @@ function webp_uploads_update_image_references( $content ) {
 	}
 
 	foreach ( $images as $img => $attachment_id ) {
-		$content = str_replace(
-			$img,
-			webp_uploads_img_tag_update_mime_type( $img, 'the_content', $attachment_id ),
-			$content
-		);
+		/**
+		 * Filters the image tag found in the content.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param string $img           The original image tag.
+		 * @param string $context       The context where this is function is being used.
+		 * @param int    $attachment_id The image ID.
+		 */
+		$new_img_tag = apply_filters( 'webp_uploads_update_img_tag', $img, 'the_content', $attachment_id );
+
+		$content = str_replace( $img, $new_img_tag, $content );
 	}
 
 	return $content;
@@ -502,3 +509,4 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 
 	return $image;
 }
+add_filter( 'webp_uploads_update_img_tag', 'webp_uploads_img_tag_update_mime_type', 10, 3 );
