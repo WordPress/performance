@@ -126,7 +126,6 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	$image_meta = apply_filters( 'dominant_color_img_tag_add_dominant_color_meta', wp_get_attachment_metadata( $attachment_id ), $attachment_id  );
 
 	if ( ! is_array( $image_meta ) || ! isset( $image_meta['has_transparency'] ) ) {
-
 		return $filtered_image;
 	}
 
