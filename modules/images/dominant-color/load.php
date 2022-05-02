@@ -143,7 +143,6 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	}
 
 	if ( empty( $dominant_color ) ) {
-
 		return $filtered_image;
 	}
 
