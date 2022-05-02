@@ -246,15 +246,17 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
                 $filtered_image = null;
 		foreach ( $matches as $match ) {
 			// Filter an image match.
-			if ( isset( $images[ $match[0] ] ) ) {
-				$filtered_image = $match[0];
-				$attachment_id  = $images[ $match[0] ];
-				$filtered_image = dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id );
-
-				if ( $filtered_image !== $match[0] ) {
-					$content = str_replace( $match[0], $filtered_image, $content );
-				}
+			if ( empty( $images[ $match[0] ] ) ) {
+			        continue;
 			}
+			
+			$filtered_image = $match[0];
+			$attachment_id  = $images[ $match[0] ];
+			$filtered_image = dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id );
+
+			if ( $filtered_image !== null && $filtered_image !== $match[0] ) {
+				$content = str_replace( $match[0], $filtered_image, $content );
+			}			
 		}
 
 		return $content;
