@@ -556,5 +556,4 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 function webp_uploads_update_featured_image( $html, $post_id, $attachment_id ) {
 	return webp_uploads_img_tag_update_mime_type( $html, 'post_thumbnail_html', $attachment_id );
 }
-
 add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );
