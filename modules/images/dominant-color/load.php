@@ -288,7 +288,6 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  * @return string[]
  */
 function dominant_color_set_image_editors() {
-
 	require_once 'class-dominant-color-image-editor-gd.php';
 	require_once 'class-dominant-color-image-editor-imagick.php';
 
