@@ -314,7 +314,6 @@ function dominant_color_get( $attachment_id ) {
 		$dominant_color = $editor->get_dominant_color();
 
 		if ( ! is_wp_error( $dominant_color ) ) {
-
 			return $dominant_color;
 		}
 	}
