@@ -123,7 +123,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	 *
 	 * @param array $image_meta The image meta returned by wp_get_attachment_metadata function.
 	 */
-	$image_meta = apply_filters( 'dominant_color_img_tag_add_dominant_color_meta', wp_get_attachment_metadata( $attachment_id ), $attachment_id  );
+	$image_meta = apply_filters( 'dominant_color_img_tag_add_dominant_color_meta', wp_get_attachment_metadata( $attachment_id ), $attachment_id );
 
 	if ( ! is_array( $image_meta ) || ! isset( $image_meta['has_transparency'] ) ) {
 		return $filtered_image;
@@ -356,7 +356,6 @@ function dominant_color_get_has_transparency( $id ) {
  * @param string $hexadecimal_color color in hex.
  *
  * @return bool
- *
  */
 function dominant_color_color_is_light( $hexadecimal_color ) {
 	$hexadecimal_color = str_replace( '#', '', $hexadecimal_color );
