@@ -240,20 +240,20 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 		}
 
 		// Iterate through the matches in order of occurrence as it is relevant for whether or not to lazy-load.
-                $filtered_image = null;
+		$filtered_image = null;
 		foreach ( $matches as $match ) {
 			// Filter an image match.
 			if ( empty( $images[ $match[0] ] ) ) {
-			        continue;
+				continue;
 			}
-			
+
 			$filtered_image = $match[0];
 			$attachment_id  = $images[ $match[0] ];
 			$filtered_image = dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id );
 
-			if ( $filtered_image !== null && $filtered_image !== $match[0] ) {
+			if ( null !== $filtered_image && $filtered_image !== $match[0] ) {
 				$content = str_replace( $match[0], $filtered_image, $content );
-			}			
+			}
 		}
 
 		return $content;
@@ -297,7 +297,7 @@ function dominant_color_set_image_editors() {
 /**
  * Get dominant color of image
  *
- *@since n.e.x.t
+ * @since n.e.x.t
  *
  * @param integer $attachment_id the image id.
  *
@@ -351,10 +351,11 @@ function dominant_color_get_has_transparency( $id ) {
 /**
  * Works out if the color is dark or light from a give hex color.
  *
+ * @since n.e.x.t
+ *
  * @param string $hexadecimal_color color in hex.
  *
  * @return bool
- *@since n.e.x.t
  *
  */
 function dominant_color_color_is_light( $hexadecimal_color ) {
