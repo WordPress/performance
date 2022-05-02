@@ -243,6 +243,7 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 		}
 
 		// Iterate through the matches in order of occurrence as it is relevant for whether or not to lazy-load.
+                $filtered_image = null;
 		foreach ( $matches as $match ) {
 			// Filter an image match.
 			if ( isset( $images[ $match[0] ] ) ) {
