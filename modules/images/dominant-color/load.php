@@ -52,7 +52,7 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
  *
  * @return mixed
  */
-function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment ) {
+function dominant_color_update_attachment_image_attributes( $attr, $attachment ) {
 
 	$image_meta = wp_get_attachment_metadata( $attachment->ID );
 	if ( ! is_array( $image_meta ) ) {
@@ -102,7 +102,7 @@ function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment )
 
 	return $attr;
 }
-add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_tag_add_adjust_to_image_attributes', 10, 2 );
+add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_update_attachment_image_attributes', 10, 2 );
 
 /**
  * Filter image tags in content to add the dominant color to the image.
