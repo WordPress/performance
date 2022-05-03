@@ -80,7 +80,7 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 		$dominant_color = apply_filters( 'dominant_color_default_color', 'cccccc' );
 	}
 
-	if ( ! empty( $dominant_color )) {
+	if ( ! empty( $dominant_color ) ) {
 
 		$attr['data-dominant-color'] = $dominant_color;
 
@@ -306,7 +306,7 @@ function dominant_color_get( $attachment_id ) {
 	$file   = get_attached_file( $attachment_id );
 	$editor = wp_get_image_editor( $file );
 
-	if ( ! is_wp_error( $editor ) && method_exists( $editor, 'get_dominant_color' ) ) {
+	if ( ! is_wp_error( $editor ) && method_exists( $editor, 'dominant_color_get_dominant_color' ) ) {
 		$dominant_color = $editor->dominant_color_get_dominant_color();
 
 		if ( ! is_wp_error( $dominant_color ) ) {
@@ -336,7 +336,7 @@ function dominant_color_get_has_transparency( $id ) {
 	$editor = wp_get_image_editor( $file );
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
-	if ( is_wp_error( $editor ) || ! method_exists( $editor, 'get_has_transparency' ) ) {
+	if ( is_wp_error( $editor ) || ! method_exists( $editor, 'dominant_color_get_has_transparency' ) ) {
 
 		return true; // safer to set to trans than not.
 	}
@@ -354,7 +354,7 @@ function dominant_color_get_has_transparency( $id ) {
  *
  * @since n.e.x.t
  *
- * @param string $hexadecimal_color color in hex. *
+ * @param string $hexadecimal_color color in hex.
  * @return bool true if the color is light.
  */
 function dominant_color_color_is_light( $hexadecimal_color ) {
