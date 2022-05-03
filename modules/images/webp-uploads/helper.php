@@ -82,9 +82,10 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 	 */
 	$image = apply_filters( 'webp_uploads_pre_generate_additional_image_source', null, $attachment_id, 'full', $size_data, $mime );
 
-	if ( ! is_wp_error( $image )
-		&& ! empty( $image['file'] )
-		&& ! empty( $image['path'] )
+	if (
+		is_array( $image ) &&
+		! empty( $image['file'] ) &&
+		! empty( $image['path'] )
 	) {
 		return array(
 			'file'     => $image['file'],
