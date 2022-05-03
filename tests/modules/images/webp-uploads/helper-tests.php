@@ -238,6 +238,8 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_create_an_image_with_filter_webp_uploads_pre_generate_additional_image_source() {
+		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
+
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
 		add_filter(
