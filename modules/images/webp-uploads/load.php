@@ -517,7 +517,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		 * Filter to replace additional image source file, by locating the original
 		 * mime types of the file and return correct file path in the end.
 		 *
-		 * @since n.e.xt
+		 * @since n.e.x.t
 		 *
 		 * @param string $image         An <img> tag where the urls would be updated.
 		 * @param int    $attachment_id The ID of the attachment being modified.
