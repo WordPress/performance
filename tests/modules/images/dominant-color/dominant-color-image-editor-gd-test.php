@@ -24,7 +24,7 @@ class Dominant_Color_Image_Editor_GD_Test extends WP_UnitTestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
+	 * @covers Dominant_Color_Image_Editor_GD::dominant_color_get_dominant_color
 	 */
 	public function test_get_dominant_color( $image_path, $expected_color ) {
 

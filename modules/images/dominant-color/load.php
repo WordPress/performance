@@ -15,8 +15,7 @@
  *
  * @param array $metadata The attachment metadata.
  * @param int   $attachment_id The attachment ID.
- *
- * @return array $metadata
+ * @return array $metadata The attachment metadata.
  */
 function dominant_color_metadata( $metadata, $attachment_id ) {
 	if ( ! wp_attachment_is_image( $attachment_id ) ) {
@@ -49,8 +48,7 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
  *
  * @param array  $attr Attributes for the image markup.
  * @param object $attachment Image attachment post.
- *
- * @return mixed
+ * @return mixed $attr Attributes for the image markup.
  */
 function dominant_color_update_attachment_image_attributes( $attr, $attachment ) {
 
@@ -193,7 +191,6 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 	 *
 	 * @param string $content the content to filter.
 	 * @param string $context the context of the content.
-	 *
 	 * @return string content
 	 */
 	function dominant_color_filter_content_tags( $content, $context = null ) {
@@ -285,7 +282,7 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  *
  * @since n.e.x.t
  *
- * @return string[]
+ * @return string[] registered image editors class names.
  */
 function dominant_color_set_image_editors() {
 	require_once 'class-dominant-color-image-editor-gd.php';
@@ -300,8 +297,7 @@ function dominant_color_set_image_editors() {
  * @since n.e.x.t
  *
  * @param integer $attachment_id the image id.
- *
- * @return string|null
+ * @return string|null the dominant color of the image. or null if no color is found.
  */
 function dominant_color_get( $attachment_id ) {
 
@@ -311,7 +307,7 @@ function dominant_color_get( $attachment_id ) {
 	$editor = wp_get_image_editor( $file );
 
 	if ( ! is_wp_error( $editor ) && method_exists( $editor, 'get_dominant_color' ) ) {
-		$dominant_color = $editor->get_dominant_color();
+		$dominant_color = $editor->dominant_color_get_dominant_color();
 
 		if ( ! is_wp_error( $dominant_color ) ) {
 			return $dominant_color;
@@ -329,8 +325,7 @@ function dominant_color_get( $attachment_id ) {
  * @since n.e.x.t
  *
  * @param integer $id the attachment id.
- *
- * @return bool
+ * @return bool true if the color has transparency.
  */
 function dominant_color_get_has_transparency( $id ) {
 
@@ -342,10 +337,16 @@ function dominant_color_get_has_transparency( $id ) {
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	if ( is_wp_error( $editor ) || ! method_exists( $editor, 'get_has_transparency' ) ) {
+
 		return true; // safer to set to trans than not.
 	}
 
-	return $editor->get_has_transparency();
+	$has_transparency = $editor->dominant_color_get_has_transparency();
+	if ( ! is_wp_error( $has_transparency ) ) {
+		return $has_transparency;
+	}
+
+	return true;
 }
 
 /**
@@ -353,9 +354,8 @@ function dominant_color_get_has_transparency( $id ) {
  *
  * @since n.e.x.t
  *
- * @param string $hexadecimal_color color in hex.
- *
- * @return bool
+ * @param string $hexadecimal_color color in hex. *
+ * @return bool true if the color is light.
  */
 function dominant_color_color_is_light( $hexadecimal_color ) {
 	$hexadecimal_color = str_replace( '#', '', $hexadecimal_color );
