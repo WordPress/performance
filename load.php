@@ -138,6 +138,37 @@ function perflab_get_active_modules() {
 }
 
 /**
+ * Gets the content attribute for the generator tag for the Performance Lab plugin.
+ *
+ * This attribute is then used in {@see perflab_render_generator()}.
+ *
+ * @since n.e.x.t
+ */
+function perflab_get_generator_content() {
+	$active_modules = perflab_get_active_modules();
+
+	return sprintf(
+		'Performance Lab %1$s; modules: %2$s',
+		PERFLAB_VERSION,
+		implode( ', ', $active_modules )
+	);
+}
+
+/**
+ * Displays the HTML generator tag for the Performance Lab plugin.
+ *
+ * See {@see 'wp_head'}.
+ *
+ * @since n.e.x.t
+ */
+function perflab_render_generator() {
+	$content = perflab_get_generator_content();
+
+	echo '<meta name="generator" content="' . esc_attr( $content ) . '">';
+}
+add_action( 'wp_head', 'perflab_render_generator' );
+
+/**
  * Loads the active performance modules.
  *
  * @since 1.0.0

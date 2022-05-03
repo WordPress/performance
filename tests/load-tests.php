@@ -120,6 +120,34 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( array( 'active-module' ), $active_modules );
 	}
 
+	public function test_perflab_get_generator_content() {
+		// Assert that it returns the current version and active modules.
+		$dummy_active_modules = array( 'images/a-module', 'object-cache/another-module' );
+		add_filter(
+			'perflab_active_modules',
+			function() use ( $dummy_active_modules ) {
+				return $dummy_active_modules;
+			}
+		);
+		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $dummy_active_modules );
+		$content  = perflab_get_generator_content();
+		$this->assertSame( $expected, $content );
+	}
+
+	public function test_perflab_render_generator() {
+		// Assert generator tag is rendered. Content does not matter, so just use no modules active.
+		add_filter( 'perflab_active_modules', '__return_empty_array' );
+		$expected = '<meta name="generator" content="Performance Lab ' . PERFLAB_VERSION . '; modules: ">';
+		$output   = get_echo( 'perflab_render_generator' );
+		$this->assertSame( $expected, $output );
+
+		// Assert that the function is hooked into 'wp_head'.
+		ob_start();
+		do_action( 'wp_head' );
+		$output = ob_get_clean();
+		$this->assertContains( $expected, $output );
+	}
+
 	private function get_expected_default_option() {
 		// This code is essentially copied over from the perflab_register_modules_setting() function.
 		$default_enabled_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
