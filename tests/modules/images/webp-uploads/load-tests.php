@@ -688,6 +688,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_replacing_an_image_uploaded_via_external_source() {
+		remove_all_filters( 'webp_uploads_pre_replace_additional_image_source' );
+
 		add_filter(
 			'webp_uploads_pre_replace_additional_image_source',
 			function() {
