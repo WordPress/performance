@@ -59,7 +59,7 @@ function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment )
 		return $attr;
 	}
 
-	$has_transparency = isset( $image_meta['has_transparency'] ) ? $image_meta['has_transparency'] : false;
+	$has_transparency = isset( $image_meta['has_transparency'] ) ? $image_meta['has_transparency'] : true;
 
 	$extra_class = '';
 	if ( ! isset( $attr['style'] ) ) {
@@ -82,7 +82,7 @@ function dominant_color_tag_add_adjust_to_image_attributes( $attr, $attachment )
 		$dominant_color = apply_filters( 'dominant_color_default_color', 'cccccc' );
 	}
 
-	if ( ! empty( $dominant_color ) ) {
+	if ( ! empty( $dominant_color )) {
 
 		$attr['data-dominant-color'] = $dominant_color;
 
