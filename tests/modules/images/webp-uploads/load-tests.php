@@ -572,94 +572,40 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Test webp_uploads_get_mime_types_by_filesize returns smallest filesize, in this case webp.
+	 * The image with the smaller filesize should be used when webp_uploads_prefer_smaller_image_file is set to true.
 	 *
 	 * @test
 	 */
-	public function it_should_return_smaller_webp_mime_type() {
-		// File should generate smallest webp image size.
-		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+	public function it_should_use_smaller_jpg_image_when_smaller_size_preferred() {
+		// Set prefer smaller image size to true.
+		add_filter( 'webp_uploads_prefer_smaller_image_file', '__return_true' );
 
-		$mime_types = webp_uploads_get_mime_types_by_filesize( array( 'image/jpeg', 'image/webp' ), $attachment_id, 'the_content' );
+		// File generates smallest WebP version of the 'full' image size, all other sub sizes have a smaller JPG version.
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$updated_tag   = webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id );
 
-		$this->assertIsArray( $mime_types );
-		$this->assertSame( array( 'image/webp', 'image/jpeg' ), $mime_types );
+		// Replace the 'full' image size with the WebP version, all other sub sizes will use the smaller JPG version.
+		$expected_tag = str_replace( $metadata['sources']['image/jpeg']['file'], $metadata['sources']['image/webp']['file'], $tag );
+
+		$this->assertSame( $expected_tag, $updated_tag );
 	}
 
 	/**
-	 * Test webp_uploads_get_mime_types_by_filesize returns smallest filesize, in this case jpeg.
+	 * Replace the featured image to WebP when requesting the featured image
 	 *
 	 * @test
 	 */
-	public function it_should_return_smaller_jpeg_mime_type() {
-		// File should generate smallest jpeg image size.
+	public function it_should_replace_the_featured_image_to_web_p_when_requesting_the_featured_image() {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
+		$post_id       = $this->factory()->post->create();
+		set_post_thumbnail( $post_id, $attachment_id );
 
-		// Mock attachment meta data to test when jpeg image is smaller.
-		add_filter(
-			'wp_get_attachment_metadata',
-			function( $data, $attachment_id ) {
-				$data['sources'] = array(
-					'image/jpeg' => array(
-						'file'     => 'paint.jpeg',
-						'filesize' => 1000,
-					),
-					'image/webp' => array(
-						'file'     => 'paint.webp',
-						'filesize' => 2000,
-					),
-				);
+		$featured_image = get_the_post_thumbnail( $post_id );
 
-				return $data;
-			},
-			10,
-			2
-		);
-
-		$mime_types = webp_uploads_get_mime_types_by_filesize( array( 'image/jpeg', 'image/webp' ), $attachment_id, 'the_content' );
-
-		$this->assertIsArray( $mime_types );
-		$this->assertSame( array( 'image/jpeg', 'image/webp' ), $mime_types );
-	}
-
-	/**
-	 * Test webp_uploads_get_mime_types_by_filesize removes invalid mime types with zero filesize.
-	 *
-	 * @test
-	 */
-	public function it_should_remove_mime_types_with_zero_filesize() {
-		// File should generate smallest jpeg image size.
-		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
-
-		// Mock attachment meta data to test mime type with zero filesize.
-		add_filter(
-			'wp_get_attachment_metadata',
-			function( $data, $attachment_id ) {
-				$data['sources'] = array(
-					'image/jpeg'    => array(
-						'file'     => 'paint.jpeg',
-						'filesize' => 1000,
-					),
-					'image/webp'    => array(
-						'file'     => 'paint.webp',
-						'filesize' => 2000,
-					),
-					'image/invalid' => array(
-						'file'     => 'paint.avif',
-						'filesize' => 0,
-					),
-				);
-
-				return $data;
-			},
-			10,
-			2
-		);
-
-		$mime_types = webp_uploads_get_mime_types_by_filesize( array( 'image/jpeg', 'image/webp' ), $attachment_id, 'the_content' );
-
-		$this->assertIsArray( $mime_types );
-		$this->assertNotContains( 'image/invalid', $mime_types );
-		$this->assertSame( array( 'image/jpeg', 'image/webp' ), $mime_types );
+		$this->assertTrue( has_post_thumbnail( $post_id ) );
+		$this->assertStringContainsString( '.webp', $featured_image );
+		$this->assertStringNotContainsString( '.jpeg', $featured_image );
 	}
 }
