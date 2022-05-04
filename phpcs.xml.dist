@@ -19,6 +19,9 @@
 	<file>./tests</file>
 
 	<!-- Do not require docblocks for unit tests -->
+	<rule ref="Squiz.Commenting.FileComment.WrongStyle">
+		<exclude-pattern>module-i18n.php</exclude-pattern>
+	</rule>
 	<rule ref="Squiz.Commenting.FunctionComment.Missing">
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
