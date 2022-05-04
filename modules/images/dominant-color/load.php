@@ -33,8 +33,6 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 
 	if ( ! empty( $has_transparency ) ) {
 		$metadata['has_transparency'] = $has_transparency;
-	} else {
-		$metadata['has_transparency'] = false;
 	}
 
 	return $metadata;
@@ -114,15 +112,8 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_update_attachm
  * @return string image tag
  */
 function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id ) {
-	/**
-	 * Filters the image meta data before try to add the dominant color to the image tag.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param array $image_meta The image meta returned by wp_get_attachment_metadata function.
-	 */
-	$image_meta = apply_filters( 'dominant_color_img_tag_add_dominant_color_meta', wp_get_attachment_metadata( $attachment_id ), $attachment_id );
 
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $image_meta ) || ! isset( $image_meta['has_transparency'] ) ) {
 		return $filtered_image;
 	}
@@ -141,6 +132,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	}
 
 	if ( empty( $dominant_color ) ) {
+
 		return $filtered_image;
 	}
 
@@ -308,8 +300,8 @@ function dominant_color_get( $attachment_id ) {
 
 	if ( ! is_wp_error( $editor ) && method_exists( $editor, 'dominant_color_get_dominant_color' ) ) {
 		$dominant_color = $editor->dominant_color_get_dominant_color();
-
 		if ( ! is_wp_error( $dominant_color ) ) {
+
 			return $dominant_color;
 		}
 	}
@@ -325,7 +317,7 @@ function dominant_color_get( $attachment_id ) {
  * @since n.e.x.t
  *
  * @param integer $id the attachment id.
- * @return bool true if the color has transparency.
+ * @return bool|null true if the color has transparency.
  */
 function dominant_color_get_has_transparency( $id ) {
 
@@ -336,17 +328,15 @@ function dominant_color_get_has_transparency( $id ) {
 	$editor = wp_get_image_editor( $file );
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
-	if ( is_wp_error( $editor ) || ! method_exists( $editor, 'dominant_color_get_has_transparency' ) ) {
+	if ( ! is_wp_error( $editor ) && method_exists( $editor, 'dominant_color_get_has_transparency' ) ) {
+		$has_transparency = $editor->dominant_color_get_has_transparency();
+		if ( ! is_wp_error( $has_transparency ) ) {
 
-		return true; // safer to set to trans than not.
+			return $has_transparency;
+		}
 	}
 
-	$has_transparency = $editor->dominant_color_get_has_transparency();
-	if ( ! is_wp_error( $has_transparency ) ) {
-		return $has_transparency;
-	}
-
-	return true;
+	return null;
 }
 
 /**

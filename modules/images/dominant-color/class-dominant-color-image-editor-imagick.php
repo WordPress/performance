@@ -44,8 +44,8 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 
 			return dechex( $color['r'] ) . dechex( $color['g'] ) . dechex( $color['b'] );
 		} catch ( Exception $e ) {
-
-			return new WP_Error( 'image_editor_dominant_color_error', sprintf( __( 'Dominant color detection failed: %s', 'performance-lab' ), $e->getMessage() );
+			//translators: %s is the error message
+			return new WP_Error( 'image_editor_dominant_color_error', sprintf( __( 'Dominant color detection failed: %s', 'performance-lab' ), $e->getMessage() ) );
 		}
 	}
 
@@ -68,8 +68,8 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			return (bool) @$this->image->getImageAlphaChannel();
 		} catch ( Exception $e ) {
-
-			return new WP_Error( 'image_editor_has_transparency_error', sprintf( __( 'Transparency detection failed: %s', 'performance-lab' ), $e->getMessage() );
+			//translators: %s is the error message
+			return new WP_Error( 'image_editor_has_transparency_error', sprintf( __( 'Transparency detection failed: %s', 'performance-lab' ), $e->getMessage() ) );
 		}
 	}
 }
