@@ -282,7 +282,7 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  *
  * @since n.e.x.t
  *
- * @return string[] registered image editors class names.
+ * @return string[] Registered image editors class names.
  */
 function dominant_color_set_image_editors() {
 	require_once 'class-dominant-color-image-editor-gd.php';
