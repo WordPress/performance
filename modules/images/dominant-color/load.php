@@ -114,7 +114,8 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_update_attachm
 function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id ) {
 
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
-	if ( ! is_array( $image_meta ) || ! isset( $image_meta['has_transparency'] ) ) {
+	if ( ! is_array( $image_meta ) ) {
+
 		return $filtered_image;
 	}
 
