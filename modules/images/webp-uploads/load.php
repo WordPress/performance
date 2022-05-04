@@ -500,7 +500,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	}
 
 	// Replace sub sizes for the image if present.
-	foreach ( $metadata['sizes'] as $name => $size_data ) {
+	foreach ( $metadata['sizes'] as $size => $size_data ) {
 		if ( empty( $size_data['file'] ) ) {
 			continue;
 		}
@@ -513,19 +513,8 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 			continue;
 		}
 
-		/**
-		 * Filter to replace additional image source file, by locating the original
-		 * mime types of the file and return correct file path in the end.
-		 *
-		 * @since n.e.x.t
-		 *
-		 * @param string $image         An <img> tag where the urls would be updated.
-		 * @param int    $attachment_id The ID of the attachment being modified.
-		 * @param string $name          The size name that would be used to create this image, out of the registered subsizes.
-		 * @param string $target_mime   The target mime in which the image should be created.
-		 * @param string $context       The context where this is function is being used.
-		 */
-		$filtered_image = (string) apply_filters( 'webp_uploads_pre_replace_additional_image_source', $image, $attachment_id, $name, $target_mime, $context );
+		/** This filter is documented in modules/images/webp-uploads/load.php */
+		$filtered_image = (string) apply_filters( 'webp_uploads_pre_replace_additional_image_source', $image, $attachment_id, $size, $target_mime, $context );
 
 		// Check if filtered image is same as the image, replace the image otherwise not.
 		if ( $filtered_image === $image ) {
