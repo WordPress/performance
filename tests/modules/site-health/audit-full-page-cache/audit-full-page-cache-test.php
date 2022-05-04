@@ -131,49 +131,6 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests Rest endpoint registration.
-	 */
-	public function test_perflab_afpc_register_async_test_endpoints() {
-		$server = rest_get_server();
-		$routes = $server->get_routes();
-
-		$endpoint = '/' . self::REST_NAMESPACE . self::REST_ROTE;
-		$this->assertArrayHasKey( $endpoint, $routes );
-
-		$route = $routes[ $endpoint ];
-		$this->assertCount( 1, $route );
-
-		$route = current( $route );
-		$this->assertEquals(
-			array( WP_REST_Server::READABLE => true ),
-			$route['methods']
-		);
-
-		$this->assertEquals(
-			'perflab_afpc_page_cache_test',
-			$route['callback']
-		);
-
-		$this->assertIsCallable( $route['permission_callback'] );
-
-		if ( current_user_can( 'view_site_health_checks' ) ) {
-			$this->assertTrue( call_user_func( $route['permission_callback'] ) );
-		} else {
-			$this->assertFalse( call_user_func( $route['permission_callback'] ) );
-		}
-
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
-		$this->assertFalse( call_user_func( $route['permission_callback'] ) );
-
-		$user = wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		if ( is_multisite() ) {
-			// Site health cap is only available for super admins in Multi sites.
-			grant_super_admin( $user->ID );
-		}
-		$this->assertTrue( call_user_func( $route['permission_callback'] ) );
-	}
-
-	/**
 	 * Gets response data for test_perflab_afpc_page_cache_test().
 	 *
 	 * @return array[]
@@ -363,5 +320,49 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 			),
 		);
 	}
+
+	/**
+	 * Tests Rest endpoint registration.
+	 */
+	public function test_perflab_afpc_register_async_test_endpoints() {
+		$server = rest_get_server();
+		$routes = $server->get_routes();
+
+		$endpoint = '/' . self::REST_NAMESPACE . self::REST_ROTE;
+		$this->assertArrayHasKey( $endpoint, $routes );
+
+		$route = $routes[ $endpoint ];
+		$this->assertCount( 1, $route );
+
+		$route = current( $route );
+		$this->assertEquals(
+			array( WP_REST_Server::READABLE => true ),
+			$route['methods']
+		);
+
+		$this->assertEquals(
+			'perflab_afpc_page_cache_test',
+			$route['callback']
+		);
+
+		$this->assertIsCallable( $route['permission_callback'] );
+
+		if ( current_user_can( 'view_site_health_checks' ) ) {
+			$this->assertTrue( call_user_func( $route['permission_callback'] ) );
+		} else {
+			$this->assertFalse( call_user_func( $route['permission_callback'] ) );
+		}
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'author' ) ) );
+		$this->assertFalse( call_user_func( $route['permission_callback'] ) );
+
+		$user = wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		if ( is_multisite() ) {
+			// Site health cap is only available for super admins in Multi sites.
+			grant_super_admin( $user->ID );
+		}
+		$this->assertTrue( call_user_func( $route['permission_callback'] ) );
+	}
+
 }
 
