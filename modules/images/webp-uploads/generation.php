@@ -148,6 +148,17 @@ add_action( 'template_redirect', 'webp_uploads_generate_missing_images' );
  * @return array Srcset sources array.
  */
 function webp_uploads_generate_image_srcset( $sources, $size_array, $image_src, $image_meta, $attachment_id ) {
+	$image_src_parts = wp_parse_url( $image_src );
+	$image_host      = $image_src_parts['host'];
+	if ( ! empty( $image_src_parts['port'] ) ) {
+		$image_host .= ':' . $image_src_parts['port'];
+	}
+
+	// Do nothing if images are loaded from a different origin.
+	if ( $image_host !== $_SERVER['HTTP_HOST'] ) {
+		return $sources;
+	}
+
 	// Do nothing if the image attachment ID is not supplied.
 	if ( empty( $attachment_id ) ) {
 		return $sources;
