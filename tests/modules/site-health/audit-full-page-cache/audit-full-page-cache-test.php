@@ -146,7 +146,7 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 				'responses'       => array(
 					'unauthorized',
 				),
-				'expected_status' => 'critical',
+				'expected_status' => 'recommended',
 				'expected_label'  => $error_label,
 				'good_basic_auth' => false,
 			),
