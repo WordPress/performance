@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for webp-uploads module.
+ * Tests for webp-uploads module load.php.
  *
  * @package performance-lab
  * @group   webp-uploads
@@ -8,7 +8,7 @@
 
 use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
-class WebP_Uploads_Tests extends ImagesTestCase {
+class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	/**
 	 * Create the original mime type as well with all the available sources for the specified mime
 	 *
@@ -118,125 +118,6 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 		foreach ( $metadata['sizes'] as $properties ) {
 			$this->assertArrayNotHasKey( 'sources', $properties );
 		}
-	}
-
-	/**
-	 * Prevent processing an image with corrupted metadata
-	 *
-	 * @dataProvider provider_with_modified_metadata
-	 *
-	 * @test
-	 */
-	public function it_should_prevent_processing_an_image_with_corrupted_metadata( callable $callback, $size ) {
-		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
-		);
-		$metadata      = wp_get_attachment_metadata( $attachment_id );
-		wp_update_attachment_metadata( $attachment_id, $callback( $metadata ) );
-		$result = webp_uploads_generate_image_size( $attachment_id, $size, 'image/webp' );
-
-		$this->assertTrue( is_wp_error( $result ) );
-		$this->assertSame( 'image_mime_type_invalid_metadata', $result->get_error_code() );
-	}
-
-	public function provider_with_modified_metadata() {
-		yield 'using a size that does not exists' => array(
-			function ( $metadata ) {
-				return $metadata;
-			},
-			'not-existing-size',
-		);
-
-		yield 'removing an existing metadata simulating that the image size still does not exists' => array(
-			function ( $metadata ) {
-				unset( $metadata['sizes']['medium'] );
-
-				return $metadata;
-			},
-			'medium',
-		);
-
-		yield 'when the specified size is not a valid array' => array(
-			function ( $metadata ) {
-				$metadata['sizes']['medium'] = null;
-
-				return $metadata;
-			},
-			'medium',
-		);
-	}
-
-	/**
-	 * Prevent to create an image size when attached file does not exists
-	 *
-	 * @test
-	 */
-	public function it_should_prevent_to_create_an_image_size_when_attached_file_does_not_exists() {
-		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
-		);
-		$file          = get_attached_file( $attachment_id );
-
-		$this->assertFileExists( $file );
-		wp_delete_file( $file );
-		$this->assertFileDoesNotExist( $file );
-
-		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
-		$this->assertTrue( is_wp_error( $result ) );
-		$this->assertSame( 'original_image_file_not_found', $result->get_error_code() );
-	}
-
-	/**
-	 * Prevent to create a subsize if the image editor does not exists
-	 *
-	 * @test
-	 */
-	public function it_should_prevent_to_create_a_subsize_if_the_image_editor_does_not_exists() {
-		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
-		);
-
-		// Make sure no editor is available.
-		add_filter( 'wp_image_editors', '__return_empty_array' );
-		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
-		$this->assertTrue( is_wp_error( $result ) );
-		$this->assertSame( 'image_no_editor', $result->get_error_code() );
-	}
-
-	/**
-	 * Prevent to upload a mime that is not supported by WordPress
-	 *
-	 * @test
-	 */
-	public function it_should_prevent_to_upload_a_mime_that_is_not_supported_by_wordpress() {
-		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
-		);
-		$result        = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/avif' );
-		$this->assertTrue( is_wp_error( $result ) );
-		$this->assertSame( 'image_mime_type_invalid', $result->get_error_code() );
-	}
-
-	/**
-	 * Prevent to process an image when the editor does not support the format
-	 *
-	 * @test
-	 */
-	public function it_should_prevent_to_process_an_image_when_the_editor_does_not_support_the_format() {
-		// Make sure no editor is available.
-		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
-		);
-
-		add_filter(
-			'wp_image_editors',
-			function () {
-				return array( 'WP_Image_Doesnt_Support_WebP' );
-			}
-		);
-		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
-		$this->assertTrue( is_wp_error( $result ) );
-		$this->assertSame( 'image_mime_type_not_supported', $result->get_error_code() );
 	}
 
 	/**
@@ -604,154 +485,6 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Checks whether the sources information is added to image sizes details of the REST response object.
-	 *
-	 * @test
-	 */
-	public function it_should_add_sources_to_rest_response() {
-		$file_location = TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg';
-		$attachment_id = $this->factory->attachment->create_upload_object( $file_location );
-		$metadata      = wp_get_attachment_metadata( $attachment_id );
-
-		$request       = new WP_REST_Request();
-		$request['id'] = $attachment_id;
-
-		$controller = new WP_REST_Attachments_Controller( 'attachment' );
-		$response   = $controller->get_item( $request );
-
-		$this->assertInstanceOf( 'WP_REST_Response', $response );
-
-		$data       = $response->get_data();
-		$mime_types = array(
-			'image/jpeg',
-			'image/webp',
-		);
-
-		foreach ( $data['media_details']['sizes'] as $size_name => $properties ) {
-			if ( ! isset( $metadata['sizes'][ $size_name ]['sources'] ) ) {
-				continue;
-			}
-
-			$this->assertArrayHasKey( 'sources', $properties );
-			$this->assertIsArray( $properties['sources'] );
-
-			foreach ( $mime_types as $mime_type ) {
-				$this->assertArrayHasKey( $mime_type, $properties['sources'] );
-
-				$this->assertArrayHasKey( 'filesize', $properties['sources'][ $mime_type ] );
-				$this->assertArrayHasKey( 'file', $properties['sources'][ $mime_type ] );
-				$this->assertArrayHasKey( 'source_url', $properties['sources'][ $mime_type ] );
-
-				$this->assertNotFalse( filter_var( $properties['sources'][ $mime_type ]['source_url'], FILTER_VALIDATE_URL ) );
-			}
-		}
-	}
-
-	/**
-	 * Return an error when creating an additional image source with invalid parameters
-	 *
-	 * @dataProvider data_provider_invalid_arguments_for_webp_uploads_generate_additional_image_source
-	 *
-	 * @test
-	 */
-	public function it_should_return_an_error_when_creating_an_additional_image_source_with_invalid_parameters( $attachment_id, $size_data, $mime, $destination_file = null ) {
-		$this->assertInstanceOf( WP_Error::class, webp_uploads_generate_additional_image_source( $attachment_id, $size_data, $mime, $destination_file ) );
-	}
-
-	public function data_provider_invalid_arguments_for_webp_uploads_generate_additional_image_source() {
-		yield 'when trying to use an attachment ID that does not exists' => array(
-			PHP_INT_MAX,
-			array(),
-			'image/webp',
-		);
-
-		add_filter( 'wp_image_editors', '__return_empty_array' );
-		yield 'when no editor is present' => array(
-			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
-			array(),
-			'image/avif',
-		);
-
-		remove_filter( 'wp_image_editors', '__return_empty_array' );
-		yield 'when using a mime that is not supported' => array(
-			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
-			array(),
-			'image/avif',
-		);
-
-		yield 'when no dimension is provided' => array(
-			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
-			array(),
-			'image/webp',
-		);
-
-		yield 'when both dimensions are negative numbers' => array(
-			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
-			array(
-				'width'  => -10,
-				'height' => -20,
-			),
-			'image/webp',
-		);
-
-		yield 'when both dimensions are zero' => array(
-			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
-			array(
-				'width'  => 0,
-				'height' => 0,
-			),
-			'image/webp',
-		);
-	}
-
-	/**
-	 * Create an image with the default suffix in the same location when no destination is specified
-	 *
-	 * @test
-	 */
-	public function it_should_create_an_image_with_the_default_suffix_in_the_same_location_when_no_destination_is_specified() {
-		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
-		$size_data     = array(
-			'width'  => 300,
-			'height' => 300,
-			'crop'   => true,
-		);
-
-		$result    = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp' );
-		$file      = get_attached_file( $attachment_id );
-		$directory = trailingslashit( pathinfo( $file, PATHINFO_DIRNAME ) );
-		$name      = pathinfo( $file, PATHINFO_FILENAME );
-
-		$this->assertIsArray( $result );
-		$this->assertArrayHasKey( 'filesize', $result );
-		$this->assertArrayHasKey( 'file', $result );
-		$this->assertStringEndsWith( '300x300.webp', $result['file'] );
-		$this->assertFileExists( "{$directory}{$name}-300x300.webp" );
-	}
-
-	/**
-	 * Create a file in the specified location with the specified name
-	 *
-	 * @test
-	 */
-	public function it_should_create_a_file_in_the_specified_location_with_the_specified_name() {
-		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
-		$size_data     = array(
-			'width'  => 300,
-			'height' => 300,
-			'crop'   => true,
-		);
-
-		$result = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp', '/tmp/image.jpg' );
-
-		$this->assertIsArray( $result );
-		$this->assertArrayHasKey( 'filesize', $result );
-		$this->assertArrayHasKey( 'file', $result );
-		$this->assertStringEndsWith( 'image.webp', $result['file'] );
-		$this->assertFileExists( '/tmp/image.webp' );
-	}
-
-	/**
 	 * Use the original image to generate all the image sizes
 	 *
 	 * @test
@@ -793,6 +526,7 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 			function( $transforms ) {
 				// Unset "image/jpeg" mime type for jpeg images.
 				unset( $transforms['image/jpeg'][ array_search( 'image/jpeg', $transforms['image/jpeg'], true ) ] );
+
 				return $transforms;
 			}
 		);
@@ -807,5 +541,71 @@ class WebP_Uploads_Tests extends ImagesTestCase {
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
 			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 		}
+	}
+
+	/**
+	 * Allow the upload of a WebP image if at least one editor supports the format
+	 *
+	 * @test
+	 */
+	public function it_should_allow_the_upload_of_a_web_p_image_if_at_least_one_editor_supports_the_format() {
+		add_filter(
+			'wp_image_editors',
+			function () {
+				return array( 'WP_Image_Doesnt_Support_WebP', 'WP_Image_Editor_GD' );
+			}
+		);
+
+		$this->assertTrue( wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertArrayHasKey( 'sources', $metadata );
+		$this->assertIsArray( $metadata['sources'] );
+
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
+	}
+
+	/**
+	 * The image with the smaller filesize should be used when webp_uploads_prefer_smaller_image_file is set to true.
+	 *
+	 * @test
+	 */
+	public function it_should_use_smaller_jpg_image_when_smaller_size_preferred() {
+		// Set prefer smaller image size to true.
+		add_filter( 'webp_uploads_prefer_smaller_image_file', '__return_true' );
+
+		// File generates smallest WebP version of the 'full' image size, all other sub sizes have a smaller JPG version.
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$updated_tag   = webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id );
+
+		// Replace the 'full' image size with the WebP version, all other sub sizes will use the smaller JPG version.
+		$expected_tag = str_replace( $metadata['sources']['image/jpeg']['file'], $metadata['sources']['image/webp']['file'], $tag );
+
+		$this->assertSame( $expected_tag, $updated_tag );
+	}
+
+	/**
+	 * Replace the featured image to WebP when requesting the featured image
+	 *
+	 * @test
+	 */
+	public function it_should_replace_the_featured_image_to_web_p_when_requesting_the_featured_image() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
+		$post_id       = $this->factory()->post->create();
+		set_post_thumbnail( $post_id, $attachment_id );
+
+		$featured_image = get_the_post_thumbnail( $post_id );
+
+		$this->assertTrue( has_post_thumbnail( $post_id ) );
+		$this->assertStringContainsString( '.webp', $featured_image );
+		$this->assertStringNotContainsString( '.jpeg', $featured_image );
 	}
 }
