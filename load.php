@@ -164,7 +164,7 @@ function perflab_get_generator_content() {
 function perflab_render_generator() {
 	$content = perflab_get_generator_content();
 
-	echo '<meta name="generator" content="' . esc_attr( $content ) . '">';
+	echo '<meta name="generator" content="' . esc_attr( $content ) . '">' . "\n";
 }
 add_action( 'wp_head', 'perflab_render_generator' );
 

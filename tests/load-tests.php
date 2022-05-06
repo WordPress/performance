@@ -137,7 +137,7 @@ class Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_render_generator() {
 		// Assert generator tag is rendered. Content does not matter, so just use no modules active.
 		add_filter( 'perflab_active_modules', '__return_empty_array' );
-		$expected = '<meta name="generator" content="Performance Lab ' . PERFLAB_VERSION . '; modules: ">';
+		$expected = '<meta name="generator" content="Performance Lab ' . PERFLAB_VERSION . '; modules: ">' . "\n";
 		$output   = get_echo( 'perflab_render_generator' );
 		$this->assertSame( $expected, $output );
 
