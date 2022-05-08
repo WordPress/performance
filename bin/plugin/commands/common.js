@@ -116,10 +116,7 @@ exports.getModuleData = async ( modulesDir ) => {
 		.sort( ( firstModule, secondModule ) => {
 			// Not the same focus group.
 			if ( firstModule.focus !== secondModule.focus ) {
-				return FOCUS_AREAS[ firstModule.focus ] >
-					FOCUS_AREAS[ secondModule.focus ]
-					? 1
-					: -1;
+				return FOCUS_AREAS[ firstModule.focus ] - FOCUS_AREAS[ secondModule.focus ];
 			}
 
 			if ( firstModule.experimental !== secondModule.experimental ) {
