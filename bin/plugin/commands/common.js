@@ -82,27 +82,28 @@ exports.getModuleData = async ( modulesDir ) => {
 			return moduleData;
 		} )
 		.filter( ( moduleData ) => {
-			const moduleDetails = JSON.stringify( moduleData );
+			const requiredProperties = [];
 			if ( ! moduleData.name ) {
-				log(
-					formats.warning(
-						`This module was not included due is missing a required property 'name', Details: ${ moduleDetails }`
-					)
-				);
+				requiredProperties.push( 'name' );
 			}
 
 			if ( ! moduleData.description ) {
-				log(
-					formats.warning(
-						`This module was not included due is missing a required property 'description', Details: ${ moduleDetails }`
-					)
-				);
+				requiredProperties.push( 'description' );
 			}
 
 			if ( typeof moduleData.experimental === 'undefined' ) {
+				requiredProperties.push( 'experimental' );
+			}
+
+			if ( requiredProperties.length >= 1 ) {
+				const properties = requiredProperties
+					.map( ( property ) => `'${ property }'` )
+					.join( ', ' );
 				log(
 					formats.warning(
-						`This module was not included due is missing a required property 'experimental', Details: ${ moduleDetails }`
+						`This module was not included because it misses required properties: ${ properties }. \nDetails: ${ JSON.stringify(
+							moduleData
+						) }`
 					)
 				);
 			}
@@ -116,7 +117,10 @@ exports.getModuleData = async ( modulesDir ) => {
 		.sort( ( firstModule, secondModule ) => {
 			// Not the same focus group.
 			if ( firstModule.focus !== secondModule.focus ) {
-				return FOCUS_AREAS[ firstModule.focus ] - FOCUS_AREAS[ secondModule.focus ];
+				return (
+					FOCUS_AREAS[ firstModule.focus ] -
+					FOCUS_AREAS[ secondModule.focus ]
+				);
 			}
 
 			if ( firstModule.experimental !== secondModule.experimental ) {
