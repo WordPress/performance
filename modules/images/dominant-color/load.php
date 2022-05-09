@@ -153,16 +153,16 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 		$data  = sprintf( 'data-dominantColor="%s"', $dominant_color );
 		$style = '';
 		if ( str_contains( $filtered_image, 'loading="lazy"' ) ) {
-			$style = ' style="--dominant-color: #' . $dominant_color . ';" ';
+			$style = ' style="--dominant-color: #' . $dominant_color . ';"';
 		}
 
 		$extra_class = '';
 
 		if ( isset( $image_meta['has_transparency'] ) && true === $image_meta['has_transparency'] ) {
-			$data       .= ' data-has-transparency="true"';
+			$data       .= 'data-has-transparency="true" ';
 			$extra_class = 'has-transparency';
 		} else {
-			$data .= ' data-has-transparency="false"';
+			$data .= 'data-has-transparency="false" ';
 		}
 
 		$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
