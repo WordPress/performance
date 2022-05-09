@@ -155,7 +155,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 			$style = ' style="--dominant-color: #' . $dominant_color . ';"';
 		}
 
-		$extra_class  = ( dominant_color_color_is_light( $dominant_color ) ) ? 'dominant-color-light' : 'dominant-color-dark';
+		$extra_class = ( dominant_color_color_is_light( $dominant_color ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 		if ( isset( $image_meta['has_transparency'] ) && true === $image_meta['has_transparency'] ) {
 			$data        .= 'data-has-transparency="true" ';
 			$extra_class .= 'has-transparency';
