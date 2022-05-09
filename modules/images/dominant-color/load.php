@@ -57,12 +57,12 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 
 	$has_transparency = isset( $image_meta['has_transparency'] ) ? $image_meta['has_transparency'] : true;
 
-	$extra_class = '';
+	$extra_class = array();
 	if ( ! isset( $attr['style'] ) ) {
 		$attr['style'] = ' --has-transparency: ' . $has_transparency . '; ';
 	} else {
 		$attr['style'] .= ' --has-transparency: ' . $has_transparency . '; ';
-		$extra_class    = ' has-transparency ';
+		$extra_class[]  = 'has-transparency';
 	}
 
 	if ( isset( $image_meta['dominant_color'] ) ) {
@@ -87,12 +87,14 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 		}
 		$attr['style'] .= '--dominant-color: #' . $image_meta['dominant_color'] . ';';
 
-		$extra_class .= ( dominant_color_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
+		$extra_class[] = ( dominant_color_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 		if ( empty( $attr['class'] ) ) {
 			$attr['class'] = '';
 		}
-		if ( isset( $attr['class'] ) && ! array_intersect( explode( ' ', $attr['class'] ), explode( ' ', $extra_class ) ) ) {
-			$attr['class'] .= ' ' . $attr['class'];
+		foreach ( $extra_class as $class ) {
+			if ( ! array_intersect( explode( ' ', $attr['class'] ), $class ) ) {
+				$attr['class'] .= ' ' . $class;
+			}
 		}
 	}
 
