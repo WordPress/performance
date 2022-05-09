@@ -101,7 +101,11 @@ exports.getModuleData = async ( modulesDir ) => {
 					.join( ', ' );
 				log(
 					formats.warning(
-						`This module was not included because it misses required properties: ${ properties }.\nDetails: ${ JSON.stringify( moduleData, null, 4 ) }`
+						`This module was not included because it misses required properties: ${ properties }.\nDetails: ${ JSON.stringify(
+							moduleData,
+							null,
+							4
+						) }`
 					)
 				);
 			}
