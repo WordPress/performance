@@ -114,20 +114,26 @@ function webp_uploads_generate_missing_images() {
 	// Save updated metadata.
 	wp_update_attachment_metadata( $attachment_id, $metadata );
 
+	// Return if file hasn't been created.
 	$image_file = $uploads_dir['basedir'] . $relpath;
-
-	// Send headers if headers haven't been sent yet.
-	if ( ! headers_sent() ) {
-		$filetype = wp_check_filetype( $image_file );
-		if ( ! empty( $filetype['type'] ) ) {
-			header( 'Content-type: ' . $filetype['type'] );
-		}
-
-		header( 'Content-Length: ' . filesize( $image_file ) );
-		header( 'Cache-Control: public, max-age=' . 0 );
-		header( 'Content-Disposition: filename=' . wp_basename( $image_file ) );
-		header( 'Last-Modified: ' . gmdate( DATE_RFC2822 ) );
+	if ( ! file_exists( $image_file ) ) {
+		return;
 	}
+
+	// Return if headers have been already sent.
+	if ( headers_sent() ) {
+		return;
+	}
+
+	$filetype = wp_check_filetype( $image_file );
+	if ( ! empty( $filetype['type'] ) ) {
+		header( 'Content-type: ' . $filetype['type'] );
+	}
+
+	header( 'Content-Length: ' . filesize( $image_file ) );
+	header( 'Cache-Control: public, max-age=0' );
+	header( 'Content-Disposition: filename=' . wp_basename( $image_file ) );
+	header( 'Last-Modified: ' . gmdate( DATE_RFC2822 ) );
 
 	// Send newly generated file and exit.
 	readfile( $image_file );
@@ -149,9 +155,12 @@ add_action( 'template_redirect', 'webp_uploads_generate_missing_images' );
  */
 function webp_uploads_generate_image_srcset( $sources, $size_array, $image_src, $image_meta, $attachment_id ) {
 	$image_src_parts = wp_parse_url( $image_src );
-	$image_host      = $image_src_parts['host'];
-	if ( ! empty( $image_src_parts['port'] ) ) {
-		$image_host .= ':' . $image_src_parts['port'];
+	$image_host      = null;
+	if ( ! empty( $image_src_parts['host'] ) ) {
+		$image_host = $image_src_parts['host'];
+		if ( ! empty( $image_src_parts['port'] ) ) {
+			$image_host .= ':' . $image_src_parts['port'];
+		}
 	}
 
 	// Do nothing if images are loaded from a different origin.
@@ -221,7 +230,12 @@ add_filter( 'wp_calculate_image_srcset', 'webp_uploads_generate_image_srcset', 1
  * @return string The updated img tag.
  */
 function webp_uploads_update_img_tag_srcset( $img, $context, $attachment_id ) {
-	list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id, 'large', false );
+	$image_src = wp_get_attachment_image_src( $attachment_id, 'large', false );
+	if ( ! is_array( $image_src ) ) {
+		return $img;
+	}
+
+	list( $src, $width, $height ) = $image_src;
 
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	$srcset     = wp_calculate_image_srcset( array( $width, $height ), $src, $image_meta, $attachment_id );
