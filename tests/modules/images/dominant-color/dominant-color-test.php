@@ -42,11 +42,11 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 
 		$attachment_id         = $this->factory->attachment->create_upload_object( $image_path );
 		$transparency_metadata = dominant_color_metadata( array(), $attachment_id );
+		$this->assertArrayHasKey( 'has_transparency', $transparency_metadata );
 		if ( $expected_transparency ) {
 			$this->assertTrue( $transparency_metadata['has_transparency'] );
-			$this->assertArrayHasKey( 'has_transparency', $transparency_metadata );
 		} else {
-			$this->assertFalse( isset( $transparency_metadata['has_transparency'] ) );
+			$this->assertFalse( $transparency_metadata['has_transparency'] );
 		}
 	}
 
