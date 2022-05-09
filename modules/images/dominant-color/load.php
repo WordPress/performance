@@ -318,7 +318,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
  * @since n.e.x.t
  *
  * @param integer $id the attachment id.
- * @return bool|null true if the color has transparency.
+ * @return bool|null True if the color has transparency, false if it doesn't, null if unknown.
  */
 function dominant_color_get_has_transparency( $id ) {
 
