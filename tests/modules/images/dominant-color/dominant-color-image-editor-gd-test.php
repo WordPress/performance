@@ -30,7 +30,7 @@ class Dominant_Color_Image_Editor_GD_Test extends WP_UnitTestCase {
 
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 
-		$this->assertContains( dominant_color_get( $attachment_id ), $expected_color );
+		$this->assertContains( dominant_color_get_dominant_color( $attachment_id ), $expected_color );
 	}
 
 	/**

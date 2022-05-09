@@ -23,7 +23,7 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 		return $metadata;
 	}
 
-	$dominant_color = dominant_color_get( $attachment_id );
+	$dominant_color = dominant_color_get_dominant_color( $attachment_id );
 
 	if ( ! empty( $dominant_color ) ) {
 		$metadata['dominant_color'] = $dominant_color;
@@ -158,7 +158,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 
 		$extra_class = '';
 
-		if ( true === $image_meta['has_transparency'] ) {
+		if ( isset( $image_meta['has_transparency'] ) && true === $image_meta['has_transparency'] ) {
 			$data       .= ' data-has-transparency="true"';
 			$extra_class = ' has-transparency ';
 		} else {
@@ -292,7 +292,7 @@ function dominant_color_set_image_editors() {
  * @param integer $attachment_id the image id.
  * @return string|null the dominant color of the image. or null if no color is found.
  */
-function dominant_color_get( $attachment_id ) {
+function dominant_color_get_dominant_color( $attachment_id ) {
 
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
