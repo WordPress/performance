@@ -19,7 +19,6 @@
  */
 function dominant_color_metadata( $metadata, $attachment_id ) {
 	if ( ! wp_attachment_is_image( $attachment_id ) ) {
-
 		return $metadata;
 	}
 
@@ -117,7 +116,6 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $image_meta ) ) {
-
 		return $filtered_image;
 	}
 
@@ -135,7 +133,6 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	}
 
 	if ( empty( $dominant_color ) ) {
-
 		return $filtered_image;
 	}
 
@@ -247,7 +244,6 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 				$content = str_replace( $match[0], $filtered_image, $content );
 			}
 		}
-
 		return $content;
 	}
 
@@ -304,7 +300,6 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 	if ( ! is_wp_error( $editor ) && method_exists( $editor, 'dominant_color_get_dominant_color' ) ) {
 		$dominant_color = $editor->dominant_color_get_dominant_color();
 		if ( ! is_wp_error( $dominant_color ) ) {
-
 			return $dominant_color;
 		}
 	}
