@@ -31,7 +31,7 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 
 	$has_transparency = dominant_color_get_has_transparency( $attachment_id );
 
-	if ( ! empty( $has_transparency ) ) {
+	if ( is_bool( $has_transparency ) ) {
 		$metadata['has_transparency'] = $has_transparency;
 	}
 
