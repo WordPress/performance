@@ -608,4 +608,27 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertStringContainsString( '.webp', $featured_image );
 		$this->assertStringNotContainsString( '.jpeg', $featured_image );
 	}
+
+	/**
+	 * Prevent replacing an image if image was uploaded via external source or plugin.
+	 *
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_prevent_replacing_an_image_uploaded_via_external_source() {
+		remove_all_filters( 'webp_uploads_pre_replace_additional_image_source' );
+
+		add_filter(
+			'webp_uploads_pre_replace_additional_image_source',
+			function() {
+				return '<img src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">';
+			}
+		);
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
 }
