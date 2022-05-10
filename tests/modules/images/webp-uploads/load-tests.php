@@ -622,7 +622,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		add_filter(
 			'webp_uploads_pre_replace_additional_image_source',
 			function() {
-				return TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg';
+				return '<img src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">';
 			}
 		);
 
