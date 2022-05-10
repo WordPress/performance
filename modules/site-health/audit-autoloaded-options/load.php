@@ -18,7 +18,7 @@
  */
 function perflab_aao_add_autoloaded_options_test( $tests ) {
 	$tests['direct']['autoloaded_options'] = array(
-		'label' => esc_html__( 'Autoloaded options', 'performance-lab' ),
+		'label' => __( 'Autoloaded options', 'performance-lab' ),
 		'test'  => 'perflab_aao_autoloaded_options_test',
 	);
 	return $tests;
