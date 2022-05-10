@@ -503,7 +503,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 			 */
 			$filtered_image = (string) apply_filters( 'webp_uploads_pre_replace_additional_image_source', $image, $attachment_id, 'full', $target_mime, $context );
 
-			// Check if filtered image is same as the image, replace the image otherwise not.
+			// If filtered image is same as the image, run our own replacement logic, otherwise rely on the filtered image.
 			if ( $filtered_image === $image ) {
 				$image = str_replace(
 					$basename,
