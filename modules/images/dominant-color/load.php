@@ -276,7 +276,9 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  * @return string[] Registered image editors class names.
  */
 function dominant_color_set_image_editors() {
-	require_once 'class-dominant-color-image-editor-gd.php';
+        if( ! class_exists( 'Dominant_Color_Image_Editor_GD' ) ) {
+	    require_once 'class-dominant-color-image-editor-gd.php';
+	}
 	require_once 'class-dominant-color-image-editor-imagick.php';
 
 	return array( 'Dominant_Color_Image_Editor_GD', 'Dominant_Color_Image_Editor_Imagick' );
