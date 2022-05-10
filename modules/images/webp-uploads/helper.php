@@ -70,6 +70,8 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 	 * Filter to allow the generation of additional image sources, in which a defined mime type
 	 * can be transformed and create additional mime types for the file.
 	 *
+	 * Returning an image data array or WP_Error here effectively short-circuits the default logic to generate the image source.
+	 *
 	 * @since n.e.x.t
 	 *
 	 * @param array  $image         Image data {'path'=>string, 'file'=>string, 'width'=>int, 'height'=>int, 'mime-type'=>string} or null or WP_Error.
