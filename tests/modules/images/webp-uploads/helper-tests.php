@@ -49,8 +49,8 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		yield 'when both dimensions are negative numbers' => array(
 			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
 			array(
-				'width'  => - 10,
-				'height' => - 20,
+				'width'  => -10,
+				'height' => -20,
 			),
 			'image/webp',
 		);
