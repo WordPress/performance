@@ -221,7 +221,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
  * @since 1.0.0
  *
  * @param int    $attachment_id The attachment ID.
- * @param string $size The attachment size.
+ * @param string $size          The attachment size.
  * @return array The attachment sources array.
  */
 function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail' ) {
