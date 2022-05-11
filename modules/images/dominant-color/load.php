@@ -257,7 +257,7 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  * @return string[] Registered image editors class names.
  */
 function dominant_color_set_image_editors() {
-    if ( ! class_exists( 'Dominant_Color_Image_Editor_GD' ) ) {
+	if ( ! class_exists( 'Dominant_Color_Image_Editor_GD' ) ) {
 		require_once 'class-dominant-color-image-editor-gd.php';
 	}
 	if ( ! class_exists( 'Dominant_Color_Image_Editor_Imagick' ) ) {
@@ -276,7 +276,7 @@ function dominant_color_set_image_editors() {
  * @return string|null the dominant color of the image. or null if no color is found.
  */
 function dominant_color_get_dominant_color( $attachment_id ) {
-    $file   = get_attached_file( $attachment_id );
+	$file = get_attached_file( $attachment_id );
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 	$editor = wp_get_image_editor( $file );
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
