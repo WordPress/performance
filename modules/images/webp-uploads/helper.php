@@ -84,20 +84,15 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 	 */
 	$image = apply_filters( 'webp_uploads_pre_generate_additional_image_source', null, $attachment_id, 'full', $size_data, $mime );
 
-	// Try to check for not empty returned filtered image.
-	if ( ! empty( $image ) ) {
-		if ( is_wp_error( $image ) ) {
-			return $image;
-		}
+	if ( is_wp_error( $image ) ) {
+		return $image;
+	}
 
-		if ( empty( $image['file'] ) ) {
-			return new WP_Error( 'image_file_not_present', __( 'The file key is not present on the image data', 'performance-lab' ) );
-		}
-
-		if ( empty( $image['path'] ) || ! file_exists( $image['path'] ) ) {
-			return new WP_Error( 'image_path_not_present', __( 'The file path is not present on the image data', 'performance-lab' ) );
-		}
-
+	if (
+		is_array( $image )
+		&& ! empty( $image['file'] )
+		&& ! empty( $image['path'] )
+	) {
 		return array(
 			'file'     => $image['file'],
 			'filesize' => filesize( $image['path'] ),
