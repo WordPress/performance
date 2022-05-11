@@ -295,22 +295,21 @@ function dominant_color_set_image_editors() {
  * @return string|null the dominant color of the image. or null if no color is found.
  */
 function dominant_color_get_dominant_color( $attachment_id ) {
-
+        $file   = get_attached_file( $attachment_id );
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
-
-	$file   = get_attached_file( $attachment_id );
 	$editor = wp_get_image_editor( $file );
-
-	if ( ! is_wp_error( $editor ) && method_exists( $editor, 'dominant_color_get_dominant_color' ) ) {
-		$dominant_color = $editor->dominant_color_get_dominant_color();
-		if ( ! is_wp_error( $dominant_color ) ) {
-			return $dominant_color;
-		}
-	}
-
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
-	return null;
+	if ( is_wp_error( $editor ) || ! method_exists( $editor, 'dominant_color_get_dominant_color' ) ) {
+		return null;
+	}
+	
+	$dominant_color = $editor->dominant_color_get_dominant_color();
+	if ( is_wp_error( $dominant_color ) ) {
+		return null;	
+	}
+
+	return $dominant_color;
 }
 
 /**
