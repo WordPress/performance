@@ -10,9 +10,8 @@
  * Returns an array with the list of valid mime types that a specific mime type can be converted into it,
  * for example an image/jpeg can be converted into an image/webp.
  *
- * @since 1.0.0
- *
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
+ * @since 1.0.0
  */
 function webp_uploads_get_upload_image_mime_transforms() {
 	$default_transforms = array(
@@ -28,9 +27,9 @@ function webp_uploads_get_upload_image_mime_transforms() {
 	 * is not needed, then the first mime type in the list supported by the image editor will be
 	 * selected for the default subsizes.
 	 *
-	 * @since 1.0.0
-	 *
 	 * @param array $default_transforms A map with the valid mime transforms.
+	 *
+	 * @since 1.0.0
 	 */
 	$transforms = (array) apply_filters( 'webp_uploads_upload_image_mime_transforms', $default_transforms );
 
@@ -55,14 +54,14 @@ function webp_uploads_get_upload_image_mime_transforms() {
  * would be saved in the specified mime and stored in the destination file. If the image can't be saved correctly
  * a WP_Error would be returned otherwise an array with the file and filesize properties.
  *
+ * @param int    $attachment_id The ID of the attachment from where this image would be created.
+ * @param array  $size_data An array with the dimensions of the image: height, width and crop.
+ * @param string $mime The target mime in which the image should be created.
+ * @param string $destination_file_name The path where the file would be stored, including the extension. If empty, `generate_filename` is used to create the destination file name.
+ *
+ * @return array|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
  * @since n.e.xt
  * @access private
- *
- * @param int    $attachment_id         The ID of the attachment from where this image would be created.
- * @param array  $size_data             An array with the dimensions of the image: height, width and crop.
- * @param string $mime                  The target mime in which the image should be created.
- * @param string $destination_file_name The path where the file would be stored, including the extension. If empty, `generate_filename` is used to create the destination file name.
- * @return array|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
  */
 function webp_uploads_generate_additional_image_source( $attachment_id, array $size_data, $mime, $destination_file_name = null ) {
 
@@ -74,20 +73,30 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param array  $image         Image data {'path'=>string, 'file'=>string, 'width'=>int, 'height'=>int, 'mime-type'=>string} or null or WP_Error.
+	 * @param array|null|WP_Error  $image         Image data {'path'=>string, 'file'=>string, 'width'=>int, 'height'=>int, 'mime-type'=>string} or null or WP_Error.
 	 * @param int    $attachment_id The ID of the attachment from where this image would be created.
 	 * @param string $image_size    The size name that would be used to create this image, out of the registered subsizes.
 	 * @param array  $size_data     An array with the dimensions of the image: height, width and crop {'height'=>int, 'width'=>int, 'crop'}.
 	 * @param string $mime          The target mime in which the image should be created.
+	 *
 	 * @return array|null|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
 	 */
 	$image = apply_filters( 'webp_uploads_pre_generate_additional_image_source', null, $attachment_id, 'full', $size_data, $mime );
 
-	if (
-		is_array( $image ) &&
-		! empty( $image['file'] ) &&
-		! empty( $image['path'] )
-	) {
+	// Try to check for not empty returned filtered image.
+	if ( ! empty( $image ) ) {
+		if ( is_wp_error( $image ) ) {
+			return $image;
+		}
+
+		if ( empty( $image['file'] ) ) {
+			return new WP_Error( 'image_file_not_present', __( 'The file key is not present on the image data', 'performance-lab' ) );
+		}
+
+		if ( empty( $image['path'] ) || ! file_exists( $image['path'] ) ) {
+			return new WP_Error( 'image_path_not_present', __( 'The file path is not present on the image data', 'performance-lab' ) );
+		}
+
 		return array(
 			'file'     => $image['file'],
 			'filesize' => filesize( $image['path'] ),
@@ -158,15 +167,14 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
  * this image would be stored in the same place as the provided size name inside the
  * metadata of the attachment.
  *
+ * @param int    $attachment_id The ID of the attachment we are going to use as a reference to create the image.
+ * @param string $size The size name that would be used to create this image, out of the registered subsizes.
+ * @param string $mime A mime type we are looking to use to create this image.
+ *
+ * @return array|WP_Error
  * @since 1.0.0
  *
  * @see wp_create_image_subsizes()
- *
- * @param int    $attachment_id The ID of the attachment we are going to use as a reference to create the image.
- * @param string $size          The size name that would be used to create this image, out of the registered subsizes.
- * @param string $mime          A mime type we are looking to use to create this image.
- *
- * @return array|WP_Error
  */
 function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 	$sizes    = wp_get_registered_image_subsizes();
@@ -208,11 +216,11 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 /**
  * Returns the attachment sources array ordered by filesize.
  *
- * @since 1.0.0
- *
  * @param int    $attachment_id The attachment ID.
- * @param string $size          The attachment size.
+ * @param string $size The attachment size.
+ *
  * @return array The attachment sources array.
+ * @since 1.0.0
  */
 function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail' ) {
 	// Check for the sources attribute in attachment metadata.
@@ -236,11 +244,11 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
  * Filters on `webp_uploads_content_image_mimes` to generate the available mime types for an attachment
  * and orders them by the smallest filesize first.
  *
- * @since 1.0.0
- *
- * @param array $mime_types    The list of mime types that can be used to update images in the content.
+ * @param array $mime_types The list of mime types that can be used to update images in the content.
  * @param int   $attachment_id The attachment ID.
+ *
  * @return array Array of available mime types ordered by filesize.
+ * @since 1.0.0
  */
 function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id ) {
 	$sources = webp_uploads_get_attachment_sources( $attachment_id, 'full' );
@@ -252,7 +260,7 @@ function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id ) 
 	// Remove mime types with filesize of 0.
 	$sources = array_filter(
 		$sources,
-		function( $source ) {
+		function ( $source ) {
 			return isset( $source['filesize'] ) && $source['filesize'] > 0;
 		}
 	);
@@ -260,7 +268,7 @@ function webp_uploads_get_mime_types_by_filesize( $mime_types, $attachment_id ) 
 	// Order sources by filesize in ascending order.
 	uasort(
 		$sources,
-		function( $a, $b ) {
+		function ( $a, $b ) {
 			return $a['filesize'] - $b['filesize'];
 		}
 	);
