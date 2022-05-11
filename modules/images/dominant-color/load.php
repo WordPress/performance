@@ -53,7 +53,9 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 	if ( ! is_array( $image_meta ) ) {
 		return $attr;
 	}
-
+if ( !isset( $image_meta['has_transparency'] ) || !isset( $image_meta['dominant_color'] )){
+    return $attr;
+}
 	$has_transparency = isset( $image_meta['has_transparency'] ) ? $image_meta['has_transparency'] : true;
 
 	$extra_class = array();
