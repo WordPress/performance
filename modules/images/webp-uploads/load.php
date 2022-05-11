@@ -428,18 +428,6 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	}
 
 	/**
-	 * Filters mime types that should be used to update all images in the content. The order of
-	 * mime types matters. The first mime type in the list will be used if it is supported by an image.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array  $target_mimes  The list of mime types that can be used to update images in the content.
-	 * @param int    $attachment_id The attachment ID.
-	 * @param string $context       The current context.
-	 */
-	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/webp', 'image/jpeg' ), $attachment_id, $context );
-
-	/**
 	 * Filters whether the smaller image should be used regardless of which MIME type is preferred overall.
 	 *
 	 * This is disabled by default only because it is not part of the current WordPress core feature proposal.
@@ -451,9 +439,22 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	 *
 	 * @param bool $prefer_smaller_image_file Whether to prefer the smaller image file.
 	 */
-	if ( apply_filters( 'webp_uploads_prefer_smaller_image_file', false ) ) {
-		$target_mimes = webp_uploads_get_mime_types_by_filesize( $target_mimes, $attachment_id );
-	}
+	$prefer_smaller_image_file = apply_filters( 'webp_uploads_prefer_smaller_image_file', false );
+
+	/**
+	 * Filters mime types that should be used to update all images in the content. The order of
+	 * mime types matters. The first mime type in the list will be used if it is supported by an image.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array  $target_mimes  The list of mime types that can be used to update images in the content.
+	 * @param int    $attachment_id The attachment ID.
+	 * @param string $context       The current context.
+	 */
+	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/webp', 'image/jpeg' ), $attachment_id, $context );
+
+	// Get the original mime type for comparison.
+	$original_mime = get_post_mime_type( $attachment_id );
 
 	$target_mime = null;
 	foreach ( $target_mimes as $mime ) {
@@ -469,18 +470,54 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 
 	// Replace the full size image if present.
 	if ( isset( $metadata['sources'][ $target_mime ]['file'] ) ) {
+		// Initially set the target mime as the replacement source.
+		$replacement_source = $metadata['sources'][ $target_mime ]['file'];
+
+		// Check for the smaller image file.
+		if (
+			$prefer_smaller_image_file &&
+			! empty( $metadata['sources'][ $target_mime ]['filesize'] ) &&
+			! empty( $metadata['sources'][ $original_mime ]['filesize'] ) &&
+			$metadata['sources'][ $original_mime ]['filesize'] < $metadata['sources'][ $target_mime ]['filesize']
+		) {
+			// Set the original source file as the replacement if smaller.
+			$replacement_source = $size_data['sources'][ $original_mime ]['file'];
+		}
+
 		$basename = wp_basename( $metadata['file'] );
-		if ( $basename !== $metadata['sources'][ $target_mime ]['file'] ) {
-			$image = str_replace(
-				$basename,
-				$metadata['sources'][ $target_mime ]['file'],
-				$image
-			);
+		if ( $basename !== $replacement_source ) {
+
+			/**
+			 * Filter to replace additional image source file, by locating the original
+			 * mime types of the file and return correct file path in the end.
+			 *
+			 * Altering the $image tag through this filter effectively short-circuits the default replacement logic using the preferred MIME type.
+			 *
+			 * @since n.e.x.t
+			 *
+			 * @param string $image         An <img> tag where the urls would be updated.
+			 * @param int    $attachment_id The ID of the attachment being modified.
+			 * @param string $size          The size name that would be used to create this image, out of the registered subsizes.
+			 * @param string $target_mime   The target mime in which the image should be created.
+			 * @param string $context       The context where this is function is being used.
+			 */
+			$filtered_image = (string) apply_filters( 'webp_uploads_pre_replace_additional_image_source', $image, $attachment_id, 'full', $target_mime, $context );
+
+			// If filtered image is same as the image, run our own replacement logic, otherwise rely on the filtered image.
+			if ( $filtered_image === $image ) {
+				$image = str_replace(
+					$basename,
+					$metadata['sources'][ $target_mime ]['file'],
+					$image
+				);
+			} else {
+				$image = $filtered_image;
+			}
 		}
 	}
 
 	// Replace sub sizes for the image if present.
-	foreach ( $metadata['sizes'] as $name => $size_data ) {
+	foreach ( $metadata['sizes'] as $size => $size_data ) {
 		if ( empty( $size_data['file'] ) ) {
 			continue;
 		}
@@ -493,12 +530,46 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 			continue;
 		}
 
-		$image = str_replace(
-			$size_data['file'],
-			$size_data['sources'][ $target_mime ]['file'],
-			$image
-		);
+		// Do not update image URL if the target image is larger than the original.
+		if (
+			$prefer_smaller_image_file &&
+			! empty( $size_data['sources'][ $target_mime ]['filesize'] ) &&
+			! empty( $size_data['sources'][ $original_mime ]['filesize'] ) &&
+			$size_data['sources'][ $original_mime ]['filesize'] < $size_data['sources'][ $target_mime ]['filesize']
+		) {
+			continue;
+		}
+
+		/** This filter is documented in modules/images/webp-uploads/load.php */
+		$filtered_image = (string) apply_filters( 'webp_uploads_pre_replace_additional_image_source', $image, $attachment_id, $size, $target_mime, $context );
+
+		// If filtered image is same as the image, run our own replacement logic, otherwise rely on the filtered image.
+		if ( $filtered_image === $image ) {
+			$image = str_replace(
+				$size_data['file'],
+				$size_data['sources'][ $target_mime ]['file'],
+				$image
+			);
+		} else {
+			$image = $filtered_image;
+		}
 	}
 
 	return $image;
 }
+
+/**
+ * Updates the references of the featured image to the a new image format if available, in the same way it
+ * occurs in the_content of a post.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $html          The current HTML markup of the featured image.
+ * @param int    $post_id       The current post ID where the featured image is requested.
+ * @param int    $attachment_id The ID of the attachment image.
+ * @return string The updated HTML markup.
+ */
+function webp_uploads_update_featured_image( $html, $post_id, $attachment_id ) {
+	return webp_uploads_img_tag_update_mime_type( $html, 'post_thumbnail_html', $attachment_id );
+}
+add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );

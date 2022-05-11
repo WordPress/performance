@@ -19,7 +19,7 @@
 function perflab_oc_health_add_tests( $tests ) {
 	if ( wp_get_environment_type() === 'production' ) {
 		$tests['direct']['persistent_object_cache'] = array(
-			'label' => 'persistent_object_cache',
+			'label' => __( 'Persistent object cache', 'performance-lab' ),
 			'test'  => 'perflab_oc_health_persistent_object_cache',
 		);
 	}

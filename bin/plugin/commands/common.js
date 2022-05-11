@@ -4,6 +4,7 @@
 const path = require( 'path' );
 const glob = require( 'fast-glob' );
 const fs = require( 'fs' );
+const { log, formats } = require( '../lib/logger' );
 
 /**
  * @typedef WPModuleData
@@ -14,6 +15,18 @@ const fs = require( 'fs' );
  * @property {string}  description  Module description.
  * @property {boolean} experimental Whether the module is experimental.
  */
+
+/**
+ * Definition of the groups areas as an object with a number to specify the order priority of each,
+ * with increments of 10 between each module, in order to allow space for any change down the road.
+ */
+const FOCUS_AREAS = {
+	images: 10,
+	javascript: 20,
+	'site-health': 30,
+	measurement: 40,
+	'object-cache': 50,
+};
 
 /**
  * Returns a promise resolving to the list of data for all modules.
@@ -68,5 +81,55 @@ exports.getModuleData = async ( modulesDir ) => {
 
 			return moduleData;
 		} )
-		.filter( ( moduleData ) => moduleData.name && moduleData.description );
+		.filter( ( moduleData ) => {
+			const requiredProperties = [];
+			if ( ! moduleData.name ) {
+				requiredProperties.push( 'name' );
+			}
+
+			if ( ! moduleData.description ) {
+				requiredProperties.push( 'description' );
+			}
+
+			if ( typeof moduleData.experimental === 'undefined' ) {
+				requiredProperties.push( 'experimental' );
+			}
+
+			if ( requiredProperties.length >= 1 ) {
+				const properties = requiredProperties
+					.map( ( property ) => `'${ property }'` )
+					.join( ', ' );
+				log(
+					formats.warning(
+						`This module was not included because it misses required properties: ${ properties }.\nDetails: ${ JSON.stringify(
+							moduleData,
+							null,
+							4
+						) }`
+					)
+				);
+			}
+
+			return (
+				moduleData.name &&
+				moduleData.description &&
+				typeof moduleData.experimental !== 'undefined'
+			);
+		} )
+		.sort( ( firstModule, secondModule ) => {
+			// Not the same focus group.
+			if ( firstModule.focus !== secondModule.focus ) {
+				return (
+					FOCUS_AREAS[ firstModule.focus ] -
+					FOCUS_AREAS[ secondModule.focus ]
+				);
+			}
+
+			if ( firstModule.experimental !== secondModule.experimental ) {
+				return firstModule.experimental ? 1 : -1;
+			}
+
+			// Lastly order alphabetically.
+			return firstModule.slug.localeCompare( secondModule.slug );
+		} );
 };
