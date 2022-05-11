@@ -86,7 +86,6 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 		}
 		$attr['style'] .= '--dominant-color: #' . $image_meta['dominant_color'] . ';';
 
-		$extra_class[] = ( dominant_color_color_is_light( $image_meta['dominant_color'] ) ) ? 'dominant-color-light' : 'dominant-color-dark';
 		if ( empty( $attr['class'] ) ) {
 			$attr['class'] = '';
 		}
@@ -155,10 +154,10 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 			$style = ' style="--dominant-color: #' . $dominant_color . ';"';
 		}
 
-		$extra_class = ( dominant_color_color_is_light( $dominant_color ) ) ? 'dominant-color-light' : 'dominant-color-dark';
+
 		if ( isset( $image_meta['has_transparency'] ) && true === $image_meta['has_transparency'] ) {
 			$data        .= 'data-has-transparency="true" ';
-			$extra_class .= 'has-transparency';
+			$extra_class = 'has-transparency';
 		} else {
 			$data .= 'data-has-transparency="false" ';
 		}
@@ -339,30 +338,4 @@ function dominant_color_get_has_transparency( $id ) {
 	}
 
 	return null;
-}
-
-/**
- * Works out if the color is dark or light from a give hex color.
- *
- * @since n.e.x.t
- *
- * @param string $hexadecimal_color color in hex.
- * @return bool true if the color is light.
- */
-function dominant_color_color_is_light( $hexadecimal_color ) {
-	$hexadecimal_color = str_replace( '#', '', $hexadecimal_color );
-	if ( 3 === strlen( $hexadecimal_color ) ) {
-		$hexadecimal_color[5] = $hexadecimal_color[2];
-		$hexadecimal_color[4] = $hexadecimal_color[2];
-		$hexadecimal_color[3] = $hexadecimal_color[1];
-		$hexadecimal_color[2] = $hexadecimal_color[1];
-		$hexadecimal_color[1] = $hexadecimal_color[0];
-	}
-
-	$r         = ( hexdec( substr( $hexadecimal_color, 0, 2 ) ) / 255 );
-	$g         = ( hexdec( substr( $hexadecimal_color, 2, 2 ) ) / 255 );
-	$b         = ( hexdec( substr( $hexadecimal_color, 4, 2 ) ) / 255 );
-	$lightness = round( ( ( ( max( $r, $g, $b ) + min( $r, $g, $b ) ) / 2 ) * 100 ) );
-
-	return $lightness >= 50;
 }
