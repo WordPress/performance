@@ -53,9 +53,7 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 	if ( ! is_array( $image_meta ) ) {
 		return $attr;
 	}
-if ( !isset( $image_meta['has_transparency'] ) || !isset( $image_meta['dominant_color'] )){
-    return $attr;
-}
+
 	$has_transparency = isset( $image_meta['has_transparency'] ) ? $image_meta['has_transparency'] : true;
 
 	$extra_class = array();
@@ -138,12 +136,12 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 			$style = ' style="--dominant-color: #' . $dominant_color . ';"';
 		}
 
-
 		if ( isset( $image_meta['has_transparency'] ) && true === $image_meta['has_transparency'] ) {
-			$data        .= 'data-has-transparency="true" ';
+			$data       .= 'data-has-transparency="true" ';
 			$extra_class = 'has-transparency';
 		} else {
-			$data .= 'data-has-transparency="false" ';
+			$data       .= 'data-has-transparency="false" ';
+			$extra_class = 'not-transparent';
 		}
 
 		$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
@@ -259,11 +257,11 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  * @return string[] Registered image editors class names.
  */
 function dominant_color_set_image_editors() {
-        if( ! class_exists( 'Dominant_Color_Image_Editor_GD' ) ) {
-	    require_once 'class-dominant-color-image-editor-gd.php';
+    if ( ! class_exists( 'Dominant_Color_Image_Editor_GD' ) ) {
+		require_once 'class-dominant-color-image-editor-gd.php';
 	}
-        if( ! class_exists( 'Dominant_Color_Image_Editor_Imagick' ) ) {
-	    require_once 'class-dominant-color-image-editor-imagick.php';
+	if ( ! class_exists( 'Dominant_Color_Image_Editor_Imagick' ) ) {
+		require_once 'class-dominant-color-image-editor-imagick.php';
 	}
 
 	return array( 'Dominant_Color_Image_Editor_GD', 'Dominant_Color_Image_Editor_Imagick' );
@@ -278,7 +276,7 @@ function dominant_color_set_image_editors() {
  * @return string|null the dominant color of the image. or null if no color is found.
  */
 function dominant_color_get_dominant_color( $attachment_id ) {
-        $file   = get_attached_file( $attachment_id );
+    $file   = get_attached_file( $attachment_id );
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 	$editor = wp_get_image_editor( $file );
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
@@ -291,7 +289,6 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 	if ( is_wp_error( $dominant_color ) ) {
 		return null;
 	}
-
 	return $dominant_color;
 }
 
@@ -304,18 +301,17 @@ function dominant_color_get_dominant_color( $attachment_id ) {
  * @return bool|null True if the color has transparency, false if it doesn't, null if unknown.
  */
 function dominant_color_get_has_transparency( $id ) {
-        $file = get_attached_file( $id );
+	$file = get_attached_file( $id );
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 	$editor = wp_get_image_editor( $file );
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
-	if ( is_wp_error( $editor ) || !method_exists( $editor, 'dominant_color_get_has_transparency' ) ) {
-	      return null;
+	if ( is_wp_error( $editor ) || ! method_exists( $editor, 'dominant_color_get_has_transparency' ) ) {
+		return null;
 	}
 	$has_transparency = $editor->dominant_color_get_has_transparency();
 	if ( is_wp_error( $has_transparency ) ) {
-	      return null;
+		return null;
 	}
-
 	return $has_transparency;
 }
