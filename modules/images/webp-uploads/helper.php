@@ -59,12 +59,14 @@ function webp_uploads_get_upload_image_mime_transforms() {
  * @access private
  *
  * @param int    $attachment_id         The ID of the attachment from where this image would be created.
+ * @param string $image_size            The size name that would be used to create the image source, out of the registered subsizes.
  * @param array  $size_data             An array with the dimensions of the image: height, width and crop.
  * @param string $mime                  The target mime in which the image should be created.
  * @param string $destination_file_name The path where the file would be stored, including the extension. If empty, `generate_filename` is used to create the destination file name.
+ *
  * @return array|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
  */
-function webp_uploads_generate_additional_image_source( $attachment_id, array $size_data, $mime, $destination_file_name = null ) {
+function webp_uploads_generate_additional_image_source( $attachment_id, $image_size, array $size_data, $mime, $destination_file_name = null ) {
 
 	/**
 	 * Filter to allow the generation of additional image sources, in which a defined mime type
@@ -74,15 +76,15 @@ function webp_uploads_generate_additional_image_source( $attachment_id, array $s
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param array|null|WP_Error  $image         Image data {'path'=>string, 'file'=>string, 'width'=>int, 'height'=>int, 'mime-type'=>string} or null or WP_Error.
-	 * @param int                  $attachment_id The ID of the attachment from where this image would be created.
-	 * @param string               $image_size    The size name that would be used to create this image, out of the registered subsizes.
-	 * @param array                $size_data     An array with the dimensions of the image: height, width and crop {'height'=>int, 'width'=>int, 'crop'}.
-	 * @param string               $mime          The target mime in which the image should be created.
+	 * @param array|null|WP_Error $image         Image data {'path'=>string, 'file'=>string, 'width'=>int, 'height'=>int, 'mime-type'=>string} or null or WP_Error.
+	 * @param int                 $attachment_id The ID of the attachment from where this image would be created.
+	 * @param string              $image_size    The size name that would be used to create this image, out of the registered subsizes.
+	 * @param array               $size_data     An array with the dimensions of the image: height, width and crop {'height'=>int, 'width'=>int, 'crop'}.
+	 * @param string              $mime          The target mime in which the image should be created.
 	 *
 	 * @return array|null|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
 	 */
-	$image = apply_filters( 'webp_uploads_pre_generate_additional_image_source', null, $attachment_id, 'full', $size_data, $mime );
+	$image = apply_filters( 'webp_uploads_pre_generate_additional_image_source', null, $attachment_id, $image_size, $size_data, $mime );
 
 	if ( is_wp_error( $image ) ) {
 		return $image;
@@ -207,7 +209,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 		$size_data['crop'] = (bool) $sizes[ $size ]['crop'];
 	}
 
-	return webp_uploads_generate_additional_image_source( $attachment_id, $size_data, $mime );
+	return webp_uploads_generate_additional_image_source( $attachment_id, $size, $size_data, $mime );
 }
 
 /**

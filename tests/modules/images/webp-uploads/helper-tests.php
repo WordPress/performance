@@ -22,6 +22,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	public function data_provider_invalid_arguments_for_webp_uploads_generate_additional_image_source() {
 		yield 'when trying to use an attachment ID that does not exists' => array(
 			PHP_INT_MAX,
+			'medium',
 			array(),
 			'image/webp',
 		);
@@ -29,6 +30,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		add_filter( 'wp_image_editors', '__return_empty_array' );
 		yield 'when no editor is present' => array(
 			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			'medium',
 			array(),
 			'image/avif',
 		);
@@ -36,18 +38,21 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		remove_filter( 'wp_image_editors', '__return_empty_array' );
 		yield 'when using a mime that is not supported' => array(
 			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			'medium',
 			array(),
 			'image/avif',
 		);
 
 		yield 'when no dimension is provided' => array(
 			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			'medium',
 			array(),
 			'image/webp',
 		);
 
 		yield 'when both dimensions are negative numbers' => array(
 			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			'medium',
 			array(
 				'width'  => -10,
 				'height' => -20,
@@ -57,6 +62,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 
 		yield 'when both dimensions are zero' => array(
 			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			'medium',
 			array(
 				'width'  => 0,
 				'height' => 0,
@@ -78,7 +84,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 			'crop'   => true,
 		);
 
-		$result    = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp' );
+		$result    = webp_uploads_generate_additional_image_source( $attachment_id, 'medium', $size_data, 'image/webp' );
 		$file      = get_attached_file( $attachment_id );
 		$directory = trailingslashit( pathinfo( $file, PATHINFO_DIRNAME ) );
 		$name      = pathinfo( $file, PATHINFO_FILENAME );
@@ -103,7 +109,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 			'crop'   => true,
 		);
 
-		$result = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp', '/tmp/image.jpg' );
+		$result = webp_uploads_generate_additional_image_source( $attachment_id, 'medium', $size_data, 'image/webp', '/tmp/image.jpg' );
 
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'filesize', $result );
@@ -258,7 +264,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 			'crop'   => true,
 		);
 
-		$result = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp', '/tmp/image.jpg' );
+		$result = webp_uploads_generate_additional_image_source( $attachment_id, 'medium', $size_data, 'image/webp', '/tmp/image.jpg' );
 
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'filesize', $result );
@@ -290,7 +296,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 			'crop'   => true,
 		);
 
-		$result = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp', '/tmp/image.jpg' );
+		$result = webp_uploads_generate_additional_image_source( $attachment_id, 'medium', $size_data, 'image/webp', '/tmp/image.jpg' );
 		$this->assertWPError( $result );
 		$this->assertSame( 'image_additional_generated_error', $result->get_error_code() );
 	}
