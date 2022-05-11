@@ -71,7 +71,6 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 			$this->assertStringContainsString( 'data-has-transparency="' . json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
 			$this->assertStringContainsString( 'style="--dominant-color: #' . $expected_color . ';"', $filtered_image_tags_added );
 
-
 			// Testing tag_add_adjust() without lazy load.
 			$filtered_image_mock_not_lazy_load = '<img width="1024" height="727" src="http://localhost:8888/wp-content/uploads/2022/03/test.png" />';
 			$filtered_image_tags_added         = dominant_color_img_tag_add_dominant_color( $filtered_image_mock_not_lazy_load, 'the_content', $attachment_id );
