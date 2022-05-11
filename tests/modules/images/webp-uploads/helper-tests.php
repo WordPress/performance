@@ -49,8 +49,8 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		yield 'when both dimensions are negative numbers' => array(
 			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
 			array(
-				'width'  => -10,
-				'height' => -20,
+				'width'  => - 10,
+				'height' => - 20,
 			),
 			'image/webp',
 		);
@@ -265,5 +265,95 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'file', $result );
 		$this->assertStringEndsWith( 'image.webp', $result['file'] );
 		$this->assertFileExists( '/tmp/image.webp' );
+	}
+
+	/**
+	 * Return an error when filter webp_uploads_pre_generate_additional_image_source returns invalid data.
+	 *
+	 * @test
+	 */
+	public function it_should_return_an_error_when_filter_webp_uploads_pre_generate_additional_image_source_returns_invalid_data() {
+		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		add_filter(
+			'webp_uploads_pre_generate_additional_image_source',
+			function () {
+				return array(
+					'file' => '',
+					'path' => '',
+				);
+			}
+		);
+
+		$size_data = array(
+			'width'  => 300,
+			'height' => 300,
+			'crop'   => true,
+		);
+
+		$result = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp', '/tmp/image.jpg' );
+		$this->assertWPError( $result );
+		$this->assertSame( 'image_file_not_present', $result->get_error_code() );
+	}
+
+	/**
+	 * Return an error when filter webp_uploads_pre_generate_additional_image_source returns invalid file path.
+	 *
+	 * @test
+	 */
+	public function it_should_return_an_error_when_filter_webp_uploads_pre_generate_additional_image_source_returns_invalid_path() {
+		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		add_filter(
+			'webp_uploads_pre_generate_additional_image_source',
+			function () {
+				return array(
+					'file' => 'image.webp',
+					'path' => '',
+				);
+			}
+		);
+
+		$size_data = array(
+			'width'  => 300,
+			'height' => 300,
+			'crop'   => true,
+		);
+
+		$result = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp', '/tmp/image.jpg' );
+		$this->assertWPError( $result );
+		$this->assertSame( 'image_path_not_present', $result->get_error_code() );
+	}
+
+	/**
+	 * Return an error when filter webp_uploads_pre_generate_additional_image_source returns WP_Error.
+	 *
+	 * @test
+	 */
+	public function it_should_return_an_error_when_filter_webp_uploads_pre_generate_additional_image_source_returns_wp_error() {
+		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		add_filter(
+			'webp_uploads_pre_generate_additional_image_source',
+			function () {
+				return new WP_Error( 'image_additional_generated_error', __( 'Additional image was not generated.', 'performance-lab' ) );
+			}
+		);
+
+		$size_data = array(
+			'width'  => 300,
+			'height' => 300,
+			'crop'   => true,
+		);
+
+		$result = webp_uploads_generate_additional_image_source( $attachment_id, $size_data, 'image/webp', '/tmp/image.jpg' );
+		$this->assertWPError( $result );
+		$this->assertSame( 'image_additional_generated_error', $result->get_error_code() );
 	}
 }
