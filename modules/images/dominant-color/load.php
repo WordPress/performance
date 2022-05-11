@@ -68,15 +68,6 @@ if ( !isset( $image_meta['has_transparency'] ) || !isset( $image_meta['dominant_
 
 	if ( isset( $image_meta['dominant_color'] ) ) {
 		$dominant_color = $image_meta['dominant_color'];
-	} else {
-		/**
-		 * Filters the default color to use when no dominant color is found.
-		 *
-		 * @since n.e.x.t
-		 *
-		 * @param string $default_color The default color 'cccccc'.
-		 */
-		$dominant_color = apply_filters( 'dominant_color_default_color', 'cccccc' );
 	}
 
 	if ( ! empty( $dominant_color ) ) {
@@ -122,15 +113,6 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 
 	if ( isset( $image_meta['dominant_color'] ) ) {
 		$dominant_color = $image_meta['dominant_color'];
-	} else {
-		/**
-		 * Filters the default color to use when no dominant color is found.
-		 *
-		 * @since n.e.x.t
-		 *
-		 * @param string $default_color The default color 'cccccc'.
-		 */
-		$dominant_color = apply_filters( 'dominant_color_default_color', 'cccccc' );
 	}
 
 	if ( empty( $dominant_color ) ) {
@@ -304,10 +286,10 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 	if ( is_wp_error( $editor ) || ! method_exists( $editor, 'dominant_color_get_dominant_color' ) ) {
 		return null;
 	}
-	
+
 	$dominant_color = $editor->dominant_color_get_dominant_color();
 	if ( is_wp_error( $dominant_color ) ) {
-		return null;	
+		return null;
 	}
 
 	return $dominant_color;
@@ -329,11 +311,11 @@ function dominant_color_get_has_transparency( $id ) {
 
 	if ( is_wp_error( $editor ) || !method_exists( $editor, 'dominant_color_get_has_transparency' ) ) {
 	      return null;
-	}      
+	}
 	$has_transparency = $editor->dominant_color_get_has_transparency();
 	if ( is_wp_error( $has_transparency ) ) {
 	      return null;
 	}
-	
+
 	return $has_transparency;
 }
