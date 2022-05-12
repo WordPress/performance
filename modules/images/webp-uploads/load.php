@@ -90,7 +90,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
 		$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
-		$image       = webp_uploads_generate_additional_image_source( $attachment_id, $original_size_data, $targeted_mime, $destination );
+		$image       = webp_uploads_generate_additional_image_source( $attachment_id, 'full', $original_size_data, $targeted_mime, $destination );
 
 		if ( is_wp_error( $image ) ) {
 			continue;
