@@ -72,25 +72,6 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		'crop'   => false,
 	);
 
-	$sizes           = wp_get_registered_image_subsizes();
-	$image_size_name = 'full';
-
-	if ( ! empty( $sizes ) ) {
-		foreach ( $sizes as $image_size_key => $size ) {
-			if (
-				isset( $size['width'] )
-				&& isset( $size['height'] )
-				&& isset( $size['crop'] )
-				&& $size['width'] === $original_size_data['width']
-				&& $size['height'] === $original_size_data['height']
-				&& $size['crop'] === $original_size_data['crop']
-			) {
-				$image_size_name = $image_size_key;
-				break;
-			}
-		}
-	}
-
 	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
 	$filename           = pathinfo( $file, PATHINFO_FILENAME );
 	$allowed_mimes      = array_flip( wp_get_mime_types() );
@@ -109,7 +90,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
 		$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
-		$image       = webp_uploads_generate_additional_image_source( $attachment_id, $image_size_name, $original_size_data, $targeted_mime, $destination );
+		$image       = webp_uploads_generate_additional_image_source( $attachment_id, 'full', $original_size_data, $targeted_mime, $destination );
 
 		if ( is_wp_error( $image ) ) {
 			continue;
