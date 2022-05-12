@@ -185,9 +185,14 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 					$current_extension = pathinfo( $thumbnail_file, PATHINFO_EXTENSION );
 					// Create a file with then new extension out of the targeted file.
-					$target_file_name                  = preg_replace( "/\.$current_extension$/", ".$extension", $thumbnail_file );
-					$target_file_location              = path_join( $original_directory, $target_file_name );
-					$result                            = $editor->save( $target_file_location, $targeted_mime );
+					$target_file_name     = preg_replace( "/\.$current_extension$/", ".$extension", $thumbnail_file );
+					$target_file_location = path_join( $original_directory, $target_file_name );
+					$result               = $editor->save( $target_file_location, $targeted_mime );
+
+					if ( is_wp_error( $result ) ) {
+						continue;
+					}
+
 					$subsized_images[ $targeted_mime ] = array( 'thumbnail' => $result );
 				} else {
 					$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension}";
