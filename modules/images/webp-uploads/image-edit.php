@@ -169,6 +169,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $or
 				$extension = explode( '|', $allowed_mimes[ $targeted_mime ] );
 				$extension = $extension[0];
 
+				// If the target is `thumbnail` make sure only that size is generated.
 				if ( 'thumbnail' === $target ) {
 					if ( ! isset( $subsized_images[ $original_mime_type ]['thumbnail']['file'] ) ) {
 						continue;
