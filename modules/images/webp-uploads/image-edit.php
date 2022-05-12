@@ -123,6 +123,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $or
 			$target       = isset( $_REQUEST['target'] ) ? $_REQUEST['target'] : 'all';
 
 			foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
+				// If the target is 'nothumb', skip generating the 'thumbnail' size.
 				if ( 'nothumb' === $target && 'thumbnail' === $size_name ) {
 					continue;
 				}
