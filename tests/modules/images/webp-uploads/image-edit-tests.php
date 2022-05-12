@@ -3,7 +3,7 @@
  * Tests for webp-uploads module image-edit.php.
  *
  * @package performance-lab
- * @group   webp-uploads
+ * @group   image-edit
  */
 
 use PerformanceLab\Tests\TestCase\ImagesTestCase;
@@ -138,31 +138,38 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$this->assertArrayHasKey( 'sources', $metadata );
-
 		$editor = new WP_Image_Edit( $attachment_id );
 		$editor->flip_vertical()->only_thumbnail()->save();
 		$this->assertTrue( $editor->success() );
-
 		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 		$this->assertEmpty( $backup_sources );
-
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 		$this->assertIsArray( $backup_sizes );
 		$this->assertCount( 1, $backup_sizes );
 		$this->assertArrayHasKey( 'thumbnail-orig', $backup_sizes );
 		$this->assertArrayHasKey( 'sources', $backup_sizes['thumbnail-orig'] );
-
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
-
 		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
 		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
+
+		$this->assertFileNameIsNotEdited( $metadata['sources']['image/jpeg']['file'] );
+		$this->assertFileNameIsNotEdited( $metadata['sources']['image/webp']['file'] );
 
 		foreach ( $metadata['sizes'] as $size_name => $properties ) {
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+
+			if ( 'thumbnail' === $size_name ) {
+				$this->assertSame( $properties['file'], $properties['sources']['image/jpeg']['file'] );
+				$this->assertSame( str_replace( '.jpg', '.webp', $properties['file'] ), $properties['sources']['image/webp']['file'] );
+				$this->assertFileNameIsEdited( $properties['sources']['image/jpeg']['file'] );
+				$this->assertFileNameIsEdited( $properties['sources']['image/webp']['file'] );
+			} else {
+				$this->assertFileNameIsNotEdited( $properties['sources']['image/jpeg']['file'] );
+				$this->assertFileNameIsNotEdited( $properties['sources']['image/webp']['file'] );
+			}
 		}
 	}
 
@@ -191,6 +198,10 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 
+		foreach ( $updated_metadata['sources'] as $properties ) {
+			$this->assertFileNameIsEdited( $properties['file'] );
+		}
+
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 		$this->assertIsArray( $backup_sizes );
 		$this->assertArrayNotHasKey( 'thumbnail-orig', $backup_sizes, 'The thumbnail-orig was stored in the back up' );
@@ -200,6 +211,60 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 				continue;
 			}
 			$this->assertArrayHasKey( 'sources', $properties, "The '{$size_name}' does not have the sources." );
+		}
+	}
+
+	/**
+	 * Use the attached image when updating subsequent images not the original version
+	 *
+	 * @test
+	 */
+	public function it_should_use_the_attached_image_when_updating_subsequent_images_not_the_original_version() {
+		// The leafs image is 1080 pixels wide with this filter we ensure a -scaled version is created for this test.
+		add_filter(
+			'big_image_size_threshold',
+			function () {
+				// Due to the largest image size is 1024 and the image is 1080x720, 1050 is a good spot to create a scaled size for all images sizes.
+				return 1050;
+			}
+		);
+
+		$attachment_id = $this->factory->attachment->create_upload_object(
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+		);
+
+		$this->assertNotSame( wp_get_original_image_path( $attachment_id ), get_attached_file( $attachment_id ) );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->flip_right()->all_except_thumbnail()->save();
+
+		$this->assertTrue( $editor->success() );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		$this->assertArrayHasKey( 'original_image', $metadata );
+		$this->assertArrayHasKey( 'sources', $metadata );
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+
+		foreach ( $metadata['sources'] as $properties ) {
+			$this->assertFileNameIsEdited( $properties['file'] );
+			$this->assertStringContainsString( '-scaled-', $properties['file'] );
+		}
+
+		$this->assertArrayHasKey( 'sizes', $metadata );
+		foreach ( $metadata['sizes'] as $size_name => $properties ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+			foreach ( $properties['sources'] as $mime_type => $values ) {
+				if ( 'thumbnail' === $size_name ) {
+					$this->assertFileNameIsNotEdited( $values['file'], "'{$size_name}' is not valid." );
+					$this->assertStringNotContainsString( '-scaled-', $values['file'] );
+				} else {
+					$this->assertFileNameIsEdited( $values['file'], "'{$size_name}' is not valid." );
+					$this->assertStringContainsString( '-scaled-', $values['file'] );
+				}
+			}
 		}
 	}
 
