@@ -141,7 +141,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $or
 
 			foreach ( $mime_transforms as $targeted_mime ) {
 				if ( $targeted_mime === $original_mime_type ) {
-					// If the target is `thumbnail` make sure is the only selected size.
+					// If the target is `thumbnail` make sure it is the only selected size.
 					if ( 'thumbnail' === $target ) {
 						if ( isset( $metadata['sizes']['thumbnail'] ) ) {
 							$subsized_images[ $targeted_mime ] = array( 'thumbnail' => $metadata['sizes']['thumbnail'] );
