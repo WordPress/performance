@@ -103,7 +103,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 	$callback_executed = false;
 	add_filter(
 		'wp_update_attachment_metadata',
-		function ( $metadata, $post_meta_id ) use ( $post_id, $file_path, $original_mime_type, $editor, $mime_transforms, &$callback_executed ) {
+		function ( $metadata, $post_meta_id ) use ( $post_id, $file_path, $mime_type, $editor, $mime_transforms, &$callback_executed ) {
 			if ( $post_meta_id !== $post_id ) {
 				return $metadata;
 			}
@@ -141,7 +141,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 			$subsized_images    = array();
 
 			foreach ( $mime_transforms as $targeted_mime ) {
-				if ( $targeted_mime === $original_mime_type ) {
+				if ( $targeted_mime === $mime_type ) {
 					// If the target is `thumbnail` make sure it is the only selected size.
 					if ( 'thumbnail' === $target ) {
 						if ( isset( $metadata['sizes']['thumbnail'] ) ) {
@@ -172,10 +172,10 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 				// If the target is `thumbnail` make sure only that size is generated.
 				if ( 'thumbnail' === $target ) {
-					if ( ! isset( $subsized_images[ $original_mime_type ]['thumbnail']['file'] ) ) {
+					if ( ! isset( $subsized_images[ $mime_type ]['thumbnail']['file'] ) ) {
 						continue;
 					}
-					$thumbnail_file = $subsized_images[ $original_mime_type ]['thumbnail']['file'];
+					$thumbnail_file = $subsized_images[ $mime_type ]['thumbnail']['file'];
 					$image_path     = path_join( $original_directory, $thumbnail_file );
 					$editor         = wp_get_image_editor( $image_path, array( 'mime_type' => $targeted_mime ) );
 
