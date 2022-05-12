@@ -81,25 +81,25 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_i
  *
  * @since 1.0.0
  *
- * @param bool|null       $override           Value to return instead of saving. Default null.
- * @param string          $file_path          Name of the file to be saved.
- * @param WP_Image_Editor $editor             The image editor instance.
- * @param string          $original_mime_type The mime type of the image.
- * @param int             $post_id            Attachment post ID.
+ * @param bool|null       $override  Value to return instead of saving. Default null.
+ * @param string          $file_path Name of the file to be saved.
+ * @param WP_Image_Editor $editor    The image editor instance.
+ * @param string          $mime_type The mime type of the image.
+ * @param int             $post_id   Attachment post ID.
  * @return bool|null Potentially modified $override value.
  */
-function webp_uploads_update_image_onchange( $override, $file_path, $editor, $original_mime_type, $post_id ) {
+function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mime_type, $post_id ) {
 	if ( null !== $override ) {
 		return $override;
 	}
 
 	$transforms = webp_uploads_get_upload_image_mime_transforms();
-	if ( empty( $transforms[ $original_mime_type ] ) ) {
+	if ( empty( $transforms[ $mime_type ] ) ) {
 		return $override;
 	}
 
-	$mime_transforms = $transforms[ $original_mime_type ];
-	// This variable allows to unhook the logic from within the closure without the need fo a function name.
+	$mime_transforms = $transforms[ $mime_type ];
+	// This variable allows to unhook the logic from within the closure without the need for a function name.
 	$callback_executed = false;
 	add_filter(
 		'wp_update_attachment_metadata',
