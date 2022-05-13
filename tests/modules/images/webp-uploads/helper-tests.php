@@ -270,7 +270,33 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'filesize', $result );
 		$this->assertArrayHasKey( 'file', $result );
 		$this->assertStringEndsWith( 'image.webp', $result['file'] );
-		$this->assertFileExists( '/tmp/image.webp' );
+	}
+
+	/**
+	 * Tests the webp_uploads_pre_generate_additional_image_source filter returning filesize property.
+	 *
+	 * @test
+	 */
+	public function it_should_return_an_error_when_filter_webp_uploads_pre_generate_additional_image_source_returns_filesize() {
+		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
+
+		add_filter(
+			'webp_uploads_pre_generate_additional_image_source',
+			function () {
+				return array(
+					'file'     => 'image.webp',
+					'filesize' => 777,
+				);
+			}
+		);
+
+		$result = webp_uploads_generate_additional_image_source( 0, 'medium', array(), 'image/webp', '/tmp/image.jpg' );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'filesize', $result );
+		$this->assertEquals( 777, $result['filesize'] );
+		$this->assertArrayHasKey( 'file', $result );
+		$this->assertStringEndsWith( 'image.webp', $result['file'] );
 	}
 
 	/**
@@ -281,8 +307,6 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	public function it_should_return_an_error_when_filter_webp_uploads_pre_generate_additional_image_source_returns_wp_error() {
 		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
 
-		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
-
 		add_filter(
 			'webp_uploads_pre_generate_additional_image_source',
 			function () {
@@ -290,14 +314,9 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 			}
 		);
 
-		$size_data = array(
-			'width'  => 300,
-			'height' => 300,
-			'crop'   => true,
-		);
-
-		$result = webp_uploads_generate_additional_image_source( $attachment_id, 'medium', $size_data, 'image/webp', '/tmp/image.jpg' );
+		$result = webp_uploads_generate_additional_image_source( 0, 'medium', array(), 'image/webp', '/tmp/image.jpg' );
 		$this->assertWPError( $result );
 		$this->assertSame( 'image_additional_generated_error', $result->get_error_code() );
 	}
+
 }
