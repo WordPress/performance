@@ -67,7 +67,6 @@ function webp_uploads_get_upload_image_mime_transforms() {
  * @return array|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
  */
 function webp_uploads_generate_additional_image_source( $attachment_id, $image_size, array $size_data, $mime, $destination_file_name = null ) {
-
 	/**
 	 * Filter to allow the generation of additional image sources, in which a defined mime type
 	 * can be transformed and create additional mime types for the file.
@@ -84,19 +83,23 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	 * @return array|null|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
 	 */
 	$image = apply_filters( 'webp_uploads_pre_generate_additional_image_source', null, $attachment_id, $image_size, $size_data, $mime );
-
 	if ( is_wp_error( $image ) ) {
 		return $image;
 	}
 
 	if (
-		is_array( $image )
-		&& ! empty( $image['file'] )
-		&& ! empty( $image['path'] )
+		is_array( $image ) &&
+		! empty( $image['file'] ) &&
+		(
+			! empty( $image['path'] ) ||
+			! empty( $image['filesize'] )
+		)
 	) {
 		return array(
 			'file'     => $image['file'],
-			'filesize' => filesize( $image['path'] ),
+			'filesize' => ! empty( $image['filesize'] )
+				? $image['filesize']
+				: filesize( $image['path'] ),
 		);
 	}
 
@@ -110,14 +113,11 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	}
 
 	$image_path = wp_get_original_image_path( $attachment_id );
-
-	// File does not exist.
 	if ( ! file_exists( $image_path ) ) {
 		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'performance-lab' ) );
 	}
 
 	$editor = wp_get_image_editor( $image_path, array( 'mime_type' => $mime ) );
-
 	if ( is_wp_error( $editor ) ) {
 		return $editor;
 	}
@@ -125,7 +125,6 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	$height = isset( $size_data['height'] ) ? (int) $size_data['height'] : 0;
 	$width  = isset( $size_data['width'] ) ? (int) $size_data['width'] : 0;
 	$crop   = isset( $size_data['crop'] ) && $size_data['crop'];
-
 	if ( $width <= 0 && $height <= 0 ) {
 		return new WP_Error( 'image_wrong_dimensions', __( 'At least one of the dimensions must be a positive number.', 'performance-lab' ) );
 	}
@@ -144,7 +143,6 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	}
 
 	$image = $editor->save( $destination_file_name, $mime );
-
 	if ( is_wp_error( $image ) ) {
 		return $image;
 	}
