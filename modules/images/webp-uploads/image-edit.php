@@ -336,8 +336,8 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
 				continue;
 			}
 
-			preg_match( '/-e(\d{13})/', $properties['file'], $matches );
-			if ( empty( $matches ) || count( $matches ) < 2 || empty( $matches[1] ) ) {
+			$matches = array();
+			if ( ! preg_match( '/-e(\d{13})/', $properties['file'], $matches ) ) {
 				continue;
 			}
 
