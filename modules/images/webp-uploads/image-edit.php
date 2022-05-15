@@ -77,7 +77,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 	}
 
 	$mime_transforms = $transforms[ $mime_type ];
-	// This variable allows to unhook the logic from within the closure without the need fo a function name.
+	// This variable allows to unhook the logic from within the closure without the need for a function name.
 	$callback_executed = false;
 	add_filter(
 		'wp_update_attachment_metadata',

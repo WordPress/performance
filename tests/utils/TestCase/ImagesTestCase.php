@@ -9,10 +9,10 @@ use WP_UnitTestCase;
 /**
  * A test case for image attachments.
  *
- * @method void assertImageHasSource( $attachment_id, $mime_type, $message ) Asserts that the image has the appropriate source.
- * @method void assertImageHasSizeSource( $attachment_id, $size, $mime_type, $message ) Asserts that the image has the appropriate source for the subsize.
- * @method void assertImageNotHasSource( $attachment_id, $mime_type, $message ) Asserts that the image doesn't have the appropriate source.
- * @method void assertImageNotHasSizeSource( $attachment_id, $size, $mime_type, $message ) Asserts that the image doesn't have the appropriate source for the subsize.
+ * @method void assertImageHasSource( int $attachment_id, string $mime_type, string $message = '' ) Asserts that the image has the appropriate source.
+ * @method void assertImageHasSizeSource( int $attachment_id, string $size_name, string $mime_type, string $message = '' ) Asserts that the image has the appropriate source for the subsize.
+ * @method void assertImageNotHasSource( int $attachment_id, string $mime_type, string $message ) Asserts that the image doesn't have the appropriate source.
+ * @method void assertImageNotHasSizeSource( int $attachment_id, string $size_name, string $mime_type, string $message = '' ) Asserts that the image doesn't have the appropriate source for the subsize.
  * @method void assertFileNameIsEdited( string $filename, string $message = '' ) Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
  * @method void assertFileNameIsNotEdited( string $filename, string $message = '' ) Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
  * @method void assertSizeNameIsHashed( string $size_name, string $hashed_size_name, string $message = '' ) Asserts that the provided size name is an edited name that contains a hash with digits.
@@ -25,8 +25,8 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @since 1.0.0
 	 *
 	 * @param int    $attachment_id The attachment ID.
-	 * @param string $mime_type The mime type of the source.
-	 * @param string $message An optional message to show on failure.
+	 * @param string $mime_type     The mime type of the source.
+	 * @param string $message       An optional message to show on failure.
 	 */
 	public static function assertImageHasSource( $attachment_id, $mime_type, $message = '' ) {
 		$constraint = new ImageHasSource( $mime_type );
@@ -39,8 +39,8 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @since 1.0.0
 	 *
 	 * @param int    $attachment_id The attachment ID.
-	 * @param string $mime_type The mime type of the source.
-	 * @param string $message An optional message to show on failure.
+	 * @param string $mime_type     The mime type of the source.
+	 * @param string $message       An optional message to show on failure.
 	 */
 	public static function assertImageNotHasSource( $attachment_id, $mime_type, $message = '' ) {
 		$constraint = new ImageHasSource( $mime_type );
@@ -54,12 +54,12 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @since 1.0.0
 	 *
 	 * @param int    $attachment_id The attachment ID.
-	 * @param string $size The subsize name.
-	 * @param string $mime_type The mime type of the source.
-	 * @param string $message An optional message to show on failure.
+	 * @param string $size_name     The subsize name.
+	 * @param string $mime_type     The mime type of the source.
+	 * @param string $message       An optional message to show on failure.
 	 */
-	public static function assertImageHasSizeSource( $attachment_id, $size, $mime_type, $message = '' ) {
-		$constraint = new ImageHasSizeSource( $mime_type, $size );
+	public static function assertImageHasSizeSource( $attachment_id, $size_name, $mime_type, $message = '' ) {
+		$constraint = new ImageHasSizeSource( $mime_type, $size_name );
 		self::assertThat( $attachment_id, $constraint, $message );
 	}
 
@@ -69,12 +69,12 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @since 1.0.0
 	 *
 	 * @param int    $attachment_id The attachment ID.
-	 * @param string $size The subsize name.
-	 * @param string $mime_type The mime type of the source.
-	 * @param string $message An optional message to show on failure.
+	 * @param string $size_name     The subsize name.
+	 * @param string $mime_type     The mime type of the source.
+	 * @param string $message       An optional message to show on failure.
 	 */
-	public static function assertImageNotHasSizeSource( $attachment_id, $size, $mime_type, $message = '' ) {
-		$constraint = new ImageHasSizeSource( $mime_type, $size );
+	public static function assertImageNotHasSizeSource( $attachment_id, $size_name, $mime_type, $message = '' ) {
+		$constraint = new ImageHasSizeSource( $mime_type, $size_name );
 		$constraint->isNot();
 		self::assertThat( $attachment_id, $constraint, $message );
 	}
@@ -106,7 +106,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 *
 	 * @param string $size_name        The size name we are looking for.
 	 * @param string $hashed_size_name The current size name we are comparing against.
-	 * @param string $message The Error message used to display when the assertion fails.
+	 * @param string $message          The Error message used to display when the assertion fails.
 	 * @return void
 	 */
 	public static function assertSizeNameIsHashed( $size_name, $hashed_size_name, $message = '' ) {
