@@ -56,5 +56,5 @@
 /tests/testdata/modules/object-cache/persistent-object-cache-health-check   @tillkruss @spacedmonkey
 
 # Module: Audit Enqueued Assets
-/modules/site-health/audit-full-page-cache                                  @manuelRod
-/tests/modules/site-health/audit-full-page-cache                            @manuelRod
+/modules/site-health/audit-full-page-cache                                  @manuelRod @westonruter
+/tests/modules/site-health/audit-full-page-cache                            @manuelRod @westonruter
