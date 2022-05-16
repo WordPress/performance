@@ -2,9 +2,9 @@
 
 Contributors:      wordpressdotorg
 Requires at least: 5.8
-Tested up to:      5.9
+Tested up to:      6.0
 Requires PHP:      5.6
-Stable tag:        1.0.0
+Stable tag:        1.1.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
