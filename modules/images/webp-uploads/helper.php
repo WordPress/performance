@@ -74,7 +74,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	 *
 	 * Returning an image data array or WP_Error here effectively short-circuits the default logic to generate the image source.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.1.0
 	 *
 	 * @param array|null|WP_Error $image         Image data {'path'=>string, 'file'=>string, 'width'=>int, 'height'=>int, 'mime-type'=>string} or null or WP_Error.
 	 * @param int                 $attachment_id The ID of the attachment from where this image would be created.

@@ -142,7 +142,7 @@ function perflab_get_active_modules() {
  *
  * This attribute is then used in {@see perflab_render_generator()}.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  */
 function perflab_get_generator_content() {
 	$active_modules = perflab_get_active_modules();
@@ -159,7 +159,7 @@ function perflab_get_generator_content() {
  *
  * See {@see 'wp_head'}.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  */
 function perflab_render_generator() {
 	$content = perflab_get_generator_content();
