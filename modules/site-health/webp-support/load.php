@@ -18,7 +18,7 @@
  */
 function webp_uploads_add_is_webp_supported_test( $tests ) {
 	$tests['direct']['webp_supported'] = array(
-		'label' => esc_html__( 'WebP Support', 'performance-lab' ),
+		'label' => __( 'WebP Support', 'performance-lab' ),
 		'test'  => 'webp_uploads_check_webp_supported_test',
 	);
 	return $tests;
