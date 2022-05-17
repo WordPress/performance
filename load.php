@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.
  * Requires at least: 5.8
  * Requires PHP: 5.6
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: WordPress Performance Group
  * Author URI: https://make.wordpress.org/core/tag/performance/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.0.0' );
+define( 'PERFLAB_VERSION', '1.1.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
@@ -142,7 +142,7 @@ function perflab_get_active_modules() {
  *
  * This attribute is then used in {@see perflab_render_generator()}.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  */
 function perflab_get_generator_content() {
 	$active_modules = perflab_get_active_modules();
@@ -159,7 +159,7 @@ function perflab_get_generator_content() {
  *
  * See {@see 'wp_head'}.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  */
 function perflab_render_generator() {
 	$content = perflab_get_generator_content();
