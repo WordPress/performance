@@ -83,10 +83,11 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 		if ( empty( $attr['class'] ) ) {
 			$attr['class'] = '';
 		}
-		foreach ( $extra_class as $class ) {
-			if ( ! array_intersect( explode( ' ', $attr['class'] ), $class ) ) {
-				$attr['class'] .= ' ' . $class;
-			}
+	}
+	
+	foreach ( $extra_class as $class ) {
+		if ( ! array_intersect( explode( ' ', $attr['class'] ), $class ) ) {
+			$attr['class'] .= ' ' . $class;
 		}
 	}
 
