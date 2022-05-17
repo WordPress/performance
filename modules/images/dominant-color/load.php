@@ -63,15 +63,14 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 			if ( empty( $attr['class'] ) ) {
 				$attr['class'] = '';
 			}
-			$class         = $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent';
+			$class          = $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent';
 			$attr['class'] .= $class;
 		}
-
 	}
 
 	if ( ! empty( $image_meta['dominant_color'] ) ) {
 		$attr['data-dominant-color'] = $image_meta['dominant_color'];
-		$attr['style']               .= '--dominant-color: #' . $image_meta['dominant_color'] . ';';
+		$attr['style']              .= '--dominant-color: #' . $image_meta['dominant_color'] . ';';
 	}
 
 	return $attr;
@@ -118,16 +117,16 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	$extra_class = '';
 
 	if ( ! empty( $image_meta['dominant_color'] ) ) {
-		$data  .= sprintf( ' data-dominantColor="%s"', $image_meta['dominant_color'] );
+		$data .= sprintf( ' data-dominantColor="%s"', $image_meta['dominant_color'] );
 		$style = ' style="--dominant-color: #' . $image_meta['dominant_color'] . ';" ';
 	}
 
 	if ( isset( $image_meta['has_transparency'] ) ) {
 		if ( $image_meta['has_transparency'] ) {
-			$data        .= ' data-has-transparency="true" ';
+			$data       .= ' data-has-transparency="true" ';
 			$extra_class = 'has-transparency';
 		} else {
-			$data        .= ' data-has-transparency="false" ';
+			$data       .= ' data-has-transparency="false" ';
 			$extra_class = 'not-transparent';
 		}
 	}
@@ -136,7 +135,6 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	if ( ! empty( $extra_class ) ) {
 		$filtered_image = str_replace( 'class="', 'class="' . $extra_class . ' ', $filtered_image );
 	}
-
 
 	return $filtered_image;
 }
@@ -271,7 +269,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 		return $editor;
 	}
 	if ( ! method_exists( $editor, 'dominant_color_get_dominant_color' ) ) {
-		return new WP_Error( 'unable_to_find_method', __( 'Unable to find dominant_color_get_dominant_color method', 'performance' ) );
+		return new WP_Error( 'unable_to_find_method', __( 'Unable to find dominant_color_get_dominant_color method', 'performance-lab' ) );
 	}
 
 	$dominant_color = $editor->dominant_color_get_dominant_color();
@@ -300,7 +298,7 @@ function dominant_color_get_has_transparency( $id ) {
 		return $editor;
 	}
 	if ( ! method_exists( $editor, 'dominant_color_get_has_transparency' ) ) {
-		return new WP_Error( 'unable_to_find_method', __( 'Unable to find dominant_color_get_has_transparency method', 'performance' ) );
+		return new WP_Error( 'unable_to_find_method', __( 'Unable to find dominant_color_get_has_transparency method', 'performance-lab' ) );
 	}
 	$has_transparency = $editor->dominant_color_get_has_transparency();
 	if ( is_wp_error( $has_transparency ) ) {

@@ -31,10 +31,10 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 
 		$color = dominant_color_get_dominant_color( $attachment_id );
-		if( ! $is_wp_error ) {
+		if ( ! $is_wp_error ) {
 			$this->assertContains( $color, $expected_color );
-		} else{
-			$this->assertInstanceOf('WP_Error', $color );
+		} else {
+			$this->assertInstanceOf( 'WP_Error', $color );
 		}
 	}
 
