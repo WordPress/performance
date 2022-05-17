@@ -13,7 +13,7 @@
  * WordPress Image Editor Class for Image Manipulation through Imagick
  * with dominant color detection
  *
- * @since 6.x
+ * @since n.e.x.t
  *
  * @see WP_Image_Editor
  */
