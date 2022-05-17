@@ -24,7 +24,7 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 
 	$dominant_color = dominant_color_get_dominant_color( $attachment_id );
 
-	if ( ! is_wp_error( $dominant_color ) && ! empty( $dominant_color ) ) {
+	if ( is_string( $dominant_color ) && ! empty( $dominant_color ) ) {
 		$metadata['dominant_color'] = $dominant_color;
 	}
 
@@ -53,15 +53,11 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 		return $attr;
 	}
 
-	if ( empty( $attr['style'] ) ) {
-		$attr['style'] = '';
-	}
-
 	if ( isset( $image_meta['has_transparency'] ) ) {
 		$attr['data-has-transparency'] = $image_meta['has_transparency'] ? 'true' : 'false';
-    
+
 		$class = $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent';
-    if ( empty( $attr['class'] ) ) {
+		if ( empty( $attr['class'] ) ) {
 			$attr['class'] = '';
 		}
 		$attr['class'] .= $class;
@@ -69,7 +65,10 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 
 	if ( ! empty( $image_meta['dominant_color'] ) ) {
 		$attr['data-dominant-color'] = $image_meta['dominant_color'];
-		$attr['style']              .= '--dominant-color: #' . $image_meta['dominant_color'] . ';';
+		if ( empty( $attr['style'] ) ) {
+			$attr['style'] = '';
+		}
+		$attr['style'] .= '--dominant-color: #' . $image_meta['dominant_color'] . ';';
 	}
 
 	return $attr;
@@ -121,16 +120,14 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	}
 
 	if ( isset( $image_meta['has_transparency'] ) ) {
-		if ( $image_meta['has_transparency'] ) {
-			$data       .= ' data-has-transparency="true" ';
-			$extra_class = 'has-transparency';
-		} else {
-			$data       .= ' data-has-transparency="false" ';
-			$extra_class = 'not-transparent';
-		}
+		$transparency = $image_meta['has_transparency'] ? 'true' : 'false';
+		$data        .= sprintf( ' data-has-transparency="%s"', $transparency );
+		$extra_class  = $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent';
 	}
 
-	$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
+	if ( ! empty( $data ) || ! empty( $style ) ) {
+		$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
+	}
 	if ( ! empty( $extra_class ) ) {
 		$filtered_image = str_replace( 'class="', 'class="' . $extra_class . ' ', $filtered_image );
 	}
@@ -255,8 +252,8 @@ function dominant_color_set_image_editors() {
  *
  * @since n.e.x.t
  *
- * @param integer $attachment_id the image id.
- * @return string|WP_Error the dominant color of the image. or WP_Error on error.
+ * @param int $attachment_id the image id.
+ * @return string|WP_Error the dominant color of the image or WP_Error on error.
  */
 function dominant_color_get_dominant_color( $attachment_id ) {
 	$file = get_attached_file( $attachment_id );
@@ -284,8 +281,8 @@ function dominant_color_get_dominant_color( $attachment_id ) {
  *
  * @since n.e.x.t
  *
- * @param integer $id the attachment id.
- * @return bool|WP_Error True if the color has transparency, false if it doesn't, WP_Error on error..
+ * @param int $id the attachment id.
+ * @return bool|WP_Error True if the color has transparency or WP_Error on error.
  */
 function dominant_color_get_has_transparency( $id ) {
 	$file = get_attached_file( $id );
