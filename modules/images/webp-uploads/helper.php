@@ -92,12 +92,12 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 		! empty( $image['file'] ) &&
 		(
 			! empty( $image['path'] ) ||
-			! empty( $image['filesize'] )
+			array_key_exists( 'filesize', $image )
 		)
 	) {
 		return array(
 			'file'     => $image['file'],
-			'filesize' => ! empty( $image['filesize'] )
+			'filesize' => array_key_exists( 'filesize', $image )
 				? $image['filesize']
 				: filesize( $image['path'] ),
 		);
