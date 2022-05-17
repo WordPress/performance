@@ -15,7 +15,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 	 *
 	 * @covers ::dominant_color_metadata
 	 */
-	public function test_dominant_color_metadata( $image_path, $expected_color, $expected_transparency, $color_is_light ) {
+	public function test_dominant_color_metadata( $image_path, $expected_color, $expected_transparency ) {
 		// Non existing attachment.
 		$dominant_color_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $dominant_color_metadata );
@@ -35,7 +35,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 	 *
 	 * @covers ::has_transparency_metadata
 	 */
-	public function test_has_transparency_metadata( $image_path, $expected_color, $expected_transparency, $color_is_light ) {
+	public function test_has_transparency_metadata( $image_path, $expected_color, $expected_transparency ) {
 		// Non existing attachment.
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $transparency_metadata );
@@ -57,27 +57,18 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 	 *
 	 * @covers ::dominant_color_img_tag_add_dominant_color
 	 */
-	public function test_tag_add_adjust_to_image_attributes( $image_path, $expected_color, $expected_transparency, $color_is_light ) {
+	public function test_tag_add_adjust_to_image_attributes( $image_path, $expected_color, $expected_transparency ) {
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
-		$image_meta    = wp_get_attachment_metadata( $attachment_id );
+		wp_get_attachment_metadata( $attachment_id );
 
 		// Testing tag_add_adjust() with image being lazy load.
 		$filtered_image_mock_lazy_load = '<img loading="lazy" width="1024" height="727" class="test" src="http://localhost:8888/wp-content/uploads/2022/03/test.png" />';
 
-		if ( isset( $image_meta['dominant_color'] ) ) {
-			$filtered_image_tags_added = dominant_color_img_tag_add_dominant_color( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
+		$filtered_image_tags_added = dominant_color_img_tag_add_dominant_color( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
 
-			$this->assertStringContainsString( 'data-dominantColor="' . $expected_color . '"', $filtered_image_tags_added );
-			$this->assertStringContainsString( 'data-has-transparency="' . json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
-			$this->assertStringContainsString( 'style="--dominant-color: #' . $expected_color . ';"', $filtered_image_tags_added );
-
-			// Testing tag_add_adjust() without lazy load.
-			$filtered_image_mock_not_lazy_load = '<img width="1024" height="727" src="http://localhost:8888/wp-content/uploads/2022/03/test.png" />';
-			$filtered_image_tags_added         = dominant_color_img_tag_add_dominant_color( $filtered_image_mock_not_lazy_load, 'the_content', $attachment_id );
-			$this->assertStringContainsString( 'data-dominantColor="' . $expected_color . '"', $filtered_image_tags_added );
-			$this->assertStringContainsString( 'data-has-transparency="' . json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
-			$this->assertStringNotContainsString( 'style="--dominant-color:', $filtered_image_tags_added );
-		}
+		$this->assertStringContainsString( 'data-dominantColor="' . $expected_color . '"', $filtered_image_tags_added );
+		$this->assertStringContainsString( 'data-has-transparency="' . json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
+		$this->assertStringContainsString( 'style="--dominant-color: #' . $expected_color . ';"', $filtered_image_tags_added );
 
 		// Deactivate filter.
 		add_filter( 'dominant_color_img_tag_add_dominant_color', '__return_false' );
@@ -96,13 +87,11 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/white.jpg',
 				'expected_color'        => 'ffffff',
 				'expected_transparency' => false,
-				'color_is_light'        => true,
 			),
 			'trans4_gif' => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.gif',
 				'expected_color'        => '133f00',
 				'expected_transparency' => true,
-				'color_is_light'        => false,
 			),
 		);
 	}
