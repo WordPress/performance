@@ -90,7 +90,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
 		$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
-		$image       = webp_uploads_generate_additional_image_source( $attachment_id, $original_size_data, $targeted_mime, $destination );
+		$image       = webp_uploads_generate_additional_image_source( $attachment_id, 'full', $original_size_data, $targeted_mime, $destination );
 
 		if ( is_wp_error( $image ) ) {
 			continue;
@@ -493,7 +493,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 			 *
 			 * Altering the $image tag through this filter effectively short-circuits the default replacement logic using the preferred MIME type.
 			 *
-			 * @since n.e.x.t
+			 * @since 1.1.0
 			 *
 			 * @param string $image         An <img> tag where the urls would be updated.
 			 * @param int    $attachment_id The ID of the attachment being modified.
@@ -562,7 +562,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
  * Updates the references of the featured image to the a new image format if available, in the same way it
  * occurs in the_content of a post.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  *
  * @param string $html          The current HTML markup of the featured image.
  * @param int    $post_id       The current post ID where the featured image is requested.

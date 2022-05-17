@@ -112,11 +112,11 @@ add_action( 'wp_footer', 'perflab_aea_audit_enqueued_styles', PHP_INT_MAX );
  */
 function perflab_aea_add_enqueued_assets_test( $tests ) {
 	$tests['direct']['enqueued_js_assets']  = array(
-		'label' => esc_html__( 'JS assets', 'performance-lab' ),
+		'label' => __( 'JS assets', 'performance-lab' ),
 		'test'  => 'perflab_aea_enqueued_js_assets_test',
 	);
 	$tests['direct']['enqueued_css_assets'] = array(
-		'label' => esc_html__( 'CSS assets', 'performance-lab' ),
+		'label' => __( 'CSS assets', 'performance-lab' ),
 		'test'  => 'perflab_aea_enqueued_css_assets_test',
 	);
 

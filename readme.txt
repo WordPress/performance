@@ -2,9 +2,9 @@
 
 Contributors:      wordpressdotorg
 Requires at least: 5.8
-Tested up to:      5.9
+Tested up to:      6.0
 Requires PHP:      5.6
-Stable tag:        1.0.0
+Stable tag:        1.1.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -18,10 +18,10 @@ The Performance Lab plugin is a collection of modules focused on enhancing perfo
 Currently the plugin includes the following performance modules:
 
 * **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
-* **Persistent Object Cache Health Check:** Adds a persistent object cache check for sites with non-trivial amounts of data in Site Health status.
+* **WebP Support:** Adds a WebP support check in Site Health status.
 * **Audit Autoloaded Options:** Adds a check for autoloaded options in Site Health status.
 * **Audit Enqueued Assets:** Adds a CSS and JS resource check in Site Health status.
-* **WebP Support:** Adds a WebP support check in Site Health status.
+* **Persistent Object Cache Health Check:** Adds a persistent object cache check for sites with non-trivial amounts of data in Site Health status.
 
 == Installation ==
 
@@ -65,6 +65,26 @@ Contributions welcome! There are several ways to contribute:
 * Join the weekly chat (Tuesdays at 16:00 UTC) in the [#performance channel on Slack](https://wordpress.slack.com/archives/performance)
 
 == Changelog ==
+
+= 1.1.0 =
+
+**Features**
+
+* Infrastructure: Add Performance Lab generator meta tag to `wp_head` output. ([322](https://github.com/WordPress/performance/pull/322))
+
+**Enhancements**
+
+* Images: Introduce filter `webp_uploads_pre_generate_additional_image_source` to short-circuit generating additional image sources on upload. ([318](https://github.com/WordPress/performance/pull/318))
+* Images: Introduce filter `webp_uploads_pre_replace_additional_image_source` to short-circuit replacing additional image sources in frontend content. ([319](https://github.com/WordPress/performance/pull/319))
+* Images: Refine logic to select smaller image file in the frontend based on `webp_uploads_prefer_smaller_image_file` filter. ([302](https://github.com/WordPress/performance/pull/302))
+* Images: Replace the featured image with WebP version when available. ([316](https://github.com/WordPress/performance/pull/316))
+* Site Health: Update Site Health Autoloaded options documentation link. ([313](https://github.com/WordPress/performance/pull/313))
+* Infrastructure: Avoid unnecessarily early escape of Site Health check labels. ([332](https://github.com/WordPress/performance/pull/332))
+
+**Bug Fixes**
+
+* Object Cache: Correct label for persistent object cache Site Health check. ([329](https://github.com/WordPress/performance/pull/329))
+* Images: Only update the specified target images when an image is edited. ([301](https://github.com/WordPress/performance/pull/301))
 
 = 1.0.0 =
 
