@@ -58,14 +58,13 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 	}
 
 	if ( isset( $image_meta['has_transparency'] ) ) {
-		$attr['style'] .= ' --has-transparency: ' . $image_meta['has_transparency'] . '; ';
-		if ( $image_meta['has_transparency'] ) {
-			if ( empty( $attr['class'] ) ) {
-				$attr['class'] = '';
-			}
-			$class          = $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent';
-			$attr['class'] .= $class;
+		$attr['data-has-transparency'] = $image_meta['has_transparency'] ? 'true' : 'false';
+    
+		$class = $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent';
+    if ( empty( $attr['class'] ) ) {
+			$attr['class'] = '';
 		}
+		$attr['class'] .= $class;
 	}
 
 	if ( ! empty( $image_meta['dominant_color'] ) ) {
