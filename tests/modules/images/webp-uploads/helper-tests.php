@@ -277,7 +277,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_an_error_when_filter_webp_uploads_pre_generate_additional_image_source_returns_filesize() {
+	public function it_should_use_filesize_when_filter_webp_uploads_pre_generate_additional_image_source_returns_filesize() {
 		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
 
 		add_filter(
