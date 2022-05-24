@@ -422,7 +422,7 @@ function webp_uploads_update_image_references( $content ) {
 
 		if ( $attachment_id !== $updated_attachment_id ) {
 			$update_class_name = preg_replace( '/wp-image-([\d]+)/i', sprintf( 'wp-image-%d', $updated_attachment_id ), $img );
-			$content = str_replace( $img, webp_uploads_img_tag_update_mime_type( $update_class_name, 'the_content', $updated_attachment_id ), $content );
+			$content           = str_replace( $img, webp_uploads_img_tag_update_mime_type( $update_class_name, 'the_content', $updated_attachment_id ), $content );
 		} else {
 			$content = str_replace( $img, webp_uploads_img_tag_update_mime_type( $img, 'the_content', $attachment_id ), $content );
 		}
