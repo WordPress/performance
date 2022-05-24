@@ -573,3 +573,46 @@ function webp_uploads_update_featured_image( $html, $post_id, $attachment_id ) {
 	return webp_uploads_img_tag_update_mime_type( $html, 'post_thumbnail_html', $attachment_id );
 }
 add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );
+
+/**
+ * Adds webp-hero polyfill.
+ *
+ * @since n.e.x.t
+ */
+function webp_uploads_wepb_hero_polyfill() {
+	?>
+	<script>
+		// 1. Doesn't work for lazyloaded images
+		// 2. Doesn't work for SPA or dynamically loaded HTML content
+		// 3. Doesn't work with srcset images
+		// 4. Doesn't work with picture elements
+
+		( function() {
+			var bundle = document.createElement('script');
+			bundle.src = 'https://unpkg.com/webp-hero@0.0.2/dist-cjs/webp-hero.bundle.js';
+			bundle.addEventListener( 'load', function() {
+				var webpMachine = new webpHero.WebpMachine();
+				webpMachine.polyfillDocument();
+			} );
+
+			var polyfills = document.createElement('script');
+			polyfills.src = 'https://unpkg.com/webp-hero@0.0.2/dist-cjs/polyfills.js';
+			polyfills.addEventListener( 'load', function() {
+				document.body.appendChild( bundle );
+			} );
+
+			var img = new Image();
+			img.src = "data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA";
+			img.onerror = function() {
+				document.body.appendChild( polyfills );
+			};
+			img.onload = function() {
+				if ( ! ( img.width > 0 && img.height > 0 ) ) {
+					document.body.appendChild( polyfills );
+				}
+			};
+		} )();
+	</script>
+	<?php
+}
+add_action( 'wp_footer', 'webp_uploads_wepb_hero_polyfill' );
