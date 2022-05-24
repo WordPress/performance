@@ -588,14 +588,13 @@ function webp_uploads_wepb_hero_polyfill() {
 		// 4. Doesn't work with picture elements
 
 		( function() {
-			var bundle = document.createElement('script');
+			var bundle = document.createElement( 'script' );
 			bundle.src = 'https://unpkg.com/webp-hero@0.0.2/dist-cjs/webp-hero.bundle.js';
 			bundle.addEventListener( 'load', function() {
-				var webpMachine = new webpHero.WebpMachine();
-				webpMachine.polyfillDocument();
+				( new webpHero.WebpMachine() ).polyfillDocument();
 			} );
 
-			var polyfills = document.createElement('script');
+			var polyfills = document.createElement( 'script' );
 			polyfills.src = 'https://unpkg.com/webp-hero@0.0.2/dist-cjs/polyfills.js';
 			polyfills.addEventListener( 'load', function() {
 				document.body.appendChild( bundle );
