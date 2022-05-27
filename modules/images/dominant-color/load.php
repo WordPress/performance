@@ -236,10 +236,10 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  */
 function dominant_color_set_image_editors() {
 	if ( ! class_exists( 'Dominant_Color_Image_Editor_GD' ) ) {
-		require_once 'class-dominant-color-image-editor-gd.php';
+		require_once __DIR__ . '/class-dominant-color-image-editor-gd.php';
 	}
 	if ( ! class_exists( 'Dominant_Color_Image_Editor_Imagick' ) ) {
-		require_once 'class-dominant-color-image-editor-imagick.php';
+		require_once __DIR__ . '/class-dominant-color-image-editor-imagick.php';
 	}
 
 	return array( 'Dominant_Color_Image_Editor_GD', 'Dominant_Color_Image_Editor_Imagick' );
