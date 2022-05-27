@@ -23,14 +23,12 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 	}
 
 	$dominant_color = dominant_color_get_dominant_color( $attachment_id );
-
-	if ( is_string( $dominant_color ) && ! empty( $dominant_color ) ) {
+	if ( ! is_wp_error( $dominant_color ) && ! empty( $dominant_color ) ) {
 		$metadata['dominant_color'] = $dominant_color;
 	}
 
 	$has_transparency = dominant_color_get_has_transparency( $attachment_id );
-
-	if ( is_bool( $has_transparency ) ) {
+	if ( ! is_wp_error( $has_transparency ) ) {
 		$metadata['has_transparency'] = $has_transparency;
 	}
 
