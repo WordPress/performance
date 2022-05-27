@@ -66,7 +66,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 
 		$filtered_image_tags_added = dominant_color_img_tag_add_dominant_color( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
 
-		$this->assertStringContainsString( 'data-dominantColor="' . $expected_color . '"', $filtered_image_tags_added );
+		$this->assertStringContainsString( 'data-dominant-color="' . $expected_color . '"', $filtered_image_tags_added );
 		$this->assertStringContainsString( 'data-has-transparency="' . json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
 		$this->assertStringContainsString( 'style="--dominant-color: #' . $expected_color . ';"', $filtered_image_tags_added );
 
