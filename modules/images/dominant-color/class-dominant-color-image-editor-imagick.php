@@ -26,7 +26,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 *
 	 * @return string|WP_Error hex color
 	 */
-	public function dominant_color_get_dominant_color() {
+	public function get_dominant_color() {
 
 		if ( ! $this->image ) {
 			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'performance-lab' ) );
@@ -56,7 +56,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 *
 	 * @return bool|WP_Error
 	 */
-	public function dominant_color_get_has_transparency() {
+	public function has_transparency() {
 
 		if ( ! $this->image ) {
 			return new WP_Error( 'image_editor_has_transparency_error_no_image', __( 'Transparency detection no image found.', 'performance-lab' ) );

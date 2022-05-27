@@ -24,7 +24,7 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers Dominant_Color_Image_Editor_GD::dominant_color_get_dominant_color
+	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
 	public function test_get_dominant_color( $image_path, $expected_color, $is_wp_error ) {
 
@@ -43,12 +43,12 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 	 *
 	 * @dataProvider provider_get_has_transparency
 	 *
-	 * @covers ::dominant_color_get_has_transparency
+	 * @covers ::dominant_color_has_transparency
 	 */
 	public function test_dominant_color_get_has_transparency( $image_path, $expected_tranasparency ) {
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 
-		$this->assertEquals( $expected_tranasparency, dominant_color_get_has_transparency( $attachment_id ) );
+		$this->assertEquals( $expected_tranasparency, dominant_color_has_transparency( $attachment_id ) );
 	}
 
 }

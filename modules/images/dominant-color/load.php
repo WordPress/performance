@@ -27,7 +27,7 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 		$metadata['dominant_color'] = $dominant_color;
 	}
 
-	$has_transparency = dominant_color_get_has_transparency( $attachment_id );
+	$has_transparency = dominant_color_has_transparency( $attachment_id );
 	if ( ! is_wp_error( $has_transparency ) ) {
 		$metadata['has_transparency'] = $has_transparency;
 	}
@@ -262,11 +262,11 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 	if ( is_wp_error( $editor ) ) {
 		return $editor;
 	}
-	if ( ! method_exists( $editor, 'dominant_color_get_dominant_color' ) ) {
-		return new WP_Error( 'unable_to_find_method', __( 'Unable to find dominant_color_get_dominant_color method', 'performance-lab' ) );
+	if ( ! method_exists( $editor, 'get_dominant_color' ) ) {
+		return new WP_Error( 'unable_to_find_method', __( 'Unable to find get_dominant_color method', 'performance-lab' ) );
 	}
 
-	$dominant_color = $editor->dominant_color_get_dominant_color();
+	$dominant_color = $editor->get_dominant_color();
 	if ( is_wp_error( $dominant_color ) ) {
 		return $dominant_color;
 	}
@@ -282,7 +282,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
  * @param int $id the attachment id.
  * @return bool|WP_Error True if the color has transparency or WP_Error on error.
  */
-function dominant_color_get_has_transparency( $id ) {
+function dominant_color_has_transparency( $id ) {
 	$file = get_attached_file( $id );
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 	$editor = wp_get_image_editor( $file );
@@ -291,10 +291,10 @@ function dominant_color_get_has_transparency( $id ) {
 	if ( is_wp_error( $editor ) ) {
 		return $editor;
 	}
-	if ( ! method_exists( $editor, 'dominant_color_get_has_transparency' ) ) {
-		return new WP_Error( 'unable_to_find_method', __( 'Unable to find dominant_color_get_has_transparency method', 'performance-lab' ) );
+	if ( ! method_exists( $editor, 'has_transparency' ) ) {
+		return new WP_Error( 'unable_to_find_method', __( 'Unable to find has_transparency method', 'performance-lab' ) );
 	}
-	$has_transparency = $editor->dominant_color_get_has_transparency();
+	$has_transparency = $editor->has_transparency();
 	if ( is_wp_error( $has_transparency ) ) {
 		return $has_transparency;
 	}
