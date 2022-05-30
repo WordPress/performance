@@ -69,7 +69,7 @@ function perflab_afpc_page_cache_test() {
 		$result['label']          = __( 'Unable to detect the presence of page caching', 'performance-lab' );
 		$result['status']         = 'recommended';
 		$error_info               = sprintf(
-		/* translators: 1 is error message, 2 is error code */
+			/* translators: 1 is error message, 2 is error code */
 			__( 'Unable to detect page caching due to possible loopback request problem. Please verify that the loopback request test is passing. Error: %1$s (Code: %2$s)', 'performance-lab' ),
 			$page_cache_detail->get_error_message(),
 			$page_cache_detail->get_error_code()
