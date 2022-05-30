@@ -37,7 +37,7 @@ add_filter( 'site_status_tests', 'perflab_afpc_add_full_page_cache_test' );
  *
  * @since n.e.x.t
  *
- * @return array
+ * @return array The test results.
  */
 function perflab_afpc_page_cache_test() {
 	$description  = '<p>' . __( 'Page caching enhances the speed and performance of your site by saving and serving static pages instead of calling for a page every time a user visits.', 'performance-lab' ) . '</p>';
