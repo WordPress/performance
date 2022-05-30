@@ -126,7 +126,7 @@ function perflab_afpc_page_cache_test() {
 		} else {
 			$headers_summary  = '<span class="dashicons dashicons-yes-alt"></span>';
 			$headers_summary .= sprintf(
-			/* translators: Placeholder is number of caching headers */
+				/* translators: Placeholder is number of caching headers */
 				_n(
 					' There was %d client caching response header detected: ',
 					' There were %d client caching response headers detected: ',
