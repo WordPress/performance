@@ -19,7 +19,7 @@ require_once __DIR__ . '/helper.php';
  * @since n.e.x.t
  *
  * @param array $tests Site Health Tests.
- * @return array
+ * @return array Modified Site Health tests including Page caching test.
  */
 function perflab_afpc_add_full_page_cache_test( $tests ) {
 	$tests['async']['perflab_page_cache'] = array(
