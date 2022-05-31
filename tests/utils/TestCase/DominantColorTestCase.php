@@ -118,12 +118,12 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'gif'         => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/earth.gif',
-				'expected_color' => array( '151517' ),
+				'expected_color' => array( '151517', '18161a' ),
 				'is_wp_error'    => false,
 			),
 			'webp'        => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp',
-				'expected_color' => array( 'c0bbb9' ),
+				'expected_color' => array( 'c5bec0' ),
 				'is_wp_error'    => false,
 			),
 		);

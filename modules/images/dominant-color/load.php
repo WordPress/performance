@@ -256,7 +256,7 @@ function dominant_color_set_image_editors() {
 function dominant_color_get_dominant_color( $attachment_id ) {
 	$file = wp_get_attachment_file_size( $attachment_id );
 	if ( ! $file ) {
-		return new WP_Error( 'unable_to_find_thumbnail', __( 'Unable to find thumbnail', 'performance-lab' ) );
+		$file = get_attached_file( $attachment_id );
 	}
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 	$editor = wp_get_image_editor( $file );
@@ -288,7 +288,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 function dominant_color_has_transparency( $attachment_id ) {
 	$file = wp_get_attachment_file_size( $attachment_id );
 	if ( ! $file ) {
-		return new WP_Error( 'unable_to_find_thumbnail', __( 'Unable to find thumbnail', 'performance-lab' ) );
+		$file = get_attached_file( $attachment_id );
 	}
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 	$editor = wp_get_image_editor( $file );
