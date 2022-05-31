@@ -132,7 +132,7 @@ function budget_calc_sanitize_settings( $input ) {
  */
 function budget_calc_render_hidden_updated_field() {
 	?>
-		<input type="hidden" value="<?php echo time(); ?>" name="budget_calc_options[updated]">
+		<input type="hidden" value="<?php echo time(); ?>" name="budget_calc_options[updated]" />
 	<?php
 }
 
