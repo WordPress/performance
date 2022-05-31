@@ -13,8 +13,8 @@
  *
  * @since n.e.x.t
  *
- * @param array $metadata The attachment metadata.
- * @param int   $attachment_id The attachment ID.
+ * @param array $metadata        The attachment metadata.
+ * @param int   $attachment_id   The attachment ID.
  * @return array $metadata The attachment metadata.
  */
 function dominant_color_metadata( $metadata, $attachment_id ) {
@@ -254,7 +254,10 @@ function dominant_color_set_image_editors() {
  * @return string|WP_Error the dominant color of the image or WP_Error on error.
  */
 function dominant_color_get_dominant_color( $attachment_id ) {
-	$file = get_attached_file( $attachment_id );
+	$file = wp_get_attachment_file_size( $attachment_id );
+	if ( ! $file ) {
+		return new WP_Error( 'unable_to_find_thumbnail', __( 'Unable to find thumbnail', 'performance-lab' ) );
+	}
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 	$editor = wp_get_image_editor( $file );
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
@@ -279,11 +282,14 @@ function dominant_color_get_dominant_color( $attachment_id ) {
  *
  * @since n.e.x.t
  *
- * @param int $id the attachment id.
+ * @param int $attachment_id the attachment id.
  * @return bool|WP_Error True if the color has transparency or WP_Error on error.
  */
-function dominant_color_has_transparency( $id ) {
-	$file = get_attached_file( $id );
+function dominant_color_has_transparency( $attachment_id ) {
+	$file = wp_get_attachment_file_size( $attachment_id );
+	if ( ! $file ) {
+		return new WP_Error( 'unable_to_find_thumbnail', __( 'Unable to find thumbnail', 'performance-lab' ) );
+	}
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 	$editor = wp_get_image_editor( $file );
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
@@ -300,4 +306,31 @@ function dominant_color_has_transparency( $id ) {
 	}
 
 	return $has_transparency;
+}
+
+/**
+ * Get file path of image based on size.
+ *
+ * @since n.e.x.t
+ *
+ * @param int    $attachment_id Attachment ID for image.
+ * @param string $size          Optional. Image size. Default 'thumbnail'.
+ *
+ * @return false|string Path to an image or false if not found.
+ */
+function wp_get_attachment_file_size( $attachment_id, $size = 'thumbnail' ) {
+	$imagedata = wp_get_attachment_metadata( $attachment_id );
+	if ( ! is_array( $imagedata ) ) {
+		return false;
+	}
+
+	if ( ! isset( $imagedata['sizes'][ $size ] ) ) {
+		return false;
+	}
+
+	$file = get_attached_file( $attachment_id );
+
+	$filepath = str_replace( wp_basename( $file ), $imagedata['sizes'][ $size ]['file'], $file );
+
+	return $filepath;
 }
