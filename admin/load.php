@@ -9,6 +9,8 @@
  * Adds the modules page to the Settings menu.
  *
  * @since 1.0.0
+ *
+ * @return string|false The resulting page's hook_suffix, or false if the user does not have the capability required.
  */
 function perflab_add_modules_page() {
 	// Don't add a page if active modules are controlled programmatically.
