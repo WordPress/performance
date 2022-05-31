@@ -21,7 +21,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 		$this->assertEmpty( $dominant_color_metadata );
 
 		// Creating attachment.
-		$attachment_id           = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 		$dominant_color_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'dominant_color', $dominant_color_metadata );
@@ -41,7 +41,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $transparency_metadata );
 
-		$attachment_id         = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 		$transparency_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'has_transparency', $transparency_metadata );
