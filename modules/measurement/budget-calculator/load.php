@@ -16,7 +16,7 @@
 function budget_calc_page_content() {
 	?>
 	<div class="wrap">
-	<h1>Budget Calculator</h1>
+	<h1><?php esc_html_e( 'Budget Calculator', 'performance-lab' ); ?></h1>
 	<form method="post" action="options.php">
 	<?php
 
@@ -36,8 +36,8 @@ function budget_calc_page_content() {
  */
 function budget_calc_menu_page() {
 	add_menu_page(
-		'Budget Calculator',
-		'Budget Calculator',
+		__( 'Budget Calculator', 'performance-lab' ),
+		__( 'Budget Calculator', 'performance-lab' ),
 		'manage_options',
 		'budget-calculator',
 		'budget_calc_page_content',
@@ -60,7 +60,7 @@ function budget_calc_register_settings() {
 		)
 	);
 
-	add_settings_section( 'budget_calc_settings_id', 'Budget Calculator Metrics', '', 'budget-calculator' );
+	add_settings_section( 'budget_calc_settings_id', __( 'Budget Calculator Metrics', 'performance-lab' ), '', 'budget-calculator' );
 
 	$options        = get_option( 'budget_calc_options', array() );
 	$range_settings = array(
