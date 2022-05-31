@@ -101,6 +101,8 @@ add_action( 'admin_init', 'budget_calc_register_settings' );
 /**
  * Callback to sanitize the input from the settings form.
  *
+ * @since n.e.x.t
+ *
  * @param array $input The raw submitted input.
  * @return array The sanitized input.
  */
