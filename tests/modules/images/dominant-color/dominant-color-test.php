@@ -22,6 +22,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 
 		// Creating attachment.
 		$attachment_id           = $this->factory->attachment->create_upload_object( $image_path );
+		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 		$dominant_color_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'dominant_color', $dominant_color_metadata );
 		$this->assertNotEmpty( $dominant_color_metadata['dominant_color'] );
@@ -41,6 +42,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 		$this->assertEmpty( $transparency_metadata );
 
 		$attachment_id         = $this->factory->attachment->create_upload_object( $image_path );
+		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 		$transparency_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'has_transparency', $transparency_metadata );
 		if ( $expected_transparency ) {
@@ -59,7 +61,7 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 	 */
 	public function test_tag_add_adjust_to_image_attributes( $image_path, $expected_color, $expected_transparency ) {
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
-		wp_get_attachment_metadata( $attachment_id );
+		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		// Testing tag_add_adjust() with image being lazy load.
 		$filtered_image_mock_lazy_load = '<img loading="lazy" width="1024" height="727" class="test" src="http://localhost:8888/wp-content/uploads/2022/03/test.png" />';

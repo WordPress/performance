@@ -313,8 +313,8 @@ function dominant_color_has_transparency( $attachment_id ) {
  *
  * @since n.e.x.t
  *
- * @param int $attachment_id
- * @param string $size
+ * @param int    $attachment_id Attachment ID for image.
+ * @param string $size          Optional. Image size. Default 'thumbnail'.
  *
  * @return false|string Path to an image or false if not found.
  */
@@ -324,13 +324,13 @@ function wp_get_attachment_file_size( $attachment_id, $size = 'thumbnail' ) {
 		return false;
 	}
 
-	if ( ! isset( $imagedata["sizes"][ $size ] ) ) {
+	if ( ! isset( $imagedata['sizes'][ $size ] ) ) {
 		return false;
 	}
 
 	$file = get_attached_file( $attachment_id );
 
-	$filepath = str_replace( wp_basename( $file ), $imagedata["sizes"][ $size ]['file'], $file );
+	$filepath = str_replace( wp_basename( $file ), $imagedata['sizes'][ $size ]['file'], $file );
 
 	return $filepath;
 }
