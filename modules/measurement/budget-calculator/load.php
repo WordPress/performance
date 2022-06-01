@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: Budget Calculator
- * Description: Allows users to define their own metrics and generate a budget.json file from them.
+ * Description: Define a performance budget to prevent future performance regressions.
  * Experimental: No
  *
  * @package performance-lab
@@ -16,7 +16,15 @@
 function budget_calc_page_content() {
 	?>
 	<div class="wrap">
-	<h1><?php esc_html_e( 'Budget Calculator', 'performance-lab' ); ?></h1>
+	<h1><?php esc_html_e( 'Performance Budget Calculator', 'performance-lab' ); ?></h1>
+	<p>
+		<?php
+		esc_html_e(
+			'Assert thresholds to performance metrics to prevent future performance regressions, by generating a budget.json and adding it to a compatible tool (e.g. Lighthouse CLI).',
+			'performance-lab'
+		);
+		?>
+	</p>
 	<form method="post" action="options.php">
 	<?php
 
