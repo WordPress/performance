@@ -82,12 +82,12 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'trans_png'   => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.png',
-				'expected_color' => array( '000' ),
+				'expected_color' => array( '' ),
 				'is_wp_error'    => true,
 			),
 			'trans4_png'  => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.png',
-				'expected_color' => array( '4cfc0' ),
+				'expected_color' => array( '133f00', '4cfc0' ),
 				'is_wp_error'    => false,
 			),
 
@@ -108,17 +108,17 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'trans_webp'  => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.webp',
-				'expected_color' => array( '000' ),
+				'expected_color' => array( '' ),
 				'is_wp_error'    => true,
 			),
 			'trans4_webp' => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.webp',
-				'expected_color' => array( '4dfc0' ),
+				'expected_color' => array( '4dfc0', '133f00' ),
 				'is_wp_error'    => false,
 			),
 			'gif'         => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/earth.gif',
-				'expected_color' => array( '151517', '1b1a1c' ),
+				'expected_color' => array( '151517', '1b1a1c', '18161a' ),
 				'is_wp_error'    => false,
 			),
 			'webp'        => array(
@@ -151,11 +151,11 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 
 			'white_gif'   => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/white.gif',
-				'expected_transparency' => true,
+				'expected_transparency' => false,
 			),
 			'trans_gif'   => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.gif',
-				'expected_transparency' => true,
+				'expected_transparency' => false,
 			),
 			'trans4_gif'  => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.gif',
