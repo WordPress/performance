@@ -318,7 +318,7 @@ function dominant_color_has_transparency( $attachment_id ) {
  *
  * @return false|string Path to an image or false if not found.
  */
-function wp_get_attachment_file_size( $attachment_id, $size = 'medium' ) {
+function wp_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
 	$imagedata = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $imagedata ) ) {
 		return false;
