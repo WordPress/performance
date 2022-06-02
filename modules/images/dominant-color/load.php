@@ -246,7 +246,7 @@ function dominant_color_set_image_editors() {
 }
 
 /**
- * Get dominant color of image
+ * Computes the dominant color of the given attachment image.
  *
  * @since n.e.x.t
  *
