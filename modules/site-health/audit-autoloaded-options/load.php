@@ -77,7 +77,7 @@ function perflab_aao_autoloaded_options_test() {
 		'<p>' . esc_html( $base_description ) . ' ' . esc_html__( 'Your site has %1$s autoloaded options (size: %2$s) in the options table, which could cause your site to be slow. You can reduce the number of autoloaded options by cleaning up your site\'s options table.', 'performance-lab' ) . '</p>',
 		$autoloaded_options_count,
 		size_format( $autoloaded_options_size )
-	);
+	) . perflab_aao_autoloaded_options_table();
 
 	/**
 	 * Filters description to be shown on Site Health warning when threshold is met.
@@ -116,4 +116,45 @@ function perflab_aao_autoloaded_options_test() {
 function perflab_aao_autoloaded_options_size() {
 	global $wpdb;
 	return (int) $wpdb->get_var( 'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload = \'yes\'' );
+}
+
+/**
+ * Fetch autoload top list.
+ *
+ * @since n.e.x.t
+ *
+ * @return array autoloaded data - autoload size, entries, option and its names.
+ */
+function perflab_aao_autoloaded_options() {
+	global $wpdb;
+
+	/**
+	 * Filters max bytes threshold to get options from Database.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param int $option_threshold Autoloaded options threshold size. Default 100.
+	 */
+	$option_threshold = apply_filters( 'perflab_aao_autoloaded_option_table_threshold', 100 );
+
+	return $wpdb->get_results( $wpdb->prepare( "SELECT option_name, LENGTH(option_value) AS option_value_length FROM `wp_options` WHERE autoload='yes' AND LENGTH(option_value) > %d ORDER BY option_value_length DESC LIMIT 20", $option_threshold ) );
+}
+
+/**
+ * Get formatted autoload options table.
+ *
+ * @since n.e.x.t
+ *
+ * @return string HTML formatted table.
+ */
+function perflab_aao_autoloaded_options_table() {
+	$autoload_summary = perflab_aao_autoloaded_options();
+
+	$html_table = '<table class="widefat striped"><thead><tr><th scope="col">#</th><th scope="col">Option Name</th><th scope="col">Size</th></tr></thead><tbody>';
+	foreach ( $autoload_summary as $key => $value ) {
+		$html_table .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td><tr>', $key + 1, $value->option_name, $value->option_value_length );
+	}
+	$html_table .= '</tbody></table>';
+
+	return $html_table;
 }
