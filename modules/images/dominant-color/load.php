@@ -278,7 +278,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 }
 
 /**
- * Works out if color has transparency
+ * Computes whether the given attachment image has transparency.
  *
  * @since n.e.x.t
  *
