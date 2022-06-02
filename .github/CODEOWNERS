@@ -54,3 +54,8 @@
 /modules/object-cache/persistent-object-cache-health-check                  @tillkruss @spacedmonkey
 /tests/modules/object-cache/persistent-object-cache-health-check            @tillkruss @spacedmonkey
 /tests/testdata/modules/object-cache/persistent-object-cache-health-check   @tillkruss @spacedmonkey
+
+# Module: Dominant Color
+/modules/images/dominant-color                                              @pbearne @spacedmonkey
+/tests/modules/images/dominant-color                                        @pbearne @spacedmonkey
+/tests/testdata/modules/images/dominant-color                               @pbearne @spacedmonkey
