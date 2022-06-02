@@ -86,6 +86,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_update_attachm
  */
 function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id ) {
 
+	// Only apply this in `the_content` for now, since otherwise it can result in duplicate runs due to a problem with full site editing logic.
 	if ( 'the_content' !== $context ) {
 		return $filtered_image;
 	}
