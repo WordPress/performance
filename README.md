@@ -7,12 +7,12 @@ Monorepo for the [WordPress Performance Group](https://make.wordpress.org/core/t
 
 ## Quick Start
 In order to get started contributing to the project you have to follow the next steps:
-1. Fork the repository
-2. Clone the fork locally
-3. Run `composer install` in the project folder
-4. Run `npm install` in the project folder
-5. Start the development environment by running `npm run wp-env start`
-6. Login using `admin` and `password`
+1. Fork the repository.
+2. Clone the fork locally.
+3. Run `composer install` in the project folder.
+4. Run `npm install` in the project folder.
+5. Start the development environment by running `npm run wp-env start`.
+6. Login using `admin` and `password`.
 
 The details about how the environment works can be found here [here](https://make.wordpress.org/core/2020/03/03/wp-env-simple-local-environments-for-wordpress/) <br>
 More details about getting started [here](./docs/Getting-started.md)
