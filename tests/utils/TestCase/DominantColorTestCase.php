@@ -123,7 +123,7 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'webp'        => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp',
-				'expected_color' => array( 'c5bec0' ),
+				'expected_color' => array( 'c5bec0', 'c1bbb9' ),
 				'is_wp_error'    => false,
 			),
 		);
