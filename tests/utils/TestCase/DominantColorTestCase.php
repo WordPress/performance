@@ -72,7 +72,7 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'green_png'   => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/green.png',
-				'expected_color' => array( '1ee204' ),
+				'expected_color' => array( '1ee204', '1ee24' ),
 				'is_wp_error'    => false,
 			),
 			'white_png'   => array(
@@ -82,23 +82,23 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'trans_png'   => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.png',
-				'expected_color' => array( '' ),
+				'expected_color' => array( '000' ),
 				'is_wp_error'    => true,
 			),
 			'trans4_png'  => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.png',
-				'expected_color' => array( '133f00' ),
+				'expected_color' => array( '4cfc0' ),
 				'is_wp_error'    => false,
 			),
 
 			'red_webp'    => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.webp',
-				'expected_color' => array( 'ff0505', 'ff0506' ),
+				'expected_color' => array( 'ff0505', 'ff55', 'ff0506', 'ff56' ),
 				'is_wp_error'    => false,
 			),
 			'green_webp'  => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/green.webp',
-				'expected_color' => array( '1de303' ),
+				'expected_color' => array( '1de303', '1de33' ),
 				'is_wp_error'    => false,
 			),
 			'white_webp'  => array(
@@ -108,22 +108,22 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'trans_webp'  => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.webp',
-				'expected_color' => array( '' ),
+				'expected_color' => array( '000' ),
 				'is_wp_error'    => true,
 			),
 			'trans4_webp' => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.webp',
-				'expected_color' => array( '133f00' ),
+				'expected_color' => array( '4dfc0' ),
 				'is_wp_error'    => false,
 			),
 			'gif'         => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/earth.gif',
-				'expected_color' => array( '151517', '18161a' ),
+				'expected_color' => array( '151517', '1b1a1c' ),
 				'is_wp_error'    => false,
 			),
 			'webp'        => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp',
-				'expected_color' => array( 'c5bec0', 'c1bbb9' ),
+				'expected_color' => array( 'c5bec0', 'c1bbb9', 'c3bdbd' ),
 				'is_wp_error'    => false,
 			),
 		);
@@ -151,11 +151,11 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 
 			'white_gif'   => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/white.gif',
-				'expected_transparency' => false,
+				'expected_transparency' => true,
 			),
 			'trans_gif'   => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.gif',
-				'expected_transparency' => false,
+				'expected_transparency' => true,
 			),
 			'trans4_gif'  => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.gif',
