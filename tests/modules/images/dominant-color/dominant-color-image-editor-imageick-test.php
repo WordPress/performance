@@ -18,7 +18,8 @@ class Dominant_Color_Image_Editor_Imageick_Test extends DominantColorTestCase {
 			'wp_image_editors',
 			static function () {
 				return array( 'Dominant_Color_Image_Editor_Imagick' );
-			}
+			},
+			100
 		);
 	}
 

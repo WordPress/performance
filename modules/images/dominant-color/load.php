@@ -254,7 +254,7 @@ function dominant_color_set_image_editors() {
  * @return string|WP_Error the dominant color of the image or WP_Error on error.
  */
 function dominant_color_get_dominant_color( $attachment_id ) {
-	$file = wp_get_attachment_file_size( $attachment_id );
+	$file = wp_get_attachment_file_path( $attachment_id );
 	if ( ! $file ) {
 		$file = get_attached_file( $attachment_id );
 	}
@@ -286,7 +286,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
  * @return bool|WP_Error True if the color has transparency or WP_Error on error.
  */
 function dominant_color_has_transparency( $attachment_id ) {
-	$file = wp_get_attachment_file_size( $attachment_id );
+	$file = wp_get_attachment_file_path( $attachment_id );
 	if ( ! $file ) {
 		$file = get_attached_file( $attachment_id );
 	}
