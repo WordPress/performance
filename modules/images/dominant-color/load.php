@@ -119,7 +119,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 
 	if ( isset( $image_meta['has_transparency'] ) ) {
 		$transparency = $image_meta['has_transparency'] ? 'true' : 'false';
-		$data        .= sprintf( ' data-has-transparency="%s"', $transparency );
+		$data        .= sprintf( 'data-has-transparency="%s" ', $transparency );
 		$extra_class  = $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent';
 	}
 
