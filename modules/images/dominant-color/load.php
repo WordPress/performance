@@ -118,7 +118,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	$extra_class = '';
 
 	if ( ! empty( $image_meta['dominant_color'] ) ) {
-		$data .= sprintf( ' data-dominant-color="%s"', $image_meta['dominant_color'] );
+		$data .= sprintf( 'data-dominant-color="%s" ', esc_attr( $image_meta['dominant_color'] ) );
 		$style = 'style="--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . ';" ';
 	}
 
