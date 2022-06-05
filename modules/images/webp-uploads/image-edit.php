@@ -396,7 +396,7 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
 	}
 
 	if ( ! defined( 'IMAGE_EDIT_OVERWRITE' ) || ! IMAGE_EDIT_OVERWRITE ) {
-		$target = null;
+		$suffix = null;
 		foreach ( $data['sources'] as $mime_type => $properties ) {
 			if ( empty( $properties['file'] ) ) {
 				continue;
@@ -407,16 +407,16 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
 				continue;
 			}
 
-			$target = $matches[1];
+			$suffix = $matches[1];
 			break;
 		}
 
-		if ( null === $target ) {
-			$target = 'orig';
+		if ( null === $suffix ) {
+			$suffix = 'orig';
 		}
 
-		if ( empty( $backup_sources[ "full-{$target}" ] ) ) {
-			$backup_sources[ "full-{$target}" ] = $data['sources'];
+		if ( empty( $backup_sources[ "full-{$suffix}" ] ) ) {
+			$backup_sources[ "full-{$suffix}" ] = $data['sources'];
 			update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $backup_sources );
 		}
 	}
