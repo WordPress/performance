@@ -395,30 +395,29 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
 		$backup_sources = array();
 	}
 
-	if ( ! defined( 'IMAGE_EDIT_OVERWRITE' ) || ! IMAGE_EDIT_OVERWRITE ) {
-		$suffix = null;
-		foreach ( $data['sources'] as $mime_type => $properties ) {
-			if ( empty( $properties['file'] ) ) {
-				continue;
-			}
-
-			$matches = array();
-			if ( ! preg_match( '/-e(\d{13})/', $properties['file'], $matches ) ) {
-				continue;
-			}
-
-			$suffix = $matches[1];
-			break;
+	// TODO: Add support for constant. `IMAGE_EDIT_OVERWRITE`.
+	$suffix = null;
+	foreach ( $data['sources'] as $mime_type => $properties ) {
+		if ( empty( $properties['file'] ) ) {
+			continue;
 		}
 
-		if ( null === $suffix ) {
-			$suffix = 'orig';
+		$matches = array();
+		if ( ! preg_match( '/-e(\d{13})/', $properties['file'], $matches ) ) {
+			continue;
 		}
 
-		if ( empty( $backup_sources[ "full-{$suffix}" ] ) ) {
-			$backup_sources[ "full-{$suffix}" ] = $data['sources'];
-			update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $backup_sources );
-		}
+		$suffix = $matches[1];
+		break;
+	}
+
+	if ( null === $suffix ) {
+		$suffix = 'orig';
+	}
+
+	if ( empty( $backup_sources[ "full-{$suffix}" ] ) ) {
+		$backup_sources[ "full-{$suffix}" ] = $data['sources'];
+		update_post_meta( $attachment_id, '_wp_attachment_backup_sources', $backup_sources );
 	}
 
 	if ( ! isset( $backup_sources['full-orig'] ) || ! is_array( $backup_sources['full-orig'] ) ) {
