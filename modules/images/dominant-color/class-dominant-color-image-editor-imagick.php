@@ -34,7 +34,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 
 		try {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-
+			// the logic here is resize the image to 1x1 pixel, then get the color of that pixel
 			$this->image->setImageColorspace( Imagick::COLORSPACE_RGB );
 			$this->image->setImageFormat( 'RGB' );
 			$this->image->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
@@ -64,6 +64,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 
 		try {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			// check if the image has an alpha channel if true, set to has_transparent to true.
 			return (bool) @$this->image->getImageAlphaChannel();
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message */
