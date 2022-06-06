@@ -457,4 +457,41 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 			}
 		}
 	}
+
+	/**
+	 * Create backup of full size images with the same hash keys as the edited images
+	 *
+	 * @test
+	 */
+	public function it_should_create_backup_of_full_size_images_with_the_same_hash_keys_as_the_edited_images() {
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->rotate_right()->save();
+		$this->assertTrue( $editor->success() );
+		$editor->rotate_right()->save();
+		$this->assertTrue( $editor->success() );
+		$editor->flip_right()->save();
+		$this->assertTrue( $editor->success() );
+
+		$backup_sizes   = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+
+		$this->assertIsArray( $backup_sources );
+		$this->assertIsArray( $backup_sizes );
+		$this->assertCount( 3, $backup_sources );
+
+		foreach ( $backup_sources as $size_name => $sources ) {
+			if ( 'full-orig' === $size_name ) {
+				// Skip this size name due this name does not have a hash name.
+				continue;
+			}
+
+			// Ensure the size name is an actual hashed value.
+			$this->assertSizeNameIsHashed( 'full', $size_name );
+			// Ensure the full-{hash} name is the same created on the backup sizes or that both hash names are the same.
+			$this->assertArrayHasKey( $size_name, $backup_sizes );
+			$this->assertIsArray( $backup_sizes[ $size_name ] );
+		}
+	}
 }
