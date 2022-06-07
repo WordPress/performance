@@ -6,7 +6,7 @@ Monorepo for the [WordPress Performance Group](https://make.wordpress.org/core/t
 [Learn more about the Performance Lab plugin.](https://make.wordpress.org/core/2022/03/07/the-performance-lab-plugin-has-been-released/)
 
 ## Quick Start
-In order to get started contributing to the project you have to follow the next steps:
+To get started with contributing to the Performance Lab project:
 1. Fork the repository.
 2. Clone the fork locally.
 3. Run `composer install` in the project folder.
@@ -16,7 +16,7 @@ In order to get started contributing to the project you have to follow the next 
 7. Log in using `admin` and `password`.
 
 See the section below for more details on how the environment works. <br>
-More details about getting started [here](./docs/Getting-started.md)
+More details about getting started [here](./docs/Getting-started.md).
 
 ## Useful commands
 
