@@ -12,7 +12,8 @@ In order to get started contributing to the project you have to follow the next 
 3. Run `composer install` in the project folder.
 4. Run `npm install` in the project folder.
 5. Start the development environment by running `npm run wp-env start`.
-6. Login using `admin` and `password`.
+6. Go to `http://localhost:8888/wp-admin/` in your browser.
+7. Log in using `admin` and `password`.
 
 The details about how the environment works can be found here [here](https://make.wordpress.org/core/2020/03/03/wp-env-simple-local-environments-for-wordpress/) <br>
 More details about getting started [here](./docs/Getting-started.md)
