@@ -575,43 +575,50 @@ function webp_uploads_update_featured_image( $html, $post_id, $attachment_id ) {
 add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );
 
 /**
- * Adds webp-hero polyfill.
+ * Adds a fallback mechanism to replace webp images with jpeg alternatives on older browsers.
  *
  * @since n.e.x.t
  */
-function webp_uploads_wepb_hero_polyfill() {
+function webp_uploads_wepb_fallback() {
 	?>
 	<script>
-		// 1. Doesn't work for lazyloaded images
-		// 2. Doesn't work for SPA or dynamically loaded HTML content
-		// 3. Doesn't work with srcset images
-		// 4. Doesn't work with picture elements
-
 		( function() {
-			var bundle = document.createElement( 'script' );
-			bundle.src = 'https://unpkg.com/webp-hero@0.0.2/dist-cjs/webp-hero.bundle.js';
-			bundle.addEventListener( 'load', function() {
-				( new webpHero.WebpMachine() ).polyfillDocument();
-			} );
-
-			var polyfills = document.createElement( 'script' );
-			polyfills.src = 'https://unpkg.com/webp-hero@0.0.2/dist-cjs/polyfills.js';
-			polyfills.addEventListener( 'load', function() {
-				document.body.appendChild( bundle );
-			} );
-
-			var img = new Image();
-			img.src = "data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA";
-			img.onerror = function() {
-				document.body.appendChild( polyfills );
-			};
-			img.onload = function() {
-				if ( ! ( img.width > 0 && img.height > 0 ) ) {
-					document.body.appendChild( polyfills );
+			var observrer = function( mutationList ) {
+				for ( var i in mutationList ) {
+					for ( var j in mutationList[i].addedNodes ) {
+						var node = mutation.addedNodes[j];
+						if (
+							node.nodeName === "IMG" &&
+							node.className.match( /\wwp-image-\d+\w/i ) &&
+							node.src.match( /\.webp$/i )
+						) {
+							node.src = node.src.replace( /\.webp$/i, '.jpg' );
+							var srcset = node.getAttribute( 'srcset' );
+							if ( srcset ) {
+								node.setAttribute( 'srcset', srcset.replace( /\.webp(\s)/i, '.jpg$1' ) );
+							}
+						}
+					}
 				}
+			};
+
+			var img = document.createElement( 'img' );
+
+			// Verify two webp images.
+			img.src = "data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==";			
+			img.onload = function() {
+				img.src = "data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=";
+			};
+
+			// Start the mutation observer if the browser doesn't support webp.
+			img.onerror = function() {
+				new MutationObserver( observrer ).observe( document.documentElement, {
+					subtree: true,
+					childList: true,
+				} );
 			};
 		} )();
 	</script>
 	<?php
 }
-add_action( 'wp_footer', 'webp_uploads_wepb_hero_polyfill' );
+add_action( 'wp_head', 'webp_uploads_wepb_fallback' );
