@@ -58,7 +58,7 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 		if ( empty( $attr['class'] ) ) {
 			$attr['class'] = '';
 		}
-		$attr['class'] .= $class;
+		$attr['class'] .= ' ' . $class;
 	}
 
 	if ( ! empty( $image_meta['dominant_color'] ) ) {
