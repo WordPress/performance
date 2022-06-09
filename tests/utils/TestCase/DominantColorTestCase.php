@@ -80,11 +80,7 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 				'expected_color' => array( 'ffffff' ),
 				'is_wp_error'    => false,
 			),
-			'trans_png'   => array(
-				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.png',
-				'expected_color' => array( '000' ),
-				'is_wp_error'    => false,
-			),
+
 			'trans4_png'  => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.png',
 				'expected_color' => array( '133f00', '4cfc0' ),
@@ -106,11 +102,7 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 				'expected_color' => array( 'ffffff' ),
 				'is_wp_error'    => false,
 			),
-			'trans_webp'  => array(
-				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.webp',
-				'expected_color' => array( '000' ),
-				'is_wp_error'    => false,
-			),
+
 			'trans4_webp' => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.webp',
 				'expected_color' => array( '4dfc0', '133f00' ),
@@ -149,14 +141,6 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 				'expected_transparency' => false,
 			),
 
-			'white_gif'   => array(
-				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/white.gif',
-				'expected_transparency' => true,
-			),
-			'trans_gif'   => array(
-				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.gif',
-				'expected_transparency' => true,
-			),
 			'trans4_gif'  => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.gif',
 				'expected_transparency' => true,
