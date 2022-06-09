@@ -66,7 +66,7 @@ function dominant_color_update_attachment_image_attributes( $attr, $attachment )
 		if ( empty( $attr['style'] ) ) {
 			$attr['style'] = '';
 		}
-		$attr['style'] .= '--dominant-color: #' . $image_meta['dominant_color'] . ';';
+		$attr['style'] .= '--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . ';';
 	}
 
 	return $attr;
