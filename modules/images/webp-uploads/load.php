@@ -90,6 +90,12 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
 		$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
+		
+		// Skip creation of duplicate WebP image if a image file has the same name with an extension of jpe, jpg, or jpeg.
+		if ( file_exists( $destination ) ) {
+			continue;
+		}
+
 		$image       = webp_uploads_generate_additional_image_source( $attachment_id, 'full', $original_size_data, $targeted_mime, $destination );
 
 		if ( is_wp_error( $image ) ) {
