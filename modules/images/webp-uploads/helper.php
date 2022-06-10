@@ -55,7 +55,7 @@ function webp_uploads_get_upload_image_mime_transforms() {
  * would be saved in the specified mime and stored in the destination file. If the image can't be saved correctly
  * a WP_Error would be returned otherwise an array with the file and filesize properties.
  *
- * @since n.e.xt
+ * @since 1.0.0
  * @access private
  *
  * @param int    $attachment_id         The ID of the attachment from where this image would be created.
