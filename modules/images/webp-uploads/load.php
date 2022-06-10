@@ -592,21 +592,26 @@ function webp_uploads_wepb_fallback() {
 	?>
 	<script>
 		( function() {
+			var updater = function( node ) {
+				if (
+					node.nodeName !== "IMG" ||
+					! node.className.match( /wp-image-\d+/i ) ||
+					! node.src.match( /\.webp$/i )
+				) {
+					return;
+				}
+
+				node.src = node.src.replace( /\.webp$/i, '.jpg' );
+				var srcset = node.getAttribute( 'srcset' );
+				if ( srcset ) {
+					node.setAttribute( 'srcset', srcset.replace( /\.webp(\s)/ig, '.jpg$1' ) );
+				}
+			}
+
 			var observrer = function( mutationList ) {
 				for ( var i in mutationList ) {
 					for ( var j in mutationList[i].addedNodes ) {
-						var node = mutation.addedNodes[j];
-						if (
-							node.nodeName === "IMG" &&
-							node.className.match( /\wwp-image-\d+\w/i ) &&
-							node.src.match( /\.webp$/i )
-						) {
-							node.src = node.src.replace( /\.webp$/i, '.jpg' );
-							var srcset = node.getAttribute( 'srcset' );
-							if ( srcset ) {
-								node.setAttribute( 'srcset', srcset.replace( /\.webp(\s)/i, '.jpg$1' ) );
-							}
-						}
+						updater( mutationList[i].addedNodes[j] );
 					}
 				}
 			};
@@ -621,6 +626,11 @@ function webp_uploads_wepb_fallback() {
 
 			// Start the mutation observer if the browser doesn't support webp.
 			img.onerror = function() {
+				var images = document.querySelectorAll( 'img' );
+				for ( var i in images ) {
+					updater( images[i] );
+				}
+
 				new MutationObserver( observrer ).observe( document.documentElement, {
 					subtree: true,
 					childList: true,
