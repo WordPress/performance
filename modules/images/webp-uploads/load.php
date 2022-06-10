@@ -596,50 +596,55 @@ function webp_uploads_wepb_fallback() {
 	?>
 	<script>
 		( function() {
-			var updater = function( node ) {
-				if ( node.nodeName !== "IMG" || ! node.src.match( /\.webp$/i ) ) {
-					return;
-				}
-
-				var attachment = node.className.match( /wp-image-(\d+)/i );
-				if ( ! attachment ) {
-					return;
-				}
-
-				// Send a request to the REST API endpoint to get the original image extension. This is needed because
-				// JPEG images can have jpg or jpeg extensions and there is no other way to know which exactly extension is used
-				// other than sending a request to get image details.
-				var req = new XMLHttpRequest();
-				var restURL = '<?php echo esc_js( get_rest_url( null, '/wp/v2/media/' ) ); ?>' + attachment[1] + '?_fields=media_details';
-
-				req.onreadystatechange = function() {
-					if ( this.readyState === 4 && this.status === 200 ) {
-						try {
-							var json = JSON.parse( this.responseText );
-							var ext = json.media_details.sources['image/jpeg'].file.match( /\.\w+$/i );
-							if ( ext && ext[0] ) {
-								node.src = node.src.replace( /\.webp$/i, ext[0] );
-								var srcset = node.getAttribute( 'srcset' );
-								if ( srcset ) {
-									node.setAttribute( 'srcset', srcset.replace( /\.webp(\s)/ig, ext[0] + '$1' ) );
-								}
-							}
-						} catch (e) {
+			window['updateWebpImages'] = function( media = [] ) {
+				for ( var i = 0; i < media.length; i++ ) {
+					try {
+						var ext = media[i].media_details.sources['image/jpeg'].file.match( /\.\w+$/i );
+						if ( ! ext || ! ext[0] ) {
+							continue;
 						}
+
+						var images = document.querySelectorAll( 'img.wp-image-' + media[i].id );
+						for ( var j = 0; j < images.length; j++ ) {
+							images[j].src = images[j].src.replace( /\.webp$/i, ext[0] );
+							var srcset = images[j].getAttribute( 'srcset' );
+							if ( srcset ) {
+								images[j].setAttribute( 'srcset', srcset.replace( /\.webp(\s)/ig, ext[0] + '$1' ) );
+							}
+						}
+					} catch ( e ) {
 					}
 				}
-
-				req.open( 'GET', restURL, true );
-				req.send();
 			}
 
-			var observrer = function( mutationList ) {
-				for ( var i in mutationList ) {
-					for ( var j in mutationList[i].addedNodes ) {
-						updater( mutationList[i].addedNodes[j] );
+			var loadMediaDetails = function( nodes ) {
+				var ids = [];
+				for ( var i = 0; i < nodes.length; i++ ) {
+					if ( nodes[i].nodeName !== "IMG" || ! nodes[i].src.match( /\.webp$/i ) ) {
+						continue;
+					}
+
+					var attachment = nodes[i].className.match( /wp-image-(\d+)/i );
+					if ( attachment && attachment[1] && ids.indexOf( attachment[1] ) === -1 ) {
+						ids.push( attachment[1] );
 					}
 				}
-			};
+
+				if ( ! ids.length ) {
+					return;
+				}
+
+				for ( var page = 0, pages = Math.ceil( ids.length / 100 ); page < pages; page++ ) {
+					var pageIds = [];
+					for ( var i = 0; i < 100 && i + page * 100 < ids.length; i++ ) {
+						pageIds.push( ids[ i + page * 100 ] );
+					}
+
+					var jsonp = document.createElement( 'script' );
+					jsonp.src = '<?php echo esc_js( get_rest_url() ); ?>wp/v2/media/?_fields=id,media_details&_jsonp=updateWebpImages&include=' + pageIds.join( ',' );
+					document.body.appendChild( jsonp );
+				}
+			}
 
 			var img = document.createElement( 'img' );
 
@@ -652,13 +657,16 @@ function webp_uploads_wepb_fallback() {
 			// Error handler will be executed if the browser doesn't support webp.
 			img.onerror = function() {
 				// Loop through already available images.
-				var images = document.querySelectorAll( 'img' );
-				for ( var i in images ) {
-					updater( images[i] );
-				}
+				loadMediaDetails( document.querySelectorAll( 'img' ) );
 
 				// Start the mutation observer to update images added dynamically.
-				new MutationObserver( observrer ).observe( document.documentElement, {
+				var observer = new MutationObserver( function( mutationList ) {
+					for ( var i = 0; i < mutationList.length; i++ ) {
+						loadMediaDetails( mutationList[i].addedNodes );
+					}
+				} );
+
+				observer.observe( document.documentElement, {
 					subtree: true,
 					childList: true,
 				} );
