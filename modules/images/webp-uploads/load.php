@@ -596,7 +596,7 @@ function webp_uploads_wepb_fallback() {
 	?>
 	<script>
 		( function() {
-			window['updateWebpImages'] = function( media = [] ) {
+			window.fallbackWebpImages = function( media ) {
 				for ( var i = 0; i < media.length; i++ ) {
 					try {
 						var ext = media[i].media_details.sources['image/jpeg'].file.match( /\.\w+$/i );
@@ -615,7 +615,7 @@ function webp_uploads_wepb_fallback() {
 					} catch ( e ) {
 					}
 				}
-			}
+			};
 
 			var loadMediaDetails = function( nodes ) {
 				var ids = [];
@@ -641,10 +641,10 @@ function webp_uploads_wepb_fallback() {
 					}
 
 					var jsonp = document.createElement( 'script' );
-					jsonp.src = '<?php echo esc_js( get_rest_url() ); ?>wp/v2/media/?_fields=id,media_details&_jsonp=updateWebpImages&include=' + pageIds.join( ',' );
+					jsonp.src = '<?php echo esc_js( get_rest_url() ); ?>wp/v2/media/?_fields=id,media_details&_jsonp=fallbackWebpImages&include=' + pageIds.join( ',' );
 					document.body.appendChild( jsonp );
 				}
-			}
+			};
 
 			var img = document.createElement( 'img' );
 
