@@ -580,6 +580,15 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
  * @since n.e.x.t
  */
 function webp_uploads_wepb_fallback() {
+	$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+	// We need to add fallback only if jpeg alternatives for the webp images are enabled for the server.
+	$jpegs = in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/webp', $transforms['image/jpeg'], true );
+	$webp  = in_array( 'image/jpeg', $transforms['image/webp'], true );
+	if ( ! $jpegs && ! $webp ) {
+		return;
+	}
+
 	?>
 	<script>
 		( function() {
