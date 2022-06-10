@@ -580,7 +580,11 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
  * @since n.e.x.t
  */
 function webp_uploads_wepb_fallback() {
+	// Get mime type transofrms for the site.
 	$transforms = webp_uploads_get_upload_image_mime_transforms();
+	if ( ! is_array( $transforms ) ) {
+		return;
+	}
 
 	// We need to add fallback only if jpeg alternatives for the webp images are enabled for the server.
 	$jpegs = in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/webp', $transforms['image/jpeg'], true );
@@ -593,19 +597,40 @@ function webp_uploads_wepb_fallback() {
 	<script>
 		( function() {
 			var updater = function( node ) {
-				if (
-					node.nodeName !== "IMG" ||
-					! node.className.match( /wp-image-\d+/i ) ||
-					! node.src.match( /\.webp$/i )
-				) {
+				if ( node.nodeName !== "IMG" || ! node.src.match( /\.webp$/i ) ) {
 					return;
 				}
 
-				node.src = node.src.replace( /\.webp$/i, '.jpg' );
-				var srcset = node.getAttribute( 'srcset' );
-				if ( srcset ) {
-					node.setAttribute( 'srcset', srcset.replace( /\.webp(\s)/ig, '.jpg$1' ) );
+				var attachment = node.className.match( /wp-image-(\d+)/i );
+				if ( ! attachment ) {
+					return;
 				}
+
+				// Send a request to the REST API endpoint to get the original image extension. This is needed because
+				// JPEG images can have jpg or jpeg extensions and there is no other way to know which exactly extension is used
+				// other than sending a request to get image details.
+				var req = new XMLHttpRequest();
+				var restURL = '<?php echo esc_js( get_rest_url( null, '/wp/v2/media/' ) ); ?>' + attachment[1] + '?_fields=media_details';
+
+				req.onreadystatechange = function() {
+					if ( this.readyState === 4 && this.status === 200 ) {
+						try {
+							var json = JSON.parse( this.responseText );
+							var ext = json.media_details.sources['image/jpeg'].file.match( /\.\w+$/i );
+							if ( ext && ext[0] ) {
+								node.src = node.src.replace( /\.webp$/i, ext[0] );
+								var srcset = node.getAttribute( 'srcset' );
+								if ( srcset ) {
+									node.setAttribute( 'srcset', srcset.replace( /\.webp(\s)/ig, ext[0] + '$1' ) );
+								}
+							}
+						} catch (e) {
+						}
+					}
+				}
+
+				req.open( 'GET', restURL, true );
+				req.send();
 			}
 
 			var observrer = function( mutationList ) {
@@ -624,13 +649,15 @@ function webp_uploads_wepb_fallback() {
 				img.src = "data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=";
 			};
 
-			// Start the mutation observer if the browser doesn't support webp.
+			// Error handler will be executed if the browser doesn't support webp.
 			img.onerror = function() {
+				// Loop through already available images.
 				var images = document.querySelectorAll( 'img' );
 				for ( var i in images ) {
 					updater( images[i] );
 				}
 
+				// Start the mutation observer to update images added dynamically.
 				new MutationObserver( observrer ).observe( document.documentElement, {
 					subtree: true,
 					childList: true,
