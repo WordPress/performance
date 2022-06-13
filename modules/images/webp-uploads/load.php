@@ -587,16 +587,16 @@ function webp_uploads_wepb_fallback() {
 	}
 
 	// We need to add fallback only if jpeg alternatives for the webp images are enabled for the server.
-	$jpegs = in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/webp', $transforms['image/jpeg'], true );
-	$webp  = in_array( 'image/jpeg', $transforms['image/webp'], true );
-	if ( ! $jpegs && ! $webp ) {
+	$preserve_jpegs_for_jpeg_transforms = in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/webp', $transforms['image/jpeg'], true );
+	$preserve_jpegs_for_webp_transforms = in_array( 'image/jpeg', $transforms['image/webp'], true );
+	if ( ! $preserve_jpegs_for_jpeg_transforms && ! $preserve_jpegs_for_webp_transforms ) {
 		return;
 	}
 
 	?>
 	<script>
 		( function() {
-			window.fallbackWebpImages = function( media ) {
+			window._fallbackWebpImages = function( media ) {
 				for ( var i = 0; i < media.length; i++ ) {
 					try {
 						var ext = media[i].media_details.sources['image/jpeg'].file.match( /\.\w+$/i );
@@ -630,10 +630,6 @@ function webp_uploads_wepb_fallback() {
 					}
 				}
 
-				if ( ! ids.length ) {
-					return;
-				}
-
 				for ( var page = 0, pages = Math.ceil( ids.length / 100 ); page < pages; page++ ) {
 					var pageIds = [];
 					for ( var i = 0; i < 100 && i + page * 100 < ids.length; i++ ) {
@@ -641,7 +637,7 @@ function webp_uploads_wepb_fallback() {
 					}
 
 					var jsonp = document.createElement( 'script' );
-					jsonp.src = '<?php echo esc_js( get_rest_url() ); ?>wp/v2/media/?_fields=id,media_details&_jsonp=fallbackWebpImages&include=' + pageIds.join( ',' );
+					jsonp.src = '<?php echo esc_js( get_rest_url() ); ?>wp/v2/media/?_fields=id,media_details&_jsonp=_fallbackWebpImages&per_page=100&include=' + pageIds.join( ',' );
 					document.body.appendChild( jsonp );
 				}
 			};
@@ -666,7 +662,7 @@ function webp_uploads_wepb_fallback() {
 					}
 				} );
 
-				observer.observe( document.documentElement, {
+				observer.observe( document.body, {
 					subtree: true,
 					childList: true,
 				} );
@@ -675,4 +671,4 @@ function webp_uploads_wepb_fallback() {
 	</script>
 	<?php
 }
-add_action( 'wp_head', 'webp_uploads_wepb_fallback' );
+add_action( 'wp_footer', 'webp_uploads_wepb_fallback' );
