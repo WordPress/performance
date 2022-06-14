@@ -13,8 +13,8 @@
  *
  * @since n.e.x.t
  *
- * @param array $metadata        The attachment metadata.
- * @param int   $attachment_id   The attachment ID.
+ * @param array $metadata      The attachment metadata.
+ * @param int   $attachment_id The attachment ID.
  * @return array $metadata The attachment metadata.
  */
 function dominant_color_metadata( $metadata, $attachment_id ) {
