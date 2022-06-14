@@ -31,7 +31,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		if ( ! $this->image ) {
 			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'performance-lab' ) );
 		}
-		// the logic here is resize the image to 1x1 pixel, then get the color of that pixel.
+		// The logic here is resize the image to 1x1 pixel, then get the color of that pixel.
 		$shorted_image = imagecreatetruecolor( 1, 1 );
 		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, imagesx( $this->image ), imagesy( $this->image ) );
 
