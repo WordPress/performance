@@ -54,7 +54,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|WP_Error True or false based on whether there are transparent pixels, or an error on failure.
 	 */
 	public function has_transparency() {
 
