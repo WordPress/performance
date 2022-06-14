@@ -55,6 +55,11 @@
 /tests/modules/object-cache/persistent-object-cache-health-check            @tillkruss @spacedmonkey
 /tests/testdata/modules/object-cache/persistent-object-cache-health-check   @tillkruss @spacedmonkey
 
+# Module: Dominant Color
+/modules/images/dominant-color                                              @pbearne @spacedmonkey
+/tests/modules/images/dominant-color                                        @pbearne @spacedmonkey
+/tests/testdata/modules/images/dominant-color                               @pbearne @spacedmonkey
+
 # Module: Audit Enqueued Assets
 /modules/site-health/audit-full-page-cache                                  @manuelRod @westonruter
 /tests/modules/site-health/audit-full-page-cache                            @manuelRod @westonruter
