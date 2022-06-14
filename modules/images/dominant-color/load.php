@@ -320,7 +320,6 @@ function dominant_color_has_transparency( $attachment_id ) {
  *
  * @param int    $attachment_id Attachment ID for image.
  * @param string $size          Optional. Image size. Default 'thumbnail'.
- *
  * @return false|string Path to an image or false if not found.
  */
 function wp_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
