@@ -24,7 +24,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return string|WP_Error Dominant hex color string.
+	 * @return string|WP_Error Dominant hex color string, or an error on failure.
 	 */
 	public function get_dominant_color() {
 
