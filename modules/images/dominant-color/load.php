@@ -133,7 +133,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 		$filtered_image = str_replace( '<img ', '<img ' . $data . $style, $filtered_image );
 	}
 	if ( ! empty( $extra_class ) ) {
-		$filtered_image = str_replace( 'class="', 'class="' . $extra_class . ' ', $filtered_image );
+		$filtered_image = str_replace( ' class="', ' class="' . $extra_class . ' ', $filtered_image );
 	}
 
 	return $filtered_image;
