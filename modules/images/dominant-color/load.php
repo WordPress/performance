@@ -314,7 +314,7 @@ function dominant_color_has_transparency( $attachment_id ) {
 }
 
 /**
- * Get file path of image based on size.
+ * Gets file path of image based on size.
  *
  * @since n.e.x.t
  *
