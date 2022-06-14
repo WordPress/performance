@@ -102,11 +102,11 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param bool $add_dominant_color_to_image Whether to add the dominant color to the image. default true.
-	 * @param int $attachment_id The image attachment ID.
-	 * @param array $image_meta The image meta data all ready set.
-	 * @param string $filtered_image The filtered image. html including img tag
-	 * @param string $context The context of the image.
+	 * @param bool   $add_dominant_color Whether to add the dominant color to the image. default true.
+	 * @param int    $attachment_id      The image attachment ID.
+	 * @param array  $image_meta         The image meta data all ready set.
+	 * @param string $filtered_image     The filtered image. html including img tag
+	 * @param string $context            The context of the image.
 	 */
 	$check = apply_filters( 'dominant_color_img_tag_add_dominant_color', true, $attachment_id, $image_meta, $filtered_image, $context );
 	if ( ! $check ) {
