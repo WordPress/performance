@@ -98,7 +98,8 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 
 	/**
 	 * Filters whether dominant color is added to the image.
-	 * set to false inorder disable adding the dominant color to the image.
+	 *
+	 * You can set this to false in order disable adding the dominant color to the image.
 	 *
 	 * @since n.e.x.t
 	 *
