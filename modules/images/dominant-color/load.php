@@ -256,7 +256,7 @@ function dominant_color_set_image_editors() {
  * @since n.e.x.t
  *
  * @param int $attachment_id The attachment ID.
- * @return string|WP_Error the dominant color of the image or WP_Error on error.
+ * @return string|WP_Error The dominant color of the image, or WP_Error on error.
  */
 function dominant_color_get_dominant_color( $attachment_id ) {
 	$file = wp_get_attachment_file_path( $attachment_id );
