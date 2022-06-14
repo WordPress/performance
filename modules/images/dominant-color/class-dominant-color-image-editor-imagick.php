@@ -63,7 +63,6 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 		}
 
 		try {
-			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			// Check if the image has an alpha channel if true, set to has_transparent to true.
 			return (bool) $this->image->getImageAlphaChannel();
 		} catch ( Exception $e ) {
