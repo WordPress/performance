@@ -50,7 +50,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return bool|WP_Error True if there are transparent pixels, false if not.
+	 * @return bool|WP_Error True or false based on whether there are transparent pixels, or an error on failure.
 	 */
 	public function has_transparency() {
 
