@@ -41,7 +41,7 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
  *
  * @since n.e.x.t
  *
- * @param array  $attr Attributes for the image markup.
+ * @param array  $attr       Attributes for the image markup.
  * @param object $attachment Image attachment post.
  * @return mixed $attr Attributes for the image markup.
  */
