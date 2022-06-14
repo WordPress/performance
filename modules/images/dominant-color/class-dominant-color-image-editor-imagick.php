@@ -24,7 +24,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return string|WP_Error hex color
+	 * @return string|WP_Error Dominant hex color string, or an error on failure.
 	 */
 	public function get_dominant_color() {
 
