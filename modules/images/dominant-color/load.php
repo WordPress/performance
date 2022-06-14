@@ -287,7 +287,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
  *
  * @since n.e.x.t
  *
- * @param int $attachment_id the attachment id.
+ * @param int $attachment_id The attachment ID.
  * @return bool|WP_Error True if the color has transparency or WP_Error on error.
  */
 function dominant_color_has_transparency( $attachment_id ) {
