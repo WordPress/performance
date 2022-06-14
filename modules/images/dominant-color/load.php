@@ -79,9 +79,8 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_update_attachm
  * @since n.e.x.t
  *
  * @param string $filtered_image The filtered image.
- * @param string $context The context of the image.
- * @param int    $attachment_id The attachment ID.
- *
+ * @param string $context        The context of the image.
+ * @param int    $attachment_id  The attachment ID.
  * @return string image tag
  */
 function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id ) {
