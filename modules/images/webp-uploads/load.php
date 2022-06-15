@@ -587,88 +587,37 @@ function webp_uploads_wepb_fallback() {
 	}
 
 	// We need to add fallback only if jpeg alternatives for the webp images are enabled for the server.
-	$preserve_jpegs_for_jpeg_transforms = in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/webp', $transforms['image/jpeg'], true );
-	$preserve_jpegs_for_webp_transforms = in_array( 'image/jpeg', $transforms['image/webp'], true );
+	$preserve_jpegs_for_jpeg_transforms = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/webp', $transforms['image/jpeg'], true );
+	$preserve_jpegs_for_webp_transforms = isset( $transforms['image/webp'] ) && in_array( 'image/jpeg', $transforms['image/webp'], true ) && in_array( 'image/webp', $transforms['image/webp'], true );
 	if ( ! $preserve_jpegs_for_jpeg_transforms && ! $preserve_jpegs_for_webp_transforms ) {
 		return;
 	}
 
-	?>
-	<script>
-		( function() {
-			window._fallbackWebpImages = function( media ) {
-				for ( var i = 0; i < media.length; i++ ) {
-					try {
-						var ext = media[i].media_details.sources['image/jpeg'].file.match( /\.\w+$/i );
-						if ( ! ext || ! ext[0] ) {
-							continue;
-						}
+	$fallback_url = plugins_url( '/fallback.js', __FILE__ );
 
-						var images = document.querySelectorAll( 'img.wp-image-' + media[i].id );
-						for ( var j = 0; j < images.length; j++ ) {
-							images[j].src = images[j].src.replace( /\.webp$/i, ext[0] );
-							var srcset = images[j].getAttribute( 'srcset' );
-							if ( srcset ) {
-								images[j].setAttribute( 'srcset', srcset.replace( /\.webp(\s)/ig, ext[0] + '$1' ) );
-							}
-						}
-					} catch ( e ) {
-					}
-				}
-			};
+	$script = <<<EOL
+( function( d, i, s, p ) {
+	s = d.createElement( s );
+	s.src = '{$fallback_url}';
 
-			var loadMediaDetails = function( nodes ) {
-				var ids = [];
-				for ( var i = 0; i < nodes.length; i++ ) {
-					if ( nodes[i].nodeName !== "IMG" || ! nodes[i].src.match( /\.webp$/i ) ) {
-						continue;
-					}
+	i = d.createElement( i );
+	i.src = p + 'UklGRjIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
+	i.onload = function() {
+		i.src = p + 'UklGRh4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
+	};
 
-					var attachment = nodes[i].className.match( /wp-image-(\d+)/i );
-					if ( attachment && attachment[1] && ids.indexOf( attachment[1] ) === -1 ) {
-						ids.push( attachment[1] );
-					}
-				}
+	i.onerror = function() {
+		d.body.appendChild( s );
+	};
+} )( document, 'img', 'script', 'data:image/webp;base64,' );
+EOL;
 
-				for ( var page = 0, pages = Math.ceil( ids.length / 100 ); page < pages; page++ ) {
-					var pageIds = [];
-					for ( var i = 0; i < 100 && i + page * 100 < ids.length; i++ ) {
-						pageIds.push( ids[ i + page * 100 ] );
-					}
-
-					var jsonp = document.createElement( 'script' );
-					jsonp.src = '<?php echo esc_js( get_rest_url() ); ?>wp/v2/media/?_fields=id,media_details&_jsonp=_fallbackWebpImages&per_page=100&include=' + pageIds.join( ',' );
-					document.body.appendChild( jsonp );
-				}
-			};
-
-			var img = document.createElement( 'img' );
-
-			// Verify two webp images.
-			img.src = "data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==";			
-			img.onload = function() {
-				img.src = "data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=";
-			};
-
-			// Error handler will be executed if the browser doesn't support webp.
-			img.onerror = function() {
-				// Loop through already available images.
-				loadMediaDetails( document.querySelectorAll( 'img' ) );
-
-				// Start the mutation observer to update images added dynamically.
-				var observer = new MutationObserver( function( mutationList ) {
-					for ( var i = 0; i < mutationList.length; i++ ) {
-						loadMediaDetails( mutationList[i].addedNodes );
-					}
-				} );
-
-				observer.observe( document.body, {
-					subtree: true,
-					childList: true,
-				} );
-			};
-		} )();
-	</script>
-	<?php
+	wp_print_inline_script_tag(
+		preg_replace( '/\s+/', '', $script ),
+		array(
+			'id'            => 'webpUploadsFallbackWebpImages',
+			'data-rest-api' => get_rest_url(),
+		)
+	);
 }
 add_action( 'wp_footer', 'webp_uploads_wepb_fallback' );
