@@ -582,9 +582,6 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
 function webp_uploads_wepb_fallback() {
 	// Get mime type transofrms for the site.
 	$transforms = webp_uploads_get_upload_image_mime_transforms();
-	if ( ! is_array( $transforms ) ) {
-		return;
-	}
 
 	// We need to add fallback only if jpeg alternatives for the webp images are enabled for the server.
 	$preserve_jpegs_for_jpeg_transforms = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/webp', $transforms['image/jpeg'], true );
