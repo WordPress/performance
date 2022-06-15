@@ -13,7 +13,7 @@ if ( ! function_exists( 'wp_filesize' ) ) {
 	/**
 	 * Wrapper for PHP filesize with filters and casting the result as an integer.
 	 *
-	 * This function is introduced in WP 6.0, to support backward compatibility
+	 * This function was introduced in WP 6.0, for backward compatibility the
 	 * function is added as backup here.
 	 *
 	 * @param string $path Path to the file.
