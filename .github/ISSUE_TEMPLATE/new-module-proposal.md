@@ -3,7 +3,6 @@ name: New module proposal
 about: Propose a new module for the Performance Lab plugin
 title: 'Module Proposal: '
 labels: [ "[Type] Module" ]
-assignees: ''
 
 ---
 
