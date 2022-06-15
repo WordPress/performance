@@ -61,7 +61,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 	) {
 		$metadata['sources'][ $mime_type ] = array(
 			'file'     => wp_basename( $file ),
-			'filesize' => filesize( $file ),
+			'filesize' => wp_filesize( $file ),
 		);
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 	}
@@ -137,7 +137,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			// Set the filesize from the current mime image.
 			$file_location = path_join( $original_directory, $properties['file'] );
 			if ( file_exists( $file_location ) ) {
-				$properties['sources'][ $current_mime ]['filesize'] = filesize( $file_location );
+				$properties['sources'][ $current_mime ]['filesize'] = wp_filesize( $file_location );
 			}
 			$metadata['sizes'][ $size_name ] = $properties;
 			wp_update_attachment_metadata( $attachment_id, $metadata );

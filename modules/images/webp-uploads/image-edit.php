@@ -25,7 +25,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_i
 			// Add sources to original image metadata.
 			$metadata['sources'][ $targeted_mime ] = array(
 				'file'     => $main_images[ $targeted_mime ]['file'],
-				'filesize' => filesize( $main_images[ $targeted_mime ]['path'] ),
+				'filesize' => wp_filesize( $main_images[ $targeted_mime ]['path'] ),
 			);
 			$image_directory                       = pathinfo( $main_images[ $targeted_mime ]['path'], PATHINFO_DIRNAME );
 		}
@@ -68,7 +68,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_i
 
 			$metadata['sizes'][ $size_name ]['sources'][ $targeted_mime ] = array(
 				'file'     => $subsized_images[ $targeted_mime ][ $size_name ]['file'],
-				'filesize' => filesize( $subsize_path ),
+				'filesize' => wp_filesize( $subsize_path ),
 			);
 		}
 	}

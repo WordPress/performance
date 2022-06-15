@@ -99,7 +99,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 			'file'     => $image['file'],
 			'filesize' => array_key_exists( 'filesize', $image )
 				? $image['filesize']
-				: filesize( $image['path'] ),
+				: wp_filesize( $image['path'] ),
 		);
 	}
 
@@ -153,7 +153,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 
 	return array(
 		'file'     => $image['file'],
-		'filesize' => isset( $image['path'] ) ? filesize( $image['path'] ) : 0,
+		'filesize' => isset( $image['path'] ) ? wp_filesize( $image['path'] ) : 0,
 	);
 }
 
