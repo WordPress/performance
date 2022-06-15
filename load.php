@@ -197,3 +197,6 @@ perflab_load_active_modules();
 if ( is_admin() ) {
 	require_once plugin_dir_path( __FILE__ ) . 'admin/load.php';
 }
+
+// Polyfills.
+require_once plugin_dir_path( __FILE__ ) . 'polyfills.php';

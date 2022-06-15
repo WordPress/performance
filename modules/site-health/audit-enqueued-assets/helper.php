@@ -115,6 +115,6 @@ function perflab_aea_get_path_from_resource_url( $resource_url ) {
  * @return int Returns size if file exists, 0 if it doesn't.
  */
 function perflab_aea_get_resource_file_size( $file_src ) {
-	return file_exists( $file_src ) ? filesize( $file_src ) : 0;
+	return wp_filesize( $file_src );
 }
 
