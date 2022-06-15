@@ -197,3 +197,47 @@ perflab_load_active_modules();
 if ( is_admin() ) {
 	require_once plugin_dir_path( __FILE__ ) . 'admin/load.php';
 }
+
+// WP Filesize function.
+if ( ! function_exists( 'wp_filesize' ) ) {
+	/**
+	 * Wrapper for PHP filesize with filters and casting the result as an integer.
+	 *
+	 * This function is introduced in WP 6.0, to support backward compatibility
+	 * function is added as backup here.
+	 *
+	 * @param string $path Path to the file.
+	 *
+	 * @return int The size of the file in bytes, or 0 in the event of an error.
+	 * @since n.e.x.t
+	 *
+	 * @link https://www.php.net/manual/en/function.filesize.php
+	 */
+	function wp_filesize( $path ) {
+		/**
+		 * Filters the result of wp_filesize before the PHP function is run.
+		 *
+		 * @param null|int $size The unfiltered value. Returning an int from the callback bypasses the filesize call.
+		 * @param string $path Path to the file.
+		 *
+		 * @since n.e.x.t
+		 */
+		$size = apply_filters( 'pre_wp_filesize', null, $path );
+
+		if ( is_int( $size ) ) {
+			return $size;
+		}
+
+		$size = file_exists( $path ) ? (int) filesize( $path ) : 0;
+
+		/**
+		 * Filters the size of the file.
+		 *
+		 * @param int $size The result of PHP filesize on the file.
+		 * @param string $path Path to the file.
+		 *
+		 * @since n.e.x.t
+		 */
+		return (int) apply_filters( 'wp_filesize', $size, $path );
+	}
+}
