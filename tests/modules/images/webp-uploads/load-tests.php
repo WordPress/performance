@@ -141,11 +141,11 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertStringEndsWith( $metadata['sources']['image/jpeg']['file'], $file );
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) );
-		$this->assertSame( $metadata['sources']['image/jpeg']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) ) );
+		$this->assertSame( $metadata['sources']['image/jpeg']['filesize'], wp_filesize( path_join( $dirname, $metadata['sources']['image/jpeg']['file'] ) ) );
 
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
-		$this->assertSame( $metadata['sources']['image/webp']['filesize'], filesize( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) ) );
+		$this->assertSame( $metadata['sources']['image/webp']['filesize'], wp_filesize( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) ) );
 
 		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
 		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );

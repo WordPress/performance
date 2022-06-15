@@ -119,7 +119,7 @@ class Audit_Enqueued_Assets_Helper_Tests extends WP_UnitTestCase {
 		$filename = __FUNCTION__ . '.css';
 		$contents = __FUNCTION__ . '_contents';
 		$file     = wp_upload_bits( $filename, null, $contents );
-		$this->assertEquals( filesize( $file['file'] ), perflab_aea_get_resource_file_size( $file['file'] ) );
+		$this->assertEquals( wp_filesize( $file['file'] ), perflab_aea_get_resource_file_size( $file['file'] ) );
 	}
 
 }
