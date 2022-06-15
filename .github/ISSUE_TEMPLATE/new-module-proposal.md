@@ -2,7 +2,7 @@
 name: New module proposal
 about: Propose a new module for the Performance Lab plugin
 title: 'Module Proposal: '
-labels: Needs Discussion, no milestone, [Type] Module
+labels: [ "[Type] Module" ]
 assignees: ''
 
 ---
