@@ -119,40 +119,40 @@ function perflab_aao_autoloaded_options_size() {
 }
 
 /**
- * Fetch autoload top list.
+ * Fetches autoload top list.
  *
  * @since n.e.x.t
  *
- * @return array autoloaded data - autoload size, entries, option and its names.
+ * @return array Autoloaded data as option names and their sizes.
  */
-function perflab_aao_autoloaded_options() {
+function perflab_aao_query_autoloaded_options() {
 	global $wpdb;
 
-	/**
-	 * Filters max bytes threshold to get options from Database.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param int $option_threshold Autoloaded options threshold size. Default 100.
-	 */
-	$option_threshold = apply_filters( 'perflab_aao_autoloaded_option_table_threshold', 100 );
+	$option_threshold = apply_filters( 'perflab_aao_autoloaded_options_table_threshold', 100 );
 
-	return $wpdb->get_results( $wpdb->prepare( "SELECT option_name, LENGTH(option_value) AS option_value_length FROM `wp_options` WHERE autoload='yes' AND LENGTH(option_value) > %d ORDER BY option_value_length DESC LIMIT 20", $option_threshold ) );
+	var_dump( $wpdb->options );
+
+	return $wpdb->get_results( $wpdb->prepare( "SELECT option_name, LENGTH(option_value) AS option_value_length FROM {$wpdb->options} WHERE autoload='yes' AND LENGTH(option_value) > %d ORDER BY option_value_length DESC LIMIT 20", $option_threshold ) );
 }
 
 /**
- * Get formatted autoload options table.
+ * Gets formatted autoload options table.
  *
  * @since n.e.x.t
  *
  * @return string HTML formatted table.
  */
-function perflab_aao_autoloaded_options_table() {
-	$autoload_summary = perflab_aao_autoloaded_options();
+function perflab_aao_get_autoloaded_options_table() {
+	$autoload_summary = perflab_aao_query_autoloaded_options();
 
-	$html_table = '<table class="widefat striped"><thead><tr><th scope="col">#</th><th scope="col">Option Name</th><th scope="col">Size</th></tr></thead><tbody>';
-	foreach ( $autoload_summary as $key => $value ) {
-		$html_table .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td><tr>', $key + 1, $value->option_name, $value->option_value_length );
+	$html_table = sprintf(
+		'<table class="widefat striped"><thead><tr><th scope="col">%s</th><th scope="col">%s</th></tr></thead><tbody>',
+		esc_html__( 'Option Name', 'performance-lab' ),
+		esc_html__( 'Size (bytes)', 'performance-lab' )
+	);
+
+	foreach ( $autoload_summary as $value ) {
+		$html_table .= sprintf( '<tr><td>%s</td><td>%s</td></tr>', $value->option_name, $value->option_value_length );
 	}
 	$html_table .= '</tbody></table>';
 
