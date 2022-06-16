@@ -34,11 +34,12 @@ class Dominant_Color_Image_Editor_Imageick_Test extends DominantColorTestCase {
 
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
-		$color = dominant_color_get_dominant_color( $attachment_id );
+
+		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
 		if ( ! $is_wp_error ) {
-			$this->assertContains( $color, $expected_color );
+			$this->assertContains( $dominant_color_data['dominant_color'], $expected_color );
 		} else {
-			$this->assertInstanceOf( 'WP_Error', $color );
+			$this->assertInstanceOf( 'WP_Error', $dominant_color_data );
 		}
 	}
 
@@ -52,6 +53,10 @@ class Dominant_Color_Image_Editor_Imageick_Test extends DominantColorTestCase {
 	public function test_dominant_color_get_has_transparency( $image_path, $expected_tranasparency ) {
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
-		$this->assertEquals( $expected_tranasparency, dominant_color_has_transparency( $attachment_id ) );
+		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
+		if( strpos( $image_path, '.gif' ) ) {
+			$expected_tranasparency = true; // all gif have aphla
+		}
+		$this->assertEquals( $expected_tranasparency, $dominant_color_data['has_transparency'] );
 	}
 }

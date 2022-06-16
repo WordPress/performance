@@ -22,14 +22,15 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 		return $metadata;
 	}
 
-	$dominant_color = dominant_color_get_dominant_color( $attachment_id );
-	if ( ! is_wp_error( $dominant_color ) && ! empty( $dominant_color ) ) {
-		$metadata['dominant_color'] = $dominant_color;
-	}
+	$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
+	if ( ! is_wp_error( $dominant_color_data ) ) {
+		if ( isset( $dominant_color_data['dominant_color'] ) ) {
+			$metadata['dominant_color'] = $dominant_color_data['dominant_color'];
+		}
 
-	$has_transparency = dominant_color_has_transparency( $attachment_id );
-	if ( ! is_wp_error( $has_transparency ) ) {
-		$metadata['has_transparency'] = $has_transparency;
+		if ( isset( $dominant_color_data['has_transparency'] ) ) {
+			$metadata['has_transparency'] = $dominant_color_data['has_transparency'];
+		}
 	}
 
 	return $metadata;
@@ -257,9 +258,11 @@ function dominant_color_set_image_editors() {
  * @since n.e.x.t
  *
  * @param int $attachment_id The attachment ID.
- * @return string|WP_Error The dominant color of the image, or WP_Error on error.
+ * @return array|WP_Error The dominant color of the image, or WP_Error on error.
+ *
+ * @access private
  */
-function dominant_color_get_dominant_color( $attachment_id ) {
+function _dominant_color_get_dominant_color_data( $attachment_id ) {
 	$file = wp_get_attachment_file_path( $attachment_id );
 	if ( ! $file ) {
 		$file = get_attached_file( $attachment_id );
@@ -271,47 +274,25 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 	if ( is_wp_error( $editor ) ) {
 		return $editor;
 	}
+
+	if ( ! method_exists( $editor, 'has_transparency' ) ) {
+		return new WP_Error( 'unable_to_find_method', __( 'Unable to find has_transparency method', 'performance-lab' ) );
+	}
+	$has_transparency = $editor->has_transparency();
+	if ( ! is_wp_error( $has_transparency ) ) {
+		$dominant_color_data['has_transparency'] = $has_transparency;
+	}
+
 	if ( ! method_exists( $editor, 'get_dominant_color' ) ) {
 		return new WP_Error( 'unable_to_find_method', __( 'Unable to find get_dominant_color method', 'performance-lab' ) );
 	}
 
 	$dominant_color = $editor->get_dominant_color();
-	if ( is_wp_error( $dominant_color ) ) {
-		return $dominant_color;
+	if ( ! is_wp_error( $dominant_color ) ) {
+		$dominant_color_data['dominant_color'] = $dominant_color;
 	}
 
-	return $dominant_color;
-}
-
-/**
- * Computes whether the given attachment image has transparency.
- *
- * @since n.e.x.t
- *
- * @param int $attachment_id The attachment ID.
- * @return bool|WP_Error True if the color has transparency or WP_Error on error.
- */
-function dominant_color_has_transparency( $attachment_id ) {
-	$file = wp_get_attachment_file_path( $attachment_id );
-	if ( ! $file ) {
-		$file = get_attached_file( $attachment_id );
-	}
-	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
-	$editor = wp_get_image_editor( $file );
-	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
-
-	if ( is_wp_error( $editor ) ) {
-		return $editor;
-	}
-	if ( ! method_exists( $editor, 'has_transparency' ) ) {
-		return new WP_Error( 'unable_to_find_method', __( 'Unable to find has_transparency method', 'performance-lab' ) );
-	}
-	$has_transparency = $editor->has_transparency();
-	if ( is_wp_error( $has_transparency ) ) {
-		return $has_transparency;
-	}
-
-	return $has_transparency;
+	return $dominant_color_data;
 }
 
 /**
@@ -338,4 +319,46 @@ function wp_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
 	$filepath = str_replace( wp_basename( $file ), $imagedata['sizes'][ $size ]['file'], $file );
 
 	return $filepath;
+}
+
+/**
+ * Gets the Dominant color for an image attachment.
+ *
+ * @since n.e.x.t
+ *
+ * @param int $attachment_id Attachment ID for image.
+ * @return string|null|WP_Error hex value of dominant color or null if not set.
+ */
+function dominant_color_get_dominant_color( $attachment_id ) {
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
+	if ( ! is_array( $image_meta ) ) {
+		return new WP_Error( 'unable_to_find_imagemeta_for_id', __( 'Unable to find metadata for image for given ID', 'performance-lab' ) );
+	}
+
+	if ( ! isset( $image_meta['dominant_color'] ) ) {
+		return null;
+	}
+
+	return $image_meta['dominant_color'];
+}
+
+/**
+ * Gets the has_transparency value for an image attachment.
+ *
+ * @since n.e.x.t
+ *
+ * @param int $attachment_id Attachment ID for image.
+ * @return bool|null|WP_Error true if may have transparency or null if not set.
+ */
+function dominant_color_has_transparency( $attachment_id ) {
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
+	if ( ! is_array( $image_meta ) ) {
+		return new WP_Error( 'unable_to_find_imagemeta_for_id', __( 'Unable to find metadata for image for given ID', 'performance-lab' ) );
+	}
+
+	if ( ! isset( $image_meta['has_transparency'] ) ) {
+		return null;
+	}
+
+	return $image_meta['has_transparency'];
 }

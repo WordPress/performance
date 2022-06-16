@@ -35,8 +35,6 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 		try {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			// The logic here is resize the image to 1x1 pixel, then get the color of that pixel.
-			$this->image->setImageColorspace( Imagick::COLORSPACE_RGB );
-			$this->image->setImageFormat( 'RGB' );
 			$this->image->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
 			$pixel = $this->image->getImagePixelColor( 0, 0 );
 			$color = $pixel->getColor();
@@ -63,8 +61,25 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 		}
 
 		try {
-			// Check if the image has an alpha channel if true, set to has_transparent to true.
-			return (bool) $this->image->getImageAlphaChannel();
+			// Check if the image has an alpha channel if false, then it can't have transparency so return early.
+			if ( ! $this->image->getImageAlphaChannel() ) {
+				return false;
+			}
+
+			// Walk through the pixels and look transparent pixels.
+			$w = $this->image->getImageWidth();
+			$h = $this->image->getImageHeight();
+			for ( $x = 0; $x < $w; $x++ ) {
+				for ( $y = 0; $y < $h; $y++ ) {
+					$pixel = $this->image->getImagePixelColor( $x, $y );
+					$color = $pixel->getColor();
+					if ( $color['a'] > 0 ) {
+						return true;
+					}
+				}
+			}
+			return false;
+
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message */
 			return new WP_Error( 'image_editor_has_transparency_error', sprintf( __( 'Transparency detection failed: %s', 'performance-lab' ), $e->getMessage() ) );

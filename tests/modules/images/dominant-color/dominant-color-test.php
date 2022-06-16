@@ -30,6 +30,19 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests dominant_color_get_dominant_color().
+	 *
+	 * @dataProvider provider_set_of_images
+	 *
+	 * @covers ::dominant_color_get_dominant_color
+	 */
+	public function test_dominant_color_get_dominant_color( $image_path, $expected_color, $expected_transparency ) {
+		// Creating attachment.
+		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$this->assertStringContainsString( $expected_color, dominant_color_get_dominant_color( $attachment_id ) );
+	}
+
+	/**
 	 * Tests has_transparency_metadata().
 	 *
 	 * @dataProvider provider_set_of_images
@@ -50,6 +63,19 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 		} else {
 			$this->assertFalse( $transparency_metadata['has_transparency'] );
 		}
+	}
+
+	/**
+	 * Tests dominant_color_get_dominant_color().
+	 *
+	 * @dataProvider provider_set_of_images
+	 *
+	 * @covers ::dominant_color_get_dominant_color
+	 */
+	public function test_dominant_color_has_transparency( $image_path, $expected_color, $expected_transparency ) {
+		// Creating attachment.
+		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$this->assertStringContainsString( $expected_transparency, dominant_color_has_transparency( $attachment_id ) );
 	}
 
 	/**
@@ -85,14 +111,14 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 	 */
 	function provider_set_of_images() {
 		return array(
-			'white_jpg'  => array(
+			'white_jpg' => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/white.jpg',
 				'expected_color'        => 'ffffff',
 				'expected_transparency' => false,
 			),
-			'trans4_gif' => array(
-				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans4.gif',
-				'expected_color'        => '133f00',
+			'trans_gif' => array(
+				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.gif',
+				'expected_color'        => '20202',
 				'expected_transparency' => true,
 			),
 		);
