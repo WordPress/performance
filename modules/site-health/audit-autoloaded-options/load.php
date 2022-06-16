@@ -77,7 +77,7 @@ function perflab_aao_autoloaded_options_test() {
 		'<p>' . esc_html( $base_description ) . ' ' . esc_html__( 'Your site has %1$s autoloaded options (size: %2$s) in the options table, which could cause your site to be slow. You can reduce the number of autoloaded options by cleaning up your site\'s options table.', 'performance-lab' ) . '</p>',
 		$autoloaded_options_count,
 		size_format( $autoloaded_options_size )
-	) . perflab_aao_autoloaded_options_table();
+	) . perflab_aao_get_autoloaded_options_table();
 
 	/**
 	 * Filters description to be shown on Site Health warning when threshold is met.
