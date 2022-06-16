@@ -142,6 +142,11 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 		$destination_file_name = $editor->generate_filename( null, null, $extension[0] );
 	}
 
+	// Skip creation of duplicate WebP image if an image file already exists in the directory.
+	if ( file_exists( $destination_file_name ) ) {
+		return new WP_Error( 'webp_image_file_present', __( 'The WebP image already exists.', 'performance-lab' ) );
+	}
+
 	$image = $editor->save( $destination_file_name, $mime );
 	if ( is_wp_error( $image ) ) {
 		return $image;
