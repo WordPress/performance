@@ -116,10 +116,6 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/white.jpg',
 				'expected_transparency' => false,
 			),
-			'trans_jpg'  => array(
-				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.jpg',
-				'expected_transparency' => false,
-			),
 
 			'white_png'  => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/white.png',
