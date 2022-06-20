@@ -330,6 +330,9 @@ function wp_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
  * @return string|null|WP_Error hex value of dominant color or null if not set.
  */
 function dominant_color_get_dominant_color( $attachment_id ) {
+	if ( ! wp_attachment_is_image( $attachment_id ) ) {
+		return null;
+	}
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $image_meta ) ) {
 		return new WP_Error( 'unable_to_find_imagemeta_for_id', __( 'Unable to find metadata for image for given ID', 'performance-lab' ) );
