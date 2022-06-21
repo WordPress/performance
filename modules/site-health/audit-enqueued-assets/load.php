@@ -47,7 +47,7 @@ function perflab_aea_audit_enqueued_scripts() {
 
 			$enqueued_scripts[] = array(
 				'src'  => $script->src,
-				'size' => perflab_aea_get_resource_file_size( $path ) + $inline_size,
+				'size' => wp_filesize( $path ) + $inline_size,
 			);
 
 		}
@@ -94,7 +94,7 @@ function perflab_aea_audit_enqueued_styles() {
 
 			$enqueued_styles[] = array(
 				'src'  => $style->src,
-				'size' => perflab_aea_get_resource_file_size( $path ) + $inline_size,
+				'size' => wp_filesize( $path ) + $inline_size,
 			);
 		}
 		set_transient( 'aea_enqueued_front_page_styles', $enqueued_styles, 12 * HOUR_IN_SECONDS );
