@@ -5,7 +5,7 @@
  * if they are supported in WP Core versions which this plugin supports.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.2.0
  */
 
 // WP Filesize function.
@@ -19,7 +19,7 @@ if ( ! function_exists( 'wp_filesize' ) ) {
 	 * @param string $path Path to the file.
 	 *
 	 * @return int The size of the file in bytes, or 0 in the event of an error.
-	 * @since n.e.x.t
+	 * @since 1.2.0
 	 *
 	 * @link https://www.php.net/manual/en/function.filesize.php
 	 */
@@ -30,7 +30,7 @@ if ( ! function_exists( 'wp_filesize' ) ) {
 		 * @param null|int $size The unfiltered value. Returning an int from the callback bypasses the filesize call.
 		 * @param string $path Path to the file.
 		 *
-		 * @since n.e.x.t
+		 * @since 1.2.0
 		 */
 		$size = apply_filters( 'pre_wp_filesize', null, $path );
 
@@ -46,7 +46,7 @@ if ( ! function_exists( 'wp_filesize' ) ) {
 		 * @param int $size The result of PHP filesize on the file.
 		 * @param string $path Path to the file.
 		 *
-		 * @since n.e.x.t
+		 * @since 1.2.0
 		 */
 		return (int) apply_filters( 'wp_filesize', $size, $path );
 	}
