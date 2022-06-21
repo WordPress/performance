@@ -5,7 +5,7 @@
  * Experimental: No
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.2.0
  */
 
 /**
@@ -16,7 +16,7 @@ require_once __DIR__ . '/helper.php';
 /**
  * Adds tests to site health.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @param array $tests Site Health Tests.
  * @return array Modified Site Health tests including Page caching test.
@@ -35,7 +35,7 @@ add_filter( 'site_status_tests', 'perflab_afpc_add_full_page_cache_test' );
 /**
  * Callback for perflab_page_cache test.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @return array The test results.
  */
@@ -154,7 +154,7 @@ function perflab_afpc_page_cache_test() {
 /**
  * Register async test REST endpoint.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  */
 function perflab_afpc_register_async_test_endpoints() {
 	register_rest_route(

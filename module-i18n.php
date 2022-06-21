@@ -3,6 +3,10 @@
 $generated_i18n_strings = array(
 	_x( 'WebP Uploads', 'module name', 'performance-lab' ),
 	_x( 'Creates WebP versions for new JPEG image uploads if supported by the server.', 'module description', 'performance-lab' ),
+	_x( 'Dominant Color', 'module name', 'performance-lab' ),
+	_x( 'Adds support to store dominant color for an image and create a placeholder background with that color.', 'module description', 'performance-lab' ),
+	_x( 'Audit Full Page Cache', 'module name', 'performance-lab' ),
+	_x( 'Adds a check for full page cache in Site Health status.', 'module description', 'performance-lab' ),
 	_x( 'WebP Support', 'module name', 'performance-lab' ),
 	_x( 'Adds a WebP support check in Site Health status.', 'module description', 'performance-lab' ),
 	_x( 'Audit Autoloaded Options', 'module name', 'performance-lab' ),
