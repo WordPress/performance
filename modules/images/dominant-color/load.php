@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: Dominant Color
- * Description: Adds support to store dominant-color for an image and create a placeholder background with that color.
+ * Description: Adds support to store dominant color for an image and create a placeholder background with that color.
  * Experimental: Yes
  *
  * @package performance-lab

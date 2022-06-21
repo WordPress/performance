@@ -18,7 +18,7 @@ The Performance Lab plugin is a collection of modules focused on enhancing perfo
 Currently the plugin includes the following performance modules:
 
 * **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
-* **Dominant Color:** Adds support to store dominant-color for an image and create a placeholder background with that color.
+* **Dominant Color:** Adds support to store dominant color for an image and create a placeholder background with that color.
 * **Audit Full Page Cache:** Adds a check for full page cache in Site Health status.
 * **WebP Support:** Adds a WebP support check in Site Health status.
 * **Audit Autoloaded Options:** Adds a check for autoloaded options in Site Health status.
