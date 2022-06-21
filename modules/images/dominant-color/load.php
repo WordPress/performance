@@ -5,13 +5,13 @@
  * Experimental: Yes
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.2.0
  */
 
 /**
  * Add the dominant color metadata to the attachment.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @param array $metadata      The attachment metadata.
  * @param int   $attachment_id The attachment ID.
@@ -39,7 +39,7 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
 /**
  * Filter various image attributes to add the dominant color to the image
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @param array  $attr       Attributes for the image markup.
  * @param object $attachment Image attachment post.
@@ -77,7 +77,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_update_attachm
 /**
  * Filter image tags in content to add the dominant color to the image.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @param string $filtered_image The filtered image.
  * @param string $context        The context of the image.
@@ -101,7 +101,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	 *
 	 * You can set this to false in order disable adding the dominant color to the image.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.2.0
 	 *
 	 * @param bool   $add_dominant_color Whether to add the dominant color to the image. default true.
 	 * @param int    $attachment_id      The image attachment ID.
@@ -146,7 +146,7 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 	/**
 	 * Filter the content to allow us to filter the image tags.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.2.0
 	 *
 	 * @param string $content the content to filter.
 	 * @param string $context the context of the content.
@@ -221,7 +221,7 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 /**
  * Add CSS needed for to show the dominant color as an image background.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  */
 function dominant_color_add_inline_style() {
 	$handle = 'dominant-color-styles';
@@ -236,7 +236,7 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
 /**
  * Overloads wp_image_editors() to load the extended classes.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @return string[] Registered image editors class names.
  */
@@ -254,7 +254,7 @@ function dominant_color_set_image_editors() {
 /**
  * Computes the dominant color of the given attachment image.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @param int $attachment_id The attachment ID.
  * @return string|WP_Error The dominant color of the image, or WP_Error on error.
@@ -286,7 +286,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 /**
  * Computes whether the given attachment image has transparency.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @param int $attachment_id The attachment ID.
  * @return bool|WP_Error True if the color has transparency or WP_Error on error.
@@ -317,7 +317,7 @@ function dominant_color_has_transparency( $attachment_id ) {
 /**
  * Gets file path of image based on size.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @param int    $attachment_id Attachment ID for image.
  * @param string $size          Optional. Image size. Default 'thumbnail'.
