@@ -126,29 +126,38 @@ function perflab_render_modules_page() {
  * @param array  $module_settings Associative array of the module's current settings.
  */
 function perflab_render_modules_page_field( $module_slug, $module_data, $module_settings ) {
-	$base_id   = sprintf( 'module_%s', $module_slug );
-	$base_name = sprintf( '%1$s[%2$s]', PERFLAB_MODULES_SETTING, $module_slug );
-	$enabled   = isset( $module_settings['enabled'] ) && $module_settings['enabled'];
+	$base_id         = sprintf( 'module_%s', $module_slug );
+	$base_name       = sprintf( '%1$s[%2$s]', PERFLAB_MODULES_SETTING, $module_slug );
+	$enabled         = isset( $module_settings['enabled'] ) && $module_settings['enabled'];
+	$can_load_module = perflab_can_load_module( $module_slug );
 	?>
 	<fieldset>
 		<legend class="screen-reader-text">
 			<?php echo esc_html( $module_data['name'] ); ?>
 		</legend>
 		<label for="<?php echo esc_attr( "{$base_id}_enabled" ); ?>">
-			<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" value="1"<?php checked( $enabled ); ?>>
+			<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" value="1"<?php checked( $enabled ); ?><?php echo ( ! $can_load_module ? ' readonly onclick="return false;"' : '' ); ?>>
 			<?php
-			if ( $module_data['experimental'] ) {
+			if ( ! $can_load_module ) {
 				printf(
 					/* translators: %s: module name */
-					__( 'Enable %s <strong>(experimental)</strong>', 'performance-lab' ),
+					__( '%s is already part of your WordPress version and therefore cannot be loaded as part of the plugin.', 'performance-lab' ),
 					esc_html( $module_data['name'] )
 				);
 			} else {
-				printf(
-					/* translators: %s: module name */
-					__( 'Enable %s', 'performance-lab' ),
-					esc_html( $module_data['name'] )
-				);
+				if ( $module_data['experimental'] ) {
+					printf(
+						/* translators: %s: module name */
+						__( 'Enable %s <strong>(experimental)</strong>', 'performance-lab' ),
+						esc_html( $module_data['name'] )
+					);
+				} else {
+					printf(
+						/* translators: %s: module name */
+						__( 'Enable %s', 'performance-lab' ),
+						esc_html( $module_data['name'] )
+					);
+				}
 			}
 			?>
 		</label>

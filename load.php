@@ -134,7 +134,25 @@ function perflab_get_active_modules() {
 	 */
 	$modules = apply_filters( 'perflab_active_modules', $modules );
 
-	return $modules;
+	$active_modules = array();
+	foreach ( $modules as $module ) {
+
+		// Do not load module if it marge in WordPress.
+		$can_load_module = perflab_can_load_module( $module );
+		if ( ! $can_load_module ) {
+			continue;
+		}
+
+		// Do not load module if it no longer exists.
+		$module_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
+		if ( ! file_exists( $module_file ) ) {
+			continue;
+		}
+
+		$active_modules[] = $module;
+	}
+
+	return $active_modules;
 }
 
 /**
@@ -169,6 +187,35 @@ function perflab_render_generator() {
 add_action( 'wp_head', 'perflab_render_generator' );
 
 /**
+ * Don't load the performance modules if the core version of the module is available.
+ *
+ * @since n.e.x.t
+ */
+function perflab_can_load_module( $module ) {
+	$module_load_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/can-load.php';
+
+	// If the load file does not exist, the feature is not in core and the module can be loaded.
+	if ( ! file_exists( $module_load_file ) ) {
+		return true;
+	}
+
+	// Require the file to include the add_filter function.
+	require_once $module_load_file;
+
+	/**
+	 * Filters whether the module can load or not.
+	 *
+	 * You can set this to false in order to disable the module.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool   $can_load_module Whether to load module. default true.
+	 * @param string $module          The name of the module.
+	 */
+	return apply_filters( 'perflab_can_load_module', true, $module );
+}
+
+/**
  * Loads the active performance modules.
  *
  * @since 1.0.0
@@ -181,13 +228,8 @@ function perflab_load_active_modules() {
 	}
 
 	foreach ( $active_modules as $module ) {
-		// Do not load module if it no longer exists.
-		$module_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
-		if ( ! file_exists( $module_file ) ) {
-			continue;
-		}
 
-		require_once $module_file;
+		require_once plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
 	}
 }
 
