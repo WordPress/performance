@@ -416,12 +416,13 @@ add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
  *
  * @since 1.0.0
  *
- * @param string $image         An <img> tag where the urls would be updated.
- * @param string $context       The context where this is function is being used.
- * @param int    $attachment_id The ID of the attachment being modified.
+ * @param string $original_image An <img> tag where the urls would be updated.
+ * @param string $context        The context where this is function is being used.
+ * @param int    $attachment_id  The ID of the attachment being modified.
  * @return string The updated img tag.
  */
-function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id ) {
+function webp_uploads_img_tag_update_mime_type( $original_image, $context, $attachment_id ) {
+	$image    = $original_image;
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 	if ( empty( $metadata['file'] ) ) {
 		return $image;
@@ -555,6 +556,15 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		}
 	}
 
+	if (
+		$image !== $original_image &&
+		'the_content' === $context &&
+		'image/jpeg' === $original_mime &&
+		'image/webp' === $target_mime
+	) {
+		add_action( 'wp_footer', 'webp_uploads_wepb_fallback' );
+	}
+
 	return $image;
 }
 
@@ -598,23 +608,22 @@ function webp_uploads_wepb_fallback() {
 	s.src = '{$fallback_url}';
 
 	i = d.createElement( i );
-	i.src = p + 'UklGRjIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
+	i.src = p + 'jIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
 	i.onload = function() {
-		i.src = p + 'UklGRh4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
+		i.src = p + 'h4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
 	};
 
 	i.onerror = function() {
 		d.body.appendChild( s );
 	};
-} )( document, 'img', 'script', 'data:image/webp;base64,' );
+} )( document, 'img', 'script', 'data:image/webp;base64,UklGR' );
 EOL;
 
 	wp_print_inline_script_tag(
 		preg_replace( '/\s+/', '', $script ),
 		array(
 			'id'            => 'webpUploadsFallbackWebpImages',
-			'data-rest-api' => get_rest_url(),
+			'data-rest-api' => trailingslashit( get_rest_url() ),
 		)
 	);
 }
-add_action( 'wp_footer', 'webp_uploads_wepb_fallback' );

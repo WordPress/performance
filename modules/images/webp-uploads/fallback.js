@@ -25,11 +25,17 @@
 	var loadMediaDetails = function( nodes ) {
 		var ids = [];
 		for ( var i = 0; i < nodes.length; i++ ) {
-			if ( nodes[i].nodeName !== "IMG" || ! nodes[i].src.match( /\.webp$/i ) ) {
+			var node = nodes[i];
+			var srcset = node.getAttribute( 'srcset' ) || '';
+
+			if (
+				node.nodeName !== "IMG" ||
+				( ! node.src.match( /\.webp$/i ) && ! srcset.match( /\.webp\s+/ ) )
+			) {
 				continue;
 			}
 
-			var attachment = nodes[i].className.match( /wp-image-(\d+)/i );
+			var attachment = node.className.match( /wp-image-(\d+)/i );
 			if ( attachment && attachment[1] && ids.indexOf( attachment[1] ) === -1 ) {
 				ids.push( attachment[1] );
 			}
