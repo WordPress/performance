@@ -121,8 +121,8 @@ class Load_Tests extends WP_UnitTestCase {
 
 		// Assert that it only allow existing modules.
 		$new_value = array(
-			'inactive-module'                                   => array( 'enabled' => false ),
-			'images/webp-uploads'                               => array( 'enabled' => true ),
+			'inactive-module'     => array( 'enabled' => false ),
+			'images/webp-uploads' => array( 'enabled' => true ),
 			'object-cache/persistent-object-cache-health-check' => array( 'enabled' => true ),
 		);
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
@@ -145,8 +145,8 @@ class Load_Tests extends WP_UnitTestCase {
 
 		// Assert that it returns active modules.
 		$new_value = array(
-			'inactive-module'                                   => array( 'enabled' => false ),
-			'images/webp-uploads'                               => array( 'enabled' => true ),
+			'inactive-module'     => array( 'enabled' => false ),
+			'images/webp-uploads' => array( 'enabled' => true ),
 			'object-cache/persistent-object-cache-health-check' => array( 'enabled' => true ),
 		);
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
@@ -157,7 +157,7 @@ class Load_Tests extends WP_UnitTestCase {
 				return $dummy_active_modules;
 			}
 		);
-		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: '.implode( ', ', $dummy_active_modules );
+		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $dummy_active_modules );
 		$content  = perflab_get_generator_content();
 		$this->assertSame( $expected, $content );
 	}
