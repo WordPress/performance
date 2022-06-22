@@ -25,7 +25,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_i
 			// Add sources to original image metadata.
 			$metadata['sources'][ $targeted_mime ] = array(
 				'file'     => $main_images[ $targeted_mime ]['file'],
-				'filesize' => filesize( $main_images[ $targeted_mime ]['path'] ),
+				'filesize' => wp_filesize( $main_images[ $targeted_mime ]['path'] ),
 			);
 			$image_directory                       = pathinfo( $main_images[ $targeted_mime ]['path'], PATHINFO_DIRNAME );
 		}
@@ -68,7 +68,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_i
 
 			$metadata['sizes'][ $size_name ]['sources'][ $targeted_mime ] = array(
 				'file'     => $subsized_images[ $targeted_mime ][ $size_name ]['file'],
-				'filesize' => filesize( $subsize_path ),
+				'filesize' => wp_filesize( $subsize_path ),
 			);
 		}
 	}
@@ -244,6 +244,7 @@ function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
 				return webp_uploads_backup_sources( $attachment_id, $data );
 			case 'wp_restore_image':
 				// When an image has been restored.
+				$data = webp_uploads_backup_sources( $attachment_id, $data );
 				return webp_uploads_restore_image( $attachment_id, $data );
 		}
 	}
@@ -387,9 +388,8 @@ function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) {
  */
 function webp_uploads_restore_image( $attachment_id, $data ) {
 	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
-
 	if ( ! is_array( $backup_sources ) ) {
-		return $data;
+		$backup_sources = array();
 	}
 
 	if ( ! isset( $backup_sources['full-orig'] ) || ! is_array( $backup_sources['full-orig'] ) ) {

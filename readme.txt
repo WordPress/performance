@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 5.8
 Tested up to:      6.0
 Requires PHP:      5.6
-Stable tag:        1.1.0
+Stable tag:        1.2.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -18,6 +18,8 @@ The Performance Lab plugin is a collection of modules focused on enhancing perfo
 Currently the plugin includes the following performance modules:
 
 * **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
+* **Dominant Color:** Adds support to store dominant color for an image and create a placeholder background with that color.
+* **Audit Full Page Cache:** Adds a check for full page cache in Site Health status.
 * **WebP Support:** Adds a WebP support check in Site Health status.
 * **Audit Autoloaded Options:** Adds a check for autoloaded options in Site Health status.
 * **Audit Enqueued Assets:** Adds a CSS and JS resource check in Site Health status.
@@ -65,6 +67,24 @@ Contributions welcome! There are several ways to contribute:
 * Join the weekly chat (Tuesdays at 16:00 UTC) in the [#performance channel on Slack](https://wordpress.slack.com/archives/performance)
 
 == Changelog ==
+
+= 1.2.0 =
+
+**Features**
+
+* Images: Add Dominant Color module to provide color background for loading images. ([282](https://github.com/WordPress/performance/pull/282))
+* Site Health: Add Site Health check for Full Page Cache usage. ([263](https://github.com/WordPress/performance/pull/263))
+
+**Enhancements**
+
+* Images: Update `webp_uploads_pre_generate_additional_image_source` filter to allow returning file size. ([334](https://github.com/WordPress/performance/pull/334))
+* Infrastructure: Introduce plugin uninstaller routine. ([345](https://github.com/WordPress/performance/pull/345))
+* Infrastructure: Use `wp_filesize` instead of `filesize` if available. ([376](https://github.com/WordPress/performance/pull/376))
+
+**Bug Fixes**
+
+* Images: Avoid overwriting existing WebP files when creating WebP images. ([359](https://github.com/WordPress/performance/pull/359))
+* Images: Back up edited `full` image sources when restoring the original image. ([314](https://github.com/WordPress/performance/pull/314))
 
 = 1.1.0 =
 

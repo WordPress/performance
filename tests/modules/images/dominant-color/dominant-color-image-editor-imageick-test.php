@@ -2,7 +2,7 @@
 /**
  * Tests for dominant-color module.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @package performance-lab
  * @group   dominant-color
