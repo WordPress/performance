@@ -110,18 +110,28 @@ class Load_Tests extends WP_UnitTestCase {
 		);
 		$this->assertSame( $expected_active_modules, $active_modules );
 
-		// Assert that option updates affect the active modules correctly.
+		// Assert that dummy module option doesn't show in active modules.
 		$new_value = array(
 			'inactive-module' => array( 'enabled' => false ),
 			'active-module'   => array( 'enabled' => true ),
 		);
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
 		$active_modules = perflab_get_active_modules();
-		$this->assertSame( array( 'active-module' ), $active_modules );
+		$this->assertSame( array(), $active_modules );
+
+		// Assert that it only allow existing modules.
+		$new_value = array(
+			'inactive-module'                                   => array( 'enabled' => false ),
+			'images/webp-uploads'                               => array( 'enabled' => true ),
+			'object-cache/persistent-object-cache-health-check' => array( 'enabled' => true ),
+		);
+		update_option( PERFLAB_MODULES_SETTING, $new_value );
+		$active_modules = perflab_get_active_modules();
+		$this->assertSame( array( 'images/webp-uploads', 'object-cache/persistent-object-cache-health-check' ), $active_modules );
 	}
 
 	public function test_perflab_get_generator_content() {
-		// Assert that it returns the current version and active modules.
+		// Assert that it doesn't returns dummy modules.
 		$dummy_active_modules = array( 'images/a-module', 'object-cache/another-module' );
 		add_filter(
 			'perflab_active_modules',
@@ -129,7 +139,25 @@ class Load_Tests extends WP_UnitTestCase {
 				return $dummy_active_modules;
 			}
 		);
-		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $dummy_active_modules );
+		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ';
+		$content  = perflab_get_generator_content();
+		$this->assertSame( $expected, $content );
+
+		// Assert that it returns active modules.
+		$new_value = array(
+			'inactive-module'                                   => array( 'enabled' => false ),
+			'images/webp-uploads'                               => array( 'enabled' => true ),
+			'object-cache/persistent-object-cache-health-check' => array( 'enabled' => true ),
+		);
+		update_option( PERFLAB_MODULES_SETTING, $new_value );
+		$dummy_active_modules = array( 'images/webp-uploads', 'object-cache/persistent-object-cache-health-check' );
+		add_filter(
+			'perflab_active_modules',
+			function() use ( $dummy_active_modules ) {
+				return $dummy_active_modules;
+			}
+		);
+		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: '.implode( ', ', $dummy_active_modules );
 		$content  = perflab_get_generator_content();
 		$this->assertSame( $expected, $content );
 	}
