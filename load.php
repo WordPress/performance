@@ -190,6 +190,9 @@ add_action( 'wp_head', 'perflab_render_generator' );
  * Don't load the performance modules if the core version of the module is available.
  *
  * @since n.e.x.t
+ *
+ * @param string $module The name of the module.
+ * @return bool Whether to load module or not.
  */
 function perflab_can_load_module( $module ) {
 	$module_load_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/can-load.php';

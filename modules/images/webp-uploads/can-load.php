@@ -11,9 +11,9 @@
  *
  * @since n.e.x.t
  *
- * @param bool   $can_load_module Whether to load module. default true.
- * @param string $module          The name of the module.
- * @return bool whether to load module or not.
+ * @param bool   $can_load Whether to load module. default true.
+ * @param string $module   The name of the module.
+ * @return bool Whether to load module or not.
  */
 function perflab_check_webp_uploads_core_functions( $can_load, $module ) {
 
