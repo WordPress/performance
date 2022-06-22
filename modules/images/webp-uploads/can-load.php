@@ -21,10 +21,6 @@ function perflab_check_webp_uploads_core_functions( $can_load, $module ) {
 		return $can_load;
 	}
 
-	if ( function_exists( 'wp_image_use_alternate_mime_types' ) ) {
-		return false;
-	}
-
-	return true;
+	return ! function_exists( 'wp_image_use_alternate_mime_types' );
 }
 add_filter( 'perflab_can_load_module', 'perflab_check_webp_uploads_core_functions', 10, 2 );
