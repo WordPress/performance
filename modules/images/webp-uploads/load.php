@@ -557,6 +557,7 @@ function webp_uploads_img_tag_update_mime_type( $original_image, $context, $atta
 	}
 
 	if (
+		! has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) &&
 		$image !== $original_image &&
 		'the_content' === $context &&
 		'image/jpeg' === $original_mime &&
