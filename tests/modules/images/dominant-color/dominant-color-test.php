@@ -118,10 +118,9 @@ class Dominant_Color_Test extends WP_UnitTestCase {
 			),
 			'trans_gif' => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.gif',
-				'expected_color'        => '20202',
+				'expected_color'        => '020202',
 				'expected_transparency' => true,
 			),
 		);
 	}
 }
-

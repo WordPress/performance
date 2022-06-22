@@ -15,12 +15,12 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 
 			'red_jpg'       => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.jpg',
-				'expected_color' => array( 'ff0000', 'ff00', 'fe0000', 'fe00' ),
+				'expected_color' => array( 'ff0000', 'fe0000' ),
 				'is_wp_error'    => false,
 			),
 			'green_jpg'     => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/green.jpg',
-				'expected_color' => array( '00ff00', '0ff0', '0ff1', 'ff01' ),
+				'expected_color' => array( '00ff00', '00ff01' ),
 				'is_wp_error'    => false,
 			),
 			'white_jpg'     => array(
@@ -31,12 +31,12 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 
 			'red_gif'       => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.gif',
-				'expected_color' => array( 'ff0000', 'ff00' ),
+				'expected_color' => array( 'ff0000' ),
 				'is_wp_error'    => false,
 			),
 			'green_gif'     => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/green.gif',
-				'expected_color' => array( '00ff00', '0ff0', 'ff01', 'ff00' ),
+				'expected_color' => array( '00ff00' ),
 				'is_wp_error'    => false,
 			),
 			'white_gif'     => array(
@@ -46,18 +46,18 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'trans_gif'     => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.gif',
-				'expected_color' => array( '5a5a5a', '20202' ),
+				'expected_color' => array( '5a5a5a', '020202' ),
 				'is_wp_error'    => false,
 			),
 
 			'red_png'       => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.png',
-				'expected_color' => array( 'ff0000', 'ff00' ),
+				'expected_color' => array( 'ff0000' ),
 				'is_wp_error'    => false,
 			),
 			'green_png'     => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/green.png',
-				'expected_color' => array( '00ff00', '0ff0', 'ff00', 'ff01' ),
+				'expected_color' => array( '00ff00' ),
 				'is_wp_error'    => false,
 			),
 			'white_png'     => array(
@@ -67,18 +67,18 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'trans_png'     => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.png',
-				'expected_color' => array( '000' ),
+				'expected_color' => array( '000000' ),
 				'is_wp_error'    => false,
 			),
 
 			'red_webp'      => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.webp',
-				'expected_color' => array( 'ff0000', 'ff00' ),
+				'expected_color' => array( 'ff0000' ),
 				'is_wp_error'    => false,
 			),
 			'green_webp'    => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/green.webp',
-				'expected_color' => array( '00ff00', '0ff0', 'ff01', 'ff00' ),
+				'expected_color' => array( '00ff00' ),
 				'is_wp_error'    => false,
 			),
 			'white_webp'    => array(
@@ -88,18 +88,18 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'trans_webp'    => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/trans.webp',
-				'expected_color' => array( '000' ),
+				'expected_color' => array( '000000' ),
 				'is_wp_error'    => false,
 			),
 
 			'earth_gif'     => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/earth.gif',
-				'expected_color' => array( '151517', '1b1a1c', '18161a' ),
+				'expected_color' => array( '18161a', '1b1a1c' ),
 				'is_wp_error'    => false,
 			),
 			'balloons_webp' => array(
 				'image_path'     => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp',
-				'expected_color' => array( 'c5bec0', 'c1bbb9', 'c3bdbd' ),
+				'expected_color' => array( 'c1bbb9', 'c3bdbd' ),
 				'is_wp_error'    => false,
 			),
 		);
