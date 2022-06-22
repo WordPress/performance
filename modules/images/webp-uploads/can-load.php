@@ -6,17 +6,25 @@
  * @package performance-lab
  */
 
-add_filter( 'perflab_can_load_module', 'perflab_check_webp_uploads_core_functions', 10, 2 );
-
+/**
+ * Filters whether the module can load or not.
+ *
+ * @since n.e.x.t
+ *
+ * @param bool   $can_load_module Whether to load module. default true.
+ * @param string $module          The name of the module.
+ * @return bool whether to load module or not.
+ */
 function perflab_check_webp_uploads_core_functions( $can_load, $module ) {
 
-    if ( 'images/webp-uploads' !== $module ) {
-        return $can_load;
-    }
+	if ( 'images/webp-uploads' !== $module ) {
+		return $can_load;
+	}
 
-    if ( function_exists( 'wp_image_use_alternate_mime_types' ) ) {
-        return false;
-    }
+	if ( function_exists( 'wp_image_use_alternate_mime_types' ) ) {
+		return false;
+	}
 
-    return true;
+	return true;
 }
+add_filter( 'perflab_can_load_module', 'perflab_check_webp_uploads_core_functions', 10, 2 );
