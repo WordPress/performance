@@ -3,7 +3,7 @@
  * Helper functions used by module.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.2.0
  */
 
 /**
@@ -12,7 +12,7 @@
  * Note: key is header name and value could be callable function to verify header value.
  * Empty value mean existence of header detect page cache is enabled.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @return array List of client caching headers and their (optional) verification callbacks.
  */
@@ -59,7 +59,7 @@ function perflab_afpc_get_page_cache_headers() {
 /**
  * Checks if site has page cache enabled or not.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @return WP_Error|array {
  *     Page caching detection details or else error information.
@@ -145,7 +145,7 @@ function perflab_afpc_check_for_page_caching() {
 /**
  * Get page cache details.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @return WP_Error|array {
  *    Page cache detail or else a WP_Error if unable to determine.
@@ -194,7 +194,7 @@ function perflab_afpc_get_page_cache_detail() {
 /**
  * Get the threshold below which a response time is considered good.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @return int Threshold in milliseconds.
  */
@@ -202,7 +202,7 @@ function perflab_afpc_get_good_response_time_threshold() {
 	/**
 	 * Filters the threshold below which a response time is considered good.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.2.0
 	 * @param int $threshold Threshold in milliseconds. Default 600.
 	 */
 	return (int) apply_filters( 'perflab_afpc_page_cache_good_response_time_threshold', 600 );
