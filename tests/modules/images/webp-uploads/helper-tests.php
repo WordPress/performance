@@ -340,8 +340,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_empty_array_when_filter_returns_empty_array()
-	{
+	public function it_should_return_empty_array_when_filter_returns_empty_array() {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
@@ -355,8 +354,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_default_transforms_when_filter_returns_non_array_type()
-	{
+	public function it_should_return_default_transforms_when_filter_returns_non_array_type() {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
 			function () {
@@ -380,8 +378,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_fallback_transforms_when_overwritten_invalid_transforms()
-	{
+	public function it_should_return_fallback_transforms_when_overwritten_invalid_transforms() {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
 			function () {
@@ -400,8 +397,7 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_custom_transforms_when_overwritten_by_filter()
-	{
+	public function it_should_return_custom_transforms_when_overwritten_by_filter() {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
 			function () {
