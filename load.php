@@ -137,13 +137,13 @@ function perflab_get_active_modules() {
 	$active_modules = array();
 	foreach ( $modules as $module ) {
 
-		// Do not load module if it marge in WordPress.
+		// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
 		$can_load_module = perflab_can_load_module( $module );
 		if ( ! $can_load_module ) {
 			continue;
 		}
 
-		// Do not load module if it no longer exists.
+		// Do not load module if no longer exists.
 		$module_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
 		if ( ! file_exists( $module_file ) ) {
 			continue;
@@ -187,7 +187,7 @@ function perflab_render_generator() {
 add_action( 'wp_head', 'perflab_render_generator' );
 
 /**
- * Don't load the performance modules if the core version of the module is available.
+ * Checks whether the given module can be loaded in the current environment.
  *
  * @since n.e.x.t
  *
@@ -197,7 +197,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
 function perflab_can_load_module( $module ) {
 	$module_load_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/can-load.php';
 
-	// If the load file does not exist, the feature is not in core and the module can be loaded.
+	// If the `can-load.php` file does not exist, assume the module can be loaded.
 	if ( ! file_exists( $module_load_file ) ) {
 		return true;
 	}
@@ -212,7 +212,7 @@ function perflab_can_load_module( $module ) {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param bool   $can_load_module Whether to load module. default true.
+	 * @param bool   $can_load_module Whether to load module. Default true.
 	 * @param string $module          The name of the module.
 	 */
 	return apply_filters( 'perflab_can_load_module', true, $module );

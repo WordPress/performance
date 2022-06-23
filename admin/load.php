@@ -144,20 +144,18 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 					__( '%s is already part of your WordPress version and therefore cannot be loaded as part of the plugin.', 'performance-lab' ),
 					esc_html( $module_data['name'] )
 				);
+			} elseif ( $module_data['experimental'] ) {
+				printf(
+					/* translators: %s: module name */
+					__( 'Enable %s <strong>(experimental)</strong>', 'performance-lab' ),
+					esc_html( $module_data['name'] )
+				);
 			} else {
-				if ( $module_data['experimental'] ) {
-					printf(
-						/* translators: %s: module name */
-						__( 'Enable %s <strong>(experimental)</strong>', 'performance-lab' ),
-						esc_html( $module_data['name'] )
-					);
-				} else {
-					printf(
-						/* translators: %s: module name */
-						__( 'Enable %s', 'performance-lab' ),
-						esc_html( $module_data['name'] )
-					);
-				}
+				printf(
+					/* translators: %s: module name */
+					__( 'Enable %s', 'performance-lab' ),
+					esc_html( $module_data['name'] )
+				);
 			}
 			?>
 		</label>

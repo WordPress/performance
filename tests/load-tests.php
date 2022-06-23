@@ -119,7 +119,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$active_modules = perflab_get_active_modules();
 		$this->assertSame( array(), $active_modules );
 
-		// Assert that it only allow existing modules.
+		// Assert that only allows existing modules.
 		$new_value = array(
 			'inactive-module'     => array( 'enabled' => false ),
 			'images/webp-uploads' => array( 'enabled' => true ),

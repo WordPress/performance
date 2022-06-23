@@ -11,7 +11,7 @@
  *
  * @since n.e.x.t
  *
- * @param bool   $can_load Whether to load module. default true.
+ * @param bool   $can_load Whether to load module. Default true.
  * @param string $module   The name of the module.
  * @return bool Whether to load module or not.
  */
