@@ -191,8 +191,8 @@ add_action( 'wp_head', 'perflab_render_generator' );
  *
  * @since n.e.x.t
  *
- * @param string $module The name of the module.
- * @return bool Whether to load module or not.
+ * @param string $module Slug of the module.
+ * @return bool Whether the module can be loaded or not.
  */
 function perflab_can_load_module( $module ) {
 	$module_load_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/can-load.php';
@@ -202,20 +202,16 @@ function perflab_can_load_module( $module ) {
 		return true;
 	}
 
-	// Require the file to include the add_filter function.
-	require_once $module_load_file;
+	// Require the file to get the closure for whether the module can load.
+	$can_load = require $module_load_file;
 
-	/**
-	 * Filters whether the module can load or not.
-	 *
-	 * You can set this to false in order to disable the module.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param bool   $can_load_module Whether to load module. Default true.
-	 * @param string $module          The name of the module.
-	 */
-	return apply_filters( 'perflab_can_load_module', true, $module );
+	// If the `can-load.php` file is invalid and does not return a closure, assume the module can be loaded.
+	if ( ! is_callable( $can_load ) ) {
+		return true;
+	}
+
+	// Call the closure to determine whether the module can be loaded.
+	return $can_load();
 }
 
 /**
