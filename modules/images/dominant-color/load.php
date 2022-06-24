@@ -352,7 +352,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
  * @since n.e.x.t
  *
  * @param int $attachment_id Attachment ID for image.
- * @return bool|null|WP_Error true if may have transparency or null if not set.
+ * @return bool|null Whether the image has transparency, or null if not set.
  */
 function dominant_color_has_transparency( $attachment_id ) {
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
