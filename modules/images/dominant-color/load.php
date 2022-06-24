@@ -347,7 +347,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 }
 
 /**
- * Gets the has_transparency value for an image attachment.
+ * Returns whether an image attachment has transparency.
  *
  * @since n.e.x.t
  *
