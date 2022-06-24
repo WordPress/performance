@@ -323,7 +323,7 @@ function wp_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
 }
 
 /**
- * Gets the Dominant color for an image attachment.
+ * Gets the dominant color for an image attachment.
  *
  * @since n.e.x.t
  *
