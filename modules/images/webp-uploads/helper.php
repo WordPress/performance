@@ -32,7 +32,7 @@ function webp_uploads_get_upload_image_mime_transforms() {
 	 *
 	 * @param array $default_transforms A map with the valid mime transforms.
 	 */
-	$transforms = (array) apply_filters( 'webp_uploads_upload_image_mime_transforms', $default_transforms );
+	$transforms = apply_filters( 'webp_uploads_upload_image_mime_transforms', $default_transforms );
 
 	// Return the default mime transforms if a non-array result is returned from the filter.
 	if ( ! is_array( $transforms ) ) {
