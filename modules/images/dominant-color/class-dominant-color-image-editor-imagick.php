@@ -65,9 +65,16 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 		}
 
 		try {
-			// Check if the image has an alpha channel if false, then it can't have transparency so return early.
-			if ( ! $this->image->getImageAlphaChannel() ) {
-				return false;
+			/*
+			 * Check if the image has an alpha channel if false, then it can't have transparency so return early.
+			 *
+			 * Note that Imagick::getImageAlphaChannel() is only available if Imagick
+			 * has been compiled against ImageMagick version 6.4.0 or newer.
+			 */
+			if ( is_callable( array( $this->image, 'getImageAlphaChannel' ) ) ) {
+				if ( ! $this->image->getImageAlphaChannel() ) {
+					return false;
+				}
 			}
 
 			// Walk through the pixels and look transparent pixels.
