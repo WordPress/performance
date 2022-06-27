@@ -49,6 +49,8 @@ class Dominant_Color_Image_Editor_Imageick_Test extends DominantColorTestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color_invalid_images
 	 *
+	 * @group ms-excluded
+	 *
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
 	public function test_get_dominant_color_invalid( $image_path, $expected_color, $expected_transparency ) {
@@ -63,33 +65,20 @@ class Dominant_Color_Image_Editor_Imageick_Test extends DominantColorTestCase {
 	}
 
 	/**
-	 * Test svg file
+	 * Test if the function returns the correct color.
 	 *
-	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
+	 * @dataProvider provider_get_dominant_color_none_images
+	 *
+	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
-	public function test_get_dominant_color_svg() {
-		$image_path    = TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/video-play.svg';
+	public function test_get_dominant_color_none_images( $image_path ) {
+
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
 
-		$this->assertInstanceOf( 'WP_Error', $dominant_color_data );
-	}
-
-	/**
-	 * Test pdf file
-	 *
-	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
-	 */
-	public function test_get_dominant_color_pdf() {
-		$image_path    = TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/wordpress-gsoc-flyer.pdf';
-		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
-		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
-
-		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
-
-		$this->assertStringContainsString( 'e8e8e8', $dominant_color_data['dominant_color'] );
-		$this->assertFalse( $dominant_color_data['has_transparency'] );
+		$this->assertWPError( $dominant_color_data );
+		$this->assertStringContainsString( 'no_image_found', $dominant_color_data->get_error_code() );
 	}
 }

@@ -18,10 +18,6 @@
  * @return array $metadata The attachment metadata.
  */
 function dominant_color_metadata( $metadata, $attachment_id ) {
-	if ( ! wp_attachment_is_image( $attachment_id ) ) {
-		return $metadata;
-	}
-
 	$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
 	if ( ! is_wp_error( $dominant_color_data ) ) {
 		if ( isset( $dominant_color_data['dominant_color'] ) ) {
@@ -262,6 +258,9 @@ function dominant_color_set_image_editors() {
  * @return array|WP_Error Array with the dominant color and has transparency values or WP_Error on error.
  */
 function _dominant_color_get_dominant_color_data( $attachment_id ) {
+	if ( ! wp_attachment_is_image( $attachment_id ) ) {
+		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'performance-lab' ) );
+	}
 	$file = wp_get_attachment_file_path( $attachment_id );
 	if ( ! $file ) {
 		$file = get_attached_file( $attachment_id );

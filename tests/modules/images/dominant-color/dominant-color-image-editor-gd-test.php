@@ -53,7 +53,8 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 
 		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
 
-		$this->assertInstanceOf( 'WP_Error', $dominant_color_data );
+		$this->assertWPError( $dominant_color_data );
+		$this->assertStringContainsString( 'image_no_editor', $dominant_color_data->get_error_code() );
 	}
 
 	/**
@@ -70,6 +71,7 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 
 		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
 
-		$this->assertInstanceOf( 'WP_Error', $dominant_color_data );
+		$this->assertWPError( $dominant_color_data );
+		$this->assertStringContainsString( 'no_image_found', $dominant_color_data->get_error_code() );
 	}
 }
