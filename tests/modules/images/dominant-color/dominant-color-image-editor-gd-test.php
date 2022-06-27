@@ -44,6 +44,8 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color_invalid_images
 	 *
+	 * @group ms-excluded
+	 *
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
 	public function test_get_dominant_color_invalid( $image_path, $expected_color, $expected_transparency ) {
