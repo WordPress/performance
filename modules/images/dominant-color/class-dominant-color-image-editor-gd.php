@@ -41,7 +41,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		$b   = $rgb & 0xFF;
 		$hex = get_hex_from_rgb( $r, $g, $b );
 		if ( ! $hex ) {
-			return new WP_Error( 'image_editor_dominant_no_color', __( 'Dominant color detection failed.', 'performance-lab' ) );
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'performance-lab' ) );
 		}
 
 		return $hex;
