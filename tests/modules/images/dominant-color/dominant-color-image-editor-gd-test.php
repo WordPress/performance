@@ -20,37 +20,56 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 			100
 		);
 	}
+
 	/**
 	 * Test if the function returns the correct color.
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
+	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
-	public function test_get_dominant_color( $image_path, $expected_color, $is_wp_error ) {
+	public function test_get_dominant_color( $image_path, $expected_color, $expected_transparency ) {
 
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+
 		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
-		if ( ! $is_wp_error ) {
-			$this->assertContains( $dominant_color_data['dominant_color'], $expected_color );
-		} else {
-			$this->assertInstanceOf( 'WP_Error', $dominant_color_data );
-		}
+
+		$this->assertContains( $dominant_color_data['dominant_color'], $expected_color );
+		$this->assertSame( $dominant_color_data['has_transparency'], $expected_transparency );
 	}
 
 	/**
 	 * Test if the function returns the correct color.
 	 *
-	 * @dataProvider provider_get_has_transparency
+	 * @dataProvider provider_get_dominant_color_invalid_images
 	 *
-	 * @covers ::dominant_color_has_transparency
+	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
-	public function test_dominant_color_get_has_transparency( $image_path, $expected_tranasparency ) {
+	public function test_get_dominant_color_invalid( $image_path, $expected_color, $expected_transparency ) {
+
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+
 		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
-		$this->assertEquals( $expected_tranasparency, $dominant_color_data['has_transparency'] );
+
+		$this->assertInstanceOf( 'WP_Error', $dominant_color_data );
 	}
 
+	/**
+	 * Test if the function returns the correct color.
+	 *
+	 * @dataProvider provider_get_dominant_color_none_images
+	 *
+	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
+	 */
+	public function test_get_dominant_color_none_images( $image_path ) {
+
+		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+
+		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
+
+		$this->assertInstanceOf( 'WP_Error', $dominant_color_data );
+	}
 }
