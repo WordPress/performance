@@ -95,12 +95,6 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 				'expected_color'        => array( '000000' ),
 				'expected_transparency' => true,
 			),
-			'earth_gif'     => array(
-				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/earth.gif',
-				'expected_color'        => array( '18161a', '1b1a1c', '151517' ),
-				'expected_transparency' => false,
-			),
-
 			'balloons_webp' => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp',
 				'expected_color'        => array( 'c1bbb9', 'c3bdbd' ),

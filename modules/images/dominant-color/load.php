@@ -373,9 +373,9 @@ function dominant_color_has_transparency( $attachment_id ) {
  *
  * @since n.e.x.t
  *
- * @param int $red
- * @param int $green
- * @param int $blue
+ * @param int $red Red 0-255.
+ * @param int $green Green 0-255.
+ * @param int $blue Blue 0-255.
  *
  * @return string|null Hex color or null if error.
  */
