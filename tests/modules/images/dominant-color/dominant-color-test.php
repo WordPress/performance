@@ -107,4 +107,63 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$filtered_image_tags_not_added = dominant_color_img_tag_add_dominant_color( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
 		$this->assertEquals( $filtered_image_mock_lazy_load, $filtered_image_tags_not_added );
 	}
+
+
+	/**
+	 * Tests get_hex_from_rgb().
+	 *
+	 * @dataProvider provider_get_hex_color
+	 *
+	 * @covers ::get_hex_from_rgb
+	 */
+	public function test_get_hex_from_rgb( $red, $green, $blue, $hex ) {
+		$this->assertSame( $hex, get_hex_from_rgb( $red, $green, $blue ) );
+	}
+
+	public function provider_get_hex_color() {
+		return array(
+			'black'   => array(
+				'red'   => 0,
+				'green' => 0,
+				'blue'  => 0,
+				'hex'   => '000000',
+			),
+			'white'   => array(
+				'red'   => 255,
+				'green' => 255,
+				'blue'  => 255,
+				'hex'   => 'ffffff',
+			),
+			'blue'    => array(
+				'red'   => 255,
+				'green' => 0,
+				'blue'  => 0,
+				'hex'   => 'ff0000',
+			),
+			'teal'    => array(
+				'red'   => 255,
+				'green' => 255,
+				'blue'  => 0,
+				'hex'   => 'ffff00',
+			),
+			'pink'    => array(
+				'red'   => 255,
+				'green' => 0,
+				'blue'  => 255,
+				'hex'   => 'ff00ff',
+			),
+			'purple'  => array(
+				'red'   => 88,
+				'green' => 42,
+				'blue'  => 158,
+				'hex'   => '582a9e',
+			),
+			'invalid' => array(
+				'red'   => -1,
+				'green' => -1,
+				'blue'  => -1,
+				'hex'   => null,
+			),
+		);
+	}
 }

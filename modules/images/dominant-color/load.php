@@ -366,3 +366,24 @@ function dominant_color_has_transparency( $attachment_id ) {
 
 	return $image_meta['has_transparency'];
 }
+
+
+/**
+ * Get Hex color from RGB.
+ *
+ * @since n.e.x.t
+ *
+ * @param int $red
+ * @param int $green
+ * @param int $blue
+ *
+ * @return string|null Hex color or null if error.
+ */
+function get_hex_from_rgb( $red, $green, $blue ) {
+	$range = range( 0, 255 );
+	if ( ! in_array( $red, $range, true ) || ! in_array( $green, $range, true ) || ! in_array( $blue, $range, true ) ) {
+		return null;
+	}
+
+	return sprintf( '%02x%02x%02x', $red, $green, $blue );
+}
