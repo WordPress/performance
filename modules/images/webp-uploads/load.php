@@ -481,7 +481,7 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 			$metadata['sources'][ $original_mime ]['filesize'] < $metadata['sources'][ $target_mime ]['filesize']
 		) {
 			// Set the original source file as the replacement if smaller.
-			$replacement_source = $size_data['sources'][ $original_mime ]['file'];
+			$replacement_source = $metadata['sources'][ $original_mime ]['file'];
 		}
 
 		$basename = wp_basename( $metadata['file'] );
