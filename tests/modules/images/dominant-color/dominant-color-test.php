@@ -110,14 +110,14 @@ class Dominant_Color_Test extends DominantColorTestCase {
 
 
 	/**
-	 * Tests get_hex_from_rgb().
+	 * Tests dominant_color_rgb_to_hex().
 	 *
 	 * @dataProvider provider_get_hex_color
 	 *
-	 * @covers ::get_hex_from_rgb
+	 * @covers ::dominant_color_rgb_to_hex
 	 */
-	public function test_get_hex_from_rgb( $red, $green, $blue, $hex ) {
-		$this->assertSame( $hex, get_hex_from_rgb( $red, $green, $blue ) );
+	public function test_dominant_color_rgb_to_hex( $red, $green, $blue, $hex ) {
+		$this->assertSame( $hex, dominant_color_rgb_to_hex( $red, $green, $blue ) );
 	}
 
 	public function provider_get_hex_color() {
