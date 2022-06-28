@@ -249,7 +249,7 @@ function dominant_color_set_image_editors() {
 }
 
 /**
- * Computes the dominant color of the given attachment image.
+ * Computes the dominant color of the given attachment image and whether it has transparency.
  *
  * @since 1.2.0
  * @access private
@@ -368,7 +368,7 @@ function dominant_color_has_transparency( $attachment_id ) {
 
 
 /**
- * Get Hex color from RGB.
+ * Gets hex color from RGB.
  *
  * @since n.e.x.t
  *
