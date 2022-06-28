@@ -5,11 +5,12 @@
 The [Performance team](https://make.wordpress.org/core/2021/10/12/proposal-for-a-performance-team/) uses GitHub to manage all code and related discussions for the Performance Lab plugin. Please follow the workflow below to ensure that all issues are properly tracked.
 
 ## Issues
-When [opening a new issue](https://github.com/WordPress/performance/issues/new/choose), use the appropriate template: Bug report, Feature request, or Report a security vulnerability. All new issues should include the following labels:
+When [opening a new issue](https://github.com/WordPress/performance/issues/new/choose), use the appropriate template: Bug report, Feature request, New module proposal, or Report a security vulnerability. All new issues should include the following labels:
 
 - A _[Focus]_ label, or Infrastructure if the issue relates to the plugin infrastructure. The [Focus] labels are aligned with the Performance team's [focus areas](https://docs.google.com/spreadsheets/d/16N5oZ9wE6AkiqMz7b_707eh24vvpjMwsEG67XFAbxy8/edit#gid=0) and [GitHub Projects](https://github.com/WordPress/performance/projects).
 - A _[Type]_ label
 - A _[Module]_ label if the issue relates to an existing module
+- A _[Milestone]_. Use your best judgment here – if it’s a smaller PR and we’re early in the release cycle, it can be assigned to the next release milestone. If it’s a large PR and we’re only a week out from the release, it should not be assigned to the next milestone, but the one after.
 
 In addition, the new issue should be assigned to an appropriate Project. By default, new issues will automatically be added to the Backlog column within its project. This is intended for tracking any future work that is not currently a high priority as defined by the project’s point(s) of contact (POCs). Contributors are welcome to work on issues in the Backlog, but response rates may be slower than they are on prioritized issues.
 
@@ -43,7 +44,7 @@ All pull requests must:
 
 - Be associated with an issue
 - Have _[Type]_ and _[Focus]_ label matching the related issue’s _[Type]_ and _[Focus]_ labels
-- Have either a milestone or the “no milestone” label
+- Have either an assigned [milestone](https://github.com/WordPress/performance/milestones) or the `no milestone` label. Milestones should be assigned based upon the complexity of the PR as well as how close we are to the due date of the next milestone. PRs that have zero effect on the plugin end-user (e.g. documentation changes, engineering tooling, anything that doesn't require a changelog) do not need a milestone, and should instead receive the `no milestone` label.
 
 When a PR for an issue is ready for review:
 - Change the Project column on the issue to **Review**
