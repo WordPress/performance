@@ -235,6 +235,8 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  *
  * @since 1.2.0
  *
+ * @param string[] $editors Array of available image editor class names. Defaults are 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD'.
+ *
  * @return string[] Registered image editors class names.
  */
 function dominant_color_set_image_editors( $editors ) {
