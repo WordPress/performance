@@ -18,18 +18,15 @@
  * @return array $metadata The attachment metadata.
  */
 function dominant_color_metadata( $metadata, $attachment_id ) {
-	if ( ! wp_attachment_is_image( $attachment_id ) ) {
-		return $metadata;
-	}
+	$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
+	if ( ! is_wp_error( $dominant_color_data ) ) {
+		if ( isset( $dominant_color_data['dominant_color'] ) ) {
+			$metadata['dominant_color'] = $dominant_color_data['dominant_color'];
+		}
 
-	$dominant_color = dominant_color_get_dominant_color( $attachment_id );
-	if ( ! is_wp_error( $dominant_color ) && ! empty( $dominant_color ) ) {
-		$metadata['dominant_color'] = $dominant_color;
-	}
-
-	$has_transparency = dominant_color_has_transparency( $attachment_id );
-	if ( ! is_wp_error( $has_transparency ) ) {
-		$metadata['has_transparency'] = $has_transparency;
+		if ( isset( $dominant_color_data['has_transparency'] ) ) {
+			$metadata['has_transparency'] = $dominant_color_data['has_transparency'];
+		}
 	}
 
 	return $metadata;
@@ -252,14 +249,18 @@ function dominant_color_set_image_editors() {
 }
 
 /**
- * Computes the dominant color of the given attachment image.
+ * Computes the dominant color of the given attachment image and whether it has transparency.
  *
  * @since 1.2.0
+ * @access private
  *
  * @param int $attachment_id The attachment ID.
- * @return string|WP_Error The dominant color of the image, or WP_Error on error.
+ * @return array|WP_Error Array with the dominant color and has transparency values or WP_Error on error.
  */
-function dominant_color_get_dominant_color( $attachment_id ) {
+function _dominant_color_get_dominant_color_data( $attachment_id ) {
+	if ( ! wp_attachment_is_image( $attachment_id ) ) {
+		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'performance-lab' ) );
+	}
 	$file = wp_get_attachment_file_path( $attachment_id );
 	if ( ! $file ) {
 		$file = get_attached_file( $attachment_id );
@@ -271,6 +272,16 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 	if ( is_wp_error( $editor ) ) {
 		return $editor;
 	}
+
+	if ( ! method_exists( $editor, 'has_transparency' ) ) {
+		return new WP_Error( 'unable_to_find_method', __( 'Unable to find has_transparency method', 'performance-lab' ) );
+	}
+	$has_transparency = $editor->has_transparency();
+	if ( is_wp_error( $has_transparency ) ) {
+		return $has_transparency;
+	}
+	$dominant_color_data['has_transparency'] = $has_transparency;
+
 	if ( ! method_exists( $editor, 'get_dominant_color' ) ) {
 		return new WP_Error( 'unable_to_find_method', __( 'Unable to find get_dominant_color method', 'performance-lab' ) );
 	}
@@ -279,39 +290,9 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 	if ( is_wp_error( $dominant_color ) ) {
 		return $dominant_color;
 	}
+	$dominant_color_data['dominant_color'] = $dominant_color;
 
-	return $dominant_color;
-}
-
-/**
- * Computes whether the given attachment image has transparency.
- *
- * @since 1.2.0
- *
- * @param int $attachment_id The attachment ID.
- * @return bool|WP_Error True if the color has transparency or WP_Error on error.
- */
-function dominant_color_has_transparency( $attachment_id ) {
-	$file = wp_get_attachment_file_path( $attachment_id );
-	if ( ! $file ) {
-		$file = get_attached_file( $attachment_id );
-	}
-	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
-	$editor = wp_get_image_editor( $file );
-	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
-
-	if ( is_wp_error( $editor ) ) {
-		return $editor;
-	}
-	if ( ! method_exists( $editor, 'has_transparency' ) ) {
-		return new WP_Error( 'unable_to_find_method', __( 'Unable to find has_transparency method', 'performance-lab' ) );
-	}
-	$has_transparency = $editor->has_transparency();
-	if ( is_wp_error( $has_transparency ) ) {
-		return $has_transparency;
-	}
-
-	return $has_transparency;
+	return $dominant_color_data;
 }
 
 /**
@@ -338,4 +319,70 @@ function wp_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
 	$filepath = str_replace( wp_basename( $file ), $imagedata['sizes'][ $size ]['file'], $file );
 
 	return $filepath;
+}
+
+/**
+ * Gets the dominant color for an image attachment.
+ *
+ * @since n.e.x.t
+ *
+ * @param int $attachment_id Attachment ID for image.
+ * @return string|null Hex value of dominant color or null if not set.
+ */
+function dominant_color_get_dominant_color( $attachment_id ) {
+	if ( ! wp_attachment_is_image( $attachment_id ) ) {
+		return null;
+	}
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
+	if ( ! is_array( $image_meta ) ) {
+		return null;
+	}
+
+	if ( ! isset( $image_meta['dominant_color'] ) ) {
+		return null;
+	}
+
+	return $image_meta['dominant_color'];
+}
+
+/**
+ * Returns whether an image attachment has transparency.
+ *
+ * @since n.e.x.t
+ *
+ * @param int $attachment_id Attachment ID for image.
+ * @return bool|null Whether the image has transparency, or null if not set.
+ */
+function dominant_color_has_transparency( $attachment_id ) {
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
+	if ( ! is_array( $image_meta ) ) {
+		return null;
+	}
+
+	if ( ! isset( $image_meta['has_transparency'] ) ) {
+		return null;
+	}
+
+	return $image_meta['has_transparency'];
+}
+
+
+/**
+ * Gets hex color from RGB.
+ *
+ * @since n.e.x.t
+ *
+ * @param int $red Red 0-255.
+ * @param int $green Green 0-255.
+ * @param int $blue Blue 0-255.
+ *
+ * @return string|null Hex color or null if error.
+ */
+function dominant_color_rgb_to_hex( $red, $green, $blue ) {
+	$range = range( 0, 255 );
+	if ( ! in_array( $red, $range, true ) || ! in_array( $green, $range, true ) || ! in_array( $blue, $range, true ) ) {
+		return null;
+	}
+
+	return sprintf( '%02x%02x%02x', $red, $green, $blue );
 }

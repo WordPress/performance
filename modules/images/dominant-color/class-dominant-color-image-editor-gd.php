@@ -35,11 +35,15 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		$shorted_image = imagecreatetruecolor( 1, 1 );
 		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, imagesx( $this->image ), imagesy( $this->image ) );
 
-		$hex = dechex( imagecolorat( $shorted_image, 0, 0 ) );
-
-		if ( strlen( $hex ) < 6 ) {
+		$rgb = imagecolorat( $shorted_image, 0, 0 );
+		$r   = ( $rgb >> 16 ) & 0xFF;
+		$g   = ( $rgb >> 8 ) & 0xFF;
+		$b   = $rgb & 0xFF;
+		$hex = dominant_color_rgb_to_hex( $r, $g, $b );
+		if ( ! $hex ) {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'performance-lab' ) );
 		}
+
 		return $hex;
 	}
 
