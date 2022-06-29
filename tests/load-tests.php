@@ -110,24 +110,14 @@ class Load_Tests extends WP_UnitTestCase {
 		);
 		$this->assertSame( $expected_active_modules, $active_modules );
 
-		// Assert that dummy module option doesn't show in active modules.
+		// Assert that only allows existing modules.
 		$new_value = array(
 			'inactive-module' => array( 'enabled' => false ),
 			'active-module'   => array( 'enabled' => true ),
 		);
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
 		$active_modules = perflab_get_active_modules();
-		$this->assertSame( array(), $active_modules );
-
-		// Assert that only allows existing modules.
-		$new_value = array(
-			'inactive-module'     => array( 'enabled' => false ),
-			'images/webp-uploads' => array( 'enabled' => true ),
-			'object-cache/persistent-object-cache-health-check' => array( 'enabled' => true ),
-		);
-		update_option( PERFLAB_MODULES_SETTING, $new_value );
-		$active_modules = perflab_get_active_modules();
-		$this->assertSame( array( 'images/webp-uploads', 'object-cache/persistent-object-cache-health-check' ), $active_modules );
+		$this->assertSame( array( 'active-module' ), $active_modules );
 	}
 
 	public function test_perflab_get_generator_content() {

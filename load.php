@@ -134,8 +134,25 @@ function perflab_get_active_modules() {
 	 */
 	$modules = apply_filters( 'perflab_active_modules', $modules );
 
-	$active_modules = array();
-	foreach ( $modules as $module ) {
+	return $modules;
+}
+
+/**
+ * Gets the active and valid performance modules.
+ *
+ * @since n.e.x.t
+ *
+ * @return array List of active valid module slugs.
+ */
+function perflab_get_active_and_valid_modules() {
+	$active_modules = perflab_get_active_modules();
+
+	if ( ! $active_modules ) {
+		return array();
+	}
+
+	$active_and_valid_modules = array();
+	foreach ( $active_modules as $module ) {
 
 		// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
 		$can_load_module = perflab_can_load_module( $module );
@@ -149,10 +166,10 @@ function perflab_get_active_modules() {
 			continue;
 		}
 
-		$active_modules[] = $module;
+		$active_and_valid_modules[] = $module;
 	}
 
-	return $active_modules;
+	return $active_and_valid_modules;
 }
 
 /**
@@ -163,12 +180,12 @@ function perflab_get_active_modules() {
  * @since 1.1.0
  */
 function perflab_get_generator_content() {
-	$active_modules = perflab_get_active_modules();
+	$active_and_valid_modules = perflab_get_active_and_valid_modules();
 
 	return sprintf(
 		'Performance Lab %1$s; modules: %2$s',
 		PERFLAB_VERSION,
-		implode( ', ', $active_modules )
+		implode( ', ', $active_and_valid_modules )
 	);
 }
 
@@ -215,24 +232,24 @@ function perflab_can_load_module( $module ) {
 }
 
 /**
- * Loads the active performance modules.
+ * Loads the active and valid performance modules.
  *
  * @since 1.0.0
  */
-function perflab_load_active_modules() {
-	$active_modules = perflab_get_active_modules();
+function perflab_load_active_and_valid_modules() {
+	$active_and_valid_modules = perflab_get_active_and_valid_modules();
 
-	if ( empty( $active_modules ) ) {
+	if ( empty( $active_and_valid_modules ) ) {
 		return;
 	}
 
-	foreach ( $active_modules as $module ) {
+	foreach ( $active_and_valid_modules as $module ) {
 
 		require_once plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
 	}
 }
 
-perflab_load_active_modules();
+perflab_load_active_and_valid_modules();
 
 // Only load admin integration when in admin.
 if ( is_admin() ) {
