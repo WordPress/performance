@@ -259,7 +259,7 @@ function dominant_color_set_image_editors() {
  */
 function _dominant_color_get_dominant_color_data( $attachment_id ) {
 	$mime_type = get_post_mime_type( $attachment_id );
-	if( 'application/pdf' === $mime_type ){
+	if ( 'application/pdf' === $mime_type ) {
 		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'performance-lab' ) );
 	}
 	$file = wp_get_attachment_file_path( $attachment_id );
@@ -267,12 +267,15 @@ function _dominant_color_get_dominant_color_data( $attachment_id ) {
 		$file = get_attached_file( $attachment_id );
 	}
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
-	$editor = wp_get_image_editor( $file, array(
-		'methods' => array(
-			'get_dominant_color',
-			'has_transparency'
+	$editor = wp_get_image_editor(
+		$file,
+		array(
+			'methods' => array(
+				'get_dominant_color',
+				'has_transparency',
+			),
 		)
-	) );
+	);
 	remove_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
 	if ( is_wp_error( $editor ) ) {
