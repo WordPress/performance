@@ -353,8 +353,8 @@ function perflab_admin_pointer( $hook_suffix ) {
 		return;
 	}
 
-	// Do not show admin pointer in multisite Network Admin.
-	if ( is_network_admin() ) {
+	// Do not show admin pointer in multisite Network admin or User admin UI.
+	if ( is_network_admin() || is_user_admin() ) {
 		return;
 	}
 
