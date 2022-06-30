@@ -137,8 +137,8 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 		</legend>
 		<label for="<?php echo esc_attr( "{$base_id}_enabled" ); ?>">
 			<?php if ( ! $can_load_module ) { ?>
-				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" disabled>
-				<input type="hidden" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>">
+				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" disabled>
+				<input type="hidden" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" value="<?php echo $enabled ? '1' : ''; ?>">
 				<?php
 					printf(
 						/* translators: %s: module name */
