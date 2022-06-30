@@ -154,15 +154,15 @@ function perflab_get_active_and_valid_modules() {
 	$active_and_valid_modules = array();
 	foreach ( $active_modules as $module ) {
 
-		// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
-		$can_load_module = perflab_can_load_module( $module );
-		if ( ! $can_load_module ) {
-			continue;
-		}
-
 		// Do not load module if no longer exists.
 		$module_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
 		if ( ! file_exists( $module_file ) ) {
+			continue;
+		}
+
+		// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
+		$can_load_module = perflab_can_load_module( $module );
+		if ( ! $can_load_module ) {
 			continue;
 		}
 
@@ -235,6 +235,7 @@ function perflab_can_load_module( $module ) {
  * Loads the active and valid performance modules.
  *
  * @since 1.0.0
+ * @since n.e.x.t Renamed to perflab_load_active_and_valid_modules().
  */
 function perflab_load_active_and_valid_modules() {
 	$active_and_valid_modules = perflab_get_active_and_valid_modules();
