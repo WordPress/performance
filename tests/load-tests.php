@@ -110,7 +110,7 @@ class Load_Tests extends WP_UnitTestCase {
 		);
 		$this->assertSame( $expected_active_modules, $active_modules );
 
-		// Assert that only allows existing modules.
+		// Assert that option updates affect the active modules correctly.
 		$new_value = array(
 			'inactive-module' => array( 'enabled' => false ),
 			'active-module'   => array( 'enabled' => true ),
@@ -121,33 +121,17 @@ class Load_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_perflab_get_generator_content() {
-		// Assert that it doesn't returns dummy modules.
-		$dummy_active_modules = array( 'images/a-module', 'object-cache/another-module' );
+		// Assert that it returns the current version and active modules.
+		// For this test, set the active modules to all defaults but the last one.
+		$active_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
+		array_pop( $active_modules );
 		add_filter(
 			'perflab_active_modules',
-			function() use ( $dummy_active_modules ) {
-				return $dummy_active_modules;
+			function() use ( $active_modules ) {
+				return $active_modules;
 			}
 		);
-		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ';
-		$content  = perflab_get_generator_content();
-		$this->assertSame( $expected, $content );
-
-		// Assert that it returns active modules.
-		$new_value = array(
-			'inactive-module'     => array( 'enabled' => false ),
-			'images/webp-uploads' => array( 'enabled' => true ),
-			'object-cache/persistent-object-cache-health-check' => array( 'enabled' => true ),
-		);
-		update_option( PERFLAB_MODULES_SETTING, $new_value );
-		$dummy_active_modules = array( 'images/webp-uploads', 'object-cache/persistent-object-cache-health-check' );
-		add_filter(
-			'perflab_active_modules',
-			function() use ( $dummy_active_modules ) {
-				return $dummy_active_modules;
-			}
-		);
-		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $dummy_active_modules );
+		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $active_modules );
 		$content  = perflab_get_generator_content();
 		$this->assertSame( $expected, $content );
 	}
