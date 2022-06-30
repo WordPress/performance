@@ -169,14 +169,14 @@ class Load_Tests extends WP_UnitTestCase {
 		if ( $wp_version >= '6.1' ) {
 			$active_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
 			add_filter(
-				 'perflab_active_modules',
-				 function() use ( $active_modules ) {
-					 return $active_modules;
-				 }
+				'perflab_active_modules',
+				function() use ( $active_modules ) {
+					return $active_modules;
+				}
 			);
 			$output = perflab_get_active_and_valid_modules();
 
-			// Remove Image module as it will marge in 6.1
+			// Remove Image module as it will marge in 6.1.
 			$remove_marge_modules = array_shift( $active_modules );
 			$this->assertSame( $active_modules, $output );
 		}
