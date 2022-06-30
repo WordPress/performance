@@ -150,6 +150,59 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertContains( $expected, $output );
 	}
 
+	public function test_perflab_get_active_and_valid_modules() {
+		global $wp_version;
+
+		// Assert that it returns the empty array for dummy modules.
+		$dummy_active_modules = array( 'javascript/demo-module-1', 'something/demo-module-2', 'images/demo-module-3' );
+		add_filter(
+			'perflab_active_modules',
+			function() use ( $dummy_active_modules ) {
+				return $dummy_active_modules;
+			}
+		);
+		$output = perflab_get_active_and_valid_modules();
+		$this->assertIsArray( $output );
+		$this->assertSame( array(), $output );
+
+		// Assert that it returns the array for modules.
+		if ( $wp_version >= '6.1' ) {
+			$active_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
+			add_filter(
+				 'perflab_active_modules',
+				 function() use ( $active_modules ) {
+					 return $active_modules;
+				 }
+			);
+			$output = perflab_get_active_and_valid_modules();
+
+			// Remove Image module as it will marge in 6.1
+			$remove_marge_modules = array_shift( $active_modules );
+			$this->assertSame( $active_modules, $output );
+		}
+	}
+
+	public function test_perflab_can_load_module() {
+		// Assert that it returns the true if can load file available and return true.
+		$module_load_file = TESTS_PLUGIN_DIR . '/tests/testdata/demo-modules/images/demo-module-3/can-load.php';
+		$expected         = true;
+		$can_load         = require $module_load_file;
+		$this->assertSame( $expected, $can_load() );
+
+		// Assert that it returns the false if can load file not available.
+		$module_load_file = TESTS_PLUGIN_DIR . '/tests/testdata/demo-modules/something/demo-module-2/can-load.php';
+		$expected         = false;
+		$this->assertSame( $expected, file_exists( $module_load_file ) );
+	}
+
+	public function test_if_can_load_file_available_but_module_does_not_marge_in_core() {
+		// Assert that it returns the false if given module can be loaded in the current environment.
+		$module_load_file = TESTS_PLUGIN_DIR . '/tests/testdata/demo-modules/javascript/demo-module-1/can-load.php';
+		$expected         = false;
+		$can_load         = require $module_load_file;
+		$this->assertSame( $expected, $can_load() );
+	}
+
 	private function get_expected_default_option() {
 		// This code is essentially copied over from the perflab_register_modules_setting() function.
 		$default_enabled_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
