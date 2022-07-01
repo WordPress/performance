@@ -5,6 +5,7 @@ ARG WPCLI_VERSION
 
 ADD https://github.com/tideways/php-xhprof-extension/archive/refs/tags/v$TIDEWAYS_VERSION.tar.gz .
 ADD https://github.com/wp-cli/wp-cli/releases/download/v$WPCLI_VERSION/wp-cli-$WPCLI_VERSION.phar .
+ADD https://raw.githubusercontent.com/WPTT/theme-unit-test/master/themeunittestdata.wordpress.xml /var/www/themeunittestdata.wordpress.xml
 
 RUN apk add $PHPIZE_DEPS \
     && mkdir -p /tmp/xhprof \

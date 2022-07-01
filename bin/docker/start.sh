@@ -14,6 +14,7 @@ fi
 # Start all services.
 if [ -z "$(dc ps -q)" ]; then
    dc up -d
+   sleep 5
 fi
 
 # Install WordPress if it is not isntalled yet.
@@ -30,10 +31,12 @@ if ! wp core is-installed; then
     # Configure WordPress
     wp rewrite structure "/%postname%/"
 
-    # Activate required plugins.
+    # Install required plugins.
     wp plugin activate performance-lab
+    wp plugin install wordpress-importer --activate
 
-    # ...
+    # Import content that is used for theme unit tests.
+    wp import /var/www/themeunittestdata.wordpress.xml --authors=create
 fi
 
 # Install liveprof-ui tables
