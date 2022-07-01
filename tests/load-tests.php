@@ -186,14 +186,15 @@ class Load_Tests extends WP_UnitTestCase {
 		// Assert that it validates the ability to load modules that are not in the core.
 		$demo_modules = array(
 			'javascript/demo-module-1' => false,
-			'something/demo-module-2' => true,
-			'images/demo-module-3' => true
+			'something/demo-module-2'  => true,
+			'images/demo-module-3'     => true,
 		);
 
-		foreach( $demo_modules as $module => $can_load ) {
+		foreach ( $demo_modules as $module => $can_load ) {
 			$output = perflab_can_load_module( '../tests/testdata/demo-modules/' . $module );
 			$this->assertSame( $can_load, $output );
 		}
+
 	}
 
 	private function get_expected_default_option() {
