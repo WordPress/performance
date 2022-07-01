@@ -183,24 +183,17 @@ class Load_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_perflab_can_load_module() {
-		// Assert that it returns the true if can load file available and return true.
-		$module_load_file = TESTS_PLUGIN_DIR . '/tests/testdata/demo-modules/images/demo-module-3/can-load.php';
-		$expected         = true;
-		$can_load         = require $module_load_file;
-		$this->assertSame( $expected, $can_load() );
+		// Assert that it validates the ability to load modules that are not in the core.
+		$demo_modules = array(
+			'javascript/demo-module-1' => false,
+			'something/demo-module-2' => true,
+			'images/demo-module-3' => true
+		);
 
-		// Assert that it returns the false if can load file not available.
-		$module_load_file = TESTS_PLUGIN_DIR . '/tests/testdata/demo-modules/something/demo-module-2/can-load.php';
-		$expected         = false;
-		$this->assertSame( $expected, file_exists( $module_load_file ) );
-	}
-
-	public function test_if_can_load_file_available_but_module_does_not_marge_in_core() {
-		// Assert that it returns the false if given module can be loaded in the current environment.
-		$module_load_file = TESTS_PLUGIN_DIR . '/tests/testdata/demo-modules/javascript/demo-module-1/can-load.php';
-		$expected         = false;
-		$can_load         = require $module_load_file;
-		$this->assertSame( $expected, $can_load() );
+		foreach( $demo_modules as $module => $can_load ) {
+			$output = perflab_can_load_module( '../tests/testdata/demo-modules/' . $module );
+			$this->assertSame( $can_load, $output );
+		}
 	}
 
 	private function get_expected_default_option() {
