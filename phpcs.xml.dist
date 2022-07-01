@@ -19,6 +19,9 @@
 	<file>./tests</file>
 
 	<!-- Do not require docblocks for unit tests -->
+	<rule ref="Squiz.Commenting.FileComment.WrongStyle">
+		<exclude-pattern>module-i18n.php</exclude-pattern>
+	</rule>
 	<rule ref="Squiz.Commenting.FunctionComment.Missing">
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
@@ -45,5 +48,21 @@
 	</rule>
 	<rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
 		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!-- Do not apply filename rules for unit tests -->
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!-- Do not apply compatibility rules to allow using the modern PHPUnit functionality -->
+	<rule ref="PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.stringFound">
+		<exclude-pattern>tests/utils/*</exclude-pattern>
+	</rule>
+	<rule ref="PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.boolFound">
+		<exclude-pattern>tests/utils/*</exclude-pattern>
 	</rule>
 </ruleset>

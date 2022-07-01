@@ -28,7 +28,7 @@ class Load_Tests extends WP_UnitTestCase {
 		}
 
 		// Assert that registered default works correctly.
-		$this->assertSame( array(), get_option( PERFLAB_MODULES_SETTING ) );
+		$this->assertSame( perflab_get_modules_setting_default(), get_option( PERFLAB_MODULES_SETTING ) );
 
 		// Assert that most basic sanitization works correctly (an array is required).
 		update_option( PERFLAB_MODULES_SETTING, 'invalid' );
@@ -56,10 +56,39 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( array( 'my-module' => array( 'enabled' => false ) ), $sanitized );
 	}
 
+	public function test_perflab_get_modules_setting_default() {
+		$default_enabled_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
+		$expected                = array();
+		foreach ( $default_enabled_modules as $default_enabled_module ) {
+			$expected[ $default_enabled_module ] = array( 'enabled' => true );
+		}
+
+		$this->assertSame( $expected, perflab_get_modules_setting_default() );
+	}
+
 	public function test_perflab_get_module_settings() {
-		// Assert that by default the settings are an empty array.
+		// Assert that by default the settings are using the same value as the registered default.
 		$settings = perflab_get_module_settings();
-		$this->assertSame( array(), $settings );
+		$this->assertSame( perflab_get_modules_setting_default(), $settings );
+
+		// More specifically though, assert that the default is also passed through to the
+		// get_option() call, to support scenarios where the function is called before 'init'.
+		// Unhook the registered default logic to verify the default comes from the passed value.
+		remove_all_filters( 'default_option_' . PERFLAB_MODULES_SETTING );
+		$has_passed_default = false;
+		add_filter(
+			'default_option_' . PERFLAB_MODULES_SETTING,
+			function( $default, $option, $passed_default ) use ( &$has_passed_default ) {
+				// This callback just records whether there is a default value being passed.
+				$has_passed_default = $passed_default;
+				return $default;
+			},
+			10,
+			3
+		);
+		$settings = perflab_get_module_settings();
+		$this->assertTrue( $has_passed_default );
+		$this->assertSame( perflab_get_modules_setting_default(), $settings );
 
 		// Assert that option updates are reflected in the settings correctly.
 		$new_value = array( 'my-module' => array( 'enabled' => true ) );
@@ -70,8 +99,16 @@ class Load_Tests extends WP_UnitTestCase {
 
 	public function test_perflab_get_active_modules() {
 		// Assert that by default there are no active modules.
-		$active_modules = perflab_get_active_modules();
-		$this->assertSame( array(), $active_modules );
+		$active_modules          = perflab_get_active_modules();
+		$expected_active_modules = array_keys(
+			array_filter(
+				perflab_get_modules_setting_default(),
+				function( $module_settings ) {
+					return $module_settings['enabled'];
+				}
+			)
+		);
+		$this->assertSame( $expected_active_modules, $active_modules );
 
 		// Assert that option updates affect the active modules correctly.
 		$new_value = array(
@@ -81,5 +118,46 @@ class Load_Tests extends WP_UnitTestCase {
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
 		$active_modules = perflab_get_active_modules();
 		$this->assertSame( array( 'active-module' ), $active_modules );
+	}
+
+	public function test_perflab_get_generator_content() {
+		// Assert that it returns the current version and active modules.
+		$dummy_active_modules = array( 'images/a-module', 'object-cache/another-module' );
+		add_filter(
+			'perflab_active_modules',
+			function() use ( $dummy_active_modules ) {
+				return $dummy_active_modules;
+			}
+		);
+		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $dummy_active_modules );
+		$content  = perflab_get_generator_content();
+		$this->assertSame( $expected, $content );
+	}
+
+	public function test_perflab_render_generator() {
+		// Assert generator tag is rendered. Content does not matter, so just use no modules active.
+		add_filter( 'perflab_active_modules', '__return_empty_array' );
+		$expected = '<meta name="generator" content="Performance Lab ' . PERFLAB_VERSION . '; modules: ">' . "\n";
+		$output   = get_echo( 'perflab_render_generator' );
+		$this->assertSame( $expected, $output );
+
+		// Assert that the function is hooked into 'wp_head'.
+		ob_start();
+		do_action( 'wp_head' );
+		$output = ob_get_clean();
+		$this->assertContains( $expected, $output );
+	}
+
+	private function get_expected_default_option() {
+		// This code is essentially copied over from the perflab_register_modules_setting() function.
+		$default_enabled_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
+		return array_reduce(
+			$default_enabled_modules,
+			function( $module_settings, $module_dir ) {
+				$module_settings[ $module_dir ] = array( 'enabled' => true );
+				return $module_settings;
+			},
+			array()
+		);
 	}
 }

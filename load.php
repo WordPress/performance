@@ -5,14 +5,18 @@
  * Description: Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.
  * Requires at least: 5.8
  * Requires PHP: 5.6
- * Version: 1.0.0-beta.1
+ * Version: 1.2.0
  * Author: WordPress Performance Group
+ * Author URI: https://make.wordpress.org/core/tag/performance/
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * Text Domain: performance-lab
  *
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.0.0-beta.1' );
+define( 'PERFLAB_VERSION', '1.2.0' );
+define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
 
@@ -28,11 +32,37 @@ function perflab_register_modules_setting() {
 		array(
 			'type'              => 'object',
 			'sanitize_callback' => 'perflab_sanitize_modules_setting',
-			'default'           => array(),
+			'default'           => perflab_get_modules_setting_default(),
 		)
 	);
 }
 add_action( 'init', 'perflab_register_modules_setting' );
+
+/**
+ * Gets the default value for the performance modules setting.
+ *
+ * @since 1.0.0
+ */
+function perflab_get_modules_setting_default() {
+	// Since the default relies on some minimal logic that includes requiring an additional file,
+	// the result is "cached" in a static variable.
+	static $default_option = null;
+
+	if ( null === $default_option ) {
+		// To set the default value for which modules are enabled, rely on this generated file.
+		$default_enabled_modules = require plugin_dir_path( __FILE__ ) . 'default-enabled-modules.php';
+		$default_option          = array_reduce(
+			$default_enabled_modules,
+			function( $module_settings, $module_dir ) {
+				$module_settings[ $module_dir ] = array( 'enabled' => true );
+				return $module_settings;
+			},
+			array()
+		);
+	}
+
+	return $default_option;
+}
 
 /**
  * Sanitizes the performance modules setting.
@@ -72,7 +102,10 @@ function perflab_sanitize_modules_setting( $value ) {
  * @return array Associative array of module settings keyed by module slug.
  */
 function perflab_get_module_settings() {
-	return (array) get_option( PERFLAB_MODULES_SETTING, array() );
+	// Even though a default value is registered for this setting, the default must be explicitly
+	// passed here, to support scenarios where this function is called before the 'init' action,
+	// for example when loading the active modules.
+	return (array) get_option( PERFLAB_MODULES_SETTING, perflab_get_modules_setting_default() );
 }
 
 /**
@@ -105,6 +138,37 @@ function perflab_get_active_modules() {
 }
 
 /**
+ * Gets the content attribute for the generator tag for the Performance Lab plugin.
+ *
+ * This attribute is then used in {@see perflab_render_generator()}.
+ *
+ * @since 1.1.0
+ */
+function perflab_get_generator_content() {
+	$active_modules = perflab_get_active_modules();
+
+	return sprintf(
+		'Performance Lab %1$s; modules: %2$s',
+		PERFLAB_VERSION,
+		implode( ', ', $active_modules )
+	);
+}
+
+/**
+ * Displays the HTML generator tag for the Performance Lab plugin.
+ *
+ * See {@see 'wp_head'}.
+ *
+ * @since 1.1.0
+ */
+function perflab_render_generator() {
+	$content = perflab_get_generator_content();
+
+	echo '<meta name="generator" content="' . esc_attr( $content ) . '">' . "\n";
+}
+add_action( 'wp_head', 'perflab_render_generator' );
+
+/**
  * Loads the active performance modules.
  *
  * @since 1.0.0
@@ -133,3 +197,6 @@ perflab_load_active_modules();
 if ( is_admin() ) {
 	require_once plugin_dir_path( __FILE__ ) . 'admin/load.php';
 }
+
+// Polyfills.
+require_once plugin_dir_path( __FILE__ ) . 'polyfills.php';

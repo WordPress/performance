@@ -70,23 +70,42 @@ class Audit_Enqueued_Assets_Helper_Tests extends WP_UnitTestCase {
 	 * Tests perflab_aea_get_path_from_resource_url() functionality.
 	 */
 	public function test_perflab_aea_get_path_from_resource_url() {
-		$test_url      = 'https://example.com/wp-content/themes/test-theme/style.css';
-		$expected_path = ABSPATH . '/wp-content/themes/test-theme/style.css';
+		$test_url      = site_url() . '/wp-content/themes/test-theme/style.css';
+		$expected_path = ABSPATH . 'wp-content/themes/test-theme/style.css';
 		$this->assertSame( $expected_path, perflab_aea_get_path_from_resource_url( $test_url ) );
 	}
 
 	/**
-	 * Tests perflab_aea_get_resource_file_size() functionality.
+	 * Tests perflab_aea_get_path_from_resource_url() functionality when wp-content in subdirectory.
 	 */
-	public function test_perflab_aea_get_resource_file_size() {
-		$non_existing_resource = ABSPATH . '/wp-content/themes/test-theme/style.css';
-		$this->assertEquals( 0, perflab_aea_get_resource_file_size( $non_existing_resource ) );
+	public function test_perflab_aea_get_path_from_resource_url_subdirectory() {
+		$test_url      = site_url() . '/wp/wp-content/themes/test-theme/style.css';
+		$expected_path = ABSPATH . 'wp/wp-content/themes/test-theme/style.css';
+		$this->assertSame( $expected_path, perflab_aea_get_path_from_resource_url( $test_url ) );
+	}
 
-		// Upload a fake resource file.
-		$filename = __FUNCTION__ . '.css';
-		$contents = __FUNCTION__ . '_contents';
-		$file     = wp_upload_bits( $filename, null, $contents );
-		$this->assertEquals( filesize( $file['file'] ), perflab_aea_get_resource_file_size( $file['file'] ) );
+	/**
+	 * Tests perflab_aea_get_path_from_resource_url() functionality empty $url.
+	 */
+	public function test_perflab_aea_get_path_from_resource_url_empty_url() {
+		$test_url      = false;
+		$expected_path = '';
+		$this->assertSame( $expected_path, perflab_aea_get_path_from_resource_url( $test_url ) );
+	}
+
+	/**
+	 * Tests perflab_aea_get_path_from_resource_url() functionality when wp-content outside wp directory.
+	 */
+	public function test_perflab_aea_get_path_from_resource_url_outside_wp_setup() {
+		$test_url      = site_url() . '/content/themes/test-theme/style.css';
+		$expected_path = WP_CONTENT_DIR . '/themes/test-theme/style.css';
+		add_filter(
+			'content_url',
+			function( $url ) {
+				return site_url() . '/content';
+			}
+		);
+		$this->assertSame( $expected_path, perflab_aea_get_path_from_resource_url( $test_url ) );
 	}
 
 }
