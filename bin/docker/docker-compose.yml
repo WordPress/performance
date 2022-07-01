@@ -37,7 +37,9 @@ services:
         if ( php_sapi_name() != 'cli' ) {
           \Badoo\LiveProfiler\LiveProfiler::getInstance()
             ->setMode( \Badoo\LiveProfiler\LiveProfiler::MODE_DB )
+            ->setApp( "WordPress" )
             ->setDivider( 1 )
+            ->setTotalDivider( 1 )
             ->useTidyWays()
             ->start();
         }
