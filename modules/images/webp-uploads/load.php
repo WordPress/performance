@@ -387,6 +387,30 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 			wp_delete_file_from_directory( $backup_intermediate_file, $intermediate_dir );
 		}
 	}
+
+	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+	$backup_sources = is_array( $backup_sources ) ? $backup_sources : array();
+
+	// Delete full sizes backup mime types.
+	foreach ( $backup_sources as $backup_mimes ) {
+
+		foreach ( $backup_mimes as $backup_mime_properties ) {
+			if ( ! is_array( $backup_mime_properties ) || empty( $backup_mime_properties['file'] ) ) {
+				continue;
+			}
+
+			$full_size = str_replace( $basename, $backup_mime_properties['file'], $file );
+			if ( empty( $full_size ) ) {
+				continue;
+			}
+
+			$full_size_file = path_join( $upload_path['basedir'], $full_size );
+			if ( ! file_exists( $full_size_file ) ) {
+				continue;
+			}
+			wp_delete_file_from_directory( $full_size_file, $intermediate_dir );
+		}
+	}
 }
 add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
 
