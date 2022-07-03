@@ -573,3 +573,40 @@ function webp_uploads_update_featured_image( $html, $post_id, $attachment_id ) {
 	return webp_uploads_img_tag_update_mime_type( $html, 'post_thumbnail_html', $attachment_id );
 }
 add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );
+
+/**
+ * Returns an array of image sizes that can have alternative mime types. By default, only core sizes
+ * are allowed and will be returned.
+ *
+ * If a custom size wants to have additional mime types support, they will need to have
+ * the provide_additional_mime_types property in the size details or it should be added using the
+ * webp_uploads_image_sizes_with_additional_mime_type_support filter.
+ *
+ * @since n.e.x.t
+ *
+ * @return array An array of image sizes that can have additional mime types.
+ */
+function webp_uploads_get_image_sizes_with_additional_mime_type_support() {
+	$allowed_sizes    = array( 'thumbnail', 'medium', 'medium_large', 'large', 'post-thumbnail' );
+	$additional_sizes = wp_get_additional_image_sizes();
+
+	foreach ( $additional_sizes as $size => $size_details ) {
+		if (
+			isset( $size_details['provide_additional_mime_types'] ) &&
+			filter_var( $size_details['provide_additional_mime_types'], FILTER_VALIDATE_BOOLEAN )
+		) {
+			$allowed_sizes[] = $size;
+		}
+	}
+
+	/**
+	 * Filters image sizes that allowed to have additional mime types.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param array $allowed_image_sizes An array of image sizes that allowed to have additional mime types.
+	 */
+	$allowed_sizes = apply_filters( 'webp_uploads_image_sizes_with_additional_mime_type_support', $allowed_sizes );
+
+	return $allowed_sizes;
+}
