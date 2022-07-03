@@ -105,9 +105,11 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		return $metadata;
 	}
 
+	$sizes_with_mime_type_support = webp_uploads_get_image_sizes_with_additional_mime_type_support();
+
 	foreach ( $metadata['sizes'] as $size_name => $properties ) {
-		// This image size is not defined or not an array.
-		if ( ! is_array( $properties ) ) {
+		// Do nothing if this image size is not an array or is not allowed to have additional mime types.
+		if ( ! is_array( $properties ) || ! isset( $sizes_with_mime_type_support[ $size_name ] ) ) {
 			continue;
 		}
 
@@ -587,15 +589,21 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
  * @return array An array of image sizes that can have additional mime types.
  */
 function webp_uploads_get_image_sizes_with_additional_mime_type_support() {
-	$allowed_sizes    = array( 'thumbnail', 'medium', 'medium_large', 'large', 'post-thumbnail' );
 	$additional_sizes = wp_get_additional_image_sizes();
+	$allowed_sizes    = array(
+		'thumbnail'      => 'thumbnail',
+		'medium'         => 'medium',
+		'medium_large'   => 'medium_large',
+		'large'          => 'large',
+		'post-thumbnail' => 'post-thumbnail',
+	);
 
 	foreach ( $additional_sizes as $size => $size_details ) {
 		if (
 			isset( $size_details['provide_additional_mime_types'] ) &&
 			filter_var( $size_details['provide_additional_mime_types'], FILTER_VALIDATE_BOOLEAN )
 		) {
-			$allowed_sizes[] = $size;
+			$allowed_sizes[ $size ] = $size;
 		}
 	}
 
