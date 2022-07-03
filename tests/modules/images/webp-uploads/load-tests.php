@@ -498,6 +498,15 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			}
 		);
 
+		remove_all_filters( 'webp_uploads_image_sizes_with_additional_mime_type_support' );
+		add_filter(
+			'webp_uploads_image_sizes_with_additional_mime_type_support',
+			function( $sizes ) {
+				$sizes['1536x1536'] = '1536x1536';
+				return $sizes;
+			}
+		);
+
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
@@ -598,6 +607,15 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_replace_the_featured_image_to_web_p_when_requesting_the_featured_image() {
+		remove_all_filters( 'webp_uploads_image_sizes_with_additional_mime_type_support' );
+		add_filter(
+			'webp_uploads_image_sizes_with_additional_mime_type_support',
+			function( $sizes ) {
+				$sizes['1536x1536'] = '1536x1536';
+				return $sizes;
+			}
+		);
+
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
 		$post_id       = $this->factory()->post->create();
 		set_post_thumbnail( $post_id, $attachment_id );
@@ -630,5 +648,29 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
+
+	/**
+	 * Tests whether additional mime types generated only for allowed image sizes or not.
+	 *
+	 * @test
+	 */
+	public function it_should_create_mime_types_for_allowed_sizes_only() {
+		remove_all_filters( 'webp_uploads_image_sizes_with_additional_mime_type_support' );
+		add_filter(
+			'webp_uploads_image_sizes_with_additional_mime_type_support',
+			function( $sizes ) {
+				$sizes['allowed_size_400x300'] = 'allowed_size_400x300';
+				return $sizes;
+			}
+		);
+
+		add_image_size( 'allowed_size_400x300', 400, 300, true );
+		add_image_size( 'not_allowed_size_200x150', 200, 150, true );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		$this->assertImageHasSizeSource( $attachment_id, 'allowed_size_400x300', 'image/webp' );
+		$this->assertImageNotHasSizeSource( $attachment_id, 'not_allowed_size_200x150', 'image/webp' );
 	}
 }
