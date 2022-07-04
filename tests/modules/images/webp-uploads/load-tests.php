@@ -229,11 +229,11 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Remove the attached WebP version if the attachment is force deleted but empty trash day is not defined
+	 * Remove the attached WebP version if the attachment is force deleted
 	 *
 	 * @test
 	 */
-	public function it_should_remove_the_attached_webp_version_if_the_attachment_is_force_deleted_but_empty_trash_day_is_not_defined() {
+	public function it_should_remove_the_attached_webp_version_if_the_attachment_is_force_deleted() {
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
@@ -248,35 +248,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 		$this->assertFileExists( path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] ) );
-
-		wp_delete_attachment( $attachment_id, true );
-
-		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] ) );
-		$this->assertFileDoesNotExist( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
-	}
-
-	/**
-	 * Remove the WebP version of the image if the image is force deleted and empty trash days is set to zero
-	 *
-	 * @test
-	 */
-	public function it_should_remove_the_webp_version_of_the_image_if_the_image_is_force_deleted_and_empty_trash_days_is_set_to_zero() {
-		$attachment_id = $this->factory->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
-		);
-
-		$file    = get_attached_file( $attachment_id, true );
-		$dirname = pathinfo( $file, PATHINFO_DIRNAME );
-
-		$this->assertIsString( $file );
-		$this->assertFileExists( $file );
-
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-
-		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
-		$this->assertFileExists( path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] ) );
-
-		define( 'EMPTY_TRASH_DAYS', 0 );
 
 		wp_delete_attachment( $attachment_id, true );
 
