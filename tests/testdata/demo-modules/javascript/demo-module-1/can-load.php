@@ -6,6 +6,4 @@
  * @package performance-lab
  */
 
-return function() {
-	return false;
-};
+return '__return_false';

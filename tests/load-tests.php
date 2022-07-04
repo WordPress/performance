@@ -154,16 +154,15 @@ class Load_Tests extends WP_UnitTestCase {
 		global $wp_version;
 
 		// Assert that it returns the empty array for dummy modules.
-		$dummy_active_modules = array( 'javascript/demo-module-1', 'something/demo-module-2', 'images/demo-module-3' );
-		add_filter(
-			'perflab_active_modules',
-			function() use ( $dummy_active_modules ) {
-				return $dummy_active_modules;
-			}
+		$dummy_active_modules = array(
+			'../tests/testdata/demo-modules/javascript/demo-module-1',
+			'../tests/testdata/demo-modules/something/demo-module-2',
+			'../tests/testdata/demo-modules/images/demo-module-3',
 		);
-		$output = perflab_get_active_and_valid_modules();
+
+		$output = perflab_get_valid_modules( $dummy_active_modules );
 		$this->assertIsArray( $output );
-		$this->assertSame( array(), $output );
+		$this->assertSame( array( '../tests/testdata/demo-modules/something/demo-module-2', '../tests/testdata/demo-modules/images/demo-module-3' ), $output );
 
 		// Assert that it returns the array for modules.
 		if ( $wp_version >= '6.1' ) {
@@ -174,7 +173,7 @@ class Load_Tests extends WP_UnitTestCase {
 					return $active_modules;
 				}
 			);
-			$output = perflab_get_active_and_valid_modules();
+			$output = perflab_get_valid_modules( perflab_get_active_modules() );
 
 			// Remove Image module as it will marge in 6.1.
 			$remove_marge_modules = array_shift( $active_modules );
@@ -190,11 +189,10 @@ class Load_Tests extends WP_UnitTestCase {
 			'images/demo-module-3'     => true,
 		);
 
-		foreach ( $demo_modules as $module => $can_load ) {
+		foreach( $demo_modules as $module => $can_load ) {
 			$output = perflab_can_load_module( '../tests/testdata/demo-modules/' . $module );
 			$this->assertSame( $can_load, $output );
 		}
-
 	}
 
 	private function get_expected_default_option() {

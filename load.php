@@ -142,6 +142,7 @@ function perflab_get_active_modules() {
  *
  * @since n.e.x.t
  *
+ * @param array $modules List of active module slugs.
  * @return array List of active valid module slugs.
  */
 function perflab_get_valid_modules( array $modules = array() ) {
