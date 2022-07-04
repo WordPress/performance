@@ -189,10 +189,11 @@ class Load_Tests extends WP_UnitTestCase {
 			'images/demo-module-3'     => true,
 		);
 
-		foreach( $demo_modules as $module => $can_load ) {
+		foreach ( $demo_modules as $module => $can_load ) {
 			$output = perflab_can_load_module( '../tests/testdata/demo-modules/' . $module );
 			$this->assertSame( $can_load, $output );
 		}
+
 	}
 
 	private function get_expected_default_option() {
