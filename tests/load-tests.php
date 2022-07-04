@@ -150,7 +150,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertContains( $expected, $output );
 	}
 
-	public function test_perflab_get_active_and_valid_modules() {
+	public function test_perflab_get_valid_modules() {
 		global $wp_version;
 
 		// Assert that it returns the empty array for dummy modules.
