@@ -144,15 +144,14 @@ function perflab_get_active_modules() {
  *
  * @return array List of active valid module slugs.
  */
-function perflab_get_active_and_valid_modules() {
-	$active_modules = perflab_get_active_modules();
+function perflab_get_valid_modules( array $modules = array() ) {
 
-	if ( ! $active_modules ) {
+	if ( ! is_array( $modules ) ) {
 		return array();
 	}
 
-	$active_and_valid_modules = array();
-	foreach ( $active_modules as $module ) {
+	$valid_modules = array();
+	foreach ( $modules as $module ) {
 
 		// Do not load module if no longer exists.
 		$module_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
@@ -161,15 +160,14 @@ function perflab_get_active_and_valid_modules() {
 		}
 
 		// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
-		$can_load_module = perflab_can_load_module( $module );
-		if ( ! $can_load_module ) {
+		if ( ! perflab_can_load_module( $module ) ) {
 			continue;
 		}
 
-		$active_and_valid_modules[] = $module;
+		$valid_modules[] = $module;
 	}
 
-	return $active_and_valid_modules;
+	return $valid_modules;
 }
 
 /**
@@ -180,7 +178,7 @@ function perflab_get_active_and_valid_modules() {
  * @since 1.1.0
  */
 function perflab_get_generator_content() {
-	$active_and_valid_modules = perflab_get_active_and_valid_modules();
+	$active_and_valid_modules = perflab_get_valid_modules( perflab_get_active_modules() );
 
 	return sprintf(
 		'Performance Lab %1$s; modules: %2$s',
@@ -220,15 +218,15 @@ function perflab_can_load_module( $module ) {
 	}
 
 	// Require the file to get the closure for whether the module can load.
-	$can_load = require $module_load_file;
+	$module = require $module_load_file;
 
 	// If the `can-load.php` file is invalid and does not return a closure, assume the module can be loaded.
-	if ( ! is_callable( $can_load ) ) {
+	if ( ! is_callable( $module ) ) {
 		return true;
 	}
 
 	// Call the closure to determine whether the module can be loaded.
-	return $can_load();
+	return (bool) $module();
 }
 
 /**
@@ -238,7 +236,7 @@ function perflab_can_load_module( $module ) {
  * @since n.e.x.t Renamed to perflab_load_active_and_valid_modules().
  */
 function perflab_load_active_and_valid_modules() {
-	$active_and_valid_modules = perflab_get_active_and_valid_modules();
+	$active_and_valid_modules = perflab_get_valid_modules( perflab_get_active_modules() );
 
 	if ( empty( $active_and_valid_modules ) ) {
 		return;
