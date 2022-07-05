@@ -498,7 +498,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			}
 		);
 
-		remove_all_filters( 'webp_uploads_image_sizes_with_additional_mime_type_support' );
 		add_filter(
 			'webp_uploads_image_sizes_with_additional_mime_type_support',
 			function( $sizes ) {
@@ -607,7 +606,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_replace_the_featured_image_to_web_p_when_requesting_the_featured_image() {
-		remove_all_filters( 'webp_uploads_image_sizes_with_additional_mime_type_support' );
 		add_filter(
 			'webp_uploads_image_sizes_with_additional_mime_type_support',
 			function( $sizes ) {
@@ -656,7 +654,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_mime_types_for_allowed_sizes_only() {
-		remove_all_filters( 'webp_uploads_image_sizes_with_additional_mime_type_support' );
 		add_filter(
 			'webp_uploads_image_sizes_with_additional_mime_type_support',
 			function( $sizes ) {
@@ -669,6 +666,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		add_image_size( 'not_allowed_size_200x150', 200, 150, true );
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		remove_image_size( 'allowed_size_400x300' );
+		remove_image_size( 'not_allowed_size_200x150' );
 
 		$this->assertImageHasSizeSource( $attachment_id, 'allowed_size_400x300', 'image/webp' );
 		$this->assertImageNotHasSizeSource( $attachment_id, 'not_allowed_size_200x150', 'image/webp' );

@@ -599,10 +599,7 @@ function webp_uploads_get_image_sizes_with_additional_mime_type_support() {
 	);
 
 	foreach ( $additional_sizes as $size => $size_details ) {
-		if (
-			isset( $size_details['provide_additional_mime_types'] ) &&
-			filter_var( $size_details['provide_additional_mime_types'], FILTER_VALIDATE_BOOLEAN )
-		) {
+		if ( ! empty( $size_details['provide_additional_mime_types'] ) ) {
 			$allowed_sizes[ $size ] = $size;
 		}
 	}
