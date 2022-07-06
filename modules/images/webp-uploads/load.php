@@ -102,7 +102,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			continue;
 		}
 
-		/* Remove WebP image if it bigger then original image */
+		// Remove WebP image if it is bigger than the original image.
 		if (
 			$webp_image_filesize >= $original_image_filesize
 			/**
@@ -113,10 +113,14 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			 *
 			 * @since n.e.x.t
 			 *
-			 * @param bool $perfer_filesize Prioritize file size over mime type. Default true.
+			 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
 			 */
 			&& apply_filters( 'webp_prioritise_filesize_over_mime_type', true )
 		) {
+			if ( ! file_exists( $destination ) ) {
+				continue;
+			}
+
 			wp_delete_file_from_directory( $destination, $original_directory );
 			continue;
 		}
@@ -185,7 +189,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 				continue;
 			}
 
-			/* Remove WebP image if it bigger then original thumbnail image */
+			// Remove the WebP image if it is bigger than the original thumbnail image.
 			if (
 				$webp_thumbnail_image_filesize >= $original_thumbnail_image_filesize
 				/**
@@ -201,6 +205,10 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 				&& apply_filters( 'webp_prioritise_filesize_over_mime_type', true )
 			) {
 				$destination = trailingslashit( $original_directory ) . "{$source['file']}";
+				if ( ! file_exists( $destination ) ) {
+					continue;
+				}
+
 				wp_delete_file_from_directory( $destination, $original_directory );
 				continue;
 			}
