@@ -573,3 +573,23 @@ function webp_uploads_update_featured_image( $html, $post_id, $attachment_id ) {
 	return webp_uploads_img_tag_update_mime_type( $html, 'post_thumbnail_html', $attachment_id );
 }
 add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );
+
+/**
+ * Updates the image src data to use the webp format if an image has webp version.
+ *
+ * @since n.e.x.t
+ *
+ * @param array|bool   $image         Image data.
+ * @param int          $attachment_id Image attachment ID.
+ * @param string|array $size          Requested image size.
+ * @return array|bool Updated image data if the image has webp version, otherwise the original value.
+ */
+function webp_uploads_update_attachment_image_src( $image, $attachment_id, $size ) {
+	// Do nothing if image data is falsy.
+	if ( empty( $image ) ) {
+		return $image;
+	}
+
+	return $image;
+}
+add_filter( 'wp_get_attachment_image_src', 'webp_uploads_update_attachment_image_src', 10, 3 );
