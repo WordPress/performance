@@ -235,9 +235,10 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  *
  * @since 1.2.0
  *
+ * @param string[] $editors Array of available image editor class names. Defaults are 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD'.
  * @return string[] Registered image editors class names.
  */
-function dominant_color_set_image_editors() {
+function dominant_color_set_image_editors( $editors ) {
 	if ( ! class_exists( 'Dominant_Color_Image_Editor_GD' ) ) {
 		require_once __DIR__ . '/class-dominant-color-image-editor-gd.php';
 	}
@@ -245,7 +246,19 @@ function dominant_color_set_image_editors() {
 		require_once __DIR__ . '/class-dominant-color-image-editor-imagick.php';
 	}
 
-	return array( 'Dominant_Color_Image_Editor_GD', 'Dominant_Color_Image_Editor_Imagick' );
+	$replaces = array(
+		'WP_Image_Editor_GD'      => 'Dominant_Color_Image_Editor_GD',
+		'WP_Image_Editor_Imagick' => 'Dominant_Color_Image_Editor_Imagick',
+	);
+
+	foreach ( $replaces as $old => $new ) {
+		$key = array_search( $old, $editors, true );
+		if ( false !== $key ) {
+			$editors[ $key ] = $new;
+		}
+	}
+
+	return $editors;
 }
 
 /**
