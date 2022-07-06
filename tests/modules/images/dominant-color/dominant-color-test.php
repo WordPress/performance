@@ -58,6 +58,9 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 		$transparency_metadata = dominant_color_metadata( array(), $attachment_id );
+		if ( strpos( $image_path, '.gif' ) ) {
+			$expected_transparency = true; // all gif have alpha.
+		}
 		$this->assertArrayHasKey( 'has_transparency', $transparency_metadata );
 		$this->assertSame( $expected_transparency, $transparency_metadata['has_transparency'] );
 	}
@@ -72,6 +75,9 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	public function test_dominant_color_has_transparency( $image_path, $expected_color, $expected_transparency ) {
 		// Creating attachment.
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		if ( strpos( $image_path, '.gif' ) ) {
+			$expected_transparency = true; // all gif have alpha.
+		}
 		$this->assertSame( $expected_transparency, dominant_color_has_transparency( $attachment_id ) );
 	}
 
@@ -92,6 +98,9 @@ class Dominant_Color_Test extends DominantColorTestCase {
 
 		$filtered_image_tags_added = dominant_color_img_tag_add_dominant_color( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
 
+		if ( strpos( $image_path, '.gif' ) ) {
+			$expected_transparency = true; // all gif have alpha.
+		}
 		$this->assertStringContainsString( 'data-has-transparency="' . json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
 
 		foreach ( $expected_color as $color ) {
@@ -108,6 +117,60 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$this->assertEquals( $filtered_image_mock_lazy_load, $filtered_image_tags_not_added );
 	}
 
+
+	/**
+	 * Tests dominant_color_set_image_editors().
+	 *
+	 * @dataProvider provider_dominant_color_set_image_editors
+	 *
+	 * @covers ::dominant_color_set_image_editors
+	 */
+	public function test_dominant_color_set_image_editors( $existing, $expected ) {
+		$this->assertEqualSets( dominant_color_set_image_editors( $existing ), $expected );
+	}
+
+	public function provider_dominant_color_set_image_editors() {
+		return array(
+			'default'  => array(
+				'existing' => array(
+					'WP_Image_Editor_GD',
+					'WP_Image_Editor_Imagick',
+				),
+				'expected' => array(
+					'Dominant_Color_Image_Editor_GD',
+					'Dominant_Color_Image_Editor_Imagick',
+				),
+			),
+			'filtered' => array(
+				'existing' => array(
+					'WP_Image_Editor_Filered_GD',
+					'WP_Image_Editor_Filered_Imagick',
+				),
+				'expected' => array(
+					'WP_Image_Editor_Filered_GD',
+					'WP_Image_Editor_Filered_Imagick',
+				),
+			),
+			'added'    => array(
+				'existing' => array(
+					'WP_Image_Editor_Filered_GD',
+					'WP_Image_Editor_Filered_Imagick',
+					'WP_Image_Editor_GD',
+					'WP_Image_Editor_Imagick',
+				),
+				'expected' => array(
+					'WP_Image_Editor_Filered_GD',
+					'WP_Image_Editor_Filered_Imagick',
+					'Dominant_Color_Image_Editor_GD',
+					'Dominant_Color_Image_Editor_Imagick',
+				),
+			),
+			'empty'    => array(
+				'existing' => array(),
+				'expected' => array(),
+			),
+		);
+	}
 
 	/**
 	 * Tests dominant_color_rgb_to_hex().
