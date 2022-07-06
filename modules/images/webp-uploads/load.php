@@ -102,20 +102,19 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			continue;
 		}
 
-		// Remove WebP image if it is bigger than the original image.
+		/**
+		 * Filter whether to prioritize the file type over the mime type.
+		 *
+		 * By default the performance lab plugin will use the mime type with the smaller filesize
+		 * rather than defaulting to `webp`.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
+		 */
 		if (
-			$webp_image_filesize >= $original_image_filesize
-			/**
-			 * Filter whether to prioritize the file type over the mime type.
-			 *
-			 * By default the performance lab plugin will use the mime type with the smaller filesize
-			 * rather than defaulting to `webp`.
-			 *
-			 * @since n.e.x.t
-			 *
-			 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
-			 */
-			&& apply_filters( 'webp_prioritise_filesize_over_mime_type', true )
+			apply_filters( 'webp_prioritise_filesize_over_mime_type', true )
+			&& $webp_image_filesize >= $original_image_filesize
 		) {
 			if ( ! file_exists( $destination ) ) {
 				continue;
@@ -189,11 +188,10 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 				continue;
 			}
 
-			// Remove the WebP image if it is bigger than the original thumbnail image.
+			/** This filter is documented in modules/images/webp-uploads/load.php */
 			if (
-				$webp_thumbnail_image_filesize >= $original_thumbnail_image_filesize
-				/** This filter is documented in modules/images/webp-uploads/load.php */
-				&& apply_filters( 'webp_prioritise_filesize_over_mime_type', true )
+				apply_filters( 'webp_prioritise_filesize_over_mime_type', true )
+				&& $webp_thumbnail_image_filesize >= $original_thumbnail_image_filesize
 			) {
 				$destination = trailingslashit( $original_directory ) . "{$source['file']}";
 				if ( ! file_exists( $destination ) ) {
