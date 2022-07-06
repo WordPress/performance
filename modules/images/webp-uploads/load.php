@@ -579,17 +579,20 @@ function webp_uploads_update_attachment_image_src( $image, $attachment_id, $size
 		return $image;
 	}
 
+	// Do nothing if not in the "the_content" context.
+	if ( ! doing_filter( 'the_content' ) ) {
+		return $image;
+	}
+
 	// Do nothing if there is no sources for the selected image size.
 	$sources = webp_uploads_get_attachment_sources( $attachment_id, $size );
 	if ( empty( $sources ) ) {
 		return $image;
 	}
 
-	$context = doing_filter( 'the_content' ) ? 'the_content' : null;
-
 	// Try to find the correct mime type for the image.
 	$target_mime  = null;
-	$target_mimes = webp_uploads_get_content_image_mimes( $attachment_id, $context );
+	$target_mimes = webp_uploads_get_content_image_mimes( $attachment_id, 'the_content' );
 	foreach ( $target_mimes as $mime ) {
 		if ( isset( $sources[ $mime ] ) ) {
 			$target_mime = $mime;
