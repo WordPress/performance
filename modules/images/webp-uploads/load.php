@@ -441,22 +441,8 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	 */
 	$prefer_smaller_image_file = apply_filters( 'webp_uploads_prefer_smaller_image_file', false );
 
-	/**
-	 * Filters mime types that should be used to update all images in the content. The order of
-	 * mime types matters. The first mime type in the list will be used if it is supported by an image.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array  $target_mimes  The list of mime types that can be used to update images in the content.
-	 * @param int    $attachment_id The attachment ID.
-	 * @param string $context       The current context.
-	 */
-	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/webp', 'image/jpeg' ), $attachment_id, $context );
-
-	// Get the original mime type for comparison.
-	$original_mime = get_post_mime_type( $attachment_id );
-
-	$target_mime = null;
+	$target_mime  = null;
+	$target_mimes = webp_uploads_get_content_image_mimes( $attachment_id, $context );
 	foreach ( $target_mimes as $mime ) {
 		if ( isset( $metadata['sources'][ $mime ] ) ) {
 			$target_mime = $mime;
@@ -467,6 +453,9 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 	if ( null === $target_mime ) {
 		return $image;
 	}
+
+	// Get the original mime type for comparison.
+	$original_mime = get_post_mime_type( $attachment_id );
 
 	// Replace the full size image if present.
 	if ( isset( $metadata['sources'][ $target_mime ]['file'] ) ) {
@@ -585,10 +574,36 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
  * @return array|bool Updated image data if the image has webp version, otherwise the original value.
  */
 function webp_uploads_update_attachment_image_src( $image, $attachment_id, $size ) {
-	// Do nothing if image data is falsy.
-	if ( empty( $image ) ) {
+	// Do nothing if image data is falsy or the size is not a string.
+	if ( empty( $image ) || ! is_string( $size ) ) {
 		return $image;
 	}
+
+	// Do nothing if there is no sources for the selected image size.
+	$sources = webp_uploads_get_attachment_sources( $attachment_id, $size );
+	if ( empty( $sources ) ) {
+		return $image;
+	}
+
+	$context = doing_filter( 'the_content' ) ? 'the_content' : null;
+
+	// Try to find the correct mime type for the image.
+	$target_mime  = null;
+	$target_mimes = webp_uploads_get_content_image_mimes( $attachment_id, $context );
+	foreach ( $target_mimes as $mime ) {
+		if ( isset( $sources[ $mime ] ) ) {
+			$target_mime = $mime;
+			break;
+		}
+	}
+
+	// Do nothing if there is no appropriate mime type for this image.
+	if ( null === $target_mime ) {
+		return $image;
+	}
+
+	// Replace the image with the new mime type.
+	$image[0] = dirname( $image[0] ) . '/' . $sources[ $target_mime ]['file'];
 
 	return $image;
 }

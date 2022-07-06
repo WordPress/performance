@@ -240,3 +240,33 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 	// Return an empty array if no sources found.
 	return array();
 }
+
+/**
+ * Returns mime types that should be used for an image in the specific context.
+ *
+ * @since n.e.x.t
+ *
+ * @param int    $attachment_id The attachment ID.
+ * @param string $context       The current context.
+ * @return array Mime types to use for the image.
+ */
+function webp_uploads_get_content_image_mimes( $attachment_id, $context ) {
+	$target_mimes = array( 'image/webp', 'image/jpeg' );
+
+	/**
+	 * Filters mime types that should be used to update all images in the content. The order of
+	 * mime types matters. The first mime type in the list will be used if it is supported by an image.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array  $target_mimes  The list of mime types that can be used to update images in the content.
+	 * @param int    $attachment_id The attachment ID.
+	 * @param string $context       The current context.
+	 */
+	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', $target_mimes, $attachment_id, $context );
+	if ( ! is_array( $target_mimes ) ) {
+		$target_mimes = array();
+	}
+
+	return $target_mimes;
+}
