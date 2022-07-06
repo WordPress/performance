@@ -192,16 +192,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			// Remove the WebP image if it is bigger than the original thumbnail image.
 			if (
 				$webp_thumbnail_image_filesize >= $original_thumbnail_image_filesize
-				/**
-				 * Filter whether to prioritize the file type over the mime type.
-				 *
-				 * By default the performance lab plugin will use the mime type with the smaller filesize
-				 * rather than defaulting to `webp`.
-				 *
-				 * @since n.e.x.t
-				 *
-				 * @param bool $perfer_filesize Prioritize file size over mime type. Default true.
-				 */
+				/** This filter is documented in modules/images/webp-uploads/load.php */
 				&& apply_filters( 'webp_prioritise_filesize_over_mime_type', true )
 			) {
 				$destination = trailingslashit( $original_directory ) . "{$source['file']}";
