@@ -312,7 +312,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Remove the attached WebP version if the attachment is force deleted but empty trash day is not defined
+	 * Remove the attached WebP version if the attachment is force deleted after edit.
 	 *
 	 * @test
 	 */
