@@ -142,33 +142,27 @@ function perflab_get_active_modules() {
  *
  * @since n.e.x.t
  *
- * @param array $modules List of active module slugs.
- * @return array List of active valid module slugs.
+ * @param string $module Slug of the module.
+ * @return null|string Module slug name on success, null on failure.
  */
-function perflab_get_valid_modules( array $modules = array() ) {
+function perflab_is_valid_module( $module ) {
 
-	if ( ! is_array( $modules ) ) {
-		return array();
+	if ( empty( $module ) ) {
+		return;
 	}
 
-	$valid_modules = array();
-	foreach ( $modules as $module ) {
-
-		// Do not load module if no longer exists.
-		$module_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
-		if ( ! file_exists( $module_file ) ) {
-			continue;
-		}
-
-		// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
-		if ( ! perflab_can_load_module( $module ) ) {
-			continue;
-		}
-
-		$valid_modules[] = $module;
+	// Do not load module if no longer exists.
+	$module_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
+	if ( ! file_exists( $module_file ) ) {
+		return;
 	}
 
-	return $valid_modules;
+	// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
+	if ( ! perflab_can_load_module( $module ) ) {
+		return;
+	}
+
+	return $module;
 }
 
 /**
@@ -179,7 +173,7 @@ function perflab_get_valid_modules( array $modules = array() ) {
  * @since 1.1.0
  */
 function perflab_get_generator_content() {
-	$active_and_valid_modules = perflab_get_valid_modules( perflab_get_active_modules() );
+	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
 
 	return sprintf(
 		'Performance Lab %1$s; modules: %2$s',
@@ -237,8 +231,7 @@ function perflab_can_load_module( $module ) {
  * @since n.e.x.t Renamed to perflab_load_active_and_valid_modules().
  */
 function perflab_load_active_and_valid_modules() {
-	$active_and_valid_modules = perflab_get_valid_modules( perflab_get_active_modules() );
-
+	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );;
 	if ( empty( $active_and_valid_modules ) ) {
 		return;
 	}

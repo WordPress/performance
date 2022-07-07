@@ -131,8 +131,9 @@ class Load_Tests extends WP_UnitTestCase {
 				return $active_modules;
 			}
 		);
-		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $active_modules );
-		$content  = perflab_get_generator_content();
+		$active_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
+		$expected       = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $active_modules );
+		$content        = perflab_get_generator_content();
 		$this->assertSame( $expected, $content );
 	}
 
@@ -150,50 +151,40 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertContains( $expected, $output );
 	}
 
-	public function test_perflab_get_valid_modules() {
-		global $wp_version;
-
-		// Assert that it returns the empty array for dummy modules.
-		$dummy_active_modules = array(
-			'../tests/testdata/demo-modules/javascript/demo-module-1',
-			'../tests/testdata/demo-modules/something/demo-module-2',
-			'../tests/testdata/demo-modules/images/demo-module-3',
-		);
-
-		$output = perflab_get_valid_modules( $dummy_active_modules );
-		$this->assertIsArray( $output );
-		$this->assertSame( array( '../tests/testdata/demo-modules/something/demo-module-2', '../tests/testdata/demo-modules/images/demo-module-3' ), $output );
-
-		// Assert that it returns the array for modules.
-		if ( $wp_version >= '6.1' ) {
-			$active_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
-			add_filter(
-				'perflab_active_modules',
-				function() use ( $active_modules ) {
-					return $active_modules;
-				}
-			);
-			$output = perflab_get_valid_modules( perflab_get_active_modules() );
-
-			// Remove Image module as it will marge in 6.1.
-			$remove_marge_modules = array_shift( $active_modules );
-			$this->assertSame( $active_modules, $output );
-		}
+	public function test_empty_module_for_perflab_is_valid_module() {
+		// Assert that it return null for empty module.
+		$this->assertEmpty( perflab_is_valid_module( '' ) );
 	}
 
-	public function test_perflab_can_load_module() {
-		// Assert that it validates the ability to load modules that are not in the core.
-		$demo_modules = array(
-			'javascript/demo-module-1' => false,
-			'something/demo-module-2'  => true,
-			'images/demo-module-3'     => true,
+	/**
+	 * @dataProvider provider_dummy_valid_modules
+	 */
+	public function test_perflab_is_valid_module( $dummy_module ) {
+		$output = perflab_is_valid_module( $dummy_module );
+		$this->assertNotEmpty( $output );
+		$this->assertIsString( $output );
+	}
+
+	public function provider_dummy_valid_modules() {
+		return array(
+			array( '../tests/testdata/demo-modules/something/demo-module-2' ),
+			array( '../tests/testdata/demo-modules/images/demo-module-3' ),
 		);
+	}
 
-		foreach ( $demo_modules as $module => $can_load ) {
-			$output = perflab_can_load_module( '../tests/testdata/demo-modules/' . $module );
-			$this->assertSame( $can_load, $output );
-		}
+	/**
+	 * @dataProvider provider_dummy_can_load_modules
+	 */
+	public function test_perflab_can_load_module( $dummy_can_load_modules, $module_status ) {
+		$this->assertSame( $module_status, perflab_can_load_module( $dummy_can_load_modules ) );
+	}
 
+	public function provider_dummy_can_load_modules() {
+		return array(
+			array( '../tests/testdata/demo-modules/javascript/demo-module-1', false ),
+			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
+			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
+		);
 	}
 
 	private function get_expected_default_option() {
