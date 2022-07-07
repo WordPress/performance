@@ -621,12 +621,12 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * The image with the smaller filesize should be used when webp_prioritise_filesize_over_mime_type is set to true.
+	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
 	 *
 	 * @test
 	 */
 	public function it_should_use_smaller_mime_type_image_from_source() {
-		add_filter( 'webp_prioritise_filesize_over_mime_type', '__return_true' );
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
 		// Look for an image that contains all of the additional mime type images.
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
@@ -651,12 +651,12 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * The image with the smaller filesize should be used when webp_prioritise_filesize_over_mime_type is set to true.
+	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
 	 *
 	 * @test
 	 */
 	public function it_should_use_smaller_mime_type_image_from_specific_source() {
-		add_filter( 'webp_prioritise_filesize_over_mime_type', '__return_true' );
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
 		// Look for an image that contains all of the additional mime type images.
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
@@ -673,12 +673,12 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * The image with the smaller filesize should be used when webp_prioritise_filesize_over_mime_type is set to true.
+	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
 	 *
 	 * @test
 	 */
 	public function it_should_use_smaller_mime_type_image_from_specific_source_for_webp_image() {
-		add_filter( 'webp_prioritise_filesize_over_mime_type', '__return_true' );
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
 		// Look for an image that contains all of the additional mime type images.
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );

@@ -54,7 +54,7 @@ tests_add_filter(
 );
 
 // Remove the filter so that other tests are not impacted.
-tests_add_filter( 'webp_prioritise_filesize_over_mime_type', '__return_false' );
+tests_add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
 
 // Start up the WP testing environment.
 require $_test_root . '/includes/bootstrap.php';
