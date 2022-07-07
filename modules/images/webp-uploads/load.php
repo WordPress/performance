@@ -347,6 +347,70 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 		}
 		wp_delete_file_from_directory( $full_size_file, $intermediate_dir );
 	}
+
+	$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+	$backup_sizes = is_array( $backup_sizes ) ? $backup_sizes : array();
+
+	foreach ( $backup_sizes as $backup_size ) {
+		if ( ! isset( $backup_size['sources'] ) || ! is_array( $backup_size['sources'] ) ) {
+			continue;
+		}
+
+		$original_backup_size_mime = empty( $backup_size['mime-type'] ) ? '' : $backup_size['mime-type'];
+
+		foreach ( $backup_size['sources'] as $backup_mime => $backup_properties ) {
+			/**
+			 * When we face the same mime type as the original image, we ignore this file as this file
+			 * would be removed when the size is removed by WordPress itself. The meta information as well
+			 * would be deleted as soon as the image is removed.
+			 *
+			 * @see wp_delete_attachment
+			 */
+			if ( $original_backup_size_mime === $backup_mime ) {
+				continue;
+			}
+
+			if ( ! is_array( $backup_properties ) || empty( $backup_properties['file'] ) ) {
+				continue;
+			}
+
+			$backup_intermediate_file = str_replace( $basename, $backup_properties['file'], $file );
+			if ( empty( $backup_intermediate_file ) ) {
+				continue;
+			}
+
+			$backup_intermediate_file = path_join( $upload_path['basedir'], $backup_intermediate_file );
+			if ( ! file_exists( $backup_intermediate_file ) ) {
+				continue;
+			}
+
+			wp_delete_file_from_directory( $backup_intermediate_file, $intermediate_dir );
+		}
+	}
+
+	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+	$backup_sources = is_array( $backup_sources ) ? $backup_sources : array();
+
+	// Delete full sizes backup mime types.
+	foreach ( $backup_sources as $backup_mimes ) {
+
+		foreach ( $backup_mimes as $backup_mime_properties ) {
+			if ( ! is_array( $backup_mime_properties ) || empty( $backup_mime_properties['file'] ) ) {
+				continue;
+			}
+
+			$full_size = str_replace( $basename, $backup_mime_properties['file'], $file );
+			if ( empty( $full_size ) ) {
+				continue;
+			}
+
+			$full_size_file = path_join( $upload_path['basedir'], $full_size );
+			if ( ! file_exists( $full_size_file ) ) {
+				continue;
+			}
+			wp_delete_file_from_directory( $full_size_file, $intermediate_dir );
+		}
+	}
 }
 add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
 

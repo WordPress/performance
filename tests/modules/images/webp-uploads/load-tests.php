@@ -283,6 +283,39 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
+	 * Remove the attached WebP version if the attachment is force deleted after edit.
+	 *
+	 * @test
+	 */
+	public function it_should_remove_the_backup_sizes_and_sources_if_the_attachment_is_deleted_after_edit() {
+		$attachment_id = $this->factory->attachment->create_upload_object(
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+		);
+
+		$file    = get_attached_file( $attachment_id, true );
+		$dirname = pathinfo( $file, PATHINFO_DIRNAME );
+
+		$this->assertIsString( $file );
+		$this->assertFileExists( $file );
+
+		$editor = new WP_Image_Edit( $attachment_id );
+		$editor->rotate_right()->save();
+
+		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+		$this->assertNotEmpty( $backup_sources );
+		$this->assertIsArray( $backup_sources );
+
+		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+		$this->assertNotEmpty( $backup_sizes );
+		$this->assertIsArray( $backup_sizes );
+
+		wp_delete_attachment( $attachment_id, true );
+
+		$this->assertFileDoesNotExist( path_join( $dirname, $backup_sources['full-orig']['image/webp']['file'] ) );
+		$this->assertFileDoesNotExist( path_join( $dirname, $backup_sizes['thumbnail-orig']['sources']['image/webp']['file'] ) );
+	}
+
+	/**
 	 * Avoid the change of URLs of images that are not part of the media library
 	 *
 	 * @group webp_uploads_update_image_references
