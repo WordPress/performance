@@ -98,30 +98,28 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 		$original_image_filesize = isset( $metadata['filesize'] ) ? (int) $metadata['filesize'] : 0;
 		$webp_image_filesize     = isset( $image['filesize'] ) ? (int) $image['filesize'] : 0;
-		if ( $original_image_filesize <= 0 && $webp_image_filesize <= 0 ) {
-			continue;
-		}
+		if ( $original_image_filesize > 0 && $webp_image_filesize > 0 ) {
+			/**
+			 * Filter whether WebP images that are larger than the matching JPEG should be discarded.
+			 *
+			 * By default the performance lab plugin will use the mime type with the smaller filesize
+			 * rather than defaulting to `webp`.
+			 *
+			 * @since n.e.x.t
+			 *
+			 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
+			 */
+			if (
+				apply_filters( 'webp_uploads_discard_larger_generated_images', true )
+				&& $webp_image_filesize >= $original_image_filesize
+			) {
+				if ( ! file_exists( $destination ) ) {
+					continue;
+				}
 
-		/**
-		 * Filter whether WebP images that are larger than the matching JPEG should be discarded.
-		 *
-		 * By default the performance lab plugin will use the mime type with the smaller filesize
-		 * rather than defaulting to `webp`.
-		 *
-		 * @since n.e.x.t
-		 *
-		 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
-		 */
-		if (
-			apply_filters( 'webp_uploads_discard_larger_generated_images', true )
-			&& $webp_image_filesize >= $original_image_filesize
-		) {
-			if ( ! file_exists( $destination ) ) {
+				wp_delete_file_from_directory( $destination, $original_directory );
 				continue;
 			}
-
-			wp_delete_file_from_directory( $destination, $original_directory );
-			continue;
 		}
 
 		$metadata['sources'][ $targeted_mime ] = $image;
@@ -184,22 +182,20 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 			$original_thumbnail_image_filesize = isset( $properties['filesize'] ) ? (int) $properties['filesize'] : 0;
 			$webp_thumbnail_image_filesize     = isset( $source['filesize'] ) ? (int) $source['filesize'] : 0;
-			if ( $original_thumbnail_image_filesize <= 0 && $webp_thumbnail_image_filesize <= 0 ) {
-				continue;
-			}
+			if ( $original_thumbnail_image_filesize > 0 && $webp_thumbnail_image_filesize > 0 ) {
+				/** This filter is documented in modules/images/webp-uploads/load.php */
+				if (
+					apply_filters( 'webp_uploads_discard_larger_generated_images', true )
+					&& $webp_thumbnail_image_filesize >= $original_thumbnail_image_filesize
+				) {
+					$destination = path_join( $original_directory, $source['file'] );
+					if ( ! file_exists( $destination ) ) {
+						continue;
+					}
 
-			/** This filter is documented in modules/images/webp-uploads/load.php */
-			if (
-				apply_filters( 'webp_uploads_discard_larger_generated_images', true )
-				&& $webp_thumbnail_image_filesize >= $original_thumbnail_image_filesize
-			) {
-				$destination = trailingslashit( $original_directory ) . "{$source['file']}";
-				if ( ! file_exists( $destination ) ) {
+					wp_delete_file_from_directory( $destination, $original_directory );
 					continue;
 				}
-
-				wp_delete_file_from_directory( $destination, $original_directory );
-				continue;
 			}
 
 			$properties['sources'][ $mime ]  = $source;
@@ -518,10 +514,10 @@ function webp_uploads_img_tag_update_mime_type( $image, $context, $attachment_id
 		 */
 		$filtered_image = (string) apply_filters( 'webp_uploads_pre_replace_additional_image_source', $image, $attachment_id, 'full', $target_mime, $context );
 
-		$basename = wp_basename( $metadata['file'] );
 		// If filtered image is same as the image, run our own replacement logic, otherwise rely on the filtered image.
 		if ( $filtered_image === $image ) {
-			$image = str_replace(
+			$basename = wp_basename( $metadata['file'] );
+			$image    = str_replace(
 				$basename,
 				$metadata['sources'][ $target_mime ]['file'],
 				$image

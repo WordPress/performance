@@ -53,8 +53,5 @@ tests_add_filter(
 	1
 );
 
-// Remove the filter so that other tests are not impacted.
-tests_add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
-
 // Start up the WP testing environment.
 require $_test_root . '/includes/bootstrap.php';

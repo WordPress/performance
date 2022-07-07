@@ -8,6 +8,12 @@
 
 class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 
+	public function set_up() {
+		parent::set_up();
+
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+	}
+
 	/**
 	 * Checks whether the sources information is added to image sizes details of the REST response object.
 	 *
