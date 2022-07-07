@@ -231,7 +231,8 @@ function perflab_can_load_module( $module ) {
  * @since n.e.x.t Renamed to perflab_load_active_and_valid_modules().
  */
 function perflab_load_active_and_valid_modules() {
-	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );;
+	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
+
 	if ( empty( $active_and_valid_modules ) ) {
 		return;
 	}
