@@ -365,6 +365,11 @@ function perflab_admin_pointer( $hook_suffix ) {
 		return;
 	}
 
+	// Do not show admin pointer in multisite Network admin or User admin UI.
+	if ( is_network_admin() || is_user_admin() ) {
+		return;
+	}
+
 	$current_user = get_current_user_id();
 	$dismissed    = explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) );
 

@@ -335,4 +335,79 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertSame( 'image_additional_generated_error', $result->get_error_code() );
 	}
 
+	/**
+	 * Returns an empty array when the overwritten with empty array by webp_uploads_upload_image_mime_transforms filter.
+	 *
+	 * @test
+	 */
+	public function it_should_return_empty_array_when_filter_returns_empty_array() {
+		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
+
+		$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+		$this->assertIsArray( $transforms );
+		$this->assertSame( array(), $transforms );
+	}
+
+	/**
+	 * Returns default transforms when the overwritten with non array type by webp_uploads_upload_image_mime_transforms filter.
+	 *
+	 * @test
+	 */
+	public function it_should_return_default_transforms_when_filter_returns_non_array_type() {
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function () {
+				return;
+			}
+		);
+
+		$default_transforms = array(
+			'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
+			'image/webp' => array( 'image/webp', 'image/jpeg' ),
+		);
+
+		$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+		$this->assertIsArray( $transforms );
+		$this->assertSame( $default_transforms, $transforms );
+	}
+
+	/**
+	 * Returns transforms array with fallback to original mime with invalid transforms array.
+	 *
+	 * @test
+	 */
+	public function it_should_return_fallback_transforms_when_overwritten_invalid_transforms() {
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function () {
+				return array( 'image/jpeg' => array() );
+			}
+		);
+
+		$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+		$this->assertIsArray( $transforms );
+		$this->assertSame( array( 'image/jpeg' => array( 'image/jpeg' ) ), $transforms );
+	}
+
+	/**
+	 * Returns custom transforms array when overwritten by webp_uploads_upload_image_mime_transforms filter.
+	 *
+	 * @test
+	 */
+	public function it_should_return_custom_transforms_when_overwritten_by_filter() {
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function () {
+				return array( 'image/jpeg' => array( 'image/jpeg', 'image/webp' ) );
+			}
+		);
+
+		$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+		$this->assertIsArray( $transforms );
+		$this->assertSame( array( 'image/jpeg' => array( 'image/jpeg', 'image/webp' ) ), $transforms );
+	}
 }
