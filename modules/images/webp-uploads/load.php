@@ -665,30 +665,30 @@ function webp_uploads_wepb_fallback() {
 		return;
 	}
 
-	$fallback_url = plugins_url( '/fallback.js', __FILE__ );
+	ob_start();
 
-	$script = <<<EOL
-( function( d, i, s, p ) {
-	s = d.createElement( s );
-	s.src = '{$fallback_url}';
+	?>
+	( function( d, i, s, p ) {
+		s = d.createElement( s );
+		s.src = '<?php echo esc_url_raw( plugins_url( '/fallback.js', __FILE__ ) ); ?>';
 
-	i = d.createElement( i );
-	i.src = p + 'jIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
-	i.onload = function() {
-		i.src = p + 'h4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
-	};
+		i = d.createElement( i );
+		i.src = p + 'jIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
+		i.onload = function() {
+			i.src = p + 'h4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
+		};
 
-	i.onerror = function() {
-		d.body.appendChild( s );
-	};
-} )( document, 'img', 'script', 'data:image/webp;base64,UklGR' );
-EOL;
+		i.onerror = function() {
+			d.body.appendChild( s );
+		};
+	} )( document, 'img', 'script', 'data:image/webp;base64,UklGR' );
+	<?php
 
 	wp_print_inline_script_tag(
-		preg_replace( '/\s+/', '', $script ),
+		preg_replace( '/\s+/', '', ob_get_clean() ),
 		array(
 			'id'            => 'webpUploadsFallbackWebpImages',
-			'data-rest-api' => trailingslashit( get_rest_url() ),
+			'data-rest-api' => esc_url_raw( trailingslashit( get_rest_url() ) ),
 		)
 	);
 }

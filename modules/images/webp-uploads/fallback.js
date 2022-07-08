@@ -1,5 +1,7 @@
-( function( d ) {
-	window.webpUploadsFallbackWebpImages = function( media ) {
+window.wpPerfLab = window.wpPerfLab || {};
+
+( function( document ) {
+	window.wpPerfLab.webpUploadsFallbackWebpImages = function( media ) {
 		for ( var i = 0; i < media.length; i++ ) {
 			try {
 				var ext = media[i].media_details.sources['image/jpeg'].file.match( /\.\w+$/i );
@@ -7,7 +9,7 @@
 					continue;
 				}
 
-				var images = d.querySelectorAll( 'img.wp-image-' + media[i].id );
+				var images = document.querySelectorAll( 'img.wp-image-' + media[i].id );
 				for ( var j = 0; j < images.length; j++ ) {
 					images[j].src = images[j].src.replace( /\.webp$/i, ext[0] );
 					var srcset = images[j].getAttribute( 'srcset' );
@@ -20,7 +22,7 @@
 		}
 	};
 
-	var restApi = d.getElementById( 'webpUploadsFallbackWebpImages' ).getAttribute( 'data-rest-api' );
+	var restApi = document.getElementById( 'webpUploadsFallbackWebpImages' ).getAttribute( 'data-rest-api' );
 
 	var loadMediaDetails = function( nodes ) {
 		var ids = [];
@@ -47,15 +49,15 @@
 				pageIds.push( ids[ i + page * 100 ] );
 			}
 
-			var jsonp = d.createElement( 'script' );
-			jsonp.src = restApi + 'wp/v2/media/?_fields=id,media_details&_jsonp=webpUploadsFallbackWebpImages&per_page=100&include=' + pageIds.join( ',' );
-			d.body.appendChild( jsonp );
+			var jsonp = document.createElement( 'script' );
+			jsonp.src = restApi + 'wp/v2/media/?_fields=id,media_details&_jsonp=wpPerfLab.webpUploadsFallbackWebpImages&per_page=100&include=' + pageIds.join( ',' );
+			document.body.appendChild( jsonp );
 		}
 	};
 
 	try {
 		// Loop through already available images.
-		loadMediaDetails( d.querySelectorAll( 'img' ) );
+		loadMediaDetails( document.querySelectorAll( 'img' ) );
 
 		// Start the mutation observer to update images added dynamically.
 		var observer = new MutationObserver( function( mutationList ) {
@@ -64,7 +66,7 @@
 			}
 		} );
 	
-		observer.observe( d.body, {
+		observer.observe( document.body, {
 			subtree: true,
 			childList: true,
 		} );
