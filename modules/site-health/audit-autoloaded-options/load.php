@@ -1,6 +1,6 @@
 <?php
 /**
- * Module Name: Audit Autoloaded Options
+ * Module Name: Autoloaded Options Health Check
  * Description: Adds a check for autoloaded options in Site Health status.
  * Experimental: Yes
  *
