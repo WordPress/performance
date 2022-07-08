@@ -138,6 +138,30 @@ function perflab_get_active_modules() {
 }
 
 /**
+ * Gets the active and valid performance modules.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $module Slug of the module.
+ * @return bool True if the module is active and valid, otherwise false.
+ */
+function perflab_is_valid_module( $module ) {
+
+	if ( empty( $module ) ) {
+		return false;
+	}
+
+	// Do not load module if no longer exists.
+	$module_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
+	if ( ! file_exists( $module_file ) ) {
+		return false;
+	}
+
+	// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
+	return perflab_can_load_module( $module );
+}
+
+/**
  * Gets the content attribute for the generator tag for the Performance Lab plugin.
  *
  * This attribute is then used in {@see perflab_render_generator()}.
@@ -145,12 +169,12 @@ function perflab_get_active_modules() {
  * @since 1.1.0
  */
 function perflab_get_generator_content() {
-	$active_modules = perflab_get_active_modules();
+	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
 
 	return sprintf(
 		'Performance Lab %1$s; modules: %2$s',
 		PERFLAB_VERSION,
-		implode( ', ', $active_modules )
+		implode( ', ', $active_and_valid_modules )
 	);
 }
 
@@ -169,29 +193,49 @@ function perflab_render_generator() {
 add_action( 'wp_head', 'perflab_render_generator' );
 
 /**
- * Loads the active performance modules.
+ * Checks whether the given module can be loaded in the current environment.
  *
- * @since 1.0.0
+ * @since n.e.x.t
+ *
+ * @param string $module Slug of the module.
+ * @return bool Whether the module can be loaded or not.
  */
-function perflab_load_active_modules() {
-	$active_modules = perflab_get_active_modules();
+function perflab_can_load_module( $module ) {
+	$module_load_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/can-load.php';
 
-	if ( empty( $active_modules ) ) {
-		return;
+	// If the `can-load.php` file does not exist, assume the module can be loaded.
+	if ( ! file_exists( $module_load_file ) ) {
+		return true;
 	}
 
-	foreach ( $active_modules as $module ) {
-		// Do not load module if it no longer exists.
-		$module_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
-		if ( ! file_exists( $module_file ) ) {
-			continue;
-		}
+	// Require the file to get the closure for whether the module can load.
+	$module = require $module_load_file;
 
-		require_once $module_file;
+	// If the `can-load.php` file is invalid and does not return a closure, assume the module can be loaded.
+	if ( ! is_callable( $module ) ) {
+		return true;
+	}
+
+	// Call the closure to determine whether the module can be loaded.
+	return (bool) $module();
+}
+
+/**
+ * Loads the active and valid performance modules.
+ *
+ * @since 1.0.0
+ * @since n.e.x.t Renamed to perflab_load_active_and_valid_modules().
+ */
+function perflab_load_active_and_valid_modules() {
+	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
+
+	foreach ( $active_and_valid_modules as $module ) {
+
+		require_once plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
 	}
 }
 
-perflab_load_active_modules();
+perflab_load_active_and_valid_modules();
 
 // Only load admin integration when in admin.
 if ( is_admin() ) {
