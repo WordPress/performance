@@ -158,11 +158,7 @@ function perflab_is_valid_module( $module ) {
 	}
 
 	// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
-	if ( ! perflab_can_load_module( $module ) ) {
-		return false;
-	}
-
-	return true;
+	return perflab_can_load_module( $module );
 }
 
 /**

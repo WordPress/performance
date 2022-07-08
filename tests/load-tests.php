@@ -161,6 +161,7 @@ class Load_Tests extends WP_UnitTestCase {
 	public function data_perflab_is_valid_module() {
 		return array(
 			array( '', false ),
+			array( '../tests/testdata/demo-modules/something/non-existing-module', false ),
 			array( '../tests/testdata/demo-modules/javascript/demo-module-1', false ),
 			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
 			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
