@@ -154,8 +154,8 @@ class Load_Tests extends WP_UnitTestCase {
 	/**
 	 * @dataProvider data_perflab_can_load_module
 	 */
-	public function test_perflab_is_valid_module( $dummy_module, $expected_status  ) {
-		$this->assertSame( $expected_status , perflab_is_valid_module( $dummy_module ) );
+	public function test_perflab_is_valid_module( $dummy_module, $expected_status ) {
+		$this->assertSame( $expected_status, perflab_is_valid_module( $dummy_module ) );
 	}
 
 	public function data_perflab_is_valid_module() {
@@ -170,8 +170,8 @@ class Load_Tests extends WP_UnitTestCase {
 	/**
 	 * @dataProvider data_perflab_can_load_module
 	 */
-	public function test_perflab_can_load_module( $dummy_module, $expected_status  ) {
-		$this->assertSame( $expected_status , perflab_can_load_module( $dummy_module ) );
+	public function test_perflab_can_load_module( $dummy_module, $expected_status ) {
+		$this->assertSame( $expected_status, perflab_can_load_module( $dummy_module ) );
 	}
 
 	public function data_perflab_can_load_module() {
