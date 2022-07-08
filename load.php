@@ -143,26 +143,26 @@ function perflab_get_active_modules() {
  * @since n.e.x.t
  *
  * @param string $module Slug of the module.
- * @return null|string Module slug name on success, null on failure.
+ * @return bool True if the module is active and valid, otherwise false.
  */
 function perflab_is_valid_module( $module ) {
 
 	if ( empty( $module ) ) {
-		return;
+		return false;
 	}
 
 	// Do not load module if no longer exists.
 	$module_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
 	if ( ! file_exists( $module_file ) ) {
-		return;
+		return false;
 	}
 
 	// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
 	if ( ! perflab_can_load_module( $module ) ) {
-		return;
+		return false;
 	}
 
-	return $module;
+	return true;
 }
 
 /**
@@ -232,10 +232,6 @@ function perflab_can_load_module( $module ) {
  */
 function perflab_load_active_and_valid_modules() {
 	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
-
-	if ( empty( $active_and_valid_modules ) ) {
-		return;
-	}
 
 	foreach ( $active_and_valid_modules as $module ) {
 

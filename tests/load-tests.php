@@ -151,35 +151,30 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertContains( $expected, $output );
 	}
 
-	public function test_empty_module_for_perflab_is_valid_module() {
-		// Assert that it return null for empty module.
-		$this->assertEmpty( perflab_is_valid_module( '' ) );
-	}
-
 	/**
-	 * @dataProvider provider_dummy_valid_modules
+	 * @dataProvider data_perflab_can_load_module
 	 */
-	public function test_perflab_is_valid_module( $dummy_module ) {
-		$output = perflab_is_valid_module( $dummy_module );
-		$this->assertNotEmpty( $output );
-		$this->assertIsString( $output );
+	public function test_perflab_is_valid_module( $dummy_module, $expected_status  ) {
+		$this->assertSame( $expected_status , perflab_is_valid_module( $dummy_module ) );
 	}
 
-	public function provider_dummy_valid_modules() {
+	public function data_perflab_is_valid_module() {
 		return array(
-			array( '../tests/testdata/demo-modules/something/demo-module-2' ),
-			array( '../tests/testdata/demo-modules/images/demo-module-3' ),
+			array( '', false ),
+			array( '../tests/testdata/demo-modules/javascript/demo-module-1', false ),
+			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
+			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
 		);
 	}
 
 	/**
-	 * @dataProvider provider_dummy_can_load_modules
+	 * @dataProvider data_perflab_can_load_module
 	 */
-	public function test_perflab_can_load_module( $dummy_can_load_modules, $module_status ) {
-		$this->assertSame( $module_status, perflab_can_load_module( $dummy_can_load_modules ) );
+	public function test_perflab_can_load_module( $dummy_module, $expected_status  ) {
+		$this->assertSame( $expected_status , perflab_can_load_module( $dummy_module ) );
 	}
 
-	public function provider_dummy_can_load_modules() {
+	public function data_perflab_can_load_module() {
 		return array(
 			array( '../tests/testdata/demo-modules/javascript/demo-module-1', false ),
 			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
