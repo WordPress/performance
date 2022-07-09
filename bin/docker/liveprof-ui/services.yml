@@ -1,0 +1,135 @@
+parameters:
+  aggregator.default_app: Default # app name to use the aggregator in few apps
+  aggregator.use_jobs_in_aggregation: false # use db queue for aggregation
+  aggregator.fields: [wt,ct,cpu,mu: mem] # field map to aggregate, KEY - in profiler, VALUE - in aggregator
+  aggregator.calls_count_field: ct # the field responses for calls count in this context
+  aggregator.field_variations: [percent,min,max] # a list of applied stats functions
+  aggregator.use_layout: true
+  aggregator.log_file: ''
+  aggregator.minimum_profiles_count: 0
+  aggregator.aggregating_jobs_lock_file: /app/db_data/aggregator_processor.lock
+  aggregator.use_method_usage_optimisation: false # returns only last day usage if method run for last 2 days
+
+  aggregator.fields_descriptions:
+    calls_count: Calls count recorded during specified day
+    ct: Average calls count in this context during specified day
+    min_ct: Minimum calls count in this context during specified day (µs)
+    max_ct: Maximim calls count in this context during specified day (µs)
+    percent_ct: 90 percentile of calls count in this context during specified day (µs)
+    wt: Average exec time in this context during specified day (µs)
+    wt_excl: Method self wall time (µs)
+    min_wt: Minimum exec time in this context during specified day (µs)
+    max_wt: Maximim exec time in this context during specified day (µs)
+    percent_wt: 90 percentile of exec time in this context during specified day (µs)
+    cpu: Average cpu time in this context during specified day (µs)
+    cpu_excl: Method self cpu usage (µs)
+    min_cpu: Minimum cpu time in this context during specified day (µs)
+    max_cpu: Maximim cpu time in this context during specified day (µs)
+    percent_cpu: 90 percentile of cpu time in this context during specified day (µs)
+    mem: Average memory usage size in this context during specified day (bytes)
+    mem_excl: Method self mem usage (bytes)
+    min_mem: Minimum memory usage size in this context during specified day (bytes)
+    max_mem: Maximum memory usage size in this context during specified day (bytes)
+    percent_mem: 90 percentile of memory usage size in this context during specified day (bytes)
+
+  # database parameters for profiler data storage
+  source_storage.url: mysql://root:password@db:3306/wordpress?charset=utf8
+  # database parameters for aggregator storage
+  aggregator_storage.url: mysql://root:password@db:3306/wordpress?charset=utf8
+
+services:
+  logger:
+    class: \Badoo\LiveProfilerUI\Logger
+    arguments: ['%aggregator.log_file%']
+
+  packer:
+    class: \Badoo\LiveProfilerUI\DataPacker
+
+  view:
+    class: \Badoo\LiveProfilerUI\View
+    arguments: ['%aggregator.use_layout%']
+
+  fields:
+    class: \Badoo\LiveProfilerUI\FieldList
+    arguments: ['%aggregator.fields%', '%aggregator.field_variations%', '%aggregator.fields_descriptions%']
+
+  field_handler:
+    class: \Badoo\LiveProfilerUI\FieldHandler
+
+  profiler:
+    class: \Badoo\LiveProfilerUI\Profiler
+    arguments: ['@source', '@logger', '%aggregator.default_app%']
+
+  aggregator:
+    class: \Badoo\LiveProfilerUI\Aggregator
+    arguments: ['@source', '@snapshot', '@method', '@method_tree', '@method_data', '@logger', '@packer', '@fields', '@field_handler','%aggregator.calls_count_field%','%aggregator.minimum_profiles_count%']
+
+  # services for pages
+  profile_list_page:
+    class: \Badoo\LiveProfilerUI\Pages\ProfileListPage
+    arguments: ['@view', '@snapshot', '@fields']
+
+  profile_method_tree_page:
+    class: \Badoo\LiveProfilerUI\Pages\ProfileMethodTreePage
+    arguments: ['@view', '@snapshot', '@method', '@method_tree', '@method_data', '@fields', '%aggregator.calls_count_field%']
+
+  profile_method_list_page:
+    class: \Badoo\LiveProfilerUI\Pages\ProfileMethodListPage
+    arguments: ['@view', '@snapshot', '@method', '@method_tree', '@method_data', '@fields', '%aggregator.calls_count_field%']
+
+  flame_graph_page:
+    class: \Badoo\LiveProfilerUI\Pages\FlameGraphPage
+    arguments: ['@view', '@snapshot', '@method', '@method_tree', '@method_data', '@fields', '%aggregator.calls_count_field%']
+
+  snapshots_diff_page:
+    class: \Badoo\LiveProfilerUI\Pages\SnapshotsDiffPage
+    arguments: ['@view', '@snapshot', '@method', '@method_tree', '@fields', '%aggregator.calls_count_field%']
+
+  method_usage_page:
+    class: \Badoo\LiveProfilerUI\Pages\MethodUsagePage
+    arguments: ['@view', '@snapshot', '@method', '@method_data', '@fields', '%aggregator.use_method_usage_optimisation%']
+
+  top_diff_page:
+    class: \Badoo\LiveProfilerUI\Pages\TopDiffPage
+    arguments: ['@view', '@snapshot', '@method', '@method_tree', '@method_data', '@fields', '%aggregator.calls_count_field%']
+
+  ajax_pages:
+    class: \Badoo\LiveProfilerUI\Pages\AjaxPages
+    arguments: ['@snapshot', '@method', '@method_data', '@job', '@aggregator', '@source', '@fields', '%aggregator.use_jobs_in_aggregation%']
+
+  # services for data providers
+  snapshot:
+    class: \Badoo\LiveProfilerUI\DataProviders\Snapshot
+    arguments: ['@aggregator_storage', '@fields']
+
+  source:
+    class: \Badoo\LiveProfilerUI\DataProviders\Source
+    arguments: ['@source_storage', '@packer']
+#    class: \Badoo\LiveProfilerUI\DataProviders\FileSource
+#    arguments: ['%source_storage.path%', '@packer']
+
+  method:
+    class: \Badoo\LiveProfilerUI\DataProviders\Method
+    arguments: ['@aggregator_storage', '@fields']
+
+  method_data:
+    class: \Badoo\LiveProfilerUI\DataProviders\MethodData
+    arguments: ['@aggregator_storage', '@fields']
+
+  method_tree:
+    class: \Badoo\LiveProfilerUI\DataProviders\MethodTree
+    arguments: ['@aggregator_storage', '@fields']
+
+  job:
+    class: \Badoo\LiveProfilerUI\DataProviders\Job
+    arguments: ['@aggregator_storage', '@fields']
+
+  # service for profiler data storage
+  source_storage:
+    class: \Badoo\LiveProfilerUI\DB\Storage
+    arguments: ['%source_storage.url%']
+
+  # service for aggregator storage
+  aggregator_storage:
+    class: \Badoo\LiveProfilerUI\DB\Storage
+    arguments: ['%aggregator_storage.url%']

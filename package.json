@@ -22,6 +22,10 @@
     }
   },
   "scripts": {
+    "start": "./bin/docker/start.sh",
+    "stop": "./bin/docker/stop.sh",
+    "build-images": "./bin/docker/build.sh",
+    "aggregate": "./bin/docker/aggregate.sh",
     "changelog": "./bin/plugin/cli.js changelog",
     "since": "./bin/plugin/cli.js since",
     "readme": "./bin/plugin/cli.js readme",
