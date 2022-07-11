@@ -629,11 +629,10 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 	/**
 	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
-	 * This test has all WebP smaller than the original size.
 	 *
 	 * @test
 	 */
-	public function it_should_use_smaller_mime_type_image_from_source_for_all_sizes() {
+	public function it_should_create_webp_when_webp_is_smaller_than_jpegs() {
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
 		// Look for an image that contains all of the additional mime type images.
@@ -669,7 +668,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_use_smaller_mime_type_image_for_full_size() {
+	public function it_should_create_webp_for_full_size_which_is_smaller_in_webp_format() {
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
 		// Look for an image that contains only full size mime type images.
@@ -692,7 +691,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_use_smaller_mime_type_image_from_specific_source_for_webp_image() {
+	public function it_should_create_webp_for_some_sizes_which_are_smaller_in_webp_format() {
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
 		// Look for an image that contains all of the additional mime type images.

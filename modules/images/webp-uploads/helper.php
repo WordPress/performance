@@ -264,10 +264,9 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 		 *
 		 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
 		 */
-		if (
-			apply_filters( 'webp_uploads_discard_larger_generated_images', true )
-			&& $additional_image_filesize >= $original_image_filesize
-		) {
+		$webp_discard_larger_images = apply_filters( 'webp_uploads_discard_larger_generated_images', true );
+
+		if ( $webp_discard_larger_images && $additional_image_filesize >= $original_image_filesize ) {
 			return true;
 		}
 	}
