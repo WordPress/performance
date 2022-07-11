@@ -144,11 +144,8 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 
 	// Skip creation of duplicate WebP image if an image file already exists in the directory.
 	if ( file_exists( $destination_file_name ) ) {
-		$extension = explode( '|', $allowed_mimes[ $mime ] );
-		$filename  = pathinfo( $destination_file_name, PATHINFO_FILENAME );
-		$filename  = "{$filename}.{$extension[0]}";
 		return array(
-			'file'     => $filename,
+			'file'     => wp_basename( $destination_file_name ),
 			'filesize' => wp_filesize( $destination_file_name ),
 		);
 	}
