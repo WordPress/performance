@@ -372,7 +372,7 @@ function webp_uploads_update_image_references( $content ) {
 	 *
 	 * The is_feed() function is to check if the query is for feeds (rdf, rss, rss2, atom).
 	 */
-	if ( ! did_action( 'template_redirect' ) || is_feed() ) {
+	if ( ! did_action( 'template_redirect' ) || doing_action( 'wp_head' ) || is_feed() ) {
 		return $content;
 	}
 
