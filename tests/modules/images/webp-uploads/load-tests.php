@@ -671,6 +671,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		add_image_size( 'allowed_size_400x300', 400, 300, true );
 		add_image_size( 'not_allowed_size_200x150', 200, 150, true );
 
+		// TODO: This property should later be set via a new parameter on add_image_size().
 		$GLOBALS['_wp_additional_image_sizes']['allowed_size_400x300']['provide_additional_mime_types'] = true;
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
