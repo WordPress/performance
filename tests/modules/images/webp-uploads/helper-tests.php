@@ -412,13 +412,11 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests the webp_uploads_discard_larger_generated_images filter.
-	 *
 	 * @dataProvider data_provider_image_filesize
 	 *
 	 * @test
 	 */
-	public function it_should_check_if_the_additional_image_is_larger_than_the_original_image( $original_filesize, $additional_filesize, $expected_status ) {
+	public function it_should_discard_additional_image_if_larger_than_the_original_image( $original_filesize, $additional_filesize, $expected_status ) {
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
 		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
@@ -446,16 +444,14 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Check the disabled behaviour of the webp_uploads_discard_larger_generated_images filter.
-	 *
 	 * @dataProvider data_provider_image_filesize
 	 *
 	 * @test
 	 */
-	public function it_should_return_an_additional_image_if_it_is_bigger_than_original( $original_filesize, $additional_filesize ) {
+	public function it_should_never_discard_additional_image_if_filter_is_false( $original_filesize, $additional_filesize ) {
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
 
 		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
-		$this->assertSame( $output, false );
+		$this->assertFalse( $output );
 	}
 }
