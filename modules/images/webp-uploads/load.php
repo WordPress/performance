@@ -654,25 +654,11 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
 function webp_uploads_get_image_sizes_additional_mime_type_support() {
 	$additional_sizes = wp_get_additional_image_sizes();
 	$allowed_sizes    = array(
-		'thumbnail'                        => true,
-		'medium'                           => true,
-		'medium_large'                     => true,
-		'large'                            => true,
-		'post-thumbnail'                   => true,
-		// 2x medium_large size.
-		'1536x1536'                        => true,
-		// 2x large size.
-		'2048x2048'                        => true,
-		// Twentyeleven theme.
-		'large-feature'                    => true,
-		'small-feature'                    => true,
-		// Twentyfourteen theme.
-		'twentyfourteen-full-width'        => true,
-		// Twentyseventeen theme.
-		'twentyseventeen-featured-image'   => true,
-		'twentyseventeen-thumbnail-avatar' => true,
-		// Twentytwenty theme.
-		'twentytwenty-fullscreen'          => true,
+		'thumbnail'      => true,
+		'medium'         => true,
+		'medium_large'   => true,
+		'large'          => true,
+		'post-thumbnail' => true,
 	);
 
 	foreach ( $additional_sizes as $size => $size_details ) {
