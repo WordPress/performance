@@ -485,6 +485,61 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
+	 * Ensure jpg image is replaced if the request is for the frontend context.
+	 *
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_not_replace_image_references_when_request_is_for_frontend_context() {
+		$this->mock_action_template_redirect();
+
+		$attachment_id = $this->factory->attachment->create_upload_object(
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+		);
+
+		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$this->assertNotSame( $tag, webp_uploads_update_image_references( $tag ) );
+	}
+
+	/**
+	 * Prevent replacing a jpg image if the request is not for the frontend context.
+	 * In this test case, the request if for the `feed` page.
+	 *
+	 * @group webp_uploads_update_image_references
+	 *
+	 * @test
+	 */
+	public function it_should_not_replace_image_references_when_request_is_not_for_frontend_context() {
+		$this->mock_action_template_redirect();
+		$this->mock_is_feed_page();
+
+		$attachment_id = $this->factory->attachment->create_upload_object(
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+		);
+
+		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
+	}
+
+	/**
+	 * Mock is_home in $wp_query.
+	 */
+	public function mock_is_feed_page() {
+		global $wp_query;
+		$wp_query->is_feed = true;
+	}
+
+	/**
+	 * Execute an empty `template_redirect` action.
+	 */
+	public function mock_action_template_redirect() {
+		remove_all_actions( 'template_redirect' );
+		do_action( 'template_redirect' );
+	}
+
+	/**
 	 * Use the original image to generate all the image sizes
 	 *
 	 * @test

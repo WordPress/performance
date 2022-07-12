@@ -240,3 +240,19 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 	// Return an empty array if no sources found.
 	return array();
 }
+
+/**
+ * Verify if the request if for the frontend context.
+ * The is_feed() function is to check if the query is for feeds (rdf, rss, rss2, atom).
+ *
+ * @since n.e.x.t
+ *
+ * @return bool
+ */
+function webp_uploads_is_frontend_context() {
+	if ( ! did_action( 'template_redirect' ) || doing_action( 'wp_head' ) || doing_action( 'wp_footer' ) || is_feed() ) {
+		return false;
+	}
+
+	return true;
+}
