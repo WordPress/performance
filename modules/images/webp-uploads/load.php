@@ -367,6 +367,15 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  * @return string The content with the updated references to the images.
  */
 function webp_uploads_update_image_references( $content ) {
+	/**
+	 * Bail early if request is not for the frontend.
+	 *
+	 * The is_feed() function is to check if the query is for feeds (rdf, rss, rss2, atom).
+	 */
+	if ( ! did_action( 'template_redirect' ) || is_feed() ) {
+		return $content;
+	}
+
 	// This content does not have any tag on it, move forward.
 	if ( ! preg_match_all( '/<(img)\s[^>]+>/', $content, $img_tags, PREG_SET_ORDER ) ) {
 		return $content;
