@@ -656,7 +656,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		$this->assertTrue( has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) === 10 );
 
-		$footer = get_echo( 'wp_footer' )
+		$footer = get_echo( 'wp_footer' );
 		$this->assertStringContainsString( 'data:image/webp;base64,UklGR', $footer );
 	}
 
