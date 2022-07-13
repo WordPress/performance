@@ -505,8 +505,11 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
-		$this->assertArrayHasKey( '1536x1536', $metadata['sizes'] );
 		foreach ( $metadata['sizes'] as $size ) {
+			if ( ! isset( $size['sources'] ) ) {
+				continue;
+			}
+
 			$this->assertStringContainsString( $size['width'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString( $size['height'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString(
@@ -601,16 +604,13 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_replace_the_featured_image_to_web_p_when_requesting_the_featured_image() {
+	public function it_should_replace_the_featured_image_to_webp_when_requesting_the_featured_image() {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
 		$post_id       = $this->factory()->post->create();
 		set_post_thumbnail( $post_id, $attachment_id );
 
 		$featured_image = get_the_post_thumbnail( $post_id );
-
-		$this->assertTrue( has_post_thumbnail( $post_id ) );
-		$this->assertStringContainsString( '.webp', $featured_image );
-		$this->assertStringNotContainsString( '.jpeg', $featured_image );
+		$this->assertMatchesRegularExpression( '/<img .*?src=".*?\.webp".*>/', $featured_image );
 	}
 
 	/**
@@ -678,5 +678,52 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$footer = ob_get_clean();
 
 		$this->assertStringNotContainsString( 'data:image/webp;base64,UklGR', $footer );
+	}
+
+	/**
+	 * Tests whether additional mime types generated only for allowed image sizes or not when the filter is used.
+	 *
+	 * @test
+	 */
+	public function it_should_create_mime_types_for_allowed_sizes_only_via_filter() {
+		add_filter(
+			'webp_uploads_image_sizes_with_additional_mime_type_support',
+			function( $sizes ) {
+				$sizes['allowed_size_400x300'] = true;
+				return $sizes;
+			}
+		);
+
+		add_image_size( 'allowed_size_400x300', 400, 300, true );
+		add_image_size( 'not_allowed_size_200x150', 200, 150, true );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		remove_image_size( 'allowed_size_400x300' );
+		remove_image_size( 'not_allowed_size_200x150' );
+
+		$this->assertImageHasSizeSource( $attachment_id, 'allowed_size_400x300', 'image/webp' );
+		$this->assertImageNotHasSizeSource( $attachment_id, 'not_allowed_size_200x150', 'image/webp' );
+	}
+
+	/**
+	 * Tests whether additional mime types generated only for allowed image sizes or not when the global variable is updated.
+	 *
+	 * @test
+	 */
+	public function it_should_create_mime_types_for_allowed_sizes_only_via_global_variable() {
+		add_image_size( 'allowed_size_400x300', 400, 300, true );
+		add_image_size( 'not_allowed_size_200x150', 200, 150, true );
+
+		// TODO: This property should later be set via a new parameter on add_image_size().
+		$GLOBALS['_wp_additional_image_sizes']['allowed_size_400x300']['provide_additional_mime_types'] = true;
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+
+		remove_image_size( 'allowed_size_400x300' );
+		remove_image_size( 'not_allowed_size_200x150' );
+
+		$this->assertImageHasSizeSource( $attachment_id, 'allowed_size_400x300', 'image/webp' );
+		$this->assertImageNotHasSizeSource( $attachment_id, 'not_allowed_size_200x150', 'image/webp' );
 	}
 }

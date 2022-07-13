@@ -2,7 +2,7 @@
 /**
  * Module Name: Dominant Color
  * Description: Adds support to store dominant color for an image and create a placeholder background with that color.
- * Experimental: Yes
+ * Experimental: No
  *
  * @package performance-lab
  * @since 1.2.0
