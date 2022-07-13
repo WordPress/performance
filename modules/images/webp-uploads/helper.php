@@ -249,8 +249,15 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
  *
  * @return bool
  */
-function webp_uploads_is_frontend_context() {
-	if ( ! did_action( 'template_redirect' ) || doing_action( 'wp_head' ) || doing_action( 'wp_footer' ) || is_feed() ) {
+function webp_uploads_in_frontend_body() {
+	global $wp_query;
+
+	// Check if this request is generally outside (or before) any frontend context.
+	if ( ! isset( $wp_query ) || defined( 'REST_REQUEST' ) || is_feed() ) {
+		return false;
+	}
+
+	if ( ! did_action( 'template_redirect' ) || doing_action( 'wp_head' ) ) {
 		return false;
 	}
 

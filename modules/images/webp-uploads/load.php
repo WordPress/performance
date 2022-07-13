@@ -368,7 +368,7 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  */
 function webp_uploads_update_image_references( $content ) {
 	// Bail early if request is not for the frontend.
-	if ( ! webp_uploads_is_frontend_context() ) {
+	if ( ! webp_uploads_in_frontend_body() ) {
 		return $content;
 	}
 

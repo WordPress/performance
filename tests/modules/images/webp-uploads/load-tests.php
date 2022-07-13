@@ -491,7 +491,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_not_replace_image_references_when_request_is_for_frontend_context() {
+	public function it_should_replace_image_references_when_in_frontend_context() {
 		$this->mock_action_template_redirect();
 
 		$attachment_id = $this->factory->attachment->create_upload_object(
@@ -510,7 +510,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_not_replace_image_references_when_request_is_not_for_frontend_context() {
+	public function it_should_not_replace_image_references_when_not_in_frontend_context() {
 		$this->mock_action_template_redirect();
 		$this->mock_is_feed_page();
 
@@ -524,7 +524,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Mock is_home in $wp_query.
+	 * Mock is_feed in $wp_query.
 	 */
 	public function mock_is_feed_page() {
 		global $wp_query;
