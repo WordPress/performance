@@ -637,6 +637,44 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
+	 * Tests that the fallback script is added when a post with updated images is rendered.
+	 *
+	 * @test
+	 */
+	public function it_should_add_fallback_script_if_content_has_updated_images() {
+		$attachment_id = $this->factory->attachment->create_upload_object(
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+		);
+
+		apply_filters(
+			'the_content',
+			sprintf(
+				'<p>before image</p>%s<p>after image</p>',
+				wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) )
+			)
+		);
+
+		$this->assertTrue( has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) === 10 );
+
+		$footer = get_echo( 'wp_footer' );
+		$this->assertStringContainsString( 'data:image/webp;base64,UklGR', $footer );
+	}
+
+	/**
+	 * Tests that the fallback script is not added when a post with no updated images is rendered.
+	 *
+	 * @test
+	 */
+	public function it_should_not_add_fallback_script_if_content_has_no_updated_images() {
+		apply_filters( 'the_content', '<p>no image</p>' );
+
+		$this->assertFalse( has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) );
+
+		$footer = get_echo( 'wp_footer' );
+		$this->assertStringNotContainsString( 'data:image/webp;base64,UklGR', $footer );
+	}
+
+	/**
 	 * Tests whether additional mime types generated only for allowed image sizes or not when the filter is used.
 	 *
 	 * @test
