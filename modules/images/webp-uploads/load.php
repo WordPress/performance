@@ -630,55 +630,6 @@ function webp_uploads_update_featured_image( $html, $post_id, $attachment_id ) {
 add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );
 
 /**
- * Updates the image src data to use the webp format if an image has webp version.
- *
- * @since n.e.x.t
- *
- * @param array|bool   $image         Image data.
- * @param int          $attachment_id Image attachment ID.
- * @param string|array $size          Requested image size.
- * @return array|bool Updated image data if the image has webp version, otherwise the original value.
- */
-function webp_uploads_update_attachment_image_src( $image, $attachment_id, $size ) {
-	// Do nothing if image data is falsy or the size is not a string.
-	if ( empty( $image ) || ! is_string( $size ) ) {
-		return $image;
-	}
-
-	// Do nothing if not in the "the_content" context.
-	if ( ! doing_filter( 'the_content' ) ) {
-		return $image;
-	}
-
-	// Do nothing if there is no sources for the selected image size.
-	$sources = webp_uploads_get_attachment_sources( $attachment_id, $size );
-	if ( empty( $sources ) ) {
-		return $image;
-	}
-
-	// Try to find the correct mime type for the image.
-	$target_mime  = null;
-	$target_mimes = webp_uploads_get_content_image_mimes( $attachment_id, 'the_content' );
-	foreach ( $target_mimes as $mime ) {
-		if ( isset( $sources[ $mime ] ) ) {
-			$target_mime = $mime;
-			break;
-		}
-	}
-
-	// Do nothing if there is no appropriate mime type for this image.
-	if ( null === $target_mime ) {
-		return $image;
-	}
-
-	// Replace the image with the new mime type.
-	$image[0] = dirname( $image[0] ) . '/' . $sources[ $target_mime ]['file'];
-
-	return $image;
-}
-add_filter( 'wp_get_attachment_image_src', 'webp_uploads_update_attachment_image_src', 10, 3 );
-
-/**
  * Returns an array of image size names that have secondary mime type output enabled. Core sizes and
  * core theme sizes are enabled by default.
  *

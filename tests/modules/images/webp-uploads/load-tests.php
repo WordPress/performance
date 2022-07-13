@@ -637,32 +637,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Checks if the image URL is update when there is an appropriate mime type.
-	 *
-	 * @test
-	 */
-	public function it_should_update_image_src_if_there_is_appropriate_mime_type() {
-		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
-		$original_url  = wp_get_attachment_image_url( $attachment_id, 'medium' );
-		$this->assertNotFalse( $original_url );
-
-		// This test should be executed within the the_content context to process correctly.
-		add_filter(
-			'the_content',
-			function() use ( $attachment_id, $original_url ) {
-				$webp_url = wp_get_attachment_image_url( $attachment_id, 'medium' );
-				$this->assertNotFalse( $webp_url );
-				$this->assertNotSame( $webp_url, $original_url );
-
-				$expected = str_replace( '.jpeg', '.webp', $original_url );
-				$this->assertSame( $expected, $webp_url );
-			}
-		);
-
-		apply_filters( 'the_content', '' );
-	}
-
-	/**
 	 * Tests whether additional mime types generated only for allowed image sizes or not when the filter is used.
 	 *
 	 * @test
