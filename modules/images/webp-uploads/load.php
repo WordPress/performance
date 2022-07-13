@@ -105,9 +105,11 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		return $metadata;
 	}
 
+	$sizes_with_mime_type_support = webp_uploads_get_image_sizes_additional_mime_type_support();
+
 	foreach ( $metadata['sizes'] as $size_name => $properties ) {
-		// This image size is not defined or not an array.
-		if ( ! is_array( $properties ) ) {
+		// Do nothing if this image size is not an array or is not allowed to have additional mime types.
+		if ( ! is_array( $properties ) || empty( $sizes_with_mime_type_support[ $size_name ] ) ) {
 			continue;
 		}
 
@@ -346,6 +348,70 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 			continue;
 		}
 		wp_delete_file_from_directory( $full_size_file, $intermediate_dir );
+	}
+
+	$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
+	$backup_sizes = is_array( $backup_sizes ) ? $backup_sizes : array();
+
+	foreach ( $backup_sizes as $backup_size ) {
+		if ( ! isset( $backup_size['sources'] ) || ! is_array( $backup_size['sources'] ) ) {
+			continue;
+		}
+
+		$original_backup_size_mime = empty( $backup_size['mime-type'] ) ? '' : $backup_size['mime-type'];
+
+		foreach ( $backup_size['sources'] as $backup_mime => $backup_properties ) {
+			/**
+			 * When we face the same mime type as the original image, we ignore this file as this file
+			 * would be removed when the size is removed by WordPress itself. The meta information as well
+			 * would be deleted as soon as the image is removed.
+			 *
+			 * @see wp_delete_attachment
+			 */
+			if ( $original_backup_size_mime === $backup_mime ) {
+				continue;
+			}
+
+			if ( ! is_array( $backup_properties ) || empty( $backup_properties['file'] ) ) {
+				continue;
+			}
+
+			$backup_intermediate_file = str_replace( $basename, $backup_properties['file'], $file );
+			if ( empty( $backup_intermediate_file ) ) {
+				continue;
+			}
+
+			$backup_intermediate_file = path_join( $upload_path['basedir'], $backup_intermediate_file );
+			if ( ! file_exists( $backup_intermediate_file ) ) {
+				continue;
+			}
+
+			wp_delete_file_from_directory( $backup_intermediate_file, $intermediate_dir );
+		}
+	}
+
+	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
+	$backup_sources = is_array( $backup_sources ) ? $backup_sources : array();
+
+	// Delete full sizes backup mime types.
+	foreach ( $backup_sources as $backup_mimes ) {
+
+		foreach ( $backup_mimes as $backup_mime_properties ) {
+			if ( ! is_array( $backup_mime_properties ) || empty( $backup_mime_properties['file'] ) ) {
+				continue;
+			}
+
+			$full_size = str_replace( $basename, $backup_mime_properties['file'], $file );
+			if ( empty( $full_size ) ) {
+				continue;
+			}
+
+			$full_size_file = path_join( $upload_path['basedir'], $full_size );
+			if ( ! file_exists( $full_size_file ) ) {
+				continue;
+			}
+			wp_delete_file_from_directory( $full_size_file, $intermediate_dir );
+		}
 	}
 }
 add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
@@ -611,3 +677,40 @@ function webp_uploads_update_attachment_image_src( $image, $attachment_id, $size
 	return $image;
 }
 add_filter( 'wp_get_attachment_image_src', 'webp_uploads_update_attachment_image_src', 10, 3 );
+
+/**
+ * Returns an array of image size names that have secondary mime type output enabled. Core sizes and
+ * core theme sizes are enabled by default.
+ *
+ * Developers can control the generation of additional mime images for all sizes using the
+ * webp_uploads_image_sizes_with_additional_mime_type_support filter.
+ *
+ * @since n.e.x.t
+ *
+ * @return array An array of image sizes that can have additional mime types.
+ */
+function webp_uploads_get_image_sizes_additional_mime_type_support() {
+	$additional_sizes = wp_get_additional_image_sizes();
+	$allowed_sizes    = array(
+		'thumbnail'      => true,
+		'medium'         => true,
+		'medium_large'   => true,
+		'large'          => true,
+		'post-thumbnail' => true,
+	);
+
+	foreach ( $additional_sizes as $size => $size_details ) {
+		$allowed_sizes[ $size ] = ! empty( $size_details['provide_additional_mime_types'] );
+	}
+
+	/**
+	 * Filters whether additional mime types are allowed for image sizes.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param array $allowed_sizes A map of image size names and whether they are allowed to have additional mime types.
+	 */
+	$allowed_sizes = apply_filters( 'webp_uploads_image_sizes_with_additional_mime_type_support', $allowed_sizes );
+
+	return $allowed_sizes;
+}

@@ -58,7 +58,8 @@ class ImageHasSizeSource extends ImageHasSource {
 			! isset( $metadata['sizes'][ $this->size ]['sources'] ) ||
 			! is_array( $metadata['sizes'][ $this->size ]['sources'] )
 		) {
-			return false;
+			// Don't fail if we intentionally check that the image doesn't have a mime type for the size.
+			return $this->is_not ? true : false;
 		}
 
 		return $this->verify_sources( $metadata['sizes'][ $this->size ]['sources'] );
