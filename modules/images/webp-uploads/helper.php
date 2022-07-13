@@ -246,7 +246,7 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
  *
  * @since n.e.x.t
  *
- * @param array $original An array with the metadata of the attachment.
+ * @param array $original   An array with the metadata of the attachment.
  * @param array $additional An array containing the filename and file size for additional mime.
  * @return bool True if the additional image is larger than the original image, otherwise false.
  */
