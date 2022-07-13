@@ -4,6 +4,10 @@ window.wpPerfLab = window.wpPerfLab || {};
 	window.wpPerfLab.webpUploadsFallbackWebpImages = function( media ) {
 		for ( var i = 0; i < media.length; i++ ) {
 			try {
+				if ( ! media[i].media_details.sources || ! media[i].media_details.sources['image/jpeg'] ) {
+					continue;
+				}
+
 				var ext = media[i].media_details.sources['image/jpeg'].file.match( /\.\w+$/i );
 				if ( ! ext || ! ext[0] ) {
 					continue;
