@@ -10,6 +10,12 @@ use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
 class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
+	public function set_up() {
+		parent::set_up();
+
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+	}
+
 	/**
 	 * Backup the sources structure alongside the full size
 	 *

@@ -110,6 +110,60 @@ class Dominant_Color_Test extends DominantColorTestCase {
 
 
 	/**
+	 * Tests dominant_color_set_image_editors().
+	 *
+	 * @dataProvider provider_dominant_color_set_image_editors
+	 *
+	 * @covers ::dominant_color_set_image_editors
+	 */
+	public function test_dominant_color_set_image_editors( $existing, $expected ) {
+		$this->assertEqualSets( dominant_color_set_image_editors( $existing ), $expected );
+	}
+
+	public function provider_dominant_color_set_image_editors() {
+		return array(
+			'default'  => array(
+				'existing' => array(
+					'WP_Image_Editor_GD',
+					'WP_Image_Editor_Imagick',
+				),
+				'expected' => array(
+					'Dominant_Color_Image_Editor_GD',
+					'Dominant_Color_Image_Editor_Imagick',
+				),
+			),
+			'filtered' => array(
+				'existing' => array(
+					'WP_Image_Editor_Filered_GD',
+					'WP_Image_Editor_Filered_Imagick',
+				),
+				'expected' => array(
+					'WP_Image_Editor_Filered_GD',
+					'WP_Image_Editor_Filered_Imagick',
+				),
+			),
+			'added'    => array(
+				'existing' => array(
+					'WP_Image_Editor_Filered_GD',
+					'WP_Image_Editor_Filered_Imagick',
+					'WP_Image_Editor_GD',
+					'WP_Image_Editor_Imagick',
+				),
+				'expected' => array(
+					'WP_Image_Editor_Filered_GD',
+					'WP_Image_Editor_Filered_Imagick',
+					'Dominant_Color_Image_Editor_GD',
+					'Dominant_Color_Image_Editor_Imagick',
+				),
+			),
+			'empty'    => array(
+				'existing' => array(),
+				'expected' => array(),
+			),
+		);
+	}
+
+	/**
 	 * Tests dominant_color_rgb_to_hex().
 	 *
 	 * @dataProvider provider_get_hex_color
