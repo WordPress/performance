@@ -240,3 +240,35 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 	// Return an empty array if no sources found.
 	return array();
 }
+
+/**
+ * Check whether the additional image is larger than the original image.
+ *
+ * @since n.e.x.t
+ *
+ * @param array $original   An array with the metadata of the attachment.
+ * @param array $additional An array containing the filename and file size for additional mime.
+ * @return bool True if the additional image is larger than the original image, otherwise false.
+ */
+function webp_uploads_should_discard_additional_image_file( array $original, array $additional ) {
+	$original_image_filesize   = isset( $original['filesize'] ) ? (int) $original['filesize'] : 0;
+	$additional_image_filesize = isset( $additional['filesize'] ) ? (int) $additional['filesize'] : 0;
+	if ( $original_image_filesize > 0 && $additional_image_filesize > 0 ) {
+		/**
+		 * Filter whether WebP images that are larger than the matching JPEG should be discarded.
+		 *
+		 * By default the performance lab plugin will use the mime type with the smaller filesize
+		 * rather than defaulting to `webp`.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
+		 */
+		$webp_discard_larger_images = apply_filters( 'webp_uploads_discard_larger_generated_images', true );
+
+		if ( $webp_discard_larger_images && $additional_image_filesize >= $original_image_filesize ) {
+			return true;
+		}
+	}
+	return false;
+}
