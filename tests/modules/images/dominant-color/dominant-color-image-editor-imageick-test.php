@@ -38,9 +38,6 @@ class Dominant_Color_Image_Editor_Imageick_Test extends DominantColorTestCase {
 		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
 
 		$this->assertContains( $dominant_color_data['dominant_color'], $expected_color );
-		if ( strpos( $image_path, '.gif' ) ) {
-			$expected_transparency = true; // all gif have alpha.
-		}
 		$this->assertSame( $dominant_color_data['has_transparency'], $expected_transparency );
 	}
 

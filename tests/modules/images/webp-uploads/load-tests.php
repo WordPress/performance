@@ -9,6 +9,13 @@
 use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
 class WebP_Uploads_Load_Tests extends ImagesTestCase {
+
+	public function set_up() {
+		parent::set_up();
+
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+	}
+
 	/**
 	 * Create the original mime type as well with all the available sources for the specified mime
 	 *
@@ -353,9 +360,18 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
 		);
 
-		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$tag          = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$expected_tag = $tag;
+		$metadata     = wp_get_attachment_metadata( $attachment_id );
+		foreach ( $metadata['sizes'] as $size => $properties ) {
+			$expected_tag = str_replace( $properties['sources']['image/webp']['file'], $properties['sources']['image/jpeg']['file'], $expected_tag );
+		}
 
-		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$expected_tag = str_replace( $metadata['sources']['image/webp']['file'], $metadata['sources']['image/jpeg']['file'], $expected_tag );
+
+		$this->assertNotEmpty( $expected_tag );
+		$this->assertNotSame( $tag, $expected_tag );
+		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
@@ -579,27 +595,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * The image with the smaller filesize should be used when webp_uploads_prefer_smaller_image_file is set to true.
-	 *
-	 * @test
-	 */
-	public function it_should_use_smaller_jpg_image_when_smaller_size_preferred() {
-		// Set prefer smaller image size to true.
-		add_filter( 'webp_uploads_prefer_smaller_image_file', '__return_true' );
-
-		// File generates smallest WebP version of the 'full' image size, all other sub sizes have a smaller JPG version.
-		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
-		$metadata      = wp_get_attachment_metadata( $attachment_id );
-		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
-		$updated_tag   = webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id );
-
-		// Replace the 'full' image size with the WebP version, all other sub sizes will use the smaller JPG version.
-		$expected_tag = str_replace( $metadata['sources']['image/jpeg']['file'], $metadata['sources']['image/webp']['file'], $tag );
-
-		$this->assertSame( $expected_tag, $updated_tag );
-	}
-
-	/**
 	 * Replace the featured image to WebP when requesting the featured image
 	 *
 	 * @test
@@ -634,6 +629,132 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
+
+	/**
+	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
+	 *
+	 * @test
+	 */
+	public function it_should_create_webp_when_webp_is_smaller_than_jpegs() {
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
+
+		// Look for an image that contains all of the additional mime type images.
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$expected_tag  = $tag;
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+		$file          = get_attached_file( $attachment_id, true );
+		$dirname       = pathinfo( $file, PATHINFO_DIRNAME );
+		$result        = webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
+
+		$this->assertNotSame( $tag, $result );
+
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+
+		foreach ( $metadata['sizes'] as $size => $properties ) {
+			$this->assertFileExists( path_join( $dirname, $properties['sources']['image/webp']['file'] ) );
+			$expected_tag = str_replace( $properties['sources']['image/jpeg']['file'], $properties['sources']['image/webp']['file'], $expected_tag );
+		}
+
+		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
+		$expected_tag = str_replace( $metadata['sources']['image/jpeg']['file'], $metadata['sources']['image/webp']['file'], $expected_tag );
+
+		$this->assertNotEmpty( $expected_tag );
+		$this->assertNotSame( $tag, $expected_tag );
+		$this->assertSame( $expected_tag, $result );
+	}
+
+	/**
+	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
+	 *
+	 * @test
+	 */
+	public function it_should_create_webp_for_full_size_which_is_smaller_in_webp_format() {
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
+
+		// Look for an image that contains only full size mime type images.
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+		$file          = get_attached_file( $attachment_id, true );
+		$dirname       = pathinfo( $file, PATHINFO_DIRNAME );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
+
+		foreach ( $metadata['sizes'] as $size => $properties ) {
+			$this->assertImageNotHasSizeSource( $attachment_id, $size, 'image/webp' );
+		}
+		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+	}
+
+	/**
+	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
+	 *
+	 * @test
+	 */
+	public function it_should_create_webp_for_some_sizes_which_are_smaller_in_webp_format() {
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
+
+		// Look for an image that contains all of the additional mime type images.
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );
+		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$expected_tag  = $tag;
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
+		$file          = get_attached_file( $attachment_id, true );
+		$dirname       = pathinfo( $file, PATHINFO_DIRNAME );
+		$updated_tag   = webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id );
+
+		$this->assertFileExists( path_join( $dirname, $metadata['sizes']['medium']['sources']['image/jpeg']['file'] ) );
+		$this->assertFileExists( path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/jpeg']['file'] ) );
+		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
+
+		$expected_tag = str_replace( $metadata['sizes']['medium']['sources']['image/webp']['file'], $metadata['sizes']['medium']['sources']['image/jpeg']['file'], $expected_tag );
+		$expected_tag = str_replace( $metadata['sizes']['thumbnail']['sources']['image/webp']['file'], $metadata['sizes']['medium']['sources']['image/jpeg']['file'], $expected_tag );
+
+		$this->assertNotSame( $tag, $updated_tag );
+		$this->assertSame( $expected_tag, $updated_tag );
+	}
+
+	/**
+	 * Tests that the fallback script is added when a post with updated images is rendered.
+	 *
+	 * @test
+	 */
+	public function it_should_add_fallback_script_if_content_has_updated_images() {
+		$attachment_id = $this->factory->attachment->create_upload_object(
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+		);
+
+		apply_filters(
+			'the_content',
+			sprintf(
+				'<p>before image</p>%s<p>after image</p>',
+				wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) )
+			)
+		);
+
+		$this->assertTrue( has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) === 10 );
+
+		$footer = get_echo( 'wp_footer' );
+		$this->assertStringContainsString( 'data:image/webp;base64,UklGR', $footer );
+	}
+
+	/**
+	 * Tests that the fallback script is not added when a post with no updated images is rendered.
+	 *
+	 * @test
+	 */
+	public function it_should_not_add_fallback_script_if_content_has_no_updated_images() {
+		apply_filters( 'the_content', '<p>no image</p>' );
+
+		$this->assertFalse( has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) );
+
+		$footer = get_echo( 'wp_footer' );
+		$this->assertStringNotContainsString( 'data:image/webp;base64,UklGR', $footer );
 	}
 
 	/**
