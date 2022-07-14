@@ -454,4 +454,57 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
 		$this->assertFalse( $output );
 	}
+
+	public function test_webp_uploads_in_frontend_body_without_wp_query() {
+		unset( $GLOBALS['wp_query'] );
+
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_with_feed() {
+		$this->mock_empty_action( 'template_redirect' );
+		$GLOBALS['wp_query']->is_feed = true;
+
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_without_template_redirect() {
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_before_template_redirect() {
+		$result = webp_uploads_in_frontend_body();
+		$this->mock_empty_action( 'template_redirect' );
+
+		$this->assertFalse( $result );
+	}
+
+	public function test_webp_uploads_in_frontend_body_after_template_redirect() {
+		$this->mock_empty_action( 'template_redirect' );
+		$result = webp_uploads_in_frontend_body();
+
+		$this->assertTrue( $result );
+	}
+
+	public function test_webp_uploads_in_frontend_body_within_wp_head() {
+		$this->mock_empty_action( 'template_redirect' );
+
+		// Call function within a 'wp_head' callback.
+		remove_all_actions( 'wp_head' );
+		$result = null;
+		add_action(
+			'wp_head',
+			function() use ( &$result ) {
+				$result = webp_uploads_in_frontend_body();
+			}
+		);
+		do_action( 'wp_head' );
+
+		$this->assertFalse( $result );
+	}
+
+	private function mock_empty_action( $action ) {
+		remove_all_actions( $action );
+		do_action( $action );
+	}
 }

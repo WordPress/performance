@@ -242,6 +242,29 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 }
 
 /**
+ * Verifies if the request is for a frontend context within the <body> tag.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if in the <body> within a frontend request, false otherwise.
+ */
+function webp_uploads_in_frontend_body() {
+	global $wp_query;
+
+	// Check if this request is generally outside (or before) any frontend context.
+	if ( ! isset( $wp_query ) || defined( 'REST_REQUEST' ) || defined( 'XMLRPC_REQUEST' ) || is_feed() ) {
+		return false;
+	}
+
+	// Check if we're anywhere before 'template_redirect' or within the 'wp_head' action.
+	if ( ! did_action( 'template_redirect' ) || doing_action( 'wp_head' ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
  * Check whether the additional image is larger than the original image.
  *
  * @since n.e.x.t
