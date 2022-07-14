@@ -822,7 +822,5 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	private function mock_frontend_body_hooks() {
 		remove_all_actions( 'template_redirect' );
 		do_action( 'template_redirect' );
-		remove_all_actions( 'wp_head' );
-		do_action( 'wp_head' );
 	}
 }

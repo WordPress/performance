@@ -256,8 +256,8 @@ function webp_uploads_in_frontend_body() {
 		return false;
 	}
 
-	// Check if we're anywhere before or within the 'wp_head' action.
-	if ( ! did_action( 'template_redirect' ) || ! did_action( 'wp_head' ) || doing_action( 'wp_head' ) ) {
+	// Check if we're anywhere before 'template_redirect' or within the 'wp_head' action.
+	if ( ! did_action( 'template_redirect' ) || doing_action( 'wp_head' ) ) {
 		return false;
 	}
 

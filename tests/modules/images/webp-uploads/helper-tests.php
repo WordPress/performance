@@ -472,20 +472,35 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertFalse( webp_uploads_in_frontend_body() );
 	}
 
-	public function test_webp_uploads_in_frontend_body_before_wp_head() {
-		$this->mock_empty_action( 'template_redirect' );
+	public function test_webp_uploads_in_frontend_body_before_template_redirect() {
 		$result = webp_uploads_in_frontend_body();
-		$this->mock_empty_action( 'wp_head' );
+		$this->mock_empty_action( 'template_redirect' );
 
 		$this->assertFalse( $result );
 	}
 
-	public function test_webp_uploads_in_frontend_body_after_wp_head() {
+	public function test_webp_uploads_in_frontend_body_after_template_redirect() {
 		$this->mock_empty_action( 'template_redirect' );
-		$this->mock_empty_action( 'wp_head' );
 		$result = webp_uploads_in_frontend_body();
 
 		$this->assertTrue( $result );
+	}
+
+	public function test_webp_uploads_in_frontend_body_within_wp_head() {
+		$this->mock_empty_action( 'template_redirect' );
+
+		// Call function within a 'wp_head' callback.
+		remove_all_actions( 'wp_head' );
+		$result = null;
+		add_action(
+			'wp_head',
+			function() use ( &$result ) {
+				$result = webp_uploads_in_frontend_body();
+			}
+		);
+		do_action( 'wp_head' );
+
+		$this->assertFalse( $result );
 	}
 
 	private function mock_empty_action( $action ) {
