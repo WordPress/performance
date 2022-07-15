@@ -1,6 +1,6 @@
 <?php
 /**
- * Can load function to determine if WebP Uploads module already marge in WordPress core.
+ * Can load function to determine if WebP Uploads module is already merged in WordPress core.
  *
  * @since   n.e.x.t
  * @package performance-lab
