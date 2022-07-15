@@ -663,9 +663,9 @@ function webp_uploads_wepb_fallback() {
 
 		i = d.createElement( i );
 		i.src = p + 'jIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
-		i.onload = function() {
+		i.addEventListener( 'load', function() {
 			i.src = p + 'h4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
-		};
+		}, { once: true } );
 
 		i.onerror = function() {
 			d.body.appendChild( s );
