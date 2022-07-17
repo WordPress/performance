@@ -38,15 +38,15 @@ class PerflabDbMetrics {
 	public function get_db_version() {
 		global $wpdb;
 		global $wp_db_version;
-		$results = $wpdb->get_results(
-			"SELECT VERSION() version,
+		$query = "SELECT VERSION() version,
 		        1 canreindex,
 		        0 unconstrained,
 	            CAST(SUBSTRING_INDEX(VERSION(), '.', 1) AS UNSIGNED) major,
 	            CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(VERSION(), '.', 2), '.', -1) AS UNSIGNED) minor,
 	            CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(REPLACE(VERSION(), '-', '.'), '.', 3), '.', -1) AS UNSIGNED) build,
-	            '' fork, '' distro"
-		);
+	            '' fork, '' distro";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_results( $query );
 		$results = $results[0];
 
 		$results->db_host = DB_HOST;
@@ -145,7 +145,9 @@ class PerflabDbMetrics {
 	public function has_large_prefix() {
 		global $wpdb;
 		/* Beware: this innodb_large_prefix variable is missing in MySQL 8+ and MySQL 5.5- */
-		$prefix = $wpdb->get_results( "SHOW VARIABLES LIKE 'innodb_large_prefix'", ARRAY_N );
+		$query = "SHOW VARIABLES LIKE 'innodb_large_prefix'";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$prefix = $wpdb->get_results( $query, ARRAY_N );
 		if ( $prefix && is_array( $prefix ) ) {
 			$prefix = $prefix[1];
 
