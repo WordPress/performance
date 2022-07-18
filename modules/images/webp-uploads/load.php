@@ -497,7 +497,7 @@ add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
  * for the specified image sizes, the *.webp references are stored inside of each size.
  *
  * @since 1.0.0
- * @since n.e.x.t Remove `webp_uploads_prefer_smaller_image_file` filter
+ * @since 1.3.0 Remove `webp_uploads_prefer_smaller_image_file` filter
  *
  * @param string $original_image An <img> tag where the urls would be updated.
  * @param string $context        The context where this is function is being used.
@@ -641,7 +641,7 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
 /**
  * Adds a fallback mechanism to replace webp images with jpeg alternatives on older browsers.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  */
 function webp_uploads_wepb_fallback() {
 	// Get mime type transofrms for the site.
@@ -691,7 +691,7 @@ function webp_uploads_wepb_fallback() {
  * Developers can control the generation of additional mime images for all sizes using the
  * webp_uploads_image_sizes_with_additional_mime_type_support filter.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @return array An array of image sizes that can have additional mime types.
  */
@@ -712,7 +712,7 @@ function webp_uploads_get_image_sizes_additional_mime_type_support() {
 	/**
 	 * Filters whether additional mime types are allowed for image sizes.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.3.0
 	 *
 	 * @param array $allowed_sizes A map of image size names and whether they are allowed to have additional mime types.
 	 */

@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.
  * Requires at least: 5.8
  * Requires PHP: 5.6
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: WordPress Performance Group
  * Author URI: https://make.wordpress.org/core/tag/performance/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.2.0' );
+define( 'PERFLAB_VERSION', '1.3.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
@@ -140,7 +140,7 @@ function perflab_get_active_modules() {
 /**
  * Gets the active and valid performance modules.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param string $module Slug of the module.
  * @return bool True if the module is active and valid, otherwise false.
@@ -195,7 +195,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
 /**
  * Checks whether the given module can be loaded in the current environment.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param string $module Slug of the module.
  * @return bool Whether the module can be loaded or not.
@@ -224,7 +224,7 @@ function perflab_can_load_module( $module ) {
  * Loads the active and valid performance modules.
  *
  * @since 1.0.0
- * @since n.e.x.t Renamed to perflab_load_active_and_valid_modules().
+ * @since 1.3.0 Renamed to perflab_load_active_and_valid_modules().
  */
 function perflab_load_active_and_valid_modules() {
 	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
