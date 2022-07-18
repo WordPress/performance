@@ -497,7 +497,7 @@ add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
  * for the specified image sizes, the *.webp references are stored inside of each size.
  *
  * @since 1.0.0
- * @since n.e.x.t Remove `webp_uploads_prefer_smaller_image_file` filter
+ * @since n.e.x.t Remove `webp_uploads_prefer_smaller_image_file` filter.
  *
  * @param string $original_image An <img> tag where the urls would be updated.
  * @param string $context        The context where this is function is being used.
