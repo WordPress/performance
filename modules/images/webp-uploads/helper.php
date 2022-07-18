@@ -244,7 +244,7 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 /**
  * Verifies if the request is for a frontend context within the <body> tag.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @return bool True if in the <body> within a frontend request, false otherwise.
  */
@@ -267,7 +267,7 @@ function webp_uploads_in_frontend_body() {
 /**
  * Check whether the additional image is larger than the original image.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param array $original   An array with the metadata of the attachment.
  * @param array $additional An array containing the filename and file size for additional mime.
@@ -283,7 +283,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 		 * By default the performance lab plugin will use the mime type with the smaller filesize
 		 * rather than defaulting to `webp`.
 		 *
-		 * @since n.e.x.t
+		 * @since 1.3.0
 		 *
 		 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
 		 */
