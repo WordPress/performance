@@ -1,0 +1,4 @@
+div.health-check-accordion.issues > div.health-check-accordion-panel > ul.tables > li.tablename {
+	list-style-type: disc;
+	list-style-position: inside;
+}
