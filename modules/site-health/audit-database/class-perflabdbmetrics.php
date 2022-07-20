@@ -40,6 +40,11 @@ class PerflabDbMetrics {
 	 */
 	public $has_hr_time = false;
 
+	/** Utility
+	 *
+	 * @var PerflabDbUtilities singleton instance
+	 */
+	private $util;
 	/** Constructor.
 	 */
 	public function __construct() {
@@ -48,6 +53,7 @@ class PerflabDbMetrics {
 		} catch ( Exception $ex ) {
 			$this->has_hr_time = false;
 		}
+		$this->util = PerflabDbUtilities::get_instance();
 	}
 
 	/** Get current time (ref UNIX era) in microseconds.
@@ -97,7 +103,7 @@ class PerflabDbMetrics {
 			$results->failure_action = __( 'Upgrade WordPress to use this Site Health feature.', 'performance-lab' );
 			$results->canreindex     = 0;
 
-			return $this->make_numeric( $results );
+			return $this->util->make_numeric( $results );
 		}
 		if ( $this->reject_newer_db_versions && $wp_db_version > $this->last_compatible_db_version ) {
 			/* fail if we don't have an expected database version */
@@ -105,7 +111,7 @@ class PerflabDbMetrics {
 			$results->failure_action = __( 'Upgrade the Performance Lab plugin to this Site Health feature.', 'performance-lab' );
 			$results->canreindex     = 0;
 
-			return $this->make_numeric( $results );
+			return $this->util->make_numeric( $results );
 		}
 
 		$is_maria = ! ! stripos( $results->version, 'mariadb' );
@@ -113,86 +119,82 @@ class PerflabDbMetrics {
 		if ( ! $is_maria && $results->major >= 8 ) {
 			$results->unconstrained = 1;
 
-			return $this->make_numeric( $results );
+			return $this->util->make_numeric( $results );
 		}
 		/* work out whether we have Antelope or Barracuda InnoDB format  mariadb 10.3 + */
 		if ( $is_maria && $results->major >= 10 && $results->minor >= 3 ) {
 			$results->unconstrained = 1;
 
-			return $this->make_numeric( $results );
+			return $this->util->make_numeric( $results );
 		}
 		/* mariadb 10.2 ar before */
 		if ( $is_maria && $results->major >= 10 ) {
 
 			$results->unconstrained = $this->has_large_prefix();
 
-			return $this->make_numeric( $results );
+			return $this->util->make_numeric( $results );
 		}
 
 		/* waaay too old */
 		if ( $results->major < 5 ) {
 			$results->canreindex = 0;
 
-			return $this->make_numeric( $results );
+			return $this->util->make_numeric( $results );
 		}
 		/* before 5.5 */
 		if ( 5 === $results->major && $results->minor < 5 ) {
 			$results->canreindex = 0;
 
-			return $this->make_numeric( $results );
+			return $this->util->make_numeric( $results );
 		}
 		/* older 5.5 */
 		if ( 5 === $results->major && 5 === $results->minor && $results->build < 62 ) {
 			$results->canreindex = 0;
 
-			return $this->make_numeric( $results );
+			return $this->util->make_numeric( $results );
 		}
 		/* older 5.6 */
 		if ( 5 === $results->major && 6 === $results->minor && $results->build < 4 ) {
 			$results->canreindex = 0;
 
-			return $this->make_numeric( $results );
+			return $this->util->make_numeric( $results );
 		}
 		$results->unconstrained = $this->has_large_prefix();
 
-		return $this->make_numeric( $results );
+		return $this->util->make_numeric( $results );
 	}
 
-	/** Convert an array to an object, and the numeric properties therein to numbers rather than strings.
+	/** Get a global variable from the DBMS.
 	 *
-	 * @param array $ob associative array.
+	 * @param string $name Name of variable.
 	 *
-	 * @return object
+	 * @return mixed|string Value of variable. 0 if nothing found.
+	 * @throws ValueError Notice about variable lookup failure.
 	 */
-	private function make_numeric( $ob ) {
-		$result = array();
-		foreach ( $ob as $key => $val ) {
-			if ( is_numeric( $val ) ) {
-				$val = $val + 0;
-			}
-			$result[ $key ] = $val;
+	public function get_variable( $name ) {
+		global $wpdb;
+		$var = $wpdb->get_results( $wpdb->prepare( 'SHOW VARIABLES LIKE %s', $name ), ARRAY_N );
+		if ( $var && is_array( $var ) && 1 === count( $var ) ) {
+			$var = $var[0];
+			return $var[1];
+		} elseif ( $var && is_array( $var ) && 0 === count( $var ) ) {
+			throw new ValueError( $name . ': no such MySQL variable' );
+		} elseif ( $var && is_array( $var ) && count( $var ) > 1 ) {
+			throw new ValueError( $name . ': returns multiple MySQL variables' );
+		} else {
+			throw new ValueError( $name . ': something went wrong looking up MySQL variable' );
 		}
-
-		return (object) $result;
 	}
+
 
 	/** Determine whether the MariaDB / MySQL instance supports InnoDB / Barracuda.
 	 *
 	 * @return int 1 means Barracuda (3072-byte index columns), 0 if Antelope (768-byte).
 	 */
-	public function has_large_prefix() {
+	private function has_large_prefix() {
 		global $wpdb;
-		/* Beware: this innodb_large_prefix variable is missing in MySQL 8+ and MySQL 5.5- */
-		$query = "SHOW VARIABLES LIKE 'innodb_large_prefix'";
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$prefix = $wpdb->get_results( $query, ARRAY_N );
-		if ( $prefix && is_array( $prefix ) ) {
-			$prefix = $prefix[1];
-
-			return ( ( 'ON' === $prefix[1] ) || ( '1' === $prefix[1] ) ) ? 1 : 0;
-		}
-
-		return 0;
+		$prefix = $this->get_variable( 'innodb_large_prefix' );
+		return ( ( 'ON' === $prefix ) || ( '1' === $prefix ) || ( 1 === $prefix ) ) ? 1 : 0;
 	}
 
 	/** Get the characteristics of each table.
@@ -231,13 +233,12 @@ class PerflabDbMetrics {
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_results( $format_query, OBJECT_K );
-
 	}
 
 	/** Get 95th percentile of time taken for a connection and trivial query.
 	 *
 	 * This opens several wpdb connections and sends a trivial query to each one.
-	 * It returns the 95th percentile of the time taken for multiple iterations.
+	 * It returns the 90th percentile of the time taken for multiple iterations.
 	 *
 	 * @param number $iterations how many times to run the operation.
 	 * @param number $timeout milliseconds before we stop rerunning.
@@ -263,74 +264,26 @@ class PerflabDbMetrics {
 			$microseconds [] = $this->now_microseconds() - $start;
 		}
 
-		return $this->percentile( $microseconds, 0.95 );
+		return $this->util->percentile( $microseconds, 0.90 );
 	}
 
-	/** Arithmetic mean
+	/** DBMS buffer pool size.
 	 *
-	 * @param array $a dataset.
+	 * @param string $engine Storage engine.
 	 *
-	 * @return number
+	 * @return int|mixed|string
 	 */
-	private function mean( array $a ) {
-		$n = count( $a );
-		if ( ! $n ) {
-			return null;
+	public function get_buffer_pool_size( $engine ) {
+		$size = 0;
+		$var  = '';
+		switch ( strtolower( $engine ) ) {
+			case 'innodb':
+				$var = 'Innodb_buffer_pool_size';
+				break;
+			case 'myisam':
+				$var = 'Key_buffer_size';
+				break;
 		}
-		if ( 1 === $n ) {
-			return $a[0];
-		}
-		$acc = 0;
-		foreach ( $a as $v ) {
-			$acc += $v;
-		}
-
-		return $acc / $n;
+		return 0 + $this->get_variable( $var );
 	}
-
-	/** Mean absolute deviation.
-	 *
-	 * @param array $a dataset.
-	 *
-	 * @return float|int|null
-	 */
-	private function mad( array $a ) {
-		$n = count( $a );
-		if ( ! $n ) {
-			return null;
-		}
-		if ( 1 === $n ) {
-			return 0.0;
-		}
-		$acc = 0;
-		foreach ( $a as $v ) {
-			$acc += $v;
-		}
-		$mean = $acc / $n;
-		$acc  = 0;
-		foreach ( $a as $v ) {
-			$acc += abs( $v - $mean );
-		}
-
-		return $acc / $n;
-	}
-
-	/** Percentile.
-	 *
-	 * @param array  $a dataset.
-	 * @param number $p percentile as fraction 0-1.
-	 *
-	 * @return float
-	 */
-	public function percentile( array $a, $p ) {
-		$n = count( $a );
-		sort( $a );
-		$i = floor( $n * $p );
-		if ( $i >= $n ) {
-			$i = $n - 1;
-		}
-
-		return $a[ $i ];
-	}
-
 }

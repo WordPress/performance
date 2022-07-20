@@ -1,4 +1,20 @@
-div.health-check-accordion.issues > div.health-check-accordion-panel > ul.tables > li.tablename {
-	list-style-type: disc;
-	list-style-position: inside;
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > thead > tr > th {
+	text-align: left;
+}
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades {
+	border-spacing: 0.5em;
+}
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > th {
+	text-align: left;
+}
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.cmd {
+	text-align: left;
+	font-family: Consolas, Monaco, monospace;
+	font-size: 95%;
+	background: rgba(0,0,0,.03);
+	padding-top: 5px;
+}
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.cmd > span.cmd,
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.cmd > img {
+	padding-left: 0.5em;
 }

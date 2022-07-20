@@ -40,14 +40,9 @@ class PerflabDbTests {
 	 * @var bool true if we should skip all tests
 	 */
 	private $skip_all_tests = false;
-	/** Test sequence number.
-	 *
-	 * @var int test number.
-	 */
-	private $test_sequence_number = 0;
 	/** Thresholds instance.
 	 *
-	 * @var PerflabDbThresholds instance.
+	 * @var PerflabDbUtilities instance.
 	 */
 	private $utilities;
 	/** Table Information.
@@ -68,13 +63,13 @@ class PerflabDbTests {
 		$this->table_stats = $this->metrics->get_table_info();
 	}
 
-	/** Add all Site Health tests.
+	/** Add all Site Health checks for database performance.
 	 *
 	 * @param array $tests Pre-existing tests.
 	 *
 	 * @return array Augmented tests.
 	 */
-	public function add_tests( $tests ) {
+	public function add_all_database_performance_checks( $tests ) {
 		$test_number = 0;
 		$label       = __( 'Database Performance One', 'performance-lab' );
 		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
@@ -90,43 +85,17 @@ class PerflabDbTests {
 			'test'  => array( $this, 'core_tables_format_test' ),
 		);
 
-		return $tests;
-	}
-
-	/** Generate health-check result array.
-	 *
-	 * @param string $label Test label visible to user.
-	 * @param string $description Test long description visible to user.
-	 * @param string $actions Actions to take to correct the problem, visible to user, default ''.
-	 * @param string $status 'critical', 'recommended', 'good', default 'good'.
-	 * @param string $color a color specifier like 'blue' or 'red', default 'blue'.
-	 *
-	 * @return array
-	 */
-	private function test_result( $label, $description, $actions = '', $status = 'good', $color = 'blue' ) {
-		$this->test_sequence_number ++;
-		$result = array(
-			'label'       => esc_html( $label ),
-			'status'      => $status,
-			'description' => $description,
-			'badge'       => array(
-				'label' => esc_html__( 'Database Performance', 'performance-lab' ),
-				'color' => $color,
-			),
-			'actions'     => is_string( $actions ) ? $actions : '',
-			'test'        => 'database_performance' . $this->test_sequence_number,
+		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
+			'label' => $label,
+			'test'  => array( $this, 'extra_tables_format_test' ),
 		);
 
-		/**
-		 * Filter database performance troubleshooting results.
-		 *
-		 * @since 1.4.0
-		 *
-		 * @param array $value The result set.
-		 */
+		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
+			'label' => $label,
+			'test'  => array( $this, 'buffer_pool_size_test' ),
+		);
 
-		return apply_filters( 'perflab_db_test_result', $result );
-
+		return $tests;
 	}
 
 	/** Check server version for Barracuda availability.
@@ -136,7 +105,7 @@ class PerflabDbTests {
 	public function server_version_test() {
 		if ( isset( $this->version->failure ) && is_string( $this->version->failure ) ) {
 			$this->skip_all_tests = true;
-			return $this->test_result(
+			return $this->utilities->test_result(
 				__( 'Upgrade your outdated WordPress installation', 'performance-lab' ),
 				$this->version->failure,
 				$this->version->failure_action,
@@ -144,7 +113,7 @@ class PerflabDbTests {
 			);
 		}
 		if ( 0 === $this->version->unconstrained ) {
-			return $this->test_result(
+			return $this->utilities->test_result(
 			/* translators: 1:  MySQL or MariaDB */
 				sprintf( __( 'Your SQL server (%s) is outdated', 'performance-lab' ), $this->name ),
 				sprintf(
@@ -158,7 +127,7 @@ class PerflabDbTests {
 			);
 		}
 
-		return $this->test_result(
+		return $this->utilities->test_result(
 		/* translators: 1:  MySQL or MariaDB */
 			sprintf( __( 'Your %s SQL server is a recent version', 'performance-lab' ), $this->name ),
 			sprintf(
@@ -172,14 +141,14 @@ class PerflabDbTests {
 
 	/** Inspect a set of tables to ensure they have the correct storage engine and row format.
 	 *
-	 * @param array $stats Result set from get_table_info.
+	 * @param array  $stats Result set from get_table_info.
+	 * @param string $target_storage_engine Usually InnoDB.
+	 * @param string $target_row_format Usually Dynamic.
 	 *
 	 * @return array The tables with the wrong format.
 	 */
-	private function get_wrong_format_tables( $stats ) {
-		$result                = array();
-		$target_storage_engine = $this->utilities->get( 'target_storage_engine' );
-		$target_row_format     = $this->utilities->get( 'target_row_format' );
+	private function get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format ) {
+		$result = array();
 		foreach ( $stats as $table => $stat ) {
 			$hit = strtolower( $stat->engine ) !== strtolower( $target_storage_engine );
 			$hit = $hit | strtolower( $stat->row_format ) !== strtolower( $target_row_format );
@@ -199,42 +168,157 @@ class PerflabDbTests {
 			return array();
 		}
 		global $wpdb;
-		$tables = $wpdb->tables();
-		$stats  = array_intersect_key( $this->table_stats, array_combine( $tables, $tables ) );
-		$bad    = $this->get_wrong_format_tables( $stats );
+		$tables                = $wpdb->tables();
+		$stats                 = array_intersect_key( $this->table_stats, array_combine( $tables, $tables ) );
+		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
+		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
+		$bad                   = $this->get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format );
 		if ( count( $bad ) === 0 ) {
-			return $this->test_result(
-				__( 'Your WordPress tables use the modern format', 'performance-lab' ),
-				__( 'Your WordPress tables use the appropriate storage engine and row format for good database performance.', 'performance-lab' )
+			return $this->utilities->test_result(
+				__( 'Your WordPress tables use the modern storage format', 'performance-lab' ),
+				sprintf(
+				/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic */
+					__( 'Your tables use the %1$s storage engine and the %2$s row format for good database performance.', 'performance-lab' ),
+					$target_storage_engine,
+					$target_row_format
+				)
 			);
-		} elseif ( count( $bad ) === count( $stats ) ) {
-			return $this->test_result(
-			/* translators: 1:  MySQL or MariaDB */
-				sprintf( __( 'All your %s SQL server WordPress tables formats suck', 'performance-lab' ), $this->name ),
-				__( 'All your WordPress tables use an obsolete storage engine and/or row format.', 'performance-lab' ),
-				'Fix them KTNKSBAI',
+		} else {
+			$label = count( $bad ) === count( $stats )
+				? __( 'Your WordPress tables use an obsolete storage format', 'performance-lab' )
+				: __( 'Some WordPress tables use an obsolete storage format', 'performance-lab' );
+
+			return $this->table_upgrade_instructions( $target_storage_engine, $target_row_format, $bad, $label );
+		}
+
+	}
+	/** Check extra tables format
+	 *
+	 * @return array
+	 */
+	public function extra_tables_format_test() {
+		if ( $this->skip_all_tests ) {
+			return array();
+		}
+		global $wpdb;
+		$tables                = $wpdb->tables();
+		$stats                 = array_diff_key( $this->table_stats, array_combine( $tables, $tables ) );
+		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
+		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
+		$bad                   = $this->get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format );
+		if ( count( $bad ) === 0 ) {
+			return $this->utilities->test_result(
+				__( 'Your plugin tables use the modern storage format', 'performance-lab' ),
+				sprintf(
+				/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic */
+					__( 'Your tables use the %1$s storage engine and the %2$s row format for good database performance.', 'performance-lab' ),
+					$target_storage_engine,
+					$target_row_format
+				)
+			);
+		} else {
+			$label = count( $bad ) === count( $stats )
+				? __( 'Your plugin tables use an obsolete storage format', 'performance-lab' )
+				: __( 'Some plugin tables use an obsolete storage format', 'performance-lab' );
+
+			return $this->table_upgrade_instructions( $target_storage_engine, $target_row_format, $bad, $label );
+		}
+
+	}
+	/** Check data size against buffer pool size
+	 *
+	 * @return array
+	 */
+	public function buffer_pool_size_test() {
+		if ( $this->skip_all_tests ) {
+			return array();
+		}
+		$innodb_size = 0;
+		$myisam_size = 0;
+		foreach ( $this->table_stats as $stat ) {
+			switch ( strtolower( $stat->engine ) ) {
+				case 'innodb':
+					$innodb_size += $stat->total_bytes;
+					break;
+				case 'myisam':
+					/* myisam only buffers indexes inside itself */
+					$myisam_size += $stat->index_bytes;
+					break;
+			}
+		}
+		$fraction = $this->utilities->get_threshold_value( 'pool_size_fraction_min' );
+
+		$myisam_pool_size = $this->metrics->get_buffer_pool_size( 'MyISAM' );
+		$innodb_pool_size = $this->metrics->get_buffer_pool_size( 'InnoDB' );
+
+		$too_small = false;
+		$msgs      = array();
+
+		if ( $myisam_size > 0 && ( $myisam_pool_size / $fraction ) < $myisam_size ) {
+			$too_small = true;
+			$msgs[]    = '<p>' . sprintf(
+			/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
+				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s, but %2$s\'s buffer size (\'Key_buffer_size\') is only %3$s. That may be inadequate.', 'performance-lab' ),
+				$this->utilities->format_bytes( $myisam_size ),
+				$this->name,
+				$this->utilities->format_bytes( $myisam_pool_size )
+			) . '</p>';
+		} else {
+			$msgs[] = '<p>' . sprintf(
+			/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
+				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s and %2$s\'s buffer size is %3$s. That is adequate in most cases.', 'performance-lab' ),
+				$this->utilities->format_bytes( $myisam_size ),
+				$this->name,
+				$this->name,
+				$this->utilities->format_bytes( $myisam_pool_size )
+			) . '</p>';
+		}
+		if ( $innodb_size > 0 && ( $innodb_pool_size / $fraction ) < $innodb_size ) {
+			$too_small = true;
+			$msgs[]    = '<p>' . sprintf(
+			/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
+				__( 'Your InnoDB tables (the modern storage engine) use %1$s, but %2$s\'s buffer pool size (\'Innodb_buffer_pool_size\') is only %3$s. That may be inadequate.', 'performance-lab' ),
+				$this->utilities->format_bytes( $innodb_size ),
+				$this->name,
+				$this->utilities->format_bytes( $innodb_pool_size )
+			) . '</p>';
+		} else {
+			$msgs[] = '<p>' . sprintf(
+			/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
+				__( 'Your InnoDB tables (the modern storage engine) use %1$s and %2$s\'s buffer pool size is %3$s. That is adequate in most cases.', 'performance-lab' ),
+				$this->utilities->format_bytes( $innodb_size ),
+				$this->name,
+				$this->utilities->format_bytes( $innodb_pool_size )
+			) . '</p>';
+		}
+		if ( $too_small ) {
+			return $this->utilities->test_result(
+				sprintf(
+				/* translators: 1 server name like MariaDB */
+					__( 'Your %1$s SQL server buffer pool is too small for your data', 'performance-lab' ),
+					$this->name
+				),
+				sprintf(
+				/* translators: 1 server name like MariaDB */
+					'<p>' . __( 'Your %1$s buffer pool is probably too small. That makes it take longer to retrieve your content, especially when your site is busy.', 'performance-lab' ),
+					$this->name
+				) . '</p><p>' . implode( ' ', $msgs ) . '</p>',
+				__( 'Consider asking your hosting provider to upgrade your SQL server\'s buffer pool size.', 'performance-lab' ),
 				'recommended',
 				'orange'
 			);
 		} else {
-			$desc = '<div class="description">' . __( 'These WordPress tables use an obsolete storage engine and/or row format.', 'performance-lab' ) . '</div>';
-			$ts   = array();
-			foreach ( $bad as $table => $data ) {
-				$ts [] = '<li class="tablename">' . $table . '</li>';
-			}
-			$desc .= '<ul class="tables">' . implode( PHP_EOL, $ts ) . '</ul>';
-			return $this->test_result(
-			/* translators: 1:  MySQL or MariaDB */
-				sprintf( __( 'Some of your %s SQL server WordPress tables formats suck', 'performance-lab' ), $this->name ),
-				$desc,
-				'Fix them KTNKSBAI',
-				'recommended',
-				'orange'
+			return $this->utilities->test_result(
+				sprintf(
+				/* translators: 1 server name like MariaDB */
+					__( 'Your %1$s SQL server buffer pool is adequate for your data', 'performance-lab' ),
+					$this->name
+				),
+				implode( '', $msgs )
 			);
-
 		}
-
 	}
+
 	/** Check server connection response time.
 	 *
 	 * @return array
@@ -243,33 +327,37 @@ class PerflabDbTests {
 		if ( $this->skip_all_tests ) {
 			return array();
 		}
-		$results   = $this->metrics->server_response(
-			$this->utilities->get( 'server_response_iterations' ),
-			$this->utilities->get( 'server_response_timeout' )
-		);
-		$formatted = number_format_i18n( $results, 2 );
-		if ( $results >= $this->utilities->get( 'server_response_very_slow' ) ) {
-			return $this->test_result(
+		$iterations          = $this->utilities->get_threshold_value( 'server_response_iterations' );
+		$response_timeout    = $this->utilities->get_threshold_value( 'server_response_timeout' );
+		$results             = $this->metrics->server_response( $iterations, $response_timeout );
+		$formatted_results   = number_format_i18n( $results, 2 );
+		$very_slow_response  = $this->utilities->get_threshold_value( 'server_response_very_slow' );
+		$slow_response       = $this->utilities->get_threshold_value( 'server_response_slow' );
+		$formatted_threshold = number_format_i18n( $slow_response, 2 );
+		if ( $results >= $very_slow_response ) {
+			return $this->utilities->test_result(
 			/* translators: 1:  MySQL or MariaDB */
 				sprintf( __( 'Your %s SQL server connects and responds very slowly', 'performance-lab' ), $this->name ),
 				sprintf(
-				/* translators: 1:  number of milliseconds */
-					__( 'Your SQL server connects and responds to simple requests from WordPress in %1$s milliseconds. For best performance it should respond in under 1 millisecond.', 'performance-lab' ),
-					$formatted
+				/* translators: 1:  number of milliseconds 2: milliseconds */
+					__( 'Your SQL server connects and responds to simple requests from WordPress in %1$s milliseconds. For best performance it should respond in under %2$s.', 'performance-lab' ),
+					$formatted_results,
+					$formatted_threshold
 				),
 				__( 'This usually means your SQL server is overburdened. Possibly many sites share it, or possibly it needs more RAM. Contact your web hosting company to correct this.', 'performance-lab' ),
 				'critical',
 				'red'
 			);
 
-		} elseif ( $results >= $this->utilities->get( 'server_response_slow' ) ) {
-			return $this->test_result(
+		} elseif ( $results >= $slow_response ) {
+			return $this->utilities->test_result(
 			/* translators: 1:  MySQL or MariaDB */
 				sprintf( __( 'Your %s SQL server connects and responds slowly', 'performance-lab' ), $this->name ),
 				sprintf(
-				/* translators: 1:  number of milliseconds */
-					__( 'Your SQL server connects and responds to simple requests from WordPress in %1$s milliseconds. For best performance it should respond in under 1 millisecond.', 'performance-lab' ),
-					$formatted
+				/* translators: 1:  number of milliseconds  2: milliseconds */
+					__( 'Your SQL server connects and responds to simple requests from WordPress in %1$s milliseconds. For best performance it should respond in under %2$s.', 'performance-lab' ),
+					$formatted_results,
+					$formatted_threshold
 				),
 				__( 'This usually means your SQL server is busy. Possibly it is shared among many sites, or possibly it needs more RAM. Contact your web hosting company to correct this.', 'performance-lab' ),
 				'recommended',
@@ -277,17 +365,67 @@ class PerflabDbTests {
 			);
 
 		} else {
-			return $this->test_result(
+			return $this->utilities->test_result(
 			/* translators: 1:  MySQL or MariaDB */
 				sprintf( __( 'Your %s SQL server connects and responds promptly', 'performance-lab' ), $this->name ),
 				sprintf(
 				/* translators: 1:  number of milliseconds */
-					__( 'Your SQL server connects and responds to simple requests from WordPress in %1$s milliseconds. This allows good performance.', 'performance-lab' ),
-					$formatted
+					__( 'Your SQL server connects and responds to simple requests from WordPress in %1$s milliseconds. This supports good site performance.', 'performance-lab' ),
+					$formatted_results
 				)
 			);
-
 		}
+	}
+
+	/** HTML for table upgrade instructions.
+	 *
+	 * @param string $target_storage_engine 'InnoDB'.
+	 * @param string $target_row_format 'Dynamic'.
+	 * @param array  $bad Array containing metrics for tables needing upgrading.
+	 * @param string $label The label to put on the health-check report.
+	 *
+	 * @return array
+	 */
+	private function table_upgrade_instructions( $target_storage_engine, $target_row_format, $bad, $label ) {
+		$clip     = plugin_dir_url( __FILE__ ) . 'assets/clip.svg';
+		$copy_txt = esc_attr__( 'Copy to clipboard', 'performance-lab' );
+		$desc     = array();
+		$desc[]   = '<p class="description">';
+		$desc[]   = sprintf(
+		/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic  3: MySQL or MariaDB */
+			__( '%3$s performance improves when your tables use the modern %1$s storage engine and the %2$s row format.', 'performance-lab' ),
+			$target_storage_engine,
+			$target_row_format,
+			$this->name
+		);
+		$desc[] = '</p>';
+		$desc[] = '<p class="description">';
+		$desc[] = __( 'Consider upgrading these tables.', 'performance-lab' );
+		$desc[] = '</p>';
+		$acts   = array();
+		$acts[] = '<table class="upgrades">';
+		$acts[] = '<thead><tr><th scope="col" class=\"table\">Table Name</th><th scope="col" class=\"cmd\">WP-CLI command to upgrade</th><th></th></tr></thead>';
+		$acts[] = '<tbody>';
+		foreach ( $bad as $table => $data ) {
+			$acts[]  = '<tr>';
+			$acts[]  = "<td class=\"table\">$table</td>";
+			$acts[]  = '<td class="cmd">';
+			$acts[]  = "<img src=\"$clip\" alt=\"$copy_txt\" title=\"$copy_txt\" >";
+			$acts[]  = '<span class="cmd">';
+			$acts[]  = "wp db query \"ALTER TABLE $table ENGINE=$target_storage_engine ROW_FORMAT=$target_row_format\"";
+			$acts [] = '</span>';
+			$acts[]  = '</td>';
+			$acts[]  = '</tr>';
+		}
+		$acts [] = '</tbody></table>';
+
+		return $this->utilities->test_result(
+			$label,
+			implode( '', $desc ) . implode( '', $acts ),
+			'',
+			'recommended',
+			'orange'
+		);
 	}
 
 }
