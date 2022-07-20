@@ -17,6 +17,10 @@
  * @since 1.4.0
  */
 class PerflabDbUtilities {
+	const KILO = 1024;
+	const MEGA = self::KILO * self::KILO;
+	const GIGA = self::MEGA * self::KILO;
+	const TERA = self::GIGA * self::KILO;
 	/** Preset threshold values.
 	 *
 	 * These can be changed with the perflab_db_threshold filter.
@@ -46,7 +50,7 @@ class PerflabDbUtilities {
 			'target_storage_engine'      => 'InnoDB',
 			'target_row_format'          => 'Dynamic',
 			'pool_size_fraction_min'     => 0.25,
-
+			'target_user_count'          => 20000,
 		);
 	}
 
@@ -235,22 +239,22 @@ class PerflabDbUtilities {
 	 * @return array
 	 */
 	private function get_byte_unit( $bytes ) {
-		if ( $bytes >= 1024 * 1024 * 1024 * 1024 ) {
-			$unit = array( 1024 * 1024 * 1024 * 1024, 'TiB', 0 );
-		} elseif ( $bytes >= 1024 * 1024 * 1024 * 1024 * 0.5 ) {
-			$unit = array( 1024 * 1024 * 1024 * 1024, 'TiB', 1 );
-		} elseif ( $bytes >= 1024 * 1024 * 1024 ) {
-			$unit = array( 1024 * 1024 * 1024 * 1024, 'GiB', 0 );
-		} elseif ( $bytes >= 1024 * 1024 * 1024 * 0.5 ) {
-			$unit = array( 1024 * 1024 * 1024, 'GiB', 1 );
-		} elseif ( $bytes >= 1024 * 1024 ) {
-			$unit = array( 1024 * 1024, 'MiB', 0 );
-		} elseif ( $bytes >= 1024 * 1024 * 0.5 ) {
-			$unit = array( 1024 * 1024, 'MiB', 1 );
-		} elseif ( $bytes >= 1024 ) {
-			$unit = array( 1024, 'KiB', 0 );
-		} elseif ( $bytes >= 1024 * 0.1 ) {
-			$unit = array( 1024, 'KiB', 1 );
+		if ( $bytes >= self::TERA ) {
+			$unit = array( self::TERA, 'TiB', 0 );
+		} elseif ( $bytes >= self::TERA * 0.5 ) {
+			$unit = array( self::TERA, 'TiB', 1 );
+		} elseif ( $bytes >= self::GIGA ) {
+			$unit = array( self::TERA, 'GiB', 0 );
+		} elseif ( $bytes >= self::GIGA * 0.5 ) {
+			$unit = array( self::GIGA, 'GiB', 1 );
+		} elseif ( $bytes >= self::MEGA ) {
+			$unit = array( self::MEGA, 'MiB', 0 );
+		} elseif ( $bytes >= self::MEGA * 0.5 ) {
+			$unit = array( self::MEGA, 'MiB', 1 );
+		} elseif ( $bytes >= self::KILO ) {
+			$unit = array( self::KILO, 'KiB', 0 );
+		} elseif ( $bytes >= self::KILO * 0.1 ) {
+			$unit = array( self::KILO, 'KiB', 1 );
 		} else {
 			$unit = array( 1, 'B', 0 );
 		}

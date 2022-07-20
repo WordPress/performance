@@ -95,6 +95,11 @@ class PerflabDbTests {
 			'test'  => array( $this, 'buffer_pool_size_test' ),
 		);
 
+		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
+			'label' => $label,
+			'test'  => array( $this, 'too_many_users_test' ),
+		);
+
 		return $tests;
 	}
 
@@ -269,7 +274,6 @@ class PerflabDbTests {
 				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s and %2$s\'s buffer size is %3$s. That is adequate in most cases.', 'performance-lab' ),
 				$this->utilities->format_bytes( $myisam_size ),
 				$this->name,
-				$this->name,
 				$this->utilities->format_bytes( $myisam_pool_size )
 			) . '</p>';
 		}
@@ -311,12 +315,44 @@ class PerflabDbTests {
 			return $this->utilities->test_result(
 				sprintf(
 				/* translators: 1 server name like MariaDB */
-					__( 'Your %1$s SQL server buffer pool is adequate for your data', 'performance-lab' ),
+					__( 'Your %1$s SQL server buffer pool appears to be adequate for your data', 'performance-lab' ),
 					$this->name
 				),
-				implode( '', $msgs )
+				implode( '', $msgs ),
+				sprintf(
+				/* translators: 1 server name like MariaDB */
+					__( 'Some hosts share their %1$s SQL servers among multiple customers. In that case the shared buffer pool may still be inadequate. Site Health cannot detect shared SQL servers.', 'performance-lab' ),
+					$this->name
+				)
 			);
 		}
+	}
+
+	/** Check for a very large number of users.
+	 *
+	 * @return array
+	 */
+	public function too_many_users_test() {
+		global $wpdb;
+		$target_user_count = $this->utilities->get_threshold_value( 'target_user_count' );
+		if ( isset( $this->table_stats[ $wpdb->users ] ) ) {
+			$user_count = $this->table_stats[ $wpdb->users ]->row_count;
+			if ( $user_count > $target_user_count ) {
+
+				return $this->utilities->test_result(
+					__( 'Your site has many registered users', 'performance-lab' ),
+					sprintf(
+					/* translators: 1 Number of registered users */
+						__( 'Your site has %1$s registered users. This may cause your dashboard\'s Posts, Pages, and Users panels to load slowly, and may interfere with editing posts and pages.', 'performance-lab' ),
+						number_format_i18n( $user_count )
+					),
+					__( 'Consider installing a plugin to help you manage many users.', 'performance-lab' ),
+					'recommended',
+					'orange'
+				);
+			}
+		}
+		return array();
 	}
 
 	/** Check server connection response time.
