@@ -77,7 +77,7 @@ function perflab_aao_autoloaded_options_test() {
 		'<p>' . esc_html( $base_description ) . ' ' . esc_html__( 'Your site has %1$s autoloaded options (size: %2$s) in the options table, which could cause your site to be slow. You can reduce the number of autoloaded options by cleaning up your site\'s options table.', 'performance-lab' ) . '</p>',
 		$autoloaded_options_count,
 		size_format( $autoloaded_options_size )
-	);
+	) . perflab_aao_get_autoloaded_options_table();
 
 	/**
 	 * Filters description to be shown on Site Health warning when threshold is met.
@@ -116,4 +116,45 @@ function perflab_aao_autoloaded_options_test() {
 function perflab_aao_autoloaded_options_size() {
 	global $wpdb;
 	return (int) $wpdb->get_var( 'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload = \'yes\'' );
+}
+
+/**
+ * Fetches autoload top list.
+ *
+ * @since n.e.x.t
+ *
+ * @return array Autoloaded data as option names and their sizes.
+ */
+function perflab_aao_query_autoloaded_options() {
+	global $wpdb;
+
+	$option_threshold = apply_filters( 'perflab_aao_autoloaded_options_table_threshold', 100 );
+
+	var_dump( $wpdb->options );
+
+	return $wpdb->get_results( $wpdb->prepare( "SELECT option_name, LENGTH(option_value) AS option_value_length FROM {$wpdb->options} WHERE autoload='yes' AND LENGTH(option_value) > %d ORDER BY option_value_length DESC LIMIT 20", $option_threshold ) );
+}
+
+/**
+ * Gets formatted autoload options table.
+ *
+ * @since n.e.x.t
+ *
+ * @return string HTML formatted table.
+ */
+function perflab_aao_get_autoloaded_options_table() {
+	$autoload_summary = perflab_aao_query_autoloaded_options();
+
+	$html_table = sprintf(
+		'<table class="widefat striped"><thead><tr><th scope="col">%s</th><th scope="col">%s</th></tr></thead><tbody>',
+		esc_html__( 'Option Name', 'performance-lab' ),
+		esc_html__( 'Size (bytes)', 'performance-lab' )
+	);
+
+	foreach ( $autoload_summary as $value ) {
+		$html_table .= sprintf( '<tr><td>%s</td><td>%s</td></tr>', $value->option_name, $value->option_value_length );
+	}
+	$html_table .= '</tbody></table>';
+
+	return $html_table;
 }
