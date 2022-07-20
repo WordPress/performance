@@ -9,7 +9,6 @@ window.wpPerfLab = window.wpPerfLab || {};
 
 				var images = document.querySelectorAll( 'img.wp-image-' + media[i].id );
 				for ( var j = 0; j < images.length; j++ ) {
-					console.log( media[i] );
 					var srcset = images[j].getAttribute( 'srcset' );
 					if ( srcset ) {
 						// Update full image in srcset.
