@@ -51,6 +51,7 @@ class PerflabDbUtilities {
 			'target_row_format'          => 'Dynamic',
 			'pool_size_fraction_min'     => 0.25,
 			'target_user_count'          => 20000,
+			'index_stop_list'            => 'woo_|crp_|yarpp_',
 		);
 	}
 

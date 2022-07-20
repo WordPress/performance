@@ -144,26 +144,6 @@ class PerflabDbTests {
 		);
 	}
 
-	/** Inspect a set of tables to ensure they have the correct storage engine and row format.
-	 *
-	 * @param array  $stats Result set from get_table_info.
-	 * @param string $target_storage_engine Usually InnoDB.
-	 * @param string $target_row_format Usually Dynamic.
-	 *
-	 * @return array The tables with the wrong format.
-	 */
-	private function get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format ) {
-		$result = array();
-		foreach ( $stats as $table => $stat ) {
-			$hit = strtolower( $stat->engine ) !== strtolower( $target_storage_engine );
-			$hit = $hit | strtolower( $stat->row_format ) !== strtolower( $target_row_format );
-			if ( $hit ) {
-				$result[ $table ] = $stat;
-			}
-		}
-		return $result;
-	}
-
 	/** Check core tables format
 	 *
 	 * @return array
@@ -177,7 +157,7 @@ class PerflabDbTests {
 		$stats                 = array_intersect_key( $this->table_stats, array_combine( $tables, $tables ) );
 		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
 		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
-		$bad                   = $this->get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format );
+		$bad                   = $this->metrics->get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format );
 		if ( count( $bad ) === 0 ) {
 			return $this->utilities->test_result(
 				__( 'Your WordPress tables use the modern storage format', 'performance-lab' ),
@@ -210,7 +190,7 @@ class PerflabDbTests {
 		$stats                 = array_diff_key( $this->table_stats, array_combine( $tables, $tables ) );
 		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
 		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
-		$bad                   = $this->get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format );
+		$bad                   = $this->metrics->get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format );
 		if ( count( $bad ) === 0 ) {
 			return $this->utilities->test_result(
 				__( 'Your plugin tables use the modern storage format', 'performance-lab' ),
@@ -271,7 +251,7 @@ class PerflabDbTests {
 		} else {
 			$msgs[] = '<p>' . sprintf(
 			/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
-				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s and %2$s\'s buffer size is %3$s. That is adequate in most cases.', 'performance-lab' ),
+				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s and %2$s\'s key buffer size is %3$s. That is adequate in most cases.', 'performance-lab' ),
 				$this->utilities->format_bytes( $myisam_size ),
 				$this->name,
 				$this->utilities->format_bytes( $myisam_pool_size )

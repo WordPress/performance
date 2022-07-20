@@ -45,6 +45,19 @@ class PerflabDbMetrics {
 	 * @var PerflabDbUtilities singleton instance
 	 */
 	private $util;
+
+	/** Memoized table_info result set.
+	 *
+	 * @var object Table descriptions.
+	 */
+	private $table_info;
+
+	/** Memoized db_version result set.
+	 *
+	 * @var object Database version object.
+	 */
+	private $db_version;
+
 	/** Constructor.
 	 */
 	public function __construct() {
@@ -73,6 +86,10 @@ class PerflabDbMetrics {
 	 * @return object
 	 */
 	public function get_db_version() {
+		/* memoized result ? */
+		if ( isset( $this->db_version ) ) {
+			return $this->db_version;
+		}
 		global $wpdb;
 		global $wp_db_version;
 		$query = "SELECT VERSION() version,
@@ -102,66 +119,66 @@ class PerflabDbMetrics {
 			$results->failure        = __( 'Your WordPress installation\'s $wp_db_version is outdated.', 'performance-lab' );
 			$results->failure_action = __( 'Upgrade WordPress to use this Site Health feature.', 'performance-lab' );
 			$results->canreindex     = 0;
-
-			return $this->util->make_numeric( $results );
+			$this->db_version        = $this->util->make_numeric( $results );
+			return $this->db_version;
 		}
 		if ( $this->reject_newer_db_versions && $wp_db_version > $this->last_compatible_db_version ) {
 			/* fail if we don't have an expected database version */
 			$results->failure        = __( 'Your WordPress installation\'s $wp_db_version is too new.', 'performance-lab' );
 			$results->failure_action = __( 'Upgrade the Performance Lab plugin to this Site Health feature.', 'performance-lab' );
 			$results->canreindex     = 0;
-
-			return $this->util->make_numeric( $results );
+			$this->db_version        = $this->util->make_numeric( $results );
+			return $this->db_version;
 		}
 
 		$is_maria = ! ! stripos( $results->version, 'mariadb' );
 		/* Work out whether we have Antelope or Barracuda InnoDB format : mysql 8+ */
 		if ( ! $is_maria && $results->major >= 8 ) {
 			$results->unconstrained = 1;
-
-			return $this->util->make_numeric( $results );
+			$this->db_version       = $this->util->make_numeric( $results );
+			return $this->db_version;
 		}
 		/* work out whether we have Antelope or Barracuda InnoDB format  mariadb 10.3 + */
 		if ( $is_maria && $results->major >= 10 && $results->minor >= 3 ) {
 			$results->unconstrained = 1;
-
-			return $this->util->make_numeric( $results );
+			$this->db_version       = $this->util->make_numeric( $results );
+			return $this->db_version;
 		}
 		/* mariadb 10.2 ar before */
 		if ( $is_maria && $results->major >= 10 ) {
 
 			$results->unconstrained = $this->has_large_prefix();
-
-			return $this->util->make_numeric( $results );
+			$this->db_version       = $this->util->make_numeric( $results );
+			return $this->db_version;
 		}
 
 		/* waaay too old */
 		if ( $results->major < 5 ) {
 			$results->canreindex = 0;
-
-			return $this->util->make_numeric( $results );
+			$this->db_version    = $this->util->make_numeric( $results );
+			return $this->db_version;
 		}
 		/* before 5.5 */
 		if ( 5 === $results->major && $results->minor < 5 ) {
 			$results->canreindex = 0;
-
-			return $this->util->make_numeric( $results );
+			$this->db_version    = $this->util->make_numeric( $results );
+			return $this->db_version;
 		}
 		/* older 5.5 */
 		if ( 5 === $results->major && 5 === $results->minor && $results->build < 62 ) {
 			$results->canreindex = 0;
-
-			return $this->util->make_numeric( $results );
+			$this->db_version    = $this->util->make_numeric( $results );
+			return $this->db_version;
 		}
 		/* older 5.6 */
 		if ( 5 === $results->major && 6 === $results->minor && $results->build < 4 ) {
 			$results->canreindex = 0;
-
-			return $this->util->make_numeric( $results );
+			$this->db_version    = $this->util->make_numeric( $results );
+			return $this->db_version;
 		}
 		$results->unconstrained = $this->has_large_prefix();
-
-		return $this->util->make_numeric( $results );
+		$this->db_version       = $this->util->make_numeric( $results );
+		return $this->db_version;
 	}
 
 	/** Get a global variable from the DBMS.
@@ -206,6 +223,10 @@ class PerflabDbMetrics {
 	 */
 	public function get_table_info( $tables = null, $exclude = false ) {
 		global $wpdb;
+		if ( isset( $this->table_info ) ) {
+			/* memoized result? */
+			return $this->table_info;
+		}
 		$format_query = "SELECT
     			t.TABLE_NAME AS table_name,
                 t.ENGINE AS engine,
@@ -232,7 +253,9 @@ class PerflabDbMetrics {
 		$format_query .= ' ORDER BY t.TABLE_NAME';
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		return $wpdb->get_results( $format_query, OBJECT_K );
+		$this->table_info = $wpdb->get_results( $format_query, OBJECT_K );
+
+		return $this->table_info;
 	}
 
 	/** Get 95th percentile of time taken for a connection and trivial query.
@@ -286,4 +309,26 @@ class PerflabDbMetrics {
 		}
 		return 0 + $this->get_variable( $var );
 	}
+
+	/** Inspect a set of tables to ensure they have the correct storage engine and row format.
+	 *
+	 * @param array  $stats Result set from get_table_info.
+	 * @param string $target_storage_engine Usually InnoDB.
+	 * @param string $target_row_format Usually Dynamic.
+	 *
+	 * @return array The tables with the wrong format.
+	 */
+	public function get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format ) {
+		$result = array();
+		foreach ( $stats as $table => $stat ) {
+			$hit = strtolower( $stat->engine ) !== strtolower( $target_storage_engine );
+			$hit = $hit | strtolower( $stat->row_format ) !== strtolower( $target_row_format );
+			if ( $hit ) {
+				$result[ $table ] = $stat;
+			}
+		}
+		return $result;
+	}
+
+
 }
