@@ -39,6 +39,8 @@ function perflab_afpc_get_page_cache_headers() {
 		'cf-cache-status'        => $cache_hit_callback,
 		'x-kinsta-cache'         => $cache_hit_callback,
 		'x-aruba-cache'          => $cache_hit_callback,
+		'x-litespeed-cache'      => $cache_hit_callback,
+		'x-qc-cache'             => $cache_hit_callback,
 		'x-cache-enabled'        => static function ( $header_value ) {
 			return 'true' === strtolower( $header_value );
 		},
