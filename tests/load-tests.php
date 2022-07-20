@@ -57,7 +57,7 @@ class Load_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_perflab_get_modules_setting_default() {
-		$default_enabled_modules = require PERFLAB_MAIN_DIR_PATH . 'default-enabled-modules.php';
+		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
 		$expected                = array();
 		foreach ( $default_enabled_modules as $default_enabled_module ) {
 			$expected[ $default_enabled_module ] = array( 'enabled' => true );
@@ -123,7 +123,7 @@ class Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_get_generator_content() {
 		// Assert that it returns the current version and active modules.
 		// For this test, set the active modules to all defaults but the last one.
-		$active_modules = require PERFLAB_MAIN_DIR_PATH . 'default-enabled-modules.php';
+		$active_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
 		array_pop( $active_modules );
 		add_filter(
 			'perflab_active_modules',
@@ -185,7 +185,7 @@ class Load_Tests extends WP_UnitTestCase {
 
 	private function get_expected_default_option() {
 		// This code is essentially copied over from the perflab_register_modules_setting() function.
-		$default_enabled_modules = require PERFLAB_MAIN_DIR_PATH . 'default-enabled-modules.php';
+		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
 		return array_reduce(
 			$default_enabled_modules,
 			function( $module_settings, $module_dir ) {
