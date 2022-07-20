@@ -408,7 +408,7 @@ function perflab_render_pointer() {
 	?>
 	<script id="perflab-admin-pointer" type="text/javascript">
 		jQuery( function() {
-			// Pointer Options
+			// Pointer Options.
 			var options = {
 				content: '<h3><?php echo esc_js( $heading ); ?></h3><p><?php echo wp_kses( $content, $wp_kses_options ); ?></p>',
 				position: {

@@ -136,7 +136,7 @@ class WP_Image_Edit {
 
 	/**
 	 * Setup the $_REQUEST global so `wp_save_image` can process the image with the same editions
-	 * performend into an image as it was performed from the editor.
+	 * performed into an image as it was performed from the editor.
 	 *
 	 * @see wp_save_image
 	 *
@@ -158,7 +158,7 @@ class WP_Image_Edit {
 	/**
 	 * Determine if the last operation executed to edit the image was successfully or not.
 	 *
-	 * @return bool whether the operation to save the image was succesfully or not.
+	 * @return bool whether the operation to save the image was successfully or not.
 	 */
 	public function success() {
 		if ( ! is_object( $this->result ) ) {
