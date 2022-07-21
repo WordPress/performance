@@ -92,8 +92,8 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'filesize', $result );
 		$this->assertArrayHasKey( 'file', $result );
-		$this->assertStringEndsWith( '300x300.webp', $result['file'] );
-		$this->assertFileExists( "{$directory}{$name}-300x300.webp" );
+		$this->assertStringEndsWith( '300x300-jpeg.webp', $result['file'] );
+		$this->assertFileExists( "{$directory}{$name}-300x300-jpeg.webp" );
 	}
 
 	/**
