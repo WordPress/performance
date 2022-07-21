@@ -4,31 +4,46 @@ window.wpPerfLab = window.wpPerfLab || {};
 	window.wpPerfLab.webpUploadsFallbackWebpImages = function( media ) {
 		for ( var i = 0; i < media.length; i++ ) {
 			try {
-				var webp_sizes = window.wpPerfLabWebpSizes;
-				var size_keys = Object.keys( webp_sizes );
-
 				var images = document.querySelectorAll( 'img.wp-image-' + media[i].id );
 				for ( var j = 0; j < images.length; j++ ) {
+
+					if ( ! media[i].media_details.sources || ! media[i].media_details.sources['image/jpeg'] ) {
+						continue;
+					}
+
+					var sizes = media[i].media_details.sizes;
+					var sizes_keys = Object.keys( sizes );
 					var srcset = images[j].getAttribute( 'srcset' );
-					if ( srcset ) {
-						// Update full image in srcset.
-						srcset = srcset.replace( images[j].src, media[i].media_details.sizes.full.source_url );
-						images[j].setAttribute( 'srcset', srcset );
 
-						// Update full image in src.
-						images[j].src = media[i].media_details.sizes.full.source_url;
+					// If a full image is present in srcset, it should be updated.
+					if( srcset && media[i].media_details.sources['image/webp'] ) {
+						srcset = srcset.replace( media[i].media_details.sources['image/webp'].file, media[i].media_details.sources['image/jpeg'].file );
+					}
 
-						// Update thumbnail images.
-						for ( var k = 0; k < size_keys.length; k++ ) {
-
-							if( ! media[i].media_details.sizes[size_keys[k]].sources['image/webp'] ) {
-								continue;
-							}
-
-							srcset = srcset.replace( media[i].media_details.sizes[size_keys[k]].sources['image/webp'].source_url, media[i].media_details.sizes[size_keys[k]].sources['image/jpeg'].source_url );
-							images[j].setAttribute( 'srcset', srcset );
+					var flag = true;
+					for ( var k = 0; k < sizes_keys.length; k++ ) {
+						if( ! media[i].media_details.sizes[sizes_keys[k]].sources || ! media[i].media_details.sizes[sizes_keys[k]].sources['image/webp'] || ! media[i].media_details.sizes[sizes_keys[k]].sources['image/jpeg'] ) {
+							continue;
 						}
 
+						// Check to see if the image src has any size set, then update it.
+						if( flag && media[i].media_details.sizes[sizes_keys[k]].sources['image/webp'].source_url === images[j].src ) {
+							images[j].src = media[i].media_details.sizes[sizes_keys[k]].sources['image/jpeg'].source_url;
+							flag = false;
+						}
+
+						if( srcset && media[i].media_details.sizes[sizes_keys[k]].sources['image/webp'] ) {
+							srcset = srcset.replace( media[i].media_details.sizes[sizes_keys[k]].sources['image/webp'].source_url, media[i].media_details.sizes[sizes_keys[k]].sources['image/jpeg'].source_url );
+						}
+					}
+
+					if( srcset ) {
+						images[j].setAttribute( 'srcset', srcset );
+					}
+
+					// If the src has not been updated, then update the image src with the sources.
+					if( flag && media[i].media_details.sources['image/webp'] ) {
+						images[j].src = images[j].src.replace( media[i].media_details.sources['image/webp'].file, media[i].media_details.sources['image/jpeg'].file );
 					}
 				}
 			} catch ( e ) {

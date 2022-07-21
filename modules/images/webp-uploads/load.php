@@ -675,10 +675,7 @@ function webp_uploads_wepb_fallback() {
 	<?php
 	$javascript = ob_get_clean();
 
-	$sizes_with_mime_type_support = webp_uploads_get_image_sizes_additional_mime_type_support();
-
 	wp_print_inline_script_tag(
-		sprintf( 'window.wpPerfLabWebpSizes = %s;', wp_json_encode( array_filter( $sizes_with_mime_type_support ) ) ) . "\n" .
 		preg_replace( '/\s+/', '', $javascript ),
 		array(
 			'id'            => 'webpUploadsFallbackWebpImages',
