@@ -48,7 +48,7 @@ class PerflabDbMetrics {
 
 	/** Memoized table_info result set.
 	 *
-	 * @var object Table descriptions.
+	 * @var array Table descriptions.
 	 */
 	private $table_info;
 
@@ -73,10 +73,10 @@ class PerflabDbMetrics {
 	 *
 	 * @return float
 	 */
-	private function now_microseconds() {
+	public function now_microseconds() {
 		try {
 			 // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.hrtimeFound
-			return $this->has_hr_time ? ( hrtime( true ) * 0.000001 ) : ( time() * 1000000. );
+			return $this->has_hr_time ? ( hrtime( true ) * 0.001 ) : ( time() * 1000000. );
 		} catch ( Exception $ex ) {
 			return time() * 1000000.;
 		}
@@ -186,7 +186,7 @@ class PerflabDbMetrics {
 	 * @param string $name Name of variable.
 	 *
 	 * @return mixed|string Value of variable. 0 if nothing found.
-	 * @throws ValueError Notice about variable lookup failure.
+	 * @throws InvalidArgumentException Notice about variable lookup failure.
 	 */
 	public function get_variable( $name ) {
 		global $wpdb;
@@ -195,11 +195,11 @@ class PerflabDbMetrics {
 			$var = $var[0];
 			return $var[1];
 		} elseif ( $var && is_array( $var ) && 0 === count( $var ) ) {
-			throw new ValueError( $name . ': no such MySQL variable' );
+			throw new InvalidArgumentException( $name . ': no such MySQL variable' );
 		} elseif ( $var && is_array( $var ) && count( $var ) > 1 ) {
-			throw new ValueError( $name . ': returns multiple MySQL variables' );
+			throw new InvalidArgumentException( $name . ': returns multiple MySQL variables' );
 		} else {
-			throw new ValueError( $name . ': something went wrong looking up MySQL variable' );
+			throw new InvalidArgumentException( $name . ': something went wrong looking up MySQL variable' );
 		}
 	}
 
@@ -219,7 +219,7 @@ class PerflabDbMetrics {
 	 * @param array|null $tables list of tables. if omitted, all tables.
 	 * @param bool       $exclude if true, exclude the tables in the list from the result set.
 	 *
-	 * @return object with object properties the names of tables.
+	 * @return array An associative array indexed by table name.
 	 */
 	public function get_table_info( $tables = null, $exclude = false ) {
 		global $wpdb;
@@ -294,7 +294,8 @@ class PerflabDbMetrics {
 	 *
 	 * @param string $engine Storage engine.
 	 *
-	 * @return int|mixed|string
+	 * @return int|mixed|string MyISAM, InnoDB.
+	 * @throws InvalidArgumentException For an unrecognized engine name.
 	 */
 	public function get_buffer_pool_size( $engine ) {
 		$size = 0;
@@ -306,6 +307,8 @@ class PerflabDbMetrics {
 			case 'myisam':
 				$var = 'Key_buffer_size';
 				break;
+			default:
+				throw new InvalidArgumentException( 'bogus engine name' );
 		}
 		return 0 + $this->get_variable( $var );
 	}
@@ -330,5 +333,50 @@ class PerflabDbMetrics {
 		return $result;
 	}
 
-
+	/** Get the indexes on a table, excluding fulltext indexes.
+	 *
+	 * @param string $table_name The subject table.
+	 *
+	 * @return array|object|stdClass[]|null One row per index.
+	 */
+	public function get_indexes( $table_name ) {
+		global $wpdb;
+		$query = "SELECT key_name, `add`, `drop`
+         FROM (
+          SELECT
+            IF(tc.CONSTRAINT_TYPE LIKE 'PRIMARY KEY', tc.CONSTRAINT_TYPE, CONCAT (s.INDEX_NAME)) key_name,
+            IF(tc.CONSTRAINT_TYPE LIKE 'PRIMARY KEY', 1, 0) is_primary,
+            CASE WHEN tc.CONSTRAINT_TYPE LIKE 'PRIMARY KEY' THEN 1
+                WHEN tc.CONSTRAINT_TYPE LIKE 'UNIQUE' THEN 1
+                ELSE 0 END is_unique,
+            CONCAT ( 'ADD ',
+                CASE WHEN tc.CONSTRAINT_TYPE = 'UNIQUE' THEN CONCAT ('UNIQUE KEY ', s.INDEX_NAME)
+                     WHEN tc.CONSTRAINT_TYPE LIKE 'PRIMARY KEY' THEN tc.CONSTRAINT_TYPE
+                                         ELSE CONCAT ('KEY', ' ', s.INDEX_NAME) END,
+                ' (',
+                GROUP_CONCAT(
+                  IF(s.SUB_PART IS NULL, s.COLUMN_NAME, CONCAT(s.COLUMN_NAME,'(',s.SUB_PART,')'))
+                  ORDER BY s.SEQ_IN_INDEX
+                  SEPARATOR ', '),
+                ')'
+                ) `add`,
+            CONCAT ( 'DROP ',
+                IF(tc.CONSTRAINT_TYPE LIKE 'PRIMARY KEY', tc.CONSTRAINT_TYPE, CONCAT ('KEY', ' ', s.INDEX_NAME))
+                ) `drop`
+          FROM information_schema.STATISTICS s
+          LEFT JOIN information_schema.TABLE_CONSTRAINTS tc
+                  ON s.TABLE_NAME = tc.TABLE_NAME
+                 AND s.TABLE_SCHEMA = tc.TABLE_SCHEMA
+                 AND s.TABLE_CATALOG = tc.CONSTRAINT_CATALOG
+                 AND s.INDEX_NAME = tc.CONSTRAINT_NAME
+         WHERE s.TABLE_SCHEMA = DATABASE()
+           AND s.TABLE_NAME = %s
+           /* #37 don't do anything with FULLTEXT indexes */
+           AND s.INDEX_TYPE <> 'FULLTEXT'
+         GROUP BY s.INDEX_NAME
+        ) q
+        ORDER BY is_primary DESC, is_unique DESC, key_name";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return $wpdb->get_results( $wpdb->prepare( $query, $table_name ), OBJECT_K );
+	}
 }

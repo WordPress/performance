@@ -43,10 +43,10 @@ class PerflabDbUtilities {
 	 */
 	private function __construct() {
 		$this->thresholds = array(
-			'server_response_very_slow'  => 10.0,
-			'server_response_slow'       => 2.0,
+			'server_response_very_slow'  => 10000.0,
+			'server_response_slow'       => 2000.0,
 			'server_response_iterations' => 20.0,
-			'server_response_timeout'    => 100.0,
+			'server_response_timeout'    => 100000.0,
 			'target_storage_engine'      => 'InnoDB',
 			'target_row_format'          => 'Dynamic',
 			'pool_size_fraction_min'     => 0.25,
@@ -108,11 +108,13 @@ class PerflabDbUtilities {
 	 * @param string $name Name of the value.
 	 *
 	 * @return mixed The value.
-	 * @throws ValueError Upon an unrecognized name.
+	 * @throws InvalidArgumentException Upon an unrecognized name.
 	 */
 	public function get_threshold_value( $name ) {
 		if ( ! array_key_exists( $name, $this->thresholds ) ) {
-			throw new ValueError( $name . ': no such PerflabDbThreshold item' );
+			$value = null;
+		} else {
+			$value = $this->thresholds[ $name ];
 		}
 
 		/**
@@ -127,7 +129,11 @@ class PerflabDbUtilities {
 		 * @param string $name The threshold name.
 		 */
 
-		return apply_filters( 'perflab_db_threshold', $this->thresholds[ $name ], $name );
+		$value = apply_filters( 'perflab_db_threshold', $this->thresholds[ $name ], $name );
+		if ( null === $value ) {
+			throw new InvalidArgumentException( $name . ': no such PerflabDbThreshold item' );
+		}
+		return $value;
 
 	}
 	/** Arithmetic mean

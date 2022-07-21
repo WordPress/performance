@@ -186,8 +186,12 @@ class PerflabDbTests {
 			return array();
 		}
 		global $wpdb;
-		$tables                = $wpdb->tables();
-		$stats                 = array_diff_key( $this->table_stats, array_combine( $tables, $tables ) );
+		$tables = $wpdb->tables();
+		$stats  = array_diff_key( $this->table_stats, array_combine( $tables, $tables ) );
+		if ( 0 === count( $stats ) ) {
+			/* don't pester the user when they have no plugin tables */
+			return array();
+		}
 		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
 		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
 		$bad                   = $this->metrics->get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format );
@@ -343,10 +347,11 @@ class PerflabDbTests {
 		if ( $this->skip_all_tests ) {
 			return array();
 		}
-		$iterations          = $this->utilities->get_threshold_value( 'server_response_iterations' );
-		$response_timeout    = $this->utilities->get_threshold_value( 'server_response_timeout' );
-		$results             = $this->metrics->server_response( $iterations, $response_timeout );
-		$formatted_results   = number_format_i18n( $results, 2 );
+		$iterations       = $this->utilities->get_threshold_value( 'server_response_iterations' );
+		$response_timeout = $this->utilities->get_threshold_value( 'server_response_timeout' );
+		$results          = $this->metrics->server_response( $iterations, $response_timeout );
+		/* results are in microseconds, and we report in milliseconds */
+		$formatted_results   = number_format_i18n( $results * 0.001, 2 );
 		$very_slow_response  = $this->utilities->get_threshold_value( 'server_response_very_slow' );
 		$slow_response       = $this->utilities->get_threshold_value( 'server_response_slow' );
 		$formatted_threshold = number_format_i18n( $slow_response, 2 );
