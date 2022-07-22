@@ -271,4 +271,54 @@ class PerflabDbUtilities {
 		return $unit;
 	}
 
+	/** Get Instructions
+	 *
+	 * @param callable $formatter Function called with ($tablename, $contents).
+	 * @param string   $explanation The problem.
+	 * @param string   $exhortation What to do about it.
+	 * @param string   $header_1 Column header for the first column of instructions.
+	 * @param string   $header_2 Column header for the second column of instructions.
+	 * @param array    $tables Associative array indexed by table name.
+	 *
+	 * @return string[] [$description, $action] HTML strings for description and action to take.
+	 */
+	public function instructions( callable $formatter, $explanation, $exhortation, $header_1, $header_2, $tables ) {
+		/* these are fragments of HTML that will be concatenated with implode() */
+		$desc = array();
+		$acts = array();
+
+		$desc[] = '<p class="description">';
+		$desc[] = $explanation;
+		$desc[] = '</p>';
+
+		$desc[] = '<p class="description">';
+		$desc[] = $exhortation;
+		$desc[] = '</p>';
+
+		/* handle the copy-to-clipboard UI HTML */
+		$clip        = plugin_dir_url( __FILE__ ) . 'assets/clip.svg';
+		$copy_txt    = esc_attr__( 'Copy to clipboard', 'performance-lab' );
+		$copyall_txt = esc_attr__( 'Copy all commands to clipboard', 'performance-lab' );
+
+		$acts[] = '<table class="upgrades"><thead><tr>';
+		$acts[] = '<th scope="col" class=\"table\">' . $header_1 . '</th>';
+		$acts[] = '<th scope="col">' . $header_2 . '</th>';
+		$acts[] = '<th scope="col" class=\"icon\">' . "<img src=\"$clip\" alt=\"$copyall_txt\" title=\"$copyall_txt\" ></th>";
+		$acts[] = '</tr></thead><tbody>';
+		foreach ( $tables as $table_name => $data ) {
+			$acts[]  = '<tr>';
+			$acts[]  = "<td class=\"table\">$table_name</td>";
+			$acts[]  = '<td class="cmd">';
+			$acts[]  = '<pre class="item">';
+			$acts[]  = call_user_func( $formatter, $table_name, $data );
+			$acts [] = '</pre>';
+			$acts[]  = '</td>';
+			$acts[]  = "<td class=\"icon\"><img src=\"$clip\" alt=\"$copy_txt\" title=\"$copy_txt\" ></td>";
+			$acts[]  = '</tr>';
+		}
+		$acts [] = '</tbody></table>';
+
+		return array( implode( '', $desc ), implode( '', $acts ) );
+	}
+
 }

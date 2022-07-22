@@ -17,6 +17,8 @@
  * @since 1.4.0
  */
 class PerflabDbMetrics {
+	const SERVER_RESPONSE_CACHE = 'performance_lab_sitehealth_server_response';
+	const SERVER_RESPONSE_TTL   = 5 * MINUTE_IN_SECONDS;
 
 	/** First eligible db version, the advent of utfmb4 in WordPress databases.
 	 *
@@ -50,7 +52,7 @@ class PerflabDbMetrics {
 	 *
 	 * @var array Table descriptions.
 	 */
-	private $table_info;
+	private $table_info = array();
 
 	/** Memoized db_version result set.
 	 *
@@ -75,12 +77,13 @@ class PerflabDbMetrics {
 	 */
 	public function now_microseconds() {
 		try {
-			 // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.hrtimeFound
+			// phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.hrtimeFound
 			return $this->has_hr_time ? ( hrtime( true ) * 0.001 ) : ( time() * 1000000. );
 		} catch ( Exception $ex ) {
 			return time() * 1000000.;
 		}
 	}
+
 	/** Get version information from the database server.
 	 *
 	 * @return object
@@ -120,6 +123,7 @@ class PerflabDbMetrics {
 			$results->failure_action = __( 'Upgrade WordPress to use this Site Health feature.', 'performance-lab' );
 			$results->canreindex     = 0;
 			$this->db_version        = $this->util->make_numeric( $results );
+
 			return $this->db_version;
 		}
 		if ( $this->reject_newer_db_versions && $wp_db_version > $this->last_compatible_db_version ) {
@@ -128,6 +132,7 @@ class PerflabDbMetrics {
 			$results->failure_action = __( 'Upgrade the Performance Lab plugin to this Site Health feature.', 'performance-lab' );
 			$results->canreindex     = 0;
 			$this->db_version        = $this->util->make_numeric( $results );
+
 			return $this->db_version;
 		}
 
@@ -136,12 +141,14 @@ class PerflabDbMetrics {
 		if ( ! $is_maria && $results->major >= 8 ) {
 			$results->unconstrained = 1;
 			$this->db_version       = $this->util->make_numeric( $results );
+
 			return $this->db_version;
 		}
 		/* work out whether we have Antelope or Barracuda InnoDB format  mariadb 10.3 + */
 		if ( $is_maria && $results->major >= 10 && $results->minor >= 3 ) {
 			$results->unconstrained = 1;
 			$this->db_version       = $this->util->make_numeric( $results );
+
 			return $this->db_version;
 		}
 		/* mariadb 10.2 ar before */
@@ -149,35 +156,41 @@ class PerflabDbMetrics {
 
 			$results->unconstrained = $this->has_large_prefix();
 			$this->db_version       = $this->util->make_numeric( $results );
+
 			return $this->db_version;
 		}
 
-		/* waaay too old */
+		/* way too old */
 		if ( $results->major < 5 ) {
 			$results->canreindex = 0;
 			$this->db_version    = $this->util->make_numeric( $results );
+
 			return $this->db_version;
 		}
 		/* before 5.5 */
 		if ( 5 === $results->major && $results->minor < 5 ) {
 			$results->canreindex = 0;
 			$this->db_version    = $this->util->make_numeric( $results );
+
 			return $this->db_version;
 		}
 		/* older 5.5 */
 		if ( 5 === $results->major && 5 === $results->minor && $results->build < 62 ) {
 			$results->canreindex = 0;
 			$this->db_version    = $this->util->make_numeric( $results );
+
 			return $this->db_version;
 		}
 		/* older 5.6 */
 		if ( 5 === $results->major && 6 === $results->minor && $results->build < 4 ) {
 			$results->canreindex = 0;
 			$this->db_version    = $this->util->make_numeric( $results );
+
 			return $this->db_version;
 		}
 		$results->unconstrained = $this->has_large_prefix();
 		$this->db_version       = $this->util->make_numeric( $results );
+
 		return $this->db_version;
 	}
 
@@ -193,6 +206,7 @@ class PerflabDbMetrics {
 		$var = $wpdb->get_results( $wpdb->prepare( 'SHOW VARIABLES LIKE %s', $name ), ARRAY_N );
 		if ( $var && is_array( $var ) && 1 === count( $var ) ) {
 			$var = $var[0];
+
 			return $var[1];
 		} elseif ( $var && is_array( $var ) && 0 === count( $var ) ) {
 			throw new InvalidArgumentException( $name . ': no such MySQL variable' );
@@ -203,18 +217,21 @@ class PerflabDbMetrics {
 		}
 	}
 
-
 	/** Determine whether the MariaDB / MySQL instance supports InnoDB / Barracuda.
 	 *
 	 * @return int 1 means Barracuda (3072-byte index columns), 0 if Antelope (768-byte).
 	 */
 	private function has_large_prefix() {
-		global $wpdb;
 		$prefix = $this->get_variable( 'innodb_large_prefix' );
+
 		return ( ( 'ON' === $prefix ) || ( '1' === $prefix ) || ( 1 === $prefix ) ) ? 1 : 0;
 	}
 
 	/** Get the characteristics of each table.
+	 *
+	 * Notice that the row_count, data_bytes, index_bytes, and total_bytes values
+	 * are approximate. We don't want to do COUNT(*) on big tables because it is
+	 * absurdly slow in InnoDB.
 	 *
 	 * @param array|null $tables list of tables. if omitted, all tables.
 	 * @param bool       $exclude if true, exclude the tables in the list from the result set.
@@ -222,11 +239,24 @@ class PerflabDbMetrics {
 	 * @return array An associative array indexed by table name.
 	 */
 	public function get_table_info( $tables = null, $exclude = false ) {
-		global $wpdb;
-		if ( isset( $this->table_info ) ) {
-			/* memoized result? */
-			return $this->table_info;
+		/* All the tables, or just some? Compute a memoization hash. */
+		$in_clause = $exclude ? 'NOT IN' : 'IN';
+		$list      = array();
+		$hash      = array();
+		if ( is_array( $tables ) ) {
+			foreach ( $tables as $table ) {
+				$hash[] = $table;
+				$list[] = "'" . $table . "'";
+			}
 		}
+		sort( $hash );
+		$memo_hash = $in_clause . '|' . implode( '|', $hash );
+		if ( array_key_exists( $memo_hash, $this->table_info ) ) {
+			/* memoized result? */
+			return $this->table_info[ $memo_hash ];
+		}
+
+		global $wpdb;
 		$format_query = "SELECT
     			t.TABLE_NAME AS table_name,
                 t.ENGINE AS engine,
@@ -241,21 +271,17 @@ class PerflabDbMetrics {
         	AND t.TABLE_TYPE = 'BASE TABLE'
             AND t.ENGINE IS NOT NULL";
 
-		if ( is_array( $tables ) ) {
-			$list = array();
-			foreach ( $tables as $table ) {
-				$list[] = "'" . $table . "'";
-			}
-			$in_clause = $exclude ? 'NOT IN' : 'IN';
-
+		if ( count( $list ) > 0 ) {
 			$format_query .= ' AND t.TABLE_NAME ' . $in_clause . ' ( ' . implode( ',', $list ) . ')';
 		}
 		$format_query .= ' ORDER BY t.TABLE_NAME';
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$this->table_info = $wpdb->get_results( $format_query, OBJECT_K );
+		$result = $wpdb->get_results( $format_query, OBJECT_K );
+		/* memoize the result */
+		$this->table_info [ $memo_hash ] = $result;
 
-		return $this->table_info;
+		return $result;
 	}
 
 	/** Get 95th percentile of time taken for a connection and trivial query.
@@ -266,15 +292,20 @@ class PerflabDbMetrics {
 	 * @param number $iterations how many times to run the operation.
 	 * @param number $timeout milliseconds before we stop rerunning.
 	 *
-	 * @return float time taken in microseconds.
+	 * @return float Time taken in microseconds.
 	 */
 	public function server_response( $iterations, $timeout ) {
-		$startall     = $this->now_microseconds();
+		/* this test is heavy, so we'll cache its result for 5 min */
+		$result = get_transient( self::SERVER_RESPONSE_CACHE );
+		if ( is_numeric( $result ) ) {
+			return $result;
+		}
+		$start_all    = $this->now_microseconds();
 		$microseconds = array();
-		for ( $i = 0; $i < $iterations; $i++ ) {
+		for ( $i = 0; $i < $iterations; $i ++ ) {
 			$start = $this->now_microseconds();
 			/* don't let this run forever */
-			if ( ( $start - $startall ) > ( 1000.0 * $timeout ) && count( $microseconds ) > $iterations * 0.25 ) {
+			if ( ( $start - $start_all ) > ( 1000.0 * $timeout ) && count( $microseconds ) > $iterations * 0.25 ) {
 				break;
 			}
 			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -287,7 +318,10 @@ class PerflabDbMetrics {
 			$microseconds [] = $this->now_microseconds() - $start;
 		}
 
-		return $this->util->percentile( $microseconds, 0.90 );
+		$result = $this->util->percentile( $microseconds, 0.90 );
+		set_transient( self::SERVER_RESPONSE_CACHE, $result, self::SERVER_RESPONSE_TTL );
+
+		return $result;
 	}
 
 	/** DBMS buffer pool size.
@@ -298,18 +332,17 @@ class PerflabDbMetrics {
 	 * @throws InvalidArgumentException For an unrecognized engine name.
 	 */
 	public function get_buffer_pool_size( $engine ) {
-		$size = 0;
-		$var  = '';
 		switch ( strtolower( $engine ) ) {
 			case 'innodb':
-				$var = 'Innodb_buffer_pool_size';
+				$var = 'innodb_buffer_pool_size';
 				break;
 			case 'myisam':
-				$var = 'Key_buffer_size';
+				$var = 'key_buffer_size';
 				break;
 			default:
 				throw new InvalidArgumentException( 'bogus engine name' );
 		}
+
 		return 0 + $this->get_variable( $var );
 	}
 
@@ -330,6 +363,7 @@ class PerflabDbMetrics {
 				$result[ $table ] = $stat;
 			}
 		}
+
 		return $result;
 	}
 
@@ -376,6 +410,7 @@ class PerflabDbMetrics {
          GROUP BY s.INDEX_NAME
         ) q
         ORDER BY is_primary DESC, is_unique DESC, key_name";
+
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_results( $wpdb->prepare( $query, $table_name ), OBJECT_K );
 	}

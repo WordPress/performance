@@ -125,11 +125,11 @@ class PerflabDbTests {
 				sprintf( __( 'Your SQL server (%s) is outdated', 'performance-lab' ), $this->name ),
 				sprintf(
 				/* translators: 1:  MySQL or MariaDB 2: actual version of database software */
-					__( 'Your %1$s SQL server is a required piece of software for WordPress\'s database. WordPress uses it to store and retrieve all your site’s content and settings. The version you use (%2$s) does not offer the fastest way to retrieve content. This affects you if you have many posts or users.', 'performance-lab' ),
+					__( 'WordPress uses your %1$s server to store and retrieve all your site’s content and settings. The version you use (%2$s) does not offer the latest InnoDB Barracuda storage engine, the most efficient way to retrieve content. This affects you if you have many posts or users.', 'performance-lab' ),
 					$this->name,
 					$this->version->version
 				),
-				__( 'For best performance we recommend running MySQL version 5.7 or higher or MariaDB 10.3 or higher. Contact your web hosting company to correct this.', 'performance-lab' ),
+				__( 'For best performance we recommend running MySQL version 5.7 or higher or MariaDB 10.3 or higher. Contact your web hosting company and ask them to upgrade their server.', 'performance-lab' ),
 				'recommended'
 			);
 		}
@@ -139,7 +139,7 @@ class PerflabDbTests {
 			sprintf( __( 'Your %s SQL server is a recent version', 'performance-lab' ), $this->name ),
 			sprintf(
 			/* translators: 1:  MySQL or MariaDB 2: actual version string (e.g. '10.3.34-MariaDB-0ubuntu0.20.04.1' or '  of database software */
-				__( 'Your %1$s SQL server is a required piece of software for WordPress\'s database. The version you use (%2$s) offers an efficient way to retrieve your content and settings.', 'performance-lab' ),
+				__( 'Your %1$s SQL server is a required piece of software for WordPress\'s database. Your version (%2$s) offers the modern InnoDB Barracuda storage engine, an efficient way to retrieve your content and settings.', 'performance-lab' ),
 				$this->name,
 				$this->version->version
 			)
@@ -155,7 +155,8 @@ class PerflabDbTests {
 			return array();
 		}
 		global $wpdb;
-		$tables                = $wpdb->tables();
+		$tables = $wpdb->tables();
+		/* Get stats for the core tables. */
 		$stats                 = array_intersect_key( $this->table_stats, array_combine( $tables, $tables ) );
 		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
 		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
@@ -189,15 +190,16 @@ class PerflabDbTests {
 		}
 		global $wpdb;
 		$tables = $wpdb->tables();
-		$stats  = array_diff_key( $this->table_stats, array_combine( $tables, $tables ) );
+		/* Get stats for the non-core tables: the ones not mentioned in $wpdb->tables() */
+		$stats = array_diff_key( $this->table_stats, array_combine( $tables, $tables ) );
 		if ( 0 === count( $stats ) ) {
 			/* don't pester the user when they have no plugin tables */
 			return array();
 		}
 		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
 		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
-		$bad                   = $this->metrics->get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format );
-		if ( count( $bad ) === 0 ) {
+		$wrong_format_tables   = $this->metrics->get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format );
+		if ( count( $wrong_format_tables ) === 0 ) {
 			return $this->utilities->test_result(
 				__( 'Your plugin tables use the modern storage format', 'performance-lab' ),
 				sprintf(
@@ -208,11 +210,11 @@ class PerflabDbTests {
 				)
 			);
 		} else {
-			$label = count( $bad ) === count( $stats )
+			$label = count( $wrong_format_tables ) === count( $stats )
 				? __( 'Your plugin tables use an obsolete storage format', 'performance-lab' )
 				: __( 'Some plugin tables use an obsolete storage format', 'performance-lab' );
 
-			return $this->table_upgrade_instructions( $target_storage_engine, $target_row_format, $bad, $label );
+			return $this->table_upgrade_instructions( $target_storage_engine, $target_row_format, $wrong_format_tables, $label );
 		}
 	}
 
@@ -357,7 +359,7 @@ class PerflabDbTests {
 		$formatted_results   = number_format_i18n( $results * 0.001, 2 );
 		$very_slow_response  = $this->utilities->get_threshold_value( 'server_response_very_slow' );
 		$slow_response       = $this->utilities->get_threshold_value( 'server_response_slow' );
-		$formatted_threshold = number_format_i18n( $slow_response, 2 );
+		$formatted_threshold = number_format_i18n( $slow_response * 0.001, 2 );
 		if ( $results >= $very_slow_response ) {
 			return $this->utilities->test_result(
 			/* translators: 1:  MySQL or MariaDB */
@@ -403,12 +405,12 @@ class PerflabDbTests {
 	 *
 	 * @param string $target_storage_engine 'InnoDB'.
 	 * @param string $target_row_format 'Dynamic'.
-	 * @param array  $bad Array containing metrics for tables needing upgrading.
+	 * @param array  $table_metrics Array containing metrics for tables needing upgrading.
 	 * @param string $label The label to put on the health-check report.
 	 *
 	 * @return array
 	 */
-	private function table_upgrade_instructions( $target_storage_engine, $target_row_format, $bad, $label ) {
+	private function table_upgrade_instructions( $target_storage_engine, $target_row_format, $table_metrics, $label ) {
 		$explanation = sprintf(
 		/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic  3: MySQL or MariaDB */
 			__( '%3$s performance improves when your tables use the modern %1$s storage engine and the %2$s row format.', 'performance-lab' ),
@@ -417,49 +419,33 @@ class PerflabDbTests {
 			$this->name
 		);
 		$exhortation = __( 'Consider upgrading these tables.', 'performance-lab' );
-
-		$desc   = array();
-		$desc[] = '<p class="description">';
-		$desc[] = $explanation;
-		$desc[] = '</p>';
-		$desc[] = '<p class="description">';
-		$desc[] = $exhortation;
 		/* translators: header of column */
 		$action_table_header_1 = __( 'Table Name', 'performance-lab' );
 		/* translators: header of column */
 		$action_table_header_2 = __( 'WP-CLI command to upgrade', 'performance-lab' );
-		$clip                  = plugin_dir_url( __FILE__ ) . 'assets/clip.svg';
-		$copy_txt              = esc_attr__( 'Copy to clipboard', 'performance-lab' );
-		$copyall_txt           = esc_attr__( 'Copy all commands to clipboard', 'performance-lab' );
 
-		$desc[] = '</p>';
-		$acts   = array();
-		$acts[] = '<table class="upgrades">';
-		$acts[] = '<thead><tr><th scope="col" class=\"table\">' . $action_table_header_1
-				. '</th><th scope="col" class=\"cmd\">' . "<img src=\"$clip\" alt=\"$copyall_txt\" title=\"$copyall_txt\" >"
-				. $action_table_header_2
-				. '</th><th></th></tr></thead>';
-		$acts[] = '<tbody>';
-		foreach ( $bad as $table => $data ) {
-			$acts[]  = '<tr>';
-			$acts[]  = "<td class=\"table\">$table</td>";
-			$acts[]  = '<td class="cmd">';
-			$acts[]  = "<img src=\"$clip\" alt=\"$copy_txt\" title=\"$copy_txt\" >";
-			$acts[]  = '<span class="cmd">';
-			$acts[]  = "wp db query \"ALTER TABLE $table ENGINE=$target_storage_engine ROW_FORMAT=$target_row_format\"";
-			$acts [] = '</span>';
-			$acts[]  = '</td>';
-			$acts[]  = '</tr>';
-		}
-		$acts [] = '</tbody></table>';
+		list( $description, $action ) = $this->utilities->instructions( array( $this, 'format_upgrade_command' ), $explanation, $exhortation, $action_table_header_1, $action_table_header_2, $table_metrics, $target_storage_engine, $target_row_format );
 
 		return $this->utilities->test_result(
 			$label,
-			implode( '', $desc ) . implode( '', $acts ),
+			$description . $action,
 			'',
 			'recommended',
 			'orange'
 		);
 	}
+
+	/** Function to format the appropriate DDL statement for the table name.
+	 *
+	 * @param string $table_name The name of the table to put into the statement.
+	 *
+	 * @return string The statement.
+	 */
+	public function format_upgrade_command( $table_name ) {
+		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
+		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
+		return "wp db query \"ALTER TABLE  $table_name ENGINE=$target_storage_engine ROW_FORMAT=$target_row_format\"";
+	}
+
 
 }

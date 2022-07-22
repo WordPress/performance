@@ -22,11 +22,6 @@
  */
 class PerflabDbIndexes {
 
-	/** Array of index-name prefixes to ignore.
-	 *
-	 * @var array like [woo_,crp_,yarpp_].
-	 */
-	private $index_stop_list;
 	/** Metrics-retrieving instance.
 	 *
 	 * @var object Collection of functions.
@@ -57,11 +52,6 @@ class PerflabDbIndexes {
 	 * @var array associative array of table information.
 	 */
 	private $table_stats;
-	/** Description of standard WordPress indexes.
-	 *
-	 * @var string[][]
-	 */
-	private $standard_indexes;
 
 	/** Constructor for tests.
 	 *
@@ -95,35 +85,60 @@ class PerflabDbIndexes {
 	/** Test need for fast indexes.
 	 */
 	public function index_upgrade_test() {
-		$action = 'fast';
 		if ( $this->skip_all_tests ) {
 			return array();
 		}
-		$all_tables = $this->get_rekeying( $this->version->unconstrained, $action );
+		$action     = 'fast';
+		$statements = $this->get_dml( $action );
 
-		$is_big       = false;
-		$meta_size    = $this->utilities->get_threshold_value( 'meta_size' );
-		$content_size = $this->utilities->get_threshold_value( 'content_size' );
-
-		foreach ( $all_tables as $table => $info ) {
-			$size_threshold = str_ends_with( $table, 'meta' ) ? $meta_size : $content_size;
-			if ( $info['row_count'] > $size_threshold ) {
-				$is_big = true;
-			}
+		if ( 0 === count( $statements ) ) {
+			return $this->utilities->test_result(
+				__( 'Your WordPress tables have high-performance keys', 'performance-lab' ),
+				sprintf(
+				/* translators: 1 MySQL or MariaDB */
+					__( 'High-performance keys improves performance of your %1$s server. You have already added them to your tables.', 'performance-lab' ),
+					$this->name
+				)
+			);
 		}
 
-		$statements = array();
-		foreach ( $all_tables as $table => $info ) {
-			if ( count( $info[ $action ] ) > 0 ) {
-				$ddl    = array();
-				$ddl [] = "ALTER TABLE $table /* {$info['row_count']} rows */";
-				foreach ( $info [ $action ] as $clause ) {
-					$ddl[] = $clause;
-				}
-				$statements [] = implode( PHP_EOL . '    ', $ddl ) . ';';
-			}
-		}
-		return array(); // TODO stub.
+		global $wpdb;
+		$label = count( $wpdb->tables() ) === count( $statements )
+			? __( 'Your WordPress tables will perform better with high-performance keys', 'performance-lab' )
+			: __( 'Some WordPress tables will perform better with high-performance keys', 'performance-lab' );
+
+		$explanation = sprintf(
+		/* translators: 1 MySQL or MariaDB */
+			__( '%1$s retrieves your content more efficiently when you use high-performance keys.', 'performance-lab' ),
+			$this->name
+		);
+		$exhortation = __( 'Consider adding them to these WordPress tables.', 'performance-lab' );
+		/* translators: header of column */
+		$action_table_header_1 = __( 'Table Name', 'performance-lab' );
+		/* translators: header of column */
+		$action_table_header_2 = __( 'WP-CLI command to add keys', 'performance-lab' );
+
+		list( $description, $action ) = $this->utilities->instructions( array( $this, 'format_rekey_command' ), $explanation, $exhortation, $action_table_header_1, $action_table_header_2, $statements );
+
+		return $this->utilities->test_result(
+			$label,
+			$description . $action,
+			'',
+			'recommended',
+			'orange'
+		);
+
+	}
+
+	/** Format the DDL for rekeying.
+	 *
+	 * @param string $name Name of the table.
+	 * @param mixed  $info Associated information.
+	 *
+	 * @return string Formatted DML.
+	 */
+	public function format_rekey_command( $name, $info ) {
+		return "wp db query \"{$info['ddl']}\"";
 	}
 
 	/** Figure out, based on current DDL and target DDL,
@@ -493,6 +508,43 @@ class PerflabDbIndexes {
 		}
 
 		return array_filter( $actions );
+	}
+
+	/** Get the DML to do rekeying.
+	 *
+	 * @param string $action 'fast' or 'standard'.
+	 *
+	 * @return array[] Indexed by table name with [ddl, is_big, and row_count] items.
+	 */
+	private function get_dml( $action ) {
+		$all_tables = $this->get_rekeying( $this->version->unconstrained, $action );
+
+		$meta_size    = $this->utilities->get_threshold_value( 'meta_size' );
+		$content_size = $this->utilities->get_threshold_value( 'content_size' );
+
+		$statements = array();
+		foreach ( $all_tables as $table => $info ) {
+			/* note the larger tables */
+			$is_big         = false;
+			$size_threshold = str_ends_with( $table, 'meta' ) ? $meta_size : $content_size;
+			if ( $info['row_count'] > $size_threshold ) {
+				$is_big = true;
+			}
+			if ( count( $info[ $action ] ) > 0 ) {
+				$ddl = array();
+				foreach ( $info [ $action ] as $clause ) {
+					$ddl[] = $clause;
+				}
+				$separator             = ',' . PHP_EOL . '    ';
+				$statements [ $table ] = array(
+					'ddl'       => "ALTER TABLE $table" . PHP_EOL . '    ' . implode( $separator, $ddl ) . ';',
+					'is_big'    => $is_big,
+					'row_count' => $info ['row_count'],
+				);
+			}
+		}
+
+		return $statements;
 	}
 
 }

@@ -1,21 +1,34 @@
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > thead > tr > th {
-	text-align: left;
-}
 div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades {
-	border-spacing: 0.5em;
+	border-spacing: 0;
 }
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > th {
+
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades  > thead > tr > th,
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades  > tbody > tr > td {
+	border-bottom-color: white;
+	border-bottom-style: solid;
+	border-bottom-width: 0.15rem;
+	vertical-align: top;
+	padding: 0.25rem 0.5rem;
+}
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades  > thead > tr > th:first-child,
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades  > tbody > tr > td:first-child {
+	padding-right: 0.5em;
+}
+
+
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > thead > tr > th,
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td {
 	text-align: left;
 }
 div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.cmd {
+	background: rgba(0,0,0,.03);
+}
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.cmd > pre.item {
 	text-align: left;
 	font-family: Consolas, Monaco, monospace;
-	font-size: 95%;
-	background: rgba(0,0,0,.03);
-	padding-top: 5px;
+	font-size: 90%;
+	margin: 0;
 }
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.cmd > span.cmd,
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > thead > tr > th.cmd > img,
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.cmd > img {
-	padding-left: 0.5em;
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.icon {
+	background: rgba(0,0,0,.03);
 }
