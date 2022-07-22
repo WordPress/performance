@@ -507,4 +507,27 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		remove_all_actions( $action );
 		do_action( $action );
 	}
+
+	/**
+	 * Check different suffix values for generate_filename.
+	 *
+	 * @test
+	 */
+	public function it_should_check_different_suffix_values_for_generate_filename() {
+		$image_path = TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg';
+		$editor     = wp_get_image_editor( $image_path );
+		$editor->resize( 100, 50, true );
+		$ext     = pathinfo( $image_path, PATHINFO_EXTENSION );
+		$suffix  = $editor->get_suffix();
+		$suffix .= "-{$ext}";
+
+		// Test with no parameters.
+		$this->assertSame( 'car-100x50.jpeg', wp_basename( $editor->generate_filename() ) );
+		// Test with webp parameter.
+		$this->assertSame( 'car-100x50.webp', wp_basename( $editor->generate_filename( null, null, 'webp' ) ) );
+		// Test with suffix and webp parameter.
+		$this->assertSame( 'car-100x50-jpeg.webp', wp_basename( $editor->generate_filename( $suffix, null, 'webp' ) ) );
+		// Test with suffix and png parameter.
+		$this->assertSame( 'car-100x50-jpeg.png', wp_basename( $editor->generate_filename( $suffix, null, 'png' ) ) );
+	}
 }
