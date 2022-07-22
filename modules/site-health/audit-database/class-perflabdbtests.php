@@ -53,9 +53,10 @@ class PerflabDbTests {
 
 	/** Constructor for tests.
 	 *
-	 * @param object $metrics Metrics-retrieving instance.
+	 * @param PerflabDbMetrics $metrics Metrics-retrieving instance.
 	 */
 	public function __construct( $metrics ) {
+
 		$this->metrics     = $metrics;
 		$this->version     = $this->metrics->get_db_version();
 		$this->name        = $this->version->server_name;
@@ -72,30 +73,30 @@ class PerflabDbTests {
 	public function add_all_database_performance_checks( $tests ) {
 		$test_number = 0;
 		$label       = __( 'Database Performance One', 'performance-lab' );
-		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
+		$tests['direct'][ 'database_performance' . $test_number ++ ] = array(
 			'label' => $label,
 			'test'  => array( $this, 'server_version_test' ),
 		);
-		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
+		$tests['direct'][ 'database_performance' . $test_number ++ ] = array(
 			'label' => $label,
 			'test'  => array( $this, 'minimal_server_response_test' ),
 		);
-		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
+		$tests['direct'][ 'database_performance' . $test_number ++ ] = array(
 			'label' => $label,
 			'test'  => array( $this, 'core_tables_format_test' ),
 		);
 
-		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
+		$tests['direct'][ 'database_performance' . $test_number ++ ] = array(
 			'label' => $label,
 			'test'  => array( $this, 'extra_tables_format_test' ),
 		);
 
-		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
+		$tests['direct'][ 'database_performance' . $test_number ++ ] = array(
 			'label' => $label,
 			'test'  => array( $this, 'buffer_pool_size_test' ),
 		);
 
-		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
+		$tests['direct'][ 'database_performance' . $test_number ++ ] = array(
 			'label' => $label,
 			'test'  => array( $this, 'too_many_users_test' ),
 		);
@@ -110,6 +111,7 @@ class PerflabDbTests {
 	public function server_version_test() {
 		if ( isset( $this->version->failure ) && is_string( $this->version->failure ) ) {
 			$this->skip_all_tests = true;
+
 			return $this->utilities->test_result(
 				__( 'Upgrade your outdated WordPress installation', 'performance-lab' ),
 				$this->version->failure,
@@ -175,8 +177,8 @@ class PerflabDbTests {
 
 			return $this->table_upgrade_instructions( $target_storage_engine, $target_row_format, $bad, $label );
 		}
-
 	}
+
 	/** Check extra tables format
 	 *
 	 * @return array
@@ -212,8 +214,8 @@ class PerflabDbTests {
 
 			return $this->table_upgrade_instructions( $target_storage_engine, $target_row_format, $bad, $label );
 		}
-
 	}
+
 	/** Check data size against buffer pool size
 	 *
 	 * @return array
@@ -246,7 +248,7 @@ class PerflabDbTests {
 		if ( $myisam_size > 0 && ( $myisam_pool_size / $fraction ) < $myisam_size ) {
 			$too_small = true;
 			$msgs[]    = '<p>' . sprintf(
-			/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
+				/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
 				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s, but %2$s\'s buffer size (\'Key_buffer_size\') is only %3$s. That may be inadequate.', 'performance-lab' ),
 				$this->utilities->format_bytes( $myisam_size ),
 				$this->name,
@@ -254,7 +256,7 @@ class PerflabDbTests {
 			) . '</p>';
 		} else {
 			$msgs[] = '<p>' . sprintf(
-			/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
+				/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
 				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s and %2$s\'s key buffer size is %3$s. That is adequate in most cases.', 'performance-lab' ),
 				$this->utilities->format_bytes( $myisam_size ),
 				$this->name,
@@ -264,7 +266,7 @@ class PerflabDbTests {
 		if ( $innodb_size > 0 && ( $innodb_pool_size / $fraction ) < $innodb_size ) {
 			$too_small = true;
 			$msgs[]    = '<p>' . sprintf(
-			/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
+				/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
 				__( 'Your InnoDB tables (the modern storage engine) use %1$s, but %2$s\'s buffer pool size (\'Innodb_buffer_pool_size\') is only %3$s. That may be inadequate.', 'performance-lab' ),
 				$this->utilities->format_bytes( $innodb_size ),
 				$this->name,
@@ -272,7 +274,7 @@ class PerflabDbTests {
 			) . '</p>';
 		} else {
 			$msgs[] = '<p>' . sprintf(
-			/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
+				/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
 				__( 'Your InnoDB tables (the modern storage engine) use %1$s and %2$s\'s buffer pool size is %3$s. That is adequate in most cases.', 'performance-lab' ),
 				$this->utilities->format_bytes( $innodb_size ),
 				$this->name,
@@ -305,7 +307,7 @@ class PerflabDbTests {
 				implode( '', $msgs ),
 				sprintf(
 				/* translators: 1 server name like MariaDB */
-					__( 'Some hosts share their %1$s SQL servers among multiple customers. In that case the shared buffer pool may still be inadequate. Site Health cannot detect shared SQL servers.', 'performance-lab' ),
+					__( 'Some hosts share their %1$s SQL servers among multiple WordPress sites. In that case the shared buffer pool may still be inadequate. Site Health cannot detect shared SQL servers.', 'performance-lab' ),
 					$this->name
 				)
 			);
@@ -336,6 +338,7 @@ class PerflabDbTests {
 				);
 			}
 		}
+
 		return array();
 	}
 
@@ -369,7 +372,6 @@ class PerflabDbTests {
 				'critical',
 				'red'
 			);
-
 		} elseif ( $results >= $slow_response ) {
 			return $this->utilities->test_result(
 			/* translators: 1:  MySQL or MariaDB */
@@ -384,7 +386,6 @@ class PerflabDbTests {
 				'recommended',
 				'orange'
 			);
-
 		} else {
 			return $this->utilities->test_result(
 			/* translators: 1:  MySQL or MariaDB */
@@ -408,24 +409,36 @@ class PerflabDbTests {
 	 * @return array
 	 */
 	private function table_upgrade_instructions( $target_storage_engine, $target_row_format, $bad, $label ) {
-		$clip     = plugin_dir_url( __FILE__ ) . 'assets/clip.svg';
-		$copy_txt = esc_attr__( 'Copy to clipboard', 'performance-lab' );
-		$desc     = array();
-		$desc[]   = '<p class="description">';
-		$desc[]   = sprintf(
+		$explanation = sprintf(
 		/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic  3: MySQL or MariaDB */
 			__( '%3$s performance improves when your tables use the modern %1$s storage engine and the %2$s row format.', 'performance-lab' ),
 			$target_storage_engine,
 			$target_row_format,
 			$this->name
 		);
+		$exhortation = __( 'Consider upgrading these tables.', 'performance-lab' );
+
+		$desc   = array();
+		$desc[] = '<p class="description">';
+		$desc[] = $explanation;
 		$desc[] = '</p>';
 		$desc[] = '<p class="description">';
-		$desc[] = __( 'Consider upgrading these tables.', 'performance-lab' );
+		$desc[] = $exhortation;
+		/* translators: header of column */
+		$action_table_header_1 = __( 'Table Name', 'performance-lab' );
+		/* translators: header of column */
+		$action_table_header_2 = __( 'WP-CLI command to upgrade', 'performance-lab' );
+		$clip                  = plugin_dir_url( __FILE__ ) . 'assets/clip.svg';
+		$copy_txt              = esc_attr__( 'Copy to clipboard', 'performance-lab' );
+		$copyall_txt           = esc_attr__( 'Copy all commands to clipboard', 'performance-lab' );
+
 		$desc[] = '</p>';
 		$acts   = array();
 		$acts[] = '<table class="upgrades">';
-		$acts[] = '<thead><tr><th scope="col" class=\"table\">Table Name</th><th scope="col" class=\"cmd\">WP-CLI command to upgrade</th><th></th></tr></thead>';
+		$acts[] = '<thead><tr><th scope="col" class=\"table\">' . $action_table_header_1
+				. '</th><th scope="col" class=\"cmd\">' . "<img src=\"$clip\" alt=\"$copyall_txt\" title=\"$copyall_txt\" >"
+				. $action_table_header_2
+				. '</th><th></th></tr></thead>';
 		$acts[] = '<tbody>';
 		foreach ( $bad as $table => $data ) {
 			$acts[]  = '<tr>';

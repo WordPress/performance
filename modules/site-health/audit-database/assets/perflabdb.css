@@ -15,6 +15,7 @@ div.health-check-accordion.issues > div.health-check-accordion-panel > table.upg
 	padding-top: 5px;
 }
 div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.cmd > span.cmd,
+div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > thead > tr > th.cmd > img,
 div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.cmd > img {
 	padding-left: 0.5em;
 }

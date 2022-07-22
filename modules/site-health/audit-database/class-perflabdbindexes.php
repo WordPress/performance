@@ -86,21 +86,43 @@ class PerflabDbIndexes {
 		$label       = __( 'Database Index One', 'performance-lab' );
 		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
 			'label' => $label,
-			'test'  => array( $this, 'index_test' ),
+			'test'  => array( $this, 'index_upgrade_test' ),
 		);
 
 		return $tests;
 	}
 
 	/** Test need for fast indexes.
-	 *
-	 * @throws InvalidArgumentException When something goes wrong with DDL generation.
 	 */
-	public function index_test() {
+	public function index_upgrade_test() {
+		$action = 'fast';
 		if ( $this->skip_all_tests ) {
 			return array();
 		}
-		$result = $this->get_rekeying( $this->version->unconstrained );
+		$all_tables = $this->get_rekeying( $this->version->unconstrained, $action );
+
+		$is_big       = false;
+		$meta_size    = $this->utilities->get_threshold_value( 'meta_size' );
+		$content_size = $this->utilities->get_threshold_value( 'content_size' );
+
+		foreach ( $all_tables as $table => $info ) {
+			$size_threshold = str_ends_with( $table, 'meta' ) ? $meta_size : $content_size;
+			if ( $info['row_count'] > $size_threshold ) {
+				$is_big = true;
+			}
+		}
+
+		$statements = array();
+		foreach ( $all_tables as $table => $info ) {
+			if ( count( $info[ $action ] ) > 0 ) {
+				$ddl    = array();
+				$ddl [] = "ALTER TABLE $table /* {$info['row_count']} rows */";
+				foreach ( $info [ $action ] as $clause ) {
+					$ddl[] = $clause;
+				}
+				$statements [] = implode( PHP_EOL . '    ', $ddl ) . ';';
+			}
+		}
 		return array(); // TODO stub.
 	}
 

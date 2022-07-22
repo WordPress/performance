@@ -52,6 +52,8 @@ class PerflabDbUtilities {
 			'pool_size_fraction_min'     => 0.25,
 			'target_user_count'          => 20000,
 			'index_stop_list'            => 'woo_|crp_|yarpp_',
+			'meta_size'                  => 2000,
+			'content_size'               => 500,
 		);
 	}
 
