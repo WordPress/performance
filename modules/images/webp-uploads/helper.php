@@ -138,13 +138,11 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	$editor->resize( $width, $height, $crop );
 
 	if ( null === $destination_file_name ) {
+		$ext                   = pathinfo( $image_path, PATHINFO_EXTENSION );
+		$suffix                = $editor->get_suffix();
+		$suffix               .= "-{$ext}";
 		$extension             = explode( '|', $allowed_mimes[ $mime ] );
-		$destination_file_name = $editor->generate_filename( null, null, $extension[0] );
-	}
-
-	// Skip creation of duplicate WebP image if an image file already exists in the directory.
-	if ( file_exists( $destination_file_name ) ) {
-		return new WP_Error( 'webp_image_file_present', __( 'The WebP image already exists.', 'performance-lab' ) );
+		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
 	}
 
 	$image = $editor->save( $destination_file_name, $mime );

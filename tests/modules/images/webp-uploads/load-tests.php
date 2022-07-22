@@ -197,7 +197,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertStringEndsWith( '-scaled.jpg', get_attached_file( $attachment_id ) );
 		$this->assertImageHasSizeSource( $attachment_id, 'medium', 'image/webp' );
 		$this->assertStringEndsNotWith( '-scaled.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
-		$this->assertStringEndsWith( '-300x200.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
+		$this->assertStringEndsWith( '-300x200-jpg.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
 	}
 
 	/**
@@ -539,7 +539,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			$this->assertStringContainsString( $size['height'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString(
 				// Remove the extension from the file.
-				substr( $size['sources']['image/webp']['file'], 0, -4 ),
+				substr( $size['sources']['image/webp']['file'], 0, -10 ),
 				$size['sources']['image/jpeg']['file']
 			);
 		}
