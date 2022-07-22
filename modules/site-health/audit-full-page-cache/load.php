@@ -1,6 +1,6 @@
 <?php
 /**
- * Module Name: Audit Full Page Cache
+ * Module Name: Full Page Cache Health Check
  * Description: Adds a check for full page cache in Site Health status.
  * Experimental: No
  *
