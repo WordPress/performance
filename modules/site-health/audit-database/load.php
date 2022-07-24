@@ -23,6 +23,8 @@ function perflab_ad_add_database_performance_tests( $tests ) {
 	require_once __DIR__ . '/class-perflabdbindexes.php';
 
 	wp_enqueue_style( 'perflabdb', plugin_dir_url( __FILE__ ) . 'assets/perflabdb.css' );
+	wp_enqueue_script( 'perflabclipboard', includes_url() . 'js/clipboard.js' );
+	wp_enqueue_script( 'perflabdbclip', plugin_dir_url( __FILE__ ) . 'assets/clip.js', array( 'jquery', 'perflabclipboard' ) );
 
 	$pdm = new PerflabDbMetrics();
 	$pdp = new PerflabDbTests( $pdm );

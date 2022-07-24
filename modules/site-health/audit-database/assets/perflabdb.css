@@ -8,7 +8,7 @@ div.health-check-accordion.issues > div.health-check-accordion-panel > table.upg
 	border-bottom-style: solid;
 	border-bottom-width: 0.15rem;
 	vertical-align: top;
-	padding: 0.25rem 0.5rem;
+	padding: 0.25rem 0.25rem 0.25rem 0.5rem;
 }
 div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades  > thead > tr > th:first-child,
 div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades  > tbody > tr > td:first-child {
@@ -31,4 +31,30 @@ div.health-check-accordion.issues > div.health-check-accordion-panel > table.upg
 }
 div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.icon {
 	background: rgba(0,0,0,.03);
+}
+
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.template.visible {
+	display:block;
+	visibility:visible;
+}
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.hidden {
+	display:none;
+	visibility:hidden;
+}
+
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.template.hidden {
+	display:none;
+	visibility: hidden;
+}
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.acknowledgement {
+	position: relative;
+	background: rgba(1,1,1,.20);
+	border: 1px solid black;
+	border-radius: 0.1rem;
+	padding: 0.25rem;
+	color: black;
+	right: 5px;
+	top: 5px;
+	width: fit-content;
+	font-weight: 600;
 }

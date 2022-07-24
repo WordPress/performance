@@ -6,6 +6,7 @@
  * @group audit-database
  *
  * @since 1.4.0
+ * @noinspection SpellCheckingInspection
  */
 
 /**
@@ -131,7 +132,7 @@ class PerflabDbUtilities {
 		 * @param string $name The threshold name.
 		 */
 
-		$value = apply_filters( 'perflab_db_threshold', $this->thresholds[ $name ], $name );
+		$value = apply_filters( 'perflab_db_threshold', $this->thresholds[ $name ], $value );
 		if ( null === $value ) {
 			throw new InvalidArgumentException( $name . ': no such PerflabDbThreshold item' );
 		}
@@ -296,14 +297,25 @@ class PerflabDbUtilities {
 		$desc[] = '</p>';
 
 		/* handle the copy-to-clipboard UI HTML */
-		$clip        = plugin_dir_url( __FILE__ ) . 'assets/clip.svg';
-		$copy_txt    = esc_attr__( 'Copy to clipboard', 'performance-lab' );
-		$copyall_txt = esc_attr__( 'Copy all commands to clipboard', 'performance-lab' );
+		$clip          = plugin_dir_url( __FILE__ ) . 'assets/clip.svg';
+		$copy_txt      = esc_attr__( 'Copy to clipboard', 'performance-lab' );
+		$copied_txt    = esc_attr__( 'Copied', 'performance-lab' );
+		$copyall_txt   = esc_attr__( 'Copy all commands to clipboard', 'performance-lab' );
+		$copiedall_txt = 1 === count( $tables ) ? $copied_txt : sprintf(
+			/* translators: 1 number of command lines copied to clipboard */
+			esc_attr__( 'Copied %d commands', 'performance-lab' ),
+			count( $tables )
+		);
+
+		/* invisible template for acknowledgement popup, copied when needed in clip.js */
+		$acts[] = '<div id="acknowledgement_template" class="hidden"><div class="acknowledgement hidden">' . $copied_txt . '</div></div>';
+		/* invisible template for whole-panel acknowledgement popup, copied when needed in clip.js */
+		$acts[] = '<div id="acknowledgement_all_template" class="hidden"><div class="acknowledgement_all hidden">' . $copiedall_txt . '</div></div>';
 
 		$acts[] = '<table class="upgrades"><thead><tr>';
 		$acts[] = '<th scope="col" class=\"table\">' . $header_1 . '</th>';
 		$acts[] = '<th scope="col">' . $header_2 . '</th>';
-		$acts[] = '<th scope="col" class=\"icon\">' . "<img src=\"$clip\" alt=\"$copyall_txt\" title=\"$copyall_txt\" ></th>";
+		$acts[] = '<th scope="col" class=\"icon\">' . "<div><img src=\"$clip\" alt=\"$copyall_txt\" title=\"$copyall_txt\" class=\"clip\" ></div></th>";
 		$acts[] = '</tr></thead><tbody>';
 		foreach ( $tables as $table_name => $data ) {
 			$acts[]  = '<tr>';
@@ -313,7 +325,7 @@ class PerflabDbUtilities {
 			$acts[]  = call_user_func( $formatter, $table_name, $data );
 			$acts [] = '</pre>';
 			$acts[]  = '</td>';
-			$acts[]  = "<td class=\"icon\"><img src=\"$clip\" alt=\"$copy_txt\" title=\"$copy_txt\" ></td>";
+			$acts[]  = "<td class=\"icon\"><div><img src=\"$clip\" alt=\"$copy_txt\" title=\"$copy_txt\"  class=\"clip\"  ></div>	</td>";
 			$acts[]  = '</tr>';
 		}
 		$acts [] = '</tbody></table>';

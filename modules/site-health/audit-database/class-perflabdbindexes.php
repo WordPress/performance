@@ -479,7 +479,7 @@ class PerflabDbIndexes {
 		$stop_list = explode( '|', $this->utilities->get_threshold_value( 'index_stop_list' ) );
 		foreach ( $stop_list as $stop ) {
 			foreach ( $indexes as $index => $val ) {
-				if ( substr_compare( $index, $stop, null, true ) === 0 ) {
+				if ( strpos( $index, $stop ) === 0 ) {
 					unset( $indexes[ $index ] );
 				}
 			}
