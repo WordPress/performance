@@ -306,17 +306,22 @@ class PerflabDbUtilities {
 			count( $tables )
 		);
 
-		$acts   = array();
-		$acts[] = '<div class="panel">';
+		/*
+		 * ClipboardJS doesn't handle large batches of text. Sigh.
+		 * $header_icon = "<div><img src=\"$clip\" alt=\"$copyall_txt\" title=\"$copyall_txt\" class=\"clip\" ></div>";
+		 */
+		$header_icon = '';
+		$acts        = array();
+		$acts[]      = '<div class="panel">';
 		/* invisible template for acknowledgement popup, copied when needed in clip.js */
 		$acts[] = '<div class="hidden acknowledgement-template"><div class="acknowledgement hidden">' . $copied_txt . '</div></div>';
 		/* invisible template for whole-panel acknowledgement popup, copied when needed in clip.js */
-		$acts[] = '<div class="hidden acknowledgement-all-template"><div class="acknowledgement_all hidden">' . $copiedall_txt . '</div></div>';
+		$acts[] = '<div class="hidden acknowledgement-all-template"><div class="acknowledgement hidden">' . $copiedall_txt . '</div></div>';
 
 		$acts[] = '<table class="upgrades"><thead><tr>';
 		$acts[] = '<th scope="col" class=\"table\">' . $header_1 . '</th>';
 		$acts[] = '<th scope="col">' . $header_2 . '</th>';
-		$acts[] = '<th scope="col" class=\"icon\">' . "<div><img src=\"$clip\" alt=\"$copyall_txt\" title=\"$copyall_txt\" class=\"clip\" ></div></th>";
+		$acts[] = '<th scope="col" class=\"icon\">' . $header_icon . '</th>';
 		$acts[] = '</tr></thead><tbody>';
 		foreach ( $tables as $table_name => $data ) {
 			$acts[]  = '<tr>';

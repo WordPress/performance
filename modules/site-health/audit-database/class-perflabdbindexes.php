@@ -78,6 +78,10 @@ class PerflabDbIndexes {
 			'label' => $label,
 			'test'  => array( $this, 'index_upgrade_test' ),
 		);
+		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
+			'label' => $label,
+			'test'  => array( $this, 'index_revert_test' ),
+		);
 
 		return $tests;
 	}
@@ -130,6 +134,44 @@ class PerflabDbIndexes {
 
 	}
 
+	/** Test need for fast indexes.
+	 */
+	public function index_revert_test() {
+		if ( $this->skip_all_tests ) {
+			return array();
+		}
+		$action     = 'standard';
+		$statements = $this->get_dml( $action );
+
+		if ( 0 === count( $statements ) ) {
+			/* don't pester the user if they have standard keys */
+			return array();
+		}
+
+		global $wpdb;
+		$label = count( $wpdb->tables() ) === count( $statements )
+			? __( 'Your WordPress tables have high performance keys to revert if necessary', 'performance-lab' )
+			: __( 'Some WordPress tables have high performance keys to revert if necessary', 'performance-lab' );
+
+		$explanation = sprintf(
+		/* translators: 1 MySQL or MariaDB */
+			__( 'You have added high-performance keys to help %1$s retrieve your content more efficiently. If you wish you can revert them to WordPress\'s standard keys.', 'performance-lab' ),
+			$this->name
+		);
+		$exhortation = __( 'If you need to revert your high-performance keys follow these instructions. You don\'t usually need to do this.', 'performance-lab' );
+		/* translators: header of column */
+		$action_table_header_1 = __( 'Table Name', 'performance-lab' );
+		/* translators: header of column */
+		$action_table_header_2 = __( 'WP-CLI command to revert keys', 'performance-lab' );
+
+		list( $description, $action ) = $this->utilities->instructions( array( $this, 'format_rekey_command' ), $explanation, $exhortation, $action_table_header_1, $action_table_header_2, $statements );
+
+		return $this->utilities->test_result(
+			$label,
+			$description . $action
+		);
+
+	}
 	/** Format the DDL for rekeying.
 	 *
 	 * @param string $name Name of the table.
@@ -533,11 +575,11 @@ class PerflabDbIndexes {
 			if ( count( $info[ $action ] ) > 0 ) {
 				$ddl = array();
 				foreach ( $info [ $action ] as $clause ) {
-					$ddl[] = $clause;
+					$ddl[] = wordwrap( $clause, 64, PHP_EOL . '    ', false );
 				}
-				$separator             = ',' . PHP_EOL . '    ';
+				$separator             = ',' . PHP_EOL . '  ';
 				$statements [ $table ] = array(
-					'ddl'       => "ALTER TABLE $table" . PHP_EOL . '    ' . implode( $separator, $ddl ) . ';',
+					'ddl'       => "ALTER TABLE $table" . PHP_EOL . '  ' . implode( $separator, $ddl ) . ';',
 					'is_big'    => $is_big,
 					'row_count' => $info ['row_count'],
 				);
