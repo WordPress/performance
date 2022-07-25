@@ -1,60 +1,64 @@
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades {
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > table.upgrades {
 	border-spacing: 0;
 }
 
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades  > thead > tr > th,
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades  > tbody > tr > td {
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > table.upgrades  > thead > tr > th,
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > table.upgrades  > tbody > tr > td {
 	border-bottom-color: white;
 	border-bottom-style: solid;
 	border-bottom-width: 0.15rem;
 	vertical-align: top;
 	padding: 0.25rem 0.25rem 0.25rem 0.5rem;
 }
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades  > thead > tr > th:first-child,
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades  > tbody > tr > td:first-child {
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > table.upgrades  > thead > tr > th:first-child,
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > table.upgrades  > tbody > tr > td:first-child {
 	padding-right: 0.5em;
 }
 
 
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > thead > tr > th,
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td {
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > table.upgrades > thead > tr > th,
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > table.upgrades > tbody > tr > td {
 	text-align: left;
 }
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.cmd {
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > table.upgrades > tbody > tr > td.cmd {
 	background: rgba(0,0,0,.03);
 }
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.cmd > pre.item {
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > table.upgrades > tbody > tr > td.cmd > pre.item {
 	text-align: left;
 	font-family: Consolas, Monaco, monospace;
 	font-size: 90%;
 	margin: 0;
 }
-div.health-check-accordion.issues > div.health-check-accordion-panel > table.upgrades > tbody > tr > td.icon {
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > table.upgrades > tbody > tr > td.icon {
 	background: rgba(0,0,0,.03);
 }
 
-div.health-check-accordion.issues > div.health-check-accordion-panel > div.template.visible {
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > div.visible {
 	display:block;
 	visibility:visible;
 }
-div.health-check-accordion.issues > div.health-check-accordion-panel > div.hidden {
+
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > div.hidden {
 	display:none;
 	visibility:hidden;
 }
 
-div.health-check-accordion.issues > div.health-check-accordion-panel > div.template.hidden {
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel > div.template.hidden {
 	display:none;
 	visibility: hidden;
 }
-div.health-check-accordion.issues > div.health-check-accordion-panel > div.acknowledgement {
+
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel  {
 	position: relative;
-	background: rgba(1,1,1,.20);
+}
+
+div.health-check-accordion.issues > div.health-check-accordion-panel > div.panel  div.acknowledgement {
+	position: absolute;
+	background: black;
 	border: 1px solid black;
-	border-radius: 0.1rem;
+	border-radius: 0.3rem;
 	padding: 0.25rem;
-	color: black;
-	right: 5px;
-	top: 5px;
+	color: white;
 	width: fit-content;
-	font-weight: 600;
+	font-weight: 500;
 }

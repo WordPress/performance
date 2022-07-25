@@ -285,16 +285,15 @@ class PerflabDbUtilities {
 	 */
 	public function instructions( callable $formatter, $explanation, $exhortation, $header_1, $header_2, $tables ) {
 		/* these are fragments of HTML that will be concatenated with implode() */
-		$desc = array();
-		$acts = array();
+		$html = array();
 
-		$desc[] = '<p class="description">';
-		$desc[] = $explanation;
-		$desc[] = '</p>';
+		$html[] = '<p class="description">';
+		$html[] = $explanation;
+		$html[] = '</p>';
 
-		$desc[] = '<p class="description">';
-		$desc[] = $exhortation;
-		$desc[] = '</p>';
+		$html[] = '<p class="description">';
+		$html[] = $exhortation;
+		$html[] = '</p>';
 
 		/* handle the copy-to-clipboard UI HTML */
 		$clip          = plugin_dir_url( __FILE__ ) . 'assets/clip.svg';
@@ -307,10 +306,12 @@ class PerflabDbUtilities {
 			count( $tables )
 		);
 
+		$acts   = array();
+		$acts[] = '<div class="panel">';
 		/* invisible template for acknowledgement popup, copied when needed in clip.js */
-		$acts[] = '<div id="acknowledgement_template" class="hidden"><div class="acknowledgement hidden">' . $copied_txt . '</div></div>';
+		$acts[] = '<div class="hidden acknowledgement-template"><div class="acknowledgement hidden">' . $copied_txt . '</div></div>';
 		/* invisible template for whole-panel acknowledgement popup, copied when needed in clip.js */
-		$acts[] = '<div id="acknowledgement_all_template" class="hidden"><div class="acknowledgement_all hidden">' . $copiedall_txt . '</div></div>';
+		$acts[] = '<div class="hidden acknowledgement-all-template"><div class="acknowledgement_all hidden">' . $copiedall_txt . '</div></div>';
 
 		$acts[] = '<table class="upgrades"><thead><tr>';
 		$acts[] = '<th scope="col" class=\"table\">' . $header_1 . '</th>';
@@ -328,9 +329,9 @@ class PerflabDbUtilities {
 			$acts[]  = "<td class=\"icon\"><div><img src=\"$clip\" alt=\"$copy_txt\" title=\"$copy_txt\"  class=\"clip\"  ></div>	</td>";
 			$acts[]  = '</tr>';
 		}
-		$acts [] = '</tbody></table>';
+		$acts [] = '</tbody></table></div>';
 
-		return array( implode( '', $desc ), implode( '', $acts ) );
+		return array( implode( '', $html ), implode( '', $acts ) );
 	}
 
 }

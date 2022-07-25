@@ -52,7 +52,7 @@ class PerflabDbMetrics {
 	 *
 	 * @var array Table descriptions.
 	 */
-	private $table_info = array();
+	private $table_info_cache = array();
 
 	/** Memoized db_version result set.
 	 *
@@ -251,9 +251,9 @@ class PerflabDbMetrics {
 		}
 		sort( $hash );
 		$memo_hash = $in_clause . '|' . implode( '|', $hash );
-		if ( array_key_exists( $memo_hash, $this->table_info ) ) {
+		if ( array_key_exists( $memo_hash, $this->table_info_cache ) ) {
 			/* memoized result? */
-			return $this->table_info[ $memo_hash ];
+			return $this->table_info_cache[ $memo_hash ];
 		}
 
 		global $wpdb;
@@ -279,7 +279,7 @@ class PerflabDbMetrics {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$result = $wpdb->get_results( $format_query, OBJECT_K );
 		/* memoize the result */
-		$this->table_info [ $memo_hash ] = $result;
+		$this->table_info_cache [ $memo_hash ] = $result;
 
 		return $result;
 	}
@@ -295,6 +295,7 @@ class PerflabDbMetrics {
 	 * @return float Time taken in microseconds.
 	 */
 	public function server_response( $iterations, $timeout ) {
+		global $wpdb;
 		/* this test is heavy, so we'll cache its result for 5 min */
 		$result = get_transient( self::SERVER_RESPONSE_CACHE );
 		if ( is_numeric( $result ) ) {
@@ -302,6 +303,8 @@ class PerflabDbMetrics {
 		}
 		$start_all    = $this->now_microseconds();
 		$microseconds = array();
+		$table_info   = $this->get_table_info();
+		$max_post_id  = $table_info[ $wpdb->posts ]->row_count;
 		for ( $i = 0; $i < $iterations; $i ++ ) {
 			$start = $this->now_microseconds();
 			/* don't let this run forever */
@@ -309,10 +312,12 @@ class PerflabDbMetrics {
 				break;
 			}
 			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			$db    = new wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
-			$query = 'SELECT ' . rand( 1, 1000 );
+			$db     = new wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+			$random = rand( 1, $max_post_id );
+			$query  = "SELECT p.ID, p.post_name, p.post_title, p.guid, m.meta_key, m.meta_value FROM $wpdb->posts p JOIN $wpdb->postmeta m ON p.ID = m.post_id WHERE p.ID = %d ";
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$db->get_results( $query );
+			$db->get_results( $db->prepare( $query, $random ) );
+
 			$db->close();
 			unset( $db );
 			$microseconds [] = $this->now_microseconds() - $start;
