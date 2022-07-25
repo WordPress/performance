@@ -11,7 +11,7 @@
  *
  * @since 1.0.0
  *
- * @return int|false Number of total scripts or false if transient hasn't been set.
+ * @return int|bool Number of total scripts or false if transient hasn't been set.
  */
 function perflab_aea_get_total_enqueued_scripts() {
 	$enqueued_scripts      = false;
@@ -27,7 +27,7 @@ function perflab_aea_get_total_enqueued_scripts() {
  *
  * @since 1.0.0
  *
- * @return int|false Byte Total size or false if transient hasn't been set.
+ * @return int|bool Byte Total size or false if transient hasn't been set.
  */
 function perflab_aea_get_total_size_bytes_enqueued_scripts() {
 	$total_size            = false;
@@ -46,7 +46,7 @@ function perflab_aea_get_total_size_bytes_enqueued_scripts() {
  *
  * @since 1.0.0
  *
- * @return int|false Number of total styles or false if transient hasn't been set.
+ * @return int|bool Number of total styles or false if transient hasn't been set.
  */
 function perflab_aea_get_total_enqueued_styles() {
 	$enqueued_styles      = false;
@@ -62,7 +62,7 @@ function perflab_aea_get_total_enqueued_styles() {
  *
  * @since 1.0.0
  *
- * @return int|false Byte Total size or false if transient hasn't been set.
+ * @return int|bool Byte Total size or false if transient hasn't been set.
  */
 function perflab_aea_get_total_size_bytes_enqueued_styles() {
 	$total_size           = false;
