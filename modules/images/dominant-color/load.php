@@ -2,7 +2,7 @@
 /**
  * Module Name: Dominant Color
  * Description: Adds support to store dominant color for an image and create a placeholder background with that color.
- * Experimental: Yes
+ * Experimental: No
  *
  * @package performance-lab
  * @since 1.2.0
@@ -339,7 +339,7 @@ function wp_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
 /**
  * Gets the dominant color for an image attachment.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param int $attachment_id Attachment ID for image.
  * @return string|null Hex value of dominant color or null if not set.
@@ -363,7 +363,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 /**
  * Returns whether an image attachment has transparency.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param int $attachment_id Attachment ID for image.
  * @return bool|null Whether the image has transparency, or null if not set.
@@ -385,7 +385,7 @@ function dominant_color_has_transparency( $attachment_id ) {
 /**
  * Gets hex color from RGB.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param int $red Red 0-255.
  * @param int $green Green 0-255.

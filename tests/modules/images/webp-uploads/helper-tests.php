@@ -410,4 +410,101 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertIsArray( $transforms );
 		$this->assertSame( array( 'image/jpeg' => array( 'image/jpeg', 'image/webp' ) ), $transforms );
 	}
+
+	/**
+	 * @dataProvider data_provider_image_filesize
+	 *
+	 * @test
+	 */
+	public function it_should_discard_additional_image_if_larger_than_the_original_image( $original_filesize, $additional_filesize, $expected_status ) {
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
+
+		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
+		$this->assertSame( $output, $expected_status );
+	}
+
+	public function data_provider_image_filesize() {
+		return array(
+			array(
+				array( 'filesize' => 120101 ),
+				array( 'filesize' => 100101 ),
+				false,
+			),
+			array(
+				array( 'filesize' => 100101 ),
+				array( 'filesize' => 120101 ),
+				true,
+			),
+			array(
+				array( 'filesize' => 10101 ),
+				array( 'filesize' => 10101 ),
+				true,
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider data_provider_image_filesize
+	 *
+	 * @test
+	 */
+	public function it_should_never_discard_additional_image_if_filter_is_false( $original_filesize, $additional_filesize ) {
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+
+		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
+		$this->assertFalse( $output );
+	}
+
+	public function test_webp_uploads_in_frontend_body_without_wp_query() {
+		unset( $GLOBALS['wp_query'] );
+
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_with_feed() {
+		$this->mock_empty_action( 'template_redirect' );
+		$GLOBALS['wp_query']->is_feed = true;
+
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_without_template_redirect() {
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_before_template_redirect() {
+		$result = webp_uploads_in_frontend_body();
+		$this->mock_empty_action( 'template_redirect' );
+
+		$this->assertFalse( $result );
+	}
+
+	public function test_webp_uploads_in_frontend_body_after_template_redirect() {
+		$this->mock_empty_action( 'template_redirect' );
+		$result = webp_uploads_in_frontend_body();
+
+		$this->assertTrue( $result );
+	}
+
+	public function test_webp_uploads_in_frontend_body_within_wp_head() {
+		$this->mock_empty_action( 'template_redirect' );
+
+		// Call function within a 'wp_head' callback.
+		remove_all_actions( 'wp_head' );
+		$result = null;
+		add_action(
+			'wp_head',
+			function() use ( &$result ) {
+				$result = webp_uploads_in_frontend_body();
+			}
+		);
+		do_action( 'wp_head' );
+
+		$this->assertFalse( $result );
+	}
+
+	private function mock_empty_action( $action ) {
+		remove_all_actions( $action );
+		do_action( $action );
+	}
 }

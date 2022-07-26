@@ -240,3 +240,58 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 	// Return an empty array if no sources found.
 	return array();
 }
+
+/**
+ * Verifies if the request is for a frontend context within the <body> tag.
+ *
+ * @since 1.3.0
+ *
+ * @return bool True if in the <body> within a frontend request, false otherwise.
+ */
+function webp_uploads_in_frontend_body() {
+	global $wp_query;
+
+	// Check if this request is generally outside (or before) any frontend context.
+	if ( ! isset( $wp_query ) || defined( 'REST_REQUEST' ) || defined( 'XMLRPC_REQUEST' ) || is_feed() ) {
+		return false;
+	}
+
+	// Check if we're anywhere before 'template_redirect' or within the 'wp_head' action.
+	if ( ! did_action( 'template_redirect' ) || doing_action( 'wp_head' ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * Check whether the additional image is larger than the original image.
+ *
+ * @since 1.3.0
+ *
+ * @param array $original   An array with the metadata of the attachment.
+ * @param array $additional An array containing the filename and file size for additional mime.
+ * @return bool True if the additional image is larger than the original image, otherwise false.
+ */
+function webp_uploads_should_discard_additional_image_file( array $original, array $additional ) {
+	$original_image_filesize   = isset( $original['filesize'] ) ? (int) $original['filesize'] : 0;
+	$additional_image_filesize = isset( $additional['filesize'] ) ? (int) $additional['filesize'] : 0;
+	if ( $original_image_filesize > 0 && $additional_image_filesize > 0 ) {
+		/**
+		 * Filter whether WebP images that are larger than the matching JPEG should be discarded.
+		 *
+		 * By default the performance lab plugin will use the mime type with the smaller filesize
+		 * rather than defaulting to `webp`.
+		 *
+		 * @since 1.3.0
+		 *
+		 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
+		 */
+		$webp_discard_larger_images = apply_filters( 'webp_uploads_discard_larger_generated_images', true );
+
+		if ( $webp_discard_larger_images && $additional_image_filesize >= $original_image_filesize ) {
+			return true;
+		}
+	}
+	return false;
+}
