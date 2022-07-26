@@ -135,22 +135,34 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 			<?php echo esc_html( $module_data['name'] ); ?>
 		</legend>
 		<label for="<?php echo esc_attr( "{$base_id}_enabled" ); ?>">
-			<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" value="1"<?php checked( $enabled ); ?>>
-			<?php
-			if ( $module_data['experimental'] ) {
-				printf(
-					/* translators: %s: module name */
-					__( 'Enable %s <strong>(experimental)</strong>', 'performance-lab' ),
-					esc_html( $module_data['name'] )
-				);
-			} else {
-				printf(
-					/* translators: %s: module name */
-					__( 'Enable %s', 'performance-lab' ),
-					esc_html( $module_data['name'] )
-				);
-			}
-			?>
+			<?php if ( perflab_can_load_module( $module_slug ) ) { ?>
+				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" value="1"<?php checked( $enabled ); ?>>
+				<?php
+				if ( $module_data['experimental'] ) {
+					printf(
+						/* translators: %s: module name */
+						__( 'Enable %s <strong>(experimental)</strong>', 'performance-lab' ),
+						esc_html( $module_data['name'] )
+					);
+				} else {
+					printf(
+						/* translators: %s: module name */
+						__( 'Enable %s', 'performance-lab' ),
+						esc_html( $module_data['name'] )
+					);
+				}
+				?>
+			<?php } else { ?>
+				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" disabled>
+				<input type="hidden" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" value="<?php echo $enabled ? '1' : '0'; ?>">
+				<?php
+					printf(
+						/* translators: %s: module name */
+						__( '%s is already part of your WordPress version and therefore cannot be loaded as part of the plugin.', 'performance-lab' ),
+						esc_html( $module_data['name'] )
+					);
+				?>
+			<?php } ?>
 		</label>
 		<p id="<?php echo esc_attr( "{$base_id}_description" ); ?>" class="description">
 			<?php echo esc_html( $module_data['description'] ); ?>
@@ -396,7 +408,7 @@ function perflab_render_pointer() {
 	?>
 	<script id="perflab-admin-pointer" type="text/javascript">
 		jQuery( function() {
-			// Pointer Options
+			// Pointer Options.
 			var options = {
 				content: '<h3><?php echo esc_js( $heading ); ?></h3><p><?php echo wp_kses( $content, $wp_kses_options ); ?></p>',
 				position: {
