@@ -385,7 +385,7 @@ function perflab_admin_pointer( $hook_suffix ) {
 add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
 
 /**
- * Renders the Admin Pointer
+ * Renders the Admin Pointer.
  *
  * Handles the rendering of the admin pointer.
  *
