@@ -1,7 +1,7 @@
 <?php
 /**
  * WordPress Image Editor Class for Image Manipulation through GD
- * with dominant color detection.
+ * with dominant color detection
  *
  * @package performance-lab
  * @group dominant-color

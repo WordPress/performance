@@ -64,7 +64,7 @@ function webp_uploads_get_upload_image_mime_transforms() {
  * @param string $mime                  The target mime in which the image should be created.
  * @param string $destination_file_name The path where the file would be stored, including the extension. If empty, `generate_filename` is used to create the destination file name.
  *
- * @return array|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error.
+ * @return array|WP_Error An array with the file and filesize if the image was created correctly, otherwise a WP_Error.
  */
 function webp_uploads_generate_additional_image_source( $attachment_id, $image_size, array $size_data, $mime, $destination_file_name = null ) {
 	/**
@@ -80,7 +80,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	 * @param string              $image_size    The size name that would be used to create this image, out of the registered subsizes.
 	 * @param array               $size_data     An array with the dimensions of the image: height, width and crop {'height'=>int, 'width'=>int, 'crop'}.
 	 * @param string              $mime          The target mime in which the image should be created.
-	 * @return array|null|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error.
+	 * @return array|null|WP_Error array|null|WP_Error An array with the file and filesize if the image was created correctly, otherwise a WP_Error.
 	 */
 	$image = apply_filters( 'webp_uploads_pre_generate_additional_image_source', null, $attachment_id, $image_size, $size_data, $mime );
 	if ( is_wp_error( $image ) ) {
