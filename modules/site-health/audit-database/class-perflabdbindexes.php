@@ -100,7 +100,7 @@ class PerflabDbIndexes {
 				__( 'Your WordPress tables have high-performance keys', 'performance-lab' ),
 				sprintf(
 				/* translators: 1 MySQL or MariaDB */
-					__( 'High-performance keys improves performance of your %1$s server. You have already added them to your tables.', 'performance-lab' ),
+					__( 'High-performance keys improve performance of your %1$s server. You have already added them to your tables.', 'performance-lab' ),
 					$this->name
 				)
 			);

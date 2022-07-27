@@ -44,17 +44,35 @@ class PerflabDbUtilities {
 	 */
 	private function __construct() {
 		$this->thresholds = array(
+			/* 10 ms means server is very slow--critical */
 			'server_response_very_slow'  => 10000.0,
+			/* 2 ms means server is slow-suggestion */
 			'server_response_slow'       => 2000.0,
+			/* times to repeat the connect / query / disconnect operation */
 			'server_response_iterations' => 20.0,
+			/* how long before abandoning the repetition of connect / query / disconnect */
 			'server_response_timeout'    => 100000.0,
+			/* the desired storage engine and row format */
 			'target_storage_engine'      => 'InnoDB',
 			'target_row_format'          => 'Dynamic',
-			'pool_size_fraction_min'     => 0.25,
+			/* 0.5 here means suggest if the pool size is less than half the total table size */
+			'pool_size_fraction_min'     => 0.5,
+			/* suggest when there are more than this many users */
 			'target_user_count'          => 20000,
+			/* ignore indexes with names starting with these prefixes */
 			'index_stop_list'            => 'woo_|crp_|yarpp_',
+			/* whatever_meta tables considered "large" if they have this many rows or more */
 			'meta_size'                  => 2000,
+			/* other tables like wp_posts considered "large" if they have this many rows or more */
 			'content_size'               => 500,
+			/* for server metrics, don't compute differences if the time between samples is less than this */
+			'minimum_delta_timestamp'    => 600,
+			/* for server metrics, don't save a new sample until the older one is this old */
+			'maximum_delta_timestamp'    => 1800,
+			/* this is a terrible buffer cache hit rate */
+			'cache_hit_rate_terrible'    => 0.9,
+			/* this is a bad buffer cache hit rate */
+			'cache_hit_rate_bad'         => 0.99,
 		);
 	}
 
@@ -132,7 +150,7 @@ class PerflabDbUtilities {
 		 * @param string $name The threshold name.
 		 */
 
-		$value = apply_filters( 'perflab_db_threshold', $this->thresholds[ $name ], $value );
+		$value = apply_filters( 'perflab_db_threshold', $value, $name );
 		if ( null === $value ) {
 			throw new InvalidArgumentException( $name . ': no such PerflabDbThreshold item' );
 		}
@@ -272,9 +290,20 @@ class PerflabDbUtilities {
 		return $unit;
 	}
 
+	/** Round up a number to the next highest power of two.
+	 *
+	 * @param float|int $val  like 33000.
+	 *
+	 * @return int rounded up number like 65536.
+	 */
+	public function power_of_two_round_up( $val ) {
+		$val = $val <= 0 ? 1 : $val;
+		return intval( pow( 2, ceil( log( 0.0 + $val, 2 ) ) ) );
+	}
+
 	/** Get Instructions
 	 *
-	 * @param callable $formatter Function called with ($tablename, $contents).
+	 * @param callable $formatter Function to format WP-CLI command, called with ($tablename, $contents).
 	 * @param string   $explanation The problem.
 	 * @param string   $exhortation What to do about it.
 	 * @param string   $header_1 Column header for the first column of instructions.
@@ -308,15 +337,12 @@ class PerflabDbUtilities {
 
 		/*
 		 * ClipboardJS doesn't handle large batches of text. Sigh.
-		 * $header_icon = "<div><img src=\"$clip\" alt=\"$copyall_txt\" title=\"$copyall_txt\" class=\"clip\" ></div>";
+		 * $header_icon = "<div title=\"$copyall_txt\" data-normal=\"dashicons-clipboard\" data-ack=\"dashicons-yes\" class=\"dashicons dashicons-clipboard clip\" ></div>";
 		 */
 		$header_icon = '';
+		$icon        = "<div title=\"$copy_txt\" data-normal=\"dashicons-clipboard\" data-ack=\"dashicons-yes\" class=\"dashicons dashicons-clipboard clip\" ></div>";
 		$acts        = array();
 		$acts[]      = '<div class="panel">';
-		/* invisible template for acknowledgement popup, copied when needed in clip.js */
-		$acts[] = '<div class="hidden acknowledgement-template"><div class="acknowledgement hidden">' . $copied_txt . '</div></div>';
-		/* invisible template for whole-panel acknowledgement popup, copied when needed in clip.js */
-		$acts[] = '<div class="hidden acknowledgement-all-template"><div class="acknowledgement hidden">' . $copiedall_txt . '</div></div>';
 
 		$acts[] = '<table class="upgrades"><thead><tr>';
 		$acts[] = '<th scope="col" class=\"table\">' . $header_1 . '</th>';
@@ -331,7 +357,7 @@ class PerflabDbUtilities {
 			$acts[]  = call_user_func( $formatter, $table_name, $data );
 			$acts [] = '</pre>';
 			$acts[]  = '</td>';
-			$acts[]  = "<td class=\"icon\"><div><img src=\"$clip\" alt=\"$copy_txt\" title=\"$copy_txt\"  class=\"clip\"  ></div>	</td>";
+			$acts[]  = "<td class=\"icon\">$icon</td>";
 			$acts[]  = '</tr>';
 		}
 		$acts [] = '</tbody></table></div>';

@@ -17,32 +17,25 @@ jQuery( document ).ready(
 			}
 			return element;
 		}
-		function reveal (e, template_name) {
-			const trigger  = e.trigger;
-			const panel    = ancestor( trigger, 6 );
-			const template = panel.querySelector( 'div.' + template_name );
-			const ack      = template.firstChild.cloneNode( true );
-			ack.style.left = (trigger.x - 2 * trigger.width) + 'px';
-			ack.style.top  = (trigger.y - 5) + 'px';
-			ack.classList.remove( 'template' );
-			ack.classList.remove( 'hidden' );
-			ack.classList.add( 'visible' );
-			panel.appendChild( ack );
-
+		function acknowledge (e) {
+			const trigger = e.trigger;
+			trigger.classList.remove( trigger.dataset.normal );
+			trigger.classList.add( trigger.dataset.ack );
 			setTimeout(
-				function (ack) {
-					ack.remove();
+				function (trigger) {
+					trigger.classList.remove( trigger.dataset.ack );
+					trigger.classList.add( trigger.dataset.normal );
 				},
 				1500,
-				ack
+				trigger
 			)
 		}
 		if (ClipboardJS.isSupported()) {
 			const clipper = new ClipboardJS(
-				'table.upgrades tbody tr img.clip',
+				'table.upgrades tbody tr td.icon div.clip',
 				{
 					text: function (icon) {
-						const row  = ancestor( icon, 3 );
+						const row  = ancestor( icon, 2 );
 						const item = row.querySelector( 'td.cmd > pre.item' );
 						return jQuery( item ).text();
 					}
@@ -51,7 +44,7 @@ jQuery( document ).ready(
 			clipper.on(
 				'success',
 				function (e) {
-					reveal( e, 'acknowledgement-template' );
+					acknowledge( e );
 				}
 			);
 			const clip_all = new ClipboardJS(
@@ -71,7 +64,7 @@ jQuery( document ).ready(
 			clip_all.on(
 				'success',
 				function (e) {
-					reveal( e, 'acknowledgement-all-template' );
+					acknowledge( e );
 				}
 			);
 		} else {

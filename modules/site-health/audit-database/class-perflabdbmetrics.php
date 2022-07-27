@@ -17,8 +17,9 @@
  * @since 1.4.0
  */
 class PerflabDbMetrics {
-	const SERVER_RESPONSE_CACHE = 'performance_lab_sitehealth_server_response';
-	const SERVER_RESPONSE_TTL   = 5 * MINUTE_IN_SECONDS;
+	const SERVER_RESPONSE_CACHE       = 'perflab_sitehealth_server_response';
+	const PREVIOUS_TRACKING_VARIABLES = 'perflab_sitehealth_server_tracking';
+	const SERVER_RESPONSE_TTL         = 5 * MINUTE_IN_SECONDS;
 
 	/** First eligible db version, the advent of utfmb4 in WordPress databases.
 	 *
@@ -60,6 +61,17 @@ class PerflabDbMetrics {
 	 */
 	private $db_version;
 
+	/** Cache for get_variable().
+	 *
+	 * @var array Associative array, in which keys are Status or Variable names
+	 */
+	private $variable_cache = array();
+	/** List of MariaDB / MySQL system status variables we need.
+	 *
+	 * @var string[] Status and variable names. NOTE WELL. Status items start with a capital letter, and variables with lowercase.
+	 */
+	private $tracking_variables_we_need;
+
 	/** Constructor.
 	 */
 	public function __construct() {
@@ -69,6 +81,22 @@ class PerflabDbMetrics {
 			$this->has_hr_time = false;
 		}
 		$this->util = PerflabDbUtilities::get_instance();
+
+		$this->tracking_variables_we_need = array(
+			'innodb_buffer_pool_size',
+			'Innodb_buffer_pool_read_requests',
+			'Innodb_buffer_pool_reads',
+			'Innodb_buffer_pool_wait_free',
+			'key_buffer_size',
+			'Key_read_requests',
+			'Key_reads',
+			'Uptime',
+			'Questions',
+			'Bytes_received',
+			'Bytes_sent',
+			'max_connections',
+			'Connection_errors_max_connections',
+		);
 	}
 
 	/** Get current time (ref UNIX era) in microseconds.
@@ -82,6 +110,85 @@ class PerflabDbMetrics {
 		} catch ( Exception $ex ) {
 			return time() * 1000000.;
 		}
+	}
+
+	/** Retrieve current values of tracking variables.
+	 *
+	 * Variable names beginning with uppercase are STATUS items.
+	 *
+	 * @return array Associative array: name => value
+	 */
+	public function get_tracking_variables() {
+		$result               = array();
+		$result ['timestamp'] = time();
+		/* this will get replaced */
+		$result ['delta_timestamp'] = time();
+		foreach ( $this->tracking_variables_we_need as $name ) {
+			$result[ $name ] = $this->get_variable( $name );
+		}
+		$result ['start_timestamp'] = time() - $result ['Uptime'];
+		return $result;
+	}
+
+	/** Retrieve differences between two sets of tracking variables.
+	 *
+	 * @param array $later The later-in-time set.
+	 * @param array $earlier The earlier-in-time set.
+	 *
+	 * @return array
+	 */
+	public function tracking_variable_diffs( $later, $earlier ) {
+		$result = array();
+
+		/* compute time difference */
+		$result ['previous_timestamp'] = $earlier ['timestamp'];
+		$result ['delta_timestamp']    = $later ['timestamp'] - $earlier['timestamp'];
+		$result ['timestamp']          = $later['timestamp'];
+
+		/* compute differences in accumulating Status items */
+		foreach ( $this->tracking_variables_we_need as $name ) {
+			$first_letter = substr( $name, 0, 1 );
+			if ( ctype_upper( $first_letter && is_numeric( $later [ $name ] ) ) ) {
+				/* is Status, not Variable */
+				$result [ $name ] = $later[ $name ] - $earlier [ $name ];
+			} else {
+				$result [ $name ] = $later[ $name ];
+			}
+		}
+		return $result;
+	}
+
+	/** Get changes in tracking variables from previous sample or server boot.
+	 *
+	 * The idea is to give us the change in Status items like Questions, Key_Read_Requests, and
+	 * so forth since some sample gathered in the past. If no sample has already been gathered
+	 * on the site, we'll use the values since SQL server bootup.
+	 *
+	 * To get a rate. for example Questions / second, do
+	 *
+	 * $items ['Questions'] / $items ['Uptime']
+	 *
+	 * @return array Associative array: name => value.
+	 */
+	public function tracking_variable_changes() {
+		$now                     = time();
+		$current                 = $this->get_tracking_variables();
+		$minimum_delta_timestamp = $this->util->get_threshold_value( 'minimum_delta_timestamp' );
+		$earlier                 = get_option( self::PREVIOUS_TRACKING_VARIABLES );
+		if ( ! $earlier || ( $now - $earlier ['timestamp'] ) < $minimum_delta_timestamp ) {
+			/* nothing saved: we'll use whatever is on the server since it started */
+			$diff            = $current;
+			$diff ['source'] = 'server';
+		} else {
+			$diff            = $this->tracking_variable_diffs( $current, $earlier );
+			$diff ['source'] = 'sample';
+		}
+		$maximum_delta_timestamp = $this->util->get_threshold_value( 'maximum_delta_timestamp' );
+		if ( ! $earlier || ( $now - $earlier ['timestamp'] ) >= $maximum_delta_timestamp ) {
+			update_option( self::PREVIOUS_TRACKING_VARIABLES, $current );
+		}
+
+		return $diff;
 	}
 
 	/** Get version information from the database server.
@@ -194,20 +301,35 @@ class PerflabDbMetrics {
 		return $this->db_version;
 	}
 
-	/** Get a global variable from the DBMS.
+	/** Get a global server variable or status from the DBMS.
 	 *
-	 * @param string $name Name of variable.
+	 * @param string $name Name of variable or status. Status names start with a capital letter.
 	 *
 	 * @return mixed|string Value of variable. 0 if nothing found.
 	 * @throws InvalidArgumentException Notice about variable lookup failure.
 	 */
 	public function get_variable( $name ) {
 		global $wpdb;
-		$var = $wpdb->get_results( $wpdb->prepare( 'SHOW VARIABLES LIKE %s', $name ), ARRAY_N );
-		if ( $var && is_array( $var ) && 1 === count( $var ) ) {
-			$var = $var[0];
+		if ( isset( $this->variable_cache [ $name ] ) ) {
+			return $this->variable_cache [ $name ];
+		}
+		$first_letter = substr( $name, 0, 1 );
+		$query        = ctype_upper( $first_letter )
+			? 'SHOW STATUS LIKE %s'
+			: 'SHOW VARIABLES LIKE %s';
 
-			return $var[1];
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$var = $wpdb->get_results( $wpdb->prepare( $query, $name ), ARRAY_N );
+		if ( $var && is_array( $var ) && 1 === count( $var ) ) {
+			/* dive into the result set and get the value we want */
+			$var = $var[0];
+			$var = $var[1];
+
+			if ( is_numeric( $var ) ) {
+				$var = 0 + $var;
+			}
+			$this->variable_cache [ $name ] = $var;
+			return $var;
 		} elseif ( $var && is_array( $var ) && 0 === count( $var ) ) {
 			throw new InvalidArgumentException( $name . ': no such MySQL variable' );
 		} elseif ( $var && is_array( $var ) && count( $var ) > 1 ) {
@@ -291,10 +413,11 @@ class PerflabDbMetrics {
 	 *
 	 * @param number $iterations how many times to run the operation.
 	 * @param number $timeout milliseconds before we stop rerunning.
+	 * @param number $percentile Fraction for percentile reporting, default 0.90.
 	 *
 	 * @return float Time taken in microseconds.
 	 */
-	public function server_response( $iterations, $timeout ) {
+	public function server_response( $iterations, $timeout, $percentile = 0.90 ) {
 		global $wpdb;
 		/* this test is heavy, so we'll cache its result for 5 min */
 		$result = get_transient( self::SERVER_RESPONSE_CACHE );
@@ -323,7 +446,8 @@ class PerflabDbMetrics {
 			$microseconds [] = $this->now_microseconds() - $start;
 		}
 
-		$result = $this->util->percentile( $microseconds, 0.90 );
+		$result = $this->util->percentile( $microseconds, $percentile );
+		/* stash this for a while; it's a bit expensive to run. */
 		set_transient( self::SERVER_RESPONSE_CACHE, $result, self::SERVER_RESPONSE_TTL );
 
 		return $result;

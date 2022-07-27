@@ -11,4 +11,5 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
+delete_option( 'perflab_sitehealth_server_tracking' );
 delete_option( 'perflab_modules_settings' );

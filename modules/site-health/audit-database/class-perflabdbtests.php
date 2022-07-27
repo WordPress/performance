@@ -98,6 +98,11 @@ class PerflabDbTests {
 
 		$tests['direct'][ 'database_performance' . $test_number ++ ] = array(
 			'label' => $label,
+			'test'  => array( $this, 'myisam_pool_test' ),
+		);
+
+		$tests['direct'][ 'database_performance' . $test_number ++ ] = array(
+			'label' => $label,
 			'test'  => array( $this, 'too_many_users_test' ),
 		);
 
@@ -129,7 +134,7 @@ class PerflabDbTests {
 					$this->name,
 					$this->version->version
 				),
-				__( 'For best performance we recommend running MySQL version 5.7 or higher or MariaDB 10.3 or higher. Contact your web hosting company and ask them to upgrade their server.', 'performance-lab' ),
+				__( 'For best performance we recommend running MySQL version 5.7 or higher or MariaDB 10.3 or higher. Contact your hosting provider and ask them to upgrade their server.', 'performance-lab' ),
 				'recommended'
 			);
 		}
@@ -204,7 +209,7 @@ class PerflabDbTests {
 				__( 'Your plugin tables use the modern storage format', 'performance-lab' ),
 				sprintf(
 				/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic */
-					__( 'Your tables use the %1$s storage engine and the %2$s row format for good database performance.', 'performance-lab' ),
+					__( 'Tables managed by your plugins use the %1$s storage engine and the %2$s row format for good database performance.', 'performance-lab' ),
 					$target_storage_engine,
 					$target_row_format
 				)
@@ -251,15 +256,17 @@ class PerflabDbTests {
 			$too_small = true;
 			$msgs[]    = '<p>' . sprintf(
 				/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
-				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s, but %2$s\'s buffer size (\'Key_buffer_size\') is only %3$s. That may be inadequate.', 'performance-lab' ),
+				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s, but %2$s\'s buffer size (\'Key_buffer_size\') is only %3$s. That may be too small.', 'performance-lab' ),
 				$this->utilities->format_bytes( $myisam_size ),
 				$this->name,
 				$this->utilities->format_bytes( $myisam_pool_size )
 			) . '</p>';
+		} elseif ( 0 === $myisam_size ) {
+			/* empty, intentionally. Don't pester the user about MyISAM here if they don't use it. */
 		} else {
 			$msgs[] = '<p>' . sprintf(
 				/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
-				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s and %2$s\'s key buffer size is %3$s. That is adequate in most cases.', 'performance-lab' ),
+				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s and %2$s\'s key buffer size is %3$s. That is big enough in most cases.', 'performance-lab' ),
 				$this->utilities->format_bytes( $myisam_size ),
 				$this->name,
 				$this->utilities->format_bytes( $myisam_pool_size )
@@ -269,7 +276,7 @@ class PerflabDbTests {
 			$too_small = true;
 			$msgs[]    = '<p>' . sprintf(
 				/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
-				__( 'Your InnoDB tables (the modern storage engine) use %1$s, but %2$s\'s buffer pool size (\'Innodb_buffer_pool_size\') is only %3$s. That may be inadequate.', 'performance-lab' ),
+				__( 'Your InnoDB tables (the modern storage engine) use %1$s, but %2$s\'s buffer pool size (\'Innodb_buffer_pool_size\') is only %3$s. That may be too small.', 'performance-lab' ),
 				$this->utilities->format_bytes( $innodb_size ),
 				$this->name,
 				$this->utilities->format_bytes( $innodb_pool_size )
@@ -277,7 +284,7 @@ class PerflabDbTests {
 		} else {
 			$msgs[] = '<p>' . sprintf(
 				/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
-				__( 'Your InnoDB tables (the modern storage engine) use %1$s and %2$s\'s buffer pool size is %3$s. That is adequate in most cases.', 'performance-lab' ),
+				__( 'Your InnoDB tables (the modern storage engine) use %1$s and %2$s\'s buffer pool size is %3$s. That is big enough in most cases.', 'performance-lab' ),
 				$this->utilities->format_bytes( $innodb_size ),
 				$this->name,
 				$this->utilities->format_bytes( $innodb_pool_size )
@@ -292,7 +299,7 @@ class PerflabDbTests {
 				),
 				sprintf(
 				/* translators: 1 server name like MariaDB */
-					'<p>' . __( 'Your %1$s buffer pool is probably too small. That makes it take longer to retrieve your content, especially when your site is busy.', 'performance-lab' ),
+					'<p>' . __( 'Your %1$s buffer pool is too small. That makes it take longer to retrieve your content, especially when your site is busy.', 'performance-lab' ),
 					$this->name
 				) . '</p><p>' . implode( ' ', $msgs ) . '</p>',
 				__( 'Consider asking your hosting provider to upgrade your SQL server\'s buffer pool size.', 'performance-lab' ),
@@ -303,17 +310,165 @@ class PerflabDbTests {
 			return $this->utilities->test_result(
 				sprintf(
 				/* translators: 1 server name like MariaDB */
-					__( 'Your %1$s SQL server buffer pool appears to be adequate for your data', 'performance-lab' ),
+					__( 'Your %1$s SQL server buffer pool is big enough for your data', 'performance-lab' ),
 					$this->name
 				),
 				implode( '', $msgs ),
 				sprintf(
 				/* translators: 1 server name like MariaDB */
-					__( 'Some hosts share their %1$s SQL servers among multiple WordPress sites. In that case the shared buffer pool may still be inadequate. Site Health cannot detect shared SQL servers.', 'performance-lab' ),
+					__( 'Some hosting providers share their %1$s servers among multiple WordPress sites. In that case the buffer pool you share with those other sites may still be inadequate. Site Health cannot detect shared %1$s servers.', 'performance-lab' ),
 					$this->name
 				)
 			);
 		}
+	}
+
+	/** Check data size against buffer pool size
+	 *
+	 * @return array
+	 */
+	public function myisam_pool_test() {
+		if ( $this->skip_all_tests ) {
+			return array();
+		}
+		$myisam_size = 0;
+		foreach ( $this->table_stats as $stat ) {
+			/* myisam only buffers indexes inside itself */
+			if ( 'myisam' === strtolower( $stat->engine ) ) {
+				$myisam_size += $stat->index_bytes;
+			}
+		}
+
+		$myisam_size_display = $this->utilities->format_bytes( $myisam_size );
+
+		$track                   = $this->metrics->tracking_variable_changes();
+		$key_buffer_size         = $track ['key_buffer_size'];
+		$cache_size              = $key_buffer_size;
+		$cache_size_display      = $this->utilities->format_bytes( $cache_size );
+		$cache_hit_rate_bad      = $this->utilities->get_threshold_value( 'cache_hit_rate_bad' );
+		$target_hit_rate_display = number_format_i18n( $cache_hit_rate_bad * 100, 1 ) . '%';
+
+		if ( $track ['Key_read_requests'] > 0 && $myisam_size > 0 ) {
+			/* MyISAM is in play */
+			list( $hit_rate_display, $terrible, $good ) = $this->figure_hit_rate( $track );
+
+			if ( ! $good ) {
+				$target_key_buffer_size = $this->utilities->power_of_two_round_up( $myisam_size );
+				$target_key_buffer_size = $terrible ? $target_key_buffer_size * 2 : $target_key_buffer_size;
+				if ( $target_key_buffer_size < $key_buffer_size ) {
+					$target_key_buffer_size = $terrible ? $key_buffer_size * 4 : $key_buffer_size * 2;
+					$target_key_buffer_size = $this->utilities->power_of_two_round_up( $target_key_buffer_size );
+				}
+				$target_key_buffer_size_display = $this->utilities->format_bytes( $target_key_buffer_size );
+
+				/* translators: 1; size like 64MiB  2: size like 64Mib  3: percent like 81.2%  4: percent like 81.2% */
+				$msg     = __( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s. Your MyISAM key buffer size is %2$s and its hit rate is too low at %3$s. An acceptable hit rate is %4$s. Your tables ', 'performance-lab' );
+				$msg     = sprintf( $msg, $cache_size_display, $myisam_size_display, $hit_rate_display, $target_hit_rate_display );
+				$action  = __( 'Consider asking your hosting provider to', 'performance-lab' ) . ' ';
+				$action .= $this->get_buffer_recommendation( 'key_buffer_size', $key_buffer_size, $target_key_buffer_size );
+				if ( $terrible ) {
+					return $this->utilities->test_result(
+						sprintf(
+						/* translators: 1 server name like MariaDB */
+							__( 'Your %1$s MyISAM key buffer size is far too small', 'performance-lab' ),
+							$this->name
+						),
+						$msg,
+						$action,
+						'critical',
+						'red'
+					);
+				}
+
+				return $this->utilities->test_result(
+					sprintf(
+					/* translators: 1 server name like MariaDB */
+						__( 'Your %1$s MyISAM key buffer size is too small', 'performance-lab' ),
+						$this->name
+					),
+					$msg,
+					$action,
+					'recommended',
+					'orange'
+				);
+			}
+		} elseif ( $myisam_size * 2 < $cache_size && $cache_size > 65536 * 4 && 0 === $track ['Key_read_requests'] ) {
+			$target_size = $this->utilities->power_of_two_round_up( $myisam_size );
+			$target_size = max( $target_size, 65536 );
+			if ( $myisam_size <= 0 ) {
+				/* translators: 1: size like 64Mib  2: MySQL or MariaDB  */
+				$msg = __( 'You do not use MyISAM (the obsolete storage engine) for any tables. But your MyISAM key buffer size is %1$s. That may be larger than you need, wasting RAM space in your %2$s server.', 'performance-lab' );
+				$msg = sprintf( $msg, $cache_size_display, $this->name );
+			} else {
+				/* translators: 1; size like 64MiB  2: size like 64Mib 3: MySQL or MariaDB  */
+				$msg = __( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s. But your MyISAM key buffer size is %2$s. That may be larger than you need, wasting RAM space in your %2$s server.', 'performance-lab' );
+				$msg = sprintf( $msg, $myisam_size_display, $cache_size_display, $this->name );
+			}
+			$action  = __( 'To save RAM in your SQL server, consider asking your hosting provider to', 'performance-lab' ) . ' ';
+			$action .= $this->get_buffer_recommendation( 'key_buffer_size', $cache_size, $target_size );
+
+			return $this->utilities->test_result(
+				sprintf(
+				/* translators: 1 server name like MariaDB */
+					__( 'Your %1$s MyISAM key buffer size may be too large', 'performance-lab' ),
+					$this->name
+				),
+				$msg,
+				$action,
+				'recommended',
+				'orange'
+			);
+		} elseif ( $myisam_size * 2 < $cache_size && $cache_size > 65536 * 4 && $track ['Key_read_requests'] > 0 ) {
+			/* we don't use much, if any MyISAM, but check the server hit rate. */
+			list( $hit_rate_display, $terrible, $good ) = $this->figure_hit_rate( $track );
+
+			if ( ! $good ) {
+
+				$target_key_buffer_size = $terrible ? $key_buffer_size * 4 : $key_buffer_size * 2;
+				$target_key_buffer_size = $this->utilities->power_of_two_round_up( $target_key_buffer_size );
+
+				/* translators: 1: MariaDB or MySQL 2; size like 64MiB  3: percent like 81.2%  4: percent like 81.2% 5: MySQL or MariaDB  */
+				$msg    = __( 'Your %1$s server\'s MyISAM key buffer size is %2$s and its hit rate is too low at %3$s. An acceptable hit rate is %4$s.', 'performance-lab' );
+				$msg    = sprintf( $msg, $this->name, $cache_size_display, $hit_rate_display, $target_hit_rate_display );
+				$action = sprintf(
+				/* translators: 1: MySQL or MariaDB  */
+					__( 'This may be because your hosting provider shares your %1$s server with other customers. Consider asking your hosting provider to', 'performance-lab' ),
+					$this->name
+				);
+				$action .= ' ';
+				$action .= $this->get_buffer_recommendation( 'key_buffer_size', $key_buffer_size, $target_key_buffer_size );
+
+				if ( $terrible ) {
+					return $this->utilities->test_result(
+						sprintf(
+						/* translators: 1 server name like MariaDB */
+							__( 'Your %1$s MyISAM key buffer is far too small', 'performance-lab' ),
+							$this->name
+						),
+						$msg,
+						$action,
+						'critical',
+						'red'
+					);
+				}
+
+				return $this->utilities->test_result(
+					sprintf(
+					/* translators: 1 server name like MariaDB */
+						__( 'Your %1$s MyISAM key buffer may be too small', 'performance-lab' ),
+						$this->name
+					),
+					$msg,
+					$action,
+					'recommended',
+					'orange'
+				);
+			}
+		}
+
+		/* the suggestion to upgrade to InnoDB is in another test */
+
+		return array();
 	}
 
 	/** Check for a very large number of users.
@@ -424,7 +579,19 @@ class PerflabDbTests {
 		/* translators: header of column */
 		$action_table_header_2 = __( 'WP-CLI command to upgrade', 'performance-lab' );
 
-		list( $description, $action ) = $this->utilities->instructions( array( $this, 'format_upgrade_command' ), $explanation, $exhortation, $action_table_header_1, $action_table_header_2, $table_metrics, $target_storage_engine, $target_row_format );
+		list( $description, $action ) = $this->utilities->instructions(
+			array(
+				$this,
+				'format_upgrade_command',
+			),
+			$explanation,
+			$exhortation,
+			$action_table_header_1,
+			$action_table_header_2,
+			$table_metrics,
+			$target_storage_engine,
+			$target_row_format
+		);
 
 		return $this->utilities->test_result(
 			$label,
@@ -444,8 +611,52 @@ class PerflabDbTests {
 	public function format_upgrade_command( $table_name ) {
 		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
 		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
-		return "wp db query \"ALTER TABLE  $table_name ENGINE=$target_storage_engine ROW_FORMAT=$target_row_format\"";
+
+		return "wp db query \"ALTER TABLE $table_name ENGINE=$target_storage_engine ROW_FORMAT=$target_row_format\"";
 	}
 
+	/** Work out cache-hit-rate stuff.
+	 *
+	 * @param array $track Statistics block.
+	 *
+	 * @return array
+	 */
+	private function figure_hit_rate( array $track ) {
+		$cache_hit_rate_terrible = $this->utilities->get_threshold_value( 'cache_hit_rate_terrible' );
+		$cache_hit_rate_bad      = $this->utilities->get_threshold_value( 'cache_hit_rate_bad' );
+		$hit_rate                = 1.0 - ( $track['Key_reads'] / $track ['Key_read_requests'] );
+		$hit_rate_display        = number_format_i18n( $hit_rate * 100, 1 ) . '%';
+		$terrible                = $hit_rate <= $cache_hit_rate_terrible;
+		$bad                     = $hit_rate <= $cache_hit_rate_bad;
+		$good                    = ! ( $terrible || $bad );
+
+		return array( $hit_rate_display, $terrible, $good );
+	}
+
+	/** Get a string with a buffer-size change recommendation.
+	 *
+	 * It looks like
+	 *
+	 * increase your MySQL server's key_buffer_size from 16384 (16KiB) to 32768 (32Kib).
+	 *
+	 * @param string $variable_name The name of the variable, like innodb_buffer_pool_size.
+	 * @param int    $buffer_size The present buffer size.
+	 * @param int    $target_buffer_size The desired buffer size.
+	 *
+	 * @return string
+	 */
+	private function get_buffer_recommendation( $variable_name, $buffer_size, $target_buffer_size ) {
+		if ( $buffer_size === $target_buffer_size ) {
+			return '';
+		}
+		$buffer_size_display        = $this->utilities->format_bytes( $buffer_size );
+		$target_buffer_size_display = $this->utilities->format_bytes( $target_buffer_size );
+		$fmt                        = $target_buffer_size > $buffer_size_display
+			/* translators: 1: MySQL or MariaDB 2: variable name like key_buffer_size 3: original size like 16384 4: original size like 16KiB 5: target size like 32765 6: target size like 32KiB */
+			? __( 'increase your %1$s server\'s %2$s variable from %3$d (%4$s) to at least %5$d (%6$s). ', 'performance-lab' )
+			/* translators: 1: MySQL or MariaDB 2: variable name like key_buffer_size 3: original size like 16384 4: original size like 16KiB 5: target size like 32765 6: target size like 32KiB */
+			: __( 'decrease your %1$s server\'s %2$s variable from %3$d (%4$s) to %5$d (%6$s). ', 'performance-lab' );
+		return sprintf( $fmt, $this->name, $variable_name, $buffer_size, $buffer_size_display, $target_buffer_size, $target_buffer_size_display );
+	}
 
 }
