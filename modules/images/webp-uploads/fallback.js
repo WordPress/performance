@@ -4,35 +4,44 @@ window.wpPerfLab = window.wpPerfLab || {};
 	window.wpPerfLab.webpUploadsFallbackWebpImages = function( media ) {
 		for ( var i = 0; i < media.length; i++ ) {
 			try {
+				var image         = media[ i ],
+					media_details = image.media_details,
+					media_sources = media_details.sources,
+					sizes         = media_details.sizes,
+					sizes_keys    = Object.keys( sizes ),
+					images        = document.querySelectorAll( 'img.wp-image-' + image.id );
 
-				var images = document.querySelectorAll( 'img.wp-image-' + media[ i ].id ),
-					media_sources = media[ i ].media_details.sources;
 				for ( var j = 0; j < images.length; j++ ) {
 
-					if ( ! media_sources || ! media_sources['image/jpeg'] ) {
+					var src    = images[ j ].src,
+						srcset = images[ j ].getAttribute( 'srcset' );
+
+					// If there are no sizes, then replace src through sources, there is nothing more to replace.
+					if ( media_sources ) {
+						src = src.replace( media_sources['image/webp'].file, media_sources['image/jpeg'].file );
+						images[ j ].setAttribute( 'src', src );
+						break;
+					}
+
+					// If the full image has no JPEG version available, no sub-size will have JPEG available either.
+					if ( ! sizes.full.sources['image/jpeg'] ) {
 						continue;
 					}
 
-					var srcset = images[ j ].getAttribute( 'srcset' ),
-						sizes = media[ i ].media_details.sizes,
-						sizes_keys = Object.keys( sizes ),
-						flag = true;
-
-					// If a full image is present in srcset, it should be updated.
-					if ( srcset && media_sources['image/webp'] ) {
-						srcset = srcset.replace( media_sources['image/webp'].file, media_sources['image/jpeg'].file );
-					}
-
 					for ( var k = 0; k < sizes_keys.length; k++ ) {
-						var media_sizes_sources = media[ i ].media_details.sizes[ sizes_keys[ k ] ].sources;
+						var media_sizes_sources = sizes[ sizes_keys[ k ] ].sources;
 						if ( ! media_sizes_sources || ! media_sizes_sources['image/webp'] || ! media_sizes_sources['image/jpeg'] ) {
 							continue;
 						}
 
 						// Check to see if the image src has any size set, then update it.
-						if ( flag && media_sizes_sources['image/webp'].source_url === images[ j ].src ) {
-							images[ j ].src = media_sizes_sources['image/jpeg'].source_url;
-							flag = false;
+						if ( media_sizes_sources['image/webp'].source_url === src ) {
+							src = media_sizes_sources['image/jpeg'].source_url;
+
+							// If there is no srcset and the src has been replaced, there is nothing more to replace.
+							if ( ! srcset ) {
+								break;
+							}
 						}
 
 						if ( srcset && media_sizes_sources['image/webp'] ) {
@@ -44,9 +53,8 @@ window.wpPerfLab = window.wpPerfLab || {};
 						images[ j ].setAttribute( 'srcset', srcset );
 					}
 
-					// If the src has not been updated, then update the image src with the sources.
-					if ( flag && media_sources['image/webp'] ) {
-						images[ j ].src = images[ j ].src.replace( media_sources['image/webp'].file, media_sources['image/jpeg'].file );
+					if ( src ) {
+						images[ j ].setAttribute( 'src', src );
 					}
 				}
 			} catch ( e ) {

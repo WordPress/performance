@@ -23,20 +23,30 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 	}
 
 	$metadata = wp_get_attachment_metadata( $post->ID );
-	foreach ( $data['media_details']['sizes'] as $size => $details ) {
+	foreach ( $data['media_details']['sizes'] as $size => &$details ) {
 		if ( empty( $metadata['sizes'][ $size ]['sources'] ) || ! is_array( $metadata['sizes'][ $size ]['sources'] ) ) {
 			continue;
 		}
-
 		$sources   = array();
-		$directory = dirname( $data['media_details']['sizes'][ $size ]['source_url'] );
+		$directory = dirname( $details['source_url'] );
 		foreach ( $metadata['sizes'][ $size ]['sources'] as $mime => $mime_details ) {
+			$source_url                  = "{$directory}/{$mime_details['file']}";
+			$mime_details['source_url']  = $source_url;
+			$details['sources'][ $mime ] = $mime_details;
+		}
+	}
+
+	$full_src = wp_get_attachment_image_src( $post->ID, 'full' );
+
+	if ( ! empty( $full_src ) ) {
+		$directory = dirname( $full_src[0] );
+		foreach ( $data['media_details']['sources'] as $mime => &$mime_details ) {
 			$source_url                 = "{$directory}/{$mime_details['file']}";
 			$mime_details['source_url'] = $source_url;
-			$sources[ $mime ]           = $mime_details;
 		}
 
-		$data['media_details']['sizes'][ $size ]['sources'] = $sources;
+		$data['media_details']['sizes']['full']['sources'] = $data['media_details']['sources'];
+		unset( $data['media_details']['sources'] );
 	}
 
 	return rest_ensure_response( $data );
