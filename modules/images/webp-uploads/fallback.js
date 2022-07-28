@@ -8,8 +8,14 @@ window.wpPerfLab = window.wpPerfLab || {};
 					media_details = image.media_details,
 					media_sources = media_details.sources,
 					sizes         = media_details.sizes,
-					sizes_keys    = Object.keys( sizes ),
-					images        = document.querySelectorAll( 'img.wp-image-' + image.id );
+					sizes_keys    = Object.keys( sizes );
+
+				// If the full image has no JPEG version available, no sub-size will have JPEG available either.
+				if ( sizes.full && ! sizes.full.sources['image/jpeg'] ) {
+					continue;
+				}
+
+				var images = document.querySelectorAll( 'img.wp-image-' + image.id );
 
 				for ( var j = 0; j < images.length; j++ ) {
 
@@ -20,11 +26,6 @@ window.wpPerfLab = window.wpPerfLab || {};
 						src = src.replace( media_sources['image/webp'].file, media_sources['image/jpeg'].file );
 						images[ j ].setAttribute( 'src', src );
 						break;
-					}
-
-					// If the full image has no JPEG version available, no sub-size will have JPEG available either.
-					if ( ! sizes.full.sources['image/jpeg'] ) {
-						continue;
 					}
 
 					var srcset = images[ j ].getAttribute( 'srcset' );
