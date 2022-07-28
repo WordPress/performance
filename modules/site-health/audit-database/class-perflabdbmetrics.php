@@ -95,7 +95,6 @@ class PerflabDbMetrics {
 			'Bytes_received',
 			'Bytes_sent',
 			'max_connections',
-			'Connection_errors_max_connections',
 		);
 	}
 
