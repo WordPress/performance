@@ -13,11 +13,10 @@ window.wpPerfLab = window.wpPerfLab || {};
 
 				for ( var j = 0; j < images.length; j++ ) {
 
-					var src    = images[ j ].src,
-						srcset = images[ j ].getAttribute( 'srcset' );
+					var src = images[ j ].src;
 
 					// If there are no sizes, then replace src through sources, there is nothing more to replace.
-					if ( media_sources ) {
+					if ( media_sources && ! sizes.full ) {
 						src = src.replace( media_sources['image/webp'].file, media_sources['image/jpeg'].file );
 						images[ j ].setAttribute( 'src', src );
 						break;
@@ -27,6 +26,8 @@ window.wpPerfLab = window.wpPerfLab || {};
 					if ( ! sizes.full.sources['image/jpeg'] ) {
 						continue;
 					}
+
+					var srcset = images[ j ].getAttribute( 'srcset' );
 
 					for ( var k = 0; k < sizes_keys.length; k++ ) {
 						var media_sizes_sources = sizes[ sizes_keys[ k ] ].sources;
@@ -44,7 +45,7 @@ window.wpPerfLab = window.wpPerfLab || {};
 							}
 						}
 
-						if ( srcset && media_sizes_sources['image/webp'] ) {
+						if ( srcset ) {
 							srcset = srcset.replace( media_sizes_sources['image/webp'].source_url, media_sizes_sources['image/jpeg'].source_url );
 						}
 					}
