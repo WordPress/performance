@@ -158,7 +158,7 @@ class PerflabDbIndexes {
 			__( 'You have added high-performance keys to help %1$s retrieve your content more efficiently. If you wish you can revert them to WordPress\'s standard keys.', 'performance-lab' ),
 			$this->name
 		);
-		$exhortation = __( 'If you need to revert your high-performance keys follow these instructions. You don\'t usually need to do this.', 'performance-lab' );
+		$exhortation = __( 'If you need to revert your high-performance keys use these commands. You don\'t usually need to do this.', 'performance-lab' );
 		/* translators: header of column */
 		$action_table_header_1 = __( 'Table Name', 'performance-lab' );
 		/* translators: header of column */

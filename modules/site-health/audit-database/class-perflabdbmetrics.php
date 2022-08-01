@@ -405,7 +405,7 @@ class PerflabDbMetrics {
 		return $result;
 	}
 
-	/** Get 95th percentile of time taken for a connection and trivial query.
+	/** Get 90th percentile of time taken for a connection and trivial query.
 	 *
 	 * This opens several wpdb connections and sends a trivial query to each one.
 	 * It returns the 90th percentile of the time taken for multiple iterations.
@@ -418,11 +418,6 @@ class PerflabDbMetrics {
 	 */
 	public function server_response( $iterations, $timeout, $percentile = 0.90 ) {
 		global $wpdb;
-		/* this test is heavy, so we'll cache its result for 5 min */
-		$result = get_transient( self::SERVER_RESPONSE_CACHE );
-		if ( is_numeric( $result ) ) {
-			return $result;
-		}
 		$start_all    = $this->now_microseconds();
 		$microseconds = array();
 		$table_info   = $this->get_table_info();
@@ -445,11 +440,7 @@ class PerflabDbMetrics {
 			$microseconds [] = $this->now_microseconds() - $start;
 		}
 
-		$result = $this->util->percentile( $microseconds, $percentile );
-		/* stash this for a while; it's a bit expensive to run. */
-		set_transient( self::SERVER_RESPONSE_CACHE, $result, self::SERVER_RESPONSE_TTL );
-
-		return $result;
+		return $this->util->percentile( $microseconds, $percentile );
 	}
 
 	/** DBMS buffer pool size.
@@ -476,6 +467,8 @@ class PerflabDbMetrics {
 
 	/** Inspect a set of tables to ensure they have the correct storage engine and row format.
 	 *
+	 * Check the storage engine. If we're in Barracuda also check the row format.
+	 *
 	 * @param array  $stats Result set from get_table_info.
 	 * @param string $target_storage_engine Usually InnoDB.
 	 * @param string $target_row_format Usually Dynamic.
@@ -486,7 +479,10 @@ class PerflabDbMetrics {
 		$result = array();
 		foreach ( $stats as $table => $stat ) {
 			$hit = strtolower( $stat->engine ) !== strtolower( $target_storage_engine );
-			$hit = $hit | strtolower( $stat->row_format ) !== strtolower( $target_row_format );
+			if ( 1 === $this->db_version->unconstrained ) {
+				/* We're in Barracuda. */
+				$hit = $hit | strtolower( $stat->row_format ) !== strtolower( $target_row_format );
+			}
 			if ( $hit ) {
 				$result[ $table ] = $stat;
 			}

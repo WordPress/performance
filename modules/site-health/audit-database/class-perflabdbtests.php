@@ -169,12 +169,19 @@ class PerflabDbTests {
 		if ( count( $bad ) === 0 ) {
 			return $this->utilities->test_result(
 				__( 'Your WordPress tables use the modern storage format', 'performance-lab' ),
-				sprintf(
-				/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic */
-					__( 'Your tables use the %1$s storage engine and the %2$s row format for good database performance.', 'performance-lab' ),
-					$target_storage_engine,
-					$target_row_format
-				)
+				( 1 === $this->version->unconstrained )
+					? sprintf(
+						/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic */
+						__( 'Your WordPress tables use the %1$s storage engine and the %2$s row format for good database performance.', 'performance-lab' ),
+						$target_storage_engine,
+						$target_row_format
+					)
+					: sprintf(
+						/* translators: 1 storage engine name, usually InnoDB. */
+						__( 'Your WordPress tables use the %1$s storage engine for good database performance.', 'performance-lab' ),
+						$target_storage_engine,
+						$target_row_format
+					)
 			);
 		} else {
 			$label = count( $bad ) === count( $stats )
@@ -207,12 +214,19 @@ class PerflabDbTests {
 		if ( count( $wrong_format_tables ) === 0 ) {
 			return $this->utilities->test_result(
 				__( 'Your plugin tables use the modern storage format', 'performance-lab' ),
-				sprintf(
-				/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic */
-					__( 'Tables managed by your plugins use the %1$s storage engine and the %2$s row format for good database performance.', 'performance-lab' ),
-					$target_storage_engine,
-					$target_row_format
-				)
+				( 1 === $this->version->unconstrained )
+					? sprintf(
+						/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic */
+						__( 'Tables managed by your plugins use the %1$s storage engine and the %2$s row format for good database performance.', 'performance-lab' ),
+						$target_storage_engine,
+						$target_row_format
+					)
+					: sprintf(
+						/* translators: 1 storage engine name, usually InnoDB   */
+						__( 'Tables managed by your plugins use the %1$s storage engine for good database performance.', 'performance-lab' ),
+						$target_storage_engine,
+						$target_row_format
+					)
 			);
 		} else {
 			$label = count( $wrong_format_tables ) === count( $stats )
@@ -256,7 +270,7 @@ class PerflabDbTests {
 			$too_small = true;
 			$msgs[]    = '<p>' . sprintf(
 				/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
-				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s, but %2$s\'s buffer size (\'Key_buffer_size\') is only %3$s. That may be too small.', 'performance-lab' ),
+				__( 'The keys on your MyISAM tables (the obsolete storage engine) use %1$s, but %2$s\'s buffer size (\'key_buffer_size\') is only %3$s. That may be too small.', 'performance-lab' ),
 				$this->utilities->format_bytes( $myisam_size ),
 				$this->name,
 				$this->utilities->format_bytes( $myisam_pool_size )
@@ -276,7 +290,7 @@ class PerflabDbTests {
 			$too_small = true;
 			$msgs[]    = '<p>' . sprintf(
 				/* translators: 1: memory size like 512MiB  2: server name like MySQL  3: memory size */
-				__( 'Your InnoDB tables (the modern storage engine) use %1$s, but %2$s\'s buffer pool size (\'Innodb_buffer_pool_size\') is only %3$s. That may be too small.', 'performance-lab' ),
+				__( 'Your InnoDB tables (the modern storage engine) use %1$s, but %2$s\'s buffer pool size (\'innodb_buffer_pool_size\') is only %3$s. That may be too small.', 'performance-lab' ),
 				$this->utilities->format_bytes( $innodb_size ),
 				$this->name,
 				$this->utilities->format_bytes( $innodb_pool_size )
@@ -509,13 +523,13 @@ class PerflabDbTests {
 		}
 		$iterations       = $this->utilities->get_threshold_value( 'server_response_iterations' );
 		$response_timeout = $this->utilities->get_threshold_value( 'server_response_timeout' );
-		$results          = $this->metrics->server_response( $iterations, $response_timeout );
 		/* results are in microseconds, and we report in milliseconds */
-		$formatted_results   = number_format_i18n( $results * 0.001, 2 );
-		$very_slow_response  = $this->utilities->get_threshold_value( 'server_response_very_slow' );
-		$slow_response       = $this->utilities->get_threshold_value( 'server_response_slow' );
-		$formatted_threshold = number_format_i18n( $slow_response * 0.001, 2 );
-		if ( $results >= $very_slow_response ) {
+		$results             = round( 0.001 * $this->metrics->server_response( $iterations, $response_timeout ), 1 );
+		$formatted_results   = number_format_i18n( $results, 1 );
+		$very_slow_response  = round( $this->utilities->get_threshold_value( 'server_response_very_slow' ), 1 );
+		$slow_response       = round( $this->utilities->get_threshold_value( 'server_response_slow' ), 1 );
+		$formatted_threshold = number_format_i18n( $slow_response, 1 );
+		if ( $results > $very_slow_response ) {
 			return $this->utilities->test_result(
 			/* translators: 1:  MySQL or MariaDB */
 				sprintf( __( 'Your %s SQL server connects and responds very slowly', 'performance-lab' ), $this->name ),
@@ -529,7 +543,7 @@ class PerflabDbTests {
 				'critical',
 				'red'
 			);
-		} elseif ( $results >= $slow_response ) {
+		} elseif ( $results > $slow_response ) {
 			return $this->utilities->test_result(
 			/* translators: 1:  MySQL or MariaDB */
 				sprintf( __( 'Your %s SQL server connects and responds slowly', 'performance-lab' ), $this->name ),
@@ -566,13 +580,19 @@ class PerflabDbTests {
 	 * @return array
 	 */
 	private function table_upgrade_instructions( $target_storage_engine, $target_row_format, $table_metrics, $label ) {
-		$explanation = sprintf(
-		/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic  3: MySQL or MariaDB */
-			__( '%3$s performance improves when your tables use the modern %1$s storage engine and the %2$s row format.', 'performance-lab' ),
-			$target_storage_engine,
-			$target_row_format,
-			$this->name
-		);
+		$explanation = ( 1 === $this->version->unconstrained )
+			? sprintf(
+			/* translators: 1 MySQL or MariaDB  2: storage engine name, usually InnoDB  3: row format name, usually Dynamic */
+				__( '%1$s performance improves when your tables use the modern %2$s storage engine and the %3$s row format.', 'performance-lab' ),
+				$this->name,
+				$target_storage_engine,
+				$target_row_format
+			) : sprintf(
+			/* translators: 1 MySQL or MariaDB  2: storage engine name, usually InnoDB  */
+				__( '%1$s performance improves when your tables use the modern %2$s storage engine.', 'performance-lab' ),
+				$this->name,
+				$target_storage_engine
+			);
 		$exhortation = __( 'Consider upgrading these tables.', 'performance-lab' );
 		/* translators: header of column */
 		$action_table_header_1 = __( 'Table Name', 'performance-lab' );
@@ -612,7 +632,11 @@ class PerflabDbTests {
 		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
 		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
 
-		return "wp db query \"ALTER TABLE $table_name ENGINE=$target_storage_engine ROW_FORMAT=$target_row_format\"";
+		$result = ( 1 === $this->version->unconstrained )
+			? "wp db query \"ALTER TABLE $table_name ENGINE=$target_storage_engine ROW_FORMAT=$target_row_format\""
+			: "wp db query \"ALTER TABLE $table_name ENGINE=$target_storage_engine\"";
+
+		return wordwrap( $result, 64, PHP_EOL . '    ', false );
 	}
 
 	/** Work out cache-hit-rate stuff.
