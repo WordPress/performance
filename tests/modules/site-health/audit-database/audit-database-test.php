@@ -168,17 +168,6 @@ class Audit_Database_Tests extends WP_UnitTestCase {
 		$this->assertEqualsWithDelta( $thenusec, $nowusec, 1500000, 'nondeterministic, possibly fails on heavily loaded test system.' );
 	}
 
-	function test_sampling() {
-		$pdm = new PerflabDbMetrics();
-
-		$diffs = $pdm->tracking_variable_changes();
-		$this->assertGreaterThan( 0, $diffs['delta_timestamp'] );
-		$this->assertEqualsWithDelta( time(), $diffs ['timestamp'], 2 );
-		$this->assertIsNumeric( $diffs ['Uptime'] );
-		$this->assertIsNumeric( $diffs ['innodb_buffer_pool_size'] );
-		$this->assertIsNumeric( $diffs ['key_buffer_size'] );
-	}
-
 	function test_arithmetic() {
 		$pdu = PerflabDbUtilities::get_instance();
 		$this->assertEquals( 65536, $pdu->power_of_two_round_up( 65535 ) );

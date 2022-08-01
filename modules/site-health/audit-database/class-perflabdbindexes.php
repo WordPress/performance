@@ -482,9 +482,8 @@ class PerflabDbIndexes {
 		$storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
 		$row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
 		$bad            = $this->metrics->get_wrong_format_tables( $stats, $storage_engine, $row_format );
-		$eligible       = array_diff_key( $stats, $bad );
 
-		return $eligible;
+		return array_diff_key( $stats, $bad );
 	}
 
 	/** Get the actions required to re-index a table.

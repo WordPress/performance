@@ -17,10 +17,6 @@
  * @since 1.4.0
  */
 class PerflabDbMetrics {
-	const SERVER_RESPONSE_CACHE       = 'perflab_sitehealth_server_response';
-	const PREVIOUS_TRACKING_VARIABLES = 'perflab_sitehealth_server_tracking';
-	const SERVER_RESPONSE_TTL         = 5 * MINUTE_IN_SECONDS;
-
 	/** First eligible db version, the advent of utfmb4 in WordPress databases.
 	 *
 	 * @var int
@@ -66,11 +62,6 @@ class PerflabDbMetrics {
 	 * @var array Associative array, in which keys are Status or Variable names
 	 */
 	private $variable_cache = array();
-	/** List of MariaDB / MySQL system status variables we need.
-	 *
-	 * @var string[] Status and variable names. NOTE WELL. Status items start with a capital letter, and variables with lowercase.
-	 */
-	private $tracking_variables_we_need;
 
 	/** Constructor.
 	 */
@@ -81,21 +72,6 @@ class PerflabDbMetrics {
 			$this->has_hr_time = false;
 		}
 		$this->util = PerflabDbUtilities::get_instance();
-
-		$this->tracking_variables_we_need = array(
-			'innodb_buffer_pool_size',
-			'Innodb_buffer_pool_read_requests',
-			'Innodb_buffer_pool_reads',
-			'Innodb_buffer_pool_wait_free',
-			'key_buffer_size',
-			'Key_read_requests',
-			'Key_reads',
-			'Uptime',
-			'Questions',
-			'Bytes_received',
-			'Bytes_sent',
-			'max_connections',
-		);
 	}
 
 	/** Get current time (ref UNIX era) in microseconds.
@@ -109,85 +85,6 @@ class PerflabDbMetrics {
 		} catch ( Exception $ex ) {
 			return time() * 1000000.;
 		}
-	}
-
-	/** Retrieve current values of tracking variables.
-	 *
-	 * Variable names beginning with uppercase are STATUS items.
-	 *
-	 * @return array Associative array: name => value
-	 */
-	public function get_tracking_variables() {
-		$result               = array();
-		$result ['timestamp'] = time();
-		/* this will get replaced */
-		$result ['delta_timestamp'] = time();
-		foreach ( $this->tracking_variables_we_need as $name ) {
-			$result[ $name ] = $this->get_variable( $name );
-		}
-		$result ['start_timestamp'] = time() - $result ['Uptime'];
-		return $result;
-	}
-
-	/** Retrieve differences between two sets of tracking variables.
-	 *
-	 * @param array $later The later-in-time set.
-	 * @param array $earlier The earlier-in-time set.
-	 *
-	 * @return array
-	 */
-	public function tracking_variable_diffs( $later, $earlier ) {
-		$result = array();
-
-		/* compute time difference */
-		$result ['previous_timestamp'] = $earlier ['timestamp'];
-		$result ['delta_timestamp']    = $later ['timestamp'] - $earlier['timestamp'];
-		$result ['timestamp']          = $later['timestamp'];
-
-		/* compute differences in accumulating Status items */
-		foreach ( $this->tracking_variables_we_need as $name ) {
-			$first_letter = substr( $name, 0, 1 );
-			if ( ctype_upper( $first_letter && is_numeric( $later [ $name ] ) ) ) {
-				/* is Status, not Variable */
-				$result [ $name ] = $later[ $name ] - $earlier [ $name ];
-			} else {
-				$result [ $name ] = $later[ $name ];
-			}
-		}
-		return $result;
-	}
-
-	/** Get changes in tracking variables from previous sample or server boot.
-	 *
-	 * The idea is to give us the change in Status items like Questions, Key_Read_Requests, and
-	 * so forth since some sample gathered in the past. If no sample has already been gathered
-	 * on the site, we'll use the values since SQL server bootup.
-	 *
-	 * To get a rate. for example Questions / second, do
-	 *
-	 * $items ['Questions'] / $items ['Uptime']
-	 *
-	 * @return array Associative array: name => value.
-	 */
-	public function tracking_variable_changes() {
-		$now                     = time();
-		$current                 = $this->get_tracking_variables();
-		$minimum_delta_timestamp = $this->util->get_threshold_value( 'minimum_delta_timestamp' );
-		$earlier                 = get_option( self::PREVIOUS_TRACKING_VARIABLES );
-		if ( ! $earlier || ( $now - $earlier ['timestamp'] ) < $minimum_delta_timestamp ) {
-			/* nothing saved: we'll use whatever is on the server since it started */
-			$diff            = $current;
-			$diff ['source'] = 'server';
-		} else {
-			$diff            = $this->tracking_variable_diffs( $current, $earlier );
-			$diff ['source'] = 'sample';
-		}
-		$maximum_delta_timestamp = $this->util->get_threshold_value( 'maximum_delta_timestamp' );
-		if ( ! $earlier || ( $now - $earlier ['timestamp'] ) >= $maximum_delta_timestamp ) {
-			update_option( self::PREVIOUS_TRACKING_VARIABLES, $current );
-		}
-
-		return $diff;
 	}
 
 	/** Get version information from the database server.
@@ -492,6 +389,8 @@ class PerflabDbMetrics {
 	}
 
 	/** Get the indexes on a table, excluding fulltext indexes.
+	 *
+	 * Note: on Antelope systems, the STORAGE_ENGINE result can be bogus.
 	 *
 	 * @param string $table_name The subject table.
 	 *
