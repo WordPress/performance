@@ -9,7 +9,7 @@
 class Audit_Database_Tests extends WP_UnitTestCase {
 
 	public function __construct( $name = null, array $data = array(), $data_name = '' ) {
-		$dir = '/../../../../modules/site-health/audit-database';
+		$dir = '/../../../../modules/site-health/database-health-check';
 		require_once __DIR__ . $dir . '/class-perflabdbutilities.php';
 		require_once __DIR__ . $dir . '/class-perflabdbmetrics.php';
 		require_once __DIR__ . $dir . '/class-perflabdbtests.php';
