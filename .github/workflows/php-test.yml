@@ -37,9 +37,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: styfle/cancel-workflow-action@0.8.0
-      - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
+      - uses: actions/checkout@v3
       - name: Setup Node.js (.nvmrc)
-        uses: actions/setup-node@5b52f097d36d4b0b2f94ed6de710023fbb8b2236 # v3.1.0
+        uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           cache: npm
