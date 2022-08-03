@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-const path = require( 'path' );
-const glob = require( 'fast-glob' );
-const fs = require( 'fs' );
-const { log, formats } = require( '../lib/logger' );
+const path = require('path');
+const glob = require('fast-glob');
+const fs = require('fs');
+const { log, formats } = require('../lib/logger');
 
 /**
  * @typedef WPModuleData
@@ -35,17 +35,17 @@ const FOCUS_AREAS = {
  *
  * @return {Promise<[]WPModuleData>} Promise resolving to module data list.
  */
-exports.getModuleData = async ( modulesDir ) => {
-	const moduleFilePattern = path.join( modulesDir, '*/*/load.php' );
-	const moduleFiles = await glob( path.resolve( '.', moduleFilePattern ) );
+exports.getModuleData = async (modulesDir) => {
+	const moduleFilePattern = path.join(modulesDir, '*/*/load.php');
+	const moduleFiles = await glob(path.resolve('.', moduleFilePattern));
 
 	return moduleFiles
-		.map( ( moduleFile ) => {
+		.map((moduleFile) => {
 			// Populate slug and focus based on file path.
-			const moduleDir = path.dirname( moduleFile );
+			const moduleDir = path.dirname(moduleFile);
 			const moduleData = {
-				slug: path.basename( moduleDir ),
-				focus: path.basename( path.dirname( moduleDir ) ),
+				slug: path.basename(moduleDir),
+				focus: path.basename(path.dirname(moduleDir)),
 			};
 
 			// Map of module header => object property.
@@ -56,56 +56,56 @@ exports.getModuleData = async ( modulesDir ) => {
 			};
 
 			// Populate name, description and experimental based on module file headers.
-			const fileContent = fs.readFileSync( moduleFile, 'utf8' );
+			const fileContent = fs.readFileSync(moduleFile, 'utf8');
 			const regex = new RegExp(
-				`^(?:[ \t]*<?php)?[ \t/*#@]*(${ Object.keys( headers ).join(
+				`^(?:[ \t]*<?php)?[ \t/*#@]*(${Object.keys(headers).join(
 					'|'
-				) }):(.*)$`,
+				)}):(.*)$`,
 				'gmi'
 			);
-			let match = regex.exec( fileContent );
-			while ( match ) {
-				const content = match[ 2 ].trim();
-				const prop = headers[ match[ 1 ] ];
-				if ( content && prop ) {
-					moduleData[ prop ] = content;
+			let match = regex.exec(fileContent);
+			while (match) {
+				const content = match[2].trim();
+				const prop = headers[match[1]];
+				if (content && prop) {
+					moduleData[prop] = content;
 				}
-				match = regex.exec( fileContent );
+				match = regex.exec(fileContent);
 			}
 
 			// Parse experimental field into a boolean.
-			if ( typeof moduleData.experimental === 'string' ) {
+			if (typeof moduleData.experimental === 'string') {
 				moduleData.experimental =
 					moduleData.experimental.toLowerCase() === 'yes';
 			}
 
 			return moduleData;
-		} )
-		.filter( ( moduleData ) => {
+		})
+		.filter((moduleData) => {
 			const requiredProperties = [];
-			if ( ! moduleData.name ) {
-				requiredProperties.push( 'name' );
+			if (!moduleData.name) {
+				requiredProperties.push('name');
 			}
 
-			if ( ! moduleData.description ) {
-				requiredProperties.push( 'description' );
+			if (!moduleData.description) {
+				requiredProperties.push('description');
 			}
 
-			if ( typeof moduleData.experimental === 'undefined' ) {
-				requiredProperties.push( 'experimental' );
+			if (typeof moduleData.experimental === 'undefined') {
+				requiredProperties.push('experimental');
 			}
 
-			if ( requiredProperties.length >= 1 ) {
+			if (requiredProperties.length >= 1) {
 				const properties = requiredProperties
-					.map( ( property ) => `'${ property }'` )
-					.join( ', ' );
+					.map((property) => `'${property}'`)
+					.join(', ');
 				log(
 					formats.warning(
-						`This module was not included because it misses required properties: ${ properties }.\nDetails: ${ JSON.stringify(
+						`This module was not included because it misses required properties: ${properties}.\nDetails: ${JSON.stringify(
 							moduleData,
 							null,
 							4
-						) }`
+						)}`
 					)
 				);
 			}
@@ -115,21 +115,21 @@ exports.getModuleData = async ( modulesDir ) => {
 				moduleData.description &&
 				typeof moduleData.experimental !== 'undefined'
 			);
-		} )
-		.sort( ( firstModule, secondModule ) => {
+		})
+		.sort((firstModule, secondModule) => {
 			// Not the same focus group.
-			if ( firstModule.focus !== secondModule.focus ) {
+			if (firstModule.focus !== secondModule.focus) {
 				return (
-					FOCUS_AREAS[ firstModule.focus ] -
-					FOCUS_AREAS[ secondModule.focus ]
+					FOCUS_AREAS[firstModule.focus] -
+					FOCUS_AREAS[secondModule.focus]
 				);
 			}
 
-			if ( firstModule.experimental !== secondModule.experimental ) {
+			if (firstModule.experimental !== secondModule.experimental) {
 				return firstModule.experimental ? 1 : -1;
 			}
 
 			// Lastly order alphabetically.
-			return firstModule.slug.localeCompare( secondModule.slug );
-		} );
+			return firstModule.slug.localeCompare(secondModule.slug);
+		});
 };

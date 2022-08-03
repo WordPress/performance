@@ -1,16 +1,16 @@
 /**
  * External dependencies
  */
-const path = require( 'path' );
-const fs = require( 'fs' );
-const { EOL } = require( 'os' );
+const path = require('path');
+const fs = require('fs');
+const { EOL } = require('os');
 
 /**
  * Internal dependencies
  */
-const { log, formats } = require( '../lib/logger' );
-const config = require( '../config' );
-const { getModuleData } = require( './common' );
+const { log, formats } = require('../lib/logger');
+const config = require('../config');
+const { getModuleData } = require('./common');
 
 const TAB = '\t';
 const NEWLINE = EOL;
@@ -61,12 +61,12 @@ exports.options = [
  *
  * @param {WPTranslationsCommandOptions} opt
  */
-exports.handler = async ( opt ) => {
-	await createTranslations( {
+exports.handler = async (opt) => {
+	await createTranslations({
 		textDomain: config.textDomain,
 		directory: opt.directory || 'modules',
 		output: opt.output || 'module-i18n.php',
-	} );
+	});
 };
 
 /**
@@ -76,9 +76,9 @@ exports.handler = async ( opt ) => {
  *
  * @return {[]WPTranslationEntry} List of translation entries.
  */
-async function getTranslations( settings ) {
-	const modulesData = await getModuleData( settings.directory );
-	const moduleTranslations = modulesData.map( ( moduleData ) => {
+async function getTranslations(settings) {
+	const modulesData = await getModuleData(settings.directory);
+	const moduleTranslations = modulesData.map((moduleData) => {
 		return [
 			{
 				text: moduleData.name,
@@ -89,7 +89,7 @@ async function getTranslations( settings ) {
 				context: 'module description',
 			},
 		];
-	} );
+	});
 
 	return moduleTranslations.flat();
 }
@@ -100,18 +100,16 @@ async function getTranslations( settings ) {
  * @param {[]WPTranslationEntry}   translations List of translation entries.
  * @param {WPTranslationsSettings} settings     Translations settings.
  */
-function createTranslationsPHPFile( translations, settings ) {
-	const output = translations.map( ( translation ) => {
+function createTranslationsPHPFile(translations, settings) {
+	const output = translations.map((translation) => {
 		// Escape single quotes.
-		return `${ TAB }_x( '${ translation.text.replace( /'/g, "\\'" ) }', '${
+		return `${TAB}_x( '${translation.text.replace(/'/g, "\\'")}', '${
 			translation.context
-		}', '${ settings.textDomain }' ),`;
-	} );
+		}', '${settings.textDomain}' ),`;
+	});
 
-	const fileOutput = `${ FILE_HEADER }${ output.join(
-		NEWLINE
-	) }${ FILE_FOOTER }`;
-	fs.writeFileSync( path.join( '.', settings.output ), fileOutput );
+	const fileOutput = `${FILE_HEADER}${output.join(NEWLINE)}${FILE_FOOTER}`;
+	fs.writeFileSync(path.join('.', settings.output), fileOutput);
 }
 
 /**
@@ -119,26 +117,26 @@ function createTranslationsPHPFile( translations, settings ) {
  *
  * @param {WPTranslationsSettings} settings Translations settings.
  */
-async function createTranslations( settings ) {
+async function createTranslations(settings) {
 	log(
 		formats.title(
-			`\n💃Preparing module translations for "${ settings.directory }" in "${ settings.output }"\n\n`
+			`\n💃Preparing module translations for "${settings.directory}" in "${settings.output}"\n\n`
 		)
 	);
 
 	try {
-		const translations = await getTranslations( settings );
-		createTranslationsPHPFile( translations, settings );
-	} catch ( error ) {
-		if ( error instanceof Error ) {
-			log( formats.error( error.stack ) );
+		const translations = await getTranslations(settings);
+		createTranslationsPHPFile(translations, settings);
+	} catch (error) {
+		if (error instanceof Error) {
+			log(formats.error(error.stack));
 			return;
 		}
 	}
 
 	log(
 		formats.success(
-			`\n💃Module translations successfully set in "${ settings.output }"\n\n`
+			`\n💃Module translations successfully set in "${settings.output}"\n\n`
 		)
 	);
 }
