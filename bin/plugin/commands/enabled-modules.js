@@ -1,15 +1,15 @@
 /**
  * External dependencies
  */
-const path = require('path');
-const fs = require('fs');
-const { EOL } = require('os');
+const path = require( 'path' );
+const fs = require( 'fs' );
+const { EOL } = require( 'os' );
 
 /**
  * Internal dependencies
  */
-const { log, formats } = require('../lib/logger');
-const { getModuleData } = require('./common');
+const { log, formats } = require( '../lib/logger' );
+const { getModuleData } = require( './common' );
 
 const TAB = '\t';
 const NEWLINE = EOL;
@@ -52,11 +52,11 @@ exports.options = [
  *
  * @param {WPEnabledModulesCommandOptions} opt
  */
-exports.handler = async (opt) => {
-	await createEnabledModules({
+exports.handler = async ( opt ) => {
+	await createEnabledModules( {
 		directory: opt.directory || 'modules',
 		output: opt.output || 'default-enabled-modules.php',
-	});
+	} );
 };
 
 /**
@@ -66,11 +66,11 @@ exports.handler = async (opt) => {
  *
  * @return {[]string} List of default enabled module paths relative to modules directory.
  */
-async function getDefaultEnabledModules(settings) {
-	const modulesData = await getModuleData(settings.directory);
+async function getDefaultEnabledModules( settings ) {
+	const modulesData = await getModuleData( settings.directory );
 	return modulesData
-		.filter((moduleData) => !moduleData.experimental)
-		.map((moduleData) => `${moduleData.focus}/${moduleData.slug}`);
+		.filter( ( moduleData ) => ! moduleData.experimental )
+		.map( ( moduleData ) => `${ moduleData.focus }/${ moduleData.slug }` );
 }
 
 /**
@@ -79,14 +79,16 @@ async function getDefaultEnabledModules(settings) {
  * @param {[]string}                 enabledModules List of default enabled module paths relative to modules directory.
  * @param {WPEnabledModulesSettings} settings       Default enabled modules settings.
  */
-function createEnabledModulesPHPFile(enabledModules, settings) {
-	const output = enabledModules.map((enabledModule) => {
+function createEnabledModulesPHPFile( enabledModules, settings ) {
+	const output = enabledModules.map( ( enabledModule ) => {
 		// Escape single quotes.
-		return `${TAB}'${enabledModule.replace(/'/g, "\\'")}',`;
-	});
+		return `${ TAB }'${ enabledModule.replace( /'/g, "\\'" ) }',`;
+	} );
 
-	const fileOutput = `${FILE_HEADER}${output.join(NEWLINE)}${FILE_FOOTER}`;
-	fs.writeFileSync(path.join('.', settings.output), fileOutput);
+	const fileOutput = `${ FILE_HEADER }${ output.join(
+		NEWLINE
+	) }${ FILE_FOOTER }`;
+	fs.writeFileSync( path.join( '.', settings.output ), fileOutput );
 }
 
 /**
@@ -94,26 +96,26 @@ function createEnabledModulesPHPFile(enabledModules, settings) {
  *
  * @param {WPEnabledModulesSettings} settings Default enabled modules settings.
  */
-async function createEnabledModules(settings) {
+async function createEnabledModules( settings ) {
 	log(
 		formats.title(
-			`\n💃Gathering non-experimental modules for "${settings.directory}" in "${settings.output}"\n\n`
+			`\n💃Gathering non-experimental modules for "${ settings.directory }" in "${ settings.output }"\n\n`
 		)
 	);
 
 	try {
-		const enabledModules = await getDefaultEnabledModules(settings);
-		createEnabledModulesPHPFile(enabledModules, settings);
-	} catch (error) {
-		if (error instanceof Error) {
-			log(formats.error(error.stack));
+		const enabledModules = await getDefaultEnabledModules( settings );
+		createEnabledModulesPHPFile( enabledModules, settings );
+	} catch ( error ) {
+		if ( error instanceof Error ) {
+			log( formats.error( error.stack ) );
 			return;
 		}
 	}
 
 	log(
 		formats.success(
-			`\n💃Non-experimental modules successfully set in "${settings.output}"\n\n`
+			`\n💃Non-experimental modules successfully set in "${ settings.output }"\n\n`
 		)
 	);
 }

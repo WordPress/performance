@@ -11,15 +11,8 @@
     "fast-glob": "^3.2.7",
     "husky": "^7.0.4",
     "lint-staged": "^12.3.4",
-    "lodash": "4.17.21"
-  },
-  "peerDependencies": {
-    "prettier": ">=2"
-  },
-  "peerDependenciesMeta": {
-    "prettier": {
-      "optional": true
-    }
+    "lodash": "4.17.21",
+    "prettier": "npm:wp-prettier@2.6.2"
   },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
