@@ -14,6 +14,14 @@
     "lodash": "4.17.21",
     "prettier": "npm:wp-prettier@2.6.2"
   },
+  "peerDependencies": {
+    "prettier": ">=2"
+  },
+  "peerDependenciesMeta": {
+    "prettier": {
+      "optional": true
+    }
+  },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
     "since": "./bin/plugin/cli.js since",
