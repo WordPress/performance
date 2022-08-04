@@ -71,9 +71,13 @@ class PerflabDbIndexes {
 	 *
 	 * @return array Augmented tests.
 	 */
-	public function add_all_database_performance_checks( $tests ) {
+	public function add_all_database_index_checks( $tests ) {
 		$test_number = 100;
-		$label       = __( 'Database Index One', 'performance-lab' );
+		$label       = __( 'Database', 'performance-lab' );
+		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
+			'label' => $label,
+			'test'  => array( $this, 'table_reformat_instructions' ),
+		);
 		$tests['direct'][ 'database_performance' . $test_number++ ] = array(
 			'label' => $label,
 			'test'  => array( $this, 'index_upgrade_test' ),
@@ -86,6 +90,28 @@ class PerflabDbIndexes {
 		return $tests;
 	}
 
+
+	/** Check core tables format
+	 *
+	 * @return array
+	 */
+	public function table_reformat_instructions() {
+		if ( $this->skip_all_tests ) {
+			return array();
+		}
+
+		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
+		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
+		$bad                   = $this->metrics->get_wrong_format_tables( $this->table_stats, $target_storage_engine, $target_row_format );
+		if ( count( $bad ) === 0 ) {
+			return array();
+		} else {
+			$label = __( 'Upgrade your tables to the modern storage format', 'performance-lab' );
+			return $this->table_upgrade_instructions( $target_storage_engine, $target_row_format, $bad, $label );
+		}
+	}
+
+
 	/** Test need for fast indexes.
 	 */
 	public function index_upgrade_test() {
@@ -96,7 +122,7 @@ class PerflabDbIndexes {
 		$statements = $this->get_dml( $action );
 
 		if ( 0 === count( $statements ) ) {
-			return $this->utilities->test_result(
+			return $this->utilities->test_index_result(
 				__( 'Your WordPress tables have high-performance keys', 'performance-lab' ),
 				sprintf(
 				/* translators: 1 MySQL or MariaDB */
@@ -124,7 +150,7 @@ class PerflabDbIndexes {
 
 		list( $description, $action ) = $this->utilities->instructions( array( $this, 'format_rekey_command' ), $explanation, $exhortation, $action_table_header_1, $action_table_header_2, $statements );
 
-		return $this->utilities->test_result(
+		return $this->utilities->test_index_result(
 			$label,
 			$description . $action,
 			'',
@@ -166,7 +192,7 @@ class PerflabDbIndexes {
 
 		list( $description, $action ) = $this->utilities->instructions( array( $this, 'format_rekey_command' ), $explanation, $exhortation, $action_table_header_1, $action_table_header_2, $statements );
 
-		return $this->utilities->test_result(
+		return $this->utilities->test_index_result(
 			$label,
 			$description . $action
 		);
@@ -587,6 +613,73 @@ class PerflabDbIndexes {
 
 		return $statements;
 	}
+
+	/** HTML for table upgrade instructions.
+	 *
+	 * @param string $target_storage_engine 'InnoDB'.
+	 * @param string $target_row_format 'Dynamic'.
+	 * @param array  $table_metrics Array containing metrics for tables needing upgrading.
+	 * @param string $label The label to put on the health-check report.
+	 *
+	 * @return array
+	 */
+	private function table_upgrade_instructions( $target_storage_engine, $target_row_format, $table_metrics, $label ) {
+		$explanation = ( 1 === $this->version->unconstrained )
+			? sprintf(
+			/* translators: 1 MySQL or MariaDB  2: storage engine name, usually InnoDB  3: row format name, usually Dynamic */
+				__( '%1$s performance improves when your tables use the modern %2$s storage engine and the %3$s row format.', 'performance-lab' ),
+				$this->name,
+				$target_storage_engine,
+				$target_row_format
+			) : sprintf(
+			/* translators: 1 MySQL or MariaDB  2: storage engine name, usually InnoDB  */
+				__( '%1$s performance improves when your tables use the modern %2$s storage engine.', 'performance-lab' ),
+				$this->name,
+				$target_storage_engine
+			);
+		$exhortation = __( 'Consider upgrading these tables.', 'performance-lab' );
+		/* translators: header of column */
+		$action_table_header_1 = __( 'Table Name', 'performance-lab' );
+		/* translators: header of column */
+		$action_table_header_2 = __( 'WP-CLI command to upgrade', 'performance-lab' );
+
+		list( $description, $action ) = $this->utilities->instructions(
+			array(
+				$this,
+				'format_upgrade_command',
+			),
+			$explanation,
+			$exhortation,
+			$action_table_header_1,
+			$action_table_header_2,
+			$table_metrics
+		);
+
+		return $this->utilities->test_index_result(
+			$label,
+			$description . $action,
+			'',
+			'recommended',
+			'orange'
+		);
+	}
+	/** Function to format the appropriate DDL statement for the table name.
+	 *
+	 * @param string $table_name The name of the table to put into the statement.
+	 *
+	 * @return string The statement.
+	 */
+	public function format_upgrade_command( $table_name ) {
+		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
+		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
+
+		$result = ( 1 === $this->version->unconstrained )
+			? "wp db query \"ALTER TABLE $table_name ENGINE=$target_storage_engine ROW_FORMAT=$target_row_format\""
+			: "wp db query \"ALTER TABLE $table_name ENGINE=$target_storage_engine\"";
+
+		return wordwrap( $result, 64, PHP_EOL . '    ', false );
+	}
+
 
 }
 

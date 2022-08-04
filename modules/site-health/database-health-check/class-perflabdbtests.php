@@ -72,7 +72,7 @@ class PerflabDbTests {
 	 */
 	public function add_all_database_performance_checks( $tests ) {
 		$test_number = 0;
-		$label       = __( 'Database Performance', 'performance-lab' );
+		$label       = __( 'Database', 'performance-lab' );
 		$tests['direct'][ 'database_performance' . $test_number ++ ] = array(
 			'label' => $label,
 			'test'  => array( $this, 'server_version_test' ),
@@ -94,11 +94,6 @@ class PerflabDbTests {
 		$tests['direct'][ 'database_performance' . $test_number ++ ] = array(
 			'label' => $label,
 			'test'  => array( $this, 'buffer_pool_size_test' ),
-		);
-
-		$tests['direct'][ 'database_performance' . $test_number ++ ] = array(
-			'label' => $label,
-			'test'  => array( $this, 'too_many_users_test' ),
 		);
 
 		return $tests;
@@ -160,8 +155,8 @@ class PerflabDbTests {
 		$stats                 = array_intersect_key( $this->table_stats, array_combine( $tables, $tables ) );
 		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
 		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
-		$bad                   = $this->metrics->get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format );
-		if ( count( $bad ) === 0 ) {
+		$wrong_format_tables   = $this->metrics->get_wrong_format_tables( $stats, $target_storage_engine, $target_row_format );
+		if ( count( $wrong_format_tables ) === 0 ) {
 			return $this->utilities->test_result(
 				__( 'Your WordPress tables use the modern storage format', 'performance-lab' ),
 				( 1 === $this->version->unconstrained )
@@ -179,11 +174,25 @@ class PerflabDbTests {
 					)
 			);
 		} else {
-			$label = count( $bad ) === count( $stats )
+			$label = count( $wrong_format_tables ) === count( $stats )
 				? __( 'Your WordPress tables use an obsolete storage format', 'performance-lab' )
 				: __( 'Some WordPress tables use an obsolete storage format', 'performance-lab' );
 
-			return $this->table_upgrade_instructions( $target_storage_engine, $target_row_format, $bad, $label );
+			$explanation = sprintf(
+				/* translators: 1 MySQL or MariaDB */
+				__( '%1$s performance improves when your WordPress tables use the modern storage format.', 'performance-lab' ),
+				$this->name
+			);
+			$actions = $this->list_wrong_format_tables( $wrong_format_tables );
+
+			return $this->utilities->test_result(
+				$label,
+				$explanation,
+				$actions,
+				'recommended',
+				'orange'
+			);
+
 		}
 	}
 
@@ -228,7 +237,20 @@ class PerflabDbTests {
 				? __( 'Your plugin tables use an obsolete storage format', 'performance-lab' )
 				: __( 'Some plugin tables use an obsolete storage format', 'performance-lab' );
 
-			return $this->table_upgrade_instructions( $target_storage_engine, $target_row_format, $wrong_format_tables, $label );
+			$explanation = sprintf(
+			/* translators: 1 MySQL or MariaDB */
+				__( '%1$s performance improves when your plugins\' tables use the modern storage format.', 'performance-lab' ),
+				$this->name
+			);
+			$actions = $this->list_wrong_format_tables( $wrong_format_tables );
+
+			return $this->utilities->test_result(
+				$label,
+				$explanation,
+				$actions,
+				'recommended',
+				'orange'
+			);
 		}
 	}
 
@@ -332,34 +354,6 @@ class PerflabDbTests {
 		}
 	}
 
-	/** Check for a very large number of users.
-	 *
-	 * @return array
-	 */
-	public function too_many_users_test() {
-		global $wpdb;
-		$target_user_count = $this->utilities->get_threshold_value( 'target_user_count' );
-		if ( isset( $this->table_stats[ $wpdb->users ] ) ) {
-			$user_count = $this->table_stats[ $wpdb->users ]->row_count;
-			if ( $user_count > $target_user_count ) {
-
-				return $this->utilities->test_result(
-					__( 'Your site has many registered users', 'performance-lab' ),
-					sprintf(
-					/* translators: 1 Number of registered users */
-						__( 'Your site has %1$s registered users. This may cause your dashboard\'s Posts, Pages, and Users panels to load slowly, and may interfere with editing posts and pages.', 'performance-lab' ),
-						number_format_i18n( $user_count )
-					),
-					__( 'Consider installing a plugin to help you manage many users.', 'performance-lab' ),
-					'recommended',
-					'orange'
-				);
-			}
-		}
-
-		return array();
-	}
-
 	/** Check server connection response time.
 	 *
 	 * @return array
@@ -417,71 +411,21 @@ class PerflabDbTests {
 		}
 	}
 
-	/** HTML for table upgrade instructions.
+	/** Generate HTML for a list of tables.
 	 *
-	 * @param string $target_storage_engine 'InnoDB'.
-	 * @param string $target_row_format 'Dynamic'.
-	 * @param array  $table_metrics Array containing metrics for tables needing upgrading.
-	 * @param string $label The label to put on the health-check report.
+	 * @param array $wrong_format_tables Associative array of tables with names to render.
 	 *
-	 * @return array
+	 * @return string
 	 */
-	private function table_upgrade_instructions( $target_storage_engine, $target_row_format, $table_metrics, $label ) {
-		$explanation = ( 1 === $this->version->unconstrained )
-			? sprintf(
-			/* translators: 1 MySQL or MariaDB  2: storage engine name, usually InnoDB  3: row format name, usually Dynamic */
-				__( '%1$s performance improves when your tables use the modern %2$s storage engine and the %3$s row format.', 'performance-lab' ),
-				$this->name,
-				$target_storage_engine,
-				$target_row_format
-			) : sprintf(
-			/* translators: 1 MySQL or MariaDB  2: storage engine name, usually InnoDB  */
-				__( '%1$s performance improves when your tables use the modern %2$s storage engine.', 'performance-lab' ),
-				$this->name,
-				$target_storage_engine
-			);
-		$exhortation = __( 'Consider upgrading these tables.', 'performance-lab' );
-		/* translators: header of column */
-		$action_table_header_1 = __( 'Table Name', 'performance-lab' );
-		/* translators: header of column */
-		$action_table_header_2 = __( 'WP-CLI command to upgrade', 'performance-lab' );
+	private function list_wrong_format_tables( array $wrong_format_tables ) {
+		$actions  = __( 'Ask your hosting provider to upgrade these tables.', 'performance-lab' );
+		$actions .= '<ul class="tablelist">';
+		foreach ( $wrong_format_tables as $name => $x ) {
+			$actions .= '<li>' . esc_html( $name ) . '</li>';
+		}
+		$actions .= '</ul>';
 
-		list( $description, $action ) = $this->utilities->instructions(
-			array(
-				$this,
-				'format_upgrade_command',
-			),
-			$explanation,
-			$exhortation,
-			$action_table_header_1,
-			$action_table_header_2,
-			$table_metrics
-		);
-
-		return $this->utilities->test_result(
-			$label,
-			$description . $action,
-			'',
-			'recommended',
-			'orange'
-		);
-	}
-
-	/** Function to format the appropriate DDL statement for the table name.
-	 *
-	 * @param string $table_name The name of the table to put into the statement.
-	 *
-	 * @return string The statement.
-	 */
-	public function format_upgrade_command( $table_name ) {
-		$target_storage_engine = $this->utilities->get_threshold_value( 'target_storage_engine' );
-		$target_row_format     = $this->utilities->get_threshold_value( 'target_row_format' );
-
-		$result = ( 1 === $this->version->unconstrained )
-			? "wp db query \"ALTER TABLE $table_name ENGINE=$target_storage_engine ROW_FORMAT=$target_row_format\""
-			: "wp db query \"ALTER TABLE $table_name ENGINE=$target_storage_engine\"";
-
-		return wordwrap( $result, 64, PHP_EOL . '    ', false );
+		return $actions;
 	}
 
 }

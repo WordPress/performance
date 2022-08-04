@@ -1,11 +1,8 @@
 /* eslint-disable */
 /**
- * TODO handles clipboard for wpcli commands
+ * Handles clipboard for database upgrade.
  *
  * @since 1.0.4
- * @output wp-content/plugins/performance-lab/TODO
- *
- * @namespace performanceLabSiteHealthAuditDatabaseClip
  *
  * @requires jQuery, ClipboardJs
  */

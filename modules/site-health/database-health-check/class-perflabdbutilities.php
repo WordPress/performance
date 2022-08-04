@@ -87,6 +87,8 @@ class PerflabDbUtilities {
 		return self::$instance;
 	}
 
+
+
 	/** Generate health-check result array.
 	 *
 	 * @param string $label Test label visible to user.
@@ -98,6 +100,37 @@ class PerflabDbUtilities {
 	 * @return array
 	 */
 	public function test_result( $label, $description, $actions = '', $status = 'good', $color = 'blue' ) {
+		$badge_label = __( 'Database Performance', 'performance-lab' );
+		return $this->result( $badge_label, $label, $description, $actions, $status, $color );
+	}
+
+	/** Generate index-check result array.
+	 *
+	 * @param string $label Test label visible to user.
+	 * @param string $description Test long description visible to user.
+	 * @param string $actions Actions to take to correct the problem, visible to user, default ''.
+	 * @param string $status 'critical', 'recommended', 'good', default 'good'.
+	 * @param string $color a color specifier like 'blue', 'orange', 'red', default 'blue'.
+	 *
+	 * @return array
+	 */
+	public function test_index_result( $label, $description, $actions = '', $status = 'good', $color = 'blue' ) {
+		$badge_label = __( 'Database Keys', 'performance-lab' );
+		return $this->result( $badge_label, $label, $description, $actions, $status, $color );
+	}
+
+		/** Generate health-check result array.
+		 *
+		 * @param string $badge_label Badge text next to accordion.
+		 * @param string $label Test label visible to user.
+		 * @param string $description Test long description visible to user.
+		 * @param string $actions Actions to take to correct the problem, visible to user, default ''.
+		 * @param string $status 'critical', 'recommended', 'good', default 'good'.
+		 * @param string $color a color specifier like 'blue', 'orange', 'red', default 'blue'.
+		 *
+		 * @return array
+		 */
+	private function result( $badge_label, $label, $description, $actions = '', $status = 'good', $color = 'blue' ) {
 		$this->test_sequence_number ++;
 
 		return array(
@@ -105,7 +138,7 @@ class PerflabDbUtilities {
 			'status'      => $status,
 			'description' => $this->sanitize( $description ),
 			'badge'       => array(
-				'label' => esc_html__( 'Database Performance', 'performance-lab' ),
+				'label' => esc_html( $badge_label ),
 				'color' => $color,
 			),
 			'actions'     => is_string( $actions ) ? $this->sanitize( $actions ) : '',
