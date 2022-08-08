@@ -660,7 +660,7 @@ function webp_uploads_wepb_fallback() {
 	?>
 	( function( d, i, s, p ) {
 		s = d.createElement( s );
-		s.src = '<?php echo esc_url_raw( plugins_url( '/fallback.js', __FILE__ ) ); ?>';
+		s.src = '<?php echo esc_url_raw( plugins_url( '/dist/fallback.js', __FILE__ ) ); ?>';
 
 		i = d.createElement( i );
 		i.src = p + 'jIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
