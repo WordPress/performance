@@ -54,7 +54,11 @@ window.wpPerfLab = window.wpPerfLab || {};
 			}
 
 			var jsonp = document.createElement( 'script' );
-			jsonp.src = restApi + 'wp/v2/media/?_fields=id,media_details&_jsonp=wpPerfLab.webpUploadsFallbackWebpImages&per_page=100&include=' + pageIds.join( ',' );
+			var restPath = 'wp/v2/media/?_fields=id,media_details&_jsonp=wpPerfLab.webpUploadsFallbackWebpImages&per_page=100&include=' + pageIds.join( ',' );
+			if ( -1 !== restApi.indexOf( '?' ) ) {
+				restPath = restPath.replace( '?', '&' );
+			}
+			jsonp.src = restApi + restPath;
 			document.body.appendChild( jsonp );
 		}
 	};
@@ -69,7 +73,7 @@ window.wpPerfLab = window.wpPerfLab || {};
 				loadMediaDetails( mutationList[i].addedNodes );
 			}
 		} );
-	
+
 		observer.observe( document.body, {
 			subtree: true,
 			childList: true,
