@@ -28,9 +28,9 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 			continue;
 		}
 
-		$directory = dirname( $details['source_url'] );
+		$image_url_basename = wp_basename( $details['source_url'] );
 		foreach ( $details['sources'] as $mime => &$mime_details ) {
-			$mime_details['source_url'] = "{$directory}/{$mime_details['file']}";
+			$mime_details['source_url'] = str_replace( $image_url_basename, $mime_details['file'], $details['source_url'] );
 		}
 	}
 
