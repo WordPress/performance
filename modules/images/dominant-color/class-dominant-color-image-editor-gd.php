@@ -11,7 +11,7 @@
 
 /**
  * WordPress Image Editor Class for Image Manipulation through GD
- * with dominant color detection
+ * with dominant color detection.
  *
  * @since 1.2.0
  *

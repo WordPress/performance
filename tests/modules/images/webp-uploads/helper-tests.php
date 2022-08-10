@@ -92,8 +92,8 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'filesize', $result );
 		$this->assertArrayHasKey( 'file', $result );
-		$this->assertStringEndsWith( '300x300.webp', $result['file'] );
-		$this->assertFileExists( "{$directory}{$name}-300x300.webp" );
+		$this->assertStringEndsWith( '300x300-jpeg.webp', $result['file'] );
+		$this->assertFileExists( "{$directory}{$name}-300x300-jpeg.webp" );
 	}
 
 	/**
@@ -453,5 +453,94 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 
 		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
 		$this->assertFalse( $output );
+	}
+
+	public function test_webp_uploads_in_frontend_body_without_wp_query() {
+		unset( $GLOBALS['wp_query'] );
+
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_with_feed() {
+		$this->mock_empty_action( 'template_redirect' );
+		$GLOBALS['wp_query']->is_feed = true;
+
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_without_template_redirect() {
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_before_template_redirect() {
+		$result = webp_uploads_in_frontend_body();
+		$this->mock_empty_action( 'template_redirect' );
+
+		$this->assertFalse( $result );
+	}
+
+	public function test_webp_uploads_in_frontend_body_after_template_redirect() {
+		$this->mock_empty_action( 'template_redirect' );
+		$result = webp_uploads_in_frontend_body();
+
+		$this->assertTrue( $result );
+	}
+
+	public function test_webp_uploads_in_frontend_body_within_wp_head() {
+		$this->mock_empty_action( 'template_redirect' );
+
+		// Call function within a 'wp_head' callback.
+		remove_all_actions( 'wp_head' );
+		$result = null;
+		add_action(
+			'wp_head',
+			function() use ( &$result ) {
+				$result = webp_uploads_in_frontend_body();
+			}
+		);
+		do_action( 'wp_head' );
+
+		$this->assertFalse( $result );
+	}
+
+	private function mock_empty_action( $action ) {
+		remove_all_actions( $action );
+		do_action( $action );
+	}
+
+	/**
+	 * Add the original image's extension to the WebP file name to ensure it is unique
+	 *
+	 * @dataProvider data_provider_same_image_name
+	 *
+	 * @test
+	 */
+	public function it_should_add_original_image_extension_to_the_webp_file_name_to_ensure_it_is_unique( $jpeg_image, $jpg_image ) {
+		$jpeg_image_attachment_id = $this->factory->attachment->create_upload_object( $jpeg_image );
+		$jpg_image_attachment_id  = $this->factory->attachment->create_upload_object( $jpg_image );
+
+		$size_data = array(
+			'width'  => 300,
+			'height' => 300,
+			'crop'   => true,
+		);
+
+		$jpeg_image_result = webp_uploads_generate_additional_image_source( $jpeg_image_attachment_id, 'medium', $size_data, 'image/webp' );
+		$jpg_image_result  = webp_uploads_generate_additional_image_source( $jpg_image_attachment_id, 'medium', $size_data, 'image/webp' );
+
+		$this->assertIsArray( $jpeg_image_result );
+		$this->assertIsArray( $jpg_image_result );
+		$this->assertStringEndsWith( '300x300-jpeg.webp', $jpeg_image_result['file'] );
+		$this->assertStringEndsWith( '300x300-jpg.webp', $jpg_image_result['file'] );
+		$this->assertNotSame( $jpeg_image_result['file'], $jpg_image_result['file'] );
+	}
+
+	public function data_provider_same_image_name() {
+		return array(
+			array(
+				TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/image.jpeg',
+				TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/image.jpg',
+			),
+		);
 	}
 }

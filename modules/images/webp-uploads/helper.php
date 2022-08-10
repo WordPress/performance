@@ -58,13 +58,13 @@ function webp_uploads_get_upload_image_mime_transforms() {
  * @since 1.0.0
  * @access private
  *
- * @param int    $attachment_id         The ID of the attachment from where this image would be created.
- * @param string $image_size            The size name that would be used to create the image source, out of the registered subsizes.
- * @param array  $size_data             An array with the dimensions of the image: height, width and crop.
- * @param string $mime                  The target mime in which the image should be created.
- * @param string $destination_file_name The path where the file would be stored, including the extension. If empty, `generate_filename` is used to create the destination file name.
+ * @param int         $attachment_id         The ID of the attachment from where this image would be created.
+ * @param string      $image_size            The size name that would be used to create the image source, out of the registered subsizes.
+ * @param array       $size_data             An array with the dimensions of the image: height, width and crop.
+ * @param string      $mime                  The target mime in which the image should be created.
+ * @param string|null $destination_file_name The path where the file would be stored, including the extension. If null, `generate_filename` is used to create the destination file name.
  *
- * @return array|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
+ * @return array|WP_Error An array with the file and filesize if the image was created correctly, otherwise a WP_Error.
  */
 function webp_uploads_generate_additional_image_source( $attachment_id, $image_size, array $size_data, $mime, $destination_file_name = null ) {
 	/**
@@ -80,7 +80,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	 * @param string              $image_size    The size name that would be used to create this image, out of the registered subsizes.
 	 * @param array               $size_data     An array with the dimensions of the image: height, width and crop {'height'=>int, 'width'=>int, 'crop'}.
 	 * @param string              $mime          The target mime in which the image should be created.
-	 * @return array|null|WP_Error An array with the file and filesize if the image was created correctly otherwise a WP_Error
+	 * @return array|null|WP_Error array|null|WP_Error An array with the file and filesize if the image was created correctly, otherwise a WP_Error.
 	 */
 	$image = apply_filters( 'webp_uploads_pre_generate_additional_image_source', null, $attachment_id, $image_size, $size_data, $mime );
 	if ( is_wp_error( $image ) ) {
@@ -138,13 +138,11 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	$editor->resize( $width, $height, $crop );
 
 	if ( null === $destination_file_name ) {
+		$ext                   = pathinfo( $image_path, PATHINFO_EXTENSION );
+		$suffix                = $editor->get_suffix();
+		$suffix               .= "-{$ext}";
 		$extension             = explode( '|', $allowed_mimes[ $mime ] );
-		$destination_file_name = $editor->generate_filename( null, null, $extension[0] );
-	}
-
-	// Skip creation of duplicate WebP image if an image file already exists in the directory.
-	if ( file_exists( $destination_file_name ) ) {
-		return new WP_Error( 'webp_image_file_present', __( 'The WebP image already exists.', 'performance-lab' ) );
+		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
 	}
 
 	$image = $editor->save( $destination_file_name, $mime );
@@ -272,9 +270,32 @@ function webp_uploads_get_content_image_mimes( $attachment_id, $context ) {
 }
 
 /**
+ * Verifies if the request is for a frontend context within the <body> tag.
+ *
+ * @since 1.3.0
+ *
+ * @return bool True if in the <body> within a frontend request, false otherwise.
+ */
+function webp_uploads_in_frontend_body() {
+	global $wp_query;
+
+	// Check if this request is generally outside (or before) any frontend context.
+	if ( ! isset( $wp_query ) || defined( 'REST_REQUEST' ) || defined( 'XMLRPC_REQUEST' ) || is_feed() ) {
+		return false;
+	}
+
+	// Check if we're anywhere before 'template_redirect' or within the 'wp_head' action.
+	if ( ! did_action( 'template_redirect' ) || doing_action( 'wp_head' ) ) {
+		return false;
+	}
+
+	return true;
+}
+
+/**
  * Check whether the additional image is larger than the original image.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param array $original   An array with the metadata of the attachment.
  * @param array $additional An array containing the filename and file size for additional mime.
@@ -290,7 +311,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 		 * By default the performance lab plugin will use the mime type with the smaller filesize
 		 * rather than defaulting to `webp`.
 		 *
-		 * @since n.e.x.t
+		 * @since 1.3.0
 		 *
 		 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
 		 */

@@ -74,6 +74,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 
 	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
 	$filename           = pathinfo( $file, PATHINFO_FILENAME );
+	$ext                = pathinfo( $file, PATHINFO_EXTENSION );
 	$allowed_mimes      = array_flip( wp_get_mime_types() );
 
 	// Create the sources for the full sized image.
@@ -89,7 +90,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		}
 
 		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
-		$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
+		$destination = trailingslashit( $original_directory ) . "{$filename}-{$ext}.{$extension[0]}";
 		$image       = webp_uploads_generate_additional_image_source( $attachment_id, 'full', $original_size_data, $targeted_mime, $destination );
 
 		if ( is_wp_error( $image ) ) {
@@ -444,6 +445,11 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  * @return string The content with the updated references to the images.
  */
 function webp_uploads_update_image_references( $content ) {
+	// Bail early if request is not for the frontend.
+	if ( ! webp_uploads_in_frontend_body() ) {
+		return $content;
+	}
+
 	// This content does not have any tag on it, move forward.
 	if ( ! preg_match_all( '/<(img)\s[^>]+>/', $content, $img_tags, PREG_SET_ORDER ) ) {
 		return $content;
@@ -492,7 +498,7 @@ add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
  * for the specified image sizes, the *.webp references are stored inside of each size.
  *
  * @since 1.0.0
- * @since n.e.x.t Remove `webp_uploads_prefer_smaller_image_file` filter
+ * @since 1.3.0 Remove `webp_uploads_prefer_smaller_image_file` filter.
  *
  * @param string $original_image An <img> tag where the urls would be updated.
  * @param string $context        The context where this is function is being used.
@@ -621,10 +627,10 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
 /**
  * Adds a fallback mechanism to replace webp images with jpeg alternatives on older browsers.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  */
 function webp_uploads_wepb_fallback() {
-	// Get mime type transofrms for the site.
+	// Get mime type transforms for the site.
 	$transforms = webp_uploads_get_upload_image_mime_transforms();
 
 	// We need to add fallback only if jpeg alternatives for the webp images are enabled for the server.
@@ -644,6 +650,7 @@ function webp_uploads_wepb_fallback() {
 		i = d.createElement( i );
 		i.src = p + 'jIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
 		i.onload = function() {
+			i.onload = undefined;
 			i.src = p + 'h4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
 		};
 
@@ -670,7 +677,7 @@ function webp_uploads_wepb_fallback() {
  * Developers can control the generation of additional mime images for all sizes using the
  * webp_uploads_image_sizes_with_additional_mime_type_support filter.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @return array An array of image sizes that can have additional mime types.
  */
@@ -691,7 +698,7 @@ function webp_uploads_get_image_sizes_additional_mime_type_support() {
 	/**
 	 * Filters whether additional mime types are allowed for image sizes.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.3.0
 	 *
 	 * @param array $allowed_sizes A map of image size names and whether they are allowed to have additional mime types.
 	 */

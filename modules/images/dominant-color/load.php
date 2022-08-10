@@ -34,7 +34,7 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 );
 
 /**
- * Filter various image attributes to add the dominant color to the image
+ * Filters various image attributes to add the dominant color to the image.
  *
  * @since 1.2.0
  *
@@ -145,9 +145,9 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 	 *
 	 * @since 1.2.0
 	 *
-	 * @param string $content the content to filter.
-	 * @param string $context the context of the content.
-	 * @return string content
+	 * @param string $content The content to filter.
+	 * @param string $context The context of the content.
+	 * @return string The updated $content.
 	 */
 	function dominant_color_filter_content_tags( $content, $context = null ) {
 		if ( null === $context ) {
@@ -339,7 +339,7 @@ function wp_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
 /**
  * Gets the dominant color for an image attachment.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param int $attachment_id Attachment ID for image.
  * @return string|null Hex value of dominant color or null if not set.
@@ -363,7 +363,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 /**
  * Returns whether an image attachment has transparency.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param int $attachment_id Attachment ID for image.
  * @return bool|null Whether the image has transparency, or null if not set.
@@ -385,7 +385,7 @@ function dominant_color_has_transparency( $attachment_id ) {
 /**
  * Gets hex color from RGB.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param int $red Red 0-255.
  * @param int $green Green 0-255.

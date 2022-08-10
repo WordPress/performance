@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.
  * Requires at least: 5.8
  * Requires PHP: 5.6
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: WordPress Performance Group
  * Author URI: https://make.wordpress.org/core/tag/performance/
  * License: GPLv2 or later
@@ -15,8 +15,9 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.2.0' );
+define( 'PERFLAB_VERSION', '1.3.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
+define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
 
@@ -50,7 +51,7 @@ function perflab_get_modules_setting_default() {
 
 	if ( null === $default_option ) {
 		// To set the default value for which modules are enabled, rely on this generated file.
-		$default_enabled_modules = require plugin_dir_path( __FILE__ ) . 'default-enabled-modules.php';
+		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
 		$default_option          = array_reduce(
 			$default_enabled_modules,
 			function( $module_settings, $module_dir ) {
@@ -140,7 +141,7 @@ function perflab_get_active_modules() {
 /**
  * Gets the active and valid performance modules.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param string $module Slug of the module.
  * @return bool True if the module is active and valid, otherwise false.
@@ -152,7 +153,7 @@ function perflab_is_valid_module( $module ) {
 	}
 
 	// Do not load module if no longer exists.
-	$module_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
+	$module_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/load.php';
 	if ( ! file_exists( $module_file ) ) {
 		return false;
 	}
@@ -195,13 +196,13 @@ add_action( 'wp_head', 'perflab_render_generator' );
 /**
  * Checks whether the given module can be loaded in the current environment.
  *
- * @since n.e.x.t
+ * @since 1.3.0
  *
  * @param string $module Slug of the module.
  * @return bool Whether the module can be loaded or not.
  */
 function perflab_can_load_module( $module ) {
-	$module_load_file = plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/can-load.php';
+	$module_load_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/can-load.php';
 
 	// If the `can-load.php` file does not exist, assume the module can be loaded.
 	if ( ! file_exists( $module_load_file ) ) {
@@ -224,14 +225,14 @@ function perflab_can_load_module( $module ) {
  * Loads the active and valid performance modules.
  *
  * @since 1.0.0
- * @since n.e.x.t Renamed to perflab_load_active_and_valid_modules().
+ * @since 1.3.0 Renamed to perflab_load_active_and_valid_modules().
  */
 function perflab_load_active_and_valid_modules() {
 	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
 
 	foreach ( $active_and_valid_modules as $module ) {
 
-		require_once plugin_dir_path( __FILE__ ) . 'modules/' . $module . '/load.php';
+		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/load.php';
 	}
 }
 
@@ -239,8 +240,8 @@ perflab_load_active_and_valid_modules();
 
 // Only load admin integration when in admin.
 if ( is_admin() ) {
-	require_once plugin_dir_path( __FILE__ ) . 'admin/load.php';
+	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
 }
 
 // Polyfills.
-require_once plugin_dir_path( __FILE__ ) . 'polyfills.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'polyfills.php';

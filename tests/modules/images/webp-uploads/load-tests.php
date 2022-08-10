@@ -197,7 +197,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertStringEndsWith( '-scaled.jpg', get_attached_file( $attachment_id ) );
 		$this->assertImageHasSizeSource( $attachment_id, 'medium', 'image/webp' );
 		$this->assertStringEndsNotWith( '-scaled.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
-		$this->assertStringEndsWith( '-300x200.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
+		$this->assertStringEndsWith( '-300x200-jpg.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
 	}
 
 	/**
@@ -330,6 +330,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_avoid_the_change_of_urls_of_images_that_are_not_part_of_the_media_library() {
+		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
+		$this->mock_frontend_body_hooks();
+
 		$paragraph = '<p>Donec accumsan, sapien et <img src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">, id commodo nisi sapien et est. Mauris nisl odio, iaculis vitae pellentesque nec.</p>';
 
 		$this->assertSame( $paragraph, webp_uploads_update_image_references( $paragraph ) );
@@ -343,6 +346,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_avoid_replacing_not_existing_attachment_i_ds() {
+		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
+		$this->mock_frontend_body_hooks();
+
 		$paragraph = '<p>Donec accumsan, sapien et <img class="wp-image-0" src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">, id commodo nisi sapien et est. Mauris nisl odio, iaculis vitae pellentesque nec.</p>';
 
 		$this->assertSame( $paragraph, webp_uploads_update_image_references( $paragraph ) );
@@ -383,6 +389,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
+
+		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
+		$this->mock_frontend_body_hooks();
 
 		$tag = wp_get_attachment_image( $attachment_id, 'medium' );
 
@@ -530,7 +539,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			$this->assertStringContainsString( $size['height'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString(
 				// Remove the extension from the file.
-				substr( $size['sources']['image/webp']['file'], 0, -4 ),
+				substr( $size['sources']['image/webp']['file'], 0, -10 ),
 				$size['sources']['image/jpeg']['file']
 			);
 		}
@@ -729,6 +738,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
 
+		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
+		$this->mock_frontend_body_hooks();
+
 		apply_filters(
 			'the_content',
 			sprintf(
@@ -802,5 +814,13 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		$this->assertImageHasSizeSource( $attachment_id, 'allowed_size_400x300', 'image/webp' );
 		$this->assertImageNotHasSizeSource( $attachment_id, 'not_allowed_size_200x150', 'image/webp' );
+	}
+
+	/**
+	 * Runs (empty) hooks to satisfy webp_uploads_in_frontend_body() conditions.
+	 */
+	private function mock_frontend_body_hooks() {
+		remove_all_actions( 'template_redirect' );
+		do_action( 'template_redirect' );
 	}
 }
