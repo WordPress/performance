@@ -513,23 +513,10 @@ function webp_uploads_img_tag_update_mime_type( $original_image, $context, $atta
 		return $image;
 	}
 
-	/**
-	 * Filters mime types that should be used to update all images in the content. The order of
-	 * mime types matters. The first mime type in the list will be used if it is supported by an image.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param array  $target_mimes  The list of mime types that can be used to update images in the content.
-	 * @param int    $attachment_id The attachment ID.
-	 * @param string $context       The current context.
-	 */
-	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', array( 'image/webp', 'image/jpeg' ), $attachment_id, $context );
-
-	// Get the original mime type for comparison.
 	$original_mime = get_post_mime_type( $attachment_id );
+	$target_mimes  = webp_uploads_get_content_image_mimes( $attachment_id, $context );
 
 	foreach ( $target_mimes as $target_mime ) {
-
 		if ( $target_mime === $original_mime ) {
 			continue;
 		}
@@ -574,7 +561,6 @@ function webp_uploads_img_tag_update_mime_type( $original_image, $context, $atta
 		}
 
 		foreach ( $target_mimes as $target_mime ) {
-
 			if ( $target_mime === $original_mime ) {
 				continue;
 			}
@@ -604,7 +590,6 @@ function webp_uploads_img_tag_update_mime_type( $original_image, $context, $atta
 	}
 
 	foreach ( $target_mimes as $target_mime ) {
-
 		if ( $target_mime === $original_mime ) {
 			continue;
 		}
