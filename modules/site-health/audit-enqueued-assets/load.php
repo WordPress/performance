@@ -144,7 +144,7 @@ function perflab_aea_enqueued_js_assets_test() {
 		'label'       => esc_html__( 'Enqueued scripts', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
-			'label' => esc_html__( 'Performance', 'performance-lab' ),
+			'label' => __( 'Performance', 'performance-lab' ),
 			'color' => 'blue',
 		),
 		'description' => sprintf(
@@ -186,8 +186,7 @@ function perflab_aea_enqueued_js_assets_test() {
 	$scripts_size_treshold = apply_filters( 'perflab_aea_enqueued_scripts_byte_size_threshold', 300000 );
 
 	if ( $enqueued_scripts > $scripts_treshold || perflab_aea_get_total_size_bytes_enqueued_scripts() > $scripts_size_treshold ) {
-		$result['status']         = 'recommended';
-		$result['badge']['color'] = 'orange';
+		$result['status'] = 'recommended';
 
 		$result['description'] = sprintf(
 			'<p>%s</p>',
@@ -238,7 +237,7 @@ function perflab_aea_enqueued_css_assets_test() {
 		'label'       => esc_html__( 'Enqueued styles', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
-			'label' => esc_html__( 'Performance', 'performance-lab' ),
+			'label' => __( 'Performance', 'performance-lab' ),
 			'color' => 'blue',
 		),
 		'description' => sprintf(
@@ -279,8 +278,7 @@ function perflab_aea_enqueued_css_assets_test() {
 	 */
 	$styles_size_threshold = apply_filters( 'perflab_aea_enqueued_styles_byte_size_threshold', 100000 );
 	if ( $enqueued_styles > $styles_threshold || perflab_aea_get_total_size_bytes_enqueued_styles() > $styles_size_threshold ) {
-		$result['status']         = 'recommended';
-		$result['badge']['color'] = 'orange';
+		$result['status'] = 'recommended';
 
 		$result['description'] = sprintf(
 			'<p>%s</p>',

@@ -47,7 +47,7 @@ function perflab_afpc_page_cache_test() {
 	$result = array(
 		'badge'       => array(
 			'label' => __( 'Performance', 'performance-lab' ),
-			'color' => 'green',
+			'color' => 'blue',
 		),
 		'description' => wp_kses_post( $description ),
 		'test'        => 'perflab_page_cache',
@@ -65,10 +65,9 @@ function perflab_afpc_page_cache_test() {
 	$page_cache_detail = perflab_afpc_get_page_cache_detail();
 
 	if ( is_wp_error( $page_cache_detail ) ) {
-		$result['badge']['color'] = 'orange';
-		$result['label']          = __( 'Unable to detect the presence of page caching', 'performance-lab' );
-		$result['status']         = 'recommended';
-		$error_info               = sprintf(
+		$result['label']  = __( 'Unable to detect the presence of page caching', 'performance-lab' );
+		$result['status'] = 'recommended';
+		$error_info       = sprintf(
 			/* translators: 1 is error message, 2 is error code */
 			__( 'Unable to detect page caching due to possible loopback request problem. Please verify that the loopback request test is passing. Error: %1$s (Code: %2$s)', 'performance-lab' ),
 			$page_cache_detail->get_error_message(),
@@ -82,15 +81,12 @@ function perflab_afpc_page_cache_test() {
 
 	switch ( $page_cache_detail['status'] ) {
 		case 'recommended':
-			$result['badge']['color'] = 'orange';
-			$result['label']          = __( 'Page caching is not detected but the server response time is OK', 'performance-lab' );
+			$result['label'] = __( 'Page caching is not detected but the server response time is OK', 'performance-lab' );
 			break;
 		case 'good':
-			$result['badge']['color'] = 'green';
-			$result['label']          = __( 'Page caching is detected and the server response time is good', 'performance-lab' );
+			$result['label'] = __( 'Page caching is detected and the server response time is good', 'performance-lab' );
 			break;
 		default:
-			$result['badge']['color'] = 'red';
 			if ( empty( $page_cache_detail['headers'] ) && ! $page_cache_detail['advanced_cache_present'] ) {
 				$result['label'] = __( 'Page caching is not detected and the server response time is slow', 'performance-lab' );
 			} else {

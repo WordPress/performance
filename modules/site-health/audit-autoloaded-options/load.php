@@ -43,7 +43,7 @@ function perflab_aao_autoloaded_options_test() {
 		'label'       => esc_html__( 'Autoloaded options are acceptable', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
-			'label' => esc_html__( 'Performance', 'performance-lab' ),
+			'label' => __( 'Performance', 'performance-lab' ),
 			'color' => 'blue',
 		),
 		'description' => sprintf(
@@ -69,10 +69,9 @@ function perflab_aao_autoloaded_options_test() {
 		return $result;
 	}
 
-	$result['status']         = 'critical';
-	$result['badge']['color'] = 'red';
-	$result['label']          = esc_html__( 'Autoloaded options could affect performance', 'performance-lab' );
-	$result['description']    = sprintf(
+	$result['status']      = 'critical';
+	$result['label']       = esc_html__( 'Autoloaded options could affect performance', 'performance-lab' );
+	$result['description'] = sprintf(
 		/* translators: 1. Number of autoloaded options. 2. Autoloaded options size. */
 		'<p>' . esc_html( $base_description ) . ' ' . esc_html__( 'Your site has %1$s autoloaded options (size: %2$s) in the options table, which could cause your site to be slow. You can reduce the number of autoloaded options by cleaning up your site\'s options table.', 'performance-lab' ) . '</p>',
 		$autoloaded_options_count,
