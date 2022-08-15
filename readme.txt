@@ -19,10 +19,10 @@ Currently the plugin includes the following performance modules:
 
 * **Dominant Color:** Adds support to store dominant color for an image and create a placeholder background with that color.
 * **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
-* **Audit Full Page Cache:** Adds a check for full page cache in Site Health status.
-* **WebP Support:** Adds a WebP support check in Site Health status.
-* **Audit Autoloaded Options:** Adds a check for autoloaded options in Site Health status.
-* **Audit Enqueued Assets:** Adds a CSS and JS resource check in Site Health status.
+* **Full Page Cache Health Check:** Adds a check for full page cache in Site Health status.
+* **WebP Support Health Check:** Adds a WebP support check in Site Health status.
+* **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
+* **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
 * **Persistent Object Cache Health Check:** Adds a persistent object cache check for sites with non-trivial amounts of data in Site Health status.
 
 == Installation ==
@@ -67,6 +67,22 @@ Contributions welcome! There are several ways to contribute:
 * Join the weekly chat (Tuesdays at 16:00 UTC) in the [#performance channel on Slack](https://wordpress.slack.com/archives/performance)
 
 == Changelog ==
+
+= 1.4.0 =
+
+**Enhancements**
+
+* Images: Enhance JS replacement mechanism for WebP to JPEG to more reliably replace full file name. ([443](https://github.com/WordPress/performance/pull/443))
+* Images: Introduce `webp_uploads_get_content_image_mimes()` to get content image MIME replacement rules. ([420](https://github.com/WordPress/performance/pull/420))
+* Infrastructure: Add `PERFLAB_PLUGIN_DIR_PATH` constant for `plugin_dir_path()`. ([429](https://github.com/WordPress/performance/pull/429))
+* Infrastructure: Rename Site Health check modules for language and consistency. ([423](https://github.com/WordPress/performance/pull/423))
+
+**Bug Fixes**
+
+* Site Health: Fix incorrect usage of badge colors in all Site Health checks. ([472](https://github.com/WordPress/performance/pull/472))
+* Images: Add the original image's extension to the WebP file name to ensure it is unique. ([444](https://github.com/WordPress/performance/pull/444))
+* Images: Fix REST API support for plain permalinks. ([457](https://github.com/WordPress/performance/pull/457))
+* Infrastructure: Remove plugin option network-wide for Multisite during uninstall. ([458](https://github.com/WordPress/performance/pull/458))
 
 = 1.3.0 =
 
