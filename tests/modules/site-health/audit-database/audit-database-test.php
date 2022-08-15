@@ -9,11 +9,10 @@
 class Audit_Database_Tests extends WP_UnitTestCase {
 
 	public function __construct( $name = null, array $data = array(), $data_name = '' ) {
-		$dir = '/../../../../modules/site-health/database-health-check';
+		$dir = '/../../../../modules/site-health/audit-database';
 		require_once __DIR__ . $dir . '/class-perflabdbutilities.php';
 		require_once __DIR__ . $dir . '/class-perflabdbmetrics.php';
 		require_once __DIR__ . $dir . '/class-perflabdbtests.php';
-		require_once __DIR__ . $dir . '/class-perflabdbindexes.php';
 		parent::__construct( $name, $data, $data_name );
 	}
 
@@ -21,12 +20,10 @@ class Audit_Database_Tests extends WP_UnitTestCase {
 
 		$pdm   = new PerflabDbMetrics();
 		$pdp   = new PerflabDbTests( $pdm );
-		$pdi   = new PerflabDbIndexes( $pdm );
 		$utils = PerflabDbUtilities::get_instance();
 
 		$this->assertIsObject( $pdm, 'Failed to instantiate PerflabDbMetrics' );
 		$this->assertIsObject( $pdp, 'Failed to instantiate PerflabDbTests' );
-		$this->assertIsObject( $pdi, 'Failed to instantiate PerflabDbIndexes' );
 		$this->assertIsObject( $utils, 'Failed to instantiate PerflabDbUtilities' );
 		$this->assertEquals( 32814, $pdm->first_compatible_db_version, 'Wrong first_compatible_db_version' );
 	}

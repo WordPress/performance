@@ -17,8 +17,8 @@
  */
 function perflab_ad_add_database_index_tests( $tests ) {
 
-	require_once __DIR__ . '/../database-health-check/class-perflabdbutilities.php';
-	require_once __DIR__ . '/../database-health-check/class-perflabdbmetrics.php';
+	require_once __DIR__ . '/../audit-database/class-perflabdbutilities.php';
+	require_once __DIR__ . '/../audit-database/class-perflabdbmetrics.php';
 	require_once __DIR__ . '/class-perflabdbindexes.php';
 
 	wp_enqueue_style( 'perflabdbclippables', plugin_dir_url( __FILE__ ) . 'assets/perflabdbclippables.css' );
