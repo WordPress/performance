@@ -7,7 +7,7 @@
  * Requires PHP: 5.6
  * Version: 1.4.0
  * Author: WordPress Performance Team
- * Author URI: https://make.wordpress.org/core/tag/performance/
+ * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * Text Domain: performance-lab
