@@ -42,16 +42,10 @@ class Audit_Full_Page_Cache_Tests extends WP_UnitTestCase {
 	 * @covers ::perflab_afpc_check_for_page_caching()
 	 */
 	public function test_perflab_afpc_page_cache_test( $responses, $expected_status, $expected_label, $good_basic_auth = null, $delay_the_response = false ) {
-		$badge_color = array(
-			'critical'    => 'red',
-			'recommended' => 'orange',
-			'good'        => 'green',
-		);
-
 		$expected_props = array(
 			'badge'  => array(
 				'label' => __( 'Performance', 'performance-lab' ),
-				'color' => $badge_color[ $expected_status ],
+				'color' => 'blue',
 			),
 			'test'   => 'perflab_page_cache',
 			'status' => $expected_status,

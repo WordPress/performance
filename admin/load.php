@@ -402,7 +402,7 @@ function perflab_render_pointer() {
 	$content = sprintf(
 		/* translators: %s: settings page link */
 		__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ),
-		'<a href="' . esc_url( add_query_arg( 'page', 'perflab-modules', admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
+		'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
 	);
 
 	?>

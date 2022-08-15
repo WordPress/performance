@@ -138,13 +138,11 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	$editor->resize( $width, $height, $crop );
 
 	if ( null === $destination_file_name ) {
+		$ext                   = pathinfo( $image_path, PATHINFO_EXTENSION );
+		$suffix                = $editor->get_suffix();
+		$suffix               .= "-{$ext}";
 		$extension             = explode( '|', $allowed_mimes[ $mime ] );
-		$destination_file_name = $editor->generate_filename( null, null, $extension[0] );
-	}
-
-	// Skip creation of duplicate WebP image if an image file already exists in the directory.
-	if ( file_exists( $destination_file_name ) ) {
-		return new WP_Error( 'webp_image_file_present', __( 'The WebP image already exists.', 'performance-lab' ) );
+		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
 	}
 
 	$image = $editor->save( $destination_file_name, $mime );
@@ -239,6 +237,36 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 
 	// Return an empty array if no sources found.
 	return array();
+}
+
+/**
+ * Returns mime types that should be used for an image in the specific context.
+ *
+ * @since 1.4.0
+ *
+ * @param int    $attachment_id The attachment ID.
+ * @param string $context       The current context.
+ * @return array Mime types to use for the image.
+ */
+function webp_uploads_get_content_image_mimes( $attachment_id, $context ) {
+	$target_mimes = array( 'image/webp', 'image/jpeg' );
+
+	/**
+	 * Filters mime types that should be used to update all images in the content. The order of
+	 * mime types matters. The first mime type in the list will be used if it is supported by an image.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array  $target_mimes  The list of mime types that can be used to update images in the content.
+	 * @param int    $attachment_id The attachment ID.
+	 * @param string $context       The current context.
+	 */
+	$target_mimes = apply_filters( 'webp_uploads_content_image_mimes', $target_mimes, $attachment_id, $context );
+	if ( ! is_array( $target_mimes ) ) {
+		$target_mimes = array();
+	}
+
+	return $target_mimes;
 }
 
 /**
