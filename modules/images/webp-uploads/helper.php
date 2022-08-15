@@ -242,7 +242,7 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 /**
  * Returns mime types that should be used for an image in the specific context.
  *
- * @since n.e.x.t
+ * @since 1.4.0
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $context       The current context.

@@ -34,7 +34,7 @@ perflab_delete_plugin_option();
 /**
  * Delete the current site's option.
  *
- * @since n.e.x.t
+ * @since 1.4.0
  */
 function perflab_delete_plugin_option() {
 	delete_option( 'perflab_modules_settings' );
