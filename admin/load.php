@@ -385,7 +385,7 @@ function perflab_admin_pointer( $hook_suffix ) {
 add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
 
 /**
- * Renders the Admin Pointer
+ * Renders the Admin Pointer.
  *
  * Handles the rendering of the admin pointer.
  *
@@ -402,13 +402,13 @@ function perflab_render_pointer() {
 	$content = sprintf(
 		/* translators: %s: settings page link */
 		__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ),
-		'<a href="' . esc_url( add_query_arg( 'page', 'perflab-modules', admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
+		'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
 	);
 
 	?>
 	<script id="perflab-admin-pointer" type="text/javascript">
 		jQuery( function() {
-			// Pointer Options
+			// Pointer Options.
 			var options = {
 				content: '<h3><?php echo esc_js( $heading ); ?></h3><p><?php echo wp_kses( $content, $wp_kses_options ); ?></p>',
 				position: {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Module Name: Audit Autoloaded Options
+ * Module Name: Autoloaded Options Health Check
  * Description: Adds a check for autoloaded options in Site Health status.
  * Experimental: Yes
  *
@@ -40,15 +40,15 @@ function perflab_aao_autoloaded_options_test() {
 	$base_description = __( 'Autoloaded options are configuration settings for plugins and themes that are automatically loaded with every page load in WordPress. Having too many autoloaded options can slow down your site.', 'performance-lab' );
 
 	$result = array(
-		'label'       => esc_html__( 'Autoloaded options are acceptable', 'performance-lab' ),
+		'label'       => __( 'Autoloaded options are acceptable', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
-			'label' => esc_html__( 'Performance', 'performance-lab' ),
+			'label' => __( 'Performance', 'performance-lab' ),
 			'color' => 'blue',
 		),
 		'description' => sprintf(
 			/* translators: 1. Number of autoloaded options. 2. Autoloaded options size. */
-			'<p>' . esc_html( $base_description ) . ' ' . esc_html__( 'Your site has %1$s autoloaded options (size: %2$s) in the options table, which is acceptable.', 'performance-lab' ) . '</p>',
+			'<p>' . esc_html( $base_description ) . ' ' . __( 'Your site has %1$s autoloaded options (size: %2$s) in the options table, which is acceptable.', 'performance-lab' ) . '</p>',
 			$autoloaded_options_count,
 			size_format( $autoloaded_options_size )
 		),
@@ -69,12 +69,11 @@ function perflab_aao_autoloaded_options_test() {
 		return $result;
 	}
 
-	$result['status']         = 'critical';
-	$result['badge']['color'] = 'red';
-	$result['label']          = esc_html__( 'Autoloaded options could affect performance', 'performance-lab' );
-	$result['description']    = sprintf(
+	$result['status']      = 'critical';
+	$result['label']       = __( 'Autoloaded options could affect performance', 'performance-lab' );
+	$result['description'] = sprintf(
 		/* translators: 1. Number of autoloaded options. 2. Autoloaded options size. */
-		'<p>' . esc_html( $base_description ) . ' ' . esc_html__( 'Your site has %1$s autoloaded options (size: %2$s) in the options table, which could cause your site to be slow. You can reduce the number of autoloaded options by cleaning up your site\'s options table.', 'performance-lab' ) . '</p>',
+		'<p>' . esc_html( $base_description ) . ' ' . __( 'Your site has %1$s autoloaded options (size: %2$s) in the options table, which could cause your site to be slow. You can reduce the number of autoloaded options by cleaning up your site\'s options table.', 'performance-lab' ) . '</p>',
 		$autoloaded_options_count,
 		size_format( $autoloaded_options_size )
 	);
@@ -92,7 +91,7 @@ function perflab_aao_autoloaded_options_test() {
 	/* translators: 1: HelpHub URL. 2: Link description. */
 		'<p><a target="_blank" href="%1$s">%2$s</a></p>',
 		esc_url( __( 'https://wordpress.org/support/article/optimization/#autoloaded-options', 'performance-lab' ) ),
-		esc_html__( 'More info about performance optimization', 'performance-lab' )
+		__( 'More info about performance optimization', 'performance-lab' )
 	);
 
 	/**

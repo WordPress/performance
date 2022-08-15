@@ -92,8 +92,8 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'filesize', $result );
 		$this->assertArrayHasKey( 'file', $result );
-		$this->assertStringEndsWith( '300x300.webp', $result['file'] );
-		$this->assertFileExists( "{$directory}{$name}-300x300.webp" );
+		$this->assertStringEndsWith( '300x300-jpeg.webp', $result['file'] );
+		$this->assertFileExists( "{$directory}{$name}-300x300-jpeg.webp" );
 	}
 
 	/**
@@ -506,5 +506,41 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	private function mock_empty_action( $action ) {
 		remove_all_actions( $action );
 		do_action( $action );
+	}
+
+	/**
+	 * Add the original image's extension to the WebP file name to ensure it is unique
+	 *
+	 * @dataProvider data_provider_same_image_name
+	 *
+	 * @test
+	 */
+	public function it_should_add_original_image_extension_to_the_webp_file_name_to_ensure_it_is_unique( $jpeg_image, $jpg_image ) {
+		$jpeg_image_attachment_id = $this->factory->attachment->create_upload_object( $jpeg_image );
+		$jpg_image_attachment_id  = $this->factory->attachment->create_upload_object( $jpg_image );
+
+		$size_data = array(
+			'width'  => 300,
+			'height' => 300,
+			'crop'   => true,
+		);
+
+		$jpeg_image_result = webp_uploads_generate_additional_image_source( $jpeg_image_attachment_id, 'medium', $size_data, 'image/webp' );
+		$jpg_image_result  = webp_uploads_generate_additional_image_source( $jpg_image_attachment_id, 'medium', $size_data, 'image/webp' );
+
+		$this->assertIsArray( $jpeg_image_result );
+		$this->assertIsArray( $jpg_image_result );
+		$this->assertStringEndsWith( '300x300-jpeg.webp', $jpeg_image_result['file'] );
+		$this->assertStringEndsWith( '300x300-jpg.webp', $jpg_image_result['file'] );
+		$this->assertNotSame( $jpeg_image_result['file'], $jpg_image_result['file'] );
+	}
+
+	public function data_provider_same_image_name() {
+		return array(
+			array(
+				TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/image.jpeg',
+				TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/image.jpg',
+			),
+		);
 	}
 }

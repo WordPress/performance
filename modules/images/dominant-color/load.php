@@ -34,7 +34,7 @@ function dominant_color_metadata( $metadata, $attachment_id ) {
 add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 );
 
 /**
- * Filter various image attributes to add the dominant color to the image
+ * Filters various image attributes to add the dominant color to the image.
  *
  * @since 1.2.0
  *
@@ -145,9 +145,9 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
 	 *
 	 * @since 1.2.0
 	 *
-	 * @param string $content the content to filter.
-	 * @param string $context the context of the content.
-	 * @return string content
+	 * @param string $content The content to filter.
+	 * @param string $context The context of the content.
+	 * @return string The updated $content.
 	 */
 	function dominant_color_filter_content_tags( $content, $context = null ) {
 		if ( null === $context ) {

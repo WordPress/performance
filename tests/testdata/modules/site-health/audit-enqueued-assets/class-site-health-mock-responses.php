@@ -74,10 +74,9 @@ class Site_Health_Mock_Responses {
 	 * @return array
 	 */
 	public static function return_aea_enqueued_js_assets_test_callback_more_than_threshold( $enqueued_scripts ) {
-		$result                   = self::return_aea_enqueued_js_assets_test_callback_less_than_threshold();
-		$result['status']         = 'recommended';
-		$result['badge']['color'] = 'orange';
-		$result['description']    = sprintf(
+		$result                = self::return_aea_enqueued_js_assets_test_callback_less_than_threshold();
+		$result['status']      = 'recommended';
+		$result['description'] = sprintf(
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
@@ -149,10 +148,9 @@ class Site_Health_Mock_Responses {
 	 * @return array
 	 */
 	public static function return_aea_enqueued_css_assets_test_callback_more_than_threshold( $enqueued_styles ) {
-		$result                   = self::return_aea_enqueued_css_assets_test_callback_less_than_threshold();
-		$result['status']         = 'recommended';
-		$result['badge']['color'] = 'orange';
-		$result['description']    = sprintf(
+		$result                = self::return_aea_enqueued_css_assets_test_callback_less_than_threshold();
+		$result['status']      = 'recommended';
+		$result['description'] = sprintf(
 			'<p>%s</p>',
 			esc_html(
 				sprintf(
