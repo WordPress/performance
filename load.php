@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.
  * Requires at least: 5.8
  * Requires PHP: 5.6
- * Version: 1.3.0
+ * Version: 1.4.0
  * Author: WordPress Performance Group
  * Author URI: https://make.wordpress.org/core/tag/performance/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.3.0' );
+define( 'PERFLAB_VERSION', '1.4.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
