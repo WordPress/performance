@@ -134,7 +134,7 @@ class PerflabDbTests {
 			sprintf( __( 'Your %s server is a recent version', 'performance-lab' ), $this->name ),
 			sprintf(
 			/* translators: 1:  MySQL or MariaDB 2: actual version string (e.g. '10.3.34-MariaDB-0ubuntu0.20.04.1' or '  of database software */
-				__( 'Your %1$s SQL server is a required piece of software for WordPress\'s database. Your version (%2$s) offers the modern InnoDB Barracuda storage engine, an efficient way to retrieve your content and settings.', 'performance-lab' ),
+				__( 'WordPress uses your %1$s SQL server to store your site’s content and settings. Your version (%2$s) offers the modern InnoDB Barracuda storage engine, an efficient way to retrieve your content and settings.', 'performance-lab' ),
 				$this->name,
 				$this->version->version
 			)
@@ -183,7 +183,7 @@ class PerflabDbTests {
 				__( '%1$s performance improves when your WordPress tables use the modern storage format.', 'performance-lab' ),
 				$this->name
 			);
-			$actions = $this->list_wrong_format_tables( $wrong_format_tables );
+			$actions = $this->list_wrong_format_tables( $wrong_format_tables, $target_storage_engine, $target_row_format );
 
 			return $this->utilities->test_result(
 				$label,
@@ -242,7 +242,7 @@ class PerflabDbTests {
 				__( '%1$s performance improves when your plugins\' tables use the modern storage format.', 'performance-lab' ),
 				$this->name
 			);
-			$actions = $this->list_wrong_format_tables( $wrong_format_tables );
+			$actions = $this->list_wrong_format_tables( $wrong_format_tables, $target_storage_engine, $target_row_format );
 
 			return $this->utilities->test_result(
 				$label,
@@ -413,19 +413,35 @@ class PerflabDbTests {
 
 	/** Generate HTML for a list of tables.
 	 *
-	 * @param array $wrong_format_tables Associative array of tables with names to render.
+	 * @param array  $wrong_format_tables Associative array of tables with names to render.
+	 * @param string $target_storage_engine Usually InnoDb.
+	 * @param string $target_row_format Usually DYNAMIC.
 	 *
 	 * @return string
 	 */
-	private function list_wrong_format_tables( array $wrong_format_tables ) {
-		$actions  = __( 'Ask your hosting provider to upgrade these tables.', 'performance-lab' );
-		$actions .= '<ul class="tablelist">';
+	private function list_wrong_format_tables( array $wrong_format_tables, $target_storage_engine, $target_row_format ) {
+		$exhortation = 1 === $this->version->unconstrained
+			? sprintf(
+			/* translators: 1 storage engine name, usually InnoDB  2: row format name, usually Dynamic */
+				__( 'Ask your hosting provider to upgrade these tables to use the %1$s storage engine and the %2$s row format.', 'performance-lab' ),
+				$target_storage_engine,
+				$target_row_format
+			)
+			: sprintf(
+			/* translators: 1 storage engine name, usually InnoDB   */
+				__( 'Ask your hosting provider to upgrade these tables to use the %1$s storage engine.', 'performance-lab' ),
+				$target_storage_engine,
+				$target_row_format
+			);
+		$actions    = array();
+		$actions [] = $exhortation;
+		$actions [] = '<ul class="tablelist">';
 		foreach ( $wrong_format_tables as $name => $x ) {
-			$actions .= '<li>' . esc_html( $name ) . '</li>';
+			$actions [] = '<li>' . esc_html( $name ) . '</li>';
 		}
-		$actions .= '</ul>';
+		$actions [] = '</ul>';
 
-		return $actions;
+		return implode( '', $actions );
 	}
 
 }
