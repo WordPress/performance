@@ -63,3 +63,7 @@
 # Module: Full Page Cache Health Check
 /modules/site-health/audit-full-page-cache                                  @manuelRod @westonruter
 /tests/modules/site-health/audit-full-page-cache                            @manuelRod @westonruter
+
+# Module: Regenerate Existing Images
+/modules/images/regenerate-existing-images                                  @jjgrainger @ankitrox
+/tests/modules/images/regenerate-existing-images                            @jjgrainger @ankitrox
