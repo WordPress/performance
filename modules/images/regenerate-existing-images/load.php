@@ -1,8 +1,7 @@
 <?php
 /**
  * Module Name: Regenarate Existing Images
- * Description: Regenerate existing images when the image sizes changes during plugin/theme
- * activation/deactivation or for any other reasons.
+ * Description: Regenerate existing images when the image sizes changes during plugin/theme activation/deactivation or for any other reasons.
  * Experimental: No
  *
  * @since   n.e.x.t
@@ -43,18 +42,44 @@ function perflab_background_job_taxonomy() {
 		'menu_name'         => __( 'Background Job', 'performance-lab' ),
 	);
 
+	$caps = get_background_job_capabilities();
+
+	// Taxonomy arguments.
 	$args = array(
-		'hierarchical'      => false, // We do not need child job.
-		'labels'            => $labels,
-		'public'            => false,
-		'show_ui'           => false,
-		'show_admin_column' => false,
-		'show_in_rest'      => false,
-		'query_var'         => true,
-		'rewrite'           => array( 'slug' => 'background_job' ),
+		'hierarchical'       => false, // We do not need child job.
+		'labels'             => $labels,
+		'public'             => false,
+		'show_ui'            => true,
+		'show_in_menu'       => false,
+		'show_in_nav_menus'  => true,
+		'show_in_quick_edit' => false,
+		'show_admin_column'  => false,
+		'show_in_rest'       => false,
+		'query_var'          => true,
+		'rewrite'            => array( 'slug' => 'background_job' ),
+		'capabilities'       => array(
+			'manage_terms' => 'manage_options',
+			'edit_terms'   => $caps['edit'],
+			'delete_terms' => $caps['delete'],
+			'assign_terms' => $caps['assign'],
+		),
 	);
 
 	// Register background_job taxonomy.
 	register_taxonomy( 'background_job', $object_types, $args );
 }
 add_action( 'init', 'perflab_background_job_taxonomy', 100 );
+
+/**
+ * Retrieve list of capabilities to manage background jobs.
+ *
+ * @return array
+ */
+function get_background_job_capabilities() {
+	return array(
+		'manage' => 'manage_jobs', // To manage background_job terms.
+		'edit'   => 'edit_job', // To edit background_job terms.
+		'delete' => 'delete_job', // To delete background_job terms.
+		'assign' => 'assign_jobs', // To assign background_job terms to posts.
+	);
+}
