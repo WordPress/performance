@@ -58,7 +58,7 @@ function perflab_background_job_taxonomy() {
 		'query_var'          => true,
 		'rewrite'            => array( 'slug' => 'background_job' ),
 		'capabilities'       => array(
-			'manage_terms' => 'manage_options',
+			'manage_terms' => $caps['manage'],
 			'edit_terms'   => $caps['edit'],
 			'delete_terms' => $caps['delete'],
 			'assign_terms' => $caps['assign'],
