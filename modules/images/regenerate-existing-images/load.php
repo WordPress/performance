@@ -1,8 +1,7 @@
 <?php
 /**
  * Module Name: Regenarate Existing Images
- * Description: Regenerate existing images when the image sizes changes during plugin/theme
- * activation/deactivation or for any other reasons.
+ * Description: Introduces background process infrastructure to regenerate existing image sizes and MIME types on demand.
  * Experimental: No
  *
  * @since   n.e.x.t
