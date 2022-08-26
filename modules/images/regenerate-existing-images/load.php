@@ -19,14 +19,6 @@
  * @since n.e.x.t
  */
 function perflab_register_background_job_taxonomy() {
-	// Get all registered public post types.
-	$object_types = get_post_types(
-		array(
-			'public' => true,
-		),
-		'names'
-	);
-
 	// Labels for the background job taxonomy.
 	$labels = array(
 		'name'                  => _x( 'Background Jobs', 'taxonomy general name', 'performance-lab' ),
@@ -50,23 +42,26 @@ function perflab_register_background_job_taxonomy() {
 
 	// Taxonomy arguments.
 	$args = array(
-		'hierarchical'       => false, // We do not need child job.
-		'labels'             => $labels,
-		'public'             => false,
-		'show_ui'            => true,
-		'show_in_menu'       => false,
-		'show_in_nav_menus'  => false,
-		'show_in_quick_edit' => false,
-		'show_admin_column'  => false,
-		'show_in_rest'       => false,
-		'query_var'          => false,
-		'capabilities'       => perflab_get_background_job_capabilities(),
+		'labels'       => $labels,
+		'public'       => false,
+		'show_ui'      => true,
+		'show_in_rest' => false,
+		'query_var'    => false,
+		'rewrite'      => false,
+		'capabilities' => perflab_get_background_job_capabilities(),
 	);
 
-	// Register background_job taxonomy.
-	register_taxonomy( 'background_job', $object_types, $args );
+	/**
+	 * Register background_job taxonomy.
+	 *
+	 * We are not assigning the taxonomy to any object type because we can
+	 * still assign the terms in taxonomy to thos object types using
+	 * `wp_set_object_terms` which do not check if there is relationship
+	 * between object and taxonomy.
+	 */
+	register_taxonomy( 'background_job', array(), $args );
 }
-add_action( 'init', 'perflab_register_background_job_taxonomy', 100 );
+add_action( 'init', 'perflab_register_background_job_taxonomy' );
 
 /**
  * Retrieves list of capabilities to manage background jobs.
