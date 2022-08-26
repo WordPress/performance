@@ -5,6 +5,7 @@ on:
     branches:
       - trunk
       - 'release/**'
+      - 'feature/**'
     # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-lint.yml'
@@ -16,6 +17,7 @@ on:
     branches:
       - trunk
       - 'release/**'
+      - 'feature/**'
     # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-lint.yml'
