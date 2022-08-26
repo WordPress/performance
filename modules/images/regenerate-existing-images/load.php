@@ -48,8 +48,6 @@ function perflab_register_background_job_taxonomy() {
 		'back_to_items'         => __( 'Back to Background Jobs', 'performance-lab' ),
 	);
 
-	$caps = perflab_get_background_job_capabilities();
-
 	// Taxonomy arguments.
 	$args = array(
 		'hierarchical'       => false, // We do not need child job.

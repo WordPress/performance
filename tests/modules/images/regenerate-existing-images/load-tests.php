@@ -3,9 +3,8 @@
  * Tests for regenerate-existing-images module load.php.
  *
  * @package performance-lab
- * @group   regenerate-existing-images
+ * @group regenerate-existing-images
  */
-
 
 class Regenerate_Existing_Images_Load_Test extends WP_UnitTestCase {
 
