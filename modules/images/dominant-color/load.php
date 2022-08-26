@@ -319,7 +319,7 @@ function _dominant_color_get_dominant_color_data( $attachment_id ) {
  * @param string $size          Optional. Image size. Default 'thumbnail'.
  * @return false|string Path to an image or false if not found.
  */
-function wp_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
+function wp_get_attachment_file_path( $attachment_id, $size = 'thumbnail' ) {
 	$imagedata = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $imagedata ) ) {
 		return false;
