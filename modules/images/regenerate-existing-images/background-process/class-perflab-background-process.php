@@ -70,17 +70,45 @@ class Perflab_Background_Process {
 				return;
 			}
 
-			$this->lock();
-
-			// If everything seems fine, attempt to run the job.
-
-			$this->unlock();
+			$this->lock(); // Lock the process for this job before running.
+			$this->run(); // Run the job.
+			$this->unlock(); // Unlock the process once everything ran successfully.
 
 		} catch ( Exception $e ) {
 			$error = new WP_Error( 'background_job_failed', $e->getMessage() );
 			$this->record_error( $error );
 			$this->unlock();
 		}
+	}
+
+	/**
+	 * Run the process over a batch of job.
+	 *
+	 * As of now, it won't fetch the next batch if memory or time
+	 * is not exceeded, but this can be introduced later.
+	 *
+	 * Consumer code can fine-tune the batch size according to requirement.
+	 *
+	 * @return void
+	 */
+	private function run() {
+		$iterator    = 0;
+		$batch_items = array_values( $this->job->batch() ); // Ensure array is numerically indexed.
+
+		if ( ! empty( $batch_items ) ) {
+			do {
+				$this->job->process( $batch_items[ $iterator ] );
+
+				unset( $batch_items[ $iterator ] );
+				// Increment the count.
+				$iterator += 1;
+			} while ( ! $this->memory_exceeded() && ! $this->time_exceeded() && ! empty( $batch_items ) );
+
+			return;
+		}
+
+		// If we are here, means there are no batch items to process, so mark job as complete.
+		$this->job->set_status( 'complete' );
 	}
 
 	/**

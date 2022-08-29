@@ -103,7 +103,7 @@ final class Perflab_Background_Job {
 		$valid_statuses = array(
 			'running',
 			'failed',
-			'completed',
+			'complete',
 		);
 
 		if ( in_array( $status, $valid_statuses, true ) ) {
@@ -160,7 +160,7 @@ final class Perflab_Background_Job {
 		if ( ! is_wp_error( $term_data ) ) {
 			// Set object properties for instance as soon as job is created.
 			$this->job_id = $term_data['term_id'];
-			$this->name   = $name;
+			$this->name   = sanitize_text_field( $name );
 			$this->data   = $data;
 
 			update_term_meta( $this->job_id, 'job_data', $this->data );
@@ -182,13 +182,41 @@ final class Perflab_Background_Job {
 	}
 
 	/**
-	 * Run this job.
+	 * Get the batch for current run.
 	 *
-	 * This needs to be implemented by concrete implementations.
+	 * This will return the items to process in the current batch.
+	 *
+	 * @return array
+	 */
+	public function batch() {
+		$items = array();
+
+		/**
+		 * Filters the items for the current batch of job.
+		 *
+		 * By default this will be empty array. Consumer code will need to use this filter in
+		 * order to return the list of items which needs to be processed in current batch.
+		 *
+		 * @param array  $items  Items for the current batch.
+		 * @param int    $job_id Background job ID.
+		 * @param string $name   Job identifier or name.
+		 * @param array  $data   Job data.
+		 *
+		 * @since n.e.x.t
+		 */
+		$items = apply_filters( 'perflab_job_batch_items', $items, $this->job_id, $this->name, $this->data );
+
+		return (array) $items;
+	}
+
+	/**
+	 * Process the batch item.
+	 *
+	 * @param mixed $item Batch item for the job.
 	 *
 	 * @return void
 	 */
-	public function run() {
+	public function process( $item ) {
 		/**
 		 * Hook to this action to run the job.
 		 *
@@ -196,9 +224,10 @@ final class Perflab_Background_Job {
 		 *
 		 * @since n.e.x.t
 		 *
+		 * @param mixed $item Batch item for the job.
 		 * @param int   $job_id Job ID.
 		 * @param array $data   Job data.
 		 */
-		do_action( 'perflab_run_job_' . $this->name, $this->job_id, $this->data );
+		do_action( 'perflab_process_' . $this->name . '_job_item', $item, $this->job_id, $this->data );
 	}
 }
