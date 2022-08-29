@@ -88,7 +88,7 @@ class Perflab_Background_Process {
 	 * @return void
 	 */
 	public function record_error( WP_Error $error ) {
-		update_term_meta( $this->job->job_id, 'job_status', 'failed' );
+		$this->job->set_status( 'failed' );
 	}
 
 	/**
@@ -118,7 +118,7 @@ class Perflab_Background_Process {
 		$time = microtime();
 
 		update_term_meta( $this->job->job_id, 'job_lock', $time );
-		update_term_meta( $this->job->job_id, 'job_status', 'running' );
+		$this->job->set_status( 'running' );
 	}
 
 	/**

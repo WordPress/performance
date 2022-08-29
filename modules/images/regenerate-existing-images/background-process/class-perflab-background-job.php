@@ -82,6 +82,25 @@ final class Perflab_Background_Job {
 	}
 
 	/**
+	 * Set the status of the current job.
+	 *
+	 * @param string $status Status to set for current job.
+	 *
+	 * @return void
+	 */
+	public function set_status( $status ) {
+		$valid_statuses = array(
+			'running',
+			'failed',
+			'completed',
+		);
+
+		if ( in_array( $status, $valid_statuses, true ) ) {
+			update_term_meta( $this->job_id, 'job_status', $status );
+		}
+	}
+
+	/**
 	 * Retrieves the job data.
 	 *
 	 * @return array|null
