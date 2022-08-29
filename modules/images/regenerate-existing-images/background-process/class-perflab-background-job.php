@@ -11,7 +11,20 @@
  *
  * Runs the heavy lifting tasks in background in separate process.
  */
-class Perflab_Background_Job {
+final class Perflab_Background_Job {
+	/**
+	 * Meta key for storing job name/action.
+	 *
+	 * @const string
+	 */
+	const JOB_NAME_META_KEY = 'job_name';
+
+	/**
+	 * Meta key for storing job data.
+	 *
+	 * @const string
+	 */
+	const JOB_DATA_META_KEY = 'job_data';
 
 	/**
 	 * Job ID.
@@ -37,13 +50,35 @@ class Perflab_Background_Job {
 	/**
 	 * Perflab_Background_Job constructor.
 	 *
-	 * @param int    $job_id job ID.
-	 * @param string $name   Name of the job to run/create.
-	 * @param array  $data   Data for the corresponding job.
+	 * @param int $job_id job ID.
 	 */
-	public function __construct( $job_id = 0, $name = '', array $data = array() ) {
+	public function __construct( $job_id = 0 ) {
 		$this->job_id = absint( $job_id );
-		$this->name   = (string) $name;
+
+		// @todo Replace taxonomy name with constant.
+		if ( term_exists( $this->job_id, 'background_job' ) ) {
+			$this->name = get_term_meta( $this->job_id, Perflab_Background_Job::JOB_NAME_META_KEY, true );
+			$this->data = get_term_meta( $this->job_id, Perflab_Background_Job::JOB_DATA_META_KEY, true );
+		}
+	}
+
+	/**
+	 * Checks that the job term exist.
+	 *
+	 * @return array|null
+	 */
+	public function exists() {
+		// @todo Replace taxonomy name with constant.
+		return term_exists( $this->job_id, 'background_job' );
+	}
+
+	/**
+	 * Checks if the background job is completed.
+	 *
+	 * @return bool
+	 */
+	public function completed() {
+		return (bool) get_term_meta( $this->job_id, 'is_completed', true );
 	}
 
 	/**
@@ -69,11 +104,15 @@ class Perflab_Background_Job {
 	 *
 	 * Job refers to the term and queue refers to the `background_job` taxonomy.
 	 *
+	 * @param string $name Name of job identifier.
+	 * @param array  $data Data for the job.
+	 *
 	 * @return int|WP_Error
 	 */
-	public function create() {
-		// Create job only when job ID for current instance is zero.
-		if ( $this->job_id > 0 ) {
+	public function create( $name, array $data ) {
+		// @todo Replace taxonomy name with constant.
+		// Create job only when job ID for current instance is non-zero and term doesn't exist.
+		if ( $this->job_id > 0 && term_exists( $this->job_id, 'background_job' ) ) {
 			return new WP_Error( __( 'Cannot create the job as it exists already.', 'performance-lab' ) );
 		}
 
@@ -89,9 +128,13 @@ class Perflab_Background_Job {
 		);
 
 		if ( ! is_wp_error( $term_data ) ) {
+			// Set object properties for instance as soon as job is created.
 			$this->job_id = $term_data['term_id'];
+			$this->name   = $name;
+			$this->data   = $data;
 
-			update_term_meta( $this->job_id, $this->data, 'job_data' );
+			update_term_meta( $this->job_id, 'job_data', $this->data );
+			update_term_meta( $this->job_id, 'job_name', $this->name );
 
 			/**
 			 * Fires when the job has been created successfully.
