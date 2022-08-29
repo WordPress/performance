@@ -31,10 +31,13 @@ class Regenerate_Existing_Images_Load_Test extends WP_UnitTestCase {
 		$this->assertFalse( $job_tax->public );
 		$this->assertFalse( $job_tax->show_in_rest );
 		$this->assertFalse( $job_tax->hierarchical );
-		$this->assertFalse( $job_tax->show_in_menu );
 		$this->assertFalse( $job_tax->show_in_nav_menus );
 		$this->assertFalse( $job_tax->show_in_quick_edit );
 		$this->assertFalse( $job_tax->show_admin_column );
 		$this->assertFalse( $job_tax->query_var );
+
+		// show_in_menu and show_ui should be true.
+		$this->assertTrue( $job_tax->show_in_menu );
+		$this->assertTrue( $job_tax->show_ui );
 	}
 }

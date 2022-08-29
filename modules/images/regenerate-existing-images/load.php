@@ -29,26 +29,26 @@ function perflab_register_background_job_taxonomy() {
 		'parent_item_colon'     => __( 'Parent Background Job:', 'performance-lab' ),
 		'edit_item'             => __( 'Edit Background Job', 'performance-lab' ),
 		'update_item'           => __( 'Update Background Job', 'performance-lab' ),
-		'add_new_item'          => __( 'Add New Background Job', 'performance-lab' ),
-		'new_item_name'         => __( 'New Background Job Name', 'performance-lab' ),
+		'add_new_item'          => __( 'Add new Background job', 'performance-lab' ),
+		'new_item_name'         => __( 'New background job', 'performance-lab' ),
 		'menu_name'             => __( 'Background Jobs', 'performance-lab' ),
 		'view_item'             => __( 'View Background Job', 'performance-lab' ),
-		'not_found'             => __( 'Background Job Not Found', 'performance-lab' ),
-		'no_terms'              => __( ' No Background Jobs', 'performance-lab' ),
-		'items_list'            => __( 'Background Jobs List', 'performance-lab' ),
-		'items_list_navigation' => __( 'Background Jobs List Navigation', 'performance-lab' ),
-		'back_to_items'         => __( 'Back to Background Jobs', 'performance-lab' ),
+		'not_found'             => __( 'No background jobs found.', 'performance-lab' ),
+		'no_terms'              => __( 'No background jobs', 'performance-lab' ),
+		'items_list'            => __( 'Background jobs list', 'performance-lab' ),
+		'items_list_navigation' => __( 'Background jobs list navigation', 'performance-lab' ),
+		'back_to_items'         => __( 'Back to background jobs', 'performance-lab' ),
 	);
 
 	// Taxonomy arguments.
 	$args = array(
-		'labels'       => $labels,
-		'public'       => false,
-		'show_ui'      => true,
-		'show_in_rest' => false,
-		'query_var'    => false,
-		'rewrite'      => false,
-		'capabilities' => perflab_get_background_job_capabilities(),
+		'labels'             => $labels,
+		'public'             => false,
+		'show_ui'            => true,
+		'query_var'          => false,
+		'rewrite'            => false,
+		'show_in_quick_edit' => false,
+		'capabilities'       => perflab_get_background_job_capabilities(),
 	);
 
 	/**
