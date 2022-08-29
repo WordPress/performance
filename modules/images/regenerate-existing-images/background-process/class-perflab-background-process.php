@@ -49,6 +49,7 @@ class Perflab_Background_Process {
 	public function handle_request() {
 		try {
 
+			// Exit if nonce varification fails.
 			check_ajax_referer( Perflab_Background_Process::BG_PROCESS_ACTION, 'nonce' );
 
 			$job_id = isset( $_POST['job_id'] ) ? absint( sanitize_text_field( $_POST['job_id'] ) ) : 0;
@@ -72,17 +73,20 @@ class Perflab_Background_Process {
 
 			$this->lock(); // Lock the process for this job before running.
 			$this->run(); // Run the job.
-			$this->unlock(); // Unlock the process once everything ran successfully.
 
 		} catch ( Exception $e ) {
+
 			$error = new WP_Error( 'background_job_failed', $e->getMessage() );
 			$this->record_error( $error );
+
+		} finally {
+			// Unlock the process once everything is done.
 			$this->unlock();
 		}
 	}
 
 	/**
-	 * Run the process over a batch of job.
+	 * Runs the process over a batch of job.
 	 *
 	 * As of now, it won't fetch the next batch if memory or time
 	 * is not exceeded, but this can be introduced later.
@@ -139,7 +143,16 @@ class Perflab_Background_Process {
 	 * @return bool
 	 */
 	private function time_exceeded() {
-		return false;
+		$current_time       = time();
+		$run_start_time     = $this->job->is_running();
+		$max_execution_time = 20; // Default to 20 seconds.
+
+		if ( function_exists( 'ini_get' ) ) {
+			$time               = ini_get( 'max_execution_time' );
+			$max_execution_time = ( ! empty( $time ) && ( $time > 0 ) ) ? $time - 10 : $max_execution_time;
+		}
+
+		return ( $current_time >= ( $run_start_time + $max_execution_time ) );
 	}
 
 	/**
@@ -148,7 +161,7 @@ class Perflab_Background_Process {
 	 * @return void
 	 */
 	private function lock() {
-		$time = microtime();
+		$time = time();
 
 		update_term_meta( $this->job->job_id, 'job_lock', $time );
 		$this->job->set_status( 'running' );
