@@ -9,6 +9,11 @@
  */
 
 /**
+ * Require helper functions and specific integrations.
+ */
+require_once __DIR__ . '/admin-page.php';
+
+/**
  * Registers the background job taxonomy.
  *
  * Intentionally on lower priority, so that other post types can be
@@ -44,7 +49,7 @@ function perflab_register_background_job_taxonomy() {
 	$args = array(
 		'labels'             => $labels,
 		'public'             => false,
-		'show_ui'            => true,
+		'show_ui'            => false,
 		'query_var'          => false,
 		'rewrite'            => false,
 		'show_in_quick_edit' => false,
@@ -59,7 +64,7 @@ function perflab_register_background_job_taxonomy() {
 	 * `wp_set_object_terms` which do not check if there is relationship
 	 * between object and taxonomy.
 	 */
-	register_taxonomy( 'background_job', array(), $args );
+	register_taxonomy( 'background_job', array( 'post' ), $args );
 }
 add_action( 'init', 'perflab_register_background_job_taxonomy' );
 
