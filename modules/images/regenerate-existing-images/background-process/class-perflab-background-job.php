@@ -72,40 +72,40 @@ class Perflab_Background_Job {
 	 * @return int|WP_Error
 	 */
 	public function create() {
-        // Create job only when job ID for current instance is zero.
-        if ( $this->job_id > 0 ) {
-            return new WP_Error( __( 'Cannot create the job as it exists already.', 'performance-lab' ) );
-        }
+		// Create job only when job ID for current instance is zero.
+		if ( $this->job_id > 0 ) {
+			return new WP_Error( __( 'Cannot create the job as it exists already.', 'performance-lab' ) );
+		}
 
-        $term_name = 'job_' . microtime();
+		$term_name = 'job_' . microtime();
 
-        // Insert the new job in queue.
-        $term_data = wp_insert_term(
-            $term_name,
-            'background_job',
-            array(
-                'slug' => $term_name,
-            )
-        );
+		// Insert the new job in queue.
+		$term_data = wp_insert_term(
+			$term_name,
+			'background_job',
+			array(
+				'slug' => $term_name,
+			)
+		);
 
-        if ( ! is_wp_error( $term_data ) ) {
-            $this->job_id = $term_data['term_id'];
+		if ( ! is_wp_error( $term_data ) ) {
+			$this->job_id = $term_data['term_id'];
 
-            update_term_meta( $this->job_id, $this->data, 'job_data' );
+			update_term_meta( $this->job_id, $this->data, 'job_data' );
 
-            /**
-             * Fires when the job has been created successfully.
-             * 
-             * @since n.e.x.t
-             * 
-             * @param int    $job_id Job ID.
-             * @param string $name Job name.
-             * @param array  $data Job data.
-             */
-            do_action( 'perflab_job_created', $this->job_id, $this->name, $this->data );
-        }
+			/**
+			 * Fires when the job has been created successfully.
+			 *
+			 * @since n.e.x.t
+			 *
+			 * @param int    $job_id Job ID.
+			 * @param string $name Job name.
+			 * @param array  $data Job data.
+			 */
+			do_action( 'perflab_job_created', $this->job_id, $this->name, $this->data );
+		}
 
-        return $term_data;
+		return $term_data;
 	}
 
 	/**
