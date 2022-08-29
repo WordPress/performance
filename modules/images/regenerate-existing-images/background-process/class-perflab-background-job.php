@@ -77,10 +77,13 @@ final class Perflab_Background_Job {
 	 *
 	 * If the job lock is present, it means job is running.
 	 *
-	 * @return bool
+	 * @return int
 	 */
 	public function is_running() {
-		return get_term_meta( $this->job_id, 'job_lock', true );
+		$lock = get_term_meta( $this->job_id, 'job_lock', true );
+		$lock = empty( $lock ) ? 0 : $lock;
+
+		return absint( $lock );
 	}
 
 	/**
