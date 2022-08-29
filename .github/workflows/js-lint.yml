@@ -5,7 +5,6 @@ on:
     branches:
       - trunk
       - 'release/**'
-      - 'feature/**'
     # Only run if JS/JSON/Lint/NVM files changed.
     paths:
       - '.github/workflows/js-lint.yml'
