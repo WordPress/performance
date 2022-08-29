@@ -61,8 +61,13 @@ class Perflab_Background_Process {
 			$this->job = new Perflab_Background_Job( $job_id );
 
 			// Checks if job is valid or not.
-			if ( $this->job->exists() && ! $this->job->completed() ) {
+			if ( ! $this->job->exists() || $this->job->completed() ) {
 				throw new Exception( 'invalid_background_job', __( 'This job may have been completed already or does not exist.', 'performance-lab' ) );
+			}
+
+			// Silently exit if the job is still running.
+			if ( $this->job->is_running() ) {
+				return;
 			}
 
 			$this->lock();
@@ -127,6 +132,6 @@ class Perflab_Background_Process {
 	 * @return void
 	 */
 	private function unlock() {
-
+		delete_term_meta( $this->job->job_id, 'job_lock' );
 	}
 }

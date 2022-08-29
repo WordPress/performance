@@ -73,6 +73,17 @@ final class Perflab_Background_Job {
 	}
 
 	/**
+	 * Checks if the job is running.
+	 *
+	 * If the job lock is present, it means job is running.
+	 *
+	 * @return bool
+	 */
+	public function is_running() {
+		return get_term_meta( $this->job_id, 'job_lock', true );
+	}
+
+	/**
 	 * Checks if the background job is completed.
 	 *
 	 * @return bool
@@ -82,7 +93,7 @@ final class Perflab_Background_Job {
 	}
 
 	/**
-	 * Set the status of the current job.
+	 * Sets the status of the current job.
 	 *
 	 * @param string $status Status to set for current job.
 	 *
@@ -119,7 +130,7 @@ final class Perflab_Background_Job {
 	}
 
 	/**
-	 * Create a new job in the queue.
+	 * Creates a new job in the queue.
 	 *
 	 * Job refers to the term and queue refers to the `background_job` taxonomy.
 	 *
