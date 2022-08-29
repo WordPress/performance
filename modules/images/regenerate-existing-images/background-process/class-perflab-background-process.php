@@ -168,7 +168,7 @@ class Perflab_Background_Process {
 	}
 
 	/**
-	 * Unlocks the process. It tells that process is running.
+	 * Unlocks the process.
 	 *
 	 * @return void
 	 */

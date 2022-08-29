@@ -166,8 +166,8 @@ final class Perflab_Background_Job {
 			$this->name   = sanitize_text_field( $name );
 			$this->data   = $data;
 
-			update_term_meta( $this->job_id, 'job_data', $this->data );
-			update_term_meta( $this->job_id, 'job_name', $this->name );
+			update_term_meta( $this->job_id, Perflab_Background_Job::JOB_DATA_META_KEY, $this->data );
+			update_term_meta( $this->job_id, Perflab_Background_Job::JOB_NAME_META_KEY, $this->name );
 
 			/**
 			 * Fires when the job has been created successfully.
