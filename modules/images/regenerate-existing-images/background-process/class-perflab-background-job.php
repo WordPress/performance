@@ -9,22 +9,34 @@
 /**
  * Class Perflab_Background_Job.
  *
- * Runs the heavy lifting tasks in background in separate process.
+ * Manage and run the background jobs.
+ *
+ * @since n.e.x.t
  */
-final class Perflab_Background_Job {
+class Perflab_Background_Job {
 	/**
 	 * Meta key for storing job name/action.
 	 *
 	 * @const string
+	 * @since n.e.x.t
 	 */
-	const JOB_NAME_META_KEY = 'job_name';
+	const JOB_NAME_META_KEY = 'perflab_job_name';
 
 	/**
 	 * Meta key for storing job data.
 	 *
 	 * @const string
+	 * @since n.e.x.t
 	 */
-	const JOB_DATA_META_KEY = 'job_data';
+	const JOB_DATA_META_KEY = 'perflab_job_data';
+
+	/**
+	 * Meta key for storing job data.
+	 *
+	 * @const string
+	 * @since n.e.x.t
+	 */
+	const JOB_RETRY_META_KEY = 'perflab_job_retries';
 
 	/**
 	 * Job ID.
@@ -50,6 +62,8 @@ final class Perflab_Background_Job {
 	/**
 	 * Perflab_Background_Job constructor.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @param int $job_id job ID.
 	 */
 	public function __construct( $job_id = 0 ) {
@@ -65,6 +79,8 @@ final class Perflab_Background_Job {
 	/**
 	 * Checks that the job term exist.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @return array|null
 	 */
 	public function exists() {
@@ -76,6 +92,8 @@ final class Perflab_Background_Job {
 	 * Checks if the job is running.
 	 *
 	 * If the job lock is present, it means job is running.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @return int
 	 */
@@ -89,6 +107,8 @@ final class Perflab_Background_Job {
 	/**
 	 * Checks if the background job is completed.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @return bool
 	 */
 	public function is_complete() {
@@ -96,7 +116,38 @@ final class Perflab_Background_Job {
 	}
 
 	/**
+	 * Determines whether a job should run for current request or not.
+	 *
+	 * It determines by checking if job is already running or completed.
+	 * It also checks if max number of retries have been attempted for the job.
+	 * For any such condition, it will return false, else true.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return bool Flag to tell whether this job should run or not.
+	 */
+	public function should_run() {
+		// If job doesn't exist or completed, return false.
+		if ( ! $this->exists() || $this->is_complete() ) {
+			return false;
+		}
+
+		// If number of attempts have been exhausted, return false.
+		if ( $this->get_retries() >= $this->max_retries_allowed() ) {
+			return false;
+		}
+
+		if ( $this->is_running() ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Sets the status of the current job.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @param string $status Status to set for current job.
 	 *
@@ -122,6 +173,8 @@ final class Perflab_Background_Job {
 	/**
 	 * Retrieves the job data.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @return array|null
 	 */
 	public function data() {
@@ -141,6 +194,8 @@ final class Perflab_Background_Job {
 	 * Creates a new job in the queue.
 	 *
 	 * Job refers to the term and queue refers to the `background_job` taxonomy.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @param string $name Name of job identifier.
 	 * @param array  $data Data for the job.
@@ -194,6 +249,8 @@ final class Perflab_Background_Job {
 	 *
 	 * This will return the items to process in the current batch.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @return array
 	 */
 	public function batch() {
@@ -220,6 +277,8 @@ final class Perflab_Background_Job {
 	/**
 	 * Process the batch item.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @param mixed $item Batch item for the job.
 	 *
 	 * @return void
@@ -240,7 +299,23 @@ final class Perflab_Background_Job {
 	}
 
 	/**
+	 * Get number of retries attempted for a job.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return int
+	 */
+	public function get_retries() {
+		$retries = get_term_meta( $this->job_id, 'perflab_job_retries', true );
+		$retries = absint( $retries );
+
+		return $retries;
+	}
+
+	/**
 	 * Locks the process. It tells that process is running.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @return void
 	 */
@@ -254,6 +329,8 @@ final class Perflab_Background_Job {
 	/**
 	 * Unlocks the process.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @return void
 	 */
 	public function unlock() {
@@ -262,6 +339,8 @@ final class Perflab_Background_Job {
 
 	/**
 	 * Records the error for the current process run.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @param WP_Error $error Error instance.
 	 *
@@ -273,13 +352,31 @@ final class Perflab_Background_Job {
 		$job_failure_data = $error->get_error_data( 'perflab_job_failure' );
 
 		if ( ! empty( $job_failure_data ) ) {
-			$retries = get_term_meta( $this->job_id, 'perflab_job_retries', true );
-			$retries = empty( $retries ) ? 0 : ( absint( $retries ) + 1 ); // Increment retry count.
-
 			$this->job->set_status( 'failed' );
 
 			update_term_meta( $this->job_id, 'job_errors', $job_failure_data );
-			update_term_meta( $this->job_id, 'perflab_job_retries', $$retries );
+			update_term_meta( $this->job_id, self::JOB_RETRY_META_KEY, ( $this->get_retries() + 1 ) );
 		}
+	}
+
+	/**
+	 * Return max number of retries to attempt for a failed job to re-run.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return int
+	 */
+	private function max_retries_allowed() {
+		/**
+		 * Number of attempts to try to re-run a failed job.
+		 * Default 3 attempts.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param int $retry Number of retries allowed for a job to re-run.
+		 *
+		 * @return int
+		 */
+		return apply_filters( 'perflab_job_max_retries_allowed', 3 );
 	}
 }
