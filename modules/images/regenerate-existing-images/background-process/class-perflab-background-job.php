@@ -57,8 +57,8 @@ final class Perflab_Background_Job {
 
 		// @todo Replace taxonomy name with constant.
 		if ( term_exists( $this->job_id, 'background_job' ) ) {
-			$this->name = get_term_meta( $this->job_id, Perflab_Background_Job::JOB_NAME_META_KEY, true );
-			$this->data = get_term_meta( $this->job_id, Perflab_Background_Job::JOB_DATA_META_KEY, true );
+			$this->name = get_term_meta( $this->job_id, self::JOB_NAME_META_KEY, true );
+			$this->data = get_term_meta( $this->job_id, self::JOB_DATA_META_KEY, true );
 		}
 	}
 
@@ -171,8 +171,8 @@ final class Perflab_Background_Job {
 			$this->name   = sanitize_text_field( $name );
 			$this->data   = $data;
 
-			update_term_meta( $this->job_id, Perflab_Background_Job::JOB_DATA_META_KEY, $this->data );
-			update_term_meta( $this->job_id, Perflab_Background_Job::JOB_NAME_META_KEY, $this->name );
+			update_term_meta( $this->job_id, self::JOB_DATA_META_KEY, $this->data );
+			update_term_meta( $this->job_id, self::JOB_NAME_META_KEY, $this->name );
 
 			/**
 			 * Fires when the job has been created successfully.
