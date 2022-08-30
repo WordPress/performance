@@ -39,6 +39,22 @@ class Perflab_Background_Job {
 	const JOB_RETRY_META_KEY = 'perflab_job_retries';
 
 	/**
+	 * Meta key for storing job lock.
+	 *
+	 * @const string
+	 * @since n.e.x.t
+	 */
+	const JOB_LOCK_META_KEY = 'perflab_job_lock';
+
+	/**
+	 * Meta key for storing job errors.
+	 *
+	 * @const string
+	 * @since n.e.x.t
+	 */
+	const JOB_ERRORS_META_KEY = 'perflab_job_errors';
+
+	/**
 	 * Job ID.
 	 *
 	 * @var int
@@ -310,7 +326,7 @@ class Perflab_Background_Job {
 	 * @return int
 	 */
 	public function get_retries() {
-		$retries = get_term_meta( $this->job_id, 'perflab_job_retries', true );
+		$retries = get_term_meta( $this->job_id, self::JOB_RETRY_META_KEY, true );
 		$retries = absint( $retries );
 
 		return $retries;
@@ -326,7 +342,7 @@ class Perflab_Background_Job {
 	public function lock() {
 		$time = time();
 
-		update_term_meta( $this->job->job_id, 'job_lock', $time );
+		update_term_meta( $this->job->job_id, self::JOB_LOCK_META_KEY, $time );
 		$this->job->set_status( 'running' );
 	}
 
@@ -338,7 +354,7 @@ class Perflab_Background_Job {
 	 * @return void
 	 */
 	public function unlock() {
-		delete_term_meta( $this->job->job_id, 'job_lock' );
+		delete_term_meta( $this->job->job_id, self::JOB_LOCK_META_KEY );
 	}
 
 	/**
@@ -358,7 +374,7 @@ class Perflab_Background_Job {
 		if ( ! empty( $job_failure_data ) ) {
 			$this->job->set_status( 'failed' );
 
-			update_term_meta( $this->job_id, 'job_errors', $job_failure_data );
+			update_term_meta( $this->job_id, self::JOB_ERRORS_META_KEY, $job_failure_data );
 			update_term_meta( $this->job_id, self::JOB_RETRY_META_KEY, ( $this->get_retries() + 1 ) );
 		}
 	}
