@@ -151,7 +151,7 @@ class Perflab_Background_Job {
 	 *
 	 * @param string $status Status to set for current job.
 	 *
-	 * @return void
+	 * @return bool Returns true if status is updated, false otherwise.
 	 */
 	public function set_status( $status ) {
 		$valid_statuses = array(
@@ -167,7 +167,11 @@ class Perflab_Background_Job {
 			if ( 'complete' === $status ) {
 				update_term_meta( $this->job_id, 'job_completed_at', time() );
 			}
+
+			return true;
 		}
+
+		return false;
 	}
 
 	/**
