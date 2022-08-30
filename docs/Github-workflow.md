@@ -40,6 +40,13 @@ If you believe you may have discovered a possible bug or have an engineering-rel
 If you have completed initial engineering and want community members to test prior to merge, add the Needs Testing label.
 
 ## Pull requests
+
+### Branch name
+
+Before opening a pull request, you should create a new branch in which you're making your suggested changes. This branch can use almost any name, although it is recommended to include a reference to the issue number in it. Please avoid prefixing your branch with `feature/` or `release/` as those are reserved names for special protected branches in the Performance Lab plugin. If you use one of those names, you will not be able to push code to the branch directly.
+
+### Pull request requirements
+
 All pull requests must:
 
 - Be associated with an issue
