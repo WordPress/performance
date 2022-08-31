@@ -13,14 +13,6 @@
     "lint-staged": "^13.0.3",
     "lodash": "4.17.21"
   },
-  "peerDependencies": {
-    "prettier": ">=2"
-  },
-  "peerDependenciesMeta": {
-    "prettier": {
-      "optional": true
-    }
-  },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
     "since": "./bin/plugin/cli.js since",
