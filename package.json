@@ -3,14 +3,14 @@
   "license": "GPL-2.0-or-later",
   "repository": "git+https://github.com/WordPress/performance.git",
   "devDependencies": {
-    "@octokit/rest": "16.26.0",
-    "@wordpress/env": "^4.2.2",
-    "@wordpress/scripts": "^19.0",
-    "chalk": "4.1.1",
-    "commander": "4.1.0",
+    "@octokit/rest": "^19.0.4",
+    "@wordpress/env": "^5.2.0",
+    "@wordpress/scripts": "^24.0.0",
+    "chalk": "^5.0.1",
+    "commander": "^9.4.0",
     "fast-glob": "^3.2.7",
-    "husky": "^7.0.4",
-    "lint-staged": "^12.3.4",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.3",
     "lodash": "4.17.21"
   },
   "peerDependencies": {
