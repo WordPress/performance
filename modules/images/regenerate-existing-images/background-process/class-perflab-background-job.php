@@ -125,8 +125,7 @@ class Perflab_Background_Job {
 	public function __construct( $job_id = 0 ) {
 		$this->job_id = absint( $job_id );
 
-		// @todo Replace taxonomy name with constant.
-		if ( term_exists( $this->job_id, 'background_job' ) ) {
+		if ( $this->exists() ) {
 			$this->name = get_term_meta( $this->job_id, self::JOB_NAME_META_KEY, true );
 			$this->data = get_term_meta( $this->job_id, self::JOB_DATA_META_KEY, true );
 		}
@@ -185,8 +184,20 @@ class Perflab_Background_Job {
 			return false;
 		}
 
+		/**
+		 * Number of attempts to try to re-run a failed job.
+		 * Default 3 attempts.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param int $retry Number of retries allowed for a job to re-run.
+		 *
+		 * @return int
+		 */
+		$max_retry_attempts = apply_filters( 'perflab_job_max_retries_allowed', 3 );
+
 		// If number of attempts have been exhausted, return false.
-		if ( $this->get_retries() >= $this->max_retries_allowed() ) {
+		if ( $this->get_retries() >= $max_retry_attempts ) {
 			return false;
 		}
 
@@ -274,7 +285,7 @@ class Perflab_Background_Job {
 	public function create( $name, array $data ) {
 		// @todo Replace taxonomy name with constant.
 		// Create job only when job ID for current instance is non-zero and term doesn't exist.
-		if ( $this->job_id > 0 && term_exists( $this->job_id, 'background_job' ) ) {
+		if ( $this->job_id > 0 && $this->exists() ) {
 			return new WP_Error( __( 'Cannot create the job as it exists already.', 'performance-lab' ) );
 		}
 
@@ -334,12 +345,14 @@ class Perflab_Background_Job {
 		 * By default this will be empty array. Consumer code will need to use this filter in
 		 * order to return the list of items which needs to be processed in current batch.
 		 *
+		 * @since n.e.x.t
+		 *
 		 * @param array  $items  Items for the current batch.
 		 * @param int    $job_id Background job ID.
 		 * @param string $name   Job identifier or name.
 		 * @param array  $data   Job data.
 		 *
-		 * @since n.e.x.t
+		 * @return array Array of items to process.
 		 */
 		$items = apply_filters( 'perflab_job_batch_items', $items, $this->job_id, $this->name, $this->data );
 
@@ -429,26 +442,5 @@ class Perflab_Background_Job {
 			update_term_meta( $this->job_id, self::JOB_ERRORS_META_KEY, $job_failure_data );
 			update_term_meta( $this->job_id, self::JOB_RETRY_META_KEY, ( $this->get_retries() + 1 ) );
 		}
-	}
-
-	/**
-	 * Return max number of retries to attempt for a failed job to re-run.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return int
-	 */
-	private function max_retries_allowed() {
-		/**
-		 * Number of attempts to try to re-run a failed job.
-		 * Default 3 attempts.
-		 *
-		 * @since n.e.x.t
-		 *
-		 * @param int $retry Number of retries allowed for a job to re-run.
-		 *
-		 * @return int
-		 */
-		return apply_filters( 'perflab_job_max_retries_allowed', 3 );
 	}
 }
