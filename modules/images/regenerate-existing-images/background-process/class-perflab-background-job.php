@@ -36,7 +36,7 @@ class Perflab_Background_Job {
 	 * @const string
 	 * @since n.e.x.t
 	 */
-	const JOB_RETRY_META_KEY = 'perflab_job_retries';
+	const JOB_ATTEMPTS_META_KEY = 'perflab_job_attempts';
 
 	/**
 	 * Meta key for storing job lock.
@@ -106,14 +106,14 @@ class Perflab_Background_Job {
 	 *
 	 * @var string
 	 */
-	public $name;
+	private $name;
 
 	/**
 	 * Job data.
 	 *
 	 * @var array
 	 */
-	public $data;
+	private $data;
 
 	/**
 	 * Perflab_Background_Job constructor.
@@ -135,7 +135,7 @@ class Perflab_Background_Job {
 	 * Determines whether a job should run for current request or not.
 	 *
 	 * It determines by checking if job is already running or completed.
-	 * It also checks if max number of retries have been attempted for the job.
+	 * It also checks if max number of attempts have been attempted for the job.
 	 * For any such condition, it will return false, else true.
 	 *
 	 * @since n.e.x.t
@@ -149,19 +149,19 @@ class Perflab_Background_Job {
 		}
 
 		/**
-		 * Number of attempts to try to re-run a failed job.
-		 * Default 3 attempts.
+		 * Number of attempts to try to run a job.
+		 * Repeated attempts may be required to run a failed job. Default 3 attempts.
 		 *
 		 * @since n.e.x.t
 		 *
-		 * @param int $retry Number of retries allowed for a job to re-run.
+		 * @param int $attempts Number of attempts allowed for a job to run.
 		 *
 		 * @return int
 		 */
-		$max_retry_attempts = apply_filters( 'perflab_job_max_retries_allowed', 3 );
+		$max_attempts = apply_filters( 'perflab_job_max_attempts_allowed', 3 );
 
 		// If number of attempts have been exhausted, return false.
-		if ( $this->get_retries() >= $max_retry_attempts ) {
+		if ( $this->get_attempts() >= $max_attempts ) {
 			return false;
 		}
 
@@ -246,10 +246,10 @@ class Perflab_Background_Job {
 	 *
 	 * @return int|WP_Error
 	 */
-	public function create( $name, array $data ) {
+	public function create( $name, array $data = array() ) {
 		// @todo Replace taxonomy name with constant.
-		// Create job only when job ID for current instance is non-zero and term doesn't exist.
-		if ( $this->job_id > 0 && $this->exists() ) {
+		// Create job only when job ID for current instance is zero or term doesn't exist.
+		if ( $this->job_id > 0 || $this->exists() ) {
 			return new WP_Error( __( 'Cannot create the job as it exists already.', 'performance-lab' ) );
 		}
 
@@ -348,17 +348,16 @@ class Perflab_Background_Job {
 	}
 
 	/**
-	 * Get number of retries attempted for a job.
+	 * Returns the number of attempts executed for a job.
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @return int
 	 */
-	public function get_retries() {
-		$retries = get_term_meta( $this->job_id, self::JOB_RETRY_META_KEY, true );
-		$retries = absint( $retries );
+	public function get_attempts() {
+		$attempts = get_term_meta( $this->job_id, self::JOB_ATTEMPTS_META_KEY, true );
 
-		return $retries;
+		return absint( $attempts );
 	}
 
 	/**
@@ -371,8 +370,8 @@ class Perflab_Background_Job {
 	public function lock() {
 		$time = time();
 
-		update_term_meta( $this->job->job_id, self::JOB_LOCK_META_KEY, $time );
-		$this->job->set_status( self::JOB_STATUS_RUNNING );
+		update_term_meta( $this->job_id, self::JOB_LOCK_META_KEY, $time );
+		$this->set_status( self::JOB_STATUS_RUNNING );
 	}
 
 	/**
@@ -383,7 +382,7 @@ class Perflab_Background_Job {
 	 * @return void
 	 */
 	public function unlock() {
-		delete_term_meta( $this->job->job_id, self::JOB_LOCK_META_KEY );
+		delete_term_meta( $this->job_id, self::JOB_LOCK_META_KEY );
 	}
 
 	/**
@@ -401,10 +400,10 @@ class Perflab_Background_Job {
 		$job_failure_data = $error->get_error_data( 'perflab_job_failure' );
 
 		if ( ! empty( $job_failure_data ) ) {
-			$this->job->set_status( self::JOB_STATUS_FAILED );
+			$this->set_status( self::JOB_STATUS_FAILED );
 
 			update_term_meta( $this->job_id, self::JOB_ERRORS_META_KEY, $job_failure_data );
-			update_term_meta( $this->job_id, self::JOB_RETRY_META_KEY, ( $this->get_retries() + 1 ) );
+			update_term_meta( $this->job_id, self::JOB_ATTEMPTS_META_KEY, ( $this->get_attempts() + 1 ) );
 		}
 	}
 
