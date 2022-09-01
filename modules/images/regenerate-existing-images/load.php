@@ -19,6 +19,9 @@
  * @since n.e.x.t
  */
 function perflab_register_background_job_taxonomy() {
+
+	require_once __DIR__ . '/background-process/class-perflab-background-job.php';
+
 	// Labels for the background job taxonomy.
 	$labels = array(
 		'name'                  => _x( 'Background Jobs', 'taxonomy general name', 'performance-lab' ),
