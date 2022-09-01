@@ -132,42 +132,6 @@ class Perflab_Background_Job {
 	}
 
 	/**
-	 * Checks that the job term exist.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return array|null
-	 */
-	public function exists() {
-		// @todo Replace taxonomy name with constant.
-		return term_exists( $this->job_id, 'background_job' );
-	}
-
-	/**
-	 * Checks if the job is running.
-	 *
-	 * If the job lock is present, it means job is running.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return bool
-	 */
-	public function is_running() {
-		return ( self::JOB_STATUS_RUNNING === $this->get_status() );
-	}
-
-	/**
-	 * Checks if the background job is completed.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return bool
-	 */
-	public function is_complete() {
-		return ( self::JOB_STATUS_COMPLETE === $this->get_status() );
-	}
-
-	/**
 	 * Determines whether a job should run for current request or not.
 	 *
 	 * It determines by checking if job is already running or completed.
@@ -180,7 +144,7 @@ class Perflab_Background_Job {
 	 */
 	public function should_run() {
 		// If job doesn't exist or completed, return false.
-		if ( ! $this->exists() || $this->is_complete() ) {
+		if ( ! $this->exists() || $this->is_completed() ) {
 			return false;
 		}
 
@@ -442,5 +406,41 @@ class Perflab_Background_Job {
 			update_term_meta( $this->job_id, self::JOB_ERRORS_META_KEY, $job_failure_data );
 			update_term_meta( $this->job_id, self::JOB_RETRY_META_KEY, ( $this->get_retries() + 1 ) );
 		}
+	}
+
+	/**
+	 * Checks that the job term exist.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array|null
+	 */
+	private function exists() {
+		// @todo Replace taxonomy name with constant.
+		return term_exists( $this->job_id, 'background_job' );
+	}
+
+	/**
+	 * Checks if the job is running.
+	 *
+	 * If the job lock is present, it means job is running.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return bool
+	 */
+	private function is_running() {
+		return ( self::JOB_STATUS_RUNNING === $this->get_status() );
+	}
+
+	/**
+	 * Checks if the background job is completed.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return bool
+	 */
+	private function is_completed() {
+		return ( self::JOB_STATUS_COMPLETE === $this->get_status() );
 	}
 }
