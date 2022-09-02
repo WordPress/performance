@@ -97,6 +97,7 @@ class Perflab_Background_Job {
 	/**
 	 * Job ID.
 	 *
+	 * @since n.e.x.t
 	 * @var int
 	 */
 	public $job_id;
@@ -104,6 +105,7 @@ class Perflab_Background_Job {
 	/**
 	 * Job name.
 	 *
+	 * @since n.e.x.t
 	 * @var string
 	 */
 	private $name;
@@ -111,6 +113,7 @@ class Perflab_Background_Job {
 	/**
 	 * Job data.
 	 *
+	 * @since n.e.x.t
 	 * @var array
 	 */
 	private $data;
