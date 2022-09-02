@@ -23,32 +23,34 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 
 	public function test_class_constants_exists() {
 		$this->job = new Perflab_Background_Job();
+		$job_class = get_class( $this->job );
 
-		$this->assertTrue( defined( get_class( $this->job ) . '::JOB_NAME_META_KEY' ) );
-		$this->assertTrue( defined( get_class( $this->job ) . '::JOB_DATA_META_KEY' ) );
-		$this->assertTrue( defined( get_class( $this->job ) . '::JOB_ATTEMPTS_META_KEY' ) );
-		$this->assertTrue( defined( get_class( $this->job ) . '::JOB_LOCK_META_KEY' ) );
-		$this->assertTrue( defined( get_class( $this->job ) . '::JOB_ERRORS_META_KEY' ) );
-		$this->assertTrue( defined( get_class( $this->job ) . '::JOB_STATUS_META_KEY' ) );
-		$this->assertTrue( defined( get_class( $this->job ) . '::JOB_STATUS_QUEUED' ) );
-		$this->assertTrue( defined( get_class( $this->job ) . '::JOB_STATUS_RUNNING' ) );
-		$this->assertTrue( defined( get_class( $this->job ) . '::JOB_STATUS_COMPLETE' ) );
-		$this->assertTrue( defined( get_class( $this->job ) . '::JOB_STATUS_FAILED' ) );
+		$this->assertTrue( defined( $job_class . '::JOB_NAME_META_KEY' ) );
+		$this->assertTrue( defined( $job_class . '::JOB_DATA_META_KEY' ) );
+		$this->assertTrue( defined( $job_class . '::JOB_ATTEMPTS_META_KEY' ) );
+		$this->assertTrue( defined( $job_class . '::JOB_LOCK_META_KEY' ) );
+		$this->assertTrue( defined( $job_class . '::JOB_ERRORS_META_KEY' ) );
+		$this->assertTrue( defined( $job_class . '::JOB_STATUS_META_KEY' ) );
+		$this->assertTrue( defined( $job_class . '::JOB_STATUS_QUEUED' ) );
+		$this->assertTrue( defined( $job_class . '::JOB_STATUS_RUNNING' ) );
+		$this->assertTrue( defined( $job_class . '::JOB_STATUS_COMPLETE' ) );
+		$this->assertTrue( defined( $job_class . '::JOB_STATUS_FAILED' ) );
 	}
 
 	public function test_class_constants_values() {
 		$this->job = new Perflab_Background_Job();
+		$job_class = get_class( $this->job );
 
-		$this->assertEquals( 'perflab_job_name', constant( get_class( $this->job ) . '::JOB_NAME_META_KEY' ) );
-		$this->assertEquals( 'perflab_job_data', constant( get_class( $this->job ) . '::JOB_DATA_META_KEY' ) );
-		$this->assertEquals( 'perflab_job_attempts', constant( get_class( $this->job ) . '::JOB_ATTEMPTS_META_KEY' ) );
-		$this->assertEquals( 'perflab_job_lock', constant( get_class( $this->job ) . '::JOB_LOCK_META_KEY' ) );
-		$this->assertEquals( 'perflab_job_errors', constant( get_class( $this->job ) . '::JOB_ERRORS_META_KEY' ) );
-		$this->assertEquals( 'perflab_job_status', constant( get_class( $this->job ) . '::JOB_STATUS_META_KEY' ) );
-		$this->assertEquals( 'perflab_job_queued', constant( get_class( $this->job ) . '::JOB_STATUS_QUEUED' ) );
-		$this->assertEquals( 'perflab_job_running', constant( get_class( $this->job ) . '::JOB_STATUS_RUNNING' ) );
-		$this->assertEquals( 'perflab_job_complete', constant( get_class( $this->job ) . '::JOB_STATUS_COMPLETE' ) );
-		$this->assertEquals( 'perflab_job_failed', constant( get_class( $this->job ) . '::JOB_STATUS_FAILED' ) );
+		$this->assertEquals( 'perflab_job_name', constant( $job_class . '::JOB_NAME_META_KEY' ) );
+		$this->assertEquals( 'perflab_job_data', constant( $job_class . '::JOB_DATA_META_KEY' ) );
+		$this->assertEquals( 'perflab_job_attempts', constant( $job_class . '::JOB_ATTEMPTS_META_KEY' ) );
+		$this->assertEquals( 'perflab_job_lock', constant( $job_class . '::JOB_LOCK_META_KEY' ) );
+		$this->assertEquals( 'perflab_job_errors', constant( $job_class . '::JOB_ERRORS_META_KEY' ) );
+		$this->assertEquals( 'perflab_job_status', constant( $job_class . '::JOB_STATUS_META_KEY' ) );
+		$this->assertEquals( 'perflab_job_queued', constant( $job_class . '::JOB_STATUS_QUEUED' ) );
+		$this->assertEquals( 'perflab_job_running', constant( $job_class . '::JOB_STATUS_RUNNING' ) );
+		$this->assertEquals( 'perflab_job_complete', constant( $job_class . '::JOB_STATUS_COMPLETE' ) );
+		$this->assertEquals( 'perflab_job_failed', constant( $job_class . '::JOB_STATUS_FAILED' ) );
 	}
 
 	public function test_job_id_is_zero() {

@@ -17,80 +17,80 @@ class Perflab_Background_Job {
 	/**
 	 * Meta key for storing job name/action.
 	 *
-	 * @const string
 	 * @since n.e.x.t
+	 * @var string Job name meta key.
 	 */
 	const JOB_NAME_META_KEY = 'perflab_job_name';
 
 	/**
 	 * Meta key for storing job data.
 	 *
-	 * @const string
 	 * @since n.e.x.t
+	 * @var string Job data meta key.
 	 */
 	const JOB_DATA_META_KEY = 'perflab_job_data';
 
 	/**
 	 * Meta key for storing job data.
 	 *
-	 * @const string
 	 * @since n.e.x.t
+	 * @var string Job attempts meta key.
 	 */
 	const JOB_ATTEMPTS_META_KEY = 'perflab_job_attempts';
 
 	/**
 	 * Meta key for storing job lock.
 	 *
-	 * @const string
 	 * @since n.e.x.t
+	 * @var string Job lock meta key.
 	 */
 	const JOB_LOCK_META_KEY = 'perflab_job_lock';
 
 	/**
 	 * Meta key for storing job errors.
 	 *
-	 * @const string
 	 * @since n.e.x.t
+	 * @var string Job errors meta key.
 	 */
 	const JOB_ERRORS_META_KEY = 'perflab_job_errors';
 
 	/**
 	 * Job status meta key.
 	 *
-	 * @const string
 	 * @since n.e.x.t
+	 * @var string Job status meta key.
 	 */
 	const JOB_STATUS_META_KEY = 'perflab_job_status';
 
 	/**
 	 * Job status for queued jobs.
 	 *
-	 * @const string
 	 * @since n.e.x.t
+	 * @var string Job status queued.
 	 */
 	const JOB_STATUS_QUEUED = 'perflab_job_queued';
 
 	/**
 	 * Job status for running jobs.
 	 *
-	 * @const string
 	 * @since n.e.x.t
+	 * @var string Job status running.
 	 */
 	const JOB_STATUS_RUNNING = 'perflab_job_running';
 
 	/**
 	 * Job status for completed jobs.
 	 *
-	 * @const string
 	 * @since n.e.x.t
+	 * @var string Job status commplete.
 	 */
 	const JOB_STATUS_COMPLETE = 'perflab_job_complete';
 
 	/**
 	 * Job status for failed jobs.
 	 *
-	 * @const string
 	 * @since n.e.x.t
+	 * @var string Job status failed.
 	 */
 	const JOB_STATUS_FAILED = 'perflab_job_failed';
 
@@ -155,8 +155,6 @@ class Perflab_Background_Job {
 		 * @since n.e.x.t
 		 *
 		 * @param int $attempts Number of attempts allowed for a job to run.
-		 *
-		 * @return int
 		 */
 		$max_attempts = apply_filters( 'perflab_job_max_attempts_allowed', 3 );
 
@@ -282,8 +280,8 @@ class Perflab_Background_Job {
 			 * @since n.e.x.t
 			 *
 			 * @param int    $job_id Job ID.
-			 * @param string $name Job name.
-			 * @param array  $data Job data.
+			 * @param string $name   Job name.
+			 * @param array  $data   Job data.
 			 */
 			do_action( 'perflab_job_created', $this->job_id, $this->name, $this->data );
 		}
@@ -315,8 +313,6 @@ class Perflab_Background_Job {
 		 * @param int    $job_id Background job ID.
 		 * @param string $name   Job identifier or name.
 		 * @param array  $data   Job data.
-		 *
-		 * @return array Array of items to process.
 		 */
 		$items = apply_filters( 'perflab_job_batch_items', $items, $this->job_id, $this->name, $this->data );
 
@@ -340,7 +336,7 @@ class Perflab_Background_Job {
 		 *
 		 * @since n.e.x.t
 		 *
-		 * @param mixed $item Batch item for the job.
+		 * @param mixed $item   Batch item for the job.
 		 * @param int   $job_id Job ID.
 		 * @param array $data   Job data.
 		 */
@@ -368,9 +364,7 @@ class Perflab_Background_Job {
 	 * @return void
 	 */
 	public function lock() {
-		$time = time();
-
-		update_term_meta( $this->job_id, self::JOB_LOCK_META_KEY, $time );
+		update_term_meta( $this->job_id, self::JOB_LOCK_META_KEY, time() );
 		$this->set_status( self::JOB_STATUS_RUNNING );
 	}
 

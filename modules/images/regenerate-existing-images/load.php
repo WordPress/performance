@@ -19,7 +19,9 @@
  * @since n.e.x.t
  */
 function perflab_register_background_job_taxonomy() {
-
+	/**
+	 * Require background job class.
+	 */
 	require_once __DIR__ . '/background-process/class-perflab-background-job.php';
 
 	// Labels for the background job taxonomy.
