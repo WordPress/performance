@@ -128,7 +128,43 @@ class Perflab_Background_Process {
 	 * @return bool
 	 */
 	private function memory_exceeded() {
-		return false;
+		$memory_limit     = $this->get_memory_limit() * 0.9; // Use 90% of memory limit.
+		$memmory_usage    = memory_get_usage( true ); // Memory allotted to php.
+		$memory_exhausted = false;
+
+		// Check if memory usage has reached the memory limit (90%).
+		if ( $memmory_usage >= $memory_limit ) {
+			$memory_exhausted = true;
+		}
+
+		/**
+		 * Filters the memory exceeded flag.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param bool $memory_exhausted Whether the memory limit has been reached.
+		 */
+		return apply_filters( 'perflab_background_process_memory_exceeded', $memory_exhausted );
+	}
+
+	/**
+	 * Get the memory limit allotted for PHP.
+	 *
+	 * @return int
+	 */
+	private function get_memory_limit() {
+		$default_memory_limit = '128M';
+
+		if ( function_exists( 'memory_limit' ) ) {
+			$memory_limit = ini_get( 'memory_limit' );
+		}
+
+		if ( empty( $memory_limit ) || -1 === $memory_limit ) {
+			$memory_limit = $default_memory_limit;
+		}
+
+		// Convert memory to bytes in integer format.
+		return wp_convert_hr_to_bytes( $memory_limit );
 	}
 
 	/**
