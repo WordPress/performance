@@ -223,9 +223,7 @@ class Perflab_Background_Job {
 	 * @return array|null
 	 */
 	public function data() {
-		/**
-		 * If we have cached data, return it.
-		 */
+		// If we have cached data, return it.
 		if ( ! is_null( $this->data ) ) {
 			return $this->data;
 		}
