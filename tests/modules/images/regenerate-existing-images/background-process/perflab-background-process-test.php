@@ -13,14 +13,13 @@
  * @group background-process
  */
 class Perflab_Background_Process_Test extends WP_UnitTestCase {
-
-    /**
-     * Process instance.
-     * 
-     * @since n.e.x.t
-     *
-     * @var Perflab_Background_Process
-     */
+	/**
+	 * Process instance.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @var Perflab_Background_Process
+	 */
 	private $process;
 
 	/**
@@ -33,13 +32,13 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/images/regenerate-existing-images/background-process/class-perflab-background-process.php';
 	}
 
-    /**
-     * Test that constant exists and its value.
-     * 
-     * @since n.e.x.t
-     *
-     * @return void
-     */
+	/**
+	 * Test that constant exists and its value.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @covers ::__construct
+	 */
 	public function test_class_constants_exists() {
 		$this->process = new Perflab_Background_Process();
 		$process_class = get_class( $this->process );
@@ -48,13 +47,13 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 		$this->assertEquals( 'background_process_handle_request', $constant_value );
 	}
 
-    /**
-     * Test that ajax hooks are getting added when object is instantiated.
-     * 
-     * @since n.e.x.t
-     *
-     * @return void
-     */
+	/**
+	 * Test that ajax hooks are getting added when object is instantiated.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @covers ::__construct
+	 */
 	public function test_handle_request_actions_added() {
 		$this->process  = new Perflab_Background_Process();
 		$process_class  = get_class( $this->process );
