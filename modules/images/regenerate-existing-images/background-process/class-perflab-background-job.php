@@ -151,6 +151,10 @@ class Perflab_Background_Job {
 			return false;
 		}
 
+		if ( $this->is_running() ) {
+			return false;
+		}
+
 		/**
 		 * Number of attempts to try to run a job.
 		 * Repeated attempts may be required to run a failed job. Default 3 attempts.
@@ -163,10 +167,6 @@ class Perflab_Background_Job {
 
 		// If number of attempts have been exhausted, return false.
 		if ( $this->get_attempts() >= $max_attempts ) {
-			return false;
-		}
-
-		if ( $this->is_running() ) {
 			return false;
 		}
 
