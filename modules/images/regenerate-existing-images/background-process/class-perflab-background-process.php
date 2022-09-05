@@ -42,7 +42,7 @@ class Perflab_Background_Process {
 	 */
 	public function __construct() {
 		add_action( 'wp_ajax_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
-		add_action( 'wp_ajax_nopriv' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
+		add_action( 'wp_ajax_nopriv_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
 	}
 
 	/**
