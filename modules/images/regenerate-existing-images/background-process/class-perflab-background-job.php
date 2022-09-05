@@ -360,15 +360,32 @@ class Perflab_Background_Job {
 	}
 
 	/**
-	 * Locks the process. It tells that process is running.
+	 * Set the start time of job.
+	 * It tells at what point of time the job has been started.
 	 *
 	 * @since n.e.x.t
 	 *
+	 * @param int $time Timestamp (in seconds) at which job has been started.
+	 *
 	 * @return void
 	 */
-	public function lock() {
-		update_term_meta( $this->job_id, self::JOB_LOCK_META_KEY, time() );
+	public function lock( $time = null ) {
+		$time = empty( $time ) ? time() : $time;
+		update_term_meta( $this->job_id, self::JOB_LOCK_META_KEY, $time );
 		$this->set_status( self::JOB_STATUS_RUNNING );
+	}
+
+	/**
+	 * Get the timestamp (in seconds) when the job was started.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return int
+	 */
+	public function get_start_time() {
+		$time = get_term_meta( $this->job_id, self::JOB_LOCK_META_KEY, true );
+
+		return absint( $time );
 	}
 
 	/**
