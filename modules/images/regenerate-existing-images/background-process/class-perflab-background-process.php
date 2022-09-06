@@ -81,7 +81,7 @@ class Perflab_Background_Process {
 			$this->run(); // Run the job.
 
 			// Once job ran successfully, change its status to queued.
-			$this->job->set_status( Perflab_Background_Job::JOB_STATUS_QUEUED );
+			$this->job->set_status( Perflab_Background_Job::JOB_STATUS_PARTIAL );
 
 		} catch ( Exception $e ) {
 			if ( $this->job instanceof Perflab_Background_Job ) {
