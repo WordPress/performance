@@ -79,6 +79,14 @@ class Perflab_Background_Job {
 	const JOB_STATUS_RUNNING = 'perflab_job_running';
 
 	/**
+	 * Job status for partially executed jobs.
+	 *
+	 * @since n.e.x.t
+	 * @var string Job status partial.
+	 */
+	const JOB_STATUS_PARTIAL = 'perflab_job_partial';
+
+	/**
 	 * Job status for completed jobs.
 	 *
 	 * @since n.e.x.t
