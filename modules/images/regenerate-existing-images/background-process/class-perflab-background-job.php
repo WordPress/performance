@@ -196,6 +196,7 @@ class Perflab_Background_Job {
 			self::JOB_STATUS_FAILED,
 			self::JOB_STATUS_QUEUED,
 			self::JOB_STATUS_RUNNING,
+			self::JOB_STATUS_PARTIAL,
 		);
 
 		if ( in_array( $status, $valid_statuses, true ) ) {
