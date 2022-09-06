@@ -252,16 +252,8 @@ class Perflab_Background_Job {
 			return new WP_Error( __( 'Cannot create the job as it exists already.', 'performance-lab' ) );
 		}
 
-		$term_name = 'job_' . microtime();
-
 		// Insert the new job in queue.
-		$term_data = wp_insert_term(
-			$term_name,
-			'background_job',
-			array(
-				'slug' => $term_name,
-			)
-		);
+		$term_data = wp_insert_term( 'job_' . time(), 'background_job' );
 
 		if ( ! is_wp_error( $term_data ) ) {
 			// Set object properties for instance as soon as job is created.
