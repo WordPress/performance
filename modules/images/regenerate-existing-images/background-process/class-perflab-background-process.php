@@ -56,21 +56,24 @@ class Perflab_Background_Process {
 	 */
 	public function handle_request() {
 		try {
-
 			// Exit if nonce varification fails.
-			check_ajax_referer( Perflab_Background_Process::BG_PROCESS_ACTION, 'nonce' );
+			$nonce_check = check_ajax_referer( Perflab_Background_Process::BG_PROCESS_ACTION, 'nonce', false );
 
-			$job_id = isset( $_POST['job_id'] ) ? absint( sanitize_text_field( $_POST['job_id'] ) ) : 0;
+			if ( false === $nonce_check ) {
+				throw new Exception( __( 'Invalid nonce passed to process.', 'performance-lab' ) );
+			}
+
+			$job_id = isset( $_REQUEST['job_id'] ) ? absint( sanitize_text_field( $_REQUEST['job_id'] ) ) : 0;
 
 			// Job ID is mandatory to be specified.
 			if ( empty( $job_id ) ) {
-				throw new Exception( 'empty_background_job_id', __( 'No job specified to execute.', 'performance-lab' ) );
+				throw new Exception( __( 'No job specified to execute.', 'performance-lab' ) );
 			}
 
 			$this->job = new Perflab_Background_Job( $job_id );
 
 			// Silently exit if the job is not ready to run.
-			if ( $this->job->should_run() ) {
+			if ( ! $this->job->should_run() ) {
 				return;
 			}
 
@@ -78,13 +81,15 @@ class Perflab_Background_Process {
 			$this->run(); // Run the job.
 
 		} catch ( Exception $e ) {
-
-			$error = new WP_Error( 'perflab_job_failure', $e->getMessage() );
-			$this->job->record_error( $error );
-
+			if ( $this->job instanceof Perflab_Background_Job ) {
+				$error = new WP_Error( 'perflab_job_failure', $e->getMessage() );
+				$this->job->record_error( $error );
+			}
 		} finally {
-			// Unlock the process once everything is done.
-			$this->job->unlock();
+			if ( $this->job instanceof Perflab_Background_Job ) {
+				// Unlock the process once everything is done.
+				$this->job->unlock();
+			}
 		}
 	}
 

@@ -71,4 +71,56 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 		$this->assertEquals( 10, $non_authenticated_action );
 	}
 
+	/**
+	 * Tests that exception is thrown when job_id is not passed.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @dataProvider job_instance
+	 * @covers ::handle_request
+	 * @group abc
+	 */
+	public function test_handle_request_throws_exception( $job ) {
+		$this->process  = new Perflab_Background_Process();
+		$process_class  = get_class( $this->process );
+		$constant_value = constant( $process_class . '::BG_PROCESS_ACTION' );
+		$nonce          = wp_create_nonce( $constant_value );
+
+		// Prepare request params.
+		$_REQUEST['nonce']  = $nonce;
+		$_REQUEST['job_id'] = $job['term_id'];
+
+		// Call the method with adding and removing filters.
+		add_filter( 'perflab_job_batch_items', array( $this, 'batch_items' ) );
+		$this->process->handle_request();
+		remove_filter( 'perflab_job_batch_items', array( $this, 'batch_items' ) );
+
+		$hook_ran = did_action( 'perflab_process_test_task_job_item' );
+
+		$this->assertSame( 5, $hook_ran );
+	}
+
+	public function job_instance() {
+		$job    = new Perflab_Background_Job();
+		$job_id = $job->create( 'test_task', array( 'test_data' => 123 ) );
+
+		return array(
+			array( $job_id ),
+		);
+	}
+
+	/**
+	 * Batch items filter callback.
+	 *
+	 * @return array Filtered batch items.
+	 */
+	public function batch_items() {
+		return array(
+			1,
+			2,
+			3,
+			4,
+			5,
+		);
+	}
 }
