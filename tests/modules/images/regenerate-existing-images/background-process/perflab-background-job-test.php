@@ -21,6 +21,15 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 */
 	private $job;
 
+	/**
+	 * Runs before any test is executed inside class.
+	 *
+	 * @return void
+	 */
+	public static function set_up_before_class() {
+		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/images/regenerate-existing-images/background-process/class-perflab-background-job.php';
+	}
+
 	public function test_class_constants_exists() {
 		$this->job = new Perflab_Background_Job();
 		$job_class = get_class( $this->job );
