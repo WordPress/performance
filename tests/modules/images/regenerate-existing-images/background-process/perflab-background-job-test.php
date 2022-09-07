@@ -13,7 +13,6 @@
  * @group background-process
  */
 class Perflab_Background_Job_Test extends WP_UnitTestCase {
-
 	/**
 	 * Job instance.
 	 *
@@ -92,53 +91,10 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers ::batch
-	 *
-	 * @todo Add the check if filter ran, once 6.1 is released.
-	 * @see https://core.trac.wordpress.org/ticket/35357
-	 */
-	public function test_batch() {
-		$this->job = new Perflab_Background_Job();
-
-		$items = $this->job->batch();
-
-		$this->assertIsArray( $items );
-		$this->assertEmpty( $items );
-	}
-
-	/**
-	 * @covers ::process
-	 */
-	public function test_process() {
-		$job_data = array(
-			'post_id'          => 10,
-			'some_random_data' => 'some_random_string',
-		);
-
-		$job = Perflab_Background_Job::create( 'random', $job_data );
-
-		$test_items = array(
-			'test_item_1',
-			'test_item_2',
-			'test_item_3',
-			'test_item_4',
-			'test_item_5',
-		);
-
-		foreach ( $test_items as $item ) {
-			$job->process( $item );
-		}
-
-		$process_hook = did_action( 'perflab_process_random_job_item' );
-
-		$this->assertEquals( 5, $process_hook );
-	}
-
-	/**
-	 * @covers ::record_error
+	 * @covers ::set_error
 	 * @covers ::get_attempts
 	 */
-	public function test_record_error() {
+	public function test_set_error() {
 		$error      = new WP_Error();
 		$error_data = array(
 			'test_error_data' => 'descriptive_infomation',
@@ -151,7 +107,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		);
 
 		$this->job = Perflab_Background_Job::create( 'random', $job_data );
-		$this->job->record_error( $error );
+		$this->job->set_error( $error );
 
 		$error_metadata = get_term_meta( $this->job->job_id, 'perflab_job_errors', true );
 		$attempts       = $this->job->get_attempts();
