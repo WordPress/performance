@@ -289,7 +289,7 @@ class Perflab_Background_Job {
 	 */
 	public static function create( $name, array $data = array() ) {
 		// Insert the new job in queue.
-		$term_data = wp_insert_term( 'job_' . time(), 'background_job' );
+		$term_data = wp_insert_term( 'job_' . time(), BACKGROUND_JOB_TAXONOMY_SLUG );
 
 		if ( ! is_wp_error( $term_data ) ) {
 			update_term_meta( $term_data['term_id'], self::JOB_DATA_META_KEY, $data );
@@ -375,8 +375,7 @@ class Perflab_Background_Job {
 	 * @return array|null
 	 */
 	private function exists() {
-		// @todo Replace taxonomy name with constant.
-		return term_exists( $this->job_id, 'background_job' );
+		return term_exists( $this->job_id, BACKGROUND_JOB_TAXONOMY_SLUG );
 	}
 
 	/**
