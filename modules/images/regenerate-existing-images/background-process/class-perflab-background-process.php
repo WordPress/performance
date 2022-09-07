@@ -57,8 +57,9 @@ class Perflab_Background_Process {
 	public function handle_request() {
 		try {
 			// Exit if nonce varification fails.
-			$nonce_check = check_ajax_referer( Perflab_Background_Process::BG_PROCESS_ACTION, 'nonce', false );
+			$nonce_check = check_ajax_referer( self::BG_PROCESS_ACTION, 'nonce', false );
 
+			// If nonce check fails, fallback to key checking.
 			if ( false === $nonce_check ) {
 				throw new Exception( __( 'Invalid nonce passed to process.', 'performance-lab' ) );
 			}
@@ -92,6 +93,7 @@ class Perflab_Background_Process {
 			if ( $this->job instanceof Perflab_Background_Job ) {
 				// Unlock the process once everything is done.
 				$this->job->unlock();
+				$this->next_batch();
 			}
 		}
 	}
@@ -116,7 +118,42 @@ class Perflab_Background_Process {
 			 * @param array $data Job data.
 			 */
 			do_action( 'perflab_job_' . $this->job->get_name(), $this->job->get_data() );
-		} while ( ! $this->memory_exceeded() && ! $this->time_exceeded() && ! empty( $batch_items ) );
+		} while ( ! $this->memory_exceeded() && ! $this->time_exceeded() );
+	}
+
+	/**
+	 * Call the next batch of the job if it is not completed already.
+	 *
+	 * This will send a POST request to admin-ajax.php with background
+	 * process specific action to continue executing the job in a new process.
+	 *
+	 * @return void
+	 */
+	private function next_batch() {
+		/**
+		 * Do not call the background process from within the script if the
+		 * real cron has been setup to do so.
+		 */
+		if ( defined( 'ENABLE_BG_PROCESS_CRON' ) ) {
+			return;
+		}
+
+		$nonce  = wp_create_nonce( self::BG_PROCESS_ACTION );
+		$job_id = $this->job->job_id;
+
+		$url    = admin_url( 'admin-ajax.php' );
+		$params = array(
+			'blocking'  => false,
+			'body'      => array(
+				'action' => self::BG_PROCESS_ACTION,
+				'job_id' => $job_id,
+				'nonce'  => $nonce,
+			),
+			'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
+			'timeout'   => 0.1,
+		);
+
+		wp_remote_post( $url, $params );
 	}
 
 	/**
