@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin page for background jobs
+ * Admin page for background jobs.
  *
  * @since n.e.x.t
  * @package performance-lab
@@ -12,15 +12,52 @@
  * @since n.e.x.t
  */
 function perflab_register_background_jobs_page() {
-	add_management_page(
+	$page_hook = add_management_page(
 		__( 'Background Jobs', 'performance-lab' ),
 		__( 'Background Jobs', 'performance-lab' ),
 		'manage_categories',
 		'background-jobs',
 		'perflab_render_background_jobs_page'
 	);
+
+	add_action( "load-{$page_hook}", 'perflab_setup_background_jobs_screen' );
 }
 add_action( 'admin_menu', 'perflab_register_background_jobs_page' );
+
+/**
+ * Adds screen options to the background jobs screen.
+ *
+ * @since n.e.x.t
+ */
+function perflab_setup_background_jobs_screen() {
+	global $perflab_background_jobs_list_table;
+
+	$arguments = array(
+		'label'   => __( 'Jobs Per Page', 'performance-lab' ),
+		'default' => 20,
+		'option'  => 'background_jobs_per_page',
+	);
+
+	add_screen_option( 'per_page', $arguments );
+
+	// Initialize background jobs table to load columns properly.
+	perflab_get_background_jobs_list_table();
+}
+
+/**
+ * Gets an instance of the background jobs list table.
+ *
+ * @since n.e.x.t
+ */
+function perflab_get_background_jobs_list_table() {
+	global $perflab_background_jobs_list_table;
+
+	if ( ! $perflab_background_jobs_list_table instanceof WP_Background_Jobs_List_Table ) {
+		$perflab_background_jobs_list_table = new WP_Background_Jobs_List_Table();
+	}
+
+	return $perflab_background_jobs_list_table;
+}
 
 /**
  * Renders the background jobs page.
@@ -41,13 +78,7 @@ function perflab_render_background_jobs_page() {
 	}
 	*/
 
-	$screen            = get_current_screen();
-	$screen->post_type = 'post';
-	$screen->id        = 'background_job';
-	$screen->taxonomy  = 'background_job';
-
-	$wp_list_table = _get_list_table( 'WP_Terms_List_Table', array( 'screen' => $screen ) );
-	$pagenum       = $wp_list_table->get_pagenum();
+	$wp_list_table = perflab_get_background_jobs_list_table();
 
 	switch ( $wp_list_table->current_action() ) {
 		// TODO: implement background job actions.
@@ -62,7 +93,9 @@ function perflab_render_background_jobs_page() {
 		<h1 class="wp-heading-inline">
 			<?php echo get_admin_page_title(); ?>
 		</h1>
-		<?php $wp_list_table->display(); ?>
+		<form id="perflab-background-jobs-list-form" method="get">
+			<?php $wp_list_table->display(); ?>
+		</form>
 	</div>
 	<?php
 }

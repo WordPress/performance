@@ -11,6 +11,7 @@
 /**
  * Require helper functions and specific integrations.
  */
+require_once __DIR__ . '/class-wp-background-jobs-list-table.php';
 require_once __DIR__ . '/admin-page.php';
 
 /**
