@@ -76,50 +76,23 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @dataProvider job_instance
 	 * @covers ::handle_request
-	 * @group abc
 	 */
-	public function test_handle_request_throws_exception( $job_id ) {
+	public function test_handle_request() {
 		$this->process  = new Perflab_Background_Process();
 		$process_class  = get_class( $this->process );
 		$constant_value = constant( $process_class . '::BG_PROCESS_ACTION' );
 		$nonce          = wp_create_nonce( $constant_value );
+		$job            = Perflab_Background_Job::create( 'test_task' );
 
 		// Prepare request params.
 		$_REQUEST['nonce']  = $nonce;
-		$_REQUEST['job_id'] = $job_id;
+		$_REQUEST['job_id'] = $job->job_id;
 
-		// Call the method with adding and removing filters.
-		add_filter( 'perflab_job_batch_items', array( $this, 'batch_items' ) );
 		$this->process->handle_request();
-		remove_filter( 'perflab_job_batch_items', array( $this, 'batch_items' ) );
 
-		$hook_ran = did_action( 'perflab_process_test_task_job_item' );
+		$hook_ran = did_action( 'perflab_job_test_task' );
 
-		$this->assertSame( 5, $hook_ran );
-	}
-
-	public function job_instance() {
-		$job = Perflab_Background_Job::create( 'test_task', array( 'test_data' => 123 ) );
-
-		return array(
-			array( $job->job_id ),
-		);
-	}
-
-	/**
-	 * Batch items filter callback.
-	 *
-	 * @return array Filtered batch items.
-	 */
-	public function batch_items() {
-		return array(
-			1,
-			2,
-			3,
-			4,
-			5,
-		);
+		$this->assertSame( 1, $hook_ran );
 	}
 }
