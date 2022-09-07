@@ -131,6 +131,9 @@ class Perflab_Background_Process {
 	/**
 	 * Checks whether the memory is exceeded for the current process.
 	 *
+	 * Keep memory limit to 90% of the values assigned to PHP config,
+	 * it will prevent the error and help run the memory exhaustion check.
+	 *
 	 * @since n.e.x.t
 	 *
 	 * @return bool
@@ -158,6 +161,9 @@ class Perflab_Background_Process {
 	/**
 	 * Get the memory limit allotted for PHP.
 	 *
+	 * Keep the default memory limit of 128M which
+	 * is there on most of the hosts.
+	 *
 	 * @return int
 	 */
 	private function get_memory_limit() {
@@ -177,6 +183,11 @@ class Perflab_Background_Process {
 
 	/**
 	 * Checks if current execution time is exceeded for the process.
+	 *
+	 * A sensible default of 20 seconds has been taken in case ini_get does not
+	 * work. Keep max_execution_time to 10 seconds less than whatever is set in PHP
+	 * configuration, so that those 10 seconds can be used to cleanup everything and
+	 * call the next batch of job.
 	 *
 	 * @since n.e.x.t
 	 *
