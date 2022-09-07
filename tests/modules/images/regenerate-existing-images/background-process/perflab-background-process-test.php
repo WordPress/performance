@@ -80,7 +80,7 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 	 * @covers ::handle_request
 	 * @group abc
 	 */
-	public function test_handle_request_throws_exception( $job ) {
+	public function test_handle_request_throws_exception( $job_id ) {
 		$this->process  = new Perflab_Background_Process();
 		$process_class  = get_class( $this->process );
 		$constant_value = constant( $process_class . '::BG_PROCESS_ACTION' );
@@ -88,7 +88,7 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 
 		// Prepare request params.
 		$_REQUEST['nonce']  = $nonce;
-		$_REQUEST['job_id'] = $job['term_id'];
+		$_REQUEST['job_id'] = $job_id;
 
 		// Call the method with adding and removing filters.
 		add_filter( 'perflab_job_batch_items', array( $this, 'batch_items' ) );
@@ -101,11 +101,10 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 	}
 
 	public function job_instance() {
-		$job    = new Perflab_Background_Job();
-		$job_id = $job->create( 'test_task', array( 'test_data' => 123 ) );
+		$job = Perflab_Background_Job::create( 'test_task', array( 'test_data' => 123 ) );
 
 		return array(
-			array( $job_id ),
+			array( $job->job_id ),
 		);
 	}
 
