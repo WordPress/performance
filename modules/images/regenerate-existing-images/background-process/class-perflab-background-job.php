@@ -214,6 +214,28 @@ class Perflab_Background_Job {
 	}
 
 	/**
+	 * Records the error for the current process run.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param WP_Error $error Error instance.
+	 *
+	 * @todo Implement the error recording activity.
+	 *
+	 * @return void
+	 */
+	public function set_error( WP_Error $error ) {
+		$job_failure_data = $error->get_error_data( 'perflab_job_failure' );
+
+		if ( ! empty( $job_failure_data ) ) {
+			$this->set_status( self::JOB_STATUS_FAILED );
+
+			update_term_meta( $this->job_id, self::JOB_ERRORS_META_KEY, $job_failure_data );
+			update_term_meta( $this->job_id, self::JOB_ATTEMPTS_META_KEY, ( $this->get_attempts() + 1 ) );
+		}
+	}
+
+	/**
 	 * Retrieves the job status from its meta information.
 	 *
 	 * @since n.e.x.t
@@ -293,60 +315,6 @@ class Perflab_Background_Job {
 	}
 
 	/**
-	 * Get the batch for current run.
-	 *
-	 * This will return the items to process in the current batch.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return array List of batch items.
-	 */
-	public function batch() {
-		$items = array();
-
-		/**
-		 * Filters the items for the current batch of job.
-		 *
-		 * By default this will be empty array. Consumer code will need to use this filter in
-		 * order to return the list of items which needs to be processed in current batch.
-		 *
-		 * @since n.e.x.t
-		 *
-		 * @param array  $items  Items for the current batch.
-		 * @param int    $job_id Background job ID.
-		 * @param string $name   Job identifier or name.
-		 * @param array  $data   Job data.
-		 */
-		$items = apply_filters( 'perflab_job_batch_items', $items, $this->job_id, $this->name, $this->data );
-
-		return (array) $items;
-	}
-
-	/**
-	 * Process the batch item.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param mixed $item Batch item for the job.
-	 *
-	 * @return void
-	 */
-	public function process( $item ) {
-		/**
-		 * Hook to this action to run the job.
-		 *
-		 * Concrete implementations would add the logic to run this job.
-		 *
-		 * @since n.e.x.t
-		 *
-		 * @param mixed $item   Batch item for the job.
-		 * @param int   $job_id Job ID.
-		 * @param array $data   Job data.
-		 */
-		do_action( 'perflab_process_' . $this->name . '_job_item', $item, $this->job_id, $this->data );
-	}
-
-	/**
 	 * Returns the number of attempts executed for a job.
 	 *
 	 * @since n.e.x.t
@@ -397,28 +365,6 @@ class Perflab_Background_Job {
 	 */
 	public function unlock() {
 		delete_term_meta( $this->job_id, self::JOB_LOCK_META_KEY );
-	}
-
-	/**
-	 * Records the error for the current process run.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param WP_Error $error Error instance.
-	 *
-	 * @todo Implement the error recording activity.
-	 *
-	 * @return void
-	 */
-	public function record_error( WP_Error $error ) {
-		$job_failure_data = $error->get_error_data( 'perflab_job_failure' );
-
-		if ( ! empty( $job_failure_data ) ) {
-			$this->set_status( self::JOB_STATUS_FAILED );
-
-			update_term_meta( $this->job_id, self::JOB_ERRORS_META_KEY, $job_failure_data );
-			update_term_meta( $this->job_id, self::JOB_ATTEMPTS_META_KEY, ( $this->get_attempts() + 1 ) );
-		}
 	}
 
 	/**
