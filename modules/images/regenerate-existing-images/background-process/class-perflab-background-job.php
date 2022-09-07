@@ -114,7 +114,7 @@ class Perflab_Background_Job {
 	 * Job name.
 	 *
 	 * @since n.e.x.t
-	 * @var string
+	 * @var string Job name.
 	 */
 	private $name;
 
@@ -122,7 +122,7 @@ class Perflab_Background_Job {
 	 * Job data.
 	 *
 	 * @since n.e.x.t
-	 * @var array
+	 * @var array Job data.
 	 */
 	private $data;
 
@@ -218,7 +218,7 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return string
+	 * @return string Job status.
 	 */
 	public function get_status() {
 		return (string) get_term_meta( $this->job_id, self::JOB_STATUS_META_KEY, true );
@@ -229,9 +229,9 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return array|null
+	 * @return array|null Job data.
 	 */
-	public function data() {
+	public function get_data() {
 		// If we have cached data, return it.
 		if ( ! is_null( $this->data ) ) {
 			return $this->data;
@@ -240,6 +240,17 @@ class Perflab_Background_Job {
 		$this->data = get_term_meta( $this->job_id, self::JOB_DATA_META_KEY, true );
 
 		return $this->data;
+	}
+
+	/**
+	 * Retrieves the job name.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return string Job name.
+	 */
+	public function get_name() {
+		return (string) $this->name;
 	}
 
 	/**
@@ -252,40 +263,30 @@ class Perflab_Background_Job {
 	 * @param string $name Name of job identifier.
 	 * @param array  $data Data for the job.
 	 *
-	 * @return int|WP_Error
+	 * @return Perflab_Background_Job|WP_Error Job object if created successfully, else WP_Error.
 	 */
-	public function create( $name, array $data = array() ) {
-		// @todo Replace taxonomy name with constant.
-		// Create job only when job ID for current instance is zero or term doesn't exist.
-		if ( $this->job_id > 0 || $this->exists() ) {
-			return new WP_Error( __( 'Cannot create the job as it exists already.', 'performance-lab' ) );
-		}
-
+	public static function create( $name, array $data = array() ) {
 		// Insert the new job in queue.
 		$term_data = wp_insert_term( 'job_' . time(), 'background_job' );
 
 		if ( ! is_wp_error( $term_data ) ) {
-			// Set object properties for instance as soon as job is created.
-			$this->job_id = $term_data['term_id'];
-			$this->name   = sanitize_text_field( $name );
-			$this->data   = $data;
-
-			// Set the queued status for freshly created jobs.
-			$this->set_status( self::JOB_STATUS_QUEUED );
-
-			update_term_meta( $this->job_id, self::JOB_DATA_META_KEY, $this->data );
-			update_term_meta( $this->job_id, self::JOB_NAME_META_KEY, $this->name );
+			update_term_meta( $term_data['term_id'], self::JOB_DATA_META_KEY, $data );
+			update_term_meta( $term_data['term_id'], self::JOB_NAME_META_KEY, $name );
 
 			/**
-			 * Fires when the job has been created successfully.
+			 * Create a fresh instance to return.
 			 *
-			 * @since n.e.x.t
-			 *
-			 * @param int    $job_id Job ID.
-			 * @param string $name   Job name.
-			 * @param array  $data   Job data.
+			 * @var Perflab_Background_Job
 			 */
-			do_action( 'perflab_job_created', $this->job_id, $this->name, $this->data );
+			$job = new self( $term_data['term_id'] );
+
+			$job->name = $name;
+			$job->data = $data;
+
+			// Set the queued status for freshly created jobs.
+			$job->set_status( self::JOB_STATUS_QUEUED );
+
+			return $job;
 		}
 
 		return $term_data;
@@ -298,7 +299,7 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return array
+	 * @return array List of batch items.
 	 */
 	public function batch() {
 		$items = array();
