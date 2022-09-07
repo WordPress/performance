@@ -81,34 +81,14 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @covers ::create
 	 */
 	public function test_create_job() {
-		$this->job = new Perflab_Background_Job();
-
 		$job_data = array(
 			'post_id'          => 10,
 			'some_random_data' => 'some_random_string',
 		);
 
-		$job_info = $this->job->create( 'test_job', $job_data );
+		$job = Perflab_Background_Job::create( 'test_job', $job_data );
 
-		$this->assertIsArray( $job_info );
-		$this->assertArrayHasKey( 'term_id', $job_info );
-		$this->assertArrayHasKey( 'term_taxonomy_id', $job_info );
-
-		$job_created_hook = did_action( 'perflab_job_created' );
-
-		$this->assertEquals( 1, $job_created_hook );
-	}
-
-	/**
-	 * Returns wp error for non-zero job id.
-	 *
-	 * @covers ::create
-	 */
-	public function test_create_returns_wp_error() {
-		$this->job = new Perflab_Background_Job( 10 ); // non-zero ID.
-		$job_data  = $this->job->create( 'test_job', array() );
-
-		$this->assertInstanceOf( WP_Error::class, $job_data );
+		$this->assertInstanceOf( Perflab_Background_Job::class, $job );
 	}
 
 	/**
@@ -130,14 +110,12 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @covers ::process
 	 */
 	public function test_process() {
-		$this->job = new Perflab_Background_Job();
-
 		$job_data = array(
 			'post_id'          => 10,
 			'some_random_data' => 'some_random_string',
 		);
 
-		$job_info = $this->job->create( 'random', $job_data );
+		$job = Perflab_Background_Job::create( 'random', $job_data );
 
 		$test_items = array(
 			'test_item_1',
@@ -148,7 +126,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		);
 
 		foreach ( $test_items as $item ) {
-			$this->job->process( $item );
+			$job->process( $item );
 		}
 
 		$process_hook = did_action( 'perflab_process_random_job_item' );
@@ -171,7 +149,8 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 			'post_id'          => 10,
 			'some_random_data' => 'some_random_string',
 		);
-		$this->job->create( 'random', $job_data );
+
+		$this->job = Perflab_Background_Job::create( 'random', $job_data );
 		$this->job->record_error( $error );
 
 		$error_metadata = get_term_meta( $this->job->job_id, 'perflab_job_errors', true );
@@ -204,12 +183,10 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @covers ::get_status
 	 */
 	public function test_lock() {
-		$this->job = new Perflab_Background_Job();
-		$this->job->create( 'test_job' );
+		$this->job = Perflab_Background_Job::create( 'test' );
+		$status    = $this->job->get_status();
 
-		$this->job->lock();
-		$status = $this->job->get_status();
-
-		$this->assertSame( 'perflab_job_running', $status );
+		// Job status is queued as soon as it is created.
+		$this->assertSame( 'perflab_job_queued', $status );
 	}
 }
