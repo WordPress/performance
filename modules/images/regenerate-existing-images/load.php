@@ -9,6 +9,11 @@
  */
 
 /**
+ * Require helper functions and specific integrations.
+ */
+require_once __DIR__ . '/helper.php';
+
+/**
  * Registers the background job taxonomy.
  *
  * Intentionally on lower priority, so that other post types can be
