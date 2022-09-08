@@ -625,6 +625,19 @@ function webp_uploads_update_featured_image( $html, $post_id, $attachment_id ) {
 add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );
 
 /**
+ * Updates the references of the attachment image to the a new image format if available, in the same way it
+ * occurs in the_content of a post.
+ *
+ * @param string $html          The current HTML markup of the featured image.
+ * @param int    $attachment_id The ID of the attachment image.
+ * @return string The updated HTML markup.
+ */
+function webp_uploads_update_attachment_image( $html, $attachment_id ) {
+	return webp_uploads_img_tag_update_mime_type( $html, 'the_content', $attachment_id );
+}
+add_filter( 'wp_get_attachment_image', 'webp_uploads_update_attachment_image', 10, 2 );
+
+/**
  * Adds a fallback mechanism to replace webp images with jpeg alternatives on older browsers.
  *
  * @since 1.3.0
