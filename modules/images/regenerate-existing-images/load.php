@@ -9,6 +9,17 @@
  */
 
 /**
+ * Define the background job taxonomy constant.
+ *
+ * @since n.e.x.t
+ *
+ * @var Background job taxonomy slug.
+ */
+if ( ! defined( 'BACKGROUND_JOB_TAXONOMY_SLUG' ) ) {
+	define( 'BACKGROUND_JOB_TAXONOMY_SLUG', 'background_job' );
+}
+
+/**
  * Registers the background job taxonomy.
  *
  * Intentionally on lower priority, so that other post types can be
@@ -59,7 +70,7 @@ function perflab_register_background_job_taxonomy() {
 	 * `wp_set_object_terms` which do not check if there is relationship
 	 * between object and taxonomy.
 	 */
-	register_taxonomy( 'background_job', array(), $args );
+	register_taxonomy( BACKGROUND_JOB_TAXONOMY_SLUG, array(), $args );
 }
 add_action( 'init', 'perflab_register_background_job_taxonomy' );
 
