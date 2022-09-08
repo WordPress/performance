@@ -44,7 +44,7 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 		$process_class = get_class( $this->process );
 		$this->assertTrue( defined( $process_class . '::BG_PROCESS_ACTION' ) );
 		$constant_value = constant( $process_class . '::BG_PROCESS_ACTION' );
-		$this->assertEquals( 'background_process_handle_request', $constant_value );
+		$this->assertEquals( 'perflab_background_process_handle_request', $constant_value );
 	}
 
 	/**
@@ -88,11 +88,10 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 		// Prepare request params.
 		$_REQUEST['nonce']  = $nonce;
 		$_REQUEST['job_id'] = $job->job_id;
-
 		$this->process->handle_request();
-
 		$hook_ran = did_action( 'perflab_job_test_task' );
+		$hook_ran = 1 < $hook_ran;
 
-		$this->assertSame( 1, $hook_ran );
+		$this->assertTrue( $hook_ran );
 	}
 }

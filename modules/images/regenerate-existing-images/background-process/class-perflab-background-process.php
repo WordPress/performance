@@ -20,7 +20,7 @@ class Perflab_Background_Process {
 	 *
 	 * @var string Background process action name.
 	 */
-	const BG_PROCESS_ACTION = 'background_process_handle_request';
+	const BG_PROCESS_ACTION = 'perflab_background_process_handle_request';
 
 	/**
 	 * Job instance.
@@ -78,11 +78,7 @@ class Perflab_Background_Process {
 				return;
 			}
 
-			$this->job->lock(); // Lock the process for this job before running.
 			$this->run(); // Run the job.
-
-			// Once job ran successfully, change its status to queued.
-			$this->job->set_status( Perflab_Background_Job::JOB_STATUS_PARTIAL );
 
 		} catch ( Exception $e ) {
 			if ( $this->job instanceof Perflab_Background_Job ) {
@@ -111,6 +107,9 @@ class Perflab_Background_Process {
 	 * @return void
 	 */
 	private function run() {
+		// Lock the process for this job before running.
+		$this->job->lock();
+
 		do {
 			/**
 			 * Consumer code will hook to this action to perform necessary tasks.
@@ -119,6 +118,9 @@ class Perflab_Background_Process {
 			 */
 			do_action( 'perflab_job_' . $this->job->get_name(), $this->job->get_data() );
 		} while ( ! $this->memory_exceeded() && ! $this->time_exceeded() );
+
+		// Once job ran successfully, change its status to queued.
+		$this->job->set_status( Perflab_Background_Job::JOB_STATUS_PARTIAL );
 	}
 
 	/**
@@ -231,6 +233,15 @@ class Perflab_Background_Process {
 			$max_execution_time = ( ! empty( $time ) && ( $time > $min_execution_time ) ) ? $time - 10 : $min_execution_time;
 		}
 
-		return ( $current_time >= ( $run_start_time + $max_execution_time ) );
+		$time_exceeded = ( $current_time >= ( $run_start_time + $max_execution_time ) );
+
+		/**
+		 * Whether the time to allotted for PHP has been exceeded.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param bool $time_exceeded Time exceeded flag.
+		 */
+		return apply_filters( 'perflab_background_process_time_exceeded', $time_exceeded );
 	}
 }
