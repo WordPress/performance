@@ -367,6 +367,17 @@ class Perflab_Background_Job {
 	}
 
 	/**
+	 * Checks if the background job is completed.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return bool
+	 */
+	public function is_completed() {
+		return ( self::JOB_STATUS_COMPLETE === $this->get_status() );
+	}
+
+	/**
 	 * Checks that the job term exist.
 	 *
 	 * @since n.e.x.t
@@ -388,16 +399,5 @@ class Perflab_Background_Job {
 	 */
 	private function is_running() {
 		return ( self::JOB_STATUS_RUNNING === $this->get_status() );
-	}
-
-	/**
-	 * Checks if the background job is completed.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return bool
-	 */
-	private function is_completed() {
-		return ( self::JOB_STATUS_COMPLETE === $this->get_status() );
 	}
 }
