@@ -117,7 +117,7 @@ class Perflab_Background_Process {
 			 * @param array $data Job data.
 			 */
 			do_action( 'perflab_job_' . $this->job->get_name(), $this->job->get_data() );
-		} while ( ! $this->memory_exceeded() && ! $this->time_exceeded() );
+		} while ( ! $this->memory_exceeded() && ! $this->time_exceeded() && $this->job->is_completed() );
 
 		// Once job ran successfully, change its status to queued.
 		$this->job->set_status( Perflab_Background_Job::JOB_STATUS_PARTIAL );
