@@ -4,12 +4,12 @@ Contributors:      wordpressdotorg
 Requires at least: 5.8
 Tested up to:      6.0
 Requires PHP:      5.6
-Stable tag:        1.2.0
+Stable tag:        1.4.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
 
-Performance plugin from the WordPress Performance Group, which is a collection of standalone performance modules.
+Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
 
 == Description ==
 
@@ -17,12 +17,12 @@ The Performance Lab plugin is a collection of modules focused on enhancing perfo
 
 Currently the plugin includes the following performance modules:
 
-* **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
 * **Dominant Color:** Adds support to store dominant color for an image and create a placeholder background with that color.
-* **Audit Full Page Cache:** Adds a check for full page cache in Site Health status.
-* **WebP Support:** Adds a WebP support check in Site Health status.
-* **Audit Autoloaded Options:** Adds a check for autoloaded options in Site Health status.
-* **Audit Enqueued Assets:** Adds a CSS and JS resource check in Site Health status.
+* **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
+* **Full Page Cache Health Check:** Adds a check for full page cache in Site Health status.
+* **WebP Support Health Check:** Adds a WebP support check in Site Health status.
+* **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
+* **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
 * **Persistent Object Cache Health Check:** Adds a persistent object cache check for sites with non-trivial amounts of data in Site Health status.
 
 == Installation ==
@@ -67,6 +67,47 @@ Contributions welcome! There are several ways to contribute:
 * Join the weekly chat (Tuesdays at 16:00 UTC) in the [#performance channel on Slack](https://wordpress.slack.com/archives/performance)
 
 == Changelog ==
+
+= 1.4.0 =
+
+**Enhancements**
+
+* Images: Enhance JS replacement mechanism for WebP to JPEG to more reliably replace full file name. ([443](https://github.com/WordPress/performance/pull/443))
+* Images: Introduce `webp_uploads_get_content_image_mimes()` to get content image MIME replacement rules. ([420](https://github.com/WordPress/performance/pull/420))
+* Infrastructure: Add `PERFLAB_PLUGIN_DIR_PATH` constant for `plugin_dir_path()`. ([429](https://github.com/WordPress/performance/pull/429))
+* Infrastructure: Rename Site Health check modules for language and consistency. ([423](https://github.com/WordPress/performance/pull/423))
+
+**Bug Fixes**
+
+* Site Health: Fix incorrect usage of badge colors in all Site Health checks. ([472](https://github.com/WordPress/performance/pull/472))
+* Images: Add the original image's extension to the WebP file name to ensure it is unique. ([444](https://github.com/WordPress/performance/pull/444))
+* Images: Fix REST API support for plain permalinks. ([457](https://github.com/WordPress/performance/pull/457))
+* Infrastructure: Remove plugin option network-wide for Multisite during uninstall. ([458](https://github.com/WordPress/performance/pull/458))
+
+= 1.3.0 =
+
+**Enhancements**
+
+* Images: Add replacing of images only in frontend context. ([424](https://github.com/WordPress/performance/pull/424))
+* Images: Allow control for which image sizes to generate additional MIME type versions. ([415](https://github.com/WordPress/performance/pull/415))
+* Images: Discard WebP image if it is larger than corresponding JPEG image. ([418](https://github.com/WordPress/performance/pull/418))
+* Images: Optimize computing dominant color and transparency for images by combining the two functions. ([381](https://github.com/WordPress/performance/pull/381))
+* Images: Provide fallback JPEG images in frontend when WebP is not supported by the browser. ([360](https://github.com/WordPress/performance/pull/360))
+* Images: Rely on `wp_get_image_editor()` methods argument to check whether it supports dominant color methods. ([404](https://github.com/WordPress/performance/pull/404))
+* Images: Remove experimental label from Dominant Color module and turn on by default for new installs. ([425](https://github.com/WordPress/performance/pull/425))
+* Site Health: Remove `perflab_aea_get_resource_file_size()` in favor of `wp_filesize()`. ([380](https://github.com/WordPress/performance/pull/380))
+* Site Health: Update documentation link for autoloaded options. ([408](https://github.com/WordPress/performance/pull/408))
+* Infrastructure: Implement mechanism to not load module if core version is available. ([390](https://github.com/WordPress/performance/pull/390))
+
+**Bug Fixes**
+
+* Images: Ensure incorrect usage of `webp_uploads_upload_image_mime_transforms` filter is treated correctly. ([393](https://github.com/WordPress/performance/pull/393))
+* Images: Fix PHP notice and bug in logic for when `webp_uploads_prefer_smaller_image_file` filter is set to `true`. ([397](https://github.com/WordPress/performance/pull/397))
+* Images: Fix an infinite loop in the WebP fallback mechanism. ([433](https://github.com/WordPress/performance/pull/433))
+* Images: Fix dominant color upload process to not override potential third-party editors. ([401](https://github.com/WordPress/performance/pull/401))
+* Images: Remove additional image backup sources & sizes files when attachment deleted. ([411](https://github.com/WordPress/performance/pull/411))
+* Infrastructure: Avoid including .husky directory in plugin ZIP. ([421](https://github.com/WordPress/performance/pull/421))
+* Infrastructure: Do not show admin pointer in multisite Network Admin. ([394](https://github.com/WordPress/performance/pull/394))
 
 = 1.2.0 =
 

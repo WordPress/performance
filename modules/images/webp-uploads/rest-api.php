@@ -22,21 +22,27 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 		return $response;
 	}
 
-	$metadata = wp_get_attachment_metadata( $post->ID );
-	foreach ( $data['media_details']['sizes'] as $size => $details ) {
-		if ( empty( $metadata['sizes'][ $size ]['sources'] ) || ! is_array( $metadata['sizes'][ $size ]['sources'] ) ) {
+	foreach ( $data['media_details']['sizes'] as $size => &$details ) {
+
+		if ( empty( $details['sources'] ) || ! is_array( $details['sources'] ) ) {
 			continue;
 		}
 
-		$sources   = array();
-		$directory = dirname( $data['media_details']['sizes'][ $size ]['source_url'] );
-		foreach ( $metadata['sizes'][ $size ]['sources'] as $mime => $mime_details ) {
-			$source_url                 = "{$directory}/{$mime_details['file']}";
-			$mime_details['source_url'] = $source_url;
-			$sources[ $mime ]           = $mime_details;
+		$image_url_basename = wp_basename( $details['source_url'] );
+		foreach ( $details['sources'] as $mime => &$mime_details ) {
+			$mime_details['source_url'] = str_replace( $image_url_basename, $mime_details['file'], $details['source_url'] );
+		}
+	}
+
+	$full_src = wp_get_attachment_image_src( $post->ID, 'full' );
+	if ( ! empty( $full_src ) && ! empty( $data['media_details']['sources'] ) && ! empty( $data['media_details']['sizes']['full'] ) ) {
+		$full_url_basename = wp_basename( $full_src[0] );
+		foreach ( $data['media_details']['sources'] as $mime => &$mime_details ) {
+			$mime_details['source_url'] = str_replace( $full_url_basename, $mime_details['file'], $full_src[0] );
 		}
 
-		$data['media_details']['sizes'][ $size ]['sources'] = $sources;
+		$data['media_details']['sizes']['full']['sources'] = $data['media_details']['sources'];
+		unset( $data['media_details']['sources'] );
 	}
 
 	return rest_ensure_response( $data );
