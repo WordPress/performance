@@ -184,13 +184,6 @@ class PerflabDbMetrics {
 
 			return $this->db_version;
 		}
-		/* older 5.6 */
-		if ( 5 === $results->major && 6 === $results->minor && $results->build < 4 ) {
-			$results->canreindex = 0;
-			$this->db_version    = $this->util->make_numeric( $results );
-
-			return $this->db_version;
-		}
 		$results->unconstrained = $this->has_large_prefix();
 		$this->db_version       = $this->util->make_numeric( $results );
 

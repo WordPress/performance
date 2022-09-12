@@ -34,7 +34,6 @@
     "lint-php": "wp-env run composer run-script lint",
     "pretest-php": "wp-env run composer 'install --no-interaction'",
     "test-php": "wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/performance/phpunit.xml.dist --verbose'",
-    "test-php-database": "wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/performance/phpunit.xml.dist --verbose --filter Audit_Database_Tests'",
     "pretest-php-multisite": "wp-env run composer 'install --no-interaction'",
     "test-php-multisite": "wp-env run phpunit 'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/performance/tests/multisite.xml --verbose'",
     "wp-env": "wp-env",
