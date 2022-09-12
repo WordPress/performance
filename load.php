@@ -43,6 +43,8 @@ add_action( 'init', 'perflab_register_modules_setting' );
  * Gets the default value for the performance modules setting.
  *
  * @since 1.0.0
+ *
+ * @return array Associative array of module settings keyed by module slug.
  */
 function perflab_get_modules_setting_default() {
 	// Since the default relies on some minimal logic that includes requiring an additional file,
