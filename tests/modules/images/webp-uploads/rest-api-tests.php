@@ -8,6 +8,12 @@
 
 class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 
+	public function set_up() {
+		parent::set_up();
+
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+	}
+
 	/**
 	 * Checks whether the sources information is added to image sizes details of the REST response object.
 	 *
@@ -24,13 +30,14 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 		$controller = new WP_REST_Attachments_Controller( 'attachment' );
 		$response   = $controller->get_item( $request );
 
-		$this->assertInstanceOf( 'WP_REST_Response', $response );
+		$this->assertNotWPError( $response );
 
 		$data       = $response->get_data();
-		$mime_types = array(
-			'image/jpeg',
-			'image/webp',
-		);
+		$mime_types = array( 'image/jpeg' );
+
+		if ( wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			array_push( $mime_types, 'image/webp' );
+		}
 
 		foreach ( $data['media_details']['sizes'] as $size_name => $properties ) {
 			if ( ! isset( $metadata['sizes'][ $size_name ]['sources'] ) ) {
@@ -50,5 +57,6 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 				$this->assertNotFalse( filter_var( $properties['sources'][ $mime_type ]['source_url'], FILTER_VALIDATE_URL ) );
 			}
 		}
+		$this->assertArrayNotHasKey( 'sources', $data['media_details'] );
 	}
 }

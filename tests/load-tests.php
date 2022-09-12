@@ -57,7 +57,7 @@ class Load_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_perflab_get_modules_setting_default() {
-		$default_enabled_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
+		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
 		$expected                = array();
 		foreach ( $default_enabled_modules as $default_enabled_module ) {
 			$expected[ $default_enabled_module ] = array( 'enabled' => true );
@@ -122,15 +122,18 @@ class Load_Tests extends WP_UnitTestCase {
 
 	public function test_perflab_get_generator_content() {
 		// Assert that it returns the current version and active modules.
-		$dummy_active_modules = array( 'images/a-module', 'object-cache/another-module' );
+		// For this test, set the active modules to all defaults but the last one.
+		$active_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
+		array_pop( $active_modules );
 		add_filter(
 			'perflab_active_modules',
-			function() use ( $dummy_active_modules ) {
-				return $dummy_active_modules;
+			function() use ( $active_modules ) {
+				return $active_modules;
 			}
 		);
-		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $dummy_active_modules );
-		$content  = perflab_get_generator_content();
+		$active_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
+		$expected       = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $active_modules );
+		$content        = perflab_get_generator_content();
 		$this->assertSame( $expected, $content );
 	}
 
@@ -148,9 +151,41 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertContains( $expected, $output );
 	}
 
+	/**
+	 * @dataProvider data_perflab_can_load_module
+	 */
+	public function test_perflab_is_valid_module( $dummy_module, $expected_status ) {
+		$this->assertSame( $expected_status, perflab_is_valid_module( $dummy_module ) );
+	}
+
+	public function data_perflab_is_valid_module() {
+		return array(
+			array( '', false ),
+			array( '../tests/testdata/demo-modules/something/non-existing-module', false ),
+			array( '../tests/testdata/demo-modules/javascript/demo-module-1', false ),
+			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
+			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
+		);
+	}
+
+	/**
+	 * @dataProvider data_perflab_can_load_module
+	 */
+	public function test_perflab_can_load_module( $dummy_module, $expected_status ) {
+		$this->assertSame( $expected_status, perflab_can_load_module( $dummy_module ) );
+	}
+
+	public function data_perflab_can_load_module() {
+		return array(
+			array( '../tests/testdata/demo-modules/javascript/demo-module-1', false ),
+			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
+			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
+		);
+	}
+
 	private function get_expected_default_option() {
 		// This code is essentially copied over from the perflab_register_modules_setting() function.
-		$default_enabled_modules = require plugin_dir_path( PERFLAB_MAIN_FILE ) . 'default-enabled-modules.php';
+		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
 		return array_reduce(
 			$default_enabled_modules,
 			function( $module_settings, $module_dir ) {

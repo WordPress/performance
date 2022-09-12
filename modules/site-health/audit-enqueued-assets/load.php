@@ -1,6 +1,6 @@
 <?php
 /**
- * Module Name: Audit Enqueued Assets
+ * Module Name: Enqueued Assets Health Check
  * Description: Adds a CSS and JS resource check in Site Health status.
  * Experimental: Yes
  *
@@ -47,7 +47,7 @@ function perflab_aea_audit_enqueued_scripts() {
 
 			$enqueued_scripts[] = array(
 				'src'  => $script->src,
-				'size' => perflab_aea_get_resource_file_size( $path ) + $inline_size,
+				'size' => wp_filesize( $path ) + $inline_size,
 			);
 
 		}
@@ -94,7 +94,7 @@ function perflab_aea_audit_enqueued_styles() {
 
 			$enqueued_styles[] = array(
 				'src'  => $style->src,
-				'size' => perflab_aea_get_resource_file_size( $path ) + $inline_size,
+				'size' => wp_filesize( $path ) + $inline_size,
 			);
 		}
 		set_transient( 'aea_enqueued_front_page_styles', $enqueued_styles, 12 * HOUR_IN_SECONDS );
@@ -141,10 +141,10 @@ function perflab_aea_enqueued_js_assets_test() {
 	}
 
 	$result = array(
-		'label'       => esc_html__( 'Enqueued scripts', 'performance-lab' ),
+		'label'       => __( 'Enqueued scripts', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
-			'label' => esc_html__( 'Performance', 'performance-lab' ),
+			'label' => __( 'Performance', 'performance-lab' ),
 			'color' => 'blue',
 		),
 		'description' => sprintf(
@@ -186,8 +186,7 @@ function perflab_aea_enqueued_js_assets_test() {
 	$scripts_size_treshold = apply_filters( 'perflab_aea_enqueued_scripts_byte_size_threshold', 300000 );
 
 	if ( $enqueued_scripts > $scripts_treshold || perflab_aea_get_total_size_bytes_enqueued_scripts() > $scripts_size_treshold ) {
-		$result['status']         = 'recommended';
-		$result['badge']['color'] = 'orange';
+		$result['status'] = 'recommended';
 
 		$result['description'] = sprintf(
 			'<p>%s</p>',
@@ -210,9 +209,9 @@ function perflab_aea_enqueued_js_assets_test() {
 			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
 			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
 			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
-			esc_html__( 'More info about performance optimization', 'performance-lab' ),
+			__( 'More info about performance optimization', 'performance-lab' ),
 			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
-			esc_html__( 'Clean Test Cache', 'performance-lab' )
+			__( 'Clean Test Cache', 'performance-lab' )
 		);
 	}
 
@@ -235,10 +234,10 @@ function perflab_aea_enqueued_css_assets_test() {
 		return array();
 	}
 	$result = array(
-		'label'       => esc_html__( 'Enqueued styles', 'performance-lab' ),
+		'label'       => __( 'Enqueued styles', 'performance-lab' ),
 		'status'      => 'good',
 		'badge'       => array(
-			'label' => esc_html__( 'Performance', 'performance-lab' ),
+			'label' => __( 'Performance', 'performance-lab' ),
 			'color' => 'blue',
 		),
 		'description' => sprintf(
@@ -279,8 +278,7 @@ function perflab_aea_enqueued_css_assets_test() {
 	 */
 	$styles_size_threshold = apply_filters( 'perflab_aea_enqueued_styles_byte_size_threshold', 100000 );
 	if ( $enqueued_styles > $styles_threshold || perflab_aea_get_total_size_bytes_enqueued_styles() > $styles_size_threshold ) {
-		$result['status']         = 'recommended';
-		$result['badge']['color'] = 'orange';
+		$result['status'] = 'recommended';
 
 		$result['description'] = sprintf(
 			'<p>%s</p>',
@@ -303,9 +301,9 @@ function perflab_aea_enqueued_css_assets_test() {
 			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
 			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
 			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
-			esc_html__( 'More info about performance optimization', 'performance-lab' ),
+			__( 'More info about performance optimization', 'performance-lab' ),
 			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
-			esc_html__( 'Clean Test Cache', 'performance-lab' )
+			__( 'Clean Test Cache', 'performance-lab' )
 		);
 	}
 

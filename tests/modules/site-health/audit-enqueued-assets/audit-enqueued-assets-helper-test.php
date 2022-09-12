@@ -108,19 +108,5 @@ class Audit_Enqueued_Assets_Helper_Tests extends WP_UnitTestCase {
 		$this->assertSame( $expected_path, perflab_aea_get_path_from_resource_url( $test_url ) );
 	}
 
-	/**
-	 * Tests perflab_aea_get_resource_file_size() functionality.
-	 */
-	public function test_perflab_aea_get_resource_file_size() {
-		$non_existing_resource = ABSPATH . '/wp-content/themes/test-theme/style.css';
-		$this->assertEquals( 0, perflab_aea_get_resource_file_size( $non_existing_resource ) );
-
-		// Upload a fake resource file.
-		$filename = __FUNCTION__ . '.css';
-		$contents = __FUNCTION__ . '_contents';
-		$file     = wp_upload_bits( $filename, null, $contents );
-		$this->assertEquals( filesize( $file['file'] ), perflab_aea_get_resource_file_size( $file['file'] ) );
-	}
-
 }
 

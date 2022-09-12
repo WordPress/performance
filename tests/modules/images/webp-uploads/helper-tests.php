@@ -92,8 +92,8 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'filesize', $result );
 		$this->assertArrayHasKey( 'file', $result );
-		$this->assertStringEndsWith( '300x300.webp', $result['file'] );
-		$this->assertFileExists( "{$directory}{$name}-300x300.webp" );
+		$this->assertStringEndsWith( '300x300-jpeg.webp', $result['file'] );
+		$this->assertFileExists( "{$directory}{$name}-300x300-jpeg.webp" );
 	}
 
 	/**
@@ -335,4 +335,212 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		$this->assertSame( 'image_additional_generated_error', $result->get_error_code() );
 	}
 
+	/**
+	 * Returns an empty array when the overwritten with empty array by webp_uploads_upload_image_mime_transforms filter.
+	 *
+	 * @test
+	 */
+	public function it_should_return_empty_array_when_filter_returns_empty_array() {
+		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
+
+		$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+		$this->assertIsArray( $transforms );
+		$this->assertSame( array(), $transforms );
+	}
+
+	/**
+	 * Returns default transforms when the overwritten with non array type by webp_uploads_upload_image_mime_transforms filter.
+	 *
+	 * @test
+	 */
+	public function it_should_return_default_transforms_when_filter_returns_non_array_type() {
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function () {
+				return;
+			}
+		);
+
+		$default_transforms = array(
+			'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
+			'image/webp' => array( 'image/webp', 'image/jpeg' ),
+		);
+
+		$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+		$this->assertIsArray( $transforms );
+		$this->assertSame( $default_transforms, $transforms );
+	}
+
+	/**
+	 * Returns transforms array with fallback to original mime with invalid transforms array.
+	 *
+	 * @test
+	 */
+	public function it_should_return_fallback_transforms_when_overwritten_invalid_transforms() {
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function () {
+				return array( 'image/jpeg' => array() );
+			}
+		);
+
+		$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+		$this->assertIsArray( $transforms );
+		$this->assertSame( array( 'image/jpeg' => array( 'image/jpeg' ) ), $transforms );
+	}
+
+	/**
+	 * Returns custom transforms array when overwritten by webp_uploads_upload_image_mime_transforms filter.
+	 *
+	 * @test
+	 */
+	public function it_should_return_custom_transforms_when_overwritten_by_filter() {
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function () {
+				return array( 'image/jpeg' => array( 'image/jpeg', 'image/webp' ) );
+			}
+		);
+
+		$transforms = webp_uploads_get_upload_image_mime_transforms();
+
+		$this->assertIsArray( $transforms );
+		$this->assertSame( array( 'image/jpeg' => array( 'image/jpeg', 'image/webp' ) ), $transforms );
+	}
+
+	/**
+	 * @dataProvider data_provider_image_filesize
+	 *
+	 * @test
+	 */
+	public function it_should_discard_additional_image_if_larger_than_the_original_image( $original_filesize, $additional_filesize, $expected_status ) {
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
+
+		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
+		$this->assertSame( $output, $expected_status );
+	}
+
+	public function data_provider_image_filesize() {
+		return array(
+			array(
+				array( 'filesize' => 120101 ),
+				array( 'filesize' => 100101 ),
+				false,
+			),
+			array(
+				array( 'filesize' => 100101 ),
+				array( 'filesize' => 120101 ),
+				true,
+			),
+			array(
+				array( 'filesize' => 10101 ),
+				array( 'filesize' => 10101 ),
+				true,
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider data_provider_image_filesize
+	 *
+	 * @test
+	 */
+	public function it_should_never_discard_additional_image_if_filter_is_false( $original_filesize, $additional_filesize ) {
+		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+
+		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
+		$this->assertFalse( $output );
+	}
+
+	public function test_webp_uploads_in_frontend_body_without_wp_query() {
+		unset( $GLOBALS['wp_query'] );
+
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_with_feed() {
+		$this->mock_empty_action( 'template_redirect' );
+		$GLOBALS['wp_query']->is_feed = true;
+
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_without_template_redirect() {
+		$this->assertFalse( webp_uploads_in_frontend_body() );
+	}
+
+	public function test_webp_uploads_in_frontend_body_before_template_redirect() {
+		$result = webp_uploads_in_frontend_body();
+		$this->mock_empty_action( 'template_redirect' );
+
+		$this->assertFalse( $result );
+	}
+
+	public function test_webp_uploads_in_frontend_body_after_template_redirect() {
+		$this->mock_empty_action( 'template_redirect' );
+		$result = webp_uploads_in_frontend_body();
+
+		$this->assertTrue( $result );
+	}
+
+	public function test_webp_uploads_in_frontend_body_within_wp_head() {
+		$this->mock_empty_action( 'template_redirect' );
+
+		// Call function within a 'wp_head' callback.
+		remove_all_actions( 'wp_head' );
+		$result = null;
+		add_action(
+			'wp_head',
+			function() use ( &$result ) {
+				$result = webp_uploads_in_frontend_body();
+			}
+		);
+		do_action( 'wp_head' );
+
+		$this->assertFalse( $result );
+	}
+
+	private function mock_empty_action( $action ) {
+		remove_all_actions( $action );
+		do_action( $action );
+	}
+
+	/**
+	 * Add the original image's extension to the WebP file name to ensure it is unique
+	 *
+	 * @dataProvider data_provider_same_image_name
+	 *
+	 * @test
+	 */
+	public function it_should_add_original_image_extension_to_the_webp_file_name_to_ensure_it_is_unique( $jpeg_image, $jpg_image ) {
+		$jpeg_image_attachment_id = $this->factory->attachment->create_upload_object( $jpeg_image );
+		$jpg_image_attachment_id  = $this->factory->attachment->create_upload_object( $jpg_image );
+
+		$size_data = array(
+			'width'  => 300,
+			'height' => 300,
+			'crop'   => true,
+		);
+
+		$jpeg_image_result = webp_uploads_generate_additional_image_source( $jpeg_image_attachment_id, 'medium', $size_data, 'image/webp' );
+		$jpg_image_result  = webp_uploads_generate_additional_image_source( $jpg_image_attachment_id, 'medium', $size_data, 'image/webp' );
+
+		$this->assertIsArray( $jpeg_image_result );
+		$this->assertIsArray( $jpg_image_result );
+		$this->assertStringEndsWith( '300x300-jpeg.webp', $jpeg_image_result['file'] );
+		$this->assertStringEndsWith( '300x300-jpg.webp', $jpg_image_result['file'] );
+		$this->assertNotSame( $jpeg_image_result['file'], $jpg_image_result['file'] );
+	}
+
+	public function data_provider_same_image_name() {
+		return array(
+			array(
+				TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/image.jpeg',
+				TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/image.jpg',
+			),
+		);
+	}
 }

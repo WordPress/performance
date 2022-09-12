@@ -105,16 +105,3 @@ function perflab_aea_get_path_from_resource_url( $resource_url ) {
 	// Standard wp-content configuration.
 	return untrailingslashit( ABSPATH ) . wp_make_link_relative( $resource_url );
 }
-
-/**
- * If file exists, returns its size.
- *
- * @since 1.0.0
- *
- * @param string $file_src Path to the file.
- * @return int Returns size if file exists, 0 if it doesn't.
- */
-function perflab_aea_get_resource_file_size( $file_src ) {
-	return file_exists( $file_src ) ? filesize( $file_src ) : 0;
-}
-
