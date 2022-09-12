@@ -106,7 +106,7 @@ class Perflab_Background_Job {
 	 * Job ID.
 	 *
 	 * @since n.e.x.t
-	 * @var int
+	 * @var int Job ID.
 	 */
 	public $job_id;
 
@@ -127,7 +127,7 @@ class Perflab_Background_Job {
 	private $data;
 
 	/**
-	 * Perflab_Background_Job constructor.
+	 * Constructor.
 	 *
 	 * @since n.e.x.t
 	 *
@@ -174,7 +174,7 @@ class Perflab_Background_Job {
 		$max_attempts = apply_filters( 'perflab_job_max_attempts_allowed', 3 );
 
 		// If number of attempts have been exhausted, return false.
-		if ( $this->get_attempts() >= $max_attempts ) {
+		if ( $this->get_attempts() >= absint( $max_attempts ) ) {
 			return false;
 		}
 
@@ -187,7 +187,6 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 *
 	 * @param string $status Status to set for current job.
-	 *
 	 * @return bool Returns true if status is updated, false otherwise.
 	 */
 	public function set_status( $status ) {
@@ -289,7 +288,7 @@ class Perflab_Background_Job {
 	 */
 	public static function create( $name, array $data = array() ) {
 		// Insert the new job in queue.
-		$term_data = wp_insert_term( 'job_' . time(), BACKGROUND_JOB_TAXONOMY_SLUG );
+		$term_data = wp_insert_term( 'job_' . time(), PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 
 		if ( ! is_wp_error( $term_data ) ) {
 			update_term_meta( $term_data['term_id'], self::JOB_DATA_META_KEY, $data );
@@ -348,7 +347,7 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return int
+	 * @return int Start time of the job.
 	 */
 	public function get_start_time() {
 		$time = get_term_meta( $this->job_id, self::JOB_LOCK_META_KEY, true );
@@ -368,6 +367,17 @@ class Perflab_Background_Job {
 	}
 
 	/**
+	 * Checks if the background job is completed.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return bool
+	 */
+	public function is_completed() {
+		return ( self::JOB_STATUS_COMPLETE === $this->get_status() );
+	}
+
+	/**
 	 * Checks that the job term exist.
 	 *
 	 * @since n.e.x.t
@@ -375,7 +385,7 @@ class Perflab_Background_Job {
 	 * @return array|null
 	 */
 	private function exists() {
-		return term_exists( $this->job_id, BACKGROUND_JOB_TAXONOMY_SLUG );
+		return term_exists( $this->job_id, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 	}
 
 	/**
@@ -389,16 +399,5 @@ class Perflab_Background_Job {
 	 */
 	private function is_running() {
 		return ( self::JOB_STATUS_RUNNING === $this->get_status() );
-	}
-
-	/**
-	 * Checks if the background job is completed.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return bool
-	 */
-	private function is_completed() {
-		return ( self::JOB_STATUS_COMPLETE === $this->get_status() );
 	}
 }

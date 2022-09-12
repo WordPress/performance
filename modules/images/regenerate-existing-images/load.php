@@ -15,9 +15,7 @@
  *
  * @var Background job taxonomy slug.
  */
-if ( ! defined( 'BACKGROUND_JOB_TAXONOMY_SLUG' ) ) {
-	define( 'BACKGROUND_JOB_TAXONOMY_SLUG', 'background_job' );
-}
+define( 'PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG', 'background_job' );
 
 /**
  * Registers the background job taxonomy.
@@ -70,7 +68,7 @@ function perflab_register_background_job_taxonomy() {
 	 * `wp_set_object_terms` which do not check if there is relationship
 	 * between object and taxonomy.
 	 */
-	register_taxonomy( BACKGROUND_JOB_TAXONOMY_SLUG, array(), $args );
+	register_taxonomy( PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG, array(), $args );
 }
 add_action( 'init', 'perflab_register_background_job_taxonomy' );
 

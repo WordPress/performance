@@ -69,11 +69,31 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->assertSame( 0, $this->job->job_id );
 	}
 
+	/**
+	 * @covers ::set_status
+	 */
 	public function test_set_status_false_for_invalid_status() {
 		$this->job = new Perflab_Background_Job();
 
 		$result = $this->job->set_status( 'invalid_status' );
 		$this->assertFalse( $result );
+	}
+
+	/**
+	 * @covers ::set_status
+	 */
+	public function test_set_status_false_for_valid_status() {
+		$this->job = Perflab_Background_Job::create( 'test' );
+
+		$running_status  = $this->job->set_status( 'perflab_job_running' );
+		$partial_status  = $this->job->set_status( 'perflab_job_partial' );
+		$failed_status   = $this->job->set_status( 'perflab_job_failed' );
+		$complete_status = $this->job->set_status( 'perflab_job_complete' );
+
+		$this->assertTrue( $running_status );
+		$this->assertTrue( $partial_status );
+		$this->assertTrue( $failed_status );
+		$this->assertTrue( $complete_status );
 	}
 
 	/**
@@ -116,6 +136,9 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->assertEquals( 1, $attempts );
 	}
 
+	/**
+	 * @covers ::should_run
+	 */
 	public function test_job_should_not_run_non_existing_job() {
 		$this->job = new Perflab_Background_Job();
 
@@ -123,6 +146,9 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->assertFalse( $run );
 	}
 
+	/**
+	 * @covers ::should_run
+	 */
 	public function test_job_should_not_run_for_completed_job() {
 		$this->job = new Perflab_Background_Job();
 		$this->job->create( 'test_job' );
@@ -136,13 +162,33 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::lock
-	 * @covers ::get_status
+	 * @covers ::unlock
 	 */
-	public function test_lock() {
+	public function test_lock_unlock() {
 		$this->job = Perflab_Background_Job::create( 'test' );
-		$status    = $this->job->get_status();
+		$time      = time();
+		$this->job->lock( $time );
+		$lock_time = get_term_meta( $this->job->job_id, 'perflab_job_lock', true );
+		$this->assertSame( absint( $lock_time ), $time );
+		$this->job->unlock();
+		$lock_time = get_term_meta( $this->job->job_id, 'perflab_job_lock', true );
+		$this->assertEmpty( $lock_time );
+	}
 
-		// Job status is queued as soon as it is created.
-		$this->assertSame( 'perflab_job_queued', $status );
+	/**
+	 * @covers ::get_start_time
+	 */
+	public function test_get_start_time() {
+		$this->job = Perflab_Background_Job::create( 'test' );
+		$time      = time();
+		$this->job->lock( $time );
+		$status    = $this->job->get_status();
+		$lock_time = get_term_meta( $this->job->job_id, 'perflab_job_lock', true );
+		$this->assertSame( absint( $lock_time ), $time );
+
+		$start_time = $this->job->get_start_time();
+		$this->assertEquals( $start_time, $lock_time );
+		$this->assertEquals( $start_time, $time );
+		$this->assertEquals( $time, $lock_time );
 	}
 }
