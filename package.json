@@ -9,6 +9,8 @@
     "chalk": "^4.1.2",
     "commander": "^9.4.0",
     "fast-glob": "^3.2.7",
+    "grunt": "~1.5.3",
+    "grunt-contrib-jshint": "3.2.0",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
     "lodash": "4.17.21"
@@ -29,7 +31,8 @@
     "pretest-php-multisite": "wp-env run composer 'install --no-interaction'",
     "test-php-multisite": "wp-env run phpunit 'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/performance/tests/multisite.xml --verbose'",
     "wp-env": "wp-env",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "grunt": "grunt"
   },
   "lint-staged": {
     "*.php": [
