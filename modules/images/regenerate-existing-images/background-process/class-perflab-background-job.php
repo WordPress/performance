@@ -11,6 +11,17 @@
  *
  * Manage and run the background jobs.
  *
+ * Following fields are being stored for a background job.
+ *
+ * 1. Job ID: Identifies the job; stored as the term ID.
+ * 2. Job name: Unique identifier for different types of jobs. Stored as term meta `perflab_job_name`.
+ * 3. Job data: Job related data. Stored in term meta in serialised format `perflab_job_data`.
+ * 4. Job status: Background job status like running, failed etc. Stored as term meta `perflab_job_status`.
+ * 5. Job errors: Errors related to a job. Stored as term meta in serialized format `perflab_job_errors`.
+ * 6. Job attempts: Number of times this job has been attempted to run after failure. Stored as term meta `perflab_job_attempts`.
+ * 7. Job lock: Timestamp in seconds at which the job has started. Stored as term meta `perflab_job_lock`.
+ * 8. Job completed at: Timestamp at which the job has been marked as completed. Stored as term meta `job_completed_at`
+ *
  * @since n.e.x.t
  */
 class Perflab_Background_Job {
@@ -31,7 +42,7 @@ class Perflab_Background_Job {
 	const META_KEY_JOB_DATA = 'perflab_job_data';
 
 	/**
-	 * Meta key for storing job data.
+	 * Meta key for storing number of attempts for a job.
 	 *
 	 * @since n.e.x.t
 	 * @var string
@@ -233,7 +244,7 @@ class Perflab_Background_Job {
 
 			// If job is complete, set the timestamp at which it was completed.
 			if ( self::JOB_STATUS_COMPLETE === $status ) {
-				update_term_meta( $this->id, 'job_completed_at', time() );
+				update_term_meta( $this->id, 'perflab_job_completed_at', time() );
 			}
 
 			return true;
