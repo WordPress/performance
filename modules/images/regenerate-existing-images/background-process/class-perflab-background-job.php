@@ -20,7 +20,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string Job name meta key.
 	 */
-	const JOB_NAME_META_KEY = 'perflab_job_name';
+	const META_KEY_JOB_NAME = 'perflab_job_name';
 
 	/**
 	 * Meta key for storing job data.
@@ -28,7 +28,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string Job data meta key.
 	 */
-	const JOB_DATA_META_KEY = 'perflab_job_data';
+	const META_KEY_JOB_DATA = 'perflab_job_data';
 
 	/**
 	 * Meta key for storing job data.
@@ -36,7 +36,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string Job attempts meta key.
 	 */
-	const JOB_ATTEMPTS_META_KEY = 'perflab_job_attempts';
+	const META_KEY_JOB_ATTEMPTS = 'perflab_job_attempts';
 
 	/**
 	 * Meta key for storing job lock.
@@ -44,7 +44,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string Job lock meta key.
 	 */
-	const JOB_LOCK_META_KEY = 'perflab_job_lock';
+	const META_KEY_JOB_LOCK = 'perflab_job_lock';
 
 	/**
 	 * Meta key for storing job errors.
@@ -52,7 +52,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string Job errors meta key.
 	 */
-	const JOB_ERRORS_META_KEY = 'perflab_job_errors';
+	const META_KEY_JOB_ERRORS = 'perflab_job_errors';
 
 	/**
 	 * Job status meta key.
@@ -60,7 +60,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string Job status meta key.
 	 */
-	const JOB_STATUS_META_KEY = 'perflab_job_status';
+	const META_KEY_JOB_STATUS = 'perflab_job_status';
 
 	/**
 	 * Job status for queued jobs.
@@ -137,8 +137,8 @@ class Perflab_Background_Job {
 		$this->job_id = absint( $job_id );
 
 		if ( $this->exists() ) {
-			$this->name = get_term_meta( $this->job_id, self::JOB_NAME_META_KEY, true );
-			$this->data = get_term_meta( $this->job_id, self::JOB_DATA_META_KEY, true );
+			$this->name = get_term_meta( $this->job_id, self::META_KEY_JOB_NAME, true );
+			$this->data = get_term_meta( $this->job_id, self::META_KEY_JOB_DATA, true );
 		}
 	}
 
@@ -199,7 +199,7 @@ class Perflab_Background_Job {
 		);
 
 		if ( in_array( $status, $valid_statuses, true ) ) {
-			update_term_meta( $this->job_id, self::JOB_STATUS_META_KEY, $status );
+			update_term_meta( $this->job_id, self::META_KEY_JOB_STATUS, $status );
 
 			// If job is complete, set the timestamp at which it was completed.
 			if ( self::JOB_STATUS_COMPLETE === $status ) {
@@ -229,8 +229,8 @@ class Perflab_Background_Job {
 		if ( ! empty( $job_failure_data ) ) {
 			$this->set_status( self::JOB_STATUS_FAILED );
 
-			update_term_meta( $this->job_id, self::JOB_ERRORS_META_KEY, $job_failure_data );
-			update_term_meta( $this->job_id, self::JOB_ATTEMPTS_META_KEY, ( $this->get_attempts() + 1 ) );
+			update_term_meta( $this->job_id, self::META_KEY_JOB_ERRORS, $job_failure_data );
+			update_term_meta( $this->job_id, self::META_KEY_JOB_ATTEMPTS, ( $this->get_attempts() + 1 ) );
 		}
 	}
 
@@ -242,7 +242,7 @@ class Perflab_Background_Job {
 	 * @return string Job status.
 	 */
 	public function get_status() {
-		return (string) get_term_meta( $this->job_id, self::JOB_STATUS_META_KEY, true );
+		return (string) get_term_meta( $this->job_id, self::META_KEY_JOB_STATUS, true );
 	}
 
 	/**
@@ -258,7 +258,7 @@ class Perflab_Background_Job {
 			return $this->data;
 		}
 
-		$this->data = get_term_meta( $this->job_id, self::JOB_DATA_META_KEY, true );
+		$this->data = get_term_meta( $this->job_id, self::META_KEY_JOB_DATA, true );
 
 		return $this->data;
 	}
@@ -291,8 +291,8 @@ class Perflab_Background_Job {
 		$term_data = wp_insert_term( 'job_' . time(), PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 
 		if ( ! is_wp_error( $term_data ) ) {
-			update_term_meta( $term_data['term_id'], self::JOB_DATA_META_KEY, $data );
-			update_term_meta( $term_data['term_id'], self::JOB_NAME_META_KEY, $name );
+			update_term_meta( $term_data['term_id'], self::META_KEY_JOB_DATA, $data );
+			update_term_meta( $term_data['term_id'], self::META_KEY_JOB_NAME, $name );
 
 			/**
 			 * Create a fresh instance to return.
@@ -321,7 +321,7 @@ class Perflab_Background_Job {
 	 * @return int
 	 */
 	public function get_attempts() {
-		$attempts = get_term_meta( $this->job_id, self::JOB_ATTEMPTS_META_KEY, true );
+		$attempts = get_term_meta( $this->job_id, self::META_KEY_JOB_ATTEMPTS, true );
 
 		return absint( $attempts );
 	}
@@ -338,7 +338,7 @@ class Perflab_Background_Job {
 	 */
 	public function lock( $time = null ) {
 		$time = empty( $time ) ? time() : $time;
-		update_term_meta( $this->job_id, self::JOB_LOCK_META_KEY, $time );
+		update_term_meta( $this->job_id, self::META_KEY_JOB_LOCK, $time );
 		$this->set_status( self::JOB_STATUS_RUNNING );
 	}
 
@@ -350,7 +350,7 @@ class Perflab_Background_Job {
 	 * @return int Start time of the job.
 	 */
 	public function get_start_time() {
-		$time = get_term_meta( $this->job_id, self::JOB_LOCK_META_KEY, true );
+		$time = get_term_meta( $this->job_id, self::META_KEY_JOB_LOCK, true );
 
 		return absint( $time );
 	}
@@ -363,7 +363,7 @@ class Perflab_Background_Job {
 	 * @return void
 	 */
 	public function unlock() {
-		delete_term_meta( $this->job_id, self::JOB_LOCK_META_KEY );
+		delete_term_meta( $this->job_id, self::META_KEY_JOB_LOCK );
 	}
 
 	/**
