@@ -10,7 +10,7 @@
  * Class Perflab_Background_Job_Test
  *
  * @coversDefaultClass Perflab_Background_Job
- * @group background-process
+ * @group regenerate-existing-images
  */
 class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	/**
