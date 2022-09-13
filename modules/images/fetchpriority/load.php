@@ -24,7 +24,7 @@ function fetchpriority_img_tag_add( $filtered_image, $context ) {
 		return $filtered_image;
 	}
 
-	if ( strpos( $filtered_image, 'loading="lazy"' ) === false ) {
+	if ( strpos( $filtered_image, ' loading="lazy"' ) === false && strpos( $filtered_image, ' fetchpriority=' ) === false ) {
 		$filtered_image = str_replace( '<img ', '<img fetchpriority="high" ', $filtered_image );
 		remove_filter( 'wp_content_img_tag', 'fetchpriority_img_tag_add', 10, 2 );
 	}
