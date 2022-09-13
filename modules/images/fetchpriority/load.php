@@ -19,7 +19,7 @@
  */
 function fetchpriority_img_tag_add_attr( $filtered_image, $context ) {
 
-	if ( 'the_content' !== $context ) {
+	if ( 'the_content' !== $context && 'the_post_thumbnail' !== $context ) {
 		return $filtered_image;
 	}
 
