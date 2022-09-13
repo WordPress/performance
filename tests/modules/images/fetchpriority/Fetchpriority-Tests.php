@@ -8,5 +8,8 @@ class Fetchpriority_Tests extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( 'fetchpriority="high"', fetchpriority_img_tag_add( $img, 'the_content' ) );
 		$this->assertStringNotContainsString( 'fetchpriority="high"', fetchpriority_img_tag_add( $img, 'not_content' ) );
+
+		$img = str_replace( '<img ', '<img loading="lazy" ', $img );
+		$this->assertStringNotContainsString( 'fetchpriority="high"', fetchpriority_img_tag_add( $img, 'the_content' ) );
 	}
 }
