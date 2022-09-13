@@ -4,8 +4,8 @@
  * Description: Adds `fetchpriority=high` parameter to the non lazy loaded images.
  * Experimental: Yes
  *
+ * @since n.e.x.t
  * @package performance-lab
- * @since 1.5.0
  */
 
 /**
