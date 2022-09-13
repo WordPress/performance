@@ -83,11 +83,11 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 		$process_class  = get_class( $this->process );
 		$constant_value = constant( $process_class . '::BG_PROCESS_ACTION' );
 		$nonce          = wp_create_nonce( $constant_value );
-		$job            = Perflab_Background_Job::create( 'test_task' );
+		$job            = perflab_create_background_job( 'test_task' );
 
 		// Prepare request params.
 		$_REQUEST['nonce']  = $nonce;
-		$_REQUEST['job_id'] = $job->job_id;
+		$_REQUEST['job_id'] = $job->get_id();
 		$this->process->handle_request();
 		$hook_ran = did_action( 'perflab_job_test_task' );
 		$hook_ran = 1 < $hook_ran;

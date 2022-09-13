@@ -118,9 +118,6 @@ class Perflab_Background_Process {
 			 */
 			do_action( 'perflab_job_' . $this->job->get_name(), $this->job->get_data() );
 		} while ( ! $this->memory_exceeded() && ! $this->time_exceeded() && ! $this->job->is_completed() );
-
-		// Once job ran successfully, change its status to queued.
-		$this->job->set_status( Perflab_Background_Job::JOB_STATUS_PARTIAL );
 	}
 
 	/**
@@ -141,7 +138,7 @@ class Perflab_Background_Process {
 		}
 
 		$nonce  = wp_create_nonce( self::BG_PROCESS_ACTION );
-		$job_id = $this->job->job_id;
+		$job_id = $this->job->get_id();
 
 		$url    = admin_url( 'admin-ajax.php' );
 		$params = array(
