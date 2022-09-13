@@ -1,6 +1,6 @@
 <?php
 
-class Fetchpriority_Tests extends WP_UnitTestCase {
+class Fetchpriority_Test extends WP_UnitTestCase {
 
 	public function test_wp_filter_content_tags_filter_adds_fetchpriority_fist_image_only() {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
