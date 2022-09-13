@@ -146,8 +146,8 @@ function perflab_aao_get_autoloaded_options_table() {
 
 	$html_table = sprintf(
 		'<table class="widefat striped"><thead><tr><th scope="col">%s</th><th scope="col">%s</th></tr></thead><tbody>',
-		esc_html__( 'Option Name', 'performance-lab' ),
-		esc_html__( 'Size', 'performance-lab' )
+		__( 'Option Name', 'performance-lab' ),
+		__( 'Size', 'performance-lab' )
 	);
 
 	foreach ( $autoload_summary as $value ) {
