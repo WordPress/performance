@@ -131,7 +131,7 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param int $job_id job ID.
+	 * @param int $job_id Job ID. Technically this is the ID of a term in the 'background_job' taxonomy.
 	 */
 	public function __construct( $job_id = 0 ) {
 		$this->id = absint( $job_id );
