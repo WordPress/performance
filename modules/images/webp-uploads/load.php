@@ -97,7 +97,10 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			continue;
 		}
 
-		if ( webp_uploads_should_discard_additional_image_file( $metadata, $image ) ) {
+		if (
+			! empty( $metadata['sources'][ $mime_type ] ) &&
+			webp_uploads_should_discard_additional_image_file( $metadata['sources'][ $mime_type ], $image )
+		) {
 			wp_delete_file_from_directory( $destination, $original_directory );
 			continue;
 		}
@@ -137,7 +140,10 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			$properties['sources'] = array();
 		}
 
-		if ( empty( $properties['sources'][ $current_mime ] ) ) {
+		if (
+			empty( $properties['sources'][ $current_mime ] ) &&
+			in_array( $current_mime, $valid_mime_transforms[ $mime_type ], true )
+		) {
 			$properties['sources'][ $current_mime ] = array(
 				'file'     => isset( $properties['file'] ) ? $properties['file'] : '',
 				'filesize' => 0,
@@ -162,7 +168,10 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 				continue;
 			}
 
-			if ( webp_uploads_should_discard_additional_image_file( $properties, $source ) ) {
+			if (
+				! empty( $metadata['sources'][ $mime_type ] ) &&
+				webp_uploads_should_discard_additional_image_file( $properties['sources'][ $mime_type ], $source )
+			) {
 				$destination = path_join( $original_directory, $source['file'] );
 				wp_delete_file_from_directory( $destination, $original_directory );
 				continue;
