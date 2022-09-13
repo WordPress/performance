@@ -135,11 +135,6 @@ class Perflab_Background_Job {
 	 */
 	public function __construct( $job_id ) {
 		$this->id = absint( $job_id );
-
-		if ( $this->exists() ) {
-			$this->name = get_term_meta( $this->id, self::META_KEY_JOB_NAME, true );
-			$this->data = get_term_meta( $this->id, self::META_KEY_JOB_DATA, true );
-		}
 	}
 
 	/**
@@ -148,7 +143,6 @@ class Perflab_Background_Job {
 	 * @return int Job ID. Technically this is a term id for `background_job` taxonomy.
 	 */
 	public function get_id() {
-
 		return $this->id;
 	}
 
@@ -160,11 +154,6 @@ class Perflab_Background_Job {
 	 * @return array|null Job data.
 	 */
 	public function get_data() {
-		// If we have cached data, return it.
-		if ( ! is_null( $this->data ) ) {
-			return $this->data;
-		}
-
 		$this->data = get_term_meta( $this->id, self::META_KEY_JOB_DATA, true );
 
 		return $this->data;
@@ -178,7 +167,9 @@ class Perflab_Background_Job {
 	 * @return string Job name.
 	 */
 	public function get_name() {
-		return (string) $this->name;
+		$this->name = get_term_meta( $this->id, self::META_KEY_JOB_NAME, true );
+
+		return $this->name;
 	}
 
 	/**
