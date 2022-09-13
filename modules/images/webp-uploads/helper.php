@@ -16,7 +16,7 @@
  */
 function webp_uploads_get_upload_image_mime_transforms() {
 	$default_transforms = array(
-		'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
+		'image/jpeg' => array( 'image/webp' ),
 		'image/webp' => array( 'image/webp', 'image/jpeg' ),
 	);
 
