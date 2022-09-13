@@ -769,6 +769,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_add_fallback_script_if_content_has_updated_images() {
+		remove_all_actions( 'wp_footer' );
+
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
@@ -796,6 +798,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_not_add_fallback_script_if_content_has_no_updated_images() {
+		remove_all_actions( 'wp_footer' );
+
 		apply_filters( 'the_content', '<p>no image</p>' );
 
 		$this->assertFalse( has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) );
