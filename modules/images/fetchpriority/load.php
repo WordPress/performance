@@ -17,7 +17,7 @@
  * @param string $context        The context of the image.
  * @return string The filtered image tag.
  */
-function fetchpriority_img_tag_add( $filtered_image, $context ) {
+function fetchpriority_img_tag_add_attr( $filtered_image, $context ) {
 
 	if ( 'the_content' !== $context ) {
 		return $filtered_image;
