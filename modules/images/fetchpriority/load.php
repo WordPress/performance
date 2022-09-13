@@ -13,10 +13,9 @@
  *
  * @since n.e.x.t
  *
- * @param string $filtered_image The filtered image.
+ * @param string $filtered_image The image tag to filter.
  * @param string $context        The context of the image.
- *
- * @return string image tag
+ * @return string The filtered image tag.
  */
 function fetchpriority_img_tag_add( $filtered_image, $context ) {
 
