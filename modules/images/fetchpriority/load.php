@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: Fetchpriority
- * Description: Adds Fetchpriority parameter to the none lazy loaded images.
+ * Description: Adds `fetchpriority=high` parameter to the non lazy loaded images.
  * Experimental: Yes
  *
  * @package performance-lab
