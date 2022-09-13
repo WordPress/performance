@@ -320,12 +320,16 @@ class Perflab_Background_Job {
 	/**
 	 * Unlocks the process.
 	 *
+	 * Mark job status as partial as the unlock implies that job has run
+	 * atleast partially.
+	 *
 	 * @since n.e.x.t
 	 *
 	 * @return void
 	 */
 	public function unlock() {
 		delete_term_meta( $this->id, self::META_KEY_JOB_LOCK );
+		$this->set_status( self::JOB_STATUS_PARTIAL );
 	}
 
 	/**
