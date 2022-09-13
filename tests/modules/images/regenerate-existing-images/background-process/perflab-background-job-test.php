@@ -66,7 +66,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	public function test_job_id_is_zero() {
 		$this->job = new Perflab_Background_Job();
 
-		$this->assertSame( 0, $this->job->job_id );
+		$this->assertSame( 0, $this->job->get_id() );
 	}
 
 	/**
@@ -129,7 +129,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->job = Perflab_Background_Job::create( 'random', $job_data );
 		$this->job->set_error( $error );
 
-		$error_metadata = get_term_meta( $this->job->job_id, 'perflab_job_errors', true );
+		$error_metadata = get_term_meta( $this->job->get_id(), 'perflab_job_errors', true );
 		$attempts       = $this->job->get_attempts();
 
 		$this->assertSame( $error_data, $error_metadata );
@@ -168,10 +168,10 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->job = Perflab_Background_Job::create( 'test' );
 		$time      = time();
 		$this->job->lock( $time );
-		$lock_time = get_term_meta( $this->job->job_id, 'perflab_job_lock', true );
+		$lock_time = get_term_meta( $this->job->get_id(), 'perflab_job_lock', true );
 		$this->assertSame( absint( $lock_time ), $time );
 		$this->job->unlock();
-		$lock_time = get_term_meta( $this->job->job_id, 'perflab_job_lock', true );
+		$lock_time = get_term_meta( $this->job->get_id(), 'perflab_job_lock', true );
 		$this->assertEmpty( $lock_time );
 	}
 
@@ -182,8 +182,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->job = Perflab_Background_Job::create( 'test' );
 		$time      = time();
 		$this->job->lock( $time );
-		$status    = $this->job->get_status();
-		$lock_time = get_term_meta( $this->job->job_id, 'perflab_job_lock', true );
+		$lock_time = get_term_meta( $this->job->get_id(), 'perflab_job_lock', true );
 		$this->assertSame( absint( $lock_time ), $time );
 
 		$start_time = $this->job->get_start_time();
