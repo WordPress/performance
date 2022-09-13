@@ -32,3 +32,16 @@ function fetchpriority_img_tag_add_attr( $filtered_image, $context ) {
 	return $filtered_image;
 }
 add_filter( 'wp_content_img_tag', 'fetchpriority_img_tag_add_attr', 10, 2 );
+
+/**
+ * Filters the post thumbnail HTML to conditionally add the fetchpriority attribute.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $html The post thumbnail HTML to filter.
+ * @return string The filtered post thumbnail HTML.
+ */
+function fetchpriority_filter_post_thumbnail_html( $html ) {
+	return fetchpriority_img_tag_add_attr( $html, 'the_post_thumbnail' );
+}
+add_filter( 'post_thumbnail_html', 'fetchpriority_filter_post_thumbnail_html' );
