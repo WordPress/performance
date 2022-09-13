@@ -60,6 +60,11 @@
 /tests/modules/images/dominant-color                                        @pbearne @spacedmonkey
 /tests/testdata/modules/images/dominant-color                               @pbearne @spacedmonkey
 
+# Module: Fetchpriority
+/modules/images/fetchpriority                                              @pbearne @adamsilverstein
+/tests/modules/images/fetchpriority                                        @pbearne @adamsilverstein
+/tests/testdata/modules/images/fetchpriority                               @pbearne @adamsilverstein
+
 # Module: Full Page Cache Health Check
 /modules/site-health/audit-full-page-cache                                  @manuelRod @westonruter
 /tests/modules/site-health/audit-full-page-cache                            @manuelRod @westonruter
