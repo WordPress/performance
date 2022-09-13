@@ -31,4 +31,4 @@ function fetchpriority_img_tag_add( $filtered_image, $context ) {
 
 	return $filtered_image;
 }
-add_filter( 'wp_content_img_tag', 'fetchpriority_img_tag_add', 10, 2 );
+add_filter( 'wp_content_img_tag', 'fetchpriority_img_tag_add_attr', 10, 2 );
