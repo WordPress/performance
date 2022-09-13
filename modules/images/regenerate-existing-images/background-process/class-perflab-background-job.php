@@ -18,7 +18,7 @@ class Perflab_Background_Job {
 	 * Meta key for storing job name/action.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job name meta key.
+	 * @var string
 	 */
 	const META_KEY_JOB_NAME = 'perflab_job_name';
 
@@ -26,7 +26,7 @@ class Perflab_Background_Job {
 	 * Meta key for storing job data.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job data meta key.
+	 * @var string
 	 */
 	const META_KEY_JOB_DATA = 'perflab_job_data';
 
@@ -34,7 +34,7 @@ class Perflab_Background_Job {
 	 * Meta key for storing job data.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job attempts meta key.
+	 * @var string
 	 */
 	const META_KEY_JOB_ATTEMPTS = 'perflab_job_attempts';
 
@@ -42,7 +42,7 @@ class Perflab_Background_Job {
 	 * Meta key for storing job lock.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job lock meta key.
+	 * @var string
 	 */
 	const META_KEY_JOB_LOCK = 'perflab_job_lock';
 
@@ -50,7 +50,7 @@ class Perflab_Background_Job {
 	 * Meta key for storing job errors.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job errors meta key.
+	 * @var string
 	 */
 	const META_KEY_JOB_ERRORS = 'perflab_job_errors';
 
@@ -58,7 +58,7 @@ class Perflab_Background_Job {
 	 * Job status meta key.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job status meta key.
+	 * @var string
 	 */
 	const META_KEY_JOB_STATUS = 'perflab_job_status';
 
@@ -66,7 +66,7 @@ class Perflab_Background_Job {
 	 * Job status for queued jobs.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job status queued.
+	 * @var string
 	 */
 	const JOB_STATUS_QUEUED = 'perflab_job_queued';
 
@@ -74,7 +74,7 @@ class Perflab_Background_Job {
 	 * Job status for running jobs.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job status running.
+	 * @var string
 	 */
 	const JOB_STATUS_RUNNING = 'perflab_job_running';
 
@@ -82,7 +82,7 @@ class Perflab_Background_Job {
 	 * Job status for partially executed jobs.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job status partial.
+	 * @var string
 	 */
 	const JOB_STATUS_PARTIAL = 'perflab_job_partial';
 
@@ -90,7 +90,7 @@ class Perflab_Background_Job {
 	 * Job status for completed jobs.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job status commplete.
+	 * @var string
 	 */
 	const JOB_STATUS_COMPLETE = 'perflab_job_complete';
 
@@ -98,7 +98,7 @@ class Perflab_Background_Job {
 	 * Job status for failed jobs.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job status failed.
+	 * @var string
 	 */
 	const JOB_STATUS_FAILED = 'perflab_job_failed';
 
@@ -106,7 +106,7 @@ class Perflab_Background_Job {
 	 * Job ID.
 	 *
 	 * @since n.e.x.t
-	 * @var int Job ID. Technically this is a term id for `background_job` taxonomy.
+	 * @var int
 	 */
 	private $id;
 
@@ -114,7 +114,7 @@ class Perflab_Background_Job {
 	 * Job name.
 	 *
 	 * @since n.e.x.t
-	 * @var string Job name.
+	 * @var string
 	 */
 	private $name;
 
@@ -122,7 +122,7 @@ class Perflab_Background_Job {
 	 * Job data.
 	 *
 	 * @since n.e.x.t
-	 * @var array Job data.
+	 * @var array
 	 */
 	private $data;
 
