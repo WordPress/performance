@@ -133,7 +133,7 @@ class Perflab_Background_Job {
 	 *
 	 * @param int $job_id Job ID. Technically this is the ID of a term in the 'background_job' taxonomy.
 	 */
-	public function __construct( $job_id = 0 ) {
+	public function __construct( $job_id ) {
 		$this->id = absint( $job_id );
 
 		if ( $this->exists() ) {
@@ -298,7 +298,8 @@ class Perflab_Background_Job {
 	 */
 	public static function create( $name, array $data = array() ) {
 		// Insert the new job in queue.
-		$term_data = wp_insert_term( 'job_' . time(), PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
+		$term_name = 'job_' . time() . rand();
+		$term_data = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 
 		if ( ! is_wp_error( $term_data ) ) {
 			update_term_meta( $term_data['term_id'], self::META_KEY_JOB_DATA, $data );

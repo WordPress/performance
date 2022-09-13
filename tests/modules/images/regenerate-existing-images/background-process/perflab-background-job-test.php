@@ -30,8 +30,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	}
 
 	public function test_class_constants_exists() {
-		$this->job = new Perflab_Background_Job();
-		$job_class = get_class( $this->job );
+		$job_class = Perflab_Background_Job::class;
 
 		$this->assertTrue( defined( $job_class . '::META_KEY_JOB_NAME' ) );
 		$this->assertTrue( defined( $job_class . '::META_KEY_JOB_DATA' ) );
@@ -47,8 +46,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	}
 
 	public function test_class_constants_values() {
-		$this->job = new Perflab_Background_Job();
-		$job_class = get_class( $this->job );
+		$job_class = Perflab_Background_Job::class;
 
 		$this->assertEquals( 'perflab_job_name', constant( $job_class . '::META_KEY_JOB_NAME' ) );
 		$this->assertEquals( 'perflab_job_data', constant( $job_class . '::META_KEY_JOB_DATA' ) );
@@ -63,17 +61,11 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->assertEquals( 'perflab_job_failed', constant( $job_class . '::JOB_STATUS_FAILED' ) );
 	}
 
-	public function test_job_id_is_zero() {
-		$this->job = new Perflab_Background_Job();
-
-		$this->assertSame( 0, $this->job->get_id() );
-	}
-
 	/**
 	 * @covers ::set_status
 	 */
 	public function test_set_status_false_for_invalid_status() {
-		$this->job = new Perflab_Background_Job();
+		$this->job = Perflab_Background_Job::create( 'test' );
 
 		$result = $this->job->set_status( 'invalid_status' );
 		$this->assertFalse( $result );
@@ -120,13 +112,12 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 			'test_error_data' => 'descriptive_infomation',
 		);
 		$error->add_data( $error_data, 'perflab_job_failure' );
-		$this->job = new Perflab_Background_Job();
-		$job_data  = array(
+		$job_data = array(
 			'post_id'          => 10,
 			'some_random_data' => 'some_random_string',
 		);
 
-		$this->job = Perflab_Background_Job::create( 'random', $job_data );
+		$this->job = Perflab_Background_Job::create( 'tecdcdcdst', $job_data );
 		$this->job->set_error( $error );
 
 		$error_metadata = get_term_meta( $this->job->get_id(), 'perflab_job_errors', true );
@@ -139,18 +130,18 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	/**
 	 * @covers ::should_run
 	 */
-	public function test_job_should_not_run_non_existing_job() {
-		$this->job = new Perflab_Background_Job();
+	public function test_job_should_run_for_job() {
+		$this->job = Perflab_Background_Job::create( 'test' );
 
 		$run = $this->job->should_run();
-		$this->assertFalse( $run );
+		$this->assertTrue( $run );
 	}
 
 	/**
 	 * @covers ::should_run
 	 */
 	public function test_job_should_not_run_for_completed_job() {
-		$this->job = new Perflab_Background_Job();
+		$this->job = Perflab_Background_Job::create( 'test' );
 		$this->job->create( 'test_job' );
 
 		// Mark job as complete.
@@ -189,5 +180,16 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->assertEquals( $start_time, $lock_time );
 		$this->assertEquals( $start_time, $time );
 		$this->assertEquals( $time, $lock_time );
+	}
+
+	/**
+	 * Runs after each test.
+	 *
+	 * @return void
+	 */
+	public function tear_down() {
+		if ( $this->job instanceof Perflab_Background_Job ) {
+			wp_delete_term( $this->job->get_id(), 'background_job' );
+		}
 	}
 }
