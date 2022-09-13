@@ -276,46 +276,6 @@ class Perflab_Background_Job {
 	}
 
 	/**
-	 * Creates a new job in the queue.
-	 *
-	 * Job refers to the term and queue refers to the `background_job` taxonomy.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param string $name Name of job identifier.
-	 * @param array  $data Data for the job.
-	 *
-	 * @return Perflab_Background_Job|WP_Error Job object if created successfully, else WP_Error.
-	 */
-	public static function create( $name, array $data = array() ) {
-		// Insert the new job in queue.
-		$term_name = 'job_' . time() . rand();
-		$term_data = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
-
-		if ( ! is_wp_error( $term_data ) ) {
-			update_term_meta( $term_data['term_id'], self::META_KEY_JOB_DATA, $data );
-			update_term_meta( $term_data['term_id'], self::META_KEY_JOB_NAME, $name );
-
-			/**
-			 * Create a fresh instance to return.
-			 *
-			 * @var Perflab_Background_Job
-			 */
-			$job = new self( $term_data['term_id'] );
-
-			$job->name = $name;
-			$job->data = $data;
-
-			// Set the queued status for freshly created jobs.
-			$job->set_status( self::JOB_STATUS_QUEUED );
-
-			return $job;
-		}
-
-		return $term_data;
-	}
-
-	/**
 	 * Returns the number of attempts executed for a job.
 	 *
 	 * @since n.e.x.t
@@ -386,7 +346,7 @@ class Perflab_Background_Job {
 	 *
 	 * @return array|null
 	 */
-	private function exists() {
+	public function exists() {
 		return term_exists( $this->id, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 	}
 
@@ -399,7 +359,7 @@ class Perflab_Background_Job {
 	 *
 	 * @return bool
 	 */
-	private function is_running() {
+	public function is_running() {
 		return ( self::JOB_STATUS_RUNNING === $this->get_status() );
 	}
 }
