@@ -9,7 +9,7 @@
  */
 
 /**
- * Filter image tags in content to add fetchpriority to the image tag if lazy loaded is not set.
+ * Filters an image tag in content to add the fetchpriority attribute if it is not lazy-loaded.
  *
  * @since n.e.x.t
  *
