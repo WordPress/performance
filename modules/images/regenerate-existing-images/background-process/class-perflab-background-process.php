@@ -89,7 +89,7 @@ class Perflab_Background_Process {
 			if ( $this->job instanceof Perflab_Background_Job ) {
 				// Unlock the process once everything is done.
 				$this->job->unlock();
-				$this->next_batch();
+				$this->next_batch( $this->job->get_id() );
 			}
 		}
 	}
@@ -126,9 +126,10 @@ class Perflab_Background_Process {
 	 * This will send a POST request to admin-ajax.php with background
 	 * process specific action to continue executing the job in a new process.
 	 *
+	 * @param int $job_id Job ID. This is the term id from `background_job` taxonomy.
 	 * @return void
 	 */
-	private function next_batch() {
+	private function next_batch( $job_id ) {
 		/**
 		 * Do not call the background process from within the script if the
 		 * real cron has been setup to do so.
@@ -138,8 +139,6 @@ class Perflab_Background_Process {
 		}
 
 		$nonce  = wp_create_nonce( self::BG_PROCESS_ACTION );
-		$job_id = $this->job->get_id();
-
 		$url    = admin_url( 'admin-ajax.php' );
 		$params = array(
 			'blocking'  => false,
