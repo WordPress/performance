@@ -43,7 +43,7 @@ If you have completed initial engineering and want community members to test pri
 
 ### Branch name
 
-Before opening a pull request, you should create a new branch in which you're making your suggested changes. This branch can use almost any name, although it is recommended to include a reference to the issue number in it. Please avoid prefixing your branch with `feature/` or `release/` as those are reserved names for special protected branches in the Performance Lab plugin. If you use one of those names, you will not be able to push code to the branch directly.
+Before opening a pull request, create a new branch for your suggested changes. This branch can use almost any name, although it is recommended to include a reference to the issue number in it. Please avoid prefixing your branch with `feature/` or `release/` as those are reserved names for special protected branches in the Performance Lab plugin. If you use one of those names, you will not be able to push code to the branch directly.
 
 ### Pull request requirements
 
