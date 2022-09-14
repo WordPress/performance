@@ -140,3 +140,34 @@ function perflab_delete_background_job( $job_id ) {
 
 	return wp_delete_term( $job_id, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 }
+
+/**
+ * Dispatch the request to trigger the background process job.
+ *
+ * @param int $job_id Job ID.
+ * @return void
+ */
+function perflab_dispatch_background_process_request( $job_id ) {
+	/**
+	 * Do not call the background process from within the script if the
+	 * real cron has been setup to do so.
+	 */
+	if ( defined( 'ENABLE_BG_PROCESS_CRON' ) ) {
+		return;
+	}
+
+	$nonce  = wp_create_nonce( Perflab_Background_Process::BG_PROCESS_ACTION );
+	$url    = admin_url( 'admin-ajax.php' );
+	$params = array(
+		'blocking'  => false,
+		'body'      => array(
+			'action' => Perflab_Background_Process::BG_PROCESS_ACTION,
+			'job_id' => $job_id,
+			'nonce'  => $nonce,
+		),
+		'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
+		'timeout'   => 0.1,
+	);
+
+	wp_remote_post( $url, $params );
+}

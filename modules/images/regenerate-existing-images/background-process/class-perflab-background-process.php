@@ -138,20 +138,7 @@ class Perflab_Background_Process {
 			return;
 		}
 
-		$nonce  = wp_create_nonce( self::BG_PROCESS_ACTION );
-		$url    = admin_url( 'admin-ajax.php' );
-		$params = array(
-			'blocking'  => false,
-			'body'      => array(
-				'action' => self::BG_PROCESS_ACTION,
-				'job_id' => $job_id,
-				'nonce'  => $nonce,
-			),
-			'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
-			'timeout'   => 0.1,
-		);
-
-		wp_remote_post( $url, $params );
+		perflab_dispatch_background_process_request( $job_id );
 	}
 
 	/**
