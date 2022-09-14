@@ -127,6 +127,18 @@ function perflab_aao_autoloaded_options_size() {
 function perflab_aao_query_autoloaded_options() {
 	global $wpdb;
 
+	/**
+	 * Filters the threshold for an autoloaded option to be considered large.
+	 *
+	 * The Site Health report will show users a notice if any of their autoloaded
+	 * options exceed the threshold for being considered large. This filters the value
+	 * for what is considered a large option.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param int $option_threshold Threshold for an option's value to be considered
+	 *                              large, in bytes. Default 100.
+	 */
 	$option_threshold = apply_filters( 'perflab_aao_autoloaded_options_table_threshold', 100 );
 
 	return $wpdb->get_results( $wpdb->prepare( "SELECT option_name, LENGTH(option_value) AS option_value_length FROM {$wpdb->options} WHERE autoload='yes' AND LENGTH(option_value) > %d ORDER BY option_value_length DESC LIMIT 20", $option_threshold ) );
