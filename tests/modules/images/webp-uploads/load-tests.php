@@ -44,7 +44,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_create_the_original_mime_type_as_well_with_all_the_available_sources_for_the_specified_mime() {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );
 
-		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -52,7 +52,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertStringEndsWith( $metadata['sources']['image/webp']['file'], $metadata['file'] );
 
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
-			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
 		}
 	}
@@ -371,6 +371,16 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_replacing_a_webp_image() {
+		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
+
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function( $transforms ) {
+				$transforms['image/webp'] = array( 'image/webp', 'image/jpeg' );
+				return $transforms;
+			}
+		);
+
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
 		);
@@ -740,7 +750,16 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_webp_for_some_sizes_which_are_smaller_in_webp_format() {
+		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
+
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function( $transforms ) {
+				$transforms['image/webp'] = array( 'image/webp', 'image/jpeg' );
+				return $transforms;
+			}
+		);
 
 		// Look for an image that contains all of the additional mime type images.
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );
@@ -770,6 +789,15 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 */
 	public function it_should_add_fallback_script_if_content_has_updated_images() {
 		remove_all_actions( 'wp_footer' );
+		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
+
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function( $transforms ) {
+				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
+				return $transforms;
+			}
+		);
 
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
