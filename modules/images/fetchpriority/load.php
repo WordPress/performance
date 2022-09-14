@@ -23,10 +23,9 @@ function fetchpriority_img_tag_add_attr( $filtered_image, $context ) {
 		return $filtered_image;
 	}
 
-	if ( strpos( $filtered_image, ' loading="lazy"' ) === false && strpos( $filtered_image, ' fetchpriority=' ) === false ) {
+	if ( ! empty( $filtered_image ) && strpos( $filtered_image, 'loading="lazy"' ) === false && strpos( $filtered_image, 'fetchpriority=' ) === false ) {
 		$filtered_image = str_replace( '<img ', '<img fetchpriority="high" ', $filtered_image );
-		remove_filter( 'wp_content_img_tag', 'fetchpriority_img_tag_add_attr', 10 );
-		remove_filter( 'post_thumbnail_html', 'fetchpriority_filter_post_thumbnail_html' );
+		remove_filter( 'wp_content_img_tag', 'fetchpriority_img_tag_add_attr' );
 	}
 
 	return $filtered_image;
@@ -42,6 +41,9 @@ add_filter( 'wp_content_img_tag', 'fetchpriority_img_tag_add_attr', 10, 2 );
  * @return string The filtered post thumbnail HTML.
  */
 function fetchpriority_filter_post_thumbnail_html( $html ) {
-	return fetchpriority_img_tag_add_attr( $html, 'the_post_thumbnail' );
+	$html = fetchpriority_img_tag_add_attr( $html, 'the_post_thumbnail' );
+	remove_filter( 'post_thumbnail_html', 'fetchpriority_filter_post_thumbnail_html' );
+
+	return $html;
 }
 add_filter( 'post_thumbnail_html', 'fetchpriority_filter_post_thumbnail_html' );
