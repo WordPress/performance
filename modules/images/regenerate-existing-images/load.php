@@ -102,7 +102,7 @@ function perflab_get_background_job_capabilities() {
  *
  * @return void
  */
-function perflab_statuc_check_cron() {
+function perflab_status_check_cron() {
 	// Check if event is already scheduled.
 	$scheduled = wp_next_scheduled( 'perflab_background_process_status_check' );
 
@@ -111,7 +111,7 @@ function perflab_statuc_check_cron() {
 		wp_schedule_event( time(), 'hourly', 'perflab_background_process_status_check' );
 	}
 }
-add_action( 'init', 'perflab_statuc_check_cron' );
+add_action( 'init', 'perflab_status_check_cron' );
 
 /**
  * Dispatch the request to trigger the background process job.
