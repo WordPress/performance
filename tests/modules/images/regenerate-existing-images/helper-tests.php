@@ -21,8 +21,6 @@ class Regenerate_Existing_Images_Helper_Test extends WP_UnitTestCase {
 	}
 
 	public function test_perflab_delete_background_job() {
-		print_r( 'Helper test' );
-		die;
 		$name    = 'test';
 		$data    = array( 'post' => 123 );
 		$job     = perflab_create_background_job( $name, $data );
