@@ -20,7 +20,7 @@
  * 5. Job errors: Errors related to a job. Stored as term meta in serialized format `perflab_job_errors`.
  * 6. Job attempts: Number of times this job has been attempted to run after failure. Stored as term meta `perflab_job_attempts`.
  * 7. Job lock: Timestamp in seconds at which the job has started. Stored as term meta `perflab_job_lock`.
- * 8. Job completed at: Timestamp at which the job has been marked as completed. Stored as term meta `job_completed_at`
+ * 8. Job completed at: Timestamp at which the job has been marked as completed. Stored as term meta `perflab_job_completed_at`.
  *
  * @since n.e.x.t
  */
