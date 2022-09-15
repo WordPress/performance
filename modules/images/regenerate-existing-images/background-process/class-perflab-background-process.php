@@ -325,6 +325,7 @@ class Perflab_Background_Process {
 	 */
 	private function get_max_execution_time() {
 		$min_execution_time = 20; // Default to 20 seconds. Almost, all servers will have this much of time.
+		$max_execution_time = $min_execution_time;
 
 		if ( function_exists( 'ini_get' ) ) {
 			$time               = ini_get( 'max_execution_time' );
