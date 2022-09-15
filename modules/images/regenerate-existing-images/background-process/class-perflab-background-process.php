@@ -41,8 +41,12 @@ class Perflab_Background_Process {
 	 * @return void
 	 */
 	public function __construct() {
+		// Handle job execution request.
 		add_action( 'wp_ajax_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
 		add_action( 'wp_ajax_nopriv_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
+
+		// Handle status check cron.
+		add_action( 'perflab_background_process_status_check', array( $this, 'status_check' ) );
 	}
 
 	/**
@@ -95,6 +99,89 @@ class Perflab_Background_Process {
 	}
 
 	/**
+	 * Status check cron handler.
+	 *
+	 * 1. Cron will be schedule if it does not exist already.
+	 * 2. It will restart any job which is halted due to failure.
+	 * 3. Remove old completed jobs.
+	 *
+	 * @return void
+	 */
+	public function status_check() {
+		$this->status_check_running_jobs();
+		$this->status_check_completed_jobs();
+	}
+
+	/**
+	 * Check the running jobs.
+	 *
+	 * If they are still running, bail it.
+	 *
+	 * If the execution has been stopped by exceeding maximum execution
+	 * time, restart the job.
+	 *
+	 * @return void
+	 */
+	private function status_check_running_jobs() {
+		$jobs_args = array(
+			'taxonomy'   => PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG,
+			'meta_key'   => Perflab_Background_Job::META_KEY_JOB_STATUS,
+			'meta_value' => Perflab_Background_Job::JOB_STATUS_RUNNING,
+			'fields'     => 'ids',
+		);
+
+		// Fetch all the running jobs.
+		$running_jobs = get_terms( $jobs_args );
+
+		if ( ! empty( $running_jobs ) && ! is_wp_error( $running_jobs ) ) {
+			foreach ( $running_jobs as $running_job ) {
+				$job_lock = get_term_meta( $running_job, Perflab_Background_Job::META_KEY_JOB_LOCK, true );
+				$job_lock = absint( $job_lock );
+
+				// If job lock is not present, trigger the job again.
+				if ( empty( $job_lock ) || $this->time_exceeded( $running_job ) ) {
+					perflab_dispatch_background_process_request( $running_job );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Check the completed jobs.
+	 *
+	 * If the job has been marked as completed and completed
+	 * time has been over 7 days, remove that job from job queue (history).
+	 *
+	 * @return void
+	 */
+	private function status_check_completed_jobs() {
+		$jobs_args = array(
+			'taxonomy'   => PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG,
+			'meta_key'   => Perflab_Background_Job::META_KEY_JOB_STATUS,
+			'meta_value' => Perflab_Background_Job::JOB_STATUS_COMPLETE,
+			'fields'     => 'ids',
+		);
+
+		$completed_jobs = get_terms( $jobs_args );
+
+		if ( ! empty( $completed_jobs ) && ! is_wp_error( $completed_jobs ) ) {
+			$expiry_days  = 7 * DAY_IN_SECONDS;
+			$current_time = time();
+
+			foreach ( $completed_jobs as $completed_job ) {
+				$job_completed_at = get_term_meta( $completed_job, 'perflab_job_completed_at', true );
+				$job_completed_at = absint( $job_completed_at );
+				$valid_till       = $job_completed_at + $expiry_days;
+
+				// If completed job has more than 7 days, delete/remove it.
+				if ( $current_time > $valid_till ) {
+					wp_delete_term( $completed_job, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Runs the process over a batch of job.
 	 *
 	 * As of now, it won't fetch the next batch if memory or time
@@ -117,7 +204,7 @@ class Perflab_Background_Process {
 			 * @param array $data Job data.
 			 */
 			do_action( 'perflab_job_' . $this->job->get_name(), $this->job->get_data() );
-		} while ( ! $this->memory_exceeded() && ! $this->time_exceeded() && ! $this->job->is_completed() );
+		} while ( ! $this->memory_exceeded() && ! $this->time_exceeded( $this->job->get_id() ) && ! $this->job->is_completed() );
 	}
 
 	/**
@@ -204,17 +291,14 @@ class Perflab_Background_Process {
 	 *
 	 * @since n.e.x.t
 	 *
+	 * @param int $job_id Job ID. Term ID for `background_job` taxonomy.
 	 * @return bool
 	 */
-	private function time_exceeded() {
+	private function time_exceeded( $job_id ) {
+		$job                = new Perflab_Background_Job( $job_id );
 		$current_time       = time();
-		$run_start_time     = $this->job->get_start_time();
-		$min_execution_time = 20; // Default to 20 seconds. Almost, all servers will have this much of time.
-
-		if ( function_exists( 'ini_get' ) ) {
-			$time               = ini_get( 'max_execution_time' );
-			$max_execution_time = ( ! empty( $time ) && ( $time > $min_execution_time ) ) ? $time - 10 : $min_execution_time;
-		}
+		$run_start_time     = $job->get_start_time();
+		$max_execution_time = $this->get_max_execution_time();
 
 		$time_exceeded = ( $current_time >= ( $run_start_time + $max_execution_time ) );
 
@@ -226,5 +310,28 @@ class Perflab_Background_Process {
 		 * @param bool $time_exceeded Time exceeded flag.
 		 */
 		return apply_filters( 'perflab_background_process_time_exceeded', $time_exceeded );
+	}
+
+	/**
+	 * Get the maximum execution time for php script.
+	 *
+	 * By default this will be 20 seconds.
+	 *
+	 * If init_get returns the time, max execution time will be 10 seconds less than
+	 * what has been returned. These 10 seconds will be utilised to perform cleanup actions
+	 * like unlocking the job and making new request for background process.
+	 *
+	 * @return int
+	 */
+	private function get_max_execution_time() {
+		$min_execution_time = 20; // Default to 20 seconds. Almost, all servers will have this much of time.
+		$max_execution_time = $min_execution_time;
+
+		if ( function_exists( 'ini_get' ) ) {
+			$time               = ini_get( 'max_execution_time' );
+			$max_execution_time = ( ! empty( $time ) && ( $time > $min_execution_time ) ) ? $time - 10 : $min_execution_time;
+		}
+
+		return $max_execution_time;
 	}
 }
