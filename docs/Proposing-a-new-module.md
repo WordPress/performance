@@ -23,7 +23,7 @@ It is understandable that this can feel like quite the tedious task - however, r
 ## Requirements for a new module
 Based on the above lifecycle for a module, there are a few initial requirements for proposing a new module. The Performance Team would like to ensure that modules inside the Performance Lab plugin keep moving forward over time, and the requirements outlined here help set the foundation.
 
-Other than outlining the purpose and scope of the module, every module proposal issue should define the following:
+Other than outlining the purpose and scope of the module, every module proposal issue should define the following by using the [new module proposal issue template](https://github.com/WordPress/performance/issues/new?assignees=&labels=%5BType%5D+Module&template=new-module-proposal.md&title=Module+Proposal%3A+):
 
 - The module name, i.e. what users see as the name for the feature inside the Performance Lab plugin. It is a good idea to use something that eventually can also act as the name for the feature project for WordPress core.
 - The module slug, i.e. the internal identifier for the module. Usually, this can be based on the module name, “slugified” (e.g. “My Module” becomes “my-module”).
