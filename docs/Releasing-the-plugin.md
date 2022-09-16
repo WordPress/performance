@@ -16,7 +16,7 @@ At the cutoff time, create a new remote branch `release/{milestoneName}` from la
 
 Once the release branch exists, any pull requests that are relevant for that upcoming release need to be based on the release branch instead of `trunk`. For relevant pull requests that are already in progress at the time of creating the branch, change the base branch accordingly.
 
-Most importantly, immediately communicate with the other plugin contributors that the release branch now exists, e.g. by updating the overall release issue with a new comment or leaving a note in the [#performance Slack channel](https://wordpress.slack.com/archives/performance). This way other contributors should be aware that critical pull requests related to that upcoming release need to be based on the release branch instead of `trunk`.
+Most importantly, immediately communicate with the other plugin contributors that the release branch now exists, e.g. by updating the overall release issue with a new comment or leaving a note in the [#core-performance Slack channel](https://wordpress.slack.com/archives/core-performance). This way other contributors should be aware that critical pull requests related to that upcoming release need to be based on the release branch instead of `trunk`.
 
 ## Preparing the release
 
