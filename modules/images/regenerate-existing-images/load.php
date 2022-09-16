@@ -9,6 +9,11 @@
  */
 
 /**
+ * Inlcude admin related functions.
+ */
+require __DIR__ . '/admin.php';
+
+/**
  * Registers the background job taxonomy.
  *
  * Intentionally on lower priority, so that other post types can be
