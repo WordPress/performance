@@ -7,6 +7,29 @@
  */
 
 /**
+ * Adds necessary hooks to enable job queue admin screen.
+ *
+ * This will add a submenu page under Tools menu.
+ *
+ * @since n.e.x.t
+ *
+ * @return void
+ */
+function perflab_add_queue_screen_hooks() {
+	/**
+	 * By default admin screen will be disabled.
+	 *
+	 * @since n.e.x.t
+	 * @param bool $enable Flag to enable admin queue screen. Default false.
+	 */
+	if ( apply_filters( 'perflab_enable_background_process_queue_screen', false ) ) {
+		add_action( 'admin_menu', 'perflab_management_page' );
+		add_action( 'parent_file', 'perflab_backgroun_job_parent_file' );
+	}
+}
+add_action( 'init', 'perflab_add_queue_screen_hooks', 100 );
+
+/**
  * Add management page which will be added in Tools menu.
  *
  * @since n.e.x.t
@@ -23,7 +46,6 @@ function perflab_management_page() {
 		100
 	);
 }
-add_action( 'admin_menu', 'perflab_management_page' );
 
 /**
  * Changes the parent file for background_job screen.
@@ -41,4 +63,3 @@ function perflab_backgroun_job_parent_file( $parent_file ) {
 
 	return $parent_file;
 }
-add_action( 'parent_file', 'perflab_backgroun_job_parent_file' );
