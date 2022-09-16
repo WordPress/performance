@@ -22,8 +22,6 @@ function perflab_management_page() {
 		'',
 		100
 	);
-
-	remove_submenu_page( 'edit.php', 'edit-tags.php?taxonomy=background_job' );
 }
 add_action( 'admin_menu', 'perflab_management_page' );
 
