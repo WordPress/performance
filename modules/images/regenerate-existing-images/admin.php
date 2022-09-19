@@ -21,6 +21,7 @@ function perflab_add_queue_screen_hooks() {
 	 *
 	 * @since n.e.x.t
 	 * @param bool $enable Flag to enable admin queue screen. Default false.
+	 * @todo Change default value to false before merge.
 	 */
 	if ( apply_filters( 'perflab_enable_background_process_queue_screen', true ) ) {
 		add_action( 'admin_menu', 'perflab_management_page' );
@@ -75,15 +76,15 @@ function perflab_background_job_parent_file( $parent_file ) {
  * @return array Filtered list of columns.
  */
 function perflab_job_taxonomy_columns( array $columns ) {
-	$new_columns = array(
-		'job_id'     => __( 'Job ID', 'performance-lab' ),
-		'job_name'   => __( 'Job Name', 'performance-lab' ),
-		'job_status' => __( 'Job Status', 'performance-lab' ),
-	);
+	$new_columns = array();
 
 	if ( isset( $columns['cb'] ) ) {
 		$new_columns['cb'] = $columns['cb'];
 	}
+
+	$new_columns['job_id']     = __( 'Job ID', 'performance-lab' );
+	$new_columns['job_name']   = __( 'Job Name', 'performance-lab' );
+	$new_columns['job_status'] = __( 'Job Status', 'performance-lab' );
 
 	return $new_columns;
 }
