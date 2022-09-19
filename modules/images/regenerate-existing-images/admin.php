@@ -22,9 +22,10 @@ function perflab_add_queue_screen_hooks() {
 	 * @since n.e.x.t
 	 * @param bool $enable Flag to enable admin queue screen. Default false.
 	 */
-	if ( apply_filters( 'perflab_enable_background_process_queue_screen', false ) ) {
+	if ( apply_filters( 'perflab_enable_background_process_queue_screen', true ) ) {
 		add_action( 'admin_menu', 'perflab_management_page' );
-		add_action( 'parent_file', 'perflab_backgroun_job_parent_file' );
+		add_action( 'parent_file', 'perflab_background_job_parent_file' );
+		add_action( 'manage_edit-background_job_columns', 'perflab_job_taxonomy_columns' );
 	}
 }
 add_action( 'init', 'perflab_add_queue_screen_hooks', 100 );
@@ -55,11 +56,34 @@ function perflab_management_page() {
  * @param  string $parent_file Parent file.
  * @return string
  */
-function perflab_backgroun_job_parent_file( $parent_file ) {
+function perflab_background_job_parent_file( $parent_file ) {
 	$screen = get_current_screen();
 	if ( $screen instanceof WP_Screen && isset( $screen->taxonomy ) && 'background_job' === $screen->taxonomy ) {
 		return 'tools.php';
 	}
 
 	return $parent_file;
+}
+
+/**
+ * Add custom columns to the job taxonomy list table.
+ *
+ * @since n.e.x.t
+ *
+ * @param array $columns Columns for job taxonomy list table.
+ *
+ * @return array Filtered list of columns.
+ */
+function perflab_job_taxonomy_columns( array $columns ) {
+	$new_columns = array(
+		'job_id'     => __( 'Job ID', 'performance-lab' ),
+		'job_name'   => __( 'Job Name', 'performance-lab' ),
+		'job_status' => __( 'Job Status', 'performance-lab' ),
+	);
+
+	if ( isset( $columns['cb'] ) ) {
+		$new_columns['cb'] = $columns['cb'];
+	}
+
+	return $new_columns;
 }
