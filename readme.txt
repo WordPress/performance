@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 5.8
 Tested up to:      6.0
 Requires PHP:      5.6
-Stable tag:        1.4.0
+Stable tag:        1.5.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -67,6 +67,12 @@ Contributions welcome! There are several ways to contribute:
 * Join the weekly chat (Tuesdays at 16:00 UTC) in the [#performance channel on Slack](https://wordpress.slack.com/archives/performance)
 
 == Changelog ==
+
+= 1.5.0 =
+
+**Enhancements**
+
+* Site Health: Improve autoloaded options check by highlighting largest autoloaded options. ([353](https://github.com/WordPress/performance/pull/353))
 
 = 1.4.0 =
 
