@@ -74,6 +74,14 @@ class Perflab_Background_Job {
 	const META_KEY_JOB_STATUS = 'perflab_job_status';
 
 	/**
+	 * Timestamp at which the job was completed.
+	 *
+	 * @since n.e.x.t
+	 * @var string
+	 */
+	const META_KEY_JOB_COMPLETED_AT = 'perflab_job_completed_at';
+
+	/**
 	 * Job status for queued jobs.
 	 *
 	 * @since n.e.x.t
@@ -213,7 +221,7 @@ class Perflab_Background_Job {
 		 *
 		 * @param int $attempts Number of attempts allowed for a job to run. Default 3.
 		 */
-		$max_attempts = apply_filters( 'perflab_job_max_attempts_allowed', 3 );
+		$max_attempts = (int) apply_filters( 'perflab_job_max_attempts_allowed', 3 );
 
 		// If number of attempts have been exhausted, return false.
 		if ( $this->get_attempts() >= absint( $max_attempts ) ) {
@@ -245,7 +253,7 @@ class Perflab_Background_Job {
 
 			// If job is complete, set the timestamp at which it was completed.
 			if ( self::JOB_STATUS_COMPLETE === $status ) {
-				update_term_meta( $this->id, 'perflab_job_completed_at', time() );
+				update_term_meta( $this->id, self::META_KEY_JOB_COMPLETED_AT, time() );
 			}
 
 			return true;

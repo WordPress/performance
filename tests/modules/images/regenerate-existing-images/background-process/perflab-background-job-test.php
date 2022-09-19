@@ -38,6 +38,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->assertTrue( defined( $job_class . '::META_KEY_JOB_LOCK' ) );
 		$this->assertTrue( defined( $job_class . '::META_KEY_JOB_ERRORS' ) );
 		$this->assertTrue( defined( $job_class . '::META_KEY_JOB_STATUS' ) );
+		$this->assertTrue( defined( $job_class . '::META_KEY_JOB_COMPLETED_AT' ) );
 		$this->assertTrue( defined( $job_class . '::JOB_STATUS_QUEUED' ) );
 		$this->assertTrue( defined( $job_class . '::JOB_STATUS_RUNNING' ) );
 		$this->assertTrue( defined( $job_class . '::JOB_STATUS_PARTIAL' ) );
@@ -54,6 +55,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->assertEquals( 'perflab_job_lock', constant( $job_class . '::META_KEY_JOB_LOCK' ) );
 		$this->assertEquals( 'perflab_job_errors', constant( $job_class . '::META_KEY_JOB_ERRORS' ) );
 		$this->assertEquals( 'perflab_job_status', constant( $job_class . '::META_KEY_JOB_STATUS' ) );
+		$this->assertEquals( 'perflab_job_completed_at', constant( $job_class . '::META_KEY_JOB_COMPLETED_AT' ) );
 		$this->assertEquals( 'perflab_job_queued', constant( $job_class . '::JOB_STATUS_QUEUED' ) );
 		$this->assertEquals( 'perflab_job_running', constant( $job_class . '::JOB_STATUS_RUNNING' ) );
 		$this->assertEquals( 'perflab_job_partial', constant( $job_class . '::JOB_STATUS_PARTIAL' ) );
