@@ -210,7 +210,7 @@ class Perflab_Background_Job {
 		 *
 		 * @since n.e.x.t
 		 *
-		 * @param int $attempts Number of attempts allowed for a job to run.
+		 * @param int $attempts Number of attempts allowed for a job to run. Default 3.
 		 */
 		$max_attempts = apply_filters( 'perflab_job_max_attempts_allowed', 3 );
 
