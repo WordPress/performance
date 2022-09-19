@@ -16,7 +16,7 @@ At the cutoff time, create a new remote branch `release/{milestoneName}` from la
 
 Once the release branch exists, any pull requests that are relevant for that upcoming release need to be based on the release branch instead of `trunk`. For relevant pull requests that are already in progress at the time of creating the branch, change the base branch accordingly.
 
-Most importantly, immediately communicate with the other plugin contributors that the release branch now exists, e.g. by updating the overall release issue with a new comment or leaving a note in the [#performance Slack channel](https://wordpress.slack.com/archives/performance). This way other contributors should be aware that critical pull requests related to that upcoming release need to be based on the release branch instead of `trunk`.
+Most importantly, immediately communicate with the other plugin contributors that the release branch now exists, e.g. by updating the overall release issue with a new comment or leaving a note in the [#core-performance Slack channel](https://wordpress.slack.com/archives/core-performance). This way other contributors should be aware that critical pull requests related to that upcoming release need to be based on the release branch instead of `trunk`.
 
 ## Preparing the release
 
@@ -55,7 +55,7 @@ Push your local branch to the GitHub repository and open a pull request against 
 
 ### Notify maintainers and review release branch
 
-Once the above pull request has been merged, let the other maintainers know on [Slack](https://wordpress.slack.com/archives/performance) that no new commits or pull requests must be added to the release branch due to the release process. Then, make sure that all [GitHub workflows](https://github.com/WordPress/performance/actions) successfully pass for the release branch.
+Once the above pull request has been merged, let the other maintainers know on [Slack](https://wordpress.slack.com/archives/core-performance) that no new commits or pull requests must be added to the release branch due to the release process. Then, make sure that all [GitHub workflows](https://github.com/WordPress/performance/actions) successfully pass for the release branch.
 
 ### Create the release tag
 
@@ -72,7 +72,7 @@ At this point, test the update process from your WordPress site, getting the plu
 * Test the plugin on a multisite environment as well.
 * Make sure there are no PHP errors or warnings and that the high-level functionality works.
 
-After successful testing, inform the other maintainers on [Slack](https://wordpress.slack.com/archives/performance) that the new release has been published and that committing may continue.
+After successful testing, inform the other maintainers on [Slack](https://wordpress.slack.com/archives/core-performance) that the new release has been published and that committing may continue.
 
 ## Wrapping up the release
 
