@@ -206,6 +206,7 @@ class Perflab_Background_Job {
 
 		/**
 		 * Number of attempts to try to run a job.
+		 * 
 		 * Repeated attempts may be required to run a failed job. Default 3 attempts.
 		 *
 		 * @since n.e.x.t
@@ -296,7 +297,7 @@ class Perflab_Background_Job {
 	public function get_attempts() {
 		$attempts = get_term_meta( $this->id, self::META_KEY_JOB_ATTEMPTS, true );
 
-		return absint( $attempts );
+		return (int) $attempts;
 	}
 
 	/**
