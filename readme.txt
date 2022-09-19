@@ -68,6 +68,12 @@ Contributions welcome! There are several ways to contribute:
 
 == Changelog ==
 
+= 1.5.0 =
+
+**Enhancements**
+
+* Site Health: Improve autoloaded options check by highlighting largest autoloaded options. ([353](https://github.com/WordPress/performance/pull/353))
+
 = 1.4.0 =
 
 **Enhancements**
