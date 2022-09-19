@@ -185,18 +185,34 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 
 	public function test_max_attempts_filter() {
 		$job = perflab_create_background_job( 'test' );
-		add_filter( 'perflab_job_max_attempts_allowed', array( $this, 'max_attempts_filter_callback' ) );
+		add_filter( 'perflab_job_max_attempts_allowed', array( $this, 'max_attempts_10' ) );
 		$job->should_run();
-		remove_filter( 'perflab_job_max_attempts_allowed', array( $this, 'max_attempts_filter_callback' ) );
+		remove_filter( 'perflab_job_max_attempts_allowed', array( $this, 'max_attempts_10' ) );
 		$filter_ran = property_exists( $this, 'attempt_filter_ran' );
 
 		$this->assertTrue( $filter_ran );
 	}
 
-	public function max_attempts_filter_callback() {
+	public function test_max_attempts_limit_reached() {
+		$job                   = perflab_create_background_job( 'test' );
+		$before_attempts_limit = $job->should_run();
+		update_term_meta( $job->get_id(), $job::META_KEY_JOB_ATTEMPTS, 2 );
+		add_filter( 'perflab_job_max_attempts_allowed', array( $this, 'max_attempts_1' ) );
+		$after_attempts_limit = $job->should_run();
+		remove_filter( 'perflab_job_max_attempts_allowed', array( $this, 'max_attempts_1' ) );
+
+		$this->assertTrue( $before_attempts_limit );
+		$this->assertFalse( $after_attempts_limit );
+	}
+
+	public function max_attempts_10() {
 		$this->attempt_filter_ran = true;
 
 		return 10;
+	}
+
+	public function max_attempts_1() {
+		return 1;
 	}
 
 	/**

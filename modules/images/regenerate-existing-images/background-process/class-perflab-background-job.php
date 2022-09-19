@@ -224,7 +224,7 @@ class Perflab_Background_Job {
 		$max_attempts = (int) apply_filters( 'perflab_job_max_attempts_allowed', 3 );
 
 		// If number of attempts have been exhausted, return false.
-		if ( $this->get_attempts() >= absint( $max_attempts ) ) {
+		if ( $this->get_attempts() >= $max_attempts ) {
 			return false;
 		}
 
