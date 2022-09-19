@@ -118,7 +118,13 @@ class Audit_Database_Tests extends WP_UnitTestCase {
 		$table_info = $pdm->get_table_info();
 		$this->assertIsArray( $table_info, '$table_info should be an array.' );
 		foreach ( $wpdb->tables() as $table ) {
-			$this->AssertArrayHasKey( $table, $table_info, '$table_info should contain ' . $table );
+			if ( $table !== $wpdb->sitecategories ) {
+				/*
+				Not all multisite installations have the wp_sitecategories table.
+				See wp-admin/includes/upgrade.php:2409
+				*/
+				$this->AssertArrayHasKey( $table, $table_info, '$table_info should contain ' . $table );
+			}
 		}
 
 		foreach ( $table_info as $table => $info ) {
@@ -133,10 +139,19 @@ class Audit_Database_Tests extends WP_UnitTestCase {
 
 		$table_info = $pdm->get_table_info( $wpdb->tables() );
 		$this->assertIsArray( $table_info );
+		$missing = 0;
 		foreach ( $wpdb->tables() as $table ) {
-			$this->AssertArrayHasKey( $table, $table_info );
+			if ( $table !== $wpdb->sitecategories ) {
+				/*
+				Not all multisite installations have the wp_sitecategories table.
+				See wp-admin/includes/upgrade.php:2409
+				*/
+				$this->AssertArrayHasKey( $table, $table_info, '$table_info should contain ' . $table );
+			} else {
+				$missing += 1;
+			}
 		}
-		$this->assertEquals( count( $wpdb->tables() ), count( $table_info ) );
+		$this->assertEquals( count( $wpdb->tables() ) - $missing, count( $table_info ) );
 
 	}
 	public function test_get_indexes() {
