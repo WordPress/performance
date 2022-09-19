@@ -206,7 +206,7 @@ class Perflab_Background_Job {
 
 		/**
 		 * Number of attempts to try to run a job.
-		 * 
+		 *
 		 * Repeated attempts may be required to run a failed job. Default 3 attempts.
 		 *
 		 * @since n.e.x.t
