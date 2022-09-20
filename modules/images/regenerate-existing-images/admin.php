@@ -27,9 +27,10 @@ function perflab_add_queue_screen_hooks() {
 		add_action( 'admin_menu', 'perflab_management_page' );
 		add_action( 'parent_file', 'perflab_background_job_parent_file' );
 		add_action( 'manage_edit-background_job_columns', 'perflab_job_taxonomy_columns' );
+		add_filter( 'manage_background_job_custom_column', 'perflab_job_column_data', 10, 3 );
 	}
 }
-add_action( 'init', 'perflab_add_queue_screen_hooks', 100 );
+add_action( 'init', 'perflab_add_queue_screen_hooks' );
 
 /**
  * Add management page which will be added in Tools menu.
@@ -78,7 +79,7 @@ function perflab_background_job_parent_file( $parent_file ) {
 function perflab_job_taxonomy_columns( array $columns ) {
 	$new_columns = array();
 
-	if ( isset( $columns['cb'] ) ) {
+	if ( isset( $columns['cb'] ) && current_user_can( 'edit_jobs' ) ) {
 		$new_columns['cb'] = $columns['cb'];
 	}
 
@@ -87,4 +88,44 @@ function perflab_job_taxonomy_columns( array $columns ) {
 	$new_columns['job_status'] = __( 'Job Status', 'performance-lab' );
 
 	return $new_columns;
+}
+
+/**
+ * Add the job specific data in custom columns in taxonomy list table.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $column Markup for the taxonomy term.
+ * @param string $column_name Custom column name.
+ * @param int    $term_id Job ID.
+ * @return string
+ */
+function perflab_job_column_data( $column, $column_name, $term_id ) {
+	static $count;
+	if ( is_null( $count ) ) {
+		$count = 0;
+	}
+
+	switch ( $column_name ) {
+		case 'job_id':
+			$column = esc_html( $term_id );
+			break;
+		case 'job_name':
+			$term_edit_link = get_edit_term_link( $term_id, 'background_job' );
+			$column         = wp_kses(
+				sprintf( '<a href="%1s">%2s %d</a>', $term_edit_link, 'Job name', ++$count ),
+				array(
+					'a' => array(
+						'href'  => array(),
+						'title' => array(),
+					),
+				)
+			);
+			break;
+		case 'job_status':
+			$column = esc_html( 'Queued' );
+			break;
+	}
+
+	return $column;
 }
