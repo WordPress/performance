@@ -289,7 +289,13 @@ class Perflab_Background_Job {
 	 * @return string Job status.
 	 */
 	public function get_status() {
-		return (string) get_term_meta( $this->id, self::META_KEY_JOB_STATUS, true );
+		$status = (string) get_term_meta( $this->id, self::META_KEY_JOB_STATUS, true );
+
+		if ( empty( $status ) ) {
+			$status = self::JOB_STATUS_QUEUED;
+		}
+
+		return $status;
 	}
 
 	/**
@@ -365,10 +371,10 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return array|null
+	 * @return bool Whether the term exists or not.
 	 */
 	public function exists() {
-		return term_exists( $this->id, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
+		return (bool) term_exists( $this->id, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 	}
 
 	/**
