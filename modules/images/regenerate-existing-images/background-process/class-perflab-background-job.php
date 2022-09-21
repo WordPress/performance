@@ -87,7 +87,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	const JOB_STATUS_QUEUED = 'perflab_job_queued';
+	const JOB_STATUS_QUEUED = 'queued';
 
 	/**
 	 * Job status for running jobs.
@@ -95,7 +95,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	const JOB_STATUS_RUNNING = 'perflab_job_running';
+	const JOB_STATUS_RUNNING = 'running';
 
 	/**
 	 * Job status for partially executed jobs.
@@ -103,7 +103,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	const JOB_STATUS_PARTIAL = 'perflab_job_partial';
+	const JOB_STATUS_PARTIAL = 'partial';
 
 	/**
 	 * Job status for completed jobs.
@@ -111,7 +111,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	const JOB_STATUS_COMPLETE = 'perflab_job_complete';
+	const JOB_STATUS_COMPLETE = 'completed';
 
 	/**
 	 * Job status for failed jobs.
@@ -119,7 +119,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	const JOB_STATUS_FAILED = 'perflab_job_failed';
+	const JOB_STATUS_FAILED = 'failed';
 
 	/**
 	 * Job ID.
@@ -251,15 +251,34 @@ class Perflab_Background_Job {
 		if ( in_array( $status, $valid_statuses, true ) ) {
 			update_term_meta( $this->id, self::META_KEY_JOB_STATUS, $status );
 
-			// If job is complete, set the timestamp at which it was completed.
-			if ( self::JOB_STATUS_COMPLETE === $status ) {
-				update_term_meta( $this->id, self::META_KEY_JOB_COMPLETED_AT, time() );
-			}
-
 			return true;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Marks the job as completed.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return void
+	 */
+	public function complete() {
+		$this->set_status( self::JOB_STATUS_COMPLETE );
+		// If job is complete, set the timestamp at which it was completed.
+		update_term_meta( $this->id, self::META_KEY_JOB_COMPLETED_AT, time() );
+	}
+
+	/**
+	 * Marks the job as queued.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return void
+	 */
+	public function queued() {
+		$this->set_status( self::JOB_STATUS_QUEUED );
 	}
 
 	/**

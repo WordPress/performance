@@ -56,11 +56,11 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->assertEquals( 'perflab_job_errors', constant( $job_class . '::META_KEY_JOB_ERRORS' ) );
 		$this->assertEquals( 'perflab_job_status', constant( $job_class . '::META_KEY_JOB_STATUS' ) );
 		$this->assertEquals( 'perflab_job_completed_at', constant( $job_class . '::META_KEY_JOB_COMPLETED_AT' ) );
-		$this->assertEquals( 'perflab_job_queued', constant( $job_class . '::JOB_STATUS_QUEUED' ) );
-		$this->assertEquals( 'perflab_job_running', constant( $job_class . '::JOB_STATUS_RUNNING' ) );
-		$this->assertEquals( 'perflab_job_partial', constant( $job_class . '::JOB_STATUS_PARTIAL' ) );
-		$this->assertEquals( 'perflab_job_complete', constant( $job_class . '::JOB_STATUS_COMPLETE' ) );
-		$this->assertEquals( 'perflab_job_failed', constant( $job_class . '::JOB_STATUS_FAILED' ) );
+		$this->assertEquals( 'queued', constant( $job_class . '::JOB_STATUS_QUEUED' ) );
+		$this->assertEquals( 'running', constant( $job_class . '::JOB_STATUS_RUNNING' ) );
+		$this->assertEquals( 'partial', constant( $job_class . '::JOB_STATUS_PARTIAL' ) );
+		$this->assertEquals( 'completed', constant( $job_class . '::JOB_STATUS_COMPLETE' ) );
+		$this->assertEquals( 'failed', constant( $job_class . '::JOB_STATUS_FAILED' ) );
 	}
 
 	/**
@@ -79,10 +79,10 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	public function test_set_status_false_for_valid_status() {
 		$this->job = perflab_create_background_job( 'test' );
 
-		$running_status  = $this->job->set_status( 'perflab_job_running' );
-		$partial_status  = $this->job->set_status( 'perflab_job_partial' );
-		$failed_status   = $this->job->set_status( 'perflab_job_failed' );
-		$complete_status = $this->job->set_status( 'perflab_job_complete' );
+		$running_status  = $this->job->set_status( 'running' );
+		$partial_status  = $this->job->set_status( 'partial' );
+		$failed_status   = $this->job->set_status( 'failed' );
+		$complete_status = $this->job->set_status( 'completed' );
 
 		$this->assertTrue( $running_status );
 		$this->assertTrue( $partial_status );
@@ -146,7 +146,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->job = perflab_create_background_job( 'test' );
 
 		// Mark job as complete.
-		$this->job->set_status( 'perflab_job_complete' );
+		$this->job->set_status( 'completed' );
 		$run = $this->job->should_run();
 
 		$this->assertFalse( $run );

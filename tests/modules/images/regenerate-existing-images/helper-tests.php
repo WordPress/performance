@@ -17,7 +17,7 @@ class Regenerate_Existing_Images_Helper_Test extends WP_UnitTestCase {
 		$job_data = $job->get_data();
 		$this->assertSame( $data, $job_data );
 		$job_status = $job->get_status();
-		$this->assertSame( 'perflab_job_queued', $job_status );
+		$this->assertSame( 'queued', $job_status );
 	}
 
 	public function test_perflab_delete_background_job() {
