@@ -16,5 +16,5 @@
 return function() {
 	global $wp_version;
 
-	return ! version_compare( $wp_version, '6.1.0', '>=' );
+	return version_compare( $wp_version, '6.1.0', '<' );
 };
