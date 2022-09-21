@@ -177,9 +177,13 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$job                   = perflab_create_background_job( 'test' );
 		$before_attempts_limit = $job->should_run();
 		update_term_meta( $job->get_id(), $job::META_KEY_JOB_ATTEMPTS, 2 );
-		add_filter( 'perflab_job_max_attempts_allowed', array( $this, 'max_attempts_1' ) );
+		add_filter(
+			'perflab_job_max_attempts_allowed',
+			function() {
+				return 1;
+			}
+		);
 		$after_attempts_limit = $job->should_run();
-		remove_filter( 'perflab_job_max_attempts_allowed', array( $this, 'max_attempts_1' ) );
 
 		$this->assertTrue( $before_attempts_limit );
 		$this->assertFalse( $after_attempts_limit );
