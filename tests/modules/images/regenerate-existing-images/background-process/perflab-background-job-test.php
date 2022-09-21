@@ -105,31 +105,6 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers ::set_error
-	 * @covers ::get_attempts
-	 */
-	public function test_set_error() {
-		$error      = new WP_Error();
-		$error_data = array(
-			'test_error_data' => 'descriptive_infomation',
-		);
-		$error->add_data( $error_data, 'perflab_job_failure' );
-		$job_data = array(
-			'post_id'          => 10,
-			'some_random_data' => 'some_random_string',
-		);
-
-		$this->job = perflab_create_background_job( 'tecdcdcdst', $job_data );
-		$this->job->set_error( $error );
-
-		$error_metadata = get_term_meta( $this->job->get_id(), 'perflab_job_errors', true );
-		$attempts       = $this->job->get_attempts();
-
-		$this->assertSame( $error_data, $error_metadata );
-		$this->assertEquals( 1, $attempts );
-	}
-
-	/**
 	 * @covers ::should_run
 	 */
 	public function test_job_should_run_for_job() {

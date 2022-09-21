@@ -282,28 +282,6 @@ class Perflab_Background_Job {
 	}
 
 	/**
-	 * Records the error for the current process run.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param WP_Error $error Error instance.
-	 *
-	 * @todo Implement the error recording activity.
-	 *
-	 * @return void
-	 */
-	public function set_error( WP_Error $error ) {
-		$job_failure_data = $error->get_error_data( 'perflab_job_failure' );
-
-		if ( ! empty( $job_failure_data ) ) {
-			$this->set_status( self::JOB_STATUS_FAILED );
-
-			update_term_meta( $this->id, self::META_KEY_JOB_ERRORS, $job_failure_data );
-			update_term_meta( $this->id, self::META_KEY_JOB_ATTEMPTS, ( $this->get_attempts() + 1 ) );
-		}
-	}
-
-	/**
 	 * Retrieves the job status from its meta information.
 	 *
 	 * @since n.e.x.t
