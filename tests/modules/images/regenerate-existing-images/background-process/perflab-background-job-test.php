@@ -159,11 +159,16 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	}
 
 	public function test_max_attempts_filter() {
-		$job = perflab_create_background_job( 'test' );
-		add_filter( 'perflab_job_max_attempts_allowed', array( $this, 'max_attempts_10' ) );
+		$job        = perflab_create_background_job( 'test' );
+		$filter_ran = false;
+		add_filter(
+			'perflab_job_max_attempts_allowed',
+			function( $value ) use ( &$filter_ran ) {
+				$filter_ran = true;
+				return $value;
+			}
+		);
 		$job->should_run();
-		remove_filter( 'perflab_job_max_attempts_allowed', array( $this, 'max_attempts_10' ) );
-		$filter_ran = property_exists( $this, 'attempt_filter_ran' );
 
 		$this->assertTrue( $filter_ran );
 	}
