@@ -13,21 +13,6 @@
  * @group regenerate-existing-images
  */
 class Perflab_Background_Job_Test extends WP_UnitTestCase {
-	/**
-	 * Job instance.
-	 *
-	 * @var Perflab_Background_Job
-	 */
-	private $job;
-
-	/**
-	 * Runs before any test is executed inside class.
-	 *
-	 * @return void
-	 */
-	public static function set_up_before_class() {
-		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/images/regenerate-existing-images/background-process/class-perflab-background-job.php';
-	}
 
 	public function test_class_constants_exists() {
 		$job_class = Perflab_Background_Job::class;
@@ -67,9 +52,9 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @covers ::set_status
 	 */
 	public function test_set_status_false_for_invalid_status() {
-		$this->job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
+		$job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
 
-		$result = $this->job->set_status( 'invalid_status' );
+		$result = $job->set_status( 'invalid_status' );
 		$this->assertFalse( $result );
 	}
 
@@ -77,12 +62,12 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @covers ::set_status
 	 */
 	public function test_set_status_false_for_valid_status() {
-		$this->job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
+		$job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
 
-		$running_status  = $this->job->set_status( 'running' );
-		$partial_status  = $this->job->set_status( 'partial' );
-		$failed_status   = $this->job->set_status( 'failed' );
-		$complete_status = $this->job->set_status( 'completed' );
+		$running_status  = $job->set_status( 'running' );
+		$partial_status  = $job->set_status( 'partial' );
+		$failed_status   = $job->set_status( 'failed' );
+		$complete_status = $job->set_status( 'completed' );
 
 		$this->assertTrue( $running_status );
 		$this->assertTrue( $partial_status );
@@ -109,9 +94,9 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @covers ::should_run
 	 */
 	public function test_job_should_run_for_job() {
-		$this->job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
+		$job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
 
-		$run = $this->job->should_run();
+		$run = $job->should_run();
 		$this->assertTrue( $run );
 	}
 
@@ -119,11 +104,11 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @covers ::should_run
 	 */
 	public function test_job_should_not_run_for_completed_job() {
-		$this->job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
+		$job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
 
 		// Mark job as complete.
-		$this->job->set_status( 'completed' );
-		$run = $this->job->should_run();
+		$job->set_status( 'completed' );
+		$run = $job->should_run();
 
 		$this->assertFalse( $run );
 	}
@@ -133,13 +118,13 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @covers ::unlock
 	 */
 	public function test_lock_unlock() {
-		$this->job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
-		$time      = time();
-		$this->job->lock( $time );
-		$lock_time = get_term_meta( $this->job->get_id(), 'perflab_job_lock', true );
+		$job  = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
+		$time = time();
+		$job->lock( $time );
+		$lock_time = get_term_meta( $job->get_id(), 'perflab_job_lock', true );
 		$this->assertSame( absint( $lock_time ), $time );
-		$this->job->unlock();
-		$lock_time = get_term_meta( $this->job->get_id(), 'perflab_job_lock', true );
+		$job->unlock();
+		$lock_time = get_term_meta( $job->get_id(), 'perflab_job_lock', true );
 		$this->assertEmpty( $lock_time );
 	}
 
@@ -147,13 +132,13 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @covers ::get_start_time
 	 */
 	public function test_get_start_time() {
-		$this->job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
-		$time      = time();
-		$this->job->lock( $time );
-		$lock_time = get_term_meta( $this->job->get_id(), 'perflab_job_lock', true );
+		$job  = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
+		$time = time();
+		$job->lock( $time );
+		$lock_time = get_term_meta( $job->get_id(), 'perflab_job_lock', true );
 		$this->assertSame( absint( $lock_time ), $time );
 
-		$start_time = $this->job->get_start_time();
+		$start_time = $job->get_start_time();
 		$this->assertEquals( $start_time, $lock_time );
 		$this->assertEquals( $start_time, $time );
 		$this->assertEquals( $time, $lock_time );
@@ -188,26 +173,5 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 
 		$this->assertTrue( $before_attempts_limit );
 		$this->assertFalse( $after_attempts_limit );
-	}
-
-	public function max_attempts_10() {
-		$this->attempt_filter_ran = true;
-
-		return 10;
-	}
-
-	public function max_attempts_1() {
-		return 1;
-	}
-
-	/**
-	 * Runs after each test.
-	 *
-	 * @return void
-	 */
-	public function tear_down() {
-		if ( $this->job instanceof Perflab_Background_Job ) {
-			wp_delete_term( $this->job->get_id(), 'background_job' );
-		}
 	}
 }
