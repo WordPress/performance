@@ -75,9 +75,6 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->assertTrue( $complete_status );
 	}
 
-	/**
-	 * @covers ::create
-	 */
 	public function test_create_job() {
 		$job_data = array(
 			'identifier'       => 'test_suite',
