@@ -8,6 +8,9 @@
  * @package performance-lab
  */
 
+// Require the background job class.
+require_once __DIR__ . '/background-process/class-perflab-background-job.php';
+
 // Require helper functions and specific integrations.
 require_once __DIR__ . '/helper.php';
 
