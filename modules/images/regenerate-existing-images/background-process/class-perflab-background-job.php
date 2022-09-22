@@ -14,7 +14,7 @@
  * Following fields are being stored for a background job.
  *
  * 1. Job ID: Identifies the job; stored as the term ID.
- * 2. Job name: Unique identifier for different types of jobs. Stored as term meta `perflab_job_name`.
+ * 2. Job identifier: Unique identifier for different types of jobs. Stored as term meta `perflab_job_identifier`.
  * 3. Job data: Job related data. Stored in term meta in serialised format `perflab_job_data`.
  * 4. Job status: Background job status like running, failed etc. Stored as term meta `perflab_job_status`.
  * 5. Job errors: Errors related to a job. Stored as term meta in serialized format `perflab_job_errors`.
@@ -31,7 +31,7 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	const META_KEY_JOB_NAME = 'perflab_job_name';
+	const META_KEY_JOB_IDENTIFIER = 'perflab_job_identifier';
 
 	/**
 	 * Meta key for storing job data.
@@ -130,12 +130,12 @@ class Perflab_Background_Job {
 	private $id;
 
 	/**
-	 * Job name.
+	 * Job identifier.
 	 *
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	private $name;
+	private $identifier;
 
 	/**
 	 * Job data.
@@ -179,16 +179,20 @@ class Perflab_Background_Job {
 	}
 
 	/**
-	 * Retrieves the job name.
+	 * Retrieves the job identifier.
+	 *
+	 * This identifier will be used in custom action triggered by background process
+	 * runner. Action will be like `perflab_job_{job_identifier}`.
+	 * Consumer code can hook onto this action to perform necessary task for the job.
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @return string Job name.
 	 */
-	public function get_name() {
-		$this->name = get_term_meta( $this->id, self::META_KEY_JOB_NAME, true );
+	public function get_identifier() {
+		$this->identifier = get_term_meta( $this->id, self::META_KEY_JOB_IDENTIFIER, true );
 
-		return $this->name;
+		return $this->identifier;
 	}
 
 	/**
@@ -303,7 +307,7 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return int
+	 * @return int Number of times the job has been attempted.
 	 */
 	public function get_attempts() {
 		$attempts = get_term_meta( $this->id, self::META_KEY_JOB_ATTEMPTS, true );

@@ -14,20 +14,10 @@
  * @since n.e.x.t
  *
  * @param string $name Name of job identifier.
- * @param array  $data {
- *      Required. Data for the job.
- *
- *      @type string $identifier   Job type identifier. Used to trigger custom action by process runner to which
- *                                 consumer code can hook to perform its task.
- * }
+ * @param array  $data Data for the job.
  * @return Perflab_Background_Job|WP_Error Job object if created successfully, else WP_Error.
  */
 function perflab_create_background_job( $name, array $data ) {
-	// Job identifier needs to be present in order to perform the custom action via background process runner.
-	if ( empty( $data['identifier'] ) ) {
-		return new WP_Error( 'perflab_job_identifier_missing', __( 'Job identifier is missing in job data.', 'performance-lab' ) );
-	}
-
 	// Insert the new job in queue.
 	$term_name = 'job_' . time() . rand();
 	$term_data = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
@@ -36,16 +26,18 @@ function perflab_create_background_job( $name, array $data ) {
 		return $term_data;
 	}
 
-	update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_DATA, $data );
-	update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_NAME, $name );
+	// Save the job data if present.
+	if ( ! empty( $data ) ) {
+		update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_DATA, $data );
+	}
+
+	// Save job identifier. sanitize_title will be used before saving identifier.
+	update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_IDENTIFIER, sanitize_title( $name ) );
 
 	// Create a fresh instance to return.
 	$job = new Perflab_Background_Job( $term_data['term_id'] );
 	// Set the queued status for freshly created jobs.
 	$job->queued();
-
-	// Save the job data.
-	update_term_meta( $job->get_id(), Perflab_Background_Job::META_KEY_JOB_DATA, $data );
 
 	return $job;
 }
