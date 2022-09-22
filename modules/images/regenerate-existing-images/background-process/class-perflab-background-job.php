@@ -347,8 +347,6 @@ class Perflab_Background_Job {
 	 * atleast partially.
 	 *
 	 * @since n.e.x.t
-	 *
-	 * @return void
 	 */
 	public function unlock() {
 		delete_term_meta( $this->id, self::META_KEY_JOB_LOCK );
@@ -360,7 +358,7 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return bool
+	 * @return bool Whether the job is completed.
 	 */
 	public function is_completed() {
 		return ( self::JOB_STATUS_COMPLETE === $this->get_status() );
@@ -384,7 +382,7 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return bool
+	 * @return bool Whether job is currently running.
 	 */
 	public function is_running() {
 		return ( self::JOB_STATUS_RUNNING === $this->get_status() );

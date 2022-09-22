@@ -10,7 +10,10 @@ class Regenerate_Existing_Images_Helper_Test extends WP_UnitTestCase {
 
 	public function test_perflab_create_background_job() {
 		$name = 'test';
-		$data = array( 'post' => 123, 'identifier' => 'test_suite' );
+		$data = array(
+			'post'       => 123,
+			'identifier' => 'test_suite',
+		);
 		$job  = perflab_create_background_job( $name, $data );
 
 		$this->assertInstanceOf( Perflab_Background_Job::class, $job );
@@ -22,7 +25,10 @@ class Regenerate_Existing_Images_Helper_Test extends WP_UnitTestCase {
 
 	public function test_perflab_delete_background_job() {
 		$name    = 'test';
-		$data    = array( 'post' => 123, 'identifier' => 'test_suite' );
+		$data    = array(
+			'post'       => 123,
+			'identifier' => 'test_suite',
+		);
 		$job     = perflab_create_background_job( $name, $data );
 		$deleted = perflab_delete_background_job( $job->get_id() );
 

@@ -14,7 +14,12 @@
  * @since n.e.x.t
  *
  * @param string $name Name of job identifier.
- * @param array  $data Data for the job.
+ * @param array  $data {
+ *      Required. Data for the job.
+ *
+ *      @type string $identifier   Job type identifier. Used to trigger custom action by process runner to which
+ *                                 consumer code can hook to perform its task.
+ * }
  * @return Perflab_Background_Job|WP_Error Job object if created successfully, else WP_Error.
  */
 function perflab_create_background_job( $name, array $data ) {

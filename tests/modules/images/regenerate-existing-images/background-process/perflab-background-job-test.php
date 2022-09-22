@@ -95,7 +95,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 */
 	public function test_create_job() {
 		$job_data = array(
-			'identifier'	   => 'test_suite',
+			'identifier'       => 'test_suite',
 			'post_id'          => 10,
 			'some_random_data' => 'some_random_string',
 		);
