@@ -3,7 +3,7 @@
 /**
  * Tests the adding of fetchpriority to img tags in the content.
  *
- * @Covers ::wp_filter_content_tags
+ * @covers ::fetchpriority_img_tag_add_attr
  */
 
 class Fetchpriority_Test extends WP_UnitTestCase {
