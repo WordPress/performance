@@ -19,7 +19,7 @@
  */
 function perflab_create_background_job( $name, array $data ) {
 	// Job identifier needs to be present in order to perform the custom action via background process runner.
-	if ( empty( $data['job_identifier'] ) ) {
+	if ( empty( $data['identifier'] ) ) {
 		return new WP_Error( 'perflab_job_identifier_missing', __( 'Job identifier is missing in job data.', 'performance-lab' ) );
 	}
 
