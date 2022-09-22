@@ -17,7 +17,7 @@
  * @param array  $data Data for the job.
  * @return Perflab_Background_Job|WP_Error Job object if created successfully, else WP_Error.
  */
-function perflab_create_background_job( $name, array $data ) {
+function perflab_create_background_job( $name, array $data = array() ) {
 	// Insert the new job in queue.
 	$term_name = 'job_' . time() . rand();
 	$term_data = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
