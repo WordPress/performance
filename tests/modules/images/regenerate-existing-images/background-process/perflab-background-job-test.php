@@ -3,7 +3,7 @@
  * Tests for background-job module.
  *
  * @package performance-lab
- * @group   background-process
+ * @group   regenerate-existing-images
  */
 
 /**
@@ -83,9 +83,9 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::should_run
-	 * @dataProvider job_provider
 	 */
-	public function test_job_should_run_for_job( $job ) {
+	public function test_job_should_run_for_job() {
+		$job = perflab_create_background_job( 'test' );
 		$run = $job->should_run();
 		$this->assertTrue( $run );
 	}
@@ -133,10 +133,8 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->assertEquals( $time, $lock_time );
 	}
 
-	/**
-	 * @dataProvider job_provider
-	 */
-	public function test_max_attempts_filter( $job ) {
+	public function test_max_attempts_filter() {
+		$job        = perflab_create_background_job( 'test' );
 		$filter_ran = false;
 		add_filter(
 			'perflab_job_max_attempts_allowed',
@@ -150,10 +148,8 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 		$this->assertTrue( $filter_ran );
 	}
 
-	/**
-	 * @dataProvider job_provider
-	 */
-	public function test_max_attempts_limit_reached( $job ) {
+	public function test_max_attempts_limit_reached() {
+		$job                   = perflab_create_background_job( 'test' );
 		$before_attempts_limit = $job->should_run();
 		update_term_meta( $job->get_id(), $job::META_KEY_JOB_ATTEMPTS, 2 );
 		add_filter(
@@ -169,10 +165,20 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	}
 
 	public function job_provider() {
-		$job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
+		$job = perflab_create_background_job( 'test' );
 
 		return array(
 			array( $job ),
 		);
+	}
+
+	public function max_attempts_10() {
+		$this->attempt_filter_ran = true;
+
+		return 10;
+	}
+
+	public function max_attempts_1() {
+		return 1;
 	}
 }
