@@ -3,14 +3,14 @@
  * Tests for background-process runner class.
  *
  * @package performance-lab
- * @group   background-process
+ * @group   regenerate-existing-images
  */
 
 /**
  * Class Perflab_Background_Process_Test
  *
  * @coversDefaultClass Perflab_Background_Process
- * @group background-process
+ * @group regenerate-existing-images
  */
 class Perflab_Background_Process_Test extends WP_UnitTestCase {
 	/**

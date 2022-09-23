@@ -67,8 +67,9 @@ function perflab_delete_background_job( $job_id ) {
 /**
  * Dispatch the request to trigger the background process job.
  *
+ * @since n.e.x.t
+ *
  * @param int $job_id Job ID.
- * @return void
  */
 function perflab_dispatch_background_process_request( $job_id ) {
 	/**

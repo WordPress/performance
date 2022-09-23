@@ -10,6 +10,8 @@
  * Class Perflab_Background_Process.
  *
  * Runs the heavy lifting tasks in background in separate process.
+ *
+ * @since n.e.x.t
  */
 class Perflab_Background_Process {
 	/**
@@ -18,7 +20,7 @@ class Perflab_Background_Process {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @var string Background process action name.
+	 * @var string
 	 */
 	const BG_PROCESS_ACTION = 'perflab_background_process_handle_request';
 
@@ -27,7 +29,7 @@ class Perflab_Background_Process {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @var Perflab_Background_Job Background job instance.
+	 * @var Perflab_Background_Job|null
 	 */
 	private $job;
 
@@ -37,8 +39,6 @@ class Perflab_Background_Process {
 	 * Adds the necessary hooks to trigger process handling.
 	 *
 	 * @since n.e.x.t
-	 *
-	 * @return void
 	 */
 	public function __construct() {
 		// Handle job execution request.
@@ -55,8 +55,6 @@ class Perflab_Background_Process {
 	 * @since n.e.x.t
 	 *
 	 * @throws Exception Invalid request for background process.
-	 *
-	 * @return void
 	 */
 	public function handle_request() {
 		try {
@@ -98,26 +96,25 @@ class Perflab_Background_Process {
 	/**
 	 * Status check cron handler.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * 1. Cron will be schedule if it does not exist already.
 	 * 2. It will restart any job which is halted due to failure.
 	 * 3. Remove old completed jobs.
-	 *
-	 * @return void
 	 */
 	public function status_check() {
 		$this->status_check_running_jobs();
-		$this->status_check_completed_jobs();
+		$this->delete_completed_jobs();
 	}
 
 	/**
 	 * Check the running jobs.
 	 *
 	 * If they are still running, bail it.
-	 *
 	 * If the execution has been stopped by exceeding maximum execution
 	 * time, restart the job.
 	 *
-	 * @return void
+	 * @since n.e.x.t
 	 */
 	private function status_check_running_jobs() {
 		$jobs_args = array(
@@ -149,9 +146,9 @@ class Perflab_Background_Process {
 	 * If the job has been marked as completed and completed
 	 * time has been over 7 days, remove that job from job queue (history).
 	 *
-	 * @return void
+	 * @since n.e.x.t
 	 */
-	private function status_check_completed_jobs() {
+	private function delete_completed_jobs() {
 		$jobs_args = array(
 			'taxonomy'   => PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG,
 			'meta_key'   => Perflab_Background_Job::META_KEY_JOB_STATUS,
@@ -183,12 +180,9 @@ class Perflab_Background_Process {
 	 *
 	 * As of now, it won't fetch the next batch if memory or time
 	 * is not exceeded, but this can be introduced later.
-	 *
 	 * Consumer code can fine-tune the batch size according to requirement.
 	 *
 	 * @since n.e.x.t
-	 *
-	 * @return void
 	 */
 	private function run() {
 		// Lock the process for this job before running.
@@ -209,6 +203,8 @@ class Perflab_Background_Process {
 	 *
 	 * This will send a POST request to admin-ajax.php with background
 	 * process specific action to continue executing the job in a new process.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @param int $job_id Job ID. This is the term id from `background_job` taxonomy.
 	 * @return void
@@ -233,7 +229,7 @@ class Perflab_Background_Process {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return bool
+	 * @return bool Whether the memory has been exceeded for currently running script.
 	 */
 	private function memory_exceeded() {
 		$memory_limit     = $this->get_memory_limit() * 0.9; // Use 90% of memory limit.
@@ -261,7 +257,9 @@ class Perflab_Background_Process {
 	 * Keep the default memory limit of 128M which
 	 * is there on most of the hosts.
 	 *
-	 * @return int
+	 * @since n.e.x.t
+	 *
+	 * @return int Memory limit allotted for script execution.
 	 */
 	private function get_memory_limit() {
 		$default_memory_limit = '128M';
@@ -289,7 +287,7 @@ class Perflab_Background_Process {
 	 * @since n.e.x.t
 	 *
 	 * @param int $job_id Job ID. Term ID for `background_job` taxonomy.
-	 * @return bool
+	 * @return bool Whether the time has been exceeded for currently running script.
 	 */
 	private function time_exceeded( $job_id ) {
 		$job                = new Perflab_Background_Job( $job_id );
@@ -313,12 +311,13 @@ class Perflab_Background_Process {
 	 * Get the maximum execution time for php script.
 	 *
 	 * By default this will be 20 seconds.
-	 *
 	 * If init_get returns the time, max execution time will be 10 seconds less than
 	 * what has been returned. These 10 seconds will be utilised to perform cleanup actions
 	 * like unlocking the job and making new request for background process.
 	 *
-	 * @return int
+	 * @since n.e.x.t
+	 *
+	 * @return int Time (in seconds ) for execution of the currently running script.
 	 */
 	private function get_max_execution_time() {
 		$min_execution_time = 20; // Default to 20 seconds. Almost, all servers will have this much of time.
