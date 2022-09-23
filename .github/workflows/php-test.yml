@@ -33,9 +33,15 @@ on:
 
 jobs:
   php-test:
-    name: PHP
+    name: "PHP ${{ matrix.php }}"
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['5.6', '7.4', '8.1']
+    env:
+      WP_ENV_PHP_VERSION: ${{ matrix.php }}-fpm
     steps:
       - uses: styfle/cancel-workflow-action@0.8.0
       - uses: actions/checkout@v3
