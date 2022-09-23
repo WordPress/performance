@@ -141,7 +141,7 @@ class Perflab_Background_Job {
 	 * Job data.
 	 *
 	 * @since n.e.x.t
-	 * @var array
+	 * @var array|null
 	 */
 	private $data;
 
@@ -158,6 +158,8 @@ class Perflab_Background_Job {
 
 	/**
 	 * Returns the id for the job.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @return int Job ID. Technically this is a term id for `background_job` taxonomy.
 	 */
@@ -187,7 +189,7 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return string Job name.
+	 * @return string Job identifier.
 	 */
 	public function get_identifier() {
 		$this->identifier = get_term_meta( $this->id, self::META_KEY_JOB_IDENTIFIER, true );
@@ -264,9 +266,10 @@ class Perflab_Background_Job {
 	/**
 	 * Marks the job as completed.
 	 *
-	 * @since n.e.x.t
+	 * 1. Mark the job status as completed.
+	 * 2. It will also save the timestamp (in seconds) at which the job was completed.
 	 *
-	 * @return void
+	 * @since n.e.x.t
 	 */
 	public function complete() {
 		$this->set_status( self::JOB_STATUS_COMPLETE );
@@ -278,8 +281,6 @@ class Perflab_Background_Job {
 	 * Marks the job as queued.
 	 *
 	 * @since n.e.x.t
-	 *
-	 * @return void
 	 */
 	public function queued() {
 		$this->set_status( self::JOB_STATUS_QUEUED );
@@ -322,8 +323,6 @@ class Perflab_Background_Job {
 	 * @since n.e.x.t
 	 *
 	 * @param int $time Timestamp (in seconds) at which job has been started.
-	 *
-	 * @return void
 	 */
 	public function lock( $time = null ) {
 		$time = empty( $time ) ? time() : $time;
