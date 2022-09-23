@@ -85,10 +85,7 @@ class Perflab_Background_Process {
 			$this->run(); // Run the job.
 
 		} catch ( Exception $e ) {
-			if ( $this->job instanceof Perflab_Background_Job ) {
-				$error = new WP_Error( 'perflab_job_failure', $e->getMessage() );
-				$this->job->set_error( $error );
-			}
+			// @todo Add the error handling
 		} finally {
 			if ( $this->job instanceof Perflab_Background_Job ) {
 				// Unlock the process once everything is done.
@@ -203,7 +200,7 @@ class Perflab_Background_Process {
 			 *
 			 * @param array $data Job data.
 			 */
-			do_action( 'perflab_job_' . $this->job->get_name(), $this->job->get_data() );
+			do_action( 'perflab_job_' . $this->job->get_identifier(), $this->job->get_data() );
 		} while ( ! $this->memory_exceeded() && ! $this->time_exceeded( $this->job->get_id() ) && ! $this->job->is_completed() );
 	}
 
