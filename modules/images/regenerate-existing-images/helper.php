@@ -22,19 +22,24 @@ function perflab_create_background_job( $name, array $data = array() ) {
 	$term_name = 'job_' . time() . rand();
 	$term_data = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 
-	if ( ! is_wp_error( $term_data ) ) {
-		update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_DATA, $data );
-		update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_NAME, $name );
-
-		// Create a fresh instance to return.
-		$job = new Perflab_Background_Job( $term_data['term_id'] );
-		// Set the queued status for freshly created jobs.
-		$job->set_status( Perflab_Background_Job::JOB_STATUS_QUEUED );
-
-		return $job;
+	if ( is_wp_error( $term_data ) ) {
+		return $term_data;
 	}
 
-	return $term_data;
+	// Save the job data if present.
+	if ( ! empty( $data ) ) {
+		update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_DATA, $data );
+	}
+
+	// Save job identifier. sanitize_title will be used before saving identifier.
+	update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_IDENTIFIER, sanitize_title( $name ) );
+
+	// Create a fresh instance to return.
+	$job = new Perflab_Background_Job( $term_data['term_id'] );
+	// Set the queued status for freshly created jobs.
+	$job->queued();
+
+	return $job;
 }
 
 /**
@@ -46,7 +51,7 @@ function perflab_create_background_job( $name, array $data = array() ) {
  * @since n.e.x.t
  *
  * @param int $job_id Job ID. Technically the term id for `background_job` taxonomy.
- * @return bool|WP_Error
+ * @return bool|WP_Error True on success, false if term does not exist. WP_Error if the taxonomy does not exist.
  */
 function perflab_delete_background_job( $job_id ) {
 	$job_id = absint( $job_id );
