@@ -25,101 +25,21 @@
  * @since n.e.x.t
  */
 class Perflab_Background_Job {
-	/**
-	 * Meta key for storing job action.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
-	const META_KEY_JOB_ACTION = 'perflab_job_action';
-
-	/**
-	 * Meta key for storing job data.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
-	const META_KEY_JOB_DATA = 'perflab_job_data';
-
-	/**
-	 * Meta key for storing number of attempts for a job.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
-	const META_KEY_JOB_ATTEMPTS = 'perflab_job_attempts';
-
-	/**
-	 * Meta key for storing job lock.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
-	const META_KEY_JOB_LOCK = 'perflab_job_lock';
-
-	/**
-	 * Meta key for storing job errors.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
-	const META_KEY_JOB_ERRORS = 'perflab_job_errors';
-
-	/**
-	 * Job status meta key.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
-	const META_KEY_JOB_STATUS = 'perflab_job_status';
-
-	/**
-	 * Timestamp at which the job was completed.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
+	// Constants for meta keys.
+	const META_KEY_JOB_ACTION       = 'perflab_job_action';
+	const META_KEY_JOB_DATA         = 'perflab_job_data';
+	const META_KEY_JOB_ATTEMPTS     = 'perflab_job_attempts';
+	const META_KEY_JOB_LOCK         = 'perflab_job_lock';
+	const META_KEY_JOB_ERRORS       = 'perflab_job_errors';
+	const META_KEY_JOB_STATUS       = 'perflab_job_status';
 	const META_KEY_JOB_COMPLETED_AT = 'perflab_job_completed_at';
 
-	/**
-	 * Job status for queued jobs.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
-	const JOB_STATUS_QUEUED = 'queued';
-
-	/**
-	 * Job status for running jobs.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
-	const JOB_STATUS_RUNNING = 'running';
-
-	/**
-	 * Job status for partially executed jobs.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
-	const JOB_STATUS_PARTIAL = 'partial';
-
-	/**
-	 * Job status for completed jobs.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
+	// Constants for job statuses.
+	const JOB_STATUS_QUEUED   = 'queued';
+	const JOB_STATUS_RUNNING  = 'running';
+	const JOB_STATUS_PARTIAL  = 'partial';
 	const JOB_STATUS_COMPLETE = 'completed';
-
-	/**
-	 * Job status for failed jobs.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
-	const JOB_STATUS_FAILED = 'failed';
+	const JOB_STATUS_FAILED   = 'failed';
 
 	/**
 	 * Job ID.
