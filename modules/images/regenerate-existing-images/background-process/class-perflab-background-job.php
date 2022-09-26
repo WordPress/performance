@@ -14,7 +14,7 @@
  * Following fields are being stored for a background job.
  *
  * 1. Job ID: Identifies the job; stored as the term ID.
- * 2. Job identifier: Unique identifier for different types of jobs. Stored as term meta `perflab_job_identifier`.
+ * 2. Job action: This is the custom action string that is called in the background process. This is prefixed so the final action hooked called is `do_action( 'perflab_job_{$job_action}' )`.
  * 3. Job data: Job related data. Stored in term meta in serialised format `perflab_job_data`.
  * 4. Job status: Background job status like running, failed etc. Stored as term meta `perflab_job_status`.
  * 5. Job errors: Errors related to a job. Stored as term meta in serialized format `perflab_job_errors`.
@@ -26,12 +26,12 @@
  */
 class Perflab_Background_Job {
 	/**
-	 * Meta key for storing job name/action.
+	 * Meta key for storing job action.
 	 *
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	const META_KEY_JOB_IDENTIFIER = 'perflab_job_identifier';
+	const META_KEY_JOB_ACTION = 'perflab_job_action';
 
 	/**
 	 * Meta key for storing job data.
@@ -130,12 +130,12 @@ class Perflab_Background_Job {
 	private $id;
 
 	/**
-	 * Job identifier.
+	 * Job action.
 	 *
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	private $identifier;
+	private $action;
 
 	/**
 	 * Job data.
@@ -181,20 +181,20 @@ class Perflab_Background_Job {
 	}
 
 	/**
-	 * Retrieves the job identifier.
+	 * Retrieves the job action.
 	 *
-	 * This identifier will be used in custom action triggered by background process
-	 * runner. Action will be like `perflab_job_{job_identifier}`.
+	 * This action will be used in custom action triggered by background process
+	 * runner. Action will be like `perflab_job_{action}`.
 	 * Consumer code can hook onto this action to perform necessary task for the job.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return string Job identifier.
+	 * @return string Job action.
 	 */
-	public function get_identifier() {
-		$this->identifier = get_term_meta( $this->id, self::META_KEY_JOB_IDENTIFIER, true );
+	public function get_action() {
+		$this->action = get_term_meta( $this->id, self::META_KEY_JOB_ACTION, true );
 
-		return $this->identifier;
+		return $this->action;
 	}
 
 	/**

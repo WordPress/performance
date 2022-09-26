@@ -13,12 +13,12 @@
  *
  * @since n.e.x.t
  *
- * @param string $name Name of job identifier.
+ * @param string $name Name of job action.
  * @param array  $data Data for the job.
  * @return Perflab_Background_Job|WP_Error Job object if created successfully, else WP_Error.
  */
 function perflab_create_background_job( $name, array $data = array() ) {
-	// Insert the new job in queue.
+	// Create the unique term name dynamically.
 	$term_name = 'job_' . time() . rand();
 	$term_data = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 
@@ -31,8 +31,8 @@ function perflab_create_background_job( $name, array $data = array() ) {
 		update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_DATA, $data );
 	}
 
-	// Save job identifier. sanitize_title will be used before saving identifier.
-	update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_IDENTIFIER, sanitize_title( $name ) );
+	// Save job action. sanitize_title will be used before saving action.
+	update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_ACTION, sanitize_title( $name ) );
 
 	// Create a fresh instance to return.
 	$job = new Perflab_Background_Job( $term_data['term_id'] );

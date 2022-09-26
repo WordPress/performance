@@ -17,7 +17,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	public function test_class_constants_exists() {
 		$job_class = Perflab_Background_Job::class;
 
-		$this->assertTrue( defined( $job_class . '::META_KEY_JOB_IDENTIFIER' ) );
+		$this->assertTrue( defined( $job_class . '::META_KEY_JOB_ACTION' ) );
 		$this->assertTrue( defined( $job_class . '::META_KEY_JOB_DATA' ) );
 		$this->assertTrue( defined( $job_class . '::META_KEY_JOB_ATTEMPTS' ) );
 		$this->assertTrue( defined( $job_class . '::META_KEY_JOB_LOCK' ) );
@@ -34,7 +34,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	public function test_class_constants_values() {
 		$job_class = Perflab_Background_Job::class;
 
-		$this->assertEquals( 'perflab_job_identifier', constant( $job_class . '::META_KEY_JOB_IDENTIFIER' ) );
+		$this->assertEquals( 'perflab_job_action', constant( $job_class . '::META_KEY_JOB_ACTION' ) );
 		$this->assertEquals( 'perflab_job_data', constant( $job_class . '::META_KEY_JOB_DATA' ) );
 		$this->assertEquals( 'perflab_job_attempts', constant( $job_class . '::META_KEY_JOB_ATTEMPTS' ) );
 		$this->assertEquals( 'perflab_job_lock', constant( $job_class . '::META_KEY_JOB_LOCK' ) );
@@ -52,7 +52,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @covers ::set_status
 	 */
 	public function test_set_status_false_for_invalid_status() {
-		$job = perflab_create_background_job( 'test', array( 'identifier' => 'testing_suite' ) );
+		$job = perflab_create_background_job( 'test', array( 'action' => 'testing_suite' ) );
 
 		$result = $job->set_status( 'invalid_status' );
 		$this->assertFalse( $result );
@@ -71,7 +71,6 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 
 	public function test_create_job() {
 		$job_data = array(
-			'identifier'       => 'test_suite',
 			'post_id'          => 10,
 			'some_random_data' => 'some_random_string',
 		);
