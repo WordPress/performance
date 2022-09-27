@@ -170,14 +170,4 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 			array( $job ),
 		);
 	}
-
-	public function max_attempts_10() {
-		$this->attempt_filter_ran = true;
-
-		return 10;
-	}
-
-	public function max_attempts_1() {
-		return 1;
-	}
 }
