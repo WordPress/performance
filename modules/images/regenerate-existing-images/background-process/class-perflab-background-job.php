@@ -11,7 +11,7 @@
  *
  * Manage and run the background jobs.
  *
- * Following fields are being stored for a background job.
+ * Following fields are being stored for a background job:
  *
  * 1. Job ID: Identifies the job; stored as the term ID.
  * 2. Job action: This is the custom action string that is called in the background process. This is prefixed so the final action hooked called is `do_action( 'perflab_job_{$job_action}' )`.
@@ -238,6 +238,7 @@ class Perflab_Background_Job {
 
 	/**
 	 * Set the start time of job.
+	 *
 	 * It tells at what point of time the job has been started.
 	 *
 	 * @since n.e.x.t
