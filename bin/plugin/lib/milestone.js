@@ -17,7 +17,7 @@
  * @return {Promise<OktokitIssuesListMilestonesForRepoResponseItem|void>} Promise resolving to milestone, if exists.
  */
 async function getMilestoneByTitle( octokit, owner, repo, title ) {
-	const options = octokit.issues.listMilestonesForRepo.endpoint.merge( {
+	const options = octokit.issues.listMilestones.endpoint.merge( {
 		owner,
 		repo,
 	} );
