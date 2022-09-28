@@ -34,4 +34,28 @@ class Fetchpriority_Test extends WP_UnitTestCase {
 		$img = str_replace( '<img ', '<img loading="lazy" ', $img );
 		$this->assertStringNotContainsString( 'fetchpriority="high"', fetchpriority_img_tag_add_attr( $img, 'the_content' ) );
 	}
+
+	public function test_fetchpriority_img_tag_add_in_wp_filter_content_tags() {
+		$img = get_image_tag( self::$attachment_id, '', '', '', 'large' );
+
+		$img     = '<!-- wp:image {"id":' . self::$attachment_id . ',"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large">' . $img . '</figure>
+<!-- /wp:image -->
+<!-- wp:paragraph -->
+<p>This is an example page. It\'s different from a blog post because it will stay in one place and will show up in your site navigation (in most themes). Most people start with an About page that introduces them to potential site visitors. It might say something like this:</p>
+<!-- /wp:paragraph -->
+<!-- wp:image {"id":' . self::$attachment_id . ',"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large">' . $img . '</figure>
+<!-- /wp:image -->
+';
+		$content = wp_filter_content_tags( $img, 'the_content' );
+		$this->assertStringContainsString( 'fetchpriority="high"', $content );
+
+		$spilt = explode( 'fetchpriority', $content );
+		$this->assertEquals( 2, count( $spilt ) );
+	}
+	public function test_get_the_post_thumbnail() {
+		set_post_thumbnail( self::$post, self::$attachment_id );
+		$this->assertStringContainsString( 'fetchpriority="high"', get_the_post_thumbnail( self::$post ) );
+	}
 }
