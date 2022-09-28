@@ -28,6 +28,7 @@ function perflab_add_queue_screen_hooks() {
 		add_action( 'parent_file', 'perflab_background_job_parent_file' );
 		add_action( 'manage_edit-background_job_columns', 'perflab_job_taxonomy_columns' );
 		add_filter( 'manage_background_job_custom_column', 'perflab_job_column_data', 10, 3 );
+		add_filter( 'submenu_file', 'perflab_term_details_submenu_file' );
 	}
 }
 add_action( 'init', 'perflab_add_queue_screen_hooks' );
@@ -40,13 +41,24 @@ add_action( 'init', 'perflab_add_queue_screen_hooks' );
  * @return void
  */
 function perflab_management_page() {
+	// @todo Replace taxonomy name with constant.
 	add_management_page(
 		__( 'Background Jobs', 'performance-lab' ),
 		__( 'Background Jobs', 'performance-lab' ),
-		'edit_jobs',
+		'manage_jobs',
 		'edit-tags.php?taxonomy=background_job',
 		'',
 		100
+	);
+
+	// Term details view page.
+	add_submenu_page(
+		'tools.php',
+		__( 'Background Job', 'performance-lab' ),
+		__( 'Background Job', 'performance-lab' ),
+		'manage_jobs',
+		'background-job-details',
+		'perflab_admin_job_details'
 	);
 }
 
@@ -60,11 +72,35 @@ function perflab_management_page() {
  */
 function perflab_background_job_parent_file( $parent_file ) {
 	$screen = get_current_screen();
-	if ( $screen instanceof WP_Screen && isset( $screen->taxonomy ) && 'background_job' === $screen->taxonomy ) {
+
+	if ( ! $screen instanceof WP_Screen ) {
+		return $parent_file;
+	}
+
+	if ( isset( $screen->taxonomy ) && 'background_job' === $screen->taxonomy ) {
 		return 'tools.php';
 	}
 
 	return $parent_file;
+}
+
+/**
+ * Changes the submenu file for job details screen.
+ *
+ * @since n.e.x.t
+ *
+ * @param  string $submenu_file Sub menu file.
+ * @return string Submenu file.
+ */
+function perflab_term_details_submenu_file( $submenu_file ) {
+	global $plugin_page;
+
+	if ( 'background-job-details' === $plugin_page ) {
+		$new_submenu_file = add_query_arg( array( 'taxonomy' => 'background_job' ), admin_url( 'edit-tags.php' ) );
+		return $new_submenu_file;
+	}
+
+	return $submenu_file;
 }
 
 /**
@@ -111,9 +147,15 @@ function perflab_job_column_data( $column, $column_name, $term_id ) {
 			$column = esc_html( $term_id );
 			break;
 		case 'job_name':
-			$term_edit_link = get_edit_term_link( $term_id, 'background_job' );
-			$column         = wp_kses(
-				sprintf( '<a href="%1s">%2s %d</a>', $term_edit_link, 'Job name', ++$count ),
+			$term_details_page = add_query_arg(
+				array(
+					'page'   => 'background-job-details',
+					'job_id' => $term_id,
+				),
+				admin_url( 'admin.php' )
+			);
+			$column            = wp_kses(
+				sprintf( '<a href="%1s">%2s %d</a>', esc_url( $term_details_page ), 'Job name', ++$count ),
 				array(
 					'a' => array(
 						'href'  => array(),
@@ -128,4 +170,16 @@ function perflab_job_column_data( $column, $column_name, $term_id ) {
 	}
 
 	return $column;
+}
+
+/**
+ * Load the job details in admin.
+ *
+ * This is substitute of term.php page as there is very limited
+ * flexibility.
+ *
+ * @since n.e.x.t
+ */
+function perflab_admin_job_details() {
+	load_template( __DIR__ . '/job-details.php' );
 }
