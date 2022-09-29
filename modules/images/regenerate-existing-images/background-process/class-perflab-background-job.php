@@ -202,7 +202,7 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 */
-	public function queued() {
+	public function queue() {
 		$this->set_status( self::JOB_STATUS_QUEUED );
 	}
 

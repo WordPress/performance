@@ -37,7 +37,7 @@ function perflab_create_background_job( $name, array $data = array() ) {
 	// Create a fresh instance to return.
 	$job = new Perflab_Background_Job( $term_data['term_id'] );
 	// Set the queued status for freshly created jobs.
-	$job->queued();
+	$job->queue();
 
 	return $job;
 }
