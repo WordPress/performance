@@ -158,6 +158,57 @@ class Perflab_Background_Job {
 	}
 
 	/**
+	 * Marks the job as completed.
+	 *
+	 * 1. Mark the job status as completed.
+	 * 2. It will also save the timestamp (in seconds) at which the job was completed.
+	 *
+	 * @since n.e.x.t
+	 */
+	public function complete() {
+		$this->set_status( self::JOB_STATUS_COMPLETE );
+		// If job is complete, set the timestamp at which it was completed.
+		update_term_meta( $this->id, self::META_KEY_JOB_COMPLETED_AT, time() );
+	}
+
+	/**
+	 * Marks the job as queued.
+	 *
+	 * @since n.e.x.t
+	 */
+	public function queue() {
+		$this->set_status( self::JOB_STATUS_QUEUED );
+	}
+
+	/**
+	 * Set the start time of job.
+	 *
+	 * It tells at what point of time the job has been started.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param int $time Timestamp (in seconds) at which job has been started.
+	 */
+	public function lock( $time = null ) {
+		$time = empty( $time ) ? time() : $time;
+		update_term_meta( $this->id, self::META_KEY_JOB_LOCK, $time );
+		$this->set_status( self::JOB_STATUS_RUNNING );
+	}
+
+	/**
+	 * Unlocks the process.
+	 *
+	 * Mark job status as partial as the unlock implies that job has run
+	 * atleast partially.
+	 *
+	 * @since n.e.x.t
+	 */
+	public function unlock() {
+		delete_term_meta( $this->id, self::META_KEY_JOB_LOCK );
+		$this->set_status( self::JOB_STATUS_PARTIAL );
+	}
+
+	/**
 	 * Sets the status of the current job.
 	 *
 	 * @since n.e.x.t
@@ -181,29 +232,6 @@ class Perflab_Background_Job {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Marks the job as completed.
-	 *
-	 * 1. Mark the job status as completed.
-	 * 2. It will also save the timestamp (in seconds) at which the job was completed.
-	 *
-	 * @since n.e.x.t
-	 */
-	public function complete() {
-		$this->set_status( self::JOB_STATUS_COMPLETE );
-		// If job is complete, set the timestamp at which it was completed.
-		update_term_meta( $this->id, self::META_KEY_JOB_COMPLETED_AT, time() );
-	}
-
-	/**
-	 * Marks the job as queued.
-	 *
-	 * @since n.e.x.t
-	 */
-	public function queue() {
-		$this->set_status( self::JOB_STATUS_QUEUED );
 	}
 
 	/**
@@ -237,21 +265,6 @@ class Perflab_Background_Job {
 	}
 
 	/**
-	 * Set the start time of job.
-	 *
-	 * It tells at what point of time the job has been started.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param int $time Timestamp (in seconds) at which job has been started.
-	 */
-	public function lock( $time = null ) {
-		$time = empty( $time ) ? time() : $time;
-		update_term_meta( $this->id, self::META_KEY_JOB_LOCK, $time );
-		$this->set_status( self::JOB_STATUS_RUNNING );
-	}
-
-	/**
 	 * Get the timestamp (in seconds) when the job was started.
 	 *
 	 * @since n.e.x.t
@@ -262,30 +275,6 @@ class Perflab_Background_Job {
 		$time = get_term_meta( $this->id, self::META_KEY_JOB_LOCK, true );
 
 		return absint( $time );
-	}
-
-	/**
-	 * Unlocks the process.
-	 *
-	 * Mark job status as partial as the unlock implies that job has run
-	 * atleast partially.
-	 *
-	 * @since n.e.x.t
-	 */
-	public function unlock() {
-		delete_term_meta( $this->id, self::META_KEY_JOB_LOCK );
-		$this->set_status( self::JOB_STATUS_PARTIAL );
-	}
-
-	/**
-	 * Checks if the background job is completed.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return bool Whether the job is completed.
-	 */
-	public function is_completed() {
-		return ( self::JOB_STATUS_COMPLETE === $this->get_status() );
 	}
 
 	/**
@@ -300,6 +289,17 @@ class Perflab_Background_Job {
 	}
 
 	/**
+	 * Checks if the background job is completed.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return bool Whether the job is completed.
+	 */
+	public function is_completed() {
+		return self::JOB_STATUS_COMPLETE === $this->get_status();
+	}
+
+	/**
 	 * Checks if the job is running.
 	 *
 	 * If the job lock is present, it means job is running.
@@ -309,6 +309,6 @@ class Perflab_Background_Job {
 	 * @return bool Whether job is currently running.
 	 */
 	public function is_running() {
-		return ( self::JOB_STATUS_RUNNING === $this->get_status() );
+		return self::JOB_STATUS_RUNNING === $this->get_status();
 	}
 }
