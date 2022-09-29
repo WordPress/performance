@@ -13,11 +13,16 @@
  *
  * @since n.e.x.t
  *
- * @param string $name Name of job action.
+ * @param string $action Name of job action.
  * @param array  $data Optional. Arbitrary data for the job. Default empty array.
  * @return Perflab_Background_Job|WP_Error Job object if created successfully, else WP_Error.
  */
-function perflab_create_background_job( $name, array $data = array() ) {
+function perflab_create_background_job( $action, array $data = array() ) {
+	// Ensure that job action is string.
+	if ( ! is_string( $action ) ) {
+		return new WP_Error( 'job_action_invalid_type', __( 'Job name must be string.', 'performance-lab' ) );
+	}
+
 	// Create the unique term name dynamically.
 	$term_name = 'job_' . time() . rand();
 	$term_data = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
@@ -31,8 +36,12 @@ function perflab_create_background_job( $name, array $data = array() ) {
 		update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_DATA, $data );
 	}
 
-	// Save job action. sanitize_title will be used before saving action.
-	update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_ACTION, sanitize_title( $name ) );
+	/**
+	 * Save job action. sanitize_title will be used before saving action.
+	 * Note that it will allow alphanumeric characters, so action names can either contain
+	 * underscores or dashes. For instance, 'custom-job-action' or 'custom_job_action'.
+	 */
+	update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_ACTION, sanitize_title( $action ) );
 
 	// Create a fresh instance to return.
 	$job = new Perflab_Background_Job( $term_data['term_id'] );

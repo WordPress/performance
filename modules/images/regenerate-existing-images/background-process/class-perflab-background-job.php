@@ -14,7 +14,7 @@
  * Following fields are being stored for a background job:
  *
  * 1. Job ID: Identifies the job; stored as the term ID.
- * 2. Job action: This is the custom action string that is called in the background process. This is prefixed so the final action hooked called is `do_action( 'perflab_job_{$job_action}' )`.
+ * 2. Job action: Stored as the term name. This is the custom action string that is called in the background process. This is prefixed so the final action hooked called is `do_action( 'perflab_job_{$job_action}' )`.
  * 3. Job data: Job related data. Stored in term meta in serialised format `perflab_job_data`.
  * 4. Job status: Background job status like running, failed etc. Stored as term meta `perflab_job_status`.
  * 5. Job errors: Errors related to a job. Stored as term meta in serialized format `perflab_job_errors`.
@@ -50,22 +50,6 @@ class Perflab_Background_Job {
 	private $id;
 
 	/**
-	 * Job action.
-	 *
-	 * @since n.e.x.t
-	 * @var string
-	 */
-	private $action;
-
-	/**
-	 * Job data.
-	 *
-	 * @since n.e.x.t
-	 * @var array|null
-	 */
-	private $data;
-
-	/**
 	 * Constructor.
 	 *
 	 * @since n.e.x.t
@@ -92,12 +76,10 @@ class Perflab_Background_Job {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return array|null Job data.
+	 * @return array Job data.
 	 */
 	public function get_data() {
-		$this->data = get_term_meta( $this->id, self::META_KEY_JOB_DATA, true );
-
-		return $this->data;
+		return (array) get_term_meta( $this->id, self::META_KEY_JOB_DATA, true );
 	}
 
 	/**
@@ -112,9 +94,7 @@ class Perflab_Background_Job {
 	 * @return string Job action.
 	 */
 	public function get_action() {
-		$this->action = get_term_meta( $this->id, self::META_KEY_JOB_ACTION, true );
-
-		return $this->action;
+		return get_term_meta( $this->id, self::META_KEY_JOB_ACTION, true );
 	}
 
 	/**
