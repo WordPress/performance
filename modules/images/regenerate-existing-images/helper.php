@@ -23,9 +23,20 @@ function perflab_create_background_job( $action, array $data = array() ) {
 		return new WP_Error( 'job_action_invalid_type', __( 'Job name must be string.', 'performance-lab' ) );
 	}
 
-	// Create the unique term name dynamically.
-	$term_name = 'job_' . time() . rand();
-	$term_data = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
+	/**
+	 * Create the unique term name dynamically.
+	 *
+	 * Save job action. sanitize_title will be used before saving action.
+	 * Note that it will allow alphanumeric characters, so action names can either contain
+	 * underscores or dashes. For instance, 'custom-job-action' or 'custom_job_action'.
+	 */
+	$term_name   = sanitize_title( $action );
+	$term_object = (object) array(
+		'taxonomy' => PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG,
+		'parent'   => null,
+	);
+	$slug        = wp_unique_term_slug( $term_name, $term_object );
+	$term_data   = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG, array( 'slug' => $slug ) );
 
 	if ( is_wp_error( $term_data ) ) {
 		return $term_data;
@@ -35,13 +46,6 @@ function perflab_create_background_job( $action, array $data = array() ) {
 	if ( ! empty( $data ) ) {
 		update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_DATA, $data );
 	}
-
-	/**
-	 * Save job action. sanitize_title will be used before saving action.
-	 * Note that it will allow alphanumeric characters, so action names can either contain
-	 * underscores or dashes. For instance, 'custom-job-action' or 'custom_job_action'.
-	 */
-	update_term_meta( $term_data['term_id'], Perflab_Background_Job::META_KEY_JOB_ACTION, sanitize_title( $action ) );
 
 	// Create a fresh instance to return.
 	$job = new Perflab_Background_Job( $term_data['term_id'] );
