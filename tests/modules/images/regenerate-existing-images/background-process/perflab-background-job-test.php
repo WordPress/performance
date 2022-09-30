@@ -137,9 +137,6 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 */
 	public function test_set_status_false_for_valid_status( $status ) {
 		$this->assertTrue( $status );
-		$this->assertTrue( $status );
-		$this->assertTrue( $status );
-		$this->assertTrue( $status );
 	}
 
 	public function job_provider() {
