@@ -120,7 +120,7 @@ function perflab_aao_autoloaded_options_size() {
 /**
  * Fetches autoload top list.
  *
- * @since n.e.x.t
+ * @since 1.5.0
  *
  * @return array Autoloaded data as option names and their sizes.
  */
@@ -134,7 +134,7 @@ function perflab_aao_query_autoloaded_options() {
 	 * options exceed the threshold for being considered large. This filters the value
 	 * for what is considered a large option.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.5.0
 	 *
 	 * @param int $option_threshold Threshold for an option's value to be considered
 	 *                              large, in bytes. Default 100.
@@ -147,7 +147,7 @@ function perflab_aao_query_autoloaded_options() {
 /**
  * Gets formatted autoload options table.
  *
- * @since n.e.x.t
+ * @since 1.5.0
  *
  * @return string HTML formatted table.
  */
