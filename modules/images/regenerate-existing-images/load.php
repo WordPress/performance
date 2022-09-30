@@ -8,12 +8,6 @@
  * @package performance-lab
  */
 
-// Require the background job class.
-require_once __DIR__ . '/background-process/class-perflab-background-job.php';
-
-// Require helper functions and specific integrations.
-require_once __DIR__ . '/helper.php';
-
 /**
  * Define the background job taxonomy constant.
  *
@@ -22,6 +16,16 @@ require_once __DIR__ . '/helper.php';
  * @var Background job taxonomy slug.
  */
 define( 'PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG', 'background_job' );
+
+/**
+ * Require the background job class.
+ */
+require_once __DIR__ . '/background-process/class-perflab-background-job.php';
+
+/**
+ * Require helper functions and specific integrations.
+ */
+require_once __DIR__ . '/helper.php';
 
 /**
  * Registers the background job taxonomy.
