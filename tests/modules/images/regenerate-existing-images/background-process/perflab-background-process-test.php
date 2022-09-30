@@ -88,6 +88,7 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 		// Prepare request params.
 		$_REQUEST['nonce']  = $nonce;
 		$_REQUEST['job_id'] = $job->get_id();
+
 		$this->process->handle_request();
 		$hook_ran = did_action( 'perflab_job_test_task' );
 		$hook_ran = 1 < $hook_ran;

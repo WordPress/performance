@@ -192,9 +192,11 @@ class Perflab_Background_Process {
 			/**
 			 * Consumer code will hook to this action to perform necessary tasks.
 			 *
+			 * @since n.e.x.t
+			 *
 			 * @param array $data Job data.
 			 */
-			do_action( 'perflab_job_' . $this->job->get_identifier(), $this->job->get_data() );
+			do_action( 'perflab_job_' . $this->job->get_action(), $this->job->get_data() );
 		} while ( ! $this->memory_exceeded() && ! $this->time_exceeded( $this->job->get_id() ) && ! $this->job->is_completed() );
 	}
 
