@@ -132,6 +132,16 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * ::get_action
+	 */
+	public function test_job_action_is_job_name() {
+		$id       = $this->job->get_id();
+		$job_term = get_term( $id, 'background_job' );
+
+		$this->assertSame( $job_term->name, $this->job->get_action() );
+	}
+
+	/**
 	 * @covers ::set_status
 	 * @dataProvider job_provider
 	 */
