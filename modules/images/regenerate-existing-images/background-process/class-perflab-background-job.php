@@ -94,7 +94,8 @@ class Perflab_Background_Job {
 	 * @return string Job action.
 	 */
 	public function get_action() {
-		return get_term_meta( $this->id, self::META_KEY_JOB_ACTION, true );
+		$job = get_term( $this->id, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
+		return $job->name;
 	}
 
 	/**
