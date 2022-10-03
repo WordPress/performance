@@ -146,16 +146,15 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @dataProvider job_provider
 	 */
 	public function test_set_status_false_for_valid_status( $status ) {
-		$this->assertTrue( $status );
+		$this->assertTrue( $this->job->set_status( $status ) );
 	}
 
 	public function job_provider() {
-		$job = perflab_create_background_job( 'test' );
 		return array(
-			'running status'   => array( $job->set_status( 'running' ) ),
-			'partial status'   => array( $job->set_status( 'partial' ) ),
-			'failed status'    => array( $job->set_status( 'failed' ) ),
-			'completed status' => array( $job->set_status( 'completed' ) ),
+			'running status'   => array( 'running' ),
+			'partial status'   => array( 'partial' ),
+			'failed status'    => array( 'failed' ),
+			'completed status' => array( 'completed' ),
 		);
 	}
 }
