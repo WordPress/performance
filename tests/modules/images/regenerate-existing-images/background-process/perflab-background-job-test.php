@@ -22,7 +22,13 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	private $job;
 
 	public function set_up() {
+		parent::set_up();
 		$this->job = perflab_create_background_job( 'test' );
+	}
+
+	public function tear_down() {
+		perflab_delete_background_job( $this->job->get_id() );
+		parent::tear_down();
 	}
 
 	public function test_class_constants_values() {
