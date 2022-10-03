@@ -32,4 +32,12 @@ class Regenerate_Existing_Images_Helper_Test extends WP_UnitTestCase {
 
 		$this->assertTrue( $deleted );
 	}
+
+	public function test_job_action_name_format() {
+		$job      = perflab_create_background_job( 'action-with-dash-and-special-%*-chars' );
+		$job_term = get_term( $job->get_id(), 'background_job' );
+
+		// Ensure dashes have been replaced with underscore.
+		$this->assertSame( 'action_with_dash_and_special_chars', $job_term->name );
+	}
 }
