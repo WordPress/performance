@@ -244,6 +244,3 @@ perflab_load_active_and_valid_modules();
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
 }
-
-// Polyfills.
-require_once PERFLAB_PLUGIN_DIR_PATH . 'polyfills.php';
