@@ -31,12 +31,10 @@ $job_data = get_term_meta( $job_id, 'perflab_job_data', true );
 
 <div class="wrap">
 	<h1><?php echo $tax->labels->view_item; ?></h1>
-
 	<h3><?php _e( 'Job Name', 'performance-lab' ); ?></h3>
-
 	<h3><?php _e( 'Job Data', 'performance-lab' ); ?></h3>
-	<textarea readonly rows="5" cols="50">
-		<?php
+	<textarea rows="10" cols="50" readonly>
+<?php
 			$data = array(
 				'test'             => 123456,
 				'post_ids'         => array(
@@ -46,8 +44,7 @@ $job_data = get_term_meta( $job_id, 'perflab_job_data', true );
 				),
 				'something_random' => 'stuff',
 			);
-
-			echo esc_html( maybe_serialize( $data ) );
+			echo wp_json_encode( $data, JSON_PRETTY_PRINT );
 			?>
 	</textarea>
 </div>
