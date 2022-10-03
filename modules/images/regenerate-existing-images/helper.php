@@ -27,10 +27,11 @@ function perflab_create_background_job( $action, array $data = array() ) {
 	 * Create the unique term name dynamically.
 	 *
 	 * Save job action. sanitize_title will be used before saving action.
-	 * Note that it will allow alphanumeric characters, so action names can either contain
-	 * underscores or dashes. For instance, 'custom-job-action' or 'custom_job_action'.
+	 * Note that it will allow alphanumeric characters with underscores.
+	 * For instance, 'custom_job_action' or 'my_custom_123_job'.
 	 */
 	$term_name   = sanitize_title( $action );
+	$term_name   = str_replace( '-', '_', $term_name );
 	$term_object = (object) array(
 		'taxonomy' => PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG,
 		'parent'   => null,

@@ -79,7 +79,10 @@ class Perflab_Background_Job {
 	 * @return array Job data.
 	 */
 	public function get_data() {
-		return (array) get_term_meta( $this->id, self::META_KEY_JOB_DATA, true );
+		$data = get_term_meta( $this->id, self::META_KEY_JOB_DATA, true );
+		$data = empty( $data ) ? array() : $data;
+
+		return $data;
 	}
 
 	/**
@@ -162,7 +165,7 @@ class Perflab_Background_Job {
 	}
 
 	/**
-	 * Set the start time of job.
+	 * Sets the start time of job.
 	 *
 	 * It tells at what point of time the job has been started.
 	 *
@@ -246,7 +249,7 @@ class Perflab_Background_Job {
 	}
 
 	/**
-	 * Get the timestamp (in seconds) when the job was started.
+	 * Gets the timestamp (in seconds) when the job was started.
 	 *
 	 * @since n.e.x.t
 	 *
