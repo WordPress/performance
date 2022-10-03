@@ -181,5 +181,36 @@ function perflab_job_column_data( $column, $column_name, $term_id ) {
  * @since n.e.x.t
  */
 function perflab_admin_job_details() {
-	load_template( __DIR__ . '/job-details.php' );
+	/**
+	 * If job ID is not present, redirect back to term listing page.
+	 */
+	if ( empty( $_REQUEST['job_id'] ) ) {
+		wp_die( __( 'No job ID specified.', 'performance-lab' ) );
+	}
+
+	$job_id = absint( $_REQUEST['job_id'] );
+	$job    = get_term( $job_id, 'background_job' );
+
+	if ( ! $job instanceof WP_Term ) {
+		wp_die( __( 'You attempted to edit an item that does not exist. Perhaps it was deleted?', 'performance-lab' ) );
+	}
+
+	if ( ! current_user_can( 'manage_jobs' ) ) {
+		wp_die( __( 'You do not have permission to access this page. Please contact administrator for more information.', 'performance-lab' ) );
+	}
+
+	$tax        = get_taxonomy( $job->taxonomy );
+	$job_data   = get_term_meta( $job_id, 'perflab_job_data', true );
+	$job_errors = get_term_meta( $job_id, 'perflab_job_errors', true );
+
+	$template_args = array(
+		'taxonomy'   => $tax,
+		'job'        => $job,
+		'job_data'   => $job_data,
+		'job_status' => 'Queued',
+		'job_errors' => $job_errors,
+	);
+
+	// Pass all the data as arguments to the template.
+	load_template( __DIR__ . '/job-details.php', true, $template_args );
 }
