@@ -50,7 +50,7 @@ class Perflab_Background_Process {
 	}
 
 	/**
-	 * Handle incoming request to run the batch of job.
+	 * Handles incoming request to run the batch of job.
 	 *
 	 * @since n.e.x.t
 	 *
@@ -98,9 +98,8 @@ class Perflab_Background_Process {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * 1. Cron will be schedule if it does not exist already.
-	 * 2. It will restart any job which is halted due to failure.
-	 * 3. Remove old completed jobs.
+	 * 1. Restarts any job which is halted due to failure.
+	 * 2. Removes old completed jobs.
 	 */
 	public function status_check() {
 		$this->status_check_running_jobs();
@@ -141,7 +140,7 @@ class Perflab_Background_Process {
 	}
 
 	/**
-	 * Check the completed jobs.
+	 * Checks the completed jobs and removes them from job queue.
 	 *
 	 * If the job has been marked as completed and completed
 	 * time has been over 7 days, remove that job from job queue (history).
@@ -159,7 +158,15 @@ class Perflab_Background_Process {
 		$completed_jobs = get_terms( $jobs_args );
 
 		if ( ! empty( $completed_jobs ) && ! is_wp_error( $completed_jobs ) ) {
-			$expiry_days  = 7 * DAY_IN_SECONDS;
+			/**
+			 * Number of days a job should reside in queue before removal.
+			 *
+			 * @since n.e.x.t
+			 *
+			 * @param int $expiry_days Number of days a job will be in queue before it gets removed. default 7 days.
+			 */
+			$expiry_days  = (int) apply_filters( 'perflab_job_cleanup_days', 7 );
+			$expiry_days  = $expiry_days * DAY_IN_SECONDS;
 			$current_time = time();
 
 			foreach ( $completed_jobs as $completed_job ) {
@@ -201,7 +208,7 @@ class Perflab_Background_Process {
 	}
 
 	/**
-	 * Call the next batch of the job if it is not completed already.
+	 * Calls the next batch of the job if it is not completed already.
 	 *
 	 * This will send a POST request to admin-ajax.php with background
 	 * process specific action to continue executing the job in a new process.
@@ -254,7 +261,7 @@ class Perflab_Background_Process {
 	}
 
 	/**
-	 * Get the memory limit allotted for PHP.
+	 * Gets the memory limit allotted for PHP.
 	 *
 	 * Keep the default memory limit of 128M which
 	 * is there on most of the hosts.
@@ -310,16 +317,16 @@ class Perflab_Background_Process {
 	}
 
 	/**
-	 * Get the maximum execution time for php script.
+	 * Gets the maximum execution time for php script.
 	 *
 	 * By default this will be 20 seconds.
-	 * If init_get returns the time, max execution time will be 10 seconds less than
+	 * If ini_get returns the time, max execution time will be 10 seconds less than
 	 * what has been returned. These 10 seconds will be utilised to perform cleanup actions
 	 * like unlocking the job and making new request for background process.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @return int Time (in seconds ) for execution of the currently running script.
+	 * @return int Time (in seconds) for executing current script.
 	 */
 	private function get_max_execution_time() {
 		$min_execution_time = 20; // Default to 20 seconds. Almost, all servers will have this much of time.
