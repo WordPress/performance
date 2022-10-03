@@ -41,7 +41,7 @@ In general, all code must follow the [WordPress Coding Standards and best practi
 
 ### WordPress and PHP compatibility
 All code in the Performance Lab plugin must follow these requirements:
-- **WordPress**: the latest release is the minimum required version. Right now, the plugin is compatible with WordPress 5.8.
+- **WordPress**: the latest release is the minimum required version. Right now, the plugin is compatible with WordPress 6.0.
 - **PHP**: always match the latest WordPress version. The minimum required version right now is 5.6.
 
 ### Linting and formatting
