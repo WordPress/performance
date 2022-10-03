@@ -31,7 +31,7 @@ function perflab_create_background_job( $action, array $data = array() ) {
 	 * For instance, 'custom_job_action' or 'my_custom_123_job'.
 	 */
 	$term_name = str_replace( '-', '_', sanitize_title( $action ) );
-	$term_data = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG ) );
+	$term_data = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 
 	if ( is_wp_error( $term_data ) ) {
 		return $term_data;
