@@ -55,10 +55,7 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		$metadata['sources'] = array();
 	}
 
-	if (
-		empty( $metadata['sources'][ $mime_type ] ) &&
-		in_array( $mime_type, $valid_mime_transforms[ $mime_type ], true )
-	) {
+	if ( empty( $metadata['sources'][ $mime_type ] ) ) {
 		$metadata['sources'][ $mime_type ] = array(
 			'file'     => wp_basename( $file ),
 			'filesize' => wp_filesize( $file ),
@@ -137,12 +134,9 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 			$properties['sources'] = array();
 		}
 
-		if (
-			in_array( $current_mime, $valid_mime_transforms[ $mime_type ], true ) &&
-			empty( $properties['sources'][ $current_mime ] )
-		) {
+		if ( empty( $properties['sources'][ $current_mime ] ) && isset( $properties['file'] ) ) {
 			$properties['sources'][ $current_mime ] = array(
-				'file'     => isset( $properties['file'] ) ? $properties['file'] : '',
+				'file'     => $properties['file'],
 				'filesize' => 0,
 			);
 			// Set the filesize from the current mime image.
