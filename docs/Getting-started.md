@@ -40,8 +40,8 @@ We use GitHub Projects as well as a few different sets of labels to ensure that 
 In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). For complete documentation about Performance Lab plugin modules specifications, read this [documentation](./Writing-a-module.md).
 
 ### WordPress and PHP compatibility
-All code in the Performance Lab plugin must follow theses requirements:
-- **WordPress**: the latest release is the minimum required version. Right now, the plugin is compatible with WordPress 5.8.
+All code in the Performance Lab plugin must follow these requirements:
+- **WordPress**: the latest release is the minimum required version. Right now, the plugin is compatible with WordPress 6.0.
 - **PHP**: always match the latest WordPress version. The minimum required version right now is 5.6.
 
 ### Linting and formatting
