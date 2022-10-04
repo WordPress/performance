@@ -744,7 +744,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback() {
 	<tr>
 		<td class="td-full" colspan="2">
 			<label for="generate_webp_and_jpeg">
-				<input name="generate_webp_and_jpeg" type="checkbox" id="generate_webp_and_jpeg" value="1" <?php checked( '1', get_option( 'generate_webp_and_jpeg' ) ); ?> />
+				<input name="generate_webp_and_jpeg" type="checkbox" id="generate_webp_and_jpeg" value="1" <?php checked( '1', get_option( 'generate_webp_and_jpeg', '1' ) ); ?> />
 				<?php _e( 'Generate JPEG files in addition to WebP', 'performance-lab' ); ?>
 				<p class="description"><?php _e( 'Enabling JPEG in addition to WebP can improve compatibility, but will effectively double the filesystem storage use of your images.', 'performance-lab' ); ?></p>
 			</label>
