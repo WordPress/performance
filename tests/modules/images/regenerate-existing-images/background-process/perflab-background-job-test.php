@@ -132,7 +132,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * ::get_action
+	 * @covers ::get_action
 	 */
 	public function test_job_action_is_job_name() {
 		$id       = $this->job->get_id();
@@ -145,7 +145,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	 * @covers ::set_status
 	 * @dataProvider job_provider
 	 */
-	public function test_set_status_false_for_valid_status( $status ) {
+	public function test_set_status_true_for_valid_status( $status ) {
 		$this->assertTrue( $this->job->set_status( $status ) );
 	}
 

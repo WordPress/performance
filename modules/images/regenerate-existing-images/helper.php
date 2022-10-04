@@ -14,7 +14,7 @@
  * @since n.e.x.t
  *
  * @param string $action Name of job action.
- * @param array  $data Optional. Arbitrary data for the job. Default empty array.
+ * @param array  $data   Optional. Arbitrary data for the job. Default empty array.
  * @return Perflab_Background_Job|WP_Error Job object if created successfully, else WP_Error.
  */
 function perflab_create_background_job( $action, array $data = array() ) {
@@ -30,14 +30,8 @@ function perflab_create_background_job( $action, array $data = array() ) {
 	 * Note that it will allow alphanumeric characters with underscores.
 	 * For instance, 'custom_job_action' or 'my_custom_123_job'.
 	 */
-	$term_name   = sanitize_title( $action );
-	$term_name   = str_replace( '-', '_', $term_name );
-	$term_object = (object) array(
-		'taxonomy' => PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG,
-		'parent'   => null,
-	);
-	$slug        = wp_unique_term_slug( $term_name, $term_object );
-	$term_data   = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG, array( 'slug' => $slug ) );
+	$term_name = str_replace( '-', '_', sanitize_title( $action ) );
+	$term_data = wp_insert_term( $term_name, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 
 	if ( is_wp_error( $term_data ) ) {
 		return $term_data;
