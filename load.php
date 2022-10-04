@@ -3,7 +3,7 @@
  * Plugin Name: Performance Lab
  * Plugin URI: https://github.com/WordPress/performance
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
- * Requires at least: 5.8
+ * Requires at least: 6.0
  * Requires PHP: 5.6
  * Version: 1.5.0
  * Author: WordPress Performance Team
@@ -244,6 +244,3 @@ perflab_load_active_and_valid_modules();
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
 }
-
-// Polyfills.
-require_once PERFLAB_PLUGIN_DIR_PATH . 'polyfills.php';
