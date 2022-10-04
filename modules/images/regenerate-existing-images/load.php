@@ -9,6 +9,25 @@
  */
 
 /**
+ * Define the background job taxonomy constant.
+ *
+ * @since n.e.x.t
+ *
+ * @var Background job taxonomy slug.
+ */
+define( 'PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG', 'background_job' );
+
+/**
+ * Require the background job class.
+ */
+require_once __DIR__ . '/background-process/class-perflab-background-job.php';
+
+/**
+ * Require helper functions and specific integrations.
+ */
+require_once __DIR__ . '/helper.php';
+
+/**
  * Registers the background job taxonomy.
  *
  * Intentionally on lower priority, so that other post types can be
@@ -19,6 +38,7 @@
  * @since n.e.x.t
  */
 function perflab_register_background_job_taxonomy() {
+
 	// Labels for the background job taxonomy.
 	$labels = array(
 		'name'                  => _x( 'Background Jobs', 'taxonomy general name', 'performance-lab' ),
@@ -58,7 +78,7 @@ function perflab_register_background_job_taxonomy() {
 	 * `wp_set_object_terms` which do not check if there is relationship
 	 * between object and taxonomy.
 	 */
-	register_taxonomy( 'background_job', array(), $args );
+	register_taxonomy( PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG, array(), $args );
 }
 add_action( 'init', 'perflab_register_background_job_taxonomy' );
 
