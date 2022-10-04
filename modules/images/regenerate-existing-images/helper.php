@@ -73,6 +73,39 @@ function perflab_delete_background_job( $job_id ) {
 }
 
 /**
+ * Retrives the background job instance based on job ID.
+ *
+ * @since n.e.x.t
+ *
+ * @param  int $job_id Background job ID. Technically the term_id for `background_job` taxonomy.
+ * @return Perflab_Background_Job|false Job instance. False if job doesn't exist.
+ */
+function perflab_get_background_job( $job_id ) {
+	$job_id      = absint( $job_id );
+	$found       = null;
+	$cache_key   = 'perflab_job_' . $job_id;
+	$cache_group = 'perflab_job_pool';
+
+	$cached_job = wp_cache_get( $cache_key, $cache_group, $found );
+
+	if ( null !== $found ) {
+		$cached_job;
+	}
+
+	// Create the instance.
+	$job = new Perflab_Background_Job( $job_id );
+
+	if ( ! $job->exists() ) {
+		$job = false;
+	}
+
+	// Save the result in object cache.
+	wp_cache_set( $cache_key, $job, $cache_group );
+
+	return $job;
+}
+
+/**
  * Dispatches the request to trigger the background job.
  *
  * @since n.e.x.t

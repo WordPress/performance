@@ -69,7 +69,7 @@ class Perflab_Background_Process {
 				throw new Exception( __( 'No job specified to execute.', 'performance-lab' ) );
 			}
 
-			$this->job = new Perflab_Background_Job( $job_id );
+			$this->job = perflab_get_background_job( $job_id );
 
 			// Silently exit if the job is not ready to run.
 			if ( ! $this->job->should_run() ) {
@@ -204,7 +204,7 @@ class Perflab_Background_Process {
 	 * @return bool Whether the time has been exceeded for currently running script.
 	 */
 	private function time_exceeded( $job_id ) {
-		$job                = new Perflab_Background_Job( $job_id );
+		$job                = perflab_get_background_job( $job_id );
 		$current_time       = time();
 		$run_start_time     = $job->get_start_time();
 		$max_execution_time = $this->get_max_execution_time();
