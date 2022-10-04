@@ -14,7 +14,7 @@
  * @since n.e.x.t
  *
  * @param string $action Name of job action.
- * @param array  $data Optional. Arbitrary data for the job. Default empty array.
+ * @param array  $data   Optional. Arbitrary data for the job. Default empty array.
  * @return Perflab_Background_Job|WP_Error Job object if created successfully, else WP_Error.
  */
 function perflab_create_background_job( $action, array $data = array() ) {
