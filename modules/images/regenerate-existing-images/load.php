@@ -23,6 +23,11 @@ define( 'PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG', 'background_job' );
 require_once __DIR__ . '/background-process/class-perflab-background-job.php';
 
 /**
+ * Require the background process runner class.
+ */
+require_once __DIR__ . '/background-process/class-perflab-background-process.php';
+
+/**
  * Require helper functions and specific integrations.
  */
 require_once __DIR__ . '/helper.php';
@@ -97,25 +102,3 @@ function perflab_get_background_job_capabilities() {
 		'assign_terms' => 'assign_jobs', // To assign background_job terms to posts.
 	);
 }
-
-/**
- * Schedule a status check cron.
- *
- * This cron job will be responsible to stop any running jobs which
- * may have stopped due to some failure.
- *
- * It will also clear the completed jobs, basically remove the terms from the
- * taxonomy.
- *
- * @return void
- */
-function perflab_status_check_cron() {
-	// Check if event is already scheduled.
-	$scheduled = wp_next_scheduled( 'perflab_background_process_status_check' );
-
-	// Schedule the event if it does not exist already.
-	if ( empty( $scheduled ) ) {
-		wp_schedule_event( time(), 'hourly', 'perflab_background_process_status_check' );
-	}
-}
-add_action( 'init', 'perflab_status_check_cron' );

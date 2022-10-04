@@ -40,10 +40,4 @@ class Regenerate_Existing_Images_Load_Test extends WP_UnitTestCase {
 		$this->assertTrue( $job_tax->show_in_menu );
 		$this->assertTrue( $job_tax->show_ui );
 	}
-
-	public function test_perflab_status_check_cron() {
-		$scheduled = wp_next_scheduled( 'perflab_background_process_status_check' );
-
-		$this->assertIsInt( $scheduled );
-	}
 }

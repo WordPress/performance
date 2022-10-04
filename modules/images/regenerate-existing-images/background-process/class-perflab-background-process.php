@@ -9,14 +9,13 @@
 /**
  * Class Perflab_Background_Process.
  *
- * Runs the heavy lifting tasks in background in separate process.
+ * Runs the heavy lifting tasks in background in a separate process.
  *
  * @since n.e.x.t
  */
 class Perflab_Background_Process {
 	/**
-	 * Name of the action which will trigger background
-	 * process to run the job.
+	 * Name of the ajax action which will trigger background process to run the job.
 	 *
 	 * @since n.e.x.t
 	 *
@@ -44,9 +43,6 @@ class Perflab_Background_Process {
 		// Handle job execution request.
 		add_action( 'wp_ajax_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
 		add_action( 'wp_ajax_nopriv_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
-
-		// Handle status check cron.
-		add_action( 'perflab_background_process_status_check', array( $this, 'status_check' ) );
 	}
 
 	/**
@@ -83,7 +79,7 @@ class Perflab_Background_Process {
 			$this->run(); // Run the job.
 
 		} catch ( Exception $e ) {
-			// @todo Add the error handling
+			// @todo Add the error handling in separate issue.
 		} finally {
 			if ( $this->job instanceof Perflab_Background_Job ) {
 				// Unlock the process once everything is done.
@@ -94,100 +90,13 @@ class Perflab_Background_Process {
 	}
 
 	/**
-	 * Status check cron handler.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * 1. Restarts any job which is halted due to failure.
-	 * 2. Removes old completed jobs.
-	 */
-	public function status_check() {
-		$this->status_check_running_jobs();
-		$this->delete_completed_jobs();
-	}
-
-	/**
-	 * Check the running jobs.
-	 *
-	 * If they are still running, bail it.
-	 * If the execution has been stopped by exceeding maximum execution
-	 * time, restart the job.
-	 *
-	 * @since n.e.x.t
-	 */
-	private function status_check_running_jobs() {
-		$jobs_args = array(
-			'taxonomy'   => PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG,
-			'meta_key'   => Perflab_Background_Job::META_KEY_JOB_STATUS,
-			'meta_value' => Perflab_Background_Job::JOB_STATUS_RUNNING,
-			'fields'     => 'ids',
-		);
-
-		// Fetch all the running jobs.
-		$running_jobs = get_terms( $jobs_args );
-
-		if ( ! empty( $running_jobs ) && ! is_wp_error( $running_jobs ) ) {
-			foreach ( $running_jobs as $running_job ) {
-				$job_lock = get_term_meta( $running_job, Perflab_Background_Job::META_KEY_JOB_LOCK, true );
-				$job_lock = absint( $job_lock );
-
-				// If job lock is not present, trigger the job again.
-				if ( empty( $job_lock ) || $this->time_exceeded( $running_job ) ) {
-					perflab_dispatch_background_process_request( $running_job );
-				}
-			}
-		}
-	}
-
-	/**
-	 * Checks the completed jobs and removes them from job queue.
-	 *
-	 * If the job has been marked as completed and completed
-	 * time has been over 7 days, remove that job from job queue (history).
-	 *
-	 * @since n.e.x.t
-	 */
-	private function delete_completed_jobs() {
-		$jobs_args = array(
-			'taxonomy'   => PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG,
-			'meta_key'   => Perflab_Background_Job::META_KEY_JOB_STATUS,
-			'meta_value' => Perflab_Background_Job::JOB_STATUS_COMPLETE,
-			'fields'     => 'ids',
-		);
-
-		$completed_jobs = get_terms( $jobs_args );
-
-		if ( ! empty( $completed_jobs ) && ! is_wp_error( $completed_jobs ) ) {
-			/**
-			 * Number of days a job should reside in queue before removal.
-			 *
-			 * @since n.e.x.t
-			 *
-			 * @param int $expiry_days Number of days a job will be in queue before it gets removed. default 7 days.
-			 */
-			$expiry_days  = (int) apply_filters( 'perflab_job_cleanup_days', 7 );
-			$expiry_days  = $expiry_days * DAY_IN_SECONDS;
-			$current_time = time();
-
-			foreach ( $completed_jobs as $completed_job ) {
-				$job_completed_at = get_term_meta( $completed_job, 'perflab_job_completed_at', true );
-				$job_completed_at = absint( $job_completed_at );
-				$valid_till       = $job_completed_at + $expiry_days;
-
-				// If completed job has more than 7 days, delete/remove it.
-				if ( $current_time > $valid_till ) {
-					wp_delete_term( $completed_job, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
-				}
-			}
-		}
-	}
-
-	/**
 	 * Runs the process over a batch of job.
 	 *
-	 * As of now, it won't fetch the next batch if memory or time
-	 * is not exceeded, but this can be introduced later.
-	 * Consumer code can fine-tune the batch size according to requirement.
+	 * This will trigger a custom action `perflab_job_{$job_action}` by hooking to which
+	 * consumer code can perform the relevant tasks. It will continue till:
+	 * 1. Allowed memory has been exceeded (90% of memory allotted to php script).
+	 * 2. Maximum execution time has been reached or exceeded. (10 seconds less than allotted time).
+	 * 3. Job is completed. Marking job as complete is responsibility of consumer code.
 	 *
 	 * @since n.e.x.t
 	 */
@@ -216,13 +125,9 @@ class Perflab_Background_Process {
 	 * @since n.e.x.t
 	 *
 	 * @param int $job_id Job ID. This is the term id from `background_job` taxonomy.
-	 * @return void
 	 */
 	private function next_batch( $job_id ) {
-		/**
-		 * Do not call the background process from within the script if the
-		 * real cron has been setup to do so.
-		 */
+		// Do not call the background process from within the script if the real cron has been setup to do so.
 		if ( defined( 'ENABLE_BG_PROCESS_CRON' ) ) {
 			return;
 		}
@@ -295,7 +200,7 @@ class Perflab_Background_Process {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param int $job_id Job ID. Term ID for `background_job` taxonomy.
+	 * @param  int $job_id Job ID. Term ID for `background_job` taxonomy.
 	 * @return bool Whether the time has been exceeded for currently running script.
 	 */
 	private function time_exceeded( $job_id ) {

@@ -23,13 +23,10 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 	private $process;
 
 	/**
-	 * Runs before any test is executed inside class.
-	 *
-	 * @return void
+	 * Runs before each test in class.
 	 */
-	public static function set_up_before_class() {
-		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/images/regenerate-existing-images/background-process/class-perflab-background-job.php';
-		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/images/regenerate-existing-images/background-process/class-perflab-background-process.php';
+	public function set_up() {
+		$this->process = new Perflab_Background_Process();
 	}
 
 	/**
@@ -39,12 +36,8 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 	 *
 	 * @covers ::__construct
 	 */
-	public function test_class_constants_exists() {
-		$this->process = new Perflab_Background_Process();
-		$process_class = get_class( $this->process );
-		$this->assertTrue( defined( $process_class . '::BG_PROCESS_ACTION' ) );
-		$constant_value = constant( $process_class . '::BG_PROCESS_ACTION' );
-		$this->assertEquals( 'perflab_background_process_handle_request', $constant_value );
+	public function test_ajax_action_constant() {
+		$this->assertEquals( 'perflab_background_process_handle_request', Perflab_Background_Process::BG_PROCESS_ACTION );
 	}
 
 	/**
@@ -55,12 +48,8 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 	 * @covers ::__construct
 	 */
 	public function test_handle_request_actions_added() {
-		$this->process  = new Perflab_Background_Process();
-		$process_class  = get_class( $this->process );
-		$constant_value = constant( $process_class . '::BG_PROCESS_ACTION' );
-
-		$authenticated_action     = has_action( 'wp_ajax_' . $constant_value, array( $this->process, 'handle_request' ) );
-		$non_authenticated_action = has_action( 'wp_ajax_nopriv_' . $constant_value, array( $this->process, 'handle_request' ) );
+		$authenticated_action     = has_action( 'wp_ajax_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this->process, 'handle_request' ) );
+		$non_authenticated_action = has_action( 'wp_ajax_nopriv_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this->process, 'handle_request' ) );
 
 		// Ensure has_action is not returning false.
 		$this->assertNotEquals( false, $authenticated_action );
@@ -79,11 +68,8 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 	 * @covers ::handle_request
 	 */
 	public function test_handle_request() {
-		$this->process  = new Perflab_Background_Process();
-		$process_class  = get_class( $this->process );
-		$constant_value = constant( $process_class . '::BG_PROCESS_ACTION' );
-		$nonce          = wp_create_nonce( $constant_value );
-		$job            = perflab_create_background_job( 'test_task' );
+		$nonce = wp_create_nonce( Perflab_Background_Process::BG_PROCESS_ACTION );
+		$job   = perflab_create_background_job( 'test_task' );
 
 		// Prepare request params.
 		$_REQUEST['nonce']  = $nonce;

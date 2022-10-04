@@ -73,17 +73,14 @@ function perflab_delete_background_job( $job_id ) {
 }
 
 /**
- * Dispatch the request to trigger the background process job.
+ * Dispatches the request to trigger the background job.
  *
  * @since n.e.x.t
  *
  * @param int $job_id Job ID.
  */
 function perflab_dispatch_background_process_request( $job_id ) {
-	/**
-	 * Do not call the background process from within the script if the
-	 * real cron has been setup to do so.
-	 */
+	// Do not call the background process from within the script if the real cron has been setup to do so.
 	if ( defined( 'ENABLE_BG_PROCESS_CRON' ) ) {
 		return;
 	}
