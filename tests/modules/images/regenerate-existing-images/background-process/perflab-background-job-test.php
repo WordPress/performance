@@ -132,7 +132,7 @@ class Perflab_Background_Job_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * ::get_action
+	 * @covers ::get_action
 	 */
 	public function test_job_action_is_job_name() {
 		$id       = $this->job->get_id();
