@@ -14,6 +14,7 @@
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/rest-api.php';
 require_once __DIR__ . '/image-edit.php';
+require_once __DIR__ . '/settings.php';
 
 /**
  * Hook called by `wp_generate_attachment_metadata` to create the `sources` property for every image
@@ -740,44 +741,4 @@ function webp_uploads_get_image_sizes_additional_mime_type_support() {
 	$allowed_sizes = apply_filters( 'webp_uploads_image_sizes_with_additional_mime_type_support', $allowed_sizes );
 
 	return $allowed_sizes;
-}
-
-/**
- * Register media settings field to generate multiple mime WebP & JPEG output.
- *
- * @since n.e.x.t
- */
-function webp_uploads_register_media_settings_field() {
-	// Register field setting for the processing.
-	register_setting( 'media', 'generate_webp_and_jpeg' );
-
-	// Add settings field.
-	add_settings_field(
-		'generate_webp_and_jpeg',
-		__( 'Generate WebP and JPEG', 'performance-lab' ),
-		'webp_uploads_generate_webp_jpeg_setting_callback',
-		'media',
-		'uploads',
-		array( 'class' => 'hidden' )
-	);
-}
-add_action( 'admin_init', 'webp_uploads_register_media_settings_field' );
-
-/**
- * Callback function for the media settings generate_webp_and_jpeg field.
- *
- * @since n.e.x.t
- */
-function webp_uploads_generate_webp_jpeg_setting_callback() {
-	?>
-	<tr>
-		<td class="td-full">
-			<label for="generate_webp_and_jpeg">
-				<input name="generate_webp_and_jpeg" type="checkbox" id="generate_webp_and_jpeg" value="1"<?php checked( '1', get_option( 'generate_webp_and_jpeg' ) ); ?> />
-				<?php _e( 'Generate JPEG files in addition to WebP', 'performance-lab' ); ?>
-				<p class="description"><?php _e( 'Enabling JPEG in addition to WebP can improve compatibility, but will effectively double the filesystem storage use of your images.', 'performance-lab' ); ?></p>
-			</label>
-		</td>
-	</tr>
-	<?php
 }
