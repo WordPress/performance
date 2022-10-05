@@ -103,6 +103,44 @@ function webp_uploads_create_sources_property( array $metadata, $attachment_id )
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 	}
 
+	// If the original MIME type should not be generated/used, override the main image
+	// with the first MIME type image that actually should be generated. In that case,
+	// the original should be backed up.
+	if (
+		! in_array( $mime_type, $valid_mime_transforms[ $mime_type ], true ) &&
+		isset( $valid_mime_transforms[ $mime_type ][0] ) &&
+		isset( $allowed_mimes[ $mime_type ] )
+	) {
+		$valid_mime_type = $valid_mime_transforms[ $mime_type ][0];
+
+		// Only do the replacement if the attachment file is still set to the original MIME type one,
+		// and if there is a possible replacement source.
+		$file_data = wp_check_filetype( $metadata['file'], array( $allowed_mimes[ $mime_type ] => $mime_type ) );
+		if ( $file_data['type'] === $mime_type && isset( $metadata['sources'][ $valid_mime_type ] ) ) {
+			$saved_data = array(
+				'path'   => trailingslashit( $original_directory ) . $metadata['sources'][ $valid_mime_type ]['file'],
+				'width'  => $metadata['width'],
+				'height' => $metadata['height'],
+			);
+
+			$original_image = wp_get_original_image_path( $attachment_id );
+
+			// If WordPress already modified the original itself, keep the original and discard WordPress's generated version.
+			if ( ! empty( $metadata['original_image'] ) ) {
+				$uploadpath = wp_get_upload_dir();
+				wp_delete_file_from_directory( get_attached_file( $attachment_id ), $uploadpath['basedir'] );
+			}
+
+			// Replace the attached file with the custom MIME type version.
+			$metadata = _wp_image_meta_replace_original( $saved_data, $original_image, $metadata, $attachment_id );
+
+			// Unset sources entry for the original MIME type, then save (to avoid inconsistent data
+			// in case of an error after this logic).
+			unset( $metadata['sources'][ $mime_type ] );
+			wp_update_attachment_metadata( $attachment_id, $metadata );
+		}
+	}
+
 	// Make sure we have some sizes to work with, otherwise avoid any work.
 	if ( empty( $metadata['sizes'] ) || ! is_array( $metadata['sizes'] ) ) {
 		return $metadata;

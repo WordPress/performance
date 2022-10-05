@@ -179,10 +179,14 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
 		$file          = get_attached_file( $attachment_id );
+		$original_file = wp_get_original_image_path( $attachment_id );
 
 		$this->assertFileExists( $file );
+		$this->assertFileExists( $original_file );
 		wp_delete_file( $file );
+		wp_delete_file( $original_file );
 		$this->assertFileDoesNotExist( $file );
+		$this->assertFileDoesNotExist( $original_file );
 
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
 		$this->assertWPError( $result );

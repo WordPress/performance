@@ -17,19 +17,31 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Not create the original mime type for JPEG images.
+	 * Don't create the original mime type for JPEG images.
 	 *
 	 * @test
 	 */
 	public function it_should_not_create_the_original_mime_type_for_jpeg_images() {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 
+		// There should be a WebP source, but no JPEG source for the full image.
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-		$this->assertArrayHasKey( 'file', $metadata );
 
+		// The full image should be a WebP.
+		$this->assertArrayHasKey( 'file', $metadata );
+		$this->assertStringEndsWith( $metadata['sources']['image/webp']['file'], $metadata['file'] );
+		$this->assertStringEndsWith( $metadata['sources']['image/webp']['file'], get_attached_file( $attachment_id ) );
+
+		// The original JPEG should be backed up.
+		$this->assertStringEndsWith( '.jpg', wp_get_original_image_path( $attachment_id ) );
+
+		// For compatibility reasons, the post MIME type should remain JPEG.
+		$this->assertSame( 'image/jpeg', get_post_mime_type( $attachment_id ) );
+
+		// There should be a WebP source, but no JPEG source for all sizes.
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
 			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
@@ -37,20 +49,28 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Create the original mime type for WEBP images.
+	 * Create the original mime type for WebP images.
 	 *
 	 * @test
 	 */
 	public function it_should_create_the_original_mime_type_as_well_with_all_the_available_sources_for_the_specified_mime() {
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );
 
+		// There should be a WebP source, but no JPEG source for the full image.
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		// The full image should be a WebP.
 		$this->assertArrayHasKey( 'file', $metadata );
 		$this->assertStringEndsWith( $metadata['sources']['image/webp']['file'], $metadata['file'] );
+		$this->assertStringEndsWith( $metadata['sources']['image/webp']['file'], get_attached_file( $attachment_id ) );
 
+		// The post MIME type should be WebP.
+		$this->assertSame( 'image/webp', get_post_mime_type( $attachment_id ) );
+
+		// There should be a WebP source, but no JPEG source for all sizes.
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
 			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
@@ -58,7 +78,38 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Not create the sources property if no transform is provided
+	 * Create JPEG and WebP for JPEG images, if opted in.
+	 *
+	 * @test
+	 */
+	public function it_should_create_jpeg_and_webp_for_jpeg_images_if_opted_in() {
+		$this->opt_in_to_jpeg_and_webp();
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+
+		// There should be JPEG and WebP sources for the full image.
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		// The full image should be a JPEG.
+		$this->assertArrayHasKey( 'file', $metadata );
+		$this->assertStringEndsWith( $metadata['sources']['image/jpeg']['file'], $metadata['file'] );
+		$this->assertStringEndsWith( $metadata['sources']['image/jpeg']['file'], get_attached_file( $attachment_id ) );
+
+		// The post MIME type should be JPEG.
+		$this->assertSame( 'image/jpeg', get_post_mime_type( $attachment_id ) );
+
+		// There should be JPEG and WebP sources for all sizes.
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+		}
+	}
+
+	/**
+	 * Don't create the sources property if no transform is provided.
 	 *
 	 * @test
 	 */
