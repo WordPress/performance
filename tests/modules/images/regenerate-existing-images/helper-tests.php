@@ -40,4 +40,14 @@ class Regenerate_Existing_Images_Helper_Test extends WP_UnitTestCase {
 		// Ensure dashes have been replaced with underscore.
 		$this->assertSame( 'action_with_dash_and_special_chars', $job_term->name );
 	}
+
+	/**
+	 * @covers ::perflab_get_background_job
+	 */
+	public function test_perflab_get_background_job() {
+		$created_job = perflab_create_background_job( 'test_job' );
+		$job         = perflab_get_background_job( $created_job->get_id() );
+
+		$this->assertInstanceOf( Perflab_Background_Job::class, $job );
+	}
 }
