@@ -144,14 +144,6 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
 	}
 
-	// If the image file already exists, do not save it again, just return its file name and size.
-	if ( file_exists( $destination_file_name ) ) {
-		return array(
-			'file'     => wp_basename( $destination_file_name ),
-			'filesize' => wp_filesize( $destination_file_name ),
-		);
-	}
-
 	remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 	$image = $editor->save( $destination_file_name, $mime );
 	add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
