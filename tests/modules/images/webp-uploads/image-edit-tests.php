@@ -144,15 +144,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_to_backup_the_full_size_image_if_only_the_thumbnail_is_edited() {
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
-
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
-				return $transforms;
-			}
-		);
+		// Create JPEG and WebP.
+		$this->opt_in_to_jpeg_and_webp();
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
@@ -367,15 +360,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_use_the_next_available_hash_for_the_full_size_image_on_multiple_image_edits() {
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
-
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
-				return $transforms;
-			}
-		);
+		// Create JPEG and WebP.
+		$this->opt_in_to_jpeg_and_webp();
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 		$editor        = new WP_Image_Edit( $attachment_id );
@@ -416,15 +402,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_store_the_metadata_on_the_next_available_hash() {
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
-
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
-				return $transforms;
-			}
-		);
+		// Create JPEG and WebP.
+		$this->opt_in_to_jpeg_and_webp();
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 
@@ -500,15 +479,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_backup_of_full_size_images_with_the_same_hash_keys_as_the_edited_images() {
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
-
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
-				return $transforms;
-			}
-		);
+		// Create JPEG and WebP.
+		$this->opt_in_to_jpeg_and_webp();
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 

@@ -183,15 +183,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_remove_scaled_suffix_from_the_generated_filename() {
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
-
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
-				return $transforms;
-			}
-		);
+		// Create JPEG and WebP to check for scaled suffix.
+		$this->opt_in_to_jpeg_and_webp();
 
 		// The leafs image is 1080 pixels wide with this filter we ensure a -scaled version is created.
 		add_filter(
@@ -371,15 +364,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_replacing_a_webp_image() {
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
-
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/webp'] = array( 'image/webp', 'image/jpeg' );
-				return $transforms;
-			}
-		);
+		// Create JPEG and WebP to check that WebP does not get replaced with JPEG.
+		$this->opt_in_to_jpeg_and_webp();
 
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
@@ -426,15 +412,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_replace_references_to_a_jpg_image_to_a_webp_version( $image_path ) {
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
-
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
-				return $transforms;
-			}
-		);
+		// Create JPEG and WebP to check replacement of JPEG => WebP.
+		$this->opt_in_to_jpeg_and_webp();
 
 		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
 
@@ -488,6 +467,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_replace_all_the_images_including_the_full_size_image() {
+		// Create JPEG and WebP to check replacement of JPEG => WebP.
+		$this->opt_in_to_jpeg_and_webp();
+
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
@@ -580,15 +562,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_preserve_jpeg_subsizes_using_transform_filter() {
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
-
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
-				return $transforms;
-			}
-		);
+		// Create JPEG and WebP.
+		$this->opt_in_to_jpeg_and_webp();
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
@@ -673,16 +648,10 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_webp_when_webp_is_smaller_than_jpegs() {
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
+		// Create JPEG and WebP.
+		$this->opt_in_to_jpeg_and_webp();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
-				return $transforms;
-			}
-		);
 
 		// Look for an image that contains all of the additional mime type images.
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
@@ -718,16 +687,10 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_webp_for_full_size_which_is_smaller_in_webp_format() {
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
+		// Create JPEG and WebP.
+		$this->opt_in_to_jpeg_and_webp();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
-				return $transforms;
-			}
-		);
 
 		// Look for an image that contains only full size mime type images.
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
@@ -750,16 +713,10 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_webp_for_some_sizes_which_are_smaller_in_webp_format() {
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
+		// Create JPEG and WebP.
+		$this->opt_in_to_jpeg_and_webp();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/webp'] = array( 'image/webp', 'image/jpeg' );
-				return $transforms;
-			}
-		);
 
 		// Look for an image that contains all of the additional mime type images.
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );
@@ -788,16 +745,10 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_add_fallback_script_if_content_has_updated_images() {
-		remove_all_actions( 'wp_footer' );
-		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
+		// Create JPEG and WebP to allow for fallback script.
+		$this->opt_in_to_jpeg_and_webp();
 
-		add_filter(
-			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
-				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
-				return $transforms;
-			}
-		);
+		remove_all_actions( 'wp_footer' );
 
 		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
