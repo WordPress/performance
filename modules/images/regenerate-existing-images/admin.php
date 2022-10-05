@@ -206,6 +206,7 @@ function perflab_admin_job_details() {
 	$template_args = array(
 		'taxonomy'   => $tax,
 		'job'        => $job,
+		'job_id'     => $job_id,
 		'job_data'   => $job_data,
 		'job_status' => 'Queued',
 		'job_errors' => $job_errors,
