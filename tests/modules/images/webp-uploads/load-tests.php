@@ -823,4 +823,36 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		remove_all_actions( 'template_redirect' );
 		do_action( 'template_redirect' );
 	}
+
+	/**
+	 * Create JPEG and WebP for JPEG images, if generate_webp_and_jpeg option set.
+	 *
+	 * @test
+	 */
+	public function it_should_create_jpeg_and_webp_for_jpeg_images_if_generate_webp_and_jpeg_set() {
+
+		update_option( 'generate_webp_and_jpeg', '1' );
+
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+
+		// There should be JPEG and WebP sources for the full image.
+		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
+		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		// The full image should be a JPEG.
+		$this->assertArrayHasKey( 'file', $metadata );
+		$this->assertStringEndsWith( $metadata['sources']['image/jpeg']['file'], $metadata['file'] );
+		$this->assertStringEndsWith( $metadata['sources']['image/jpeg']['file'], get_attached_file( $attachment_id ) );
+
+		// The post MIME type should be JPEG.
+		$this->assertSame( 'image/jpeg', get_post_mime_type( $attachment_id ) );
+
+		// There should be JPEG and WebP sources for all sizes.
+		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+		}
+	}
 }
