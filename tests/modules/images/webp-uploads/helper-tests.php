@@ -6,7 +6,9 @@
  * @group   webp-uploads
  */
 
-class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
+use PerformanceLab\Tests\TestCase\ImagesTestCase;
+
+class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 	/**
 	 * Return an error when creating an additional image source with invalid parameters
@@ -77,6 +79,9 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_create_an_image_with_the_default_suffix_in_the_same_location_when_no_destination_is_specified() {
+		// Create JPEG and WebP so that both versions are generated.
+		$this->opt_in_to_jpeg_and_webp();
+
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 		$size_data     = array(
 			'width'  => 300,
@@ -174,10 +179,14 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
 		$file          = get_attached_file( $attachment_id );
+		$original_file = wp_get_original_image_path( $attachment_id );
 
 		$this->assertFileExists( $file );
+		$this->assertFileExists( $original_file );
 		wp_delete_file( $file );
+		wp_delete_file( $original_file );
 		$this->assertFileDoesNotExist( $file );
+		$this->assertFileDoesNotExist( $original_file );
 
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
 		$this->assertWPError( $result );
@@ -363,8 +372,8 @@ class WebP_Uploads_Helper_Tests extends WP_UnitTestCase {
 		);
 
 		$default_transforms = array(
-			'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
-			'image/webp' => array( 'image/webp', 'image/jpeg' ),
+			'image/jpeg' => array( 'image/webp' ),
+			'image/webp' => array( 'image/webp' ),
 		);
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
