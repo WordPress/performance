@@ -187,7 +187,8 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 					// Create a file with then new extension out of the targeted file.
 					$target_file_name     = preg_replace( "/\.$current_extension$/", ".$extension", $thumbnail_file );
 					$target_file_location = path_join( $original_directory, $target_file_name );
-					$result               = $editor->save( $target_file_location, $targeted_mime );
+
+					$result = webp_uploads_check_multi_mime_support( $editor, $target_file_location, $targeted_mime );
 
 					if ( is_wp_error( $result ) ) {
 						continue;
@@ -196,7 +197,8 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 					$subsized_images[ $targeted_mime ] = array( 'thumbnail' => $result );
 				} else {
 					$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension}";
-					$result      = $editor->save( $destination, $targeted_mime );
+
+					$result = webp_uploads_check_multi_mime_support( $editor, $destination, $targeted_mime );
 
 					if ( is_wp_error( $result ) ) {
 						continue;
