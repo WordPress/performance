@@ -21,7 +21,7 @@ function webp_uploads_get_upload_image_mime_transforms() {
 	);
 
 	// Check Setting for generating mimes.
-	if ( 1 === (int) get_option( 'generate_webp_and_jpeg', '1' ) ) {
+	if ( true === (bool) get_option( 'generate_webp_and_jpeg' ) ) {
 		$default_transforms = array(
 			'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
 			'image/webp' => array( 'image/webp', 'image/jpeg' ),
@@ -152,7 +152,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
 	}
 
-	if ( 1 === (int) get_option( 'generate_webp_and_jpeg', '1' ) ) {
+	if ( true === (bool) get_option( 'generate_webp_and_jpeg' ) ) {
 		$image = $editor->save( $destination_file_name, $mime );
 	} else {
 		remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
