@@ -44,10 +44,23 @@ class Regenerate_Existing_Images_Helper_Test extends WP_UnitTestCase {
 	/**
 	 * @covers ::perflab_get_background_job
 	 */
-	public function test_perflab_get_background_job() {
+	public function test_perflab_get_background_job_instance() {
 		$created_job = perflab_create_background_job( 'test_job' );
 		$job         = perflab_get_background_job( $created_job->get_id() );
 
 		$this->assertInstanceOf( Perflab_Background_Job::class, $job );
 	}
+
+	/**
+	 * @covers ::perflab_get_background_job
+	 */
+	public function test_perflab_get_background_job_instance_caches() {
+		$created_job  = perflab_create_background_job( 'test_job' );
+		$job          = perflab_get_background_job( $created_job->get_id() );
+		$cache_result = wp_cache_get( 'perflab_job_' . $created_job->get_id(), 'perflab_job_pool' );
+
+		$this->assertNotEmpty( $cache_result );
+		$this->assertInstanceOf( Perflab_Background_Job::class, $job );
+	}
+
 }
