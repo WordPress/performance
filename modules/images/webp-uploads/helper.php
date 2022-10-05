@@ -21,7 +21,7 @@ function webp_uploads_get_upload_image_mime_transforms() {
 	);
 
 	// Check Setting for generating mimes.
-	if ( true === (bool) get_option( 'generate_webp_and_jpeg' ) ) {
+	if ( true === (bool) get_option( 'perflab_generate_webp_and_jpeg' ) ) {
 		$default_transforms = array(
 			'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
 			'image/webp' => array( 'image/webp', 'image/jpeg' ),
@@ -152,7 +152,9 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
 	}
 
-	$image = webp_uploads_check_multi_mime_support( $editor, $destination_file_name, $mime );
+	remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
+	$image = $editor->save( $destination_file_name, $mime );
+	add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 
 	if ( is_wp_error( $image ) ) {
 		return $image;
@@ -330,25 +332,4 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 		}
 	}
 	return false;
-}
-
-/**
- * Returns the updated WP_Image_Editor instance if the multi mime is activated or not.
- *
- * @since n.e.x.t
- *
- * @param WP_Image_Editor $editor    WP_Image_Editor instance.
- * @param string          $file_name The path where the file would be stored, including the extension.
- * @param string          $mime      The target mime in which the image should be created.
- * @return WP_Image_Editor WP_Image_Editor instance with changes applied.
- */
-function webp_uploads_check_multi_mime_support( $editor, $file_name, $mime ) {
-	if ( true === (bool) get_option( 'generate_webp_and_jpeg' ) ) {
-		$image = $editor->save( $file_name, $mime );
-	} else {
-		remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
-		$image = $editor->save( $file_name, $mime );
-		add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
-	}
-	return $image;
 }
