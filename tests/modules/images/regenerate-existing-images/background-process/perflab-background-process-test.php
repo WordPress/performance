@@ -48,16 +48,13 @@ class Perflab_Background_Process_Test extends WP_UnitTestCase {
 	 * @covers ::__construct
 	 */
 	public function test_handle_request_actions_added() {
-		$authenticated_action     = has_action( 'wp_ajax_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this->process, 'handle_request' ) );
-		$non_authenticated_action = has_action( 'wp_ajax_nopriv_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this->process, 'handle_request' ) );
+		$authenticated_action = has_action( 'wp_ajax_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this->process, 'handle_request' ) );
 
 		// Ensure has_action is not returning false.
 		$this->assertNotEquals( false, $authenticated_action );
-		$this->assertNotEquals( false, $non_authenticated_action );
 
 		// has_action will return priority, so check that as well.
 		$this->assertEquals( 10, $authenticated_action );
-		$this->assertEquals( 10, $non_authenticated_action );
 	}
 
 	/**

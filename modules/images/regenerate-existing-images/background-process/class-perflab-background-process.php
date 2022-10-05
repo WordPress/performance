@@ -42,7 +42,6 @@ class Perflab_Background_Process {
 	public function __construct() {
 		// Handle job execution request.
 		add_action( 'wp_ajax_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
-		add_action( 'wp_ajax_nopriv_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
 	}
 
 	/**
@@ -53,40 +52,29 @@ class Perflab_Background_Process {
 	 * @throws Exception Invalid request for background process.
 	 */
 	public function handle_request() {
-		try {
-			// Exit if nonce varification fails.
-			$nonce_check = check_ajax_referer( self::BG_PROCESS_ACTION, 'nonce', false );
+		// Exit if nonce varification fails.
+		$nonce_check = check_ajax_referer( self::BG_PROCESS_ACTION, 'nonce', false );
 
-			// If nonce check fails, fallback to key checking.
-			if ( false === $nonce_check ) {
-				throw new Exception( __( 'Invalid nonce passed to process.', 'performance-lab' ) );
-			}
-
-			$job_id = isset( $_REQUEST['job_id'] ) ? absint( sanitize_text_field( $_REQUEST['job_id'] ) ) : 0;
-
-			// Job ID is mandatory to be specified.
-			if ( empty( $job_id ) ) {
-				throw new Exception( __( 'No job specified to execute.', 'performance-lab' ) );
-			}
-
-			$this->job = perflab_get_background_job( $job_id );
-
-			// Silently exit if the job is not ready to run.
-			if ( ! $this->job->should_run() ) {
-				return;
-			}
-
-			$this->run(); // Run the job.
-
-		} catch ( Exception $e ) {
-			// @todo Add the error handling in separate issue.
-		} finally {
-			if ( $this->job instanceof Perflab_Background_Job ) {
-				// Unlock the process once everything is done.
-				$this->job->unlock();
-				$this->next_batch( $this->job->get_id() );
-			}
+		// If nonce check fails, fallback to key checking.
+		if ( false === $nonce_check ) {
+			throw new Exception( __( 'Invalid nonce passed to process.', 'performance-lab' ) );
 		}
+
+		$job_id = isset( $_REQUEST['job_id'] ) ? absint( sanitize_text_field( $_REQUEST['job_id'] ) ) : 0;
+
+		// Job ID is mandatory to be specified.
+		if ( empty( $job_id ) ) {
+			throw new Exception( __( 'No job specified to execute.', 'performance-lab' ) );
+		}
+
+		$this->job = perflab_get_background_job( $job_id );
+
+		// Silently exit if the job is not ready to run.
+		if ( ! $this->job->should_run() ) {
+			return;
+		}
+
+		$this->run(); // Run the job.
 	}
 
 	/**
@@ -114,6 +102,11 @@ class Perflab_Background_Process {
 			 */
 			do_action( 'perflab_job_' . $this->job->get_action(), $this->job->get_data() );
 		} while ( ! $this->memory_exceeded() && ! $this->time_exceeded( $this->job->get_id() ) && ! $this->job->is_completed() );
+
+		// Unlock the job once ran.
+		$this->job->unlock();
+		// Call the next batch of the job.
+		$this->next_batch( $this->job->get_id() );
 	}
 
 	/**
@@ -132,7 +125,7 @@ class Perflab_Background_Process {
 			return;
 		}
 
-		perflab_dispatch_background_process_request( $job_id );
+		perflab_start_background_job( $job_id );
 	}
 
 	/**

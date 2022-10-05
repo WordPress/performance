@@ -112,7 +112,7 @@ function perflab_get_background_job( $job_id ) {
  *
  * @param int $job_id Job ID.
  */
-function perflab_dispatch_background_process_request( $job_id ) {
+function perflab_start_background_job( $job_id ) {
 	// Do not call the background process from within the script if the real cron has been setup to do so.
 	if ( defined( 'ENABLE_BG_PROCESS_CRON' ) ) {
 		return;
