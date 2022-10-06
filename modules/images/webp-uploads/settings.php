@@ -18,7 +18,7 @@ function webp_uploads_register_media_settings_field() {
 add_action( 'init', 'webp_uploads_register_media_settings_field' );
 
 /**
- * Add media settings field to generate multiple mime WebP & JPEG output.
+ * Adds media settings field for the 'perflab_generate_webp_and_jpeg' setting.
  *
  * @since n.e.x.t
  */
