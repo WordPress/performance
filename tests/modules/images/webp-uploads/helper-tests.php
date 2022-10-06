@@ -428,7 +428,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	public function it_should_return_jpeg_and_webp_transforms_when_option_generate_webp_and_jpeg_set() {
 		remove_all_filters( 'webp_uploads_get_upload_image_mime_transforms' );
 
-		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+		update_option( 'perflab_generate_webp_and_jpeg', true );
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
