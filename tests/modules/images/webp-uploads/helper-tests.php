@@ -421,7 +421,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Returns custom transforms array when overwritten by webp_uploads_upload_image_mime_transforms filter.
+	 * Returns JPG and WebP transforms array when perflab_generate_webp_and_jpeg option is true.
 	 *
 	 * @test
 	 */
