@@ -36,7 +36,7 @@ function webp_uploads_add_media_settings_field() {
 add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
 
 /**
- * Callback function for the media settings perflab_generate_webp_and_jpeg field.
+ * Renders the settings field for the 'perflab_generate_webp_and_jpeg' setting.
  *
  * @since n.e.x.t
  */
