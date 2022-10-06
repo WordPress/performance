@@ -20,7 +20,7 @@ function webp_uploads_get_upload_image_mime_transforms() {
 		'image/webp' => array( 'image/webp' ),
 	);
 
-	// Check Setting for generating mimes.
+	// Check setting for whether to generate both JPEG and WebP.
 	if ( true === (bool) get_option( 'perflab_generate_webp_and_jpeg' ) ) {
 		$default_transforms = array(
 			'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
