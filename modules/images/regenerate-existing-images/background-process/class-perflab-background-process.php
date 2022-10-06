@@ -81,7 +81,7 @@ class Perflab_Background_Process {
 			/**
 			 * Check if the key in request matches that of in the options.
 			 */
-			$request_key = isset( $_REQUEST['key'] ) ? urldecode_deep( sanitize_text_field( $_REQUEST['key'] ) ) : '';
+			$request_key = isset( $_REQUEST['key'] ) ? urldecode_deep( $_REQUEST['key'] ) : '';
 			$stored_key  = get_option( 'background_process_key_' . $job_id );
 
 			// Check if key is present in request.

@@ -158,7 +158,7 @@ function perflab_start_background_job( $job_id, $request_body = array() ) {
 function perflab_background_process_next_batch( $job_id ) {
 	// Create a secret key for validating next batch request.
 	$key         = wp_generate_password( 20, true, true );
-	$encoded_key = urlencode_deep( $key );
+	$encoded_key = rawurlencode_deep( $key );
 
 	update_option( 'background_process_key_' . absint( $job_id ), $key, false );
 
