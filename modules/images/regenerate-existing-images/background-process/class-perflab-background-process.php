@@ -52,6 +52,9 @@ class Perflab_Background_Process {
 		// Handle job execution request.
 		add_action( 'wp_ajax_' . self::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
 		add_action( 'wp_ajax_' . self::BG_PROCESS_NEXT_BATCH_ACTION, array( $this, 'handle_request' ) );
+
+		// Handle status check cron.
+		add_action( 'perflab_background_process_status_check', array( $this, 'status_check' ) );
 	}
 
 	/**
@@ -130,6 +133,95 @@ class Perflab_Background_Process {
 		$this->job->unlock();
 		// Call the next batch of the job.
 		$this->next_batch( $this->job->get_id() );
+	}
+
+	/**
+	 * Status check cron handler.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * 1. Restarts any job which is halted due to failure.
+	 * 2. Removes old completed jobs.
+	 */
+	public function status_check() {
+		$this->status_check_running_jobs();
+		$this->delete_completed_jobs();
+	}
+
+	/**
+	 * Check the running jobs.
+	 *
+	 * If they are still running, bail it.
+	 * If the execution has been stopped by exceeding maximum execution
+	 * time, restart the job.
+	 *
+	 * @since n.e.x.t
+	 */
+	private function status_check_running_jobs() {
+		$jobs_args = array(
+			'taxonomy'   => PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG,
+			'meta_key'   => Perflab_Background_Job::META_KEY_JOB_STATUS,
+			'meta_value' => Perflab_Background_Job::JOB_STATUS_RUNNING,
+			'fields'     => 'ids',
+		);
+
+		// Fetch all the running jobs.
+		$running_jobs = get_terms( $jobs_args );
+
+		if ( ! empty( $running_jobs ) && ! is_wp_error( $running_jobs ) ) {
+			foreach ( $running_jobs as $running_job ) {
+				$job_lock = get_term_meta( $running_job, Perflab_Background_Job::META_KEY_JOB_LOCK, true );
+				$job_lock = absint( $job_lock );
+
+				// If job lock is not present, trigger the job again.
+				if ( empty( $job_lock ) || $this->time_exceeded( $running_job ) ) {
+					perflab_background_process_next_batch( $running_job );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Checks the completed jobs and removes them from job queue.
+	 *
+	 * If the job has been marked as completed and completed
+	 * time has been over 7 days, remove that job from job queue (history).
+	 *
+	 * @since n.e.x.t
+	 */
+	private function delete_completed_jobs() {
+		$jobs_args = array(
+			'taxonomy'   => PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG,
+			'meta_key'   => Perflab_Background_Job::META_KEY_JOB_STATUS,
+			'meta_value' => Perflab_Background_Job::JOB_STATUS_COMPLETE,
+			'fields'     => 'ids',
+		);
+
+		$completed_jobs = get_terms( $jobs_args );
+
+		if ( ! empty( $completed_jobs ) && ! is_wp_error( $completed_jobs ) ) {
+			/**
+			 * Number of days a job should reside in queue before removal.
+			 *
+			 * @since n.e.x.t
+			 *
+			 * @param int $expiry_days Number of days a job will be in queue before it gets removed. default 7 days.
+			 */
+			$expiry_days  = (int) apply_filters( 'perflab_job_cleanup_days', 7 );
+			$expiry_days  = $expiry_days * DAY_IN_SECONDS;
+			$current_time = time();
+
+			foreach ( $completed_jobs as $completed_job ) {
+				$job_completed_at = get_term_meta( $completed_job, 'perflab_job_completed_at', true );
+				$job_completed_at = absint( $job_completed_at );
+				$valid_till       = $job_completed_at + $expiry_days;
+
+				// If completed job has more than 7 days, delete/remove it.
+				if ( $current_time > $valid_till ) {
+					wp_delete_term( $completed_job, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
+				}
+			}
+		}
 	}
 
 	/**
