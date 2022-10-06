@@ -12,14 +12,13 @@
  * @since n.e.x.t
  */
 function webp_uploads_register_media_settings_field() {
-	// Register field setting for the processing.
 	register_setting(
 		'media',
 		'perflab_generate_webp_and_jpeg',
 		array(
-				'type'         => 'boolean',
-				'default'      => false,
-				'show_in_rest' => false,
+			'type'         => 'boolean',
+			'default'      => false,
+			'show_in_rest' => false,
 		)
 	);
 }
