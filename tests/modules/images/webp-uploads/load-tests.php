@@ -114,7 +114,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_jpeg_and_webp_for_jpeg_images_if_generate_webp_and_jpeg_set() {
-		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+		update_option( 'perflab_generate_webp_and_jpeg', true );
 
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 
