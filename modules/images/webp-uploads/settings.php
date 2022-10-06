@@ -68,7 +68,8 @@ function webp_uploads_media_setting_style() {
 	global $pagenow;
 
 	if ( 'options-media.php' === $pagenow ) {
-		echo '<style>
+		?>
+		<style>
 		.form-table .perflab-generate-webp-and-jpeg th {
 			display: none;
 		}
@@ -76,7 +77,8 @@ function webp_uploads_media_setting_style() {
 			width: auto;
 			padding-left: 0;
 		}
-		</style>';
+		</style>
+		<?php
 	}
 }
 add_action( 'admin_head', 'webp_uploads_media_setting_style' );
