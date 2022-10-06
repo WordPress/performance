@@ -49,11 +49,13 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
  */
 function webp_uploads_generate_webp_jpeg_setting_callback() {
 	?>
-	<label for="perflab_generate_webp_and_jpeg">
-		<input name="perflab_generate_webp_and_jpeg" type="checkbox" id="perflab_generate_webp_and_jpeg" aria-describedby="perflab_generate_webp_and_jpeg_description" value="1"<?php checked( '1', get_option( 'perflab_generate_webp_and_jpeg' ) ); ?> />
-		<?php esc_html_e( 'Generate JPEG files in addition to WebP', 'performance-lab' ); ?>
-	</label>
-	<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG in addition to WebP can improve compatibility, but will effectively double the filesystem storage use of your images.', 'performance-lab' ); ?></p>
+	</td>
+	<td class="td-full">
+		<label for="perflab_generate_webp_and_jpeg">
+			<input name="perflab_generate_webp_and_jpeg" type="checkbox" id="perflab_generate_webp_and_jpeg" aria-describedby="perflab_generate_webp_and_jpeg_description" value="1"<?php checked( '1', get_option( 'perflab_generate_webp_and_jpeg' ) ); ?> />
+			<?php esc_html_e( 'Generate JPEG files in addition to WebP', 'performance-lab' ); ?>
+		</label>
+		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG in addition to WebP can improve compatibility, but will effectively double the filesystem storage use of your images.', 'performance-lab' ); ?></p>
 	<?php
 }
 
@@ -70,12 +72,9 @@ function webp_uploads_media_setting_style() {
 	if ( 'options-media.php' === $pagenow ) {
 		?>
 		<style>
-		.form-table .perflab-generate-webp-and-jpeg th {
+		.form-table .perflab-generate-webp-and-jpeg th,
+		.form-table .perflab-generate-webp-and-jpeg td:not(.td-full) {
 			display: none;
-		}
-		.form-table .perflab-generate-webp-and-jpeg td {
-			width: auto;
-			padding-left: 0;
 		}
 		</style>
 		<?php
