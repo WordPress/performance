@@ -23,6 +23,11 @@ define( 'PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG', 'background_job' );
 require_once __DIR__ . '/background-process/class-perflab-background-job.php';
 
 /**
+ * Require the background process runner class.
+ */
+require_once __DIR__ . '/background-process/class-perflab-background-process.php';
+
+/**
  * Require helper functions and specific integrations.
  */
 require_once __DIR__ . '/helper.php';
