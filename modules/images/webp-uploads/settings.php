@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings for the webp uploads module.
+ * Settings for the WebP Uploads module.
  *
  * @package performance-lab
  * @since n.e.x.t
