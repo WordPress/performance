@@ -7,7 +7,7 @@
  */
 
 /**
- * Register media settings field to generate multiple mime WebP & JPEG output.
+ * Registers setting for generating both JPEG and WebP versions for image uploads.
  *
  * @since n.e.x.t
  */
