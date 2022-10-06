@@ -24,6 +24,15 @@ class Perflab_Background_Process {
 	const BG_PROCESS_ACTION = 'perflab_background_process_handle_request';
 
 	/**
+	 * Name of the ajax action which will trigger next batch of background process to run the job.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @var string
+	 */
+	const BG_PROCESS_NEXT_BATCH_ACTION = 'perflab_background_process_next_batch';
+
+	/**
 	 * Job instance.
 	 *
 	 * @since n.e.x.t
@@ -41,30 +50,44 @@ class Perflab_Background_Process {
 	 */
 	public function __construct() {
 		// Handle job execution request.
-		add_action( 'wp_ajax_' . Perflab_Background_Process::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
+		add_action( 'wp_ajax_' . self::BG_PROCESS_ACTION, array( $this, 'handle_request' ) );
+		add_action( 'wp_ajax_' . self::BG_PROCESS_NEXT_BATCH_ACTION, array( $this, 'handle_request' ) );
 	}
 
 	/**
 	 * Handles incoming request to run the batch of job.
 	 *
 	 * @since n.e.x.t
-	 *
-	 * @throws Exception Invalid request for background process.
 	 */
 	public function handle_request() {
-		// Exit if nonce varification fails.
-		$nonce_check = check_ajax_referer( self::BG_PROCESS_ACTION, 'nonce', false );
-
-		// If nonce check fails, fallback to key checking.
-		if ( false === $nonce_check ) {
-			throw new Exception( __( 'Invalid nonce passed to process.', 'performance-lab' ) );
-		}
-
 		$job_id = isset( $_REQUEST['job_id'] ) ? absint( sanitize_text_field( $_REQUEST['job_id'] ) ) : 0;
 
 		// Job ID is mandatory to be specified.
 		if ( empty( $job_id ) ) {
-			throw new Exception( __( 'No job specified to execute.', 'performance-lab' ) );
+			wp_send_json_error( __( 'No job specified to execute.', 'performance-lab' ), 400 );
+		}
+
+		$current_action = current_action();
+
+		if ( 'wp_ajax_' . self::BG_PROCESS_ACTION === $current_action ) {
+			// Exit if nonce varification fails.
+			$nonce_check = check_ajax_referer( self::BG_PROCESS_ACTION, 'nonce', false );
+
+			// If nonce check fails, fallback to key checking.
+			if ( false === $nonce_check ) {
+				wp_send_json_error( __( 'Invalid nonce passed to process.', 'performance-lab' ), 400 );
+			}
+		} elseif ( 'wp_ajax_' . self::BG_PROCESS_NEXT_BATCH_ACTION === $current_action ) {
+			/**
+			 * Check if the key in request matches that of in the options.
+			 */
+			$request_key = isset( $_REQUEST['key'] ) ? urldecode_deep( sanitize_text_field( $_REQUEST['key'] ) ) : '';
+			$stored_key  = get_option( 'background_process_key_' . $job_id );
+
+			// Check if key is present in request.
+			if ( empty( $request_key ) || $stored_key !== $request_key ) {
+				wp_send_json_error( __( 'Key passed to the request is not valid.', 'performance-lab' ), 400 );
+			}
 		}
 
 		$this->job = perflab_get_background_job( $job_id );
@@ -120,11 +143,6 @@ class Perflab_Background_Process {
 	 * @param int $job_id Job ID. This is the term id from `background_job` taxonomy.
 	 */
 	private function next_batch( $job_id ) {
-		// Do not call the background process from within the script if the real cron has been setup to do so.
-		if ( defined( 'ENABLE_BG_PROCESS_CRON' ) ) {
-			return;
-		}
-
 		perflab_start_background_job( $job_id );
 	}
 
