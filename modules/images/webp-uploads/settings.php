@@ -63,21 +63,15 @@ function webp_uploads_generate_webp_jpeg_setting_callback() {
  * Adds custom style for media settings.
  *
  * @since n.e.x.t
- *
- * @global string $pagenow The filename of the current screen.
  */
 function webp_uploads_media_setting_style() {
-	global $pagenow;
-
-	if ( 'options-media.php' === $pagenow ) {
-		?>
-		<style>
-		.form-table .perflab-generate-webp-and-jpeg th,
-		.form-table .perflab-generate-webp-and-jpeg td:not(.td-full) {
-			display: none;
-		}
-		</style>
-		<?php
+	?>
+	<style>
+	.form-table .perflab-generate-webp-and-jpeg th,
+	.form-table .perflab-generate-webp-and-jpeg td:not(.td-full) {
+		display: none;
 	}
+	</style>
+	<?php
 }
 add_action( 'admin_head-options-media.php', 'webp_uploads_media_setting_style' );
