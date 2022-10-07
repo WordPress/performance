@@ -20,6 +20,14 @@ function webp_uploads_get_upload_image_mime_transforms() {
 		'image/webp' => array( 'image/webp' ),
 	);
 
+	// Check setting for whether to generate both JPEG and WebP.
+	if ( true === (bool) get_option( 'perflab_generate_webp_and_jpeg' ) ) {
+		$default_transforms = array(
+			'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
+			'image/webp' => array( 'image/webp', 'image/jpeg' ),
+		);
+	}
+
 	/**
 	 * Filter to allow the definition of a custom mime types, in which a defined mime type
 	 * can be transformed and provide a wide range of mime types.

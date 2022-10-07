@@ -14,6 +14,7 @@
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/rest-api.php';
 require_once __DIR__ . '/image-edit.php';
+require_once __DIR__ . '/settings.php';
 
 /**
  * Hook called by `wp_generate_attachment_metadata` to create the `sources` property for every image
