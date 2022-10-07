@@ -7,7 +7,6 @@
  */
 
 class Regenerate_Existing_Images_Load_Test extends WP_UnitTestCase {
-
 	/**
 	 * Test that background_job taxonomy is present in system.
 	 *
@@ -39,5 +38,14 @@ class Regenerate_Existing_Images_Load_Test extends WP_UnitTestCase {
 		// show_in_menu and show_ui should be true.
 		$this->assertTrue( $job_tax->show_in_menu );
 		$this->assertTrue( $job_tax->show_ui );
+	}
+
+	/**
+	 * @covers ::perflab_status_check_cron
+	 */
+	public function test_perflab_status_check_cron() {
+		$scheduled = wp_next_scheduled( 'perflab_background_process_status_check' );
+
+		$this->assertIsInt( $scheduled );
 	}
 }

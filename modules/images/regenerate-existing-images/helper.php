@@ -71,3 +71,103 @@ function perflab_delete_background_job( $job_id ) {
 
 	return wp_delete_term( $job_id, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 }
+
+/**
+ * Retrives the background job instance based on job ID.
+ *
+ * @since n.e.x.t
+ *
+ * @param  int $job_id Background job ID. Technically the term_id for `background_job` taxonomy.
+ * @return Perflab_Background_Job|false Job instance. False if job doesn't exist.
+ */
+function perflab_get_background_job( $job_id ) {
+	$job_id      = absint( $job_id );
+	$found       = null;
+	$cache_key   = 'perflab_job_' . $job_id;
+	$cache_group = 'perflab_job_pool';
+
+	$cached_job = wp_cache_get( $cache_key, $cache_group, $found );
+
+	if ( null !== $found ) {
+		$cached_job;
+	}
+
+	// Create the instance.
+	$job = new Perflab_Background_Job( $job_id );
+
+	if ( ! $job->exists() ) {
+		$job = false;
+	}
+
+	// Save the result in object cache.
+	wp_cache_set( $cache_key, $job, $cache_group );
+
+	return $job;
+}
+
+/**
+ * Dispatches the request to trigger the background job.
+ *
+ * @since n.e.x.t
+ *
+ * @param  int   $job_id       Job ID. Technically, the term_id from `background_job` taxonomy.
+ * @param  array $request_body Arguments to pass in `body` of the wp_remote_post request.
+ * @return bool|WP_Error True if request was made successfully; WP_Error otherwise.
+ */
+function perflab_start_background_job( $job_id, $request_body = array() ) {
+	$default_request_body = array(
+		'action' => Perflab_Background_Process::BG_PROCESS_ACTION,
+		'job_id' => $job_id,
+		'nonce'  => wp_create_nonce( Perflab_Background_Process::BG_PROCESS_ACTION ),
+	);
+
+	$request_body = wp_parse_args( $request_body, $default_request_body );
+
+	// Build the HTTP Post request args.
+	$params = array(
+		'blocking'  => false,
+		'body'      => $request_body,
+		'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
+		'timeout'   => 0.1,
+	);
+
+	// Admin ajax to send request to.
+	$url = admin_url( 'admin-ajax.php' );
+
+	/**
+	 * As this is a non-blocking request, we won't receive response from
+	 * server, but we will get to know whether request was successfully made.
+	 */
+	$success = wp_remote_post( $url, $params );
+
+	if ( is_wp_error( $success ) ) {
+		return $success;
+	}
+
+	return true;
+}
+
+/**
+ * Calls the next batch of a job by triggering HTTP request.
+ *
+ * @since n.e.x.t
+ *
+ * @param  int $job_id Job ID. Technically, the term_id from `background_job` taxonomy.
+ * @return bool|WP_Error True if request was made successfully; WP_Error otherwise.
+ */
+function perflab_background_process_next_batch( $job_id ) {
+	// Create a secret key for validating next batch request.
+	$key         = wp_generate_password( 20, true, true );
+	$encoded_key = rawurlencode_deep( $key );
+
+	update_option( 'background_process_key_' . absint( $job_id ), $key, false );
+
+	$request_body = array(
+		'action' => Perflab_Background_Process::BG_PROCESS_NEXT_BATCH_ACTION,
+		'job_id' => $job_id,
+		'key'    => $encoded_key,
+		'nonce'  => wp_create_nonce( Perflab_Background_Process::BG_PROCESS_NEXT_BATCH_ACTION ),
+	);
+
+	return perflab_start_background_job( $job_id, $request_body );
+}
