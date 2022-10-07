@@ -80,4 +80,4 @@ function webp_uploads_media_setting_style() {
 		<?php
 	}
 }
-add_action( 'admin_head', 'webp_uploads_media_setting_style' );
+add_action( 'admin_head-options-media.php', 'webp_uploads_media_setting_style' );
