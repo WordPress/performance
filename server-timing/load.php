@@ -75,3 +75,52 @@ function perflab_register_default_server_timing_metrics( $server_timing ) {
 	);
 }
 add_action( 'perflab_server_timing_init', 'perflab_register_default_server_timing_metrics' );
+
+/**
+ * Wraps a callback (e.g. for an action or filter) to be measured and included in the Server-Timing header.
+ *
+ * @since n.e.x.t
+ *
+ * @param callable $callback    The callback to wrap.
+ * @param string   $metric_slug The metric slug to use within the Server-Timing header.
+ * @param string   $access_cap  Capability required to view the metric. If this is a public metric, this needs to be
+ *                              set to "exist".
+ */
+function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
+	// Gain access to Perflab_Server_Timing_Metric instance.
+	$server_timing_metric = null;
+	add_action(
+		'perflab_server_timing_init',
+		function( $server_timing ) use ( &$server_timing_metric, $metric_slug, $access_cap ) {
+			$server_timing->register_metric(
+				$metric_slug,
+				array(
+					'measure_callback' => function( $metric ) use ( &$server_timing_metric ) {
+						$server_timing_metric = $metric;
+					},
+					'access_cap'       => $access_cap,
+				)
+			);
+		}
+	);
+
+	return function( ...$callback_args ) use ( &$server_timing_metric, $callback ) {
+		// If metric instance was not set, this metric should not be calculated.
+		if ( null === $server_timing_metric ) {
+			return call_user_func_array( $callback, $callback_args );
+		}
+
+		// Store start time (in microseconds).
+		$start_time = microtime( true );
+
+		// Execute the callback.
+		$result = call_user_func_array( $callback, $callback_args );
+
+		// Calculate total time (in milliseconds) and set it for the metric.
+		$total_time = ( microtime( true ) - $start_time ) * 1000.0;
+		$server_timing_metric->set_value( $total_time );
+
+		// Return result (e.g. in case this is a filter callback).
+		return $result;
+	};
+}
