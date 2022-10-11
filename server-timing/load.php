@@ -26,18 +26,18 @@ function perflab_server_timing() {
 		// The 'template_include' filter is the very last point before HTML is rendered.
 		add_filter(
 			'template_include',
-			function( $passthrough ) {
+			function( $passthrough ) use ( $server_timing ) {
 				ob_start();
+				add_action(
+					'shutdown',
+					function() use ( $server_timing ) {
+						$output = ob_get_clean();
+						$server_timing->add_header();
+						echo $output;
+					},
+					-1000
+				);
 				return $passthrough;
-			},
-			PHP_INT_MAX
-		);
-		add_action(
-			'wp_footer',
-			function() use ( $server_timing ) {
-				$output = ob_get_clean();
-				$server_timing->add_header();
-				echo $output;
 			},
 			PHP_INT_MAX
 		);
@@ -130,14 +130,15 @@ function perflab_register_default_server_timing_metrics( $server_timing ) {
 						PHP_INT_MAX - 1
 					);
 					add_action(
-						'wp_footer',
+						'shutdown',
 						function() use ( $metric, &$start_time ) {
 							if ( null === $start_time ) {
 								return;
 							}
 							$metric->set_value( ( microtime( true ) - $start_time ) * 1000.0 );
 						},
-						PHP_INT_MAX - 1
+						// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+						defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -1001
 					);
 				},
 				'access_cap'       => 'exist',
