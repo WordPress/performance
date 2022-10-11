@@ -22,15 +22,36 @@ function perflab_server_timing() {
 
 	$server_timing = new Perflab_Server_Timing();
 
-	// The 'template_include' filter is the very last point before HTML is rendered.
-	add_filter(
-		'template_include',
-		function( $passthrough ) use ( $server_timing ) {
-			$server_timing->add_header();
-			return $passthrough;
-		},
-		PHP_INT_MAX
-	);
+	if ( perflab_server_timing_use_output_buffer() ) {
+		// The 'template_include' filter is the very last point before HTML is rendered.
+		add_filter(
+			'template_include',
+			function( $passthrough ) {
+				ob_start();
+				return $passthrough;
+			},
+			PHP_INT_MAX
+		);
+		add_action(
+			'wp_footer',
+			function() use ( $server_timing ) {
+				$output = ob_get_clean();
+				$server_timing->add_header();
+				echo $output;
+			},
+			PHP_INT_MAX
+		);
+	} else {
+		// The 'template_include' filter is the very last point before HTML is rendered.
+		add_filter(
+			'template_include',
+			function( $passthrough ) use ( $server_timing ) {
+				$server_timing->add_header();
+				return $passthrough;
+			},
+			PHP_INT_MAX
+		);
+	}
 
 	/**
 	 * Initialization hook for the Server-Timing API.
@@ -42,6 +63,24 @@ function perflab_server_timing() {
 	do_action( 'perflab_server_timing_init', $server_timing );
 }
 add_action( 'plugins_loaded', 'perflab_server_timing', 0 );
+
+/**
+ * Returns whether an output buffer should be used to gather Server-Timing metrics during template rendering.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if an output buffer should be used, false otherwise.
+ */
+function perflab_server_timing_use_output_buffer() {
+	/**
+	 * Filters whether an output buffer should be used to be able to gather additional Server-Timing metrics.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $use_output_buffer Whether to use an output buffer.
+	 */
+	return apply_filters( 'perflab_server_timing_use_output_buffer', false );
+}
 
 /**
  * Registers the default Server-Timing metrics.
@@ -73,6 +112,38 @@ function perflab_register_default_server_timing_metrics( $server_timing ) {
 			'access_cap'       => 'exist',
 		)
 	);
+
+	if ( perflab_server_timing_use_output_buffer() ) {
+		// WordPress execution while serving the template.
+		$server_timing->register_metric(
+			'template',
+			array(
+				'measure_callback' => function( $metric ) {
+					$start_time = null;
+
+					add_filter(
+						'template_include',
+						function( $passthrough ) use ( &$start_time ) {
+							$start_time = microtime( true );
+							return $passthrough;
+						},
+						PHP_INT_MAX - 1
+					);
+					add_action(
+						'wp_footer',
+						function() use ( $metric, &$start_time ) {
+							if ( null === $start_time ) {
+								return;
+							}
+							$metric->set_value( ( microtime( true ) - $start_time ) * 1000.0 );
+						},
+						PHP_INT_MAX - 1
+					);
+				},
+				'access_cap'       => 'exist',
+			)
+		);
+	}
 }
 add_action( 'perflab_server_timing_init', 'perflab_register_default_server_timing_metrics' );
 
