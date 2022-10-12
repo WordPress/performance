@@ -113,6 +113,36 @@ function perflab_register_default_server_timing_metrics( $server_timing ) {
 		)
 	);
 
+	// Variable to subtract from total query time after template.
+	$queries_before_template_time_seconds = null;
+
+	if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
+		// WordPress database query time before template.
+		$server_timing->register_metric(
+			'before-template-db-queries',
+			array(
+				'measure_callback' => function( $metric ) use ( &$queries_before_template_time_seconds ) {
+					add_filter(
+						'template_include',
+						function( $passthrough ) use ( $metric, &$queries_before_template_time_seconds ) {
+							$queries_before_template_time_seconds = array_reduce(
+								$GLOBALS['wpdb']->queries,
+								function( $acc, $query ) {
+									return $acc + $query[1];
+								},
+								0.0
+							);
+							$metric->set_value( $queries_before_template_time_seconds * 1000.0 );
+							return $passthrough;
+						},
+						PHP_INT_MAX - 1
+					);
+				},
+				'access_cap'       => 'exist',
+			)
+		);
+	}
+
 	if ( perflab_server_timing_use_output_buffer() ) {
 		// WordPress execution while serving the template.
 		$server_timing->register_metric(
@@ -144,6 +174,36 @@ function perflab_register_default_server_timing_metrics( $server_timing ) {
 				'access_cap'       => 'exist',
 			)
 		);
+
+		if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
+			// WordPress database query time within template.
+			$server_timing->register_metric(
+				'template-db-queries',
+				array(
+					'measure_callback' => function( $metric ) use ( &$queries_before_template_time_seconds ) {
+						add_action(
+							'shutdown',
+							function() use ( $metric, &$queries_before_template_time_seconds ) {
+								if ( null === $queries_before_template_time_seconds ) {
+									return;
+								}
+								$total_queries_time_seconds = array_reduce(
+									$GLOBALS['wpdb']->queries,
+									function( $acc, $query ) {
+										return $acc + $query[1];
+									},
+									0.0
+								);
+								$metric->set_value( ( $total_queries_time_seconds - $queries_before_template_time_seconds ) * 1000.0 );
+							},
+							// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+							defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -1001
+						);
+					},
+					'access_cap'       => 'exist',
+				)
+			);
+		}
 	}
 }
 add_action( 'perflab_server_timing_init', 'perflab_register_default_server_timing_metrics' );
