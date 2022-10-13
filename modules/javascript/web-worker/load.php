@@ -55,7 +55,7 @@ function perflab_web_worker_partytown_init() {
 add_action( 'wp_enqueue_scripts', 'perflab_web_worker_partytown_init', 1 );
 
 /**
- * Get all scripts tags which has `partytown` dependency.
+ * Get all scripts tags which have a `partytown` dependency.
  *
  * @since 1.0.0
  * @return void
@@ -65,7 +65,7 @@ function perflab_web_worker_partytown_worker_scripts() {
 
 	$partytown_handles = array();
 
-	// Get all scripts which has `partytown` dependency.
+	// Get all scripts which have a `partytown` dependency.
 	foreach ( $wp_scripts->registered as $handle => $script ) {
 		if ( ! empty( $script->deps ) && in_array( 'partytown', $script->deps, true ) ) {
 			$partytown_handles[] = $handle;
