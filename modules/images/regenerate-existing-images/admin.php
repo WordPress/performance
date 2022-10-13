@@ -77,7 +77,7 @@ function perflab_background_job_parent_file( $parent_file ) {
 		return $parent_file;
 	}
 
-	if ( isset( $screen->taxonomy ) && 'background_job' === $screen->taxonomy ) {
+	if ( isset( $screen->taxonomy ) && PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG === $screen->taxonomy ) {
 		return 'tools.php';
 	}
 
@@ -189,7 +189,7 @@ function perflab_admin_job_details() {
 	}
 
 	$job_id = absint( $_REQUEST['job_id'] );
-	$job    = get_term( $job_id, 'background_job' );
+	$job    = get_term( $job_id, PERFLAB_BACKGROUND_JOB_TAXONOMY_SLUG );
 
 	if ( ! $job instanceof WP_Term ) {
 		wp_die( __( 'You attempted to edit an item that does not exist. Perhaps it was deleted?', 'performance-lab' ) );
