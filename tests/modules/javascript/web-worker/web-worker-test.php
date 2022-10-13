@@ -104,7 +104,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			$script_handles,
-			$this->get_partytown_handles()
+			perflab_get_partytown_handles()
 		);
 
 		$expected_scripts_chunk = '';
@@ -135,21 +135,5 @@ class Web_Worker_Test extends WP_UnitTestCase {
 		 * @see perflab_aea_audit_enqueued_scripts()
 		 */
 		$wp_scripts->done = array();
-	}
-
-	/**
-	 * Helper function to get all scripts tags which has `partytown` dependency.
-	 */
-	function get_partytown_handles() {
-		global $wp_scripts;
-
-		$partytown_handles = array();
-		foreach ( $wp_scripts->registered as $handle => $script ) {
-			if ( ! empty( $script->deps ) && in_array( 'partytown', $script->deps, true ) ) {
-				$partytown_handles[] = $handle;
-			}
-		}
-
-		return $partytown_handles;
 	}
 }
