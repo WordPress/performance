@@ -7,14 +7,14 @@
 class Web_Worker_Test extends WP_UnitTestCase {
 
 	/**
-	 * @covers ::web_worker_partytown_configuration
+	 * @covers ::perflab_web_worker_partytown_configuration
 	 */
-	function test_web_worker_partytown_configuration() {
+	function test_perflab_web_worker_partytown_configuration() {
 		$this->assertNotFalse(
-			has_action( 'wp_head', 'web_worker_partytown_configuration' )
+			has_action( 'wp_head', 'perflab_web_worker_partytown_configuration' )
 		);
 
-		$config_output = get_echo( 'web_worker_partytown_configuration' );
+		$config_output = get_echo( 'perflab_web_worker_partytown_configuration' );
 
 		$desired_output_string_chunks = array(
 			'<script>',
@@ -29,7 +29,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 
 		// Add a filter to modify the PartyTown configuration.
 		add_filter(
-			'partytown_configuration',
+			'perflab_partytown_configuration',
 			function ( $config ) {
 				$config['lib']   = '/partytown/';
 				$config['debug'] = true;
@@ -37,7 +37,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 			}
 		);
 
-		$config_output = get_echo( 'web_worker_partytown_configuration' );
+		$config_output = get_echo( 'perflab_web_worker_partytown_configuration' );
 
 		$desired_output_string_chunks = array(
 			'<script>',
@@ -54,28 +54,28 @@ class Web_Worker_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers ::web_worker_partytown_init
+	 * @covers ::perflab_web_worker_partytown_init
 	 */
-	function test_web_worker_partytown_init() {
+	function perflab_test_web_worker_partytown_init() {
 		$this->assertNotFalse(
 			has_action(
 				'wp_enqueue_scripts',
-				'web_worker_partytown_init'
+				'perflab_web_worker_partytown_init'
 			)
 		);
 
-		web_worker_partytown_init();
+		perflab_web_worker_partytown_init();
 		$this->assertTrue( wp_script_is( 'partytown', 'enqueued' ) );
 	}
 
 	/**
-	 * @covers ::web_worker_partytown_worker_scripts
+	 * @covers ::perflab_web_worker_partytown_worker_scripts
 	 */
-	function test_web_worker_partytown_worker_scripts() {
+	function perflab_test_web_worker_partytown_worker_scripts() {
 		global $wp_scripts;
 
 		$this->assertNotFalse(
-			has_action( 'wp_print_scripts', 'web_worker_partytown_worker_scripts' )
+			has_action( 'wp_print_scripts', 'perflab_web_worker_partytown_worker_scripts' )
 		);
 
 		$this->assertEmpty( $this->get_partytown_handles() );
@@ -100,7 +100,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 		$this->assertTrue( wp_script_is( 'analytics-js', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'third-party-js', 'enqueued' ) );
 
-		web_worker_partytown_worker_scripts();
+		perflab_web_worker_partytown_worker_scripts();
 
 		$this->assertEquals(
 			$script_handles,
