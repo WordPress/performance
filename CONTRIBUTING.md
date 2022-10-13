@@ -1,6 +1,6 @@
 # Contributing to the Performance Lab plugin
 
-Thank you for your interest in contributing to the Performance Lab plugin! Complete documentation for getting started and contributing to the plugin is available in the [Performance Lab](https://make.wordpress.org/performance/handbook//performance-lab/) section of our [Performance Team Handbook](https://make.wordpress.org/performance/handbook/).
+Thank you for your interest in contributing to the Performance Lab plugin! Complete documentation for getting started and contributing to the plugin is available in the [Performance Lab](https://make.wordpress.org/performance/handbook/performance-lab/) section of our [Performance Team Handbook](https://make.wordpress.org/performance/handbook/).
 
 ## Coding standards
 
