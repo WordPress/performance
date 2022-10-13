@@ -17,7 +17,8 @@
  */
 function perflab_web_worker_partytown_configuration() {
 	$config = array(
-		'lib' => str_replace( site_url(), '', plugin_dir_url( __FILE__ ) ) . 'assets/js/partytown/',
+		'lib'     => str_replace( site_url(), '', plugin_dir_url( __FILE__ ) ) . 'assets/js/partytown/',
+		'forward' => array(),
 	);
 
 	/**
