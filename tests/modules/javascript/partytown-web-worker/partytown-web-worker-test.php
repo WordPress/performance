@@ -56,7 +56,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 	/**
 	 * @covers ::perflab_web_worker_partytown_init
 	 */
-	function perflab_test_web_worker_partytown_init() {
+	function test_perflab_web_worker_partytown_init() {
 		$this->assertNotFalse(
 			has_action(
 				'wp_enqueue_scripts',
@@ -70,15 +70,16 @@ class Web_Worker_Test extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::perflab_web_worker_partytown_worker_scripts
+	 * @covers ::perflab_get_partytown_handles
 	 */
-	function perflab_test_web_worker_partytown_worker_scripts() {
+	function test_perflab_web_worker_partytown_worker_scripts() {
 		global $wp_scripts;
 
 		$this->assertNotFalse(
 			has_action( 'wp_print_scripts', 'perflab_web_worker_partytown_worker_scripts' )
 		);
 
-		$this->assertEmpty( $this->get_partytown_handles() );
+		$this->assertEmpty( perflab_get_partytown_handles() );
 
 		// Create some scripts with `partytown` dependency.
 		$script_handles = array(
