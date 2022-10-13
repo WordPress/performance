@@ -61,16 +61,7 @@ add_action( 'wp_enqueue_scripts', 'perflab_web_worker_partytown_init', 1 );
  * @return void
  */
 function perflab_web_worker_partytown_worker_scripts() {
-	global $wp_scripts;
-
-	$partytown_handles = array();
-
-	// Get all scripts which have a `partytown` dependency.
-	foreach ( $wp_scripts->registered as $handle => $script ) {
-		if ( ! empty( $script->deps ) && in_array( 'partytown', $script->deps, true ) ) {
-			$partytown_handles[] = $handle;
-		}
-	}
+	$partytown_handles = perflab_get_partytown_handles();
 
 	foreach ( $partytown_handles as $partytown_handle ) {
 		add_filter(
@@ -103,3 +94,19 @@ function perflab_web_worker_partytown_worker_scripts() {
 	}
 }
 add_action( 'wp_print_scripts', 'perflab_web_worker_partytown_worker_scripts' );
+
+/**
+ * Helper function to get all scripts tags which has `partytown` dependency.
+ */
+function perflab_get_partytown_handles() {
+	global $wp_scripts;
+
+	$partytown_handles = array();
+	foreach ( $wp_scripts->registered as $handle => $script ) {
+		if ( ! empty( $script->deps ) && in_array( 'partytown', $script->deps, true ) ) {
+			$partytown_handles[] = $handle;
+		}
+	}
+
+	return $partytown_handles;
+}
