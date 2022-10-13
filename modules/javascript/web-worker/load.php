@@ -67,7 +67,7 @@ function perflab_web_worker_partytown_worker_scripts() {
 
 	// Get all scripts which has `partytown` dependency.
 	foreach ( $wp_scripts->registered as $handle => $script ) {
-		if ( ! empty( $script->deps ) && in_array( 'partytown', $script->deps ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+		if ( ! empty( $script->deps ) && in_array( 'partytown', $script->deps, true ) ) {
 			$partytown_handles[] = $handle;
 		}
 	}
