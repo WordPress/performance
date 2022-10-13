@@ -12,12 +12,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3.5.0
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+
+      - name: Install Node production dependencies
+        run: npm ci --production
+        env:
+          CI: true
+
+      - name: Add Partytown library files to release
+        run: npm run partytown
+
       - name: WordPress plugin deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
         env:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SLUG: performance-lab
+
       - name: Upload release assets
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
