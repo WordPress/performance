@@ -35,7 +35,7 @@
     "test-php": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test",
     "test-php-multisite": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test-multisite",
     "wp-env": "wp-env",
-    "prepare": "husky install",
+    "prepare": "husky install && npm run partytown",
     "partytown": "partytown copylib './modules/javascript/partytown-web-worker/assets/js/partytown'"
   },
   "lint-staged": {
