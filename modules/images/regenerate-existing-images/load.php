@@ -8,7 +8,7 @@
  * @package performance-lab
  */
 
-/**
+/*
  * Define the background job taxonomy constant.
  *
  * @since n.e.x.t
@@ -26,6 +26,11 @@ require_once __DIR__ . '/background-process/class-perflab-background-job.php';
  * Require helper functions and specific integrations.
  */
 require_once __DIR__ . '/helper.php';
+
+/**
+ * Inlcude admin related functions.
+ */
+require __DIR__ . '/admin.php';
 
 /**
  * Registers the background job taxonomy.
