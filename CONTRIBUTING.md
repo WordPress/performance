@@ -1,10 +1,14 @@
-# Contributing Guidelines
+# Contributing to the Performance Lab plugin
 
-Welcome to the Performance plugin project! We're glad you're here. Here's a few things to help you get started.
+Thank you for your interest in contributing to the Performance Lab plugin! Complete documentation for getting started and contributing to the plugin is available in the [Performance Lab](https://make.wordpress.org/performance/handbook/performance-lab/) section of our [Performance Team Handbook](https://make.wordpress.org/performance/handbook/).
 
-## How to contribute?
+## Coding standards
 
-Check [here](./docs/Getting-started.md) for the complete documentation about how to contribute to the project.
+In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). All code in the Performance Lab plugin must follow these requirements:
+
+- **WordPress**: The latest release is the minimum required version. As of Performance Lab v1.6.0, released October 17, 2022, the plugin's minimum WordPress version requirement is 6.0.
+- **PHP**: Always match the latest WordPress version. The minimum required version right now is 5.6.
+
 
 ## Guidelines
 
