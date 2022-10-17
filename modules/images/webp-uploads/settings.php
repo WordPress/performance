@@ -3,13 +3,13 @@
  * Settings for the WebP Uploads module.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.6.0
  */
 
 /**
  * Registers setting for generating both JPEG and WebP versions for image uploads.
  *
- * @since n.e.x.t
+ * @since 1.6.0
  */
 function webp_uploads_register_media_settings_field() {
 	register_setting(
@@ -27,7 +27,7 @@ add_action( 'init', 'webp_uploads_register_media_settings_field' );
 /**
  * Adds media settings field for the 'perflab_generate_webp_and_jpeg' setting.
  *
- * @since n.e.x.t
+ * @since 1.6.0
  */
 function webp_uploads_add_media_settings_field() {
 	// Add settings field.
@@ -45,7 +45,7 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
 /**
  * Renders the settings field for the 'perflab_generate_webp_and_jpeg' setting.
  *
- * @since n.e.x.t
+ * @since 1.6.0
  */
 function webp_uploads_generate_webp_jpeg_setting_callback() {
 	?>
@@ -62,7 +62,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback() {
 /**
  * Adds custom style for media settings.
  *
- * @since n.e.x.t
+ * @since 1.6.0
  */
 function webp_uploads_media_setting_style() {
 	?>
