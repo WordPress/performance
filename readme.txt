@@ -68,6 +68,15 @@ Contributions welcome! There are several ways to contribute:
 
 == Changelog ==
 
+= 1.6.0 =
+
+**Enhancements**
+
+* Site Health: Only load Site Health checks for persistent cache and full page cache when not available in core. ([543](https://github.com/WordPress/performance/pull/543))
+* Images: Add checkbox to Settings > Media to control whether to generate JPEG in addition to WebP. ([537](https://github.com/WordPress/performance/pull/537))
+* Images: Generate only WebP images by default for JPEG and WebP uploads. ([527](https://github.com/WordPress/performance/pull/527))
+* Infrastructure: Bump minimum WordPress requirement to 6.0. ([549](https://github.com/WordPress/performance/pull/549))
+
 = 1.5.0 =
 
 **Enhancements**
