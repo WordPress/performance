@@ -1,4 +1,10 @@
 <?php
+/**
+ * Extend and replace the wpdb class.
+ *
+ * @package performance-lab
+ * @since x.x.x
+ */
 
 /**
  * This class extends wpdb and replaces it.
@@ -32,9 +38,9 @@ class WP_SQLite_DB extends wpdb {
 	 *
 	 * @see wpdb::set_charset()
 	 *
-	 * @param resource $dbh The resource given by mysql_connect
-	 * @param string $charset Optional. The character set. Default null.
-	 * @param string $collate Optional. The collation. Default null.
+	 * @param resource $dbh The resource given by mysql_connect.
+	 * @param string   $charset Optional. The character set. Default null.
+	 * @param string   $collate Optional. The collation. Default null.
 	 */
 	public function set_charset( $dbh, $charset = null, $collate = null ) {
 	}
@@ -56,7 +62,7 @@ class WP_SQLite_DB extends wpdb {
 	 *
 	 * @see wpdb::select()
 	 *
-	 * @param string $db MySQL database name
+	 * @param string        $db  MySQL database name. Not used.
 	 * @param resource|null $dbh Optional link identifier.
 	 */
 	public function select( $db, $dbh = null ) {
@@ -70,12 +76,12 @@ class WP_SQLite_DB extends wpdb {
 	 *
 	 * @see wpdb::_real_escape()
 	 *
-	 * @param  string $string to escape
+	 * @param string $str The string to escape.
 	 *
 	 * @return string escaped
 	 */
-	function _real_escape( $string ) {
-		return SQLite3::escapeString( $string );
+	function _real_escape( $str ) {
+		return SQLite3::escapeString( $str );
 	}
 
 	/**
@@ -104,7 +110,7 @@ class WP_SQLite_DB extends wpdb {
 	 *
 	 * @global array $EZSQL_ERROR Stores error information of query and error string
 	 *
-	 * @param string $str The error to display
+	 * @param string $str The error to display.
 	 *
 	 * @return bool False if the showing of errors is disabled.
 	 */
@@ -130,14 +136,14 @@ class WP_SQLite_DB extends wpdb {
 		if ( $caller ) {
 			$error_str = sprintf(
 				/* translators: 1: Database error message, 2: SQL query, 3: Caller. */
-				__( 'WordPress database error %1$s for query %2$s made by %3$s' ),
+				__( 'WordPress database error %1$s for query %2$s made by %3$s', 'performance-lab' ),
 				$str,
 				$this->last_query,
 				$caller
 			);
 		} else {
 			/* translators: 1: Database error message, 2: SQL query. */
-			$error_str = sprintf( __( 'WordPress database error %1$s for query %2$s' ), $str, $this->last_query );
+			$error_str = sprintf( __( 'WordPress database error %1$s for query %2$s', 'performance-lab' ), $str, $this->last_query );
 		}
 
 		error_log( $error_str );
@@ -192,7 +198,7 @@ class WP_SQLite_DB extends wpdb {
 	 *
 	 * @see wpdb::db_connect()
 	 *
-	 * @param bool $allow_bail
+	 * @param bool $allow_bail Not used.
 	 */
 	public function db_connect( $allow_bail = true ) {
 		$this->init_charset();
@@ -203,7 +209,7 @@ class WP_SQLite_DB extends wpdb {
 	/**
 	 * Method to dummy out wpdb::check_connection()
 	 *
-	 * @param bool $allow_bail
+	 * @param bool $allow_bail Not used.
 	 *
 	 * @return bool
 	 */
@@ -219,7 +225,7 @@ class WP_SQLite_DB extends wpdb {
 	 *
 	 * @see wpdb::query()
 	 *
-	 * @param string $query Database query
+	 * @param string $query Database query.
 	 *
 	 * @return int|false Number of rows affected/selected or false on error
 	 */

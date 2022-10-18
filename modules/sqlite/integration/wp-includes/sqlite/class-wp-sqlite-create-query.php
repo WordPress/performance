@@ -1,8 +1,13 @@
 <?php
+/**
+ * Implementation to rewrite CREATE queries.
+ *
+ * @package performance-lab
+ * @since x.x.x
+ */
 
 /**
  * This class provides a function to rewrite CREATE query.
- *
  */
 class WP_SQLite_Create_Query {
 
@@ -45,7 +50,7 @@ class WP_SQLite_Create_Query {
 	/**
 	 * Function to rewrite query.
 	 *
-	 * @param string $query the query being processed
+	 * @param string $query The query being processed.
 	 *
 	 * @return string|array    the processed (rewritten) query
 	 */
@@ -181,6 +186,7 @@ class WP_SQLite_Create_Query {
 	 * Method for stripping the engine and other stuffs.
 	 *
 	 * TYPE, ENGINE and AUTO_INCREMENT are removed here.
+	 *
 	 * @access private
 	 */
 	private function rewrite_engine_info() {
@@ -273,7 +279,7 @@ class WP_SQLite_Create_Query {
 	/**
 	 * Callback method for rewrite_unique_key.
 	 *
-	 * @param array $matches an array of matches from the Regex
+	 * @param array $matches An array of matches from the Regex.
 	 *
 	 * @access private
 	 * @return string
@@ -320,7 +326,7 @@ class WP_SQLite_Create_Query {
 	 *
 	 * @access private
 	 *
-	 * @param $matches
+	 * @param array $matches An array of matches from the Regex.
 	 *
 	 * @return string
 	 */
@@ -361,7 +367,7 @@ class WP_SQLite_Create_Query {
 	/**
 	 * Callback method for rewrite_key.
 	 *
-	 * @param array $matches an array of matches from the Regex
+	 * @param array $matches an array of matches from the Regex.
 	 *
 	 * @access private
 	 * @return string
@@ -395,7 +401,7 @@ class WP_SQLite_Create_Query {
 	 *
 	 * This method is deprecated.
 	 *
-	 * @param string $match
+	 * @param string $match The string to be removed. Not used.
 	 *
 	 * @return string whose length is zero
 	 * @access private

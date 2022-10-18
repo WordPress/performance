@@ -1,15 +1,22 @@
 <?php
 /**
  * Main integration file.
+ *
+ * @package performance-lab
+ * @since x.x.x
  */
 
-/**
- * When merged in Core, this will be opt-in by defining the constant in wp-config.php.
- * For the purposes of this plugin, activating the plugin IS opting-in so we are disabling the check.
+// Bail early if DATABASE_TYPE is not defined as sqlite.
 if ( ! defined( 'DATABASE_TYPE' ) || 'sqlite' !== DATABASE_TYPE ) {
 	return;
 }
-*/
+
+/**
+ * Log errors.
+ *
+ * @param string $message The error message.
+ * @param mixed  $data    The data to be logged.
+ */
 function pdo_log_error( $message, $data = null ) {
 	$admin_dir = 'wp-admin/';
 	if ( strpos( $_SERVER['SCRIPT_NAME'], 'wp-admin' ) !== false ) {
@@ -103,7 +110,7 @@ function make_db_sqlite() {
 	$queries       = explode( ';', $table_schemas );
 	$query_parser  = new WP_SQLite_Create_Query();
 	try {
-		$pdo = new PDO( 'sqlite:' . FQDB, null, null, array( PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ) );
+		$pdo = new PDO( 'sqlite:' . FQDB, null, null, array( PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ) ); // phpcs:ignore WordPress.DB.RestrictedClasses
 	} catch ( PDOException $err ) {
 		$err_data = $err->errorInfo; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$message  = 'Database connection error!<br />';
@@ -124,10 +131,6 @@ function make_db_sqlite() {
 				$index_queries = $rewritten_query;
 				$table_query   = trim( $table_query );
 				$pdo->exec( $table_query );
-				//foreach($rewritten_query as $single_query) {
-				//  $single_query = trim($single_query);
-				//  $pdo->exec($single_query);
-				//}
 			} else {
 				$rewritten_query = trim( $rewritten_query );
 				$pdo->exec( $rewritten_query );
@@ -160,7 +163,7 @@ function make_db_sqlite() {
 		$err_data = $err->errorInfo; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$err_code = $err_data[1];
 		if ( 5 == $err_code || 6 == $err_code ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
-			// if the database is locked, commit again
+			// If the database is locked, commit again.
 			$pdo->commit();
 		} else {
 			$pdo->rollBack();
@@ -188,7 +191,7 @@ function make_db_sqlite() {
  * @param string $blog_title Site title.
  * @param string $user_name User's username.
  * @param string $user_email User's email.
- * @param bool $public Whether site is public.
+ * @param bool   $public Whether site is public.
  * @param string $deprecated Optional. Not used.
  * @param string $user_password Optional. User's chosen password. Default empty (random password).
  * @param string $language Optional. Language chosen. Default empty.
@@ -202,10 +205,7 @@ function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated 
 
 	wp_check_mysql_version();
 	wp_cache_flush();
-	/* begin wp-sqlite-db changes */
-	// make_db_current_silent();
 	make_db_sqlite();
-	/* end wp-sqlite-db changes */
 	populate_options();
 	populate_roles();
 
@@ -238,16 +238,16 @@ function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated 
 	$email_password = false;
 	if ( ! $user_id && empty( $user_password ) ) {
 		$user_password = wp_generate_password( 12, false );
-		$message       = __( '<strong><em>Note that password</em></strong> carefully! It is a <em>random</em> password that was generated just for you.' );
+		$message       = __( '<strong><em>Note that password</em></strong> carefully! It is a <em>random</em> password that was generated just for you.', 'performance-lab' );
 		$user_id       = wp_create_user( $user_name, $user_password, $user_email );
 		update_user_option( $user_id, 'default_password_nag', true, true );
 		$email_password = true;
 	} elseif ( ! $user_id ) {
-		// Password has been provided
-		$message = '<em>' . __( 'Your chosen password.' ) . '</em>';
+		// Password has been provided.
+		$message = '<em>' . __( 'Your chosen password.', 'performance-lab' ) . '</em>';
 		$user_id = wp_create_user( $user_name, $user_password, $user_email );
 	} else {
-		$message = __( 'User already exists. Password inherited.' );
+		$message = __( 'User already exists. Password inherited.', 'performance-lab' );
 	}
 
 	$user = new WP_User( $user_id );
@@ -259,7 +259,7 @@ function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated 
 
 	flush_rewrite_rules();
 
-	wp_new_blog_notification( $blog_title, $guessurl, $user_id, ( $email_password ? $user_password : __( 'The password you chose during installation.' ) ) );
+	wp_new_blog_notification( $blog_title, $guessurl, $user_id, ( $email_password ? $user_password : __( 'The password you chose during installation.', 'performance-lab' ) ) );
 
 	wp_cache_flush();
 

@@ -1,4 +1,10 @@
 <?php
+/**
+ * The main PDO extension class.
+ *
+ * @package performance-lab
+ * @since x.x.x
+ */
 
 /**
  * This class extends PDO class and does the real work.
@@ -6,7 +12,7 @@
  * It accepts a request from wpdb class, initialize PDO instance,
  * execute SQL statement, and returns the results to WordPress.
  */
-class WP_PDO_Engine extends PDO {
+class WP_PDO_Engine extends PDO { // phpcs:ignore
 
 	/**
 	 * Class variable to check if there is an error.
@@ -169,13 +175,15 @@ class WP_PDO_Engine extends PDO {
 	private $can_insert_multiple_rows = false;
 
 	/**
+	 * The parameter number.
 	 *
 	 * @var integer
 	 */
 	private $param_num;
 
 	/**
-	 * Varible to check if there is an active transaction.
+	 * Variable to check if there is an active transaction.
+	 *
 	 * @var boolean
 	 * @access protected
 	 */
@@ -189,8 +197,6 @@ class WP_PDO_Engine extends PDO {
 	 * PDO instance but many others jobs.
 	 *
 	 * Constructor definition is changed since version 1.7.1.
-	 *
-	 * @param none
 	 */
 	function __construct() {
 		register_shutdown_function( array( $this, '__destruct' ) );
@@ -204,12 +210,12 @@ class WP_PDO_Engine extends PDO {
 			return;
 		}
 
-		$locked = false;
-		$status = 0;
+		$locked      = false;
+		$status      = 0;
 		$err_message = '';
 		do {
 			try {
-				$this->pdo = new PDO( $dsn, null, null, array( PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ) );
+				$this->pdo = new PDO( $dsn, null, null, array( PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ) ); // phpcs:ignore WordPress.DB.RestrictedClasses
 				new WP_PDO_SQLite_User_Defined_Functions( $this->pdo );
 				$GLOBALS['@pdo'] = $this->pdo;
 			} catch ( PDOException $ex ) {
@@ -229,7 +235,7 @@ class WP_PDO_Engine extends PDO {
 				/* translators: %d: error code */
 				sprintf( __( 'Code: %d', 'performance-lab' ), $status ),
 				/* translators: %s: error message */
-				sprintf( _( 'Error Message: %s', 'performance-lab' ), $err_message )
+				sprintf( __( 'Error Message: %s', 'performance-lab' ), $err_message )
 			);
 			$this->set_error( __LINE__, __FILE__, $message );
 
@@ -289,7 +295,7 @@ class WP_PDO_Engine extends PDO {
 	 * function will do no harms.
 	 */
 	private function init() {
-		if ( version_compare( $this->get_sqlite_version(), '3.7.11', '>=' ) ) {
+		if ( version_compare( SQLite3::version()['versionString'], '3.7.11', '>=' ) ) {
 			$this->can_insert_multiple_rows = true;
 		}
 		$statement = $this->pdo->query( 'PRAGMA foreign_keys' );
@@ -367,15 +373,14 @@ class WP_PDO_Engine extends PDO {
 	 *
 	 * #1 process has been changed since version 1.5.1.
 	 *
-	 * @param string $statement full SQL statement string
-	 *
-	 * @param int $mode
-	 * @param array $fetch_mode_args
+	 * @param string $statement          Full SQL statement string.
+	 * @param int    $mode               Not used.
+	 * @param array  ...$fetch_mode_args Not used.
 	 *
 	 * @return mixed according to the query type
 	 * @see PDO::query()
 	 */
-	public function query( $statement, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, ...$fetch_mode_args ) {
+	public function query( $statement, $mode = PDO::ATTR_DEFAULT_FETCH_MODE, ...$fetch_mode_args ) { // phpcs:ignore WordPress.DB.RestrictedClasses
 		$this->flush();
 
 		$this->queries[] = "Raw query:\n$statement";
@@ -383,7 +388,7 @@ class WP_PDO_Engine extends PDO {
 		if ( ! $res && defined( 'PDO_DEBUG' ) && PDO_DEBUG ) {
 			$bailout_string = sprintf(
 				/* translators: %s: SQL statement */
-				'<h1>' . __( 'Unknown query type' ) . '</h1><p>' . __( 'Sorry, we cannot determine the type of query that is requested (%s).' ) . '</p>',
+				'<h1>' . __( 'Unknown query type', 'performance-lab' ) . '</h1><p>' . __( 'Sorry, we cannot determine the type of query that is requested (%s).', 'performance-lab' ) . '</p>',
 				$statement
 			);
 			$this->set_error( __LINE__, __FUNCTION__, $bailout_string );
@@ -504,18 +509,18 @@ class WP_PDO_Engine extends PDO {
 			);
 			$unique_key  = array( 'term_id', 'taxonomy', 'slug' );
 			$data        = array(
-				'name'         => '', // column name
-				'table'        => '', // table name
-				'max_length'   => 0,  // max length of the column
-				'not_null'     => 1,  // 1 if not null
-				'primary_key'  => 0,  // 1 if column has primary key
-				'unique_key'   => 0,  // 1 if column has unique key
-				'multiple_key' => 0,  // 1 if column doesn't have unique key
-				'numeric'      => 0,  // 1 if column has numeric value
-				'blob'         => 0,  // 1 if column is blob
-				'type'         => '', // type of the column
-				'unsigned'     => 0,  // 1 if column is unsigned integer
-				'zerofill'     => 0,  // 1 if column is zero-filled
+				'name'         => '', // Column name.
+				'table'        => '', // Table name.
+				'max_length'   => 0,  // Max length of the column.
+				'not_null'     => 1,  // 1 if not null.
+				'primary_key'  => 0,  // 1 if column has primary key.
+				'unique_key'   => 0,  // 1 if column has unique key.
+				'multiple_key' => 0,  // 1 if column doesn't have unique key.
+				'numeric'      => 0,  // 1 if column has numeric value.
+				'blob'         => 0,  // 1 if column is blob.
+				'type'         => '', // Type of the column.
+				'unsigned'     => 0,  // 1 if column is unsigned integer.
+				'zerofill'     => 0,  // 1 if column is zero-filled.
 			);
 			$table_name  = '';
 			if ( preg_match( '/\s*FROM\s*(.*)?\s*/i', $this->rewritten_query, $match ) ) {
@@ -531,7 +536,7 @@ class WP_PDO_Engine extends PDO {
 				} else {
 					$data['multiple_key'] = 1;
 				}
-				$this->column_data[]  = new WP_SQLite_Object_Array( $data );
+				$this->column_data[] = new WP_SQLite_Object_Array( $data );
 
 				// Reset data for next iteration.
 				$data['name']         = '';
@@ -599,9 +604,10 @@ class WP_PDO_Engine extends PDO {
 		foreach ( $this->error_messages as $num => $m ) {
 			$output .= '<div style="clear:both;margin_bottom:2px;border:red dotted thin;" class="error_message" style="border-bottom:dotted blue thin;">';
 			$output .= sprintf(
-				__( 'Error occurred at line %d in Function %s. Error message was: %s.', 'performance-lab' ),
-				(int) $this->errors[$num]['line'],
-				'<code>' . esc_html( $this->errors[$num]['function'] ) . '</code>',
+				/* translators: %1$d: line number, %2$s: function name, %3$s: error message */
+				__( 'Error occurred at line %1$d in Function %2$s. Error message was: %3$s.', 'performance-lab' ),
+				(int) $this->errors[ $num ]['line'],
+				'<code>' . esc_html( $this->errors[ $num ]['function'] ) . '</code>',
 				$m
 			);
 			$output .= '</div>';
@@ -656,7 +662,7 @@ class WP_PDO_Engine extends PDO {
 	 * It is not a good habit to change the include files programatically.
 	 * Needs to be fixed some other way.
 	 *
-	 * @param string $query_type
+	 * @param string $query_type The query type (create, alter, etc).
 	 *
 	 * @return object reference to apropreate driver
 	 */
@@ -704,7 +710,7 @@ class WP_PDO_Engine extends PDO {
 	 * The variables are class fields. So if success, no return value. If failure, it
 	 * returns void and stops.
 	 *
-	 * @param object $statement of PDO statement
+	 * @param object $statement The PDO statement.
 	 *
 	 * @return boolean
 	 */
@@ -764,9 +770,9 @@ class WP_PDO_Engine extends PDO {
 			$this->set_error( __LINE__, __FUNCTION__, $err_message );
 			return false;
 		}
-		$this->_results = $statement->fetchAll( PDO::FETCH_OBJ );
+		$this->_results = $statement->fetchAll( PDO::FETCH_OBJ ); // phpcs:ignore WordPress.DB.RestrictedClasses
 
-		//generate the results that $wpdb will want to see
+		// Generate the results that $wpdb will want to see.
 		switch ( $this->query_type ) {
 			case 'insert':
 			case 'update':
@@ -784,7 +790,6 @@ class WP_PDO_Engine extends PDO {
 			case 'desc':
 			case 'check':
 			case 'analyze':
-				//case "foundrows":
 				$this->num_rows     = count( $this->_results );
 				$this->return_value = $this->num_rows;
 				break;
@@ -818,7 +823,7 @@ class WP_PDO_Engine extends PDO {
 			return;
 		}
 
-		//long queries can really kill this
+		// Long queries can really kill this.
 		$pattern = '/(?<!\\\\)([\'"])(.*?)(?<!\\\\)\\1/imsx';
 		$_limit  = ini_get( 'pcre.backtrack_limit' );
 		$limit   = $_limit;
@@ -833,7 +838,7 @@ class WP_PDO_Engine extends PDO {
 			do {
 				if ( $limit > 10000000 ) {
 					$this->set_error( __LINE__, __FUNCTION__, 'The query is too big to parse properly' );
-					break; //no point in continuing execution, would get into a loop
+					break; // No point in continuing execution, would get into a loop.
 				}
 				ini_set( 'pcre.backtrack_limit', $limit );
 				$query = preg_replace_callback(
@@ -844,7 +849,7 @@ class WP_PDO_Engine extends PDO {
 				$limit = $limit * 10;
 			} while ( is_null( $query ) );
 
-			//reset the pcre.backtrack_limit
+			// Reset the pcre.backtrack_limit.
 			ini_set( 'pcre.backtrack_limit', $_limit );
 		}
 
@@ -857,29 +862,27 @@ class WP_PDO_Engine extends PDO {
 	/**
 	 * Call back function to replace field data with PDO parameter.
 	 *
-	 * @param string $matches
+	 * @param string $matches Matched string.
 	 *
 	 * @return string
 	 */
 	private function replace_variables_with_placeholders( $matches ) {
-		//remove the WordPress escaping mechanism
+		// Remove the WordPress escaping mechanism.
 		$param = stripslashes( $matches[0] );
 
-		//remove trailing spaces
+		// Remove trailing spaces.
 		$param = trim( $param );
 
-		//remove the quotes at the end and the beginning
+		// Remove the quotes at the end and the beginning.
 		if ( in_array( $param[ strlen( $param ) - 1 ], array( "'", '"' ), true ) ) {
-			$param = substr( $param, 0, -1 );//end
+			$param = substr( $param, 0, -1 ); // End.
 		}
 		if ( in_array( $param[0], array( "'", '"' ), true ) ) {
-			$param = substr( $param, 1 ); //start
+			$param = substr( $param, 1 ); // Start.
 		}
-		//$this->extracted_variables[] = $param;
 		$key                         = ':param_' . $this->param_num++;
 		$this->extracted_variables[] = $param;
-		//return the placeholder
-		//return ' ? ';
+		// Return the placeholder.
 		return ' ' . $key . ' ';
 	}
 
@@ -889,7 +892,7 @@ class WP_PDO_Engine extends PDO {
 	 * It takes the query string ,determines the type and returns the type string.
 	 * If the query is the type that SQLite Integration can't executes, returns false.
 	 *
-	 * @param string $query
+	 * @param string $query The query string.
 	 *
 	 * @return boolean|string
 	 */
@@ -950,7 +953,7 @@ class WP_PDO_Engine extends PDO {
 	 * SQLite version 3.7.11 began to support multiple rows insert with values
 	 * clause. This is for that version or later.
 	 *
-	 * @param string $query
+	 * @param string $query The query string.
 	 */
 	private function execute_insert_query_new( $query ) {
 		$engine                = $this->prepare_engine( $this->query_type );
@@ -967,7 +970,7 @@ class WP_PDO_Engine extends PDO {
 	 * It executes the INSERT query for SQLite version 3.7.10 or lesser. It is
 	 * necessary to rewrite multiple row values.
 	 *
-	 * @param string $query
+	 * @param string $query The query string.
 	 */
 	private function execute_insert_query( $query ) {
 		global $wpdb;
@@ -1021,7 +1024,7 @@ class WP_PDO_Engine extends PDO {
 	 *
 	 * It splits the values clause into an array to execute separately.
 	 *
-	 * @param string $values
+	 * @param string $values The values to be split.
 	 *
 	 * @return array
 	 */
@@ -1062,7 +1065,7 @@ class WP_PDO_Engine extends PDO {
 	/**
 	 * Method to execute CREATE query.
 	 *
-	 * @param string
+	 * @param string $query The query to execute.
 	 *
 	 * @return boolean
 	 */
@@ -1071,7 +1074,7 @@ class WP_PDO_Engine extends PDO {
 		$rewritten_query = $engine->rewrite_query( $query );
 		$reason          = 0;
 		$message         = '';
-		//$queries = explode(";", $this->rewritten_query);
+
 		try {
 			$this->beginTransaction();
 			foreach ( $rewritten_query as $single_query ) {
@@ -1105,7 +1108,7 @@ class WP_PDO_Engine extends PDO {
 	/**
 	 * Method to execute ALTER TABLE query.
 	 *
-	 * @param string
+	 * @param string $query The query to execute.
 	 *
 	 * @return boolean
 	 */
@@ -1165,7 +1168,7 @@ class WP_PDO_Engine extends PDO {
 	 * This query is meaningless for SQLite. This function returns null data with some
 	 * exceptions and only avoids the error message.
 	 *
-	 * @param string
+	 * @param string $query The query to execute.
 	 *
 	 * @return bool
 	 */
@@ -1178,7 +1181,7 @@ class WP_PDO_Engine extends PDO {
 		if ( preg_match( $pattern, $query, $match ) ) {
 			$value                       = str_replace( "'", '', $match[1] );
 			$dummy_data['Variable_name'] = trim( $value );
-			// this is set for Wordfence Security Plugin
+			// This is set for Wordfence Security Plugin.
 			$dummy_data['Value'] = '';
 			if ( 'max_allowed_packet' === $value ) {
 				$dummy_data['Value'] = 1047552;
@@ -1195,9 +1198,9 @@ class WP_PDO_Engine extends PDO {
 	/**
 	 * Method to execute SHOW TABLE STATUS query.
 	 *
-	 * This query is meaningless for SQLite. This function return dummy data.
+	 * This query is meaningless for SQLite. This function returns dummy data.
 	 *
-	 * @param string
+	 * @param string $query The query to execute.
 	 *
 	 * @return bool
 	 */
@@ -1238,7 +1241,7 @@ class WP_PDO_Engine extends PDO {
 	/**
 	 * Method to format the queried data to that of MySQL.
 	 *
-	 * @param string $engine
+	 * @param string $engine Not used.
 	 */
 	private function process_results( $engine ) {
 		if ( in_array( $this->query_type, array( 'describe', 'desc', 'showcolumns' ), true ) ) {
@@ -1258,9 +1261,9 @@ class WP_PDO_Engine extends PDO {
 	 * When $wpdb::suppress_errors is set to true or $wpdb::show_errors is set to false,
 	 * the error messages are ignored.
 	 *
-	 * @param string $line where the error occurred.
-	 * @param string $function to indicate the function name where the error occurred.
-	 * @param string $message
+	 * @param string $line     Where the error occurred.
+	 * @param string $function Indicate the function name where the error occurred.
+	 * @param string $message  The message.
 	 *
 	 * @return boolean
 	 */
@@ -1308,7 +1311,7 @@ class WP_PDO_Engine extends PDO {
 	 */
 	private function convert_to_columns_object() {
 		$_results = array();
-		$_columns = array( //Field names MySQL SHOW COLUMNS returns
+		$_columns = array( // Field names MySQL SHOW COLUMNS returns.
 			'Field'   => '',
 			'Type'    => '',
 			'Null'    => '',
@@ -1343,16 +1346,16 @@ class WP_PDO_Engine extends PDO {
 		$_results = array();
 		$_columns = array(
 			'Table'        => '',
-			'Non_unique'   => '', // unique -> 0, not unique -> 1
-			'Key_name'     => '', // the name of the index
-			'Seq_in_index' => '', // column sequence number in the index. begins at 1
+			'Non_unique'   => '', // Unique -> 0, not unique -> 1.
+			'Key_name'     => '', // The name of the index.
+			'Seq_in_index' => '', // Column sequence number in the index. begins at 1.
 			'Column_name'  => '',
-			'Collation'    => '', //A(scend) or NULL
+			'Collation'    => '', // A(scend) or NULL.
 			'Cardinality'  => '',
-			'Sub_part'     => '', // set to NULL
-			'Packed'       => '', // How to pack key or else NULL
+			'Sub_part'     => '', // Set to NULL.
+			'Packed'       => '', // How to pack key or else NULL.
 			'Null'         => '', // If column contains null, YES. If not, NO.
-			'Index_type'   => '', // BTREE, FULLTEXT, HASH, RTREE
+			'Index_type'   => '', // BTREE, FULLTEXT, HASH, RTREE.
 			'Comment'      => '',
 		);
 		if ( 0 === count( $this->_results ) ) {
@@ -1435,7 +1438,7 @@ class WP_PDO_Engine extends PDO {
 				'Table'    => '',
 				'Op'       => $is_check ? 'check' : 'analyze',
 				'Msg_type' => 'status',
-				'Msg_text' => $is_check ? 'OK' : __( 'Table is already up to date' ),
+				'Msg_text' => $is_check ? __( 'OK', 'performance-lab' ) : __( 'Table is already up to date', 'performance-lab' ),
 			)
 		);
 		$this->results = $_results;
@@ -1453,7 +1456,7 @@ class WP_PDO_Engine extends PDO {
 		try {
 			$statement = $this->pdo->prepare( 'SELECT sqlite_version()' );
 			$statement->execute();
-			$result = $statement->fetch( PDO::FETCH_NUM );
+			$result = $statement->fetch( PDO::FETCH_NUM ); // phpcs:ignore WordPress.DB.RestrictedClasses
 
 			return $result[0];
 		} catch ( PDOException $err ) {

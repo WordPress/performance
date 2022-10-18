@@ -1,4 +1,10 @@
 <?php
+/**
+ * Custom functions for the SQLite implementation.
+ *
+ * @package performance-lab
+ * @since x.x.x
+ */
 
 /**
  * This class defines user defined functions(UDFs) for PDO library.
@@ -21,7 +27,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 *
 	 * Initializes the use defined functions to PDO object with PDO::sqliteCreateFunction().
 	 *
-	 * @param PDO $pdo
+	 * @param PDO $pdo The PDO object.
 	 */
 	public function __construct( $pdo ) {
 		if ( ! $pdo ) {
@@ -33,7 +39,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	}
 
 	/**
-	 * array to define MySQL function => function defined with PHP.
+	 * Array to define MySQL function => function defined with PHP.
 	 *
 	 * Replaced functions must be public.
 	 *
@@ -87,7 +93,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to extract the month value from the date.
 	 *
-	 * @param string representing the date formatted as 0000-00-00.
+	 * @param string $field representing the date formatted as 0000-00-00.
 	 *
 	 * @return string representing the number of the month between 1 and 12.
 	 */
@@ -98,7 +104,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to extract the year value from the date.
 	 *
-	 * @param string representing the date formatted as 0000-00-00.
+	 * @param string $field representing the date formatted as 0000-00-00.
 	 *
 	 * @return string representing the number of the year.
 	 */
@@ -109,7 +115,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to extract the day value from the date.
 	 *
-	 * @param string representing the date formatted as 0000-00-00.
+	 * @param string $field Representing the date formatted as 0000-00-00.
 	 *
 	 * @return string representing the number of the day of the month from 1 and 31.
 	 */
@@ -124,7 +130,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 * from '1970-01-01 00:00:00' GMT). Used with the argument, it changes the value
 	 * to the timestamp.
 	 *
-	 * @param string representing the date formatted as '0000-00-00 00:00:00'.
+	 * @param string $field Representing the date formatted as '0000-00-00 00:00:00'.
 	 *
 	 * @return number of unsigned integer
 	 */
@@ -135,7 +141,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to emulate MySQL SECOND() function.
 	 *
-	 * @param string representing the time formatted as '00:00:00'.
+	 * @param string $field Representing the time formatted as '00:00:00'.
 	 *
 	 * @return number of unsigned integer
 	 */
@@ -146,7 +152,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to emulate MySQL MINUTE() function.
 	 *
-	 * @param string representing the time formatted as '00:00:00'.
+	 * @param string $field Representing the time formatted as '00:00:00'.
 	 *
 	 * @return number of unsigned integer
 	 */
@@ -157,7 +163,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to emulate MySQL HOUR() function.
 	 *
-	 * @param string representing the time formatted as '00:00:00'.
+	 * @param string $time Representing the time formatted as '00:00:00'.
 	 *
 	 * @return number
 	 */
@@ -170,13 +176,13 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to emulate MySQL FROM_UNIXTIME() function.
 	 *
-	 * @param integer of unix timestamp
-	 * @param string to indicate the way of formatting(optional)
+	 * @param integer $field The unix timestamp.
+	 * @param string  $format Indicate the way of formatting(optional).
 	 *
 	 * @return string formatted as '0000-00-00 00:00:00'.
 	 */
 	public function from_unixtime( $field, $format = null ) {
-		//convert to ISO time
+		// Convert to ISO time.
 		$date = gmdate( 'Y-m-d H:i:s', $field );
 
 		return is_null( $format ) ? $date : $this->dateformat( $date, $format );
@@ -203,7 +209,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to emulate MySQL CHAR_LENGTH() function.
 	 *
-	 * @param string
+	 * @param string $field The string to be measured.
 	 *
 	 * @return int unsigned integer for the length of the argument.
 	 */
@@ -214,7 +220,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to emulate MySQL MD5() function.
 	 *
-	 * @param string
+	 * @param string $field The string to be hashed.
 	 *
 	 * @return string of the md5 hash value of the argument.
 	 */
@@ -244,9 +250,9 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 * This function rewrites the function name to SQLite compatible substr(),
 	 * which can manipulate UTF-8 characters.
 	 *
-	 * @param string $text
-	 * @param integer $pos representing the start point.
-	 * @param integer $len representing the length of the substring(optional).
+	 * @param string  $text The text to be processed.
+	 * @param integer $pos  Representing the start point.
+	 * @param integer $len  Representing the length of the substring(optional).
 	 *
 	 * @return string
 	 */
@@ -257,8 +263,8 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to emulate MySQL DATEFORMAT() function.
 	 *
-	 * @param string date formatted as '0000-00-00' or datetime as '0000-00-00 00:00:00'.
-	 * @param string $format
+	 * @param string $date   Formatted as '0000-00-00' or datetime as '0000-00-00 00:00:00'.
+	 * @param string $format The string format.
 	 *
 	 * @return string formatted according to $format
 	 */
@@ -313,7 +319,6 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 * @param string $interval representing the expression of the time to add.
 	 *
 	 * @return string date formatted as '0000-00-00 00:00:00'.
-	 * @throws Exception
 	 */
 	public function date_add( $date, $interval ) {
 		$interval = $this->derive_interval( $interval );
@@ -346,7 +351,6 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 * @param string $interval representing the expression of the time to subtract.
 	 *
 	 * @return string date formatted as '0000-00-00 00:00:00'.
-	 * @throws Exception
 	 */
 	public function date_sub( $date, $interval ) {
 		$interval = $this->derive_interval( $interval );
@@ -457,7 +461,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 *
 	 * This function returns true if the argument is null, and true if not.
 	 *
-	 * @param various types $field
+	 * @param mixed $field The field to be tested.
 	 *
 	 * @return boolean
 	 */
@@ -483,8 +487,8 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to emulate MySQL REGEXP() function.
 	 *
-	 * @param string $field haystack
-	 * @param string $pattern : regular expression to match.
+	 * @param string $field   Haystack.
+	 * @param string $pattern Regular expression to match.
 	 *
 	 * @return integer 1 if matched, 0 if not matched.
 	 */
@@ -501,9 +505,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 * SQLite does have CONCAT() function, but it has a different syntax from MySQL.
 	 * So this function must be manipulated here.
 	 *
-	 * @param string
-	 *
-	 * @return NULL if the argument is null | string conatenated if the argument is given.
+	 * @return null|string Return null if the argument is null, or a concatenated string if the argument is given.
 	 */
 	public function concat() {
 		$return_value = '';
@@ -526,9 +528,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 * If the same value is found, it returns the position of that value. If not, it
 	 * returns 0.
 	 *
-	 * @param int...|float... variable number of string, integer or double
-	 *
-	 * @return int unsigned integer
+	 * @return int
 	 */
 	public function field() {
 		global $wpdb;
@@ -568,10 +568,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 * Used without an argument, it returns false. This returned value will be
 	 * rewritten to 0, because SQLite doesn't understand true/false value.
 	 *
-	 * @param integer representing the base of the logarithm, which is optional.
-	 * @param double value to turn into logarithm.
-	 *
-	 * @return double | NULL
+	 * @return double|null
 	 */
 	public function log() {
 		$num_args = func_num_args();
@@ -620,8 +617,8 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 *
 	 * This function is meaningless in SQLite, so we do nothing.
 	 *
-	 * @param string $name
-	 * @param integer $timeout
+	 * @param string  $name    Not used.
+	 * @param integer $timeout Not used.
 	 *
 	 * @return string
 	 */
@@ -634,7 +631,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 *
 	 * This function is meaningless in SQLite, so we do nothing.
 	 *
-	 * @param string $name
+	 * @param string $name Not used.
 	 *
 	 * @return string
 	 */
@@ -648,27 +645,26 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 * This is MySQL alias for upper() function. This function rewrites it
 	 * to SQLite compatible name upper().
 	 *
-	 * @param string
+	 * @param string $content String to be converted to uppercase.
 	 *
 	 * @return string SQLite compatible function name.
 	 */
-	public function ucase( $string ) {
-		return "upper($string)";
+	public function ucase( $content ) {
+		return "upper($content)";
 	}
 
 	/**
 	 * Method to emulate MySQL LCASE() function.
 	 *
-	 *
 	 * This is MySQL alias for lower() function. This function rewrites it
 	 * to SQLite compatible name lower().
 	 *
-	 * @param string
+	 * @param string $content String to be converted to lowercase.
 	 *
 	 * @return string SQLite compatible function name.
 	 */
-	public function lcase( $string ) {
-		return "lower($string)";
+	public function lcase( $content ) {
+		return "lower($content)";
 	}
 
 	/**
@@ -676,7 +672,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 *
 	 * This function gets 4 or 8 bytes integer and turn it into the network address.
 	 *
-	 * @param unsigned long integer
+	 * @param integer $num Long integer.
 	 *
 	 * @return string
 	 */
@@ -689,7 +685,7 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 *
 	 * This function gets the network address and turns it into integer.
 	 *
-	 * @param string
+	 * @param string $addr Network address.
 	 *
 	 * @return int long integer
 	 */
@@ -702,8 +698,8 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 *
 	 * This function compares two dates value and returns the difference.
 	 *
-	 * @param string start
-	 * @param string end
+	 * @param string $start Start date.
+	 * @param string $end   End date.
 	 *
 	 * @return string
 	 */
@@ -722,9 +718,9 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 * it returns 0. If mbstring extension is loaded, mb_strpos() function is
 	 * used.
 	 *
-	 * @param string needle
-	 * @param string haystack
-	 * @param integer position
+	 * @param string  $substr Needle.
+	 * @param string  $str    Haystack.
+	 * @param integer $pos    Position.
 	 *
 	 * @return integer
 	 */
@@ -746,8 +742,6 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to return GMT date in the string format.
 	 *
-	 * @param none
-	 *
 	 * @return string formatted GMT date 'dddd-mm-dd'
 	 */
 	public function utc_date() {
@@ -757,8 +751,6 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	/**
 	 * Method to return GMT time in the string format.
 	 *
-	 * @param none
-	 *
 	 * @return string formatted GMT time '00:00:00'
 	 */
 	public function utc_time() {
@@ -767,8 +759,6 @@ class WP_PDO_SQLite_User_Defined_Functions {
 
 	/**
 	 * Method to return GMT time stamp in the string format.
-	 *
-	 * @param none
 	 *
 	 * @return string formatted GMT timestamp 'yyyy-mm-dd 00:00:00'
 	 */
@@ -782,13 +772,9 @@ class WP_PDO_SQLite_User_Defined_Functions {
 	 * This function only returns the current newest version number of MySQL,
 	 * because it is meaningless for SQLite database.
 	 *
-	 * @param none
-	 *
 	 * @return string representing the version number: major_version.minor_version
 	 */
 	public function version() {
-		//global $required_mysql_version;
-		//return $required_mysql_version;
 		return '5.5';
 	}
 }

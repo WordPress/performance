@@ -1,10 +1,19 @@
 <?php
+/**
+ * Rewrite the ALTER queries for SQLite to execute.
+ *
+ * @package performance-lab
+ * @since x.x.x
+ */
 
-
+/**
+ * Class to handle the ALTER query.
+ */
 class WP_SQLite_Alter_Query {
 
 	/**
 	 * Variable to store the rewritten query string.
+	 *
 	 * @var string
 	 */
 	public $_query = null;
@@ -12,8 +21,8 @@ class WP_SQLite_Alter_Query {
 	/**
 	 * Function to split the query string to the tokens and call appropriate functions.
 	 *
-	 * @param $query
-	 * @param string $query_type
+	 * @param string $query      The query string.
+	 * @param string $query_type The query type.
 	 *
 	 * @return boolean | string
 	 */
@@ -87,7 +96,7 @@ class WP_SQLite_Alter_Query {
 	/**
 	 * Function to analyze ALTER TABLE command and sets the data to an array.
 	 *
-	 * @param string $command
+	 * @param string $command The command string.
 	 *
 	 * @return boolean|array
 	 * @access private
@@ -107,7 +116,9 @@ class WP_SQLite_Alter_Query {
 				case 'add':
 					if ( in_array( strtolower( $match_2 ), array( 'fulltext', 'constraint', 'foreign' ), true ) ) {
 						break;
-					} elseif ( stripos( 'column', $match_2 ) !== false ) {
+					}
+
+					if ( stripos( 'column', $match_2 ) !== false ) {
 						$tokens['command']     = $match_1 . ' ' . $match_2;
 						$tokens['column_name'] = $match_3;
 						$tokens['column_def']  = trim( $the_rest );
@@ -138,6 +149,7 @@ class WP_SQLite_Alter_Query {
 						$tokens['column_def']  = $match_3 . ' ' . $the_rest;
 					}
 					break;
+
 				case 'drop':
 					if ( stripos( 'column', $match_2 ) !== false ) {
 						$tokens['command']     = $match_1 . ' ' . $match_2;
@@ -154,6 +166,7 @@ class WP_SQLite_Alter_Query {
 						$tokens['column_name'] = $match_2;
 					}
 					break;
+
 				case 'rename':
 					if ( stripos( 'to', $match_2 ) !== false ) {
 						$tokens['command']     = $match_1 . ' ' . $match_2;
@@ -163,6 +176,7 @@ class WP_SQLite_Alter_Query {
 						$tokens['column_name'] = $match_2;
 					}
 					break;
+
 				case 'modify':
 					if ( stripos( 'column', $match_2 ) !== false ) {
 						$tokens['command']     = $match_1 . ' ' . $match_2;
@@ -174,6 +188,7 @@ class WP_SQLite_Alter_Query {
 						$tokens['column_def']  = $match_3 . ' ' . trim( $the_rest );
 					}
 					break;
+
 				case 'change':
 					$the_rest = trim( $the_rest );
 					if ( stripos( 'column', $match_2 ) !== false ) {
@@ -200,6 +215,7 @@ class WP_SQLite_Alter_Query {
 						}
 					}
 					break;
+
 				case 'alter':
 					$tokens['default_command'] = 'DROP DEFAULT';
 					if ( stripos( 'column', $match_2 ) !== false ) {
@@ -221,6 +237,7 @@ class WP_SQLite_Alter_Query {
 						}
 					}
 					break;
+
 				default:
 					break;
 			}
@@ -234,7 +251,7 @@ class WP_SQLite_Alter_Query {
 	 *
 	 * @access private
 	 *
-	 * @param array of string $queries
+	 * @param array $queries An array of string queries.
 	 *
 	 * @return string
 	 */
@@ -261,9 +278,9 @@ class WP_SQLite_Alter_Query {
 	 *
 	 * @access private
 	 *
-	 * @param array of string $queries
+	 * @param array $queries An array of string queries.
 	 *
-	 * @return array of string
+	 * @return array
 	 */
 	private function handle_add_primary_key( $queries ) {
 		$tokenized_query = $queries;
@@ -295,9 +312,9 @@ class WP_SQLite_Alter_Query {
 	 *
 	 * @access private
 	 *
-	 * @param array of string $queries
+	 * @param array $queries An of string $queries.
 	 *
-	 * @return array of string
+	 * @return array
 	 */
 	private function handle_drop_primary_key( $queries ) {
 		$tokenized_query = $queries;
@@ -333,9 +350,9 @@ class WP_SQLite_Alter_Query {
 	 *
 	 * @access private
 	 *
-	 * @param array of string $queries
+	 * @param array $queries An array of string queries.
 	 *
-	 * @return string|array of string
+	 * @return string|array
 	 */
 	private function handle_modify_command( $queries ) {
 		$tokenized_query = $queries;
@@ -350,7 +367,8 @@ class WP_SQLite_Alter_Query {
 		$create_query = array_shift( $index_queries );
 		if ( stripos( $create_query, $tokenized_query['column_name'] ) === false ) {
 			return 'SELECT 1=1';
-		} elseif ( preg_match( "/{$tokenized_query['column_name']}\\s*{$column_def}\\s*[,)]/i", $create_query ) ) {
+		}
+		if ( preg_match( "/{$tokenized_query['column_name']}\\s*{$column_def}\\s*[,)]/i", $create_query ) ) {
 			return 'SELECT 1=1';
 		}
 		$create_query = preg_replace( "/{$tokenized_query['table_name']}/i", $temp_table, $create_query );
@@ -383,9 +401,9 @@ class WP_SQLite_Alter_Query {
 	 *
 	 * @access private
 	 *
-	 * @param array of string $queries
+	 * @param array $queries An array of string queries.
 	 *
-	 * @return string|array of string
+	 * @return string|array
 	 */
 	private function handle_change_command( $queries ) {
 		$col_check       = false;
@@ -456,9 +474,9 @@ class WP_SQLite_Alter_Query {
 	 *
 	 * @access private
 	 *
-	 * @param array of string $queries
+	 * @param array $queries An array of string queries.
 	 *
-	 * @return string|array of string
+	 * @return string|array
 	 */
 	private function handle_alter_command( $queries ) {
 		$tokenized_query = $queries;
@@ -526,8 +544,8 @@ class WP_SQLite_Alter_Query {
 	 *
 	 * @access private
 	 *
-	 * @param string $col_name
-	 * @param string $col_def
+	 * @param string $col_name Column name.
+	 * @param string $col_def  Column definition.
 	 *
 	 * @return string
 	 */
@@ -544,9 +562,9 @@ class WP_SQLite_Alter_Query {
 		}
 		$def_string = preg_replace( '/unsigned/im', '', $def_string );
 		$def_string = preg_replace( '/auto_increment/im', 'PRIMARY KEY AUTOINCREMENT', $def_string );
-		// when you use ALTER TABLE ADD, you can't use current_*. so we replace
+		// When you use ALTER TABLE ADD, you can't use current_*. so we replace.
 		$def_string = str_ireplace( $array_curtime, $array_reptime, $def_string );
-		// colDef is enum
+		// This is enum.
 		$pattern_enum = '/enum\((.*?)\)([^,\)]*)/ims';
 		if ( preg_match( $pattern_enum, $col_def, $matches ) ) {
 			$def_string = 'TEXT' . $matches[2] . ' CHECK (' . $col_name . ' IN (' . $matches[1] . '))';

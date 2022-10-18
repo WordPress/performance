@@ -1,4 +1,10 @@
 <?php
+/**
+ * Modify queried data to a PHP object.
+ *
+ * @package performance-lab
+ * @since x.x.x
+ */
 
 /**
  * Class to change queried data to PHP object.
@@ -7,7 +13,13 @@
  */
 class WP_SQLite_Object_Array {
 
-	function __construct( $data = null, &$node = null ) {
+	/**
+	 * Constructor.
+	 *
+	 * @param array    $data The data to be converted.
+	 * @param stdClass $node The node to be converted.
+	 */
+	public function __construct( $data = null, &$node = null ) {
 		foreach ( $data as $key => $value ) {
 			if ( is_array( $value ) ) {
 				if ( ! $node ) {
