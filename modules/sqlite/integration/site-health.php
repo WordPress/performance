@@ -1,6 +1,9 @@
 <?php
 /**
  * Adds and filters data in the site-health screen.
+ *
+ * @package performance-lab
+ * @since x.x.x
  */
 
 /**

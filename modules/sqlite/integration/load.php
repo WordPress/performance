@@ -31,11 +31,6 @@ function sqlite_plugin_copy_db_file() {
 		return;
 	}
 
-	// Bail early if there is a `.delete-db` file.
-	if ( file_exists( WP_CONTENT_DIR . '/.delete-db' ) ) {
-		return;
-	}
-
 	// Init the filesystem to allow copying the file.
 	global $wp_filesystem;
 	if ( ! $wp_filesystem ) {
@@ -51,58 +46,28 @@ function sqlite_plugin_copy_db_file() {
 				'{SQLITE_IMPLEMENTATION_FOLDER_PATH}',
 				'{PERFLAB_PLUGIN}',
 				'{SQLITE_MODULE}',
-				'{PERFLAB_MODULES_SETTING}'
+				'{PERFLAB_MODULES_SETTING}',
 			),
 			array(
 				__DIR__,
 				str_replace( WP_PLUGIN_DIR . '/', '', PERFLAB_MAIN_FILE ),
 				'sqlite/integration',
-				PERFLAB_MODULES_SETTING
+				PERFLAB_MODULES_SETTING,
 			),
 			file_get_contents( __DIR__ . '/db.copy' )
 		);
 		$wp_filesystem->put_contents( $destination, $file_contents );
-
-		wp_safe_redirect( wp_login_url() );
-		wp_die();
 	}
 }
-
-add_action( 'init', function() {
-	// If there is a `.delete-db` file, delete it and deactivate the module.
-	if ( file_exists( WP_CONTENT_DIR . '/.delete-db' ) ) {
-		global $wp_filesystem;
-		if ( ! $wp_filesystem ) {
-			require_once ABSPATH . '/wp-admin/includes/file.php';
-			WP_Filesystem();
-		}
-
-		if ( file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
-			$wp_filesystem->delete( WP_CONTENT_DIR . '/db.php' );
-			wp_safe_redirect( wp_login_url() );
-			wp_die();
-		}
-
-		$modules = get_option( PERFLAB_MODULES_SETTING, array() );
-		unset( $modules['sqlite/integration'] );
-		update_option( PERFLAB_MODULES_SETTING, $modules );
-		$wp_filesystem->delete( WP_CONTENT_DIR . '/.delete-db' );
-	}
-
-	sqlite_plugin_copy_db_file(); // Copy db.php file.
-} );
+add_action( 'plugins_loaded', 'sqlite_plugin_copy_db_file' );
 
 /**
  * Trigger actions when the module gets deactivated.
  *
- * @param string $option    Name of the option.
- * @param mixed  $old_value Old value of the option.
- * @param mixed  $value     New value of the option.
+ * @param mixed $value New value of the option.
  */
-function perflab_sqlite_module_activation_deactivation( $value, $old_value ) {
-	$disabled = ! isset( $value['sqlite/integration'] );
-
-	if ( $disabled ) {
+function perflab_sqlite_module_deactivation( $value ) {
+	if ( ! isset( $value['sqlite/integration'] ) ) {
 		if ( file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
 			global $wp_filesystem;
 			if ( ! $wp_filesystem ) {
@@ -110,11 +75,48 @@ function perflab_sqlite_module_activation_deactivation( $value, $old_value ) {
 				WP_Filesystem();
 			}
 			$wp_filesystem->delete( WP_CONTENT_DIR . '/db.php' );
-			$wp_filesystem->touch( WP_CONTENT_DIR . '/.delete-db' );
 		}
+
+		// Run an action on `shutdown`, to deactivate the option in the MySQL database.
+		add_action(
+			'shutdown',
+			function() {
+				global $table_prefix;
+
+				// Remove the filter to avoid an infinite loop.
+				remove_filter( 'pre_update_option_' . PERFLAB_MODULES_SETTING, 'perflab_sqlite_module_deactivation', 10 );
+
+				// Get credentials for the MySQL database.
+				$dbuser     = defined( 'DB_USER' ) ? DB_USER : '';
+				$dbpassword = defined( 'DB_PASSWORD' ) ? DB_PASSWORD : '';
+				$dbname     = defined( 'DB_NAME' ) ? DB_NAME : '';
+				$dbhost     = defined( 'DB_HOST' ) ? DB_HOST : '';
+
+				// Init a connection to the MySQL database.
+				$wpdb_mysql = new wpdb( $dbuser, $dbpassword, $dbname, $dbhost );
+				$wpdb_mysql->set_prefix( $table_prefix );
+
+				// Get the perflab options, remove the sqlite/integration module and update the option.
+				$alloptions = $wpdb_mysql->get_results( "SELECT option_name, option_value FROM $wpdb_mysql->options WHERE autoload = 'yes'" );
+				$value      = array();
+				foreach ( $alloptions as $o ) {
+					if ( PERFLAB_MODULES_SETTING === $o->option_name ) {
+						$value = maybe_unserialize( $o->option_value );
+						break;
+					}
+				}
+				unset( $value['sqlite/integration'] );
+				$wpdb_mysql->update(
+					$wpdb_mysql->options,
+					array( 'option_value' => maybe_serialize( $value ) ),
+					array( 'option_name' => PERFLAB_MODULES_SETTING )
+				);
+			}
+		);
 	}
+	return $value;
 }
-add_action( 'pre_update_option_' . PERFLAB_MODULES_SETTING, 'perflab_sqlite_module_activation_deactivation',10, 3 );
+add_filter( 'pre_update_option_' . PERFLAB_MODULES_SETTING, 'perflab_sqlite_module_deactivation', 10, 3 );
 
 /**
  * Add admin notices.
@@ -127,7 +129,7 @@ function sqlite_plugin_admin_notice() {
 	if ( ! class_exists( 'SQLite3' ) ) {
 		printf(
 			'<div class="notice notice-error"><p>%s</p></div>',
-			esc_html__( 'The SQLite Integration module is active, but the SQLite3 class is missing from your server. Please make sure that SQLite is enabled in your PHP installation.', 'performance-lab' )
+			esc_html__( 'The SQLite Integration module is active, but the SQLite3 extension is not installed on server. Please make sure that SQLite is enabled in your PHP installation.', 'performance-lab' )
 		);
 		return;
 	}
@@ -137,6 +139,7 @@ function sqlite_plugin_admin_notice() {
 		printf(
 			'<div class="notice notice-error"><p>%s</p></div>',
 			sprintf(
+				/* translators: %1$s: <code>wp-content/db.php</code>, %2$s: The admin-URL to deactivate the module. */
 				__( 'The SQLite Integration module is active, but the %1$s file is missing. Please <a href="%2$s">deactivate the module</a> and re-activate it to try again.', 'performance-lab' ),
 				'<code>wp-content/db.php</code>',
 				esc_url( admin_url( 'options-general.php?page=perflab-modules' ) )

@@ -1,17 +1,43 @@
 <?php
+/**
+ * This file is auto-generated and copied from the performance-lab plugin.
+ *
+ * Please don't edit this file directly.
+ *
+ * @package performance-lab
+ */
 
+// Bail early if the SQLite implementation was not located in the performance-lab plugin.
+if ( ! file_exists( '{SQLITE_IMPLEMENTATION_FOLDER_PATH}/wp-includes/sqlite/db.php' ) ) {
+	return;
+}
+
+// Define SQLite constant.
+if ( ! defined( 'DATABASE_TYPE' ) ) {
+	define( 'DATABASE_TYPE', 'sqlite' );
+}
+
+// Require the implementation from the performance-lab plugin.
 require_once '{SQLITE_IMPLEMENTATION_FOLDER_PATH}/wp-includes/sqlite/db.php';
 
-add_action( 'init', function() {
-	if ( ! function_exists( 'activate_plugin' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+// Activate the performance-lab plugin if it is not already activated.
+add_action(
+	'init',
+	function() {
+		if ( ! function_exists( 'activate_plugin' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		if ( is_plugin_inactive( '{PERFLAB_PLUGIN}' ) ) {
+			activate_plugin( '{PERFLAB_PLUGIN}' );
+		}
 	}
-	if ( is_plugin_inactive( '{PERFLAB_PLUGIN}' ) ) {
-		activate_plugin( '{PERFLAB_PLUGIN}' );
-	}
-} );
+);
 
-add_filter( 'option_{PERFLAB_MODULES_SETTING}', function( $value ) {
-	$value['{SQLITE_MODULE}'] = array( 'enabled' => 1 );
-	return $value;
-} );
+// Enable the SQLite module.
+add_filter(
+	'option_{PERFLAB_MODULES_SETTING}',
+	function( $value ) {
+		$value['{SQLITE_MODULE}'] = array( 'enabled' => 1 );
+		return $value;
+	}
+);
