@@ -1,9 +1,13 @@
 # Documentation/Infrastructure
-/docs                                       @JustinyAhin @felixarntz
 /admin                                      @JustinyAhin @felixarntz
 /tests/admin                                @JustinyAhin @felixarntz
 /bin                                        @JustinyAhin @felixarntz
 /.github                                    @JustinyAhin @felixarntz
+
+# Focus: Database
+/modules/database
+/tests/modules/database
+/tests/testdata/modules/database
 
 # Focus: Images
 /modules/images                             @adamsilverstein @getsource
