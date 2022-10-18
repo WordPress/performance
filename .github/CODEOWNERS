@@ -14,7 +14,7 @@
 /tests/modules/images                       @adamsilverstein @getsource
 /tests/testdata/modules/images              @adamsilverstein @getsource
 
-# Focus: JavaScript
+# Focus: CSS & JS
 /modules/javascript                         @aristath @sgomes
 /tests/modules/javascript                   @aristath @sgomes
 /tests/testdata/modules/javascript          @aristath @sgomes
