@@ -37,7 +37,7 @@ add_action(
 add_filter(
 	'option_{PERFLAB_MODULES_SETTING}',
 	function( $value ) {
-		$value['{SQLITE_MODULE}'] = array( 'enabled' => 1 );
+		$value['{SQLITE_MODULE}'] = array( 'enabled' => '1' );
 		return $value;
 	}
 );
