@@ -50,7 +50,7 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
 function webp_uploads_generate_webp_jpeg_setting_callback() {
 	?>
 	</td>
-	<td <?php echo ! is_multisite() ? esc_html( 'class="td-full"' ) : ''; ?>>
+	<td class="<?php echo ! is_multisite() ? esc_attr( 'td-full' ) : ''; ?>">
 		<label for="perflab_generate_webp_and_jpeg">
 			<input name="perflab_generate_webp_and_jpeg" type="checkbox" id="perflab_generate_webp_and_jpeg" aria-describedby="perflab_generate_webp_and_jpeg_description" value="1"<?php checked( '1', get_option( 'perflab_generate_webp_and_jpeg' ) ); ?> />
 			<?php esc_html_e( 'Generate JPEG files in addition to WebP', 'performance-lab' ); ?>
