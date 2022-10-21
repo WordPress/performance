@@ -30,22 +30,22 @@
 /tests/modules/images/webp-uploads                                          @adamsilverstein @felixarntz @mitogh
 /tests/testdata/modules/images/webp-uploads                                 @adamsilverstein @felixarntz @mitogh
 
-# Module: WebP Support Health Check
+# Module: WebP Support
 /modules/images/webp-support                                           @adamsilverstein @kirtangajjar @mitogh
 /tests/modules/images/webp-support                                     @adamsilverstein @kirtangajjar @mitogh
 /tests/testdata/modules/images/webp-support                            @adamsilverstein @kirtangajjar @mitogh
 
-# Module: Autoloaded Options Health Check
+# Module: Audit Autoloaded Options
 /modules/database/audit-autoloaded-options                               @manuelRod
 /tests/modules/database/audit-autoloaded-options                         @manuelRod
 /tests/testdata/modules/database/audit-autoloaded-options                @manuelRod
 
-# Module: Enqueued Assets Health Check
+# Module: Audit Enqueued Assets
 /modules/css-and-js/audit-enqueued-assets                                  @manuelRod
 /tests/modules/css-and-js/audit-enqueued-assets                            @manuelRod
 /tests/testdata/modules/css-and-js/audit-enqueued-assets                   @manuelRod
 
-# Module: Persistent Object Cache Health Check
+# Module: Persistent Object Cache
 /modules/object-cache/persistent-object-cache-health-check                  @tillkruss @spacedmonkey
 /tests/modules/object-cache/persistent-object-cache-health-check            @tillkruss @spacedmonkey
 /tests/testdata/modules/object-cache/persistent-object-cache-health-check   @tillkruss @spacedmonkey
@@ -55,6 +55,6 @@
 /tests/modules/images/dominant-color                                        @pbearne @spacedmonkey
 /tests/testdata/modules/images/dominant-color                               @pbearne @spacedmonkey
 
-# Module: Full Page Cache Health Check
+# Module: Audit Full Page Cache
 /modules/object-cache/audit-full-page-cache                                  @manuelRod @westonruter
 /tests/modules/object-cache/audit-full-page-cache                            @manuelRod @westonruter
