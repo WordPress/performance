@@ -20,6 +20,16 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_add_sources_to_rest_response() {
+		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
+
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function( $transforms ) {
+				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
+				return $transforms;
+			}
+		);
+
 		$file_location = TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg';
 		$attachment_id = $this->factory->attachment->create_upload_object( $file_location );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
@@ -57,6 +67,8 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 				$this->assertNotFalse( filter_var( $properties['sources'][ $mime_type ]['source_url'], FILTER_VALIDATE_URL ) );
 			}
 		}
+
 		$this->assertArrayNotHasKey( 'sources', $data['media_details'] );
 	}
+
 }

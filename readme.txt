@@ -1,10 +1,10 @@
 === Performance Lab ===
 
 Contributors:      wordpressdotorg
-Requires at least: 5.8
-Tested up to:      6.0
+Requires at least: 6.0
+Tested up to:      6.1
 Requires PHP:      5.6
-Stable tag:        1.5.0
+Stable tag:        1.6.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -67,6 +67,15 @@ Contributions welcome! There are several ways to contribute:
 * Join the weekly chat (Tuesdays at 16:00 UTC) in the [#performance channel on Slack](https://wordpress.slack.com/archives/performance)
 
 == Changelog ==
+
+= 1.6.0 =
+
+**Enhancements**
+
+* Site Health: Only load Site Health checks for persistent cache and full page cache when not available in core. ([543](https://github.com/WordPress/performance/pull/543))
+* Images: Add checkbox to Settings > Media to control whether to generate JPEG in addition to WebP. ([537](https://github.com/WordPress/performance/pull/537))
+* Images: Generate only WebP images by default for JPEG and WebP uploads. ([527](https://github.com/WordPress/performance/pull/527))
+* Infrastructure: Bump minimum WordPress requirement to 6.0. ([549](https://github.com/WordPress/performance/pull/549))
 
 = 1.5.0 =
 
