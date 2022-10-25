@@ -37,6 +37,9 @@ add_action(
 add_filter(
 	'option_{PERFLAB_MODULES_SETTING}',
 	function( $value ) {
+		if ( empty( $value ) ) {
+			$value = function_exists( 'perflab_get_modules_setting_default' ) ? perflab_get_modules_setting_default() : array();
+		}
 		$value['{SQLITE_MODULE}']            = empty( $value['{SQLITE_MODULE}'] ) ? array() : $value['{SQLITE_MODULE}'];
 		$value['{SQLITE_MODULE}']['enabled'] = '1';
 		return $value;
