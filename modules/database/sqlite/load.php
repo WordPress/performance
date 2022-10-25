@@ -53,7 +53,7 @@ function sqlite_plugin_copy_db_file() {
 			array(
 				__DIR__,
 				str_replace( WP_PLUGIN_DIR . '/', '', PERFLAB_MAIN_FILE ),
-				'sqlite/integration',
+				'database/sqlite',
 				PERFLAB_MODULES_SETTING,
 			),
 			file_get_contents( __DIR__ . '/db.copy' )
@@ -73,7 +73,7 @@ add_action( 'plugins_loaded', 'sqlite_plugin_copy_db_file' );
  * @return mixed Returns the value.
  */
 function perflab_sqlite_module_deactivation( $value ) {
-	if ( ! isset( $value['sqlite/integration'] ) ) {
+	if ( ! isset( $value['database/sqlite'] ) ) {
 		if ( file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
 			global $wp_filesystem;
 			if ( ! $wp_filesystem ) {
@@ -102,7 +102,7 @@ function perflab_sqlite_module_deactivation( $value ) {
 				$wpdb_mysql = new wpdb( $dbuser, $dbpassword, $dbname, $dbhost );
 				$wpdb_mysql->set_prefix( $table_prefix );
 
-				// Get the perflab options, remove the sqlite/integration module and update the option.
+				// Get the perflab options, remove the database/sqlite module and update the option.
 				$alloptions = $wpdb_mysql->get_results( "SELECT option_name, option_value FROM $wpdb_mysql->options WHERE autoload = 'yes'" );
 				$value      = array();
 				foreach ( $alloptions as $o ) {
@@ -111,7 +111,7 @@ function perflab_sqlite_module_deactivation( $value ) {
 						break;
 					}
 				}
-				unset( $value['sqlite/integration'] );
+				unset( $value['database/sqlite'] );
 				$wpdb_mysql->update(
 					$wpdb_mysql->options,
 					array( 'option_value' => maybe_serialize( $value ) ),
