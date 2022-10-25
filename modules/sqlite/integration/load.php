@@ -69,6 +69,8 @@ add_action( 'plugins_loaded', 'sqlite_plugin_copy_db_file' );
  * @since n.e.x.t
  *
  * @param mixed $value New value of the option.
+ *
+ * @return mixed Returns the value.
  */
 function perflab_sqlite_module_deactivation( $value ) {
 	if ( ! isset( $value['sqlite/integration'] ) ) {
