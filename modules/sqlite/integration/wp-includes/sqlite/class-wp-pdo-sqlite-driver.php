@@ -3,7 +3,7 @@
  * Rewrite queries (except CREATE and ALTER) for SQLite to execute.
  *
  * @package performance-lab
- * @since x.x.x
+ * @since n.e.x.t
  */
 
 /**

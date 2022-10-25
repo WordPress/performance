@@ -3,7 +3,7 @@
  * Adds and filters data in the site-health screen.
  *
  * @package performance-lab
- * @since x.x.x
+ * @since n.e.x.t
  */
 
 /**
@@ -11,6 +11,8 @@
  *
  * When the plugin gets merged in wp-core, these should be merged in src/wp-admin/includes/class-wp-debug-data.php
  * See https://github.com/WordPress/wordpress-develop/pull/3220/files
+ *
+ * @since n.e.x.t
  *
  * @param array $info The debug data.
  */

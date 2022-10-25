@@ -3,7 +3,7 @@
  * Main integration file.
  *
  * @package performance-lab
- * @since x.x.x
+ * @since n.e.x.t
  */
 
 // Bail early if DATABASE_TYPE is not defined as sqlite.

@@ -5,7 +5,7 @@
  * Experimental: Yes
  *
  * @package performance-lab
- * @since x.x.x
+ * @since n.e.x.t
  */
 
 // Temporary - This will be in wp-config.php once SQLite is merged in Core.
@@ -17,6 +17,8 @@ if ( ! defined( 'DATABASE_TYPE' ) ) {
  * Adds the db.php file in wp-content.
  *
  * When the plugin gets merged in wp-core, this is not to be ported.
+ *
+ * @since n.e.x.t
  */
 function sqlite_plugin_copy_db_file() {
 	// Bail early if the SQLite3 class does not exist.
@@ -63,6 +65,8 @@ add_action( 'plugins_loaded', 'sqlite_plugin_copy_db_file' );
 
 /**
  * Trigger actions when the module gets deactivated.
+ *
+ * @since n.e.x.t
  *
  * @param mixed $value New value of the option.
  */
@@ -122,6 +126,8 @@ add_filter( 'pre_update_option_' . PERFLAB_MODULES_SETTING, 'perflab_sqlite_modu
  * Add admin notices.
  *
  * When the plugin gets merged in wp-core, this is not to be ported.
+ *
+ * @since n.e.x.t
  */
 function sqlite_plugin_admin_notice() {
 

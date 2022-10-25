@@ -3,7 +3,7 @@
  * Extend and replace the wpdb class.
  *
  * @package performance-lab
- * @since x.x.x
+ * @since n.e.x.t
  */
 
 /**

@@ -3,7 +3,7 @@
  * Rewrite the ALTER queries for SQLite to execute.
  *
  * @package performance-lab
- * @since x.x.x
+ * @since n.e.x.t
  */
 
 /**

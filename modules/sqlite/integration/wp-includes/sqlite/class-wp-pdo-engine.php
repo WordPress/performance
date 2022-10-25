@@ -3,7 +3,7 @@
  * The main PDO extension class.
  *
  * @package performance-lab
- * @since x.x.x
+ * @since n.e.x.t
  */
 
 /**
