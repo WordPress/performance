@@ -40,6 +40,7 @@ function perflab_sqlite_plugin_copy_db_file() {
 		WP_Filesystem();
 	}
 
+	$file_copied_successfully = false;
 	if ( $wp_filesystem->touch( $destination ) ) {
 
 		// Get the db.copy file contents, replace placeholders and write it to the destination.
@@ -58,7 +59,17 @@ function perflab_sqlite_plugin_copy_db_file() {
 			),
 			file_get_contents( __DIR__ . '/db.copy' )
 		);
-		$wp_filesystem->put_contents( $destination, $file_contents );
+
+		$file_copied_successfully = $wp_filesystem->put_contents( $destination, $file_contents );
+	}
+
+	if ( $file_copied_successfully ) {
+		add_action(
+			'admin_head',
+			function() {
+				echo '<script>window.location.reload(true);</script>';
+			}
+		);
 	}
 }
 add_action( 'plugins_loaded', 'perflab_sqlite_plugin_copy_db_file' );
