@@ -14,7 +14,7 @@ if ( ! defined( 'DATABASE_TYPE' ) ) {
 }
 
 /**
- * Add the db.php file in wp-content.
+ * Adds the db.php file in wp-content.
  *
  * When the plugin gets merged in wp-core, this is not to be ported.
  */
