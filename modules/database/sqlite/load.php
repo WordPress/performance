@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: SQLite Integration
- * Description: Use an SQLite database instead of MySQL. <div style="background:#fff;border:1px solid #c3c4c7;border-left-width: 4px;border-left-color:#dba617;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);padding:1em;max-width:50em;">CAUTION: Enabling this module will bring up the WordPress installation screen. You will need to reconfigure your site, and you will lose all your data. If you then disable the module, you will get back to your previous MySQL database, with all your previous data intact.</div>
+ * Description: Use an SQLite database instead of MySQL. CAUTION: Enabling this module will bring up the WordPress installation screen. You will need to reconfigure your site, and you will lose all your data. If you then disable the module, you will get back to your previous MySQL database, with all your previous data intact.
  * Experimental: Yes
  *
  * @package performance-lab

@@ -164,9 +164,9 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				?>
 			<?php } ?>
 		</label>
-		<div id="<?php echo esc_attr( "{$base_id}_description" ); ?>" class="description">
-			<?php echo wp_kses_post( $module_data['description'] ); ?>
-		</div>
+		<p id="<?php echo esc_attr( "{$base_id}_description" ); ?>" class="description">
+			<?php echo esc_html( $module_data['description'] ); ?>
+		</p>
 	</fieldset>
 	<?php
 }
