@@ -132,16 +132,6 @@ add_filter( 'pre_update_option_' . PERFLAB_MODULES_SETTING, 'perflab_sqlite_modu
  * @since n.e.x.t
  */
 function sqlite_plugin_admin_notice() {
-
-	// If SQLite is not detected, bail early.
-	if ( ! class_exists( 'SQLite3' ) ) {
-		printf(
-			'<div class="notice notice-error"><p>%s</p></div>',
-			esc_html__( 'The SQLite Integration module is active, but the SQLite3 extension is not installed on server. Please make sure that SQLite is enabled in your PHP installation.', 'performance-lab' )
-		);
-		return;
-	}
-
 	// Check if the wp-content/db.php file exists.
 	if ( ! file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
 		printf(
