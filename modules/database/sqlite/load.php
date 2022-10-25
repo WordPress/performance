@@ -64,6 +64,12 @@ function perflab_sqlite_plugin_copy_db_file() {
 	}
 
 	if ( $file_copied_successfully ) {
+		/**
+		 * This hack is here because it's impossible to redirect properly in PHP,
+		 * due to hooks race conditions and the fact that the redirect is done before the output is sent.
+		 *
+		 * When SQLite gets merged in Core this will be a non-issue.
+		 */
 		add_action(
 			'admin_head',
 			function() {
