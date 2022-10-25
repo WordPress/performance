@@ -15,6 +15,15 @@
 class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 
 	/**
+	 * The database version.
+	 *
+	 * This is used here to avoid PHP warnings in the health screen.
+	 *
+	 * @var string
+	 */
+	public $client_info = '';
+
+	/**
 	 * Class variable to check if there is an error.
 	 *
 	 * @var boolean
@@ -199,6 +208,10 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 	 * Constructor definition is changed since version 1.7.1.
 	 */
 	function __construct() {
+
+		// Fixes a warning in the site-health screen.
+		$this->client_info = SQLite3::version()['versionString'];
+
 		register_shutdown_function( array( $this, '__destruct' ) );
 		if ( ! is_file( FQDB ) ) {
 			$this->prepare_directory();
