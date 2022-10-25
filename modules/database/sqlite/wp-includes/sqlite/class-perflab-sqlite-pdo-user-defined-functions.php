@@ -14,13 +14,13 @@
  * Usage:
  *
  * <code>
- * new WP_PDO_SQLite_User_Defined_Functions(ref_to_pdo_obj);
+ * new Perflab_SQLite_PDO_User_Defined_Functions(ref_to_pdo_obj);
  * </code>
  *
  * This automatically enables ref_to_pdo_obj to replace the function in the SQL statement
  * to the ones defined here.
  */
-class WP_PDO_SQLite_User_Defined_Functions {
+class Perflab_SQLite_PDO_User_Defined_Functions {
 
 	/**
 	 * The class constructor

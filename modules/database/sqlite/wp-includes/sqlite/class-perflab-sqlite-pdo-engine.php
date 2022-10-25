@@ -12,7 +12,7 @@
  * It accepts a request from wpdb class, initialize PDO instance,
  * execute SQL statement, and returns the results to WordPress.
  */
-class WP_PDO_Engine extends PDO { // phpcs:ignore
+class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 
 	/**
 	 * Class variable to check if there is an error.
@@ -216,7 +216,7 @@ class WP_PDO_Engine extends PDO { // phpcs:ignore
 		do {
 			try {
 				$this->pdo = new PDO( $dsn, null, null, array( PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ) ); // phpcs:ignore WordPress.DB.RestrictedClasses
-				new WP_PDO_SQLite_User_Defined_Functions( $this->pdo );
+				new Perflab_SQLite_PDO_User_Defined_Functions( $this->pdo );
 				$GLOBALS['@pdo'] = $this->pdo;
 			} catch ( PDOException $ex ) {
 				$status = $ex->getCode();
@@ -404,7 +404,7 @@ class WP_PDO_Engine extends PDO { // phpcs:ignore
 				if ( ! is_null( $this->found_rows_result ) ) {
 					$this->num_rows          = $this->found_rows_result;
 					$_column['FOUND_ROWS()'] = $this->num_rows;
-					$column[]                = new WP_SQLite_Object_Array( $_column );
+					$column[]                = new Perflab_SQLite_Object_Array( $_column );
 					$this->results           = $column;
 					$this->found_rows_result = null;
 				}
@@ -536,7 +536,7 @@ class WP_PDO_Engine extends PDO { // phpcs:ignore
 				} else {
 					$data['multiple_key'] = 1;
 				}
-				$this->column_data[] = new WP_SQLite_Object_Array( $data );
+				$this->column_data[] = new Perflab_SQLite_Object_Array( $data );
 
 				// Reset data for next iteration.
 				$data['name']         = '';
@@ -668,12 +668,12 @@ class WP_PDO_Engine extends PDO { // phpcs:ignore
 	 */
 	private function prepare_engine( $query_type = null ) {
 		if ( stripos( $query_type, 'create' ) !== false ) {
-			return new WP_SQLite_Create_Query();
+			return new Perflab_SQLite_Create_Query();
 		}
 		if ( stripos( $query_type, 'alter' ) !== false ) {
-			return new WP_SQLite_Alter_Query();
+			return new Perflab_SQLite_Alter_Query();
 		}
-		return new WP_PDO_SQLite_Driver();
+		return new Perflab_SQLite_PDO_Driver();
 	}
 
 	/**
@@ -1187,7 +1187,7 @@ class WP_PDO_Engine extends PDO { // phpcs:ignore
 				$dummy_data['Value'] = 1047552;
 			}
 		}
-		$_results[]         = new WP_SQLite_Object_Array( $dummy_data );
+		$_results[]         = new Perflab_SQLite_Object_Array( $dummy_data );
 		$this->results      = $_results;
 		$this->num_rows     = count( $this->results );
 		$this->return_value = $this->num_rows;
@@ -1230,7 +1230,7 @@ class WP_PDO_Engine extends PDO { // phpcs:ignore
 			'Create_options'  => '',
 			'Comment'         => '',
 		);
-		$_results[]         = new WP_SQLite_Object_Array( $dummy_data );
+		$_results[]         = new Perflab_SQLite_Object_Array( $dummy_data );
 		$this->results      = $_results;
 		$this->num_rows     = count( $this->results );
 		$this->return_value = $this->num_rows;
@@ -1295,7 +1295,7 @@ class WP_PDO_Engine extends PDO { // phpcs:ignore
 			echo $this->get_error_message();
 		} else {
 			foreach ( $this->results as $row ) {
-				$_results[] = new WP_SQLite_Object_Array( $row );
+				$_results[] = new Perflab_SQLite_Object_Array( $row );
 			}
 		}
 		$this->results = $_results;
@@ -1328,7 +1328,7 @@ class WP_PDO_Engine extends PDO { // phpcs:ignore
 				$_columns['Null']    = $row->notnull ? 'NO' : 'YES';
 				$_columns['Key']     = $row->pk ? 'PRI' : '';
 				$_columns['Default'] = $row->dflt_value;
-				$_results[]          = new WP_SQLite_Object_Array( $_columns );
+				$_results[]          = new Perflab_SQLite_Object_Array( $_columns );
 			}
 		}
 		$this->results = $_results;
@@ -1406,7 +1406,7 @@ class WP_PDO_Engine extends PDO { // phpcs:ignore
 				$_columns['Null']        = 'NO';
 				$_columns['Index_type']  = 'BTREE';
 				$_columns['Comment']     = '';
-				$_results[]              = new WP_SQLite_Object_Array( $_columns );
+				$_results[]              = new Perflab_SQLite_Object_Array( $_columns );
 			}
 			if ( stripos( $this->queries[0], 'WHERE' ) !== false ) {
 				preg_match( '/WHERE\\s*(.*)$/im', $this->queries[0], $match );
@@ -1433,7 +1433,7 @@ class WP_PDO_Engine extends PDO { // phpcs:ignore
 	 */
 	private function convert_result_check_or_analyze() {
 		$is_check      = 'check' === $this->query_type;
-		$_results[]    = new WP_SQLite_Object_Array(
+		$_results[]    = new Perflab_SQLite_Object_Array(
 			array(
 				'Table'    => '',
 				'Op'       => $is_check ? 'check' : 'analyze',

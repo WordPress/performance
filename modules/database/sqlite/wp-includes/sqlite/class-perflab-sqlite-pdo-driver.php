@@ -9,7 +9,7 @@
 /**
  * This class is for rewriting various query string except CREATE and ALTER.
  */
-class WP_PDO_SQLite_Driver {
+class Perflab_SQLite_PDO_Driver {
 
 	/**
 	 * Variable to indicate the query types.
@@ -258,7 +258,7 @@ class WP_PDO_SQLite_Driver {
 		$this->_query = str_ireplace( 'SQL_CALC_FOUND_ROWS', '', $this->_query );
 		// We make the data for next SELECE FOUND_ROWS() statement.
 		$unlimited_query              = preg_replace( '/\\bLIMIT\\s*.*/imsx', '', $this->_query );
-		$_wpdb                        = new WP_SQLite_DB();
+		$_wpdb                        = new Perflab_SQLite_DB();
 		$result                       = $_wpdb->query( $unlimited_query );
 		$wpdb->dbh->found_rows_result = $result;
 		$_wpdb                        = null;
@@ -325,7 +325,7 @@ class WP_PDO_SQLite_Driver {
 	 * @access private
 	 */
 	private function handle_create_query() {
-		$engine       = new WP_SQLite_Create_Query();
+		$engine       = new Perflab_SQLite_Create_Query();
 		$this->_query = $engine->rewrite_query( $this->_query );
 		$engine       = null;
 	}
@@ -339,7 +339,7 @@ class WP_PDO_SQLite_Driver {
 	 * @access private
 	 */
 	private function handle_alter_query() {
-		$engine       = new WP_SQLite_Alter_Query();
+		$engine       = new Perflab_SQLite_Alter_Query();
 		$this->_query = $engine->rewrite_query( $this->_query, 'alter' );
 		$engine       = null;
 	}
@@ -372,7 +372,7 @@ class WP_PDO_SQLite_Driver {
 	 * @access private
 	 */
 	private function rewrite_limit_usage() {
-		$_wpdb   = new WP_SQLite_DB();
+		$_wpdb   = new Perflab_SQLite_DB();
 		$options = $_wpdb->get_results( 'PRAGMA compile_options' );
 		foreach ( $options as $opt ) {
 			if ( isset( $opt->compile_option ) && stripos( $opt->compile_option, 'ENABLE_UPDATE_DELETE_LIMIT' ) !== false ) {
@@ -394,7 +394,7 @@ class WP_PDO_SQLite_Driver {
 	 * @access private
 	 */
 	private function rewrite_order_by_usage() {
-		$_wpdb   = new WP_SQLite_DB();
+		$_wpdb   = new Perflab_SQLite_DB();
 		$options = $_wpdb->get_results( 'PRAGMA compile_options' );
 		foreach ( $options as $opt ) {
 			if ( isset( $opt->compile_option ) && stripos( $opt->compile_option, 'ENABLE_UPDATE_DELETE_LIMIT' ) !== false ) {
@@ -561,7 +561,7 @@ class WP_PDO_SQLite_Driver {
 			$update_data = trim( $match_0[3] );
 			// Prepare two unique key data for the table.
 			// 1. array('col1', 'col2, col3', etc) 2. array('col1', 'col2', 'col3', etc).
-			$_wpdb   = new WP_SQLite_DB();
+			$_wpdb   = new Perflab_SQLite_DB();
 			$indexes = $_wpdb->get_results( "SHOW INDEX FROM {$table_name}" );
 			if ( ! empty( $indexes ) ) {
 				foreach ( $indexes as $index ) {
@@ -729,7 +729,7 @@ class WP_PDO_SQLite_Driver {
 
 			if ( $tbl_name && in_array( $tbl_name, $wpdb->tables, true ) ) {
 				$query   = str_replace( $match[0], '', $this->_query );
-				$_wpdb   = new WP_SQLite_DB();
+				$_wpdb   = new Perflab_SQLite_DB();
 				$results = $_wpdb->get_results( $query );
 				$_wpdb   = null;
 				usort(
@@ -764,7 +764,7 @@ class WP_PDO_SQLite_Driver {
 		} elseif ( stripos( $this->_query, $pattern2 ) !== false ) {
 			$time       = time();
 			$prep_query = "SELECT a.meta_id AS aid, b.meta_id AS bid FROM $wpdb->sitemeta AS a INNER JOIN $wpdb->sitemeta AS b ON a.meta_key='_site_transient_timeout_'||substr(b.meta_key, 17) WHERE b.meta_key='_site_transient_'||substr(a.meta_key, 25) AND a.meta_value < $time";
-			$_wpdb      = new WP_SQLite_DB();
+			$_wpdb      = new Perflab_SQLite_DB();
 			$ids        = $_wpdb->get_results( $prep_query );
 			foreach ( $ids as $id ) {
 				$ids_to_delete[] = $id->aid;

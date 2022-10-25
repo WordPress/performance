@@ -9,7 +9,7 @@
 /**
  * Class to handle the ALTER query.
  */
-class WP_SQLite_Alter_Query {
+class Perflab_SQLite_Alter_Query {
 
 	/**
 	 * Variable to store the rewritten query string.
@@ -286,7 +286,7 @@ class WP_SQLite_Alter_Query {
 		$tokenized_query = $queries;
 		$tbl_name        = $tokenized_query['table_name'];
 		$temp_table      = 'temp_' . $tokenized_query['table_name'];
-		$_wpdb           = new WP_SQLite_DB();
+		$_wpdb           = new Perflab_SQLite_DB();
 		$query_obj       = $_wpdb->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='$tbl_name'" );
 		$_wpdb           = null;
 		for ( $i = 0; $i < count( $query_obj ); $i++ ) {
@@ -319,7 +319,7 @@ class WP_SQLite_Alter_Query {
 	private function handle_drop_primary_key( $queries ) {
 		$tokenized_query = $queries;
 		$temp_table      = 'temp_' . $tokenized_query['table_name'];
-		$_wpdb           = new WP_SQLite_DB();
+		$_wpdb           = new Perflab_SQLite_DB();
 		$query_obj       = $_wpdb->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
 		$_wpdb           = null;
 		for ( $i = 0; $i < count( $query_obj ); $i++ ) {
@@ -358,7 +358,7 @@ class WP_SQLite_Alter_Query {
 		$tokenized_query = $queries;
 		$temp_table      = 'temp_' . $tokenized_query['table_name'];
 		$column_def      = $this->convert_field_types( $tokenized_query['column_name'], $tokenized_query['column_def'] );
-		$_wpdb           = new WP_SQLite_DB();
+		$_wpdb           = new Perflab_SQLite_DB();
 		$query_obj       = $_wpdb->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
 		$_wpdb           = null;
 		for ( $i = 0; $i < count( $query_obj ); $i++ ) {
@@ -415,7 +415,7 @@ class WP_SQLite_Alter_Query {
 			$column_name = $tokenized_query['new_column'];
 		}
 		$column_def = $this->convert_field_types( $column_name, $tokenized_query['column_def'] );
-		$_wpdb      = new WP_SQLite_DB();
+		$_wpdb      = new Perflab_SQLite_DB();
 		$col_obj    = $_wpdb->get_results( "SHOW COLUMNS FROM {$tokenized_query['table_name']}" );
 		foreach ( $col_obj as $col ) {
 			if ( stripos( $col->Field, $tokenized_query['old_column'] ) !== false ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -486,7 +486,7 @@ class WP_SQLite_Alter_Query {
 			$def_value = $this->convert_field_types( $tokenized_query['column_name'], $tokenized_query['default_value'] );
 			$def_value = 'DEFAULT ' . $def_value;
 		}
-		$_wpdb     = new WP_SQLite_DB();
+		$_wpdb     = new Perflab_SQLite_DB();
 		$query_obj = $_wpdb->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
 		$_wpdb     = null;
 		for ( $i = 0; $i < count( $query_obj ); $i++ ) {

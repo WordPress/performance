@@ -9,7 +9,7 @@
 /**
  * This class provides a function to rewrite CREATE query.
  */
-class WP_SQLite_Create_Query {
+class Perflab_SQLite_Create_Query {
 
 	/**
 	 * The query string to be rewritten in this class.
@@ -58,7 +58,7 @@ class WP_SQLite_Create_Query {
 		$this->_query     = $query;
 		$this->_errors [] = '';
 		if ( preg_match( '/^CREATE\\s*(UNIQUE|FULLTEXT|)\\s*INDEX/ims', $this->_query, $match ) ) {
-			// we manipulate CREATE INDEX query in WP_PDO_Engine.class.php
+			// We manipulate CREATE INDEX query in the Perflab_SQLite_PDO_Engine class.
 			// FULLTEXT index creation is simply ignored.
 			if ( isset( $match[1] ) && stripos( $match[1], 'fulltext' ) !== false ) {
 				return 'SELECT 1=1';
@@ -66,8 +66,8 @@ class WP_SQLite_Create_Query {
 			return $this->_query;
 		}
 		if ( preg_match( '/^CREATE\\s*(TEMP|TEMPORARY|)\\s*TRIGGER\\s*/im', $this->_query ) ) {
-			// if WordPress comes to use foreign key constraint, trigger will be needed.
-			// we don't use it for now.
+			// If WordPress comes to use foreign key constraint, trigger will be needed.
+			// We don't use it for now.
 			return $this->_query;
 		}
 		$this->strip_backticks();
@@ -291,7 +291,7 @@ class WP_SQLite_Create_Query {
 		if ( preg_match( '/\(\\d+?\)/', $col_name ) ) {
 			$col_name = preg_replace( '/\(\\d+?\)/', '', $col_name );
 		}
-		$_wpdb   = new WP_SQLite_DB();
+		$_wpdb   = new Perflab_SQLite_DB();
 		$results = $_wpdb->get_results( "SELECT name FROM sqlite_master WHERE type='index'" );
 		$_wpdb   = null;
 		if ( $results ) {
@@ -379,7 +379,7 @@ class WP_SQLite_Create_Query {
 			$col_name = preg_replace_callback( '/\([0-9]+?\)/', array( $this, '_remove_length' ), $col_name );
 		}
 		$tbl_name = $this->table_name;
-		$_wpdb    = new WP_SQLite_DB();
+		$_wpdb    = new Perflab_SQLite_DB();
 		$results  = $_wpdb->get_results( "SELECT name FROM sqlite_master WHERE type='index'" );
 		$_wpdb    = null;
 		if ( $results ) {

@@ -11,7 +11,7 @@
  *
  * @author kjm
  */
-class WP_SQLite_Object_Array {
+class Perflab_SQLite_Object_Array {
 
 	/**
 	 * Constructor.

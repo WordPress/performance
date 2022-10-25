@@ -11,14 +11,14 @@
  *
  * It also rewrites some methods that use mysql specific functions.
  */
-class WP_SQLite_DB extends wpdb {
+class Perflab_SQLite_DB extends wpdb {
 
 	/**
 	 * Database Handle
 	 *
 	 * @access protected
 	 *
-	 * @var WP_PDO_Engine
+	 * @var Perflab_SQLite_PDO_Engine
 	 */
 	protected $dbh;
 
@@ -202,7 +202,7 @@ class WP_SQLite_DB extends wpdb {
 	 */
 	public function db_connect( $allow_bail = true ) {
 		$this->init_charset();
-		$this->dbh   = new WP_PDO_Engine();
+		$this->dbh   = new Perflab_SQLite_PDO_Engine();
 		$this->ready = true;
 	}
 
