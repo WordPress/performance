@@ -472,10 +472,12 @@ class Perflab_SQLite_Alter_Query {
 				1
 			);
 		}
-		$query[] = $create_query;
-		$query[] = "INSERT INTO $temp_table ($new_fields) SELECT $old_fields FROM {$tokenized_query['table_name']}";
-		$query[] = "DROP TABLE IF EXISTS {$tokenized_query['table_name']}";
-		$query[] = "ALTER TABLE $temp_table RENAME TO {$tokenized_query['table_name']}";
+		$query = array(
+			$create_query,
+			"INSERT INTO $temp_table ($new_fields) SELECT $old_fields FROM {$tokenized_query['table_name']}",
+			"DROP TABLE IF EXISTS {$tokenized_query['table_name']}",
+			"ALTER TABLE $temp_table RENAME TO {$tokenized_query['table_name']}",
+		);
 		foreach ( $index_queries as $index ) {
 			$query[] = $index;
 		}
@@ -540,10 +542,12 @@ class Perflab_SQLite_Alter_Query {
 		} else {
 			return 'SELECT 1=1';
 		}
-		$query[] = $create_query;
-		$query[] = "INSERT INTO $temp_table SELECT * FROM {$tokenized_query['table_name']}";
-		$query[] = "DROP TABLE IF EXISTS {$tokenized_query['table_name']}";
-		$query[] = "ALTER TABLE $temp_table RENAME TO {$tokenized_query['table_name']}";
+		$query = array(
+			$create_query,
+			"INSERT INTO $temp_table SELECT * FROM {$tokenized_query['table_name']}",
+			"DROP TABLE IF EXISTS {$tokenized_query['table_name']}",
+			"ALTER TABLE $temp_table RENAME TO {$tokenized_query['table_name']}",
+		);
 		foreach ( $index_queries as $index ) {
 			$query[] = $index;
 		}
