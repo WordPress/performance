@@ -448,13 +448,11 @@ class Perflab_SQLite_Alter_Query {
 			$old_fields .= $col->Field . ','; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		}
 		if ( false === $col_check ) {
-			$_wpdb = null;
 			return 'SELECT 1=1';
 		}
 		$old_fields = rtrim( $old_fields, ',' );
 		$new_fields = str_ireplace( $tokenized_query['old_column'], $column_name, $old_fields );
 		$query_obj  = $_wpdb->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
-		$_wpdb      = null;
 		for ( $i = 0; $i < count( $query_obj ); $i++ ) {
 			$index_queries[ $i ] = $query_obj[ $i ]->sql;
 		}
