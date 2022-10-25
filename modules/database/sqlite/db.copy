@@ -24,6 +24,9 @@ require_once '{SQLITE_IMPLEMENTATION_FOLDER_PATH}/wp-includes/sqlite/db.php';
 add_action(
 	'init',
 	function() {
+		if ( defined( 'PERFLAB_VERSION' ) ) {
+			return;
+		}
 		if ( ! function_exists( 'activate_plugin' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
