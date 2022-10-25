@@ -31,7 +31,8 @@ class Perflab_SQLite_Alter_Query {
 			return false;
 		}
 		$query   = str_replace( '`', '', $query );
-		$matched = preg_match( '/^\\s*(ALTER\\s*TABLE)\\s*(\\w+)?\\s*/ims', $query, $match );
+		$pattern = '/^\\s*(ALTER\\s*TABLE)\\s*(\\w+)?\\s*/ims';
+		$matched = preg_match( $pattern, $query, $match );
 
 		if ( ! $matched ) {
 			$this->_query = 'SELECT 1=1';
@@ -109,12 +110,9 @@ class Perflab_SQLite_Alter_Query {
 	 * @access private
 	 */
 	private function command_tokenizer( $command ) {
-		$tokens = array();
-		if ( preg_match(
-			'/^(ADD|DROP|RENAME|MODIFY|CHANGE|ALTER)\\s*(\\w+)?\\s*(\\w+(\(.+\)|))?\\s*/ims',
-			$command,
-			$match
-		) ) {
+		$tokens  = array();
+		$pattern = '/^(ADD|DROP|RENAME|MODIFY|CHANGE|ALTER)\\s*(\\w+)?\\s*(\\w+(\(.+\)|))?\\s*/ims';
+		if ( preg_match( $pattern, $command, $match ) ) {
 			$the_rest = str_ireplace( $match[0], '', $command );
 			$match_1  = trim( $match[1] );
 			$match_2  = trim( $match[2] );
@@ -133,12 +131,7 @@ class Perflab_SQLite_Alter_Query {
 						$tokens['command']     = $match_1 . ' ' . $match_2 . ' ' . $match_3;
 						$tokens['column_name'] = $the_rest;
 					} elseif ( stripos( 'unique', $match_2 ) !== false ) {
-						list($index_name, $col_name) = preg_split(
-							'/[\(\)]/s',
-							trim( $the_rest ),
-							-1,
-							PREG_SPLIT_DELIM_CAPTURE
-						);
+						list($index_name, $col_name) = preg_split( '/[\(\)]/s', trim( $the_rest ), -1, PREG_SPLIT_DELIM_CAPTURE );
 						$tokens['unique']            = true;
 						$tokens['command']           = $match_1 . ' ' . $match_3;
 						$tokens['index_name']        = trim( $index_name );
@@ -384,22 +377,19 @@ class Perflab_SQLite_Alter_Query {
 		if ( stripos( $create_query, $tokenized_query['column_name'] ) === false ) {
 			return 'SELECT 1=1';
 		}
-		if ( preg_match( "/{$tokenized_query['column_name']}\\s*{$column_def}\\s*[,)]/i", $create_query ) ) {
+		$pattern = "/{$tokenized_query['column_name']}\\s*{$column_def}\\s*[,)]/i";
+		if ( preg_match( $pattern, $create_query ) ) {
 			return 'SELECT 1=1';
 		}
-		$create_query = preg_replace( "/{$tokenized_query['table_name']}/i", $temp_table, $create_query );
-		if ( preg_match( "/\\b{$tokenized_query['column_name']}\\s*.*(?=,)/ims", $create_query ) ) {
-			$create_query = preg_replace(
-				"/\\b{$tokenized_query['column_name']}\\s*.*(?=,)/ims",
-				"{$tokenized_query['column_name']} {$column_def}",
-				$create_query
-			);
-		} elseif ( preg_match( "/\\b{$tokenized_query['column_name']}\\s*.*(?=\))/ims", $create_query ) ) {
-			$create_query = preg_replace(
-				"/\\b{$tokenized_query['column_name']}\\s*.*(?=\))/ims",
-				"{$tokenized_query['column_name']} {$column_def}",
-				$create_query
-			);
+		$pattern_1 = "/{$tokenized_query['table_name']}/i";
+		$pattern_2 = "/\\b{$tokenized_query['column_name']}\\s*.*(?=,)/ims";
+		$pattern_3 = "/\\b{$tokenized_query['column_name']}\\s*.*(?=\))/ims";
+
+		$create_query = preg_replace( $pattern_1, $temp_table, $create_query );
+		if ( preg_match( $pattern_2, $create_query ) ) {
+			$create_query = preg_replace( $pattern_2, "{$tokenized_query['column_name']} {$column_def}", $create_query );
+		} elseif ( preg_match( $pattern_3, $create_query ) ) {
+			$create_query = preg_replace( $pattern_3, "{$tokenized_query['column_name']} {$column_def}", $create_query );
 		}
 		$query = array(
 			$create_query,
@@ -451,26 +441,21 @@ class Perflab_SQLite_Alter_Query {
 		}
 		$create_query = array_shift( $index_queries );
 		$create_query = preg_replace( "/{$tokenized_query['table_name']}/i", $temp_table, $create_query );
-		if ( preg_match( "/\\b{$tokenized_query['old_column']}\\s*(.+?)(?=,)/ims", $create_query, $match ) ) {
+
+		$pattern_1 = "/\\b{$tokenized_query['old_column']}\\s*(.+?)(?=,)/ims";
+		$pattern_2 = "/\\b{$tokenized_query['old_column']}\\s*(.+?)(?=\))/ims";
+		if ( preg_match( $pattern_1, $create_query, $match ) ) {
 			if ( stripos( trim( $match[1] ), $column_def ) !== false ) {
 				return 'SELECT 1=1';
 			}
-			$create_query = preg_replace(
-				"/\\b{$tokenized_query['old_column']}\\s*.+?(?=,)/ims",
-				"{$column_name} {$column_def}",
-				$create_query,
-				1
-			);
-		} elseif ( preg_match( "/\\b{$tokenized_query['old_column']}\\s*(.+?)(?=\))/ims", $create_query, $match ) ) {
+			$pattern      = "/\\b{$tokenized_query['old_column']}\\s*.+?(?=,)/ims";
+			$create_query = preg_replace( $pattern, "{$column_name} {$column_def}", $create_query, 1 );
+		} elseif ( preg_match( $pattern_2, $create_query, $match ) ) {
 			if ( stripos( trim( $match[1] ), $column_def ) !== false ) {
 				return 'SELECT 1=1';
 			}
-			$create_query = preg_replace(
-				"/\\b{$tokenized_query['old_column']}\\s*.*(?=\))/ims",
-				"{$column_name} {$column_def}",
-				$create_query,
-				1
-			);
+			$pattern      = "/\\b{$tokenized_query['old_column']}\\s*.*(?=\))/ims";
+			$create_query = preg_replace( $pattern, "{$column_name} {$column_def}", $create_query, 1 );
 		}
 		$query = array(
 			$create_query,
@@ -510,33 +495,31 @@ class Perflab_SQLite_Alter_Query {
 		if ( stripos( $create_query, $tokenized_query['column_name'] ) === false ) {
 			return 'SELECT 1=1';
 		}
-		if ( preg_match(
-			"/\\s*({$tokenized_query['column_name']})\\s*(.*)?(DEFAULT\\s*.*)[,)]/im",
-			$create_query,
-			$match
-		) ) {
+		$pattern_1 = "/\\s*({$tokenized_query['column_name']})\\s*(.*)?(DEFAULT\\s*.*)[,)]/im";
+		$pattern_2 = "/\\s*({$tokenized_query['column_name']})\\s*(.*)?[,)]/im";
+		if ( preg_match( $pattern, $create_query, $match ) ) {
 			$col_name        = trim( $match[1] );
 			$col_def         = trim( $match[2] );
 			$col_def_esc     = str_replace( array( '(', ')' ), array( '\(', '\)' ), $col_def );
 			$checked_col_def = $this->convert_field_types( $col_name, $col_def );
 			$old_default     = trim( $match[3] );
-			$pattern         = "/$col_name\\s*$col_def_esc\\s*$old_default/im";
 			$replacement     = $col_name . ' ' . $checked_col_def;
 			if ( ! is_null( $def_value ) ) {
 				$replacement .= ' ' . $def_value;
 			}
+			$pattern      = "/$col_name\\s*$col_def_esc\\s*$old_default/im";
 			$create_query = preg_replace( $pattern, $replacement, $create_query );
 			$create_query = str_ireplace( $tokenized_query['table_name'], $temp_table, $create_query );
-		} elseif ( preg_match( "/\\s*({$tokenized_query['column_name']})\\s*(.*)?[,)]/im", $create_query, $match ) ) {
+		} elseif ( preg_match( $pattern_2, $create_query, $match ) ) {
 			$col_name        = trim( $match[1] );
 			$col_def         = trim( $match[2] );
 			$col_def_esc     = str_replace( array( '(', ')' ), array( '\(', '\)' ), $col_def );
 			$checked_col_def = $this->convert_field_types( $col_name, $col_def );
-			$pattern         = "/$col_name\\s*$col_def_esc/im";
 			$replacement     = $col_name . ' ' . $checked_col_def;
 			if ( ! is_null( $def_value ) ) {
 				$replacement .= ' ' . $def_value;
 			}
+			$pattern      = "/$col_name\\s*$col_def_esc/im";
 			$create_query = preg_replace( $pattern, $replacement, $create_query );
 			$create_query = str_ireplace( $tokenized_query['table_name'], $temp_table, $create_query );
 		} else {
