@@ -30,64 +30,71 @@ class Perflab_SQLite_Alter_Query {
 		if ( stripos( $query, $query_type ) === false ) {
 			return false;
 		}
-		$query = str_replace( '`', '', $query );
-		if ( preg_match( '/^\\s*(ALTER\\s*TABLE)\\s*(\\w+)?\\s*/ims', $query, $match ) ) {
-			$tmp_query                = array();
-			$re_command               = '';
-			$command                  = str_ireplace( $match[0], '', $query );
-			$tmp_tokens['query_type'] = trim( $match[1] );
-			$tmp_tokens['table_name'] = trim( $match[2] );
-			$command_array            = explode( ',', $command );
+		$query   = str_replace( '`', '', $query );
+		$matched = preg_match( '/^\\s*(ALTER\\s*TABLE)\\s*(\\w+)?\\s*/ims', $query, $match );
 
-			$single_command = array_shift( $command_array );
-			if ( ! empty( $command_array ) ) {
-				$re_command  = "ALTER TABLE {$tmp_tokens['table_name']} ";
-				$re_command .= implode( ',', $command_array );
-			}
-			$command_tokens = $this->command_tokenizer( $single_command );
-			if ( ! empty( $command_tokens ) ) {
-				$tokens = array_merge( $tmp_tokens, $command_tokens );
-			} else {
-				$this->_query = 'SELECT 1=1';
-
-				return $this->_query;
-			}
-			$command_name = strtolower( $tokens['command'] );
-			switch ( $command_name ) {
-				case 'add column':
-				case 'rename to':
-				case 'add index':
-				case 'drop index':
-					$tmp_query = $this->handle_single_command( $tokens );
-					break;
-				case 'add primary key':
-					$tmp_query = $this->handle_add_primary_key( $tokens );
-					break;
-				case 'drop primary key':
-					$tmp_query = $this->handle_drop_primary_key( $tokens );
-					break;
-				case 'modify column':
-					$tmp_query = $this->handle_modify_command( $tokens );
-					break;
-				case 'change column':
-					$tmp_query = $this->handle_change_command( $tokens );
-					break;
-				case 'alter column':
-					$tmp_query = $this->handle_alter_command( $tokens );
-					break;
-				default:
-					break;
-			}
-			if ( ! is_array( $tmp_query ) ) {
-				$this->_query[] = $tmp_query;
-			} else {
-				$this->_query = $tmp_query;
-			}
-			if ( '' !== $re_command ) {
-				$this->_query = array_merge( $this->_query, array( 'recursion' => $re_command ) );
-			}
-		} else {
+		if ( ! $matched ) {
 			$this->_query = 'SELECT 1=1';
+			return $this->_query;
+		}
+
+		$tmp_query                = array();
+		$re_command               = '';
+		$command                  = str_ireplace( $match[0], '', $query );
+		$tmp_tokens['query_type'] = trim( $match[1] );
+		$tmp_tokens['table_name'] = trim( $match[2] );
+		$command_array            = explode( ',', $command );
+
+		$single_command = array_shift( $command_array );
+		if ( ! empty( $command_array ) ) {
+			$re_command  = "ALTER TABLE {$tmp_tokens['table_name']} ";
+			$re_command .= implode( ',', $command_array );
+		}
+		$command_tokens = $this->command_tokenizer( $single_command );
+		if ( empty( $command_tokens ) ) {
+			$this->_query = 'SELECT 1=1';
+			return $this->_query;
+		}
+		$tokens       = array_merge( $tmp_tokens, $command_tokens );
+		$command_name = strtolower( $tokens['command'] );
+		switch ( $command_name ) {
+			case 'add column':
+			case 'rename to':
+			case 'add index':
+			case 'drop index':
+				$tmp_query = $this->handle_single_command( $tokens );
+				break;
+
+			case 'add primary key':
+				$tmp_query = $this->handle_add_primary_key( $tokens );
+				break;
+
+			case 'drop primary key':
+				$tmp_query = $this->handle_drop_primary_key( $tokens );
+				break;
+
+			case 'modify column':
+				$tmp_query = $this->handle_modify_command( $tokens );
+				break;
+
+			case 'change column':
+				$tmp_query = $this->handle_change_command( $tokens );
+				break;
+
+			case 'alter column':
+				$tmp_query = $this->handle_alter_command( $tokens );
+				break;
+
+			default:
+				break;
+		}
+		if ( ! is_array( $tmp_query ) ) {
+			$this->_query[] = $tmp_query;
+		} else {
+			$this->_query = $tmp_query;
+		}
+		if ( '' !== $re_command ) {
+			$this->_query = array_merge( $this->_query, array( 'recursion' => $re_command ) );
 		}
 
 		return $this->_query;
