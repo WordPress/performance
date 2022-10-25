@@ -134,17 +134,15 @@ class Perflab_SQLite_DB extends wpdb {
 
 		$caller = $this->get_caller();
 		if ( $caller ) {
-			$error_str = sprintf(
-				/* translators: 1: Database error message, 2: SQL query, 3: Caller. */
-				__( 'WordPress database error %1$s for query %2$s made by %3$s', 'performance-lab' ),
-				$str,
-				$this->last_query,
-				$caller
-			);
-		} else {
-			/* translators: 1: Database error message, 2: SQL query. */
-			$error_str = sprintf( __( 'WordPress database error %1$s for query %2$s', 'performance-lab' ), $str, $this->last_query );
+			$caller = __( '(unknown)', 'performance-lab' );
 		}
+		$error_str = sprintf(
+			/* translators: 1: Database error message, 2: SQL query, 3: Caller. */
+			__( 'WordPress database error %1$s for query %2$s made by %3$s', 'performance-lab' ),
+			$str,
+			$this->last_query,
+			$caller
+		);
 
 		error_log( $error_str );
 
