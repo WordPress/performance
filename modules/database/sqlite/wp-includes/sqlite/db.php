@@ -213,6 +213,7 @@ function wp_install( $blog_title, $user_name, $user_email, $is_public, $deprecat
 
 	wp_check_mysql_version();
 	wp_cache_flush();
+	/* SQLite changes: Replace the call to make_db_current_silent() with perflab_sqlite_make_db_sqlite(). */
 	perflab_sqlite_make_db_sqlite();
 	populate_options();
 	populate_roles();
