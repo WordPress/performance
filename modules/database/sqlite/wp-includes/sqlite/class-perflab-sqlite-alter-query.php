@@ -105,7 +105,7 @@ class Perflab_SQLite_Alter_Query {
 	 *
 	 * @param string $command The command string.
 	 *
-	 * @return boolean|array
+	 * @return array
 	 * @access private
 	 */
 	private function command_tokenizer( $command ) {
@@ -248,9 +248,8 @@ class Perflab_SQLite_Alter_Query {
 				default:
 					break;
 			}
-
-			return $tokens;
 		}
+		return $tokens;
 	}
 
 	/**
