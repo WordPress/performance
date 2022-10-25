@@ -303,9 +303,7 @@ class Perflab_SQLite_Alter_Query {
 		$tokenized_query = $queries;
 		$tbl_name        = $tokenized_query['table_name'];
 		$temp_table      = 'temp_' . $tokenized_query['table_name'];
-		$_wpdb           = new Perflab_SQLite_DB();
-		$query_obj       = $_wpdb->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='$tbl_name'" );
-		$_wpdb           = null;
+		$query_obj       = ( new Perflab_SQLite_DB() )->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='$tbl_name'" );
 		for ( $i = 0; $i < count( $query_obj ); $i++ ) {
 			$index_queries[ $i ] = $query_obj[ $i ]->sql;
 		}
@@ -339,9 +337,7 @@ class Perflab_SQLite_Alter_Query {
 	private function handle_drop_primary_key( $queries ) {
 		$tokenized_query = $queries;
 		$temp_table      = 'temp_' . $tokenized_query['table_name'];
-		$_wpdb           = new Perflab_SQLite_DB();
-		$query_obj       = $_wpdb->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
-		$_wpdb           = null;
+		$query_obj       = ( new Perflab_SQLite_DB() )->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
 		for ( $i = 0; $i < count( $query_obj ); $i++ ) {
 			$index_queries[ $i ] = $query_obj[ $i ]->sql;
 		}
@@ -380,9 +376,7 @@ class Perflab_SQLite_Alter_Query {
 		$tokenized_query = $queries;
 		$temp_table      = 'temp_' . $tokenized_query['table_name'];
 		$column_def      = $this->convert_field_types( $tokenized_query['column_name'], $tokenized_query['column_def'] );
-		$_wpdb           = new Perflab_SQLite_DB();
-		$query_obj       = $_wpdb->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
-		$_wpdb           = null;
+		$query_obj       = ( new Perflab_SQLite_DB() )->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
 		for ( $i = 0; $i < count( $query_obj ); $i++ ) {
 			$index_queries[ $i ] = $query_obj[ $i ]->sql;
 		}
@@ -439,8 +433,7 @@ class Perflab_SQLite_Alter_Query {
 			$column_name = $tokenized_query['new_column'];
 		}
 		$column_def = $this->convert_field_types( $column_name, $tokenized_query['column_def'] );
-		$_wpdb      = new Perflab_SQLite_DB();
-		$col_obj    = $_wpdb->get_results( "SHOW COLUMNS FROM {$tokenized_query['table_name']}" );
+		$col_obj    = ( new Perflab_SQLite_DB() )->get_results( "SHOW COLUMNS FROM {$tokenized_query['table_name']}" );
 		foreach ( $col_obj as $col ) {
 			if ( stripos( $col->Field, $tokenized_query['old_column'] ) !== false ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				$col_check = true;
@@ -452,7 +445,7 @@ class Perflab_SQLite_Alter_Query {
 		}
 		$old_fields = rtrim( $old_fields, ',' );
 		$new_fields = str_ireplace( $tokenized_query['old_column'], $column_name, $old_fields );
-		$query_obj  = $_wpdb->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
+		$query_obj  = ( new Perflab_SQLite_DB() )->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
 		for ( $i = 0; $i < count( $query_obj ); $i++ ) {
 			$index_queries[ $i ] = $query_obj[ $i ]->sql;
 		}
@@ -507,9 +500,7 @@ class Perflab_SQLite_Alter_Query {
 			$def_value = $this->convert_field_types( $tokenized_query['column_name'], $tokenized_query['default_value'] );
 			$def_value = 'DEFAULT ' . $def_value;
 		}
-		$_wpdb     = new Perflab_SQLite_DB();
-		$query_obj = $_wpdb->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
-		$_wpdb     = null;
+		$query_obj = ( new Perflab_SQLite_DB() )->get_results( "SELECT sql FROM sqlite_master WHERE tbl_name='{$tokenized_query['table_name']}'" );
 		for ( $i = 0; $i < count( $query_obj ); $i++ ) {
 			$index_queries[ $i ] = $query_obj[ $i ]->sql;
 		}
