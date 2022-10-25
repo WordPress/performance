@@ -188,17 +188,25 @@ function perflab_sqlite_make_db_sqlite() {
  * Runs the required functions to set up and populate the database,
  * including primary admin user and initial options.
  *
- * @param string $blog_title Site title.
- * @param string $user_name User's username.
- * @param string $user_email User's email.
- * @param bool   $public Whether site is public.
- * @param string $deprecated Optional. Not used.
- * @param string $user_password Optional. User's chosen password. Default empty (random password).
- * @param string $language Optional. Language chosen. Default empty.
+ * @since n.e.x.t.
  *
- * @return array Array keys 'url', 'user_id', 'password', and 'password_message'.
+ * @param string $blog_title    Site title.
+ * @param string $user_name     User's username.
+ * @param string $user_email    User's email.
+ * @param bool   $is_public     Whether the site is public.
+ * @param string $deprecated    Optional. Not used.
+ * @param string $user_password Optional. User's chosen password. Default empty (random password).
+ * @param string $language      Optional. Language chosen. Default empty.
+ * @return array {
+ *     Data for the newly installed site.
+ *
+ *     @type string $url              The URL of the site.
+ *     @type int    $user_id          The ID of the site owner.
+ *     @type string $password         The password of the site owner, if their user account didn't already exist.
+ *     @type string $password_message The explanatory message regarding the password.
+ * }
  */
-function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated = '', $user_password = '', $language = '' ) {
+function wp_install( $blog_title, $user_name, $user_email, $is_public, $deprecated = '', $user_password = '', $language = '' ) {
 	if ( ! empty( $deprecated ) ) {
 		_deprecated_argument( __FUNCTION__, '2.6.0' );
 	}
@@ -211,7 +219,7 @@ function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated 
 
 	update_option( 'blogname', $blog_title );
 	update_option( 'admin_email', $user_email );
-	update_option( 'blog_public', $public );
+	update_option( 'blog_public', $is_public );
 
 	// Freshness of site - in the future, this could get more specific about actions taken, perhaps.
 	update_option( 'fresh_site', 1 );
@@ -224,34 +232,43 @@ function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated 
 
 	update_option( 'siteurl', $guessurl );
 
-	// If not a public blog, don't ping.
-	if ( ! $public ) {
+	// If not a public site, don't ping.
+	if ( ! $is_public ) {
 		update_option( 'default_pingback_flag', 0 );
 	}
 
 	/*
-		* Create default user. If the user already exists, the user tables are
-		* being shared among sites. Just set the role in that case.
-		*/
+	 * Create default user. If the user already exists, the user tables are
+	 * being shared among sites. Just set the role in that case.
+	 */
 	$user_id        = username_exists( $user_name );
 	$user_password  = trim( $user_password );
 	$email_password = false;
+	$user_created   = false;
+
 	if ( ! $user_id && empty( $user_password ) ) {
 		$user_password = wp_generate_password( 12, false );
 		$message       = __( '<strong><em>Note that password</em></strong> carefully! It is a <em>random</em> password that was generated just for you.', 'performance-lab' );
 		$user_id       = wp_create_user( $user_name, $user_password, $user_email );
-		update_user_option( $user_id, 'default_password_nag', true, true );
+		update_user_meta( $user_id, 'default_password_nag', true );
 		$email_password = true;
+		$user_created   = true;
 	} elseif ( ! $user_id ) {
 		// Password has been provided.
-		$message = '<em>' . __( 'Your chosen password.', 'performance-lab' ) . '</em>';
-		$user_id = wp_create_user( $user_name, $user_password, $user_email );
+		$message      = '<em>' . __( 'Your chosen password.', 'performance-lab' ) . '</em>';
+		$user_id      = wp_create_user( $user_name, $user_password, $user_email );
+		$user_created = true;
 	} else {
 		$message = __( 'User already exists. Password inherited.', 'performance-lab' );
 	}
 
 	$user = new WP_User( $user_id );
 	$user->set_role( 'administrator' );
+
+	if ( $user_created ) {
+		$user->user_url = $guessurl;
+		wp_update_user( $user );
+	}
 
 	wp_install_defaults( $user_id );
 
@@ -265,6 +282,8 @@ function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated 
 
 	/**
 	 * Fires after a site is fully installed.
+	 *
+	 * @since 3.9.0
 	 *
 	 * @param WP_User $user The site owner.
 	 */
