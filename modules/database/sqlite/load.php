@@ -20,7 +20,7 @@ if ( ! defined( 'DATABASE_TYPE' ) ) {
  *
  * @since n.e.x.t
  */
-function sqlite_plugin_copy_db_file() {
+function perflab_sqlite_plugin_copy_db_file() {
 	// Bail early if the SQLite3 class does not exist.
 	if ( ! class_exists( 'SQLite3' ) ) {
 		return;
@@ -61,7 +61,7 @@ function sqlite_plugin_copy_db_file() {
 		$wp_filesystem->put_contents( $destination, $file_contents );
 	}
 }
-add_action( 'plugins_loaded', 'sqlite_plugin_copy_db_file' );
+add_action( 'plugins_loaded', 'perflab_sqlite_plugin_copy_db_file' );
 
 /**
  * Trigger actions when the module gets deactivated.
@@ -131,7 +131,7 @@ add_filter( 'pre_update_option_' . PERFLAB_MODULES_SETTING, 'perflab_sqlite_modu
  *
  * @since n.e.x.t
  */
-function sqlite_plugin_admin_notice() {
+function perflab_sqlite_plugin_admin_notice() {
 	// Check if the wp-content/db.php file exists.
 	if ( ! file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
 		printf(
@@ -145,4 +145,4 @@ function sqlite_plugin_admin_notice() {
 		);
 	}
 }
-add_action( 'admin_notices', 'sqlite_plugin_admin_notice' ); // Add the admin notices.
+add_action( 'admin_notices', 'perflab_sqlite_plugin_admin_notice' ); // Add the admin notices.

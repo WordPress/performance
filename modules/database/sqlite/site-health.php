@@ -16,7 +16,7 @@
  *
  * @param array $info The debug data.
  */
-function sqlite_plugin_filter_debug_data( $info ) {
+function perflab_sqlite_plugin_filter_debug_data( $info ) {
 	$database_type = defined( 'DATABASE_TYPE' ) && 'sqlite' === DATABASE_TYPE ? 'sqlite' : 'mysql';
 	if ( 'sqlite' !== $database_type ) {
 		return $info;
@@ -62,4 +62,4 @@ function sqlite_plugin_filter_debug_data( $info ) {
 
 	return $info;
 }
-add_filter( 'debug_information', 'sqlite_plugin_filter_debug_data' ); // Filter debug data in site-health screen.
+add_filter( 'debug_information', 'perflab_sqlite_plugin_filter_debug_data' ); // Filter debug data in site-health screen.

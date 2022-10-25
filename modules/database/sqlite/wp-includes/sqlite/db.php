@@ -17,7 +17,7 @@ if ( ! defined( 'DATABASE_TYPE' ) || 'sqlite' !== DATABASE_TYPE ) {
  * @param string $message The error message.
  * @param mixed  $data    The data to be logged.
  */
-function pdo_log_error( $message, $data = null ) {
+function perflab_sqlite_pdo_log_error( $message, $data = null ) {
 	$admin_dir = 'wp-admin/';
 	if ( strpos( $_SERVER['SCRIPT_NAME'], 'wp-admin' ) !== false ) {
 		$admin_dir = '';
@@ -44,14 +44,14 @@ HTML
 }
 
 if ( ! extension_loaded( 'pdo' ) ) {
-	pdo_log_error(
+	perflab_sqlite_pdo_log_error(
 		'PHP PDO Extension is not loaded.',
 		'Your PHP installation appears to be missing the PDO extension which is required for this version of WordPress.'
 	);
 }
 
 if ( ! extension_loaded( 'pdo_sqlite' ) ) {
-	pdo_log_error(
+	perflab_sqlite_pdo_log_error(
 		'PDO Driver for SQLite is missing.',
 		'Your PHP installation appears not to have the right PDO drivers loaded. These are required for this version of WordPress and the type of database you have specified.'
 	);
@@ -102,7 +102,7 @@ require_once __DIR__ . '/class-perflab-sqlite-alter-query.php';
  *
  * @return boolean
  */
-function make_db_sqlite() {
+function perflab_sqlite_make_db_sqlite() {
 	include_once ABSPATH . 'wp-admin/includes/schema.php';
 	$index_array = array();
 
@@ -205,7 +205,7 @@ function wp_install( $blog_title, $user_name, $user_email, $public, $deprecated 
 
 	wp_check_mysql_version();
 	wp_cache_flush();
-	make_db_sqlite();
+	perflab_sqlite_make_db_sqlite();
 	populate_options();
 	populate_roles();
 
