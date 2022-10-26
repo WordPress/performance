@@ -69,14 +69,15 @@ function webp_uploads_generate_webp_jpeg_setting_callback() {
  * @since 1.6.0
  */
 function webp_uploads_media_setting_style() {
+	if ( is_multisite() ) {
+		return;
+	}
 	?>
 	<style>
-		<?php if ( ! is_multisite() ) : ?>
-			.form-table .perflab-generate-webp-and-jpeg th,
-			.form-table .perflab-generate-webp-and-jpeg td:not(.td-full) {
-				display: none;
-			}
-		<?php endif; ?>
+		.form-table .perflab-generate-webp-and-jpeg th,
+		.form-table .perflab-generate-webp-and-jpeg td:not(.td-full) {
+			display: none;
+		}
 	</style>
 	<?php
 }
