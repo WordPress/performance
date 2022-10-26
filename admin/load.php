@@ -167,6 +167,11 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 		<p id="<?php echo esc_attr( "{$base_id}_description" ); ?>" class="description">
 			<?php echo esc_html( $module_data['description'] ); ?>
 		</p>
+		<?php if ( ! empty( $module_data['notice'] ) ) : ?>
+			<p style="background:#fff;border:1px solid #c3c4c7;border-left-width: 4px;border-left-color:#dba617;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);padding:1em;max-width:50em;">
+				<?php echo esc_html( $module_data['notice'] ); ?>
+			</p>
+		<?php endif; ?>
 	</fieldset>
 	<?php
 }
@@ -314,6 +319,7 @@ function perflab_get_module_data( $module_file ) {
 		'name'         => 'Module Name',
 		'description'  => 'Description',
 		'experimental' => 'Experimental',
+		'notice'       => 'Notice',
 	);
 
 	$module_data = get_file_data( $module_file, $default_headers, 'perflab_module' );
@@ -342,6 +348,7 @@ function perflab_get_module_data( $module_file ) {
 	$translatable_fields = array(
 		'name'        => 'module name',
 		'description' => 'module description',
+		'notice'      => 'module notice',
 	);
 	foreach ( $translatable_fields as $field => $context ) {
 		// phpcs:ignore WordPress.WP.I18n.LowLevelTranslationFunction,WordPress.WP.I18n.NonSingularStringLiteralContext,WordPress.WP.I18n.NonSingularStringLiteralText
