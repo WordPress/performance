@@ -48,9 +48,13 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
  * @since 1.6.0
  */
 function webp_uploads_generate_webp_jpeg_setting_callback() {
+	if ( ! is_multisite() ) {
+		?>
+			</td>
+			<td class="td-full">
+		<?php
+	}
 	?>
-	</td>
-	<td class="<?php echo ! is_multisite() ? esc_attr( 'td-full' ) : ''; ?>">
 		<label for="perflab_generate_webp_and_jpeg">
 			<input name="perflab_generate_webp_and_jpeg" type="checkbox" id="perflab_generate_webp_and_jpeg" aria-describedby="perflab_generate_webp_and_jpeg_description" value="1"<?php checked( '1', get_option( 'perflab_generate_webp_and_jpeg' ) ); ?> />
 			<?php esc_html_e( 'Generate JPEG files in addition to WebP', 'performance-lab' ); ?>
@@ -68,17 +72,10 @@ function webp_uploads_media_setting_style() {
 	?>
 	<style>
 		<?php if ( ! is_multisite() ) : ?>
-		.form-table .perflab-generate-webp-and-jpeg th,
-		.form-table .perflab-generate-webp-and-jpeg td:not(.td-full) {
-			display: none;
-		}
-		<?php else : ?>
-		.form-table .perflab-generate-webp-and-jpeg > th {
-			font-size: 16px;
-		}
-		.form-table .perflab-generate-webp-and-jpeg > td:nth-child(2) {
-			display: none;
-		}
+			.form-table .perflab-generate-webp-and-jpeg th,
+			.form-table .perflab-generate-webp-and-jpeg td:not(.td-full) {
+				display: none;
+			}
 		<?php endif; ?>
 	</style>
 	<?php
