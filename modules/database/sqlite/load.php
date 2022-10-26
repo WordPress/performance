@@ -8,10 +8,8 @@
  * @since n.e.x.t
  */
 
-// Temporary - This will be in wp-config.php once SQLite is merged in Core.
-if ( ! defined( 'DATABASE_TYPE' ) ) {
-	define( 'DATABASE_TYPE', 'sqlite' );
-}
+// Require the constants file.
+require_once __DIR__ . '/constants.php';
 
 /**
  * Adds the db.php file in wp-content.
