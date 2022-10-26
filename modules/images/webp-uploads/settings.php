@@ -36,7 +36,7 @@ function webp_uploads_add_media_settings_field() {
 		__( 'WebP and JPEG', 'performance-lab' ),
 		'webp_uploads_generate_webp_jpeg_setting_callback',
 		'media',
-		! is_multisite() ? 'uploads' : 'default',
+		is_multisite() ? 'default' : 'uploads',
 		array( 'class' => 'perflab-generate-webp-and-jpeg' )
 	);
 }
