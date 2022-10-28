@@ -112,4 +112,18 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	public static function assertSizeNameIsHashed( $size_name, $hashed_size_name, $message = '' ) {
 		self::assertRegExp( "/{$size_name}-\d{13}/", $hashed_size_name, $message );
 	}
+
+	/**
+	 * Adds filter so that for a JPEG upload both JPEG and WebP versions are generated.
+	 */
+	public function opt_in_to_jpeg_and_webp() {
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function( $transforms ) {
+				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
+				$transforms['image/webp'] = array( 'image/webp', 'image/jpeg' );
+				return $transforms;
+			}
+		);
+	}
 }
