@@ -49,7 +49,7 @@ class Fetchpriority_Test extends WP_UnitTestCase {
 
 	public function test_fetchpriority_img_tag_add_in_wp_filter_content_tags() {
 		global $wp_query;
-
+		global $wp_the_query;
 		$img   = get_image_tag( self::$attachment_id, '', '', '', 'large' );
 		$img_2 = get_image_tag( self::$attachment_id_2, '', '', '', 'large' );
 
@@ -63,10 +63,10 @@ class Fetchpriority_Test extends WP_UnitTestCase {
 <figure class="wp-block-image size-large">' . $img_2 . '</figure>
 <!-- /wp:image -->
 ';
-		// Ensure image filtering occurs 'in_the_loop'.
+		// Ensure image filtering occurs 'in_the_loop', is_main_query.
+		$wp_the_query          = $wp_query;
 		$wp_query->in_the_loop = true;
 		$content               = wp_filter_content_tags( $img, 'the_content' );
-		$wp_query->in_the_loop = false;
 		$this->assertStringContainsString( 'fetchpriority="high"', $content );
 		$this->assertStringContainsString( 'loading="lazy"', $content );
 		$this->assertTrue( strpos( $content, 'fetchpriority="high"' ) < strpos( $content, 'loading="lazy"' ) );
