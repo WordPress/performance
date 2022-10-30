@@ -5,6 +5,7 @@ const fs = require( 'fs' );
 const readline = require( 'readline' );
 const autocannon = require( 'autocannon' );
 const { mean, floor } = require( 'lodash' );
+const { table } = require( 'table' );
 
 /**
  * Internal dependencies
@@ -29,9 +30,10 @@ const { log } = require( '../lib/logger' );
 /**
  * @typedef BenchmarkCommandOptions
  *
- * @property {string} url         An URL.
+ * @property {string} url         An URL to benchmark.
  * @property {number} concurrency Number of multiple requests to make at a time.
  * @property {number} requests    Number of requests to perform.
+ * @property {string} file        A path to a file with URLs to benchmark.
  */
 exports.options = [
 	{
@@ -73,21 +75,7 @@ exports.handler = async ( opt ) => {
 		results.push( [ url, responseTimes, metrics ] );
 	}
 
-	for ( let i = 0, len = results.length; i < len; i++ ) {
-		const [ url, responseTimes, metrics ] = results[ i ];
-
-		log(
-			`${ url } avr response time: ${ floor(
-				mean( responseTimes ),
-				2
-			) }ms`
-		);
-
-		for ( const metric of Object.keys( metrics ) ) {
-			const metricAvgMs = floor( mean( metrics[ metric ] ), 2 );
-			log( ` - ${ metric }: ${ metricAvgMs }ms` );
-		}
-	}
+	outputResults( opt, results );
 };
 
 /**
@@ -178,4 +166,52 @@ function getServerTimingMetricsFromHeaders( headers ) {
 	}
 
 	return {};
+}
+
+/**
+ * Ouptuts results of benchmarking.
+ *
+ * @param {BenchmarkCommandOptions} opt     Command options.
+ * @param {Array.<Array>}           results A collection of benchmark results for each URL.
+ */
+function outputResults( opt, results ) {
+	const len = results.length;
+	const allMetricNames = {};
+
+	const newRow = ( title ) => {
+		const line = new Array( len + 1 ).fill( '' );
+		line[ 0 ] = title;
+		return line;
+	};
+
+	const tableData = [ newRow( '' ), newRow( 'Avg Time' ) ];
+
+	for ( let i = 0; i < len; i++ ) {
+		for ( const metric of Object.keys( results[ i ][ 2 ] ) ) {
+			allMetricNames[ metric ] = '';
+		}
+	}
+
+	Object.keys( allMetricNames ).forEach( ( name ) => {
+		tableData.push( newRow( name ) );
+	} );
+
+	for ( let i = 0; i < len; i++ ) {
+		const [ url, responseTimes, metrics ] = results[ i ];
+
+		tableData[ 0 ][ i + 1 ] = url;
+		tableData[ 1 ][ i + 1 ] = floor( mean( responseTimes ), 2 );
+
+		for ( const metric of Object.keys( metrics ) ) {
+			const metricAvgMs = floor( mean( metrics[ metric ] ), 2 );
+
+			for ( let j = 2; j < tableData.length; j++ ) {
+				if ( tableData[ j ][ 0 ] === metric ) {
+					tableData[ j ][ i + 1 ] = metricAvgMs;
+				}
+			}
+		}
+	}
+
+	log( table( tableData ) );
 }

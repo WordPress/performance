@@ -12,7 +12,8 @@
     "fast-glob": "^3.2.7",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
-    "lodash": "4.17.21"
+    "lodash": "4.17.21",
+    "table": "^6.8.0"
   },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
