@@ -6,18 +6,21 @@ const readline = require( 'readline' );
 const autocannon = require( 'autocannon' );
 const { mean, floor } = require( 'lodash' );
 const { table } = require( 'table' );
+const { stringify } = require( 'csv-stringify/sync' );
 
 /**
  * Internal dependencies
  */
 const { log } = require( '../lib/logger' );
 
+const OUTPUT_FORMAT_CSV = 'csv';
+
 /**
  * @typedef BenchmarkOptions
  *
  * @property {string} url         An URL.
- * @property {number} connections Number of multiple requests to make at a time.
- * @property {number} amount      Number of requests to perform.
+ * @property {number} connections A number of multiple requests to make at a time.
+ * @property {number} amount      A number of requests to perform.
  */
 
 /**
@@ -31,9 +34,10 @@ const { log } = require( '../lib/logger' );
  * @typedef BenchmarkCommandOptions
  *
  * @property {string} url         An URL to benchmark.
- * @property {number} concurrency Number of multiple requests to make at a time.
- * @property {number} requests    Number of requests to perform.
+ * @property {number} concurrency A number of multiple requests to make at a time.
+ * @property {number} requests    A number of requests to perform.
  * @property {string} file        A path to a file with URLs to benchmark.
+ * @property {string} output      An output format.
  */
 exports.options = [
 	{
@@ -53,6 +57,11 @@ exports.options = [
 	{
 		argname: '-f, --file <file>',
 		description: 'File with URLs to run benchmark tests for',
+	},
+	{
+		argname: '-o, --output <output>',
+		description: 'Output format: csv or console',
+		defaults: 'console',
 	},
 ];
 
@@ -213,5 +222,10 @@ function outputResults( opt, results ) {
 		}
 	}
 
-	log( table( tableData ) );
+	const output =
+		OUTPUT_FORMAT_CSV === opt.output.toLowerCase()
+			? stringify( tableData )
+			: table( tableData );
+
+	log( output );
 }
