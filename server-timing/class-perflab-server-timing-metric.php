@@ -22,12 +22,20 @@ class Perflab_Server_Timing_Metric {
 	private $slug;
 
 	/**
-	 * The metric value.
+	 * The metric value in milliseconds.
 	 *
 	 * @since n.e.x.t
 	 * @var int|float|null
 	 */
 	private $value;
+
+	/**
+	 * The value measured before relevant execution logic in seconds, if used.
+	 *
+	 * @since n.e.x.t
+	 * @var float|null
+	 */
+	private $before_value;
 
 	/**
 	 * Constructor.
@@ -53,6 +61,9 @@ class Perflab_Server_Timing_Metric {
 
 	/**
 	 * Sets the metric value.
+	 *
+	 * Alternatively to setting the metric value directly, the {@see Perflab_Server_Timing_Metric::measure_before()}
+	 * and {@see Perflab_Server_Timing_Metric::measure_after()} methods can be used to further simplify measuring.
 	 *
 	 * @since n.e.x.t
 	 *
@@ -89,5 +100,39 @@ class Perflab_Server_Timing_Metric {
 	 */
 	public function get_value() {
 		return $this->value;
+	}
+
+	/**
+	 * Captures the current time, as a reference point to calculate the duration of a task afterwards.
+	 *
+	 * This should be used in combination with {@see Perflab_Server_Timing_Metric::measure_after()}. Alternatively,
+	 * {@see Perflab_Server_Timing_Metric::set_value()} can be used to set a calculated value manually.
+	 *
+	 * @since n.e.x.t
+	 */
+	public function measure_before() {
+		$this->before_value = microtime( true );
+	}
+
+	/**
+	 * Captures the current time and compares it to the reference point to calculate a task's duration.
+	 *
+	 * This should be used in combination with {@see Perflab_Server_Timing_Metric::measure_before()}. Alternatively,
+	 * {@see Perflab_Server_Timing_Metric::set_value()} can be used to set a calculated value manually.
+	 *
+	 * @since n.e.x.t
+	 */
+	public function measure_after() {
+		if ( ! $this->before_value ) {
+			_doing_it_wrong(
+				__METHOD__,
+				/* translators: %s: PHP method name */
+				sprintf( __( 'The %s method must be called before.', 'performance-lab' ), __CLASS__ . '::measure_before()' ),
+				''
+			);
+			return;
+		}
+
+		$this->set_value( ( microtime( true ) - $this->before_value ) * 1000.0 );
 	}
 }

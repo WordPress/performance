@@ -32,6 +32,8 @@ class Perflab_Server_Timing {
 	/**
 	 * Registers a metric to calculate for the Server-Timing header.
 	 *
+	 * This method must be called before the {@see 'perflab_server_timing_send_header'} hook.
+	 *
 	 * @since n.e.x.t
 	 *
 	 * @param string $metric_slug The metric slug.
@@ -47,6 +49,16 @@ class Perflab_Server_Timing {
 	 * }
 	 */
 	public function register_metric( $metric_slug, array $args ) {
+		if ( did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				/* translators: %s: WordPress action name */
+				sprintf( __( 'The method must be called before or during the %s action.', 'performance-lab' ), 'perflab_server_timing_send_header' ),
+				''
+			);
+			return;
+		}
+
 		$args = wp_parse_args(
 			$args,
 			array(
@@ -93,7 +105,7 @@ class Perflab_Server_Timing {
 	 *
 	 * @since n.e.x.t
 	 */
-	public function add_header() {
+	public function send_header() {
 		if ( headers_sent() ) {
 			_doing_it_wrong(
 				__METHOD__,
@@ -102,6 +114,15 @@ class Perflab_Server_Timing {
 			);
 			return;
 		}
+
+		/**
+		 * Fires right before the Server-Timing header is sent.
+		 *
+		 * This action is the last possible point to register a Server-Timing metric.
+		 *
+		 * @since n.e.x.t
+		 */
+		do_action( 'perflab_server_timing_send_header' );
 
 		$header_value = $this->get_header_value();
 		if ( ! $header_value ) {
@@ -143,6 +164,55 @@ class Perflab_Server_Timing {
 		);
 
 		return implode( ', ', $metric_header_values );
+	}
+
+	/**
+	 * Returns whether an output buffer should be used to gather Server-Timing metrics during template rendering.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return bool True if an output buffer should be used, false otherwise.
+	 */
+	public function use_output_buffer() {
+		/**
+		 * Filters whether an output buffer should be used to be able to gather additional Server-Timing metrics.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param bool $use_output_buffer Whether to use an output buffer.
+		 */
+		return apply_filters( 'perflab_server_timing_use_output_buffer', false );
+	}
+
+	/**
+	 * Hook callback for the 'template_include' filter.
+	 *
+	 * This effectively initializes the class to send the Server-Timing header at the right point.
+	 *
+	 * This method is solely intended for internal use within WordPress.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param mixed $passthrough Optional. Filter value. Default null.
+	 * @return mixed Unmodified value of $passthrough.
+	 */
+	public function on_template_include( $passthrough = null ) {
+		if ( ! $this->use_output_buffer() ) {
+			$this->send_header();
+			return $passthrough;
+		}
+
+		ob_start();
+		add_action(
+			'shutdown',
+			function() {
+				$output = ob_get_clean();
+				$this->send_header();
+				echo $output;
+			},
+			-1000
+		);
+		return $passthrough;
 	}
 
 	/**

@@ -7,62 +7,48 @@
  */
 
 /**
- * Initializes the Server-Timing API.
+ * Provides access the Server-Timing API.
  *
- * This fires the {@see 'perflab_server_timing_init'} action that should be used to register metrics.
+ * When called for the first time, this also initializes the API to schedule the header for output.
+ * In case that no metrics are registered, this is still called on {@see 'wp_loaded'}, so that even then it still fires
+ * its action hooks as expected.
  *
  * @since n.e.x.t
  */
 function perflab_server_timing() {
 	static $server_timing;
 
-	if ( null !== $server_timing ) {
-		return;
+	if ( null === $server_timing ) {
+		$server_timing = new Perflab_Server_Timing();
+		add_filter( 'template_include', array( $server_timing, 'on_template_include' ), PHP_INT_MAX );
 	}
 
-	$server_timing = new Perflab_Server_Timing();
-
-	if ( perflab_server_timing_use_output_buffer() ) {
-		// The 'template_include' filter is the very last point before HTML is rendered.
-		add_filter(
-			'template_include',
-			function( $passthrough ) use ( $server_timing ) {
-				ob_start();
-				add_action(
-					'shutdown',
-					function() use ( $server_timing ) {
-						$output = ob_get_clean();
-						$server_timing->add_header();
-						echo $output;
-					},
-					-1000
-				);
-				return $passthrough;
-			},
-			PHP_INT_MAX
-		);
-	} else {
-		// The 'template_include' filter is the very last point before HTML is rendered.
-		add_filter(
-			'template_include',
-			function( $passthrough ) use ( $server_timing ) {
-				$server_timing->add_header();
-				return $passthrough;
-			},
-			PHP_INT_MAX
-		);
-	}
-
-	/**
-	 * Initialization hook for the Server-Timing API.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param Perflab_Server_Timing $server_timing Server-Timing API to register metrics.
-	 */
-	do_action( 'perflab_server_timing_init', $server_timing );
+	return $server_timing;
 }
-add_action( 'plugins_loaded', 'perflab_server_timing', 0 );
+add_action( 'wp_loaded', 'perflab_server_timing' );
+
+/**
+ * Registers a metric to calculate for the Server-Timing header.
+ *
+ * This method must be called before the {@see 'perflab_server_timing_send_header'} hook.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $metric_slug The metric slug.
+ * @param array  $args        {
+ *     Arguments for the metric.
+ *
+ *     @type callable $measure_callback The callback that initiates calculating the metric value. It will receive
+ *                                      the Perflab_Server_Timing_Metric instance as a parameter, in order to set
+ *                                      the value when it has been calculated. Metric values must be provided in
+ *                                      milliseconds.
+ *     @type string   $access_cap       Capability required to view the metric. If this is a public metric, this
+ *                                      needs to be set to "exist".
+ * }
+ */
+function perflab_server_timing_register_metric( $metric_slug, array $args ) {
+	perflab_server_timing()->register_metric( $metric_slug, $args );
+}
 
 /**
  * Returns whether an output buffer should be used to gather Server-Timing metrics during template rendering.
@@ -72,141 +58,110 @@ add_action( 'plugins_loaded', 'perflab_server_timing', 0 );
  * @return bool True if an output buffer should be used, false otherwise.
  */
 function perflab_server_timing_use_output_buffer() {
-	/**
-	 * Filters whether an output buffer should be used to be able to gather additional Server-Timing metrics.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param bool $use_output_buffer Whether to use an output buffer.
-	 */
-	return apply_filters( 'perflab_server_timing_use_output_buffer', false );
+	return perflab_server_timing()->use_output_buffer();
 }
 
 /**
  * Registers the default Server-Timing metrics.
  *
  * @since n.e.x.t
- *
- * @param Perflab_Server_Timing $server_timing Server-Timing API to register metrics.
  */
-function perflab_register_default_server_timing_metrics( $server_timing ) {
-	// WordPress execution prior to serving the template.
-	$server_timing->register_metric(
-		'before-template',
-		array(
-			'measure_callback' => function( $metric ) {
-				global $timestart;
-
-				// Use original value of global in case a plugin messes with it.
-				$start_time = $timestart;
-
-				add_filter(
-					'template_include',
-					function( $passthrough ) use ( $metric, $start_time ) {
-						$metric->set_value( ( microtime( true ) - $start_time ) * 1000.0 );
-						return $passthrough;
-					},
-					PHP_INT_MAX - 1
-				);
-			},
-			'access_cap'       => 'exist',
-		)
-	);
-
-	// Variable to subtract from total query time after template.
-	$queries_before_template_time_seconds = null;
-
-	if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
-		// WordPress database query time before template.
-		$server_timing->register_metric(
-			'before-template-db-queries',
-			array(
-				'measure_callback' => function( $metric ) use ( &$queries_before_template_time_seconds ) {
-					add_filter(
-						'template_include',
-						function( $passthrough ) use ( $metric, &$queries_before_template_time_seconds ) {
-							$queries_before_template_time_seconds = array_reduce(
-								$GLOBALS['wpdb']->queries,
-								function( $acc, $query ) {
-									return $acc + $query[1];
-								},
-								0.0
-							);
-							$metric->set_value( $queries_before_template_time_seconds * 1000.0 );
-							return $passthrough;
-						},
-						PHP_INT_MAX - 1
-					);
-				},
-				'access_cap'       => 'exist',
-			)
-		);
-	}
-
-	if ( perflab_server_timing_use_output_buffer() ) {
-		// WordPress execution while serving the template.
-		$server_timing->register_metric(
-			'template',
+function perflab_register_default_server_timing_metrics() {
+	$calculate_before_template_metrics = function( $passthrough = null ) {
+		// WordPress execution prior to serving the template.
+		perflab_server_timing_register_metric(
+			'before-template',
 			array(
 				'measure_callback' => function( $metric ) {
-					$start_time = null;
-
-					add_filter(
-						'template_include',
-						function( $passthrough ) use ( &$start_time ) {
-							$start_time = microtime( true );
-							return $passthrough;
-						},
-						PHP_INT_MAX - 1
-					);
-					add_action(
-						'shutdown',
-						function() use ( $metric, &$start_time ) {
-							if ( null === $start_time ) {
-								return;
-							}
-							$metric->set_value( ( microtime( true ) - $start_time ) * 1000.0 );
-						},
-						// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
-						defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -1001
-					);
+					// The 'timestart' global is set right at the beginning of WordPress execution.
+					$metric->set_value( ( microtime( true ) - $GLOBALS['timestart'] ) * 1000.0 );
 				},
 				'access_cap'       => 'exist',
 			)
 		);
 
 		if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
-			// WordPress database query time within template.
-			$server_timing->register_metric(
-				'template-db-queries',
+			// WordPress database query time before template.
+			perflab_server_timing_register_metric(
+				'before-template-db-queries',
 				array(
-					'measure_callback' => function( $metric ) use ( &$queries_before_template_time_seconds ) {
-						add_action(
-							'shutdown',
-							function() use ( $metric, &$queries_before_template_time_seconds ) {
-								if ( null === $queries_before_template_time_seconds ) {
-									return;
-								}
-								$total_queries_time_seconds = array_reduce(
+					'measure_callback' => function( $metric ) {
+						// Store this value in a global to later subtract it from total query time after template.
+						$GLOBALS['perflab_query_time_before_template'] = array_reduce(
+							$GLOBALS['wpdb']->queries,
+							function( $acc, $query ) {
+								return $acc + $query[1];
+							},
+							0.0
+						);
+						$metric->set_value( $GLOBALS['perflab_query_time_before_template'] * 1000.0 );
+					},
+					'access_cap'       => 'exist',
+				)
+			);
+		}
+
+		return $passthrough;
+	};
+
+	// If output buffering is used, explicitly measure only the time before serving the template.
+	// Otherwise, the Server-Timing header will be sent before serving the template anyway.
+	if ( perflab_server_timing_use_output_buffer() ) {
+		add_filter( 'template_include', $calculate_before_template_metrics, PHP_INT_MAX );
+	} else {
+		add_action( 'perflab_server_timing_send_header', $calculate_before_template_metrics, PHP_INT_MAX );
+	}
+
+	// Template-related metrics can only be recorded if output buffering is used.
+	if ( perflab_server_timing_use_output_buffer() ) {
+		add_filter(
+			'template_include',
+			function( $passthrough = null ) {
+				// WordPress execution while serving the template.
+				perflab_server_timing_register_metric(
+					'template',
+					array(
+						'measure_callback' => function( $metric ) {
+							$metric->measure_before();
+							add_action( 'perflab_server_timing_send_header', array( $metric, 'measure_after' ), PHP_INT_MAX );
+						},
+						'access_cap'       => 'exist',
+					)
+				);
+
+				return $passthrough;
+			},
+			PHP_INT_MAX
+		);
+
+		if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
+			add_action(
+				'perflab_server_timing_send_header',
+				function() {
+					// WordPress database query time within template.
+					perflab_server_timing_register_metric(
+						'template-db-queries',
+						array(
+							'measure_callback' => function( $metric ) {
+								$total_query_time = array_reduce(
 									$GLOBALS['wpdb']->queries,
 									function( $acc, $query ) {
 										return $acc + $query[1];
 									},
 									0.0
 								);
-								$metric->set_value( ( $total_queries_time_seconds - $queries_before_template_time_seconds ) * 1000.0 );
+								$metric->set_value( ( $total_query_time - $GLOBALS['perflab_query_time_before_template'] ) * 1000.0 );
 							},
-							// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
-							defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -1001
-						);
-					},
-					'access_cap'       => 'exist',
-				)
+							'access_cap'       => 'exist',
+						)
+					);
+				},
+				PHP_INT_MAX
 			);
 		}
 	}
 }
-add_action( 'perflab_server_timing_init', 'perflab_register_default_server_timing_metrics' );
+add_action( 'plugins_loaded', 'perflab_register_default_server_timing_metrics' );
 
 /**
  * Wraps a callback (e.g. for an action or filter) to be measured and included in the Server-Timing header.
@@ -219,38 +174,33 @@ add_action( 'perflab_server_timing_init', 'perflab_register_default_server_timin
  *                              set to "exist".
  */
 function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
-	// Gain access to Perflab_Server_Timing_Metric instance.
-	$server_timing_metric = null;
-	add_action(
-		'perflab_server_timing_init',
-		function( $server_timing ) use ( &$server_timing_metric, $metric_slug, $access_cap ) {
-			$server_timing->register_metric(
-				$metric_slug,
-				array(
-					'measure_callback' => function( $metric ) use ( &$server_timing_metric ) {
-						$server_timing_metric = $metric;
-					},
-					'access_cap'       => $access_cap,
-				)
-			);
-		}
-	);
+	return function( ...$callback_args ) use ( $callback, $metric_slug, $access_cap ) {
+		// Gain access to Perflab_Server_Timing_Metric instance.
+		$server_timing_metric = null;
 
-	return function( ...$callback_args ) use ( &$server_timing_metric, $callback ) {
+		perflab_server_timing_register_metric(
+			$metric_slug,
+			array(
+				'measure_callback' => function( $metric ) use ( &$server_timing_metric ) {
+					$server_timing_metric = $metric;
+				},
+				'access_cap'       => $access_cap,
+			)
+		);
+
 		// If metric instance was not set, this metric should not be calculated.
 		if ( null === $server_timing_metric ) {
 			return call_user_func_array( $callback, $callback_args );
 		}
 
-		// Store start time (in microseconds).
-		$start_time = microtime( true );
+		// Measure time before the callback.
+		$server_timing_metric->measure_before();
 
 		// Execute the callback.
 		$result = call_user_func_array( $callback, $callback_args );
 
-		// Calculate total time (in milliseconds) and set it for the metric.
-		$total_time = ( microtime( true ) - $start_time ) * 1000.0;
-		$server_timing_metric->set_value( $total_time );
+		// Measure time after the callback and calculate total.
+		$server_timing_metric->measure_after();
 
 		// Return result (e.g. in case this is a filter callback).
 		return $result;
