@@ -2,14 +2,14 @@
 /**
  * Can load function to determine if Persistent Object Cache Health Check module is already merged in WordPress core.
  *
- * @since n.e.x.t
+ * @since 1.6.0
  * @package performance-lab
  */
 
 /**
  * Checks whether the given module is already merged into the WordPress core.
  *
- * @since n.e.x.t
+ * @since 1.6.0
  *
  * @global string $wp_version The WordPress version string.
  */
