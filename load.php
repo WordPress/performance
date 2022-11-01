@@ -108,23 +108,23 @@ function perflab_get_module_settings() {
 	// Even though a default value is registered for this setting, the default must be explicitly
 	// passed here, to support scenarios where this function is called before the 'init' action,
 	// for example when loading the active modules.
-	$perflab_get_module_settings = (array) get_option( PERFLAB_MODULES_SETTING, perflab_get_modules_setting_default() );
+	$module_settings = (array) get_option( PERFLAB_MODULES_SETTING, perflab_get_modules_setting_default() );
 
-	$legacy_module_slug = array(
+	$legacy_module_slugs = array(
 		'site-health/audit-autoloaded-options' => 'database/audit-autoloaded-options',
 		'site-health/audit-enqueued-assets'    => 'js-and-css/audit-enqueued-assets',
 		'site-health/audit-full-page-cache'    => 'object-cache/audit-full-page-cache',
 		'site-health/webp-support'             => 'images/webp-support',
 	);
 
-	foreach ( $perflab_get_module_settings as $module_slug => $module_data ) {
-		if ( isset( $legacy_module_slug[ $module_slug ] ) ) {
-			$perflab_get_module_settings[ $legacy_module_slug[ $module_slug ] ] = $module_data;
-			unset( $perflab_get_module_settings[ $module_slug ] );
+	foreach ( $legacy_module_slugs as $legacy_slug => $current_slug ) {
+		if ( isset( $module_settings[ $legacy_slug ] ) ) {
+			$module_settings[ $current_slug ] = $module_settings[ $legacy_slug ];
+			unset( $module_settings[ $legacy_slug ] );
 		}
 	}
 
-	return $perflab_get_module_settings;
+	return $module_settings;
 }
 
 /**
