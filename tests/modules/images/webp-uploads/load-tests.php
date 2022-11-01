@@ -775,6 +775,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->opt_in_to_jpeg_and_webp();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
+		remove_all_filters( 'wp_editor_set_quality' );
 
 		// Look for an image that contains only full size mime type images.
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
@@ -801,6 +802,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->opt_in_to_jpeg_and_webp();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
+		remove_all_filters( 'wp_editor_set_quality' );
 
 		// Look for an image that contains all of the additional mime type images.
 		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );
