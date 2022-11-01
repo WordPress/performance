@@ -31,15 +31,9 @@ function perflab_sqlite_module_update_option( $option, $old_value, $value ) {
 	$activating_sqlite   = $sqlite_is_active && ! $sqlite_was_active;
 	$deactivating_sqlite = ! $sqlite_is_active && $sqlite_was_active;
 
-	// If we're activating the module, copy the db.php file and install the DB.
+	// If we're activating the module, copy the db.php file.
 	if ( $activating_sqlite ) {
 		perflab_sqlite_module_copy_db_file();
-		/**
-		 * Experiment with auto-installing WP on activation.
-		 * Uncomment the line below to enable the experiment.
-		perflab_sqlite_module_install_db_with_user();
-		 */
-		perflab_sqlite_module_force_reload();
 	}
 
 	// If we are deactivating the module, delete the db.php file.
@@ -59,20 +53,18 @@ add_action( 'update_option', 'perflab_sqlite_module_update_option', 10, 3 );
  * When the plugin gets merged in wp-core, this is not to be ported.
  *
  * @since n.e.x.t
- *
- * @return bool Returns whether the file was successfully copied.
  */
 function perflab_sqlite_module_copy_db_file() {
 	// Bail early if the SQLite3 class does not exist.
 	if ( ! class_exists( 'SQLite3' ) ) {
-		return false;
+		return;
 	}
 
 	$destination = WP_CONTENT_DIR . '/db.php';
 
 	// Bail early if the file already exists.
 	if ( file_exists( $destination ) ) {
-		return false;
+		return;
 	}
 
 	// Init the filesystem to allow copying the file.
@@ -105,26 +97,20 @@ function perflab_sqlite_module_copy_db_file() {
 		$file_copied_successfully = $wp_filesystem->put_contents( $destination, $file_contents );
 	}
 
-	return $file_copied_successfully;
-}
-
-/**
- * Add a script in wp_head to force-reload the current URL.
- *
- * This hack is here because it's impossible to redirect properly in PHP,
- * due to hooks race conditions and the fact that the redirect is done before the output is sent.
- *
- * When SQLite gets merged in Core this will be a non-issue.
- *
- * @since n.e.x.t
- */
-function perflab_sqlite_module_force_reload() {
-	add_action(
-		'admin_head',
-		function() {
-			echo '<script>window.location.reload(true);</script>';
-		}
-	);
+	if ( $file_copied_successfully ) {
+		/**
+		 * This hack is here because it's impossible to redirect properly in PHP,
+		 * due to hooks race conditions and the fact that the redirect is done before the output is sent.
+		 *
+		 * When SQLite gets merged in Core this will be a non-issue.
+		 */
+		add_action(
+			'admin_head',
+			function() {
+				echo '<script>window.location.reload(true);</script>';
+			}
+		);
+	}
 }
 
 /**
@@ -176,50 +162,4 @@ function perflab_sqlite_module_deactivate_module_in_mysql() {
 		array( 'option_value' => maybe_serialize( $value ) ),
 		array( 'option_name' => PERFLAB_MODULES_SETTING )
 	);
-}
-
-/**
- * Copy the sample database and install WP.
- *
- * This is a modified version of wp_install, which gets data from the current database
- * and then injects that in the new one.
- * Not to be backported to Core.
- *
- * @since n.e.x.t
- */
-function perflab_sqlite_module_install_db_with_user() {
-	global $wpdb;
-
-	// Bail early if the database already exists.
-	if ( file_exists( FQDB ) ) {
-		return;
-	}
-
-	/* SQLite change: Require the upgrade.php file. This is only needed for the plugin, not to be backported. */
-	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-
-	// Basic props for the site.
-	$blog_title   = get_bloginfo( 'name' ) . ' - SQLite';
-	$current_user = wp_get_current_user();
-	$is_public    = get_option( 'blog_public' );
-	$language     = get_locale();
-	$language     = 'en_US' === $language ? '' : $language;
-
-	// Get the hashed password for the current user.
-	$hashed_pass = '';
-	if ( ! empty( $current_user->ID ) ) {
-		// Get the database entries for the current user for the wp_users table.
-		$db_user     = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->users WHERE ID = %d", $current_user->ID ) );
-		$hashed_pass = $db_user->user_pass;
-	}
-
-	require_once __DIR__ . '/wp-includes/sqlite/db.php';
-
-	$GLOBALS['wpdb'] = new Perflab_SQLite_DB();
-	perflab_sqlite_wp_install( $blog_title, $current_user->user_login, $current_user->user_email, $is_public, '', 'password', $language );
-
-	// Update the user password.
-	if ( $hashed_pass ) {
-		$wpdb->update( $wpdb->users, array( 'user_pass' => $hashed_pass ), array( 'ID' => $user_id ) );
-	}
 }
