@@ -10,7 +10,10 @@
 require_once __DIR__ . '/constants.php';
 
 /**
- * Trigger actions when the module gets deactivated.
+ * Trigger actions when the module gets activated or deactivated.
+ *
+ * This action needs to be in the must-load.php file,
+ * because the load.php file only gets loaded when the module is already active.
  *
  * @since n.e.x.t
  *
