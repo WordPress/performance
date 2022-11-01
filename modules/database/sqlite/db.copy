@@ -19,6 +19,7 @@ if ( ! defined( 'DATABASE_TYPE' ) ) {
 
 // Require the implementation from the performance-lab plugin.
 require_once '{SQLITE_IMPLEMENTATION_FOLDER_PATH}/wp-includes/sqlite/db.php';
+require_once '{SQLITE_IMPLEMENTATION_FOLDER_PATH}/must-load.php';
 
 // Activate the performance-lab plugin if it is not already activated.
 add_action(
@@ -33,18 +34,17 @@ add_action(
 		if ( is_plugin_inactive( '{PERFLAB_PLUGIN}' ) ) {
 			activate_plugin( '{PERFLAB_PLUGIN}' );
 		}
-	}
-);
 
-// Enable the SQLite module.
-add_filter(
-	'option_{PERFLAB_MODULES_SETTING}',
-	function( $value ) {
-		if ( empty( $value ) ) {
-			$value = function_exists( 'perflab_get_modules_setting_default' ) ? perflab_get_modules_setting_default() : array();
+		// Enable the SQLite module.
+		$option_value = get_option( '{PERFLAB_MODULES_SETTING}', array() );
+		if ( empty( $option_value ) ) {
+			$option_value = function_exists( 'perflab_get_modules_setting_default' ) ? perflab_get_modules_setting_default() : array();
 		}
-		$value['{SQLITE_MODULE}']            = empty( $value['{SQLITE_MODULE}'] ) ? array() : $value['{SQLITE_MODULE}'];
-		$value['{SQLITE_MODULE}']['enabled'] = '1';
-		return $value;
+		if ( ! in_array( '{SQLITE_MODULE}', $option_value, true ) ) {
+			$option_value['{SQLITE_MODULE}']            = empty( $option_value['{SQLITE_MODULE}'] ) ? array() : $option_value['{SQLITE_MODULE}'];
+			$option_value['{SQLITE_MODULE}']['enabled'] = '1';
+
+			update_option( '{PERFLAB_MODULES_SETTING}', $option_value );
+		}
 	}
 );
