@@ -97,6 +97,32 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( $new_value, $settings );
 	}
 
+	/**
+	 * @dataProvider data_legacy_modules
+	 */
+	public function test_legacy_module_for_perflab_get_module_settings( $legacy_module_slug, $current_module_slug ) {
+		$new_value = array(
+			'site-health/audit-autoloaded-options' => array( 'enabled' => true ),
+			'site-health/audit-enqueued-assets'    => array( 'enabled' => true ),
+			'site-health/audit-full-page-cache'    => array( 'enabled' => true ),
+			'site-health/webp-support'             => array( 'enabled' => true ),
+		);
+		update_option( PERFLAB_MODULES_SETTING, $new_value );
+
+		$settings = perflab_get_module_settings();
+		$this->assertArrayNotHasKey( $legacy_module_slug, $settings, 'The settings do not contain the old legacy module slug in the database' );
+		$this->assertArrayHasKey( $current_module_slug, $settings, 'The settings contain an updated module slug in the database' );
+	}
+
+	public function data_legacy_modules() {
+		return array(
+			array( 'site-health/audit-autoloaded-options', 'database/audit-autoloaded-options' ),
+			array( 'site-health/audit-enqueued-assets', 'js-and-css/audit-enqueued-assets' ),
+			array( 'site-health/audit-full-page-cache', 'object-cache/audit-full-page-cache' ),
+			array( 'site-health/webp-support', 'images/webp-support' ),
+		);
+	}
+
 	public function test_perflab_get_active_modules() {
 		// Assert that by default there are no active modules.
 		$active_modules          = perflab_get_active_modules();
