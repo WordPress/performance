@@ -34,6 +34,8 @@ jobs:
     name: PHP
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      composer-cache-dir: ${{ steps.composer-cache.outputs.dir }}
     steps:
       - uses: styfle/cancel-workflow-action@0.9.1
       - uses: actions/checkout@v3
@@ -46,7 +48,7 @@ jobs:
           echo "name=dir::$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       - uses: actions/cache@v3
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
+          path: ${{ needs.php-lint.outputs.composer-cache-dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
