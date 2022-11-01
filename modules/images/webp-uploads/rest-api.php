@@ -18,7 +18,7 @@
  */
 function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Post $post, WP_REST_Request $request ) {
 	$data = $response->get_data();
-	if ( ! isset( $data['media_details']['sizes'] ) || ! is_array( $data['media_details']['sizes'] ) ) {
+	if ( ! isset( $data['media_details'] ) || ! is_array( $data['media_details'] ) || ! isset( $data['media_details']['sizes'] ) || ! is_array( $data['media_details']['sizes'] ) ) {
 		return $response;
 	}
 
