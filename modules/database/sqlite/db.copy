@@ -19,7 +19,6 @@ if ( ! defined( 'DATABASE_TYPE' ) ) {
 
 // Require the implementation from the performance-lab plugin.
 require_once '{SQLITE_IMPLEMENTATION_FOLDER_PATH}/wp-includes/sqlite/db.php';
-require_once '{SQLITE_IMPLEMENTATION_FOLDER_PATH}/must-load.php';
 
 // Activate the performance-lab plugin if it is not already activated.
 add_action(

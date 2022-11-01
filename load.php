@@ -262,16 +262,49 @@ if ( is_admin() ) {
 }
 
 /**
- * Always load the must-load.php file for each module.
+ * Trigger actions when a module gets activated or deactivated.
  *
  * @since n.e.x.t
+ *
+ * @param string $option    The option name.
+ * @param mixed  $old_value Old value of the option.
+ * @param mixed  $value     New value of the option.
+ *
+ * @return void
  */
-function perflab_load_must_load_modules() {
-	// Get all must-load files.
-	$must_load_files = glob( PERFLAB_PLUGIN_DIR_PATH . 'modules/*/*/must-load.php' );
-	foreach ( $must_load_files as $must_load_file ) {
-		require_once $must_load_file;
+function perflab_run_module_activation_deactivation( $option, $old_value, $value ) {
+	if ( PERFLAB_MODULES_SETTING !== $option ) {
+		return;
 	}
-}
 
-perflab_load_must_load_modules();
+	foreach ( $value as $module => $module_settings ) {
+		if ( ! empty( $module_settings['enabled'] ) && ( empty( $old_value[ $module ] ) || empty( $old_value[ $module ]['enabled'] ) ) ) {
+			$module_activation_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/activate.php';
+			if ( ! file_exists( $module_activation_file ) ) {
+				continue;
+			}
+			$module = require $module_activation_file;
+			if ( ! is_callable( $module ) ) {
+				continue;
+			}
+			$module();
+		}
+	}
+
+	foreach ( $old_value as $module => $module_settings ) {
+		if ( ! empty( $module_settings['enabled'] ) && ( empty( $value[ $module ] ) || empty( $value[ $module ]['enabled'] ) ) ) {
+			$module_deactivation_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/deactivate.php';
+			if ( ! file_exists( $module_deactivation_file ) ) {
+				continue;
+			}
+			$module = require $module_deactivation_file;
+			if ( ! is_callable( $module ) ) {
+				continue;
+			}
+			$module();
+		}
+	}
+
+	return $value;
+}
+add_action( 'update_option', 'perflab_run_module_activation_deactivation', 10, 3 );
