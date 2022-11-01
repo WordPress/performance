@@ -14,12 +14,17 @@ require_once __DIR__ . '/constants.php';
  *
  * @since n.e.x.t
  *
- * @param mixed $value New value of the option.
- * @param mixed $old_value Old value of the option.
+ * @param string $option    The option name.
+ * @param mixed  $old_value Old value of the option.
+ * @param mixed  $value     New value of the option.
  *
- * @return mixed Returns the value.
+ * @return void
  */
-function perflab_sqlite_module_pre_update_option( $value, $old_value ) {
+function perflab_sqlite_module_update_option( $option, $old_value, $value ) {
+	if ( PERFLAB_MODULES_SETTING !== $option ) {
+		return;
+	}
+
 	// Figure out we're activating or deactivating the module.
 	$sqlite_was_active   = isset( $old_value['database/sqlite'] ) && ! empty( $old_value['database/sqlite']['enabled'] );
 	$sqlite_is_active    = isset( $value['database/sqlite'] ) && ! empty( $value['database/sqlite']['enabled'] );
@@ -40,7 +45,7 @@ function perflab_sqlite_module_pre_update_option( $value, $old_value ) {
 	}
 	return $value;
 }
-add_filter( 'pre_update_option_' . PERFLAB_MODULES_SETTING, 'perflab_sqlite_module_pre_update_option', 10, 3 );
+add_action( 'update_option', 'perflab_sqlite_module_update_option', 10, 3 );
 
 /**
  * Adds the db.php file in wp-content.
@@ -131,9 +136,6 @@ function perflab_sqlite_module_delete_db_file() {
  */
 function perflab_sqlite_module_deactivate_module_in_mysql() {
 	global $table_prefix;
-
-	// Remove the filter to avoid an infinite loop.
-	remove_filter( 'pre_update_option_' . PERFLAB_MODULES_SETTING, 'perflab_sqlite_module_pre_update_option', 10 );
 
 	// Get credentials for the MySQL database.
 	$dbuser     = defined( 'DB_USER' ) ? DB_USER : '';
