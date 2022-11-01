@@ -260,3 +260,18 @@ perflab_load_active_and_valid_modules();
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
 }
+
+/**
+ * Always load the must-load.php file for each module.
+ *
+ * @since n.e.x.t
+ */
+function perflab_load_must_load_modules() {
+	// Get all must-load files.
+	$must_load_files = glob( PERFLAB_PLUGIN_DIR_PATH . 'modules/*/*/must-load.php' );
+	foreach ( $must_load_files as $must_load_file ) {
+		require_once $must_load_file;
+	}
+}
+
+perflab_load_must_load_modules();
