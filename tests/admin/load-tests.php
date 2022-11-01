@@ -8,11 +8,11 @@
 class Admin_Load_Tests extends WP_UnitTestCase {
 
 	private static $demo_modules = array(
-		'css-and-js/demo-module-1' => array(
+		'js-and-css/demo-module-1' => array(
 			'name'         => 'Demo Module 1',
 			'description'  => 'This is the description for demo module 1.',
 			'experimental' => false,
-			'focus'        => 'css-and-js',
+			'focus'        => 'js-and-css',
 			'slug'         => 'demo-module-1',
 		),
 		'something/demo-module-2'  => array(
@@ -35,8 +35,8 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		'images'       => array(
 			'name' => 'Images',
 		),
-		'css-and-js'   => array(
-			'name' => 'css-and-js',
+		'js-and-css'   => array(
+			'name' => 'js-and-css',
 		),
 		'database'     => array(
 			'name' => 'Database',
@@ -115,9 +115,9 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 					'title'    => 'Images',
 					'callback' => null,
 				),
-				'css-and-js' => array(
-					'id'       => 'css-and-js',
-					'title'    => 'css-and-js',
+				'js-and-css' => array(
+					'id'       => 'js-and-css',
+					'title'    => 'js-and-css',
 					'callback' => null,
 				),
 				'other'      => array(
@@ -131,7 +131,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$this->assertEqualSets(
 			array(
 				'images',
-				'css-and-js',
+				'js-and-css',
 				'other',
 			),
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ] )
@@ -141,8 +141,8 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['images'] )
 		);
 		$this->assertEqualSets(
-			array( 'css-and-js/demo-module-1' ),
-			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['css-and-js'] )
+			array( 'js-and-css/demo-module-1' ),
+			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['js-and-css'] )
 		);
 		$this->assertEqualSets(
 			array( 'something/demo-module-2' ),
@@ -159,7 +159,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_perflab_render_modules_page_field() {
-		$module_slug     = 'css-and-js/demo-module-1';
+		$module_slug     = 'js-and-css/demo-module-1';
 		$module_data     = self::$demo_modules[ $module_slug ];
 		$module_settings = array( 'enabled' => false );
 
@@ -187,7 +187,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_get_focus_areas() {
 		$expected_focus_areas = array(
 			'images',
-			'css-and-js',
+			'js-and-css',
 			'database',
 			'measurement',
 			'object-cache',

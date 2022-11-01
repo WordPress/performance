@@ -10,10 +10,10 @@
 /tests/modules/images                       @adamsilverstein @getsource
 /tests/testdata/modules/images              @adamsilverstein @getsource
 
-# Focus: CSS & JS
-/modules/css-and-js                         @aristath @sgomes
-/tests/modules/css-and-js                   @aristath @sgomes
-/tests/testdata/modules/css-and-js          @aristath @sgomes
+# Focus: JS & CSS
+/modules/js-and-css                         @aristath @sgomes
+/tests/modules/js-and-css                   @aristath @sgomes
+/tests/testdata/modules/js-and-css          @aristath @sgomes
 
 # Focus: Measurement
 /modules/measurement
@@ -41,9 +41,9 @@
 /tests/testdata/modules/database/audit-autoloaded-options                @manuelRod
 
 # Module: Audit Enqueued Assets
-/modules/css-and-js/audit-enqueued-assets                                  @manuelRod
-/tests/modules/css-and-js/audit-enqueued-assets                            @manuelRod
-/tests/testdata/modules/css-and-js/audit-enqueued-assets                   @manuelRod
+/modules/js-and-css/audit-enqueued-assets                                  @manuelRod
+/tests/modules/js-and-css/audit-enqueued-assets                            @manuelRod
+/tests/testdata/modules/js-and-css/audit-enqueued-assets                   @manuelRod
 
 # Module: Persistent Object Cache
 /modules/object-cache/persistent-object-cache-health-check                  @tillkruss @spacedmonkey
