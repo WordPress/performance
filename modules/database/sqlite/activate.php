@@ -42,12 +42,14 @@ return function() {
 				'{PERFLAB_PLUGIN}',
 				'{SQLITE_MODULE}',
 				'{PERFLAB_MODULES_SETTING}',
+				'{PERFLAB_MODULES_SCREEN}',
 			),
 			array(
 				__DIR__,
 				str_replace( WP_PLUGIN_DIR . '/', '', PERFLAB_MAIN_FILE ),
 				'database/sqlite',
 				PERFLAB_MODULES_SETTING,
+				PERFLAB_MODULES_SCREEN,
 			),
 			file_get_contents( __DIR__ . '/db.copy' )
 		);

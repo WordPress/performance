@@ -22,28 +22,29 @@ require_once '{SQLITE_IMPLEMENTATION_FOLDER_PATH}/wp-includes/sqlite/db.php';
 
 // Activate the performance-lab plugin if it is not already activated.
 add_action(
-	'init',
+	'current_screen',
 	function() {
-		if ( defined( 'PERFLAB_VERSION' ) ) {
-			return;
-		}
-		if ( ! function_exists( 'activate_plugin' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-		if ( is_plugin_inactive( '{PERFLAB_PLUGIN}' ) ) {
-			activate_plugin( '{PERFLAB_PLUGIN}' );
+		if ( ! defined( 'PERFLAB_VERSION' ) ) {
+			if ( ! function_exists( 'activate_plugin' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+			if ( is_plugin_inactive( '{PERFLAB_PLUGIN}' ) ) {
+				activate_plugin( '{PERFLAB_PLUGIN}' );
+			}
 		}
 
 		// Enable the SQLite module.
-		$option_value = get_option( '{PERFLAB_MODULES_SETTING}', array() );
-		if ( empty( $option_value ) ) {
-			$option_value = function_exists( 'perflab_get_modules_setting_default' ) ? perflab_get_modules_setting_default() : array();
-		}
-		if ( ! in_array( '{SQLITE_MODULE}', $option_value, true ) ) {
-			$option_value['{SQLITE_MODULE}']            = empty( $option_value['{SQLITE_MODULE}'] ) ? array() : $option_value['{SQLITE_MODULE}'];
-			$option_value['{SQLITE_MODULE}']['enabled'] = '1';
+		if ( 'settings_page_{PERFLAB_MODULES_SCREEN}' === get_current_screen()->base ) {
+			$option_value = get_option( '{PERFLAB_MODULES_SETTING}', array() );
+			if ( empty( $option_value ) ) {
+				$option_value = function_exists( 'perflab_get_modules_setting_default' ) ? perflab_get_modules_setting_default() : array();
+			}
+			if ( ! in_array( '{SQLITE_MODULE}', $option_value, true ) ) {
+				$option_value['{SQLITE_MODULE}']            = empty( $option_value['{SQLITE_MODULE}'] ) ? array() : $option_value['{SQLITE_MODULE}'];
+				$option_value['{SQLITE_MODULE}']['enabled'] = '1';
 
-			update_option( '{PERFLAB_MODULES_SETTING}', $option_value );
+				update_option( '{PERFLAB_MODULES_SETTING}', $option_value );
+			}
 		}
 	}
 );
