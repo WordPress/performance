@@ -12,5 +12,6 @@
  * @since n.e.x.t
  */
 return function() {
-	return class_exists( 'SQLite3' );
+	$is_writable_wp_content_dir = wp_is_writable( WP_CONTENT_DIR );
+	return class_exists( 'SQLite3' ) && $is_writable_wp_content_dir;
 };
