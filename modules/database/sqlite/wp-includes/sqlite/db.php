@@ -14,49 +14,23 @@ if ( ! defined( 'DATABASE_TYPE' ) || 'sqlite' !== DATABASE_TYPE ) {
 	return;
 }
 
-/**
- * Log errors.
- *
- * @param string $message The error message.
- * @param mixed  $data    The data to be logged.
- */
-function perflab_sqlite_pdo_log_error( $message, $data = null ) {
-	$admin_dir = 'wp-admin/';
-	if ( strpos( $_SERVER['SCRIPT_NAME'], 'wp-admin' ) !== false ) {
-		$admin_dir = '';
-	}
-	die(
-		<<<HTML
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title>WordPress &rsaquo; Error</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link rel="stylesheet" href="{$admin_dir}css/install.css" type="text/css" />
-</head>
-<body>
-<h1 id="logo"><img alt="WordPress" src="{$admin_dir}images/wordpress-logo.png" /></h1>
-<p>$message</p>
-<p>$data</p>
-</body>
-<html>
-
-HTML
-	);
-}
-
 if ( ! extension_loaded( 'pdo' ) ) {
-	perflab_sqlite_pdo_log_error(
-		'PHP PDO Extension is not loaded.',
-		'Your PHP installation appears to be missing the PDO extension which is required for this version of WordPress.'
+	wp_die(
+		new WP_Error(
+			'pdo_not_loaded',
+			'<strong>PHP PDO Extension is not loaded:</strong> Your PHP installation appears to be missing the PDO extension which is required for this version of WordPress and the type of database you have specified.'
+		),
+		'PHP PDO Extension is not loaded.'
 	);
 }
 
 if ( ! extension_loaded( 'pdo_sqlite' ) ) {
-	perflab_sqlite_pdo_log_error(
-		'PDO Driver for SQLite is missing.',
-		'Your PHP installation appears not to have the right PDO drivers loaded. These are required for this version of WordPress and the type of database you have specified.'
+	wp_die(
+		new WP_Error(
+			'pdo_driver_not_loaded',
+			'<strong>PDO Driver for SQLite is missing:</strong> Your PHP installation appears not to have the right PDO drivers loaded. These are required for this version of WordPress and the type of database you have specified.'
+		),
+		'PDO Driver for SQLite is missing.'
 	);
 }
 
