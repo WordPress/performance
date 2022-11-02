@@ -167,10 +167,15 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 		<p id="<?php echo esc_attr( "{$base_id}_description" ); ?>" class="description">
 			<?php echo esc_html( $module_data['description'] ); ?>
 		</p>
-		<?php if ( ! empty( $module_data['notice'] ) ) : ?>
+		<?php if ( $enabled && ! empty( $module_data['enabled-notice'] ) ) : ?>
 			<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
 			<p style="background:#fff;border:1px solid #c3c4c7;border-left-width: 4px;border-left-color:#dba617;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);padding:1em;max-width:50em;">
-				<?php echo esc_html( $module_data['notice'] ); ?>
+				<?php echo esc_html( $module_data['enabled-notice'] ); ?>
+			</p>
+		<?php elseif ( ! $enabled && perflab_can_load_module( $module_slug ) && ! empty( $module_data['disabled-notice'] ) ) : ?>
+			<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
+			<p style="background:#fff;border:1px solid #c3c4c7;border-left-width: 4px;border-left-color:#dba617;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);padding:1em;max-width:50em;">
+				<?php echo esc_html( $module_data['disabled-notice'] ); ?>
 			</p>
 		<?php endif; ?>
 	</fieldset>
@@ -317,10 +322,11 @@ function perflab_get_module_data( $module_file ) {
 	$module_dir = $matches[1];
 
 	$default_headers = array(
-		'name'         => 'Module Name',
-		'description'  => 'Description',
-		'experimental' => 'Experimental',
-		'notice'       => 'Notice',
+		'name'            => 'Module Name',
+		'description'     => 'Description',
+		'experimental'    => 'Experimental',
+		'enabled-notice'  => 'Enabled Notice',
+		'disabled-notice' => 'Disabled Notice',
 	);
 
 	$module_data = get_file_data( $module_file, $default_headers, 'perflab_module' );
@@ -347,9 +353,10 @@ function perflab_get_module_data( $module_file ) {
 	// Translate fields using low-level function since they come from PHP comments, including the necessary context for
 	// `_x()`. This must match how these are translated in the generated `/module-i18n.php` file.
 	$translatable_fields = array(
-		'name'        => 'module name',
-		'description' => 'module description',
-		'notice'      => 'module notice',
+		'name'            => 'module name',
+		'description'     => 'module description',
+		'enabled-notice'  => 'module enabled notice',
+		'disabled-notice' => 'module disabled notice',
 	);
 	foreach ( $translatable_fields as $field => $context ) {
 		// phpcs:ignore WordPress.WP.I18n.LowLevelTranslationFunction,WordPress.WP.I18n.NonSingularStringLiteralContext,WordPress.WP.I18n.NonSingularStringLiteralText
