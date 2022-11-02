@@ -114,6 +114,16 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertArrayHasKey( $current_module_slug, $settings, 'The settings contain an updated module slug in the database' );
 	}
 
+	/**
+	 * Data provider for test_legacy_module_for_perflab_get_module_settings().
+	 *
+	 * @return array {
+	 *     @type array {
+	 *         @type string $legacy_module_slug  The legacy module slug.
+	 *         @type string $current_module_slug The new/updated module slug.
+	 *     }
+	 * }
+	 */
 	public function data_legacy_modules() {
 		return array(
 			array( 'site-health/audit-autoloaded-options', 'database/audit-autoloaded-options' ),
