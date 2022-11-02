@@ -101,12 +101,7 @@ class Load_Tests extends WP_UnitTestCase {
 	 * @dataProvider data_legacy_modules
 	 */
 	public function test_legacy_module_for_perflab_get_module_settings( $legacy_module_slug, $current_module_slug ) {
-		$new_value = array(
-			'site-health/audit-autoloaded-options' => array( 'enabled' => true ),
-			'site-health/audit-enqueued-assets'    => array( 'enabled' => true ),
-			'site-health/audit-full-page-cache'    => array( 'enabled' => true ),
-			'site-health/webp-support'             => array( 'enabled' => true ),
-		);
+		$new_value = array( $legacy_module_slug => array( 'enabled' => true ) );
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
 
 		$settings = perflab_get_module_settings();
