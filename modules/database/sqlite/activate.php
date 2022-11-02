@@ -31,6 +31,7 @@ return function() {
 		WP_Filesystem();
 	}
 
+	// Copy the file, replacing contents as needed.
 	$file_copied_successfully = false;
 	if ( $wp_filesystem->touch( $destination ) ) {
 

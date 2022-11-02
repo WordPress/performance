@@ -277,6 +277,7 @@ function perflab_run_module_activation_deactivation( $option, $old_value, $value
 		return;
 	}
 
+	// Get the list of modules that were activated, and load the activate.php files if they exist.
 	foreach ( $value as $module => $module_settings ) {
 		if ( ! empty( $module_settings['enabled'] ) && ( empty( $old_value[ $module ] ) || empty( $old_value[ $module ]['enabled'] ) ) ) {
 			$module_activation_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/activate.php';
@@ -291,6 +292,7 @@ function perflab_run_module_activation_deactivation( $option, $old_value, $value
 		}
 	}
 
+	// Get the list of modules that were deactivated, and load the deactivate.php files if they exist.
 	foreach ( $old_value as $module => $module_settings ) {
 		if ( ! empty( $module_settings['enabled'] ) && ( empty( $value[ $module ] ) || empty( $value[ $module ]['enabled'] ) ) ) {
 			$module_deactivation_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/deactivate.php';
