@@ -4,14 +4,14 @@
 const fs = require( 'fs' );
 const readline = require( 'readline' );
 const autocannon = require( 'autocannon' );
-const { mean, floor } = require( 'lodash' );
+const { round } = require( 'lodash' );
 const { table } = require( 'table' );
-const { stringify } = require( 'csv-stringify/sync' );
+const { stringify: csv } = require( 'csv-stringify/sync' );
 
 /**
  * Internal dependencies
  */
-const { log } = require( '../lib/logger' );
+const { log, formats } = require( '../lib/logger' );
 
 const OUTPUT_FORMAT_CSV = 'csv';
 
@@ -35,7 +35,7 @@ const OUTPUT_FORMAT_CSV = 'csv';
  *
  * @property {string} url         An URL to benchmark.
  * @property {number} concurrency A number of multiple requests to make at a time.
- * @property {number} requests    A number of requests to perform.
+ * @property {number} number      A number of requests to perform.
  * @property {string} file        A path to a file with URLs to benchmark.
  * @property {string} output      An output format.
  */
@@ -50,7 +50,7 @@ exports.options = [
 		defaults: 1,
 	},
 	{
-		argname: '-n, --requests <requests>',
+		argname: '-n, --number <number>',
 		description: 'Number of requests to perform',
 		defaults: 1,
 	},
@@ -60,8 +60,8 @@ exports.options = [
 	},
 	{
 		argname: '-o, --output <output>',
-		description: 'Output format: csv or console',
-		defaults: 'console',
+		description: 'Output format: csv or table',
+		defaults: 'table',
 	},
 ];
 
@@ -71,20 +71,30 @@ exports.options = [
  * @param {BenchmarkCommandOptions} opt Command options.
  */
 exports.handler = async ( opt ) => {
-	const { concurrency: connections, requests: amount } = opt;
+	const { concurrency: connections, number: amount } = opt;
 	const results = [];
 
 	for await ( const url of getURLs( opt ) ) {
-		const { responseTimes, metrics } = await benchmarkURL( {
-			url,
-			connections,
-			amount,
-		} );
+		const { completeRequests, responseTimes, metrics } = await benchmarkURL(
+			{
+				url,
+				connections,
+				amount,
+			}
+		);
 
-		results.push( [ url, responseTimes, metrics ] );
+		results.push( [ url, completeRequests, responseTimes, metrics ] );
 	}
 
-	outputResults( opt, results );
+	if ( results.length === 0 ) {
+		log(
+			formats.error(
+				'No URLs were found. Please, provide URLs to benchmark.'
+			)
+		);
+	} else {
+		outputResults( opt, results );
+	}
 };
 
 /**
@@ -121,6 +131,7 @@ async function* getURLs( opt ) {
 function benchmarkURL( params ) {
 	const metrics = {};
 	const responseTimes = [];
+	let completeRequests = 0;
 
 	const onHeaders = ( { headers } ) => {
 		const responseMetrics = getServerTimingMetricsFromHeaders( headers );
@@ -131,6 +142,10 @@ function benchmarkURL( params ) {
 	};
 
 	const onResponse = ( statusCode, resBytes, responseTime ) => {
+		if ( statusCode === 200 ) {
+			completeRequests++;
+		}
+
 		responseTimes.push( responseTime );
 	};
 
@@ -148,7 +163,7 @@ function benchmarkURL( params ) {
 	return new Promise( ( resolve ) => {
 		instance.on( 'done', () => {
 			process.off( 'SIGINT', onStop );
-			resolve( { responseTimes, metrics } );
+			resolve( { responseTimes, completeRequests, metrics } );
 		} );
 	} );
 }
@@ -193,10 +208,14 @@ function outputResults( opt, results ) {
 		return line;
 	};
 
-	const tableData = [ newRow( '' ), newRow( 'Avg Time' ) ];
+	const tableData = [
+		newRow( '' ),
+		newRow( 'Complete Requests' ),
+		newRow( 'Response Time' ),
+	];
 
 	for ( let i = 0; i < len; i++ ) {
-		for ( const metric of Object.keys( results[ i ][ 2 ] ) ) {
+		for ( const metric of Object.keys( results[ i ][ 3 ] ) ) {
 			allMetricNames[ metric ] = '';
 		}
 	}
@@ -206,15 +225,20 @@ function outputResults( opt, results ) {
 	} );
 
 	for ( let i = 0; i < len; i++ ) {
-		const [ url, responseTimes, metrics ] = results[ i ];
+		const [ url, completeRequests, responseTimes, metrics ] = results[ i ];
+		const completionRate = round(
+			( 100 * completeRequests ) / ( opt.number || 1 ),
+			1
+		);
 
 		tableData[ 0 ][ i + 1 ] = url;
-		tableData[ 1 ][ i + 1 ] = floor( mean( responseTimes ), 2 );
+		tableData[ 1 ][ i + 1 ] = `${ completionRate }%`;
+		tableData[ 2 ][ i + 1 ] = calcMedian( responseTimes );
 
 		for ( const metric of Object.keys( metrics ) ) {
-			const metricAvgMs = floor( mean( metrics[ metric ] ), 2 );
+			const metricAvgMs = calcMedian( metrics[ metric ] );
 
-			for ( let j = 2; j < tableData.length; j++ ) {
+			for ( let j = 3; j < tableData.length; j++ ) {
 				if ( tableData[ j ][ 0 ] === metric ) {
 					tableData[ j ][ i + 1 ] = metricAvgMs;
 				}
@@ -224,8 +248,31 @@ function outputResults( opt, results ) {
 
 	const output =
 		OUTPUT_FORMAT_CSV === opt.output.toLowerCase()
-			? stringify( tableData )
+			? csv( tableData )
 			: table( tableData );
 
 	log( output );
+}
+
+/**
+ * Calculates and returns a median value for a set of values.
+ *
+ * @param {Array.<number>} values An array of values.
+ * @return {number} A median value.
+ */
+function calcMedian( values ) {
+	const len = values.length;
+	if ( len === 0 ) {
+		return 0;
+	}
+
+	const list = [ ...values ];
+	list.sort( ( a, b ) => b - a );
+
+	const median =
+		len % 2 === 0
+			? ( list[ len / 2 ] + list[ len / 2 - 1 ] ) / 2
+			: list[ Math.floor( len / 2 ) ];
+
+	return round( median, 2 );
 }
