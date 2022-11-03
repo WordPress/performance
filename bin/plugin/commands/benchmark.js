@@ -210,7 +210,7 @@ function outputResults( opt, results ) {
 
 	const tableData = [
 		newRow( '' ),
-		newRow( 'Complete Requests' ),
+		newRow( 'Success Rate' ),
 		newRow( 'Response Time' ),
 	];
 
