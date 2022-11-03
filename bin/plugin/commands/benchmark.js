@@ -89,7 +89,7 @@ exports.handler = async ( opt ) => {
 	if ( results.length === 0 ) {
 		log(
 			formats.error(
-				'No URLs were found. Please, provide URLs to benchmark.'
+				'You need to provide a URL to benchmark via the --url (-u) argument, or a file with multiple URLs via the --file (-f) argument.'
 			)
 		);
 	} else {
