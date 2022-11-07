@@ -111,19 +111,28 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$this->assertSame(
 			array(
 				'images'     => array(
-					'id'       => 'images',
-					'title'    => 'Images',
-					'callback' => null,
+					'id'             => 'images',
+					'title'          => 'Images',
+					'callback'       => null,
+					'before_section' => '',
+					'after_section'  => '',
+					'section_class'  => '',
 				),
 				'javascript' => array(
-					'id'       => 'javascript',
-					'title'    => 'JavaScript',
-					'callback' => null,
+					'id'             => 'javascript',
+					'title'          => 'JavaScript',
+					'callback'       => null,
+					'before_section' => '',
+					'after_section'  => '',
+					'section_class'  => '',
 				),
 				'other'      => array(
-					'id'       => 'other',
-					'title'    => 'Other',
-					'callback' => null,
+					'id'             => 'other',
+					'title'          => 'Other',
+					'callback'       => null,
+					'before_section' => '',
+					'after_section'  => '',
+					'section_class'  => '',
 				),
 			),
 			$wp_settings_sections[ PERFLAB_MODULES_SCREEN ]
