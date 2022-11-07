@@ -22,7 +22,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$this->assertEmpty( $dominant_color_metadata );
 
 		// Creating attachment.
-		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 		$dominant_color_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'dominant_color', $dominant_color_metadata );
@@ -39,7 +39,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 */
 	public function test_dominant_color_get_dominant_color( $image_path, $expected_color, $expected_transparency ) {
 		// Creating attachment.
-		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		$this->assertContains( dominant_color_get_dominant_color( $attachment_id ), $expected_color );
 	}
 
@@ -55,7 +55,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $transparency_metadata );
 
-		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 		$transparency_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'has_transparency', $transparency_metadata );
@@ -71,7 +71,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 */
 	public function test_dominant_color_has_transparency( $image_path, $expected_color, $expected_transparency ) {
 		// Creating attachment.
-		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		$this->assertSame( $expected_transparency, dominant_color_has_transparency( $attachment_id ) );
 	}
 
@@ -83,7 +83,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @covers ::dominant_color_img_tag_add_dominant_color
 	 */
 	public function test_tag_add_adjust_to_image_attributes( $image_path, $expected_color, $expected_transparency ) {
-		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id );
