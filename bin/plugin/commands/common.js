@@ -22,8 +22,8 @@ const { log, formats } = require( '../lib/logger' );
  */
 const FOCUS_AREAS = {
 	images: 10,
-	javascript: 20,
-	'site-health': 30,
+	'js-and-css': 20,
+	database: 30,
 	measurement: 40,
 	'object-cache': 50,
 };
