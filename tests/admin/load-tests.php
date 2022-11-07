@@ -68,7 +68,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		remove_all_filters( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ) );
 
 		// Rely on current user to be an administrator (with 'manage_options' capability).
-		$user_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
 		$hook_suffix = perflab_add_modules_page();
 		$this->assertSame( get_plugin_page_hookname( PERFLAB_MODULES_SCREEN, 'options-general.php' ), $hook_suffix );
