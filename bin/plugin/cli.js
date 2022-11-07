@@ -6,8 +6,8 @@
 const program = require( 'commander' );
 
 const withOptions = ( command, options ) => {
-	options.forEach( ( { description, argname } ) => {
-		command = command.option( argname, description );
+	options.forEach( ( { description, argname, defaults } ) => {
+		command = command.option( argname, description, defaults );
 	} );
 	return command;
 };
@@ -46,6 +46,10 @@ const {
 	handler: sinceHandler,
 	options: sinceOptions,
 } = require( './commands/since' );
+const {
+	handler: benchmarkHandler,
+	options: benchmarkOptions,
+} = require( './commands/benchmark' );
 
 withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 	.alias( 'changelog' )
@@ -56,6 +60,10 @@ withOptions( program.command( 'release-plugin-since' ), sinceOptions )
 	.alias( 'since' )
 	.description( 'Updates "n.e.x.t" tags with the current release version' )
 	.action( catchException( sinceHandler ) );
+
+withOptions( program.command( 'benchmark' ), benchmarkOptions )
+	.description( 'Runs benchmarks for an URL' )
+	.action( catchException( benchmarkHandler ) );
 
 withOptions( program.command( 'plugin-readme' ), readmeOptions )
 	.alias( 'readme' )

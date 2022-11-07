@@ -15,14 +15,9 @@
 /tests/testdata/modules/images              @adamsilverstein @getsource
 
 # Focus: JS & CSS
-/modules/javascript                         @aristath @sgomes
-/tests/modules/javascript                   @aristath @sgomes
-/tests/testdata/modules/javascript          @aristath @sgomes
-
-# Focus: Site Health
-/modules/site-health
-/tests/modules/site-health
-/tests/testdata/modules/site-health
+/modules/js-and-css                         @aristath @sgomes
+/tests/modules/js-and-css                   @aristath @sgomes
+/tests/testdata/modules/js-and-css          @aristath @sgomes
 
 # Focus: Measurement
 /modules/measurement
@@ -40,19 +35,19 @@
 /tests/testdata/modules/images/webp-uploads                                 @adamsilverstein @felixarntz @mitogh
 
 # Module: WebP Support Health Check
-/modules/site-health/webp-support                                           @adamsilverstein @kirtangajjar @mitogh
-/tests/modules/site-health/webp-support                                     @adamsilverstein @kirtangajjar @mitogh
-/tests/testdata/modules/site-health/webp-support                            @adamsilverstein @kirtangajjar @mitogh
+/modules/images/webp-support                                                @adamsilverstein @kirtangajjar @mitogh
+/tests/modules/images/webp-support                                          @adamsilverstein @kirtangajjar @mitogh
+/tests/testdata/modules/images/webp-support                                 @adamsilverstein @kirtangajjar @mitogh
 
 # Module: Autoloaded Options Health Check
-/modules/site-health/audit-autoloaded-options                               @manuelRod
-/tests/modules/site-health/audit-autoloaded-options                         @manuelRod
-/tests/testdata/modules/site-health/audit-autoloaded-options                @manuelRod
+/modules/database/audit-autoloaded-options                                  @manuelRod
+/tests/modules/database/audit-autoloaded-options                            @manuelRod
+/tests/testdata/modules/database/audit-autoloaded-options                   @manuelRod
 
 # Module: Enqueued Assets Health Check
-/modules/site-health/audit-enqueued-assets                                  @manuelRod
-/tests/modules/site-health/audit-enqueued-assets                            @manuelRod
-/tests/testdata/modules/site-health/audit-enqueued-assets                   @manuelRod
+/modules/js-and-css/audit-enqueued-assets                                   @manuelRod
+/tests/modules/js-and-css/audit-enqueued-assets                             @manuelRod
+/tests/testdata/modules/js-and-css/audit-enqueued-assets                    @manuelRod
 
 # Module: Persistent Object Cache Health Check
 /modules/object-cache/persistent-object-cache-health-check                  @tillkruss @spacedmonkey
@@ -65,5 +60,5 @@
 /tests/testdata/modules/images/dominant-color                               @pbearne @spacedmonkey
 
 # Module: Full Page Cache Health Check
-/modules/site-health/audit-full-page-cache                                  @manuelRod @westonruter
-/tests/modules/site-health/audit-full-page-cache                            @manuelRod @westonruter
+/modules/object-cache/audit-full-page-cache                                 @manuelRod @westonruter
+/tests/modules/object-cache/audit-full-page-cache                           @manuelRod @westonruter

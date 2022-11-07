@@ -8,11 +8,11 @@
 class Admin_Load_Tests extends WP_UnitTestCase {
 
 	private static $demo_modules = array(
-		'javascript/demo-module-1' => array(
+		'js-and-css/demo-module-1' => array(
 			'name'         => 'Demo Module 1',
 			'description'  => 'This is the description for demo module 1.',
 			'experimental' => false,
-			'focus'        => 'javascript',
+			'focus'        => 'js-and-css',
 			'slug'         => 'demo-module-1',
 		),
 		'something/demo-module-2'  => array(
@@ -35,11 +35,11 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		'images'       => array(
 			'name' => 'Images',
 		),
-		'javascript'   => array(
-			'name' => 'JavaScript',
+		'js-and-css'   => array(
+			'name' => 'js-and-css',
 		),
-		'site-health'  => array(
-			'name' => 'Site Health',
+		'database'     => array(
+			'name' => 'Database',
 		),
 		'measurement'  => array(
 			'name' => 'Measurement',
@@ -68,7 +68,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		remove_all_filters( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ) );
 
 		// Rely on current user to be an administrator (with 'manage_options' capability).
-		$user_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
 		$hook_suffix = perflab_add_modules_page();
 		$this->assertSame( get_plugin_page_hookname( PERFLAB_MODULES_SCREEN, 'options-general.php' ), $hook_suffix );
@@ -111,19 +111,28 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$this->assertSame(
 			array(
 				'images'     => array(
-					'id'       => 'images',
-					'title'    => 'Images',
-					'callback' => null,
+					'id'             => 'images',
+					'title'          => 'Images',
+					'callback'       => null,
+					'before_section' => '',
+					'after_section'  => '',
+					'section_class'  => '',
 				),
-				'javascript' => array(
-					'id'       => 'javascript',
-					'title'    => 'JavaScript',
-					'callback' => null,
+				'js-and-css' => array(
+					'id'             => 'js-and-css',
+					'title'          => 'js-and-css',
+					'callback'       => null,
+					'before_section' => '',
+					'after_section'  => '',
+					'section_class'  => '',
 				),
 				'other'      => array(
-					'id'       => 'other',
-					'title'    => 'Other',
-					'callback' => null,
+					'id'             => 'other',
+					'title'          => 'Other',
+					'callback'       => null,
+					'before_section' => '',
+					'after_section'  => '',
+					'section_class'  => '',
 				),
 			),
 			$wp_settings_sections[ PERFLAB_MODULES_SCREEN ]
@@ -131,7 +140,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$this->assertEqualSets(
 			array(
 				'images',
-				'javascript',
+				'js-and-css',
 				'other',
 			),
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ] )
@@ -141,8 +150,8 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['images'] )
 		);
 		$this->assertEqualSets(
-			array( 'javascript/demo-module-1' ),
-			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['javascript'] )
+			array( 'js-and-css/demo-module-1' ),
+			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['js-and-css'] )
 		);
 		$this->assertEqualSets(
 			array( 'something/demo-module-2' ),
@@ -159,7 +168,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_perflab_render_modules_page_field() {
-		$module_slug     = 'javascript/demo-module-1';
+		$module_slug     = 'js-and-css/demo-module-1';
 		$module_data     = self::$demo_modules[ $module_slug ];
 		$module_settings = array( 'enabled' => false );
 
@@ -187,8 +196,8 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_get_focus_areas() {
 		$expected_focus_areas = array(
 			'images',
-			'javascript',
-			'site-health',
+			'js-and-css',
+			'database',
 			'measurement',
 			'object-cache',
 		);
