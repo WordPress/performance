@@ -9,6 +9,11 @@
  * @since 1.2.0
  */
 
+if ( ! class_exists( 'WP_Image_Editor_GD' ) ) {
+	require_once ABSPATH . WPINC . '/class-wp-image-editor.php';
+	require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php';
+}
+
 /**
  * WordPress Image Editor Class for Image Manipulation through GD
  * with dominant color detection.
