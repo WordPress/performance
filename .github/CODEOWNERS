@@ -5,9 +5,9 @@
 /.github                                    @JustinyAhin @felixarntz
 
 # Focus: Database
-/modules/database							@olliejones
-/tests/modules/database						@olliejones
-/tests/testdata/modules/database			@olliejones
+/modules/database                           @olliejones
+/tests/modules/database                     @olliejones
+/tests/testdata/modules/database            @olliejones
 
 # Focus: Images
 /modules/images                             @adamsilverstein @getsource
