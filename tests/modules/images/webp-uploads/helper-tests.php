@@ -31,7 +31,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		add_filter( 'wp_image_editors', '__return_empty_array' );
 		yield 'when no editor is present' => array(
-			self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
 			'medium',
 			array(),
 			'image/avif',
@@ -39,21 +39,21 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		remove_filter( 'wp_image_editors', '__return_empty_array' );
 		yield 'when using a mime that is not supported' => array(
-			self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
 			'medium',
 			array(),
 			'image/avif',
 		);
 
 		yield 'when no dimension is provided' => array(
-			self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
 			'medium',
 			array(),
 			'image/webp',
 		);
 
 		yield 'when both dimensions are negative numbers' => array(
-			self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
 			'medium',
 			array(
 				'width'  => -10,
@@ -63,7 +63,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		);
 
 		yield 'when both dimensions are zero' => array(
-			self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
+			$this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' ),
 			'medium',
 			array(
 				'width'  => 0,
@@ -82,7 +82,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		// Create JPEG and WebP so that both versions are generated.
 		$this->opt_in_to_jpeg_and_webp();
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 		$size_data     = array(
 			'width'  => 300,
 			'height' => 300,
@@ -107,7 +107,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_a_file_in_the_specified_location_with_the_specified_name() {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 		$size_data     = array(
 			'width'  => 300,
 			'height' => 300,
@@ -131,7 +131,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_processing_an_image_with_corrupted_metadata( callable $callback, $size ) {
-		$attachment_id = self::factory()->attachment->create_upload_object(
+		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
 		);
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
@@ -175,7 +175,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_to_create_an_image_size_when_attached_file_does_not_exists() {
-		$attachment_id = self::factory()->attachment->create_upload_object(
+		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
 		$file          = get_attached_file( $attachment_id );
@@ -199,7 +199,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_to_create_a_subsize_if_the_image_editor_does_not_exists() {
-		$attachment_id = self::factory()->attachment->create_upload_object(
+		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
 
@@ -216,7 +216,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_to_upload_a_mime_that_is_not_supported_by_wordpress() {
-		$attachment_id = self::factory()->attachment->create_upload_object(
+		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
 		$result        = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/avif' );
@@ -231,7 +231,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 */
 	public function it_should_prevent_to_process_an_image_when_the_editor_does_not_support_the_format() {
 		// Make sure no editor is available.
-		$attachment_id = self::factory()->attachment->create_upload_object(
+		$attachment_id = $this->factory->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
 
@@ -255,7 +255,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	public function it_should_create_an_image_with_filter_webp_uploads_pre_generate_additional_image_source() {
 		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
 		add_filter(
 			'webp_uploads_pre_generate_additional_image_source',
@@ -289,7 +289,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	public function it_should_use_filesize_when_filter_webp_uploads_pre_generate_additional_image_source_returns_filesize() {
 		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
 		add_filter(
 			'webp_uploads_pre_generate_additional_image_source',
@@ -324,7 +324,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	public function it_should_return_an_error_when_filter_webp_uploads_pre_generate_additional_image_source_returns_wp_error() {
 		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
+		$attachment_id = $this->factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 
 		add_filter(
 			'webp_uploads_pre_generate_additional_image_source',
@@ -547,8 +547,8 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_add_original_image_extension_to_the_webp_file_name_to_ensure_it_is_unique( $jpeg_image, $jpg_image ) {
-		$jpeg_image_attachment_id = self::factory()->attachment->create_upload_object( $jpeg_image );
-		$jpg_image_attachment_id  = self::factory()->attachment->create_upload_object( $jpg_image );
+		$jpeg_image_attachment_id = $this->factory->attachment->create_upload_object( $jpeg_image );
+		$jpg_image_attachment_id  = $this->factory->attachment->create_upload_object( $jpg_image );
 
 		$size_data = array(
 			'width'  => 300,

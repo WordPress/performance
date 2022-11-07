@@ -31,7 +31,7 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 		);
 
 		$file_location = TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg';
-		$attachment_id = self::factory()->attachment->create_upload_object( $file_location );
+		$attachment_id = $this->factory->attachment->create_upload_object( $file_location );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		$request       = new WP_REST_Request();
@@ -78,7 +78,7 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 	 */
 	public function it_should_check_media_details_in_rest_response() {
 		$file_location = TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg';
-		$attachment_id = self::factory()->attachment->create_upload_object( $file_location );
+		$attachment_id = $this->factory->attachment->create_upload_object( $file_location );
 
 		$request       = new WP_REST_Request();
 		$request['id'] = $attachment_id;
