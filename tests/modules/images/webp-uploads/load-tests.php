@@ -926,26 +926,25 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function test_set_quality_with_image_conversion() {
-		remove_all_filters( 'wp_editor_set_quality' );
-
+		global $wp_version;
 		// Set conversions for uploaded images.
 		add_filter( 'image_editor_output_format', array( $this, 'image_editor_output_formats' ) );
+		$expected_webp = 82;
+		if ( version_compare( '6.2', $wp_version ) ) {
+			$expected_webp = 86;
+		}
 
 		$editor = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dice.png', array( 'mime_type' => 'image/png' ) );
 
 		// Quality setting for the source image. For PNG the fallback default of 82 is used.
 		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for PNG is 82.' );
 
-		// A PNG image will be converted to WEBP whose quality should be 86 by default.
-		$editor->save();
-		$this->assertSame( 86, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 86 by default.' );
+		// A PNG image will be converted to WEBP whose quality should be 82 for wp version 6.2 and above.
+		$result = $editor->save();
+		$this->assertIsArray( $result );
+		$this->assertSame( $expected_webp, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 for WP version 6.2 and above.' );
 
-		add_filter( 'wp_editor_set_quality', 'webp_uploads_set_wp_image_editor_quality', 10, 2 );
-		// A PNG image will be converted to WEBP whose quality should be 82.
-		$editor->save();
-		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 after adding filter.' );
-
-		remove_all_filters( 'wp_editor_set_quality' );
+		$this->unlink( $result['path'] );
 		unset( $editor );
 
 		$editor = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
@@ -953,17 +952,14 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// Quality setting for the source image. For JPG the fallback default of 82 is used.
 		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for JPG is 82.' );
 
-		// A JPG image will be converted to WEBP whose quality should be 86 by default.
-		$editor->save();
-		$this->assertSame( 86, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 86 by default.' );
+		// A JPG image will be converted to WEBP whose quality should be 82 for wp version 6.2 and above.
+		$result = $editor->save();
+		$this->assertIsArray( $result );
+		$this->assertSame( $expected_webp, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 for WP version 6.2 and above.' );
 
-		add_filter( 'wp_editor_set_quality', 'webp_uploads_set_wp_image_editor_quality', 10, 2 );
-		// A JPG image will be converted to WEBP whose quality should be 82.
-		$editor->save();
-		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 after adding filter.' );
-
-		remove_all_filters( 'wp_editor_set_quality' );
+		$this->unlink( $result['path'] );
 		unset( $editor );
+		remove_filter( 'image_editor_output_format', array( $this, 'image_editor_output_formats' ) );
 	}
 
 	/**
