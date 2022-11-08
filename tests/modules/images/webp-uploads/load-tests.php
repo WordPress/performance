@@ -940,11 +940,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for PNG is 82.' );
 
 		// A PNG image will be converted to WEBP whose quality should be 82 for wp version 6.2 and above.
-		$result = $editor->save();
-		$this->assertIsArray( $result );
+		$editor->save();
 		$this->assertSame( $expected_webp, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 for WP version 6.2 and above.' );
 
-		$this->unlink( $result['path'] );
 		unset( $editor );
 
 		$editor = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
@@ -953,11 +951,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for JPG is 82.' );
 
 		// A JPG image will be converted to WEBP whose quality should be 82 for wp version 6.2 and above.
-		$result = $editor->save();
-		$this->assertIsArray( $result );
+		$editor->save();
 		$this->assertSame( $expected_webp, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 for WP version 6.2 and above.' );
 
-		$this->unlink( $result['path'] );
 		unset( $editor );
 		remove_filter( 'image_editor_output_format', array( $this, 'image_editor_output_formats' ) );
 	}
