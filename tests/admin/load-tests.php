@@ -9,7 +9,6 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 
 	private static $demo_modules = array(
 		'js-and-css/demo-module-1' => array(
-		'javascript/demo-module-1' => array(
 			'name'            => 'Demo Module 1',
 			'description'     => 'This is the description for demo module 1.',
 			'experimental'    => false,
