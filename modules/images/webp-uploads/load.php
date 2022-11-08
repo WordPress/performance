@@ -754,16 +754,26 @@ function webp_uploads_get_image_sizes_additional_mime_type_support() {
  */
 function webp_uploads_set_wp_image_editor_quality( $quality, $mime_type ) {
 	global $wp_version;
+
+	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
+
+	// Return early for non image or invalid mime types.
+	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
+		return $quality;
+	}
+
+	// Default quality set to 82 for all mimes for WP version less than 6.1.
+	$quality = 82;
+
 	if ( version_compare( '6.1', $wp_version, '>=' ) ) {
 		switch ( $mime_type ) {
 			case 'image/webp':
 				$quality = 82;
 				break;
-			// Add more cases for mime types.
+			// Add more cases for other mime types.
 		}
-	} else {
-		$quality = 82;
 	}
+
 	return $quality;
 }
 add_filter( 'wp_editor_set_quality', 'webp_uploads_set_wp_image_editor_quality', 10, 2 );
