@@ -18,10 +18,13 @@
 	<file>./modules</file>
 	<file>./tests</file>
 
-	<!-- Do not require docblocks for unit tests -->
+	<!-- Do not require file headers on generated files -->
 	<rule ref="Squiz.Commenting.FileComment.WrongStyle">
+		<exclude-pattern>default-enabled-modules.php</exclude-pattern>
 		<exclude-pattern>module-i18n.php</exclude-pattern>
 	</rule>
+
+	<!-- Do not require docblocks for unit tests -->
 	<rule ref="Squiz.Commenting.FunctionComment.Missing">
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
