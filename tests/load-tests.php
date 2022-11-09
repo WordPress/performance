@@ -97,6 +97,37 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( $new_value, $settings );
 	}
 
+	/**
+	 * @dataProvider data_legacy_modules
+	 */
+	public function test_legacy_module_for_perflab_get_module_settings( $legacy_module_slug, $current_module_slug ) {
+		$new_value = array( $legacy_module_slug => array( 'enabled' => true ) );
+		update_option( PERFLAB_MODULES_SETTING, $new_value );
+
+		$settings = perflab_get_module_settings();
+		$this->assertArrayNotHasKey( $legacy_module_slug, $settings, 'The settings do not contain the old legacy module slug in the database' );
+		$this->assertArrayHasKey( $current_module_slug, $settings, 'The settings contain an updated module slug in the database' );
+	}
+
+	/**
+	 * Data provider for test_legacy_module_for_perflab_get_module_settings().
+	 *
+	 * @return array {
+	 *     @type array {
+	 *         @type string $legacy_module_slug  The legacy module slug.
+	 *         @type string $current_module_slug The new/updated module slug.
+	 *     }
+	 * }
+	 */
+	public function data_legacy_modules() {
+		return array(
+			array( 'site-health/audit-autoloaded-options', 'database/audit-autoloaded-options' ),
+			array( 'site-health/audit-enqueued-assets', 'js-and-css/audit-enqueued-assets' ),
+			array( 'site-health/audit-full-page-cache', 'object-cache/audit-full-page-cache' ),
+			array( 'site-health/webp-support', 'images/webp-support' ),
+		);
+	}
+
 	public function test_perflab_get_active_modules() {
 		// Assert that by default there are no active modules.
 		$active_modules          = perflab_get_active_modules();
@@ -162,7 +193,7 @@ class Load_Tests extends WP_UnitTestCase {
 		return array(
 			array( '', false ),
 			array( '../tests/testdata/demo-modules/something/non-existing-module', false ),
-			array( '../tests/testdata/demo-modules/javascript/demo-module-1', false ),
+			array( '../tests/testdata/demo-modules/js-and-css/demo-module-1', false ),
 			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
 			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
 		);
@@ -177,7 +208,7 @@ class Load_Tests extends WP_UnitTestCase {
 
 	public function data_perflab_can_load_module() {
 		return array(
-			array( '../tests/testdata/demo-modules/javascript/demo-module-1', false ),
+			array( '../tests/testdata/demo-modules/js-and-css/demo-module-1', false ),
 			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
 			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
 		);
