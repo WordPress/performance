@@ -925,7 +925,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function test_set_quality_with_image_conversion() {
+	public function it_should_set_quality_with_image_conversion() {
 		global $wp_version;
 		// Set conversions for uploaded images.
 		add_filter( 'image_editor_output_format', array( $this, 'image_editor_output_formats' ) );
