@@ -88,6 +88,12 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 		return $filtered_image;
 	}
 
+	// Only apply the dom color to images that have a src attribute that
+	// starts with a double quote, ensuring escaped JSON is also excluded.
+	if ( false === strpos( $filtered_image, ' src="' ) ) {
+		return $filtered_image;
+	}
+
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $image_meta ) ) {
 		return $filtered_image;
