@@ -300,9 +300,6 @@ class Perflab_SQLite_Alter_Query {
 		for ( $i = 0; $i < count( $query_obj ); $i++ ) {
 			$index_queries[ $i ] = $query_obj[ $i ]->sql;
 		}
-		$table_query = array_shift( $index_queries );
-		$table_query = str_replace( $tokenized_query['table_name'], $temp_table, $table_query );
-		$table_query = rtrim( $table_query, ')' );
 		$table_query = ", PRIMARY KEY {$tokenized_query['column_name']}";
 		$query       = array(
 			$table_query,
