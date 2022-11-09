@@ -494,7 +494,7 @@ class Perflab_SQLite_Alter_Query {
 		}
 		$pattern_1 = "/\\s*({$tokenized_query['column_name']})\\s*(.*)?(DEFAULT\\s*.*)[,)]/im";
 		$pattern_2 = "/\\s*({$tokenized_query['column_name']})\\s*(.*)?[,)]/im";
-		if ( preg_match( $pattern, $create_query, $match ) ) {
+		if ( preg_match( $pattern_1, $create_query, $match ) ) {
 			$col_name        = trim( $match[1] );
 			$col_def         = trim( $match[2] );
 			$col_def_esc     = str_replace( array( '(', ')' ), array( '\(', '\)' ), $col_def );
