@@ -745,7 +745,7 @@ function webp_uploads_get_image_sizes_additional_mime_type_support() {
 
 /**
  * Updates the quality of images used in the wp editor.
- * For WP version less than 6.2 returns 82,
+ * For WP version less than 6.1 or WebP returns 82,
  * Otherwise returns default quality.
  *
  * @since n.e.x.t
@@ -757,18 +757,12 @@ function webp_uploads_get_image_sizes_additional_mime_type_support() {
 function webp_uploads_set_wp_image_editor_quality( $quality, $mime_type ) {
 	global $wp_version;
 
-	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
-
-	// Return early for non image or invalid mime types.
-	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
-		return $quality;
+	// Below WP 6.1 or WebP, always return 82.
+	if ( version_compare( $wp_version, '6.1', '<' ) || 'image/webp' === $mime_type ) {
+		return 82;
 	}
 
-	if ( version_compare( '6.2', $wp_version, '>=' ) ) {
-		return $quality;
-	}
-
-	// Default quality set to 82 for all mimes for WP version less than 6.2.
-	return 82;
+	// Return default quality for WP 6.1+.
+	return $quality;
 }
 add_filter( 'wp_editor_set_quality', 'webp_uploads_set_wp_image_editor_quality', 10, 2 );
