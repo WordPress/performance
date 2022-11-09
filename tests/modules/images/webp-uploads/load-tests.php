@@ -929,19 +929,15 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		global $wp_version;
 		// Set conversions for uploaded images.
 		add_filter( 'image_editor_output_format', array( $this, 'image_editor_output_formats' ) );
-		$expected_webp = 82;
-		if ( version_compare( '6.2', $wp_version ) ) {
-			$expected_webp = 86;
-		}
 
 		$editor = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dice.png', array( 'mime_type' => 'image/png' ) );
 
 		// Quality setting for the source image. For PNG the fallback default of 82 is used.
 		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for PNG is 82.' );
 
-		// A PNG image will be converted to WEBP whose quality should be 82 for wp version 6.2 and above.
+		// A PNG image will be converted to WebP whose quality should be 82 universally.
 		$editor->save();
-		$this->assertSame( $expected_webp, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 for WP version 6.2 and above.' );
+		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 universally.' );
 
 		unset( $editor );
 
@@ -950,9 +946,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// Quality setting for the source image. For JPG the fallback default of 82 is used.
 		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for JPG is 82.' );
 
-		// A JPG image will be converted to WEBP whose quality should be 82 for wp version 6.2 and above.
+		// A JPG image will be converted to WEBP whose quality should be 82 universally.
 		$editor->save();
-		$this->assertSame( $expected_webp, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 for WP version 6.2 and above.' );
+		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 universally.' );
 
 		unset( $editor );
 		remove_filter( 'image_editor_output_format', array( $this, 'image_editor_output_formats' ) );
