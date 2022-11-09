@@ -299,7 +299,7 @@ class Perflab_SQLite_DB extends wpdb {
 	 *                       'group_concat', 'subqueries', 'set_charset',
 	 *                       'utf8mb4', or 'utf8mb4_520'.
 	 *
-	 * @return int|false Whether the database feature is supported, false otherwise.
+	 * @return bool Whether the database feature is supported, false otherwise.
 	 */
 	public function has_cap( $db_cap ) {
 		return 'subqueries' === strtolower( $db_cap );
