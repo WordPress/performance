@@ -926,19 +926,18 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_set_quality_with_image_conversion() {
-		global $wp_version;
-		// Set conversions for uploaded images.
-		add_filter( 'image_editor_output_format', array( $this, 'image_editor_output_formats' ) );
-
 		$editor = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dice.png', array( 'mime_type' => 'image/png' ) );
 
 		// Quality setting for the source image. For PNG the fallback default of 82 is used.
 		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for PNG is 82.' );
 
-		// A PNG image will be converted to WebP whose quality should be 82 universally.
-		$editor->save();
-		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 universally.' );
+		$file = wp_tempnam();
 
+		// A PNG image will be converted to WebP whose quality should be 82 universally.
+		$editor->save( $file, 'image/webp' );
+		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WebP. Quality setting for it should be 82 universally.' );
+
+		unlink( $file );
 		unset( $editor );
 
 		$editor = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
@@ -946,12 +945,14 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// Quality setting for the source image. For JPG the fallback default of 82 is used.
 		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for JPG is 82.' );
 
-		// A JPG image will be converted to WEBP whose quality should be 82 universally.
-		$editor->save();
-		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WEBP. Quality setting for it should be 82 universally.' );
+		$file = wp_tempnam();
 
+		// A JPG image will be converted to WebP whose quality should be 82 universally.
+		$editor->save( $file, 'image/webp' );
+		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WebP. Quality setting for it should be 82 universally.' );
+
+		unlink( $file );
 		unset( $editor );
-		remove_filter( 'image_editor_output_format', array( $this, 'image_editor_output_formats' ) );
 	}
 
 	/**
@@ -960,19 +961,5 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	private function mock_frontend_body_hooks() {
 		remove_all_actions( 'template_redirect' );
 		do_action( 'template_redirect' );
-	}
-
-	/**
-	 * Changes the output format when editing images. PNG and JPEG files
-	 * will be converted to WEBP (if the image editor in PHP supports it).
-	 *
-	 * @param array $formats Output formats.
-	 *
-	 * @return array
-	 */
-	public function image_editor_output_formats( $formats ) {
-		$formats['image/png']  = 'image/webp';
-		$formats['image/jpeg'] = 'image/webp';
-		return $formats;
 	}
 }
