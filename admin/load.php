@@ -156,16 +156,11 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" disabled>
 				<input type="hidden" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" value="<?php echo $enabled ? '1' : '0'; ?>">
 				<?php
-				$message = perflab_can_load_module( $module_slug, true );
-				if ( $message ) {
-					echo esc_html( $message );
-				} else {
 					printf(
 						/* translators: %s: module name */
 						__( '%s is already part of your WordPress version and therefore cannot be loaded as part of the plugin.', 'performance-lab' ),
 						esc_html( $module_data['name'] )
 					);
-				}
 				?>
 			<?php } ?>
 		</label>

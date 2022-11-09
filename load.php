@@ -216,14 +216,10 @@ add_action( 'wp_head', 'perflab_render_generator' );
  *
  * @since 1.3.0
  *
- * @param string $module      Slug of the module.
- * @param bool   $get_message Optional. Whether to return the message instead of a boolean. Default false.
- *
- * @return bool|string Whether the module can be loaded or not.
- *                     If the module can't be loaded, it can return either `false`,
- *                     or a string with the message to be shown to users when $get_message is `true`.
+ * @param string $module Slug of the module.
+ * @return bool Whether the module can be loaded or not.
  */
-function perflab_can_load_module( $module, $get_message = false ) {
+function perflab_can_load_module( $module ) {
 	$module_load_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/can-load.php';
 
 	// If the `can-load.php` file does not exist, assume the module can be loaded.
@@ -240,13 +236,7 @@ function perflab_can_load_module( $module, $get_message = false ) {
 	}
 
 	// Call the closure to determine whether the module can be loaded.
-	$result = $module();
-
-	if ( false !== $result && true !== $result ) {
-		return $get_message ? $result : false;
-	}
-
-	return (bool) $result;
+	return (bool) $module();
 }
 
 /**
