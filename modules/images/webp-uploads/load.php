@@ -750,6 +750,8 @@ function webp_uploads_get_image_sizes_additional_mime_type_support() {
  *
  * @since n.e.x.t
  *
+ * @global string $wp_version The WordPress version string.
+ *
  * @param int    $quality   Quality level between 1 (low) and 100 (high).
  * @param string $mime_type Image mime type.
  * @return int The updated quality for mime types.
