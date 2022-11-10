@@ -72,7 +72,7 @@ There are two primary reasons that a WebP image may not be generated:
 
 = With the WebP Uploads module activated, will Performance Lab generate JPEG and WebP versions of every image that I upload? =
 
-By default, the WebP Uploads module will only generate a WebP version of the image that you are uploading. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Setings > Media** and enable the **Generate JPEG files in addition to WebP** option.
+By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
 
