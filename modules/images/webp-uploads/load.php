@@ -757,7 +757,7 @@ function webp_uploads_get_image_sizes_additional_mime_type_support() {
  * @param string $mime_type Image mime type.
  * @return int The updated quality for mime types.
  */
-function webp_uploads_set_wp_image_editor_quality( $quality, $mime_type ) {
+function webp_uploads_modify_webp_quality( $quality, $mime_type ) {
 	global $wp_version;
 
 	// Below WP 6.1 or WebP, always return 82.
