@@ -765,7 +765,7 @@ function webp_uploads_modify_webp_quality( $quality, $mime_type ) {
 		return 82;
 	}
 
-	// Return default quality for WP 6.1+.
+	// Return default quality for non-WebP images in WP 6.1+.
 	return $quality;
 }
 add_filter( 'wp_editor_set_quality', 'webp_uploads_modify_webp_quality', 10, 2 );
