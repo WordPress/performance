@@ -768,4 +768,4 @@ function webp_uploads_set_wp_image_editor_quality( $quality, $mime_type ) {
 	// Return default quality for WP 6.1+.
 	return $quality;
 }
-add_filter( 'wp_editor_set_quality', 'webp_uploads_set_wp_image_editor_quality', 10, 2 );
+add_filter( 'wp_editor_set_quality', 'webp_uploads_modify_webp_quality', 10, 2 );
