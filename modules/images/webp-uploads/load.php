@@ -760,7 +760,7 @@ function webp_uploads_get_image_sizes_additional_mime_type_support() {
 function webp_uploads_modify_webp_quality( $quality, $mime_type ) {
 	global $wp_version;
 
-	// Below WP 6.1 or WebP, always return 82.
+	// Below WP 6.1 or for WebP images, always return 82 (other MIME types were already using 82 by default anyway).
 	if ( version_compare( $wp_version, '6.1', '<' ) || 'image/webp' === $mime_type ) {
 		return 82;
 	}
