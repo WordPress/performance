@@ -11,6 +11,11 @@
  */
 
 /**
+ * Require the site-health tweaks.
+ */
+require_once __DIR__ . '/site-health.php';
+
+/**
  * Add admin notices.
  *
  * When the plugin gets merged in wp-core, this is not to be ported.
