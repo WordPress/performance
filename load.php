@@ -303,4 +303,22 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 
 	return $value;
 }
+
+// Run the module activation & deactivation actions when the option is updated.
 add_action( 'update_option_' . PERFLAB_MODULES_SETTING, 'perflab_run_module_activation_deactivation', 10, 3 );
+
+// Run the module activation & deactivation actions when the option is added.
+add_action(
+	'add_option_' . PERFLAB_MODULES_SETTING,
+	/**
+	 * Fires after the option has been added.
+	 *
+	 * @param string $option Name of the option to add.
+	 * @param mixed  $value  Value of the option.
+	 */
+	function( $option, $value ) {
+		perflab_run_module_activation_deactivation( perflab_get_modules_setting_default(), $value );
+	},
+	10,
+	2
+);
