@@ -437,7 +437,6 @@ class Perflab_SQLite_PDO_Driver {
 	 *
 	 * I don't understand that...
 	 *
-	 * @return void
 	 * @access private
 	 */
 	private function rewrite_badly_formed_dates() {
@@ -448,7 +447,6 @@ class Perflab_SQLite_PDO_Driver {
 	/**
 	 * Method to remove INDEX HINT.
 	 *
-	 * @return void
 	 * @access private
 	 */
 	private function delete_index_hints() {
@@ -467,7 +465,6 @@ class Perflab_SQLite_PDO_Driver {
 	 * I use preg_replace_callback instead of 'e' option because of security reason.
 	 * cf. PHP manual (regular expression)
 	 *
-	 * @return void
 	 * @access private
 	 */
 	private function fix_date_quoting() {
@@ -545,7 +542,6 @@ class Perflab_SQLite_PDO_Driver {
 	 *
 	 * Added the literal check since the version 1.5.1.
 	 *
-	 * @return void
 	 * @access private
 	 */
 	private function execute_duplicate_key_update() {

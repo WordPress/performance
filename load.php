@@ -269,8 +269,6 @@ if ( is_admin() ) {
  * @param string $option    The option name.
  * @param mixed  $old_value Old value of the option.
  * @param mixed  $value     New value of the option.
- *
- * @return void
  */
 function perflab_run_module_activation_deactivation( $option, $old_value, $value ) {
 	if ( PERFLAB_MODULES_SETTING !== $option ) {
