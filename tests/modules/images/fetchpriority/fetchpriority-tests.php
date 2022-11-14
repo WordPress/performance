@@ -76,7 +76,7 @@ class Fetchpriority_Test extends WP_UnitTestCase {
 		// Disable lazy loading and verify fetchpriority isn't added.
 		add_filter( 'wp_lazy_loading_enabled', '__return_false' );
 		$content = wp_filter_content_tags( $img, 'the_content' );
-		$this->assertNotStringContainsString( 'fetchpriority="high"', $content );
+		$this->assertStringNotContainsString( 'fetchpriority="high"', $content );
 
 	}
 }
