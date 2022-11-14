@@ -43,7 +43,6 @@ add_filter( 'wp_content_img_tag', 'fetchpriority_img_tag_add_attr', 10, 2 );
  */
 function fetchpriority_filter_post_thumbnail_html( $html ) {
 	$html = fetchpriority_img_tag_add_attr( $html, 'the_post_thumbnail' );
-	remove_filter( 'post_thumbnail_html', 'fetchpriority_filter_post_thumbnail_html' );
 
 	return $html;
 }
