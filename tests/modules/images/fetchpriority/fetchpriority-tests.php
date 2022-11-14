@@ -72,24 +72,11 @@ class Fetchpriority_Test extends WP_UnitTestCase {
 		$this->assertTrue( strpos( $content, 'fetchpriority="high"' ) < strpos( $content, 'loading="lazy"' ) );
 
 		$this->assertEquals( 1, substr_count( $content, 'fetchpriority' ) );
-	}
 
-	public function test_fetchpriority_img_tag_with_lazyload_disabled() {
-		// Disable lazy loading.
+		// Disable lazy loading and verify fetchpriority isn't added.
 		add_filter( 'wp_lazy_loading_enabled', '__return_false' );
+		$content = wp_filter_content_tags( $img, 'the_content' );
+		$this->assertNotStringContainsString( 'fetchpriority="high"', $content );
 
-		$post          = $factory->post->create_and_get();
-		$attachment_id = $factory->attachment->create_upload_object(
-			DIR_TESTDATA . '/images/canola.jpg',
-			$post->ID,
-			array(
-				'post_mime_type' => 'image/jpeg',
-			)
-		);
-		$img           = get_image_tag( $attachment_id, '', '', '', 'large' );
-		$this->assertStringNotContainsString( 'fetchpriority="high"', fetchpriority_img_tag_add_attr( $img, 'the_content' ) );
-
-		// Cleanup.
-		wp_delete_attachment( self::$attachment_id, true );
 	}
 }
