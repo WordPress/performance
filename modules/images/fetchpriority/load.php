@@ -23,6 +23,11 @@ function fetchpriority_img_tag_add_attr( $filtered_image, $context ) {
 		return $filtered_image;
 	}
 
+	// Fetchpriority relies on lazy loading logic.
+	if ( ! wp_lazy_loading_enabled( 'img', $context ) ) {
+		return $filtered_image;
+	}
+
 	if ( ! empty( $filtered_image ) && strpos( $filtered_image, 'loading="lazy"' ) === false && strpos( $filtered_image, 'fetchpriority=' ) === false ) {
 		$filtered_image = str_replace( '<img ', '<img fetchpriority="high" ', $filtered_image );
 		remove_filter( 'wp_content_img_tag', 'fetchpriority_img_tag_add_attr' );
