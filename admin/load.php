@@ -156,11 +156,21 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" disabled>
 				<input type="hidden" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" value="<?php echo $enabled ? '1' : '0'; ?>">
 				<?php
+				if ( 'database/sqlite' === $module_slug && ! wp_is_writable( WP_CONTENT_DIR ) ) {
+					printf(
+						/* translators: %s: WP_CONTENT_DIR */
+						__( 'The SQLite module cannot be activated because the %s directory is not writable.', 'performance-lab' ),
+						WP_CONTENT_DIR
+					);
+				} elseif ( 'database/sqlite' === $module_slug && ( ! extension_loaded( 'sqlite3' ) || ! class_exists( 'SQLite3' ) ) ) {
+					_e( 'The SQLite module cannot be activated because the SQLite extension is not loaded.', 'performance-lab' );
+				} else {
 					printf(
 						/* translators: %s: module name */
 						__( '%s is already part of your WordPress version and therefore cannot be loaded as part of the plugin.', 'performance-lab' ),
 						esc_html( $module_data['name'] )
 					);
+				}
 				?>
 			<?php } ?>
 		</label>
