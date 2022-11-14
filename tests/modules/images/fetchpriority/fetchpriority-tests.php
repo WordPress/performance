@@ -71,7 +71,6 @@ class Fetchpriority_Test extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'loading="lazy"', $content );
 		$this->assertTrue( strpos( $content, 'fetchpriority="high"' ) < strpos( $content, 'loading="lazy"' ) );
 
-		$spilt = explode( 'fetchpriority', $content );
-		$this->assertEquals( 2, count( $spilt ) );
+		$this->assertEquals( 1, substr_count( $content, 'fetchpriority' ) );
 	}
 }
