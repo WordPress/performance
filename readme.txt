@@ -67,7 +67,6 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 There are two primary reasons that a WebP image may not be generated:
 
 1. Performance Lab has identified that the WebP version of the uploaded JPEG image would have a larger file size than the original JPEG image, so it does not generate the WebP version.
-
 2. The JPEG image was not uploaded to the [Media Library](https://wordpress.com/support/media/). At this time, WebP versions are only generated for images to the Media Library. WebP versions are not generated for JPEG images that are added to your site in other ways, such as in a template file or the [Customizer](https://wordpress.com/support/customizer/).
 
 = With the WebP Uploads module activated, will the plugin generate JPEG and WebP versions of every image that I upload? =
