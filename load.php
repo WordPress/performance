@@ -266,14 +266,10 @@ if ( is_admin() ) {
  *
  * @since n.e.x.t
  *
- * @param string $option    The option name.
- * @param mixed  $old_value Old value of the option.
- * @param mixed  $value     New value of the option.
+ * @param mixed $old_value Old value of the option.
+ * @param mixed $value     New value of the option.
  */
-function perflab_run_module_activation_deactivation( $option, $old_value, $value ) {
-	if ( PERFLAB_MODULES_SETTING !== $option ) {
-		return;
-	}
+function perflab_run_module_activation_deactivation( $old_value, $value ) {
 
 	// Get the list of modules that were activated, and load the activate.php files if they exist.
 	foreach ( $value as $module => $module_settings ) {
@@ -307,4 +303,4 @@ function perflab_run_module_activation_deactivation( $option, $old_value, $value
 
 	return $value;
 }
-add_action( 'update_option', 'perflab_run_module_activation_deactivation', 10, 3 );
+add_action( 'update_option_' . PERFLAB_MODULES_SETTING, 'perflab_run_module_activation_deactivation', 10, 3 );
