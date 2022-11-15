@@ -775,7 +775,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->opt_in_to_jpeg_and_webp();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
-		add_filter( 'wp_editor_set_quality', array( $this, 'return_webp_image_quality' ), PHP_INT_MAX, 2 );
+		add_filter( 'wp_editor_set_quality', array( $this, 'force_webp_image_quality_86' ), PHP_INT_MAX, 2 );
 
 		// Look for an image that contains only full size mime type images.
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
@@ -790,8 +790,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			$this->assertImageNotHasSizeSource( $attachment_id, $size, 'image/webp' );
 		}
 		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
-
-		remove_filter( 'wp_editor_set_quality', array( $this, 'return_webp_image_quality' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -804,7 +802,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->opt_in_to_jpeg_and_webp();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
-		add_filter( 'wp_editor_set_quality', array( $this, 'return_webp_image_quality' ), PHP_INT_MAX, 2 );
+		add_filter( 'wp_editor_set_quality', array( $this, 'force_webp_image_quality_86' ), PHP_INT_MAX, 2 );
 
 		// Look for an image that contains all of the additional mime type images.
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );
@@ -825,8 +823,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		$this->assertNotSame( $tag, $updated_tag );
 		$this->assertSame( $expected_tag, $updated_tag );
-
-		remove_filter( 'wp_editor_set_quality', array( $this, 'return_webp_image_quality' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -963,10 +959,15 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_return_correct_quality_for_mime_types() {
+		global $wp_version;
 		$this->assertSame( 82, webp_uploads_modify_webp_quality( 90, 'image/webp' ), 'WebP image quality should always be 82.' );
 		$this->assertSame( 82, webp_uploads_modify_webp_quality( 82, 'image/webp' ), 'WebP image quality should always be 82.' );
-		$this->assertSame( 80, webp_uploads_modify_webp_quality( 80, 'image/jpeg' ), 'JPEG image quality should return default quality provided from WP filter wp_editor_set_quality.' );
-		$this->assertNotSame( 50, webp_uploads_modify_webp_quality( 40, 'image/jpeg' ), 'JPEG image quality should return default quality provided from WP filter wp_editor_set_quality.' );
+
+		if ( version_compare( $wp_version, '6.1', '<' ) ) {
+			$this->assertSame( 82, webp_uploads_modify_webp_quality( 86, 'image/jpeg' ), 'JPEG image quality should always return 82 quality for WP version lower than 6.1.' );
+		} else {
+			$this->assertSame( 80, webp_uploads_modify_webp_quality( 80, 'image/jpeg' ), 'JPEG image quality should return default quality provided from WP filter wp_editor_set_quality.' );
+		}
 	}
 
 	/**
@@ -978,9 +979,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Return WebP image quality 86 for testing.
+	 * Force return WebP image quality 86 for testing.
 	 */
-	public function return_webp_image_quality( $quality, $mime_type ) {
+	public function force_webp_image_quality_86( $quality, $mime_type ) {
 		if ( 'image/webp' === $mime_type ) {
 			return 86;
 		}
