@@ -32,7 +32,6 @@ return function() {
 	}
 
 	// Copy the file, replacing contents as needed.
-	$file_copied_successfully = false;
 	if ( $wp_filesystem->touch( $destination ) ) {
 
 		// Get the db.copy file contents, replace placeholders and write it to the destination.
@@ -54,6 +53,6 @@ return function() {
 			file_get_contents( __DIR__ . '/db.copy' )
 		);
 
-		$file_copied_successfully = $wp_filesystem->put_contents( $destination, $file_contents );
+		$wp_filesystem->put_contents( $destination, $file_contents );
 	}
 };
