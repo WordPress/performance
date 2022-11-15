@@ -277,15 +277,7 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 	if ( ! empty( $value ) ) {
 		foreach ( $value as $module => $module_settings ) {
 			if ( ! empty( $module_settings['enabled'] ) && ( empty( $old_value[ $module ] ) || empty( $old_value[ $module ]['enabled'] ) ) ) {
-				$module_activation_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/activate.php';
-				if ( ! file_exists( $module_activation_file ) ) {
-					continue;
-				}
-				$module = require $module_activation_file;
-				if ( ! is_callable( $module ) ) {
-					continue;
-				}
-				$module();
+				perflab_activate_module( PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module );
 			}
 		}
 	}
@@ -294,20 +286,54 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 	if ( ! empty( $old_value ) ) {
 		foreach ( $old_value as $module => $module_settings ) {
 			if ( ! empty( $module_settings['enabled'] ) && ( empty( $value[ $module ] ) || empty( $value[ $module ]['enabled'] ) ) ) {
-				$module_deactivation_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/deactivate.php';
-				if ( ! file_exists( $module_deactivation_file ) ) {
-					continue;
-				}
-				$module = require $module_deactivation_file;
-				if ( ! is_callable( $module ) ) {
-					continue;
-				}
-				$module();
+				perflab_deactivate_module( PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module );
 			}
 		}
 	}
 
 	return $value;
+}
+
+/**
+ * Activate a module.
+ *
+ * Runs the activate.php file if it exists.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $module_dir_path The module's directory path.
+ */
+function perflab_activate_module( $module_dir_path ) {
+	$module_activation_file = $module_dir_path . '/activate.php';
+	if ( ! file_exists( $module_activation_file ) ) {
+		return;
+	}
+	$module = require $module_activation_file;
+	if ( ! is_callable( $module ) ) {
+		return;
+	}
+	$module();
+}
+
+/**
+ * Deactivate a module.
+ *
+ * Runs the deactivate.php file if it exists.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $module_dir_path The module's directory path.
+ */
+function perflab_deactivate_module( $module_dir_path ) {
+	$module_deactivation_file = $module_dir_path . '/activate.php';
+	if ( ! file_exists( $module_deactivation_file ) ) {
+		return;
+	}
+	$module = require $module_deactivation_file;
+	if ( ! is_callable( $module ) ) {
+		return;
+	}
+	$module();
 }
 
 // Run the module activation & deactivation actions when the option is updated.
