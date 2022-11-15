@@ -162,7 +162,7 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 						__( 'The SQLite module cannot be activated because the %s directory is not writable.', 'performance-lab' ),
 						WP_CONTENT_DIR
 					);
-				} elseif ( 'database/sqlite' === $module_slug && ( ! extension_loaded( 'sqlite3' ) || ! class_exists( 'SQLite3' ) ) ) {
+				} elseif ( 'database/sqlite' === $module_slug && ! class_exists( 'SQLite3' ) ) {
 					_e( 'The SQLite module cannot be activated because the SQLite extension is not loaded.', 'performance-lab' );
 				} else {
 					printf(
