@@ -325,7 +325,7 @@ function perflab_activate_module( $module_dir_path ) {
  * @param string $module_dir_path The module's directory path.
  */
 function perflab_deactivate_module( $module_dir_path ) {
-	$module_deactivation_file = $module_dir_path . '/activate.php';
+	$module_deactivation_file = $module_dir_path . '/deactivate.php';
 	if ( ! file_exists( $module_deactivation_file ) ) {
 		return;
 	}
