@@ -270,34 +270,40 @@ if ( is_admin() ) {
  * @param mixed $value     New value of the option.
  */
 function perflab_run_module_activation_deactivation( $old_value, $value ) {
+	$old_value = (array) $old_value;
+	$value     = (array) $value;
 
 	// Get the list of modules that were activated, and load the activate.php files if they exist.
-	foreach ( $value as $module => $module_settings ) {
-		if ( ! empty( $module_settings['enabled'] ) && ( empty( $old_value[ $module ] ) || empty( $old_value[ $module ]['enabled'] ) ) ) {
-			$module_activation_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/activate.php';
-			if ( ! file_exists( $module_activation_file ) ) {
-				continue;
+	if ( ! empty( $value ) ) {
+		foreach ( $value as $module => $module_settings ) {
+			if ( ! empty( $module_settings['enabled'] ) && ( empty( $old_value[ $module ] ) || empty( $old_value[ $module ]['enabled'] ) ) ) {
+				$module_activation_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/activate.php';
+				if ( ! file_exists( $module_activation_file ) ) {
+					continue;
+				}
+				$module = require $module_activation_file;
+				if ( ! is_callable( $module ) ) {
+					continue;
+				}
+				$module();
 			}
-			$module = require $module_activation_file;
-			if ( ! is_callable( $module ) ) {
-				continue;
-			}
-			$module();
 		}
 	}
 
 	// Get the list of modules that were deactivated, and load the deactivate.php files if they exist.
-	foreach ( $old_value as $module => $module_settings ) {
-		if ( ! empty( $module_settings['enabled'] ) && ( empty( $value[ $module ] ) || empty( $value[ $module ]['enabled'] ) ) ) {
-			$module_deactivation_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/deactivate.php';
-			if ( ! file_exists( $module_deactivation_file ) ) {
-				continue;
+	if ( ! empty( $old_value ) ) {
+		foreach ( $old_value as $module => $module_settings ) {
+			if ( ! empty( $module_settings['enabled'] ) && ( empty( $value[ $module ] ) || empty( $value[ $module ]['enabled'] ) ) ) {
+				$module_deactivation_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/deactivate.php';
+				if ( ! file_exists( $module_deactivation_file ) ) {
+					continue;
+				}
+				$module = require $module_deactivation_file;
+				if ( ! is_callable( $module ) ) {
+					continue;
+				}
+				$module();
 			}
-			$module = require $module_deactivation_file;
-			if ( ! is_callable( $module ) ) {
-				continue;
-			}
-			$module();
 		}
 	}
 
