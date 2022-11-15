@@ -2,8 +2,6 @@
 /**
  * Module Name: SQLite Integration
  * Description: Use an SQLite database instead of MySQL.
- * Disabled Notice: Enabling this module will bring up the WordPress installation screen. You will need to reconfigure your site, and start with a fresh site. Disabling the module you will get back to your previous MySQL database, with all your previous data intact.
- * Enabled Notice: Your site is currently using an SQLite database. You can disable this module to get back to your previous MySQL database, with all your previous data intact.
  * Experimental: Yes
  *
  * @package performance-lab
