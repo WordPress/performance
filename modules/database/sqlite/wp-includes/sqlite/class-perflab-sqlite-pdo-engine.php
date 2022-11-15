@@ -907,7 +907,7 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 	 *
 	 * @param string $query The query string.
 	 *
-	 * @return boolean|string
+	 * @return boolean
 	 */
 	private function determine_query_type( $query ) {
 		$result = preg_match(
