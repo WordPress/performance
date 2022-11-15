@@ -305,7 +305,7 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 }
 
 // Run the module activation & deactivation actions when the option is updated.
-add_action( 'update_option_' . PERFLAB_MODULES_SETTING, 'perflab_run_module_activation_deactivation', 10, 3 );
+add_action( 'update_option_' . PERFLAB_MODULES_SETTING, 'perflab_run_module_activation_deactivation', 10, 2 );
 
 // Run the module activation & deactivation actions when the option is added.
 add_action(
