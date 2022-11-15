@@ -123,7 +123,7 @@ function perflab_sqlite_make_db_sqlite() {
 		} else {
 			$pdo->rollBack();
 			$message  = sprintf(
-				'Error occured while creating tables or indexes...<br />Query was: %s<br />',
+				'Error occurred while creating tables or indexes...<br />Query was: %s<br />',
 				var_export( $rewritten_query, true )
 			);
 			$message .= sprintf( 'Error message is: %s', $err_data[2] );
