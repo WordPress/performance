@@ -108,6 +108,27 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$this->assertEquals( $filtered_image_mock_lazy_load, $filtered_image_tags_not_added );
 	}
 
+	/**
+	 * Tests that only img tags using double quotes are updated.
+	 *
+	 * @covers ::dominant_color_img_tag_add_dominant_color
+	 */
+	public function test_dominant_color_img_tag_add_dominant_color_requires_proper_quotes() {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.jpg' );
+		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+
+		$image_url = wp_get_attachment_image_url( $attachment_id );
+
+		$img_with_double_quotes = '<img src="' . $image_url . '">';
+		$this->assertStringContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_double_quotes ) );
+
+		$img_with_single_quotes = "<img src='" . $image_url . "'>";
+		$this->assertStringNotContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_single_quotes ) );
+
+		$img_with_escaped_quotes = '<img src=\"' . $image_url . '\">';
+		$this->assertStringNotContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_escaped_quotes ) );
+	}
+
 
 	/**
 	 * Tests dominant_color_set_image_editors().

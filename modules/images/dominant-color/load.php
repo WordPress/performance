@@ -88,9 +88,9 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 		return $filtered_image;
 	}
 
-	// Only apply the dom color to images that have a src attribute that
+	// Only apply the dominant color to images that have a src attribute that
 	// starts with a double quote, ensuring escaped JSON is also excluded.
-	if ( false === strpos( $filtered_image, ' src="' ) ) {
+	if ( ! str_contains( $filtered_image, ' src="' ) ) {
 		return $filtered_image;
 	}
 
