@@ -108,6 +108,25 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$this->assertEquals( $filtered_image_mock_lazy_load, $filtered_image_tags_not_added );
 	}
 
+	/**
+	 * Tests dominant_color_img_tag_add_dominant_color() do not override the style attribute.
+	 *
+	 * @covers ::dominant_color_img_tag_add_dominant_color
+	 */
+	public function test_dominant_color_do_not_override_the_style_attribute_in_img_tag() {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.jpg' );
+		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+
+		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id );
+
+		$filtered_image = sprintf( '<img src="%s" width="%d" height="%d" />', $src, $width, $height );
+
+		$this->assertStringContainsString( 'style="--dominant-color: #fe0000;"', dominant_color_img_tag_add_dominant_color( $filtered_image, 'the_content', $attachment_id ) );
+
+		$filtered_image_with_style_tag = sprintf( '<img style="color: #ffffff;" src="%s" width="%d" height="%d" />', $src, $width, $height );
+
+		$this->assertStringContainsString( 'style="--dominant-color: #fe0000; color: #ffffff;"', dominant_color_img_tag_add_dominant_color( $filtered_image_with_style_tag, 'the_content', $attachment_id ) );
+	}
 
 	/**
 	 * Tests dominant_color_set_image_editors().
