@@ -113,7 +113,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 *
 	 * @covers ::dominant_color_img_tag_add_dominant_color
 	 */
-	public function test_dominant_color_do_not_override_the_style_attribute_in_img_tag() {
+	public function test_dominant_color_should_not_replace_existing_inline_styles() {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.jpg' );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
