@@ -94,6 +94,11 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 		return $filtered_image;
 	}
 
+	// Ensure to not run the logic below in case relevant attributes are already present.
+	if ( str_contains( $filtered_image, ' data-dominant-color="' ) || str_contains( $filtered_image, ' data-has-transparency="' ) ) {
+		return $filtered_image;
+	}
+
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $image_meta ) ) {
 		return $filtered_image;
