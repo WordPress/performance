@@ -120,13 +120,13 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$image_url = wp_get_attachment_image_url( $attachment_id );
 
 		$img_with_double_quotes = '<img src="' . $image_url . '">';
-		$this->assertStringContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_double_quotes ) );
+		$this->assertStringContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_double_quotes, 'the_content', $attachment_id ) );
 
 		$img_with_single_quotes = "<img src='" . $image_url . "'>";
-		$this->assertStringNotContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_single_quotes ) );
+		$this->assertStringNotContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_single_quotes, 'the_content', $attachment_id ) );
 
 		$img_with_escaped_quotes = '<img src=\"' . $image_url . '\">';
-		$this->assertStringNotContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_escaped_quotes ) );
+		$this->assertStringNotContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_escaped_quotes, 'the_content', $attachment_id ) );
 	}
 
 	/**
