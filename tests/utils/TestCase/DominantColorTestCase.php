@@ -24,7 +24,7 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'green_jpg'     => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/green.jpg',
-				'expected_color'        => array( '00ff00', '00ff01' ),
+				'expected_color'        => array( '00ff00', '00ff01', '02ff01' ),
 				'expected_transparency' => false,
 			),
 			'white_jpg'     => array(
