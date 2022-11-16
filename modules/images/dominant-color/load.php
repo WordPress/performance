@@ -117,7 +117,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	if ( ! empty( $image_meta['dominant_color'] ) ) {
 		$data .= sprintf( 'data-dominant-color="%s" ', esc_attr( $image_meta['dominant_color'] ) );
 		if ( str_contains( $filtered_image, ' style="' ) ) {
-			$filtered_image = str_replace( ' style="', ' style="--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . ';', $filtered_image );
+			$filtered_image = str_replace( ' style="', ' style="--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . '; ', $filtered_image );
 		} else {
 			$filtered_image = str_replace( '<img ', '<img style="--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . ';" ', $filtered_image );
 		}
