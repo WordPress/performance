@@ -118,12 +118,16 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	}
 
 	$data        = '';
-	$style       = '';
 	$extra_class = '';
 
 	if ( ! empty( $image_meta['dominant_color'] ) ) {
 		$data .= sprintf( 'data-dominant-color="%s" ', esc_attr( $image_meta['dominant_color'] ) );
-		$style = '--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . '; ';
+
+		if ( str_contains( $filtered_image, ' style="' ) ) {
+			$filtered_image = str_replace( ' style="', ' style="--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . '; ', $filtered_image );
+		} else {
+			$filtered_image = str_replace( '<img ', '<img style="--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . ';" ', $filtered_image );
+		}
 	}
 
 	if ( isset( $image_meta['has_transparency'] ) ) {
@@ -132,15 +136,10 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 		$extra_class  = $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent';
 	}
 
-	if ( ! empty( $data ) || ! empty( $style ) || ! str_contains( $data, $filtered_image ) ) {
-		if ( str_contains( $filtered_image, ' style=' ) ) {
-			$filtered_image = str_replace( ' style="', ' ' . $data . 'style="' . $style, $filtered_image );
-		} elseif ( ! empty( $style ) ) {
-			$filtered_image = str_replace( '<img ', '<img ' . $data . 'style="' . $style . '" ', $filtered_image );
-		} else {
-			$filtered_image = str_replace( '<img ', '<img ' . $data, $filtered_image );
-		}
+	if ( ! empty( $data ) ) {
+		$filtered_image = str_replace( '<img ', '<img ' . $data, $filtered_image );
 	}
+
 	if ( ! empty( $extra_class ) ) {
 		$filtered_image = str_replace( ' class="', ' class="' . $extra_class . ' ', $filtered_image );
 	}

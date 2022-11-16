@@ -150,6 +150,7 @@ function benchmarkURL( params ) {
 	};
 
 	const instance = autocannon( {
+		method: 'POST', // The post method is needed to bypass CDN or full page cache.
 		...params,
 		setupClient( client ) {
 			client.on( 'headers', onHeaders );
