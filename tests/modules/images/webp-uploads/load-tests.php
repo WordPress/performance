@@ -10,10 +10,28 @@ use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
 class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
+	/**
+	 * To unlink files.
+	 *
+	 * @var array
+	 */
+	protected $to_unlink = array();
+
 	public function set_up() {
 		parent::set_up();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+	}
+
+	public function tear_down() {
+		$this->to_unlink = array_filter(
+			$this->to_unlink,
+			function ( $filename ) {
+				return unlink( $filename );
+			}
+		);
+
+		parent::tear_down();
 	}
 
 	/**
@@ -775,6 +793,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->opt_in_to_jpeg_and_webp();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
+		add_filter( 'wp_editor_set_quality', array( $this, 'force_webp_image_quality_86' ), PHP_INT_MAX, 2 );
 
 		// Look for an image that contains only full size mime type images.
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
@@ -801,6 +820,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->opt_in_to_jpeg_and_webp();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
+		add_filter( 'wp_editor_set_quality', array( $this, 'force_webp_image_quality_86' ), PHP_INT_MAX, 2 );
 
 		// Look for an image that contains all of the additional mime type images.
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );
@@ -919,10 +939,81 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
+	 * Test image quality for image conversion.
+	 *
+	 * @test
+	 */
+	public function it_should_set_quality_with_image_conversion() {
+		// Temporary file path.
+		$file = $this->temp_filename();
+
+		$editor = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dice.png', array( 'mime_type' => 'image/png' ) );
+
+		// Quality setting for the source image. For PNG the fallback default of 82 is used.
+		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for PNG is 82.' );
+
+		// A PNG image will be converted to WebP whose quality should be 82 universally.
+		$editor->save( $file, 'image/webp' );
+		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WebP. Quality setting for it should be 82 universally.' );
+
+		$editor = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+
+		// Quality setting for the source image. For JPG the fallback default of 82 is used.
+		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for JPG is 82.' );
+
+		// A JPG image will be converted to WebP whose quality should be 82 universally.
+		$editor->save( $file, 'image/webp' );
+		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WebP. Quality setting for it should be 82 universally.' );
+	}
+
+	/**
+	 * Test webp_uploads_modify_webp_quality function for image quality.
+	 *
+	 * @covers ::webp_uploads_modify_webp_quality()
+	 *
+	 * @test
+	 */
+	public function it_should_return_correct_quality_for_mime_types() {
+		global $wp_version;
+		$this->assertSame( 82, webp_uploads_modify_webp_quality( 90, 'image/webp' ), 'WebP image quality should always be 82.' );
+		$this->assertSame( 82, webp_uploads_modify_webp_quality( 82, 'image/webp' ), 'WebP image quality should always be 82.' );
+
+		if ( version_compare( $wp_version, '6.1', '<' ) ) {
+			$this->assertSame( 82, webp_uploads_modify_webp_quality( 86, 'image/jpeg' ), 'JPEG image quality should always return 82 quality for WP version lower than 6.1.' );
+		} else {
+			$this->assertSame( 80, webp_uploads_modify_webp_quality( 80, 'image/jpeg' ), 'JPEG image quality should return default quality provided from WP filter wp_editor_set_quality.' );
+		}
+	}
+
+	/**
 	 * Runs (empty) hooks to satisfy webp_uploads_in_frontend_body() conditions.
 	 */
 	private function mock_frontend_body_hooks() {
 		remove_all_actions( 'template_redirect' );
 		do_action( 'template_redirect' );
+	}
+
+	/**
+	 * Force return WebP image quality 86 for testing.
+	 */
+	public function force_webp_image_quality_86( $quality, $mime_type ) {
+		if ( 'image/webp' === $mime_type ) {
+			return 86;
+		}
+		return $quality;
+	}
+
+	/**
+	 * Get temporary file name.
+	 *
+	 * @return string Temp File name.
+	 */
+	public function temp_filename() {
+		$filename = wp_tempnam();
+
+		// Store filename to unlink it later in tear down.
+		$this->to_unlink[] = $filename;
+
+		return $filename;
 	}
 }
