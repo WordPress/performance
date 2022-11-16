@@ -114,6 +114,10 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @dataProvider data_provider_dominant_color_check_inline_style
 	 *
 	 * @covers ::dominant_color_img_tag_add_dominant_color
+	 *
+	 * @param string $filtered_image The filtered image markup.
+	 *                               Must include `src="%s" width="%d" height="%d"`.
+	 * @param string $expected       The expected style attribute and value.
 	 */
 	public function test_dominant_color_img_tag_add_dominant_color_should_add_dominant_color_inline_style( $filtered_image, $expected ) {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.jpg' );
