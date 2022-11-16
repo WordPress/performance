@@ -10,10 +10,28 @@ use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
 class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
+	/**
+	 * To unlink files.
+	 *
+	 * @var array
+	 */
+	protected $to_unlink = array();
+
 	public function set_up() {
 		parent::set_up();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+	}
+
+	public function tear_down() {
+		$this->to_unlink = array_filter(
+			$this->to_unlink,
+			function ( $filename ) {
+				return unlink( $filename );
+			}
+		);
+
+		parent::tear_down();
 	}
 
 	/**
@@ -926,13 +944,13 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_set_quality_with_image_conversion() {
+		// Temporary file path.
+		$file = $this->temp_filename();
+
 		$editor = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dice.png', array( 'mime_type' => 'image/png' ) );
 
 		// Quality setting for the source image. For PNG the fallback default of 82 is used.
 		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for PNG is 82.' );
-
-		// Temporary file.
-		$file = wp_tempnam();
 
 		// A PNG image will be converted to WebP whose quality should be 82 universally.
 		$editor->save( $file, 'image/webp' );
@@ -946,9 +964,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// A JPG image will be converted to WebP whose quality should be 82 universally.
 		$editor->save( $file, 'image/webp' );
 		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WebP. Quality setting for it should be 82 universally.' );
-
-		// Delete the temporary file.
-		unlink( $file );
 	}
 
 	/**
@@ -986,5 +1001,19 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			return 86;
 		}
 		return $quality;
+	}
+
+	/**
+	 * Get temporary file name.
+	 *
+	 * @return string Temp File name.
+	 */
+	public function temp_filename() {
+		$filename = wp_tempnam();
+
+		// Store filename to unlink it later in tear down.
+		$this->to_unlink[] = $filename;
+
+		return $filename;
 	}
 }
