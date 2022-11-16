@@ -109,7 +109,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	}
 
 	/**
-	 * Tests dominant_color_img_tag_add_dominant_color() do not override the style attribute.
+	 * Tests that dominant_color_img_tag_add_dominant_color() does not replace existing inline styles.
 	 *
 	 * @covers ::dominant_color_img_tag_add_dominant_color
 	 */
