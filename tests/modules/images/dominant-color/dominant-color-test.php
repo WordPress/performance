@@ -111,21 +111,40 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	/**
 	 * Tests that dominant_color_img_tag_add_dominant_color() does not replace existing inline styles.
 	 *
+	 * @dataProvider data_provider_dominant_color_check_inline_style
+	 *
 	 * @covers ::dominant_color_img_tag_add_dominant_color
 	 */
-	public function test_dominant_color_should_not_replace_existing_inline_styles() {
+	public function test_dominant_color_img_tag_add_dominant_color_should_add_dominant_color_inline_style( $filtered_image, $expected ) {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.jpg' );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id );
 
-		$filtered_image = sprintf( '<img src="%s" width="%d" height="%d" />', $src, $width, $height );
+		$filtered_image = sprintf( $filtered_image, $src, $width, $height );
 
-		$this->assertStringContainsString( 'style="--dominant-color: #fe0000;"', dominant_color_img_tag_add_dominant_color( $filtered_image, 'the_content', $attachment_id ) );
+		$this->assertStringContainsString(
+			$expected,
+			dominant_color_img_tag_add_dominant_color( $filtered_image, 'the_content', $attachment_id )
+		);
+	}
 
-		$filtered_image_with_style_tag = sprintf( '<img style="color: #ffffff;" src="%s" width="%d" height="%d" />', $src, $width, $height );
-
-		$this->assertStringContainsString( 'style="--dominant-color: #fe0000; color: #ffffff;"', dominant_color_img_tag_add_dominant_color( $filtered_image_with_style_tag, 'the_content', $attachment_id ) );
+	/**
+	 * Data provider for test_dominant_color_img_tag_add_dominant_color_should_add_dominant_color_inline_style().
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_dominant_color_check_inline_style() {
+		return array(
+			'no existing inline styles' => array(
+				'filtered_image' => '<img src="%s" width="%d" height="%d" />',
+				'expected'       => 'style="--dominant-color: #fe0000;"',
+			),
+			'existing inline styles'    => array(
+				'filtered_image' => '<img style="color: #ffffff;" src="%s" width="%d" height="%d" />',
+				'expected'       => 'style="--dominant-color: #fe0000; color: #ffffff;"',
+			),
+		);
 	}
 
 	/**
