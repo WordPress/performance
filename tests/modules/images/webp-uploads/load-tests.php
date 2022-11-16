@@ -926,34 +926,29 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_set_quality_with_image_conversion() {
-		// Temporary file path.
-		$file = wp_tempnam();
+		$editor = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dice.png', array( 'mime_type' => 'image/png' ) );
 
-		$editor      = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dice.png', array( 'mime_type' => 'image/png' ) );
-		$png_quality = $editor->get_quality();
+		// Quality setting for the source image. For PNG the fallback default of 82 is used.
+		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for PNG is 82.' );
+
+		// Temporary file.
+		$file = wp_tempnam();
 
 		// A PNG image will be converted to WebP whose quality should be 82 universally.
 		$editor->save( $file, 'image/webp' );
-		$png_to_webp_quality = $editor->get_quality();
+		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WebP. Quality setting for it should be 82 universally.' );
 
-		$editor      = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
-		$jpg_quality = $editor->get_quality();
+		$editor = wp_get_image_editor( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+
+		// Quality setting for the source image. For JPG the fallback default of 82 is used.
+		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for JPG is 82.' );
 
 		// A JPG image will be converted to WebP whose quality should be 82 universally.
 		$editor->save( $file, 'image/webp' );
-		$jpg_to_webp_quality = $editor->get_quality();
+		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WebP. Quality setting for it should be 82 universally.' );
 
-		// Delete the temporary file before assertions.
+		// Delete the temporary file.
 		unlink( $file );
-
-		// Quality setting for the source image. For PNG the fallback default of 82 is used.
-		$this->assertSame( 82, $png_quality, 'Default quality setting for PNG is 82.' );
-
-		// Quality setting for the source image. For JPG the fallback default of 82 is used.
-		$this->assertSame( 82, $jpg_quality, 'Default quality setting for JPG is 82.' );
-
-		$this->assertSame( 82, $png_to_webp_quality, 'Output image format is WebP. Quality setting for it should be 82 universally.' );
-		$this->assertSame( 82, $jpg_to_webp_quality, 'Output image format is WebP. Quality setting for it should be 82 universally.' );
 	}
 
 	/**
