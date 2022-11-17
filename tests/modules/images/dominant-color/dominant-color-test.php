@@ -111,22 +111,45 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	/**
 	 * Tests that only img tags using double quotes are updated.
 	 *
+	 * @dataProvider data_dominant_color_img_tag_add_dominant_color_requires_proper_quotes
+	 *
 	 * @covers ::dominant_color_img_tag_add_dominant_color
+	 *
+	 * @param string $image    The image markup.
+	 *                         Must include %s for the 'src' value.
+	 * @param bool   $expected Whether the dominant color should be added.
 	 */
-	public function test_dominant_color_img_tag_add_dominant_color_requires_proper_quotes() {
+	public function test_dominant_color_img_tag_add_dominant_color_requires_proper_quotes( $image, $expected ) {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.jpg' );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		$image_url = wp_get_attachment_image_url( $attachment_id );
+		$image     = sprintf( $image, $image_url );
+		$result    = dominant_color_img_tag_add_dominant_color( $image, 'the_content', $attachment_id );
 
-		$img_with_double_quotes = '<img src="' . $image_url . '">';
-		$this->assertStringContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_double_quotes, 'the_content', $attachment_id ) );
+		$this->assertSame( $expected, str_contains( $result, ' data-dominant-color=' ) );
+	}
 
-		$img_with_single_quotes = "<img src='" . $image_url . "'>";
-		$this->assertStringNotContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_single_quotes, 'the_content', $attachment_id ) );
-
-		$img_with_escaped_quotes = '<img src=\"' . $image_url . '\">';
-		$this->assertStringNotContainsString( ' data-dominant-color=', dominant_color_img_tag_add_dominant_color( $img_with_escaped_quotes, 'the_content', $attachment_id ) );
+	/**
+	 * Data provider for test_dominant_color_img_tag_add_dominant_color_requires_proper_quotes();
+	 *
+	 * @return array[]
+	 */
+	public function data_dominant_color_img_tag_add_dominant_color_requires_proper_quotes() {
+		return array(
+			'double quotes'         => array(
+				'image'    => '<img src="%s">',
+				'expected' => true,
+			),
+			'single quotes'         => array(
+				'image'    => "<img src='%s'>",
+				'expected' => false,
+			),
+			'escaped double quotes' => array(
+				'image'    => '<img src=\"%s\">',
+				'expected' => false,
+			),
+		);
 	}
 
 	/**
