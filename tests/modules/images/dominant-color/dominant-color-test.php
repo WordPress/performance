@@ -127,7 +127,11 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$image     = sprintf( $image, $image_url );
 		$result    = dominant_color_img_tag_add_dominant_color( $image, 'the_content', $attachment_id );
 
-		$this->assertSame( $expected, str_contains( $result, ' data-dominant-color=' ) );
+		if ( $expected ) {
+			$this->assertStringContainsString( ' data-dominant-color=', $result );
+		} else {
+			$this->assertStringNotContainsString( ' data-dominant-color=', $result );
+		}
 	}
 
 	/**
