@@ -88,6 +88,17 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 		return $filtered_image;
 	}
 
+	// Only apply the dominant color to images that have a src attribute that
+	// starts with a double quote, ensuring escaped JSON is also excluded.
+	if ( ! str_contains( $filtered_image, ' src="' ) ) {
+		return $filtered_image;
+	}
+
+	// Ensure to not run the logic below in case relevant attributes are already present.
+	if ( str_contains( $filtered_image, ' data-dominant-color="' ) || str_contains( $filtered_image, ' data-has-transparency="' ) ) {
+		return $filtered_image;
+	}
+
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $image_meta ) ) {
 		return $filtered_image;
@@ -116,6 +127,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 
 	if ( ! empty( $image_meta['dominant_color'] ) ) {
 		$data .= sprintf( 'data-dominant-color="%s" ', esc_attr( $image_meta['dominant_color'] ) );
+
 		if ( str_contains( $filtered_image, ' style="' ) ) {
 			$filtered_image = str_replace( ' style="', ' style="--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . '; ', $filtered_image );
 		} else {
@@ -228,7 +240,7 @@ function dominant_color_add_inline_style() {
 	$handle = 'dominant-color-styles';
 	wp_register_style( $handle, false );
 	wp_enqueue_style( $handle );
-	$custom_css = 'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); background-clip: content-box, padding-box; }';
+	$custom_css = 'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }';
 	wp_add_inline_style( $handle, $custom_css );
 }
 add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
