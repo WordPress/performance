@@ -4,9 +4,8 @@
   "repository": "git+https://github.com/WordPress/performance.git",
   "devDependencies": {
     "@octokit/rest": "16.26.0",
-    "@wordpress/env": "^4.2.2",
-    "@wordpress/scripts": "^19.0",
-    "@wordpress/browserslist-config": "^4.1.2",
+    "@wordpress/env": "^5.7.0",
+    "@wordpress/scripts": "^24.6.0",
     "chalk": "4.1.1",
     "commander": "4.1.0",
     "fast-glob": "^3.2.7",
