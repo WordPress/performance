@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.0
 Tested up to:      6.1
 Requires PHP:      5.6
-Stable tag:        1.6.0
+Stable tag:        1.7.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -18,11 +18,11 @@ The Performance Lab plugin is a collection of modules focused on enhancing perfo
 Currently the plugin includes the following performance modules:
 
 * **Dominant Color:** Adds support to store dominant color for an image and create a placeholder background with that color.
-* **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
-* **Full Page Cache Health Check:** Adds a check for full page cache in Site Health status.
 * **WebP Support Health Check:** Adds a WebP support check in Site Health status.
-* **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
+* **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
 * **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
+* **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
+* **Full Page Cache Health Check:** Adds a check for full page cache in Site Health status.
 * **Persistent Object Cache Health Check:** Adds a persistent object cache check for sites with non-trivial amounts of data in Site Health status.
 
 == Installation ==
@@ -74,6 +74,20 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 1.7.0 =
+
+**Enhancements**
+
+* Images: Change WP Image editor quality for mime types. ([571](https://github.com/WordPress/performance/pull/571))
+* Infrastructure: Introduce database focus area, rename JavaScript focus area to JS & CSS, and phase out Site Health focus area. ([566](https://github.com/WordPress/performance/pull/566))
+
+**Bug Fixes**
+
+* Images: Avoid potentially adding invalid attributes or duplicates for dominant color images. ([578](https://github.com/WordPress/performance/pull/578))
+* Images: Fix fatal error in REST API response when an image has no attachment metadata. ([568](https://github.com/WordPress/performance/pull/568))
+* Images: Fix image focal point bug when dominant color is enabled by not overriding `style` attribute. ([582](https://github.com/WordPress/performance/pull/582))
+* Images: Fix opt-in checkbox for generating WebP and JPEG to also show on Multisite. ([565](https://github.com/WordPress/performance/pull/565))
 
 = 1.6.0 =
 
