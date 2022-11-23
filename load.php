@@ -259,6 +259,7 @@ perflab_load_active_and_valid_modules();
 require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing-metric.php';
 require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing.php';
 require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/load.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/defaults.php';
 
 // Only load admin integration when in admin.
 if ( is_admin() ) {
