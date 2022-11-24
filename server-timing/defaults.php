@@ -72,6 +72,35 @@ function perflab_register_default_server_timing_before_template_metrics() {
 		},
 		PHP_INT_MAX
 	);
+
+	// Measure duration of autoloaded options query.
+	// Requires the Performance Lab object-cache.php drop-in to be present in order to work.
+	add_filter(
+		'query',
+		function( $query ) {
+			global $wpdb;
+			if ( "SELECT option_name, option_value FROM $wpdb->options WHERE autoload = 'yes'" !== $query ) {
+				return $query;
+			}
+			perflab_server_timing_register_metric(
+				'load-alloptions-query',
+				array(
+					'measure_callback' => function( $metric ) {
+						$metric->measure_before();
+						add_filter(
+							'pre_cache_alloptions',
+							function( $passthrough ) use ( $metric ) {
+								$metric->measure_after();
+								return $passthrough;
+							}
+						);
+					},
+					'access_cap'       => 'exist',
+				)
+			);
+			return $query;
+		}
+	);
 }
 perflab_register_default_server_timing_before_template_metrics();
 
