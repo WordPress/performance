@@ -21,6 +21,16 @@ define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
 
+// If the constant isn't defined yet, it means the Performance Lab object cache file is not loaded.
+if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
+	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', false );
+}
+
+require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing-metric.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/load.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/defaults.php';
+
 /**
  * Registers the performance modules setting.
  *
@@ -253,13 +263,55 @@ function perflab_load_active_and_valid_modules() {
 		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/load.php';
 	}
 }
-
 perflab_load_active_and_valid_modules();
 
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing-metric.php';
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing.php';
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/load.php';
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/defaults.php';
+/**
+ * Places the Performance Lab's object cache drop-in in the drop-ins folder.
+ *
+ * This only runs in WP Admin to not have any potential performance impact on
+ * the frontend.
+ *
+ * This function will short-circuit if the constant
+ * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
+ *
+ * @since n.e.x.t
+ */
+function perflab_maybe_set_object_cache_dropin() {
+	global $wp_filesystem;
+
+	// Bail if disabled via constant.
+	if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {
+		return;
+	}
+
+	// Bail if already placed.
+	if ( PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
+		return;
+	}
+
+	// Bail if already attempted before timeout has been completed.
+	// This is present in case placing the file fails for some reason, to avoid
+	// excessively retrying to place it on every request.
+	$timeout = get_transient( 'perflab_set_object_cache_dropin' );
+	if ( false !== $timeout ) {
+		return;
+	}
+
+	if ( $wp_filesystem || WP_Filesystem() ) {
+		// If there is an actual object-cache.php file, rename it.
+		// The Performance Lab object-cache.php will still load it, so the
+		// behavior does not change.
+		if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) ) {
+			$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache.php', WP_CONTENT_DIR . '/object-cache-orig.php' );
+		}
+
+		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.php', WP_CONTENT_DIR . '/object-cache.php' );
+	}
+
+	// Set timeout of 1 hour before retrying again (only in case of failure).
+	set_transient( 'perflab_set_object_cache_dropin', true, HOUR_IN_SECONDS );
+}
+add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
 
 // Only load admin integration when in admin.
 if ( is_admin() ) {
