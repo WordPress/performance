@@ -3,9 +3,9 @@
  * Plugin Name: Performance Lab
  * Plugin URI: https://github.com/WordPress/performance
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
- * Requires at least: 5.8
+ * Requires at least: 6.0
  * Requires PHP: 5.6
- * Version: 1.4.0
+ * Version: 1.7.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.4.0' );
+define( 'PERFLAB_VERSION', '1.7.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -108,7 +108,23 @@ function perflab_get_module_settings() {
 	// Even though a default value is registered for this setting, the default must be explicitly
 	// passed here, to support scenarios where this function is called before the 'init' action,
 	// for example when loading the active modules.
-	return (array) get_option( PERFLAB_MODULES_SETTING, perflab_get_modules_setting_default() );
+	$module_settings = (array) get_option( PERFLAB_MODULES_SETTING, perflab_get_modules_setting_default() );
+
+	$legacy_module_slugs = array(
+		'site-health/audit-autoloaded-options' => 'database/audit-autoloaded-options',
+		'site-health/audit-enqueued-assets'    => 'js-and-css/audit-enqueued-assets',
+		'site-health/audit-full-page-cache'    => 'object-cache/audit-full-page-cache',
+		'site-health/webp-support'             => 'images/webp-support',
+	);
+
+	foreach ( $legacy_module_slugs as $legacy_slug => $current_slug ) {
+		if ( isset( $module_settings[ $legacy_slug ] ) ) {
+			$module_settings[ $current_slug ] = $module_settings[ $legacy_slug ];
+			unset( $module_settings[ $legacy_slug ] );
+		}
+	}
+
+	return $module_settings;
 }
 
 /**
@@ -244,6 +260,3 @@ perflab_load_active_and_valid_modules();
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
 }
-
-// Polyfills.
-require_once PERFLAB_PLUGIN_DIR_PATH . 'polyfills.php';

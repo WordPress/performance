@@ -2,7 +2,7 @@
  * External dependencies
  */
 const { groupBy } = require( 'lodash' );
-const Octokit = require( '@octokit/rest' );
+const { Octokit } = require( '@octokit/rest' );
 
 /**
  * Internal dependencies

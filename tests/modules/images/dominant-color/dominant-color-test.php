@@ -22,7 +22,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$this->assertEmpty( $dominant_color_metadata );
 
 		// Creating attachment.
-		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 		$dominant_color_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'dominant_color', $dominant_color_metadata );
@@ -39,7 +39,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 */
 	public function test_dominant_color_get_dominant_color( $image_path, $expected_color, $expected_transparency ) {
 		// Creating attachment.
-		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		$this->assertContains( dominant_color_get_dominant_color( $attachment_id ), $expected_color );
 	}
 
@@ -55,7 +55,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $transparency_metadata );
 
-		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 		$transparency_metadata = dominant_color_metadata( array(), $attachment_id );
 		$this->assertArrayHasKey( 'has_transparency', $transparency_metadata );
@@ -71,7 +71,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 */
 	public function test_dominant_color_has_transparency( $image_path, $expected_color, $expected_transparency ) {
 		// Creating attachment.
-		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		$this->assertSame( $expected_transparency, dominant_color_has_transparency( $attachment_id ) );
 	}
 
@@ -83,7 +83,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @covers ::dominant_color_img_tag_add_dominant_color
 	 */
 	public function test_tag_add_adjust_to_image_attributes( $image_path, $expected_color, $expected_transparency ) {
-		$attachment_id = $this->factory->attachment->create_upload_object( $image_path );
+		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id );
@@ -108,6 +108,96 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$this->assertEquals( $filtered_image_mock_lazy_load, $filtered_image_tags_not_added );
 	}
 
+	/**
+	 * Tests that only img tags using double quotes are updated.
+	 *
+	 * @dataProvider data_dominant_color_img_tag_add_dominant_color_requires_proper_quotes
+	 *
+	 * @covers ::dominant_color_img_tag_add_dominant_color
+	 *
+	 * @param string $image    The image markup.
+	 *                         Must include %s for the 'src' value.
+	 * @param bool   $expected Whether the dominant color should be added.
+	 */
+	public function test_dominant_color_img_tag_add_dominant_color_requires_proper_quotes( $image, $expected ) {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.jpg' );
+		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+
+		$image_url = wp_get_attachment_image_url( $attachment_id );
+		$image     = sprintf( $image, $image_url );
+		$result    = dominant_color_img_tag_add_dominant_color( $image, 'the_content', $attachment_id );
+
+		if ( $expected ) {
+			$this->assertStringContainsString( ' data-dominant-color=', $result );
+		} else {
+			$this->assertStringNotContainsString( ' data-dominant-color=', $result );
+		}
+	}
+
+	/**
+	 * Data provider for test_dominant_color_img_tag_add_dominant_color_requires_proper_quotes();
+	 *
+	 * @return array[]
+	 */
+	public function data_dominant_color_img_tag_add_dominant_color_requires_proper_quotes() {
+		return array(
+			'double quotes'         => array(
+				'image'    => '<img src="%s">',
+				'expected' => true,
+			),
+			'single quotes'         => array(
+				'image'    => "<img src='%s'>",
+				'expected' => false,
+			),
+			'escaped double quotes' => array(
+				'image'    => '<img src=\"%s\">',
+				'expected' => false,
+			),
+		);
+	}
+
+	/**
+	 * Tests that dominant_color_img_tag_add_dominant_color() does not replace existing inline styles.
+	 *
+	 * @dataProvider data_provider_dominant_color_check_inline_style
+	 *
+	 * @covers ::dominant_color_img_tag_add_dominant_color
+	 *
+	 * @param string $filtered_image The filtered image markup.
+	 *                               Must include `src="%s" width="%d" height="%d"`.
+	 * @param string $expected       The expected style attribute and value.
+	 */
+	public function test_dominant_color_img_tag_add_dominant_color_should_add_dominant_color_inline_style( $filtered_image, $expected ) {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.jpg' );
+		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
+
+		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id );
+
+		$filtered_image = sprintf( $filtered_image, $src, $width, $height );
+
+		$this->assertStringContainsString(
+			$expected,
+			dominant_color_img_tag_add_dominant_color( $filtered_image, 'the_content', $attachment_id )
+		);
+	}
+
+	/**
+	 * Data provider for test_dominant_color_img_tag_add_dominant_color_should_add_dominant_color_inline_style().
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_dominant_color_check_inline_style() {
+		return array(
+			'no existing inline styles' => array(
+				'filtered_image' => '<img src="%s" width="%d" height="%d" />',
+				'expected'       => 'style="--dominant-color: #fe0000;"',
+			),
+			'existing inline styles'    => array(
+				'filtered_image' => '<img style="color: #ffffff;" src="%s" width="%d" height="%d" />',
+				'expected'       => 'style="--dominant-color: #fe0000; color: #ffffff;"',
+			),
+		);
+	}
 
 	/**
 	 * Tests dominant_color_set_image_editors().

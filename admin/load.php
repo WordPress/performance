@@ -184,11 +184,11 @@ function perflab_get_focus_areas() {
 		'images'       => array(
 			'name' => __( 'Images', 'performance-lab' ),
 		),
-		'javascript'   => array(
-			'name' => __( 'JavaScript', 'performance-lab' ),
+		'js-and-css'   => array(
+			'name' => __( 'JS & CSS', 'performance-lab' ),
 		),
-		'site-health'  => array(
-			'name' => __( 'Site Health', 'performance-lab' ),
+		'database'     => array(
+			'name' => __( 'Database', 'performance-lab' ),
 		),
 		'measurement'  => array(
 			'name' => __( 'Measurement', 'performance-lab' ),
