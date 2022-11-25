@@ -11,6 +11,8 @@
     "commander": "^9.4.1",
     "csv-stringify": "^6.2.0",
     "fast-glob": "^3.2.7",
+    "grunt": "~1.5.3",
+    "grunt-contrib-jshint": "3.2.0",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
     "lodash": "4.17.21",
@@ -24,7 +26,8 @@
     "enabled-modules": "./bin/plugin/cli.js enabled-modules",
     "benchmark": "./bin/plugin/cli.js benchmark",
     "format-js": "wp-scripts format ./bin",
-    "lint-js": "wp-scripts lint-js ./bin",
+    "lint-js": "wp-scripts lint-js",
+    "lint-js-fix": "npm run lint-js -- --fix",
     "format-php": "wp-env run composer run-script format",
     "prelint-php": "wp-env run composer 'install --no-interaction'",
     "lint-php": "wp-env run composer run-script lint",
@@ -33,7 +36,8 @@
     "pretest-php-multisite": "wp-env run composer 'install --no-interaction'",
     "test-php-multisite": "wp-env run phpunit 'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/performance/tests/multisite.xml --verbose'",
     "wp-env": "wp-env",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "grunt": "grunt"
   },
   "lint-staged": {
     "*.php": [
