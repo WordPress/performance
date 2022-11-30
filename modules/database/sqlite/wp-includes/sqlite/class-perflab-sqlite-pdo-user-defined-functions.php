@@ -533,7 +533,7 @@ class Perflab_SQLite_PDO_User_Defined_Functions {
 	public function field() {
 		global $wpdb;
 		$num_args = func_num_args();
-		if ( $num_args < 2 or is_null( func_get_arg( 0 ) ) ) {
+		if ( $num_args < 2 || is_null( func_get_arg( 0 ) ) ) {
 			return 0;
 		}
 		$arg_list      = func_get_args();
