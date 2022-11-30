@@ -45,7 +45,7 @@ return function() {
 			),
 			array(
 				__DIR__,
-				str_replace( WP_PLUGIN_DIR . '/', '', PERFLAB_MAIN_FILE ),
+				str_replace( WP_PLUGIN_DIR . DIRECTORY_SEPARATOR, '', PERFLAB_MAIN_FILE ),
 				'database/sqlite',
 				PERFLAB_MODULES_SETTING,
 				PERFLAB_MODULES_SCREEN,
