@@ -21,18 +21,18 @@ require_once __DIR__ . '/site-health.php';
  * @since n.e.x.t
  */
 function perflab_sqlite_plugin_admin_notice() {
-	// Check if the wp-content/db.php file exists.
-	if ( ! file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
-		printf(
-			'<div class="notice notice-error"><p>%s</p></div>',
-			sprintf(
-				/* translators: %1$s: <code>wp-content/db.php</code>, %2$s: The admin-URL to deactivate the module. */
-				__( 'The SQLite Integration module is active, but the %1$s file is missing. Please <a href="%2$s">deactivate the module</a> and re-activate it to try again.', 'performance-lab' ),
-				'<code>wp-content/db.php</code>',
-				esc_url( admin_url( 'options-general.php?page=perflab-modules' ) )
-			)
-		);
-	} elseif ( ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
+	// Bail early if the PERFLAB_SQLITE_DB_DROPIN_VERSION is defined.
+	if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
+		return;
+	}
+
+	/*
+	 * If the PERFLAB_SQLITE_DB_DROPIN_VERSION constant is not defined
+	 * but there's a db.php file in the wp-content directory, then the module can't be activated.
+	 * The module should not have been activated in the first place
+	 * (there's a check in the can-load.php file), but this is a fallback check.
+	 */
+	if ( file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
 		printf(
 			'<div class="notice notice-error"><p>%s</p></div>',
 			sprintf(
@@ -42,6 +42,19 @@ function perflab_sqlite_plugin_admin_notice() {
 				esc_url( admin_url( 'options-general.php?page=perflab-modules' ) )
 			)
 		);
+
+		return;
 	}
+
+	// The dropin db.php is missing.
+	printf(
+		'<div class="notice notice-error"><p>%s</p></div>',
+		sprintf(
+			/* translators: %1$s: <code>wp-content/db.php</code>, %2$s: The admin-URL to deactivate the module. */
+			__( 'The SQLite Integration module is active, but the %1$s file is missing. Please <a href="%2$s">deactivate the module</a> and re-activate it to try again.', 'performance-lab' ),
+			'<code>wp-content/db.php</code>',
+			esc_url( admin_url( 'options-general.php?page=perflab-modules' ) )
+		)
+	);
 }
 add_action( 'admin_notices', 'perflab_sqlite_plugin_admin_notice' ); // Add the admin notices.
