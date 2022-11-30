@@ -498,7 +498,7 @@ class Perflab_SQLite_PDO_Driver {
 	}
 
 	/**
-	 * Method to handl SHOW COLUMN query.
+	 * Method to handle SHOW COLUMN query.
 	 *
 	 * @access private
 	 */
