@@ -40,13 +40,10 @@ return function() {
 			$wpdb_mysql->set_prefix( $table_prefix );
 
 			// Get the perflab options, remove the database/sqlite module and update the option.
-			$value = $wpdb_mysql->get_results( $wpdb_mysql->prepare( "SELECT option_value FROM $wpdb_mysql->options WHERE option_name = %s", PERFLAB_MODULES_SETTING ) );
-			if ( is_array( $value ) && ! empty( $value[0] ) ) {
-				$value = $value[0];
-			}
-			if ( ! empty( $value->option_value ) ) {
-				$value = maybe_unserialize( $value->option_value );
-				if ( is_array( $value ) ) {
+			$row = $wpdb_mysql->get_row( $wpdb_mysql->prepare( "SELECT option_value FROM $wpdb_mysql->options WHERE option_name = %s LIMIT 1", PERFLAB_MODULES_SETTING ) );
+			if ( is_object( $row ) ) {
+				$value = maybe_unserialize( $row->option_value );
+				if ( is_array( $value ) && isset( $value['database/sqlite'] ) ) {
 					unset( $value['database/sqlite'] );
 					$wpdb_mysql->update( $wpdb_mysql->options, array( 'option_value' => maybe_serialize( $value ) ), array( 'option_name' => PERFLAB_MODULES_SETTING ) );
 				}
