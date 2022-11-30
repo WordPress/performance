@@ -12,7 +12,7 @@
  * @since n.e.x.t
  */
 return function() {
-	if ( ! file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
+	if ( ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) || ! file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
 		return;
 	}
 

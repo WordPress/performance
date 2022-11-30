@@ -156,7 +156,13 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" disabled>
 				<input type="hidden" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" value="<?php echo $enabled ? '1' : '0'; ?>">
 				<?php
-				if ( 'database/sqlite' === $module_slug && ! wp_is_writable( WP_CONTENT_DIR ) ) {
+				if ( 'database/sqlite' === $module_slug && file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
+					printf(
+						/* translators: %s: WP_CONTENT_DIR */
+						esc_html__( 'The SQLite module cannot be activated because a different %s drop-in already exists.', 'performance-lab' ),
+						'<code>' . esc_html( WP_CONTENT_DIR ) . '/db.php</code>'
+					);
+				} elseif ( 'database/sqlite' === $module_slug && ! wp_is_writable( WP_CONTENT_DIR ) ) {
 					printf(
 						/* translators: %s: WP_CONTENT_DIR */
 						esc_html__( 'The SQLite module cannot be activated because the %s directory is not writable.', 'performance-lab' ),
@@ -179,10 +185,12 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 		</p>
 		<?php if ( 'database/sqlite' === $module_slug ) : ?>
 			<?php if ( $enabled ) : ?>
-				<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
-				<p style="background:#fff;border:1px solid #c3c4c7;border-left-width: 4px;border-left-color:#dba617;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);padding:1em;max-width:50em;">
-					<?php esc_html_e( 'Your site is currently using an SQLite database. You can disable this module to get back to your previous MySQL database, with all your previous data intact.', 'performance-lab' ); ?>
-				</p>
+				<?php if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) : ?>
+					<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
+					<p style="background:#fff;border:1px solid #c3c4c7;border-left-width: 4px;border-left-color:#dba617;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);padding:1em;max-width:50em;">
+						<?php esc_html_e( 'Your site is currently using an SQLite database. You can disable this module to get back to your previous MySQL database, with all your previous data intact.', 'performance-lab' ); ?>
+					</p>
+				<?php endif; ?>
 			<?php else : ?>
 				<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
 				<p style="background:#fff;border:1px solid #c3c4c7;border-left-width: 4px;border-left-color:#dba617;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);padding:1em;max-width:50em;">

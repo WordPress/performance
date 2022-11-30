@@ -12,6 +12,8 @@
  * @package performance-lab
  */
 
+define( 'PERFLAB_SQLITE_DB_DROPIN_VERSION', '1.8.0' );
+
 // Bail early if the SQLite implementation was not located in the performance-lab plugin.
 if ( ! file_exists( '{SQLITE_IMPLEMENTATION_FOLDER_PATH}/wp-includes/sqlite/db.php' ) ) {
 	return;
