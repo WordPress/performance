@@ -632,7 +632,6 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 		ob_end_clean();
 
 		return $output;
-
 	}
 
 	/**

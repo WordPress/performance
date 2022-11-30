@@ -20,7 +20,7 @@ return function() {
 	$destination = WP_CONTENT_DIR . '/db.php';
 
 	// Bail early if the file already exists.
-	if ( file_exists( $destination ) ) {
+	if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) || file_exists( $destination ) ) {
 		return;
 	}
 

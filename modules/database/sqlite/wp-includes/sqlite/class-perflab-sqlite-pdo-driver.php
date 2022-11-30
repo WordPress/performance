@@ -17,42 +17,49 @@ class Perflab_SQLite_PDO_Driver {
 	 * @var string $query_type
 	 */
 	public $query_type = '';
+
 	/**
 	 * Variable to store query string.
 	 *
 	 * @var string
 	 */
 	public $_query = '';
+
 	/**
 	 * Variable to check if rewriting CALC_FOUND_ROWS is needed.
 	 *
 	 * @var boolean
 	 */
 	private $rewrite_calc_found = false;
+
 	/**
 	 * Variable to check if rewriting ON DUPLICATE KEY UPDATE is needed.
 	 *
 	 * @var boolean
 	 */
 	private $rewrite_duplicate_key = false;
+
 	/**
 	 * Variable to check if rewriting index hints is needed.
 	 *
 	 * @var boolean
 	 */
 	private $rewrite_index_hint = false;
+
 	/**
 	 * Variable to check if rewriting BETWEEN is needed.
 	 *
 	 * @var boolean
 	 */
 	private $rewrite_between = false;
+
 	/**
 	 * Variable to check how many times rewriting BETWEEN is needed.
 	 *
 	 * @var integer
 	 */
 	private $num_of_rewrite_between = 0;
+
 	/**
 	 * Variable to check order by field() with column data.
 	 *
@@ -63,7 +70,7 @@ class Perflab_SQLite_PDO_Driver {
 	/**
 	 * Method to rewrite a query string for SQLite to execute.
 	 *
-	 * @param strin  $query      Query string.
+	 * @param string $query      Query string.
 	 * @param string $query_type Query type (SELECT, INSERT, UPDATE, DELETE, TRUNCATE, ALTER, CREATE, DESCRIBE, DESC, SHOW, SHOWCOLUMNS, SHOWINDEX).
 	 *
 	 * @return string
@@ -498,7 +505,7 @@ class Perflab_SQLite_PDO_Driver {
 	}
 
 	/**
-	 * Method to handl SHOW COLUMN query.
+	 * Method to handle SHOW COLUMN query.
 	 *
 	 * @access private
 	 */

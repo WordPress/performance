@@ -18,6 +18,7 @@ class Perflab_SQLite_Create_Query {
 	 * @access private
 	 */
 	private $_query = '';
+
 	/**
 	 * The array to contain CREATE INDEX queries.
 	 *
@@ -25,6 +26,7 @@ class Perflab_SQLite_Create_Query {
 	 * @access private
 	 */
 	private $index_queries = array();
+
 	/**
 	 * The array to contain error messages.
 	 *
@@ -32,6 +34,7 @@ class Perflab_SQLite_Create_Query {
 	 * @access private
 	 */
 	private $_errors = array();
+
 	/**
 	 * Variable to have the table name to be executed.
 	 *
@@ -39,6 +42,7 @@ class Perflab_SQLite_Create_Query {
 	 * @access private
 	 */
 	private $table_name = '';
+
 	/**
 	 * Variable to check if the query has the primary key.
 	 *
