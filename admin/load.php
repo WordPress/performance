@@ -194,7 +194,7 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 			<?php else : ?>
 				<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
 				<p style="background:#fff;border:1px solid #c3c4c7;border-left-width: 4px;border-left-color:#dba617;box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);padding:1em;max-width:50em;">
-					<?php esc_html_e( 'Enabling this module will bring up the WordPress installation screen. You will need to reconfigure your site, and start with a fresh site. Disabling the module you will get back to your previous MySQL database, with all your previous data intact.', 'performance-lab' ); ?>
+					<?php esc_html_e( 'Enabling this module will switch to a separate database and install WordPress in it. You will need to reconfigure your site, and start with a fresh site. Disabling the module you will get back to your previous MySQL database, with all your previous data intact.', 'performance-lab' ); ?>
 				</p>
 			<?php endif; ?>
 		<?php endif; ?>

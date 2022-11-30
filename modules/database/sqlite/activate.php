@@ -19,34 +19,33 @@ return function() {
 
 	$destination = WP_CONTENT_DIR . '/db.php';
 
-	// Bail early if the file already exists.
-	if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) || file_exists( $destination ) ) {
-		return;
+	// Place database drop-in if not present yet, except in case there is
+	// another database drop-in present already.
+	if ( ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) && ! file_exists( $destination ) ) {
+		// Init the filesystem to allow copying the file.
+		global $wp_filesystem;
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+
+		// Copy the file, replacing contents as needed.
+		if ( $wp_filesystem->touch( $destination ) ) {
+
+			// Get the db.copy file contents, replace placeholders and write it to the destination.
+			$file_contents = str_replace(
+				'{SQLITE_IMPLEMENTATION_FOLDER_PATH}',
+				__DIR__,
+				file_get_contents( __DIR__ . '/db.copy' )
+			);
+
+			$wp_filesystem->put_contents( $destination, $file_contents );
+		}
 	}
 
-	// Init the filesystem to allow copying the file.
-	global $wp_filesystem;
-	if ( ! $wp_filesystem ) {
-		require_once ABSPATH . '/wp-admin/includes/file.php';
-		WP_Filesystem();
-	}
-
-	// Copy the file, replacing contents as needed.
-	if ( $wp_filesystem->touch( $destination ) ) {
-
-		// Get the db.copy file contents, replace placeholders and write it to the destination.
-		$file_contents = str_replace(
-			'{SQLITE_IMPLEMENTATION_FOLDER_PATH}',
-			__DIR__,
-			file_get_contents( __DIR__ . '/db.copy' )
-		);
-
-		$wp_filesystem->put_contents( $destination, $file_contents );
-	}
-
-	// Load SQLite constants and bail if database file already exists.
-	require_once __DIR__ . '/constants.php';
-	if ( file_exists( FQDB ) ) {
+	// As an extra safety check, bail if the current user cannot update
+	// (or install) WordPress core.
+	if ( ! current_user_can( 'update_core' ) ) {
 		return;
 	}
 
@@ -56,6 +55,24 @@ return function() {
 	add_filter(
 		'wp_redirect',
 		function( $redirect_location ) {
+			// If the SQLite DB already exists, simply ensure the module is
+			// active there.
+			require_once __DIR__ . '/constants.php';
+			if ( file_exists( FQDB ) ) {
+				require_once __DIR__ . '/wp-includes/sqlite/db.php';
+				wp_set_wpdb_vars();
+				global $wpdb;
+				$row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", PERFLAB_MODULES_SETTING ) );
+				if ( is_object( $row ) ) {
+					$value = maybe_unserialize( $row->option_value );
+					if ( is_array( $value ) && ( ! isset( $value['database/sqlite'] ) || ! $value['database/sqlite']['enabled'] ) ) {
+						$value['database/sqlite'] = array( 'enabled' => true );
+						$wpdb->update( $wpdb->options, array( 'option_value' => maybe_serialize( $value ) ), array( 'option_name' => PERFLAB_MODULES_SETTING ) );
+					}
+				}
+				return $redirect_location;
+			}
+
 			// Get current basic setup data to install WordPress in the new DB.
 			$blog_title = get_bloginfo( 'name' );
 			$is_public  = (bool) get_option( 'blog_public' );
@@ -65,25 +82,24 @@ return function() {
 			if ( ! $admin_user ) {
 				$admin_user = wp_get_current_user();
 			}
-			$user_name     = $admin_user->user_login;
-			$user_password = $admin_user->user_pass;
 
-			// Get current data to keep the Performance Lab plugin and relevant
-			// modules active in the new DB.
-			$active_plugins_option = get_option( 'active_plugins', array() );
-			$pl_index              = array_search( plugin_basename( PERFLAB_MAIN_FILE ), $active_plugins_option, true );
-			$active_plugins_option = false !== $pl_index ? array( $active_plugins_option[ $pl_index ] ) : array();
-			$active_modules_option = get_option( PERFLAB_MODULES_SETTING, array() );
-
-			// If the current user is the admin user, attempt to keep them
+			// If the current user is not the admin email user, look up the
+			// data for the current user. Additionally, attempt to keep them
 			// logged-in by retaining their current session. Depending on the
 			// site configuration, this is not 100% reliable as sites may store
 			// session tokens outside of user meta. However that does not lead
 			// to any problem, the user would simply be required to sign in
 			// again.
-			if ( (int) get_current_user_id() === (int) $admin_user->ID ) {
-				$admin_sessions = get_user_meta( $admin_user->ID, 'session_tokens', true );
+			$current_user = null;
+			if ( (int) get_current_user_id() !== (int) $admin_user->ID ) {
+				$current_user = wp_get_current_user();
 			}
+			$user_sessions = get_user_meta( get_current_user_id(), 'session_tokens', true );
+
+			// Get current data to keep the Performance Lab plugin and relevant
+			// modules active in the new DB.
+			$active_plugins_option = array( plugin_basename( PERFLAB_MAIN_FILE ) );
+			$active_modules_option = get_option( PERFLAB_MODULES_SETTING, array() );
 
 			// Load and set up SQLite database.
 			require_once __DIR__ . '/wp-includes/sqlite/db.php';
@@ -93,35 +109,54 @@ return function() {
 			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 			// Install WordPress in the SQLite database with the same base
-			// configuration as the MySQL database. Also copy over the
-			// Performance Lab modules configuration.
-
-			// Since $user_password is already hashed, add a filter to ensure
-			// it is inserted into the database like that, instead of being
-			// re-hashed.
-			$unhash_user_pass = function( $data, $update, $user_id, $userdata ) use ( $user_password ) {
+			// configuration as the MySQL database.
+			// Since $admin_user->user_pass is already hashed, add a filter to
+			// ensure it is inserted into the database like that, instead of
+			// being re-hashed.
+			$unhash_user_pass = function( $data, $update, $user_id, $userdata ) use ( $admin_user, $current_user ) {
 				// Double check this is actually the already hashed password,
 				// to prevent any chance of accidentally putting another
 				// password into the database which would then be plain text.
-				if ( ! empty( $userdata['user_pass'] ) && $userdata['user_pass'] === $user_password ) {
+				if (
+					! empty( $userdata['user_pass'] )
+					&& (
+						$userdata['user_pass'] === $admin_user->user_pass
+						|| $current_user && $userdata['user_pass'] === $current_user->user_pass
+					)
+				) {
 					$data['user_pass'] = $userdata['user_pass'];
 				}
 				return $data;
 			};
 			add_filter( 'wp_pre_insert_user_data', $unhash_user_pass, 10, 4 );
-			wp_install( $blog_title, $user_name, $user_email, $is_public, '', $user_password, $language );
+			wp_install( $blog_title, $admin_user->user_login, $user_email, $is_public, '', $admin_user->user_pass, $language );
+			if ( $current_user ) { // Also "copy" current admin user if it's not the admin email owner.
+				wp_create_user( $current_user->user_login, $current_user->user_pass, $current_user->user_email );
+			}
 			remove_filter( 'wp_pre_insert_user_data', $unhash_user_pass, 10 );
 
-			// Activate the Performance Lab plugin and its modules.
-			update_option( 'active_plugins', $active_plugins_option );
-			update_option( PERFLAB_MODULES_SETTING, $active_modules_option );
-
-			if ( isset( $admin_sessions ) && $admin_sessions ) {
-				$admin_user = get_user_by( 'login', $user_name );
-				if ( $admin_user ) {
-					update_user_meta( $admin_user->ID, 'session_tokens', $admin_sessions );
+			// If user sessions are found, migrate them over so that the
+			// current user remains logged in.
+			if ( $user_sessions ) {
+				$session_user = get_user_by( 'login', $current_user ? $current_user->user_login : $admin_user->user_login );
+				if ( $session_user ) {
+					update_user_meta( $session_user->ID, 'session_tokens', $user_sessions );
 				}
 			}
+
+			// Activate the Performance Lab plugin and its modules.
+			// Use direct database query for Performance Lab modules to
+			// prevent module activation logic from firing again.
+			update_option( 'active_plugins', $active_plugins_option );
+			global $wpdb;
+			$wpdb->insert(
+				$wpdb->options,
+				array(
+					'option_name'  => PERFLAB_MODULES_SETTING,
+					'option_value' => maybe_serialize( $active_modules_option ),
+					'autoload'     => 'yes',
+				)
+			);
 
 			return $redirect_location;
 		}
