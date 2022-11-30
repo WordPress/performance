@@ -63,7 +63,7 @@ class Perflab_SQLite_PDO_Driver {
 	/**
 	 * Method to rewrite a query string for SQLite to execute.
 	 *
-	 * @param string  $query      Query string.
+	 * @param string $query      Query string.
 	 * @param string $query_type Query type (SELECT, INSERT, UPDATE, DELETE, TRUNCATE, ALTER, CREATE, DESCRIBE, DESC, SHOW, SHOWCOLUMNS, SHOWINDEX).
 	 *
 	 * @return string
