@@ -301,11 +301,11 @@ class Perflab_SQLite_PDO_User_Defined_Functions {
 			'%Y' => 'Y',
 			'%y' => 'y',
 		);
-		$t                      = strtotime( $date );
-		$format                 = strtr( $format, $mysql_php_date_formats );
-		$output                 = gmdate( $format, $t );
 
-		return $output;
+		$time   = strtotime( $date );
+		$format = strtr( $format, $mysql_php_date_formats );
+
+		return gmdate( $format, $time );
 	}
 
 	/**
