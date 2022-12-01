@@ -21,16 +21,13 @@ class Perflab_SQLite_Object_Array {
 	 */
 	public function __construct( $data = null, &$node = null ) {
 		foreach ( $data as $key => $value ) {
+			if ( ! $node ) {
+				$node =& $this;
+			}
 			if ( is_array( $value ) ) {
-				if ( ! $node ) {
-					$node =& $this;
-				}
 				$node->$key = new stdClass();
 				self::__construct( $value, $node->$key );
 			} else {
-				if ( ! $node ) {
-					$node =& $this;
-				}
 				$node->$key = $value;
 			}
 		}
