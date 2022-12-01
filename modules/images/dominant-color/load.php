@@ -419,6 +419,12 @@ add_filter( 'plugins_loaded', 'dominant_color_add_media_library_integration' );
 
 /**
  * Add the dominant color when preparing attachment data.
+ *
+ * @param array       $response   Array of prepared attachment data. @see wp_prepare_attachment_for_js().
+ * @param WP_Post     $attachment Attachment object.
+ * @param array|false $meta       Array of attachment meta data, or false if there is none.
+ *
+ * @return array Array of prepared attachment data.
  */
 function dominant_color_prepare_attachment_for_js( $response, $attachment, $meta ) {
 	if ( ! wp_attachment_is_image( $attachment->ID ) ) {
