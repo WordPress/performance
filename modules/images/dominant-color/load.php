@@ -410,11 +410,11 @@ function dominant_color_rgb_to_hex( $red, $green, $blue ) {
  * Integrate with the media library.
  */
 function dominant_color_add_media_library_integration() {
-	remove_action( 'admin_footer', 'wp_print_media_templates' );
 	add_action( 'admin_footer', 'dominant_color_print_media_templates' );
 	add_filter( 'wp_prepare_attachment_for_js', 'dominant_color_prepare_attachment_for_js', 10, 3 );
 }
 add_filter( 'plugins_loaded', 'dominant_color_add_media_library_integration' );
+remove_action( 'admin_footer', 'wp_print_media_templates' );
 
 
 /**
