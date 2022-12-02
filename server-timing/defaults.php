@@ -33,6 +33,11 @@ function perflab_register_default_server_timing_before_template_metrics() {
 				'before-template-db-queries',
 				array(
 					'measure_callback' => function( $metric ) {
+						// This should never happen, but some odd database implementations may be doing it wrong.
+						if ( ! isset( $GLOBALS['wpdb']->queries ) || ! is_array( $GLOBALS['wpdb']->queries ) ) {
+							return;
+						}
+
 						// Store this value in a global to later subtract it from total query time after template.
 						$GLOBALS['perflab_query_time_before_template'] = array_reduce(
 							$GLOBALS['wpdb']->queries,
@@ -148,10 +153,11 @@ function perflab_register_default_server_timing_template_metrics() {
 					'template-db-queries',
 					array(
 						'measure_callback' => function( $metric ) {
-							// This global should always be set when this is called, but check just in case.
+							// This global should typically be set when this is called, but check just in case.
 							if ( ! isset( $GLOBALS['perflab_query_time_before_template'] ) ) {
 								return;
 							}
+
 							$total_query_time = array_reduce(
 								$GLOBALS['wpdb']->queries,
 								function( $acc, $query ) {
