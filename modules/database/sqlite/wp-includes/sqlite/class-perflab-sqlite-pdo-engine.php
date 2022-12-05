@@ -1089,7 +1089,7 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 
 		try {
 			$this->beginTransaction();
-			foreach ( $rewritten_query as $single_query ) {
+			foreach ( (array) $rewritten_query as $single_query ) {
 				$this->queries[] = "Executing:\n" . $single_query;
 				$single_query    = trim( $single_query );
 				if ( empty( $single_query ) ) {
