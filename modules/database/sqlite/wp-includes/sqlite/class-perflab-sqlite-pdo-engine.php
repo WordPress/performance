@@ -177,7 +177,7 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 	 *
 	 * Whether VALUES clause in the INSERT query can take multiple values or not
 	 * depends on the version of SQLite library. We check the version and set
-	 * this varable to true or false.
+	 * this variable to true or false.
 	 *
 	 * @var boolean
 	 */
