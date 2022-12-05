@@ -671,7 +671,7 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 	/**
 	 * Method to include the apropreate class files.
 	 *
-	 * It is not a good habit to change the include files programatically.
+	 * It is not a good habit to change the include files programmatically.
 	 * Needs to be fixed some other way.
 	 *
 	 * @param string $query_type The query type (create, alter, etc).
