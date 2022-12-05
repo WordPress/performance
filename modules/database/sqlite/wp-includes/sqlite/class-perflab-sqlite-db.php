@@ -108,7 +108,7 @@ class Perflab_SQLite_DB extends wpdb {
 	 *
 	 * @see wpdb::print_error()
 	 *
-	 * @global array $EZSQL_ERROR Stores error information of query and error string
+	 * @global array $EZSQL_ERROR Stores error information of query and error string.
 	 *
 	 * @param string $str The error to display.
 	 *
