@@ -55,8 +55,7 @@ class Perflab_SQLite_Create_Query {
 	 * Function to rewrite query.
 	 *
 	 * @param string $query The query being processed.
-	 *
-	 * @return string|array    the processed (rewritten) query
+	 * @return string|array The processed (rewritten) query
 	 */
 	public function rewrite_query( $query ) {
 		$this->_query     = $query;
