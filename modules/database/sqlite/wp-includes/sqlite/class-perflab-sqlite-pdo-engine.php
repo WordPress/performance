@@ -318,7 +318,7 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 	}
 
 	/**
-	 * This method makes database direcotry and .htaccess file.
+	 * This method makes database directory and .htaccess file.
 	 *
 	 * It is executed only once when the installation begins.
 	 */
