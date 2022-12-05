@@ -23,8 +23,7 @@ class Perflab_SQLite_Alter_Query {
 	 *
 	 * @param string $query      The query string.
 	 * @param string $query_type The query type.
-	 *
-	 * @return boolean | string
+	 * @return bool|string
 	 */
 	public function rewrite_query( $query, $query_type ) {
 		if ( stripos( $query, $query_type ) === false ) {
