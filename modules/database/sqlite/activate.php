@@ -134,7 +134,7 @@ return function() {
 			if ( $current_user ) { // Also "copy" current admin user if it's not the admin email owner.
 				wp_create_user( $current_user->user_login, $current_user->user_pass, $current_user->user_email );
 			}
-			remove_filter( 'wp_pre_insert_user_data', $unhash_user_pass, 10 );
+			remove_filter( 'wp_pre_insert_user_data', $unhash_user_pass );
 
 			// If user sessions are found, migrate them over so that the
 			// current user remains logged in.
