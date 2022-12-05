@@ -15,6 +15,8 @@
  * @since n.e.x.t
  *
  * @param array $info The debug data.
+ *
+ * @return array The filtered debug data.
  */
 function perflab_sqlite_plugin_filter_debug_data( $info ) {
 	$database_type = defined( 'DATABASE_TYPE' ) && 'sqlite' === DATABASE_TYPE ? 'sqlite' : 'mysql';
