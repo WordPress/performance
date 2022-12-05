@@ -149,6 +149,7 @@ return function() {
 			// Use direct database query for Performance Lab modules to
 			// prevent module activation logic from firing again.
 			update_option( 'active_plugins', $active_plugins_option );
+			global $wpdb;
 			$wpdb->insert(
 				$wpdb->options,
 				array(
