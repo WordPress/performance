@@ -283,9 +283,9 @@ class Perflab_SQLite_Create_Query {
 	/**
 	 * Callback method for rewrite_unique_key.
 	 *
-	 * @param array $matches An array of matches from the Regex.
-	 *
 	 * @access private
+	 *
+	 * @param array $matches An array of matches from the Regex.
 	 * @return string
 	 */
 	private function _rewrite_unique_key( $matches ) {
