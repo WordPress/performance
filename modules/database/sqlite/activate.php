@@ -90,11 +90,12 @@ return function() {
 			// session tokens outside of user meta. However that does not lead
 			// to any problem, the user would simply be required to sign in
 			// again.
-			$current_user = null;
-			if ( (int) get_current_user_id() !== (int) $admin_user->ID ) {
+			$current_user    = null;
+			$current_user_id = get_current_user_id();
+			if ( $current_user_id !== (int) $admin_user->ID ) {
 				$current_user = wp_get_current_user();
 			}
-			$user_sessions = get_user_meta( get_current_user_id(), 'session_tokens', true );
+			$user_sessions = get_user_meta( $current_user_id, 'session_tokens', true );
 
 			// Get current data to keep the Performance Lab plugin and relevant
 			// modules active in the new DB.
