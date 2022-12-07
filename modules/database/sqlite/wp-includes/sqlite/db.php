@@ -93,7 +93,7 @@ function perflab_sqlite_make_db_sqlite() {
 		}
 		$pdo->commit();
 		if ( $index_queries ) {
-			// $query_parser rewrites KEY to INDEX, so we don't need KEY pattern
+			// $query_parser rewrites KEY to INDEX, so we don't need KEY pattern.
 			$pattern = '/CREATE\\s*(UNIQUE\\s*INDEX|INDEX)\\s*IF\\s*NOT\\s*EXISTS\\s*(\\w+)?\\s*.*/im';
 			$pdo->beginTransaction();
 			foreach ( $index_queries as $index_query ) {
