@@ -55,6 +55,8 @@ require_once __DIR__ . '/class-perflab-sqlite-alter-query.php';
  *
  * This is executed only once while installation.
  *
+ * @since n.e.x.t
+ *
  * @return boolean
  */
 function perflab_sqlite_make_db_sqlite() {
