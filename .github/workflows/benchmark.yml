@@ -1,0 +1,32 @@
+name: Benchmarking
+on:
+  pull_request:
+    branches:
+      - analysis/hosting-providers
+    types:
+      - opened
+      - reopened
+      - synchronize
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file:
+          - managed-1
+          - managed-2
+          - shared-1
+          - shared-2
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - run: npm ci
+      - run: npm run benchmark --silent -- -c 2 -n 10 -f urls/${{ matrix.file }}.txt -o csv > ${{ matrix.file }}.csv
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.file }}
+          path: |
+            ${{ matrix.file }}.csv
