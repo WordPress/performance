@@ -39,7 +39,7 @@ function perflab_sqlite_plugin_admin_notice() {
 				/* translators: %1$s: <code>PERFLAB_SQLITE_DB_DROPIN_VERSION</code>, %2$s: The admin-URL to deactivate the module. */
 				__( 'The SQLite Integration module is active, but the %1$s constant is missing. It appears you already have another %2$s file present on your site. ', 'performance-lab' ),
 				'<code>PERFLAB_SQLITE_DB_DROPIN_VERSION</code>',
-				esc_url( admin_url( 'options-general.php?page=' . PERFLAB_MODULES_SCREEN ) )
+				'<code>wp-content/db.php</code>'
 			)
 		);
 
