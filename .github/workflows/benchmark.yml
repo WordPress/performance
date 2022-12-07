@@ -2,7 +2,7 @@ name: Benchmarking
 on:
   pull_request:
     branches:
-      - analysis/hosting-providers
+      - trunk
     types:
       - opened
       - reopened
