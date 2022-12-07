@@ -6,6 +6,9 @@
  * @since n.e.x.t
  */
 
+// Require the constants file.
+require_once __DIR__ . '/constants.php';
+
 /**
  * Filter debug data in site-health screen.
  *
@@ -19,9 +22,6 @@
  */
 function perflab_sqlite_plugin_filter_debug_data( $info ) {
 	$database_type = defined( 'DATABASE_TYPE' ) && 'sqlite' === DATABASE_TYPE ? 'sqlite' : 'mysql';
-	if ( 'sqlite' !== $database_type ) {
-		return $info;
-	}
 
 	$info['wp-constants']['fields']['DATABASE_TYPE'] = array(
 		'label' => 'DATABASE_TYPE',
@@ -34,32 +34,34 @@ function perflab_sqlite_plugin_filter_debug_data( $info ) {
 		'value' => 'sqlite' === $database_type ? 'SQLite' : 'MySQL/MariaDB',
 	);
 
-	$info['wp-database']['fields']['database_version'] = array(
-		'label' => __( 'SQLite version', 'performance-lab' ),
-		'value' => class_exists( 'SQLite3' ) ? SQLite3::version()['versionString'] : null,
-	);
+	if ( 'sqlite' === $database_type ) {
+		$info['wp-database']['fields']['database_version'] = array(
+			'label' => __( 'SQLite version', 'performance-lab' ),
+			'value' => class_exists( 'SQLite3' ) ? SQLite3::version()['versionString'] : null,
+		);
 
-	$info['wp-database']['fields']['database_file'] = array(
-		'label'   => __( 'Database file', 'performance-lab' ),
-		'value'   => FQDB,
-		'private' => true,
-	);
+		$info['wp-database']['fields']['database_file'] = array(
+			'label'   => __( 'Database file', 'performance-lab' ),
+			'value'   => FQDB,
+			'private' => true,
+		);
 
-	$info['wp-database']['fields']['database_size'] = array(
-		'label' => __( 'Database size', 'performance-lab' ),
-		'value' => size_format( filesize( FQDB ) ),
-	);
+		$info['wp-database']['fields']['database_size'] = array(
+			'label' => __( 'Database size', 'performance-lab' ),
+			'value' => size_format( filesize( FQDB ) ),
+		);
 
-	unset( $info['wp-database']['fields']['extension'] );
-	unset( $info['wp-database']['fields']['server_version'] );
-	unset( $info['wp-database']['fields']['client_version'] );
-	unset( $info['wp-database']['fields']['database_host'] );
-	unset( $info['wp-database']['fields']['database_user'] );
-	unset( $info['wp-database']['fields']['database_name'] );
-	unset( $info['wp-database']['fields']['database_charset'] );
-	unset( $info['wp-database']['fields']['database_collate'] );
-	unset( $info['wp-database']['fields']['max_allowed_packet'] );
-	unset( $info['wp-database']['fields']['max_connections'] );
+		unset( $info['wp-database']['fields']['extension'] );
+		unset( $info['wp-database']['fields']['server_version'] );
+		unset( $info['wp-database']['fields']['client_version'] );
+		unset( $info['wp-database']['fields']['database_host'] );
+		unset( $info['wp-database']['fields']['database_user'] );
+		unset( $info['wp-database']['fields']['database_name'] );
+		unset( $info['wp-database']['fields']['database_charset'] );
+		unset( $info['wp-database']['fields']['database_collate'] );
+		unset( $info['wp-database']['fields']['max_allowed_packet'] );
+		unset( $info['wp-database']['fields']['max_connections'] );
+	}
 
 	return $info;
 }

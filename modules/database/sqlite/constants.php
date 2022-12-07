@@ -8,7 +8,11 @@
 
 // Temporary - This will be in wp-config.php once SQLite is merged in Core.
 if ( ! defined( 'DATABASE_TYPE' ) ) {
-	define( 'DATABASE_TYPE', 'sqlite' );
+	if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
+		define( 'DATABASE_TYPE', 'sqlite' );
+	} else {
+		define( 'DATABASE_TYPE', 'mysql' );
+	}
 }
 
 /**
