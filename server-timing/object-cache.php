@@ -35,8 +35,13 @@ function perflab_load_server_timing_api_from_dropin() {
 		return;
 	}
 
-	$plugin_dir = ( defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR : WP_CONTENT_DIR . '/plugins' ) . '/performance-lab/';
+	$plugins_dir = defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR : WP_CONTENT_DIR . '/plugins';
+	$plugin_dir  = $plugins_dir . '/performance-lab/';
 	if ( ! file_exists( $plugin_dir . 'server-timing/load.php' ) ) {
+		$plugin_dir = $plugins_dir . '/performance/';
+		if ( ! file_exists( $plugin_dir . 'server-timing/load.php' ) ) {
+			return;
+		}
 		return;
 	}
 
