@@ -42,7 +42,6 @@ function perflab_load_server_timing_api_from_dropin() {
 		if ( ! file_exists( $plugin_dir . 'server-timing/load.php' ) ) {
 			return;
 		}
-		return;
 	}
 
 	require_once $plugin_dir . 'server-timing/class-perflab-server-timing-metric.php';
