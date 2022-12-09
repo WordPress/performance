@@ -70,6 +70,7 @@ function perflab_server_timing_use_output_buffer() {
  * @param string   $metric_slug The metric slug to use within the Server-Timing header.
  * @param string   $access_cap  Capability required to view the metric. If this is a public metric, this needs to be
  *                              set to "exist".
+ * @return callable Callback function that will run $callback and measure its execution time once called.
  */
 function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
 	return function( ...$callback_args ) use ( $callback, $metric_slug, $access_cap ) {
