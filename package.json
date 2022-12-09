@@ -22,7 +22,6 @@
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
     "enabled-modules": "./bin/plugin/cli.js enabled-modules",
-    "benchmark": "./bin/plugin/cli.js benchmark",
     "format-js": "wp-scripts format ./bin",
     "lint-js": "wp-scripts lint-js ./bin",
     "format-php": "wp-env run composer run-script format",
