@@ -87,6 +87,10 @@ function perflab_register_default_server_timing_before_template_metrics() {
 			if ( "SELECT option_name, option_value FROM $wpdb->options WHERE autoload = 'yes'" !== $query ) {
 				return $query;
 			}
+			// In case the autoloaded options query is run again, prevent re-registering it and do not measure again.
+			if ( perflab_server_timing()->has_registered_metric( 'load-alloptions-query' ) ) {
+				return $query;
+			}
 			perflab_server_timing_register_metric(
 				'load-alloptions-query',
 				array(

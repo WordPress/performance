@@ -49,6 +49,16 @@ class Perflab_Server_Timing {
 	 * }
 	 */
 	public function register_metric( $metric_slug, array $args ) {
+		if ( isset( $this->registered_metrics[ $metric_slug ] ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				/* translators: %s: metric slug */
+				sprintf( __( 'A metric with the slug %s is already registered.', 'performance-lab' ), $metric_slug ),
+				''
+			);
+			return;
+		}
+
 		if ( did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
 			_doing_it_wrong(
 				__METHOD__,
