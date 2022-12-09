@@ -1,9 +1,4 @@
 {
 	"core": null,
 	"plugins": [ "." ],
-	"env": {
-		"tests": {
-			"phpVersion": "7.4"
-		}
-	}
 }
