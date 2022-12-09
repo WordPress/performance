@@ -99,6 +99,18 @@ class Perflab_Server_Timing {
 	}
 
 	/**
+	 * Checks whether the given metric has been registered.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $metric_slug The metric slug.
+	 * @return bool True if registered, false otherwise.
+	 */
+	public function has_registered_metric( $metric_slug ) {
+		return isset( $this->registered_metrics[ $metric_slug ] ) && isset( $this->registered_metrics_data[ $metric_slug ] );
+	}
+
+	/**
 	 * Outputs the Server-Timing header.
 	 *
 	 * This method must be called before rendering the page.
