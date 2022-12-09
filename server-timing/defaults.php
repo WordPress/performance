@@ -158,6 +158,11 @@ function perflab_register_default_server_timing_template_metrics() {
 								return;
 							}
 
+							// This should never happen, but some odd database implementations may be doing it wrong.
+							if ( ! isset( $GLOBALS['wpdb']->queries ) || ! is_array( $GLOBALS['wpdb']->queries ) ) {
+								return;
+							}
+
 							$total_query_time = array_reduce(
 								$GLOBALS['wpdb']->queries,
 								function( $acc, $query ) {
