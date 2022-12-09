@@ -80,14 +80,6 @@ class Perflab_Server_Timing_Metric {
 			return;
 		}
 
-		if ( headers_sent() ) {
-			_doing_it_wrong(
-				__METHOD__,
-				__( 'Metrics can only be measured before headers have been sent.', 'performance-lab' ),
-				''
-			);
-		}
-
 		$this->value = $value;
 	}
 
