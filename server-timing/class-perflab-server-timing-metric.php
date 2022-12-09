@@ -80,6 +80,16 @@ class Perflab_Server_Timing_Metric {
 			return;
 		}
 
+		if ( did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
+			_doing_it_wrong(
+				__METHOD__,
+				/* translators: %s: WordPress action name */
+				sprintf( __( 'The method must be called before or during the %s action.', 'performance-lab' ), 'perflab_server_timing_send_header' ),
+				''
+			);
+			return;
+		}
+
 		$this->value = $value;
 	}
 
