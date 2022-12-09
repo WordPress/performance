@@ -77,15 +77,19 @@ function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
 		// Gain access to Perflab_Server_Timing_Metric instance.
 		$server_timing_metric = null;
 
-		perflab_server_timing_register_metric(
-			$metric_slug,
-			array(
-				'measure_callback' => function( $metric ) use ( &$server_timing_metric ) {
-					$server_timing_metric = $metric;
-				},
-				'access_cap'       => $access_cap,
-			)
-		);
+		// Only register the metric the first time the function is called.
+		// For now, this also means only the first function call is measured.
+		if ( ! perflab_server_timing()->has_registered_metric( $metric_slug ) ) {
+			perflab_server_timing_register_metric(
+				$metric_slug,
+				array(
+					'measure_callback' => function( $metric ) use ( &$server_timing_metric ) {
+						$server_timing_metric = $metric;
+					},
+					'access_cap'       => $access_cap,
+				)
+			);
+		}
 
 		// If metric instance was not set, this metric should not be calculated.
 		if ( null === $server_timing_metric ) {

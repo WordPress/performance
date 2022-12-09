@@ -5,6 +5,9 @@
  * @package performance-lab
  */
 
+/**
+ * @group server-timing
+ */
 class Server_Timing_Load_Tests extends WP_UnitTestCase {
 
 	public function test_perflab_server_timing() {
@@ -52,5 +55,7 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( 123, $wrapped(), 'Wrapped callback with capability did not return expected value' );
 		$this->assertTrue( perflab_server_timing()->has_registered_metric( 'wrapped-cb-with-capability' ), 'Wrapped callback metric should be registered' );
 		$this->assertStringContainsString( 'wrapped-cb-with-capability', perflab_server_timing()->get_header_value(), 'Wrapped callback was not measured despite having necessary capability' );
+
+		$this->assertSame( 123, $wrapped(), 'Calling wrapped callback multiple times should not result in warning' );
 	}
 }
