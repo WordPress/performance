@@ -1,5 +1,12 @@
 {
 	"core": null,
-	"phpVersion": "7.4",
-	"plugins": [ "." ]
+	"plugins": [ "." ],
+	"env": {
+		"development": {
+			"phpVersion": "7.4"
+		},
+		"tests": {
+			"phpVersion": "7.4"
+		}
+	}
 }
