@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for server-timing/load.php
+ * Tests for server-timing/class-perflab-server-timing.php
  *
  * @package performance-lab
  */
