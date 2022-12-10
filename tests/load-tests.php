@@ -226,4 +226,16 @@ class Load_Tests extends WP_UnitTestCase {
 			array()
 		);
 	}
+
+	public function test_perflab_maybe_set_object_cache_dropin() {
+		$this->assertFalse( file_exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertFalse( PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
+
+		perflab_maybe_set_object_cache_dropin();
+		$this->assertTrue( file_exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+
+		// Clean up. This is okay to be run after the assertion since otherwise
+		// the file does not exist anyway.
+		$GLOBALS['wp_filesystem']->delete( WP_CONTENT_DIR . '/object-cache.php' );
+	}
 }
