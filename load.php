@@ -315,6 +315,49 @@ function perflab_maybe_set_object_cache_dropin() {
 }
 add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
 
+/**
+ * Removes the Performance Lab's object cache drop-in from the drop-ins folder.
+ *
+ * This function should be run on plugin deactivation. If there was another original
+ * object-cache.php drop-in file (renamed in `perflab_maybe_set_object_cache_dropin()`
+ * to object-cache-orig.php), it will be restored.
+ *
+ * This function will short-circuit if the constant
+ * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
+ *
+ * @since n.e.x.t
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function perflab_maybe_remove_object_cache_dropin() {
+	global $wp_filesystem;
+
+	// Bail if disabled via constant.
+	if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {
+		return;
+	}
+
+	// Bail if custom drop-in not present anyway.
+	if ( ! PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
+		return;
+	}
+
+	if ( $wp_filesystem || WP_Filesystem() ) {
+		// If there is an actual object-cache.php file, restore it
+		// and override the Performance Lab file.
+		// Otherwise just delete the Performance Lab file.
+		if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-orig.php' ) ) {
+			$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache-orig.php', WP_CONTENT_DIR . '/object-cache.php', true );
+		} else {
+			$wp_filesystem->delete( WP_CONTENT_DIR . '/object-cache.php' );
+		}
+	}
+
+	// Delete transient for drop-in check in case the plugin is reactivated shortly after.
+	delete_transient( 'perflab_set_object_cache_dropin' );
+}
+register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin' );
+
 // Only load admin integration when in admin.
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
