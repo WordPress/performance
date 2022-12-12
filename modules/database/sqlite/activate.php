@@ -55,9 +55,13 @@ return function() {
 	add_filter(
 		'wp_redirect',
 		function( $redirect_location ) {
+			if ( ! defined( 'DATABASE_TYPE' ) ) {
+				define( 'DATABASE_TYPE', 'sqlite' );
+			}
+			require_once __DIR__ . '/constants.php';
+
 			// If the SQLite DB already exists, simply ensure the module is
 			// active there.
-			require_once __DIR__ . '/constants.php';
 			if ( file_exists( FQDB ) ) {
 				require_once __DIR__ . '/wp-includes/sqlite/db.php';
 				wp_set_wpdb_vars();
