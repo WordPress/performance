@@ -28,8 +28,8 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 		self::delete_user( self::$admin_id );
 	}
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->server_timing = new Perflab_Server_Timing();
 	}
 

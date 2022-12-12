@@ -12,8 +12,8 @@ class Perflab_Server_Timing_Metric_Tests extends WP_UnitTestCase {
 
 	private $metric;
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 		$this->metric = new Perflab_Server_Timing_Metric( 'test-metric' );
 	}
 
