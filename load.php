@@ -275,6 +275,8 @@ perflab_load_active_and_valid_modules();
  * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
  *
  * @since n.e.x.t
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
 function perflab_maybe_set_object_cache_dropin() {
 	global $wp_filesystem;
