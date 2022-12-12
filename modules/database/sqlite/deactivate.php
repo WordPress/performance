@@ -17,11 +17,13 @@ return function() {
 	}
 
 	global $wp_filesystem;
-	if ( ! $wp_filesystem ) {
-		require_once ABSPATH . '/wp-admin/includes/file.php';
-		WP_Filesystem();
+
+	require_once ABSPATH . '/wp-admin/includes/file.php';
+
+	// Init the filesystem if needed, then delete custom drop-in.
+	if ( $wp_filesystem || WP_Filesystem() ) {
+		$wp_filesystem->delete( WP_CONTENT_DIR . '/db.php' );
 	}
-	$wp_filesystem->delete( WP_CONTENT_DIR . '/db.php' );
 
 	// Run an action on `shutdown`, to deactivate the option in the MySQL database.
 	add_action(
