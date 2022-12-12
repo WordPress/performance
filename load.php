@@ -304,7 +304,7 @@ function perflab_maybe_set_object_cache_dropin() {
 		// The Performance Lab object-cache.php will still load it, so the
 		// behavior does not change.
 		if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) ) {
-			$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache.php', WP_CONTENT_DIR . '/object-cache-orig.php' );
+			$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache.php', WP_CONTENT_DIR . '/object-cache-plst-orig.php' );
 		}
 
 		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php', WP_CONTENT_DIR . '/object-cache.php' );
@@ -320,7 +320,7 @@ add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
  *
  * This function should be run on plugin deactivation. If there was another original
  * object-cache.php drop-in file (renamed in `perflab_maybe_set_object_cache_dropin()`
- * to object-cache-orig.php), it will be restored.
+ * to object-cache-plst-orig.php), it will be restored.
  *
  * This function will short-circuit if the constant
  * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
@@ -346,8 +346,8 @@ function perflab_maybe_remove_object_cache_dropin() {
 		// If there is an actual object-cache.php file, restore it
 		// and override the Performance Lab file.
 		// Otherwise just delete the Performance Lab file.
-		if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-orig.php' ) ) {
-			$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache-orig.php', WP_CONTENT_DIR . '/object-cache.php', true );
+		if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) ) {
+			$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache-plst-orig.php', WP_CONTENT_DIR . '/object-cache.php', true );
 		} else {
 			$wp_filesystem->delete( WP_CONTENT_DIR . '/object-cache.php' );
 		}

@@ -52,6 +52,6 @@ function perflab_load_server_timing_api_from_dropin() {
 perflab_load_server_timing_api_from_dropin();
 
 // Load the original object cache drop-in if present.
-if ( file_exists( WP_CONTENT_DIR . '/object-cache-orig.php' ) ) {
-	require_once WP_CONTENT_DIR . '/object-cache-orig.php';
+if ( file_exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) ) {
+	require_once WP_CONTENT_DIR . '/object-cache-plst-orig.php';
 }
