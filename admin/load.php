@@ -158,15 +158,15 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<?php
 				if ( 'database/sqlite' === $module_slug && file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
 					printf(
-						/* translators: %s: WP_CONTENT_DIR */
+						/* translators: %s: db.php drop-in path */
 						esc_html__( 'The SQLite module cannot be activated because a different %s drop-in already exists.', 'performance-lab' ),
-						'<code>' . esc_html( WP_CONTENT_DIR ) . '/db.php</code>'
+						'<code>' . esc_html( basename( WP_CONTENT_DIR ) ) . '/db.php</code>'
 					);
 				} elseif ( 'database/sqlite' === $module_slug && ! wp_is_writable( WP_CONTENT_DIR ) ) {
 					printf(
-						/* translators: %s: WP_CONTENT_DIR */
+						/* translators: %s: db.php drop-in path */
 						esc_html__( 'The SQLite module cannot be activated because the %s directory is not writable.', 'performance-lab' ),
-						'<code>' . esc_html( WP_CONTENT_DIR ) . '</code>'
+						'<code>' . esc_html( basename( WP_CONTENT_DIR ) ) . '</code>'
 					);
 				} elseif ( 'database/sqlite' === $module_slug && ! class_exists( 'SQLite3' ) ) {
 					esc_html_e( 'The SQLite module cannot be activated because the SQLite extension is not loaded.', 'performance-lab' );
