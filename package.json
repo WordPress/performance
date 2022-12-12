@@ -6,15 +6,12 @@
     "@octokit/rest": "^19.0.5",
     "@wordpress/env": "^5.7.0",
     "@wordpress/scripts": "^24.6.0",
-    "autocannon": "^7.10.0",
     "chalk": "^4.1.2",
     "commander": "^9.4.1",
-    "csv-stringify": "^6.2.3",
     "fast-glob": "^3.2.12",
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
-    "lodash": "4.17.21",
-    "table": "^6.8.1"
+    "lodash": "4.17.21"
   },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
@@ -22,7 +19,6 @@
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
     "enabled-modules": "./bin/plugin/cli.js enabled-modules",
-    "benchmark": "./bin/plugin/cli.js benchmark",
     "format-js": "wp-scripts format ./bin",
     "lint-js": "wp-scripts lint-js ./bin",
     "format-php": "wp-env run composer run-script format",
