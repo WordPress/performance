@@ -50,9 +50,9 @@ function perflab_sqlite_plugin_admin_notice() {
 	printf(
 		'<div class="notice notice-error"><p>%s</p></div>',
 		sprintf(
-			/* translators: %1$s: <code>wp-content/db.php</code>, %2$s: The admin-URL to deactivate the module. */
+			/* translators: 1: db.php drop-in path, 2: Admin URL to deactivate the module */
 			__( 'The SQLite Integration module is active, but the %1$s file is missing. Please <a href="%2$s">deactivate the module</a> and re-activate it to try again.', 'performance-lab' ),
-			'<code>wp-content/db.php</code>',
+			'<code>' . esc_html( basename( WP_CONTENT_DIR ) ) . '/db.php</code>',
 			esc_url( admin_url( 'options-general.php?page=' . PERFLAB_MODULES_SCREEN ) )
 		)
 	);
