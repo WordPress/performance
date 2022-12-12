@@ -214,6 +214,16 @@ class Load_Tests extends WP_UnitTestCase {
 		);
 	}
 
+	public function test_perflab_activate_module() {
+		perflab_activate_module( __DIR__ . '/testdata/demo-modules/something/demo-module-2' );
+		$this->assertSame( 'activated', get_option( 'test_demo_module_activation_status' ) );
+	}
+
+	public function test_perflab_deactivate_module() {
+		perflab_deactivate_module( __DIR__ . '/testdata/demo-modules/something/demo-module-2' );
+		$this->assertSame( 'deactivated', get_option( 'test_demo_module_activation_status' ) );
+	}
+
 	private function get_expected_default_option() {
 		// This code is essentially copied over from the perflab_register_modules_setting() function.
 		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';

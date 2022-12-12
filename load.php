@@ -317,3 +317,97 @@ add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
 }
+
+/**
+ * Trigger actions when a module gets activated or deactivated.
+ *
+ * @since n.e.x.t
+ *
+ * @param mixed $old_value Old value of the option.
+ * @param mixed $value     New value of the option.
+ */
+function perflab_run_module_activation_deactivation( $old_value, $value ) {
+	$old_value = (array) $old_value;
+	$value     = (array) $value;
+
+	// Get the list of modules that were activated, and load the activate.php files if they exist.
+	if ( ! empty( $value ) ) {
+		foreach ( $value as $module => $module_settings ) {
+			if ( ! empty( $module_settings['enabled'] ) && ( empty( $old_value[ $module ] ) || empty( $old_value[ $module ]['enabled'] ) ) ) {
+				perflab_activate_module( PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module );
+			}
+		}
+	}
+
+	// Get the list of modules that were deactivated, and load the deactivate.php files if they exist.
+	if ( ! empty( $old_value ) ) {
+		foreach ( $old_value as $module => $module_settings ) {
+			if ( ! empty( $module_settings['enabled'] ) && ( empty( $value[ $module ] ) || empty( $value[ $module ]['enabled'] ) ) ) {
+				perflab_deactivate_module( PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module );
+			}
+		}
+	}
+
+	return $value;
+}
+
+/**
+ * Activate a module.
+ *
+ * Runs the activate.php file if it exists.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $module_dir_path The module's directory path.
+ */
+function perflab_activate_module( $module_dir_path ) {
+	$module_activation_file = $module_dir_path . '/activate.php';
+	if ( ! file_exists( $module_activation_file ) ) {
+		return;
+	}
+	$module = require $module_activation_file;
+	if ( ! is_callable( $module ) ) {
+		return;
+	}
+	$module();
+}
+
+/**
+ * Deactivate a module.
+ *
+ * Runs the deactivate.php file if it exists.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $module_dir_path The module's directory path.
+ */
+function perflab_deactivate_module( $module_dir_path ) {
+	$module_deactivation_file = $module_dir_path . '/deactivate.php';
+	if ( ! file_exists( $module_deactivation_file ) ) {
+		return;
+	}
+	$module = require $module_deactivation_file;
+	if ( ! is_callable( $module ) ) {
+		return;
+	}
+	$module();
+}
+
+// Run the module activation & deactivation actions when the option is updated.
+add_action( 'update_option_' . PERFLAB_MODULES_SETTING, 'perflab_run_module_activation_deactivation', 10, 2 );
+
+// Run the module activation & deactivation actions when the option is added.
+add_action(
+	'add_option_' . PERFLAB_MODULES_SETTING,
+	/**
+	 * Fires after the option has been added.
+	 *
+	 * @param string $option Name of the option to add.
+	 * @param mixed  $value  Value of the option.
+	 */
+	function( $option, $value ) {
+		perflab_run_module_activation_deactivation( perflab_get_modules_setting_default(), $value );
+	},
+	10,
+	2
+);
