@@ -32,11 +32,11 @@ return function() {
 		// Copy the file, replacing contents as needed.
 		if ( $wp_filesystem->touch( $destination ) ) {
 
-			// Get the db.copy file contents, replace placeholders and write it to the destination.
+			// Get the db.copy.php file contents, replace placeholders and write it to the destination.
 			$file_contents = str_replace(
 				'{SQLITE_IMPLEMENTATION_FOLDER_PATH}',
 				__DIR__,
-				file_get_contents( __DIR__ . '/db.copy' )
+				file_get_contents( __DIR__ . '/db.copy.php' )
 			);
 
 			$wp_filesystem->put_contents( $destination, $file_contents );
