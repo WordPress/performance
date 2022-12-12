@@ -50,6 +50,8 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: npm
+      - name: Composer update
+        run: composer update
       - name: npm install
         run: npm ci
       - name: Install WordPress
