@@ -59,7 +59,7 @@ class Perflab_Server_Timing_Metric_Tests extends WP_UnitTestCase {
 		$this->metric->measure_after();
 
 		// Loose float comparison with 100ms delta, since measurement won't be exactly 1000ms.
-		$this->assertEquals( 1000.0, $this->metric->get_value(), '', 100.0 );
+		$this->assertEqualsWithDelta( 1000.0, $this->metric->get_value(), 100.0 );
 	}
 
 	public function test_measure_after_without_before() {
