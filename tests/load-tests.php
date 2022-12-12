@@ -238,19 +238,19 @@ class Load_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_perflab_maybe_set_object_cache_dropin() {
-		if ( ! $GLOBALS['wp_filesystem'] ) {
-			WP_Filesystem();
+		if ( ! $GLOBALS['wp_filesystem'] && ! WP_Filesystem() ) {
+			$this->markTestSkipped( 'Filesystem cannot be initialized.' );
 		}
 
 		if ( ! $GLOBALS['wp_filesystem']->is_writable( WP_CONTENT_DIR ) ) {
 			$this->markTestSkipped( 'This system does not allow file modifications within WP_CONTENT_DIR.' );
 		}
 
-		$this->assertFalse( file_exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertFalse( $GLOBALS['wp_filesystem']->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
 		$this->assertFalse( PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
 
 		perflab_maybe_set_object_cache_dropin();
-		$this->assertTrue( file_exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertTrue( $GLOBALS['wp_filesystem']->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
 
 		// Clean up. This is okay to be run after the assertion since otherwise
 		// the file does not exist anyway.
