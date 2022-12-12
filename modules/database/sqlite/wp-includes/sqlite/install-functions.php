@@ -210,5 +210,3 @@ function wp_install( $blog_title, $user_name, $user_email, $is_public, $deprecat
 		'password_message' => $message,
 	);
 }
-
-$GLOBALS['wpdb'] = new Perflab_SQLite_DB();

@@ -50,3 +50,5 @@ require_once __DIR__ . '/class-perflab-sqlite-pdo-driver.php';
 require_once __DIR__ . '/class-perflab-sqlite-create-query.php';
 require_once __DIR__ . '/class-perflab-sqlite-alter-query.php';
 require_once __DIR__ . '/install-functions.php';
+
+$GLOBALS['wpdb'] = new Perflab_SQLite_DB();
