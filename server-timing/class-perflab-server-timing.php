@@ -240,7 +240,8 @@ class Perflab_Server_Timing {
 				$this->send_header();
 				echo $output;
 			},
-			-1000
+			// phpcs:ignore PHPCompatibility.Constants.NewConstants
+			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -1000
 		);
 		return $passthrough;
 	}
