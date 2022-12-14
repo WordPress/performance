@@ -24,13 +24,11 @@ return function() {
 	if ( ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) && ! file_exists( $destination ) ) {
 		// Init the filesystem to allow copying the file.
 		global $wp_filesystem;
-		if ( ! $wp_filesystem ) {
-			require_once ABSPATH . '/wp-admin/includes/file.php';
-			WP_Filesystem();
-		}
 
-		// Copy the file, replacing contents as needed.
-		if ( $wp_filesystem->touch( $destination ) ) {
+		require_once ABSPATH . '/wp-admin/includes/file.php';
+
+		// Init the filesystem if needed, then copy the file, replacing contents as needed.
+		if ( ( $wp_filesystem || WP_Filesystem() ) && $wp_filesystem->touch( $destination ) ) {
 
 			// Get the db.copy.php file contents, replace placeholders and write it to the destination.
 			$file_contents = str_replace(

@@ -582,8 +582,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		);
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertSame( $expected, wp_check_filetype( get_attached_file( $attachment_id ) ) );
-		$this->assertNotContains( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
-		$this->assertContains( $metadata['sources']['image/webp']['file'], webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->assertStringContainsString( $metadata['sources']['image/webp']['file'], webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
