@@ -191,6 +191,10 @@ class Perflab_Server_Timing {
 	/**
 	 * Returns whether an output buffer should be used to gather Server-Timing metrics during template rendering.
 	 *
+	 * Without an output buffer, it is only possible to cover metrics from before serving the template, i.e. before
+	 * the HTML output starts. Therefore sites that would like to gather metrics while serving the template should
+	 * enable this via the {@see 'perflab_server_timing_use_output_buffer'} filter.
+	 *
 	 * @since n.e.x.t
 	 *
 	 * @return bool True if an output buffer should be used, false otherwise.
@@ -198,6 +202,10 @@ class Perflab_Server_Timing {
 	public function use_output_buffer() {
 		/**
 		 * Filters whether an output buffer should be used to be able to gather additional Server-Timing metrics.
+		 *
+		 * Without an output buffer, it is only possible to cover metrics from before serving the template, i.e. before
+		 * the HTML output starts. Therefore sites that would like to gather metrics while serving the template should
+		 * enable this.
 		 *
 		 * @since n.e.x.t
 		 *
