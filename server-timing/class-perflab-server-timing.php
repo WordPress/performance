@@ -166,11 +166,6 @@ class Perflab_Server_Timing {
 		$metric_header_values = array_filter(
 			array_map(
 				function( Perflab_Server_Timing_Metric $metric ) {
-					$value = $metric->get_value();
-					if ( null === $value ) {
-						return null;
-					}
-
 					// Check the registered capability here to ensure no metric without access is exposed.
 					if ( ! current_user_can( $this->registered_metrics_data[ $metric->get_slug() ]['access_cap'] ) ) {
 						return null;
@@ -252,10 +247,16 @@ class Perflab_Server_Timing {
 	 * @since n.e.x.t
 	 *
 	 * @param Perflab_Server_Timing_Metric $metric The metric to format.
-	 * @return string Segment for the Server-Timing header.
+	 * @return string|null Segment for the Server-Timing header, or null if no value set.
 	 */
 	private function format_metric_header_value( Perflab_Server_Timing_Metric $metric ) {
 		$value = $metric->get_value();
+
+		// If no value is set, make sure it's just passed through.
+		if ( null === $value ) {
+			return null;
+		}
+
 		if ( is_float( $value ) ) {
 			$value = round( $value, 2 );
 		}
