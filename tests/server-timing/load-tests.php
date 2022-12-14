@@ -49,12 +49,12 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		$wrapped = perflab_wrap_server_timing( $cb, 'wrapped-cb-without-capability', 'manage_options' );
 		$this->assertSame( 123, $wrapped(), 'Wrapped callback without capability did not return expected value' );
 		$this->assertTrue( perflab_server_timing()->has_registered_metric( 'wrapped-cb-without-capability' ), 'Wrapped callback metric should be registered despite lack of capability' );
-		$this->assertStringNotContainsString( 'wrapped-cb-without-capability', perflab_server_timing()->get_header_value(), 'Wrapped callback was measured despite lack of capability' );
+		$this->assertStringNotContainsString( 'wrapped-cb-without-capability', perflab_server_timing()->get_header(), 'Wrapped callback was measured despite lack of capability' );
 
 		$wrapped = perflab_wrap_server_timing( $cb, 'wrapped-cb-with-capability', 'exist' );
 		$this->assertSame( 123, $wrapped(), 'Wrapped callback with capability did not return expected value' );
 		$this->assertTrue( perflab_server_timing()->has_registered_metric( 'wrapped-cb-with-capability' ), 'Wrapped callback metric should be registered' );
-		$this->assertStringContainsString( 'wrapped-cb-with-capability', perflab_server_timing()->get_header_value(), 'Wrapped callback was not measured despite having necessary capability' );
+		$this->assertStringContainsString( 'wrapped-cb-with-capability', perflab_server_timing()->get_header(), 'Wrapped callback was not measured despite having necessary capability' );
 
 		$this->assertSame( 123, $wrapped(), 'Calling wrapped callback multiple times should not result in warning' );
 	}

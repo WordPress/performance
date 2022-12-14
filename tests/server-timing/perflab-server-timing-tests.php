@@ -120,16 +120,16 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @dataProvider data_get_header_value
+	 * @dataProvider data_get_header
 	 */
-	public function test_get_header_value( $expected, $metrics ) {
+	public function test_get_header( $expected, $metrics ) {
 		foreach ( $metrics as $metric_slug => $args ) {
 			$this->server_timing->register_metric( $metric_slug, $args );
 		}
-		$this->assertSame( $expected, $this->server_timing->get_header_value() );
+		$this->assertSame( $expected, $this->server_timing->get_header() );
 	}
 
-	public function data_get_header_value() {
+	public function data_get_header() {
 		$measure_42         = function( $metric ) {
 			$metric->set_value( 42 );
 		};

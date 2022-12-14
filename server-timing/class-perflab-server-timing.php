@@ -146,7 +146,7 @@ class Perflab_Server_Timing {
 		 */
 		do_action( 'perflab_server_timing_send_header' );
 
-		$header_value = $this->get_header_value();
+		$header_value = $this->get_header();
 		if ( ! $header_value ) {
 			return;
 		}
@@ -161,7 +161,7 @@ class Perflab_Server_Timing {
 	 *
 	 * @return string The Server-Timing header value.
 	 */
-	public function get_header_value() {
+	public function get_header() {
 		// Get all metric header values, as long as the current user has access to the metric.
 		$metric_header_values = array_filter(
 			array_map(
