@@ -179,7 +179,7 @@ class Load_Tests extends WP_UnitTestCase {
 		ob_start();
 		do_action( 'wp_head' );
 		$output = ob_get_clean();
-		$this->assertContains( $expected, $output );
+		$this->assertStringContainsString( $expected, $output );
 	}
 
 	/**
