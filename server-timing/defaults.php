@@ -27,6 +27,7 @@ function perflab_register_default_server_timing_before_template_metrics() {
 			)
 		);
 
+		// SQL query time is only measured if the SAVEQUERIES constant is set to true.
 		if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
 			// WordPress database query time before template.
 			perflab_server_timing_register_metric(
@@ -151,6 +152,7 @@ function perflab_register_default_server_timing_template_metrics() {
 		PHP_INT_MAX
 	);
 
+	// SQL query time is only measured if the SAVEQUERIES constant is set to true.
 	if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
 		add_action(
 			'perflab_server_timing_send_header',
