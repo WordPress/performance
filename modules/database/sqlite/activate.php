@@ -76,28 +76,24 @@ return function() {
 			}
 
 			// Get current basic setup data to install WordPress in the new DB.
-			$blog_title = get_bloginfo( 'name' );
-			$is_public  = (bool) get_option( 'blog_public' );
-			$language   = get_option( 'WPLANG' );
-			$user_email = get_option( 'admin_email' );
-			$admin_user = get_user_by( 'email', $user_email );
+			$blog_title  = get_bloginfo( 'name' );
+			$is_public   = (bool) get_option( 'blog_public' );
+			$language    = get_option( 'WPLANG' );
+			$admin_email = get_option( 'admin_email' );
+			$admin_user  = get_user_by( 'email', $admin_email );
 			if ( ! $admin_user ) {
 				$admin_user = wp_get_current_user();
 			}
 
-			// If the current user is not the admin email user, look up the
-			// data for the current user. Additionally, attempt to keep them
+			// Look up the data for the current user (in case they're not the
+			// admin email user). Additionally, attempt to keep them
 			// logged-in by retaining their current session. Depending on the
 			// site configuration, this is not 100% reliable as sites may store
 			// session tokens outside of user meta. However that does not lead
 			// to any problem, the user would simply be required to sign in
 			// again.
-			$current_user    = null;
-			$current_user_id = get_current_user_id();
-			if ( $current_user_id !== (int) $admin_user->ID ) {
-				$current_user = wp_get_current_user();
-			}
-			$user_sessions = get_user_meta( $current_user_id, 'session_tokens', true );
+			$current_user          = wp_get_current_user();
+			$current_user_sessions = get_user_meta( $current_user->ID, 'session_tokens', true );
 
 			// Get current data to keep the Performance Lab plugin and relevant
 			// modules active in the new DB.
@@ -124,7 +120,7 @@ return function() {
 					! empty( $userdata['user_pass'] )
 					&& (
 						$userdata['user_pass'] === $admin_user->user_pass
-						|| $current_user && $userdata['user_pass'] === $current_user->user_pass
+						|| $userdata['user_pass'] === $current_user->user_pass
 					)
 				) {
 					$data['user_pass'] = $userdata['user_pass'];
@@ -132,18 +128,28 @@ return function() {
 				return $data;
 			};
 			add_filter( 'wp_pre_insert_user_data', $unhash_user_pass, 10, 4 );
-			wp_install( $blog_title, $admin_user->user_login, $user_email, $is_public, '', $admin_user->user_pass, $language );
-			if ( $current_user ) { // Also "copy" current admin user if it's not the admin email owner.
+			wp_install( $blog_title, $admin_user->user_login, $admin_user->user_email, $is_public, '', $admin_user->user_pass, $language );
+			// If the current user is not the admin user, create an account for that user too.
+			if ( $current_user->user_login !== $admin_user->user_login ) {
 				wp_create_user( $current_user->user_login, $current_user->user_pass, $current_user->user_email );
 			}
 			remove_filter( 'wp_pre_insert_user_data', $unhash_user_pass );
 
+			// If the admin email was originally not attached to any user
+			// (e.g. when the original admin email user was deleted), reset
+			// the option to the original admin email again (by default
+			// `wp_install()` will set it to the same email as the initial
+			// admin user email).
+			if ( 0 !== strcasecmp( $admin_user->user_email, $admin_email ) ) {
+				update_option( 'admin_email', $admin_email );
+			}
+
 			// If user sessions are found, migrate them over so that the
 			// current user remains logged in.
-			if ( $user_sessions ) {
-				$session_user = get_user_by( 'login', $current_user ? $current_user->user_login : $admin_user->user_login );
+			if ( $current_user_sessions ) {
+				$session_user = get_user_by( 'login', $current_user->user_login );
 				if ( $session_user ) {
-					update_user_meta( $session_user->ID, 'session_tokens', $user_sessions );
+					update_user_meta( $session_user->ID, 'session_tokens', $current_user_sessions );
 				}
 			}
 
