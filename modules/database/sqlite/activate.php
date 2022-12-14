@@ -41,6 +41,12 @@ return function() {
 		}
 	}
 
+	// Do not automatically set up SQLite DB on a multisite as that is notably
+	// more complex. Potentially it can be added in the future.
+	if ( is_multisite() ) {
+		return;
+	}
+
 	// As an extra safety check, bail if the current user cannot update
 	// (or install) WordPress core.
 	if ( ! current_user_can( 'update_core' ) ) {
