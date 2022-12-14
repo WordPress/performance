@@ -114,7 +114,7 @@ function perflab_register_default_server_timing_before_template_metrics() {
 perflab_register_default_server_timing_before_template_metrics();
 
 /**
- * Registers the default Server-Timing metrics for while rendering the template.
+ * Registers the default Server-Timing metrics while rendering the template.
  *
  * These metrics should be registered at a later point, e.g. the 'wp_loaded' action.
  * They will only be registered if the Server-Timing API is configured to use an
