@@ -1335,6 +1335,9 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 			echo $this->get_error_message();
 		} else {
 			foreach ( $this->_results as $row ) {
+				if ( ! is_object( $row ) ) {
+					continue;
+				}
 				if ( property_exists( $row, 'name' ) ) {
 					$_columns['Field'] = $row->name;
 				}
