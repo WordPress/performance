@@ -1335,12 +1335,22 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 			echo $this->get_error_message();
 		} else {
 			foreach ( $this->_results as $row ) {
-				$_columns['Field']   = $row->name;
-				$_columns['Type']    = $row->type;
-				$_columns['Null']    = $row->notnull ? 'NO' : 'YES';
-				$_columns['Key']     = $row->pk ? 'PRI' : '';
-				$_columns['Default'] = $row->dflt_value;
-				$_results[]          = new Perflab_SQLite_Object_Array( $_columns );
+				if ( property_exists( $row, 'name' ) ) {
+					$_columns['Field'] = $row->name;
+				}
+				if ( property_exists( $row, 'type' ) ) {
+					$_columns['Type'] = $row->type;
+				}
+				if ( property_exists( $row, 'notnull' ) ) {
+					$_columns['Null'] = $row->notnull ? 'NO' : 'YES';
+				}
+				if ( property_exists( $row, 'pk' ) ) {
+					$_columns['Key'] = $row->pk ? 'PRI' : '';
+				}
+				if ( property_exists( $row, 'dflt_value' ) ) {
+					$_columns['Default'] = $row->dflt_value;
+				}
+				$_results[] = new Perflab_SQLite_Object_Array( $_columns );
 			}
 		}
 		$this->results = $_results;
