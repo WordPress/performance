@@ -65,6 +65,9 @@ add_action( 'admin_notices', 'perflab_sqlite_plugin_admin_notice' ); // Add the 
  * @param WP_Admin_Bar $admin_bar The admin bar object.
  */
 function perflab_sqlite_plugin_adminbar_item( $admin_bar ) {
+	if ( ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
+		return;
+	}
 	$args = array(
 		'id'     => 'performance-lab-sqlite',
 		'parent' => 'top-secondary',
