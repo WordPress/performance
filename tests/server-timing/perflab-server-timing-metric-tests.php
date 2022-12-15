@@ -31,7 +31,12 @@ class Perflab_Server_Timing_Metric_Tests extends WP_UnitTestCase {
 		$this->assertSame( 123.4567, $this->metric->get_value() );
 	}
 
-	public function test_set_value_requires_integer_or_float() {
+	public function test_set_value_with_numeric_string() {
+		$this->metric->set_value( '123.4567' );
+		$this->assertSame( 123.4567, $this->metric->get_value() );
+	}
+
+	public function test_set_value_requires_integer_or_float_or_numeric_string() {
 		$this->setExpectedIncorrectUsage( Perflab_Server_Timing_Metric::class . '::set_value' );
 
 		$this->metric->set_value( 'not-a-number' );

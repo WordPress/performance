@@ -70,11 +70,11 @@ class Perflab_Server_Timing_Metric {
 	 * @param int|float $value The metric value to set, in milliseconds.
 	 */
 	public function set_value( $value ) {
-		if ( ! is_int( $value ) && ! is_float( $value ) ) {
+		if ( ! is_numeric( $value ) ) {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: PHP parameter name */
-				sprintf( __( 'The %s parameter must be an integer or float.', 'performance-lab' ), '$value' ),
+				sprintf( __( 'The %s parameter must be an integer, float, or numeric string.', 'performance-lab' ), '$value' ),
 				''
 			);
 			return;
@@ -88,6 +88,11 @@ class Perflab_Server_Timing_Metric {
 				''
 			);
 			return;
+		}
+
+		// In case e.g. a numeric string is passed, cast it.
+		if ( ! is_int( $value ) && ! is_float( $value ) ) {
+			$value = (float) $value;
 		}
 
 		$this->value = $value;
