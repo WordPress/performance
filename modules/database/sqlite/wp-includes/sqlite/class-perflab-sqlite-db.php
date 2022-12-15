@@ -81,7 +81,7 @@ class Perflab_SQLite_DB extends wpdb {
 	 * @return string escaped
 	 */
 	function _real_escape( $str ) {
-		return SQLite3::escapeString( $str );
+		return addslashes( $str );
 	}
 
 	/**
