@@ -3,7 +3,7 @@
  * Modify queried data to a PHP object.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**

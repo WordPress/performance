@@ -3,7 +3,7 @@
  * Adds and filters data in the site-health screen.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 // Require the constants file.
@@ -15,7 +15,7 @@ require_once __DIR__ . '/constants.php';
  * When the plugin gets merged in wp-core, these should be merged in src/wp-admin/includes/class-wp-debug-data.php
  * See https://github.com/WordPress/wordpress-develop/pull/3220/files
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @param array $info The debug data.
  * @return array The filtered debug data.

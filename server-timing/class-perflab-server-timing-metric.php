@@ -3,20 +3,20 @@
  * Server-Timing API: Perflab_Server_Timing_Metric class
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**
  * Class representing a single Server-Timing metric.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  */
 class Perflab_Server_Timing_Metric {
 
 	/**
 	 * The metric slug.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 * @var string
 	 */
 	private $slug;
@@ -24,7 +24,7 @@ class Perflab_Server_Timing_Metric {
 	/**
 	 * The metric value in milliseconds.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 * @var int|float|null
 	 */
 	private $value;
@@ -32,7 +32,7 @@ class Perflab_Server_Timing_Metric {
 	/**
 	 * The value measured before relevant execution logic in seconds, if used.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 * @var float|null
 	 */
 	private $before_value;
@@ -40,7 +40,7 @@ class Perflab_Server_Timing_Metric {
 	/**
 	 * Constructor.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 *
 	 * @param string $slug The metric slug.
 	 */
@@ -51,7 +51,7 @@ class Perflab_Server_Timing_Metric {
 	/**
 	 * Gets the metric slug.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 *
 	 * @return string The metric slug.
 	 */
@@ -65,7 +65,7 @@ class Perflab_Server_Timing_Metric {
 	 * Alternatively to setting the metric value directly, the {@see Perflab_Server_Timing_Metric::measure_before()}
 	 * and {@see Perflab_Server_Timing_Metric::measure_after()} methods can be used to further simplify measuring.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 *
 	 * @param int|float $value The metric value to set, in milliseconds.
 	 */
@@ -101,7 +101,7 @@ class Perflab_Server_Timing_Metric {
 	/**
 	 * Gets the metric value.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 *
 	 * @return int|float|null The metric value, or null if none set.
 	 */
@@ -115,7 +115,7 @@ class Perflab_Server_Timing_Metric {
 	 * This should be used in combination with {@see Perflab_Server_Timing_Metric::measure_after()}. Alternatively,
 	 * {@see Perflab_Server_Timing_Metric::set_value()} can be used to set a calculated value manually.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 */
 	public function measure_before() {
 		$this->before_value = microtime( true );
@@ -127,7 +127,7 @@ class Perflab_Server_Timing_Metric {
 	 * This should be used in combination with {@see Perflab_Server_Timing_Metric::measure_before()}. Alternatively,
 	 * {@see Perflab_Server_Timing_Metric::set_value()} can be used to set a calculated value manually.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 */
 	public function measure_after() {
 		if ( ! $this->before_value ) {

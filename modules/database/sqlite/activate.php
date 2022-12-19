@@ -2,14 +2,14 @@
 /**
  * Actions to run when the module gets activated.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  * @package performance-lab
  */
 
 /**
  * Copies the db.php file in wp-content and reloads the page.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  */
 return function() {
 	// Bail early if the SQLite3 class does not exist.

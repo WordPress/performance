@@ -3,7 +3,7 @@
  * Main integration file.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 // Require the constants file.

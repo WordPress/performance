@@ -3,7 +3,7 @@
  * Server-Timing API integration file
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**
@@ -13,7 +13,7 @@
  * In case that no metrics are registered, this is still called on {@see 'wp_loaded'}, so that even then it still fires
  * its action hooks as expected.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  */
 function perflab_server_timing() {
 	static $server_timing;
@@ -32,7 +32,7 @@ add_action( 'wp_loaded', 'perflab_server_timing' );
  *
  * This method must be called before the {@see 'perflab_server_timing_send_header'} hook.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @param string $metric_slug The metric slug.
  * @param array  $args        {
@@ -53,7 +53,7 @@ function perflab_server_timing_register_metric( $metric_slug, array $args ) {
 /**
  * Returns whether an output buffer should be used to gather Server-Timing metrics during template rendering.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @return bool True if an output buffer should be used, false otherwise.
  */
@@ -64,7 +64,7 @@ function perflab_server_timing_use_output_buffer() {
 /**
  * Wraps a callback (e.g. for an action or filter) to be measured and included in the Server-Timing header.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @param callable $callback    The callback to wrap.
  * @param string   $metric_slug The metric slug to use within the Server-Timing header.

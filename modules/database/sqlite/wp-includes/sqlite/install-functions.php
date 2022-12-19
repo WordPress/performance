@@ -3,7 +3,7 @@
  * Main integration file.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**
@@ -11,7 +11,7 @@
  *
  * This is executed only once while installation.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @return boolean
  */
@@ -101,7 +101,7 @@ function perflab_sqlite_make_db_sqlite() {
  * Runs the required functions to set up and populate the database,
  * including primary admin user and initial options.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @param string $blog_title    Site title.
  * @param string $user_name     User's username.
