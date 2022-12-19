@@ -3,7 +3,7 @@
  * Custom functions for the SQLite implementation.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**
