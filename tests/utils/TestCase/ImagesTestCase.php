@@ -84,7 +84,6 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 *
 	 * @param string $filename The name of the filename to be asserted.
 	 * @param string $message  The Error message used to display when the assertion fails.
-	 * @return void
 	 */
 	public static function assertFileNameIsEdited( $filename, $message = '' ) {
 		self::assertRegExp( '/e\d{13}/', $filename, $message );
@@ -95,7 +94,6 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 *
 	 * @param string $filename The name of the filename to be asserted.
 	 * @param string $message  The Error message used to display when the assertion fails.
-	 * @return void
 	 */
 	public static function assertFileNameIsNotEdited( $filename, $message = '' ) {
 		self::assertNotRegExp( '/e\d{13}/', $filename, $message );
@@ -107,9 +105,22 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $size_name        The size name we are looking for.
 	 * @param string $hashed_size_name The current size name we are comparing against.
 	 * @param string $message          The Error message used to display when the assertion fails.
-	 * @return void
 	 */
 	public static function assertSizeNameIsHashed( $size_name, $hashed_size_name, $message = '' ) {
 		self::assertRegExp( "/{$size_name}-\d{13}/", $hashed_size_name, $message );
+	}
+
+	/**
+	 * Adds filter so that for a JPEG upload both JPEG and WebP versions are generated.
+	 */
+	public function opt_in_to_jpeg_and_webp() {
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function( $transforms ) {
+				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
+				$transforms['image/webp'] = array( 'image/webp', 'image/jpeg' );
+				return $transforms;
+			}
+		);
 	}
 }

@@ -16,9 +16,17 @@
  */
 function webp_uploads_get_upload_image_mime_transforms() {
 	$default_transforms = array(
-		'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
-		'image/webp' => array( 'image/webp', 'image/jpeg' ),
+		'image/jpeg' => array( 'image/webp' ),
+		'image/webp' => array( 'image/webp' ),
 	);
+
+	// Check setting for whether to generate both JPEG and WebP.
+	if ( true === (bool) get_option( 'perflab_generate_webp_and_jpeg' ) ) {
+		$default_transforms = array(
+			'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
+			'image/webp' => array( 'image/webp', 'image/jpeg' ),
+		);
+	}
 
 	/**
 	 * Filter to allow the definition of a custom mime types, in which a defined mime type
@@ -144,7 +152,10 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
 	}
 
+	remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 	$image = $editor->save( $destination_file_name, $mime );
+	add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
+
 	if ( is_wp_error( $image ) ) {
 		return $image;
 	}

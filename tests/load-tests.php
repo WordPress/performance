@@ -97,6 +97,37 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( $new_value, $settings );
 	}
 
+	/**
+	 * @dataProvider data_legacy_modules
+	 */
+	public function test_legacy_module_for_perflab_get_module_settings( $legacy_module_slug, $current_module_slug ) {
+		$new_value = array( $legacy_module_slug => array( 'enabled' => true ) );
+		update_option( PERFLAB_MODULES_SETTING, $new_value );
+
+		$settings = perflab_get_module_settings();
+		$this->assertArrayNotHasKey( $legacy_module_slug, $settings, 'The settings do not contain the old legacy module slug in the database' );
+		$this->assertArrayHasKey( $current_module_slug, $settings, 'The settings contain an updated module slug in the database' );
+	}
+
+	/**
+	 * Data provider for test_legacy_module_for_perflab_get_module_settings().
+	 *
+	 * @return array {
+	 *     @type array {
+	 *         @type string $legacy_module_slug  The legacy module slug.
+	 *         @type string $current_module_slug The new/updated module slug.
+	 *     }
+	 * }
+	 */
+	public function data_legacy_modules() {
+		return array(
+			array( 'site-health/audit-autoloaded-options', 'database/audit-autoloaded-options' ),
+			array( 'site-health/audit-enqueued-assets', 'js-and-css/audit-enqueued-assets' ),
+			array( 'site-health/audit-full-page-cache', 'object-cache/audit-full-page-cache' ),
+			array( 'site-health/webp-support', 'images/webp-support' ),
+		);
+	}
+
 	public function test_perflab_get_active_modules() {
 		// Assert that by default there are no active modules.
 		$active_modules          = perflab_get_active_modules();
@@ -148,7 +179,7 @@ class Load_Tests extends WP_UnitTestCase {
 		ob_start();
 		do_action( 'wp_head' );
 		$output = ob_get_clean();
-		$this->assertContains( $expected, $output );
+		$this->assertStringContainsString( $expected, $output );
 	}
 
 	/**
@@ -162,7 +193,7 @@ class Load_Tests extends WP_UnitTestCase {
 		return array(
 			array( '', false ),
 			array( '../tests/testdata/demo-modules/something/non-existing-module', false ),
-			array( '../tests/testdata/demo-modules/javascript/demo-module-1', false ),
+			array( '../tests/testdata/demo-modules/js-and-css/demo-module-1', false ),
 			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
 			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
 		);
@@ -177,10 +208,20 @@ class Load_Tests extends WP_UnitTestCase {
 
 	public function data_perflab_can_load_module() {
 		return array(
-			array( '../tests/testdata/demo-modules/javascript/demo-module-1', false ),
+			array( '../tests/testdata/demo-modules/js-and-css/demo-module-1', false ),
 			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
 			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
 		);
+	}
+
+	public function test_perflab_activate_module() {
+		perflab_activate_module( __DIR__ . '/testdata/demo-modules/something/demo-module-2' );
+		$this->assertSame( 'activated', get_option( 'test_demo_module_activation_status' ) );
+	}
+
+	public function test_perflab_deactivate_module() {
+		perflab_deactivate_module( __DIR__ . '/testdata/demo-modules/something/demo-module-2' );
+		$this->assertSame( 'deactivated', get_option( 'test_demo_module_activation_status' ) );
 	}
 
 	private function get_expected_default_option() {
@@ -194,5 +235,25 @@ class Load_Tests extends WP_UnitTestCase {
 			},
 			array()
 		);
+	}
+
+	public function test_perflab_maybe_set_object_cache_dropin() {
+		if ( ! $GLOBALS['wp_filesystem'] && ! WP_Filesystem() ) {
+			$this->markTestSkipped( 'Filesystem cannot be initialized.' );
+		}
+
+		if ( ! $GLOBALS['wp_filesystem']->is_writable( WP_CONTENT_DIR ) ) {
+			$this->markTestSkipped( 'This system does not allow file modifications within WP_CONTENT_DIR.' );
+		}
+
+		$this->assertFalse( $GLOBALS['wp_filesystem']->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertFalse( PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
+
+		perflab_maybe_set_object_cache_dropin();
+		$this->assertTrue( $GLOBALS['wp_filesystem']->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+
+		// Clean up. This is okay to be run after the assertion since otherwise
+		// the file does not exist anyway.
+		$GLOBALS['wp_filesystem']->delete( WP_CONTENT_DIR . '/object-cache.php' );
 	}
 }

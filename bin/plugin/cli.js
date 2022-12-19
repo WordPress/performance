@@ -6,8 +6,8 @@
 const program = require( 'commander' );
 
 const withOptions = ( command, options ) => {
-	options.forEach( ( { description, argname } ) => {
-		command = command.option( argname, description );
+	options.forEach( ( { description, argname, defaults } ) => {
+		command = command.option( argname, description, defaults );
 	} );
 	return command;
 };

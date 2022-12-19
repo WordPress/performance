@@ -20,8 +20,18 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 	 * @test
 	 */
 	public function it_should_add_sources_to_rest_response() {
+		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
+
+		add_filter(
+			'webp_uploads_upload_image_mime_transforms',
+			function( $transforms ) {
+				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
+				return $transforms;
+			}
+		);
+
 		$file_location = TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg';
-		$attachment_id = $this->factory->attachment->create_upload_object( $file_location );
+		$attachment_id = self::factory()->attachment->create_upload_object( $file_location );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		$request       = new WP_REST_Request();
@@ -57,6 +67,43 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 				$this->assertNotFalse( filter_var( $properties['sources'][ $mime_type ]['source_url'], FILTER_VALIDATE_URL ) );
 			}
 		}
+
 		$this->assertArrayNotHasKey( 'sources', $data['media_details'] );
+	}
+
+	/**
+	 * Checks whether the media details information is added to the REST response object.
+	 *
+	 * @test
+	 */
+	public function it_should_check_media_details_in_rest_response() {
+		$file_location = TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg';
+		$attachment_id = self::factory()->attachment->create_upload_object( $file_location );
+
+		$request       = new WP_REST_Request();
+		$request['id'] = $attachment_id;
+
+		$controller = new WP_REST_Attachments_Controller( 'attachment' );
+		$response   = $controller->get_item( $request );
+
+		$this->assertNotWPError( $response );
+
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'media_details', $data );
+		$this->assertIsArray( $data['media_details'] );
+
+		// Delete attachment metadata to set media_details as object in response.
+		delete_post_meta( $attachment_id, '_wp_attachment_metadata' );
+
+		$response = $controller->get_item( $request );
+
+		$this->assertNotWPError( $response );
+
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'media_details', $data );
+		$this->assertIsNotArray( $data['media_details'] );
+		$this->assertIsObject( $data['media_details'] );
 	}
 }

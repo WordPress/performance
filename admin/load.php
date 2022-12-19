@@ -156,17 +156,48 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" disabled>
 				<input type="hidden" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" value="<?php echo $enabled ? '1' : '0'; ?>">
 				<?php
+				if ( 'database/sqlite' === $module_slug && file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
+					printf(
+						/* translators: %s: db.php drop-in path */
+						esc_html__( 'The SQLite module cannot be activated because a different %s drop-in already exists.', 'performance-lab' ),
+						'<code>' . esc_html( basename( WP_CONTENT_DIR ) ) . '/db.php</code>'
+					);
+				} elseif ( 'database/sqlite' === $module_slug && ! wp_is_writable( WP_CONTENT_DIR ) ) {
+					printf(
+						/* translators: %s: db.php drop-in path */
+						esc_html__( 'The SQLite module cannot be activated because the %s directory is not writable.', 'performance-lab' ),
+						'<code>' . esc_html( basename( WP_CONTENT_DIR ) ) . '</code>'
+					);
+				} elseif ( 'database/sqlite' === $module_slug && ! class_exists( 'SQLite3' ) ) {
+					esc_html_e( 'The SQLite module cannot be activated because the SQLite extension is not loaded.', 'performance-lab' );
+				} else {
 					printf(
 						/* translators: %s: module name */
 						__( '%s is already part of your WordPress version and therefore cannot be loaded as part of the plugin.', 'performance-lab' ),
 						esc_html( $module_data['name'] )
 					);
+				}
 				?>
 			<?php } ?>
 		</label>
 		<p id="<?php echo esc_attr( "{$base_id}_description" ); ?>" class="description">
 			<?php echo esc_html( $module_data['description'] ); ?>
 		</p>
+		<?php if ( 'database/sqlite' === $module_slug ) : ?>
+			<?php if ( $enabled ) : ?>
+				<?php if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) : ?>
+					<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
+					<p class="notice notice-warning" style="padding:1em;max-width:50em;">
+						<?php esc_html_e( 'Your site is currently using an SQLite database. You can disable this module to get back to your previous MySQL database, with all your previous data intact.', 'performance-lab' ); ?>
+					</p>
+				<?php endif; ?>
+			<?php else : ?>
+				<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
+				<p class="notice notice-warning" style="padding:1em;max-width:50em;">
+					<?php esc_html_e( 'Enabling this module will switch to a separate database and install WordPress in it. You will need to reconfigure your site, and start with a fresh site. Disabling the module you will get back to your previous MySQL database, with all your previous data intact. Warning: Do not activate if your site is implemented in a multi-server environment.', 'performance-lab' ); ?>
+				</p>
+			<?php endif; ?>
+		<?php endif; ?>
 	</fieldset>
 	<?php
 }
@@ -184,11 +215,11 @@ function perflab_get_focus_areas() {
 		'images'       => array(
 			'name' => __( 'Images', 'performance-lab' ),
 		),
-		'javascript'   => array(
-			'name' => __( 'JavaScript', 'performance-lab' ),
+		'js-and-css'   => array(
+			'name' => __( 'JS & CSS', 'performance-lab' ),
 		),
-		'site-health'  => array(
-			'name' => __( 'Site Health', 'performance-lab' ),
+		'database'     => array(
+			'name' => __( 'Database', 'performance-lab' ),
 		),
 		'measurement'  => array(
 			'name' => __( 'Measurement', 'performance-lab' ),
