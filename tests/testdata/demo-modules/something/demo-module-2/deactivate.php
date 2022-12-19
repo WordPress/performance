@@ -2,7 +2,7 @@
 /**
  * Actions to run when the module gets deactivated.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  * @package performance-lab
  */
 

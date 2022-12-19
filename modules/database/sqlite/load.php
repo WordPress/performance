@@ -5,7 +5,7 @@
  * Experimental: Yes
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**
@@ -18,7 +18,7 @@ require_once __DIR__ . '/site-health.php';
  *
  * When the plugin gets merged in wp-core, this is not to be ported.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  */
 function perflab_sqlite_plugin_admin_notice() {
 	// Bail early if the PERFLAB_SQLITE_DB_DROPIN_VERSION is defined.

@@ -16,7 +16,7 @@
  *     define( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN', true );
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 // Set constant to be able to later check for whether this file was loaded.
@@ -28,7 +28,7 @@ define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', 1 );
  * This function will short-circuit if the constant
  * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  */
 function perflab_load_server_timing_api_from_dropin() {
 	if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {

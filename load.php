@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
  * Requires at least: 6.0
  * Requires PHP: 5.6
- * Version: 1.7.0
+ * Version: 1.8.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.7.0' );
+define( 'PERFLAB_VERSION', '1.8.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -274,7 +274,7 @@ perflab_load_active_and_valid_modules();
  * This function will short-circuit if the constant
  * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
@@ -325,7 +325,7 @@ add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
  * This function will short-circuit if the constant
  * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
@@ -366,7 +366,7 @@ if ( is_admin() ) {
 /**
  * Trigger actions when a module gets activated or deactivated.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @param mixed $old_value Old value of the option.
  * @param mixed $value     New value of the option.
@@ -401,7 +401,7 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
  *
  * Runs the activate.php file if it exists.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @param string $module_dir_path The module's directory path.
  */
@@ -422,7 +422,7 @@ function perflab_activate_module( $module_dir_path ) {
  *
  * Runs the deactivate.php file if it exists.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @param string $module_dir_path The module's directory path.
  */
