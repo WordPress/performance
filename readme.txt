@@ -20,8 +20,10 @@ Currently the plugin includes the following performance modules:
 * **Dominant Color:** Adds support to store dominant color for an image and create a placeholder background with that color.
 * **WebP Support Health Check:** Adds a WebP support check in Site Health status.
 * **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
+* **Fetchpriority:** Adds a fetchpriority hint for the primary content image on the page to load faster.
 * **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
 * **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
+* **SQLite Integration:** Use an SQLite database instead of MySQL.
 * **Full Page Cache Health Check:** Adds a check for full page cache in Site Health status.
 * **Persistent Object Cache Health Check:** Adds a persistent object cache check for sites with non-trivial amounts of data in Site Health status.
 
@@ -74,6 +76,20 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 1.8.0 =
+
+**Features**
+
+* Measurement: Implement Server-Timing API foundation as well as basic load time metrics. ([553](https://github.com/WordPress/performance/pull/553))
+* Database: Implement new experimental SQLite integration module. ([547](https://github.com/WordPress/performance/pull/547))
+* Images: Implement new experimental `fetchpriority` module. ([528](https://github.com/WordPress/performance/pull/528))
+
+**Bug Fixes**
+
+* Database: Fix SQLite notices related to undefined properties. ([600](https://github.com/WordPress/performance/pull/600))
+* Database: Fix incorrect handling of `admin_email` and actual admin user's email when original `admin_email` user was deleted. ([603](https://github.com/WordPress/performance/pull/603))
+* Database: Make WP filesystem setup more robust to prevent potential errors. ([595](https://github.com/WordPress/performance/pull/595))
 
 = 1.7.0 =
 
