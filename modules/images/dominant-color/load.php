@@ -466,8 +466,11 @@ function dominant_color_prepare_attachment_for_js( $response, $attachment, $meta
  * Print media templates.
  *
  * Copied from core's wp_print_media_templates() and modified to add the dominant color.
+ *
+ * Eslint is disabled because this block of code is copied from core and only included here to enable modification.
  */
-function dominant_color_print_media_templates() {
+// phpcs:disable
+ function dominant_color_print_media_templates() {
 	$class = 'media-modal wp-core-ui';
 
 	$alt_text_description = sprintf(
@@ -1838,3 +1841,4 @@ function dominant_color_print_media_templates() {
 	 */
 	do_action( 'print_media_templates' );
 }
+// phpcs:enable
