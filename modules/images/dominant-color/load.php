@@ -448,7 +448,7 @@ function dominant_color_prepare_attachment_for_js( $response, $attachment, $meta
 		return $response;
 	}
 
-	$response['dominant_color'] = $dominant_color;
+	$response['dominantColor'] = $dominant_color;
 
 	// Set hasTransparency.
 	if ( dominant_color_has_transparency( $attachment->ID ) ) {
