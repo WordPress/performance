@@ -12,6 +12,7 @@ on:
       - '**.json'
       - '.eslint*'
       - '.nvmrc'
+      - '.wp-env.json'
       - '**/package.json'
       - 'package-lock.json'
   pull_request:
@@ -26,6 +27,7 @@ on:
       - '**.json'
       - '.eslint*'
       - '.nvmrc'
+      - '.wp-env.json'
       - '**/package.json'
       - 'package-lock.json'
     types:

@@ -179,7 +179,7 @@ class Load_Tests extends WP_UnitTestCase {
 		ob_start();
 		do_action( 'wp_head' );
 		$output = ob_get_clean();
-		$this->assertContains( $expected, $output );
+		$this->assertStringContainsString( $expected, $output );
 	}
 
 	/**
@@ -214,6 +214,16 @@ class Load_Tests extends WP_UnitTestCase {
 		);
 	}
 
+	public function test_perflab_activate_module() {
+		perflab_activate_module( __DIR__ . '/testdata/demo-modules/something/demo-module-2' );
+		$this->assertSame( 'activated', get_option( 'test_demo_module_activation_status' ) );
+	}
+
+	public function test_perflab_deactivate_module() {
+		perflab_deactivate_module( __DIR__ . '/testdata/demo-modules/something/demo-module-2' );
+		$this->assertSame( 'deactivated', get_option( 'test_demo_module_activation_status' ) );
+	}
+
 	private function get_expected_default_option() {
 		// This code is essentially copied over from the perflab_register_modules_setting() function.
 		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
@@ -225,5 +235,25 @@ class Load_Tests extends WP_UnitTestCase {
 			},
 			array()
 		);
+	}
+
+	public function test_perflab_maybe_set_object_cache_dropin() {
+		if ( ! $GLOBALS['wp_filesystem'] && ! WP_Filesystem() ) {
+			$this->markTestSkipped( 'Filesystem cannot be initialized.' );
+		}
+
+		if ( ! $GLOBALS['wp_filesystem']->is_writable( WP_CONTENT_DIR ) ) {
+			$this->markTestSkipped( 'This system does not allow file modifications within WP_CONTENT_DIR.' );
+		}
+
+		$this->assertFalse( $GLOBALS['wp_filesystem']->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertFalse( PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
+
+		perflab_maybe_set_object_cache_dropin();
+		$this->assertTrue( $GLOBALS['wp_filesystem']->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+
+		// Clean up. This is okay to be run after the assertion since otherwise
+		// the file does not exist anyway.
+		$GLOBALS['wp_filesystem']->delete( WP_CONTENT_DIR . '/object-cache.php' );
 	}
 }

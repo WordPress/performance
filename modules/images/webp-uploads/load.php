@@ -749,7 +749,7 @@ function webp_uploads_get_image_sizes_additional_mime_type_support() {
  * Prior to WordPress 6.1, the MIME type was not correctly provided to this filter, so for those versions this function
  * simply returns 82 universally (since all other MIME types already use 82 anyway).
  *
- * @since n.e.x.t
+ * @since 1.7.0
  *
  * @global string $wp_version The WordPress version string.
  *

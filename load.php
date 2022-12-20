@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
  * Requires at least: 6.0
  * Requires PHP: 5.6
- * Version: 1.6.0
+ * Version: 1.8.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,11 +15,21 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.6.0' );
+define( 'PERFLAB_VERSION', '1.8.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
+
+// If the constant isn't defined yet, it means the Performance Lab object cache file is not loaded.
+if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
+	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', false );
+}
+
+require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing-metric.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/load.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/defaults.php';
 
 /**
  * Registers the performance modules setting.
@@ -253,10 +263,196 @@ function perflab_load_active_and_valid_modules() {
 		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/load.php';
 	}
 }
-
 perflab_load_active_and_valid_modules();
+
+/**
+ * Places the Performance Lab's object cache drop-in in the drop-ins folder.
+ *
+ * This only runs in WP Admin to not have any potential performance impact on
+ * the frontend.
+ *
+ * This function will short-circuit if the constant
+ * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
+ *
+ * @since 1.8.0
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function perflab_maybe_set_object_cache_dropin() {
+	global $wp_filesystem;
+
+	// Bail if disabled via constant.
+	if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {
+		return;
+	}
+
+	// Bail if already placed.
+	if ( PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
+		return;
+	}
+
+	// Bail if already attempted before timeout has been completed.
+	// This is present in case placing the file fails for some reason, to avoid
+	// excessively retrying to place it on every request.
+	$timeout = get_transient( 'perflab_set_object_cache_dropin' );
+	if ( false !== $timeout ) {
+		return;
+	}
+
+	if ( $wp_filesystem || WP_Filesystem() ) {
+		// If there is an actual object-cache.php file, rename it.
+		// The Performance Lab object-cache.php will still load it, so the
+		// behavior does not change.
+		if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) ) {
+			$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache.php', WP_CONTENT_DIR . '/object-cache-plst-orig.php' );
+		}
+
+		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php', WP_CONTENT_DIR . '/object-cache.php' );
+	}
+
+	// Set timeout of 1 hour before retrying again (only in case of failure).
+	set_transient( 'perflab_set_object_cache_dropin', true, HOUR_IN_SECONDS );
+}
+add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
+
+/**
+ * Removes the Performance Lab's object cache drop-in from the drop-ins folder.
+ *
+ * This function should be run on plugin deactivation. If there was another original
+ * object-cache.php drop-in file (renamed in `perflab_maybe_set_object_cache_dropin()`
+ * to object-cache-plst-orig.php), it will be restored.
+ *
+ * This function will short-circuit if the constant
+ * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
+ *
+ * @since 1.8.0
+ *
+ * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
+ */
+function perflab_maybe_remove_object_cache_dropin() {
+	global $wp_filesystem;
+
+	// Bail if disabled via constant.
+	if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {
+		return;
+	}
+
+	// Bail if custom drop-in not present anyway.
+	if ( ! PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
+		return;
+	}
+
+	if ( $wp_filesystem || WP_Filesystem() ) {
+		// If there is an actual object-cache.php file, restore it
+		// and override the Performance Lab file.
+		// Otherwise just delete the Performance Lab file.
+		if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) ) {
+			$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache-plst-orig.php', WP_CONTENT_DIR . '/object-cache.php', true );
+		} else {
+			$wp_filesystem->delete( WP_CONTENT_DIR . '/object-cache.php' );
+		}
+	}
+
+	// Delete transient for drop-in check in case the plugin is reactivated shortly after.
+	delete_transient( 'perflab_set_object_cache_dropin' );
+}
+register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin' );
 
 // Only load admin integration when in admin.
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
 }
+
+/**
+ * Trigger actions when a module gets activated or deactivated.
+ *
+ * @since 1.8.0
+ *
+ * @param mixed $old_value Old value of the option.
+ * @param mixed $value     New value of the option.
+ */
+function perflab_run_module_activation_deactivation( $old_value, $value ) {
+	$old_value = (array) $old_value;
+	$value     = (array) $value;
+
+	// Get the list of modules that were activated, and load the activate.php files if they exist.
+	if ( ! empty( $value ) ) {
+		foreach ( $value as $module => $module_settings ) {
+			if ( ! empty( $module_settings['enabled'] ) && ( empty( $old_value[ $module ] ) || empty( $old_value[ $module ]['enabled'] ) ) ) {
+				perflab_activate_module( PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module );
+			}
+		}
+	}
+
+	// Get the list of modules that were deactivated, and load the deactivate.php files if they exist.
+	if ( ! empty( $old_value ) ) {
+		foreach ( $old_value as $module => $module_settings ) {
+			if ( ! empty( $module_settings['enabled'] ) && ( empty( $value[ $module ] ) || empty( $value[ $module ]['enabled'] ) ) ) {
+				perflab_deactivate_module( PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module );
+			}
+		}
+	}
+
+	return $value;
+}
+
+/**
+ * Activate a module.
+ *
+ * Runs the activate.php file if it exists.
+ *
+ * @since 1.8.0
+ *
+ * @param string $module_dir_path The module's directory path.
+ */
+function perflab_activate_module( $module_dir_path ) {
+	$module_activation_file = $module_dir_path . '/activate.php';
+	if ( ! file_exists( $module_activation_file ) ) {
+		return;
+	}
+	$module = require $module_activation_file;
+	if ( ! is_callable( $module ) ) {
+		return;
+	}
+	$module();
+}
+
+/**
+ * Deactivate a module.
+ *
+ * Runs the deactivate.php file if it exists.
+ *
+ * @since 1.8.0
+ *
+ * @param string $module_dir_path The module's directory path.
+ */
+function perflab_deactivate_module( $module_dir_path ) {
+	$module_deactivation_file = $module_dir_path . '/deactivate.php';
+	if ( ! file_exists( $module_deactivation_file ) ) {
+		return;
+	}
+	$module = require $module_deactivation_file;
+	if ( ! is_callable( $module ) ) {
+		return;
+	}
+	$module();
+}
+
+// Run the module activation & deactivation actions when the option is updated.
+add_action( 'update_option_' . PERFLAB_MODULES_SETTING, 'perflab_run_module_activation_deactivation', 10, 2 );
+
+// Run the module activation & deactivation actions when the option is added.
+add_action(
+	'add_option_' . PERFLAB_MODULES_SETTING,
+	/**
+	 * Fires after the option has been added.
+	 *
+	 * @param string $option Name of the option to add.
+	 * @param mixed  $value  Value of the option.
+	 */
+	function( $option, $value ) {
+		perflab_run_module_activation_deactivation( perflab_get_modules_setting_default(), $value );
+	},
+	10,
+	2
+);
