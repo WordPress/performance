@@ -488,7 +488,7 @@ function dominant_color_prepare_attachment_for_js( $response, $attachment, $meta
 
 	<?php
 	// Template for the media frame: used both in the media grid and in the media modal.
-		// Include the inline styles for the dominant color feature.
+	// Include the inline styles for the dominant color feature.
 	?>
 	<style>
 		.wp-core-ui .attachment-preview[data-dominant-color]:not(.has-transparency) {
