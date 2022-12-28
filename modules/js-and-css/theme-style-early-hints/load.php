@@ -78,7 +78,7 @@ function perflab_tseh_send_early_hints_header() {
 
 	// Bail if stylesheet not used.
 	if ( ! $preload_stylesheet ) {
-		return $resources;
+		return;
 	}
 
 	status_header( 103 );
