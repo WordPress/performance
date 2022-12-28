@@ -9,7 +9,7 @@
  */
 
 /**
- * Checks whether the theme's style.css file is actually being enqueued.
+ * Checks whether the theme's style.css file is actually being enqueued and records the URL.
  *
  * @since n.e.x.t
  */
@@ -20,7 +20,7 @@ function perflab_tsp_stylesheet_check() {
 	}
 
 	// Bail if already populated.
-	if ( get_option( 'perflab_stylesheet_loaded' ) !== false ) {
+	if ( get_option( 'perflab_preload_stylesheet' ) !== false ) {
 		return;
 	}
 
@@ -29,18 +29,25 @@ function perflab_tsp_stylesheet_check() {
 	$handles    = array_merge( wp_styles()->queue, wp_styles()->done );
 	$registered = wp_styles()->registered;
 
-	$loaded = false;
+	$preload = '0';
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $registered[ $handle ] ) ) {
 			continue;
 		}
 		if ( $registered[ $handle ]->src === $stylesheet_uri ) {
-			$loaded = true;
+			$preload = $registered[ $handle ]->src;
+			$ver     = $registered[ $handle ]->ver;
+			if ( null !== $ver ) {
+				if ( false === $ver ) {
+					$ver = wp_styles()->default_version;
+				}
+				$preload = add_query_arg( 'ver', $ver, $preload );
+			}
 			break;
 		}
 	}
 
-	update_option( 'perflab_stylesheet_loaded', $loaded ? '1' : '0' );
+	update_option( 'perflab_preload_stylesheet', $preload );
 }
 add_action( 'wp_print_styles', 'perflab_tsp_stylesheet_check' );
 
@@ -50,9 +57,11 @@ add_action( 'wp_print_styles', 'perflab_tsp_stylesheet_check' );
  * @since n.e.x.t
  */
 function perflab_tsp_reset_stylesheet_check() {
-	delete_option( 'perflab_stylesheet_loaded' );
+	delete_option( 'perflab_preload_stylesheet' );
 }
 add_action( 'switch_theme', 'perflab_tsp_reset_stylesheet_check' );
+add_action( 'update_option_home', 'perflab_tsp_reset_stylesheet_check' );
+add_action( 'update_option_siteurl', 'perflab_tsp_reset_stylesheet_check' );
 
 /**
  * Add theme's style.css as a resource to preload, if available.
@@ -63,13 +72,15 @@ add_action( 'switch_theme', 'perflab_tsp_reset_stylesheet_check' );
  * @return array Modified $resources.
  */
 function perflab_tsp_preload_resources( $resources ) {
+	$preload_stylesheet = get_option( 'perflab_preload_stylesheet' );
+
 	// Bail if stylesheet not used.
-	if ( ! get_option( 'perflab_stylesheet_loaded' ) ) {
+	if ( ! $preload_stylesheet ) {
 		return $resources;
 	}
 
 	$resources[] = array(
-		'href' => get_stylesheet_uri(),
+		'href' => $preload_stylesheet,
 		'as'   => 'style',
 	);
 

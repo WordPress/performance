@@ -34,11 +34,12 @@ function perflab_hieh_img_tag_check( $filtered_image, $context ) {
 	}
 
 	if ( ! empty( $filtered_image ) && strpos( $filtered_image, 'loading="lazy"' ) === false ) {
+		// Store the entire srcset and pick which image to use for Early Hints when loading the page.
 		// In reality, this approach will not work well, because the image loaded may be one in `srcset` rather than
 		// in `src`. However, Early Hints do not support `imagesrcset` and `imagesizes`, this is only supported in
 		// a `preload` link tag (see https://html.spec.whatwg.org/multipage/semantics.html#early-hints:attr-link-imagesrcset).
 		// This probably means at this point Early Hints can only be reasonably used for CSS or JS.
-		if ( preg_match( '/ src="([^"]+)/', $filtered_image, $matches ) ) {
+		if ( preg_match( '/ srcset="([^"]+)/', $filtered_image, $matches ) ) {
 			update_option( 'perflab_hieh_' . md5( $perflab_hieh_request_uri ), $matches[1] );
 		}
 		remove_filter( 'wp_content_img_tag', 'perflab_hieh_img_tag_check' );
@@ -107,9 +108,39 @@ function perflab_hieh_send_early_hints_header() {
 		$perflab_hieh_request_uri = '/';
 	}
 
-	$hero_img_url = get_option( 'perflab_hieh_' . md5( $perflab_hieh_request_uri ) );
-	if ( ! $hero_img_url ) {
+	$hero_img_srcset = get_option( 'perflab_hieh_' . md5( $perflab_hieh_request_uri ) );
+	if ( ! $hero_img_srcset ) {
 		return;
+	}
+
+	$hero_img_srcset = array_filter(
+		array_map(
+			function( $srcset_entry ) {
+				if ( ! preg_match( '/ (\d+)w$/', $srcset_entry, $matches ) ) {
+					return false;
+				}
+				return array(
+					'src' => str_replace( $matches[0], '', $srcset_entry ),
+					'w'   => (int) $matches[1],
+				);
+			},
+			explode( ', ', $hero_img_srcset )
+		)
+	);
+	$hero_img_srcset = wp_list_sort( $hero_img_srcset, 'w', 'ASC' );
+
+	// This approach is obviously not reliable and clearly shows how Early Hints as of today
+	// is not really feasible for images due to lack of srcset and sizes support.
+	$min_width    = wp_is_mobile() ? 1000 : 1600;
+	$hero_img_url = '';
+	foreach ( $hero_img_srcset as $srcset_entry ) {
+		if ( $srcset_entry['w'] > $min_width ) {
+			$hero_img_url = $srcset_entry['src'];
+			break;
+		}
+	}
+	if ( ! $hero_img_url ) {
+		$hero_img_url = array_pop( $hero_img_srcset )['src'];
 	}
 
 	status_header( 103 );

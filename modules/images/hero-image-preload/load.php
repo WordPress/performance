@@ -94,7 +94,10 @@ add_action( 'init', 'perflab_hip_add_hooks' );
 function perflab_hip_preload_resources( $resources ) {
 	$post = get_queried_object();
 	if ( ! $post instanceof WP_Post ) {
-		return $resources;
+		if ( ! isset( $GLOBALS['wp_the_query']->posts[0] ) || ! $GLOBALS['wp_the_query']->posts[0] instanceof WP_Post ) {
+			return $resources;
+		}
+		$post = $GLOBALS['wp_the_query']->posts[0];
 	}
 
 	$image_preload = get_post_meta( $post->ID, 'perflab_hero_image_preload', true );
