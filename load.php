@@ -300,11 +300,14 @@ function perflab_maybe_set_object_cache_dropin() {
 	}
 
 	if ( $wp_filesystem || WP_Filesystem() ) {
+		$dropin_path        = WP_CONTENT_DIR . '/object-cache.php';
+		$dropin_backup_path = WP_CONTENT_DIR . '/object-cache-plst-orig.php';
+
 		// If there is an actual object-cache.php file, rename it to effectively
 		// back it up.
 		// The Performance Lab object-cache.php will still load it, so the
 		// behavior does not change.
-		if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) ) {
+		if ( $wp_filesystem->exists( $dropin_path ) ) {
 			// If even the backup file already exists, we should not do anything,
 			// except for the case where that file is the same as the main
 			// object-cache.php file. This can happen if another plugin is
@@ -314,17 +317,17 @@ function perflab_maybe_set_object_cache_dropin() {
 			// https://github.com/WordPress/performance/issues/612).
 			// In that case we can simply delete the main file since it is
 			// already backed up.
-			if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) ) {
-				$oc_content      = $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' );
-				$oc_orig_content = $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache-plst-orig.php' );
+			if ( $wp_filesystem->exists( $dropin_backup_path ) ) {
+				$oc_content      = $wp_filesystem->get_contents( $dropin_path );
+				$oc_orig_content = $wp_filesystem->get_contents( $dropin_backup_path );
 				if ( ! $oc_content || $oc_content !== $oc_orig_content ) {
 					// Set timeout of 1 hour before retrying again (only in case of failure).
 					set_transient( 'perflab_set_object_cache_dropin', true, HOUR_IN_SECONDS );
 					return;
 				}
-				$wp_filesystem->delete( WP_CONTENT_DIR . '/object-cache.php' );
+				$wp_filesystem->delete( $dropin_path );
 			} else {
-				$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache.php', WP_CONTENT_DIR . '/object-cache-plst-orig.php' );
+				$wp_filesystem->move( $dropin_path, $dropin_backup_path );
 			}
 		}
 
@@ -364,13 +367,16 @@ function perflab_maybe_remove_object_cache_dropin() {
 	}
 
 	if ( $wp_filesystem || WP_Filesystem() ) {
+		$dropin_path        = WP_CONTENT_DIR . '/object-cache.php';
+		$dropin_backup_path = WP_CONTENT_DIR . '/object-cache-plst-orig.php';
+
 		// If there is an actual object-cache.php file, restore it
 		// and override the Performance Lab file.
 		// Otherwise just delete the Performance Lab file.
-		if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) ) {
-			$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache-plst-orig.php', WP_CONTENT_DIR . '/object-cache.php', true );
+		if ( $wp_filesystem->exists( $dropin_backup_path ) ) {
+			$wp_filesystem->move( $dropin_backup_path, $dropin_path, true );
 		} else {
-			$wp_filesystem->delete( WP_CONTENT_DIR . '/object-cache.php' );
+			$wp_filesystem->delete( $dropin_path );
 		}
 	}
 
