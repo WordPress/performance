@@ -81,12 +81,42 @@ function perflab_hieh_add_hooks() {
 add_action( 'init', 'perflab_hieh_add_hooks' );
 
 /**
+ * Replacement for the WP core status_header() function.
+ *
+ * This function in theory supports setting multiple HTTP status headers, which WP core's function does not support.
+ *
+ * However, in practice this still doesn't matter, as PHP itself allows only for a single HTTP response code, making
+ * this entire feature not usable in the server environment.
+ *
+ * @since n.e.x.t
+ *
+ * @param int    $code        HTTP status code.
+ * @param string $description Description for the HTTP status.
+ */
+function perflab_hieh_fixed_status_header( $code, $description ) {
+	if ( ! $description ) {
+		return;
+	}
+
+	$protocol      = wp_get_server_protocol();
+	$status_header = "$protocol $code $description";
+
+	// This filter is copied over from the WP core function status_header().
+	$status_header = apply_filters( 'status_header', $status_header, $code, $description, $protocol );
+
+	if ( ! headers_sent() ) {
+		// The `false` here is the critical change needed, to not override previous status headers.
+		header( $status_header, false, $code );
+	}
+}
+
+/**
  * Checks the request URI and based on it attempts to send a 103 Early Hints header for the hero image.
  *
  * @since n.e.x.t
  */
 function perflab_hieh_send_early_hints_header() {
-	global $perflab_hieh_request_uri;
+	global $perflab_hieh_request_uri, $wp_header_to_desc;
 
 	// Bail if not a frontend request.
 	if ( is_admin() || defined( 'XMLRPC_REQUEST' ) || defined( 'REST_REQUEST' ) || defined( 'MS_FILES_REQUEST' ) ) {
@@ -143,30 +173,41 @@ function perflab_hieh_send_early_hints_header() {
 		$hero_img_url = array_pop( $hero_img_srcset )['src'];
 	}
 
-	status_header( 103 );
+	perflab_hieh_fixed_status_header( 103, get_status_header_desc( 103 ) );
 	header( "Link: <{$hero_img_url}>; rel=preload; as=image", false );
 
-	// Fix WP core headers no longer being output because of its problematic `headers_sent()` checks.
+	// Empty header descriptions list to prevent core from overriding status header.
+	// Instead the status header will be manually printed below.
+	$orig_header_to_desc = $wp_header_to_desc;
+	$wp_header_to_desc   = array();
+
+	// Output status header manually here since, per the above hack, WP core will no longer do that itself.
 	add_filter(
 		'wp_headers',
-		function( $headers ) {
-			// Send headers on 'send_headers' early, since status header will still be sent by WP.
+		function( $headers ) use ( $orig_header_to_desc ) {
+			global $wp_query;
+
+			if ( $wp_query->is_404() ) {
+				$code = 404;
+			} else {
+				$code = 200;
+			}
+
+			// Output status header using this "fixed" function, so that previous status headers are not overwritten.
+			perflab_hieh_fixed_status_header( $code, isset( $orig_header_to_desc[ $code ] ) ? $orig_header_to_desc[ $code ] : '' );
+
+			// Restore original $wp_header_to_desc.
 			add_action(
 				'send_headers',
-				function() use ( $headers ) {
-					if ( isset( $headers['Last-Modified'] ) && false === $headers['Last-Modified'] ) {
-						unset( $headers['Last-Modified'] );
+				function() use ( $orig_header_to_desc ) {
+					global $wp_header_to_desc;
 
-						header_remove( 'Last-Modified' );
-					}
-
-					foreach ( (array) $headers as $name => $field_value ) {
-						header( "{$name}: {$field_value}" );
-					}
+					$wp_header_to_desc = $orig_header_to_desc;
 				},
 				// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 				PHP_INT_MIN
 			);
+
 			return $headers;
 		}
 	);
