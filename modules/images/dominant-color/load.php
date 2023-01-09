@@ -419,7 +419,9 @@ function dominant_color_rgb_to_hex( $red, $green, $blue ) {
 }
 
 /**
- * Integrate with the media library.
+ * Integrates with the media library.
+ *
+ * @since n.e.x.t
  */
 function dominant_color_add_media_library_integration() {
 	add_action( 'admin_footer', 'dominant_color_print_media_templates' );
@@ -428,14 +430,14 @@ function dominant_color_add_media_library_integration() {
 add_filter( 'plugins_loaded', 'dominant_color_add_media_library_integration' );
 remove_action( 'admin_footer', 'wp_print_media_templates' );
 
-
 /**
  * Add the dominant color when preparing attachment data.
+ *
+ * @since n.e.x.t
  *
  * @param array       $response   Array of prepared attachment data. @see wp_prepare_attachment_for_js().
  * @param WP_Post     $attachment Attachment object.
  * @param array|false $meta       Array of attachment meta data, or false if there is none.
- *
  * @return array Array of prepared attachment data.
  */
 function dominant_color_prepare_attachment_for_js( $response, $attachment, $meta ) {
@@ -463,11 +465,13 @@ function dominant_color_prepare_attachment_for_js( $response, $attachment, $meta
 }
 
 /**
- * Print media templates.
+ * Prints the templates used in the media manager.
  *
  * Copied from core's wp_print_media_templates() and modified to add the dominant color.
  *
  * Eslint is disabled because this block of code is copied from core and only included here to enable modification.
+ *
+ * @since n.e.x.t
  */
 // phpcs:disable
  function dominant_color_print_media_templates() {
