@@ -9,6 +9,7 @@
 	<testsuites>
 		<testsuite name="default">
 			<directory suffix=".php">./</directory>
+    		<exclude>./utils</exclude>
 		</testsuite>
 	</testsuites>
 	<groups>
