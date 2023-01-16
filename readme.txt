@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.0
 Tested up to:      6.1
 Requires PHP:      5.6
-Stable tag:        1.8.0
+Stable tag:        1.9.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -76,6 +76,16 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 1.9.0 =
+
+**Enhancements**
+
+* Database: Remove warning about multi-server environment from the SQLite module description. ([619](https://github.com/WordPress/performance/pull/619))
+
+**Bug Fixes**
+
+* Infrastructure: Enhance object-cache.php drop-in interoperability with other plugins. ([616](https://github.com/WordPress/performance/pull/616))
 
 = 1.8.0 =
 
