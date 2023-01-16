@@ -77,6 +77,16 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 == Changelog ==
 
+= 1.9.0 =
+
+**Enhancements**
+
+* Database: Remove warning about multi-server environment from the SQLite module description. ([619](https://github.com/WordPress/performance/pull/619))
+
+**Bug Fixes**
+
+* Infrastructure: Enhance object-cache.php drop-in interoperability with other plugins. ([616](https://github.com/WordPress/performance/pull/616))
+
 = 1.8.0 =
 
 **Features**
