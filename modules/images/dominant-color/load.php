@@ -474,7 +474,7 @@ function dominant_color_prepare_attachment_for_js( $response, $attachment, $meta
  * @since n.e.x.t
  */
 // phpcs:disable
- function dominant_color_print_media_templates() {
+function dominant_color_print_media_templates() {
 	$class = 'media-modal wp-core-ui';
 
 	$alt_text_description = sprintf(
