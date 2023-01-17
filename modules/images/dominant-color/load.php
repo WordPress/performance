@@ -496,7 +496,7 @@ function dominant_color_print_media_templates() {
 	?>
 	<style>
 		.wp-core-ui .attachment-preview[data-dominant-color]:not(.has-transparency) {
-			background: var(--dominant-color);
+			background-color: var(--dominant-color);
 		}
 	</style>
 	<script type="text/html" id="tmpl-media-frame">
