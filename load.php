@@ -290,7 +290,7 @@ function perflab_maybe_set_object_cache_dropin() {
 	if ( PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
 		return;
 	}
-	
+
 	/**
 	 * Filters whether the Perflab server timing drop-in should be set.
 	 *
