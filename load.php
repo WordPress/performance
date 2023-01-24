@@ -290,6 +290,17 @@ function perflab_maybe_set_object_cache_dropin() {
 	if ( PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
 		return;
 	}
+	
+	/**
+	 * Filters whether the Perflab server timing drop-in should be set.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param bool Whether the server timing drop-in should be set.
+	 */
+	if ( apply_filters( 'perflab_object_cache_dropin', '__return_false' ) ) {
+		return;
+	}
 
 	// Bail if already attempted before timeout has been completed.
 	// This is present in case placing the file fails for some reason, to avoid
