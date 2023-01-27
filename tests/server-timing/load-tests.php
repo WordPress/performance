@@ -41,23 +41,6 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		$this->assertTrue( perflab_server_timing_use_output_buffer() );
 	}
 
-	public function test_perflab_object_cache_dropin_may_be_disabled_via_filter() {
-		global $wp_filesystem;
-
-		$this->set_up_mock_filesystem();
-
-		// Ensure PL object-cache.php drop-in is not present and constant is not set.
-		$this->assertFalse( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
-		$this->assertFalse( PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
-
-		// Add filter to disable drop-in.
-		add_filter( 'perflab_disable_object_cache_dropin', '__return_true' );
-
-		// Run function to place drop-in and ensure it still doesn't exist afterwards.
-		perflab_maybe_set_object_cache_dropin();
-		$this->assertFalse( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
-	}
-
 	public function test_perflab_wrap_server_timing() {
 		$cb = function() {
 			return 123;
