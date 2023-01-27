@@ -40,7 +40,7 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		add_filter( 'perflab_server_timing_use_output_buffer', '__return_true' );
 		$this->assertTrue( perflab_server_timing_use_output_buffer() );
 	}
-	
+
 	public function test_perflab_object_cache_dropin_may_be_disabled_via_filter() {
 		global $wp_filesystem;
 
