@@ -123,7 +123,6 @@ function perflab_get_module_settings() {
 	$legacy_module_slugs = array(
 		'site-health/audit-autoloaded-options' => 'database/audit-autoloaded-options',
 		'site-health/audit-enqueued-assets'    => 'js-and-css/audit-enqueued-assets',
-		'site-health/audit-full-page-cache'    => 'object-cache/audit-full-page-cache',
 		'site-health/webp-support'             => 'images/webp-support',
 	);
 

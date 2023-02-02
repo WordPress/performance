@@ -123,7 +123,6 @@ class Load_Tests extends WP_UnitTestCase {
 		return array(
 			array( 'site-health/audit-autoloaded-options', 'database/audit-autoloaded-options' ),
 			array( 'site-health/audit-enqueued-assets', 'js-and-css/audit-enqueued-assets' ),
-			array( 'site-health/audit-full-page-cache', 'object-cache/audit-full-page-cache' ),
 			array( 'site-health/webp-support', 'images/webp-support' ),
 		);
 	}
