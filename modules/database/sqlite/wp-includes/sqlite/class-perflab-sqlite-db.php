@@ -168,6 +168,7 @@ class Perflab_SQLite_DB extends wpdb {
 				'<code>' . $query . '</code>'
 			);
 		}
+		return true;
 	}
 
 	/**
