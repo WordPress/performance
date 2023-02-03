@@ -443,6 +443,7 @@ class Perflab_SQLite_PDO_User_Defined_Functions {
 				list($years, $months) = explode( '-', $_parts[0] );
 				return 'P' . $years . 'Y' . $months . 'M';
 		}
+		return '';
 	}
 
 	/**
