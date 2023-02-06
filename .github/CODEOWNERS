@@ -63,7 +63,3 @@
 /modules/images/fetchpriority                                               @pbearne @adamsilverstein
 /tests/modules/images/fetchpriority                                         @pbearne @adamsilverstein
 /tests/testdata/modules/images/fetchpriority                                @pbearne @adamsilverstein
-
-# Module: Full Page Cache Health Check
-/modules/object-cache/audit-full-page-cache                                 @manuelRod @westonruter
-/tests/modules/object-cache/audit-full-page-cache                           @manuelRod @westonruter
