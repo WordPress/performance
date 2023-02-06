@@ -27,6 +27,7 @@ function perflab_add_modules_page() {
 	// Add the following hooks only if the screen was successfully added.
 	if ( false !== $hook_suffix ) {
 		add_action( "load-{$hook_suffix}", 'perflab_load_modules_page', 10, 0 );
+		add_action( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' );
 	}
 
 	return $hook_suffix;
