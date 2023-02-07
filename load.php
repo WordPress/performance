@@ -3,7 +3,7 @@
  * Plugin Name: Performance Lab
  * Plugin URI: https://github.com/WordPress/performance
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
- * Requires at least: 6.0
+ * Requires at least: 6.1
  * Requires PHP: 5.6
  * Version: 1.9.0
  * Author: WordPress Performance Team
@@ -123,7 +123,6 @@ function perflab_get_module_settings() {
 	$legacy_module_slugs = array(
 		'site-health/audit-autoloaded-options' => 'database/audit-autoloaded-options',
 		'site-health/audit-enqueued-assets'    => 'js-and-css/audit-enqueued-assets',
-		'site-health/audit-full-page-cache'    => 'object-cache/audit-full-page-cache',
 		'site-health/webp-support'             => 'images/webp-support',
 	);
 
