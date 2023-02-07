@@ -159,7 +159,7 @@ function perflab_get_active_modules() {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array An array of the currently active modules.
+	 * @param array $modules An array of the currently active modules.
 	 */
 	$modules = apply_filters( 'perflab_active_modules', $modules );
 
