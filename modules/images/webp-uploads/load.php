@@ -590,37 +590,40 @@ function webp_uploads_img_tag_update_mime_type( $original_image, $context, $atta
 		}
 	}
 
-	// Replace sub sizes for the image if present.
-	foreach ( $metadata['sizes'] as $size => $size_data ) {
-		if ( empty( $size_data['file'] ) ) {
-			continue;
-		}
+	if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
+		// Replace sub sizes for the image if present.
+		foreach ( $metadata['sizes'] as $size => $size_data ) {
 
-		foreach ( $target_mimes as $target_mime ) {
-			if ( $target_mime === $original_mime ) {
+			if ( empty( $size_data['file'] ) ) {
 				continue;
 			}
 
-			if ( ! isset( $size_data['sources'][ $target_mime ]['file'] ) ) {
-				continue;
-			}
+			foreach ( $target_mimes as $target_mime ) {
+				if ( $target_mime === $original_mime ) {
+					continue;
+				}
 
-			if ( $size_data['file'] === $size_data['sources'][ $target_mime ]['file'] ) {
-				continue;
-			}
+				if ( ! isset( $size_data['sources'][ $target_mime ]['file'] ) ) {
+					continue;
+				}
 
-			/** This filter is documented in modules/images/webp-uploads/load.php */
-			$filtered_image = (string) apply_filters( 'webp_uploads_pre_replace_additional_image_source', $image, $attachment_id, $size, $target_mime, $context );
+				if ( $size_data['file'] === $size_data['sources'][ $target_mime ]['file'] ) {
+					continue;
+				}
 
-			// If filtered image is same as the image, run our own replacement logic, otherwise rely on the filtered image.
-			if ( $filtered_image === $image ) {
-				$image = str_replace(
-					$size_data['file'],
-					$size_data['sources'][ $target_mime ]['file'],
-					$image
-				);
-			} else {
-				$image = $filtered_image;
+				/** This filter is documented in modules/images/webp-uploads/load.php */
+				$filtered_image = (string) apply_filters( 'webp_uploads_pre_replace_additional_image_source', $image, $attachment_id, $size, $target_mime, $context );
+
+				// If filtered image is same as the image, run our own replacement logic, otherwise rely on the filtered image.
+				if ( $filtered_image === $image ) {
+					$image = str_replace(
+						$size_data['file'],
+						$size_data['sources'][ $target_mime ]['file'],
+						$image
+					);
+				} else {
+					$image = $filtered_image;
+				}
 			}
 		}
 	}
