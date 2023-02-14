@@ -1,5 +1,14 @@
 <?php
 /**
+ * Plugin Name: Performance Lab Server Timing Object Cache Drop-In
+ * Plugin URI: https://github.com/WordPress/performance
+ * Description: Performance Lab drop-in to register Server-Timing metrics early. This is not a real object cache drop-in and will not override other actual object cache drop-ins.
+ * Version: 1
+ * Author: WordPress Performance Team
+ * Author URI: https://make.wordpress.org/performance/
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ *
  * Object cache drop-in from Performance Lab plugin.
  *
  * This drop-in is used, admittedly as a hack, to be able to measure server
