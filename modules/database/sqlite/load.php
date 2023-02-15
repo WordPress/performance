@@ -73,13 +73,10 @@ function perflab_sqlite_plugin_adminbar_item( $admin_bar ) {
 
 	if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) && defined( 'DATABASE_TYPE' ) && 'sqlite' === DATABASE_TYPE ) {
 		$title = '<span style="color:#46B450;">' . __( 'Database: SQLite', 'performance-lab' ) . '</span>';
+	} elseif ( stripos( $wpdb->db_server_info(), 'maria' ) !== false ) {
+		$title = '<span style="color:#DC3232;">' . __( 'Database: MariaDB', 'performance-lab' ) . '</span>';
 	} else {
-		$db_info = $wpdb->db_server_info();
-		if ( stripos( $db_info, 'maria' ) !== false ) {
-			$title = '<span style="color:#DC3232;">' . __( 'Database: MariaDB', 'performance-lab' ) . '</span>';
-		} else {
-			$title = '<span style="color:#DC3232;">' . __( 'Database: MySQL', 'performance-lab' ) . '</span>';
-		}
+		$title = '<span style="color:#DC3232;">' . __( 'Database: MySQL', 'performance-lab' ) . '</span>';
 	}
 
 	$args = array(
