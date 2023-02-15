@@ -65,14 +65,13 @@ add_action( 'admin_notices', 'perflab_sqlite_plugin_admin_notice' ); // Add the 
  * @param WP_Admin_Bar $admin_bar The admin bar object.
  */
 function perflab_sqlite_plugin_adminbar_item( $admin_bar ) {
-	if ( ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
-		return;
-	}
 	$args = array(
 		'id'     => 'performance-lab-sqlite',
 		'parent' => 'top-secondary',
 		/* translators: %s: SQLite icon. */
-		'title'  => '<span style="color:#46B450;">' . __( 'SQLite activated', 'performance-lab' ) . '</span>',
+		'title'  => defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) && defined( 'DATABASE_TYPE' ) && 'sqlite' === DATABASE_TYPE
+			? '<span style="color:#46B450;">' . __( 'Database: SQLite', 'performance-lab' ) . '</span>'
+			: '<span style="color:#DC3232;">' . __( 'Database: MySQL', 'performance-lab' ) . '</span>',
 		'href'   => esc_url( admin_url( 'options-general.php?page=' . PERFLAB_MODULES_SCREEN ) ),
 		'meta'   => false,
 	);
