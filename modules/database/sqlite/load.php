@@ -14,7 +14,7 @@
 require_once __DIR__ . '/site-health.php';
 
 /**
- * Add admin notices.
+ * Adds admin notices.
  *
  * When the plugin gets merged in wp-core, this is not to be ported.
  *
@@ -58,3 +58,34 @@ function perflab_sqlite_plugin_admin_notice() {
 	);
 }
 add_action( 'admin_notices', 'perflab_sqlite_plugin_admin_notice' ); // Add the admin notices.
+
+/**
+ * Adds a link to the admin bar.
+ *
+ * @since n.e.x.t
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
+ * @param WP_Admin_Bar $admin_bar The admin bar object.
+ */
+function perflab_sqlite_plugin_adminbar_item( $admin_bar ) {
+	global $wpdb;
+
+	if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) && defined( 'DATABASE_TYPE' ) && 'sqlite' === DATABASE_TYPE ) {
+		$title = '<span style="color:#46B450;">' . __( 'Database: SQLite', 'performance-lab' ) . '</span>';
+	} elseif ( stripos( $wpdb->db_server_info(), 'maria' ) !== false ) {
+		$title = '<span style="color:#DC3232;">' . __( 'Database: MariaDB', 'performance-lab' ) . '</span>';
+	} else {
+		$title = '<span style="color:#DC3232;">' . __( 'Database: MySQL', 'performance-lab' ) . '</span>';
+	}
+
+	$args = array(
+		'id'     => 'performance-lab-sqlite',
+		'parent' => 'top-secondary',
+		'title'  => $title,
+		'href'   => esc_url( admin_url( 'options-general.php?page=' . PERFLAB_MODULES_SCREEN ) ),
+		'meta'   => false,
+	);
+	$admin_bar->add_node( $args );
+}
+add_action( 'admin_bar_menu', 'perflab_sqlite_plugin_adminbar_item', 999 );
