@@ -62,7 +62,7 @@ add_action( 'admin_notices', 'perflab_sqlite_plugin_admin_notice' ); // Add the 
 /**
  * Adds a link to the admin bar.
  *
- * @since n.e.x.t
+ * @since 2.0.0
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
