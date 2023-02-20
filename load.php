@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
  * Requires at least: 6.1
  * Requires PHP: 5.6
- * Version: 1.9.0
+ * Version: 2.0.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.9.0' );
+define( 'PERFLAB_VERSION', '2.0.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -293,7 +293,7 @@ function perflab_maybe_set_object_cache_dropin() {
 	/**
 	 * Filters whether the Perflab server timing drop-in should be set.
 	 *
-	 * @since n.e.x.t
+	 * @since 2.0.0
 	 *
 	 * @param bool Whether the server timing drop-in should be set.
 	 */
