@@ -24,8 +24,6 @@ Currently the plugin includes the following performance modules:
 * **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
 * **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
 * **SQLite Integration:** Use an SQLite database instead of MySQL.
-* **Full Page Cache Health Check:** Adds a check for full page cache in Site Health status.
-* **Persistent Object Cache Health Check:** Adds a persistent object cache check for sites with non-trivial amounts of data in Site Health status.
 
 == Installation ==
 
@@ -76,6 +74,25 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.0.0 =
+
+**Enhancements**
+
+* Object Cache: Update WordPress version to 6.1 and remove Cache modules. ([641](https://github.com/WordPress/performance/pull/641))
+* Measurement: Add `perflab_disable_object_cache_dropin` filter. ([629](https://github.com/WordPress/performance/pull/629))
+* Database: Add an indicator in the adminbar to show when using SQLite. ([604](https://github.com/WordPress/performance/pull/604))
+
+**Bug Fixes**
+
+* Images: Check for existing `$metadata['sizes']` to fix PHP warning. ([648](https://github.com/WordPress/performance/pull/648))
+* Images: Use correct number of arguments in filter callback. ([634](https://github.com/WordPress/performance/pull/634))
+* Database: Fix invalid docs and return types as highlighted by static analysis. ([645](https://github.com/WordPress/performance/pull/645))
+* Infrastructure: Fix incorrect usage of `plugin_action_links_*` filter. ([647](https://github.com/WordPress/performance/pull/647))
+
+**Documentation**
+
+* Infrastructure: Add file header to object-cache drop-in to clarify purpose. ([649](https://github.com/WordPress/performance/pull/649))
 
 = 1.9.0 =
 
