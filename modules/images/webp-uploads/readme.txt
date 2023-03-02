@@ -1,0 +1,63 @@
+=== Performance Lab - WebP Uploads Module ===
+
+Contributors:      wordpressdotorg
+Requires at least: 6.1
+Tested up to:      6.1
+Requires PHP:      5.6
+Stable tag:        2.0.0
+License:           GPLv2 or later
+License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+Tags:              performance, images, site health, measurement, webp
+
+WebP uploads module for the [performance plugin](https://wordpress.org/plugins/performance-lab/) from the WordPress Performance Team.
+
+== Description ==
+
+This plugin adds a WebP uploads module to the [performance plugin](https://wordpress.org/plugins/performance-lab/), enabling WebP support for media uploads within the WordPress application, when this module is enabled.
+
+This plugin is intended to be used alongside the [performance plugin](https://wordpress.org/plugins/performance-lab/), and will not function as a standalone plugin. The performance plugin may be obtained [here](https://wordpress.org/plugins/performance-lab/).
+
+== Installation ==
+
+= Installation from within WordPress =
+
+1. Visit **Plugins > Add New**.
+2. Search for **Performance Lab - WebP Uploads Module**.
+3. Install and activate the **Performance Lab - WebP Uploads Module** plugin.
+
+= Manual installation =
+
+1. Upload the entire `performance-lab-webp-support-module` folder to the `/wp-content/plugins/` directory.
+2. Visit **Plugins**.
+3. Activate the **Performance Lab - WebP Uploads Module** plugin.
+
+= After activation =
+
+1. Visit the new **Settings > Performance** menu.
+2. Enable the individual modules you would like to use, one of which should be this WebP support module.
+
+== Frequently Asked Questions ==
+
+= What is the purpose of this plugin? =
+
+The primary purpose of the Performance Lab - WebP Support Module plugin is to add an additional module to the performance plugin that enables the ability to toggle on/off WebP support.
+
+= Can I use this plugin on my production site? =
+
+Per the primary purpose of the plugin (see above), it can be considered stable for production usage given that this particular module is not marked as experimental.
+
+= Where can I submit my plugin feedback? =
+
+Feedback is encouraged and much appreciated, especially since this plugin may contain future WordPress core features. If you have suggestions or requests for new features, you can [submit them as an issue in the Performance Lab GitHub repository](https://github.com/WordPress/performance/issues/new/choose). If you need help with troubleshooting or have a question about the plugin, please [create a new topic on our support forum](https://wordpress.org/support/plugin/performance-lab/#new-topic-0).
+
+= How can I contribute to the plugin? =
+
+Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
+
+== Changelog ==
+
+= 1.0.0 =
+
+**Initial Release**
+
+* Initial release of the WebP support performance plugin module as a standalone plugin. ([636](https://github.com/WordPress/performance/issues/636))
