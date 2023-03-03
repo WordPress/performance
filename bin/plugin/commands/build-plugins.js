@@ -27,15 +27,33 @@ exports.handler = async () => {
 		}
 
 		try {
-			const customer = JSON.parse( jsonString );
-			for ( const key in customer ) {
+			const modules = JSON.parse( jsonString );
+			for ( const key in modules ) {
 				const pluginKey = key;
-				const pluginVersion = customer[ pluginKey ].version;
-				const pluginSlug = customer[ pluginKey ].slug;
+				const pluginVersion = modules[ pluginKey ].version;
+				const pluginSlug = modules[ pluginKey ].slug;
+
+				if ( ! pluginVersion || ! pluginSlug ) {
+					log(
+						formats.error(
+							'\nThe given module configuration is not valid.\n\n'
+						)
+					);
+					return;
+				}
+
 				try {
 					// Copy module files from the folder.
 					const modulePath = path.join( '.', 'modules/' + key );
-					fs.copySync( modulePath, './build', { overwrite: true } );
+					try {
+						fs.copySync( modulePath, './build', { overwrite: true } );
+					} catch ( copyError ) {
+						log(
+							formats.error(
+								`\nError copying plugin file: "${ copyError }"\n\n`
+							)
+						);
+					}
 
 					// Update file content.
 					updatePluginFiles( {
@@ -128,7 +146,7 @@ async function updatePluginFiles( settings ) {
 }
 
 /**
- * Updates the `readme.txt` file with the given changelog.
+ * Gets the specific module file header information.
  *
  * @param {string} fileHeaderContent File header.
  *
