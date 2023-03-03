@@ -30,13 +30,13 @@ exports.handler = async () => {
 			const modules = JSON.parse( jsonString );
 			for ( const key in modules ) {
 				const pluginKey = key;
-				const pluginVersion = modules[ pluginKey ].version;
-				const pluginSlug = modules[ pluginKey ].slug;
+				const pluginVersion = modules[ pluginKey ]?.version;
+				const pluginSlug = modules[ pluginKey ]?.slug;
 
 				if ( ! pluginVersion || ! pluginSlug ) {
 					log(
 						formats.error(
-							'\nThe given module configuration is not valid.\n\n'
+							'\nThe given module configuration is invalid, the module JSON object is missing the "version" and/or "slug" properties, or they are misspelled.\n\n'
 						)
 					);
 					return;
@@ -110,12 +110,13 @@ async function updatePluginFiles( settings ) {
 
 	// Get module header data.
 	const { name, description } = await getModuleData( buildLoadFileContent );
+	const { key, version, slug } = settings;
 	const moduleData = {
 		pluginname: name,
 		plugindescription: description,
-		pluginuri: '/tree/trunk/modules/' + settings.key,
-		pluginversion: settings.version,
-		textdomain: settings.slug,
+		pluginuri: '/tree/trunk/modules/' + key,
+		pluginversion: version,
+		textdomain: slug,
 	};
 
 	// Map of module header => object property.
@@ -143,6 +144,56 @@ async function updatePluginFiles( settings ) {
 			updatedBuildLoadFileContent = fs.readFileSync( buildLoadFile, 'utf-8' );
 		}
 	} );
+
+	// Add load module script.
+	await addCanLoadScript( slug, buildLoadFile, updatedBuildLoadFileContent );
+}
+
+/**
+ * Adds can load functions.
+ *
+ * @param {string} slug File header.
+ * @param {string} buildLoadFile File header.
+ * @param {string} buildLoadFileContent File header.
+ */
+async function addCanLoadScript( slug, buildLoadFile, buildLoadFileContent ) {
+	const regex = /\/\*[*](\n[\s\S]*?)\*\//mi;
+	const newPluginComment = buildLoadFileContent.match( regex )?.[ 0 ];
+	const moduleSlug = slug.replace( /-/g, '_' );
+	let newContent;
+	const canLoadFunction = `
+function ${ moduleSlug }_can_load() {
+	$can_load = require __DIR__ . '/can-load.php';
+	if ( $can_load() ) {
+		return true;
+	}
+	add_action(
+		'admin_notices',
+		function() {
+			printf(
+				'<div class="notice notice-error"><p>%s</p></div>',
+				sprintf(
+					__( 'The module is already merged into WordPress core or loaded by another plugin.', 'performance-lab' ),
+				)
+			);
+			return;
+		}
+	);
+	return false;
+}
+
+// Do not run the plugin if conditions are not met.
+if ( ! ${ moduleSlug }_can_load() ) {
+	return;
+}`;
+
+	if ( buildLoadFileContent.match( regex ) ) {
+		newContent = buildLoadFileContent
+			.replace( newPluginComment, newPluginComment + '\n' + canLoadFunction )
+			.trim()
+			.concat( '\n' );
+	}
+	fs.writeFileSync( buildLoadFile, newContent );
 }
 
 /**
