@@ -53,6 +53,7 @@ exports.handler = async () => {
 								`\nError copying plugin file: "${ copyError }"\n\n`
 							)
 						);
+						continue;
 					}
 
 					// Update file content.
