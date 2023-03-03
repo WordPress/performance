@@ -46,7 +46,7 @@ exports.handler = async () => {
 					// Copy module files from the folder.
 					const modulePath = path.join( '.', 'modules/' + key );
 					try {
-						fs.copySync( modulePath, './build', { overwrite: true } );
+						fs.copySync( modulePath, './build/' + pluginSlug, { overwrite: true } );
 					} catch ( copyError ) {
 						log(
 							formats.error(
@@ -95,9 +95,10 @@ exports.handler = async () => {
  * @param {[]Settings} settings Plugin settings.
  */
 async function updatePluginFiles( settings ) {
+	const { key, version, slug } = settings;
 	const loadFile = path.join( '.', 'load.php' );
 	const loadFileContent = fs.readFileSync( loadFile, 'utf-8' );
-	const buildLoadFile = path.join( '.', 'build/load.php' );
+	const buildLoadFile = path.join( '.', 'build/' + slug + '/load.php' );
 	const buildLoadFileContent = fs.readFileSync( buildLoadFile, 'utf-8' );
 
 	const regex = /\/\\*\\*[\s\S]+?(?=\*\/)/mi;
@@ -110,7 +111,6 @@ async function updatePluginFiles( settings ) {
 
 	// Get module header data.
 	const { name, description } = await getModuleData( buildLoadFileContent );
-	const { key, version, slug } = settings;
 	const moduleData = {
 		pluginname: name,
 		plugindescription: description,
@@ -162,6 +162,13 @@ async function addCanLoadScript( slug, buildLoadFile, buildLoadFileContent ) {
 	const moduleSlug = slug.replace( /-/g, '_' );
 	let newContent;
 	const canLoadFunction = `
+/**
+ * Can load function to determine if the module is already merged into WordPress core or loaded by another plugin.
+ *
+ * @since 1.0.0
+ *
+ * @return boolean
+ */
 function ${ moduleSlug }_can_load() {
 	$can_load = require __DIR__ . '/can-load.php';
 	if ( $can_load() ) {
