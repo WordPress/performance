@@ -9,6 +9,39 @@
  */
 
 /**
+ * Can load function to determine if the module is already merged into WordPress core or loaded by
+ * another plugin.
+ *
+ * @since 1.0.0
+ *
+ * @return boolean
+ */
+function webp_uploads_can_load() {
+	$can_load = require __DIR__ . '/can-load.php';
+	if ( $can_load() ) {
+		return true;
+	}
+	add_action(
+		'admin_notices',
+		function() {
+			printf(
+				'<div class="notice notice-error"><p>%s</p></div>',
+				sprintf(
+					__( 'The module is already merged into WordPress core or loaded by another plugin.', 'performance-lab' )
+				)
+			);
+			return;
+		}
+	);
+	return false;
+}
+
+// Do not run the plugin if conditions are not met.
+if ( ! webp_uploads_can_load() ) {
+	return;
+}
+
+/**
  * Require helper functions and specific integrations.
  */
 require_once __DIR__ . '/helper.php';
