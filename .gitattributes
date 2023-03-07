@@ -31,10 +31,4 @@
 /.gitattributes export-ignore
 /.gitignore export-ignore
 
-/modules/database/audit-autoloaded-options/readme.txt export-ignore
-modules/database/sqlite/readme.txt export-ignore
-/modules/images/dominant-color/readme.txt export-ignore
-/modules/images/fetchpriority/readme.txt export-ignore
-/modules/images/webp-support/readme.txt export-ignore
-/modules/images/webp-uploads/readme.txt export-ignore
-/modules/js-and-css/audit-enqueued-assets/readme.txt export-ignore
+/modules/**/readme.txt export-ignore
