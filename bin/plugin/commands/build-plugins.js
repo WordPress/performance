@@ -9,7 +9,7 @@ const glob = require( 'fast-glob' );
  * Internal dependencies
  */
 const { log, formats } = require( '../lib/logger' );
-const { getModuleDataFromHeaders } = require( './common' );
+const { getModuleDataFromHeader, getModuleHeader } = require( './common' );
 
 exports.options = [];
 
@@ -45,8 +45,8 @@ exports.handler = async () => {
 				try {
 					// Copy module files from the folder.
 					const modulePath = path.join( '.', 'modules/' + moduleDir );
+					const buildModulePath = path.join( '.', 'build/' + pluginSlug );
 					try {
-						const buildModulePath = path.join( '.', 'build/' + pluginSlug );
 						// Clean up build module files directory.
 						fs.rmSync( buildModulePath, { force: true, recursive: true } );
 
@@ -65,12 +65,21 @@ exports.handler = async () => {
 						key: moduleDir,
 						slug: pluginSlug,
 						version: pluginVersion,
-						pluginModulePath: modulePath,
+						pluginPath: buildModulePath,
 					} );
 
 					// Update text domain.
-					updateTextDomain( {
-						slug: pluginSlug,
+					updateModuleDetails( {
+						pluginPath: buildModulePath,
+						regex: '[\']performance-lab[\']',
+						result: `'${ pluginSlug }'`,
+					} );
+
+					// Update `@package`.
+					updateModuleDetails( {
+						pluginPath: buildModulePath,
+						regex: '@package\\s{1,}performance-lab',
+						result: '@package ' + pluginSlug,
 					} );
 				} catch ( error ) {
 					log(
@@ -96,23 +105,24 @@ exports.handler = async () => {
  * @param {[]Settings} settings Plugin settings.
  */
 async function updatePluginHeader( settings ) {
-	const { key, version, slug, pluginModulePath } = settings;
-	const loadFile = path.join( '.', 'load.php' );
-	const loadFileContent = fs.readFileSync( loadFile, 'utf-8' );
-	const buildLoadFile = path.join( '.', 'build/' + slug + '/load.php' );
+	const { key, version, slug, pluginPath } = settings;
+	// Plugin root `load.php` file content.
+	const rootLoadFile = path.join( '.', 'load.php' );
+	const rootLoadFileContent = fs.readFileSync( rootLoadFile, 'utf-8' );
+	// Specific module `load.php` file content.
+	const buildLoadFile = path.join( pluginPath, 'load.php' );
 	const buildLoadFileContent = fs.readFileSync( buildLoadFile, 'utf-8' );
 
-	const regex = /\/\\*\\*[\s\S]+?(?=\*\/)/mi;
-	const pluginComment = loadFileContent.match( regex )?.[ 0 ];
-	const newPluginComment = buildLoadFileContent.match( regex )?.[ 0 ];
+	const rootFileHeader = await getModuleHeader( rootLoadFileContent );
+	const buildFileLoad = await getModuleHeader( buildLoadFileContent );
 
-	fs.writeFileSync( buildLoadFile, buildLoadFileContent.replace( newPluginComment, pluginComment ) );
+	// Get module header data.
+	const { name, description } = await getModuleData( buildLoadFileContent );
+
+	// Replace plugin root's `load.php` header in the module file header.
+	fs.writeFileSync( buildLoadFile, buildLoadFileContent.replace( buildFileLoad, rootFileHeader ) );
 
 	let updatedBuildLoadFileContent = fs.readFileSync( buildLoadFile, 'utf-8' );
-
-	const moduleFilePattern = path.join( pluginModulePath, 'load.php' );
-	const moduleFiles = path.resolve( '.', moduleFilePattern );
-	const { name, description } = await getModuleDataFromHeaders( moduleFiles );
 
 	// Get module header data.
 	const moduleData = {
@@ -151,27 +161,39 @@ async function updatePluginHeader( settings ) {
 }
 
 /**
- * Updates the text domain in the build folder files content.
+ * Gets the specific module file header information.
+ *
+ * @param {string} moduleFileContent File content.
+ *
+ * @return {[]HeaderData} File header data.
+ */
+async function getModuleData( moduleFileContent ) {
+	const moduleHeader = await getModuleHeader( moduleFileContent );
+	return await getModuleDataFromHeader( moduleHeader );
+}
+
+/**
+ * Updates the text domain and package details in the build folder files content.
  *
  * @param {[]Settings} settings Plugin settings.
  */
-async function updateTextDomain( settings ) {
+async function updateModuleDetails( settings ) {
 	const patterns = [
-		path.resolve( __dirname, '../../../build/**/*.php' ),
+		path.resolve( settings.pluginPath, './**/*.php' ),
 	];
 
 	const files = await glob( patterns, {
 		ignore: [ __filename ],
 	} );
 
-	const regexp = new RegExp( '[\']performance-lab[\']', 'gm' );
+	const regexp = new RegExp( settings.regex, 'gm' );
 
 	files.forEach( ( file ) => {
 		const content = fs.readFileSync( file, 'utf-8' );
 		if ( regexp.test( content ) ) {
 			fs.writeFileSync(
 				file,
-				content.replace( regexp, `'${ settings.slug }'` )
+				content.replace( regexp, `${ settings.result }` )
 			);
 		}
 	} );

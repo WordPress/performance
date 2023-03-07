@@ -9,12 +9,13 @@
  */
 
 /**
- * Can load function to determine if the module is already merged into WordPress core or loaded by
- * another plugin.
+ * Determines whether the feature can be loaded, or whether is already merged into WordPress core.
  *
- * @since 1.0.0
+ * If it cannot be loaded, it will add an action to display a WordPress admin notice.
  *
- * @return boolean
+ * @since n.e.x.t
+ *
+ * @return bool Whether the feature can be loaded.
  */
 function webp_uploads_can_load() {
 	$can_load = require __DIR__ . '/can-load.php';
@@ -26,11 +27,8 @@ function webp_uploads_can_load() {
 		function() {
 			printf(
 				'<div class="notice notice-error"><p>%s</p></div>',
-				sprintf(
-					__( 'The module is already merged into WordPress core or loaded by another plugin.', 'performance-lab' )
-				)
+				esc_html__( 'The WebP Uploads feature cannot be loaded from within the plugin since it is already merged into WordPress core.', 'performance-lab' )
 			);
-			return;
 		}
 	);
 	return false;

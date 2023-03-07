@@ -41,7 +41,16 @@ exports.getModuleData = async ( modulesDir ) => {
 
 	return moduleFiles
 		.map( ( moduleFile ) => {
-			const moduleData = exports.getModuleDataFromHeaders( moduleFile );
+			const moduleFileContent = fs.readFileSync( moduleFile, 'utf8' );
+			const moduleHeader = exports.getModuleHeader( moduleFileContent );
+
+			// Populate slug and focus based on file path.
+			const moduleDir = path.dirname( moduleFile );
+			const moduleData = {
+				slug: path.basename( moduleDir ),
+				focus: path.basename( path.dirname( moduleDir ) ),
+				...exports.getModuleDataFromHeader( moduleHeader ),
+			};
 			return moduleData;
 		} )
 		.filter( ( moduleData ) => {
@@ -98,20 +107,14 @@ exports.getModuleData = async ( modulesDir ) => {
 };
 
 /**
- * Returns the list of module data for all modules.
+ * Returns the list of module data for module.
  *
- * @param {string} moduleFile Modules file.
+ * @param {string} moduleHeader Modules file header contetnt.
  *
  * @return {[]WPModuleData} Module data list.
  */
-exports.getModuleDataFromHeaders = ( moduleFile ) => {
-	// Populate slug and focus based on file path.
-	const moduleDir = path.dirname( moduleFile );
-	const moduleData = {
-		slug: path.basename( moduleDir ),
-		focus: path.basename( path.dirname( moduleDir ) ),
-	};
-
+exports.getModuleDataFromHeader = ( moduleHeader ) => {
+	const moduleData = {};
 	// Map of module header => object property.
 	const headers = {
 		'Module Name': 'name',
@@ -119,22 +122,20 @@ exports.getModuleDataFromHeaders = ( moduleFile ) => {
 		Experimental: 'experimental',
 	};
 
-	// Populate name, description and experimental based on module file headers.
-	const fileContent = fs.readFileSync( moduleFile, 'utf8' );
 	const regex = new RegExp(
 		`^(?:[ \t]*<?php)?[ \t/*#@]*(${ Object.keys( headers ).join(
 			'|'
 		) }):(.*)$`,
 		'gmi'
 	);
-	let match = regex.exec( fileContent );
+	let match = regex.exec( moduleHeader );
 	while ( match ) {
 		const content = match[ 2 ].trim();
 		const prop = headers[ match[ 1 ] ];
 		if ( content && prop ) {
 			moduleData[ prop ] = content;
 		}
-		match = regex.exec( fileContent );
+		match = regex.exec( moduleHeader );
 	}
 
 	// Parse experimental field into a boolean.
@@ -144,4 +145,17 @@ exports.getModuleDataFromHeaders = ( moduleFile ) => {
 	}
 
 	return moduleData;
+};
+
+/**
+ * Returns the file header.
+ *
+ * @param {string} moduleFileContent Module file content.
+ *
+ * @return {string} Module file header.
+ */
+exports.getModuleHeader = ( moduleFileContent ) => {
+	const regex = /\/\\*\\*[\s\S]+?(?=\*\/)/mi;
+	const moduleHeader = moduleFileContent.match( regex )?.[ 0 ];
+	return moduleHeader;
 };
