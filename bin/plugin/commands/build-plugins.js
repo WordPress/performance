@@ -62,7 +62,7 @@ exports.handler = async () => {
 
 					// Update file content.
 					updatePluginHeader( {
-						key: moduleDir,
+						originalModulePath: moduleDir,
 						slug: pluginSlug,
 						version: pluginVersion,
 						pluginPath: buildModulePath,
@@ -102,80 +102,29 @@ exports.handler = async () => {
 /**
  * Updates the `load.php` file header information.
  *
- * @param {[]Settings} settings Plugin settings.
+ * @param {Object} settings Plugin settings.
  */
 async function updatePluginHeader( settings ) {
-	const { key, version, slug, pluginPath } = settings;
-	// Plugin root `load.php` file content.
-	const rootLoadFile = path.join( '.', 'load.php' );
-	const rootLoadFileContent = fs.readFileSync( rootLoadFile, 'utf-8' );
+	const { originalModulePath, version, slug, pluginPath } = settings;
 	// Specific module `load.php` file content.
 	const buildLoadFile = path.join( pluginPath, 'load.php' );
 	const buildLoadFileContent = fs.readFileSync( buildLoadFile, 'utf-8' );
 
-	const rootFileHeader = await getModuleHeader( rootLoadFileContent );
-	const buildFileLoad = await getModuleHeader( buildLoadFileContent );
+	const moduleHeader = await getModuleHeader( buildLoadFileContent );
 
 	// Get module header data.
-	const { name, description } = await getModuleData( buildLoadFileContent );
+	const { name, description } = await getModuleDataFromHeader( moduleHeader );
 
-	// Replace plugin root's `load.php` header in the module file header.
-	fs.writeFileSync( buildLoadFile, buildLoadFileContent.replace( buildFileLoad, rootFileHeader ) );
+	const pluginHeader = `/**\n * Plugin Name: ${ name }\n * Plugin URI: https://github.com/WordPress/performance/tree/trunk/modules/${ originalModulePath }\n * Description: ${ description }\n * Requires at least: 6.1\n * Requires PHP: 5.6\n * Version: ${ version }\n * Author: WordPress Performance Team\n * Author URI: https://make.wordpress.org/performance/\n * License: GPLv2 or later\n * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n * Text Domain: ${ slug }\n *\n * @package ${ slug }\n `;
 
-	let updatedBuildLoadFileContent = fs.readFileSync( buildLoadFile, 'utf-8' );
-
-	// Get module header data.
-	const moduleData = {
-		pluginname: name,
-		plugindescription: description,
-		pluginuri: '/tree/trunk/modules/' + key,
-		pluginversion: version,
-		textdomain: slug,
-	};
-
-	// Map of module header => object property.
-	const headers = {
-		'Plugin Name': 'pluginname',
-		'Plugin URI': 'pluginuri',
-		Description: 'plugindescription',
-		Version: 'pluginversion',
-		'Text Domain': 'textdomain',
-	};
-
-	const headerRegex = new RegExp( `(?<header>${ Object.keys( headers ).join( '|' ) }): (?<value>(.*?)+)`, 'gmi' );
-	const matches = [ ...updatedBuildLoadFileContent.matchAll( headerRegex ) ];
-
-	matches.forEach( ( match ) => {
-		const { header, value } = match.groups;
-		const prop = headers[ header ];
-		let moduleDataValue = moduleData[ prop ];
-
-		if ( value && prop && moduleDataValue ) {
-			if ( prop === 'pluginuri' ) {
-				moduleDataValue = value + moduleDataValue;
-			}
-			fs.writeFileSync( buildLoadFile, updatedBuildLoadFileContent.replace( new RegExp( value ), moduleDataValue ) );
-			updatedBuildLoadFileContent = fs.readFileSync( buildLoadFile, 'utf-8' );
-		}
-	} );
-}
-
-/**
- * Gets the specific module file header information.
- *
- * @param {string} moduleFileContent File content.
- *
- * @return {[]HeaderData} File header data.
- */
-async function getModuleData( moduleFileContent ) {
-	const moduleHeader = await getModuleHeader( moduleFileContent );
-	return await getModuleDataFromHeader( moduleHeader );
+	// Replace the module file header.
+	fs.writeFileSync( buildLoadFile, buildLoadFileContent.replace( moduleHeader, pluginHeader ) );
 }
 
 /**
  * Updates the text domain and package details in the build folder files content.
  *
- * @param {[]Settings} settings Plugin settings.
+ * @param {Object} settings Plugin settings.
  */
 async function updateModuleDetails( settings ) {
 	const patterns = [

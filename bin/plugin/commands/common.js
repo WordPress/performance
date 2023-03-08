@@ -32,7 +32,6 @@ const FOCUS_AREAS = {
  * Returns a promise resolving to the list of data for all modules.
  *
  * @param {string} modulesDir Modules directory.
- *
  * @return {Promise<[]WPModuleData>} Promise resolving to module data list.
  */
 exports.getModuleData = async ( modulesDir ) => {
@@ -110,8 +109,7 @@ exports.getModuleData = async ( modulesDir ) => {
  * Returns the list of module data for module.
  *
  * @param {string} moduleHeader Modules file header contetnt.
- *
- * @return {[]WPModuleData} Module data list.
+ * @return {WPModuleData} Module data.
  */
 exports.getModuleDataFromHeader = ( moduleHeader ) => {
 	const moduleData = {};
@@ -151,7 +149,6 @@ exports.getModuleDataFromHeader = ( moduleHeader ) => {
  * Returns the file header.
  *
  * @param {string} moduleFileContent Module file content.
- *
  * @return {string} Module file header.
  */
 exports.getModuleHeader = ( moduleFileContent ) => {
