@@ -54,7 +54,7 @@ exports.handler = async () => {
 					} catch ( copyError ) {
 						log(
 							formats.error(
-								`Error copying plugin file: "${ copyError }"`
+								`Error copying files for plugin "${ pluginSlug }": "${ copyError }"`
 							)
 						);
 						continue;
@@ -62,7 +62,7 @@ exports.handler = async () => {
 
 					// Update file content.
 					updatePluginHeader( {
-						originalModulePath: moduleDir,
+						modulePath: moduleDir,
 						slug: pluginSlug,
 						version: pluginVersion,
 						pluginPath: buildModulePath,
@@ -105,20 +105,37 @@ exports.handler = async () => {
  * @param {Object} settings Plugin settings.
  */
 async function updatePluginHeader( settings ) {
-	const { originalModulePath, version, slug, pluginPath } = settings;
+	const { modulePath, version, slug, pluginPath } = settings;
 	// Specific module `load.php` file content.
 	const buildLoadFile = path.join( pluginPath, 'load.php' );
-	const buildLoadFileContent = fs.readFileSync( buildLoadFile, 'utf-8' );
+	let buildLoadFileContent = '';
+	try {
+		buildLoadFileContent = fs.readFileSync( buildLoadFile, 'utf-8' );
+	} catch ( err ) {
+		log(
+			formats.error(
+				`Error reading the file "${ buildLoadFile }": "${ err }"`
+			)
+		);
+	}
 
 	const moduleHeader = await getModuleHeader( buildLoadFileContent );
 
 	// Get module header data.
 	const { name, description } = await getModuleDataFromHeader( moduleHeader );
 
-	const pluginHeader = `/**\n * Plugin Name: ${ name }\n * Plugin URI: https://github.com/WordPress/performance/tree/trunk/modules/${ originalModulePath }\n * Description: ${ description }\n * Requires at least: 6.1\n * Requires PHP: 5.6\n * Version: ${ version }\n * Author: WordPress Performance Team\n * Author URI: https://make.wordpress.org/performance/\n * License: GPLv2 or later\n * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n * Text Domain: ${ slug }\n *\n * @package ${ slug }\n `;
+	const pluginHeader = `/**\n * Plugin Name: ${ name }\n * Plugin URI: https://github.com/WordPress/performance/tree/trunk/modules/${ modulePath }\n * Description: ${ description }\n * Requires at least: 6.1\n * Requires PHP: 5.6\n * Version: ${ version }\n * Author: WordPress Performance Team\n * Author URI: https://make.wordpress.org/performance/\n * License: GPLv2 or later\n * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n * Text Domain: ${ slug }\n *\n * @package ${ slug }\n `;
 
-	// Replace the module file header.
-	fs.writeFileSync( buildLoadFile, buildLoadFileContent.replace( moduleHeader, pluginHeader ) );
+	try {
+		// Replace the module file header.
+		fs.writeFileSync( buildLoadFile, buildLoadFileContent.replace( moduleHeader, pluginHeader ) );
+	} catch ( error ) {
+		log(
+			formats.error(
+				`Error replacing module file header: "${ error }"`
+			)
+		);
+	}
 }
 
 /**
@@ -138,12 +155,29 @@ async function updateModuleDetails( settings ) {
 	const regexp = new RegExp( settings.regex, 'gm' );
 
 	files.forEach( ( file ) => {
-		const content = fs.readFileSync( file, 'utf-8' );
-		if ( regexp.test( content ) ) {
-			fs.writeFileSync(
-				file,
-				content.replace( regexp, `${ settings.result }` )
+		let content = '';
+		try {
+			content = fs.readFileSync( file, 'utf-8' );
+		} catch ( err ) {
+			log(
+				formats.error(
+					`Error reading the file "${ file }": "${ err }"`
+				)
 			);
+		}
+		if ( regexp.test( content ) ) {
+			try {
+				fs.writeFileSync(
+					file,
+					content.replace( regexp, `${ settings.result }` )
+				);
+			} catch ( error ) {
+				log(
+					formats.error(
+						`Error replacing content for regex "${ settings.regex }": "${ error }"`
+					)
+				);
+			}
 		}
 	} );
 }

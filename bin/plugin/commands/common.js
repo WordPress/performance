@@ -40,7 +40,16 @@ exports.getModuleData = async ( modulesDir ) => {
 
 	return moduleFiles
 		.map( ( moduleFile ) => {
-			const moduleFileContent = fs.readFileSync( moduleFile, 'utf8' );
+			let moduleFileContent = '';
+			try {
+				moduleFileContent = fs.readFileSync( moduleFile, 'utf-8' );
+			} catch ( error ) {
+				log(
+					formats.error(
+						`Error reading the file "${ moduleFile }": "${ error }"`
+					)
+				);
+			}
 			const moduleHeader = exports.getModuleHeader( moduleFileContent );
 
 			// Populate slug and focus based on file path.
