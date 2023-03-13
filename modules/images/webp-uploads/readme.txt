@@ -13,9 +13,8 @@ Creates WebP versions for new JPEG image uploads if supported by the server.
 
 == Description ==
 
-This plugin adds a WebP uploads module to the [performance plugin](https://wordpress.org/plugins/performance-lab/), enabling WebP support for media uploads within the WordPress application, when this module is enabled.
+This plugin adds WebP support for media uploads within the WordPress application.
 
-This plugin is intended to be used alongside the [performance plugin](https://wordpress.org/plugins/performance-lab/), and will not function as a standalone plugin. The performance plugin may be obtained [here](https://wordpress.org/plugins/performance-lab/).
 
 == Installation ==
 
