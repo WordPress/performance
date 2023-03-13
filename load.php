@@ -162,7 +162,34 @@ function perflab_get_active_modules() {
 	 */
 	$modules = apply_filters( 'perflab_active_modules', $modules );
 
+	if ( ! function_exists( 'is_plugin_active' ) ) {
+		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+	}
+
+	$standalone_plugin_config = perflab_get_standalone_plugins_config();
+	foreach ( $standalone_plugin_config as $plugin_slug => $plugin_main_file ) {
+		if ( in_array( $plugin_slug, $modules, true ) && is_plugin_active( $plugin_main_file ) ) {
+			$key = array_search( $plugin_slug, $modules, true );
+			if ( false !== $key ) {
+				unset( $modules[ $key ] );
+			}
+		}
+	}
+
 	return $modules;
+}
+
+/**
+ * Gets the standalone plugin configuration.
+ *
+ * @since n.e.x.t
+ *
+ * @return array Array of standalone plugin configuration.
+ */
+function perflab_get_standalone_plugins_config() {
+	return array(
+		'images/webp-uploads' => 'webp-uploads/load.php',
+	);
 }
 
 /**
