@@ -36,9 +36,21 @@ This plugin is intended to be used alongside the [performance plugin](https://wo
 = Where can I submit my plugin feedback? =
 
 Feedback is encouraged and much appreciated, especially since this plugin may contain future WordPress core features. If you have suggestions or requests for new features, you can [submit them as an issue in the WordPress Performance Team's GitHub repository](https://github.com/WordPress/performance/issues/new/choose). If you need help with troubleshooting or have a question about the plugin, please [create a new topic on our support forum](https://wordpress.org/support/plugin/webp-uploads/#new-topic-0).
+
 = How can I contribute to the plugin? =
 
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
+
+= I've activated the WebP Uploads module, but WebP images are not always generated when I upload a JPEG image. Why? =
+
+There are two primary reasons that a WebP image may not be generated:
+
+1. The WebP Uploads plugin has identified that the WebP version of the uploaded JPEG image would have a larger file size than the original JPEG image, so it does not generate the WebP version.
+2. The JPEG image was not uploaded to the [Media Library](https://wordpress.com/support/media/). At this time, WebP versions are only generated for images to the Media Library. WebP versions are not generated for JPEG images that are added to your site in other ways, such as in a template file or the [Customizer](https://wordpress.com/support/customizer/).
+
+= With the WebP Uploads plugin activated, will the plugin generate JPEG and WebP versions of every image that I upload? =
+
+By default, the WebP Uploads plugin will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
 
@@ -46,4 +58,4 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 **Initial Release**
 
-* Initial release of the WebP support performance plugin module as a standalone plugin. ([636](https://github.com/WordPress/performance/issues/636))
+* Initial release of the WebP Uploads plugin as a standalone plugin. ([664](https://github.com/WordPress/performance/pull/664))
