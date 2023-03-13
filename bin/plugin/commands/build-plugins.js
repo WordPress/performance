@@ -119,13 +119,34 @@ async function updatePluginHeader( settings ) {
 		);
 	}
 
+	if ( buildLoadFileContent === '' ) {
+		log(
+			formats.error(
+				`Error reading the file "${ buildLoadFile }"`
+			)
+		);
+		return false;
+	}
 	const moduleHeader = await getModuleHeader( buildLoadFileContent );
 
 	// Get module header data.
 	const { name, description } = await getModuleDataFromHeader( moduleHeader );
 
-	const pluginHeader = `/**\n * Plugin Name: ${ name }\n * Plugin URI: https://github.com/WordPress/performance/tree/trunk/modules/${ modulePath }\n * Description: ${ description }\n * Requires at least: 6.1\n * Requires PHP: 5.6\n * Version: ${ version }\n * Author: WordPress Performance Team\n * Author URI: https://make.wordpress.org/performance/\n * License: GPLv2 or later\n * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html\n * Text Domain: ${ slug }\n *\n * @package ${ slug }\n `;
-
+	const pluginHeader = `/**
+ * Plugin Name: ${ name }
+ * Plugin URI: https://github.com/WordPress/performance/tree/trunk/modules/${ modulePath }
+ * Description: ${ description }
+ * Requires at least: 6.1
+ * Requires PHP: 5.6
+ * Version: ${ version }
+ * Author: WordPress Performance Team
+ * Author URI: https://make.wordpress.org/performance/
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * Text Domain: ${ slug }
+ *
+ * @package ${ slug }
+ `;
 	try {
 		// Replace the module file header.
 		fs.writeFileSync( buildLoadFile, buildLoadFileContent.replace( moduleHeader, pluginHeader ) );
@@ -165,6 +186,16 @@ async function updateModuleDetails( settings ) {
 				)
 			);
 		}
+
+		if ( content === '' ) {
+			log(
+				formats.error(
+					`Error reading the file "${ file }"`
+				)
+			);
+			return false;
+		}
+
 		if ( regexp.test( content ) ) {
 			try {
 				fs.writeFileSync(
