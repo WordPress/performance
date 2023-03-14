@@ -128,6 +128,7 @@ exports.handler = async () => {
 		log( formats.error( `Error reading file "${ wpEnvFile }": "${ e }"` ) );
 	}
 
+	// If the contents of the file were incorrectly read or exception was not captured and value is blank, abort.
 	if ( '' === wpEnvFileContent ) {
 		log(
 			formats.error(
@@ -145,14 +146,17 @@ exports.handler = async () => {
 				`Unable to find plugins property/key in WP Env config file: "${ wpEnvFile }". Please ensure that it is present and try agagin.`
 			)
 		);
+
+		return;
 	}
+
+	// Let the user know we're re-writing the .wp-env.json file.
+	log(
+		formats.success( `Rewriting plugins property in ${ wpEnvFile }` )
+	);
 
 	// Attempt replacement of the plugins property in .wp-env.json file to match built plugins.
 	try {
-		log(
-			formats.success( `Rewriting plugins property in ${ wpEnvFile }` )
-		);
-
 		// Create plugins property from built plugins.
 		wpEnvPluginsRegexReplacement = `"plugins": [ "${ builtPlugins
 			.map( ( item ) => `${ builtPluginsDir }${ item }` )
