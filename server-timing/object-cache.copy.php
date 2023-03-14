@@ -62,7 +62,14 @@ if ( ! function_exists( 'perflab_load_server_timing_api_from_dropin' ) ) {
 }
 perflab_load_server_timing_api_from_dropin();
 
-// Load the original object cache drop-in if present.
+/**
+ * Load the original object cache drop-in if present.
+ * This is only here for backward compatibility, as new Performance Lab
+ * versions no longer use the approach of backing up the original
+ * object-cache.php file and loading both.
+ * It is critical however to maintain this line here to not break existing
+ * sites where this approach has been working as expected.
+ */
 if ( file_exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) ) {
 	require_once WP_CONTENT_DIR . '/object-cache-plst-orig.php';
 }
