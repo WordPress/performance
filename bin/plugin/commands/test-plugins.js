@@ -43,7 +43,8 @@ exports.handler = async () => {
 			)
 		);
 
-		return;
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
 	}
 
 	// Only try to read plugin dirs if build ir exists.
@@ -67,6 +68,9 @@ exports.handler = async () => {
 				`Built plugins directory at ${ builtPluginsDir } does not exist. Please run the 'npm run build-plugins' command first.`
 			)
 		);
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
 	}
 
 	// For each built plugin, copy the test.
@@ -93,6 +97,9 @@ exports.handler = async () => {
 					`Error copying test assets for plugin "${ plugin }". ${ e }`
 				)
 			);
+
+			// Return with exit code 1 to trigger a failure in the test pipeline.
+			process.exit( 1 );
 		}
 
 		// Execute composer install within built plugin following copy.
@@ -126,6 +133,9 @@ exports.handler = async () => {
 		wpEnvFileContent = fs.readFileSync( wpEnvFile, 'utf-8' );
 	} catch ( e ) {
 		log( formats.error( `Error reading file "${ wpEnvFile }": "${ e }"` ) );
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
 	}
 
 	// If the contents of the file were incorrectly read or exception was not captured and value is blank, abort.
@@ -136,7 +146,8 @@ exports.handler = async () => {
 			)
 		);
 
-		return;
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
 	}
 
 	// If we do not have a match on the wp-env enabled plugins regex, abort.
@@ -147,13 +158,12 @@ exports.handler = async () => {
 			)
 		);
 
-		return;
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
 	}
 
 	// Let the user know we're re-writing the .wp-env.json file.
-	log(
-		formats.success( `Rewriting plugins property in ${ wpEnvFile }` )
-	);
+	log( formats.success( `Rewriting plugins property in ${ wpEnvFile }` ) );
 
 	// Attempt replacement of the plugins property in .wp-env.json file to match built plugins.
 	try {
@@ -175,6 +185,9 @@ exports.handler = async () => {
 				`Error replacing content in ${ wpEnvFile } using regex "${ wpEnvPluginsRegex }": "${ e }"`
 			)
 		);
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
 	}
 
 	// Start the wp-env environment.
@@ -191,7 +204,9 @@ exports.handler = async () => {
 		// once the command has completed, the callback function is called
 		if ( err ) {
 			log( formats.error( `${ err }` ) );
-			return;
+
+			// Return with exit code 1 to trigger a failure in the test pipeline.
+			process.exit( 1 );
 		}
 		// log the output received from the command
 		log( output );
@@ -209,7 +224,9 @@ exports.handler = async () => {
 		// once the command has completed, the callback function is called
 		if ( err ) {
 			log( formats.error( `${ err }` ) );
-			return;
+
+			// Return with exit code 1 to trigger a failure in the test pipeline.
+			process.exit( 1 );
 		}
 		// log the output received from the command
 		log( output );
@@ -244,7 +261,8 @@ exports.handler = async () => {
 				)
 			);
 
-			return;
+			// Return with exit code 1 to trigger a failure in the test pipeline.
+			process.exit( 1 );
 		}
 
 		// Run phpunit tests for specific plugin.
@@ -259,7 +277,9 @@ exports.handler = async () => {
 								`Error executing phpunit test command: ${ err }`
 							)
 						);
-						return;
+
+						// Return with exit code 1 to trigger a failure in the test pipeline.
+						process.exit( 1 );
 					}
 					// log the output received from the command
 					log( output );
@@ -271,6 +291,9 @@ exports.handler = async () => {
 					`One or more tests failed for plugin "${ plugin }"`
 				)
 			);
+
+			// Return with exit code 1 to trigger a failure in the test pipeline.
+			process.exit( 1 );
 		}
 	} );
 
