@@ -249,10 +249,10 @@ exports.handler = async () => {
 				`wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml.dist --verbose --testdox'`,
 				( err, output ) => {
 					// once the command has completed, the callback function is called
-					if ( e ) {
+					if ( err ) {
 						log(
 							formats.error(
-								`Error executing phpunit test command: ${ e }`
+								`Error executing phpunit test command: ${ err }`
 							)
 						);
 						return;
