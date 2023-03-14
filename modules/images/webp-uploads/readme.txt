@@ -15,7 +15,6 @@ Creates WebP versions for new JPEG image uploads if supported by the server.
 
 This plugin adds WebP support for media uploads within the WordPress application.
 
-
 == Installation ==
 
 = Installation from within WordPress =
