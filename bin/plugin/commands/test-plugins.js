@@ -200,7 +200,7 @@ exports.handler = async () => {
 	);
 
 	// Execute wp-env start.
-	execSync( `wp-env start`, ( err, output ) => {
+	execSync( `npm run wp-env start`, ( err, output ) => {
 		// once the command has completed, the callback function is called
 		if ( err ) {
 			log( formats.error( `${ err }` ) );
@@ -317,4 +317,7 @@ exports.handler = async () => {
 		// log the output received from the command
 		log( output );
 	} );
+
+	// Return with exit code 0 to trigger a success in the test pipeline.
+	process.exit( 0 );
 };
