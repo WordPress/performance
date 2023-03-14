@@ -30,3 +30,5 @@
 
 /.gitattributes export-ignore
 /.gitignore export-ignore
+
+/plugin-tests export-ignore
