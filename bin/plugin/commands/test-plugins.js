@@ -88,7 +88,7 @@ exports.handler = async () => {
 			} );
 			log(
 				formats.success(
-					`Copied test assets for plugin "${ plugin }, executing "composer install --no-interaction" on plugin.\n`
+					`Copied test assets for plugin "${ plugin }", executing "composer install --no-interaction" on plugin.\n`
 				)
 			);
 		} catch ( e ) {
@@ -201,14 +201,14 @@ exports.handler = async () => {
 
 	// Execute wp-env start.
 	execSync( `npm run wp-env start`, ( err, output ) => {
-		// once the command has completed, the callback function is called
+		// once the command has completed, the callback function is called.
 		if ( err ) {
 			log( formats.error( `${ err }` ) );
 
 			// Return with exit code 1 to trigger a failure in the test pipeline.
 			process.exit( 1 );
 		}
-		// log the output received from the command
+		// log the output received from the command.
 		log( output );
 	} );
 
@@ -219,16 +219,16 @@ exports.handler = async () => {
 		)
 	);
 
-	// Run composer install on the main coposer container for the project.
+	// Run composer install on the main composer container for the project.
 	execSync( `npm run pretest-php`, ( err, output ) => {
-		// once the command has completed, the callback function is called
+		// once the command has completed, the callback function is called.
 		if ( err ) {
 			log( formats.error( `${ err }` ) );
 
 			// Return with exit code 1 to trigger a failure in the test pipeline.
 			process.exit( 1 );
 		}
-		// log the output received from the command
+		// log the output received from the command.
 		log( output );
 	} );
 
@@ -270,7 +270,7 @@ exports.handler = async () => {
 			execSync(
 				`wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml.dist --verbose --testdox'`,
 				( err, output ) => {
-					// once the command has completed, the callback function is called
+					// once the command has completed, the callback function is called.
 					if ( err ) {
 						log(
 							formats.error(
@@ -281,7 +281,7 @@ exports.handler = async () => {
 						// Return with exit code 1 to trigger a failure in the test pipeline.
 						process.exit( 1 );
 					}
-					// log the output received from the command
+					// log the output received from the command.
 					log( output );
 				}
 			);
@@ -309,12 +309,12 @@ exports.handler = async () => {
 
 	// Stop wp-env.
 	execSync( `wp-env stop`, ( err, output ) => {
-		// once the command has completed, the callback function is called
+		// once the command has completed, the callback function is called.
 		if ( err ) {
 			log( formats.error( `${ err }` ) );
 			return;
 		}
-		// log the output received from the command
+		// log the output received from the command.
 		log( output );
 	} );
 

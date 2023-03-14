@@ -2,7 +2,7 @@
 /**
  * Class PluginTest
  *
- * @package Webp_Uploads
+ * @package performance-lab
  */
 
 /**
