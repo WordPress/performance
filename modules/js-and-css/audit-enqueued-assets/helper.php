@@ -1,10 +1,196 @@
 <?php
 /**
- * Helper functions used by module.
+ * Helper functions used for Enqueued Assets Health Check.
  *
  * @package performance-lab
  * @since 1.0.0
  */
+
+/**
+ * Callback for enqueued_js_assets test.
+ *
+ * @since 1.0.0
+ *
+ * @return array
+ */
+function perflab_aea_enqueued_js_assets_test() {
+	/**
+	 * If the test didn't run yet, deactivate.
+	 */
+	$enqueued_scripts = perflab_aea_get_total_enqueued_scripts();
+	if ( false === $enqueued_scripts ) {
+		return array();
+	}
+
+	$result = array(
+		'label'       => __( 'Enqueued scripts', 'performance-lab' ),
+		'status'      => 'good',
+		'badge'       => array(
+			'label' => __( 'Performance', 'performance-lab' ),
+			'color' => 'blue',
+		),
+		'description' => sprintf(
+			'<p>%s</p>',
+			esc_html(
+				sprintf(
+					/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					_n(
+						'The amount of %1$s enqueued script (size: %2$s) is acceptable.',
+						'The amount of %1$s enqueued scripts (size: %2$s) is acceptable.',
+						$enqueued_scripts,
+						'performance-lab'
+					),
+					$enqueued_scripts,
+					size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+				)
+			)
+		),
+		'actions'     => '',
+		'test'        => 'enqueued_js_assets',
+	);
+
+	/**
+	 * Filters number of enqueued scripts to trigger warning.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $scripts_treshold Scripts threshold number. Default 30.
+	 */
+	$scripts_treshold = apply_filters( 'perflab_aea_enqueued_scripts_threshold', 30 );
+
+	/**
+	 * Filters size of enqueued scripts to trigger warning.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $scripts_size_treshold Enqueued Scripts size (in bytes) threshold. Default 300000.
+	 */
+	$scripts_size_treshold = apply_filters( 'perflab_aea_enqueued_scripts_byte_size_threshold', 300000 );
+
+	if ( $enqueued_scripts > $scripts_treshold || perflab_aea_get_total_size_bytes_enqueued_scripts() > $scripts_size_treshold ) {
+		$result['status'] = 'recommended';
+
+		$result['description'] = sprintf(
+			'<p>%s</p>',
+			esc_html(
+				sprintf(
+					/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					_n(
+						'Your website enqueues %1$s script (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website enqueues %1$s scripts (size: %2$s). Try to reduce the number or to concatenate them.',
+						$enqueued_scripts,
+						'performance-lab'
+					),
+					$enqueued_scripts,
+					size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+				)
+			)
+		);
+
+		$result['actions'] = sprintf(
+			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
+			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
+			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
+			__( 'More info about performance optimization', 'performance-lab' ),
+			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
+			__( 'Clean Test Cache', 'performance-lab' )
+		);
+	}
+
+	return $result;
+}
+
+/**
+ * Callback for enqueued_css_assets test.
+ *
+ * @since 1.0.0
+ *
+ * @return array
+ */
+function perflab_aea_enqueued_css_assets_test() {
+	/**
+	 * If the test didn't run yet, deactivate.
+	 */
+	$enqueued_styles = perflab_aea_get_total_enqueued_styles();
+	if ( false === $enqueued_styles ) {
+		return array();
+	}
+	$result = array(
+		'label'       => __( 'Enqueued styles', 'performance-lab' ),
+		'status'      => 'good',
+		'badge'       => array(
+			'label' => __( 'Performance', 'performance-lab' ),
+			'color' => 'blue',
+		),
+		'description' => sprintf(
+			'<p>%s</p>',
+			esc_html(
+				sprintf(
+					/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					_n(
+						'The amount of %1$s enqueued style (size: %2$s) is acceptable.',
+						'The amount of %1$s enqueued styles (size: %2$s) is acceptable.',
+						$enqueued_styles,
+						'performance-lab'
+					),
+					$enqueued_styles,
+					size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+				)
+			)
+		),
+		'actions'     => '',
+		'test'        => 'enqueued_css_assets',
+	);
+
+	/**
+	 * Filters number of enqueued styles to trigger warning.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $styles_threshold Styles threshold number. Default 10.
+	 */
+	$styles_threshold = apply_filters( 'perflab_aea_enqueued_styles_threshold', 10 );
+
+	/**
+	 * Filters size of enqueued styles to trigger warning.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $styles_size_threshold Enqueued styles size (in bytes) threshold. Default 100000.
+	 */
+	$styles_size_threshold = apply_filters( 'perflab_aea_enqueued_styles_byte_size_threshold', 100000 );
+	if ( $enqueued_styles > $styles_threshold || perflab_aea_get_total_size_bytes_enqueued_styles() > $styles_size_threshold ) {
+		$result['status'] = 'recommended';
+
+		$result['description'] = sprintf(
+			'<p>%s</p>',
+			esc_html(
+				sprintf(
+					/* translators: 1: Number of enqueued styles. 2.Styles size. */
+					_n(
+						'Your website enqueues %1$s style (size: %2$s). Try to reduce the number or to concatenate them.',
+						'Your website enqueues %1$s styles (size: %2$s). Try to reduce the number or to concatenate them.',
+						$enqueued_styles,
+						'performance-lab'
+					),
+					$enqueued_styles,
+					size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+				)
+			)
+		);
+
+		$result['actions'] = sprintf(
+			/* translators: 1: HelpHub URL. 2: Link description. 3.URL to clean cache. 4. Clean Cache text. */
+			'<p><a target="_blank" href="%1$s">%2$s</a></p><p><a href="%3$s">%4$s</a></p>',
+			esc_url( __( 'https://wordpress.org/support/article/optimization/', 'performance-lab' ) ),
+			__( 'More info about performance optimization', 'performance-lab' ),
+			esc_url( add_query_arg( 'action', 'clean_aea_audit', wp_nonce_url( admin_url( 'site-health.php' ), 'clean_aea_audit' ) ) ),
+			__( 'Clean Test Cache', 'performance-lab' )
+		);
+	}
+
+	return $result;
+}
 
 /**
  * Gets total of enqueued scripts.

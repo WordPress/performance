@@ -1,10 +1,41 @@
 <?php
 /**
- * Helper functions used by module.
+ * Helper functions used for WebP Uploads.
  *
  * @package performance-lab
  * @since 1.0.0
  */
+
+/**
+ * Determines whether the feature can be loaded, or whether is already merged into WordPress core.
+ *
+ * If it cannot be loaded, it will add an action to display a WordPress admin notice.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool Whether the feature can be loaded.
+ */
+function webp_uploads_can_load() {
+	$can_load = require __DIR__ . '/can-load.php';
+	if ( $can_load() ) {
+		return true;
+	}
+	add_action(
+		'admin_notices',
+		function() {
+			printf(
+				'<div class="notice notice-error"><p>%s</p></div>',
+				esc_html__( 'The WebP Uploads feature cannot be loaded from within the plugin since it is already merged into WordPress core.', 'performance-lab' )
+			);
+		}
+	);
+	return false;
+}
+
+// Do not run the plugin if conditions are not met.
+if ( ! webp_uploads_can_load() ) {
+	return;
+}
 
 /**
  * Returns an array with the list of valid mime types that a specific mime type can be converted into it,

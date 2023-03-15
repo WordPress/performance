@@ -152,6 +152,23 @@ function perflab_register_default_server_timing_template_metrics() {
 		PHP_INT_MAX
 	);
 
+	add_action(
+		'perflab_server_timing_send_header',
+		function() {
+			// WordPress total load time.
+			perflab_server_timing_register_metric(
+				'total',
+				array(
+					'measure_callback' => function( $metric ) {
+						// The 'timestart' global is set right at the beginning of WordPress execution.
+						$metric->set_value( ( microtime( true ) - $GLOBALS['timestart'] ) * 1000.0 );
+					},
+					'access_cap'       => 'exist',
+				)
+			);
+		}
+	);
+
 	// SQL query time is only measured if the SAVEQUERIES constant is set to true.
 	if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
 		add_action(
