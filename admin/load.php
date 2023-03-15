@@ -126,18 +126,18 @@ function perflab_render_modules_page() {
  * @param array  $module_settings Associative array of the module's current settings.
  */
 function perflab_render_modules_page_field( $module_slug, $module_data, $module_settings ) {
-	$base_id          = sprintf( 'module_%s', $module_slug );
-	$base_name        = sprintf( '%1$s[%2$s]', PERFLAB_MODULES_SETTING, $module_slug );
-	$enabled          = isset( $module_settings['enabled'] ) && $module_settings['enabled'];
-	$plugins_config   = perflab_get_standalone_plugins_config();
-	$is_active_plugin = ( isset( $plugins_config[ $module_slug ] ) && ( '' !== $plugins_config[ $module_slug ] ) && is_plugin_active( $plugins_config[ $module_slug ] ) ) ? true : false;
+	$base_id         = sprintf( 'module_%s', $module_slug );
+	$base_name       = sprintf( '%1$s[%2$s]', PERFLAB_MODULES_SETTING, $module_slug );
+	$enabled         = isset( $module_settings['enabled'] ) && $module_settings['enabled'];
+	$can_load_module = perflab_can_load_module( $module_slug );
+	print_r( $can_load_module );
 	?>
 	<fieldset>
 		<legend class="screen-reader-text">
 			<?php echo esc_html( $module_data['name'] ); ?>
 		</legend>
 		<label for="<?php echo esc_attr( "{$base_id}_enabled" ); ?>">
-			<?php if ( perflab_can_load_module( $module_slug ) && ! $is_active_plugin ) { ?>
+			<?php if ( $can_load_module && ! is_wp_error( $can_load_module ) ) { ?>
 				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" value="1"<?php checked( $enabled ); ?>>
 				<?php
 				if ( $module_data['experimental'] ) {
@@ -172,7 +172,7 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 					);
 				} elseif ( 'database/sqlite' === $module_slug && ! class_exists( 'SQLite3' ) ) {
 					esc_html_e( 'The SQLite module cannot be activated because the SQLite extension is not loaded.', 'performance-lab' );
-				} elseif ( $is_active_plugin ) {
+				} elseif ( is_wp_error( $can_load_module ) ) {
 					esc_html_e( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' );
 				} else {
 					printf(

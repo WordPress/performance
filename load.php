@@ -162,34 +162,7 @@ function perflab_get_active_modules() {
 	 */
 	$modules = apply_filters( 'perflab_active_modules', $modules );
 
-	if ( ! function_exists( 'is_plugin_active' ) ) {
-		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-	}
-
-	$standalone_plugin_config = perflab_get_standalone_plugins_config();
-	foreach ( $standalone_plugin_config as $plugin_slug => $plugin_main_file ) {
-		if ( in_array( $plugin_slug, $modules, true ) && is_plugin_active( $plugin_main_file ) ) {
-			$key = array_search( $plugin_slug, $modules, true );
-			if ( false !== $key ) {
-				unset( $modules[ $key ] );
-			}
-		}
-	}
-
 	return $modules;
-}
-
-/**
- * Gets the standalone plugin configuration.
- *
- * @since n.e.x.t
- *
- * @return array Array of standalone plugin configuration.
- */
-function perflab_get_standalone_plugins_config() {
-	return array(
-		'images/webp-uploads' => 'webp-uploads/load.php',
-	);
 }
 
 /**
@@ -253,7 +226,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
  * @since 1.3.0
  *
  * @param string $module Slug of the module.
- * @return bool Whether the module can be loaded or not.
+ * @return bool|WP_Error Whether the module can be loaded or not, otherwise a WP_Error.
  */
 function perflab_can_load_module( $module ) {
 	$module_load_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/can-load.php';
@@ -261,6 +234,13 @@ function perflab_can_load_module( $module ) {
 	// If the `can-load.php` file does not exist, assume the module can be loaded.
 	if ( ! file_exists( $module_load_file ) ) {
 		return true;
+	}
+
+	$standalone_plugin_config = perflab_get_standalone_plugins_config();
+	foreach ( $standalone_plugin_config as $slug => $constant ) {
+		if ( $module === $slug && defined( $constant ) ) {
+			return new WP_Error( 'standalone_plugin_activated', __( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' ) );
+		}
 	}
 
 	// Require the file to get the closure for whether the module can load.
@@ -273,6 +253,19 @@ function perflab_can_load_module( $module ) {
 
 	// Call the closure to determine whether the module can be loaded.
 	return (bool) $module();
+}
+
+/**
+ * Gets the standalone plugin configuration.
+ *
+ * @since n.e.x.t
+ *
+ * @return array Array of standalone plugin configuration.
+ */
+function perflab_get_standalone_plugins_config() {
+	return array(
+		'images/webp-uploads' => 'WEBP_UPLOADS_VERSION',
+	);
 }
 
 /**
