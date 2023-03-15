@@ -54,6 +54,4 @@ By default, the WebP Uploads plugin will only generate WebP versions of the imag
 
 = 1.0.0 =
 
-**Initial Release**
-
 * Initial release of the WebP Uploads plugin as a standalone plugin. ([664](https://github.com/WordPress/performance/pull/664))
