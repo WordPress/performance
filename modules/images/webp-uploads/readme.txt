@@ -15,7 +15,6 @@ Creates WebP versions for new JPEG image uploads if supported by the server.
 
 This plugin adds WebP support for media uploads within the WordPress application.
 
-
 == Installation ==
 
 = Installation from within WordPress =
@@ -54,7 +53,5 @@ By default, the WebP Uploads plugin will only generate WebP versions of the imag
 == Changelog ==
 
 = 1.0.0 =
-
-**Initial Release**
 
 * Initial release of the WebP Uploads plugin as a standalone plugin. ([664](https://github.com/WordPress/performance/pull/664))
