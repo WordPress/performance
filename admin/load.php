@@ -130,7 +130,6 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 	$base_name       = sprintf( '%1$s[%2$s]', PERFLAB_MODULES_SETTING, $module_slug );
 	$enabled         = isset( $module_settings['enabled'] ) && $module_settings['enabled'];
 	$can_load_module = perflab_can_load_module( $module_slug );
-	print_r( $can_load_module );
 	?>
 	<fieldset>
 		<legend class="screen-reader-text">
