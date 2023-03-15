@@ -8,28 +8,13 @@
  * @package performance-lab
  */
 
-/**
- * Require helper functions and specific integrations.
- */
 // Do not load the code if it is already loaded through another means.
 if ( function_exists( 'webp_uploads_create_sources_property' ) ) {
 	return;
 }
 
-/**
- * Determines whether the feature can be loaded, or whether is already merged into WordPress core.
- *
- * If it cannot be loaded, it will add an action to display a WordPress admin notice.
- *
- * @since n.e.x.t
- *
- * @return bool Whether the feature can be loaded.
- */
-function webp_uploads_can_load() {
-	$can_load = require __DIR__ . '/can-load.php';
-	if ( $can_load() ) {
-		return true;
-	}
+// Do not load the code and show an admin notice instead if conditions are not met.
+if ( ! require __DIR__ . '/can-load.php' ) {
 	add_action(
 		'admin_notices',
 		function() {
@@ -39,11 +24,6 @@ function webp_uploads_can_load() {
 			);
 		}
 	);
-	return false;
-}
-
-// Do not run the plugin if conditions are not met.
-if ( ! webp_uploads_can_load() ) {
 	return;
 }
 
