@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper functions used by module.
+ * Helper functions used for WebP Uploads.
  *
  * @package performance-lab
  * @since 1.0.0
