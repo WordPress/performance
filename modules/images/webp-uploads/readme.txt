@@ -2,7 +2,7 @@
 
 Contributors:      wordpressdotorg
 Requires at least: 6.1
-Tested up to:      6.1
+Tested up to:      6.2
 Requires PHP:      5.6
 Stable tag:        1.0.0
 License:           GPLv2 or later
@@ -34,6 +34,12 @@ This plugin adds WebP support for media uploads within the WordPress application
 = Where can I submit my plugin feedback? =
 
 Feedback is encouraged and much appreciated, especially since this plugin may contain future WordPress core features. If you have suggestions or requests for new features, you can [submit them as an issue in the WordPress Performance Team's GitHub repository](https://github.com/WordPress/performance/issues/new/choose). If you need help with troubleshooting or have a question about the plugin, please [create a new topic on our support forum](https://wordpress.org/support/plugin/webp-uploads/#new-topic-0).
+
+= Where can I report security bugs? =
+
+The Performance team and WordPress community take security bugs seriously. We appreciate your efforts to responsibly disclose your findings, and will make every effort to acknowledge your contributions.
+
+To report a security issue, please visit the [WordPress HackerOne](https://hackerone.com/wordpress) program.
 
 = How can I contribute to the plugin? =
 
