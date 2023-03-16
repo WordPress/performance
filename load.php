@@ -282,7 +282,16 @@ function perflab_load_active_and_valid_modules() {
 		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/load.php';
 	}
 }
-perflab_load_active_and_valid_modules();
+
+/**
+ * Loads the modules once the activated plugins have loaded.
+ *
+ * @since n.e.x.t
+ */
+function perflab_plugins_loaded() {
+	perflab_load_active_and_valid_modules();
+}
+add_action( 'plugins_loaded', 'perflab_plugins_loaded' );
 
 /**
  * Places the Performance Lab's object cache drop-in in the drop-ins folder.
