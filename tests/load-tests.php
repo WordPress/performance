@@ -283,63 +283,10 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
 		$this->assertFalse( PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
 
-		// Run function to place drop-in and ensure it exists afterwards, and
-		// the dummy one is backed up to object-cache-plst-orig.php.
+		// Run function to place drop-in and ensure it does not override the existing drop-in.
 		perflab_maybe_set_object_cache_dropin();
 		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
-		$this->assertSame( file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php' ), $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
-		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) );
-		$this->assertSame( $dummy_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) );
-	}
-
-	public function test_perflab_maybe_set_object_cache_dropin_with_conflict_and_orig_same_files() {
-		global $wp_filesystem;
-
-		$this->set_up_mock_filesystem();
-
-		$dummy_file_content = '<?php /* Empty object-cache.php drop-in file. */';
-		$wp_filesystem->put_contents( WP_CONTENT_DIR . '/object-cache.php', $dummy_file_content );
-		$wp_filesystem->put_contents( WP_CONTENT_DIR . '/object-cache-plst-orig.php', $dummy_file_content );
-
-		// Ensure two dummy object-cache.php drop-ins are present and PL constant is not set.
-		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
-		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) );
-		$this->assertFalse( PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
-
-		// Run function to place drop-in and ensure it exists afterwards, and
-		// the dummy one remains backed up to object-cache-plst-orig.php. Since
-		// both files were the same, the original one could just be replaced.
-		perflab_maybe_set_object_cache_dropin();
-		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
-		$this->assertSame( file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php' ), $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
-		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) );
-		$this->assertSame( $dummy_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) );
-	}
-
-	public function test_perflab_maybe_set_object_cache_dropin_with_conflict_and_orig_different_files() {
-		global $wp_filesystem;
-
-		$this->set_up_mock_filesystem();
-
-		$dummy_file_content1 = '<?php /* Empty object-cache.php drop-in file 1. */';
-		$dummy_file_content2 = '<?php /* Empty object-cache.php drop-in file 2. */';
-		$wp_filesystem->put_contents( WP_CONTENT_DIR . '/object-cache.php', $dummy_file_content1 );
-		$wp_filesystem->put_contents( WP_CONTENT_DIR . '/object-cache-plst-orig.php', $dummy_file_content2 );
-
-		// Ensure two dummy object-cache.php drop-ins are present and PL constant is not set.
-		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
-		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) );
-		$this->assertFalse( PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
-
-		// Run function to place drop-in, but in this case it should not modify
-		// anything. There are already two different object-cache.php drop-ins,
-		// one main one, and another backup one, so it is better not to touch
-		// them, in order to avoid any risk of breakage.
-		perflab_maybe_set_object_cache_dropin();
-		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
-		$this->assertSame( $dummy_file_content1, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
-		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) );
-		$this->assertSame( $dummy_file_content2, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) );
+		$this->assertSame( $dummy_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
 	}
 
 	public function test_perflab_object_cache_dropin_may_be_disabled_via_filter() {
