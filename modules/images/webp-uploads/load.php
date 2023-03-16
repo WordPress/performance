@@ -20,6 +20,20 @@ if ( function_exists( 'webp_uploads_create_sources_property' ) ) {
 	return;
 }
 
+// Do not load the code and show an admin notice instead if conditions are not met.
+if ( ! require __DIR__ . '/can-load.php' ) {
+	add_action(
+		'admin_notices',
+		function() {
+			printf(
+				'<div class="notice notice-error"><p>%s</p></div>',
+				esc_html__( 'The WebP Uploads feature cannot be loaded from within the plugin since it is already merged into WordPress core.', 'performance-lab' )
+			);
+		}
+	);
+	return;
+}
+
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/rest-api.php';
 require_once __DIR__ . '/image-edit.php';

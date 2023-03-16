@@ -303,6 +303,7 @@ add_action( 'plugins_loaded', 'perflab_plugins_loaded' );
  * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
  *
  * @since 1.8.0
+ * @since n.e.x.t No longer attempts to use two of the drop-ins together.
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
@@ -339,41 +340,27 @@ function perflab_maybe_set_object_cache_dropin() {
 	}
 
 	if ( $wp_filesystem || WP_Filesystem() ) {
-		$dropin_path        = WP_CONTENT_DIR . '/object-cache.php';
-		$dropin_backup_path = WP_CONTENT_DIR . '/object-cache-plst-orig.php';
+		$dropin_path = WP_CONTENT_DIR . '/object-cache.php';
 
-		// If there is an actual object-cache.php file, rename it to effectively
-		// back it up.
-		// The Performance Lab object-cache.php will still load it, so the
-		// behavior does not change.
+		/**
+		 * If there is an actual object-cache.php file, do not replace it.
+		 * Previous versions of the Performance Lab plugin were renaming the
+		 * original object-cache.php file and then loading both. However, due
+		 * to other plugins eagerly checking file headers, this caused too many
+		 * problems across sites so it was decided to remove this layer.
+		 * Only placing the drop-in file if no other one exists yet is the
+		 * safest solution.
+		 */
 		if ( $wp_filesystem->exists( $dropin_path ) ) {
-			// If even the backup file already exists, we should not do anything,
-			// except for the case where that file is the same as the main
-			// object-cache.php file. This can happen if another plugin is
-			// aggressively trying to re-add its own object-cache.php file,
-			// ignoring that the Performance Lab object-cache.php file still
-			// loads that other file. This is also outlined in the bug
-			// https://github.com/WordPress/performance/issues/612).
-			// In that case we can simply delete the main file since it is
-			// already backed up.
-			if ( $wp_filesystem->exists( $dropin_backup_path ) ) {
-				$oc_content      = $wp_filesystem->get_contents( $dropin_path );
-				$oc_orig_content = $wp_filesystem->get_contents( $dropin_backup_path );
-				if ( ! $oc_content || $oc_content !== $oc_orig_content ) {
-					// Set timeout of 1 hour before retrying again (only in case of failure).
-					set_transient( 'perflab_set_object_cache_dropin', true, HOUR_IN_SECONDS );
-					return;
-				}
-				$wp_filesystem->delete( $dropin_path );
-			} else {
-				$wp_filesystem->move( $dropin_path, $dropin_backup_path );
-			}
+			// Set timeout of 1 day before retrying again (only in case the file already exists).
+			set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
+			return;
 		}
 
-		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php', WP_CONTENT_DIR . '/object-cache.php' );
+		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php', $dropin_path );
 	}
 
-	// Set timeout of 1 hour before retrying again (only in case of failure).
+	// Set timeout of 1 hour before retrying again (only relevant in case the above failed).
 	set_transient( 'perflab_set_object_cache_dropin', true, HOUR_IN_SECONDS );
 }
 add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
@@ -381,9 +368,9 @@ add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
 /**
  * Removes the Performance Lab's object cache drop-in from the drop-ins folder.
  *
- * This function should be run on plugin deactivation. If there was another original
- * object-cache.php drop-in file (renamed in `perflab_maybe_set_object_cache_dropin()`
- * to object-cache-plst-orig.php), it will be restored.
+ * This function should be run on plugin deactivation. For backward compatibility with
+ * an earlier implementation of `perflab_maybe_set_object_cache_dropin()`, this function
+ * checks whether there is an object-cache-plst-orig.php file, and if so restores it.
  *
  * This function will short-circuit if the constant
  * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
@@ -409,9 +396,13 @@ function perflab_maybe_remove_object_cache_dropin() {
 		$dropin_path        = WP_CONTENT_DIR . '/object-cache.php';
 		$dropin_backup_path = WP_CONTENT_DIR . '/object-cache-plst-orig.php';
 
-		// If there is an actual object-cache.php file, restore it
-		// and override the Performance Lab file.
-		// Otherwise just delete the Performance Lab file.
+		/**
+		 * If there is an object-cache-plst-orig.php file, restore it and
+		 * override the Performance Lab file. This is only relevant for
+		 * backward-compatibility with previous Performance Lab versions
+		 * which were backing up the file and then loading both.
+		 * Otherwise just delete the Performance Lab file.
+		 */
 		if ( $wp_filesystem->exists( $dropin_backup_path ) ) {
 			$wp_filesystem->move( $dropin_backup_path, $dropin_path, true );
 		} else {
