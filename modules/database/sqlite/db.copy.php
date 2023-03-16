@@ -19,9 +19,14 @@ if ( ! file_exists( '{SQLITE_IMPLEMENTATION_FOLDER_PATH}/wp-includes/sqlite/db.p
 	return;
 }
 
-// Define SQLite constant.
+// Constant for backward compatibility.
 if ( ! defined( 'DATABASE_TYPE' ) ) {
 	define( 'DATABASE_TYPE', 'sqlite' );
+}
+
+// Define SQLite constant.
+if ( ! defined( 'DB_ENGINE' ) ) {
+	define( 'DB_ENGINE', 'sqlite' );
 }
 
 // Require the implementation from the performance-lab plugin.

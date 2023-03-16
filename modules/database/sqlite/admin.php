@@ -64,7 +64,7 @@ add_action( 'admin_notices', 'perflab_sqlite_plugin_admin_notice' ); // Add the 
 function perflab_sqlite_plugin_adminbar_item( $admin_bar ) {
 	global $wpdb;
 
-	if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) && defined( 'DATABASE_TYPE' ) && 'sqlite' === DATABASE_TYPE ) {
+	if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) && defined( 'DB_ENGINE' ) && 'sqlite' === DB_ENGINE ) {
 		$title = '<span style="color:#46B450;">' . __( 'Database: SQLite', 'performance-lab' ) . '</span>';
 	} elseif ( stripos( $wpdb->db_server_info(), 'maria' ) !== false ) {
 		$title = '<span style="color:#DC3232;">' . __( 'Database: MariaDB', 'performance-lab' ) . '</span>';

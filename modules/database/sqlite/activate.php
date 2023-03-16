@@ -59,8 +59,8 @@ return function() {
 	add_filter(
 		'wp_redirect',
 		function( $redirect_location ) {
-			if ( ! defined( 'DATABASE_TYPE' ) ) {
-				define( 'DATABASE_TYPE', 'sqlite' );
+			if ( ! defined( 'DB_ENGINE' ) ) {
+				define( 'DB_ENGINE', 'sqlite' );
 			}
 			require_once __DIR__ . '/constants.php';
 

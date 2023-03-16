@@ -2,8 +2,8 @@
 /**
  * Main integration file.
  *
- * @package performance-lab
- * @since 1.8.0
+ * @package wp-sqlite-integration
+ * @since 1.0.0
  */
 
 /**
@@ -11,17 +11,17 @@
  *
  * This is executed only once while installation.
  *
- * @since 1.8.0
+ * @since 1.0.0
  *
  * @return boolean
+ *
+ * @throws PDOException If the database connection fails.
  */
-function perflab_sqlite_make_db_sqlite() {
+function sqlite_make_db_sqlite() {
 	include_once ABSPATH . 'wp-admin/includes/schema.php';
-	$index_array = array();
 
 	$table_schemas = wp_get_db_schema();
 	$queries       = explode( ';', $table_schemas );
-	$query_parser  = new Perflab_SQLite_Create_Query();
 	try {
 		$pdo = new PDO( 'sqlite:' . FQDB, null, null, array( PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ) ); // phpcs:ignore WordPress.DB.RestrictedClasses
 	} catch ( PDOException $err ) {
@@ -31,66 +31,81 @@ function perflab_sqlite_make_db_sqlite() {
 		wp_die( $message, 'Database Error!' );
 	}
 
+	$translator = new WP_SQLite_Translator( $pdo, $GLOBALS['table_prefix'] );
+	$query      = null;
+
 	try {
-		$pdo->beginTransaction();
+		$translator->begin_transaction();
 		foreach ( $queries as $query ) {
 			$query = trim( $query );
 			if ( empty( $query ) ) {
 				continue;
 			}
-			$rewritten_query = $query_parser->rewrite_query( $query );
-			if ( is_array( $rewritten_query ) ) {
-				$table_query   = array_shift( $rewritten_query );
-				$index_queries = $rewritten_query;
-				$table_query   = trim( $table_query );
-				$pdo->exec( $table_query );
-			} else {
-				$rewritten_query = trim( $rewritten_query );
-				$pdo->exec( $rewritten_query );
+
+			$result = $translator->query( $query );
+			if ( false === $result ) {
+				throw new PDOException( $translator->get_error_message() );
 			}
 		}
-		$pdo->commit();
-		if ( $index_queries ) {
-			// $query_parser rewrites KEY to INDEX, so we don't need KEY pattern.
-			$pattern = '/CREATE\\s*(UNIQUE\\s*INDEX|INDEX)\\s*IF\\s*NOT\\s*EXISTS\\s*(\\w+)?\\s*.*/im';
-			$pdo->beginTransaction();
-			foreach ( $index_queries as $index_query ) {
-				preg_match( $pattern, $index_query, $match );
-				$index_name = trim( $match[2] );
-				if ( in_array( $index_name, $index_array, true ) ) {
-					$r           = rand( 0, 50 );
-					$replacement = $index_name . "_$r";
-					$index_query = str_ireplace(
-						'EXISTS ' . $index_name,
-						'EXISTS ' . $replacement,
-						$index_query
-					);
-				} else {
-					$index_array[] = $index_name;
-				}
-				$pdo->exec( $index_query );
-			}
-			$pdo->commit();
-		}
+		$translator->commit();
 	} catch ( PDOException $err ) {
 		$err_data = $err->errorInfo; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$err_code = $err_data[1];
-		if ( 5 == $err_code || 6 == $err_code ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
-			// If the database is locked, commit again.
-			$pdo->commit();
-		} else {
-			$pdo->rollBack();
-			$message  = sprintf(
-				'Error occurred while creating tables or indexes...<br />Query was: %s<br />',
-				var_export( $rewritten_query, true )
-			);
-			$message .= sprintf( 'Error message is: %s', $err_data[2] );
-			wp_die( $message, 'Database Error!' );
+		$translator->rollback();
+		$message  = sprintf(
+			'Error occurred while creating tables or indexes...<br />Query was: %s<br />',
+			var_export( $query, true )
+		);
+		$message .= sprintf( 'Error message is: %s', $err_data[2] );
+		wp_die( $message, 'Database Error!' );
+	}
+
+	/*
+	 * Debug: Cross-check with MySQL.
+	 * This is for debugging purpose only and requires files
+	 * that are present in the GitHub repository
+	 * but not the plugin published on WordPress.org.
+	 */
+	if ( defined( 'SQLITE_DEBUG_CROSSCHECK' ) && SQLITE_DEBUG_CROSSCHECK ) {
+		$host = DB_HOST;
+		$port = 3306;
+		if ( str_contains( $host, ':' ) ) {
+			$host_parts = explode( ':', $host );
+			$host       = $host_parts[0];
+			$port       = $host_parts[1];
+		}
+		$dsn       = 'mysql:host=' . $host . '; port=' . $port . '; dbname=' . DB_NAME;
+		$pdo_mysql = new PDO( $dsn, DB_USER, DB_PASSWORD, array( PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ) ); // phpcs:ignore WordPress.DB.RestrictedClasses.mysql__PDO
+		$pdo_mysql->query( 'SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";' );
+		$pdo_mysql->query( 'SET time_zone = "+00:00";' );
+		foreach ( $queries as $query ) {
+			$query = trim( $query );
+			if ( empty( $query ) ) {
+				continue;
+			}
+			try {
+				$pdo_mysql->beginTransaction();
+				$pdo_mysql->query( $query );
+			} catch ( PDOException $err ) {
+				$err_data = $err->errorInfo; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				$err_code = $err_data[1];
+				if ( 5 == $err_code || 6 == $err_code ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
+					// If the database is locked, commit again.
+					$pdo_mysql->commit();
+				} else {
+					$pdo_mysql->rollBack();
+					$message  = sprintf(
+						'Error occurred while creating tables or indexes...<br />Query was: %s<br />',
+						var_export( $query, true )
+					);
+					$message .= sprintf( 'Error message is: %s', $err_data[2] );
+					wp_die( $message, 'Database Error!' );
+				}
+			}
 		}
 	}
 
-	$query_parser = null;
-	$pdo          = null;
+	$pdo = null;
 
 	return true;
 }
@@ -101,7 +116,7 @@ function perflab_sqlite_make_db_sqlite() {
  * Runs the required functions to set up and populate the database,
  * including primary admin user and initial options.
  *
- * @since 1.8.0
+ * @since 1.0.0
  *
  * @param string $blog_title    Site title.
  * @param string $user_name     User's username.
@@ -126,8 +141,8 @@ function wp_install( $blog_title, $user_name, $user_email, $is_public, $deprecat
 
 	wp_check_mysql_version();
 	wp_cache_flush();
-	/* SQLite changes: Replace the call to make_db_current_silent() with perflab_sqlite_make_db_sqlite(). */
-	perflab_sqlite_make_db_sqlite();
+	/* SQLite changes: Replace the call to make_db_current_silent() with sqlite_make_db_sqlite(). */
+	sqlite_make_db_sqlite(); // phpcs:ignore PHPCompatibility.Extensions.RemovedExtensions.sqliteRemoved
 	populate_options();
 	populate_roles();
 

@@ -2,8 +2,8 @@
 /**
  * Extend and replace the wpdb class.
  *
- * @package performance-lab
- * @since 1.8.0
+ * @package wp-sqlite-integration
+ * @since 1.0.0
  */
 
 /**
@@ -11,14 +11,14 @@
  *
  * It also rewrites some methods that use mysql specific functions.
  */
-class Perflab_SQLite_DB extends wpdb {
+class WP_SQLite_DB extends wpdb {
 
 	/**
 	 * Database Handle
 	 *
 	 * @access protected
 	 *
-	 * @var Perflab_SQLite_PDO_Engine
+	 * @var WP_SQLite_Translator
 	 */
 	protected $dbh;
 
@@ -29,6 +29,7 @@ class Perflab_SQLite_DB extends wpdb {
 	 */
 	public function __construct() {
 		parent::__construct( '', '', '', '' );
+		$this->charset = 'utf8mb4';
 	}
 
 	/**
@@ -46,6 +47,20 @@ class Perflab_SQLite_DB extends wpdb {
 	}
 
 	/**
+	 * Method to get the character set for the database.
+	 * Hardcoded to utf8mb4 for now.
+	 *
+	 * @param string $table  The table name.
+	 * @param string $column The column name.
+	 *
+	 * @return string The character set.
+	 */
+	public function get_col_charset( $table, $column ) {
+		// Hardcoded for now.
+		return 'utf8mb4';
+	}
+
+	/**
 	 * Method to dummy out wpdb::set_sql_mode()
 	 *
 	 * @see wpdb::set_sql_mode()
@@ -53,6 +68,16 @@ class Perflab_SQLite_DB extends wpdb {
 	 * @param array $modes Optional. A list of SQL modes to set.
 	 */
 	public function set_sql_mode( $modes = array() ) {
+	}
+
+	/**
+	 * Closes the current database connection.
+	 * Noop in SQLite.
+	 *
+	 * @return bool True to indicate the connection was successfully closed.
+	 */
+	public function close() {
+		return true;
 	}
 
 	/**
@@ -133,11 +158,10 @@ class Perflab_SQLite_DB extends wpdb {
 		wp_load_translations_early();
 
 		$caller = $this->get_caller();
-		$caller = $caller ? $caller : __( '(unknown)', 'performance-lab' );
+		$caller = $caller ? $caller : '(unknown)';
 
 		$error_str = sprintf(
-			/* translators: 1: Database error message, 2: SQL query, 3: Caller. */
-			__( 'WordPress database error %1$s for query %2$s made by %3$s', 'performance-lab' ),
+			'WordPress database error %1$s for query %2$s made by %3$s',
 			$str,
 			$this->last_query,
 			$caller
@@ -162,8 +186,7 @@ class Perflab_SQLite_DB extends wpdb {
 			$query = htmlspecialchars( $this->last_query, ENT_QUOTES );
 
 			printf(
-				/* translators: 1: Database error message, 2: SQL query. */
-				'<div id="error"><p class="wpdberror">' . __( 'WordPress database error: [%1$s] %2$s', 'performance-lab' ) . '</p></div>',
+				'<div id="error"><p class="wpdberror">WordPress database error: [%1$s] %2$s</p></div>',
 				$str,
 				'<code>' . $query . '</code>'
 			);
@@ -199,9 +222,22 @@ class Perflab_SQLite_DB extends wpdb {
 	 * @return void
 	 */
 	public function db_connect( $allow_bail = true ) {
+		if ( $this->dbh ) {
+			return;
+		}
 		$this->init_charset();
-		$this->dbh   = new Perflab_SQLite_PDO_Engine();
-		$this->ready = true;
+
+		$pdo = null;
+		if ( isset( $GLOBALS['@pdo'] ) ) {
+			$pdo = $GLOBALS['@pdo'];
+		}
+		$this->dbh        = new WP_SQLite_Translator( $pdo );
+		$this->last_error = $this->dbh->get_error_message();
+		if ( $this->last_error ) {
+			return false;
+		}
+		$GLOBALS['@pdo'] = $this->dbh->get_pdo();
+		$this->ready     = true;
 	}
 
 	/**
@@ -251,12 +287,12 @@ class Perflab_SQLite_DB extends wpdb {
 		}
 
 		$this->last_error = $this->dbh->get_error_message();
-		if ( $this->last_error && ( ! defined( 'WP_INSTALLING' ) || ! WP_INSTALLING ) ) {
+		if ( $this->last_error ) {
 			$this->print_error( $this->last_error );
 			return false;
 		}
 
-		if ( preg_match( '/^\\s*(create|alter|truncate|drop|optimize)\\s*/i', $query ) ) {
+		if ( preg_match( '/^\\s*(set|create|alter|truncate|drop|optimize)\\s*/i', $query ) ) {
 			return $this->dbh->get_return_value();
 		}
 

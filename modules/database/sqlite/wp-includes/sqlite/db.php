@@ -2,15 +2,15 @@
 /**
  * Main integration file.
  *
- * @package performance-lab
- * @since 1.8.0
+ * @package wp-sqlite-integration
+ * @since 1.0.0
  */
 
 // Require the constants file.
 require_once dirname( dirname( __DIR__ ) ) . '/constants.php';
 
-// Bail early if DATABASE_TYPE is not defined as sqlite.
-if ( ! defined( 'DATABASE_TYPE' ) || 'sqlite' !== DATABASE_TYPE ) {
+// Bail early if DB_ENGINE is not defined as sqlite.
+if ( ! defined( 'DB_ENGINE' ) || 'sqlite' !== DB_ENGINE ) {
 	return;
 }
 
@@ -42,13 +42,24 @@ if ( ! extension_loaded( 'pdo_sqlite' ) ) {
 	);
 }
 
-require_once __DIR__ . '/class-perflab-sqlite-pdo-user-defined-functions.php';
-require_once __DIR__ . '/class-perflab-sqlite-pdo-engine.php';
-require_once __DIR__ . '/class-perflab-sqlite-object-array.php';
-require_once __DIR__ . '/class-perflab-sqlite-db.php';
-require_once __DIR__ . '/class-perflab-sqlite-pdo-driver.php';
-require_once __DIR__ . '/class-perflab-sqlite-create-query.php';
-require_once __DIR__ . '/class-perflab-sqlite-alter-query.php';
+require_once __DIR__ . '/class-wp-sqlite-lexer.php';
+require_once __DIR__ . '/class-wp-sqlite-query-rewriter.php';
+require_once __DIR__ . '/class-wp-sqlite-translator.php';
+require_once __DIR__ . '/class-wp-sqlite-token.php';
+require_once __DIR__ . '/class-wp-sqlite-pdo-user-defined-functions.php';
+require_once __DIR__ . '/class-wp-sqlite-db.php';
 require_once __DIR__ . '/install-functions.php';
 
-$GLOBALS['wpdb'] = new Perflab_SQLite_DB();
+/*
+ * Debug: Cross-check with MySQL.
+ * This is for debugging purpose only and requires files
+ * that are present in the GitHub repository
+ * but not the plugin published on WordPress.org.
+ */
+$crosscheck_tests_file_path = dirname( dirname( __DIR__ ) ) . '/tests/class-wp-sqlite-crosscheck-db.php';
+if ( defined( 'SQLITE_DEBUG_CROSSCHECK' ) && SQLITE_DEBUG_CROSSCHECK && file_exists( $crosscheck_tests_file_path ) ) {
+	require_once $crosscheck_tests_file_path;
+	$GLOBALS['wpdb'] = new WP_SQLite_Crosscheck_DB();
+} else {
+	$GLOBALS['wpdb'] = new WP_SQLite_DB();
+}

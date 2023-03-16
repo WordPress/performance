@@ -21,20 +21,20 @@ require_once __DIR__ . '/constants.php';
  * @return array The filtered debug data.
  */
 function perflab_sqlite_plugin_filter_debug_data( $info ) {
-	$database_type = defined( 'DATABASE_TYPE' ) && 'sqlite' === DATABASE_TYPE ? 'sqlite' : 'mysql';
+	$db_engine = defined( 'DB_ENGINE' ) && 'sqlite' === DB_ENGINE ? 'sqlite' : 'mysql';
 
-	$info['wp-constants']['fields']['DATABASE_TYPE'] = array(
-		'label' => 'DATABASE_TYPE',
-		'value' => ( defined( 'DATABASE_TYPE' ) ? DATABASE_TYPE : __( 'Undefined', 'performance-lab' ) ),
-		'debug' => ( defined( 'DATABASE_TYPE' ) ? DATABASE_TYPE : 'undefined' ),
+	$info['wp-constants']['fields']['DB_ENGINE'] = array(
+		'label' => 'DB_ENGINE',
+		'value' => ( defined( 'DB_ENGINE' ) ? DB_ENGINE : __( 'Undefined', 'performance-lab' ) ),
+		'debug' => ( defined( 'DB_ENGINE' ) ? DB_ENGINE : 'undefined' ),
 	);
 
-	$info['wp-database']['fields']['database_type'] = array(
+	$info['wp-database']['fields']['db_engine'] = array(
 		'label' => __( 'Database type', 'performance-lab' ),
-		'value' => 'sqlite' === $database_type ? 'SQLite' : 'MySQL/MariaDB',
+		'value' => 'sqlite' === $db_engine ? 'SQLite' : 'MySQL/MariaDB',
 	);
 
-	if ( 'sqlite' === $database_type ) {
+	if ( 'sqlite' === $db_engine ) {
 		$info['wp-database']['fields']['database_version'] = array(
 			'label' => __( 'SQLite version', 'performance-lab' ),
 			'value' => class_exists( 'SQLite3' ) ? SQLite3::version()['versionString'] : null,
