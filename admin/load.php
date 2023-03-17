@@ -157,7 +157,9 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" disabled>
 				<input type="hidden" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" value="<?php echo $enabled ? '1' : '0'; ?>">
 				<?php
-				if ( 'database/sqlite' === $module_slug && file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
+				if ( is_wp_error( $can_load_module ) ) {
+					echo $can_load_module->get_error_message();
+				} elseif ( 'database/sqlite' === $module_slug && file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
 					printf(
 						/* translators: %s: db.php drop-in path */
 						esc_html__( 'The SQLite module cannot be activated because a different %s drop-in already exists.', 'performance-lab' ),
@@ -171,8 +173,6 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 					);
 				} elseif ( 'database/sqlite' === $module_slug && ! class_exists( 'SQLite3' ) ) {
 					esc_html_e( 'The SQLite module cannot be activated because the SQLite extension is not loaded.', 'performance-lab' );
-				} elseif ( is_wp_error( $can_load_module ) ) {
-					esc_html_e( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' );
 				} else {
 					printf(
 						/* translators: %s: module name */

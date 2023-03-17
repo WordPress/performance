@@ -236,11 +236,9 @@ function perflab_can_load_module( $module ) {
 		return true;
 	}
 
-	$standalone_plugin_config = perflab_get_standalone_plugins_config();
-	foreach ( $standalone_plugin_config as $slug => $constant ) {
-		if ( $module === $slug && defined( $constant ) ) {
-			return new WP_Error( 'standalone_plugin_activated', __( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' ) );
-		}
+	$standalone_plugins_constants = perflab_get_standalone_plugins_constants();
+	if ( isset( $standalone_plugins_constants[ $module ] ) && defined( $standalone_plugins_constants[ $module ] ) ) {
+		return new WP_Error( 'standalone_plugin_activated', __( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' ) );
 	}
 
 	// Require the file to get the closure for whether the module can load.
@@ -256,13 +254,13 @@ function perflab_can_load_module( $module ) {
 }
 
 /**
- * Gets the standalone plugin configuration.
+ * Gets the standalone plugin constants used for each module / plugin.
  *
  * @since n.e.x.t
  *
- * @return array Array of standalone plugin configuration.
+ * @return array Map of module path to version constant used.
  */
-function perflab_get_standalone_plugins_config() {
+function perflab_get_standalone_plugins_constants() {
 	return array(
 		'images/webp-uploads' => 'WEBP_UPLOADS_VERSION',
 	);
@@ -282,16 +280,7 @@ function perflab_load_active_and_valid_modules() {
 		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/load.php';
 	}
 }
-
-/**
- * Loads the modules once the activated plugins have loaded.
- *
- * @since n.e.x.t
- */
-function perflab_plugins_loaded() {
-	perflab_load_active_and_valid_modules();
-}
-add_action( 'plugins_loaded', 'perflab_plugins_loaded' );
+add_action( 'plugins_loaded', 'perflab_load_active_and_valid_modules' );
 
 /**
  * Places the Performance Lab's object cache drop-in in the drop-ins folder.
