@@ -73,11 +73,12 @@ withOptions( program.command( 'module-translations' ), translationsOptions )
 	)
 	.action( catchException( translationsHandler ) );
 
-withOptions( program.command( 'build-standalone-plugins' ), buildPluginsOptions )
+withOptions(
+	program.command( 'build-standalone-plugins' ),
+	buildPluginsOptions
+)
 	.alias( 'build-plugins' )
-	.description(
-		'Build standalone plugins'
-	)
+	.description( 'Build standalone plugins' )
 	.action( catchException( buildPluginsHandler ) );
 
 withOptions(
