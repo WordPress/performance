@@ -81,6 +81,13 @@ exports.handler = async () => {
 						regex: '@package\\s{1,}performance-lab',
 						result: '@package ' + pluginSlug,
 					} );
+
+					// Update version constant.
+					updateModuleDetails( {
+						pluginPath: buildModulePath,
+						regex: '[\']Performance Lab [\'] . PERFLAB_VERSION',
+						result: `'${ pluginVersion }'`,
+					} );
 				} catch ( error ) {
 					log(
 						formats.error(
