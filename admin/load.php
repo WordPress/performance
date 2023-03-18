@@ -158,7 +158,7 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<input type="hidden" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" value="<?php echo $enabled ? '1' : '0'; ?>">
 				<?php
 				if ( is_wp_error( $can_load_module ) ) {
-					echo $can_load_module->get_error_message();
+					echo esc_html( $can_load_module->get_error_message() );
 				} elseif ( 'database/sqlite' === $module_slug && file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
 					printf(
 						/* translators: %s: db.php drop-in path */
