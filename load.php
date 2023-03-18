@@ -240,7 +240,7 @@ function perflab_can_load_module( $module ) {
 	if (
 		isset( $standalone_plugins_constants[ $module ] ) &&
 		defined( $standalone_plugins_constants[ $module ] ) &&
-		0 !== strpos( constant( $standalone_plugins_constants[ $module ] ), 'Performance Lab ' )
+		! str_starts_with( constant( $standalone_plugins_constants[ $module ] ), 'Performance Lab ' )
 	) {
 		return new WP_Error( 'standalone_plugin_activated', __( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' ) );
 	}
