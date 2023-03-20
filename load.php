@@ -169,6 +169,7 @@ function perflab_get_active_modules() {
  * Gets the active and valid performance modules.
  *
  * @since 1.3.0
+ * @since n.e.x.t Adds an additional check for standalone plugins.
  *
  * @param string $module Slug of the module.
  * @return bool True if the module is active and valid, otherwise false.
@@ -176,6 +177,11 @@ function perflab_get_active_modules() {
 function perflab_is_valid_module( $module ) {
 
 	if ( empty( $module ) ) {
+		return false;
+	}
+
+	// Do not load the module if it can be loaded by a separate plugin.
+	if ( perflab_is_standalone_plugin_loaded( $module ) ) {
 		return false;
 	}
 
@@ -224,7 +230,6 @@ add_action( 'wp_head', 'perflab_render_generator' );
  * Checks whether the given module can be loaded in the current environment.
  *
  * @since 1.3.0
- * @since n.e.x.t Adds an additional check for standalone plugins.
  *
  * @param string $module Slug of the module.
  * @return bool Whether the module can be loaded or not.
@@ -235,11 +240,6 @@ function perflab_can_load_module( $module ) {
 	// If the `can-load.php` file does not exist, assume the module can be loaded.
 	if ( ! file_exists( $module_load_file ) ) {
 		return true;
-	}
-
-	// Do not load the module if it can be loaded by a separate plugin.
-	if ( perflab_is_module_standalone( $module ) ) {
-		return false;
 	}
 
 	// Require the file to get the closure for whether the module can load.
@@ -262,7 +262,7 @@ function perflab_can_load_module( $module ) {
  * @param string $module Slug of the module.
  * @return bool Whether the module can be loaded by a separate plugin or not.
  */
-function perflab_is_module_standalone( $module ) {
+function perflab_is_standalone_plugin_loaded( $module ) {
 	$standalone_plugins_constants = perflab_get_standalone_plugins_constants();
 	if (
 		isset( $standalone_plugins_constants[ $module ] ) &&

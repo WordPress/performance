@@ -126,18 +126,18 @@ function perflab_render_modules_page() {
  * @param array  $module_settings Associative array of the module's current settings.
  */
 function perflab_render_modules_page_field( $module_slug, $module_data, $module_settings ) {
-	$base_id              = sprintf( 'module_%s', $module_slug );
-	$base_name            = sprintf( '%1$s[%2$s]', PERFLAB_MODULES_SETTING, $module_slug );
-	$enabled              = isset( $module_settings['enabled'] ) && $module_settings['enabled'];
-	$can_load_module      = perflab_can_load_module( $module_slug );
-	$is_module_standalone = perflab_is_module_standalone( $module_slug );
+	$base_id                     = sprintf( 'module_%s', $module_slug );
+	$base_name                   = sprintf( '%1$s[%2$s]', PERFLAB_MODULES_SETTING, $module_slug );
+	$enabled                     = isset( $module_settings['enabled'] ) && $module_settings['enabled'];
+	$can_load_module             = perflab_can_load_module( $module_slug );
+	$is_standalone_plugin_loaded = perflab_is_standalone_plugin_loaded( $module_slug );
 	?>
 	<fieldset>
 		<legend class="screen-reader-text">
 			<?php echo esc_html( $module_data['name'] ); ?>
 		</legend>
 		<label for="<?php echo esc_attr( "{$base_id}_enabled" ); ?>">
-			<?php if ( $can_load_module && ! $is_module_standalone ) { ?>
+			<?php if ( $can_load_module && ! $is_standalone_plugin_loaded ) { ?>
 				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" value="1"<?php checked( $enabled ); ?>>
 				<?php
 				if ( $module_data['experimental'] ) {
@@ -158,7 +158,7 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" disabled>
 				<input type="hidden" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" value="<?php echo $enabled ? '1' : '0'; ?>">
 				<?php
-				if ( $is_module_standalone ) {
+				if ( $is_standalone_plugin_loaded ) {
 					esc_html_e( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' );
 				} elseif ( 'database/sqlite' === $module_slug && file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
 					printf(
