@@ -148,7 +148,7 @@ exports.getModuleDataFromHeader = ( moduleHeader ) => {
 	// Parse experimental field into a boolean.
 	if ( typeof moduleData.experimental === 'string' ) {
 		moduleData.experimental =
-		moduleData.experimental.toLowerCase() === 'yes';
+			moduleData.experimental.toLowerCase() === 'yes';
 	}
 
 	return moduleData;
@@ -161,7 +161,7 @@ exports.getModuleDataFromHeader = ( moduleHeader ) => {
  * @return {string} Module file header.
  */
 exports.getModuleHeader = ( moduleFileContent ) => {
-	const regex = /\/\\*\\*[\s\S]+?(?=\*\/)/mi;
+	const regex = /\/\\*\\*[\s\S]+?(?=\*\/)/im;
 	const moduleHeader = moduleFileContent.match( regex )?.[ 0 ];
 	return moduleHeader;
 };
