@@ -3,7 +3,7 @@
  * Hook callbacks used for Dominant Color.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 2.1.0
  */
 
 /**
