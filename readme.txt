@@ -81,6 +81,17 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 == Changelog ==
 
+= 2.1.0 =
+
+**Enhancements**
+
+* Infrastructure: Add `wp-total` metric to default Server-Timing metrics. ([669](https://github.com/WordPress/performance/pull/669))
+* Infrastructure: Ensure module `load.php` files really only load other code to prevent conflicts in standalone plugins. ([674](https://github.com/WordPress/performance/pull/674))
+
+**Bug Fixes**
+
+* Infrastructure: Fix problems with placing `object-cache.php` drop-in. ([672](https://github.com/WordPress/performance/pull/672))
+
 = 2.0.0 =
 
 **Enhancements**
