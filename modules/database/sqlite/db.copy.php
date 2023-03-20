@@ -26,7 +26,7 @@ if ( ! defined( 'DATABASE_TYPE' ) ) {
 
 // Define SQLite constant.
 if ( ! defined( 'DB_ENGINE' ) ) {
-	define( 'DB_ENGINE', 'sqlite' );
+	define( 'DB_ENGINE', DATABASE_TYPE );
 }
 
 // Require the implementation from the performance-lab plugin.
