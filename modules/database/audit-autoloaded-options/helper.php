@@ -3,7 +3,7 @@
  * Helper functions used for Autoloaded Options Health Check.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 2.1.0
  */
 
 /**
