@@ -224,9 +224,10 @@ add_action( 'wp_head', 'perflab_render_generator' );
  * Checks whether the given module can be loaded in the current environment.
  *
  * @since 1.3.0
+ * @since n.e.x.t Adds an additional check for standalone plugins.
  *
  * @param string $module Slug of the module.
- * @return bool|WP_Error Whether the module can be loaded or not, otherwise a WP_Error.
+ * @return bool Whether the module can be loaded or not.
  */
 function perflab_can_load_module( $module ) {
 	$module_load_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/can-load.php';
@@ -236,13 +237,9 @@ function perflab_can_load_module( $module ) {
 		return true;
 	}
 
-	$standalone_plugins_constants = perflab_get_standalone_plugins_constants();
-	if (
-		isset( $standalone_plugins_constants[ $module ] ) &&
-		defined( $standalone_plugins_constants[ $module ] ) &&
-		! str_starts_with( constant( $standalone_plugins_constants[ $module ] ), 'Performance Lab ' )
-	) {
-		return new WP_Error( 'standalone_plugin_activated', __( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' ) );
+	// Do not load the module if it can be loaded by a separate plugin.
+	if ( perflab_is_module_standalone( $module ) ) {
+		return false;
 	}
 
 	// Require the file to get the closure for whether the module can load.
@@ -255,6 +252,26 @@ function perflab_can_load_module( $module ) {
 
 	// Call the closure to determine whether the module can be loaded.
 	return (bool) $module();
+}
+
+/**
+ * Checks whether the given module can be loaded by a separate plugin.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $module Slug of the module.
+ * @return bool Whether the module can be loaded by a separate plugin or not.
+ */
+function perflab_is_module_standalone( $module ) {
+	$standalone_plugins_constants = perflab_get_standalone_plugins_constants();
+	if (
+		isset( $standalone_plugins_constants[ $module ] ) &&
+		defined( $standalone_plugins_constants[ $module ] ) &&
+		! str_starts_with( constant( $standalone_plugins_constants[ $module ] ), 'Performance Lab ' )
+	) {
+		return true;
+	}
+	return false;
 }
 
 /**
