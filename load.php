@@ -255,12 +255,12 @@ function perflab_can_load_module( $module ) {
 }
 
 /**
- * Checks whether the given module can be loaded by a separate plugin.
+ * Checks whether the given module has already been loaded by a separate plugin.
  *
  * @since n.e.x.t
  *
  * @param string $module Slug of the module.
- * @return bool Whether the module can be loaded by a separate plugin or not.
+ * @return bool Whether the module has already been loaded by a separate plugin.
  */
 function perflab_is_standalone_plugin_loaded( $module ) {
 	$standalone_plugins_constants = perflab_get_standalone_plugins_constants();
