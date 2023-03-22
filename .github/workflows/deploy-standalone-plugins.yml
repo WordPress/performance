@@ -1,0 +1,59 @@
+name: Deploy standalone plugins to WordPress.org
+
+on:
+  push:
+    branches:
+      - trunk
+      - 'release/**'
+    paths:
+      - '.github/workflows/deploy-standalone-plugins.yml'
+  pull_request:
+    branches:
+      - trunk
+      - 'release/**'
+      - 'feature/**'
+    paths:
+      - '.github/workflows/deploy-standalone-plugins.yml'
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  release:
+    name: New Release
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: set-matrix
+        run: echo "matrix="$(jq -c '{include:[keys[] as $k | {name:$k,slug:.[$k].slug,version:.[$k].version }]}' plugins.json) >> $GITHUB_OUTPUT
+      - uses: actions/checkout@v3
+      - name: Setup Node.js (.nvmrc)
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: npm install
+        run: npm ci
+      - name: Building standalone plugins
+        id: build-plugins
+        run: npm run build-plugins
+  deploy:
+    needs: release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJSON(needs.release.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy Standalone Plugin - ${{ matrix.slug }}
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          #SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          #SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: SVN_PASSWORD
+          SVN_USERNAME: SVN_USERNAME
+          SLUG: ${{ matrix.slug }}
+          VERSION: ${{ matrix.version }}
+          BUILD_DIR: ./build/${{ matrix.slug }}
