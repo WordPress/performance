@@ -127,6 +127,7 @@ function doRunStandalonePluginTests( settings ) {
 			)
 		);
 
+		// Return with exit code 1 to trigger a failure in the test pipeline.
 		process.exit( 1 );
 	}
 
