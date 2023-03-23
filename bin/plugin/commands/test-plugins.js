@@ -18,11 +18,11 @@ const { log, formats } = require( '../lib/logger' );
 /**
  * @typedef WPTestPluginsSettings
  *
- * @property {string}  siteType             Site type. 'single' or 'multi'.
- * @property {string}  pluginTestAssets     Path to 'plugin-tests' folder.
- * @property {string}  builtPluginsDir      Path to 'build' directory.
- * @property {string=} wpEnvFile            Path to the plugin tests specific .wp-env.json file.
- * @property {string=} wpEnvDestinationFile Path to the final base .wp-env.json file.
+ * @property {string} siteType             Site type. 'single' or 'multi'.
+ * @property {string} pluginTestAssets     Path to 'plugin-tests' folder.
+ * @property {string} builtPluginsDir      Path to 'build' directory.
+ * @property {string} wpEnvFile            Path to the plugin tests specific .wp-env.json file.
+ * @property {string} wpEnvDestinationFile Path to the final base .wp-env.json file.
  */
 
 exports.options = [
