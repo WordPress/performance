@@ -61,7 +61,7 @@ exports.handler = async ( opt ) => {
 		pluginTestAssets: './plugin-tests', // plugin test assets.
 		builtPluginsDir: './build/', // Built plugins directory.
 		wpEnvFile: './plugin-tests/.wp-env.json', // Base .wp-env.json file for testing plugins.
-		wpEnvDestinationFile: './.wp-env.json', // Destination .wp-env.json file at root level.
+		wpEnvDestinationFile: './.wp-env.override.json', // Destination .wp-env.override.json file at root level.
 		wpEnvPluginsRegexPattern: '"plugins": \\[(.*)\\],', // Regex to match plugins string in .wp-env.json.
 	} );
 };
