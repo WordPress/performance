@@ -16,6 +16,22 @@ const { log, formats } = require( '../lib/logger' );
  */
 
 /**
+ * @typedef WPDoReplaceWpEnvContent
+ *
+ * @property {string} wpEnvPluginsRegexPattern Regex to match against plugins property of .wp-env.json.
+ * @property {string} wpEnvFile                Path to the plugin tests specific .wp-env.json file.
+ * @property {string} wpEnvDestinationFile     Path to the final base .wp-env.json file.
+ * @property {Object} builtPlugins             Array of plugins slugs from plugins json file.
+ */
+
+/**
+ * @typedef WPDoRunUnitTests
+ *
+ * @property {string} siteType     Site type. 'single' or 'multi'.
+ * @property {Object} builtPlugins Array of plugins slugs from plugins json file.
+ */
+
+/**
  * @typedef WPTestPluginsSettings
  *
  * @property {string} pluginsJsonFile      Path to the plugins.json file used for building plugins.
@@ -51,6 +67,213 @@ exports.handler = async ( opt ) => {
 };
 
 /**
+ * Handles replacement of plugins array in .wp-env.json file.
+ * Split into separate function in order to easily re-run tests with WPP plugin active.
+ *
+ * @param {WPDoReplaceWpEnvContent} settings Plugin test settings.
+ */
+function doReplaceWpEnvContent( settings ) {
+	// Regex object to match wp-env plugins string.
+	const wpEnvPluginsRegex = new RegExp( settings.wpEnvPluginsRegexPattern, 'gm' );
+
+	let wpEnvPluginsRegexReplacement = '';
+	// Amend wp-env.json to reference built plugins only.
+	// Buffer .wp-env.json content var.
+	let wpEnvFileContent = '';
+
+	try {
+		wpEnvFileContent = fs.readFileSync( settings.wpEnvFile, 'utf-8' );
+	} catch ( e ) {
+		log( formats.error( `Error reading file "${ settings.wpEnvFile }": "${ e }"` ) );
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
+	}
+
+	// If the contents of the file were incorrectly read or exception was not captured and value is blank, abort.
+	if ( '' === wpEnvFileContent ) {
+		log(
+			formats.error(
+				`File content for "${ settings.wpEnvFile }" is empty, aborting.`
+			)
+		);
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
+	}
+
+	// If we do not have a match on the wp-env enabled plugins regex, abort.
+	if ( ! wpEnvPluginsRegex.test( wpEnvFileContent ) ) {
+		log(
+			formats.error(
+				`Unable to find plugins property/key in WP Env config file: "${ settings.wpEnvFile }". Please ensure that it is present and try agagin.`
+			)
+		);
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
+	}
+
+	// Let the user know we're re-writing the .wp-env.json file.
+	log( formats.success( `Rewriting plugins property in ${ settings.wpEnvFile }` ) );
+
+	// Attempt replacement of the plugins property in .wp-env.json file to match built plugins.
+	try {
+		// Create plugins property from built plugins.
+		wpEnvPluginsRegexReplacement = `"plugins": [ "${ settings.builtPlugins
+			.map( ( item ) => {
+				if ( '.' === item ) {
+					// Do not append build dir for root plugin.
+					return item;
+				} else {
+					return `${ settings.builtPluginsDir }${ item }`;
+				}
+			} )
+			.join( '", "' ) }" ],`;
+
+		fs.writeFileSync(
+			settings.wpEnvFile,
+			wpEnvFileContent.replace(
+				wpEnvPluginsRegex,
+				wpEnvPluginsRegexReplacement
+			)
+		);
+	} catch ( e ) {
+		log(
+			formats.error(
+				`Error replacing content in ${ settings.wpEnvFile } using regex "${ wpEnvPluginsRegex }": "${ e }"`
+			)
+		);
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
+	}
+
+	// Copy the newly modified ./plugins-tests/.wp-env.json file to the root level.
+	try {
+		fs.copySync( settings.wpEnvFile, settings.wpEnvDestinationFile, {
+			overwrite: true,
+		} );
+		log(
+			formats.success(
+				`Copied modified .wp-env.json file to root level, ready to start wp-env.`
+			)
+		);
+	} catch ( e ) {
+		log(
+			formats.error(
+				`Error copying modified .wp-env.json file at "${ settings.wpEnvFile } to root level". ${ e }`
+			)
+		);
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
+	}
+}
+/**
+ * Handles starting of wp-env, running unit tests and stopping of wp-env.
+ * Split into separate function in order to easily re-run tests with WPP plugin active.
+ *
+ * @param {WPDoRunUnitTests} settings Unit testing settings.
+ */
+function doRunUnitTests( settings ) {
+	// Start the wp-env environment.
+	log(
+		formats.success(
+			`Starting wp-env environment with active plugins: ${ settings.builtPlugins.join(
+				', '
+			) }`
+		)
+	);
+
+	// Exclude the main WPP plugin from actual traversion into build folder during testing.
+	if ( '.' === settings.builtPlugins[ 0 ] ) {
+		settings.builtPlugins.shift();
+	}
+
+	// Execute wp-env start.
+	execSync( `npm run wp-env start`, ( err, output ) => {
+		// once the command has completed, the callback function is called.
+		if ( err ) {
+			log( formats.error( `${ err }` ) );
+
+			// Return with exit code 1 to trigger a failure in the test pipeline.
+			process.exit( 1 );
+		}
+		// log the output received from the command.
+		log( output );
+	} );
+
+	// Run tests per plugin.
+	log(
+		formats.success(
+			`wp-env is running, running composer install on main composer container`
+		)
+	);
+
+	settings.builtPlugins.forEach( ( plugin ) => {
+		log(
+			formats.success(
+				`Running plugin integration tests for plugin: "${ plugin }"`
+			)
+		);
+
+		// Define multi site flag based on single vs multi sitetype arg.
+		const isMutiSite = 'multi' === settings.siteType;
+		let command = '';
+
+		if ( isMutiSite ) {
+			command = spawnSync(
+				'wp-env',
+				[
+					'run',
+					'phpunit',
+					`'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/${ plugin }/multisite.xml --verbose --testdox'`,
+				],
+				{ shell: true, encoding: 'utf8' }
+			);
+		} else {
+			command = spawnSync(
+				'wp-env',
+				[
+					'run',
+					'phpunit',
+					`'phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml --verbose --testdox'`,
+				],
+				{ shell: true, encoding: 'utf8' }
+			);
+		}
+
+		log( command.stdout.replace( '\n', '' ) );
+
+		if ( 1 === command.status ) {
+			log(
+				formats.error(
+					`One or more tests failed for plugin ${ plugin }`
+				)
+			);
+
+			// Return with exit code 1 to trigger a failure in the test pipeline.
+			process.exit( 1 );
+		}
+	} );
+
+	// Start winding down.
+	log( `Stopping wp-env...` );
+
+	// Stop wp-env.
+	execSync( `wp-env stop`, ( err, output ) => {
+		// once the command has completed, the callback function is called.
+		if ( err ) {
+			log( formats.error( `${ err }` ) );
+			return;
+		}
+		// log the output received from the command.
+		log( output );
+	} );
+}
+
+/**
  * Runs standalone plugin tests in single or multisite environments.
  *
  * @param {WPTestPluginsSettings} settings Plugin test settings.
@@ -70,11 +293,6 @@ function doRunStandalonePluginTests( settings ) {
 		// Return with exit code 1 to trigger a failure in the test pipeline.
 		process.exit( 1 );
 	}
-
-	// Regex object to match wp-env plugins string.
-	const wpEnvPluginsRegex = new RegExp( settings.wpEnvPluginsRegexPattern, 'gm' );
-
-	let wpEnvPluginsRegexReplacement = '';
 
 	// If the base .wp-env.json file for testing plugins is missing, abort.
 	if ( ! fs.pathExistsSync( settings.wpEnvFile ) ) {
@@ -135,7 +353,7 @@ function doRunStandalonePluginTests( settings ) {
 	builtPlugins = Object.keys( pluginsJsonFileContentAsJson )
 		.map( ( item ) => pluginsJsonFileContentAsJson[ item ].slug );
 
-	// For each built plugin, copy the test.
+	// For each built plugin, copy the test assets.
 	builtPlugins.forEach( ( plugin ) => {
 		log(
 			formats.success(
@@ -178,188 +396,33 @@ function doRunStandalonePluginTests( settings ) {
 		);
 	} );
 
-	// Amend wp-env.json to reference built plugins only.
-	// Buffer .wp-env.json content var.
-	let wpEnvFileContent = '';
+	// Handle replacement of wp-env file content for round 1 of testing without root plugin.
+	doReplaceWpEnvContent( { ...settings, builtPlugins } );
 
-	try {
-		wpEnvFileContent = fs.readFileSync( settings.wpEnvFile, 'utf-8' );
-	} catch ( e ) {
-		log( formats.error( `Error reading file "${ settings.wpEnvFile }": "${ e }"` ) );
+	// Run unit tests against built plugins.
+	doRunUnitTests( { ...settings, builtPlugins } );
 
-		// Return with exit code 1 to trigger a failure in the test pipeline.
-		process.exit( 1 );
-	}
-
-	// If the contents of the file were incorrectly read or exception was not captured and value is blank, abort.
-	if ( '' === wpEnvFileContent ) {
-		log(
-			formats.error(
-				`File content for "${ settings.wpEnvFile }" is empty, aborting.`
-			)
-		);
-
-		// Return with exit code 1 to trigger a failure in the test pipeline.
-		process.exit( 1 );
-	}
-
-	// If we do not have a match on the wp-env enabled plugins regex, abort.
-	if ( ! wpEnvPluginsRegex.test( wpEnvFileContent ) ) {
-		log(
-			formats.error(
-				`Unable to find plugins property/key in WP Env config file: "${ settings.wpEnvFile }". Please ensure that it is present and try agagin.`
-			)
-		);
-
-		// Return with exit code 1 to trigger a failure in the test pipeline.
-		process.exit( 1 );
-	}
-
-	// Let the user know we're re-writing the .wp-env.json file.
-	log( formats.success( `Rewriting plugins property in ${ settings.wpEnvFile }` ) );
-
-	// Attempt replacement of the plugins property in .wp-env.json file to match built plugins.
-	try {
-		// Create plugins property from built plugins.
-		wpEnvPluginsRegexReplacement = `"plugins": [ "${ builtPlugins
-			.map( ( item ) => `${ settings.builtPluginsDir }${ item }` )
-			.join( '", "' ) }" ],`;
-
-		fs.writeFileSync(
-			settings.wpEnvFile,
-			wpEnvFileContent.replace(
-				wpEnvPluginsRegex,
-				wpEnvPluginsRegexReplacement
-			)
-		);
-	} catch ( e ) {
-		log(
-			formats.error(
-				`Error replacing content in ${ settings.wpEnvFile } using regex "${ wpEnvPluginsRegex }": "${ e }"`
-			)
-		);
-
-		// Return with exit code 1 to trigger a failure in the test pipeline.
-		process.exit( 1 );
-	}
-
-	// Copy the newly modified ./plugins-tests/.wp-env.json file to the root level.
-	try {
-		fs.copySync( settings.wpEnvFile, settings.wpEnvDestinationFile, {
-			overwrite: true,
-		} );
-		log(
-			formats.success(
-				`Copied modified .wp-env.json file to root level, ready to start wp-env.`
-			)
-		);
-	} catch ( e ) {
-		log(
-			formats.error(
-				`Error copying modified .wp-env.json file at "${ settings.wpEnvFile } to root level". ${ e }`
-			)
-		);
-
-		// Return with exit code 1 to trigger a failure in the test pipeline.
-		process.exit( 1 );
-	}
-
-	// Start the wp-env environment.
 	log(
 		formats.success(
-			`Starting wp-env environment with active plugins: ${ builtPlugins.join(
-				', '
-			) }`
+			`Re-running standalone plugin integration tests with WPP plugin active.`
 		)
 	);
+	// Add the root level WPP plugin to the built plugins array.
+	// This allows to re-run tests with WPP plugin active.
+	builtPlugins.unshift( '.' );
 
-	// Execute wp-env start.
-	execSync( `npm run wp-env start`, ( err, output ) => {
-		// once the command has completed, the callback function is called.
-		if ( err ) {
-			log( formats.error( `${ err }` ) );
+	// Handle replacement of wp-env file content for round 2 of testing with root plugin.
+	doReplaceWpEnvContent( { ...settings, builtPlugins } );
 
-			// Return with exit code 1 to trigger a failure in the test pipeline.
-			process.exit( 1 );
-		}
-		// log the output received from the command.
-		log( output );
-	} );
-
-	// Run tests per plugin.
-	log(
-		formats.success(
-			`wp-env is running, running composer install on main composer container`
-		)
-	);
-
-	builtPlugins.forEach( ( plugin ) => {
-		log(
-			formats.success(
-				`Running plugin integration tests for plugin: "${ plugin }"`
-			)
-		);
-
-		// Define multi site flag based on single vs multi sitetype arg.
-		const isMutiSite = 'multi' === settings.siteType;
-		let command = '';
-
-		if ( isMutiSite ) {
-			command = spawnSync(
-				'wp-env',
-				[
-					'run',
-					'phpunit',
-					`'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/${ plugin }/multisite.xml --verbose --testdox'`,
-				],
-				{ shell: true, encoding: 'utf8' }
-			);
-		} else {
-			command = spawnSync(
-				'wp-env',
-				[
-					'run',
-					'phpunit',
-					`'phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml --verbose --testdox'`,
-				],
-				{ shell: true, encoding: 'utf8' }
-			);
-		}
-
-		log( command.stdout.replace( '\n', '' ) );
-
-		if ( 1 === command.status ) {
-			log(
-				formats.error(
-					`One or more tests failed for plugin ${ plugin }`
-				)
-			);
-
-			// Return with exit code 1 to trigger a failure in the test pipeline.
-			process.exit( 1 );
-		}
-	} );
+	// Re-run unit tests against built plugins, with WPP plugin active as well.
+	doRunUnitTests( { ...settings, builtPlugins } );
 
 	// If we've reached this far, all tests have passed.
 	log(
 		formats.success(
-			`All standalone plugin tests appeared to have passed :)`
+			`All standalone plugin tests appeared to have passed.`
 		)
 	);
-
-	// Start winding down.
-	log( `Stopping wp-env...` );
-
-	// Stop wp-env.
-	execSync( `wp-env stop`, ( err, output ) => {
-		// once the command has completed, the callback function is called.
-		if ( err ) {
-			log( formats.error( `${ err }` ) );
-			return;
-		}
-		// log the output received from the command.
-		log( output );
-	} );
 
 	// Return with exit code 0 to trigger a success in the test pipeline.
 	process.exit( 0 );
