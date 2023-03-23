@@ -1,0 +1,12 @@
+{
+  "core": null,
+  "plugins": [ "." ],
+  "env": {
+    "tests": {
+      "config": {
+        "FS_METHOD": "direct"
+      },
+      "phpVersion": "7.4"
+    }
+  }
+}
