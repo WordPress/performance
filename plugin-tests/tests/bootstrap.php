@@ -32,11 +32,6 @@ if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
 	$_test_root = '/tmp/wordpress-tests-lib';
 }
 
-// Force plugin to be active.
-$GLOBALS['wp_tests_options'] = array(
-	'active_plugins' => array( basename( TESTS_PLUGIN_DIR ) . '/load.php' ),
-);
-
 // Start up the WP testing environment.
 require $_test_root . '/includes/bootstrap.php';
 
