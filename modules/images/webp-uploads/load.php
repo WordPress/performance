@@ -8,6 +8,13 @@
  * @package performance-lab
  */
 
+// Define the constant.
+if ( defined( 'WEBP_UPLOADS_VERSION' ) ) {
+	return;
+}
+
+define( 'WEBP_UPLOADS_VERSION', 'Performance Lab ' . PERFLAB_VERSION );
+
 // Do not load the code if it is already loaded through another means.
 if ( function_exists( 'webp_uploads_create_sources_property' ) ) {
 	return;
