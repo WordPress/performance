@@ -8,6 +8,7 @@
 /bin export-ignore
 /docs export-ignore
 /tests export-ignore
+/plugin-tests export-ignore
 
 /*.DS_store export-ignore
 /.DS_store? export-ignore
@@ -32,5 +33,3 @@
 /.gitignore export-ignore
 
 /modules/**/readme.txt export-ignore
-
-/plugin-tests export-ignore
