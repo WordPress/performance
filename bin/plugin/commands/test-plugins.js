@@ -2,19 +2,50 @@
  * External dependencies
  */
 const fs = require( 'fs-extra' );
-const { execSync, spawnSync } = require( 'node:child_process' );
+const { execSync, spawnSync } = require( 'child_process' );
 
 /**
  * Internal dependencies
  */
 const { log, formats } = require( '../lib/logger' );
 
-exports.options = [];
+/**
+ * @typedef WPTestPluginsCommandOptions
+ *
+ * @property {string} sitetype Site type, 'single' or 'multi'.
+ */
+
+exports.options = [
+	{
+		argname: '--sitetype <sitetype>',
+		description: 'Whether to test "single" (default) or "multi" site.',
+	},
+];
 
 /**
- * Command for testing all built stndalone plugins.
+ * Command for testing all built standalone plugins.
+ *
+ * @param {WPTestPluginsCommandOptions} opt Command options.
  */
-exports.handler = async () => {
+exports.handler = async ( opt ) => {
+	// Single vs multi site arg.
+	const sitetype = opt.sitetype || 'single';
+
+	// Check if the sitettype arg is one of single or multi.
+	if (
+		'single' !== sitetype &&
+		'multi' !== sitetype
+	) {
+		log(
+			formats.error(
+				`--sitetype must be one of "single" or "multi".`
+			)
+		);
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
+	}
+
 	// plugin test assets.
 	const pluginTestAssets = './plugin-tests';
 
@@ -24,8 +55,11 @@ exports.handler = async () => {
 	// Buffer built plugins array.
 	let builtPlugins = [];
 
-	// root .wp-env.json file.
-	const wpEnvFile = '.wp-env.json';
+	// Base .wp-env.json file for testing plugins.
+	const wpEnvFile = `${ pluginTestAssets }/.wp-env.json`;
+
+	// Destination .wp-env.json file at root level.
+	const wpEnvDestinationFile = `./.wp-env.json`;
 
 	// Regex to match plugins string in .wp-env.json.
 	const wpEnvPluginsRegexPattern = '"plugins": \\[(.*)\\],';
@@ -35,7 +69,7 @@ exports.handler = async () => {
 
 	let wpEnvPluginsRegexReplacement = '';
 
-	// If the root .wp-env.json file is missing, abort.
+	// If the base .wp-env.json file for testing plugins is missing, abort.
 	if ( ! fs.pathExistsSync( wpEnvFile ) ) {
 		log(
 			formats.error(
@@ -106,10 +140,9 @@ exports.handler = async () => {
 		execSync(
 			`composer install --working-dir=${ builtPluginsDir }${ plugin } --no-interaction`,
 			( err, output ) => {
-				// once the command has completed, the callback function is called
 				if ( err ) {
 					log( formats.error( `${ err }` ) );
-					return;
+					process.exit( 1 );
 				}
 				// log the output received from the command
 				log( output );
@@ -118,14 +151,6 @@ exports.handler = async () => {
 	} );
 
 	// Amend wp-env.json to reference built plugins only.
-	log(
-		formats.success(
-			`\nTest assets copied and "composer install" executed for all built plugins, configuring .wp-env.json file to reference built plugins as active plugins. Plugins to be enabled are: ${ builtPlugins.join(
-				', '
-			) }`
-		)
-	);
-
 	// Buffer .wp-env.json content var.
 	let wpEnvFileContent = '';
 
@@ -183,6 +208,27 @@ exports.handler = async () => {
 		log(
 			formats.error(
 				`Error replacing content in ${ wpEnvFile } using regex "${ wpEnvPluginsRegex }": "${ e }"`
+			)
+		);
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
+	}
+
+	// Copy the newly modified ./plugins-tests/.wp-env.json file to the root level.
+	try {
+		fs.copySync( wpEnvFile, wpEnvDestinationFile, {
+			overwrite: true,
+		} );
+		log(
+			formats.success(
+				`Copied modified .wp-env.json file to root level, ready to start wp-env.`
+			)
+		);
+	} catch ( e ) {
+		log(
+			formats.error(
+				`Error copying modified .wp-env.json file at "${ wpEnvFile } to root level". ${ e }`
 			)
 		);
 
