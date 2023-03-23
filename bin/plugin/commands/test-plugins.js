@@ -351,6 +351,17 @@ function doRunStandalonePluginTests( settings ) {
 
 	// Create an array of plugins from entries in plugins JSON file.
 	builtPlugins = Object.keys( pluginsJsonFileContentAsJson )
+		.filter( ( item ) => {
+			if ( ! fs.pathExistsSync( `${ settings.builtPluginsDir }${ pluginsJsonFileContentAsJson[ item ].slug }` ) ) {
+				log(
+					formats.error(
+						`Built plugin path "${ settings.builtPluginsDir }${ pluginsJsonFileContentAsJson[ item ].slug }" not found, skipping and removing from plugin list`
+					)
+				);
+				return false;
+			}
+			return true;
+		} )
 		.map( ( item ) => pluginsJsonFileContentAsJson[ item ].slug );
 
 	// For each built plugin, copy the test assets.
