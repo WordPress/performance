@@ -21,6 +21,7 @@
     "translations": "./bin/plugin/cli.js translations",
     "build-plugins": "./bin/plugin/cli.js build-plugins",
     "test-plugins": "./bin/plugin/cli.js test-plugins",
+    "test-plugins-multisite": "./bin/plugin/cli.js test-plugins --sitetype=multi",
     "enabled-modules": "./bin/plugin/cli.js enabled-modules",
     "format-js": "wp-scripts format ./bin",
     "lint-js": "wp-scripts lint-js ./bin",
