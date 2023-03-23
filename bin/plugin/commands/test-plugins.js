@@ -123,7 +123,7 @@ exports.handler = async ( opt ) => {
 
 		// Copy over test files.
 		try {
-			fs.copySync( pluginTestAssets, `./build/${ plugin }/`, {
+			fs.copySync( pluginTestAssets, `${ builtPluginsDir }${ plugin }/`, {
 				overwrite: true,
 			} );
 			log(
