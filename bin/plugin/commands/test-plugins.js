@@ -12,13 +12,17 @@ const { log, formats } = require( '../lib/logger' );
 /**
  * @typedef WPTestPluginsCommandOptions
  *
- * @property {string} --sitetype Site type, 'single' or 'multi'.
+ * @property {string=} sitetype Site type, 'single' or 'multi'.
  */
 
 /**
- * @typedef WPTestPluginsCommandOptions
+ * @typedef WPTestPluginsSettings
  *
- * @property {string=} sitetype Site type, 'single' or 'multi'.
+ * @property {string}  siteType             Site type. 'single' or 'multi'.
+ * @property {string}  pluginTestAssets     Path to 'plugin-tests' folder.
+ * @property {string}  builtPluginsDir      Path to 'build' directory.
+ * @property {string=} wpEnvFile            Path to the plugin tests specific .wp-env.json file.
+ * @property {string=} wpEnvDestinationFile Path to the final base .wp-env.json file.
  */
 
 exports.options = [
@@ -34,13 +38,26 @@ exports.options = [
  * @param {WPTestPluginsCommandOptions} opt Command options.
  */
 exports.handler = async ( opt ) => {
-	// Single vs multi site arg.
-	const siteType = opt.sitetype || 'single';
+	doRunStandalonePluginTests( {
+		siteType: opt.sitetype || 'single', // Site type.
+		pluginTestAssets: './plugin-tests', // plugin test assets.
+		builtPluginsDir: './build/', // Built plugins directory.
+		wpEnvFile: './plugin-tests/.wp-env.json', // Base .wp-env.json file for testing plugins.
+		wpEnvDestinationFile: './.wp-env.json', // Destination .wp-env.json file at root level.
+		wpEnvPluginsRegexPattern: '"plugins": \\[(.*)\\],', // Regex to match plugins string in .wp-env.json.
+	} );
+};
 
+/**
+ * Runs standalone plugin tests in single or multisite environments.
+ *
+ * @param {WPTestPluginsSettings} settings Plugin test settings.
+ */
+function doRunStandalonePluginTests( settings ) {
 	// Check if the siteType arg is one of single or multi.
 	if (
-		'single' !== siteType &&
-		'multi' !== siteType
+		'single' !== settings.siteType &&
+		'multi' !== settings.siteType
 	) {
 		log(
 			formats.error(
@@ -52,34 +69,19 @@ exports.handler = async ( opt ) => {
 		process.exit( 1 );
 	}
 
-	// plugin test assets.
-	const pluginTestAssets = './plugin-tests';
-
-	// Built plugins directory.
-	const builtPluginsDir = './build/';
-
 	// Buffer built plugins array.
 	let builtPlugins = [];
 
-	// Base .wp-env.json file for testing plugins.
-	const wpEnvFile = `${ pluginTestAssets }/.wp-env.json`;
-
-	// Destination .wp-env.json file at root level.
-	const wpEnvDestinationFile = `./.wp-env.json`;
-
-	// Regex to match plugins string in .wp-env.json.
-	const wpEnvPluginsRegexPattern = '"plugins": \\[(.*)\\],';
-
 	// Regex object to match wp-env plugins string.
-	const wpEnvPluginsRegex = new RegExp( wpEnvPluginsRegexPattern, 'gm' );
+	const wpEnvPluginsRegex = new RegExp( settings.wpEnvPluginsRegexPattern, 'gm' );
 
 	let wpEnvPluginsRegexReplacement = '';
 
 	// If the base .wp-env.json file for testing plugins is missing, abort.
-	if ( ! fs.pathExistsSync( wpEnvFile ) ) {
+	if ( ! fs.pathExistsSync( settings.wpEnvFile ) ) {
 		log(
 			formats.error(
-				`WP Env config file "${ wpEnvFile }" not detected in root of project.`
+				`WP Env config file "${ settings.wpEnvFile }" not detected in root of project.`
 			)
 		);
 
@@ -88,24 +90,24 @@ exports.handler = async ( opt ) => {
 	}
 
 	// Only try to read plugin dirs if build directory exists.
-	if ( fs.pathExistsSync( builtPluginsDir ) ) {
+	if ( fs.pathExistsSync( settings.builtPluginsDir ) ) {
 		// Read all built plugins from build dir.
 		try {
 			builtPlugins = fs
-				.readdirSync( builtPluginsDir, { withFileTypes: true } )
+				.readdirSync( settings.builtPluginsDir, { withFileTypes: true } )
 				.filter( ( item ) => item.isDirectory() )
 				.map( ( item ) => item.name );
 		} catch ( e ) {
 			log(
 				formats.success(
-					`Unable to read plugins from ${ builtPluginsDir }: ${ e }`
+					`Unable to read plugins from ${ settings.builtPluginsDir }: ${ e }`
 				)
 			);
 		}
 	} else {
 		log(
 			formats.error(
-				`Built plugins directory at ${ builtPluginsDir } does not exist. Please run the 'npm run build-plugins' command first.`
+				`Built plugins directory at ${ settings.builtPluginsDir } does not exist. Please run the 'npm run build-plugins' command first.`
 			)
 		);
 
@@ -123,7 +125,7 @@ exports.handler = async ( opt ) => {
 
 		// Copy over test files.
 		try {
-			fs.copySync( pluginTestAssets, `${ builtPluginsDir }${ plugin }/`, {
+			fs.copySync( settings.pluginTestAssets, `${ settings.builtPluginsDir }${ plugin }/`, {
 				overwrite: true,
 			} );
 			log(
@@ -144,7 +146,7 @@ exports.handler = async ( opt ) => {
 
 		// Execute composer install within built plugin following copy.
 		execSync(
-			`composer install --working-dir=${ builtPluginsDir }${ plugin } --no-interaction`,
+			`composer install --working-dir=${ settings.builtPluginsDir }${ plugin } --no-interaction`,
 			( err, output ) => {
 				if ( err ) {
 					log( formats.error( `${ err }` ) );
@@ -161,9 +163,9 @@ exports.handler = async ( opt ) => {
 	let wpEnvFileContent = '';
 
 	try {
-		wpEnvFileContent = fs.readFileSync( wpEnvFile, 'utf-8' );
+		wpEnvFileContent = fs.readFileSync( settings.wpEnvFile, 'utf-8' );
 	} catch ( e ) {
-		log( formats.error( `Error reading file "${ wpEnvFile }": "${ e }"` ) );
+		log( formats.error( `Error reading file "${ settings.wpEnvFile }": "${ e }"` ) );
 
 		// Return with exit code 1 to trigger a failure in the test pipeline.
 		process.exit( 1 );
@@ -173,7 +175,7 @@ exports.handler = async ( opt ) => {
 	if ( '' === wpEnvFileContent ) {
 		log(
 			formats.error(
-				`File content for "${ wpEnvFile }" is empty, aborting.`
+				`File content for "${ settings.wpEnvFile }" is empty, aborting.`
 			)
 		);
 
@@ -185,7 +187,7 @@ exports.handler = async ( opt ) => {
 	if ( ! wpEnvPluginsRegex.test( wpEnvFileContent ) ) {
 		log(
 			formats.error(
-				`Unable to find plugins property/key in WP Env config file: "${ wpEnvFile }". Please ensure that it is present and try agagin.`
+				`Unable to find plugins property/key in WP Env config file: "${ settings.wpEnvFile }". Please ensure that it is present and try agagin.`
 			)
 		);
 
@@ -194,17 +196,17 @@ exports.handler = async ( opt ) => {
 	}
 
 	// Let the user know we're re-writing the .wp-env.json file.
-	log( formats.success( `Rewriting plugins property in ${ wpEnvFile }` ) );
+	log( formats.success( `Rewriting plugins property in ${ settings.wpEnvFile }` ) );
 
 	// Attempt replacement of the plugins property in .wp-env.json file to match built plugins.
 	try {
 		// Create plugins property from built plugins.
 		wpEnvPluginsRegexReplacement = `"plugins": [ "${ builtPlugins
-			.map( ( item ) => `${ builtPluginsDir }${ item }` )
+			.map( ( item ) => `${ settings.builtPluginsDir }${ item }` )
 			.join( '", "' ) }" ],`;
 
 		fs.writeFileSync(
-			wpEnvFile,
+			settings.wpEnvFile,
 			wpEnvFileContent.replace(
 				wpEnvPluginsRegex,
 				wpEnvPluginsRegexReplacement
@@ -213,7 +215,7 @@ exports.handler = async ( opt ) => {
 	} catch ( e ) {
 		log(
 			formats.error(
-				`Error replacing content in ${ wpEnvFile } using regex "${ wpEnvPluginsRegex }": "${ e }"`
+				`Error replacing content in ${ settings.wpEnvFile } using regex "${ wpEnvPluginsRegex }": "${ e }"`
 			)
 		);
 
@@ -223,7 +225,7 @@ exports.handler = async ( opt ) => {
 
 	// Copy the newly modified ./plugins-tests/.wp-env.json file to the root level.
 	try {
-		fs.copySync( wpEnvFile, wpEnvDestinationFile, {
+		fs.copySync( settings.wpEnvFile, settings.wpEnvDestinationFile, {
 			overwrite: true,
 		} );
 		log(
@@ -279,7 +281,7 @@ exports.handler = async ( opt ) => {
 		);
 
 		// Define multi site flag based on single vs multi sitetype arg.
-		const isMutiSite = 'multi' === siteType;
+		const isMutiSite = 'multi' === settings.siteType;
 		let command = '';
 
 		if ( isMutiSite ) {
@@ -372,4 +374,4 @@ exports.handler = async ( opt ) => {
 
 	// Return with exit code 0 to trigger a success in the test pipeline.
 	process.exit( 0 );
-};
+}
