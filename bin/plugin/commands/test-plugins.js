@@ -236,7 +236,7 @@ function doRunStandalonePluginTests( settings ) {
 	} catch ( e ) {
 		log(
 			formats.error(
-				`Error copying modified .wp-env.json file at "${ wpEnvFile } to root level". ${ e }`
+				`Error copying modified .wp-env.json file at "${ settings.wpEnvFile } to root level". ${ e }`
 			)
 		);
 
