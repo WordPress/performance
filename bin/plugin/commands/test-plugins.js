@@ -87,7 +87,7 @@ exports.handler = async ( opt ) => {
 		process.exit( 1 );
 	}
 
-	// Only try to read plugin dirs if build ir exists.
+	// Only try to read plugin dirs if build directory exists.
 	if ( fs.pathExistsSync( builtPluginsDir ) ) {
 		// Read all built plugins from build dir.
 		try {
