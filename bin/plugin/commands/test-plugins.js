@@ -12,7 +12,7 @@ const { log, formats } = require( '../lib/logger' );
 /**
  * @typedef WPTestPluginsCommandOptions
  *
- * @property {string=} sitetype Site type, 'single' or 'multi'.
+ * @property {string=} siteType Optional site type, 'single' or 'multi'. Defaults to single.
  */
 
 /**
