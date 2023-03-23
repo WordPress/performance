@@ -125,9 +125,9 @@ function doReplaceWpEnvContent( settings ) {
 				if ( '.' === item ) {
 					// Do not append build dir for root plugin.
 					return item;
-				} else {
-					return `${ settings.builtPluginsDir }${ item }`;
 				}
+
+				return `${ settings.builtPluginsDir }${ item }`;
 			} )
 			.join( '", "' ) }" ],`;
 
