@@ -12,12 +12,18 @@ const { log, formats } = require( '../lib/logger' );
 /**
  * @typedef WPTestPluginsCommandOptions
  *
- * @property {string} sitetype Site type, 'single' or 'multi'.
+ * @property {string} --sitetype Site type, 'single' or 'multi'.
+ */
+
+/**
+ * @typedef WPTestPluginsCommandOptions
+ *
+ * @property {string=} sitetype Site type, 'single' or 'multi'.
  */
 
 exports.options = [
 	{
-		argname: '--sitetype <sitetype>',
+		argname: '-s, --sitetype <sitetype>',
 		description: 'Whether to test "single" (default) or "multi" site.',
 	},
 ];
@@ -29,12 +35,12 @@ exports.options = [
  */
 exports.handler = async ( opt ) => {
 	// Single vs multi site arg.
-	const sitetype = opt.sitetype || 'single';
+	const siteType = opt.sitetype || 'single';
 
-	// Check if the sitettype arg is one of single or multi.
+	// Check if the siteType arg is one of single or multi.
 	if (
-		'single' !== sitetype &&
-		'multi' !== sitetype
+		'single' !== siteType &&
+		'multi' !== siteType
 	) {
 		log(
 			formats.error(
@@ -272,15 +278,31 @@ exports.handler = async ( opt ) => {
 			)
 		);
 
-		const command = spawnSync(
-			'wp-env',
-			[
-				'run',
-				'phpunit',
-				`'phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml.dist --verbose --testdox'`,
-			],
-			{ shell: true, encoding: 'utf8' }
-		);
+		// Define multi site flag based on single vs multi sitetype arg.
+		const isMutiSite = 'multi' === siteType;
+		let command = '';
+
+		if ( isMutiSite ) {
+			command = spawnSync(
+				'wp-env',
+				[
+					'run',
+					'phpunit',
+					`'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/${ plugin }/multisite.xml --verbose --testdox'`,
+				],
+				{ shell: true, encoding: 'utf8' }
+			);
+		} else {
+			command = spawnSync(
+				'wp-env',
+				[
+					'run',
+					'phpunit',
+					`'phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml --verbose --testdox'`,
+				],
+				{ shell: true, encoding: 'utf8' }
+			);
+		}
 
 		log( command.stdout.replace( '\n', '' ) );
 
