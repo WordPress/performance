@@ -18,6 +18,7 @@ const { log, formats } = require( '../lib/logger' );
 /**
  * @typedef WPTestPluginsSettings
  *
+ * @property {string} pluginsJsonFile      Path to the plugins.json file used for building plugins.
  * @property {string} siteType             Site type. 'single' or 'multi'.
  * @property {string} pluginTestAssets     Path to 'plugin-tests' folder.
  * @property {string} builtPluginsDir      Path to 'build' directory.
@@ -39,6 +40,7 @@ exports.options = [
  */
 exports.handler = async ( opt ) => {
 	doRunStandalonePluginTests( {
+		pluginsJsonFile: './plugins.json', // Path to plugins.json file.
 		siteType: opt.sitetype || 'single', // Site type.
 		pluginTestAssets: './plugin-tests', // plugin test assets.
 		builtPluginsDir: './build/', // Built plugins directory.
@@ -69,9 +71,6 @@ function doRunStandalonePluginTests( settings ) {
 		process.exit( 1 );
 	}
 
-	// Buffer built plugins array.
-	let builtPlugins = [];
-
 	// Regex object to match wp-env plugins string.
 	const wpEnvPluginsRegex = new RegExp( settings.wpEnvPluginsRegexPattern, 'gm' );
 
@@ -89,31 +88,51 @@ function doRunStandalonePluginTests( settings ) {
 		process.exit( 1 );
 	}
 
-	// Only try to read plugin dirs if build directory exists.
-	if ( fs.pathExistsSync( settings.builtPluginsDir ) ) {
-		// Read all built plugins from build dir.
-		try {
-			builtPlugins = fs
-				.readdirSync( settings.builtPluginsDir, { withFileTypes: true } )
-				.filter( ( item ) => item.isDirectory() )
-				.map( ( item ) => item.name );
-		} catch ( e ) {
-			log(
-				formats.success(
-					`Unable to read plugins from ${ settings.builtPluginsDir }: ${ e }`
-				)
-			);
-		}
-	} else {
+	// Buffer built plugins array.
+	let builtPlugins = [];
+
+	// Buffer contents of plugins JSON file.
+	let pluginsJsonFileContent = '';
+
+	try {
+		pluginsJsonFileContent = fs.readFileSync( settings.pluginsJsonFile, 'utf-8' );
+	} catch ( e ) {
+		log(
+			formats.error( `Error reading file at "${ settings.pluginsJsonFile }". ${ e }` )
+		);
+	}
+
+	// Validate that the plugins JSON file contains content before proceeding.
+	if (
+		'' === pluginsJsonFileContent ||
+		! pluginsJsonFileContent
+	) {
 		log(
 			formats.error(
-				`Built plugins directory at ${ settings.builtPluginsDir } does not exist. Please run the 'npm run build-plugins' command first.`
+				`Contents of file at "${ settings.pluginsJsonFile }" could not be read, or are empty.`
+			)
+		);
+	}
+
+	const pluginsJsonFileContentAsJson = JSON.parse( pluginsJsonFileContent );
+
+	// Check for valid and not empty object resulting from plugins JSON file parse.
+	if (
+		'object' !== typeof pluginsJsonFileContentAsJson ||
+		0 === Object.keys( pluginsJsonFileContentAsJson ).length
+	) {
+		log(
+			formats.error(
+				`File at "settings.pluginsJsonFile" parsed, but detected empty/non valid JSON object.`
 			)
 		);
 
-		// Return with exit code 1 to trigger a failure in the test pipeline.
 		process.exit( 1 );
 	}
+
+	// Create an array of plugins from entries in plugins JSON file.
+	builtPlugins = Object.keys( pluginsJsonFileContentAsJson )
+		.map( ( item ) => pluginsJsonFileContentAsJson[ item ].slug );
 
 	// For each built plugin, copy the test.
 	builtPlugins.forEach( ( plugin ) => {
