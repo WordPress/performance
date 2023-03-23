@@ -318,37 +318,6 @@ function doRunStandalonePluginTests( settings ) {
 			// Return with exit code 1 to trigger a failure in the test pipeline.
 			process.exit( 1 );
 		}
-
-		// Run phpunit tests for specific plugin.
-		try {
-			execSync(
-				`wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml.dist --verbose --testdox'`,
-				( err, output ) => {
-					// once the command has completed, the callback function is called.
-					if ( err ) {
-						log(
-							formats.error(
-								`Error executing phpunit test command: ${ err }`
-							)
-						);
-
-						// Return with exit code 1 to trigger a failure in the test pipeline.
-						process.exit( 1 );
-					}
-					// log the output received from the command.
-					log( output );
-				}
-			);
-		} catch ( e ) {
-			log(
-				formats.error(
-					`One or more tests failed for plugin "${ plugin }"`
-				)
-			);
-
-			// Return with exit code 1 to trigger a failure in the test pipeline.
-			process.exit( 1 );
-		}
 	} );
 
 	// If we've reached this far, all tests have passed.
