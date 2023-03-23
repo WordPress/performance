@@ -27,7 +27,7 @@ const { log, formats } = require( '../lib/logger' );
 
 exports.options = [
 	{
-		argname: '-s, --sitetype <sitetype>',
+		argname: '-s, --sitetype <siteType>',
 		description: 'Whether to test "single" (default) or "multi" site.',
 	},
 ];
