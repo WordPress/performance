@@ -265,22 +265,6 @@ exports.handler = async ( opt ) => {
 		)
 	);
 
-	// Run composer install on the main composer container for the project.
-	execSync( `npm run pretest-php`, ( err, output ) => {
-		// once the command has completed, the callback function is called.
-		if ( err ) {
-			log( formats.error( `${ err }` ) );
-
-			// Return with exit code 1 to trigger a failure in the test pipeline.
-			process.exit( 1 );
-		}
-		// log the output received from the command.
-		log( output );
-	} );
-
-	// Run tests per plugin.
-	log( formats.success( `About to execute standalone plugins tests.` ) );
-
 	builtPlugins.forEach( ( plugin ) => {
 		log(
 			formats.success(
