@@ -31,4 +31,6 @@
 /.gitattributes export-ignore
 /.gitignore export-ignore
 
+/modules/**/readme.txt export-ignore
+
 /plugin-tests export-ignore

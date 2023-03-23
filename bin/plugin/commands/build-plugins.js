@@ -20,11 +20,7 @@ exports.handler = async () => {
 	const pluginsFile = path.join( '.', 'plugins.json' );
 	fs.readFile( pluginsFile, 'utf8', ( err, jsonString ) => {
 		if ( err ) {
-			log(
-				formats.error(
-					`Error reading file from disk: "${ err }"`
-				)
-			);
+			log( formats.error( `Error reading file from disk: "${ err }"` ) );
 		}
 
 		try {
@@ -45,12 +41,20 @@ exports.handler = async () => {
 				try {
 					// Copy module files from the folder.
 					const modulePath = path.join( '.', 'modules/' + moduleDir );
-					const buildModulePath = path.join( '.', 'build/' + pluginSlug );
+					const buildModulePath = path.join(
+						'.',
+						'build/' + pluginSlug
+					);
 					try {
 						// Clean up build module files directory.
-						fs.rmSync( buildModulePath, { force: true, recursive: true } );
+						fs.rmSync( buildModulePath, {
+							force: true,
+							recursive: true,
+						} );
 
-						fs.copySync( modulePath, buildModulePath, { overwrite: true } );
+						fs.copySync( modulePath, buildModulePath, {
+							overwrite: true,
+						} );
 					} catch ( copyError ) {
 						log(
 							formats.error(
@@ -71,7 +75,7 @@ exports.handler = async () => {
 					// Update text domain.
 					updateModuleDetails( {
 						pluginPath: buildModulePath,
-						regex: '[\']performance-lab[\']',
+						regex: "[']performance-lab[']",
 						result: `'${ pluginSlug }'`,
 					} );
 
@@ -82,18 +86,12 @@ exports.handler = async () => {
 						result: '@package ' + pluginSlug,
 					} );
 				} catch ( error ) {
-					log(
-						formats.error(
-							`${ error }`
-						)
-					);
+					log( formats.error( `${ error }` ) );
 				}
 			}
 		} catch ( jsonError ) {
 			log(
-				formats.error(
-					`Error parsing JSON string: "${ jsonError }"`
-				)
+				formats.error( `Error parsing JSON string: "${ jsonError }"` )
 			);
 		}
 	} );
@@ -120,11 +118,7 @@ async function updatePluginHeader( settings ) {
 	}
 
 	if ( buildLoadFileContent === '' ) {
-		log(
-			formats.error(
-				`Error reading the file "${ buildLoadFile }"`
-			)
-		);
+		log( formats.error( `Error reading the file "${ buildLoadFile }"` ) );
 		return false;
 	}
 	const moduleHeader = await getModuleHeader( buildLoadFileContent );
@@ -149,12 +143,13 @@ async function updatePluginHeader( settings ) {
  `;
 	try {
 		// Replace the module file header.
-		fs.writeFileSync( buildLoadFile, buildLoadFileContent.replace( moduleHeader, pluginHeader ) );
+		fs.writeFileSync(
+			buildLoadFile,
+			buildLoadFileContent.replace( moduleHeader, pluginHeader )
+		);
 	} catch ( error ) {
 		log(
-			formats.error(
-				`Error replacing module file header: "${ error }"`
-			)
+			formats.error( `Error replacing module file header: "${ error }"` )
 		);
 	}
 }
@@ -165,9 +160,7 @@ async function updatePluginHeader( settings ) {
  * @param {Object} settings Plugin settings.
  */
 async function updateModuleDetails( settings ) {
-	const patterns = [
-		path.resolve( settings.pluginPath, './**/*.php' ),
-	];
+	const patterns = [ path.resolve( settings.pluginPath, './**/*.php' ) ];
 
 	const files = await glob( patterns, {
 		ignore: [ __filename ],
@@ -188,11 +181,7 @@ async function updateModuleDetails( settings ) {
 		}
 
 		if ( content === '' ) {
-			log(
-				formats.error(
-					`Error reading the file "${ file }"`
-				)
-			);
+			log( formats.error( `Error reading the file "${ file }"` ) );
 			return false;
 		}
 
