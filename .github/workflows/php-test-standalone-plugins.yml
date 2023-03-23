@@ -54,5 +54,7 @@ jobs:
         run: npm ci
       - name: Building standalone plugins
         run: npm run build-plugins
-      - name: Running standalone plugin integration tests
+      - name: Running single site standalone plugin integration tests
         run: npm run test-plugins
+      - name: Running multi site standalone plugin integration tests
+        run: npm run test-plugins -- --sitetype=multi
