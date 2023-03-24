@@ -10,6 +10,7 @@ on:
       - '.github/workflows/php-test.yml'
       - '**.php'
       - '.wp-env.json'
+      - 'plugins.json'
       - '**/package.json'
       - 'package-lock.json'
       - 'phpunit.xml.dist'
@@ -25,6 +26,7 @@ on:
     paths:
       - '.github/workflows/php-test.yml'
       - '**.php'
+      - 'plugins.json'
       - '.wp-env.json'
       - '**/package.json'
       - 'package-lock.json'
