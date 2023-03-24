@@ -2,5 +2,9 @@
   "images/webp-uploads": {
     "slug": "webp-uploads",
     "version": "1.0.0"
+  },
+  "images/dominant-color": {
+    "slug": "dominant-color",
+    "version": "1.0.0"
   }
 }
