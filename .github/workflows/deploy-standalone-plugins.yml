@@ -29,20 +29,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       - name: Set matrix
-      - id: set-matrix
+        id: set-matrix
         # Load the JSON file and parse from "{name: {slug, version}, ...}" to "include: [{ name, slug, version }, ...]"
         # for use in the matrix.
         run: echo "matrix="$(jq -c '{include:[keys[] as $k | {name:$k,slug:.[$k].slug,version:.[$k].version }]}' plugins.json) >> $GITHUB_OUTPUT
-      - name: Setup Node.js (.nvmrc)
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-      - name: Install npm dependencies
-        run: npm ci
-      - name: Building standalone plugins
-        id: build-plugins
-        run: npm run build-plugins
   deploy:
     needs: release
     runs-on: ubuntu-latest
@@ -51,6 +41,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Setup Node.js (.nvmrc)
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: Install npm dependencies
+        run: npm ci
+      - name: Building standalone plugins
+        run: npm run build-plugins
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
         #uses: 10up/action-wordpress-plugin-deploy@stable
         env:
