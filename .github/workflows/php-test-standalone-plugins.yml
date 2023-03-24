@@ -1,4 +1,4 @@
-name: Standalone Plugin Integration Testing
+name: Integration Tests for Standalone Plugins
 
 on:
   push:
@@ -7,13 +7,13 @@ on:
       - 'release/**'
     # Only run if PHP-related files changed.
     paths:
-      - '.github/workflows/php-test.yml'
+      - '.github/workflows/php-test-standalone-plugins.yml'
+      - 'plugin-tests/**'
       - '**.php'
       - '.wp-env.json'
       - '**/package.json'
       - 'package-lock.json'
       - 'phpunit.xml.dist'
-      - 'tests/multisite.xml'
       - 'composer.json'
       - 'composer.lock'
   pull_request:
@@ -23,13 +23,13 @@ on:
       - 'feature/**'
     # Only run if PHP-related files changed.
     paths:
-      - '.github/workflows/php-test.yml'
+      - '.github/workflows/php-test-standalone-plugins.yml'
+      - 'plugin-tests/**'
       - '**.php'
       - '.wp-env.json'
       - '**/package.json'
       - 'package-lock.json'
       - 'phpunit.xml.dist'
-      - 'tests/multisite.xml'
       - 'composer.json'
       - 'composer.lock'
     types:
@@ -39,7 +39,7 @@ on:
 
 jobs:
   php-test:
-    name: PHP
+    name: PHP Integration Tests for Standalone Plugins
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
