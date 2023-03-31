@@ -27,10 +27,11 @@ const { log, formats } = require( '../lib/logger' );
 /**
  * @typedef WPDoRunUnitTests
  *
- * @property {string} siteType       Site type. 'single' or 'multi'.
- * @property {Object} builtPlugins   Array of plugin slugs from plugins json file.
- * @property {Object} disablePlugins Array of plugin slugs to deactivate on test run.
- * @property {Object} enablePlugins  Array of plugin slugs to activate on test run.
+ * @property {string} siteType             Site type. 'single' or 'multi'.
+ * @property {Object} builtPlugins         Array of plugin slugs from plugins json file.
+ * @property {Object} disablePlugins       Array of plugin slugs to deactivate on test run.
+ * @property {Object} enablePlugins        Array of plugin slugs to activate on test run.
+ * @property {string} wpEnvDestinationFile Path to the final base .wp-env.json file.
  */
 
 /**
@@ -223,6 +224,15 @@ function doRunUnitTests( settings ) {
 
 		// Flag that the env is now started.
 		isWpEnvStarted = true;
+
+		// Remove the wp-env overrides file.
+		try {
+			fs.unlinkSync( settings.wpEnvDestinationFile );
+		} catch ( error ) {
+			log(
+				formats.error( `Error deleting file: ${ settings.wpEnvDestinationFile }. ${ error }` )
+			);
+		}
 	}
 
 	// If there is the presence of an disablePlugins array, disable said plugins prior to testing.
@@ -488,9 +498,6 @@ function doRunStandalonePluginTests( settings ) {
 		)
 	);
 
-	// Start winding down.
-	log( `Performing cleanup operations...` );
-
 	// Stop wp-env.
 	execSync( `wp-env stop`, ( err, output ) => {
 		// once the command has completed, the callback function is called.
@@ -501,15 +508,6 @@ function doRunStandalonePluginTests( settings ) {
 		// log the output received from the command.
 		log( output );
 	} );
-
-	// Remove the ep-env overrides file.
-	try {
-		fs.unlinkSync( settings.wpEnvDestinationFile );
-	} catch ( error ) {
-		log(
-			formats.error( `Error deleting file: ${ settings.wpEnvDestinationFile }. ${ error }` )
-		);
-	}
 
 	// Return with exit code 0 to trigger a success in the test pipeline.
 	process.exit( 0 );
