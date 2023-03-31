@@ -55,6 +55,10 @@ exports.options = [
 // Switch for flagging start of wp-env so it is not started multiple times.
 let isWpEnvStarted = false;
 
+// The Current directory from which the script is executed.
+// This should always be base plugin folder.
+const baseDirectory = process.cwd().match( /([^\/]*)\/*$/ )[ 1 ];
+
 /**
  * Command for testing all built standalone plugins.
  *
@@ -69,7 +73,7 @@ exports.handler = async ( opt ) => {
 		wpEnvFile: './plugin-tests/.wp-env.json', // Base .wp-env.json file for testing plugins.
 		wpEnvDestinationFile: './.wp-env.override.json', // Destination .wp-env.override.json file at root level.
 		wpEnvPluginsRegexPattern: '"plugins": \\[(.*)\\],', // Regex to match plugins string in .wp-env.json.
-		performancePluginSlug: 'performance', // The plugin slug of the main WPP plugin.
+		performancePluginSlug: baseDirectory, // The plugin slug of the main WPP plugin, should be the base directory.
 	} );
 };
 
@@ -485,7 +489,7 @@ function doRunStandalonePluginTests( settings ) {
 	);
 
 	// Start winding down.
-	log( `Stopping wp-env...` );
+	log( `Performing cleanup operations...` );
 
 	// Stop wp-env.
 	execSync( `wp-env stop`, ( err, output ) => {
@@ -497,6 +501,15 @@ function doRunStandalonePluginTests( settings ) {
 		// log the output received from the command.
 		log( output );
 	} );
+
+	// Remove the ep-env overrides file.
+	try {
+		fs.unlinkSync( settings.wpEnvDestinationFile );
+	} catch ( error ) {
+		log(
+			formats.error( `Error deleting file: ${ settings.wpEnvDestinationFile }. ${ error }` )
+		);
+	}
 
 	// Return with exit code 0 to trigger a success in the test pipeline.
 	process.exit( 0 );
