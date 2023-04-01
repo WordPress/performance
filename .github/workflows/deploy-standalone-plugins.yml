@@ -51,10 +51,10 @@ jobs:
       - name: Building standalone plugins
         run: npm run build-plugins
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
-        # uses: 10up/action-wordpress-plugin-deploy@stable
+        #uses: 10up/action-wordpress-plugin-deploy@stable
         env:
-          # SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          # SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          #SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          #SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: SVN_PASSWORD
           SVN_USERNAME: SVN_USERNAME
           SLUG: ${{ matrix.slug }}
