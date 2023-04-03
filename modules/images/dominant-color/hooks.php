@@ -236,7 +236,7 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
  */
 function dominant_color_add_inline_style() {
 	$handle = 'dominant-color-styles';
-	wp_register_style( $handle, false );
+	wp_register_style( $handle, false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 	wp_enqueue_style( $handle );
 	$custom_css = 'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }';
 	wp_add_inline_style( $handle, $custom_css );

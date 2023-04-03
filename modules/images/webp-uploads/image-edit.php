@@ -120,7 +120,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 			$old_metadata = wp_get_attachment_metadata( $post_id );
 			$resize_sizes = array();
-			$target       = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all';
+			$target       = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
 				// If the target is 'nothumb', skip generating the 'thumbnail' size.
@@ -237,7 +237,7 @@ add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 1
  * @return array The updated metadata for the attachment to be stored in the meta table.
  */
 function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
-	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
+	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
 
 	foreach ( $trace as $element ) {
 		if ( ! isset( $element['function'] ) ) {
@@ -272,7 +272,7 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  * @return array The updated metadata for the attachment.
  */
 function webp_uploads_backup_sources( $attachment_id, $data ) {
-	$target = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all';
+	$target = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 	// When an edit to an image is only applied to a thumbnail there's nothing we need to back up.
 	if ( 'thumbnail' === $target ) {

@@ -326,7 +326,7 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 		global $wpdb;
 		$u = umask( 0000 );
 		if ( ! is_dir( FQDBDIR ) ) {
-			if ( ! @mkdir( FQDBDIR, 0704, true ) ) {
+			if ( ! @mkdir( FQDBDIR, 0704, true ) ) { // phpcs:disable WordPress.PHP.NoSilencedErrors.Discouraged
 				umask( $u );
 				$message = __( 'Unable to create the required directory! Please check your server settings.', 'performance-lab' );
 				wp_die( $message, 'Error!' );

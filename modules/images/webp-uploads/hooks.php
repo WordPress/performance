@@ -242,7 +242,7 @@ function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta
 	 * @see wp_update_image_subsizes()
 	 * @see wp_get_missing_image_subsizes()
 	 */
-	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
+	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
 
 	foreach ( $trace as $element ) {
 		if ( isset( $element['function'] ) && 'wp_update_image_subsizes' === $element['function'] ) {
