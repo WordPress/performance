@@ -2,9 +2,9 @@
 
 Contributors:      wordpressdotorg
 Requires at least: 6.1
-Tested up to:      6.1
+Tested up to:      6.2
 Requires PHP:      5.6
-Stable tag:        2.0.0
+Stable tag:        2.1.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -58,6 +58,12 @@ Per the primary purpose of the plugin (see above), it can mostly be considered a
 
 Feedback is encouraged and much appreciated, especially since this plugin is a collection of future WordPress core features. If you have suggestions or requests for new features, you can [submit them as an issue in the Performance Lab GitHub repository](https://github.com/WordPress/performance/issues/new/choose). If you need help with troubleshooting or have a question about the plugin, please [create a new topic on our support forum](https://wordpress.org/support/plugin/performance-lab/#new-topic-0).
 
+= Where can I report security bugs? =
+
+The Performance team and WordPress community take security bugs seriously. We appreciate your efforts to responsibly disclose your findings, and will make every effort to acknowledge your contributions.
+
+To report a security issue, please visit the [WordPress HackerOne](https://hackerone.com/wordpress) program.
+
 = How can I contribute to the plugin? =
 
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
@@ -74,6 +80,17 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.1.0 =
+
+**Enhancements**
+
+* Infrastructure: Add `wp-total` metric to default Server-Timing metrics. ([669](https://github.com/WordPress/performance/pull/669))
+* Infrastructure: Ensure module `load.php` files really only load other code to prevent conflicts in standalone plugins. ([674](https://github.com/WordPress/performance/pull/674))
+
+**Bug Fixes**
+
+* Infrastructure: Fix problems with placing `object-cache.php` drop-in. ([672](https://github.com/WordPress/performance/pull/672))
 
 = 2.0.0 =
 

@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
  * Requires at least: 6.1
  * Requires PHP: 5.6
- * Version: 2.0.0
+ * Version: 2.1.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '2.0.0' );
+define( 'PERFLAB_VERSION', '2.1.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -313,7 +313,7 @@ add_action( 'plugins_loaded', 'perflab_load_active_and_valid_modules' );
  * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
  *
  * @since 1.8.0
- * @since n.e.x.t No longer attempts to use two of the drop-ins together.
+ * @since 2.1.0 No longer attempts to use two of the drop-ins together.
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
