@@ -144,7 +144,7 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 						esc_html( $module_data['name'] )
 					);
 				if ( $module_data['experimental'] ) {
-					echo '<strong>' . esc_html__( '(experimental)', 'performance-lab' ) . '</strong>';
+					echo ' <strong>' . esc_html__( '(experimental)', 'performance-lab' ) . '</strong>';
 				}
 				?>
 			<?php } else { ?>
