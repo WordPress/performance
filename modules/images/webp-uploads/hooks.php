@@ -775,7 +775,7 @@ function webp_uploads_render_generator() {
 		defined( 'WEBP_UPLOADS_VERSION' ) &&
 		! str_starts_with( constant( 'WEBP_UPLOADS_VERSION' ), 'Performance Lab ' )
 	) {
-		echo '<meta name="generator" content="Performance Lab plugin: webp-uploads:' . WEBP_UPLOADS_VERSION . '" />' . "\n";
+		echo '<meta name="generator" content="WebP Uploads ' . esc_attr( WEBP_UPLOADS_VERSION ) . '">' . "\n";
 	}
 }
 add_action( 'wp_head', 'webp_uploads_render_generator' );
