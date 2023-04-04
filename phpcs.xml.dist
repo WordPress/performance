@@ -8,6 +8,7 @@
 	<rule ref="WordPress-Docs"/>
 	<rule ref="WordPress-Extra">
 		<exclude-pattern>tests/*</exclude-pattern>
+		<!-- TODO The SQLite module generates a lot of notices and errors, so it will be covered later. -->
 		<exclude-pattern>modules/database/sqlite/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.WP.I18n"/>

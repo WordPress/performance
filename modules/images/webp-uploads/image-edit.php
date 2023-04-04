@@ -120,7 +120,8 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 			$old_metadata = wp_get_attachment_metadata( $post_id );
 			$resize_sizes = array();
-			$target       = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// PHPCS ignore reason: A nonce check is not necessary here as this logic directly ties in with WordPress core logic which already has one.
+			$target = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
 				// If the target is 'nothumb', skip generating the 'thumbnail' size.
