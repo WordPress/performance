@@ -60,4 +60,5 @@ jobs:
           SLUG: ${{ matrix.slug }}
           VERSION: ${{ matrix.version }}
           BUILD_DIR: ./build/${{ matrix.slug }}
+          ASSETS_DIR: ./build/${{ matrix.slug }}/.wordpress-org
         run: bash ./deploy.sh
