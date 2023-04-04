@@ -762,3 +762,20 @@ function webp_uploads_modify_webp_quality( $quality, $mime_type ) {
 	return $quality;
 }
 add_filter( 'wp_editor_set_quality', 'webp_uploads_modify_webp_quality', 10, 2 );
+
+/**
+ * Displays the HTML generator tag for the WebP Uploads plugin.
+ *
+ * See {@see 'wp_head'}.
+ *
+ * @since n.e.x.t
+ */
+function webp_uploads_render_generator() {
+	if (
+		defined( 'WEBP_UPLOADS_VERSION' ) &&
+		! str_starts_with( WEBP_UPLOADS_VERSION, 'Performance Lab ' )
+	) {
+		echo '<meta name="generator" content="WebP Uploads ' . esc_attr( WEBP_UPLOADS_VERSION ) . '">' . "\n";
+	}
+}
+add_action( 'wp_head', 'webp_uploads_render_generator' );
