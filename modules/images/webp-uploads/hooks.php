@@ -773,7 +773,7 @@ add_filter( 'wp_editor_set_quality', 'webp_uploads_modify_webp_quality', 10, 2 )
 function webp_uploads_render_generator() {
 	if (
 		defined( 'WEBP_UPLOADS_VERSION' ) &&
-		! str_starts_with( constant( 'WEBP_UPLOADS_VERSION' ), 'Performance Lab ' )
+		! str_starts_with( WEBP_UPLOADS_VERSION, 'Performance Lab ' )
 	) {
 		echo '<meta name="generator" content="WebP Uploads ' . esc_attr( WEBP_UPLOADS_VERSION ) . '">' . "\n";
 	}
