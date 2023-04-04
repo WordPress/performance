@@ -1,12 +1,7 @@
 name: Deploy standalone plugins to WordPress.org
 
 on:
-  push:
-    branches:
-      - trunk
-      - 'release/**'
-    paths:
-      - '.github/workflows/deploy-standalone-plugins.yml'
+  # TODO The pull_request will be removed once the workflow is tested.
   pull_request:
     branches:
       - trunk
@@ -18,6 +13,13 @@ on:
       - opened
       - reopened
       - synchronize
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      slug:
+        type: string
+        description: 'The slug of the plugin to deploy'
 
 jobs:
   release:
@@ -51,14 +53,18 @@ jobs:
       - name: Building standalone plugins
         run: npm run build-plugins
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
+        # TODO Once the workflow is tested, we will remove the comment and use the 10up action to deploy the plugin.
         #uses: 10up/action-wordpress-plugin-deploy@stable
         env:
+          # TODO Once the workflow is tested, we will remove the comment and use the secret SVN access.
           #SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           #SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          # TODO Once the workflow is tested, we will remove this test credential.
           SVN_PASSWORD: SVN_PASSWORD
           SVN_USERNAME: SVN_USERNAME
           SLUG: ${{ matrix.slug }}
           VERSION: ${{ matrix.version }}
           BUILD_DIR: ./build/${{ matrix.slug }}
           ASSETS_DIR: ./build/${{ matrix.slug }}/.wordpress-org
+        # TODO The script will be removed once the workflow is tested.
         run: bash ./deploy.sh
