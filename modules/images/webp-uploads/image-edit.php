@@ -120,8 +120,10 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 			$old_metadata = wp_get_attachment_metadata( $post_id );
 			$resize_sizes = array();
-			// PHPCS ignore reason: A nonce check is not necessary here as this logic directly ties in with WordPress core logic which already has one.
-			$target = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			// PHPCS ignore reason: A nonce check is not necessary here as this logic directly ties in with WordPress core
+			// function `wp_ajax_image_editor()` which already has one.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$target = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all';
 
 			foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
 				// If the target is 'nothumb', skip generating the 'thumbnail' size.
@@ -238,7 +240,9 @@ add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 1
  * @return array The updated metadata for the attachment to be stored in the meta table.
  */
 function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
-	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
+	// PHPCS ignore reason: Update the attachment's metadata by either restoring or editing it.
+	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
+	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
 
 	foreach ( $trace as $element ) {
 		if ( ! isset( $element['function'] ) ) {
@@ -273,7 +277,10 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  * @return array The updated metadata for the attachment.
  */
 function webp_uploads_backup_sources( $attachment_id, $data ) {
-	$target = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	// PHPCS ignore reason: A nonce check is not necessary here as this logic directly ties in with WordPress core
+	// function `wp_ajax_image_editor()` which already has one.
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$target = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all';
 
 	// When an edit to an image is only applied to a thumbnail there's nothing we need to back up.
 	if ( 'thumbnail' === $target ) {

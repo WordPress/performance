@@ -254,7 +254,8 @@ function perflab_get_modules( $modules_root = null ) {
 	$modules      = array();
 	$module_files = array();
 	// PHPCS ignore reason: A modules directory is always present.
-	$modules_dir = @opendir( $modules_root ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	$modules_dir = @opendir( $modules_root );
 
 	// Modules are organized as {focus}/{module-slug} in the modules folder.
 	if ( $modules_dir ) {
@@ -270,7 +271,8 @@ function perflab_get_modules( $modules_root = null ) {
 			}
 
 			// PHPCS ignore reason: Only the focus area directory is allowed.
-			$focus_dir = @opendir( $modules_root . '/' . $focus ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$focus_dir = @opendir( $modules_root . '/' . $focus );
 			if ( $focus_dir ) {
 				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				while ( ( $file = readdir( $focus_dir ) ) !== false ) {
@@ -280,7 +282,8 @@ function perflab_get_modules( $modules_root = null ) {
 					}
 
 					// PHPCS ignore reason: Only the module directory is allowed.
-					$module_dir = @opendir( $modules_root . '/' . $focus . '/' . $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+					// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+					$module_dir = @opendir( $modules_root . '/' . $focus . '/' . $file );
 					if ( $module_dir ) {
 						// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 						while ( ( $subfile = readdir( $module_dir ) ) !== false ) {
