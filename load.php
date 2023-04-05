@@ -169,6 +169,7 @@ function perflab_get_active_modules() {
  * Gets the active and valid performance modules.
  *
  * @since 1.3.0
+ * @since n.e.x.t Adds an additional check for standalone plugins.
  *
  * @param string $module Slug of the module.
  * @return bool True if the module is active and valid, otherwise false.
@@ -176,6 +177,11 @@ function perflab_get_active_modules() {
 function perflab_is_valid_module( $module ) {
 
 	if ( empty( $module ) ) {
+		return false;
+	}
+
+	// Do not load the module if it can be loaded by a separate plugin.
+	if ( perflab_is_standalone_plugin_loaded( $module ) ) {
 		return false;
 	}
 
@@ -249,6 +255,39 @@ function perflab_can_load_module( $module ) {
 }
 
 /**
+ * Checks whether the given module has already been loaded by a separate plugin.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $module Slug of the module.
+ * @return bool Whether the module has already been loaded by a separate plugin.
+ */
+function perflab_is_standalone_plugin_loaded( $module ) {
+	$standalone_plugins_constants = perflab_get_standalone_plugins_constants();
+	if (
+		isset( $standalone_plugins_constants[ $module ] ) &&
+		defined( $standalone_plugins_constants[ $module ] ) &&
+		! str_starts_with( constant( $standalone_plugins_constants[ $module ] ), 'Performance Lab ' )
+	) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Gets the standalone plugin constants used for each module / plugin.
+ *
+ * @since n.e.x.t
+ *
+ * @return array Map of module path to version constant used.
+ */
+function perflab_get_standalone_plugins_constants() {
+	return array(
+		'images/webp-uploads' => 'WEBP_UPLOADS_VERSION',
+	);
+}
+
+/**
  * Loads the active and valid performance modules.
  *
  * @since 1.0.0
@@ -262,7 +301,7 @@ function perflab_load_active_and_valid_modules() {
 		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/load.php';
 	}
 }
-perflab_load_active_and_valid_modules();
+add_action( 'plugins_loaded', 'perflab_load_active_and_valid_modules' );
 
 /**
  * Places the Performance Lab's object cache drop-in in the drop-ins folder.

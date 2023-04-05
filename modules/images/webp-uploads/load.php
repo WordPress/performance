@@ -8,8 +8,29 @@
  * @package performance-lab
  */
 
+// Define the constant.
+if ( defined( 'WEBP_UPLOADS_VERSION' ) ) {
+	return;
+}
+
+define( 'WEBP_UPLOADS_VERSION', 'Performance Lab ' . PERFLAB_VERSION );
+
 // Do not load the code if it is already loaded through another means.
 if ( function_exists( 'webp_uploads_create_sources_property' ) ) {
+	return;
+}
+
+// Do not load the code and show an admin notice instead if conditions are not met.
+if ( ! require __DIR__ . '/can-load.php' ) {
+	add_action(
+		'admin_notices',
+		function() {
+			printf(
+				'<div class="notice notice-error"><p>%s</p></div>',
+				esc_html__( 'The WebP Uploads feature cannot be loaded from within the plugin since it is already merged into WordPress core.', 'performance-lab' )
+			);
+		}
+	);
 	return;
 }
 
