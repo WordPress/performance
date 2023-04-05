@@ -2,16 +2,17 @@
 /**
  * Define constants for the SQLite implementation.
  *
- * @since 1.8.0
- * @package performance-lab
+ * @since 1.0.0
+ * @package wp-sqlite-integration
  */
 
 // Temporary - This will be in wp-config.php once SQLite is merged in Core.
 if ( ! defined( 'DB_ENGINE' ) ) {
-	if ( defined( 'DATABASE_TYPE' ) ) {
-		define( 'DB_ENGINE', DATABASE_TYPE );
-	} elseif ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
+	if ( defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
 		define( 'DB_ENGINE', 'sqlite' );
+	} elseif ( defined( 'DATABASE_ENGINE' ) ) {
+		// backwards compatibility with previous versions of the plugin.
+		define( 'DB_ENGINE', DATABASE_ENGINE );
 	} else {
 		define( 'DB_ENGINE', 'mysql' );
 	}
