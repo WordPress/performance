@@ -14,7 +14,7 @@ on:
 
 jobs:
   release:
-    name: New Release
+    name: Prepare Deployment
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -33,6 +33,7 @@ jobs:
             echo "matrix="$(jq -c '{include:[keys[] as $k | {name:$k,slug:.[$k].slug,version:.[$k].version }]}' plugins.json) >> $GITHUB_OUTPUT
           fi
   deploy:
+    name: Deploy Plugin
     needs: release
     runs-on: ubuntu-latest
     strategy:
@@ -50,18 +51,11 @@ jobs:
       - name: Building standalone plugins
         run: npm run build-plugins
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
-        # TODO Once the workflow is tested, we will remove the comment and use the 10up action to deploy the plugin.
-        #uses: 10up/action-wordpress-plugin-deploy@stable
+        uses: 10up/action-wordpress-plugin-deploy@stable
         env:
-          # TODO Once the workflow is tested, we will remove the comment and use the secret SVN access.
-          #SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          #SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-          # TODO Once the workflow is tested, we will remove this test credential.
-          SVN_PASSWORD: SVN_PASSWORD
-          SVN_USERNAME: SVN_USERNAME
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SLUG: ${{ matrix.slug }}
           VERSION: ${{ matrix.version }}
           BUILD_DIR: ./build/${{ matrix.slug }}
           ASSETS_DIR: ./build/${{ matrix.slug }}/.wordpress-org
-        # TODO The script will be removed once the workflow is tested.
-        run: bash ./deploy.sh
