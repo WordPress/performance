@@ -236,6 +236,8 @@ if ( version_compare( '6', $GLOBALS['wp_version'], '>=' ) ) {
  */
 function dominant_color_add_inline_style() {
 	$handle = 'dominant-color-styles';
+	// PHPCS ignore reason: Version not used since this handle is only registered for adding an inline style.
+	// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 	wp_register_style( $handle, false );
 	wp_enqueue_style( $handle );
 	$custom_css = 'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }';

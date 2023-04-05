@@ -140,14 +140,17 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<?php
 				if ( $module_data['experimental'] ) {
 					printf(
-						/* translators: %s: module name */
-						__( 'Enable %s <strong>(experimental)</strong>', 'performance-lab' ),
+						wp_kses(
+							/* translators: %s: module name */
+							__( 'Enable %s <strong>(experimental)</strong>', 'performance-lab' ),
+							array( 'strong' => array() )
+						),
 						esc_html( $module_data['name'] )
 					);
 				} else {
 					printf(
 						/* translators: %s: module name */
-						__( 'Enable %s', 'performance-lab' ),
+						esc_html__( 'Enable %s', 'performance-lab' ),
 						esc_html( $module_data['name'] )
 					);
 				}
@@ -173,7 +176,7 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				} else {
 					printf(
 						/* translators: %s: module name */
-						__( '%s is already part of your WordPress version and therefore cannot be loaded as part of the plugin.', 'performance-lab' ),
+						esc_html__( '%s is already part of your WordPress version and therefore cannot be loaded as part of the plugin.', 'performance-lab' ),
 						esc_html( $module_data['name'] )
 					);
 				}
@@ -250,7 +253,9 @@ function perflab_get_modules( $modules_root = null ) {
 
 	$modules      = array();
 	$module_files = array();
-	$modules_dir  = @opendir( $modules_root );
+	// PHPCS ignore reason: A modules directory is always present.
+	// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	$modules_dir = @opendir( $modules_root );
 
 	// Modules are organized as {focus}/{module-slug} in the modules folder.
 	if ( $modules_dir ) {
@@ -265,6 +270,8 @@ function perflab_get_modules( $modules_root = null ) {
 				continue;
 			}
 
+			// PHPCS ignore reason: Only the focus area directory is allowed.
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			$focus_dir = @opendir( $modules_root . '/' . $focus );
 			if ( $focus_dir ) {
 				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
@@ -274,6 +281,8 @@ function perflab_get_modules( $modules_root = null ) {
 						continue;
 					}
 
+					// PHPCS ignore reason: Only the module directory is allowed.
+					// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 					$module_dir = @opendir( $modules_root . '/' . $focus . '/' . $file );
 					if ( $module_dir ) {
 						// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
