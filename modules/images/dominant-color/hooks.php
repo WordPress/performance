@@ -244,3 +244,20 @@ function dominant_color_add_inline_style() {
 	wp_add_inline_style( $handle, $custom_css );
 }
 add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
+
+/**
+ * Displays the HTML generator tag for the Dominant Color Images plugin.
+ *
+ * See {@see 'wp_head'}.
+ *
+ * @since n.e.x.t
+ */
+function dominant_color_render_generator() {
+	if (
+		defined( 'DOMINANT_COLOR_IMAGES_VERSION' ) &&
+		! str_starts_with( DOMINANT_COLOR_IMAGES_VERSION, 'Performance Lab ' )
+	) {
+		echo '<meta name="generator" content="Dominant Color Images ' . esc_attr( DOMINANT_COLOR_IMAGES_VERSION ) . '">' . "\n";
+	}
+}
+add_action( 'wp_head', 'dominant_color_render_generator' );
