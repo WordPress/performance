@@ -2,7 +2,7 @@
 /**
  * Module Name: Fetchpriority
  * Description: Adds a fetchpriority hint for the primary content image on the page to load faster.
- * Experimental: Yes
+ * Experimental: No
  *
  * @since 1.8.0
  * @package performance-lab
