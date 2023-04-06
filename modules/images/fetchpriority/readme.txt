@@ -7,7 +7,7 @@ Requires PHP:      5.6
 Stable tag:        1.0.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, images, dominant color
+Tags:              performance, images, fetchpriority
 
 Adds a fetchpriority hint for the primary content image on the page to load faster.
 
