@@ -49,7 +49,7 @@
 /tests/modules/js-and-css/audit-enqueued-assets                             @manuelRod
 /tests/testdata/modules/js-and-css/audit-enqueued-assets                    @manuelRod
 
-# Module: Dominant Color
+# Module: Dominant Color Images
 /modules/images/dominant-color                                              @pbearne @spacedmonkey
 /tests/modules/images/dominant-color                                        @pbearne @spacedmonkey
 /tests/testdata/modules/images/dominant-color                               @pbearne @spacedmonkey

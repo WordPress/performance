@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper functions used for Dominant Color.
+ * Helper functions used for Dominant Color Images.
  *
  * @package performance-lab
  * @since 2.1.0

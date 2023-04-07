@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook callbacks used for Dominant Color.
+ * Hook callbacks used for Dominant Color Images.
  *
  * @package performance-lab
  * @since 2.1.0
