@@ -69,7 +69,7 @@ class Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_get_module_settings() {
 		// Assert that by default the settings are using the same value as the registered default.
 		$settings = perflab_get_module_settings();
-		$this->assertSame( perflab_get_modules_setting_default(), $settings );
+		$this->assertEqualSetsWithIndex( perflab_get_modules_setting_default(), $settings );
 
 		// More specifically though, assert that the default is also passed through to the
 		// get_option() call, to support scenarios where the function is called before 'init'.
@@ -88,13 +88,13 @@ class Load_Tests extends WP_UnitTestCase {
 		);
 		$settings = perflab_get_module_settings();
 		$this->assertTrue( $has_passed_default );
-		$this->assertSame( perflab_get_modules_setting_default(), $settings );
+		$this->assertEqualSetsWithIndex( perflab_get_modules_setting_default(), $settings );
 
 		// Assert that option updates are reflected in the settings correctly.
 		$new_value = array( 'my-module' => array( 'enabled' => true ) );
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
 		$settings = perflab_get_module_settings();
-		$this->assertSame( $new_value, $settings );
+		$this->assertEqualSetsWithIndex( $new_value, $settings );
 	}
 
 	/**
@@ -139,7 +139,7 @@ class Load_Tests extends WP_UnitTestCase {
 				}
 			)
 		);
-		$this->assertSame( $expected_active_modules, $active_modules );
+		$this->assertEqualSetsWithIndex( $expected_active_modules, $active_modules );
 
 		// Assert that option updates affect the active modules correctly.
 		$new_value = array(
@@ -148,7 +148,7 @@ class Load_Tests extends WP_UnitTestCase {
 		);
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
 		$active_modules = perflab_get_active_modules();
-		$this->assertSame( array( 'active-module' ), $active_modules );
+		$this->assertEqualSetsWithIndex( array( 'active-module' ), $active_modules );
 	}
 
 	public function test_perflab_get_generator_content() {
