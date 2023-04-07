@@ -4,7 +4,7 @@
  * with dominant color detection
  *
  * @package performance-lab
- * @group dominant-color
+ * @group dominant-color-images
  *
  * @since 1.2.0
  */

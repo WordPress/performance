@@ -1,6 +1,6 @@
 <?php
 /**
- * Module Name: Dominant Color
+ * Module Name: Dominant Color Images
  * Description: Adds support to store dominant color for an image and create a placeholder background with that color.
  * Experimental: No
  *
