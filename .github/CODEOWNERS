@@ -50,9 +50,9 @@
 /tests/testdata/modules/js-and-css/audit-enqueued-assets                    @manuelRod
 
 # Module: Dominant Color Images
-/modules/images/dominant-color                                              @pbearne @spacedmonkey
-/tests/modules/images/dominant-color                                        @pbearne @spacedmonkey
-/tests/testdata/modules/images/dominant-color                               @pbearne @spacedmonkey
+/modules/images/dominant-color-images                                       @pbearne @spacedmonkey
+/tests/modules/images/dominant-color-images                                 @pbearne @spacedmonkey
+/tests/testdata/modules/images/dominant-color-images                        @pbearne @spacedmonkey
 
 # Module: Fetchpriority
 /modules/images/fetchpriority                                               @pbearne @adamsilverstein
