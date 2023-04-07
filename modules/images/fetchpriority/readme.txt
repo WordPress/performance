@@ -13,7 +13,7 @@ Adds a fetchpriority hint for the primary content image on the page to load fast
 
 == Description ==
 
-This plugin determines adds the `fetchpriority="high"` attribute to the image that is most likely the LCP image for the current response, improving LCP performance by telling the browser to prioritize that image. The LCP image detection directly relies on the existing WordPress core heuristics that determine whether to not lazy-load an image. The only difference is that, while multiple images may not be lazy-loaded, only a single image will be annotated with `fetchpriority="high"`.
+This plugin adds the `fetchpriority="high"` attribute to the image that is most likely the LCP image for the current response, improving LCP performance by telling the browser to prioritize that image. The LCP image detection directly relies on the existing WordPress core heuristics that determine whether to not lazy-load an image. The only difference is that, while multiple images may not be lazy-loaded, only a single image will be annotated with `fetchpriority="high"`.
 
 == Installation ==
 

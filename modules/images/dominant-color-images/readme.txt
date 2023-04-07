@@ -9,11 +9,11 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, dominant color
 
-Adds support to store dominant color for an image and create a placeholder background with that color.
+Adds support to store the dominant color of newly uploaded images and create a placeholder background of that color.
 
 == Description ==
 
-This plugin determines and stores the dominant color for media uploads within WordPress and then uses it to create a placeholder background with that color in the frontend while the image is loading.
+This plugin determines and stores the dominant color for newly uploaded images in the media library within WordPress and then uses it to create a placeholder background of that color in the frontend, visible until the image is loaded.
 
 == Installation ==
 
