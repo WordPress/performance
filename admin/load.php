@@ -163,7 +163,7 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<?php
 				if ( $is_standalone_plugin_loaded ) {
 					esc_html_e( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' );
-				} elseif ( 'database/sqlite' === $module_slug && file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
+				} elseif ( 'database/sqlite' === $module_slug && file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) && ! defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
 					printf(
 						/* translators: %s: db.php drop-in path */
 						esc_html__( 'The SQLite module cannot be activated because a different %s drop-in already exists.', 'performance-lab' ),
@@ -192,7 +192,7 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 		</p>
 		<?php if ( 'database/sqlite' === $module_slug ) : ?>
 			<?php if ( $enabled ) : ?>
-				<?php if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) : ?>
+				<?php if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) || defined( 'SQLITE_DB_DROPIN_VERSION' ) ) : ?>
 					<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
 					<p class="notice notice-warning" style="padding:1em;max-width:50em;">
 						<?php esc_html_e( 'Your site is currently using an SQLite database. You can disable this module to get back to your previous MySQL database, with all your previous data intact.', 'performance-lab' ); ?>

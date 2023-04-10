@@ -32,7 +32,7 @@ function sqlite_integration_admin_screen() {
 	</div>
 	<!-- Set the wrapper width to 50em, to improve readability. -->
 	<div style="max-width:50em;">
-		<?php if ( defined( 'SQLITE_DB_DROPIN_VERSION' ) ) : ?>
+		<?php if ( defined( 'SQLITE_DB_DROPIN_VERSION' ) || defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) : ?>
 			<div class="notice notice-success">
 				<p><?php esc_html_e( 'SQLite is enabled.', 'performance-lab' ); ?></p>
 			</div>
@@ -51,7 +51,7 @@ function sqlite_integration_admin_screen() {
 				<div class="notice notice-error">
 					<p><?php esc_html_e( 'We detected that the SQLite3 class is missing from your server. Please make sure that SQLite is enabled in your PHP installation before proceeding.', 'performance-lab' ); ?></p>
 				</div>
-			<?php elseif ( file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'SQLITE_DB_DROPIN_VERSION' ) ) : ?>
+			<?php elseif ( file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'SQLITE_DB_DROPIN_VERSION' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) : ?>
 				<div class="notice notice-error">
 					<p>
 						<?php
@@ -102,7 +102,7 @@ function sqlite_integration_admin_screen() {
 function sqlite_plugin_adminbar_item( $admin_bar ) {
 	global $wpdb;
 
-	if ( defined( 'SQLITE_DB_DROPIN_VERSION' ) && defined( 'DB_ENGINE' ) && 'sqlite' === DB_ENGINE ) {
+	if ( ( defined( 'SQLITE_DB_DROPIN_VERSION' ) || defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) && defined( 'DB_ENGINE' ) && 'sqlite' === DB_ENGINE ) {
 		$title = '<span style="color:#46B450;">' . __( 'Database: SQLite', 'performance-lab' ) . '</span>';
 	} elseif ( stripos( $wpdb->db_server_info(), 'maria' ) !== false ) {
 		$title = '<span style="color:#DC3232;">' . __( 'Database: MariaDB', 'performance-lab' ) . '</span>';

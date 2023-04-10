@@ -34,7 +34,7 @@ function sqlite_plugin_admin_notice() {
 	 * The module should not have been activated in the first place
 	 * (there's a check in the can-load.php file), but this is a fallback check.
 	 */
-	if ( file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
+	if ( file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'SQLITE_DB_DROPIN_VERSION' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
 		printf(
 			'<div class="notice notice-error"><p>%s</p></div>',
 			sprintf(
