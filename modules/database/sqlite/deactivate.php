@@ -66,3 +66,12 @@ function sqlite_plugin_remove_db_file() {
 	wp_cache_flush();
 }
 register_deactivation_hook( SQLITE_MAIN_FILE, 'sqlite_plugin_remove_db_file' ); // Remove db.php file on plugin deactivation.
+
+/**
+ * Return a callable function for the Performance Lab to deactivate the module.
+ *
+ * When this is a standalone plugin, this function is not to be ported.
+ */
+return function() {
+	sqlite_plugin_remove_db_file(); // phpcs:ignore PHPCompatibility.Extensions.RemovedExtensions
+};

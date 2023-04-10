@@ -96,3 +96,13 @@ function sqlite_plugin_copy_db_file() {
 		}
 	}
 }
+
+/**
+ * Return a callable function for the Performance Lab to activate the module.
+ *
+ * When this is a standalone plugin, this function is not to be ported.
+ */
+return function() {
+	wp_redirect( admin_url( 'options-general.php?page=sqlite-integration' ) );
+	exit;
+};
