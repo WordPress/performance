@@ -3,7 +3,7 @@
  * Tests for Dominant Color Images module.
  *
  * @package performance-lab
- * @group   dominant-color
+ * @group   dominant-color-images
  */
 
 use PerformanceLab\Tests\TestCase\DominantColorTestCase;
