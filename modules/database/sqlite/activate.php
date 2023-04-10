@@ -9,7 +9,7 @@
 /**
  * Redirect to the plugin's admin screen on activation.
  *
- * @since 1.8.0
+ * @since 2.2.0
  *
  * @param string $plugin The plugin basename.
  */
