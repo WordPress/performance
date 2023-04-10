@@ -2,7 +2,7 @@
 /**
  * Custom functions for the SQLite implementation.
  *
- * @package wp-sqlite-integration
+ * @package performance-lab
  * @since 1.0.0
  */
 

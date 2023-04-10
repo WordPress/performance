@@ -2,7 +2,7 @@
 /**
  * Class WP_SQLite_Query_Rewriter
  *
- * @package wp-sqlite-integration
+ * @package performance-lab
  */
 
 /**

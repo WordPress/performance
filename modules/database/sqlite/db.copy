@@ -8,7 +8,7 @@
  * This file is auto-generated and copied from the sqlite plugin.
  * Please don't edit this file directly.
  *
- * @package wp-sqlite-integration
+ * @package performance-lab
  */
 
 define( 'SQLITE_DB_DROPIN_VERSION', '1.8.0' );

@@ -2,7 +2,7 @@
 /**
  * The queries translator.
  *
- * @package wp-sqlite-integration
+ * @package performance-lab
  * @see https://github.com/phpmyadmin/sql-parser
  */
 

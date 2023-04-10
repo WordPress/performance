@@ -2,7 +2,7 @@
 /**
  * This file is a port of the Lexer & Tokens_List classes from the PHPMyAdmin/sql-parser library.
  *
- * @package wp-sqlite-integration
+ * @package performance-lab
  * @see https://github.com/phpmyadmin/sql-parser
  */
 

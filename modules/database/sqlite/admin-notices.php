@@ -3,7 +3,7 @@
  * Functions to add admin notices if necessary.
  *
  * @since 1.0.0
- * @package wp-sqlite-integration
+ * @package performance-lab
  */
 
 /**

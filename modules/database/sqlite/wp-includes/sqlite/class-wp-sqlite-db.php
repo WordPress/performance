@@ -2,7 +2,7 @@
 /**
  * Extend and replace the wpdb class.
  *
- * @package wp-sqlite-integration
+ * @package performance-lab
  * @since 1.0.0
  */
 

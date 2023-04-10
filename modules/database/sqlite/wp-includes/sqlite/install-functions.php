@@ -2,7 +2,7 @@
 /**
  * Main integration file.
  *
- * @package wp-sqlite-integration
+ * @package performance-lab
  * @since 1.0.0
  */
 
