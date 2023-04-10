@@ -60,51 +60,6 @@ function sqlite_make_db_sqlite() {
 		wp_die( $message, 'Database Error!' );
 	}
 
-	/*
-	 * Debug: Cross-check with MySQL.
-	 * This is for debugging purpose only and requires files
-	 * that are present in the GitHub repository
-	 * but not the plugin published on WordPress.org.
-	 */
-	if ( defined( 'SQLITE_DEBUG_CROSSCHECK' ) && SQLITE_DEBUG_CROSSCHECK ) {
-		$host = DB_HOST;
-		$port = 3306;
-		if ( str_contains( $host, ':' ) ) {
-			$host_parts = explode( ':', $host );
-			$host       = $host_parts[0];
-			$port       = $host_parts[1];
-		}
-		$dsn       = 'mysql:host=' . $host . '; port=' . $port . '; dbname=' . DB_NAME;
-		$pdo_mysql = new PDO( $dsn, DB_USER, DB_PASSWORD, array( PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION ) ); // phpcs:ignore WordPress.DB.RestrictedClasses.mysql__PDO
-		$pdo_mysql->query( 'SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";' );
-		$pdo_mysql->query( 'SET time_zone = "+00:00";' );
-		foreach ( $queries as $query ) {
-			$query = trim( $query );
-			if ( empty( $query ) ) {
-				continue;
-			}
-			try {
-				$pdo_mysql->beginTransaction();
-				$pdo_mysql->query( $query );
-			} catch ( PDOException $err ) {
-				$err_data = $err->errorInfo; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				$err_code = $err_data[1];
-				if ( 5 == $err_code || 6 == $err_code ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
-					// If the database is locked, commit again.
-					$pdo_mysql->commit();
-				} else {
-					$pdo_mysql->rollBack();
-					$message  = sprintf(
-						'Error occurred while creating tables or indexes...<br />Query was: %s<br />',
-						var_export( $query, true )
-					);
-					$message .= sprintf( 'Error message is: %s', $err_data[2] );
-					wp_die( $message, 'Database Error!' );
-				}
-			}
-		}
-	}
-
 	$pdo = null;
 
 	return true;

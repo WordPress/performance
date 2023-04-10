@@ -50,16 +50,4 @@ require_once __DIR__ . '/class-wp-sqlite-pdo-user-defined-functions.php';
 require_once __DIR__ . '/class-wp-sqlite-db.php';
 require_once __DIR__ . '/install-functions.php';
 
-/*
- * Debug: Cross-check with MySQL.
- * This is for debugging purpose only and requires files
- * that are present in the GitHub repository
- * but not the plugin published on WordPress.org.
- */
-$crosscheck_tests_file_path = dirname( dirname( __DIR__ ) ) . '/tests/class-wp-sqlite-crosscheck-db.php';
-if ( defined( 'SQLITE_DEBUG_CROSSCHECK' ) && SQLITE_DEBUG_CROSSCHECK && file_exists( $crosscheck_tests_file_path ) ) {
-	require_once $crosscheck_tests_file_path;
-	$GLOBALS['wpdb'] = new WP_SQLite_Crosscheck_DB();
-} else {
-	$GLOBALS['wpdb'] = new WP_SQLite_DB();
-}
+$GLOBALS['wpdb'] = new WP_SQLite_DB();
