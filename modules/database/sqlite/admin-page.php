@@ -2,14 +2,14 @@
 /**
  * Functions for the admin page of the plugin.
  *
- * @since 1.0.0
+ * @since 1.8.0
  * @package performance-lab
  */
 
 /**
  * Add an admin menu page.
  *
- * @since 1.0.0
+ * @since 1.8.0
  */
 function sqlite_add_admin_menu() {
 	add_options_page(

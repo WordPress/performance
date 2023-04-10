@@ -2,7 +2,7 @@
 /**
  * Define constants for the SQLite implementation.
  *
- * @since 1.0.0
+ * @since 1.8.0
  * @package performance-lab
  */
 
