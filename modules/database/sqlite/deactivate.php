@@ -1,18 +1,18 @@
 <?php
 /**
- * Handle the SQLite deactivation.
+ * Actions to run when the module gets deactivated.
  *
  * @since 1.8.0
  * @package performance-lab
  */
 
 /**
- * Delete the db.php file in wp-content.
+ * Deletes the db.php file, and deactivates the module in the SQLite database.
  *
- * When the plugin gets merged in wp-core, this is not to be ported.
+ * @since 1.8.0
  */
-function sqlite_plugin_remove_db_file() {
-	if ( ! defined( 'SQLITE_DB_DROPIN_VERSION' ) || ! file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
+return function() {
+	if ( ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) || ! file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
 		return;
 	}
 
@@ -22,12 +22,7 @@ function sqlite_plugin_remove_db_file() {
 
 	// Init the filesystem if needed, then delete custom drop-in.
 	if ( $wp_filesystem || WP_Filesystem() ) {
-		// Flush any persistent cache.
-		wp_cache_flush();
-		// Delete the drop-in.
 		$wp_filesystem->delete( WP_CONTENT_DIR . '/db.php' );
-		// Flush the cache again to mitigate a possible race condition.
-		wp_cache_flush();
 	}
 
 	// Run an action on `shutdown`, to deactivate the option in the MySQL database.
@@ -47,31 +42,14 @@ function sqlite_plugin_remove_db_file() {
 			$wpdb_mysql->set_prefix( $table_prefix );
 
 			// Get the perflab options, remove the database/sqlite module and update the option.
-			$row = $wpdb_mysql->get_row( $wpdb_mysql->prepare( "SELECT option_value FROM $wpdb_mysql->options WHERE option_name = %s LIMIT 1", 'active_plugins' ) );
+			$row = $wpdb_mysql->get_row( $wpdb_mysql->prepare( "SELECT option_value FROM $wpdb_mysql->options WHERE option_name = %s LIMIT 1", PERFLAB_MODULES_SETTING ) );
 			if ( is_object( $row ) ) {
 				$value = maybe_unserialize( $row->option_value );
-				if ( is_array( $value ) ) {
-					$value_flipped = array_flip( $value );
-					$items         = array_reverse( explode( DIRECTORY_SEPARATOR, SQLITE_MAIN_FILE ) );
-					$item          = $items[1] . DIRECTORY_SEPARATOR . $items[0];
-					unset( $value_flipped[ $item ] );
-					$value = array_flip( $value_flipped );
-					$wpdb_mysql->update( $wpdb_mysql->options, array( 'option_value' => maybe_serialize( $value ) ), array( 'option_name' => 'active_plugins' ) );
+				if ( is_array( $value ) && isset( $value['database/sqlite'] ) ) {
+					unset( $value['database/sqlite'] );
+					$wpdb_mysql->update( $wpdb_mysql->options, array( 'option_value' => maybe_serialize( $value ) ), array( 'option_name' => PERFLAB_MODULES_SETTING ) );
 				}
 			}
-		},
-		PHP_INT_MAX
+		}
 	);
-	// Flush any persistent cache.
-	wp_cache_flush();
-}
-register_deactivation_hook( SQLITE_MAIN_FILE, 'sqlite_plugin_remove_db_file' ); // Remove db.php file on plugin deactivation.
-
-/**
- * Return a callable function for the Performance Lab to deactivate the module.
- *
- * When this is a standalone plugin, this function is not to be ported.
- */
-return function() {
-	sqlite_plugin_remove_db_file(); // phpcs:ignore PHPCompatibility.Extensions.RemovedExtensions
 };
