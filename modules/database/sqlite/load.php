@@ -14,4 +14,4 @@ if ( function_exists( 'perflab_sqlite_plugin_admin_notice' ) ) {
 }
 
 require_once __DIR__ . '/admin.php';
-require_once __DIR__ . '/health-check.php';
+require_once __DIR__ . '/site-health.php';
