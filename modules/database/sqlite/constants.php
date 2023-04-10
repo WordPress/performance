@@ -6,13 +6,21 @@
  * @package performance-lab
  */
 
+// Backwards-compatibility.
+if ( ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) && defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
+	define( 'PERFLAB_SQLITE_DB_DROPIN_VERSION', SQLITE_DB_DROPIN_VERSION );
+}
+
 // Temporary - This will be in wp-config.php once SQLite is merged in Core.
 if ( ! defined( 'DB_ENGINE' ) ) {
 	if ( defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
 		define( 'DB_ENGINE', 'sqlite' );
 	} elseif ( defined( 'DATABASE_ENGINE' ) ) {
-		// backwards compatibility with previous versions of the plugin.
+		// backwards compatibility with previous versions of the standalone plugin.
 		define( 'DB_ENGINE', DATABASE_ENGINE );
+	} elseif ( defined( 'DATABASE_TYPE' ) ) {
+		// backwards compatibility with previous versions of the performance-lab plugin.
+		define( 'DB_ENGINE', DATABASE_TYPE );
 	} else {
 		define( 'DB_ENGINE', 'mysql' );
 	}
