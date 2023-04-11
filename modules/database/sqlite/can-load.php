@@ -13,7 +13,7 @@
  */
 return function() {
 
-	// If the PERFLAB_SQLITE_DB_DROPIN_VERSION  or SQLITE_DB_DROPIN_VERSION constants
+	// If the PERFLAB_SQLITE_DB_DROPIN_VERSION or SQLITE_DB_DROPIN_VERSION constants
 	// are defined, then the module is already active.
 	if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) || defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
 		return true;
