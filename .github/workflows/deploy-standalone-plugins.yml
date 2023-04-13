@@ -6,12 +6,17 @@ on:
   workflow_dispatch:
     inputs:
       slug:
-        type: string
-        description: 'The slug of the plugin to deploy'
-      version:
-        type: string
-        description: 'The version of the plugin to deploy'
-
+        type: choice
+        default: 'webp-uploads'
+        options:
+        - audit-autoloaded-options
+        - audit-enqueued-assets
+        - dominant-color-images
+        - fetchpriority
+        - sqlite
+        - webp-support
+        - webp-uploads
+        description: 'Select a slug of the plugin to deploy'
 jobs:
   release:
     name: Prepare Deployment
@@ -21,16 +26,61 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Get plugin version
+        id: get-version
+        uses: actions/github-script@v6
+        with:
+          script: |
+            // Bail early if workflow is not manual.
+            if ( ${{ github.event_name != 'workflow_dispatch' }} ) {
+              return "auto";
+            }
+
+            const fs = require( 'fs' );
+            const path = require( 'path' );
+
+            const pluginsFile = path.join( '.', 'plugins.json' );
+            let pluginsFileContent = '';
+            try {
+              pluginsFileContent = fs.readFileSync( pluginsFile, 'utf-8' );
+            } catch ( err ) {
+              console.log( `Error reading the file "${ pluginsFile }": "${ err }"` );
+
+              // Return with exit code 1 to trigger a failure in the deploy standalone workflow pipeline.
+              process.exit( 1 );
+            }
+
+            if ( pluginsFileContent === '' ) {
+              console.log( `Error reading the file "${ pluginsFile }"` );
+
+              // Return with exit code 1 to trigger a failure in the deploy standalone workflow pipeline.
+              process.exit( 1 );
+            }
+
+            const plugins = JSON.parse( pluginsFileContent );
+            for ( const moduleDir in plugins ) {
+              const pluginVersion = plugins[ moduleDir ]?.version;
+              const pluginSlug = plugins[ moduleDir ]?.slug;
+
+              if ( pluginVersion && pluginSlug && ( "${{ inputs.slug }}" == pluginSlug ) ) {
+                return pluginVersion;
+              }
+            }
+
+            console.log( `The "${{ inputs.slug }}" module slug is missing in the file "${ pluginsFile }".` );
+
+            // Return with exit code 1 to trigger a failure in the deploy standalone workflow pipeline.
+            process.exit( 1 );
       - name: Set matrix
         id: set-matrix
         run: |
-          if ${{ github.event_name == 'workflow_dispatch' }}; then
-            # Set the manual input values in JSON format for use in the matrix.
-            echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ inputs.version }}\"}]}" >> $GITHUB_OUTPUT
-          else
+          if [[ ${{ steps.get-version.outputs.result }} == 'auto' ]]; then
             # Load the JSON file and parse from "{name: {slug, version}, ...}" to "include: [{ name, slug, version }, ...]"
             # for use in the matrix.
             echo "matrix="$(jq -c '{include:[keys[] as $k | {name:$k,slug:.[$k].slug,version:.[$k].version }]}' plugins.json) >> $GITHUB_OUTPUT
+          else
+            # Set the manual input values in JSON format for use in the matrix.
+            echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ steps.get-version.outputs.result }}\"}]}" >> $GITHUB_OUTPUT
           fi
   deploy:
     name: Deploy Plugin
