@@ -103,8 +103,10 @@ jobs:
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
         uses: 10up/action-wordpress-plugin-deploy@stable
         env:
-          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          #SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          #SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: SVN_PASSWORD
+          SVN_USERNAME: SVN_USERNAME
           SLUG: ${{ matrix.slug }}
           VERSION: ${{ matrix.version }}
           BUILD_DIR: ./build/${{ matrix.slug }}
