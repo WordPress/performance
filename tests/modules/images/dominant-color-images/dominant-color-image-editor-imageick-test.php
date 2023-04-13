@@ -5,7 +5,7 @@
  * @since 1.2.0
  *
  * @package performance-lab
- * @group   dominant-color
+ * @group   dominant-color-images
  */
 
 use PerformanceLab\Tests\TestCase\DominantColorTestCase;
