@@ -770,7 +770,7 @@ add_filter( 'wp_editor_set_quality', 'webp_uploads_modify_webp_quality', 10, 2 )
  *
  * See {@see 'wp_head'}.
  *
- * @since n.e.x.t
+ * @since 2.2.0
  */
 function webp_uploads_render_generator() {
 	if (
