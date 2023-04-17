@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
  * Requires at least: 6.1
  * Requires PHP: 5.6
- * Version: 2.1.0
+ * Version: 2.2.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '2.1.0' );
+define( 'PERFLAB_VERSION', '2.2.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -170,7 +170,7 @@ function perflab_get_active_modules() {
  * Gets the active and valid performance modules.
  *
  * @since 1.3.0
- * @since n.e.x.t Adds an additional check for standalone plugins.
+ * @since 2.2.0 Adds an additional check for standalone plugins.
  *
  * @param string $module Slug of the module.
  * @return bool True if the module is active and valid, otherwise false.
@@ -258,7 +258,7 @@ function perflab_can_load_module( $module ) {
 /**
  * Checks whether the given module has already been loaded by a separate plugin.
  *
- * @since n.e.x.t
+ * @since 2.2.0
  *
  * @param string $module Slug of the module.
  * @return bool Whether the module has already been loaded by a separate plugin.
@@ -278,7 +278,7 @@ function perflab_is_standalone_plugin_loaded( $module ) {
 /**
  * Gets the standalone plugin constants used for each module / plugin.
  *
- * @since n.e.x.t
+ * @since 2.2.0
  *
  * @return array Map of module path to version constant used.
  */
