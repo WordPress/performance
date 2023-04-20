@@ -200,6 +200,43 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	}
 
 	/**
+	 * Tests that the dominant color style always comes before other existing inline styles.
+	 *
+	 * @dataProvider data_provider_dominant_color_filter_check_inline_style
+	 *
+	 * @param string $style_attr The image style attribute.
+	 * @param string $expected   The expected style attribute and value.
+	 */
+	public function test_dominant_color_update_attachment_image_attributes( $style_attr, $expected ) {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/red.jpg' );
+		
+		$attachment_image = wp_get_attachment_image( $attachment_id, 'full', '', array( "style" => $style_attr )  );
+		$this->assertStringContainsString( $expected, $attachment_image );
+	}
+
+	/**
+	 * Data provider for test_dominant_color_update_attachment_image_attributes().
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_dominant_color_filter_check_inline_style() {
+		return array(
+			'no inline styles'                   => array(
+				'style_attr' => '',
+				'expected'   => 'style="--dominant-color: #fe0000;"',
+			),
+			'inline style with end semicolon'    => array(
+				'style_attr' => 'color: #ffffff;',
+				'expected'   => 'style="--dominant-color: #fe0000;color: #ffffff;"',
+			),
+			'inline style without end semicolon' => array(
+				'style_attr' => 'color: #ffffff',
+				'expected'   => 'style="--dominant-color: #fe0000;color: #ffffff"',
+			),
+		);
+	}
+
+	/**
 	 * Tests dominant_color_set_image_editors().
 	 *
 	 * @dataProvider provider_dominant_color_set_image_editors
