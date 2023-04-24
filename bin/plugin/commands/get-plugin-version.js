@@ -4,6 +4,11 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 
+/**
+ * Internal dependencies
+ */
+const { log } = require( '../lib/logger' );
+
 exports.options = [
 	{
 		argname: '-s, --slug <slug>',
@@ -66,7 +71,7 @@ function doRunGetPluginVersion( settings ) {
 		const pluginVersion = plugins[ moduleDir ]?.version;
 		const pluginSlug = plugins[ moduleDir ]?.slug;
 		if ( pluginVersion && pluginSlug && ( settings.slug === pluginSlug ) ) {
-			return console.log( pluginVersion );
+			return log( pluginVersion );
 		}
 	}
 
