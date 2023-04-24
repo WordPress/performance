@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.1
 Tested up to:      6.2
 Requires PHP:      5.6
-Stable tag:        2.1.0
+Stable tag:        2.2.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -17,10 +17,10 @@ The Performance Lab plugin is a collection of modules focused on enhancing perfo
 
 Currently the plugin includes the following performance modules:
 
-* **Dominant Color:** Adds support to store dominant color for an image and create a placeholder background with that color.
+* **Dominant Color Images:** Adds support to store the dominant color of newly uploaded images and create a placeholder background of that color.
+* **Fetchpriority:** Adds a fetchpriority hint for the primary content image on the page to load faster.
 * **WebP Support Health Check:** Adds a WebP support check in Site Health status.
 * **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
-* **Fetchpriority:** Adds a fetchpriority hint for the primary content image on the page to load faster.
 * **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
 * **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
 * **SQLite Integration:** Use an SQLite database instead of MySQL.
@@ -80,6 +80,23 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.2.0 =
+
+**Enhancements**
+
+* Images: Remove "experimental" flag from Fetchpriority module. ([702](https://github.com/WordPress/performance/pull/702))
+* Infrastructure: Implement infrastructure for launching standalone plugins from modules, including WebP Uploads. ([699](https://github.com/WordPress/performance/pull/699))
+* Infrastructure: Include `WordPress-Extra` rules in PHPCS configuration and fix resulting problems. ([695](https://github.com/WordPress/performance/pull/695))
+
+**Bug Fixes**
+
+* Images: Sanitize target param before using it. ([690](https://github.com/WordPress/performance/pull/690))
+
+**Documentation**
+
+* Images: Change module slug/directory from `dominant-color` to `dominant-color-images`. ([708](https://github.com/WordPress/performance/pull/708))
+* Images: Rename `Dominant Color` module to `Dominant Color images`. ([705](https://github.com/WordPress/performance/pull/705))
 
 = 2.1.0 =
 

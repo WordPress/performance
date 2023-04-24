@@ -50,3 +50,20 @@ function fetchpriority_filter_post_thumbnail_html( $html ) {
 	return $html;
 }
 add_filter( 'post_thumbnail_html', 'fetchpriority_filter_post_thumbnail_html' );
+
+/**
+ * Displays the HTML generator tag for the Fetchpriority plugin.
+ *
+ * See {@see 'wp_head'}.
+ *
+ * @since n.e.x.t
+ */
+function fetchpriority_render_generator() {
+	if (
+		defined( 'FETCHPRIORITY_VERSION' ) &&
+		! str_starts_with( FETCHPRIORITY_VERSION, 'Performance Lab ' )
+	) {
+		echo '<meta name="generator" content="Fetchpriority ' . esc_attr( FETCHPRIORITY_VERSION ) . '">' . "\n";
+	}
+}
+add_action( 'wp_head', 'fetchpriority_render_generator' );
