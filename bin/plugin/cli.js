@@ -47,6 +47,10 @@ const {
 	options: testPluginsOptions,
 } = require( './commands/test-plugins' );
 const {
+	handler: getPluginVersionHandler,
+	options: getPluginVersionOptions,
+} = require( './commands/get-plugin-version' );
+const {
 	handler: enabledModulesHandler,
 	options: enabledModulesOptions,
 } = require( './commands/enabled-modules' );
@@ -91,6 +95,13 @@ withOptions( program.command( 'test-standalone-plugins' ), testPluginsOptions )
 		'Test standalone plugins'
 	)
 	.action( catchException( testPluginsHandler ) );
+
+withOptions( program.command( 'get-standalone-plugin-version' ), getPluginVersionOptions )
+	.alias( 'get-plugin-version' )
+	.description(
+		'Get standalone plugin version'
+	)
+	.action( catchException( getPluginVersionHandler ) );
 
 withOptions(
 	program.command( 'default-enabled-modules' ),

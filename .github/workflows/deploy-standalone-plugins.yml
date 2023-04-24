@@ -6,17 +6,8 @@ on:
   workflow_dispatch:
     inputs:
       slug:
-        type: choice
-        default: 'webp-uploads'
-        options:
-        - audit-autoloaded-options
-        - audit-enqueued-assets
-        - dominant-color-images
-        - fetchpriority
-        - sqlite
-        - webp-support
-        - webp-uploads
-        description: 'Select a slug of the plugin to deploy'
+        type: string
+        description: 'The slug of the plugin to deploy'
 jobs:
   release:
     name: Prepare Deployment
@@ -26,61 +17,33 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Setup Node.js (.nvmrc)
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: Install npm dependencies
+        run: npm ci
       - name: Get plugin version
         id: get-version
-        uses: actions/github-script@v6
-        with:
-          script: |
-            // Bail early if workflow is not manual.
-            if ( ${{ github.event_name != 'workflow_dispatch' }} ) {
-              return "auto";
-            }
-
-            const fs = require( 'fs' );
-            const path = require( 'path' );
-
-            const pluginsFile = path.join( '.', 'plugins.json' );
-            let pluginsFileContent = '';
-            try {
-              pluginsFileContent = fs.readFileSync( pluginsFile, 'utf-8' );
-            } catch ( err ) {
-              console.log( `Error reading the file "${ pluginsFile }": "${ err }"` );
-
-              // Return with exit code 1 to trigger a failure in the deploy standalone workflow pipeline.
-              process.exit( 1 );
-            }
-
-            if ( pluginsFileContent === '' ) {
-              console.log( `Error reading the file "${ pluginsFile }"` );
-
-              // Return with exit code 1 to trigger a failure in the deploy standalone workflow pipeline.
-              process.exit( 1 );
-            }
-
-            const plugins = JSON.parse( pluginsFileContent );
-            for ( const moduleDir in plugins ) {
-              const pluginVersion = plugins[ moduleDir ]?.version;
-              const pluginSlug = plugins[ moduleDir ]?.slug;
-
-              if ( pluginVersion && pluginSlug && ( "${{ inputs.slug }}" == pluginSlug ) ) {
-                return pluginVersion;
-              }
-            }
-
-            console.log( `The "${{ inputs.slug }}" module slug is missing in the file "${ pluginsFile }".` );
-
-            // Return with exit code 1 to trigger a failure in the deploy standalone workflow pipeline.
-            process.exit( 1 );
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          echo "version=$(node ./bin/plugin/cli.js get-plugin-version --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
       - name: Set matrix
         id: set-matrix
         run: |
-          if [[ ${{ steps.get-version.outputs.result }} == 'auto' ]]; then
+          if ${{ github.event_name == 'workflow_dispatch' }}; then
+            if ${{ steps.get-version.outputs.version == '' }}; then
+              echo "The ${{ inputs.slug }} module slug is missing in the file plugins.json."
+              exit 1
+            else
+              # Set the manual input values in JSON format for use in the matrix.
+              echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ steps.get-version.outputs.version }}\"}]}" >> $GITHUB_OUTPUT
+            fi
+          else
             # Load the JSON file and parse from "{name: {slug, version}, ...}" to "include: [{ name, slug, version }, ...]"
             # for use in the matrix.
             echo "matrix="$(jq -c '{include:[keys[] as $k | {name:$k,slug:.[$k].slug,version:.[$k].version }]}' plugins.json) >> $GITHUB_OUTPUT
-          else
-            # Set the manual input values in JSON format for use in the matrix.
-            echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ steps.get-version.outputs.result }}\"}]}" >> $GITHUB_OUTPUT
           fi
   deploy:
     name: Deploy Plugin
@@ -103,8 +66,10 @@ jobs:
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
         uses: 10up/action-wordpress-plugin-deploy@stable
         env:
+          # TODO Once the workflow is tested, we will remove the comment and use the secret SVN access.
           #SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           #SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          # TODO Once the workflow is tested, we will remove this test credential.
           SVN_PASSWORD: SVN_PASSWORD
           SVN_USERNAME: SVN_USERNAME
           SLUG: ${{ matrix.slug }}
