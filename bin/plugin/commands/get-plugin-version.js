@@ -50,10 +50,7 @@ function doRunGetPluginVersion( settings ) {
 	}
 
 	// Validate that the plugins JSON file contains content before proceeding.
-	if (
-		'' === pluginsFileContent ||
-		! pluginsFileContent
-	) {
+	if ( ! pluginsFileContent ) {
 		throw Error( `Contents of file at "${ pluginsFile }" could not be read, or are empty.` );
 	}
 
