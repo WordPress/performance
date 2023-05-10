@@ -67,12 +67,8 @@ jobs:
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
         uses: 10up/action-wordpress-plugin-deploy@stable
         env:
-          # TODO Once the workflow is tested, we will remove the comment and use the secret SVN access.
-          #SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          #SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-          # TODO Once the workflow is tested, we will remove this test credential.
-          SVN_PASSWORD: SVN_PASSWORD
-          SVN_USERNAME: SVN_USERNAME
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SLUG: ${{ matrix.slug }}
           VERSION: ${{ matrix.version }}
           BUILD_DIR: ./build/${{ matrix.slug }}
