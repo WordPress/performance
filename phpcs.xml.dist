@@ -73,9 +73,7 @@
 		<exclude-pattern>tests/utils/*</exclude-pattern>
 	</rule>
 
-	<rule ref="SlevomatCodingStandard.Functions.StaticClosure">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
+	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
 
 	<!--
 	Prevent errors caused by WordPress Coding Standards not supporting PHP 8.0+.

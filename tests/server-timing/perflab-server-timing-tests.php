@@ -17,7 +17,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
 	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ) {
 		self::$dummy_args = array(
-			'measure_callback' => function() {},
+			'measure_callback' => static function() {},
 			'access_cap'       => 'exist',
 		);
 
@@ -38,7 +38,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->server_timing->register_metric(
 			'test-metric',
 			array(
-				'measure_callback' => function() use ( &$called ) {
+				'measure_callback' => static function() use ( &$called ) {
 					$called = true;
 				},
 				'access_cap'       => 'exist',
@@ -52,7 +52,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	public function test_register_metric_runs_measure_callback_based_on_access_cap() {
 		$called = false;
 		$args   = array(
-			'measure_callback' => function() use ( &$called ) {
+			'measure_callback' => static function() use ( &$called ) {
 				$called = true;
 			},
 			'access_cap'       => 'manage_options', // Admin capability.
@@ -106,7 +106,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
 		$this->server_timing->register_metric(
 			'metric-without-access-cap',
-			array( 'measure_callback' => function() {} )
+			array( 'measure_callback' => static function() {} )
 		);
 
 		$this->assertFalse( $this->server_timing->has_registered_metric( 'metric-without-access-cap' ) );
@@ -130,13 +130,13 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	}
 
 	public function data_get_header() {
-		$measure_42         = function( $metric ) {
+		$measure_42         = static function( $metric ) {
 			$metric->set_value( 42 );
 		};
-		$measure_300        = function( $metric ) {
+		$measure_300        = static function( $metric ) {
 			$metric->set_value( 300 );
 		};
-		$measure_12point345 = function( $metric ) {
+		$measure_12point345 = static function( $metric ) {
 			$metric->set_value( 12.345 );
 		};
 
