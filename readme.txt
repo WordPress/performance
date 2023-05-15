@@ -81,6 +81,18 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 == Changelog ==
 
+= 2.3.0 =
+
+**Enhancements**
+
+* Images: Configure `Dominant Color` and `Fetchpriority` modules for their standalone plugins. ([704](https://github.com/WordPress/performance/pull/704))
+* Infrastructure: Temporarily remove Dominant Color Images from standalone `plugins.json` definition. ([719](https://github.com/WordPress/performance/pull/719))
+* Infrastructure: Use dynamic version from `plugins.json` for manual workflow. ([710](https://github.com/WordPress/performance/pull/710))
+
+**Bug Fixes**
+
+* Images: Add dominant color styling before any existing inline style attributes. ([716](https://github.com/WordPress/performance/pull/716))
+
 = 2.2.0 =
 
 **Enhancements**
