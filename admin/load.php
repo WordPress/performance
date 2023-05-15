@@ -508,7 +508,7 @@ function perflab_plugin_action_links_add_settings( $links ) {
  * This function adds a nonce check before dismissing perflab-admin-pointer
  * It runs before the dismiss-wp-pointer AJAX action is performed.
  *
- * @since n.e.x.t
+ * @since 2.3.0
  * @see perflab_render_modules_pointer()
  */
 function perflab_dismiss_wp_pointer_wrapper() {
