@@ -56,7 +56,7 @@ add_filter( 'post_thumbnail_html', 'fetchpriority_filter_post_thumbnail_html' );
  *
  * See {@see 'wp_head'}.
  *
- * @since n.e.x.t
+ * @since 2.3.0
  */
 function fetchpriority_render_generator() {
 	if (

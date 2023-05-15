@@ -467,6 +467,7 @@ function perflab_render_pointer() {
 						{
 							pointer: 'perflab-admin-pointer',
 							action:  'dismiss-wp-pointer',
+							_wpnonce: <?php echo wp_json_encode( wp_create_nonce( 'dismiss_pointer' ) ); ?>,
 						}
 					);
 				}
@@ -500,3 +501,21 @@ function perflab_plugin_action_links_add_settings( $links ) {
 
 	return $links;
 }
+
+/**
+ * Dismisses notification pointer after verfying nonce.
+ *
+ * This function adds a nonce check before dismissing perflab-admin-pointer
+ * It runs before the dismiss-wp-pointer AJAX action is performed.
+ *
+ * @since 2.3.0
+ * @see perflab_render_modules_pointer()
+ */
+function perflab_dismiss_wp_pointer_wrapper() {
+	if ( isset( $_POST['pointer'] ) && 'perflab-admin-pointer' !== $_POST['pointer'] ) {
+		// Another plugin's pointer, do nothing.
+		return;
+	}
+	check_ajax_referer( 'dismiss_pointer' );
+}
+add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 0 );
