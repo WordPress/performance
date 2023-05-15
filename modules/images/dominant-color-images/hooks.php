@@ -248,7 +248,7 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  *
  * See {@see 'wp_head'}.
  *
- * @since n.e.x.t
+ * @since 2.3.0
  */
 function dominant_color_render_generator() {
 	if (
