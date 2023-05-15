@@ -79,7 +79,7 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 		add_settings_field(
 			$module_slug,
 			$module_data['name'],
-			function() use ( $module_slug, $module_data, $module_settings ) {
+			static function() use ( $module_slug, $module_data, $module_settings ) {
 				perflab_render_modules_page_field( $module_slug, $module_data, $module_settings );
 			},
 			PERFLAB_MODULES_SCREEN,
@@ -329,7 +329,7 @@ function perflab_get_modules( $modules_root = null ) {
 
 	uasort(
 		$modules,
-		function( $a, $b ) {
+		static function( $a, $b ) {
 			return strnatcasecmp( $a['name'], $b['name'] );
 		}
 	);
