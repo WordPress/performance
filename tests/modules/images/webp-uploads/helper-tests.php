@@ -367,7 +367,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
 			function () {
-				return;
+				return null;
 			}
 		);
 
