@@ -10,6 +10,7 @@ on:
       - '.github/workflows/php-lint.yml'
       - '**.php'
       - 'phpcs.xml.dist'
+      - 'phpstan.neon.dist'
       - 'composer.json'
       - 'composer.lock'
   pull_request:
