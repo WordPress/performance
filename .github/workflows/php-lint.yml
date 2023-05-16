@@ -56,3 +56,5 @@ jobs:
         run: composer install --no-interaction --no-progress
       - name: PHP Lint
         run: composer lint
+      - name: PHPStan
+        run: composer phpstan
