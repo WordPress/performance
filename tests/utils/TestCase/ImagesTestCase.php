@@ -86,7 +86,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $message  The Error message used to display when the assertion fails.
 	 */
 	public static function assertFileNameIsEdited( $filename, $message = '' ) {
-		self::assertRegExp( '/e\d{13}/', $filename, $message );
+		self::assertMatchesRegularExpression( '/e\d{13}/', $filename, $message );
 	}
 
 	/**
@@ -96,7 +96,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $message  The Error message used to display when the assertion fails.
 	 */
 	public static function assertFileNameIsNotEdited( $filename, $message = '' ) {
-		self::assertNotRegExp( '/e\d{13}/', $filename, $message );
+		self::assertDoesNotMatchRegularExpression( '/e\d{13}/', $filename, $message );
 	}
 
 	/**
@@ -107,7 +107,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $message          The Error message used to display when the assertion fails.
 	 */
 	public static function assertSizeNameIsHashed( $size_name, $hashed_size_name, $message = '' ) {
-		self::assertRegExp( "/{$size_name}-\d{13}/", $hashed_size_name, $message );
+		self::assertMatchesRegularExpression( "/{$size_name}-\d{13}/", $hashed_size_name, $message );
 	}
 
 	/**
