@@ -11,7 +11,7 @@ use WP_UnitTestCase;
  *
  * @method void assertImageHasSource( int $attachment_id, string $mime_type, string $message = '' ) Asserts that the image has the appropriate source.
  * @method void assertImageHasSizeSource( int $attachment_id, string $size_name, string $mime_type, string $message = '' ) Asserts that the image has the appropriate source for the subsize.
- * @method void assertImageNotHasSource( int $attachment_id, string $mime_type, string $message ) Asserts that the image doesn't have the appropriate source.
+ * @method void assertImageNotHasSource( int $attachment_id, string $mime_type, string $message = '' ) Asserts that the image doesn't have the appropriate source.
  * @method void assertImageNotHasSizeSource( int $attachment_id, string $size_name, string $mime_type, string $message = '' ) Asserts that the image doesn't have the appropriate source for the subsize.
  * @method void assertFileNameIsEdited( string $filename, string $message = '' ) Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
  * @method void assertFileNameIsNotEdited( string $filename, string $message = '' ) Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
