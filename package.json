@@ -26,6 +26,7 @@
     "format-js": "wp-scripts format ./bin",
     "lint-js": "wp-scripts lint-js ./bin",
     "format-php": "wp-env run composer run-script format",
+    "phpstan": "wp-env run composer run-script phpstan",
     "prelint-php": "wp-env run composer 'install --no-interaction'",
     "lint-php": "wp-env run composer run-script lint",
     "pretest-php": "wp-env run composer 'install --no-interaction'",
@@ -37,7 +38,8 @@
   },
   "lint-staged": {
     "*.php": [
-      "composer run-script lint"
+      "composer run-script lint",
+      "composer run-script analyze"
     ]
   }
 }
