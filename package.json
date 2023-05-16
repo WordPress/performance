@@ -39,7 +39,7 @@
   "lint-staged": {
     "*.php": [
       "composer run-script lint",
-      "composer run-script analyze"
+      "composer run-script phpstan"
     ]
   }
 }
