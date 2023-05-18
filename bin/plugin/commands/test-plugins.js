@@ -306,8 +306,8 @@ function doRunUnitTests( settings ) {
 				'wp-env',
 				[
 					'run',
-					'phpunit',
-					`'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/${ plugin }/multisite.xml --verbose --testdox'`,
+					'tests-wordpress',
+					`'env WP_MULTISITE=1 WORDPRESS_TABLE_PREFIX=wptests_ /var/www/html/wp-content/plugins/${ plugin }/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml.dist --verbose --testdox'`,
 				],
 				{ shell: true, encoding: 'utf8' }
 			);
@@ -316,8 +316,8 @@ function doRunUnitTests( settings ) {
 				'wp-env',
 				[
 					'run',
-					'phpunit',
-					`'phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml --verbose --testdox'`,
+					'tests-wordpress',
+					`'env WORDPRESS_TABLE_PREFIX=wptests_ /var/www/html/wp-content/plugins/${ plugin }/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml --verbose --testdox'`,
 				],
 				{ shell: true, encoding: 'utf8' }
 			);
