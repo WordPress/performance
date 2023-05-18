@@ -17,7 +17,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
 	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ) {
 		self::$dummy_args = array(
-			'measure_callback' => static function() {},
+			'measure_callback' => '__return_null',
 			'access_cap'       => 'exist',
 		);
 
@@ -106,7 +106,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
 		$this->server_timing->register_metric(
 			'metric-without-access-cap',
-			array( 'measure_callback' => static function() {} )
+			array( 'measure_callback' => '__return_null' )
 		);
 
 		$this->assertFalse( $this->server_timing->has_registered_metric( 'metric-without-access-cap' ) );
