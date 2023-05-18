@@ -307,7 +307,7 @@ function doRunUnitTests( settings ) {
 				[
 					'run',
 					'tests-wordpress',
-					`'env WP_MULTISITE=1 WORDPRESS_TABLE_PREFIX=wptests_ /var/www/html/wp-content/plugins/${ plugin }/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml.dist --verbose --testdox'`,
+					`'env WP_MULTISITE=1 WORDPRESS_TABLE_PREFIX=wptests_ /var/www/html/wp-content/plugins/${ plugin }/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/${ plugin }/multisite.xml --verbose --testdox'`,
 				],
 				{ shell: true, encoding: 'utf8' }
 			);

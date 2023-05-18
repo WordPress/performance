@@ -33,7 +33,7 @@
     "pretest-php": "npm run composer-install",
     "test-php": "wp-env run tests-wordpress 'env WORDPRESS_TABLE_PREFIX=wptests_ /var/www/html/wp-content/plugins/$(basename $(pwd))/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/$(basename $(pwd))/phpunit.xml.dist --verbose'",
     "pretest-php-multisite": "npm run composer-install",
-    "test-php-multisite": "wp-env run tests-wordpress 'env WP_MULTISITE=1 WORDPRESS_TABLE_PREFIX=wptests_ /var/www/html/wp-content/plugins/$(basename $(pwd))/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/$(basename $(pwd))/phpunit.xml.dist --verbose'",
+    "test-php-multisite": "wp-env run tests-wordpress 'env WP_MULTISITE=1 WORDPRESS_TABLE_PREFIX=wptests_ /var/www/html/wp-content/plugins/$(basename $(pwd))/vendor/bin/phpunit -c /var/www/html/wp-content/plugins/$(basename $(pwd))/tests/multisite.xml --verbose'",
     "wp-env": "wp-env",
     "prepare": "husky install"
   },
