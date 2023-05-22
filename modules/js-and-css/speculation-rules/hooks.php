@@ -37,7 +37,7 @@ JS;
 	wp_print_inline_script_tag(
 		sprintf(
 			$script,
-			str_replace( '\\', '\\\\', wp_json_encode( $rules ) )
+			wp_json_encode( $rules )
 		)
 	);
 }
