@@ -647,14 +647,16 @@ add_action(
 		$step3_before      = $todo_before;
 		$step3_after       = $todo_after;
 		$step3_placeholder = 'SQLite';
-		if ( 'index.php' === $hook_suffix ) { // Link to Performance Lab settings.
+		if ( 'index.php' === $hook_suffix && defined( 'SQLITE_MAIN_FILE' ) ) {
+			// Link to Performance Lab settings.
 			$screen_url = add_query_arg(
 				'page',
 				PERFLAB_MODULES_SCREEN,
 				admin_url( 'options-general.php' )
 			);
 
-			$step3_placeholder = '<a href="' . esc_url( $screen_url ) . '">' . $step3_placeholder . '</a>';
+			$step3_before .= '<a href="' . esc_url( $screen_url ) . '">';
+			$step3_after   = '</a>' . $step3_after;
 		}
 
 		/*
