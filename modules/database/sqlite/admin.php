@@ -19,6 +19,11 @@ function perflab_sqlite_plugin_admin_notice() {
 		return;
 	}
 
+	// Bail early if the standalone plugin's equivalent constant is defined.
+	if ( defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
+		return;
+	}
+
 	/*
 	 * If the PERFLAB_SQLITE_DB_DROPIN_VERSION constant is not defined
 	 * but there's a db.php file in the wp-content directory, then the module can't be activated.
