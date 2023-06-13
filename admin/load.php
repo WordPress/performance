@@ -442,7 +442,7 @@ function perflab_admin_pointer( $hook_suffix ) {
 		wp_enqueue_script( 'wp-pointer' );
 		add_action(
 			'admin_print_footer_scripts',
-			function() {
+			static function() {
 				$content  = __( 'The SQLite module will be removed in the upcoming Performance Lab release in favor of a standalone plugin.', 'performance-lab' );
 				$content .= ' ' . sprintf(
 					/* translators: %s: settings page link */
@@ -580,7 +580,7 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
  */
 add_action(
 	'admin_notices',
-	function() {
+	static function() {
 		global $hook_suffix;
 
 		// Only show in the WordPress dashboard and Performance Lab admin screen.
