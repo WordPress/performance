@@ -144,14 +144,14 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 	public function provider_with_modified_metadata() {
 		yield 'using a size that does not exists' => array(
-			function ( $metadata ) {
+			static function ( $metadata ) {
 				return $metadata;
 			},
 			'not-existing-size',
 		);
 
 		yield 'removing an existing metadata simulating that the image size still does not exists' => array(
-			function ( $metadata ) {
+			static function ( $metadata ) {
 				unset( $metadata['sizes']['medium'] );
 
 				return $metadata;
@@ -160,7 +160,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		);
 
 		yield 'when the specified size is not a valid array' => array(
-			function ( $metadata ) {
+			static function ( $metadata ) {
 				$metadata['sizes']['medium'] = null;
 
 				return $metadata;
@@ -237,7 +237,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		add_filter(
 			'wp_image_editors',
-			function () {
+			static function () {
 				return array( 'WP_Image_Doesnt_Support_WebP' );
 			}
 		);
@@ -259,7 +259,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		add_filter(
 			'webp_uploads_pre_generate_additional_image_source',
-			function () {
+			static function () {
 				return array(
 					'file' => 'image.webp',
 					'path' => '/tmp/image.webp',
@@ -293,7 +293,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		add_filter(
 			'webp_uploads_pre_generate_additional_image_source',
-			function () {
+			static function () {
 				return array(
 					'file'     => 'image.webp',
 					'filesize' => 777,
@@ -328,7 +328,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		add_filter(
 			'webp_uploads_pre_generate_additional_image_source',
-			function () {
+			static function () {
 				return new WP_Error( 'image_additional_generated_error', __( 'Additional image was not generated.', 'performance-lab' ) );
 			}
 		);
@@ -385,7 +385,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	public function it_should_return_fallback_transforms_when_overwritten_invalid_transforms() {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
-			function () {
+			static function () {
 				return array( 'image/jpeg' => array() );
 			}
 		);
@@ -404,7 +404,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	public function it_should_return_custom_transforms_when_overwritten_by_filter() {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
-			function () {
+			static function () {
 				return array( 'image/jpeg' => array( 'image/jpeg', 'image/webp' ) );
 			}
 		);
@@ -520,7 +520,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$result = null;
 		add_action(
 			'wp_head',
-			function() use ( &$result ) {
+			static function() use ( &$result ) {
 				$result = webp_uploads_in_frontend_body();
 			}
 		);

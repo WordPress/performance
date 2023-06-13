@@ -79,7 +79,7 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 		add_settings_field(
 			$module_slug,
 			$module_data['name'],
-			function() use ( $module_slug, $module_data, $module_settings ) {
+			static function() use ( $module_slug, $module_data, $module_settings ) {
 				perflab_render_modules_page_field( $module_slug, $module_data, $module_settings );
 			},
 			PERFLAB_MODULES_SCREEN,
@@ -332,7 +332,7 @@ function perflab_get_modules( $modules_root = null ) {
 
 	uasort(
 		$modules,
-		function( $a, $b ) {
+		static function( $a, $b ) {
 			return strnatcasecmp( $a['name'], $b['name'] );
 		}
 	);
@@ -442,7 +442,7 @@ function perflab_admin_pointer( $hook_suffix ) {
 		wp_enqueue_script( 'wp-pointer' );
 		add_action(
 			'admin_print_footer_scripts',
-			function() {
+			static function() {
 				$content  = __( 'The SQLite module will be removed in the upcoming Performance Lab release in favor of a standalone plugin.', 'performance-lab' );
 				$content .= ' ' . sprintf(
 					/* translators: %s: settings page link */
@@ -580,7 +580,7 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
  */
 add_action(
 	'admin_notices',
-	function() {
+	static function() {
 		global $hook_suffix;
 
 		// Only show in the WordPress dashboard and Performance Lab admin screen.

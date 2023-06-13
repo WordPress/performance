@@ -23,7 +23,8 @@
     "wp-phpunit/wp-phpunit": "^5.8",
     "yoast/phpunit-polyfills": "^1.0",
     "phpstan/phpstan-phpunit": "^1.3",
-    "phpstan/phpstan-deprecation-rules": "^1.1"
+    "phpstan/phpstan-deprecation-rules": "^1.1",
+    "slevomat/coding-standard": "^8.0"
   },
   "require": {
     "composer/installers": "~1.0",

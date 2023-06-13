@@ -116,7 +116,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	public function opt_in_to_jpeg_and_webp() {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
+			static function( $transforms ) {
 				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
 				$transforms['image/webp'] = array( 'image/webp', 'image/jpeg' );
 				return $transforms;

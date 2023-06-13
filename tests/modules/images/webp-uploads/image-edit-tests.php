@@ -239,7 +239,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		// The leafs image is 1080 pixels wide with this filter we ensure a -scaled version is created for this test.
 		add_filter(
 			'big_image_size_threshold',
-			function () {
+			static function () {
 				// Due to the largest image size is 1024 and the image is 1080x720, 1050 is a good spot to create a scaled size for all images sizes.
 				return 1050;
 			}
