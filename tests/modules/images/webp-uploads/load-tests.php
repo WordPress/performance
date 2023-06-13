@@ -969,7 +969,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	/**
 	 * Test webp_uploads_modify_webp_quality function for image quality.
 	 *
-	 * @covers ::webp_uploads_modify_webp_quality()
+	 * @covers ::webp_uploads_modify_webp_quality
 	 *
 	 * @test
 	 */
