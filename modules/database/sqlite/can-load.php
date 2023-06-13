@@ -19,7 +19,8 @@ return static function() {
 	}
 
 	// If a db.php file already exists in the wp-content directory, then the module cannot be activated.
-	if ( file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
+	// Except if it is the standalone plugin's drop-in.
+	if ( file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
 		return false;
 	}
 

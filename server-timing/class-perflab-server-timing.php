@@ -227,16 +227,11 @@ class Perflab_Server_Timing {
 			return $passthrough;
 		}
 
-		ob_start();
-		add_action(
-			'shutdown',
-			function() {
-				$output = ob_get_clean();
+		ob_start(
+			function( $output ) {
 				$this->send_header();
-				echo $output;
-			},
-			// phpcs:ignore PHPCompatibility.Constants.NewConstants
-			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -1000
+				return $output;
+			}
 		);
 		return $passthrough;
 	}

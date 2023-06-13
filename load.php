@@ -338,7 +338,7 @@ function perflab_maybe_set_object_cache_dropin() {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param bool Whether the server timing drop-in should be set.
+	 * @param bool $disabled Whether to disable the server timing drop-in. Default false.
 	 */
 	if ( apply_filters( 'perflab_disable_object_cache_dropin', false ) ) {
 		return;
