@@ -12,17 +12,21 @@
  * @since 1.8.0
  */
 return static function() {
-	if ( ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) || ! file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
+	// If neither of these constants are defined, the site is not operating in SQLite database.
+	if ( ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) && ! defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
 		return;
 	}
 
 	global $wp_filesystem;
 
-	require_once ABSPATH . '/wp-admin/includes/file.php';
+	// If the PL's own drop-in file is used, it should be removed.
+	if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) && file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
+		require_once ABSPATH . '/wp-admin/includes/file.php';
 
-	// Init the filesystem if needed, then delete custom drop-in.
-	if ( $wp_filesystem || WP_Filesystem() ) {
-		$wp_filesystem->delete( WP_CONTENT_DIR . '/db.php' );
+		// Init the filesystem if needed, then delete custom drop-in.
+		if ( $wp_filesystem || WP_Filesystem() ) {
+			$wp_filesystem->delete( WP_CONTENT_DIR . '/db.php' );
+		}
 	}
 
 	// Run an action on `shutdown`, to deactivate the option in the MySQL database.
