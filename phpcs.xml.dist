@@ -72,6 +72,9 @@
 	<rule ref="PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.boolFound">
 		<exclude-pattern>tests/utils/*</exclude-pattern>
 	</rule>
+
+	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
+
 	<!--
 	Prevent errors caused by WordPress Coding Standards not supporting PHP 8.0+.
 	See https://github.com/WordPress/WordPress-Coding-Standards/issues/2035
