@@ -2,53 +2,22 @@
 /**
  * Module Name: Fetchpriority
  * Description: Adds a fetchpriority hint for the primary content image on the page to load faster.
- * Experimental: Yes
+ * Experimental: No
  *
- * @since n.e.x.t
+ * @since 1.8.0
  * @package performance-lab
  */
 
-/**
- * Filters an image tag in content to add the fetchpriority attribute if it is not lazy-loaded.
- *
- * @since n.e.x.t
- *
- * @param string $filtered_image The image tag to filter.
- * @param string $context        The context of the image.
- * @return string The filtered image tag.
- */
-function fetchpriority_img_tag_add_attr( $filtered_image, $context ) {
-
-	if ( 'the_content' !== $context && 'the_post_thumbnail' !== $context ) {
-		return $filtered_image;
-	}
-
-	// Fetchpriority relies on lazy loading logic.
-	if ( ! wp_lazy_loading_enabled( 'img', $context ) ) {
-		return $filtered_image;
-	}
-
-	if ( ! empty( $filtered_image ) && strpos( $filtered_image, 'loading="lazy"' ) === false && strpos( $filtered_image, 'fetchpriority=' ) === false ) {
-		$filtered_image = str_replace( '<img ', '<img fetchpriority="high" ', $filtered_image );
-		remove_filter( 'wp_content_img_tag', 'fetchpriority_img_tag_add_attr' );
-		remove_filter( 'post_thumbnail_html', 'fetchpriority_filter_post_thumbnail_html' );
-	}
-
-	return $filtered_image;
+// Define the constant.
+if ( defined( 'FETCHPRIORITY_VERSION' ) ) {
+	return;
 }
-add_filter( 'wp_content_img_tag', 'fetchpriority_img_tag_add_attr', 10, 2 );
 
-/**
- * Filters the post thumbnail HTML to conditionally add the fetchpriority attribute.
- *
- * @since n.e.x.t
- *
- * @param string $html The post thumbnail HTML to filter.
- * @return string The filtered post thumbnail HTML.
- */
-function fetchpriority_filter_post_thumbnail_html( $html ) {
-	$html = fetchpriority_img_tag_add_attr( $html, 'the_post_thumbnail' );
+define( 'FETCHPRIORITY_VERSION', 'Performance Lab ' . PERFLAB_VERSION );
 
-	return $html;
+// Do not load the code if it is already loaded through another means.
+if ( function_exists( 'fetchpriority_img_tag_add_attr' ) ) {
+	return;
 }
-add_filter( 'post_thumbnail_html', 'fetchpriority_filter_post_thumbnail_html' );
+
+require_once __DIR__ . '/hooks.php';

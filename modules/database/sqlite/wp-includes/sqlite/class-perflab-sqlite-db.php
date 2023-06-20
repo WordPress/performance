@@ -3,7 +3,7 @@
  * Extend and replace the wpdb class.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**
@@ -112,7 +112,7 @@ class Perflab_SQLite_DB extends wpdb {
 	 *
 	 * @param string $str The error to display.
 	 *
-	 * @return bool False if the showing of errors is disabled.
+	 * @return bool|void False if the showing of errors is disabled.
 	 */
 	public function print_error( $str = '' ) {
 		global $EZSQL_ERROR;
@@ -196,6 +196,7 @@ class Perflab_SQLite_DB extends wpdb {
 	 * @see wpdb::db_connect()
 	 *
 	 * @param bool $allow_bail Not used.
+	 * @return void
 	 */
 	public function db_connect( $allow_bail = true ) {
 		$this->init_charset();

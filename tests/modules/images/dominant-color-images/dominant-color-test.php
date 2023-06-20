@@ -2,10 +2,10 @@
 
 use PerformanceLab\Tests\TestCase\DominantColorTestCase;
 /**
- * Tests for dominant-color module.
+ * Tests for Dominant Color Images module.
  *
  * @package performance-lab
- * @group dominant-color
+ * @group dominant-color-images
  */
 class Dominant_Color_Test extends DominantColorTestCase {
 
@@ -48,10 +48,10 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers ::has_transparency_metadata
+	 * @covers ::dominant_color_metadata
 	 */
 	public function test_has_transparency_metadata( $image_path, $expected_color, $expected_transparency ) {
-		// Non existing attachment.
+		// Non-existing attachment.
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $transparency_metadata );
 
@@ -120,7 +120,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @param bool   $expected Whether the dominant color should be added.
 	 */
 	public function test_dominant_color_img_tag_add_dominant_color_requires_proper_quotes( $image, $expected ) {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/red.jpg' );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		$image_url = wp_get_attachment_image_url( $attachment_id );
@@ -168,7 +168,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @param string $expected       The expected style attribute and value.
 	 */
 	public function test_dominant_color_img_tag_add_dominant_color_should_add_dominant_color_inline_style( $filtered_image, $expected ) {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color/red.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/red.jpg' );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id );
@@ -195,6 +195,43 @@ class Dominant_Color_Test extends DominantColorTestCase {
 			'existing inline styles'    => array(
 				'filtered_image' => '<img style="color: #ffffff;" src="%s" width="%d" height="%d" />',
 				'expected'       => 'style="--dominant-color: #fe0000; color: #ffffff;"',
+			),
+		);
+	}
+
+	/**
+	 * Tests that the dominant color style always comes before other existing inline styles.
+	 *
+	 * @dataProvider data_provider_dominant_color_filter_check_inline_style
+	 *
+	 * @param string $style_attr The image style attribute.
+	 * @param string $expected   The expected style attribute and value.
+	 */
+	public function test_dominant_color_update_attachment_image_attributes( $style_attr, $expected ) {
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/red.jpg' );
+
+		$attachment_image = wp_get_attachment_image( $attachment_id, 'full', '', array( "style" => $style_attr )  );
+		$this->assertStringContainsString( $expected, $attachment_image );
+	}
+
+	/**
+	 * Data provider for test_dominant_color_update_attachment_image_attributes().
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_dominant_color_filter_check_inline_style() {
+		return array(
+			'no inline styles'                   => array(
+				'style_attr' => '',
+				'expected'   => 'style="--dominant-color: #fe0000;"',
+			),
+			'inline style with end semicolon'    => array(
+				'style_attr' => 'color: #ffffff;',
+				'expected'   => 'style="--dominant-color: #fe0000;color: #ffffff;"',
+			),
+			'inline style without end semicolon' => array(
+				'style_attr' => 'color: #ffffff',
+				'expected'   => 'style="--dominant-color: #fe0000;color: #ffffff"',
 			),
 		);
 	}

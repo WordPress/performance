@@ -3,20 +3,20 @@
  * Server-Timing API: Perflab_Server_Timing class
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**
  * Class controlling the Server-Timing header.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  */
 class Perflab_Server_Timing {
 
 	/**
 	 * Map of registered metric slugs and their metric instances.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 * @var array
 	 */
 	private $registered_metrics = array();
@@ -24,7 +24,7 @@ class Perflab_Server_Timing {
 	/**
 	 * Map of registered metric slugs and their registered data.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 * @var array
 	 */
 	private $registered_metrics_data = array();
@@ -34,7 +34,7 @@ class Perflab_Server_Timing {
 	 *
 	 * This method must be called before the {@see 'perflab_server_timing_send_header'} hook.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 *
 	 * @param string $metric_slug The metric slug.
 	 * @param array  $args        {
@@ -111,7 +111,7 @@ class Perflab_Server_Timing {
 	/**
 	 * Checks whether the given metric has been registered.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 *
 	 * @param string $metric_slug The metric slug.
 	 * @return bool True if registered, false otherwise.
@@ -125,7 +125,7 @@ class Perflab_Server_Timing {
 	 *
 	 * This method must be called before rendering the page.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 */
 	public function send_header() {
 		if ( headers_sent() ) {
@@ -142,7 +142,7 @@ class Perflab_Server_Timing {
 		 *
 		 * This action is the last possible point to register a Server-Timing metric.
 		 *
-		 * @since n.e.x.t
+		 * @since 1.8.0
 		 */
 		do_action( 'perflab_server_timing_send_header' );
 
@@ -157,7 +157,7 @@ class Perflab_Server_Timing {
 	/**
 	 * Gets the value for the Server-Timing header.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 *
 	 * @return string The Server-Timing header value.
 	 */
@@ -190,7 +190,7 @@ class Perflab_Server_Timing {
 	 * the HTML output starts. Therefore sites that would like to gather metrics while serving the template should
 	 * enable this via the {@see 'perflab_server_timing_use_output_buffer'} filter.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 *
 	 * @return bool True if an output buffer should be used, false otherwise.
 	 */
@@ -202,7 +202,7 @@ class Perflab_Server_Timing {
 		 * the HTML output starts. Therefore sites that would like to gather metrics while serving the template should
 		 * enable this.
 		 *
-		 * @since n.e.x.t
+		 * @since 1.8.0
 		 *
 		 * @param bool $use_output_buffer Whether to use an output buffer.
 		 */
@@ -216,7 +216,7 @@ class Perflab_Server_Timing {
 	 *
 	 * This method is solely intended for internal use within WordPress.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 *
 	 * @param mixed $passthrough Optional. Filter value. Default null.
 	 * @return mixed Unmodified value of $passthrough.
@@ -227,16 +227,11 @@ class Perflab_Server_Timing {
 			return $passthrough;
 		}
 
-		ob_start();
-		add_action(
-			'shutdown',
-			function() {
-				$output = ob_get_clean();
+		ob_start(
+			function( $output ) {
 				$this->send_header();
-				echo $output;
-			},
-			// phpcs:ignore PHPCompatibility.Constants.NewConstants
-			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -1000
+				return $output;
+			}
 		);
 		return $passthrough;
 	}
@@ -244,7 +239,7 @@ class Perflab_Server_Timing {
 	/**
 	 * Formats the header segment for a single metric.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.8.0
 	 *
 	 * @param Perflab_Server_Timing_Metric $metric The metric to format.
 	 * @return string|null Segment for the Server-Timing header, or null if no value set.

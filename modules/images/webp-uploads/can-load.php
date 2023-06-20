@@ -6,6 +6,6 @@
  * @package performance-lab
  */
 
-return function() {
+return static function() {
 	return ! function_exists( 'wp_image_use_alternate_mime_types' );
 };

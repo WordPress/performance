@@ -32,7 +32,6 @@ const FOCUS_AREAS = {
  * Returns a promise resolving to the list of data for all modules.
  *
  * @param {string} modulesDir Modules directory.
- *
  * @return {Promise<[]WPModuleData>} Promise resolving to module data list.
  */
 exports.getModuleData = async ( modulesDir ) => {
@@ -41,44 +40,25 @@ exports.getModuleData = async ( modulesDir ) => {
 
 	return moduleFiles
 		.map( ( moduleFile ) => {
+			let moduleFileContent = '';
+			try {
+				moduleFileContent = fs.readFileSync( moduleFile, 'utf-8' );
+			} catch ( error ) {
+				log(
+					formats.error(
+						`Error reading the file "${ moduleFile }": "${ error }"`
+					)
+				);
+			}
+			const moduleHeader = exports.getModuleHeader( moduleFileContent );
+
 			// Populate slug and focus based on file path.
 			const moduleDir = path.dirname( moduleFile );
 			const moduleData = {
 				slug: path.basename( moduleDir ),
 				focus: path.basename( path.dirname( moduleDir ) ),
+				...exports.getModuleDataFromHeader( moduleHeader ),
 			};
-
-			// Map of module header => object property.
-			const headers = {
-				'Module Name': 'name',
-				Description: 'description',
-				Experimental: 'experimental',
-			};
-
-			// Populate name, description and experimental based on module file headers.
-			const fileContent = fs.readFileSync( moduleFile, 'utf8' );
-			const regex = new RegExp(
-				`^(?:[ \t]*<?php)?[ \t/*#@]*(${ Object.keys( headers ).join(
-					'|'
-				) }):(.*)$`,
-				'gmi'
-			);
-			let match = regex.exec( fileContent );
-			while ( match ) {
-				const content = match[ 2 ].trim();
-				const prop = headers[ match[ 1 ] ];
-				if ( content && prop ) {
-					moduleData[ prop ] = content;
-				}
-				match = regex.exec( fileContent );
-			}
-
-			// Parse experimental field into a boolean.
-			if ( typeof moduleData.experimental === 'string' ) {
-				moduleData.experimental =
-					moduleData.experimental.toLowerCase() === 'yes';
-			}
-
 			return moduleData;
 		} )
 		.filter( ( moduleData ) => {
@@ -132,4 +112,56 @@ exports.getModuleData = async ( modulesDir ) => {
 			// Lastly order alphabetically.
 			return firstModule.slug.localeCompare( secondModule.slug );
 		} );
+};
+
+/**
+ * Returns the list of module data for module.
+ *
+ * @param {string} moduleHeader Modules file header contetnt.
+ * @return {WPModuleData} Module data.
+ */
+exports.getModuleDataFromHeader = ( moduleHeader ) => {
+	const moduleData = {};
+	// Map of module header => object property.
+	const headers = {
+		'Module Name': 'name',
+		Description: 'description',
+		Experimental: 'experimental',
+	};
+
+	const regex = new RegExp(
+		`^(?:[ \t]*<?php)?[ \t/*#@]*(${ Object.keys( headers ).join(
+			'|'
+		) }):(.*)$`,
+		'gmi'
+	);
+	let match = regex.exec( moduleHeader );
+	while ( match ) {
+		const content = match[ 2 ].trim();
+		const prop = headers[ match[ 1 ] ];
+		if ( content && prop ) {
+			moduleData[ prop ] = content;
+		}
+		match = regex.exec( moduleHeader );
+	}
+
+	// Parse experimental field into a boolean.
+	if ( typeof moduleData.experimental === 'string' ) {
+		moduleData.experimental =
+			moduleData.experimental.toLowerCase() === 'yes';
+	}
+
+	return moduleData;
+};
+
+/**
+ * Returns the file header.
+ *
+ * @param {string} moduleFileContent Module file content.
+ * @return {string} Module file header.
+ */
+exports.getModuleHeader = ( moduleFileContent ) => {
+	const regex = /\/\\*\\*[\s\S]+?(?=\*\/)/im;
+	const moduleHeader = moduleFileContent.match( regex )?.[ 0 ];
+	return moduleHeader;
 };

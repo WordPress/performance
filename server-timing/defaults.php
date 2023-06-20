@@ -3,7 +3,7 @@
  * Server-Timing API default metrics
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**
@@ -11,7 +11,7 @@
  *
  * These metrics should be registered as soon as possible.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  */
 function perflab_register_default_server_timing_before_template_metrics() {
 	$calculate_before_template_metrics = function() {
@@ -124,7 +124,7 @@ perflab_register_default_server_timing_before_template_metrics();
  * They will only be registered if the Server-Timing API is configured to use an
  * output buffer for the site's template.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  */
 function perflab_register_default_server_timing_template_metrics() {
 	// Template-related metrics can only be recorded if output buffering is used.
@@ -150,6 +150,23 @@ function perflab_register_default_server_timing_template_metrics() {
 			return $passthrough;
 		},
 		PHP_INT_MAX
+	);
+
+	add_action(
+		'perflab_server_timing_send_header',
+		function() {
+			// WordPress total load time.
+			perflab_server_timing_register_metric(
+				'total',
+				array(
+					'measure_callback' => function( $metric ) {
+						// The 'timestart' global is set right at the beginning of WordPress execution.
+						$metric->set_value( ( microtime( true ) - $GLOBALS['timestart'] ) * 1000.0 );
+					},
+					'access_cap'       => 'exist',
+				)
+			);
+		}
 	);
 
 	// SQL query time is only measured if the SAVEQUERIES constant is set to true.

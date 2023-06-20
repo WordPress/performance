@@ -2,16 +2,16 @@
 /**
  * Can load function to determine if SQLite can be activated.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  * @package performance-lab
  */
 
 /**
  * Checks whether the given module can be activated.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  */
-return function() {
+return static function() {
 
 	// If the PERFLAB_SQLITE_DB_DROPIN_VERSION constant is defined, then the module is already active.
 	if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
@@ -19,7 +19,8 @@ return function() {
 	}
 
 	// If a db.php file already exists in the wp-content directory, then the module cannot be activated.
-	if ( file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
+	// Except if it is the standalone plugin's drop-in.
+	if ( file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'SQLITE_DB_DROPIN_VERSION' ) ) {
 		return false;
 	}
 

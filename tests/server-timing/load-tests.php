@@ -25,7 +25,7 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		perflab_server_timing_register_metric(
 			'test-metric',
 			array(
-				'measure_callback' => function( $metric ) {
+				'measure_callback' => static function( $metric ) {
 					$metric->set_value( 100 );
 				},
 				'access_cap'       => 'exist',
@@ -42,7 +42,7 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_perflab_wrap_server_timing() {
-		$cb = function() {
+		$cb = static function() {
 			return 123;
 		};
 

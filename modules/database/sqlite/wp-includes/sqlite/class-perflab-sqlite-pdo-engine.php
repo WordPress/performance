@@ -3,7 +3,7 @@
  * The main PDO extension class.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**
@@ -724,7 +724,7 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 	 *
 	 * @param object $statement The PDO statement.
 	 *
-	 * @return boolean
+	 * @return boolean|void
 	 */
 	private function execute_query( $statement ) {
 		$reason  = 0;
@@ -1277,7 +1277,7 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 	 * @param string $function Indicate the function name where the error occurred.
 	 * @param string $message  The message.
 	 *
-	 * @return boolean
+	 * @return boolean|void
 	 */
 	private function set_error( $line, $function, $message ) {
 		global $wpdb;
@@ -1507,6 +1507,7 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 	 * Method to call PDO::commit().
 	 *
 	 * @see PDO::commit()
+	 * @return void
 	 */
 	public function commit() {
 		$this->pdo->commit();
@@ -1517,6 +1518,7 @@ class Perflab_SQLite_PDO_Engine extends PDO { // phpcs:ignore
 	 * Method to call PDO::rollBack().
 	 *
 	 * @see PDO::rollBack()
+	 * @return void
 	 */
 	public function rollBack() {
 		$this->pdo->rollBack();

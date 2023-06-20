@@ -9,6 +9,7 @@
     "chalk": "^4.1.2",
     "commander": "^9.4.1",
     "fast-glob": "^3.2.12",
+    "fs-extra": "^11.1.0",
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
     "lodash": "4.17.21"
@@ -18,21 +19,27 @@
     "since": "./bin/plugin/cli.js since",
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
+    "build-plugins": "./bin/plugin/cli.js build-plugins",
+    "test-plugins": "./bin/plugin/cli.js test-plugins",
+    "test-plugins-multisite": "./bin/plugin/cli.js test-plugins --sitetype=multi",
     "enabled-modules": "./bin/plugin/cli.js enabled-modules",
     "format-js": "wp-scripts format ./bin",
     "lint-js": "wp-scripts lint-js ./bin",
     "format-php": "wp-env run composer run-script format",
+    "phpstan": "wp-env run composer run-script phpstan",
     "prelint-php": "wp-env run composer 'install --no-interaction'",
     "lint-php": "wp-env run composer run-script lint",
-    "test-php": "wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/performance/phpunit.xml.dist --verbose'",
+    "pretest-php": "wp-env run composer 'install --no-interaction'",
+    "test-php": "wp-env run phpunit 'phpunit -c /var/www/html/wp-content/plugins/$(basename $(pwd))/phpunit.xml.dist --verbose'",
     "pretest-php-multisite": "wp-env run composer 'install --no-interaction'",
-    "test-php-multisite": "wp-env run phpunit 'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/performance/tests/multisite.xml --verbose'",
+    "test-php-multisite": "wp-env run phpunit 'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/$(basename $(pwd))/tests/multisite.xml --verbose'",
     "wp-env": "wp-env",
     "prepare": "husky install"
   },
   "lint-staged": {
     "*.php": [
-      "composer run-script lint"
+      "composer run-script lint",
+      "composer run-script phpstan"
     ]
   }
 }

@@ -3,9 +3,9 @@
  * Plugin Name: Performance Lab
  * Plugin URI: https://github.com/WordPress/performance
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
- * Requires at least: 6.0
+ * Requires at least: 6.1
  * Requires PHP: 5.6
- * Version: 1.7.0
+ * Version: 2.3.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '1.7.0' );
+define( 'PERFLAB_VERSION', '2.2.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -66,7 +66,7 @@ function perflab_get_modules_setting_default() {
 		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
 		$default_option          = array_reduce(
 			$default_enabled_modules,
-			function( $module_settings, $module_dir ) {
+			static function( $module_settings, $module_dir ) {
 				$module_settings[ $module_dir ] = array( 'enabled' => true );
 				return $module_settings;
 			},
@@ -93,7 +93,7 @@ function perflab_sanitize_modules_setting( $value ) {
 	// Ensure that every element is an array with an 'enabled' key.
 	return array_filter(
 		array_map(
-			function( $module_settings ) {
+			static function( $module_settings ) {
 				if ( ! is_array( $module_settings ) ) {
 					return array();
 				}
@@ -123,8 +123,8 @@ function perflab_get_module_settings() {
 	$legacy_module_slugs = array(
 		'site-health/audit-autoloaded-options' => 'database/audit-autoloaded-options',
 		'site-health/audit-enqueued-assets'    => 'js-and-css/audit-enqueued-assets',
-		'site-health/audit-full-page-cache'    => 'object-cache/audit-full-page-cache',
 		'site-health/webp-support'             => 'images/webp-support',
+		'images/dominant-color'                => 'images/dominant-color-images',
 	);
 
 	foreach ( $legacy_module_slugs as $legacy_slug => $current_slug ) {
@@ -148,7 +148,7 @@ function perflab_get_active_modules() {
 	$modules = array_keys(
 		array_filter(
 			perflab_get_module_settings(),
-			function( $module_settings ) {
+			static function( $module_settings ) {
 				return isset( $module_settings['enabled'] ) && $module_settings['enabled'];
 			}
 		)
@@ -159,7 +159,7 @@ function perflab_get_active_modules() {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array An array of the currently active modules.
+	 * @param array $modules An array of the currently active modules.
 	 */
 	$modules = apply_filters( 'perflab_active_modules', $modules );
 
@@ -170,6 +170,7 @@ function perflab_get_active_modules() {
  * Gets the active and valid performance modules.
  *
  * @since 1.3.0
+ * @since 2.2.0 Adds an additional check for standalone plugins.
  *
  * @param string $module Slug of the module.
  * @return bool True if the module is active and valid, otherwise false.
@@ -177,6 +178,11 @@ function perflab_get_active_modules() {
 function perflab_is_valid_module( $module ) {
 
 	if ( empty( $module ) ) {
+		return false;
+	}
+
+	// Do not load the module if it can be loaded by a separate plugin.
+	if ( perflab_is_standalone_plugin_loaded( $module ) ) {
 		return false;
 	}
 
@@ -250,6 +256,41 @@ function perflab_can_load_module( $module ) {
 }
 
 /**
+ * Checks whether the given module has already been loaded by a separate plugin.
+ *
+ * @since 2.2.0
+ *
+ * @param string $module Slug of the module.
+ * @return bool Whether the module has already been loaded by a separate plugin.
+ */
+function perflab_is_standalone_plugin_loaded( $module ) {
+	$standalone_plugins_constants = perflab_get_standalone_plugins_constants();
+	if (
+		isset( $standalone_plugins_constants[ $module ] ) &&
+		defined( $standalone_plugins_constants[ $module ] ) &&
+		! str_starts_with( constant( $standalone_plugins_constants[ $module ] ), 'Performance Lab ' )
+	) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Gets the standalone plugin constants used for each module / plugin.
+ *
+ * @since 2.2.0
+ *
+ * @return array Map of module path to version constant used.
+ */
+function perflab_get_standalone_plugins_constants() {
+	return array(
+		'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
+		'images/fetchpriority'         => 'FETCHPRIORITY_VERSION',
+		'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
+	);
+}
+
+/**
  * Loads the active and valid performance modules.
  *
  * @since 1.0.0
@@ -263,7 +304,7 @@ function perflab_load_active_and_valid_modules() {
 		require_once PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/load.php';
 	}
 }
-perflab_load_active_and_valid_modules();
+add_action( 'plugins_loaded', 'perflab_load_active_and_valid_modules' );
 
 /**
  * Places the Performance Lab's object cache drop-in in the drop-ins folder.
@@ -274,7 +315,8 @@ perflab_load_active_and_valid_modules();
  * This function will short-circuit if the constant
  * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
  *
- * @since n.e.x.t
+ * @since 1.8.0
+ * @since 2.1.0 No longer attempts to use two of the drop-ins together.
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
@@ -291,6 +333,17 @@ function perflab_maybe_set_object_cache_dropin() {
 		return;
 	}
 
+	/**
+	 * Filters whether the Perflab server timing drop-in should be set.
+	 *
+	 * @since 2.0.0
+	 *
+	 * @param bool $disabled Whether to disable the server timing drop-in. Default false.
+	 */
+	if ( apply_filters( 'perflab_disable_object_cache_dropin', false ) ) {
+		return;
+	}
+
 	// Bail if already attempted before timeout has been completed.
 	// This is present in case placing the file fails for some reason, to avoid
 	// excessively retrying to place it on every request.
@@ -300,17 +353,27 @@ function perflab_maybe_set_object_cache_dropin() {
 	}
 
 	if ( $wp_filesystem || WP_Filesystem() ) {
-		// If there is an actual object-cache.php file, rename it.
-		// The Performance Lab object-cache.php will still load it, so the
-		// behavior does not change.
-		if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) ) {
-			$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache.php', WP_CONTENT_DIR . '/object-cache-plst-orig.php' );
+		$dropin_path = WP_CONTENT_DIR . '/object-cache.php';
+
+		/**
+		 * If there is an actual object-cache.php file, do not replace it.
+		 * Previous versions of the Performance Lab plugin were renaming the
+		 * original object-cache.php file and then loading both. However, due
+		 * to other plugins eagerly checking file headers, this caused too many
+		 * problems across sites so it was decided to remove this layer.
+		 * Only placing the drop-in file if no other one exists yet is the
+		 * safest solution.
+		 */
+		if ( $wp_filesystem->exists( $dropin_path ) ) {
+			// Set timeout of 1 day before retrying again (only in case the file already exists).
+			set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
+			return;
 		}
 
-		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php', WP_CONTENT_DIR . '/object-cache.php' );
+		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php', $dropin_path );
 	}
 
-	// Set timeout of 1 hour before retrying again (only in case of failure).
+	// Set timeout of 1 hour before retrying again (only relevant in case the above failed).
 	set_transient( 'perflab_set_object_cache_dropin', true, HOUR_IN_SECONDS );
 }
 add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
@@ -318,14 +381,14 @@ add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
 /**
  * Removes the Performance Lab's object cache drop-in from the drop-ins folder.
  *
- * This function should be run on plugin deactivation. If there was another original
- * object-cache.php drop-in file (renamed in `perflab_maybe_set_object_cache_dropin()`
- * to object-cache-plst-orig.php), it will be restored.
+ * This function should be run on plugin deactivation. For backward compatibility with
+ * an earlier implementation of `perflab_maybe_set_object_cache_dropin()`, this function
+ * checks whether there is an object-cache-plst-orig.php file, and if so restores it.
  *
  * This function will short-circuit if the constant
  * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
@@ -343,13 +406,20 @@ function perflab_maybe_remove_object_cache_dropin() {
 	}
 
 	if ( $wp_filesystem || WP_Filesystem() ) {
-		// If there is an actual object-cache.php file, restore it
-		// and override the Performance Lab file.
-		// Otherwise just delete the Performance Lab file.
-		if ( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) ) {
-			$wp_filesystem->move( WP_CONTENT_DIR . '/object-cache-plst-orig.php', WP_CONTENT_DIR . '/object-cache.php', true );
+		$dropin_path        = WP_CONTENT_DIR . '/object-cache.php';
+		$dropin_backup_path = WP_CONTENT_DIR . '/object-cache-plst-orig.php';
+
+		/**
+		 * If there is an object-cache-plst-orig.php file, restore it and
+		 * override the Performance Lab file. This is only relevant for
+		 * backward-compatibility with previous Performance Lab versions
+		 * which were backing up the file and then loading both.
+		 * Otherwise just delete the Performance Lab file.
+		 */
+		if ( $wp_filesystem->exists( $dropin_backup_path ) ) {
+			$wp_filesystem->move( $dropin_backup_path, $dropin_path, true );
 		} else {
-			$wp_filesystem->delete( WP_CONTENT_DIR . '/object-cache.php' );
+			$wp_filesystem->delete( $dropin_path );
 		}
 	}
 
@@ -366,7 +436,7 @@ if ( is_admin() ) {
 /**
  * Trigger actions when a module gets activated or deactivated.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @param mixed $old_value Old value of the option.
  * @param mixed $value     New value of the option.
@@ -401,7 +471,7 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
  *
  * Runs the activate.php file if it exists.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @param string $module_dir_path The module's directory path.
  */
@@ -422,7 +492,7 @@ function perflab_activate_module( $module_dir_path ) {
  *
  * Runs the deactivate.php file if it exists.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  *
  * @param string $module_dir_path The module's directory path.
  */
@@ -450,7 +520,7 @@ add_action(
 	 * @param string $option Name of the option to add.
 	 * @param mixed  $value  Value of the option.
 	 */
-	function( $option, $value ) {
+	static function( $option, $value ) {
 		perflab_run_module_activation_deactivation( perflab_get_modules_setting_default(), $value );
 	},
 	10,

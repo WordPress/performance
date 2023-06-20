@@ -2,10 +2,10 @@
 /**
  * Actions to run when the module gets activated.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  * @package performance-lab
  */
 
-return function() {
+return static function() {
 	update_option( 'test_demo_module_activation_status', 'activated' );
 };

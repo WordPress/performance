@@ -1,0 +1,60 @@
+name: Integration Tests for Standalone Plugins
+
+on:
+  push:
+    branches:
+      - trunk
+      - 'release/**'
+    # Only run if PHP-related files changed.
+    paths:
+      - '.github/workflows/php-test-standalone-plugins.yml'
+      - 'plugin-tests/**'
+      - '**.php'
+      - '.wp-env.json'
+      - '**/package.json'
+      - 'package-lock.json'
+      - 'phpunit.xml.dist'
+      - 'composer.json'
+      - 'composer.lock'
+  pull_request:
+    branches:
+      - trunk
+      - 'release/**'
+      - 'feature/**'
+    # Only run if PHP-related files changed.
+    paths:
+      - '.github/workflows/php-test-standalone-plugins.yml'
+      - 'plugin-tests/**'
+      - '**.php'
+      - '.wp-env.json'
+      - '**/package.json'
+      - 'package-lock.json'
+      - 'phpunit.xml.dist'
+      - 'composer.json'
+      - 'composer.lock'
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+jobs:
+  php-test:
+    name: PHP Integration Tests for Standalone Plugins
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: styfle/cancel-workflow-action@0.9.1
+      - uses: actions/checkout@v3
+      - name: Setup Node.js (.nvmrc)
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: npm install
+        run: npm ci
+      - name: Building standalone plugins
+        run: npm run build-plugins
+      - name: Running single site standalone plugin integration tests
+        run: npm run test-plugins
+      - name: Running multisite standalone plugin integration tests
+        run: npm run test-plugins-multisite

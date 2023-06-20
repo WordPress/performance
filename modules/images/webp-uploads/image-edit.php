@@ -103,7 +103,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 	$callback_executed = false;
 	add_filter(
 		'wp_update_attachment_metadata',
-		function ( $metadata, $post_meta_id ) use ( $post_id, $file_path, $mime_type, $editor, $mime_transforms, &$callback_executed ) {
+		static function ( $metadata, $post_meta_id ) use ( $post_id, $file_path, $mime_type, $editor, $mime_transforms, &$callback_executed ) {
 			if ( $post_meta_id !== $post_id ) {
 				return $metadata;
 			}
@@ -120,7 +120,10 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 			$old_metadata = wp_get_attachment_metadata( $post_id );
 			$resize_sizes = array();
-			$target       = isset( $_REQUEST['target'] ) ? $_REQUEST['target'] : 'all';
+			// PHPCS ignore reason: A nonce check is not necessary here as this logic directly ties in with WordPress core
+			// function `wp_ajax_image_editor()` which already has one.
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$target = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all';
 
 			foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
 				// If the target is 'nothumb', skip generating the 'thumbnail' size.
@@ -221,7 +224,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 	return $override;
 }
-add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 10, 7 );
+add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 10, 5 );
 
 /**
  * Inspect if the current call to `wp_update_attachment_metadata()` was done from within the context
@@ -237,6 +240,8 @@ add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 1
  * @return array The updated metadata for the attachment to be stored in the meta table.
  */
 function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
+	// PHPCS ignore reason: Update the attachment's metadata by either restoring or editing it.
+	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
 	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
 
 	foreach ( $trace as $element ) {
@@ -272,7 +277,10 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  * @return array The updated metadata for the attachment.
  */
 function webp_uploads_backup_sources( $attachment_id, $data ) {
-	$target = isset( $_REQUEST['target'] ) ? $_REQUEST['target'] : 'all';
+	// PHPCS ignore reason: A nonce check is not necessary here as this logic directly ties in with WordPress core
+	// function `wp_ajax_image_editor()` which already has one.
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$target = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all';
 
 	// When an edit to an image is only applied to a thumbnail there's nothing we need to back up.
 	if ( 'thumbnail' === $target ) {
@@ -289,7 +297,7 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
 	// Prevent execution of the callbacks more than once if the callback was already executed.
 	$has_been_processed = false;
 
-	$hook = function ( $meta_id, $post_id, $meta_name ) use ( $attachment_id, $sources, &$has_been_processed ) {
+	$hook = static function ( $meta_id, $post_id, $meta_name ) use ( $attachment_id, $sources, &$has_been_processed ) {
 		// Make sure this hook is only executed in the same context for the provided $attachment_id.
 		if ( $post_id !== $attachment_id ) {
 			return;

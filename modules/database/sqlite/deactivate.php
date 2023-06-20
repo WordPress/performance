@@ -2,16 +2,16 @@
 /**
  * Actions to run when the module gets deactivated.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  * @package performance-lab
  */
 
 /**
  * Deletes the db.php file, and deactivates the module in the SQLite database.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  */
-return function() {
+return static function() {
 	if ( ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) || ! file_exists( WP_CONTENT_DIR . '/db.php' ) ) {
 		return;
 	}
@@ -28,7 +28,7 @@ return function() {
 	// Run an action on `shutdown`, to deactivate the option in the MySQL database.
 	add_action(
 		'shutdown',
-		function() {
+		static function() {
 			global $table_prefix;
 
 			// Get credentials for the MySQL database.

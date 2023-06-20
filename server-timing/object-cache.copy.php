@@ -1,5 +1,14 @@
 <?php
 /**
+ * Plugin Name: Performance Lab Server Timing Object Cache Drop-In
+ * Plugin URI: https://github.com/WordPress/performance
+ * Description: Performance Lab drop-in to register Server-Timing metrics early. This is not a real object cache drop-in and will not override other actual object cache drop-ins.
+ * Version: 2
+ * Author: WordPress Performance Team
+ * Author URI: https://make.wordpress.org/performance/
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ *
  * Object cache drop-in from Performance Lab plugin.
  *
  * This drop-in is used, admittedly as a hack, to be able to measure server
@@ -16,42 +25,53 @@
  *     define( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN', true );
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 // Set constant to be able to later check for whether this file was loaded.
-define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', 1 );
+if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
+	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', 2 );
+}
 
-/**
- * Loads the Performance Lab Server-Timing API if available.
- *
- * This function will short-circuit if the constant
- * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
- *
- * @since n.e.x.t
- */
-function perflab_load_server_timing_api_from_dropin() {
-	if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {
-		return;
-	}
-
-	$plugins_dir = defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR : WP_CONTENT_DIR . '/plugins';
-	$plugin_dir  = $plugins_dir . '/performance-lab/';
-	if ( ! file_exists( $plugin_dir . 'server-timing/load.php' ) ) {
-		$plugin_dir = $plugins_dir . '/performance/';
-		if ( ! file_exists( $plugin_dir . 'server-timing/load.php' ) ) {
+if ( ! function_exists( 'perflab_load_server_timing_api_from_dropin' ) ) {
+	/**
+	 * Loads the Performance Lab Server-Timing API if available.
+	 *
+	 * This function will short-circuit if the constant
+	 * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
+	 *
+	 * @since 1.8.0
+	 */
+	function perflab_load_server_timing_api_from_dropin() {
+		if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {
 			return;
 		}
-	}
 
-	require_once $plugin_dir . 'server-timing/class-perflab-server-timing-metric.php';
-	require_once $plugin_dir . 'server-timing/class-perflab-server-timing.php';
-	require_once $plugin_dir . 'server-timing/load.php';
-	require_once $plugin_dir . 'server-timing/defaults.php';
+		$plugins_dir = defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR : WP_CONTENT_DIR . '/plugins';
+		$plugin_dir  = $plugins_dir . '/performance-lab/';
+		if ( ! file_exists( $plugin_dir . 'server-timing/load.php' ) ) {
+			$plugin_dir = $plugins_dir . '/performance/';
+			if ( ! file_exists( $plugin_dir . 'server-timing/load.php' ) ) {
+				return;
+			}
+		}
+
+		require_once $plugin_dir . 'server-timing/class-perflab-server-timing-metric.php';
+		require_once $plugin_dir . 'server-timing/class-perflab-server-timing.php';
+		require_once $plugin_dir . 'server-timing/load.php';
+		require_once $plugin_dir . 'server-timing/defaults.php';
+	}
 }
 perflab_load_server_timing_api_from_dropin();
 
-// Load the original object cache drop-in if present.
+/**
+ * Load the original object cache drop-in if present.
+ * This is only here for backward compatibility, as new Performance Lab
+ * versions no longer use the approach of backing up the original
+ * object-cache.php file and loading both.
+ * It is critical however to maintain this line here to not break existing
+ * sites where this approach has been working as expected.
+ */
 if ( file_exists( WP_CONTENT_DIR . '/object-cache-plst-orig.php' ) ) {
 	require_once WP_CONTENT_DIR . '/object-cache-plst-orig.php';
 }

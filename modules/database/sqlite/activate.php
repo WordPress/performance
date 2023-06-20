@@ -2,16 +2,16 @@
 /**
  * Actions to run when the module gets activated.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  * @package performance-lab
  */
 
 /**
  * Copies the db.php file in wp-content and reloads the page.
  *
- * @since n.e.x.t
+ * @since 1.8.0
  */
-return function() {
+return static function() {
 	// Bail early if the SQLite3 class does not exist.
 	if ( ! class_exists( 'SQLite3' ) ) {
 		return;
@@ -58,7 +58,7 @@ return function() {
 	// but rather remains in the Performance Lab modules screen.
 	add_filter(
 		'wp_redirect',
-		function( $redirect_location ) {
+		static function( $redirect_location ) {
 			if ( ! defined( 'DATABASE_TYPE' ) ) {
 				define( 'DATABASE_TYPE', 'sqlite' );
 			}
@@ -118,7 +118,7 @@ return function() {
 			// Since $admin_user->user_pass is already hashed, add a filter to
 			// ensure it is inserted into the database like that, instead of
 			// being re-hashed.
-			$unhash_user_pass = function( $data, $update, $user_id, $userdata ) use ( $admin_user, $current_user ) {
+			$unhash_user_pass = static function( $data, $update, $user_id, $userdata ) use ( $admin_user, $current_user ) {
 				// Double check this is actually the already hashed password,
 				// to prevent any chance of accidentally putting another
 				// password into the database which would then be plain text.

@@ -1,0 +1,10 @@
+{
+  "images/fetchpriority": {
+    "slug": "fetchpriority",
+    "version": "1.0.0"
+  },
+  "images/webp-uploads": {
+    "slug": "webp-uploads",
+    "version": "1.0.0"
+  }
+}

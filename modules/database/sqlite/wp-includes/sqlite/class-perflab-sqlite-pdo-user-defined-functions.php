@@ -3,7 +3,7 @@
  * Custom functions for the SQLite implementation.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**
@@ -443,6 +443,7 @@ class Perflab_SQLite_PDO_User_Defined_Functions {
 				list($years, $months) = explode( '-', $_parts[0] );
 				return 'P' . $years . 'Y' . $months . 'M';
 		}
+		return '';
 	}
 
 	/**

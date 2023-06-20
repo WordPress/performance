@@ -3,7 +3,7 @@
  * Rewrite queries (except CREATE and ALTER) for SQLite to execute.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 1.8.0
  */
 
 /**
@@ -737,7 +737,7 @@ class Perflab_SQLite_PDO_Driver {
 				$_wpdb   = null;
 				usort(
 					$results,
-					function ( $a, $b ) use ( $flipped ) {
+					static function ( $a, $b ) use ( $flipped ) {
 						return $flipped[ $a->ID ] - $flipped[ $b->ID ];
 					}
 				);
