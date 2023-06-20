@@ -287,6 +287,7 @@ function perflab_get_standalone_plugins_constants() {
 		'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
 		'images/fetchpriority'         => 'FETCHPRIORITY_VERSION',
 		'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
+		'database/sqlite'              => 'SQLITE_MAIN_FILE',
 	);
 }
 
