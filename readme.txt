@@ -81,6 +81,19 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 == Changelog ==
 
+= 2.4.0 =
+
+**Enhancements**
+
+* Database: Implement migration prompt to migrate from SQLite module to standalone plugin due to removal in the following release. ([739](https://github.com/WordPress/performance/pull/739))
+* Infrastructure: Enhance code quality by adding PHPStan and fixing level 0 issues. ([730](https://github.com/WordPress/performance/pull/730))
+* Infrastructure: Use static closures for minor performance improvement whenever instance access is not needed. ([729](https://github.com/WordPress/performance/pull/729))
+
+**Bug Fixes**
+
+* Database: Fix SQLite module deactivation routine to make standalone plugin migration work correctly. ([743](https://github.com/WordPress/performance/pull/743))
+* Infrastructure: Make `Server-Timing` header output more robust. ([736](https://github.com/WordPress/performance/pull/736))
+
 = 2.3.0 =
 
 **Enhancements**
