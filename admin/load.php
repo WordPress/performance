@@ -478,7 +478,7 @@ add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
  * Handles the rendering of the admin pointer.
  *
  * @since 1.0.0
- * @since n.e.x.t Optional arguments were added to make the function reusable for different pointers.
+ * @since 2.4.0 Optional arguments were added to make the function reusable for different pointers.
  *
  * @param string $pointer_id Optional. ID of the pointer. Default 'perflab-admin-pointer'.
  * @param array  $args       Optional. Pointer arguments. Supports 'heading' and 'content' entries.
