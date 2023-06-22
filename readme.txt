@@ -391,4 +391,4 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 = 2.5.0 =
 
-The SQLite module has been removed as part of this Performance Lab release. If you are using it, please install and activate the SQLite integration plugin before updating Performance Lab.
+The SQLite module is no longer present starting with this release. If you still use it, please migrate to the standalone plugin before updating.
