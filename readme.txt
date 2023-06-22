@@ -386,3 +386,9 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 * Infrastructure: Add contribution documentation. ([47](https://github.com/WordPress/performance/pull/47))
 * Infrastructure: Add release documentation. ([138](https://github.com/WordPress/performance/pull/138))
 * Infrastructure: Define module specification in documentation. ([26](https://github.com/WordPress/performance/pull/26))
+
+== Upgrade Notice ==
+
+= 2.5.0 =
+
+The SQLite module has been removed as part of this Performance Lab release. If you are using it, please install and activate the SQLite integration plugin before updating Performance Lab.
