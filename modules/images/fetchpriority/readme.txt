@@ -2,9 +2,9 @@
 
 Contributors:      wordpressdotorg
 Requires at least: 6.1
-Tested up to:      6.2
+Tested up to:      6.3
 Requires PHP:      5.6
-Stable tag:        1.0.0
+Stable tag:        1.1.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, fetchpriority
@@ -46,6 +46,10 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.1.0 =
+
+* Display admin notice to deactivate the plugin if feature already available in WordPress core. ([769](https://github.com/WordPress/performance/pull/769))
 
 = 1.0.0 =
 

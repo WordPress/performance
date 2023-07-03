@@ -67,3 +67,19 @@ function fetchpriority_render_generator() {
 	}
 }
 add_action( 'wp_head', 'fetchpriority_render_generator' );
+
+// Show an admin notice if fetchpriority is already available in WordPress core (only relevant for the standalone plugin).
+if ( function_exists( 'wp_get_loading_optimization_attributes' ) && ! str_starts_with( FETCHPRIORITY_VERSION, 'Performance Lab ' ) ) {
+	add_action(
+		'admin_notices',
+		static function() {
+			?>
+			<div class="notice notice-warning">
+				<p>
+					<?php esc_html_e( 'Fetchpriority is already part of your WordPress version. Please deactivate the Fetchpriority plugin.', 'performance-lab' ); ?>
+				</p>
+			</div>
+			<?php
+		}
+	);
+}
