@@ -23,7 +23,6 @@ Currently the plugin includes the following performance modules:
 * **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
 * **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
 * **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
-* **SQLite Integration:** Use an SQLite database instead of MySQL.
 
 == Installation ==
 
@@ -80,6 +79,14 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.5.0 =
+
+**Enhancements**
+
+* Images: Check for fetchpriority feature being available in WordPress core before loading the module. ([769](https://github.com/WordPress/performance/pull/769))
+* Database Optimization: Remove SQLite module. ([764](https://github.com/WordPress/performance/pull/764))
+* Infrastructure: Bump tested up to version to 6.3. ([772](https://github.com/WordPress/performance/pull/772))
 
 = 2.4.0 =
 
