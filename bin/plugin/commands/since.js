@@ -47,13 +47,14 @@ exports.handler = async ( opt ) => {
 		ignore: [ __filename, '**/node_modules', '**/vendor' ],
 	} );
 
-	const regexp = new RegExp( '@since n.e.x.t', 'g' );
+	const regexp = new RegExp( '@since(\\s+)n.e.x.t', 'g' );
+
 	files.forEach( ( file ) => {
 		const content = fs.readFileSync( file, 'utf-8' );
 		if ( regexp.test( content ) ) {
 			fs.writeFileSync(
 				file,
-				content.replace( regexp, `@since ${ opt.release }` )
+				content.replace( regexp, `@since$1${ opt.release }` )
 			);
 		}
 	} );

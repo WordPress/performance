@@ -13,7 +13,5 @@ $generated_i18n_strings = array(
 	_x( 'Adds a CSS and JS resource check in Site Health status.', 'module description', 'performance-lab' ),
 	_x( 'Autoloaded Options Health Check', 'module name', 'performance-lab' ),
 	_x( 'Adds a check for autoloaded options in Site Health status.', 'module description', 'performance-lab' ),
-	_x( 'SQLite Integration', 'module name', 'performance-lab' ),
-	_x( 'Use an SQLite database instead of MySQL.', 'module description', 'performance-lab' ),
 );
 /* THIS IS THE END OF THE GENERATED FILE */
