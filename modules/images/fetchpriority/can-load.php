@@ -2,7 +2,7 @@
 /**
  * Can load function to determine if the Fetchpriority feature is already available in WordPress core.
  *
- * @since   n.e.x.t
+ * @since   2.5.0
  * @package performance-lab
  */
 
