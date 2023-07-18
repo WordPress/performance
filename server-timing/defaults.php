@@ -207,3 +207,84 @@ function perflab_register_default_server_timing_template_metrics() {
 	}
 }
 add_action( 'wp_loaded', 'perflab_register_default_server_timing_template_metrics' );
+
+/**
+ * Registers additional Server-Timing metrics as configured in the setting.
+ *
+ * These metrics should be registered as soon as possible. They can be added
+ * and modified in the "Tools > Server-Timing" screen.
+ *
+ * @since n.e.x.t
+ */
+function perflab_register_additional_server_timing_metrics_from_setting() {
+	$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
+
+	if ( isset( $options['benchmarking_actions'] ) ) {
+		foreach ( $options['benchmarking_actions'] as $action ) {
+			$metric_slug = 'action-' . $action;
+
+			$measure_callback = function( $metric ) use ( $action ) {
+				$metric->measure_before();
+				add_action( $action, array( $metric, 'measure_after' ), PHP_INT_MAX, 0 );
+			};
+
+			add_action(
+				$action,
+				static function() use ( $metric_slug, $measure_callback ) {
+					perflab_server_timing_register_metric(
+						$metric_slug,
+						array(
+							'measure_callback' => $measure_callback,
+							'access_cap'       => 'exist',
+						)
+					);
+				},
+				defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -9999
+			);
+		}
+	}
+
+	if ( isset( $options['benchmarking_filters'] ) ) {
+		foreach ( $options['benchmarking_filters'] as $filter ) {
+			$metric_slug = 'filter-' . $filter;
+
+			$measure_callback = function( $metric ) use ( $filter ) {
+				$metric->measure_before();
+				add_filter(
+					$filter,
+					static function( $passthrough ) use ( $metric ) {
+						$metric->measure_after();
+						return $passthrough;
+					},
+					PHP_INT_MAX
+				);
+			};
+
+			add_filter(
+				$filter,
+				static function( $passthrough ) use ( $metric_slug, $measure_callback ) {
+					perflab_server_timing_register_metric(
+						$metric_slug,
+						array(
+							'measure_callback' => $measure_callback,
+							'access_cap'       => 'exist',
+						)
+					);
+					return $passthrough;
+				},
+				defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -9999
+			);
+		}
+	}
+}
+
+/*
+ * If this file is loaded from the Server-Timing logic in the object-cache.php
+ * drop-in, it must not call this function right away since otherwise the cache
+ * will not be loaded yet.
+ */
+if ( ! did_action( 'muplugins_loaded' ) ) {
+	add_action( 'muplugins_loaded', 'perflab_register_additional_server_timing_metrics_from_setting' );
+} else {
+	perflab_register_additional_server_timing_metrics_from_setting();
+}

@@ -6,6 +6,54 @@
  * @since 1.8.0
  */
 
+define( 'PERFLAB_SERVER_TIMING_SETTING', 'perflab_server_timing_settings' );
+define( 'PERFLAB_SERVER_TIMING_SCREEN', 'perflab-server-timing' );
+
+/**
+ * Registers the Server-Timing setting.
+ *
+ * @since n.e.x.t
+ */
+function perflab_register_server_timing_setting() {
+	register_setting(
+		PERFLAB_SERVER_TIMING_SCREEN,
+		PERFLAB_SERVER_TIMING_SETTING,
+		array(
+			'type'              => 'object',
+			'sanitize_callback' => 'perflab_sanitize_server_timing_setting',
+			'default'           => array(),
+		)
+	);
+}
+add_action( 'init', 'perflab_register_server_timing_setting' );
+
+/**
+ * Sanitizes the Server-Timing setting.
+ *
+ * @since n.e.x.t
+ *
+ * @param mixed $value Server-Timing setting value.
+ * @return array Sanitized Server-Timing setting value.
+ */
+function perflab_sanitize_server_timing_setting( $value ) {
+	if ( ! is_array( $value ) ) {
+		return array();
+	}
+
+	// Ensure that every element is an indexed array of hook names.
+	return array_filter(
+		array_map(
+			static function( $hooks ) {
+				if ( ! is_array( $hooks ) ) {
+					$hooks = explode( "\n", $hooks );
+				}
+				return array_filter( array_map( 'sanitize_key', $hooks ) );
+			},
+			$value
+		)
+	);
+}
+
 /**
  * Provides access the Server-Timing API.
  *
