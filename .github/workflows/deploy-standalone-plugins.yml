@@ -10,7 +10,8 @@ on:
         description: 'The slug of the plugin to deploy'
       dry-run:
         type: boolean
-        description: 'True to set debug mode'
+        description: 'Debug mode (run without publishing).'
+        default: false
 jobs:
   release:
     name: Prepare Deployment
@@ -47,6 +48,8 @@ jobs:
           else
             # Load the JSON file and parse from "{name: {slug, version}, ...}" to "include: [{ name, slug, version }, ...]"
             # for use in the matrix.
+            # The "dry-run" parameter is included here to set the deployment mode.
+            # When running the manual (workflow_dispatch) workflow, this value will be set from manual input type.
             echo "matrix="$(jq -c '{include:[keys[] as $k | {name:$k,slug:.[$k].slug,version:.[$k].version,"dry-run":false }]}' plugins.json) >> $GITHUB_OUTPUT
           fi
   deploy:
