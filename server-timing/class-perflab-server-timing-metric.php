@@ -74,7 +74,7 @@ class Perflab_Server_Timing_Metric {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: PHP parameter name */
-				sprintf( __( 'The %s parameter must be an integer, float, or numeric string.', 'performance-lab' ), '$value' ),
+				sprintf( esc_html__( 'The %s parameter must be an integer, float, or numeric string.', 'performance-lab' ), '$value' ),
 				''
 			);
 			return;
@@ -84,7 +84,7 @@ class Perflab_Server_Timing_Metric {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: WordPress action name */
-				sprintf( __( 'The method must be called before or during the %s action.', 'performance-lab' ), 'perflab_server_timing_send_header' ),
+				sprintf( esc_html__( 'The method must be called before or during the %s action.', 'performance-lab' ), 'perflab_server_timing_send_header' ),
 				''
 			);
 			return;
@@ -134,7 +134,7 @@ class Perflab_Server_Timing_Metric {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: PHP method name */
-				sprintf( __( 'The %s method must be called before.', 'performance-lab' ), __CLASS__ . '::measure_before()' ),
+				sprintf( esc_html__( 'The %s method must be called before.', 'performance-lab' ), __CLASS__ . '::measure_before()' ),
 				''
 			);
 			return;
