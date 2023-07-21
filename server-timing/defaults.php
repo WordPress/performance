@@ -223,7 +223,7 @@ function perflab_register_additional_server_timing_metrics_from_setting() {
 		foreach ( $options['benchmarking_actions'] as $action ) {
 			$metric_slug = 'action-' . $action;
 
-			$measure_callback = function( $metric ) use ( $action ) {
+			$measure_callback = static function( $metric ) use ( $action ) {
 				$metric->measure_before();
 				add_action( $action, array( $metric, 'measure_after' ), PHP_INT_MAX, 0 );
 			};
@@ -239,6 +239,7 @@ function perflab_register_additional_server_timing_metrics_from_setting() {
 						)
 					);
 				},
+				// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 				defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -9999
 			);
 		}
@@ -248,7 +249,7 @@ function perflab_register_additional_server_timing_metrics_from_setting() {
 		foreach ( $options['benchmarking_filters'] as $filter ) {
 			$metric_slug = 'filter-' . $filter;
 
-			$measure_callback = function( $metric ) use ( $filter ) {
+			$measure_callback = static function( $metric ) use ( $filter ) {
 				$metric->measure_before();
 				add_filter(
 					$filter,
@@ -272,6 +273,7 @@ function perflab_register_additional_server_timing_metrics_from_setting() {
 					);
 					return $passthrough;
 				},
+				// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 				defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -9999
 			);
 		}
