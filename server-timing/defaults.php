@@ -14,12 +14,12 @@
  * @since 1.8.0
  */
 function perflab_register_default_server_timing_before_template_metrics() {
-	$calculate_before_template_metrics = function() {
+	$calculate_before_template_metrics = static function() {
 		// WordPress execution prior to serving the template.
 		perflab_server_timing_register_metric(
 			'before-template',
 			array(
-				'measure_callback' => function( $metric ) {
+				'measure_callback' => static function( $metric ) {
 					// The 'timestart' global is set right at the beginning of WordPress execution.
 					$metric->set_value( ( microtime( true ) - $GLOBALS['timestart'] ) * 1000.0 );
 				},
@@ -33,7 +33,7 @@ function perflab_register_default_server_timing_before_template_metrics() {
 			perflab_server_timing_register_metric(
 				'before-template-db-queries',
 				array(
-					'measure_callback' => function( $metric ) {
+					'measure_callback' => static function( $metric ) {
 						// This should never happen, but some odd database implementations may be doing it wrong.
 						if ( ! isset( $GLOBALS['wpdb']->queries ) || ! is_array( $GLOBALS['wpdb']->queries ) ) {
 							return;
@@ -42,7 +42,7 @@ function perflab_register_default_server_timing_before_template_metrics() {
 						// Store this value in a global to later subtract it from total query time after template.
 						$GLOBALS['perflab_query_time_before_template'] = array_reduce(
 							$GLOBALS['wpdb']->queries,
-							function( $acc, $query ) {
+							static function( $acc, $query ) {
 								return $acc + $query[1];
 							},
 							0.0
@@ -61,7 +61,7 @@ function perflab_register_default_server_timing_before_template_metrics() {
 	// modify the value prior to the check.
 	add_filter(
 		'template_include',
-		function( $passthrough ) use ( $calculate_before_template_metrics ) {
+		static function( $passthrough ) use ( $calculate_before_template_metrics ) {
 			if ( perflab_server_timing_use_output_buffer() ) {
 				$calculate_before_template_metrics();
 			}
@@ -71,7 +71,7 @@ function perflab_register_default_server_timing_before_template_metrics() {
 	);
 	add_action(
 		'perflab_server_timing_send_header',
-		function() use ( $calculate_before_template_metrics ) {
+		static function() use ( $calculate_before_template_metrics ) {
 			if ( ! perflab_server_timing_use_output_buffer() ) {
 				$calculate_before_template_metrics();
 			}
@@ -85,7 +85,7 @@ function perflab_register_default_server_timing_before_template_metrics() {
 	if ( PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
 		add_filter(
 			'query',
-			function( $query ) {
+			static function( $query ) {
 				global $wpdb;
 				if ( "SELECT option_name, option_value FROM $wpdb->options WHERE autoload = 'yes'" !== $query ) {
 					return $query;
@@ -97,11 +97,11 @@ function perflab_register_default_server_timing_before_template_metrics() {
 				perflab_server_timing_register_metric(
 					'load-alloptions-query',
 					array(
-						'measure_callback' => function( $metric ) {
+						'measure_callback' => static function( $metric ) {
 							$metric->measure_before();
 							add_filter(
 								'pre_cache_alloptions',
-								function( $passthrough ) use ( $metric ) {
+								static function( $passthrough ) use ( $metric ) {
 									$metric->measure_after();
 									return $passthrough;
 								}
@@ -134,12 +134,12 @@ function perflab_register_default_server_timing_template_metrics() {
 
 	add_filter(
 		'template_include',
-		function( $passthrough = null ) {
+		static function( $passthrough = null ) {
 			// WordPress execution while serving the template.
 			perflab_server_timing_register_metric(
 				'template',
 				array(
-					'measure_callback' => function( $metric ) {
+					'measure_callback' => static function( $metric ) {
 						$metric->measure_before();
 						add_action( 'perflab_server_timing_send_header', array( $metric, 'measure_after' ), PHP_INT_MAX );
 					},
@@ -154,12 +154,12 @@ function perflab_register_default_server_timing_template_metrics() {
 
 	add_action(
 		'perflab_server_timing_send_header',
-		function() {
+		static function() {
 			// WordPress total load time.
 			perflab_server_timing_register_metric(
 				'total',
 				array(
-					'measure_callback' => function( $metric ) {
+					'measure_callback' => static function( $metric ) {
 						// The 'timestart' global is set right at the beginning of WordPress execution.
 						$metric->set_value( ( microtime( true ) - $GLOBALS['timestart'] ) * 1000.0 );
 					},
@@ -173,12 +173,12 @@ function perflab_register_default_server_timing_template_metrics() {
 	if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
 		add_action(
 			'perflab_server_timing_send_header',
-			function() {
+			static function() {
 				// WordPress database query time within template.
 				perflab_server_timing_register_metric(
 					'template-db-queries',
 					array(
-						'measure_callback' => function( $metric ) {
+						'measure_callback' => static function( $metric ) {
 							// This global should typically be set when this is called, but check just in case.
 							if ( ! isset( $GLOBALS['perflab_query_time_before_template'] ) ) {
 								return;
@@ -191,7 +191,7 @@ function perflab_register_default_server_timing_template_metrics() {
 
 							$total_query_time = array_reduce(
 								$GLOBALS['wpdb']->queries,
-								function( $acc, $query ) {
+								static function( $acc, $query ) {
 									return $acc + $query[1];
 								},
 								0.0
