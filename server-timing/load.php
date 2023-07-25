@@ -6,6 +6,10 @@
  * @since 1.8.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Provides access the Server-Timing API.
  *

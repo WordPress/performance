@@ -6,6 +6,10 @@
  * @since 2.1.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Callback for autoloaded_options test.
  *
