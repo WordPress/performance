@@ -45,17 +45,18 @@ function dominant_color_set_image_editors( $editors ) {
  * Computes the dominant color of the given attachment image and whether it has transparency.
  *
  * @since 1.2.0
+ * @since n.e.x.t Function renamed to remove the `_` prefix.
  * @access private
  *
  * @param int $attachment_id The attachment ID.
  * @return array|WP_Error Array with the dominant color and has transparency values or WP_Error on error.
  */
-function _dominant_color_get_dominant_color_data( $attachment_id ) {
+function dominant_color_get_dominant_color_data( $attachment_id ) {
 	$mime_type = get_post_mime_type( $attachment_id );
 	if ( 'application/pdf' === $mime_type ) {
 		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'performance-lab' ) );
 	}
-	$file = wp_get_attachment_file_path( $attachment_id );
+	$file = dominant_color_get_attachment_file_path( $attachment_id );
 	if ( ! $file ) {
 		$file = get_attached_file( $attachment_id );
 	}
@@ -94,12 +95,13 @@ function _dominant_color_get_dominant_color_data( $attachment_id ) {
  * Gets file path of image based on size.
  *
  * @since 1.2.0
+ * @since n.e.x.t Function renamed to change `wp_` prefix to `dominant_color_`.
  *
  * @param int    $attachment_id Attachment ID for image.
  * @param string $size          Optional. Image size. Default 'medium'.
  * @return false|string Path to an image or false if not found.
  */
-function wp_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
+function dominant_color_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
 	$imagedata = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $imagedata ) ) {
 		return false;
