@@ -6,6 +6,10 @@
  * @since 1.0.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Returns an array with the list of valid mime types that a specific mime type can be converted into it,
  * for example an image/jpeg can be converted into an image/webp.
