@@ -6,6 +6,10 @@
  * @since 2.1.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Hook called by `wp_generate_attachment_metadata` to create the `sources` property for every image
  * size, the sources' property would create a new image size with all the mime types specified in

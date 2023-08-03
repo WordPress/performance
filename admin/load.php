@@ -5,6 +5,10 @@
  * @package performance-lab
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Adds the modules page to the Settings menu.
  *

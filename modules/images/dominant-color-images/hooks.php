@@ -6,6 +6,10 @@
  * @since 2.1.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Add the dominant color metadata to the attachment.
  *
@@ -16,7 +20,7 @@
  * @return array $metadata The attachment metadata.
  */
 function dominant_color_metadata( $metadata, $attachment_id ) {
-	$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
+	$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 	if ( ! is_wp_error( $dominant_color_data ) ) {
 		if ( isset( $dominant_color_data['dominant_color'] ) ) {
 			$metadata['dominant_color'] = $dominant_color_data['dominant_color'];

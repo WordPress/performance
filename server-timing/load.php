@@ -6,6 +6,10 @@
  * @since 1.8.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 define( 'PERFLAB_SERVER_TIMING_SETTING', 'perflab_server_timing_settings' );
 define( 'PERFLAB_SERVER_TIMING_SCREEN', 'perflab-server-timing' );
 

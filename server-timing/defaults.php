@@ -6,6 +6,10 @@
  * @since 1.8.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Registers the default Server-Timing metrics for before rendering the template.
  *
