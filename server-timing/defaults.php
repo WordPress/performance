@@ -223,63 +223,62 @@ add_action( 'wp_loaded', 'perflab_register_default_server_timing_template_metric
 function perflab_register_additional_server_timing_metrics_from_setting() {
 	$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
 
+	/*
+	 * This closure measures performance of a hook (action or filter), as follows:
+	 *
+	 * 1. Add a hook callback at the minimum (i.e. earliest) priority possible.
+	 * 2. In that callback, register the metric for the hook, with a prefix of either "action" or "filter".
+	 * 3. Provide a measuring callback which captures the time span between beginning to end of the hook:
+	 *     1. Capture the current time immediately, i.e. at the earliest hook priority.
+	 *     2. Add another hook callback at the maximum (i.e. latest) priority possible.
+	 *     3. In that callback, capture the current time, leading the Server-Timing API to calculate the difference.
+	 *
+	 * Parameters to this closure are the hook name, what type of hook it is (either "action" or "filter", used as a
+	 * prefix for the registered metric), and the callback function to add the hook (either "add_action" or
+	 * "add_filter").
+	 */
+	$measure_hook = static function( $hook_name, $hook_type, $add_hook_func ) {
+		$metric_slug      = "{$hook_type}-{$hook_name}";
+		$measure_callback = static function( $metric ) use ( $hook_name, $add_hook_func ) {
+			$metric->measure_before();
+			call_user_func(
+				$add_hook_func,
+				$hook_name,
+				static function( $passthrough = null ) use ( $metric ) {
+					$metric->measure_after();
+					return $passthrough;
+				},
+				PHP_INT_MAX
+			);
+		};
+
+		call_user_func(
+			$add_hook_func,
+			$hook_name,
+			static function( $passthrough = null ) use ( $metric_slug, $measure_callback ) {
+				perflab_server_timing_register_metric(
+					$metric_slug,
+					array(
+						'measure_callback' => $measure_callback,
+						'access_cap'       => 'exist',
+					)
+				);
+				return $passthrough;
+			},
+			// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX
+		);
+	};
+
 	if ( isset( $options['benchmarking_actions'] ) ) {
 		foreach ( $options['benchmarking_actions'] as $action ) {
-			$metric_slug = 'action-' . $action;
-
-			$measure_callback = static function( $metric ) use ( $action ) {
-				$metric->measure_before();
-				add_action( $action, array( $metric, 'measure_after' ), PHP_INT_MAX, 0 );
-			};
-
-			add_action(
-				$action,
-				static function() use ( $metric_slug, $measure_callback ) {
-					perflab_server_timing_register_metric(
-						$metric_slug,
-						array(
-							'measure_callback' => $measure_callback,
-							'access_cap'       => 'exist',
-						)
-					);
-				},
-				// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
-				defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX
-			);
+			$measure_hook( $action, 'action', 'add_action' );
 		}
 	}
 
 	if ( isset( $options['benchmarking_filters'] ) ) {
 		foreach ( $options['benchmarking_filters'] as $filter ) {
-			$metric_slug = 'filter-' . $filter;
-
-			$measure_callback = static function( $metric ) use ( $filter ) {
-				$metric->measure_before();
-				add_filter(
-					$filter,
-					static function( $passthrough ) use ( $metric ) {
-						$metric->measure_after();
-						return $passthrough;
-					},
-					PHP_INT_MAX
-				);
-			};
-
-			add_filter(
-				$filter,
-				static function( $passthrough ) use ( $metric_slug, $measure_callback ) {
-					perflab_server_timing_register_metric(
-						$metric_slug,
-						array(
-							'measure_callback' => $measure_callback,
-							'access_cap'       => 'exist',
-						)
-					);
-					return $passthrough;
-				},
-				// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
-				defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX
-			);
+			$measure_hook( $filter, 'filter', 'add_filter' );
 		}
 	}
 }
