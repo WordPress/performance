@@ -44,14 +44,17 @@ function perflab_sanitize_server_timing_setting( $value ) {
 		return array();
 	}
 
-	// Ensure that every element is an indexed array of hook names.
+	/*
+	 * Ensure that every element is an indexed array of hook names.
+	 * Any duplicates across a group of hooks are removed.
+	 */
 	return array_filter(
 		array_map(
 			static function( $hooks ) {
 				if ( ! is_array( $hooks ) ) {
 					$hooks = explode( "\n", $hooks );
 				}
-				return array_filter( array_map( 'sanitize_key', $hooks ) );
+				return array_unique( array_filter( array_map( 'sanitize_key', $hooks ) ) );
 			},
 			$value
 		)
