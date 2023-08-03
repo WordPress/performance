@@ -41,6 +41,13 @@ function perflab_load_server_timing_page() {
 			?>
 			<p>
 				<?php esc_html_e( 'In this section, you can provide hook names to include measurements for them in the Server-Timing header.', 'performance-lab' ); ?>
+				<br>
+				<?php
+				echo wp_kses(
+					__( 'For any hook name provided, the <strong>cumulative duration between all callbacks</strong> attached to the hook is measured, in milliseconds.', 'performance-lab' ),
+					array( 'strong' => array() )
+				);
+				?>
 			</p>
 			<?php
 		},
