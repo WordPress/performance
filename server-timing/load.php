@@ -161,7 +161,16 @@ function perflab_sanitize_server_timing_setting( $value ) {
 				return array_values(
 					array_unique(
 						array_filter(
-							array_map( 'sanitize_key', $hooks )
+							array_map(
+								static function( $hookname ) {
+									return preg_replace(
+										'/[^A-Za-z0-9_\-\/\.]/',
+										'',
+										strtolower( $hookname )
+									);
+								},
+								$hooks
+							)
 						)
 					)
 				);

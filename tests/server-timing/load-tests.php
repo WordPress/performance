@@ -97,41 +97,45 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 
 	public function data_perflab_sanitize_server_timing_setting() {
 		return array(
-			'invalid type'                          => array(
+			'invalid type'                                => array(
 				'invalid',
 				array(),
 			),
-			'empty list, array'                     => array(
+			'empty list, array'                           => array(
 				array( 'benchmarking_actions' => array() ),
 				array(),
 			),
-			'empty list, string'                    => array(
+			'empty list, string'                          => array(
 				array( 'benchmarking_actions' => '' ),
 				array(),
 			),
-			'empty list, string with whitespace'    => array(
+			'empty list, string with whitespace'          => array(
 				array( 'benchmarking_actions' => ' ' ),
 				array(),
 			),
-			'regular list, array'                   => array(
+			'regular list, array'                         => array(
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
 			),
-			'regular list, string'                  => array(
+			'regular list, string'                        => array(
 				array( 'benchmarking_actions' => "after_setup_theme\ninit\nwp_loaded" ),
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
 			),
-			'regular list, string with whitespace'  => array(
+			'regular list, string with whitespace'        => array(
 				array( 'benchmarking_actions' => "after_setup_theme \ninit \n\nwp_loaded\n" ),
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
 			),
-			'regular list, string with unformatted' => array(
+			'regular list, string with unformatted'       => array(
 				array( 'benchmarking_actions' => "After_Setup_Theme\ninit?\nWP_Loaded" ),
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
 			),
-			'regular list, array with duplicates'   => array(
+			'regular list, array with duplicates'         => array(
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded', 'init' ) ),
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
+			),
+			'regular list, array with special hook chars' => array(
+				array( 'benchmarking_actions' => array( 'namespace/hookname', 'namespace.hookname' ) ),
+				array( 'benchmarking_actions' => array( 'namespace/hookname', 'namespace.hookname' ) ),
 			),
 		);
 	}
