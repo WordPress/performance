@@ -6,6 +6,10 @@
  * @since 2.1.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Audit enqueued and printed scripts in is_front_page(). Ignore /wp-includes scripts.
  *

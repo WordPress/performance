@@ -6,6 +6,10 @@
  * @since 1.8.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Provides access the Server-Timing API.
  *
@@ -73,7 +77,7 @@ function perflab_server_timing_use_output_buffer() {
  * @return callable Callback function that will run $callback and measure its execution time once called.
  */
 function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
-	return function( ...$callback_args ) use ( $callback, $metric_slug, $access_cap ) {
+	return static function( ...$callback_args ) use ( $callback, $metric_slug, $access_cap ) {
 		// Gain access to Perflab_Server_Timing_Metric instance.
 		$server_timing_metric = null;
 
@@ -83,7 +87,7 @@ function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
 			perflab_server_timing_register_metric(
 				$metric_slug,
 				array(
-					'measure_callback' => function( $metric ) use ( &$server_timing_metric ) {
+					'measure_callback' => static function( $metric ) use ( &$server_timing_metric ) {
 						$server_timing_metric = $metric;
 					},
 					'access_cap'       => $access_cap,

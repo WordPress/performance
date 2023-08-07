@@ -33,7 +33,7 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
-		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
+		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
 		$this->assertContains( $dominant_color_data['dominant_color'], $expected_color );
 		$this->assertSame( $dominant_color_data['has_transparency'], $expected_transparency );
@@ -53,7 +53,7 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
-		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
+		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
 		$this->assertWPError( $dominant_color_data );
 		$this->assertStringContainsString( 'image_no_editor', $dominant_color_data->get_error_code() );
@@ -71,7 +71,7 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
-		$dominant_color_data = _dominant_color_get_dominant_color_data( $attachment_id );
+		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
 		$this->assertWPError( $dominant_color_data );
 	}
