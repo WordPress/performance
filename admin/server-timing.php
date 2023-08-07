@@ -47,6 +47,15 @@ function perflab_load_server_timing_page() {
 					__( 'For any hook name provided, the <strong>cumulative duration between all callbacks</strong> attached to the hook is measured, in milliseconds.', 'performance-lab' ),
 					array( 'strong' => array() )
 				);
+				if ( ! perflab_server_timing_use_output_buffer() ) {
+					?>
+					<br>
+					<?php
+					echo wp_kses(
+						__( 'Since the Server-Timing header is sent before the template is loaded, only hooks before the <code>template_include</code> filter can be measured.', 'performance-lab' ),
+						array( 'code' => array() )
+					);
+				}
 				?>
 			</p>
 			<?php
