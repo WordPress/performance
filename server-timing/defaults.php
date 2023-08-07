@@ -276,21 +276,18 @@ function perflab_register_additional_server_timing_metrics_from_setting() {
 				$metric->measure_before();
 
 				if ( 'action' === $hook_type ) {
-					add_action(
-						$hook_name,
-						array( $metric, 'measure_after' ),
-						PHP_INT_MAX,
-						0
-					);
+					$cb = static function() use ( $metric, $hook_name, &$cb ) {
+						$metric->measure_after();
+						remove_action( $hook_name, $cb, PHP_INT_MAX );
+					};
+					add_action( $hook_name, $cb, PHP_INT_MAX );
 				} else {
-					add_filter(
-						$hook_name,
-						static function( $passthrough ) use ( $metric ) {
-							$metric->measure_after();
-							return $passthrough;
-						},
-						PHP_INT_MAX
-					);
+					$cb = static function( $passthrough ) use ( $metric, $hook_name, &$cb ) {
+						$metric->measure_after();
+						remove_filter( $hook_name, $cb, PHP_INT_MAX );
+						return $passthrough;
+					};
+					add_filter( $hook_name, $cb, PHP_INT_MAX );
 				}
 			};
 
