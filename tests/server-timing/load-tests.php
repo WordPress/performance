@@ -103,15 +103,15 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 			),
 			'empty list, array'                           => array(
 				array( 'benchmarking_actions' => array() ),
-				array(),
+				array( 'benchmarking_actions' => array() ),
 			),
 			'empty list, string'                          => array(
 				array( 'benchmarking_actions' => '' ),
-				array(),
+				array( 'benchmarking_actions' => array() ),
 			),
 			'empty list, string with whitespace'          => array(
 				array( 'benchmarking_actions' => ' ' ),
-				array(),
+				array( 'benchmarking_actions' => array() ),
 			),
 			'regular list, array'                         => array(
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
