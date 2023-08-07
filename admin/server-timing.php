@@ -94,7 +94,7 @@ function perflab_render_server_timing_page() {
 			<?php esc_html_e( 'Server-Timing', 'performance-lab' ); ?>
 		</h1>
 
-		<form action="options.php" method="post" novalidate>
+		<form action="options.php" method="post">
 			<?php settings_fields( PERFLAB_SERVER_TIMING_SCREEN ); ?>
 			<?php do_settings_sections( PERFLAB_SERVER_TIMING_SCREEN ); ?>
 			<?php submit_button(); ?>
