@@ -125,10 +125,6 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 				array( 'benchmarking_actions' => "after_setup_theme \ninit \n\nwp_loaded\n" ),
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
 			),
-			'regular list, string with unformatted'       => array(
-				array( 'benchmarking_actions' => "After_Setup_Theme\ninit?\nWP_Loaded" ),
-				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
-			),
 			'regular list, array with duplicates'         => array(
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded', 'init' ) ),
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),

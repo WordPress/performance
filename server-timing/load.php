@@ -163,10 +163,16 @@ function perflab_sanitize_server_timing_setting( $value ) {
 						array_filter(
 							array_map(
 								static function( $hookname ) {
+									/*
+									 * Allow any characters except whitespace.
+									 * While most hooks use a limited set of characters, hook names in plugins are not
+									 * restricted to them, therefore the sanitization does not limit the characters
+									 * used.
+									 */
 									return preg_replace(
-										'/[^A-Za-z0-9_\-\/\.]/',
+										'/\s/',
 										'',
-										strtolower( $hookname )
+										sanitize_text_field( $hookname )
 									);
 								},
 								$hooks
