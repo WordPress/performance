@@ -111,7 +111,7 @@ function perflab_render_modules_page() {
 			<?php esc_html_e( 'Performance Modules', 'performance-lab' ); ?>
 		</h1>
 
-		<form action="options.php" method="post" novalidate="novalidate">
+		<form action="options.php" method="post" novalidate>
 			<?php settings_fields( PERFLAB_MODULES_SCREEN ); ?>
 			<?php do_settings_sections( PERFLAB_MODULES_SCREEN ); ?>
 			<?php submit_button(); ?>
