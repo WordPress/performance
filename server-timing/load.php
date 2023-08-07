@@ -144,44 +144,48 @@ add_action( 'init', 'perflab_register_server_timing_setting' );
  * @return array Sanitized Server-Timing setting value.
  */
 function perflab_sanitize_server_timing_setting( $value ) {
+	static $allowed_keys = array(
+		'benchmarking_actions' => true,
+		'benchmarking_filters' => true,
+	);
+
 	if ( ! is_array( $value ) ) {
 		return array();
 	}
+
+	$value = array_intersect_key( $value, $allowed_keys );
 
 	/*
 	 * Ensure that every element is an indexed array of hook names.
 	 * Any duplicates across a group of hooks are removed.
 	 */
-	return array_filter(
-		array_map(
-			static function( $hooks ) {
-				if ( ! is_array( $hooks ) ) {
-					$hooks = explode( "\n", $hooks );
-				}
-				return array_values(
-					array_unique(
-						array_filter(
-							array_map(
-								static function( $hookname ) {
-									/*
-									 * Allow any characters except whitespace.
-									 * While most hooks use a limited set of characters, hook names in plugins are not
-									 * restricted to them, therefore the sanitization does not limit the characters
-									 * used.
-									 */
-									return preg_replace(
-										'/\s/',
-										'',
-										sanitize_text_field( $hookname )
-									);
-								},
-								$hooks
-							)
-						)
+	foreach ( $value as $key => $hooks ) {
+		if ( ! is_array( $hooks ) ) {
+			$hooks = explode( "\n", $hooks );
+		}
+		$value[ $key ] = array_values(
+			array_unique(
+				array_filter(
+					array_map(
+						static function( $hookname ) {
+							/*
+							 * Allow any characters except whitespace.
+							 * While most hooks use a limited set of characters, hook names in plugins are not
+							 * restricted to them, therefore the sanitization does not limit the characters
+							 * used.
+							 */
+							return preg_replace(
+								'/\s/',
+								'',
+								sanitize_text_field( $hookname )
+							);
+						},
+						$hooks
 					)
-				);
-			},
-			$value
-		)
-	);
+				)
+			)
+		);
+	}
+
+	return $value;
 }

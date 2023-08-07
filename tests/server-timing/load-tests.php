@@ -133,6 +133,10 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 				array( 'benchmarking_actions' => array( 'namespace/hookname', 'namespace.hookname' ) ),
 				array( 'benchmarking_actions' => array( 'namespace/hookname', 'namespace.hookname' ) ),
 			),
+			'regular list, disallowed key'                => array(
+				array( 'not_allowed' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
+				array(),
+			),
 		);
 	}
 }
