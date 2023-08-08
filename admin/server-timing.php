@@ -40,7 +40,16 @@ function perflab_load_server_timing_page() {
 		static function() {
 			?>
 			<p>
-				<?php esc_html_e( 'In this section, you can provide hook names to include measurements for them in the Server-Timing header.', 'performance-lab' ); ?>
+				<?php
+				echo wp_kses(
+					sprintf(
+						/* translators: %s: Server-Timing */
+						__( 'In this section, you can provide hook names to include measurements for them in the %s header.', 'performance-lab' ),
+						'<code>Server-Timing</code>'
+					),
+					array( 'code' => array() )
+				);
+				?>
 				<br>
 				<?php
 				echo wp_kses(
@@ -52,7 +61,12 @@ function perflab_load_server_timing_page() {
 					<br>
 					<?php
 					echo wp_kses(
-						__( 'Since the Server-Timing header is sent before the template is loaded, only hooks before the <code>template_include</code> filter can be measured.', 'performance-lab' ),
+						sprintf(
+							/* translators: 1: Server-Timing, 2: template_include */
+							__( 'Since the %1$s header is sent before the template is loaded, only hooks before the %2$s filter can be measured.', 'performance-lab' ),
+							'<code>Server-Timing</code>',
+							'<code>template_include</code>'
+						),
 						array( 'code' => array() )
 					);
 				}
