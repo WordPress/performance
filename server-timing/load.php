@@ -37,7 +37,6 @@ function perflab_server_timing() {
 
 	return $server_timing;
 }
-
 add_action( 'wp_loaded', 'perflab_server_timing' );
 
 /**
