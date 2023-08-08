@@ -316,8 +316,9 @@ add_action( 'plugins_loaded', 'perflab_load_active_and_valid_modules' );
  * This only runs in WP Admin to not have any potential performance impact on
  * the frontend.
  *
- * This function will short-circuit if the constant
- * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
+ * This function will short-circuit if at least one of the constants
+ * 'PERFLAB_DISABLE_SERVER_TIMING' or 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is
+ * set as true.
  *
  * @since 1.8.0
  * @since 2.1.0 No longer attempts to use two of the drop-ins together.
@@ -326,6 +327,11 @@ add_action( 'plugins_loaded', 'perflab_load_active_and_valid_modules' );
  */
 function perflab_maybe_set_object_cache_dropin() {
 	global $wp_filesystem;
+
+	// Bail if Server-Timing is disabled entirely.
+	if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
+		return;
+	}
 
 	// Bail if disabled via constant.
 	if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {

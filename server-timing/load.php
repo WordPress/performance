@@ -10,6 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+// Do not add any of the hooks if Server-Timing is disabled.
+if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
+	return;
+}
+
 define( 'PERFLAB_SERVER_TIMING_SETTING', 'perflab_server_timing_settings' );
 define( 'PERFLAB_SERVER_TIMING_SCREEN', 'perflab-server-timing' );
 
@@ -32,6 +37,7 @@ function perflab_server_timing() {
 
 	return $server_timing;
 }
+
 add_action( 'wp_loaded', 'perflab_server_timing' );
 
 /**

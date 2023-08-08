@@ -10,6 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+// Do not add any of the hooks if Server-Timing is disabled.
+if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
+	return;
+}
+
 /**
  * Registers the default Server-Timing metrics for before rendering the template.
  *
