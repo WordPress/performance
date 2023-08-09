@@ -32,6 +32,17 @@ function perflab_server_timing() {
 
 	if ( null === $server_timing ) {
 		$server_timing = new Perflab_Server_Timing();
+
+		/*
+		 * Do not add the hook for Server-Timing header output if it is entirely disabled.
+		 * While the constant checks on top of the file prevent this from happening by default, external code could
+		 * still call the `perflab_server_timing()` function. It needs to be ensured that such calls do not result in
+		 * fatal errors, but they should at least not lead to the header being output.
+		 */
+		if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
+			return $server_timing;
+		}
+
 		add_filter( 'template_include', array( $server_timing, 'on_template_include' ), PHP_INT_MAX );
 	}
 
