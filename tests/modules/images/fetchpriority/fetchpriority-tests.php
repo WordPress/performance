@@ -37,11 +37,15 @@ class Fetchpriority_Test extends WP_UnitTestCase {
 		parent::tear_down_after_class();
 	}
 
-	public function test_fetchpriority_img_tag_add_attr_based_on_context_and_loading_lazy() {
-		if ( version_compare( get_bloginfo( 'version' ), '6.3', '>=' ) ) {
-			$this->markTestSkipped( 'Fetchpriority module no longer relevant with WordPress 6.3 shipping with the feature' );
-		}
+	public function set_up() {
+		parent::set_up();
 
+		if ( ! perflab_can_load_module( 'images/fetchpriority' ) ) {
+			$this->markTestSkipped( 'Fetchpriority module tests irrelevant since available in WordPress core' );
+		}
+	}
+
+	public function test_fetchpriority_img_tag_add_attr_based_on_context_and_loading_lazy() {
 		$img = get_image_tag( self::$attachment_id, '', '', '', 'large' );
 
 		$this->assertStringContainsString( 'fetchpriority="high"', fetchpriority_img_tag_add_attr( $img, 'the_content' ) );
@@ -52,10 +56,6 @@ class Fetchpriority_Test extends WP_UnitTestCase {
 	}
 
 	public function test_fetchpriority_img_tag_add_in_wp_filter_content_tags() {
-		if ( version_compare( get_bloginfo( 'version' ), '6.3', '>=' ) ) {
-			$this->markTestSkipped( 'Fetchpriority module no longer relevant with WordPress 6.3 shipping with the feature' );
-		}
-
 		global $wp_query;
 		global $wp_the_query;
 		$img   = get_image_tag( self::$attachment_id, '', '', '', 'large' );
