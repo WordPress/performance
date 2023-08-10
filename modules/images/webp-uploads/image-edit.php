@@ -437,9 +437,6 @@ function webp_uploads_image_edit_thumbnails_separately() {
 		return true;
 	}
 
-	/*
-	 * This filter was introduced in WordPress 6.3 with default value `false`,
-	 * thus changing the behavior of several image editing functions.
-	 */
+	/** This filter is documented in wp-admin/includes/image-edit.php */
 	return (bool) apply_filters( 'image_edit_thumbnails_separately', false );
 }
