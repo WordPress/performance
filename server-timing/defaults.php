@@ -10,6 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+// Do not add any of the hooks if Server-Timing is disabled.
+if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
+	return;
+}
+
 /**
  * Registers the default Server-Timing metrics for before rendering the template.
  *
@@ -211,3 +216,106 @@ function perflab_register_default_server_timing_template_metrics() {
 	}
 }
 add_action( 'wp_loaded', 'perflab_register_default_server_timing_template_metrics' );
+
+/**
+ * Registers additional Server-Timing metrics as configured in the setting.
+ *
+ * These metrics should be registered as soon as possible. They can be added
+ * and modified in the "Tools > Server-Timing" screen.
+ *
+ * @since n.e.x.t
+ */
+function perflab_register_additional_server_timing_metrics_from_setting() {
+	$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
+
+	$hooks_to_measure = array();
+
+	if ( isset( $options['benchmarking_actions'] ) ) {
+		foreach ( $options['benchmarking_actions'] as $action ) {
+			$hooks_to_measure[ $action ] = 'action';
+		}
+	}
+
+	if ( isset( $options['benchmarking_filters'] ) ) {
+		foreach ( $options['benchmarking_filters'] as $filter ) {
+			$hooks_to_measure[ $filter ] = 'filter';
+		}
+	}
+
+	// Bail early if there are no hooks to measure.
+	if ( ! $hooks_to_measure ) {
+		return;
+	}
+
+	/*
+	 * This logic measures performance of a hook (action or filter).
+	 *
+	 * Currently, only hooks that run once are properly supported.
+	 * For hooks that run multiple times, only the first occurrence will be measured.
+	 *
+	 * Here is an outline of the logic:
+	 *
+	 * 1. Use the 'all' hook at the minimum (i.e. earliest) priority possible.
+	 * 2. In that callback, check that the hook should be measured and that it has not already been registered yet, and
+	 *    if so, register the metric for the hook, with a prefix of either "action" or "filter".
+	 * 3. Provide a measuring callback which captures the time span between beginning to end of the hook:
+	 *     1. Capture the current time immediately, i.e. within the 'all' hook.
+	 *     2. Add another hook callback at the maximum (i.e. latest) priority possible.
+	 *     3. In that callback, capture the current time, leading the Server-Timing API to calculate the difference.
+	 */
+	add_action(
+		'all',
+		static function( $hook_name ) use ( $hooks_to_measure ) {
+			if ( ! isset( $hooks_to_measure[ $hook_name ] ) ) {
+				return;
+			}
+
+			$hook_type   = $hooks_to_measure[ $hook_name ];
+			$metric_slug = "{$hook_type}-{$hook_name}";
+
+			if ( perflab_server_timing()->has_registered_metric( $metric_slug ) ) {
+				return;
+			}
+
+			$measure_callback = static function( $metric ) use ( $hook_name, $hook_type ) {
+				$metric->measure_before();
+
+				if ( 'action' === $hook_type ) {
+					$cb = static function() use ( $metric, $hook_name, &$cb ) {
+						$metric->measure_after();
+						remove_action( $hook_name, $cb, PHP_INT_MAX );
+					};
+					add_action( $hook_name, $cb, PHP_INT_MAX );
+				} else {
+					$cb = static function( $passthrough ) use ( $metric, $hook_name, &$cb ) {
+						$metric->measure_after();
+						remove_filter( $hook_name, $cb, PHP_INT_MAX );
+						return $passthrough;
+					};
+					add_filter( $hook_name, $cb, PHP_INT_MAX );
+				}
+			};
+
+			perflab_server_timing_register_metric(
+				$metric_slug,
+				array(
+					'measure_callback' => $measure_callback,
+					'access_cap'       => 'exist',
+				)
+			);
+		},
+		// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+		defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX
+	);
+}
+
+/*
+ * If this file is loaded from the Server-Timing logic in the object-cache.php
+ * drop-in, it must not call this function right away since otherwise the cache
+ * will not be loaded yet.
+ */
+if ( ! did_action( 'muplugins_loaded' ) ) {
+	add_action( 'muplugins_loaded', 'perflab_register_additional_server_timing_metrics_from_setting' );
+} else {
+	perflab_register_additional_server_timing_metrics_from_setting();
+}

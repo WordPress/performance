@@ -10,6 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+// Do not add any of the hooks if Server-Timing is disabled.
+if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
+	return;
+}
+
+define( 'PERFLAB_SERVER_TIMING_SETTING', 'perflab_server_timing_settings' );
+define( 'PERFLAB_SERVER_TIMING_SCREEN', 'perflab-server-timing' );
+
 /**
  * Provides access the Server-Timing API.
  *
@@ -24,6 +32,17 @@ function perflab_server_timing() {
 
 	if ( null === $server_timing ) {
 		$server_timing = new Perflab_Server_Timing();
+
+		/*
+		 * Do not add the hook for Server-Timing header output if it is entirely disabled.
+		 * While the constant checks on top of the file prevent this from happening by default, external code could
+		 * still call the `perflab_server_timing()` function. It needs to be ensured that such calls do not result in
+		 * fatal errors, but they should at least not lead to the header being output.
+		 */
+		if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
+			return $server_timing;
+		}
+
 		add_filter( 'template_include', array( $server_timing, 'on_template_include' ), PHP_INT_MAX );
 	}
 
@@ -112,4 +131,77 @@ function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
 		// Return result (e.g. in case this is a filter callback).
 		return $result;
 	};
+}
+
+/**
+ * Registers the Server-Timing setting.
+ *
+ * @since n.e.x.t
+ */
+function perflab_register_server_timing_setting() {
+	register_setting(
+		PERFLAB_SERVER_TIMING_SCREEN,
+		PERFLAB_SERVER_TIMING_SETTING,
+		array(
+			'type'              => 'object',
+			'sanitize_callback' => 'perflab_sanitize_server_timing_setting',
+			'default'           => array(),
+		)
+	);
+}
+add_action( 'init', 'perflab_register_server_timing_setting' );
+
+/**
+ * Sanitizes the Server-Timing setting.
+ *
+ * @since n.e.x.t
+ *
+ * @param mixed $value Server-Timing setting value.
+ * @return array Sanitized Server-Timing setting value.
+ */
+function perflab_sanitize_server_timing_setting( $value ) {
+	static $allowed_keys = array(
+		'benchmarking_actions' => true,
+		'benchmarking_filters' => true,
+	);
+
+	if ( ! is_array( $value ) ) {
+		return array();
+	}
+
+	$value = array_intersect_key( $value, $allowed_keys );
+
+	/*
+	 * Ensure that every element is an indexed array of hook names.
+	 * Any duplicates across a group of hooks are removed.
+	 */
+	foreach ( $value as $key => $hooks ) {
+		if ( ! is_array( $hooks ) ) {
+			$hooks = explode( "\n", $hooks );
+		}
+		$value[ $key ] = array_values(
+			array_unique(
+				array_filter(
+					array_map(
+						static function( $hookname ) {
+							/*
+							 * Allow any characters except whitespace.
+							 * While most hooks use a limited set of characters, hook names in plugins are not
+							 * restricted to them, therefore the sanitization does not limit the characters
+							 * used.
+							 */
+							return preg_replace(
+								'/\s/',
+								'',
+								sanitize_text_field( $hookname )
+							);
+						},
+						$hooks
+					)
+				)
+			)
+		);
+	}
+
+	return $value;
 }
