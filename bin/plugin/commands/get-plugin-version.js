@@ -51,26 +51,29 @@ function doRunGetPluginVersion( settings ) {
 
 	// Validate that the plugins JSON file contains content before proceeding.
 	if ( ! pluginsFileContent ) {
-		throw Error( `Contents of file at "${ pluginsFile }" could not be read, or are empty.` );
+		throw Error(
+			`Contents of file at "${ pluginsFile }" could not be read, or are empty.`
+		);
 	}
 
 	const plugins = JSON.parse( pluginsFileContent );
 
 	// Check for valid and not empty object resulting from plugins JSON file parse.
-	if (
-		'object' !== typeof plugins ||
-		0 === Object.keys( plugins ).length
-	) {
-		throw Error( `File at "${ pluginsFile }" parsed, but detected empty/non valid JSON object.` );
+	if ( 'object' !== typeof plugins || 0 === Object.keys( plugins ).length ) {
+		throw Error(
+			`File at "${ pluginsFile }" parsed, but detected empty/non valid JSON object.`
+		);
 	}
 
 	for ( const moduleDir in plugins ) {
 		const pluginVersion = plugins[ moduleDir ]?.version;
 		const pluginSlug = plugins[ moduleDir ]?.slug;
-		if ( pluginVersion && pluginSlug && ( settings.slug === pluginSlug ) ) {
+		if ( pluginVersion && pluginSlug && settings.slug === pluginSlug ) {
 			return log( pluginVersion );
 		}
 	}
 
-	throw Error( `The "${ settings.slug }" module slug is missing in the file "${ pluginsFile }".` );
+	throw Error(
+		`The "${ settings.slug }" module slug is missing in the file "${ pluginsFile }".`
+	);
 }

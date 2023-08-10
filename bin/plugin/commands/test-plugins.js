@@ -86,7 +86,10 @@ exports.handler = async ( opt ) => {
  */
 function doReplaceWpEnvContent( settings ) {
 	// Regex object to match wp-env plugins string.
-	const wpEnvPluginsRegex = new RegExp( settings.wpEnvPluginsRegexPattern, 'gm' );
+	const wpEnvPluginsRegex = new RegExp(
+		settings.wpEnvPluginsRegexPattern,
+		'gm'
+	);
 
 	let wpEnvPluginsRegexReplacement = '';
 
@@ -97,7 +100,11 @@ function doReplaceWpEnvContent( settings ) {
 	try {
 		wpEnvFileContent = fs.readFileSync( settings.wpEnvFile, 'utf-8' );
 	} catch ( e ) {
-		log( formats.error( `Error reading file "${ settings.wpEnvFile }": "${ e }"` ) );
+		log(
+			formats.error(
+				`Error reading file "${ settings.wpEnvFile }": "${ e }"`
+			)
+		);
 
 		// Return with exit code 1 to trigger a failure in the test pipeline.
 		process.exit( 1 );
@@ -151,7 +158,11 @@ function doReplaceWpEnvContent( settings ) {
 	}
 
 	// Let the user know we're re-writing the .wp-env.json file.
-	log( formats.success( `Rewriting plugins property in ${ settings.wpEnvDestinationFile }` ) );
+	log(
+		formats.success(
+			`Rewriting plugins property in ${ settings.wpEnvDestinationFile }`
+		)
+	);
 
 	// Attempt replacement of the plugins property in .wp-env.json file to match built plugins.
 	try {
@@ -230,7 +241,9 @@ function doRunUnitTests( settings ) {
 			fs.unlinkSync( settings.wpEnvDestinationFile );
 		} catch ( error ) {
 			log(
-				formats.error( `Error deleting file: ${ settings.wpEnvDestinationFile }. ${ error }` )
+				formats.error(
+					`Error deleting file: ${ settings.wpEnvDestinationFile }. ${ error }`
+				)
 			);
 		}
 	}
@@ -250,15 +263,18 @@ function doRunUnitTests( settings ) {
 		);
 		settings.disablePlugins.forEach( ( plugin ) => {
 			// Disable plugin via wp-cli.
-			execSync( `wp-env run cli wp plugin deactivate ${ plugin }`, ( err, output ) => {
-				// once the command has completed, the callback function is called.
-				if ( err ) {
-					log( formats.error( `${ err }` ) );
-					return;
+			execSync(
+				`wp-env run cli wp plugin deactivate ${ plugin }`,
+				( err, output ) => {
+					// once the command has completed, the callback function is called.
+					if ( err ) {
+						log( formats.error( `${ err }` ) );
+						return;
+					}
+					// log the output received from the command.
+					log( output );
 				}
-				// log the output received from the command.
-				log( output );
-			} );
+			);
 		} );
 	}
 
@@ -277,15 +293,18 @@ function doRunUnitTests( settings ) {
 		);
 		settings.enablePlugins.forEach( ( plugin ) => {
 			// Disable plugin via wp-cli.
-			execSync( `wp-env run cli wp plugin activate ${ plugin }`, ( err, output ) => {
-				// once the command has completed, the callback function is called.
-				if ( err ) {
-					log( formats.error( `${ err }` ) );
-					return;
+			execSync(
+				`wp-env run cli wp plugin activate ${ plugin }`,
+				( err, output ) => {
+					// once the command has completed, the callback function is called.
+					if ( err ) {
+						log( formats.error( `${ err }` ) );
+						return;
+					}
+					// log the output received from the command.
+					log( output );
 				}
-				// log the output received from the command.
-				log( output );
-			} );
+			);
 		} );
 	}
 
@@ -345,14 +364,9 @@ function doRunUnitTests( settings ) {
  */
 function doRunStandalonePluginTests( settings ) {
 	// Check if the siteType arg is one of single or multi.
-	if (
-		'single' !== settings.siteType &&
-		'multi' !== settings.siteType
-	) {
+	if ( 'single' !== settings.siteType && 'multi' !== settings.siteType ) {
 		log(
-			formats.error(
-				`--sitetype must be one of "single" or "multi".`
-			)
+			formats.error( `--sitetype must be one of "single" or "multi".` )
 		);
 
 		// Return with exit code 1 to trigger a failure in the test pipeline.
@@ -378,18 +392,20 @@ function doRunStandalonePluginTests( settings ) {
 	let pluginsJsonFileContent = '';
 
 	try {
-		pluginsJsonFileContent = fs.readFileSync( settings.pluginsJsonFile, 'utf-8' );
+		pluginsJsonFileContent = fs.readFileSync(
+			settings.pluginsJsonFile,
+			'utf-8'
+		);
 	} catch ( e ) {
 		log(
-			formats.error( `Error reading file at "${ settings.pluginsJsonFile }". ${ e }` )
+			formats.error(
+				`Error reading file at "${ settings.pluginsJsonFile }". ${ e }`
+			)
 		);
 	}
 
 	// Validate that the plugins JSON file contains content before proceeding.
-	if (
-		'' === pluginsJsonFileContent ||
-		! pluginsJsonFileContent
-	) {
+	if ( '' === pluginsJsonFileContent || ! pluginsJsonFileContent ) {
 		log(
 			formats.error(
 				`Contents of file at "${ settings.pluginsJsonFile }" could not be read, or are empty.`
@@ -417,7 +433,11 @@ function doRunStandalonePluginTests( settings ) {
 	// Create an array of plugins from entries in plugins JSON file.
 	builtPlugins = Object.keys( pluginsJsonFileContentAsJson )
 		.filter( ( item ) => {
-			if ( ! fs.pathExistsSync( `${ settings.builtPluginsDir }${ pluginsJsonFileContentAsJson[ item ].slug }` ) ) {
+			if (
+				! fs.pathExistsSync(
+					`${ settings.builtPluginsDir }${ pluginsJsonFileContentAsJson[ item ].slug }`
+				)
+			) {
 				log(
 					formats.error(
 						`Built plugin path "${ settings.builtPluginsDir }${ pluginsJsonFileContentAsJson[ item ].slug }" not found, skipping and removing from plugin list`
@@ -439,9 +459,13 @@ function doRunStandalonePluginTests( settings ) {
 
 		// Copy over test files.
 		try {
-			fs.copySync( settings.pluginTestAssets, `${ settings.builtPluginsDir }${ plugin }/`, {
-				overwrite: true,
-			} );
+			fs.copySync(
+				settings.pluginTestAssets,
+				`${ settings.builtPluginsDir }${ plugin }/`,
+				{
+					overwrite: true,
+				}
+			);
 			log(
 				formats.success(
 					`Copied test assets for plugin "${ plugin }", executing "composer install --no-interaction" on plugin.\n`
