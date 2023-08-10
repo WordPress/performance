@@ -5,6 +5,9 @@
  * @package performance-lab
  */
 
+/**
+ * @group admin
+ */
 class Admin_Load_Tests extends WP_UnitTestCase {
 
 	private static $demo_modules = array(
