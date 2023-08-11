@@ -91,16 +91,15 @@ withOptions(
 
 withOptions( program.command( 'test-standalone-plugins' ), testPluginsOptions )
 	.alias( 'test-plugins' )
-	.description(
-		'Test standalone plugins'
-	)
+	.description( 'Test standalone plugins' )
 	.action( catchException( testPluginsHandler ) );
 
-withOptions( program.command( 'get-standalone-plugin-version' ), getPluginVersionOptions )
+withOptions(
+	program.command( 'get-standalone-plugin-version' ),
+	getPluginVersionOptions
+)
 	.alias( 'get-plugin-version' )
-	.description(
-		'Get standalone plugin version'
-	)
+	.description( 'Get standalone plugin version' )
 	.action( catchException( getPluginVersionHandler ) );
 
 withOptions(

@@ -2,6 +2,10 @@
   "name": "performance",
   "license": "GPL-2.0-or-later",
   "repository": "git+https://github.com/WordPress/performance.git",
+  "engines": {
+    "node": ">=16.19.1",
+    "npm": ">=8.19.3 <9"
+  },
   "devDependencies": {
     "@octokit/rest": "^19.0.5",
     "@wordpress/env": "^5.7.0",
