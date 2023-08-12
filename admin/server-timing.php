@@ -70,13 +70,20 @@ function perflab_load_server_timing_page() {
 					<br>
 					<?php
 					echo wp_kses(
-						sprintf(
-							/* translators: 1: Server-Timing, 2: template_include */
-							__( 'Since the %1$s header is sent before the template is loaded, only hooks before the %2$s filter can be measured.', 'performance-lab' ),
-							'<code>Server-Timing</code>',
-							'<code>template_include</code>'
+						str_replace(
+							'<a>',
+							'<a href="#server_timing_output_buffering">',
+							sprintf(
+								/* translators: 1: Server-Timing, 2: template_include */
+								__( 'Since the %1$s header is sent before the template is loaded, only hooks before the %2$s filter can be measured. Enable <a>Output Buffering</a> to measure hooks during template rendering.', 'performance-lab' ),
+								'<code>Server-Timing</code>',
+								'<code>template_include</code>'
+							)
 						),
-						array( 'code' => array() )
+						array(
+							'code' => array(),
+							'a'    => array( 'href' => true ),
+						)
 					);
 				}
 				?>
@@ -95,7 +102,7 @@ function perflab_load_server_timing_page() {
 		'benchmarking_actions',
 		__( 'Actions', 'performance-lab' ),
 		static function() {
-			perflab_render_server_timing_page_field( 'benchmarking_actions' );
+			perflab_render_server_timing_page_hooks_field( 'benchmarking_actions' );
 		},
 		PERFLAB_SERVER_TIMING_SCREEN,
 		'benchmarking',
@@ -105,11 +112,19 @@ function perflab_load_server_timing_page() {
 		'benchmarking_filters',
 		__( 'Filters', 'performance-lab' ),
 		static function() {
-			perflab_render_server_timing_page_field( 'benchmarking_filters' );
+			perflab_render_server_timing_page_hooks_field( 'benchmarking_filters' );
 		},
 		PERFLAB_SERVER_TIMING_SCREEN,
 		'benchmarking',
 		array( 'label_for' => 'server_timing_benchmarking_filters' )
+	);
+	add_settings_field(
+		'output_buffering',
+		__( 'Output Buffering', 'performance-lab' ),
+		'perflab_render_server_timing_page_output_buffer_checkbox',
+		PERFLAB_SERVER_TIMING_SCREEN,
+		'benchmarking',
+		array( 'label_for' => 'server_timing_output_buffering' )
 	);
 }
 
@@ -136,13 +151,13 @@ function perflab_render_server_timing_page() {
 }
 
 /**
- * Renders a field for the given Server-Timing option.
+ * Renders a hooks field for the given Server-Timing option.
  *
  * @since n.e.x.t
  *
  * @param string $slug Slug of the field and sub-key in the Server-Timing option.
  */
-function perflab_render_server_timing_page_field( $slug ) {
+function perflab_render_server_timing_page_hooks_field( $slug ) {
 	$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
 
 	// Value for the sub-key is an array of hook names.
@@ -166,5 +181,58 @@ function perflab_render_server_timing_page_field( $slug ) {
 	<p id="<?php echo esc_attr( $description_id ); ?>" class="description">
 		<?php esc_html_e( 'Enter a single hook name per line.', 'performance-lab' ); ?>
 	</p>
+	<?php
+}
+
+/**
+ * Renders a checkbox for enabling output buffering for Server-Timing.
+ *
+ * @since n.e.x.t
+ */
+function perflab_render_server_timing_page_output_buffer_checkbox() {
+	$slug           = 'output_buffering';
+	$field_id       = "server_timing_{$slug}";
+	$field_name     = PERFLAB_SERVER_TIMING_SETTING . '[' . $slug . ']';
+	$description_id = "{$field_id}_description";
+	$has_filter     = has_filter( 'perflab_server_timing_use_output_buffer' );
+	$is_enabled     = perflab_server_timing_use_output_buffer();
+
+	?>
+	<fieldset>
+		<legend class="screen-reader-text">
+			<?php esc_html_e( 'Output Buffering', 'performance-lab' ); ?>
+		</legend>
+		<input
+			type="checkbox"
+			id="<?php echo esc_attr( $field_id ); ?>"
+			name="<?php echo esc_attr( $field_name ); ?>"
+			aria-describedby="<?php echo esc_attr( $description_id ); ?>"
+			<?php disabled( $has_filter ); ?>
+			<?php checked( $is_enabled ); ?>
+		>
+		<label for="<?php echo esc_attr( $field_id ); ?>">
+			<?php esc_html_e( 'Enable output buffering of template rendering.', 'performance-lab' ); ?>
+		</label>
+		<p id="<?php echo esc_attr( $description_id ); ?>" class="description">
+			<?php if ( $has_filter ) : ?>
+				<?php if ( $is_enabled ) : ?>
+					<?php
+					echo wp_kses(
+						__( 'Output buffering has been forcibly enabled via the <code>perflab_server_timing_use_output_buffer</code> filter.', 'performance-lab' ),
+						array( 'code' => array() )
+					);
+					?>
+				<?php else : ?>
+					<?php
+					echo wp_kses(
+						__( 'Output buffering has been forcibly disabled via the <code>perflab_server_timing_use_output_buffer</code> filter.', 'performance-lab' ),
+						array( 'code' => array() )
+					);
+					?>
+				<?php endif; ?>
+			<?php endif; ?>
+			<?php esc_html_e( 'This is needed to capture metrics after headers have been sent and the template is being rendered. Without output buffering, adding a hook that fires during template rendering may result in a PHP notice: "Function Perflab_Server_Timing::register_metric was called incorrectly. The method must be called before or during the perflab_server_timing_send_header action." Note that output buffering may possibly cause an increase in TTFB if the response would be flushed multiple times.', 'performance-lab' ); ?>
+		</p>
+	</fieldset>
 	<?php
 }

@@ -195,18 +195,25 @@ class Perflab_Server_Timing {
 	 * @return bool True if an output buffer should be used, false otherwise.
 	 */
 	public function use_output_buffer() {
-		/**
-		 * Filters whether an output buffer should be used to be able to gather additional Server-Timing metrics.
-		 *
-		 * Without an output buffer, it is only possible to cover metrics from before serving the template, i.e. before
-		 * the HTML output starts. Therefore sites that would like to gather metrics while serving the template should
-		 * enable this.
-		 *
-		 * @since 1.8.0
-		 *
-		 * @param bool $use_output_buffer Whether to use an output buffer.
-		 */
-		return apply_filters( 'perflab_server_timing_use_output_buffer', false );
+		if ( has_filter( 'perflab_server_timing_use_output_buffer' ) ) {
+			/**
+			 * Filters whether an output buffer should be used to be able to gather additional Server-Timing metrics.
+			 *
+			 * Without an output buffer, it is only possible to cover metrics from before serving the template, i.e. before
+			 * the HTML output starts. Therefore sites that would like to gather metrics while serving the template should
+			 * enable this.
+			 *
+			 * @since 1.8.0
+			 *
+			 * @param bool $use_output_buffer Whether to use an output buffer.
+			 */
+			return apply_filters( 'perflab_server_timing_use_output_buffer', false );
+		}
+
+		// Use the stored value from the Server-Timing screen.
+		$slug    = 'output_buffering';
+		$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
+		return ! empty( $options[ $slug ] );
 	}
 
 	/**

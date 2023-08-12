@@ -163,6 +163,7 @@ function perflab_sanitize_server_timing_setting( $value ) {
 	static $allowed_keys = array(
 		'benchmarking_actions' => true,
 		'benchmarking_filters' => true,
+		'output_buffering'     => true,
 	);
 
 	if ( ! is_array( $value ) ) {
@@ -175,7 +176,7 @@ function perflab_sanitize_server_timing_setting( $value ) {
 	 * Ensure that every element is an indexed array of hook names.
 	 * Any duplicates across a group of hooks are removed.
 	 */
-	foreach ( $value as $key => $hooks ) {
+	foreach ( wp_array_slice_assoc( $value, array( 'benchmarking_actions', 'benchmarking_filters' ) ) as $key => $hooks ) {
 		if ( ! is_array( $hooks ) ) {
 			$hooks = explode( "\n", $hooks );
 		}
@@ -202,6 +203,8 @@ function perflab_sanitize_server_timing_setting( $value ) {
 			)
 		);
 	}
+
+	$value['output_buffering'] = ! empty( $value['output_buffering'] );
 
 	return $value;
 }

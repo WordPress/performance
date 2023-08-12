@@ -75,7 +75,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		$slug = 'benchmarking_actions';
 
 		ob_start();
-		perflab_render_server_timing_page_field( $slug );
+		perflab_render_server_timing_page_hooks_field( $slug );
 		$output = ob_get_clean();
 
 		$this->assertStringContainsString( '<textarea', $output );
@@ -87,7 +87,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		delete_option( PERFLAB_SERVER_TIMING_SETTING );
 
 		ob_start();
-		perflab_render_server_timing_page_field( 'benchmarking_actions' );
+		perflab_render_server_timing_page_hooks_field( 'benchmarking_actions' );
 		$output = ob_get_clean();
 
 		$this->assertStringContainsString( '></textarea>', $output );
@@ -100,7 +100,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		);
 
 		ob_start();
-		perflab_render_server_timing_page_field( 'benchmarking_actions' );
+		perflab_render_server_timing_page_hooks_field( 'benchmarking_actions' );
 		$output = ob_get_clean();
 
 		// Array is formatted/imploded as strings, one per line.
