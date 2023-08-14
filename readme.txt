@@ -359,7 +359,7 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 * Images: Add WebP for uploads module. ([32](https://github.com/WordPress/performance/pull/32))
 * Images: Support retry mechanism for generating sub-sizes in additional MIME types on constrained environments. ([188](https://github.com/WordPress/performance/pull/188))
-* Images: Update `the_content` with the appropiate image format. ([152](https://github.com/WordPress/performance/pull/152))
+* Images: Update `the_content` with the appropriate image format. ([152](https://github.com/WordPress/performance/pull/152))
 * Site Health: Add WebP support in site health. ([141](https://github.com/WordPress/performance/pull/141))
 * Site Health: Add module to alert about excessive JS and CSS assets. ([54](https://github.com/WordPress/performance/pull/54))
 * Object Cache: Add Site Health check module for persistent object cache. ([111](https://github.com/WordPress/performance/pull/111))
