@@ -37,6 +37,14 @@ class Fetchpriority_Test extends WP_UnitTestCase {
 		parent::tear_down_after_class();
 	}
 
+	public function set_up() {
+		parent::set_up();
+
+		if ( ! perflab_can_load_module( 'images/fetchpriority' ) ) {
+			$this->markTestSkipped( 'Fetchpriority module tests irrelevant since available in WordPress core' );
+		}
+	}
+
 	public function test_fetchpriority_img_tag_add_attr_based_on_context_and_loading_lazy() {
 		$img = get_image_tag( self::$attachment_id, '', '', '', 'large' );
 
