@@ -487,7 +487,7 @@ function perflab_plugin_action_links_add_settings( $links ) {
 }
 
 /**
- * Dismisses notification pointer after verfying nonce.
+ * Dismisses notification pointer after verifying nonce.
  *
  * This function adds a nonce check before dismissing perflab-admin-pointer
  * It runs before the dismiss-wp-pointer AJAX action is performed.
