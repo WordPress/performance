@@ -57,7 +57,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 			array_keys( $wp_settings_fields[ PERFLAB_SERVER_TIMING_SCREEN ] )
 		);
 		$this->assertEqualSets(
-			array( 'benchmarking_actions', 'benchmarking_filters' ),
+			array( 'benchmarking_actions', 'benchmarking_filters', 'output_buffering' ),
 			array_keys( $wp_settings_fields[ PERFLAB_SERVER_TIMING_SCREEN ]['benchmarking'] )
 		);
 	}
