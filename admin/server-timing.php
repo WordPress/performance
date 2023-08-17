@@ -233,14 +233,22 @@ function perflab_render_server_timing_page_output_buffer_checkbox() {
 				<?php if ( $is_enabled ) : ?>
 					<?php
 					echo wp_kses(
-						__( 'Output buffering has been forcibly enabled via the <code>perflab_server_timing_use_output_buffer</code> filter.', 'performance-lab' ),
+						sprintf(
+							/* translators: %s: perflab_server_timing_use_output_buffer */
+							__( 'Output buffering has been forcibly enabled via the %s filter.', 'performance-lab' ),
+							'<code>perflab_server_timing_use_output_buffer</code>'
+						),
 						array( 'code' => array() )
 					);
 					?>
 				<?php else : ?>
 					<?php
 					echo wp_kses(
-						__( 'Output buffering has been forcibly disabled via the <code>perflab_server_timing_use_output_buffer</code> filter.', 'performance-lab' ),
+						sprintf(
+							/* translators: %s: perflab_server_timing_use_output_buffer */
+							__( 'Output buffering has been forcibly disabled via the %s filter.', 'performance-lab' ),
+							'<code>perflab_server_timing_use_output_buffer</code>'
+						),
 						array( 'code' => array() )
 					);
 					?>
