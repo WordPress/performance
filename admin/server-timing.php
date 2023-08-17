@@ -265,7 +265,7 @@ function perflab_render_server_timing_page_output_buffer_checkbox() {
 					?>
 				<?php endif; ?>
 			<?php endif; ?>
-			<?php esc_html_e( 'This is needed to capture metrics after headers have been sent and while the template is being rendered. Note that output buffering may possibly cause an increase in TTFB if the response would be flushed multiple times.', 'performance-lab' ); ?>
+			<?php esc_html_e( 'Output buffering is needed to capture metrics after headers have been sent and while the template is being rendered. Note that output buffering may possibly cause an increase in TTFB if the response would be flushed multiple times.', 'performance-lab' ); ?>
 		</p>
 	</div>
 	<?php
