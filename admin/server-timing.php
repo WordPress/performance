@@ -50,6 +50,40 @@ function perflab_load_server_timing_page() {
 		PERFLAB_SERVER_TIMING_SCREEN
 	);
 
+	add_action(
+		'admin_print_styles',
+		static function () {
+			?>
+			<style>
+				.wrap p {
+					max-width: 800px;
+				}
+
+				/* The following styles are copied from core where they normally include `.form-table td` in the selectors. */
+				.output-buffering-field {
+					margin-bottom: 9px;
+					padding-bottom: 15px;
+					line-height: 1.3;
+					vertical-align: middle;
+					font-size: 14px;
+				}
+				.output-buffering-field label,
+				.output-buffering-field p {
+					line-height: 1.4;
+				}
+				.output-buffering-field label {
+					margin: 0.35em 0 0.5em !important;
+					display: inline-block;
+					vertical-align: middle;
+				}
+				.output-buffering-field p {
+					font-size: 14px;
+				}
+			</style>
+			<?php
+		}
+	);
+
 	add_settings_section(
 		'benchmarking',
 		__( 'Benchmarking', 'performance-lab' ),
@@ -65,17 +99,11 @@ function perflab_load_server_timing_page() {
 					),
 					array( 'code' => array() )
 				);
-				?>
-				<br>
-				<?php
 				echo wp_kses(
 					__( 'For any hook name provided, the <strong>cumulative duration between all callbacks</strong> attached to the hook is measured, in milliseconds.', 'performance-lab' ),
 					array( 'strong' => array() )
 				);
 				if ( ! perflab_server_timing_use_output_buffer() ) {
-					?>
-					<br>
-					<?php
 					echo wp_kses(
 						sprintf(
 							/* translators: 1: Server-Timing, 2: template_include, 3: anchor link */
@@ -194,28 +222,6 @@ function perflab_render_server_timing_page_output_buffer_checkbox() {
 	$is_enabled     = perflab_server_timing_use_output_buffer();
 
 	?>
-	<style>
-	/* The following styles are copied from core where they normally include `.form-table td` in the selectors. */
-	.output-buffering-field {
-		margin-bottom: 9px;
-		padding-bottom: 15px;
-		line-height: 1.3;
-		vertical-align: middle;
-		font-size: 14px;
-	}
-	.output-buffering-field label,
-	.output-buffering-field p {
-		line-height: 1.4;
-	}
-	.output-buffering-field label {
-		margin: 0.35em 0 0.5em !important;
-		display: inline-block;
-		vertical-align: middle;
-	}
-	.output-buffering-field p {
-		font-size: 14px;
-	}
-	</style>
 	<div class="output-buffering-field">
 		<input
 			type="checkbox"
