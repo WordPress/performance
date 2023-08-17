@@ -195,9 +195,8 @@ class Perflab_Server_Timing {
 	 * @return bool True if an output buffer should be used, false otherwise.
 	 */
 	public function use_output_buffer() {
-		$slug    = 'output_buffering';
 		$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
-		$enabled = ! empty( $options[ $slug ] );
+		$enabled = ! empty( $options['output_buffering'] );
 
 		/**
 		 * Filters whether an output buffer should be used to be able to gather additional Server-Timing metrics.
