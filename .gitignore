@@ -59,3 +59,8 @@ temp/
 ._*
 .Trashes
 .svn
+
+############
+## Assets
+############
+admin/assets
