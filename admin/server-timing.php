@@ -228,7 +228,7 @@ function perflab_render_server_timing_page_output_buffer_checkbox() {
 					?>
 				<?php endif; ?>
 			<?php endif; ?>
-			<?php esc_html_e( 'This is needed to capture metrics after headers have been sent and the template is being rendered. Without output buffering, adding a hook that fires during template rendering may result in a PHP notice: "Function Perflab_Server_Timing::register_metric was called incorrectly. The method must be called before or during the perflab_server_timing_send_header action." Note that output buffering may possibly cause an increase in TTFB if the response would be flushed multiple times.', 'performance-lab' ); ?>
+			<?php esc_html_e( 'This is needed to capture metrics after headers have been sent and while the template is being rendered. Note that output buffering may possibly cause an increase in TTFB if the response would be flushed multiple times.', 'performance-lab' ); ?>
 		</p>
 	</fieldset>
 	<?php
