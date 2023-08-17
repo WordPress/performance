@@ -196,29 +196,27 @@ function perflab_render_server_timing_page_output_buffer_checkbox() {
 	?>
 	<style>
 	/* The following styles are copied from core where they normally include `.form-table td` in the selectors. */
-	fieldset.output-buffering {
+	.output-buffering-field {
 		margin-bottom: 9px;
 		padding: 15px 10px 15px 0;
 		line-height: 1.3;
 		vertical-align: middle;
 		font-size: 14px;
 	}
-	fieldset.output-buffering label,
-	fieldset.output-buffering p {
+	.output-buffering-field label,
+	.output-buffering-field p {
 		line-height: 1.4;
 	}
-	fieldset.output-buffering label {
+	.output-buffering-field label {
 		margin: 0.35em 0 0.5em !important;
 		display: inline-block;
+		vertical-align: middle;
 	}
-	fieldset.output-buffering p {
+	.output-buffering-field p {
 		font-size: 14px;
 	}
 	</style>
-	<fieldset class="output-buffering">
-		<legend class="screen-reader-text">
-			<?php esc_html_e( 'Output Buffering', 'performance-lab' ); ?>
-		</legend>
+	<div class="output-buffering-field">
 		<input
 			type="checkbox"
 			id="<?php echo esc_attr( $field_id ); ?>"
@@ -250,6 +248,6 @@ function perflab_render_server_timing_page_output_buffer_checkbox() {
 			<?php endif; ?>
 			<?php esc_html_e( 'This is needed to capture metrics after headers have been sent and while the template is being rendered. Note that output buffering may possibly cause an increase in TTFB if the response would be flushed multiple times.', 'performance-lab' ); ?>
 		</p>
-	</fieldset>
+	</div>
 	<?php
 }
