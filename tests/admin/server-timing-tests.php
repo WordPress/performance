@@ -49,7 +49,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		perflab_load_server_timing_page();
 		$this->assertArrayHasKey( PERFLAB_SERVER_TIMING_SCREEN, $wp_settings_sections );
 		$this->assertEqualSets(
-			array( 'benchmarking' ),
+			array( 'output-buffering', 'benchmarking' ),
 			array_keys( $wp_settings_sections[ PERFLAB_SERVER_TIMING_SCREEN ] )
 		);
 		$this->assertEqualSets(
@@ -57,7 +57,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 			array_keys( $wp_settings_fields[ PERFLAB_SERVER_TIMING_SCREEN ] )
 		);
 		$this->assertEqualSets(
-			array( 'benchmarking_actions', 'benchmarking_filters', 'output_buffering' ),
+			array( 'benchmarking_actions', 'benchmarking_filters' ),
 			array_keys( $wp_settings_fields[ PERFLAB_SERVER_TIMING_SCREEN ]['benchmarking'] )
 		);
 	}
