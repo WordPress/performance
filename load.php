@@ -25,6 +25,11 @@ define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
 
+// Load Composer dependencies if applicable.
+if ( file_exists( PERFLAB_PLUGIN_DIR_PATH . '/vendor/autoload.php' ) ) {
+	require_once PERFLAB_PLUGIN_DIR_PATH . '/vendor/autoload.php';
+}
+
 // If the constant isn't defined yet, it means the Performance Lab object cache file is not loaded.
 if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
 	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', false );
@@ -34,6 +39,12 @@ require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timin
 require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing.php';
 require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/load.php';
 require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/defaults.php';
+
+// Register REST Routes.
+$rest_routes             = new PerformanceLab\REST_API\REST_Routes();
+$rest_plugins_controller = new PerformanceLab\REST_API\REST_Plugins_Controller();
+$rest_routes->register();
+$rest_plugins_controller->register();
 
 /**
  * Registers the performance modules setting.

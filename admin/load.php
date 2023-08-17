@@ -5,8 +5,41 @@
  * @package performance-lab
  */
 
+use PerformanceLab\classes\Plugin_Manager as Plugin_Manager;
+use PerformanceLab\REST_API\REST_Routes as REST_Routes;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
+}
+
+add_action( 'admin_enqueue_scripts', 'admin_scripts' );
+
+/**
+ * Callback function to handle admin scripts.
+ *
+ * @return void
+ */
+function admin_scripts() {
+	wp_enqueue_script(
+		'wpp-plugin-manager',
+		plugin_dir_url( __FILE__ ) . 'assets/js/plugin_manager.js',
+		array( 'jquery' ),
+		'1.0.0',
+		array(
+			'strategy' => 'defer',
+		)
+	);
+
+	wp_localize_script(
+		'wpp-plugin-manager',
+		'wpp_plugin_manager',
+		array(
+			'rest_base'      => esc_url_raw( rest_url() ),
+			'rest_namespace' => REST_Routes::REST_ROOT,
+			'nonce'          => wp_create_nonce( 'wp_rest' ),
+			'wpp_plugins'    => Plugin_Manager::get_standalone_plugins(),
+		)
+	);
 }
 
 /**
@@ -107,9 +140,11 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 function perflab_render_modules_page() {
 	?>
 	<div class="wrap">
-		<h1>
+		<?php Plugin_Manager::render_plugins_ui(); ?>
+
+		<h2>
 			<?php esc_html_e( 'Performance Modules', 'performance-lab' ); ?>
-		</h1>
+		</h2>
 
 		<form action="options.php" method="post">
 			<?php settings_fields( PERFLAB_MODULES_SCREEN ); ?>
