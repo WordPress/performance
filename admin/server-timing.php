@@ -44,6 +44,13 @@ add_action( 'admin_menu', 'perflab_add_server_timing_page' );
  */
 function perflab_load_server_timing_page() {
 	add_settings_section(
+		'output-buffering',
+		__( 'Output Buffering', 'performance-lab' ),
+		'perflab_render_server_timing_page_output_buffer_checkbox',
+		PERFLAB_SERVER_TIMING_SCREEN
+	);
+
+	add_settings_section(
 		'benchmarking',
 		__( 'Benchmarking', 'performance-lab' ),
 		static function() {
@@ -114,14 +121,6 @@ function perflab_load_server_timing_page() {
 		PERFLAB_SERVER_TIMING_SCREEN,
 		'benchmarking',
 		array( 'label_for' => 'server_timing_benchmarking_filters' )
-	);
-	add_settings_field(
-		'output_buffering',
-		__( 'Output Buffering', 'performance-lab' ),
-		'perflab_render_server_timing_page_output_buffer_checkbox',
-		PERFLAB_SERVER_TIMING_SCREEN,
-		'benchmarking',
-		array( 'label_for' => 'server_timing_output_buffering' )
 	);
 }
 
@@ -195,7 +194,28 @@ function perflab_render_server_timing_page_output_buffer_checkbox() {
 	$is_enabled     = perflab_server_timing_use_output_buffer();
 
 	?>
-	<fieldset>
+	<style>
+	/* The following styles are copied from core where they normally include `.form-table td` in the selectors. */
+	fieldset.output-buffering {
+		margin-bottom: 9px;
+		padding: 15px 10px 15px 0;
+		line-height: 1.3;
+		vertical-align: middle;
+		font-size: 14px;
+	}
+	fieldset.output-buffering label,
+	fieldset.output-buffering p {
+		line-height: 1.4;
+	}
+	fieldset.output-buffering label {
+		margin: 0.35em 0 0.5em !important;
+		display: inline-block;
+	}
+	fieldset.output-buffering p {
+		font-size: 14px;
+	}
+	</style>
+	<fieldset class="output-buffering">
 		<legend class="screen-reader-text">
 			<?php esc_html_e( 'Output Buffering', 'performance-lab' ); ?>
 		</legend>
