@@ -70,15 +70,12 @@ function perflab_load_server_timing_page() {
 					<br>
 					<?php
 					echo wp_kses(
-						str_replace(
-							'<a>',
-							'<a href="#server_timing_output_buffering">',
-							sprintf(
-								/* translators: 1: Server-Timing, 2: template_include */
-								__( 'Since the %1$s header is sent before the template is loaded, only hooks before the %2$s filter can be measured. Enable <a>Output Buffering</a> to measure hooks during template rendering.', 'performance-lab' ),
-								'<code>Server-Timing</code>',
-								'<code>template_include</code>'
-							)
+						sprintf(
+							/* translators: 1: Server-Timing, 2: template_include, 3: anchor link */
+							__( 'Since the %1$s header is sent before the template is loaded, only hooks before the %2$s filter can be measured. Enable <a href="%3$s">Output Buffering</a> to measure hooks during template rendering.', 'performance-lab' ),
+							'<code>Server-Timing</code>',
+							'<code>template_include</code>',
+							esc_url( '#server_timing_output_buffering' )
 						),
 						array(
 							'code' => array(),
