@@ -99,11 +99,16 @@ function perflab_load_server_timing_page() {
 					),
 					array( 'code' => array() )
 				);
+				echo ' ';
 				echo wp_kses(
 					__( 'For any hook name provided, the <strong>cumulative duration between all callbacks</strong> attached to the hook is measured, in milliseconds.', 'performance-lab' ),
 					array( 'strong' => array() )
 				);
-				if ( ! perflab_server_timing_use_output_buffer() ) {
+				?>
+			</p>
+			<?php if ( ! perflab_server_timing_use_output_buffer() ) : ?>
+				<p>
+					<?php
 					echo wp_kses(
 						sprintf(
 							/* translators: 1: Server-Timing, 2: template_include, 3: anchor link */
@@ -117,8 +122,8 @@ function perflab_load_server_timing_page() {
 							'a'    => array( 'href' => true ),
 						)
 					);
-				}
-				?>
+					?>
+				<?php endif; ?>
 			</p>
 			<?php
 		},
