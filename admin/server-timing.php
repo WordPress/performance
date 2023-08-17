@@ -198,7 +198,7 @@ function perflab_render_server_timing_page_output_buffer_checkbox() {
 	/* The following styles are copied from core where they normally include `.form-table td` in the selectors. */
 	.output-buffering-field {
 		margin-bottom: 9px;
-		padding: 15px 10px 15px 0;
+		padding-bottom: 15px;
 		line-height: 1.3;
 		vertical-align: middle;
 		font-size: 14px;
