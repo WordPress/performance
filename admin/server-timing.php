@@ -232,7 +232,7 @@ function perflab_render_server_timing_page_output_buffering_section() {
 						<?php disabled( $has_filter ); ?>
 						<?php checked( $is_enabled ); ?>
 					>
-					<?php esc_html_e( 'Enable output buffering of template rendering.', 'performance-lab' ); ?>
+					<?php esc_html_e( 'Enable output buffering of template rendering', 'performance-lab' ); ?>
 				</label>
 				<p id="<?php echo esc_attr( $description_id ); ?>" class="description">
 					<?php if ( $has_filter ) : ?>
