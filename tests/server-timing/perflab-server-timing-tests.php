@@ -231,7 +231,9 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
 	/**
 	 * @covers Perflab_Server_Timing::use_output_buffer
+	 *
 	 * @dataProvider get_data_to_test_use_output_buffer
+	 *
 	 * @param callable $set_up   Set up.
 	 * @param bool     $expected Expected value.
 	 */
