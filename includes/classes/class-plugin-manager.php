@@ -9,7 +9,7 @@
  * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
 
-namespace PerformanceLab\classes;
+namespace PerformanceLab;
 
 use WP_Error;
 

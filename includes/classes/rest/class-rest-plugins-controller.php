@@ -11,7 +11,7 @@
 
 namespace PerformanceLab\REST_API;
 
-use PerformanceLab\classes\Plugin_Manager as Plugin_Manager;
+use PerformanceLab\Plugin_Manager as Plugin_Manager;
 use PerformanceLab\REST_API\REST_Route as REST_Route;
 use WP_Error;
 use WP_REST_Request;

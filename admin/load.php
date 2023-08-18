@@ -5,7 +5,7 @@
  * @package performance-lab
  */
 
-use PerformanceLab\classes\Plugin_Manager as Plugin_Manager;
+use PerformanceLab\Plugin_Manager as Plugin_Manager;
 use PerformanceLab\REST_API\REST_Routes as REST_Routes;
 
 if ( ! defined( 'ABSPATH' ) ) {
