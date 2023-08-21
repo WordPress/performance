@@ -8,8 +8,6 @@
 	<rule ref="WordPress-Docs"/>
 	<rule ref="WordPress-Extra">
 		<exclude-pattern>tests/*</exclude-pattern>
-		<!-- TODO The SQLite module generates a lot of notices and errors, so it will be covered later. -->
-		<exclude-pattern>modules/database/sqlite/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.WP.I18n"/>
 	<config name="text_domain" value="performance-lab,default"/>
@@ -20,6 +18,7 @@
 	<file>./admin</file>
 	<file>./load.php</file>
 	<file>./modules</file>
+	<file>./server-timing</file>
 	<file>./tests</file>
 
 	<!-- Do not require file headers on generated files -->

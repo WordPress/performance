@@ -2,9 +2,9 @@
 
 Contributors:      wordpressdotorg
 Requires at least: 6.1
-Tested up to:      6.2
+Tested up to:      6.3
 Requires PHP:      5.6
-Stable tag:        2.3.0
+Stable tag:        2.5.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -23,7 +23,6 @@ Currently the plugin includes the following performance modules:
 * **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
 * **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
 * **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
-* **SQLite Integration:** Use an SQLite database instead of MySQL.
 
 == Installation ==
 
@@ -80,6 +79,27 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.5.0 =
+
+**Enhancements**
+
+* Images: Check for fetchpriority feature being available in WordPress core before loading the module. ([769](https://github.com/WordPress/performance/pull/769))
+* Database Optimization: Remove SQLite module. ([764](https://github.com/WordPress/performance/pull/764))
+* Infrastructure: Bump tested up to version to 6.3. ([772](https://github.com/WordPress/performance/pull/772))
+
+= 2.4.0 =
+
+**Enhancements**
+
+* Database: Implement migration prompt to migrate from SQLite module to standalone plugin due to removal in the following release. ([739](https://github.com/WordPress/performance/pull/739))
+* Infrastructure: Enhance code quality by adding PHPStan and fixing level 0 issues. ([730](https://github.com/WordPress/performance/pull/730))
+* Infrastructure: Use static closures for minor performance improvement whenever instance access is not needed. ([729](https://github.com/WordPress/performance/pull/729))
+
+**Bug Fixes**
+
+* Database: Fix SQLite module deactivation routine to make standalone plugin migration work correctly. ([743](https://github.com/WordPress/performance/pull/743))
+* Infrastructure: Make `Server-Timing` header output more robust. ([736](https://github.com/WordPress/performance/pull/736))
 
 = 2.3.0 =
 
@@ -339,7 +359,7 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 * Images: Add WebP for uploads module. ([32](https://github.com/WordPress/performance/pull/32))
 * Images: Support retry mechanism for generating sub-sizes in additional MIME types on constrained environments. ([188](https://github.com/WordPress/performance/pull/188))
-* Images: Update `the_content` with the appropiate image format. ([152](https://github.com/WordPress/performance/pull/152))
+* Images: Update `the_content` with the appropriate image format. ([152](https://github.com/WordPress/performance/pull/152))
 * Site Health: Add WebP support in site health. ([141](https://github.com/WordPress/performance/pull/141))
 * Site Health: Add module to alert about excessive JS and CSS assets. ([54](https://github.com/WordPress/performance/pull/54))
 * Object Cache: Add Site Health check module for persistent object cache. ([111](https://github.com/WordPress/performance/pull/111))
@@ -373,3 +393,9 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 * Infrastructure: Add contribution documentation. ([47](https://github.com/WordPress/performance/pull/47))
 * Infrastructure: Add release documentation. ([138](https://github.com/WordPress/performance/pull/138))
 * Infrastructure: Define module specification in documentation. ([26](https://github.com/WordPress/performance/pull/26))
+
+== Upgrade Notice ==
+
+= 2.5.0 =
+
+The SQLite module is no longer present starting with this release. If you still use it, please migrate to the standalone plugin before updating.

@@ -6,6 +6,10 @@
  * @since 1.0.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Adds sources to metadata for an attachment.
  *
@@ -127,7 +131,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 
 			foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
 				// If the target is 'nothumb', skip generating the 'thumbnail' size.
-				if ( 'nothumb' === $target && 'thumbnail' === $size_name ) {
+				if ( webp_uploads_image_edit_thumbnails_separately() && 'nothumb' === $target && 'thumbnail' === $size_name ) {
 					continue;
 				}
 
@@ -146,7 +150,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 			foreach ( $mime_transforms as $targeted_mime ) {
 				if ( $targeted_mime === $mime_type ) {
 					// If the target is `thumbnail` make sure it is the only selected size.
-					if ( 'thumbnail' === $target ) {
+					if ( webp_uploads_image_edit_thumbnails_separately() && 'thumbnail' === $target ) {
 						if ( isset( $metadata['sizes']['thumbnail'] ) ) {
 							$subsized_images[ $targeted_mime ] = array( 'thumbnail' => $metadata['sizes']['thumbnail'] );
 						}
@@ -174,7 +178,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 				$extension = $extension[0];
 
 				// If the target is `thumbnail` make sure only that size is generated.
-				if ( 'thumbnail' === $target ) {
+				if ( webp_uploads_image_edit_thumbnails_separately() && 'thumbnail' === $target ) {
 					if ( ! isset( $subsized_images[ $mime_type ]['thumbnail']['file'] ) ) {
 						continue;
 					}
@@ -283,7 +287,7 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
 	$target = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all';
 
 	// When an edit to an image is only applied to a thumbnail there's nothing we need to back up.
-	if ( 'thumbnail' === $target ) {
+	if ( webp_uploads_image_edit_thumbnails_separately() && 'thumbnail' === $target ) {
 		return $data;
 	}
 
@@ -415,4 +419,24 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
 	$data['sources'] = $backup_sources['full-orig'];
 
 	return $data;
+}
+
+/**
+ * Compatibility function to check whether editing image thumbnails separately is enabled.
+ *
+ * The filter {@see 'image_edit_thumbnails_separately'} was introduced in WordPress 6.3 with default value of `false`,
+ * for a behavior that previously was always enabled.
+ *
+ * @since n.e.x.t
+ * @see https://core.trac.wordpress.org/ticket/57685
+ *
+ * @return bool True if editing image thumbnails is enabled, false otherwise.
+ */
+function webp_uploads_image_edit_thumbnails_separately() {
+	if ( version_compare( get_bloginfo( 'version' ), '6.3', '<' ) ) {
+		return true;
+	}
+
+	/** This filter is documented in wp-admin/includes/image-edit.php */
+	return (bool) apply_filters( 'image_edit_thumbnails_separately', false );
 }

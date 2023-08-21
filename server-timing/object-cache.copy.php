@@ -28,6 +28,10 @@
  * @since 1.8.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 // Set constant to be able to later check for whether this file was loaded.
 if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
 	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', 2 );
@@ -37,12 +41,17 @@ if ( ! function_exists( 'perflab_load_server_timing_api_from_dropin' ) ) {
 	/**
 	 * Loads the Performance Lab Server-Timing API if available.
 	 *
-	 * This function will short-circuit if the constant
+	 * This function will short-circuit if at least one of the constants
+	 * 'PERFLAB_DISABLE_SERVER_TIMING' or
 	 * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
 	 *
 	 * @since 1.8.0
 	 */
 	function perflab_load_server_timing_api_from_dropin() {
+		if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
+			return;
+		}
+
 		if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {
 			return;
 		}
