@@ -17,7 +17,7 @@ if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING
 /**
  * Adds the Server-Timing page to the Tools menu.
  *
- * @since n.e.x.t
+ * @since 2.6.0
  */
 function perflab_add_server_timing_page() {
 	$hook_suffix = add_management_page(
@@ -40,7 +40,7 @@ add_action( 'admin_menu', 'perflab_add_server_timing_page' );
 /**
  * Initializes settings sections and fields for the Server-Timing page.
  *
- * @since n.e.x.t
+ * @since 2.6.0
  */
 function perflab_load_server_timing_page() {
 	/*
@@ -147,7 +147,7 @@ function perflab_load_server_timing_page() {
 /**
  * Renders the Server-Timing page.
  *
- * @since n.e.x.t
+ * @since 2.6.0
  */
 function perflab_render_server_timing_page() {
 	?>
@@ -169,7 +169,7 @@ function perflab_render_server_timing_page() {
 /**
  * Renders a hooks field for the given Server-Timing option.
  *
- * @since n.e.x.t
+ * @since 2.6.0
  *
  * @param string $slug Slug of the field and sub-key in the Server-Timing option.
  */
@@ -203,7 +203,7 @@ function perflab_render_server_timing_page_hooks_field( $slug ) {
 /**
  * Renders the section for enabling output buffering for Server-Timing.
  *
- * @since n.e.x.t
+ * @since 2.6.0
  */
 function perflab_render_server_timing_page_output_buffering_section() {
 	$slug           = 'output_buffering';

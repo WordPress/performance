@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.1
 Tested up to:      6.3
 Requires PHP:      5.6
-Stable tag:        2.5.0
+Stable tag:        2.6.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -79,6 +79,24 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.6.0 =
+
+**Features**
+
+* Infrastructure: Add output buffering checkbox to Server-Timing screen. ([801](https://github.com/WordPress/performance/pull/801))
+* Infrastructure: Implement logic to measure specific hook execution time with Server-Timing controlled by a WP Admin screen. ([784](https://github.com/WordPress/performance/pull/784))
+
+**Enhancements**
+
+* Images: Fix incorrect function prefixes in Dominant Color Images. ([789](https://github.com/WordPress/performance/pull/789))
+* Infrastructure: Add early exit clauses to files with procedural code. ([790](https://github.com/WordPress/performance/pull/790))
+* Infrastructure: Allow disabling Server-Timing entirely using `PERFLAB_DISABLE_SERVER_TIMING` constant. ([795](https://github.com/WordPress/performance/pull/795))
+
+**Bug Fixes**
+
+* Images: Fix WebP handling when editing images based on WordPress 6.3 change. ([796](https://github.com/WordPress/performance/pull/796))
+* Infrastructure: Fix errors detected by Plugin Checker. ([788](https://github.com/WordPress/performance/pull/788))
 
 = 2.5.0 =
 
