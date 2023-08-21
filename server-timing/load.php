@@ -136,7 +136,7 @@ function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
 /**
  * Registers the Server-Timing setting.
  *
- * @since n.e.x.t
+ * @since 2.6.0
  */
 function perflab_register_server_timing_setting() {
 	register_setting(
@@ -154,7 +154,7 @@ add_action( 'init', 'perflab_register_server_timing_setting' );
 /**
  * Sanitizes the Server-Timing setting.
  *
- * @since n.e.x.t
+ * @since 2.6.0
  *
  * @param mixed $value Server-Timing setting value.
  * @return array Sanitized Server-Timing setting value.
