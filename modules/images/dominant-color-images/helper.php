@@ -45,7 +45,7 @@ function dominant_color_set_image_editors( $editors ) {
  * Computes the dominant color of the given attachment image and whether it has transparency.
  *
  * @since 1.2.0
- * @since n.e.x.t Function renamed to remove the `_` prefix.
+ * @since 2.6.0 Function renamed to remove the `_` prefix.
  * @access private
  *
  * @param int $attachment_id The attachment ID.
@@ -95,7 +95,7 @@ function dominant_color_get_dominant_color_data( $attachment_id ) {
  * Gets file path of image based on size.
  *
  * @since 1.2.0
- * @since n.e.x.t Function renamed to change `wp_` prefix to `dominant_color_`.
+ * @since 2.6.0 Function renamed to change `wp_` prefix to `dominant_color_`.
  *
  * @param int    $attachment_id Attachment ID for image.
  * @param string $size          Optional. Image size. Default 'medium'.

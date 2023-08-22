@@ -223,7 +223,7 @@ add_action( 'wp_loaded', 'perflab_register_default_server_timing_template_metric
  * These metrics should be registered as soon as possible. They can be added
  * and modified in the "Tools > Server-Timing" screen.
  *
- * @since n.e.x.t
+ * @since 2.6.0
  */
 function perflab_register_additional_server_timing_metrics_from_setting() {
 	$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
