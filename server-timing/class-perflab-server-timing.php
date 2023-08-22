@@ -165,7 +165,7 @@ class Perflab_Server_Timing {
 		// Get all metric header values, as long as the current user has access to the metric.
 		$metric_header_values = array_filter(
 			array_map(
-				function( Perflab_Server_Timing_Metric $metric ) {
+				function ( Perflab_Server_Timing_Metric $metric ) {
 					// Check the registered capability here to ensure no metric without access is exposed.
 					if ( ! current_user_can( $this->registered_metrics_data[ $metric->get_slug() ]['access_cap'] ) ) {
 						return null;
@@ -175,7 +175,7 @@ class Perflab_Server_Timing {
 				},
 				$this->registered_metrics
 			),
-			static function( $value ) {
+			static function ( $value ) {
 				return null !== $value;
 			}
 		);
@@ -228,7 +228,7 @@ class Perflab_Server_Timing {
 		}
 
 		ob_start(
-			function( $output ) {
+			function ( $output ) {
 				$this->send_header();
 				return $output;
 			}

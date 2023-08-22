@@ -83,7 +83,7 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 		add_settings_field(
 			$module_slug,
 			$module_data['name'],
-			static function() use ( $module_slug, $module_data, $module_settings ) {
+			static function () use ( $module_slug, $module_data, $module_settings ) {
 				perflab_render_modules_page_field( $module_slug, $module_data, $module_settings );
 			},
 			PERFLAB_MODULES_SCREEN,
@@ -238,7 +238,7 @@ function perflab_get_modules( $modules_root = null ) {
 
 	// Modules are organized as {focus}/{module-slug} in the modules folder.
 	if ( $modules_dir ) {
-		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+		// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 		while ( ( $focus = readdir( $modules_dir ) ) !== false ) {
 			if ( '.' === substr( $focus, 0, 1 ) ) {
 				continue;
@@ -253,7 +253,7 @@ function perflab_get_modules( $modules_root = null ) {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			$focus_dir = @opendir( $modules_root . '/' . $focus );
 			if ( $focus_dir ) {
-				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+				// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				while ( ( $file = readdir( $focus_dir ) ) !== false ) {
 					// Unlike plugins, modules must be in a directory.
 					if ( ! is_dir( $modules_root . '/' . $focus . '/' . $file ) ) {
@@ -264,7 +264,7 @@ function perflab_get_modules( $modules_root = null ) {
 					// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 					$module_dir = @opendir( $modules_root . '/' . $focus . '/' . $file );
 					if ( $module_dir ) {
-						// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+						// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 						while ( ( $subfile = readdir( $module_dir ) ) !== false ) {
 							if ( '.' === substr( $subfile, 0, 1 ) ) {
 								continue;
@@ -304,7 +304,7 @@ function perflab_get_modules( $modules_root = null ) {
 
 	uasort(
 		$modules,
-		static function( $a, $b ) {
+		static function ( $a, $b ) {
 			return strnatcasecmp( $a['name'], $b['name'] );
 		}
 	);

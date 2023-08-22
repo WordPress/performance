@@ -76,7 +76,7 @@ add_action( 'wp_head', 'fetchpriority_render_generator' );
 if ( function_exists( 'wp_get_loading_optimization_attributes' ) && ! str_starts_with( FETCHPRIORITY_VERSION, 'Performance Lab ' ) ) {
 	add_action(
 		'admin_notices',
-		static function() {
+		static function () {
 			?>
 			<div class="notice notice-warning">
 				<p>
