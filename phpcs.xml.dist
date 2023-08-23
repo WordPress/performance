@@ -56,8 +56,9 @@
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 
-	<!-- Do not apply filename rules for unit tests -->
+	<!-- Do not apply filename rules for unit tests and object cache -->
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>server-timing/object-cache.copy.php</exclude-pattern>
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
@@ -73,10 +74,4 @@
 	</rule>
 
 	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
-
-	<!--
-	Prevent errors caused by WordPress Coding Standards not supporting PHP 8.0+.
-	See https://github.com/WordPress/WordPress-Coding-Standards/issues/2035
-	-->
-	<ini name="error_reporting" value="E_ALL &#38; ~E_DEPRECATED" />
 </ruleset>

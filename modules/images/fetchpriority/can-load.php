@@ -10,6 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-return static function() {
+return static function () {
 	return ! function_exists( 'wp_get_loading_optimization_attributes' );
 };

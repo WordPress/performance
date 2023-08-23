@@ -96,7 +96,7 @@ function perflab_server_timing_use_output_buffer() {
  * @return callable Callback function that will run $callback and measure its execution time once called.
  */
 function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
-	return static function( ...$callback_args ) use ( $callback, $metric_slug, $access_cap ) {
+	return static function ( ...$callback_args ) use ( $callback, $metric_slug, $access_cap ) {
 		// Gain access to Perflab_Server_Timing_Metric instance.
 		$server_timing_metric = null;
 
@@ -106,7 +106,7 @@ function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
 			perflab_server_timing_register_metric(
 				$metric_slug,
 				array(
-					'measure_callback' => static function( $metric ) use ( &$server_timing_metric ) {
+					'measure_callback' => static function ( $metric ) use ( &$server_timing_metric ) {
 						$server_timing_metric = $metric;
 					},
 					'access_cap'       => $access_cap,
@@ -184,7 +184,7 @@ function perflab_sanitize_server_timing_setting( $value ) {
 			array_unique(
 				array_filter(
 					array_map(
-						static function( $hookname ) {
+						static function ( $hookname ) {
 							/*
 							 * Allow any characters except whitespace.
 							 * While most hooks use a limited set of characters, hook names in plugins are not

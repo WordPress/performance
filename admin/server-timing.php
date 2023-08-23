@@ -74,7 +74,7 @@ function perflab_load_server_timing_page() {
 	add_settings_section(
 		'benchmarking',
 		__( 'Benchmarking', 'performance-lab' ),
-		static function() {
+		static function () {
 			?>
 			<p>
 				<?php
@@ -125,7 +125,7 @@ function perflab_load_server_timing_page() {
 	add_settings_field(
 		'benchmarking_actions',
 		__( 'Actions', 'performance-lab' ),
-		static function() {
+		static function () {
 			perflab_render_server_timing_page_hooks_field( 'benchmarking_actions' );
 		},
 		PERFLAB_SERVER_TIMING_SCREEN,
@@ -135,7 +135,7 @@ function perflab_load_server_timing_page() {
 	add_settings_field(
 		'benchmarking_filters',
 		__( 'Filters', 'performance-lab' ),
-		static function() {
+		static function () {
 			perflab_render_server_timing_page_hooks_field( 'benchmarking_filters' );
 		},
 		PERFLAB_SERVER_TIMING_SCREEN,
