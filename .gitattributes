@@ -34,3 +34,4 @@
 /.gitignore export-ignore
 
 /modules/**/readme.txt export-ignore
+/modules/**/.wordpress-org export-ignore
