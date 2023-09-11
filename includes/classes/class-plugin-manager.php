@@ -473,18 +473,49 @@ class Plugin_Manager {
 			<h1>Performance Plugins</h1>
 			<p>The following standalone performance plugins are available for installation.</p>
 			<div class="wrap">
-				<div id="plugin-filter">
+				<form id="plugin-filter" method="post">
 					<div class="wp-list-table widefat plugin-install wpp-standalone-plugins">
 						<h2 class="screen-reader-text">Plugins list</h2>
 						<div id="the-list">
 							<?php
-							foreach ( $standalone_plugins as $standalone_plugin ) {
+							/*foreach ( $standalone_plugins as $standalone_plugin ) {
 								self::render_plugin_card( $standalone_plugin );
-							}
+							}*/
 							?>
+
+							<div class="plugin-card plugin-card-classic-editor">
+								<div class="plugin-card-top">
+									<div class="name column-name">
+										<h3>
+											<a href="http://localhost:8888/wp-admin/plugin-install.php?tab=plugin-information&amp;plugin=classic-editor&amp;TB_iframe=true&amp;width=772&amp;height=507" class="thickbox open-plugin-details-modal">
+												Classic Editor						<img src="https://ps.w.org/classic-editor/assets/icon-256x256.png?rev=1998671" class="plugin-icon" alt="">
+											</a>
+										</h3>
+									</div>
+									<div class="action-links">
+										<ul class="plugin-action-buttons"><li><a class="install-now button" data-slug="classic-editor" href="http://localhost:8888/wp-admin/update.php?action=install-plugin&amp;plugin=classic-editor&amp;_wpnonce=a02cf10534" aria-label="Install Classic Editor 1.6.3 now" data-name="Classic Editor 1.6.3">Install Now</a></li><li><a href="http://localhost:8888/wp-admin/plugin-install.php?tab=plugin-information&amp;plugin=classic-editor&amp;TB_iframe=true&amp;width=772&amp;height=507" class="thickbox open-plugin-details-modal" aria-label="More information about Classic Editor 1.6.3" data-title="Classic Editor 1.6.3">More Details</a></li></ul>				</div>
+									<div class="desc column-description">
+										<p>Enables the previous "classic" editor and the old-style Edit Post screen with TinyMCE, Meta Boxes, etc. Supports all plugins that extend this screen.</p>
+										<p class="authors"> <cite>By <a href="https://github.com/WordPress/classic-editor/">WordPress Contributors</a></cite></p>
+									</div>
+								</div>
+								<div class="plugin-card-bottom">
+									<div class="vers column-rating">
+										<div class="star-rating"><span class="screen-reader-text">5.0 rating based on 1,141 ratings</span><div class="star star-full" aria-hidden="true"></div><div class="star star-full" aria-hidden="true"></div><div class="star star-full" aria-hidden="true"></div><div class="star star-full" aria-hidden="true"></div><div class="star star-full" aria-hidden="true"></div></div>					<span class="num-ratings" aria-hidden="true">(1,141)</span>
+									</div>
+									<div class="column-updated">
+										<strong>Last Updated:</strong>
+										1 month ago				</div>
+									<div class="column-downloaded">
+										5+ Million Active Installations				</div>
+									<div class="column-compatibility">
+										<span class="compatibility-compatible"><strong>Compatible</strong> with your version of WordPress</span>				</div>
+								</div>
+							</div>
+
 						</div>
 					</div>
-				</div>
+				</form>
 			</div>
 
 			<div class="clear"></div>

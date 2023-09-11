@@ -22,15 +22,21 @@ add_action( 'admin_enqueue_scripts', 'admin_scripts' );
 function admin_scripts() {
 	wp_enqueue_script(
 		'wpp-plugin-manager',
-		plugin_dir_url( __FILE__ ) . 'assets/js/plugin_manager.js',
-		array( 'jquery' ),
-		'1.0.0',
-		array(
-			'strategy' => 'defer',
-		)
+		plugin_dir_url( __FILE__ ) . 'assets/js/updates.js',
+		array( 'jquery', 'wp' ),
+		microtime(),
+		true
 	);
 
 	wp_localize_script(
+		'wpp-plugin-manager',
+		'_wpUpdatesSettings',
+		array(
+			'ajax_nonce' => wp_installing() ? '' : wp_create_nonce( 'updates' ),
+		)
+	);
+
+	/*wp_localize_script(
 		'wpp-plugin-manager',
 		'wpp_plugin_manager',
 		array(
@@ -39,7 +45,7 @@ function admin_scripts() {
 			'nonce'          => wp_create_nonce( 'wp_rest' ),
 			'wpp_plugins'    => Plugin_Manager::get_standalone_plugins(),
 		)
-	);
+	);*/
 }
 
 /**
