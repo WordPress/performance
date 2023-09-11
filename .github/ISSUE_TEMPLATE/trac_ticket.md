@@ -7,7 +7,7 @@ labels: [ "Trac Ticket", "WP Core" ]
 ---
 
 <!-- 
-Trac ticket issues are for team organization purposes only. Please update the Title of the issue and link to the Trac ticket below.
+Trac ticket issues are for team organization purposes only. Please update the title of the issue and link to the Trac ticket below.
 -->
 
 Trac ticket: <!-- insert a link to the WordPress Trac ticket here -->
