@@ -1,4 +1,8 @@
 {
+  "images/dominant-color-images": {
+    "slug": "dominant-color-images",
+    "version": "1.0.0"
+  },
   "images/fetchpriority": {
     "slug": "fetchpriority",
     "version": "1.1.1"
