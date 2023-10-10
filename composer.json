@@ -28,7 +28,7 @@
   },
   "require": {
     "composer/installers": "~1.0",
-    "php": ">=5.6|^7|^8"
+    "php": ">=7|^8"
   },
   "scripts": {
     "phpstan": "phpstan analyze --ansi --memory-limit=2048M",
