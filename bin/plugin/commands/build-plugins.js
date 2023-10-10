@@ -137,7 +137,7 @@ async function updatePluginHeader( settings ) {
  * Plugin Name: ${ name }
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/modules/${ modulePath }
  * Description: ${ description }
- * Requires at least: 6.1
+ * Requires at least: 6.3
  * Requires PHP: 7.0
  * Version: ${ version }
  * Author: WordPress Performance Team

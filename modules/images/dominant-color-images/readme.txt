@@ -1,7 +1,7 @@
 === Dominant Color Images ===
 
 Contributors:      wordpressdotorg
-Requires at least: 6.1
+Requires at least: 6.3
 Tested up to:      6.3
 Requires PHP:      7.0
 Stable tag:        1.0.0
