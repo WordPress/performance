@@ -304,8 +304,7 @@ function perflab_register_additional_server_timing_metrics_from_setting() {
 				)
 			);
 		},
-		// phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
-		defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX
+		PHP_INT_MIN
 	);
 }
 
