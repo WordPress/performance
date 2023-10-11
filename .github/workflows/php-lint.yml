@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: latest
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
