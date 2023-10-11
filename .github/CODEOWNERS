@@ -53,9 +53,3 @@
 /modules/images/dominant-color-images                                       @pbearne @spacedmonkey
 /tests/modules/images/dominant-color-images                                 @pbearne @spacedmonkey
 /tests/testdata/modules/images/dominant-color-images                        @pbearne @spacedmonkey
-
-# Module: Fetchpriority
-/modules/images/fetchpriority                                               @pbearne @adamsilverstein
-/tests/modules/images/fetchpriority                                         @pbearne @adamsilverstein
-/tests/testdata/modules/images/fetchpriority                                @pbearne @adamsilverstein
-

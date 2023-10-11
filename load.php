@@ -289,7 +289,6 @@ function perflab_is_standalone_plugin_loaded( $module ) {
 function perflab_get_standalone_plugins_constants() {
 	return array(
 		'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
-		'images/fetchpriority'         => 'FETCHPRIORITY_VERSION',
 		'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
 	);
 }
