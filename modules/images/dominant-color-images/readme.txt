@@ -1,9 +1,9 @@
 === Dominant Color Images ===
 
 Contributors:      wordpressdotorg
-Requires at least: 6.1
+Requires at least: 6.3
 Tested up to:      6.3
-Requires PHP:      5.6
+Requires PHP:      7.0
 Stable tag:        1.0.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
