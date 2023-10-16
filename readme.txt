@@ -18,7 +18,6 @@ The Performance Lab plugin is a collection of modules focused on enhancing perfo
 Currently the plugin includes the following performance modules:
 
 * **Dominant Color Images:** Adds support to store the dominant color of newly uploaded images and create a placeholder background of that color.
-* **Fetchpriority:** Adds a fetchpriority hint for the primary content image on the page to load faster.
 * **WebP Support Health Check:** Adds a WebP support check in Site Health status.
 * **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
 * **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
@@ -79,6 +78,17 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.7.0 =
+
+**Enhancements**
+
+* Images: Remove Fetchpriority module as the functionality is now available in WordPress core. ([854](https://github.com/WordPress/performance/pull/854))
+* Infrastructure: Bump minimum required PHP version to 7.0 and minimum required WP version to 6.3. ([851](https://github.com/WordPress/performance/pull/851))
+
+**Documentation**
+
+* Infrastructure: Publish Dominant Color Images standalone plugin. ([842](https://github.com/WordPress/performance/pull/842))
 
 = 2.6.1 =
 
