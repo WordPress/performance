@@ -37,11 +37,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: styfle/cancel-workflow-action@0.9.1
+      - uses: styfle/cancel-workflow-action@0.11.0
       - uses: actions/checkout@v3
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: latest
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |

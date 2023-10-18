@@ -1,10 +1,10 @@
 {
-  "images/fetchpriority": {
-    "slug": "fetchpriority",
-    "version": "1.1.1"
+  "images/dominant-color-images": {
+    "slug": "dominant-color-images",
+    "version": "1.0.0"
   },
   "images/webp-uploads": {
     "slug": "webp-uploads",
-    "version": "1.0.3"
+    "version": "1.0.4"
   }
 }

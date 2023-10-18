@@ -3,9 +3,9 @@
  * Plugin Name: Performance Lab
  * Plugin URI: https://github.com/WordPress/performance
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
- * Requires at least: 6.1
- * Requires PHP: 5.6
- * Version: 2.6.0
+ * Requires at least: 6.3
+ * Requires PHP: 7.0
+ * Version: 2.7.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'PERFLAB_VERSION', '2.6.0' );
+define( 'PERFLAB_VERSION', '2.7.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -289,7 +289,6 @@ function perflab_is_standalone_plugin_loaded( $module ) {
 function perflab_get_standalone_plugins_constants() {
 	return array(
 		'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
-		'images/fetchpriority'         => 'FETCHPRIORITY_VERSION',
 		'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
 	);
 }
