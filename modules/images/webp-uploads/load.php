@@ -24,7 +24,7 @@ if ( function_exists( 'webp_uploads_create_sources_property' ) ) {
 if ( ! require __DIR__ . '/can-load.php' ) {
 	add_action(
 		'admin_notices',
-		static function() {
+		static function () {
 			printf(
 				'<div class="notice notice-error"><p>%s</p></div>',
 				esc_html__( 'The WebP Uploads feature cannot be loaded from within the plugin since it is already merged into WordPress core.', 'performance-lab' )

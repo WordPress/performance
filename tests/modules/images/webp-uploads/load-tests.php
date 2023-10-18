@@ -977,12 +977,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		global $wp_version;
 		$this->assertSame( 82, webp_uploads_modify_webp_quality( 90, 'image/webp' ), 'WebP image quality should always be 82.' );
 		$this->assertSame( 82, webp_uploads_modify_webp_quality( 82, 'image/webp' ), 'WebP image quality should always be 82.' );
-
-		if ( version_compare( $wp_version, '6.1', '<' ) ) {
-			$this->assertSame( 82, webp_uploads_modify_webp_quality( 86, 'image/jpeg' ), 'JPEG image quality should always return 82 quality for WP version lower than 6.1.' );
-		} else {
-			$this->assertSame( 80, webp_uploads_modify_webp_quality( 80, 'image/jpeg' ), 'JPEG image quality should return default quality provided from WP filter wp_editor_set_quality.' );
-		}
+		$this->assertSame( 80, webp_uploads_modify_webp_quality( 80, 'image/jpeg' ), 'JPEG image quality should return default quality provided from WP filter wp_editor_set_quality.' );
 	}
 
 	/**
