@@ -5,8 +5,7 @@
  * @package performance-lab
  */
 
-use PerformanceLab\Plugin_Manager as Plugin_Manager;
-use PerformanceLab\REST_API\REST_Routes as REST_Routes;
+use PerformanceLab\Plugin_Manager;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -20,32 +19,20 @@ add_action( 'admin_enqueue_scripts', 'admin_scripts' );
  * @return void
  */
 function admin_scripts() {
-	wp_enqueue_script(
-		'wpp-plugin-manager',
-		plugin_dir_url( __FILE__ ) . 'assets/js/updates.js',
-		array( 'jquery', 'wp' ),
-		microtime(),
-		true
-	);
+	wp_enqueue_script( 'updates' );
 
 	wp_localize_script(
-		'wpp-plugin-manager',
-		'_wpUpdatesSettings',
+		'updates',
+		'_wpUpdatesItemCounts',
 		array(
-			'ajax_nonce' => wp_installing() ? '' : wp_create_nonce( 'updates' ),
+			'settings' => array(
+				'totals' => wp_get_update_data(),
+			),
 		)
 	);
 
-	/*wp_localize_script(
-		'wpp-plugin-manager',
-		'wpp_plugin_manager',
-		array(
-			'rest_base'      => esc_url_raw( rest_url() ),
-			'rest_namespace' => REST_Routes::REST_ROOT,
-			'nonce'          => wp_create_nonce( 'wp_rest' ),
-			'wpp_plugins'    => Plugin_Manager::get_standalone_plugins(),
-		)
-	);*/
+	wp_enqueue_script( 'thickbox' );
+	wp_enqueue_style( 'thickbox' );
 }
 
 /**
@@ -544,3 +531,38 @@ function perflab_dismiss_wp_pointer_wrapper() {
 	check_ajax_referer( 'dismiss_pointer' );
 }
 add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 0 );
+
+$standalone_plugins = Plugin_Manager::get_standalone_plugins();
+
+add_action( 'admin_init', 'handle_wpp_inline_plugin_updates', 15, 0 );
+
+/**
+ * Callback function hooked to admin_init to handle WPP inline standalone
+ * plugins activation and deactivation.
+ *
+ * @return void
+ */
+function handle_wpp_inline_plugin_updates() {
+	if (
+		! empty( filter_input( INPUT_GET, 'wpp' ) ) &&
+		! empty( filter_input( INPUT_GET, 'action' ) ) &&
+		! empty( filter_input( INPUT_GET, 'plugin' ) ) &&
+		'1' === filter_input( INPUT_GET, 'wpp' ) &&
+		(
+			'deactivate' === filter_input( INPUT_GET, 'action' ) ||
+			'activate' === filter_input( INPUT_GET, 'action' )
+		)
+	) {
+		$referer = wp_get_referer();
+		switch ( filter_input( INPUT_GET, 'action' ) ) {
+			case 'activate':
+				activate_plugins( filter_input( INPUT_GET, 'plugin' ) );
+				break;
+			case 'deactivate':
+				deactivate_plugins( filter_input( INPUT_GET, 'plugin' ) );
+				break;
+		}
+		wp_safe_redirect( $referer );
+		exit;
+	}
+}

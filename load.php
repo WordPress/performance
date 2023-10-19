@@ -40,12 +40,6 @@ require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timin
 require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/load.php';
 require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/defaults.php';
 
-// Register REST Routes.
-$rest_routes             = new PerformanceLab\REST_API\REST_Routes();
-$rest_plugins_controller = new PerformanceLab\REST_API\REST_Plugins_Controller();
-$rest_routes->register();
-$rest_plugins_controller->register();
-
 /**
  * Registers the performance modules setting.
  *
