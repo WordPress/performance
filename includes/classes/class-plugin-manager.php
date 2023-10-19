@@ -815,9 +815,9 @@ class Plugin_Manager {
 						if ( ! $tested_wp ) {
 							echo '<span class="compatibility-untested">' . esc_html__( 'Untested with your version of WordPress', 'default' ) . '</span>';
 						} elseif ( ! $compatible_wp ) {
-							echo '<span class="compatibility-incompatible">' . esc_html__( '<strong>Incompatible</strong> with your version of WordPress', 'default' ) . '</span>';
+							echo '<span class="compatibility-incompatible">' . wp_kses_post( __( '<strong>Incompatible</strong> with your version of WordPress', 'default' ) ) . '</span>';
 						} else {
-							echo '<span class="compatibility-compatible">' . esc_html__( '<strong>Compatible</strong> with your version of WordPress', 'default' ) . '</span>';
+							echo '<span class="compatibility-compatible">' . wp_kses_post( __( '<strong>Compatible</strong> with your version of WordPress', 'default' ) ) . '</span>';
 						}
 						?>
 					</div>
