@@ -111,81 +111,6 @@ class Plugin_Manager {
 	}
 
 	/**
-	 * Activate a plugin, installing it first if necessary.
-	 *
-	 * @param string $plugin The plugin slug or URL to the plugin.
-	 * @return bool True on success. False on failure or if plugin was already activated.
-	 */
-	public static function activate( $plugin ) {
-		if ( ! function_exists( 'get_plugins' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		$plugin_slug = self::get_plugin_slug( $plugin );
-		if ( ! $plugin_slug ) {
-			return new WP_Error( 'wpp_invalid_plugin', __( 'Invalid plugin.', 'performance-lab' ) );
-		}
-
-		$installed_plugins = self::get_installed_plugins();
-
-		// Install the plugin if it's not installed already.
-		$plugin_installed = isset( $installed_plugins[ $plugin_slug ] );
-		if ( ! $plugin_installed ) {
-			$plugin_installed = self::install( $plugin );
-		}
-
-		// @phpstan-ignore-next-line false flag that this will always amount to true.
-		if ( is_wp_error( $plugin_installed ) ) {
-			return $plugin_installed;
-		}
-
-		// Refresh the installed plugin list if the plugin isn't present because we just installed it.
-		if ( ! isset( $installed_plugins[ $plugin_slug ] ) ) {
-			$installed_plugins = self::get_installed_plugins();
-		}
-
-		if ( is_plugin_active( $installed_plugins[ $plugin_slug ] ) ) {
-			return new WP_Error( 'wpp_plugin_already_active', __( 'The plugin is already active.', 'performance-lab' ) );
-		}
-
-		$activated = activate_plugin( $installed_plugins[ $plugin_slug ] );
-		if ( is_wp_error( $activated ) ) {
-			return new WP_Error( 'wpp_plugin_failed_activation', $activated->get_error_message() );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Deactivate a plugin.
-	 *
-	 * @param string $plugin The plugin slug (e.g. 'newspack') or path to the plugin file. e.g. ('newspack/newspack.php').
-	 * @return bool True on success. False on failure.
-	 */
-	public static function deactivate( $plugin ) {
-		$installed_plugins = self::get_installed_plugins();
-		if ( ! in_array( $plugin, $installed_plugins, true ) && ! isset( $installed_plugins[ $plugin ] ) ) {
-			return new WP_Error( 'wpp_plugin_not_installed', __( 'The plugin is not installed.', 'performance-lab' ) );
-		}
-
-		if ( isset( $installed_plugins[ $plugin ] ) ) {
-			$plugin_file = $installed_plugins[ $plugin ];
-		} else {
-			$plugin_file = $plugin;
-		}
-
-		if ( ! is_plugin_active( $plugin_file ) ) {
-			return new WP_Error( 'wpp_plugin_not_active', __( 'The plugin is not active.', 'performance-lab' ) );
-		}
-
-		deactivate_plugins( $plugin_file );
-		if ( is_plugin_active( $plugin_file ) ) {
-			return new WP_Error( 'wpp_plugin_failed_deactivation', __( 'Failed to deactivate plugin.', 'performance-lab' ) );
-		}
-		return true;
-	}
-
-	/**
 	 * Get a simple list of all installed plugins.
 	 *
 	 * @return array of 'plugin_slug => plugin_file_path' entries for all installed plugins.
@@ -214,233 +139,6 @@ class Plugin_Manager {
 			$installed_plugins_info[ $key ]['Path'] = $path;
 		}
 		return $installed_plugins_info;
-	}
-
-	/**
-	 * Parse a plugin slug from the slug or URL to download a plugin.
-	 *
-	 * @param string $plugin A plugin slug or the URL to a plugin zip file.
-	 * @return string|bool Parsed slug on success. False on failure.
-	 */
-	public static function get_plugin_slug( $plugin ) {
-		if ( ! is_string( $plugin ) || empty( $plugin ) ) {
-			return false;
-		}
-
-		$url = wp_http_validate_url( $plugin );
-
-		// A plugin slug was passed in, so just return it.
-		if ( ! $url ) {
-			return $plugin;
-		}
-
-		if ( ! stripos( $url, '.zip' ) ) {
-			return false;
-		}
-
-		$result = preg_match_all( '/\/([^\.\/*]+)/', $url, $matches );
-		if ( ! $result ) {
-			return false;
-		}
-
-		$group = end( $matches );
-		$slug  = end( $group );
-		return $slug;
-	}
-
-	/**
-	 * Installs a plugin.
-	 *
-	 * @param string $plugin Plugin slug or URL to plugin zip file.
-	 * @return bool True on success. False on failure.
-	 */
-	public static function install( $plugin ) {
-		if ( ! self::can_install_plugins() ) {
-			return new WP_Error( 'wpp_plugin_failed_install', __( 'Plugins cannot be installed.', 'performance-lab' ) );
-		}
-
-		if ( wp_http_validate_url( $plugin ) ) {
-			return self::install_from_url( $plugin );
-		} else {
-			return self::install_from_slug( $plugin );
-		}
-	}
-
-	/**
-	 * Uninstall a plugin.
-	 *
-	 * @param string|array $plugin The plugin slug (e.g. 'webp-uploads') or path to the plugin file. e.g. ('webp-uploads/webp-uploads.php'), or an array thereof.
-	 * @return bool True on success. False on failure.
-	 */
-	public static function uninstall( $plugin ) {
-		if ( ! self::can_install_plugins() ) {
-			return new WP_Error( 'wpp_plugin_failed_uninstall', __( 'Plugins cannot be uninstalled.', 'performance-lab' ) );
-		}
-
-		$plugins_to_uninstall = array();
-		$installed_plugins    = self::get_installed_plugins();
-
-		if ( ! is_array( $plugin ) ) {
-			$plugin = array( $plugin );
-		}
-
-		foreach ( $plugin as $plugin_slug ) {
-			if ( ! in_array( $plugin_slug, $installed_plugins, true ) && ! isset( $installed_plugins[ $plugin_slug ] ) ) {
-				return new WP_Error( 'wpp_plugin_failed_uninstall', __( 'The plugin is not installed.', 'performance-lab' ) );
-			}
-
-			if ( isset( $installed_plugins[ $plugin_slug ] ) ) {
-				$plugin_file = $installed_plugins[ $plugin_slug ];
-			} else {
-				$plugin_file = $plugin_slug;
-			}
-
-			// Deactivate plugin before uninstalling.
-			self::deactivate( $plugin_file );
-
-			$plugins_to_uninstall[] = $plugin_file;
-		}
-
-		if ( ! function_exists( 'request_filesystem_credentials' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-
-		$success = (bool) delete_plugins( $plugins_to_uninstall );
-		if ( $success ) {
-			wp_clean_plugins_cache();
-			return true;
-		}
-		return new WP_Error( 'wpp_plugin_failed_uninstall', __( 'The plugin could not be uninstalled.', 'performance-lab' ) );
-	}
-
-	/**
-	 * Install a plugin by slug.
-	 *
-	 * @param string $plugin_slug The slug for the plugin.
-	 * @return Mixed True on success. WP_Error on failure.
-	 */
-	protected static function install_from_slug( $plugin_slug ) {
-		// Quick check to make sure plugin directory doesn't already exist.
-		$plugin_directory = WP_PLUGIN_DIR . '/' . $plugin_slug;
-		if ( is_dir( $plugin_directory ) ) {
-			return new WP_Error( 'wpp_plugin_already_installed', __( 'The plugin directory already exists.', 'performance-lab' ) );
-		}
-
-		$managed_plugins = self::get_standalone_plugins();
-		if ( ! isset( $managed_plugins[ $plugin_slug ] ) ) {
-			return new WP_Error(
-				'wpp_plugin_failed_install',
-				__( 'Plugin not found.', 'performance-lab' )
-			);
-		}
-
-		// Return a useful error if we are unable to get download info for the plugin.
-		if ( empty( $managed_plugins[ $plugin_slug ]['Download'] ) ) {
-			$error_message = __( 'Performance Lab cannot install this plugin. You will need to get it from the plugin\'s site and install it manually.', 'performance-lab' );
-			if ( ! empty( $managed_plugins[ $plugin_slug ]['PluginURI'] ) ) {
-				/* translators: %s: plugin URL */
-				$error_message = sprintf( __( 'Performance Lab cannot install this plugin. You will need to get it from <a href="%s">the plugin\'s site</a> and install it manually.', 'performance-lab' ), esc_url( $managed_plugins[ $plugin_slug ]['PluginURI'] ) );
-			}
-
-			return new WP_Error(
-				'wpp_plugin_failed_install',
-				$error_message
-			);
-		}
-
-		// If the plugin has a URL as its Download, install it from there.
-		if ( wp_http_validate_url( $managed_plugins[ $plugin_slug ]['Download'] ) ) {
-			return self::install_from_url( $managed_plugins[ $plugin_slug ]['Download'] );
-		}
-
-		if ( ! function_exists( 'plugins_api' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-		}
-
-		// Check WP.org for a download link, and install it from WP.org.
-		$plugin_info = plugins_api(
-			'plugin_information',
-			array(
-				'slug'   => $plugin_slug,
-				'fields' => array(
-					'short_description' => false,
-					'sections'          => false,
-					'requires'          => false,
-					'rating'            => false,
-					'ratings'           => false,
-					'downloaded'        => false,
-					'last_updated'      => false,
-					'added'             => false,
-					'tags'              => false,
-					'compatibility'     => false,
-					'homepage'          => false,
-					'donate_link'       => false,
-				),
-			)
-		);
-
-		if ( is_wp_error( $plugin_info ) ) {
-			return new WP_Error( 'wpp_plugin_failed_install', $plugin_info->get_error_message() );
-		}
-
-		return self::install_from_url( $plugin_info->download_link );
-	}
-
-	/**
-	 * Install a plugin from an arbitrary URL.
-	 *
-	 * @param string $plugin_url The URL to the plugin zip file.
-	 * @return bool True on success. False on failure.
-	 */
-	protected static function install_from_url( $plugin_url ) {
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-
-		WP_Filesystem();
-
-		$skin     = new \Automatic_Upgrader_Skin();
-		$upgrader = new \WP_Upgrader( $skin );
-		$upgrader->init();
-
-		$download = $upgrader->download_package( $plugin_url );
-		if ( is_wp_error( $download ) ) {
-			return new WP_Error( 'wpp_plugin_failed_install', $download->get_error_message() );
-		}
-
-		// GitHub appends random strings to the end of its downloads.
-		// If we asked for foo.zip, make sure the downloaded file is called foo.tmp.
-		if ( stripos( $plugin_url, 'github' ) ) {
-			$plugin_url_parts  = explode( '/', $plugin_url );
-			$desired_file_name = str_replace( '.zip', '', end( $plugin_url_parts ) );
-			$new_file_name     = preg_replace( '#(' . $desired_file_name . '.*).tmp#', $desired_file_name . '.tmp', $download );
-			rename( $download, $new_file_name ); // phpcs:ignore
-			$download = $new_file_name;
-		}
-
-		$working_dir = $upgrader->unpack_package( $download );
-		if ( is_wp_error( $working_dir ) ) {
-			return new WP_Error( 'wpp_plugin_failed_install', $working_dir->get_error_message() );
-		}
-
-		$result = $upgrader->install_package(
-			array(
-				'source'        => $working_dir,
-				'destination'   => WP_PLUGIN_DIR,
-				'clear_working' => true,
-				'hook_extra'    => array(
-					'type'   => 'plugin',
-					'action' => 'install',
-				),
-			)
-		);
-		if ( is_wp_error( $result ) ) {
-			return new WP_Error( 'wpp_plugin_failed_install', $result->get_error_message() );
-		}
-
-		wp_clean_plugins_cache();
-		return true;
 	}
 
 	/**
@@ -473,12 +171,12 @@ class Plugin_Manager {
 		$standalone_plugins = static::get_standalone_plugins();
 		?>
 		<div class="wrap">
-			<h1>Performance Plugins</h1>
-			<p>The following standalone performance plugins are available for installation.</p>
+			<h1><?php echo esc_html( __( 'Performance Plugins', 'performance-lab' ) ); ?></h1>
+			<p><?php echo esc_html( __( 'The following standalone performance plugins are available for installation.', 'performance-lab' ) ); ?></p>
 			<div class="wrap">
 				<form id="plugin-filter" method="post">
 					<div class="wp-list-table widefat plugin-install wpp-standalone-plugins">
-						<h2 class="screen-reader-text">Plugins list</h2>
+						<h2 class="screen-reader-text"><?php echo esc_html( __( 'Plugins list', 'performance-lab' ) ); ?></h2>
 						<div id="the-list">
 							<?php
 							foreach ( $standalone_plugins as $standalone_plugin ) {
@@ -539,7 +237,7 @@ class Plugin_Manager {
 		$author      = $plugin['author'];
 		if ( ! empty( $author ) ) {
 			/* translators: %s: Plugin author. */
-			$author = ' <cite>' . sprintf( __( 'By %s', 'performance-lab' ), $author ) . '</cite>';
+			$author = ' <cite>' . sprintf( __( 'By %s', 'default' ), $author ) . '</cite>';
 		}
 
 		$requires_php = isset( $plugin['requires_php'] ) ? $plugin['requires_php'] : null;
@@ -562,14 +260,14 @@ class Plugin_Manager {
 								esc_attr( $plugin['slug'] ),
 								esc_url( $status['url'] ),
 								/* translators: %s: Plugin name and version. */
-								esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'performance-lab' ), $name ) ),
+								esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
 								esc_attr( $name ),
 								__( 'Install Now', 'performance-lab' )
 							);
 						} else {
 							$action_links[] = sprintf(
 								'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-								_x( 'Cannot Install', 'plugin', 'performance-lab' )
+								_x( 'Cannot Install', 'plugin', 'default' )
 							);
 						}
 					}
@@ -584,14 +282,14 @@ class Plugin_Manager {
 								esc_attr( $plugin['slug'] ),
 								esc_url( $status['url'] ),
 								/* translators: %s: Plugin name and version. */
-								esc_attr( sprintf( _x( 'Update %s now', 'plugin', 'performance-lab' ), $name ) ),
+								esc_attr( sprintf( _x( 'Update %s now', 'plugin', 'default' ), $name ) ),
 								esc_attr( $name ),
 								__( 'Update Now', 'performance-lab' )
 							);
 						} else {
 							$action_links[] = sprintf(
 								'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-								_x( 'Cannot Update', 'plugin', 'performance-lab' )
+								_x( 'Cannot Update', 'plugin', 'default' )
 							);
 						}
 					}
@@ -602,7 +300,7 @@ class Plugin_Manager {
 					if ( is_plugin_active( $status['file'] ) ) {
 						$action_links[] = sprintf(
 							'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-							_x( 'Active', 'plugin', 'performance-lab' )
+							_x( 'Active', 'plugin', 'default' )
 						);
 						if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
 							global $page, $paged;
@@ -614,7 +312,7 @@ class Plugin_Manager {
 								wp_nonce_url( 'plugins.php?wpp=1&action=deactivate&amp;plugin=' . rawurlencode( $status['file'] ) . '&amp;plugin_status=' . $context . '&amp;paged=' . $page . '&amp;s=' . $s, 'deactivate-plugin_' . $status['file'] ),
 								esc_attr( $plugin['slug'] ),
 								/* translators: %s: Plugin name. */
-								esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'performance-lab' ), $plugin['slug'] ) ),
+								esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'default' ), $plugin['slug'] ) ),
 								__( 'Deactivate', 'performance-lab' )
 							);
 						}
@@ -622,7 +320,7 @@ class Plugin_Manager {
 						if ( $compatible_php && $compatible_wp ) {
 							$button_text = __( 'Activate', 'performance-lab' );
 							/* translators: %s: Plugin name. */
-							$button_label = _x( 'Activate %s', 'plugin', 'performance-lab' );
+							$button_label = _x( 'Activate %s', 'plugin', 'default' );
 							$activate_url = add_query_arg(
 								array(
 									'_wpnonce' => wp_create_nonce( 'activate-plugin_' . $status['file'] ),
@@ -636,7 +334,7 @@ class Plugin_Manager {
 							if ( is_network_admin() ) {
 								$button_text = __( 'Network Activate', 'performance-lab' );
 								/* translators: %s: Plugin name. */
-								$button_label = _x( 'Network Activate %s', 'plugin', 'performance-lab' );
+								$button_label = _x( 'Network Activate %s', 'plugin', 'default' );
 								$activate_url = add_query_arg( array( 'networkwide' => 1 ), $activate_url );
 							}
 
@@ -649,13 +347,13 @@ class Plugin_Manager {
 						} else {
 							$action_links[] = sprintf(
 								'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-								_x( 'Cannot Activate', 'plugin', 'performance-lab' )
+								_x( 'Cannot Activate', 'plugin', 'default' )
 							);
 						}
 					} else {
 						$action_links[] = sprintf(
 							'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-							_x( 'Installed', 'plugin', 'performance-lab' )
+							_x( 'Installed', 'plugin', 'default' )
 						);
 					}
 					break;
@@ -802,7 +500,7 @@ class Plugin_Manager {
 								number_format_i18n( $active_installs_millions )
 							);
 						} elseif ( 0 === $plugin['active_installs'] ) {
-							$active_installs_text = _x( 'Less Than 10', 'Active plugin installations', 'performance-lab' );
+							$active_installs_text = _x( 'Less Than 10', 'Active plugin installations', 'default' );
 						} else {
 							$active_installs_text = number_format_i18n( $plugin['active_installs'] ) . '+';
 						}
