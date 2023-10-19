@@ -277,7 +277,7 @@ class Plugin_Manager {
 					if ( $status['url'] ) {
 						if ( $compatible_php && $compatible_wp ) {
 							$action_links[] = sprintf(
-								'<a class="update-now button aria-button-if-js" data-plugin="%s" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
+								'<a class="button aria-button-if-js" data-plugin="%s" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
 								esc_attr( $status['file'] ),
 								esc_attr( $plugin['slug'] ),
 								esc_url( $status['url'] ),
