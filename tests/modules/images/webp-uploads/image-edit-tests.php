@@ -144,6 +144,10 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_to_backup_the_full_size_image_if_only_the_thumbnail_is_edited() {
+		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
+			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
+		}
+
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
@@ -195,6 +199,10 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_backup_the_image_when_all_images_except_the_thumbnail_are_updated() {
+		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
+			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
+		}
+
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
@@ -236,10 +244,14 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_use_the_attached_image_when_updating_subsequent_images_not_the_original_version() {
+		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
+			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
+		}
+
 		// The leafs image is 1080 pixels wide with this filter we ensure a -scaled version is created for this test.
 		add_filter(
 			'big_image_size_threshold',
-			function () {
+			static function () {
 				// Due to the largest image size is 1024 and the image is 1080x720, 1050 is a good spot to create a scaled size for all images sizes.
 				return 1050;
 			}

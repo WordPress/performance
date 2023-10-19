@@ -6,6 +6,6 @@
  * @package performance-lab
  */
 
-return function() {
+return static function() {
 	update_option( 'test_demo_module_activation_status', 'activated' );
 };

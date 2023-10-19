@@ -1,10 +1,10 @@
 === Performance Lab ===
 
 Contributors:      wordpressdotorg
-Requires at least: 6.1
-Tested up to:      6.2
-Requires PHP:      5.6
-Stable tag:        2.1.0
+Requires at least: 6.3
+Tested up to:      6.4
+Requires PHP:      7.0
+Stable tag:        2.7.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -17,13 +17,11 @@ The Performance Lab plugin is a collection of modules focused on enhancing perfo
 
 Currently the plugin includes the following performance modules:
 
-* **Dominant Color:** Adds support to store dominant color for an image and create a placeholder background with that color.
+* **Dominant Color Images:** Adds support to store the dominant color of newly uploaded images and create a placeholder background of that color.
 * **WebP Support Health Check:** Adds a WebP support check in Site Health status.
 * **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
-* **Fetchpriority:** Adds a fetchpriority hint for the primary content image on the page to load faster.
 * **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
 * **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
-* **SQLite Integration:** Use an SQLite database instead of MySQL.
 
 == Installation ==
 
@@ -80,6 +78,96 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.7.0 =
+
+**Enhancements**
+
+* Images: Remove Fetchpriority module as the functionality is now available in WordPress core. ([854](https://github.com/WordPress/performance/pull/854))
+* Infrastructure: Bump minimum required PHP version to 7.0 and minimum required WP version to 6.3. ([851](https://github.com/WordPress/performance/pull/851))
+
+**Documentation**
+
+* Infrastructure: Publish Dominant Color Images standalone plugin. ([842](https://github.com/WordPress/performance/pull/842))
+
+= 2.6.1 =
+
+**Bug Fixes**
+
+* Infrastructure: Remove PHPStan config file from plugin directory. ([816](https://github.com/WordPress/performance/pull/816))
+
+**Documentation**
+
+* Infrastructure: Add standalone plugin assets. ([815](https://github.com/WordPress/performance/pull/815))
+
+= 2.6.0 =
+
+**Features**
+
+* Infrastructure: Add output buffering checkbox to Server-Timing screen. ([801](https://github.com/WordPress/performance/pull/801))
+* Infrastructure: Implement logic to measure specific hook execution time with Server-Timing controlled by a WP Admin screen. ([784](https://github.com/WordPress/performance/pull/784))
+
+**Enhancements**
+
+* Images: Fix incorrect function prefixes in Dominant Color Images. ([789](https://github.com/WordPress/performance/pull/789))
+* Infrastructure: Add early exit clauses to files with procedural code. ([790](https://github.com/WordPress/performance/pull/790))
+* Infrastructure: Allow disabling Server-Timing entirely using `PERFLAB_DISABLE_SERVER_TIMING` constant. ([795](https://github.com/WordPress/performance/pull/795))
+
+**Bug Fixes**
+
+* Images: Fix WebP handling when editing images based on WordPress 6.3 change. ([796](https://github.com/WordPress/performance/pull/796))
+* Infrastructure: Fix errors detected by Plugin Checker. ([788](https://github.com/WordPress/performance/pull/788))
+
+= 2.5.0 =
+
+**Enhancements**
+
+* Images: Check for fetchpriority feature being available in WordPress core before loading the module. ([769](https://github.com/WordPress/performance/pull/769))
+* Database Optimization: Remove SQLite module. ([764](https://github.com/WordPress/performance/pull/764))
+* Infrastructure: Bump tested up to version to 6.3. ([772](https://github.com/WordPress/performance/pull/772))
+
+= 2.4.0 =
+
+**Enhancements**
+
+* Database: Implement migration prompt to migrate from SQLite module to standalone plugin due to removal in the following release. ([739](https://github.com/WordPress/performance/pull/739))
+* Infrastructure: Enhance code quality by adding PHPStan and fixing level 0 issues. ([730](https://github.com/WordPress/performance/pull/730))
+* Infrastructure: Use static closures for minor performance improvement whenever instance access is not needed. ([729](https://github.com/WordPress/performance/pull/729))
+
+**Bug Fixes**
+
+* Database: Fix SQLite module deactivation routine to make standalone plugin migration work correctly. ([743](https://github.com/WordPress/performance/pull/743))
+* Infrastructure: Make `Server-Timing` header output more robust. ([736](https://github.com/WordPress/performance/pull/736))
+
+= 2.3.0 =
+
+**Enhancements**
+
+* Images: Configure `Dominant Color` and `Fetchpriority` modules for their standalone plugins. ([704](https://github.com/WordPress/performance/pull/704))
+* Infrastructure: Temporarily remove Dominant Color Images from standalone `plugins.json` definition. ([719](https://github.com/WordPress/performance/pull/719))
+* Infrastructure: Use dynamic version from `plugins.json` for manual workflow. ([710](https://github.com/WordPress/performance/pull/710))
+
+**Bug Fixes**
+
+* Images: Add dominant color styling before any existing inline style attributes. ([716](https://github.com/WordPress/performance/pull/716))
+* Infrastructure: Resolve low-severity security advisory [GHSA-66qq-69rw-6x63](https://github.com/WordPress/performance/security/advisories/GHSA-66qq-69rw-6x63).
+
+= 2.2.0 =
+
+**Enhancements**
+
+* Images: Remove "experimental" flag from Fetchpriority module. ([702](https://github.com/WordPress/performance/pull/702))
+* Infrastructure: Implement infrastructure for launching standalone plugins from modules, including WebP Uploads. ([699](https://github.com/WordPress/performance/pull/699))
+* Infrastructure: Include `WordPress-Extra` rules in PHPCS configuration and fix resulting problems. ([695](https://github.com/WordPress/performance/pull/695))
+
+**Bug Fixes**
+
+* Images: Sanitize target param before using it. ([690](https://github.com/WordPress/performance/pull/690))
+
+**Documentation**
+
+* Images: Change module slug/directory from `dominant-color` to `dominant-color-images`. ([708](https://github.com/WordPress/performance/pull/708))
+* Images: Rename `Dominant Color` module to `Dominant Color images`. ([705](https://github.com/WordPress/performance/pull/705))
 
 = 2.1.0 =
 
@@ -309,7 +397,7 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 * Images: Add WebP for uploads module. ([32](https://github.com/WordPress/performance/pull/32))
 * Images: Support retry mechanism for generating sub-sizes in additional MIME types on constrained environments. ([188](https://github.com/WordPress/performance/pull/188))
-* Images: Update `the_content` with the appropiate image format. ([152](https://github.com/WordPress/performance/pull/152))
+* Images: Update `the_content` with the appropriate image format. ([152](https://github.com/WordPress/performance/pull/152))
 * Site Health: Add WebP support in site health. ([141](https://github.com/WordPress/performance/pull/141))
 * Site Health: Add module to alert about excessive JS and CSS assets. ([54](https://github.com/WordPress/performance/pull/54))
 * Object Cache: Add Site Health check module for persistent object cache. ([111](https://github.com/WordPress/performance/pull/111))
@@ -343,3 +431,9 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 * Infrastructure: Add contribution documentation. ([47](https://github.com/WordPress/performance/pull/47))
 * Infrastructure: Add release documentation. ([138](https://github.com/WordPress/performance/pull/138))
 * Infrastructure: Define module specification in documentation. ([26](https://github.com/WordPress/performance/pull/26))
+
+== Upgrade Notice ==
+
+= 2.5.0 =
+
+The SQLite module is no longer present starting with this release. If you still use it, please migrate to the standalone plugin before updating.

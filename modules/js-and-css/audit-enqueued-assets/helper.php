@@ -6,6 +6,10 @@
  * @since 1.0.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Callback for enqueued_js_assets test.
  *
@@ -54,20 +58,20 @@ function perflab_aea_enqueued_js_assets_test() {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $scripts_treshold Scripts threshold number. Default 30.
+	 * @param int $scripts_threshold Scripts threshold number. Default 30.
 	 */
-	$scripts_treshold = apply_filters( 'perflab_aea_enqueued_scripts_threshold', 30 );
+	$scripts_threshold = apply_filters( 'perflab_aea_enqueued_scripts_threshold', 30 );
 
 	/**
 	 * Filters size of enqueued scripts to trigger warning.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $scripts_size_treshold Enqueued Scripts size (in bytes) threshold. Default 300000.
+	 * @param int $scripts_size_threshold Enqueued Scripts size (in bytes) threshold. Default 300000.
 	 */
-	$scripts_size_treshold = apply_filters( 'perflab_aea_enqueued_scripts_byte_size_threshold', 300000 );
+	$scripts_size_threshold = apply_filters( 'perflab_aea_enqueued_scripts_byte_size_threshold', 300000 );
 
-	if ( $enqueued_scripts > $scripts_treshold || perflab_aea_get_total_size_bytes_enqueued_scripts() > $scripts_size_treshold ) {
+	if ( $enqueued_scripts > $scripts_threshold || perflab_aea_get_total_size_bytes_enqueued_scripts() > $scripts_size_threshold ) {
 		$result['status'] = 'recommended';
 
 		$result['description'] = sprintf(

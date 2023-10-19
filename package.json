@@ -2,6 +2,10 @@
   "name": "performance",
   "license": "GPL-2.0-or-later",
   "repository": "git+https://github.com/WordPress/performance.git",
+  "engines": {
+    "node": ">=16.19.1",
+    "npm": ">=8.19.3 <9"
+  },
   "devDependencies": {
     "@octokit/rest": "^19.0.5",
     "@wordpress/env": "^5.7.0",
@@ -26,6 +30,7 @@
     "format-js": "wp-scripts format ./bin",
     "lint-js": "wp-scripts lint-js ./bin",
     "format-php": "wp-env run composer run-script format",
+    "phpstan": "wp-env run composer run-script phpstan",
     "prelint-php": "wp-env run composer 'install --no-interaction'",
     "lint-php": "wp-env run composer run-script lint",
     "pretest-php": "wp-env run composer 'install --no-interaction'",
@@ -37,7 +42,8 @@
   },
   "lint-staged": {
     "*.php": [
-      "composer run-script lint"
+      "composer run-script lint",
+      "composer run-script phpstan"
     ]
   }
 }

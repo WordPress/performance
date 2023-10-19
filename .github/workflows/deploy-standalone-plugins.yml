@@ -8,31 +8,52 @@ on:
       slug:
         type: string
         description: 'The slug of the plugin to deploy'
-      version:
-        type: string
-        description: 'The version of the plugin to deploy'
-
+      dry-run:
+        type: boolean
+        description: 'Debug mode (run without publishing).'
+        default: false
 jobs:
   release:
-    name: New Release
+    name: Prepare Deployment
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Setup Node.js (.nvmrc)
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: Install npm dependencies
+        run: npm ci
+      - name: Get plugin version
+        id: get-version
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          echo "version=$(node ./bin/plugin/cli.js get-plugin-version --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
       - name: Set matrix
         id: set-matrix
         run: |
           if ${{ github.event_name == 'workflow_dispatch' }}; then
-            # Set the manual input values in JSON format for use in the matrix.
-            echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ inputs.version }}\"}]}" >> $GITHUB_OUTPUT
+            result=$(echo "${{ steps.get-version.outputs.version }}" | awk '/^(\*|[0-9]+(\.[0-9]+){0,2}(-[a-zA-Z0-9.]+)?)$/ {print "Matched"}')
+            if [[ -n "$result" ]]; then
+              # Set the manual input values in JSON format for use in the matrix.
+              echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ steps.get-version.outputs.version }}\",\"dry-run\":\"${{ inputs.dry-run }}\"}]}" >> $GITHUB_OUTPUT
+            else
+              echo "The ${{ inputs.slug }} module slug is missing in the file plugins.json."
+              exit 1
+            fi
           else
             # Load the JSON file and parse from "{name: {slug, version}, ...}" to "include: [{ name, slug, version }, ...]"
             # for use in the matrix.
-            echo "matrix="$(jq -c '{include:[keys[] as $k | {name:$k,slug:.[$k].slug,version:.[$k].version }]}' plugins.json) >> $GITHUB_OUTPUT
+            # The "dry-run" parameter is included here to set the deployment mode.
+            # When running the manual (workflow_dispatch) workflow, this value will be set from manual input type.
+            echo "matrix="$(jq -c '{include:[keys[] as $k | {name:$k,slug:.[$k].slug,version:.[$k].version,"dry-run":false }]}' plugins.json) >> $GITHUB_OUTPUT
           fi
   deploy:
+    name: Deploy Plugin
     needs: release
     runs-on: ubuntu-latest
     strategy:
@@ -50,18 +71,13 @@ jobs:
       - name: Building standalone plugins
         run: npm run build-plugins
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
-        # TODO Once the workflow is tested, we will remove the comment and use the 10up action to deploy the plugin.
-        #uses: 10up/action-wordpress-plugin-deploy@stable
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        with:
+          dry-run: ${{ matrix.dry-run }}
         env:
-          # TODO Once the workflow is tested, we will remove the comment and use the secret SVN access.
-          #SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          #SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-          # TODO Once the workflow is tested, we will remove this test credential.
-          SVN_PASSWORD: SVN_PASSWORD
-          SVN_USERNAME: SVN_USERNAME
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SLUG: ${{ matrix.slug }}
           VERSION: ${{ matrix.version }}
           BUILD_DIR: ./build/${{ matrix.slug }}
           ASSETS_DIR: ./build/${{ matrix.slug }}/.wordpress-org
-        # TODO The script will be removed once the workflow is tested.
-        run: bash ./deploy.sh

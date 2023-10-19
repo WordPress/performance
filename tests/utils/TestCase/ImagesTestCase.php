@@ -11,7 +11,7 @@ use WP_UnitTestCase;
  *
  * @method void assertImageHasSource( int $attachment_id, string $mime_type, string $message = '' ) Asserts that the image has the appropriate source.
  * @method void assertImageHasSizeSource( int $attachment_id, string $size_name, string $mime_type, string $message = '' ) Asserts that the image has the appropriate source for the subsize.
- * @method void assertImageNotHasSource( int $attachment_id, string $mime_type, string $message ) Asserts that the image doesn't have the appropriate source.
+ * @method void assertImageNotHasSource( int $attachment_id, string $mime_type, string $message = '' ) Asserts that the image doesn't have the appropriate source.
  * @method void assertImageNotHasSizeSource( int $attachment_id, string $size_name, string $mime_type, string $message = '' ) Asserts that the image doesn't have the appropriate source for the subsize.
  * @method void assertFileNameIsEdited( string $filename, string $message = '' ) Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
  * @method void assertFileNameIsNotEdited( string $filename, string $message = '' ) Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
@@ -86,7 +86,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $message  The Error message used to display when the assertion fails.
 	 */
 	public static function assertFileNameIsEdited( $filename, $message = '' ) {
-		self::assertRegExp( '/e\d{13}/', $filename, $message );
+		self::assertMatchesRegularExpression( '/e\d{13}/', $filename, $message );
 	}
 
 	/**
@@ -96,7 +96,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $message  The Error message used to display when the assertion fails.
 	 */
 	public static function assertFileNameIsNotEdited( $filename, $message = '' ) {
-		self::assertNotRegExp( '/e\d{13}/', $filename, $message );
+		self::assertDoesNotMatchRegularExpression( '/e\d{13}/', $filename, $message );
 	}
 
 	/**
@@ -107,7 +107,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $message          The Error message used to display when the assertion fails.
 	 */
 	public static function assertSizeNameIsHashed( $size_name, $hashed_size_name, $message = '' ) {
-		self::assertRegExp( "/{$size_name}-\d{13}/", $hashed_size_name, $message );
+		self::assertMatchesRegularExpression( "/{$size_name}-\d{13}/", $hashed_size_name, $message );
 	}
 
 	/**
@@ -116,7 +116,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	public function opt_in_to_jpeg_and_webp() {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
-			function( $transforms ) {
+			static function( $transforms ) {
 				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
 				$transforms['image/webp'] = array( 'image/webp', 'image/jpeg' );
 				return $transforms;

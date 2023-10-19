@@ -3,9 +3,9 @@
  * Plugin Name: Performance Lab
  * Plugin URI: https://github.com/WordPress/performance
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
- * Requires at least: 6.1
- * Requires PHP: 5.6
- * Version: 2.1.0
+ * Requires at least: 6.3
+ * Requires PHP: 7.0
+ * Version: 2.7.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,7 +15,11 @@
  * @package performance-lab
  */
 
-define( 'PERFLAB_VERSION', '2.1.0' );
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
+define( 'PERFLAB_VERSION', '2.7.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -66,7 +70,7 @@ function perflab_get_modules_setting_default() {
 		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
 		$default_option          = array_reduce(
 			$default_enabled_modules,
-			function( $module_settings, $module_dir ) {
+			static function ( $module_settings, $module_dir ) {
 				$module_settings[ $module_dir ] = array( 'enabled' => true );
 				return $module_settings;
 			},
@@ -93,7 +97,7 @@ function perflab_sanitize_modules_setting( $value ) {
 	// Ensure that every element is an array with an 'enabled' key.
 	return array_filter(
 		array_map(
-			function( $module_settings ) {
+			static function ( $module_settings ) {
 				if ( ! is_array( $module_settings ) ) {
 					return array();
 				}
@@ -124,6 +128,7 @@ function perflab_get_module_settings() {
 		'site-health/audit-autoloaded-options' => 'database/audit-autoloaded-options',
 		'site-health/audit-enqueued-assets'    => 'js-and-css/audit-enqueued-assets',
 		'site-health/webp-support'             => 'images/webp-support',
+		'images/dominant-color'                => 'images/dominant-color-images',
 	);
 
 	foreach ( $legacy_module_slugs as $legacy_slug => $current_slug ) {
@@ -147,7 +152,7 @@ function perflab_get_active_modules() {
 	$modules = array_keys(
 		array_filter(
 			perflab_get_module_settings(),
-			function( $module_settings ) {
+			static function ( $module_settings ) {
 				return isset( $module_settings['enabled'] ) && $module_settings['enabled'];
 			}
 		)
@@ -169,7 +174,7 @@ function perflab_get_active_modules() {
  * Gets the active and valid performance modules.
  *
  * @since 1.3.0
- * @since n.e.x.t Adds an additional check for standalone plugins.
+ * @since 2.2.0 Adds an additional check for standalone plugins.
  *
  * @param string $module Slug of the module.
  * @return bool True if the module is active and valid, otherwise false.
@@ -257,7 +262,7 @@ function perflab_can_load_module( $module ) {
 /**
  * Checks whether the given module has already been loaded by a separate plugin.
  *
- * @since n.e.x.t
+ * @since 2.2.0
  *
  * @param string $module Slug of the module.
  * @return bool Whether the module has already been loaded by a separate plugin.
@@ -277,13 +282,14 @@ function perflab_is_standalone_plugin_loaded( $module ) {
 /**
  * Gets the standalone plugin constants used for each module / plugin.
  *
- * @since n.e.x.t
+ * @since 2.2.0
  *
  * @return array Map of module path to version constant used.
  */
 function perflab_get_standalone_plugins_constants() {
 	return array(
-		'images/webp-uploads' => 'WEBP_UPLOADS_VERSION',
+		'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
+		'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
 	);
 }
 
@@ -309,8 +315,9 @@ add_action( 'plugins_loaded', 'perflab_load_active_and_valid_modules' );
  * This only runs in WP Admin to not have any potential performance impact on
  * the frontend.
  *
- * This function will short-circuit if the constant
- * 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is set as true.
+ * This function will short-circuit if at least one of the constants
+ * 'PERFLAB_DISABLE_SERVER_TIMING' or 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' is
+ * set as true.
  *
  * @since 1.8.0
  * @since 2.1.0 No longer attempts to use two of the drop-ins together.
@@ -319,6 +326,11 @@ add_action( 'plugins_loaded', 'perflab_load_active_and_valid_modules' );
  */
 function perflab_maybe_set_object_cache_dropin() {
 	global $wp_filesystem;
+
+	// Bail if Server-Timing is disabled entirely.
+	if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
+		return;
+	}
 
 	// Bail if disabled via constant.
 	if ( defined( 'PERFLAB_DISABLE_OBJECT_CACHE_DROPIN' ) && PERFLAB_DISABLE_OBJECT_CACHE_DROPIN ) {
@@ -335,7 +347,7 @@ function perflab_maybe_set_object_cache_dropin() {
 	 *
 	 * @since 2.0.0
 	 *
-	 * @param bool Whether the server timing drop-in should be set.
+	 * @param bool $disabled Whether to disable the server timing drop-in. Default false.
 	 */
 	if ( apply_filters( 'perflab_disable_object_cache_dropin', false ) ) {
 		return;
@@ -428,6 +440,7 @@ register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin'
 // Only load admin integration when in admin.
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
+	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/server-timing.php';
 }
 
 /**
@@ -517,7 +530,7 @@ add_action(
 	 * @param string $option Name of the option to add.
 	 * @param mixed  $value  Value of the option.
 	 */
-	function( $option, $value ) {
+	static function ( $option, $value ) {
 		perflab_run_module_activation_deactivation( perflab_get_modules_setting_default(), $value );
 	},
 	10,

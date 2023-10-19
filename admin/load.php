@@ -5,6 +5,10 @@
  * @package performance-lab
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Adds the modules page to the Settings menu.
  *
@@ -79,7 +83,7 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 		add_settings_field(
 			$module_slug,
 			$module_data['name'],
-			function() use ( $module_slug, $module_data, $module_settings ) {
+			static function () use ( $module_slug, $module_data, $module_settings ) {
 				perflab_render_modules_page_field( $module_slug, $module_data, $module_settings );
 			},
 			PERFLAB_MODULES_SCREEN,
@@ -107,7 +111,7 @@ function perflab_render_modules_page() {
 			<?php esc_html_e( 'Performance Modules', 'performance-lab' ); ?>
 		</h1>
 
-		<form action="options.php" method="post" novalidate="novalidate">
+		<form action="options.php" method="post">
 			<?php settings_fields( PERFLAB_MODULES_SCREEN ); ?>
 			<?php do_settings_sections( PERFLAB_MODULES_SCREEN ); ?>
 			<?php submit_button(); ?>
@@ -142,14 +146,17 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<?php
 				if ( $module_data['experimental'] ) {
 					printf(
-						/* translators: %s: module name */
-						__( 'Enable %s <strong>(experimental)</strong>', 'performance-lab' ),
+						wp_kses(
+							/* translators: %s: module name */
+							__( 'Enable %s <strong>(experimental)</strong>', 'performance-lab' ),
+							array( 'strong' => array() )
+						),
 						esc_html( $module_data['name'] )
 					);
 				} else {
 					printf(
 						/* translators: %s: module name */
-						__( 'Enable %s', 'performance-lab' ),
+						esc_html__( 'Enable %s', 'performance-lab' ),
 						esc_html( $module_data['name'] )
 					);
 				}
@@ -160,24 +167,10 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<?php
 				if ( $is_standalone_plugin_loaded ) {
 					esc_html_e( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' );
-				} elseif ( 'database/sqlite' === $module_slug && file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
-					printf(
-						/* translators: %s: db.php drop-in path */
-						esc_html__( 'The SQLite module cannot be activated because a different %s drop-in already exists.', 'performance-lab' ),
-						'<code>' . esc_html( basename( WP_CONTENT_DIR ) ) . '/db.php</code>'
-					);
-				} elseif ( 'database/sqlite' === $module_slug && ! wp_is_writable( WP_CONTENT_DIR ) ) {
-					printf(
-						/* translators: %s: db.php drop-in path */
-						esc_html__( 'The SQLite module cannot be activated because the %s directory is not writable.', 'performance-lab' ),
-						'<code>' . esc_html( basename( WP_CONTENT_DIR ) ) . '</code>'
-					);
-				} elseif ( 'database/sqlite' === $module_slug && ! class_exists( 'SQLite3' ) ) {
-					esc_html_e( 'The SQLite module cannot be activated because the SQLite extension is not loaded.', 'performance-lab' );
 				} else {
 					printf(
 						/* translators: %s: module name */
-						__( '%s is already part of your WordPress version and therefore cannot be loaded as part of the plugin.', 'performance-lab' ),
+						esc_html__( '%s is already part of your WordPress version and therefore cannot be loaded as part of the plugin.', 'performance-lab' ),
 						esc_html( $module_data['name'] )
 					);
 				}
@@ -187,21 +180,6 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 		<p id="<?php echo esc_attr( "{$base_id}_description" ); ?>" class="description">
 			<?php echo esc_html( $module_data['description'] ); ?>
 		</p>
-		<?php if ( 'database/sqlite' === $module_slug ) : ?>
-			<?php if ( $enabled ) : ?>
-				<?php if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) : ?>
-					<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
-					<p class="notice notice-warning" style="padding:1em;max-width:50em;">
-						<?php esc_html_e( 'Your site is currently using an SQLite database. You can disable this module to get back to your previous MySQL database, with all your previous data intact.', 'performance-lab' ); ?>
-					</p>
-				<?php endif; ?>
-			<?php else : ?>
-				<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
-				<p class="notice notice-warning" style="padding:1em;max-width:50em;">
-					<?php esc_html_e( 'Enabling this module will switch to a separate database and install WordPress in it. You will need to reconfigure your site, and start with a fresh site. Disabling the module you will get back to your previous MySQL database, with all your previous data intact.', 'performance-lab' ); ?>
-				</p>
-			<?php endif; ?>
-		<?php endif; ?>
 	</fieldset>
 	<?php
 }
@@ -254,11 +232,13 @@ function perflab_get_modules( $modules_root = null ) {
 
 	$modules      = array();
 	$module_files = array();
-	$modules_dir  = @opendir( $modules_root );
+	// PHPCS ignore reason: A modules directory is always present.
+	// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	$modules_dir = @opendir( $modules_root );
 
 	// Modules are organized as {focus}/{module-slug} in the modules folder.
 	if ( $modules_dir ) {
-		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+		// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 		while ( ( $focus = readdir( $modules_dir ) ) !== false ) {
 			if ( '.' === substr( $focus, 0, 1 ) ) {
 				continue;
@@ -269,18 +249,22 @@ function perflab_get_modules( $modules_root = null ) {
 				continue;
 			}
 
+			// PHPCS ignore reason: Only the focus area directory is allowed.
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			$focus_dir = @opendir( $modules_root . '/' . $focus );
 			if ( $focus_dir ) {
-				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+				// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				while ( ( $file = readdir( $focus_dir ) ) !== false ) {
 					// Unlike plugins, modules must be in a directory.
 					if ( ! is_dir( $modules_root . '/' . $focus . '/' . $file ) ) {
 						continue;
 					}
 
+					// PHPCS ignore reason: Only the module directory is allowed.
+					// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 					$module_dir = @opendir( $modules_root . '/' . $focus . '/' . $file );
 					if ( $module_dir ) {
-						// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+						// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 						while ( ( $subfile = readdir( $module_dir ) ) !== false ) {
 							if ( '.' === substr( $subfile, 0, 1 ) ) {
 								continue;
@@ -320,7 +304,7 @@ function perflab_get_modules( $modules_root = null ) {
 
 	uasort(
 		$modules,
-		function( $a, $b ) {
+		static function ( $a, $b ) {
 			return strnatcasecmp( $a['name'], $b['name'] );
 		}
 	);
@@ -387,7 +371,7 @@ function perflab_get_module_data( $module_file ) {
 }
 
 /**
- * Initialise Admin Pointer
+ * Initializes admin pointer.
  *
  * Handles the bootstrapping of the admin pointer.
  * Mainly jQuery code that is self-initialising.
@@ -415,7 +399,7 @@ function perflab_admin_pointer( $hook_suffix ) {
 	// Enqueue pointer CSS and JS.
 	wp_enqueue_style( 'wp-pointer' );
 	wp_enqueue_script( 'wp-pointer' );
-	add_action( 'admin_print_footer_scripts', 'perflab_render_pointer' );
+	add_action( 'admin_print_footer_scripts', 'perflab_render_pointer', 10, 0 );
 }
 add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
 
@@ -425,27 +409,36 @@ add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
  * Handles the rendering of the admin pointer.
  *
  * @since 1.0.0
+ * @since 2.4.0 Optional arguments were added to make the function reusable for different pointers.
+ *
+ * @param string $pointer_id Optional. ID of the pointer. Default 'perflab-admin-pointer'.
+ * @param array  $args       Optional. Pointer arguments. Supports 'heading' and 'content' entries.
+ *                           Defaults are the heading and content for the 'perflab-admin-pointer'.
  */
-function perflab_render_pointer() {
-	$heading         = __( 'Performance Lab', 'performance-lab' );
+function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = array() ) {
+	if ( ! isset( $args['heading'] ) ) {
+		$args['heading'] = __( 'Performance Lab', 'performance-lab' );
+	}
+	if ( ! isset( $args['content'] ) ) {
+		$args['content'] = sprintf(
+			/* translators: %s: settings page link */
+			__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ),
+			'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
+		);
+	}
+
 	$wp_kses_options = array(
 		'a' => array(
 			'href' => array(),
 		),
 	);
 
-	$content = sprintf(
-		/* translators: %s: settings page link */
-		__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ),
-		'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
-	);
-
 	?>
-	<script id="perflab-admin-pointer" type="text/javascript">
+	<script id="<?php echo esc_attr( $pointer_id ); ?>" type="text/javascript">
 		jQuery( function() {
 			// Pointer Options.
 			var options = {
-				content: '<h3><?php echo esc_js( $heading ); ?></h3><p><?php echo wp_kses( $content, $wp_kses_options ); ?></p>',
+				content: '<h3><?php echo esc_js( $args['heading'] ); ?></h3><p><?php echo wp_kses( $args['content'], $wp_kses_options ); ?></p>',
 				position: {
 					edge:  'left',
 					align: 'right',
@@ -456,8 +449,9 @@ function perflab_render_pointer() {
 					jQuery.post(
 						window.ajaxurl,
 						{
-							pointer: 'perflab-admin-pointer',
+							pointer: '<?php echo esc_js( $pointer_id ); ?>',
 							action:  'dismiss-wp-pointer',
+							_wpnonce: <?php echo wp_json_encode( wp_create_nonce( 'dismiss_pointer' ) ); ?>,
 						}
 					);
 				}
@@ -491,3 +485,21 @@ function perflab_plugin_action_links_add_settings( $links ) {
 
 	return $links;
 }
+
+/**
+ * Dismisses notification pointer after verifying nonce.
+ *
+ * This function adds a nonce check before dismissing perflab-admin-pointer
+ * It runs before the dismiss-wp-pointer AJAX action is performed.
+ *
+ * @since 2.3.0
+ * @see perflab_render_modules_pointer()
+ */
+function perflab_dismiss_wp_pointer_wrapper() {
+	if ( isset( $_POST['pointer'] ) && 'perflab-admin-pointer' !== $_POST['pointer'] ) {
+		// Another plugin's pointer, do nothing.
+		return;
+	}
+	check_ajax_referer( 'dismiss_pointer' );
+}
+add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 0 );
