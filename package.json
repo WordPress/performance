@@ -38,8 +38,7 @@
     "pretest-php-multisite": "wp-env run composer 'install --no-interaction'",
     "test-php-multisite": "wp-env run phpunit 'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/$(basename $(pwd))/tests/multisite.xml --verbose'",
     "wp-env": "wp-env",
-    "prepare": "husky install",
-    "build:admin-js": "wp-scripts build ./src/admin/assets/js/**.js --output-path=admin/assets/js/"
+    "prepare": "husky install"
   },
   "lint-staged": {
     "*.php": [
