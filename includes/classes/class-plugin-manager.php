@@ -467,7 +467,10 @@ class Plugin_Manager {
 	 * @return void
 	 */
 	public static function render_plugins_ui() {
-		$standalone_plugins = self::get_standalone_plugins();
+		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		$standalone_plugins = static::get_standalone_plugins();
 		?>
 		<div class="wrap">
 			<h1>Performance Plugins</h1>
@@ -478,41 +481,10 @@ class Plugin_Manager {
 						<h2 class="screen-reader-text">Plugins list</h2>
 						<div id="the-list">
 							<?php
-							/*foreach ( $standalone_plugins as $standalone_plugin ) {
+							foreach ( $standalone_plugins as $standalone_plugin ) {
 								self::render_plugin_card( $standalone_plugin );
-							}*/
+							}
 							?>
-
-							<div class="plugin-card plugin-card-classic-editor">
-								<div class="plugin-card-top">
-									<div class="name column-name">
-										<h3>
-											<a href="http://localhost:8888/wp-admin/plugin-install.php?tab=plugin-information&amp;plugin=classic-editor&amp;TB_iframe=true&amp;width=772&amp;height=507" class="thickbox open-plugin-details-modal">
-												Classic Editor						<img src="https://ps.w.org/classic-editor/assets/icon-256x256.png?rev=1998671" class="plugin-icon" alt="">
-											</a>
-										</h3>
-									</div>
-									<div class="action-links">
-										<ul class="plugin-action-buttons"><li><a class="install-now button" data-slug="classic-editor" href="http://localhost:8888/wp-admin/update.php?action=install-plugin&amp;plugin=classic-editor&amp;_wpnonce=a02cf10534" aria-label="Install Classic Editor 1.6.3 now" data-name="Classic Editor 1.6.3">Install Now</a></li><li><a href="http://localhost:8888/wp-admin/plugin-install.php?tab=plugin-information&amp;plugin=classic-editor&amp;TB_iframe=true&amp;width=772&amp;height=507" class="thickbox open-plugin-details-modal" aria-label="More information about Classic Editor 1.6.3" data-title="Classic Editor 1.6.3">More Details</a></li></ul>				</div>
-									<div class="desc column-description">
-										<p>Enables the previous "classic" editor and the old-style Edit Post screen with TinyMCE, Meta Boxes, etc. Supports all plugins that extend this screen.</p>
-										<p class="authors"> <cite>By <a href="https://github.com/WordPress/classic-editor/">WordPress Contributors</a></cite></p>
-									</div>
-								</div>
-								<div class="plugin-card-bottom">
-									<div class="vers column-rating">
-										<div class="star-rating"><span class="screen-reader-text">5.0 rating based on 1,141 ratings</span><div class="star star-full" aria-hidden="true"></div><div class="star star-full" aria-hidden="true"></div><div class="star star-full" aria-hidden="true"></div><div class="star star-full" aria-hidden="true"></div><div class="star star-full" aria-hidden="true"></div></div>					<span class="num-ratings" aria-hidden="true">(1,141)</span>
-									</div>
-									<div class="column-updated">
-										<strong>Last Updated:</strong>
-										1 month ago				</div>
-									<div class="column-downloaded">
-										5+ Million Active Installations				</div>
-									<div class="column-compatibility">
-										<span class="compatibility-compatible"><strong>Compatible</strong> with your version of WordPress</span>				</div>
-								</div>
-							</div>
-
 						</div>
 					</div>
 				</form>
@@ -532,68 +504,325 @@ class Plugin_Manager {
 	 * @return void
 	 */
 	private static function render_plugin_card( array $standalone_plugin = array() ) {
-		?>
-		<div class="plugin-card plugin-card-<?php echo esc_attr( $standalone_plugin['Slug'] ); ?>" data-wpp-plugin="<?php echo esc_attr( $standalone_plugin['Slug'] ); ?>">
-			<div class="plugin-card-top">
-				<div class="name column-name">
-					<h3>
-						<a href="http://localhost:8888/wp-admin/plugin-install.php?tab=plugin-information&amp;plugin=<?php echo esc_attr( $standalone_plugin['Slug'] ); ?>&amp;TB_iframe=true&amp;width=600&amp;height=550" class="thickbox open-plugin-details-modal">
-							<?php echo esc_html( $standalone_plugin['Name'] ); ?>
-							<img src="https://s.w.org/plugins/geopattern-icon/<?php echo esc_attr( $standalone_plugin['Slug'] ); ?>.svg" class="plugin-icon" alt="">
-						</a>
-					</h3>
-				</div>
-				<div class="action-links">
-					<ul class="plugin-action-buttons">
-						<li>
-							<?php
-							switch ( $standalone_plugin['Status'] ) {
-								case 'uninstalled':
-									?>
-									<button type="button" class="button">Install</button>
-									<?php
-									break;
-								case 'active':
-									?>
-									<button type="button" class="button button-disabled" disabled="disabled">Active</button>
-									<?php
-									break;
-								case 'inactive':
-									?>
-									<button type="button" class="button">Activate</button>
-									<?php
-									break;
+		$plugin = plugins_api(
+			'plugin_information',
+			array(
+				'slug'   => $standalone_plugin['Slug'],
+				'fields' => array(
+					'short_description' => true,
+					'icons'             => true,
+				),
+			)
+		);
+
+		if ( is_object( $plugin ) ) {
+			$plugin = (array) $plugin;
+		}
+
+		$title = $plugin['name'];
+
+		// Remove any HTML from the description.
+		$description = wp_strip_all_tags( $plugin['short_description'] );
+
+		/**
+		 * Filters the plugin card description on the Add Plugins screen.
+		 *
+		 * @since 6.0.0
+		 *
+		 * @param string $description Plugin card description.
+		 * @param array  $plugin      An array of plugin data. See {@see plugins_api()}
+		 *                            for the list of possible values.
+		 */
+		$description = apply_filters( 'plugin_install_description', $description, $plugin );
+		$version     = $plugin['version'];
+		$name        = wp_strip_all_tags( $title . ' ' . $version );
+		$author      = $plugin['author'];
+		if ( ! empty( $author ) ) {
+			/* translators: %s: Plugin author. */
+			$author = ' <cite>' . sprintf( __( 'By %s', 'performance-lab' ), $author ) . '</cite>';
+		}
+
+		$requires_php = isset( $plugin['requires_php'] ) ? $plugin['requires_php'] : null;
+		$requires_wp  = isset( $plugin['requires'] ) ? $plugin['requires'] : null;
+
+		$compatible_php = is_php_version_compatible( $requires_php );
+		$compatible_wp  = is_wp_version_compatible( $requires_wp );
+		$tested_wp      = ( empty( $plugin['tested'] ) || version_compare( get_bloginfo( 'version' ), $plugin['tested'], '<=' ) );
+		$action_links   = array();
+
+		if ( current_user_can( 'install_plugins' ) || current_user_can( 'update_plugins' ) ) {
+			$status = install_plugin_install_status( $plugin );
+
+			switch ( $status['status'] ) {
+				case 'install':
+					if ( $status['url'] ) {
+						if ( $compatible_php && $compatible_wp ) {
+							$action_links[] = sprintf(
+								'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
+								esc_attr( $plugin['slug'] ),
+								esc_url( $status['url'] ),
+								/* translators: %s: Plugin name and version. */
+								esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'performance-lab' ), $name ) ),
+								esc_attr( $name ),
+								__( 'Install Now', 'performance-lab' )
+							);
+						} else {
+							$action_links[] = sprintf(
+								'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+								_x( 'Cannot Install', 'plugin', 'performance-lab' )
+							);
+						}
+					}
+					break;
+
+				case 'update_available':
+					if ( $status['url'] ) {
+						if ( $compatible_php && $compatible_wp ) {
+							$action_links[] = sprintf(
+								'<a class="update-now button aria-button-if-js" data-plugin="%s" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
+								esc_attr( $status['file'] ),
+								esc_attr( $plugin['slug'] ),
+								esc_url( $status['url'] ),
+								/* translators: %s: Plugin name and version. */
+								esc_attr( sprintf( _x( 'Update %s now', 'plugin', 'performance-lab' ), $name ) ),
+								esc_attr( $name ),
+								__( 'Update Now', 'performance-lab' )
+							);
+						} else {
+							$action_links[] = sprintf(
+								'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+								_x( 'Cannot Update', 'plugin', 'performance-lab' )
+							);
+						}
+					}
+					break;
+
+				case 'latest_installed':
+				case 'newer_installed':
+					if ( is_plugin_active( $status['file'] ) ) {
+						$action_links[] = sprintf(
+							'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+							_x( 'Active', 'plugin', 'performance-lab' )
+						);
+						if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
+							global $page, $paged;
+							$s       = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : ''; // phpcs:ignore
+							$context = $status['status'];
+
+							$action_links[] = sprintf(
+								'<a href="%s" id="deactivate-%s" aria-label="%s" style="color:red;text-decoration: underline;">%s</a>',
+								wp_nonce_url( 'plugins.php?wpp=1&action=deactivate&amp;plugin=' . rawurlencode( $status['file'] ) . '&amp;plugin_status=' . $context . '&amp;paged=' . $page . '&amp;s=' . $s, 'deactivate-plugin_' . $status['file'] ),
+								esc_attr( $plugin['slug'] ),
+								/* translators: %s: Plugin name. */
+								esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'performance-lab' ), $plugin['slug'] ) ),
+								__( 'Deactivate', 'performance-lab' )
+							);
+						}
+					} elseif ( current_user_can( 'activate_plugin', $status['file'] ) ) {
+						if ( $compatible_php && $compatible_wp ) {
+							$button_text = __( 'Activate', 'performance-lab' );
+							/* translators: %s: Plugin name. */
+							$button_label = _x( 'Activate %s', 'plugin', 'performance-lab' );
+							$activate_url = add_query_arg(
+								array(
+									'_wpnonce' => wp_create_nonce( 'activate-plugin_' . $status['file'] ),
+									'action'   => 'activate',
+									'plugin'   => $status['file'],
+									'wpp'      => 1,
+								),
+								network_admin_url( 'plugins.php' )
+							);
+
+							if ( is_network_admin() ) {
+								$button_text = __( 'Network Activate', 'performance-lab' );
+								/* translators: %s: Plugin name. */
+								$button_label = _x( 'Network Activate %s', 'plugin', 'performance-lab' );
+								$activate_url = add_query_arg( array( 'networkwide' => 1 ), $activate_url );
 							}
-							?>
-						</li>
 
-						<?php if ( 'inactive' === $standalone_plugin['Status'] ) { ?>
-							<li>
-								<button type="button" class="button" style="display: inline; padding: 0; background: none; border: none; color: #DC3232; text-decoration: underline; display: block; text-align: center;">
-									Uninstall
-								</button>
-							</li>
-						<?php }; ?>
+							$action_links[] = sprintf(
+								'<a href="%1$s" class="button activate-now" aria-label="%2$s">%3$s</a>',
+								esc_url( $activate_url ),
+								esc_attr( sprintf( $button_label, $plugin['name'] ) ),
+								$button_text
+							);
+						} else {
+							$action_links[] = sprintf(
+								'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+								_x( 'Cannot Activate', 'plugin', 'performance-lab' )
+							);
+						}
+					} else {
+						$action_links[] = sprintf(
+							'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+							_x( 'Installed', 'plugin', 'performance-lab' )
+						);
+					}
+					break;
+			}
+		}
 
-						<?php if ( 'active' === $standalone_plugin['Status'] ) { ?>
-						<li>
-							<button type="button" class="button" style="display: inline; padding: 0; background: none; border: none; color: #DC3232; text-decoration: underline; display: block; text-align: center;">
-								Deactivate
-							</button>
-						</li>
-						<?php }; ?>
+		$details_link = self_admin_url(
+			'plugin-install.php?tab=plugin-information&amp;plugin=' . $plugin['slug'] .
+			'&amp;TB_iframe=true&amp;width=600&amp;height=550'
+		);
 
-					</ul>
+		$action_links[] = sprintf(
+			'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s" data-title="%s">%s</a>',
+			esc_url( $details_link ),
+			/* translators: %s: Plugin name and version. */
+			esc_attr( sprintf( __( 'More information about %s', 'performance-lab' ), $name ) ),
+			esc_attr( $name ),
+			__( 'More Details', 'performance-lab' )
+		);
+
+		if ( ! empty( $plugin['icons']['svg'] ) ) {
+			$plugin_icon_url = $plugin['icons']['svg'];
+		} elseif ( ! empty( $plugin['icons']['2x'] ) ) {
+			$plugin_icon_url = $plugin['icons']['2x'];
+		} elseif ( ! empty( $plugin['icons']['1x'] ) ) {
+			$plugin_icon_url = $plugin['icons']['1x'];
+		} else {
+			$plugin_icon_url = $plugin['icons']['default'];
+		}
+
+		/**
+		 * Filters the install action links for a plugin.
+		 *
+		 * @since 2.7.0
+		 *
+		 * @param string[] $action_links An array of plugin action links.
+		 *                               Defaults are links to Details and Install Now.
+		 * @param array    $plugin       An array of plugin data. See {@see plugins_api()}
+		 *                               for the list of possible values.
+		 */
+		$action_links = apply_filters( 'plugin_install_action_links', $action_links, $plugin );
+
+		$last_updated_timestamp = strtotime( $plugin['last_updated'] );
+		?>
+			<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin['slug'] ); ?>">
+				<?php
+				if ( ! $compatible_php || ! $compatible_wp ) {
+					echo '<div class="notice inline notice-error notice-alt"><p>';
+					if ( ! $compatible_php && ! $compatible_wp ) {
+						esc_html_e( 'This plugin does not work with your versions of WordPress and PHP.', 'default' );
+						if ( current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
+							printf(
+							/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
+								' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.', 'default' ), // phpcs:ignore
+								esc_url( self_admin_url( 'update-core.php' ) ),
+								esc_url( wp_get_update_php_url() )
+							);
+							wp_update_php_annotation( '</p><p><em>', '</em>' );
+						} elseif ( current_user_can( 'update_core' ) ) {
+							printf(
+							/* translators: %s: URL to WordPress Updates screen. */
+								' ' . __( '<a href="%s">Please update WordPress</a>.', 'performance-lab' ), // phpcs:ignore
+								esc_url( self_admin_url( 'update-core.php' ) )
+							);
+						} elseif ( current_user_can( 'update_php' ) ) {
+							printf(
+							/* translators: %s: URL to Update PHP page. */
+								' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'performance-lab' ), // phpcs:ignore
+								esc_url( wp_get_update_php_url() )
+							);
+							wp_update_php_annotation( '</p><p><em>', '</em>' );
+						}
+					} elseif ( ! $compatible_wp ) {
+						esc_html_e( 'This plugin does not work with your version of WordPress.', 'default' );
+						if ( current_user_can( 'update_core' ) ) {
+							printf(
+							/* translators: %s: URL to WordPress Updates screen. */
+								' ' . __( '<a href="%s">Please update WordPress</a>.', 'performance-lab' ), // phpcs:ignore
+								esc_url( self_admin_url( 'update-core.php' ) )
+							);
+						}
+					} elseif ( ! $compatible_php ) {
+						esc_html_e( 'This plugin does not work with your version of PHP.', 'default' );
+						if ( current_user_can( 'update_php' ) ) {
+							printf(
+							/* translators: %s: URL to Update PHP page. */
+								' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ), // phpcs:ignore
+								esc_url( wp_get_update_php_url() )
+							);
+							wp_update_php_annotation( '</p><p><em>', '</em>' );
+						}
+					}
+					echo '</p></div>';
+				}
+				?>
+				<div class="plugin-card-top">
+					<div class="name column-name">
+						<h3>
+							<a href="<?php echo esc_url( $details_link ); ?>" class="thickbox open-plugin-details-modal">
+								<?php echo wp_kses_post( $title ); ?>
+								<img src="<?php echo esc_url( $plugin_icon_url ); ?>" class="plugin-icon" alt="" />
+							</a>
+						</h3>
+					</div>
+					<div class="action-links">
+						<?php
+						if ( $action_links ) {
+							echo wp_kses_post( '<ul class="plugin-action-buttons"><li>' . implode( '</li><li>', $action_links ) . '</li></ul>' );
+						}
+						?>
+					</div>
+					<div class="desc column-description">
+						<p><?php echo wp_kses_post( $description ); ?></p>
+						<p class="authors"><?php echo wp_kses_post( $author ); ?></p>
+					</div>
 				</div>
-				<div class="desc column-description" style='min-height: 100px;'>
-					<p><?php echo esc_html( $standalone_plugin['Description'] ); ?></p>
-					<p class="authors">
-						<cite>By <a href="<?php echo esc_attr( $standalone_plugin['AuthorURI'] ); ?>" target='_blank'><?php echo esc_attr( $standalone_plugin['Author'] ); ?></a></cite>
-					</p>
+				<div class="plugin-card-bottom">
+					<div class="vers column-rating">
+						<?php
+						wp_star_rating(
+							array(
+								'rating' => $plugin['rating'],
+								'type'   => 'percent',
+								'number' => $plugin['num_ratings'],
+							)
+						);
+						?>
+						<span class="num-ratings" aria-hidden="true">(<?php echo esc_html( number_format_i18n( $plugin['num_ratings'] ) ); ?>)</span>
+					</div>
+					<div class="column-updated">
+						<strong><?php esc_html_e( 'Last Updated:', 'default' ); ?></strong>
+						<?php
+						/* translators: %s: Human-readable time difference. */
+						printf( __( '%s ago', 'performance-lab' ), human_time_diff( $last_updated_timestamp ) ); // phpcs:ignore
+						?>
+					</div>
+					<div class="column-downloaded">
+						<?php
+						if ( $plugin['active_installs'] >= 1000000 ) {
+							$active_installs_millions = floor( $plugin['active_installs'] / 1000000 );
+							$active_installs_text     = sprintf(
+							/* translators: %s: Number of millions. */
+								_nx( '%s+ Million', '%s+ Million', $active_installs_millions, 'Active plugin installations', 'default' ),
+								number_format_i18n( $active_installs_millions )
+							);
+						} elseif ( 0 === $plugin['active_installs'] ) {
+							$active_installs_text = _x( 'Less Than 10', 'Active plugin installations', 'performance-lab' );
+						} else {
+							$active_installs_text = number_format_i18n( $plugin['active_installs'] ) . '+';
+						}
+						/* translators: %s: Number of installations. */
+						printf( esc_html__( '%s Active Installations', 'default' ), esc_html( $active_installs_text ) );
+						?>
+					</div>
+					<div class="column-compatibility">
+						<?php
+						if ( ! $tested_wp ) {
+							echo '<span class="compatibility-untested">' . esc_html__( 'Untested with your version of WordPress', 'default' ) . '</span>';
+						} elseif ( ! $compatible_wp ) {
+							echo '<span class="compatibility-incompatible">' . esc_html__( '<strong>Incompatible</strong> with your version of WordPress', 'default' ) . '</span>';
+						} else {
+							echo '<span class="compatibility-compatible">' . esc_html__( '<strong>Compatible</strong> with your version of WordPress', 'default' ) . '</span>';
+						}
+						?>
+					</div>
 				</div>
 			</div>
-
-		</div>
 		<?php
 	}
 }
