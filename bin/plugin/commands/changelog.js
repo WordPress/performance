@@ -162,7 +162,7 @@ function getIssueFocus( issue ) {
  * @return {string} The formatted changelog string.
  */
 function formatChangelog( milestone, pullRequests ) {
-	let changelog = '= ' + milestone + ' =\n\n';
+	let changelog = '= ' + milestone.replace( 'PL Plugin ', '' ) + ' =\n\n';
 
 	// Group PRs by type.
 	const typeGroups = groupBy( pullRequests, getIssueType );

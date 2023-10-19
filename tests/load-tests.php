@@ -69,7 +69,7 @@ class Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_get_module_settings() {
 		// Assert that by default the settings are using the same value as the registered default.
 		$settings = perflab_get_module_settings();
-		$this->assertSame( perflab_get_modules_setting_default(), $settings );
+		$this->assertEqualSetsWithIndex( perflab_get_modules_setting_default(), $settings );
 
 		// More specifically though, assert that the default is also passed through to the
 		// get_option() call, to support scenarios where the function is called before 'init'.
@@ -78,7 +78,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$has_passed_default = false;
 		add_filter(
 			'default_option_' . PERFLAB_MODULES_SETTING,
-			function( $default, $option, $passed_default ) use ( &$has_passed_default ) {
+			static function( $default, $option, $passed_default ) use ( &$has_passed_default ) {
 				// This callback just records whether there is a default value being passed.
 				$has_passed_default = $passed_default;
 				return $default;
@@ -88,13 +88,13 @@ class Load_Tests extends WP_UnitTestCase {
 		);
 		$settings = perflab_get_module_settings();
 		$this->assertTrue( $has_passed_default );
-		$this->assertSame( perflab_get_modules_setting_default(), $settings );
+		$this->assertEqualSetsWithIndex( perflab_get_modules_setting_default(), $settings );
 
 		// Assert that option updates are reflected in the settings correctly.
 		$new_value = array( 'my-module' => array( 'enabled' => true ) );
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
 		$settings = perflab_get_module_settings();
-		$this->assertSame( $new_value, $settings );
+		$this->assertEqualSetsWithIndex( $new_value, $settings );
 	}
 
 	/**
@@ -124,6 +124,7 @@ class Load_Tests extends WP_UnitTestCase {
 			array( 'site-health/audit-autoloaded-options', 'database/audit-autoloaded-options' ),
 			array( 'site-health/audit-enqueued-assets', 'js-and-css/audit-enqueued-assets' ),
 			array( 'site-health/webp-support', 'images/webp-support' ),
+			array( 'images/dominant-color', 'images/dominant-color-images' ),
 		);
 	}
 
@@ -133,12 +134,12 @@ class Load_Tests extends WP_UnitTestCase {
 		$expected_active_modules = array_keys(
 			array_filter(
 				perflab_get_modules_setting_default(),
-				function( $module_settings ) {
+				static function( $module_settings ) {
 					return $module_settings['enabled'];
 				}
 			)
 		);
-		$this->assertSame( $expected_active_modules, $active_modules );
+		$this->assertEqualSetsWithIndex( $expected_active_modules, $active_modules );
 
 		// Assert that option updates affect the active modules correctly.
 		$new_value = array(
@@ -147,7 +148,7 @@ class Load_Tests extends WP_UnitTestCase {
 		);
 		update_option( PERFLAB_MODULES_SETTING, $new_value );
 		$active_modules = perflab_get_active_modules();
-		$this->assertSame( array( 'active-module' ), $active_modules );
+		$this->assertEqualSetsWithIndex( array( 'active-module' ), $active_modules );
 	}
 
 	public function test_perflab_get_generator_content() {
@@ -157,7 +158,7 @@ class Load_Tests extends WP_UnitTestCase {
 		array_pop( $active_modules );
 		add_filter(
 			'perflab_active_modules',
-			function() use ( $active_modules ) {
+			static function() use ( $active_modules ) {
 				return $active_modules;
 			}
 		);
@@ -228,7 +229,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
 		return array_reduce(
 			$default_enabled_modules,
-			function( $module_settings, $module_dir ) {
+			static function( $module_settings, $module_dir ) {
 				$module_settings[ $module_dir ] = array( 'enabled' => true );
 				return $module_settings;
 			},
@@ -311,13 +312,13 @@ class Load_Tests extends WP_UnitTestCase {
 
 		add_filter(
 			'filesystem_method_file',
-			function() {
+			static function() {
 				return __DIR__ . '/utils/Filesystem/WP_Filesystem_MockFilesystem.php';
 			}
 		);
 		add_filter(
 			'filesystem_method',
-			function() {
+			static function() {
 				return 'MockFilesystem';
 			}
 		);

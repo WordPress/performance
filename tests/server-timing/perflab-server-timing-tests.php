@@ -17,7 +17,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
 	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ) {
 		self::$dummy_args = array(
-			'measure_callback' => function() {},
+			'measure_callback' => '__return_null',
 			'access_cap'       => 'exist',
 		);
 
@@ -38,7 +38,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->server_timing->register_metric(
 			'test-metric',
 			array(
-				'measure_callback' => function() use ( &$called ) {
+				'measure_callback' => static function() use ( &$called ) {
 					$called = true;
 				},
 				'access_cap'       => 'exist',
@@ -52,7 +52,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	public function test_register_metric_runs_measure_callback_based_on_access_cap() {
 		$called = false;
 		$args   = array(
-			'measure_callback' => function() use ( &$called ) {
+			'measure_callback' => static function() use ( &$called ) {
 				$called = true;
 			},
 			'access_cap'       => 'manage_options', // Admin capability.
@@ -106,7 +106,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
 		$this->server_timing->register_metric(
 			'metric-without-access-cap',
-			array( 'measure_callback' => function() {} )
+			array( 'measure_callback' => '__return_null' )
 		);
 
 		$this->assertFalse( $this->server_timing->has_registered_metric( 'metric-without-access-cap' ) );
@@ -130,13 +130,13 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	}
 
 	public function data_get_header() {
-		$measure_42         = function( $metric ) {
+		$measure_42         = static function( $metric ) {
 			$metric->set_value( 42 );
 		};
-		$measure_300        = function( $metric ) {
+		$measure_300        = static function( $metric ) {
 			$metric->set_value( 300 );
 		};
-		$measure_12point345 = function( $metric ) {
+		$measure_12point345 = static function( $metric ) {
 			$metric->set_value( 12.345 );
 		};
 
@@ -187,10 +187,58 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 		);
 	}
 
-	public function test_use_output_buffer() {
-		$this->assertFalse( $this->server_timing->use_output_buffer() );
+	public function get_data_to_test_use_output_buffer() {
+		$enable_option = static function () {
+			$option = (array) get_option( PERFLAB_SERVER_TIMING_SETTING );
+			$option['output_buffering'] = true;
+			update_option( PERFLAB_SERVER_TIMING_SETTING, $option );
+		};
+		$disable_option = static function () {
+			$option = (array) get_option( PERFLAB_SERVER_TIMING_SETTING );
+			$option['output_buffering'] = false;
+			update_option( PERFLAB_SERVER_TIMING_SETTING, $option );
+		};
 
-		add_filter( 'perflab_server_timing_use_output_buffer', '__return_true' );
-		$this->assertTrue( $this->server_timing->use_output_buffer() );
+		return array(
+			'default' => array(
+				'set_up'   => static function () {},
+				'expected' => false,
+			),
+			'option-enabled' => array(
+				'set_up'   => $enable_option,
+				'expected' => true,
+			),
+			'option-disabled' => array(
+				'set_up'   => $disable_option,
+				'expected' => false,
+			),
+			'filter-enabled' => array(
+				'set_up'   => static function () use ( $disable_option ) {
+					$disable_option();
+					add_filter( 'perflab_server_timing_use_output_buffer', '__return_true' );
+				},
+				'expected' => true,
+			),
+			'filter-disabled' => array(
+				'set_up'   => static function () use ( $enable_option ) {
+					$enable_option();
+					add_filter( 'perflab_server_timing_use_output_buffer', '__return_false' );
+				},
+				'expected' => false,
+			),
+		);
+	}
+
+	/**
+	 * @covers Perflab_Server_Timing::use_output_buffer
+	 *
+	 * @dataProvider get_data_to_test_use_output_buffer
+	 *
+	 * @param callable $set_up   Set up.
+	 * @param bool     $expected Expected value.
+	 */
+	public function test_use_output_buffer( callable $set_up, $expected ) {
+		$set_up();
+		$this->assertSame( $expected, $this->server_timing->use_output_buffer() );
 	}
 }

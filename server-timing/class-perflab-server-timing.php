@@ -53,7 +53,7 @@ class Perflab_Server_Timing {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: metric slug */
-				sprintf( __( 'A metric with the slug %s is already registered.', 'performance-lab' ), $metric_slug ),
+				sprintf( esc_html__( 'A metric with the slug %s is already registered.', 'performance-lab' ), esc_attr( $metric_slug ) ),
 				''
 			);
 			return;
@@ -63,7 +63,7 @@ class Perflab_Server_Timing {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: WordPress action name */
-				sprintf( __( 'The method must be called before or during the %s action.', 'performance-lab' ), 'perflab_server_timing_send_header' ),
+				sprintf( esc_html__( 'The method must be called before or during the %s action.', 'performance-lab' ), 'perflab_server_timing_send_header' ),
 				''
 			);
 			return;
@@ -80,7 +80,7 @@ class Perflab_Server_Timing {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: PHP parameter name */
-				sprintf( __( 'The %s argument is required and must be a callable.', 'performance-lab' ), '$args["measure_callback"]' ),
+				sprintf( esc_html__( 'The %s argument is required and must be a callable.', 'performance-lab' ), esc_attr( $args['measure_callback'] ) ),
 				''
 			);
 			return;
@@ -89,7 +89,7 @@ class Perflab_Server_Timing {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: PHP parameter name */
-				sprintf( __( 'The %s argument is required and must be a string.', 'performance-lab' ), '$args["access_cap"]' ),
+				sprintf( esc_html__( 'The %s argument is required and must be a string.', 'performance-lab' ), esc_attr( $args['access_cap'] ) ),
 				''
 			);
 			return;
@@ -131,7 +131,7 @@ class Perflab_Server_Timing {
 		if ( headers_sent() ) {
 			_doing_it_wrong(
 				__METHOD__,
-				__( 'The method must be called before headers have been sent.', 'performance-lab' ),
+				esc_html__( 'The method must be called before headers have been sent.', 'performance-lab' ),
 				''
 			);
 			return;
@@ -165,7 +165,7 @@ class Perflab_Server_Timing {
 		// Get all metric header values, as long as the current user has access to the metric.
 		$metric_header_values = array_filter(
 			array_map(
-				function( Perflab_Server_Timing_Metric $metric ) {
+				function ( Perflab_Server_Timing_Metric $metric ) {
 					// Check the registered capability here to ensure no metric without access is exposed.
 					if ( ! current_user_can( $this->registered_metrics_data[ $metric->get_slug() ]['access_cap'] ) ) {
 						return null;
@@ -175,7 +175,7 @@ class Perflab_Server_Timing {
 				},
 				$this->registered_metrics
 			),
-			function( $value ) {
+			static function ( $value ) {
 				return null !== $value;
 			}
 		);
@@ -195,6 +195,9 @@ class Perflab_Server_Timing {
 	 * @return bool True if an output buffer should be used, false otherwise.
 	 */
 	public function use_output_buffer() {
+		$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
+		$enabled = ! empty( $options['output_buffering'] );
+
 		/**
 		 * Filters whether an output buffer should be used to be able to gather additional Server-Timing metrics.
 		 *
@@ -206,7 +209,7 @@ class Perflab_Server_Timing {
 		 *
 		 * @param bool $use_output_buffer Whether to use an output buffer.
 		 */
-		return apply_filters( 'perflab_server_timing_use_output_buffer', false );
+		return (bool) apply_filters( 'perflab_server_timing_use_output_buffer', $enabled );
 	}
 
 	/**
@@ -227,16 +230,11 @@ class Perflab_Server_Timing {
 			return $passthrough;
 		}
 
-		ob_start();
-		add_action(
-			'shutdown',
-			function() {
-				$output = ob_get_clean();
+		ob_start(
+			function ( $output ) {
 				$this->send_header();
-				echo $output;
-			},
-			// phpcs:ignore PHPCompatibility.Constants.NewConstants
-			defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : -1000
+				return $output;
+			}
 		);
 		return $passthrough;
 	}
