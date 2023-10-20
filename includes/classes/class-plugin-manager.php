@@ -29,6 +29,7 @@ class Plugin_Manager {
 	 * Get info about all the standalone plugins and their status.
 	 *
 	 * @since n.e.x.t
+	 *
 	 * @return array of plugins info.
 	 */
 	public static function get_standalone_plugins() {
@@ -44,6 +45,7 @@ class Plugin_Manager {
 	 * Renders plugin UI for managing standalone plugins within PL Settings screen.
 	 *
 	 * @since n.e.x.t
+	 *
 	 * @return void
 	 */
 	public static function render_plugins_ui() {
@@ -77,9 +79,10 @@ class Plugin_Manager {
 	/**
 	 * Render individual plugin cards.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @param string $standalone_plugin Plugin slug as passed from get_standalone_plugins().
 	 *
-	 * @since n.e.x.t
 	 * @return void
 	 */
 	private static function render_plugin_card( string $standalone_plugin ) {
