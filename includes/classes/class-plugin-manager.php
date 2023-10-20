@@ -185,7 +185,7 @@ class Plugin_Manager {
 							_x( 'Active', 'plugin', 'default' )
 						);
 						if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
-							global $page, $paged;
+							global $page;
 							$s       = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : ''; // phpcs:ignore
 							$context = $status['status'];
 
@@ -287,23 +287,23 @@ class Plugin_Manager {
 					if ( ! $compatible_php && ! $compatible_wp ) {
 						esc_html_e( 'This plugin does not work with your versions of WordPress and PHP.', 'default' );
 						if ( current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
-							printf(
+							echo wp_kses_post(
 							/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
-								' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.', 'default' ), // phpcs:ignore
+								' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.', 'default' ),
 								esc_url( self_admin_url( 'update-core.php' ) ),
 								esc_url( wp_get_update_php_url() )
 							);
 							wp_update_php_annotation( '</p><p><em>', '</em>' );
 						} elseif ( current_user_can( 'update_core' ) ) {
-							printf(
+							echo wp_kses_post(
 							/* translators: %s: URL to WordPress Updates screen. */
-								' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ), // phpcs:ignore
+								' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
 								esc_url( self_admin_url( 'update-core.php' ) )
 							);
 						} elseif ( current_user_can( 'update_php' ) ) {
-							printf(
+							echo wp_kses_post(
 							/* translators: %s: URL to Update PHP page. */
-								' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ), // phpcs:ignore
+								' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
 								esc_url( wp_get_update_php_url() )
 							);
 							wp_update_php_annotation( '</p><p><em>', '</em>' );
@@ -311,18 +311,18 @@ class Plugin_Manager {
 					} elseif ( ! $compatible_wp ) {
 						esc_html_e( 'This plugin does not work with your version of WordPress.', 'default' );
 						if ( current_user_can( 'update_core' ) ) {
-							printf(
+							echo wp_kses_post(
 							/* translators: %s: URL to WordPress Updates screen. */
-								' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ), // phpcs:ignore
+								' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
 								esc_url( self_admin_url( 'update-core.php' ) )
 							);
 						}
 					} elseif ( ! $compatible_php ) {
 						esc_html_e( 'This plugin does not work with your version of PHP.', 'default' );
 						if ( current_user_can( 'update_php' ) ) {
-							printf(
+							echo wp_kses_post(
 							/* translators: %s: URL to Update PHP page. */
-								' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ), // phpcs:ignore
+								' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
 								esc_url( wp_get_update_php_url() )
 							);
 							wp_update_php_annotation( '</p><p><em>', '</em>' );
