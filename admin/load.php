@@ -532,17 +532,14 @@ function perflab_dismiss_wp_pointer_wrapper() {
 }
 add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 0 );
 
-$standalone_plugins = Plugin_Manager::get_standalone_plugins();
-
-add_action( 'admin_init', 'handle_wpp_inline_plugin_updates', 15, 0 );
-
 /**
  * Callback function hooked to admin_init to handle WPP inline standalone
- * plugins activation and deactivation.
+ * plugin actions such as activation and deactivation.
  *
+ * @since n.e.x.t
  * @return void
  */
-function handle_wpp_inline_plugin_updates() {
+function perflab_handle_inline_plugin_actions() {
 	if (
 		! empty( filter_input( INPUT_GET, 'wpp' ) ) &&
 		! empty( filter_input( INPUT_GET, 'action' ) ) &&
@@ -554,6 +551,7 @@ function handle_wpp_inline_plugin_updates() {
 		)
 	) {
 		$referer = wp_get_referer();
+
 		switch ( filter_input( INPUT_GET, 'action' ) ) {
 			case 'activate':
 				activate_plugins( filter_input( INPUT_GET, 'plugin' ) );
@@ -566,3 +564,4 @@ function handle_wpp_inline_plugin_updates() {
 		exit;
 	}
 }
+add_action( 'admin_init', 'perflab_handle_inline_plugin_actions', 15, 0 );
