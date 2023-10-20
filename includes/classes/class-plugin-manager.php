@@ -16,11 +16,11 @@ use WP_Error;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * General purpose class for managing installation/activation of standalone performance plugins
+ * General purpose class for managing the UI of standalone performance plugins
  * and rendering of the UI associated therewith.
  *
  * @since n.e.x.t
- * @access private
+ * @access public
  * @ignore
  */
 class Plugin_Manager {
@@ -28,140 +28,22 @@ class Plugin_Manager {
 	/**
 	 * Get info about all the standalone plugins and their status.
 	 *
+	 * @since n.e.x.t
 	 * @return array of plugins info.
 	 */
 	public static function get_standalone_plugins() {
 		$managed_standalone_plugins = array(
-			'webp-uploads'                => array(
-				'Name'        => esc_html__( 'WebP Uploads', 'performance-lab' ),
-				'Description' => esc_html__( 'This plugin adds WebP support for media uploads within the WordPress application.', 'performance-lab' ),
-				'Author'      => esc_html__( 'WordPress Performance Team', 'performance-lab' ),
-				'AuthorURI'   => esc_url( 'https://make.wordpress.org/performance/' ),
-				'PluginURI'   => esc_url( 'https://wordpress.org/plugins/webp-uploads/' ),
-				'Download'    => 'wporg',
-			),
-			'sqlite-database-integration' => array(
-				'Name'        => esc_html__( 'SQLite Database Integration', 'performance-lab' ),
-				'Description' => esc_html__( 'Allows testing an SQLite integration with WordPress and gather feedback, with the goal of eventually landing it in WordPress core.', 'performance-lab' ),
-				'Author'      => esc_html__( 'WordPress Performance Team', 'performance-lab' ),
-				'AuthorURI'   => esc_url( 'https://make.wordpress.org/performance/' ),
-				'PluginURI'   => esc_url( 'https://wordpress.org/plugins/sqlite-database-integration/' ),
-				'Download'    => 'wporg',
-			),
+			'webp-uploads',
+			'sqlite-database-integration',
 		);
 
-		$default_info = array(
-			'Name'        => '',
-			'Description' => '',
-			'Author'      => '',
-			'Version'     => '',
-			'PluginURI'   => '',
-			'AuthorURI'   => '',
-			'TextDomain'  => '',
-			'DomainPath'  => '',
-			'Download'    => '',
-			'Status'      => '',
-		);
-
-		// Add plugin status info and fill in defaults.
-		foreach ( $managed_standalone_plugins as $plugin_slug => $managed_standalone_plugin ) {
-			$status = self::get_managed_standalone_plugin_status( $plugin_slug );
-
-			$managed_standalone_plugins[ $plugin_slug ]['Status']      = $status;
-			$managed_standalone_plugins[ $plugin_slug ]['Slug']        = $plugin_slug;
-			$managed_standalone_plugins[ $plugin_slug ]['HandoffLink'] = isset( $managed_standalone_plugins[ $plugin_slug ]['EditPath'] ) ? admin_url( $managed_standalone_plugins[ $plugin_slug ]['EditPath'] ) : null;
-			$managed_standalone_plugins[ $plugin_slug ]                = wp_parse_args( $managed_standalone_plugins[ $plugin_slug ], $default_info );
-		}
 		return $managed_standalone_plugins;
 	}
 
 	/**
-	 * Determine a managed standalone plugin status.
+	 * Renders plugin UI for managing standalone plugins within PL Settings screen.
 	 *
-	 * @param string $plugin_slug Plugin slug.
-	 */
-	private static function get_managed_standalone_plugin_status( $plugin_slug ) {
-		$status            = 'uninstalled';
-		$installed_plugins = self::get_installed_plugins();
-
-		if ( isset( $installed_plugins[ $plugin_slug ] ) ) {
-			if ( is_plugin_active( $installed_plugins[ $plugin_slug ] ) ) {
-				$status = 'active';
-			} else {
-				$status = 'inactive';
-			}
-		}
-
-		return $status;
-	}
-
-
-	/**
-	 * Determine whether plugin installation is allowed in the current environment.
-	 *
-	 * @return bool
-	 */
-	public static function can_install_plugins() {
-		if ( ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT ) ||
-			( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Get a simple list of all installed plugins.
-	 *
-	 * @return array of 'plugin_slug => plugin_file_path' entries for all installed plugins.
-	 */
-	public static function get_installed_plugins() {
-		if ( ! function_exists( 'get_plugins' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		$plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'reduce_plugin_info' ) );
-		$themes  = array_reduce( array_keys( wp_get_themes() ), array( __CLASS__, 'reduce_plugin_info' ) );
-		return array_merge( $plugins, $themes );
-	}
-
-	/**
-	 * Get a list of all installed plugins, with complete info for each.
-	 *
-	 * @return array of 'plugin_slug => []' entries for all installed plugins.
-	 */
-	public static function get_installed_plugins_info() {
-		$plugins = array_merge( get_plugins(), wp_get_themes() );
-
-		$installed_plugins_info = array();
-		foreach ( self::get_installed_plugins() as $key => $path ) {
-			$installed_plugins_info[ $key ]         = $plugins[ $path ];
-			$installed_plugins_info[ $key ]['Path'] = $path;
-		}
-		return $installed_plugins_info;
-	}
-
-	/**
-	 * Reduce get_plugins() info to form 'folder => file'.
-	 *
-	 * @param array  $plugins Associative array of plugin files to paths.
-	 * @param string $key     Plugin relative path. Example: performance/performance.php.
-	 * @return array
-	 */
-	private static function reduce_plugin_info( $plugins, $key ) {
-		$path   = explode( '/', $key );
-		$folder = current( $path );
-
-		// Strip version info from key. (e.g. 'performance-lab-1.0.0' should just be 'performance-lab').
-		$folder = preg_replace( '/[\-0-9\.]+$/', '', $folder );
-
-		$plugins[ $folder ] = $key;
-		return $plugins;
-	}
-
-	/**
-	 * Renders plugin UI for managing standalone plugins.
-	 *
+	 * @since n.e.x.t
 	 * @return void
 	 */
 	public static function render_plugins_ui() {
@@ -171,12 +53,12 @@ class Plugin_Manager {
 		$standalone_plugins = static::get_standalone_plugins();
 		?>
 		<div class="wrap">
-			<h1><?php echo esc_html( __( 'Performance Plugins', 'performance-lab' ) ); ?></h1>
-			<p><?php echo esc_html( __( 'The following standalone performance plugins are available for installation.', 'performance-lab' ) ); ?></p>
+			<h1><?php echo esc_html__( 'Performance Plugins', 'performance-lab' ); ?></h1>
+			<p><?php echo esc_html__( 'The following standalone performance plugins are available for installation.', 'performance-lab' ); ?></p>
 			<div class="wrap">
 				<form id="plugin-filter" method="post">
 					<div class="wp-list-table widefat plugin-install wpp-standalone-plugins">
-						<h2 class="screen-reader-text"><?php echo esc_html( __( 'Plugins list', 'performance-lab' ) ); ?></h2>
+						<h2 class="screen-reader-text"><?php echo esc_html__( 'Plugins list', 'default' ); ?></h2>
 						<div id="the-list">
 							<?php
 							foreach ( $standalone_plugins as $standalone_plugin ) {
@@ -187,9 +69,7 @@ class Plugin_Manager {
 					</div>
 				</form>
 			</div>
-
 			<div class="clear"></div>
-
 		</div>
 		<?php
 	}
@@ -197,35 +77,34 @@ class Plugin_Manager {
 	/**
 	 * Render individual plugin cards.
 	 *
-	 * @param array $standalone_plugin Array of plugin data passed from get_standalone_plugins().
+	 * @param string $standalone_plugin Plugin slug as passed from get_standalone_plugins().
 	 *
+	 * @since n.e.x.t
 	 * @return void
 	 */
-	private static function render_plugin_card( array $standalone_plugin = array() ) {
+	private static function render_plugin_card( string $standalone_plugin ) {
 		$plugin = plugins_api(
 			'plugin_information',
 			array(
-				'slug'   => $standalone_plugin['Slug'],
+				'slug'   => $standalone_plugin,
 				'fields' => array(
 					'short_description' => true,
 					'icons'             => true,
 				),
 			)
 		);
-
 		if ( is_object( $plugin ) ) {
 			$plugin = (array) $plugin;
 		}
 
-		$title = $plugin['name'];
-
 		// Remove any HTML from the description.
 		$description = wp_strip_all_tags( $plugin['short_description'] );
+		$title       = $plugin['name'];
 
 		/**
 		 * Filters the plugin card description on the Add Plugins screen.
 		 *
-		 * @since 6.0.0
+		 * @since n.e.x.t
 		 *
 		 * @param string $description Plugin card description.
 		 * @param array  $plugin      An array of plugin data. See {@see plugins_api()}
@@ -262,7 +141,7 @@ class Plugin_Manager {
 								/* translators: %s: Plugin name and version. */
 								esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
 								esc_attr( $name ),
-								__( 'Install Now', 'performance-lab' )
+								__( 'Install Now', 'default' )
 							);
 						} else {
 							$action_links[] = sprintf(
@@ -284,7 +163,7 @@ class Plugin_Manager {
 								/* translators: %s: Plugin name and version. */
 								esc_attr( sprintf( _x( 'Update %s now', 'plugin', 'default' ), $name ) ),
 								esc_attr( $name ),
-								__( 'Update Now', 'performance-lab' )
+								__( 'Update Now', 'default' )
 							);
 						} else {
 							$action_links[] = sprintf(
@@ -313,12 +192,12 @@ class Plugin_Manager {
 								esc_attr( $plugin['slug'] ),
 								/* translators: %s: Plugin name. */
 								esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'default' ), $plugin['slug'] ) ),
-								__( 'Deactivate', 'performance-lab' )
+								__( 'Deactivate', 'default' )
 							);
 						}
 					} elseif ( current_user_can( 'activate_plugin', $status['file'] ) ) {
 						if ( $compatible_php && $compatible_wp ) {
-							$button_text = __( 'Activate', 'performance-lab' );
+							$button_text = __( 'Activate', 'default' );
 							/* translators: %s: Plugin name. */
 							$button_label = _x( 'Activate %s', 'plugin', 'default' );
 							$activate_url = add_query_arg(
@@ -332,7 +211,7 @@ class Plugin_Manager {
 							);
 
 							if ( is_network_admin() ) {
-								$button_text = __( 'Network Activate', 'performance-lab' );
+								$button_text = __( 'Network Activate', 'default' );
 								/* translators: %s: Plugin name. */
 								$button_label = _x( 'Network Activate %s', 'plugin', 'default' );
 								$activate_url = add_query_arg( array( 'networkwide' => 1 ), $activate_url );
@@ -369,7 +248,7 @@ class Plugin_Manager {
 			'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s" data-title="%s">%s</a>',
 			esc_url( $details_link ),
 			/* translators: %s: Plugin name and version. */
-			esc_attr( sprintf( __( 'More information about %s', 'performance-lab' ), $name ) ),
+			esc_attr( sprintf( __( 'More information about %s', 'default' ), $name ) ),
 			esc_attr( $name ),
 			__( 'More Details', 'performance-lab' )
 		);
@@ -387,7 +266,7 @@ class Plugin_Manager {
 		/**
 		 * Filters the install action links for a plugin.
 		 *
-		 * @since 2.7.0
+		 * @since n.e.x.t
 		 *
 		 * @param string[] $action_links An array of plugin action links.
 		 *                               Defaults are links to Details and Install Now.
@@ -415,13 +294,13 @@ class Plugin_Manager {
 						} elseif ( current_user_can( 'update_core' ) ) {
 							printf(
 							/* translators: %s: URL to WordPress Updates screen. */
-								' ' . __( '<a href="%s">Please update WordPress</a>.', 'performance-lab' ), // phpcs:ignore
+								' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ), // phpcs:ignore
 								esc_url( self_admin_url( 'update-core.php' ) )
 							);
 						} elseif ( current_user_can( 'update_php' ) ) {
 							printf(
 							/* translators: %s: URL to Update PHP page. */
-								' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'performance-lab' ), // phpcs:ignore
+								' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ), // phpcs:ignore
 								esc_url( wp_get_update_php_url() )
 							);
 							wp_update_php_annotation( '</p><p><em>', '</em>' );
@@ -431,7 +310,7 @@ class Plugin_Manager {
 						if ( current_user_can( 'update_core' ) ) {
 							printf(
 							/* translators: %s: URL to WordPress Updates screen. */
-								' ' . __( '<a href="%s">Please update WordPress</a>.', 'performance-lab' ), // phpcs:ignore
+								' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ), // phpcs:ignore
 								esc_url( self_admin_url( 'update-core.php' ) )
 							);
 						}
@@ -460,7 +339,7 @@ class Plugin_Manager {
 					</div>
 					<div class="action-links">
 						<?php
-						if ( $action_links ) {
+						if ( ! empty( $action_links ) ) {
 							echo wp_kses_post( '<ul class="plugin-action-buttons"><li>' . implode( '</li><li>', $action_links ) . '</li></ul>' );
 						}
 						?>
