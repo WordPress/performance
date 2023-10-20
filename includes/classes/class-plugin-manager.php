@@ -35,6 +35,7 @@ class Plugin_Manager {
 	public static function get_standalone_plugins() {
 		$managed_standalone_plugins = array(
 			'webp-uploads',
+			'performant-translations',
 			'sqlite-database-integration',
 		);
 
