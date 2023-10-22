@@ -16,6 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * It will save information in a transient for 12 hours.
  *
  * @since 1.0.0
+ * 
+ * @global WP_Scripts $wp_scripts
  */
 function perflab_aea_audit_enqueued_scripts() {
 	if ( ! is_admin() && is_front_page() && current_user_can( 'view_site_health_checks' ) && false === get_transient( 'aea_enqueued_front_page_scripts' ) ) {
@@ -59,6 +61,8 @@ add_action( 'wp_footer', 'perflab_aea_audit_enqueued_scripts', PHP_INT_MAX );
  * It will save information in a transient for 12 hours.
  *
  * @since 1.0.0
+ * 
+ * @global WP_Styles  $wp_styles  The WP_Styles current instance.
  */
 function perflab_aea_audit_enqueued_styles() {
 	if ( ! is_admin() && is_front_page() && current_user_can( 'view_site_health_checks' ) && false === get_transient( 'aea_enqueued_front_page_styles' ) ) {
