@@ -30,9 +30,10 @@ class Plugin_Manager {
 	 *
 	 * @since n.e.x.t
 	 *
+	 * @access private
 	 * @return array of plugins info.
 	 */
-	public static function get_standalone_plugins() {
+	private static function get_standalone_plugins() {
 		$managed_standalone_plugins = array(
 			'webp-uploads',
 			'performant-translations',
