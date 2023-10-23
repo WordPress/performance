@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * It will save information in a transient for 12 hours.
  *
  * @since 1.0.0
- * 
+ *
  * @global WP_Scripts $wp_scripts
  */
 function perflab_aea_audit_enqueued_scripts() {

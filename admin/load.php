@@ -42,7 +42,7 @@ add_action( 'admin_menu', 'perflab_add_modules_page' );
  * Initializes settings sections and fields for the modules page.
  *
  * @since 1.0.0
- * 
+ *
  * @global array $wp_settings_sections Registered WordPress settings sections.
  *
  * @param array|null $modules     Associative array of available module data, keyed by module slug. By default, this

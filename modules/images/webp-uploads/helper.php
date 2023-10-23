@@ -289,7 +289,7 @@ function webp_uploads_get_content_image_mimes( $attachment_id, $context ) {
  * @since 1.3.0
  *
  * @global WP_Query $wp_query WordPress Query object.
- * 
+ *
  * @return bool True if in the <body> within a frontend request, false otherwise.
  */
 function webp_uploads_in_frontend_body() {
