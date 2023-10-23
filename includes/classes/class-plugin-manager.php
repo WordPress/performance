@@ -172,7 +172,7 @@ class Plugin_Manager {
 						} else {
 							$action_links[] = sprintf(
 								'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-								_x( 'Cannot Update', 'plugin', 'default' )
+								esc_html( _x( 'Cannot Update', 'plugin', 'default' ) )
 							);
 						}
 					}
