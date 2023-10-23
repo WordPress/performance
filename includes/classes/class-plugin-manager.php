@@ -243,9 +243,17 @@ class Plugin_Manager {
 			}
 		}
 
-		$details_link = self_admin_url(
-			'plugin-install.php?tab=plugin-information&amp;plugin=' . $plugin['slug'] .
-			'&amp;TB_iframe=true&amp;width=600&amp;height=550'
+		$details_link = esc_url_raw(
+			add_query_arg(
+				array(
+					'tab'       => 'plugin-information',
+					'plugin'    => $plugin['slug'],
+					'TB_iframe' => 'true',
+					'width'     => 600,
+					'height'    => 550,
+				),
+				admin_url( 'plugin-install.php' )
+			)
 		);
 
 		$action_links[] = sprintf(
@@ -254,7 +262,7 @@ class Plugin_Manager {
 			/* translators: %s: Plugin name and version. */
 			esc_attr( sprintf( __( 'More information about %s', 'default' ), $name ) ),
 			esc_attr( $name ),
-			__( 'More Details', 'performance-lab' )
+			__( 'More Details', 'default' )
 		);
 
 		if ( ! empty( $plugin['icons']['svg'] ) ) {
