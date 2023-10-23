@@ -56,8 +56,8 @@ class Plugin_Manager {
 		$standalone_plugins = static::get_standalone_plugins();
 		?>
 		<div class="wrap">
-			<h1><?php echo esc_html__( 'Performance Plugins', 'performance-lab' ); ?></h1>
-			<p><?php echo esc_html__( 'The following standalone performance plugins are available for installation.', 'performance-lab' ); ?></p>
+			<h1><?php esc_html_e( 'Performance Plugins', 'performance-lab' ); ?></h1>
+			<p><?php esc_html_e( 'The following standalone performance plugins are available for installation.', 'performance-lab' ); ?></p>
 			<div class="wrap">
 				<form id="plugin-filter" method="post">
 					<div class="wp-list-table widefat plugin-install wpp-standalone-plugins">
