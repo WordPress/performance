@@ -61,7 +61,7 @@ class Plugin_Manager {
 			<div class="wrap">
 				<form id="plugin-filter" method="post">
 					<div class="wp-list-table widefat plugin-install wpp-standalone-plugins">
-						<h2 class="screen-reader-text"><?php echo esc_html__( 'Plugins list', 'default' ); ?></h2>
+						<h2 class="screen-reader-text"><?php esc_html_e( 'Plugins list', 'default' ); ?></h2>
 						<div id="the-list">
 							<?php
 							foreach ( $standalone_plugins as $standalone_plugin ) {
