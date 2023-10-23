@@ -145,7 +145,7 @@ class Plugin_Manager {
 								/* translators: %s: Plugin name and version. */
 								esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
 								esc_attr( $name ),
-								__( 'Install Now', 'default' )
+								esc_html__( 'Install Now', 'default' )
 							);
 						} else {
 							$action_links[] = sprintf(
