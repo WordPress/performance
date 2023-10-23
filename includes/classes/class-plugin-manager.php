@@ -183,7 +183,7 @@ class Plugin_Manager {
 					if ( is_plugin_active( $status['file'] ) ) {
 						$action_links[] = sprintf(
 							'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-							_x( 'Active', 'plugin', 'default' )
+							esc_html( _x( 'Active', 'plugin', 'default' ) )
 						);
 						if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
 							global $page;
