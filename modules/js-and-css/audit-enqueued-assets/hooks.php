@@ -62,7 +62,7 @@ add_action( 'wp_footer', 'perflab_aea_audit_enqueued_scripts', PHP_INT_MAX );
  *
  * @since 1.0.0
  * 
- * @global WP_Styles  $wp_styles  The WP_Styles current instance.
+ * @global WP_Styles $wp_styles The WP_Styles current instance.
  */
 function perflab_aea_audit_enqueued_styles() {
 	if ( ! is_admin() && is_front_page() && current_user_can( 'view_site_health_checks' ) && false === get_transient( 'aea_enqueued_front_page_styles' ) ) {
