@@ -61,7 +61,7 @@ add_action( 'wp_footer', 'perflab_aea_audit_enqueued_scripts', PHP_INT_MAX );
  * It will save information in a transient for 12 hours.
  *
  * @since 1.0.0
- * 
+ *
  * @global WP_Styles $wp_styles The WP_Styles current instance.
  */
 function perflab_aea_audit_enqueued_styles() {
