@@ -167,7 +167,7 @@ class Plugin_Manager {
 								/* translators: %s: Plugin name and version. */
 								esc_attr( sprintf( _x( 'Update %s now', 'plugin', 'default' ), $name ) ),
 								esc_attr( $name ),
-								__( 'Update Now', 'default' )
+								esc_html__( 'Update Now', 'default' )
 							);
 						} else {
 							$action_links[] = sprintf(
