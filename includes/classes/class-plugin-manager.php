@@ -36,7 +36,7 @@ class Plugin_Manager {
 		$managed_standalone_plugins = array(
 			'webp-uploads',
 			'performant-translations',
-			'sqlite-database-integration',
+			'dominant-color-images',
 		);
 
 		return $managed_standalone_plugins;
