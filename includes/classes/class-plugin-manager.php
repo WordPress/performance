@@ -56,12 +56,12 @@ class Plugin_Manager {
 		$standalone_plugins = static::get_standalone_plugins();
 		?>
 		<div class="wrap">
-			<h1><?php echo esc_html__( 'Performance Plugins', 'performance-lab' ); ?></h1>
-			<p><?php echo esc_html__( 'The following standalone performance plugins are available for installation.', 'performance-lab' ); ?></p>
+			<h1><?php esc_html_e( 'Performance Plugins', 'performance-lab' ); ?></h1>
+			<p><?php esc_html_e( 'The following standalone performance plugins are available for installation.', 'performance-lab' ); ?></p>
 			<div class="wrap">
 				<form id="plugin-filter" method="post">
 					<div class="wp-list-table widefat plugin-install wpp-standalone-plugins">
-						<h2 class="screen-reader-text"><?php echo esc_html__( 'Plugins list', 'default' ); ?></h2>
+						<h2 class="screen-reader-text"><?php esc_html_e( 'Plugins list', 'default' ); ?></h2>
 						<div id="the-list">
 							<?php
 							foreach ( $standalone_plugins as $standalone_plugin ) {
@@ -145,12 +145,12 @@ class Plugin_Manager {
 								/* translators: %s: Plugin name and version. */
 								esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
 								esc_attr( $name ),
-								__( 'Install Now', 'default' )
+								esc_html__( 'Install Now', 'default' )
 							);
 						} else {
 							$action_links[] = sprintf(
 								'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-								_x( 'Cannot Install', 'plugin', 'default' )
+								esc_html( _x( 'Cannot Install', 'plugin', 'default' ) )
 							);
 						}
 					}
@@ -167,12 +167,12 @@ class Plugin_Manager {
 								/* translators: %s: Plugin name and version. */
 								esc_attr( sprintf( _x( 'Update %s now', 'plugin', 'default' ), $name ) ),
 								esc_attr( $name ),
-								__( 'Update Now', 'default' )
+								esc_html__( 'Update Now', 'default' )
 							);
 						} else {
 							$action_links[] = sprintf(
 								'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-								_x( 'Cannot Update', 'plugin', 'default' )
+								esc_html( _x( 'Cannot Update', 'plugin', 'default' ) )
 							);
 						}
 					}
@@ -183,7 +183,7 @@ class Plugin_Manager {
 					if ( is_plugin_active( $status['file'] ) ) {
 						$action_links[] = sprintf(
 							'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-							_x( 'Active', 'plugin', 'default' )
+							esc_html( _x( 'Active', 'plugin', 'default' ) )
 						);
 						if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
 							global $page;
@@ -236,7 +236,7 @@ class Plugin_Manager {
 					} else {
 						$action_links[] = sprintf(
 							'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-							_x( 'Installed', 'plugin', 'default' )
+							esc_html( _x( 'Installed', 'plugin', 'default' ) )
 						);
 					}
 					break;
