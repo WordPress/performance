@@ -47,7 +47,6 @@ function image_loading_optimization_buffer_output( $passthrough = null ) {
 }
 add_filter( 'template_include', 'image_loading_optimization_buffer_output', PHP_INT_MAX );
 
-
 /**
  * Prints the script for detecting loaded images and the LCP element.
  */
@@ -63,7 +62,7 @@ function image_loading_optimization_print_detection_script() {
 	 * also has a lot of traffic could result in a cache stampede.
 	 *
 	 * @since n.e.x.t
-	 * @todo The value should probably be something like the 99th percentile of TTFB for WordPress sites in CrUX.
+	 * @todo The value should probably be something like the 99th percentile of Time To Last Byte (TTLB) for WordPress sites in CrUX.
 	 *
 	 * @param int $detection_time_window Detection time window in milliseconds.
 	 */
