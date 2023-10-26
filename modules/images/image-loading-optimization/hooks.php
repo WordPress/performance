@@ -46,3 +46,34 @@ function image_loading_optimization_buffer_output( $passthrough = null ) {
 	return $passthrough;
 }
 add_filter( 'template_include', 'image_loading_optimization_buffer_output', PHP_INT_MAX );
+
+
+/**
+ * Prints the script for detecting loaded images and the LCP element.
+ */
+function image_loading_optimization_print_detection_script() {
+	$serve_time = ceil( microtime( true ) * 1000 );
+
+	/**
+	 * Filters the time window between serve time and run time in which loading detection is allowed to run.
+	 *
+	 * Allow this amount of milliseconds between when the page was first generated (and perhaps cached) and when the
+	 * detect function on the page is allowed to perform its detection logic and submit the request to store the results.
+	 * This avoids situations in which there is missing detection metrics in which case a site with page caching which
+	 * also has a lot of traffic could result in a cache stampede.
+	 *
+	 * @since n.e.x.t
+	 * @todo The value should probably be something like the 99th percentile of TTFB for WordPress sites in CrUX.
+	 *
+	 * @param int $detection_time_window Detection time window in milliseconds.
+	 */
+	$detection_time_window = apply_filters( 'perflab_image_loading_detection_time_window', 5000 );
+
+	$detect_function = file_get_contents( __DIR__ . '/detect.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	$detect_args     = array( $serve_time, $detection_time_window, WP_DEBUG );
+	wp_print_inline_script_tag(
+		sprintf( '( %s )( ...%s )', $detect_function, wp_json_encode( $detect_args ) ),
+		array( 'type' => 'module' )
+	);
+}
+add_action( 'wp_print_footer_scripts', 'image_loading_optimization_print_detection_script' );
