@@ -5,7 +5,7 @@
  * @param {number} detectionTimeWindow The number of milliseconds between now and when the page was first generated in which detection should proceed.
  * @param {boolean} isDebug Whether to show debug messages.
  */
-function detect( serveTime, detectionTimeWindow, isDebug ) {
+export default async function detect( serveTime, detectionTimeWindow, isDebug ) {
 	const runTime = new Date().valueOf();
 
 	// Abort running detection logic if it was served in a cached page.

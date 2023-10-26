@@ -68,10 +68,13 @@ function image_loading_optimization_print_detection_script() {
 	 */
 	$detection_time_window = apply_filters( 'perflab_image_loading_detection_time_window', 5000 );
 
-	$detect_function = file_get_contents( __DIR__ . '/detect.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-	$detect_args     = array( $serve_time, $detection_time_window, WP_DEBUG );
+	$detect_args = array( $serve_time, $detection_time_window, WP_DEBUG );
 	wp_print_inline_script_tag(
-		sprintf( '( %s )( ...%s )', $detect_function, wp_json_encode( $detect_args ) ),
+		sprintf(
+			'import detect from %s; detect( ...%s )',
+			wp_json_encode( add_query_arg( 'ver', PERFLAB_VERSION, plugin_dir_url( __FILE__ ) . 'detect.js' ) ),
+			wp_json_encode( $detect_args )
+		),
 		array( 'type' => 'module' )
 	);
 }
