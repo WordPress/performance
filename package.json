@@ -45,5 +45,8 @@
       "composer run-script lint",
       "composer run-script phpstan"
     ]
+  },
+  "dependencies": {
+    "web-vitals": "3.5.0"
   }
 }

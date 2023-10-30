@@ -32,6 +32,36 @@ function yieldToMain() {
 }
 
 /**
+ * @typedef {Object} Breadcrumb
+ * @property {number} index
+ * @property {string} tagName
+ */
+
+/**
+ * Gets breadcrumbs for a given element.
+ *
+ * @param {Element} element
+ * @return {Breadcrumb[]} Breadcrumbs.
+ */
+function getBreadcrumbs( element ) {
+	/** @type {Breadcrumb[]} */
+	const breadcrumbs = [];
+
+	let node = element;
+	while ( node instanceof Element ) {
+		breadcrumbs.unshift( {
+			tagName: node.tagName,
+			index: node.parentElement
+				? Array.from( node.parentElement.children ).indexOf( node )
+				: 0,
+		} );
+		node = node.parentElement;
+	}
+
+	return breadcrumbs;
+}
+
+/**
  * Detect the LCP element, loaded images, client viewport and store for future optimizations.
  *
  * @param {number}  serveTime           The serve time of the page in milliseconds from PHP via `ceil( microtime( true ) * 1000 )`.
@@ -59,6 +89,14 @@ export default async function detect(
 		log( 'Proceeding with detection' );
 	}
 
+	const results = {
+		viewport: {
+			width: window.innerWidth,
+			height: window.innerHeight,
+		},
+		images: [],
+	};
+
 	// TODO: Use a local copy of web-vitals.
 	const { onLCP } = await import(
 		// eslint-disable-next-line import/no-unresolved
@@ -66,13 +104,13 @@ export default async function detect(
 	);
 
 	/** @type {LCPMetricWithAttribution[]} */
-	const lcpCandidates = [];
+	const lcpMetricCandidates = [];
 
 	// Obtain at least one LCP candidate.
 	const lcpCandidateObtained = new Promise( ( resolve ) => {
 		onLCP(
 			( metric ) => {
-				lcpCandidates.push( metric );
+				lcpMetricCandidates.push( metric );
 				resolve();
 			},
 			{
@@ -84,31 +122,29 @@ export default async function detect(
 		);
 	} );
 
-	// To watch for intersection relative to the device's viewport, specify null for the root option.
-	log( {
-		viewportWidth: window.innerWidth,
-		viewportHeight: window.innerHeight,
-	} );
+	/** @type {IntersectionObserverEntry[]} */
+	const imageIntersections = [];
 
-	const options = {
-		root: null,
-		// rootMargin: "0px",
-		threshold: 0.0, // As soon as even one pixel is visible.
-	};
+	const imageObserver = new IntersectionObserver(
+		( entries ) => {
+			for ( const entry of entries ) {
+				//if ( entry.isIntersecting ) {
+				console.info( 'interesecting!', entry );
+				imageIntersections.push( entry );
+				//}
+			}
+		},
+		{
+			root: null, // To watch for intersection relative to the device's viewport, specify null for the root option.
+			threshold: 0.0, // As soon as even one pixel is visible.
+		}
+	);
 
 	const adminBar = document.getElementById( 'wpadminbar' );
-	const imageObserver = new IntersectionObserver( ( entries ) => {
-		for ( const entry of entries ) {
-			if (
-				entry.isIntersecting &&
-				( ! adminBar || ! adminBar.contains( entry.target ) )
-			) {
-				log( 'Initial image:', entry.target );
-			}
-		}
-	}, options );
 	for ( const img of document.getElementsByTagName( 'img' ) ) {
-		imageObserver.observe( img );
+		if ( ! adminBar || ! adminBar.contains( img ) ) {
+			imageObserver.observe( img );
+		}
 	}
 
 	// Wait until we have an LCP candidate, although more may come upon the page finishing loading.
@@ -129,7 +165,18 @@ export default async function detect(
 		log( 'Detection is stopping.' );
 	}
 
-	log( 'lcpCandidates', lcpCandidates );
+	console.info( imageIntersections );
+	const lcpMetric = lcpMetricCandidates.at( -1 );
+	for ( const imageIntersection of imageIntersections ) {
+		log(
+			'imageIntersection.target',
+			imageIntersection.target,
+			getBreadcrumbs( imageIntersection.target )
+		);
+	}
+	// lcpMetric.attribution.element
+
+	log( 'lcpCandidates', lcpMetricCandidates );
 
 	// TODO: Send data to server.
 }
