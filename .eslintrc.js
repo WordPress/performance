@@ -8,7 +8,14 @@ const config = {
 	rules: {
 		...( wpConfig?.rules || {} ),
 		'jsdoc/valid-types': 'off',
+		'no-console': 'off',
 	},
+	env: {
+		'browser': true,
+	},
+	globals: {
+		scheduler: false,
+	}
 };
 
 module.exports = config;
