@@ -126,12 +126,16 @@ export default async function detect(
 	const imageIntersections = [];
 
 	const imageObserver = new IntersectionObserver(
-		( entries ) => {
+		( entries, observer ) => {
+			consl.info('callback!');
 			for ( const entry of entries ) {
-				//if ( entry.isIntersecting ) {
-				console.info( 'interesecting!', entry );
-				imageIntersections.push( entry );
-				//}
+				if ( entry.isIntersecting ) {
+					console.info( 'interesecting!', entry );
+					imageIntersections.push( entry );
+				} else {
+					console.info( 'npt interesecting!', entry );
+				}
+				observer.unobserve( entry.target );
 			}
 		},
 		{
@@ -141,8 +145,10 @@ export default async function detect(
 	);
 
 	const adminBar = document.getElementById( 'wpadminbar' );
-	for ( const img of document.getElementsByTagName( 'img' ) ) {
+	const imgCollection = document.body.getElementsByTagName( 'img' );
+	for ( /** @type {HTMLImageElement} */ const img of imgCollection ) {
 		if ( ! adminBar || ! adminBar.contains( img ) ) {
+			console.info( 'observe', img );
 			imageObserver.observe( img );
 		}
 	}
@@ -179,4 +185,5 @@ export default async function detect(
 	log( 'lcpCandidates', lcpMetricCandidates );
 
 	// TODO: Send data to server.
+	log( results );
 }
