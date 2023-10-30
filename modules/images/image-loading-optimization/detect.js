@@ -17,7 +17,6 @@ function warn( ...message ) {
  * @return {Promise<void>}
  */
 function yieldToMain() {
-	/** @type  */
 	if (
 		typeof scheduler !== 'undefined' &&
 		typeof scheduler.yield === 'function'
@@ -122,24 +121,28 @@ export default async function detect(
 		);
 	} );
 
+	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
+	await new Promise( ( resolve ) => {
+		if ( document.readyState !== 'loading' ) {
+			resolve();
+		} else {
+			document.addEventListener( 'DOMContentLoaded', resolve );
+		}
+	} );
+
 	/** @type {IntersectionObserverEntry[]} */
 	const imageIntersections = [];
 
 	const imageObserver = new IntersectionObserver(
-		( entries, observer ) => {
-			consl.info('callback!');
+		( entries ) => {
 			for ( const entry of entries ) {
 				if ( entry.isIntersecting ) {
-					console.info( 'interesecting!', entry );
 					imageIntersections.push( entry );
-				} else {
-					console.info( 'npt interesecting!', entry );
 				}
-				observer.unobserve( entry.target );
 			}
 		},
 		{
-			root: null, // To watch for intersection relative to the device's viewport, specify null for the root option.
+			root: null, // To watch for intersection relative to the device's viewport.
 			threshold: 0.0, // As soon as even one pixel is visible.
 		}
 	);
@@ -148,7 +151,6 @@ export default async function detect(
 	const imgCollection = document.body.getElementsByTagName( 'img' );
 	for ( /** @type {HTMLImageElement} */ const img of imgCollection ) {
 		if ( ! adminBar || ! adminBar.contains( img ) ) {
-			console.info( 'observe', img );
 			imageObserver.observe( img );
 		}
 	}
@@ -156,12 +158,22 @@ export default async function detect(
 	// Wait until we have an LCP candidate, although more may come upon the page finishing loading.
 	await lcpCandidateObtained;
 
-	// Wait until the page has fully loaded. Note that a module is delayed like a script with defer.
+	// Wait until the images on the page have fully loaded.
 	await new Promise( ( resolve ) => {
 		if ( document.readyState === 'complete' ) {
 			resolve();
 		} else {
 			window.addEventListener( 'load', resolve, { once: true } );
+		}
+	} );
+
+	// Give the image intersection observer a chance to report back.
+	// TODO: This needs to be hardened. How long to wait for callback? What about when there are no images in the page?
+	await new Promise( async ( resolve ) => {
+		if ( window.requestIdleCallback ) {
+			window.requestIdleCallback( resolve );
+		} else {
+			setTimeout( resolve, 1 );
 		}
 	} );
 
@@ -171,16 +183,19 @@ export default async function detect(
 		log( 'Detection is stopping.' );
 	}
 
-	console.info( imageIntersections );
 	const lcpMetric = lcpMetricCandidates.at( -1 );
 	for ( const imageIntersection of imageIntersections ) {
 		log(
 			'imageIntersection.target',
 			imageIntersection.target,
-			getBreadcrumbs( imageIntersection.target )
+			getBreadcrumbs( imageIntersection.target ),
+			lcpMetric &&
+				imageIntersection.target ===
+					lcpMetric.attribution.lcpEntry.element
+				? 'is LCP'
+				: 'is NOT LCP'
 		);
 	}
-	// lcpMetric.attribution.element
 
 	log( 'lcpCandidates', lcpMetricCandidates );
 
