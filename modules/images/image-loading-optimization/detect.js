@@ -1,8 +1,14 @@
-/**
- * External dependencies
- */
-
 /** @typedef {import("web-vitals").LCPMetricWithAttribution} LCPMetricWithAttribution */
+
+const consoleLogPrefix = '[Image Loading Optimization]';
+
+function log( ...message ) {
+	console.log( consoleLogPrefix, ...message );
+}
+
+function warn( ...message ) {
+	console.warn( consoleLogPrefix, ...message );
+}
 
 /**
  * Yield to the main thread.
@@ -42,7 +48,7 @@ export default async function detect(
 	// Abort running detection logic if it was served in a cached page.
 	if ( runTime - serveTime > detectionTimeWindow ) {
 		if ( isDebug ) {
-			console.warn(
+			warn(
 				'Aborted detection for Image Loading Optimization due to being outside detection time window.'
 			);
 		}
@@ -50,9 +56,7 @@ export default async function detect(
 	}
 
 	if ( isDebug ) {
-		console.info(
-			'Proceeding with detection for Image Loading Optimization.'
-		);
+		log( 'Proceeding with detection' );
 	}
 
 	// TODO: Use a local copy of web-vitals.
@@ -61,22 +65,10 @@ export default async function detect(
 		'https://unpkg.com/web-vitals@3/dist/web-vitals.attribution.js?module'
 	);
 
-	// const perfObserver = new PerformanceObserver( ( list ) => {
-	// 	const entries = list.getEntries();
-	// 	for ( const entry of entries ) {
-	// 		console.log( 'perfObserver LCP:', entry );
-	// 	}
-	// } );
-	//
-	// perfObserver.observe( {
-	// 	type: 'largest-contentful-paint',
-	// 	buffered: true,
-	// } );
-
 	/** @type {LCPMetricWithAttribution[]} */
 	const lcpCandidates = [];
 
-	// TODO: Obtain other candidates than the LCP? If the LCP is text and there's an image too, we should add fetchpriority to the image still even though it isn't LCP.
+	// Obtain at least one LCP candidate.
 	const lcpCandidateObtained = new Promise( ( resolve ) => {
 		onLCP(
 			( metric ) => {
@@ -92,10 +84,8 @@ export default async function detect(
 		);
 	} );
 
-	// Note: We cannot use the window load event because the module may load after it fires.
-
 	// To watch for intersection relative to the device's viewport, specify null for the root option.
-	console.info( {
+	log( {
 		viewportWidth: window.innerWidth,
 		viewportHeight: window.innerHeight,
 	} );
@@ -113,7 +103,7 @@ export default async function detect(
 				entry.isIntersecting &&
 				( ! adminBar || ! adminBar.contains( entry.target ) )
 			) {
-				console.info( 'Initial image:', entry.target );
+				log( 'Initial image:', entry.target );
 			}
 		}
 	}, options );
@@ -133,18 +123,13 @@ export default async function detect(
 		}
 	} );
 
-	// Wait for an additional timer.
-	// await new Promise( ( resolve ) => {
-	// 	setTimeout( resolve, 1000 ); // TODO: What time makes sense?
-	// } );
-
 	// Stop observing.
 	imageObserver.disconnect();
 	if ( isDebug ) {
-		console.info( 'Detection is stopping.' );
+		log( 'Detection is stopping.' );
 	}
 
-	console.info( 'lcpCandidates', lcpCandidates );
+	log( 'lcpCandidates', lcpCandidates );
 
 	// TODO: Send data to server.
 }
