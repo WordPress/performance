@@ -11,11 +11,13 @@ const config = {
 		'no-console': 'off',
 	},
 	env: {
-		'browser': true,
+		browser: true,
 	},
 	globals: {
 		scheduler: false,
-	}
+	},
+	// Note: The '/wp-*' pattern is to ignore symlinks which may be added for local development.
+	ignorePatterns: [ '/vendor', '/node_modules', '/wp-*' ],
 };
 
 module.exports = config;
