@@ -32,8 +32,14 @@ function yieldToMain() {
 
 /**
  * @typedef {Object} Breadcrumb
- * @property {number} index
- * @property {string} tagName
+ * @property {number} index   - Index of element among sibling elements.
+ * @property {string} tagName - Tag name.
+ */
+
+/**
+ * @typedef {Object} ElementBreadcrumb
+ * @property {Element}    element    - Element node.
+ * @property {Breadcrumb} breadcrumb - Breadcrumb for the element.
  */
 
 /**
@@ -73,6 +79,8 @@ export default async function detect(
 	isDebug
 ) {
 	const runTime = new Date().valueOf();
+	const doc = document;
+	const win = window;
 
 	// Abort running detection logic if it was served in a cached page.
 	if ( runTime - serveTime > detectionTimeWindow ) {
@@ -88,13 +96,75 @@ export default async function detect(
 		log( 'Proceeding with detection' );
 	}
 
+	// Obtain the admin bar element because we don't want to detect elements inside of it.
+	const adminBar =
+		/** @type {?HTMLDivElement} */ doc.getElementById( 'wpadminbar' );
+
+	// Note that we capture an array of image elements because getElementsByTagName() returns a live HTMLCollection.
+	// We also need to capture the original elements and their breadcrumbs as early as possible in case JavaScript is
+	// mutating the DOM from the original HTML rendered by the server, in which case the breadcrumbs obtained from the
+	// client will no longer be valid on the server.
+	const breadcrumbedImages = /** @type {ElementBreadcrumb[]} */ Array.from(
+		doc.body.getElementsByTagName( 'img' )
+	).map( ( img ) => {
+		return {
+			element: img,
+			breadcrumb: getBreadcrumbs( img ),
+		};
+	} );
+
 	const results = {
 		viewport: {
-			width: window.innerWidth,
-			height: window.innerHeight,
+			width: win.innerWidth,
+			height: win.innerHeight,
 		},
 		images: [],
 	};
+
+	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
+	await new Promise( ( resolve ) => {
+		if ( doc.readyState !== 'loading' ) {
+			resolve();
+		} else {
+			doc.addEventListener( 'DOMContentLoaded', resolve, { once: true } );
+		}
+	} );
+
+	/** @type {IntersectionObserverEntry[]} */
+	const imageIntersections = [];
+
+	/** @type {?IntersectionObserver} */
+	let imageObserver;
+
+	// Wait for the intersection observer to report back on the initially-visible images.
+	// Note that the first callback will include _all_ observed entries per <https://github.com/w3c/IntersectionObserver/issues/476>.
+	if ( breadcrumbedImages.length > 0 ) {
+		await new Promise( ( resolve ) => {
+			imageObserver = new IntersectionObserver(
+				( entries ) => {
+					for ( const entry of entries ) {
+						if ( entry.isIntersecting ) {
+							imageIntersections.push( entry );
+						}
+					}
+					resolve();
+				},
+				{
+					root: null, // To watch for intersection relative to the device's viewport.
+					threshold: 0.0, // As soon as even one pixel is visible.
+				}
+			);
+
+			for ( const breadcrumbedImage of breadcrumbedImages ) {
+				if (
+					! adminBar ||
+					! adminBar.contains( breadcrumbedImage.element )
+				) {
+					imageObserver.observe( breadcrumbedImage.element );
+				}
+			}
+		} );
+	}
 
 	// TODO: Use a local copy of web-vitals.
 	const { onLCP } = await import(
@@ -105,8 +175,8 @@ export default async function detect(
 	/** @type {LCPMetricWithAttribution[]} */
 	const lcpMetricCandidates = [];
 
-	// Obtain at least one LCP candidate.
-	const lcpCandidateObtained = new Promise( ( resolve ) => {
+	// Obtain at least one LCP candidate. More may be reported before the page finishes loading.
+	await new Promise( ( resolve ) => {
 		onLCP(
 			( metric ) => {
 				lcpMetricCandidates.push( metric );
@@ -121,64 +191,19 @@ export default async function detect(
 		);
 	} );
 
-	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
-	await new Promise( ( resolve ) => {
-		if ( document.readyState !== 'loading' ) {
-			resolve();
-		} else {
-			document.addEventListener( 'DOMContentLoaded', resolve );
-		}
-	} );
-
-	/** @type {IntersectionObserverEntry[]} */
-	const imageIntersections = [];
-
-	const imageObserver = new IntersectionObserver(
-		( entries ) => {
-			for ( const entry of entries ) {
-				if ( entry.isIntersecting ) {
-					imageIntersections.push( entry );
-				}
-			}
-		},
-		{
-			root: null, // To watch for intersection relative to the device's viewport.
-			threshold: 0.0, // As soon as even one pixel is visible.
-		}
-	);
-
-	const adminBar = document.getElementById( 'wpadminbar' );
-	const imgCollection = document.body.getElementsByTagName( 'img' );
-	for ( /** @type {HTMLImageElement} */ const img of imgCollection ) {
-		if ( ! adminBar || ! adminBar.contains( img ) ) {
-			imageObserver.observe( img );
-		}
-	}
-
-	// Wait until we have an LCP candidate, although more may come upon the page finishing loading.
-	await lcpCandidateObtained;
-
 	// Wait until the images on the page have fully loaded.
 	await new Promise( ( resolve ) => {
-		if ( document.readyState === 'complete' ) {
+		if ( doc.readyState === 'complete' ) {
 			resolve();
 		} else {
-			window.addEventListener( 'load', resolve, { once: true } );
-		}
-	} );
-
-	// Give the image intersection observer a chance to report back.
-	// TODO: This needs to be hardened. How long to wait for callback? What about when there are no images in the page?
-	await new Promise( async ( resolve ) => {
-		if ( window.requestIdleCallback ) {
-			window.requestIdleCallback( resolve );
-		} else {
-			setTimeout( resolve, 1 );
+			win.addEventListener( 'load', resolve, { once: true } );
 		}
 	} );
 
 	// Stop observing.
-	imageObserver.disconnect();
+	if ( imageObserver ) {
+		imageObserver.disconnect();
+	}
 	if ( isDebug ) {
 		log( 'Detection is stopping.' );
 	}
