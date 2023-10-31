@@ -14,26 +14,6 @@ function warn( ...message ) {
 }
 
 /**
- * Yield to the main thread.
- *
- * @see https://developer.chrome.com/blog/introducing-scheduler-yield-origin-trial/#enter-scheduleryield
- * @return {Promise<void>}
- */
-function yieldToMain() {
-	if (
-		typeof scheduler !== 'undefined' &&
-		typeof scheduler.yield === 'function'
-	) {
-		return scheduler.yield();
-	}
-
-	// Fall back to setTimeout:
-	return new Promise( ( resolve ) => {
-		setTimeout( resolve, 0 );
-	} );
-}
-
-/**
  * @typedef {Object} Breadcrumb
  * @property {number} index   - Index of element among sibling elements.
  * @property {string} tagName - Tag name.
