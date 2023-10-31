@@ -2,6 +2,9 @@
 
 const consoleLogPrefix = '[Image Loading Optimization]';
 
+const win = window;
+const doc = win.document;
+
 function log( ...message ) {
 	console.log( consoleLogPrefix, ...message );
 }
@@ -38,9 +41,31 @@ function yieldToMain() {
 
 /**
  * @typedef {Object} ElementBreadcrumb
- * @property {Element}    element    - Element node.
- * @property {Breadcrumb} breadcrumb - Breadcrumb for the element.
+ * @property {Element}      element     - Element node.
+ * @property {Breadcrumb[]} breadcrumbs - Breadcrumb for the element.
  */
+
+/**
+ * Get breadcrumbed elements.
+ *
+ * @param {string} selector
+ * @return {ElementBreadcrumb[]} Breadcrumbed elements.
+ */
+function getBreadcrumbedElements( selector ) {
+	/** @type {ElementBreadcrumb[]} */
+	const breadcrumbedElements = [];
+
+	/** @type {HTMLCollection} */
+	const elements = doc.body.querySelectorAll( selector );
+	for ( const element of elements ) {
+		breadcrumbedElements.push( {
+			element,
+			breadcrumb: getBreadcrumbs( element ),
+		} );
+	}
+
+	return breadcrumbedElements;
+}
 
 /**
  * Gets breadcrumbs for a given element.
@@ -79,8 +104,6 @@ export default async function detect(
 	isDebug
 ) {
 	const runTime = new Date().valueOf();
-	const doc = document;
-	const win = window;
 
 	// Abort running detection logic if it was served in a cached page.
 	if ( runTime - serveTime > detectionTimeWindow ) {
@@ -104,14 +127,7 @@ export default async function detect(
 	// We also need to capture the original elements and their breadcrumbs as early as possible in case JavaScript is
 	// mutating the DOM from the original HTML rendered by the server, in which case the breadcrumbs obtained from the
 	// client will no longer be valid on the server.
-	const breadcrumbedImages = /** @type {ElementBreadcrumb[]} */ Array.from(
-		doc.body.getElementsByTagName( 'img' )
-	).map( ( img ) => {
-		return {
-			element: img,
-			breadcrumb: getBreadcrumbs( img ),
-		};
-	} );
+	const breadcrumbedImages = getBreadcrumbedElements( 'img' );
 
 	const results = {
 		viewport: {
