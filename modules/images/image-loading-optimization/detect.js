@@ -89,7 +89,17 @@ export default async function detect(
 	if ( runTime - serveTime > detectionTimeWindow ) {
 		if ( isDebug ) {
 			warn(
-				'Aborted detection for Image Loading Optimization due to being outside detection time window.'
+				'Aborted detection due to being outside detection time window.'
+			);
+		}
+		return;
+	}
+
+	// Prevent detection when page is not scrolled to the initial viewport.
+	if ( doc.documentElement.scrollTop > 0 ) {
+		if ( isDebug ) {
+			warn(
+				'Aborted detection since initial scroll position of page is not at the top.'
 			);
 		}
 		return;
