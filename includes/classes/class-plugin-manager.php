@@ -84,8 +84,6 @@ class Plugin_Manager {
 	 * @since n.e.x.t
 	 *
 	 * @param string $standalone_plugin Plugin slug as passed from get_standalone_plugins().
-	 *
-	 * @return void
 	 */
 	private static function render_plugin_card( string $standalone_plugin ) {
 		$plugin = plugins_api(
