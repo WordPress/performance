@@ -265,6 +265,4 @@ export default async function detect(
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();
-	breadcrumbedElementsWithBackgrounds.length = 0;
-	breadcrumbedImages.length = 0;
 }
