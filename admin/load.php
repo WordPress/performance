@@ -11,30 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-add_action( 'admin_enqueue_scripts', 'perflab_admin_scripts' );
-
-/**
- * Callback function to handle admin scripts.
- *
- * @since n.e.x.t
- */
-function perflab_admin_scripts() {
-	wp_enqueue_script( 'updates' );
-
-	wp_localize_script(
-		'updates',
-		'_wpUpdatesItemCounts',
-		array(
-			'settings' => array(
-				'totals' => wp_get_update_data(),
-			),
-		)
-	);
-
-	wp_enqueue_script( 'thickbox' );
-	wp_enqueue_style( 'thickbox' );
-}
-
 /**
  * Adds the modules page to the Settings menu.
  *
@@ -78,6 +54,9 @@ add_action( 'admin_menu', 'perflab_add_modules_page' );
  */
 function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 	global $wp_settings_sections;
+
+	// Handle script enqueuing for settings page.
+	add_action( 'admin_enqueue_scripts', 'perflab_enqueue_modules_page_scripts' );
 
 	// Register sections for all focus areas, plus 'Other'.
 	if ( ! is_array( $focus_areas ) ) {
@@ -531,6 +510,28 @@ function perflab_dismiss_wp_pointer_wrapper() {
 	check_ajax_referer( 'dismiss_pointer' );
 }
 add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 0 );
+
+/**
+ * Callback function to handle admin scripts.
+ *
+ * @since n.e.x.t
+ */
+function perflab_enqueue_modules_page_scripts() {
+	wp_enqueue_script( 'updates' );
+
+	wp_localize_script(
+		'updates',
+		'_wpUpdatesItemCounts',
+		array(
+			'settings' => array(
+				'totals' => wp_get_update_data(),
+			),
+		)
+	);
+
+	wp_enqueue_script( 'thickbox' );
+	wp_enqueue_style( 'thickbox' );
+}
 
 /**
  * Callback function hooked to admin_init to handle WPP inline standalone
