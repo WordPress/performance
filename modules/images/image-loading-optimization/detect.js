@@ -1,4 +1,4 @@
-/** @typedef {import("web-vitals").LCPMetricWithAttribution} LCPMetricWithAttribution */
+/** @typedef {import("web-vitals").LCPMetric} LCPMetric */
 
 const consoleLogPrefix = '[Image Loading Optimization]';
 
@@ -26,7 +26,27 @@ function warn( ...message ) {
  */
 
 /**
+ * @typedef {Object} ElementMetrics
+ * @property {boolean}         isLCP              - Whether it is the LCP candidate.
+ * @property {boolean}         isLCPCandidate     - Whether it is among the LCP candidates.
+ * @property {Breadcrumb[]}    breadcrumbs        - Breadcrumbs.
+ * @property {number}          intersectionRatio  - Intersection ratio.
+ * @property {DOMRectReadOnly} intersectionRect   - Intersection rectangle.
+ * @property {DOMRectReadOnly} boundingClientRect - Bounding client rectangle.
+ */
+
+/**
+ * @typedef {Object} PageMetrics
+ * @property {Object}           viewport        - Viewport.
+ * @property {number}           viewport.width  - Viewport width.
+ * @property {number}           viewport.height - Viewport height.
+ * @property {ElementMetrics[]} elements        - Metrics for the elements observed on the page.
+ */
+
+/**
  * Get breadcrumbed elements.
+ *
+ * @todo We probably don't need this.
  *
  * @param {HTMLCollection|Element[]} elements Elements.
  * @return {ElementBreadcrumbs[]} Breadcrumbed elements.
@@ -142,14 +162,6 @@ export default async function detect(
 		);
 	}
 
-	const results = {
-		viewport: {
-			width: win.innerWidth,
-			height: win.innerHeight,
-		},
-		elements: [],
-	};
-
 	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
 	await new Promise( ( resolve ) => {
 		if ( doc.readyState !== 'loading' ) {
@@ -208,10 +220,10 @@ export default async function detect(
 	// TODO: Use a local copy of web-vitals.
 	const { onLCP } = await import(
 		// eslint-disable-next-line import/no-unresolved
-		'https://unpkg.com/web-vitals@3/dist/web-vitals.attribution.js?module'
+		'https://unpkg.com/web-vitals@3/dist/web-vitals.js?module'
 	);
 
-	/** @type {LCPMetricWithAttribution[]} */
+	/** @type {LCPMetric[]} */
 	const lcpMetricCandidates = [];
 
 	// Obtain at least one LCP candidate. More may be reported before the page finishes loading.
@@ -245,36 +257,50 @@ export default async function detect(
 		log( 'Detection is stopping.' );
 	}
 
-	const lcpMetric = lcpMetricCandidates.at( -1 );
-	for ( const elementIntersection of elementIntersections ) {
-		// const elementInfo = {
-		// 	...
-		// };
+	/** @type {PageMetrics} */
+	const pageMetrics = {
+		viewport: {
+			width: win.innerWidth,
+			height: win.innerHeight,
+		},
+		elements: [],
+	};
 
+	const lcpMetric = lcpMetricCandidates.at( -1 );
+
+	for ( const elementIntersection of elementIntersections ) {
 		const breadcrumbs = breadcrumbedElementsMap.get(
 			elementIntersection.target
 		);
 		if ( ! breadcrumbs ) {
-			warn( 'Unable to look up breadcrumbs for element' );
+			if ( isDebug ) {
+				warn( 'Unable to look up breadcrumbs for element' );
+			}
 			continue;
 		}
 
-		log(
-			'elementIntersection.target',
-			elementIntersection.target,
+		const isLCP =
+			elementIntersection.target === lcpMetric?.entries[ 0 ]?.element;
+
+		/** @type {ElementMetrics} */
+		const elementMetrics = {
+			isLCP,
+			isLCPCandidate: !! lcpMetricCandidates.find(
+				( lcpMetricCandidate ) =>
+					lcpMetricCandidate.entries[ 0 ]?.element ===
+					elementIntersection.target
+			),
 			breadcrumbs,
-			lcpMetric &&
-				elementIntersection.target ===
-					lcpMetric.attribution.lcpEntry.element
-				? 'is LCP'
-				: 'is NOT LCP'
-		);
+			intersectionRatio: elementIntersection.intersectionRatio,
+			intersectionRect: elementIntersection.intersectionRect,
+			boundingClientRect: elementIntersection.boundingClientRect,
+		};
+
+		pageMetrics.elements.push( elementMetrics );
 	}
 
-	log( 'lcpCandidates', lcpMetricCandidates );
-
 	// TODO: Send data to server.
-	log( results );
+	log( pageMetrics );
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();
