@@ -48,7 +48,4 @@
       "PerformanceLab\\Tests\\": "tests/utils"
     }
   },
-  "autoload": {
-    "classmap": ["includes/"]
-  }
 }
