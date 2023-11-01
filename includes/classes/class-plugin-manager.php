@@ -2,11 +2,7 @@
 /**
  * Class PerformanceLab\Plugin_Manager
  *
- * @package PerformanceLab
- * Author: WordPress Performance Team
- * Author URI: https://make.wordpress.org/performance/
- * License: GPLv2 or later
- * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @package performance-lab
  */
 
 namespace PerformanceLab;
