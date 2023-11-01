@@ -20,12 +20,6 @@ function warn( ...message ) {
  */
 
 /**
- * @typedef {Object} ElementBreadcrumbs
- * @property {Element}      element     - Element node.
- * @property {Breadcrumb[]} breadcrumbs - Breadcrumb for the element.
- */
-
-/**
  * @typedef {Object} ElementMetrics
  * @property {boolean}         isLCP              - Whether it is the LCP candidate.
  * @property {boolean}         isLCPCandidate     - Whether it is among the LCP candidates.
@@ -42,29 +36,6 @@ function warn( ...message ) {
  * @property {number}           viewport.height - Viewport height.
  * @property {ElementMetrics[]} elements        - Metrics for the elements observed on the page.
  */
-
-/**
- * Get breadcrumbed elements.
- *
- * @todo We probably don't need this.
- *
- * @param {HTMLCollection|Element[]} elements Elements.
- * @return {ElementBreadcrumbs[]} Breadcrumbed elements.
- */
-function getBreadcrumbedElements( elements ) {
-	/** @type {ElementBreadcrumbs[]} */
-	const breadcrumbedElements = [];
-
-	/** @type {HTMLCollection} */
-	for ( const element of elements ) {
-		breadcrumbedElements.push( {
-			element,
-			breadcrumbs: getBreadcrumbs( element ),
-		} );
-	}
-
-	return breadcrumbedElements;
-}
 
 /**
  * Gets breadcrumbs for a given element.
@@ -136,31 +107,21 @@ export default async function detect(
 	// We need to capture the original elements and their breadcrumbs as early as possible in case JavaScript is
 	// mutating the DOM from the original HTML rendered by the server, in which case the breadcrumbs obtained from the
 	// client will no longer be valid on the server. As such, the results are stored in an array and not any live list.
-	const breadcrumbedImages = getBreadcrumbedElements(
-		doc.body.querySelectorAll( 'img' )
-	);
+	const breadcrumbedImages = doc.body.querySelectorAll( 'img' );
 
 	// We do the same for elements with background images which are not data: URLs.
-	const breadcrumbedElementsWithBackgrounds = getBreadcrumbedElements(
-		Array.from(
-			doc.body.querySelectorAll( '[style*="background"]' )
-		).filter( ( /** @type {Element} */ el ) =>
-			/url\(\s*['"](?!=data:)/.test( el.style.backgroundImage )
-		)
+	const breadcrumbedElementsWithBackgrounds = Array.from(
+		doc.body.querySelectorAll( '[style*="background"]' )
+	).filter( ( /** @type {Element} */ el ) =>
+		/url\(\s*['"](?!=data:)/.test( el.style.backgroundImage )
 	);
 
-	// Create a mapping of element to
 	/** @type {Map<Element, Breadcrumb[]>} */
-	const breadcrumbedElementsMap = new Map();
-	for ( const breadcrumbedElement of [
-		...breadcrumbedImages,
-		...breadcrumbedElementsWithBackgrounds,
-	] ) {
-		breadcrumbedElementsMap.set(
-			breadcrumbedElement.element,
-			breadcrumbedElement.breadcrumbs
-		);
-	}
+	const breadcrumbedElementsMap = new Map(
+		[ ...breadcrumbedImages, ...breadcrumbedElementsWithBackgrounds ].map(
+			( element ) => [ element, getBreadcrumbs( element ) ]
+		)
+	);
 
 	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
 	await new Promise( ( resolve ) => {
