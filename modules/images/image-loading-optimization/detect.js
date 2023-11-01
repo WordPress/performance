@@ -129,17 +129,25 @@ export default async function detect(
 		)
 	);
 
-	const breadcrumbedOptimizableElements = [
+	// Create a mapping of element to
+	/** @type {Map<Element, Breadcrumb[]>} */
+	const breadcrumbedElementsMap = new Map();
+	for ( const breadcrumbedElement of [
 		...breadcrumbedImages,
 		...breadcrumbedElementsWithBackgrounds,
-	];
+	] ) {
+		breadcrumbedElementsMap.set(
+			breadcrumbedElement.element,
+			breadcrumbedElement.breadcrumbs
+		);
+	}
 
 	const results = {
 		viewport: {
 			width: win.innerWidth,
 			height: win.innerHeight,
 		},
-		images: [],
+		elements: [],
 	};
 
 	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
@@ -166,7 +174,7 @@ export default async function detect(
 
 	// Wait for the intersection observer to report back on the initially-visible elements.
 	// Note that the first callback will include _all_ observed entries per <https://github.com/w3c/IntersectionObserver/issues/476>.
-	if ( breadcrumbedOptimizableElements.length > 0 ) {
+	if ( breadcrumbedElementsMap.size > 0 ) {
 		await new Promise( ( resolve ) => {
 			intersectionObserver = new IntersectionObserver(
 				( entries ) => {
@@ -183,12 +191,9 @@ export default async function detect(
 				}
 			);
 
-			for ( const breadcrumbedElement of breadcrumbedOptimizableElements ) {
-				if (
-					! adminBar ||
-					! adminBar.contains( breadcrumbedElement.element )
-				) {
-					intersectionObserver.observe( breadcrumbedElement.element );
+			for ( const element of breadcrumbedElementsMap.keys() ) {
+				if ( ! adminBar || ! adminBar.contains( element ) ) {
+					intersectionObserver.observe( element );
 				}
 			}
 		} );
@@ -242,10 +247,22 @@ export default async function detect(
 
 	const lcpMetric = lcpMetricCandidates.at( -1 );
 	for ( const elementIntersection of elementIntersections ) {
+		// const elementInfo = {
+		// 	...
+		// };
+
+		const breadcrumbs = breadcrumbedElementsMap.get(
+			elementIntersection.target
+		);
+		if ( ! breadcrumbs ) {
+			warn( 'Unable to look up breadcrumbs for element' );
+			continue;
+		}
+
 		log(
 			'elementIntersection.target',
 			elementIntersection.target,
-			getBreadcrumbs( elementIntersection.target ),
+			breadcrumbs,
 			lcpMetric &&
 				elementIntersection.target ===
 					lcpMetric.attribution.lcpEntry.element
@@ -258,4 +275,9 @@ export default async function detect(
 
 	// TODO: Send data to server.
 	log( results );
+
+	// Clean up.
+	breadcrumbedElementsMap.clear();
+	breadcrumbedElementsWithBackgrounds.length = 0;
+	breadcrumbedImages.length = 0;
 }
