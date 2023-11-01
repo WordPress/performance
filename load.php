@@ -25,11 +25,6 @@ define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
 
-// Load Composer dependencies if applicable.
-if ( file_exists( PERFLAB_PLUGIN_DIR_PATH . '/vendor/autoload.php' ) ) {
-	require_once PERFLAB_PLUGIN_DIR_PATH . '/vendor/autoload.php';
-}
-
 // If the constant isn't defined yet, it means the Performance Lab object cache file is not loaded.
 if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
 	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', false );
@@ -446,6 +441,7 @@ register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin'
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/server-timing.php';
+	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/plugins.php';
 }
 
 /**
