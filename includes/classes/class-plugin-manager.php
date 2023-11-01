@@ -47,8 +47,6 @@ class Plugin_Manager {
 	 * Renders plugin UI for managing standalone plugins within PL Settings screen.
 	 *
 	 * @since n.e.x.t
-	 *
-	 * @return void
 	 */
 	public static function render_plugins_ui() {
 		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
