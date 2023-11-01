@@ -20,7 +20,7 @@ function warn( ...message ) {
  */
 
 /**
- * @typedef {Object} ElementBreadcrumb
+ * @typedef {Object} ElementBreadcrumbs
  * @property {Element}      element     - Element node.
  * @property {Breadcrumb[]} breadcrumbs - Breadcrumb for the element.
  */
@@ -28,19 +28,18 @@ function warn( ...message ) {
 /**
  * Get breadcrumbed elements.
  *
- * @param {string} selector
- * @return {ElementBreadcrumb[]} Breadcrumbed elements.
+ * @param {HTMLCollection|Element[]} elements Elements.
+ * @return {ElementBreadcrumbs[]} Breadcrumbed elements.
  */
-function getBreadcrumbedElements( selector ) {
-	/** @type {ElementBreadcrumb[]} */
+function getBreadcrumbedElements( elements ) {
+	/** @type {ElementBreadcrumbs[]} */
 	const breadcrumbedElements = [];
 
 	/** @type {HTMLCollection} */
-	const elements = doc.body.querySelectorAll( selector );
 	for ( const element of elements ) {
 		breadcrumbedElements.push( {
 			element,
-			breadcrumb: getBreadcrumbs( element ),
+			breadcrumbs: getBreadcrumbs( element ),
 		} );
 	}
 
@@ -96,6 +95,7 @@ export default async function detect(
 	}
 
 	// Prevent detection when page is not scrolled to the initial viewport.
+	// TODO: Does this cause layout/reflow? https://gist.github.com/paulirish/5d52fb081b3570c81e3a
 	if ( doc.documentElement.scrollTop > 0 ) {
 		if ( isDebug ) {
 			warn(
@@ -113,11 +113,26 @@ export default async function detect(
 	const adminBar =
 		/** @type {?HTMLDivElement} */ doc.getElementById( 'wpadminbar' );
 
-	// Note that we capture an array of image elements because getElementsByTagName() returns a live HTMLCollection.
-	// We also need to capture the original elements and their breadcrumbs as early as possible in case JavaScript is
+	// We need to capture the original elements and their breadcrumbs as early as possible in case JavaScript is
 	// mutating the DOM from the original HTML rendered by the server, in which case the breadcrumbs obtained from the
-	// client will no longer be valid on the server.
-	const breadcrumbedImages = getBreadcrumbedElements( 'img' );
+	// client will no longer be valid on the server. As such, the results are stored in an array and not any live list.
+	const breadcrumbedImages = getBreadcrumbedElements(
+		doc.body.querySelectorAll( 'img' )
+	);
+
+	// We do the same for elements with background images which are not data: URLs.
+	const breadcrumbedElementsWithBackgrounds = getBreadcrumbedElements(
+		Array.from(
+			doc.body.querySelectorAll( '[style*="background"]' )
+		).filter( ( /** @type {Element} */ el ) =>
+			/url\(\s*['"](?!=data:)/.test( el.style.backgroundImage )
+		)
+	);
+
+	const breadcrumbedOptimizableElements = [
+		...breadcrumbedImages,
+		...breadcrumbedElementsWithBackgrounds,
+	];
 
 	const results = {
 		viewport: {
@@ -137,27 +152,27 @@ export default async function detect(
 	} );
 
 	/** @type {IntersectionObserverEntry[]} */
-	const imageIntersections = [];
+	const elementIntersections = [];
 
 	/** @type {?IntersectionObserver} */
-	let imageObserver;
+	let intersectionObserver;
 
-	function disconnectImageObserver() {
-		if ( imageObserver instanceof IntersectionObserver ) {
-			imageObserver.disconnect();
-			win.removeEventListener( 'scroll', disconnectImageObserver ); // Clean up, even though this is registered with once:true.
+	function disconnectIntersectionObserver() {
+		if ( intersectionObserver instanceof IntersectionObserver ) {
+			intersectionObserver.disconnect();
+			win.removeEventListener( 'scroll', disconnectIntersectionObserver ); // Clean up, even though this is registered with once:true.
 		}
 	}
 
-	// Wait for the intersection observer to report back on the initially-visible images.
+	// Wait for the intersection observer to report back on the initially-visible elements.
 	// Note that the first callback will include _all_ observed entries per <https://github.com/w3c/IntersectionObserver/issues/476>.
-	if ( breadcrumbedImages.length > 0 ) {
+	if ( breadcrumbedOptimizableElements.length > 0 ) {
 		await new Promise( ( resolve ) => {
-			imageObserver = new IntersectionObserver(
+			intersectionObserver = new IntersectionObserver(
 				( entries ) => {
 					for ( const entry of entries ) {
 						if ( entry.isIntersecting ) {
-							imageIntersections.push( entry );
+							elementIntersections.push( entry );
 						}
 					}
 					resolve();
@@ -168,18 +183,18 @@ export default async function detect(
 				}
 			);
 
-			for ( const breadcrumbedImage of breadcrumbedImages ) {
+			for ( const breadcrumbedElement of breadcrumbedOptimizableElements ) {
 				if (
 					! adminBar ||
-					! adminBar.contains( breadcrumbedImage.element )
+					! adminBar.contains( breadcrumbedElement.element )
 				) {
-					imageObserver.observe( breadcrumbedImage.element );
+					intersectionObserver.observe( breadcrumbedElement.element );
 				}
 			}
 		} );
 
-		// Stop observing images as soon as the page scrolls since we only want initial-viewport images.
-		win.addEventListener( 'scroll', disconnectImageObserver, {
+		// Stop observing as soon as the page scrolls since we only want initial-viewport elements.
+		win.addEventListener( 'scroll', disconnectIntersectionObserver, {
 			once: true,
 			passive: true,
 		} );
@@ -210,7 +225,7 @@ export default async function detect(
 		);
 	} );
 
-	// Wait until the images on the page have fully loaded.
+	// Wait until the resources on the page have fully loaded.
 	await new Promise( ( resolve ) => {
 		if ( doc.readyState === 'complete' ) {
 			resolve();
@@ -220,19 +235,19 @@ export default async function detect(
 	} );
 
 	// Stop observing.
-	disconnectImageObserver();
+	disconnectIntersectionObserver();
 	if ( isDebug ) {
 		log( 'Detection is stopping.' );
 	}
 
 	const lcpMetric = lcpMetricCandidates.at( -1 );
-	for ( const imageIntersection of imageIntersections ) {
+	for ( const elementIntersection of elementIntersections ) {
 		log(
-			'imageIntersection.target',
-			imageIntersection.target,
-			getBreadcrumbs( imageIntersection.target ),
+			'elementIntersection.target',
+			elementIntersection.target,
+			getBreadcrumbs( elementIntersection.target ),
 			lcpMetric &&
-				imageIntersection.target ===
+				elementIntersection.target ===
 					lcpMetric.attribution.lcpEntry.element
 				? 'is LCP'
 				: 'is NOT LCP'
