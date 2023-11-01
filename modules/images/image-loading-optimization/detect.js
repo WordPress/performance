@@ -1,9 +1,9 @@
 /** @typedef {import("web-vitals").LCPMetric} LCPMetric */
 
-const consoleLogPrefix = '[Image Loading Optimization]';
-
 const win = window;
 const doc = win.document;
+
+const consoleLogPrefix = '[Image Loading Optimization]';
 
 function log( ...message ) {
 	console.log( consoleLogPrefix, ...message );
@@ -38,24 +38,35 @@ function warn( ...message ) {
  */
 
 /**
+ * Gets element index among siblings.
+ *
+ * @param {Element} element Element.
+ * @return {number} Index.
+ */
+function getElementIndex( element ) {
+	if ( ! element.parentElement ) {
+		return 0;
+	}
+	return [ ...element.parentElement.children ].indexOf( element );
+}
+
+/**
  * Gets breadcrumbs for a given element.
  *
- * @param {Element} element
+ * @param {Element} leafElement
  * @return {Breadcrumb[]} Breadcrumbs.
  */
-function getBreadcrumbs( element ) {
+function getBreadcrumbs( leafElement ) {
 	/** @type {Breadcrumb[]} */
 	const breadcrumbs = [];
 
-	let node = element;
-	while ( node instanceof Element ) {
+	let element = leafElement;
+	while ( element instanceof Element ) {
 		breadcrumbs.unshift( {
-			tagName: node.tagName,
-			index: node.parentElement
-				? Array.from( node.parentElement.children ).indexOf( node )
-				: 0,
+			tagName: element.tagName,
+			index: getElementIndex( element ),
 		} );
-		node = node.parentElement;
+		element = element.parentElement;
 	}
 
 	return breadcrumbs;
