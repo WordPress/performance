@@ -142,6 +142,13 @@ export default async function detect(
 	/** @type {?IntersectionObserver} */
 	let imageObserver;
 
+	function disconnectImageObserver() {
+		if ( imageObserver instanceof IntersectionObserver ) {
+			imageObserver.disconnect();
+			win.removeEventListener( 'scroll', disconnectImageObserver ); // Clean up, even though this is registered with once:true.
+		}
+	}
+
 	// Wait for the intersection observer to report back on the initially-visible images.
 	// Note that the first callback will include _all_ observed entries per <https://github.com/w3c/IntersectionObserver/issues/476>.
 	if ( breadcrumbedImages.length > 0 ) {
@@ -169,6 +176,12 @@ export default async function detect(
 					imageObserver.observe( breadcrumbedImage.element );
 				}
 			}
+		} );
+
+		// Stop observing images as soon as the page scrolls since we only want initial-viewport images.
+		win.addEventListener( 'scroll', disconnectImageObserver, {
+			once: true,
+			passive: true,
 		} );
 	}
 
@@ -207,9 +220,7 @@ export default async function detect(
 	} );
 
 	// Stop observing.
-	if ( imageObserver ) {
-		imageObserver.disconnect();
-	}
+	disconnectImageObserver();
 	if ( isDebug ) {
 		log( 'Detection is stopping.' );
 	}
