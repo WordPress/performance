@@ -5,8 +5,6 @@
  * @package performance-lab
  */
 
-use PerformanceLab\Plugin_Manager;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -112,7 +110,7 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 function perflab_render_modules_page() {
 	?>
 	<div class="wrap">
-		<?php Plugin_Manager::render_plugins_ui(); ?>
+		<?php perflab_render_plugins_ui(); ?>
 
 		<h2>
 			<?php esc_html_e( 'Performance Modules', 'performance-lab' ); ?>
