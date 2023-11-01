@@ -73,7 +73,7 @@ function getBreadcrumbs( leafElement ) {
 }
 
 /**
- * Detect the LCP element, loaded images, client viewport and store for future optimizations.
+ * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
  * @param {number}  serveTime           The serve time of the page in milliseconds from PHP via `ceil( microtime( true ) * 1000 )`.
  * @param {number}  detectionTimeWindow The number of milliseconds between now and when the page was first generated in which detection should proceed.
