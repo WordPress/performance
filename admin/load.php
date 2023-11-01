@@ -559,8 +559,9 @@ function perflab_handle_inline_plugin_actions() {
 				deactivate_plugins( filter_input( INPUT_GET, 'plugin' ) );
 				break;
 		}
-		wp_safe_redirect( $referer );
-		exit;
+		if ( wp_safe_redirect( $referer ) ) {
+			exit;
+		}
 	}
 }
 add_action( 'admin_init', 'perflab_handle_inline_plugin_actions', 15, 0 );
