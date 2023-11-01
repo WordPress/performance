@@ -387,7 +387,7 @@ class Plugin_Manager {
 						if ( $plugin['active_installs'] >= 1000000 ) {
 							$active_installs_millions = floor( $plugin['active_installs'] / 1000000 );
 							$active_installs_text     = sprintf(
-							/* translators: %s: Number of millions. */
+								/* translators: %s: Number of millions. */
 								_nx( '%s+ Million', '%s+ Million', $active_installs_millions, 'Active plugin installations', 'default' ),
 								number_format_i18n( $active_installs_millions )
 							);
