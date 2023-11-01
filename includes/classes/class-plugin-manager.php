@@ -2,11 +2,7 @@
 /**
  * Class PerformanceLab\Plugin_Manager
  *
- * @package PerformanceLab
- * Author: WordPress Performance Team
- * Author URI: https://make.wordpress.org/performance/
- * License: GPLv2 or later
- * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @package performance-lab
  */
 
 namespace PerformanceLab;
@@ -47,8 +43,6 @@ class Plugin_Manager {
 	 * Renders plugin UI for managing standalone plugins within PL Settings screen.
 	 *
 	 * @since n.e.x.t
-	 *
-	 * @return void
 	 */
 	public static function render_plugins_ui() {
 		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
@@ -84,8 +78,6 @@ class Plugin_Manager {
 	 * @since n.e.x.t
 	 *
 	 * @param string $standalone_plugin Plugin slug as passed from get_standalone_plugins().
-	 *
-	 * @return void
 	 */
 	private static function render_plugin_card( string $standalone_plugin ) {
 		$plugin = plugins_api(
@@ -387,7 +379,7 @@ class Plugin_Manager {
 						if ( $plugin['active_installs'] >= 1000000 ) {
 							$active_installs_millions = floor( $plugin['active_installs'] / 1000000 );
 							$active_installs_text     = sprintf(
-							/* translators: %s: Number of millions. */
+								/* translators: %s: Number of millions. */
 								_nx( '%s+ Million', '%s+ Million', $active_installs_millions, 'Active plugin installations', 'default' ),
 								number_format_i18n( $active_installs_millions )
 							);

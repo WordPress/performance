@@ -539,7 +539,6 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
  * plugin actions such as activation and deactivation.
  *
  * @since n.e.x.t
- * @return void
  */
 function perflab_handle_inline_plugin_actions() {
 	if (
