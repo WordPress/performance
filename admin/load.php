@@ -17,8 +17,6 @@ add_action( 'admin_enqueue_scripts', 'perflab_admin_scripts' );
  * Callback function to handle admin scripts.
  *
  * @since n.e.x.t
- *
- * @return void
  */
 function perflab_admin_scripts() {
 	wp_enqueue_script( 'updates' );
