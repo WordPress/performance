@@ -539,7 +539,7 @@ function perflab_enqueue_modules_page_scripts() {
 function perflab_activate_plugin() {
 	// Do not proceed if plugin query arg is not present.
 	if ( empty( $_GET['plugin'] ) ) {
-		exit;
+		return;
 	}
 
 	// The plugin being activated.
@@ -552,8 +552,6 @@ function perflab_activate_plugin() {
 		if ( wp_safe_redirect( $referer ) ) {
 			exit;
 		}
-	} else {
-		exit;
 	}
 }
 
@@ -567,7 +565,7 @@ add_action( 'admin_action_perflab_activate_plugin', 'perflab_activate_plugin' );
 function perflab_deactivate_plugin() {
 	// Do not proceed if plugin query arg is not present.
 	if ( empty( $_GET['plugin'] ) ) {
-		exit;
+		return;
 	}
 
 	// The plugin being deactivated.
@@ -580,8 +578,6 @@ function perflab_deactivate_plugin() {
 		if ( wp_safe_redirect( $referer ) ) {
 			exit;
 		}
-	} else {
-		exit;
 	}
 }
 
