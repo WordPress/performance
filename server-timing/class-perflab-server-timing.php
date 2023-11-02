@@ -225,6 +225,21 @@ class Perflab_Server_Timing {
 	 * @return mixed Unmodified value of $passthrough.
 	 */
 	public function on_template_include( $passthrough = null ) {
+		// Skip doing anything with output buffering if it is already enabled via Image Loading Optimization.
+		if ( has_filter( 'template_include', 'image_loading_optimization_buffer_output' ) ) {
+			// It feels better if this could rather be replaced with add_action( 'shutdown', [ $this, 'send_header' ] )
+			// However, this does not work because the buffer is sent before the shutdown callback is executed.
+			add_filter(
+				'perflab_template_output_buffer',
+				function ( $buffer ) {
+					$this->send_header();
+					return $buffer;
+				},
+				PHP_INT_MAX
+			);
+			return $passthrough;
+		}
+
 		if ( ! $this->use_output_buffer() ) {
 			$this->send_header();
 			return $passthrough;
