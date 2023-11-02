@@ -68,7 +68,13 @@ function image_loading_optimization_print_detection_script() {
 	 */
 	$detection_time_window = apply_filters( 'perflab_image_loading_detection_time_window', 5000 );
 
-	$detect_args = array( $serve_time, $detection_time_window, WP_DEBUG );
+	$detect_args = array(
+		$serve_time,
+		$detection_time_window,
+		WP_DEBUG,
+		rest_url( '/perflab/v1/image-loading-optimization/metrics-storage' ),
+		wp_create_nonce( 'wp_rest' ),
+	);
 	wp_print_inline_script_tag(
 		sprintf(
 			'import detect from %s; detect( ...%s )',

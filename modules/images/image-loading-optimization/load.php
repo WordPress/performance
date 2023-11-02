@@ -15,3 +15,4 @@ if ( function_exists( 'image_loading_optimization_buffer_output' ) ) {
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';
+require_once __DIR__ . '/rest-api.php';

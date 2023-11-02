@@ -78,11 +78,15 @@ function getBreadcrumbs( leafElement ) {
  * @param {number}  serveTime           The serve time of the page in milliseconds from PHP via `ceil( microtime( true ) * 1000 )`.
  * @param {number}  detectionTimeWindow The number of milliseconds between now and when the page was first generated in which detection should proceed.
  * @param {boolean} isDebug             Whether to show debug messages.
+ * @param {string}  restApiEndpoint     URL for where to send the detection data.
+ * @param {string}  restApiNonce        Nonce for writing to the REST API.
  */
 export default async function detect(
 	serveTime,
 	detectionTimeWindow,
-	isDebug
+	isDebug,
+	restApiEndpoint,
+	restApiNonce
 ) {
 	const runTime = new Date().valueOf();
 
@@ -270,6 +274,17 @@ export default async function detect(
 
 		pageMetrics.elements.push( elementMetrics );
 	}
+
+	// TODO: Wait until idle.
+	const response = await fetch( restApiEndpoint, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': restApiNonce,
+		},
+		body: JSON.stringify( pageMetrics ),
+	} );
+	log( 'response:', await response.json() );
 
 	// TODO: Send data to server.
 	log( pageMetrics );
