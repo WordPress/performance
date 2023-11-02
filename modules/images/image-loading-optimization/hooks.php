@@ -49,6 +49,9 @@ add_filter( 'template_include', 'image_loading_optimization_buffer_output', PHP_
 
 /**
  * Prints the script for detecting loaded images and the LCP element.
+ *
+ * @todo This should eventually only print the script if metrics are needed.
+ * @todo This script should not be printed if the page was requested with non-removal (non-canonical) query args.
  */
 function image_loading_optimization_print_detection_script() {
 	$serve_time = ceil( microtime( true ) * 1000 );

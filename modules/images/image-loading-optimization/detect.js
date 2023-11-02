@@ -31,6 +31,7 @@ function warn( ...message ) {
 
 /**
  * @typedef {Object} PageMetrics
+ * @property {string}           url             - URL of the page.
  * @property {Object}           viewport        - Viewport.
  * @property {number}           viewport.width  - Viewport width.
  * @property {number}           viewport.height - Viewport height.
@@ -235,6 +236,7 @@ export default async function detect(
 
 	/** @type {PageMetrics} */
 	const pageMetrics = {
+		url: win.location.href, // TODO: Consider sending canonical URL instead.
 		viewport: {
 			width: win.innerWidth,
 			height: win.innerHeight,

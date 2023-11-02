@@ -38,18 +38,25 @@ function image_loading_optimization_register_endpoint() {
 			'callback'            => 'image_loading_optimization_handle_rest_request',
 			'permission_callback' => '__return_true', // Needs to be available to unauthenticated visitors.
 			'args'                => array(
+				'url'      => array(
+					'type'     => 'string',
+					'required' => true,
+					'format'   => 'uri',
+				),
 				'viewport' => array(
 					'description' => __( 'Viewport dimensions', 'performance-lab' ),
 					'type'        => 'object',
 					'required'    => true,
 					'properties'  => array(
 						'width'  => array(
-							'type'    => 'int',
-							'minimum' => 0,
+							'type'     => 'int',
+							'required' => true,
+							'minimum'  => 0,
 						),
 						'height' => array(
-							'type'    => 'int',
-							'minimum' => 0,
+							'type'     => 'int',
+							'required' => true,
+							'minimum'  => 0,
 						),
 					),
 				),
@@ -61,19 +68,21 @@ function image_loading_optimization_register_endpoint() {
 						'type'       => 'object',
 						'properties' => array(
 							'isLCP'              => array(
-								'type' => 'bool',
+								'type'     => 'bool',
+								'required' => true,
 							),
 							'isLCPCandidate'     => array(
 								'type' => 'bool',
 							),
 							'breadcrumbs'        => array(
-								'type'  => 'array',
-								'items' => array(
+								'type'     => 'array',
+								'required' => true,
+								'items'    => array(
 									'type'       => 'object',
 									'properties' => array(
 										'tagName' => array(
-											'type' => 'string',
-											// TODO: Pattern?
+											'type'    => 'string',
+											'pattern' => '^[a-zA-Z0-9-]+$',
 										),
 										'index'   => array(
 											'type'    => 'int',
@@ -83,9 +92,10 @@ function image_loading_optimization_register_endpoint() {
 								),
 							),
 							'intersectionRatio'  => array(
-								'type'    => 'number',
-								'minimum' => 0.0,
-								'maximum' => 1.0,
+								'type'     => 'number',
+								'required' => true,
+								'minimum'  => 0.0,
+								'maximum'  => 1.0,
 							),
 							'intersectionRect'   => $dom_rect_schema,
 							'boundingClientRect' => $dom_rect_schema,
