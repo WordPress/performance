@@ -276,7 +276,7 @@ function perflab_render_plugin_card( string $standalone_plugin ) {
 				esc_html_e( 'This plugin does not work with your versions of WordPress and PHP.', 'default' );
 				if ( current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
-					/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
+						/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
 						' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.', 'default' ),
 						esc_url( self_admin_url( 'update-core.php' ) ),
 						esc_url( wp_get_update_php_url() )
