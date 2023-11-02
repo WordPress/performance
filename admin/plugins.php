@@ -172,7 +172,14 @@ function perflab_render_plugin_card( string $standalone_plugin ) {
 
 						$action_links[] = sprintf(
 							'<a href="%s" id="deactivate-%s" aria-label="%s" style="color:red;text-decoration: underline;">%s</a>',
-							wp_nonce_url( 'plugins.php?wpp=1&action=deactivate&amp;plugin=' . rawurlencode( $status['file'] ) . '&amp;plugin_status=' . $context . '&amp;paged=' . $page . '&amp;s=' . $s, 'deactivate-plugin_' . $status['file'] ),
+							add_query_arg(
+								array(
+									'_wpnonce' => wp_create_nonce( 'perflab_deactivate_plugin_' . $status['file'] ),
+									'action'   => 'perflab_deactivate_plugin',
+									'plugin'   => $status['file'],
+								),
+								network_admin_url( 'plugins.php' )
+							),
 							esc_attr( $plugin['slug'] ),
 							/* translators: %s: Plugin name. */
 							esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'default' ), $plugin['slug'] ) ),
@@ -186,20 +193,12 @@ function perflab_render_plugin_card( string $standalone_plugin ) {
 						$button_label = _x( 'Activate %s', 'plugin', 'default' );
 						$activate_url = add_query_arg(
 							array(
-								'_wpnonce' => wp_create_nonce( 'activate-plugin_' . $status['file'] ),
-								'action'   => 'activate',
+								'_wpnonce' => wp_create_nonce( 'perflab_activate_plugin_' . $status['file'] ),
+								'action'   => 'perflab_activate_plugin',
 								'plugin'   => $status['file'],
-								'wpp'      => 1,
 							),
 							network_admin_url( 'plugins.php' )
 						);
-
-						if ( is_network_admin() ) {
-							$button_text = __( 'Network Activate', 'default' );
-							/* translators: %s: Plugin name. */
-							$button_label = _x( 'Network Activate %s', 'plugin', 'default' );
-							$activate_url = add_query_arg( array( 'networkwide' => 1 ), $activate_url );
-						}
 
 						$action_links[] = sprintf(
 							'<a href="%1$s" class="button activate-now" aria-label="%2$s">%3$s</a>',
