@@ -39,9 +39,15 @@ function image_loading_optimization_register_endpoint() {
 			'permission_callback' => '__return_true', // Needs to be available to unauthenticated visitors.
 			'args'                => array(
 				'url'      => array(
-					'type'     => 'string',
-					'required' => true,
-					'format'   => 'uri',
+					'type'              => 'string',
+					'required'          => true,
+					'format'            => 'uri',
+					'validate_callback' => static function ( $url ) {
+						if ( ! wp_validate_redirect( $url ) ) {
+							return new WP_Error( 'non_origin_url', __( 'URL for another site provided.', 'performance-lab' ) );
+						}
+						return true;
+					},
 				),
 				'viewport' => array(
 					'description' => __( 'Viewport dimensions', 'performance-lab' ),
