@@ -532,35 +532,57 @@ function perflab_enqueue_modules_page_scripts() {
 }
 
 /**
- * Callback function hooked to admin_init to handle WPP inline standalone
- * plugin actions such as activation and deactivation.
+ * Callback function hooked to admin_action_perflab_activate_plugin to handle plugin activation.
  *
  * @since n.e.x.t
  */
-function perflab_handle_inline_plugin_actions() {
-	if (
-		! empty( filter_input( INPUT_GET, 'wpp' ) ) &&
-		! empty( filter_input( INPUT_GET, 'action' ) ) &&
-		! empty( filter_input( INPUT_GET, 'plugin' ) ) &&
-		'1' === filter_input( INPUT_GET, 'wpp' ) &&
-		(
-			'deactivate' === filter_input( INPUT_GET, 'action' ) ||
-			'activate' === filter_input( INPUT_GET, 'action' )
-		)
-	) {
-		$referer = wp_get_referer();
+function perflab_activate_plugin() {
+	// Do not proceed if plugin query arg is not present.
+	if ( empty( $_GET['plugin'] ) ) {
+		exit;
+	}
 
-		switch ( filter_input( INPUT_GET, 'action' ) ) {
-			case 'activate':
-				activate_plugins( filter_input( INPUT_GET, 'plugin' ) );
-				break;
-			case 'deactivate':
-				deactivate_plugins( filter_input( INPUT_GET, 'plugin' ) );
-				break;
-		}
+	// The plugin being activated.
+	$plugin = filter_input( INPUT_GET, 'plugin' );
+
+	if ( check_admin_referer( 'perflab_activate_plugin_' . $plugin ) && current_user_can( 'activate_plugin', $plugin ) ) {
+		// Activate the plugin in question and return to prior screen.
+		activate_plugins( $plugin );
+		$referer = wp_get_referer();
 		if ( wp_safe_redirect( $referer ) ) {
 			exit;
 		}
+	} else {
+		exit;
 	}
 }
-add_action( 'admin_init', 'perflab_handle_inline_plugin_actions', 15, 0 );
+
+add_action( 'admin_action_perflab_activate_plugin', 'perflab_activate_plugin' );
+
+/**
+ * Callback function hooked to admin_action_perflab_deactivate_plugin to handle plugin deactivation.
+ *
+ * @since n.e.x.t
+ */
+function perflab_deactivate_plugin() {
+	// Do not proceed if plugin query arg is not present.
+	if ( empty( $_GET['plugin'] ) ) {
+		exit;
+	}
+
+	// The plugin being deactivated.
+	$plugin = filter_input( INPUT_GET, 'plugin' );
+
+	if ( check_admin_referer( 'perflab_deactivate_plugin_' . $plugin ) && current_user_can( 'deactivate_plugin', $plugin ) ) {
+		// Deactivate the plugin in question and return to prior screen.
+		deactivate_plugins( $plugin );
+		$referer = wp_get_referer();
+		if ( wp_safe_redirect( $referer ) ) {
+			exit;
+		}
+	} else {
+		exit;
+	}
+}
+
+add_action( 'admin_action_perflab_deactivate_plugin', 'perflab_deactivate_plugin' );
