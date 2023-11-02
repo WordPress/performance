@@ -16,8 +16,7 @@ const config = {
 	globals: {
 		scheduler: false,
 	},
-	// Note: The '/wp-*' pattern is to ignore symlinks which may be added for local development.
-	ignorePatterns: [ '/vendor', '/node_modules', '/wp-*' ],
+	ignorePatterns: [ '/vendor', '/node_modules' ],
 };
 
 module.exports = config;
