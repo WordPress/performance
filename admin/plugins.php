@@ -36,6 +36,10 @@ function perflab_render_plugins_ui() {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 	$standalone_plugins = perflab_get_standalone_plugins();
+
+	if ( empty( $standalone_plugins ) ) {
+		return;
+	}
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Performance Plugins', 'performance-lab' ); ?></h1>
