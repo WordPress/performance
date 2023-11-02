@@ -543,7 +543,7 @@ function perflab_activate_plugin() {
 	}
 
 	// The plugin being activated.
-	$plugin = filter_input( INPUT_GET, 'plugin' );
+	$plugin = sanitize_text_field( $_GET['plugin'] );
 
 	if ( check_admin_referer( "perflab_activate_plugin_{$plugin}" ) && current_user_can( 'activate_plugin', $plugin ) ) {
 		// Activate the plugin in question and return to prior screen.
@@ -571,7 +571,7 @@ function perflab_deactivate_plugin() {
 	}
 
 	// The plugin being deactivated.
-	$plugin = filter_input( INPUT_GET, 'plugin' );
+	$plugin = sanitize_text_field( $_GET['plugin'] );
 
 	if ( check_admin_referer( "perflab_deactivate_plugin_{$plugin}" ) && current_user_can( 'deactivate_plugin', $plugin ) ) {
 		// Deactivate the plugin in question and return to prior screen.
