@@ -87,12 +87,14 @@ function image_loading_optimization_register_endpoint() {
 									'type'       => 'object',
 									'properties' => array(
 										'tagName' => array(
-											'type'    => 'string',
-											'pattern' => '^[a-zA-Z0-9-]+$',
+											'type'     => 'string',
+											'required' => true,
+											'pattern'  => '^[a-zA-Z0-9-]+$',
 										),
 										'index'   => array(
-											'type'    => 'int',
-											'minimum' => 0,
+											'type'     => 'int',
+											'required' => true,
+											'minimum'  => 0,
 										),
 									),
 								),
