@@ -10,6 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+define( 'IMAGE_LOADING_OPTIMIZATION_PAGE_METRICS_POST_TYPE', 'ilo_page_metrics' );
+
 /**
  * Gets the TTL for the metrics storage lock.
  *
@@ -67,3 +69,28 @@ function image_loading_optimization_is_metrics_storage_locked() {
 	}
 	return time() - $locked_time < $ttl;
 }
+
+/**
+ * Register post type for metrics storage.
+ *
+ * This the configuration for this post type is similar to the oembed_cache in core.
+ */
+function image_loading_optimization_register_page_metrics_post_type() {
+	register_post_type(
+		IMAGE_LOADING_OPTIMIZATION_PAGE_METRICS_POST_TYPE,
+		array(
+			'labels'           => array(
+				'name'          => __( 'Page Metrics', 'performance-lab' ),
+				'singular_name' => __( 'Page Metrics', 'performance-lab' ),
+			),
+			'public'           => false,
+			'hierarchical'     => false,
+			'rewrite'          => false,
+			'query_var'        => false,
+			'delete_with_user' => false,
+			'can_export'       => false,
+			'supports'         => array(),
+		)
+	);
+}
+add_action( 'init', 'image_loading_optimization_register_page_metrics_post_type' );
