@@ -20,14 +20,17 @@ function image_loading_optimization_get_metrics_storage_lock_ttl() {
 	/**
 	 * Filters how long a given IP is locked from submitting another metrics-storage REST API request.
 	 *
+	 * Filtering the TTL to zero will disable any metrics storage locking. This is useful during development.
+	 *
 	 * @param int $ttl TTL.
 	 */
-	return (int) apply_filters( 'perflab_image_loading_detection_lock_ttl', 10 * MINUTE_IN_SECONDS );
+	return (int) apply_filters( 'perflab_image_loading_optimization_metrics_storage_lock_ttl', MINUTE_IN_SECONDS );
 }
 
 /**
  * Gets transient key for locking metrics storage (for the current IP).
  *
+ * @todo Should the URL be included in the key? Or should a user only be allowed to store one metric?
  * @return string Transient key.
  */
 function image_loading_optimization_get_metrics_storage_lock_transient_key() {
@@ -51,7 +54,6 @@ function image_loading_optimization_set_metrics_storage_lock() {
 /**
  * Checks whether metrics storage is locked (for the current IP).
  *
- * @todo This isn't working properly?
  * @return bool Whether locked.
  */
 function image_loading_optimization_is_metrics_storage_locked() {
@@ -59,9 +61,9 @@ function image_loading_optimization_is_metrics_storage_locked() {
 	if ( 0 === $ttl ) {
 		return false;
 	}
-	$transient = (int) get_transient( image_loading_optimization_get_metrics_storage_lock_transient_key() );
-	if ( 0 === $transient ) {
+	$locked_time = (int) get_transient( image_loading_optimization_get_metrics_storage_lock_transient_key() );
+	if ( 0 === $locked_time ) {
 		return false;
 	}
-	return time() - $transient < $ttl;
+	return time() - $locked_time < $ttl;
 }
