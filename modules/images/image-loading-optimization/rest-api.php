@@ -36,7 +36,17 @@ function image_loading_optimization_register_endpoint() {
 		array(
 			'methods'             => 'POST',
 			'callback'            => 'image_loading_optimization_handle_rest_request',
-			'permission_callback' => '__return_true', // Needs to be available to unauthenticated visitors.
+			'permission_callback' => static function () {
+				// Needs to be available to unauthenticated visitors.
+				if ( image_loading_optimization_is_metrics_storage_locked() ) {
+					return new WP_Error(
+						'metrics_storage_locked',
+						__( 'Metrics storage is presently locked for the current IP.', 'performance-lab' ),
+						array( 'status' => 403 )
+					);
+				}
+				return true;
+			},
 			'args'                => array(
 				'url'      => array(
 					'type'              => 'string',
@@ -123,6 +133,10 @@ add_action( 'rest_api_init', 'image_loading_optimization_register_endpoint' );
  * @return WP_REST_Response Response.
  */
 function image_loading_optimization_handle_rest_request( WP_REST_Request $request ) {
+
+	// TODO: We need storage.
+
+	image_loading_optimization_set_metrics_storage_lock();
 
 	return new WP_REST_Response(
 		array(

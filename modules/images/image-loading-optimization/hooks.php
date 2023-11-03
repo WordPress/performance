@@ -54,6 +54,11 @@ add_filter( 'template_include', 'image_loading_optimization_buffer_output', PHP_
  * @todo This script should not be printed if the page was requested with non-removal (non-canonical) query args.
  */
 function image_loading_optimization_print_detection_script() {
+
+	if ( image_loading_optimization_is_metrics_storage_locked() ) {
+		return;
+	}
+
 	$serve_time = ceil( microtime( true ) * 1000 );
 
 	/**
