@@ -5,11 +5,23 @@ const doc = win.document;
 
 const consoleLogPrefix = '[Image Loading Optimization]';
 
+/**
+ * Log a message.
+ *
+ * @param {...*} message
+ */
 function log( ...message ) {
+	// eslint-disable-next-line no-console
 	console.log( consoleLogPrefix, ...message );
 }
 
+/**
+ * Log a warning.
+ *
+ * @param {...*} message
+ */
 function warn( ...message ) {
+	// eslint-disable-next-line no-console
 	console.warn( consoleLogPrefix, ...message );
 }
 

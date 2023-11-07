@@ -59,6 +59,3 @@ temp/
 ._*
 .Trashes
 .svn
-
-# Possible symlinks to wp-env install-path directories.
-/wp-*

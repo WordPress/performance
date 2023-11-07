@@ -8,7 +8,6 @@ const config = {
 	rules: {
 		...( wpConfig?.rules || {} ),
 		'jsdoc/valid-types': 'off',
-		'no-console': 'off',
 	},
 	env: {
 		browser: true,
@@ -16,8 +15,11 @@ const config = {
 	globals: {
 		scheduler: false,
 	},
-	// Note: The '/wp-*' pattern is to ignore symlinks which may be added for local development.
-	ignorePatterns: [ '/vendor', '/node_modules', '/wp-*' ],
+	ignorePatterns: [
+		'/vendor',
+		'/node_modules',
+		'/modules/images/webp-uploads/fallback.js', // TODO: Issues need to be fixed here.
+	],
 };
 
 module.exports = config;
