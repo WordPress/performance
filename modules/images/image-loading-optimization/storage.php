@@ -13,23 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'ILO_PAGE_METRICS_POST_TYPE', 'ilo_page_metrics' );
 
 /**
- * Gets the TTL for the page metric storage lock.
- *
- * @return int TTL.
- */
-function ilo_get_page_metric_storage_lock_ttl() {
-
-	/**
-	 * Filters how long a given IP is locked from submitting another metric-storage REST API request.
-	 *
-	 * Filtering the TTL to zero will disable any metric storage locking. This is useful during development.
-	 *
-	 * @param int $ttl TTL.
-	 */
-	return (int) apply_filters( 'ilo_metrics_storage_lock_ttl', MINUTE_IN_SECONDS );
-}
-
-/**
  * Gets the breakpoint max widths to group page metrics for various viewports.
  *
  * Each max with represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then
@@ -59,6 +42,37 @@ function ilo_get_breakpoint_max_widths() {
 
 	sort( $breakpoint_max_widths );
 	return $breakpoint_max_widths;
+}
+
+/**
+ * Gets desired sample size for a viewport's page metrics.
+ *
+ * @return int Sample size.
+ */
+function ilo_get_page_metrics_breakpoint_sample_size() {
+	/**
+	 * Filters desired sample size for a viewport's page metrics.
+	 *
+	 * @param int $sample_size Sample size.
+	 */
+	return (int) apply_filters( 'ilo_page_metrics_viewport_sample_size', 10 );
+}
+
+/**
+ * Gets the TTL for the page metric storage lock.
+ *
+ * @return int TTL.
+ */
+function ilo_get_page_metric_storage_lock_ttl() {
+
+	/**
+	 * Filters how long a given IP is locked from submitting another metric-storage REST API request.
+	 *
+	 * Filtering the TTL to zero will disable any metric storage locking. This is useful during development.
+	 *
+	 * @param int $ttl TTL.
+	 */
+	return (int) apply_filters( 'ilo_metrics_storage_lock_ttl', MINUTE_IN_SECONDS );
 }
 
 /**
@@ -126,20 +140,6 @@ function ilo_register_page_metrics_post_type() {
 	);
 }
 add_action( 'init', 'ilo_register_page_metrics_post_type' );
-
-/**
- * Gets desired sample size for a viewport's page metrics.
- *
- * @return int
- */
-function ilo_get_page_metrics_breakpoint_sample_size() {
-	/**
-	 * Filters desired sample size for a viewport's page metrics.
-	 *
-	 * @param int $sample_size Sample size.
-	 */
-	return (int) apply_filters( 'ilo_page_metrics_viewport_sample_size', 10 );
-}
 
 /**
  * Gets slug for page metrics post.

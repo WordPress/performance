@@ -136,9 +136,6 @@ add_action( 'rest_api_init', 'ilo_register_endpoint' );
  * @return WP_REST_Response|WP_Error Response.
  */
 function ilo_handle_rest_request( WP_REST_Request $request ) {
-
-	// TODO: We need storage.
-
 	ilo_set_page_metric_storage_lock();
 
 	$result = ilo_store_page_metric( $request->get_json_params() );

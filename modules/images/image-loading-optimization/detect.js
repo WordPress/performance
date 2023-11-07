@@ -289,6 +289,8 @@ export default async function detect(
 		pageMetrics.elements.push( elementMetrics );
 	}
 
+	log( pageMetrics );
+
 	// TODO: Wait until idle.
 	const response = await fetch( restApiEndpoint, {
 		method: 'POST',
@@ -299,9 +301,6 @@ export default async function detect(
 		body: JSON.stringify( pageMetrics ),
 	} );
 	log( 'response:', await response.json() );
-
-	// TODO: Send data to server.
-	log( pageMetrics );
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();
