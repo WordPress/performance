@@ -55,7 +55,7 @@ add_filter( 'template_include', 'image_loading_optimization_buffer_output', PHP_
  */
 function image_loading_optimization_print_detection_script() {
 
-	if ( image_loading_optimization_is_metrics_storage_locked() ) {
+	if ( image_loading_optimization_is_page_metric_storage_locked() ) {
 		return;
 	}
 
@@ -80,7 +80,7 @@ function image_loading_optimization_print_detection_script() {
 		$serve_time,
 		$detection_time_window,
 		WP_DEBUG,
-		rest_url( '/perflab/v1/image-loading-optimization/metrics-storage' ),
+		rest_url( IMAGE_LOADING_OPTIMIZATION_REST_API_NAMESPACE . IMAGE_LOADING_OPTIMIZATION_PAGE_METRIC_STORAGE_ROUTE ),
 		wp_create_nonce( 'wp_rest' ),
 	);
 	wp_print_inline_script_tag(

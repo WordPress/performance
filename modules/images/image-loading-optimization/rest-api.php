@@ -10,8 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+define( 'IMAGE_LOADING_OPTIMIZATION_REST_API_NAMESPACE', 'image-loading-optimization/v1' );
+define( 'IMAGE_LOADING_OPTIMIZATION_PAGE_METRIC_STORAGE_ROUTE', '/image-loading-optimization/page-metric-storage' );
+
 /**
- * Register endpoint for storage of metrics.
+ * Register endpoint for storage of page metric.
  */
 function image_loading_optimization_register_endpoint() {
 
@@ -31,17 +34,17 @@ function image_loading_optimization_register_endpoint() {
 	);
 
 	register_rest_route(
-		'perflab/v1',
-		'/image-loading-optimization/metrics-storage', // @todo or rather metric-storage?
+		IMAGE_LOADING_OPTIMIZATION_REST_API_NAMESPACE,
+		IMAGE_LOADING_OPTIMIZATION_PAGE_METRIC_STORAGE_ROUTE,
 		array(
 			'methods'             => 'POST',
 			'callback'            => 'image_loading_optimization_handle_rest_request',
 			'permission_callback' => static function () {
 				// Needs to be available to unauthenticated visitors.
-				if ( image_loading_optimization_is_metrics_storage_locked() ) {
+				if ( image_loading_optimization_is_page_metric_storage_locked() ) {
 					return new WP_Error(
-						'metrics_storage_locked',
-						__( 'Metrics storage is presently locked for the current IP.', 'performance-lab' ),
+						'page_metric_storage_locked',
+						__( 'Page metric storage is presently locked for the current IP.', 'performance-lab' ),
 						array( 'status' => 403 )
 					);
 				}
@@ -130,18 +133,26 @@ add_action( 'rest_api_init', 'image_loading_optimization_register_endpoint' );
  * Handle REST API request to store metrics.
  *
  * @param WP_REST_Request $request Request.
- * @return WP_REST_Response Response.
+ * @return WP_REST_Response|WP_Error Response.
  */
 function image_loading_optimization_handle_rest_request( WP_REST_Request $request ) {
 
 	// TODO: We need storage.
 
-	image_loading_optimization_set_metrics_storage_lock();
+	image_loading_optimization_set_page_metric_storage_lock();
 
-	return new WP_REST_Response(
+	$result = image_loading_optimization_store_page_metric( $request->get_json_params() );
+
+	if ( $result instanceof WP_Error ) {
+		return $result;
+	}
+
+	$response = new WP_REST_Response(
 		array(
 			'success' => true,
-			'body'    => $request->get_json_params(),
+			'post_id' => $result,
 		)
 	);
+	$response->set_status( 201 );
+	return $response;
 }

@@ -13,16 +13,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'IMAGE_LOADING_OPTIMIZATION_PAGE_METRICS_POST_TYPE', 'ilo_page_metrics' );
 
 /**
- * Gets the TTL for the metrics storage lock.
+ * Gets the TTL for the page metric storage lock.
  *
  * @return int TTL.
  */
-function image_loading_optimization_get_metrics_storage_lock_ttl() {
+function image_loading_optimization_get_page_metric_storage_lock_ttl() {
 
 	/**
-	 * Filters how long a given IP is locked from submitting another metrics-storage REST API request.
+	 * Filters how long a given IP is locked from submitting another metric-storage REST API request.
 	 *
-	 * Filtering the TTL to zero will disable any metrics storage locking. This is useful during development.
+	 * Filtering the TTL to zero will disable any metric storage locking. This is useful during development.
 	 *
 	 * @param int $ttl TTL.
 	 */
@@ -46,22 +46,22 @@ function image_loading_optimization_get_max_mobile_viewport_width() {
 }
 
 /**
- * Gets transient key for locking metrics storage (for the current IP).
+ * Gets transient key for locking page metric storage (for the current IP).
  *
  * @todo Should the URL be included in the key? Or should a user only be allowed to store one metric?
  * @return string Transient key.
  */
-function image_loading_optimization_get_metrics_storage_lock_transient_key() {
+function image_loading_optimization_get_page_metric_storage_lock_transient_key() {
 	$ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
 	return 'page_metrics_storage_lock_' . wp_hash( $ip_address );
 }
 
 /**
- * Sets metrics storage lock (for the current IP).
+ * Sets page metric storage lock (for the current IP).
  */
-function image_loading_optimization_set_metrics_storage_lock() {
-	$ttl = image_loading_optimization_get_metrics_storage_lock_ttl();
-	$key = image_loading_optimization_get_metrics_storage_lock_transient_key();
+function image_loading_optimization_set_page_metric_storage_lock() {
+	$ttl = image_loading_optimization_get_page_metric_storage_lock_ttl();
+	$key = image_loading_optimization_get_page_metric_storage_lock_transient_key();
 	if ( 0 === $ttl ) {
 		delete_transient( $key );
 	} else {
@@ -70,16 +70,16 @@ function image_loading_optimization_set_metrics_storage_lock() {
 }
 
 /**
- * Checks whether metrics storage is locked (for the current IP).
+ * Checks whether page metric storage is locked (for the current IP).
  *
  * @return bool Whether locked.
  */
-function image_loading_optimization_is_metrics_storage_locked() {
-	$ttl = image_loading_optimization_get_metrics_storage_lock_ttl();
+function image_loading_optimization_is_page_metric_storage_locked() {
+	$ttl = image_loading_optimization_get_page_metric_storage_lock_ttl();
 	if ( 0 === $ttl ) {
 		return false;
 	}
-	$locked_time = (int) get_transient( image_loading_optimization_get_metrics_storage_lock_transient_key() );
+	$locked_time = (int) get_transient( image_loading_optimization_get_page_metric_storage_lock_transient_key() );
 	if ( 0 === $locked_time ) {
 		return false;
 	}
@@ -87,7 +87,7 @@ function image_loading_optimization_is_metrics_storage_locked() {
 }
 
 /**
- * Register post type for metrics storage.
+ * Register post type for page metrics storage.
  *
  * This the configuration for this post type is similar to the oembed_cache in core.
  */
@@ -126,7 +126,7 @@ function image_loading_optimization_get_page_metrics_viewport_sample_size() {
 }
 
 /**
- * Get slug for page metrics post.
+ * Gets slug for page metrics post.
  *
  * @param string $url URL.
  * @return string Slug for URL.
@@ -165,7 +165,7 @@ function image_loading_optimization_get_page_metrics_post( $url ) {
 }
 
 /**
- * Store page metrics.
+ * Parses post content in page metrics post.
  *
  * @param WP_Post $post Page metrics post.
  * @return array|WP_Error Page metrics when valid, or WP_Error otherwise.
@@ -202,14 +202,14 @@ function image_loading_optimization_parse_stored_page_metrics( WP_Post $post ) {
  *
  * @return void
  */
-function image_loading_optimization_segment_stored_page_metrics() {
+function image_loading_optimization_segment_stored_page_metrics( array $page_metrics, array $breakpoints ) {
 
 }
 
 /**
- * Store page metrics.
+ * Stores page metric by merging it with the other page metrics for a given URL.
  *
- * The $validated_page_metrics parameter has the following array shape:
+ * The $validated_page_metric parameter has the following array shape:
  *
  * {
  *      'url': string,
@@ -220,12 +220,14 @@ function image_loading_optimization_segment_stored_page_metrics() {
  *      'elements': array
  * }
  *
- * @param array $validated_page_metrics Page metrics, already validated by REST API.
- * @return true|WP_Error True on success or WP_Error otherwise.
+ * @param array $validated_page_metric Page metric, already validated by REST API.
+ *
+ * @return int|WP_Error Post ID or WP_Error otherwise.
  */
-function image_loading_optimization_store_page_metrics( array $validated_page_metrics ) {
-	$url = $validated_page_metrics['url'];
-	unset( $validated_page_metrics['url'] ); // Not stored in post_content but rather in post_title/post_name.
+function image_loading_optimization_store_page_metric( array $validated_page_metric ) {
+	$url = $validated_page_metric['url'];
+	unset( $validated_page_metric['url'] ); // Not stored in post_content but rather in post_title/post_name.
+	$validated_page_metric['timestamp'] = time();
 
 	// TODO: What about storing a version identifier?
 	$post_data = array(
@@ -250,18 +252,16 @@ function image_loading_optimization_store_page_metrics( array $validated_page_me
 		$page_metrics           = array();
 	}
 
-	// TODO: Unshift the first metrics entry if we are currently at the max allowed.
-	$segmented_page_metrics =
-
-	$mobile_max_width     = image_loading_optimization_get_max_mobile_viewport_width();
+	// Add the provided page metric to the page metrics.
+	// TODO: Need to implement viewport breakpoint segmenting.
+	// $segmented_page_metrics =
+	// $mobile_max_width     = image_loading_optimization_get_max_mobile_viewport_width();
 	$viewport_sample_size = image_loading_optimization_get_page_metrics_viewport_sample_size();
+	// $viewport_page_metrics = array();
+	$page_metrics = array_slice( $page_metrics, 0, $viewport_sample_size - 1 ); // Make room for the additional page metric.
+	array_unshift( $page_metrics, $validated_page_metric );
 
-	$viewport_page_metrics = array();
-
-	$existing_storage[] = $validated_page_metrics;
-
-
-	$post_data['post_content'] = wp_json_encode( $validated_page_metrics );
+	$post_data['post_content'] = wp_json_encode( $page_metrics, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ); // TODO: No need for pretty-printing.
 
 	$has_kses = false !== has_filter( 'content_save_pre', 'wp_filter_post_kses' );
 	if ( $has_kses ) {
@@ -269,6 +269,8 @@ function image_loading_optimization_store_page_metrics( array $validated_page_me
 		kses_remove_filters();
 	}
 
+	$post_data['post_type']   = IMAGE_LOADING_OPTIMIZATION_PAGE_METRICS_POST_TYPE;
+	$post_data['post_status'] = 'publish';
 	if ( isset( $post_data['ID'] ) ) {
 		$result = wp_update_post( wp_slash( $post_data ), true );
 	} else {
@@ -279,5 +281,5 @@ function image_loading_optimization_store_page_metrics( array $validated_page_me
 		kses_init_filters();
 	}
 
-	return $result instanceof WP_Error ? $result : true;
+	return $result;
 }
