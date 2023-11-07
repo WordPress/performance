@@ -32,7 +32,7 @@ function image_loading_optimization_register_endpoint() {
 
 	register_rest_route(
 		'perflab/v1',
-		'/image-loading-optimization/metrics-storage',
+		'/image-loading-optimization/metrics-storage', // @todo or rather metric-storage?
 		array(
 			'methods'             => 'POST',
 			'callback'            => 'image_loading_optimization_handle_rest_request',
