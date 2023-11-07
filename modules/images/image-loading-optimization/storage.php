@@ -30,19 +30,35 @@ function ilo_get_page_metric_storage_lock_ttl() {
 }
 
 /**
- * Gets the maximum width for a viewport to be considered as a mobile device.
+ * Gets the breakpoint max widths to group page metrics for various viewports.
  *
- * @todo This could instead return an array of thresholds, like [ 320, 480, 576 ] which would add additional buckets for small smartphones and phablets in addition to normal smartphones and desktops.
- * @return int Viewport width.
+ * Each max with represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then
+ * this means there will be two viewport groupings, one for 0<=480, and another >480. If instead there were three
+ * provided breakpoints (320, 480, 576) then this means there will be four viewport groupings:
+ *
+ *  1. 0-320 (small smartphone)
+ *  2. 321-480 (normal smartphone)
+ *  3. 481-576 (phablets)
+ *  4. >576 (desktop)
+ *
+ * @return int[] Breakpoint max widths, sorted in ascending order.
  */
-function ilo_get_max_mobile_viewport_width() {
+function ilo_get_breakpoint_max_widths() {
 
 	/**
-	 * Filters the maximum width for a viewport to be considered as a mobile device.
+	 * Filters the breakpoint max widths to group page metrics for various viewports.
 	 *
-	 * @param int $mobile_max_width Mobile max width.
+	 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints.
 	 */
-	return (int) apply_filters( 'ilo_max_mobile_viewport_with', 480 );
+	$breakpoint_max_widths = array_map(
+		static function ( $breakpoint_max_width ) {
+			return (int) $breakpoint_max_width;
+		},
+		(array) apply_filters( 'ilo_viewport_breakpoint_max_widths', array( 480 ) )
+	);
+
+	sort( $breakpoint_max_widths );
+	return $breakpoint_max_widths;
 }
 
 /**
@@ -116,7 +132,7 @@ add_action( 'init', 'ilo_register_page_metrics_post_type' );
  *
  * @return int
  */
-function ilo_get_page_metrics_viewport_sample_size() {
+function ilo_get_page_metrics_breakpoint_sample_size() {
 	/**
 	 * Filters desired sample size for a viewport's page metrics.
 	 *
@@ -197,13 +213,31 @@ function ilo_parse_stored_page_metrics( WP_Post $post ) {
 }
 
 /**
+ * Groups page metrics by breakpoint.
  *
- * @todo This needs to take a set of page metrics and segment the individual metrics into breakpoints.
- *
- * @return void
+ * @param array $page_metrics Page metrics.
+ * @param int[] $breakpoints  Viewport breakpoint max widths, sorted in ascending order.
+ * @return array Grouped page metrics.
  */
-function ilo_segment_stored_page_metrics( array $page_metrics, array $breakpoints ) {
-
+function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $breakpoints ) {
+	$max_index          = count( $breakpoints );
+	$groups             = array_fill( 0, $max_index + 1, array() );
+	$largest_breakpoint = $breakpoints[ $max_index - 1 ];
+	foreach ( $page_metrics as $page_metric ) {
+		if ( ! isset( $page_metric['viewport']['width'] ) ) {
+			continue;
+		}
+		$viewport_width = $page_metric['viewport']['width'];
+		if ( $viewport_width > $largest_breakpoint ) {
+			$groups[ $max_index ][] = $page_metric;
+		}
+		foreach ( $breakpoints as $group => $breakpoint ) {
+			if ( $viewport_width <= $breakpoint ) {
+				$groups[ $group ][] = $page_metric;
+			}
+		}
+	}
+	return $groups;
 }
 
 /**
@@ -253,14 +287,20 @@ function ilo_store_page_metric( array $validated_page_metric ) {
 	}
 
 	// Add the provided page metric to the page metrics.
-	// TODO: Need to implement viewport breakpoint segmenting.
-	// $segmented_page_metrics =
-	// $mobile_max_width     = ilo_get_max_mobile_viewport_width();
-	$viewport_sample_size = ilo_get_page_metrics_viewport_sample_size();
-	// $viewport_page_metrics = array();
-	$page_metrics = array_slice( $page_metrics, 0, $viewport_sample_size - 1 ); // Make room for the additional page metric.
 	array_unshift( $page_metrics, $validated_page_metric );
+	$breakpoints          = ilo_get_breakpoint_max_widths();
+	$sample_size          = ilo_get_page_metrics_breakpoint_sample_size();
+	$grouped_page_metrics = ilo_group_page_metrics_by_breakpoint( $page_metrics, $breakpoints );
 
+	foreach ( $grouped_page_metrics as &$breakpoint_page_metrics ) {
+		if ( count( $breakpoint_page_metrics ) > $sample_size ) {
+			$breakpoint_page_metrics = array_slice( $breakpoint_page_metrics, 0, $sample_size );
+		}
+	}
+
+	$page_metrics = array_merge( ...$grouped_page_metrics );
+
+	// TODO: Also need to capture the current theme and template which can be used to invalidate the cached page metrics.
 	$post_data['post_content'] = wp_json_encode( $page_metrics, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ); // TODO: No need for pretty-printing.
 
 	$has_kses = false !== has_filter( 'content_save_pre', 'wp_filter_post_kses' );
