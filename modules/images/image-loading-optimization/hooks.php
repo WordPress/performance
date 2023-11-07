@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param mixed $passthrough Optional. Filter value. Default null.
  * @return mixed Unmodified value of $passthrough.
  */
-function image_loading_optimization_buffer_output( $passthrough = null ) {
+function ilo_buffer_output( $passthrough = null ) {
 	ob_start(
 		static function ( $output ) {
 			/**
@@ -45,7 +45,7 @@ function image_loading_optimization_buffer_output( $passthrough = null ) {
 	);
 	return $passthrough;
 }
-add_filter( 'template_include', 'image_loading_optimization_buffer_output', PHP_INT_MAX );
+add_filter( 'template_include', 'ilo_buffer_output', PHP_INT_MAX );
 
 /**
  * Prints the script for detecting loaded images and the LCP element.
@@ -53,9 +53,9 @@ add_filter( 'template_include', 'image_loading_optimization_buffer_output', PHP_
  * @todo This should eventually only print the script if metrics are needed.
  * @todo This script should not be printed if the page was requested with non-removal (non-canonical) query args.
  */
-function image_loading_optimization_print_detection_script() {
+function ilo_print_detection_script() {
 
-	if ( image_loading_optimization_is_page_metric_storage_locked() ) {
+	if ( ilo_is_page_metric_storage_locked() ) {
 		return;
 	}
 
@@ -80,7 +80,7 @@ function image_loading_optimization_print_detection_script() {
 		$serve_time,
 		$detection_time_window,
 		WP_DEBUG,
-		rest_url( IMAGE_LOADING_OPTIMIZATION_REST_API_NAMESPACE . IMAGE_LOADING_OPTIMIZATION_PAGE_METRIC_STORAGE_ROUTE ),
+		rest_url( ILO_REST_API_NAMESPACE . ILO_PAGE_METRIC_STORAGE_ROUTE ),
 		wp_create_nonce( 'wp_rest' ),
 	);
 	wp_print_inline_script_tag(
@@ -92,4 +92,4 @@ function image_loading_optimization_print_detection_script() {
 		array( 'type' => 'module' )
 	);
 }
-add_action( 'wp_print_footer_scripts', 'image_loading_optimization_print_detection_script' );
+add_action( 'wp_print_footer_scripts', 'ilo_print_detection_script' );
