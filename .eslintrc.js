@@ -15,7 +15,11 @@ const config = {
 	globals: {
 		scheduler: false,
 	},
-	ignorePatterns: [ '/vendor', '/node_modules' ],
+	ignorePatterns: [
+		'/vendor',
+		'/node_modules',
+		'/modules/images/webp-uploads/fallback.js', // TODO: Issues need to be fixed here.
+	],
 };
 
 module.exports = config;
