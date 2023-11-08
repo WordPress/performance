@@ -1,6 +1,6 @@
 <?php
 /**
- * Metrics storage.
+ * Storage for image loading optimization.
  *
  * @package performance-lab
  * @since n.e.x.t
