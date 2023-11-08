@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'ILO_PAGE_METRICS_POST_TYPE', 'ilo_page_metrics' );
+const ILO_PAGE_METRICS_POST_TYPE = 'ilo_page_metrics';
 
 /**
  * Register post type for page metrics storage.
@@ -88,7 +88,7 @@ function ilo_parse_stored_page_metrics( WP_Post $post ) {
 		return new WP_Error(
 			'page_metrics_json_parse_error',
 			sprintf(
-			/* translators: 1: Post type slug, 2: JSON error message */
+				/* translators: 1: Post type slug, 2: JSON error message */
 				__( 'Contents of %1$s post type not valid JSON: %2$s', 'performance-lab' ),
 				ILO_PAGE_METRICS_POST_TYPE,
 				json_last_error_msg()
@@ -99,7 +99,7 @@ function ilo_parse_stored_page_metrics( WP_Post $post ) {
 		return new WP_Error(
 			'page_metrics_invalid_data_format',
 			sprintf(
-			/* translators: %s is post type slug */
+				/* translators: %s is post type slug */
 				__( 'Contents of %s post type was not a JSON array.', 'performance-lab' ),
 				ILO_PAGE_METRICS_POST_TYPE
 			)

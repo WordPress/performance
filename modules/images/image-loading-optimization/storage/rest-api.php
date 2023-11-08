@@ -10,8 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'ILO_REST_API_NAMESPACE', 'image-loading-optimization/v1' );
-define( 'ILO_PAGE_METRIC_STORAGE_ROUTE', '/image-loading-optimization/page-metric-storage' );
+const ILO_REST_API_NAMESPACE = 'image-loading-optimization/v1';
+
+const ILO_PAGE_METRIC_STORAGE_ROUTE = '/image-loading-optimization/page-metric-storage';
 
 /**
  * Register endpoint for storage of page metric.
