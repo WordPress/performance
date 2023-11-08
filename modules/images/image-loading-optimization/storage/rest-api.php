@@ -148,12 +148,11 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 		return $result;
 	}
 
-	$response = new WP_REST_Response(
+	return new WP_REST_Response(
 		array(
 			'success' => true,
 			'post_id' => $result,
+			'data'    => ilo_parse_stored_page_metrics( ilo_get_page_metrics_post( $page_metric['url'] ) ), // TODO: Remove this debug data.
 		)
 	);
-	$response->set_status( 201 );
-	return $response;
 }

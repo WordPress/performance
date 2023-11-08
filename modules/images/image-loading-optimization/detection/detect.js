@@ -26,6 +26,16 @@ function warn( ...message ) {
 }
 
 /**
+ * Log an error.
+ *
+ * @param {...*} message
+ */
+function error( ...message ) {
+	// eslint-disable-next-line no-console
+	console.error( consoleLogPrefix, ...message );
+}
+
+/**
  * @typedef {Object} Breadcrumb
  * @property {number} index   - Index of element among sibling elements.
  * @property {string} tagName - Tag name.
@@ -264,7 +274,7 @@ export default async function detect(
 		);
 		if ( ! breadcrumbs ) {
 			if ( isDebug ) {
-				warn( 'Unable to look up breadcrumbs for element' );
+				error( 'Unable to look up breadcrumbs for element' );
 			}
 			continue;
 		}
@@ -289,18 +299,33 @@ export default async function detect(
 		pageMetrics.elements.push( elementMetrics );
 	}
 
-	log( pageMetrics );
+	if ( isDebug ) {
+		log( 'Page metrics:', pageMetrics );
+	}
 
-	// TODO: Wait until idle.
-	const response = await fetch( restApiEndpoint, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': restApiNonce,
-		},
-		body: JSON.stringify( pageMetrics ),
-	} );
-	log( 'response:', await response.json() );
+	// TODO: Wait until idle? Yield to main?
+	try {
+		const response = await fetch( restApiEndpoint, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': restApiNonce,
+			},
+			body: JSON.stringify( pageMetrics ),
+		} );
+		if ( isDebug ) {
+			const body = await response.json();
+			if ( response.status === 200 ) {
+				log( 'Response:', body );
+			} else {
+				error( 'Failure:', body );
+			}
+		}
+	} catch ( err ) {
+		if ( isDebug ) {
+			error( err );
+		}
+	}
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();
