@@ -64,7 +64,7 @@ function perflab_render_plugins_ui() {
 }
 
 /**
- * Render individual plugin cards.
+ * Renders individual plugin cards.
  *
  * @since n.e.x.t
  *
