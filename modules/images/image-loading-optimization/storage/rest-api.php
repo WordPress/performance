@@ -39,7 +39,9 @@ function ilo_register_endpoint() {
 		ILO_PAGE_METRIC_STORAGE_ROUTE,
 		array(
 			'methods'             => 'POST',
-			'callback'            => 'ilo_handle_rest_request',
+			'callback'            => static function ( WP_REST_Request $request ) {
+				return ilo_handle_rest_request( $request );
+			},
 			'permission_callback' => static function () {
 				// Needs to be available to unauthenticated visitors.
 				if ( ilo_is_page_metric_storage_locked() ) {
