@@ -575,13 +575,17 @@ function perflab_deactivate_plugin() {
 	// The plugin being deactivated.
 	$plugin = sanitize_text_field( $_GET['plugin'] );
 
-	if ( check_admin_referer( "perflab_deactivate_plugin_{$plugin}" ) && current_user_can( 'deactivate_plugin', $plugin ) ) {
-		// Deactivate the plugin in question and return to prior screen.
-		deactivate_plugins( $plugin );
-		$referer = wp_get_referer();
-		if ( wp_safe_redirect( $referer ) ) {
-			exit;
-		}
+	check_admin_referer( "perflab_deactivate_plugin_{$plugin}" )
+
+	if ( ! current_user_can( 'deactivate_plugin', $plugin ) ) {
+		wp_die( __( 'Sorry, you are not allowed to deactivate this plugin.', 'default' ) );
+	}
+
+	// Deactivate the plugin in question and return to prior screen.
+	deactivate_plugins( $plugin );
+	$referer = wp_get_referer();
+	if ( wp_safe_redirect( $referer ) ) {
+		exit;
 	}
 }
 
