@@ -121,7 +121,7 @@ function perflab_render_plugin_card( string $standalone_plugin ) {
 		switch ( $status['status'] ) {
 			case 'install':
 				if ( $status['url'] ) {
-					if ( $compatible_php && $compatible_wp ) {
+					if ( $compatible_php && $compatible_wp && current_user_can( 'install_plugins' ) ) {
 						$action_links[] = sprintf(
 							'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
 							esc_attr( $plugin['slug'] ),
