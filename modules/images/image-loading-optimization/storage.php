@@ -37,7 +37,7 @@ function ilo_get_breakpoint_max_widths() {
 		static function ( $breakpoint_max_width ) {
 			return (int) $breakpoint_max_width;
 		},
-		(array) apply_filters( 'ilo_viewport_breakpoint_max_widths', array( 480 ) )
+		(array) apply_filters( 'ilo_breakpoint_max_widths', array( 480 ) )
 	);
 
 	sort( $breakpoint_max_widths );
@@ -45,7 +45,7 @@ function ilo_get_breakpoint_max_widths() {
 }
 
 /**
- * Gets desired sample size for a viewport's page metrics.
+ * Gets desired sample size for a breakpoint's page metrics.
  *
  * @return int Sample size.
  */
@@ -55,7 +55,25 @@ function ilo_get_page_metrics_breakpoint_sample_size() {
 	 *
 	 * @param int $sample_size Sample size.
 	 */
-	return (int) apply_filters( 'ilo_page_metrics_viewport_sample_size', 10 );
+	return (int) apply_filters( 'ilo_page_metrics_breakpoint_sample_size', 10 );
+}
+
+/**
+ * Gets the expiration age for a given page metric.
+ *
+ * When a page metric expires it is eligible to be replaced by a newer one.
+ *
+ * TODO: However, we keep viewport-specific page metrics regardless of TTL.
+ *
+ * @return int Expiration age in seconds.
+ */
+function ilo_get_page_metric_ttl() {
+	/**
+	 * Filters the expiration age for a given page metric.
+	 *
+	 * @param int $ttl TTL.
+	 */
+	return (int) apply_filters( 'ilo_page_metric_ttl', MONTH_IN_SECONDS );
 }
 
 /**
@@ -300,7 +318,6 @@ function ilo_store_page_metric( array $validated_page_metric ) {
 
 	$page_metrics = array_merge( ...$grouped_page_metrics );
 
-	// TODO: Also need to capture the current theme and template which can be used to invalidate the cached page metrics.
 	$post_data['post_content'] = wp_json_encode( $page_metrics, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ); // TODO: No need for pretty-printing.
 
 	$has_kses = false !== has_filter( 'content_save_pre', 'wp_filter_post_kses' );

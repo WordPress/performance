@@ -55,6 +55,7 @@ add_filter( 'template_include', 'ilo_buffer_output', PHP_INT_MAX );
  */
 function ilo_print_detection_script() {
 
+	// TODO: Also abort if we don't need any new page metrics due to the sample size being full.
 	if ( ilo_is_page_metric_storage_locked() ) {
 		return;
 	}
