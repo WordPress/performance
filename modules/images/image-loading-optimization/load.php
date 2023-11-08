@@ -20,7 +20,6 @@ if ( function_exists( 'ilo_buffer_output' ) ) {
 	return;
 }
 
-require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';
 require_once __DIR__ . '/storage.php';
 require_once __DIR__ . '/detection.php';
