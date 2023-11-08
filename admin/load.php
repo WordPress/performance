@@ -588,5 +588,4 @@ function perflab_deactivate_plugin() {
 		exit;
 	}
 }
-
 add_action( 'admin_action_perflab_deactivate_plugin', 'perflab_deactivate_plugin' );
