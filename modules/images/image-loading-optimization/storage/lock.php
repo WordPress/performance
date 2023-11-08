@@ -1,6 +1,6 @@
 <?php
 /**
- * Metrics storage locking.
+ * Metrics storage lock.
  *
  * @package performance-lab
  * @since n.e.x.t

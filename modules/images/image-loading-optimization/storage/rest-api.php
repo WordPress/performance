@@ -138,7 +138,8 @@ add_action( 'rest_api_init', 'ilo_register_endpoint' );
 function ilo_handle_rest_request( WP_REST_Request $request ) {
 	ilo_set_page_metric_storage_lock();
 
-	$result = ilo_store_page_metric( $request->get_json_params() );
+	$page_metric = $request->get_json_params();
+	$result      = ilo_store_page_metric( $page_metric );
 
 	if ( $result instanceof WP_Error ) {
 		return $result;
