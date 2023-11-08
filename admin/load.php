@@ -545,13 +545,17 @@ function perflab_activate_plugin() {
 	// The plugin being activated.
 	$plugin = sanitize_text_field( $_GET['plugin'] );
 
-	if ( check_admin_referer( "perflab_activate_plugin_{$plugin}" ) && current_user_can( 'activate_plugin', $plugin ) ) {
-		// Activate the plugin in question and return to prior screen.
-		activate_plugins( $plugin );
-		$referer = wp_get_referer();
-		if ( wp_safe_redirect( $referer ) ) {
-			exit;
-		}
+	check_admin_referer( "perflab_activate_plugin_{$plugin}" );
+
+	if ( ! current_user_can( 'activate_plugin', $plugin ) ) {
+		wp_die( __( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
+	}
+
+	// Activate the plugin in question and return to prior screen.
+	activate_plugins( $plugin );
+	$referer = wp_get_referer();
+	if ( wp_safe_redirect( $referer ) ) {
+		exit;
 	}
 }
 
