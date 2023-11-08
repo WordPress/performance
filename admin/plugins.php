@@ -142,7 +142,7 @@ function perflab_render_plugin_card( string $standalone_plugin ) {
 
 			case 'update_available':
 				if ( $status['url'] ) {
-					if ( $compatible_php && $compatible_wp ) {
+					if ( $compatible_php && $compatible_wp && current_user_can( 'update_plugins' ) ) {
 						$action_links[] = sprintf(
 							'<a class="button aria-button-if-js" data-plugin="%s" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
 							esc_attr( $status['file'] ),
