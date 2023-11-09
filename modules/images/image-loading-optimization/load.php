@@ -15,11 +15,6 @@ if ( defined( 'IMAGE_LOADING_OPTIMIZATION_VERSION' ) ) {
 
 define( 'IMAGE_LOADING_OPTIMIZATION_VERSION', 'Performance Lab ' . PERFLAB_VERSION );
 
-// Do not load the code if it is already loaded through another means.
-if ( function_exists( 'ilo_buffer_output' ) ) {
-	return;
-}
-
 require_once __DIR__ . '/hooks.php';
 require_once __DIR__ . '/storage.php';
 require_once __DIR__ . '/detection.php';
