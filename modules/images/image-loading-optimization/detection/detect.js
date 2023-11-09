@@ -98,19 +98,20 @@ function getBreadcrumbs( leafElement ) {
 /**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
- * @param {number}  serveTime           The serve time of the page in milliseconds from PHP via `ceil( microtime( true ) * 1000 )`.
- * @param {number}  detectionTimeWindow The number of milliseconds between now and when the page was first generated in which detection should proceed.
- * @param {boolean} isDebug             Whether to show debug messages.
- * @param {string}  restApiEndpoint     URL for where to send the detection data.
- * @param {string}  restApiNonce        Nonce for writing to the REST API.
+ * @param {Object}  args                     Args.
+ * @param {number}  args.serveTime           The serve time of the page in milliseconds from PHP via `ceil( microtime( true ) * 1000 )`.
+ * @param {number}  args.detectionTimeWindow The number of milliseconds between now and when the page was first generated in which detection should proceed.
+ * @param {boolean} args.isDebug             Whether to show debug messages.
+ * @param {string}  args.restApiEndpoint     URL for where to send the detection data.
+ * @param {string}  args.restApiNonce        Nonce for writing to the REST API.
  */
-export default async function detect(
+export default async function detect( {
 	serveTime,
 	detectionTimeWindow,
 	isDebug,
 	restApiEndpoint,
-	restApiNonce
-) {
+	restApiNonce,
+} ) {
 	const runTime = new Date().valueOf();
 
 	// Abort running detection logic if it was served in a cached page.

@@ -41,15 +41,15 @@ function ilo_print_detection_script() {
 	$detection_time_window = apply_filters( 'perflab_image_loading_detection_time_window', 5000 );
 
 	$detect_args = array(
-		$serve_time,
-		$detection_time_window,
-		WP_DEBUG,
-		rest_url( ILO_REST_API_NAMESPACE . ILO_PAGE_METRICS_ROUTE ),
-		wp_create_nonce( 'wp_rest' ),
+		'serveTime'           => $serve_time,
+		'detectionTimeWindow' => $detection_time_window,
+		'isDebug'             => WP_DEBUG,
+		'restApiEndpoint'     => rest_url( ILO_REST_API_NAMESPACE . ILO_PAGE_METRICS_ROUTE ),
+		'restApiNonce'        => wp_create_nonce( 'wp_rest' ),
 	);
 	wp_print_inline_script_tag(
 		sprintf(
-			'import detect from %s; detect( ...%s )',
+			'import detect from %s; detect( %s )',
 			wp_json_encode( add_query_arg( 'ver', PERFLAB_VERSION, plugin_dir_url( __FILE__ ) . 'detection/detect.js' ) ),
 			wp_json_encode( $detect_args )
 		),
