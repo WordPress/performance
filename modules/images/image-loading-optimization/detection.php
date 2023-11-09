@@ -44,7 +44,7 @@ function ilo_print_detection_script() {
 		$serve_time,
 		$detection_time_window,
 		WP_DEBUG,
-		rest_url( ILO_REST_API_NAMESPACE . ILO_PAGE_METRIC_STORAGE_ROUTE ),
+		rest_url( ILO_REST_API_NAMESPACE . ILO_PAGE_METRICS_ROUTE ),
 		wp_create_nonce( 'wp_rest' ),
 	);
 	wp_print_inline_script_tag(

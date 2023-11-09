@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const ILO_REST_API_NAMESPACE = 'image-loading-optimization/v1';
 
-const ILO_PAGE_METRIC_STORAGE_ROUTE = '/image-loading-optimization/page-metric-storage';
+const ILO_PAGE_METRICS_ROUTE = '/page-metrics';
 
 /**
  * Register endpoint for storage of page metric.
@@ -36,7 +36,7 @@ function ilo_register_endpoint() {
 
 	register_rest_route(
 		ILO_REST_API_NAMESPACE,
-		ILO_PAGE_METRIC_STORAGE_ROUTE,
+		ILO_PAGE_METRICS_ROUTE,
 		array(
 			'methods'             => 'POST',
 			'callback'            => static function ( WP_REST_Request $request ) {
