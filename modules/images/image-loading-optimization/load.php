@@ -16,5 +16,11 @@ if ( defined( 'IMAGE_LOADING_OPTIMIZATION_VERSION' ) ) {
 define( 'IMAGE_LOADING_OPTIMIZATION_VERSION', 'Performance Lab ' . PERFLAB_VERSION );
 
 require_once __DIR__ . '/hooks.php';
-require_once __DIR__ . '/storage.php';
+
+// Storage logic.
+require_once __DIR__ . '/storage/lock.php';
+require_once __DIR__ . '/storage/post-type.php';
+require_once __DIR__ . '/storage/data.php';
+require_once __DIR__ . '/storage/rest-api.php';
+
 require_once __DIR__ . '/detection.php';
