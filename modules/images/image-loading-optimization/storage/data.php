@@ -83,17 +83,21 @@ function ilo_get_breakpoint_max_widths() {
 }
 
 /**
- * Gets desired sample size for a breakpoint's page metrics.
+ * Gets the sample size for a breakpoint's page metrics on a given URL.
+ *
+ * A breakpoint divides page metrics for viewports which are smaller and those which are larger. Given the default
+ * sample size of 3 and there being just a single breakpoint (480) by default, for a given URL, there would be a maximum
+ * total of 6 page metrics stored for a given URL: 3 for mobile and 3 for desktop.
  *
  * @return int Sample size.
  */
 function ilo_get_page_metrics_breakpoint_sample_size() {
 	/**
-	 * Filters desired sample size for a viewport's page metrics.
+	 * Filters the sample size for a breakpoint's page metrics on a given URL.
 	 *
 	 * @param int $sample_size Sample size.
 	 */
-	return (int) apply_filters( 'ilo_page_metrics_breakpoint_sample_size', 10 );
+	return (int) apply_filters( 'ilo_page_metrics_breakpoint_sample_size', 3 );
 }
 
 /**
