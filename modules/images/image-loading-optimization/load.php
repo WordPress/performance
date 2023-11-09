@@ -9,11 +9,11 @@
  */
 
 // Define the constant.
-if ( defined( 'ILO_VERSION' ) ) {
+if ( defined( 'IMAGE_LOADING_OPTIMIZATION_VERSION' ) ) {
 	return;
 }
 
-define( 'ILO_VERSION', 'Performance Lab ' . PERFLAB_VERSION );
+define( 'IMAGE_LOADING_OPTIMIZATION_VERSION', 'Performance Lab ' . PERFLAB_VERSION );
 
 // Do not load the code if it is already loaded through another means.
 if ( function_exists( 'ilo_buffer_output' ) ) {
