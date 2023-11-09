@@ -29,6 +29,78 @@ function ilo_get_page_metric_ttl() {
 }
 
 /**
+ * Gets the normalized current URL.
+ *
+ * TODO: This will need to be made more robust for non-singular URLs. What about multi-faceted archives with multiple taxonomies and date parameters?
+ *
+ * @return string Normalized current URL.
+ */
+function ilo_get_normalized_current_url() {
+	if ( is_singular() ) {
+		$url = wp_get_canonical_url();
+		if ( $url ) {
+			return $url;
+		}
+	}
+
+	$home_path = wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+
+	$scheme = is_ssl() ? 'https' : 'http';
+	$host   = strtok( $_SERVER['HTTP_HOST'], ':' ); // Use of strtok() since wp-env erroneously includes port in host.
+	$port   = (int) $_SERVER['SERVER_PORT'];
+	$path   = '';
+	$query  = '';
+	if ( preg_match( '%(^.+?)(?:\?([^#]+))?%', wp_unslash( $_SERVER['REQUEST_URI'] ), $matches ) ) {
+		if ( ! empty( $matches[1] ) ) {
+			$path = $matches[1];
+		}
+		if ( ! empty( $matches[2] ) ) {
+			$query = $matches[2];
+		}
+	}
+	if ( $query ) {
+		$removable_query_args   = wp_removable_query_args();
+		$removable_query_args[] = 'fbclid';
+
+		$old_query_args = array();
+		$new_query_args = array();
+		wp_parse_str( $query, $old_query_args );
+		foreach ( $old_query_args as $key => $value ) {
+			if (
+				str_starts_with( 'utm_', $key ) ||
+				in_array( $key, $removable_query_args, true )
+			) {
+				continue;
+			}
+			$new_query_args[ $key ] = $value;
+		}
+		asort( $new_query_args );
+		$query = build_query( $new_query_args );
+	}
+
+	// Normalize open-ended URLs.
+	if ( is_404() ) {
+		$path  = $home_path;
+		$query = 'error=404';
+	} elseif ( is_search() ) {
+		$path  = $home_path;
+		$query = 's={}';
+	}
+
+	// Rebuild the URL.
+	$url = $scheme . '://' . $host;
+	if ( 80 !== $port && 443 !== $port ) {
+		$url .= ":{$port}";
+	}
+	$url .= $path;
+	if ( $query ) {
+		$url .= "?{$query}";
+	}
+
+	return $url;
+}
+
+/**
  * Unshift a new page metric onto an array of page metrics.
  *
  * @param array $page_metrics          Page metrics.
