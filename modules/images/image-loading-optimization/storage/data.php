@@ -15,11 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * When a page metric expires it is eligible to be replaced by a newer one.
  *
- * TODO: However, we keep viewport-specific page metrics regardless of TTL.
- *
  * @return int Expiration age in seconds.
  */
-function ilo_get_page_metric_ttl() {
+function ilo_get_page_metric_freshness_ttl() {
 	/**
 	 * Filters the expiration age for a given page metric.
 	 *
@@ -216,25 +214,39 @@ function ilo_get_page_metrics_breakpoint_sample_size() {
  *
  * @param array $page_metrics Page metrics.
  * @param int[] $breakpoints  Viewport breakpoint max widths, sorted in ascending order.
- * @return array Grouped page metrics.
+ * @return array Page metrics grouped by breakpoint. The array keys are the minimum widths for a viewport to lie within
+ *               the breakpoint. The returned array is always one larger than the provided array of breakpoints, since
+ *               the breakpoints reflect the max inclusive boundaries whereas the return value is the groups of page
+ *               metrics with viewports on either side of the breakpoint boundaries.
  */
 function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $breakpoints ) {
-	$max_index          = count( $breakpoints );
-	$groups             = array_fill( 0, $max_index + 1, array() );
-	$largest_breakpoint = $breakpoints[ $max_index - 1 ];
+
+	// Convert breakpoint max widths into viewport minimum widths.
+	$viewport_minimum_widths = array_map(
+		static function ( $breakpoint ) {
+			return $breakpoint + 1;
+		},
+		$breakpoints
+	);
+
+	$grouped = array_fill_keys( array_merge( array( 0 ), $viewport_minimum_widths ), array() );
+
 	foreach ( $page_metrics as $page_metric ) {
 		if ( ! isset( $page_metric['viewport']['width'] ) ) {
 			continue;
 		}
 		$viewport_width = $page_metric['viewport']['width'];
-		if ( $viewport_width > $largest_breakpoint ) {
-			$groups[ $max_index ][] = $page_metric;
-		}
-		foreach ( $breakpoints as $group => $breakpoint ) {
-			if ( $viewport_width <= $breakpoint ) {
-				$groups[ $group ][] = $page_metric;
+
+		$current_minimum_viewport = 0;
+		foreach ( $viewport_minimum_widths as $viewport_minimum_width ) {
+			if ( $viewport_width > $viewport_minimum_width ) {
+				$current_minimum_viewport = $viewport_minimum_width;
+			} else {
+				break;
 			}
 		}
+
+		$grouped[ $current_minimum_viewport ][] = $page_metric;
 	}
-	return $groups;
+	return $grouped;
 }

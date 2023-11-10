@@ -31,7 +31,7 @@ function ilo_register_page_metrics_post_type() {
 			'query_var'        => false,
 			'delete_with_user' => false,
 			'can_export'       => false,
-			'supports'         => array( 'title' ), // The original URL is stored in the post_title, and the MD5 hash in the post_name.
+			'supports'         => array( 'title' ), // The original URL is stored in the post_title, and the post_name is a hash of the query vars.
 		)
 	);
 }
@@ -96,6 +96,24 @@ function ilo_parse_stored_page_metrics( WP_Post $post ) {
 		);
 	}
 	return $page_metrics;
+}
+
+/**
+ * Parses post content in page metrics post.
+ *
+ * @param string $slug Page metrics slug.
+ * @return array Page metrics data, or null if invalid.
+ */
+function ilo_get_page_metrics_data( $slug ) {
+	$post = ilo_get_page_metrics_post( $slug );
+	if ( ! ( $post instanceof WP_Post ) ) {
+		return null;
+	}
+	$data = ilo_parse_stored_page_metrics( $post );
+	if ( ! is_array( $data ) ) {
+		return null;
+	}
+	return $data;
 }
 
 /**

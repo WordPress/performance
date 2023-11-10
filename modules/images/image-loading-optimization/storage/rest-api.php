@@ -157,8 +157,12 @@ add_action( 'rest_api_init', 'ilo_register_endpoint' );
 function ilo_handle_rest_request( WP_REST_Request $request ) {
 	ilo_set_page_metric_storage_lock();
 
-	$page_metric = $request->get_json_params();
-	$result      = ilo_store_page_metric( $page_metric['url'], $page_metric['slug'], $request->get_json_params() );
+	$page_metric = wp_array_slice_assoc( $request->get_json_params(), array( 'viewport', 'elements' ) );
+	$result      = ilo_store_page_metric(
+		$request->get_param( 'url' ),
+		$request->get_param( 'slug' ),
+		$page_metric
+	);
 
 	if ( $result instanceof WP_Error ) {
 		return $result;
@@ -168,7 +172,7 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 		array(
 			'success' => true,
 			'post_id' => $result,
-			'data'    => ilo_parse_stored_page_metrics( ilo_get_page_metrics_post( $page_metric['slug'] ) ), // TODO: Remove this debug data.
+			'data'    => ilo_parse_stored_page_metrics( ilo_get_page_metrics_post( $request->get_param( 'slug' ) ) ), // TODO: Remove this debug data.
 		)
 	);
 }
