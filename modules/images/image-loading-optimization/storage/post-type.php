@@ -68,7 +68,7 @@ function ilo_get_page_metrics_post( $url ) {
 		)
 	);
 
-	$post = array_shift( $post_query->posts );
+	$post = current( $post_query->posts );
 	if ( $post instanceof WP_Post ) {
 		return $post;
 	} else {
