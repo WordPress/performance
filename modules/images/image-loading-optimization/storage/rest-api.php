@@ -65,6 +65,22 @@ function ilo_register_endpoint() {
 						return true;
 					},
 				),
+				'slug'     => array(
+					'type'     => 'string',
+					'required' => true,
+					'pattern'  => '^[0-9a-f]{32}$',
+				),
+				'hmac'     => array(
+					'type'              => 'string',
+					'required'          => true,
+					'pattern'           => '^[0-9a-f]+$',
+					'validate_callback' => static function ( $hmac, WP_REST_Request $request ) {
+						if ( ! hash_equals( $hmac, ilo_get_slug_hmac( $request->get_param( 'slug' ) ) ) ) {
+							return new WP_Error( 'invalid_hmac', __( 'HMAC comparison failure.', 'performance-lab' ) );
+						}
+						return true;
+					},
+				),
 				'viewport' => array(
 					'description' => __( 'Viewport dimensions', 'performance-lab' ),
 					'type'        => 'object',
@@ -142,7 +158,7 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	ilo_set_page_metric_storage_lock();
 
 	$page_metric = $request->get_json_params();
-	$result      = ilo_store_page_metric( $page_metric );
+	$result      = ilo_store_page_metric( $page_metric['url'], $page_metric['slug'], $request->get_json_params() );
 
 	if ( $result instanceof WP_Error ) {
 		return $result;
@@ -152,7 +168,7 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 		array(
 			'success' => true,
 			'post_id' => $result,
-			'data'    => ilo_parse_stored_page_metrics( ilo_get_page_metrics_post( $page_metric['url'] ) ), // TODO: Remove this debug data.
+			'data'    => ilo_parse_stored_page_metrics( ilo_get_page_metrics_post( $page_metric['slug'] ) ), // TODO: Remove this debug data.
 		)
 	);
 }

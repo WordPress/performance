@@ -38,27 +38,17 @@ function ilo_register_page_metrics_post_type() {
 add_action( 'init', 'ilo_register_page_metrics_post_type' );
 
 /**
- * Gets slug for page metrics post.
- *
- * @param string $url URL.
- * @return string Slug for URL.
- */
-function ilo_get_page_metrics_slug( $url ) {
-	return md5( $url );
-}
-
-/**
  * Get page metrics post.
  *
- * @param string $url URL.
+ * @param string $slug Page metrics slug.
  * @return WP_Post|null Post object if exists.
  */
-function ilo_get_page_metrics_post( $url ) {
+function ilo_get_page_metrics_post( $slug ) {
 	$post_query = new WP_Query(
 		array(
 			'post_type'              => ILO_PAGE_METRICS_POST_TYPE,
 			'post_status'            => 'publish',
-			'name'                   => ilo_get_page_metrics_slug( $url ),
+			'name'                   => $slug,
 			'posts_per_page'         => 1,
 			'no_found_rows'          => true,
 			'cache_results'          => true,
@@ -114,7 +104,6 @@ function ilo_parse_stored_page_metrics( WP_Post $post ) {
  * The $validated_page_metric parameter has the following array shape:
  *
  * {
- *      'url': string,
  *      'viewport': array{
  *          'width': int,
  *          'height': int
@@ -122,21 +111,20 @@ function ilo_parse_stored_page_metrics( WP_Post $post ) {
  *      'elements': array
  * }
  *
- * @param array $validated_page_metric Page metric, already validated by REST API.
- *
+ * @param string $url                   URL for the page metrics. This is used purely as metadata.
+ * @param string $slug                  Page metrics slug (computed from query vars).
+ * @param array  $validated_page_metric Page metric, already validated by REST API.
  * @return int|WP_Error Post ID or WP_Error otherwise.
  */
-function ilo_store_page_metric( array $validated_page_metric ) {
-	$url = $validated_page_metric['url'];
-	unset( $validated_page_metric['url'] ); // Not stored in post_content but rather in post_title/post_name.
+function ilo_store_page_metric( $url, $slug, array $validated_page_metric ) {
 	$validated_page_metric['timestamp'] = time();
 
 	// TODO: What about storing a version identifier?
 	$post_data = array(
-		'post_title' => $url,
+		'post_title' => $url, // TODO: Should we keep this? It can help with debugging.
 	);
 
-	$post = ilo_get_page_metrics_post( $url );
+	$post = ilo_get_page_metrics_post( $slug );
 
 	if ( $post instanceof WP_Post ) {
 		$post_data['ID']        = $post->ID;
@@ -150,7 +138,7 @@ function ilo_store_page_metric( array $validated_page_metric ) {
 			$page_metrics = array();
 		}
 	} else {
-		$post_data['post_name'] = ilo_get_page_metrics_slug( $url );
+		$post_data['post_name'] = $slug;
 		$page_metrics           = array();
 	}
 

@@ -40,12 +40,17 @@ function ilo_print_detection_script() {
 	 */
 	$detection_time_window = apply_filters( 'perflab_image_loading_detection_time_window', 5000 );
 
+	$query_vars = ilo_get_normalized_query_vars();
+	$slug       = ilo_get_page_metrics_slug( $query_vars );
+
 	$detect_args = array(
 		'serveTime'           => $serve_time,
 		'detectionTimeWindow' => $detection_time_window,
 		'isDebug'             => WP_DEBUG,
 		'restApiEndpoint'     => rest_url( ILO_REST_API_NAMESPACE . ILO_PAGE_METRICS_ROUTE ),
 		'restApiNonce'        => wp_create_nonce( 'wp_rest' ),
+		'pageMetricsSlug'     => $slug,
+		'pageMetricsHmac'     => ilo_get_slug_hmac( $slug ), // TODO: Or would a nonce make more sense with the $slug being the action?
 	);
 	wp_print_inline_script_tag(
 		sprintf(

@@ -97,6 +97,30 @@ function ilo_get_normalized_query_vars() {
 }
 
 /**
+ * Gets slug for page metrics.
+ *
+ * @see ilo_get_normalized_query_vars()
+ *
+ * @param array $query_vars Normalized query vars.
+ * @return string Slug.
+ */
+function ilo_get_page_metrics_slug( $query_vars ) {
+	return md5( wp_json_encode( $query_vars ) );
+}
+
+/**
+ * Compute HMAC for page metrics slug.
+ *
+ * This is used in the REST API to authenticate the storage of new page metrics from a given URL.
+ *
+ * @param string $slug Page metrics slug.
+ * @return false HMAC.
+ */
+function ilo_get_slug_hmac( $slug ) {
+	return hash_hmac( 'sha1', $slug, wp_salt() );
+}
+
+/**
  * Unshift a new page metric onto an array of page metrics.
  *
  * @param array $page_metrics          Page metrics.
