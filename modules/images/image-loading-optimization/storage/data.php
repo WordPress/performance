@@ -109,15 +109,34 @@ function ilo_get_page_metrics_slug( $query_vars ) {
 }
 
 /**
- * Compute HMAC for page metrics slug.
+ * Compute nonce for storing page metrics for a specific slug.
  *
  * This is used in the REST API to authenticate the storage of new page metrics from a given URL.
  *
+ * @see wp_create_nonce()
+ * @see ilo_verify_page_metrics_storage_nonce()
+ *
  * @param string $slug Page metrics slug.
- * @return false HMAC.
+ * @return string Nonce.
  */
-function ilo_get_slug_hmac( $slug ) {
-	return hash_hmac( 'sha1', $slug, wp_salt() );
+function ilo_get_page_metrics_storage_nonce( $slug ) {
+	return wp_create_nonce( "store_page_metrics:{$slug}" );
+}
+
+/**
+ * Verify nonce for storing page metrics for a specific slug.
+ *
+ * @see wp_verify_nonce()
+ * @see ilo_get_page_metrics_storage_nonce()
+ *
+ * @param string $nonce Page metrics storage nonce.
+ * @param string $slug  Page metrics slug.
+ * @return int|false 1 if the nonce is valid and generated between 0-12 hours ago,
+ *                   2 if the nonce is valid and generated between 12-24 hours ago.
+ *                   False if the nonce is invalid.
+ */
+function ilo_verify_page_metrics_storage_nonce( $nonce, $slug ) {
+	return wp_verify_nonce( $nonce, "store_page_metrics:{$slug}" );
 }
 
 /**

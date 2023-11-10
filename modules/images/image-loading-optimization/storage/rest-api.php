@@ -70,13 +70,13 @@ function ilo_register_endpoint() {
 					'required' => true,
 					'pattern'  => '^[0-9a-f]{32}$',
 				),
-				'hmac'     => array(
+				'nonce'    => array(
 					'type'              => 'string',
 					'required'          => true,
 					'pattern'           => '^[0-9a-f]+$',
-					'validate_callback' => static function ( $hmac, WP_REST_Request $request ) {
-						if ( ! hash_equals( $hmac, ilo_get_slug_hmac( $request->get_param( 'slug' ) ) ) ) {
-							return new WP_Error( 'invalid_hmac', __( 'HMAC comparison failure.', 'performance-lab' ) );
+					'validate_callback' => static function ( $nonce, WP_REST_Request $request ) {
+						if ( ! ilo_verify_page_metrics_storage_nonce( $nonce, $request->get_param( 'slug' ) ) ) {
+							return new WP_Error( 'invalid_nonce', __( 'Page metrics nonce verification failure.', 'performance-lab' ) );
 						}
 						return true;
 					},

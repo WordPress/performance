@@ -50,7 +50,7 @@ function ilo_print_detection_script() {
 		'restApiEndpoint'     => rest_url( ILO_REST_API_NAMESPACE . ILO_PAGE_METRICS_ROUTE ),
 		'restApiNonce'        => wp_create_nonce( 'wp_rest' ),
 		'pageMetricsSlug'     => $slug,
-		'pageMetricsHmac'     => ilo_get_slug_hmac( $slug ), // TODO: Or would a nonce make more sense with the $slug being the action?
+		'pageMetricsNonce'    => ilo_get_page_metrics_storage_nonce( $slug ),
 	);
 	wp_print_inline_script_tag(
 		sprintf(

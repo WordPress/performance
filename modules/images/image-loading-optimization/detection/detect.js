@@ -105,7 +105,7 @@ function getBreadcrumbs( leafElement ) {
  * @param {string}  args.restApiEndpoint     URL for where to send the detection data.
  * @param {string}  args.restApiNonce        Nonce for writing to the REST API.
  * @param {string}  args.pageMetricsSlug     Slug for page metrics.
- * @param {string}  args.pageMetricsHmac     HMAC for the page metric slug.
+ * @param {string}  args.pageMetricsNonce    Nonce for page metrics storage.
  */
 export default async function detect( {
 	serveTime,
@@ -114,7 +114,7 @@ export default async function detect( {
 	restApiEndpoint,
 	restApiNonce,
 	pageMetricsSlug,
-	pageMetricsHmac,
+	pageMetricsNonce,
 } ) {
 	const runTime = new Date().valueOf();
 
@@ -265,7 +265,7 @@ export default async function detect( {
 	const pageMetrics = {
 		url: win.location.href,
 		slug: pageMetricsSlug,
-		hmac: pageMetricsHmac,
+		nonce: pageMetricsNonce,
 		viewport: {
 			width: win.innerWidth,
 			height: win.innerHeight,
