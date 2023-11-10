@@ -29,75 +29,71 @@ function ilo_get_page_metric_ttl() {
 }
 
 /**
- * Gets the normalized current URL.
+ * Get the URL for the current request.
  *
- * TODO: This will need to be made more robust for non-singular URLs. What about multi-faceted archives with multiple taxonomies and date parameters?
+ * This is essentially the REQUEST_URI prefixed by the scheme and host for the home URL.
+ * This is needed in particular due to subdirectory installs.
  *
- * @return string Normalized current URL.
+ * @return string Current URL.
  */
-function ilo_get_normalized_current_url() {
-	if ( is_singular() ) {
-		$url = wp_get_canonical_url();
-		if ( $url ) {
-			return $url;
-		}
+function ilo_get_current_url() {
+	$parsed_url = wp_parse_url( home_url() );
+
+	if ( ! is_array( $parsed_url ) ) {
+		$parsed_url = array();
 	}
 
-	$home_path = wp_parse_url( home_url( '/' ), PHP_URL_PATH );
-
-	$scheme = is_ssl() ? 'https' : 'http';
-	$host   = strtok( $_SERVER['HTTP_HOST'], ':' ); // Use of strtok() since wp-env erroneously includes port in host.
-	$port   = (int) $_SERVER['SERVER_PORT'];
-	$path   = '';
-	$query  = '';
-	if ( preg_match( '%(^.+?)(?:\?([^#]+))?%', wp_unslash( $_SERVER['REQUEST_URI'] ), $matches ) ) {
-		if ( ! empty( $matches[1] ) ) {
-			$path = $matches[1];
-		}
-		if ( ! empty( $matches[2] ) ) {
-			$query = $matches[2];
-		}
+	if ( empty( $parsed_url['scheme'] ) ) {
+		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 	}
-	if ( $query ) {
-		$removable_query_args   = wp_removable_query_args();
-		$removable_query_args[] = 'fbclid';
-
-		$old_query_args = array();
-		$new_query_args = array();
-		wp_parse_str( $query, $old_query_args );
-		foreach ( $old_query_args as $key => $value ) {
-			if (
-				str_starts_with( 'utm_', $key ) ||
-				in_array( $key, $removable_query_args, true )
-			) {
-				continue;
-			}
-			$new_query_args[ $key ] = $value;
-		}
-		asort( $new_query_args );
-		$query = build_query( $new_query_args );
+	if ( ! isset( $parsed_url['host'] ) ) {
+		$parsed_url['host'] = isset( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
 	}
 
-	// Normalize open-ended URLs.
+	$current_url = $parsed_url['scheme'] . '://';
+	if ( isset( $parsed_url['user'] ) ) {
+		$current_url .= $parsed_url['user'];
+		if ( isset( $parsed_url['pass'] ) ) {
+			$current_url .= ':' . $parsed_url['pass'];
+		}
+		$current_url .= '@';
+	}
+	$current_url .= $parsed_url['host'];
+	if ( isset( $parsed_url['port'] ) ) {
+		$current_url .= ':' . $parsed_url['port'];
+	}
+	$current_url .= '/';
+
+	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
+	}
+	return esc_url_raw( $current_url );
+}
+
+/**
+ * Gets the normalized query vars for the current request.
+ *
+ * This is used as a cache key for stored page metrics.
+ *
+ * @return array Normalized query vars.
+ */
+function ilo_get_normalized_query_vars() {
+	global $wp;
+
+	// Note that the order of this array is naturally normalized since it is
+	// assembled by iterating over public_query_vars.
+	$normalized_query_vars = $wp->query_vars;
+
+	// Normalize unbounded query vars.
 	if ( is_404() ) {
-		$path  = $home_path;
-		$query = 'error=404';
-	} elseif ( is_search() ) {
-		$path  = $home_path;
-		$query = 's={}';
+		$normalized_query_vars = array(
+			'error' => 404,
+		);
+	} elseif ( array_key_exists( 's', $normalized_query_vars ) ) {
+		$normalized_query_vars['s'] = '...';
 	}
 
-	// Rebuild the URL.
-	$url = $scheme . '://' . $host;
-	if ( 80 !== $port && 443 !== $port ) {
-		$url .= ":{$port}";
-	}
-	$url .= $path;
-	if ( $query ) {
-		$url .= "?{$query}";
-	}
-
-	return $url;
+	return $normalized_query_vars;
 }
 
 /**
