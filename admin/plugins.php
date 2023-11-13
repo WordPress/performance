@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Helper function to get plugin info from plugin slug.
+ * Gets plugin info from plugin slug.
  *
  * @since n.e.x.t
  *
@@ -42,7 +42,7 @@ function perflab_get_plugin_info( string $plugin_slug ) {
 }
 
 /**
- * Get info about all the standalone plugins and their status.
+ * Gets info about all the standalone plugins and their status.
  *
  * @since n.e.x.t
  *
