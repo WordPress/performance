@@ -10,6 +10,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Helper function to get plugin info from plugin slug.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $plugin_slug The string identifier for the plugin in questions slug.
+ *
+ * @return array Array of plugin data, or empty if none/error.
+ */
+function perflab_get_plugin_info( string $plugin_slug ) {
+	$plugin = plugins_api(
+		'plugin_information',
+		array(
+			'slug'   => $plugin_slug,
+			'fields' => array(
+				'short_description' => true,
+				'icons'             => true,
+			),
+		)
+	);
+
+	if ( is_wp_error( $plugin ) ) {
+		return array();
+	}
+
+	if ( is_object( $plugin ) ) {
+		$plugin = (array) $plugin;
+	}
+
+	return $plugin;
+}
+
+/**
  * Get info about all the standalone plugins and their status.
  *
  * @since n.e.x.t
@@ -18,10 +50,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function perflab_get_standalone_plugins() {
 	$managed_standalone_plugins = array(
-		'webp-uploads',
-		'performant-translations',
-		'dominant-color-images',
+		'webp-uploads'            => array(
+			'plugin_data' => array(),
+		),
+		'performant-translations' => array(
+			'plugin_data' => array(),
+		),
+		'dominant-color-images'   => array(
+			'plugin_data' => array(),
+		),
 	);
+
+	foreach ( $managed_standalone_plugins as $managed_standalone_plugin_slug => $managed_standalone_plugin_entry ) {
+		$managed_standalone_plugins[ $managed_standalone_plugin_slug ]['plugin_data'] = perflab_get_plugin_info( $managed_standalone_plugin_slug );
+	}
 
 	return $managed_standalone_plugins;
 }
@@ -68,21 +110,14 @@ function perflab_render_plugins_ui() {
  *
  * @since n.e.x.t
  *
- * @param string $standalone_plugin Plugin slug as passed from get_standalone_plugins().
+ * @param array $standalone_plugin Plugin data as passed from get_standalone_plugins().
  */
-function perflab_render_plugin_card( string $standalone_plugin ) {
-	$plugin = plugins_api(
-		'plugin_information',
-		array(
-			'slug'   => $standalone_plugin,
-			'fields' => array(
-				'short_description' => true,
-				'icons'             => true,
-			),
-		)
-	);
-	if ( is_object( $plugin ) ) {
-		$plugin = (array) $plugin;
+function perflab_render_plugin_card( array $standalone_plugin ) {
+	$plugin = $standalone_plugin['plugin_data'];
+
+	// If no plugin data is returned with the plugin item, return.
+	if ( empty( $plugin ) ) {
+		return;
 	}
 
 	// Remove any HTML from the description.
