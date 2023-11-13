@@ -94,9 +94,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		Audit_Assets_Transients_Set::set_style_transient_with_data( 3 );
 
 		// Avoid deprecation warning due to related change in WordPress 6.4.
-		if ( has_action( 'wp_print_styles', 'print_emoji_styles' ) ) {
-			remove_action( 'wp_print_styles', 'print_emoji_styles' );
-		}
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		get_echo( 'wp_print_styles' );
 
 		perflab_aea_audit_enqueued_styles();
@@ -145,9 +143,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		wp_add_inline_style( 'style1', $style );
 
 		// Avoid deprecation warning due to related change in WordPress 6.4.
-		if ( has_action( 'wp_print_styles', 'print_emoji_styles' ) ) {
-			remove_action( 'wp_print_styles', 'print_emoji_styles' );
-		}
+		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		get_echo( 'wp_print_styles' );
 
 		perflab_aea_audit_enqueued_styles();
