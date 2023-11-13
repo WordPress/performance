@@ -21,7 +21,7 @@ function ilo_print_detection_script() {
 	$slug       = ilo_get_page_metrics_slug( $query_vars );
 	$data       = ilo_get_page_metrics_data( $slug );
 	if ( ! is_array( $data ) ) {
-		$data = $data;
+		$data = array();
 	}
 
 	$metrics_by_breakpoint = ilo_group_page_metrics_by_breakpoint( $data, ilo_get_breakpoint_max_widths() );
