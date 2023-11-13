@@ -38,7 +38,7 @@ add_action( 'wp_footer', 'plsr_print_speculation_rules' );
  * @access private
  * @ignore
  */
-function plsr_print_origin_trial_optin() {
+function plsr_print_origin_trial_opt_in() {
 	if ( ! defined( 'PLSR_ORIGIN_TRIAL_TOKEN' ) || ! PLSR_ORIGIN_TRIAL_TOKEN ) {
 		return;
 	}
@@ -46,4 +46,4 @@ function plsr_print_origin_trial_optin() {
 	<meta http-equiv="origin-trial" content="<?php echo esc_attr( PLSR_ORIGIN_TRIAL_TOKEN ); ?>">
 	<?php
 }
-add_action( 'wp_head', 'plsr_print_origin_trial_optin' );
+add_action( 'wp_head', 'plsr_print_origin_trial_opt_in' );
