@@ -548,7 +548,7 @@ function perflab_activate_plugin() {
 	check_admin_referer( "perflab_activate_plugin_{$plugin}" );
 
 	if ( ! current_user_can( 'activate_plugin', $plugin ) ) {
-		wp_die( __( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
+		wp_die( __( 'Sorry, you are not allowed to activate this plugin.', 'default' ) ); // phpcs:ignore
 	}
 
 	// Activate the plugin in question and return to prior screen.
@@ -574,10 +574,10 @@ function perflab_deactivate_plugin() {
 	// The plugin being deactivated.
 	$plugin = sanitize_text_field( $_GET['plugin'] );
 
-	check_admin_referer( "perflab_deactivate_plugin_{$plugin}" )
+	check_admin_referer( "perflab_deactivate_plugin_{$plugin}" );
 
 	if ( ! current_user_can( 'deactivate_plugin', $plugin ) ) {
-		wp_die( __( 'Sorry, you are not allowed to deactivate this plugin.', 'default' ) );
+		wp_die( __( 'Sorry, you are not allowed to deactivate this plugin.', 'default' ) ); // phpcs:ignore
 	}
 
 	// Deactivate the plugin in question and return to prior screen.
