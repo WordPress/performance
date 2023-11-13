@@ -23,15 +23,15 @@ function plsr_get_speculation_rules() {
 				'and' => array(
 					// Prerender any URLs within the same site.
 					array(
-						'href_matches' => '/*\\\\?*',
+						'href_matches' => '/*\\?*',
 						'relative_to'  => 'document',
 					),
 					// Except for WP login and admin URLs.
 					array(
 						'not' => array(
 							'href_matches' => array(
-								'/wp-login.php\\\\?*#*',
-								'/wp-admin/*\\\\?*#*',
+								'/wp-login.php\\?*#*',
+								'/wp-admin/*\\?*#*',
 							),
 						),
 					),
