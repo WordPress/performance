@@ -6,6 +6,10 @@
  * @since 1.0.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Returns an array with the list of valid mime types that a specific mime type can be converted into it,
  * for example an image/jpeg can be converted into an image/webp.
@@ -283,6 +287,8 @@ function webp_uploads_get_content_image_mimes( $attachment_id, $context ) {
  * Verifies if the request is for a frontend context within the <body> tag.
  *
  * @since 1.3.0
+ *
+ * @global WP_Query $wp_query WordPress Query object.
  *
  * @return bool True if in the <body> within a frontend request, false otherwise.
  */

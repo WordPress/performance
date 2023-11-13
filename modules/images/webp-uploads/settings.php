@@ -6,6 +6,10 @@
  * @since 1.6.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Registers setting for generating both JPEG and WebP versions for image uploads.
  *

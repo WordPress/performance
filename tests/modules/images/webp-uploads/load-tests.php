@@ -26,7 +26,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function tear_down() {
 		$this->to_unlink = array_filter(
 			$this->to_unlink,
-			function ( $filename ) {
+			static function ( $filename ) {
 				return unlink( $filename );
 			}
 		);
@@ -186,7 +186,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_create_the_sources_property_when_no_transform_is_available() {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
-			function () {
+			static function () {
 				return array( 'image/jpeg' => array() );
 			}
 		);
@@ -213,7 +213,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_not_create_the_sources_property_if_the_mime_is_not_specified_on_the_transforms_images() {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
-			function () {
+			static function () {
 				return array( 'image/jpeg' => array() );
 			}
 		);
@@ -289,7 +289,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// The leafs image is 1080 pixels wide with this filter we ensure a -scaled version is created.
 		add_filter(
 			'big_image_size_threshold',
-			function () {
+			static function () {
 				return 850;
 			}
 		);
@@ -544,7 +544,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		add_filter(
 			'webp_uploads_content_image_mimes',
-			function( $mime_types ) {
+			static function( $mime_types ) {
 				unset( $mime_types[ array_search( 'image/webp', $mime_types, true ) ] );
 				return $mime_types;
 			}
@@ -633,7 +633,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// Use a 1500 threshold.
 		add_filter(
 			'big_image_size_threshold',
-			function () {
+			static function () {
 				return 1500;
 			}
 		);
@@ -685,7 +685,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_allow_the_upload_of_a_webp_image_if_at_least_one_editor_supports_the_format() {
 		add_filter(
 			'wp_image_editors',
-			function () {
+			static function () {
 				// WP core does not choose the WP_Image_Editor instance based on MIME type support,
 				// therefore the one that does support WebP needs to be first in this list.
 				return array( 'WP_Image_Editor_GD', 'WP_Image_Doesnt_Support_WebP' );
@@ -733,7 +733,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		add_filter(
 			'webp_uploads_pre_replace_additional_image_source',
-			function() {
+			static function() {
 				return '<img src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">';
 			}
 		);
@@ -899,7 +899,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_create_mime_types_for_allowed_sizes_only_via_filter() {
 		add_filter(
 			'webp_uploads_image_sizes_with_additional_mime_type_support',
-			function( $sizes ) {
+			static function( $sizes ) {
 				$sizes['allowed_size_400x300'] = true;
 				return $sizes;
 			}
@@ -969,7 +969,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	/**
 	 * Test webp_uploads_modify_webp_quality function for image quality.
 	 *
-	 * @covers ::webp_uploads_modify_webp_quality()
+	 * @covers ::webp_uploads_modify_webp_quality
 	 *
 	 * @test
 	 */
@@ -977,12 +977,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		global $wp_version;
 		$this->assertSame( 82, webp_uploads_modify_webp_quality( 90, 'image/webp' ), 'WebP image quality should always be 82.' );
 		$this->assertSame( 82, webp_uploads_modify_webp_quality( 82, 'image/webp' ), 'WebP image quality should always be 82.' );
-
-		if ( version_compare( $wp_version, '6.1', '<' ) ) {
-			$this->assertSame( 82, webp_uploads_modify_webp_quality( 86, 'image/jpeg' ), 'JPEG image quality should always return 82 quality for WP version lower than 6.1.' );
-		} else {
-			$this->assertSame( 80, webp_uploads_modify_webp_quality( 80, 'image/jpeg' ), 'JPEG image quality should return default quality provided from WP filter wp_editor_set_quality.' );
-		}
+		$this->assertSame( 80, webp_uploads_modify_webp_quality( 80, 'image/jpeg' ), 'JPEG image quality should return default quality provided from WP filter wp_editor_set_quality.' );
 	}
 
 	/**

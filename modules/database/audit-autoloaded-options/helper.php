@@ -6,6 +6,10 @@
  * @since 2.1.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Callback for autoloaded_options test.
  *
@@ -91,6 +95,8 @@ function perflab_aao_autoloaded_options_test() {
  *
  * @since 1.0.0
  *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
  * @return int autoloaded data in bytes.
  */
 function perflab_aao_autoloaded_options_size() {
@@ -102,6 +108,8 @@ function perflab_aao_autoloaded_options_size() {
  * Fetches autoload top list.
  *
  * @since 1.5.0
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
  *
  * @return array Autoloaded data as option names and their sizes.
  */

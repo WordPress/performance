@@ -6,6 +6,10 @@
  * @since 1.0.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Updates the response for an attachment to include sources for additional mime types available the image.
  *
@@ -13,10 +17,9 @@
  *
  * @param WP_REST_Response $response The original response object.
  * @param WP_Post          $post     The post object.
- * @param WP_REST_Request  $request  The request object.
  * @return WP_REST_Response A new response object for the attachment with additional sources.
  */
-function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Post $post, WP_REST_Request $request ) {
+function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Post $post ) {
 	$data = $response->get_data();
 	if ( ! isset( $data['media_details'] ) || ! is_array( $data['media_details'] ) || ! isset( $data['media_details']['sizes'] ) || ! is_array( $data['media_details']['sizes'] ) ) {
 		return $response;
@@ -47,4 +50,4 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 
 	return rest_ensure_response( $data );
 }
-add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 3 );
+add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 2 );

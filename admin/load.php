@@ -5,6 +5,10 @@
  * @package performance-lab
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * Adds the modules page to the Settings menu.
  *
@@ -37,9 +41,9 @@ add_action( 'admin_menu', 'perflab_add_modules_page' );
 /**
  * Initializes settings sections and fields for the modules page.
  *
- * @global array $wp_settings_sections Registered WordPress settings sections.
- *
  * @since 1.0.0
+ *
+ * @global array $wp_settings_sections Registered WordPress settings sections.
  *
  * @param array|null $modules     Associative array of available module data, keyed by module slug. By default, this
  *                                will rely on {@see perflab_get_modules()}.
@@ -79,7 +83,7 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 		add_settings_field(
 			$module_slug,
 			$module_data['name'],
-			function() use ( $module_slug, $module_data, $module_settings ) {
+			static function () use ( $module_slug, $module_data, $module_settings ) {
 				perflab_render_modules_page_field( $module_slug, $module_data, $module_settings );
 			},
 			PERFLAB_MODULES_SCREEN,
@@ -107,7 +111,7 @@ function perflab_render_modules_page() {
 			<?php esc_html_e( 'Performance Modules', 'performance-lab' ); ?>
 		</h1>
 
-		<form action="options.php" method="post" novalidate="novalidate">
+		<form action="options.php" method="post">
 			<?php settings_fields( PERFLAB_MODULES_SCREEN ); ?>
 			<?php do_settings_sections( PERFLAB_MODULES_SCREEN ); ?>
 			<?php submit_button(); ?>
@@ -163,20 +167,6 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<?php
 				if ( $is_standalone_plugin_loaded ) {
 					esc_html_e( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' );
-				} elseif ( 'database/sqlite' === $module_slug && file_exists( WP_CONTENT_DIR . '/db.php' ) && ! defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) {
-					printf(
-						/* translators: %s: db.php drop-in path */
-						esc_html__( 'The SQLite module cannot be activated because a different %s drop-in already exists.', 'performance-lab' ),
-						'<code>' . esc_html( basename( WP_CONTENT_DIR ) ) . '/db.php</code>'
-					);
-				} elseif ( 'database/sqlite' === $module_slug && ! wp_is_writable( WP_CONTENT_DIR ) ) {
-					printf(
-						/* translators: %s: db.php drop-in path */
-						esc_html__( 'The SQLite module cannot be activated because the %s directory is not writable.', 'performance-lab' ),
-						'<code>' . esc_html( basename( WP_CONTENT_DIR ) ) . '</code>'
-					);
-				} elseif ( 'database/sqlite' === $module_slug && ! class_exists( 'SQLite3' ) ) {
-					esc_html_e( 'The SQLite module cannot be activated because the SQLite extension is not loaded.', 'performance-lab' );
 				} else {
 					printf(
 						/* translators: %s: module name */
@@ -190,24 +180,6 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 		<p id="<?php echo esc_attr( "{$base_id}_description" ); ?>" class="description">
 			<?php echo esc_html( $module_data['description'] ); ?>
 		</p>
-		<?php if ( 'database/sqlite' === $module_slug ) : ?>
-			<?php if ( $enabled ) : ?>
-				<?php if ( defined( 'PERFLAB_SQLITE_DB_DROPIN_VERSION' ) ) : ?>
-					<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
-					<p class="notice notice-warning" style="padding:1em;max-width:50em;">
-						<?php esc_html_e( 'Your site is currently using an SQLite database. You can disable this module to get back to your previous MySQL database, with all your previous data intact.', 'performance-lab' ); ?>
-					</p>
-				<?php endif; ?>
-			<?php else : ?>
-				<?php // Don't use the WP notice classes here, as that makes them move to the top of the page. ?>
-				<p class="notice notice-warning" style="padding:1em;max-width:50em;">
-					<?php esc_html_e( 'It is not advised to activate this module since it will be removed in the upcoming Performance Lab release.', 'performance-lab' ); ?>
-					<a href="https://wordpress.org/plugins/sqlite-database-integration">
-						<?php esc_html_e( 'Please use the standalone plugin instead.', 'performance-lab' ); ?>
-					</a>
-				</p>
-			<?php endif; ?>
-		<?php endif; ?>
 	</fieldset>
 	<?php
 }
@@ -266,7 +238,7 @@ function perflab_get_modules( $modules_root = null ) {
 
 	// Modules are organized as {focus}/{module-slug} in the modules folder.
 	if ( $modules_dir ) {
-		// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+		// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 		while ( ( $focus = readdir( $modules_dir ) ) !== false ) {
 			if ( '.' === substr( $focus, 0, 1 ) ) {
 				continue;
@@ -281,7 +253,7 @@ function perflab_get_modules( $modules_root = null ) {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			$focus_dir = @opendir( $modules_root . '/' . $focus );
 			if ( $focus_dir ) {
-				// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+				// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				while ( ( $file = readdir( $focus_dir ) ) !== false ) {
 					// Unlike plugins, modules must be in a directory.
 					if ( ! is_dir( $modules_root . '/' . $focus . '/' . $file ) ) {
@@ -292,7 +264,7 @@ function perflab_get_modules( $modules_root = null ) {
 					// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 					$module_dir = @opendir( $modules_root . '/' . $focus . '/' . $file );
 					if ( $module_dir ) {
-						// phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+						// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 						while ( ( $subfile = readdir( $module_dir ) ) !== false ) {
 							if ( '.' === substr( $subfile, 0, 1 ) ) {
 								continue;
@@ -332,7 +304,7 @@ function perflab_get_modules( $modules_root = null ) {
 
 	uasort(
 		$modules,
-		function( $a, $b ) {
+		static function ( $a, $b ) {
 			return strnatcasecmp( $a['name'], $b['name'] );
 		}
 	);
@@ -399,7 +371,7 @@ function perflab_get_module_data( $module_file ) {
 }
 
 /**
- * Initialise Admin Pointer
+ * Initializes admin pointer.
  *
  * Handles the bootstrapping of the admin pointer.
  * Mainly jQuery code that is self-initialising.
@@ -420,47 +392,6 @@ function perflab_admin_pointer( $hook_suffix ) {
 	$current_user = get_current_user_id();
 	$dismissed    = explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) );
 
-	/*
-	 * Temporary: Show an admin pointer if SQLite module is active to prompt
-	 * for an action to use the standalone plugin instead.
-	 *
-	 * This code will be removed again when the SQLite module is removed from
-	 * the codebase.
-	 */
-	if (
-		defined( 'SQLITE_VERSION' )
-		&& str_starts_with( SQLITE_VERSION, 'Performance Lab ' )
-		&& ! in_array( 'perflab-sqlite-module-removal-pointer', $dismissed, true )
-		&& current_user_can( 'activate_plugins' )
-	) {
-		/*
-		 * Enqueue the pointer logic and return early. A closure is used to
-		 * avoid introducing a new function as it should be removed again in
-		 * the following release.
-		 */
-		wp_enqueue_style( 'wp-pointer' );
-		wp_enqueue_script( 'wp-pointer' );
-		add_action(
-			'admin_print_footer_scripts',
-			function() {
-				$content  = __( 'The SQLite module will be removed in the upcoming Performance Lab release in favor of a standalone plugin.', 'performance-lab' );
-				$content .= ' ' . sprintf(
-					/* translators: %s: settings page link */
-					__( 'Open %s to learn more about next steps to keep the functionality available.', 'performance-lab' ),
-					'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
-				);
-				perflab_render_pointer(
-					'perflab-sqlite-module-removal-pointer',
-					array(
-						'heading' => __( 'Action required', 'performance-lab' ),
-						'content' => $content,
-					)
-				);
-			}
-		);
-		return;
-	}
-
 	if ( in_array( 'perflab-admin-pointer', $dismissed, true ) ) {
 		return;
 	}
@@ -478,7 +409,7 @@ add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
  * Handles the rendering of the admin pointer.
  *
  * @since 1.0.0
- * @since n.e.x.t Optional arguments were added to make the function reusable for different pointers.
+ * @since 2.4.0 Optional arguments were added to make the function reusable for different pointers.
  *
  * @param string $pointer_id Optional. ID of the pointer. Default 'perflab-admin-pointer'.
  * @param array  $args       Optional. Pointer arguments. Supports 'heading' and 'content' entries.
@@ -556,7 +487,7 @@ function perflab_plugin_action_links_add_settings( $links ) {
 }
 
 /**
- * Dismisses notification pointer after verfying nonce.
+ * Dismisses notification pointer after verifying nonce.
  *
  * This function adds a nonce check before dismissing perflab-admin-pointer
  * It runs before the dismiss-wp-pointer AJAX action is performed.
@@ -565,155 +496,10 @@ function perflab_plugin_action_links_add_settings( $links ) {
  * @see perflab_render_modules_pointer()
  */
 function perflab_dismiss_wp_pointer_wrapper() {
-	if ( isset( $_POST['pointer'] ) && 'perflab-admin-pointer' !== $_POST['pointer'] && 'perflab-sqlite-module-removal-pointer' !== $_POST['pointer'] ) {
+	if ( isset( $_POST['pointer'] ) && 'perflab-admin-pointer' !== $_POST['pointer'] ) {
 		// Another plugin's pointer, do nothing.
 		return;
 	}
 	check_ajax_referer( 'dismiss_pointer' );
 }
 add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 0 );
-
-/*
- * Temporary code to inform about SQLite module removal. Since it will be
- * removed again when the module is removed from the plugin, it uses a closure
- * instead of a regular function.
- */
-add_action(
-	'admin_notices',
-	function() {
-		global $hook_suffix;
-
-		// Only show in the WordPress dashboard and Performance Lab admin screen.
-		if ( ! in_array( $hook_suffix, array( 'index.php', 'settings_page_' . PERFLAB_MODULES_SCREEN ), true ) ) {
-			return;
-		}
-
-		// Only show if the SQLite module is active.
-		if ( ! defined( 'SQLITE_VERSION' ) || ! str_starts_with( SQLITE_VERSION, 'Performance Lab ' ) ) {
-			return;
-		}
-
-		// Only show if the user can manage plugins.
-		if ( ! current_user_can( 'activate_plugins' ) ) {
-			return;
-		}
-
-		$wp_kses_options = array(
-			'span'   => array(
-				'style' => array(),
-			),
-			'strong' => array(),
-			'a'      => array(
-				'href' => array(),
-			),
-		);
-
-		$todo_before = '<span>';
-		$todo_after  = '</span>';
-		$done_before = '<span style="text-decoration: line-through;">';
-		$done_after  = '</span> ✅';
-
-		if ( file_exists( WP_PLUGIN_DIR . '/sqlite-database-integration/load.php' ) ) {
-			$step1_before      = $done_before;
-			$step1_after       = $done_after;
-			$step1_placeholder = 'SQLite Database Integration';
-		} else {
-			$step1_before      = $todo_before;
-			$step1_after       = $todo_after;
-			$step1_placeholder = '<a href="https://wordpress.org/plugins/sqlite-database-integration/">SQLite Database Integration</a></strong>';
-		}
-		if ( defined( 'SQLITE_MAIN_FILE' ) ) {
-			$step2_before = $done_before;
-			$step2_after  = $done_after;
-		} else {
-			$step2_before = $todo_before;
-			$step2_after  = $todo_after;
-			if ( file_exists( WP_PLUGIN_DIR . '/sqlite-database-integration/load.php' ) ) {
-				$activate_url = wp_nonce_url(
-					add_query_arg(
-						array(
-							'action' => 'activate',
-							'plugin' => 'sqlite-database-integration/load.php',
-						),
-						admin_url( 'plugins.php' )
-					),
-					'activate-plugin_sqlite-database-integration/load.php'
-				);
-
-				$step2_before .= '<a href="' . esc_url( $activate_url ) . '">';
-				$step2_after   = '</a>' . $step2_after;
-			}
-		}
-		$step3_before      = $todo_before;
-		$step3_after       = $todo_after;
-		$step3_placeholder = 'SQLite';
-		if ( 'index.php' === $hook_suffix && defined( 'SQLITE_MAIN_FILE' ) ) {
-			// Link to Performance Lab settings.
-			$screen_url = add_query_arg(
-				'page',
-				PERFLAB_MODULES_SCREEN,
-				admin_url( 'options-general.php' )
-			);
-
-			$step3_before .= '<a href="' . esc_url( $screen_url ) . '">';
-			$step3_after   = '</a>' . $step3_after;
-		}
-
-		/*
-		 * The first two translation strings below are reused in the SQLite
-		 * module admin pointer to keep new temporary translation strings at a
-		 * small number.
-		 */
-		?>
-		<div class="notice notice-warning">
-			<h2><?php esc_html_e( 'Action required', 'performance-lab' ); ?></h2>
-			<p>
-				<?php esc_html_e( 'The SQLite module will be removed in the upcoming Performance Lab release in favor of a standalone plugin.', 'performance-lab' ); ?>
-				<?php esc_html_e( 'In order to keep the functionality available, please go through the following steps:', 'performance-lab' ); ?>
-			</p>
-			<ol>
-				<li>
-					<?php
-					echo wp_kses(
-						sprintf(
-							/* translators: %s: plugin name */
-							'%s' . __( 'Install the %s plugin', 'performance-lab' ) . '%s',
-							$step1_before,
-							$step1_placeholder,
-							$step1_after
-						),
-						$wp_kses_options
-					);
-					?>
-				</li>
-				<li>
-					<?php
-					echo wp_kses(
-						sprintf(
-							'%s' . __( 'Activate the plugin', 'performance-lab' ) . '%s',
-							$step2_before,
-							$step2_after
-						),
-						$wp_kses_options
-					);
-					?>
-				</li>
-				<li>
-					<?php
-					echo wp_kses(
-						sprintf(
-							/* translators: %s: module name */
-							'%s' . __( 'Deactivate the %s module', 'performance-lab' ) . '%s',
-							$step3_before,
-							$step3_placeholder,
-							$step3_after
-						),
-						$wp_kses_options
-					);
-					?>
-				</li>
-			</ol>
-		</div>
-		<?php
-	}
-);
