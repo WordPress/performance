@@ -11,19 +11,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Gets the expiration age for a given page metric.
+ * Gets the freshness age (TTL) for a given page metric.
  *
- * When a page metric expires it is eligible to be replaced by a newer one.
+ * When a page metric expires it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
  *
- * @return int Expiration age in seconds.
+ * @return int Expiration TTL in seconds.
  */
 function ilo_get_page_metric_freshness_ttl() {
 	/**
-	 * Filters the expiration age for a given page metric.
+	 * Filters the freshness age (TTL) for a given page metric.
 	 *
-	 * @param int $ttl TTL.
+	 * @param int $ttl Expiration TTL in seconds.
 	 */
-	return (int) apply_filters( 'ilo_page_metric_ttl', MONTH_IN_SECONDS );
+	return (int) apply_filters( 'ilo_page_metric_freshness_ttl', DAY_IN_SECONDS );
 }
 
 /**
