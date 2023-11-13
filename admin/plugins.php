@@ -150,115 +150,113 @@ function perflab_render_plugin_card( array $standalone_plugin ) {
 	$tested_wp      = ( empty( $plugin['tested'] ) || version_compare( get_bloginfo( 'version' ), $plugin['tested'], '<=' ) );
 	$action_links   = array();
 
-	if ( current_user_can( 'install_plugins' ) || current_user_can( 'update_plugins' ) ) {
-		$status = install_plugin_install_status( $plugin );
+	$status = install_plugin_install_status( $plugin );
 
-		switch ( $status['status'] ) {
-			case 'install':
-				if ( $status['url'] ) {
-					if ( $compatible_php && $compatible_wp && current_user_can( 'install_plugins' ) ) {
-						$action_links[] = sprintf(
-							'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
-							esc_attr( $plugin['slug'] ),
-							esc_url( $status['url'] ),
-							/* translators: %s: Plugin name and version. */
-							esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
-							esc_attr( $name ),
-							esc_html__( 'Install Now', 'default' )
-						);
-					} else {
-						$action_links[] = sprintf(
-							'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-							esc_html( _x( 'Cannot Install', 'plugin', 'default' ) )
-						);
-					}
-				}
-				break;
-
-			case 'update_available':
-				if ( $status['url'] ) {
-					if ( $compatible_php && $compatible_wp && current_user_can( 'update_plugins' ) ) {
-						$action_links[] = sprintf(
-							'<a class="button aria-button-if-js" data-plugin="%s" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
-							esc_attr( $status['file'] ),
-							esc_attr( $plugin['slug'] ),
-							esc_url( $status['url'] ),
-							/* translators: %s: Plugin name and version. */
-							esc_attr( sprintf( _x( 'Update %s now', 'plugin', 'default' ), $name ) ),
-							esc_attr( $name ),
-							esc_html__( 'Update Now', 'default' )
-						);
-					} else {
-						$action_links[] = sprintf(
-							'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-							esc_html( _x( 'Cannot Update', 'plugin', 'default' ) )
-						);
-					}
-				}
-				break;
-
-			case 'latest_installed':
-			case 'newer_installed':
-				if ( is_plugin_active( $status['file'] ) ) {
+	switch ( $status['status'] ) {
+		case 'install':
+			if ( $status['url'] ) {
+				if ( $compatible_php && $compatible_wp && current_user_can( 'install_plugins' ) ) {
 					$action_links[] = sprintf(
-						'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-						esc_html( _x( 'Active', 'plugin', 'default' ) )
+						'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
+						esc_attr( $plugin['slug'] ),
+						esc_url( $status['url'] ),
+						/* translators: %s: Plugin name and version. */
+						esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
+						esc_attr( $name ),
+						esc_html__( 'Install Now', 'default' )
 					);
-					if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
-						global $page;
-						$s       = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : ''; // phpcs:ignore
-						$context = $status['status'];
-
-						$action_links[] = sprintf(
-							'<a href="%s" id="deactivate-%s" aria-label="%s" style="color:red;text-decoration: underline;">%s</a>',
-							add_query_arg(
-								array(
-									'_wpnonce' => wp_create_nonce( 'perflab_deactivate_plugin_' . $status['file'] ),
-									'action'   => 'perflab_deactivate_plugin',
-									'plugin'   => $status['file'],
-								),
-								network_admin_url( 'plugins.php' )
-							),
-							esc_attr( $plugin['slug'] ),
-							/* translators: %s: Plugin name. */
-							esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'default' ), $plugin['slug'] ) ),
-							__( 'Deactivate', 'default' )
-						);
-					}
-				} elseif ( current_user_can( 'activate_plugin', $status['file'] ) ) {
-					if ( $compatible_php && $compatible_wp ) {
-						$button_text = __( 'Activate', 'default' );
-						/* translators: %s: Plugin name. */
-						$button_label = _x( 'Activate %s', 'plugin', 'default' );
-						$activate_url = add_query_arg(
-							array(
-								'_wpnonce' => wp_create_nonce( 'perflab_activate_plugin_' . $status['file'] ),
-								'action'   => 'perflab_activate_plugin',
-								'plugin'   => $status['file'],
-							),
-							network_admin_url( 'plugins.php' )
-						);
-
-						$action_links[] = sprintf(
-							'<a href="%1$s" class="button activate-now" aria-label="%2$s">%3$s</a>',
-							esc_url( $activate_url ),
-							esc_attr( sprintf( $button_label, $plugin['name'] ) ),
-							$button_text
-						);
-					} else {
-						$action_links[] = sprintf(
-							'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-							_x( 'Cannot Activate', 'plugin', 'default' )
-						);
-					}
 				} else {
 					$action_links[] = sprintf(
 						'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-						esc_html( _x( 'Installed', 'plugin', 'default' ) )
+						esc_html( _x( 'Cannot Install', 'plugin', 'default' ) )
 					);
 				}
-				break;
-		}
+			}
+			break;
+
+		case 'update_available':
+			if ( $status['url'] ) {
+				if ( $compatible_php && $compatible_wp && current_user_can( 'update_plugins' ) ) {
+					$action_links[] = sprintf(
+						'<a class="button aria-button-if-js" data-plugin="%s" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
+						esc_attr( $status['file'] ),
+						esc_attr( $plugin['slug'] ),
+						esc_url( $status['url'] ),
+						/* translators: %s: Plugin name and version. */
+						esc_attr( sprintf( _x( 'Update %s now', 'plugin', 'default' ), $name ) ),
+						esc_attr( $name ),
+						esc_html__( 'Update Now', 'default' )
+					);
+				} else {
+					$action_links[] = sprintf(
+						'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+						esc_html( _x( 'Cannot Update', 'plugin', 'default' ) )
+					);
+				}
+			}
+			break;
+
+		case 'latest_installed':
+		case 'newer_installed':
+			if ( is_plugin_active( $status['file'] ) ) {
+				$action_links[] = sprintf(
+					'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+					esc_html( _x( 'Active', 'plugin', 'default' ) )
+				);
+				if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
+					global $page;
+					$s       = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : ''; // phpcs:ignore
+					$context = $status['status'];
+
+					$action_links[] = sprintf(
+						'<a href="%s" id="deactivate-%s" aria-label="%s" style="color:red;text-decoration: underline;">%s</a>',
+						add_query_arg(
+							array(
+								'_wpnonce' => wp_create_nonce( 'perflab_deactivate_plugin_' . $status['file'] ),
+								'action'   => 'perflab_deactivate_plugin',
+								'plugin'   => $status['file'],
+							),
+							network_admin_url( 'plugins.php' )
+						),
+						esc_attr( $plugin['slug'] ),
+						/* translators: %s: Plugin name. */
+						esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'default' ), $plugin['slug'] ) ),
+						__( 'Deactivate', 'default' )
+					);
+				}
+			} elseif ( current_user_can( 'activate_plugin', $status['file'] ) ) {
+				if ( $compatible_php && $compatible_wp ) {
+					$button_text = __( 'Activate', 'default' );
+					/* translators: %s: Plugin name. */
+					$button_label = _x( 'Activate %s', 'plugin', 'default' );
+					$activate_url = add_query_arg(
+						array(
+							'_wpnonce' => wp_create_nonce( 'perflab_activate_plugin_' . $status['file'] ),
+							'action'   => 'perflab_activate_plugin',
+							'plugin'   => $status['file'],
+						),
+						network_admin_url( 'plugins.php' )
+					);
+
+					$action_links[] = sprintf(
+						'<a href="%1$s" class="button activate-now" aria-label="%2$s">%3$s</a>',
+						esc_url( $activate_url ),
+						esc_attr( sprintf( $button_label, $plugin['name'] ) ),
+						$button_text
+					);
+				} else {
+					$action_links[] = sprintf(
+						'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+						_x( 'Cannot Activate', 'plugin', 'default' )
+					);
+				}
+			} else {
+				$action_links[] = sprintf(
+					'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+					esc_html( _x( 'Installed', 'plugin', 'default' ) )
+				);
+			}
+			break;
 	}
 
 	$details_link = esc_url_raw(
