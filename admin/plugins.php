@@ -175,27 +175,6 @@ function perflab_render_plugin_card( array $standalone_plugin ) {
 			break;
 
 		case 'update_available':
-			if ( $status['url'] ) {
-				if ( $compatible_php && $compatible_wp && current_user_can( 'update_plugins' ) ) {
-					$action_links[] = sprintf(
-						'<a class="button aria-button-if-js" data-plugin="%s" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
-						esc_attr( $status['file'] ),
-						esc_attr( $plugin['slug'] ),
-						esc_url( $status['url'] ),
-						/* translators: %s: Plugin name and version. */
-						esc_attr( sprintf( _x( 'Update %s now', 'plugin', 'default' ), $name ) ),
-						esc_attr( $name ),
-						esc_html__( 'Update Now', 'default' )
-					);
-				} else {
-					$action_links[] = sprintf(
-						'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-						esc_html( _x( 'Cannot Update', 'plugin', 'default' ) )
-					);
-				}
-			}
-			break;
-
 		case 'latest_installed':
 		case 'newer_installed':
 			if ( is_plugin_active( $status['file'] ) ) {
