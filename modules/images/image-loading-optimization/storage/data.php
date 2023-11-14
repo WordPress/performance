@@ -51,6 +51,8 @@ function ilo_can_optimize_response() {
  *
  * This is used as a cache key for stored page metrics.
  *
+ * TODO: For non-singular requests, consider adding the post IDs from The Loop to ensure publishing a new post will invalidate the cache.
+ *
  * @return array Normalized query vars.
  */
 function ilo_get_normalized_query_vars() {
