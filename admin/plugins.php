@@ -175,7 +175,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 				);
 				if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
 					global $page;
-					$s       = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : ''; // phpcs:ignore
+					$s       = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					$context = $status['status'];
 
 					$action_links[] = sprintf(
@@ -363,8 +363,11 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			<div class="column-updated">
 				<strong><?php esc_html_e( 'Last Updated:', 'default' ); ?></strong>
 				<?php
-				/* translators: %s: Human-readable time difference. */
-				printf( __( '%s ago', 'performance-lab' ), human_time_diff( $last_updated_timestamp ) ); // phpcs:ignore
+				printf(
+					/* translators: %s: Human-readable time difference. */
+					esc_html__( '%s ago', 'performance-lab' ),
+					esc_html( human_time_diff( $last_updated_timestamp ) )
+				);
 				?>
 			</div>
 			<div class="column-downloaded">
