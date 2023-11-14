@@ -160,14 +160,14 @@ function isViewportNeeded( viewportWidth, neededMinimumViewportWidths ) {
  * @return {number} Current time in milliseconds.
  */
 function getCurrentTime() {
-	return new Date().valueOf();
+	return Date.now();
 }
 
 /**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
  * @param {Object}                   args                             Args.
- * @param {number}                   args.serveTime                   The serve time of the page in milliseconds from PHP via `ceil( microtime( true ) * 1000 )`.
+ * @param {number}                   args.serveTime                   The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
  * @param {number}                   args.detectionTimeWindow         The number of milliseconds between now and when the page was first generated in which detection should proceed.
  * @param {boolean}                  args.isDebug                     Whether to show debug messages.
  * @param {string}                   args.restApiEndpoint             URL for where to send the detection data.

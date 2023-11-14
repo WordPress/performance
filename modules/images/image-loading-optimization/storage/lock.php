@@ -11,9 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Gets the TTL for the page metric storage lock.
+ * Gets the TTL (in seconds) for the page metric storage lock.
  *
- * @return int TTL.
+ * @return int TTL in seconds.
  */
 function ilo_get_page_metric_storage_lock_ttl() {
 
@@ -47,7 +47,7 @@ function ilo_set_page_metric_storage_lock() {
 	if ( 0 === $ttl ) {
 		delete_transient( $key );
 	} else {
-		set_transient( $key, time(), $ttl );
+		set_transient( $key, microtime( true ), $ttl );
 	}
 }
 
@@ -61,9 +61,9 @@ function ilo_is_page_metric_storage_locked() {
 	if ( 0 === $ttl ) {
 		return false;
 	}
-	$locked_time = (int) get_transient( ilo_get_page_metric_storage_lock_transient_key() );
-	if ( 0 === $locked_time ) {
+	$locked_time = get_transient( ilo_get_page_metric_storage_lock_transient_key() );
+	if ( false === $locked_time ) {
 		return false;
 	}
-	return time() - $locked_time < $ttl;
+	return microtime( true ) - floatval( $locked_time ) < $ttl;
 }

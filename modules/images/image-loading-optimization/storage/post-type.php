@@ -140,7 +140,7 @@ function ilo_get_page_metrics_data( $slug ) {
  * @return int|WP_Error Post ID or WP_Error otherwise.
  */
 function ilo_store_page_metric( $url, $slug, array $validated_page_metric ) {
-	$validated_page_metric['timestamp'] = time();
+	$validated_page_metric['timestamp'] = microtime( true );
 
 	// TODO: What about storing a version identifier?
 	$post_data = array(

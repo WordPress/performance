@@ -18,11 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 function ilo_print_detection_script() {
 	$query_vars = ilo_get_normalized_query_vars();
 	$slug       = ilo_get_page_metrics_slug( $query_vars );
+	$microtime  = microtime( true );
 
 	// Abort if we already have all the sample size we need for all breakpoints.
 	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths(
 		ilo_get_page_metrics_data( $slug ),
-		time(),
+		$microtime,
 		ilo_get_breakpoint_max_widths(),
 		ilo_get_page_metrics_breakpoint_sample_size(),
 		ilo_get_page_metric_freshness_ttl()
@@ -30,8 +31,6 @@ function ilo_print_detection_script() {
 	if ( ! ilo_needs_page_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
 		return;
 	}
-
-	$serve_time = ceil( microtime( true ) * 1000 );
 
 	/**
 	 * Filters the time window between serve time and run time in which loading detection is allowed to run.
@@ -49,7 +48,7 @@ function ilo_print_detection_script() {
 	$detection_time_window = apply_filters( 'perflab_image_loading_detection_time_window', 5000 );
 
 	$detect_args = array(
-		'serveTime'                   => $serve_time,
+		'serveTime'                   => $microtime * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
 		'detectionTimeWindow'         => $detection_time_window,
 		'isDebug'                     => WP_DEBUG,
 		'restApiEndpoint'             => rest_url( ILO_REST_API_NAMESPACE . ILO_PAGE_METRICS_ROUTE ),

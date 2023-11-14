@@ -225,7 +225,7 @@ function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $break
  * Get needed minimum viewport widths.
  *
  * @param array $page_metrics           Page metrics.
- * @param int   $current_time           Current time.
+ * @param float $current_time           Current time as returned by microtime(true).
  * @param int[] $breakpoint_max_widths  Breakpoint max widths.
  * @param int   $sample_size            Sample size for viewports in a breakpoint.
  * @param int   $freshness_ttl          Freshness TTL for a page metric.
