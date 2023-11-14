@@ -124,19 +124,9 @@ function ilo_get_page_metrics_data( $slug ) {
 /**
  * Stores page metric by merging it with the other page metrics for a given URL.
  *
- * The $validated_page_metric parameter has the following array shape:
- *
- * {
- *      'viewport': array{
- *          'width': int,
- *          'height': int
- *      },
- *      'elements': array
- * }
- *
  * @param string $url                   URL for the page metrics. This is used purely as metadata.
  * @param string $slug                  Page metrics slug (computed from query vars).
- * @param array  $validated_page_metric Page metric, already validated by REST API.
+ * @param array  $validated_page_metric Validated page metric. See JSON Schema defined in ilo_register_endpoint().
  * @return int|WP_Error Post ID or WP_Error otherwise.
  */
 function ilo_store_page_metric( $url, $slug, array $validated_page_metric ) {

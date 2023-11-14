@@ -119,7 +119,7 @@ function ilo_verify_page_metrics_storage_nonce( $nonce, $slug ) {
  * Unshift a new page metric onto an array of page metrics.
  *
  * @param array $page_metrics          Page metrics.
- * @param array $validated_page_metric Validated page metric.
+ * @param array $validated_page_metric Validated page metric. See JSON Schema defined in ilo_register_endpoint().
  * @return array Updated page metrics.
  */
 function ilo_unshift_page_metrics( $page_metrics, $validated_page_metric ) {
