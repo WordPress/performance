@@ -110,6 +110,18 @@ function ilo_unshift_page_metrics( $page_metrics, $validated_page_metric ) {
 
 	foreach ( $grouped_page_metrics as &$breakpoint_page_metrics ) {
 		if ( count( $breakpoint_page_metrics ) > $sample_size ) {
+
+			// Sort page metrics in descending order by timestamp.
+			usort(
+				$breakpoint_page_metrics,
+				static function ( $a, $b ) {
+					if ( ! isset( $a['timestamp'] ) || ! isset( $b['timestamp'] ) ) {
+						return 0;
+					}
+					return $b['timestamp'] <=> $a['timestamp'];
+				}
+			);
+
 			$breakpoint_page_metrics = array_slice( $breakpoint_page_metrics, 0, $sample_size );
 		}
 	}
