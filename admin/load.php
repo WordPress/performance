@@ -552,8 +552,17 @@ function perflab_activate_plugin() {
 	}
 
 	// Activate the plugin in question and return to prior screen.
-	activate_plugins( $plugin );
-	$referer = wp_get_referer();
+	$do_plugin_activation = activate_plugins( $plugin );
+	$referer              = wp_get_referer();
+	if ( ! is_wp_error( $do_plugin_activation ) ) {
+		$referer = add_query_arg(
+			array(
+				'activate' => true,
+			),
+			$referer
+		);
+	}
+
 	if ( wp_safe_redirect( $referer ) ) {
 		exit;
 	}
@@ -581,10 +590,47 @@ function perflab_deactivate_plugin() {
 	}
 
 	// Deactivate the plugin in question and return to prior screen.
-	deactivate_plugins( $plugin );
-	$referer = wp_get_referer();
+	$do_plugin_deactivation = deactivate_plugins( $plugin );
+	$referer                = wp_get_referer();
+	if ( ! is_wp_error( $do_plugin_deactivation ) ) {
+		$referer = add_query_arg(
+			array(
+				'deactivate' => true,
+			),
+			$referer
+		);
+	}
+
 	if ( wp_safe_redirect( $referer ) ) {
 		exit;
 	}
 }
 add_action( 'admin_action_perflab_deactivate_plugin', 'perflab_deactivate_plugin' );
+
+/**
+ * Callback function hooked to admin_notices to render plugin activate/deactivate notices.
+ *
+ * @since n.e.x.t
+ *
+ * @return void
+ */
+function perflab_plugin_admin_notices() {
+	if ( 'settings_page_perflab-modules' !== get_current_screen()->id ) {
+		return;
+	}
+
+	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p><?php esc_html_e( 'Plugin activated.', 'default' ); ?></p>
+		</div>
+		<?php
+	} elseif ( isset( $_GET['deactivate'] ) ) { // phpcs:ignore
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p><?php esc_html_e( 'Plugin deactivated.', 'default' ); ?></p>
+		</div>
+		<?php
+	}
+}
+add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
