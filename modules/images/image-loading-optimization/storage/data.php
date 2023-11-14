@@ -80,7 +80,7 @@ function ilo_get_normalized_query_vars() {
  * @param array $query_vars Normalized query vars.
  * @return string Slug.
  */
-function ilo_get_page_metrics_slug( $query_vars ) {
+function ilo_get_page_metrics_slug( array $query_vars ) {
 	return md5( wp_json_encode( $query_vars ) );
 }
 
@@ -122,7 +122,7 @@ function ilo_verify_page_metrics_storage_nonce( $nonce, $slug ) {
  * @param array $validated_page_metric Validated page metric. See JSON Schema defined in ilo_register_endpoint().
  * @return array Updated page metrics.
  */
-function ilo_unshift_page_metrics( $page_metrics, $validated_page_metric ) {
+function ilo_unshift_page_metrics( array $page_metrics, array $validated_page_metric ) {
 	array_unshift( $page_metrics, $validated_page_metric );
 	$breakpoints          = ilo_get_breakpoint_max_widths();
 	$sample_size          = ilo_get_page_metrics_breakpoint_sample_size();
@@ -251,7 +251,7 @@ function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $break
  * @param int   $freshness_ttl          Freshness TTL for a page metric.
  * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
  */
-function ilo_get_needed_minimum_viewport_widths( $page_metrics, $current_time, $breakpoint_max_widths, $sample_size, $freshness_ttl ) {
+function ilo_get_needed_minimum_viewport_widths( array $page_metrics, $current_time, array $breakpoint_max_widths, $sample_size, $freshness_ttl ) {
 	$metrics_by_breakpoint          = ilo_group_page_metrics_by_breakpoint( $page_metrics, $breakpoint_max_widths );
 	$needed_minimum_viewport_widths = array();
 	foreach ( $metrics_by_breakpoint as $minimum_viewport_width => $viewport_page_metrics ) {
@@ -301,7 +301,7 @@ function ilo_get_needed_minimum_viewport_widths_now_for_slug( $slug ) {
  * @param array<int, array{int, bool}> $needed_minimum_viewport_widths Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
  * @return bool Whether a page metric is needed.
  */
-function ilo_needs_page_metric_for_breakpoint( $needed_minimum_viewport_widths ) {
+function ilo_needs_page_metric_for_breakpoint( array $needed_minimum_viewport_widths ) {
 	foreach ( $needed_minimum_viewport_widths as list( $minimum_viewport_width, $is_needed ) ) {
 		if ( $is_needed ) {
 			return true;
