@@ -96,16 +96,39 @@ function getBreadcrumbs( leafElement ) {
 }
 
 /**
+ * Checks whether the page metric(s) for the provided viewport width is needed.
+ *
+ * @param {number}                   viewportWidth               - Current viewport width.
+ * @param {Array<number, boolean>[]} neededMinimumViewportWidths - Needed minimum viewport widths, in ascending order.
+ * @return {boolean} Whether page metrics are needed.
+ */
+function isViewportNeeded( viewportWidth, neededMinimumViewportWidths ) {
+	let lastWasNeeded = false;
+	for ( const [
+		minimumViewportWidth,
+		isNeeded,
+	] of neededMinimumViewportWidths ) {
+		if ( viewportWidth >= minimumViewportWidth ) {
+			lastWasNeeded = isNeeded;
+		} else {
+			break;
+		}
+	}
+	return lastWasNeeded;
+}
+
+/**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
- * @param {Object}  args                     Args.
- * @param {number}  args.serveTime           The serve time of the page in milliseconds from PHP via `ceil( microtime( true ) * 1000 )`.
- * @param {number}  args.detectionTimeWindow The number of milliseconds between now and when the page was first generated in which detection should proceed.
- * @param {boolean} args.isDebug             Whether to show debug messages.
- * @param {string}  args.restApiEndpoint     URL for where to send the detection data.
- * @param {string}  args.restApiNonce        Nonce for writing to the REST API.
- * @param {string}  args.pageMetricsSlug     Slug for page metrics.
- * @param {string}  args.pageMetricsNonce    Nonce for page metrics storage.
+ * @param {Object}                 args                             Args.
+ * @param {number}                 args.serveTime                   The serve time of the page in milliseconds from PHP via `ceil( microtime( true ) * 1000 )`.
+ * @param {number}                 args.detectionTimeWindow         The number of milliseconds between now and when the page was first generated in which detection should proceed.
+ * @param {boolean}                args.isDebug                     Whether to show debug messages.
+ * @param {string}                 args.restApiEndpoint             URL for where to send the detection data.
+ * @param {string}                 args.restApiNonce                Nonce for writing to the REST API.
+ * @param {string}                 args.pageMetricsSlug             Slug for page metrics.
+ * @param {string}                 args.pageMetricsNonce            Nonce for page metrics storage.
+ * @param {Array<number, boolean>} args.neededMinimumViewportWidths Needed minimum viewport widths for page metrics.
  */
 export default async function detect( {
 	serveTime,
@@ -115,6 +138,7 @@ export default async function detect( {
 	restApiNonce,
 	pageMetricsSlug,
 	pageMetricsNonce,
+	neededMinimumViewportWidths, // TODO: The name is not great here.
 } ) {
 	const runTime = new Date().valueOf();
 
@@ -135,6 +159,13 @@ export default async function detect( {
 			warn(
 				'Aborted detection since initial scroll position of page is not at the top.'
 			);
+		}
+		return;
+	}
+
+	if ( ! isViewportNeeded( win.innerWidth, neededMinimumViewportWidths ) ) {
+		if ( isDebug ) {
+			log( 'No need for page metrics from the current viewport.' );
 		}
 		return;
 	}

@@ -155,13 +155,22 @@ add_action( 'rest_api_init', 'ilo_register_endpoint' );
  * @return WP_REST_Response|WP_Error Response.
  */
 function ilo_handle_rest_request( WP_REST_Request $request ) {
-	ilo_set_page_metric_storage_lock();
+	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths( $request->get_param( 'slug' ) );
+	if ( ! ilo_needs_page_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
+		return new WP_Error(
+			'no_page_metric_needed',
+			__( 'No page metric needed for any of the breakpoints.', 'performance-lab' ),
+			array( 'status' => 403 )
+		);
+	}
 
-	$page_metric = wp_array_slice_assoc( $request->get_json_params(), array( 'viewport', 'elements' ) );
-	$result      = ilo_store_page_metric(
+	ilo_set_page_metric_storage_lock();
+	$new_page_metric = wp_array_slice_assoc( $request->get_json_params(), array( 'viewport', 'elements' ) );
+
+	$result = ilo_store_page_metric(
 		$request->get_param( 'url' ),
 		$request->get_param( 'slug' ),
-		$page_metric
+		$new_page_metric
 	);
 
 	if ( $result instanceof WP_Error ) {
