@@ -103,7 +103,7 @@ function perflab_render_plugins_ui() {
  *
  * @since n.e.x.t
  *
- * @param array $plugin_data Plugin data as passed from get_standalone_plugins().
+ * @param array $plugin_data Plugin data from the WordPress.org API.
  */
 function perflab_render_plugin_card( array $plugin_data ) {
 	// If no plugin data is returned, return.
