@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Gets plugin info from plugin slug.
+ * Gets plugin info for the given plugin slug from WordPress.org.
  *
  * @since n.e.x.t
  *
