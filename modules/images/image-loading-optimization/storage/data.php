@@ -255,6 +255,27 @@ function ilo_get_needed_minimum_viewport_widths( $page_metrics, $current_time, $
 	return $needed_minimum_viewport_widths;
 }
 
+
+/**
+ * Get needed minimum viewport widths by slug for the current time.
+ *
+ * This is a convenience wrapper on top of ilo_get_needed_minimum_viewport_widths() to reduce code duplication.
+ *
+ * @see ilo_get_needed_minimum_viewport_widths()
+ *
+ * @param string $slug Page metrics slug.
+ * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
+ */
+function ilo_get_needed_minimum_viewport_widths_now_for_slug( $slug ) {
+	return ilo_get_needed_minimum_viewport_widths(
+		ilo_get_page_metrics_data( $slug ),
+		microtime( true ),
+		ilo_get_breakpoint_max_widths(),
+		ilo_get_page_metrics_breakpoint_sample_size(),
+		ilo_get_page_metric_freshness_ttl()
+	);
+}
+
 /**
  * Checks whether there is a page metric needed for one of the breakpoints.
  *

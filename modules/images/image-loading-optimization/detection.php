@@ -21,13 +21,7 @@ function ilo_print_detection_script() {
 	$microtime  = microtime( true );
 
 	// Abort if we already have all the sample size we need for all breakpoints.
-	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths(
-		ilo_get_page_metrics_data( $slug ),
-		$microtime,
-		ilo_get_breakpoint_max_widths(),
-		ilo_get_page_metrics_breakpoint_sample_size(),
-		ilo_get_page_metric_freshness_ttl()
-	);
+	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths_now_for_slug( $slug );
 	if ( ! ilo_needs_page_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
 		return;
 	}
