@@ -31,11 +31,6 @@ function ilo_print_detection_script() {
 		return;
 	}
 
-	// Abort if storage is locked.
-	if ( ilo_is_page_metric_storage_locked() ) {
-		return;
-	}
-
 	$serve_time = ceil( microtime( true ) * 1000 );
 
 	/**
@@ -62,6 +57,7 @@ function ilo_print_detection_script() {
 		'pageMetricsSlug'             => $slug,
 		'pageMetricsNonce'            => ilo_get_page_metrics_storage_nonce( $slug ),
 		'neededMinimumViewportWidths' => $needed_minimum_viewport_widths,
+		'storageLockTTL'              => ilo_get_page_metric_storage_lock_ttl(),
 	);
 	wp_print_inline_script_tag(
 		sprintf(

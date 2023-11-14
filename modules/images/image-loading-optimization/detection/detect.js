@@ -5,6 +5,43 @@ const doc = win.document;
 
 const consoleLogPrefix = '[Image Loading Optimization]';
 
+const storageLockTimeSessionKey = 'iloStorageLockTime';
+
+/**
+ * Checks whether storage is locked.
+ *
+ * @param {number} currentTime    - Current time in milliseconds.
+ * @param {number} storageLockTTL - Storage lock TTL in seconds.
+ * @return {boolean} Whether storage is locked.
+ */
+function isStorageLocked( currentTime, storageLockTTL ) {
+	try {
+		const storageLockTime = parseInt(
+			sessionStorage.getItem( storageLockTimeSessionKey )
+		);
+		return (
+			! isNaN( storageLockTime ) &&
+			currentTime < storageLockTime + storageLockTTL * 1000
+		);
+	} catch ( e ) {
+		return false;
+	}
+}
+
+/**
+ * Set the storage lock.
+ *
+ * @param {number} currentTime - Current time in milliseconds.
+ */
+function setStorageLock( currentTime ) {
+	try {
+		sessionStorage.setItem(
+			storageLockTimeSessionKey,
+			String( currentTime )
+		);
+	} catch ( e ) {}
+}
+
 /**
  * Log a message.
  *
@@ -118,17 +155,27 @@ function isViewportNeeded( viewportWidth, neededMinimumViewportWidths ) {
 }
 
 /**
+ * Gets the current time in milliseconds.
+ *
+ * @return {number} Current time in milliseconds.
+ */
+function getCurrentTime() {
+	return new Date().valueOf();
+}
+
+/**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
- * @param {Object}                 args                             Args.
- * @param {number}                 args.serveTime                   The serve time of the page in milliseconds from PHP via `ceil( microtime( true ) * 1000 )`.
- * @param {number}                 args.detectionTimeWindow         The number of milliseconds between now and when the page was first generated in which detection should proceed.
- * @param {boolean}                args.isDebug                     Whether to show debug messages.
- * @param {string}                 args.restApiEndpoint             URL for where to send the detection data.
- * @param {string}                 args.restApiNonce                Nonce for writing to the REST API.
- * @param {string}                 args.pageMetricsSlug             Slug for page metrics.
- * @param {string}                 args.pageMetricsNonce            Nonce for page metrics storage.
- * @param {Array<number, boolean>} args.neededMinimumViewportWidths Needed minimum viewport widths for page metrics.
+ * @param {Object}                   args                             Args.
+ * @param {number}                   args.serveTime                   The serve time of the page in milliseconds from PHP via `ceil( microtime( true ) * 1000 )`.
+ * @param {number}                   args.detectionTimeWindow         The number of milliseconds between now and when the page was first generated in which detection should proceed.
+ * @param {boolean}                  args.isDebug                     Whether to show debug messages.
+ * @param {string}                   args.restApiEndpoint             URL for where to send the detection data.
+ * @param {string}                   args.restApiNonce                Nonce for writing to the REST API.
+ * @param {string}                   args.pageMetricsSlug             Slug for page metrics.
+ * @param {string}                   args.pageMetricsNonce            Nonce for page metrics storage.
+ * @param {Array<number, boolean>[]} args.neededMinimumViewportWidths Needed minimum viewport widths for page metrics.
+ * @param {number}                   args.storageLockTTL              The TTL (in seconds) for the page metric storage lock.
  */
 export default async function detect( {
 	serveTime,
@@ -138,12 +185,23 @@ export default async function detect( {
 	restApiNonce,
 	pageMetricsSlug,
 	pageMetricsNonce,
-	neededMinimumViewportWidths, // TODO: The name is not great here.
+	neededMinimumViewportWidths,
+	storageLockTTL,
 } ) {
-	const runTime = new Date().valueOf();
+	const currentTime = getCurrentTime();
+
+	// As an alternative to this, the ilo_print_detection_script() function can short-circuit if the
+	// ilo_is_page_metric_storage_locked() function returns true. However, the downside with that is page caching could
+	// result in metrics being missed being gathered when a user navigates around a site and primes the page cache.
+	if ( isStorageLocked( currentTime, storageLockTTL ) ) {
+		if ( isDebug ) {
+			warn( 'Aborted detection due to storage being locked.' );
+		}
+		return;
+	}
 
 	// Abort running detection logic if it was served in a cached page.
-	if ( runTime - serveTime > detectionTimeWindow ) {
+	if ( currentTime - serveTime > detectionTimeWindow ) {
 		if ( isDebug ) {
 			warn(
 				'Aborted detection due to being outside detection time window.'
@@ -351,6 +409,11 @@ export default async function detect( {
 			},
 			body: JSON.stringify( pageMetrics ),
 		} );
+
+		if ( response.status === 200 ) {
+			setStorageLock( getCurrentTime() );
+		}
+
 		if ( isDebug ) {
 			const body = await response.json();
 			if ( response.status === 200 ) {
