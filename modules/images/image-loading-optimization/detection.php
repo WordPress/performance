@@ -12,10 +12,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Prints the script for detecting loaded images and the LCP element.
- *
- * @todo This script should not be printed if the page was requested with non-removal (non-canonical) query args.
  */
 function ilo_print_detection_script() {
+	if ( ! ilo_can_optimize_response() ) {
+		return;
+	}
+
 	$query_vars = ilo_get_normalized_query_vars();
 	$slug       = ilo_get_page_metrics_slug( $query_vars );
 	$microtime  = microtime( true );

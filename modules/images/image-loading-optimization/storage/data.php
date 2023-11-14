@@ -27,6 +27,26 @@ function ilo_get_page_metric_freshness_ttl() {
 }
 
 /**
+ * Determines whether the current response can be optimized.
+ *
+ * Only search results are not eligible by default for optimization. This is because there is no predictability in
+ * whether posts in the loop will have featured images assigned or not. If a theme template for search results doesn't
+ * even show featured images, then this isn't an issue.
+ *
+ * @return bool Whether response can be optimized.
+ */
+function ilo_can_optimize_response() {
+	$able = ! is_search();
+
+	/**
+	 * Filters whether the current response can be optimized.
+	 *
+	 * @param bool $able Whether response can be optimized.
+	 */
+	return (bool) apply_filters( 'ilo_can_optimize_response', $able );
+}
+
+/**
  * Gets the normalized query vars for the current request.
  *
  * This is used as a cache key for stored page metrics.
@@ -45,8 +65,6 @@ function ilo_get_normalized_query_vars() {
 		$normalized_query_vars = array(
 			'error' => 404,
 		);
-	} elseif ( array_key_exists( 's', $normalized_query_vars ) ) {
-		$normalized_query_vars['s'] = '...';
 	}
 
 	return $normalized_query_vars;
@@ -254,7 +272,6 @@ function ilo_get_needed_minimum_viewport_widths( $page_metrics, $current_time, $
 
 	return $needed_minimum_viewport_widths;
 }
-
 
 /**
  * Get needed minimum viewport widths by slug for the current time.
