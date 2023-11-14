@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return array Array of plugin data, or empty if none/error.
  */
-function perflab_get_plugin_info( string $plugin_slug ) {
+function perflab_query_plugin_info( string $plugin_slug ) {
 	$plugin = plugins_api(
 		'plugin_information',
 		array(
@@ -42,30 +42,18 @@ function perflab_get_plugin_info( string $plugin_slug ) {
 }
 
 /**
- * Gets info about all the standalone plugins and their status.
+ * Returns an array of WPP standalone plugins.
  *
  * @since n.e.x.t
  *
- * @return array of plugins info.
+ * @return array of wpp standalone plugins as slugs.
  */
 function perflab_get_standalone_plugins() {
-	$managed_standalone_plugins = array(
-		'webp-uploads'            => array(
-			'plugin_data' => array(),
-		),
-		'performant-translations' => array(
-			'plugin_data' => array(),
-		),
-		'dominant-color-images'   => array(
-			'plugin_data' => array(),
-		),
+	return array(
+		'webp-uploads',
+		'performant-translations',
+		'dominant-color-images',
 	);
-
-	foreach ( $managed_standalone_plugins as $managed_standalone_plugin_slug => $managed_standalone_plugin_entry ) {
-		$managed_standalone_plugins[ $managed_standalone_plugin_slug ]['plugin_data'] = perflab_get_plugin_info( $managed_standalone_plugin_slug );
-	}
-
-	return $managed_standalone_plugins;
 }
 
 /**
@@ -77,7 +65,12 @@ function perflab_render_plugins_ui() {
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	$standalone_plugins = perflab_get_standalone_plugins();
+	$standalone_plugins = array();
+	foreach ( perflab_get_standalone_plugins() as $managed_standalone_plugin_slug ) {
+		$standalone_plugins[ $managed_standalone_plugin_slug ] = array(
+			'plugin_data' => perflab_query_plugin_info( $managed_standalone_plugin_slug ),
+		);
+	}
 
 	if ( empty( $standalone_plugins ) ) {
 		return;
@@ -93,7 +86,7 @@ function perflab_render_plugins_ui() {
 					<div id="the-list">
 						<?php
 						foreach ( $standalone_plugins as $standalone_plugin ) {
-							perflab_render_plugin_card( $standalone_plugin );
+							perflab_render_plugin_card( $standalone_plugin['plugin_data'] );
 						}
 						?>
 					</div>
@@ -110,19 +103,17 @@ function perflab_render_plugins_ui() {
  *
  * @since n.e.x.t
  *
- * @param array $standalone_plugin Plugin data as passed from get_standalone_plugins().
+ * @param array $plugin_data Plugin data as passed from get_standalone_plugins().
  */
-function perflab_render_plugin_card( array $standalone_plugin ) {
-	$plugin = $standalone_plugin['plugin_data'];
-
-	// If no plugin data is returned with the plugin item, return.
-	if ( empty( $plugin ) ) {
+function perflab_render_plugin_card( array $plugin_data ) {
+	// If no plugin data is returned, return.
+	if ( empty( $plugin_data ) ) {
 		return;
 	}
 
 	// Remove any HTML from the description.
-	$description = wp_strip_all_tags( $plugin['short_description'] );
-	$title       = $plugin['name'];
+	$description = wp_strip_all_tags( $plugin_data['short_description'] );
+	$title       = $plugin_data['name'];
 
 	/**
 	 * Filters the plugin card description on the Add Plugins screen.
@@ -130,27 +121,27 @@ function perflab_render_plugin_card( array $standalone_plugin ) {
 	 * @since n.e.x.t
 	 *
 	 * @param string $description Plugin card description.
-	 * @param array  $plugin      An array of plugin data. See {@see plugins_api()}
+	 * @param array  $plugin_data An array of plugin data. See {@see plugins_api()}
 	 *                            for the list of possible values.
 	 */
-	$description = apply_filters( 'plugin_install_description', $description, $plugin );
-	$version     = $plugin['version'];
+	$description = apply_filters( 'plugin_install_description', $description, $plugin_data );
+	$version     = $plugin_data['version'];
 	$name        = wp_strip_all_tags( $title . ' ' . $version );
-	$author      = $plugin['author'];
+	$author      = $plugin_data['author'];
 	if ( ! empty( $author ) ) {
 		/* translators: %s: Plugin author. */
 		$author = ' <cite>' . sprintf( __( 'By %s', 'default' ), $author ) . '</cite>';
 	}
 
-	$requires_php = isset( $plugin['requires_php'] ) ? $plugin['requires_php'] : null;
-	$requires_wp  = isset( $plugin['requires'] ) ? $plugin['requires'] : null;
+	$requires_php = isset( $plugin_data['requires_php'] ) ? $plugin_data['requires_php'] : null;
+	$requires_wp  = isset( $plugin_data['requires'] ) ? $plugin_data['requires'] : null;
 
 	$compatible_php = is_php_version_compatible( $requires_php );
 	$compatible_wp  = is_wp_version_compatible( $requires_wp );
-	$tested_wp      = ( empty( $plugin['tested'] ) || version_compare( get_bloginfo( 'version' ), $plugin['tested'], '<=' ) );
+	$tested_wp      = ( empty( $plugin_data['tested'] ) || version_compare( get_bloginfo( 'version' ), $plugin_data['tested'], '<=' ) );
 	$action_links   = array();
 
-	$status = install_plugin_install_status( $plugin );
+	$status = install_plugin_install_status( $plugin_data );
 
 	switch ( $status['status'] ) {
 		case 'install':
@@ -158,7 +149,7 @@ function perflab_render_plugin_card( array $standalone_plugin ) {
 				if ( $compatible_php && $compatible_wp && current_user_can( 'install_plugins' ) ) {
 					$action_links[] = sprintf(
 						'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
-						esc_attr( $plugin['slug'] ),
+						esc_attr( $plugin_data['slug'] ),
 						esc_url( $status['url'] ),
 						/* translators: %s: Plugin name and version. */
 						esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
@@ -197,9 +188,9 @@ function perflab_render_plugin_card( array $standalone_plugin ) {
 							),
 							network_admin_url( 'plugins.php' )
 						),
-						esc_attr( $plugin['slug'] ),
+						esc_attr( $plugin_data['slug'] ),
 						/* translators: %s: Plugin name. */
-						esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'default' ), $plugin['slug'] ) ),
+						esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'default' ), $plugin_data['slug'] ) ),
 						__( 'Deactivate', 'default' )
 					);
 				}
@@ -220,7 +211,7 @@ function perflab_render_plugin_card( array $standalone_plugin ) {
 					$action_links[] = sprintf(
 						'<a href="%1$s" class="button activate-now" aria-label="%2$s">%3$s</a>',
 						esc_url( $activate_url ),
-						esc_attr( sprintf( $button_label, $plugin['name'] ) ),
+						esc_attr( sprintf( $button_label, $plugin_data['name'] ) ),
 						$button_text
 					);
 				} else {
@@ -242,7 +233,7 @@ function perflab_render_plugin_card( array $standalone_plugin ) {
 		add_query_arg(
 			array(
 				'tab'       => 'plugin-information',
-				'plugin'    => $plugin['slug'],
+				'plugin'    => $plugin_data['slug'],
 				'TB_iframe' => 'true',
 				'width'     => 600,
 				'height'    => 550,
@@ -260,14 +251,14 @@ function perflab_render_plugin_card( array $standalone_plugin ) {
 		__( 'More Details', 'default' )
 	);
 
-	if ( ! empty( $plugin['icons']['svg'] ) ) {
-		$plugin_icon_url = $plugin['icons']['svg'];
-	} elseif ( ! empty( $plugin['icons']['2x'] ) ) {
-		$plugin_icon_url = $plugin['icons']['2x'];
-	} elseif ( ! empty( $plugin['icons']['1x'] ) ) {
-		$plugin_icon_url = $plugin['icons']['1x'];
+	if ( ! empty( $plugin_data['icons']['svg'] ) ) {
+		$plugin_icon_url = $plugin_data['icons']['svg'];
+	} elseif ( ! empty( $plugin_data['icons']['2x'] ) ) {
+		$plugin_icon_url = $plugin_data['icons']['2x'];
+	} elseif ( ! empty( $plugin_data['icons']['1x'] ) ) {
+		$plugin_icon_url = $plugin_data['icons']['1x'];
 	} else {
-		$plugin_icon_url = $plugin['icons']['default'];
+		$plugin_icon_url = $plugin_data['icons']['default'];
 	}
 
 	/**
@@ -280,11 +271,11 @@ function perflab_render_plugin_card( array $standalone_plugin ) {
 	 * @param array    $plugin       An array of plugin data. See {@see plugins_api()}
 	 *                               for the list of possible values.
 	 */
-	$action_links = apply_filters( 'plugin_install_action_links', $action_links, $plugin );
+	$action_links = apply_filters( 'plugin_install_action_links', $action_links, $plugin_data );
 
-	$last_updated_timestamp = strtotime( $plugin['last_updated'] );
+	$last_updated_timestamp = strtotime( $plugin_data['last_updated'] );
 	?>
-	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin['slug'] ); ?>">
+	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>">
 		<?php
 		if ( ! $compatible_php || ! $compatible_wp ) {
 			echo '<div class="notice inline notice-error notice-alt"><p>';
@@ -361,13 +352,13 @@ function perflab_render_plugin_card( array $standalone_plugin ) {
 				<?php
 				wp_star_rating(
 					array(
-						'rating' => $plugin['rating'],
+						'rating' => $plugin_data['rating'],
 						'type'   => 'percent',
-						'number' => $plugin['num_ratings'],
+						'number' => $plugin_data['num_ratings'],
 					)
 				);
 				?>
-				<span class="num-ratings" aria-hidden="true">(<?php echo esc_html( number_format_i18n( $plugin['num_ratings'] ) ); ?>)</span>
+				<span class="num-ratings" aria-hidden="true">(<?php echo esc_html( number_format_i18n( $plugin_data['num_ratings'] ) ); ?>)</span>
 			</div>
 			<div class="column-updated">
 				<strong><?php esc_html_e( 'Last Updated:', 'default' ); ?></strong>
@@ -378,17 +369,17 @@ function perflab_render_plugin_card( array $standalone_plugin ) {
 			</div>
 			<div class="column-downloaded">
 				<?php
-				if ( $plugin['active_installs'] >= 1000000 ) {
-					$active_installs_millions = floor( $plugin['active_installs'] / 1000000 );
+				if ( $plugin_data['active_installs'] >= 1000000 ) {
+					$active_installs_millions = floor( $plugin_data['active_installs'] / 1000000 );
 					$active_installs_text     = sprintf(
 						/* translators: %s: Number of millions. */
 						_nx( '%s+ Million', '%s+ Million', $active_installs_millions, 'Active plugin installations', 'default' ),
 						number_format_i18n( $active_installs_millions )
 					);
-				} elseif ( 0 === $plugin['active_installs'] ) {
+				} elseif ( 0 === $plugin_data['active_installs'] ) {
 					$active_installs_text = _x( 'Less Than 10', 'Active plugin installations', 'default' );
 				} else {
-					$active_installs_text = number_format_i18n( $plugin['active_installs'] ) . '+';
+					$active_installs_text = number_format_i18n( $plugin_data['active_installs'] ) . '+';
 				}
 				/* translators: %s: Number of installations. */
 				printf( esc_html__( '%s Active Installations', 'default' ), esc_html( $active_installs_text ) );
