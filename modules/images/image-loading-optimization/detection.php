@@ -20,7 +20,13 @@ function ilo_print_detection_script() {
 	$slug       = ilo_get_page_metrics_slug( $query_vars );
 
 	// Abort if we already have all the sample size we need for all breakpoints.
-	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths( $slug );
+	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths(
+		ilo_get_page_metrics_data( $slug ),
+		time(),
+		ilo_get_breakpoint_max_widths(),
+		ilo_get_page_metrics_breakpoint_sample_size(),
+		ilo_get_page_metric_freshness_ttl()
+	);
 	if ( ! ilo_needs_page_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
 		return;
 	}

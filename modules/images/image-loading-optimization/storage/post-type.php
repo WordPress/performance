@@ -99,19 +99,24 @@ function ilo_parse_stored_page_metrics( WP_Post $post ) {
 }
 
 /**
- * Parses post content in page metrics post.
+ * Gets page metrics for a slug.
+ *
+ * This is a convenience abstractions for lower-level functions.
+ *
+ * @see ilo_get_page_metrics_post()
+ * @see ilo_parse_stored_page_metrics()
  *
  * @param string $slug Page metrics slug.
- * @return array Page metrics data, or null if invalid.
+ * @return array Page metrics data, or empty array if invalid.
  */
 function ilo_get_page_metrics_data( $slug ) {
 	$post = ilo_get_page_metrics_post( $slug );
 	if ( ! ( $post instanceof WP_Post ) ) {
-		return null;
+		return array();
 	}
 	$data = ilo_parse_stored_page_metrics( $post );
 	if ( ! is_array( $data ) ) {
-		return null;
+		return array();
 	}
 	return $data;
 }

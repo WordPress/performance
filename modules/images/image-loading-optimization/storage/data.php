@@ -212,20 +212,15 @@ function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $break
 /**
  * Get needed minimum viewport widths.
  *
- * @param string $slug Page metric slug.
+ * @param array $page_metrics           Page metrics.
+ * @param int   $current_time           Current time.
+ * @param int[] $breakpoint_max_widths  Breakpoint max widths.
+ * @param int   $sample_size            Sample size for viewports in a breakpoint.
+ * @param int   $freshness_ttl          Freshness TTL for a page metric.
  * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
  */
-function ilo_get_needed_minimum_viewport_widths( $slug ) {
-	$data = ilo_get_page_metrics_data( $slug );
-	if ( ! is_array( $data ) ) {
-		$data = array();
-	}
-
-	$metrics_by_breakpoint = ilo_group_page_metrics_by_breakpoint( $data, ilo_get_breakpoint_max_widths() );
-	$sample_size           = ilo_get_page_metrics_breakpoint_sample_size();
-	$freshness_ttl         = ilo_get_page_metric_freshness_ttl();
-
-	$current_time                   = time();
+function ilo_get_needed_minimum_viewport_widths( $page_metrics, $current_time, $breakpoint_max_widths, $sample_size, $freshness_ttl ) {
+	$metrics_by_breakpoint          = ilo_group_page_metrics_by_breakpoint( $page_metrics, $breakpoint_max_widths );
 	$needed_minimum_viewport_widths = array();
 	foreach ( $metrics_by_breakpoint as $minimum_viewport_width => $viewport_page_metrics ) {
 		$needs_page_metrics = false;
