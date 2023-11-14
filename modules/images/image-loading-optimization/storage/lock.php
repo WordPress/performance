@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return int TTL in seconds.
  */
-function ilo_get_page_metric_storage_lock_ttl() {
+function ilo_get_page_metric_storage_lock_ttl(): int {
 
 	/**
 	 * Filters how long a given IP is locked from submitting another metric-storage REST API request.
@@ -33,7 +33,7 @@ function ilo_get_page_metric_storage_lock_ttl() {
  * @todo Should the URL be included in the key? Or should a user only be allowed to store one metric?
  * @return string Transient key.
  */
-function ilo_get_page_metric_storage_lock_transient_key() {
+function ilo_get_page_metric_storage_lock_transient_key(): string {
 	$ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
 	return 'page_metrics_storage_lock_' . wp_hash( $ip_address );
 }
@@ -41,7 +41,7 @@ function ilo_get_page_metric_storage_lock_transient_key() {
 /**
  * Sets page metric storage lock (for the current IP).
  */
-function ilo_set_page_metric_storage_lock() {
+function ilo_set_page_metric_storage_lock() /*: void (in PHP 7.1) */ {
 	$ttl = ilo_get_page_metric_storage_lock_ttl();
 	$key = ilo_get_page_metric_storage_lock_transient_key();
 	if ( 0 === $ttl ) {
@@ -56,7 +56,7 @@ function ilo_set_page_metric_storage_lock() {
  *
  * @return bool Whether locked.
  */
-function ilo_is_page_metric_storage_locked() {
+function ilo_is_page_metric_storage_locked(): bool {
 	$ttl = ilo_get_page_metric_storage_lock_ttl();
 	if ( 0 === $ttl ) {
 		return false;

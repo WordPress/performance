@@ -42,7 +42,7 @@ class Image_Loading_Optimization_Load_Tests extends ImagesTestCase {
 		);
 
 		$original_ob_level = ob_get_level();
-		ilo_buffer_output();
+		ilo_buffer_output( '' );
 		$this->assertSame( $original_ob_level + 1, ob_get_level(), 'Expected call to ob_start().' );
 		echo $original;
 

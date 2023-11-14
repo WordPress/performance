@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return int Expiration TTL in seconds.
  */
-function ilo_get_page_metric_freshness_ttl() {
+function ilo_get_page_metric_freshness_ttl(): int {
 	/**
 	 * Filters the freshness age (TTL) for a given page metric.
 	 *
@@ -35,7 +35,7 @@ function ilo_get_page_metric_freshness_ttl() {
  *
  * @return bool Whether response can be optimized.
  */
-function ilo_can_optimize_response() {
+function ilo_can_optimize_response(): bool {
 	$able = ! is_search();
 
 	/**
@@ -55,7 +55,7 @@ function ilo_can_optimize_response() {
  *
  * @return array Normalized query vars.
  */
-function ilo_get_normalized_query_vars() {
+function ilo_get_normalized_query_vars(): array {
 	global $wp;
 
 	// Note that the order of this array is naturally normalized since it is
@@ -80,7 +80,7 @@ function ilo_get_normalized_query_vars() {
  * @param array $query_vars Normalized query vars.
  * @return string Slug.
  */
-function ilo_get_page_metrics_slug( array $query_vars ) {
+function ilo_get_page_metrics_slug( array $query_vars ): string {
 	return md5( wp_json_encode( $query_vars ) );
 }
 
@@ -95,7 +95,7 @@ function ilo_get_page_metrics_slug( array $query_vars ) {
  * @param string $slug Page metrics slug.
  * @return string Nonce.
  */
-function ilo_get_page_metrics_storage_nonce( $slug ) {
+function ilo_get_page_metrics_storage_nonce( string $slug ): string {
 	return wp_create_nonce( "store_page_metrics:{$slug}" );
 }
 
@@ -107,12 +107,12 @@ function ilo_get_page_metrics_storage_nonce( $slug ) {
  *
  * @param string $nonce Page metrics storage nonce.
  * @param string $slug  Page metrics slug.
- * @return int|false 1 if the nonce is valid and generated between 0-12 hours ago,
- *                   2 if the nonce is valid and generated between 12-24 hours ago.
- *                   False if the nonce is invalid.
+ * @return int 1 if the nonce is valid and generated between 0-12 hours ago,
+ *             2 if the nonce is valid and generated between 12-24 hours ago.
+ *             0 if the nonce is invalid.
  */
-function ilo_verify_page_metrics_storage_nonce( $nonce, $slug ) {
-	return wp_verify_nonce( $nonce, "store_page_metrics:{$slug}" );
+function ilo_verify_page_metrics_storage_nonce( string $nonce, string $slug ): int {
+	return (int) wp_verify_nonce( $nonce, "store_page_metrics:{$slug}" );
 }
 
 /**
@@ -122,7 +122,7 @@ function ilo_verify_page_metrics_storage_nonce( $nonce, $slug ) {
  * @param array $validated_page_metric Validated page metric. See JSON Schema defined in ilo_register_endpoint().
  * @return array Updated page metrics.
  */
-function ilo_unshift_page_metrics( array $page_metrics, array $validated_page_metric ) {
+function ilo_unshift_page_metrics( array $page_metrics, array $validated_page_metric ): array {
 	array_unshift( $page_metrics, $validated_page_metric );
 	$breakpoints          = ilo_get_breakpoint_max_widths();
 	$sample_size          = ilo_get_page_metrics_breakpoint_sample_size();
@@ -163,7 +163,7 @@ function ilo_unshift_page_metrics( array $page_metrics, array $validated_page_me
  *
  * @return int[] Breakpoint max widths, sorted in ascending order.
  */
-function ilo_get_breakpoint_max_widths() {
+function ilo_get_breakpoint_max_widths(): array {
 
 	/**
 	 * Filters the breakpoint max widths to group page metrics for various viewports.
@@ -190,7 +190,7 @@ function ilo_get_breakpoint_max_widths() {
  *
  * @return int Sample size.
  */
-function ilo_get_page_metrics_breakpoint_sample_size() {
+function ilo_get_page_metrics_breakpoint_sample_size(): int {
 	/**
 	 * Filters the sample size for a breakpoint's page metrics on a given URL.
 	 *
@@ -209,7 +209,7 @@ function ilo_get_page_metrics_breakpoint_sample_size() {
  *               the breakpoints reflect the max inclusive boundaries whereas the return value is the groups of page
  *               metrics with viewports on either side of the breakpoint boundaries.
  */
-function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $breakpoints ) {
+function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $breakpoints ): array {
 
 	// Convert breakpoint max widths into viewport minimum widths.
 	$viewport_minimum_widths = array_map(
@@ -251,7 +251,7 @@ function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $break
  * @param int   $freshness_ttl          Freshness TTL for a page metric.
  * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
  */
-function ilo_get_needed_minimum_viewport_widths( array $page_metrics, $current_time, array $breakpoint_max_widths, $sample_size, $freshness_ttl ) {
+function ilo_get_needed_minimum_viewport_widths( array $page_metrics, float $current_time, array $breakpoint_max_widths, int $sample_size, int $freshness_ttl ): array {
 	$metrics_by_breakpoint          = ilo_group_page_metrics_by_breakpoint( $page_metrics, $breakpoint_max_widths );
 	$needed_minimum_viewport_widths = array();
 	foreach ( $metrics_by_breakpoint as $minimum_viewport_width => $viewport_page_metrics ) {
@@ -285,7 +285,7 @@ function ilo_get_needed_minimum_viewport_widths( array $page_metrics, $current_t
  * @param string $slug Page metrics slug.
  * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
  */
-function ilo_get_needed_minimum_viewport_widths_now_for_slug( $slug ) {
+function ilo_get_needed_minimum_viewport_widths_now_for_slug( string $slug ): array {
 	return ilo_get_needed_minimum_viewport_widths(
 		ilo_get_page_metrics_data( $slug ),
 		microtime( true ),
@@ -301,7 +301,7 @@ function ilo_get_needed_minimum_viewport_widths_now_for_slug( $slug ) {
  * @param array<int, array{int, bool}> $needed_minimum_viewport_widths Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
  * @return bool Whether a page metric is needed.
  */
-function ilo_needs_page_metric_for_breakpoint( array $needed_minimum_viewport_widths ) {
+function ilo_needs_page_metric_for_breakpoint( array $needed_minimum_viewport_widths ): bool {
 	foreach ( $needed_minimum_viewport_widths as list( $minimum_viewport_width, $is_needed ) ) {
 		if ( $is_needed ) {
 			return true;

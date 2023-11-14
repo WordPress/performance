@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Prints the script for detecting loaded images and the LCP element.
  */
-function ilo_print_detection_script() {
+function ilo_print_detection_script() /*: void (in PHP 7.1) */ {
 	if ( ! ilo_can_optimize_response() ) {
 		return;
 	}

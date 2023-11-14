@@ -28,19 +28,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @link https://core.trac.wordpress.org/ticket/43258
  *
- * @param mixed $passthrough Optional. Filter value. Default null.
- * @return mixed Unmodified value of $passthrough.
+ * @param string $passthrough Optional. Filter value. Default null.
+ * @return string Unmodified value of $passthrough.
  */
-function ilo_buffer_output( $passthrough = null ) {
+function ilo_buffer_output( string $passthrough ): string {
 	ob_start(
-		static function ( $output ) {
+		static function ( string $output ): string {
 			/**
 			 * Filters the template output buffer prior to sending to the client.
 			 *
 			 * @param string $output Output buffer.
 			 * @return string Filtered output buffer.
 			 */
-			return apply_filters( 'perflab_template_output_buffer', $output );
+			return (string) apply_filters( 'perflab_template_output_buffer', $output );
 		}
 	);
 	return $passthrough;

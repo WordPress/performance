@@ -17,7 +17,7 @@ const ILO_PAGE_METRICS_POST_TYPE = 'ilo_page_metrics';
  *
  * This the configuration for this post type is similar to the oembed_cache in core.
  */
-function ilo_register_page_metrics_post_type() {
+function ilo_register_page_metrics_post_type() /*: void (in PHP 7.1) */ {
 	register_post_type(
 		ILO_PAGE_METRICS_POST_TYPE,
 		array(
@@ -43,7 +43,7 @@ add_action( 'init', 'ilo_register_page_metrics_post_type' );
  * @param string $slug Page metrics slug.
  * @return WP_Post|null Post object if exists.
  */
-function ilo_get_page_metrics_post( $slug ) {
+function ilo_get_page_metrics_post( string $slug ) /*: ?WP_Post (in PHP 7.1) */ {
 	$post_query = new WP_Query(
 		array(
 			'post_type'              => ILO_PAGE_METRICS_POST_TYPE,
@@ -72,7 +72,7 @@ function ilo_get_page_metrics_post( $slug ) {
  * @param WP_Post $post Page metrics post.
  * @return array|WP_Error Page metrics when valid, or WP_Error otherwise.
  */
-function ilo_parse_stored_page_metrics( WP_Post $post ) {
+function ilo_parse_stored_page_metrics( WP_Post $post ) /*: array|WP_Error (in PHP 8) */ {
 	$page_metrics = json_decode( $post->post_content, true );
 	if ( json_last_error() ) {
 		return new WP_Error(
@@ -109,7 +109,7 @@ function ilo_parse_stored_page_metrics( WP_Post $post ) {
  * @param string $slug Page metrics slug.
  * @return array Page metrics data, or empty array if invalid.
  */
-function ilo_get_page_metrics_data( $slug ) {
+function ilo_get_page_metrics_data( string $slug ): array {
 	$post = ilo_get_page_metrics_post( $slug );
 	if ( ! ( $post instanceof WP_Post ) ) {
 		return array();
@@ -129,7 +129,7 @@ function ilo_get_page_metrics_data( $slug ) {
  * @param array  $validated_page_metric Validated page metric. See JSON Schema defined in ilo_register_endpoint().
  * @return int|WP_Error Post ID or WP_Error otherwise.
  */
-function ilo_store_page_metric( $url, $slug, array $validated_page_metric ) {
+function ilo_store_page_metric( string $url, string $slug, array $validated_page_metric ) /*: int|WP_Error (in PHP 8) */ {
 	$validated_page_metric['timestamp'] = microtime( true );
 
 	// TODO: What about storing a version identifier?
