@@ -15,11 +15,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * When a page metric expires it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @return int Expiration TTL in seconds.
  */
 function ilo_get_page_metric_freshness_ttl(): int {
 	/**
 	 * Filters the freshness age (TTL) for a given page metric.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @param int $ttl Expiration TTL in seconds.
 	 */
@@ -33,6 +38,9 @@ function ilo_get_page_metric_freshness_ttl(): int {
  * whether posts in the loop will have featured images assigned or not. If a theme template for search results doesn't
  * even show featured images, then this isn't an issue.
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @return bool Whether response can be optimized.
  */
 function ilo_can_optimize_response(): bool {
@@ -40,6 +48,8 @@ function ilo_can_optimize_response(): bool {
 
 	/**
 	 * Filters whether the current response can be optimized.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @param bool $able Whether response can be optimized.
 	 */
@@ -52,6 +62,9 @@ function ilo_can_optimize_response(): bool {
  * This is used as a cache key for stored page metrics.
  *
  * TODO: For non-singular requests, consider adding the post IDs from The Loop to ensure publishing a new post will invalidate the cache.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @return array Normalized query vars.
  */
@@ -75,6 +88,9 @@ function ilo_get_normalized_query_vars(): array {
 /**
  * Gets slug for page metrics.
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @see ilo_get_normalized_query_vars()
  *
  * @param array $query_vars Normalized query vars.
@@ -89,6 +105,9 @@ function ilo_get_page_metrics_slug( array $query_vars ): string {
  *
  * This is used in the REST API to authenticate the storage of new page metrics from a given URL.
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @see wp_create_nonce()
  * @see ilo_verify_page_metrics_storage_nonce()
  *
@@ -101,6 +120,9 @@ function ilo_get_page_metrics_storage_nonce( string $slug ): string {
 
 /**
  * Verifies nonce for storing page metrics for a specific slug.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @see wp_verify_nonce()
  * @see ilo_get_page_metrics_storage_nonce()
@@ -117,6 +139,9 @@ function ilo_verify_page_metrics_storage_nonce( string $nonce, string $slug ): i
 
 /**
  * Unshifts a new page metric onto an array of page metrics.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @param array $page_metrics          Page metrics.
  * @param array $validated_page_metric Validated page metric. See JSON Schema defined in ilo_register_endpoint().
@@ -161,6 +186,9 @@ function ilo_unshift_page_metrics( array $page_metrics, array $validated_page_me
  *  3. 481-576 (phablets)
  *  4. >576 (desktop)
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @return int[] Breakpoint max widths, sorted in ascending order.
  */
 function ilo_get_breakpoint_max_widths(): array {
@@ -188,11 +216,16 @@ function ilo_get_breakpoint_max_widths(): array {
  * sample size of 3 and there being just a single breakpoint (480) by default, for a given URL, there would be a maximum
  * total of 6 page metrics stored for a given URL: 3 for mobile and 3 for desktop.
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @return int Sample size.
  */
 function ilo_get_page_metrics_breakpoint_sample_size(): int {
 	/**
 	 * Filters the sample size for a breakpoint's page metrics on a given URL.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @param int $sample_size Sample size.
 	 */
@@ -201,6 +234,9 @@ function ilo_get_page_metrics_breakpoint_sample_size(): int {
 
 /**
  * Groups page metrics by breakpoint.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @param array $page_metrics Page metrics.
  * @param int[] $breakpoints  Viewport breakpoint max widths, sorted in ascending order.
@@ -244,6 +280,9 @@ function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $break
 /**
  * Gets needed minimum viewport widths.
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @param array $page_metrics           Page metrics.
  * @param float $current_time           Current time as returned by microtime(true).
  * @param int[] $breakpoint_max_widths  Breakpoint max widths.
@@ -280,6 +319,9 @@ function ilo_get_needed_minimum_viewport_widths( array $page_metrics, float $cur
  *
  * This is a convenience wrapper on top of ilo_get_needed_minimum_viewport_widths() to reduce code duplication.
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @see ilo_get_needed_minimum_viewport_widths()
  *
  * @param string $slug Page metrics slug.
@@ -297,6 +339,9 @@ function ilo_get_needed_minimum_viewport_widths_now_for_slug( string $slug ): ar
 
 /**
  * Checks whether there is a page metric needed for one of the breakpoints.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @param array<int, array{int, bool}> $needed_minimum_viewport_widths Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
  * @return bool Whether a page metric is needed.

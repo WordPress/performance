@@ -16,6 +16,9 @@ const ILO_PAGE_METRICS_POST_TYPE = 'ilo_page_metrics';
  * Registers post type for page metrics storage.
  *
  * This the configuration for this post type is similar to the oembed_cache in core.
+ *
+ * @since n.e.x.t
+ * @access private
  */
 function ilo_register_page_metrics_post_type() /*: void (in PHP 7.1) */ {
 	register_post_type(
@@ -39,6 +42,9 @@ add_action( 'init', 'ilo_register_page_metrics_post_type' );
 
 /**
  * Gets page metrics post.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @param string $slug Page metrics slug.
  * @return WP_Post|null Post object if exists.
@@ -68,6 +74,9 @@ function ilo_get_page_metrics_post( string $slug ) /*: ?WP_Post (in PHP 7.1) */ 
 
 /**
  * Parses post content in page metrics post.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @param WP_Post $post Page metrics post.
  * @return array|WP_Error Page metrics when valid, or WP_Error otherwise.
@@ -103,6 +112,9 @@ function ilo_parse_stored_page_metrics( WP_Post $post ) /*: array|WP_Error (in P
  *
  * This is a convenience abstractions for lower-level functions.
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @see ilo_get_page_metrics_post()
  * @see ilo_parse_stored_page_metrics()
  *
@@ -123,6 +135,9 @@ function ilo_get_page_metrics_data( string $slug ): array {
 
 /**
  * Stores page metric by merging it with the other page metrics for a given URL.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @param string $url                   URL for the page metrics. This is used purely as metadata.
  * @param string $slug                  Page metrics slug (computed from query vars).

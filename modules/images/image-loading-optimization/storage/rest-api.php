@@ -16,6 +16,9 @@ const ILO_PAGE_METRICS_ROUTE = '/page-metrics';
 
 /**
  * Registers endpoint for storage of page metric.
+ *
+ * @since n.e.x.t
+ * @access private
  */
 function ilo_register_endpoint() /*: void (in PHP 7.1) */ {
 
@@ -150,6 +153,9 @@ add_action( 'rest_api_init', 'ilo_register_endpoint' );
 
 /**
  * Handles REST API request to store metrics.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @param WP_REST_Request $request Request.
  * @return WP_REST_Response|WP_Error Response.
