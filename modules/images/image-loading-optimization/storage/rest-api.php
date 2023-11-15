@@ -15,7 +15,7 @@ const ILO_REST_API_NAMESPACE = 'image-loading-optimization/v1';
 const ILO_PAGE_METRICS_ROUTE = '/page-metrics';
 
 /**
- * Register endpoint for storage of page metric.
+ * Registers endpoint for storage of page metric.
  */
 function ilo_register_endpoint() /*: void (in PHP 7.1) */ {
 
@@ -149,7 +149,7 @@ function ilo_register_endpoint() /*: void (in PHP 7.1) */ {
 add_action( 'rest_api_init', 'ilo_register_endpoint' );
 
 /**
- * Handle REST API request to store metrics.
+ * Handles REST API request to store metrics.
  *
  * @param WP_REST_Request $request Request.
  * @return WP_REST_Response|WP_Error Response.

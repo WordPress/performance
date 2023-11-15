@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const ILO_PAGE_METRICS_POST_TYPE = 'ilo_page_metrics';
 
 /**
- * Register post type for page metrics storage.
+ * Registers post type for page metrics storage.
  *
  * This the configuration for this post type is similar to the oembed_cache in core.
  */
@@ -38,7 +38,7 @@ function ilo_register_page_metrics_post_type() /*: void (in PHP 7.1) */ {
 add_action( 'init', 'ilo_register_page_metrics_post_type' );
 
 /**
- * Get page metrics post.
+ * Gets page metrics post.
  *
  * @param string $slug Page metrics slug.
  * @return WP_Post|null Post object if exists.

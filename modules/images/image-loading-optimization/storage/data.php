@@ -242,7 +242,7 @@ function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $break
 }
 
 /**
- * Get needed minimum viewport widths.
+ * Gets needed minimum viewport widths.
  *
  * @param array $page_metrics           Page metrics.
  * @param float $current_time           Current time as returned by microtime(true).
@@ -276,7 +276,7 @@ function ilo_get_needed_minimum_viewport_widths( array $page_metrics, float $cur
 }
 
 /**
- * Get needed minimum viewport widths by slug for the current time.
+ * Gets needed minimum viewport widths by slug for the current time.
  *
  * This is a convenience wrapper on top of ilo_get_needed_minimum_viewport_widths() to reduce code duplication.
  *
