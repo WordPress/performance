@@ -165,15 +165,15 @@ function ilo_unshift_page_metrics( array $page_metrics, array $validated_page_me
  */
 function ilo_get_breakpoint_max_widths(): array {
 
-	/**
-	 * Filters the breakpoint max widths to group page metrics for various viewports.
-	 *
-	 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints.
-	 */
 	$breakpoint_max_widths = array_map(
 		static function ( $breakpoint_max_width ) {
 			return (int) $breakpoint_max_width;
 		},
+		/**
+		 * Filters the breakpoint max widths to group page metrics for various viewports.
+		 *
+		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints.
+		 */
 		(array) apply_filters( 'ilo_breakpoint_max_widths', array( 480 ) )
 	);
 
