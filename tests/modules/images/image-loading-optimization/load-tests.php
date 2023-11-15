@@ -16,14 +16,14 @@ class Image_Loading_Optimization_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_is_hooking_output_buffering_at_template_include() {
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'template_include', 'image_loading_optimization_buffer_output' ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'template_include', 'ilo_buffer_output' ) );
 	}
 
 	/**
 	 * Make output is buffered and that it is also filtered.
 	 *
 	 * @test
-	 * @covers ::image_loading_optimization_buffer_output
+	 * @covers ::ilo_buffer_output
 	 */
 	public function it_buffers_and_filters_output() {
 		$original = 'Hello World!';
@@ -42,7 +42,7 @@ class Image_Loading_Optimization_Load_Tests extends ImagesTestCase {
 		);
 
 		$original_ob_level = ob_get_level();
-		image_loading_optimization_buffer_output();
+		ilo_buffer_output( '' );
 		$this->assertSame( $original_ob_level + 1, ob_get_level(), 'Expected call to ob_start().' );
 		echo $original;
 

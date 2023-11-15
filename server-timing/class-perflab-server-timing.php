@@ -226,7 +226,7 @@ class Perflab_Server_Timing {
 	 */
 	public function on_template_include( $passthrough = null ) {
 		// Skip doing anything with output buffering if it is already enabled via Image Loading Optimization.
-		if ( has_filter( 'template_include', 'image_loading_optimization_buffer_output' ) ) {
+		if ( has_filter( 'template_include', 'ilo_buffer_output' ) ) {
 			// It feels better if this could rather be replaced with add_action( 'shutdown', [ $this, 'send_header' ] )
 			// However, this does not work because the buffer is sent before the shutdown callback is executed.
 			add_filter(

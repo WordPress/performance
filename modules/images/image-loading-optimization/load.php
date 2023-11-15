@@ -15,10 +15,12 @@ if ( defined( 'IMAGE_LOADING_OPTIMIZATION_VERSION' ) ) {
 
 define( 'IMAGE_LOADING_OPTIMIZATION_VERSION', 'Performance Lab ' . PERFLAB_VERSION );
 
-// Do not load the code if it is already loaded through another means.
-if ( function_exists( 'image_loading_optimization_buffer_output' ) ) {
-	return;
-}
-
-require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';
+
+// Storage logic.
+require_once __DIR__ . '/storage/lock.php';
+require_once __DIR__ . '/storage/post-type.php';
+require_once __DIR__ . '/storage/data.php';
+require_once __DIR__ . '/storage/rest-api.php';
+
+require_once __DIR__ . '/detection.php';
