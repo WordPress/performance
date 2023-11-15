@@ -85,7 +85,7 @@ function ilo_get_page_metrics_slug( array $query_vars ): string {
 }
 
 /**
- * Compute nonce for storing page metrics for a specific slug.
+ * Computes nonce for storing page metrics for a specific slug.
  *
  * This is used in the REST API to authenticate the storage of new page metrics from a given URL.
  *
@@ -100,7 +100,7 @@ function ilo_get_page_metrics_storage_nonce( string $slug ): string {
 }
 
 /**
- * Verify nonce for storing page metrics for a specific slug.
+ * Verifies nonce for storing page metrics for a specific slug.
  *
  * @see wp_verify_nonce()
  * @see ilo_get_page_metrics_storage_nonce()
@@ -116,7 +116,7 @@ function ilo_verify_page_metrics_storage_nonce( string $nonce, string $slug ): i
 }
 
 /**
- * Unshift a new page metric onto an array of page metrics.
+ * Unshifts a new page metric onto an array of page metrics.
  *
  * @param array $page_metrics          Page metrics.
  * @param array $validated_page_metric Validated page metric. See JSON Schema defined in ilo_register_endpoint().
