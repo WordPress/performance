@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  *
- * @return int TTL in seconds, greater than or equal to zero.
+ * @return int TTL in seconds, greater than or equal to zero. A value of zero means that the storage lock should be disabled and thus that transients must not be used.
  */
 function ilo_get_page_metric_storage_lock_ttl(): int {
 
