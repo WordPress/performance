@@ -20,7 +20,7 @@ const ILO_PAGE_METRICS_POST_TYPE = 'ilo_page_metrics';
  * @since n.e.x.t
  * @access private
  */
-function ilo_register_page_metrics_post_type() /*: void (in PHP 7.1) */ {
+function ilo_register_page_metrics_post_type() {
 	register_post_type(
 		ILO_PAGE_METRICS_POST_TYPE,
 		array(
@@ -49,7 +49,7 @@ add_action( 'init', 'ilo_register_page_metrics_post_type' );
  * @param string $slug Page metrics slug.
  * @return WP_Post|null Post object if exists.
  */
-function ilo_get_page_metrics_post( string $slug ) /*: ?WP_Post (in PHP 7.1) */ {
+function ilo_get_page_metrics_post( string $slug ) {
 	$post_query = new WP_Query(
 		array(
 			'post_type'              => ILO_PAGE_METRICS_POST_TYPE,
@@ -124,7 +124,7 @@ function ilo_parse_stored_page_metrics( WP_Post $post ): array {
  * @param array  $validated_page_metric Validated page metric. See JSON Schema defined in ilo_register_endpoint().
  * @return int|WP_Error Post ID or WP_Error otherwise.
  */
-function ilo_store_page_metric( string $url, string $slug, array $validated_page_metric ) /*: int|WP_Error (in PHP 8) */ {
+function ilo_store_page_metric( string $url, string $slug, array $validated_page_metric ) {
 	$validated_page_metric['timestamp'] = microtime( true );
 
 	// TODO: What about storing a version identifier?

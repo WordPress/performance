@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  */
-function ilo_print_detection_script() /*: void (in PHP 7.1) */ {
+function ilo_print_detection_script() {
 	if ( ! ilo_can_optimize_response() ) {
 		return;
 	}

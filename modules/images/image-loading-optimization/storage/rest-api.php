@@ -20,7 +20,7 @@ const ILO_PAGE_METRICS_ROUTE = '/page-metrics';
  * @since n.e.x.t
  * @access private
  */
-function ilo_register_endpoint() /*: void (in PHP 7.1) */ {
+function ilo_register_endpoint() {
 
 	$dom_rect_schema = array(
 		'type'       => 'object',
@@ -160,7 +160,7 @@ add_action( 'rest_api_init', 'ilo_register_endpoint' );
  * @param WP_REST_Request $request Request.
  * @return WP_REST_Response|WP_Error Response.
  */
-function ilo_handle_rest_request( WP_REST_Request $request ) /*: WP_REST_Response|WP_Error (in PHP 8) */ {
+function ilo_handle_rest_request( WP_REST_Request $request ) {
 	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths_now_for_slug( $request->get_param( 'slug' ) );
 	if ( ! ilo_needs_page_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
 		return new WP_Error(

@@ -58,7 +58,7 @@ function ilo_get_page_metric_storage_lock_transient_key(): string {
  * @since n.e.x.t
  * @access private
  */
-function ilo_set_page_metric_storage_lock() /*: void (in PHP 7.1) */ {
+function ilo_set_page_metric_storage_lock() {
 	$ttl = ilo_get_page_metric_storage_lock_ttl();
 	$key = ilo_get_page_metric_storage_lock_transient_key();
 	if ( 0 === $ttl ) {
