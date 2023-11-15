@@ -60,7 +60,7 @@ function ilo_print_detection_script() /*: void (in PHP 7.1) */ {
 	wp_print_inline_script_tag(
 		sprintf(
 			'import detect from %s; detect( %s );',
-			wp_json_encode( add_query_arg( 'ver', PERFLAB_VERSION, plugin_dir_url( __FILE__ ) . 'detection/detect.js' ) ),
+			wp_json_encode( add_query_arg( 'ver', IMAGE_LOADING_OPTIMIZATION_VERSION, plugin_dir_url( __FILE__ ) . 'detection/detect.js' ) ),
 			wp_json_encode( $detect_args )
 		),
 		array( 'type' => 'module' )
