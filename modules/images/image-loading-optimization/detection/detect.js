@@ -93,7 +93,7 @@ function error( ...message ) {
  */
 
 /**
- * @typedef {Object} PageMetrics
+ * @typedef {Object} URLMetrics
  * @property {string}           url             - URL of the page.
  * @property {Object}           viewport        - Viewport.
  * @property {number}           viewport.width  - Viewport width.
@@ -137,11 +137,11 @@ function getBreadcrumbs( leafElement ) {
 }
 
 /**
- * Checks whether the page metric(s) for the provided viewport width is needed.
+ * Checks whether the URL metric(s) for the provided viewport width is needed.
  *
  * @param {number}                   viewportWidth               - Current viewport width.
  * @param {Array<number, boolean>[]} neededMinimumViewportWidths - Needed minimum viewport widths, in ascending order.
- * @return {boolean} Whether page metrics are needed.
+ * @return {boolean} Whether URL metrics are needed.
  */
 function isViewportNeeded( viewportWidth, neededMinimumViewportWidths ) {
 	let lastWasNeeded = false;
@@ -176,10 +176,10 @@ function getCurrentTime() {
  * @param {boolean}                  args.isDebug                     Whether to show debug messages.
  * @param {string}                   args.restApiEndpoint             URL for where to send the detection data.
  * @param {string}                   args.restApiNonce                Nonce for writing to the REST API.
- * @param {string}                   args.pageMetricsSlug             Slug for page metrics.
- * @param {string}                   args.pageMetricsNonce            Nonce for page metrics storage.
- * @param {Array<number, boolean>[]} args.neededMinimumViewportWidths Needed minimum viewport widths for page metrics.
- * @param {number}                   args.storageLockTTL              The TTL (in seconds) for the page metric storage lock.
+ * @param {string}                   args.urlMetricsSlug              Slug for URL metrics.
+ * @param {string}                   args.urlMetricsNonce             Nonce for URL metrics storage.
+ * @param {Array<number, boolean>[]} args.neededMinimumViewportWidths Needed minimum viewport widths for URL metrics.
+ * @param {number}                   args.storageLockTTL              The TTL (in seconds) for the URL metric storage lock.
  */
 export default async function detect( {
 	serveTime,
@@ -187,15 +187,15 @@ export default async function detect( {
 	isDebug,
 	restApiEndpoint,
 	restApiNonce,
-	pageMetricsSlug,
-	pageMetricsNonce,
+	urlMetricsSlug,
+	urlMetricsNonce,
 	neededMinimumViewportWidths,
 	storageLockTTL,
 } ) {
 	const currentTime = getCurrentTime();
 
 	// As an alternative to this, the ilo_print_detection_script() function can short-circuit if the
-	// ilo_is_page_metric_storage_locked() function returns true. However, the downside with that is page caching could
+	// ilo_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
 	// result in metrics being missed being gathered when a user navigates around a site and primes the page cache.
 	if ( isStorageLocked( currentTime, storageLockTTL ) ) {
 		if ( isDebug ) {
@@ -227,7 +227,7 @@ export default async function detect( {
 
 	if ( ! isViewportNeeded( win.innerWidth, neededMinimumViewportWidths ) ) {
 		if ( isDebug ) {
-			log( 'No need for page metrics from the current viewport.' );
+			log( 'No need for URL metrics from the current viewport.' );
 		}
 		return;
 	}
@@ -354,11 +354,11 @@ export default async function detect( {
 		log( 'Detection is stopping.' );
 	}
 
-	/** @type {PageMetrics} */
-	const pageMetrics = {
+	/** @type {URLMetrics} */
+	const urlMetrics = {
 		url: win.location.href,
-		slug: pageMetricsSlug,
-		nonce: pageMetricsNonce,
+		slug: urlMetricsSlug,
+		nonce: urlMetricsNonce,
 		viewport: {
 			width: win.innerWidth,
 			height: win.innerHeight,
@@ -396,11 +396,11 @@ export default async function detect( {
 			boundingClientRect: elementIntersection.boundingClientRect,
 		};
 
-		pageMetrics.elements.push( elementMetrics );
+		urlMetrics.elements.push( elementMetrics );
 	}
 
 	if ( isDebug ) {
-		log( 'Page metrics:', pageMetrics );
+		log( 'URL metrics:', urlMetrics );
 	}
 
 	// TODO: Wait until idle? Yield to main?
@@ -411,7 +411,7 @@ export default async function detect( {
 				'Content-Type': 'application/json',
 				'X-WP-Nonce': restApiNonce,
 			},
-			body: JSON.stringify( pageMetrics ),
+			body: JSON.stringify( urlMetrics ),
 		} );
 
 		if ( response.status === 200 ) {

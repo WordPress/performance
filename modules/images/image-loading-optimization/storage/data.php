@@ -11,24 +11,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Gets the freshness age (TTL) for a given page metric.
+ * Gets the freshness age (TTL) for a given URL metric.
  *
- * When a page metric expires it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
+ * When a URL metric expires it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
  *
  * @since n.e.x.t
  * @access private
  *
  * @return int Expiration TTL in seconds.
  */
-function ilo_get_page_metric_freshness_ttl(): int {
+function ilo_get_url_metric_freshness_ttl(): int {
 	/**
-	 * Filters the freshness age (TTL) for a given page metric.
+	 * Filters the freshness age (TTL) for a given URL metric.
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @param int $ttl Expiration TTL in seconds.
 	 */
-	return (int) apply_filters( 'ilo_page_metric_freshness_ttl', DAY_IN_SECONDS );
+	return (int) apply_filters( 'ilo_url_metric_freshness_ttl', DAY_IN_SECONDS );
 }
 
 /**
@@ -59,7 +59,7 @@ function ilo_can_optimize_response(): bool {
 /**
  * Gets the normalized query vars for the current request.
  *
- * This is used as a cache key for stored page metrics.
+ * This is used as a cache key for stored URL metrics.
  *
  * TODO: For non-singular requests, consider adding the post IDs from The Loop to ensure publishing a new post will invalidate the cache.
  *
@@ -86,7 +86,7 @@ function ilo_get_normalized_query_vars(): array {
 }
 
 /**
- * Gets slug for page metrics.
+ * Gets slug for URL metrics.
  *
  * @since n.e.x.t
  * @access private
@@ -96,69 +96,69 @@ function ilo_get_normalized_query_vars(): array {
  * @param array $query_vars Normalized query vars.
  * @return string Slug.
  */
-function ilo_get_page_metrics_slug( array $query_vars ): string {
+function ilo_get_url_metrics_slug( array $query_vars ): string {
 	return md5( wp_json_encode( $query_vars ) );
 }
 
 /**
- * Computes nonce for storing page metrics for a specific slug.
+ * Computes nonce for storing URL metrics for a specific slug.
  *
- * This is used in the REST API to authenticate the storage of new page metrics from a given URL.
+ * This is used in the REST API to authenticate the storage of new URL metrics from a given URL.
  *
  * @since n.e.x.t
  * @access private
  *
  * @see wp_create_nonce()
- * @see ilo_verify_page_metrics_storage_nonce()
+ * @see ilo_verify_url_metrics_storage_nonce()
  *
- * @param string $slug Page metrics slug.
+ * @param string $slug URL metrics slug.
  * @return string Nonce.
  */
-function ilo_get_page_metrics_storage_nonce( string $slug ): string {
-	return wp_create_nonce( "store_page_metrics:{$slug}" );
+function ilo_get_url_metrics_storage_nonce( string $slug ): string {
+	return wp_create_nonce( "store_url_metrics:{$slug}" );
 }
 
 /**
- * Verifies nonce for storing page metrics for a specific slug.
+ * Verifies nonce for storing URL metrics for a specific slug.
  *
  * @since n.e.x.t
  * @access private
  *
  * @see wp_verify_nonce()
- * @see ilo_get_page_metrics_storage_nonce()
+ * @see ilo_get_url_metrics_storage_nonce()
  *
- * @param string $nonce Page metrics storage nonce.
- * @param string $slug  Page metrics slug.
+ * @param string $nonce URL metrics storage nonce.
+ * @param string $slug  URL metrics slug.
  * @return int 1 if the nonce is valid and generated between 0-12 hours ago,
  *             2 if the nonce is valid and generated between 12-24 hours ago.
  *             0 if the nonce is invalid.
  */
-function ilo_verify_page_metrics_storage_nonce( string $nonce, string $slug ): int {
-	return (int) wp_verify_nonce( $nonce, "store_page_metrics:{$slug}" );
+function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): int {
+	return (int) wp_verify_nonce( $nonce, "store_url_metrics:{$slug}" );
 }
 
 /**
- * Unshifts a new page metric onto an array of page metrics.
+ * Unshifts a new URL metric onto an array of URL metrics.
  *
  * @since n.e.x.t
  * @access private
  *
- * @param array $page_metrics          Page metrics.
- * @param array $validated_page_metric Validated page metric. See JSON Schema defined in ilo_register_endpoint().
- * @return array Updated page metrics.
+ * @param array $url_metrics          URL metrics.
+ * @param array $validated_url_metric Validated URL metric. See JSON Schema defined in ilo_register_endpoint().
+ * @return array Updated URL metrics.
  */
-function ilo_unshift_page_metrics( array $page_metrics, array $validated_page_metric ): array {
-	array_unshift( $page_metrics, $validated_page_metric );
-	$breakpoints          = ilo_get_breakpoint_max_widths();
-	$sample_size          = ilo_get_page_metrics_breakpoint_sample_size();
-	$grouped_page_metrics = ilo_group_page_metrics_by_breakpoint( $page_metrics, $breakpoints );
+function ilo_unshift_url_metrics( array $url_metrics, array $validated_url_metric ): array {
+	array_unshift( $url_metrics, $validated_url_metric );
+	$breakpoints         = ilo_get_breakpoint_max_widths();
+	$sample_size         = ilo_get_url_metrics_breakpoint_sample_size();
+	$grouped_url_metrics = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoints );
 
-	foreach ( $grouped_page_metrics as &$breakpoint_page_metrics ) {
-		if ( count( $breakpoint_page_metrics ) > $sample_size ) {
+	foreach ( $grouped_url_metrics as &$breakpoint_url_metrics ) {
+		if ( count( $breakpoint_url_metrics ) > $sample_size ) {
 
-			// Sort page metrics in descending order by timestamp.
+			// Sort URL metrics in descending order by timestamp.
 			usort(
-				$breakpoint_page_metrics,
+				$breakpoint_url_metrics,
 				static function ( $a, $b ) {
 					if ( ! isset( $a['timestamp'] ) || ! isset( $b['timestamp'] ) ) {
 						return 0;
@@ -167,15 +167,15 @@ function ilo_unshift_page_metrics( array $page_metrics, array $validated_page_me
 				}
 			);
 
-			$breakpoint_page_metrics = array_slice( $breakpoint_page_metrics, 0, $sample_size );
+			$breakpoint_url_metrics = array_slice( $breakpoint_url_metrics, 0, $sample_size );
 		}
 	}
 
-	return array_merge( ...$grouped_page_metrics );
+	return array_merge( ...$grouped_url_metrics );
 }
 
 /**
- * Gets the breakpoint max widths to group page metrics for various viewports.
+ * Gets the breakpoint max widths to group URL metrics for various viewports.
  *
  * Each max with represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then
  * this means there will be two viewport groupings, one for 0<=480, and another >480. If instead there were three
@@ -198,7 +198,7 @@ function ilo_get_breakpoint_max_widths(): array {
 			return (int) $breakpoint_max_width;
 		},
 		/**
-		 * Filters the breakpoint max widths to group page metrics for various viewports.
+		 * Filters the breakpoint max widths to group URL metrics for various viewports.
 		 *
 		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints.
 		 */
@@ -210,42 +210,42 @@ function ilo_get_breakpoint_max_widths(): array {
 }
 
 /**
- * Gets the sample size for a breakpoint's page metrics on a given URL.
+ * Gets the sample size for a breakpoint's URL metrics on a given URL.
  *
- * A breakpoint divides page metrics for viewports which are smaller and those which are larger. Given the default
+ * A breakpoint divides URL metrics for viewports which are smaller and those which are larger. Given the default
  * sample size of 3 and there being just a single breakpoint (480) by default, for a given URL, there would be a maximum
- * total of 6 page metrics stored for a given URL: 3 for mobile and 3 for desktop.
+ * total of 6 URL metrics stored for a given URL: 3 for mobile and 3 for desktop.
  *
  * @since n.e.x.t
  * @access private
  *
  * @return int Sample size.
  */
-function ilo_get_page_metrics_breakpoint_sample_size(): int {
+function ilo_get_url_metrics_breakpoint_sample_size(): int {
 	/**
-	 * Filters the sample size for a breakpoint's page metrics on a given URL.
+	 * Filters the sample size for a breakpoint's URL metrics on a given URL.
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @param int $sample_size Sample size.
 	 */
-	return (int) apply_filters( 'ilo_page_metrics_breakpoint_sample_size', 3 );
+	return (int) apply_filters( 'ilo_url_metrics_breakpoint_sample_size', 3 );
 }
 
 /**
- * Groups page metrics by breakpoint.
+ * Groups URL metrics by breakpoint.
  *
  * @since n.e.x.t
  * @access private
  *
- * @param array $page_metrics Page metrics.
+ * @param array $url_metrics URL metrics.
  * @param int[] $breakpoints  Viewport breakpoint max widths, sorted in ascending order.
- * @return array Page metrics grouped by breakpoint. The array keys are the minimum widths for a viewport to lie within
+ * @return array URL metrics grouped by breakpoint. The array keys are the minimum widths for a viewport to lie within
  *               the breakpoint. The returned array is always one larger than the provided array of breakpoints, since
  *               the breakpoints reflect the max inclusive boundaries whereas the return value is the groups of page
  *               metrics with viewports on either side of the breakpoint boundaries.
  */
-function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $breakpoints ): array {
+function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpoints ): array {
 
 	// Convert breakpoint max widths into viewport minimum widths.
 	$viewport_minimum_widths = array_map(
@@ -257,11 +257,11 @@ function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $break
 
 	$grouped = array_fill_keys( array_merge( array( 0 ), $viewport_minimum_widths ), array() );
 
-	foreach ( $page_metrics as $page_metric ) {
-		if ( ! isset( $page_metric['viewport']['width'] ) ) {
+	foreach ( $url_metrics as $url_metric ) {
+		if ( ! isset( $url_metric['viewport']['width'] ) ) {
 			continue;
 		}
-		$viewport_width = $page_metric['viewport']['width'];
+		$viewport_width = $url_metric['viewport']['width'];
 
 		$current_minimum_viewport = 0;
 		foreach ( $viewport_minimum_widths as $viewport_minimum_width ) {
@@ -272,7 +272,7 @@ function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $break
 			}
 		}
 
-		$grouped[ $current_minimum_viewport ][] = $page_metric;
+		$grouped[ $current_minimum_viewport ][] = $url_metric;
 	}
 	return $grouped;
 }
@@ -283,31 +283,31 @@ function ilo_group_page_metrics_by_breakpoint( array $page_metrics, array $break
  * @since n.e.x.t
  * @access private
  *
- * @param array $page_metrics           Page metrics.
+ * @param array $url_metrics           URL metrics.
  * @param float $current_time           Current time as returned by microtime(true).
  * @param int[] $breakpoint_max_widths  Breakpoint max widths.
  * @param int   $sample_size            Sample size for viewports in a breakpoint.
- * @param int   $freshness_ttl          Freshness TTL for a page metric.
- * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
+ * @param int   $freshness_ttl          Freshness TTL for a URL metric.
+ * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
  */
-function ilo_get_needed_minimum_viewport_widths( array $page_metrics, float $current_time, array $breakpoint_max_widths, int $sample_size, int $freshness_ttl ): array {
-	$metrics_by_breakpoint          = ilo_group_page_metrics_by_breakpoint( $page_metrics, $breakpoint_max_widths );
+function ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $current_time, array $breakpoint_max_widths, int $sample_size, int $freshness_ttl ): array {
+	$metrics_by_breakpoint          = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );
 	$needed_minimum_viewport_widths = array();
-	foreach ( $metrics_by_breakpoint as $minimum_viewport_width => $viewport_page_metrics ) {
-		$needs_page_metrics = false;
-		if ( count( $viewport_page_metrics ) < $sample_size ) {
-			$needs_page_metrics = true;
+	foreach ( $metrics_by_breakpoint as $minimum_viewport_width => $viewport_url_metrics ) {
+		$needs_url_metrics = false;
+		if ( count( $viewport_url_metrics ) < $sample_size ) {
+			$needs_url_metrics = true;
 		} else {
-			foreach ( $viewport_page_metrics as $page_metric ) {
-				if ( isset( $page_metric['timestamp'] ) && $page_metric['timestamp'] + $freshness_ttl < $current_time ) {
-					$needs_page_metrics = true;
+			foreach ( $viewport_url_metrics as $url_metric ) {
+				if ( isset( $url_metric['timestamp'] ) && $url_metric['timestamp'] + $freshness_ttl < $current_time ) {
+					$needs_url_metrics = true;
 					break;
 				}
 			}
 		}
 		$needed_minimum_viewport_widths[] = array(
 			$minimum_viewport_width,
-			$needs_page_metrics,
+			$needs_url_metrics,
 		);
 	}
 
@@ -324,30 +324,30 @@ function ilo_get_needed_minimum_viewport_widths( array $page_metrics, float $cur
  *
  * @see ilo_get_needed_minimum_viewport_widths()
  *
- * @param string $slug Page metrics slug.
- * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
+ * @param string $slug URL metrics slug.
+ * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
  */
 function ilo_get_needed_minimum_viewport_widths_now_for_slug( string $slug ): array {
-	$post = ilo_get_page_metrics_post( $slug );
+	$post = ilo_get_url_metrics_post( $slug );
 	return ilo_get_needed_minimum_viewport_widths(
-		$post instanceof WP_Post ? ilo_parse_stored_page_metrics( $post ) : array(),
+		$post instanceof WP_Post ? ilo_parse_stored_url_metrics( $post ) : array(),
 		microtime( true ),
 		ilo_get_breakpoint_max_widths(),
-		ilo_get_page_metrics_breakpoint_sample_size(),
-		ilo_get_page_metric_freshness_ttl()
+		ilo_get_url_metrics_breakpoint_sample_size(),
+		ilo_get_url_metric_freshness_ttl()
 	);
 }
 
 /**
- * Checks whether there is a page metric needed for one of the breakpoints.
+ * Checks whether there is a URL metric needed for one of the breakpoints.
  *
  * @since n.e.x.t
  * @access private
  *
- * @param array<int, array{int, bool}> $needed_minimum_viewport_widths Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
- * @return bool Whether a page metric is needed.
+ * @param array<int, array{int, bool}> $needed_minimum_viewport_widths Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
+ * @return bool Whether a URL metric is needed.
  */
-function ilo_needs_page_metric_for_breakpoint( array $needed_minimum_viewport_widths ): bool {
+function ilo_needs_url_metric_for_breakpoint( array $needed_minimum_viewport_widths ): bool {
 	foreach ( $needed_minimum_viewport_widths as list( $minimum_viewport_width, $is_needed ) ) {
 		if ( $is_needed ) {
 			return true;

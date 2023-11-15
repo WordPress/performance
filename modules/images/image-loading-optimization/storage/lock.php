@@ -11,14 +11,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Gets the TTL (in seconds) for the page metric storage lock.
+ * Gets the TTL (in seconds) for the URL metric storage lock.
  *
  * @since n.e.x.t
  * @access private
  *
  * @return int TTL in seconds, greater than or equal to zero. A value of zero means that the storage lock should be disabled and thus that transients must not be used.
  */
-function ilo_get_page_metric_storage_lock_ttl(): int {
+function ilo_get_url_metric_storage_lock_ttl(): int {
 
 	/**
 	 * Filters how long a given IP is locked from submitting another metric-storage REST API request.
@@ -39,18 +39,18 @@ function ilo_get_page_metric_storage_lock_ttl(): int {
 }
 
 /**
- * Gets transient key for locking page metric storage (for the current IP).
+ * Gets transient key for locking URL metric storage (for the current IP).
  *
  * @todo Should the URL be included in the key? Or should a user only be allowed to store one metric?
  * @return string Transient key.
  */
-function ilo_get_page_metric_storage_lock_transient_key(): string {
+function ilo_get_url_metric_storage_lock_transient_key(): string {
 	$ip_address = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
-	return 'page_metrics_storage_lock_' . wp_hash( $ip_address );
+	return 'url_metrics_storage_lock_' . wp_hash( $ip_address );
 }
 
 /**
- * Sets page metric storage lock (for the current IP).
+ * Sets URL metric storage lock (for the current IP).
  *
  * If the storage lock TTL is greater than zero, then a transient is set with the current timestamp and expiring at TTL
  * seconds. Otherwise, if the current TTL is zero, then any transient is deleted.
@@ -58,9 +58,9 @@ function ilo_get_page_metric_storage_lock_transient_key(): string {
  * @since n.e.x.t
  * @access private
  */
-function ilo_set_page_metric_storage_lock() {
-	$ttl = ilo_get_page_metric_storage_lock_ttl();
-	$key = ilo_get_page_metric_storage_lock_transient_key();
+function ilo_set_url_metric_storage_lock() {
+	$ttl = ilo_get_url_metric_storage_lock_ttl();
+	$key = ilo_get_url_metric_storage_lock_transient_key();
 	if ( 0 === $ttl ) {
 		delete_transient( $key );
 	} else {
@@ -69,19 +69,19 @@ function ilo_set_page_metric_storage_lock() {
 }
 
 /**
- * Checks whether page metric storage is locked (for the current IP).
+ * Checks whether URL metric storage is locked (for the current IP).
  *
  * @since n.e.x.t
  * @access private
  *
  * @return bool Whether locked.
  */
-function ilo_is_page_metric_storage_locked(): bool {
-	$ttl = ilo_get_page_metric_storage_lock_ttl();
+function ilo_is_url_metric_storage_locked(): bool {
+	$ttl = ilo_get_url_metric_storage_lock_ttl();
 	if ( 0 === $ttl ) {
 		return false;
 	}
-	$locked_time = get_transient( ilo_get_page_metric_storage_lock_transient_key() );
+	$locked_time = get_transient( ilo_get_url_metric_storage_lock_transient_key() );
 	if ( false === $locked_time ) {
 		return false;
 	}

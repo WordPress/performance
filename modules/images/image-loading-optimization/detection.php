@@ -22,12 +22,12 @@ function ilo_print_detection_script() {
 	}
 
 	$query_vars = ilo_get_normalized_query_vars();
-	$slug       = ilo_get_page_metrics_slug( $query_vars );
+	$slug       = ilo_get_url_metrics_slug( $query_vars );
 	$microtime  = microtime( true );
 
 	// Abort if we already have all the sample size we need for all breakpoints.
 	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths_now_for_slug( $slug );
-	if ( ! ilo_needs_page_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
+	if ( ! ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
 		return;
 	}
 
@@ -50,12 +50,12 @@ function ilo_print_detection_script() {
 		'serveTime'                   => $microtime * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
 		'detectionTimeWindow'         => $detection_time_window,
 		'isDebug'                     => WP_DEBUG,
-		'restApiEndpoint'             => rest_url( ILO_REST_API_NAMESPACE . ILO_PAGE_METRICS_ROUTE ),
+		'restApiEndpoint'             => rest_url( ILO_REST_API_NAMESPACE . ILO_URL_METRICS_ROUTE ),
 		'restApiNonce'                => wp_create_nonce( 'wp_rest' ),
-		'pageMetricsSlug'             => $slug,
-		'pageMetricsNonce'            => ilo_get_page_metrics_storage_nonce( $slug ),
+		'urlMetricsSlug'              => $slug,
+		'urlMetricsNonce'             => ilo_get_url_metrics_storage_nonce( $slug ),
 		'neededMinimumViewportWidths' => $needed_minimum_viewport_widths,
-		'storageLockTTL'              => ilo_get_page_metric_storage_lock_ttl(),
+		'storageLockTTL'              => ilo_get_url_metric_storage_lock_ttl(),
 	);
 	wp_print_inline_script_tag(
 		sprintf(
