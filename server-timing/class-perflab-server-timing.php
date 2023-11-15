@@ -230,7 +230,7 @@ class Perflab_Server_Timing {
 			// It feels better if this could rather be replaced with add_action( 'shutdown', [ $this, 'send_header' ] )
 			// However, this does not work because the buffer is sent before the shutdown callback is executed.
 			add_filter(
-				'perflab_template_output_buffer',
+				'ilo_template_output_buffer',
 				function ( $buffer ) {
 					$this->send_header();
 					return $buffer;

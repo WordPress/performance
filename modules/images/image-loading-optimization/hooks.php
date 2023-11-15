@@ -41,7 +41,7 @@ function ilo_buffer_output( string $passthrough ): string {
 			 * @param string $output Output buffer.
 			 * @return string Filtered output buffer.
 			 */
-			return (string) apply_filters( 'perflab_template_output_buffer', $output );
+			return (string) apply_filters( 'ilo_template_output_buffer', $output );
 		}
 	);
 	return $passthrough;
