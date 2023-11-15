@@ -10,9 +10,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+/**
+ * Namespace for image-loading-optimization.
+ *
+ * @var string
+ */
 const ILO_REST_API_NAMESPACE = 'image-loading-optimization/v1';
 
-const ILO_URL_METRICS_ROUTE = '/url-metrics';
+/**
+ * Route for storing a URL metric.
+ *
+ * Note the `:store` art of the endpoint follows Google's guidance in AIP-136 for the use of the POST method in a way
+ * that does not strictly follow the standard usage. Namely, submitting a POST request to this endpoint will either
+ * create a new `ilo_url_metrics` post, or it will update an existing post if one already exists for the provided slug.
+ *
+ * @link https://google.aip.dev/136
+ * @var string
+ */
+const ILO_URL_METRICS_ROUTE = '/url-metrics:store';
 
 /**
  * Registers endpoint for storage of URL metric.
