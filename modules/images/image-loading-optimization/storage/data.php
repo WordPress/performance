@@ -328,8 +328,9 @@ function ilo_get_needed_minimum_viewport_widths( array $page_metrics, float $cur
  * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether page metric(s) are needed.
  */
 function ilo_get_needed_minimum_viewport_widths_now_for_slug( string $slug ): array {
+	$post = ilo_get_page_metrics_post( $slug );
 	return ilo_get_needed_minimum_viewport_widths(
-		ilo_get_page_metrics_data( $slug ),
+		$post instanceof WP_Post ? ilo_parse_stored_page_metrics( $post ) : array(),
 		microtime( true ),
 		ilo_get_breakpoint_max_widths(),
 		ilo_get_page_metrics_breakpoint_sample_size(),

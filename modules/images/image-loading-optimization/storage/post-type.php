@@ -79,13 +79,19 @@ function ilo_get_page_metrics_post( string $slug ) /*: ?WP_Post (in PHP 7.1) */ 
  * @access private
  *
  * @param WP_Post $post Page metrics post.
- * @return array|WP_Error Page metrics when valid, or WP_Error otherwise.
+ * @return array Page metrics.
  */
-function ilo_parse_stored_page_metrics( WP_Post $post ) /*: array|WP_Error (in PHP 8) */ {
+function ilo_parse_stored_page_metrics( WP_Post $post ): array {
+	$this_function = __FUNCTION__;
+	$trigger_error = static function ( $error ) use ( $this_function ) {
+		if ( function_exists( 'wp_trigger_error' ) ) {
+			wp_trigger_error( $this_function, esc_html( $error ), E_USER_WARNING );
+		}
+	};
+
 	$page_metrics = json_decode( $post->post_content, true );
 	if ( json_last_error() ) {
-		return new WP_Error(
-			'page_metrics_json_parse_error',
+		$trigger_error(
 			sprintf(
 				/* translators: 1: Post type slug, 2: JSON error message */
 				__( 'Contents of %1$s post type not valid JSON: %2$s', 'performance-lab' ),
@@ -93,44 +99,18 @@ function ilo_parse_stored_page_metrics( WP_Post $post ) /*: array|WP_Error (in P
 				json_last_error_msg()
 			)
 		);
-	}
-	if ( ! is_array( $page_metrics ) ) {
-		return new WP_Error(
-			'page_metrics_invalid_data_format',
+		$page_metrics = array();
+	} elseif ( ! is_array( $page_metrics ) ) {
+		$trigger_error(
 			sprintf(
 				/* translators: %s is post type slug */
 				__( 'Contents of %s post type was not a JSON array.', 'performance-lab' ),
 				ILO_PAGE_METRICS_POST_TYPE
 			)
 		);
+		$page_metrics = array();
 	}
 	return $page_metrics;
-}
-
-/**
- * Gets page metrics for a slug.
- *
- * This is a convenience abstractions for lower-level functions.
- *
- * @since n.e.x.t
- * @access private
- *
- * @see ilo_get_page_metrics_post()
- * @see ilo_parse_stored_page_metrics()
- *
- * @param string $slug Page metrics slug.
- * @return array Page metrics data, or empty array if invalid.
- */
-function ilo_get_page_metrics_data( string $slug ): array {
-	$post = ilo_get_page_metrics_post( $slug );
-	if ( ! ( $post instanceof WP_Post ) ) {
-		return array();
-	}
-	$data = ilo_parse_stored_page_metrics( $post );
-	if ( ! is_array( $data ) ) {
-		return array();
-	}
-	return $data;
 }
 
 /**
@@ -157,14 +137,7 @@ function ilo_store_page_metric( string $url, string $slug, array $validated_page
 	if ( $post instanceof WP_Post ) {
 		$post_data['ID']        = $post->ID;
 		$post_data['post_name'] = $post->post_name;
-
-		$page_metrics = ilo_parse_stored_page_metrics( $post );
-		if ( $page_metrics instanceof WP_Error ) {
-			if ( function_exists( 'wp_trigger_error' ) ) {
-				wp_trigger_error( __FUNCTION__, esc_html( $page_metrics->get_error_message() ) );
-			}
-			$page_metrics = array();
-		}
+		$page_metrics           = ilo_parse_stored_page_metrics( $post );
 	} else {
 		$post_data['post_name'] = $slug;
 		$page_metrics           = array();
