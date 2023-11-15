@@ -15,7 +15,7 @@ const storageLockTimeSessionKey = 'iloStorageLockTime';
  * @return {boolean} Whether storage is locked.
  */
 function isStorageLocked( currentTime, storageLockTTL ) {
-	if ( ! storageLockTTL ) {
+	if ( storageLockTTL === 0 ) {
 		return false;
 	}
 

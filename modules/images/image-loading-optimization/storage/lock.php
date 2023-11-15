@@ -13,18 +13,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Gets the TTL (in seconds) for the page metric storage lock.
  *
- * @return int TTL in seconds.
+ * @return int TTL in seconds, greater than or equal to zero.
  */
 function ilo_get_page_metric_storage_lock_ttl(): int {
 
 	/**
 	 * Filters how long a given IP is locked from submitting another metric-storage REST API request.
 	 *
-	 * Filtering the TTL to zero will disable any metric storage locking. This is useful during development.
+	 * Filtering the TTL to zero will disable any metric storage locking. This is useful, for example, to disable
+	 * locking when a user is logged-in with code like the following:
+	 *
+	 *     add_filter( 'ilo_metrics_storage_lock_ttl', static function ( $ttl ) {
+	 *         return is_user_logged_in() ? 0 : $ttl;
+	 *     } );
 	 *
 	 * @param int $ttl TTL.
 	 */
-	return (int) apply_filters( 'ilo_metrics_storage_lock_ttl', MINUTE_IN_SECONDS );
+	$ttl = (int) apply_filters( 'ilo_metrics_storage_lock_ttl', MINUTE_IN_SECONDS );
+	return max( 0, $ttl );
 }
 
 /**
@@ -40,6 +46,9 @@ function ilo_get_page_metric_storage_lock_transient_key(): string {
 
 /**
  * Sets page metric storage lock (for the current IP).
+ *
+ * If the storage lock TTL is greater than zero, then a transient is set with the current timestamp and expiring at TTL
+ * seconds. Otherwise, if the current TTL is zero, then any transient is deleted.
  */
 function ilo_set_page_metric_storage_lock() /*: void (in PHP 7.1) */ {
 	$ttl = ilo_get_page_metric_storage_lock_ttl();
