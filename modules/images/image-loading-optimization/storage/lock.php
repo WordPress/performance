@@ -34,7 +34,7 @@ function ilo_get_url_metric_storage_lock_ttl(): int {
 	 *
 	 * @param int $ttl TTL.
 	 */
-	$ttl = (int) apply_filters( 'ilo_metrics_storage_lock_ttl', MINUTE_IN_SECONDS );
+	$ttl = (int) apply_filters( 'ilo_url_metric_storage_lock_ttl', MINUTE_IN_SECONDS );
 	return max( 0, $ttl );
 }
 
