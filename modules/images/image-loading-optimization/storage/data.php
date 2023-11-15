@@ -115,7 +115,7 @@ function ilo_get_url_metrics_slug( array $query_vars ): string {
  * @return string Nonce.
  */
 function ilo_get_url_metrics_storage_nonce( string $slug ): string {
-	return wp_create_nonce( "store_url_metrics:{$slug}" );
+	return wp_create_nonce( "store_url_metrics:$slug" );
 }
 
 /**
@@ -134,7 +134,7 @@ function ilo_get_url_metrics_storage_nonce( string $slug ): string {
  *             0 if the nonce is invalid.
  */
 function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): int {
-	return (int) wp_verify_nonce( $nonce, "store_url_metrics:{$slug}" );
+	return (int) wp_verify_nonce( $nonce, "store_url_metrics:$slug" );
 }
 
 /**
