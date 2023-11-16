@@ -115,15 +115,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	$description = wp_strip_all_tags( $plugin_data['short_description'] );
 	$title       = $plugin_data['name'];
 
-	/**
-	 * Filters the plugin card description on the Add Plugins screen.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param string $description Plugin card description.
-	 * @param array  $plugin_data An array of plugin data. See {@see plugins_api()}
-	 *                            for the list of possible values.
-	 */
+	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
 	$description = apply_filters( 'plugin_install_description', $description, $plugin_data );
 	$version     = $plugin_data['version'];
 	$name        = wp_strip_all_tags( $title . ' ' . $version );
