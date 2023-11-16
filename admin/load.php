@@ -581,7 +581,7 @@ function perflab_deactivate_plugin() {
 	}
 
 	// The plugin being deactivated.
-	$plugin = sanitize_text_field( $_GET['plugin'] );
+	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
 
 	check_admin_referer( "perflab_deactivate_plugin_{$plugin}" );
 
