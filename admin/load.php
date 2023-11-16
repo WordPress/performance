@@ -543,7 +543,7 @@ function perflab_activate_plugin() {
 	}
 
 	// The plugin being activated.
-	$plugin = sanitize_text_field( $_GET['plugin'] );
+	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
 
 	check_admin_referer( "perflab_activate_plugin_{$plugin}" );
 
