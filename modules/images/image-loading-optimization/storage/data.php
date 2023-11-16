@@ -289,6 +289,66 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
 }
 
 /**
+ * Gets the LCP element for each breakpoint.
+ *
+ * The array keys are the minimum viewport width required for the element to be LCP.
+ *
+ * @param array $url_metrics           URL metrics.
+ * @param int[] $breakpoint_max_widths Breakpoint max widths.
+ * @return array LCP elements keyed by its minimum viewport width.
+ */
+function ilo_get_lcp_elements_by_minimum_viewport_widths( array $url_metrics, array $breakpoint_max_widths ): array {
+	$grouped_url_metrics = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );
+
+	$lcp_element_by_viewport_minimum_width = array();
+	foreach ( $grouped_url_metrics as $viewport_minimum_width => $breakpoint_url_metrics ) {
+
+		// The following arrays all share array indices.
+		$seen_breadcrumbs   = array();
+		$breadcrumb_counts  = array();
+		$breadcrumb_element = array();
+
+		foreach ( $breakpoint_url_metrics as $breakpoint_url_metric ) {
+			foreach ( $breakpoint_url_metric['elements'] as $element ) {
+				if ( ! $element['isLCP'] ) {
+					continue;
+				}
+
+				$i = array_search( $element['breadcrumbs'], $seen_breadcrumbs, true );
+				if ( false === $i ) {
+					$i                       = count( $seen_breadcrumbs );
+					$seen_breadcrumbs[ $i ]  = $element['breadcrumbs'];
+					$breadcrumb_counts[ $i ] = 0;
+				}
+
+				$breadcrumb_counts[ $i ] += 1;
+				$breadcrumb_element[ $i ] = $element;
+				break; // We found the LCP element for the URL metric, go to the next URL metric.
+			}
+		}
+
+		// Now sort by the breadcrumb counts in descending order, so the remaining first key is the most common breadcrumb.
+		if ( $seen_breadcrumbs ) {
+			arsort( $breadcrumb_counts );
+			$most_common_breadcrumb_index = key( $breadcrumb_counts );
+
+			$lcp_element_by_viewport_minimum_width[ $viewport_minimum_width ] = $breadcrumb_element[ $most_common_breadcrumb_index ];
+		}
+	}
+
+	// Now we need to merge the breakpoints when there is an LCP element common between them.
+	$reduced_breadcrumbs     = array();
+	$last_breadcrumb_element = null;
+	foreach ( $lcp_element_by_viewport_minimum_width as $viewport_minimum_width => $lcp_element ) {
+		if ( ! $last_breadcrumb_element || $lcp_element['breadcrumbs'] !== $last_breadcrumb_element['breadcrumbs'] ) {
+			$reduced_breadcrumbs[ $viewport_minimum_width ] = $lcp_element;
+			$last_breadcrumb_element                        = $lcp_element;
+		}
+	}
+	return $reduced_breadcrumbs;
+}
+
+/**
  * Gets needed minimum viewport widths.
  *
  * @since n.e.x.t
