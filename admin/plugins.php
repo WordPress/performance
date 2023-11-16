@@ -308,7 +308,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 				esc_html_e( 'This plugin does not work with your version of PHP.', 'default' );
 				if ( current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
-					/* translators: %s: URL to Update PHP page. */
+						/* translators: %s: URL to Update PHP page. */
 						' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
 						esc_url( wp_get_update_php_url() )
 					);
