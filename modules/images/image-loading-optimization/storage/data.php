@@ -186,8 +186,17 @@ function ilo_unshift_url_metrics( array $url_metrics, array $validated_url_metri
  *  3. 481-576 (phablets)
  *  4. >576 (desktop)
  *
+ * The default breakpoints are reused from Gutenberg where the _breakpoints.scss file includes these variables:
+ *
+ *     $break-medium: 782px; // adminbar goes big
+ *     $break-small: 600px;
+ *     $break-mobile: 480px;
+ *
+ * These breakpoints appear to be used the most in media queries that affect frontend styles.
+ *
  * @since n.e.x.t
  * @access private
+ * @link https://github.com/WordPress/gutenberg/blob/093d52cbfd3e2c140843d3fb91ad3d03330320a5/packages/base-styles/_breakpoints.scss#L11-L13
  *
  * @return int[] Breakpoint max widths, sorted in ascending order.
  */
@@ -200,9 +209,11 @@ function ilo_get_breakpoint_max_widths(): array {
 		/**
 		 * Filters the breakpoint max widths to group URL metrics for various viewports.
 		 *
+		 * @since n.e.x.t
+		 *
 		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints.
 		 */
-		(array) apply_filters( 'ilo_breakpoint_max_widths', array( 480 ) )
+		(array) apply_filters( 'ilo_breakpoint_max_widths', array( 480, 600, 782 ) )
 	);
 
 	sort( $breakpoint_max_widths );
