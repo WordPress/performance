@@ -337,15 +337,15 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( array $url_metrics, ar
 	}
 
 	// Now we need to merge the breakpoints when there is an LCP element common between them.
-	$reduced_breadcrumbs     = array();
-	$last_breadcrumb_element = null;
-	foreach ( $lcp_element_by_viewport_minimum_width as $viewport_minimum_width => $lcp_element ) {
-		if ( ! $last_breadcrumb_element || $lcp_element['breadcrumbs'] !== $last_breadcrumb_element['breadcrumbs'] ) {
-			$reduced_breadcrumbs[ $viewport_minimum_width ] = $lcp_element;
-			$last_breadcrumb_element                        = $lcp_element;
+	$last_lcp_element = null;
+	return array_filter(
+		$lcp_element_by_viewport_minimum_width,
+		static function ( $lcp_element ) use ( &$last_lcp_element ) {
+			$include          = ( ! $last_lcp_element || $last_lcp_element['breadcrumbs'] !== $lcp_element['breadcrumbs'] );
+			$last_lcp_element = $lcp_element;
+			return $include;
 		}
-	}
-	return $reduced_breadcrumbs;
+	);
 }
 
 /**
