@@ -291,9 +291,10 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
 /**
  * Gets the LCP element for each breakpoint.
  *
- * The array keys are the minimum viewport width required for the element to be LCP.
- *
- * @TODO: If there is no LCP element at a given breakpoint, make sure to return null?
+ * The array keys are the minimum viewport width required for the element to be LCP. If there are URL metrics for a
+ * given breakpoint and yet there is no LCP element, then the array value is `false`. If there is an LCP element at the
+ * breakpoint, then the array value is an array representing that element, including its breadcrumbs. If two adjoining
+ * breakpoints have the same value, then the latter is dropped.
  *
  * @param array $url_metrics           URL metrics.
  * @param int[] $breakpoint_max_widths Breakpoint max widths.
@@ -335,6 +336,8 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( array $url_metrics, ar
 			$most_common_breadcrumb_index = key( $breadcrumb_counts );
 
 			$lcp_element_by_viewport_minimum_width[ $viewport_minimum_width ] = $breadcrumb_element[ $most_common_breadcrumb_index ];
+		} elseif ( ! empty( $breakpoint_url_metrics ) ) {
+			$lcp_element_by_viewport_minimum_width[ $viewport_minimum_width ] = false; // No LCP image at this breakpoint.
 		}
 	}
 
@@ -343,7 +346,22 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( array $url_metrics, ar
 	return array_filter(
 		$lcp_element_by_viewport_minimum_width,
 		static function ( $lcp_element ) use ( &$last_lcp_element ) {
-			$include          = ( ! $last_lcp_element || $last_lcp_element['breadcrumbs'] !== $lcp_element['breadcrumbs'] );
+			$include = (
+				// First element in list.
+				null === $last_lcp_element
+				||
+				( is_array( $last_lcp_element ) && is_array( $lcp_element )
+					?
+					// This breakpoint and previous breakpoint had LCP element, and they were not the same element.
+					$last_lcp_element['breadcrumbs'] !== $lcp_element['breadcrumbs']
+					:
+					// This LCP element and the last LCP element were not the same. In this case, either variable may be
+					// false or an array, but both cannot be an array. If both are false, we don't want to include since
+					// it is the same. If one is an array and the other is false, then do want to include because this
+					// indicates a difference at this breakpoint.
+					$last_lcp_element !== $lcp_element
+				)
+			);
 			$last_lcp_element = $lcp_element;
 			return $include;
 		}
