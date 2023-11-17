@@ -293,6 +293,8 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
  *
  * The array keys are the minimum viewport width required for the element to be LCP.
  *
+ * @TODO: If there is no LCP element at a given breakpoint, make sure to return null?
+ *
  * @param array $url_metrics           URL metrics.
  * @param int[] $breakpoint_max_widths Breakpoint max widths.
  * @return array LCP elements keyed by its minimum viewport width.
