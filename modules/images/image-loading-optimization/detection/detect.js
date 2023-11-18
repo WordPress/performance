@@ -7,6 +7,8 @@ const consoleLogPrefix = '[Image Loading Optimization]';
 
 const storageLockTimeSessionKey = 'iloStorageLockTime';
 
+const adminBarId = 'wpadminbar';
+
 /**
  * Checks whether storage is locked.
  *
@@ -111,7 +113,12 @@ function getElementIndex( element ) {
 	if ( ! element.parentElement ) {
 		return 0;
 	}
-	return [ ...element.parentElement.children ].indexOf( element );
+	const children = [ ...element.parentElement.children ];
+	let index = children.indexOf( element );
+	if ( children.includes( document.getElementById( adminBarId ) ) ) {
+		--index;
+	}
+	return index;
 }
 
 /**
@@ -238,7 +245,7 @@ export default async function detect( {
 
 	// Obtain the admin bar element because we don't want to detect elements inside of it.
 	const adminBar =
-		/** @type {?HTMLDivElement} */ doc.getElementById( 'wpadminbar' );
+		/** @type {?HTMLDivElement} */ doc.getElementById( adminBarId );
 
 	// We need to capture the original elements and their breadcrumbs as early as possible in case JavaScript is
 	// mutating the DOM from the original HTML rendered by the server, in which case the breadcrumbs obtained from the

@@ -136,7 +136,7 @@ function ilo_register_endpoint() {
 								'items'    => array(
 									'type'       => 'object',
 									'properties' => array(
-										'tagName' => array(
+										'tagName' => array( // TODO: Should this just be 'tag' instead?
 											'type'     => 'string',
 											'required' => true,
 											'pattern'  => '^[a-zA-Z0-9-]+$',
