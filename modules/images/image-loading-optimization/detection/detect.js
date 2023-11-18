@@ -116,6 +116,15 @@ function getElementIndex( element ) {
 	const children = [ ...element.parentElement.children ];
 	let index = children.indexOf( element );
 	if ( children.includes( document.getElementById( adminBarId ) ) ) {
+		// TODO: Should detection just be turned off when is_user_logged_in()?
+		--index;
+	}
+	if (
+		children.includes(
+			document.querySelector( '.skip-link.screen-reader-text' )
+		)
+	) {
+		// TODO: This is not good.
 		--index;
 	}
 	return index;
