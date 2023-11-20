@@ -7,9 +7,10 @@
  */
 
 /**
- * Prints the speculation rules in a cross-browser compatible way.
+ * Returns the speculation rules.
  *
- * For browsers that do not support speculation rules yet, the rules will not be loaded.
+ * Plugins with features that rely on frontend URLs to exclude from prefetching or prerendering should use the
+ * {@see 'plsr_speculation_rules_href_exclude_paths'} filter to ensure those URL patterns are excluded.
  *
  * @since n.e.x.t
  *
@@ -35,14 +36,14 @@ function plsr_get_speculation_rules() {
 	$href_exclude_paths = (array) apply_filters( 'plsr_speculation_rules_href_exclude_paths', $href_exclude_paths );
 
 	// Ensure that there are no duplicates and that the base paths cannot be removed.
-	$href_exclude_paths = array_map(
-		static function ( $exclude_path ) {
-			if ( ! str_starts_with( $exclude_path, '/' ) ) {
-				$exclude_path = '/' . $exclude_path;
-			}
-			return $exclude_path . '\\?*#*';
-		},
-		array_unique(
+	$href_exclude_paths = array_unique(
+		array_map(
+			static function ( $exclude_path ) {
+				if ( ! str_starts_with( $exclude_path, '/' ) ) {
+					$exclude_path = '/' . $exclude_path;
+				}
+				return $exclude_path . '\\?*#*';
+			},
 			array_merge(
 				$base_href_exclude_paths,
 				$href_exclude_paths
