@@ -209,7 +209,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 						'<a href="%1$s" class="button activate-now" aria-label="%2$s">%3$s</a>',
 						esc_url( $activate_url ),
 						esc_attr( sprintf( $button_label, $plugin_data['name'] ) ),
-						$button_text
+						esc_html( $button_text )
 					);
 				} else {
 					$action_links[] = sprintf(
