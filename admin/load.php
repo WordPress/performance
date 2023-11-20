@@ -41,9 +41,9 @@ add_action( 'admin_menu', 'perflab_add_modules_page' );
 /**
  * Initializes settings sections and fields for the modules page.
  *
- * @global array $wp_settings_sections Registered WordPress settings sections.
- *
  * @since 1.0.0
+ *
+ * @global array $wp_settings_sections Registered WordPress settings sections.
  *
  * @param array|null $modules     Associative array of available module data, keyed by module slug. By default, this
  *                                will rely on {@see perflab_get_modules()}.
@@ -543,12 +543,12 @@ function perflab_activate_plugin() {
 	}
 
 	// The plugin being activated.
-	$plugin = sanitize_text_field( $_GET['plugin'] );
+	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
 
 	check_admin_referer( "perflab_activate_plugin_{$plugin}" );
 
 	if ( ! current_user_can( 'activate_plugin', $plugin ) ) {
-		wp_die( __( 'Sorry, you are not allowed to activate this plugin.', 'default' ) ); // phpcs:ignore
+		wp_die( esc_html__( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
 	}
 
 	// Activate the plugin in question and return to prior screen.
@@ -581,12 +581,12 @@ function perflab_deactivate_plugin() {
 	}
 
 	// The plugin being deactivated.
-	$plugin = sanitize_text_field( $_GET['plugin'] );
+	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
 
 	check_admin_referer( "perflab_deactivate_plugin_{$plugin}" );
 
 	if ( ! current_user_can( 'deactivate_plugin', $plugin ) ) {
-		wp_die( __( 'Sorry, you are not allowed to deactivate this plugin.', 'default' ) ); // phpcs:ignore
+		wp_die( esc_html__( 'Sorry, you are not allowed to deactivate this plugin.', 'default' ) );
 	}
 
 	// Deactivate the plugin in question and return to prior screen.
@@ -619,13 +619,13 @@ function perflab_plugin_admin_notices() {
 		return;
 	}
 
-	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore
+	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
 		<div class="notice notice-success is-dismissible">
 			<p><?php esc_html_e( 'Plugin activated.', 'default' ); ?></p>
 		</div>
 		<?php
-	} elseif ( isset( $_GET['deactivate'] ) ) { // phpcs:ignore
+	} elseif ( isset( $_GET['deactivate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
 		<div class="notice notice-success is-dismissible">
 			<p><?php esc_html_e( 'Plugin deactivated.', 'default' ); ?></p>

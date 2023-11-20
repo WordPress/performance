@@ -101,9 +101,14 @@ function perflab_render_plugins_ui() {
 /**
  * Renders individual plugin cards.
  *
+ * This is adapted from `WP_Plugin_Install_List_Table::display_rows()` in core.
+ *
  * @since n.e.x.t
  *
- * @param array $plugin_data Plugin data as passed from get_standalone_plugins().
+ * @see WP_Plugin_Install_List_Table::display_rows()
+ * @link https://github.com/WordPress/wordpress-develop/blob/0b8ca16ea3bd9722bd1a38f8ab68901506b1a0e7/src/wp-admin/includes/class-wp-plugin-install-list-table.php#L467-L830
+ *
+ * @param array $plugin_data Plugin data from the WordPress.org API.
  */
 function perflab_render_plugin_card( array $plugin_data ) {
 	// If no plugin data is returned, return.
@@ -115,22 +120,14 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	$description = wp_strip_all_tags( $plugin_data['short_description'] );
 	$title       = $plugin_data['name'];
 
-	/**
-	 * Filters the plugin card description on the Add Plugins screen.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param string $description Plugin card description.
-	 * @param array  $plugin_data An array of plugin data. See {@see plugins_api()}
-	 *                            for the list of possible values.
-	 */
+	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
 	$description = apply_filters( 'plugin_install_description', $description, $plugin_data );
 	$version     = $plugin_data['version'];
 	$name        = wp_strip_all_tags( $title . ' ' . $version );
 	$author      = $plugin_data['author'];
 	if ( ! empty( $author ) ) {
 		/* translators: %s: Plugin author. */
-		$author = ' <cite>' . sprintf( __( 'By %s', 'default' ), $author ) . '</cite>';
+		$author = ' <cite>' . esc_html( sprintf( __( 'By %s', 'default' ), $author ) ) . '</cite>';
 	}
 
 	$requires_php = isset( $plugin_data['requires_php'] ) ? $plugin_data['requires_php'] : null;
@@ -175,7 +172,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 				);
 				if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
 					global $page;
-					$s       = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : ''; // phpcs:ignore
+					$s       = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					$context = $status['status'];
 
 					$action_links[] = sprintf(
@@ -297,7 +294,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 					);
 				} elseif ( current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
-					/* translators: %s: URL to Update PHP page. */
+						/* translators: %s: URL to Update PHP page. */
 						' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
 						esc_url( wp_get_update_php_url() )
 					);
@@ -307,7 +304,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 				esc_html_e( 'This plugin does not work with your version of WordPress.', 'default' );
 				if ( current_user_can( 'update_core' ) ) {
 					echo wp_kses_post(
-					/* translators: %s: URL to WordPress Updates screen. */
+						/* translators: %s: URL to WordPress Updates screen. */
 						' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
 						esc_url( self_admin_url( 'update-core.php' ) )
 					);
@@ -316,7 +313,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 				esc_html_e( 'This plugin does not work with your version of PHP.', 'default' );
 				if ( current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
-					/* translators: %s: URL to Update PHP page. */
+						/* translators: %s: URL to Update PHP page. */
 						' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
 						esc_url( wp_get_update_php_url() )
 					);
@@ -363,8 +360,11 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			<div class="column-updated">
 				<strong><?php esc_html_e( 'Last Updated:', 'default' ); ?></strong>
 				<?php
-				/* translators: %s: Human-readable time difference. */
-				printf( __( '%s ago', 'performance-lab' ), human_time_diff( $last_updated_timestamp ) ); // phpcs:ignore
+				printf(
+					/* translators: %s: Human-readable time difference. */
+					esc_html__( '%s ago', 'performance-lab' ),
+					esc_html( human_time_diff( $last_updated_timestamp ) )
+				);
 				?>
 			</div>
 			<div class="column-downloaded">
