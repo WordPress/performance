@@ -275,9 +275,9 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>">
 		<?php
 		if ( ! $compatible_php || ! $compatible_wp ) {
-			echo '<div class="notice inline notice-error notice-alt"><p>';
+			echo '<div class="notice inline notice-error notice-alt">';
 			if ( ! $compatible_php && ! $compatible_wp ) {
-				esc_html_e( 'This plugin does not work with your versions of WordPress and PHP.', 'default' );
+				echo '<p>' . esc_html_e( 'This plugin does not work with your versions of WordPress and PHP.', 'default' ) . '</p>';
 				if ( current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
 						/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
@@ -285,7 +285,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 						esc_url( self_admin_url( 'update-core.php' ) ),
 						esc_url( wp_get_update_php_url() )
 					);
-					wp_update_php_annotation( '</p><p><em>', '</em>' );
+					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				} elseif ( current_user_can( 'update_core' ) ) {
 					echo wp_kses_post(
 					/* translators: %s: URL to WordPress Updates screen. */
@@ -298,7 +298,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 						' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
 						esc_url( wp_get_update_php_url() )
 					);
-					wp_update_php_annotation( '</p><p><em>', '</em>' );
+					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				}
 			} elseif ( ! $compatible_wp ) {
 				esc_html_e( 'This plugin does not work with your version of WordPress.', 'default' );
@@ -317,10 +317,10 @@ function perflab_render_plugin_card( array $plugin_data ) {
 						' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
 						esc_url( wp_get_update_php_url() )
 					);
-					wp_update_php_annotation( '</p><p><em>', '</em>' );
+					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				}
 			}
-			echo '</p></div>';
+			echo '</div>';
 		}
 		?>
 		<div class="plugin-card-top">
