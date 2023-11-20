@@ -188,7 +188,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 						esc_attr( $plugin_data['slug'] ),
 						/* translators: %s: Plugin name. */
 						esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'default' ), $plugin_data['slug'] ) ),
-						__( 'Deactivate', 'default' )
+						esc_html__( 'Deactivate', 'default' )
 					);
 				}
 			} elseif ( current_user_can( 'activate_plugin', $status['file'] ) ) {
