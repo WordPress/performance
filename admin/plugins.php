@@ -258,16 +258,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		$plugin_icon_url = $plugin_data['icons']['default'];
 	}
 
-	/**
-	 * Filters the install action links for a plugin.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param string[] $action_links An array of plugin action links.
-	 *                               Defaults are links to Details and Install Now.
-	 * @param array    $plugin       An array of plugin data. See {@see plugins_api()}
-	 *                               for the list of possible values.
-	 */
+	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
 	$action_links = apply_filters( 'plugin_install_action_links', $action_links, $plugin_data );
 
 	$last_updated_timestamp = strtotime( $plugin_data['last_updated'] );
