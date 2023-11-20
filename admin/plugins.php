@@ -279,7 +279,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				} elseif ( current_user_can( 'update_core' ) ) {
 					echo wp_kses_post(
-					/* translators: %s: URL to WordPress Updates screen. */
+					  /* translators: %s: URL to WordPress Updates screen. */
 						' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
 						esc_url( self_admin_url( 'update-core.php' ) )
 					);
