@@ -42,6 +42,13 @@ function plsr_get_speculation_rules() {
 				if ( ! str_starts_with( $exclude_path, '/' ) ) {
 					$exclude_path = '/' . $exclude_path;
 				}
+
+				/*
+				 * TODO: Remove this eventually as it's no longer needed in Chrome 121+.
+				 * See:
+				 * * https://github.com/whatwg/urlpattern/issues/179
+				 * * https://chromium-review.googlesource.com/c/chromium/src/+/4975595
+				 */
 				return $exclude_path . '\\?*#*';
 			},
 			array_merge(
