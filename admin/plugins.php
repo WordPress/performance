@@ -245,7 +245,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		/* translators: %s: Plugin name and version. */
 		esc_attr( sprintf( __( 'More information about %s', 'default' ), $name ) ),
 		esc_attr( $name ),
-		__( 'More Details', 'default' )
+		esc_html__( 'More Details', 'default' )
 	);
 
 	if ( ! empty( $plugin_data['icons']['svg'] ) ) {
