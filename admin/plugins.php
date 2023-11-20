@@ -188,7 +188,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 						esc_attr( $plugin_data['slug'] ),
 						/* translators: %s: Plugin name. */
 						esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'default' ), $plugin_data['slug'] ) ),
-						__( 'Deactivate', 'default' )
+						esc_html__( 'Deactivate', 'default' )
 					);
 				}
 			} elseif ( current_user_can( 'activate_plugin', $status['file'] ) ) {
@@ -209,12 +209,12 @@ function perflab_render_plugin_card( array $plugin_data ) {
 						'<a href="%1$s" class="button activate-now" aria-label="%2$s">%3$s</a>',
 						esc_url( $activate_url ),
 						esc_attr( sprintf( $button_label, $plugin_data['name'] ) ),
-						$button_text
+						esc_html( $button_text )
 					);
 				} else {
 					$action_links[] = sprintf(
 						'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-						_x( 'Cannot Activate', 'plugin', 'default' )
+						esc_html( _x( 'Cannot Activate', 'plugin', 'default' ) )
 					);
 				}
 			} else {
@@ -245,7 +245,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		/* translators: %s: Plugin name and version. */
 		esc_attr( sprintf( __( 'More information about %s', 'default' ), $name ) ),
 		esc_attr( $name ),
-		__( 'More Details', 'default' )
+		esc_html__( 'More Details', 'default' )
 	);
 
 	if ( ! empty( $plugin_data['icons']['svg'] ) ) {
@@ -258,16 +258,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		$plugin_icon_url = $plugin_data['icons']['default'];
 	}
 
-	/**
-	 * Filters the install action links for a plugin.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param string[] $action_links An array of plugin action links.
-	 *                               Defaults are links to Details and Install Now.
-	 * @param array    $plugin       An array of plugin data. See {@see plugins_api()}
-	 *                               for the list of possible values.
-	 */
+	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
 	$action_links = apply_filters( 'plugin_install_action_links', $action_links, $plugin_data );
 
 	$last_updated_timestamp = strtotime( $plugin_data['last_updated'] );
@@ -288,7 +279,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				} elseif ( current_user_can( 'update_core' ) ) {
 					echo wp_kses_post(
-					/* translators: %s: URL to WordPress Updates screen. */
+					  /* translators: %s: URL to WordPress Updates screen. */
 						' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
 						esc_url( self_admin_url( 'update-core.php' ) )
 					);
