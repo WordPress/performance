@@ -214,7 +214,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 				} else {
 					$action_links[] = sprintf(
 						'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-						_x( 'Cannot Activate', 'plugin', 'default' )
+						esc_html( _x( 'Cannot Activate', 'plugin', 'default' ) )
 					);
 				}
 			} else {
