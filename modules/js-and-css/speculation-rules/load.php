@@ -15,5 +15,6 @@ if ( defined( 'SPECULATION_RULES_VERSION' ) ) {
 
 define( 'SPECULATION_RULES_VERSION', 'Performance Lab ' . PERFLAB_VERSION );
 
+require_once __DIR__ . '/class-plsr-url-pattern-prefixer.php';
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';

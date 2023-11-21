@@ -17,9 +17,11 @@
  * @return array Associative array of speculation rules by type.
  */
 function plsr_get_speculation_rules() {
+	$prefixer = new PLSR_URL_Pattern_Prefixer();
+
 	$base_href_exclude_paths = array(
-		'/wp-login.php',
-		'/wp-admin/*',
+		$prefixer->prefix_path_pattern( '/wp-login.php', 'site' ),
+		$prefixer->prefix_path_pattern( '/wp-admin/*', 'site' ),
 	);
 	$href_exclude_paths      = $base_href_exclude_paths;
 
@@ -28,6 +30,8 @@ function plsr_get_speculation_rules() {
 	 *
 	 * All paths should start in a forward slash, relative to the root document. The `*` can be used as a wildcard.
 	 * By default, the array includes `/wp-login.php` and `/wp-admin/*`.
+	 *
+	 * If the WordPress site is in a subdirectory, the exclude paths will automatically be prefixed as necessary.
 	 *
 	 * @since n.e.x.t
 	 *
@@ -38,10 +42,8 @@ function plsr_get_speculation_rules() {
 	// Ensure that there are no duplicates and that the base paths cannot be removed.
 	$href_exclude_paths = array_unique(
 		array_map(
-			static function ( $exclude_path ) {
-				if ( ! str_starts_with( $exclude_path, '/' ) ) {
-					$exclude_path = '/' . $exclude_path;
-				}
+			static function ( $exclude_path ) use ( $prefixer ) {
+				$exclude_path = $prefixer->prefix_path_pattern( $exclude_path );
 
 				/*
 				 * TODO: Remove this eventually as it's no longer needed in Chrome 121+.
@@ -65,7 +67,7 @@ function plsr_get_speculation_rules() {
 				'and' => array(
 					// Prerender any URLs within the same site.
 					array(
-						'href_matches' => '/*\\?*',
+						'href_matches' => $prefixer->prefix_path_pattern( '/*\\?*' ),
 						'relative_to'  => 'document',
 					),
 					// Except for WP login and admin URLs.
