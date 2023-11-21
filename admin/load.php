@@ -53,6 +53,9 @@ add_action( 'admin_menu', 'perflab_add_modules_page' );
 function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 	global $wp_settings_sections;
 
+	// Handle script enqueuing for settings page.
+	add_action( 'admin_enqueue_scripts', 'perflab_enqueue_modules_page_scripts' );
+
 	// Register sections for all focus areas, plus 'Other'.
 	if ( ! is_array( $focus_areas ) ) {
 		$focus_areas = perflab_get_focus_areas();
@@ -107,9 +110,11 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 function perflab_render_modules_page() {
 	?>
 	<div class="wrap">
-		<h1>
+		<?php perflab_render_plugins_ui(); ?>
+
+		<h2>
 			<?php esc_html_e( 'Performance Modules', 'performance-lab' ); ?>
-		</h1>
+		</h2>
 
 		<form action="options.php" method="post">
 			<?php settings_fields( PERFLAB_MODULES_SCREEN ); ?>
@@ -503,3 +508,129 @@ function perflab_dismiss_wp_pointer_wrapper() {
 	check_ajax_referer( 'dismiss_pointer' );
 }
 add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 0 );
+
+/**
+ * Callback function to handle admin scripts.
+ *
+ * @since n.e.x.t
+ */
+function perflab_enqueue_modules_page_scripts() {
+	wp_enqueue_script( 'updates' );
+
+	wp_localize_script(
+		'updates',
+		'_wpUpdatesItemCounts',
+		array(
+			'settings' => array(
+				'totals' => wp_get_update_data(),
+			),
+		)
+	);
+
+	wp_enqueue_script( 'thickbox' );
+	wp_enqueue_style( 'thickbox' );
+}
+
+/**
+ * Callback function hooked to admin_action_perflab_activate_plugin to handle plugin activation.
+ *
+ * @since n.e.x.t
+ */
+function perflab_activate_plugin() {
+	// Do not proceed if plugin query arg is not present.
+	if ( empty( $_GET['plugin'] ) ) {
+		return;
+	}
+
+	// The plugin being activated.
+	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
+
+	check_admin_referer( "perflab_activate_plugin_{$plugin}" );
+
+	if ( ! current_user_can( 'activate_plugin', $plugin ) ) {
+		wp_die( esc_html__( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
+	}
+
+	// Activate the plugin in question and return to prior screen.
+	$do_plugin_activation = activate_plugins( $plugin );
+	$referer              = wp_get_referer();
+	if ( ! is_wp_error( $do_plugin_activation ) ) {
+		$referer = add_query_arg(
+			array(
+				'activate' => true,
+			),
+			$referer
+		);
+	}
+
+	if ( wp_safe_redirect( $referer ) ) {
+		exit;
+	}
+}
+add_action( 'admin_action_perflab_activate_plugin', 'perflab_activate_plugin' );
+
+/**
+ * Callback function hooked to admin_action_perflab_deactivate_plugin to handle plugin deactivation.
+ *
+ * @since n.e.x.t
+ */
+function perflab_deactivate_plugin() {
+	// Do not proceed if plugin query arg is not present.
+	if ( empty( $_GET['plugin'] ) ) {
+		return;
+	}
+
+	// The plugin being deactivated.
+	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
+
+	check_admin_referer( "perflab_deactivate_plugin_{$plugin}" );
+
+	if ( ! current_user_can( 'deactivate_plugin', $plugin ) ) {
+		wp_die( esc_html__( 'Sorry, you are not allowed to deactivate this plugin.', 'default' ) );
+	}
+
+	// Deactivate the plugin in question and return to prior screen.
+	$do_plugin_deactivation = deactivate_plugins( $plugin );
+	$referer                = wp_get_referer();
+	if ( ! is_wp_error( $do_plugin_deactivation ) ) {
+		$referer = add_query_arg(
+			array(
+				'deactivate' => true,
+			),
+			$referer
+		);
+	}
+
+	if ( wp_safe_redirect( $referer ) ) {
+		exit;
+	}
+}
+add_action( 'admin_action_perflab_deactivate_plugin', 'perflab_deactivate_plugin' );
+
+/**
+ * Callback function hooked to admin_notices to render plugin activate/deactivate notices.
+ *
+ * @since n.e.x.t
+ *
+ * @return void
+ */
+function perflab_plugin_admin_notices() {
+	if ( 'settings_page_perflab-modules' !== get_current_screen()->id ) {
+		return;
+	}
+
+	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p><?php esc_html_e( 'Plugin activated.', 'default' ); ?></p>
+		</div>
+		<?php
+	} elseif ( isset( $_GET['deactivate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p><?php esc_html_e( 'Plugin deactivated.', 'default' ); ?></p>
+		</div>
+		<?php
+	}
+}
+add_action( 'admin_notices', 'perflab_plugin_admin_notices' );

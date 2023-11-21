@@ -441,6 +441,7 @@ register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin'
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/server-timing.php';
+	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/plugins.php';
 }
 
 /**
