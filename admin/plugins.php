@@ -127,7 +127,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	$author      = $plugin_data['author'];
 	if ( ! empty( $author ) ) {
 		/* translators: %s: Plugin author. */
-		$author = ' <cite>' . wp_kses_post( sprintf( __( 'By %s', 'default' ), $author ) ) . '</cite>';
+		$author = ' <cite>' . sprintf( __( 'By %s', 'default' ), $author ) . '</cite>';
 	}
 
 	$requires_php = isset( $plugin_data['requires_php'] ) ? $plugin_data['requires_php'] : null;
