@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-$oembed_lazy_load_scripts = 0;
+$oembed_lazy_load_scripts = false;
 
 /**
  * Filter the oEmbed HTML.
@@ -25,31 +25,32 @@ $oembed_lazy_load_scripts = 0;
 function plab_optimize_oembed_html( $html ) {
 	global $oembed_lazy_load_scripts;
 
-	// Locate script tags using regex.
+	// Find script tags in the oembed using regex.
 	preg_match_all( '/<script\b[^>]*>([\s\S]*?)<\/script>/mi', $html, $matches );
 
 	if ( ! empty( $matches[0][0] ) ) {
-
-		$found_tag = $matches[0][0];
+		$found_tag                = $matches[0][0];
+		$oembed_lazy_load_scripts = true;
 
 		// Remove the src attribute from the first script tag, transforming it into data-lazy-src.
 		$script_tag = str_replace( 'src=', 'data-lazy-embed-src=', $matches[0][0] );
 
-		++$oembed_lazy_load_scripts;
-
 		// Replace the script tag with the new one.
 		$html = str_replace( $found_tag, $script_tag, $html );
-
 	}
 
-	// Bail early if the tag already has a loading attribute.
-	if ( false !== strpos( $html, 'loading=' ) ) {
-		return $html;
+	// Find iframes in the oEmbed using a regex.
+	preg_match_all( '/<iframe\b[^>]*>([\s\S]*?)<\/iframe>/mi', $html, $matches );
+
+	// Add loading="lazy" to iframes that don't have a loading attribute.
+	if ( ! empty( $matches[0][0] ) ) {
+		foreach ( $matches[0] as $match ) {
+			if ( false === strpos( $match, 'loading=' ) ) {
+				$iframe_tag = str_replace( '<iframe', '<iframe loading="lazy"', $match );
+				$html       = str_replace( $match, $iframe_tag, $html );
+			}
+		}
 	}
-
-	// Add loading="lazy" to iframe tags.
-	$html = str_replace( '<iframe', '<iframe loading="lazy"', $html );
-
 	return $html;
 }
 add_filter( 'embed_oembed_html', 'plab_optimize_oembed_html', 10 );
@@ -63,7 +64,7 @@ add_filter( 'embed_oembed_html', 'plab_optimize_oembed_html', 10 );
 function plab_optimize_oembed_lazy_load_scripts() {
 	global $oembed_lazy_load_scripts;
 
-	if ( 0 === $oembed_lazy_load_scripts ) {
+	if ( ! $oembed_lazy_load_scripts ) {
 		return;
 	}
 	?>
