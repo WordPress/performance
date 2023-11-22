@@ -8,5 +8,5 @@
  * @package performance-lab
  */
 
-require_once __DIR__ . '/helper.php';
+// Load in the oEmbed Optimizer module hooks.
 require_once __DIR__ . '/hooks.php';
