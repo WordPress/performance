@@ -20,7 +20,7 @@ $oembed_lazy_load_scripts = false;
  *
  * @since n.e.x.t
  *
- * @param string $html The cached HTML result, stored in post meta.
+ * @param string $html The oEmbed HTML.
  * @return string
  */
 function plab_optimize_oembed_html( $html ) {
