@@ -15,7 +15,8 @@ $oembed_lazy_load_scripts = false;
 /**
  * Filter the oEmbed HTML.
  *
- * Always add loading="lazy" to any iframe tags.
+ * Add loading="lazy" to any iframe tags.
+ * Lazy load any script tags.
  *
  * @since n.e.x.t
  *
@@ -57,7 +58,7 @@ add_filter( 'embed_oembed_html', 'plab_optimize_oembed_html', 10 );
 
 /**
  * Add a script to the footer if there are lazy loaded embeds.
- * This script will load the embeds when they approach the viewport.
+ * Load the embed's scripts when they approach the viewport using an IntersectionObserver.
  *
  * @since n.e.x.t
  */
