@@ -23,7 +23,7 @@ $oembed_lazy_load_scripts = false;
  * @param string $html The oEmbed HTML.
  * @return string
  */
-function plab_optimize_oembed_html( $html ) {
+function perflab_optimize_oembed_html( $html ) {
 	global $oembed_lazy_load_scripts;
 
 	// Find iframes and script tags in the oEmbed using the WP_HTML_Tag_Processor.
@@ -44,7 +44,7 @@ function plab_optimize_oembed_html( $html ) {
 
 	return $html;
 }
-add_filter( 'embed_oembed_html', 'plab_optimize_oembed_html', 10 );
+add_filter( 'embed_oembed_html', 'perflab_optimize_oembed_html', 10 );
 
 /**
  * Add a script to the footer if there are lazy loaded embeds.
@@ -52,7 +52,7 @@ add_filter( 'embed_oembed_html', 'plab_optimize_oembed_html', 10 );
  *
  * @since n.e.x.t
  */
-function plab_optimize_oembed_lazy_load_scripts() {
+function perflab_optimize_oembed_lazy_load_scripts() {
 	global $oembed_lazy_load_scripts;
 
 	if ( ! $oembed_lazy_load_scripts ) {
@@ -86,4 +86,4 @@ function plab_optimize_oembed_lazy_load_scripts() {
 	</script>
 	<?php
 }
-add_action( 'wp_footer', 'plab_optimize_oembed_lazy_load_scripts', 99 );
+add_action( 'wp_footer', 'perflab_optimize_oembed_lazy_load_scripts', 99 );
