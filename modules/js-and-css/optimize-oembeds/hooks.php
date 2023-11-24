@@ -66,7 +66,7 @@ function perflab_optimize_oembed_lazy_load_scripts() {
 			lazyEmbeds.forEach( function( lazyEmbed ) {
 				parents.push( lazyEmbed.parentNode );
 			} );
-			var lazyEmbedObserver = new IntersectionObserver( function( entries, observer ) {
+			var lazyEmbedObserver = new IntersectionObserver( function( entries ) {
 				entries.forEach( function( entry ) {
 					if ( entry.isIntersecting ) {
 						var lazyDiv = entry.target;
