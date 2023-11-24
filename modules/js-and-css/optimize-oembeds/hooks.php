@@ -26,32 +26,22 @@ $oembed_lazy_load_scripts = false;
 function plab_optimize_oembed_html( $html ) {
 	global $oembed_lazy_load_scripts;
 
-	// Find script tags in the oembed using regex.
-	preg_match_all( '/<script\b[^>]*>([\s\S]*?)<\/script>/mi', $html, $matches );
-
-	if ( ! empty( $matches[0][0] ) ) {
-		$found_tag                = $matches[0][0];
-		$oembed_lazy_load_scripts = true;
-
-		// Remove the src attribute from the first script tag, transforming it into data-lazy-src.
-		$script_tag = str_replace( 'src=', 'data-lazy-embed-src=', $matches[0][0] );
-
-		// Replace the script tag with the new one.
-		$html = str_replace( $found_tag, $script_tag, $html );
-	}
-
-	// Find iframes in the oEmbed using a regex.
-	preg_match_all( '/<iframe\b[^>]*>([\s\S]*?)<\/iframe>/mi', $html, $matches );
-
-	// Add loading="lazy" to iframes that don't have a loading attribute.
-	if ( ! empty( $matches[0][0] ) ) {
-		foreach ( $matches[0] as $match ) {
-			if ( false === strpos( $match, 'loading=' ) ) {
-				$iframe_tag = str_replace( '<iframe', '<iframe loading="lazy"', $match );
-				$html       = str_replace( $match, $iframe_tag, $html );
-			}
+	// Find iframes and script tags in the oEmbed using the WP_HTML_Tag_Processor.
+	$p = new WP_HTML_Tag_Processor( $html );
+	if ( $p->next_tag( 'iframe' ) ) {
+		if ( empty( $p->get_attribute( 'loading' ) ) ) {
+			$p->set_attribute( 'loading', 'lazy' );
+			$html = $p->get_updated_html();
 		}
 	}
+	$p = new WP_HTML_Tag_Processor( $html );
+	if ( $p->next_tag( 'script' ) ) {
+		$oembed_lazy_load_scripts = true;
+		$p->set_attribute( 'data-lazy-embed-src', $p->get_attribute( 'src' ) );
+		$p->set_attribute( 'src', '' );
+		$html = $p->get_updated_html();
+	}
+
 	return $html;
 }
 add_filter( 'embed_oembed_html', 'plab_optimize_oembed_html', 10 );
