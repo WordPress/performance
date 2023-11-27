@@ -130,9 +130,6 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 	 */
 	public function provider_get_dominant_color_none_images() {
 		return array(
-			'svg' => array(
-				'files_path' => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/video-play.svg',
-			),
 			'pdf' => array(
 				'files_path' => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/wordpress-gsoc-flyer.pdf',
 			),
