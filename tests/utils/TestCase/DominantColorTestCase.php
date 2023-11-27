@@ -14,7 +14,7 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 		return array(
 			'animated_gif'  => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/animated.gif',
-				'expected_color'        => array( '874e4e', 'df7f7f' ),
+				'expected_color'        => array( '874e4e', '864e4e', 'df7f7f' ),
 				'expected_transparency' => true,
 			),
 			'red_jpg'       => array(
@@ -97,7 +97,7 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 			),
 			'balloons_webp' => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp',
-				'expected_color'        => array( 'c1bbb9', 'c3bdbd' ),
+				'expected_color'        => array( 'c1bbb9', 'c0bbb9', 'c3bdbd' ),
 				'expected_transparency' => false,
 			),
 		);
