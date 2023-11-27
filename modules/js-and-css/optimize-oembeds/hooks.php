@@ -26,20 +26,23 @@ $oembed_lazy_load_scripts = false;
 function perflab_optimize_oembed_html( $html ) {
 	global $oembed_lazy_load_scripts;
 
-	// Find iframes and script tags in the oEmbed using the WP_HTML_Tag_Processor.
 	$p = new WP_HTML_Tag_Processor( $html );
-	if ( $p->next_tag( 'iframe' ) ) {
-		if ( empty( $p->get_attribute( 'loading' ) ) ) {
-			$p->set_attribute( 'loading', 'lazy' );
-			$html = $p->get_updated_html();
+
+	// Find the first iframe or script tag to act on.
+	while ( $p->next_tag() ) {
+		if ( 'IFRAME' === $p->get_tag() ) {
+			$loading_value = $p->get_attribute( 'loading' );
+			if ( ! is_string( $loading_value ) || empty( $loading_value ) ) {
+				$p->set_attribute( 'loading', 'lazy' );
+			}
+			return $p->get_updated_html();
+
+		} elseif ( 'SCRIPT' === $p->get_tag() ) {
+			$oembed_lazy_load_scripts = true;
+			$p->set_attribute( 'data-lazy-embed-src', $p->get_attribute( 'src' ) );
+			$p->set_attribute( 'src', '' );
+			return $p->get_updated_html();
 		}
-	}
-	$p = new WP_HTML_Tag_Processor( $html );
-	if ( $p->next_tag( 'script' ) ) {
-		$oembed_lazy_load_scripts = true;
-		$p->set_attribute( 'data-lazy-embed-src', $p->get_attribute( 'src' ) );
-		$p->set_attribute( 'src', '' );
-		$html = $p->get_updated_html();
 	}
 
 	return $html;
