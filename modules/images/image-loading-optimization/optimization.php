@@ -107,9 +107,12 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 					}
 
 					if ( $processor->get_breadcrumbs() === $lcp_element['breadcrumbs'] ) {
-						// TODO: If it already has the attribute, include an attribute to indicate server-side heuristics were successful.
-						$processor->set_attribute( 'fetchpriority', 'high' );
-						$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
+						if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
+							$processor->set_attribute( 'data-ilo-fetchpriority-already-added', true );
+						} else {
+							$processor->set_attribute( 'fetchpriority', 'high' );
+							$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
+						}
 					} else {
 						$processor->remove_fetchpriority_attribute();
 					}
