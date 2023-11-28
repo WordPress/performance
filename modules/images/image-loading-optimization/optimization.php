@@ -81,21 +81,33 @@ function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widt
  * @return string Filtered template output buffer.
  */
 function ilo_optimize_template_output_buffer( string $buffer ): string {
-	$slug        = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
-	$post        = ilo_get_url_metrics_post( $slug );
-	$url_metrics = $post ? ilo_parse_stored_url_metrics( $post ) : array(); // TODO: If $post is null, short circuit?
+	$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
+	$post = ilo_get_url_metrics_post( $slug );
 
-	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $url_metrics, ilo_get_breakpoint_max_widths() );
+	// No URL metrics are present, so there's nothing we can do.
+	if ( ! $post ) {
+		return $buffer;
+	}
+
+	$url_metrics = ilo_parse_stored_url_metrics( $post );
+
+	$breakpoint_max_widths                   = ilo_get_breakpoint_max_widths();
+	$url_metrics_grouped_by_breakpoint       = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );
+	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $url_metrics_grouped_by_breakpoint );
 
 	if ( ! empty( $lcp_elements_by_minimum_viewport_widths ) ) {
 
-		// TODO: What if we just don't have enough data for the other breakpoints yet? That is if count(ilo_group_url_metrics_by_breakpoint) !== count($breakpoint_max_widths)+1.
-		// If there is exactly one LCP image for all breakpoints, ensure fetchpriority is set on that image only.
+		// TODO: Handle case when the LCP element is not an image at all, but rather a background-image.
+		// Use the fetchpriority attribute on the image when all breakpoints have the same LCP element.
 		if (
 			// All breakpoints share the same LCP element (or all have none at all).
-			1 === count( $lcp_elements_by_minimum_viewport_widths ) &&
+			1 === count( $lcp_elements_by_minimum_viewport_widths )
+			&&
 			// The breakpoints don't share a common lack of an LCP element.
 			! in_array( false, $lcp_elements_by_minimum_viewport_widths, true )
+			&&
+			// All breakpoints have URL metrics being reported.
+			count( array_filter( $url_metrics_grouped_by_breakpoint ) ) === count( $breakpoint_max_widths ) + 1
 		) {
 			$lcp_element = current( $lcp_elements_by_minimum_viewport_widths );
 
