@@ -47,12 +47,14 @@ function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widt
 			unset( $img_attributes['src'] );
 		}
 
-		// Add media query.
-		$media_query = sprintf( 'screen and ( min-width: %dpx )', $minimum_viewport_widths[ $i ] );
-		if ( isset( $minimum_viewport_widths[ $i + 1 ] ) ) {
-			$media_query .= sprintf( ' and ( max-width: %dpx )', $minimum_viewport_widths[ $i + 1 ] - 1 );
+		// Add media query if it's going to be something other than just `min-width: 0px`.
+		if ( $minimum_viewport_widths[ $i ] > 0 || isset( $minimum_viewport_widths[ $i + 1 ] ) ) {
+			$media_query = sprintf( '( min-width: %dpx )', $minimum_viewport_widths[ $i ] );
+			if ( isset( $minimum_viewport_widths[ $i + 1 ] ) ) {
+				$media_query .= sprintf( ' and ( max-width: %dpx )', $minimum_viewport_widths[ $i + 1 ] - 1 );
+			}
+			$img_attributes['media'] = $media_query;
 		}
-		$img_attributes['media'] = $media_query;
 
 		// Construct preload link.
 		$link_tag = '<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image"';
