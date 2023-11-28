@@ -265,15 +265,18 @@ export default async function detect( {
 	const breadcrumbedImages = doc.body.querySelectorAll( 'img' );
 
 	// We do the same for elements with background images which are not data: URLs.
-	const breadcrumbedElementsWithBackgrounds = Array.from(
-		doc.body.querySelectorAll( '[style*="background"]' )
-	).filter( ( /** @type {Element} */ el ) =>
-		/url\(\s*['"](?!=data:)/.test( el.style.backgroundImage )
-	);
+	// TODO: Re-enable background image support when server-side is implemented.
+	// const breadcrumbedElementsWithBackgrounds = Array.from(
+	// 	doc.body.querySelectorAll( '[style*="background"]' )
+	// ).filter( ( /** @type {Element} */ el ) =>
+	// 	/url\(\s*['"](?!=data:)/.test( el.style.backgroundImage )
+	// );
 
 	/** @type {Map<Element, Breadcrumb[]>} */
 	const breadcrumbedElementsMap = new Map(
-		[ ...breadcrumbedImages, ...breadcrumbedElementsWithBackgrounds ].map(
+		[
+			...breadcrumbedImages /*, ...breadcrumbedElementsWithBackgrounds*/,
+		].map(
 			// TODO: Instead of generating breadcrumbs here, rely instead on server-generated breadcrumbs that are added to a data attribute by the server.
 			( element ) => [ element, getBreadcrumbs( element ) ]
 		)
