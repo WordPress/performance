@@ -83,7 +83,7 @@ function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widt
 function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$slug        = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
 	$post        = ilo_get_url_metrics_post( $slug );
-	$url_metrics = ilo_parse_stored_url_metrics( $post );
+	$url_metrics = $post ? ilo_parse_stored_url_metrics( $post ) : array(); // TODO: If $post is null, short circuit?
 
 	$lcp_images_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $url_metrics, ilo_get_breakpoint_max_widths() );
 
