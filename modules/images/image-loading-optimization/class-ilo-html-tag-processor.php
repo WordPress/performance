@@ -112,9 +112,9 @@ class ILO_HTML_Tag_Processor {
 	 *
 	 * Whenever an open tag is encountered, invoke the supplied $open_tag_callback and pass the tag name and breadcrumbs.
 	 *
-	 * @param Closure $open_tag_callback Open tag callback. The processor instance is passed as the sole argument.
+	 * @param callable $open_tag_callback Open tag callback. The processor instance is passed as the sole argument.
 	 */
-	public function walk( Closure $open_tag_callback ) {
+	public function walk( callable $open_tag_callback ) {
 		$p = $this->processor;
 
 		/*
