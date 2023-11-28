@@ -52,7 +52,7 @@ class PLSR_URL_Pattern_Prefixer {
 	 *                             directory that WordPress is installed in). Default 'home'.
 	 * @return string URL pattern, prefixed as necessary.
 	 */
-	public function prefix_path_pattern( string $path_pattern, string $context = 'home' ) {
+	public function prefix_path_pattern( string $path_pattern, string $context = 'home' ): string {
 		// If context path does not exist, the context is invalid.
 		if ( ! isset( $this->contexts[ $context ] ) ) {
 			_doing_it_wrong(
