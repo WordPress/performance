@@ -32,7 +32,7 @@ function perflab_optimize_oembed_html( $html ) {
 	while ( $p->next_tag() ) {
 		if ( 'IFRAME' === $p->get_tag() ) {
 			$loading_value = $p->get_attribute( 'loading' );
-			if ( ! is_string( $loading_value ) || empty( $loading_value ) ) {
+			if ( empty( $loading_value ) ) {
 				$p->set_attribute( 'loading', 'lazy' );
 			}
 			return $p->get_updated_html();
