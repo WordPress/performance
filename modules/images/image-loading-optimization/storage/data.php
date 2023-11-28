@@ -44,7 +44,14 @@ function ilo_get_url_metric_freshness_ttl(): int {
  * @return bool Whether response can be optimized.
  */
 function ilo_can_optimize_response(): bool {
-	$able = ! is_search();
+	$able = ! (
+		// Since the URL space is infinite.
+		is_search() ||
+		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
+		is_customize_preview() ||
+		// The images detected in the response body of a POST request cannot, by definition, be cached.
+		'GET' !== $_SERVER['REQUEST_METHOD']
+	);
 
 	/**
 	 * Filters whether the current response can be optimized.
