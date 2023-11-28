@@ -106,6 +106,8 @@ function error( ...message ) {
 /**
  * Gets element index among siblings.
  *
+ * @todo Eliminate this in favor of doing all breadcrumb generation exclusively on the server.
+ *
  * @param {Element} element Element.
  * @return {number} Index.
  */
@@ -124,7 +126,6 @@ function getElementIndex( element ) {
 			document.querySelector( '.skip-link.screen-reader-text' )
 		)
 	) {
-		// TODO: This is not good.
 		--index;
 	}
 	return index;
@@ -132,6 +133,8 @@ function getElementIndex( element ) {
 
 /**
  * Gets breadcrumbs for a given element.
+ *
+ * @todo Eliminate this in favor of doing all breadcrumb generation exclusively on the server.
  *
  * @param {Element} leafElement
  * @return {Breadcrumb[]} Breadcrumbs.
@@ -271,6 +274,7 @@ export default async function detect( {
 	/** @type {Map<Element, Breadcrumb[]>} */
 	const breadcrumbedElementsMap = new Map(
 		[ ...breadcrumbedImages, ...breadcrumbedElementsWithBackgrounds ].map(
+			// TODO: Instead of generating breadcrumbs here, rely instead on server-generated breadcrumbs that are added to a data attribute by the server.
 			( element ) => [ element, getBreadcrumbs( element ) ]
 		)
 	);
