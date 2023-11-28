@@ -342,27 +342,27 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( array $url_metrics, ar
 	}
 
 	// Now we need to merge the breakpoints when there is an LCP element common between them.
-	$last_lcp_element = null;
+	$prev_lcp_element = null;
 	return array_filter(
 		$lcp_element_by_viewport_minimum_width,
-		static function ( $lcp_element ) use ( &$last_lcp_element ) {
+		static function ( $lcp_element ) use ( &$prev_lcp_element ) {
 			$include = (
 				// First element in list.
-				null === $last_lcp_element
+				null === $prev_lcp_element
 				||
-				( is_array( $last_lcp_element ) && is_array( $lcp_element )
+				( is_array( $prev_lcp_element ) && is_array( $lcp_element )
 					?
 					// This breakpoint and previous breakpoint had LCP element, and they were not the same element.
-					$last_lcp_element['breadcrumbs'] !== $lcp_element['breadcrumbs']
+					$prev_lcp_element['breadcrumbs'] !== $lcp_element['breadcrumbs']
 					:
 					// This LCP element and the last LCP element were not the same. In this case, either variable may be
 					// false or an array, but both cannot be an array. If both are false, we don't want to include since
 					// it is the same. If one is an array and the other is false, then do want to include because this
 					// indicates a difference at this breakpoint.
-					$last_lcp_element !== $lcp_element
+					$prev_lcp_element !== $lcp_element
 				)
 			);
-			$last_lcp_element = $lcp_element;
+			$prev_lcp_element = $lcp_element;
 			return $include;
 		}
 	);
