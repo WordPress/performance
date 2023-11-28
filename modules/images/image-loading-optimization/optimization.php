@@ -128,12 +128,12 @@ function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widt
 
 			$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
 		}
-		$link_tag .= '>';
+		$link_tag .= ">\n";
 
 		$preload_links[] = $link_tag;
 	}
 
-	return implode( "\n", $preload_links );
+	return implode( '', $preload_links );
 }
 
 /**
@@ -314,7 +314,8 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 
 			$preload_links = ilo_construct_preload_links( $lcp_images_by_minimum_viewport_widths );
 
-			$buffer = str_replace( '</head>', $preload_links . '</head>', $buffer );
+			// TODO: In the future, WP_HTML_Processor could be used to do this injection. However, given the simple replacement here this is not essential.
+			$buffer = preg_replace( '#(?=</head>)#', $preload_links, $buffer, 1 );
 		}
 	}
 
