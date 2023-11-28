@@ -315,7 +315,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 			$preload_links = ilo_construct_preload_links( $lcp_images_by_minimum_viewport_widths );
 
 			// TODO: In the future, WP_HTML_Processor could be used to do this injection. However, given the simple replacement here this is not essential.
-			$buffer = preg_replace( '#(?=</head>)#', $preload_links, $buffer, 1 );
+			$buffer = preg_replace( '#(?=</HEAD>)#i', $preload_links, $buffer, 1 );
 		}
 	}
 
