@@ -218,14 +218,14 @@ class ILO_HTML_Tag_Processor {
 	 *
 	 * Breadcrumbs are constructed to match the format from detect.js.
 	 *
-	 * @return array<array{tagName: string, index: int}> Breadcrumbs.
+	 * @return array<array{tag: string, index: int}> Breadcrumbs.
 	 */
 	public function get_breadcrumbs(): array {
 		$breadcrumbs = array();
 		foreach ( $this->open_stack_tags as $i => $breadcrumb_tag_name ) {
 			$breadcrumbs[] = array(
-				'tagName' => $breadcrumb_tag_name, // TODO: Just 'tag'.
-				'index'   => $this->open_stack_indices[ $i ],
+				'tag'   => $breadcrumb_tag_name,
+				'index' => $this->open_stack_indices[ $i ],
 			);
 		}
 		return $breadcrumbs;

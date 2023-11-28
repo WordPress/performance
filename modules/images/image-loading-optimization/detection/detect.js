@@ -80,8 +80,8 @@ function error( ...message ) {
 
 /**
  * @typedef {Object} Breadcrumb
- * @property {number} index   - Index of element among sibling elements.
- * @property {string} tagName - Tag name.
+ * @property {number} index - Index of element among sibling elements.
+ * @property {string} tag   - Tag name.
  */
 
 /**
@@ -146,7 +146,7 @@ function getBreadcrumbs( leafElement ) {
 	let element = leafElement;
 	while ( element instanceof Element ) {
 		breadcrumbs.unshift( {
-			tagName: element.tagName,
+			tag: element.tagName,
 			index: getElementIndex( element ),
 		} );
 		element = element.parentElement;
