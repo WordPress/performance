@@ -85,14 +85,19 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$post        = ilo_get_url_metrics_post( $slug );
 	$url_metrics = $post ? ilo_parse_stored_url_metrics( $post ) : array(); // TODO: If $post is null, short circuit?
 
-	$lcp_images_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $url_metrics, ilo_get_breakpoint_max_widths() );
+	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $url_metrics, ilo_get_breakpoint_max_widths() );
 
-	if ( ! empty( $lcp_images_by_minimum_viewport_widths ) ) {
-		$breakpoint_lcp_images = array_filter( $lcp_images_by_minimum_viewport_widths );
+	if ( ! empty( $lcp_elements_by_minimum_viewport_widths ) ) {
 
+		// TODO: What if we just don't have enough data for the other breakpoints yet? That is if count(ilo_group_url_metrics_by_breakpoint) !== count($breakpoint_max_widths)+1.
 		// If there is exactly one LCP image for all breakpoints, ensure fetchpriority is set on that image only.
-		if ( 1 === count( $lcp_images_by_minimum_viewport_widths ) && 1 === count( $breakpoint_lcp_images ) ) {
-			$lcp_element = current( $lcp_images_by_minimum_viewport_widths );
+		if (
+			// All breakpoints share the same LCP element (or all have none at all).
+			1 === count( $lcp_elements_by_minimum_viewport_widths ) &&
+			// The breakpoints don't share a common lack of an LCP element.
+			! in_array( false, $lcp_elements_by_minimum_viewport_widths, true )
+		) {
+			$lcp_element = current( $lcp_elements_by_minimum_viewport_widths );
 
 			$processor = new ILO_HTML_Tag_Processor( $buffer );
 			$processor->walk(
@@ -102,6 +107,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 					}
 
 					if ( $processor->get_breadcrumbs() === $lcp_element['breadcrumbs'] ) {
+						// TODO: If it already has the attribute, include an attribute to indicate server-side heuristics were successful.
 						$processor->set_attribute( 'fetchpriority', 'high' );
 						$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
 					} else {
@@ -117,7 +123,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 			// capturing the attributes from the LCP element which we can then use for preload links.
 			$processor = new ILO_HTML_Tag_Processor( $buffer );
 			$processor->walk(
-				static function () use ( $processor, &$lcp_images_by_minimum_viewport_widths ) {
+				static function () use ( $processor, &$lcp_elements_by_minimum_viewport_widths ) {
 					if ( $processor->get_tag() !== 'IMG' ) {
 						return;
 					}
@@ -125,13 +131,11 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 					$processor->remove_fetchpriority_attribute();
 
 					// Capture the attributes from the LCP elements to use in preload links.
-					if ( count( $lcp_images_by_minimum_viewport_widths ) > 1 ) { // TODO: Why?
-						foreach ( $lcp_images_by_minimum_viewport_widths as &$lcp_element ) {
-							if ( $lcp_element && $lcp_element['breadcrumbs'] === $processor->get_breadcrumbs() ) {
-								$lcp_element['attributes'] = array();
-								foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
-									$lcp_element['attributes'][ $attr_name ] = $processor->get_attribute( $attr_name );
-								}
+					foreach ( $lcp_elements_by_minimum_viewport_widths as &$lcp_element ) {
+						if ( $lcp_element && $lcp_element['breadcrumbs'] === $processor->get_breadcrumbs() ) {
+							$lcp_element['attributes'] = array();
+							foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
+								$lcp_element['attributes'][ $attr_name ] = $processor->get_attribute( $attr_name );
 							}
 						}
 					}
@@ -139,7 +143,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 			);
 			$buffer = $processor->get_updated_html();
 
-			$preload_links = ilo_construct_preload_links( $lcp_images_by_minimum_viewport_widths );
+			$preload_links = ilo_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
 
 			// TODO: In the future, WP_HTML_Processor could be used to do this injection. However, given the simple replacement here this is not essential.
 			$buffer = preg_replace( '#(?=</HEAD>)#i', $preload_links, $buffer, 1 );

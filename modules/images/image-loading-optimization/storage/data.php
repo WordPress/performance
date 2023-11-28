@@ -305,7 +305,7 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
  *
  * @param array $url_metrics           URL metrics.
  * @param int[] $breakpoint_max_widths Breakpoint max widths.
- * @return array LCP elements keyed by its minimum viewport width.
+ * @return array LCP elements keyed by its minimum viewport width. If there is no LCP element at a breakpoint, then `false` is used.
  */
 function ilo_get_lcp_elements_by_minimum_viewport_widths( array $url_metrics, array $breakpoint_max_widths ): array {
 	$grouped_url_metrics = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );
