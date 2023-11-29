@@ -14,6 +14,9 @@ require_once __DIR__ . '/class-ilo-html-tag-processor.php';
 
 /**
  * Adds template output buffer filter for optimization if eligible.
+ *
+ * @since n.e.x.t
+ * @access private
  */
 function ilo_maybe_add_template_output_buffer_filter() {
 	if ( ! ilo_can_optimize_response() ) {
@@ -25,6 +28,9 @@ add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
 
 /**
  * Constructs preload links.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @param array $lcp_images_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
  * @return string Markup for one or more preload link tags.
@@ -78,6 +84,9 @@ function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widt
 
 /**
  * Optimizes template output buffer.
+ *
+ * @since n.e.x.t
+ * @access private
  *
  * @param string $buffer Template output buffer.
  * @return string Filtered template output buffer.

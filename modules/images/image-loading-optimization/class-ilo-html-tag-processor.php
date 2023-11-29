@@ -10,6 +10,7 @@
  * Subclass of WP_HTML_Tag_Processor that adds support for breadcrumbs and a visiting callback.
  *
  * @since n.e.x.t
+ * @access private
  */
 class ILO_HTML_Tag_Processor {
 
