@@ -49,6 +49,8 @@ final class ILO_HTML_Tag_Processor {
 	 *
 	 * @link https://www.w3.org/TR/html-markup/p.html
 	 * @link https://github.com/ampproject/amp-toolbox-php/blob/c79a0fe558a3c042aee4789bbf33376cca7a733d/src/Html/Tag.php#L262-L293
+	 *
+	 * @var string[]
 	 */
 	const P_CLOSING_TAGS = array(
 		'ADDRESS',
