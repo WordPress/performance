@@ -7,12 +7,12 @@
  */
 
 /**
- * Subclass of WP_HTML_Tag_Processor that adds support for breadcrumbs and a visiting callback.
+ * Processor leveraging WP_HTML_Tag_Processor which walks over a document and gathers breadcrumbs and invokes a callback for each open tag.
  *
  * @since n.e.x.t
  * @access private
  */
-class ILO_HTML_Tag_Processor {
+final class ILO_HTML_Tag_Processor {
 
 	/**
 	 * HTML elements that are self-closing.
@@ -193,8 +193,18 @@ class ILO_HTML_Tag_Processor {
 
 				if ( ! $did_splice ) {
 					$popped_tag_name = array_pop( $this->open_stack_tags );
-					if ( $popped_tag_name !== $tag_name ) {
-						error_log( "Expected popped tag stack element $popped_tag_name to match the currently visited closing tag $tag_name." ); // phpcs:ignore
+					if ( $popped_tag_name !== $tag_name && function_exists( 'wp_trigger_error' ) ) {
+						wp_trigger_error(
+							__METHOD__,
+							esc_html(
+								sprintf(
+									/* translators: 1: Popped tag name, 2: Closing tag name */
+									__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'performance-lab' ),
+									$popped_tag_name,
+									$tag_name
+								)
+							)
+						);
 					}
 				}
 				array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) + 1 );
