@@ -139,8 +139,9 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 					$processor->set_attribute( 'fetchpriority', 'high' );
 					$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
 				}
-			} else {
-				$processor->remove_fetchpriority_attribute();
+			} elseif ( $processor->get_attribute( 'fetchpriority' ) ) {
+				$processor->set_attribute( 'data-ilo-removed-fetchpriority', $processor->get_attribute( 'fetchpriority' ) );
+				$processor->remove_attribute( 'fetchpriority' );
 			}
 
 			// Capture the attributes from the LCP elements to use in preload links.

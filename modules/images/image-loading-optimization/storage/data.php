@@ -349,7 +349,7 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( array $grouped_url_met
 		}
 	}
 
-	// Now we need to merge the breakpoints when there is an LCP element common between them.
+	// Now merge the breakpoints when there is an LCP element common between them.
 	$prev_lcp_element = null;
 	return array_filter(
 		$lcp_element_by_viewport_minimum_width,

@@ -235,23 +235,6 @@ class ILO_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Removes the fetchpriority attribute from the current node being walked over.
-	 *
-	 * Also sets an attribute to indicate that the attribute was removed.
-	 *
-	 * @return bool Whether an attribute was removed.
-	 */
-	public function remove_fetchpriority_attribute(): bool {
-		$p = $this->processor;
-		if ( $p->get_attribute( 'fetchpriority' ) ) {
-			$p->set_attribute( 'data-ilo-removed-fetchpriority', $p->get_attribute( 'fetchpriority' ) );
-			return $p->remove_attribute( 'fetchpriority' );
-		} else {
-			return false;
-		}
-	}
-
-	/**
 	 * Returns the value of a requested attribute from a matched tag opener if that attribute exists.
 	 *
 	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
