@@ -303,6 +303,9 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
  * breakpoint, then the array value is an array representing that element, including its breadcrumbs. If two adjoining
  * breakpoints have the same value, then the latter is dropped.
  *
+ * @since n.e.x.t
+ * @access private
+ *
  * @param array $grouped_url_metrics URL metrics grouped by breakpoint. See `ilo_group_url_metrics_by_breakpoint()`.
  * @return array LCP elements keyed by its minimum viewport width. If there is no LCP element at a breakpoint, then `false` is used.
  */
