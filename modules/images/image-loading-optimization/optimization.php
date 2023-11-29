@@ -126,38 +126,36 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 
 	// Walk over all IMG tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes for preloading.
 	$processor = new ILO_HTML_Tag_Processor( $buffer );
-	$processor->walk(
-		static function () use ( $processor, $common_lcp_element, $all_breakpoints_have_url_metrics, &$lcp_elements_by_minimum_viewport_widths ) {
-			if ( $processor->get_tag() !== 'IMG' ) {
-				return;
-			}
+	foreach ( $processor->open_tags() as $tag_name ) {
+		if ( 'IMG' !== $tag_name ) {
+			continue;
+		}
 
-			// Ensure the fetchpriority attribute is set on the element properly.
-			if ( $common_lcp_element && $processor->get_breadcrumbs() === $common_lcp_element['breadcrumbs'] ) {
-				if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
-					$processor->set_attribute( 'data-ilo-fetchpriority-already-added', true );
-				} else {
-					$processor->set_attribute( 'fetchpriority', 'high' );
-					$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
-				}
-			} elseif ( $all_breakpoints_have_url_metrics && $processor->get_attribute( 'fetchpriority' ) ) {
-				// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
-				// continue to apply while waiting for all breakpoints to have metrics collected for them.
-				$processor->set_attribute( 'data-ilo-removed-fetchpriority', $processor->get_attribute( 'fetchpriority' ) );
-				$processor->remove_attribute( 'fetchpriority' );
+		// Ensure the fetchpriority attribute is set on the element properly.
+		if ( $common_lcp_element && $processor->get_breadcrumbs() === $common_lcp_element['breadcrumbs'] ) {
+			if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
+				$processor->set_attribute( 'data-ilo-fetchpriority-already-added', true );
+			} else {
+				$processor->set_attribute( 'fetchpriority', 'high' );
+				$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
 			}
+		} elseif ( $all_breakpoints_have_url_metrics && $processor->get_attribute( 'fetchpriority' ) ) {
+			// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
+			// continue to apply while waiting for all breakpoints to have metrics collected for them.
+			$processor->set_attribute( 'data-ilo-removed-fetchpriority', $processor->get_attribute( 'fetchpriority' ) );
+			$processor->remove_attribute( 'fetchpriority' );
+		}
 
-			// Capture the attributes from the LCP elements to use in preload links.
-			foreach ( $lcp_elements_by_minimum_viewport_widths as &$lcp_element ) {
-				if ( $lcp_element && $lcp_element['breadcrumbs'] === $processor->get_breadcrumbs() ) {
-					$lcp_element['attributes'] = array();
-					foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
-						$lcp_element['attributes'][ $attr_name ] = $processor->get_attribute( $attr_name );
-					}
+		// Capture the attributes from the LCP elements to use in preload links.
+		foreach ( $lcp_elements_by_minimum_viewport_widths as &$lcp_element ) {
+			if ( $lcp_element && $lcp_element['breadcrumbs'] === $processor->get_breadcrumbs() ) {
+				$lcp_element['attributes'] = array();
+				foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
+					$lcp_element['attributes'][ $attr_name ] = $processor->get_attribute( $attr_name );
 				}
 			}
 		}
-	);
+	}
 	$buffer = $processor->get_updated_html();
 
 	// Inject any preload links at the end of the HEAD. In the future, WP_HTML_Processor could be used to do this injection.

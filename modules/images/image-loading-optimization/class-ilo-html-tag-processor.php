@@ -7,7 +7,7 @@
  */
 
 /**
- * Processor leveraging WP_HTML_Tag_Processor which walks over a document and gathers breadcrumbs and invokes a callback for each open tag.
+ * Processor leveraging WP_HTML_Tag_Processor which gathers breadcrumbs which can be queried while iterating the open_tags() generator .
  *
  * @since n.e.x.t
  * @access private
@@ -111,13 +111,14 @@ final class ILO_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Walk over the document.
+	 * Gets all open tags in the document.
 	 *
-	 * Whenever an open tag is encountered, invoke the supplied $open_tag_callback and pass the tag name and breadcrumbs.
+	 * A generator is used so that when iterating at a specific tag, additional information about the tag at that point
+	 * can be queried from the class. Similarly, mutations may be performed when iterating at an open tag.
 	 *
-	 * @param callable $open_tag_callback Open tag callback. The processor instance is passed as the sole argument.
+	 * @return Generator<string> Tag name of current open tag.
 	 */
-	public function walk( callable $open_tag_callback ) {
+	public function open_tags(): Generator {
 		$p = $this->processor;
 
 		/*
@@ -170,8 +171,9 @@ final class ILO_HTML_Tag_Processor {
 					--$this->open_stack_indices[ $level ];
 				}
 
-				// Invoke the callback to do processing.
-				$open_tag_callback( $tag_name, $this->get_breadcrumbs() );
+				// Now that the breadcrumbs are constructed, yield the tag name so that they can be queried if desired.
+				// Other mutations may be performed to the open tag's attributes by the callee at this point as well.
+				yield $tag_name;
 
 				// Immediately pop off self-closing tags.
 				if ( in_array( $tag_name, self::SELF_CLOSING_TAGS, true ) ) {
@@ -212,20 +214,6 @@ final class ILO_HTML_Tag_Processor {
 				array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) + 1 );
 			}
 		}
-	}
-
-	/**
-	 * Returns the uppercase name of the matched tag.
-	 *
-	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
-	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
-	 *
-	 * @see WP_HTML_Tag_Processor::get_tag()
-	 *
-	 * @return string|null Name of currently matched tag in input HTML, or `null` if none found.
-	 */
-	public function get_tag() {
-		return $this->processor->get_tag();
 	}
 
 	/**
