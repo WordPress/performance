@@ -98,7 +98,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $url_metrics_grouped_by_breakpoint );
 
 	// TODO: Handle case when the LCP element is not an image at all, but rather a background-image.
-	// Use the fetchpriority attribute on the image when all breakpoints have the same LCP element.
+	// Prepare to set fetchpriority attribute on the image when all breakpoints have the same LCP element.
 	if (
 		// All breakpoints share the same LCP element (or all have none at all).
 		1 === count( $lcp_elements_by_minimum_viewport_widths )
@@ -109,59 +109,54 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		// All breakpoints have URL metrics being reported.
 		count( array_filter( $url_metrics_grouped_by_breakpoint ) ) === count( $breakpoint_max_widths ) + 1
 	) {
-		$lcp_element = current( $lcp_elements_by_minimum_viewport_widths );
-
-		$processor = new ILO_HTML_Tag_Processor( $buffer );
-		$processor->walk(
-			static function () use ( $processor, $lcp_element ) {
-				if ( $processor->get_tag() !== 'IMG' ) {
-					return;
-				}
-
-				if ( $processor->get_breadcrumbs() === $lcp_element['breadcrumbs'] ) {
-					if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
-						$processor->set_attribute( 'data-ilo-fetchpriority-already-added', true );
-					} else {
-						$processor->set_attribute( 'fetchpriority', 'high' );
-						$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
-					}
-				} else {
-					$processor->remove_fetchpriority_attribute();
-				}
-			}
-		);
-		$buffer = $processor->get_updated_html();
-
-		// TODO: We could also add the preload links here.
+		$common_lcp_element = current( $lcp_elements_by_minimum_viewport_widths );
 	} else {
-		// If there is not exactly one LCP element, we need to remove fetchpriority from all images while also
-		// capturing the attributes from the LCP element which we can then use for preload links.
-		$processor = new ILO_HTML_Tag_Processor( $buffer );
-		$processor->walk(
-			static function () use ( $processor, &$lcp_elements_by_minimum_viewport_widths ) {
-				if ( $processor->get_tag() !== 'IMG' ) {
-					return;
+		$common_lcp_element = null;
+	}
+
+	// Walk over all IMG tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes for preloading.
+	$processor = new ILO_HTML_Tag_Processor( $buffer );
+	$processor->walk(
+		static function () use ( $processor, $common_lcp_element, &$lcp_elements_by_minimum_viewport_widths ) {
+			if ( $processor->get_tag() !== 'IMG' ) {
+				return;
+			}
+
+			// Ensure the fetchpriority attribute is set on the element properly.
+			if ( $common_lcp_element && $processor->get_breadcrumbs() === $common_lcp_element['breadcrumbs'] ) {
+				if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
+					$processor->set_attribute( 'data-ilo-fetchpriority-already-added', true );
+				} else {
+					$processor->set_attribute( 'fetchpriority', 'high' );
+					$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
 				}
-
+			} else {
 				$processor->remove_fetchpriority_attribute();
+			}
 
-				// Capture the attributes from the LCP elements to use in preload links.
-				foreach ( $lcp_elements_by_minimum_viewport_widths as &$lcp_element ) {
-					if ( $lcp_element && $lcp_element['breadcrumbs'] === $processor->get_breadcrumbs() ) {
-						$lcp_element['attributes'] = array();
-						foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
-							$lcp_element['attributes'][ $attr_name ] = $processor->get_attribute( $attr_name );
-						}
+			// Capture the attributes from the LCP elements to use in preload links.
+			foreach ( $lcp_elements_by_minimum_viewport_widths as &$lcp_element ) {
+				if ( $lcp_element && $lcp_element['breadcrumbs'] === $processor->get_breadcrumbs() ) {
+					$lcp_element['attributes'] = array();
+					foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
+						$lcp_element['attributes'][ $attr_name ] = $processor->get_attribute( $attr_name );
 					}
 				}
 			}
+		}
+	);
+	$buffer = $processor->get_updated_html();
+
+	// Inject any preload links at the end of the HEAD. In the future, WP_HTML_Processor could be used to do this injection.
+	// However, given the simple replacement here this is not essential.
+	$preload_links = ilo_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
+	if ( $preload_links ) {
+		$buffer = preg_replace(
+			'#(?=</HEAD>)#i',
+			$preload_links,
+			$buffer,
+			1
 		);
-		$buffer = $processor->get_updated_html();
-
-		$preload_links = ilo_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
-
-		// TODO: In the future, WP_HTML_Processor could be used to do this injection. However, given the simple replacement here this is not essential.
-		$buffer = preg_replace( '#(?=</HEAD>)#i', $preload_links, $buffer, 1 );
 	}
 
 	return $buffer;
