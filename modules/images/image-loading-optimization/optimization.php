@@ -33,7 +33,7 @@ add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
  * @access private
  *
  * @param array $lcp_images_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
- * @return string Markup for one or more preload link tags.
+ * @return string Markup for zero or more preload link tags.
  */
 function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widths ): string {
 	$preload_links = array();
