@@ -142,6 +142,8 @@ class ILO_HTML_Tag_Processor {
 			if ( ! $p->is_tag_closer() ) {
 
 				// Close an open P tag when a P-closing tag is encountered.
+				// TODO: There are quite a few more cases of optional closing tags: https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
+				// Nevertheless, given WordPress's legacy of XHTML compatibility, the lack of closing tags may not be common enough to warrant worrying about any of them.
 				if ( in_array( $tag_name, self::P_CLOSING_TAGS, true ) ) {
 					$i = array_search( 'P', $this->open_stack_tags, true );
 					if ( false !== $i ) {
