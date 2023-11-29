@@ -105,6 +105,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$breakpoint_max_widths                   = ilo_get_breakpoint_max_widths();
 	$url_metrics_grouped_by_breakpoint       = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );
 	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $url_metrics_grouped_by_breakpoint );
+	$all_breakpoints_have_url_metrics        = count( array_filter( $url_metrics_grouped_by_breakpoint ) ) === count( $breakpoint_max_widths ) + 1;
 
 	// TODO: Handle case when the LCP element is not an image at all, but rather a background-image.
 	// Prepare to set fetchpriority attribute on the image when all breakpoints have the same LCP element.
@@ -116,7 +117,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		! in_array( false, $lcp_elements_by_minimum_viewport_widths, true )
 		&&
 		// All breakpoints have URL metrics being reported.
-		count( array_filter( $url_metrics_grouped_by_breakpoint ) ) === count( $breakpoint_max_widths ) + 1
+		$all_breakpoints_have_url_metrics
 	) {
 		$common_lcp_element = current( $lcp_elements_by_minimum_viewport_widths );
 	} else {
@@ -126,7 +127,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	// Walk over all IMG tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes for preloading.
 	$processor = new ILO_HTML_Tag_Processor( $buffer );
 	$processor->walk(
-		static function () use ( $processor, $common_lcp_element, &$lcp_elements_by_minimum_viewport_widths ) {
+		static function () use ( $processor, $common_lcp_element, $all_breakpoints_have_url_metrics, &$lcp_elements_by_minimum_viewport_widths ) {
 			if ( $processor->get_tag() !== 'IMG' ) {
 				return;
 			}
@@ -139,7 +140,9 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 					$processor->set_attribute( 'fetchpriority', 'high' );
 					$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
 				}
-			} elseif ( $processor->get_attribute( 'fetchpriority' ) ) {
+			} elseif ( $all_breakpoints_have_url_metrics && $processor->get_attribute( 'fetchpriority' ) ) {
+				// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
+				// continue to apply while waiting for all breakpoints to have metrics collected for them.
 				$processor->set_attribute( 'data-ilo-removed-fetchpriority', $processor->get_attribute( 'fetchpriority' ) );
 				$processor->remove_attribute( 'fetchpriority' );
 			}
