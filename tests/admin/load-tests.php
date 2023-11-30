@@ -32,6 +32,13 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 			'focus'        => 'images',
 			'slug'         => 'demo-module-3',
 		),
+		'check-error/demo-module-4' => array(
+			'name'         => 'Demo Module 4',
+			'description'  => 'This is the description for demo module 4.',
+			'experimental' => false,
+			'focus'        => 'check-error',
+			'slug'         => 'demo-module-4',
+		),
 	);
 
 	private static $demo_focus_areas = array(
@@ -157,7 +164,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['js-and-css'] )
 		);
 		$this->assertEqualSets(
-			array( 'something/demo-module-2' ),
+			array( 'something/demo-module-2', 'check-error/demo-module-4' ),
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['other'] )
 		);
 	}

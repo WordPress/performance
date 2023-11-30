@@ -141,7 +141,7 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 			<?php echo esc_html( $module_data['name'] ); ?>
 		</legend>
 		<label for="<?php echo esc_attr( "{$base_id}_enabled" ); ?>">
-			<?php if ( $can_load_module && ! $is_standalone_plugin_loaded ) { ?>
+			<?php if ( ! is_wp_error( $can_load_module ) && ! $is_standalone_plugin_loaded ) { ?>
 				<input type="checkbox" id="<?php echo esc_attr( "{$base_id}_enabled" ); ?>" name="<?php echo esc_attr( "{$base_name}[enabled]" ); ?>" aria-describedby="<?php echo esc_attr( "{$base_id}_description" ); ?>" value="1"<?php checked( $enabled ); ?>>
 				<?php
 				if ( $module_data['experimental'] ) {
@@ -167,6 +167,8 @@ function perflab_render_modules_page_field( $module_slug, $module_data, $module_
 				<?php
 				if ( $is_standalone_plugin_loaded ) {
 					esc_html_e( 'The module cannot be managed with Performance Lab since it is already active as a standalone plugin.', 'performance-lab' );
+				} elseif ( is_wp_error( $can_load_module ) ) {
+					echo esc_html( $can_load_module->get_error_message() );
 				} else {
 					printf(
 						/* translators: %s: module name */
