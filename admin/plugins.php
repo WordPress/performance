@@ -57,6 +57,40 @@ function perflab_get_standalone_plugins() {
 }
 
 /**
+ * Returns an array mapping of standalone plugins to existing wpp modules.
+ *
+ * @since n.e.x.t
+ *
+ * @return string[]
+ */
+function perflab_get_standalone_plugins_module_map() {
+	return array(
+		'webp-uploads'          => 'images/webp-uploads',
+		'dominant-color-images' => 'images/dominant-color-images',
+	);
+}
+
+/**
+ * Returns an array of standalone plugins with currently active modules.
+ *
+ * @since n.e.x.t
+ *
+ * @return string[]
+ */
+function perflab_get_standalone_plugins_with_active_modules() {
+	$modules                                = perflab_get_module_settings();
+	$standalone_plugins_with_active_modules = array_filter(
+		perflab_get_standalone_plugins_module_map(),
+		static function ( $v ) use ( $modules ) {
+			return ! empty( $modules[ $v ] ) && '1' === $modules[ $v ]['enabled'];
+		},
+		ARRAY_FILTER_USE_BOTH
+	);
+
+	return $standalone_plugins_with_active_modules;
+}
+
+/**
  * Renders plugin UI for managing standalone plugins within PL Settings screen.
  *
  * @since n.e.x.t
@@ -65,10 +99,16 @@ function perflab_render_plugins_ui() {
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	$standalone_plugins = array();
+	$standalone_plugins                     = array();
+	$standalone_plugins_with_active_modules = perflab_get_standalone_plugins_with_active_modules();
 	foreach ( perflab_get_standalone_plugins() as $managed_standalone_plugin_slug ) {
 		$standalone_plugins[ $managed_standalone_plugin_slug ] = array(
-			'plugin_data' => perflab_query_plugin_info( $managed_standalone_plugin_slug ),
+			'plugin_data' => array_merge(
+				perflab_query_plugin_info( $managed_standalone_plugin_slug ),
+				array(
+					'perflab_has_enabled_module' => ! empty( $standalone_plugins_with_active_modules[ $managed_standalone_plugin_slug ] ),
+				)
+			),
 		);
 	}
 
@@ -138,7 +178,8 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	$tested_wp      = ( empty( $plugin_data['tested'] ) || version_compare( get_bloginfo( 'version' ), $plugin_data['tested'], '<=' ) );
 	$action_links   = array();
 
-	$status = install_plugin_install_status( $plugin_data );
+	$status                     = install_plugin_install_status( $plugin_data );
+	$perflab_has_enabled_module = ! empty( $plugin_data['perflab_has_enabled_module'] ) && true === $plugin_data['perflab_has_enabled_module'];
 
 	switch ( $status['status'] ) {
 		case 'install':
@@ -265,6 +306,12 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	?>
 	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>">
 		<?php
+		if ( true === $perflab_has_enabled_module ) {
+			echo '<div class="notice inline notice-warning notice-alt"><p>';
+			echo esc_html__( 'An active performance module was detected, please install and activate this plugin instead.', 'performance-lab' );
+			echo '</p></div>';
+		}
+
 		if ( ! $compatible_php || ! $compatible_wp ) {
 			echo '<div class="notice inline notice-error notice-alt">';
 			if ( ! $compatible_php && ! $compatible_wp ) {

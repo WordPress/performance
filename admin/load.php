@@ -616,7 +616,34 @@ add_action( 'admin_action_perflab_deactivate_plugin', 'perflab_deactivate_plugin
  */
 function perflab_plugin_admin_notices() {
 	if ( 'settings_page_perflab-modules' !== get_current_screen()->id ) {
+		if ( ! empty( perflab_get_standalone_plugins_with_active_modules() ) ) {
+			?>
+			<div class="notice notice-warning is-dismissible">
+				<p>
+					<?php
+					printf(
+						/* translators: 1: Link to Performance Lab Settings screen */
+						esc_html__( 'Performance Lab has detected usage of modules that have standalone plugin equivalents. Please visit the %1$s screen to see the plugins available for installation.', 'performance-lab' ),
+						sprintf(
+							'<a href="%s">%s</a>',
+							esc_html( menu_page_url( PERFLAB_MODULES_SCREEN, false ) ),
+							esc_html__( 'Performance Lab Settings', 'performance-lab' )
+						)
+					);
+					?>
+				</p>
+			</div>
+			<?php
+		}
 		return;
+	}
+
+	if ( ! empty( perflab_get_standalone_plugins_with_active_modules() ) ) {
+		?>
+		<div class="notice notice-warning is-dismissible">
+			<p><?php esc_html_e( 'Performance Lab has detected usage of modules that have standalone plugin equivalents. Please see the available plugins below. Installing and activating a performance plugin will disable the legacy module equivalent. This will not impact functionality of the module.', 'performance-lab' ); ?></p>
+		</div>
+		<?php
 	}
 
 	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
