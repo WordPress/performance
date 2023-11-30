@@ -133,7 +133,7 @@ final class ILO_HTML_Tag_Processor {
 		 *   </body>
 		 * </html>
 		 *
-		 * The two upon processing the IMG element, the two arrays should be equal to the following:
+		 * Upon processing the IMG element, the two arrays should be equal to the following:
 		 *
 		 * $open_stack_tags    = array( 'HTML', 'BODY', 'IMG' );
 		 * $open_stack_indices = array( 0, 1, 1 );
