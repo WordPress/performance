@@ -15,29 +15,30 @@
 final class ILO_HTML_Tag_Processor {
 
 	/**
-	 * HTML elements that are self-closing.
+	 * HTML void tags (i.e. those which are self-closing).
 	 *
-	 * @link https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
-	 * @link https://github.com/ampproject/amp-toolbox-php/blob/c79a0fe558a3c042aee4789bbf33376cca7a733d/src/Html/Tag.php#L206-L232
+	 * @link https://html.spec.whatwg.org/multipage/syntax.html#void-elements
+	 * @see WP_HTML_Processor::is_void()
+	 * @todo Reuse `WP_HTML_Processor::is_void()` once WordPress 6.4 is the minimum-supported version.
 	 *
 	 * @var string[]
 	 */
-	const SELF_CLOSING_TAGS = array(
+	const VOID_TAGS = array(
 		'AREA',
 		'BASE',
-		'BASEFONT',
-		'BGSOUND',
+		'BASEFONT', // Obsolete.
+		'BGSOUND', // Obsolete.
 		'BR',
 		'COL',
 		'EMBED',
-		'FRAME',
+		'FRAME', // Deprecated.
 		'HR',
 		'IMG',
 		'INPUT',
-		'KEYGEN',
+		'KEYGEN', // Obsolete.
 		'LINK',
 		'META',
-		'PARAM',
+		'PARAM', // Deprecated.
 		'SOURCE',
 		'TRACK',
 		'WBR',
@@ -47,8 +48,7 @@ final class ILO_HTML_Tag_Processor {
 	 * The set of HTML tags whose presence will implicitly close a <p> element.
 	 * For example '<p>foo<h1>bar</h1>' should parse the same as '<p>foo</p><h1>bar</h1>'.
 	 *
-	 * @link https://www.w3.org/TR/html-markup/p.html
-	 * @link https://github.com/ampproject/amp-toolbox-php/blob/c79a0fe558a3c042aee4789bbf33376cca7a733d/src/Html/Tag.php#L262-L293
+	 * @link https://html.spec.whatwg.org/multipage/grouping-content.html#the-p-element
 	 *
 	 * @var string[]
 	 */
@@ -57,9 +57,12 @@ final class ILO_HTML_Tag_Processor {
 		'ARTICLE',
 		'ASIDE',
 		'BLOCKQUOTE',
-		'DIR',
+		'DETAILS',
+		'DIV',
 		'DL',
 		'FIELDSET',
+		'FIGCAPTION',
+		'FIGURE',
 		'FOOTER',
 		'FORM',
 		'H1',
@@ -69,12 +72,15 @@ final class ILO_HTML_Tag_Processor {
 		'H5',
 		'H6',
 		'HEADER',
+		'HGROUP',
 		'HR',
+		'MAIN',
 		'MENU',
 		'NAV',
 		'OL',
 		'P',
 		'PRE',
+		'SEARCH',
 		'SECTION',
 		'TABLE',
 		'UL',
@@ -176,12 +182,12 @@ final class ILO_HTML_Tag_Processor {
 				yield $tag_name;
 
 				// Immediately pop off self-closing tags.
-				if ( in_array( $tag_name, self::SELF_CLOSING_TAGS, true ) ) {
+				if ( in_array( $tag_name, self::VOID_TAGS, true ) ) {
 					array_pop( $this->open_stack_tags );
 				}
 			} else {
 				// If the closing tag is for self-closing tag, we ignore it since it was already handled above.
-				if ( in_array( $tag_name, self::SELF_CLOSING_TAGS, true ) ) {
+				if ( in_array( $tag_name, self::VOID_TAGS, true ) ) {
 					continue;
 				}
 
