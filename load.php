@@ -198,7 +198,7 @@ function perflab_is_valid_module( $module ) {
 
 	// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
 	$can_load_module = perflab_can_load_module( $module );
-	return is_wp_error( $can_load_module ) ? false : $can_load_module;
+	return $can_load_module && ! is_wp_error( $can_load_module );
 }
 
 /**
@@ -256,13 +256,14 @@ function perflab_can_load_module( $module ) {
 		return true;
 	}
 
-	// Check if can load return an error.
-	if ( is_wp_error( $module() ) ) {
-		return $module();
+	// Call the closure to determine whether the module can be loaded.
+	$result = $module();
+
+	if ( is_wp_error( $result ) ) {
+		return $result;
 	}
 
-	// Call the closure to determine whether the module can be loaded.
-	return (bool) $module();
+	return (bool) $result;
 }
 
 /**
