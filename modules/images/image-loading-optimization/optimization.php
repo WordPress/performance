@@ -10,8 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-require_once __DIR__ . '/class-ilo-html-tag-processor.php';
-
 /**
  * Adds template output buffer filter for optimization if eligible.
  *
