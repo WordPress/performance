@@ -170,7 +170,6 @@ final class ILO_HTML_Tag_Processor {
 					++$this->open_stack_indices[ $level ];
 				}
 
-				// TODO: We should consider not collecting metrics when the admin bar is shown and the user is logged-in.
 				// Only increment the tag index at this level only if it isn't the admin bar, since the presence of the
 				// admin bar can throw off the indices.
 				if ( 'DIV' === $tag_name && $p->get_attribute( 'id' ) === 'wpadminbar' ) {
