@@ -7,7 +7,9 @@
  */
 
 /**
- * Processor leveraging WP_HTML_Tag_Processor which gathers breadcrumbs which can be queried while iterating the open_tags() generator .
+ * Processor leveraging WP_HTML_Tag_Processor which gathers breadcrumbs which can be queried while iterating the open_tags() generator.
+ *
+ * Eventually this class should be made largely obsolete once `WP_HTML_Processor` is fully implemented to support all HTML tags.
  *
  * @since n.e.x.t
  * @access private
