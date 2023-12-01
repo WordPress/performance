@@ -52,10 +52,12 @@ function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widt
 		}
 
 		// Add media query if it's going to be something other than just `min-width: 0px`.
-		if ( $minimum_viewport_widths[ $i ] > 0 || isset( $minimum_viewport_widths[ $i + 1 ] ) ) {
-			$media_query = sprintf( '( min-width: %dpx )', $minimum_viewport_widths[ $i ] );
-			if ( isset( $minimum_viewport_widths[ $i + 1 ] ) ) {
-				$media_query .= sprintf( ' and ( max-width: %dpx )', $minimum_viewport_widths[ $i + 1 ] - 1 );
+		$minimum_viewport_width = $minimum_viewport_widths[ $i ];
+		$maximum_viewport_width = isset( $minimum_viewport_widths[ $i + 1 ] ) ? $minimum_viewport_widths[ $i + 1 ] - 1 : null;
+		if ( $minimum_viewport_width > 0 || null !== $maximum_viewport_width ) {
+			$media_query = sprintf( '( min-width: %dpx )', $minimum_viewport_width );
+			if ( null !== $maximum_viewport_width ) {
+				$media_query .= sprintf( ' and ( max-width: %dpx )', $maximum_viewport_width );
 			}
 			$img_attributes['media'] = $media_query;
 		}
