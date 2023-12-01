@@ -81,6 +81,24 @@ function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widt
 }
 
 /**
+ * Constructs a breadcrumbs string from a breadcrumbs array.
+ *
+ * @param array<array{tag: string, index: int}> $breadcrumbs Breadcrumbs.
+ * @return string Breadcrumb string.
+ */
+function ilo_construct_breadcrumbs_string( array $breadcrumbs ): string {
+	return implode(
+		' ',
+		array_map(
+			static function ( $breadcrumb ) {
+				return sprintf( '%s,%s', $breadcrumb['tag'], $breadcrumb['index'] );
+			},
+			$breadcrumbs
+		)
+	);
+}
+
+/**
  * Optimizes template output buffer.
  *
  * @since n.e.x.t
@@ -104,6 +122,15 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$url_metrics_grouped_by_breakpoint       = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );
 	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $url_metrics_grouped_by_breakpoint );
 	$all_breakpoints_have_url_metrics        = count( array_filter( $url_metrics_grouped_by_breakpoint ) ) === count( $breakpoint_max_widths ) + 1;
+
+	// Optimize looking up the LCP element by breadcrumb.
+	$lcp_element_minimum_viewport_width_by_breadcrumb = array();
+	foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
+		if ( false !== $lcp_element ) {
+			$breadcrumb_string = ilo_construct_breadcrumbs_string( $lcp_element['breadcrumbs'] );
+			$lcp_element_minimum_viewport_width_by_breadcrumb[ $breadcrumb_string ] = $minimum_viewport_width;
+		}
+	}
 
 	// TODO: Handle case when the LCP element is not an image at all, but rather a background-image.
 	// Prepare to set fetchpriority attribute on the image when all breakpoints have the same LCP element.
@@ -146,13 +173,14 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		// Capture the attributes from the LCP elements to use in preload links.
-		foreach ( $lcp_elements_by_minimum_viewport_widths as &$lcp_element ) {
-			if ( $lcp_element && $lcp_element['breadcrumbs'] === $processor->get_breadcrumbs() ) {
-				$lcp_element['attributes'] = array();
-				foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
-					$lcp_element['attributes'][ $attr_name ] = $processor->get_attribute( $attr_name );
-				}
+		$breadcrumb_string = ilo_construct_breadcrumbs_string( $processor->get_breadcrumbs() );
+		if ( isset( $lcp_element_minimum_viewport_width_by_breadcrumb[ $breadcrumb_string ] ) ) {
+			$attributes = array();
+			foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
+				$attributes[ $attr_name ] = $processor->get_attribute( $attr_name );
 			}
+			$minimum_viewport_width = $lcp_element_minimum_viewport_width_by_breadcrumb[ $breadcrumb_string ];
+			$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['attributes'] = $attributes;
 		}
 	}
 	$buffer = $processor->get_updated_html();

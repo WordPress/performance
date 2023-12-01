@@ -228,6 +228,8 @@ final class ILO_HTML_Tag_Processor {
 	 *
 	 * Breadcrumbs are constructed to match the format from detect.js.
 	 *
+	 * TODO: Consider rather each breadcrumb being a (tag,index) tuple.
+	 *
 	 * @return array<array{tag: string, index: int}> Breadcrumbs.
 	 */
 	public function get_breadcrumbs(): array {
