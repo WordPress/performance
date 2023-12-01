@@ -218,7 +218,7 @@ class Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_can_load_module_with_not_loaded_module() {
 		$can_load_module = perflab_can_load_module( '../tests/testdata/demo-modules/check-error/demo-module-4' );
 		$this->assertInstanceOf( 'WP_Error', $can_load_module );
-		$this->assertSame( 'module_not_loaded', $can_load_module->get_error_code() );
+		$this->assertSame( 'cannot_load_module', $can_load_module->get_error_code() );
 	}
 
 	public function test_perflab_activate_module() {

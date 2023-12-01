@@ -236,9 +236,10 @@ add_action( 'wp_head', 'perflab_render_generator' );
  * Checks whether the given module can be loaded in the current environment.
  *
  * @since 1.3.0
+ * @since n.e.x.t The function may now alternatively return a WP_Error.
  *
  * @param string $module Slug of the module.
- * @return bool|WP_Error True or false based on whether the module can be loaded or not, or an error on failure.
+ * @return bool|WP_Error True if the module can be loaded, or false or a WP_Error with more concrete information otherwise.
  */
 function perflab_can_load_module( $module ) {
 	$module_load_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/can-load.php';
