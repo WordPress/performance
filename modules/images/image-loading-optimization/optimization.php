@@ -163,9 +163,14 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 			if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
 				$processor->set_attribute( 'data-ilo-fetchpriority-already-added', true );
 			} else {
-				// TODO: When optimizing lazy-loading, this should also remove any `loading` attribute here.
 				$processor->set_attribute( 'fetchpriority', 'high' );
 				$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
+			}
+
+			// Never include loading=lazy on the LCP image common across all breakpoints.
+			if ( 'lazy' === $processor->get_attribute( 'loading' ) ) {
+				$processor->set_attribute( 'data-ilo-removed-loading', $processor->get_attribute( 'loading' ) );
+				$processor->remove_attribute( 'loading' );
 			}
 		} elseif ( $all_breakpoints_have_url_metrics && $processor->get_attribute( 'fetchpriority' ) ) {
 			// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
