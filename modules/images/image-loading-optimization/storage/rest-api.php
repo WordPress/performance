@@ -130,7 +130,7 @@ function ilo_register_endpoint() {
 							'isLCPCandidate'     => array(
 								'type' => 'bool',
 							),
-							'breadcrumbs'        => array(
+							'xpath'              => array(
 								'type'     => 'string',
 								'required' => true,
 								'pattern'  => '^(/\*\[\d+\]\[self::.+?\])+$', // e.g. `/*[1][self::html]/*[2][self::body]`.

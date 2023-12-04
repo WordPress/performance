@@ -79,16 +79,10 @@ function error( ...message ) {
 }
 
 /**
- * @typedef {Object} Breadcrumb
- * @property {number} index - Index of element among sibling elements.
- * @property {string} tag   - Tag name.
- */
-
-/**
  * @typedef {Object} ElementMetrics
  * @property {boolean}         isLCP              - Whether it is the LCP candidate.
  * @property {boolean}         isLCPCandidate     - Whether it is among the LCP candidates.
- * @property {Breadcrumb[]}    breadcrumbs        - Breadcrumbs.
+ * @property {string}          xpath              - XPath.
  * @property {number}          intersectionRatio  - Intersection ratio.
  * @property {DOMRectReadOnly} intersectionRect   - Intersection rectangle.
  * @property {DOMRectReadOnly} boundingClientRect - Bounding client rectangle.
@@ -209,7 +203,7 @@ export default async function detect( {
 
 	// TODO: This query no longer needs to be done as early as possible since the server is adding the breadcrumbs.
 	const breadcrumbedImages = doc.body.querySelectorAll(
-		'img[data-ilo-breadcrumbs]' // TODO: Or 'data-ilo-xpath'.
+		'img[data-ilo-xpath]'
 	);
 
 	// We do the same for elements with background images which are not data: URLs.
@@ -227,9 +221,9 @@ export default async function detect( {
 		].map(
 			/**
 			 * @param {HTMLElement} element
-			 * @return {[HTMLElement, string]} Tuple of element and its breadcrumbs.
+			 * @return {[HTMLElement, string]} Tuple of element and its XPath.
 			 */
-			( element ) => [ element, element.dataset.iloBreadcrumbs ] // TODO: Rename to iloXpath.
+			( element ) => [ element, element.dataset.iloXpath ]
 		)
 	);
 
@@ -343,12 +337,10 @@ export default async function detect( {
 	const lcpMetric = lcpMetricCandidates.at( -1 );
 
 	for ( const elementIntersection of elementIntersections ) {
-		const breadcrumbs = breadcrumbedElementsMap.get(
-			elementIntersection.target
-		);
-		if ( ! breadcrumbs ) {
+		const xpath = breadcrumbedElementsMap.get( elementIntersection.target );
+		if ( ! xpath ) {
 			if ( isDebug ) {
-				error( 'Unable to look up breadcrumbs for element' );
+				error( 'Unable to look up XPath for element' );
 			}
 			continue;
 		}
@@ -364,7 +356,7 @@ export default async function detect( {
 					lcpMetricCandidate.entries[ 0 ]?.element ===
 					elementIntersection.target
 			),
-			breadcrumbs,
+			xpath,
 			intersectionRatio: elementIntersection.intersectionRatio,
 			intersectionRect: elementIntersection.intersectionRect,
 			boundingClientRect: elementIntersection.boundingClientRect,

@@ -86,7 +86,7 @@ function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widt
  * Gets XPath from a breadcrumbs array.
  *
  * @param array<array{string, int}> $breadcrumbs Breadcrumbs.
- * @return string Breadcrumb XPath.
+ * @return string XPath.
  */
 function ilo_get_breadcrumbs_xpath( array $breadcrumbs ): string {
 	return implode(
@@ -143,7 +143,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$lcp_element_minimum_viewport_width_by_xpath = array();
 	foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
 		if ( false !== $lcp_element ) {
-			$lcp_element_minimum_viewport_width_by_xpath[ $lcp_element['breadcrumbs'] ][] = $minimum_viewport_width; // TODO: Rename 'breadcrumbs' to 'xpath'.
+			$lcp_element_minimum_viewport_width_by_xpath[ $lcp_element['xpath'] ][] = $minimum_viewport_width;
 		}
 	}
 
@@ -171,10 +171,10 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 			continue;
 		}
 
-		$breadcrumbs_xpath = ilo_get_breadcrumbs_xpath( $processor->get_breadcrumbs() );
+		$xpath = ilo_get_breadcrumbs_xpath( $processor->get_breadcrumbs() );
 
 		// Ensure the fetchpriority attribute is set on the element properly.
-		if ( $common_lcp_element && $breadcrumbs_xpath === $common_lcp_element['breadcrumbs'] ) { // TODO: Rename 'breadcrumbs' to 'xpath'.
+		if ( $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
 			if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
 				$processor->set_attribute( 'data-ilo-fetchpriority-already-added', true );
 			} else {
@@ -195,18 +195,18 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		// Capture the attributes from the LCP elements to use in preload links.
-		if ( isset( $lcp_element_minimum_viewport_width_by_xpath[ $breadcrumbs_xpath ] ) ) {
+		if ( isset( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] ) ) {
 			$attributes = array();
 			foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
 				$attributes[ $attr_name ] = $processor->get_attribute( $attr_name );
 			}
-			foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $breadcrumbs_xpath ] as $minimum_viewport_width ) {
+			foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
 				$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['attributes'] = $attributes;
 			}
 		}
 
 		if ( $needs_detection ) {
-			$processor->set_attribute( 'data-ilo-breadcrumbs', $breadcrumbs_xpath );
+			$processor->set_attribute( 'data-ilo-xpath', $xpath );
 		}
 	}
 	$buffer = $processor->get_updated_html();

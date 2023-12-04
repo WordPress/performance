@@ -325,10 +325,10 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( array $grouped_url_met
 					continue;
 				}
 
-				$i = array_search( $element['breadcrumbs'], $seen_breadcrumbs, true );
+				$i = array_search( $element['xpath'], $seen_breadcrumbs, true );
 				if ( false === $i ) {
 					$i                       = count( $seen_breadcrumbs );
-					$seen_breadcrumbs[ $i ]  = $element['breadcrumbs'];
+					$seen_breadcrumbs[ $i ]  = $element['xpath'];
 					$breadcrumb_counts[ $i ] = 0;
 				}
 
@@ -361,7 +361,7 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( array $grouped_url_met
 				( is_array( $prev_lcp_element ) && is_array( $lcp_element )
 					?
 					// This breakpoint and previous breakpoint had LCP element, and they were not the same element.
-					$prev_lcp_element['breadcrumbs'] !== $lcp_element['breadcrumbs']
+					$prev_lcp_element['xpath'] !== $lcp_element['xpath']
 					:
 					// This LCP element and the last LCP element were not the same. In this case, either variable may be
 					// false or an array, but both cannot be an array. If both are false, we don't want to include since
@@ -422,6 +422,7 @@ function ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $curr
  * @access private
  *
  * @see ilo_get_needed_minimum_viewport_widths()
+ * @todo This is not being used at the moment.
  *
  * @param array $url_metrics URL metrics slug.
  * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
