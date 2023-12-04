@@ -423,13 +423,12 @@ function ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $curr
  *
  * @see ilo_get_needed_minimum_viewport_widths()
  *
- * @param string $slug URL metrics slug.
+ * @param array $url_metrics URL metrics slug.
  * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
  */
-function ilo_get_needed_minimum_viewport_widths_now_for_slug( string $slug ): array {
-	$post = ilo_get_url_metrics_post( $slug );
+function ilo_get_needed_minimum_viewport_widths_now_for_slug( array $url_metrics ): array {
 	return ilo_get_needed_minimum_viewport_widths(
-		$post instanceof WP_Post ? ilo_parse_stored_url_metrics( $post ) : array(),
+		$url_metrics,
 		microtime( true ),
 		ilo_get_breakpoint_max_widths(),
 		ilo_get_url_metrics_breakpoint_sample_size(),

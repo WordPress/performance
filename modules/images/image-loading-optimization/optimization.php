@@ -107,6 +107,7 @@ function ilo_get_breadcrumbs_xpath( array $breadcrumbs ): string {
  *
  * @since n.e.x.t
  * @access private
+ * @todo This should also inject the detection script currently output via ilo_print_detection_script().
  *
  * @param string $buffer Template output buffer.
  * @return string Filtered template output buffer.
@@ -115,12 +116,23 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
 	$post = ilo_get_url_metrics_post( $slug );
 
-	// No URL metrics are present, so there's nothing we can do.
-	if ( ! $post ) {
-		return $buffer;
-	}
+	$url_metrics = $post ? ilo_parse_stored_url_metrics( $post ) : array();
 
-	$url_metrics = ilo_parse_stored_url_metrics( $post );
+	// Abort if we already have all the sample size we need for all breakpoints.
+	// TODO: Also inject detection script from ilo_print_detection_script() when this is true instead of printing at wp_footer.
+	$needs_detection = (
+		! $post
+		||
+		ilo_needs_url_metric_for_breakpoint(
+			ilo_get_needed_minimum_viewport_widths(
+				$url_metrics,
+				microtime( true ),
+				ilo_get_breakpoint_max_widths(),
+				ilo_get_url_metrics_breakpoint_sample_size(),
+				ilo_get_url_metric_freshness_ttl()
+			)
+		)
+	);
 
 	$breakpoint_max_widths                   = ilo_get_breakpoint_max_widths();
 	$url_metrics_grouped_by_breakpoint       = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );
@@ -131,8 +143,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$lcp_element_minimum_viewport_width_by_xpath = array();
 	foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
 		if ( false !== $lcp_element ) {
-			$breadcrumbs_xpath = ilo_get_breadcrumbs_xpath( $lcp_element['breadcrumbs'] );
-			$lcp_element_minimum_viewport_width_by_xpath[ $breadcrumbs_xpath ][] = $minimum_viewport_width;
+			$lcp_element_minimum_viewport_width_by_xpath[ $lcp_element['breadcrumbs'] ][] = $minimum_viewport_width; // TODO: Rename 'breadcrumbs' to 'xpath'.
 		}
 	}
 
@@ -160,8 +171,10 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 			continue;
 		}
 
+		$breadcrumbs_xpath = ilo_get_breadcrumbs_xpath( $processor->get_breadcrumbs() );
+
 		// Ensure the fetchpriority attribute is set on the element properly.
-		if ( $common_lcp_element && $processor->get_breadcrumbs() === $common_lcp_element['breadcrumbs'] ) {
+		if ( $common_lcp_element && $breadcrumbs_xpath === $common_lcp_element['breadcrumbs'] ) { // TODO: Rename 'breadcrumbs' to 'xpath'.
 			if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
 				$processor->set_attribute( 'data-ilo-fetchpriority-already-added', true );
 			} else {
@@ -182,7 +195,6 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		// Capture the attributes from the LCP elements to use in preload links.
-		$breadcrumbs_xpath = ilo_get_breadcrumbs_xpath( $processor->get_breadcrumbs() );
 		if ( isset( $lcp_element_minimum_viewport_width_by_xpath[ $breadcrumbs_xpath ] ) ) {
 			$attributes = array();
 			foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
@@ -191,6 +203,10 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 			foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $breadcrumbs_xpath ] as $minimum_viewport_width ) {
 				$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['attributes'] = $attributes;
 			}
+		}
+
+		if ( $needs_detection ) {
+			$processor->set_attribute( 'data-ilo-breadcrumbs', $breadcrumbs_xpath );
 		}
 	}
 	$buffer = $processor->get_updated_html();

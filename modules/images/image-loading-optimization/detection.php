@@ -23,10 +23,18 @@ function ilo_print_detection_script() {
 
 	$query_vars = ilo_get_normalized_query_vars();
 	$slug       = ilo_get_url_metrics_slug( $query_vars );
+	$post       = ilo_get_url_metrics_post( $slug );
 	$microtime  = microtime( true );
 
+	// TODO: Eliminate this conditional in favor of calling ilo_print_detection_script() inside of ilo_optimize_template_output_buffer() if $needs_detection.
 	// Abort if we already have all the sample size we need for all breakpoints.
-	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths_now_for_slug( $slug );
+	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths(
+		$post ? ilo_parse_stored_url_metrics( $post ) : array(),
+		microtime( true ),
+		ilo_get_breakpoint_max_widths(),
+		ilo_get_url_metrics_breakpoint_sample_size(),
+		ilo_get_url_metric_freshness_ttl()
+	);
 	if ( ! ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
 		return;
 	}
