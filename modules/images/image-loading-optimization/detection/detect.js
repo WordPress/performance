@@ -209,7 +209,7 @@ export default async function detect( {
 	// We do the same for elements with background images which are not data: URLs.
 	// TODO: Re-enable background image support when server-side is implemented.
 	// const breadcrumbedElementsWithBackgrounds = Array.from(
-	// 	doc.body.querySelectorAll( '[data-ilo-breadcrumbs][style*="background"]' )
+	// 	doc.body.querySelectorAll( '[data-ilo-xpath][style*="background"]' )
 	// ).filter( ( /** @type {Element} */ el ) =>
 	// 	/url\(\s*['"](?!=data:)/.test( el.style.backgroundImage )
 	// );
