@@ -130,7 +130,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
 		if ( false !== $lcp_element ) {
 			$breadcrumb_string = ilo_construct_breadcrumbs_string( $lcp_element['breadcrumbs'] );
-			$lcp_element_minimum_viewport_width_by_breadcrumb[ $breadcrumb_string ] = $minimum_viewport_width;
+			$lcp_element_minimum_viewport_width_by_breadcrumb[ $breadcrumb_string ][] = $minimum_viewport_width;
 		}
 	}
 
@@ -186,8 +186,9 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 			foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
 				$attributes[ $attr_name ] = $processor->get_attribute( $attr_name );
 			}
-			$minimum_viewport_width = $lcp_element_minimum_viewport_width_by_breadcrumb[ $breadcrumb_string ];
-			$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['attributes'] = $attributes;
+			foreach ( $lcp_element_minimum_viewport_width_by_breadcrumb[ $breadcrumb_string ] as $minimum_viewport_width ) {
+				$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['attributes'] = $attributes;
+			}
 		}
 	}
 	$buffer = $processor->get_updated_html();
