@@ -226,19 +226,14 @@ final class ILO_HTML_Tag_Processor {
 	/**
 	 * Gets breadcrumbs for the current open tag.
 	 *
-	 * Breadcrumbs are constructed to match the format from detect.js.
+	 * A breadcrumb consists of a tag name and its sibling index.
 	 *
-	 * TODO: Consider rather each breadcrumb being a (tag,index) tuple.
-	 *
-	 * @return array<array{tag: string, index: int}> Breadcrumbs.
+	 * @return array<array{string, int}> Breadcrumbs.
 	 */
 	public function get_breadcrumbs(): array {
 		$breadcrumbs = array();
 		foreach ( $this->open_stack_tags as $i => $breadcrumb_tag_name ) {
-			$breadcrumbs[] = array(
-				'tag'   => $breadcrumb_tag_name,
-				'index' => $this->open_stack_indices[ $i ],
-			);
+			$breadcrumbs[] = array( $breadcrumb_tag_name, $this->open_stack_indices[ $i ] );
 		}
 		return $breadcrumbs;
 	}
