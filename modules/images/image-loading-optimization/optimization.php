@@ -107,7 +107,6 @@ function ilo_get_breadcrumbs_xpath( array $breadcrumbs ): string {
  *
  * @since n.e.x.t
  * @access private
- * @todo This should also inject the detection script currently output via ilo_print_detection_script().
  *
  * @param string $buffer Template output buffer.
  * @return string Filtered template output buffer.
@@ -118,21 +117,16 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 
 	$url_metrics = $post ? ilo_parse_stored_url_metrics( $post ) : array();
 
-	// Abort if we already have all the sample size we need for all breakpoints.
-	// TODO: Also inject detection script from ilo_print_detection_script() when this is true instead of printing at wp_footer.
-	$needs_detection = (
-		! $post
-		||
-		ilo_needs_url_metric_for_breakpoint(
-			ilo_get_needed_minimum_viewport_widths(
-				$url_metrics,
-				microtime( true ),
-				ilo_get_breakpoint_max_widths(),
-				ilo_get_url_metrics_breakpoint_sample_size(),
-				ilo_get_url_metric_freshness_ttl()
-			)
-		)
+	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths(
+		$url_metrics,
+		microtime( true ),
+		ilo_get_breakpoint_max_widths(),
+		ilo_get_url_metrics_breakpoint_sample_size(),
+		ilo_get_url_metric_freshness_ttl()
 	);
+
+	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
+	$needs_detection = ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths );
 
 	$breakpoint_max_widths                   = ilo_get_breakpoint_max_widths();
 	$url_metrics_grouped_by_breakpoint       = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );
@@ -213,11 +207,18 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 
 	// Inject any preload links at the end of the HEAD. In the future, WP_HTML_Processor could be used to do this injection.
 	// However, given the simple replacement here this is not essential.
-	$preload_links = ilo_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
-	if ( $preload_links ) {
+	$head_injection = ilo_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
+
+	// Inject detection script.
+	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce.
+	if ( $needs_detection ) {
+		$head_injection .= ilo_get_detection_script( $slug, $needed_minimum_viewport_widths );
+	}
+
+	if ( $head_injection ) {
 		$buffer = preg_replace(
 			'#(?=</HEAD>)#i',
-			$preload_links,
+			$head_injection,
 			$buffer,
 			1
 		);
