@@ -239,6 +239,9 @@ final class ILO_HTML_Tag_Processor {
 	/**
 	 * Gets XPath for the current open tag.
 	 *
+	 * It would be nicer if this were like `/html[1]/body[2]` but in XPath the position() here refers to the
+	 * index of the preceding node set. So it has to rather be written `/*[1][self::html]/*[2][self::body]`.
+	 *
 	 * @return string XPath.
 	 */
 	public function get_xpath(): string {
