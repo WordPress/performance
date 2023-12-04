@@ -83,26 +83,6 @@ function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widt
 }
 
 /**
- * Gets XPath from a breadcrumbs array.
- *
- * @param array<array{string, int}> $breadcrumbs Breadcrumbs.
- * @return string XPath.
- */
-function ilo_get_breadcrumbs_xpath( array $breadcrumbs ): string {
-	return implode(
-		'',
-		array_map(
-			static function ( $breadcrumb ) {
-				// It would be nicer if this were like `/html[1]/body[2]` but in XPath the position() here refers to the
-				// index of the preceding node set. So it has to rather be written `/*[1][self::html]/*[2][self::body]`.
-				return sprintf( '/*[%d][self::%s]', $breadcrumb[1], $breadcrumb[0] );
-			},
-			$breadcrumbs
-		)
-	);
-}
-
-/**
  * Optimizes template output buffer.
  *
  * @since n.e.x.t
@@ -165,7 +145,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 			continue;
 		}
 
-		$xpath = ilo_get_breadcrumbs_xpath( $processor->get_breadcrumbs() );
+		$xpath = $processor->get_xpath();
 
 		// Ensure the fetchpriority attribute is set on the element properly.
 		if ( $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
