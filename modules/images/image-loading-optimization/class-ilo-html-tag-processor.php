@@ -237,7 +237,7 @@ final class ILO_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Gets XPath for the current node.
+	 * Gets XPath for the current open tag.
 	 *
 	 * @return string XPath.
 	 */
