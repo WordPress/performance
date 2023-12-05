@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for image-loading-optimization module load.php.
+ * Tests for image-loading-optimization module hooks.php.
  *
  * @package performance-lab
  * @group   image-loading-optimization
@@ -8,7 +8,7 @@
 
 use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
-class Image_Loading_Optimization_Load_Tests extends ImagesTestCase {
+class Image_Loading_Optimization_Hooks_Tests extends ImagesTestCase {
 
 	/**
 	 * Make sure the hook is added.
