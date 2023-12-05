@@ -6,9 +6,7 @@
  * @group   image-loading-optimization
  */
 
-use PerformanceLab\Tests\TestCase\ImagesTestCase;
-
-class Image_Loading_Optimization_Detection_Tests extends ImagesTestCase {
+class Image_Loading_Optimization_Detection_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.
@@ -17,7 +15,7 @@ class Image_Loading_Optimization_Detection_Tests extends ImagesTestCase {
 	 */
 	public function data_provider_ilo_get_detection_script(): array {
 		return array(
-			'no_filters' => array(
+			'unfiltered' => array(
 				'set_up' => static function () {},
 				'expected_exports' => array(
 					'detectionTimeWindow' => 5000,

@@ -6,9 +6,7 @@
  * @group   image-loading-optimization
  */
 
-use PerformanceLab\Tests\TestCase\ImagesTestCase;
-
-class Image_Loading_Optimization_Hooks_Tests extends ImagesTestCase {
+class Image_Loading_Optimization_Hooks_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Make sure the hook is added.
