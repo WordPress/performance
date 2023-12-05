@@ -68,7 +68,6 @@ function plsr_get_speculation_rules() {
 					// Prerender any URLs within the same site.
 					array(
 						'href_matches' => $prefixer->prefix_path_pattern( '/*\\?*' ),
-						'relative_to'  => 'document',
 					),
 					// Except for WP login and admin URLs.
 					array(
