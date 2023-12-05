@@ -36,6 +36,7 @@ add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
 function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widths ): string {
 	$preload_links = array();
 
+	// This uses a for loop to be able to access the following element within the iteration, using a numeric index.
 	$minimum_viewport_widths = array_keys( $lcp_images_by_minimum_viewport_widths );
 	for ( $i = 0, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
 		$lcp_element = $lcp_images_by_minimum_viewport_widths[ $minimum_viewport_widths[ $i ] ];
