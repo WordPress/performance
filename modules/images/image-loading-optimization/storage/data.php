@@ -279,11 +279,10 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
 		if ( ! isset( $url_metric['viewport']['width'] ) ) {
 			continue;
 		}
-		$viewport_width = $url_metric['viewport']['width'];
 
 		$current_minimum_viewport = 0;
 		foreach ( $viewport_minimum_widths as $viewport_minimum_width ) {
-			if ( $viewport_width > $viewport_minimum_width ) {
+			if ( $url_metric['viewport']['width'] > $viewport_minimum_width ) {
 				$current_minimum_viewport = $viewport_minimum_width;
 			} else {
 				break;

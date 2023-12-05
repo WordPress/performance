@@ -46,6 +46,8 @@ add_action( 'init', 'ilo_register_url_metrics_post_type' );
  * @since n.e.x.t
  * @access private
  *
+ * @todo Consider returning post ID instead of WP_Post object.
+ *
  * @param string $slug URL metrics slug.
  * @return WP_Post|null Post object if exists.
  */
@@ -110,7 +112,40 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 		);
 		$url_metrics = array();
 	}
-	return $url_metrics;
+
+	return array_values(
+		array_filter(
+			$url_metrics,
+			static function ( $url_metric ) use ( $trigger_error ) {
+				// TODO: If we wanted, we could use the JSON Schema to validate the stored metrics.
+				$is_valid = (
+					is_array( $url_metric )
+					&&
+					isset(
+						$url_metric['viewport']['width'],
+						$url_metric['viewport']['height'],
+						$url_metric['elements']
+					)
+					&&
+					is_int( $url_metric['viewport']['width'] )
+					&&
+					is_array( $url_metric['elements'] )
+				);
+
+				if ( ! $is_valid ) {
+					$trigger_error(
+						sprintf(
+							/* translators: %s is post type slug */
+							__( 'Unexpected shape to JSON array in post_content of %s post type.', 'performance-lab' ),
+							ILO_URL_METRICS_POST_TYPE
+						)
+					);
+				}
+
+				return $is_valid;
+			}
+		)
+	);
 }
 
 /**
@@ -119,8 +154,8 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
  * @since n.e.x.t
  * @access private
  *
- * @param string $url                   URL for the URL metrics. This is used purely as metadata.
- * @param string $slug                  URL metrics slug (computed from query vars).
+ * @param string $url                  URL for the URL metrics. This is used purely as metadata.
+ * @param string $slug                 URL metrics slug (computed from query vars).
  * @param array  $validated_url_metric Validated URL metric. See JSON Schema defined in ilo_register_endpoint().
  * @return int|WP_Error Post ID or WP_Error otherwise.
  */
