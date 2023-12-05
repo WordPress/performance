@@ -140,7 +140,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		// All breakpoints share the same LCP element (or all have none at all).
 		1 === count( $lcp_elements_by_minimum_viewport_widths )
 		&&
-		// The breakpoints don't share a common lack of an LCP element.
+		// The breakpoints don't share a common lack of an LCP image.
 		! in_array( false, $lcp_elements_by_minimum_viewport_widths, true )
 		&&
 		// All breakpoints have URL metrics being reported.
