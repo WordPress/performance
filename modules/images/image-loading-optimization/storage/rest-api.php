@@ -105,12 +105,12 @@ function ilo_register_endpoint() {
 					'required'    => true,
 					'properties'  => array(
 						'width'  => array(
-							'type'     => 'int',
+							'type'     => 'integer',
 							'required' => true,
 							'minimum'  => 0,
 						),
 						'height' => array(
-							'type'     => 'int',
+							'type'     => 'integer',
 							'required' => true,
 							'minimum'  => 0,
 						),
@@ -119,16 +119,17 @@ function ilo_register_endpoint() {
 				'elements' => array(
 					'description' => __( 'Element metrics', 'performance-lab' ),
 					'type'        => 'array',
+					'required'    => true,
 					'items'       => array(
 						// See the ElementMetrics in detect.js.
 						'type'       => 'object',
 						'properties' => array(
 							'isLCP'              => array(
-								'type'     => 'bool',
+								'type'     => 'boolean',
 								'required' => true,
 							),
 							'isLCPCandidate'     => array(
-								'type' => 'bool',
+								'type' => 'boolean',
 							),
 							'xpath'              => array(
 								'type'     => 'string',
@@ -171,6 +172,8 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 		ilo_get_url_metrics_breakpoint_sample_size(),
 		ilo_get_url_metric_freshness_ttl()
 	);
+
+	// TODO: This is not right. It is asking if it is needed for any breakpoint, not if it is needed for the supplied breakpoint. This logic here is specific for the frontend.
 	if ( ! ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
 		return new WP_Error(
 			'no_url_metric_needed',
@@ -180,7 +183,7 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	}
 
 	ilo_set_url_metric_storage_lock();
-	$new_url_metric = wp_array_slice_assoc( $request->get_json_params(), array( 'viewport', 'elements' ) );
+	$new_url_metric = wp_array_slice_assoc( $request->get_params(), array( 'viewport', 'elements' ) );
 
 	$result = ilo_store_url_metric(
 		$request->get_param( 'url' ),
