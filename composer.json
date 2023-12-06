@@ -34,7 +34,7 @@
     "format": "phpcbf --standard=phpcs.xml.dist --report-summary --report-source",
     "lint": "phpcs --standard=phpcs.xml.dist",
     "test": "phpunit -c phpunit.xml.dist --verbose",
-    "test-multisite": "WP_MULTISITE=1 phpunit -c tests/multisite.xml --verbose"
+    "test-multisite": "phpunit -c tests/multisite.xml --verbose"
   },
   "config": {
     "allow-plugins": {
