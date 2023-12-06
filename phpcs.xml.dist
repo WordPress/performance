@@ -6,9 +6,7 @@
 	<config name="testVersion" value="7.0-"/>
 
 	<rule ref="WordPress-Docs"/>
-	<rule ref="WordPress-Extra">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
+	<rule ref="WordPress-Extra" />
 	<rule ref="WordPress.WP.I18n"/>
 	<config name="text_domain" value="performance-lab,default"/>
 
@@ -71,6 +69,23 @@
 	</rule>
 	<rule ref="PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.boolFound">
 		<exclude-pattern>tests/utils/*</exclude-pattern>
+	</rule>
+
+	<!-- Ignore inapplicable WordPress-Extra sniffs in tests. -->
+	<rule ref="WordPress.WP.EnqueuedResourceParameters">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.EscapeOutput.OutputNotEscaped">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions.unlink_unlink">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.GlobalVariablesOverride.Prohibited">
+		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 
 	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />

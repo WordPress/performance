@@ -177,4 +177,3 @@ class Site_Health_Mock_Responses {
 		return $result;
 	}
 }
-

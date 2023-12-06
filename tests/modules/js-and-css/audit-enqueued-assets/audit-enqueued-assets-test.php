@@ -78,7 +78,6 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 			),
 			$transient
 		);
-
 	}
 
 	/**
@@ -287,4 +286,3 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_more_than_threshold( $number_of_assets );
 	}
 }
-

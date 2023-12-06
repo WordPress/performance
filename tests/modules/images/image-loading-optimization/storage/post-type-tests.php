@@ -66,24 +66,24 @@ class Image_Loading_Optimization_Storage_Post_Type_Tests extends WP_UnitTestCase
 					'height' => 480,
 				),
 				'elements' => array(),
-			)
+			),
 		);
 
 		return array(
 			'malformed_json' => array(
-				'post_content' => '{"bad":',
+				'post_content'   => '{"bad":',
 				'expected_value' => array(),
 			),
 			'not_array_json' => array(
-				'post_content' => '{"cool":"beans"}',
+				'post_content'   => '{"cool":"beans"}',
 				'expected_value' => array(),
 			),
-			'missing_keys' => array(
-				'post_content' => '[{},{},{}]',
+			'missing_keys'   => array(
+				'post_content'   => '[{},{},{}]',
 				'expected_value' => array(),
 			),
-			'valid' => array(
-				'post_content' => json_encode( $valid_content ),
+			'valid'          => array(
+				'post_content'   => wp_json_encode( $valid_content ),
 				'expected_value' => $valid_content,
 			),
 		);
@@ -99,7 +99,7 @@ class Image_Loading_Optimization_Storage_Post_Type_Tests extends WP_UnitTestCase
 	public function test_ilo_parse_stored_url_metrics( string $post_content, array $expected_value ) {
 		$post = self::factory()->post->create_and_get(
 			array(
-				'post_type' => ILO_URL_METRICS_POST_TYPE,
+				'post_type'    => ILO_URL_METRICS_POST_TYPE,
 				'post_content' => $post_content,
 			)
 		);
@@ -125,10 +125,10 @@ class Image_Loading_Optimization_Storage_Post_Type_Tests extends WP_UnitTestCase
 			),
 			'elements' => array(
 				array(
-					'isLCP'              => true,
-					'isLCPCandidate'     => true,
-					'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
-					'intersectionRatio'  => 1,
+					'isLCP'             => true,
+					'isLCPCandidate'    => true,
+					'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
+					'intersectionRatio' => 1,
 				),
 			),
 		);
@@ -147,7 +147,7 @@ class Image_Loading_Optimization_Storage_Post_Type_Tests extends WP_UnitTestCase
 		$this->assertLessThanOrEqual( microtime( true ), $url_metrics[0]['timestamp'] );
 
 		$again_post_id = ilo_store_url_metric( $url, $slug, $validated_url_metric );
-		$post = get_post( $again_post_id );
+		$post          = get_post( $again_post_id );
 		$this->assertSame( $post_id, $again_post_id );
 		$url_metrics = ilo_parse_stored_url_metrics( $post );
 		$this->assertCount( 2, $url_metrics );

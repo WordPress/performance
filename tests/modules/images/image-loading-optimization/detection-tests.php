@@ -16,14 +16,14 @@ class Image_Loading_Optimization_Detection_Tests extends WP_UnitTestCase {
 	public function data_provider_ilo_get_detection_script(): array {
 		return array(
 			'unfiltered' => array(
-				'set_up' => static function () {},
+				'set_up'           => static function () {},
 				'expected_exports' => array(
 					'detectionTimeWindow' => 5000,
-					'storageLockTTL' => MINUTE_IN_SECONDS,
+					'storageLockTTL'      => MINUTE_IN_SECONDS,
 				),
 			),
-			'filtered' => array(
-				'set_up' => static function () {
+			'filtered'   => array(
+				'set_up'           => static function () {
 					add_filter(
 						'ilo_detection_time_window',
 						static function (): int {
@@ -39,7 +39,7 @@ class Image_Loading_Optimization_Detection_Tests extends WP_UnitTestCase {
 				},
 				'expected_exports' => array(
 					'detectionTimeWindow' => 2500,
-					'storageLockTTL' => HOUR_IN_SECONDS,
+					'storageLockTTL'      => HOUR_IN_SECONDS,
 				),
 			),
 		);
@@ -57,13 +57,13 @@ class Image_Loading_Optimization_Detection_Tests extends WP_UnitTestCase {
 	 */
 	public function test_ilo_get_detection_script_returns_script( Closure $set_up, array $expected_exports ) {
 		$set_up();
-		$slug = ilo_get_url_metrics_slug( array( 'p' => '1' ) );
+		$slug                           = ilo_get_url_metrics_slug( array( 'p' => '1' ) );
 		$needed_minimum_viewport_widths = array(
 			array( 480, false ),
 			array( 600, false ),
-			array( 782, true )
+			array( 782, true ),
 		);
-		$script = ilo_get_detection_script( $slug, $needed_minimum_viewport_widths );
+		$script                         = ilo_get_detection_script( $slug, $needed_minimum_viewport_widths );
 
 		$this->assertStringContainsString( '<script type="module">', $script );
 		$this->assertStringContainsString( 'import detect from', $script );

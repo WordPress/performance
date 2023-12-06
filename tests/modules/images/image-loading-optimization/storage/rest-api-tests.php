@@ -31,7 +31,7 @@ class Image_Loading_Optimization_Storage_REST_API_Tests extends WP_UnitTestCase 
 	 * @covers ::ilo_handle_rest_request
 	 */
 	public function test_rest_request_good_params() {
-		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request      = new WP_REST_Request( 'POST', self::ROUTE );
 		$valid_params = $this->get_valid_params();
 		$request->set_body_params( $valid_params );
 		$response = rest_get_server()->dispatch( $request );
@@ -67,48 +67,51 @@ class Image_Loading_Optimization_Storage_REST_API_Tests extends WP_UnitTestCase 
 				);
 			},
 			array(
-				'bad_url' => array(
+				'bad_url'                                  => array(
 					'url' => 'bad://url',
 				),
-				'other_origin_url' => array(
-					'url' => 'https://bogus.example.com/'
+				'other_origin_url'                         => array(
+					'url' => 'https://bogus.example.com/',
 				),
-				'bad_slug' => array(
-					'slug' => '<script>document.write("evil")</script>'
+				'bad_slug'                                 => array(
+					'slug' => '<script>document.write("evil")</script>',
 				),
-				'bad_nonce' => array(
-					'nonce' => 'not even a hash'
+				'bad_nonce'                                => array(
+					'nonce' => 'not even a hash',
 				),
-				'invalid_nonce' => array(
-					'nonce' => ilo_get_url_metrics_storage_nonce( ilo_get_url_metrics_slug( array( 'different' => 'query vars' ) ) )
+				'invalid_nonce'                            => array(
+					'nonce' => ilo_get_url_metrics_storage_nonce( ilo_get_url_metrics_slug( array( 'different' => 'query vars' ) ) ),
 				),
-				'invalid_viewport_type' => array(
-					'viewport' => '640x480'
+				'invalid_viewport_type'                    => array(
+					'viewport' => '640x480',
 				),
-				'invalid_viewport_values' => array(
-					'viewport' => array( 'breadth' => 100, 'depth' => 200 )
+				'invalid_viewport_values'                  => array(
+					'viewport' => array(
+						'breadth' => 100,
+						'depth'   => 200,
+					),
 				),
-				'invalid_elements_type' => array(
-					'elements' => 'bad'
+				'invalid_elements_type'                    => array(
+					'elements' => 'bad',
 				),
-				'invalid_elements_prop_is_lcp' => array(
+				'invalid_elements_prop_is_lcp'             => array(
 					'elements' => array(
 						array_merge(
 							$valid_element,
 							array(
 								'isLCP' => 'totally!',
 							)
-						)
+						),
 					),
 				),
-				'invalid_elements_prop_xpath' => array(
+				'invalid_elements_prop_xpath'              => array(
 					'elements' => array(
 						array_merge(
 							$valid_element,
 							array(
 								'xpath' => 'html > body img',
 							)
-						)
+						),
 					),
 				),
 				'invalid_elements_prop_intersection_ratio' => array(
@@ -116,9 +119,9 @@ class Image_Loading_Optimization_Storage_REST_API_Tests extends WP_UnitTestCase 
 						array_merge(
 							$valid_element,
 							array(
-								'intersectionRatio' => -1,
+								'intersectionRatio' => - 1,
 							)
-						)
+						),
 					),
 				),
 			)
@@ -175,9 +178,9 @@ class Image_Loading_Optimization_Storage_REST_API_Tests extends WP_UnitTestCase 
 		$viewport_widths = array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) );
 		foreach ( $viewport_widths as $breakpoint_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
-				$valid_params = $this->get_valid_params();
+				$valid_params                      = $this->get_valid_params();
 				$valid_params['viewport']['width'] = $breakpoint_width;
-				$request = new WP_REST_Request( 'POST', self::ROUTE );
+				$request                           = new WP_REST_Request( 'POST', self::ROUTE );
 				$request->set_body_params( $valid_params );
 				$response = rest_get_server()->dispatch( $request );
 				$this->assertSame( 200, $response->get_status() );
@@ -221,10 +224,10 @@ class Image_Loading_Optimization_Storage_REST_API_Tests extends WP_UnitTestCase 
 			),
 			'elements' => array(
 				array(
-					'isLCP'              => true,
-					'isLCPCandidate'     => true,
-					'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
-					'intersectionRatio'  => 1,
+					'isLCP'             => true,
+					'isLCPCandidate'    => true,
+					'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
+					'intersectionRatio' => 1,
 				),
 			),
 		);

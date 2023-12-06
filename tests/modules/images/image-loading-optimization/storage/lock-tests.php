@@ -11,7 +11,7 @@ class Image_Loading_Optimization_Storage_Lock_Tests extends WP_UnitTestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tear_down(){
+	public function tear_down() {
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 		parent::tear_down();
 	}
@@ -23,11 +23,11 @@ class Image_Loading_Optimization_Storage_Lock_Tests extends WP_UnitTestCase {
 	 */
 	public function data_provider_ilo_get_url_metric_storage_lock_ttl(): array {
 		return array(
-			'unfiltered' => array(
+			'unfiltered'        => array(
 				'set_up'   => static function () {},
 				'expected' => MINUTE_IN_SECONDS,
 			),
-			'filtered_hour' => array(
+			'filtered_hour'     => array(
 				'set_up'   => static function () {
 					add_filter(
 						'ilo_url_metric_storage_lock_ttl',
@@ -39,7 +39,7 @@ class Image_Loading_Optimization_Storage_Lock_Tests extends WP_UnitTestCase {
 				'expected' => HOUR_IN_SECONDS,
 			),
 			'filtered_negative' => array(
-				'set_up' => static function () {
+				'set_up'   => static function () {
 					add_filter(
 						'ilo_url_metric_storage_lock_ttl',
 						static function (): int {
@@ -77,11 +77,11 @@ class Image_Loading_Optimization_Storage_Lock_Tests extends WP_UnitTestCase {
 		unset( $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_X_FORWARDED_FOR'] );
 
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-		$first_key = ilo_get_url_metric_storage_lock_transient_key();
+		$first_key              = ilo_get_url_metric_storage_lock_transient_key();
 		$this->assertStringStartsWith( 'url_metrics_storage_lock_', $first_key );
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '127.0.0.2';
-		$second_key = ilo_get_url_metric_storage_lock_transient_key();
+		$second_key                      = ilo_get_url_metric_storage_lock_transient_key();
 		$this->assertStringStartsWith( 'url_metrics_storage_lock_', $second_key );
 
 		$this->assertNotEquals( $second_key, $first_key, 'Expected setting HTTP_X_FORWARDED_FOR header to take precedence over REMOTE_ADDR.' );
