@@ -94,6 +94,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$directory = trailingslashit( pathinfo( $file, PATHINFO_DIRNAME ) );
 		$name      = pathinfo( $file, PATHINFO_FILENAME );
 
+		$this->assertNotWPError( $result );
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'filesize', $result );
 		$this->assertArrayHasKey( 'file', $result );
@@ -116,6 +117,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$result = webp_uploads_generate_additional_image_source( $attachment_id, 'medium', $size_data, 'image/webp', '/tmp/image.jpg' );
 
+		$this->assertNotWPError( $result );
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'filesize', $result );
 		$this->assertArrayHasKey( 'file', $result );

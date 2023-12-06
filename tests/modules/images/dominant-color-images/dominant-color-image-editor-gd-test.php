@@ -35,6 +35,7 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 
 		$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 
+		$this->assertNotWPError( $dominant_color_data );
 		$this->assertContains( $dominant_color_data['dominant_color'], $expected_color );
 		$this->assertSame( $dominant_color_data['has_transparency'], $expected_transparency );
 	}
