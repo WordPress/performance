@@ -36,6 +36,7 @@ add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
 function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widths ): string {
 	$preload_links = array();
 
+	// This uses a for loop to be able to access the following element within the iteration, using a numeric index.
 	$minimum_viewport_widths = array_keys( $lcp_images_by_minimum_viewport_widths );
 	for ( $i = 0, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
 		$lcp_element = $lcp_images_by_minimum_viewport_widths[ $minimum_viewport_widths[ $i ] ];
@@ -127,7 +128,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		// All breakpoints share the same LCP element (or all have none at all).
 		1 === count( $lcp_elements_by_minimum_viewport_widths )
 		&&
-		// The breakpoints don't share a common lack of an LCP element.
+		// The breakpoints don't share a common lack of an LCP image.
 		! in_array( false, $lcp_elements_by_minimum_viewport_widths, true )
 		&&
 		// All breakpoints have URL metrics being reported.
