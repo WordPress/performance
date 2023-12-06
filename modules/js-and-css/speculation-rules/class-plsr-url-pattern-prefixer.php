@@ -57,10 +57,12 @@ class PLSR_URL_Pattern_Prefixer {
 		if ( ! isset( $this->contexts[ $context ] ) ) {
 			_doing_it_wrong(
 				__FUNCTION__,
-				sprintf(
-					/* translators: %s: context string */
-					esc_html__( 'Invalid context %s.', 'performance-lab' ),
-					esc_html( $context )
+				esc_html(
+					sprintf(
+						/* translators: %s: context string */
+						__( 'Invalid context %s.', 'performance-lab' ),
+						$context
+					)
 				),
 				'Performance Lab n.e.x.t'
 			);
