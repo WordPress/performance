@@ -1,0 +1,14 @@
+{
+  "require-dev": {
+    "phpstan/extension-installer": "^1.3.0",
+    "phpstan/phpstan": "^1.10",
+    "phpstan/phpstan-phpunit": "^1.3",
+    "phpstan/phpstan-deprecation-rules": "^1.1",
+    "szepeviktor/phpstan-wordpress": "^1.3.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "phpstan/extension-installer": true
+    }
+  }
+}
