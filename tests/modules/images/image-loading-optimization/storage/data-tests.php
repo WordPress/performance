@@ -309,7 +309,23 @@ class Image_Loading_Optimization_Storage_Data_Tests extends WP_UnitTestCase {
 	 * @covers ::ilo_get_breakpoint_max_widths
 	 */
 	public function test_ilo_get_breakpoint_max_widths() {
-		$this->markTestIncomplete();
+		$this->assertSame(
+			array( 480, 600, 782 ),
+			ilo_get_breakpoint_max_widths()
+		);
+
+		$filtered_breakpoints = array( 2000, 500, '1000', 3000 );
+
+		add_filter(
+			'ilo_breakpoint_max_widths',
+			static function () use ( $filtered_breakpoints ) {
+				return $filtered_breakpoints;
+			}
+		);
+
+		$filtered_breakpoints = array_map( 'intval', $filtered_breakpoints );
+		sort( $filtered_breakpoints );
+		$this->assertSame( $filtered_breakpoints, ilo_get_breakpoint_max_widths() );
 	}
 
 	/**
@@ -319,7 +335,16 @@ class Image_Loading_Optimization_Storage_Data_Tests extends WP_UnitTestCase {
 	 * @covers ::ilo_get_url_metrics_breakpoint_sample_size
 	 */
 	public function test_ilo_get_url_metrics_breakpoint_sample_size() {
-		$this->markTestIncomplete();
+		$this->assertSame( 3, ilo_get_url_metrics_breakpoint_sample_size() );
+
+		add_filter(
+			'ilo_url_metrics_breakpoint_sample_size',
+			static function () {
+				return '1';
+			}
+		);
+
+		$this->assertSame( 1, ilo_get_url_metrics_breakpoint_sample_size() );
 	}
 
 	/**
