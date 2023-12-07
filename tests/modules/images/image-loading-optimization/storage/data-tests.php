@@ -233,14 +233,13 @@ class Image_Loading_Optimization_Storage_Data_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ilo_unshift_url_metrics() and its use of ilo_group_url_metrics_by_breakpoint().
+	 * Test ilo_unshift_url_metrics().
 	 *
 	 * @test
 	 * @covers ::ilo_unshift_url_metrics
-	 * @covers ::ilo_group_url_metrics_by_breakpoint
 	 * @dataProvider data_provider_sample_size_and_breakpoints
 	 */
-	public function test_ilo_unshift_url_metrics_and_ilo_group_url_metrics_by_breakpoint( int $sample_size, array $breakpoints, array $viewport_widths ) {
+	public function test_ilo_unshift_url_metrics( int $sample_size, array $breakpoints, array $viewport_widths ) {
 		$old_timestamp = 1701978742;
 
 		// Fully populate the sample size for the breakpoints.
@@ -345,6 +344,65 @@ class Image_Loading_Optimization_Storage_Data_Tests extends WP_UnitTestCase {
 		);
 
 		$this->assertSame( 1, ilo_get_url_metrics_breakpoint_sample_size() );
+	}
+
+	public function data_provider_test_ilo_group_url_metrics_by_breakpoint(): array {
+		return array(
+			'2-breakpoints-and-3-viewport-widths' => array(
+				'breakpoints'     => array( 480, 640 ),
+				'viewport_widths' => array( 400, 600, 800 ),
+			),
+			'1-breakpoint-and-4-viewport-widths'  => array(
+				'breakpoints'     => array( 480 ),
+				'viewport_widths' => array( 400, 600, 800, 1000 ),
+			),
+		);
+	}
+
+	/**
+	 * Test ilo_group_url_metrics_by_breakpoint().
+	 *
+	 * @test
+	 * @covers ::ilo_group_url_metrics_by_breakpoint
+	 * @dataProvider data_provider_test_ilo_group_url_metrics_by_breakpoint
+	 */
+	public function test_ilo_group_url_metrics_by_breakpoint( array $breakpoints, array $viewport_widths ) {
+		$url_metrics = array();
+		foreach ( $viewport_widths as $viewport_width ) {
+			$url_metric                      = $this->get_validated_url_metric();
+			$url_metric['viewport']['width'] = $viewport_width;
+			$url_metrics[]                   = $url_metric;
+		}
+
+		$grouped_url_metrics = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoints );
+		$this->assertCount( count( $breakpoints ) + 1, $grouped_url_metrics, 'Expected number of breakpoint groups to always be one greater than the number of breakpoints.' );
+		$minimum_viewport_widths = array_keys( $grouped_url_metrics );
+		$this->assertSame( 0, array_shift( $minimum_viewport_widths ), 'Expected the first minimum viewport width to always be zero.' );
+		foreach ( $breakpoints as $breakpoint ) {
+			$this->assertSame( $breakpoint + 1, array_shift( $minimum_viewport_widths ) );
+		}
+
+		$minimum_viewport_widths = array_keys( $grouped_url_metrics );
+		for ( $i = 0, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
+			$minimum_viewport_width = $minimum_viewport_widths[ $i ];
+			$maximum_viewport_width = $minimum_viewport_widths[ $i + 1 ] ?? null;
+			if ( 0 === $i ) {
+				$this->assertSame( 0, $minimum_viewport_width );
+			} else {
+				$this->assertGreaterThan( 0, $minimum_viewport_width );
+			}
+			if ( isset( $maximum_viewport_width ) ) {
+				$this->assertLessThan( $maximum_viewport_width, $minimum_viewport_width );
+			}
+
+			$this->assertIsArray( $grouped_url_metrics[ $minimum_viewport_width ] );
+			foreach ( $grouped_url_metrics[ $minimum_viewport_width ] as $url_metric ) {
+				$this->assertGreaterThanOrEqual( $minimum_viewport_width, $url_metric['viewport']['width'] );
+				if ( isset( $maximum_viewport_width ) ) {
+					$this->assertLessThanOrEqual( $maximum_viewport_width, $url_metric['viewport']['width'] );
+				}
+			}
+		}
 	}
 
 	/**

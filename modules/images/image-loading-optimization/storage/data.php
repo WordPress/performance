@@ -273,14 +273,14 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
 function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpoints ): array {
 
 	// Convert breakpoint max widths into viewport minimum widths.
-	$viewport_minimum_widths = array_map(
+	$minimum_viewport_widths = array_map(
 		static function ( $breakpoint ) {
 			return $breakpoint + 1;
 		},
 		$breakpoints
 	);
 
-	$grouped = array_fill_keys( array_merge( array( 0 ), $viewport_minimum_widths ), array() );
+	$grouped = array_fill_keys( array_merge( array( 0 ), $minimum_viewport_widths ), array() );
 
 	foreach ( $url_metrics as $url_metric ) {
 		if ( ! isset( $url_metric['viewport']['width'] ) ) {
@@ -288,7 +288,7 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
 		}
 
 		$current_minimum_viewport = 0;
-		foreach ( $viewport_minimum_widths as $viewport_minimum_width ) {
+		foreach ( $minimum_viewport_widths as $viewport_minimum_width ) {
 			if ( $url_metric['viewport']['width'] > $viewport_minimum_width ) {
 				$current_minimum_viewport = $viewport_minimum_width;
 			} else {
