@@ -24,3 +24,6 @@ require_once __DIR__ . '/storage/data.php';
 require_once __DIR__ . '/storage/rest-api.php';
 
 require_once __DIR__ . '/detection.php';
+
+require_once __DIR__ . '/class-ilo-html-tag-processor.php';
+require_once __DIR__ . '/optimization.php';

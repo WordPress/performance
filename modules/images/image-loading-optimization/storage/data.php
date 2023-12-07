@@ -44,7 +44,14 @@ function ilo_get_url_metric_freshness_ttl(): int {
  * @return bool Whether response can be optimized.
  */
 function ilo_can_optimize_response(): bool {
-	$able = ! is_search();
+	$able = ! (
+		// Since the URL space is infinite.
+		is_search() ||
+		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
+		is_customize_preview() ||
+		// The images detected in the response body of a POST request cannot, by definition, be cached.
+		'GET' !== $_SERVER['REQUEST_METHOD']
+	);
 
 	/**
 	 * Filters whether the current response can be optimized.
@@ -186,8 +193,17 @@ function ilo_unshift_url_metrics( array $url_metrics, array $validated_url_metri
  *  3. 481-576 (phablets)
  *  4. >576 (desktop)
  *
+ * The default breakpoints are reused from Gutenberg where the _breakpoints.scss file includes these variables:
+ *
+ *     $break-medium: 782px; // adminbar goes big
+ *     $break-small: 600px;
+ *     $break-mobile: 480px;
+ *
+ * These breakpoints appear to be used the most in media queries that affect frontend styles.
+ *
  * @since n.e.x.t
  * @access private
+ * @link https://github.com/WordPress/gutenberg/blob/093d52cbfd3e2c140843d3fb91ad3d03330320a5/packages/base-styles/_breakpoints.scss#L11-L13
  *
  * @return int[] Breakpoint max widths, sorted in ascending order.
  */
@@ -200,9 +216,11 @@ function ilo_get_breakpoint_max_widths(): array {
 		/**
 		 * Filters the breakpoint max widths to group URL metrics for various viewports.
 		 *
+		 * @since n.e.x.t
+		 *
 		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints.
 		 */
-		(array) apply_filters( 'ilo_breakpoint_max_widths', array( 480 ) )
+		(array) apply_filters( 'ilo_breakpoint_max_widths', array( 480, 600, 782 ) )
 	);
 
 	sort( $breakpoint_max_widths );
@@ -275,6 +293,87 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
 		$grouped[ $current_minimum_viewport ][] = $url_metric;
 	}
 	return $grouped;
+}
+
+/**
+ * Gets the LCP element for each breakpoint.
+ *
+ * The array keys are the minimum viewport width required for the element to be LCP. If there are URL metrics for a
+ * given breakpoint and yet there is no LCP element, then the array value is `false`. If there is an LCP element at the
+ * breakpoint, then the array value is an array representing that element, including its breadcrumbs. If two adjoining
+ * breakpoints have the same value, then the latter is dropped.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param array $grouped_url_metrics URL metrics grouped by breakpoint. See `ilo_group_url_metrics_by_breakpoint()`.
+ * @return array LCP elements keyed by its minimum viewport width. If there is no LCP element at a breakpoint, then `false` is used.
+ */
+function ilo_get_lcp_elements_by_minimum_viewport_widths( array $grouped_url_metrics ): array {
+
+	$lcp_element_by_viewport_minimum_width = array();
+	foreach ( $grouped_url_metrics as $viewport_minimum_width => $breakpoint_url_metrics ) {
+
+		// The following arrays all share array indices.
+		$seen_breadcrumbs   = array();
+		$breadcrumb_counts  = array();
+		$breadcrumb_element = array();
+
+		foreach ( $breakpoint_url_metrics as $breakpoint_url_metric ) {
+			foreach ( $breakpoint_url_metric['elements'] as $element ) {
+				if ( ! $element['isLCP'] ) {
+					continue;
+				}
+
+				$i = array_search( $element['breadcrumbs'], $seen_breadcrumbs, true );
+				if ( false === $i ) {
+					$i                       = count( $seen_breadcrumbs );
+					$seen_breadcrumbs[ $i ]  = $element['breadcrumbs'];
+					$breadcrumb_counts[ $i ] = 0;
+				}
+
+				$breadcrumb_counts[ $i ] += 1;
+				$breadcrumb_element[ $i ] = $element;
+				break; // We found the LCP element for the URL metric, go to the next URL metric.
+			}
+		}
+
+		// Now sort by the breadcrumb counts in descending order, so the remaining first key is the most common breadcrumb.
+		if ( $seen_breadcrumbs ) {
+			arsort( $breadcrumb_counts );
+			$most_common_breadcrumb_index = key( $breadcrumb_counts );
+
+			$lcp_element_by_viewport_minimum_width[ $viewport_minimum_width ] = $breadcrumb_element[ $most_common_breadcrumb_index ];
+		} elseif ( ! empty( $breakpoint_url_metrics ) ) {
+			$lcp_element_by_viewport_minimum_width[ $viewport_minimum_width ] = false; // No LCP image at this breakpoint.
+		}
+	}
+
+	// Now merge the breakpoints when there is an LCP element common between them.
+	$prev_lcp_element = null;
+	return array_filter(
+		$lcp_element_by_viewport_minimum_width,
+		static function ( $lcp_element ) use ( &$prev_lcp_element ) {
+			$include = (
+				// First element in list.
+				null === $prev_lcp_element
+				||
+				( is_array( $prev_lcp_element ) && is_array( $lcp_element )
+					?
+					// This breakpoint and previous breakpoint had LCP element, and they were not the same element.
+					$prev_lcp_element['breadcrumbs'] !== $lcp_element['breadcrumbs']
+					:
+					// This LCP element and the last LCP element were not the same. In this case, either variable may be
+					// false or an array, but both cannot be an array. If both are false, we don't want to include since
+					// it is the same. If one is an array and the other is false, then do want to include because this
+					// indicates a difference at this breakpoint.
+					$prev_lcp_element !== $lcp_element
+				)
+			);
+			$prev_lcp_element = $lcp_element;
+			return $include;
+		}
+	);
 }
 
 /**

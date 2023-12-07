@@ -34,7 +34,7 @@ class Image_Loading_Optimization_Load_Tests extends ImagesTestCase {
 		ob_start();
 
 		add_filter(
-			'perflab_template_output_buffer',
+			'ilo_template_output_buffer',
 			function ( $buffer ) use ( $original, $expected ) {
 				$this->assertSame( $original, $buffer );
 				return $expected;

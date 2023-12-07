@@ -7,6 +7,8 @@ const consoleLogPrefix = '[Image Loading Optimization]';
 
 const storageLockTimeSessionKey = 'iloStorageLockTime';
 
+const adminBarId = 'wpadminbar';
+
 /**
  * Checks whether storage is locked.
  *
@@ -78,8 +80,8 @@ function error( ...message ) {
 
 /**
  * @typedef {Object} Breadcrumb
- * @property {number} index   - Index of element among sibling elements.
- * @property {string} tagName - Tag name.
+ * @property {number} index - Index of element among sibling elements.
+ * @property {string} tag   - Tag name.
  */
 
 /**
@@ -104,6 +106,8 @@ function error( ...message ) {
 /**
  * Gets element index among siblings.
  *
+ * @todo Eliminate this in favor of doing all breadcrumb generation exclusively on the server.
+ *
  * @param {Element} element Element.
  * @return {number} Index.
  */
@@ -111,11 +115,25 @@ function getElementIndex( element ) {
 	if ( ! element.parentElement ) {
 		return 0;
 	}
-	return [ ...element.parentElement.children ].indexOf( element );
+	const children = [ ...element.parentElement.children ];
+	let index = children.indexOf( element );
+	if ( children.includes( document.getElementById( adminBarId ) ) ) {
+		--index;
+	}
+	if (
+		children.includes(
+			document.querySelector( '.skip-link.screen-reader-text' )
+		)
+	) {
+		--index;
+	}
+	return index;
 }
 
 /**
  * Gets breadcrumbs for a given element.
+ *
+ * @todo Eliminate this in favor of doing all breadcrumb generation exclusively on the server.
  *
  * @param {Element} leafElement
  * @return {Breadcrumb[]} Breadcrumbs.
@@ -127,7 +145,7 @@ function getBreadcrumbs( leafElement ) {
 	let element = leafElement;
 	while ( element instanceof Element ) {
 		breadcrumbs.unshift( {
-			tagName: element.tagName,
+			tag: element.tagName,
 			index: getElementIndex( element ),
 		} );
 		element = element.parentElement;
@@ -238,7 +256,7 @@ export default async function detect( {
 
 	// Obtain the admin bar element because we don't want to detect elements inside of it.
 	const adminBar =
-		/** @type {?HTMLDivElement} */ doc.getElementById( 'wpadminbar' );
+		/** @type {?HTMLDivElement} */ doc.getElementById( adminBarId );
 
 	// We need to capture the original elements and their breadcrumbs as early as possible in case JavaScript is
 	// mutating the DOM from the original HTML rendered by the server, in which case the breadcrumbs obtained from the
@@ -246,15 +264,19 @@ export default async function detect( {
 	const breadcrumbedImages = doc.body.querySelectorAll( 'img' );
 
 	// We do the same for elements with background images which are not data: URLs.
-	const breadcrumbedElementsWithBackgrounds = Array.from(
-		doc.body.querySelectorAll( '[style*="background"]' )
-	).filter( ( /** @type {Element} */ el ) =>
-		/url\(\s*['"](?!=data:)/.test( el.style.backgroundImage )
-	);
+	// TODO: Re-enable background image support when server-side is implemented.
+	// const breadcrumbedElementsWithBackgrounds = Array.from(
+	// 	doc.body.querySelectorAll( '[style*="background"]' )
+	// ).filter( ( /** @type {Element} */ el ) =>
+	// 	/url\(\s*['"](?!=data:)/.test( el.style.backgroundImage )
+	// );
 
 	/** @type {Map<Element, Breadcrumb[]>} */
 	const breadcrumbedElementsMap = new Map(
-		[ ...breadcrumbedImages, ...breadcrumbedElementsWithBackgrounds ].map(
+		[
+			...breadcrumbedImages /*, ...breadcrumbedElementsWithBackgrounds*/,
+		].map(
+			// TODO: Instead of generating breadcrumbs here, rely instead on server-generated breadcrumbs that are added to a data attribute by the server.
 			( element ) => [ element, getBreadcrumbs( element ) ]
 		)
 	);
