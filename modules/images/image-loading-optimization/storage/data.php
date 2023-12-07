@@ -152,14 +152,16 @@ function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): in
  *
  * @param array $url_metrics          URL metrics.
  * @param array $validated_url_metric Validated URL metric. See JSON Schema defined in ilo_register_endpoint().
+ * @param int[] $breakpoints          Breakpoint max widths.
+ * @param int   $sample_size          Sample size for URL metrics at a given breakpoint.
  * @return array Updated URL metrics.
  */
-function ilo_unshift_url_metrics( array $url_metrics, array $validated_url_metric ): array {
+function ilo_unshift_url_metrics( array $url_metrics, array $validated_url_metric, array $breakpoints, int $sample_size ): array {
 	array_unshift( $url_metrics, $validated_url_metric );
-	$breakpoints         = ilo_get_breakpoint_max_widths();
-	$sample_size         = ilo_get_url_metrics_breakpoint_sample_size();
 	$grouped_url_metrics = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoints );
 
+	// Make sure there is at most $sample_size number of URL metrics for each breakpoint.
+	// TODO: Consider array_map() instead.
 	foreach ( $grouped_url_metrics as &$breakpoint_url_metrics ) {
 		if ( count( $breakpoint_url_metrics ) > $sample_size ) {
 
