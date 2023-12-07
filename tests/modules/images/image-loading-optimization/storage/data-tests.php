@@ -217,14 +217,89 @@ class Image_Loading_Optimization_Storage_Data_Tests extends WP_UnitTestCase {
 		}
 	}
 
+	public function data_provider_sample_size_and_breakpoints(): array {
+		return array(
+			'3 sample size and 2 breakpoints' => array(
+				'sample_size'     => 3,
+				'breakpoints'     => array( 480, 782 ),
+				'viewport_widths' => array( 400, 600, 800 ),
+			),
+			'1 sample size and 1 breakpoint'  => array(
+				'sample_size'     => 1,
+				'breakpoints'     => array( 480 ),
+				'viewport_widths' => array( 400, 800 ),
+			),
+		);
+	}
+
 	/**
-	 * Test ilo_unshift_url_metrics().
+	 * Test ilo_unshift_url_metrics() and its use of ilo_group_url_metrics_by_breakpoint().
 	 *
 	 * @test
 	 * @covers ::ilo_unshift_url_metrics
+	 * @covers ::ilo_group_url_metrics_by_breakpoint
+	 * @dataProvider data_provider_sample_size_and_breakpoints
 	 */
-	public function test_ilo_unshift_url_metrics() {
-		$this->markTestIncomplete();
+	public function test_ilo_unshift_url_metrics_and_ilo_group_url_metrics_by_breakpoint( int $sample_size, array $breakpoints, array $viewport_widths ) {
+		$old_timestamp = 1701978742;
+
+		// Fully populate the sample size for the breakpoints.
+		$all_url_metrics = array();
+		foreach ( $viewport_widths as $viewport_width ) {
+			for ( $i = 0; $i < $sample_size; $i++ ) {
+				$url_metric                      = $this->get_validated_url_metric();
+				$url_metric['viewport']['width'] = $viewport_width;
+
+				$all_url_metrics = ilo_unshift_url_metrics(
+					$all_url_metrics,
+					$url_metric,
+					$breakpoints,
+					$sample_size
+				);
+			}
+		}
+		$max_possible_url_metrics_count = $sample_size * ( count( $breakpoints ) + 1 );
+		$this->assertCount(
+			$max_possible_url_metrics_count,
+			$all_url_metrics,
+			sprintf( 'Expected there to be exactly sample size (%d) times the number of breakpoint groups (which is %d + 1)', $sample_size, count( $breakpoints ) )
+		);
+
+		// Make sure that ilo_unshift_url_metrics() added a timestamp and then force them to all be old.
+		$all_url_metrics = array_map(
+			function ( $url_metric ) use ( $old_timestamp ) {
+				$this->assertArrayHasKey( 'timestamp', $url_metric, 'Expected a timestamp to have been added to a URL metric.' );
+				$url_metric['timestamp'] = $old_timestamp;
+				return $url_metric;
+			},
+			$all_url_metrics
+		);
+
+		// Try adding one URL metric for each breakpoint group.
+		foreach ( $viewport_widths as $viewport_width ) {
+			$url_metric                      = $this->get_validated_url_metric();
+			$url_metric['viewport']['width'] = $viewport_width;
+
+			$all_url_metrics = ilo_unshift_url_metrics(
+				$all_url_metrics,
+				$url_metric,
+				$breakpoints,
+				$sample_size
+			);
+		}
+		$this->assertCount(
+			$max_possible_url_metrics_count,
+			$all_url_metrics,
+			'Expected the total count of URL metrics to not exceed the multiple of the sample size.'
+		);
+		$new_count = 0;
+		foreach ( $all_url_metrics as $url_metric ) {
+			if ( $url_metric['timestamp'] > $old_timestamp ) {
+				++$new_count;
+			}
+		}
+		$this->assertGreaterThan( 0, $new_count, 'Expected there to be at least one new URL metric.' );
+		$this->assertSame( count( $viewport_widths ), $new_count, 'Expected the new URL metrics to all have been added.' );
 	}
 
 	/**
@@ -244,16 +319,6 @@ class Image_Loading_Optimization_Storage_Data_Tests extends WP_UnitTestCase {
 	 * @covers ::ilo_get_url_metrics_breakpoint_sample_size
 	 */
 	public function test_ilo_get_url_metrics_breakpoint_sample_size() {
-		$this->markTestIncomplete();
-	}
-
-	/**
-	 * Test ilo_group_url_metrics_by_breakpoint().
-	 *
-	 * @test
-	 * @covers ::ilo_group_url_metrics_by_breakpoint
-	 */
-	public function test_ilo_group_url_metrics_by_breakpoint() {
 		$this->markTestIncomplete();
 	}
 
@@ -285,5 +350,22 @@ class Image_Loading_Optimization_Storage_Data_Tests extends WP_UnitTestCase {
 	 */
 	public function test_ilo_needs_url_metric_for_breakpoint() {
 		$this->markTestIncomplete();
+	}
+
+	private function get_validated_url_metric(): array {
+		return array(
+			'viewport' => array(
+				'width'  => 480,
+				'height' => 640,
+			),
+			'elements' => array(
+				array(
+					'isLCP'             => true,
+					'isLCPCandidate'    => true,
+					'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
+					'intersectionRatio' => 1,
+				),
+			),
+		);
 	}
 }

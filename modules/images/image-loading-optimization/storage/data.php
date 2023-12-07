@@ -150,35 +150,40 @@ function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): in
  * @since n.e.x.t
  * @access private
  *
- * @param array $url_metrics          URL metrics.
+ * @param array $url_metrics          URL metrics. Each URL metric is expected to have a timestamp key.
  * @param array $validated_url_metric Validated URL metric. See JSON Schema defined in ilo_register_endpoint().
  * @param int[] $breakpoints          Breakpoint max widths.
  * @param int   $sample_size          Sample size for URL metrics at a given breakpoint.
- * @return array Updated URL metrics.
+ * @return array Updated URL metrics, with timestamp key added.
  */
 function ilo_unshift_url_metrics( array $url_metrics, array $validated_url_metric, array $breakpoints, int $sample_size ): array {
+	$validated_url_metric['timestamp'] = microtime( true );
 	array_unshift( $url_metrics, $validated_url_metric );
 	$grouped_url_metrics = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoints );
 
 	// Make sure there is at most $sample_size number of URL metrics for each breakpoint.
-	// TODO: Consider array_map() instead.
-	foreach ( $grouped_url_metrics as &$breakpoint_url_metrics ) {
-		if ( count( $breakpoint_url_metrics ) > $sample_size ) {
+	$grouped_url_metrics = array_map(
+		static function ( $breakpoint_url_metrics ) use ( $sample_size ) {
+			if ( count( $breakpoint_url_metrics ) > $sample_size ) {
 
-			// Sort URL metrics in descending order by timestamp.
-			usort(
-				$breakpoint_url_metrics,
-				static function ( $a, $b ) {
-					if ( ! isset( $a['timestamp'] ) || ! isset( $b['timestamp'] ) ) {
-						return 0;
+				// Sort URL metrics in descending order by timestamp.
+				usort(
+					$breakpoint_url_metrics,
+					static function ( $a, $b ) {
+						if ( ! isset( $a['timestamp'] ) || ! isset( $b['timestamp'] ) ) {
+							return 0;
+						}
+						return $b['timestamp'] <=> $a['timestamp'];
 					}
-					return $b['timestamp'] <=> $a['timestamp'];
-				}
-			);
+				);
 
-			$breakpoint_url_metrics = array_slice( $breakpoint_url_metrics, 0, $sample_size );
-		}
-	}
+				// Only keep the sample size of the newest URL metrics.
+				$breakpoint_url_metrics = array_slice( $breakpoint_url_metrics, 0, $sample_size );
+			}
+			return $breakpoint_url_metrics;
+		},
+		$grouped_url_metrics
+	);
 
 	return array_merge( ...$grouped_url_metrics );
 }

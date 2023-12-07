@@ -160,7 +160,6 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
  * @return int|WP_Error Post ID or WP_Error otherwise.
  */
 function ilo_store_url_metric( string $url, string $slug, array $validated_url_metric ) {
-	$validated_url_metric['timestamp'] = microtime( true );
 
 	// TODO: What about storing a version identifier?
 	$post_data = array(
