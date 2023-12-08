@@ -183,7 +183,11 @@ final class ILO_HTML_Tag_Processor {
 				yield $tag_name;
 
 				// Immediately pop off self-closing tags.
-				if ( in_array( $tag_name, self::VOID_TAGS, true ) ) {
+				if (
+					in_array( $tag_name, self::VOID_TAGS, true )
+					||
+					( $p->has_self_closing_flag() && $this->is_foreign_element() )
+				) {
 					array_pop( $this->open_stack_tags );
 				}
 			} else {
@@ -192,32 +196,21 @@ final class ILO_HTML_Tag_Processor {
 					continue;
 				}
 
-				// Since SVG and MathML can have a lot more self-closing/empty tags, potentially pop off the stack until getting to the open tag.
-				$did_splice = false;
-				if ( 'SVG' === $tag_name || 'MATH' === $tag_name ) {
-					$i = array_search( $tag_name, $this->open_stack_tags, true );
-					if ( false !== $i ) {
-						array_splice( $this->open_stack_tags, $i );
-						$did_splice = true;
-					}
+				$popped_tag_name = array_pop( $this->open_stack_tags );
+				if ( $popped_tag_name !== $tag_name && function_exists( 'wp_trigger_error' ) ) {
+					wp_trigger_error(
+						__METHOD__,
+						esc_html(
+							sprintf(
+								/* translators: 1: Popped tag name, 2: Closing tag name */
+								__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'performance-lab' ),
+								$popped_tag_name,
+								$tag_name
+							)
+						)
+					);
 				}
 
-				if ( ! $did_splice ) {
-					$popped_tag_name = array_pop( $this->open_stack_tags );
-					if ( $popped_tag_name !== $tag_name && function_exists( 'wp_trigger_error' ) ) {
-						wp_trigger_error(
-							__METHOD__,
-							esc_html(
-								sprintf(
-									/* translators: 1: Popped tag name, 2: Closing tag name */
-									__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'performance-lab' ),
-									$popped_tag_name,
-									$tag_name
-								)
-							)
-						);
-					}
-				}
 				array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) + 1 );
 			}
 		}
@@ -234,6 +227,20 @@ final class ILO_HTML_Tag_Processor {
 		foreach ( $this->open_stack_tags as $i => $breadcrumb_tag_name ) {
 			yield array( $breadcrumb_tag_name, $this->open_stack_indices[ $i ] );
 		}
+	}
+
+	/**
+	 * Determines whether currently inside a foreign element (MATH or SVG).
+	 *
+	 * @return bool In foreign element.
+	 */
+	private function is_foreign_element(): bool {
+		foreach ( $this->open_stack_tags as $open_stack_tag ) {
+			if ( 'MATH' === $open_stack_tag || 'SVG' === $open_stack_tag ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
