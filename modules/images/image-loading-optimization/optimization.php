@@ -30,21 +30,22 @@ add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
  * @since n.e.x.t
  * @access private
  *
- * @param array $lcp_images_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
+ * @param array $lcp_elements_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
  * @return string Markup for zero or more preload link tags.
  */
-function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widths ): string {
+function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths ): string {
 	$preload_links = array();
 
 	// This uses a for loop to be able to access the following element within the iteration, using a numeric index.
-	$minimum_viewport_widths = array_keys( $lcp_images_by_minimum_viewport_widths );
+	$minimum_viewport_widths = array_keys( $lcp_elements_by_minimum_viewport_widths );
 	for ( $i = 0, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
-		$lcp_element = $lcp_images_by_minimum_viewport_widths[ $minimum_viewport_widths[ $i ] ];
+		$lcp_element = $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_widths[ $i ] ];
 		if ( false === $lcp_element || empty( $lcp_element['attributes'] ) ) {
-			// No LCP element at this breakpoint, so nothing to preload.
+			// No supported LCP element at this breakpoint, so nothing to preload.
 			continue;
 		}
 
+		// TODO: Add support for background images.
 		$img_attributes = $lcp_element['attributes'];
 
 		// Prevent preloading src for browsers that don't support imagesrcset on the link element.

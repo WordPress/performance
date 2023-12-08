@@ -305,15 +305,16 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
  * Gets the LCP element for each breakpoint.
  *
  * The array keys are the minimum viewport width required for the element to be LCP. If there are URL metrics for a
- * given breakpoint and yet there is no LCP element, then the array value is `false`. If there is an LCP element at the
- * breakpoint, then the array value is an array representing that element, including its breadcrumbs. If two adjoining
- * breakpoints have the same value, then the latter is dropped.
+ * given breakpoint and yet there is no supported LCP element, then the array value is `false`. (Currently only IMG is
+ * an supported LCP element.) If there is a supported LCP element at the breakpoint, then the array value is an array
+ * representing that element, including its breadcrumbs. If two adjoining breakpoints have the same value, then the
+ * latter is dropped.
  *
  * @since n.e.x.t
  * @access private
  *
  * @param array $grouped_url_metrics URL metrics grouped by breakpoint. See `ilo_group_url_metrics_by_breakpoint()`.
- * @return array LCP elements keyed by its minimum viewport width. If there is no LCP element at a breakpoint, then `false` is used.
+ * @return array LCP elements keyed by its minimum viewport width. If there is no supported LCP element at a breakpoint, then `false` is used.
  */
 function ilo_get_lcp_elements_by_minimum_viewport_widths( array $grouped_url_metrics ): array {
 
