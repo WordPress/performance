@@ -388,8 +388,8 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( array $grouped_url_met
  * @since n.e.x.t
  * @access private
  *
- * @param array $url_metrics           URL metrics.
- * @param float $current_time           Current time as returned by microtime(true).
+ * @param array $url_metrics            URL metrics.
+ * @param float $current_time           Current time as returned by `microtime(true)`.
  * @param int[] $breakpoint_max_widths  Breakpoint max widths.
  * @param int   $sample_size            Sample size for viewports in a breakpoint.
  * @param int   $freshness_ttl          Freshness TTL for a URL metric.
