@@ -45,7 +45,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
  *
  * @since n.e.x.t
  *
- * @return array of wpp standalone plugins as slugs.
+ * @return array List of WPP standalone plugins as slugs.
  */
 function perflab_get_standalone_plugins() {
 	return array(
@@ -129,7 +129,7 @@ function perflab_render_plugins_ui() {
 		return;
 	}
 	?>
-	<div class="wrap">
+	<div class="wrap plugin-install-php">
 		<h1><?php esc_html_e( 'Performance Plugins', 'performance-lab' ); ?></h1>
 		<p><?php esc_html_e( 'The following standalone performance plugins are available for installation.', 'performance-lab' ); ?></p>
 		<div class="wrap">

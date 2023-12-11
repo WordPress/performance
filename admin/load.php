@@ -533,6 +533,8 @@ function perflab_enqueue_modules_page_scripts() {
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_style( 'thickbox' );
 
+	wp_enqueue_script( 'plugin-install' );
+
 	wp_enqueue_script(
 		'perflab-admin',
 		plugin_dir_url( __FILE__ ) . 'perflab-admin.js',
