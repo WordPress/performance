@@ -15,7 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  *
  * @param string $plugin_slug The string identifier for the plugin in questions slug.
- *
  * @return array Array of plugin data, or empty if none/error.
  */
 function perflab_query_plugin_info( string $plugin_slug ) {
@@ -71,6 +70,20 @@ function perflab_get_standalone_plugins_module_map() {
 }
 
 /**
+ * Returns an array mapping of standalone plugins main file to existing wpp modules.
+ *
+ * @since n.e.x.t
+ *
+ * @return string[]
+ */
+function perflab_get_standalone_plugins_file_map() {
+	return array(
+		'webp-uploads'          => 'webp-uploads/load.php',
+		'dominant-color-images' => 'dominant-color-images/load.php',
+	);
+}
+
+/**
  * Returns an array of standalone plugins with currently active modules.
  *
  * @since n.e.x.t
@@ -82,7 +95,7 @@ function perflab_get_standalone_plugins_with_active_modules() {
 	$standalone_plugins_with_active_modules = array_filter(
 		perflab_get_standalone_plugins_module_map(),
 		static function ( $v ) use ( $modules ) {
-			return ! empty( $modules[ $v ] ) && '1' === $modules[ $v ]['enabled'];
+			return ! empty( $modules[ $v ] ) && $modules[ $v ]['enabled'];
 		},
 		ARRAY_FILTER_USE_BOTH
 	);
@@ -304,9 +317,16 @@ function perflab_render_plugin_card( array $plugin_data ) {
 
 	$last_updated_timestamp = strtotime( $plugin_data['last_updated'] );
 	?>
-	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>">
+	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>" data-module="<?php echo esc_attr( $plugin_data['slug'] ); ?>">
 		<?php
-		if ( true === $perflab_has_enabled_module ) {
+		$is_standalone_plugin_loaded = false;
+		foreach ( perflab_get_standalone_plugins_module_map() as $standalone_plugin => $module_slug ) {
+			if ( $plugin_data['slug'] === $standalone_plugin && perflab_is_standalone_plugin_loaded( $module_slug ) ) {
+				$is_standalone_plugin_loaded = true;
+			}
+		}
+
+		if ( true === $perflab_has_enabled_module && ! $is_standalone_plugin_loaded ) {
 			echo '<div class="notice inline notice-warning notice-alt"><p>';
 			echo esc_html__( 'An active performance module was detected, please install and activate this plugin instead.', 'performance-lab' );
 			echo '</p></div>';
@@ -437,4 +457,88 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		</div>
 	</div>
 	<?php
+}
+
+// WordPress AJAX action to handle the button click event.
+add_action( 'wp_ajax_perflab_install_activate_standalone_plugins', 'perflab_install_activate_standalone_plugins_callback' );
+add_action( 'wp_ajax_nopriv_perflab_install_activate_standalone_plugins', 'perflab_install_activate_standalone_plugins_callback' );
+
+/**
+ * Handles the standalone plugin install and activation via AJAX.
+ *
+ * @since n.e.x.t
+ */
+function perflab_install_activate_standalone_plugins_callback() {
+	if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'perflab-install-activate-plugins' ) ) {
+		$status['errorMessage'] = esc_html__( 'Invalid nonce: Please refresh and try again.', 'performance-lab' );
+		wp_send_json_error( $status );
+	}
+
+	if ( ! isset( $_REQUEST['data'] ) ) {
+		$status['errorMessage'] = esc_html__( 'Invalid plugin data: Please refresh and try again.', 'performance-lab' );
+		wp_send_json_error( $status );
+	}
+
+	if ( ! function_exists( 'plugins_api' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+	}
+	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-ajax-upgrader-skin.php';
+
+	$plugins_to_install = $_REQUEST['data'];
+	$plugins_to_install = explode( ',', $plugins_to_install );
+
+	$get_standalone_plugins_module_map = perflab_get_standalone_plugins_module_map();
+	$get_standalone_plugins_file_map   = perflab_get_standalone_plugins_file_map();
+	$modules                           = perflab_get_module_settings();
+
+	$status = array();
+	foreach ( $plugins_to_install as $plugin_slug ) {
+
+		$api = perflab_query_plugin_info( $plugin_slug );
+
+		$module_slug = isset( $get_standalone_plugins_module_map[ $plugin_slug ] ) ? $get_standalone_plugins_module_map[ $plugin_slug ] : '';
+		$plugin_slug = $get_standalone_plugins_file_map[ $plugin_slug ];
+
+		// Check if the plugin is already installed.
+		if ( ! is_plugin_installed( $plugin_slug ) ) {
+			$plugin_path = WP_PLUGIN_DIR . '/' . $plugin_slug;
+
+			// Check if the plugin zip file exists.
+			if ( ! file_exists( $plugin_path ) ) {
+
+				// Replace new Plugin_Installer_Skin with new Quiet_Upgrader_Skin when output needs to be suppressed.
+				$skin     = new WP_Ajax_Upgrader_Skin( array( 'api' => $api ) );
+				$upgrader = new Plugin_Upgrader( $skin );
+				$result   = $upgrader->install( $api['download_link'] );
+
+				if ( is_wp_error( $result ) ) {
+					$status['errorMessage'] = $result->get_error_message();
+					wp_send_json_error( $status );
+				} elseif ( is_wp_error( $skin->result ) ) {
+					$status['errorMessage'] = $skin->result->get_error_message();
+					wp_send_json_error( $status );
+				} elseif ( $skin->get_errors()->has_errors() ) {
+					$status['errorMessage'] = $skin->get_error_messages();
+					wp_send_json_error( $status );
+				}
+			}
+		}
+
+		$result = activate_plugin( $plugin_slug );
+		if ( is_wp_error( $result ) ) {
+			$status['errorMessage'] = $result->get_error_message();
+			wp_send_json_error( $status );
+		}
+
+		// Deactivate legacy modules.
+		foreach ( $modules as $slug => $data ) {
+			if ( $module_slug === $slug ) {
+				unset( $modules[ $slug ] );
+			}
+		}
+
+		update_option( PERFLAB_MODULES_SETTING, $modules );
+	}
+	wp_send_json_success( $status );
 }
