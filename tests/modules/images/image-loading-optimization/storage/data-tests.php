@@ -500,13 +500,131 @@ class Image_Loading_Optimization_Storage_Data_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_test_ilo_get_needed_minimum_viewport_widths(): array {
+		$current_time = microtime( true );
+
+		$none_needed_data = array(
+			'url_metrics'           => ( function () use ( $current_time ): array {
+				return array_merge(
+					array_fill(
+						0,
+						3,
+						array_merge( $this->get_validated_url_metric( 400 ), array( 'timestamp' => $current_time ) )
+					),
+					array_fill(
+						0,
+						3,
+						array_merge( $this->get_validated_url_metric( 600 ), array( 'timestamp' => $current_time ) )
+					)
+				);
+			} )(),
+			'current_time'          => $current_time,
+			'breakpoint_max_widths' => array( 480 ),
+			'sample_size'           => 3,
+			'freshness_ttl'         => HOUR_IN_SECONDS,
+		);
+
+		return array(
+			'none-needed'            => array_merge(
+				$none_needed_data,
+				array(
+					'expected' => array(
+						array( 0, false ),
+						array( 481, false ),
+					),
+				)
+			),
+
+			'not-enough-url-metrics' => array_merge(
+				$none_needed_data,
+				array(
+					'sample_size' => $none_needed_data['sample_size'] + 1,
+				),
+				array(
+					'expected' => array(
+						array( 0, true ),
+						array( 481, true ),
+					),
+				)
+			),
+
+			'url-metric-too-old'     => array_merge(
+				( static function ( $data ): array {
+					$data['url_metrics'][0]['timestamp'] -= $data['freshness_ttl'] + 1;
+					return $data;
+				} )( $none_needed_data ),
+				array(
+					'expected' => array(
+						array( 0, true ),
+						array( 481, false ),
+					),
+				)
+			),
+		);
+	}
+
+	/**
 	 * Test ilo_get_needed_minimum_viewport_widths().
 	 *
 	 * @test
 	 * @covers ::ilo_get_needed_minimum_viewport_widths
+	 * @dataProvider data_provider_test_ilo_get_needed_minimum_viewport_widths
 	 */
-	public function test_ilo_get_needed_minimum_viewport_widths() {
-		$this->markTestIncomplete();
+	public function test_ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $current_time, array $breakpoint_max_widths, int $sample_size, int $freshness_ttl, array $expected ) {
+		$this->assertSame(
+			$expected,
+			ilo_get_needed_minimum_viewport_widths( $url_metrics, $current_time, $breakpoint_max_widths, $sample_size, $freshness_ttl )
+		);
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_test_ilo_needs_url_metric_for_breakpoint(): array {
+		return array(
+			'one-needed'       => array(
+				array(
+					array( 480, false ),
+				),
+				false,
+			),
+			'one-unneeded'     => array(
+				array(
+					array( 480, true ),
+				),
+				true,
+			),
+			'one-of-3-needed'  => array(
+				array(
+					array( 480, false ),
+					array( 600, true ),
+					array( 782, false ),
+				),
+				true,
+			),
+			'none-of-3-needed' => array(
+				array(
+					array( 480, false ),
+					array( 600, false ),
+					array( 782, false ),
+				),
+				false,
+			),
+			'all-of-3-needed'  => array(
+				array(
+					array( 480, true ),
+					array( 600, true ),
+					array( 782, true ),
+				),
+				true,
+			),
+		);
 	}
 
 	/**
@@ -514,11 +632,20 @@ class Image_Loading_Optimization_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @test
 	 * @covers ::ilo_needs_url_metric_for_breakpoint
+	 * @dataProvider data_provider_test_ilo_needs_url_metric_for_breakpoint
 	 */
-	public function test_ilo_needs_url_metric_for_breakpoint() {
-		$this->markTestIncomplete();
+	public function test_ilo_needs_url_metric_for_breakpoint( array $needed_minimum_viewport_widths, bool $expected_needed ) {
+		$this->assertSame( $expected_needed, ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths ) );
 	}
 
+	/**
+	 * Gets a validated URL metric for testing.
+	 *
+	 * @param int      $viewport_width Viewport width.
+	 * @param string[] $breadcrumbs    Breadcrumb tags.
+	 * @param bool     $is_lcp         Whether LCP.
+	 * @return array Validated URL metric.
+	 */
 	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): array {
 		return array(
 			'viewport' => array(
@@ -537,6 +664,8 @@ class Image_Loading_Optimization_Storage_Data_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Gets sample XPath.
+	 *
 	 * @param string ...$breadcrumbs List of tags.
 	 * @return string XPath.
 	 */
