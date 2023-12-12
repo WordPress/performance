@@ -30,13 +30,57 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_test_ilo_construct_preload_links(): array {
+		return array(
+			'no-lcp-image'                 => array(
+				'lcp_elements_by_minimum_viewport_widths' => array(
+					0 => false,
+				),
+				'expected'                                => '',
+			),
+			'one-non-responsive-lcp-image' => array(
+				'lcp_elements_by_minimum_viewport_widths' => array(
+					0 => array(
+						'attributes' => array(
+							'src' => 'https://example.com/image.jpg',
+						),
+					),
+				),
+				'expected'                                => '
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg">
+				',
+			),
+			'one-responsive-lcp-image'     => array(
+				'lcp_elements_by_minimum_viewport_widths' => array(
+					0 => array(
+						'attributes' => array(
+							'src'         => 'elva-fairy-800w.jpg',
+							'srcset'      => 'elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w',
+							'sizes'       => '(max-width: 600px) 480px, 800px',
+							'crossorigin' => 'anonymous',
+						),
+					),
+				),
+				'expected'                                => '
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
+				',
+			),
+		);
+	}
+
+	/**
 	 * Test ilo_construct_preload_links().
 	 *
 	 * @test
 	 * @covers ::ilo_construct_preload_links
+	 * @dataProvider data_provider_test_ilo_construct_preload_links
 	 */
-	public function test_ilo_construct_preload_links() {
-		$this->markTestIncomplete();
+	public function test_ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths, string $expected ) {
+		$this->assertSame( trim( $expected ), trim( ilo_construct_preload_links( $lcp_elements_by_minimum_viewport_widths ) ) );
 	}
 
 	/**

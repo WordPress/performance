@@ -40,7 +40,7 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 	$minimum_viewport_widths = array_keys( $lcp_elements_by_minimum_viewport_widths );
 	for ( $i = 0, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
 		$lcp_element = $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_widths[ $i ] ];
-		if ( false === $lcp_element || empty( $lcp_element['attributes'] ) ) {
+		if ( false === $lcp_element ) {
 			// No supported LCP element at this breakpoint, so nothing to preload.
 			continue;
 		}
@@ -173,7 +173,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		// Capture the attributes from the LCP elements to use in preload links.
 		if ( isset( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] ) ) {
 			$attributes = array();
-			foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
+			foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin' ) as $attr_name ) {
 				$attributes[ $attr_name ] = $processor->get_attribute( $attr_name );
 			}
 			foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
