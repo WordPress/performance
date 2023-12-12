@@ -302,43 +302,24 @@ class Image_Loading_Optimization_ILO_HTML_Tag_Processor_Tests extends WP_UnitTes
 	}
 
 	/**
-	 * Test get_attribute().
+	 * Test get_attribute(), set_attribute(), remove_attribute(), and get_updated_html().
 	 *
 	 * @test
 	 * @covers ::get_attribute
-	 */
-	public function test_get_attribute() {
-		$this->markTestIncomplete();
-	}
-
-	/**
-	 * Test set_attribute().
-	 *
-	 * @test
 	 * @covers ::set_attribute
-	 */
-	public function test_set_attribute() {
-		$this->markTestIncomplete();
-	}
-
-	/**
-	 * Test remove_attribute().
-	 *
-	 * @test
 	 * @covers ::remove_attribute
-	 */
-	public function test_remove_attribute() {
-		$this->markTestIncomplete();
-	}
-
-	/**
-	 * Test get_updated_html().
-	 *
-	 * @test
 	 * @covers ::get_updated_html
 	 */
-	public function test_get_updated_html() {
-		$this->markTestIncomplete();
+	public function test_html_tag_processor_wrapper_methods() {
+		$processor = new ILO_HTML_Tag_Processor( '<html lang="en" xml:lang="en"></html>' );
+		foreach ( $processor->open_tags() as $open_tag ) {
+			if ( 'HTML' === $open_tag ) {
+				$this->assertSame( 'en', $processor->get_attribute( 'lang' ) );
+				$processor->set_attribute( 'lang', 'es' );
+				$processor->remove_attribute( 'xml:lang' );
+			}
+		}
+		$this->assertSame( '<html lang="es" ></html>', $processor->get_updated_html() );
 	}
 
 	/**
