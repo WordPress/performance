@@ -56,6 +56,20 @@ function perflab_get_standalone_plugins() {
 }
 
 /**
+ * Returns an array mapping of standalone plugins main file to existing wpp modules.
+ *
+ * @since n.e.x.t
+ *
+ * @return string[]
+ */
+function perflab_get_standalone_plugins_file_map() {
+	return array(
+		'webp-uploads'          => 'webp-uploads/load.php',
+		'dominant-color-images' => 'dominant-color-images/load.php',
+	);
+}
+
+/**
  * Renders plugin UI for managing standalone plugins within PL Settings screen.
  *
  * @since n.e.x.t
@@ -261,8 +275,11 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	$action_links = apply_filters( 'plugin_install_action_links', $action_links, $plugin_data );
 
 	$last_updated_timestamp = strtotime( $plugin_data['last_updated'] );
+
+	$standalone_plugins_file_map = perflab_get_standalone_plugins_file_map();
+	$plugin_file                 = isset( $standalone_plugins_file_map[ $plugin_data['slug'] ] ) ? wp_create_nonce( 'perflab_activate_plugin_' . $standalone_plugins_file_map[ $plugin_data['slug'] ] ) : '';
 	?>
-	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>">
+	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>" data-module="<?php echo esc_attr( $plugin_data['slug'] ); ?>" data-plugin="<?php echo esc_attr( $plugin_file ); ?>">
 		<?php
 		if ( ! $compatible_php || ! $compatible_wp ) {
 			echo '<div class="notice inline notice-error notice-alt">';

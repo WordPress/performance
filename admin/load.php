@@ -56,6 +56,9 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 	// Handle script enqueuing for settings page.
 	add_action( 'admin_enqueue_scripts', 'perflab_enqueue_modules_page_scripts' );
 
+	// Handle script for settings page.
+	add_action( 'admin_footer', 'perflab_enqueue_custom_script' );
+
 	// Register sections for all focus areas, plus 'Other'.
 	if ( ! is_array( $focus_areas ) ) {
 		$focus_areas = perflab_get_focus_areas();
@@ -636,3 +639,33 @@ function perflab_plugin_admin_notices() {
 	}
 }
 add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
+
+/**
+ * Callback function to handle admin custom script.
+ *
+ * @since n.e.x.t
+ */
+function perflab_enqueue_custom_script() {
+	?>
+<script>
+( function( $ ) {
+	if ( window.pagenow === 'settings_page_perflab-modules' ) {
+		// Only listen for ajaxComplete if this is the performance setting page.
+		$( document ).ajaxComplete( function( event, xhr, settings ) {
+			// Check if this is the 'install-plugin' request.
+			if ( settings.data && typeof settings.data === 'string' && settings.data.includes( 'action=install-plugin' ) ) {
+				setTimeout( function() {
+					var plugin_url = $( event.target.activeElement ).attr( 'href' );
+					var nonce = $( event.target.activeElement ).parents( '.plugin-card' ).attr( 'data-plugin' );
+					var url = new URL( plugin_url );
+					url.searchParams.set( 'action', 'perflab_activate_plugin' );
+					url.searchParams.set( '_wpnonce', nonce );
+					$( event.target.activeElement ).attr( 'href', url.href );
+				}, 1500 );
+			}
+		} );
+	}
+} )( jQuery );
+</script>
+	<?php
+}
