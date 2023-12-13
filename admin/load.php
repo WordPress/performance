@@ -57,7 +57,7 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 	add_action( 'admin_enqueue_scripts', 'perflab_enqueue_modules_page_scripts' );
 
 	// Handle style for settings page.
-	add_action( 'admin_footer', 'perflab_enqueue_modules_page_style' );
+	add_action( 'admin_head', 'perflab_print_modules_page_style' );
 
 	// Register sections for all focus areas, plus 'Other'.
 	if ( ! is_array( $focus_areas ) ) {
@@ -748,7 +748,7 @@ function is_plugin_installed( $plugin_slug ) {
  *
  * @since n.e.x.t
  */
-function perflab_enqueue_modules_page_style() {
+function perflab_print_modules_page_style() {
 	?>
 <style type="text/css">
 	.perflab-button-wrapper {
