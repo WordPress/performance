@@ -59,6 +59,9 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 	// Handle style for settings page.
 	add_action( 'admin_head', 'perflab_print_modules_page_style' );
 
+	// Handle admin notices for settings page.
+	add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
+
 	// Register sections for all focus areas, plus 'Other'.
 	if ( ! is_array( $focus_areas ) ) {
 		$focus_areas = perflab_get_focus_areas();
@@ -642,22 +645,6 @@ add_action( 'admin_action_perflab_deactivate_plugin', 'perflab_deactivate_plugin
  */
 function perflab_plugin_admin_notices() {
 	$standalone_plugins_with_active_modules = perflab_get_standalone_plugins_with_active_modules();
-	if ( 'settings_page_perflab-modules' !== get_current_screen()->id ) {
-		if ( ! empty( $standalone_plugins_with_active_modules ) ) {
-			echo '<div class="notice notice-warning is-dismissible"><p>';
-				printf(
-					/* translators: Link to Performance Lab Settings screen */
-					esc_html__( 'Performance Lab has detected usage of modules that have standalone plugin equivalents. Please visit the %1$s screen to see the plugins available for installation.', 'performance-lab' ),
-					sprintf(
-						'<a href="%s">%s</a>',
-						esc_html( menu_page_url( PERFLAB_MODULES_SCREEN, false ) ),
-						esc_html__( 'Performance Lab Settings', 'performance-lab' )
-					)
-				);
-			echo '</p></div>';
-			return;
-		}
-	}
 
 	if ( ! empty( $standalone_plugins_with_active_modules ) ) {
 		$module_data                 = perflab_get_modules();
@@ -729,7 +716,6 @@ function perflab_plugin_admin_notices() {
 		<?php
 	}
 }
-add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
 
 /**
  * Helper function to check if a plugin is installed.
