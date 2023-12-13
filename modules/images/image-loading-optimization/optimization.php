@@ -30,7 +30,7 @@ add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
  * @since n.e.x.t
  * @access private
  *
- * @param array $lcp_elements_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
+ * @param array<int, array{attributes: array{src?: string, srcset?: string, sizes?: string, crossorigin?: string}}|false> $lcp_elements_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
  * @return string Markup for zero or more preload link tags.
  */
 function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths ): string {
@@ -46,11 +46,11 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 		}
 
 		// TODO: Add support for background images.
-		$img_attributes = $lcp_element['attributes'];
+		$attributes = $lcp_element['attributes'];
 
 		// Prevent preloading src for browsers that don't support imagesrcset on the link element.
-		if ( isset( $img_attributes['src'], $img_attributes['srcset'] ) ) {
-			unset( $img_attributes['src'] );
+		if ( isset( $attributes['src'], $attributes['srcset'] ) ) {
+			unset( $attributes['src'] );
 		}
 
 		// Add media query if it's going to be something other than just `min-width: 0px`.
@@ -61,12 +61,12 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 			if ( null !== $maximum_viewport_width ) {
 				$media_query .= sprintf( ' and ( max-width: %dpx )', $maximum_viewport_width );
 			}
-			$img_attributes['media'] = $media_query;
+			$attributes['media'] = $media_query;
 		}
 
 		// Construct preload link.
 		$link_tag = '<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image"';
-		foreach ( array_filter( $img_attributes ) as $name => $value ) {
+		foreach ( array_filter( $attributes ) as $name => $value ) {
 			// Map img attribute name to link attribute name.
 			if ( 'srcset' === $name || 'sizes' === $name ) {
 				$name = 'image' . $name;
