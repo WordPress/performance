@@ -170,6 +170,9 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 			$processor->remove_attribute( 'fetchpriority' );
 		}
 
+		// TODO: If the image is visible (intersectionRatio!=0) in any of the URL metrics, remove loading=lazy.
+		// TODO: Conversely, if an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
+
 		// Capture the attributes from the LCP elements to use in preload links.
 		if ( isset( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] ) ) {
 			$attributes = array();

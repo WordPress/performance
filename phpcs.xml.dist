@@ -91,5 +91,17 @@
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 
+	<!-- Exceptions for variable name casing. -->
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<properties>
+			<property name="allowed_custom_properties" type="array">
+				<element value="nodeValue"/>
+				<element value="parentNode"/>
+				<element value="createTextNode"/>
+				<element value="textContent"/>
+			</property>
+		</properties>
+	</rule>
+
 	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
 </ruleset>
