@@ -157,13 +157,17 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		case 'install':
 			if ( $status['url'] ) {
 				if ( $compatible_php && $compatible_wp && current_user_can( 'install_plugins' ) ) {
+					$standalone_plugins_file_map = perflab_get_standalone_plugins_file_map();
+					$plugin_file                 = isset( $standalone_plugins_file_map[ $plugin_data['slug'] ] ) ? wp_create_nonce( 'perflab_activate_plugin_' . $standalone_plugins_file_map[ $plugin_data['slug'] ] ) : '';
+
 					$action_links[] = sprintf(
-						'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
+						'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s" data-plugin-activation-nonce="%s">%s</a>',
 						esc_attr( $plugin_data['slug'] ),
 						esc_url( $status['url'] ),
 						/* translators: %s: Plugin name and version. */
 						esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
 						esc_attr( $name ),
+						esc_attr( $plugin_file ),
 						esc_html__( 'Install Now', 'default' )
 					);
 				} else {
@@ -275,11 +279,8 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	$action_links = apply_filters( 'plugin_install_action_links', $action_links, $plugin_data );
 
 	$last_updated_timestamp = strtotime( $plugin_data['last_updated'] );
-
-	$standalone_plugins_file_map = perflab_get_standalone_plugins_file_map();
-	$plugin_file                 = isset( $standalone_plugins_file_map[ $plugin_data['slug'] ] ) ? wp_create_nonce( 'perflab_activate_plugin_' . $standalone_plugins_file_map[ $plugin_data['slug'] ] ) : '';
 	?>
-	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>" data-module="<?php echo esc_attr( $plugin_data['slug'] ); ?>" data-plugin="<?php echo esc_attr( $plugin_file ); ?>">
+	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>">
 		<?php
 		if ( ! $compatible_php || ! $compatible_wp ) {
 			echo '<div class="notice inline notice-error notice-alt">';
