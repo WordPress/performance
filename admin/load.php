@@ -543,21 +543,29 @@ function perflab_enqueue_modules_page_scripts() {
  */
 function perflab_activate_plugin() {
 	// Do not proceed if plugin query arg is not present.
-	if ( empty( $_GET['plugin'] ) ) {
+	if ( empty( $_GET['plugin_slug'] ) ) {
 		return;
 	}
 
-	// The plugin being activated.
-	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
+	$plugin_slug = sanitize_text_field( wp_unslash( $_GET['plugin_slug'] ) );
 
-	check_admin_referer( "perflab_activate_plugin_{$plugin}" );
+	check_admin_referer( "perflab_activate_plugin_{$plugin_slug}" );
 
-	if ( ! current_user_can( 'activate_plugin', $plugin ) ) {
+	$plugins = get_plugins( '/' . $plugin_slug );
+
+	if ( empty( $plugins ) ) {
+		return;
+	}
+
+	$keys        = array_keys( $plugins );
+	$plugin_file = $plugin_slug . '/' . $keys[0];
+
+	if ( ! current_user_can( 'activate_plugin', $plugin_file ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
 	}
 
 	// Activate the plugin in question and return to prior screen.
-	$do_plugin_activation = activate_plugins( $plugin );
+	$do_plugin_activation = activate_plugins( $plugin_file );
 	$referer              = wp_get_referer();
 	if ( ! is_wp_error( $do_plugin_activation ) ) {
 		$referer = add_query_arg(
@@ -646,35 +654,37 @@ add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
  * @since n.e.x.t
  */
 function perflab_print_plugin_activation_script() {
-	ob_start();
-	?>
-	( function( $ ) {
-		$( document ).ajaxComplete( function( event, xhr, settings ) {
-			// Check if this is the 'install-plugin' request.
-			if ( settings.data && typeof settings.data === 'string' && settings.data.includes( 'action=install-plugin' ) ) {
-				var target_element = $( event.target.activeElement );
-				if ( ! target_element ) {
+	$js = <<<JS
+( function( $ ) {
+	$( document ).ajaxComplete( function( event, xhr, settings ) {
+		// Check if this is the 'install-plugin' request.
+		if ( settings.data && typeof settings.data === 'string' && settings.data.includes( 'action=install-plugin' ) ) {
+			var target_element = $( event.target.activeElement );
+			if ( ! target_element ) {
+				return;
+			}
+			/*
+				* WordPress core uses a 1s timeout for updating the activation link,
+				* so we set a 1.5 timeout here to ensure our changes get updated after
+				* the core changes have taken place.
+				*/
+			setTimeout( function() {
+				var plugin_url = target_element.attr( 'href' );
+				if ( ! plugin_url ) {
 					return;
 				}
-				/*
-				 * WordPress core uses a 1s timeout for updating the activation link,
-				 * so we set a 1.5 timeout here to ensure our changes get updated after
-				 * the core changes have taken place.
-				 */
-				setTimeout( function() {
-					var plugin_url = target_element.attr( 'href' );
-					if ( ! plugin_url ) {
-						return;
-					}
-					var nonce = target_element.attr( 'data-plugin-activation-nonce' );
-					var url = new URL( plugin_url );
-					url.searchParams.set( 'action', 'perflab_activate_plugin' );
-					url.searchParams.set( '_wpnonce', nonce );
-					target_element.attr( 'href', url.href );
-				}, 1500 );
-			}
-		} );
-	} )( jQuery );
-	<?php
-	wp_print_inline_script_tag( ob_get_clean() );
+				var nonce = target_element.attr( 'data-plugin-activation-nonce' );
+				var plugin_slug = target_element.attr( 'data-slug' );
+				var url = new URL( plugin_url );
+				url.searchParams.set( 'action', 'perflab_activate_plugin' );
+				url.searchParams.set( '_wpnonce', nonce );
+				url.searchParams.append( 'plugin_slug', plugin_slug );
+				target_element.attr( 'href', url.href );
+			}, 1500 );
+		}
+	} );
+} )( jQuery );
+JS;
+
+	wp_print_inline_script_tag( $js );
 }

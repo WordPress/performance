@@ -56,20 +56,6 @@ function perflab_get_standalone_plugins() {
 }
 
 /**
- * Returns an array mapping of standalone plugins main file to existing wpp modules.
- *
- * @since n.e.x.t
- *
- * @return string[]
- */
-function perflab_get_standalone_plugins_file_map() {
-	return array(
-		'webp-uploads'          => 'webp-uploads/load.php',
-		'dominant-color-images' => 'dominant-color-images/load.php',
-	);
-}
-
-/**
  * Renders plugin UI for managing standalone plugins within PL Settings screen.
  *
  * @since n.e.x.t
@@ -157,9 +143,6 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		case 'install':
 			if ( $status['url'] ) {
 				if ( $compatible_php && $compatible_wp && current_user_can( 'install_plugins' ) ) {
-					$standalone_plugins_file_map = perflab_get_standalone_plugins_file_map();
-					$plugin_file                 = isset( $standalone_plugins_file_map[ $plugin_data['slug'] ] ) ? wp_create_nonce( 'perflab_activate_plugin_' . $standalone_plugins_file_map[ $plugin_data['slug'] ] ) : '';
-
 					$action_links[] = sprintf(
 						'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s" data-plugin-activation-nonce="%s">%s</a>',
 						esc_attr( $plugin_data['slug'] ),
@@ -167,7 +150,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 						/* translators: %s: Plugin name and version. */
 						esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
 						esc_attr( $name ),
-						esc_attr( $plugin_file ),
+						wp_create_nonce( 'perflab_activate_plugin_' . $plugin_data['slug'] ),
 						esc_html__( 'Install Now', 'default' )
 					);
 				} else {
