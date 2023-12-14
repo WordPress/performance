@@ -162,29 +162,56 @@ class Image_Loading_Optimization_Storage_REST_API_Tests extends WP_UnitTestCase 
 		$this->assertSame( 'url_metric_storage_locked', $response->get_data()['code'] );
 	}
 
-
 	/**
-	 * Test sending viewport data that isn't needed.
+	 * Test sending viewport data that isn't needed for a specific breakpoint.
 	 *
 	 * @test
 	 * @covers ::ilo_register_endpoint
 	 * @covers ::ilo_handle_rest_request
 	 */
-	public function test_rest_request_breakpoint_not_needed() {
+	public function test_rest_request_breakpoint_not_needed_for_any_breakpoint() {
 		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
 
-		// First fully populate the sample for a given breakpoint.
+		// First fully populate the sample for all breakpoints.
 		$sample_size     = ilo_get_url_metrics_breakpoint_sample_size();
 		$viewport_widths = array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) );
-		foreach ( $viewport_widths as $breakpoint_width ) {
+		foreach ( $viewport_widths as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
 				$valid_params                      = $this->get_valid_params();
-				$valid_params['viewport']['width'] = $breakpoint_width;
+				$valid_params['viewport']['width'] = $viewport_width;
 				$request                           = new WP_REST_Request( 'POST', self::ROUTE );
 				$request->set_body_params( $valid_params );
 				$response = rest_get_server()->dispatch( $request );
 				$this->assertSame( 200, $response->get_status() );
 			}
+		}
+
+		// The next request with the same sample size will be rejected.
+		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params( $this->get_valid_params() );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 403, $response->get_status() );
+	}
+
+	/**
+	 * Test sending viewport data that isn't needed for any breakpoint.
+	 *
+	 * @test
+	 * @covers ::ilo_register_endpoint
+	 * @covers ::ilo_handle_rest_request
+	 */
+	public function test_rest_request_breakpoint_not_needed_for_specific_breakpoint() {
+		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
+
+		// First fully populate the sample for a given breakpoint.
+		$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
+		for ( $i = 0; $i < $sample_size; $i++ ) {
+			$valid_params                      = $this->get_valid_params();
+			$valid_params['viewport']['width'] = 480;
+			$request                           = new WP_REST_Request( 'POST', self::ROUTE );
+			$request->set_body_params( $valid_params );
+			$response = rest_get_server()->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
 		}
 
 		// The next request with the same sample size will be rejected.

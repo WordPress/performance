@@ -173,11 +173,21 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 		ilo_get_url_metric_freshness_ttl()
 	);
 
-	// TODO: This is not right. It is asking if it is needed for any breakpoint, not if it is needed for the supplied breakpoint. This logic here is specific for the frontend.
-	if ( ! ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
+	// Block the request if URL metrics aren't needed for the provided viewport width.
+	// This logic is the same as the isViewportNeeded() function in detect.js.
+	$viewport_width  = $request->get_param( 'viewport' )['width'];
+	$last_was_needed = false;
+	foreach ( $needed_minimum_viewport_widths as list( $minimum_viewport_width, $is_needed ) ) {
+		if ( $viewport_width >= $minimum_viewport_width ) {
+			$last_was_needed = $is_needed;
+		} else {
+			break;
+		}
+	}
+	if ( ! $last_was_needed ) {
 		return new WP_Error(
 			'no_url_metric_needed',
-			__( 'No URL metric needed for any of the breakpoints.', 'performance-lab' ),
+			__( 'No URL metric needed for the provided viewport width.', 'performance-lab' ),
 			array( 'status' => 403 )
 		);
 	}
