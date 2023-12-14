@@ -447,10 +447,9 @@ function perflab_install_activate_standalone_plugins_callback() {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	require_once ABSPATH . 'wp-admin/includes/class-wp-ajax-upgrader-skin.php';
 
-	$get_standalone_plugins_file_map = perflab_get_standalone_plugins_file_map();
-	$plugins_to_activate             = perflab_get_active_modules_with_standalone_plugins();
-	$plugins                         = get_plugins();
-	$status                          = array();
+	$plugins_to_activate = perflab_get_active_modules_with_standalone_plugins();
+	$plugins             = get_plugins();
+	$status              = array();
 
 	foreach ( $plugins_to_activate as $module_slug ) {
 
@@ -459,16 +458,16 @@ function perflab_install_activate_standalone_plugins_callback() {
 			continue;
 		}
 
-		$plugin_slug = basename( $module_slug );
-		$api         = perflab_query_plugin_info( $plugin_slug );
-		$plugin_slug = isset( $get_standalone_plugins_file_map[ $plugin_slug ] ) ? $get_standalone_plugins_file_map[ $plugin_slug ] : '';
+		$plugin_slug     = basename( $module_slug );
+		$plugin_basename = $plugin_slug . '/load.php';
+		$api             = perflab_query_plugin_info( $plugin_slug );
 
 		if ( ! $plugin_slug ) {
 			$status['errorMessage'] = esc_html__( 'Invalid plugin.', 'performance-lab' );
 			wp_send_json_error( $status );
 		}
 
-		// Check if the plugin is already installed.
+		// Install the plugin if it is not installed yet.
 		if ( ! isset( $plugins[ $plugin_slug ] ) ) {
 			$plugin_path = WP_PLUGIN_DIR . '/' . $plugin_slug;
 
@@ -492,7 +491,7 @@ function perflab_install_activate_standalone_plugins_callback() {
 			}
 		}
 
-		$result = activate_plugin( $plugin_slug );
+		$result = activate_plugin( WP_PLUGIN_DIR . '/' . $plugin_basename );
 		if ( is_wp_error( $result ) ) {
 			$status['errorMessage'] = $result->get_error_message();
 			wp_send_json_error( $status );

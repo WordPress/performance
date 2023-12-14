@@ -645,7 +645,7 @@ function perflab_deactivate_plugin() {
 add_action( 'admin_action_perflab_deactivate_plugin', 'perflab_deactivate_plugin' );
 
 /**
- * Callback function hooked to admin_notices to render plugin activate/deactivate notices.
+ * Callback function hooked to admin_notices to render admin notices on the plugin's screen.
  *
  * @since n.e.x.t
  */
@@ -684,12 +684,12 @@ function perflab_plugin_admin_notices() {
 			$message  = '<p>';
 			$message .= sprintf(
 				/* translators: Module name */
-				esc_html__( 'Performance Lab has detected usage of "%s" module that have standalone plugin equivalents. Installing and activating a performance plugin will disable the legacy module equivalent. This will not impact functionality of the module.', 'performance-lab' ),
+				esc_html__( 'Your site is using the "%s" module which will be removed in the future in favor of its equivalent standalone plugin. Please click the following button to install and activate the relevant plugin in favor of the module. This will not impact any of the underlying functionality.', 'performance-lab' ),
 				esc_attr( $available_modules_list[0] )
 			);
 			$message .= '</p>';
 		} else {
-			$message  = '<p>' . esc_html__( 'Performance Lab has detected usage of modules that have standalone plugin equivalents. Please see the available plugins below. Installing and activating a performance plugin will disable the legacy module equivalent. This will not impact functionality of the module.', 'performance-lab' ) . '</p>';
+			$message  = '<p>' . esc_html__( 'Your site is using modules which will be removed in the future in favor of their equivalent standalone plugins. Please click the following button to install and activate the relevant plugins in favor of the modules. This will not impact any of the underlying functionality.', 'performance-lab' ) . '</p>';
 			$message .= '<strong>' . esc_html__( 'Available standalone plugins:', 'performance-lab' ) . '</strong>';
 			$message .= '<ol>';
 			foreach ( $available_modules_list as $names ) {
@@ -698,15 +698,17 @@ function perflab_plugin_admin_notices() {
 			$message .= '</ol>';
 		}
 
-		echo '<div class="notice notice-warning is-dismissible">';
-			echo wp_kses_post( $message );
-			echo '<p class="perflab-button-wrapper">';
-				echo '<button type="button" class="button button-primary perflab-install-active-plugin">';
-					echo esc_html__( 'Migrate legacy modules to standalone plugins', 'performance-lab' );
-				echo '</button>';
-				echo '<span class="dashicons dashicons-update hidden"></span>';
-			echo '</p>';
-		echo '</div>';
+		?>
+		<div class="notice notice-warning is-dismissible">
+			<?php echo wp_kses_post( $message ); ?>
+			<p class="perflab-button-wrapper">
+				<button type="button" class="button button-primary perflab-install-active-plugin">
+					<?php echo esc_html__( 'Migrate legacy modules to standalone plugins', 'performance-lab' ); ?>
+				</button>
+				<span class="dashicons dashicons-update hidden"></span>
+			</p>
+		</div>
+		<?php
 	}
 }
 
