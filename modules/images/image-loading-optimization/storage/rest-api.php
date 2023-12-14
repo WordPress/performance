@@ -208,8 +208,6 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	return new WP_REST_Response(
 		array(
 			'success' => true,
-			'post_id' => $result,
-			'data'    => ilo_parse_stored_url_metrics( ilo_get_url_metrics_post( $request->get_param( 'slug' ) ) ), // TODO: Remove this debug data.
 		)
 	);
 }

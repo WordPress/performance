@@ -33,16 +33,17 @@ class Image_Loading_Optimization_Storage_REST_API_Tests extends WP_UnitTestCase 
 	public function test_rest_request_good_params() {
 		$request      = new WP_REST_Request( 'POST', self::ROUTE );
 		$valid_params = $this->get_valid_params();
+		$this->assertCount( 0, get_posts( array( 'post_type' => ILO_URL_METRICS_POST_TYPE ) ) );
 		$request->set_body_params( $valid_params );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 200, $response->get_status() );
 
 		$data = $response->get_data();
 		$this->assertTrue( $data['success'] );
-		$this->assertIsInt( $data['post_id'] );
 
+		$this->assertCount( 1, get_posts( array( 'post_type' => ILO_URL_METRICS_POST_TYPE ) ) );
 		$post = ilo_get_url_metrics_post( $valid_params['slug'] );
-		$this->assertSame( $post->ID, $data['post_id'] );
+		$this->assertInstanceOf( WP_Post::class, $post );
 
 		$url_metrics = ilo_parse_stored_url_metrics( $post );
 		$this->assertCount( 1, $url_metrics );
