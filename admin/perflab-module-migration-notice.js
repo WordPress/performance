@@ -28,7 +28,7 @@
 					})
 					.then( function( result ) {
 						target.parentElement.querySelector( 'span' ).classList.add( 'hidden' );
-						if ( result.error ) {
+						if ( ! result.success ) {
 							alert( result.data.errorMessage );
 						}
 						window.location.reload();

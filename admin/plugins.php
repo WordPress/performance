@@ -56,20 +56,6 @@ function perflab_get_standalone_plugins() {
 }
 
 /**
- * Returns an array mapping of standalone plugins main file to existing wpp modules.
- *
- * @since n.e.x.t
- *
- * @return string[]
- */
-function perflab_get_standalone_plugins_file_map() {
-	return array(
-		'webp-uploads'          => 'webp-uploads/load.php',
-		'dominant-color-images' => 'dominant-color-images/load.php',
-	);
-}
-
-/**
  * Returns an array of standalone plugins with currently active modules.
  *
  * @since n.e.x.t
@@ -99,12 +85,7 @@ function perflab_render_plugins_ui() {
 	$get_active_modules_with_standalone_plugins = perflab_get_active_modules_with_standalone_plugins();
 	foreach ( perflab_get_standalone_plugins() as $managed_standalone_plugin_slug ) {
 		$standalone_plugins[ $managed_standalone_plugin_slug ] = array(
-			'plugin_data' => array_merge(
-				perflab_query_plugin_info( $managed_standalone_plugin_slug ),
-				array(
-					'perflab_has_enabled_module' => ! empty( $get_active_modules_with_standalone_plugins[ $managed_standalone_plugin_slug ] ),
-				)
-			),
+			'plugin_data' => perflab_query_plugin_info( $managed_standalone_plugin_slug ),
 		);
 	}
 
@@ -425,82 +406,4 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		</div>
 	</div>
 	<?php
-}
-
-// WordPress AJAX action to handle the button click event.
-add_action( 'wp_ajax_perflab_install_activate_standalone_plugins', 'perflab_install_activate_standalone_plugins_callback' );
-
-/**
- * Handles the standalone plugin install and activation via AJAX.
- *
- * @since n.e.x.t
- */
-function perflab_install_activate_standalone_plugins_callback() {
-	if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'perflab-install-activate-plugins' ) ) {
-		$status['errorMessage'] = esc_html__( 'Invalid nonce: Please refresh and try again.', 'performance-lab' );
-		wp_send_json_error( $status );
-	}
-
-	if ( ! function_exists( 'plugins_api' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-	}
-	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-	require_once ABSPATH . 'wp-admin/includes/class-wp-ajax-upgrader-skin.php';
-
-	$plugins_to_activate = perflab_get_active_modules_with_standalone_plugins();
-	$plugins             = get_plugins();
-	$status              = array();
-
-	foreach ( $plugins_to_activate as $module_slug ) {
-
-		// Skip checking for already activated plugin.
-		if ( perflab_is_standalone_plugin_loaded( $module_slug ) ) {
-			continue;
-		}
-
-		$plugin_slug     = basename( $module_slug );
-		$plugin_basename = $plugin_slug . '/load.php';
-		$api             = perflab_query_plugin_info( $plugin_slug );
-
-		if ( ! $plugin_slug ) {
-			$status['errorMessage'] = esc_html__( 'Invalid plugin.', 'performance-lab' );
-			wp_send_json_error( $status );
-		}
-
-		// Install the plugin if it is not installed yet.
-		if ( ! isset( $plugins[ $plugin_slug ] ) ) {
-			$plugin_path = WP_PLUGIN_DIR . '/' . $plugin_slug;
-
-			// Check if the plugin file exists.
-			if ( ! file_exists( $plugin_path ) ) {
-				// Replace new Plugin_Installer_Skin with new Quiet_Upgrader_Skin when output needs to be suppressed.
-				$skin     = new WP_Ajax_Upgrader_Skin( array( 'api' => $api ) );
-				$upgrader = new Plugin_Upgrader( $skin );
-				$result   = $upgrader->install( $api['download_link'] );
-
-				if ( is_wp_error( $result ) ) {
-					$status['errorMessage'] = $result->get_error_message();
-					wp_send_json_error( $status );
-				} elseif ( is_wp_error( $skin->result ) ) {
-					$status['errorMessage'] = $skin->result->get_error_message();
-					wp_send_json_error( $status );
-				} elseif ( $skin->get_errors()->has_errors() ) {
-					$status['errorMessage'] = $skin->get_error_messages();
-					wp_send_json_error( $status );
-				}
-			}
-		}
-
-		$result = activate_plugin( WP_PLUGIN_DIR . '/' . $plugin_basename );
-		if ( is_wp_error( $result ) ) {
-			$status['errorMessage'] = $result->get_error_message();
-			wp_send_json_error( $status );
-		}
-
-		// Deactivate legacy modules.
-		unset( $modules[ $module_slug ] );
-
-		update_option( PERFLAB_MODULES_SETTING, $modules );
-	}
-	wp_send_json_success( $status );
 }
