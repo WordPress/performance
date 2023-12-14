@@ -46,8 +46,6 @@ add_action( 'init', 'ilo_register_url_metrics_post_type' );
  * @since n.e.x.t
  * @access private
  *
- * @todo Consider returning post ID instead of WP_Post object.
- *
  * @param string $slug URL metrics slug.
  * @return WP_Post|null Post object if exists.
  */
