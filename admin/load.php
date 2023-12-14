@@ -558,12 +558,10 @@ function perflab_enqueue_modules_page_scripts() {
 		'perflab-module-migration-notice',
 		'perflab_module_migration_notice',
 		array(
-			'ajaxurl'          => admin_url( 'admin-ajax.php' ),
-			'nonce'            => wp_create_nonce( 'perflab-install-activate-plugins' ),
-			'has_permission'   => current_user_can( 'install_plugins' ) && current_user_can( 'activate_plugins' ),
-			'permission_error' => esc_html__( 'Sorry, you are not allowed to manage plugins for this site. Please contact the administrator.', 'performance-lab' ),
-			'network_error'    => esc_html__( 'Network response was not ok.', 'performance-lab' ),
-			'prompt_message'   => esc_html__( 'Are you sure you want to migrate legacy modules to standalone plugins?', 'performance-lab' ),
+			'ajaxurl'        => admin_url( 'admin-ajax.php' ),
+			'nonce'          => wp_create_nonce( 'perflab-install-activate-plugins' ),
+			'network_error'  => esc_html__( 'Network response was not ok.', 'performance-lab' ),
+			'prompt_message' => esc_html__( 'Are you sure you want to migrate legacy modules to standalone plugins?', 'performance-lab' ),
 		)
 	);
 }
@@ -655,6 +653,11 @@ add_action( 'wp_ajax_perflab_install_activate_standalone_plugins', 'perflab_inst
 function perflab_install_activate_standalone_plugins_callback() {
 	if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'perflab-install-activate-plugins' ) ) {
 		$status['errorMessage'] = esc_html__( 'Invalid nonce: Please refresh and try again.', 'performance-lab' );
+		wp_send_json_error( $status );
+	}
+
+	if ( ! current_user_can( 'install_plugins' ) || ! current_user_can( 'activate_plugins' ) ) {
+		$status['errorMessage'] = esc_html__( 'Sorry, you are not allowed to manage plugins for this site. Please contact the administrator.', 'performance-lab' );
 		wp_send_json_error( $status );
 	}
 

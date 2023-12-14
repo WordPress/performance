@@ -2,10 +2,6 @@
 	document.addEventListener( 'DOMContentLoaded', function() {
 		document.addEventListener( 'click', function(event) {
 			if ( event.target.classList.contains( 'perflab-install-active-plugin' ) ) {
-                if ( ! perflab_module_migration_notice.has_permission ) {
-                    alert( perflab_module_migration_notice.permission_error );
-                    return;
-                }
 
 				if ( confirm( perflab_module_migration_notice.prompt_message ) ) {
 					var target = event.target;
