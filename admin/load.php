@@ -653,8 +653,7 @@ function perflab_print_plugin_activation_script() {
 			// Check if this is the 'install-plugin' request.
 			if ( settings.data && typeof settings.data === 'string' && settings.data.includes( 'action=install-plugin' ) ) {
 				var target_element = $( event.target.activeElement );
-				// Bail early if the element is not a[href].
-				if ( ! target_element.is( 'a[href]' ) ) {
+				if ( ! target_element ) {
 					return;
 				}
 				/*
@@ -664,6 +663,9 @@ function perflab_print_plugin_activation_script() {
 				 */
 				setTimeout( function() {
 					var plugin_url = target_element.attr( 'href' );
+					if ( ! plugin_url ) {
+						return;
+					}
 					var nonce = target_element.attr( 'data-plugin-activation-nonce' );
 					var url = new URL( plugin_url );
 					url.searchParams.set( 'action', 'perflab_activate_plugin' );
