@@ -6,7 +6,7 @@
  * @group   image-loading-optimization
  */
 
-class Image_Loading_Optimization_Storage_Post_Type_Tests extends WP_UnitTestCase {
+class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Test ilo_register_url_metrics_post_type().

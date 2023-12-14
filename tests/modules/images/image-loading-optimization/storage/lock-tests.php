@@ -6,7 +6,7 @@
  * @group   image-loading-optimization
  */
 
-class Image_Loading_Optimization_Storage_Lock_Tests extends WP_UnitTestCase {
+class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Tear down.

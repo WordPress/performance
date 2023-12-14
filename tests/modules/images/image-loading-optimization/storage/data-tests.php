@@ -6,7 +6,7 @@
  * @group   image-loading-optimization
  */
 
-class Image_Loading_Optimization_Storage_Data_Tests extends WP_UnitTestCase {
+class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 
 	public function tear_down() {
 		unset( $GLOBALS['wp_customize'] );
