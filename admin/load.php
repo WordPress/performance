@@ -664,15 +664,34 @@ function perflab_print_plugin_activation_script() {
 	$( document ).ajaxComplete( function( event, xhr, settings ) {
 		// Check if this is the 'install-plugin' request.
 		if ( settings.data && typeof settings.data === 'string' && settings.data.includes( 'action=install-plugin' ) ) {
-			var target_element = $( event.target.activeElement );
+			// Split the data string by '&' to separate parameters.
+			var params = settings.data.split( '&' );
+
+			// Loop through the parameters to find the 'slug' parameter.
+			var slug = '';
+			for ( var i = 0; i < params.length; i++ ) {
+				var param = params[ i ].split( '=' );
+				if ( param[0] === 'slug') {
+					slug = param[1];
+					break;
+				}
+			}
+
+			// Check if 'slug' was found and output the value.
+			if ( ! slug ) {
+				return;
+			}
+
+			var target_element = $( '.wpp-standalone-plugins a[data-slug=' + slug + ']' );
 			if ( ! target_element ) {
 				return;
 			}
+
 			/*
-				* WordPress core uses a 1s timeout for updating the activation link,
-				* so we set a 1.5 timeout here to ensure our changes get updated after
-				* the core changes have taken place.
-				*/
+			 * WordPress core uses a 1s timeout for updating the activation link,
+			 * so we set a 1.5 timeout here to ensure our changes get updated after
+			 * the core changes have taken place.
+			 */
 			setTimeout( function() {
 				var plugin_url = target_element.attr( 'href' );
 				if ( ! plugin_url ) {
