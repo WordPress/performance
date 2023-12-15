@@ -685,7 +685,7 @@ function perflab_install_activate_standalone_plugins_callback() {
 
 		// Return early if plugin API return an error.
 		if ( ! $api ) {
-			$status['errorMessage'] = esc_html__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this servers configuration.', 'performance-lab' );
+			$status['errorMessage'] = __( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration.', 'performance-lab' );
 			wp_send_json_error( $status );
 		}
 
@@ -767,12 +767,18 @@ function perflab_plugin_admin_notices() {
 			$message  = '<p>';
 			$message .= sprintf(
 				/* translators: Module name */
-				esc_html__( 'Your site is using the "%s" module which will be removed in the future in favor of its equivalent standalone plugin. Please click the following button to install and activate the relevant plugin in favor of the module. This will not impact any of the underlying functionality.', 'performance-lab' ),
+				esc_html__( 'Your site is using the "%s" module which will be removed in the future in favor of its equivalent standalone plugin.', 'performance-lab' ),
 				esc_attr( $available_module_names[0] )
 			);
+			$message .= '<br>';
+			$message .= esc_html__( 'Please click the following button to install and activate the relevant plugin in favor of the module. This will not impact any of the underlying functionality.', 'performance-lab' );
 			$message .= '</p>';
 		} else {
-			$message  = '<p>' . esc_html__( 'Your site is using modules which will be removed in the future in favor of their equivalent standalone plugins. Please click the following button to install and activate the relevant plugins in favor of the modules. This will not impact any of the underlying functionality.', 'performance-lab' ) . '</p>';
+			$message  = '<p>';
+			$message .= esc_html__( 'Your site is using modules which will be removed in the future in favor of their equivalent standalone plugins.', 'performance-lab' );
+			$message .= '<br>';
+			$message .= esc_html__( 'Please click the following button to install and activate the relevant plugins in favor of the modules. This will not impact any of the underlying functionality.', 'performance-lab' );
+			$message .= '</p>';
 			$message .= '<strong>' . esc_html__( 'Available standalone plugins:', 'performance-lab' ) . '</strong>';
 			$message .= '<ol>';
 			foreach ( $available_module_names as $names ) {

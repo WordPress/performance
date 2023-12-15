@@ -81,8 +81,7 @@ function perflab_render_plugins_ui() {
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	$standalone_plugins                         = array();
-	$get_active_modules_with_standalone_plugins = perflab_get_active_modules_with_standalone_plugins();
+	$standalone_plugins = array();
 	foreach ( perflab_get_standalone_plugins() as $managed_standalone_plugin_slug ) {
 		$standalone_plugins[ $managed_standalone_plugin_slug ] = array(
 			'plugin_data' => perflab_query_plugin_info( $managed_standalone_plugin_slug ),
