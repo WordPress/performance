@@ -543,29 +543,34 @@ function perflab_enqueue_modules_page_scripts() {
  */
 function perflab_activate_plugin() {
 	// Do not proceed if plugin query arg is not present.
-	if ( empty( $_GET['plugin_slug'] ) ) {
+	if ( empty( $_GET['plugin'] ) ) {
 		return;
 	}
 
-	$plugin_slug = sanitize_text_field( wp_unslash( $_GET['plugin_slug'] ) );
+	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
 
-	check_admin_referer( "perflab_activate_plugin_{$plugin_slug}" );
+	// Check whether "plugin" is a plugin slug or a plugin basename.
+	if ( str_contains( $plugin, '/' ) ) {
+		check_admin_referer( "perflab_activate_plugin_{$plugin}" );
+	} else {
+		check_admin_referer( "perflab_activate_plugin_{$plugin}" );
 
-	$plugins = get_plugins( '/' . $plugin_slug );
+		$plugins = get_plugins( '/' . $plugin );
 
-	if ( empty( $plugins ) ) {
-		return;
+		if ( empty( $plugins ) ) {
+			wp_die( esc_html__( 'Plugin not found.', 'default' ) );
+		}
+
+		$plugin_file_names = array_keys( $plugins );
+		$plugin            = $plugin . '/' . $plugin_file_names[0];
 	}
 
-	$keys        = array_keys( $plugins );
-	$plugin_file = $plugin_slug . '/' . $keys[0];
-
-	if ( ! current_user_can( 'activate_plugin', $plugin_file ) ) {
+	if ( ! current_user_can( 'activate_plugin', $plugin ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
 	}
 
 	// Activate the plugin in question and return to prior screen.
-	$do_plugin_activation = activate_plugins( $plugin_file );
+	$do_plugin_activation = activate_plugins( $plugin );
 	$referer              = wp_get_referer();
 	if ( ! is_wp_error( $do_plugin_activation ) ) {
 		$referer = add_query_arg(
@@ -664,10 +669,10 @@ function perflab_print_plugin_activation_script() {
 				return;
 			}
 			/*
-				* WordPress core uses a 1s timeout for updating the activation link,
-				* so we set a 1.5 timeout here to ensure our changes get updated after
-				* the core changes have taken place.
-				*/
+			 * WordPress core uses a 1s timeout for updating the activation link,
+			 * so we set a 1.5 timeout here to ensure our changes get updated after
+			 * the core changes have taken place.
+			 */
 			setTimeout( function() {
 				var plugin_url = target_element.attr( 'href' );
 				if ( ! plugin_url ) {
@@ -678,7 +683,7 @@ function perflab_print_plugin_activation_script() {
 				var url = new URL( plugin_url );
 				url.searchParams.set( 'action', 'perflab_activate_plugin' );
 				url.searchParams.set( '_wpnonce', nonce );
-				url.searchParams.append( 'plugin_slug', plugin_slug );
+				url.searchParams.set( 'plugin', plugin_slug );
 				target_element.attr( 'href', url.href );
 			}, 1500 );
 		}
