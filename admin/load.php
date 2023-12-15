@@ -669,10 +669,10 @@ function perflab_print_plugin_activation_script() {
 				return;
 			}
 			/*
-			 * WordPress core uses a 1s timeout for updating the activation link,
-			 * so we set a 1.5 timeout here to ensure our changes get updated after
-			 * the core changes have taken place.
-			 */
+				* WordPress core uses a 1s timeout for updating the activation link,
+				* so we set a 1.5 timeout here to ensure our changes get updated after
+				* the core changes have taken place.
+				*/
 			setTimeout( function() {
 				var plugin_url = target_element.attr( 'href' );
 				if ( ! plugin_url ) {
