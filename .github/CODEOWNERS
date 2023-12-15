@@ -53,3 +53,8 @@
 /modules/images/dominant-color-images                                       @pbearne @spacedmonkey
 /tests/modules/images/dominant-color-images                                 @pbearne @spacedmonkey
 /tests/testdata/modules/images/dominant-color-images                        @pbearne @spacedmonkey
+
+# Module: Speculation Rules
+/modules/js-and-css/speculation-rules                                       @felixarntz
+/tests/modules/js-and-css/speculation-rules                                 @felixarntz
+/tests/testdata/modules/js-and-css/speculation-rules                        @felixarntz
