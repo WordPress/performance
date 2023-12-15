@@ -62,30 +62,34 @@ function perflab_optimize_oembed_lazy_load_scripts() {
 		return;
 	}
 	?>
-	<script>
-		(function() {
-			var lazyEmbeds = document.querySelectorAll( 'script[data-lazy-embed-src]' );
-			parents = [];
-			lazyEmbeds.forEach( function( lazyEmbed ) {
-				parents.push( lazyEmbed.parentNode );
-			} );
-			var lazyEmbedObserver = new IntersectionObserver( function( entries ) {
-				entries.forEach( function( entry ) {
-					if ( entry.isIntersecting ) {
-						var lazyDiv = entry.target;
-						var lazyEmbed = lazyDiv.querySelector( 'script[data-lazy-embed-src]' );
-						lazyEmbed.src = lazyEmbed.dataset.lazyEmbedSrc;
-						lazyEmbedObserver.unobserve( lazyDiv );
-					}
-				} );
-			}, {
-				rootMargin: '0px 0px 500px 0px',
-				threshold: 0
-			} );
-			parents.forEach( function( lazyEmbed ) {
-				lazyEmbedObserver.observe( lazyEmbed );
-			} );
-		})();
+	<script type="module">
+        const lazyEmbedsScripts = document.querySelectorAll( 'script[data-lazy-embed-src]' );
+        const lazyEmbedScriptsByParents = new Map();
+
+        const lazyEmbedObserver = new IntersectionObserver( 
+            ( entries ) => {
+                for ( const entry of entries ) {
+                    if ( entry.isIntersecting ) {
+                        const lazyEmbedParent = entry.target;
+                        const lazyEmbedScript = lazyEmbedScriptsByParents.get( lazyEmbedParent );
+                        const embedScript = lazyEmbedScript.cloneNode();
+                        embedScript.src = lazyEmbedScript.dataset.lazyEmbedSrc;
+                        lazyEmbedScript.replaceWith( embedScript );
+                        lazyEmbedObserver.unobserve( lazyEmbedParent );
+                    }
+                }
+            }, 
+            {
+                rootMargin: '0px 0px 500px 0px',
+                threshold: 0
+            } 
+        );
+        
+        for ( const lazyEmbedScript of lazyEmbedsScripts ) {
+            const lazyEmbedParent = lazyEmbedScript.parentNode;
+            lazyEmbedScriptsByParents.set( lazyEmbedParent, lazyEmbedScript );
+            lazyEmbedObserver.observe( lazyEmbedParent );
+        }
 	</script>
 	<?php
 }
