@@ -558,10 +558,9 @@ function perflab_enqueue_modules_page_scripts() {
 		'perflab-module-migration-notice',
 		'perflab_module_migration_notice',
 		array(
-			'ajaxurl'        => admin_url( 'admin-ajax.php' ),
-			'nonce'          => wp_create_nonce( 'perflab-install-activate-plugins' ),
-			'network_error'  => esc_html__( 'Network response was not ok.', 'performance-lab' ),
-			'prompt_message' => esc_html__( 'Are you sure you want to migrate legacy modules to standalone plugins?', 'performance-lab' ),
+			'ajaxurl'       => admin_url( 'admin-ajax.php' ),
+			'nonce'         => wp_create_nonce( 'perflab-install-activate-plugins' ),
+			'network_error' => esc_html__( 'Network response was not ok.', 'performance-lab' ),
 		)
 	);
 }

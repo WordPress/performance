@@ -155,6 +155,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	$action_links   = array();
 
 	$status = install_plugin_install_status( $plugin_data );
+
 	switch ( $status['status'] ) {
 		case 'install':
 			if ( $status['url'] ) {
