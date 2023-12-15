@@ -37,7 +37,7 @@ function perflab_optimize_oembed_html( $html ) {
 			}
 			return $p->get_updated_html();
 
-		} elseif ( 'SCRIPT' === $p->get_tag() ) {
+		} elseif ( 'SCRIPT' === $p->get_tag() && $p->get_attribute( 'src' ) ) {
 			$oembed_lazy_load_scripts = true;
 			$p->set_attribute( 'data-lazy-embed-src', $p->get_attribute( 'src' ) );
 			$p->set_attribute( 'src', '' );
