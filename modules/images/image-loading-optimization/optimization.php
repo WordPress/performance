@@ -143,8 +143,21 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	// Walk over all IMG tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes for preloading.
 	$processor = new ILO_HTML_Tag_Processor( $buffer );
 	foreach ( $processor->open_tags() as $tag_name ) {
-		if ( 'IMG' !== $tag_name ) {
+		$style             = $processor->get_attribute( 'style' );
+		$background_images = array();
+		// TODO: The background image could be supplied via `background` shorthand as well.
+		// TODO: Multiple background images may be layered.
+		if ( $style && preg_match( '/background-image\s*:\s*url\(\s*[\'"]?(?!data:)(?<background_image>.+?)[\'"]?\s*\)/', $style, $matches ) ) {
+			$background_images[] = $matches['background_image'];
+		}
+
+		if ( ! ( 'IMG' === $tag_name || $background_images ) ) {
 			continue;
+		}
+
+		// DEBUG.
+		if ( $background_images ) {
+			$processor->set_attribute( 'data-ilo-has-bg-image', implode( ' ', $background_images ) );
 		}
 
 		$xpath = $processor->get_xpath();
