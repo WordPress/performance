@@ -429,7 +429,7 @@ function perflab_admin_pointer( $hook_suffix ) {
 				perflab_render_pointer(
 					'perflab-module-migration-pointer',
 					array(
-						'heading' => __( 'Action required', 'performance-lab' ),
+						'heading' => __( 'Performance Lab: Action required', 'performance-lab' ),
 						'content' => $content,
 					)
 				);
