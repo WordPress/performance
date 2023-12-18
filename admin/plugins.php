@@ -150,7 +150,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 						/* translators: %s: Plugin name and version. */
 						esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
 						esc_attr( $name ),
-						wp_create_nonce( 'perflab_activate_plugin_' . $plugin_data['slug'] ),
+						esc_attr( wp_create_nonce( 'perflab_activate_plugin_' . $plugin_data['slug'] ) ),
 						esc_html__( 'Install Now', 'default' )
 					);
 				} else {

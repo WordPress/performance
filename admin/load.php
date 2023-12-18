@@ -662,25 +662,15 @@ function perflab_print_plugin_activation_script() {
 	$( document ).ajaxComplete( function( event, xhr, settings ) {
 		// Check if this is the 'install-plugin' request.
 		if ( settings.data && typeof settings.data === 'string' && settings.data.includes( 'action=install-plugin' ) ) {
-			// Split the data string by '&' to separate parameters.
-			var params = settings.data.split( '&' );
-
-			// Loop through the parameters to find the 'slug' parameter.
-			var slug = '';
-			for ( var i = 0; i < params.length; i++ ) {
-				var param = params[ i ].split( '=' );
-				if ( param[0] === 'slug') {
-					slug = param[1];
-					break;
-				}
-			}
+			var params = new URLSearchParams( settings.data );
+			var slug = params.get('slug');
 
 			// Check if 'slug' was found and output the value.
 			if ( ! slug ) {
 				return;
 			}
 
-			var target_element = $( '.wpp-standalone-plugins a[data-slug=' + slug + ']' );
+			var target_element = $( `.wpp-standalone-plugins a[data-slug="${slug}"]` );
 			if ( ! target_element ) {
 				return;
 			}
