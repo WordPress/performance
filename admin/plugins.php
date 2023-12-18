@@ -66,8 +66,8 @@ function perflab_get_active_modules_with_standalone_plugins() {
 	$modules = perflab_get_module_settings();
 	return array_filter(
 		array_keys( perflab_get_standalone_plugins_constants() ),
-		static function ( $v ) use ( $modules ) {
-			return ! empty( $modules[ $v ] ) && $modules[ $v ]['enabled'];
+		static function ( $module ) use ( $modules ) {
+			return ! empty( $modules[ $module ] ) && $modules[ $module ]['enabled'];
 		}
 	);
 }

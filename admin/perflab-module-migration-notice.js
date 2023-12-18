@@ -26,7 +26,7 @@
 					.then( function ( response ) {
 						if ( ! response.ok ) {
 							throw new Error(
-								perflab_module_migration_notice.network_error
+								wp.i18n.__( 'Network response was not ok.', 'performance-lab' )
 							);
 						}
 						return response.json();
