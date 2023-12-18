@@ -709,7 +709,7 @@ function perflab_install_activate_standalone_plugins_callback() {
 			}
 		}
 
-		$result = activate_plugin( WP_PLUGIN_DIR . '/' . $plugin_basename );
+		$result = activate_plugin( $plugin_basename );
 		if ( is_wp_error( $result ) ) {
 			$status['errorMessage'] = $result->get_error_message();
 			wp_send_json_error( $status );
