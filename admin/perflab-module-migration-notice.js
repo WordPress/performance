@@ -36,11 +36,7 @@
 							.querySelector( 'span' )
 							.classList.add( 'hidden' );
 						if ( ! result.success ) {
-							alert(
-								perflab_replace_html_entity(
-									result.data.errorMessage
-								)
-							);
+							alert( result.data.errorMessage );
 						}
 						window.location.reload();
 					} )
@@ -50,12 +46,5 @@
 					} );
 			}
 		} );
-
-		// Function to replace HTML entities with their corresponding characters.
-		function perflab_replace_html_entity( str ) {
-			return str.replace( /&#(\d+);/g, function ( match, dec ) {
-				return String.fromCharCode( dec );
-			} );
-		}
 	} );
 } )( document );

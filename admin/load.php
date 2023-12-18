@@ -681,7 +681,7 @@ function perflab_install_activate_standalone_plugins_callback() {
 
 		// Return early if plugin API return an error.
 		if ( ! $api ) {
-			$status['errorMessage'] = __( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration.', 'performance-lab' );
+			$status['errorMessage'] = html_entity_decode( __( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration.', 'performance-lab' ), ENT_QUOTES );
 			wp_send_json_error( $status );
 		}
 
