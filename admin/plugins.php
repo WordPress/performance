@@ -56,6 +56,23 @@ function perflab_get_standalone_plugins() {
 }
 
 /**
+ * Returns an array of standalone plugins with currently active modules.
+ *
+ * @since n.e.x.t
+ *
+ * @return string[]
+ */
+function perflab_get_active_modules_with_standalone_plugins() {
+	$modules = perflab_get_module_settings();
+	return array_filter(
+		array_keys( perflab_get_standalone_plugins_constants() ),
+		static function ( $module ) use ( $modules ) {
+			return ! empty( $modules[ $module ] ) && $modules[ $module ]['enabled'];
+		}
+	);
+}
+
+/**
  * Renders plugin UI for managing standalone plugins within PL Settings screen.
  *
  * @since n.e.x.t

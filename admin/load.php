@@ -56,6 +56,12 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 	// Handle script enqueuing for settings page.
 	add_action( 'admin_enqueue_scripts', 'perflab_enqueue_modules_page_scripts' );
 
+	// Handle style for settings page.
+	add_action( 'admin_head', 'perflab_print_modules_page_style' );
+
+	// Handle admin notices for settings page.
+	add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
+
 	// Register sections for all focus areas, plus 'Other'.
 	if ( ! is_array( $focus_areas ) ) {
 		$focus_areas = perflab_get_focus_areas();
@@ -531,6 +537,31 @@ function perflab_enqueue_modules_page_scripts() {
 	wp_enqueue_style( 'thickbox' );
 
 	wp_enqueue_script( 'plugin-install' );
+
+	// Bail early if module is not active.
+	$get_active_modules_with_standalone_plugins = perflab_get_active_modules_with_standalone_plugins();
+	if ( empty( $get_active_modules_with_standalone_plugins ) ) {
+		return;
+	}
+
+	wp_enqueue_script(
+		'perflab-module-migration-notice',
+		plugin_dir_url( __FILE__ ) . 'perflab-module-migration-notice.js',
+		array( 'wp-i18n' ),
+		'1.0.0',
+		array(
+			'strategy' => 'defer',
+		)
+	);
+
+	wp_localize_script(
+		'perflab-module-migration-notice',
+		'perflab_module_migration_notice',
+		array(
+			'ajaxurl' => admin_url( 'admin-ajax.php' ),
+			'nonce'   => wp_create_nonce( 'perflab-install-activate-plugins' ),
+		)
+	);
 }
 
 /**
@@ -609,18 +640,95 @@ function perflab_deactivate_plugin() {
 }
 add_action( 'admin_action_perflab_deactivate_plugin', 'perflab_deactivate_plugin' );
 
+// WordPress AJAX action to handle the button click event.
+add_action( 'wp_ajax_perflab_install_activate_standalone_plugins', 'perflab_install_activate_standalone_plugins_callback' );
+
 /**
- * Callback function hooked to admin_notices to render plugin activate/deactivate notices.
+ * Handles the standalone plugin install and activation via AJAX.
  *
  * @since n.e.x.t
- *
- * @return void
  */
-function perflab_plugin_admin_notices() {
-	if ( 'settings_page_perflab-modules' !== get_current_screen()->id ) {
-		return;
+function perflab_install_activate_standalone_plugins_callback() {
+	if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'perflab-install-activate-plugins' ) ) {
+		$status['errorMessage'] = __( 'Invalid nonce: Please refresh and try again.', 'performance-lab' );
+		wp_send_json_error( $status );
 	}
 
+	if ( ! current_user_can( 'install_plugins' ) || ! current_user_can( 'activate_plugins' ) ) {
+		$status['errorMessage'] = __( 'Sorry, you are not allowed to manage plugins for this site. Please contact the administrator.', 'performance-lab' );
+		wp_send_json_error( $status );
+	}
+
+	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-ajax-upgrader-skin.php';
+
+	$plugins_to_activate = perflab_get_active_modules_with_standalone_plugins();
+	$modules             = perflab_get_module_settings();
+	$plugins             = get_plugins();
+	$status              = array();
+
+	foreach ( $plugins_to_activate as $module_slug ) {
+
+		// Skip checking for already activated plugin.
+		if ( perflab_is_standalone_plugin_loaded( $module_slug ) ) {
+			continue;
+		}
+
+		$plugin_slug     = basename( $module_slug );
+		$plugin_basename = $plugin_slug . '/load.php';
+		$api             = perflab_query_plugin_info( $plugin_slug );
+
+		// Return early if plugin API return an error.
+		if ( ! $api ) {
+			$status['errorMessage'] = html_entity_decode( __( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration.', 'performance-lab' ), ENT_QUOTES );
+			wp_send_json_error( $status );
+		}
+
+		if ( ! $plugin_slug ) {
+			$status['errorMessage'] = __( 'Invalid plugin.', 'performance-lab' );
+			wp_send_json_error( $status );
+		}
+
+		// Install the plugin if it is not installed yet.
+		if ( ! isset( $plugins[ $plugin_basename ] ) ) {
+			// Replace new Plugin_Installer_Skin with new Quiet_Upgrader_Skin when output needs to be suppressed.
+			$skin     = new WP_Ajax_Upgrader_Skin( array( 'api' => $api ) );
+			$upgrader = new Plugin_Upgrader( $skin );
+			$result   = $upgrader->install( $api['download_link'] );
+
+			if ( is_wp_error( $result ) ) {
+				$status['errorMessage'] = $result->get_error_message();
+				wp_send_json_error( $status );
+			} elseif ( is_wp_error( $skin->result ) ) {
+				$status['errorMessage'] = $skin->result->get_error_message();
+				wp_send_json_error( $status );
+			} elseif ( $skin->get_errors()->has_errors() ) {
+				$status['errorMessage'] = $skin->get_error_messages();
+				wp_send_json_error( $status );
+			}
+		}
+
+		$result = activate_plugin( $plugin_basename );
+		if ( is_wp_error( $result ) ) {
+			$status['errorMessage'] = $result->get_error_message();
+			wp_send_json_error( $status );
+		}
+
+		// Deactivate legacy modules.
+		unset( $modules[ $module_slug ] );
+
+		update_option( PERFLAB_MODULES_SETTING, $modules );
+	}
+	wp_send_json_success( $status );
+}
+
+/**
+ * Callback function hooked to admin_notices to render admin notices on the plugin's screen.
+ *
+ * @since n.e.x.t
+ */
+function perflab_plugin_admin_notices() {
 	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
 		<div class="notice notice-success is-dismissible">
@@ -634,5 +742,77 @@ function perflab_plugin_admin_notices() {
 		</div>
 		<?php
 	}
+
+	$active_modules_with_plugins = perflab_get_active_modules_with_standalone_plugins();
+
+	if ( ! empty( $active_modules_with_plugins ) ) {
+		$module_data            = perflab_get_modules();
+		$available_module_names = array();
+		foreach ( $active_modules_with_plugins as $module_slug ) {
+			if ( isset( $module_data[ $module_slug ] ) && ! perflab_is_standalone_plugin_loaded( $module_slug ) ) {
+				$available_module_names[] = $module_data[ $module_slug ]['name'];
+			}
+		}
+
+		$modules_count = count( $available_module_names );
+		if ( $modules_count < 1 ) {
+			return;
+		}
+
+		if ( 1 === $modules_count ) {
+			$message  = '<p>';
+			$message .= sprintf(
+				/* translators: Module name */
+				esc_html__( 'Your site is using the "%s" module which will be removed in the future in favor of its equivalent standalone plugin.', 'performance-lab' ),
+				esc_attr( $available_module_names[0] )
+			);
+			$message .= ' ';
+			$message .= esc_html__( 'Please click the following button to install and activate the relevant plugin in favor of the module. This will not impact any of the underlying functionality.', 'performance-lab' );
+			$message .= '</p>';
+		} else {
+			$message  = '<p>';
+			$message .= esc_html__( 'Your site is using modules which will be removed in the future in favor of their equivalent standalone plugins.', 'performance-lab' );
+			$message .= ' ';
+			$message .= esc_html__( 'Please click the following button to install and activate the relevant plugins in favor of the modules. This will not impact any of the underlying functionality.', 'performance-lab' );
+			$message .= '</p>';
+			$message .= '<strong>' . esc_html__( 'Available standalone plugins:', 'performance-lab' ) . '</strong>';
+			$message .= '<ol>';
+			foreach ( $available_module_names as $module_name ) {
+				$message .= sprintf( '<li>%s</li>', esc_html( $module_name ) );
+			}
+			$message .= '</ol>';
+		}
+
+		?>
+		<div class="notice notice-warning is-dismissible">
+			<?php echo wp_kses_post( $message ); ?>
+			<p class="perflab-button-wrapper">
+				<button type="button" class="button button-primary perflab-install-active-plugin">
+					<?php esc_html_e( 'Migrate legacy modules to standalone plugins', 'performance-lab' ); ?>
+				</button>
+				<span class="dashicons dashicons-update hidden"></span>
+			</p>
+		</div>
+		<?php
+	}
 }
-add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
+
+/**
+ * Callback function to handle admin inline style.
+ *
+ * @since n.e.x.t
+ */
+function perflab_print_modules_page_style() {
+	?>
+<style type="text/css">
+	.perflab-button-wrapper {
+		display: flex;
+		align-items: center;
+	}
+	.perflab-button-wrapper span {
+		animation: rotation 2s infinite linear;
+		margin-left: 5px;
+	}
+</style>
+	<?php
+}
