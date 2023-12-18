@@ -549,12 +549,10 @@ function perflab_activate_plugin() {
 
 	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
 
-	// Check whether "plugin" is a plugin slug or a plugin basename.
-	if ( str_contains( $plugin, '/' ) ) {
-		check_admin_referer( "perflab_activate_plugin_{$plugin}" );
-	} else {
-		check_admin_referer( "perflab_activate_plugin_{$plugin}" );
+	check_admin_referer( "perflab_activate_plugin_{$plugin}" );
 
+	// If `$plugin` is a plugin slug rather than a plugin basename, determine the full plugin basename.
+	if ( ! str_contains( $plugin, '/' ) ) {
 		$plugins = get_plugins( '/' . $plugin );
 
 		if ( empty( $plugins ) ) {
