@@ -670,7 +670,7 @@ function perflab_print_plugin_activation_script() {
 				return;
 			}
 
-			var target_element = $( `.wpp-standalone-plugins a[data-slug="${slug}"]` );
+			var target_element = $( '.wpp-standalone-plugins a[data-slug="' + slug + '"]' );
 			if ( ! target_element ) {
 				return;
 			}
