@@ -161,12 +161,13 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			if ( $status['url'] ) {
 				if ( $compatible_php && $compatible_wp && current_user_can( 'install_plugins' ) ) {
 					$action_links[] = sprintf(
-						'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s">%s</a>',
+						'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s" data-plugin-activation-nonce="%s">%s</a>',
 						esc_attr( $plugin_data['slug'] ),
 						esc_url( $status['url'] ),
 						/* translators: %s: Plugin name and version. */
 						esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
 						esc_attr( $name ),
+						esc_attr( wp_create_nonce( 'perflab_activate_plugin_' . $plugin_data['slug'] ) ),
 						esc_html__( 'Install Now', 'default' )
 					);
 				} else {

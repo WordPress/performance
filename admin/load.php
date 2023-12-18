@@ -59,6 +59,9 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 	// Handle style for settings page.
 	add_action( 'admin_head', 'perflab_print_modules_page_style' );
 
+	// Handle script for settings page.
+	add_action( 'admin_footer', 'perflab_print_plugin_activation_script' );
+
 	// Handle admin notices for settings page.
 	add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
 
@@ -575,10 +578,21 @@ function perflab_activate_plugin() {
 		return;
 	}
 
-	// The plugin being activated.
 	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
 
 	check_admin_referer( "perflab_activate_plugin_{$plugin}" );
+
+	// If `$plugin` is a plugin slug rather than a plugin basename, determine the full plugin basename.
+	if ( ! str_contains( $plugin, '/' ) ) {
+		$plugins = get_plugins( '/' . $plugin );
+
+		if ( empty( $plugins ) ) {
+			wp_die( esc_html__( 'Plugin not found.', 'default' ) );
+		}
+
+		$plugin_file_names = array_keys( $plugins );
+		$plugin            = $plugin . '/' . $plugin_file_names[0];
+	}
 
 	if ( ! current_user_can( 'activate_plugin', $plugin ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
@@ -815,4 +829,55 @@ function perflab_print_modules_page_style() {
 	}
 </style>
 	<?php
+}
+add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
+
+/**
+ * Callback function that print plugin activation script.
+ *
+ * @since n.e.x.t
+ */
+function perflab_print_plugin_activation_script() {
+	$js = <<<JS
+( function( $ ) {
+	$( document ).ajaxComplete( function( event, xhr, settings ) {
+		// Check if this is the 'install-plugin' request.
+		if ( settings.data && typeof settings.data === 'string' && settings.data.includes( 'action=install-plugin' ) ) {
+			var params = new URLSearchParams( settings.data );
+			var slug = params.get('slug');
+
+			// Check if 'slug' was found and output the value.
+			if ( ! slug ) {
+				return;
+			}
+
+			var target_element = $( '.wpp-standalone-plugins a[data-slug="' + slug + '"]' );
+			if ( ! target_element ) {
+				return;
+			}
+
+			/*
+			 * WordPress core uses a 1s timeout for updating the activation link,
+			 * so we set a 1.5 timeout here to ensure our changes get updated after
+			 * the core changes have taken place.
+			 */
+			setTimeout( function() {
+				var plugin_url = target_element.attr( 'href' );
+				if ( ! plugin_url ) {
+					return;
+				}
+				var nonce = target_element.attr( 'data-plugin-activation-nonce' );
+				var plugin_slug = target_element.attr( 'data-slug' );
+				var url = new URL( plugin_url );
+				url.searchParams.set( 'action', 'perflab_activate_plugin' );
+				url.searchParams.set( '_wpnonce', nonce );
+				url.searchParams.set( 'plugin', plugin_slug );
+				target_element.attr( 'href', url.href );
+			}, 1500 );
+		}
+	} );
+} )( jQuery );
+JS;
+
+	wp_print_inline_script_tag( $js );
 }
