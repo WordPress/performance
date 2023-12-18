@@ -59,7 +59,7 @@ function perflab_load_modules_page( $modules = null, $focus_areas = null ) {
 	// Handle style for settings page.
 	add_action( 'admin_head', 'perflab_print_modules_page_style' );
 
-  // Handle script for settings page.
+	// Handle script for settings page.
 	add_action( 'admin_footer', 'perflab_print_plugin_activation_script' );
 
 	// Handle admin notices for settings page.
