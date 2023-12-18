@@ -420,10 +420,9 @@ function perflab_admin_pointer( $hook_suffix ) {
 		add_action(
 			'admin_print_footer_scripts',
 			static function () {
-				$content  = __( 'Your site is using modules which will be removed in the future in favor of their equivalent standalone plugins.', 'performance-lab' );
-				$content .= ' ' . sprintf(
+				$content = sprintf(
 					/* translators: %s: settings page link */
-					__( 'Open %s to learn more about next steps to keep the functionality available.', 'performance-lab' ),
+					__( 'Your site is using modules which will be removed in the future in favor of their equivalent standalone plugins. Open %s to learn more about next steps to keep the functionality available.', 'performance-lab' ),
 					'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
 				);
 				perflab_render_pointer(
