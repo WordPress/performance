@@ -390,8 +390,9 @@ function perflab_get_module_data( $module_file ) {
  * Handles the bootstrapping of the admin pointer.
  * Mainly jQuery code that is self-initialising.
  *
- * @param string $hook_suffix The current admin page.
  * @since 1.0.0
+ *
+ * @param string $hook_suffix The current admin page.
  */
 function perflab_admin_pointer( $hook_suffix ) {
 	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
@@ -483,6 +484,7 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
  * This function is only used if the modules page exists and is accessible.
  *
  * @since 1.0.0
+ *
  * @see perflab_add_modules_page()
  *
  * @param array $links List of plugin action links HTML.
@@ -507,6 +509,7 @@ function perflab_plugin_action_links_add_settings( $links ) {
  * It runs before the dismiss-wp-pointer AJAX action is performed.
  *
  * @since 2.3.0
+ *
  * @see perflab_render_modules_pointer()
  */
 function perflab_dismiss_wp_pointer_wrapper() {
