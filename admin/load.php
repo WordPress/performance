@@ -830,7 +830,6 @@ function perflab_print_modules_page_style() {
 </style>
 	<?php
 }
-add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
 
 /**
  * Callback function that print plugin activation script.
