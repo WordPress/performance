@@ -841,7 +841,7 @@ function perflab_plugin_admin_notices() {
  *
  * @since n.e.x.t
  *
- * @return array Returns an array of active module data with inactive standalone plugins, otherwise an empty array.
+ * @return array Array of active module data with inactive standalone plugins, otherwise an empty array.
  */
 function perflab_get_active_module_data_with_inactive_standalone_plugins() {
 	$active_modules_with_plugins = perflab_get_active_modules_with_standalone_plugins();
