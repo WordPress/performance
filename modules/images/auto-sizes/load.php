@@ -9,10 +9,10 @@
  */
 
 // Define the constant.
-if ( defined( 'IMAGE_AUTO_SIZES' ) ) {
+if ( defined( 'IMAGE_AUTO_SIZES_VERSION' ) ) {
 	return;
 }
 
-define( 'IMAGE_AUTO_SIZES', 'Performance Lab ' . PERFLAB_VERSION );
+define( 'IMAGE_AUTO_SIZES_VERSION', 'Performance Lab ' . PERFLAB_VERSION );
 
 require_once __DIR__ . '/hooks.php';
