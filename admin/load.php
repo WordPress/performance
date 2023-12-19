@@ -407,12 +407,12 @@ function perflab_admin_pointer( $hook_suffix ) {
 	$dismissed    = explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) );
 
 	/*
-	 * Show an admin pointer if module is active to prompt
-	 * for an action to use the standalone plugin instead.
+	 * If there are any active modules with inactive standalone plugins,
+	 * show an admin pointer to prompt the user to migrate.
 	 */
-	$available_module_names = perflab_get_modules_compatible_with_standalone_plugin();
+	$active_modules_with_inactive_plugins = perflab_get_active_module_data_with_inactive_standalone_plugins();
 	if (
-		! empty( $available_module_names )
+		! empty( $active_modules_with_inactive_plugins )
 		&& current_user_can( 'install_plugins' )
 		&& current_user_can( 'activate_plugins' )
 		&& ! in_array( 'perflab-module-migration-pointer', $dismissed, true )
@@ -425,8 +425,8 @@ function perflab_admin_pointer( $hook_suffix ) {
 			static function () {
 				$content = sprintf(
 					/* translators: %s: settings page link */
-					__( 'Your site is using modules which will be removed in the future in favor of their equivalent standalone plugins. Open %s to learn more about next steps to keep the functionality available.', 'performance-lab' ),
-					'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
+					esc_html__( 'Your site is using modules which will be removed in the future in favor of their equivalent standalone plugins. Open %s to learn more about next steps to keep the functionality available.', 'performance-lab' ),
+					'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . esc_html__( 'Settings > Performance', 'performance-lab' ) . '</a>'
 				);
 				perflab_render_pointer(
 					'perflab-module-migration-pointer',
@@ -470,8 +470,8 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
 	if ( ! isset( $args['content'] ) ) {
 		$args['content'] = sprintf(
 			/* translators: %s: settings page link */
-			__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ),
-			'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . __( 'Settings > Performance', 'performance-lab' ) . '</a>'
+			esc_html__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features included in the plugin.', 'performance-lab' ),
+			'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . esc_html__( 'Settings > Performance', 'performance-lab' ) . '</a>'
 		);
 	}
 
@@ -791,15 +791,13 @@ function perflab_plugin_admin_notices() {
 		<?php
 	}
 
-	$available_module_names = perflab_get_modules_compatible_with_standalone_plugin();
-	if ( empty( $available_module_names ) ) {
+	$active_modules_with_inactive_plugins = perflab_get_active_module_data_with_inactive_standalone_plugins();
+	if ( empty( $active_modules_with_inactive_plugins ) ) {
 		return;
 	}
 
-	$modules_count = count( $available_module_names );
-	if ( $modules_count < 1 ) {
-		return;
-	}
+	$available_module_names = wp_list_pluck( $active_modules_with_inactive_plugins, 'name' );
+	$modules_count          = count( $available_module_names );
 
 	if ( 1 === $modules_count ) {
 		$message  = '<p>';
@@ -839,26 +837,26 @@ function perflab_plugin_admin_notices() {
 }
 
 /**
- * Returns an array of standalone plugins name which currently active modules.
+ * Returns an array of active module data with inactive standalone plugins.
  *
  * @since n.e.x.t
  *
- * @return string[]
+ * @return array Returns an array of active module data with inactive standalone plugins, otherwise an empty array.
  */
-function perflab_get_modules_compatible_with_standalone_plugin() {
+function perflab_get_active_module_data_with_inactive_standalone_plugins() {
 	$active_modules_with_plugins = perflab_get_active_modules_with_standalone_plugins();
 	if ( empty( $active_modules_with_plugins ) ) {
-		return;
+		return array();
 	}
 
 	$module_data            = perflab_get_modules();
-	$available_module_names = array();
-	foreach ( $active_modules_with_plugins as $module_slug ) {
-		if ( isset( $module_data[ $module_slug ] ) && ! perflab_is_standalone_plugin_loaded( $module_slug ) ) {
-			$available_module_names[] = $module_data[ $module_slug ]['name'];
+	$available_modules_data = array();
+	foreach ( $active_modules_with_plugins as $module_dir ) {
+		if ( isset( $module_data[ $module_dir ] ) && ! perflab_is_standalone_plugin_loaded( $module_dir ) ) {
+			$available_modules_data[] = $module_data[ $module_dir ];
 		}
 	}
-	return $available_module_names;
+	return $available_modules_data;
 }
 
 /**
