@@ -45,7 +45,7 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 			'one-non-responsive-lcp-image'              => array(
 				'lcp_elements_by_minimum_viewport_widths' => array(
 					0 => array(
-						'attributes' => array(
+						'img_attributes' => array(
 							'src' => 'https://example.com/image.jpg',
 						),
 					),
@@ -57,7 +57,7 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 			'one-responsive-lcp-image'                  => array(
 				'lcp_elements_by_minimum_viewport_widths' => array(
 					0 => array(
-						'attributes' => array(
+						'img_attributes' => array(
 							'src'         => 'elva-fairy-800w.jpg',
 							'srcset'      => 'elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w',
 							'sizes'       => '(max-width: 600px) 480px, 800px',
@@ -72,7 +72,7 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 			'two-breakpoint-responsive-lcp-images'      => array(
 				'lcp_elements_by_minimum_viewport_widths' => array(
 					0   => array(
-						'attributes' => array(
+						'img_attributes' => array(
 							'src'         => 'elva-fairy-800w.jpg',
 							'srcset'      => 'elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w',
 							'sizes'       => '(max-width: 600px) 480px, 800px',
@@ -80,7 +80,7 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 						),
 					),
 					601 => array(
-						'attributes' => array(
+						'img_attributes' => array(
 							'src'         => 'alt-elva-fairy-800w.jpg',
 							'srcset'      => 'alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w',
 							'sizes'       => '(max-width: 600px) 480px, 800px',
@@ -96,7 +96,7 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 			'two-non-consecutive-responsive-lcp-images' => array(
 				'lcp_elements_by_minimum_viewport_widths' => array(
 					0   => array(
-						'attributes' => array(
+						'img_attributes' => array(
 							'src'         => 'elva-fairy-800w.jpg',
 							'srcset'      => 'elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w',
 							'sizes'       => '(max-width: 600px) 480px, 800px',
@@ -105,7 +105,7 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 					),
 					481 => false,
 					601 => array(
-						'attributes' => array(
+						'img_attributes' => array(
 							'src'         => 'alt-elva-fairy-800w.jpg',
 							'srcset'      => 'alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w',
 							'sizes'       => '(max-width: 600px) 480px, 800px',
@@ -116,6 +116,49 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 				'expected'                                => '
 					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 0px ) and ( max-width: 480px )">
 					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" imagesrcset="alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 601px )">
+				',
+			),
+			'one-background-lcp-image'                  => array(
+				'lcp_elements_by_minimum_viewport_widths' => array(
+					0 => array(
+						'background_image' => 'https://example.com/image.jpg',
+					),
+				),
+				'expected'                                => '
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg">
+				',
+			),
+			'two-background-lcp-images'                 => array(
+				'lcp_elements_by_minimum_viewport_widths' => array(
+					0   => array(
+						'background_image' => 'https://example.com/mobile.jpg',
+					),
+					481 => array(
+						'background_image' => 'https://example.com/desktop.jpg',
+					),
+				),
+				'expected'                                => '
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile.jpg" media="( min-width: 0px ) and ( max-width: 480px )">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="( min-width: 481px )">
+				',
+			),
+			'one-bg-image-one-img-element'              => array(
+				'lcp_elements_by_minimum_viewport_widths' => array(
+					0   => array(
+						'img_attributes' => array(
+							'src'         => 'mobile-800w.jpg',
+							'srcset'      => 'mobile-480w.jpg 480w, mobile-800w.jpg 800w',
+							'sizes'       => '(max-width: 600px) 480px, 800px',
+							'crossorigin' => 'anonymous',
+						),
+					),
+					481 => array(
+						'background_image' => 'https://example.com/desktop.jpg',
+					),
+				),
+				'expected'                                => '
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" imagesrcset="mobile-480w.jpg 480w, mobile-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 0px ) and ( max-width: 480px )">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="( min-width: 481px )">
 				',
 			),
 		);
