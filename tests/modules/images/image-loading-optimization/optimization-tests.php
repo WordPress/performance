@@ -265,6 +265,53 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 				',
 			),
 
+			'common-lcp-background-image-with-fully-populated-sample-data' => array(
+				'set_up'   => function () {
+					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
+					$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
+					foreach ( array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+						for ( $i = 0; $i < $sample_size; $i++ ) {
+							ilo_store_url_metric(
+								home_url( '/' ),
+								$slug,
+								$this->get_validated_url_metric(
+									$viewport_width,
+									array(
+										array(
+											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]',
+											'isLCP' => true,
+										),
+									)
+								)
+							);
+						}
+					}
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<div style="background-image:url(https://example.com/foo-bg.jpg); width:100%; height: 200px;">This is so background!</div>
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo-bg.jpg" rel="preload"/>
+						</head>
+						<body>
+							<div data-ilo-has-bg-image="https://example.com/foo-bg.jpg" style="background-image:url(https://example.com/foo-bg.jpg); width:100%; height: 200px;">This is so background!</div>
+						</body>
+					</html>
+				',
+			),
+
 			'fetch-priority-high-already-on-common-lcp-image-with-fully-populated-sample-data' => array(
 				'set_up'   => function () {
 					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
