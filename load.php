@@ -462,6 +462,27 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 			if ( ! empty( $module_settings['enabled'] ) && ( empty( $old_value[ $module ] ) || empty( $old_value[ $module ]['enabled'] ) ) ) {
 				perflab_activate_module( PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module );
 			}
+
+			// Check whether it is necessary to display an admin pointer to prompt the user to migrate.
+			$plugin_slug        = basename( $module );
+			$standalone_plugins = perflab_get_standalone_plugins();
+
+			// Plugin slug should be in standalone plugins list.
+			if ( ! in_array( $plugin_slug, $standalone_plugins, true ) ) {
+				continue;
+			}
+
+			$current_user = get_current_user_id();
+			$dismissed    = array_filter( explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) ) );
+
+			if ( ! in_array( 'perflab-module-migration-pointer', $dismissed, true ) ) {
+				continue;
+			}
+
+			unset( $dismissed[ array_search( 'perflab-module-migration-pointer', $dismissed, true ) ] );
+			$dismissed = implode( ',', $dismissed );
+
+			update_user_meta( $current_user, 'dismissed_wp_pointers', $dismissed );
 		}
 	}
 
