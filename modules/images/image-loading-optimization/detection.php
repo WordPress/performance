@@ -15,22 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since n.e.x.t
  * @access private
+ *
+ * @param string                       $slug                           URL metrics slug.
+ * @param array<int, array{int, bool}> $needed_minimum_viewport_widths Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
  */
-function ilo_print_detection_script() {
-	if ( ! ilo_can_optimize_response() ) {
-		return;
-	}
-
-	$query_vars = ilo_get_normalized_query_vars();
-	$slug       = ilo_get_url_metrics_slug( $query_vars );
-	$microtime  = microtime( true );
-
-	// Abort if we already have all the sample size we need for all breakpoints.
-	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths_now_for_slug( $slug );
-	if ( ! ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
-		return;
-	}
-
+function ilo_get_detection_script( string $slug, array $needed_minimum_viewport_widths ): string {
 	/**
 	 * Filters the time window between serve time and run time in which loading detection is allowed to run.
 	 *
@@ -47,7 +36,7 @@ function ilo_print_detection_script() {
 	$detection_time_window = apply_filters( 'perflab_image_loading_detection_time_window', 5000 );
 
 	$detect_args = array(
-		'serveTime'                   => $microtime * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
+		'serveTime'                   => microtime( true ) * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
 		'detectionTimeWindow'         => $detection_time_window,
 		'isDebug'                     => WP_DEBUG,
 		'restApiEndpoint'             => rest_url( ILO_REST_API_NAMESPACE . ILO_URL_METRICS_ROUTE ),
@@ -57,7 +46,7 @@ function ilo_print_detection_script() {
 		'neededMinimumViewportWidths' => $needed_minimum_viewport_widths,
 		'storageLockTTL'              => ilo_get_url_metric_storage_lock_ttl(),
 	);
-	wp_print_inline_script_tag(
+	return wp_get_inline_script_tag(
 		sprintf(
 			'import detect from %s; detect( %s );',
 			wp_json_encode( add_query_arg( 'ver', IMAGE_LOADING_OPTIMIZATION_VERSION, plugin_dir_url( __FILE__ ) . 'detection/detect.js' ) ),
@@ -66,4 +55,3 @@ function ilo_print_detection_script() {
 		array( 'type' => 'module' )
 	);
 }
-add_action( 'wp_print_footer_scripts', 'ilo_print_detection_script' );

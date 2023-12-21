@@ -7,7 +7,7 @@
  */
 
 /**
- * Processor leveraging WP_HTML_Tag_Processor which gathers breadcrumbs which can be queried while iterating the open_tags() generator.
+ * Processor leveraging WP_HTML_Tag_Processor which gathers breadcrumbs which can be obtained as XPath while iterating the open_tags() generator.
  *
  * Eventually this class should be made largely obsolete once `WP_HTML_Processor` is fully implemented to support all HTML tags.
  *
@@ -87,6 +87,14 @@ final class ILO_HTML_Tag_Processor {
 		'TABLE',
 		'UL',
 	);
+
+	/**
+	 * Pattern for valid XPath subset for breadcrumb.
+	 *
+	 * @see self::get_xpath()
+	 * @var string
+	 */
+	const XPATH_PATTERN = '^(/\*\[\d+\]\[self::.+?\])+$';
 
 	/**
 	 * Open stack tags.
@@ -226,21 +234,30 @@ final class ILO_HTML_Tag_Processor {
 	/**
 	 * Gets breadcrumbs for the current open tag.
 	 *
-	 * Breadcrumbs are constructed to match the format from detect.js.
+	 * A breadcrumb consists of a tag name and its sibling index.
 	 *
-	 * TODO: Consider rather each breadcrumb being a (tag,index) tuple.
-	 *
-	 * @return array<array{tag: string, index: int}> Breadcrumbs.
+	 * @return Generator<array{string, int}> Breadcrumb.
 	 */
-	public function get_breadcrumbs(): array {
-		$breadcrumbs = array();
+	private function get_breadcrumbs(): Generator {
 		foreach ( $this->open_stack_tags as $i => $breadcrumb_tag_name ) {
-			$breadcrumbs[] = array(
-				'tag'   => $breadcrumb_tag_name,
-				'index' => $this->open_stack_indices[ $i ],
-			);
+			yield array( $breadcrumb_tag_name, $this->open_stack_indices[ $i ] );
 		}
-		return $breadcrumbs;
+	}
+
+	/**
+	 * Gets XPath for the current open tag.
+	 *
+	 * It would be nicer if this were like `/html[1]/body[2]` but in XPath the position() here refers to the
+	 * index of the preceding node set. So it has to rather be written `/*[1][self::html]/*[2][self::body]`.
+	 *
+	 * @return string XPath.
+	 */
+	public function get_xpath(): string {
+		$xpath = '';
+		foreach ( $this->get_breadcrumbs() as list( $tag_name, $index ) ) {
+			$xpath .= sprintf( '/*[%d][self::%s]', $index, $tag_name );
+		}
+		return $xpath;
 	}
 
 	/**

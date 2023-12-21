@@ -79,16 +79,10 @@ function error( ...message ) {
 }
 
 /**
- * @typedef {Object} Breadcrumb
- * @property {number} index - Index of element among sibling elements.
- * @property {string} tag   - Tag name.
- */
-
-/**
  * @typedef {Object} ElementMetrics
  * @property {boolean}         isLCP              - Whether it is the LCP candidate.
  * @property {boolean}         isLCPCandidate     - Whether it is among the LCP candidates.
- * @property {Breadcrumb[]}    breadcrumbs        - Breadcrumbs.
+ * @property {string}          xpath              - XPath.
  * @property {number}          intersectionRatio  - Intersection ratio.
  * @property {DOMRectReadOnly} intersectionRect   - Intersection rectangle.
  * @property {DOMRectReadOnly} boundingClientRect - Bounding client rectangle.
@@ -102,57 +96,6 @@ function error( ...message ) {
  * @property {number}           viewport.height - Viewport height.
  * @property {ElementMetrics[]} elements        - Metrics for the elements observed on the page.
  */
-
-/**
- * Gets element index among siblings.
- *
- * @todo Eliminate this in favor of doing all breadcrumb generation exclusively on the server.
- *
- * @param {Element} element Element.
- * @return {number} Index.
- */
-function getElementIndex( element ) {
-	if ( ! element.parentElement ) {
-		return 0;
-	}
-	const children = [ ...element.parentElement.children ];
-	let index = children.indexOf( element );
-	if ( children.includes( document.getElementById( adminBarId ) ) ) {
-		--index;
-	}
-	if (
-		children.includes(
-			document.querySelector( '.skip-link.screen-reader-text' )
-		)
-	) {
-		--index;
-	}
-	return index;
-}
-
-/**
- * Gets breadcrumbs for a given element.
- *
- * @todo Eliminate this in favor of doing all breadcrumb generation exclusively on the server.
- *
- * @param {Element} leafElement
- * @return {Breadcrumb[]} Breadcrumbs.
- */
-function getBreadcrumbs( leafElement ) {
-	/** @type {Breadcrumb[]} */
-	const breadcrumbs = [];
-
-	let element = leafElement;
-	while ( element instanceof Element ) {
-		breadcrumbs.unshift( {
-			tag: element.tagName,
-			index: getElementIndex( element ),
-		} );
-		element = element.parentElement;
-	}
-
-	return breadcrumbs;
-}
 
 /**
  * Checks whether the URL metric(s) for the provided viewport width is needed.
@@ -258,26 +201,29 @@ export default async function detect( {
 	const adminBar =
 		/** @type {?HTMLDivElement} */ doc.getElementById( adminBarId );
 
-	// We need to capture the original elements and their breadcrumbs as early as possible in case JavaScript is
-	// mutating the DOM from the original HTML rendered by the server, in which case the breadcrumbs obtained from the
-	// client will no longer be valid on the server. As such, the results are stored in an array and not any live list.
-	const breadcrumbedImages = doc.body.querySelectorAll( 'img' );
+	// TODO: This query no longer needs to be done as early as possible since the server is adding the breadcrumbs.
+	const breadcrumbedImages = doc.body.querySelectorAll(
+		'img[data-ilo-xpath]'
+	);
 
 	// We do the same for elements with background images which are not data: URLs.
 	// TODO: Re-enable background image support when server-side is implemented.
 	// const breadcrumbedElementsWithBackgrounds = Array.from(
-	// 	doc.body.querySelectorAll( '[style*="background"]' )
+	// 	doc.body.querySelectorAll( '[data-ilo-xpath][style*="background"]' )
 	// ).filter( ( /** @type {Element} */ el ) =>
 	// 	/url\(\s*['"](?!=data:)/.test( el.style.backgroundImage )
 	// );
 
-	/** @type {Map<Element, Breadcrumb[]>} */
+	/** @type {Map<HTMLElement, string>} */
 	const breadcrumbedElementsMap = new Map(
 		[
 			...breadcrumbedImages /*, ...breadcrumbedElementsWithBackgrounds*/,
 		].map(
-			// TODO: Instead of generating breadcrumbs here, rely instead on server-generated breadcrumbs that are added to a data attribute by the server.
-			( element ) => [ element, getBreadcrumbs( element ) ]
+			/**
+			 * @param {HTMLElement} element
+			 * @return {[HTMLElement, string]} Tuple of element and its XPath.
+			 */
+			( element ) => [ element, element.dataset.iloXpath ]
 		)
 	);
 
@@ -391,12 +337,10 @@ export default async function detect( {
 	const lcpMetric = lcpMetricCandidates.at( -1 );
 
 	for ( const elementIntersection of elementIntersections ) {
-		const breadcrumbs = breadcrumbedElementsMap.get(
-			elementIntersection.target
-		);
-		if ( ! breadcrumbs ) {
+		const xpath = breadcrumbedElementsMap.get( elementIntersection.target );
+		if ( ! xpath ) {
 			if ( isDebug ) {
-				error( 'Unable to look up breadcrumbs for element' );
+				error( 'Unable to look up XPath for element' );
 			}
 			continue;
 		}
@@ -412,7 +356,7 @@ export default async function detect( {
 					lcpMetricCandidate.entries[ 0 ]?.element ===
 					elementIntersection.target
 			),
-			breadcrumbs,
+			xpath,
 			intersectionRatio: elementIntersection.intersectionRatio,
 			intersectionRect: elementIntersection.intersectionRect,
 			boundingClientRect: elementIntersection.boundingClientRect,

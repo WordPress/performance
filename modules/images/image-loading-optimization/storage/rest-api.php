@@ -130,24 +130,10 @@ function ilo_register_endpoint() {
 							'isLCPCandidate'     => array(
 								'type' => 'bool',
 							),
-							'breadcrumbs'        => array(
-								'type'     => 'array',
+							'xpath'              => array(
+								'type'     => 'string',
 								'required' => true,
-								'items'    => array(
-									'type'       => 'object',
-									'properties' => array(
-										'tag'   => array(
-											'type'     => 'string',
-											'required' => true,
-											'pattern'  => '^[a-zA-Z0-9-]+$',
-										),
-										'index' => array(
-											'type'     => 'int',
-											'required' => true,
-											'minimum'  => 0,
-										),
-									),
-								),
+								'pattern'  => ILO_HTML_Tag_Processor::XPATH_PATTERN,
 							),
 							'intersectionRatio'  => array(
 								'type'     => 'number',
@@ -176,7 +162,15 @@ add_action( 'rest_api_init', 'ilo_register_endpoint' );
  * @return WP_REST_Response|WP_Error Response.
  */
 function ilo_handle_rest_request( WP_REST_Request $request ) {
-	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths_now_for_slug( $request->get_param( 'slug' ) );
+	$post = ilo_get_url_metrics_post( $request->get_param( 'slug' ) );
+
+	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths(
+		$post ? ilo_parse_stored_url_metrics( $post ) : array(),
+		microtime( true ),
+		ilo_get_breakpoint_max_widths(),
+		ilo_get_url_metrics_breakpoint_sample_size(),
+		ilo_get_url_metric_freshness_ttl()
+	);
 	if ( ! ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths ) ) {
 		return new WP_Error(
 			'no_url_metric_needed',
