@@ -54,14 +54,7 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 		if ( ! empty( $lcp_element['background_image'] ) ) {
 			$link_attributes['href'] = $lcp_element['background_image'];
 		} elseif ( ! empty( $lcp_element['img_attributes'] ) ) {
-			$img_attributes = $lcp_element['img_attributes'];
-
-			// Prevent preloading src for browsers that don't support imagesrcset on the link element.
-			if ( isset( $img_attributes['src'], $img_attributes['srcset'] ) ) {
-				unset( $img_attributes['src'] );
-			}
-
-			foreach ( $img_attributes as $name => $value ) {
+			foreach ( $lcp_element['img_attributes'] as $name => $value ) {
 				// Map img attribute name to link attribute name.
 				if ( 'srcset' === $name || 'sizes' === $name ) {
 					$name = 'image' . $name;

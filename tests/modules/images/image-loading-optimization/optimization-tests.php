@@ -66,7 +66,7 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
 				',
 			),
 			'two-breakpoint-responsive-lcp-images'      => array(
@@ -89,8 +89,8 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 0px ) and ( max-width: 600px )">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" imagesrcset="alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 601px )">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 0px ) and ( max-width: 600px )">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="alt-elva-fairy-800w.jpg" imagesrcset="alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 601px )">
 				',
 			),
 			'two-non-consecutive-responsive-lcp-images' => array(
@@ -114,8 +114,8 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 0px ) and ( max-width: 480px )">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" imagesrcset="alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 601px )">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 0px ) and ( max-width: 480px )">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="alt-elva-fairy-800w.jpg" imagesrcset="alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 601px )">
 				',
 			),
 			'one-background-lcp-image'                  => array(
@@ -157,7 +157,7 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" imagesrcset="mobile-480w.jpg 480w, mobile-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 0px ) and ( max-width: 480px )">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="mobile-800w.jpg" imagesrcset="mobile-480w.jpg 480w, mobile-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 0px ) and ( max-width: 480px )">
 					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="( min-width: 481px )">
 				',
 			),
