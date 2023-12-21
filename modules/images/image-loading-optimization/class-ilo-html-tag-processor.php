@@ -89,6 +89,14 @@ final class ILO_HTML_Tag_Processor {
 	);
 
 	/**
+	 * Pattern for valid XPath subset for breadcrumb.
+	 *
+	 * @see self::get_xpath()
+	 * @var string
+	 */
+	const XPATH_PATTERN = '^(/\*\[\d+\]\[self::.+?\])+$';
+
+	/**
 	 * Open stack tags.
 	 *
 	 * @var string[]

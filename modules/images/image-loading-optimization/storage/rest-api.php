@@ -133,7 +133,7 @@ function ilo_register_endpoint() {
 							'xpath'              => array(
 								'type'     => 'string',
 								'required' => true,
-								'pattern'  => '^(/\*\[\d+\]\[self::.+?\])+$', // See ILO_HTML_Tag_Processor::get_xpath() for format.
+								'pattern'  => ILO_HTML_Tag_Processor::XPATH_PATTERN,
 							),
 							'intersectionRatio'  => array(
 								'type'     => 'number',
