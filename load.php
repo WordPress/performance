@@ -458,14 +458,14 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 
 	// Get the list of modules that were activated, and load the activate.php files if they exist.
 	if ( ! empty( $value ) ) {
-		$enable_module_migration_pointer = false;
+		$reset_migration_pointer_dismissals = false;
 		foreach ( $value as $module => $module_settings ) {
 			if ( ! empty( $module_settings['enabled'] ) && ( empty( $old_value[ $module ] ) || empty( $old_value[ $module ]['enabled'] ) ) ) {
 				perflab_activate_module( PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module );
-				$enable_module_migration_pointer = true;
+				$reset_migration_pointer_dismissals = true;
 			}
 		}
-		if ( $enable_module_migration_pointer ) {
+		if ( $reset_migration_pointer_dismissals ) {
 			// Retrieve a list of active modules with associated standalone plugins.
 			$active_modules_with_plugins = perflab_get_active_modules_with_standalone_plugins();
 
