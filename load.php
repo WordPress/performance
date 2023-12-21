@@ -458,25 +458,30 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 
 	// Get the list of modules that were activated, and load the activate.php files if they exist.
 	if ( ! empty( $value ) ) {
+		$enable_module_migration_pointer = false;
 		foreach ( $value as $module => $module_settings ) {
 			if ( ! empty( $module_settings['enabled'] ) && ( empty( $old_value[ $module ] ) || empty( $old_value[ $module ]['enabled'] ) ) ) {
 				perflab_activate_module( PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module );
+				$enable_module_migration_pointer = true;
 			}
+		}
+		if ( $enable_module_migration_pointer ) {
+			// Retrieve a list of active modules with associated standalone plugins.
+			$active_modules_with_plugins = perflab_get_active_modules_with_standalone_plugins();
 
-			// Check whether it is necessary to display an admin pointer to prompt the user to migrate.
-			$plugin_slug        = basename( $module );
-			$standalone_plugins = perflab_get_standalone_plugins();
-
-			// Plugin slug should be in standalone plugins list.
-			if ( ! in_array( $plugin_slug, $standalone_plugins, true ) ) {
-				continue;
+			/*
+			 * Check if there are any active modules with compatible standalone plugins.
+			 * If no such modules are found bail early.
+			 */
+			if ( empty( $active_modules_with_plugins ) ) {
+				return;
 			}
 
 			$current_user = get_current_user_id();
 			$dismissed    = array_filter( explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) ) );
 
 			if ( ! in_array( 'perflab-module-migration-pointer', $dismissed, true ) ) {
-				continue;
+				return;
 			}
 
 			unset( $dismissed[ array_search( 'perflab-module-migration-pointer', $dismissed, true ) ] );
