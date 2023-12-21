@@ -20,7 +20,11 @@ function ilo_maybe_add_template_output_buffer_filter() {
 	if ( ! ilo_can_optimize_response() ) {
 		return;
 	}
-	add_filter( 'ilo_template_output_buffer', 'ilo_optimize_template_output_buffer' );
+	$callback = 'ilo_optimize_template_output_buffer';
+	if ( function_exists( 'perflab_wrap_server_timing' ) ) {
+		$callback = perflab_wrap_server_timing( $callback, 'image-loading-optimization', 'exist' );
+	}
+	add_filter( 'ilo_template_output_buffer', $callback );
 }
 add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
 
