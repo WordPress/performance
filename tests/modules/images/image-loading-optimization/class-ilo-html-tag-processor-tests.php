@@ -7,7 +7,7 @@
  *
  * @coversDefaultClass ILO_HTML_Tag_Processor
  */
-class Image_Loading_Optimization_ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
+class ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 
 	public function data_provider_sample_documents(): array {
 		return array(

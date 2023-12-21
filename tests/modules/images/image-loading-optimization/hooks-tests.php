@@ -6,7 +6,7 @@
  * @group   image-loading-optimization
  */
 
-class Image_Loading_Optimization_Hooks_Tests extends WP_UnitTestCase {
+class ILO_Hooks_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Make sure the hook is added.

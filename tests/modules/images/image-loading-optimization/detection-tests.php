@@ -6,7 +6,7 @@
  * @group   image-loading-optimization
  */
 
-class Image_Loading_Optimization_Detection_Tests extends WP_UnitTestCase {
+class ILO_Detection_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.

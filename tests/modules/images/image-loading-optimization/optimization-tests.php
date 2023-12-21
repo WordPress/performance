@@ -6,7 +6,7 @@
  * @group   image-loading-optimization
  */
 
-class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
+class ILO_Optimization_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Test ilo_maybe_add_template_output_buffer_filter().
