@@ -477,17 +477,37 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 				return;
 			}
 
-			$current_user = get_current_user_id();
-			$dismissed    = array_filter( explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) ) );
+			$current_user       = wp_get_current_user();
+			$current_user_roles = array_shift( $current_user->roles );
 
-			if ( ! in_array( 'perflab-module-migration-pointer', $dismissed, true ) ) {
-				return;
+			$args = array(
+				'role'       => $current_user_roles,
+				'meta_query' => array(
+					array(
+						'key'     => 'dismissed_wp_pointers',
+						'value'   => 'perflab-module-migration-pointer',
+						'compare' => 'LIKE',
+					),
+				),
+			);
+
+			$user_query = new WP_User_Query( $args );
+			$get_users  = $user_query->get_results();
+
+			if ( ! empty( $get_users ) ) {
+				foreach ( $get_users as $user ) {
+					$dismissed = array_filter( explode( ',', (string) get_user_meta( $user->ID, 'dismissed_wp_pointers', true ) ) );
+
+					if ( ! in_array( 'perflab-module-migration-pointer', $dismissed, true ) ) {
+						return;
+					}
+
+					unset( $dismissed[ array_search( 'perflab-module-migration-pointer', $dismissed, true ) ] );
+					$dismissed = implode( ',', $dismissed );
+
+					update_user_meta( $user->ID, 'dismissed_wp_pointers', $dismissed );
+				}
 			}
-
-			unset( $dismissed[ array_search( 'perflab-module-migration-pointer', $dismissed, true ) ] );
-			$dismissed = implode( ',', $dismissed );
-
-			update_user_meta( $current_user, 'dismissed_wp_pointers', $dismissed );
 		}
 	}
 
