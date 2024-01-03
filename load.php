@@ -477,35 +477,35 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 				return;
 			}
 
-			$current_user       = wp_get_current_user();
-			$current_user_roles = array_shift( $current_user->roles );
+			$current_user = wp_get_current_user();
 
-			$args = array(
-				'role'       => $current_user_roles,
-				'meta_query' => array(
-					array(
-						'key'     => 'dismissed_wp_pointers',
-						'value'   => 'perflab-module-migration-pointer',
-						'compare' => 'LIKE',
+			/*
+			 * Disable WordPress pointers for specific users based on conditions.
+			 *
+			 * Checks if there is a large user count on the site. If true,
+			 * disables pointers for the current user only. Otherwise, disables
+			 * pointers for users with the same role as the current user.
+			 */
+			if ( ! wp_is_large_user_count() ) {
+				perflab_dismissed_wp_pointers( $current_user );
+			} else {
+				$current_user_roles = array_shift( $current_user->roles );
+
+				$args = array(
+					'role'       => $current_user_roles,
+					'meta_query' => array(
+						array(
+							'key'     => 'dismissed_wp_pointers',
+							'value'   => 'perflab-module-migration-pointer',
+							'compare' => 'LIKE',
+						),
 					),
-				),
-			);
+				);
 
-			$user_query = new WP_User_Query( $args );
-			$get_users  = $user_query->get_results();
+				$users = get_users( $args );
 
-			if ( ! empty( $get_users ) ) {
-				foreach ( $get_users as $user ) {
-					$dismissed = array_filter( explode( ',', (string) get_user_meta( $user->ID, 'dismissed_wp_pointers', true ) ) );
-
-					if ( ! in_array( 'perflab-module-migration-pointer', $dismissed, true ) ) {
-						return;
-					}
-
-					unset( $dismissed[ array_search( 'perflab-module-migration-pointer', $dismissed, true ) ] );
-					$dismissed = implode( ',', $dismissed );
-
-					update_user_meta( $user->ID, 'dismissed_wp_pointers', $dismissed );
+				foreach ( $users as $user ) {
+					perflab_dismissed_wp_pointers( $user );
 				}
 			}
 		}
@@ -521,6 +521,26 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 	}
 
 	return $value;
+}
+
+/**
+ * Handles dismissing a WordPress pointer.
+ *
+ * @since n.e.x.t
+ *
+ * @param WP_User $user The WP_User object.
+ */
+function perflab_dismissed_wp_pointers( $user ) {
+	$dismissed = array_filter( explode( ',', (string) get_user_meta( $user->ID, 'dismissed_wp_pointers', true ) ) );
+
+	if ( ! in_array( 'perflab-module-migration-pointer', $dismissed, true ) ) {
+		return;
+	}
+
+	unset( $dismissed[ array_search( 'perflab-module-migration-pointer', $dismissed, true ) ] );
+	$dismissed = implode( ',', $dismissed );
+
+	update_user_meta( $user->ID, 'dismissed_wp_pointers', $dismissed );
 }
 
 /**
