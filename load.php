@@ -486,14 +486,14 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 			 * disables pointers for the current user only. Otherwise, disables
 			 * pointers for users with the same role as the current user.
 			 */
-			if ( ! wp_is_large_user_count() ) {
-				perflab_dismissed_wp_pointers( $current_user );
+			if ( wp_is_large_user_count() ) {
+				perflab_undismiss_module_migration_pointer( $current_user );
 			} else {
 				$current_user_roles = $current_user->roles;
 				$current_user_role  = array_shift( $current_user_roles );
 
 				$args = array(
-					'role'       => $current_user_roles,
+					'role'       => $current_user_role,
 					'meta_query' => array(
 						array(
 							'key'     => 'dismissed_wp_pointers',
@@ -506,7 +506,7 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 				$users = get_users( $args );
 
 				foreach ( $users as $user ) {
-					perflab_dismissed_wp_pointers( $user );
+					perflab_undismiss_module_migration_pointer( $user );
 				}
 			}
 		}
