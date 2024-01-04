@@ -477,17 +477,38 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 				return;
 			}
 
-			$current_user = get_current_user_id();
-			$dismissed    = array_filter( explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) ) );
+			$current_user = wp_get_current_user();
 
-			if ( ! in_array( 'perflab-module-migration-pointer', $dismissed, true ) ) {
-				return;
+			/*
+			 * Disable WordPress pointers for specific users based on conditions.
+			 *
+			 * Checks if there is a large user count on the site. If true,
+			 * disables pointers for the current user only. Otherwise, disables
+			 * pointers for users with the same role as the current user.
+			 */
+			if ( wp_is_large_user_count() ) {
+				perflab_undismiss_module_migration_pointer( $current_user );
+			} else {
+				$current_user_roles = $current_user->roles;
+				$current_user_role  = array_shift( $current_user_roles );
+
+				$args = array(
+					'role'       => $current_user_role,
+					'meta_query' => array(
+						array(
+							'key'     => 'dismissed_wp_pointers',
+							'value'   => 'perflab-module-migration-pointer',
+							'compare' => 'LIKE',
+						),
+					),
+				);
+
+				$users = get_users( $args );
+
+				foreach ( $users as $user ) {
+					perflab_undismiss_module_migration_pointer( $user );
+				}
 			}
-
-			unset( $dismissed[ array_search( 'perflab-module-migration-pointer', $dismissed, true ) ] );
-			$dismissed = implode( ',', $dismissed );
-
-			update_user_meta( $current_user, 'dismissed_wp_pointers', $dismissed );
 		}
 	}
 
@@ -501,6 +522,27 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 	}
 
 	return $value;
+}
+
+/**
+ * Reverts the module migration pointer dismissal for the given user.
+ *
+ * @since n.e.x.t
+ *
+ * @param WP_User $user The WP_User object.
+ */
+function perflab_undismiss_module_migration_pointer( $user ) {
+	$dismissed = array_filter( explode( ',', (string) get_user_meta( $user->ID, 'dismissed_wp_pointers', true ) ) );
+
+	$pointer_index = array_search( 'perflab-module-migration-pointer', $dismissed, true );
+	if ( false === $pointer_index ) {
+		return;
+	}
+
+	unset( $dismissed[ $pointer_index ] );
+	$dismissed = implode( ',', $dismissed );
+
+	update_user_meta( $user->ID, 'dismissed_wp_pointers', $dismissed );
 }
 
 /**
