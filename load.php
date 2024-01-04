@@ -197,7 +197,8 @@ function perflab_is_valid_module( $module ) {
 	}
 
 	// Do not load module if it cannot be loaded, e.g. if it was already merged and is available in WordPress core.
-	return perflab_can_load_module( $module );
+	$can_load_module = perflab_can_load_module( $module );
+	return $can_load_module && ! is_wp_error( $can_load_module );
 }
 
 /**
@@ -235,9 +236,10 @@ add_action( 'wp_head', 'perflab_render_generator' );
  * Checks whether the given module can be loaded in the current environment.
  *
  * @since 1.3.0
+ * @since n.e.x.t The function may now alternatively return a WP_Error.
  *
  * @param string $module Slug of the module.
- * @return bool Whether the module can be loaded or not.
+ * @return bool|WP_Error True if the module can be loaded, or false or a WP_Error with more concrete information otherwise.
  */
 function perflab_can_load_module( $module ) {
 	$module_load_file = PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module . '/can-load.php';
@@ -256,7 +258,13 @@ function perflab_can_load_module( $module ) {
 	}
 
 	// Call the closure to determine whether the module can be loaded.
-	return (bool) $module();
+	$result = $module();
+
+	if ( is_wp_error( $result ) ) {
+		return $result;
+	}
+
+	return (bool) $result;
 }
 
 /**
