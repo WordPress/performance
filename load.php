@@ -489,7 +489,8 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 			if ( ! wp_is_large_user_count() ) {
 				perflab_dismissed_wp_pointers( $current_user );
 			} else {
-				$current_user_roles = array_shift( $current_user->roles );
+				$current_user_roles = $current_user->roles;
+				$current_user_role  = array_shift( $current_user_roles );
 
 				$args = array(
 					'role'       => $current_user_roles,
@@ -524,20 +525,21 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 }
 
 /**
- * Handles dismissing a WordPress pointer.
+ * Reverts the module migration pointer dismissal for the given user.
  *
  * @since n.e.x.t
  *
  * @param WP_User $user The WP_User object.
  */
-function perflab_dismissed_wp_pointers( $user ) {
+function perflab_undismiss_module_migration_pointer( $user ) {
 	$dismissed = array_filter( explode( ',', (string) get_user_meta( $user->ID, 'dismissed_wp_pointers', true ) ) );
 
-	if ( ! in_array( 'perflab-module-migration-pointer', $dismissed, true ) ) {
+	$pointer_index = array_search( 'perflab-module-migration-pointer', $dismissed, true );
+	if ( false === $pointer_index ) {
 		return;
 	}
 
-	unset( $dismissed[ array_search( 'perflab-module-migration-pointer', $dismissed, true ) ] );
+	unset( $dismissed[ $pointer_index ] );
 	$dismissed = implode( ',', $dismissed );
 
 	update_user_meta( $user->ID, 'dismissed_wp_pointers', $dismissed );
