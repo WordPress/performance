@@ -35,7 +35,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	/**
 	 * Test generated markup for an image with lazy loading gets auto sizes.
 	 *
-	 * @covers ::performance_lab_auto_sizes_attr
+	 * @covers ::auto_sizes_update_image_attributes
 	 */
 	public function test_image_with_lazy_loading_has_auto_sizes() {
 		$this->assertStringContainsString(
@@ -47,7 +47,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	/**
 	 * Test generated markup for an image without lazy loading does not get auto sizes.
 	 *
-	 * @covers ::performance_lab_auto_sizes_attr
+	 * @covers ::auto_sizes_update_image_attributes
 	 */
 	public function test_image_without_lazy_loading_does_not_have_auto_sizes() {
 		$this->assertStringContainsString(
@@ -59,7 +59,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	/**
 	 * Test content filtered markup with lazy loading gets auto sizes.
 	 *
-	 * @covers ::performance_lab_auto_sizes_img_tag
+	 * @covers ::auto_sizes_update_content_img_tag
 	 */
 	public function test_content_image_with_lazy_loading_has_auto_sizes() {
 		// Force lazy loading attribute.
@@ -76,7 +76,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	/**
 	 * Test content filtered markup without lazy loading does not get auto sizes.
 	 *
-	 * @covers ::performance_lab_auto_sizes_img_tag
+	 * @covers ::auto_sizes_update_content_img_tag
 	 */
 	public function test_content_image_without_lazy_loading_does_not_have_auto_sizes() {
 		// Disable lazy loading attribute.
