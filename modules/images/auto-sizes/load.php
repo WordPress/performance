@@ -1,6 +1,6 @@
 <?php
 /**
- * Module Name: Auto Sizes for Lazy-loaded Images.
+ * Module Name: Auto Sizes for Lazy-loaded Images
  * Description: Implements auto sizes for lazy loaded images.
  * Experimental: Yes
  *
