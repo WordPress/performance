@@ -13,7 +13,7 @@ Adds support for automatically calculating the sizes attribute for lazy-loaded i
 
 == Description ==
 
-This plugin implements the HTML spec for auto sizes for lazy-loaded images.
+This plugin implements the HTML spec for `sizes="auto"` for lazy-loaded images.
 For background, see: https://github.com/whatwg/html/issues/4654
 
 == Installation ==
