@@ -577,12 +577,6 @@ function perflab_enqueue_modules_page_scripts() {
 
 	wp_enqueue_script( 'plugin-install' );
 
-	// Bail early if module is not active.
-	$get_active_modules_with_standalone_plugins = perflab_get_active_modules_with_standalone_plugins();
-	if ( empty( $get_active_modules_with_standalone_plugins ) ) {
-		return;
-	}
-
 	wp_enqueue_script(
 		'perflab-module-migration-notice',
 		plugin_dir_url( __FILE__ ) . 'perflab-module-migration-notice.js',
