@@ -10,9 +10,9 @@
 /tests/testdata/modules/database            @olliejones
 
 # Focus: Images
-/modules/images                             @adamsilverstein @getsource
-/tests/modules/images                       @adamsilverstein @getsource
-/tests/testdata/modules/images              @adamsilverstein @getsource
+/modules/images                             @adamsilverstein @getsource @joemcgill
+/tests/modules/images                       @adamsilverstein @getsource @joemcgill
+/tests/testdata/modules/images              @adamsilverstein @getsource @joemcgill
 
 # Focus: JS & CSS
 /modules/js-and-css                         @westonruter
@@ -20,9 +20,9 @@
 /tests/testdata/modules/js-and-css          @westonruter
 
 # Focus: Measurement
-/modules/measurement
-/tests/modules/measurement
-/tests/testdata/modules/measurement
+/modules/measurement                        @joemcgill
+/tests/modules/measurement                  @joemcgill
+/tests/testdata/modules/measurement         @joemcgill
 
 # Focus: Object Cache
 /modules/object-cache                       @tillkruss @spacedmonkey
