@@ -578,8 +578,25 @@ function perflab_enqueue_modules_page_scripts() {
 	wp_enqueue_script( 'plugin-install' );
 
 	wp_enqueue_script(
+		'perflab-plugin-management',
+		plugin_dir_url( __FILE__ ) . 'js/perflab-plugin-management.js',
+		array(),
+		'1.0.0',
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
+
+	// Bail early if module is not active.
+	$get_active_modules_with_standalone_plugins = perflab_get_active_modules_with_standalone_plugins();
+	if ( empty( $get_active_modules_with_standalone_plugins ) ) {
+		return;
+	}
+
+	wp_enqueue_script(
 		'perflab-module-migration-notice',
-		plugin_dir_url( __FILE__ ) . 'perflab-module-migration-notice.js',
+		plugin_dir_url( __FILE__ ) . 'js/perflab-module-migration-notice.js',
 		array( 'wp-i18n' ),
 		'1.0.0',
 		array(
