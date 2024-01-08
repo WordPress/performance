@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook callbacks used for Auto Sizes for Lazy-loaded Images.
+ * Hook callbacks used for Auto-sizes for Lazy-loaded Images.
  *
  * @package performance-lab
  * @since n.e.x.t

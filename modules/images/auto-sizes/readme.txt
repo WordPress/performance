@@ -1,4 +1,4 @@
-=== Auto Sizes for Lazy-loaded Images ===
+=== Auto-sizes for Lazy-loaded Images ===
 
 Contributors:      wordpressdotorg
 Requires at least: 6.4
@@ -7,28 +7,28 @@ Requires PHP:      7.0
 Stable tag:        1.0.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, images, auto sizes
+Tags:              performance, images, auto-sizes
 
 Adds support for automatically calculating the sizes attribute for lazy-loaded images.
 
 == Description ==
 
-This plugin implements the HTML spec for `sizes="auto"` for lazy-loaded images.
-For background, see: https://github.com/whatwg/html/issues/4654
+This plugin implements the HTML spec for adding `sizes="auto"` to lazy-loaded images.
+For background, see: https://github.com/whatwg/html/issues/4654.
 
 == Installation ==
 
 = Installation from within WordPress =
 
 1. Visit **Plugins > Add New**.
-2. Search for **Auto Sizes for Lazy-loaded Images**.
-3. Install and activate the **Auto Sizes for Lazy-loaded Images** plugin.
+2. Search for **Auto-sizes for Lazy-loaded Images**.
+3. Install and activate the **Auto-sizes for Lazy-loaded Images** plugin.
 
 = Manual installation =
 
 1. Upload the entire `auto-sizes` folder to the `/wp-content/plugins/` directory.
 2. Visit **Plugins**.
-3. Activate the **Auto Sizes for Lazy-loaded Images** plugin.
+3. Activate the **Auto-sizes for Lazy-loaded Images** plugin.
 
 == Frequently Asked Questions ==
 
@@ -50,4 +50,4 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.0.0 =
 
-* Initial release of the Auto Sizes for Lazy-loaded Images plugin as a standalone plugin. ([904](https://github.com/WordPress/performance/pull/904))
+* Initial release of the Auto-sizes for Lazy-loaded Images plugin as a standalone plugin. ([904](https://github.com/WordPress/performance/pull/904))

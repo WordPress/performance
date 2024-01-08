@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the Auto Sizes for Lazy-loaded Images module.
+ * Tests for the Auto-sizes for Lazy-loaded Images module.
  *
  * @package performance-lab
  * @group   auto-sizes
@@ -33,7 +33,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test generated markup for an image with lazy loading gets auto sizes.
+	 * Test generated markup for an image with lazy loading gets auto-sizes.
 	 *
 	 * @covers ::auto_sizes_update_image_attributes
 	 */
@@ -45,7 +45,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test generated markup for an image without lazy loading does not get auto sizes.
+	 * Test generated markup for an image without lazy loading does not get auto-sizes.
 	 *
 	 * @covers ::auto_sizes_update_image_attributes
 	 */
@@ -57,7 +57,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test content filtered markup with lazy loading gets auto sizes.
+	 * Test content filtered markup with lazy loading gets auto-sizes.
 	 *
 	 * @covers ::auto_sizes_update_content_img_tag
 	 */
@@ -74,7 +74,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test content filtered markup without lazy loading does not get auto sizes.
+	 * Test content filtered markup without lazy loading does not get auto-sizes.
 	 *
 	 * @covers ::auto_sizes_update_content_img_tag
 	 */
