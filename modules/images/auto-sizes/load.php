@@ -1,7 +1,7 @@
 <?php
 /**
- * Module Name: Auto Sizes for Lazy-loaded Images.
- * Description: Implements auto sizes for lazy loaded images.
+ * Module Name: Auto-sizes for Lazy-loaded Images
+ * Description: This plugin implements the HTML spec for adding `sizes="auto"` to lazy-loaded images.
  * Experimental: Yes
  *
  * @package performance-lab

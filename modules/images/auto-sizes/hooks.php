@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook callbacks used for Auto Sizes for Lazy-loaded Images.
+ * Hook callbacks used for Auto-sizes for Lazy-loaded Images.
  *
  * @package performance-lab
  * @since n.e.x.t
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param array $attr Attributes for the image markup.
  * @return array The filtered attributes for the image markup.
  */
-function performance_lab_auto_sizes_attr( $attr ) {
+function auto_sizes_update_image_attributes( $attr ) {
 	// Bail early if the image is not lazy-loaded.
 	if ( ! isset( $attr['loading'] ) || 'lazy' !== $attr['loading'] ) {
 		return $attr;
@@ -38,7 +38,7 @@ function performance_lab_auto_sizes_attr( $attr ) {
 
 	return $attr;
 }
-add_filter( 'wp_get_attachment_image_attributes', 'performance_lab_auto_sizes_attr' );
+add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' );
 
 /**
  * Adds auto to the sizes attribute to the image, if applicable.
@@ -48,7 +48,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'performance_lab_auto_sizes_at
  * @param string $html The HTML image tag markup being filtered.
  * @return string The filtered HTML image tag markup.
  */
-function performance_lab_auto_sizes_img_tag( $html ) {
+function auto_sizes_update_content_img_tag( $html ) {
 	// Bail early if the image is not lazy-loaded.
 	if ( false === strpos( $html, 'loading="lazy"' ) ) {
 		return $html;
@@ -68,4 +68,4 @@ function performance_lab_auto_sizes_img_tag( $html ) {
 
 	return $html;
 }
-add_filter( 'wp_content_img_tag', 'performance_lab_auto_sizes_img_tag' );
+add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
