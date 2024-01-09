@@ -288,23 +288,29 @@ function perflab_render_plugin_card( array $plugin_data ) {
 				echo '<p>' . esc_html_e( 'This plugin does not work with your versions of WordPress and PHP.', 'default' ) . '</p>';
 				if ( current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
-						/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
-						' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.', 'default' ),
-						esc_url( self_admin_url( 'update-core.php' ) ),
-						esc_url( wp_get_update_php_url() )
+						sprintf(
+							/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
+							' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.', 'default' ),
+							esc_url( self_admin_url( 'update-core.php' ) ),
+							esc_url( wp_get_update_php_url() )
+						)
 					);
 					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				} elseif ( current_user_can( 'update_core' ) ) {
 					echo wp_kses_post(
-						/* translators: %s: URL to WordPress Updates screen. */
-						' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
-						esc_url( self_admin_url( 'update-core.php' ) )
+						sprintf(
+							/* translators: %s: URL to WordPress Updates screen. */
+							' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
+							esc_url( self_admin_url( 'update-core.php' ) )
+						)
 					);
 				} elseif ( current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
-						/* translators: %s: URL to Update PHP page. */
-						' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
-						esc_url( wp_get_update_php_url() )
+						sprintf(
+							/* translators: %s: URL to Update PHP page. */
+							' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
+							esc_url( wp_get_update_php_url() )
+						)
 					);
 					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				}
@@ -312,18 +318,22 @@ function perflab_render_plugin_card( array $plugin_data ) {
 				esc_html_e( 'This plugin does not work with your version of WordPress.', 'default' );
 				if ( current_user_can( 'update_core' ) ) {
 					echo wp_kses_post(
-						/* translators: %s: URL to WordPress Updates screen. */
-						' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
-						esc_url( self_admin_url( 'update-core.php' ) )
+						sprintf(
+							/* translators: %s: URL to WordPress Updates screen. */
+							' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
+							esc_url( self_admin_url( 'update-core.php' ) )
+						)
 					);
 				}
 			} elseif ( ! $compatible_php ) {
 				esc_html_e( 'This plugin does not work with your version of PHP.', 'default' );
 				if ( current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
-						/* translators: %s: URL to Update PHP page. */
-						' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
-						esc_url( wp_get_update_php_url() )
+						sprintf(
+							/* translators: %s: URL to Update PHP page. */
+							' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
+							esc_url( wp_get_update_php_url() )
+						)
 					);
 					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				}
@@ -378,7 +388,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			<div class="column-downloaded">
 				<?php
 				if ( $plugin_data['active_installs'] >= 1000000 ) {
-					$active_installs_millions = floor( $plugin_data['active_installs'] / 1000000 );
+					$active_installs_millions = (int) floor( $plugin_data['active_installs'] / 1000000 );
 					$active_installs_text     = sprintf(
 						/* translators: %s: Number of millions. */
 						_nx( '%s+ Million', '%s+ Million', $active_installs_millions, 'Active plugin installations', 'default' ),
