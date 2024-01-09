@@ -11,7 +11,6 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_maybe_add_template_output_buffer_filter().
 	 *
-	 * @test
 	 * @covers ::ilo_maybe_add_template_output_buffer_filter
 	 */
 	public function test_ilo_maybe_add_template_output_buffer_filter() {
@@ -124,7 +123,6 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_construct_preload_links().
 	 *
-	 * @test
 	 * @covers ::ilo_construct_preload_links
 	 * @dataProvider data_provider_test_ilo_construct_preload_links
 	 */
@@ -383,7 +381,6 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_optimize_template_output_buffer().
 	 *
-	 * @test
 	 * @covers ::ilo_optimize_template_output_buffer
 	 * @dataProvider data_provider_test_ilo_optimize_template_output_buffer
 	 */

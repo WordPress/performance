@@ -55,7 +55,6 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_url_metric_storage_lock_ttl().
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metric_storage_lock_ttl
 	 * @dataProvider data_provider_ilo_get_url_metric_storage_lock_ttl
 	 *
@@ -70,7 +69,6 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_url_metric_storage_lock_transient_key().
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metric_storage_lock_transient_key
 	 */
 	public function test_ilo_get_url_metric_storage_lock_transient_key() {
@@ -90,7 +88,6 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_set_url_metric_storage_lock() and ilo_is_url_metric_storage_locked().
 	 *
-	 * @test
 	 * @covers ::ilo_set_url_metric_storage_lock
 	 * @covers ::ilo_is_url_metric_storage_locked
 	 */

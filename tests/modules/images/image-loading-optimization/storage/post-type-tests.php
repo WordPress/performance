@@ -11,7 +11,6 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_register_url_metrics_post_type().
 	 *
-	 * @test
 	 * @covers ::ilo_register_url_metrics_post_type
 	 */
 	public function test_ilo_register_url_metrics_post_type() {
@@ -24,7 +23,6 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_url_metrics_post() when there is no post.
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metrics_post
 	 */
 	public function test_ilo_get_url_metrics_post_when_absent() {
@@ -35,7 +33,6 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_url_metrics_post() when there is a post.
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metrics_post
 	 */
 	public function test_ilo_get_url_metrics_post_when_present() {
@@ -92,7 +89,6 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_parse_stored_url_metrics().
 	 *
-	 * @test
 	 * @covers ::ilo_parse_stored_url_metrics
 	 * @dataProvider data_provider_test_ilo_parse_stored_url_metrics
 	 */
@@ -111,7 +107,6 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_store_url_metric().
 	 *
-	 * @test
 	 * @covers ::ilo_store_url_metric
 	 */
 	public function test_ilo_store_url_metric() {

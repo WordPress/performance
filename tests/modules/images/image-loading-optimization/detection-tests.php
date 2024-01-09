@@ -48,7 +48,6 @@ class ILO_Detection_Tests extends WP_UnitTestCase {
 	/**
 	 * Make sure the expected script is printed.
 	 *
-	 * @test
 	 * @dataProvider data_provider_ilo_get_detection_script
 	 * @covers ::ilo_get_detection_script
 	 *

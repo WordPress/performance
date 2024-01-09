@@ -16,7 +16,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_url_metric_freshness_ttl().
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metric_freshness_ttl
 	 */
 	public function test_ilo_get_url_metric_freshness_ttl() {
@@ -83,7 +82,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_can_optimize_response().
 	 *
-	 * @test
 	 * @covers ::ilo_can_optimize_response
 	 * @dataProvider data_provider_test_ilo_can_optimize_response
 	 */
@@ -147,7 +145,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_normalized_query_vars().
 	 *
-	 * @test
 	 * @covers ::ilo_get_normalized_query_vars
 	 * @dataProvider data_provider_test_ilo_get_normalized_query_vars
 	 */
@@ -159,7 +156,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_url_metrics_slug().
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metrics_slug
 	 */
 	public function test_ilo_get_url_metrics_slug() {
@@ -174,7 +170,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_url_metrics_storage_nonce().
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metrics_storage_nonce
 	 * @covers ::ilo_verify_url_metrics_storage_nonce
 	 */
@@ -235,7 +230,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_unshift_url_metrics().
 	 *
-	 * @test
 	 * @covers ::ilo_unshift_url_metrics
 	 * @dataProvider data_provider_sample_size_and_breakpoints
 	 */
@@ -298,7 +292,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_breakpoint_max_widths().
 	 *
-	 * @test
 	 * @covers ::ilo_get_breakpoint_max_widths
 	 */
 	public function test_ilo_get_breakpoint_max_widths() {
@@ -324,7 +317,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_url_metrics_breakpoint_sample_size().
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metrics_breakpoint_sample_size
 	 */
 	public function test_ilo_get_url_metrics_breakpoint_sample_size() {
@@ -356,7 +348,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_group_url_metrics_by_breakpoint().
 	 *
-	 * @test
 	 * @covers ::ilo_group_url_metrics_by_breakpoint
 	 * @dataProvider data_provider_test_ilo_group_url_metrics_by_breakpoint
 	 */
@@ -475,7 +466,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_lcp_elements_by_minimum_viewport_widths().
 	 *
-	 * @test
 	 * @covers ::ilo_get_lcp_elements_by_minimum_viewport_widths
 	 * @dataProvider data_provider_test_ilo_get_lcp_elements_by_minimum_viewport_widths
 	 */
@@ -570,7 +560,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_needed_minimum_viewport_widths().
 	 *
-	 * @test
 	 * @covers ::ilo_get_needed_minimum_viewport_widths
 	 * @dataProvider data_provider_test_ilo_get_needed_minimum_viewport_widths
 	 */
@@ -630,7 +619,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_needs_url_metric_for_breakpoint().
 	 *
-	 * @test
 	 * @covers ::ilo_needs_url_metric_for_breakpoint
 	 * @dataProvider data_provider_test_ilo_needs_url_metric_for_breakpoint
 	 */

@@ -16,7 +16,6 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_register_endpoint().
 	 *
-	 * @test
 	 * @covers ::ilo_register_endpoint
 	 */
 	public function test_ilo_register_endpoint_hooked() {
@@ -26,7 +25,6 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test good params.
 	 *
-	 * @test
 	 * @covers ::ilo_register_endpoint
 	 * @covers ::ilo_handle_rest_request
 	 */
@@ -132,7 +130,6 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test bad params.
 	 *
-	 * @test
 	 * @covers ::ilo_register_endpoint
 	 * @covers ::ilo_handle_rest_request
 	 * @dataProvider data_provider_invalid_params
@@ -148,7 +145,6 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test REST API request when metric storage is locked.
 	 *
-	 * @test
 	 * @covers ::ilo_register_endpoint
 	 * @covers ::ilo_handle_rest_request
 	 */
@@ -166,7 +162,6 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test sending viewport data that isn't needed for a specific breakpoint.
 	 *
-	 * @test
 	 * @covers ::ilo_register_endpoint
 	 * @covers ::ilo_handle_rest_request
 	 */
@@ -197,7 +192,6 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test sending viewport data that isn't needed for any breakpoint.
 	 *
-	 * @test
 	 * @covers ::ilo_register_endpoint
 	 * @covers ::ilo_handle_rest_request
 	 */
