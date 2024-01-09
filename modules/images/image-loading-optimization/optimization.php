@@ -108,7 +108,12 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	);
 
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
-	$needs_detection = ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths );
+	$needs_detection = in_array(
+		true,
+		// Each array item is array{int, bool}, with the second item being whether the viewport width is needed.
+		array_column( $needed_minimum_viewport_widths, 1 ),
+		true
+	);
 
 	$breakpoint_max_widths                   = ilo_get_breakpoint_max_widths();
 	$url_metrics_grouped_by_breakpoint       = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );

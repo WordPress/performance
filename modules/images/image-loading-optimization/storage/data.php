@@ -419,21 +419,3 @@ function ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $curr
 
 	return $needed_minimum_viewport_widths;
 }
-
-/**
- * Checks whether there is a URL metric needed for one of the breakpoints.
- *
- * @since n.e.x.t
- * @access private
- *
- * @param array<int, array{int, bool}> $needed_minimum_viewport_widths Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
- * @return bool Whether a URL metric is needed.
- */
-function ilo_needs_url_metric_for_breakpoint( array $needed_minimum_viewport_widths ): bool {
-	foreach ( $needed_minimum_viewport_widths as list( $minimum_viewport_width, $is_needed ) ) {
-		if ( $is_needed ) {
-			return true;
-		}
-	}
-	return false;
-}
