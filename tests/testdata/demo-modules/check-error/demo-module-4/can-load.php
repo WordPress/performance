@@ -6,5 +6,5 @@
  */
 
 return static function () {
-    return new WP_Error( 'cannot_load_module', esc_html__( 'The module cannot be loaded.', 'performance-lab' ) );
+	return new WP_Error( 'cannot_load_module', esc_html__( 'The module cannot be loaded.', 'performance-lab' ) );
 };
