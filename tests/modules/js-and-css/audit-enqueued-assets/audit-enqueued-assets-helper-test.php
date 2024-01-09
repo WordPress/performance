@@ -101,10 +101,12 @@ class Audit_Enqueued_Assets_Helper_Tests extends WP_UnitTestCase {
 		$expected_path = WP_CONTENT_DIR . '/themes/test-theme/style.css';
 		add_filter(
 			'content_url',
-			static function () {
+			static function( $url ) {
 				return site_url() . '/content';
 			}
 		);
 		$this->assertSame( $expected_path, perflab_aea_get_path_from_resource_url( $test_url ) );
 	}
+
 }
+

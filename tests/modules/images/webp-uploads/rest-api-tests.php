@@ -24,7 +24,7 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
-			static function ( $transforms ) {
+			static function( $transforms ) {
 				$transforms['image/jpeg'] = array( 'image/jpeg', 'image/webp' );
 				return $transforms;
 			}

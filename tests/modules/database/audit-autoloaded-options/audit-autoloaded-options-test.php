@@ -86,3 +86,4 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 		delete_option( self::AUTOLOADED_OPTION_KEY );
 	}
 }
+

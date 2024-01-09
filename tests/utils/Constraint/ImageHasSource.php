@@ -136,4 +136,5 @@ class ImageHasSource extends Constraint {
 	protected function failureDescription( $attachment_id ): string {
 		return sprintf( 'an image %s', $this->toString() );
 	}
+
 }

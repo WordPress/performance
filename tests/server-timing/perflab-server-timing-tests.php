@@ -38,7 +38,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->server_timing->register_metric(
 			'test-metric',
 			array(
-				'measure_callback' => static function () use ( &$called ) {
+				'measure_callback' => static function() use ( &$called ) {
 					$called = true;
 				},
 				'access_cap'       => 'exist',
@@ -52,7 +52,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	public function test_register_metric_runs_measure_callback_based_on_access_cap() {
 		$called = false;
 		$args   = array(
-			'measure_callback' => static function () use ( &$called ) {
+			'measure_callback' => static function() use ( &$called ) {
 				$called = true;
 			},
 			'access_cap'       => 'manage_options', // Admin capability.
@@ -130,13 +130,13 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	}
 
 	public function data_get_header() {
-		$measure_42         = static function ( $metric ) {
+		$measure_42         = static function( $metric ) {
 			$metric->set_value( 42 );
 		};
-		$measure_300        = static function ( $metric ) {
+		$measure_300        = static function( $metric ) {
 			$metric->set_value( 300 );
 		};
-		$measure_12point345 = static function ( $metric ) {
+		$measure_12point345 = static function( $metric ) {
 			$metric->set_value( 12.345 );
 		};
 
@@ -188,23 +188,23 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	}
 
 	public function get_data_to_test_use_output_buffer() {
-		$enable_option  = static function () {
-			$option                     = (array) get_option( PERFLAB_SERVER_TIMING_SETTING );
+		$enable_option = static function () {
+			$option = (array) get_option( PERFLAB_SERVER_TIMING_SETTING );
 			$option['output_buffering'] = true;
 			update_option( PERFLAB_SERVER_TIMING_SETTING, $option );
 		};
 		$disable_option = static function () {
-			$option                     = (array) get_option( PERFLAB_SERVER_TIMING_SETTING );
+			$option = (array) get_option( PERFLAB_SERVER_TIMING_SETTING );
 			$option['output_buffering'] = false;
 			update_option( PERFLAB_SERVER_TIMING_SETTING, $option );
 		};
 
 		return array(
-			'default'         => array(
+			'default' => array(
 				'set_up'   => static function () {},
 				'expected' => false,
 			),
-			'option-enabled'  => array(
+			'option-enabled' => array(
 				'set_up'   => $enable_option,
 				'expected' => true,
 			),
@@ -212,7 +212,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 				'set_up'   => $disable_option,
 				'expected' => false,
 			),
-			'filter-enabled'  => array(
+			'filter-enabled' => array(
 				'set_up'   => static function () use ( $disable_option ) {
 					$disable_option();
 					add_filter( 'perflab_server_timing_use_output_buffer', '__return_true' );

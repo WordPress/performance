@@ -78,6 +78,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 			),
 			$transient
 		);
+
 	}
 
 	/**
@@ -92,10 +93,8 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 
 		Audit_Assets_Transients_Set::set_style_transient_with_data( 3 );
 
-		// Avoid deprecation warning due to related change in WordPress 6.4.
-		remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		// Avoids echoing styles.
 		get_echo( 'wp_print_styles' );
-
 		perflab_aea_audit_enqueued_styles();
 		$transient = get_transient( 'aea_enqueued_front_page_styles' );
 		$this->assertIsArray( $transient );
@@ -140,9 +139,6 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		$style .= "\tbackground: red;\n";
 		$style .= '}';
 		wp_add_inline_style( 'style1', $style );
-
-		// Avoid deprecation warning due to related change in WordPress 6.4.
-		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		get_echo( 'wp_print_styles' );
 
 		perflab_aea_audit_enqueued_styles();
@@ -241,23 +237,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		$_REQUEST['_wpnonce'] = wp_create_nonce( 'clean_aea_audit' );
 		$_GET['action']       = 'clean_aea_audit';
 		$this->current_user_can_view_site_health_checks_cap();
-		$redirected_url = null;
-		add_filter(
-			'wp_redirect',
-			static function ( $url ) use ( &$redirected_url ) {
-				$redirected_url = $url;
-				return false;
-			}
-		);
-		$_REQUEST['_wp_http_referer'] = add_query_arg(
-			array(
-				'_wpnonce' => 'foo',
-				'action'   => 'bar',
-			),
-			home_url( '/' )
-		);
 		perflab_aea_clean_aea_audit_action();
-		$this->assertSame( home_url( '/' ), $redirected_url );
 		$this->assertFalse( get_transient( 'aea_enqueued_front_page_scripts' ) );
 		$this->assertFalse( get_transient( 'aea_enqueued_front_page_styles' ) );
 	}
@@ -302,3 +282,4 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_more_than_threshold( $number_of_assets );
 	}
 }
+

@@ -544,7 +544,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		add_filter(
 			'webp_uploads_content_image_mimes',
-			static function ( $mime_types ) {
+			static function( $mime_types ) {
 				unset( $mime_types[ array_search( 'image/webp', $mime_types, true ) ] );
 				return $mime_types;
 			}
@@ -733,7 +733,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		add_filter(
 			'webp_uploads_pre_replace_additional_image_source',
-			static function () {
+			static function() {
 				return '<img src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">';
 			}
 		);
@@ -899,7 +899,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_create_mime_types_for_allowed_sizes_only_via_filter() {
 		add_filter(
 			'webp_uploads_image_sizes_with_additional_mime_type_support',
-			static function ( $sizes ) {
+			static function( $sizes ) {
 				$sizes['allowed_size_400x300'] = true;
 				return $sizes;
 			}
