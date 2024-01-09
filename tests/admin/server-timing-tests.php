@@ -49,7 +49,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		perflab_load_server_timing_page();
 		$this->assertArrayHasKey( PERFLAB_SERVER_TIMING_SCREEN, $wp_settings_sections );
 		$expected_sections = array( 'benchmarking' );
-		if ( ! has_filter( 'template_include', 'image_loading_optimization_buffer_output' ) ) {
+		if ( ! has_filter( 'template_include', 'ilo_buffer_output' ) ) {
 			$expected_sections[] = 'output-buffering';
 		}
 		$this->assertEqualSets(
