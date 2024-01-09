@@ -78,10 +78,10 @@ class Load_Tests extends WP_UnitTestCase {
 		$has_passed_default = false;
 		add_filter(
 			'default_option_' . PERFLAB_MODULES_SETTING,
-			static function ( $default, $option, $passed_default ) use ( &$has_passed_default ) {
+			static function ( $current_default, $option, $passed_default ) use ( &$has_passed_default ) {
 				// This callback just records whether there is a default value being passed.
 				$has_passed_default = $passed_default;
-				return $default;
+				return $current_default;
 			},
 			10,
 			3

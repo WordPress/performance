@@ -101,7 +101,7 @@ class Audit_Enqueued_Assets_Helper_Tests extends WP_UnitTestCase {
 		$expected_path = WP_CONTENT_DIR . '/themes/test-theme/style.css';
 		add_filter(
 			'content_url',
-			static function ( $url ) {
+			static function () {
 				return site_url() . '/content';
 			}
 		);
