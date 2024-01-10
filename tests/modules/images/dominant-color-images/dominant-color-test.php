@@ -92,7 +92,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 
 		$filtered_image_tags_added = dominant_color_img_tag_add_dominant_color( $filtered_image_mock_lazy_load, 'the_content', $attachment_id );
 
-		$this->assertStringContainsString( 'data-has-transparency="' . json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
+		$this->assertStringContainsString( 'data-has-transparency="' . wp_json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
 
 		foreach ( $expected_color as $color ) {
 			if ( false !== strpos( $color, $filtered_image_tags_added ) ) {
@@ -210,7 +210,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	public function test_dominant_color_update_attachment_image_attributes( $style_attr, $expected ) {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/red.jpg' );
 
-		$attachment_image = wp_get_attachment_image( $attachment_id, 'full', '', array( "style" => $style_attr )  );
+		$attachment_image = wp_get_attachment_image( $attachment_id, 'full', '', array( 'style' => $style_attr ) );
 		$this->assertStringContainsString( $expected, $attachment_image );
 	}
 
