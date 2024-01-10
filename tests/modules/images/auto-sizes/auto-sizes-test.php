@@ -10,7 +10,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 
 	/**
 	 * Attachment ID.
-     *
+	 *
 	 * @var int
 	 */
 	public static $image_id;
