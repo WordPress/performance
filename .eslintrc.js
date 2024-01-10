@@ -12,9 +12,6 @@ const config = {
 	env: {
 		browser: true,
 	},
-	globals: {
-		scheduler: false,
-	},
 	ignorePatterns: [ '/vendor', '/node_modules' ],
 };
 
