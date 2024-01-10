@@ -8,8 +8,19 @@
 
 class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 
+	/**
+	 * @var array<string, mixed>
+	 */
+	private $original_server_global = array();
+
+	public function set_up() {
+		$this->original_server_global = $_SERVER;
+		parent::set_up();
+	}
+
 	public function tear_down() {
 		unset( $GLOBALS['wp_customize'] );
+		$_SERVER = $this->original_server_global;
 		parent::tear_down();
 	}
 
