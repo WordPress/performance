@@ -520,7 +520,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$result = null;
 		add_action(
 			'wp_head',
-			static function() use ( &$result ) {
+			static function () use ( &$result ) {
 				$result = webp_uploads_in_frontend_body();
 			}
 		);

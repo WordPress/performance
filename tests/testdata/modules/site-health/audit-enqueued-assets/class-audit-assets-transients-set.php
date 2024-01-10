@@ -62,4 +62,3 @@ class Audit_Assets_Transients_Set {
 		delete_transient( self::STYLES_TRANSIENT );
 	}
 }
-
