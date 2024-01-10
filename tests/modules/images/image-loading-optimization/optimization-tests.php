@@ -8,6 +8,11 @@
 
 class ILO_Optimization_Tests extends WP_UnitTestCase {
 
+	public function tear_down() {
+		parent::tear_down();
+		unset( $_SERVER['REQUEST_URI'] );
+	}
+
 	/**
 	 * Test ilo_maybe_add_template_output_buffer_filter().
 	 *
