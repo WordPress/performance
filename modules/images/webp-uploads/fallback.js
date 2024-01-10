@@ -1,8 +1,10 @@
+/* eslint no-var: "off", camelcase: "off" */
+
 window.wpPerfLab = window.wpPerfLab || {};
 
 ( function ( document ) {
 	window.wpPerfLab.webpUploadsFallbackWebpImages = function ( media ) {
-		for ( var i = 0; i < media.length; i++ ) {
+		for ( let i = 0; i < media.length; i++ ) {
 			try {
 				var image = media[ i ],
 					media_details = image.media_details,
@@ -19,7 +21,7 @@ window.wpPerfLab = window.wpPerfLab || {};
 					'img.wp-image-' + image.id
 				);
 
-				for ( var j = 0; j < images.length; j++ ) {
+				for ( let j = 0; j < images.length; j++ ) {
 					var src = images[ j ].src;
 
 					// If there are sources but no sizes, then attempt to replace src through sources. In that case, there is nothing more to replace.
@@ -41,7 +43,7 @@ window.wpPerfLab = window.wpPerfLab || {};
 
 					var srcset = images[ j ].getAttribute( 'srcset' );
 
-					for ( var k = 0; k < sizes_keys.length; k++ ) {
+					for ( let k = 0; k < sizes_keys.length; k++ ) {
 						var media_sizes_sources =
 							sizes[ sizes_keys[ k ] ].sources;
 						if (
@@ -92,7 +94,7 @@ window.wpPerfLab = window.wpPerfLab || {};
 
 	var loadMediaDetails = function ( nodes ) {
 		var ids = [];
-		for ( var i = 0; i < nodes.length; i++ ) {
+		for ( let i = 0; i < nodes.length; i++ ) {
 			var node = nodes[ i ];
 			var srcset = node.getAttribute( 'srcset' ) || '';
 
@@ -115,12 +117,12 @@ window.wpPerfLab = window.wpPerfLab || {};
 		}
 
 		for (
-			var page = 0, pages = Math.ceil( ids.length / 100 );
+			let page = 0, pages = Math.ceil( ids.length / 100 );
 			page < pages;
 			page++
 		) {
 			var pageIds = [];
-			for ( var i = 0; i < 100 && i + page * 100 < ids.length; i++ ) {
+			for ( let i = 0; i < 100 && i + page * 100 < ids.length; i++ ) {
 				pageIds.push( ids[ i + page * 100 ] );
 			}
 
@@ -142,7 +144,7 @@ window.wpPerfLab = window.wpPerfLab || {};
 
 		// Start the mutation observer to update images added dynamically.
 		var observer = new MutationObserver( function ( mutationList ) {
-			for ( var i = 0; i < mutationList.length; i++ ) {
+			for ( let i = 0; i < mutationList.length; i++ ) {
 				loadMediaDetails( mutationList[ i ].addedNodes );
 			}
 		} );

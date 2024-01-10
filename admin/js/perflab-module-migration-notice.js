@@ -1,3 +1,6 @@
+/* eslint camelcase: "off", no-alert: "off" */
+/* global perflab_module_migration_notice:false */
+
 ( function ( document ) {
 	document.addEventListener( 'DOMContentLoaded', function () {
 		document.addEventListener( 'click', function ( event ) {

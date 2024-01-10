@@ -1,3 +1,6 @@
+/* eslint no-var: "off", camelcase: "off" */
+/* global jQuery:false */
+
 ( function ( $, document ) {
 	$( document ).ajaxComplete( function ( event, xhr, settings ) {
 		// Check if this is the 'install-plugin' request.
