@@ -580,7 +580,7 @@ function perflab_enqueue_modules_page_scripts() {
 	wp_enqueue_script(
 		'perflab-plugin-management',
 		plugin_dir_url( __FILE__ ) . 'js/perflab-plugin-management.js',
-		array(),
+		array( 'jquery' ),
 		'1.0.0',
 		array(
 			'in_footer' => true,
