@@ -11,21 +11,21 @@
 class Admin_Load_Tests extends WP_UnitTestCase {
 
 	private static $demo_modules = array(
-		'js-and-css/demo-module-1' => array(
+		'js-and-css/demo-module-1'  => array(
 			'name'         => 'Demo Module 1',
 			'description'  => 'This is the description for demo module 1.',
 			'experimental' => false,
 			'focus'        => 'js-and-css',
 			'slug'         => 'demo-module-1',
 		),
-		'something/demo-module-2'  => array(
+		'something/demo-module-2'   => array(
 			'name'         => 'Demo Module 2',
 			'description'  => 'This is the description for demo module 2.',
 			'experimental' => true,
 			'focus'        => 'something',
 			'slug'         => 'demo-module-2',
 		),
-		'images/demo-module-3'     => array(
+		'images/demo-module-3'      => array(
 			'name'         => 'Demo Module 3',
 			'description'  => 'This is the description for demo module 3.',
 			'experimental' => false,

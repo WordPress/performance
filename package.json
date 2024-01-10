@@ -3,17 +3,17 @@
   "license": "GPL-2.0-or-later",
   "repository": "git+https://github.com/WordPress/performance.git",
   "engines": {
-    "node": ">=16.19.1",
-    "npm": ">=8.19.3 <9"
+    "node": ">=20.10.0",
+    "npm": ">=10.2.3"
   },
   "devDependencies": {
     "@octokit/rest": "^19.0.5",
     "@wordpress/env": "^5.7.0",
-    "@wordpress/scripts": "^24.6.0",
+    "@wordpress/scripts": "^26.19.0",
     "chalk": "^4.1.2",
     "commander": "^9.4.1",
-    "fast-glob": "^3.2.12",
-    "fs-extra": "^11.1.0",
+    "fast-glob": "^3.3.2",
+    "fs-extra": "^11.2.0",
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
     "lodash": "4.17.21"
