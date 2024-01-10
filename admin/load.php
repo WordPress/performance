@@ -888,6 +888,10 @@ function perflab_print_modules_page_style() {
 		animation: rotation 2s infinite linear;
 		margin-left: 5px;
 	}
+	.plugin-action-buttons a[id^="deactivate-"] {
+		color: #b32d2e;
+		text-decoration: underline;
+	}
 </style>
 	<?php
 }
