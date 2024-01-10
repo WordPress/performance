@@ -26,7 +26,10 @@
 					.then( function ( response ) {
 						if ( ! response.ok ) {
 							throw new Error(
-								wp.i18n.__( 'Network response was not ok.', 'performance-lab' )
+								wp.i18n.__(
+									'Network response was not ok.',
+									'performance-lab'
+								)
 							);
 						}
 						return response.json();
