@@ -12,14 +12,7 @@ const config = {
 	env: {
 		browser: true,
 	},
-	globals: {
-		scheduler: false,
-	},
-	ignorePatterns: [
-		'/vendor',
-		'/node_modules',
-		'/modules/images/webp-uploads/fallback.js', // TODO: Issues need to be fixed here.
-	],
+	ignorePatterns: [ '/vendor', '/node_modules' ],
 };
 
 module.exports = config;

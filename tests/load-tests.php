@@ -78,10 +78,10 @@ class Load_Tests extends WP_UnitTestCase {
 		$has_passed_default = false;
 		add_filter(
 			'default_option_' . PERFLAB_MODULES_SETTING,
-			static function( $default, $option, $passed_default ) use ( &$has_passed_default ) {
+			static function ( $current_default, $option, $passed_default ) use ( &$has_passed_default ) {
 				// This callback just records whether there is a default value being passed.
 				$has_passed_default = $passed_default;
-				return $default;
+				return $current_default;
 			},
 			10,
 			3
@@ -134,7 +134,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$expected_active_modules = array_keys(
 			array_filter(
 				perflab_get_modules_setting_default(),
-				static function( $module_settings ) {
+				static function ( $module_settings ) {
 					return $module_settings['enabled'];
 				}
 			)
@@ -158,7 +158,7 @@ class Load_Tests extends WP_UnitTestCase {
 		array_pop( $active_modules );
 		add_filter(
 			'perflab_active_modules',
-			static function() use ( $active_modules ) {
+			static function () use ( $active_modules ) {
 				return $active_modules;
 			}
 		);
@@ -196,6 +196,7 @@ class Load_Tests extends WP_UnitTestCase {
 			array( '../tests/testdata/demo-modules/js-and-css/demo-module-1', false ),
 			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
 			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
+			array( '../tests/testdata/demo-modules/check-error/demo-module-4', false ),
 		);
 	}
 
@@ -214,6 +215,12 @@ class Load_Tests extends WP_UnitTestCase {
 		);
 	}
 
+	public function test_perflab_can_load_module_with_not_loaded_module() {
+		$can_load_module = perflab_can_load_module( '../tests/testdata/demo-modules/check-error/demo-module-4' );
+		$this->assertInstanceOf( 'WP_Error', $can_load_module );
+		$this->assertSame( 'cannot_load_module', $can_load_module->get_error_code() );
+	}
+
 	public function test_perflab_activate_module() {
 		perflab_activate_module( __DIR__ . '/testdata/demo-modules/something/demo-module-2' );
 		$this->assertSame( 'activated', get_option( 'test_demo_module_activation_status' ) );
@@ -229,7 +236,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
 		return array_reduce(
 			$default_enabled_modules,
-			static function( $module_settings, $module_dir ) {
+			static function ( $module_settings, $module_dir ) {
 				$module_settings[ $module_dir ] = array( 'enabled' => true );
 				return $module_settings;
 			},
@@ -312,13 +319,13 @@ class Load_Tests extends WP_UnitTestCase {
 
 		add_filter(
 			'filesystem_method_file',
-			static function() {
+			static function () {
 				return __DIR__ . '/utils/Filesystem/WP_Filesystem_MockFilesystem.php';
 			}
 		);
 		add_filter(
 			'filesystem_method',
-			static function() {
+			static function () {
 				return 'MockFilesystem';
 			}
 		);
