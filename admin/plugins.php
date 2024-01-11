@@ -193,14 +193,16 @@ function perflab_render_plugin_card( array $plugin_data ) {
 					$context = $status['status'];
 
 					$action_links[] = sprintf(
-						'<a href="%s" id="deactivate-%s" aria-label="%s" style="color:red;text-decoration: underline;">%s</a>',
-						add_query_arg(
-							array(
-								'_wpnonce' => wp_create_nonce( 'perflab_deactivate_plugin_' . $status['file'] ),
-								'action'   => 'perflab_deactivate_plugin',
-								'plugin'   => $status['file'],
-							),
-							network_admin_url( 'plugins.php' )
+						'<a href="%s" id="deactivate-%s" aria-label="%s">%s</a>',
+						esc_url(
+							add_query_arg(
+								array(
+									'_wpnonce' => wp_create_nonce( 'perflab_deactivate_plugin_' . $status['file'] ),
+									'action'   => 'perflab_deactivate_plugin',
+									'plugin'   => $status['file'],
+								),
+								network_admin_url( 'plugins.php' )
+							)
 						),
 						esc_attr( $plugin_data['slug'] ),
 						/* translators: %s: Plugin name. */
