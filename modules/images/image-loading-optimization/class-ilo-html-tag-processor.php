@@ -244,6 +244,8 @@ final class ILO_HTML_Tag_Processor {
 	/**
 	 * Determines whether currently inside a foreign element (MATH or SVG).
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @return bool In foreign element.
 	 */
 	private function is_foreign_element(): bool {
