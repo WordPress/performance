@@ -186,12 +186,19 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	// Walk over all IMG tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes for preloading.
 	$processor = new ILO_HTML_Tag_Processor( $buffer );
 	foreach ( $processor->open_tags() as $tag_name ) {
-		$is_img_tag       = ( 'IMG' === $tag_name );
-		$style            = $processor->get_attribute( 'style' );
+		$is_img_tag = ( 'IMG' === $tag_name );
+		$style      = $processor->get_attribute( 'style' );
+
+		/*
+		 * Note that CSS allows for a `background`/`background-image` to have multiple `url()` CSS functions, resulting
+		 * in multiple background images being layered on top of each other. This ability is not employed in core. Here
+		 * is a regex to search WPDirectory for instances of this: /background(-image)?:[^;}]+?url\([^;}]+?[^_]url\(/.
+		 * It is used in Jetpack with the second background image being a gradient. To support multiple background
+		 * images, this logic would need to be modified to make $background_image an array and to have a more robust
+		 * parser of the `url()` functions from the property value.
+		 */
 		$background_image = null;
-		// TODO: The background image could be supplied via `background` shorthand as well.
-		// TODO: Multiple background images may be layered, in which case $background_image should be an array.
-		if ( $style && preg_match( '/background-image\s*:\s*url\(\s*[\'"]?(?!data:)(?<background_image>.+?)[\'"]?\s*\)/', $style, $matches ) ) {
+		if ( $style && preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?(?!data:)(?<background_image>.+?)[\'"]?\s*\)/', $style, $matches ) ) {
 			$background_image = $matches['background_image'];
 		}
 

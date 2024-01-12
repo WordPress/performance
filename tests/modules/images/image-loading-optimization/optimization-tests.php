@@ -451,7 +451,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<style>/* responsive styles to show only one div.header at a time... */</style>
 						</head>
 						<body>
-							<div class="header desktop" style="background-image:url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>
+							<div class="header desktop" style="background: red no-repeat center/80% url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>
 							<div class="header tablet" style=\'background-image:url( "https://example.com/tablet-bg.jpg" ); width:100%; height: 200px;\'>This is the tablet background!</div>
 							<div class="header mobile" style="background-image:url(https://example.com/mobile-bg.jpg); width:100%; height: 200px;">This is the mobile background!</div>
 						</body>
@@ -468,7 +468,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/desktop-bg.jpg" media="screen and (min-width: 601px)" rel="preload">
 						</head>
 						<body>
-							<div class="header desktop" style="background-image:url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>
+							<div class="header desktop" style="background: red no-repeat center/80% url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>
 							<div class="header tablet" style=\'background-image:url( "https://example.com/tablet-bg.jpg" ); width:100%; height: 200px;\'>This is the tablet background!</div>
 							<div class="header mobile" style="background-image:url(https://example.com/mobile-bg.jpg); width:100%; height: 200px;">This is the mobile background!</div>
 						</body>
