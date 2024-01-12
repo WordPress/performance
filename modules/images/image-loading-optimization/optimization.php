@@ -187,20 +187,15 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	foreach ( $processor->open_tags() as $tag_name ) {
 		$is_img_tag       = ( 'IMG' === $tag_name );
 		$style            = $processor->get_attribute( 'style' );
-		$background_image = null; // TODO: Could be an array.
+		$background_image = null;
 		// TODO: The background image could be supplied via `background` shorthand as well.
-		// TODO: Multiple background images may be layered.
+		// TODO: Multiple background images may be layered, in which case $background_image should be an array.
 		if ( $style && preg_match( '/background-image\s*:\s*url\(\s*[\'"]?(?!data:)(?<background_image>.+?)[\'"]?\s*\)/', $style, $matches ) ) {
 			$background_image = $matches['background_image'];
 		}
 
 		if ( ! ( $is_img_tag || $background_image ) ) {
 			continue;
-		}
-
-		// DEBUG.
-		if ( $background_image ) {
-			$processor->set_attribute( 'data-ilo-has-bg-image', $background_image );
 		}
 
 		$xpath = $processor->get_xpath();
