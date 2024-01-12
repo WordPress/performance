@@ -7,7 +7,7 @@
  *
  * @coversDefaultClass ILO_HTML_Tag_Processor
  */
-class Image_Loading_Optimization_ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
+class ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 
 	public function data_provider_sample_documents(): array {
 		return array(
@@ -281,7 +281,6 @@ class Image_Loading_Optimization_ILO_HTML_Tag_Processor_Tests extends WP_UnitTes
 	/**
 	 * Test open_tags() and get_xpath().
 	 *
-	 * @test
 	 * @covers ::open_tags
 	 * @covers ::get_xpath
 	 *
@@ -304,7 +303,6 @@ class Image_Loading_Optimization_ILO_HTML_Tag_Processor_Tests extends WP_UnitTes
 	/**
 	 * Test get_attribute(), set_attribute(), remove_attribute(), and get_updated_html().
 	 *
-	 * @test
 	 * @covers ::get_attribute
 	 * @covers ::set_attribute
 	 * @covers ::remove_attribute

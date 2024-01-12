@@ -11,26 +11,33 @@
 class Admin_Load_Tests extends WP_UnitTestCase {
 
 	private static $demo_modules = array(
-		'js-and-css/demo-module-1' => array(
+		'js-and-css/demo-module-1'  => array(
 			'name'         => 'Demo Module 1',
 			'description'  => 'This is the description for demo module 1.',
 			'experimental' => false,
 			'focus'        => 'js-and-css',
 			'slug'         => 'demo-module-1',
 		),
-		'something/demo-module-2'  => array(
+		'something/demo-module-2'   => array(
 			'name'         => 'Demo Module 2',
 			'description'  => 'This is the description for demo module 2.',
 			'experimental' => true,
 			'focus'        => 'something',
 			'slug'         => 'demo-module-2',
 		),
-		'images/demo-module-3'     => array(
+		'images/demo-module-3'      => array(
 			'name'         => 'Demo Module 3',
 			'description'  => 'This is the description for demo module 3.',
 			'experimental' => false,
 			'focus'        => 'images',
 			'slug'         => 'demo-module-3',
+		),
+		'check-error/demo-module-4' => array(
+			'name'         => 'Demo Module 4',
+			'description'  => 'This is the description for demo module 4.',
+			'experimental' => false,
+			'focus'        => 'check-error',
+			'slug'         => 'demo-module-4',
 		),
 	);
 
@@ -84,7 +91,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		remove_all_filters( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ) );
 
 		// Does not register the page if the perflab_active_modules filter is used.
-		add_filter( 'perflab_active_modules', '__return_null' );
+		add_filter( 'perflab_active_modules', '__return_array' );
 		$hook_suffix = perflab_add_modules_page();
 		$this->assertFalse( $hook_suffix );
 		$this->assertFalse( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_MODULES_SCREEN ] ) );
@@ -157,7 +164,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['js-and-css'] )
 		);
 		$this->assertEqualSets(
-			array( 'something/demo-module-2' ),
+			array( 'something/demo-module-2', 'check-error/demo-module-4' ),
 			array_keys( $wp_settings_fields[ PERFLAB_MODULES_SCREEN ]['other'] )
 		);
 	}

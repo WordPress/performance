@@ -9,14 +9,16 @@
 class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 
 	public function tear_down() {
-		unset( $GLOBALS['wp_customize'] );
+		unset(
+			$GLOBALS['wp_customize'],
+			$_SERVER['REQUEST_URI']
+		);
 		parent::tear_down();
 	}
 
 	/**
 	 * Test ilo_get_url_metric_freshness_ttl().
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metric_freshness_ttl
 	 */
 	public function test_ilo_get_url_metric_freshness_ttl() {
@@ -30,66 +32,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		);
 
 		$this->assertSame( HOUR_IN_SECONDS, ilo_get_url_metric_freshness_ttl() );
-	}
-
-	/**
-	 * Data provider.
-	 *
-	 * @return array
-	 */
-	public function data_provider_test_ilo_can_optimize_response(): array {
-		return array(
-			'homepage'           => array(
-				'set_up'   => function () {
-					$this->go_to( home_url( '/' ) );
-				},
-				'expected' => true,
-			),
-			'homepage_filtered'  => array(
-				'set_up'   => function () {
-					$this->go_to( home_url( '/' ) );
-					add_filter( 'ilo_can_optimize_response', '__return_false' );
-				},
-				'expected' => false,
-			),
-			'search'             => array(
-				'set_up'   => function () {
-					self::factory()->post->create( array( 'post_title' => 'Hello' ) );
-					$this->go_to( home_url( '?s=Hello' ) );
-				},
-				'expected' => false,
-			),
-			'customizer_preview' => array(
-				'set_up'   => function () {
-					$this->go_to( home_url( '/' ) );
-					global $wp_customize;
-					/** @noinspection PhpIncludeInspection */
-					require_once ABSPATH . 'wp-includes/class-wp-customize-manager.php';
-					$wp_customize = new WP_Customize_Manager();
-					$wp_customize->start_previewing_theme();
-				},
-				'expected' => false,
-			),
-			'post_request'       => array(
-				'set_up'   => function () {
-					$this->go_to( home_url( '/' ) );
-					$_SERVER['REQUEST_METHOD'] = 'POST';
-				},
-				'expected' => false,
-			),
-		);
-	}
-
-	/**
-	 * Test ilo_can_optimize_response().
-	 *
-	 * @test
-	 * @covers ::ilo_can_optimize_response
-	 * @dataProvider data_provider_test_ilo_can_optimize_response
-	 */
-	public function test_ilo_can_optimize_response( Closure $set_up, bool $expected ) {
-		$set_up();
-		$this->assertSame( $expected, ilo_can_optimize_response() );
 	}
 
 	/**
@@ -147,8 +89,8 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_normalized_query_vars().
 	 *
-	 * @test
 	 * @covers ::ilo_get_normalized_query_vars
+	 *
 	 * @dataProvider data_provider_test_ilo_get_normalized_query_vars
 	 */
 	public function test_ilo_get_normalized_query_vars( Closure $set_up ) {
@@ -159,7 +101,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_url_metrics_slug().
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metrics_slug
 	 */
 	public function test_ilo_get_url_metrics_slug() {
@@ -174,7 +115,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_url_metrics_storage_nonce().
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metrics_storage_nonce
 	 * @covers ::ilo_verify_url_metrics_storage_nonce
 	 */
@@ -196,7 +136,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		$slug   = ilo_get_url_metrics_slug( array() );
 		$nonce1 = ilo_get_url_metrics_storage_nonce( $slug );
 		$this->assertMatchesRegularExpression( '/^[0-9a-f]{10}$/', $nonce1 );
-		$this->assertSame( 1, ilo_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
+		$this->assertTrue( ilo_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
 		$this->assertCount( 2, $nonce_life_actions );
 
 		// Create second nonce for unauthenticated user.
@@ -208,8 +148,8 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		wp_set_current_user( $user_id );
 		$nonce3 = ilo_get_url_metrics_storage_nonce( $slug );
 		$this->assertNotEquals( $nonce3, $nonce2 );
-		$this->assertSame( 0, ilo_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
-		$this->assertSame( 1, ilo_verify_url_metrics_storage_nonce( $nonce3, $slug ) );
+		$this->assertFalse( ilo_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
+		$this->assertTrue( ilo_verify_url_metrics_storage_nonce( $nonce3, $slug ) );
 		$this->assertCount( 6, $nonce_life_actions );
 
 		foreach ( $nonce_life_actions as $nonce_life_action ) {
@@ -235,8 +175,8 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_unshift_url_metrics().
 	 *
-	 * @test
 	 * @covers ::ilo_unshift_url_metrics
+	 *
 	 * @dataProvider data_provider_sample_size_and_breakpoints
 	 */
 	public function test_ilo_unshift_url_metrics( int $sample_size, array $breakpoints, array $viewport_widths ) {
@@ -298,7 +238,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_breakpoint_max_widths().
 	 *
-	 * @test
 	 * @covers ::ilo_get_breakpoint_max_widths
 	 */
 	public function test_ilo_get_breakpoint_max_widths() {
@@ -324,7 +263,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_url_metrics_breakpoint_sample_size().
 	 *
-	 * @test
 	 * @covers ::ilo_get_url_metrics_breakpoint_sample_size
 	 */
 	public function test_ilo_get_url_metrics_breakpoint_sample_size() {
@@ -356,8 +294,8 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_group_url_metrics_by_breakpoint().
 	 *
-	 * @test
 	 * @covers ::ilo_group_url_metrics_by_breakpoint
+	 *
 	 * @dataProvider data_provider_test_ilo_group_url_metrics_by_breakpoint
 	 */
 	public function test_ilo_group_url_metrics_by_breakpoint( array $breakpoints, array $viewport_widths ) {
@@ -475,7 +413,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_lcp_elements_by_minimum_viewport_widths().
 	 *
-	 * @test
 	 * @covers ::ilo_get_lcp_elements_by_minimum_viewport_widths
 	 * @dataProvider data_provider_test_ilo_get_lcp_elements_by_minimum_viewport_widths
 	 */
@@ -570,8 +507,8 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_needed_minimum_viewport_widths().
 	 *
-	 * @test
 	 * @covers ::ilo_get_needed_minimum_viewport_widths
+	 *
 	 * @dataProvider data_provider_test_ilo_get_needed_minimum_viewport_widths
 	 */
 	public function test_ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $current_time, array $breakpoint_max_widths, int $sample_size, int $freshness_ttl, array $expected ) {
@@ -579,63 +516,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 			$expected,
 			ilo_get_needed_minimum_viewport_widths( $url_metrics, $current_time, $breakpoint_max_widths, $sample_size, $freshness_ttl )
 		);
-	}
-
-	/**
-	 * Data provider.
-	 *
-	 * @return array[]
-	 */
-	public function data_provider_test_ilo_needs_url_metric_for_breakpoint(): array {
-		return array(
-			'one-needed'       => array(
-				array(
-					array( 480, false ),
-				),
-				false,
-			),
-			'one-unneeded'     => array(
-				array(
-					array( 480, true ),
-				),
-				true,
-			),
-			'one-of-3-needed'  => array(
-				array(
-					array( 480, false ),
-					array( 600, true ),
-					array( 782, false ),
-				),
-				true,
-			),
-			'none-of-3-needed' => array(
-				array(
-					array( 480, false ),
-					array( 600, false ),
-					array( 782, false ),
-				),
-				false,
-			),
-			'all-of-3-needed'  => array(
-				array(
-					array( 480, true ),
-					array( 600, true ),
-					array( 782, true ),
-				),
-				true,
-			),
-		);
-	}
-
-	/**
-	 * Test ilo_needs_url_metric_for_breakpoint().
-	 *
-	 * @test
-	 * @covers ::ilo_needs_url_metric_for_breakpoint
-	 * @dataProvider data_provider_test_ilo_needs_url_metric_for_breakpoint
-	 */
-	public function test_ilo_needs_url_metric_for_breakpoint( array $needed_minimum_viewport_widths, bool $expected_needed ) {
-		$this->assertSame( $expected_needed, ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths ) );
 	}
 
 	/**

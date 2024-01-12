@@ -6,24 +6,21 @@
  * @group   image-loading-optimization
  */
 
-class Image_Loading_Optimization_Hooks_Tests extends WP_UnitTestCase {
+class ILO_Hooks_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Make sure the hook is added.
-	 *
-	 * @test
 	 */
-	public function it_is_hooking_output_buffering_at_template_include() {
+	public function test_hooking_output_buffering_at_template_include() {
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'template_include', 'ilo_buffer_output' ) );
 	}
 
 	/**
 	 * Make output is buffered and that it is also filtered.
 	 *
-	 * @test
 	 * @covers ::ilo_buffer_output
 	 */
-	public function it_buffers_and_filters_output() {
+	public function test_buffering_and_filtering_output() {
 		$original = 'Hello World!';
 		$expected = '¡Hola Mundo!';
 

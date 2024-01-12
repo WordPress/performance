@@ -6,12 +6,16 @@
  * @group   image-loading-optimization
  */
 
-class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
+class ILO_Optimization_Tests extends WP_UnitTestCase {
+
+	public function tear_down() {
+		parent::tear_down();
+		unset( $_SERVER['REQUEST_URI'] );
+	}
 
 	/**
 	 * Test ilo_maybe_add_template_output_buffer_filter().
 	 *
-	 * @test
 	 * @covers ::ilo_maybe_add_template_output_buffer_filter
 	 */
 	public function test_ilo_maybe_add_template_output_buffer_filter() {
@@ -27,6 +31,66 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 		$this->assertTrue( ilo_can_optimize_response() );
 		ilo_maybe_add_template_output_buffer_filter();
 		$this->assertTrue( has_filter( 'ilo_template_output_buffer' ) );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array
+	 */
+	public function data_provider_test_ilo_can_optimize_response(): array {
+		return array(
+			'homepage'           => array(
+				'set_up'   => function () {
+					$this->go_to( home_url( '/' ) );
+				},
+				'expected' => true,
+			),
+			'homepage_filtered'  => array(
+				'set_up'   => function () {
+					$this->go_to( home_url( '/' ) );
+					add_filter( 'ilo_can_optimize_response', '__return_false' );
+				},
+				'expected' => false,
+			),
+			'search'             => array(
+				'set_up'   => function () {
+					self::factory()->post->create( array( 'post_title' => 'Hello' ) );
+					$this->go_to( home_url( '?s=Hello' ) );
+				},
+				'expected' => false,
+			),
+			'customizer_preview' => array(
+				'set_up'   => function () {
+					$this->go_to( home_url( '/' ) );
+					global $wp_customize;
+					/** @noinspection PhpIncludeInspection */
+					require_once ABSPATH . 'wp-includes/class-wp-customize-manager.php';
+					$wp_customize = new WP_Customize_Manager();
+					$wp_customize->start_previewing_theme();
+				},
+				'expected' => false,
+			),
+			'post_request'       => array(
+				'set_up'   => function () {
+					$this->go_to( home_url( '/' ) );
+					$_SERVER['REQUEST_METHOD'] = 'POST';
+				},
+				'expected' => false,
+			),
+		);
+	}
+
+	/**
+	 * Test ilo_can_optimize_response().
+	 *
+	 * @covers ::ilo_can_optimize_response
+	 *
+	 * @dataProvider data_provider_test_ilo_can_optimize_response
+	 */
+	public function test_ilo_can_optimize_response( Closure $set_up, bool $expected ) {
+		$set_up();
+		$this->assertSame( $expected, ilo_can_optimize_response() );
 	}
 
 	/**
@@ -167,8 +231,8 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_construct_preload_links().
 	 *
-	 * @test
 	 * @covers ::ilo_construct_preload_links
+	 *
 	 * @dataProvider data_provider_test_ilo_construct_preload_links
 	 */
 	public function test_ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths, string $expected ) {
@@ -473,8 +537,8 @@ class Image_Loading_Optimization_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_optimize_template_output_buffer().
 	 *
-	 * @test
 	 * @covers ::ilo_optimize_template_output_buffer
+	 *
 	 * @dataProvider data_provider_test_ilo_optimize_template_output_buffer
 	 */
 	public function test_ilo_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ) {

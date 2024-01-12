@@ -29,6 +29,38 @@ function ilo_maybe_add_template_output_buffer_filter() {
 add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
 
 /**
+ * Determines whether the current response can be optimized.
+ *
+ * Only search results are not eligible by default for optimization. This is because there is no predictability in
+ * whether posts in the loop will have featured images assigned or not. If a theme template for search results doesn't
+ * even show featured images, then this isn't an issue.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @return bool Whether response can be optimized.
+ */
+function ilo_can_optimize_response(): bool {
+	$able = ! (
+		// Since the URL space is infinite.
+		is_search() ||
+		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
+		is_customize_preview() ||
+		// The images detected in the response body of a POST request cannot, by definition, be cached.
+		'GET' !== $_SERVER['REQUEST_METHOD']
+	);
+
+	/**
+	 * Filters whether the current response can be optimized.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $able Whether response can be optimized.
+	 */
+	return (bool) apply_filters( 'ilo_can_optimize_response', $able );
+}
+
+/**
  * Constructs preload links.
  *
  * @since n.e.x.t
@@ -113,7 +145,12 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	);
 
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
-	$needs_detection = ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths );
+	$needs_detection = in_array(
+		true,
+		// Each array item is array{int, bool}, with the second item being whether the viewport width is needed.
+		array_column( $needed_minimum_viewport_widths, 1 ),
+		true
+	);
 
 	$breakpoint_max_widths                   = ilo_get_breakpoint_max_widths();
 	$url_metrics_grouped_by_breakpoint       = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );

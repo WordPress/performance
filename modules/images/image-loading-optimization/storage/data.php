@@ -32,38 +32,6 @@ function ilo_get_url_metric_freshness_ttl(): int {
 }
 
 /**
- * Determines whether the current response can be optimized.
- *
- * Only search results are not eligible by default for optimization. This is because there is no predictability in
- * whether posts in the loop will have featured images assigned or not. If a theme template for search results doesn't
- * even show featured images, then this isn't an issue.
- *
- * @since n.e.x.t
- * @access private
- *
- * @return bool Whether response can be optimized.
- */
-function ilo_can_optimize_response(): bool {
-	$able = ! (
-		// Since the URL space is infinite.
-		is_search() ||
-		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
-		is_customize_preview() ||
-		// The images detected in the response body of a POST request cannot, by definition, be cached.
-		'GET' !== $_SERVER['REQUEST_METHOD']
-	);
-
-	/**
-	 * Filters whether the current response can be optimized.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param bool $able Whether response can be optimized.
-	 */
-	return (bool) apply_filters( 'ilo_can_optimize_response', $able );
-}
-
-/**
  * Gets the normalized query vars for the current request.
  *
  * This is used as a cache key for stored URL metrics.
@@ -136,12 +104,10 @@ function ilo_get_url_metrics_storage_nonce( string $slug ): string {
  *
  * @param string $nonce URL metrics storage nonce.
  * @param string $slug  URL metrics slug.
- * @return int 1 if the nonce is valid and generated between 0-12 hours ago,
- *             2 if the nonce is valid and generated between 12-24 hours ago.
- *             0 if the nonce is invalid.
+ * @return bool Whether the nonce is valid.
  */
-function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): int {
-	return (int) wp_verify_nonce( $nonce, "store_url_metrics:$slug" );
+function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): bool {
+	return (bool) wp_verify_nonce( $nonce, "store_url_metrics:$slug" );
 }
 
 /**
@@ -418,22 +384,4 @@ function ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $curr
 	}
 
 	return $needed_minimum_viewport_widths;
-}
-
-/**
- * Checks whether there is a URL metric needed for one of the breakpoints.
- *
- * @since n.e.x.t
- * @access private
- *
- * @param array<int, array{int, bool}> $needed_minimum_viewport_widths Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
- * @return bool Whether a URL metric is needed.
- */
-function ilo_needs_url_metric_for_breakpoint( array $needed_minimum_viewport_widths ): bool {
-	foreach ( $needed_minimum_viewport_widths as list( $minimum_viewport_width, $is_needed ) ) {
-		if ( $is_needed ) {
-			return true;
-		}
-	}
-	return false;
 }
