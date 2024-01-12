@@ -276,6 +276,35 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				',
 			),
 
+			'no-url-metrics-with-data-url-background-image' => array(
+				'set_up'   => static function () {},
+				// Smallest PNG courtesy of <https://evanhahn.com/worlds-smallest-png/>.
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<div style="background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==); width:100%; height: 200px;">This is so background!</div>
+						</body>
+					</html>
+				',
+				// There should be no data-ilo-xpath added to the DIV because it is using a data: URL for the background-image.
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+							<script type="module">/* import detect ... */</script>
+						</head>
+						<body>
+							<div style="background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==); width:100%; height: 200px;">This is so background!</div>
+						</body>
+					</html>
+				',
+			),
+
 			'common-lcp-image-with-fully-populated-sample-data' => array(
 				'set_up'   => function () {
 					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
