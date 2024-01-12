@@ -194,7 +194,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		$slug   = ilo_get_url_metrics_slug( array() );
 		$nonce1 = ilo_get_url_metrics_storage_nonce( $slug );
 		$this->assertMatchesRegularExpression( '/^[0-9a-f]{10}$/', $nonce1 );
-		$this->assertSame( 1, ilo_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
+		$this->assertTrue( ilo_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
 		$this->assertCount( 2, $nonce_life_actions );
 
 		// Create second nonce for unauthenticated user.
@@ -206,8 +206,8 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		wp_set_current_user( $user_id );
 		$nonce3 = ilo_get_url_metrics_storage_nonce( $slug );
 		$this->assertNotEquals( $nonce3, $nonce2 );
-		$this->assertSame( 0, ilo_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
-		$this->assertSame( 1, ilo_verify_url_metrics_storage_nonce( $nonce3, $slug ) );
+		$this->assertFalse( ilo_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
+		$this->assertTrue( ilo_verify_url_metrics_storage_nonce( $nonce3, $slug ) );
 		$this->assertCount( 6, $nonce_life_actions );
 
 		foreach ( $nonce_life_actions as $nonce_life_action ) {

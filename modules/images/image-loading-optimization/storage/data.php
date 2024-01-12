@@ -136,12 +136,10 @@ function ilo_get_url_metrics_storage_nonce( string $slug ): string {
  *
  * @param string $nonce URL metrics storage nonce.
  * @param string $slug  URL metrics slug.
- * @return int 1 if the nonce is valid and generated between 0-12 hours ago,
- *             2 if the nonce is valid and generated between 12-24 hours ago.
- *             0 if the nonce is invalid.
+ * @return bool Whether the nonce is valid.
  */
-function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): int {
-	return (int) wp_verify_nonce( $nonce, "store_url_metrics:$slug" );
+function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): bool {
+	return (bool) wp_verify_nonce( $nonce, "store_url_metrics:$slug" );
 }
 
 /**
