@@ -370,7 +370,78 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo-bg.jpg" rel="preload"/>
 						</head>
 						<body>
-							<div data-ilo-has-bg-image="https://example.com/foo-bg.jpg" style="background-image:url(https://example.com/foo-bg.jpg); width:100%; height: 200px;">This is so background!</div>
+							<div style="background-image:url(https://example.com/foo-bg.jpg); width:100%; height: 200px;">This is so background!</div>
+						</body>
+					</html>
+				',
+			),
+
+			'responsive-background-images'                => array(
+				'set_up'   => function () {
+					$mobile_breakpoint  = 480;
+					$tablet_breakpoint  = 600;
+					$desktop_breakpoint = 782;
+					add_filter(
+						'ilo_breakpoint_max_widths',
+						static function () use ( $mobile_breakpoint, $tablet_breakpoint ): array {
+							return array( $mobile_breakpoint, $tablet_breakpoint );
+						}
+					);
+					$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
+
+					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
+					$div_index_to_viewport_width_mapping = array(
+						0 => $desktop_breakpoint,
+						1 => $tablet_breakpoint,
+						2 => $mobile_breakpoint,
+					);
+
+					foreach ( $div_index_to_viewport_width_mapping as $div_index => $viewport_width ) {
+						for ( $i = 0; $i < $sample_size; $i++ ) {
+							ilo_store_url_metric(
+								home_url( '/' ),
+								$slug,
+								$this->get_validated_url_metric(
+									$viewport_width,
+									array(
+										array(
+											'xpath' => "/*[0][self::HTML]/*[1][self::BODY]/*[{$div_index}][self::DIV]",
+											'isLCP' => true,
+										),
+									)
+								)
+							);
+						}
+					}
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+							<style>/* responsive styles to show only one div.header at a time... */</style>
+						</head>
+						<body>
+							<div class="header desktop" style="background-image:url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>
+							<div class="header tablet" style=\'background-image:url( "https://example.com/tablet-bg.jpg" ); width:100%; height: 200px;\'>This is the tablet background!</div>
+							<div class="header mobile" style="background-image:url(https://example.com/mobile-bg.jpg); width:100%; height: 200px;">This is the mobile background!</div>
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+							<style>/* responsive styles to show only one div.header at a time... */</style>
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-bg.jpg" media="( min-width: 0px ) and ( max-width: 480px )" rel="preload">
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/tablet-bg.jpg" media="( min-width: 481px ) and ( max-width: 600px )" rel="preload">
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/desktop-bg.jpg" media="( min-width: 601px )" rel="preload">
+						</head>
+						<body>
+							<div class="header desktop" style="background-image:url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>
+							<div class="header tablet" style=\'background-image:url( "https://example.com/tablet-bg.jpg" ); width:100%; height: 200px;\'>This is the tablet background!</div>
+							<div class="header mobile" style="background-image:url(https://example.com/mobile-bg.jpg); width:100%; height: 200px;">This is the mobile background!</div>
 						</body>
 					</html>
 				',
