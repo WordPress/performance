@@ -90,6 +90,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	 * Test ilo_get_normalized_query_vars().
 	 *
 	 * @covers ::ilo_get_normalized_query_vars
+	 *
 	 * @dataProvider data_provider_test_ilo_get_normalized_query_vars
 	 */
 	public function test_ilo_get_normalized_query_vars( Closure $set_up ) {
@@ -175,6 +176,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	 * Test ilo_unshift_url_metrics().
 	 *
 	 * @covers ::ilo_unshift_url_metrics
+	 *
 	 * @dataProvider data_provider_sample_size_and_breakpoints
 	 */
 	public function test_ilo_unshift_url_metrics( int $sample_size, array $breakpoints, array $viewport_widths ) {
@@ -293,6 +295,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	 * Test ilo_group_url_metrics_by_breakpoint().
 	 *
 	 * @covers ::ilo_group_url_metrics_by_breakpoint
+	 *
 	 * @dataProvider data_provider_test_ilo_group_url_metrics_by_breakpoint
 	 */
 	public function test_ilo_group_url_metrics_by_breakpoint( array $breakpoints, array $viewport_widths ) {
@@ -505,6 +508,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	 * Test ilo_get_needed_minimum_viewport_widths().
 	 *
 	 * @covers ::ilo_get_needed_minimum_viewport_widths
+	 *
 	 * @dataProvider data_provider_test_ilo_get_needed_minimum_viewport_widths
 	 */
 	public function test_ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $current_time, array $breakpoint_max_widths, int $sample_size, int $freshness_ttl, array $expected ) {

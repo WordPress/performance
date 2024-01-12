@@ -85,6 +85,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	 * Test ilo_can_optimize_response().
 	 *
 	 * @covers ::ilo_can_optimize_response
+	 *
 	 * @dataProvider data_provider_test_ilo_can_optimize_response
 	 */
 	public function test_ilo_can_optimize_response( Closure $set_up, bool $expected ) {
@@ -188,6 +189,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	 * Test ilo_construct_preload_links().
 	 *
 	 * @covers ::ilo_construct_preload_links
+	 *
 	 * @dataProvider data_provider_test_ilo_construct_preload_links
 	 */
 	public function test_ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths, string $expected ) {
@@ -446,6 +448,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	 * Test ilo_optimize_template_output_buffer().
 	 *
 	 * @covers ::ilo_optimize_template_output_buffer
+	 *
 	 * @dataProvider data_provider_test_ilo_optimize_template_output_buffer
 	 */
 	public function test_ilo_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ) {
