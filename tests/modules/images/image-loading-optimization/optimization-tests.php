@@ -115,7 +115,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg" media="screen">
 				',
 			),
 			'one-responsive-lcp-image'                  => array(
@@ -130,7 +130,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen">
 				',
 			),
 			'two-breakpoint-responsive-lcp-images'      => array(
@@ -153,8 +153,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 0px ) and ( max-width: 600px )">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="alt-elva-fairy-800w.jpg" imagesrcset="alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 601px )">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 600px)">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="alt-elva-fairy-800w.jpg" imagesrcset="alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
 				',
 			),
 			'two-non-consecutive-responsive-lcp-images' => array(
@@ -178,8 +178,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 0px ) and ( max-width: 480px )">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="alt-elva-fairy-800w.jpg" imagesrcset="alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 601px )">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="alt-elva-fairy-800w.jpg" imagesrcset="alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
 				',
 			),
 			'one-background-lcp-image'                  => array(
@@ -189,7 +189,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg" media="screen">
 				',
 			),
 			'two-background-lcp-images'                 => array(
@@ -202,8 +202,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile.jpg" media="( min-width: 0px ) and ( max-width: 480px )">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="( min-width: 481px )">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile.jpg" media="screen and (max-width: 480px)">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="screen and (min-width: 481px)">
 				',
 			),
 			'one-bg-image-one-img-element'              => array(
@@ -221,8 +221,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="mobile-800w.jpg" imagesrcset="mobile-480w.jpg 480w, mobile-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="( min-width: 0px ) and ( max-width: 480px )">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="( min-width: 481px )">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="mobile-800w.jpg" imagesrcset="mobile-480w.jpg 480w, mobile-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="screen and (min-width: 481px)">
 				',
 			),
 		);
@@ -319,7 +319,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload"/>
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload" media="screen">
 						</head>
 						<body>
 							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" fetchpriority="high" data-ilo-added-fetchpriority data-ilo-removed-loading="lazy">
@@ -367,7 +367,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo-bg.jpg" rel="preload"/>
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo-bg.jpg" rel="preload" media="screen">
 						</head>
 						<body>
 							<div style="background-image:url(https://example.com/foo-bg.jpg); width:100%; height: 200px;">This is so background!</div>
@@ -434,9 +434,9 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<meta charset="utf-8">
 							<title>...</title>
 							<style>/* responsive styles to show only one div.header at a time... */</style>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-bg.jpg" media="( min-width: 0px ) and ( max-width: 480px )" rel="preload">
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/tablet-bg.jpg" media="( min-width: 481px ) and ( max-width: 600px )" rel="preload">
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/desktop-bg.jpg" media="( min-width: 601px )" rel="preload">
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-bg.jpg" media="screen and (max-width: 480px)" rel="preload">
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/tablet-bg.jpg" media="screen and (min-width: 481px) and (max-width: 600px)" rel="preload">
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/desktop-bg.jpg" media="screen and (min-width: 601px)" rel="preload">
 						</head>
 						<body>
 							<div class="header desktop" style="background-image:url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>
@@ -485,7 +485,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload"/>
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload" media="screen">
 						</head>
 						<body>
 							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" fetchpriority="high" data-ilo-fetchpriority-already-added>
@@ -526,7 +526,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload"/>
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload" media="screen">
 							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
@@ -590,8 +590,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="( min-width: 0px ) and ( max-width: 782px )" rel="preload">
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/desktop-logo.png" media="( min-width: 783px )" rel="preload">
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (max-width: 782px)" rel="preload">
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/desktop-logo.png" media="screen and (min-width: 783px)" rel="preload">
 							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>

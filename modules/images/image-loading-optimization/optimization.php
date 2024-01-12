@@ -100,13 +100,14 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 		// Add media query if it's going to be something other than just `min-width: 0px`.
 		$minimum_viewport_width = $minimum_viewport_widths[ $i ];
 		$maximum_viewport_width = isset( $minimum_viewport_widths[ $i + 1 ] ) ? $minimum_viewport_widths[ $i + 1 ] - 1 : null;
-		if ( $minimum_viewport_width > 0 || null !== $maximum_viewport_width ) {
-			$media_query = sprintf( '( min-width: %dpx )', $minimum_viewport_width ); // TODO: No need to add min-width:0px.
-			if ( null !== $maximum_viewport_width ) {
-				$media_query .= sprintf( ' and ( max-width: %dpx )', $maximum_viewport_width );
-			}
-			$link_attributes['media'] = $media_query;
+		$media_features         = array( 'screen' );
+		if ( $minimum_viewport_width > 0 ) {
+			$media_features[] = sprintf( '(min-width: %dpx)', $minimum_viewport_width );
 		}
+		if ( null !== $maximum_viewport_width ) {
+			$media_features[] = sprintf( '(max-width: %dpx)', $maximum_viewport_width );
+		}
+		$link_attributes['media'] = implode( ' and ', $media_features );
 
 		// Construct preload link.
 		$link_tag = '<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image"';
