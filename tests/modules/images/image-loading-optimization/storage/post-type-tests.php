@@ -90,6 +90,7 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 * Test ilo_parse_stored_url_metrics().
 	 *
 	 * @covers ::ilo_parse_stored_url_metrics
+	 *
 	 * @dataProvider data_provider_test_ilo_parse_stored_url_metrics
 	 */
 	public function test_ilo_parse_stored_url_metrics( string $post_content, array $expected_value ) {

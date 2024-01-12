@@ -132,6 +132,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::ilo_register_endpoint
 	 * @covers ::ilo_handle_rest_request
+	 *
 	 * @dataProvider data_provider_invalid_params
 	 */
 	public function test_rest_request_bad_params( array $params ) {

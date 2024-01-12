@@ -56,6 +56,7 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 	 * Test ilo_get_url_metric_storage_lock_ttl().
 	 *
 	 * @covers ::ilo_get_url_metric_storage_lock_ttl
+	 *
 	 * @dataProvider data_provider_ilo_get_url_metric_storage_lock_ttl
 	 *
 	 * @param Closure $set_up   Set up.

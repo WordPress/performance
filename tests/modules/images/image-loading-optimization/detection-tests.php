@@ -48,8 +48,9 @@ class ILO_Detection_Tests extends WP_UnitTestCase {
 	/**
 	 * Make sure the expected script is printed.
 	 *
-	 * @dataProvider data_provider_ilo_get_detection_script
 	 * @covers ::ilo_get_detection_script
+	 *
+	 * @dataProvider data_provider_ilo_get_detection_script
 	 *
 	 * @param Closure                                                                       $set_up           Set up callback.
 	 * @param array<string, array{set_up: Closure, expected_exports: array<string, mixed>}> $expected_exports Expected exports.
