@@ -132,6 +132,8 @@ final class ILO_HTML_Tag_Processor {
 	 * A generator is used so that when iterating at a specific tag, additional information about the tag at that point
 	 * can be queried from the class. Similarly, mutations may be performed when iterating at an open tag.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @return Generator<string> Tag name of current open tag.
 	 */
 	public function open_tags(): Generator {
@@ -191,7 +193,11 @@ final class ILO_HTML_Tag_Processor {
 				yield $tag_name;
 
 				// Immediately pop off self-closing tags.
-				if ( in_array( $tag_name, self::VOID_TAGS, true ) ) {
+				if (
+					in_array( $tag_name, self::VOID_TAGS, true )
+					||
+					( $p->has_self_closing_flag() && $this->is_foreign_element() )
+				) {
 					array_pop( $this->open_stack_tags );
 				}
 			} else {
@@ -200,32 +206,21 @@ final class ILO_HTML_Tag_Processor {
 					continue;
 				}
 
-				// Since SVG and MathML can have a lot more self-closing/empty tags, potentially pop off the stack until getting to the open tag.
-				$did_splice = false;
-				if ( 'SVG' === $tag_name || 'MATH' === $tag_name ) {
-					$i = array_search( $tag_name, $this->open_stack_tags, true );
-					if ( false !== $i ) {
-						array_splice( $this->open_stack_tags, $i );
-						$did_splice = true;
-					}
+				$popped_tag_name = array_pop( $this->open_stack_tags );
+				if ( $popped_tag_name !== $tag_name && function_exists( 'wp_trigger_error' ) ) {
+					wp_trigger_error(
+						__METHOD__,
+						esc_html(
+							sprintf(
+								/* translators: 1: Popped tag name, 2: Closing tag name */
+								__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'performance-lab' ),
+								$popped_tag_name,
+								$tag_name
+							)
+						)
+					);
 				}
 
-				if ( ! $did_splice ) {
-					$popped_tag_name = array_pop( $this->open_stack_tags );
-					if ( $popped_tag_name !== $tag_name && function_exists( 'wp_trigger_error' ) ) {
-						wp_trigger_error(
-							__METHOD__,
-							esc_html(
-								sprintf(
-									/* translators: 1: Popped tag name, 2: Closing tag name */
-									__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'performance-lab' ),
-									$popped_tag_name,
-									$tag_name
-								)
-							)
-						);
-					}
-				}
 				array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) + 1 );
 			}
 		}
@@ -236,6 +231,8 @@ final class ILO_HTML_Tag_Processor {
 	 *
 	 * A breadcrumb consists of a tag name and its sibling index.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @return Generator<array{string, int}> Breadcrumb.
 	 */
 	private function get_breadcrumbs(): Generator {
@@ -245,10 +242,28 @@ final class ILO_HTML_Tag_Processor {
 	}
 
 	/**
+	 * Determines whether currently inside a foreign element (MATH or SVG).
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return bool In foreign element.
+	 */
+	private function is_foreign_element(): bool {
+		foreach ( $this->open_stack_tags as $open_stack_tag ) {
+			if ( 'MATH' === $open_stack_tag || 'SVG' === $open_stack_tag ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Gets XPath for the current open tag.
 	 *
 	 * It would be nicer if this were like `/html[1]/body[2]` but in XPath the position() here refers to the
 	 * index of the preceding node set. So it has to rather be written `/*[1][self::html]/*[2][self::body]`.
+	 *
+	 * @since n.e.x.t
 	 *
 	 * @return string XPath.
 	 */
@@ -266,6 +281,7 @@ final class ILO_HTML_Tag_Processor {
 	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
+	 * @since n.e.x.t
 	 * @see WP_HTML_Tag_Processor::get_attribute()
 	 *
 	 * @param string $name Name of attribute whose value is requested.
@@ -281,6 +297,7 @@ final class ILO_HTML_Tag_Processor {
 	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
+	 * @since n.e.x.t
 	 * @see WP_HTML_Tag_Processor::set_attribute()
 	 *
 	 * @param string      $name  The attribute name to target.
@@ -297,6 +314,7 @@ final class ILO_HTML_Tag_Processor {
 	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
+	 * @since n.e.x.t
 	 * @see WP_HTML_Tag_Processor::remove_attribute()
 	 *
 	 * @param string $name The attribute name to remove.
@@ -312,6 +330,7 @@ final class ILO_HTML_Tag_Processor {
 	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
+	 * @since n.e.x.t
 	 * @see WP_HTML_Tag_Processor::get_updated_html()
 	 *
 	 * @return string The processed HTML.

@@ -25,31 +25,64 @@ function ilo_maybe_add_template_output_buffer_filter() {
 add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
 
 /**
+ * Determines whether the current response can be optimized.
+ *
+ * Only search results are not eligible by default for optimization. This is because there is no predictability in
+ * whether posts in the loop will have featured images assigned or not. If a theme template for search results doesn't
+ * even show featured images, then this isn't an issue.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @return bool Whether response can be optimized.
+ */
+function ilo_can_optimize_response(): bool {
+	$able = ! (
+		// Since the URL space is infinite.
+		is_search() ||
+		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
+		is_customize_preview() ||
+		// The images detected in the response body of a POST request cannot, by definition, be cached.
+		'GET' !== $_SERVER['REQUEST_METHOD']
+	);
+
+	/**
+	 * Filters whether the current response can be optimized.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $able Whether response can be optimized.
+	 */
+	return (bool) apply_filters( 'ilo_can_optimize_response', $able );
+}
+
+/**
  * Constructs preload links.
  *
  * @since n.e.x.t
  * @access private
  *
- * @param array $lcp_images_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
+ * @param array<int, array{attributes: array{src?: string, srcset?: string, sizes?: string, crossorigin?: string}}|false> $lcp_elements_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
  * @return string Markup for zero or more preload link tags.
  */
-function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widths ): string {
+function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths ): string {
 	$preload_links = array();
 
 	// This uses a for loop to be able to access the following element within the iteration, using a numeric index.
-	$minimum_viewport_widths = array_keys( $lcp_images_by_minimum_viewport_widths );
+	$minimum_viewport_widths = array_keys( $lcp_elements_by_minimum_viewport_widths );
 	for ( $i = 0, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
-		$lcp_element = $lcp_images_by_minimum_viewport_widths[ $minimum_viewport_widths[ $i ] ];
-		if ( false === $lcp_element || empty( $lcp_element['attributes'] ) ) {
-			// No LCP element at this breakpoint, so nothing to preload.
+		$lcp_element = $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_widths[ $i ] ];
+		if ( false === $lcp_element ) {
+			// No supported LCP element at this breakpoint, so nothing to preload.
 			continue;
 		}
 
-		$img_attributes = $lcp_element['attributes'];
+		// TODO: Add support for background images.
+		$attributes = $lcp_element['attributes'];
 
 		// Prevent preloading src for browsers that don't support imagesrcset on the link element.
-		if ( isset( $img_attributes['src'], $img_attributes['srcset'] ) ) {
-			unset( $img_attributes['src'] );
+		if ( isset( $attributes['src'], $attributes['srcset'] ) ) {
+			unset( $attributes['src'] );
 		}
 
 		// Add media query if it's going to be something other than just `min-width: 0px`.
@@ -60,12 +93,12 @@ function ilo_construct_preload_links( array $lcp_images_by_minimum_viewport_widt
 			if ( null !== $maximum_viewport_width ) {
 				$media_query .= sprintf( ' and ( max-width: %dpx )', $maximum_viewport_width );
 			}
-			$img_attributes['media'] = $media_query;
+			$attributes['media'] = $media_query;
 		}
 
 		// Construct preload link.
 		$link_tag = '<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image"';
-		foreach ( array_filter( $img_attributes ) as $name => $value ) {
+		foreach ( array_filter( $attributes ) as $name => $value ) {
 			// Map img attribute name to link attribute name.
 			if ( 'srcset' === $name || 'sizes' === $name ) {
 				$name = 'image' . $name;
@@ -107,7 +140,12 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	);
 
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
-	$needs_detection = ilo_needs_url_metric_for_breakpoint( $needed_minimum_viewport_widths );
+	$needs_detection = in_array(
+		true,
+		// Each array item is array{int, bool}, with the second item being whether the viewport width is needed.
+		array_column( $needed_minimum_viewport_widths, 1 ),
+		true
+	);
 
 	$breakpoint_max_widths                   = ilo_get_breakpoint_max_widths();
 	$url_metrics_grouped_by_breakpoint       = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );
@@ -169,10 +207,13 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 			$processor->remove_attribute( 'fetchpriority' );
 		}
 
+		// TODO: If the image is visible (intersectionRatio!=0) in any of the URL metrics, remove loading=lazy.
+		// TODO: Conversely, if an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
+
 		// Capture the attributes from the LCP elements to use in preload links.
 		if ( isset( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] ) ) {
 			$attributes = array();
-			foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin', 'integrity' ) as $attr_name ) {
+			foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin' ) as $attr_name ) {
 				$attributes[ $attr_name ] = $processor->get_attribute( $attr_name );
 			}
 			foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {

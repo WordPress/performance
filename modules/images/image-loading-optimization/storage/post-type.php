@@ -110,7 +110,40 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 		);
 		$url_metrics = array();
 	}
-	return $url_metrics;
+
+	return array_values(
+		array_filter(
+			$url_metrics,
+			static function ( $url_metric ) use ( $trigger_error ) {
+				// TODO: If we wanted, we could use the JSON Schema to validate the stored metrics.
+				$is_valid = (
+					is_array( $url_metric )
+					&&
+					isset(
+						$url_metric['viewport']['width'],
+						$url_metric['viewport']['height'],
+						$url_metric['elements']
+					)
+					&&
+					is_int( $url_metric['viewport']['width'] )
+					&&
+					is_array( $url_metric['elements'] )
+				);
+
+				if ( ! $is_valid ) {
+					$trigger_error(
+						sprintf(
+							/* translators: %s is post type slug */
+							__( 'Unexpected shape to JSON array in post_content of %s post type.', 'performance-lab' ),
+							ILO_URL_METRICS_POST_TYPE
+						)
+					);
+				}
+
+				return $is_valid;
+			}
+		)
+	);
 }
 
 /**
@@ -119,13 +152,12 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
  * @since n.e.x.t
  * @access private
  *
- * @param string $url                   URL for the URL metrics. This is used purely as metadata.
- * @param string $slug                  URL metrics slug (computed from query vars).
+ * @param string $url                  URL for the URL metrics. This is used purely as metadata.
+ * @param string $slug                 URL metrics slug (computed from query vars).
  * @param array  $validated_url_metric Validated URL metric. See JSON Schema defined in ilo_register_endpoint().
  * @return int|WP_Error Post ID or WP_Error otherwise.
  */
 function ilo_store_url_metric( string $url, string $slug, array $validated_url_metric ) {
-	$validated_url_metric['timestamp'] = microtime( true );
 
 	// TODO: What about storing a version identifier?
 	$post_data = array(
@@ -143,7 +175,9 @@ function ilo_store_url_metric( string $url, string $slug, array $validated_url_m
 		$url_metrics            = array();
 	}
 
-	$url_metrics = ilo_unshift_url_metrics( $url_metrics, $validated_url_metric );
+	$breakpoints = ilo_get_breakpoint_max_widths();
+	$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
+	$url_metrics = ilo_unshift_url_metrics( $url_metrics, $validated_url_metric, $breakpoints, $sample_size );
 
 	$post_data['post_content'] = wp_json_encode( $url_metrics, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ); // TODO: No need for pretty-printing.
 

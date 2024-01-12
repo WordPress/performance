@@ -28,6 +28,7 @@
   "require": {
     "composer/installers": "~1.0",
     "php": ">=7|^8",
+    "ext-dom": "*",
     "ext-json": "*"
   },
   "scripts": {

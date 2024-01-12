@@ -33,7 +33,7 @@ function ilo_get_detection_script( string $slug, array $needed_minimum_viewport_
 	 *
 	 * @param int $detection_time_window Detection time window in milliseconds.
 	 */
-	$detection_time_window = apply_filters( 'perflab_image_loading_detection_time_window', 5000 );
+	$detection_time_window = apply_filters( 'ilo_detection_time_window', 5000 );
 
 	$detect_args = array(
 		'serveTime'                   => microtime( true ) * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
