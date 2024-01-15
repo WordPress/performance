@@ -1,8 +1,8 @@
 # Documentation/Infrastructure
-/admin                                      @JustinyAhin @felixarntz
-/tests/admin                                @JustinyAhin @felixarntz
-/bin                                        @JustinyAhin @felixarntz
-/.github                                    @JustinyAhin @felixarntz
+/admin                                      @mukeshpanchal27 @felixarntz
+/tests/admin                                @mukeshpanchal27 @felixarntz
+/bin                                        @mukeshpanchal27 @felixarntz
+/.github                                    @mukeshpanchal27 @felixarntz
 
 # Focus: Database
 /modules/database                           @olliejones
@@ -10,19 +10,19 @@
 /tests/testdata/modules/database            @olliejones
 
 # Focus: Images
-/modules/images                             @adamsilverstein @getsource
-/tests/modules/images                       @adamsilverstein @getsource
-/tests/testdata/modules/images              @adamsilverstein @getsource
+/modules/images                             @adamsilverstein @getsource @joemcgill
+/tests/modules/images                       @adamsilverstein @getsource @joemcgill
+/tests/testdata/modules/images              @adamsilverstein @getsource @joemcgill
 
 # Focus: JS & CSS
-/modules/js-and-css                         @aristath @sgomes
-/tests/modules/js-and-css                   @aristath @sgomes
-/tests/testdata/modules/js-and-css          @aristath @sgomes
+/modules/js-and-css                         @westonruter
+/tests/modules/js-and-css                   @westonruter
+/tests/testdata/modules/js-and-css          @westonruter
 
 # Focus: Measurement
-/modules/measurement
-/tests/modules/measurement
-/tests/testdata/modules/measurement
+/modules/measurement                        @joemcgill
+/tests/modules/measurement                  @joemcgill
+/tests/testdata/modules/measurement         @joemcgill
 
 # Focus: Object Cache
 /modules/object-cache                       @tillkruss @spacedmonkey
@@ -30,19 +30,19 @@
 /tests/testdata/modules/object-cache        @tillkruss @spacedmonkey
 
 # Module: WebP Uploads
-/modules/images/webp-uploads                                                @adamsilverstein @felixarntz @mitogh
-/tests/modules/images/webp-uploads                                          @adamsilverstein @felixarntz @mitogh
-/tests/testdata/modules/images/webp-uploads                                 @adamsilverstein @felixarntz @mitogh
+/modules/images/webp-uploads                                                @adamsilverstein @felixarntz
+/tests/modules/images/webp-uploads                                          @adamsilverstein @felixarntz
+/tests/testdata/modules/images/webp-uploads                                 @adamsilverstein @felixarntz
 
 # Module: WebP Support Health Check
-/modules/images/webp-support                                                @adamsilverstein @kirtangajjar @mitogh
-/tests/modules/images/webp-support                                          @adamsilverstein @kirtangajjar @mitogh
-/tests/testdata/modules/images/webp-support                                 @adamsilverstein @kirtangajjar @mitogh
+/modules/images/webp-support                                                @adamsilverstein
+/tests/modules/images/webp-support                                          @adamsilverstein
+/tests/testdata/modules/images/webp-support                                 @adamsilverstein
 
 # Module: Autoloaded Options Health Check
-/modules/database/audit-autoloaded-options                                  @manuelRod
-/tests/modules/database/audit-autoloaded-options                            @manuelRod
-/tests/testdata/modules/database/audit-autoloaded-options                   @manuelRod
+/modules/database/audit-autoloaded-options                                  @manuelRod @felixarntz
+/tests/modules/database/audit-autoloaded-options                            @manuelRod @felixarntz
+/tests/testdata/modules/database/audit-autoloaded-options                   @manuelRod @felixarntz
 
 # Module: Enqueued Assets Health Check
 /modules/js-and-css/audit-enqueued-assets                                   @manuelRod
