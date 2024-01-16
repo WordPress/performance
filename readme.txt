@@ -96,7 +96,6 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 **Bug Fixes**
 
 * Infrastructure: Fix construction of translation strings in admin/plugins.php. ([925](https://github.com/WordPress/performance/pull/925))
-* Infrastructure: Prevent sending `Location` header during `test_perflab_aea_clean_aea_audit_action`. ([926](https://github.com/WordPress/performance/pull/926))
 
 = 2.7.0 =
 
