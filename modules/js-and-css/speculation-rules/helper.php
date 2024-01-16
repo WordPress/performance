@@ -83,17 +83,20 @@ function plsr_get_speculation_rules() {
 							'href_matches' => $href_exclude_paths,
 						),
 					),
-					// And except for any links marked with a class to not prerender.
-					array(
-						'not' => array(
-							'selector_matches' => '.no-prerender',
-						),
-					),
 				),
 			),
 			'eagerness' => $eagerness,
 		),
 	);
+
+	// Allow adding a class on any links to prevent prerendering.
+	if ( 'prerender' === $mode ) {
+		$rules[0]['where']['and'][] = array(
+			'not' => array(
+				'selector_matches' => '.no-prerender',
+			),
+		);
+	}
 
 	return array( $mode => $rules );
 }
