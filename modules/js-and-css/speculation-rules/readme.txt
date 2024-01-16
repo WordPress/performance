@@ -15,6 +15,8 @@ Uses the Speculation Rules API to prerender linked URLs upon hover.
 
 This plugin adds support for the [Speculation Rules API](https://developer.mozilla.org/en-US/docs/Web/API/Speculation_Rules_API), which allows defining rules by which certain URLs are dynamically prefetched or prerendered based on user interaction.
 
+[See the Speculation Rules WICG specification draft.](https://wicg.github.io/nav-speculation/speculation-rules.html)
+
 By default, the plugin is configured to prerender WordPress frontend URLs when the user hovers over a relevant link. This can be customized via the "Speculation Rules" section under _Settings > Reading_.
 
 A filter can be used to exclude certain URL paths from being eligible for prefetching and prerendering (see FAQ section). Alternatively, you can add the 'no-prerender' CSS class to any link (`<a>` tag) that should not be prerendered.
