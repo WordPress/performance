@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Gets plugin info for the given plugin slug from WordPress.org.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @param string $plugin_slug The string identifier for the plugin in questions slug.
  * @return array Array of plugin data, or empty if none/error.
@@ -43,7 +43,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 /**
  * Returns an array of WPP standalone plugins.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @return array List of WPP standalone plugins as slugs.
  */
@@ -58,7 +58,7 @@ function perflab_get_standalone_plugins() {
 /**
  * Returns an array of standalone plugins with currently active modules.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @return string[]
  */
@@ -75,7 +75,7 @@ function perflab_get_active_modules_with_standalone_plugins() {
 /**
  * Renders plugin UI for managing standalone plugins within PL Settings screen.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_render_plugins_ui() {
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
@@ -119,7 +119,7 @@ function perflab_render_plugins_ui() {
  *
  * This is adapted from `WP_Plugin_Install_List_Table::display_rows()` in core.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @see WP_Plugin_Install_List_Table::display_rows()
  * @link https://github.com/WordPress/wordpress-develop/blob/0b8ca16ea3bd9722bd1a38f8ab68901506b1a0e7/src/wp-admin/includes/class-wp-plugin-install-list-table.php#L467-L830

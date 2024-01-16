@@ -557,7 +557,7 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
 /**
  * Callback function to handle admin scripts.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_enqueue_modules_page_scripts() {
 	wp_enqueue_script( 'updates' );
@@ -617,7 +617,7 @@ function perflab_enqueue_modules_page_scripts() {
 /**
  * Callback function hooked to admin_action_perflab_activate_plugin to handle plugin activation.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_activate_plugin() {
 	// Do not proceed if plugin query arg is not present.
@@ -666,7 +666,7 @@ add_action( 'admin_action_perflab_activate_plugin', 'perflab_activate_plugin' );
 /**
  * Callback function hooked to admin_action_perflab_deactivate_plugin to handle plugin deactivation.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_deactivate_plugin() {
 	// Do not proceed if plugin query arg is not present.
@@ -707,7 +707,7 @@ add_action( 'wp_ajax_perflab_install_activate_standalone_plugins', 'perflab_inst
 /**
  * Handles the standalone plugin install and activation via AJAX.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_install_activate_standalone_plugins_callback() {
 	if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'perflab-install-activate-plugins' ) ) {
@@ -787,7 +787,7 @@ function perflab_install_activate_standalone_plugins_callback() {
 /**
  * Callback function hooked to admin_notices to render admin notices on the plugin's screen.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_plugin_admin_notices() {
 	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -852,7 +852,7 @@ function perflab_plugin_admin_notices() {
 /**
  * Returns an array of active module data with inactive standalone plugins.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @return array Array of active module data with inactive standalone plugins, otherwise an empty array.
  */
@@ -875,7 +875,7 @@ function perflab_get_active_module_data_with_inactive_standalone_plugins() {
 /**
  * Callback function to handle admin inline style.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_print_modules_page_style() {
 	?>

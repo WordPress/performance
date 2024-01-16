@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
  * Requires at least: 6.3
  * Requires PHP: 7.0
- * Version: 2.7.0
+ * Version: 2.8.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'PERFLAB_VERSION', '2.7.0' );
+define( 'PERFLAB_VERSION', '2.8.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -236,7 +236,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
  * Checks whether the given module can be loaded in the current environment.
  *
  * @since 1.3.0
- * @since n.e.x.t The function may now alternatively return a WP_Error.
+ * @since 2.8.0 The function may now alternatively return a WP_Error.
  *
  * @param string $module Slug of the module.
  * @return bool|WP_Error True if the module can be loaded, or false or a WP_Error with more concrete information otherwise.
@@ -535,7 +535,7 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 /**
  * Reverts the module migration pointer dismissal for the given user.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @param WP_User $user The WP_User object.
  */
