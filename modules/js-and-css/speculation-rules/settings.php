@@ -140,7 +140,7 @@ function plsr_add_setting_ui() {
 	$fields = array(
 		'mode'      => array(
 			'title'       => __( 'Mode', 'performance-lab' ),
-			'description' => __( 'Prerendering will lead to faster load times than prefetching, however in case of interactive content prefetching may be a safer choice.', 'performance-lab' ),
+			'description' => __( 'Prerendering will lead to faster load times than prefetching. However, in case of interactive content, prefetching may be a safer choice.', 'performance-lab' ),
 		),
 		'eagerness' => array(
 			'title'       => __( 'Eagerness', 'performance-lab' ),
