@@ -139,13 +139,13 @@ function plsr_add_setting_ui() {
 
 	$fields = array(
 		'mode'      => array(
-			'title'       => __( 'Mode', 'performance-lab' ),
+			'title'       => __( 'Speculation Mode', 'performance-lab' ),
 			'description' => __( 'Prerendering will lead to faster load times than prefetching. However, in case of interactive content, prefetching may be a safer choice.', 'performance-lab' ),
 		),
 		'eagerness' => array(
 			'title'       => __( 'Eagerness', 'performance-lab' ),
 			'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered.', 'performance-lab' )
-				. '<br>' . __( '"Eager" will have the minimum delay to start loading, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'performance-lab' ),
+				. '<br>' . __( '"Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'performance-lab' ),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
