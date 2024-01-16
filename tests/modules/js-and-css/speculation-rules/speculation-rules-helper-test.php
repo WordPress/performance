@@ -49,7 +49,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 			array(
 				'/wp-login.php\\?*#*',
 				'/wp-admin/*\\?*#*',
-				'/custom-file.php\\?*#*'
+				'/custom-file.php\\?*#*',
 			),
 			$href_exclude_paths
 		);
