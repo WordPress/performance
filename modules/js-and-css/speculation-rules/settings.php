@@ -145,7 +145,7 @@ function plsr_add_setting_ui() {
 		'eagerness' => array(
 			'title'       => __( 'Eagerness', 'performance-lab' ),
 			'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered.', 'performance-lab' )
-				. '<br>' . __( '"Eager" is best from a performance perspective, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'performance-lab' ),
+				. '<br>' . __( '"Eager" will have the minimum delay to start loading, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'performance-lab' ),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
