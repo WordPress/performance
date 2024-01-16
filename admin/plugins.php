@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Gets plugin info for the given plugin slug from WordPress.org.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @param string $plugin_slug The string identifier for the plugin in questions slug.
  * @return array Array of plugin data, or empty if none/error.
@@ -43,7 +43,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 /**
  * Returns an array of WPP standalone plugins.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @return array List of WPP standalone plugins as slugs.
  */
@@ -58,7 +58,7 @@ function perflab_get_standalone_plugins() {
 /**
  * Returns an array of standalone plugins with currently active modules.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @return string[]
  */
@@ -75,7 +75,7 @@ function perflab_get_active_modules_with_standalone_plugins() {
 /**
  * Renders plugin UI for managing standalone plugins within PL Settings screen.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_render_plugins_ui() {
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
@@ -119,7 +119,7 @@ function perflab_render_plugins_ui() {
  *
  * This is adapted from `WP_Plugin_Install_List_Table::display_rows()` in core.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @see WP_Plugin_Install_List_Table::display_rows()
  * @link https://github.com/WordPress/wordpress-develop/blob/0b8ca16ea3bd9722bd1a38f8ab68901506b1a0e7/src/wp-admin/includes/class-wp-plugin-install-list-table.php#L467-L830
@@ -193,14 +193,16 @@ function perflab_render_plugin_card( array $plugin_data ) {
 					$context = $status['status'];
 
 					$action_links[] = sprintf(
-						'<a href="%s" id="deactivate-%s" aria-label="%s" style="color:red;text-decoration: underline;">%s</a>',
-						add_query_arg(
-							array(
-								'_wpnonce' => wp_create_nonce( 'perflab_deactivate_plugin_' . $status['file'] ),
-								'action'   => 'perflab_deactivate_plugin',
-								'plugin'   => $status['file'],
-							),
-							network_admin_url( 'plugins.php' )
+						'<a href="%s" id="deactivate-%s" aria-label="%s">%s</a>',
+						esc_url(
+							add_query_arg(
+								array(
+									'_wpnonce' => wp_create_nonce( 'perflab_deactivate_plugin_' . $status['file'] ),
+									'action'   => 'perflab_deactivate_plugin',
+									'plugin'   => $status['file'],
+								),
+								network_admin_url( 'plugins.php' )
+							)
 						),
 						esc_attr( $plugin_data['slug'] ),
 						/* translators: %s: Plugin name. */
@@ -288,23 +290,29 @@ function perflab_render_plugin_card( array $plugin_data ) {
 				echo '<p>' . esc_html_e( 'This plugin does not work with your versions of WordPress and PHP.', 'default' ) . '</p>';
 				if ( current_user_can( 'update_core' ) && current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
-						/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
-						' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.', 'default' ),
-						esc_url( self_admin_url( 'update-core.php' ) ),
-						esc_url( wp_get_update_php_url() )
+						sprintf(
+							/* translators: 1: URL to WordPress Updates screen, 2: URL to Update PHP page. */
+							' ' . __( '<a href="%1$s">Please update WordPress</a>, and then <a href="%2$s">learn more about updating PHP</a>.', 'default' ),
+							esc_url( self_admin_url( 'update-core.php' ) ),
+							esc_url( wp_get_update_php_url() )
+						)
 					);
 					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				} elseif ( current_user_can( 'update_core' ) ) {
 					echo wp_kses_post(
-						/* translators: %s: URL to WordPress Updates screen. */
-						' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
-						esc_url( self_admin_url( 'update-core.php' ) )
+						sprintf(
+							/* translators: %s: URL to WordPress Updates screen. */
+							' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
+							esc_url( self_admin_url( 'update-core.php' ) )
+						)
 					);
 				} elseif ( current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
-						/* translators: %s: URL to Update PHP page. */
-						' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
-						esc_url( wp_get_update_php_url() )
+						sprintf(
+							/* translators: %s: URL to Update PHP page. */
+							' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
+							esc_url( wp_get_update_php_url() )
+						)
 					);
 					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				}
@@ -312,18 +320,22 @@ function perflab_render_plugin_card( array $plugin_data ) {
 				esc_html_e( 'This plugin does not work with your version of WordPress.', 'default' );
 				if ( current_user_can( 'update_core' ) ) {
 					echo wp_kses_post(
-						/* translators: %s: URL to WordPress Updates screen. */
-						' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
-						esc_url( self_admin_url( 'update-core.php' ) )
+						sprintf(
+							/* translators: %s: URL to WordPress Updates screen. */
+							' ' . __( '<a href="%s">Please update WordPress</a>.', 'default' ),
+							esc_url( self_admin_url( 'update-core.php' ) )
+						)
 					);
 				}
 			} elseif ( ! $compatible_php ) {
 				esc_html_e( 'This plugin does not work with your version of PHP.', 'default' );
 				if ( current_user_can( 'update_php' ) ) {
 					echo wp_kses_post(
-						/* translators: %s: URL to Update PHP page. */
-						' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
-						esc_url( wp_get_update_php_url() )
+						sprintf(
+							/* translators: %s: URL to Update PHP page. */
+							' ' . __( '<a href="%s">Learn more about updating PHP</a>.', 'default' ),
+							esc_url( wp_get_update_php_url() )
+						)
 					);
 					wp_update_php_annotation( '<p><em>', '</em></p>' );
 				}
@@ -378,7 +390,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			<div class="column-downloaded">
 				<?php
 				if ( $plugin_data['active_installs'] >= 1000000 ) {
-					$active_installs_millions = floor( $plugin_data['active_installs'] / 1000000 );
+					$active_installs_millions = (int) floor( $plugin_data['active_installs'] / 1000000 );
 					$active_installs_text     = sprintf(
 						/* translators: %s: Number of millions. */
 						_nx( '%s+ Million', '%s+ Million', $active_installs_millions, 'Active plugin installations', 'default' ),
