@@ -29,8 +29,8 @@ function plsr_get_mode_labels() {
  */
 function plsr_get_eagerness_labels() {
 	return array(
-		'conservative' => _x( 'Conservative (on click)', 'setting label', 'performance-lab' ),
-		'moderate'     => _x( 'Moderate (on hover)', 'setting label', 'performance-lab' ),
+		'conservative' => _x( 'Conservative (typically on click)', 'setting label', 'performance-lab' ),
+		'moderate'     => _x( 'Moderate (typically on hover)', 'setting label', 'performance-lab' ),
 		'eager'        => _x( 'Eager (on slightest suggestion)', 'setting label', 'performance-lab' ),
 	);
 }
