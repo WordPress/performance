@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: Speculation Rules
- * Description: Uses the Speculation Rules API to prerender linked URLs upon hover.
+ * Description: Uses the Speculation Rules API to prerender linked URLs upon hover by default.
  * Experimental: Yes
  *
  * @package performance-lab

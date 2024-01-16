@@ -9,7 +9,7 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, javascript, speculation rules, prerender, prefetch
 
-Uses the Speculation Rules API to prerender linked URLs upon hover.
+Uses the Speculation Rules API to prerender linked URLs upon hover by default.
 
 == Description ==
 
@@ -23,7 +23,7 @@ A filter can be used to exclude certain URL paths from being eligible for prefet
 
 = Browser support =
 
-The Speculation Rules API is a new web API and currently requires using Chrome 121+.
+The Speculation Rules API is a new web API, and the specific syntax used by the plugin currently requires using Chrome 121+.
 
 Other browsers will not see any adverse effects, however the feature will not work for those clients.
 
@@ -48,7 +48,7 @@ Other browsers will not see any adverse effects, however the feature will not wo
 
 = How can I prevent certain URLs from being prefetched and prerendered? =
 
-Not every URL can be reasonably prerendered. Prerendering static content is typically reliable, however prerendering dynamic content, such as a shopping cart or a checkout page, can lead to issues. You can prevent certain URL paths from being prefetched or prerendered by using the `plsr_speculation_rules_href_exclude_paths` filter.
+Not every URL can be reasonably prerendered. Prerendering static content is typically reliable, however prerendering interactive content, such as a logout URL, can lead to issues. For this reason, certain WordPress core URLs such as `/wp-login.php` and `/wp-admin/*` are excluded from prefetching and prerendering. You can exclude additional URL patterns by using the `plsr_speculation_rules_href_exclude_paths` filter.
 
 This example would ensure that URLs like `https://example.com/cart/` or `https://example.com/cart/foo` would be excluded from prefetching and prerendering.
 `
