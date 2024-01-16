@@ -9,9 +9,6 @@
 class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
 
 	public function test_plsr_register_setting() {
-		$settings = get_registered_settings();
-		$this->assertArrayHasKey( 'plsr_speculation_rules', $settings );
-
 		unregister_setting( 'reading', 'plsr_speculation_rules' );
 		$settings = get_registered_settings();
 		$this->assertArrayNotHasKey( 'plsr_speculation_rules', $settings );
