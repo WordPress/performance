@@ -60,7 +60,11 @@ function plsr_get_speculation_rules() {
 		)
 	);
 
-	$prerender_rules = array(
+	$option    = get_option( 'plsr_speculation_rules' );
+	$mode      = $option['mode'];
+	$eagerness = $option['eagerness'];
+
+	$rules = array(
 		array(
 			'source'    => 'document',
 			'where'     => array(
@@ -83,9 +87,9 @@ function plsr_get_speculation_rules() {
 					),
 				),
 			),
-			'eagerness' => 'moderate',
+			'eagerness' => $eagerness,
 		),
 	);
 
-	return array( 'prerender' => $prerender_rules );
+	return array( $mode => $rules );
 }
