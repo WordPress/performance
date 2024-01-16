@@ -60,7 +60,11 @@ function plsr_get_speculation_rules() {
 		)
 	);
 
-	$option    = get_option( 'plsr_speculation_rules' );
+	$option = get_option( 'plsr_speculation_rules' );
+	if ( ! $option ) {
+		$option = plsr_get_setting_default();
+	}
+
 	$mode      = $option['mode'];
 	$eagerness = $option['eagerness'];
 
