@@ -2,7 +2,7 @@
 /**
  * Class 'PLSR_URL_Pattern_Prefixer'.
  *
- * @package performance-lab
+ * @package speculation-rules
  * @since n.e.x.t
  */
 
@@ -60,7 +60,7 @@ class PLSR_URL_Pattern_Prefixer {
 				esc_html(
 					sprintf(
 						/* translators: %s: context string */
-						__( 'Invalid context %s.', 'performance-lab' ),
+						__( 'Invalid context %s.', 'speculation-rules' ),
 						$context
 					)
 				),

@@ -2,7 +2,7 @@
 /**
  * Hook callbacks used for Speculation Rules.
  *
- * @package performance-lab
+ * @package speculation-rules
  * @since n.e.x.t
  */
 

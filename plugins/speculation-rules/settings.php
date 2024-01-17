@@ -2,7 +2,7 @@
 /**
  * Settings functions used for Speculation Rules.
  *
- * @package performance-lab
+ * @package speculation-rules
  * @since n.e.x.t
  */
 
@@ -15,8 +15,8 @@
  */
 function plsr_get_mode_labels() {
 	return array(
-		'prefetch'  => _x( 'Prefetch', 'setting label', 'performance-lab' ),
-		'prerender' => _x( 'Prerender', 'setting label', 'performance-lab' ),
+		'prefetch'  => _x( 'Prefetch', 'setting label', 'speculation-rules' ),
+		'prerender' => _x( 'Prerender', 'setting label', 'speculation-rules' ),
 	);
 }
 
@@ -29,9 +29,9 @@ function plsr_get_mode_labels() {
  */
 function plsr_get_eagerness_labels() {
 	return array(
-		'conservative' => _x( 'Conservative (typically on click)', 'setting label', 'performance-lab' ),
-		'moderate'     => _x( 'Moderate (typically on hover)', 'setting label', 'performance-lab' ),
-		'eager'        => _x( 'Eager (on slightest suggestion)', 'setting label', 'performance-lab' ),
+		'conservative' => _x( 'Conservative (typically on click)', 'setting label', 'speculation-rules' ),
+		'moderate'     => _x( 'Moderate (typically on hover)', 'setting label', 'speculation-rules' ),
+		'eager'        => _x( 'Eager (on slightest suggestion)', 'setting label', 'speculation-rules' ),
 	);
 }
 
@@ -103,19 +103,19 @@ function plsr_register_setting() {
 		'plsr_speculation_rules',
 		array(
 			'type'              => 'object',
-			'description'       => __( 'Configuration for the Speculation Rules API.', 'performance-lab' ),
+			'description'       => __( 'Configuration for the Speculation Rules API.', 'speculation-rules' ),
 			'sanitize_callback' => 'plsr_sanitize_setting',
 			'default'           => plsr_get_setting_default(),
 			'show_in_rest'      => array(
 				'schema' => array(
 					'properties' => array(
 						'mode'      => array(
-							'description' => __( 'Whether to prefetch or prerender URLs.', 'performance-lab' ),
+							'description' => __( 'Whether to prefetch or prerender URLs.', 'speculation-rules' ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_mode_labels() ),
 						),
 						'eagerness' => array(
-							'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'performance-lab' ),
+							'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_eagerness_labels() ),
 						),
@@ -136,11 +136,11 @@ add_action( 'init', 'plsr_register_setting' );
 function plsr_add_setting_ui() {
 	add_settings_section(
 		'plsr_speculation_rules',
-		__( 'Speculation Rules', 'performance-lab' ),
+		__( 'Speculation Rules', 'speculation-rules' ),
 		static function () {
 			?>
 			<p class="description">
-				<?php esc_html_e( 'This section allows you to control how URLs that your users navigate to are speculatively loaded to improve performance.', 'performance-lab' ); ?>
+				<?php esc_html_e( 'This section allows you to control how URLs that your users navigate to are speculatively loaded to improve performance.', 'speculation-rules' ); ?>
 			</p>
 			<?php
 		},
@@ -149,12 +149,12 @@ function plsr_add_setting_ui() {
 
 	$fields = array(
 		'mode'      => array(
-			'title'       => __( 'Speculation Mode', 'performance-lab' ),
-			'description' => __( 'Prerendering will lead to faster load times than prefetching. However, in case of interactive content, prefetching may be a safer choice.', 'performance-lab' ),
+			'title'       => __( 'Speculation Mode', 'speculation-rules' ),
+			'description' => __( 'Prerendering will lead to faster load times than prefetching. However, in case of interactive content, prefetching may be a safer choice.', 'speculation-rules' ),
 		),
 		'eagerness' => array(
-			'title'       => __( 'Eagerness', 'performance-lab' ),
-			'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'performance-lab' ),
+			'title'       => __( 'Eagerness', 'speculation-rules' ),
+			'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
