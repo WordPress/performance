@@ -11,7 +11,7 @@
  *
  * @since n.e.x.t
  *
- * @return array Associative array of `$mode => $label` pairs.
+ * @return array<string, string> Associative array of `$mode => $label` pairs.
  */
 function plsr_get_mode_labels() {
 	return array(
@@ -25,7 +25,7 @@ function plsr_get_mode_labels() {
  *
  * @since n.e.x.t
  *
- * @return array Associative array of `$eagerness => $label` pairs.
+ * @return array<string, string> Associative array of `$eagerness => $label` pairs.
  */
 function plsr_get_eagerness_labels() {
 	return array(
@@ -55,7 +55,12 @@ function plsr_get_setting_default() {
  * @since n.e.x.t
  *
  * @param mixed $input Setting to sanitize.
- * @return array Sanitized setting, an associative array with 'mode' and 'eagerness' keys.
+ * @return array<string, string> {
+ *     Sanitized setting.
+ *
+ *     @type string $mode      Mode.
+ *     @type string $eagerness Eagerness.
+ * }
  */
 function plsr_sanitize_setting( $input ) {
 	$default_value = plsr_get_setting_default();
