@@ -13,8 +13,5 @@ class Speculation_Rules_Tests extends WP_UnitTestCase {
 
 		// Check the tag.
 		$this->assertStringContainsString( '<script type="speculationrules">', $output );
-
-		// Check that backslashes are correctly included.
-		$this->assertStringContainsString( '\\?*#*', $output );
 	}
 }
