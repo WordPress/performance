@@ -8,6 +8,11 @@
  * @since n.e.x.t
  */
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 // Define the constant.
 if ( defined( 'IMAGE_AUTO_SIZES_VERSION' ) ) {
 	return;
