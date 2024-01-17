@@ -154,8 +154,7 @@ function plsr_add_setting_ui() {
 		),
 		'eagerness' => array(
 			'title'       => __( 'Eagerness', 'performance-lab' ),
-			'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered.', 'performance-lab' )
-				. '<br>' . __( '"Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'performance-lab' ),
+			'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'performance-lab' ),
 		),
 	);
 	foreach ( $fields as $slug => $args ) {
@@ -223,8 +222,8 @@ function plsr_render_settings_field( array $args ) {
 
 		if ( ! empty( $args['description'] ) ) {
 			?>
-			<p class="description">
-				<?php echo wp_kses( $args['description'], array( 'br' => array() ) ); ?>
+			<p class="description" style="max-width: 800px;">
+				<?php echo esc_html( $args['description'] ); ?>
 			</p>
 			<?php
 		}
