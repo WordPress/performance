@@ -815,14 +815,14 @@ function perflab_plugin_admin_notices() {
 	if ( current_user_can( 'install_plugins' ) && current_user_can( 'activate_plugins' ) ) {
 		$user_have_capability = true;
 		if ( 1 === $modules_count ) {
-			$additional_message = esc_html__( 'Please click the following button to install and activate the relevant plugin in favor of the module.', 'performance-lab' );
+			$additional_message = __( 'Please click the following button to install and activate the relevant plugin in favor of the module.', 'performance-lab' );
 		} else {
-			$additional_message = esc_html__( 'Please click the following button to install and activate the relevant plugins in favor of the modules.', 'performance-lab' );
+			$additional_message = __( 'Please click the following button to install and activate the relevant plugins in favor of the modules.', 'performance-lab' );
 		}
 	} elseif ( 1 === $modules_count ) {
-		$additional_message = esc_html__( 'Please install and activate the relevant plugin in favor of the module.', 'performance-lab' );
+		$additional_message = __( 'Please install and activate the relevant plugin in favor of the module.', 'performance-lab' );
 	} else {
-		$additional_message = esc_html__( 'Please install and activate the relevant plugins in favor of the modules.', 'performance-lab' );
+		$additional_message = __( 'Please install and activate the relevant plugins in favor of the modules.', 'performance-lab' );
 	}
 
 	if ( 1 === $modules_count ) {
@@ -833,7 +833,7 @@ function perflab_plugin_admin_notices() {
 			esc_attr( $available_module_names[0] )
 		);
 		$message .= ' ';
-		$message .= $additional_message;
+		$message .= esc_html( $additional_message );
 		$message .= ' ';
 		$message .= esc_html__( 'This will not impact any of the underlying functionality.', 'performance-lab' );
 		$message .= '</p>';
@@ -841,7 +841,7 @@ function perflab_plugin_admin_notices() {
 		$message  = '<p>';
 		$message .= esc_html__( 'Your site is using modules which will be removed in the future in favor of their equivalent standalone plugins.', 'performance-lab' );
 		$message .= ' ';
-		$message .= $additional_message;
+		$message .= esc_html( $additional_message );
 		$message .= ' ';
 		$message .= esc_html__( 'This will not impact any of the underlying functionality.', 'performance-lab' );
 		$message .= '</p>';
@@ -852,13 +852,10 @@ function perflab_plugin_admin_notices() {
 		}
 		$message .= '</ol>';
 	}
-
 	?>
 	<div class="notice notice-warning is-dismissible">
-		<?php
-		echo wp_kses_post( $message );
-		if ( $user_have_capability ) {
-			?>
+		<?php echo wp_kses_post( $message ); ?>
+		<?php if ( $user_have_capability ) { ?>
 		<p class="perflab-button-wrapper">
 			<button type="button" class="button button-primary perflab-install-active-plugin">
 				<?php esc_html_e( 'Migrate legacy modules to standalone plugins', 'performance-lab' ); ?>
