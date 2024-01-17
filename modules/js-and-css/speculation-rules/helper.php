@@ -42,17 +42,7 @@ function plsr_get_speculation_rules() {
 	// Ensure that there are no duplicates and that the base paths cannot be removed.
 	$href_exclude_paths = array_unique(
 		array_map(
-			static function ( $exclude_path ) use ( $prefixer ) {
-				$exclude_path = $prefixer->prefix_path_pattern( $exclude_path );
-
-				/*
-				 * TODO: Remove this eventually as it's no longer needed in Chrome 121+.
-				 * See:
-				 * * https://github.com/whatwg/urlpattern/issues/179
-				 * * https://chromium-review.googlesource.com/c/chromium/src/+/4975595
-				 */
-				return $exclude_path . '\\?*#*';
-			},
+			array( $prefixer, 'prefix_path_pattern' ),
 			array_merge(
 				$base_href_exclude_paths,
 				$href_exclude_paths
@@ -75,7 +65,7 @@ function plsr_get_speculation_rules() {
 				'and' => array(
 					// Prerender any URLs within the same site.
 					array(
-						'href_matches' => $prefixer->prefix_path_pattern( '/*\\?*' ),
+						'href_matches' => $prefixer->prefix_path_pattern( '/*' ),
 					),
 					// Except for WP login and admin URLs.
 					array(
