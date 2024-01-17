@@ -40,7 +40,12 @@ function plsr_get_eagerness_labels() {
  *
  * @since n.e.x.t
  *
- * @return array Default value, an associative array with 'mode' and 'eagerness' keys.
+ * @return array<string, string> {
+ *     Default setting value.
+ *
+ *     @type string $mode      Mode.
+ *     @type string $eagerness Eagerness.
+ * }
  */
 function plsr_get_setting_default() {
 	return array(
@@ -175,7 +180,13 @@ add_action( 'load-options-reading.php', 'plsr_add_setting_ui' );
  * @since n.e.x.t
  * @access private
  *
- * @param array $args Associative array with 'field', 'title', and optional 'description' keys.
+ * @param array<string, string> $args {
+ *     Associative array of arguments.
+ *
+ *     @type string $field       The slug of the sub setting controlled by the field.
+ *     @type string $title       The title for the field.
+ *     @type string $description Optional. A description to show for the field.
+ * }
  */
 function plsr_render_settings_field( array $args ) {
 	if ( empty( $args['field'] ) || empty( $args['title'] ) ) { // Invalid.
