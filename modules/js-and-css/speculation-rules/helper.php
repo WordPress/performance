@@ -50,7 +50,22 @@ function plsr_get_speculation_rules() {
 		)
 	);
 
-	$prerender_rules = array(
+	$option = get_option( 'plsr_speculation_rules' );
+
+	/*
+	 * This logic is only relevant for edge-cases where the setting may not be registered,
+	 * a.k.a. defensive coding.
+	 */
+	if ( ! $option || ! is_array( $option ) ) {
+		$option = plsr_get_setting_default();
+	} else {
+		$option = array_merge( plsr_get_setting_default(), $option );
+	}
+
+	$mode      = $option['mode'];
+	$eagerness = $option['eagerness'];
+
+	$rules = array(
 		array(
 			'source'    => 'document',
 			'where'     => array(
@@ -65,17 +80,20 @@ function plsr_get_speculation_rules() {
 							'href_matches' => $href_exclude_paths,
 						),
 					),
-					// And except for any links marked with a class to not prerender.
-					array(
-						'not' => array(
-							'selector_matches' => '.no-prerender',
-						),
-					),
 				),
 			),
-			'eagerness' => 'moderate',
+			'eagerness' => $eagerness,
 		),
 	);
 
-	return array( 'prerender' => $prerender_rules );
+	// Allow adding a class on any links to prevent prerendering.
+	if ( 'prerender' === $mode ) {
+		$rules[0]['where']['and'][] = array(
+			'not' => array(
+				'selector_matches' => '.no-prerender',
+			),
+		);
+	}
+
+	return array( $mode => $rules );
 }

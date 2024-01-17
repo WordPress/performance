@@ -54,4 +54,40 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 			$href_exclude_paths
 		);
 	}
+
+	public function test_plsr_get_speculation_rules_prerender() {
+		$rules = plsr_get_speculation_rules();
+
+		$this->assertArrayHasKey( 'prerender', $rules );
+		$this->assertCount( 3, $rules['prerender'][0]['where']['and'] );
+	}
+
+	public function test_plsr_get_speculation_rules_prefetch() {
+		update_option( 'plsr_speculation_rules', array( 'mode' => 'prefetch' ) );
+
+		$rules = plsr_get_speculation_rules();
+
+		$this->assertArrayHasKey( 'prefetch', $rules );
+		$this->assertCount( 2, $rules['prefetch'][0]['where']['and'] );
+	}
+
+	/**
+	 * @dataProvider data_plsr_get_speculation_rules_with_eagerness
+	 */
+	public function test_plsr_get_speculation_rules_with_eagerness( string $eagerness ) {
+		update_option( 'plsr_speculation_rules', array( 'eagerness' => $eagerness ) );
+
+		$rules = plsr_get_speculation_rules();
+
+		$this->assertArrayHasKey( 'prerender', $rules );
+		$this->assertSame( $eagerness, $rules['prerender'][0]['eagerness'] );
+	}
+
+	public function data_plsr_get_speculation_rules_with_eagerness() {
+		return array(
+			array( 'conservative' ),
+			array( 'moderate' ),
+			array( 'eager' ),
+		);
+	}
 }
