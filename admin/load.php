@@ -813,7 +813,6 @@ function perflab_plugin_admin_notices() {
 
 	$has_cap = current_user_can( 'install_plugins' ) && current_user_can( 'activate_plugins' );
 	if ( $has_cap ) {
-		$user_have_capability = true;
 		if ( 1 === $modules_count ) {
 			$additional_message = __( 'Please click the following button to install and activate the relevant plugin in favor of the module.', 'performance-lab' );
 		} else {
