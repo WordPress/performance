@@ -115,7 +115,7 @@ function plsr_register_setting() {
 							'enum'        => array_keys( plsr_get_mode_labels() ),
 						),
 						'eagerness' => array(
-							'description' => __( 'Whether to trigger on click (conservative), on hover (moderate), or on even the slight suggestion (eager) that the user may navigate to the URL.', 'performance-lab' ),
+							'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'performance-lab' ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_eagerness_labels() ),
 						),
