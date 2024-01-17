@@ -811,8 +811,8 @@ function perflab_plugin_admin_notices() {
 	$available_module_names = wp_list_pluck( $active_modules_with_inactive_plugins, 'name' );
 	$modules_count          = count( $available_module_names );
 
-	$user_have_capability = false;
-	if ( current_user_can( 'install_plugins' ) && current_user_can( 'activate_plugins' ) ) {
+	$has_cap = current_user_can( 'install_plugins' ) && current_user_can( 'activate_plugins' );
+	if ( $has_cap ) {
 		$user_have_capability = true;
 		if ( 1 === $modules_count ) {
 			$additional_message = __( 'Please click the following button to install and activate the relevant plugin in favor of the module.', 'performance-lab' );
@@ -855,7 +855,7 @@ function perflab_plugin_admin_notices() {
 	?>
 	<div class="notice notice-warning is-dismissible">
 		<?php echo wp_kses_post( $message ); ?>
-		<?php if ( $user_have_capability ) { ?>
+		<?php if ( $has_cap ) { ?>
 		<p class="perflab-button-wrapper">
 			<button type="button" class="button button-primary perflab-install-active-plugin">
 				<?php esc_html_e( 'Migrate legacy modules to standalone plugins', 'performance-lab' ); ?>
