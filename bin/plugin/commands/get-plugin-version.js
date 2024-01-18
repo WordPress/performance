@@ -56,12 +56,22 @@ function doRunGetPluginVersion( settings ) {
 		);
 	}
 
-	const plugins = JSON.parse( pluginsFileContent );
+	const pluginsConfig = JSON.parse( pluginsFileContent );
 
 	// Check for valid and not empty object resulting from plugins JSON file parse.
-	if ( 'object' !== typeof plugins || 0 === Object.keys( plugins ).length ) {
+	if (
+		'object' !== typeof pluginsConfig ||
+		0 === Object.keys( pluginsConfig ).length
+	) {
 		throw Error(
 			`File at "${ pluginsFile }" parsed, but detected empty/non valid JSON object.`
+		);
+	}
+
+	const plugins = pluginsConfig.modules;
+	if ( ! plugins ) {
+		throw Error(
+			`File at "${ pluginsFile }" parsed, but the modules is missing, or they are misspelled.`
 		);
 	}
 
