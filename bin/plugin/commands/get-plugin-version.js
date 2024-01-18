@@ -71,7 +71,7 @@ function doRunGetPluginVersion( settings ) {
 	const plugins = pluginsConfig.modules;
 	if ( ! plugins ) {
 		throw Error(
-			`File at "${ pluginsFile }" parsed, but the modules is missing, or they are misspelled.`
+			`File at "${ pluginsFile }" parsed, but the modules are missing, or they are misspelled.`
 		);
 	}
 

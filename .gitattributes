@@ -9,7 +9,7 @@
 /docs export-ignore
 /tests export-ignore
 /plugin-tests export-ignore
-/plugin export-ignore
+/plugins export-ignore
 
 /*.DS_store export-ignore
 /.DS_store? export-ignore

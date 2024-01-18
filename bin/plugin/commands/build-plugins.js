@@ -29,7 +29,7 @@ exports.handler = async () => {
 			if ( ! plugins ) {
 				log(
 					formats.error(
-						'The given module configuration is invalid, the modules is missing, or they are misspelled.'
+						'The given module configuration is invalid, the modules are missing, or they are misspelled.'
 					)
 				);
 				return;
