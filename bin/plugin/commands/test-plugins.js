@@ -413,16 +413,31 @@ function doRunStandalonePluginTests( settings ) {
 		);
 	}
 
-	const pluginsJsonFileContentAsJson = JSON.parse( pluginsJsonFileContent );
+	const pluginsJsonFileContentAsEntireJsonData = JSON.parse(
+		pluginsJsonFileContent
+	);
 
 	// Check for valid and not empty object resulting from plugins JSON file parse.
 	if (
-		'object' !== typeof pluginsJsonFileContentAsJson ||
-		0 === Object.keys( pluginsJsonFileContentAsJson ).length
+		'object' !== typeof pluginsJsonFileContentAsEntireJsonData ||
+		0 === Object.keys( pluginsJsonFileContentAsEntireJsonData ).length
 	) {
 		log(
 			formats.error(
 				`File at "settings.pluginsJsonFile" parsed, but detected empty/non valid JSON object.`
+			)
+		);
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
+	}
+
+	const pluginsJsonFileContentAsJson =
+		pluginsJsonFileContentAsEntireJsonData.modules;
+	if ( ! pluginsJsonFileContentAsJson ) {
+		log(
+			formats.error(
+				'The given module configuration is invalid, the modules is missing, or they are misspelled.'
 			)
 		);
 
