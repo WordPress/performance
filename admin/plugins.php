@@ -48,10 +48,8 @@ function perflab_query_plugin_info( string $plugin_slug ) {
  * @return array List of WPP standalone plugins as slugs.
  */
 function perflab_get_standalone_plugins() {
-	return array(
-		'webp-uploads',
-		'performant-translations',
-		'dominant-color-images',
+	return array_keys(
+		perflab_get_standalone_plugins_constants( 'plugins' )
 	);
 }
 
@@ -65,7 +63,7 @@ function perflab_get_standalone_plugins() {
 function perflab_get_active_modules_with_standalone_plugins() {
 	$modules = perflab_get_module_settings();
 	return array_filter(
-		array_keys( perflab_get_standalone_plugins_constants() ),
+		array_keys( perflab_get_standalone_plugins_constants( 'modules' ) ),
 		static function ( $module ) use ( $modules ) {
 			return ! empty( $modules[ $module ] ) && $modules[ $module ]['enabled'];
 		}

@@ -207,14 +207,23 @@ function perflab_is_valid_module( $module ) {
  * This attribute is then used in {@see perflab_render_generator()}.
  *
  * @since 1.1.0
+ * @since n.e.x.t The generator tag now includes the active standalone plugin slugs.
  */
 function perflab_get_generator_content() {
 	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
 
+	$active_plugins = array();
+	foreach ( perflab_get_standalone_plugins_constants( 'plugins' ) as $plugin_slug => $constant_name ) {
+		if ( defined( $constant_name ) && ! str_starts_with( constant( $constant_name ), 'Performance Lab ' ) ) {
+			$active_plugins[] = $plugin_slug;
+		}
+	}
+
 	return sprintf(
-		'Performance Lab %1$s; modules: %2$s',
+		'Performance Lab %1$s; modules: %2$s; plugins: %3$s',
 		PERFLAB_VERSION,
-		implode( ', ', $active_and_valid_modules )
+		implode( ', ', $active_and_valid_modules ),
+		implode( ', ', $active_plugins )
 	);
 }
 
@@ -276,7 +285,7 @@ function perflab_can_load_module( $module ) {
  * @return bool Whether the module has already been loaded by a separate plugin.
  */
 function perflab_is_standalone_plugin_loaded( $module ) {
-	$standalone_plugins_constants = perflab_get_standalone_plugins_constants();
+	$standalone_plugins_constants = perflab_get_standalone_plugins_constants( 'modules' );
 	if (
 		isset( $standalone_plugins_constants[ $module ] ) &&
 		defined( $standalone_plugins_constants[ $module ] ) &&
@@ -291,13 +300,23 @@ function perflab_is_standalone_plugin_loaded( $module ) {
  * Gets the standalone plugin constants used for each module / plugin.
  *
  * @since 2.2.0
+ * @since n.e.x.t The `$type` parameter was added.
  *
- * @return array Map of module path to version constant used.
+ * @param string $type Optional. Either 'modules' or 'plugins'. Default 'modules'.
+ * @return array Map of module path / plugin slug and the version constant used.
  */
-function perflab_get_standalone_plugins_constants() {
+function perflab_get_standalone_plugins_constants( $type = 'modules' ) {
+	if ( 'modules' === $type ) {
+		return array(
+			'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
+			'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
+		);
+	}
+
 	return array(
-		'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
-		'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
+		'webp-uploads'            => 'WEBP_UPLOADS_VERSION',
+		'dominant-color-images'   => 'DOMINANT_COLOR_IMAGES_VERSION',
+		'performant-translations' => 'PERFORMANT_TRANSLATIONS_VERSION',
 	);
 }
 

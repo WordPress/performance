@@ -163,7 +163,7 @@ class Load_Tests extends WP_UnitTestCase {
 			}
 		);
 		$active_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
-		$expected       = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $active_modules );
+		$expected       = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $active_modules ) . '; plugins: ';
 		$content        = perflab_get_generator_content();
 		$this->assertSame( $expected, $content );
 	}
