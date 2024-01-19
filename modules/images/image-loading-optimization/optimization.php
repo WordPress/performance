@@ -166,7 +166,6 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		}
 	}
 
-	// TODO: Handle case when the LCP element is not an image at all, but rather a background-image.
 	// Prepare to set fetchpriority attribute on the image when all breakpoints have the same LCP element.
 	if (
 		// All breakpoints share the same LCP element (or all have none at all).
