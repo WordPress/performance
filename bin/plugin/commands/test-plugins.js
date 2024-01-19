@@ -413,12 +413,12 @@ function doRunStandalonePluginTests( settings ) {
 		);
 	}
 
-	const pluginsJsonFileContentAsJson = JSON.parse( pluginsJsonFileContent );
+	const pluginsConfig = JSON.parse( pluginsJsonFileContent );
 
 	// Check for valid and not empty object resulting from plugins JSON file parse.
 	if (
-		'object' !== typeof pluginsJsonFileContentAsJson ||
-		0 === Object.keys( pluginsJsonFileContentAsJson ).length
+		'object' !== typeof pluginsConfig ||
+		0 === Object.keys( pluginsConfig ).length
 	) {
 		log(
 			formats.error(
@@ -430,24 +430,36 @@ function doRunStandalonePluginTests( settings ) {
 		process.exit( 1 );
 	}
 
+	const plugins = pluginsConfig.modules;
+	if ( ! plugins ) {
+		log(
+			formats.error(
+				'The given module configuration is invalid, the modules are missing, or they are misspelled.'
+			)
+		);
+
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
+	}
+
 	// Create an array of plugins from entries in plugins JSON file.
-	builtPlugins = Object.keys( pluginsJsonFileContentAsJson )
+	builtPlugins = Object.keys( plugins )
 		.filter( ( item ) => {
 			if (
 				! fs.pathExistsSync(
-					`${ settings.builtPluginsDir }${ pluginsJsonFileContentAsJson[ item ].slug }`
+					`${ settings.builtPluginsDir }${ plugins[ item ].slug }`
 				)
 			) {
 				log(
 					formats.error(
-						`Built plugin path "${ settings.builtPluginsDir }${ pluginsJsonFileContentAsJson[ item ].slug }" not found, skipping and removing from plugin list`
+						`Built plugin path "${ settings.builtPluginsDir }${ plugins[ item ].slug }" not found, skipping and removing from plugin list`
 					)
 				);
 				return false;
 			}
 			return true;
 		} )
-		.map( ( item ) => pluginsJsonFileContentAsJson[ item ].slug );
+		.map( ( item ) => plugins[ item ].slug );
 
 	// For each built plugin, copy the test assets.
 	builtPlugins.forEach( ( plugin ) => {

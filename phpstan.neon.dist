@@ -8,6 +8,7 @@ parameters:
 		- load.php
 		- module-i18n.php
 		- modules/
+		- plugins/
 		- server-timing/
 		- tests/
 		- uninstall.php
