@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "web-vitals": "3.5.0",
-    "@builder.io/partytown": "^0.5.4"
+    "@builder.io/partytown": "^0.8.2"
   },
   "devDependencies": {
     "@octokit/rest": "^19.0.5",
