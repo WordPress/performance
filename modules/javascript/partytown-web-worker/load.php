@@ -15,9 +15,12 @@
  * @see https://partytown.builder.io/configuration
  * @return array
  */
-function perflab_web_worker_partytown_configuration() {
+function perflab_partytown_web_worker_configuration() {
+	$plugin_dir           = trailingslashit( plugin_dir_path( __FILE__ ) );
+	$content_dir_basename = basename( WP_CONTENT_DIR );
+
 	$config = array(
-		'lib'     => str_replace( site_url(), '', plugin_dir_url( __FILE__ ) ) . 'assets/js/partytown/',
+		'lib'     => '/' . substr( $plugin_dir, strpos( $plugin_dir, $content_dir_basename ) ) . 'assets/js/partytown/',
 		'forward' => array(),
 	);
 
@@ -38,10 +41,18 @@ function perflab_web_worker_partytown_configuration() {
  * @since n.e.x.t
  * @return void
  */
-function perflab_web_worker_partytown_init() {
+function perflab_partytown_web_worker_init() {
+	$partytown_js = __DIR__ . '/assets/js/partytown/partytown.js';
+
+	if ( file_exists( $partytown_js ) ) {
+		$partytown_js = file_get_contents( $partytown_js ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	} else {
+		$partytown_js = '';
+	}
+
 	wp_register_script(
 		'partytown',
-		plugin_dir_url( __FILE__ ) . 'assets/js/partytown/partytown.js',
+		'',
 		array(),
 		PERFLAB_VERSION,
 		array( 'in_footer' => false )
@@ -51,58 +62,25 @@ function perflab_web_worker_partytown_init() {
 		'partytown',
 		sprintf(
 			'window.partytown = %s;',
-			wp_json_encode( perflab_web_worker_partytown_configuration() )
+			wp_json_encode( perflab_partytown_web_worker_configuration() )
 		),
 		'before'
 	);
 
-	wp_enqueue_script( 'partytown' );
+	wp_add_inline_script(
+		'partytown',
+		is_string( $partytown_js ) ? $partytown_js : '',
+		'after'
+	);
 }
-add_action( 'wp_enqueue_scripts', 'perflab_web_worker_partytown_init', defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~ PHP_INT_MAX );
-
-/**
- * Get all scripts tags which have a `partytown` dependency.
- *
- * @since n.e.x.t
- * @return void
- */
-function perflab_web_worker_partytown_worker_scripts() {
-	$partytown_handles = perflab_get_partytown_handles();
-
-	foreach ( $partytown_handles as $partytown_handle ) {
-		add_filter(
-			'script_loader_tag',
-			/**
-			 * Add type="text/partytown" to script tag.
-			 *
-			 * @since n.e.x.t
-			 * @param string $tag Script tag.
-			 * @param string $handle Script handle.
-			 * @param string $src Script source.
-			 * @param string $partytown_handle Script handle which have `partytown` dependency.
-			 *
-			 * @return string $tag Script tag with type="text/partytown".
-			 */
-			static function ( $tag, $handle, $src ) use ( $partytown_handle ) {
-				if ( $handle === $partytown_handle ) {
-					$create_script_tag = sprintf(
-						'<script type="text/partytown" src="%1s" id="%2s"></script>',
-						$src,
-						$handle . '-js'
-					);
-					$tag               = $create_script_tag;
-				}
-				return $tag;
-			},
-			10,
-			3
-		);
-	}
-}
-add_action( 'wp_print_scripts', 'perflab_web_worker_partytown_worker_scripts' );
+add_action( 'wp_enqueue_scripts', 'perflab_partytown_web_worker_init' );
 
 /**
  * Helper function to get all scripts tags which has `partytown` dependency.
+ *
+ * @since n.e.x.t
+ *
+ * @return array Array of script handles with `partytown` dependency.
  */
 function perflab_get_partytown_handles() {
 	global $wp_scripts;
@@ -116,3 +94,48 @@ function perflab_get_partytown_handles() {
 
 	return $partytown_handles;
 }
+
+/**
+ * Update script type for handles having `partytown` as dependency.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $tag Script tag.
+ * @param string $handle Script handle.
+ * @param string $src Script source.
+ *
+ * @return string $tag Script tag with type="text/partytown".
+ */
+function perflab_partytown_web_worker_update_script_type( $tag, $handle, $src ) {
+	global $wp_scripts;
+
+	$partytown_handles = perflab_get_partytown_handles();
+
+	if ( in_array( $handle, $partytown_handles, true ) ) {
+		$before_script = $wp_scripts->get_inline_script_data( $handle, 'before' );
+		$after_script  = $wp_scripts->get_inline_script_data( $handle, 'after' );
+
+		if ( ! empty( $before_script ) || ! empty( $after_script ) ) {
+			_doing_it_wrong(
+				'wp_add_inline_script',
+				sprintf(
+					/* translators: %s: script handle */
+					esc_html__( 'Cannot add inline script "%s" to scripts with a "partytown" dependency. Script will continue to load in the main thread.', 'performance-lab' ),
+					'<a href="https://developer.wordpress.org/reference/functions/wp_add_inline_script/">wp_add_inline_script()</a>'
+				),
+				esc_html( PERFLAB_VERSION )
+			);
+		} else {
+			$tag = wp_get_script_tag(
+				array(
+					'type'   => 'text/partytown',
+					'src'    => $src,
+					'handle' => $handle . '-js',
+				)
+			);
+		}
+	}
+
+	return $tag;
+}
+add_filter( 'script_loader_tag', 'perflab_partytown_web_worker_update_script_type', 10, 3 );
