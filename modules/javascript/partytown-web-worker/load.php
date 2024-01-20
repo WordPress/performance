@@ -78,7 +78,7 @@ function perflab_web_worker_partytown_worker_scripts() {
 			 *
 			 * @return string $tag Script tag with type="text/partytown".
 			 */
-			function( $tag, $handle, $src ) use ( $partytown_handle ) {
+			static function ( $tag, $handle, $src ) use ( $partytown_handle ) {
 				if ( $handle === $partytown_handle ) {
 					$create_script_tag = sprintf(
 						'<script type="text/partytown" src="%1s" id="%2s"></script>',
