@@ -9,7 +9,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 	/**
 	 * @covers ::perflab_web_worker_partytown_configuration
 	 */
-	function test_perflab_web_worker_partytown_configuration() {
+	public function test_perflab_web_worker_partytown_configuration() {
 		$this->assertNotFalse(
 			has_action( 'wp_head', 'perflab_web_worker_partytown_configuration' )
 		);
@@ -56,7 +56,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 	/**
 	 * @covers ::perflab_web_worker_partytown_init
 	 */
-	function test_perflab_web_worker_partytown_init() {
+	public function test_perflab_web_worker_partytown_init() {
 		$this->assertNotFalse(
 			has_action(
 				'wp_enqueue_scripts',
@@ -72,7 +72,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 	 * @covers ::perflab_web_worker_partytown_worker_scripts
 	 * @covers ::perflab_get_partytown_handles
 	 */
-	function test_perflab_web_worker_partytown_worker_scripts() {
+	public function test_perflab_web_worker_partytown_worker_scripts() {
 		global $wp_scripts;
 
 		$this->assertNotFalse(
