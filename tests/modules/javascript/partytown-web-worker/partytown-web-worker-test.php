@@ -30,7 +30,7 @@ class Web_Worker_Test extends WP_UnitTestCase {
 		// Add a filter to modify the PartyTown configuration.
 		add_filter(
 			'perflab_partytown_configuration',
-			function ( $config ) {
+			static function ( $config ) {
 				$config['lib']   = '/partytown/';
 				$config['debug'] = true;
 				return $config;
