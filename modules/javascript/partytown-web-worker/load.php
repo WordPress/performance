@@ -13,7 +13,7 @@
  *
  * @since n.e.x.t
  * @see https://partytown.builder.io/configuration
- * @return void
+ * @return array
  */
 function perflab_web_worker_partytown_configuration() {
 	$config = array(
@@ -25,18 +25,12 @@ function perflab_web_worker_partytown_configuration() {
 	 * Add configuration for PartyTown.
 	 *
 	 * @since n.e.x.t
+	 * @see <https://partytown.builder.io/configuration>.
 	 * @param array $config Configuration for PartyTown.
 	 * @return array
 	 */
-	$config = apply_filters( 'perflab_partytown_configuration', $config );
-
-	?>
-	<script>
-		window.partytown = <?php echo wp_json_encode( $config ); ?>;
-	</script>
-	<?php
+	return apply_filters( 'perflab_partytown_configuration', $config );
 }
-add_action( 'wp_head', 'perflab_web_worker_partytown_configuration', 1 );
 
 /**
  * Initialize PartyTown
@@ -45,15 +39,26 @@ add_action( 'wp_head', 'perflab_web_worker_partytown_configuration', 1 );
  * @return void
  */
 function perflab_web_worker_partytown_init() {
-	wp_enqueue_script(
+	wp_register_script(
 		'partytown',
 		plugin_dir_url( __FILE__ ) . 'assets/js/partytown/partytown.js',
 		array(),
 		PERFLAB_VERSION,
-		false
+		array( 'in_footer' => false )
 	);
+
+	wp_add_inline_script(
+		'partytown',
+		sprintf(
+			'window.partytown = %s;',
+			wp_json_encode( perflab_web_worker_partytown_configuration() )
+		),
+		'before'
+	);
+
+	wp_enqueue_script( 'partytown' );
 }
-add_action( 'wp_enqueue_scripts', 'perflab_web_worker_partytown_init', 1 );
+add_action( 'wp_enqueue_scripts', 'perflab_web_worker_partytown_init', defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~ PHP_INT_MAX );
 
 /**
  * Get all scripts tags which have a `partytown` dependency.
