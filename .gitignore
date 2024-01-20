@@ -16,6 +16,7 @@ local.properties
 .cproject
 .buildpath
 nbproject/
+.vscode
 
 ############
 ## Build
