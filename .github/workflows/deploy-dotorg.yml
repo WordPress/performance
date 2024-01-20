@@ -19,13 +19,13 @@ jobs:
           node-version-file: ".nvmrc"
           cache: npm
 
-      - name: Install Node production dependencies
-        run: npm ci --production
+      - name: Install dependencies
+        run: npm ci
         env:
           CI: true
 
-      - name: Add Partytown library files to release
-        run: npm run partytown
+      - name: Build Plugin
+        run: npm run build-plugins
 
       - name: WordPress plugin deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
