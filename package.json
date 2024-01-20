@@ -38,8 +38,8 @@
     "test-php": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test",
     "test-php-multisite": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test-multisite",
     "wp-env": "wp-env",
-    "prepare": "husky install && npm run partytown",
-    "partytown": "partytown copylib './modules/javascript/partytown-web-worker/assets/js/partytown'"
+    "prepare": "husky install && npm run copy-vendor-libs",
+    "copy-vendor-libs": "node ./bin/plugin/cli.js copy-vendor-libs"
   },
   "lint-staged": {
     "*.php": [
@@ -49,5 +49,11 @@
     "*.js": [
       "npm run lint-js"
     ]
+  },
+  "copy-vendor-libs": {
+    "partytown": {
+      "from": "node_modules/@builder.io/partytown/lib",
+      "to": "modules/javascript/partytown-web-worker/assets/js/partytown"
+    }
   }
 }
