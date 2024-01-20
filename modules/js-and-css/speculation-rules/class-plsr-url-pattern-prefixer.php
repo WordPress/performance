@@ -86,8 +86,32 @@ class PLSR_URL_Pattern_Prefixer {
 	 */
 	public static function get_default_contexts(): array {
 		return array(
-			'home' => trailingslashit( wp_parse_url( home_url( '/' ), PHP_URL_PATH ) ),
-			'site' => trailingslashit( wp_parse_url( site_url( '/' ), PHP_URL_PATH ) ),
+			'home' => self::escape_pattern_string( trailingslashit( wp_parse_url( home_url( '/' ), PHP_URL_PATH ) ) ),
+			'site' => self::escape_pattern_string( trailingslashit( wp_parse_url( site_url( '/' ), PHP_URL_PATH ) ) ),
 		);
+	}
+
+	/**
+	 * Escapes a string for use in a URL pattern component.
+	 * https://urlpattern.spec.whatwg.org/#escape-a-pattern-string
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $str String to be escaped.
+	 * @return string String with backslashes added where required.
+	 */
+	public static function escape_pattern_string( string $str ): string {
+		$replacements = array(
+			'+'  => '\\+',
+			'*'  => '\\*',
+			'?'  => '\\?',
+			':'  => '\\:',
+			'{'  => '\\{',
+			'}'  => '\\}',
+			'('  => '\\(',
+			')'  => '\\)',
+			'\\' => '\\\\',
+		);
+		return strtr( $str, $replacements );
 	}
 }
