@@ -4,14 +4,14 @@
  * Description: Run JavaScript in a separate Web Worker with the help of Partytown library.
  * Experimental: Yes
  *
- * @since   1.0.0
+ * @since   n.e.x.t
  * @package performance-lab
  */
 
 /**
  * PartyTown Configuration
  *
- * @since 1.0.0
+ * @since n.e.x.t
  * @see https://partytown.builder.io/configuration
  * @return void
  */
@@ -24,7 +24,7 @@ function perflab_web_worker_partytown_configuration() {
 	/**
 	 * Add configuration for PartyTown.
 	 *
-	 * @since 1.0.0
+	 * @since n.e.x.t
 	 * @param array $config Configuration for PartyTown.
 	 * @return array
 	 */
@@ -41,7 +41,7 @@ add_action( 'wp_head', 'perflab_web_worker_partytown_configuration', 1 );
 /**
  * Initialize PartyTown
  *
- * @since 1.0.0
+ * @since n.e.x.t
  * @return void
  */
 function perflab_web_worker_partytown_init() {
@@ -58,7 +58,7 @@ add_action( 'wp_enqueue_scripts', 'perflab_web_worker_partytown_init', 1 );
 /**
  * Get all scripts tags which have a `partytown` dependency.
  *
- * @since 1.0.0
+ * @since n.e.x.t
  * @return void
  */
 function perflab_web_worker_partytown_worker_scripts() {
@@ -70,7 +70,7 @@ function perflab_web_worker_partytown_worker_scripts() {
 			/**
 			 * Add type="text/partytown" to script tag.
 			 *
-			 * @since 1.0.0
+			 * @since n.e.x.t
 			 * @param string $tag Script tag.
 			 * @param string $handle Script handle.
 			 * @param string $src Script source.
