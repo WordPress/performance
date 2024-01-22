@@ -41,9 +41,10 @@ $GLOBALS['wp_tests_options'] = array(
 require_once $_test_root . '/includes/functions.php';
 tests_add_filter(
 	'plugins_loaded',
-	static function() {
+	static function () {
 		require_once TESTS_PLUGIN_DIR . '/admin/load.php';
 		require_once TESTS_PLUGIN_DIR . '/admin/server-timing.php';
+		require_once TESTS_PLUGIN_DIR . '/admin/plugins.php';
 		$module_files = glob( TESTS_PLUGIN_DIR . '/modules/*/*/load.php' );
 		if ( $module_files ) {
 			foreach ( $module_files as $module_file ) {

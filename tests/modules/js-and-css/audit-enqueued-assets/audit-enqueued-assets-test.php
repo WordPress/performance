@@ -78,7 +78,6 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 			),
 			$transient
 		);
-
 	}
 
 	/**
@@ -242,7 +241,23 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		$_REQUEST['_wpnonce'] = wp_create_nonce( 'clean_aea_audit' );
 		$_GET['action']       = 'clean_aea_audit';
 		$this->current_user_can_view_site_health_checks_cap();
+		$redirected_url = null;
+		add_filter(
+			'wp_redirect',
+			static function ( $url ) use ( &$redirected_url ) {
+				$redirected_url = $url;
+				return false;
+			}
+		);
+		$_REQUEST['_wp_http_referer'] = add_query_arg(
+			array(
+				'_wpnonce' => 'foo',
+				'action'   => 'bar',
+			),
+			home_url( '/' )
+		);
 		perflab_aea_clean_aea_audit_action();
+		$this->assertSame( home_url( '/' ), $redirected_url );
 		$this->assertFalse( get_transient( 'aea_enqueued_front_page_scripts' ) );
 		$this->assertFalse( get_transient( 'aea_enqueued_front_page_styles' ) );
 	}
@@ -287,4 +302,3 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 		return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_more_than_threshold( $number_of_assets );
 	}
 }
-

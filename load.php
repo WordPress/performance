@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
  * Requires at least: 6.3
  * Requires PHP: 7.0
- * Version: 2.7.0
+ * Version: 2.8.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'PERFLAB_VERSION', '2.7.0' );
+define( 'PERFLAB_VERSION', '2.8.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -236,7 +236,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
  * Checks whether the given module can be loaded in the current environment.
  *
  * @since 1.3.0
- * @since n.e.x.t The function may now alternatively return a WP_Error.
+ * @since 2.8.0 The function may now alternatively return a WP_Error.
  *
  * @param string $module Slug of the module.
  * @return bool|WP_Error True if the module can be loaded, or false or a WP_Error with more concrete information otherwise.
@@ -449,6 +449,7 @@ register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin'
 if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/server-timing.php';
+	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/plugins.php';
 }
 
 /**
@@ -465,9 +466,56 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 
 	// Get the list of modules that were activated, and load the activate.php files if they exist.
 	if ( ! empty( $value ) ) {
+		$reset_migration_pointer_dismissals = false;
 		foreach ( $value as $module => $module_settings ) {
 			if ( ! empty( $module_settings['enabled'] ) && ( empty( $old_value[ $module ] ) || empty( $old_value[ $module ]['enabled'] ) ) ) {
 				perflab_activate_module( PERFLAB_PLUGIN_DIR_PATH . 'modules/' . $module );
+				$reset_migration_pointer_dismissals = true;
+			}
+		}
+		if ( $reset_migration_pointer_dismissals ) {
+			// Retrieve a list of active modules with associated standalone plugins.
+			$active_modules_with_plugins = perflab_get_active_modules_with_standalone_plugins();
+
+			/*
+			 * Check if there are any active modules with compatible standalone plugins.
+			 * If no such modules are found bail early.
+			 */
+			if ( empty( $active_modules_with_plugins ) ) {
+				return;
+			}
+
+			$current_user = wp_get_current_user();
+
+			/*
+			 * Disable WordPress pointers for specific users based on conditions.
+			 *
+			 * Checks if there is a large user count on the site. If true,
+			 * disables pointers for the current user only. Otherwise, disables
+			 * pointers for users with the same role as the current user.
+			 */
+			if ( wp_is_large_user_count() ) {
+				perflab_undismiss_module_migration_pointer( $current_user );
+			} else {
+				$current_user_roles = $current_user->roles;
+				$current_user_role  = array_shift( $current_user_roles );
+
+				$args = array(
+					'role'       => $current_user_role,
+					'meta_query' => array(
+						array(
+							'key'     => 'dismissed_wp_pointers',
+							'value'   => 'perflab-module-migration-pointer',
+							'compare' => 'LIKE',
+						),
+					),
+				);
+
+				$users = get_users( $args );
+
+				foreach ( $users as $user ) {
+					perflab_undismiss_module_migration_pointer( $user );
+				}
 			}
 		}
 	}
@@ -482,6 +530,27 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 	}
 
 	return $value;
+}
+
+/**
+ * Reverts the module migration pointer dismissal for the given user.
+ *
+ * @since 2.8.0
+ *
+ * @param WP_User $user The WP_User object.
+ */
+function perflab_undismiss_module_migration_pointer( $user ) {
+	$dismissed = array_filter( explode( ',', (string) get_user_meta( $user->ID, 'dismissed_wp_pointers', true ) ) );
+
+	$pointer_index = array_search( 'perflab-module-migration-pointer', $dismissed, true );
+	if ( false === $pointer_index ) {
+		return;
+	}
+
+	unset( $dismissed[ $pointer_index ] );
+	$dismissed = implode( ',', $dismissed );
+
+	update_user_meta( $user->ID, 'dismissed_wp_pointers', $dismissed );
 }
 
 /**
