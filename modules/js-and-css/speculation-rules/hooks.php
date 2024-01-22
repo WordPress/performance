@@ -19,8 +19,8 @@ function plsr_print_speculation_rules() {
 		return;
 	}
 
-	$is_html5 = current_theme_supports( 'html5', 'script' );
-	if ( ! $is_html5 ) {
+	$needs_html5_workaround = ! current_theme_supports( 'html5', 'script' );
+	if ( $needs_html5_workaround ) {
 		$backup_wp_theme_features = $GLOBALS['_wp_theme_features'];
 		add_theme_support( 'html5', array( 'script' ) );
 	}
@@ -30,7 +30,7 @@ function plsr_print_speculation_rules() {
 		array( 'type' => 'speculationrules' )
 	);
 
-	if ( ! $is_html5 ) {
+	if ( $needs_html5_workaround ) {
 		$GLOBALS['_wp_theme_features'] = $backup_wp_theme_features; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 }
