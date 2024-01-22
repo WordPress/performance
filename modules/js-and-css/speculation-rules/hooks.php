@@ -19,9 +19,19 @@ function plsr_print_speculation_rules() {
 		return;
 	}
 
+	$is_html5 = current_theme_supports( 'html5', 'script' );
+	if ( ! $is_html5 ) {
+		$backup_wp_theme_features = $GLOBALS['_wp_theme_features'];
+		add_theme_support( 'html5', array( 'script' ) );
+	}
+
 	wp_print_inline_script_tag(
 		wp_json_encode( $rules ),
 		array( 'type' => 'speculationrules' )
 	);
+
+	if ( ! $is_html5 ) {
+		$GLOBALS['_wp_theme_features'] = $backup_wp_theme_features; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
 }
 add_action( 'wp_footer', 'plsr_print_speculation_rules' );
