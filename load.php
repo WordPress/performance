@@ -303,7 +303,7 @@ function perflab_is_standalone_plugin_loaded( $module ) {
  * @since n.e.x.t The `$type` parameter was added.
  *
  * @param string $type Optional. Either 'modules' or 'plugins'. Default 'modules'.
- * @return array Map of module path / plugin slug and the version constant used.
+ * @return array<string, string> Map of module path / plugin slug and the version constant used.
  */
 function perflab_get_standalone_plugins_constants( $type = 'modules' ) {
 	if ( 'modules' === $type ) {
