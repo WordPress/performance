@@ -28,24 +28,48 @@ function perflab_optimize_oembed_html( $html ) {
 
 	$p = new WP_HTML_Tag_Processor( $html );
 
-	// Find the first iframe or script tag to act on.
+	/**
+	 * Determine how to lazy load the embed.
+	 *
+	 * - If there is only one iframe, set loading="lazy".
+	 * - Prevent making scripts lazy if there is an inline script.
+	 *  - Only make script lazy if there is a single external script (since if there are
+	 *    multiple they may not get loaded in the right order).
+	 *  - Ensure that both the iframe and the script are made lazy if both occur in the same embed.
+	 */
+	$iframe_count      = 0;
+	$script_count      = 0;
+	$has_inline_script = false;
+	// Locate the iframes and scripts.
 	while ( $p->next_tag() ) {
 		if ( 'IFRAME' === $p->get_tag() ) {
 			$loading_value = $p->get_attribute( 'loading' );
 			if ( empty( $loading_value ) ) {
-				$p->set_attribute( 'loading', 'lazy' );
+				++$iframe_count;
+				$p->set_bookmark( 'iframe' );
 			}
-			return $p->get_updated_html();
-
-		} elseif ( 'SCRIPT' === $p->get_tag() && $p->get_attribute( 'src' ) ) {
-			$oembed_lazy_load_scripts = true;
-			$p->set_attribute( 'data-lazy-embed-src', $p->get_attribute( 'src' ) );
-			$p->set_attribute( 'src', '' );
-			return $p->get_updated_html();
+		} elseif ( 'SCRIPT' === $p->get_tag() ) {
+			if ( ! $p->get_attribute( 'src' ) ) {
+				$has_inline_script = true;
+			} else {
+				++$script_count;
+				$p->set_bookmark( 'script' );
+			}
 		}
 	}
-
-	return $html;
+	// If there was only one non-inline script, make it lazy.
+	if ( 1 === $script_count && ! $has_inline_script ) {
+		$oembed_lazy_load_scripts = true;
+		$p->seek( 'script' );
+		$p->set_attribute( 'data-lazy-embed-src', $p->get_attribute( 'src' ) );
+		$p->remove_attribute( 'src' );
+	}
+	// If there was only one iframe, make it lazy.
+	if ( 1 === $iframe_count ) {
+		$p->seek( 'frame' );
+		$p->set_attribute( 'loading', 'lazy' );
+	}
+	return $p->get_updated_html();
 }
 add_filter( 'embed_oembed_html', 'perflab_optimize_oembed_html', 10 );
 
@@ -63,44 +87,44 @@ function perflab_optimize_oembed_lazy_load_scripts() {
 	}
 	?>
 	<script type="module">
-        const lazyEmbedsScripts = document.querySelectorAll( 'script[data-lazy-embed-src]' );
-        const lazyEmbedScriptsByParents = new Map();
+		const lazyEmbedsScripts = document.querySelectorAll( 'script[data-lazy-embed-src]' );
+		const lazyEmbedScriptsByParents = new Map();
 
-        const lazyEmbedObserver = new IntersectionObserver( 
-            ( entries ) => {
-                for ( const entry of entries ) {
-                    if ( entry.isIntersecting ) {
-                        const lazyEmbedParent = entry.target;
-                        const lazyEmbedScript = lazyEmbedScriptsByParents.get( lazyEmbedParent );
-                        const embedScript = document.createElement( 'script' );
-                        for ( const attr of lazyEmbedScript.attributes ) {
-                            if ( attr.nodeName === 'src' ) {
-                                // Even though the src attribute is absent, the browser seems to presume it is present.
-                                continue;
-                            }
+		const lazyEmbedObserver = new IntersectionObserver(
+			( entries ) => {
+				for ( const entry of entries ) {
+					if ( entry.isIntersecting ) {
+						const lazyEmbedParent = entry.target;
+						const lazyEmbedScript = lazyEmbedScriptsByParents.get( lazyEmbedParent );
+						const embedScript = document.createElement( 'script' );
+						for ( const attr of lazyEmbedScript.attributes ) {
+							if ( attr.nodeName === 'src' ) {
+								// Even though the src attribute is absent, the browser seems to presume it is present.
+								continue;
+							}
 
-                            embedScript.setAttribute(
-                                attr.nodeName === 'data-lazy-embed-src' ? 'src' : attr.nodeName,
-                                attr.nodeValue
-                            );
-                        }
-                        lazyEmbedScript.replaceWith( embedScript );
-                        lazyEmbedScript.replaceWith( embedScript );
-                        lazyEmbedObserver.unobserve( lazyEmbedParent );
-                    }
-                }
-            }, 
-            {
-                rootMargin: '0px 0px 500px 0px',
-                threshold: 0
-            } 
-        );
-        
-        for ( const lazyEmbedScript of lazyEmbedsScripts ) {
-            const lazyEmbedParent = lazyEmbedScript.parentNode;
-            lazyEmbedScriptsByParents.set( lazyEmbedParent, lazyEmbedScript );
-            lazyEmbedObserver.observe( lazyEmbedParent );
-        }
+							embedScript.setAttribute(
+								attr.nodeName === 'data-lazy-embed-src' ? 'src' : attr.nodeName,
+								attr.nodeValue
+							);
+						}
+						lazyEmbedScript.replaceWith( embedScript );
+						lazyEmbedScript.replaceWith( embedScript );
+						lazyEmbedObserver.unobserve( lazyEmbedParent );
+					}
+				}
+			},
+			{
+				rootMargin: '0px 0px 500px 0px',
+				threshold: 0
+			}
+		);
+
+		for ( const lazyEmbedScript of lazyEmbedsScripts ) {
+			const lazyEmbedParent = lazyEmbedScript.parentNode;
+			lazyEmbedScriptsByParents.set( lazyEmbedParent, lazyEmbedScript );
+			lazyEmbedObserver.observe( lazyEmbedParent );
+		}
 	</script>
 	<?php
 }
