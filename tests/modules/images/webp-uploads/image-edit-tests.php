@@ -302,6 +302,10 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_validate_source_attribute_update_when_webp_edited() {
+		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
+			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
+		}
+
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
 
 		$editor = new WP_Image_Edit( $attachment_id );
