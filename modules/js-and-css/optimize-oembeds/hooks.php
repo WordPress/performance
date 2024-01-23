@@ -109,7 +109,6 @@ function perflab_optimize_oembed_lazy_load_scripts() {
 							);
 						}
 						lazyEmbedScript.replaceWith( embedScript );
-						lazyEmbedScript.replaceWith( embedScript );
 						lazyEmbedObserver.unobserve( lazyEmbedParent );
 					}
 				}
