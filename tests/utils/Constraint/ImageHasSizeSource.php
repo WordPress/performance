@@ -64,5 +64,4 @@ class ImageHasSizeSource extends ImageHasSource {
 
 		return $this->verify_sources( $metadata['sizes'][ $this->size ]['sources'] );
 	}
-
 }

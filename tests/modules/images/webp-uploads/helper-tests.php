@@ -364,6 +364,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_return_default_transforms_when_filter_returns_non_array_type() {
+		/** @phpstan-ignore-next-line */
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_null' );
 
 		$default_transforms = array(
@@ -520,7 +521,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$result = null;
 		add_action(
 			'wp_head',
-			static function() use ( &$result ) {
+			static function () use ( &$result ) {
 				$result = webp_uploads_in_frontend_body();
 			}
 		);
