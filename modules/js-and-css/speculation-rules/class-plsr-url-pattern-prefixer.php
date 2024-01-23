@@ -117,17 +117,6 @@ class PLSR_URL_Pattern_Prefixer {
 	 * @return string String with backslashes added where required.
 	 */
 	private static function escape_pattern_string( string $str ): string {
-		$replacements = array(
-			'+'  => '\\+',
-			'*'  => '\\*',
-			'?'  => '\\?',
-			':'  => '\\:',
-			'{'  => '\\{',
-			'}'  => '\\}',
-			'('  => '\\(',
-			')'  => '\\)',
-			'\\' => '\\\\',
-		);
-		return strtr( $str, $replacements );
+		return addcslashes( $str, '+*?:{}()\\' );
 	}
 }
