@@ -20,7 +20,11 @@ function ilo_maybe_add_template_output_buffer_filter() {
 	if ( ! ilo_can_optimize_response() ) {
 		return;
 	}
-	add_filter( 'ilo_template_output_buffer', 'ilo_optimize_template_output_buffer' );
+	$callback = 'ilo_optimize_template_output_buffer';
+	if ( function_exists( 'perflab_wrap_server_timing' ) ) {
+		$callback = perflab_wrap_server_timing( $callback, 'image-loading-optimization', 'exist' );
+	}
+	add_filter( 'ilo_template_output_buffer', $callback );
 }
 add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
 
@@ -62,7 +66,7 @@ function ilo_can_optimize_response(): bool {
  * @since n.e.x.t
  * @access private
  *
- * @param array<int, array{attributes: array{src?: string, srcset?: string, sizes?: string, crossorigin?: string}}|false> $lcp_elements_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
+ * @param array<int, array{background_image?: string, img_attributes?: array{src?: string, srcset?: string, sizes?: string, crossorigin?: string}}|false> $lcp_elements_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
  * @return string Markup for zero or more preload link tags.
  */
 function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths ): string {
@@ -77,35 +81,37 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 			continue;
 		}
 
-		// TODO: Add support for background images.
-		$attributes = $lcp_element['attributes'];
+		$link_attributes = array();
 
-		// Prevent preloading src for browsers that don't support imagesrcset on the link element.
-		if ( isset( $attributes['src'], $attributes['srcset'] ) ) {
-			unset( $attributes['src'] );
+		if ( ! empty( $lcp_element['background_image'] ) ) {
+			$link_attributes['href'] = $lcp_element['background_image'];
+		} elseif ( ! empty( $lcp_element['img_attributes'] ) ) {
+			foreach ( $lcp_element['img_attributes'] as $name => $value ) {
+				// Map img attribute name to link attribute name.
+				if ( 'srcset' === $name || 'sizes' === $name ) {
+					$name = 'image' . $name;
+				} elseif ( 'src' === $name ) {
+					$name = 'href';
+				}
+				$link_attributes[ $name ] = $value;
+			}
 		}
 
 		// Add media query if it's going to be something other than just `min-width: 0px`.
 		$minimum_viewport_width = $minimum_viewport_widths[ $i ];
 		$maximum_viewport_width = isset( $minimum_viewport_widths[ $i + 1 ] ) ? $minimum_viewport_widths[ $i + 1 ] - 1 : null;
-		if ( $minimum_viewport_width > 0 || null !== $maximum_viewport_width ) {
-			$media_query = sprintf( '( min-width: %dpx )', $minimum_viewport_width );
-			if ( null !== $maximum_viewport_width ) {
-				$media_query .= sprintf( ' and ( max-width: %dpx )', $maximum_viewport_width );
-			}
-			$attributes['media'] = $media_query;
+		$media_features         = array( 'screen' );
+		if ( $minimum_viewport_width > 0 ) {
+			$media_features[] = sprintf( '(min-width: %dpx)', $minimum_viewport_width );
 		}
+		if ( null !== $maximum_viewport_width ) {
+			$media_features[] = sprintf( '(max-width: %dpx)', $maximum_viewport_width );
+		}
+		$link_attributes['media'] = implode( ' and ', $media_features );
 
 		// Construct preload link.
 		$link_tag = '<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image"';
-		foreach ( array_filter( $attributes ) as $name => $value ) {
-			// Map img attribute name to link attribute name.
-			if ( 'srcset' === $name || 'sizes' === $name ) {
-				$name = 'image' . $name;
-			} elseif ( 'src' === $name ) {
-				$name = 'href';
-			}
-
+		foreach ( $link_attributes as $name => $value ) {
 			$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
 		}
 		$link_tag .= ">\n";
@@ -160,7 +166,6 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		}
 	}
 
-	// TODO: Handle case when the LCP element is not an image at all, but rather a background-image.
 	// Prepare to set fetchpriority attribute on the image when all breakpoints have the same LCP element.
 	if (
 		// All breakpoints share the same LCP element (or all have none at all).
@@ -180,31 +185,49 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	// Walk over all IMG tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes for preloading.
 	$processor = new ILO_HTML_Tag_Processor( $buffer );
 	foreach ( $processor->open_tags() as $tag_name ) {
-		if ( 'IMG' !== $tag_name ) {
+		$is_img_tag = ( 'IMG' === $tag_name );
+		$style      = $processor->get_attribute( 'style' );
+
+		/*
+		 * Note that CSS allows for a `background`/`background-image` to have multiple `url()` CSS functions, resulting
+		 * in multiple background images being layered on top of each other. This ability is not employed in core. Here
+		 * is a regex to search WPDirectory for instances of this: /background(-image)?:[^;}]+?url\([^;}]+?[^_]url\(/.
+		 * It is used in Jetpack with the second background image being a gradient. To support multiple background
+		 * images, this logic would need to be modified to make $background_image an array and to have a more robust
+		 * parser of the `url()` functions from the property value.
+		 */
+		$background_image = null;
+		if ( $style && preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?(?!data:)(?<background_image>.+?)[\'"]?\s*\)/', $style, $matches ) ) {
+			$background_image = $matches['background_image'];
+		}
+
+		if ( ! ( $is_img_tag || $background_image ) ) {
 			continue;
 		}
 
 		$xpath = $processor->get_xpath();
 
 		// Ensure the fetchpriority attribute is set on the element properly.
-		if ( $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
-			if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
-				$processor->set_attribute( 'data-ilo-fetchpriority-already-added', true );
-			} else {
-				$processor->set_attribute( 'fetchpriority', 'high' );
-				$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
-			}
+		if ( $is_img_tag ) {
+			if ( $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
+				if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
+					$processor->set_attribute( 'data-ilo-fetchpriority-already-added', true );
+				} else {
+					$processor->set_attribute( 'fetchpriority', 'high' );
+					$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
+				}
 
-			// Never include loading=lazy on the LCP image common across all breakpoints.
-			if ( 'lazy' === $processor->get_attribute( 'loading' ) ) {
-				$processor->set_attribute( 'data-ilo-removed-loading', $processor->get_attribute( 'loading' ) );
-				$processor->remove_attribute( 'loading' );
+				// Never include loading=lazy on the LCP image common across all breakpoints.
+				if ( 'lazy' === $processor->get_attribute( 'loading' ) ) {
+					$processor->set_attribute( 'data-ilo-removed-loading', $processor->get_attribute( 'loading' ) );
+					$processor->remove_attribute( 'loading' );
+				}
+			} elseif ( $all_breakpoints_have_url_metrics && $processor->get_attribute( 'fetchpriority' ) ) {
+				// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
+				// continue to apply while waiting for all breakpoints to have metrics collected for them.
+				$processor->set_attribute( 'data-ilo-removed-fetchpriority', $processor->get_attribute( 'fetchpriority' ) );
+				$processor->remove_attribute( 'fetchpriority' );
 			}
-		} elseif ( $all_breakpoints_have_url_metrics && $processor->get_attribute( 'fetchpriority' ) ) {
-			// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
-			// continue to apply while waiting for all breakpoints to have metrics collected for them.
-			$processor->set_attribute( 'data-ilo-removed-fetchpriority', $processor->get_attribute( 'fetchpriority' ) );
-			$processor->remove_attribute( 'fetchpriority' );
 		}
 
 		// TODO: If the image is visible (intersectionRatio!=0) in any of the URL metrics, remove loading=lazy.
@@ -212,12 +235,21 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 
 		// Capture the attributes from the LCP elements to use in preload links.
 		if ( isset( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] ) ) {
-			$attributes = array();
-			foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin' ) as $attr_name ) {
-				$attributes[ $attr_name ] = $processor->get_attribute( $attr_name );
-			}
-			foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
-				$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['attributes'] = $attributes;
+			if ( $is_img_tag ) {
+				$img_attributes = array();
+				foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin' ) as $attr_name ) {
+					$value = $processor->get_attribute( $attr_name );
+					if ( null !== $value ) {
+						$img_attributes[ $attr_name ] = $value;
+					}
+				}
+				foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
+					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['img_attributes'] = $img_attributes;
+				}
+			} elseif ( $background_image ) {
+				foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
+					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['background_image'] = $background_image;
+				}
 			}
 		}
 

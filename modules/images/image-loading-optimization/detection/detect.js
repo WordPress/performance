@@ -202,23 +202,12 @@ export default async function detect( {
 		/** @type {?HTMLDivElement} */ doc.getElementById( adminBarId );
 
 	// TODO: This query no longer needs to be done as early as possible since the server is adding the breadcrumbs.
-	const breadcrumbedImages = doc.body.querySelectorAll(
-		'img[data-ilo-xpath]'
-	);
-
-	// We do the same for elements with background images which are not data: URLs.
-	// TODO: Re-enable background image support when server-side is implemented.
-	// const breadcrumbedElementsWithBackgrounds = Array.from(
-	// 	doc.body.querySelectorAll( '[data-ilo-xpath][style*="background"]' )
-	// ).filter( ( /** @type {Element} */ el ) =>
-	// 	/url\(\s*['"](?!=data:)/.test( el.style.backgroundImage )
-	// );
+	const breadcrumbedElements =
+		doc.body.querySelectorAll( '[data-ilo-xpath]' );
 
 	/** @type {Map<HTMLElement, string>} */
 	const breadcrumbedElementsMap = new Map(
-		[
-			...breadcrumbedImages /*, ...breadcrumbedElementsWithBackgrounds*/,
-		].map(
+		[ ...breadcrumbedElements ].map(
 			/**
 			 * @param {HTMLElement} element
 			 * @return {[HTMLElement, string]} Tuple of element and its XPath.
