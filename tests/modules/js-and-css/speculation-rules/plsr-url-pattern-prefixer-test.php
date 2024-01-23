@@ -33,6 +33,8 @@ class PLSR_URL_Pattern_Prefixer_Tests extends WP_UnitTestCase {
 			// Missing trailing slash still works, does not consider "cut-off" directory names.
 			array( '/subdir', '/subdirectory/my-page/', '/subdir/subdirectory/my-page/' ),
 			array( '/subdir', 'subdirectory/my-page/', '/subdir/subdirectory/my-page/' ),
+			// A base path containing a : must be enclosed in braces to avoid confusion.
+			array( '/scope:0/', '/*/foo', '{/scope\\:0}/*/foo' ),
 		);
 	}
 

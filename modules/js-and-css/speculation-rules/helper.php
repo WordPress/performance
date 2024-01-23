@@ -41,10 +41,10 @@ function plsr_get_speculation_rules() {
 
 	// Ensure that there are no duplicates and that the base paths cannot be removed.
 	$href_exclude_paths = array_unique(
-		array_merge(
-			$base_href_exclude_paths,
-			array_map(
-				array( $prefixer, 'prefix_path_pattern' ),
+		array_map(
+			array( $prefixer, 'prefix_path_pattern' ),
+			array_merge(
+				$base_href_exclude_paths,
 				$href_exclude_paths
 			)
 		)
@@ -72,17 +72,12 @@ function plsr_get_speculation_rules() {
 				'and' => array(
 					// Prerender any URLs within the same site.
 					array(
-						'href_matches' => array( 'pathname' => $prefixer->prefix_path_pattern( '/*' ) ),
+						'href_matches' => $prefixer->prefix_path_pattern( '/*' ),
 					),
 					// Except for WP login and admin URLs.
 					array(
 						'not' => array(
-							'href_matches' => array_map(
-								static function ( string $path ): array {
-									return array( 'pathname' => $path );
-								},
-								$href_exclude_paths
-							),
+							'href_matches' => $href_exclude_paths,
 						),
 					),
 				),

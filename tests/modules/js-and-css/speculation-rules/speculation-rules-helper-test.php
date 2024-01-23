@@ -27,8 +27,8 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 
 		$this->assertSameSets(
 			array(
-				array( 'pathname' => '/wp-login.php' ),
-				array( 'pathname' => '/wp-admin/*' ),
+				'/wp-login.php',
+				'/wp-admin/*',
 			),
 			$href_exclude_paths
 		);
@@ -47,9 +47,9 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		// Ensure the base exclude paths are still present and that the custom path was formatted correctly.
 		$this->assertSameSets(
 			array(
-				array( 'pathname' => '/wp-login.php' ),
-				array( 'pathname' => '/wp-admin/*' ),
-				array( 'pathname' => '/custom-file.php' ),
+				'/wp-login.php',
+				'/wp-admin/*',
+				'/custom-file.php',
 			),
 			$href_exclude_paths
 		);
