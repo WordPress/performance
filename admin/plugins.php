@@ -49,7 +49,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
  */
 function perflab_get_standalone_plugins() {
 	return array_keys(
-		perflab_get_standalone_plugins_constants( 'plugins' )
+		perflab_get_standalone_plugin_version_constants( 'plugins' )
 	);
 }
 
@@ -63,7 +63,7 @@ function perflab_get_standalone_plugins() {
 function perflab_get_active_modules_with_standalone_plugins() {
 	$modules = perflab_get_module_settings();
 	return array_filter(
-		array_keys( perflab_get_standalone_plugins_constants( 'modules' ) ),
+		array_keys( perflab_get_standalone_plugin_version_constants( 'modules' ) ),
 		static function ( $module ) use ( $modules ) {
 			return ! empty( $modules[ $module ] ) && $modules[ $module ]['enabled'];
 		}

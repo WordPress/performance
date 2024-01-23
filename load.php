@@ -213,7 +213,7 @@ function perflab_get_generator_content() {
 	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
 
 	$active_plugins = array();
-	foreach ( perflab_get_standalone_plugins_constants( 'plugins' ) as $plugin_slug => $constant_name ) {
+	foreach ( perflab_get_standalone_plugin_version_constants( 'plugins' ) as $plugin_slug => $constant_name ) {
 		if ( defined( $constant_name ) && ! str_starts_with( constant( $constant_name ), 'Performance Lab ' ) ) {
 			$active_plugins[] = $plugin_slug;
 		}
@@ -285,7 +285,7 @@ function perflab_can_load_module( $module ) {
  * @return bool Whether the module has already been loaded by a separate plugin.
  */
 function perflab_is_standalone_plugin_loaded( $module ) {
-	$standalone_plugins_constants = perflab_get_standalone_plugins_constants( 'modules' );
+	$standalone_plugins_constants = perflab_get_standalone_plugin_version_constants( 'modules' );
 	if (
 		isset( $standalone_plugins_constants[ $module ] ) &&
 		defined( $standalone_plugins_constants[ $module ] ) &&
@@ -297,22 +297,42 @@ function perflab_is_standalone_plugin_loaded( $module ) {
 }
 
 /**
- * Gets the standalone plugin constants used for each module / plugin.
+ * Gets the standalone plugin constants used for each module with a standalone plugin.
  *
  * @since 2.2.0
- * @since n.e.x.t The `$type` parameter was added.
+ * @deprecated n.e.x.t
  *
- * @param string $type Optional. Either 'modules' or 'plugins'. Default 'modules'.
- * @return array<string, string> Map of module path / plugin slug and the version constant used.
+ * @return array Map of module path to version constant used.
  */
-function perflab_get_standalone_plugins_constants( $type = 'modules' ) {
-	if ( 'modules' === $type ) {
+function perflab_get_standalone_plugins_constants() {
+	_deprecated_function( __FUNCTION__, 'Performance Lab n.e.x.t', "perflab_get_standalone_plugin_version_constants( 'modules' )" );
+	return perflab_get_standalone_plugin_version_constants( 'modules' );
+}
+
+/**
+ * Gets the standalone plugin constants used for each available standalone plugin, or module with a standalone plugin.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $source Optional. Either 'plugins' or 'modules'. Default 'plugins'.
+ * @return array<string, string> Map of plugin slug / module path and the version constant used.
+ */
+function perflab_get_standalone_plugin_version_constants( $source = 'plugins' ) {
+	if ( 'modules' === $source ) {
+		/*
+		 * This list includes all modules which are also available as standalone plugins,
+		 * as `$module_dir => $version_constant` pairs.
+		 */
 		return array(
 			'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
 			'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
 		);
 	}
 
+	/*
+	 * This list includes all standalone plugins that are part of the Performance Lab project,
+	 * as `$plugin_slug => $version_constant` pairs.
+	 */
 	return array(
 		'webp-uploads'            => 'WEBP_UPLOADS_VERSION',
 		'dominant-color-images'   => 'DOMINANT_COLOR_IMAGES_VERSION',
