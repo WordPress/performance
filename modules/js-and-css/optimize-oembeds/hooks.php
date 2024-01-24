@@ -22,8 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function perflab_optimize_oembed_html( $html ) {
-	global $oembed_lazy_load_scripts;
-
 	$p = new WP_HTML_Tag_Processor( $html );
 
 	/**
