@@ -10,8 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-$oembed_lazy_load_scripts = false;
-
 /**
  * Filter the oEmbed HTML.
  *
