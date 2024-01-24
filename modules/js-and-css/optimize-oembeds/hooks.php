@@ -89,11 +89,6 @@ function perflab_optimize_oembed_lazy_load_scripts() {
 						const lazyEmbedScript = lazyEmbedScriptsByParents.get( lazyEmbedParent );
 						const embedScript = document.createElement( 'script' );
 						for ( const attr of lazyEmbedScript.attributes ) {
-							if ( attr.nodeName === 'src' ) {
-								// Even though the src attribute is absent, the browser seems to presume it is present.
-								continue;
-							}
-
 							embedScript.setAttribute(
 								attr.nodeName === 'data-lazy-embed-src' ? 'src' : attr.nodeName,
 								attr.nodeValue
