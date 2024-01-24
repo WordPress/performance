@@ -55,7 +55,7 @@ function perflab_optimize_oembed_html( $html ) {
 	}
 	// If there was only one non-inline script, make it lazy.
 	if ( 1 === $script_count && ! $has_inline_script ) {
-		$oembed_lazy_load_scripts = true;
+		add_action( 'wp_footer', 'perflab_optimize_oembed_lazy_load_scripts' );
 		$p->seek( 'script' );
 		$p->set_attribute( 'data-lazy-embed-src', $p->get_attribute( 'src' ) );
 		$p->remove_attribute( 'src' );
