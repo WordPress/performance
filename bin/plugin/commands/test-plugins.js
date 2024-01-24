@@ -327,7 +327,7 @@ function doRunUnitTests( settings ) {
 				[
 					'run',
 					'tests-cli',
-					`--env-cwd=/var/www/html/wp-content/plugins/${ plugin } vendor/bin/phpunit -c tests/multisite.xml --verbose --testdox`,
+					`--env-cwd=/var/www/html/wp-content/plugins/${ plugin } vendor/bin/phpunit -c plugin-tests/multisite.xml --verbose --testdox`,
 				],
 				{ shell: true, encoding: 'utf8' }
 			);
@@ -337,7 +337,7 @@ function doRunUnitTests( settings ) {
 				[
 					'run',
 					'tests-cli',
-					`--env-cwd=/var/www/html/wp-content/plugins/${ plugin } vendor/bin/phpunit --verbose --testdox`,
+					`--env-cwd=/var/www/html/wp-content/plugins/${ plugin } vendor/bin/phpunit -c plugin-tests/phpunit.xml --verbose --testdox`,
 				],
 				{ shell: true, encoding: 'utf8' }
 			);
