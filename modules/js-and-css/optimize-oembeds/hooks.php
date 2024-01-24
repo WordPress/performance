@@ -123,4 +123,3 @@ function perflab_optimize_oembed_lazy_load_scripts() {
 	</script>
 	<?php
 }
-add_action( 'wp_footer', 'perflab_optimize_oembed_lazy_load_scripts', 99 );
