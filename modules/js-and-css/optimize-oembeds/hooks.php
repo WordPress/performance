@@ -66,7 +66,7 @@ function perflab_optimize_oembed_html( $html ) {
 	}
 	// If there was only one iframe, make it lazy.
 	if ( 1 === $iframe_count ) {
-		$p->seek( 'frame' );
+		$p->seek( 'iframe' );
 		$p->set_attribute( 'loading', 'lazy' );
 	}
 	return $p->get_updated_html();
