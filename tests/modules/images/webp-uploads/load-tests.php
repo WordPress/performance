@@ -21,6 +21,10 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		parent::set_up();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
+
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
 	}
 
 	public function tear_down() {

@@ -79,6 +79,10 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_an_image_with_the_default_suffix_in_the_same_location_when_no_destination_is_specified() {
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
 		// Create JPEG and WebP so that both versions are generated.
 		$this->opt_in_to_jpeg_and_webp();
 
@@ -108,6 +112,10 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_a_file_in_the_specified_location_with_the_specified_name() {
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 		$size_data     = array(
 			'width'  => 300,
@@ -177,6 +185,10 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_to_create_an_image_size_when_attached_file_does_not_exists() {
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
 		);
@@ -545,6 +557,10 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_add_original_image_extension_to_the_webp_file_name_to_ensure_it_is_unique( $jpeg_image, $jpg_image ) {
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
 		$jpeg_image_attachment_id = self::factory()->attachment->create_upload_object( $jpeg_image );
 		$jpg_image_attachment_id  = self::factory()->attachment->create_upload_object( $jpg_image );
 
