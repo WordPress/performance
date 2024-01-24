@@ -320,13 +320,14 @@ function doRunUnitTests( settings ) {
 		const isMultiSite = 'multi' === settings.siteType;
 		let command = '';
 
+		// wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test
 		if ( isMultiSite ) {
 			command = spawnSync(
 				'wp-env',
 				[
 					'run',
-					'phpunit',
-					`'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/${ plugin }/multisite.xml --verbose --testdox'`,
+					'tests-cli',
+					`--env-cwd=/var/www/html/wp-content/plugins/${ plugin } vendor/bin/phpunit -c tests/multisite.xml --verbose --testdox`,
 				],
 				{ shell: true, encoding: 'utf8' }
 			);
@@ -335,8 +336,8 @@ function doRunUnitTests( settings ) {
 				'wp-env',
 				[
 					'run',
-					'phpunit',
-					`'phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml --verbose --testdox'`,
+					'tests-cli',
+					`--env-cwd=/var/www/html/wp-content/plugins/${ plugin } vendor/bin/phpunit --verbose --testdox`,
 				],
 				{ shell: true, encoding: 'utf8' }
 			);
