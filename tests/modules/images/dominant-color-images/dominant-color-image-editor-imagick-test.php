@@ -24,6 +24,11 @@ class Dominant_Color_Image_Editor_Imagick_Test extends DominantColorTestCase {
 			$this->markTestSkipped( 'The Imagick PHP extension is not loaded.' );
 		}
 
+		$mime_type = wp_check_filetype( $image_path )['type'];
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
