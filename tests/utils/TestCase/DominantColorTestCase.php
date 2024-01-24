@@ -111,14 +111,10 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 	public function provider_get_dominant_color_invalid_images() {
 		return array(
 			'tiff' => array(
-				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/test-image.tiff',
-				'expected_color'        => array( 'dfdfdf' ),
-				'expected_transparency' => true,
+				'image_path' => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/test-image.tiff',
 			),
 			'bmp'  => array(
-				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/test-image.bmp',
-				'expected_color'        => array( 'dfdfdf' ),
-				'expected_transparency' => true,
+				'image_path' => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/test-image.bmp',
 			),
 		);
 	}

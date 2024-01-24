@@ -41,7 +41,7 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 	 *
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
-	public function test_get_dominant_color_invalid( $image_path, $expected_color, $expected_transparency ) {
+	public function test_get_dominant_color_invalid( $image_path ) {
 		if ( ! extension_loaded( 'gd' ) || ! function_exists( 'gd_info' ) ) {
 			$this->markTestSkipped( 'The GD PHP extension is not loaded.' );
 		}
