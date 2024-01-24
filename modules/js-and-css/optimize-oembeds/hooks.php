@@ -76,11 +76,6 @@ add_filter( 'embed_oembed_html', 'perflab_optimize_oembed_html' );
  * @since n.e.x.t
  */
 function perflab_optimize_oembed_lazy_load_scripts() {
-	global $oembed_lazy_load_scripts;
-
-	if ( ! $oembed_lazy_load_scripts ) {
-		return;
-	}
 	?>
 	<script type="module">
 		const lazyEmbedsScripts = document.querySelectorAll( 'script[data-lazy-embed-src]' );
