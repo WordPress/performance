@@ -300,12 +300,12 @@ function perflab_is_standalone_plugin_loaded( $module ) {
  * Gets the standalone plugin constants used for each module with a standalone plugin.
  *
  * @since 2.2.0
- * @deprecated n.e.x.t
+ * @deprecated 2.9.0
  *
  * @return array Map of module path to version constant used.
  */
 function perflab_get_standalone_plugins_constants() {
-	_deprecated_function( __FUNCTION__, 'Performance Lab n.e.x.t', "perflab_get_standalone_plugin_version_constants( 'modules' )" );
+	_deprecated_function( __FUNCTION__, 'Performance Lab 2.9.0', "perflab_get_standalone_plugin_version_constants( 'modules' )" );
 	return perflab_get_standalone_plugin_version_constants( 'modules' );
 }
 
