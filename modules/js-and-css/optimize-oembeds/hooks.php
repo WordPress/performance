@@ -67,7 +67,7 @@ function perflab_optimize_oembed_html( $html ) {
 	}
 	return $p->get_updated_html();
 }
-add_filter( 'embed_oembed_html', 'perflab_optimize_oembed_html', 10 );
+add_filter( 'embed_oembed_html', 'perflab_optimize_oembed_html' );
 
 /**
  * Add a script to the footer if there are lazy loaded embeds.
