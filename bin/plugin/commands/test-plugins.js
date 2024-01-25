@@ -342,6 +342,10 @@ function doRunUnitTests( settings ) {
 			);
 		}
 
+		if ( command.stderr ) {
+			log( formats.error( command.stderr.replace( '\n', '' ) ) );
+		}
+
 		log( command.stdout.replace( '\n', '' ) );
 
 		if ( 1 === command.status ) {
