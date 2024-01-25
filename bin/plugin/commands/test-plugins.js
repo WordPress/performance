@@ -507,6 +507,23 @@ function doRunStandalonePluginTests( settings ) {
 	// Handle replacement of wp-env file content for round 1 of testing without root plugin.
 	doReplaceWpEnvContent( { ...settings, builtPlugins } );
 
+	// Update PHPUnit if necessary.
+	const command = spawnSync(
+		'wp-env',
+		[
+			'run',
+			'tests-cli',
+			`--env-cwd=/var/www/html/wp-content/plugins/${ settings.performancePluginSlug } composer update --no-interaction`,
+		],
+		{ shell: true, encoding: 'utf8' }
+	);
+
+	if ( command.stderr ) {
+		log( formats.error( command.stderr.replace( '\n', '' ) ) );
+	}
+
+	log( command.stdout.replace( '\n', '' ) );
+
 	// Run unit tests with main WPP plugin disabled.
 	const disablePlugins = [ settings.performancePluginSlug ];
 
