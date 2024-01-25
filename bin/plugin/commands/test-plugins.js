@@ -472,7 +472,7 @@ function doRunStandalonePluginTests( settings ) {
 			);
 			log(
 				formats.success(
-					`Copied test assets for plugin "${ plugin }", executing "composer install --no-interaction" on plugin.\n`
+					`Copied test assets for plugin "${ plugin }", executing "composer update --no-interaction" on plugin.\n`
 				)
 			);
 		} catch ( e ) {
@@ -486,18 +486,23 @@ function doRunStandalonePluginTests( settings ) {
 			process.exit( 1 );
 		}
 
-		// Execute composer install within built plugin following copy.
-		execSync(
-			`composer install --working-dir=${ settings.builtPluginsDir }${ plugin } --no-interaction`,
-			( err, output ) => {
-				if ( err ) {
-					log( formats.error( `${ err }` ) );
-					process.exit( 1 );
-				}
-				// log the output received from the command
-				log( output );
-			}
+		// Execute composer update within built plugin following copy.
+		// Ensures PHPUnit is downgraded/upgrades as necessary.
+		const command = spawnSync(
+			'wp-env',
+			[
+				'run',
+				'tests-cli',
+				`--env-cwd=/var/www/html/wp-content/plugins/${ plugin } composer update --no-interaction`,
+			],
+			{ shell: true, encoding: 'utf8' }
 		);
+
+		if ( command.stderr ) {
+			log( formats.error( command.stderr.replace( '\n', '' ) ) );
+		}
+
+		log( command.stdout.replace( '\n', '' ) );
 	} );
 
 	// Add the root level WPP plugin to the built plugins array.
@@ -506,23 +511,6 @@ function doRunStandalonePluginTests( settings ) {
 
 	// Handle replacement of wp-env file content for round 1 of testing without root plugin.
 	doReplaceWpEnvContent( { ...settings, builtPlugins } );
-
-	// Update PHPUnit if necessary.
-	const command = spawnSync(
-		'wp-env',
-		[
-			'run',
-			'tests-cli',
-			`--env-cwd=/var/www/html/wp-content/plugins/${ settings.performancePluginSlug } composer update --no-interaction`,
-		],
-		{ shell: true, encoding: 'utf8' }
-	);
-
-	if ( command.stderr ) {
-		log( formats.error( command.stderr.replace( '\n', '' ) ) );
-	}
-
-	log( command.stdout.replace( '\n', '' ) );
 
 	// Run unit tests with main WPP plugin disabled.
 	const disablePlugins = [ settings.performancePluginSlug ];
