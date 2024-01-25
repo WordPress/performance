@@ -29,9 +29,9 @@ function perflab_optimize_oembed_html( $html ) {
 	 *
 	 * - If there is only one iframe, set loading="lazy".
 	 * - Prevent making scripts lazy if there is an inline script.
-	 *  - Only make script lazy if there is a single external script (since if there are
-	 *    multiple they may not get loaded in the right order).
-	 *  - Ensure that both the iframe and the script are made lazy if both occur in the same embed.
+	 * - Only make script lazy if there is a single external script (since if there are
+	 *   multiple they may not get loaded in the right order).
+	 * - Ensure that both the iframe and the script are made lazy if both occur in the same embed.
 	 */
 	$iframe_count      = 0;
 	$script_count      = 0;
