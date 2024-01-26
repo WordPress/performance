@@ -8,6 +8,10 @@
  * @package performance-lab
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 /**
  * PartyTown Configuration
  *
