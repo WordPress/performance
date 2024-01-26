@@ -50,11 +50,11 @@ const webVitals = () => {
 				patterns: [
 					{
 						from: `${ source }/dist/web-vitals.js`,
-						to: `${ destination }/web-vitals/index.js`,
+						to: `${ destination }/web-vitals.js`,
 					},
 					{
 						from: `${ source }/package.json`,
-						to: `${ destination }/web-vitals/index.asset.php`,
+						to: `${ destination }/web-vitals.asset.php`,
 						transform: {
 							transformer: assetDataTransformer,
 							cache: false,
