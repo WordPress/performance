@@ -28,6 +28,7 @@
     "since": "./bin/plugin/cli.js since",
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
+    "build": "wp-scripts build",
     "build-plugins": "./bin/plugin/cli.js build-plugins",
     "test-plugins": "./bin/plugin/cli.js test-plugins",
     "test-plugins-multisite": "./bin/plugin/cli.js test-plugins --sitetype=multi",
@@ -51,11 +52,5 @@
     "*.js": [
       "npm run lint-js"
     ]
-  },
-  "copy-vendor-libs": {
-    "partytown": {
-      "from": "node_modules/@builder.io/partytown/lib",
-      "to": "modules/javascript/partytown-web-worker/assets/js/partytown"
-    }
   }
 }
