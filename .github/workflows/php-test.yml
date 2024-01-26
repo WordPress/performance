@@ -52,7 +52,7 @@ jobs:
           cache: npm
       - name: npm install
         run: npm ci
-      - name: Assets build
+      - name: Build assets
         run: npm run build
       - name: Install WordPress
         run: npm run wp-env start
