@@ -46,13 +46,7 @@ function perflab_partytown_web_worker_configuration() {
  * @return void
  */
 function perflab_partytown_web_worker_init() {
-	$partytown_js = __DIR__ . '/assets/js/partytown/partytown.js';
-
-	if ( file_exists( $partytown_js ) ) {
-		$partytown_js = file_get_contents( $partytown_js ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
-	} else {
-		$partytown_js = '';
-	}
+	$partytown_js = file_get_contents( __DIR__ . '/assets/js/partytown/partytown.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 
 	wp_register_script(
 		'partytown',
@@ -73,7 +67,7 @@ function perflab_partytown_web_worker_init() {
 
 	wp_add_inline_script(
 		'partytown',
-		is_string( $partytown_js ) ? $partytown_js : '',
+		$partytown_js,
 		'after'
 	);
 }
