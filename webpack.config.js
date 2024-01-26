@@ -22,7 +22,7 @@ const sharedConfig = {
  * @param {Buffer} content      The content as a Buffer of the file being transformed.
  * @param {string} absoluteFrom The absolute path to the file being transformed.
  *
- * @return {string} The transformed content.
+ * @return {Buffer|string} The transformed content.
  */
 const assetDataTransformer = ( content, absoluteFrom ) => {
 	if ( 'package.json' !== path.basename( absoluteFrom ) ) {
