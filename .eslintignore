@@ -1,0 +1,5 @@
+**/*.min.js
+**/node_modules/**
+**/vendor/**
+build/*
+modules/javascript/partytown-web-worker/assets/js/partytown/*
