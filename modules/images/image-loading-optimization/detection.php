@@ -35,7 +35,7 @@ function ilo_get_detection_script( string $slug, array $needed_minimum_viewport_
 	 */
 	$detection_time_window = apply_filters( 'ilo_detection_time_window', 5000 );
 
-	$web_vitals_lib_data = require_once __DIR__ . '/detection/web-vitals.asset.php';
+	$web_vitals_lib_data = require __DIR__ . '/detection/web-vitals.asset.php';
 	$web_vitals_lib_src  = add_query_arg( 'ver', $web_vitals_lib_data['version'], plugin_dir_url( __FILE__ ) . '/detection/web-vitals.js' );
 
 	$detect_args = array(
