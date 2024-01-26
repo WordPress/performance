@@ -35,6 +35,9 @@ function ilo_get_detection_script( string $slug, array $needed_minimum_viewport_
 	 */
 	$detection_time_window = apply_filters( 'ilo_detection_time_window', 5000 );
 
+	$web_vitals_version = require_once __DIR__ . '/detection/web-vitals/index.asset.php';
+	$web_vitals_lib_src = add_query_arg( 'ver', $web_vitals_version, plugin_dir_url( __FILE__ ) . '/detection/web-vitals/index.js' );
+
 	$detect_args = array(
 		'serveTime'                   => microtime( true ) * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
 		'detectionTimeWindow'         => $detection_time_window,
@@ -45,6 +48,7 @@ function ilo_get_detection_script( string $slug, array $needed_minimum_viewport_
 		'urlMetricsNonce'             => ilo_get_url_metrics_storage_nonce( $slug ),
 		'neededMinimumViewportWidths' => $needed_minimum_viewport_widths,
 		'storageLockTTL'              => ilo_get_url_metric_storage_lock_ttl(),
+		'webVitalsLibrarySrc'         => $web_vitals_lib_src,
 	);
 	return wp_get_inline_script_tag(
 		sprintf(
