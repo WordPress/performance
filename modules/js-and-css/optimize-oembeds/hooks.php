@@ -100,7 +100,7 @@ function perflab_optimize_oembed_lazy_load_scripts() {
 				}
 			},
 			{
-				rootMargin: '0px 0px 500px 0px',
+				rootMargin: '100% 0% 100% 0%',
 				threshold: 0
 			}
 		);
