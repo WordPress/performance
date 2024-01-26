@@ -58,6 +58,9 @@ jobs:
     steps:
       - uses: styfle/cancel-workflow-action@0.11.0
       - uses: actions/checkout@v3
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
       - name: Setup Node.js (.nvmrc)
         uses: actions/setup-node@v3
         with:
@@ -65,6 +68,12 @@ jobs:
           cache: npm
       - name: npm install
         run: npm ci
+      - name: General debug information
+        run: |
+          npm --version
+          node --version
+          composer --version
+          php -v
       - name: Building standalone plugins
         run: npm run build-plugins
       - name: Running single site standalone plugin integration tests
