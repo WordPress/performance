@@ -6,6 +6,9 @@
     "node": ">=20.10.0",
     "npm": ">=10.2.3"
   },
+  "dependencies": {
+    "web-vitals": "3.5.0"
+  },
   "devDependencies": {
     "@octokit/rest": "^19.0.5",
     "@wordpress/env": "^5.7.0",
@@ -25,6 +28,7 @@
     "since": "./bin/plugin/cli.js since",
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
+    "build": "wp-scripts build",
     "build-plugins": "./bin/plugin/cli.js build-plugins",
     "test-plugins": "./bin/plugin/cli.js test-plugins",
     "test-plugins-multisite": "./bin/plugin/cli.js test-plugins --sitetype=multi",
@@ -50,8 +54,5 @@
     "*.js": [
       "npm run lint-js"
     ]
-  },
-  "dependencies": {
-    "web-vitals": "3.5.0"
   }
 }
