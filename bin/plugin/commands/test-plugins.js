@@ -316,6 +316,18 @@ function doRunUnitTests( settings ) {
 			)
 		);
 
+		execSync(
+			`composer install --working-dir=${ settings.builtPluginsDir }${ plugin } --no-interaction`,
+			( err, output ) => {
+				if ( err ) {
+					log( formats.error( `${ err }` ) );
+					process.exit( 1 );
+				}
+				// log the output received from the command
+				log( output );
+			}
+		);
+
 		// Define multi site flag based on single vs multi sitetype arg.
 		const isMultiSite = 'multi' === settings.siteType;
 		let command = '';
@@ -342,13 +354,12 @@ function doRunUnitTests( settings ) {
 			);
 		}
 
-		if ( command.stderr ) {
-			log( formats.error( command.stderr.replace( '\n', '' ) ) );
-		}
-
 		log( command.stdout.replace( '\n', '' ) );
 
 		if ( 1 === command.status ) {
+			// Log error.
+			log( formats.error( command.stderr.replace( '\n', '' ) ) );
+
 			log(
 				formats.error(
 					`One or more tests failed for plugin ${ plugin }`
@@ -472,7 +483,7 @@ function doRunStandalonePluginTests( settings ) {
 			);
 			log(
 				formats.success(
-					`Copied test assets for plugin "${ plugin }", executing "composer update --no-interaction" on plugin.\n`
+					`Copied test assets for plugin "${ plugin }", executing "composer install --no-interaction" on plugin.\n`
 				)
 			);
 		} catch ( e ) {
@@ -486,23 +497,18 @@ function doRunStandalonePluginTests( settings ) {
 			process.exit( 1 );
 		}
 
-		// Execute composer update within built plugin following copy.
-		// Ensures PHPUnit is downgraded/upgrades as necessary.
-		const command = spawnSync(
-			'wp-env',
-			[
-				'run',
-				'tests-cli',
-				`--env-cwd=/var/www/html/wp-content/plugins/${ plugin } composer update --no-interaction`,
-			],
-			{ shell: true, encoding: 'utf8' }
+		// Execute composer install within built plugin following copy.
+		execSync(
+			`composer install --working-dir=${ settings.builtPluginsDir }${ plugin } --no-interaction`,
+			( err, output ) => {
+				if ( err ) {
+					log( formats.error( `${ err }` ) );
+					process.exit( 1 );
+				}
+				// log the output received from the command
+				log( output );
+			}
 		);
-
-		if ( command.stderr ) {
-			log( formats.error( command.stderr.replace( '\n', '' ) ) );
-		}
-
-		log( command.stdout.replace( '\n', '' ) );
 	} );
 
 	// Add the root level WPP plugin to the built plugins array.
