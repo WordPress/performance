@@ -59,3 +59,8 @@ temp/
 ._*
 .Trashes
 .svn
+
+############
+## Vendor Libraries
+############
+modules/images/image-loading-optimization/detection/web-vitals/*
