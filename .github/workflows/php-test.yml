@@ -52,6 +52,8 @@ jobs:
           cache: npm
       - name: npm install
         run: npm ci
+      - name: Assets build
+        run: npm run build
       - name: Install WordPress
         run: npm run wp-env start
       - name: Running single site unit tests
