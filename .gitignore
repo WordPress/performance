@@ -63,4 +63,4 @@ temp/
 ############
 ## Vendor Libraries
 ############
-modules/images/image-loading-optimization/detection/web-vitals/*
+modules/images/image-loading-optimization/detection/web-vitals*
