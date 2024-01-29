@@ -23,6 +23,7 @@ nbproject/
 
 build
 .wp-env.override.json
+*.asset.php
 
 ############
 ## Vendor
