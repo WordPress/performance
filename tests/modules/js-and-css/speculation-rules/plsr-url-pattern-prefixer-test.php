@@ -33,6 +33,8 @@ class PLSR_URL_Pattern_Prefixer_Tests extends WP_UnitTestCase {
 			// Missing trailing slash still works, does not consider "cut-off" directory names.
 			array( '/subdir', '/subdirectory/my-page/', '/subdir/subdirectory/my-page/' ),
 			array( '/subdir', 'subdirectory/my-page/', '/subdir/subdirectory/my-page/' ),
+			// A base path containing a : must be enclosed in braces to avoid confusion.
+			array( '/scope:0/', '/*/foo', '{/scope\\:0}/*/foo' ),
 		);
 	}
 
@@ -45,25 +47,30 @@ class PLSR_URL_Pattern_Prefixer_Tests extends WP_UnitTestCase {
 		$this->assertSame( '/', $contexts['site'] );
 	}
 
-	public function test_get_default_contexts_with_subdirectories() {
+	/**
+	 * @dataProvider data_default_contexts_with_subdirectories
+	 */
+	public function test_get_default_contexts_with_subdirectories( $context, $unescaped, $expected ) {
 		add_filter(
-			'home_url',
-			static function () {
-				return 'https://example.com/subdir/';
-			}
-		);
-		add_filter(
-			'site_url',
-			static function () {
-				return 'https://example.com/subdir/wp/';
+			$context . '_url',
+			static function () use ( $unescaped ) {
+				return $unescaped;
 			}
 		);
 
 		$contexts = PLSR_URL_Pattern_Prefixer::get_default_contexts();
 
-		$this->assertArrayHasKey( 'home', $contexts );
-		$this->assertArrayHasKey( 'site', $contexts );
-		$this->assertSame( '/subdir/', $contexts['home'] );
-		$this->assertSame( '/subdir/wp/', $contexts['site'] );
+		$this->assertArrayHasKey( $context, $contexts );
+		$this->assertSame( $expected, $contexts[ $context ] );
+	}
+
+	public function data_default_contexts_with_subdirectories() {
+		return array(
+			array( 'home', 'https://example.com/subdir/', '/subdir/' ),
+			array( 'site', 'https://example.com/subdir/wp/', '/subdir/wp/' ),
+			// If the context URL has URL pattern special characters it may need escaping.
+			array( 'home', 'https://example.com/scope:0.*/', '/scope\\:0.\\*/' ),
+			array( 'site', 'https://example.com/scope:0.*/wp+/', '/scope\\:0.\\*/wp\\+/' ),
+		);
 	}
 }
