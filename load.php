@@ -337,6 +337,8 @@ function perflab_get_standalone_plugin_version_constants( $source = 'plugins' ) 
 		'webp-uploads'            => 'WEBP_UPLOADS_VERSION',
 		'dominant-color-images'   => 'DOMINANT_COLOR_IMAGES_VERSION',
 		'performant-translations' => 'PERFORMANT_TRANSLATIONS_VERSION',
+		'auto-sizes'              => 'IMAGE_AUTO_SIZES_VERSION',
+		'speculation-rules'       => 'SPECULATION_RULES_VERSION',
 	);
 }
 
