@@ -95,7 +95,10 @@ class Perflab_Server_Timing {
 			return;
 		}
 
-		$this->registered_metrics[ $metric_slug ]      = new Perflab_Server_Timing_Metric( $metric_slug );
+		// See https://github.com/WordPress/performance/issues/955
+		$sanitized_slug = str_replace( '/', '-', $metric_slug );
+
+		$this->registered_metrics[ $metric_slug ]      = new Perflab_Server_Timing_Metric( $sanitized_slug );
 		$this->registered_metrics_data[ $metric_slug ] = $args;
 
 		// If the current user has already been determined and they lack the necessary access,
