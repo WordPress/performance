@@ -21,6 +21,7 @@ on:
       - trunk
       - 'release/**'
       - 'feature/**'
+      - 'fix/399-unit-tests-in-php-versions'
     # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-test-plugins.yml'
