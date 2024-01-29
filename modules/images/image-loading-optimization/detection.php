@@ -48,7 +48,7 @@ function ilo_get_detection_script( string $slug, array $needed_minimum_viewport_
 		'urlMetricsNonce'             => ilo_get_url_metrics_storage_nonce( $slug ),
 		'neededMinimumViewportWidths' => $needed_minimum_viewport_widths,
 		'storageLockTTL'              => ilo_get_url_metric_storage_lock_ttl(),
-		'webVitalsLibrarySrc'         => esc_url( $web_vitals_lib_src ),
+		'webVitalsLibrarySrc'         => $web_vitals_lib_src,
 	);
 
 	return wp_get_inline_script_tag(

@@ -19,8 +19,8 @@ return static function () {
 			'perflab_missing_web_vitals_library',
 			sprintf(
 				/* translators: npm command. */
-				esc_html__( 'The Web Vitals library is missing. Please do "%s" to finish installing the plugin.', 'performance-lab' ),
-				'npm install &amp;&amp; npm run build'
+				__( 'The Web Vitals library is missing. Please do "%s" to finish installing the plugin.', 'performance-lab' ),
+				'npm install && npm run build'
 			)
 		);
 	}
