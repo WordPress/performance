@@ -95,7 +95,7 @@ class Perflab_Server_Timing {
 			return;
 		}
 
-		// See https://github.com/WordPress/performance/issues/955
+		// See https://github.com/WordPress/performance/issues/955.
 		$sanitized_slug = str_replace( '/', '-', $metric_slug );
 
 		$this->registered_metrics[ $metric_slug ]      = new Perflab_Server_Timing_Metric( $sanitized_slug );
