@@ -109,8 +109,8 @@ class PLSR_URL_Pattern_Prefixer {
 
 	/**
 	 * Escapes a string for use in a URL pattern component.
-	 * https://urlpattern.spec.whatwg.org/#escape-a-pattern-string
 	 *
+	 * @link https://urlpattern.spec.whatwg.org/#escape-a-pattern-string
 	 * @since n.e.x.t
 	 *
 	 * @param string $str String to be escaped.
