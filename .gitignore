@@ -30,6 +30,7 @@ build
 
 node_modules/
 vendor/
+modules/images/image-loading-optimization/detection/web-vitals*
 
 ############
 ## OSes
@@ -59,8 +60,3 @@ temp/
 ._*
 .Trashes
 .svn
-
-############
-## Vendor Libraries
-############
-modules/images/image-loading-optimization/detection/web-vitals*
