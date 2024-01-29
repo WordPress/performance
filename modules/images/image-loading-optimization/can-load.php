@@ -17,7 +17,11 @@ return static function () {
 	) {
 		return new WP_Error(
 			'perflab_missing_web_vitals_library',
-			__( 'The Web Vitals library is missing. Please do "npm install &amp;&amp; npm run build" to finish installing the plugin.', 'performance-lab' )
+			sprintf(
+				/* translators: npm command. */
+				esc_html__( 'The Web Vitals library is missing. Please do "%s" to finish installing the plugin.', 'performance-lab' ),
+				'npm install &amp;&amp; npm run build'
+			)
 		);
 	}
 
