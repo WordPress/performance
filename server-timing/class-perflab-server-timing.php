@@ -95,10 +95,7 @@ class Perflab_Server_Timing {
 			return;
 		}
 
-		// See https://github.com/WordPress/performance/issues/955.
-		$sanitized_slug = str_replace( '/', '-', $metric_slug );
-
-		$this->registered_metrics[ $metric_slug ]      = new Perflab_Server_Timing_Metric( $sanitized_slug );
+		$this->registered_metrics[ $metric_slug ]      = new Perflab_Server_Timing_Metric( $metric_slug );
 		$this->registered_metrics_data[ $metric_slug ] = $args;
 
 		// If the current user has already been determined and they lack the necessary access,
@@ -261,6 +258,10 @@ class Perflab_Server_Timing {
 		if ( is_float( $value ) ) {
 			$value = round( $value, 2 );
 		}
-		return sprintf( 'wp-%1$s;dur=%2$s', $metric->get_slug(), $value );
+
+		// See https://github.com/WordPress/performance/issues/955.
+		$name = str_replace( '/', '-', $metric->get_slug() );
+
+		return sprintf( 'wp-%1$s;dur=%2$s', $name, $value );
 	}
 }
