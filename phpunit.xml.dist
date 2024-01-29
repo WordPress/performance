@@ -9,7 +9,11 @@
 	<testsuites>
 		<testsuite name="default">
 			<directory suffix=".php">./tests</directory>
-    		<exclude>./tests/utils</exclude>
+			<exclude>./tests/utils</exclude>
+			<exclude>./tests/plugins</exclude>
+		</testsuite>
+		<testsuite name="webp-uploads">
+			<directory suffix=".php">./tests/plugins/webp-uploads</directory>
 		</testsuite>
 	</testsuites>
 	<groups>
