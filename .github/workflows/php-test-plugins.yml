@@ -1,4 +1,4 @@
-name: Unit Testing for Plugins
+name: Unit Testing for WebP Uploads Plugin
 
 on:
   push:
@@ -21,7 +21,6 @@ on:
       - trunk
       - 'release/**'
       - 'feature/**'
-      - 'fix/399-unit-tests-in-php-versions'
     # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-test-plugins.yml'
@@ -71,6 +70,6 @@ jobs:
       - name: Install WordPress
         run: npm run wp-env start
       - name: Running single site unit tests
-        run: npm run test-php -- -- --testsuite=webp-uploads
+        run: npm run test-php -- -- -- --testsuite webp-uploads
       - name: Running multisite unit tests
-        run: npm run test-php-multisite -- -- --testsuite=webp-uploads
+        run: npm run test-php-multisite -- -- -- --testsuite webp-uploads
