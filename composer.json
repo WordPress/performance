@@ -32,8 +32,8 @@
       "composer --working-dir=build-cs update --no-interaction",
       "build-cs/vendor/bin/phpcs --standard=phpcs.xml.dist"
     ],
-    "test": "phpunit -c phpunit.xml.dist --verbose --testsuite=performance-lab",
-    "test-multisite": "phpunit -c tests/multisite.xml --verbose  --testsuite=performance-lab"
+    "test": "phpunit -c phpunit.xml.dist --verbose --testsuite performance-lab",
+    "test-multisite": "phpunit -c tests/multisite.xml --verbose  --testsuite performance-lab"
   },
   "config": {
     "allow-plugins": {
