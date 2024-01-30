@@ -258,6 +258,10 @@ class Perflab_Server_Timing {
 		if ( is_float( $value ) ) {
 			$value = round( $value, 2 );
 		}
-		return sprintf( 'wp-%1$s;dur=%2$s', $metric->get_slug(), $value );
+
+		// See https://github.com/WordPress/performance/issues/955.
+		$name = preg_replace( '/[^!#$%&\'*+\-.^_`|~0-9a-zA-Z]/', '-', $metric->get_slug() );
+
+		return sprintf( 'wp-%1$s;dur=%2$s', $name, $value );
 	}
 }
