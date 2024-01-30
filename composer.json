@@ -20,8 +20,8 @@
     "php": ">=7|^8"
   },
   "scripts": {
-    "post-install-cmd": "composer --working-dir=build-cs install --no-interaction",
-    "post-update-cmd": "composer --working-dir=build-cs update --no-interaction",
+    "post-install-cmd": "if [ $(php -r 'echo PHP_MAJOR_VERSION;') -ge 8 ]; then composer --working-dir=build-cs install --no-interaction; else echo 'Skipping composer install for build-cs since not on PHP 8.'; fi",
+    "post-update-cmd": "if [ $(php -r 'echo PHP_MAJOR_VERSION;') -ge 8 ]; then composer --working-dir=build-cs update --no-interaction; else echo 'Skipping composer update for build-cs since not on PHP 8.'; fi",
     "phpstan": "build-cs/vendor/bin/phpstan analyse --memory-limit=2048M -c phpstan.neon.dist",
     "format": "build-cs/vendor/bin/phpcbf --standard=phpcs.xml.dist --report-summary --report-source",
     "lint": "build-cs/vendor/bin/phpcs --standard=phpcs.xml.dist",
