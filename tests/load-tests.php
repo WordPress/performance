@@ -163,7 +163,7 @@ class Load_Tests extends WP_UnitTestCase {
 			}
 		);
 		$active_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
-		$expected       = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $active_modules );
+		$expected       = 'Performance Lab ' . PERFLAB_VERSION . '; modules: ' . implode( ', ', $active_modules ) . '; plugins: ';
 		$content        = perflab_get_generator_content();
 		$this->assertSame( $expected, $content );
 	}
@@ -171,7 +171,7 @@ class Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_render_generator() {
 		// Assert generator tag is rendered. Content does not matter, so just use no modules active.
 		add_filter( 'perflab_active_modules', '__return_empty_array' );
-		$expected = '<meta name="generator" content="Performance Lab ' . PERFLAB_VERSION . '; modules: ">' . "\n";
+		$expected = '<meta name="generator" content="Performance Lab ' . PERFLAB_VERSION . '; modules: ; plugins: ">' . "\n";
 		$output   = get_echo( 'perflab_render_generator' );
 		$this->assertSame( $expected, $output );
 

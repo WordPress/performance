@@ -12,35 +12,34 @@
     "issues": "https://github.com/WordPress/performance/issues"
   },
   "require-dev": {
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.7",
-    "phpcompatibility/php-compatibility": "^9.3",
-    "phpstan/extension-installer": "^1.3.0",
-    "phpstan/phpstan": "^1.10",
-    "squizlabs/php_codesniffer": "^3.5",
-    "szepeviktor/phpstan-wordpress": "^1.3.0",
-    "wp-coding-standards/wpcs": "^3.0.0",
     "wp-phpunit/wp-phpunit": "^5.8",
-    "yoast/phpunit-polyfills": "^1.0",
-    "phpstan/phpstan-phpunit": "^1.3",
-    "phpstan/phpstan-deprecation-rules": "^1.1",
-    "slevomat/coding-standard": "^8.0"
+    "yoast/phpunit-polyfills": "^1.0"
   },
   "require": {
     "composer/installers": "~1.0",
     "php": ">=7|^8"
   },
   "scripts": {
-    "phpstan": "phpstan analyze --ansi --memory-limit=2048M",
-    "format": "phpcbf --standard=phpcs.xml.dist --report-summary --report-source",
-    "lint": "phpcs --standard=phpcs.xml.dist",
+    "phpstan": [
+      "composer --working-dir=build-cs update --no-interaction",
+      "build-cs/vendor/bin/phpstan analyse --memory-limit=2048M -c phpstan.neon.dist"
+    ],
+    "format": [
+      "composer --working-dir=build-cs update --no-interaction",
+      "build-cs/vendor/bin/phpcbf --standard=phpcs.xml.dist --report-summary --report-source"
+    ],
+    "lint": [
+      "composer --working-dir=build-cs update --no-interaction",
+      "build-cs/vendor/bin/phpcs --standard=phpcs.xml.dist"
+    ],
     "test": "phpunit -c phpunit.xml.dist --verbose",
-    "test-multisite": "WP_MULTISITE=1 phpunit -c tests/multisite.xml --verbose"
+    "test-multisite": "phpunit -c tests/multisite.xml --verbose"
   },
   "config": {
     "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true,
       "composer/installers": true,
-      "phpstan/extension-installer": true
+      "phpstan/extension-installer": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true
     }
   },
   "autoload-dev": {
