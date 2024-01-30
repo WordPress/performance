@@ -23,6 +23,7 @@ nbproject/
 
 build
 .wp-env.override.json
+*.asset.php
 
 ############
 ## Vendor
@@ -30,6 +31,7 @@ build
 
 node_modules/
 vendor/
+modules/images/image-loading-optimization/detection/web-vitals*
 
 ############
 ## OSes

@@ -6,23 +6,29 @@
     "node": ">=20.10.0",
     "npm": ">=10.2.3"
   },
+  "dependencies": {
+    "web-vitals": "3.5.0"
+  },
   "devDependencies": {
     "@octokit/rest": "^19.0.5",
     "@wordpress/env": "^5.7.0",
     "@wordpress/scripts": "^26.19.0",
     "chalk": "^4.1.2",
     "commander": "^9.4.1",
+    "copy-webpack-plugin": "^12.0.2",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
-    "lodash": "4.17.21"
+    "lodash": "4.17.21",
+    "webpackbar": "^6.0.0"
   },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
     "since": "./bin/plugin/cli.js since",
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
+    "build": "wp-scripts build",
     "build-plugins": "./bin/plugin/cli.js build-plugins",
     "test-plugins": "./bin/plugin/cli.js test-plugins",
     "test-plugins-multisite": "./bin/plugin/cli.js test-plugins --sitetype=multi",
@@ -48,8 +54,5 @@
     "*.js": [
       "npm run lint-js"
     ]
-  },
-  "dependencies": {
-    "web-vitals": "3.5.0"
   }
 }

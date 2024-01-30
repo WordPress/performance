@@ -141,6 +141,7 @@ function getCurrentTime() {
  * @param {string}                   args.urlMetricsNonce             Nonce for URL metrics storage.
  * @param {Array<number, boolean>[]} args.neededMinimumViewportWidths Needed minimum viewport widths for URL metrics.
  * @param {number}                   args.storageLockTTL              The TTL (in seconds) for the URL metric storage lock.
+ * @param {string}                   args.webVitalsLibrarySrc         The URL for the web-vitals library.
  */
 export default async function detect( {
 	serveTime,
@@ -152,6 +153,7 @@ export default async function detect( {
 	urlMetricsNonce,
 	neededMinimumViewportWidths,
 	storageLockTTL,
+	webVitalsLibrarySrc,
 } ) {
 	const currentTime = getCurrentTime();
 
@@ -271,11 +273,7 @@ export default async function detect( {
 		} );
 	}
 
-	// TODO: Use a local copy of web-vitals.
-	const { onLCP } = await import(
-		// eslint-disable-next-line import/no-unresolved
-		'https://unpkg.com/web-vitals@3/dist/web-vitals.js?module'
-	);
+	const { onLCP } = await import( webVitalsLibrarySrc );
 
 	/** @type {LCPMetric[]} */
 	const lcpMetricCandidates = [];

@@ -12,6 +12,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Setup Node.js (.nvmrc)
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+      - name: npm install
+        run: npm ci
+      - name: Build assets
+        run: npm run build
       - name: WordPress plugin deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
         env:

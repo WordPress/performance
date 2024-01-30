@@ -28,6 +28,8 @@ jobs:
           cache: npm
       - name: Install npm dependencies
         run: npm ci
+      - name: Build assets
+        run: npm run build
       - name: Get plugin version
         id: get-version
         if: ${{ github.event_name == 'workflow_dispatch' }}
