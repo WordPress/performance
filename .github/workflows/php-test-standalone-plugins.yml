@@ -66,14 +66,14 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: npm
+      - name: npm install
+        run: npm ci
       - name: General debug information
         run: |
           npm --version
           node --version
           composer --version
           php -v
-      - name: npm install
-        run: npm ci
       - name: Building standalone plugins
         run: npm run build-plugins
       - name: Running single site standalone plugin integration tests
