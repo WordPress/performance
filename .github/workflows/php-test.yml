@@ -58,13 +58,22 @@ jobs:
     steps:
       - uses: styfle/cancel-workflow-action@0.11.0
       - uses: actions/checkout@v3
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
       - name: Setup Node.js (.nvmrc)
         uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           cache: npm
-      - name: Composer update
-        run: composer update
+      - name: General debug information
+        run: |
+          npm --version
+          node --version
+          composer --version
+          php -v
+      - name: Composer install
+        run: composer install
       - name: npm install
         run: npm ci
       - name: Install WordPress
