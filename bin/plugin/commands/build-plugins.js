@@ -24,7 +24,16 @@ exports.handler = async () => {
 		}
 
 		try {
-			const plugins = JSON.parse( jsonString );
+			const pluginsConfig = JSON.parse( jsonString );
+			const plugins = pluginsConfig.modules;
+			if ( ! plugins ) {
+				log(
+					formats.error(
+						'The given module configuration is invalid, the modules are missing, or they are misspelled.'
+					)
+				);
+				return;
+			}
 			for ( const moduleDir in plugins ) {
 				const pluginVersion = plugins[ moduleDir ]?.version;
 				const pluginSlug = plugins[ moduleDir ]?.slug;
