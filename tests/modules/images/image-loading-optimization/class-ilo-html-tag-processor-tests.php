@@ -18,28 +18,37 @@ class ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf8">
 							<title>Foo</title>
+							<script>/*...*/</script>
+							<style>/*...*/</style>
 						</head>
 						<body>
+							<iframe src="https://example.com/"></iframe>
 							<p>
 								Foo!
 								<br>
 								<img src="/foo.jpg" width="1000" height="600" alt="Foo">
 							</p>
+							<form><textarea>Write here!</textarea></form>
 							<footer>The end!</footer>
 						</body>
 					</html>
 				',
-				'open_tags' => array( 'HTML', 'HEAD', 'META', 'TITLE', 'BODY', 'P', 'BR', 'IMG', 'FOOTER' ),
+				'open_tags' => array( 'HTML', 'HEAD', 'META', 'TITLE', 'SCRIPT', 'STYLE', 'BODY', 'IFRAME', 'P', 'BR', 'IMG', 'FORM', 'TEXTAREA', 'FOOTER' ),
 				'xpaths'    => array(
 					'/*[0][self::HTML]',
 					'/*[0][self::HTML]/*[0][self::HEAD]',
 					'/*[0][self::HTML]/*[0][self::HEAD]/*[0][self::META]',
 					'/*[0][self::HTML]/*[0][self::HEAD]/*[1][self::TITLE]',
+					'/*[0][self::HTML]/*[0][self::HEAD]/*[2][self::SCRIPT]',
+					'/*[0][self::HTML]/*[0][self::HEAD]/*[3][self::STYLE]',
 					'/*[0][self::HTML]/*[1][self::BODY]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::P]/*[0][self::BR]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::P]/*[1][self::IMG]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::FOOTER]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IFRAME]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]/*[0][self::BR]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]/*[1][self::IMG]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[2][self::FORM]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[2][self::FORM]/*[0][self::TEXTAREA]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[3][self::FOOTER]',
 				),
 			),
 			'foreign-elements'   => array(
@@ -297,7 +306,7 @@ class ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 		}
 
 		$this->assertSame( $actual_open_tags, $open_tags, "Expected list of open tags to match.\nSnapshot: " . $this->export_array_snapshot( $actual_open_tags, true ) );
-		$this->assertSame( $actual_xpaths, $xpaths, "Expected list of XPaths to match.\nSnapshot:" . $this->export_array_snapshot( $actual_xpaths ) );
+		$this->assertSame( $actual_xpaths, $xpaths, "Expected list of XPaths to match.\nSnapshot: " . $this->export_array_snapshot( $actual_xpaths ) );
 	}
 
 	/**
