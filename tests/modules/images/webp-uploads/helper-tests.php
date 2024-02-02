@@ -233,7 +233,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
-		$result        = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/avif' );
+		$result        = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/vnd.zbrush.pcx' );
 		$this->assertWPError( $result );
 		$this->assertSame( 'image_mime_type_invalid', $result->get_error_code() );
 	}
