@@ -47,6 +47,38 @@ final class ILO_HTML_Tag_Processor {
 	);
 
 	/**
+	 * Raw text tags.
+	 *
+	 * These are treated like void tags for the purposes of walking over the document since we do not process any text
+	 * nodes. To cite the docblock for WP_HTML_Tag_Processor:
+	 *
+	 * > Some HTML elements are handled in a special way; their start and end tags
+	 * > act like a void tag. These are special because their contents can't contain
+	 * > HTML markup. Everything inside these elements is handled in a special way
+	 * > and content that _appears_ like HTML tags inside of them isn't. There can
+	 * > be no nesting in these elements.
+	 * >
+	 * > In the following list, "raw text" means that all of the content in the HTML
+	 * > until the matching closing tag is treated verbatim without any replacements
+	 * > and without any parsing.
+	 *
+	 * @link https://github.com/WordPress/wordpress-develop/blob/6dd00b1ffac54c20c1c1c7721aeebbcd82d0e378/src/wp-includes/html-api/class-wp-html-tag-processor.php#L136-L155
+	 * @link https://core.trac.wordpress.org/ticket/60392#comment:2
+	 *
+	 * @var string[]
+	 */
+	const RAW_TEXT_TAGS = array(
+		'SCRIPT',
+		'IFRAME',
+		'NOEMBED', // Deprecated.
+		'NOFRAMES', // Deprecated.
+		'STYLE',
+		'TEXTAREA',
+		'TITLE',
+		'XMP', // Deprecated.
+	);
+
+	/**
 	 * The set of HTML tags whose presence will implicitly close a <p> element.
 	 * For example '<p>foo<h1>bar</h1>' should parse the same as '<p>foo</p><h1>bar</h1>'.
 	 *
@@ -192,17 +224,23 @@ final class ILO_HTML_Tag_Processor {
 				// Other mutations may be performed to the open tag's attributes by the callee at this point as well.
 				yield $tag_name;
 
-				// Immediately pop off self-closing tags.
+				// Immediately pop off self-closing and raw text tags.
 				if (
 					in_array( $tag_name, self::VOID_TAGS, true )
+					||
+					in_array( $tag_name, self::RAW_TEXT_TAGS, true )
 					||
 					( $p->has_self_closing_flag() && $this->is_foreign_element() )
 				) {
 					array_pop( $this->open_stack_tags );
 				}
 			} else {
-				// If the closing tag is for self-closing tag, we ignore it since it was already handled above.
-				if ( in_array( $tag_name, self::VOID_TAGS, true ) ) {
+				// If the closing tag is for self-closing or raw text tag, we ignore it since it was already handled above.
+				if (
+					in_array( $tag_name, self::VOID_TAGS, true )
+					||
+					in_array( $tag_name, self::RAW_TEXT_TAGS, true )
+				) {
 					continue;
 				}
 
