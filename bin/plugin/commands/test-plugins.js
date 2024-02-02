@@ -316,6 +316,18 @@ function doRunUnitTests( settings ) {
 			)
 		);
 
+		execSync(
+			`composer install --working-dir=${ settings.builtPluginsDir }${ plugin } --no-interaction`,
+			( err, output ) => {
+				if ( err ) {
+					log( formats.error( `${ err }` ) );
+					process.exit( 1 );
+				}
+				// log the output received from the command
+				log( output );
+			}
+		);
+
 		// Define multi site flag based on single vs multi sitetype arg.
 		const isMultiSite = 'multi' === settings.siteType;
 		let command = '';
@@ -325,8 +337,8 @@ function doRunUnitTests( settings ) {
 				'wp-env',
 				[
 					'run',
-					'phpunit',
-					`'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/plugins/${ plugin }/multisite.xml --verbose --testdox'`,
+					'tests-cli',
+					`--env-cwd=/var/www/html/wp-content/plugins/${ plugin } vendor/bin/phpunit -c multisite.xml --verbose --testdox`,
 				],
 				{ shell: true, encoding: 'utf8' }
 			);
@@ -335,8 +347,8 @@ function doRunUnitTests( settings ) {
 				'wp-env',
 				[
 					'run',
-					'phpunit',
-					`'phpunit -c /var/www/html/wp-content/plugins/${ plugin }/phpunit.xml --verbose --testdox'`,
+					'tests-cli',
+					`--env-cwd=/var/www/html/wp-content/plugins/${ plugin } vendor/bin/phpunit -c phpunit.xml --verbose --testdox`,
 				],
 				{ shell: true, encoding: 'utf8' }
 			);
@@ -345,6 +357,9 @@ function doRunUnitTests( settings ) {
 		log( command.stdout.replace( '\n', '' ) );
 
 		if ( 1 === command.status ) {
+			// Log error.
+			log( formats.error( command.stderr.replace( '\n', '' ) ) );
+
 			log(
 				formats.error(
 					`One or more tests failed for plugin ${ plugin }`

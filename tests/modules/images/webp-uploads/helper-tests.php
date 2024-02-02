@@ -79,6 +79,10 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_an_image_with_the_default_suffix_in_the_same_location_when_no_destination_is_specified() {
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
 		// Create JPEG and WebP so that both versions are generated.
 		$this->opt_in_to_jpeg_and_webp();
 
@@ -94,6 +98,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$directory = trailingslashit( pathinfo( $file, PATHINFO_DIRNAME ) );
 		$name      = pathinfo( $file, PATHINFO_FILENAME );
 
+		$this->assertNotWPError( $result );
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'filesize', $result );
 		$this->assertArrayHasKey( 'file', $result );
@@ -107,6 +112,10 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_a_file_in_the_specified_location_with_the_specified_name() {
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 		$size_data     = array(
 			'width'  => 300,
@@ -116,6 +125,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$result = webp_uploads_generate_additional_image_source( $attachment_id, 'medium', $size_data, 'image/webp', '/tmp/image.jpg' );
 
+		$this->assertNotWPError( $result );
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'filesize', $result );
 		$this->assertArrayHasKey( 'file', $result );
@@ -175,8 +185,12 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_to_create_an_image_size_when_attached_file_does_not_exists() {
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
 		$file          = get_attached_file( $attachment_id );
 		$original_file = wp_get_original_image_path( $attachment_id );
@@ -200,7 +214,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 */
 	public function it_should_prevent_to_create_a_subsize_if_the_image_editor_does_not_exists() {
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
 
 		// Make sure no editor is available.
@@ -217,9 +231,9 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 */
 	public function it_should_prevent_to_upload_a_mime_that_is_not_supported_by_wordpress() {
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
-		$result        = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/avif' );
+		$result        = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/vnd.zbrush.pcx' );
 		$this->assertWPError( $result );
 		$this->assertSame( 'image_mime_type_invalid', $result->get_error_code() );
 	}
@@ -232,7 +246,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	public function it_should_prevent_to_process_an_image_when_the_editor_does_not_support_the_format() {
 		// Make sure no editor is available.
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
 
 		add_filter(
@@ -543,6 +557,10 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_add_original_image_extension_to_the_webp_file_name_to_ensure_it_is_unique( $jpeg_image, $jpg_image ) {
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
 		$jpeg_image_attachment_id = self::factory()->attachment->create_upload_object( $jpeg_image );
 		$jpg_image_attachment_id  = self::factory()->attachment->create_upload_object( $jpg_image );
 

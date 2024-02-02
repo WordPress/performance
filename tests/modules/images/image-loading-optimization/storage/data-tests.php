@@ -8,11 +8,16 @@
 
 class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 
+	private $original_request_uri;
+
+	public function set_up() {
+		$this->original_request_uri = $_SERVER['REQUEST_URI'];
+		parent::set_up();
+	}
+
 	public function tear_down() {
-		unset(
-			$GLOBALS['wp_customize'],
-			$_SERVER['REQUEST_URI']
-		);
+		$_SERVER['REQUEST_URI'] = $this->original_request_uri;
+		unset( $GLOBALS['wp_customize'] );
 		parent::tear_down();
 	}
 

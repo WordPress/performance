@@ -8,9 +8,16 @@
 
 class ILO_Optimization_Tests extends WP_UnitTestCase {
 
+	private $original_request_uri;
+
+	public function set_up() {
+		$this->original_request_uri = $_SERVER['REQUEST_URI'];
+		parent::set_up();
+	}
+
 	public function tear_down() {
+		$_SERVER['REQUEST_URI'] = $this->original_request_uri;
 		parent::tear_down();
-		unset( $_SERVER['REQUEST_URI'] );
 	}
 
 	/**

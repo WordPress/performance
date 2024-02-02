@@ -413,8 +413,7 @@ function perflab_admin_pointer( $hook_suffix ) {
 	$active_modules_with_inactive_plugins = perflab_get_active_module_data_with_inactive_standalone_plugins();
 	if (
 		! empty( $active_modules_with_inactive_plugins )
-		&& current_user_can( 'install_plugins' )
-		&& current_user_can( 'activate_plugins' )
+		&& ( current_user_can( 'install_plugins' ) || current_user_can( 'activate_plugins' ) )
 		&& ! in_array( 'perflab-module-migration-pointer', $dismissed, true )
 	) {
 		// Enqueue the pointer logic and return early.
@@ -557,7 +556,7 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
 /**
  * Callback function to handle admin scripts.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_enqueue_modules_page_scripts() {
 	wp_enqueue_script( 'updates' );
@@ -580,7 +579,7 @@ function perflab_enqueue_modules_page_scripts() {
 	wp_enqueue_script(
 		'perflab-plugin-management',
 		plugin_dir_url( __FILE__ ) . 'js/perflab-plugin-management.js',
-		array(),
+		array( 'jquery' ),
 		'1.0.0',
 		array(
 			'in_footer' => true,
@@ -617,7 +616,7 @@ function perflab_enqueue_modules_page_scripts() {
 /**
  * Callback function hooked to admin_action_perflab_activate_plugin to handle plugin activation.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_activate_plugin() {
 	// Do not proceed if plugin query arg is not present.
@@ -666,7 +665,7 @@ add_action( 'admin_action_perflab_activate_plugin', 'perflab_activate_plugin' );
 /**
  * Callback function hooked to admin_action_perflab_deactivate_plugin to handle plugin deactivation.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_deactivate_plugin() {
 	// Do not proceed if plugin query arg is not present.
@@ -707,7 +706,7 @@ add_action( 'wp_ajax_perflab_install_activate_standalone_plugins', 'perflab_inst
 /**
  * Handles the standalone plugin install and activation via AJAX.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_install_activate_standalone_plugins_callback() {
 	if ( ! wp_verify_nonce( $_REQUEST['nonce'], 'perflab-install-activate-plugins' ) ) {
@@ -787,7 +786,7 @@ function perflab_install_activate_standalone_plugins_callback() {
 /**
  * Callback function hooked to admin_notices to render admin notices on the plugin's screen.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_plugin_admin_notices() {
 	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -812,6 +811,19 @@ function perflab_plugin_admin_notices() {
 	$available_module_names = wp_list_pluck( $active_modules_with_inactive_plugins, 'name' );
 	$modules_count          = count( $available_module_names );
 
+	$has_cap = current_user_can( 'install_plugins' ) && current_user_can( 'activate_plugins' );
+	if ( $has_cap ) {
+		if ( 1 === $modules_count ) {
+			$additional_message = __( 'Please click the following button to install and activate the relevant plugin in favor of the module.', 'performance-lab' );
+		} else {
+			$additional_message = __( 'Please click the following button to install and activate the relevant plugins in favor of the modules.', 'performance-lab' );
+		}
+	} elseif ( 1 === $modules_count ) {
+		$additional_message = __( 'Please install and activate the relevant plugin in favor of the module.', 'performance-lab' );
+	} else {
+		$additional_message = __( 'Please install and activate the relevant plugins in favor of the modules.', 'performance-lab' );
+	}
+
 	if ( 1 === $modules_count ) {
 		$message  = '<p>';
 		$message .= sprintf(
@@ -820,13 +832,17 @@ function perflab_plugin_admin_notices() {
 			esc_attr( $available_module_names[0] )
 		);
 		$message .= ' ';
-		$message .= esc_html__( 'Please click the following button to install and activate the relevant plugin in favor of the module. This will not impact any of the underlying functionality.', 'performance-lab' );
+		$message .= esc_html( $additional_message );
+		$message .= ' ';
+		$message .= esc_html__( 'This will not impact any of the underlying functionality.', 'performance-lab' );
 		$message .= '</p>';
 	} else {
 		$message  = '<p>';
 		$message .= esc_html__( 'Your site is using modules which will be removed in the future in favor of their equivalent standalone plugins.', 'performance-lab' );
 		$message .= ' ';
-		$message .= esc_html__( 'Please click the following button to install and activate the relevant plugins in favor of the modules. This will not impact any of the underlying functionality.', 'performance-lab' );
+		$message .= esc_html( $additional_message );
+		$message .= ' ';
+		$message .= esc_html__( 'This will not impact any of the underlying functionality.', 'performance-lab' );
 		$message .= '</p>';
 		$message .= '<strong>' . esc_html__( 'Available standalone plugins:', 'performance-lab' ) . '</strong>';
 		$message .= '<ol>';
@@ -835,16 +851,17 @@ function perflab_plugin_admin_notices() {
 		}
 		$message .= '</ol>';
 	}
-
 	?>
 	<div class="notice notice-warning is-dismissible">
 		<?php echo wp_kses_post( $message ); ?>
+		<?php if ( $has_cap ) { ?>
 		<p class="perflab-button-wrapper">
 			<button type="button" class="button button-primary perflab-install-active-plugin">
 				<?php esc_html_e( 'Migrate legacy modules to standalone plugins', 'performance-lab' ); ?>
 			</button>
 			<span class="dashicons dashicons-update hidden"></span>
 		</p>
+		<?php } ?>
 	</div>
 	<?php
 }
@@ -852,7 +869,7 @@ function perflab_plugin_admin_notices() {
 /**
  * Returns an array of active module data with inactive standalone plugins.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @return array Array of active module data with inactive standalone plugins, otherwise an empty array.
  */
@@ -875,7 +892,7 @@ function perflab_get_active_module_data_with_inactive_standalone_plugins() {
 /**
  * Callback function to handle admin inline style.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  */
 function perflab_print_modules_page_style() {
 	?>
@@ -887,6 +904,10 @@ function perflab_print_modules_page_style() {
 	.perflab-button-wrapper span {
 		animation: rotation 2s infinite linear;
 		margin-left: 5px;
+	}
+	.plugin-action-buttons a[id^="deactivate-"] {
+		color: #b32d2e;
+		text-decoration: underline;
 	}
 </style>
 	<?php
