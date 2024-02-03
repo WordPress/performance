@@ -20,11 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function perflab_partytown_web_worker_configuration() {
-	$plugin_dir           = untrailingslashit( plugin_dir_path( __FILE__ ) );
+	$plugin_dir           = plugin_dir_path( __FILE__ );
 	$content_dir_basename = basename( WP_CONTENT_DIR );
 
 	$config = array(
-		'lib'     => '/' . substr( $plugin_dir, strpos( $plugin_dir, $content_dir_basename ) ) . '/assets/js/partytown/',
+		'lib'     => substr( $plugin_dir, strpos( $plugin_dir, $content_dir_basename ) - 1 ) . 'assets/js/partytown/',
 		'forward' => array(),
 	);
 
