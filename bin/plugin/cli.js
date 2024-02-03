@@ -58,10 +58,6 @@ const {
 	handler: sinceHandler,
 	options: sinceOptions,
 } = require( './commands/since' );
-const {
-	handler: copyLibsHandler,
-	options: copyLibsOptions,
-} = require( './commands/copy-vendor-libs' );
 
 withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 	.alias( 'changelog' )
@@ -116,10 +112,5 @@ withOptions(
 	.alias( 'enabled-modules' )
 	.description( 'Generates a PHP file with non-experimental module slugs' )
 	.action( catchException( enabledModulesHandler ) );
-
-withOptions( program.command( 'copy-vendor-libs' ), copyLibsOptions )
-	.alias( 'copyvendorlibs' )
-	.description( 'Copy vendor libraries to the plugin' )
-	.action( catchException( copyLibsHandler ) );
 
 program.parse( process.argv );
