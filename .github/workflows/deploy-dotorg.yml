@@ -25,7 +25,7 @@ jobs:
           CI: true
 
       - name: Build Plugin
-        run: npm run build-plugins
+        run: npm run build
 
       - name: WordPress plugin deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
