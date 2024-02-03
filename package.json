@@ -50,5 +50,17 @@
     "test-php-multisite": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:plugins",
     "wp-env": "wp-env",
     "prepare": "husky install"
+<<<<<<< HEAD
+=======
+  },
+  "lint-staged": {
+    "*.php": [
+      "composer run-script lint",
+      "composer run-script phpstan"
+    ],
+    "*.js": [
+      "npm run lint-js"
+    ]
+>>>>>>> 0be9bf32 (Update build command)
   }
 }
