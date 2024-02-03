@@ -41,8 +41,7 @@
     "test-php": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test",
     "test-php-multisite": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test-multisite",
     "wp-env": "wp-env",
-    "prepare": "husky install && npm run copy-vendor-libs",
-    "copy-vendor-libs": "node ./bin/plugin/cli.js copy-vendor-libs"
+    "prepare": "husky install"
   },
   "lint-staged": {
     "*.php": [
