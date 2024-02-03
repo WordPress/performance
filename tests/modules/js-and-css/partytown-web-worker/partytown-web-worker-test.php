@@ -7,11 +7,43 @@
 class Partytown_Web_Worker_Tests extends WP_UnitTestCase {
 
 	/**
+	 * Cache original $wp_scripts global.
+	 *
+	 * @var WP_Scripts
+	 */
+	private static $wp_scripts_cache;
+
+	/**
+	 * Setup before class.
+	 */
+	public static function set_up_before_class() {
+		parent::set_up_before_class();
+
+		global $wp_scripts;
+
+		// Cache the original $wp_scripts global.
+		self::$wp_scripts_cache = $wp_scripts;
+	}
+
+	/**
+	 * Tear down after class.
+	 */
+	public static function tear_down_after_class() {
+		global $wp_scripts;
+
+		// Restore the original $wp_scripts global.
+		$wp_scripts = self::$wp_scripts_cache;
+
+		parent::tear_down_after_class();
+	}
+
+
+	/**
 	 * @covers ::perflab_partytown_web_worker_configuration
 	 */
 	public function test_perflab_partytown_web_worker_configuration() {
 		$wp_content_dir        = WP_CONTENT_DIR;
-		$partytown_assets_path = 'assets/js/partytown/';
+		$partytown_assets_path = 'modules/js-and-css/partytown-web-worker/assets/js/partytown/';
 		$config                = perflab_partytown_web_worker_configuration();
 
 		$this->assertArrayHasKey( 'lib', $config );
@@ -39,6 +71,7 @@ class Partytown_Web_Worker_Tests extends WP_UnitTestCase {
 		$this->assertIsArray( $config['forward'] );
 		$this->assertTrue( $config['debug'] );
 		$this->assertContains( 'datalayer.push', $config['forward'] );
+
 		remove_all_filters( 'perflab_partytown_configuration' );
 	}
 
@@ -57,7 +90,6 @@ class Partytown_Web_Worker_Tests extends WP_UnitTestCase {
 		$after_data       = $wp_scripts->get_inline_script_data( 'partytown', 'after' );
 
 		$this->assertTrue( wp_script_is( 'partytown', 'registered' ) );
-
 		$this->assertNotEmpty( $before_data );
 		$this->assertNotEmpty( $after_data );
 		$this->assertEquals(
@@ -69,6 +101,7 @@ class Partytown_Web_Worker_Tests extends WP_UnitTestCase {
 
 		// Ensure that Partytown is enqueued when a script depends on it.
 		wp_enqueue_script( 'partytown-test', 'https://example.com/test.js', array( 'partytown' ) );
+
 		$this->assertTrue( wp_script_is( 'partytown', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'partytown-test', 'enqueued' ) );
 
