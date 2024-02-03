@@ -87,10 +87,7 @@ withOptions(
 )
 	.alias( 'build-plugins' )
 	.description( 'Build standalone plugins' )
-	.action( ( ...args ) => {
-		catchException( copyLibsHandler )( ...args );
-		catchException( buildPluginsHandler )( ...args );
-	} );
+	.action( catchException( buildPluginsHandler ) );
 
 withOptions( program.command( 'test-standalone-plugins' ), testPluginsOptions )
 	.alias( 'test-plugins' )
