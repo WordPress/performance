@@ -1,7 +1,7 @@
 <?php
 /**
  * Module Name: Partytown Web Worker
- * Description: Run JavaScript in a separate Web Worker with the help of Partytown library.
+ * Description: Add support for running JavaScript in a separate Web Worker with the help of the Partytown library.
  * Experimental: Yes
  *
  * @since   n.e.x.t
