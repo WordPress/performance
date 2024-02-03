@@ -2,4 +2,4 @@
 **/node_modules/**
 **/vendor/**
 build/*
-modules/javascript/partytown-web-worker/assets/js/partytown/*
+modules/js-and-css/partytown-web-worker/assets/js/partytown/*

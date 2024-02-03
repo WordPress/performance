@@ -34,7 +34,7 @@ build-cs/composer.lock
 node_modules/
 vendor/
 
-modules/javascript/partytown-web-worker/assets/js/partytown
+modules/js-and-css/partytown-web-worker/assets/js/partytown
 ############
 ## OSes
 ############
