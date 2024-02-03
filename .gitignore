@@ -34,7 +34,7 @@ node_modules/
 vendor/
 plugins/optimization-detective/detection/web-vitals*
 
-modules/javascript/partytown-web-worker/assets/js/partytown
+modules/js-and-css/partytown-web-worker/assets/js/partytown
 ############
 ## OSes
 ############
