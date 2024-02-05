@@ -48,6 +48,8 @@
 /modules/js-and-css/audit-enqueued-assets                                   @manuelRod
 /tests/modules/js-and-css/audit-enqueued-assets                             @manuelRod
 /tests/testdata/modules/js-and-css/audit-enqueued-assets                    @manuelRod
+/modules/js-and-css/partytown-web-worker                                    @thelovekesh
+/tests/modules/js-and-css/partytown-web-worker                              @thelovekesh
 
 # Module: Dominant Color Images
 /modules/images/dominant-color-images                                       @pbearne @spacedmonkey

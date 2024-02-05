@@ -9,6 +9,8 @@ $generated_i18n_strings = array(
 	_x( 'Creates WebP versions for new JPEG image uploads if supported by the server.', 'module description', 'performance-lab' ),
 	_x( 'Enqueued Assets Health Check', 'module name', 'performance-lab' ),
 	_x( 'Adds a CSS and JS resource check in Site Health status.', 'module description', 'performance-lab' ),
+	_x( 'Partytown Web Worker', 'module name', 'performance-lab' ),
+	_x( 'Add support for running JavaScript in a separate Web Worker with the help of the Partytown library.', 'module description', 'performance-lab' ),
 	_x( 'Autoloaded Options Health Check', 'module name', 'performance-lab' ),
 	_x( 'Adds a check for autoloaded options in Site Health status.', 'module description', 'performance-lab' ),
 );

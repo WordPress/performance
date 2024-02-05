@@ -42,8 +42,8 @@
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 	<rule ref="Generic.Commenting.DocComment.Empty">
-    	<exclude-pattern>tests/*</exclude-pattern>
-    </rule>
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
 	<rule ref="Generic.Commenting.DocComment.MissingShort">
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
@@ -102,6 +102,11 @@
 			</property>
 		</properties>
 	</rule>
+
+	<!-- Check up to 20 files simultaneously. -->
+	<arg name="parallel" value="20"/>
+
+	<exclude-pattern>*.asset.php</exclude-pattern>
 
 	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
 </ruleset>
