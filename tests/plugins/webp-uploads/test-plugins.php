@@ -13,4 +13,8 @@ class PluginTest extends WP_UnitTestCase {
 	public function test_plugin_does_not_fatal() {
 		$this->assertTrue( true );
 	}
+
+	public function test_another_plugin_does_not_fatal() {
+		$this->assertTrue( true );
+	}
 }
