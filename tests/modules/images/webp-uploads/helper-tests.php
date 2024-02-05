@@ -190,7 +190,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		}
 
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
 		$file          = get_attached_file( $attachment_id );
 		$original_file = wp_get_original_image_path( $attachment_id );
@@ -214,7 +214,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 */
 	public function it_should_prevent_to_create_a_subsize_if_the_image_editor_does_not_exists() {
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
 
 		// Make sure no editor is available.
@@ -231,9 +231,9 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 */
 	public function it_should_prevent_to_upload_a_mime_that_is_not_supported_by_wordpress() {
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
-		$result        = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/avif' );
+		$result        = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/vnd.zbrush.pcx' );
 		$this->assertWPError( $result );
 		$this->assertSame( 'image_mime_type_invalid', $result->get_error_code() );
 	}
@@ -246,7 +246,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	public function it_should_prevent_to_process_an_image_when_the_editor_does_not_support_the_format() {
 		// Make sure no editor is available.
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
 
 		add_filter(
