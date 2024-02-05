@@ -25,8 +25,8 @@
     "phpstan": "build-cs/vendor/bin/phpstan analyse --memory-limit=2048M -c phpstan.neon.dist",
     "format": "build-cs/vendor/bin/phpcbf --standard=phpcs.xml.dist --report-summary --report-source",
     "lint": "build-cs/vendor/bin/phpcs --standard=phpcs.xml.dist",
-    "test": "phpunit -c phpunit.xml.dist --verbose",
-    "test-multisite": "phpunit -c tests/multisite.xml --verbose"
+    "test": "phpunit -c phpunit.xml.dist --verbose --testsuite performance-lab",
+    "test-multisite": "phpunit -c tests/multisite.xml --verbose --testsuite performance-lab"
   },
   "config": {
     "allow-plugins": {
