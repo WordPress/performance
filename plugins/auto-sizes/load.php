@@ -17,12 +17,12 @@
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 // Define the constant.
 if ( defined( 'IMAGE_AUTO_SIZES_VERSION' ) ) {
-    return;
+	return;
 }
 
 define( 'IMAGE_AUTO_SIZES_VERSION', '1.0.0' );
