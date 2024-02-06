@@ -55,5 +55,28 @@ tests_add_filter(
 	1
 );
 
+
+$testsuite_count = array_count_values( $_SERVER['argv'] )['--testsuite'];
+
+if ( $testsuite_count > 1 ) {
+	// Dynamically include tests from all plugins in the "Plugin Suite".
+	$plugin_folders = glob( TESTS_PLUGIN_DIR . '/plugins/*/', GLOB_ONLYDIR );
+
+	foreach ( $plugin_folders as $plugin_folder ) {
+		$plugin_name      = basename( rtrim( $plugin_folder, '/' ) );
+		$plugin_test_path = TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name;
+
+		if ( file_exists( $plugin_test_path ) ) {
+			tests_add_filter(
+				'plugins_loaded',
+				static function () use ( $plugin_test_path ) {
+					require_once $plugin_test_path . '/load.php';
+				},
+				1
+			);
+		}
+	}
+}
+
 // Start up the WP testing environment.
 require $_test_root . '/includes/bootstrap.php';
