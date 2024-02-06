@@ -11,4 +11,9 @@
 			<directory suffix=".php">./tests</directory>
 		</testsuite>
 	</testsuites>
+	<groups>
+		<exclude>
+			<group>ms-required</group>
+		</exclude>
+	</groups>
 </phpunit>

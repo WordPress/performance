@@ -9,6 +9,10 @@ const config = {
 		...( wpConfig?.rules || {} ),
 		'jsdoc/valid-types': 'off',
 	},
+	env: {
+		browser: true,
+	},
+	ignorePatterns: [ '/vendor', '/node_modules' ],
 };
 
 module.exports = config;

@@ -91,7 +91,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		remove_all_filters( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ) );
 
 		// Does not register the page if the perflab_active_modules filter is used.
-		add_filter( 'perflab_active_modules', '__return_null' );
+		add_filter( 'perflab_active_modules', '__return_array' );
 		$hook_suffix = perflab_add_modules_page();
 		$this->assertFalse( $hook_suffix );
 		$this->assertFalse( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_MODULES_SCREEN ] ) );

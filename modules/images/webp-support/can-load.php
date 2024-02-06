@@ -2,7 +2,7 @@
 /**
  * Can load function to determine if Site Health module is supported or not.
  *
- * @since   n.e.x.t
+ * @since   2.8.0
  * @package performance-lab
  */
 
