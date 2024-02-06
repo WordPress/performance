@@ -8,7 +8,7 @@
 	<rule ref="WordPress-Docs"/>
 	<rule ref="WordPress-Extra" />
 	<rule ref="WordPress.WP.I18n"/>
-	<config name="text_domain" value="performance-lab,default"/>
+	<config name="text_domain" value="performance-lab,default,auto-sizes"/>
 
 	<arg value="ps"/>
 	<arg name="extensions" value="php"/>

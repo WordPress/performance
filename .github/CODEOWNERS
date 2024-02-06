@@ -54,7 +54,6 @@
 /tests/modules/images/dominant-color-images                                 @pbearne @spacedmonkey
 /tests/testdata/modules/images/dominant-color-images                        @pbearne @spacedmonkey
 
-# Module: Auto-sizes for Lazy-Loaded Images
-/modules/images/auto-sizes                                                  @joemcgill
-/tests/modules/images/auto-sizes                                            @joemcgill
-/tests/testdata/modules/images/auto-sizes                                   @joemcgill
+# Plugin: Auto-sizes for Lazy-Loaded Images
+/plugins/auto-sizes                         @joemcgill
+/tests/plugins/auto-sizes                   @joemcgill
