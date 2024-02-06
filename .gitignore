@@ -23,6 +23,8 @@ nbproject/
 
 build
 .wp-env.override.json
+build-cs/vendor/
+build-cs/composer.lock
 
 ############
 ## Vendor

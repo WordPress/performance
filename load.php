@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
  * Requires at least: 6.3
  * Requires PHP: 7.0
- * Version: 2.7.0
+ * Version: 2.8.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'PERFLAB_VERSION', '2.7.0' );
+define( 'PERFLAB_VERSION', '2.8.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -207,14 +207,23 @@ function perflab_is_valid_module( $module ) {
  * This attribute is then used in {@see perflab_render_generator()}.
  *
  * @since 1.1.0
+ * @since n.e.x.t The generator tag now includes the active standalone plugin slugs.
  */
 function perflab_get_generator_content() {
 	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
 
+	$active_plugins = array();
+	foreach ( perflab_get_standalone_plugin_version_constants( 'plugins' ) as $plugin_slug => $constant_name ) {
+		if ( defined( $constant_name ) && ! str_starts_with( constant( $constant_name ), 'Performance Lab ' ) ) {
+			$active_plugins[] = $plugin_slug;
+		}
+	}
+
 	return sprintf(
-		'Performance Lab %1$s; modules: %2$s',
+		'Performance Lab %1$s; modules: %2$s; plugins: %3$s',
 		PERFLAB_VERSION,
-		implode( ', ', $active_and_valid_modules )
+		implode( ', ', $active_and_valid_modules ),
+		implode( ', ', $active_plugins )
 	);
 }
 
@@ -236,7 +245,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
  * Checks whether the given module can be loaded in the current environment.
  *
  * @since 1.3.0
- * @since n.e.x.t The function may now alternatively return a WP_Error.
+ * @since 2.8.0 The function may now alternatively return a WP_Error.
  *
  * @param string $module Slug of the module.
  * @return bool|WP_Error True if the module can be loaded, or false or a WP_Error with more concrete information otherwise.
@@ -276,7 +285,7 @@ function perflab_can_load_module( $module ) {
  * @return bool Whether the module has already been loaded by a separate plugin.
  */
 function perflab_is_standalone_plugin_loaded( $module ) {
-	$standalone_plugins_constants = perflab_get_standalone_plugins_constants();
+	$standalone_plugins_constants = perflab_get_standalone_plugin_version_constants( 'modules' );
 	if (
 		isset( $standalone_plugins_constants[ $module ] ) &&
 		defined( $standalone_plugins_constants[ $module ] ) &&
@@ -288,16 +297,48 @@ function perflab_is_standalone_plugin_loaded( $module ) {
 }
 
 /**
- * Gets the standalone plugin constants used for each module / plugin.
+ * Gets the standalone plugin constants used for each module with a standalone plugin.
  *
  * @since 2.2.0
+ * @deprecated 2.9.0
  *
  * @return array Map of module path to version constant used.
  */
 function perflab_get_standalone_plugins_constants() {
+	_deprecated_function( __FUNCTION__, 'Performance Lab 2.9.0', "perflab_get_standalone_plugin_version_constants( 'modules' )" );
+	return perflab_get_standalone_plugin_version_constants( 'modules' );
+}
+
+/**
+ * Gets the standalone plugin constants used for each available standalone plugin, or module with a standalone plugin.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $source Optional. Either 'plugins' or 'modules'. Default 'plugins'.
+ * @return array<string, string> Map of plugin slug / module path and the version constant used.
+ */
+function perflab_get_standalone_plugin_version_constants( $source = 'plugins' ) {
+	if ( 'modules' === $source ) {
+		/*
+		 * This list includes all modules which are also available as standalone plugins,
+		 * as `$module_dir => $version_constant` pairs.
+		 */
+		return array(
+			'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
+			'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
+		);
+	}
+
+	/*
+	 * This list includes all standalone plugins that are part of the Performance Lab project,
+	 * as `$plugin_slug => $version_constant` pairs.
+	 */
 	return array(
-		'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
-		'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
+		'webp-uploads'            => 'WEBP_UPLOADS_VERSION',
+		'dominant-color-images'   => 'DOMINANT_COLOR_IMAGES_VERSION',
+		'performant-translations' => 'PERFORMANT_TRANSLATIONS_VERSION',
+		'auto-sizes'              => 'IMAGE_AUTO_SIZES_VERSION',
+		'speculation-rules'       => 'SPECULATION_RULES_VERSION',
 	);
 }
 
@@ -535,7 +576,7 @@ function perflab_run_module_activation_deactivation( $old_value, $value ) {
 /**
  * Reverts the module migration pointer dismissal for the given user.
  *
- * @since n.e.x.t
+ * @since 2.8.0
  *
  * @param WP_User $user The WP_User object.
  */
