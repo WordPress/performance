@@ -10,6 +10,9 @@
  */
 class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
+	/**
+	 * @var Perflab_Server_Timing
+	 */
 	private $server_timing;
 
 	private static $admin_id;
@@ -117,6 +120,19 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
 		$this->server_timing->register_metric( 'metric-to-check-for', self::$dummy_args );
 		$this->assertTrue( $this->server_timing->has_registered_metric( 'metric-to-check-for' ), 'Metric should be available after registration' );
+	}
+
+	public function test_register_metric_replaces_slashes() {
+		$this->server_timing->register_metric(
+			'foo/bar/baz',
+			array(
+				'measure_callback' => static function ( $metric ) {
+					$metric->set_value( 123 );
+				},
+				'access_cap'       => 'exist',
+			)
+		);
+		$this->assertSame( 'wp-foo-bar-baz;dur=123', $this->server_timing->get_header() );
 	}
 
 	/**
