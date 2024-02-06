@@ -8,6 +8,18 @@
 
 class Speculation_Rules_Tests extends WP_UnitTestCase {
 
+	private $original_wp_theme_features = array();
+
+	public function set_up() {
+		parent::set_up();
+		$this->original_wp_theme_features = $GLOBALS['_wp_theme_features'];
+	}
+
+	public function tear_down() {
+		$GLOBALS['_wp_theme_features'] = $this->original_wp_theme_features;
+		parent::tear_down();
+	}
+
 	public function data_provider_to_test_print_speculation_rules(): array {
 		return array(
 			'xhtml' => array(
