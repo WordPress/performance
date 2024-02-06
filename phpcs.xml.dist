@@ -16,6 +16,7 @@
 	<file>./admin</file>
 	<file>./load.php</file>
 	<file>./modules</file>
+	<file>./plugins</file>
 	<file>./server-timing</file>
 	<file>./tests</file>
 

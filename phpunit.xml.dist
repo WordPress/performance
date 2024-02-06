@@ -14,6 +14,9 @@
 		</testsuite>
 		<testsuite name="auto-sizes">
 			<directory suffix=".php">./tests/plugins/auto-sizes</directory>
+    </testsuite>
+		<testsuite name="test-plugin">
+			<directory suffix=".php">./tests/plugins/test-plugin</directory>
 		</testsuite>
 	</testsuites>
 	<groups>
