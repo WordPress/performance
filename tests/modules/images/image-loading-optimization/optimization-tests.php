@@ -312,6 +312,64 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				',
 			),
 
+			'no-url-metrics-with-data-url-image'          => array(
+				'set_up'   => static function () {},
+				// Smallest PNG courtesy of <https://evanhahn.com/worlds-smallest-png/>.
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==">
+						</body>
+					</html>
+				',
+				// There should be no data-ilo-xpath added to the IMG because it is using a data: URL.
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+							<script type="module">/* import detect ... */</script>
+						</head>
+						<body>
+							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==">
+						</body>
+					</html>
+				',
+			),
+
+			'no-url-metrics-for-image-without-src'        => array(
+				'set_up'   => static function () {},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<img id="no-src">
+							<img id="empty-src" src="">
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+							<script type="module">/* import detect ... */</script>
+						</head>
+						<body>
+							<img id="no-src">
+							<img id="empty-src" src="">
+						</body>
+					</html>
+				',
+			),
+
 			'common-lcp-image-with-fully-populated-sample-data' => array(
 				'set_up'   => function () {
 					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
