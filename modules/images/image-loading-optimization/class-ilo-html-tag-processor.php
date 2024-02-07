@@ -10,9 +10,6 @@
  * Processor leveraging WP_HTML_Tag_Processor which gathers breadcrumbs for computing XPaths while iterating the open_tags() generator.
  *
  * Eventually this class should be made largely obsolete once `WP_HTML_Processor` is fully implemented to support all HTML tags.
- * Note that the admin bar is skipped over since its presence throws off the XPath indices and its presence is irrelevant for
- * the purposes of optimizing normal frontend responses: a logged-in user with the admin bar showing should be able to gather
- * URL metrics which can be used for logged-out visitors.
  *
  * @since n.e.x.t
  * @access private
@@ -174,8 +171,6 @@ final class ILO_HTML_Tag_Processor {
 	public function open_tags(): Generator {
 		$p = $this->processor;
 
-		$inside_admin_bar_depth = 0;
-
 		/*
 		 * The keys for the following two arrays correspond to each other. Given the following document:
 		 *
@@ -219,20 +214,9 @@ final class ILO_HTML_Tag_Processor {
 					++$this->open_stack_indices[ $level ];
 				}
 
-				// Decrement the index if this is the admin bar element so that it will be invisible in XPaths.
-				$is_admin_bar = ( 'DIV' === $tag_name && $p->get_attribute( 'id' ) === 'wpadminbar' );
-				if ( $is_admin_bar ) {
-					--$this->open_stack_indices[ $level ];
-				}
-
-				// Skip over the admin bar and its descendents.
-				if ( $is_admin_bar || $inside_admin_bar_depth > 0 ) {
-					++$inside_admin_bar_depth;
-				} else {
-					// Now that the breadcrumbs are constructed, yield the tag name so that they can be queried if desired.
-					// Other mutations may be performed to the open tag's attributes by the callee at this point as well.
-					yield $tag_name;
-				}
+				// Now that the breadcrumbs are constructed, yield the tag name so that they can be queried if desired.
+				// Other mutations may be performed to the open tag's attributes by the callee at this point as well.
+				yield $tag_name;
 
 				// Immediately pop off self-closing and raw text tags.
 				if (
@@ -243,9 +227,6 @@ final class ILO_HTML_Tag_Processor {
 					( $p->has_self_closing_flag() && $this->is_foreign_element() )
 				) {
 					array_pop( $this->open_stack_tags );
-					if ( $inside_admin_bar_depth > 0 ) {
-						--$inside_admin_bar_depth;
-					}
 				}
 			} else {
 				// If the closing tag is for self-closing or raw text tag, we ignore it since it was already handled above.
@@ -267,20 +248,6 @@ final class ILO_HTML_Tag_Processor {
 							$tag_name
 						)
 					);
-				}
-
-				if ( $inside_admin_bar_depth > 0 ) {
-					--$inside_admin_bar_depth;
-					if ( 0 === $inside_admin_bar_depth && 'DIV' !== $tag_name ) {
-						$this->warn(
-							sprintf(
-								/* translators: 1: Current tag name, 2: Closing tag name DIV */
-								__( 'Expected closing %1$s tag to rather be the closing %2$s tag for the admin bar.', 'performance-lab' ),
-								$tag_name,
-								'DIV'
-							)
-						);
-					}
 				}
 
 				array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) + 1 );

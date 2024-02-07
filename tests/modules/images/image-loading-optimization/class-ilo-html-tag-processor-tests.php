@@ -9,19 +9,8 @@
  */
 class ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 
-	private function get_admin_bar_markup(): string {
-		return <<<HTML
-			<div id="wpadminbar" class="nojq nojs">
-				<div class="quicklinks" id="wp-toolbar" role="navigation" aria-label="Toolbar">
-					<ul id='wp-admin-bar-root-default' class="ab-top-menu"><li id='wp-admin-bar-wp-logo' class="menupop"><a class='ab-item' aria-haspopup="true" href='http://localhost:8888/wp-admin/about.php'><span class="ab-icon" aria-hidden="true"></span><span class="screen-reader-text">About WordPress</span></a><div class="ab-sub-wrapper"><ul id='wp-admin-bar-wp-logo-default' class="ab-submenu"><li id='wp-admin-bar-about'><a class='ab-item' href='http://localhost:8888/wp-admin/about.php'>About WordPress</a></li><li id='wp-admin-bar-contribute'><a class='ab-item' href='http://localhost:8888/wp-admin/contribute.php'>Get Involved</a></li></ul><ul id='wp-admin-bar-wp-logo-external' class="ab-sub-secondary ab-submenu"><li id='wp-admin-bar-wporg'><a class='ab-item' href='https://wordpress.org/'>WordPress.org</a></li><li id='wp-admin-bar-documentation'><a class='ab-item' href='https://wordpress.org/documentation/'>Documentation</a></li><li id='wp-admin-bar-learn'><a class='ab-item' href='https://learn.wordpress.org/'>Learn WordPress</a></li><li id='wp-admin-bar-support-forums'><a class='ab-item' href='https://wordpress.org/support/forums/'>Support</a></li><li id='wp-admin-bar-feedback'><a class='ab-item' href='https://wordpress.org/support/forum/requests-and-feedback'>Feedback</a></li></ul></div></li><li id='wp-admin-bar-site-name' class="menupop"><a class='ab-item' aria-haspopup="true" href='http://localhost:8888/wp-admin/'>performance</a><div class="ab-sub-wrapper"><ul id='wp-admin-bar-site-name-default' class="ab-submenu"><li id='wp-admin-bar-dashboard'><a class='ab-item' href='http://localhost:8888/wp-admin/'>Dashboard</a></li><li id='wp-admin-bar-plugins'><a class='ab-item' href='http://localhost:8888/wp-admin/plugins.php'>Plugins</a></li></ul><ul id='wp-admin-bar-appearance' class="ab-submenu"><li id='wp-admin-bar-themes'><a class='ab-item' href='http://localhost:8888/wp-admin/themes.php'>Themes</a></li></ul></div></li><li id='wp-admin-bar-site-editor'><a class='ab-item' href='http://localhost:8888/wp-admin/site-editor.php?postType=wp_template&#038;postId=twentytwentythree//single'>Edit site</a></li><li id='wp-admin-bar-comments'><a class='ab-item' href='http://localhost:8888/wp-admin/edit-comments.php'><span class="ab-icon" aria-hidden="true"></span><span class="ab-label awaiting-mod pending-count count-0" aria-hidden="true">0</span><span class="screen-reader-text comments-in-moderation-text">0 Comments in moderation</span></a></li><li id='wp-admin-bar-new-content' class="menupop"><a class='ab-item' aria-haspopup="true" href='http://localhost:8888/wp-admin/post-new.php'><span class="ab-icon" aria-hidden="true"></span><span class="ab-label">New</span></a><div class="ab-sub-wrapper"><ul id='wp-admin-bar-new-content-default' class="ab-submenu"><li id='wp-admin-bar-new-post'><a class='ab-item' href='http://localhost:8888/wp-admin/post-new.php'>Post</a></li><li id='wp-admin-bar-new-media'><a class='ab-item' href='http://localhost:8888/wp-admin/media-new.php'>Media</a></li><li id='wp-admin-bar-new-page'><a class='ab-item' href='http://localhost:8888/wp-admin/post-new.php?post_type=page'>Page</a></li><li id='wp-admin-bar-new-user'><a class='ab-item' href='http://localhost:8888/wp-admin/user-new.php'>User</a></li></ul></div></li><li id='wp-admin-bar-edit'><a class='ab-item' href='http://localhost:8888/wp-admin/post.php?post=7&#038;action=edit'>Edit Post</a></li></ul><ul id='wp-admin-bar-top-secondary' class="ab-top-secondary ab-top-menu"><li id='wp-admin-bar-search' class="admin-bar-search"><div class="ab-item ab-empty-item" tabindex="-1"><form action="http://localhost:8888/" method="get" id="adminbarsearch"><input class="adminbar-input" name="s" id="adminbar-search" type="text" value="" maxlength="150" /><label for="adminbar-search" class="screen-reader-text">Search</label><input type="submit" class="adminbar-button" value="Search" /></form></div></li><li id='wp-admin-bar-my-account' class="menupop with-avatar"><a class='ab-item' aria-haspopup="true" href='http://localhost:8888/wp-admin/profile.php'>Howdy, <span class="display-name">admin</span><img alt='' src='http://2.gravatar.com/avatar/ea8b076b398ee48b71cfaecf898c582b?s=26&#038;d=mm&#038;r=g' srcset='http://2.gravatar.com/avatar/ea8b076b398ee48b71cfaecf898c582b?s=52&#038;d=mm&#038;r=g 2x' class='avatar avatar-26 photo' height='26' width='26' loading='lazy' decoding='async'/></a><div class="ab-sub-wrapper"><ul id='wp-admin-bar-user-actions' class="ab-submenu"><li id='wp-admin-bar-user-info'><a class='ab-item' tabindex="-1" href='http://localhost:8888/wp-admin/profile.php'><img alt='' src='http://2.gravatar.com/avatar/ea8b076b398ee48b71cfaecf898c582b?s=64&#038;d=mm&#038;r=g' srcset='http://2.gravatar.com/avatar/ea8b076b398ee48b71cfaecf898c582b?s=128&#038;d=mm&#038;r=g 2x' class='avatar avatar-64 photo' height='64' width='64' loading='lazy' decoding='async'/><span class='display-name'>admin</span></a></li><li id='wp-admin-bar-edit-profile'><a class='ab-item' href='http://localhost:8888/wp-admin/profile.php'>Edit Profile</a></li><li id='wp-admin-bar-logout'><a class='ab-item' href='http://localhost:8888/wp-login.php?action=logout&#038;_wpnonce=a4d55eb7a9'>Log Out</a></li></ul></div></li></ul>
-				</div>
-				<a class="screen-reader-shortcut" href="http://localhost:8888/wp-login.php?action=logout&#038;_wpnonce=a4d55eb7a9">Log Out</a>
-			</div>
-HTML;
-	}
-
 	public function data_provider_sample_documents(): array {
-		$datasets = array(
+		return array(
 			'well-formed-html'   => array(
 				'document'  => '
 					<!DOCTYPE html>
@@ -296,23 +285,6 @@ HTML;
 				),
 			),
 		);
-
-		$all_datasets = array();
-		foreach ( $datasets as $key => $dataset ) {
-			$all_datasets[ $key ] = $dataset;
-
-			// Inject the admin bar at the beginning of the body and the Customizer support script.
-			$dataset['document'] = preg_replace(
-				'#<body[^>]*>#',
-				'$0' . get_echo( 'wp_customize_support_script' ) . $this->get_admin_bar_markup(),
-				$dataset['document']
-			);
-
-			// Add the admin bar variant as a new dataset.
-			$all_datasets[ "$key-with-adminbar" ] = $dataset;
-		}
-
-		return $all_datasets;
 	}
 
 	/**

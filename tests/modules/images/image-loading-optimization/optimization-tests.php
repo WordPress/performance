@@ -10,13 +10,18 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 
 	private $original_request_uri;
 
+	private $original_request_method;
+
 	public function set_up() {
-		$this->original_request_uri = $_SERVER['REQUEST_URI'];
+		$this->original_request_uri    = $_SERVER['REQUEST_URI'];
+		$this->original_request_method = $_SERVER['REQUEST_METHOD'];
 		parent::set_up();
 	}
 
 	public function tear_down() {
-		$_SERVER['REQUEST_URI'] = $this->original_request_uri;
+		$_SERVER['REQUEST_URI']    = $this->original_request_uri;
+		$_SERVER['REQUEST_METHOD'] = $this->original_request_method;
+		unset( $GLOBALS['wp_customize'] );
 		parent::tear_down();
 	}
 
@@ -82,6 +87,20 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				'set_up'   => function () {
 					$this->go_to( home_url( '/' ) );
 					$_SERVER['REQUEST_METHOD'] = 'POST';
+				},
+				'expected' => false,
+			),
+			'subscriber_user'    => array(
+				'set_up'   => function () {
+					wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
+					$this->go_to( home_url( '/' ) );
+				},
+				'expected' => true,
+			),
+			'admin_user'         => array(
+				'set_up'   => function () {
+					wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+					$this->go_to( home_url( '/' ) );
 				},
 				'expected' => false,
 			),

@@ -88,6 +88,13 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 					return array( 'error' => 404 );
 				},
 			),
+			'logged-in'    => array(
+				'set_up' => function () {
+					wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
+					$this->go_to( home_url( '/' ) );
+					return array( 'user_logged_in' => true );
+				},
+			),
 		);
 	}
 
