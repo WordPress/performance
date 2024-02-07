@@ -442,6 +442,55 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				',
 			),
 
+			'common-lcp-image-with-stale-sample-data'     => array(
+				'set_up'   => function () {
+					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
+					$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
+					foreach ( array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+						for ( $i = 0; $i < $sample_size; $i++ ) {
+							ilo_store_url_metric(
+								home_url( '/' ),
+								$slug,
+								$this->get_validated_url_metric(
+									$viewport_width,
+									array(
+										array(
+											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+											'isLCP' => true,
+										),
+									)
+								)
+							);
+						}
+					}
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<script>/* Something injected with wp_body_open */</script>
+							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+						</body>
+					</html>
+				',
+				// The preload link should be absent because the URL Metrics were collected before the script was printed at wp_body_open, causing the XPath to no longer be valid.
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<script>/* Something injected with wp_body_open */</script>
+							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+						</body>
+					</html>
+				',
+			),
+
 			'common-lcp-background-image-with-fully-populated-sample-data' => array(
 				'set_up'   => function () {
 					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
