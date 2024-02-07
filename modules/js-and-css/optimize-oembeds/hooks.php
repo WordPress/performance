@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $html The oEmbed HTML.
  * @return string
  */
-function perflab_optimize_oembed_html( $html ) {
+function perflab_optimize_oembed_html( string $html ): string {
 	$p = new WP_HTML_Tag_Processor( $html );
 
 	/**
