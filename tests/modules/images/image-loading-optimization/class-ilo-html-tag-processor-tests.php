@@ -301,10 +301,10 @@ HTML;
 		foreach ( $datasets as $key => $dataset ) {
 			$all_datasets[ $key ] = $dataset;
 
-			// Inject the admin bar at the beginning of the body.
+			// Inject the admin bar at the beginning of the body and the Customizer support script.
 			$dataset['document'] = preg_replace(
 				'#<body[^>]*>#',
-				'$0' . $this->get_admin_bar_markup(),
+				'$0' . get_echo( 'wp_customize_support_script' ) . $this->get_admin_bar_markup(),
 				$dataset['document']
 			);
 
