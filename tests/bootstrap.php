@@ -69,8 +69,17 @@ if ( $testsuite_count > 1 ) {
 		if ( file_exists( $plugin_test_path ) ) {
 			tests_add_filter(
 				'plugins_loaded',
-				static function () use ( $plugin_test_path ) {
-					require_once $plugin_test_path . '/load.php';
+				static function () use ( $plugin_test_path, $plugin_name ) {
+					// Check if plugin have "plugin/plugin.php" file.
+					if ( file_exists( $plugin_test_path . '/' . $plugin_name . '.php' ) ) {
+						require_once $plugin_test_path . '/' . $plugin_name . '.php';
+						return;
+					}
+
+					// Check if plugin have "plugin/load.php" file.
+					if ( file_exists( $plugin_test_path . '/load.php' ) ) {
+						require_once $plugin_test_path . '/load.php';
+					}
 				},
 				1
 			);
