@@ -185,8 +185,13 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	// Walk over all IMG tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes for preloading.
 	$processor = new ILO_HTML_Tag_Processor( $buffer );
 	foreach ( $processor->open_tags() as $tag_name ) {
-		$is_img_tag = ( 'IMG' === $tag_name );
-		$style      = $processor->get_attribute( 'style' );
+		$is_img_tag = (
+			'IMG' === $tag_name
+			&&
+			$processor->get_attribute( 'src' )
+			&&
+			! str_starts_with( $processor->get_attribute( 'src' ), 'data:' )
+		);
 
 		/*
 		 * Note that CSS allows for a `background`/`background-image` to have multiple `url()` CSS functions, resulting
@@ -196,12 +201,19 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		 * images, this logic would need to be modified to make $background_image an array and to have a more robust
 		 * parser of the `url()` functions from the property value.
 		 */
-		$background_image = null;
-		if ( $style && preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?(?!data:)(?<background_image>.+?)[\'"]?\s*\)/', $style, $matches ) ) {
-			$background_image = $matches['background_image'];
+		$background_image_url = null;
+		$style                = $processor->get_attribute( 'style' );
+		if (
+			$style
+			&&
+			preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?(?<background_image>.+?)[\'"]?\s*\)/', $style, $matches )
+			&&
+			! str_starts_with( $matches['background_image'], 'data:' )
+		) {
+			$background_image_url = $matches['background_image'];
 		}
 
-		if ( ! ( $is_img_tag || $background_image ) ) {
+		if ( ! ( $is_img_tag || $background_image_url ) ) {
 			continue;
 		}
 
@@ -246,9 +258,9 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 				foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
 					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['img_attributes'] = $img_attributes;
 				}
-			} elseif ( $background_image ) {
+			} elseif ( $background_image_url ) {
 				foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
-					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['background_image'] = $background_image;
+					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['background_image'] = $background_image_url;
 				}
 			}
 		}
