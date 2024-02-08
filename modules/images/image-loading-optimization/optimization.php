@@ -68,7 +68,7 @@ function ilo_can_optimize_response(): bool {
  * @since n.e.x.t
  * @access private
  *
- * @param array<int, array{background_image?: string, img_attributes?: array{src?: string, srcset?: string, sizes?: string, crossorigin?: string}}|false> $lcp_elements_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
+ * @param array<int, array{background_image?: string, img_attributes?: array{src?: string, srcset?: string, sizes?: string, crossorigin?: string}}|false> $lcp_elements_by_minimum_viewport_widths LCP elements keyed by minimum viewport width, amended with element details.
  * @return string Markup for zero or more preload link tags.
  */
 function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths ): string {
@@ -97,6 +97,11 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 				}
 				$link_attributes[ $name ] = $value;
 			}
+		}
+
+		// Skip constructing a link if it is missing required attributes.
+		if ( empty( $link_attributes['href'] ) && empty( $link_attributes['imagesrcset'] ) ) {
+			continue;
 		}
 
 		// Add media query if it's going to be something other than just `min-width: 0px`.
@@ -184,7 +189,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		$common_lcp_element = null;
 	}
 
-	// Walk over all IMG tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes for preloading.
+	// Walk over all tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes or background-image for preloading.
 	$processor = new ILO_HTML_Tag_Processor( $buffer );
 	foreach ( $processor->open_tags() as $tag_name ) {
 		$is_img_tag = (
@@ -248,7 +253,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		// TODO: Conversely, if an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
 
 		// Capture the attributes from the LCP elements to use in preload links.
-		if ( isset( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] ) ) {
+		if ( isset( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] ) && ( $is_img_tag || $background_image_url ) ) {
 			if ( $is_img_tag ) {
 				$img_attributes = array();
 				foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin' ) as $attr_name ) {
