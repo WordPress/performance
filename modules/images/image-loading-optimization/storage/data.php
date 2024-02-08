@@ -57,6 +57,11 @@ function ilo_get_normalized_query_vars(): array {
 		);
 	}
 
+	// Vary URL metrics by whether the user is logged in since additional elements may be present.
+	if ( is_user_logged_in() ) {
+		$normalized_query_vars['user_logged_in'] = true;
+	}
+
 	return $normalized_query_vars;
 }
 

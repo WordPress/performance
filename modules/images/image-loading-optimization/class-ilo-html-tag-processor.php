@@ -7,7 +7,7 @@
  */
 
 /**
- * Processor leveraging WP_HTML_Tag_Processor which gathers breadcrumbs which can be obtained as XPath while iterating the open_tags() generator.
+ * Processor leveraging WP_HTML_Tag_Processor which gathers breadcrumbs for computing XPaths while iterating the open_tags() generator.
  *
  * Eventually this class should be made largely obsolete once `WP_HTML_Processor` is fully implemented to support all HTML tags.
  *
@@ -214,12 +214,6 @@ final class ILO_HTML_Tag_Processor {
 					++$this->open_stack_indices[ $level ];
 				}
 
-				// Only increment the tag index at this level only if it isn't the admin bar, since the presence of the
-				// admin bar can throw off the indices.
-				if ( 'DIV' === $tag_name && $p->get_attribute( 'id' ) === 'wpadminbar' ) {
-					--$this->open_stack_indices[ $level ];
-				}
-
 				// Now that the breadcrumbs are constructed, yield the tag name so that they can be queried if desired.
 				// Other mutations may be performed to the open tag's attributes by the callee at this point as well.
 				yield $tag_name;
@@ -245,16 +239,13 @@ final class ILO_HTML_Tag_Processor {
 				}
 
 				$popped_tag_name = array_pop( $this->open_stack_tags );
-				if ( $popped_tag_name !== $tag_name && function_exists( 'wp_trigger_error' ) ) {
-					wp_trigger_error(
-						__METHOD__,
-						esc_html(
-							sprintf(
-								/* translators: 1: Popped tag name, 2: Closing tag name */
-								__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'performance-lab' ),
-								$popped_tag_name,
-								$tag_name
-							)
+				if ( $popped_tag_name !== $tag_name ) {
+					$this->warn(
+						sprintf(
+							/* translators: 1: Popped tag name, 2: Closing tag name */
+							__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'performance-lab' ),
+							$popped_tag_name,
+							$tag_name
 						)
 					);
 				}
@@ -262,6 +253,21 @@ final class ILO_HTML_Tag_Processor {
 				array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) + 1 );
 			}
 		}
+	}
+
+	/**
+	 * Warns of bad markup.
+	 *
+	 * @param string $message Warning message.
+	 */
+	private function warn( string $message ) {
+		if ( ! function_exists( 'wp_trigger_error' ) ) {
+			return;
+		}
+		wp_trigger_error(
+			__CLASS__ . '::open_tags',
+			esc_html( $message )
+		);
 	}
 
 	/**

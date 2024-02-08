@@ -7,8 +7,6 @@ const consoleLogPrefix = '[Image Loading Optimization]';
 
 const storageLockTimeSessionKey = 'iloStorageLockTime';
 
-const adminBarId = 'wpadminbar';
-
 /**
  * Checks whether storage is locked.
  *
@@ -199,10 +197,6 @@ export default async function detect( {
 		log( 'Proceeding with detection' );
 	}
 
-	// Obtain the admin bar element because we don't want to detect elements inside of it.
-	const adminBar =
-		/** @type {?HTMLDivElement} */ doc.getElementById( adminBarId );
-
 	// TODO: This query no longer needs to be done as early as possible since the server is adding the breadcrumbs.
 	const breadcrumbedElements =
 		doc.body.querySelectorAll( '[data-ilo-xpath]' );
@@ -260,9 +254,7 @@ export default async function detect( {
 			);
 
 			for ( const element of breadcrumbedElementsMap.keys() ) {
-				if ( ! adminBar || ! adminBar.contains( element ) ) {
-					intersectionObserver.observe( element );
-				}
+				intersectionObserver.observe( element );
 			}
 		} );
 

@@ -31,10 +31,6 @@ add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
 /**
  * Determines whether the current response can be optimized.
  *
- * Only search results are not eligible by default for optimization. This is because there is no predictability in
- * whether posts in the loop will have featured images assigned or not. If a theme template for search results doesn't
- * even show featured images, then this isn't an issue.
- *
  * @since n.e.x.t
  * @access private
  *
@@ -42,12 +38,18 @@ add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
  */
 function ilo_can_optimize_response(): bool {
 	$able = ! (
-		// Since the URL space is infinite.
+		// Since there is no predictability in whether posts in the loop will have featured images assigned or not. If a
+		// theme template for search results doesn't even show featured images, then this wouldn't be an issue.
 		is_search() ||
 		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
 		is_customize_preview() ||
-		// The images detected in the response body of a POST request cannot, by definition, be cached.
-		'GET' !== $_SERVER['REQUEST_METHOD']
+		// Since the images detected in the response body of a POST request cannot, by definition, be cached.
+		'GET' !== $_SERVER['REQUEST_METHOD'] ||
+		// The aim is to optimize pages for the majority of site visitors, not those who administer the site. For admin
+		// users, additional elements will be present like the script from wp_customize_support_script() which will
+		// interfere with the XPath indices. Note that ilo_get_normalized_query_vars() is varied by is_user_logged_in()
+		// so membership sites and e-commerce sites will still be able to be optimized for their normal visitors.
+		current_user_can( 'customize' )
 	);
 
 	/**
