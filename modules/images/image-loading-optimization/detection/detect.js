@@ -155,16 +155,6 @@ export default async function detect( {
 } ) {
 	const currentTime = getCurrentTime();
 
-	// As an alternative to this, the ilo_print_detection_script() function can short-circuit if the
-	// ilo_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
-	// result in metrics being missed being gathered when a user navigates around a site and primes the page cache.
-	if ( isStorageLocked( currentTime, storageLockTTL ) ) {
-		if ( isDebug ) {
-			warn( 'Aborted detection due to storage being locked.' );
-		}
-		return;
-	}
-
 	// Abort running detection logic if it was served in a cached page.
 	if ( currentTime - serveTime > detectionTimeWindow ) {
 		if ( isDebug ) {
@@ -175,8 +165,50 @@ export default async function detect( {
 		return;
 	}
 
+	// Abort if the current viewport is not among those which need URL metrics.
+	if ( ! isViewportNeeded( win.innerWidth, neededMinimumViewportWidths ) ) {
+		if ( isDebug ) {
+			log( 'No need for URL metrics from the current viewport.' );
+		}
+		return;
+	}
+
+	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
+	await new Promise( ( resolve ) => {
+		if ( doc.readyState !== 'loading' ) {
+			resolve();
+		} else {
+			doc.addEventListener( 'DOMContentLoaded', resolve, { once: true } );
+		}
+	} );
+
+	// Wait until the resources on the page have fully loaded.
+	await new Promise( ( resolve ) => {
+		if ( doc.readyState === 'complete' ) {
+			resolve();
+		} else {
+			win.addEventListener( 'load', resolve, { once: true } );
+		}
+	} );
+
+	// Wait yet further until idle.
+	if ( typeof requestIdleCallback === 'function' ) {
+		await new Promise( ( resolve ) => {
+			requestIdleCallback( resolve );
+		} );
+	}
+
+	// As an alternative to this, the ilo_print_detection_script() function can short-circuit if the
+	// ilo_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
+	// result in metrics missed from being gathered when a user navigates around a site and primes the page cache.
+	if ( isStorageLocked( currentTime, storageLockTTL ) ) {
+		if ( isDebug ) {
+			warn( 'Aborted detection due to storage being locked.' );
+		}
+		return;
+	}
+
 	// Prevent detection when page is not scrolled to the initial viewport.
-	// TODO: Does this cause layout/reflow? https://gist.github.com/paulirish/5d52fb081b3570c81e3a
 	if ( doc.documentElement.scrollTop > 0 ) {
 		if ( isDebug ) {
 			warn(
@@ -186,18 +218,10 @@ export default async function detect( {
 		return;
 	}
 
-	if ( ! isViewportNeeded( win.innerWidth, neededMinimumViewportWidths ) ) {
-		if ( isDebug ) {
-			log( 'No need for URL metrics from the current viewport.' );
-		}
-		return;
-	}
-
 	if ( isDebug ) {
 		log( 'Proceeding with detection' );
 	}
 
-	// TODO: This query no longer needs to be done as early as possible since the server is adding the breadcrumbs.
 	const breadcrumbedElements =
 		doc.body.querySelectorAll( '[data-ilo-xpath]' );
 
@@ -211,15 +235,6 @@ export default async function detect( {
 			( element ) => [ element, element.dataset.iloXpath ]
 		)
 	);
-
-	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
-	await new Promise( ( resolve ) => {
-		if ( doc.readyState !== 'loading' ) {
-			resolve();
-		} else {
-			doc.addEventListener( 'DOMContentLoaded', resolve, { once: true } );
-		}
-	} );
 
 	/** @type {IntersectionObserverEntry[]} */
 	const elementIntersections = [];
@@ -286,15 +301,6 @@ export default async function detect( {
 		);
 	} );
 
-	// Wait until the resources on the page have fully loaded.
-	await new Promise( ( resolve ) => {
-		if ( doc.readyState === 'complete' ) {
-			resolve();
-		} else {
-			win.addEventListener( 'load', resolve, { once: true } );
-		}
-	} );
-
 	// Stop observing.
 	disconnectIntersectionObserver();
 	if ( isDebug ) {
@@ -348,7 +354,11 @@ export default async function detect( {
 		log( 'URL metrics:', urlMetrics );
 	}
 
-	// TODO: Wait until idle? Yield to main?
+	// Yield to main before sending data to server to further break up task.
+	await new Promise( ( resolve ) => {
+		setTimeout( resolve, 0 );
+	} );
+
 	try {
 		const response = await fetch( restApiEndpoint, {
 			method: 'POST',
