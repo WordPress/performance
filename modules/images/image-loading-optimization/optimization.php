@@ -101,6 +101,13 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 
 		// Skip constructing a link if it is missing required attributes.
 		if ( empty( $link_attributes['href'] ) && empty( $link_attributes['imagesrcset'] ) ) {
+			_doing_it_wrong(
+				__FUNCTION__,
+				esc_html(
+					__( 'Attempted to construct preload link without an available href or imagesrcset. Supplied LCP element: ', 'performance-lab' ) . wp_json_encode( $lcp_element )
+				),
+				''
+			);
 			continue;
 		}
 
