@@ -200,7 +200,7 @@ export default async function detect( {
 
 	// As an alternative to this, the ilo_print_detection_script() function can short-circuit if the
 	// ilo_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
-	// result in metrics being missed being gathered when a user navigates around a site and primes the page cache.
+	// result in metrics missed from being gathered when a user navigates around a site and primes the page cache.
 	if ( isStorageLocked( currentTime, storageLockTTL ) ) {
 		if ( isDebug ) {
 			warn( 'Aborted detection due to storage being locked.' );
