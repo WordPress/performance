@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook callbacks used for oEmbed Optimizer.
+ * Hook callbacks used for Optimize Embeds.
  *
  * @since n.e.x.t
  * @package performance-lab
