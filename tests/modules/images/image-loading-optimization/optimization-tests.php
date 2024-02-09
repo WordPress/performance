@@ -870,6 +870,114 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					</html>
 				',
 			),
+
+			'different-lcp-elements-for-two-non-consecutive-breakpoints-and-one-is-stale' => array(
+				'set_up'   => function () {
+					add_filter(
+						'ilo_breakpoint_max_widths',
+						static function () {
+							return array( 480, 600, 782 );
+						}
+					);
+
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							500,
+							array(
+								array(
+									'isLCP' => true,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							650,
+							array(
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							800,
+							array(
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => true,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							800,
+							array(
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
+							<p>New paragraph since URL Metrics were captured!</p>
+							<img src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (min-width: 481px) and (max-width: 600px)" rel="preload"/>
+							<script type="module">/* import detect ... */</script>
+						</head>
+						<body>
+							<img alt="Mobile Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
+							<p>New paragraph since URL Metrics were captured!</p>
+							<img alt="Desktop Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[2][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
+						</body>
+					</html>
+				',
+			),
 		);
 	}
 
