@@ -442,6 +442,55 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				',
 			),
 
+			'common-lcp-image-with-stale-sample-data'     => array(
+				'set_up'   => function () {
+					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
+					$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
+					foreach ( array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+						for ( $i = 0; $i < $sample_size; $i++ ) {
+							ilo_store_url_metric(
+								home_url( '/' ),
+								$slug,
+								$this->get_validated_url_metric(
+									$viewport_width,
+									array(
+										array(
+											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+											'isLCP' => true,
+										),
+									)
+								)
+							);
+						}
+					}
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<script>/* Something injected with wp_body_open */</script>
+							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+						</body>
+					</html>
+				',
+				// The preload link should be absent because the URL Metrics were collected before the script was printed at wp_body_open, causing the XPath to no longer be valid.
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<script>/* Something injected with wp_body_open */</script>
+							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+						</body>
+					</html>
+				',
+			),
+
 			'common-lcp-background-image-with-fully-populated-sample-data' => array(
 				'set_up'   => function () {
 					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
@@ -715,6 +764,220 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				',
 			),
 
+			'different-lcp-elements-for-two-non-consecutive-breakpoints' => array(
+				'set_up'   => function () {
+					add_filter(
+						'ilo_breakpoint_max_widths',
+						static function () {
+							return array( 480, 600, 782 );
+						}
+					);
+
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							400,
+							array(
+								array(
+									'isLCP' => true,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							500,
+							array(
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							700,
+							array(
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => true,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							800,
+							array(
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
+							<img src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (max-width: 480px)" rel="preload"/>
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/desktop-logo.png" media="screen and (min-width: 601px) and (max-width: 782px)" rel="preload"/>
+							<script type="module">/* import detect ... */</script>
+						</head>
+						<body>
+							<img alt="Mobile Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
+							<img alt="Desktop Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
+						</body>
+					</html>
+				',
+			),
+
+			'different-lcp-elements-for-two-non-consecutive-breakpoints-and-one-is-stale' => array(
+				'set_up'   => function () {
+					add_filter(
+						'ilo_breakpoint_max_widths',
+						static function () {
+							return array( 480, 600, 782 );
+						}
+					);
+
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							500,
+							array(
+								array(
+									'isLCP' => true,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							650,
+							array(
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							800,
+							array(
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => true,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+					ilo_store_url_metric(
+						home_url( '/' ),
+						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						$this->get_validated_url_metric(
+							800,
+							array(
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+								),
+								array(
+									'isLCP' => false,
+									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+								),
+							)
+						)
+					);
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
+							<p>New paragraph since URL Metrics were captured!</p>
+							<img src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (min-width: 481px) and (max-width: 600px)" rel="preload"/>
+							<script type="module">/* import detect ... */</script>
+						</head>
+						<body>
+							<img alt="Mobile Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
+							<p>New paragraph since URL Metrics were captured!</p>
+							<img alt="Desktop Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[2][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
+						</body>
+					</html>
+				',
+			),
 		);
 	}
 

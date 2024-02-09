@@ -68,7 +68,7 @@ function ilo_can_optimize_response(): bool {
  * @since n.e.x.t
  * @access private
  *
- * @param array<int, array{background_image?: string, img_attributes?: array{src?: string, srcset?: string, sizes?: string, crossorigin?: string}}|false> $lcp_elements_by_minimum_viewport_widths LCP images keyed by minimum viewport width, amended with attributes key for the IMG attributes.
+ * @param array<int, array{background_image?: string, img_attributes?: array{src?: string, srcset?: string, sizes?: string, crossorigin?: string}}|false> $lcp_elements_by_minimum_viewport_widths LCP elements keyed by minimum viewport width, amended with element details.
  * @return string Markup for zero or more preload link tags.
  */
 function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths ): string {
@@ -97,6 +97,18 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 				}
 				$link_attributes[ $name ] = $value;
 			}
+		}
+
+		// Skip constructing a link if it is missing required attributes.
+		if ( empty( $link_attributes['href'] ) && empty( $link_attributes['imagesrcset'] ) ) {
+			_doing_it_wrong(
+				__FUNCTION__,
+				esc_html(
+					__( 'Attempted to construct preload link without an available href or imagesrcset. Supplied LCP element: ', 'performance-lab' ) . wp_json_encode( $lcp_element )
+				),
+				''
+			);
+			continue;
 		}
 
 		// Add media query if it's going to be something other than just `min-width: 0px`.
@@ -160,11 +172,15 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $url_metrics_grouped_by_breakpoint );
 	$all_breakpoints_have_url_metrics        = count( array_filter( $url_metrics_grouped_by_breakpoint ) ) === count( $breakpoint_max_widths ) + 1;
 
-	// Optimize looking up the LCP element by XPath.
-	$lcp_element_minimum_viewport_width_by_xpath = array();
+	/**
+	 * Optimized lookup of the LCP element viewport widths by XPath.
+	 *
+	 * @var array<string, int[]> $lcp_element_minimum_viewport_widths_by_xpath
+	 */
+	$lcp_element_minimum_viewport_widths_by_xpath = array();
 	foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
 		if ( false !== $lcp_element ) {
-			$lcp_element_minimum_viewport_width_by_xpath[ $lcp_element['xpath'] ][] = $minimum_viewport_width;
+			$lcp_element_minimum_viewport_widths_by_xpath[ $lcp_element['xpath'] ][] = $minimum_viewport_width;
 		}
 	}
 
@@ -184,7 +200,17 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		$common_lcp_element = null;
 	}
 
-	// Walk over all IMG tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes for preloading.
+	/**
+	 * Mapping of XPath to true to indicate whether the element was found in the document.
+	 *
+	 * After processing through the entire document, only the elements which were actually found in the document can get
+	 * preload links.
+	 *
+	 * @var array<string, true> $detected_lcp_element_xpaths
+	 */
+	$detected_lcp_element_xpaths = array();
+
+	// Walk over all tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes or background-image for preloading.
 	$processor = new ILO_HTML_Tag_Processor( $buffer );
 	foreach ( $processor->open_tags() as $tag_name ) {
 		$is_img_tag = (
@@ -248,7 +274,9 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		// TODO: Conversely, if an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
 
 		// Capture the attributes from the LCP elements to use in preload links.
-		if ( isset( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] ) ) {
+		if ( isset( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] ) ) {
+			$detected_lcp_element_xpaths[ $xpath ] = true;
+
 			if ( $is_img_tag ) {
 				$img_attributes = array();
 				foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin' ) as $attr_name ) {
@@ -257,11 +285,11 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 						$img_attributes[ $attr_name ] = $value;
 					}
 				}
-				foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
+				foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
 					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['img_attributes'] = $img_attributes;
 				}
 			} elseif ( $background_image_url ) {
-				foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
+				foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
 					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['background_image'] = $background_image_url;
 				}
 			}
@@ -273,12 +301,22 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	}
 	$buffer = $processor->get_updated_html();
 
+	// If there were any LCP elements captured in URL Metrics that no longer exist in the document, we need to behave as
+	// if they didn't exist in the first place as there is nothing that can be preloaded.
+	foreach ( array_keys( $lcp_element_minimum_viewport_widths_by_xpath ) as $xpath ) {
+		if ( empty( $detected_lcp_element_xpaths[ $xpath ] ) ) {
+			foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
+				$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ] = false;
+			}
+		}
+	}
+
 	// Inject any preload links at the end of the HEAD. In the future, WP_HTML_Processor could be used to do this injection.
 	// However, given the simple replacement here this is not essential.
 	$head_injection = ilo_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
 
 	// Inject detection script.
-	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce.
+	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-ilo-xpath attributes.
 	if ( $needs_detection ) {
 		$head_injection .= ilo_get_detection_script( $slug, $needed_minimum_viewport_widths );
 	}
