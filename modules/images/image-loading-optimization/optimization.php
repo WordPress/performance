@@ -173,14 +173,14 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$all_breakpoints_have_url_metrics        = count( array_filter( $url_metrics_grouped_by_breakpoint ) ) === count( $breakpoint_max_widths ) + 1;
 
 	/**
-	 * Optimized lookup of the LCP element for a viewport width by XPath.
+	 * Optimized lookup of the LCP element viewport widths by XPath.
 	 *
-	 * @var array<string, int[]> $lcp_element_minimum_viewport_width_by_xpath
+	 * @var array<string, int[]> $lcp_element_minimum_viewport_widths_by_xpath
 	 */
-	$lcp_element_minimum_viewport_width_by_xpath = array();
+	$lcp_element_minimum_viewport_widths_by_xpath = array();
 	foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
 		if ( false !== $lcp_element ) {
-			$lcp_element_minimum_viewport_width_by_xpath[ $lcp_element['xpath'] ][] = $minimum_viewport_width;
+			$lcp_element_minimum_viewport_widths_by_xpath[ $lcp_element['xpath'] ][] = $minimum_viewport_width;
 		}
 	}
 
@@ -274,7 +274,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		// TODO: Conversely, if an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
 
 		// Capture the attributes from the LCP elements to use in preload links.
-		if ( isset( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] ) ) {
+		if ( isset( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] ) ) {
 			$detected_lcp_element_xpaths[ $xpath ] = true;
 
 			if ( $is_img_tag ) {
@@ -285,11 +285,11 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 						$img_attributes[ $attr_name ] = $value;
 					}
 				}
-				foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
+				foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
 					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['img_attributes'] = $img_attributes;
 				}
 			} elseif ( $background_image_url ) {
-				foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
+				foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
 					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['background_image'] = $background_image_url;
 				}
 			}
@@ -303,9 +303,9 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 
 	// If there were any LCP elements captured in URL Metrics that no longer exist in the document, we need to behave as
 	// if they didn't exist in the first place as there is nothing that can be preloaded.
-	foreach ( array_keys( $lcp_element_minimum_viewport_width_by_xpath ) as $xpath ) {
+	foreach ( array_keys( $lcp_element_minimum_viewport_widths_by_xpath ) as $xpath ) {
 		if ( empty( $detected_lcp_element_xpaths[ $xpath ] ) ) {
-			foreach ( $lcp_element_minimum_viewport_width_by_xpath[ $xpath ] as $minimum_viewport_width ) {
+			foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
 				$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ] = false;
 			}
 		}
