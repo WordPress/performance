@@ -155,16 +155,6 @@ export default async function detect( {
 } ) {
 	const currentTime = getCurrentTime();
 
-	// As an alternative to this, the ilo_print_detection_script() function can short-circuit if the
-	// ilo_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
-	// result in metrics being missed being gathered when a user navigates around a site and primes the page cache.
-	if ( isStorageLocked( currentTime, storageLockTTL ) ) {
-		if ( isDebug ) {
-			warn( 'Aborted detection due to storage being locked.' );
-		}
-		return;
-	}
-
 	// Abort running detection logic if it was served in a cached page.
 	if ( currentTime - serveTime > detectionTimeWindow ) {
 		if ( isDebug ) {
@@ -206,6 +196,16 @@ export default async function detect( {
 		await new Promise( ( resolve ) => {
 			requestIdleCallback( resolve );
 		} );
+	}
+
+	// As an alternative to this, the ilo_print_detection_script() function can short-circuit if the
+	// ilo_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
+	// result in metrics being missed being gathered when a user navigates around a site and primes the page cache.
+	if ( isStorageLocked( currentTime, storageLockTTL ) ) {
+		if ( isDebug ) {
+			warn( 'Aborted detection due to storage being locked.' );
+		}
+		return;
 	}
 
 	// Prevent detection when page is not scrolled to the initial viewport.
