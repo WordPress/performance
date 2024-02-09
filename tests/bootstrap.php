@@ -32,38 +32,25 @@ if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
 	$_test_root = '/tmp/wordpress-tests-lib';
 }
 
-// Force plugin to be active.
-$GLOBALS['wp_tests_options'] = array(
-	'active_plugins' => array( basename( TESTS_PLUGIN_DIR ) . '/load.php' ),
-);
-
-// Add filter to ensure the plugin's admin integration and all modules are loaded for tests.
 require_once $_test_root . '/includes/functions.php';
-tests_add_filter(
-	'plugins_loaded',
-	static function () {
-		require_once TESTS_PLUGIN_DIR . '/admin/load.php';
-		require_once TESTS_PLUGIN_DIR . '/admin/server-timing.php';
-		require_once TESTS_PLUGIN_DIR . '/admin/plugins.php';
-		$module_files = glob( TESTS_PLUGIN_DIR . '/modules/*/*/load.php' );
-		if ( $module_files ) {
-			foreach ( $module_files as $module_file ) {
-				require_once $module_file;
-			}
-		}
-	},
-	1
-);
 
-
+// Check if we use the plugin's test suite. If so, disable the PL plugin and only load the requested plugin.
 $testsuite_count = array_count_values( $_SERVER['argv'] )['--testsuite'];
-
 if ( $testsuite_count > 1 ) {
-	// Dynamically include tests from all plugins in the "Plugin Suite".
-	$plugin_folders = glob( TESTS_PLUGIN_DIR . '/plugins/*/', GLOB_ONLYDIR );
 
-	foreach ( $plugin_folders as $plugin_folder ) {
-		$plugin_name      = basename( rtrim( $plugin_folder, '/' ) );
+	$plugin_name = '';
+	foreach ( $_SERVER['argv'] as $index => $arg ) {
+		if (
+			'--testsuite' === $arg &&
+			isset( $_SERVER['argv'][ $index + 1 ] ) &&
+			'performance-lab' !== $_SERVER['argv'][ $index + 1 ]
+		) {
+			$plugin_name = $_SERVER['argv'][ $index + 1 ];
+			break;
+		}
+	}
+
+	if ( $plugin_name ) {
 		$plugin_test_path = TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name;
 
 		if ( file_exists( $plugin_test_path ) ) {
@@ -85,6 +72,28 @@ if ( $testsuite_count > 1 ) {
 			);
 		}
 	}
+} else {
+	// Force plugin to be active.
+	$GLOBALS['wp_tests_options'] = array(
+		'active_plugins' => array( basename( TESTS_PLUGIN_DIR ) . '/load.php' ),
+	);
+
+	// Add filter to ensure the plugin's admin integration and all modules are loaded for tests.
+	tests_add_filter(
+		'plugins_loaded',
+		static function () {
+			require_once TESTS_PLUGIN_DIR . '/admin/load.php';
+			require_once TESTS_PLUGIN_DIR . '/admin/server-timing.php';
+			require_once TESTS_PLUGIN_DIR . '/admin/plugins.php';
+			$module_files = glob( TESTS_PLUGIN_DIR . '/modules/*/*/load.php' );
+			if ( $module_files ) {
+				foreach ( $module_files as $module_file ) {
+					require_once $module_file;
+				}
+			}
+		},
+		1
+	);
 }
 
 // Start up the WP testing environment.
