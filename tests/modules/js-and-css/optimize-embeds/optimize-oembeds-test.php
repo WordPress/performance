@@ -97,7 +97,7 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 			// Crowdsignal / Polldaddy embed.
 			array(
 				'<div class="pd-embed" data-settings="{&quot;type&quot;:&quot;iframe&quot;,&quot;auto&quot;:true,&quot;domain&quot;:&quot;napolidirect.survey.fm&quot;,&quot;id&quot;:&quot;customer-sample-survey-assessment&quot;,&quot;single_mode&quot;:false,&quot;placeholder&quot;:&quot;pd_1707508178&quot;}"></div><script type="text/javascript">(function(d,c,j){if(!document.getElementById(j)){var pd=d.createElement(c),s;pd.id=j;pd.src=\'https://app.crowdsignal.com/survey.js\';s=document.getElementsByTagName(c)[0];s.parentNode.insertBefore(pd,s);}}(document,\'script\',\'pd-embed\'));</script>',
-				'<div class="pd-embed" data-settings="{&quot;type&quot;:&quot;iframe&quot;,&quot;auto&quot;:true,&quot;domain&quot;:&quot;napolidirect.survey.fm&quot;,&quot;id&quot;:&quot;customer-sample-survey-assessment&quot;,&quot;single_mode&quot;:false,&quot;placeholder&quot;:&quot;pd_1707508178&quot;}"></div><script type="text/javascript">(function(d,c,j){if(!document.getElementById(j)){var pd=d.createElement(c),s;pd.id=j;pd.src=\'https://app.crowdsignal.com/survey.js\';s=document.getElementsByTagName(c)[0];s.parentNode.insertBefore(pd,s);}}(document,\'script\',\'pd-embed\'));</script>',
+				null, // No change.
 			),
 		);
 	}
