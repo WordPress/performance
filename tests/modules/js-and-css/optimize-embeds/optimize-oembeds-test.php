@@ -55,7 +55,7 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 			// Vimeo embed.
 			array(
 				'<iframe loading="lazy" title="Expedia - Plates (DC)" src="https://player.vimeo.com/video/806311047?dnt=1&amp;app_id=122963" width="500" height="281" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>',
-				'<iframe loading="lazy" title="Expedia - Plates (DC)" src="https://player.vimeo.com/video/806311047?dnt=1&amp;app_id=122963" width="500" height="281" frameborder="0" allow="autoplay; fullscreen; picture-in-picture"></iframe>',
+				null, // No change.
 			),
 			// Twitter embed.
 			array(
