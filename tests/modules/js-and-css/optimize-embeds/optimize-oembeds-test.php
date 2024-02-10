@@ -6,7 +6,7 @@
  * @group embed-optimizer
  */
 
-class Embed_Helper_Tests extends WP_UnitTestCase {
+class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Test that the oEmbed HTML is filtered.
