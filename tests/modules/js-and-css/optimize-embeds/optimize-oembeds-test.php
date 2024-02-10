@@ -100,14 +100,20 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 
 			// Scribd embed.
 			array(
+				'<iframe title="ACLS Practice Test2" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/135593338/content" data-aspect-ratio="0.7729220222793488" scrolling="no" id="135593338" width="500" height="750" frameborder="0"></iframe><script type="text/javascript">          (function() { var scribd = document.createElement("script"); scribd.type = "text/javascript"; scribd.async = true; scribd.src = "https://www.scribd.com/javascripts/embed_code/inject.js"; var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(scribd, s); })()        </script>',
 				'<iframe loading="lazy" title="ACLS Practice Test2" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/135593338/content" data-aspect-ratio="0.7729220222793488" scrolling="no" id="135593338" width="500" height="750" frameborder="0"></iframe><script type="text/javascript">          (function() { var scribd = document.createElement("script"); scribd.type = "text/javascript"; scribd.async = true; scribd.src = "https://www.scribd.com/javascripts/embed_code/inject.js"; var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(scribd, s); })()        </script>',
-				null, // No change.
 			),
 
 			// Crowdsignal / Polldaddy embed.
 			array(
 				'<div class="pd-embed" data-settings="{&quot;type&quot;:&quot;iframe&quot;,&quot;auto&quot;:true,&quot;domain&quot;:&quot;napolidirect.survey.fm&quot;,&quot;id&quot;:&quot;customer-sample-survey-assessment&quot;,&quot;single_mode&quot;:false,&quot;placeholder&quot;:&quot;pd_1707508178&quot;}"></div><script type="text/javascript">(function(d,c,j){if(!document.getElementById(j)){var pd=d.createElement(c),s;pd.id=j;pd.src=\'https://app.crowdsignal.com/survey.js\';s=document.getElementsByTagName(c)[0];s.parentNode.insertBefore(pd,s);}}(document,\'script\',\'pd-embed\'));</script>',
 				null, // No change.
+			),
+
+			// YouTube embed.
+			array(
+				'<iframe title="New in Chrome 111: View transitions API, CSS color level 4 and more!" width="500" height="281" src="https://www.youtube.com/embed/cscwgzz85Og?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
+				'<iframe loading="lazy" title="New in Chrome 111: View transitions API, CSS color level 4 and more!" width="500" height="281" src="https://www.youtube.com/embed/cscwgzz85Og?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
 			),
 		);
 	}
