@@ -40,7 +40,7 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 			// An iframe that is already lazy loaded.
 			array(
 				'<iframe src="https://www.youtube.com/embed/123" width="560" height="315" frameborder="0" loading="lazy"></iframe>',
-				'<iframe src="https://www.youtube.com/embed/123" width="560" height="315" frameborder="0" loading="lazy"></iframe>',
+				null, // No change.
 			),
 			// An iframe and an inline script.
 			array(
