@@ -13,11 +13,11 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 	 *
 	 * @dataProvider test_oembed_optimize_html_data
 	 */
-	public function test_perflab_optimize_oembed_html( $html, $expected = null ) {
+	public function test_embed_optimizer_html( $html, $expected = null ) {
 		if ( null === $expected ) {
 			$expected = $html; // No change.
 		}
-		$this->assertEquals( $expected, perflab_optimize_oembed_html( $html ) );
+		$this->assertEquals( $expected, embed_optimizer_html( $html ) );
 	}
 
 	/**
