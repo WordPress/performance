@@ -91,7 +91,7 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 			// Scribd embed.
 			array(
 				'<iframe loading="lazy" title="ACLS Practice Test2" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/135593338/content" data-aspect-ratio="0.7729220222793488" scrolling="no" id="135593338" width="500" height="750" frameborder="0"></iframe><script type="text/javascript">          (function() { var scribd = document.createElement("script"); scribd.type = "text/javascript"; scribd.async = true; scribd.src = "https://www.scribd.com/javascripts/embed_code/inject.js"; var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(scribd, s); })()        </script>',
-				'<iframe loading="lazy" title="ACLS Practice Test2" class="scribd_iframe_embed" src="https://www.scribd.com/embeds/135593338/content" data-aspect-ratio="0.7729220222793488" scrolling="no" id="135593338" width="500" height="750" frameborder="0"></iframe><script type="text/javascript">          (function() { var scribd = document.createElement("script"); scribd.type = "text/javascript"; scribd.async = true; scribd.src = "https://www.scribd.com/javascripts/embed_code/inject.js"; var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(scribd, s); })()        </script>',
+				null, // No change.
 			),
 
 			// Crowdsignal / Polldaddy embed.
