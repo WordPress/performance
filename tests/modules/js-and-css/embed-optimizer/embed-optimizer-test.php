@@ -117,6 +117,18 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 				'<iframe title="New in Chrome 111: View transitions API, CSS color level 4 and more!" width="500" height="281" src="https://www.youtube.com/embed/cscwgzz85Og?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
 				'<iframe loading="lazy" title="New in Chrome 111: View transitions API, CSS color level 4 and more!" width="500" height="281" src="https://www.youtube.com/embed/cscwgzz85Og?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
 			),
+
+			// Hypothetical embed using an external script module.
+			array(
+				'<div class="example-embed"></div><script type="module" src="https://example.com/embed.mjs"></script>',
+				'<div class="example-embed"></div><script data-lazy-embed-src="https://example.com/embed.mjs" type="module" ></script>',
+			),
+
+			// Hypothetical embed using a traditional text/javascript external script.
+			array(
+				'<div class="example-embed"></div><script type="text/javascript" src="https://example.com/embed.js"></script>',
+				'<div class="example-embed"></div><script data-lazy-embed-src="https://example.com/embed.js" type="text/javascript" ></script>',
+			),
 		);
 	}
 }
