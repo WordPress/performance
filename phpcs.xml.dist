@@ -54,6 +54,11 @@
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 
+	<!-- Do not apply script rules for unit tests -->
+	<rule ref="WordPress.WP.EnqueuedResources.NonEnqueuedScript">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
 	<!-- Do not apply filename rules for unit tests and object cache -->
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
 		<exclude-pattern>server-timing/object-cache.copy.php</exclude-pattern>

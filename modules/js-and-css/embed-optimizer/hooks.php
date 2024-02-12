@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook callbacks used for oEmbed Optimizer.
+ * Hook callbacks used for Optimize Embeds.
  *
  * @since n.e.x.t
  * @package performance-lab
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $html The oEmbed HTML.
  * @return string
  */
-function perflab_optimize_oembed_html( string $html ): string {
+function embed_optimizer_filter_oembed_html( string $html ): string {
 	$p = new WP_HTML_Tag_Processor( $html );
 
 	/**
@@ -55,7 +55,7 @@ function perflab_optimize_oembed_html( string $html ): string {
 	}
 	// If there was only one non-inline script, make it lazy.
 	if ( 1 === $script_count && ! $has_inline_script ) {
-		add_action( 'wp_footer', 'perflab_optimize_oembed_lazy_load_scripts' );
+		add_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' );
 		$p->seek( 'script' );
 		$p->set_attribute( 'data-lazy-embed-src', $p->get_attribute( 'src' ) );
 		$p->remove_attribute( 'src' );
@@ -67,7 +67,7 @@ function perflab_optimize_oembed_html( string $html ): string {
 	}
 	return $p->get_updated_html();
 }
-add_filter( 'embed_oembed_html', 'perflab_optimize_oembed_html' );
+add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
 
 /**
  * Add a script to the footer if there are lazy loaded embeds.
@@ -75,7 +75,7 @@ add_filter( 'embed_oembed_html', 'perflab_optimize_oembed_html' );
  *
  * @since n.e.x.t
  */
-function perflab_optimize_oembed_lazy_load_scripts() {
+function embed_optimizer_lazy_load_scripts() {
 	?>
 	<script type="module">
 		const lazyEmbedsScripts = document.querySelectorAll( 'script[data-lazy-embed-src]' );
