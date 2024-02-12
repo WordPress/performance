@@ -63,8 +63,10 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 	if ( 1 === $script_count && ! $has_inline_script && $p->has_bookmark( 'script' ) ) {
 		add_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' );
 		if ( $p->seek( 'script' ) ) {
-			$p->set_attribute( 'data-lazy-embed-src', $p->get_attribute( 'src' ) );
-			$p->remove_attribute( 'src' );
+			if ( $p->get_attribute( 'type' ) ) {
+				$p->set_attribute( 'data-original-type', $p->get_attribute( 'type' ) );
+			}
+			$p->set_attribute( 'type', 'text/x.lazy-loaded-javascript' );
 		} else {
 			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to script bookmark.', 'performance-lab' ) );
 		}
@@ -90,7 +92,7 @@ add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
 function embed_optimizer_lazy_load_scripts() {
 	?>
 	<script type="module">
-		const lazyEmbedsScripts = document.querySelectorAll( 'script[data-lazy-embed-src]' );
+		const lazyEmbedsScripts = document.querySelectorAll( 'script[type="text/x.lazy-loaded-javascript"]' );
 		const lazyEmbedScriptsByParents = new Map();
 
 		const lazyEmbedObserver = new IntersectionObserver(
@@ -101,8 +103,12 @@ function embed_optimizer_lazy_load_scripts() {
 						const lazyEmbedScript = lazyEmbedScriptsByParents.get( lazyEmbedParent );
 						const embedScript = document.createElement( 'script' );
 						for ( const attr of lazyEmbedScript.attributes ) {
+							if ( attr.nodeName === 'type' ) {
+								// Omit type=text/x.lazy-loaded-javascript type.
+								continue;
+							}
 							embedScript.setAttribute(
-								attr.nodeName === 'data-lazy-embed-src' ? 'src' : attr.nodeName,
+								attr.nodeName === 'data-original-type' ? 'type' : attr.nodeName,
 								attr.nodeValue
 							);
 						}
