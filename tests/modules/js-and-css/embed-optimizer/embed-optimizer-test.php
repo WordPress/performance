@@ -12,6 +12,7 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 	 * Test that the oEmbed HTML is filtered.
 	 *
 	 * @covers ::embed_optimizer_filter_oembed_html
+	 * @covers ::embed_optimizer_lazy_load_scripts
 	 * @dataProvider get_data_to_test_filter_oembed_html_data
 	 */
 	public function test_embed_optimizer_filter_oembed_html( string $html, string $expected = null ) {
