@@ -9,5 +9,5 @@
       "version": "1.0.5"
     }
   },
-  "plugins": []
+  "plugins": [ "auto-sizes" ]
 }
