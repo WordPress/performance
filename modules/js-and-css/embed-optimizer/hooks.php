@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $html The oEmbed HTML.
  * @return string
  */
-function embed_optimizer_html( string $html ): string {
+function embed_optimizer_filter_oembed_html( string $html ): string {
 	$p = new WP_HTML_Tag_Processor( $html );
 
 	/**
@@ -67,7 +67,7 @@ function embed_optimizer_html( string $html ): string {
 	}
 	return $p->get_updated_html();
 }
-add_filter( 'embed_oembed_html', 'embed_optimizer_html' );
+add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
 
 /**
  * Add a script to the footer if there are lazy loaded embeds.
