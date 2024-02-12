@@ -21,7 +21,7 @@ on:
       - trunk
       - "release/**"
   pull_request:
-    # Only run if JS or Python files changed.
+    # Only run if JS files changed.
     paths:
       - "**.js"
     branches:
