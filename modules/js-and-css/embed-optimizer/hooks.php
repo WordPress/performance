@@ -90,8 +90,8 @@ add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
  * @since n.e.x.t
  */
 function embed_optimizer_lazy_load_scripts() {
-	?>
-	<script type="module">
+
+	$js = <<<JS
 		const lazyEmbedsScripts = document.querySelectorAll( 'script[type="text/x.lazy-loaded-javascript"]' );
 		const lazyEmbedScriptsByParents = new Map();
 
@@ -128,8 +128,8 @@ function embed_optimizer_lazy_load_scripts() {
 			lazyEmbedScriptsByParents.set( lazyEmbedParent, lazyEmbedScript );
 			lazyEmbedObserver.observe( lazyEmbedParent );
 		}
-	</script>
-	<?php
+JS;
+	wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
 }
 
 /**

@@ -12,7 +12,6 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 	 * Test that the oEmbed HTML is filtered.
 	 *
 	 * @covers ::embed_optimizer_filter_oembed_html
-	 * @covers ::embed_optimizer_lazy_load_scripts
 	 * @dataProvider get_data_to_test_filter_oembed_html_data
 	 */
 	public function test_embed_optimizer_filter_oembed_html( string $html, string $expected = null ) {
@@ -130,5 +129,33 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 				'<div class="example-embed"></div><script data-original-type="text/javascript" type="text/x.lazy-loaded-javascript" src="https://example.com/embed.js"></script>',
 			),
 		);
+	}
+
+	/**
+	 * Test printing the script lazy-loader.
+	 *
+	 * @covers ::embed_optimizer_lazy_load_scripts
+	 * @dataProvider get_data_to_test_filter_oembed_html_data
+	 */
+	public function test_embed_optimizer_lazy_load_scripts() {
+		$script = trim( get_echo( 'embed_optimizer_lazy_load_scripts' ) );
+		$this->assertStringStartsWith( '<script type="module">', $script );
+		$this->assertStringContainsString( 'IntersectionObserver', $script );
+		$this->assertStringEndsWith( '</script>', $script );
+
+		add_filter(
+			'wp_inline_script_attributes',
+			function ( array $attrs, string $javascript ) {
+				$this->assertEquals( array( 'type' => 'module' ), $attrs );
+				$this->assertStringContainsString( 'IntersectionObserver', $javascript );
+				$attrs['nonce'] = 'abc123';
+				return $attrs;
+			},
+			10,
+			2
+		);
+		$script = trim( get_echo( 'embed_optimizer_lazy_load_scripts' ) );
+		$this->assertStringStartsWith( '<script type="module" nonce="abc123">', $script );
+		$this->assertStringEndsWith( '</script>', $script );
 	}
 }
