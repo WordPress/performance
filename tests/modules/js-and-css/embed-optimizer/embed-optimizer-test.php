@@ -11,9 +11,10 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 	/**
 	 * Test that the oEmbed HTML is filtered.
 	 *
-	 * @dataProvider test_filter_oembed_html_data
+	 * @covers ::embed_optimizer_filter_oembed_html
+	 * @dataProvider get_data_to_test_filter_oembed_html_data
 	 */
-	public function test__filter_oembed_html( $html, $expected = null ) {
+	public function test_embed_optimizer_filter_oembed_html( string $html, string $expected = null ) {
 		if ( null === $expected ) {
 			$expected = $html; // No change.
 		}
@@ -25,7 +26,7 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array
 	 */
-	public function test_filter_oembed_html_data() {
+	public function get_data_to_test_filter_oembed_html_data(): array {
 		return array(
 			// A single iframe.
 			array(
