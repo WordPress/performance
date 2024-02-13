@@ -41,6 +41,7 @@ const { log, formats } = require( '../lib/logger' );
  * @property {string} siteType              Site type. 'single' or 'multi'.
  * @property {string} pluginTestAssets      Path to 'plugin-tests' folder.
  * @property {string} builtPluginsDir       Path to 'build' directory.
+ * @property {string} pluginsDir            Path to 'plugins' directory.
  * @property {string} wpEnvFile             Path to the plugin tests specific .wp-env.json file.
  * @property {string} wpEnvDestinationFile  Path to the final base .wp-env.json file.
  * @property {string} performancePluginSlug Slug of the main WPP plugin.
@@ -71,6 +72,7 @@ exports.handler = async ( opt ) => {
 		siteType: opt.sitetype || 'single', // Site type.
 		pluginTestAssets: './plugin-tests', // plugin test assets.
 		builtPluginsDir: './build/', // Built plugins directory.
+		pluginsDir: './plugins/', // Plugins directory.
 		wpEnvFile: './plugin-tests/.wp-env.json', // Base .wp-env.json file for testing plugins.
 		wpEnvDestinationFile: './.wp-env.override.json', // Destination .wp-env.override.json file at root level.
 		wpEnvPluginsRegexPattern: '"plugins": \\[(.*)\\],', // Regex to match plugins string in .wp-env.json.
@@ -445,8 +447,8 @@ function doRunStandalonePluginTests( settings ) {
 		process.exit( 1 );
 	}
 
-	const plugins = pluginsConfig.modules;
-	if ( ! plugins ) {
+	const stPlugins = pluginsConfig.modules;
+	if ( ! stPlugins ) {
 		log(
 			formats.error(
 				'The given module configuration is invalid, the modules are missing, or they are misspelled.'
@@ -458,23 +460,51 @@ function doRunStandalonePluginTests( settings ) {
 	}
 
 	// Create an array of plugins from entries in plugins JSON file.
-	builtPlugins = Object.keys( plugins )
+	builtPlugins = Object.keys( stPlugins )
 		.filter( ( item ) => {
 			if (
 				! fs.pathExistsSync(
-					`${ settings.builtPluginsDir }${ plugins[ item ].slug }`
+					`${ settings.builtPluginsDir }${ stPlugins[ item ].slug }`
 				)
 			) {
 				log(
 					formats.error(
-						`Built plugin path "${ settings.builtPluginsDir }${ plugins[ item ].slug }" not found, skipping and removing from plugin list`
+						`Built plugin path "${ settings.builtPluginsDir }${ stPlugins[ item ].slug }" not found, skipping and removing from plugin list`
 					)
 				);
 				return false;
 			}
 			return true;
 		} )
-		.map( ( item ) => plugins[ item ].slug );
+		.map( ( item ) => stPlugins[ item ].slug );
+
+	// Append plugins into array.
+	const plugins = pluginsConfig.plugins;
+	if ( plugins && Object.keys( plugins ).length > 0 ) {
+		plugins.forEach( ( plugin ) => {
+			// Copy plugins to build for testing.
+			try {
+				fs.copySync(
+					`${ settings.pluginsDir }${ plugin }/`,
+					`${ settings.builtPluginsDir }${ plugin }/`,
+					{
+						overwrite: true,
+					}
+				);
+				log( formats.success( `Copied plugin "${ plugin }".\n` ) );
+				builtPlugins = builtPlugins.concat( plugin );
+			} catch ( e ) {
+				log(
+					formats.error(
+						`Error copying plugin "${ plugin }". ${ e }`
+					)
+				);
+
+				// Return with exit code 1 to trigger a failure in the test pipeline.
+				process.exit( 1 );
+			}
+		} );
+	}
 
 	// For each built plugin, copy the test assets.
 	builtPlugins.forEach( ( plugin ) => {
