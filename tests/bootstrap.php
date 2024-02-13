@@ -43,34 +43,31 @@ if ( $testsuite_count > 1 ) {
 		if (
 			'--testsuite' === $arg &&
 			isset( $_SERVER['argv'][ $index + 1 ] ) &&
-			'performance-lab' !== $_SERVER['argv'][ $index + 1 ]
+			'performance-lab' !== $_SERVER['argv'][ $index + 1 ] &&
+			file_exists( TESTS_PLUGIN_DIR . '/plugins/' . $_SERVER['argv'][ $index + 1 ] )
 		) {
 			$plugin_name = $_SERVER['argv'][ $index + 1 ];
-			break;
 		}
 	}
 
 	if ( $plugin_name ) {
 		$plugin_test_path = TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name;
-
-		if ( file_exists( $plugin_test_path ) ) {
-			tests_add_filter(
-				'plugins_loaded',
-				static function () use ( $plugin_test_path, $plugin_name ) {
-					// Check if plugin has a "plugin/plugin.php" file.
-					if ( file_exists( $plugin_test_path . '/' . $plugin_name . '.php' ) ) {
-						require_once $plugin_test_path . '/' . $plugin_name . '.php';
-						return;
-					}
-
+		tests_add_filter(
+			'plugins_loaded',
+			static function () use ( $plugin_test_path, $plugin_name ) {
+				// Check if plugin has a "plugin/plugin.php" file.
+				if ( file_exists( $plugin_test_path . '/' . $plugin_name . '.php' ) ) {
+					require_once $plugin_test_path . '/' . $plugin_name . '.php';
+				} elseif ( file_exists( $plugin_test_path . '/load.php' ) ) {
 					// Check if plugin has a "plugin/load.php" file.
-					if ( file_exists( $plugin_test_path . '/load.php' ) ) {
-						require_once $plugin_test_path . '/load.php';
-					}
-				},
-				1
-			);
-		}
+					require_once $plugin_test_path . '/load.php';
+				} else {
+					echo "Unable to locate standalone plugin bootstrap file in $plugin_test_path.";
+					exit( 1 );
+				}
+			},
+			1
+		);
 	}
 } else {
 	// Force plugin to be active.
