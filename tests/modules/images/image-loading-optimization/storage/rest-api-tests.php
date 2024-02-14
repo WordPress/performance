@@ -44,7 +44,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$this->assertInstanceOf( WP_Post::class, $post );
 
 		$url_metrics = ilo_parse_stored_url_metrics( $post );
-		$this->assertCount( 1, $url_metrics );
+		$this->assertCount( 1, $url_metrics, 'Expected number of URL metrics stored.' );
 		foreach ( array( 'viewport', 'elements' ) as $key ) {
 			$this->assertSame( $valid_params[ $key ], $url_metrics[0][ $key ] );
 		}
@@ -139,8 +139,8 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params( $params );
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
 	}
 
 	/**

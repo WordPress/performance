@@ -142,7 +142,24 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	}
 
 	ilo_set_url_metric_storage_lock();
-	$new_url_metric = wp_array_slice_assoc( $request->get_params(), array( 'viewport', 'elements' ) );
+
+	try {
+		$data           = array_merge(
+			wp_array_slice_assoc( $request->get_params(), array( 'viewport', 'elements' ) ),
+			array(
+				'timestamp' => microtime( true ),
+			)
+		);
+		$new_url_metric = new ILO_URL_Metric(
+			$data,
+			true // Already validated via REST API.
+		);
+	} catch ( Exception $e ) {
+		return new WP_Error(
+			'url_metric_exception',
+			__( 'Exception occurred while creating URL metric.', 'performance-lab' )
+		);
+	}
 
 	$result = ilo_store_url_metric(
 		$request->get_param( 'url' ),

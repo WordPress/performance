@@ -121,15 +121,15 @@ function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): bo
  * @since n.e.x.t
  * @access private
  *
- * @param array $url_metrics          URL metrics. Each URL metric is expected to have a timestamp key.
- * @param array $validated_url_metric Validated URL metric. See JSON Schema defined in ilo_register_endpoint().
- * @param int[] $breakpoints          Breakpoint max widths.
- * @param int   $sample_size          Sample size for URL metrics at a given breakpoint.
- * @return array Updated URL metrics, with timestamp key added.
+ * @param ILO_URL_Metric[] $url_metrics    Existing URL metrics. Each URL metric is expected to have a timestamp key.
+ * @param ILO_URL_Metric   $new_url_metric Validated URL metric. See JSON Schema defined in ilo_register_endpoint().
+ * @param int[]            $breakpoints    Breakpoint max widths.
+ * @param int              $sample_size    Sample size for URL metrics at a given breakpoint.
+ *
+ * @return ILO_URL_Metric[] Updated URL metrics.
  */
-function ilo_unshift_url_metrics( array $url_metrics, array $validated_url_metric, array $breakpoints, int $sample_size ): array {
-	$validated_url_metric['timestamp'] = microtime( true );
-	array_unshift( $url_metrics, $validated_url_metric );
+function ilo_unshift_url_metrics( array $url_metrics, ILO_URL_Metric $new_url_metric, array $breakpoints, int $sample_size ): array {
+	array_unshift( $url_metrics, $new_url_metric );
 	$grouped_url_metrics = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoints );
 
 	// Make sure there is at most $sample_size number of URL metrics for each breakpoint.
@@ -140,10 +140,7 @@ function ilo_unshift_url_metrics( array $url_metrics, array $validated_url_metri
 				// Sort URL metrics in descending order by timestamp.
 				usort(
 					$breakpoint_url_metrics,
-					static function ( $a, $b ) {
-						if ( ! isset( $a['timestamp'] ) || ! isset( $b['timestamp'] ) ) {
-							return 0;
-						}
+					static function ( ILO_URL_Metric $a, ILO_URL_Metric $b ) {
 						return $b['timestamp'] <=> $a['timestamp'];
 					}
 				);
@@ -234,8 +231,8 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
  * @since n.e.x.t
  * @access private
  *
- * @param array $url_metrics URL metrics.
- * @param int[] $breakpoints  Viewport breakpoint max widths, sorted in ascending order.
+ * @param ILO_URL_Metric[] $url_metrics URL metrics.
+ * @param int[]            $breakpoints Viewport breakpoint max widths, sorted in ascending order.
  * @return array URL metrics grouped by breakpoint. The array keys are the minimum widths for a viewport to lie within
  *               the breakpoint. The returned array is always one larger than the provided array of breakpoints, since
  *               the breakpoints reflect the max inclusive boundaries whereas the return value is the groups of page
@@ -254,10 +251,6 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
 	$grouped = array_fill_keys( array_merge( array( 0 ), $minimum_viewport_widths ), array() );
 
 	foreach ( $url_metrics as $url_metric ) {
-		if ( ! isset( $url_metric['viewport']['width'] ) ) {
-			continue;
-		}
-
 		$current_minimum_viewport = 0;
 		foreach ( $minimum_viewport_widths as $viewport_minimum_width ) {
 			if ( $url_metric['viewport']['width'] > $viewport_minimum_width ) {

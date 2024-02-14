@@ -79,7 +79,7 @@ function ilo_get_url_metrics_post( string $slug ) {
  * @access private
  *
  * @param WP_Post $post URL metrics post.
- * @return array URL metrics.
+ * @return ILO_URL_Metric[] URL metrics.
  */
 function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 	$this_function = __FUNCTION__;
@@ -89,7 +89,7 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 		}
 	};
 
-	$url_metrics = json_decode( $post->post_content, true );
+	$url_metrics_data = json_decode( $post->post_content, true );
 	if ( json_last_error() ) {
 		$trigger_error(
 			sprintf(
@@ -99,8 +99,8 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 				json_last_error_msg()
 			)
 		);
-		$url_metrics = array();
-	} elseif ( ! is_array( $url_metrics ) ) {
+		$url_metrics_data = array();
+	} elseif ( ! is_array( $url_metrics_data ) ) {
 		$trigger_error(
 			sprintf(
 				/* translators: %s is post type slug */
@@ -108,40 +108,28 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 				ILO_URL_METRICS_POST_TYPE
 			)
 		);
-		$url_metrics = array();
+		$url_metrics_data = array();
 	}
 
 	return array_values(
 		array_filter(
-			$url_metrics,
-			static function ( $url_metric ) use ( $trigger_error ) {
-				// TODO: If we wanted, we could use the JSON Schema to validate the stored metrics.
-				$is_valid = (
-					is_array( $url_metric )
-					&&
-					isset(
-						$url_metric['viewport']['width'],
-						$url_metric['viewport']['height'],
-						$url_metric['elements']
-					)
-					&&
-					is_int( $url_metric['viewport']['width'] )
-					&&
-					is_array( $url_metric['elements'] )
-				);
-
-				if ( ! $is_valid ) {
-					$trigger_error(
-						sprintf(
-							/* translators: %s is post type slug */
-							__( 'Unexpected shape to JSON array in post_content of %s post type.', 'performance-lab' ),
-							ILO_URL_METRICS_POST_TYPE
-						)
-					);
-				}
-
-				return $is_valid;
-			}
+			array_map(
+				static function ( $url_metric_data ) use ( $trigger_error ) {
+					try {
+						return new ILO_URL_Metric( $url_metric_data );
+					} catch ( Exception $e ) {
+						$trigger_error(
+							sprintf(
+								/* translators: %s is post type slug */
+								__( 'Unexpected shape to JSON array in post_content of %s post type.', 'performance-lab' ),
+								ILO_URL_METRICS_POST_TYPE
+							)
+						);
+						return null;
+					}
+				},
+				$url_metrics_data
+			)
 		)
 	);
 }
@@ -152,12 +140,12 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
  * @since n.e.x.t
  * @access private
  *
- * @param string $url                  URL for the URL metrics. This is used purely as metadata.
- * @param string $slug                 URL metrics slug (computed from query vars).
- * @param array  $validated_url_metric Validated URL metric. See JSON Schema defined in ilo_register_endpoint().
+ * @param string         $url            URL for the URL metrics. This is used purely as metadata.
+ * @param string         $slug           URL metrics slug (computed from query vars).
+ * @param ILO_URL_Metric $new_url_metric New URL metric.
  * @return int|WP_Error Post ID or WP_Error otherwise.
  */
-function ilo_store_url_metric( string $url, string $slug, array $validated_url_metric ) {
+function ilo_store_url_metric( string $url, string $slug, ILO_URL_Metric $new_url_metric ) {
 
 	// TODO: What about storing a version identifier?
 	$post_data = array(
@@ -177,9 +165,12 @@ function ilo_store_url_metric( string $url, string $slug, array $validated_url_m
 
 	$breakpoints = ilo_get_breakpoint_max_widths();
 	$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
-	$url_metrics = ilo_unshift_url_metrics( $url_metrics, $validated_url_metric, $breakpoints, $sample_size );
+	$url_metrics = ilo_unshift_url_metrics( $url_metrics, $new_url_metric, $breakpoints, $sample_size );
 
-	$post_data['post_content'] = wp_json_encode( $url_metrics, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ); // TODO: No need for pretty-printing.
+	$post_data['post_content'] = wp_json_encode(
+		$url_metrics,
+		JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES // TODO: No need for pretty-printing.
+	);
 
 	$has_kses = false !== has_filter( 'content_save_pre', 'wp_filter_post_kses' );
 	if ( $has_kses ) {
