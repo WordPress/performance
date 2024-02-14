@@ -18,6 +18,7 @@ define( 'IMAGE_LOADING_OPTIMIZATION_VERSION', 'Performance Lab ' . PERFLAB_VERSI
 require_once __DIR__ . '/hooks.php';
 
 // Storage logic.
+require_once __DIR__ . '/class-ilo-url-metric.php';
 require_once __DIR__ . '/storage/lock.php';
 require_once __DIR__ . '/storage/post-type.php';
 require_once __DIR__ . '/storage/data.php';

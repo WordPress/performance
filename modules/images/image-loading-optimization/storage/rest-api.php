@@ -37,20 +37,45 @@ const ILO_URL_METRICS_ROUTE = '/url-metrics:store';
  */
 function ilo_register_endpoint() {
 
-	$dom_rect_schema = array(
-		'type'       => 'object',
-		'properties' => array(
-			'width'  => array(
-				'type'    => 'number',
-				'minimum' => 0,
-			),
-			'height' => array(
-				'type'    => 'number',
-				'minimum' => 0,
-			),
-			// TODO: There are other properties to define if we need them: x, y, top, right, bottom, left.
+	$args = array(
+		'url'   => array(
+			'type'              => 'string',
+			'description'       => __( 'The URL for which the metric was obtained.', 'performance-lab' ),
+			'required'          => true,
+			'format'            => 'uri',
+			'validate_callback' => static function ( $url ) {
+				if ( ! wp_validate_redirect( $url ) ) {
+					return new WP_Error( 'non_origin_url', __( 'URL for another site provided.', 'performance-lab' ) );
+				}
+				// TODO: This is not validated as corresponding to the slug in any way. True it is not used for anything but metadata.
+				return true;
+			},
+		),
+		'slug'  => array(
+			'type'        => 'string',
+			'description' => __( 'An MD5 hash of the query args.', 'performance-lab' ),
+			'required'    => true,
+			'pattern'     => '^[0-9a-f]{32}$',
+			// This is validated via the nonce validate_callback, as it is provided as input to create the nonce by the server
+			// which then is verified to match in the REST API request.
+		),
+		'nonce' => array(
+			'type'              => 'string',
+			'description'       => __( 'Nonce originally computed by server required to authorize the request.', 'performance-lab' ),
+			'required'          => true,
+			'pattern'           => '^[0-9a-f]+$',
+			'validate_callback' => static function ( $nonce, WP_REST_Request $request ) {
+				if ( ! ilo_verify_url_metrics_storage_nonce( $nonce, $request->get_param( 'slug' ) ) ) {
+					return new WP_Error( 'invalid_nonce', __( 'URL metrics nonce verification failure.', 'performance-lab' ) );
+				}
+				return true;
+			},
 		),
 	);
+
+	$schema = ILO_URL_Metric::get_json_schema();
+
+	$args = array_merge( $args, $schema['properties'] );
 
 	register_rest_route(
 		ILO_REST_API_NAMESPACE,
@@ -71,83 +96,7 @@ function ilo_register_endpoint() {
 				}
 				return true;
 			},
-			'args'                => array(
-				'url'      => array(
-					'type'              => 'string',
-					'required'          => true,
-					'format'            => 'uri',
-					'validate_callback' => static function ( $url ) {
-						if ( ! wp_validate_redirect( $url ) ) {
-							return new WP_Error( 'non_origin_url', __( 'URL for another site provided.', 'performance-lab' ) );
-						}
-						return true;
-					},
-				),
-				'slug'     => array(
-					'type'     => 'string',
-					'required' => true,
-					'pattern'  => '^[0-9a-f]{32}$',
-				),
-				'nonce'    => array(
-					'type'              => 'string',
-					'required'          => true,
-					'pattern'           => '^[0-9a-f]+$',
-					'validate_callback' => static function ( $nonce, WP_REST_Request $request ) {
-						if ( ! ilo_verify_url_metrics_storage_nonce( $nonce, $request->get_param( 'slug' ) ) ) {
-							return new WP_Error( 'invalid_nonce', __( 'URL metrics nonce verification failure.', 'performance-lab' ) );
-						}
-						return true;
-					},
-				),
-				'viewport' => array(
-					'description' => __( 'Viewport dimensions', 'performance-lab' ),
-					'type'        => 'object',
-					'required'    => true,
-					'properties'  => array(
-						'width'  => array(
-							'type'     => 'integer',
-							'required' => true,
-							'minimum'  => 0,
-						),
-						'height' => array(
-							'type'     => 'integer',
-							'required' => true,
-							'minimum'  => 0,
-						),
-					),
-				),
-				'elements' => array(
-					'description' => __( 'Element metrics', 'performance-lab' ),
-					'type'        => 'array',
-					'required'    => true,
-					'items'       => array(
-						// See the ElementMetrics in detect.js.
-						'type'       => 'object',
-						'properties' => array(
-							'isLCP'              => array(
-								'type'     => 'boolean',
-								'required' => true,
-							),
-							'isLCPCandidate'     => array(
-								'type' => 'boolean',
-							),
-							'xpath'              => array(
-								'type'     => 'string',
-								'required' => true,
-								'pattern'  => ILO_HTML_Tag_Processor::XPATH_PATTERN,
-							),
-							'intersectionRatio'  => array(
-								'type'     => 'number',
-								'required' => true,
-								'minimum'  => 0.0,
-								'maximum'  => 1.0,
-							),
-							'intersectionRect'   => $dom_rect_schema,
-							'boundingClientRect' => $dom_rect_schema,
-						),
-					),
-				),
-			),
+			'args'                => $args,
 		)
 	);
 }
