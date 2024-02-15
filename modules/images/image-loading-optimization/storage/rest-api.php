@@ -75,6 +75,10 @@ function ilo_register_endpoint() {
 
 	$schema = ILO_URL_Metric::get_json_schema();
 
+	// Make timestamp not required since it is forcibly-provided in ilo_handle_rest_request().
+	$schema['properties']['timestamp']['required'] = false;
+	$schema['properties']['timestamp']['readonly'] = true;
+
 	$args = array_merge( $args, $schema['properties'] );
 
 	register_rest_route(

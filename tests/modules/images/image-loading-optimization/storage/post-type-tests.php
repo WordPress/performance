@@ -58,11 +58,12 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	public function data_provider_test_ilo_parse_stored_url_metrics(): array {
 		$valid_content = array(
 			array(
-				'viewport' => array(
+				'viewport'  => array(
 					'width'  => 640,
 					'height' => 480,
 				),
-				'elements' => array(),
+				'timestamp' => microtime( true ),
+				'elements'  => array(),
 			),
 		);
 

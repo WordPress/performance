@@ -60,8 +60,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 				'timestamp' => array(
 					'description' => __( 'Timestamp at which the URL metric was captured.', 'performance-lab' ),
 					'type'        => 'number',
-					'readonly'    => true, // Use the server-provided timestamp.
-					'default'     => microtime( true ),
+					'required'    => true,
 					'minimum'     => 0,
 				),
 				'elements'  => array(

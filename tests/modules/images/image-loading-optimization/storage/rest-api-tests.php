@@ -34,7 +34,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$this->assertCount( 0, get_posts( array( 'post_type' => ILO_URL_METRICS_POST_TYPE ) ) );
 		$request->set_body_params( $valid_params );
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 200, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 
 		$data = $response->get_data();
 		$this->assertTrue( $data['success'] );
@@ -222,7 +222,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 */
 	private function get_valid_params(): array {
 		$slug = ilo_get_url_metrics_slug( array() );
-		return array_merge(
+		$data = array_merge(
 			array(
 				'url'   => home_url( '/' ),
 				'slug'  => $slug,
@@ -230,6 +230,8 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 			),
 			$this->get_sample_validated_url_metric()
 		);
+		unset( $data['timestamp'] ); // Since provided by request handler.
+		return $data;
 	}
 
 	/**
@@ -239,11 +241,12 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 */
 	private function get_sample_validated_url_metric(): array {
 		return array(
-			'viewport' => array(
+			'viewport'  => array(
 				'width'  => 480,
 				'height' => 640,
 			),
-			'elements' => array(
+			'timestamp' => microtime( true ),
+			'elements'  => array(
 				array(
 					'isLCP'             => true,
 					'isLCPCandidate'    => true,
