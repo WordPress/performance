@@ -79,6 +79,24 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 == Changelog ==
 
+= 2.9.0 =
+
+**Features**
+
+* Infrastructure: Add standalone plugin version constants for auto-sizes and speculation-rules. ([958](https://github.com/WordPress/performance/pull/958))
+
+**Enhancements**
+
+* Infrastructure: Include standalone plugin slugs in generator tag. ([949](https://github.com/WordPress/performance/pull/949))
+
+**Bug Fixes**
+
+* Infrastructure: Sanitize metric name for `Server-Timing` header. ([957](https://github.com/WordPress/performance/pull/957))
+
+**Task**
+
+* Images: Add plugin directory assets for Speculation Rules. ([987](https://github.com/WordPress/performance/pull/987))
+
 = 2.8.0 =
 
 **Features**
