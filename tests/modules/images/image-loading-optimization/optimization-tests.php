@@ -1010,15 +1010,16 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	 * Gets a validated URL metric.
 	 *
 	 * @param int $viewport_width Viewport width for the URL metric.
-	 * @return array URL metric.
+	 * @return ILO_URL_Metric URL metric.
 	 */
-	private function get_validated_url_metric( int $viewport_width, array $elements = array() ): array {
-		return array(
-			'viewport' => array(
+	private function get_validated_url_metric( int $viewport_width, array $elements = array() ): ILO_URL_Metric {
+		$data = array(
+			'viewport'  => array(
 				'width'  => $viewport_width,
 				'height' => 800,
 			),
-			'elements' => array_map(
+			'timestamp' => microtime( true ),
+			'elements'  => array_map(
 				static function ( array $element ): array {
 					return array_merge(
 						array(
@@ -1031,6 +1032,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				$elements
 			),
 		);
+		return new ILO_URL_Metric( $data );
 	}
 
 	/**

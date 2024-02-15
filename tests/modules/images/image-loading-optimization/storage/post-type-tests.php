@@ -101,7 +101,13 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 			)
 		);
 
-		$url_metrics = ilo_parse_stored_url_metrics( $post );
+		$url_metrics = array_map(
+			static function ( ILO_URL_Metric $url_metric ): array {
+				return $url_metric->jsonSerialize();
+			},
+			ilo_parse_stored_url_metrics( $post )
+		);
+
 		$this->assertSame( $expected_value, $url_metrics );
 	}
 
@@ -114,19 +120,22 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 		$url  = home_url( '/' );
 		$slug = ilo_get_url_metrics_slug( array( 'p' => 1 ) );
 
-		$validated_url_metric = array(
-			'viewport' => array(
-				'width'  => 480,
-				'height' => 640,
-			),
-			'elements' => array(
-				array(
-					'isLCP'             => true,
-					'isLCPCandidate'    => true,
-					'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
-					'intersectionRatio' => 1,
+		$validated_url_metric = new ILO_URL_Metric(
+			array(
+				'viewport'  => array(
+					'width'  => 480,
+					'height' => 640,
 				),
-			),
+				'timestamp' => microtime( true ),
+				'elements'  => array(
+					array(
+						'isLCP'             => true,
+						'isLCPCandidate'    => true,
+						'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
+						'intersectionRatio' => 1,
+					),
+				),
+			)
 		);
 
 		$post_id = ilo_store_url_metric( $url, $slug, $validated_url_metric );
@@ -138,22 +147,11 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 
 		$url_metrics = ilo_parse_stored_url_metrics( $post );
 		$this->assertCount( 1, $url_metrics );
-		$this->assertArrayHasKey( 'timestamp', $url_metrics[0] );
-		$this->assertIsFloat( $url_metrics[0]['timestamp'] );
-		$this->assertLessThanOrEqual( microtime( true ), $url_metrics[0]['timestamp'] );
 
 		$again_post_id = ilo_store_url_metric( $url, $slug, $validated_url_metric );
 		$post          = get_post( $again_post_id );
 		$this->assertSame( $post_id, $again_post_id );
 		$url_metrics = ilo_parse_stored_url_metrics( $post );
 		$this->assertCount( 2, $url_metrics );
-
-		foreach ( $url_metrics as $url_metric ) {
-			$this->assertArrayHasKey( 'timestamp', $url_metric );
-			$this->assertIsFloat( $url_metric['timestamp'] );
-			$this->assertLessThanOrEqual( microtime( true ), $url_metric['timestamp'] );
-			unset( $url_metric['timestamp'] );
-			$this->assertSame( $validated_url_metric, $url_metric );
-		}
 	}
 }

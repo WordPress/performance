@@ -145,7 +145,10 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 
 	try {
 		$data           = array_merge(
-			wp_array_slice_assoc( $request->get_params(), array( 'viewport', 'elements' ) ),
+			wp_array_slice_assoc(
+				$request->get_params(),
+				array_keys( ILO_URL_Metric::get_json_schema()['properties'] )
+			),
 			array(
 				'timestamp' => microtime( true ),
 			)

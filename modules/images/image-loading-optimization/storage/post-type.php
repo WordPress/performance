@@ -115,6 +115,10 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 		array_filter(
 			array_map(
 				static function ( $url_metric_data ) use ( $trigger_error ) {
+					if ( ! is_array( $url_metric_data ) ) {
+						return null;
+					}
+
 					try {
 						return new ILO_URL_Metric( $url_metric_data );
 					} catch ( Exception $e ) {

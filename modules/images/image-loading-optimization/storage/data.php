@@ -141,7 +141,7 @@ function ilo_unshift_url_metrics( array $url_metrics, ILO_URL_Metric $new_url_me
 				usort(
 					$breakpoint_url_metrics,
 					static function ( ILO_URL_Metric $a, ILO_URL_Metric $b ) {
-						return $b['timestamp'] <=> $a['timestamp'];
+						return $b->get_timestamp() <=> $a->get_timestamp();
 					}
 				);
 
@@ -233,10 +233,10 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
  *
  * @param ILO_URL_Metric[] $url_metrics URL metrics.
  * @param int[]            $breakpoints Viewport breakpoint max widths, sorted in ascending order.
- * @return array URL metrics grouped by breakpoint. The array keys are the minimum widths for a viewport to lie within
- *               the breakpoint. The returned array is always one larger than the provided array of breakpoints, since
- *               the breakpoints reflect the max inclusive boundaries whereas the return value is the groups of page
- *               metrics with viewports on either side of the breakpoint boundaries.
+ * @return array<int, ILO_URL_Metric[]> URL metrics grouped by breakpoint. The array keys are the minimum widths for a viewport to lie within
+ *                                      the breakpoint. The returned array is always one larger than the provided array of breakpoints, since
+ *                                      the breakpoints reflect the max inclusive boundaries whereas the return value is the groups of page
+ *                                      metrics with viewports on either side of the breakpoint boundaries.
  */
 function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpoints ): array {
 
@@ -253,7 +253,7 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
 	foreach ( $url_metrics as $url_metric ) {
 		$current_minimum_viewport = 0;
 		foreach ( $minimum_viewport_widths as $viewport_minimum_width ) {
-			if ( $url_metric['viewport']['width'] > $viewport_minimum_width ) {
+			if ( $url_metric->get_viewport_width() > $viewport_minimum_width ) {
 				$current_minimum_viewport = $viewport_minimum_width;
 			} else {
 				break;
@@ -277,7 +277,7 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
  * @since n.e.x.t
  * @access private
  *
- * @param array $grouped_url_metrics URL metrics grouped by breakpoint. See `ilo_group_url_metrics_by_breakpoint()`.
+ * @param array<int, ILO_URL_Metric[]> $grouped_url_metrics URL metrics grouped by breakpoint. See `ilo_group_url_metrics_by_breakpoint()`.
  * @return array LCP elements keyed by its minimum viewport width. If there is no supported LCP element at a breakpoint, then `false` is used.
  */
 function ilo_get_lcp_elements_by_minimum_viewport_widths( array $grouped_url_metrics ): array {
@@ -291,7 +291,7 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( array $grouped_url_met
 		$breadcrumb_element = array();
 
 		foreach ( $breakpoint_url_metrics as $breakpoint_url_metric ) {
-			foreach ( $breakpoint_url_metric['elements'] as $element ) {
+			foreach ( $breakpoint_url_metric->get_elements() as $element ) {
 				if ( ! $element['isLCP'] ) {
 					continue;
 				}
@@ -353,11 +353,11 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( array $grouped_url_met
  * @since n.e.x.t
  * @access private
  *
- * @param array $url_metrics            URL metrics.
- * @param float $current_time           Current time as returned by `microtime(true)`.
- * @param int[] $breakpoint_max_widths  Breakpoint max widths.
- * @param int   $sample_size            Sample size for viewports in a breakpoint.
- * @param int   $freshness_ttl          Freshness TTL for a URL metric.
+ * @param ILO_URL_Metric[] $url_metrics URL metrics.
+ * @param float            $current_time           Current time as returned by `microtime(true)`.
+ * @param int[]            $breakpoint_max_widths  Breakpoint max widths.
+ * @param int              $sample_size            Sample size for viewports in a breakpoint.
+ * @param int              $freshness_ttl          Freshness TTL for a URL metric.
  * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
  */
 function ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $current_time, array $breakpoint_max_widths, int $sample_size, int $freshness_ttl ): array {
@@ -369,7 +369,7 @@ function ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $curr
 			$needs_url_metrics = true;
 		} else {
 			foreach ( $viewport_url_metrics as $url_metric ) {
-				if ( isset( $url_metric['timestamp'] ) && $url_metric['timestamp'] + $freshness_ttl < $current_time ) {
+				if ( $url_metric->get_timestamp() + $freshness_ttl < $current_time ) {
 					$needs_url_metrics = true;
 					break;
 				}

@@ -38,10 +38,10 @@ final class ILO_URL_Metric implements ArrayAccess, JsonSerializable {
 		);
 
 		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'ilo-url-metric',
-			'type'       => 'object',
-			'properties' => array(
+			'$schema'              => 'http://json-schema.org/draft-04/schema#',
+			'title'                => 'ilo-url-metric',
+			'type'                 => 'object',
+			'properties'           => array(
 				'viewport'  => array(
 					'description' => __( 'Viewport dimensions', 'performance-lab' ),
 					'type'        => 'object',
@@ -98,6 +98,7 @@ final class ILO_URL_Metric implements ArrayAccess, JsonSerializable {
 					),
 				),
 			),
+			'additionalProperties' => false,
 		);
 	}
 
@@ -113,12 +114,29 @@ final class ILO_URL_Metric implements ArrayAccess, JsonSerializable {
 	 *
 	 * @param array $data      URL metric data.
 	 * @param bool  $validated Whether the data was already validated.
+	 *
+	 * @throws Exception When the input is invalid.
 	 */
 	public function __construct( array $data, bool $validated = false ) {
 		if ( ! $validated ) {
-			// TODO: Validate.
+			$valid = rest_validate_object_value_from_schema( $data, self::get_json_schema(), self::class );
+			if ( is_wp_error( $valid ) ) {
+				throw new Exception( $valid->get_error_message() );
+			}
 		}
 		$this->data = $data;
+	}
+
+	public function get_viewport_width(): int {
+		return $this->data['viewport']['width'];
+	}
+
+	public function get_timestamp(): float {
+		return $this->data['timestamp'];
+	}
+
+	public function get_elements(): array {
+		return $this->data['elements'];
 	}
 
 	/**
