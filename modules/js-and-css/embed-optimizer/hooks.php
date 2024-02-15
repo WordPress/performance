@@ -42,28 +42,40 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			$loading_value = $p->get_attribute( 'loading' );
 			if ( empty( $loading_value ) ) {
 				++$iframe_count;
-				$p->set_bookmark( 'iframe' );
+				if ( ! $p->set_bookmark( 'iframe' ) ) {
+					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set iframe bookmark.', 'performance-lab' ) );
+					return $html;
+				}
 			}
 		} elseif ( 'SCRIPT' === $p->get_tag() ) {
 			if ( ! $p->get_attribute( 'src' ) ) {
 				$has_inline_script = true;
 			} else {
 				++$script_count;
-				$p->set_bookmark( 'script' );
+				if ( ! $p->set_bookmark( 'script' ) ) {
+					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set script bookmark.', 'performance-lab' ) );
+					return $html;
+				}
 			}
 		}
 	}
 	// If there was only one non-inline script, make it lazy.
-	if ( 1 === $script_count && ! $has_inline_script ) {
+	if ( 1 === $script_count && ! $has_inline_script && $p->has_bookmark( 'script' ) ) {
 		add_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' );
-		$p->seek( 'script' );
-		$p->set_attribute( 'data-lazy-embed-src', $p->get_attribute( 'src' ) );
-		$p->remove_attribute( 'src' );
+		if ( $p->seek( 'script' ) ) {
+			$p->set_attribute( 'data-lazy-embed-src', $p->get_attribute( 'src' ) );
+			$p->remove_attribute( 'src' );
+		} else {
+			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to script bookmark.', 'performance-lab' ) );
+		}
 	}
 	// If there was only one iframe, make it lazy.
-	if ( 1 === $iframe_count ) {
-		$p->seek( 'iframe' );
-		$p->set_attribute( 'loading', 'lazy' );
+	if ( 1 === $iframe_count && $p->has_bookmark( 'iframe' ) ) {
+		if ( $p->seek( 'iframe' ) ) {
+			$p->set_attribute( 'loading', 'lazy' );
+		} else {
+			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to iframe bookmark.', 'performance-lab' ) );
+		}
 	}
 	return $p->get_updated_html();
 }
@@ -112,4 +124,25 @@ function embed_optimizer_lazy_load_scripts() {
 		}
 	</script>
 	<?php
+}
+
+/**
+ * Generates a user-level error/warning/notice/deprecation message.
+ *
+ * Generates the message when `WP_DEBUG` is true.
+ *
+ * @param string $function_name The function that triggered the error.
+ * @param string $message       The message explaining the error.
+ *                              The message can contain allowed HTML 'a' (with href), 'code',
+ *                              'br', 'em', and 'strong' tags and http or https protocols.
+ *                              If it contains other HTML tags or protocols, the message should be escaped
+ *                              before passing to this function to avoid being stripped {@see wp_kses()}.
+ * @param int    $error_level   Optional. The designated error type for this error.
+ *                              Only works with E_USER family of constants. Default E_USER_NOTICE.
+ */
+function embed_optimizer_trigger_error( string $function_name, string $message, int $error_level = E_USER_NOTICE ) {
+	if ( ! function_exists( 'wp_trigger_error' ) ) {
+		return;
+	}
+	wp_trigger_error( $function_name, $message, $error_level );
 }
