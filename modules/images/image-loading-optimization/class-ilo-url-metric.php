@@ -21,8 +21,8 @@ final class ILO_URL_Metric implements JsonSerializable {
 	 */
 	public static function get_json_schema(): array {
 		$dom_rect_schema = array(
-			'type'       => 'object',
-			'properties' => array(
+			'type'                 => 'object',
+			'properties'           => array(
 				'width'  => array(
 					'type'    => 'number',
 					'minimum' => 0,
@@ -31,8 +31,9 @@ final class ILO_URL_Metric implements JsonSerializable {
 					'type'    => 'number',
 					'minimum' => 0,
 				),
-				// TODO: There are other properties to define if we need them: x, y, top, right, bottom, left.
 			),
+			// TODO: There are other properties to define if we need them: x, y, top, right, bottom, left.
+			'additionalProperties' => true,
 		);
 
 		return array(
@@ -69,8 +70,8 @@ final class ILO_URL_Metric implements JsonSerializable {
 					'required'    => true,
 					'items'       => array(
 						// See the ElementMetrics in detect.js.
-						'type'       => 'object',
-						'properties' => array(
+						'type'                 => 'object',
+						'properties'           => array(
 							'isLCP'              => array(
 								'type'     => 'boolean',
 								'required' => true,
@@ -92,6 +93,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 							'intersectionRect'   => $dom_rect_schema,
 							'boundingClientRect' => $dom_rect_schema,
 						),
+						'additionalProperties' => false,
 					),
 				),
 			),
@@ -102,9 +104,20 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Data.
 	 *
-	 * @var array
+	 * @var array{
+	 *          timestamp: int,
+	 *          viewport: array{ width: int, height: int },
+	 *          elements: array<array{
+	 *              isLCP: bool,
+	 *              isLCPCandidate: bool,
+	 *              xpath: string,
+	 *              intersectionRatio: float,
+	 *              intersectionRect: array{ width: int, height: int },
+	 *              boundingClientRect: array{ width: int, height: int },
+	 *          }>
+	 *      }
 	 */
-	private $data = array();
+	private $data;
 
 	/**
 	 * Constructor.
