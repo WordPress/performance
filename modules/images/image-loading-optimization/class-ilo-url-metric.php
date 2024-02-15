@@ -9,12 +9,10 @@
 /**
  * Representation of the measurements taken from a single client's visit to a specific URL.
  *
- * @implements ArrayAccess<string, mixed>
- *
  * @since n.e.x.t
  * @access private
  */
-final class ILO_URL_Metric implements ArrayAccess, JsonSerializable {
+final class ILO_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Gets JSON schema for URL Metric.
@@ -103,11 +101,11 @@ final class ILO_URL_Metric implements ArrayAccess, JsonSerializable {
 	}
 
 	/**
-	 * Validated data.
+	 * Data.
 	 *
 	 * @var array
 	 */
-	private $data;
+	private $data = array();
 
 	/**
 	 * Constructor.
@@ -121,68 +119,37 @@ final class ILO_URL_Metric implements ArrayAccess, JsonSerializable {
 		if ( ! $validated ) {
 			$valid = rest_validate_object_value_from_schema( $data, self::get_json_schema(), self::class );
 			if ( is_wp_error( $valid ) ) {
-				throw new Exception( $valid->get_error_message() );
+				throw new Exception( esc_html( $valid->get_error_message() ) );
 			}
 		}
 		$this->data = $data;
 	}
 
+	/**
+	 * Gets viewport width.
+	 *
+	 * @return int
+	 */
 	public function get_viewport_width(): int {
 		return $this->data['viewport']['width'];
 	}
 
+	/**
+	 * Gets timestamp.
+	 *
+	 * @return float
+	 */
 	public function get_timestamp(): float {
 		return $this->data['timestamp'];
 	}
 
+	/**
+	 * Gets elements.
+	 *
+	 * @return array
+	 */
 	public function get_elements(): array {
 		return $this->data['elements'];
-	}
-
-	/**
-	 * Checks if the offset exists.
-	 *
-	 * @param string $offset Offset.
-	 * @return bool Whether exists.
-	 */
-	public function offsetExists( $offset ): bool {
-		return isset( $this->data[ $offset ] );
-	}
-
-	/**
-	 * Gets offset.
-	 *
-	 * @throws Exception If the offset does not exist.
-	 *
-	 * @param string $offset Offset.
-	 * @return mixed Value.
-	 */
-	public function offsetGet( $offset ) {
-		if ( ! $this->offsetExists( $offset ) ) {
-			throw new Exception( sprintf( __( 'Unknown property %s on ILO_URL_Metric.', 'performance-lab' ), $offset ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-		}
-		return $this->data[ $offset ];
-	}
-
-	/**
-	 * Sets offset (disabled).
-	 *
-	 * @param string $offset Offset.
-	 * @param mixed  $value  Value.
-	 * @throws Exception
-	 */
-	public function offsetSet( $offset, $value ) {
-		throw new Exception( __( 'Cannot set properties on ILO_URL_Metric.', 'performance-lab' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-	}
-
-	/**
-	 * Unsets offset (disabled).
-	 *
-	 * @param string $offset Offset.
-	 * @throws Exception
-	 */
-	public function offsetUnset( $offset ) {
-		throw new Exception( __( 'Cannot unset properties on ILO_URL_Metric.', 'performance-lab' ) );
 	}
 
 	/**

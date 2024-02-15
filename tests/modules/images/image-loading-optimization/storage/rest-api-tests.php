@@ -45,10 +45,8 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 
 		$url_metrics = ilo_parse_stored_url_metrics( $post );
 		$this->assertCount( 1, $url_metrics, 'Expected number of URL metrics stored.' );
-		foreach ( array( 'viewport', 'elements' ) as $key ) {
-			$this->assertSame( $valid_params[ $key ], $url_metrics[0][ $key ] );
-		}
-		$this->assertArrayHasKey( 'timestamp', $url_metrics[0] );
+		$this->assertSame( $valid_params['elements'], $url_metrics[0]->get_elements() );
+		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
 	}
 
 	/**
