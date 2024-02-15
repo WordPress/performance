@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.3
 Tested up to:      6.4
 Requires PHP:      7.0
-Stable tag:        1.0.0
+Stable tag:        1.0.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, javascript, speculation rules, prerender, prefetch
@@ -78,6 +78,12 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.0.1 =
+
+* Escape path prefix and restrict it to be a pathname in Speculation Rules. ([951](https://github.com/WordPress/performance/pull/951))
+* Force HTML5 script theme support when printing JSON script. ([952](https://github.com/WordPress/performance/pull/952))
+* Add icon and banner asserts for plugin directory. ([987](https://github.com/WordPress/performance/pull/987))
 
 = 1.0.0 =
 
