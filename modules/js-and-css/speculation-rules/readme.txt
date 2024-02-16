@@ -83,7 +83,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 * Escape path prefix and restrict it to be a pathname in Speculation Rules. ([951](https://github.com/WordPress/performance/pull/951))
 * Force HTML5 script theme support when printing JSON script. ([952](https://github.com/WordPress/performance/pull/952))
-* Add icon and banner asserts for plugin directory. ([987](https://github.com/WordPress/performance/pull/987))
+* Add icon and banner assets for plugin directory. ([987](https://github.com/WordPress/performance/pull/987))
 
 = 1.0.0 =
 
