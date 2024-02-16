@@ -43,6 +43,13 @@ vendor/
 .DS_store?
 
 ############
+## CS and tools
+############
+phpcs.xml
+phpunit.xml
+phpstan.neon
+
+############
 ## Misc
 ############
 
