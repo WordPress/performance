@@ -43,7 +43,7 @@ vendor/
 .DS_store?
 
 ############
-## CS and tools
+## CS tools
 ############
 phpcs.xml
 phpunit.xml
