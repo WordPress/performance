@@ -23,9 +23,9 @@
     "post-install-cmd": "if php -r 'exit( version_compare( phpversion(), \"8.1\", \">=\" ) ? 0 : 1 );'; then composer --working-dir=build-cs install --no-interaction; else echo 'Skipping composer install for build-cs since not on PHP 8.1+. You are running: '; php -v;  fi",
     "post-update-cmd": "if php -r 'exit( version_compare( phpversion(), \"8.1\", \">=\" ) ? 0 : 1 );'; then composer --working-dir=build-cs update --no-interaction; else echo 'Skipping composer update for build-cs since not on PHP 8.1+. You are running: '; php -v; fi",
     "phpstan": "build-cs/vendor/bin/phpstan analyse --memory-limit=2048M",
-    "format": "build-cs/vendor/bin/phpcbf --standard=phpcs.xml.dist --report-summary --report-source",
-    "lint": "build-cs/vendor/bin/phpcs --standard=phpcs.xml.dist",
-    "test": "phpunit -c phpunit.xml.dist --verbose",
+    "format": "build-cs/vendor/bin/phpcbf --report-summary --report-source",
+    "lint": "build-cs/vendor/bin/phpcs",
+    "test": "phpunit --verbose",
     "test-multisite": "phpunit -c tests/multisite.xml --verbose"
   },
   "config": {
