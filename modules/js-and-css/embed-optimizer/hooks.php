@@ -66,7 +66,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			if ( $p->get_attribute( 'type' ) ) {
 				$p->set_attribute( 'data-original-type', $p->get_attribute( 'type' ) );
 			}
-			$p->set_attribute( 'type', 'text/x.lazy-loaded-javascript' );
+			$p->set_attribute( 'type', 'application/vnd.embed-optimizer.javascript' );
 		} else {
 			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to script bookmark.', 'performance-lab' ) );
 		}
@@ -92,7 +92,7 @@ add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
 function embed_optimizer_lazy_load_scripts() {
 	?>
 	<script type="module">
-		const lazyEmbedsScripts = document.querySelectorAll( 'script[type="text/x.lazy-loaded-javascript"]' );
+		const lazyEmbedsScripts = document.querySelectorAll( 'script[type="application/vnd.embed-optimizer.javascript"]' );
 		const lazyEmbedScriptsByParents = new Map();
 
 		const lazyEmbedObserver = new IntersectionObserver(
@@ -104,7 +104,7 @@ function embed_optimizer_lazy_load_scripts() {
 						const embedScript = document.createElement( 'script' );
 						for ( const attr of lazyEmbedScript.attributes ) {
 							if ( attr.nodeName === 'type' ) {
-								// Omit type=text/x.lazy-loaded-javascript type.
+								// Omit type=application/vnd.embed-optimizer.javascript type.
 								continue;
 							}
 							embedScript.setAttribute(
