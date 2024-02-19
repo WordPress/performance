@@ -93,10 +93,6 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 * Infrastructure: Sanitize metric name for `Server-Timing` header. ([957](https://github.com/WordPress/performance/pull/957))
 
-**Task**
-
-* Images: Add plugin directory assets for Speculation Rules. ([987](https://github.com/WordPress/performance/pull/987))
-
 = 2.8.0 =
 
 **Features**
