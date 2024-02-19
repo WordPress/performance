@@ -2,7 +2,7 @@
 /**
  * Tests for the Auto-sizes for Lazy-loaded Images module.
  *
- * @package performance-lab
+ * @package auto-sizes
  * @group   auto-sizes
  */
 
