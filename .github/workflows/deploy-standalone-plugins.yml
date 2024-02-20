@@ -47,7 +47,7 @@ jobs:
           echo "directory=$(node ./bin/plugin/cli.js get-plugin-dir --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
       - name: Get plugin version
         id: get-version
-        if: ${{ github.event_name == 'workflow_dispatch' && steps.get-plugin-directory.outputs.directory == 'build' }}
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           echo "version=$(node ./bin/plugin/cli.js get-plugin-version --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
       - name: Set matrix
@@ -55,11 +55,8 @@ jobs:
         run: |
           if ${{ github.event_name == 'workflow_dispatch' }}; then
             result=$(echo "${{ steps.get-version.outputs.version }}" | awk '/^(\*|[0-9]+(\.[0-9]+){0,2}(-[a-zA-Z0-9.]+)?)$/ {print "Matched"}')
-            if ${{ steps.get-plugin-directory.outputs.directory == 'plugins' }}; then
-              # Set the manual input values in JSON format for use in the matrix for plugins.
-              echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"directory\":\"${{ steps.get-plugin-directory.outputs.directory }}\",\"dry-run\":\"true\"}]}" >> $GITHUB_OUTPUT
-            elif [[ -n "$result" ]]; then
-              # Set the manual input values in JSON format for use in the matrix for modules.
+            if [[ -n "$result" ]]; then
+              # Set the manual input values in JSON format for use in the matrix.
               echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ steps.get-version.outputs.version }}\",\"directory\":\"${{ steps.get-plugin-directory.outputs.directory }}\",\"dry-run\":\"true\"}]}" >> $GITHUB_OUTPUT
             else
               echo "The ${{ inputs.slug }} module slug is missing in the file plugins.json."
@@ -70,7 +67,7 @@ jobs:
             # for use in the matrix.
             # The "dry-run" parameter is included here to set the deployment mode.
             # When running the manual (workflow_dispatch) workflow, this value will be set from manual input type.
-            echo "matrix=$(jq -c '{include: ([.modules | to_entries[] | {name:.key,slug:.value.slug,version:.value.version,directory:"build","dry-run":true }] + [.plugins[] | {slug:. , directory:"plugins", "dry-run":true}])}' plugins.json)" >> $GITHUB_OUTPUT
+            echo "matrix=$(jq -c '{include: ([.modules | to_entries[] | {name:.key,slug:.value.slug,version:.value.version,directory:"build","dry-run":true }] + [.plugins | to_entries[] | {name:.key,slug:.value.slug,version:.value.version,directory:"plugins","dry-run":true }])}' plugins.json)" >> $GITHUB_OUTPUT
           fi
   deploy:
     name: Deploy Plugin
@@ -89,6 +86,7 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
       - name: Building standalone plugins
+        if: ${{ matrix.directory != 'plugins' }}
         run: npm run build-plugins
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
         uses: 10up/action-wordpress-plugin-deploy@stable

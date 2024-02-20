@@ -81,14 +81,16 @@ function doRunGetPluginDir( settings ) {
 
 	const plugins = pluginsConfig.plugins;
 	if ( plugins ) {
-		for ( const plugin in plugins ) {
-			if ( plugins[ plugin ] && settings.slug === plugins[ plugin ] ) {
+		for ( const pluginDir in plugins ) {
+			const pluginVersion = plugins[ pluginDir ]?.version;
+			const pluginSlug = plugins[ pluginDir ]?.slug;
+			if ( pluginVersion && pluginSlug && settings.slug === pluginSlug ) {
 				return log( 'plugins' );
 			}
 		}
 	}
 
 	throw Error(
-		`The "${ settings.slug }" module slug is missing in the file "${ pluginsFile }".`
+		`The "${ settings.slug }" module/plugin slug is missing in the file "${ pluginsFile }".`
 	);
 }

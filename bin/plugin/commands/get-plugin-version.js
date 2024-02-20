@@ -68,22 +68,29 @@ function doRunGetPluginVersion( settings ) {
 		);
 	}
 
-	const plugins = pluginsConfig.modules;
-	if ( ! plugins ) {
-		throw Error(
-			`File at "${ pluginsFile }" parsed, but the modules are missing, or they are misspelled.`
-		);
+	const stPlugins = pluginsConfig.modules;
+	if ( stPlugins ) {
+		for ( const moduleDir in stPlugins ) {
+			const pluginVersion = stPlugins[ moduleDir ]?.version;
+			const pluginSlug = stPlugins[ moduleDir ]?.slug;
+			if ( pluginVersion && pluginSlug && settings.slug === pluginSlug ) {
+				return log( pluginVersion );
+			}
+		}
 	}
 
-	for ( const moduleDir in plugins ) {
-		const pluginVersion = plugins[ moduleDir ]?.version;
-		const pluginSlug = plugins[ moduleDir ]?.slug;
-		if ( pluginVersion && pluginSlug && settings.slug === pluginSlug ) {
-			return log( pluginVersion );
+	const plugins = pluginsConfig.plugins;
+	if ( plugins ) {
+		for ( const moduleDir in plugins ) {
+			const pluginVersion = plugins[ moduleDir ]?.version;
+			const pluginSlug = plugins[ moduleDir ]?.slug;
+			if ( pluginVersion && pluginSlug && settings.slug === pluginSlug ) {
+				return log( pluginVersion );
+			}
 		}
 	}
 
 	throw Error(
-		`The "${ settings.slug }" module slug is missing in the file "${ pluginsFile }".`
+		`The "${ settings.slug }" module/plugin slug is missing in the file "${ pluginsFile }".`
 	);
 }

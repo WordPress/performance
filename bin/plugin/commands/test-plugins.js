@@ -480,31 +480,47 @@ function doRunStandalonePluginTests( settings ) {
 
 	// Append plugins into array.
 	const plugins = pluginsConfig.plugins;
-	if ( plugins && Object.keys( plugins ).length > 0 ) {
-		plugins.forEach( ( plugin ) => {
-			// Copy plugins to build for testing.
-			try {
-				fs.copySync(
-					`${ settings.pluginsDir }${ plugin }/`,
-					`${ settings.builtPluginsDir }${ plugin }/`,
-					{
-						overwrite: true,
-					}
-				);
-				log( formats.success( `Copied plugin "${ plugin }".\n` ) );
-				builtPlugins = builtPlugins.concat( plugin );
-			} catch ( e ) {
-				log(
-					formats.error(
-						`Error copying plugin "${ plugin }". ${ e }`
-					)
-				);
+	if ( ! plugins ) {
+		log(
+			formats.error(
+				'The given plugin configuration is invalid, the plugins are missing, or they are misspelled.'
+			)
+		);
 
-				// Return with exit code 1 to trigger a failure in the test pipeline.
-				process.exit( 1 );
-			}
-		} );
+		// Return with exit code 1 to trigger a failure in the test pipeline.
+		process.exit( 1 );
 	}
+
+	// Create an array of plugins from entries in plugins JSON file.
+	builtPlugins = builtPlugins.concat(
+		Object.keys( plugins )
+			.filter( ( item ) => {
+				try {
+					fs.copySync(
+						`${ settings.pluginsDir }${ plugins[ item ].slug }/`,
+						`${ settings.builtPluginsDir }${ plugins[ item ].slug }/`,
+						{
+							overwrite: true,
+						}
+					);
+					log(
+						formats.success(
+							`Copied plugin "${ plugins[ item ].slug }".\n`
+						)
+					);
+					return true;
+				} catch ( e ) {
+					// Handle the error appropriately
+					log(
+						formats.error(
+							`Error copying plugin "${ plugins[ item ].slug }": ${ e.message }`
+						)
+					);
+					return false;
+				}
+			} )
+			.map( ( item ) => plugins[ item ].slug )
+	);
 
 	// For each built plugin, copy the test assets.
 	builtPlugins.forEach( ( plugin ) => {
