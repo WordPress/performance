@@ -158,7 +158,14 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets elements.
 	 *
-	 * @return array
+	 * @return array<array{
+	 *             isLCP: bool,
+	 *             isLCPCandidate: bool,
+	 *             xpath: string,
+	 *             intersectionRatio: float,
+	 *             intersectionRect: array{ width: int, height: int },
+	 *             boundingClientRect: array{ width: int, height: int },
+	 *         }>
 	 */
 	public function get_elements(): array {
 		return $this->data['elements'];

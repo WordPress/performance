@@ -120,6 +120,7 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 					}
 
 					try {
+						// TODO: This is re-validating the data which has been stored in the post type. This ensures it remains valid, but is it overkill?
 						return new ILO_URL_Metric( $url_metric_data );
 					} catch ( Exception $e ) {
 						$trigger_error(
