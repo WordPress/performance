@@ -124,6 +124,8 @@ function perflab_render_plugins_ui() {
  *
  * @global string $page
  * 
+ * 
+ * 
  * @param array $plugin_data Plugin data from the WordPress.org API.
  */
 function perflab_render_plugin_card( array $plugin_data ) {
