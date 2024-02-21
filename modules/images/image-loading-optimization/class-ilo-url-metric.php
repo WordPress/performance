@@ -15,6 +15,24 @@
 final class ILO_URL_Metric implements JsonSerializable {
 
 	/**
+	 * Data.
+	 *
+	 * @var array{
+	 *          timestamp: int,
+	 *          viewport: array{ width: int, height: int },
+	 *          elements: array<array{
+	 *              isLCP: bool,
+	 *              isLCPCandidate: bool,
+	 *              xpath: string,
+	 *              intersectionRatio: float,
+	 *              intersectionRect: array{ width: int, height: int },
+	 *              boundingClientRect: array{ width: int, height: int },
+	 *          }>
+	 *      }
+	 */
+	private $data;
+
+	/**
 	 * Gets JSON schema for URL Metric.
 	 *
 	 * @return array
@@ -100,24 +118,6 @@ final class ILO_URL_Metric implements JsonSerializable {
 			'additionalProperties' => false,
 		);
 	}
-
-	/**
-	 * Data.
-	 *
-	 * @var array{
-	 *          timestamp: int,
-	 *          viewport: array{ width: int, height: int },
-	 *          elements: array<array{
-	 *              isLCP: bool,
-	 *              isLCPCandidate: bool,
-	 *              xpath: string,
-	 *              intersectionRatio: float,
-	 *              intersectionRect: array{ width: int, height: int },
-	 *              boundingClientRect: array{ width: int, height: int },
-	 *          }>
-	 *      }
-	 */
-	private $data;
 
 	/**
 	 * Constructor.
