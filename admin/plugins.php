@@ -123,9 +123,7 @@ function perflab_render_plugins_ui() {
  * @link https://github.com/WordPress/wordpress-develop/blob/0b8ca16ea3bd9722bd1a38f8ab68901506b1a0e7/src/wp-admin/includes/class-wp-plugin-install-list-table.php#L467-L830
  *
  * @global string $page
- * 
- * 
- * 
+ *
  * @param array $plugin_data Plugin data from the WordPress.org API.
  */
 function perflab_render_plugin_card( array $plugin_data ) {
