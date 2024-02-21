@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-const fs = require( 'fs' );
 const path = require( 'path' );
 
 /**
@@ -38,56 +37,47 @@ function doRunGetPluginDir( settings ) {
 		throw Error( 'A slug must be provided via the --slug (-s) argument.' );
 	}
 
-	const pluginsFile = path.join( '.', settings.pluginsJsonFile );
-
-	// Buffer contents of plugins JSON file.
-	let pluginsFileContent = '';
+	// Resolve the absolute path to the plugins.json file.
+	const pluginsFile = path.join(
+		__dirname,
+		'../../../' + settings.pluginsJsonFile
+	);
 
 	try {
-		pluginsFileContent = fs.readFileSync( pluginsFile, 'utf-8' );
-	} catch ( e ) {
-		throw Error( `Error reading file at "${ pluginsFile }": ${ e }` );
-	}
+		// Read the plugins.json file synchronously.
+		const { modules, plugins } = require( pluginsFile );
 
-	// Validate that the plugins JSON file contains content before proceeding.
-	if ( ! pluginsFileContent ) {
-		throw Error(
-			`Contents of file at "${ pluginsFile }" could not be read, or are empty.`
-		);
-	}
-
-	const pluginsConfig = JSON.parse( pluginsFileContent );
-
-	// Check for valid and not empty object resulting from plugins JSON file parse.
-	if (
-		'object' !== typeof pluginsConfig ||
-		0 === Object.keys( pluginsConfig ).length
-	) {
-		throw Error(
-			`File at "${ pluginsFile }" parsed, but detected empty/non valid JSON object.`
-		);
-	}
-
-	const stPlugins = pluginsConfig.modules;
-	if ( stPlugins ) {
-		for ( const moduleDir in stPlugins ) {
-			const pluginVersion = stPlugins[ moduleDir ]?.version;
-			const pluginSlug = stPlugins[ moduleDir ]?.slug;
-			if ( pluginVersion && pluginSlug && settings.slug === pluginSlug ) {
-				return log( 'build' );
+		// Validate that the modules object is not empty.
+		if ( modules || Object.keys( modules ).length !== 0 ) {
+			for ( const moduleDir in modules ) {
+				const pluginVersion = modules[ moduleDir ]?.version;
+				const pluginSlug = modules[ moduleDir ]?.slug;
+				if (
+					pluginVersion &&
+					pluginSlug &&
+					settings.slug === pluginSlug
+				) {
+					return log( 'build' );
+				}
 			}
 		}
-	}
 
-	const plugins = pluginsConfig.plugins;
-	if ( plugins ) {
-		for ( const pluginDir in plugins ) {
-			const pluginVersion = plugins[ pluginDir ]?.version;
-			const pluginSlug = plugins[ pluginDir ]?.slug;
-			if ( pluginVersion && pluginSlug && settings.slug === pluginSlug ) {
-				return log( 'plugins' );
+		// Validate that the plugins object is not empty.
+		if ( plugins || Object.keys( plugins ).length !== 0 ) {
+			for ( const pluginDir in plugins ) {
+				const pluginVersion = plugins[ pluginDir ]?.version;
+				const pluginSlug = plugins[ pluginDir ]?.slug;
+				if (
+					pluginVersion &&
+					pluginSlug &&
+					settings.slug === pluginSlug
+				) {
+					return log( 'plugins' );
+				}
 			}
 		}
+	} catch ( error ) {
+		throw Error( `Error reading file at "${ pluginsFile }": ${ error }` );
 	}
 
 	throw Error(
