@@ -106,38 +106,7 @@ const buildPlugin = ( env ) => {
 		};
 	}
 
-	const from = path.resolve( __dirname );
 	const to = path.resolve( __dirname, 'build' );
-	const pluginDistIncludes = [
-		'admin',
-		'modules',
-		'server-timing',
-		'default-enabled-modules.php',
-		'LICENSE',
-		'load.php',
-		'module-i18n.php',
-		'plugins.json',
-		'readme.txt',
-		'uninstall.php',
-	];
-	const pluginDistIgnores = [
-		'**/.git/**',
-		'**/.github/**',
-		'**/.husky/**',
-		'**/.vscode/**',
-		'**/bin/**',
-		'**/build/**',
-		'**/dist/**',
-		'**/tests/**',
-		'**/plugin-tests/**',
-		'**/build-cs/**',
-		'**/docs/**',
-		'**/node_modules/**',
-		'**/vendor/**',
-		'**/modules/**/readme.txt',
-		'**/modules/**/.gitattributes',
-		'**/modules/**/.wordpress-org',
-	];
 
 	// Delete the build directory if it exists.
 	deleteFileOrDirectory( to );
@@ -149,16 +118,11 @@ const buildPlugin = ( env ) => {
 			new CopyWebpackPlugin( {
 				patterns: [
 					{
-						from,
+						from: path.resolve( __dirname ),
 						to,
 						globOptions: {
 							dot: true,
-							ignore: pluginDistIgnores,
-						},
-						filter: ( resourcePath ) => {
-							return pluginDistIncludes.some( ( include ) =>
-								resourcePath.includes( include )
-							);
+							ignoreFiles: '.distignore',
 						},
 					},
 				],
