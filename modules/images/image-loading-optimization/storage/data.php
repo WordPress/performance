@@ -253,7 +253,7 @@ function ilo_group_url_metrics_by_breakpoint( array $url_metrics, array $breakpo
 	foreach ( $url_metrics as $url_metric ) {
 		$current_minimum_viewport = 0;
 		foreach ( $minimum_viewport_widths as $viewport_minimum_width ) {
-			if ( $url_metric->get_viewport_width() > $viewport_minimum_width ) {
+			if ( $url_metric->get_viewport()['width'] > $viewport_minimum_width ) {
 				$current_minimum_viewport = $viewport_minimum_width;
 			} else {
 				break;

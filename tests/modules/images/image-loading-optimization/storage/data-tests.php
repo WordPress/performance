@@ -346,9 +346,9 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 
 			$this->assertIsArray( $grouped_url_metrics[ $minimum_viewport_width ] );
 			foreach ( $grouped_url_metrics[ $minimum_viewport_width ] as $url_metric ) {
-				$this->assertGreaterThanOrEqual( $minimum_viewport_width, $url_metric->get_viewport_width() );
+				$this->assertGreaterThanOrEqual( $minimum_viewport_width, $url_metric->get_viewport()['width'] );
 				if ( isset( $maximum_viewport_width ) ) {
-					$this->assertLessThanOrEqual( $maximum_viewport_width, $url_metric->get_viewport_width() );
+					$this->assertLessThanOrEqual( $maximum_viewport_width, $url_metric->get_viewport()['width'] );
 				}
 			}
 		}
