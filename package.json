@@ -29,6 +29,7 @@
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
     "build": "wp-scripts build",
+    "build-plugin": "wp-scripts build --env build=plugin",
     "build-plugins": "./bin/plugin/cli.js build-plugins",
     "test-plugins": "./bin/plugin/cli.js test-plugins",
     "test-plugins-multisite": "./bin/plugin/cli.js test-plugins --sitetype=multi",
