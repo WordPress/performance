@@ -48,31 +48,21 @@ function doRunGetPluginVersion( settings ) {
 		const { modules, plugins } = require( pluginsFile );
 
 		// Validate that the modules object is not empty.
-		if ( modules || Object.keys( modules ).length !== 0 ) {
-			for ( const moduleDir in modules ) {
-				const pluginVersion = modules[ moduleDir ]?.version;
-				const pluginSlug = modules[ moduleDir ]?.slug;
-				if (
-					pluginVersion &&
-					pluginSlug &&
-					settings.slug === pluginSlug
-				) {
-					return log( pluginVersion );
+		if ( modules && Object.keys( modules ).length !== 0 ) {
+			for ( const module of Object.values( modules ) ) {
+				if ( module.version && settings.slug === module.slug ) {
+					log( module.version );
+					return;
 				}
 			}
 		}
 
 		// Validate that the plugins object is not empty.
-		if ( plugins || Object.keys( plugins ).length !== 0 ) {
-			for ( const pluginDir in plugins ) {
-				const pluginVersion = plugins[ pluginDir ]?.version;
-				const pluginSlug = plugins[ pluginDir ]?.slug;
-				if (
-					pluginVersion &&
-					pluginSlug &&
-					settings.slug === pluginSlug
-				) {
-					return log( pluginVersion );
+		if ( plugins && Object.keys( plugins ).length !== 0 ) {
+			for ( const plugin of Object.values( plugins ) ) {
+				if ( plugin.version && settings.slug === plugin.slug ) {
+					log( plugin.version );
+					return;
 				}
 			}
 		}

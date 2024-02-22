@@ -447,8 +447,8 @@ function doRunStandalonePluginTests( settings ) {
 		process.exit( 1 );
 	}
 
-	const stPlugins = pluginsConfig.modules;
-	if ( ! stPlugins ) {
+	const standalonePlugins = pluginsConfig.modules;
+	if ( ! standalonePlugins ) {
 		log(
 			formats.error(
 				'The given module configuration is invalid, the modules are missing, or they are misspelled.'
@@ -460,23 +460,23 @@ function doRunStandalonePluginTests( settings ) {
 	}
 
 	// Create an array of plugins from entries in plugins JSON file.
-	builtPlugins = Object.keys( stPlugins )
+	builtPlugins = Object.keys( standalonePlugins )
 		.filter( ( item ) => {
 			if (
 				! fs.pathExistsSync(
-					`${ settings.builtPluginsDir }${ stPlugins[ item ].slug }`
+					`${ settings.builtPluginsDir }${ standalonePlugins[ item ].slug }`
 				)
 			) {
 				log(
 					formats.error(
-						`Built plugin path "${ settings.builtPluginsDir }${ stPlugins[ item ].slug }" not found, skipping and removing from plugin list`
+						`Built plugin path "${ settings.builtPluginsDir }${ standalonePlugins[ item ].slug }" not found, skipping and removing from plugin list`
 					)
 				);
 				return false;
 			}
 			return true;
 		} )
-		.map( ( item ) => stPlugins[ item ].slug );
+		.map( ( item ) => standalonePlugins[ item ].slug );
 
 	// Append plugins into array.
 	const plugins = pluginsConfig.plugins;
@@ -493,33 +493,31 @@ function doRunStandalonePluginTests( settings ) {
 
 	// Create an array of plugins from entries in plugins JSON file.
 	builtPlugins = builtPlugins.concat(
-		Object.keys( plugins )
-			.filter( ( item ) => {
+		Object.values( plugins )
+			.filter( ( plugin ) => {
 				try {
 					fs.copySync(
-						`${ settings.pluginsDir }${ plugins[ item ].slug }/`,
-						`${ settings.builtPluginsDir }${ plugins[ item ].slug }/`,
+						`${ settings.pluginsDir }${ plugin.slug }/`,
+						`${ settings.builtPluginsDir }${ plugin.slug }/`,
 						{
 							overwrite: true,
 						}
 					);
 					log(
-						formats.success(
-							`Copied plugin "${ plugins[ item ].slug }".\n`
-						)
+						formats.success( `Copied plugin "${ plugin.slug }".\n` )
 					);
 					return true;
 				} catch ( e ) {
 					// Handle the error appropriately
 					log(
 						formats.error(
-							`Error copying plugin "${ plugins[ item ].slug }": ${ e.message }`
+							`Error copying plugin "${ plugin.slug }": ${ e.message }`
 						)
 					);
 					return false;
 				}
 			} )
-			.map( ( item ) => plugins[ item ].slug )
+			.map( ( plugin ) => plugin.slug )
 	);
 
 	// For each built plugin, copy the test assets.

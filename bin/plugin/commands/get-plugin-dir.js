@@ -11,7 +11,7 @@ const { log } = require( '../lib/logger' );
 exports.options = [
 	{
 		argname: '-s, --slug <slug>',
-		description: 'Plugin or Standalone module/plugin slug to get directory',
+		description: 'Slug to search out whether it is a plugin or module.',
 	},
 ];
 
@@ -23,12 +23,12 @@ exports.options = [
 exports.handler = async ( opt ) => {
 	doRunGetPluginDir( {
 		pluginsJsonFile: 'plugins.json', // Path to plugins.json file.
-		slug: opt.slug, // Plugin slug.
+		slug: opt.slug, // Plugin/module slug.
 	} );
 };
 
 /**
- * Returns directory for plugin or module based on the slug.
+ * Prints directory root for plugin or module based on the slug.
  *
  * @param {Object} settings Plugin settings.
  */
@@ -48,31 +48,21 @@ function doRunGetPluginDir( settings ) {
 		const { modules, plugins } = require( pluginsFile );
 
 		// Validate that the modules object is not empty.
-		if ( modules || Object.keys( modules ).length !== 0 ) {
-			for ( const moduleDir in modules ) {
-				const pluginVersion = modules[ moduleDir ]?.version;
-				const pluginSlug = modules[ moduleDir ]?.slug;
-				if (
-					pluginVersion &&
-					pluginSlug &&
-					settings.slug === pluginSlug
-				) {
-					return log( 'build' );
+		if ( modules && Object.keys( modules ).length !== 0 ) {
+			for ( const module of Object.values( modules ) ) {
+				if ( module.version && settings.slug === module.slug ) {
+					log( 'build' );
+					return;
 				}
 			}
 		}
 
 		// Validate that the plugins object is not empty.
-		if ( plugins || Object.keys( plugins ).length !== 0 ) {
-			for ( const pluginDir in plugins ) {
-				const pluginVersion = plugins[ pluginDir ]?.version;
-				const pluginSlug = plugins[ pluginDir ]?.slug;
-				if (
-					pluginVersion &&
-					pluginSlug &&
-					settings.slug === pluginSlug
-				) {
-					return log( 'plugins' );
+		if ( plugins && Object.keys( plugins ).length !== 0 ) {
+			for ( const plugin of Object.values( plugins ) ) {
+				if ( plugin.version && settings.slug === plugin.slug ) {
+					log( 'plugins' );
+					return;
 				}
 			}
 		}
