@@ -86,6 +86,7 @@ function ilo_register_endpoint() {
 		ILO_URL_METRICS_ROUTE,
 		array(
 			'methods'             => 'POST',
+			'args'                => $args,
 			'callback'            => static function ( WP_REST_Request $request ) {
 				return ilo_handle_rest_request( $request );
 			},
@@ -100,7 +101,6 @@ function ilo_register_endpoint() {
 				}
 				return true;
 			},
-			'args'                => $args,
 		)
 	);
 }
@@ -148,17 +148,16 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	ilo_set_url_metric_storage_lock();
 
 	try {
-		$data           = array_merge(
-			wp_array_slice_assoc(
-				$request->get_params(),
-				array_keys( ILO_URL_Metric::get_json_schema()['properties'] )
-			),
-			array(
-				'timestamp' => microtime( true ),
-			)
-		);
 		$new_url_metric = new ILO_URL_Metric(
-			$data,
+			array_merge(
+				wp_array_slice_assoc(
+					$request->get_params(),
+					array_keys( ILO_URL_Metric::get_json_schema()['properties'] )
+				),
+				array(
+					'timestamp' => microtime( true ),
+				)
+			),
 			true // Already validated via REST API.
 		);
 	} catch ( Exception $e ) {
