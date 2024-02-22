@@ -62,7 +62,7 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 					'width'  => 640,
 					'height' => 480,
 				),
-				'timestamp' => microtime( true ),
+				'timestamp' => (int) microtime( true ), // Integer to facilitate equality tests.
 				'elements'  => array(),
 			),
 		);
