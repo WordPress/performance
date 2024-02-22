@@ -4,10 +4,15 @@
  *
  * @package performance-lab
  * @group   image-loading-optimization
+ *
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 
+	/**
+	 * @var string
+	 */
 	private $original_request_uri;
 
 	public function set_up() {
@@ -344,7 +349,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 				$this->assertLessThan( $maximum_viewport_width, $minimum_viewport_width );
 			}
 
-			$this->assertIsArray( $grouped_url_metrics[ $minimum_viewport_width ] );
 			foreach ( $grouped_url_metrics[ $minimum_viewport_width ] as $url_metric ) {
 				$this->assertGreaterThanOrEqual( $minimum_viewport_width, $url_metric->get_viewport()['width'] );
 				if ( isset( $maximum_viewport_width ) ) {
@@ -553,7 +557,9 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	 * @param int      $viewport_width Viewport width.
 	 * @param string[] $breadcrumbs    Breadcrumb tags.
 	 * @param bool     $is_lcp         Whether LCP.
+	 *
 	 * @return ILO_URL_Metric Validated URL metric.
+	 * @throws Exception From ILO_URL_Metric if there is a parse error, but there won't be.
 	 */
 	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): ILO_URL_Metric {
 		$data = array(

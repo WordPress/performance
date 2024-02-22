@@ -4,6 +4,8 @@
  *
  * @package performance-lab
  * @group   image-loading-optimization
+ *
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {

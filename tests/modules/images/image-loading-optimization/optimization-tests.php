@@ -4,12 +4,20 @@
  *
  * @package performance-lab
  * @group   image-loading-optimization
+ *
+ * @noinspection HtmlUnknownTarget
  */
 
 class ILO_Optimization_Tests extends WP_UnitTestCase {
 
+	/**
+	 * @var string
+	 */
 	private $original_request_uri;
 
+	/**
+	 * @var string
+	 */
 	private $original_request_method;
 
 	public function set_up() {
@@ -76,7 +84,6 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				'set_up'   => function () {
 					$this->go_to( home_url( '/' ) );
 					global $wp_customize;
-					/** @noinspection PhpIncludeInspection */
 					require_once ABSPATH . 'wp-includes/class-wp-customize-manager.php';
 					$wp_customize = new WP_Customize_Manager();
 					$wp_customize->start_previewing_theme();
@@ -341,7 +348,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==">
+							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==" alt="">
 						</body>
 					</html>
 				',
@@ -354,7 +361,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
-							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==">
+							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==" alt="">
 						</body>
 					</html>
 				',
@@ -369,8 +376,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<img id="no-src">
-							<img id="empty-src" src="">
+							<img id="no-src" alt="">
+							<img id="empty-src" src="" alt="">
 						</body>
 					</html>
 				',
@@ -382,8 +389,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
-							<img id="no-src">
-							<img id="empty-src" src="">
+							<img id="no-src" alt="">
+							<img id="empty-src" src="" alt="">
 						</body>
 					</html>
 				',
@@ -1011,6 +1018,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @param int $viewport_width Viewport width for the URL metric.
 	 * @return ILO_URL_Metric URL metric.
+	 * @throws Exception From ILO_URL_Metric if there is a parse error, but there won't be.
 	 */
 	private function get_validated_url_metric( int $viewport_width, array $elements = array() ): ILO_URL_Metric {
 		$data = array(
