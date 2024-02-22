@@ -7,7 +7,6 @@
  *
  * @coversDefaultClass ILO_HTML_Tag_Processor
  *
- * @noinspection HtmlUnknownTarget
  * @noinspection HtmlRequiredTitleElement
  * @noinspection HtmlRequiredAltAttribute
  * @noinspection HtmlRequiredLangAttribute
