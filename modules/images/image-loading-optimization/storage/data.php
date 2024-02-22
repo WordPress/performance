@@ -122,7 +122,7 @@ function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): bo
  * @access private
  *
  * @param ILO_URL_Metric[] $url_metrics    Existing URL metrics. Each URL metric is expected to have a timestamp key.
- * @param ILO_URL_Metric   $new_url_metric Validated URL metric. See JSON Schema defined in ilo_register_endpoint().
+ * @param ILO_URL_Metric   $new_url_metric New URL metric.
  * @param int[]            $breakpoints    Breakpoint max widths.
  * @param int              $sample_size    Sample size for URL metrics at a given breakpoint.
  *
