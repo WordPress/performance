@@ -140,7 +140,7 @@ function ilo_unshift_url_metrics( array $url_metrics, ILO_URL_Metric $new_url_me
 				// Sort URL metrics in descending order by timestamp.
 				usort(
 					$breakpoint_url_metrics,
-					static function ( ILO_URL_Metric $a, ILO_URL_Metric $b ) {
+					static function ( ILO_URL_Metric $a, ILO_URL_Metric $b ): int {
 						return $b->get_timestamp() <=> $a->get_timestamp();
 					}
 				);
