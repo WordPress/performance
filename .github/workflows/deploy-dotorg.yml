@@ -20,13 +20,14 @@ jobs:
       - name: npm install
         run: npm ci
       - name: Build assets
-        run: npm run build
+        run: npm run build-plugin
       - name: WordPress plugin deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
         env:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SLUG: performance-lab
+          BUILD_DIR: build
       - name: Upload release assets
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
