@@ -43,6 +43,13 @@ vendor/
 .DS_store?
 
 ############
+## Config overrides for CS tools
+############
+phpcs.xml
+phpunit.xml
+phpstan.neon
+
+############
 ## Misc
 ############
 
