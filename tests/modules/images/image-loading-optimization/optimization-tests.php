@@ -6,6 +6,7 @@
  * @group   image-loading-optimization
  *
  * @noinspection HtmlUnknownTarget
+ * @todo There are "Cannot resolve ..." errors and "Element img doesn't have a required attribute src" warnings that should be excluded from inspection.
  */
 
 class ILO_Optimization_Tests extends WP_UnitTestCase {

@@ -6,6 +6,15 @@
  * @group   image-loading-optimization
  *
  * @coversDefaultClass ILO_HTML_Tag_Processor
+ *
+ * @noinspection HtmlUnknownTarget
+ * @noinspection HtmlRequiredTitleElement
+ * @noinspection HtmlRequiredAltAttribute
+ * @noinspection HtmlRequiredLangAttribute
+ * @noinspection HtmlDeprecatedTag
+ * @noinspection HtmlDeprecatedAttribute
+ * @noinspection HtmlExtraClosingTag
+ * @todo What are the other inspection IDs which can turn off inspections for the other irrelevant warnings? Remaining is "The tag is marked as deprecated."
  */
 class ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 
@@ -26,7 +35,7 @@ class ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 							<p>
 								Foo!
 								<br>
-								<img src="/foo.jpg" width="1000" height="600" alt="Foo">
+								<img src="https://example.com/foo.jpg" width="1000" height="600" alt="Foo">
 							</p>
 							<form><textarea>Write here!</textarea></form>
 							<footer>The end!</footer>
@@ -124,14 +133,14 @@ class ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 							<embed>
 							<frame>
 							<hr>
-							<img>
+							<img src="">
 							<input>
 							<keygen>
 							<link>
 							<meta>
-							<param>
+							<param name="foo" value="bar">
 							<source>
-							<track>
+							<track src="https://example.com/track">
 							<wbr>
 
 							<!-- The following are not void -->
