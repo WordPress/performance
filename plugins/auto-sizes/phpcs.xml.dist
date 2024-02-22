@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <ruleset name="WordPress Coding Standards for Auto-sizes for Lazy-loaded Images Plugin">
 
-	<rule ref="phpcs.ruleset.xml"/>
+	<rule ref="../../phpcs.ruleset.xml"/>
 
-	<config name="text_domain" value="auto-sizes,default"/>
+	<config name="text_domain" value="auto-sizes"/>
 
 	<file>.</file>
 </ruleset>

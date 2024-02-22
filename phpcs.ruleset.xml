@@ -12,12 +12,6 @@
 	<arg value="ps"/>
 	<arg name="extensions" value="php"/>
 
-	<!-- Do not require file headers on generated files -->
-	<rule ref="Squiz.Commenting.FileComment.WrongStyle">
-		<exclude-pattern>default-enabled-modules.php</exclude-pattern>
-		<exclude-pattern>module-i18n.php</exclude-pattern>
-	</rule>
-
 	<!-- Do not require docblocks for unit tests -->
 	<rule ref="Squiz.Commenting.FunctionComment.Missing">
 		<exclude-pattern>tests/*</exclude-pattern>
@@ -49,7 +43,6 @@
 
 	<!-- Do not apply filename rules for unit tests and object cache -->
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
-		<exclude-pattern>server-timing/object-cache.copy.php</exclude-pattern>
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">

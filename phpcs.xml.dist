@@ -2,7 +2,17 @@
 <ruleset name="WordPress Coding Standards for Performance Plugin">
 	<rule ref="phpcs.ruleset.xml"/>
 	
-	<config name="text_domain" value="performance-lab,default"/>
+	<config name="text_domain" value="performance-lab, default"/>
+
+	<!-- Do not require file headers on generated files -->
+	<rule ref="Squiz.Commenting.FileComment.WrongStyle">
+		<exclude-pattern>default-enabled-modules.php</exclude-pattern>
+		<exclude-pattern>module-i18n.php</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>server-timing/object-cache.copy.php</exclude-pattern>
+	</rule>
 
 	<file>./admin</file>
 	<file>./load.php</file>
