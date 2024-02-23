@@ -47,23 +47,17 @@ function doRunGetPluginDir( settings ) {
 		// Read the plugins.json file synchronously.
 		const { modules, plugins } = require( pluginsFile );
 
-		// Validate that the modules object is not empty.
-		if ( modules && Object.keys( modules ).length !== 0 ) {
-			for ( const module of Object.values( modules ) ) {
-				if ( module.version && settings.slug === module.slug ) {
-					log( 'build' );
-					return;
-				}
+		for ( const module of Object.values( modules ) ) {
+			if ( settings.slug === module.slug ) {
+				log( 'build' );
+				return;
 			}
 		}
 
-		// Validate that the plugins object is not empty.
-		if ( plugins && Object.keys( plugins ).length !== 0 ) {
-			for ( const plugin of Object.values( plugins ) ) {
-				if ( plugin.version && settings.slug === plugin.slug ) {
-					log( 'plugins' );
-					return;
-				}
+		for ( const plugin of Object.values( plugins ) ) {
+			if ( settings.slug === plugin.slug ) {
+				log( 'plugins' );
+				return;
 			}
 		}
 	} catch ( error ) {
