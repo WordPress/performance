@@ -2,8 +2,9 @@
 /**
  * Settings for the WebP Uploads module.
  *
- * @package performance-lab
- * @since 1.6.0
+ * @package webp-uploads
+ *
+ * @since 1.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Registers setting for generating both JPEG and WebP versions for image uploads.
  *
- * @since 1.6.0
+ * @since 1.0.0
  */
 function webp_uploads_register_media_settings_field() {
 	register_setting(
@@ -31,7 +32,7 @@ add_action( 'init', 'webp_uploads_register_media_settings_field' );
 /**
  * Adds media settings field for the 'perflab_generate_webp_and_jpeg' setting.
  *
- * @since 1.6.0
+ * @since 1.0.0
  */
 function webp_uploads_add_media_settings_field() {
 	// Add settings field.
@@ -49,7 +50,7 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
 /**
  * Renders the settings field for the 'perflab_generate_webp_and_jpeg' setting.
  *
- * @since 1.6.0
+ * @since 1.0.0
  */
 function webp_uploads_generate_webp_jpeg_setting_callback() {
 	if ( ! is_multisite() ) {
@@ -70,7 +71,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback() {
 /**
  * Adds custom style for media settings.
  *
- * @since 1.6.0
+ * @since 1.0.0
  */
 function webp_uploads_media_setting_style() {
 	if ( is_multisite() ) {

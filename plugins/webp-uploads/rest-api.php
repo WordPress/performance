@@ -2,7 +2,8 @@
 /**
  * REST API integration for the module.
  *
- * @package performance-lab
+ * @package webp-uploads
+ *
  * @since 1.0.0
  */
 

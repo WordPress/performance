@@ -2,13 +2,10 @@
 /**
  * Helper functions used for WebP Uploads.
  *
- * @package performance-lab
+ * @package webp-uploads
+ *
  * @since 1.0.0
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
 
 /**
  * Returns an array with the list of valid mime types that a specific mime type can be converted into it,
@@ -256,7 +253,7 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 /**
  * Returns mime types that should be used for an image in the specific context.
  *
- * @since 1.4.0
+ * @since 1.0.0
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $context       The current context.
@@ -286,7 +283,7 @@ function webp_uploads_get_content_image_mimes( $attachment_id, $context ) {
 /**
  * Verifies if the request is for a frontend context within the <body> tag.
  *
- * @since 1.3.0
+ * @since 1.0.0
  *
  * @global WP_Query $wp_query WordPress Query object.
  *
@@ -311,7 +308,7 @@ function webp_uploads_in_frontend_body() {
 /**
  * Check whether the additional image is larger than the original image.
  *
- * @since 1.3.0
+ * @since 1.0.0
  *
  * @param array $original   An array with the metadata of the attachment.
  * @param array $additional An array containing the filename and file size for additional mime.
@@ -327,7 +324,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 		 * By default the performance lab plugin will use the mime type with the smaller filesize
 		 * rather than defaulting to `webp`.
 		 *
-		 * @since 1.3.0
+		 * @since 1.0.0
 		 *
 		 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
 		 */
