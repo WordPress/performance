@@ -2,18 +2,15 @@
 /**
  * Helper functions used for Dominant Color Images.
  *
- * @package performance-lab
- * @since 2.1.0
+ * @package dominant-color-images
+ *
+ * @since 1.0.0
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
 
 /**
  * Overloads wp_image_editors() to load the extended classes.
  *
- * @since 1.2.0
+ * @since 1.0.0
  *
  * @param string[] $editors Array of available image editor class names. Defaults are 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD'.
  * @return string[] Registered image editors class names.
@@ -44,8 +41,8 @@ function dominant_color_set_image_editors( $editors ) {
 /**
  * Computes the dominant color of the given attachment image and whether it has transparency.
  *
- * @since 1.2.0
- * @since 2.6.0 Function renamed to remove the `_` prefix.
+ * @since 1.0.0
+ *
  * @access private
  *
  * @param int $attachment_id The attachment ID.
@@ -94,8 +91,7 @@ function dominant_color_get_dominant_color_data( $attachment_id ) {
 /**
  * Gets file path of image based on size.
  *
- * @since 1.2.0
- * @since 2.6.0 Function renamed to change `wp_` prefix to `dominant_color_`.
+ * @since 1.0.0
  *
  * @param int    $attachment_id Attachment ID for image.
  * @param string $size          Optional. Image size. Default 'medium'.
@@ -121,7 +117,7 @@ function dominant_color_get_attachment_file_path( $attachment_id, $size = 'mediu
 /**
  * Gets the dominant color for an image attachment.
  *
- * @since 1.3.0
+ * @since 1.0.0
  *
  * @param int $attachment_id Attachment ID for image.
  * @return string|null Hex value of dominant color or null if not set.
@@ -145,7 +141,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
 /**
  * Returns whether an image attachment has transparency.
  *
- * @since 1.3.0
+ * @since 1.0.0
  *
  * @param int $attachment_id Attachment ID for image.
  * @return bool|null Whether the image has transparency, or null if not set.
@@ -167,7 +163,7 @@ function dominant_color_has_transparency( $attachment_id ) {
 /**
  * Gets hex color from RGB.
  *
- * @since 1.3.0
+ * @since 1.0.0
  *
  * @param int $red Red 0-255.
  * @param int $green Green 0-255.
