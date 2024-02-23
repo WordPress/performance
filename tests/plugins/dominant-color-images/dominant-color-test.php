@@ -4,8 +4,7 @@ use PerformanceLab\Tests\TestCase\DominantColorTestCase;
 /**
  * Tests for Dominant Color Images module.
  *
- * @package performance-lab
- * @group dominant-color-images
+ * @package dominant-color-images
  */
 class Dominant_Color_Test extends DominantColorTestCase {
 

@@ -2,8 +2,7 @@
 /**
  * Tests for webp-uploads module load.php.
  *
- * @package performance-lab
- * @group   webp-uploads
+ * @package webp-uploads
  */
 
 use PerformanceLab\Tests\TestCase\ImagesTestCase;
