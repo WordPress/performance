@@ -122,8 +122,6 @@ function perflab_render_plugins_ui() {
  * @see WP_Plugin_Install_List_Table::display_rows()
  * @link https://github.com/WordPress/wordpress-develop/blob/0b8ca16ea3bd9722bd1a38f8ab68901506b1a0e7/src/wp-admin/includes/class-wp-plugin-install-list-table.php#L467-L830
  *
- * @global string $page
- *
  * @param array $plugin_data Plugin data from the WordPress.org API.
  */
 function perflab_render_plugin_card( array $plugin_data ) {
@@ -188,7 +186,6 @@ function perflab_render_plugin_card( array $plugin_data ) {
 					esc_html( _x( 'Active', 'plugin', 'default' ) )
 				);
 				if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
-					global $page;
 					$s       = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					$context = $status['status'];
 
