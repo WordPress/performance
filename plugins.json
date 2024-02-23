@@ -11,6 +11,8 @@
   },
   "plugins": [
     "auto-sizes",
-    "speculation-rules"
+    "dominant-color-images",
+    "speculation-rules",
+    "webp-uploads"
   ]
 }
