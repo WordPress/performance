@@ -4,34 +4,34 @@ on:
   push:
     branches:
       - trunk
-      - "release/**"
+      - 'release/**'
     # Only run if PHP-related files changed.
     paths:
-      - ".github/workflows/php-test-plugins.yml"
-      - "plugins/**.php"
-      - ".wp-env.json"
-      - "**/package.json"
-      - "package-lock.json"
-      - "phpunit.xml.dist"
-      - "tests/multisite.xml"
-      - "composer.json"
-      - "composer.lock"
+      - '.github/workflows/php-test-plugins.yml'
+      - 'plugins/**.php'
+      - '.wp-env.json'
+      - '**/package.json'
+      - 'package-lock.json'
+      - 'phpunit.xml.dist'
+      - 'tests/multisite.xml'
+      - 'composer.json'
+      - 'composer.lock'
   pull_request:
     branches:
       - trunk
-      - "release/**"
-      - "feature/**"
+      - 'release/**'
+      - 'feature/**'
     # Only run if PHP-related files changed.
     paths:
-      - ".github/workflows/php-test-plugins.yml"
-      - "plugins/**.php"
-      - ".wp-env.json"
-      - "**/package.json"
-      - "package-lock.json"
-      - "phpunit.xml.dist"
-      - "tests/multisite.xml"
-      - "composer.json"
-      - "composer.lock"
+      - '.github/workflows/php-test-plugins.yml'
+      - 'plugins/**.php'
+      - '.wp-env.json'
+      - '**/package.json'
+      - 'package-lock.json'
+      - 'phpunit.xml.dist'
+      - 'tests/multisite.xml'
+      - 'composer.json'
+      - 'composer.lock'
     types:
       - opened
       - reopened
@@ -45,13 +45,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ["8.2", "8.1", "8.0", "7.4", "7.3", "7.2", "7.1", "7.0"]
-        wp: ["latest"]
+        php: ['8.2', '8.1', '8.0', '7.4', '7.3', '7.2', '7.1', '7.0']
+        wp: [ 'latest' ]
         include:
-          - php: "7.4"
-            wp: "6.3"
-          - php: "8.3"
-            wp: "trunk"
+          - php: '7.4'
+            wp: '6.3'
+          - php: '8.3'
+            wp: 'trunk'
     env:
       WP_ENV_PHP_VERSION: ${{ matrix.php }}
       WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
@@ -61,7 +61,7 @@ jobs:
       - name: Setup Node.js (.nvmrc)
         uses: actions/setup-node@v3
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: '.nvmrc'
           cache: npm
       - name: npm install
         run: npm ci
