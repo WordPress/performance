@@ -33,6 +33,7 @@ indent_size = 2
 insert_final_newline = false
 indent_style = space
 indent_size = 2
+quote_type = single
 
 [.github/CODEOWNERS]
 indent_style = space
