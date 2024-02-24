@@ -28,7 +28,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	public function get_dominant_color() {
 
 		if ( ! $this->image ) {
-			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'performance-lab' ) );
+			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'dominant-color-images' ) );
 		}
 
 		try {
@@ -39,13 +39,13 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			$color = $pixel->getColor();
 			$hex   = dominant_color_rgb_to_hex( $color['r'], $color['g'], $color['b'] );
 			if ( ! $hex ) {
-				return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'performance-lab' ) );
+				return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 			}
 
 			return $hex;
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message. */
-			return new WP_Error( 'image_editor_dominant_color_error', sprintf( __( 'Dominant color detection failed: %s', 'performance-lab' ), $e->getMessage() ) );
+			return new WP_Error( 'image_editor_dominant_color_error', sprintf( __( 'Dominant color detection failed: %s', 'dominant-color-images' ), $e->getMessage() ) );
 		}
 	}
 
@@ -60,7 +60,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	public function has_transparency() {
 
 		if ( ! $this->image ) {
-			return new WP_Error( 'image_editor_has_transparency_error_no_image', __( 'Transparency detection no image found.', 'performance-lab' ) );
+			return new WP_Error( 'image_editor_has_transparency_error_no_image', __( 'Transparency detection no image found.', 'dominant-color-images' ) );
 		}
 
 		try {
@@ -92,7 +92,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message */
-			return new WP_Error( 'image_editor_has_transparency_error', sprintf( __( 'Transparency detection failed: %s', 'performance-lab' ), $e->getMessage() ) );
+			return new WP_Error( 'image_editor_has_transparency_error', sprintf( __( 'Transparency detection failed: %s', 'dominant-color-images' ), $e->getMessage() ) );
 		}
 	}
 }

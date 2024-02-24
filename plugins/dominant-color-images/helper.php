@@ -51,7 +51,7 @@ function dominant_color_set_image_editors( $editors ) {
 function dominant_color_get_dominant_color_data( $attachment_id ) {
 	$mime_type = get_post_mime_type( $attachment_id );
 	if ( 'application/pdf' === $mime_type ) {
-		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'performance-lab' ) );
+		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'dominant-color-images' ) );
 	}
 	$file = dominant_color_get_attachment_file_path( $attachment_id );
 	if ( ! $file ) {
