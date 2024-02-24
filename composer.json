@@ -78,6 +78,9 @@
   "autoload-dev": {
     "psr-4": {
       "PerformanceLab\\Tests\\": "tests/utils"
-    }
+    },
+    "classmap": [
+      "tests/helpers.php"
+    ]
   }
 }
