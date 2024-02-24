@@ -1,6 +1,6 @@
 <?php
 
-use PerformanceLab\Tests\TestCase\DominantColorTestCase;
+use Dominant_Color_Image\Tests\TestCase as DominantColorTestCase;
 /**
  * Tests for Dominant Color Images module.
  *

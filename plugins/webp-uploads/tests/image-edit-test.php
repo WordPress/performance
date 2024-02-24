@@ -6,7 +6,7 @@
  * @subpackage image-edit
  */
 
-use PerformanceLab\Tests\TestCase\ImagesTestCase;
+use WebP_Uploads\Tests\TestCase as ImagesTestCase;
 
 class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 

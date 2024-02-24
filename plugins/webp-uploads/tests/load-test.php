@@ -5,7 +5,7 @@
  * @package webp-uploads
  */
 
-use PerformanceLab\Tests\TestCase\ImagesTestCase;
+use WebP_Uploads\Tests\TestCase as ImagesTestCase;
 
 class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
