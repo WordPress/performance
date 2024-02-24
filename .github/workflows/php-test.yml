@@ -1,4 +1,4 @@
-name: Unit Testing for Plugins
+name: PHP Unit Tests
 
 on:
   push:
@@ -27,7 +27,7 @@ permissions: {}
 
 jobs:
   unit-test-main-plugin:
-    name: 'PHP ${{ matrix.php }} / WP ${{ matrix.wp }}'
+    name: "PerfLab / PHP ${{ matrix.environment.php }} / WP ${{ matrix.environment.wp }} ${{ 'true' == matrix.multisite && '/ Multisite'}}"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -49,38 +49,18 @@ jobs:
       fail-fast: false
       matrix:
         multisite: ['true', 'false']
-        include:
-          - php: '7.0'
-            phpunit: '6'
-            wp: 'latest'
+        environment:
+          [
+            { php: '7.0', phpunit: '6', wp: 'latest' },
+            { php: '7.1', phpunit: '7', wp: 'latest' },
+            { php: '7.2', phpunit: '7', wp: 'latest' },
+            { php: '7.3', phpunit: '7', wp: 'latest' },
+            { php: '7.4', phpunit: '9.3', wp: 'latest' },
+            { php: '8.0', phpunit: '9.3', wp: 'latest' },
+            { php: '8.1', phpunit: '9.6', wp: 'latest' },
+            { php: '8.2', phpunit: '9.6', wp: 'latest' },
+          ]
 
-          - php: '7.1'
-            phpunit: '7'
-            wp: 'latest'
-
-          - php: '7.2'
-            phpunit: '7'
-            wp: 'latest'
-
-          - php: '7.3'
-            phpunit: '7'
-            wp: 'latest'
-
-          - php: '7.4'
-            phpunit: '9.3'
-            wp: 'latest'
-
-          - php: '8.0'
-            phpunit: '9.3'
-            wp: 'latest'
-
-          - php: '8.1'
-            phpunit: '9.6'
-            wp: 'latest'
-
-          - php: '8.2'
-            phpunit: '9.6'
-            wp: 'latest'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -88,9 +68,9 @@ jobs:
       - name: Setup WP tests
         uses: ./.github/actions/setup-wp-tests
         with:
-          wp: ${{ matrix.wp }}
-          php: ${{ matrix.php }}
-          phpunit: ${{ matrix.phpunit }}
+          wp: ${{ matrix.environment.wp }}
+          php: ${{ matrix.environment.php }}
+          phpunit: ${{ matrix.environment.phpunit }}
           multisite-tests: ${{ matrix.multisite }}
           mysql-port: ${{ job.services.mysql.ports['3306'] }}
 
