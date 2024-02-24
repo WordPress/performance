@@ -20,10 +20,6 @@ inputs:
     description: 'Code coverage driver'
     required: false
     default: 'none'
-  phpunit:
-    description: 'PHPUnit version'
-    required: false
-    default: '9.3'
   multisite-tests:
     description: 'Run multisite tests'
     required: false
@@ -77,11 +73,3 @@ runs:
     - name: Copy plugin to WP plugins directory
       shell: bash
       run: cp -r ${{ inputs.plugin-path }} ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance
-
-    - name: Run ${{ 'true' == inputs.multisite-tests && 'Multisite' || 'Single site' }} tests
-      shell: bash
-      run: |
-        phpunit --verbose
-      working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance
-      env:
-        WP_MULTISITE: ${{ 'true' == inputs.multisite-tests && 1 || 0 }}
