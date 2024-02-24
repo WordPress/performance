@@ -20,7 +20,7 @@ if ( file_exists( TESTS_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
 }
 
 // Detect where to load the WordPress tests environment from.
-$_tests_dir = get_path_to_wp_test_dir();
+$_tests_dir = WPP_Tests_Helpers::get_path_to_wp_test_dir();
 require_once $_tests_dir . '/includes/functions.php';
 
 // Force plugin to be active.
