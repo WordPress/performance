@@ -80,7 +80,8 @@
       "PerformanceLab\\Tests\\": "tests/utils"
     },
     "classmap": [
-      "tests/helpers.php"
+      "tests/helpers.php",
+      "plugins/*/tests/"
     ]
   }
 }
