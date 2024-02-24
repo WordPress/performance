@@ -113,16 +113,16 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 
 	$allowed_mimes = array_flip( wp_get_mime_types() );
 	if ( ! isset( $allowed_mimes[ $mime ] ) || ! is_string( $allowed_mimes[ $mime ] ) ) {
-		return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'performance-lab' ) );
+		return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'webp-uploads' ) );
 	}
 
 	if ( ! wp_image_editor_supports( array( 'mime_type' => $mime ) ) ) {
-		return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'performance-lab' ) );
+		return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'webp-uploads' ) );
 	}
 
 	$image_path = wp_get_original_image_path( $attachment_id );
 	if ( ! file_exists( $image_path ) ) {
-		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'performance-lab' ) );
+		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'webp-uploads' ) );
 	}
 
 	$editor = wp_get_image_editor( $image_path, array( 'mime_type' => $mime ) );
@@ -134,7 +134,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	$width  = isset( $size_data['width'] ) ? (int) $size_data['width'] : 0;
 	$crop   = isset( $size_data['crop'] ) && $size_data['crop'];
 	if ( $width <= 0 && $height <= 0 ) {
-		return new WP_Error( 'image_wrong_dimensions', __( 'At least one of the dimensions must be a positive number.', 'performance-lab' ) );
+		return new WP_Error( 'image_wrong_dimensions', __( 'At least one of the dimensions must be a positive number.', 'webp-uploads' ) );
 	}
 
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
@@ -162,7 +162,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	}
 
 	if ( empty( $image['file'] ) ) {
-		return new WP_Error( 'image_file_not_present', __( 'The file key is not present on the image data', 'performance-lab' ) );
+		return new WP_Error( 'image_file_not_present', __( 'The file key is not present on the image data', 'webp-uploads' ) );
 	}
 
 	return array(
@@ -195,7 +195,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 		|| ! is_array( $metadata['sizes'][ $size ] )
 		|| ! is_array( $sizes[ $size ] )
 	) {
-		return new WP_Error( 'image_mime_type_invalid_metadata', __( 'The image does not have a valid metadata.', 'performance-lab' ) );
+		return new WP_Error( 'image_mime_type_invalid_metadata', __( 'The image does not have a valid metadata.', 'webp-uploads' ) );
 	}
 
 	$size_data = array(
