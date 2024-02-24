@@ -23,11 +23,17 @@ on:
       - reopened
       - synchronize
 
+permissions: {}
+
 jobs:
   unit-test-main-plugin:
     name: 'PHP ${{ matrix.php }} / WP ${{ matrix.wp }}'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      WP_CORE_DIR: /tmp/wordpress
+      WP_TESTS_DIR: /tmp/wordpress-tests-lib
+      WP_ENVIRONMENT_TYPE: local
     services:
       mysql:
         image: mariadb:latest
@@ -42,6 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        multisite: ['true', 'false']
         php: ['7.4']
         wp: ['latest']
         phpunit: ['9.3']
@@ -83,4 +90,5 @@ jobs:
           wp: ${{ matrix.wp }}
           php: ${{ matrix.php }}
           phpunit: ${{ matrix.phpunit }}
+          multisite-tests: ${{ matrix.multisite }}
           mysql-port: ${{ job.services.mysql.ports['3306'] }}
