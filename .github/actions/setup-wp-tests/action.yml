@@ -1,0 +1,93 @@
+---
+name: Setup WP Tests
+
+description: 'Setup WordPress tests for GitHub Actions'
+
+inputs:
+  wp:
+    description: 'WordPress version'
+    required: false
+    default: 'latest'
+  php:
+    description: 'PHP version'
+    required: false
+    default: '7.4'
+  mysql-port:
+    description: 'MySQL port'
+    required: false
+    default: '3306'
+  coverage:
+    description: 'Code coverage driver'
+    required: false
+    default: 'none'
+  phpunit:
+    description: 'PHPUnit version'
+    required: false
+    default: '9.3'
+  plugin-path:
+    description: 'Path to the plugin'
+    required: false
+    default: ${{ github.workspace }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php }}
+        tools: 'composer,phpunit:${{ inputs.phpunit }}'
+        coverage: ${{ inputs.coverage }}
+
+    - name: Setup composer cache
+      uses: actions/cache@v3
+      id: php-composer-cache
+      env:
+        SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
+      with:
+        path: vendor
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}-${{ hashFiles('.github/actions/setup-wp-tests/action.yml') }}
+
+    - name: Install composer dependencies
+      if: ${{ steps.php-composer-cache.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: composer install --ansi --no-interaction --prefer-dist --ignore-platform-reqs
+
+    - name: Remove default PHPUnit
+      shell: bash
+      run: |
+        rm -rf vendor/phpunit
+        composer dump-autoload
+
+    # Scan the logs for failing tests and surface that information by creating annotations and log file decorations.
+    - name: Setup problem matcher to provide annotations for PHPUnit
+      shell: bash
+      # The JSON file is provided by the `shivammathur/setup-php` action. See https://github.com/shivammathur/setup-php#problem-matchers.
+      run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+    - name: Install WP Tests
+      shell: bash
+      run: |
+        bash ./install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ inputs.mysql-port }} ${{ inputs.wp }} true
+      env:
+        WP_CORE_DIR: /tmp/wordpress
+        WP_TESTS_DIR: /tmp/wordpress-tests-lib
+        WP_ENVIRONMENT_TYPE: local
+
+    - name: Copy plugin to WP plugins directory
+      shell: bash
+      run: cp -r "$PWD" "$WP_CORE_DIR/src/wp-content/plugins/performance"
+
+    - name: Run single site tests
+      shell: bash
+      run: |
+        phpunit --verbose
+      working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance
+
+    - name: Run multisite tests
+      shell: bash
+      run: |
+        phpunit --verbose
+      working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance
+      env:
+        WP_MULTISITE: 1
