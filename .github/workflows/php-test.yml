@@ -137,12 +137,11 @@ jobs:
           phpunit: ${{ matrix.environment.phpunit }}
           multisite-tests: ${{ matrix.environment.multisite }}
           mysql-port: ${{ job.services.mysql.ports['3306'] }}
-          plugin-path: ${{ github.workspace }}/plugins/${{ matrix.plugin }}
 
       - name: Run ${{ 'true' == matrix.environment.multisite && 'Multisite' || 'Single Site' }} tests
         shell: bash
         run: |
           phpunit --verbose
-        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance
+        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance/plugins/${{ matrix.plugin }}
         env:
           WP_MULTISITE: ${{ 'true' == matrix.environment.multisite && 1 || 0 }}
