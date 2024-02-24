@@ -27,7 +27,7 @@ permissions: {}
 
 jobs:
   unit-test-main-plugin:
-    name: "PerfLab / PHP ${{ matrix.environment.php }} / WP ${{ matrix.environment.wp }} ${{ 'true' == matrix.multisite && '/ Multisite'}}"
+    name: "PerfLab / PHP ${{ matrix.environment.php }} / WP ${{ matrix.environment.wp }} ${{ 'true' == matrix.multisite && '/ Multisite' || ''}}"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -81,3 +81,68 @@ jobs:
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance
         env:
           WP_MULTISITE: ${{ 'true' == matrix.multisite && 1 || 0 }}
+
+  unit-tests-standalone-plugins:
+    name: "Plugin: ${{ matrix.plugin }} / PHP ${{ matrix.environment.php }} / WP ${{ matrix.environment.wp }} ${{ 'true' == matrix.environment.multisite && '/ Multisite' || ''}}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      WP_CORE_DIR: /tmp/wordpress
+      WP_TESTS_DIR: /tmp/wordpress-tests-lib
+      WP_ENVIRONMENT_TYPE: local
+    services:
+      mysql:
+        image: mariadb:latest
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+          MARIADB_DATABASE: wordpress_test
+          MARIADB_MYSQL_LOCALHOST_USER: 1
+          MARIADB_MYSQL_LOCALHOST_GRANTS: USAGE
+        ports:
+          - 3306
+        options: --health-cmd="healthcheck.sh --su-mysql --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: ['auto-sizes', 'dominant-color-images', 'webp-uploads']
+        environment:
+          [
+            { php: '7.0', phpunit: '6', wp: 'latest', multisite: 'true' },
+            { php: '7.1', phpunit: '7', wp: 'latest', multisite: 'true' },
+            { php: '7.2', phpunit: '7', wp: 'latest', multisite: 'true' },
+            { php: '7.3', phpunit: '7', wp: 'latest', multisite: 'true' },
+            { php: '7.4', phpunit: '9.3', wp: 'latest', multisite: 'true' },
+            { php: '8.0', phpunit: '9.3', wp: 'latest', multisite: 'true' },
+            { php: '8.1', phpunit: '9.6', wp: 'latest', multisite: 'true' },
+            { php: '8.2', phpunit: '9.6', wp: 'latest', multisite: 'true' },
+            { php: '7.0', phpunit: '6', wp: 'latest', multisite: 'false' },
+            { php: '7.1', phpunit: '7', wp: 'latest', multisite: 'false' },
+            { php: '7.2', phpunit: '7', wp: 'latest', multisite: 'false' },
+            { php: '7.3', phpunit: '7', wp: 'latest', multisite: 'false' },
+            { php: '7.4', phpunit: '9.3', wp: 'latest', multisite: 'false' },
+            { php: '8.0', phpunit: '9.3', wp: 'latest', multisite: 'false' },
+            { php: '8.1', phpunit: '9.6', wp: 'latest', multisite: 'false' },
+            { php: '8.2', phpunit: '9.6', wp: 'latest', multisite: 'false' },
+          ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup WP tests
+        uses: ./.github/actions/setup-wp-tests
+        with:
+          wp: ${{ matrix.environment.wp }}
+          php: ${{ matrix.environment.php }}
+          phpunit: ${{ matrix.environment.phpunit }}
+          multisite-tests: ${{ matrix.environment.multisite }}
+          mysql-port: ${{ job.services.mysql.ports['3306'] }}
+          plugin-path: ${{ github.workspace }}/plugins/${{ matrix.plugin }}
+
+      - name: Run ${{ 'true' == matrix.environment.multisite && 'Multisite' || 'Single Site' }} tests
+        shell: bash
+        run: |
+          phpunit --verbose
+        working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance
+        env:
+          WP_MULTISITE: ${{ 'true' == matrix.environment.multisite && 1 || 0 }}
