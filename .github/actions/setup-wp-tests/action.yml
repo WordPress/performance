@@ -76,7 +76,7 @@ runs:
 
     - name: Copy plugin to WP plugins directory
       shell: bash
-      run: cp -r "$PWD" "$WP_CORE_DIR/src/wp-content/plugins/performance"
+      run: cp -r ${{ inputs.plugin-path }} ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance
 
     - name: Run single site tests
       shell: bash
