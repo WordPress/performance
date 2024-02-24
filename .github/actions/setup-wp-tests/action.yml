@@ -20,6 +20,10 @@ inputs:
     description: 'Code coverage driver'
     required: false
     default: 'none'
+  phpunit:
+    description: 'PHPUnit version'
+    required: false
+    default: '9.3'
   multisite-tests:
     description: 'Run multisite tests'
     required: false
