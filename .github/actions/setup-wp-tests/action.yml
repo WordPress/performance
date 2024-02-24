@@ -68,7 +68,7 @@ runs:
     - name: Install WP Tests
       shell: bash
       run: |
-        bash ./install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ inputs.mysql-port }} ${{ inputs.wp }} true
+        bash ./.github/actions/setup-wp-tests/install-wp-tests.sh wordpress_test root '' 127.0.0.1:${{ inputs.mysql-port }} ${{ inputs.wp }} true
       env:
         WP_CORE_DIR: /tmp/wordpress
         WP_TESTS_DIR: /tmp/wordpress-tests-lib
