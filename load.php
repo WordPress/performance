@@ -322,10 +322,7 @@ function perflab_get_standalone_plugin_version_constants( $source = 'plugins' ) 
 		 * This list includes all modules which are also available as standalone plugins,
 		 * as `$module_dir => $version_constant` pairs.
 		 */
-		return array(
-			'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
-			'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
-		);
+		return array();
 	}
 
 	/*
