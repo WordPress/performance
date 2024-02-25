@@ -128,7 +128,6 @@ function perflab_get_module_settings() {
 		'site-health/audit-autoloaded-options' => 'database/audit-autoloaded-options',
 		'site-health/audit-enqueued-assets'    => 'js-and-css/audit-enqueued-assets',
 		'site-health/webp-support'             => 'images/webp-support',
-		'images/dominant-color'                => 'images/dominant-color-images',
 	);
 
 	foreach ( $legacy_module_slugs as $legacy_slug => $current_slug ) {
