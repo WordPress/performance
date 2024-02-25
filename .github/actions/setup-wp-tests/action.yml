@@ -44,7 +44,7 @@ runs:
         coverage: ${{ inputs.coverage }}
 
     - name: Setup composer cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: php-composer-cache
       env:
         SEGMENT_DOWNLOAD_TIMEOUT_MINS: '5'
