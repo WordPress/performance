@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="WordPress Coding Standards for Performance Plugin">
+<ruleset name="WPP-PerfLab">
+	<description>WordPress Coding Standards for the Performance Lab Plugin</description>
 	<rule ref="phpcs.ruleset.xml"/>
 	
 	<config name="text_domain" value="performance-lab, default"/>
@@ -14,10 +15,10 @@
 		<exclude-pattern>server-timing/object-cache.copy.php</exclude-pattern>
 	</rule>
 
-	<file>./admin</file>
-	<file>./load.php</file>
-	<file>./modules</file>
-	<file>./server-timing</file>
-	<file>./tests</file>
+	<file>.</file>
+	<exclude-pattern>./build/*</exclude-pattern>
+	<exclude-pattern>./node_modules/*</exclude-pattern>
+	<exclude-pattern>./plugins/*</exclude-pattern>
+	<exclude-pattern>./vendor/*</exclude-pattern>
 
 </ruleset>

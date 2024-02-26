@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="WordPress Coding Standards for Auto-sizes for Lazy-loaded Images Plugin">
+<ruleset name="WPP-AutoSizes">
+	<description>WordPress Coding Standards for Auto-sizes for Lazy-loaded Images Plugin</description>
 
 	<rule ref="../../phpcs.ruleset.xml"/>
 

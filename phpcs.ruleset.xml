@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="WordPress Coding Standards for Performance related Plugins">
+<ruleset name="WPP-Base">
 	<description>Sniffs for WordPress plugins</description>
 
 	<rule ref="PHPCompatibility"/>
