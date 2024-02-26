@@ -144,7 +144,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @param bool   $expected Whether the dominant color should be added.
 	 */
 	public function test_dominant_color_img_tag_add_dominant_color_requires_proper_quotes( $image, $expected ) {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/red.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/plugins/dominant-color-images/data/images/red.jpg' );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		$image_url = wp_get_attachment_image_url( $attachment_id );
@@ -192,7 +192,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @param string $expected       The expected style attribute and value.
 	 */
 	public function test_dominant_color_img_tag_add_dominant_color_should_add_dominant_color_inline_style( $filtered_image, $expected ) {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/red.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/plugins/dominant-color-images/data/images/red.jpg' );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 
 		list( $src, $width, $height ) = wp_get_attachment_image_src( $attachment_id );
@@ -232,7 +232,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @param string $expected   The expected style attribute and value.
 	 */
 	public function test_dominant_color_update_attachment_image_attributes( $style_attr, $expected ) {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dominant-color-images/red.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/plugins/dominant-color-images/data/images/red.jpg' );
 
 		$attachment_image = wp_get_attachment_image( $attachment_id, 'full', '', array( 'style' => $style_attr ) );
 		$this->assertStringContainsString( $expected, $attachment_image );
