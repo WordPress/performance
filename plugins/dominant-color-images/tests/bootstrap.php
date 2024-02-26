@@ -1,6 +1,6 @@
 <?php
 /**
- * PHPUnit bootstrap file
+ * PHPUnit bootstrap file.
  *
  * @package dominant-color-images
  */
@@ -26,7 +26,7 @@ require_once $_tests_dir . '/includes/functions.php';
 
 // Force plugin to be active.
 $GLOBALS['wp_tests_options'] = array(
-	'active_plugins' => array( basename( TESTS_PLUGIN_DIR ) . '/dominant-color-images.php' ),
+	'active_plugins' => array( basename( TESTS_PLUGIN_DIR ) . '/load.php' ),
 );
 
 // Start up the WP testing environment.
