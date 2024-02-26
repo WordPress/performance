@@ -118,13 +118,14 @@ add_action( 'rest_api_init', 'ilo_register_endpoint' );
 function ilo_handle_rest_request( WP_REST_Request $request ) {
 	$post = ilo_get_url_metrics_post( $request->get_param( 'slug' ) );
 
-	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths(
+	$grouped_url_metrics = new ILO_Grouped_URL_Metrics(
 		$post ? ilo_parse_stored_url_metrics( $post ) : array(),
-		microtime( true ),
 		ilo_get_breakpoint_max_widths(),
 		ilo_get_url_metrics_breakpoint_sample_size(),
 		ilo_get_url_metric_freshness_ttl()
 	);
+
+	$needed_minimum_viewport_widths = $grouped_url_metrics->ilo_get_needed_minimum_viewport_widths( microtime( true ) );
 
 	// Block the request if URL metrics aren't needed for the provided viewport width.
 	// This logic is the same as the isViewportNeeded() function in detect.js.

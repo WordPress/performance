@@ -66,7 +66,7 @@ final class ILO_Grouped_URL_Metrics /*implements Iterator*/ {
 	 * @param ILO_URL_Metric $new_url_metric New URL metric.
 	 */
 	public function ilo_unshift_url_metrics( ILO_URL_Metric $new_url_metric ) {
-		$url_metrics = array_merge( ...array_values( $this->groups ) );
+		$url_metrics = $this->flatten();
 		array_unshift( $url_metrics, $new_url_metric );
 
 		$grouped_url_metrics = $this->ilo_group_url_metrics_by_breakpoint( $url_metrics );
@@ -248,6 +248,35 @@ final class ILO_Grouped_URL_Metrics /*implements Iterator*/ {
 				$prev_lcp_element = $lcp_element;
 				return $include;
 			}
+		);
+	}
+
+	/**
+	 * Checks whether all groups have URL metrics.
+	 *
+	 * @return bool
+	 */
+	public function all_breakpoints_have_url_metrics(): bool {
+		return count( array_filter( $this->groups ) ) === count( $this->breakpoints ) + 1;
+
+		// TODO: The following should be the same as the above, but simpler.
+		foreach ( $this->groups as $group ) {
+			if ( empty( $group ) ) {
+				return false;
+			}
+		}
+		return true;
+
+	}
+
+	/**
+	 * Flatten groups of URL metrics into an array of URL metrics.
+	 *
+	 * @return ILO_URL_Metric[] URL metrics.
+	 */
+	public function flatten(): array {
+		return array_merge(
+			...array_values( $this->groups )
 		);
 	}
 }

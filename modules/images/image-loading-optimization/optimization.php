@@ -149,15 +149,14 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
 	$post = ilo_get_url_metrics_post( $slug );
 
-	$url_metrics = $post ? ilo_parse_stored_url_metrics( $post ) : array();
-
-	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths(
-		$url_metrics,
-		microtime( true ),
+	$grouped_url_metrics = new ILO_Grouped_URL_Metrics(
+		$post ? ilo_parse_stored_url_metrics( $post ) : array(),
 		ilo_get_breakpoint_max_widths(),
 		ilo_get_url_metrics_breakpoint_sample_size(),
 		ilo_get_url_metric_freshness_ttl()
 	);
+
+	$needed_minimum_viewport_widths = $grouped_url_metrics->ilo_get_needed_minimum_viewport_widths( microtime( true ) );
 
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = in_array(
@@ -167,10 +166,8 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		true
 	);
 
-	$breakpoint_max_widths                   = ilo_get_breakpoint_max_widths();
-	$url_metrics_grouped_by_breakpoint       = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );
-	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $url_metrics_grouped_by_breakpoint );
-	$all_breakpoints_have_url_metrics        = count( array_filter( $url_metrics_grouped_by_breakpoint ) ) === count( $breakpoint_max_widths ) + 1;
+	$lcp_elements_by_minimum_viewport_widths = $grouped_url_metrics->ilo_get_lcp_elements_by_minimum_viewport_widths();
+	$all_breakpoints_have_url_metrics        = $grouped_url_metrics->all_breakpoints_have_url_metrics();
 
 	/**
 	 * Optimized lookup of the LCP element viewport widths by XPath.

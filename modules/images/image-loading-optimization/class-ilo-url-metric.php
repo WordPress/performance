@@ -172,9 +172,9 @@ final class ILO_URL_Metric implements JsonSerializable {
 	}
 
 	/**
-	 * Gets the JSON representation of the object.
+	 * Specifies data which should be serialized to JSON.
 	 *
-	 * @return array
+	 * @return array Data which can be serialized by json_encode().
 	 */
 	public function jsonSerialize(): array {
 		return $this->data;
