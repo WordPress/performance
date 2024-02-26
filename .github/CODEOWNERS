@@ -59,4 +59,3 @@
 # Plugin: Dominant Color Images
 /plugins/dominant-color-images                                              @pbearne @spacedmonkey
 /tests/plugins/dominant-color-images                                        @pbearne @spacedmonkey
-/tests/testdata/modules/images/dominant-color-images                        @pbearne @spacedmonkey
