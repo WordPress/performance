@@ -25,6 +25,11 @@
     "phpstan": "build-cs/vendor/bin/phpstan analyse --memory-limit=2048M",
     "format": "build-cs/vendor/bin/phpcbf --report-summary --report-source",
     "lint": "build-cs/vendor/bin/phpcs",
+    "lint:all": [
+        "@lint",
+        "@lint:auto-sizes"
+    ],
+    "lint:auto-sizes": "@lint -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
     "test": "phpunit --verbose --testsuite performance-lab",
     "test-multisite": "phpunit -c tests/multisite.xml --verbose --testsuite performance-lab"
   },
