@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WebP Uploads
- * Plugin URI: https://github.com/WordPress/performance/tree/trunk/modules/images/webp-uploads
+ * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/images/webp-uploads
  * Description: Creates WebP versions for new JPEG image uploads if supported by the server.
  * Requires at least: 6.3
  * Requires PHP: 7.0

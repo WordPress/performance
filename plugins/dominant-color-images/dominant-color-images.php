@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Dominant Color Images
- * Plugin URI: https://github.com/WordPress/performance/tree/trunk/modules/images/dominant-color-images
+ * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/images/dominant-color-images
  * Description: Adds support to store the dominant color of newly uploaded images and create a placeholder background of that color.
  * Requires at least: 6.3
  * Requires PHP: 7.0
