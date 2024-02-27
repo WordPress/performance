@@ -27,9 +27,11 @@
     "lint": "build-cs/vendor/bin/phpcs",
     "lint:all": [
         "@lint",
-        "@lint:auto-sizes"
+        "@lint:auto-sizes",
+        "@lint:speculation-rules"
     ],
     "lint:auto-sizes": "@lint -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
+    "lint:speculation-rules": "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
     "test": "phpunit --verbose --testsuite performance-lab",
     "test-multisite": "phpunit -c tests/multisite.xml --verbose --testsuite performance-lab",
     "test:all": [
