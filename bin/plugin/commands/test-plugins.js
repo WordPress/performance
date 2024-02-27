@@ -2,6 +2,7 @@
  * External dependencies
  */
 const fs = require( 'fs-extra' );
+const path = require( 'path' );
 const { execSync, spawnSync } = require( 'child_process' );
 
 /**
@@ -41,6 +42,7 @@ const { log, formats } = require( '../lib/logger' );
  * @property {string} siteType              Site type. 'single' or 'multi'.
  * @property {string} pluginTestAssets      Path to 'plugin-tests' folder.
  * @property {string} builtPluginsDir       Path to 'build' directory.
+ * @property {string} pluginsDir            Path to 'plugins' directory.
  * @property {string} wpEnvFile             Path to the plugin tests specific .wp-env.json file.
  * @property {string} wpEnvDestinationFile  Path to the final base .wp-env.json file.
  * @property {string} performancePluginSlug Slug of the main WPP plugin.
@@ -71,6 +73,7 @@ exports.handler = async ( opt ) => {
 		siteType: opt.sitetype || 'single', // Site type.
 		pluginTestAssets: './plugin-tests', // plugin test assets.
 		builtPluginsDir: './build/', // Built plugins directory.
+		pluginsDir: './plugins/', // Plugins directory.
 		wpEnvFile: './plugin-tests/.wp-env.json', // Base .wp-env.json file for testing plugins.
 		wpEnvDestinationFile: './.wp-env.override.json', // Destination .wp-env.override.json file at root level.
 		wpEnvPluginsRegexPattern: '"plugins": \\[(.*)\\],', // Regex to match plugins string in .wp-env.json.
@@ -403,78 +406,68 @@ function doRunStandalonePluginTests( settings ) {
 	// Buffer built plugins array.
 	let builtPlugins = [];
 
-	// Buffer contents of plugins JSON file.
-	let pluginsJsonFileContent = '';
+	// Resolve the absolute path to the plugins.json file.
+	const pluginsFile = path.join(
+		__dirname,
+		'../../../' + settings.pluginsJsonFile
+	);
 
 	try {
-		pluginsJsonFileContent = fs.readFileSync(
-			settings.pluginsJsonFile,
-			'utf-8'
-		);
-	} catch ( e ) {
-		log(
-			formats.error(
-				`Error reading file at "${ settings.pluginsJsonFile }". ${ e }`
-			)
-		);
-	}
+		// Read the plugins.json file synchronously.
+		const { modules, plugins } = require( pluginsFile );
 
-	// Validate that the plugins JSON file contains content before proceeding.
-	if ( '' === pluginsJsonFileContent || ! pluginsJsonFileContent ) {
-		log(
-			formats.error(
-				`Contents of file at "${ settings.pluginsJsonFile }" could not be read, or are empty.`
-			)
-		);
-	}
-
-	const pluginsConfig = JSON.parse( pluginsJsonFileContent );
-
-	// Check for valid and not empty object resulting from plugins JSON file parse.
-	if (
-		'object' !== typeof pluginsConfig ||
-		0 === Object.keys( pluginsConfig ).length
-	) {
-		log(
-			formats.error(
-				`File at "settings.pluginsJsonFile" parsed, but detected empty/non valid JSON object.`
-			)
-		);
-
-		// Return with exit code 1 to trigger a failure in the test pipeline.
-		process.exit( 1 );
-	}
-
-	const plugins = pluginsConfig.modules;
-	if ( ! plugins ) {
-		log(
-			formats.error(
-				'The given module configuration is invalid, the modules are missing, or they are misspelled.'
-			)
-		);
-
-		// Return with exit code 1 to trigger a failure in the test pipeline.
-		process.exit( 1 );
-	}
-
-	// Create an array of plugins from entries in plugins JSON file.
-	builtPlugins = Object.keys( plugins )
-		.filter( ( item ) => {
-			if (
-				! fs.pathExistsSync(
-					`${ settings.builtPluginsDir }${ plugins[ item ].slug }`
-				)
-			) {
-				log(
-					formats.error(
-						`Built plugin path "${ settings.builtPluginsDir }${ plugins[ item ].slug }" not found, skipping and removing from plugin list`
+		// Create an array of plugins from entries in plugins JSON file.
+		builtPlugins = Object.keys( modules )
+			.filter( ( item ) => {
+				if (
+					! fs.pathExistsSync(
+						`${ settings.builtPluginsDir }${ modules[ item ].slug }`
 					)
-				);
-				return false;
-			}
-			return true;
-		} )
-		.map( ( item ) => plugins[ item ].slug );
+				) {
+					log(
+						formats.error(
+							`Built plugin path "${ settings.builtPluginsDir }${ modules[ item ].slug }" not found, skipping and removing from plugin list`
+						)
+					);
+					return false;
+				}
+				return true;
+			} )
+			.map( ( item ) => modules[ item ].slug );
+
+		// Create an array of plugins from entries in plugins JSON file.
+		builtPlugins = builtPlugins.concat(
+			Object.values( plugins )
+				.filter( ( plugin ) => {
+					try {
+						fs.copySync(
+							`${ settings.pluginsDir }${ plugin.slug }/`,
+							`${ settings.builtPluginsDir }${ plugin.slug }/`,
+							{
+								overwrite: true,
+							}
+						);
+						log(
+							formats.success(
+								`Copied plugin "${ plugin.slug }".\n`
+							)
+						);
+						return true;
+					} catch ( e ) {
+						// Handle the error appropriately
+						log(
+							formats.error(
+								`Error copying plugin "${ plugin.slug }": ${ e.message }`
+							)
+						);
+						return false;
+					}
+				} )
+				.map( ( plugin ) => plugin.slug )
+		);
+	} catch ( error ) {
+		throw Error( `Error reading file at "${ pluginsFile }": ${ error }` );
+	}
 
 	// For each built plugin, copy the test assets.
 	builtPlugins.forEach( ( plugin ) => {
