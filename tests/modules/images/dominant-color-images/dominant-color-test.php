@@ -17,6 +17,11 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @covers ::dominant_color_metadata
 	 */
 	public function test_dominant_color_metadata( $image_path, $expected_color, $expected_transparency ) {
+		$mime_type = wp_check_filetype( $image_path )['type'];
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
 		// Non existing attachment.
 		$dominant_color_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $dominant_color_metadata );
@@ -38,6 +43,11 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @covers ::dominant_color_get_dominant_color
 	 */
 	public function test_dominant_color_get_dominant_color( $image_path, $expected_color, $expected_transparency ) {
+		$mime_type = wp_check_filetype( $image_path )['type'];
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
 		// Creating attachment.
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		$this->assertContains( dominant_color_get_dominant_color( $attachment_id ), $expected_color );
@@ -51,6 +61,11 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @covers ::dominant_color_metadata
 	 */
 	public function test_has_transparency_metadata( $image_path, $expected_color, $expected_transparency ) {
+		$mime_type = wp_check_filetype( $image_path )['type'];
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
 		// Non-existing attachment.
 		$transparency_metadata = dominant_color_metadata( array(), 1 );
 		$this->assertEmpty( $transparency_metadata );
@@ -70,6 +85,11 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @covers ::dominant_color_get_dominant_color
 	 */
 	public function test_dominant_color_has_transparency( $image_path, $expected_color, $expected_transparency ) {
+		$mime_type = wp_check_filetype( $image_path )['type'];
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
 		// Creating attachment.
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		$this->assertSame( $expected_transparency, dominant_color_has_transparency( $attachment_id ) );
@@ -83,6 +103,11 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @covers ::dominant_color_img_tag_add_dominant_color
 	 */
 	public function test_tag_add_adjust_to_image_attributes( $image_path, $expected_color, $expected_transparency ) {
+		$mime_type = wp_check_filetype( $image_path )['type'];
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 

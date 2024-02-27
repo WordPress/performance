@@ -6,10 +6,17 @@
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
 	>
+	<php>
+		<const name="WP_TESTS_MULTISITE" value="1" />
+	</php>
 	<testsuites>
-		<testsuite name="default">
+		<testsuite name="performance-lab">
 			<directory suffix=".php">./</directory>
-    		<exclude>./utils</exclude>
+			<exclude>./utils</exclude>
+			<exclude>./plugins</exclude>
+		</testsuite>
+		<testsuite name="auto-sizes">
+			<directory suffix=".php">./plugins/auto-sizes</directory>
 		</testsuite>
 	</testsuites>
 	<groups>

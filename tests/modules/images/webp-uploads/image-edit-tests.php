@@ -22,7 +22,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_backup_the_sources_structure_alongside_the_full_size() {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertEmpty( get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true ) );
@@ -64,7 +64,11 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_restore_the_sources_array_from_the_backup_when_an_image_is_edited() {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		$editor = new WP_Image_Edit( $attachment_id );
@@ -118,7 +122,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		// Disable the generation of the sources attributes.
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertArrayNotHasKey( 'sources', $metadata );
@@ -151,7 +155,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$this->assertArrayHasKey( 'sources', $metadata );
 
@@ -203,7 +207,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
 		}
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		$editor = new WP_Image_Edit( $attachment_id );
@@ -248,7 +252,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
 		}
 
-		// The leafs image is 1080 pixels wide with this filter we ensure a -scaled version is created for this test.
+		// The leaves image is 1080 pixels wide with this filter we ensure a -scaled version is created for this test.
 		add_filter(
 			'big_image_size_threshold',
 			static function () {
@@ -258,7 +262,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		);
 
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg'
+			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
 
 		$this->assertNotSame( wp_get_original_image_path( $attachment_id ), get_attached_file( $attachment_id ) );
@@ -302,7 +306,11 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_validate_source_attribute_update_when_webp_edited() {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
+			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
+		}
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 
 		$editor = new WP_Image_Edit( $attachment_id );
 		$editor->crop( 1000, 200, 0, 0 )->save();
@@ -331,7 +339,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_not_return_a_target_if_no_backup_image_exists() {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$this->assertNull( webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) );
 	}
 
@@ -344,7 +352,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		// Remove the filter to prevent the usage of the next target.
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$editor        = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
 
@@ -358,7 +366,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_return_null_when_looking_for_a_target_that_is_already_used() {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$editor        = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
 
@@ -375,7 +383,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$editor        = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
 
@@ -397,12 +405,12 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		// Remove the filter to prevent the usage of the next target.
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$editor        = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
 		$this->assertTrue( $editor->success() );
 
-		$sources = array( 'image/webp' => 'leafs.webp' );
+		$sources = array( 'image/webp' => 'leaves.webp' );
 		webp_uploads_backup_full_image_sources( $attachment_id, $sources );
 
 		$this->assertSame( array( 'full-orig' => $sources ), get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
@@ -417,7 +425,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 
 		$editor = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
@@ -428,7 +436,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$editor->rotate_right()->save();
 		$this->assertTrue( $editor->success() );
 
-		$sources = array( 'image/webp' => 'leafs.webp' );
+		$sources = array( 'image/webp' => 'leaves.webp' );
 		webp_uploads_backup_full_image_sources( $attachment_id, $sources );
 
 		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
@@ -449,7 +457,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		// Remove the filter to prevent the usage of the next target.
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$editor        = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
 
@@ -465,7 +473,11 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_store_the_next_image_hash_on_the_backup_sources() {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
+
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$editor        = new WP_Image_Edit( $attachment_id );
 		// Edit the image.
 		$editor->rotate_right()->save();
@@ -494,7 +506,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leafs.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 
 		$editor = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();

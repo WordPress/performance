@@ -8,7 +8,7 @@
 	<rule ref="WordPress-Docs"/>
 	<rule ref="WordPress-Extra" />
 	<rule ref="WordPress.WP.I18n"/>
-	<config name="text_domain" value="performance-lab,default,speculation-rules"/>
+	<config name="text_domain" value="performance-lab,default,auto-sizes,speculation-rules"/>
 
 	<arg value="ps"/>
 	<arg name="extensions" value="php"/>
@@ -16,6 +16,7 @@
 	<file>./admin</file>
 	<file>./load.php</file>
 	<file>./modules</file>
+	<file>./plugins</file>
 	<file>./server-timing</file>
 	<file>./tests</file>
 

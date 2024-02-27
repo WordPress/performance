@@ -1,5 +1,5 @@
 includes:
-	- phar://phpstan.phar/conf/bleedingEdge.neon
+	- build-cs/vendor/phpstan/phpstan/conf/bleedingEdge.neon
 parameters:
 	level: 0
 	paths:
@@ -8,6 +8,7 @@ parameters:
 		- load.php
 		- module-i18n.php
 		- modules/
+		- plugins/
 		- server-timing/
 		- tests/
 		- uninstall.php
