@@ -31,7 +31,9 @@ exports.handler = async ( opt ) => {
 /**
  * Returns the match plugin version from plugins.json file.
  *
- * @param {Object} settings Plugin settings.
+ * @param {Object} settings                 Plugin settings.
+ * @param {string} settings.pluginsJsonFile Path to plugins JSON file.
+ * @param {string} settings.slug            Slug for the plugin or module.
  */
 function doRunGetPluginVersion( settings ) {
 	if ( settings.slug === undefined ) {

@@ -30,7 +30,9 @@ exports.handler = async ( opt ) => {
 /**
  * Prints directory root for plugin or module based on the slug.
  *
- * @param {Object} settings Plugin settings.
+ * @param {Object} settings                 Plugin settings.
+ * @param {string} settings.pluginsJsonFile Path to plugins JSON file.
+ * @param {string} settings.slug            Slug for the plugin or module.
  */
 function doRunGetPluginDir( settings ) {
 	if ( settings.slug === undefined ) {
