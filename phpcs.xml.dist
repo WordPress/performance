@@ -1,24 +1,9 @@
 <?xml version="1.0"?>
-<ruleset name="WordPress Coding Standards for Performance Plugin">
-	<description>Sniffs for WordPress plugins, with minor modifications for Performance</description>
+<ruleset name="WPP-PerfLab">
+	<description>WordPress Coding Standards for the Performance Lab Plugin</description>
+	<rule ref="phpcs.ruleset.xml"/>
 
-	<rule ref="PHPCompatibility"/>
-	<config name="testVersion" value="7.0-"/>
-
-	<rule ref="WordPress-Docs"/>
-	<rule ref="WordPress-Extra" />
-	<rule ref="WordPress.WP.I18n"/>
-	<config name="text_domain" value="performance-lab,default,auto-sizes,speculation-rules"/>
-
-	<arg value="ps"/>
-	<arg name="extensions" value="php"/>
-
-	<file>./admin</file>
-	<file>./load.php</file>
-	<file>./modules</file>
-	<file>./plugins</file>
-	<file>./server-timing</file>
-	<file>./tests</file>
+	<config name="text_domain" value="performance-lab,default"/>
 
 	<!-- Do not require file headers on generated files -->
 	<rule ref="Squiz.Commenting.FileComment.WrongStyle">
@@ -26,83 +11,13 @@
 		<exclude-pattern>module-i18n.php</exclude-pattern>
 	</rule>
 
-	<!-- Do not require docblocks for unit tests -->
-	<rule ref="Squiz.Commenting.FunctionComment.Missing">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="Squiz.Commenting.FileComment.Missing">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="Squiz.Commenting.ClassComment.Missing">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="Squiz.Commenting.ClassComment.SpacingAfter">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="Generic.Commenting.DocComment.Empty">
-    	<exclude-pattern>tests/*</exclude-pattern>
-    </rule>
-	<rule ref="Generic.Commenting.DocComment.MissingShort">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="Squiz.Commenting.VariableComment.Missing">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-
-	<!-- Do not apply filename rules for unit tests and object cache -->
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
 		<exclude-pattern>server-timing/object-cache.copy.php</exclude-pattern>
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
-		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 
-	<!-- Do not apply compatibility rules to allow using the modern PHPUnit functionality -->
-	<rule ref="PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.stringFound">
-		<exclude-pattern>tests/utils/*</exclude-pattern>
-	</rule>
-	<rule ref="PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.boolFound">
-		<exclude-pattern>tests/utils/*</exclude-pattern>
-	</rule>
-
-	<!-- Ignore inapplicable WordPress-Extra sniffs in tests. -->
-	<rule ref="WordPress.WP.EnqueuedResourceParameters">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.Security.EscapeOutput.OutputNotEscaped">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.WP.AlternativeFunctions.unlink_unlink">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.WP.GlobalVariablesOverride.Prohibited">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.PHP.DevelopmentFunctions.error_log_var_export">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-
-	<!-- Exceptions for variable name casing. -->
-	<rule ref="WordPress.NamingConventions.ValidVariableName">
-		<properties>
-			<property name="allowed_custom_properties" type="array">
-				<element value="nodeValue"/>
-				<element value="parentNode"/>
-				<element value="createTextNode"/>
-				<element value="textContent"/>
-			</property>
-		</properties>
-	</rule>
-
-	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
+	<file>.</file>
+	<exclude-pattern>./build/*</exclude-pattern>
+	<exclude-pattern>./node_modules/*</exclude-pattern>
+	<exclude-pattern>./plugins/*</exclude-pattern>
+	<exclude-pattern>./vendor/*</exclude-pattern>
 </ruleset>

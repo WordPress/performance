@@ -72,11 +72,7 @@ jobs:
         # PHP that the composer.lock was created for.
       - name: Composer update
         run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer update --no-interaction
-      - name: Running single site unit tests for Auto-sizes for Lazy-Loaded Images Plugin
-        run: npm run test-php -- -- -- --testsuite auto-sizes
-      - name: Running multisite unit tests for Auto-sizes for Lazy-Loaded Images Plugin
-        run: npm run test-php-multisite -- -- -- --testsuite auto-sizes
-      - name: Running single site unit tests for Speculation Rules Plugin
-        run: npm run test-php -- -- -- --testsuite speculation-rules
-      - name: Running multisite unit tests for Speculation Rules Plugin
-        run: npm run test-php-multisite -- -- -- --testsuite speculation-rules
+      - name: Running single site unit tests for plugins
+        run: npm run test-php-plugins
+      - name: Running multisite unit tests for plugins
+        run: npm run test-php-multisite-plugins
