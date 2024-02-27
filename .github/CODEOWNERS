@@ -46,7 +46,6 @@
 
 # Plugin: Auto-sizes for Lazy-Loaded Images
 /plugins/auto-sizes                         @joemcgill
-/tests/plugins/auto-sizes                   @joemcgill
 
 # Plugin: Speculation Rules
 /plugins/speculation-rules                  @felixarntz
@@ -54,8 +53,6 @@
 
 # Plugin: WebP Uploads
 /plugins/webp-uploads                       @adamsilverstein @felixarntz
-/tests/plugins/webp-uploads                 @adamsilverstein @felixarntz
 
 # Plugin: Dominant Color Images
-/plugins/dominant-color-images              @pbearne @spacedmonkey
-/tests/plugins/dominant-color-images        @pbearne @spacedmonkey
+/plugins/dominant-color-images                                              @pbearne @spacedmonkey
