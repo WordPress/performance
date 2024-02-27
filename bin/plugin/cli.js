@@ -51,6 +51,10 @@ const {
 	options: getPluginVersionOptions,
 } = require( './commands/get-plugin-version' );
 const {
+	handler: getPluginDirHandler,
+	options: getPluginDirOptions,
+} = require( './commands/get-plugin-dir' );
+const {
 	handler: enabledModulesHandler,
 	options: enabledModulesOptions,
 } = require( './commands/enabled-modules' );
@@ -101,6 +105,11 @@ withOptions(
 	.alias( 'get-plugin-version' )
 	.description( 'Get standalone plugin version' )
 	.action( catchException( getPluginVersionHandler ) );
+
+withOptions( program.command( 'get-plugin-dir' ), getPluginDirOptions )
+	.alias( 'get-plugin-directory' )
+	.description( 'Get plugin directory' )
+	.action( catchException( getPluginDirHandler ) );
 
 withOptions(
 	program.command( 'default-enabled-modules' ),

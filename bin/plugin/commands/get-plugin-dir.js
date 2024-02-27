@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-const fs = require( 'fs' );
 const path = require( 'path' );
 
 /**
@@ -12,31 +11,31 @@ const { log } = require( '../lib/logger' );
 exports.options = [
 	{
 		argname: '-s, --slug <slug>',
-		description: 'Standalone plugin slug to get version from plugins.json',
+		description: 'Slug to search out whether it is a plugin or module.',
 	},
 ];
 
 /**
- * Command to get the plugin version based on the slug.
+ * Command to get directory for plugin/module based on the slug.
  *
  * @param {Object} opt      Command options.
  * @param {string} opt.slug Plugin/module slug.
  */
 exports.handler = async ( opt ) => {
-	doRunGetPluginVersion( {
+	doRunGetPluginDir( {
 		pluginsJsonFile: 'plugins.json', // Path to plugins.json file.
 		slug: opt.slug,
 	} );
 };
 
 /**
- * Returns the match plugin version from plugins.json file.
+ * Prints directory root for plugin or module based on the slug.
  *
  * @param {Object} settings                 Plugin settings.
  * @param {string} settings.pluginsJsonFile Path to plugins JSON file.
  * @param {string} settings.slug            Slug for the plugin or module.
  */
-function doRunGetPluginVersion( settings ) {
+function doRunGetPluginDir( settings ) {
 	if ( settings.slug === undefined ) {
 		throw Error( 'A slug must be provided via the --slug (-s) argument.' );
 	}
@@ -53,37 +52,15 @@ function doRunGetPluginVersion( settings ) {
 
 		for ( const module of Object.values( modules ) ) {
 			if ( settings.slug === module.slug ) {
-				log( module.version );
+				log( 'build' );
 				return;
 			}
 		}
 
 		for ( const plugin of Object.values( plugins ) ) {
-			if ( settings.slug === plugin ) {
-				const readmeFile = path.join(
-					__dirname,
-					'../../../plugins/' + plugin + '/readme.txt'
-				);
-
-				let fileContent = '';
-				try {
-					fileContent = fs.readFileSync( readmeFile, 'utf-8' );
-				} catch ( err ) {
-					throw Error(
-						`Error reading the file "${ readmeFile }": "${ err }"`
-					);
-				}
-
-				if ( fileContent === '' ) {
-					throw Error( `Error reading the file "${ readmeFile }"` );
-				}
-
-				const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+)/i;
-				const match = versionRegex.exec( fileContent );
-				if ( match ) {
-					log( match[ 1 ] );
-					return;
-				}
+			if ( settings.slug === plugin.slug ) {
+				log( 'plugins' );
+				return;
 			}
 		}
 	} catch ( error ) {
