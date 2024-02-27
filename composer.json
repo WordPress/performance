@@ -31,7 +31,23 @@
     ],
     "lint:auto-sizes": "@lint -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
     "test": "phpunit --verbose --testsuite performance-lab",
-    "test-multisite": "phpunit -c tests/multisite.xml --verbose --testsuite performance-lab"
+    "test-multisite": "phpunit -c tests/multisite.xml --verbose --testsuite performance-lab",
+    "test:all": [
+      "@test",
+      "@test:plugins"
+    ],
+    "test-multisite:all": [
+      "@test-multisite",
+      "@test-multisite:plugins"
+    ],
+    "test:plugins": [
+      "@test:auto-sizes"
+    ],
+    "test-multisite:plugins": [
+      "@test-multisite:auto-sizes"
+    ],
+    "test:auto-sizes": "phpunit --verbose --testsuite auto-sizes",
+    "test-multisite:auto-sizes": "phpunit -c tests/multisite.xml --verbose --testsuite auto-sizes"
   },
   "config": {
     "allow-plugins": {

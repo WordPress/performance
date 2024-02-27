@@ -34,6 +34,8 @@
     "lint-php": "composer lint:all",
     "test-php": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test",
     "test-php-multisite": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test-multisite",
+    "test-php-plugins": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test:plugins",
+    "test-php-multisite-plugins": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test-multisite:plugins",
     "wp-env": "wp-env",
     "prepare": "husky install"
   },
