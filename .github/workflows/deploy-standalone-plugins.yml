@@ -65,9 +65,10 @@ jobs:
           else
             # Load the JSON file and parse from "{name: {slug, version}, ...}" to "include: [{ name, slug, version }, ...]"
             # for use in the matrix.
+            # For plugins, the "version" parameter is not included here; it will dynamically get it in its own job.
             # The "dry-run" parameter is included here to set the deployment mode.
             # When running the manual (workflow_dispatch) workflow, this value will be set from manual input type.
-            echo "matrix=$(jq -c '{include: ([.modules | to_entries[] | {name:.key,slug:.value.slug,version:.value.version,directory:"build","dry-run":true }] + [.plugins | to_entries[] | {name:.key,slug:.value.slug,version:.value.version,directory:"plugins","dry-run":true }])}' plugins.json)" >> $GITHUB_OUTPUT
+            echo "matrix=$(jq -c '{include: ([.modules | to_entries[] | {name:.key, slug: .value.slug, version: .value.version, directory: "build", "dry-run": true}] + ([.plugins[] | {name:. , slug:. , directory: "plugins", "dry-run": true}]))}' plugins.json)" >> $GITHUB_OUTPUT
           fi
   deploy:
     name: Deploy Plugin
@@ -88,6 +89,12 @@ jobs:
       - name: Building standalone plugins
         if: ${{ matrix.directory != 'plugins' }}
         run: npm run build-plugins
+      - name: Set version
+        id: set_version
+        run: |
+          if [ -z "${{ matrix.version }}" ]; then
+            echo "version=$(node ./bin/plugin/cli.js get-plugin-version --slug=${{ matrix.slug }})" >> $GITHUB_OUTPUT
+          fi
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
         uses: 10up/action-wordpress-plugin-deploy@stable
         with:
@@ -100,6 +107,6 @@ jobs:
           SVN_PASSWORD: SVN_PASSWORD
           SVN_USERNAME: SVN_USERNAME
           SLUG: ${{ matrix.slug }}
-          VERSION: ${{ matrix.version }}
+          VERSION: ${{ steps.set_version.outputs.version }}
           BUILD_DIR: ./${{ matrix.directory }}/${{ matrix.slug }}
           ASSETS_DIR: ./${{ matrix.directory }}/${{ matrix.slug }}/.wordpress-org

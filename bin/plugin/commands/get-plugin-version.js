@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+const fs = require( 'fs' );
 const path = require( 'path' );
 
 /**
@@ -54,11 +55,32 @@ function doRunGetPluginVersion( settings ) {
 			}
 		}
 
-		// Validate that the plugins object is not empty.
 		for ( const plugin of Object.values( plugins ) ) {
-			if ( settings.slug === plugin.slug ) {
-				log( plugin.version );
-				return;
+			if ( settings.slug === plugin ) {
+				const readmeFile = path.join(
+					__dirname,
+					'../../../plugins/' + plugin + '/readme.txt'
+				);
+
+				let fileContent = '';
+				try {
+					fileContent = fs.readFileSync( readmeFile, 'utf-8' );
+				} catch ( err ) {
+					throw Error(
+						`Error reading the file "${ readmeFile }": "${ err }"`
+					);
+				}
+
+				if ( fileContent === '' ) {
+					throw Error( `Error reading the file "${ readmeFile }"` );
+				}
+
+				const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+)/i;
+				const match = versionRegex.exec( fileContent );
+				if ( match ) {
+					log( match[ 1 ] );
+					return;
+				}
 			}
 		}
 	} catch ( error ) {
