@@ -3,7 +3,7 @@
 	<description>WordPress Coding Standards for the Performance Lab Plugin</description>
 	<rule ref="phpcs.ruleset.xml"/>
 	
-	<config name="text_domain" value="performance-lab"/>
+	<config name="text_domain" value="performance-lab,default"/>
 
 	<!-- Do not require file headers on generated files -->
 	<rule ref="Squiz.Commenting.FileComment.WrongStyle">
@@ -20,11 +20,5 @@
 	<exclude-pattern>./node_modules/*</exclude-pattern>
 	<exclude-pattern>./plugins/*</exclude-pattern>
 	<exclude-pattern>./vendor/*</exclude-pattern>
-
-	<!-- Exclude specific files from the TextDomainMismatch sniff -->
-	<rule ref="WordPress.WP.I18n.TextDomainMismatch">
-		<exclude-pattern>admin/load.php</exclude-pattern>
-		<exclude-pattern>admin/plugins.php</exclude-pattern>
-	</rule>
 
 </ruleset>
