@@ -66,6 +66,7 @@ jobs:
             # Load the JSON file and parse from "{name: {slug, version}, ...}" to "include: [{ name, slug, version }, ...]"
             # for use in the matrix.
             # For plugins, the "version" parameter is not included here; it will dynamically get it in its own job.
+
             # The "dry-run" parameter is included here to set the deployment mode.
             # When running the manual (workflow_dispatch) workflow, this value will be set from manual input type.
             echo "matrix=$(jq -c '{include: ([.modules | to_entries[] | {name:.key, slug: .value.slug, version: .value.version, directory: "build", "dry-run": true}] + ([.plugins[] | {name:. , slug:. , directory: "plugins", "dry-run": true}]))}' plugins.json)" >> $GITHUB_OUTPUT
@@ -94,6 +95,8 @@ jobs:
         run: |
           if [ -z "${{ matrix.version }}" ]; then
             echo "version=$(node ./bin/plugin/cli.js get-plugin-version --slug=${{ matrix.slug }})" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ matrix.version }})" >> $GITHUB_OUTPUT
           fi
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
         uses: 10up/action-wordpress-plugin-deploy@stable
