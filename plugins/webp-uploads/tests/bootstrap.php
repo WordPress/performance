@@ -12,7 +12,7 @@ define( 'TESTS_PLUGIN_ROOT', dirname( dirname( TESTS_PLUGIN_DIR ) ) );
 require_once TESTS_PLUGIN_ROOT . '/tests/bootstrap-functions.php';
 
 // Initialize the WP testing environment.
-$_tests_dir = PerformanceLab\Tests\init( TESTS_PLUGIN_ROOT );
+$_tests_dir = PerformanceLab\Tests\init( TESTS_PLUGIN_ROOT, TESTS_PLUGIN_DIR );
 
 // Force plugin to be active.
 $GLOBALS['wp_tests_options'] = array(
