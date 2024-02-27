@@ -19,7 +19,7 @@ function plsr_print_speculation_rules() {
 		return;
 	}
 
-	// This workaround is needed for WP 6.4. See <https://core.trac.wordpress.org/ticket/56313>.
+	// This workaround is needed for WP 6.4. See <https://core.trac.wordpress.org/ticket/60320>.
 	$needs_html5_workaround = (
 		! current_theme_supports( 'html5', 'script' ) &&
 		version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.4', '>=' ) &&

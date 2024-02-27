@@ -33,6 +33,7 @@ class Speculation_Rules_Tests extends WP_UnitTestCase {
 
 	/**
 	 * @dataProvider data_provider_to_test_print_speculation_rules
+	 * @covers ::plsr_print_speculation_rules
 	 */
 	public function test_plsr_print_speculation_rules_without_html5_support( bool $html5_support ) {
 		if ( $html5_support ) {
