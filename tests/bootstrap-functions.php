@@ -10,11 +10,17 @@ namespace PerformanceLab\Tests;
 /**
  * Initialize the test environment.
  *
- * @param string $plugin_dir Performance Lab plugin root directory.
+ * @param string $plugin_root The root directory of the plugin.
+ * @param string $plugin_dir  The directory of the plugin.
  *
  * @return string The path to the WP test directory.
  */
-function init( $plugin_dir ) {
+function init( $plugin_root, $plugin_dir = '' ) {
+	// If plugin directory is not set, assume it is the same as the plugin root.
+	if ( empty( $plugin_dir ) ) {
+		$plugin_dir = $plugin_root;
+	}
+
 	// Determine correct location for plugins directory to use.
 	if ( false !== getenv( 'WP_PLUGIN_DIR' ) ) {
 		define( 'WP_PLUGIN_DIR', getenv( 'WP_PLUGIN_DIR' ) );
@@ -23,8 +29,8 @@ function init( $plugin_dir ) {
 	}
 
 	// Load the Composer dependencies if applicable.
-	if ( file_exists( $plugin_dir . '/vendor/autoload.php' ) ) {
-		require_once $plugin_dir . '/vendor/autoload.php';
+	if ( file_exists( $plugin_root . '/vendor/autoload.php' ) ) {
+		require_once $plugin_root . '/vendor/autoload.php';
 	}
 
 	$wp_tests_dir = get_path_to_wp_test_dir();
