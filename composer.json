@@ -41,13 +41,17 @@
       "@test-multisite:plugins"
     ],
     "test:plugins": [
-      "@test:auto-sizes"
+      "@test:auto-sizes",
+      "@test:speculation-rules"
     ],
     "test-multisite:plugins": [
-      "@test-multisite:auto-sizes"
+      "@test-multisite:auto-sizes",
+      "@test-multisite:speculation-rules"
     ],
     "test:auto-sizes": "phpunit --verbose --testsuite auto-sizes",
-    "test-multisite:auto-sizes": "phpunit -c tests/multisite.xml --verbose --testsuite auto-sizes"
+    "test-multisite:auto-sizes": "phpunit -c tests/multisite.xml --verbose --testsuite auto-sizes",
+    "test:speculation-rules": "phpunit --verbose --testsuite speculation-rules",
+    "test-multisite:speculation-rules": "phpunit -c tests/multisite.xml --verbose --testsuite speculation-rules"
   },
   "config": {
     "allow-plugins": {
