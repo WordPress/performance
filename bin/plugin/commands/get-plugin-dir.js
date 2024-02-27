@@ -18,12 +18,13 @@ exports.options = [
 /**
  * Command to get directory for plugin/module based on the slug.
  *
- * @param {Object} opt Command options.
+ * @param {Object} opt      Command options.
+ * @param {string} opt.slug Plugin/module slug.
  */
 exports.handler = async ( opt ) => {
 	doRunGetPluginDir( {
 		pluginsJsonFile: 'plugins.json', // Path to plugins.json file.
-		slug: opt.slug, // Plugin/module slug.
+		slug: opt.slug,
 	} );
 };
 

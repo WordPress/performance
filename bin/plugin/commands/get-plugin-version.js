@@ -19,12 +19,13 @@ exports.options = [
 /**
  * Command to get the plugin version based on the slug.
  *
- * @param {Object} opt Command options.
+ * @param {Object} opt      Command options.
+ * @param {string} opt.slug Plugin/module slug.
  */
 exports.handler = async ( opt ) => {
 	doRunGetPluginVersion( {
 		pluginsJsonFile: 'plugins.json', // Path to plugins.json file.
-		slug: opt.slug, // Plugin slug.
+		slug: opt.slug,
 	} );
 };
 
