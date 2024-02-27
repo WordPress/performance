@@ -7,21 +7,11 @@
 
 define( 'TESTS_PLUGIN_DIR', dirname( __DIR__ ) );
 
-// Determine correct location for plugins directory to use.
-if ( false !== getenv( 'WP_PLUGIN_DIR' ) ) {
-	define( 'WP_PLUGIN_DIR', getenv( 'WP_PLUGIN_DIR' ) );
-} else {
-	define( 'WP_PLUGIN_DIR', dirname( TESTS_PLUGIN_DIR ) );
-}
+// Load bootstrap functions.
+require_once TESTS_PLUGIN_ROOT . '/tests/bootstrap-functions.php';
 
-// Load Composer dependencies if applicable.
-if ( file_exists( TESTS_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
-	require_once TESTS_PLUGIN_DIR . '/vendor/autoload.php';
-}
-
-// Detect where to load the WordPress tests environment from.
-$_tests_dir = WPP_Tests_Helpers::get_path_to_wp_test_dir();
-require_once $_tests_dir . '/includes/functions.php';
+// Initialize the WP testing environment.
+$_tests_dir = PerformanceLab\Tests\init( TESTS_PLUGIN_ROOT );
 
 // Force plugin to be active.
 $GLOBALS['wp_tests_options'] = array(
