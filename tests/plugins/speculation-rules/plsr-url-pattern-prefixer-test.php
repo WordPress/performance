@@ -2,8 +2,7 @@
 /**
  * Tests for PLSR_URL_Pattern_Prefixer class.
  *
- * @package performance-lab
- * @group speculation-rules
+ * @package speculation-rules
  */
 
 class PLSR_URL_Pattern_Prefixer_Tests extends WP_UnitTestCase {

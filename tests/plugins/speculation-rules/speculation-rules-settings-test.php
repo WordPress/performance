@@ -2,8 +2,7 @@
 /**
  * Tests for speculation-rules settings file.
  *
- * @package performance-lab
- * @group speculation-rules
+ * @package speculation-rules
  */
 
 class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
