@@ -1,14 +1,5 @@
 {
-  "modules": {
-    "images/dominant-color-images": {
-      "slug": "dominant-color-images",
-      "version": "1.0.1"
-    },
-    "images/webp-uploads": {
-      "slug": "webp-uploads",
-      "version": "1.0.5"
-    }
-  },
+  "modules": {},
   "plugins": [
     "auto-sizes",
     "dominant-color-images",
