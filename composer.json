@@ -17,6 +17,7 @@
   },
   "require": {
     "composer/installers": "~1.0",
+    "ext-json": "*",
     "php": ">=7|^8"
   },
   "scripts": {
@@ -27,9 +28,11 @@
     "lint": "build-cs/vendor/bin/phpcs",
     "lint:all": [
         "@lint",
-        "@lint:auto-sizes"
+        "@lint:auto-sizes",
+        "@lint:speculation-rules"
     ],
     "lint:auto-sizes": "@lint -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
+    "lint:speculation-rules": "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
     "test": "phpunit --verbose --testsuite performance-lab",
     "test-multisite": "phpunit -c tests/multisite.xml --verbose --testsuite performance-lab",
     "test:all": [
@@ -41,13 +44,17 @@
       "@test-multisite:plugins"
     ],
     "test:plugins": [
-      "@test:auto-sizes"
+      "@test:auto-sizes",
+      "@test:speculation-rules"
     ],
     "test-multisite:plugins": [
-      "@test-multisite:auto-sizes"
+      "@test-multisite:auto-sizes",
+      "@test-multisite:speculation-rules"
     ],
     "test:auto-sizes": "phpunit --verbose --testsuite auto-sizes",
-    "test-multisite:auto-sizes": "phpunit -c tests/multisite.xml --verbose --testsuite auto-sizes"
+    "test-multisite:auto-sizes": "phpunit -c tests/multisite.xml --verbose --testsuite auto-sizes",
+    "test:speculation-rules": "phpunit --verbose --testsuite speculation-rules",
+    "test-multisite:speculation-rules": "phpunit -c tests/multisite.xml --verbose --testsuite speculation-rules"
   },
   "config": {
     "allow-plugins": {
