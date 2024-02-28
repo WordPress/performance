@@ -163,7 +163,11 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	} catch ( Exception $e ) {
 		return new WP_Error(
 			'url_metric_exception',
-			__( 'Exception occurred while creating URL metric.', 'performance-lab' )
+			sprintf(
+				/* translators: %s is exception name */
+				__( 'Failed to validate URL metric: %s', 'performance-lab' ),
+				$e->getMessage()
+			)
 		);
 	}
 

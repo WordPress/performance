@@ -93,9 +93,10 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 	if ( json_last_error() ) {
 		$trigger_error(
 			sprintf(
-				/* translators: 1: Post type slug, 2: JSON error message */
-				__( 'Contents of %1$s post type not valid JSON: %2$s', 'performance-lab' ),
+				/* translators: 1: Post type slug, 2: Post ID, 3: JSON error message */
+				__( 'Contents of %1$s post type (ID: %2$s) not valid JSON: %3$s', 'performance-lab' ),
 				ILO_URL_METRICS_POST_TYPE,
+				$post->ID,
 				json_last_error_msg()
 			)
 		);
@@ -125,9 +126,10 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 					} catch ( Exception $e ) {
 						$trigger_error(
 							sprintf(
-								/* translators: %s is post type slug */
-								__( 'Unexpected shape to JSON array in post_content of %s post type.', 'performance-lab' ),
-								ILO_URL_METRICS_POST_TYPE
+								/* translators: 1: Post type slug. 2: Exception message. */
+								__( 'Unexpected shape to JSON array in post_content of %1$s post type: %2$s', 'performance-lab' ),
+								ILO_URL_METRICS_POST_TYPE,
+								$e->getMessage()
 							)
 						);
 						return null;
