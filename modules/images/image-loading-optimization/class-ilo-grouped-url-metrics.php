@@ -1,6 +1,6 @@
 <?php
 /**
- * Image Loading Optimization: ILO_Grouped_URL_Metric_Collection class
+ * Image Loading Optimization: ILO_Grouped_URL_Metrics class
  *
  * @package performance-lab
  * @since n.e.x.t
