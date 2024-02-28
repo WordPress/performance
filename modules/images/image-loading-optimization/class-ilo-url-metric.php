@@ -35,7 +35,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Constructor.
 	 *
-	 * @param array $data      URL metric data.
+	 * @param array $data URL metric data.
 	 *
 	 * @throws ILO_Data_Validation_Exception When the input is invalid.
 	 */
