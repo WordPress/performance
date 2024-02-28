@@ -75,11 +75,7 @@ function ilo_register_endpoint() {
 
 	$schema = ILO_URL_Metric::get_json_schema();
 
-	// Make timestamp not required since it is forcibly-provided in ilo_handle_rest_request().
-	$schema['properties']['timestamp']['required'] = false;
-	$schema['properties']['timestamp']['readonly'] = true;
-
-	$args = array_merge( $args, $schema['properties'] );
+	$args = array_merge( $args, rest_get_endpoint_args_for_schema( $schema ) );
 
 	register_rest_route(
 		ILO_REST_API_NAMESPACE,
@@ -148,14 +144,17 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	ilo_set_url_metric_storage_lock();
 
 	try {
-		$new_url_metric = new ILO_URL_Metric(
+		$properties = ILO_URL_Metric::get_json_schema()['properties'];
+		$url_metric = new ILO_URL_Metric(
 			array_merge(
 				wp_array_slice_assoc(
 					$request->get_params(),
-					array_keys( ILO_URL_Metric::get_json_schema()['properties'] )
+					array_keys( $properties )
 				),
 				array(
-					'timestamp' => microtime( true ),
+					// Now supply the timestamp since it was omitted from the REST API params since it is `readonly`.
+					// Nevertheless, it is also `required`, so it must be set to instantiate an ILO_URL_Metric.
+					'timestamp' => $properties['timestamp']['default'],
 				)
 			)
 		);
@@ -173,7 +172,7 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	$result = ilo_store_url_metric(
 		$request->get_param( 'url' ),
 		$request->get_param( 'slug' ),
-		$new_url_metric
+		$url_metric
 	);
 
 	if ( $result instanceof WP_Error ) {

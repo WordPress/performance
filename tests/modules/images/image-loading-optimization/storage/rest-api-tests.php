@@ -139,6 +139,37 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+
+		$this->assertNull( ilo_get_url_metrics_post( $params['slug'] ) );
+	}
+
+	/**
+	 * Test timestamp ignored.
+	 *
+	 * @covers ::ilo_register_endpoint
+	 * @covers ::ilo_handle_rest_request
+	 */
+	public function test_rest_request_timestamp_ignored() {
+		$initial_microtime = microtime( true );
+
+		$request = new WP_REST_Request( 'POST', self::ROUTE );
+
+		$params              = $this->get_valid_params();
+		$params['timestamp'] = microtime( true ) - HOUR_IN_SECONDS; // Should be ignored.
+
+		$request->set_body_params( $params );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
+
+		$post = ilo_get_url_metrics_post( $params['slug'] );
+		$this->assertInstanceOf( WP_Post::class, $post );
+
+		$url_metrics = ilo_parse_stored_url_metrics( $post );
+		$this->assertCount( 1, $url_metrics );
+		$url_metric = $url_metrics[0];
+		$this->assertNotEquals( $params['timestamp'], $url_metric->get_timestamp() );
+		$this->assertGreaterThanOrEqual( $initial_microtime, $url_metric->get_timestamp() );
 	}
 
 	/**
@@ -230,7 +261,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 			),
 			$this->get_sample_validated_url_metric()
 		);
-		unset( $data['timestamp'] ); // Since provided by request handler.
+		unset( $data['timestamp'] ); // Since provided by default args.
 		return $data;
 	}
 

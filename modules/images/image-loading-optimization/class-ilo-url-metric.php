@@ -95,6 +95,8 @@ final class ILO_URL_Metric implements JsonSerializable {
 					'description' => __( 'Timestamp at which the URL metric was captured.', 'performance-lab' ),
 					'type'        => 'number',
 					'required'    => true,
+					'readonly'    => true, // Omit from REST API.
+					'default'     => microtime( true ), // Value provided when instantiating ILO_URL_Metric in REST API.
 					'minimum'     => 0,
 				),
 				'elements'  => array(
