@@ -274,16 +274,12 @@ final class ILO_Grouped_URL_Metrics {
 	 * @return bool
 	 */
 	public function all_breakpoints_have_url_metrics(): bool {
-		return count( array_filter( $this->groups ) ) === count( $this->breakpoints ) + 1;
-
-		// TODO: The following should be the same as the above, but simpler.
 		foreach ( $this->groups as $group ) {
 			if ( empty( $group ) ) {
 				return false;
 			}
 		}
 		return true;
-
 	}
 
 	/**
