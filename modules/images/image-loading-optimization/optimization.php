@@ -156,7 +156,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		ilo_get_url_metric_freshness_ttl()
 	);
 
-	$needed_minimum_viewport_widths = $grouped_url_metrics->ilo_get_needed_minimum_viewport_widths( microtime( true ) );
+	$needed_minimum_viewport_widths = $grouped_url_metrics->get_needed_minimum_viewport_widths( microtime( true ) );
 
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = in_array(
@@ -166,8 +166,8 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		true
 	);
 
-	$lcp_elements_by_minimum_viewport_widths = $grouped_url_metrics->ilo_get_lcp_elements_by_minimum_viewport_widths();
-	$all_breakpoints_have_url_metrics        = $grouped_url_metrics->all_breakpoints_have_url_metrics();
+	$lcp_elements_by_minimum_viewport_widths = $grouped_url_metrics->get_lcp_elements_by_minimum_viewport_widths();
+	$all_breakpoints_have_url_metrics        = $grouped_url_metrics->are_all_groups_populated();
 
 	/**
 	 * Optimized lookup of the LCP element viewport widths by XPath.

@@ -175,7 +175,7 @@ function ilo_store_url_metric( string $url, string $slug, ILO_URL_Metric $new_ur
 		ilo_get_url_metric_freshness_ttl()
 	);
 
-	$grouped_url_metrics->ilo_unshift_url_metrics( $new_url_metric );
+	$grouped_url_metrics->add( $new_url_metric );
 
 	$post_data['post_content'] = wp_json_encode(
 		array_map(

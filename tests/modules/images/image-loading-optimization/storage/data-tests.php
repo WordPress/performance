@@ -192,7 +192,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_unshift_url_metrics().
 	 *
-	 * @covers ILO_Grouped_URL_Metrics::ilo_unshift_url_metrics
+	 * @covers ILO_Grouped_URL_Metrics::add
 	 *
 	 * @dataProvider data_provider_sample_size_and_breakpoints
 	 */
@@ -202,7 +202,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		// Over-populate the sample size for the breakpoints by a dozen.
 		foreach ( $viewport_widths as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size + 12; $i++ ) {
-				$grouped_url_metrics->ilo_unshift_url_metrics( $this->get_validated_url_metric( $viewport_width ) );
+				$grouped_url_metrics->add( $this->get_validated_url_metric( $viewport_width ) );
 			}
 		}
 		$max_possible_url_metrics_count = $sample_size * ( count( $breakpoints ) + 1 );
@@ -216,7 +216,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test that ilo_unshift_url_metrics() pushes out old metrics.
 	 *
-	 * @covers ILO_Grouped_URL_Metrics::ilo_unshift_url_metrics
+	 * @covers ILO_Grouped_URL_Metrics::add
 	 *
 	 * @dataProvider data_provider_sample_size_and_breakpoints
 	 * @throws Exception When a parse error happens.
@@ -229,7 +229,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		// Populate the groups with stale URL metrics.
 		foreach ( $viewport_widths as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
-				$grouped_url_metrics->ilo_unshift_url_metrics(
+				$grouped_url_metrics->add(
 					new ILO_URL_Metric(
 						array_merge(
 							$this->get_validated_url_metric( $viewport_width )->jsonSerialize(),
@@ -244,7 +244,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 
 		// Try adding one URL metric for each breakpoint group.
 		foreach ( $viewport_widths as $viewport_width ) {
-			$grouped_url_metrics->ilo_unshift_url_metrics( $this->get_validated_url_metric( $viewport_width ) );
+			$grouped_url_metrics->add( $this->get_validated_url_metric( $viewport_width ) );
 		}
 
 		$max_possible_url_metrics_count = $sample_size * ( count( $breakpoints ) + 1 );
@@ -322,7 +322,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_group_url_metrics_by_breakpoint().
 	 *
-	 * @covers ILO_Grouped_URL_Metrics::ilo_group_url_metrics_by_breakpoint
 	 * @covers ILO_Grouped_URL_Metrics::get_groups
 	 * @covers ILO_Grouped_URL_Metrics::get_minimum_viewport_widths
 	 *
@@ -438,13 +437,13 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_lcp_elements_by_minimum_viewport_widths().
 	 *
-	 * @covers ILO_Grouped_URL_Metrics::ilo_get_lcp_elements_by_minimum_viewport_widths
+	 * @covers ILO_Grouped_URL_Metrics::get_lcp_elements_by_minimum_viewport_widths
 	 * @dataProvider data_provider_test_ilo_get_lcp_elements_by_minimum_viewport_widths
 	 */
 	public function test_ilo_get_lcp_elements_by_minimum_viewport_widths( array $breakpoints, array $url_metrics, array $expected_lcp_element_xpaths ) {
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, 10, HOUR_IN_SECONDS );
 
-		$lcp_elements_by_minimum_viewport_widths = $grouped_url_metrics->ilo_get_lcp_elements_by_minimum_viewport_widths();
+		$lcp_elements_by_minimum_viewport_widths = $grouped_url_metrics->get_lcp_elements_by_minimum_viewport_widths();
 
 		$lcp_element_xpaths_by_minimum_viewport_widths = array();
 		foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
@@ -546,7 +545,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_needed_minimum_viewport_widths().
 	 *
-	 * @covers ILO_Grouped_URL_Metrics::ilo_get_needed_minimum_viewport_widths
+	 * @covers ILO_Grouped_URL_Metrics::get_needed_minimum_viewport_widths
 	 *
 	 * @dataProvider data_provider_test_ilo_get_needed_minimum_viewport_widths
 	 */
@@ -554,7 +553,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertSame(
 			$expected,
-			$grouped_url_metrics->ilo_get_needed_minimum_viewport_widths()
+			$grouped_url_metrics->get_needed_minimum_viewport_widths()
 		);
 	}
 

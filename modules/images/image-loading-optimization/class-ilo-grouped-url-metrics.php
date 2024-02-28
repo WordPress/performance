@@ -54,7 +54,7 @@ final class ILO_Grouped_URL_Metrics {
 		$this->breakpoints   = $breakpoints;
 		$this->sample_size   = $sample_size;
 		$this->freshness_ttl = $freshness_ttl;
-		$this->groups        = $this->ilo_group_url_metrics_by_breakpoint( $url_metrics );
+		$this->groups        = $this->group_url_metrics_by_breakpoint( $url_metrics );
 	}
 
 	/**
@@ -83,11 +83,11 @@ final class ILO_Grouped_URL_Metrics {
 	 *
 	 * @param ILO_URL_Metric $new_url_metric New URL metric.
 	 */
-	public function ilo_unshift_url_metrics( ILO_URL_Metric $new_url_metric ) {
+	public function add( ILO_URL_Metric $new_url_metric ) {
 		$url_metrics = $this->flatten();
 		array_unshift( $url_metrics, $new_url_metric );
 
-		$grouped_url_metrics = $this->ilo_group_url_metrics_by_breakpoint( $url_metrics );
+		$grouped_url_metrics = $this->group_url_metrics_by_breakpoint( $url_metrics );
 
 		// Make sure there is at most $sample_size number of URL metrics for each breakpoint.
 		$grouped_url_metrics = array_map(
@@ -125,7 +125,7 @@ final class ILO_Grouped_URL_Metrics {
 	 *                                      the breakpoints reflect the max inclusive boundaries whereas the return value is the groups of page
 	 *                                      metrics with viewports on either side of the breakpoint boundaries.
 	 */
-	private function ilo_group_url_metrics_by_breakpoint( array $url_metrics ): array {
+	private function group_url_metrics_by_breakpoint( array $url_metrics ): array {
 
 		// Convert breakpoint max widths into viewport minimum widths.
 		$minimum_viewport_widths = array_map(
@@ -161,7 +161,7 @@ final class ILO_Grouped_URL_Metrics {
 	 * @param float $current_time Current time, defaults to `microtime(true)`.
 	 * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
 	 */
-	public function ilo_get_needed_minimum_viewport_widths( float $current_time = null ): array {
+	public function get_needed_minimum_viewport_widths( float $current_time = null ): array {
 		if ( null === $current_time ) {
 			$current_time = microtime( true );
 		}
@@ -202,7 +202,7 @@ final class ILO_Grouped_URL_Metrics {
 	 *
 	 * @return array LCP elements keyed by its minimum viewport width. If there is no supported LCP element at a breakpoint, then `false` is used.
 	 */
-	public function ilo_get_lcp_elements_by_minimum_viewport_widths(): array {
+	public function get_lcp_elements_by_minimum_viewport_widths(): array {
 		$lcp_element_by_viewport_minimum_width = array();
 		foreach ( $this->groups as $viewport_minimum_width => $breakpoint_url_metrics ) {
 
@@ -271,9 +271,9 @@ final class ILO_Grouped_URL_Metrics {
 	/**
 	 * Checks whether all groups have URL metrics.
 	 *
-	 * @return bool
+	 * @return bool Whether all groups have URL metrics.
 	 */
-	public function all_breakpoints_have_url_metrics(): bool {
+	public function are_all_groups_populated(): bool {
 		foreach ( $this->groups as $group ) {
 			if ( empty( $group ) ) {
 				return false;
@@ -285,7 +285,7 @@ final class ILO_Grouped_URL_Metrics {
 	/**
 	 * Flatten groups of URL metrics into an array of URL metrics.
 	 *
-	 * @return ILO_URL_Metric[] URL metrics.
+	 * @return ILO_URL_Metric[] Ungrouped URL metrics.
 	 */
 	public function flatten(): array {
 		return array_merge(
