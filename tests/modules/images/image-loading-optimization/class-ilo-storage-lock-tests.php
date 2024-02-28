@@ -1,9 +1,11 @@
 <?php
 /**
- * Tests for image-loading-optimization module storage/lock.php.
+ * Tests for ILO_Storage_Lock.
  *
  * @package performance-lab
  * @group   image-loading-optimization
+ *
+ * @coversDefaultClass ILO_Storage_Lock
  */
 
 class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
@@ -21,7 +23,7 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array<string, array{set_up: Closure, expected: int}>
 	 */
-	public function data_provider_ilo_get_url_metric_storage_lock_ttl(): array {
+	public function data_provider_get_ttl(): array {
 		return array(
 			'unfiltered'        => array(
 				'set_up'   => static function () {},
@@ -53,48 +55,50 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ilo_get_url_metric_storage_lock_ttl().
+	 * Test get_ttl().
 	 *
-	 * @covers ::ilo_get_url_metric_storage_lock_ttl
+	 * @covers ::get_ttl
 	 *
-	 * @dataProvider data_provider_ilo_get_url_metric_storage_lock_ttl
+	 * @dataProvider data_provider_get_ttl
 	 *
 	 * @param Closure $set_up   Set up.
 	 * @param int     $expected Expected value.
 	 */
-	public function test_ilo_get_url_metric_storage_lock_ttl( Closure $set_up, int $expected ) {
+	public function test_get_ttl( Closure $set_up, int $expected ) {
 		$set_up();
-		$this->assertSame( $expected, ilo_get_url_metric_storage_lock_ttl() );
+		$this->assertSame( $expected, ILO_Storage_Lock::get_ttl() );
 	}
 
 	/**
-	 * Test ilo_get_url_metric_storage_lock_transient_key().
+	 * Test get_transient_key().
 	 *
-	 * @covers ::ilo_get_url_metric_storage_lock_transient_key
+	 * @covers ::get_transient_key
 	 */
-	public function test_ilo_get_url_metric_storage_lock_transient_key() {
+	public function test_get_transient_key() {
 		unset( $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_X_FORWARDED_FOR'] );
 
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-		$first_key              = ilo_get_url_metric_storage_lock_transient_key();
+		$first_key              = ILO_Storage_Lock::get_transient_key();
 		$this->assertStringStartsWith( 'url_metrics_storage_lock_', $first_key );
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '127.0.0.2';
-		$second_key                      = ilo_get_url_metric_storage_lock_transient_key();
+		$second_key                      = ILO_Storage_Lock::get_transient_key();
 		$this->assertStringStartsWith( 'url_metrics_storage_lock_', $second_key );
 
 		$this->assertNotEquals( $second_key, $first_key, 'Expected setting HTTP_X_FORWARDED_FOR header to take precedence over REMOTE_ADDR.' );
 	}
 
 	/**
-	 * Test ilo_set_url_metric_storage_lock() and ilo_is_url_metric_storage_locked().
+	 * Test set_lock() and is_locked().
 	 *
-	 * @covers ::ilo_set_url_metric_storage_lock
-	 * @covers ::ilo_is_url_metric_storage_locked
+	 * @covers ::set_lock
+	 * @covers ::is_locked
+	 * @covers ::get_transient_key
+	 * @covers ::get_ttl
 	 */
-	public function test_ilo_set_url_metric_storage_lock_and_ilo_is_url_metric_storage_locked() {
-		$key = ilo_get_url_metric_storage_lock_transient_key();
-		$ttl = ilo_get_url_metric_storage_lock_ttl();
+	public function test_set_lock_and_is_locked() {
+		$key = ILO_Storage_Lock::get_transient_key();
+		$ttl = ILO_Storage_Lock::get_ttl();
 
 		$transient_value      = null;
 		$transient_expiration = null;
@@ -110,20 +114,20 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 		);
 
 		// Set the lock.
-		ilo_set_url_metric_storage_lock();
+		ILO_Storage_Lock::set_lock();
 		$this->assertSame( $ttl, $transient_expiration );
 		$this->assertLessThanOrEqual( microtime( true ), $transient_value );
 		$this->assertEquals( $transient_value, get_transient( $key ) );
-		$this->assertTrue( ilo_is_url_metric_storage_locked() );
+		$this->assertTrue( ILO_Storage_Lock::is_locked() );
 
 		// Simulate expired lock.
 		set_transient( $key, microtime( true ) - HOUR_IN_SECONDS );
-		$this->assertFalse( ilo_is_url_metric_storage_locked() );
+		$this->assertFalse( ILO_Storage_Lock::is_locked() );
 
 		// Clear the lock.
 		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
-		ilo_set_url_metric_storage_lock();
+		ILO_Storage_Lock::set_lock();
 		$this->assertFalse( get_transient( $key ) );
-		$this->assertFalse( ilo_is_url_metric_storage_locked() );
+		$this->assertFalse( ILO_Storage_Lock::is_locked() );
 	}
 }

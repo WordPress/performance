@@ -47,7 +47,7 @@ function ilo_get_detection_script( string $slug, array $needed_minimum_viewport_
 		'urlMetricsSlug'              => $slug,
 		'urlMetricsNonce'             => ilo_get_url_metrics_storage_nonce( $slug ),
 		'neededMinimumViewportWidths' => $needed_minimum_viewport_widths,
-		'storageLockTTL'              => ilo_get_url_metric_storage_lock_ttl(),
+		'storageLockTTL'              => ILO_Storage_Lock::get_ttl(),
 		'webVitalsLibrarySrc'         => $web_vitals_lib_src,
 	);
 

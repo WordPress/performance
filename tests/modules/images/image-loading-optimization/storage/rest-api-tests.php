@@ -148,7 +148,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 * @covers ::ilo_handle_rest_request
 	 */
 	public function test_rest_request_locked() {
-		ilo_set_url_metric_storage_lock();
+		ILO_Storage_Lock::set_lock();
 
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params( $this->get_valid_params() );

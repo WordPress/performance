@@ -20,7 +20,7 @@ require_once __DIR__ . '/hooks.php';
 // Storage logic.
 require_once __DIR__ . '/class-ilo-url-metric.php';
 require_once __DIR__ . '/class-ilo-grouped-url-metrics.php';
-require_once __DIR__ . '/storage/lock.php';
+require_once __DIR__ . '/class-ilo-storage-lock.php';
 require_once __DIR__ . '/storage/post-type.php';
 require_once __DIR__ . '/storage/data.php';
 require_once __DIR__ . '/storage/rest-api.php';
