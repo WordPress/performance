@@ -192,63 +192,69 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_unshift_url_metrics().
 	 *
-	 * @covers ::ilo_unshift_url_metrics
+	 * @covers ILO_Grouped_URL_Metrics::ilo_unshift_url_metrics
 	 *
 	 * @dataProvider data_provider_sample_size_and_breakpoints
 	 */
 	public function test_ilo_unshift_url_metrics( int $sample_size, array $breakpoints, array $viewport_widths ) {
-		$old_timestamp = 1701978742;
+		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
 
-		// Fully populate the sample size for the breakpoints.
-		$all_url_metrics = array();
+		// Over-populate the sample size for the breakpoints by a dozen.
 		foreach ( $viewport_widths as $viewport_width ) {
-			for ( $i = 0; $i < $sample_size; $i++ ) {
-				$all_url_metrics = ilo_unshift_url_metrics(
-					$all_url_metrics,
-					$this->get_validated_url_metric( $viewport_width ),
-					$breakpoints,
-					$sample_size
-				);
+			for ( $i = 0; $i < $sample_size + 12; $i++ ) {
+				$grouped_url_metrics->ilo_unshift_url_metrics( $this->get_validated_url_metric( $viewport_width ) );
 			}
 		}
 		$max_possible_url_metrics_count = $sample_size * ( count( $breakpoints ) + 1 );
 		$this->assertCount(
 			$max_possible_url_metrics_count,
-			$all_url_metrics,
+			$grouped_url_metrics->flatten(),
 			sprintf( 'Expected there to be exactly sample size (%d) times the number of breakpoint groups (which is %d + 1)', $sample_size, count( $breakpoints ) )
 		);
+	}
 
-		// Make sure that ilo_unshift_url_metrics() added a timestamp and then force them to all be old.
-		$all_url_metrics = array_map(
-			static function ( $url_metric ) use ( $old_timestamp ): ILO_URL_Metric {
-				return new ILO_URL_Metric(
-					array_merge(
-						$url_metric->jsonSerialize(),
-						array(
-							'timestamp' => $old_timestamp,
+	/**
+	 * Test that ilo_unshift_url_metrics() pushes out old metrics.
+	 *
+	 * @covers ILO_Grouped_URL_Metrics::ilo_unshift_url_metrics
+	 *
+	 * @dataProvider data_provider_sample_size_and_breakpoints
+	 * @throws Exception When a parse error happens.
+	 */
+	public function test_ilo_unshift_url_metrics_pushes_out_old_metrics( int $sample_size, array $breakpoints, array $viewport_widths ) {
+		$old_timestamp = microtime( true ) - ( HOUR_IN_SECONDS + 1 );
+
+		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
+
+		// Populate the groups with stale URL metrics.
+		foreach ( $viewport_widths as $viewport_width ) {
+			for ( $i = 0; $i < $sample_size; $i++ ) {
+				$grouped_url_metrics->ilo_unshift_url_metrics(
+					new ILO_URL_Metric(
+						array_merge(
+							$this->get_validated_url_metric( $viewport_width )->jsonSerialize(),
+							array(
+								'timestamp' => $old_timestamp,
+							)
 						)
 					)
 				);
-			},
-			$all_url_metrics
-		);
+			}
+		}
 
 		// Try adding one URL metric for each breakpoint group.
 		foreach ( $viewport_widths as $viewport_width ) {
-			$all_url_metrics = ilo_unshift_url_metrics(
-				$all_url_metrics,
-				$this->get_validated_url_metric( $viewport_width ),
-				$breakpoints,
-				$sample_size
-			);
+			$grouped_url_metrics->ilo_unshift_url_metrics( $this->get_validated_url_metric( $viewport_width ) );
 		}
+
+		$max_possible_url_metrics_count = $sample_size * ( count( $breakpoints ) + 1 );
 		$this->assertCount(
 			$max_possible_url_metrics_count,
-			$all_url_metrics,
+			$grouped_url_metrics->flatten(),
 			'Expected the total count of URL metrics to not exceed the multiple of the sample size.'
 		);
 		$new_count = 0;
-		foreach ( $all_url_metrics as $url_metric ) {
+		foreach ( $grouped_url_metrics->flatten() as $url_metric ) {
 			if ( $url_metric->get_timestamp() > $old_timestamp ) {
 				++$new_count;
 			}
@@ -316,7 +322,9 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_group_url_metrics_by_breakpoint().
 	 *
-	 * @covers ::ilo_group_url_metrics_by_breakpoint
+	 * @covers ILO_Grouped_URL_Metrics::ilo_group_url_metrics_by_breakpoint
+	 * @covers ILO_Grouped_URL_Metrics::get_groups
+	 * @covers ILO_Grouped_URL_Metrics::get_minimum_viewport_widths
 	 *
 	 * @dataProvider data_provider_test_ilo_group_url_metrics_by_breakpoint
 	 */
@@ -328,15 +336,17 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 			$viewport_widths
 		);
 
-		$grouped_url_metrics = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoints );
-		$this->assertCount( count( $breakpoints ) + 1, $grouped_url_metrics, 'Expected number of breakpoint groups to always be one greater than the number of breakpoints.' );
-		$minimum_viewport_widths = array_keys( $grouped_url_metrics );
+		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, 3, HOUR_IN_SECONDS );
+
+		$this->assertCount( count( $breakpoints ) + 1, $grouped_url_metrics->get_groups(), 'Expected number of breakpoint groups to always be one greater than the number of breakpoints.' );
+		$minimum_viewport_widths = $grouped_url_metrics->get_minimum_viewport_widths();
+		$this->assertSame( array_keys( $grouped_url_metrics->get_groups() ), $minimum_viewport_widths );
 		$this->assertSame( 0, array_shift( $minimum_viewport_widths ), 'Expected the first minimum viewport width to always be zero.' );
 		foreach ( $breakpoints as $breakpoint ) {
 			$this->assertSame( $breakpoint + 1, array_shift( $minimum_viewport_widths ) );
 		}
 
-		$minimum_viewport_widths = array_keys( $grouped_url_metrics );
+		$minimum_viewport_widths = $grouped_url_metrics->get_minimum_viewport_widths();
 		for ( $i = 0, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
 			$minimum_viewport_width = $minimum_viewport_widths[ $i ];
 			$maximum_viewport_width = $minimum_viewport_widths[ $i + 1 ] ?? null;
@@ -349,7 +359,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 				$this->assertLessThan( $maximum_viewport_width, $minimum_viewport_width );
 			}
 
-			foreach ( $grouped_url_metrics[ $minimum_viewport_width ] as $url_metric ) {
+			foreach ( $grouped_url_metrics->get_groups()[ $minimum_viewport_width ] as $url_metric ) {
 				$this->assertGreaterThanOrEqual( $minimum_viewport_width, $url_metric->get_viewport()['width'] );
 				if ( isset( $maximum_viewport_width ) ) {
 					$this->assertLessThanOrEqual( $maximum_viewport_width, $url_metric->get_viewport()['width'] );
@@ -361,68 +371,62 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	public function data_provider_test_ilo_get_lcp_elements_by_minimum_viewport_widths(): array {
 		return array(
 			'common_lcp_element_across_breakpoints'    => array(
-				'grouped_url_metrics'         => array(
-					0   => array(
-						$this->get_validated_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-						$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
-						$this->get_validated_url_metric( 599, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					),
-					600 => array(
-						$this->get_validated_url_metric( 600, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-						$this->get_validated_url_metric( 700, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					),
-					800 => array(
-						$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					),
+				'breakpoints'                 => array( 600, 800 ),
+				'url_metrics'                 => array(
+					// 0.
+					$this->get_validated_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
+					$this->get_validated_url_metric( 599, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					// 600.
+					$this->get_validated_url_metric( 600, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$this->get_validated_url_metric( 700, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					// 800.
+					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
 				),
 				'expected_lcp_element_xpaths' => array(
 					0 => $this->get_xpath( 'HTML', 'BODY', 'FIGURE', 'IMG' ),
 				),
 			),
 			'different_lcp_elements_across_breakpoint' => array(
-				'grouped_url_metrics'         => array(
-					0   => array(
-						$this->get_validated_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-						$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
-						$this->get_validated_url_metric( 599, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					),
-					600 => array(
-						$this->get_validated_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-						$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-					),
+				'breakpoints'                 => array( 600 ),
+				'url_metrics'                 => array(
+					// 0.
+					$this->get_validated_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
+					$this->get_validated_url_metric( 600, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					// 600.
+					$this->get_validated_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
 				),
 				'expected_lcp_element_xpaths' => array(
 					0   => $this->get_xpath( 'HTML', 'BODY', 'FIGURE', 'IMG' ),
-					600 => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
+					601 => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
 				),
 			),
 			'same_lcp_element_across_non_consecutive_breakpoints' => array(
-				'grouped_url_metrics'         => array(
-					0   => array(
-						$this->get_validated_url_metric( 300, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-					),
-					400 => array(
-						$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'HEADER', 'IMG' ), false ),
-					),
-					600 => array(
-						$this->get_validated_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-						$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-					),
+				'breakpoints'                 => array( 400, 600 ),
+				'url_metrics'                 => array(
+					// 0.
+					$this->get_validated_url_metric( 300, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+					// 400.
+					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'HEADER', 'IMG' ), false ),
+					// 600.
+					$this->get_validated_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
 				),
 				'expected_lcp_element_xpaths' => array(
 					0   => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
-					400 => false, // The (image) element is either not visible at this breakpoint or it is not LCP element.
-					600 => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
+					401 => false, // The (image) element is either not visible at this breakpoint or it is not LCP element.
+					601 => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
 				),
 			),
 			'no_lcp_image_elements'                    => array(
-				'grouped_url_metrics'         => array(
-					0   => array(
-						$this->get_validated_url_metric( 300, array( 'HTML', 'BODY', 'IMG' ), false ),
-					),
-					600 => array(
-						$this->get_validated_url_metric( 300, array( 'HTML', 'BODY', 'IMG' ), false ),
-					),
+				'breakpoints'                 => array( 600 ),
+				'url_metrics'                 => array(
+					// 0.
+					$this->get_validated_url_metric( 300, array( 'HTML', 'BODY', 'IMG' ), false ),
+					// 600.
+					$this->get_validated_url_metric( 700, array( 'HTML', 'BODY', 'IMG' ), false ),
 				),
 				'expected_lcp_element_xpaths' => array(
 					0 => false,
@@ -434,11 +438,13 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_lcp_elements_by_minimum_viewport_widths().
 	 *
-	 * @covers ::ilo_get_lcp_elements_by_minimum_viewport_widths
+	 * @covers ILO_Grouped_URL_Metrics::ilo_get_lcp_elements_by_minimum_viewport_widths
 	 * @dataProvider data_provider_test_ilo_get_lcp_elements_by_minimum_viewport_widths
 	 */
-	public function test_ilo_get_lcp_elements_by_minimum_viewport_widths( array $grouped_url_metrics, array $expected_lcp_element_xpaths ) {
-		$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $grouped_url_metrics );
+	public function test_ilo_get_lcp_elements_by_minimum_viewport_widths( array $breakpoints, array $url_metrics, array $expected_lcp_element_xpaths ) {
+		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, 10, HOUR_IN_SECONDS );
+
+		$lcp_elements_by_minimum_viewport_widths = $grouped_url_metrics->ilo_get_lcp_elements_by_minimum_viewport_widths();
 
 		$lcp_element_xpaths_by_minimum_viewport_widths = array();
 		foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
@@ -466,7 +472,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		$current_time = microtime( true );
 
 		$none_needed_data = array(
-			'url_metrics'           => ( function () use ( $current_time ): array {
+			'url_metrics'   => ( function () use ( $current_time ): array {
 				return array_merge(
 					array_fill(
 						0,
@@ -490,10 +496,10 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 					)
 				);
 			} )(),
-			'current_time'          => $current_time,
-			'breakpoint_max_widths' => array( 480 ),
-			'sample_size'           => 3,
-			'freshness_ttl'         => HOUR_IN_SECONDS,
+			'current_time'  => $current_time,
+			'breakpoints'   => array( 480 ),
+			'sample_size'   => 3,
+			'freshness_ttl' => HOUR_IN_SECONDS,
 		);
 
 		return array(
@@ -540,14 +546,15 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test ilo_get_needed_minimum_viewport_widths().
 	 *
-	 * @covers ::ilo_get_needed_minimum_viewport_widths
+	 * @covers ILO_Grouped_URL_Metrics::ilo_get_needed_minimum_viewport_widths
 	 *
 	 * @dataProvider data_provider_test_ilo_get_needed_minimum_viewport_widths
 	 */
-	public function test_ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $current_time, array $breakpoint_max_widths, int $sample_size, int $freshness_ttl, array $expected ) {
+	public function test_ilo_get_needed_minimum_viewport_widths( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected ) {
+		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertSame(
 			$expected,
-			ilo_get_needed_minimum_viewport_widths( $url_metrics, $current_time, $breakpoint_max_widths, $sample_size, $freshness_ttl )
+			$grouped_url_metrics->ilo_get_needed_minimum_viewport_widths()
 		);
 	}
 

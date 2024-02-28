@@ -12,7 +12,7 @@
  * @since n.e.x.t
  * @access private
  */
-final class ILO_Grouped_URL_Metrics /*implements Iterator*/ {
+final class ILO_Grouped_URL_Metrics {
 
 	/**
 	 * URL metrics grouped by minimum viewport width for the provided breakpoints.
@@ -58,6 +58,24 @@ final class ILO_Grouped_URL_Metrics /*implements Iterator*/ {
 	}
 
 	/**
+	 * Gets grouped keyed by the minimum viewport width.
+	 *
+	 * @return array<int, ILO_URL_Metric[]> Groups.
+	 */
+	public function get_groups(): array {
+		return $this->groups;
+	}
+
+	/**
+	 * Gets minimum viewport widths for the groups of URL metrics divided by the breakpoints.
+	 *
+	 * @return int[]
+	 */
+	public function get_minimum_viewport_widths(): array {
+		return array_keys( $this->groups );
+	}
+
+	/**
 	 * Unshifts a new URL metric, potentially pushing out older URL metrics when exceeding the sample size.
 	 *
 	 * @since n.e.x.t
@@ -94,7 +112,6 @@ final class ILO_Grouped_URL_Metrics /*implements Iterator*/ {
 
 		$this->groups = $grouped_url_metrics;
 	}
-
 
 	/**
 	 * Groups URL metrics by breakpoint.
