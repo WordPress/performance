@@ -466,6 +466,10 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 == Upgrade Notice ==
 
+= 3.0.0 =
+
+The WebP Uploads and Dominant Color Images modules will no longer be available starting with this release; instead, they'll be standalone plugins. If you're using these features, please migrate to the standalone plugins before updating.
+
 = 2.5.0 =
 
 The SQLite module is no longer present starting with this release. If you still use it, please migrate to the standalone plugin before updating.
