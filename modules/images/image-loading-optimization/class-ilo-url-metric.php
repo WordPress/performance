@@ -36,16 +36,13 @@ final class ILO_URL_Metric implements JsonSerializable {
 	 * Constructor.
 	 *
 	 * @param array $data      URL metric data.
-	 * @param bool  $validated Whether the data was already validated.
 	 *
-	 * @throws Exception When the input is invalid.
+	 * @throws ILO_Data_Validation_Exception When the input is invalid.
 	 */
-	public function __construct( array $data, bool $validated = false ) {
-		if ( ! $validated ) {
-			$valid = rest_validate_object_value_from_schema( $data, self::get_json_schema(), self::class );
-			if ( is_wp_error( $valid ) ) {
-				throw new Exception( esc_html( $valid->get_error_message() ) );
-			}
+	public function __construct( array $data ) {
+		$valid = rest_validate_object_value_from_schema( $data, self::get_json_schema(), self::class );
+		if ( is_wp_error( $valid ) ) {
+			throw new ILO_Data_Validation_Exception( esc_html( $valid->get_error_message() ) );
 		}
 		$this->data = $data;
 	}

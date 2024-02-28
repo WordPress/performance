@@ -157,10 +157,9 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 				array(
 					'timestamp' => microtime( true ),
 				)
-			),
-			true // Already validated via REST API.
+			)
 		);
-	} catch ( Exception $e ) {
+	} catch ( ILO_Data_Validation_Exception $e ) {
 		return new WP_Error(
 			'url_metric_exception',
 			sprintf(

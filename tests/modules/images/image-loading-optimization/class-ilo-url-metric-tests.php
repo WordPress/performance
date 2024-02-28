@@ -109,7 +109,7 @@ class ILO_URL_Metric_Tests extends WP_UnitTestCase {
 	 */
 	public function test_constructor( array $data, string $error = '' ) {
 		if ( $error ) {
-			$this->expectException( Exception::class );
+			$this->expectException( ILO_Data_Validation_Exception::class );
 			$this->expectExceptionMessage( $error );
 		}
 		$url_metric = new ILO_URL_Metric( $data );
