@@ -3,7 +3,7 @@
  * Hook callbacks used for Speculation Rules.
  *
  * @package speculation-rules
- * @since n.e.x.t
+ * @since 1.0.0
  */
 
 /**
@@ -11,7 +11,7 @@
  *
  * For browsers that do not support speculation rules yet, the `script[type="speculationrules"]` tag will be ignored.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  */
 function plsr_print_speculation_rules() {
 	$rules = plsr_get_speculation_rules();

@@ -3,13 +3,13 @@
  * Settings functions used for Speculation Rules.
  *
  * @package speculation-rules
- * @since n.e.x.t
+ * @since 1.0.0
  */
 
 /**
  * Returns the available options for the Speculation Rules mode and their labels.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @return array<string, string> Associative array of `$mode => $label` pairs.
  */
@@ -23,7 +23,7 @@ function plsr_get_mode_labels() {
 /**
  * Returns the available options for the Speculation Rules eagerness and their labels.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @return array<string, string> Associative array of `$eagerness => $label` pairs.
  */
@@ -38,7 +38,7 @@ function plsr_get_eagerness_labels() {
 /**
  * Returns the default setting value for Speculation Rules configuration.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @return array<string, string> {
  *     Default setting value.
@@ -57,7 +57,7 @@ function plsr_get_setting_default() {
 /**
  * Sanitizes the setting for Speculation Rules configuration.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @param mixed $input Setting to sanitize.
  * @return array<string, string> {
@@ -94,7 +94,7 @@ function plsr_sanitize_setting( $input ) {
 /**
  * Registers setting to control Speculation Rules configuration.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  */
 function plsr_register_setting() {
@@ -130,7 +130,7 @@ add_action( 'init', 'plsr_register_setting' );
 /**
  * Adds the settings sections and fields for the Speculation Rules configuration.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  */
 function plsr_add_setting_ui() {
@@ -176,7 +176,7 @@ add_action( 'load-options-reading.php', 'plsr_add_setting_ui' );
 /**
  * Renders a settings field for the Speculation Rules configuration.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @param array<string, string> $args {

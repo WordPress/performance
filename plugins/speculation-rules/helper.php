@@ -3,7 +3,7 @@
  * Helper functions used for Speculation Rules.
  *
  * @package speculation-rules
- * @since n.e.x.t
+ * @since 1.0.0
  */
 
 /**
@@ -12,7 +12,7 @@
  * Plugins with features that rely on frontend URLs to exclude from prefetching or prerendering should use the
  * {@see 'plsr_speculation_rules_href_exclude_paths'} filter to ensure those URL patterns are excluded.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @return array Associative array of speculation rules by type.
  */
@@ -33,7 +33,7 @@ function plsr_get_speculation_rules() {
 	 *
 	 * If the WordPress site is in a subdirectory, the exclude paths will automatically be prefixed as necessary.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param array $href_exclude_paths Paths to disable speculative prerendering for.
 	 */

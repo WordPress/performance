@@ -3,20 +3,20 @@
  * Class 'PLSR_URL_Pattern_Prefixer'.
  *
  * @package speculation-rules
- * @since n.e.x.t
+ * @since 1.0.0
  */
 
 /**
  * Class for prefixing URL patterns.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  */
 class PLSR_URL_Pattern_Prefixer {
 
 	/**
 	 * Map of `$context_string => $base_path` pairs.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var array
 	 */
 	private $contexts;
@@ -24,7 +24,7 @@ class PLSR_URL_Pattern_Prefixer {
 	/**
 	 * Constructor.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param array $contexts Optional. Map of `$context_string => $base_path` pairs. Default is the contexts returned
 	 *                        by the {@see PLSR_URL_Pattern_Prefixer::get_default_contexts()} method.
@@ -50,7 +50,7 @@ class PLSR_URL_Pattern_Prefixer {
 	 *
 	 * The given URL path pattern is only prefixed if it does not already include the expected prefix.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param string $path_pattern URL pattern starting with the path segment.
 	 * @param string $context      Optional. Either 'home' (any frontend content) or 'site' (content relative to the
@@ -69,7 +69,7 @@ class PLSR_URL_Pattern_Prefixer {
 						$context
 					)
 				),
-				'Performance Lab n.e.x.t'
+				'Performance Lab 1.0.0'
 			);
 			return $path_pattern;
 		}
@@ -96,7 +96,7 @@ class PLSR_URL_Pattern_Prefixer {
 	/**
 	 * Returns the default contexts used by the class.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @return array Map of `$context_string => $base_path` pairs.
 	 */
@@ -111,7 +111,7 @@ class PLSR_URL_Pattern_Prefixer {
 	 * Escapes a string for use in a URL pattern component.
 	 *
 	 * @link https://urlpattern.spec.whatwg.org/#escape-a-pattern-string
-	 * @since n.e.x.t
+	 * @since 1.0.1
 	 *
 	 * @param string $str String to be escaped.
 	 * @return string String with backslashes added where required.
