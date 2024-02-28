@@ -468,7 +468,7 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 = 3.0.0 =
 
-The WebP Uploads and Dominant Color Images modules will no longer be available starting with this release; instead, they'll be standalone plugins. If you're using these features, please migrate to the standalone plugins before updating.
+Starting with this release, modules such as Dominant Color Images and WebP Uploads will be available as standalone plugins. After updating, you will be able to easily migrate to this new structure.
 
 = 2.5.0 =
 
