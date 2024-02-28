@@ -53,7 +53,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets JSON schema for URL Metric.
 	 *
-	 * @return array
+	 * @return array Schema.
 	 */
 	public static function get_json_schema(): array {
 		$dom_rect_schema = array(
