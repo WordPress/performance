@@ -73,16 +73,15 @@ function ilo_register_endpoint() {
 		),
 	);
 
-	$schema = ILO_URL_Metric::get_json_schema();
-
-	$args = array_merge( $args, rest_get_endpoint_args_for_schema( $schema ) );
-
 	register_rest_route(
 		ILO_REST_API_NAMESPACE,
 		ILO_URL_METRICS_ROUTE,
 		array(
 			'methods'             => 'POST',
-			'args'                => $args,
+			'args'                => array_merge(
+				$args,
+				rest_get_endpoint_args_for_schema( ILO_URL_Metric::get_json_schema() )
+			),
 			'callback'            => static function ( WP_REST_Request $request ) {
 				return ilo_handle_rest_request( $request );
 			},
