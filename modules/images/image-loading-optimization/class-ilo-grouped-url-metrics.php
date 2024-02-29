@@ -140,7 +140,7 @@ final class ILO_Grouped_URL_Metrics {
 		foreach ( $url_metrics as $url_metric ) {
 			$current_minimum_viewport = 0;
 			foreach ( $minimum_viewport_widths as $viewport_minimum_width ) {
-				if ( $url_metric->get_viewport()['width'] > $viewport_minimum_width ) {
+				if ( $url_metric->get_viewport()['width'] >= $viewport_minimum_width ) {
 					$current_minimum_viewport = $viewport_minimum_width;
 				} else {
 					break;

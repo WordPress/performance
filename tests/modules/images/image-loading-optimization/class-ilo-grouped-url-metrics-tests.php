@@ -22,12 +22,44 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 			'3 sample size and 2 breakpoints' => array(
 				'sample_size'     => 3,
 				'breakpoints'     => array( 480, 782 ),
-				'viewport_widths' => array( 400, 600, 800 ),
+				'viewport_widths' => array(
+					400 => 3,
+					600 => 3,
+					800 => 1,
+				),
+				'expected_counts' => array(
+					0   => 3,
+					481 => 3,
+					783 => 1,
+				),
+			),
+			'2 sample size and 3 breakpoints' => array(
+				'sample_size'     => 2,
+				'breakpoints'     => array( 480, 600, 782 ),
+				'viewport_widths' => array(
+					200 => 4,
+					481 => 2,
+					601 => 7,
+					783 => 6,
+				),
+				'expected_counts' => array(
+					0   => 2,
+					481 => 2,
+					601 => 2,
+					783 => 2,
+				),
 			),
 			'1 sample size and 1 breakpoint'  => array(
 				'sample_size'     => 1,
 				'breakpoints'     => array( 480 ),
-				'viewport_widths' => array( 400, 800 ),
+				'viewport_widths' => array(
+					400 => 1,
+					800 => 1,
+				),
+				'expected_counts' => array(
+					0   => 1,
+					481 => 1,
+				),
 			),
 		);
 	}
@@ -37,23 +69,33 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::add
 	 *
+	 * @param int             $sample_size     Sample size.
+	 * @param array           $breakpoints     Breakpoints.
+	 * @param array<int, int> $viewport_widths Viewport widths mapped to the number of URL metrics to instantiate.
+	 * @param array<int, int> $expected_counts Minimum viewport widths mapped to the expected counts in each group.
+	 *
 	 * @dataProvider data_provider_sample_size_and_breakpoints
+	 * @throws ILO_Data_Validation_Exception When failing to instantiate a URL metric.
 	 */
-	public function test_add( int $sample_size, array $breakpoints, array $viewport_widths ) {
+	public function test_add( int $sample_size, array $breakpoints, array $viewport_widths, array $expected_counts ) {
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
 
 		// Over-populate the sample size for the breakpoints by a dozen.
-		foreach ( $viewport_widths as $viewport_width ) {
-			for ( $i = 0; $i < $sample_size + 12; $i++ ) {
+		foreach ( $viewport_widths as $viewport_width => $count ) {
+			for ( $i = 0; $i < $count; $i++ ) {
 				$grouped_url_metrics->add( $this->get_validated_url_metric( $viewport_width ) );
 			}
 		}
-		$max_possible_url_metrics_count = $sample_size * ( count( $breakpoints ) + 1 );
-		$this->assertCount(
-			$max_possible_url_metrics_count,
-			$grouped_url_metrics->flatten(),
-			sprintf( 'Expected there to be exactly sample size (%d) times the number of breakpoint groups (which is %d + 1)', $sample_size, count( $breakpoints ) )
+
+		$this->assertLessThanOrEqual(
+			$sample_size * ( count( $breakpoints ) + 1 ),
+			count( $grouped_url_metrics->flatten() ),
+			sprintf( 'Expected there to be at most sample size (%d) times the number of breakpoint groups (which is %d + 1)', $sample_size, count( $breakpoints ) )
 		);
+
+		foreach ( $expected_counts as $minimum_viewport_width => $count ) {
+			$this->assertCount( $count, $grouped_url_metrics->get_groups()[ $minimum_viewport_width ] );
+		}
 	}
 
 	/**
@@ -61,15 +103,17 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::add
 	 *
-	 * @dataProvider data_provider_sample_size_and_breakpoints
-	 * @throws Exception When a parse error happens.
+	 * @throws ILO_Data_Validation_Exception When failing to instantiate a URL metric.
 	 */
-	public function test_adding_pushes_out_old_metrics( int $sample_size, array $breakpoints, array $viewport_widths ) {
-		$old_timestamp = microtime( true ) - ( HOUR_IN_SECONDS + 1 );
-
+	public function test_adding_pushes_out_old_metrics() {
+		$sample_size         = 3;
+		$breakpoints         = array( 400, 600 );
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
 
 		// Populate the groups with stale URL metrics.
+		$viewport_widths = array( 300, 500, 700 );
+		$old_timestamp   = microtime( true ) - ( HOUR_IN_SECONDS + 1 );
+
 		foreach ( $viewport_widths as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
 				$grouped_url_metrics->add(
