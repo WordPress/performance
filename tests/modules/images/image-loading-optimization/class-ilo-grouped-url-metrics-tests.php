@@ -360,7 +360,10 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 			'none-needed'            => array_merge(
 				$none_needed_data,
 				array(
-					'expected' => array(),
+					'expected' => array(
+						array( 0, false ),
+						array( 481, false ),
+					),
 				)
 			),
 
@@ -370,7 +373,10 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 					'sample_size' => $none_needed_data['sample_size'] + 1,
 				),
 				array(
-					'expected' => array( 0, 481 ),
+					'expected' => array(
+						array( 0, true ),
+						array( 481, true ),
+					),
 				)
 			),
 
@@ -382,7 +388,10 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 					return $data;
 				} )( $none_needed_data ),
 				array(
-					'expected' => array( 0 ),
+					'expected' => array(
+						array( 0, true ),
+						array( 481, false ),
+					),
 				)
 			),
 		);
