@@ -98,18 +98,15 @@ function error( ...message ) {
 /**
  * Checks whether the URL metric(s) for the provided viewport width is needed.
  *
- * @param {number}                   viewportWidth               - Current viewport width.
- * @param {Array<number, boolean>[]} neededMinimumViewportWidths - Needed minimum viewport widths, in ascending order.
+ * @param {number}   viewportWidth               - Current viewport width.
+ * @param {number[]} neededMinimumViewportWidths - Minimum viewport widths for which URL metric(s) are needed.
  * @return {boolean} Whether URL metrics are needed.
  */
 function isViewportNeeded( viewportWidth, neededMinimumViewportWidths ) {
 	let lastWasNeeded = false;
-	for ( const [
-		minimumViewportWidth,
-		isNeeded,
-	] of neededMinimumViewportWidths ) {
+	for ( const minimumViewportWidth of neededMinimumViewportWidths ) {
 		if ( viewportWidth >= minimumViewportWidth ) {
-			lastWasNeeded = isNeeded;
+			lastWasNeeded = true;
 		} else {
 			break;
 		}

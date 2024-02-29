@@ -16,8 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  *
- * @param string                       $slug                           URL metrics slug.
- * @param array<int, array{int, bool}> $needed_minimum_viewport_widths Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
+ * @param string $slug                           URL metrics slug.
+ * @param int[]  $needed_minimum_viewport_widths Minimum viewport widths for which URL metric(s) are needed.
  */
 function ilo_get_detection_script( string $slug, array $needed_minimum_viewport_widths ): string {
 	/**

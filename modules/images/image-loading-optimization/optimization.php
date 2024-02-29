@@ -159,12 +159,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$needed_minimum_viewport_widths = $grouped_url_metrics->get_needed_minimum_viewport_widths( microtime( true ) );
 
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
-	$needs_detection = in_array(
-		true,
-		// Each array item is array{int, bool}, with the second item being whether the viewport width is needed.
-		array_column( $needed_minimum_viewport_widths, 1 ),
-		true
-	);
+	$needs_detection = count( $needed_minimum_viewport_widths ) > 0;
 
 	$lcp_elements_by_minimum_viewport_widths = $grouped_url_metrics->get_lcp_elements_by_minimum_viewport_widths();
 	$all_breakpoints_have_url_metrics        = $grouped_url_metrics->are_all_groups_populated();

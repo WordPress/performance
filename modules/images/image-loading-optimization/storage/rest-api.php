@@ -126,9 +126,9 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	// This logic is the same as the isViewportNeeded() function in detect.js.
 	$viewport_width  = $request->get_param( 'viewport' )['width'];
 	$last_was_needed = false;
-	foreach ( $needed_minimum_viewport_widths as list( $minimum_viewport_width, $is_needed ) ) {
+	foreach ( $needed_minimum_viewport_widths as $minimum_viewport_width ) {
 		if ( $viewport_width >= $minimum_viewport_width ) {
-			$last_was_needed = $is_needed;
+			$last_was_needed = true;
 		} else {
 			break;
 		}
