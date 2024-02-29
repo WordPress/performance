@@ -73,20 +73,15 @@ function ilo_register_endpoint() {
 		),
 	);
 
-	$schema = ILO_URL_Metric::get_json_schema();
-
-	// Make timestamp not required since it is forcibly-provided in ilo_handle_rest_request().
-	$schema['properties']['timestamp']['required'] = false;
-	$schema['properties']['timestamp']['readonly'] = true;
-
-	$args = array_merge( $args, $schema['properties'] );
-
 	register_rest_route(
 		ILO_REST_API_NAMESPACE,
 		ILO_URL_METRICS_ROUTE,
 		array(
 			'methods'             => 'POST',
-			'args'                => $args,
+			'args'                => array_merge(
+				$args,
+				rest_get_endpoint_args_for_schema( ILO_URL_Metric::get_json_schema() )
+			),
 			'callback'            => static function ( WP_REST_Request $request ) {
 				return ilo_handle_rest_request( $request );
 			},
@@ -149,29 +144,35 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	ilo_set_url_metric_storage_lock();
 
 	try {
-		$new_url_metric = new ILO_URL_Metric(
+		$properties = ILO_URL_Metric::get_json_schema()['properties'];
+		$url_metric = new ILO_URL_Metric(
 			array_merge(
 				wp_array_slice_assoc(
 					$request->get_params(),
-					array_keys( ILO_URL_Metric::get_json_schema()['properties'] )
+					array_keys( $properties )
 				),
 				array(
-					'timestamp' => microtime( true ),
+					// Now supply the timestamp since it was omitted from the REST API params since it is `readonly`.
+					// Nevertheless, it is also `required`, so it must be set to instantiate an ILO_URL_Metric.
+					'timestamp' => $properties['timestamp']['default'],
 				)
-			),
-			true // Already validated via REST API.
+			)
 		);
-	} catch ( Exception $e ) {
+	} catch ( ILO_Data_Validation_Exception $e ) {
 		return new WP_Error(
 			'url_metric_exception',
-			__( 'Exception occurred while creating URL metric.', 'performance-lab' )
+			sprintf(
+				/* translators: %s is exception name */
+				__( 'Failed to validate URL metric: %s', 'performance-lab' ),
+				$e->getMessage()
+			)
 		);
 	}
 
 	$result = ilo_store_url_metric(
 		$request->get_param( 'url' ),
 		$request->get_param( 'slug' ),
-		$new_url_metric
+		$url_metric
 	);
 
 	if ( $result instanceof WP_Error ) {

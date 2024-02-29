@@ -35,17 +35,14 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Constructor.
 	 *
-	 * @param array $data      URL metric data.
-	 * @param bool  $validated Whether the data was already validated.
+	 * @param array $data URL metric data.
 	 *
-	 * @throws Exception When the input is invalid.
+	 * @throws ILO_Data_Validation_Exception When the input is invalid.
 	 */
-	public function __construct( array $data, bool $validated = false ) {
-		if ( ! $validated ) {
-			$valid = rest_validate_object_value_from_schema( $data, self::get_json_schema(), self::class );
-			if ( is_wp_error( $valid ) ) {
-				throw new Exception( esc_html( $valid->get_error_message() ) );
-			}
+	public function __construct( array $data ) {
+		$valid = rest_validate_object_value_from_schema( $data, self::get_json_schema(), self::class );
+		if ( is_wp_error( $valid ) ) {
+			throw new ILO_Data_Validation_Exception( esc_html( $valid->get_error_message() ) );
 		}
 		$this->data = $data;
 	}
@@ -53,7 +50,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets JSON schema for URL Metric.
 	 *
-	 * @return array
+	 * @return array Schema.
 	 */
 	public static function get_json_schema(): array {
 		$dom_rect_schema = array(
@@ -98,6 +95,8 @@ final class ILO_URL_Metric implements JsonSerializable {
 					'description' => __( 'Timestamp at which the URL metric was captured.', 'performance-lab' ),
 					'type'        => 'number',
 					'required'    => true,
+					'readonly'    => true, // Omit from REST API.
+					'default'     => microtime( true ), // Value provided when instantiating ILO_URL_Metric in REST API.
 					'minimum'     => 0,
 				),
 				'elements'  => array(
