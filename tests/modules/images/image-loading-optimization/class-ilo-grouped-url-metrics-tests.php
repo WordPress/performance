@@ -219,7 +219,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @throws Exception When invalid URL metric (which there should not be).
+	 * @throws ILO_Data_Validation_Exception When failing to instantiate a URL metric.
 	 * @return array[]
 	 */
 	public function data_provider_test_get_lcp_elements_by_minimum_viewport_widths(): array {
@@ -463,7 +463,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 * @param bool     $is_lcp         Whether LCP.
 	 *
 	 * @return ILO_URL_Metric Validated URL metric.
-	 * @throws Exception From ILO_URL_Metric if there is a parse error, but there won't be.
+	 * @throws ILO_Data_Validation_Exception From ILO_URL_Metric if there is a parse error, but there won't be.
 	 */
 	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): ILO_URL_Metric {
 		$data = array(
