@@ -4,10 +4,15 @@
  *
  * @package performance-lab
  * @group   image-loading-optimization
+ *
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 
+	/**
+	 * @var string
+	 */
 	private $original_request_uri;
 
 	public function set_up() {
@@ -215,10 +220,15 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 
 		// Make sure that ilo_unshift_url_metrics() added a timestamp and then force them to all be old.
 		$all_url_metrics = array_map(
-			function ( $url_metric ) use ( $old_timestamp ) {
-				$this->assertArrayHasKey( 'timestamp', $url_metric, 'Expected a timestamp to have been added to a URL metric.' );
-				$url_metric['timestamp'] = $old_timestamp;
-				return $url_metric;
+			static function ( $url_metric ) use ( $old_timestamp ): ILO_URL_Metric {
+				return new ILO_URL_Metric(
+					array_merge(
+						$url_metric->jsonSerialize(),
+						array(
+							'timestamp' => $old_timestamp,
+						)
+					)
+				);
 			},
 			$all_url_metrics
 		);
@@ -239,7 +249,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		);
 		$new_count = 0;
 		foreach ( $all_url_metrics as $url_metric ) {
-			if ( $url_metric['timestamp'] > $old_timestamp ) {
+			if ( $url_metric->get_timestamp() > $old_timestamp ) {
 				++$new_count;
 			}
 		}
@@ -339,11 +349,10 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 				$this->assertLessThan( $maximum_viewport_width, $minimum_viewport_width );
 			}
 
-			$this->assertIsArray( $grouped_url_metrics[ $minimum_viewport_width ] );
 			foreach ( $grouped_url_metrics[ $minimum_viewport_width ] as $url_metric ) {
-				$this->assertGreaterThanOrEqual( $minimum_viewport_width, $url_metric['viewport']['width'] );
+				$this->assertGreaterThanOrEqual( $minimum_viewport_width, $url_metric->get_viewport()['width'] );
 				if ( isset( $maximum_viewport_width ) ) {
-					$this->assertLessThanOrEqual( $maximum_viewport_width, $url_metric['viewport']['width'] );
+					$this->assertLessThanOrEqual( $maximum_viewport_width, $url_metric->get_viewport()['width'] );
 				}
 			}
 		}
@@ -462,12 +471,22 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 					array_fill(
 						0,
 						3,
-						array_merge( $this->get_validated_url_metric( 400 ), array( 'timestamp' => $current_time ) )
+						new ILO_URL_Metric(
+							array_merge(
+								$this->get_validated_url_metric( 400 )->jsonSerialize(),
+								array( 'timestamp' => $current_time )
+							)
+						)
 					),
 					array_fill(
 						0,
 						3,
-						array_merge( $this->get_validated_url_metric( 600 ), array( 'timestamp' => $current_time ) )
+						new ILO_URL_Metric(
+							array_merge(
+								$this->get_validated_url_metric( 600 )->jsonSerialize(),
+								array( 'timestamp' => $current_time )
+							)
+						)
 					)
 				);
 			} )(),
@@ -503,7 +522,9 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 
 			'url-metric-too-old'     => array_merge(
 				( static function ( $data ): array {
-					$data['url_metrics'][0]['timestamp'] -= $data['freshness_ttl'] + 1;
+					$url_metrics_data = $data['url_metrics'][0]->jsonSerialize();
+					$url_metrics_data['timestamp'] -= $data['freshness_ttl'] + 1;
+					$data['url_metrics'][0] = new ILO_URL_Metric( $url_metrics_data );
 					return $data;
 				} )( $none_needed_data ),
 				array(
@@ -536,15 +557,18 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	 * @param int      $viewport_width Viewport width.
 	 * @param string[] $breadcrumbs    Breadcrumb tags.
 	 * @param bool     $is_lcp         Whether LCP.
-	 * @return array Validated URL metric.
+	 *
+	 * @return ILO_URL_Metric Validated URL metric.
+	 * @throws Exception From ILO_URL_Metric if there is a parse error, but there won't be.
 	 */
-	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): array {
-		return array(
-			'viewport' => array(
+	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): ILO_URL_Metric {
+		$data = array(
+			'viewport'  => array(
 				'width'  => $viewport_width,
 				'height' => 640,
 			),
-			'elements' => array(
+			'timestamp' => microtime( true ),
+			'elements'  => array(
 				array(
 					'isLCP'             => $is_lcp,
 					'isLCPCandidate'    => $is_lcp,
@@ -553,6 +577,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 				),
 			),
 		);
+		return new ILO_URL_Metric( $data );
 	}
 
 	/**

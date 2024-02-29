@@ -37,18 +37,39 @@ const ILO_URL_METRICS_ROUTE = '/url-metrics:store';
  */
 function ilo_register_endpoint() {
 
-	$dom_rect_schema = array(
-		'type'       => 'object',
-		'properties' => array(
-			'width'  => array(
-				'type'    => 'number',
-				'minimum' => 0,
-			),
-			'height' => array(
-				'type'    => 'number',
-				'minimum' => 0,
-			),
-			// TODO: There are other properties to define if we need them: x, y, top, right, bottom, left.
+	$args = array(
+		'url'   => array(
+			'type'              => 'string',
+			'description'       => __( 'The URL for which the metric was obtained.', 'performance-lab' ),
+			'required'          => true,
+			'format'            => 'uri',
+			'validate_callback' => static function ( $url ) {
+				if ( ! wp_validate_redirect( $url ) ) {
+					return new WP_Error( 'non_origin_url', __( 'URL for another site provided.', 'performance-lab' ) );
+				}
+				// TODO: This is not validated as corresponding to the slug in any way. True it is not used for anything but metadata.
+				return true;
+			},
+		),
+		'slug'  => array(
+			'type'        => 'string',
+			'description' => __( 'An MD5 hash of the query args.', 'performance-lab' ),
+			'required'    => true,
+			'pattern'     => '^[0-9a-f]{32}$',
+			// This is validated via the nonce validate_callback, as it is provided as input to create the nonce by the server
+			// which then is verified to match in the REST API request.
+		),
+		'nonce' => array(
+			'type'              => 'string',
+			'description'       => __( 'Nonce originally computed by server required to authorize the request.', 'performance-lab' ),
+			'required'          => true,
+			'pattern'           => '^[0-9a-f]+$',
+			'validate_callback' => static function ( $nonce, WP_REST_Request $request ) {
+				if ( ! ilo_verify_url_metrics_storage_nonce( $nonce, $request->get_param( 'slug' ) ) ) {
+					return new WP_Error( 'invalid_nonce', __( 'URL metrics nonce verification failure.', 'performance-lab' ) );
+				}
+				return true;
+			},
 		),
 	);
 
@@ -57,6 +78,10 @@ function ilo_register_endpoint() {
 		ILO_URL_METRICS_ROUTE,
 		array(
 			'methods'             => 'POST',
+			'args'                => array_merge(
+				$args,
+				rest_get_endpoint_args_for_schema( ILO_URL_Metric::get_json_schema() )
+			),
 			'callback'            => static function ( WP_REST_Request $request ) {
 				return ilo_handle_rest_request( $request );
 			},
@@ -71,83 +96,6 @@ function ilo_register_endpoint() {
 				}
 				return true;
 			},
-			'args'                => array(
-				'url'      => array(
-					'type'              => 'string',
-					'required'          => true,
-					'format'            => 'uri',
-					'validate_callback' => static function ( $url ) {
-						if ( ! wp_validate_redirect( $url ) ) {
-							return new WP_Error( 'non_origin_url', __( 'URL for another site provided.', 'performance-lab' ) );
-						}
-						return true;
-					},
-				),
-				'slug'     => array(
-					'type'     => 'string',
-					'required' => true,
-					'pattern'  => '^[0-9a-f]{32}$',
-				),
-				'nonce'    => array(
-					'type'              => 'string',
-					'required'          => true,
-					'pattern'           => '^[0-9a-f]+$',
-					'validate_callback' => static function ( $nonce, WP_REST_Request $request ) {
-						if ( ! ilo_verify_url_metrics_storage_nonce( $nonce, $request->get_param( 'slug' ) ) ) {
-							return new WP_Error( 'invalid_nonce', __( 'URL metrics nonce verification failure.', 'performance-lab' ) );
-						}
-						return true;
-					},
-				),
-				'viewport' => array(
-					'description' => __( 'Viewport dimensions', 'performance-lab' ),
-					'type'        => 'object',
-					'required'    => true,
-					'properties'  => array(
-						'width'  => array(
-							'type'     => 'integer',
-							'required' => true,
-							'minimum'  => 0,
-						),
-						'height' => array(
-							'type'     => 'integer',
-							'required' => true,
-							'minimum'  => 0,
-						),
-					),
-				),
-				'elements' => array(
-					'description' => __( 'Element metrics', 'performance-lab' ),
-					'type'        => 'array',
-					'required'    => true,
-					'items'       => array(
-						// See the ElementMetrics in detect.js.
-						'type'       => 'object',
-						'properties' => array(
-							'isLCP'              => array(
-								'type'     => 'boolean',
-								'required' => true,
-							),
-							'isLCPCandidate'     => array(
-								'type' => 'boolean',
-							),
-							'xpath'              => array(
-								'type'     => 'string',
-								'required' => true,
-								'pattern'  => ILO_HTML_Tag_Processor::XPATH_PATTERN,
-							),
-							'intersectionRatio'  => array(
-								'type'     => 'number',
-								'required' => true,
-								'minimum'  => 0.0,
-								'maximum'  => 1.0,
-							),
-							'intersectionRect'   => $dom_rect_schema,
-							'boundingClientRect' => $dom_rect_schema,
-						),
-					),
-				),
-			),
 		)
 	);
 }
@@ -193,12 +141,37 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	}
 
 	ilo_set_url_metric_storage_lock();
-	$new_url_metric = wp_array_slice_assoc( $request->get_params(), array( 'viewport', 'elements' ) );
+
+	try {
+		$properties = ILO_URL_Metric::get_json_schema()['properties'];
+		$url_metric = new ILO_URL_Metric(
+			array_merge(
+				wp_array_slice_assoc(
+					$request->get_params(),
+					array_keys( $properties )
+				),
+				array(
+					// Now supply the timestamp since it was omitted from the REST API params since it is `readonly`.
+					// Nevertheless, it is also `required`, so it must be set to instantiate an ILO_URL_Metric.
+					'timestamp' => $properties['timestamp']['default'],
+				)
+			)
+		);
+	} catch ( ILO_Data_Validation_Exception $e ) {
+		return new WP_Error(
+			'url_metric_exception',
+			sprintf(
+				/* translators: %s is exception name */
+				__( 'Failed to validate URL metric: %s', 'performance-lab' ),
+				$e->getMessage()
+			)
+		);
+	}
 
 	$result = ilo_store_url_metric(
 		$request->get_param( 'url' ),
 		$request->get_param( 'slug' ),
-		$new_url_metric
+		$url_metric
 	);
 
 	if ( $result instanceof WP_Error ) {

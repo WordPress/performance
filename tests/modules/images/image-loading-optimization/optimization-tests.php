@@ -4,12 +4,20 @@
  *
  * @package performance-lab
  * @group   image-loading-optimization
+ *
+ * @todo There are "Cannot resolve ..." errors and "Element img doesn't have a required attribute src" warnings that should be excluded from inspection.
  */
 
 class ILO_Optimization_Tests extends WP_UnitTestCase {
 
+	/**
+	 * @var string
+	 */
 	private $original_request_uri;
 
+	/**
+	 * @var string
+	 */
 	private $original_request_method;
 
 	public function set_up() {
@@ -76,7 +84,6 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				'set_up'   => function () {
 					$this->go_to( home_url( '/' ) );
 					global $wp_customize;
-					/** @noinspection PhpIncludeInspection */
 					require_once ABSPATH . 'wp-includes/class-wp-customize-manager.php';
 					$wp_customize = new WP_Customize_Manager();
 					$wp_customize->start_previewing_theme();
@@ -148,47 +155,47 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				'lcp_elements_by_minimum_viewport_widths' => array(
 					0 => array(
 						'img_attributes' => array(
-							'src'         => 'elva-fairy-800w.jpg',
-							'srcset'      => 'elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w',
+							'src'         => 'https://example.com/elva-fairy-800w.jpg',
+							'srcset'      => 'https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w',
 							'sizes'       => '(max-width: 600px) 480px, 800px',
 							'crossorigin' => 'anonymous',
 						),
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen">
 				',
 			),
 			'two-breakpoint-responsive-lcp-images'      => array(
 				'lcp_elements_by_minimum_viewport_widths' => array(
 					0   => array(
 						'img_attributes' => array(
-							'src'         => 'elva-fairy-800w.jpg',
-							'srcset'      => 'elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w',
+							'src'         => 'https://example.com/elva-fairy-800w.jpg',
+							'srcset'      => 'https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w',
 							'sizes'       => '(max-width: 600px) 480px, 800px',
 							'crossorigin' => 'anonymous',
 						),
 					),
 					601 => array(
 						'img_attributes' => array(
-							'src'         => 'alt-elva-fairy-800w.jpg',
-							'srcset'      => 'alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w',
+							'src'         => 'https://example.com/alt-elva-fairy-800w.jpg',
+							'srcset'      => 'https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w',
 							'sizes'       => '(max-width: 600px) 480px, 800px',
 							'crossorigin' => 'anonymous',
 						),
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 600px)">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="alt-elva-fairy-800w.jpg" imagesrcset="alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 600px)">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/alt-elva-fairy-800w.jpg" imagesrcset="https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
 				',
 			),
 			'two-non-consecutive-responsive-lcp-images' => array(
 				'lcp_elements_by_minimum_viewport_widths' => array(
 					0   => array(
 						'img_attributes' => array(
-							'src'         => 'elva-fairy-800w.jpg',
-							'srcset'      => 'elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w',
+							'src'         => 'https://example.com/elva-fairy-800w.jpg',
+							'srcset'      => 'https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w',
 							'sizes'       => '(max-width: 600px) 480px, 800px',
 							'crossorigin' => 'anonymous',
 						),
@@ -196,16 +203,16 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					481 => false,
 					601 => array(
 						'img_attributes' => array(
-							'src'         => 'alt-elva-fairy-800w.jpg',
-							'srcset'      => 'alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w',
+							'src'         => 'https://example.com/alt-elva-fairy-800w.jpg',
+							'srcset'      => 'https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w',
 							'sizes'       => '(max-width: 600px) 480px, 800px',
 							'crossorigin' => 'anonymous',
 						),
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="elva-fairy-800w.jpg" imagesrcset="elva-fairy-480w.jpg 480w, elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="alt-elva-fairy-800w.jpg" imagesrcset="alt-elva-fairy-480w.jpg 480w, alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/alt-elva-fairy-800w.jpg" imagesrcset="https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
 				',
 			),
 			'one-background-lcp-image'                  => array(
@@ -236,8 +243,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				'lcp_elements_by_minimum_viewport_widths' => array(
 					0   => array(
 						'img_attributes' => array(
-							'src'         => 'mobile-800w.jpg',
-							'srcset'      => 'mobile-480w.jpg 480w, mobile-800w.jpg 800w',
+							'src'         => 'https://example.com/mobile-800w.jpg',
+							'srcset'      => 'https://example.com/mobile-480w.jpg 480w, https://example.com/mobile-800w.jpg 800w',
 							'sizes'       => '(max-width: 600px) 480px, 800px',
 							'crossorigin' => 'anonymous',
 						),
@@ -247,7 +254,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="mobile-800w.jpg" imagesrcset="mobile-480w.jpg 480w, mobile-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
+					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-800w.jpg" imagesrcset="https://example.com/mobile-480w.jpg 480w, https://example.com/mobile-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
 					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="screen and (min-width: 481px)">
 				',
 			),
@@ -341,7 +348,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==">
+							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==" alt="">
 						</body>
 					</html>
 				',
@@ -354,7 +361,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
-							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==">
+							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==" alt="">
 						</body>
 					</html>
 				',
@@ -369,8 +376,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<img id="no-src">
-							<img id="empty-src" src="">
+							<img id="no-src" alt="">
+							<img id="empty-src" src="" alt="">
 						</body>
 					</html>
 				',
@@ -382,8 +389,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
-							<img id="no-src">
-							<img id="empty-src" src="">
+							<img id="no-src" alt="">
+							<img id="empty-src" src="" alt="">
 						</body>
 					</html>
 				',
@@ -1010,15 +1017,17 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	 * Gets a validated URL metric.
 	 *
 	 * @param int $viewport_width Viewport width for the URL metric.
-	 * @return array URL metric.
+	 * @return ILO_URL_Metric URL metric.
+	 * @throws Exception From ILO_URL_Metric if there is a parse error, but there won't be.
 	 */
-	private function get_validated_url_metric( int $viewport_width, array $elements = array() ): array {
-		return array(
-			'viewport' => array(
+	private function get_validated_url_metric( int $viewport_width, array $elements = array() ): ILO_URL_Metric {
+		$data = array(
+			'viewport'  => array(
 				'width'  => $viewport_width,
 				'height' => 800,
 			),
-			'elements' => array_map(
+			'timestamp' => microtime( true ),
+			'elements'  => array_map(
 				static function ( array $element ): array {
 					return array_merge(
 						array(
@@ -1031,6 +1040,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				$elements
 			),
 		);
+		return new ILO_URL_Metric( $data );
 	}
 
 	/**
