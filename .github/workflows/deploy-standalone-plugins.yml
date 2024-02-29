@@ -1,18 +1,6 @@
 name: Deploy standalone plugins to WordPress.org
 
 on:
-  # TODO The pull_request will be removed once the workflow is tested.
-  pull_request:
-    branches:
-      - trunk
-      - 'release/**'
-      - 'feature/**'
-    paths:
-      - '.github/workflows/deploy-standalone-plugins.yml'
-    types:
-      - opened
-      - reopened
-      - synchronize
   release:
     types: [published]
   workflow_dispatch:
@@ -57,7 +45,7 @@ jobs:
             result=$(echo "${{ steps.get-version.outputs.version }}" | awk '/^(\*|[0-9]+(\.[0-9]+){0,2}(-[a-zA-Z0-9.]+)?)$/ {print "Matched"}')
             if [[ -n "$result" ]]; then
               # Set the manual input values in JSON format for use in the matrix.
-              echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ steps.get-version.outputs.version }}\",\"directory\":\"${{ steps.get-plugin-directory.outputs.directory }}\",\"dry-run\":\"true\"}]}" >> $GITHUB_OUTPUT
+              echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ steps.get-version.outputs.version }}\",\"directory\":\"${{ steps.get-plugin-directory.outputs.directory }}\",\"dry-run\":\"${{ inputs.dry-run }}\"}]}" >> $GITHUB_OUTPUT
             else
               echo "The ${{ inputs.slug }} module slug is missing in the file plugins.json."
               exit 1
@@ -69,7 +57,7 @@ jobs:
 
             # The "dry-run" parameter is included here to set the deployment mode.
             # When running the manual (workflow_dispatch) workflow, this value will be set from manual input type.
-            echo "matrix=$(jq -c '{include: ([.modules | to_entries[] | {name:.key, slug: .value.slug, version: .value.version, directory: "build", "dry-run": true}] + ([.plugins[] | {name:. , slug:. , directory: "plugins", "dry-run": true}]))}' plugins.json)" >> $GITHUB_OUTPUT
+            echo "matrix=$(jq -c '{include: ([.modules | to_entries[] | {name:.key, slug: .value.slug, version: .value.version, directory: "build", "dry-run": false}] + ([.plugins[] | {name:. , slug:. , directory: "plugins", "dry-run": false}]))}' plugins.json)" >> $GITHUB_OUTPUT
           fi
   deploy:
     name: Deploy Plugin
@@ -103,12 +91,8 @@ jobs:
         with:
           dry-run: ${{ matrix.dry-run }}
         env:
-          # TODO Once the workflow is tested, we will remove the comment and use the secret SVN access.
-          #SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          #SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-          # TODO Once the workflow is tested, we will remove this test credential.
-          SVN_PASSWORD: SVN_PASSWORD
-          SVN_USERNAME: SVN_USERNAME
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SLUG: ${{ matrix.slug }}
           VERSION: ${{ steps.set_version.outputs.version }}
           BUILD_DIR: ./${{ matrix.directory }}/${{ matrix.slug }}
