@@ -219,107 +219,6 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @throws ILO_Data_Validation_Exception When failing to instantiate a URL metric.
-	 * @return array[]
-	 */
-	public function data_provider_test_get_lcp_elements_by_minimum_viewport_widths(): array {
-		return array(
-			'common_lcp_element_across_breakpoints'    => array(
-				'breakpoints'                 => array( 600, 800 ),
-				'url_metrics'                 => array(
-					// 0.
-					$this->get_validated_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
-					$this->get_validated_url_metric( 599, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					// 600.
-					$this->get_validated_url_metric( 600, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					$this->get_validated_url_metric( 700, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					// 800.
-					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-				),
-				'expected_lcp_element_xpaths' => array(
-					0 => $this->get_xpath( 'HTML', 'BODY', 'FIGURE', 'IMG' ),
-				),
-			),
-			'different_lcp_elements_across_breakpoint' => array(
-				'breakpoints'                 => array( 600 ),
-				'url_metrics'                 => array(
-					// 0.
-					$this->get_validated_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
-					$this->get_validated_url_metric( 600, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					// 600.
-					$this->get_validated_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-				),
-				'expected_lcp_element_xpaths' => array(
-					0   => $this->get_xpath( 'HTML', 'BODY', 'FIGURE', 'IMG' ),
-					601 => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
-				),
-			),
-			'same_lcp_element_across_non_consecutive_breakpoints' => array(
-				'breakpoints'                 => array( 400, 600 ),
-				'url_metrics'                 => array(
-					// 0.
-					$this->get_validated_url_metric( 300, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-					// 400.
-					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'HEADER', 'IMG' ), false ),
-					// 600.
-					$this->get_validated_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-				),
-				'expected_lcp_element_xpaths' => array(
-					0   => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
-					401 => false, // The (image) element is either not visible at this breakpoint or it is not LCP element.
-					601 => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
-				),
-			),
-			'no_lcp_image_elements'                    => array(
-				'breakpoints'                 => array( 600 ),
-				'url_metrics'                 => array(
-					// 0.
-					$this->get_validated_url_metric( 300, array( 'HTML', 'BODY', 'IMG' ), false ),
-					// 600.
-					$this->get_validated_url_metric( 700, array( 'HTML', 'BODY', 'IMG' ), false ),
-				),
-				'expected_lcp_element_xpaths' => array(
-					0 => false,
-				),
-			),
-		);
-	}
-
-	/**
-	 * Test get_lcp_elements_by_minimum_viewport_widths().
-	 *
-	 * @covers ::get_lcp_elements_by_minimum_viewport_widths
-	 * @dataProvider data_provider_test_get_lcp_elements_by_minimum_viewport_widths
-	 */
-	public function test_get_lcp_elements_by_minimum_viewport_widths( array $breakpoints, array $url_metrics, array $expected_lcp_element_xpaths ) {
-		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, 10, HOUR_IN_SECONDS );
-
-		$lcp_elements_by_minimum_viewport_widths = $grouped_url_metrics->get_lcp_elements_by_minimum_viewport_widths();
-
-		$lcp_element_xpaths_by_minimum_viewport_widths = array();
-		foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
-			$this->assertTrue( is_array( $lcp_element ) || false === $lcp_element );
-			if ( is_array( $lcp_element ) ) {
-				$this->assertTrue( $lcp_element['isLCP'] );
-				$this->assertTrue( $lcp_element['isLCPCandidate'] );
-				$this->assertIsString( $lcp_element['xpath'] );
-				$this->assertIsNumeric( $lcp_element['intersectionRatio'] );
-				$lcp_element_xpaths_by_minimum_viewport_widths[ $minimum_viewport_width ] = $lcp_element['xpath'];
-			} else {
-				$lcp_element_xpaths_by_minimum_viewport_widths[ $minimum_viewport_width ] = false;
-			}
-		}
-
-		$this->assertSame( $expected_lcp_element_xpaths, $lcp_element_xpaths_by_minimum_viewport_widths );
-	}
-
-	/**
-	 * Data provider.
-	 *
 	 * @return array[]
 	 */
 	public function data_provider_test_get_needed_minimum_viewport_widths(): array {
@@ -467,14 +366,12 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	/**
 	 * Gets a validated URL metric for testing.
 	 *
-	 * @param int      $viewport_width Viewport width.
-	 * @param string[] $breadcrumbs    Breadcrumb tags.
-	 * @param bool     $is_lcp         Whether LCP.
+	 * @param int $viewport_width Viewport width.
 	 *
 	 * @return ILO_URL_Metric Validated URL metric.
 	 * @throws ILO_Data_Validation_Exception From ILO_URL_Metric if there is a parse error, but there won't be.
 	 */
-	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): ILO_URL_Metric {
+	private function get_validated_url_metric( int $viewport_width = 480 ): ILO_URL_Metric {
 		$data = array(
 			'viewport'  => array(
 				'width'  => $viewport_width,
@@ -483,31 +380,13 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 			'timestamp' => microtime( true ),
 			'elements'  => array(
 				array(
-					'isLCP'             => $is_lcp,
-					'isLCPCandidate'    => $is_lcp,
-					'xpath'             => $this->get_xpath( ...$breadcrumbs ),
+					'isLCP'             => true,
+					'isLCPCandidate'    => true,
+					'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]',
 					'intersectionRatio' => 1,
 				),
 			),
 		);
 		return new ILO_URL_Metric( $data );
-	}
-
-	/**
-	 * Gets sample XPath.
-	 *
-	 * @param string ...$breadcrumbs List of tags.
-	 * @return string XPath.
-	 */
-	private function get_xpath( ...$breadcrumbs ): string {
-		return implode(
-			'',
-			array_map(
-				static function ( $tag ) {
-					return sprintf( '/*[0][self::%s]', strtoupper( $tag ) );
-				},
-				$breadcrumbs
-			)
-		);
 	}
 }
