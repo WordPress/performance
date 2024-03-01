@@ -28,6 +28,11 @@ jobs:
           cache: npm
       - name: Install npm dependencies
         run: npm ci
+      - name: Get directory
+        id: get-plugin-directory
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          echo "directory=$(node ./bin/plugin/cli.js get-plugin-dir --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
       - name: Get plugin version
         id: get-version
         if: ${{ github.event_name == 'workflow_dispatch' }}
@@ -40,7 +45,7 @@ jobs:
             result=$(echo "${{ steps.get-version.outputs.version }}" | awk '/^(\*|[0-9]+(\.[0-9]+){0,2}(-[a-zA-Z0-9.]+)?)$/ {print "Matched"}')
             if [[ -n "$result" ]]; then
               # Set the manual input values in JSON format for use in the matrix.
-              echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ steps.get-version.outputs.version }}\",\"dry-run\":\"${{ inputs.dry-run }}\"}]}" >> $GITHUB_OUTPUT
+              echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ steps.get-version.outputs.version }}\",\"directory\":\"${{ steps.get-plugin-directory.outputs.directory }}\",\"dry-run\":\"${{ inputs.dry-run }}\"}]}" >> $GITHUB_OUTPUT
             else
               echo "The ${{ inputs.slug }} module slug is missing in the file plugins.json."
               exit 1
@@ -48,9 +53,11 @@ jobs:
           else
             # Load the JSON file and parse from "{name: {slug, version}, ...}" to "include: [{ name, slug, version }, ...]"
             # for use in the matrix.
+            # For plugins, the "version" parameter is not included here; it will dynamically get it in its own job.
+
             # The "dry-run" parameter is included here to set the deployment mode.
             # When running the manual (workflow_dispatch) workflow, this value will be set from manual input type.
-            echo "matrix="$(jq -c '{include:[keys[] as $k | {name:$k,slug:.[$k].slug,version:.[$k].version,"dry-run":false }]}' plugins.json) >> $GITHUB_OUTPUT
+            echo "matrix=$(jq -c '{include: ([.modules | to_entries[] | {name:.key, slug: .value.slug, version: .value.version, directory: "build", "dry-run": false}] + ([.plugins[] | {name:. , slug:. , directory: "plugins", "dry-run": false}]))}' plugins.json)" >> $GITHUB_OUTPUT
           fi
   deploy:
     name: Deploy Plugin
@@ -69,7 +76,16 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
       - name: Building standalone plugins
+        if: ${{ matrix.directory != 'plugins' }}
         run: npm run build-plugins
+      - name: Set version
+        id: set_version
+        run: |
+          if [ -z "${{ matrix.version }}" ]; then
+            echo "version=$(node ./bin/plugin/cli.js get-plugin-version --slug=${{ matrix.slug }})" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ matrix.version }})" >> $GITHUB_OUTPUT
+          fi
       - name: Deploy Standalone Plugin - ${{ matrix.slug }}
         uses: 10up/action-wordpress-plugin-deploy@stable
         with:
@@ -78,6 +94,6 @@ jobs:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SLUG: ${{ matrix.slug }}
-          VERSION: ${{ matrix.version }}
-          BUILD_DIR: ./build/${{ matrix.slug }}
-          ASSETS_DIR: ./build/${{ matrix.slug }}/.wordpress-org
+          VERSION: ${{ steps.set_version.outputs.version }}
+          BUILD_DIR: ./${{ matrix.directory }}/${{ matrix.slug }}
+          ASSETS_DIR: ./${{ matrix.directory }}/${{ matrix.slug }}/.wordpress-org

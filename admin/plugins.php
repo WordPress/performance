@@ -186,7 +186,6 @@ function perflab_render_plugin_card( array $plugin_data ) {
 					esc_html( _x( 'Active', 'plugin', 'default' ) )
 				);
 				if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
-					global $page;
 					$s       = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					$context = $status['status'];
 

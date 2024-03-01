@@ -17,6 +17,7 @@
   },
   "require": {
     "composer/installers": "~1.0",
+    "ext-json": "*",
     "php": ">=7|^8"
   },
   "scripts": {
@@ -25,8 +26,35 @@
     "phpstan": "build-cs/vendor/bin/phpstan analyse --memory-limit=2048M",
     "format": "build-cs/vendor/bin/phpcbf --report-summary --report-source",
     "lint": "build-cs/vendor/bin/phpcs",
-    "test": "phpunit --verbose",
-    "test-multisite": "phpunit -c tests/multisite.xml --verbose"
+    "lint:all": [
+        "@lint",
+        "@lint:auto-sizes",
+        "@lint:speculation-rules"
+    ],
+    "lint:auto-sizes": "@lint -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
+    "lint:speculation-rules": "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
+    "test": "phpunit --verbose --testsuite performance-lab",
+    "test-multisite": "phpunit -c tests/multisite.xml --verbose --testsuite performance-lab",
+    "test:all": [
+      "@test",
+      "@test:plugins"
+    ],
+    "test-multisite:all": [
+      "@test-multisite",
+      "@test-multisite:plugins"
+    ],
+    "test:plugins": [
+      "@test:auto-sizes",
+      "@test:speculation-rules"
+    ],
+    "test-multisite:plugins": [
+      "@test-multisite:auto-sizes",
+      "@test-multisite:speculation-rules"
+    ],
+    "test:auto-sizes": "phpunit --verbose --testsuite auto-sizes",
+    "test-multisite:auto-sizes": "phpunit -c tests/multisite.xml --verbose --testsuite auto-sizes",
+    "test:speculation-rules": "phpunit --verbose --testsuite speculation-rules",
+    "test-multisite:speculation-rules": "phpunit -c tests/multisite.xml --verbose --testsuite speculation-rules"
   },
   "config": {
     "allow-plugins": {
