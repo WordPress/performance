@@ -291,6 +291,41 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test fully populating the narrower viewport group and then adding one more.
+	 *
+	 * @covers ::ilo_register_endpoint
+	 * @covers ::ilo_handle_rest_request
+	 */
+	public function test_rest_request_over_populate_narrower_viewport_group() {
+		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
+
+		// First establish a single breakpoint, so there are two groups of URL metrics
+		// with viewport widths 0-480 and >481.
+		$breakpoint_width = 480;
+		add_filter(
+			'ilo_breakpoint_max_widths',
+			static function () use ( $breakpoint_width ): array {
+				return array( $breakpoint_width );
+			}
+		);
+
+		$narrower_viewport_params = $this->get_valid_params( array( 'viewport' => array( 'width' => $breakpoint_width ) ) );
+
+		// Fully populate the narrower viewport group, leaving the wider one empty.
+		$this->populate_url_metrics(
+			ilo_get_url_metrics_breakpoint_sample_size(),
+			$narrower_viewport_params
+		);
+
+		// Now attempt to store one more URL metric for the narrower viewport group.
+		// This should fail because the group is already fully populated to the sample size.
+		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params( $narrower_viewport_params );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 403, $response->get_status(), 'Response: ' . wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
 	 * Populate URL metrics.
 	 *
 	 * @param int   $count  Count of URL metrics to populate.
