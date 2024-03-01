@@ -76,7 +76,9 @@ final class ILO_Grouped_URL_Metrics {
 	}
 
 	/**
-	 * Unshifts a new URL metric, potentially pushing out older URL metrics when exceeding the sample size.
+	 * Adds a new URL metric to a group.
+	 *
+	 * Once a group reaches the sample size, the oldest URL metric is pushed out.
 	 *
 	 * @since n.e.x.t
 	 * @access private
