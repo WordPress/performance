@@ -16,10 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  *
- * @param string                       $slug                            URL metrics slug.
- * @param array<int, array{int, bool}> $viewport_group_lacking_statuses Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
+ * @param string                                                        $slug                    URL metrics slug.
+ * @param array<array{ minimum_viewport_width: int, is_lacking: bool }> $viewport_group_statuses Viewport group statuses.
  */
-function ilo_get_detection_script( string $slug, array $viewport_group_lacking_statuses ): string {
+function ilo_get_detection_script( string $slug, array $viewport_group_statuses ): string {
 	/**
 	 * Filters the time window between serve time and run time in which loading detection is allowed to run.
 	 *
@@ -39,16 +39,24 @@ function ilo_get_detection_script( string $slug, array $viewport_group_lacking_s
 	$web_vitals_lib_src  = add_query_arg( 'ver', $web_vitals_lib_data['version'], plugin_dir_url( __FILE__ ) . '/detection/web-vitals.js' );
 
 	$detect_args = array(
-		'serveTime'                    => microtime( true ) * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
-		'detectionTimeWindow'          => $detection_time_window,
-		'isDebug'                      => WP_DEBUG,
-		'restApiEndpoint'              => rest_url( ILO_REST_API_NAMESPACE . ILO_URL_METRICS_ROUTE ),
-		'restApiNonce'                 => wp_create_nonce( 'wp_rest' ),
-		'urlMetricsSlug'               => $slug,
-		'urlMetricsNonce'              => ilo_get_url_metrics_storage_nonce( $slug ),
-		'viewportGroupLackingStatuses' => $viewport_group_lacking_statuses,
-		'storageLockTTL'               => ilo_get_url_metric_storage_lock_ttl(),
-		'webVitalsLibrarySrc'          => $web_vitals_lib_src,
+		'serveTime'             => microtime( true ) * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
+		'detectionTimeWindow'   => $detection_time_window,
+		'isDebug'               => WP_DEBUG,
+		'restApiEndpoint'       => rest_url( ILO_REST_API_NAMESPACE . ILO_URL_METRICS_ROUTE ),
+		'restApiNonce'          => wp_create_nonce( 'wp_rest' ),
+		'urlMetricsSlug'        => $slug,
+		'urlMetricsNonce'       => ilo_get_url_metrics_storage_nonce( $slug ),
+		'viewportGroupStatuses' => array_map(
+			static function ( $viewport_group_status ) {
+				return array(
+					'minimumViewportWidth' => $viewport_group_status['minimum_viewport_width'],
+					'isLacking'            => $viewport_group_status['is_lacking'],
+				);
+			},
+			$viewport_group_statuses
+		),
+		'storageLockTTL'        => ilo_get_url_metric_storage_lock_ttl(),
+		'webVitalsLibrarySrc'   => $web_vitals_lib_src,
 	);
 
 	return wp_get_inline_script_tag(

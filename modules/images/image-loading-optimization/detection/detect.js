@@ -96,25 +96,28 @@ function error( ...message ) {
  */
 
 /**
+ * @typedef {Object} ViewportGroupStatus
+ * @property {number}  minimumViewportWidth - Minimum viewport width.
+ * @property {boolean} isLacking            - Whether viewport group is lacking URL metrics.
+ */
+
+/**
  * Checks whether the URL metric(s) for the provided viewport width is needed.
  *
- * @param {number}                   viewportWidth                - Current viewport width.
- * @param {Array<number, boolean>[]} viewportGroupLackingStatuses - Viewport group lacking statuses, mapping minimum viewport width to whether lacking metrics.
+ * @param {number}                viewportWidth         - Current viewport width.
+ * @param {ViewportGroupStatus[]} viewportGroupStatuses - Viewport group statuses.
  * @return {boolean} Whether URL metrics are needed.
  */
-function isViewportNeeded( viewportWidth, viewportGroupLackingStatuses ) {
-	let lastWasNeeded = false;
-	for ( const [
-		minimumViewportWidth,
-		isNeeded,
-	] of viewportGroupLackingStatuses ) {
+function isViewportNeeded( viewportWidth, viewportGroupStatuses ) {
+	let lastWasLacking = false;
+	for ( const { minimumViewportWidth, isLacking } of viewportGroupStatuses ) {
 		if ( viewportWidth >= minimumViewportWidth ) {
-			lastWasNeeded = isNeeded;
+			lastWasLacking = isLacking;
 		} else {
 			break;
 		}
 	}
-	return lastWasNeeded;
+	return lastWasLacking;
 }
 
 /**
@@ -129,17 +132,17 @@ function getCurrentTime() {
 /**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
- * @param {Object}                   args                              Args.
- * @param {number}                   args.serveTime                    The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
- * @param {number}                   args.detectionTimeWindow          The number of milliseconds between now and when the page was first generated in which detection should proceed.
- * @param {boolean}                  args.isDebug                      Whether to show debug messages.
- * @param {string}                   args.restApiEndpoint              URL for where to send the detection data.
- * @param {string}                   args.restApiNonce                 Nonce for writing to the REST API.
- * @param {string}                   args.urlMetricsSlug               Slug for URL metrics.
- * @param {string}                   args.urlMetricsNonce              Nonce for URL metrics storage.
- * @param {Array<number, boolean>[]} args.viewportGroupLackingStatuses Viewport group lacking statuses, mapping minimum viewport width to whether lacking metrics.
- * @param {number}                   args.storageLockTTL               The TTL (in seconds) for the URL metric storage lock.
- * @param {string}                   args.webVitalsLibrarySrc          The URL for the web-vitals library.
+ * @param {Object}                args                       Args.
+ * @param {number}                args.serveTime             The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
+ * @param {number}                args.detectionTimeWindow   The number of milliseconds between now and when the page was first generated in which detection should proceed.
+ * @param {boolean}               args.isDebug               Whether to show debug messages.
+ * @param {string}                args.restApiEndpoint       URL for where to send the detection data.
+ * @param {string}                args.restApiNonce          Nonce for writing to the REST API.
+ * @param {string}                args.urlMetricsSlug        Slug for URL metrics.
+ * @param {string}                args.urlMetricsNonce       Nonce for URL metrics storage.
+ * @param {ViewportGroupStatus[]} args.viewportGroupStatuses Viewport group lacking statuses.
+ * @param {number}                args.storageLockTTL        The TTL (in seconds) for the URL metric storage lock.
+ * @param {string}                args.webVitalsLibrarySrc   The URL for the web-vitals library.
  */
 export default async function detect( {
 	serveTime,
@@ -149,7 +152,7 @@ export default async function detect( {
 	restApiNonce,
 	urlMetricsSlug,
 	urlMetricsNonce,
-	viewportGroupLackingStatuses,
+	viewportGroupStatuses,
 	storageLockTTL,
 	webVitalsLibrarySrc,
 } ) {
@@ -166,7 +169,7 @@ export default async function detect( {
 	}
 
 	// Abort if the current viewport is not among those which need URL metrics.
-	if ( ! isViewportNeeded( win.innerWidth, viewportGroupLackingStatuses ) ) {
+	if ( ! isViewportNeeded( win.innerWidth, viewportGroupStatuses ) ) {
 		if ( isDebug ) {
 			log( 'No need for URL metrics from the current viewport.' );
 		}
