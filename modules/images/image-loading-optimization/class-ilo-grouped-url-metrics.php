@@ -158,13 +158,10 @@ final class ILO_Grouped_URL_Metrics {
 	 * @since n.e.x.t
 	 * @access private
 	 *
-	 * @param float $current_time Current time, defaults to `microtime(true)`.
 	 * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
 	 */
-	public function get_needed_minimum_viewport_widths( float $current_time = null ): array {
-		if ( null === $current_time ) {
-			$current_time = microtime( true );
-		}
+	public function get_needed_minimum_viewport_widths(): array {
+		$current_time = microtime( true );
 
 		$needed_minimum_viewport_widths = array();
 		foreach ( $this->groups as $minimum_viewport_width => $viewport_url_metrics ) {

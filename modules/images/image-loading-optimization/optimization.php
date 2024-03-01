@@ -156,7 +156,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		ilo_get_url_metric_freshness_ttl()
 	);
 
-	$needed_minimum_viewport_widths = $grouped_url_metrics->get_needed_minimum_viewport_widths( microtime( true ) );
+	$needed_minimum_viewport_widths = $grouped_url_metrics->get_needed_minimum_viewport_widths();
 
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = in_array(

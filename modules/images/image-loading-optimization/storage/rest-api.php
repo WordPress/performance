@@ -120,7 +120,7 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 		ilo_get_url_metric_freshness_ttl()
 	);
 
-	$needed_minimum_viewport_widths = $grouped_url_metrics->get_needed_minimum_viewport_widths( microtime( true ) );
+	$needed_minimum_viewport_widths = $grouped_url_metrics->get_needed_minimum_viewport_widths();
 
 	// Block the request if URL metrics aren't needed for the provided viewport width.
 	// This logic is the same as the isViewportNeeded() function in detect.js.
