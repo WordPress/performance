@@ -221,7 +221,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array[]
 	 */
-	public function data_provider_test_get_viewport_group_lacking_statuses(): array {
+	public function data_provider_test_get_group_statuses(): array {
 		$current_time = microtime( true );
 
 		$none_needed_data = array(
@@ -261,12 +261,12 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 				array(
 					'expected_return'           => array(
 						array(
-							'minimum_viewport_width' => 0,
-							'is_lacking'             => false,
+							'minimumViewportWidth' => 0,
+							'isLacking'            => false,
 						),
 						array(
-							'minimum_viewport_width' => 481,
-							'is_lacking'             => false,
+							'minimumViewportWidth' => 481,
+							'isLacking'            => false,
 						),
 					),
 					'expected_is_group_lacking' => array(
@@ -285,12 +285,12 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 				array(
 					'expected_return'           => array(
 						array(
-							'minimum_viewport_width' => 0,
-							'is_lacking'             => true,
+							'minimumViewportWidth' => 0,
+							'isLacking'            => true,
 						),
 						array(
-							'minimum_viewport_width' => 481,
-							'is_lacking'             => true,
+							'minimumViewportWidth' => 481,
+							'isLacking'            => true,
 						),
 					),
 					'expected_is_group_lacking' => array(
@@ -312,12 +312,12 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 				array(
 					'expected_return'           => array(
 						array(
-							'minimum_viewport_width' => 0,
-							'is_lacking'             => true,
+							'minimumViewportWidth' => 0,
+							'isLacking'            => true,
 						),
 						array(
-							'minimum_viewport_width' => 481,
-							'is_lacking'             => false,
+							'minimumViewportWidth' => 481,
+							'isLacking'            => false,
 						),
 					),
 					'expected_is_group_lacking' => array(
@@ -333,24 +333,29 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_viewport_group_lacking_statuses().
+	 * Test get_group_statuses().
 	 *
-	 * @covers ::get_viewport_group_statuses
-	 * @covers ::is_viewport_group_lacking
+	 * @covers ::get_group_statuses
+	 * @covers ::is_group_lacking
 	 *
-	 * @dataProvider data_provider_test_get_viewport_group_lacking_statuses
+	 * @dataProvider data_provider_test_get_group_statuses
 	 */
-	public function test_get_viewport_group_lacking_statuses( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_lacking ) {
+	public function test_get_group_statuses( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_lacking ) {
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertSame(
 			$expected_return,
-			$grouped_url_metrics->get_viewport_group_statuses()
+			array_map(
+				static function ( ILO_URL_Metrics_Group_Status $status ) {
+					return $status->jsonSerialize();
+				},
+				$grouped_url_metrics->get_group_statuses()
+			)
 		);
 
 		foreach ( $expected_is_group_lacking as $viewport_width => $expected ) {
 			$this->assertSame(
 				$expected,
-				$grouped_url_metrics->is_viewport_group_lacking( $viewport_width ),
+				$grouped_url_metrics->is_group_lacking( $viewport_width ),
 				"Unexpected value for viewport width of $viewport_width"
 			);
 		}

@@ -155,19 +155,19 @@ final class ILO_Grouped_URL_Metrics {
 	}
 
 	/**
-	 * Determines whether the group for a given viewport is lacking URL metrics.
+	 * Determines whether the URL metrics group for a given viewport is lacking URL metrics.
 	 *
-	 * Either the viewport group does not have enough URL metrics for the desired sample size,
+	 * Either the group does not have enough URL metrics for the desired sample size,
 	 * or some of the URL metrics are stale.
 	 *
 	 * @param int $viewport_width Viewport width.
 	 * @return bool Whether group is lacking.
 	 */
-	public function is_viewport_group_lacking( int $viewport_width ): bool {
+	public function is_group_lacking( int $viewport_width ): bool {
 		$last_was_lacking = false;
-		foreach ( $this->get_viewport_group_statuses() as $status ) {
-			if ( $viewport_width >= $status['minimum_viewport_width'] ) {
-				$last_was_lacking = $status['is_lacking'];
+		foreach ( $this->get_group_statuses() as $status ) {
+			if ( $viewport_width >= $status->get_minimum_viewport_width() ) {
+				$last_was_lacking = $status->is_lacking();
 			} else {
 				break;
 			}
@@ -176,36 +176,33 @@ final class ILO_Grouped_URL_Metrics {
 	}
 
 	/**
-	 * Gets the statuses of whether the viewport groups are lacking.
+	 * Gets the statuses of the URL metrics groups.
 	 *
-	 * A viewport group is lacking URL metrics if it does not have the desired sample size or
+	 * A group is lacking URL metrics if it does not have the desired sample size or
 	 * if some of the URL metrics are stale.
 	 *
 	 * @since n.e.x.t
 	 * @access private
 	 *
-	 * @return array<array{ minimum_viewport_width: int, is_lacking: bool }> Array of viewport group statuses including the minimum viewport width and whether it is lacking URL metrics.
+	 * @return ILO_URL_Metrics_Group_Status[] URL metrics group statuses.
 	 */
-	public function get_viewport_group_statuses(): array {
+	public function get_group_statuses(): array {
 		$current_time = microtime( true );
 
 		$statuses = array();
 		foreach ( $this->groups as $minimum_viewport_width => $viewport_url_metrics ) {
-			$status = array(
-				'minimum_viewport_width' => $minimum_viewport_width,
-				'is_lacking'             => false,
-			);
+			$is_lacking = false;
 			if ( count( $viewport_url_metrics ) < $this->sample_size ) {
-				$status['is_lacking'] = true;
+				$is_lacking = true;
 			} else {
 				foreach ( $viewport_url_metrics as $url_metric ) {
 					if ( $url_metric->get_timestamp() + $this->freshness_ttl < $current_time ) {
-						$status['is_lacking'] = true;
+						$is_lacking = true;
 						break;
 					}
 				}
 			}
-			$statuses[] = $status;
+			$statuses[] = new ILO_URL_Metrics_Group_Status( $minimum_viewport_width, $is_lacking );
 		}
 
 		return $statuses;
