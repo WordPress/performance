@@ -321,24 +321,24 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test are_all_groups_populated().
+	 * Test is_every_group_populated().
 	 *
-	 * @covers ::are_all_groups_populated
+	 * @covers ::is_every_group_populated
 	 */
-	public function test_are_all_groups_populated() {
+	public function test_is_every_group_populated() {
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics(
 			array(),
 			array( 480, 800 ),
 			3,
 			HOUR_IN_SECONDS
 		);
-		$this->assertFalse( $grouped_url_metrics->are_all_groups_populated() );
+		$this->assertFalse( $grouped_url_metrics->is_every_group_populated() );
 		$grouped_url_metrics->add( $this->get_validated_url_metric( 200 ) );
-		$this->assertFalse( $grouped_url_metrics->are_all_groups_populated() );
+		$this->assertFalse( $grouped_url_metrics->is_every_group_populated() );
 		$grouped_url_metrics->add( $this->get_validated_url_metric( 500 ) );
-		$this->assertFalse( $grouped_url_metrics->are_all_groups_populated() );
+		$this->assertFalse( $grouped_url_metrics->is_every_group_populated() );
 		$grouped_url_metrics->add( $this->get_validated_url_metric( 900 ) );
-		$this->assertTrue( $grouped_url_metrics->are_all_groups_populated() );
+		$this->assertTrue( $grouped_url_metrics->is_every_group_populated() );
 	}
 
 	/**

@@ -206,11 +206,13 @@ final class ILO_Grouped_URL_Metrics {
 	}
 
 	/**
-	 * Checks whether all groups have URL metrics.
+	 * Checks whether every group is populated with at least one URL metric each.
+	 *
+	 * They aren't necessarily filled to the sample size, however.
 	 *
 	 * @return bool Whether all groups have URL metrics.
 	 */
-	public function are_all_groups_populated(): bool {
+	public function is_every_group_populated(): bool {
 		foreach ( $this->groups as $group ) {
 			if ( empty( $group ) ) {
 				return false;

@@ -167,7 +167,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	);
 
 	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $grouped_url_metrics );
-	$all_breakpoints_have_url_metrics        = $grouped_url_metrics->are_all_groups_populated();
+	$all_breakpoints_have_url_metrics        = $grouped_url_metrics->is_every_group_populated();
 
 	/**
 	 * Optimized lookup of the LCP element viewport widths by XPath.
