@@ -155,14 +155,17 @@ final class ILO_Grouped_URL_Metrics {
 	}
 
 	/**
-	 * Determines whether the group for a given viewport has been filled to the sample size.
+	 * Determines whether the group for a given viewport is lacking URL metrics.
+	 *
+	 * Either the viewport group does not have enough URL metrics for the desired sample size,
+	 * or some of the URL metrics are stale.
 	 *
 	 * @param int $viewport_width Viewport width.
 	 * @return bool Whether group is filled.
 	 */
-	public function is_group_filled( int $viewport_width ): bool {
+	public function is_viewport_group_lacking( int $viewport_width ): bool {
 		$last_was_needed = false;
-		foreach ( $this->get_needed_minimum_viewport_widths() as list( $minimum_viewport_width, $is_needed ) ) {
+		foreach ( $this->get_lacking_viewport_groups() as list( $minimum_viewport_width, $is_needed ) ) {
 			if ( $viewport_width >= $minimum_viewport_width ) {
 				$last_was_needed = $is_needed;
 			} else {
@@ -173,17 +176,20 @@ final class ILO_Grouped_URL_Metrics {
 	}
 
 	/**
-	 * Gets needed minimum viewport widths.
+	 * Gets which viewport groups are lacking URL metrics.
+	 *
+	 * A viewport group is lacking URL metrics if it does not have the desired sample size or
+	 * if some of the URL metrics are stale.
 	 *
 	 * @since n.e.x.t
 	 * @access private
 	 *
 	 * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
 	 */
-	public function get_needed_minimum_viewport_widths(): array {
+	public function get_lacking_viewport_groups(): array {
 		$current_time = microtime( true );
 
-		$needed_minimum_viewport_widths = array();
+		$lacking_viewport_groups = array();
 		foreach ( $this->groups as $minimum_viewport_width => $viewport_url_metrics ) {
 			$needs_url_metrics = false;
 			if ( count( $viewport_url_metrics ) < $this->sample_size ) {
@@ -196,13 +202,13 @@ final class ILO_Grouped_URL_Metrics {
 					}
 				}
 			}
-			$needed_minimum_viewport_widths[] = array(
+			$lacking_viewport_groups[] = array(
 				$minimum_viewport_width,
 				$needs_url_metrics,
 			);
 		}
 
-		return $needed_minimum_viewport_widths;
+		return $lacking_viewport_groups;
 	}
 
 	/**

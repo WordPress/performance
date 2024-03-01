@@ -57,13 +57,13 @@ class ILO_Detection_Tests extends WP_UnitTestCase {
 	 */
 	public function test_ilo_get_detection_script_returns_script( Closure $set_up, array $expected_exports ) {
 		$set_up();
-		$slug                           = ilo_get_url_metrics_slug( array( 'p' => '1' ) );
-		$needed_minimum_viewport_widths = array(
+		$slug                    = ilo_get_url_metrics_slug( array( 'p' => '1' ) );
+		$lacking_viewport_groups = array(
 			array( 480, false ),
 			array( 600, false ),
 			array( 782, true ),
 		);
-		$script                         = ilo_get_detection_script( $slug, $needed_minimum_viewport_widths );
+		$script                  = ilo_get_detection_script( $slug, $lacking_viewport_groups );
 
 		$this->assertStringContainsString( '<script type="module">', $script );
 		$this->assertStringContainsString( 'import detect from', $script );

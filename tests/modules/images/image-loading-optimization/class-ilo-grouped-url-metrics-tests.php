@@ -221,7 +221,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array[]
 	 */
-	public function data_provider_test_get_needed_minimum_viewport_widths(): array {
+	public function data_provider_test_get_lacking_viewport_groups(): array {
 		$current_time = microtime( true );
 
 		$none_needed_data = array(
@@ -259,9 +259,14 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 			'none-needed'            => array_merge(
 				$none_needed_data,
 				array(
-					'expected' => array(
+					'expected_return'          => array(
 						array( 0, false ),
 						array( 481, false ),
+					),
+					'expected_is_group_filled' => array(
+						400 => false,
+						480 => false,
+						600 => false,
 					),
 				)
 			),
@@ -272,9 +277,15 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 					'sample_size' => $none_needed_data['sample_size'] + 1,
 				),
 				array(
-					'expected' => array(
+					'expected_return'          => array(
 						array( 0, true ),
 						array( 481, true ),
+					),
+					'expected_is_group_filled' => array(
+						200 => true,
+						480 => true,
+						481 => true,
+						500 => true,
 					),
 				)
 			),
@@ -287,9 +298,16 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 					return $data;
 				} )( $none_needed_data ),
 				array(
-					'expected' => array(
+					'expected_return'          => array(
 						array( 0, true ),
 						array( 481, false ),
+					),
+					'expected_is_group_filled' => array(
+						200 => true,
+						400 => true,
+						480 => true,
+						481 => false,
+						500 => false,
 					),
 				)
 			),
@@ -297,27 +315,27 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test is_group_filled().
+	 * Test get_lacking_viewport_groups().
 	 *
-	 * @covers ::is_group_filled
+	 * @covers ::get_lacking_viewport_groups
+	 * @covers ::is_viewport_group_lacking
+	 *
+	 * @dataProvider data_provider_test_get_lacking_viewport_groups
 	 */
-	public function test_is_group_filled() {
-		$this->markTestIncomplete();
-	}
-
-	/**
-	 * Test get_needed_minimum_viewport_widths().
-	 *
-	 * @covers ::get_needed_minimum_viewport_widths
-	 *
-	 * @dataProvider data_provider_test_get_needed_minimum_viewport_widths
-	 */
-	public function test_get_needed_minimum_viewport_widths( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected ) {
+	public function test_get_lacking_viewport_groups( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_filled ) {
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertSame(
-			$expected,
-			$grouped_url_metrics->get_needed_minimum_viewport_widths()
+			$expected_return,
+			$grouped_url_metrics->get_lacking_viewport_groups()
 		);
+
+		foreach ( $expected_is_group_filled as $viewport_width => $expected ) {
+			$this->assertSame(
+				$expected,
+				$grouped_url_metrics->is_viewport_group_lacking( $viewport_width ),
+				"Unexpected value for viewport width of $viewport_width"
+			);
+		}
 	}
 
 	/**

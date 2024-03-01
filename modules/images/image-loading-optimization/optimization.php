@@ -156,13 +156,13 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		ilo_get_url_metric_freshness_ttl()
 	);
 
-	$needed_minimum_viewport_widths = $grouped_url_metrics->get_needed_minimum_viewport_widths();
+	$lacking_viewport_groups = $grouped_url_metrics->get_lacking_viewport_groups();
 
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = in_array(
 		true,
 		// Each array item is array{int, bool}, with the second item being whether the viewport width is needed.
-		array_column( $needed_minimum_viewport_widths, 1 ),
+		array_column( $lacking_viewport_groups, 1 ),
 		true
 	);
 
@@ -315,7 +315,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-ilo-xpath attributes.
 	if ( $needs_detection ) {
-		$head_injection .= ilo_get_detection_script( $slug, $needed_minimum_viewport_widths );
+		$head_injection .= ilo_get_detection_script( $slug, $lacking_viewport_groups );
 	}
 
 	if ( $head_injection ) {
