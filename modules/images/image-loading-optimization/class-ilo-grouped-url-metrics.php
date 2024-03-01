@@ -161,7 +161,7 @@ final class ILO_Grouped_URL_Metrics {
 	 * or some of the URL metrics are stale.
 	 *
 	 * @param int $viewport_width Viewport width.
-	 * @return bool Whether group is filled.
+	 * @return bool Whether group is lacking.
 	 */
 	public function is_viewport_group_lacking( int $viewport_width ): bool {
 		$last_was_lacking = false;

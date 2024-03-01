@@ -259,11 +259,11 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 			'none-needed'            => array_merge(
 				$none_needed_data,
 				array(
-					'expected_return'          => array(
+					'expected_return'           => array(
 						array( 0, false ),
 						array( 481, false ),
 					),
-					'expected_is_group_filled' => array(
+					'expected_is_group_lacking' => array(
 						400 => false,
 						480 => false,
 						600 => false,
@@ -277,11 +277,11 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 					'sample_size' => $none_needed_data['sample_size'] + 1,
 				),
 				array(
-					'expected_return'          => array(
+					'expected_return'           => array(
 						array( 0, true ),
 						array( 481, true ),
 					),
-					'expected_is_group_filled' => array(
+					'expected_is_group_lacking' => array(
 						200 => true,
 						480 => true,
 						481 => true,
@@ -298,11 +298,11 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 					return $data;
 				} )( $none_needed_data ),
 				array(
-					'expected_return'          => array(
+					'expected_return'           => array(
 						array( 0, true ),
 						array( 481, false ),
 					),
-					'expected_is_group_filled' => array(
+					'expected_is_group_lacking' => array(
 						200 => true,
 						400 => true,
 						480 => true,
@@ -322,14 +322,14 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_test_get_viewport_group_lacking_statuses
 	 */
-	public function test_get_viewport_group_lacking_statuses( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_filled ) {
+	public function test_get_viewport_group_lacking_statuses( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_lacking ) {
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertSame(
 			$expected_return,
 			$grouped_url_metrics->get_viewport_group_lacking_statuses()
 		);
 
-		foreach ( $expected_is_group_filled as $viewport_width => $expected ) {
+		foreach ( $expected_is_group_lacking as $viewport_width => $expected ) {
 			$this->assertSame(
 				$expected,
 				$grouped_url_metrics->is_viewport_group_lacking( $viewport_width ),
