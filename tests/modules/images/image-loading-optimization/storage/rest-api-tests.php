@@ -204,13 +204,10 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$sample_size     = ilo_get_url_metrics_breakpoint_sample_size();
 		$viewport_widths = array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) );
 		foreach ( $viewport_widths as $viewport_width ) {
-			for ( $i = 0; $i < $sample_size; $i++ ) {
-				$valid_params = $this->get_valid_params( array( 'viewport' => array( 'width' => $viewport_width ) ) );
-				$request      = new WP_REST_Request( 'POST', self::ROUTE );
-				$request->set_body_params( $valid_params );
-				$response = rest_get_server()->dispatch( $request );
-				$this->assertSame( 200, $response->get_status() );
-			}
+			$this->populate_url_metrics(
+				$sample_size,
+				$this->get_valid_params( array( 'viewport' => array( 'width' => $viewport_width ) ) )
+			);
 		}
 
 		// The next request will be rejected because all groups are fully populated with samples.
@@ -233,12 +230,10 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 
 		// First fully populate the sample for a given breakpoint.
 		$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
-		for ( $i = 0; $i < $sample_size; $i++ ) {
-			$request = new WP_REST_Request( 'POST', self::ROUTE );
-			$request->set_body_params( $valid_params );
-			$response = rest_get_server()->dispatch( $request );
-			$this->assertSame( 200, $response->get_status() );
-		}
+		$this->populate_url_metrics(
+			$sample_size,
+			$valid_params
+		);
 
 		// The next request will be rejected because the one group is fully populated with the needed sample size.
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
@@ -248,12 +243,12 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test fully populating the larger viewport group and then adding one more.
+	 * Test fully populating the wider viewport group and then adding one more.
 	 *
 	 * @covers ::ilo_register_endpoint
 	 * @covers ::ilo_handle_rest_request
 	 */
-	public function test_rest_request_over_populate_larger_viewport_group() {
+	public function test_rest_request_over_populate_wider_viewport_group() {
 		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
 
 		// First establish a single breakpoint, so there are two groups of URL metrics
@@ -270,12 +265,10 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 
 		// Fully populate the wider viewport group, leaving the narrower one empty.
 		$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
-		for ( $i = 0; $i < $sample_size; $i++ ) {
-			$request = new WP_REST_Request( 'POST', self::ROUTE );
-			$request->set_body_params( $wider_viewport_params );
-			$response = rest_get_server()->dispatch( $request );
-			$this->assertSame( 200, $response->get_status() );
-		}
+		$this->populate_url_metrics(
+			$sample_size,
+			$wider_viewport_params
+		);
 
 		// Sanity check that the groups were constructed as expected.
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics(
@@ -295,6 +288,21 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$request->set_body_params( $wider_viewport_params );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 403, $response->get_status(), 'Response: ' . wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
+	 * Populate URL metrics.
+	 *
+	 * @param int   $count  Count of URL metrics to populate.
+	 * @param array $params Params for URL metric.
+	 */
+	private function populate_url_metrics( int $count, array $params ) {
+		for ( $i = 0; $i < $count; $i++ ) {
+			$request = new WP_REST_Request( 'POST', self::ROUTE );
+			$request->set_body_params( $params );
+			$response = rest_get_server()->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+		}
 	}
 
 	/**
