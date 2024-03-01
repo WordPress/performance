@@ -7,9 +7,16 @@
 	convertWarningsToExceptions="true"
 	>
 	<testsuites>
-		<testsuite name="default">
+		<testsuite name="performance-lab">
 			<directory suffix=".php">./tests</directory>
-    		<exclude>./tests/utils</exclude>
+			<exclude>./tests/utils</exclude>
+			<exclude>./tests/plugins</exclude>
+		</testsuite>
+		<testsuite name="auto-sizes">
+			<directory suffix=".php">./tests/plugins/auto-sizes</directory>
+		</testsuite>
+		<testsuite name="speculation-rules">
+			<directory suffix=".php">./tests/plugins/speculation-rules</directory>
 		</testsuite>
 	</testsuites>
 	<groups>

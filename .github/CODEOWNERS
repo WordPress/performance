@@ -53,3 +53,11 @@
 /modules/images/dominant-color-images                                       @pbearne @spacedmonkey
 /tests/modules/images/dominant-color-images                                 @pbearne @spacedmonkey
 /tests/testdata/modules/images/dominant-color-images                        @pbearne @spacedmonkey
+
+# Plugin: Auto-sizes for Lazy-Loaded Images
+/plugins/auto-sizes                         @joemcgill
+/tests/plugins/auto-sizes                   @joemcgill
+
+# Plugin: Speculation Rules
+/plugins/speculation-rules                  @felixarntz
+/tests/plugins/speculation-rules            @felixarntz

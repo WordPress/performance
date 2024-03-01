@@ -9,6 +9,7 @@
 /docs export-ignore
 /tests export-ignore
 /plugin-tests export-ignore
+/plugins export-ignore
 
 /*.DS_store export-ignore
 /.DS_store? export-ignore
@@ -21,7 +22,8 @@
 /composer.lock export-ignore
 /package.json export-ignore
 /package-lock.json export-ignore
-/phpcs.xml.dist export-ignore
+phpcs.xml.dist export-ignore
+/phpcs.ruleset.xml export-ignore
 /phpstan.neon.dist export-ignore
 /phpunit.xml.dist export-ignore
 
@@ -34,3 +36,5 @@
 
 /modules/**/readme.txt export-ignore
 /modules/**/.wordpress-org export-ignore
+
+/plugins/**/.wordpress-org export-ignore
