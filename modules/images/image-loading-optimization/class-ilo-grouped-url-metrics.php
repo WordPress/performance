@@ -153,6 +153,24 @@ final class ILO_Grouped_URL_Metrics {
 	}
 
 	/**
+	 * Determines whether the group for a given viewport has been filled to the sample size.
+	 *
+	 * @param int $viewport_width Viewport width.
+	 * @return bool Whether group is filled.
+	 */
+	public function is_group_filled( int $viewport_width ): bool {
+		$last_was_needed = false;
+		foreach ( $this->get_needed_minimum_viewport_widths() as list( $minimum_viewport_width, $is_needed ) ) {
+			if ( $viewport_width >= $minimum_viewport_width ) {
+				$last_was_needed = $is_needed;
+			} else {
+				break;
+			}
+		}
+		return $last_was_needed;
+	}
+
+	/**
 	 * Gets needed minimum viewport widths.
 	 *
 	 * @since n.e.x.t

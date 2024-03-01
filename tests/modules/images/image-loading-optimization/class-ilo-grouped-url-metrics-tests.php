@@ -398,6 +398,15 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test is_group_filled().
+	 *
+	 * @covers ::is_group_filled
+	 */
+	public function test_is_group_filled() {
+		$this->markTestIncomplete();
+	}
+
+	/**
 	 * Test get_needed_minimum_viewport_widths().
 	 *
 	 * @covers ::get_needed_minimum_viewport_widths
