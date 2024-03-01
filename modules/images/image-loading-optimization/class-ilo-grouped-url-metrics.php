@@ -164,19 +164,19 @@ final class ILO_Grouped_URL_Metrics {
 	 * @return bool Whether group is filled.
 	 */
 	public function is_viewport_group_lacking( int $viewport_width ): bool {
-		$last_was_needed = false;
-		foreach ( $this->get_lacking_viewport_groups() as list( $minimum_viewport_width, $is_needed ) ) {
+		$last_was_lacking = false;
+		foreach ( $this->get_viewport_group_lacking_statuses() as list( $minimum_viewport_width, $is_lacking ) ) {
 			if ( $viewport_width >= $minimum_viewport_width ) {
-				$last_was_needed = $is_needed;
+				$last_was_lacking = $is_lacking;
 			} else {
 				break;
 			}
 		}
-		return $last_was_needed;
+		return $last_was_lacking;
 	}
 
 	/**
-	 * Gets which viewport groups are lacking URL metrics.
+	 * Gets the statuses of whether the viewport groups are lacking.
 	 *
 	 * A viewport group is lacking URL metrics if it does not have the desired sample size or
 	 * if some of the URL metrics are stale.
@@ -186,10 +186,10 @@ final class ILO_Grouped_URL_Metrics {
 	 *
 	 * @return array<int, array{int, bool}> Array of tuples mapping minimum viewport width to whether URL metric(s) are needed.
 	 */
-	public function get_lacking_viewport_groups(): array {
+	public function get_viewport_group_lacking_statuses(): array {
 		$current_time = microtime( true );
 
-		$lacking_viewport_groups = array();
+		$statuses = array();
 		foreach ( $this->groups as $minimum_viewport_width => $viewport_url_metrics ) {
 			$needs_url_metrics = false;
 			if ( count( $viewport_url_metrics ) < $this->sample_size ) {
@@ -202,13 +202,13 @@ final class ILO_Grouped_URL_Metrics {
 					}
 				}
 			}
-			$lacking_viewport_groups[] = array(
+			$statuses[] = array(
 				$minimum_viewport_width,
 				$needs_url_metrics,
 			);
 		}
 
-		return $lacking_viewport_groups;
+		return $statuses;
 	}
 
 	/**
