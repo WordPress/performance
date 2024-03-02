@@ -35,30 +35,28 @@ jobs:
     name: 'Pre Run'
     runs-on: ubuntu-latest
     outputs:
-      plugins: ${{ steps.get-plugins.outputs.plugins }}
-      environment: ${{ steps.set-environment.outputs.environment }}
+      json: ${{ steps.create-matrix.outputs.json }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get plugins
-        id: get-plugins
+      - name: Create Matrix JSON
+        id: create-matrix
         run: |
-          echo "plugins=$(jq -r '.plugins' plugins.json)" >> $GITHUB_OUTPUT
-
-      - name: Set environment matrix
-        id: set-environment
-        run: |
-          echo "environment=[
-            { php: '7.0', phpunit: '6', wp: 'latest' },
-            { php: '7.1', phpunit: '7', wp: 'latest' },
-            { php: '7.2', phpunit: '7', wp: 'latest' },
-            { php: '7.3', phpunit: '7', wp: 'latest' },
-            { php: '7.4', phpunit: '9.3', wp: 'latest' },
-            { php: '8.0', phpunit: '9.3', wp: 'latest' },
-            { php: '8.1', phpunit: '9.6', wp: 'latest' },
-            { php: '8.2', phpunit: '9.6', wp: 'latest' },
-          ]" >> $GITHUB_OUTPUT
+          raw_json="{
+            \"plugins\": $(jq -r '.plugins' plugins.json),
+            \"environment\": [
+              { \"php\": \"7.0\", \"phpunit\": \"6\", \"wp\": \"latest\" },
+              { \"php\": \"7.1\", \"phpunit\": \"7\", \"wp\": \"latest\" },
+              { \"php\": \"7.2\", \"phpunit\": \"7\", \"wp\": \"latest\" },
+              { \"php\": \"7.3\", \"phpunit\": \"7\", \"wp\": \"latest\" },
+              { \"php\": \"7.4\", \"phpunit\": \"9.3\", \"wp\": \"latest\" },
+              { \"php\": \"8.0\", \"phpunit\": \"9.3\", \"wp\": \"latest\" },
+              { \"php\": \"8.1\", \"phpunit\": \"9.6\", \"wp\": \"latest\" },
+              { \"php\": \"8.2\", \"phpunit\": \"9.6\", \"wp\": \"latest\" }
+            ]
+          }"
+          echo "json=$(echo $raw_json | jq -c .)" >> $GITHUB_OUTPUT
 
   perflab-unit-tests:
     name: "PerfLab / PHP ${{ matrix.environment.php }} / WP ${{ matrix.environment.wp }} ${{ 'true' == matrix.multisite && '/ Multisite' || ''}}"
@@ -80,8 +78,7 @@ jobs:
       fail-fast: false
       matrix:
         multisite: ['true', 'false']
-        environment: ${{ needs.pre-run.outputs.environment }}
-
+        environment: ${{ fromJson(needs.pre-run.outputs.json).environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -122,12 +119,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        plugin: ${{ needs.pre-run.outputs.plugins }}
-        environment: ${{ needs.pre-run.outputs.environment }}
-        includes:
-          - multisite: 'true'
-          - multisite: 'false'
-
+        multisite: ['true', 'false']
+        plugin: ${{ fromJson(needs.pre-run.outputs.json).plugins }}
+        environment: ${{ fromJson(needs.pre-run.outputs.json).environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
