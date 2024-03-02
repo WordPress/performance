@@ -24,10 +24,6 @@ inputs:
     description: 'PHPUnit version'
     required: false
     default: '9.3'
-  multisite-tests:
-    description: 'Run multisite tests'
-    required: false
-    default: 'false'
   plugin-path:
     description: 'Path to the plugin'
     required: false

@@ -89,7 +89,6 @@ jobs:
           wp: ${{ matrix.environment.wp }}
           php: ${{ matrix.environment.php }}
           phpunit: ${{ matrix.environment.phpunit }}
-          multisite-tests: ${{ matrix.multisite }}
           mysql-port: ${{ job.services.mysql.ports['3306'] }}
 
       - name: Run ${{ 'true' == matrix.multisite && 'Multisite' || 'Single Site' }} tests
@@ -132,10 +131,9 @@ jobs:
           wp: ${{ matrix.environment.wp }}
           php: ${{ matrix.environment.php }}
           phpunit: ${{ matrix.environment.phpunit }}
-          multisite-tests: ${{ matrix.environment.multisite }}
           mysql-port: ${{ job.services.mysql.ports['3306'] }}
 
-      - name: Run ${{ 'true' == matrix.environment.multisite && 'Multisite' || 'Single Site' }} tests
+      - name: Run ${{ 'true' == matrix.multisite && 'Multisite' || 'Single Site' }} tests
         shell: bash
         run: |
           phpunit ${{ 'true' == matrix.multisite && '--exclude-group=ms-excluded' || '' }} --verbose
