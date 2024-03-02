@@ -2,7 +2,7 @@
 <ruleset name="WPP-PerfLab">
 	<description>WordPress Coding Standards for the Performance Lab Plugin</description>
 	<rule ref="phpcs.ruleset.xml"/>
-	
+
 	<config name="text_domain" value="performance-lab,default"/>
 
 	<!-- Do not require file headers on generated files -->

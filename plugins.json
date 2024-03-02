@@ -9,5 +9,8 @@
       "version": "1.0.5"
     }
   },
-  "plugins": [ "auto-sizes" ]
+  "plugins": [
+    "auto-sizes",
+    "speculation-rules"
+  ]
 }

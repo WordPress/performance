@@ -18,6 +18,9 @@
 		<testsuite name="auto-sizes">
 			<directory suffix=".php">./plugins/auto-sizes</directory>
 		</testsuite>
+		<testsuite name="speculation-rules">
+			<directory suffix=".php">./plugins/speculation-rules</directory>
+		</testsuite>
 	</testsuites>
 	<groups>
 		<exclude>
