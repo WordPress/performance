@@ -77,7 +77,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        multisite: ['true', 'false']
+        multisite: ['false', 'true']
         environment: ${{ fromJson(needs.pre-run.outputs.json).environment }}
     steps:
       - name: Checkout
@@ -118,7 +118,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        multisite: ['true', 'false']
+        multisite: ['false', 'true']
         plugin: ${{ fromJson(needs.pre-run.outputs.json).plugins }}
         environment: ${{ fromJson(needs.pre-run.outputs.json).environment }}
     steps:
