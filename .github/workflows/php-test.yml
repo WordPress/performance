@@ -25,15 +25,46 @@ on:
 
 permissions: {}
 
+env:
+  WP_CORE_DIR: /tmp/wordpress
+  WP_TESTS_DIR: /tmp/wordpress-tests-lib
+  WP_ENVIRONMENT_TYPE: local
+
 jobs:
-  unit-test-main-plugin:
+  pre-run:
+    name: 'Pre Run'
+    runs-on: ubuntu-latest
+    outputs:
+      plugins: ${{ steps.get-plugins.outputs.plugins }}
+      environment: ${{ steps.set-environment.outputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get plugins
+        id: get-plugins
+        run: |
+          echo "plugins=$(jq -r '.plugins' plugins.json)" >> $GITHUB_OUTPUT
+
+      - name: Set environment matrix
+        id: set-environment
+        run: |
+          echo "environment=[
+            { php: '7.0', phpunit: '6', wp: 'latest' },
+            { php: '7.1', phpunit: '7', wp: 'latest' },
+            { php: '7.2', phpunit: '7', wp: 'latest' },
+            { php: '7.3', phpunit: '7', wp: 'latest' },
+            { php: '7.4', phpunit: '9.3', wp: 'latest' },
+            { php: '8.0', phpunit: '9.3', wp: 'latest' },
+            { php: '8.1', phpunit: '9.6', wp: 'latest' },
+            { php: '8.2', phpunit: '9.6', wp: 'latest' },
+          ]" >> $GITHUB_OUTPUT
+
+  perflab-unit-tests:
     name: "PerfLab / PHP ${{ matrix.environment.php }} / WP ${{ matrix.environment.wp }} ${{ 'true' == matrix.multisite && '/ Multisite' || ''}}"
+    needs: pre-run
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      WP_CORE_DIR: /tmp/wordpress
-      WP_TESTS_DIR: /tmp/wordpress-tests-lib
-      WP_ENVIRONMENT_TYPE: local
     services:
       mysql:
         image: mariadb:latest
@@ -49,17 +80,7 @@ jobs:
       fail-fast: false
       matrix:
         multisite: ['true', 'false']
-        environment:
-          [
-            { php: '7.0', phpunit: '6', wp: 'latest' },
-            { php: '7.1', phpunit: '7', wp: 'latest' },
-            { php: '7.2', phpunit: '7', wp: 'latest' },
-            { php: '7.3', phpunit: '7', wp: 'latest' },
-            { php: '7.4', phpunit: '9.3', wp: 'latest' },
-            { php: '8.0', phpunit: '9.3', wp: 'latest' },
-            { php: '8.1', phpunit: '9.6', wp: 'latest' },
-            { php: '8.2', phpunit: '9.6', wp: 'latest' },
-          ]
+        environment: ${{ needs.pre-run.outputs.environment }}
 
     steps:
       - name: Checkout
@@ -77,19 +98,16 @@ jobs:
       - name: Run ${{ 'true' == matrix.multisite && 'Multisite' || 'Single Site' }} tests
         shell: bash
         run: |
-          phpunit --verbose
+          phpunit ${{ 'true' == matrix.multisite && '--exclude-group=ms-excluded' || '' }} --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance
         env:
           WP_MULTISITE: ${{ 'true' == matrix.multisite && 1 || 0 }}
 
-  unit-tests-standalone-plugins:
-    name: "Plugin: ${{ matrix.plugin }} / PHP ${{ matrix.environment.php }} / WP ${{ matrix.environment.wp }} ${{ 'true' == matrix.environment.multisite && '/ Multisite' || ''}}"
+  plugins-unit-tests:
+    name: "Plugin: ${{ matrix.plugin }} / PHP ${{ matrix.environment.php }} / WP ${{ matrix.environment.wp }} ${{ 'true' == matrix.multisite && '/ Multisite' || ''}}"
+    needs: pre-run
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      WP_CORE_DIR: /tmp/wordpress
-      WP_TESTS_DIR: /tmp/wordpress-tests-lib
-      WP_ENVIRONMENT_TYPE: local
     services:
       mysql:
         image: mariadb:latest
@@ -104,26 +122,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        plugin: ['auto-sizes', 'dominant-color-images', 'webp-uploads']
-        environment:
-          [
-            { php: '7.0', phpunit: '6', wp: 'latest', multisite: 'true' },
-            { php: '7.1', phpunit: '7', wp: 'latest', multisite: 'true' },
-            { php: '7.2', phpunit: '7', wp: 'latest', multisite: 'true' },
-            { php: '7.3', phpunit: '7', wp: 'latest', multisite: 'true' },
-            { php: '7.4', phpunit: '9.3', wp: 'latest', multisite: 'true' },
-            { php: '8.0', phpunit: '9.3', wp: 'latest', multisite: 'true' },
-            { php: '8.1', phpunit: '9.6', wp: 'latest', multisite: 'true' },
-            { php: '8.2', phpunit: '9.6', wp: 'latest', multisite: 'true' },
-            { php: '7.0', phpunit: '6', wp: 'latest', multisite: 'false' },
-            { php: '7.1', phpunit: '7', wp: 'latest', multisite: 'false' },
-            { php: '7.2', phpunit: '7', wp: 'latest', multisite: 'false' },
-            { php: '7.3', phpunit: '7', wp: 'latest', multisite: 'false' },
-            { php: '7.4', phpunit: '9.3', wp: 'latest', multisite: 'false' },
-            { php: '8.0', phpunit: '9.3', wp: 'latest', multisite: 'false' },
-            { php: '8.1', phpunit: '9.6', wp: 'latest', multisite: 'false' },
-            { php: '8.2', phpunit: '9.6', wp: 'latest', multisite: 'false' },
-          ]
+        plugin: ${{ needs.pre-run.outputs.plugins }}
+        environment: ${{ needs.pre-run.outputs.environment }}
+        includes:
+          - multisite: 'true'
+          - multisite: 'false'
 
     steps:
       - name: Checkout
@@ -141,7 +144,7 @@ jobs:
       - name: Run ${{ 'true' == matrix.environment.multisite && 'Multisite' || 'Single Site' }} tests
         shell: bash
         run: |
-          phpunit --verbose
+          phpunit ${{ 'true' == matrix.multisite && '--exclude-group=ms-excluded' || '' }} --verbose
         working-directory: ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance/plugins/${{ matrix.plugin }}
         env:
-          WP_MULTISITE: ${{ 'true' == matrix.environment.multisite && 1 || 0 }}
+          WP_MULTISITE: ${{ 'true' == matrix.multisite && 1 || 0 }}
