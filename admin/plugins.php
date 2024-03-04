@@ -18,6 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array Array of plugin data, or empty if none/error.
  */
 function perflab_query_plugin_info( string $plugin_slug ) {
+	$plugin = get_transient( 'perflab_plugin_info_' . $plugin_slug );
+
+	if ( $plugin ) {
+		return $plugin;
+	}
+
 	$plugin = plugins_api(
 		'plugin_information',
 		array(
@@ -36,6 +42,8 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	if ( is_object( $plugin ) ) {
 		$plugin = (array) $plugin;
 	}
+
+	set_transient( 'perflab_plugin_info_' . $plugin_slug, $plugin, HOUR_IN_SECONDS );
 
 	return $plugin;
 }
