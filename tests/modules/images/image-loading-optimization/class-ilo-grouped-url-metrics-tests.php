@@ -67,7 +67,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	/**
 	 * Test add().
 	 *
-	 * @covers ::add
+	 * @covers ::add_url_metric
 	 *
 	 * @param int             $sample_size     Sample size.
 	 * @param array           $breakpoints     Breakpoints.
@@ -77,13 +77,13 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 * @dataProvider data_provider_sample_size_and_breakpoints
 	 * @throws ILO_Data_Validation_Exception When failing to instantiate a URL metric.
 	 */
-	public function test_add( int $sample_size, array $breakpoints, array $viewport_widths, array $expected_counts ) {
+	public function test_add_url_metric( int $sample_size, array $breakpoints, array $viewport_widths, array $expected_counts ) {
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
 
 		// Over-populate the sample size for the breakpoints by a dozen.
 		foreach ( $viewport_widths as $viewport_width => $count ) {
 			for ( $i = 0; $i < $count; $i++ ) {
-				$grouped_url_metrics->add( $this->get_validated_url_metric( $viewport_width ) );
+				$grouped_url_metrics->add_url_metric( $this->get_validated_url_metric( $viewport_width ) );
 			}
 		}
 
@@ -101,7 +101,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	/**
 	 * Test that add() pushes out old metrics.
 	 *
-	 * @covers ::add
+	 * @covers ::add_url_metric
 	 *
 	 * @throws ILO_Data_Validation_Exception When failing to instantiate a URL metric.
 	 */
@@ -116,7 +116,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 
 		foreach ( $viewport_widths as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
-				$grouped_url_metrics->add(
+				$grouped_url_metrics->add_url_metric(
 					new ILO_URL_Metric(
 						array_merge(
 							$this->get_validated_url_metric( $viewport_width )->jsonSerialize(),
@@ -131,7 +131,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 
 		// Try adding one URL metric for each breakpoint group.
 		foreach ( $viewport_widths as $viewport_width ) {
-			$grouped_url_metrics->add( $this->get_validated_url_metric( $viewport_width ) );
+			$grouped_url_metrics->add_url_metric( $this->get_validated_url_metric( $viewport_width ) );
 		}
 
 		$max_possible_url_metrics_count = $sample_size * ( count( $breakpoints ) + 1 );
@@ -374,11 +374,11 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 			HOUR_IN_SECONDS
 		);
 		$this->assertFalse( $grouped_url_metrics->is_every_group_populated() );
-		$grouped_url_metrics->add( $this->get_validated_url_metric( 200 ) );
+		$grouped_url_metrics->add_url_metric( $this->get_validated_url_metric( 200 ) );
 		$this->assertFalse( $grouped_url_metrics->is_every_group_populated() );
-		$grouped_url_metrics->add( $this->get_validated_url_metric( 500 ) );
+		$grouped_url_metrics->add_url_metric( $this->get_validated_url_metric( 500 ) );
 		$this->assertFalse( $grouped_url_metrics->is_every_group_populated() );
-		$grouped_url_metrics->add( $this->get_validated_url_metric( 900 ) );
+		$grouped_url_metrics->add_url_metric( $this->get_validated_url_metric( 900 ) );
 		$this->assertTrue( $grouped_url_metrics->is_every_group_populated() );
 	}
 

@@ -85,7 +85,7 @@ final class ILO_Grouped_URL_Metrics {
 	 *
 	 * @param ILO_URL_Metric $new_url_metric New URL metric.
 	 */
-	public function add( ILO_URL_Metric $new_url_metric ) {
+	public function add_url_metric( ILO_URL_Metric $new_url_metric ) {
 		$url_metrics = $this->flatten();
 		array_unshift( $url_metrics, $new_url_metric );
 
