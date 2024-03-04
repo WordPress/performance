@@ -56,7 +56,7 @@ This example would ensure that URLs like `https://example.com/cart/` or `https:/
 
 add_filter(
 	'plsr_speculation_rules_href_exclude_paths',
-	function ( $exclude_paths ) {
+	function ( array $exclude_paths ): array {
 		$exclude_paths[] = '/cart/*';
 		return $exclude_paths;
 	}
@@ -73,7 +73,7 @@ The following example would ensure that URLs like `https://example.com/products/
 
 add_filter(
 	'plsr_speculation_rules_href_exclude_paths',
-	function ( $exclude_paths, $mode ) {
+	function ( array $exclude_paths, string $mode ): array {
 		if ( 'prerender' === $mode ) {
 			$exclude_paths[] = '/products/*';
 		}
