@@ -15,6 +15,11 @@
  * @package speculation-rules
  */
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 // Define the constant.
 if ( defined( 'SPECULATION_RULES_VERSION' ) ) {
 	return;
