@@ -2,7 +2,7 @@
 
 Contributors:      wordpressdotorg
 Requires at least: 6.3
-Tested up to:      6.4
+Tested up to:      6.5
 Requires PHP:      7.0
 Stable tag:        2.9.0
 License:           GPLv2 or later

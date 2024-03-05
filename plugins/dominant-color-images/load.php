@@ -5,7 +5,7 @@
  * Description: Adds support to store the dominant color of newly uploaded images and create a placeholder background of that color.
  * Requires at least: 6.3
  * Requires PHP: 7.0
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -25,7 +25,7 @@ if ( defined( 'DOMINANT_COLOR_IMAGES_VERSION' ) ) {
 	return;
 }
 
-define( 'DOMINANT_COLOR_IMAGES_VERSION', '1.0.1' );
+define( 'DOMINANT_COLOR_IMAGES_VERSION', '1.0.2' );
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';
