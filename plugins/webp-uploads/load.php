@@ -21,6 +21,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define required constants.
+if ( defined( 'WEBP_UPLOADS_VERSION' ) ) {
+	return;
+}
+
 define( 'WEBP_UPLOADS_VERSION', '1.0.5' );
 
 require_once __DIR__ . '/helper.php';

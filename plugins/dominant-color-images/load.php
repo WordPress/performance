@@ -21,6 +21,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define required constants.
+if ( defined( 'DOMINANT_COLOR_IMAGES_VERSION' ) ) {
+	return;
+}
+
 define( 'DOMINANT_COLOR_IMAGES_VERSION', '1.0.1' );
 
 require_once __DIR__ . '/helper.php';
