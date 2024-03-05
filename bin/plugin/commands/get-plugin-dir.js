@@ -58,7 +58,7 @@ function doRunGetPluginDir( settings ) {
 		}
 
 		for ( const plugin of Object.values( plugins ) ) {
-			if ( settings.slug === plugin.slug ) {
+			if ( settings.slug === plugin ) {
 				log( 'plugins' );
 				return;
 			}
