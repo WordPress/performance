@@ -15,9 +15,9 @@
 final class ILO_Grouped_URL_Metrics {
 
 	/**
-	 * URL metrics grouped by minimum viewport width for the provided breakpoints.
+	 * URL metrics groups.
 	 *
-	 * @var array<int, ILO_URL_Metric[]>
+	 * @var ILO_URL_Metrics_Group[]
 	 */
 	private $groups;
 
@@ -45,34 +45,99 @@ final class ILO_Grouped_URL_Metrics {
 	/**
 	 * Constructor.
 	 *
+	 * @throws InvalidArgumentException When an invalid argument is supplied.
+	 *
 	 * @param ILO_URL_Metric[] $url_metrics   URL metrics.
 	 * @param int[]            $breakpoints   Breakpoints in max widths.
 	 * @param int              $sample_size   Sample size for the maximum number of viewports in a group between breakpoints.
 	 * @param int              $freshness_ttl Freshness age (TTL) for a given URL metric.
 	 */
 	public function __construct( array $url_metrics, array $breakpoints, int $sample_size, int $freshness_ttl ) {
-		$this->breakpoints   = $breakpoints;
-		$this->sample_size   = $sample_size;
+		// Set breakpoints.
+		sort( $breakpoints );
+		$breakpoints = array_values( array_unique( $breakpoints, SORT_NUMERIC ) );
+		foreach ( $breakpoints as $breakpoint ) {
+			if ( $breakpoint <= 0 ) {
+				throw new InvalidArgumentException(
+					esc_html(
+						sprintf(
+							/* translators: %d is the invalid breakpoint */
+							__(
+								'Each of the breakpoints must be greater than zero, but encountered: %d',
+								'performance-lab'
+							),
+							$breakpoint
+						)
+					)
+				);
+			}
+		}
+		$this->breakpoints = $breakpoints;
+
+		// Set sample size.
+		if ( $sample_size <= 0 ) {
+			throw new InvalidArgumentException(
+				esc_html(
+					sprintf(
+						/* translators: %d is the invalid sample size */
+						__( 'Sample size must be greater than zero, but provided: %d', 'performance-lab' ),
+						$sample_size
+					)
+				)
+			);
+		}
+		$this->sample_size = $sample_size;
+
+		// Set freshness TTL.
+		if ( $freshness_ttl < 0 ) {
+			throw new InvalidArgumentException(
+				esc_html(
+					sprintf(
+						/* translators: %d is the invalid sample size */
+						__( 'Freshness TTL must be at least zero, but provided: %d', 'performance-lab' ),
+						$freshness_ttl
+					)
+				)
+			);
+		}
 		$this->freshness_ttl = $freshness_ttl;
-		$this->groups        = $this->group_url_metrics_by_breakpoint( $url_metrics );
+
+		// Set groups.
+		$this->groups = $this->group_url_metrics_by_breakpoint( $url_metrics );
 	}
 
 	/**
 	 * Gets grouped keyed by the minimum viewport width.
 	 *
-	 * @return array<int, ILO_URL_Metric[]> Groups.
+	 * @return ILO_URL_Metrics_Group[] Groups.
 	 */
 	public function get_groups(): array {
 		return $this->groups;
 	}
 
 	/**
-	 * Gets minimum viewport widths for the groups of URL metrics divided by the breakpoints.
+	 * Get group for viewport width.
 	 *
-	 * @return int[]
+	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
+	 *
+	 * @param int $viewport_width Viewport width.
+	 * @return ILO_URL_Metrics_Group URL metrics group for the viewport width.
 	 */
-	public function get_minimum_viewport_widths(): array {
-		return array_keys( $this->groups );
+	public function get_group_for_viewport_width( int $viewport_width ): ILO_URL_Metrics_Group {
+		foreach ( $this->groups as $group ) {
+			if ( $group->is_viewport_width_in_range( $viewport_width ) ) {
+				return $group;
+			}
+		}
+		throw new InvalidArgumentException(
+			esc_html(
+				sprintf(
+					/* translators: %d is viewport width */
+					__( 'No URL metrics group found for viewport width: %d', 'performance-lab' ),
+					$viewport_width
+				)
+			)
+		);
 	}
 
 	/**
@@ -80,39 +145,16 @@ final class ILO_Grouped_URL_Metrics {
 	 *
 	 * Once a group reaches the sample size, the oldest URL metric is pushed out.
 	 *
-	 * @since n.e.x.t
-	 * @access private
-	 *
 	 * @param ILO_URL_Metric $new_url_metric New URL metric.
+	 * @return bool Whether the URL metric was added to a group.
 	 */
-	public function add_url_metric( ILO_URL_Metric $new_url_metric ) {
-		$url_metrics = $this->flatten();
-		array_unshift( $url_metrics, $new_url_metric );
-
-		$grouped_url_metrics = $this->group_url_metrics_by_breakpoint( $url_metrics );
-
-		// Make sure there is at most $sample_size number of URL metrics for each breakpoint.
-		$grouped_url_metrics = array_map(
-			function ( $breakpoint_url_metrics ) {
-				if ( count( $breakpoint_url_metrics ) > $this->sample_size ) {
-
-					// Sort URL metrics in descending order by timestamp.
-					usort(
-						$breakpoint_url_metrics,
-						static function ( ILO_URL_Metric $a, ILO_URL_Metric $b ): int {
-							return $b->get_timestamp() <=> $a->get_timestamp();
-						}
-					);
-
-					// Only keep the sample size of the newest URL metrics.
-					$breakpoint_url_metrics = array_slice( $breakpoint_url_metrics, 0, $this->sample_size );
-				}
-				return $breakpoint_url_metrics;
-			},
-			$grouped_url_metrics
-		);
-
-		$this->groups = $grouped_url_metrics;
+	public function add_url_metric( ILO_URL_Metric $new_url_metric ): bool {
+		foreach ( $this->groups as $group ) {
+			if ( $group->add_url_metric( $new_url_metric ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -122,90 +164,28 @@ final class ILO_Grouped_URL_Metrics {
 	 * @access private
 	 *
 	 * @param ILO_URL_Metric[] $url_metrics URL metrics.
-	 * @return array<int, ILO_URL_Metric[]> URL metrics grouped by breakpoint. The array keys are the minimum widths for a viewport to lie within
-	 *                                      the breakpoint. The returned array is always one larger than the provided array of breakpoints, since
-	 *                                      the breakpoints reflect the max inclusive boundaries whereas the return value is the groups of page
-	 *                                      metrics with viewports on either side of the breakpoint boundaries.
+	 * @return ILO_URL_Metrics_Group[] URL metrics grouped by breakpoint.
 	 */
 	private function group_url_metrics_by_breakpoint( array $url_metrics ): array {
+		$url_metrics_groups     = array();
+		$minimum_viewport_width = 0;
+		foreach ( $this->breakpoints as $maximum_viewport_width ) {
+			$url_metrics_groups[]   = new ILO_URL_Metrics_Group( array(), $minimum_viewport_width, $maximum_viewport_width, $this->sample_size, $this->freshness_ttl );
+			$minimum_viewport_width = $maximum_viewport_width + 1;
+		}
+		$url_metrics_groups[] = new ILO_URL_Metrics_Group( array(), $minimum_viewport_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl );
 
-		// Convert breakpoint max widths into viewport minimum widths.
-		$minimum_viewport_widths = array_map(
-			static function ( $breakpoint ) {
-				return $breakpoint + 1;
-			},
-			$this->breakpoints
-		);
-
-		$grouped = array_fill_keys( array_merge( array( 0 ), $minimum_viewport_widths ), array() );
-
+		// Now add the URL metrics to the groups.
 		foreach ( $url_metrics as $url_metric ) {
-			$current_minimum_viewport = 0;
-			foreach ( $minimum_viewport_widths as $viewport_minimum_width ) {
-				if ( $url_metric->get_viewport()['width'] >= $viewport_minimum_width ) {
-					$current_minimum_viewport = $viewport_minimum_width;
-				} else {
-					break;
+			foreach ( $url_metrics_groups as $url_metrics_group ) {
+				if ( $url_metrics_group->add_url_metric( $url_metric ) ) {
+					// Skip to the next URL metric once successfully added to a group.
+					continue 2;
 				}
 			}
-
-			$grouped[ $current_minimum_viewport ][] = $url_metric;
-		}
-		return $grouped;
-	}
-
-	/**
-	 * Determines whether the URL metrics group for a given viewport is lacking URL metrics.
-	 *
-	 * Either the group does not have enough URL metrics for the desired sample size,
-	 * or some of the URL metrics are stale.
-	 *
-	 * @param int $viewport_width Viewport width.
-	 * @return bool Whether group is lacking.
-	 */
-	public function is_group_lacking( int $viewport_width ): bool {
-		$last_was_lacking = false;
-		foreach ( $this->get_group_statuses() as $status ) {
-			if ( $viewport_width >= $status->get_minimum_viewport_width() ) {
-				$last_was_lacking = $status->is_lacking();
-			} else {
-				break;
-			}
-		}
-		return $last_was_lacking;
-	}
-
-	/**
-	 * Gets the statuses of the URL metrics groups.
-	 *
-	 * A group is lacking URL metrics if it does not have the desired sample size or
-	 * if some of the URL metrics are stale.
-	 *
-	 * @since n.e.x.t
-	 * @access private
-	 *
-	 * @return ILO_URL_Metrics_Group_Status[] URL metrics group statuses.
-	 */
-	public function get_group_statuses(): array {
-		$current_time = microtime( true );
-
-		$statuses = array();
-		foreach ( $this->groups as $minimum_viewport_width => $viewport_url_metrics ) {
-			$is_lacking = false;
-			if ( count( $viewport_url_metrics ) < $this->sample_size ) {
-				$is_lacking = true;
-			} else {
-				foreach ( $viewport_url_metrics as $url_metric ) {
-					if ( $url_metric->get_timestamp() + $this->freshness_ttl < $current_time ) {
-						$is_lacking = true;
-						break;
-					}
-				}
-			}
-			$statuses[] = new ILO_URL_Metrics_Group_Status( $minimum_viewport_width, $is_lacking );
 		}
 
-		return $statuses;
+		return $url_metrics_groups;
 	}
 
 	/**
@@ -217,7 +197,7 @@ final class ILO_Grouped_URL_Metrics {
 	 */
 	public function is_every_group_populated(): bool {
 		foreach ( $this->groups as $group ) {
-			if ( empty( $group ) ) {
+			if ( $group->count() === 0 ) {
 				return false;
 			}
 		}
@@ -231,7 +211,12 @@ final class ILO_Grouped_URL_Metrics {
 	 */
 	public function flatten(): array {
 		return array_merge(
-			...array_values( $this->groups )
+			...array_map(
+				static function ( ILO_URL_Metrics_Group $group ): array {
+					return $group->get_url_metrics();
+				},
+				$this->groups
+			)
 		);
 	}
 }

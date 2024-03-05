@@ -156,12 +156,10 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		ilo_get_url_metric_freshness_ttl()
 	);
 
-	$group_statuses = $grouped_url_metrics->get_group_statuses();
-
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = false;
-	foreach ( $group_statuses as $group_status ) {
-		if ( $group_status->is_lacking() ) {
+	foreach ( $grouped_url_metrics->get_groups() as $group ) {
+		if ( $group->is_lacking() ) {
 			$needs_detection = true;
 			break;
 		}
@@ -316,7 +314,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-ilo-xpath attributes.
 	if ( $needs_detection ) {
-		$head_injection .= ilo_get_detection_script( $slug, $group_statuses );
+		$head_injection .= ilo_get_detection_script( $slug, $grouped_url_metrics );
 	}
 
 	if ( $head_injection ) {

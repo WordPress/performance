@@ -202,15 +202,15 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
  */
 function ilo_get_lcp_elements_by_minimum_viewport_widths( ILO_Grouped_URL_Metrics $grouped_url_metrics ): array {
 	$lcp_element_by_viewport_minimum_width = array();
-	foreach ( $grouped_url_metrics->get_groups() as $viewport_minimum_width => $breakpoint_url_metrics ) {
+	foreach ( $grouped_url_metrics->get_groups() as $group ) {
 
 		// The following arrays all share array indices.
 		$seen_breadcrumbs   = array();
 		$breadcrumb_counts  = array();
 		$breadcrumb_element = array();
 
-		foreach ( $breakpoint_url_metrics as $breakpoint_url_metric ) {
-			foreach ( $breakpoint_url_metric->get_elements() as $element ) {
+		foreach ( $group->get_url_metrics() as $url_metric ) {
+			foreach ( $url_metric->get_elements() as $element ) {
 				if ( ! $element['isLCP'] ) {
 					continue;
 				}
@@ -233,9 +233,9 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( ILO_Grouped_URL_Metric
 			arsort( $breadcrumb_counts );
 			$most_common_breadcrumb_index = key( $breadcrumb_counts );
 
-			$lcp_element_by_viewport_minimum_width[ $viewport_minimum_width ] = $breadcrumb_element[ $most_common_breadcrumb_index ];
-		} elseif ( ! empty( $breakpoint_url_metrics ) ) {
-			$lcp_element_by_viewport_minimum_width[ $viewport_minimum_width ] = false; // No LCP image at this breakpoint.
+			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = $breadcrumb_element[ $most_common_breadcrumb_index ];
+		} elseif ( $group->count() > 0 ) {
+			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = false; // No LCP image at this breakpoint.
 		}
 	}
 

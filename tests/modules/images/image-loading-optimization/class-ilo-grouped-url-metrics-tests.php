@@ -94,7 +94,8 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 		);
 
 		foreach ( $expected_counts as $minimum_viewport_width => $count ) {
-			$this->assertCount( $count, $grouped_url_metrics->get_groups()[ $minimum_viewport_width ] );
+			$group = $grouped_url_metrics->get_group_for_viewport_width( $minimum_viewport_width );
+			$this->assertSame( $count, $group->count(), "Expected equal count for $minimum_viewport_width minimum viewport width." );
 		}
 	}
 
@@ -155,28 +156,56 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array[]
 	 */
-	public function data_provider_test_get_groups_and_get_minimum_viewport_widths(): array {
+	public function data_provider_test_get_groups(): array {
 		return array(
 			'2-breakpoints-and-3-viewport-widths' => array(
 				'breakpoints'     => array( 480, 640 ),
 				'viewport_widths' => array( 400, 480, 800 ),
+				'expected_groups' => array(
+					array(
+						'minimum_viewport_width'     => 0,
+						'maximum_viewport_width'     => 480,
+						'url_metric_viewport_widths' => array( 400, 480 ),
+					),
+					array(
+						'minimum_viewport_width'     => 481,
+						'maximum_viewport_width'     => 640,
+						'url_metric_viewport_widths' => array(),
+					),
+					array(
+						'minimum_viewport_width'     => 641,
+						'maximum_viewport_width'     => PHP_INT_MAX,
+						'url_metric_viewport_widths' => array( 800 ),
+					),
+				),
 			),
 			'1-breakpoint-and-4-viewport-widths'  => array(
 				'breakpoints'     => array( 480 ),
 				'viewport_widths' => array( 400, 600, 800, 1000 ),
+				'expected_groups' => array(
+					array(
+						'minimum_viewport_width'     => 0,
+						'maximum_viewport_width'     => 480,
+						'url_metric_viewport_widths' => array( 400 ),
+					),
+					array(
+						'minimum_viewport_width'     => 481,
+						'maximum_viewport_width'     => PHP_INT_MAX,
+						'url_metric_viewport_widths' => array( 600, 800, 1000 ),
+					),
+				),
 			),
 		);
 	}
 
 	/**
-	 * Test get_groups() and get_minimum_viewport_widths().
+	 * Test get_groups().
 	 *
 	 * @covers ::get_groups
-	 * @covers ::get_minimum_viewport_widths
 	 *
-	 * @dataProvider data_provider_test_get_groups_and_get_minimum_viewport_widths
+	 * @dataProvider data_provider_test_get_groups
 	 */
-	public function test_get_groups_and_get_minimum_viewport_widths( array $breakpoints, array $viewport_widths ) {
+	public function test_get_groups( array $breakpoints, array $viewport_widths, array $expected_groups ) {
 		$url_metrics = array_map(
 			function ( $viewport_width ) {
 				return $this->get_validated_url_metric( $viewport_width );
@@ -186,34 +215,27 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, 3, HOUR_IN_SECONDS );
 
-		$this->assertCount( count( $breakpoints ) + 1, $grouped_url_metrics->get_groups(), 'Expected number of breakpoint groups to always be one greater than the number of breakpoints.' );
-		$minimum_viewport_widths = $grouped_url_metrics->get_minimum_viewport_widths();
-		$this->assertSame( array_keys( $grouped_url_metrics->get_groups() ), $minimum_viewport_widths );
-		$this->assertSame( 0, array_shift( $minimum_viewport_widths ), 'Expected the first minimum viewport width to always be zero.' );
-		foreach ( $breakpoints as $breakpoint ) {
-			$this->assertSame( $breakpoint + 1, array_shift( $minimum_viewport_widths ) );
+		$this->assertCount(
+			count( $breakpoints ) + 1,
+			$grouped_url_metrics->get_groups(),
+			'Expected number of breakpoint groups to always be one greater than the number of breakpoints.'
+		);
+
+		$actual_groups = array();
+		foreach ( $grouped_url_metrics->get_groups() as $group ) {
+			$actual_groups[] = array(
+				'minimum_viewport_width'     => $group->get_minimum_viewport_width(),
+				'maximum_viewport_width'     => $group->get_maximum_viewport_width(),
+				'url_metric_viewport_widths' => array_map(
+					static function ( ILO_URL_Metric $url_metric ) {
+						return $url_metric->get_viewport()['width'];
+					},
+					$group->get_url_metrics()
+				),
+			);
 		}
 
-		$minimum_viewport_widths = $grouped_url_metrics->get_minimum_viewport_widths();
-		for ( $i = 0, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
-			$minimum_viewport_width = $minimum_viewport_widths[ $i ];
-			$maximum_viewport_width = $minimum_viewport_widths[ $i + 1 ] ?? null;
-			if ( 0 === $i ) {
-				$this->assertSame( 0, $minimum_viewport_width );
-			} else {
-				$this->assertGreaterThan( 0, $minimum_viewport_width );
-			}
-			if ( isset( $maximum_viewport_width ) ) {
-				$this->assertLessThan( $maximum_viewport_width, $minimum_viewport_width );
-			}
-
-			foreach ( $grouped_url_metrics->get_groups()[ $minimum_viewport_width ] as $url_metric ) {
-				$this->assertGreaterThanOrEqual( $minimum_viewport_width, $url_metric->get_viewport()['width'] );
-				if ( isset( $maximum_viewport_width ) ) {
-					$this->assertLessThanOrEqual( $maximum_viewport_width, $url_metric->get_viewport()['width'] );
-				}
-			}
-		}
+		$this->assertEquals( $expected_groups, $actual_groups );
 	}
 
 	/**
@@ -262,11 +284,11 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 					'expected_return'           => array(
 						array(
 							'minimumViewportWidth' => 0,
-							'isLacking'            => false,
+							'lacking'              => false,
 						),
 						array(
 							'minimumViewportWidth' => 481,
-							'isLacking'            => false,
+							'lacking'              => false,
 						),
 					),
 					'expected_is_group_lacking' => array(
@@ -286,11 +308,11 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 					'expected_return'           => array(
 						array(
 							'minimumViewportWidth' => 0,
-							'isLacking'            => true,
+							'lacking'              => true,
 						),
 						array(
 							'minimumViewportWidth' => 481,
-							'isLacking'            => true,
+							'lacking'              => true,
 						),
 					),
 					'expected_is_group_lacking' => array(
@@ -313,11 +335,11 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 					'expected_return'           => array(
 						array(
 							'minimumViewportWidth' => 0,
-							'isLacking'            => true,
+							'lacking'              => true,
 						),
 						array(
 							'minimumViewportWidth' => 481,
-							'isLacking'            => false,
+							'lacking'              => false,
 						),
 					),
 					'expected_is_group_lacking' => array(
@@ -333,10 +355,12 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_group_statuses().
+	 * Test statuses().
 	 *
-	 * @covers ::get_group_statuses
-	 * @covers ::is_group_lacking
+	 * @covers ::get_groups
+	 * @covers ::get_group_for_viewport_width
+	 * @covers ILO_URL_Metrics_Group::is_lacking
+	 * @covers ILO_URL_Metrics_Group::get_minimum_viewport_width
 	 *
 	 * @dataProvider data_provider_test_get_group_statuses
 	 */
@@ -345,17 +369,20 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 		$this->assertSame(
 			$expected_return,
 			array_map(
-				static function ( ILO_URL_Metrics_Group_Status $status ) {
-					return $status->jsonSerialize();
+				static function ( ILO_URL_Metrics_Group $group ) {
+					return array(
+						'minimumViewportWidth' => $group->get_minimum_viewport_width(),
+						'lacking'              => $group->is_lacking(),
+					);
 				},
-				$grouped_url_metrics->get_group_statuses()
+				$grouped_url_metrics->get_groups()
 			)
 		);
 
 		foreach ( $expected_is_group_lacking as $viewport_width => $expected ) {
 			$this->assertSame(
 				$expected,
-				$grouped_url_metrics->is_group_lacking( $viewport_width ),
+				$grouped_url_metrics->get_group_for_viewport_width( $viewport_width )->is_lacking(),
 				"Unexpected value for viewport width of $viewport_width"
 			);
 		}

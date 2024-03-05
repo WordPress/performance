@@ -16,10 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  *
- * @param string                         $slug                       URL metrics slug.
- * @param ILO_URL_Metrics_Group_Status[] $url_metrics_group_statuses URL metric group statuses.
+ * @param string                  $slug                URL metrics slug.
+ * @param ILO_Grouped_URL_Metrics $grouped_url_metrics Grouped URL metrics.
  */
-function ilo_get_detection_script( string $slug, array $url_metrics_group_statuses ): string {
+function ilo_get_detection_script( string $slug, ILO_Grouped_URL_Metrics $grouped_url_metrics ): string {
 	/**
 	 * Filters the time window between serve time and run time in which loading detection is allowed to run.
 	 *
@@ -46,7 +46,15 @@ function ilo_get_detection_script( string $slug, array $url_metrics_group_status
 		'restApiNonce'            => wp_create_nonce( 'wp_rest' ),
 		'urlMetricsSlug'          => $slug,
 		'urlMetricsNonce'         => ilo_get_url_metrics_storage_nonce( $slug ),
-		'urlMetricsGroupStatuses' => $url_metrics_group_statuses,
+		'urlMetricsGroupStatuses' => array_map(
+			static function ( ILO_URL_Metrics_Group $group ): array {
+				return array(
+					'minimumViewportWidth' => $group->get_minimum_viewport_width(),
+					'lacking'              => $group->is_lacking(),
+				);
+			},
+			$grouped_url_metrics->get_groups()
+		),
 		'storageLockTTL'          => ilo_get_url_metric_storage_lock_ttl(),
 		'webVitalsLibrarySrc'     => $web_vitals_lib_src,
 	);

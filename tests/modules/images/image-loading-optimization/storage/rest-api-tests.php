@@ -278,9 +278,17 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 			HOUR_IN_SECONDS
 		);
 		$url_metric_groups   = $grouped_url_metrics->get_groups();
-		$this->assertSame( array( 0, $breakpoint_width + 1 ), array_keys( $url_metric_groups ) );
-		$this->assertCount( 0, $url_metric_groups[0], 'Expected first group to be empty.' );
-		$this->assertCount( $sample_size, $url_metric_groups[ $breakpoint_width + 1 ], 'Expected last group to be fully populated.' );
+		$this->assertSame(
+			array( 0, $breakpoint_width + 1 ),
+			array_map(
+				static function ( ILO_URL_Metrics_Group $group ) {
+					return $group->get_minimum_viewport_width();
+				},
+				$url_metric_groups
+			)
+		);
+		$this->assertSame( 0, $url_metric_groups[0]->count(), 'Expected first group to be empty.' );
+		$this->assertSame( $sample_size, end( $url_metric_groups )->count(), 'Expected last group to be fully populated.' );
 
 		// Now attempt to store one more URL metric for the wider viewport group.
 		// This should fail because the group is already fully populated to the sample size.
