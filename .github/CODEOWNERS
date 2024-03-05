@@ -57,5 +57,5 @@
 /tests/plugins/webp-uploads                 @adamsilverstein @felixarntz
 
 # Plugin: Dominant Color Images
-/plugins/dominant-color-images                                              @pbearne @spacedmonkey
-/tests/plugins/dominant-color-images                                        @pbearne @spacedmonkey
+/plugins/dominant-color-images              @pbearne @spacedmonkey
+/tests/plugins/dominant-color-images        @pbearne @spacedmonkey
