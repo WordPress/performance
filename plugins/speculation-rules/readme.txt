@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.3
 Tested up to:      6.4
 Requires PHP:      7.0
-Stable tag:        1.0.1
+Stable tag:        1.1.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, javascript, speculation rules, prerender, prefetch
@@ -56,10 +56,31 @@ This example would ensure that URLs like `https://example.com/cart/` or `https:/
 
 add_filter(
 	'plsr_speculation_rules_href_exclude_paths',
-	function ( $exclude_paths ) {
+	function ( array $exclude_paths ): array {
 		$exclude_paths[] = '/cart/*';
 		return $exclude_paths;
 	}
+);
+`
+
+Keep in mind that sometimes it may be useful to exclude a URL from prerendering while still allowing it to be prefetched. For example, a page with client-side JavaScript to update user state should probably not be prerendered, but it would be reasonable to prefetch.
+
+For this purpose, the `plsr_speculation_rules_href_exclude_paths` filter receives the current mode (either "prefetch" or "prerender") to provide conditional exclusions.
+
+The following example would ensure that URLs like `https://example.com/products/...` cannot be prerendered, while still allowing them to be prefetched.
+`
+<?php
+
+add_filter(
+	'plsr_speculation_rules_href_exclude_paths',
+	function ( array $exclude_paths, string $mode ): array {
+		if ( 'prerender' === $mode ) {
+			$exclude_paths[] = '/products/*';
+		}
+		return $exclude_paths;
+	},
+	10,
+	2
 );
 `
 
@@ -78,6 +99,10 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.1.0 =
+
+* Allow excluding URL patterns from prerendering or prefetching specifically. ([1025](https://github.com/WordPress/performance/pull/1025))
 
 = 1.0.1 =
 
