@@ -2,7 +2,8 @@
 /**
  * Helper functions used for WebP Uploads.
  *
- * @package performance-lab
+ * @package webp-uploads
+ *
  * @since 1.0.0
  */
 
@@ -116,16 +117,16 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 
 	$allowed_mimes = array_flip( wp_get_mime_types() );
 	if ( ! isset( $allowed_mimes[ $mime ] ) || ! is_string( $allowed_mimes[ $mime ] ) ) {
-		return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'performance-lab' ) );
+		return new WP_Error( 'image_mime_type_invalid', __( 'The provided mime type is not allowed.', 'webp-uploads' ) );
 	}
 
 	if ( ! wp_image_editor_supports( array( 'mime_type' => $mime ) ) ) {
-		return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'performance-lab' ) );
+		return new WP_Error( 'image_mime_type_not_supported', __( 'The provided mime type is not supported.', 'webp-uploads' ) );
 	}
 
 	$image_path = wp_get_original_image_path( $attachment_id );
 	if ( ! file_exists( $image_path ) ) {
-		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'performance-lab' ) );
+		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'webp-uploads' ) );
 	}
 
 	$editor = wp_get_image_editor( $image_path, array( 'mime_type' => $mime ) );
@@ -137,7 +138,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	$width  = isset( $size_data['width'] ) ? (int) $size_data['width'] : 0;
 	$crop   = isset( $size_data['crop'] ) && $size_data['crop'];
 	if ( $width <= 0 && $height <= 0 ) {
-		return new WP_Error( 'image_wrong_dimensions', __( 'At least one of the dimensions must be a positive number.', 'performance-lab' ) );
+		return new WP_Error( 'image_wrong_dimensions', __( 'At least one of the dimensions must be a positive number.', 'webp-uploads' ) );
 	}
 
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
@@ -165,7 +166,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	}
 
 	if ( empty( $image['file'] ) ) {
-		return new WP_Error( 'image_file_not_present', __( 'The file key is not present on the image data', 'performance-lab' ) );
+		return new WP_Error( 'image_file_not_present', __( 'The file key is not present on the image data', 'webp-uploads' ) );
 	}
 
 	return array(
@@ -198,7 +199,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 		|| ! is_array( $metadata['sizes'][ $size ] )
 		|| ! is_array( $sizes[ $size ] )
 	) {
-		return new WP_Error( 'image_mime_type_invalid_metadata', __( 'The image does not have a valid metadata.', 'performance-lab' ) );
+		return new WP_Error( 'image_mime_type_invalid_metadata', __( 'The image does not have a valid metadata.', 'webp-uploads' ) );
 	}
 
 	$size_data = array(
@@ -256,7 +257,7 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
 /**
  * Returns mime types that should be used for an image in the specific context.
  *
- * @since 1.4.0
+ * @since 1.0.0
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $context       The current context.
@@ -286,7 +287,7 @@ function webp_uploads_get_content_image_mimes( $attachment_id, $context ) {
 /**
  * Verifies if the request is for a frontend context within the <body> tag.
  *
- * @since 1.3.0
+ * @since 1.0.0
  *
  * @global WP_Query $wp_query WordPress Query object.
  *
@@ -311,7 +312,7 @@ function webp_uploads_in_frontend_body() {
 /**
  * Check whether the additional image is larger than the original image.
  *
- * @since 1.3.0
+ * @since 1.0.0
  *
  * @param array $original   An array with the metadata of the attachment.
  * @param array $additional An array containing the filename and file size for additional mime.
@@ -327,7 +328,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 		 * By default the performance lab plugin will use the mime type with the smaller filesize
 		 * rather than defaulting to `webp`.
 		 *
-		 * @since 1.3.0
+		 * @since 1.0.0
 		 *
 		 * @param bool $preferred_filesize Prioritize file size over mime type. Default true.
 		 */

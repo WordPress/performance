@@ -2,8 +2,7 @@
 /**
  * Tests for webp-uploads module rest-api.php.
  *
- * @package performance-lab
- * @group   webp-uploads
+ * @package webp-uploads
  */
 
 class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {

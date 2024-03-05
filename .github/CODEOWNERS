@@ -29,11 +29,6 @@
 /tests/modules/object-cache                 @tillkruss @spacedmonkey
 /tests/testdata/modules/object-cache        @tillkruss @spacedmonkey
 
-# Module: WebP Uploads
-/modules/images/webp-uploads                                                @adamsilverstein @felixarntz
-/tests/modules/images/webp-uploads                                          @adamsilverstein @felixarntz
-/tests/testdata/modules/images/webp-uploads                                 @adamsilverstein @felixarntz
-
 # Module: WebP Support Health Check
 /modules/images/webp-support                                                @adamsilverstein
 /tests/modules/images/webp-support                                          @adamsilverstein
@@ -49,11 +44,6 @@
 /tests/modules/js-and-css/audit-enqueued-assets                             @manuelRod
 /tests/testdata/modules/js-and-css/audit-enqueued-assets                    @manuelRod
 
-# Module: Dominant Color Images
-/modules/images/dominant-color-images                                       @pbearne @spacedmonkey
-/tests/modules/images/dominant-color-images                                 @pbearne @spacedmonkey
-/tests/testdata/modules/images/dominant-color-images                        @pbearne @spacedmonkey
-
 # Plugin: Auto-sizes for Lazy-Loaded Images
 /plugins/auto-sizes                         @joemcgill
 /tests/plugins/auto-sizes                   @joemcgill
@@ -61,3 +51,11 @@
 # Plugin: Speculation Rules
 /plugins/speculation-rules                  @felixarntz
 /tests/plugins/speculation-rules            @felixarntz
+
+# Plugin: WebP Uploads
+/plugins/webp-uploads                       @adamsilverstein @felixarntz
+/tests/plugins/webp-uploads                 @adamsilverstein @felixarntz
+
+# Plugin: Dominant Color Images
+/plugins/dominant-color-images              @pbearne @spacedmonkey
+/tests/plugins/dominant-color-images        @pbearne @spacedmonkey

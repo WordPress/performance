@@ -128,7 +128,6 @@ function perflab_get_module_settings() {
 		'site-health/audit-autoloaded-options' => 'database/audit-autoloaded-options',
 		'site-health/audit-enqueued-assets'    => 'js-and-css/audit-enqueued-assets',
 		'site-health/webp-support'             => 'images/webp-support',
-		'images/dominant-color'                => 'images/dominant-color-images',
 	);
 
 	foreach ( $legacy_module_slugs as $legacy_slug => $current_slug ) {
@@ -323,10 +322,7 @@ function perflab_get_standalone_plugin_version_constants( $source = 'plugins' ) 
 		 * This list includes all modules which are also available as standalone plugins,
 		 * as `$module_dir => $version_constant` pairs.
 		 */
-		return array(
-			'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
-			'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
-		);
+		return array();
 	}
 
 	/*

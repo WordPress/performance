@@ -3,17 +3,16 @@
  * WordPress Image Editor Class for Image Manipulation through Imagick
  * with dominant color detection
  *
- * @package performance-lab
- * @group dominant-color-images
+ * @package dominant-color-images
  *
- * @since 1.2.0
+ * @since 1.0.0
  */
 
 /**
  * WordPress Image Editor Class for Image Manipulation through Imagick
  * with dominant color detection.
  *
- * @since 1.2.0
+ * @since 1.0.0
  *
  * @see WP_Image_Editor
  */
@@ -22,14 +21,14 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	/**
 	 * Get dominant color from a file.
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @return string|WP_Error Dominant hex color string, or an error on failure.
 	 */
 	public function get_dominant_color() {
 
 		if ( ! $this->image ) {
-			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'performance-lab' ) );
+			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'dominant-color-images' ) );
 		}
 
 		try {
@@ -40,13 +39,13 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			$color = $pixel->getColor();
 			$hex   = dominant_color_rgb_to_hex( $color['r'], $color['g'], $color['b'] );
 			if ( ! $hex ) {
-				return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'performance-lab' ) );
+				return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 			}
 
 			return $hex;
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message. */
-			return new WP_Error( 'image_editor_dominant_color_error', sprintf( __( 'Dominant color detection failed: %s', 'performance-lab' ), $e->getMessage() ) );
+			return new WP_Error( 'image_editor_dominant_color_error', sprintf( __( 'Dominant color detection failed: %s', 'dominant-color-images' ), $e->getMessage() ) );
 		}
 	}
 
@@ -54,14 +53,14 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 * Looks for transparent pixels in the image.
 	 * If there are none, it returns false.
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @return bool|WP_Error True or false based on whether there are transparent pixels, or an error on failure.
 	 */
 	public function has_transparency() {
 
 		if ( ! $this->image ) {
-			return new WP_Error( 'image_editor_has_transparency_error_no_image', __( 'Transparency detection no image found.', 'performance-lab' ) );
+			return new WP_Error( 'image_editor_has_transparency_error_no_image', __( 'Transparency detection no image found.', 'dominant-color-images' ) );
 		}
 
 		try {
@@ -93,7 +92,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 
 		} catch ( Exception $e ) {
 			/* translators: %s is the error message */
-			return new WP_Error( 'image_editor_has_transparency_error', sprintf( __( 'Transparency detection failed: %s', 'performance-lab' ), $e->getMessage() ) );
+			return new WP_Error( 'image_editor_has_transparency_error', sprintf( __( 'Transparency detection failed: %s', 'dominant-color-images' ), $e->getMessage() ) );
 		}
 	}
 }

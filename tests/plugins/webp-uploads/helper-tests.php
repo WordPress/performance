@@ -2,8 +2,7 @@
 /**
  * Tests for webp-uploads module helper.php.
  *
- * @package performance-lab
- * @group   webp-uploads
+ * @package webp-uploads
  */
 
 use PerformanceLab\Tests\TestCase\ImagesTestCase;
@@ -343,7 +342,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		add_filter(
 			'webp_uploads_pre_generate_additional_image_source',
 			static function () {
-				return new WP_Error( 'image_additional_generated_error', __( 'Additional image was not generated.', 'performance-lab' ) );
+				return new WP_Error( 'image_additional_generated_error', __( 'Additional image was not generated.', 'webp-uploads' ) );
 			}
 		);
 

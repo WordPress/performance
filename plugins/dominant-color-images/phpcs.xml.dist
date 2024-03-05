@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="WPP-DominantColorImages">
+	<description>WordPress Coding Standards for Dominant Color Images Plugin</description>
+
+	<rule ref="../../phpcs.ruleset.xml"/>
+
+	<config name="text_domain" value="dominant-color-images"/>
+
+	<file>.</file>
+</ruleset>

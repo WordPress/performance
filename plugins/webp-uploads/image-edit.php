@@ -2,7 +2,8 @@
 /**
  * Edit images integration for the module, including backup and restore support.
  *
- * @package performance-lab
+ * @package webp-uploads
+ *
  * @since 1.0.0
  */
 
@@ -427,7 +428,8 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
  * The filter {@see 'image_edit_thumbnails_separately'} was introduced in WordPress 6.3 with default value of `false`,
  * for a behavior that previously was always enabled.
  *
- * @since 2.6.0
+ * @since 1.0.2
+ *
  * @see https://core.trac.wordpress.org/ticket/57685
  *
  * @return bool True if editing image thumbnails is enabled, false otherwise.

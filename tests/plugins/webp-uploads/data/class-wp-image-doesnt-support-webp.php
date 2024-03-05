@@ -2,7 +2,7 @@
 /**
  * A WP_Image_Editor mock that doesn't support WebP.
  *
- * @package performance-lab
+ * @package webp-uploads
  * @since 1.0.0
  */
 

@@ -2,8 +2,9 @@
 /**
  * Settings for the WebP Uploads module.
  *
- * @package performance-lab
- * @since 1.6.0
+ * @package webp-uploads
+ *
+ * @since 1.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Registers setting for generating both JPEG and WebP versions for image uploads.
  *
- * @since 1.6.0
+ * @since 1.0.0
  */
 function webp_uploads_register_media_settings_field() {
 	register_setting(
@@ -31,13 +32,13 @@ add_action( 'init', 'webp_uploads_register_media_settings_field' );
 /**
  * Adds media settings field for the 'perflab_generate_webp_and_jpeg' setting.
  *
- * @since 1.6.0
+ * @since 1.0.0
  */
 function webp_uploads_add_media_settings_field() {
 	// Add settings field.
 	add_settings_field(
 		'perflab_generate_webp_and_jpeg',
-		__( 'WebP and JPEG', 'performance-lab' ),
+		__( 'WebP and JPEG', 'webp-uploads' ),
 		'webp_uploads_generate_webp_jpeg_setting_callback',
 		'media',
 		is_multisite() ? 'default' : 'uploads',
@@ -49,7 +50,7 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
 /**
  * Renders the settings field for the 'perflab_generate_webp_and_jpeg' setting.
  *
- * @since 1.6.0
+ * @since 1.0.0
  */
 function webp_uploads_generate_webp_jpeg_setting_callback() {
 	if ( ! is_multisite() ) {
@@ -61,16 +62,16 @@ function webp_uploads_generate_webp_jpeg_setting_callback() {
 	?>
 		<label for="perflab_generate_webp_and_jpeg">
 			<input name="perflab_generate_webp_and_jpeg" type="checkbox" id="perflab_generate_webp_and_jpeg" aria-describedby="perflab_generate_webp_and_jpeg_description" value="1"<?php checked( '1', get_option( 'perflab_generate_webp_and_jpeg' ) ); ?> />
-			<?php esc_html_e( 'Generate JPEG files in addition to WebP', 'performance-lab' ); ?>
+			<?php esc_html_e( 'Generate JPEG files in addition to WebP', 'webp-uploads' ); ?>
 		</label>
-		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG in addition to WebP can improve compatibility, but will effectively double the filesystem storage use of your images.', 'performance-lab' ); ?></p>
+		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG in addition to WebP can improve compatibility, but will effectively double the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
 	<?php
 }
 
 /**
  * Adds custom style for media settings.
  *
- * @since 1.6.0
+ * @since 1.0.0
  */
 function webp_uploads_media_setting_style() {
 	if ( is_multisite() ) {

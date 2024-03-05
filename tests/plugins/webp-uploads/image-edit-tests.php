@@ -2,8 +2,8 @@
 /**
  * Tests for webp-uploads module image-edit.php.
  *
- * @package performance-lab
- * @group   image-edit
+ * @package webp-uploads
+ * @subpackage image-edit
  */
 
 use PerformanceLab\Tests\TestCase\ImagesTestCase;

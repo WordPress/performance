@@ -2,8 +2,9 @@
 /**
  * Hook callbacks used for Dominant Color Images.
  *
- * @package performance-lab
- * @since 2.1.0
+ * @package dominant-color-images
+ *
+ * @since 1.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Add the dominant color metadata to the attachment.
  *
- * @since 1.2.0
+ * @since 1.0.0
  *
  * @param array $metadata      The attachment metadata.
  * @param int   $attachment_id The attachment ID.
@@ -38,7 +39,7 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
 /**
  * Filters various image attributes to add the dominant color to the image.
  *
- * @since 1.2.0
+ * @since 1.0.0
  *
  * @param array  $attr       Attributes for the image markup.
  * @param object $attachment Image attachment post.
@@ -74,7 +75,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_update_attachm
 /**
  * Filter image tags in content to add the dominant color to the image.
  *
- * @since 1.2.0
+ * @since 1.0.0
  *
  * @param string $filtered_image The filtered image.
  * @param string $context        The context of the image.
@@ -109,7 +110,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 	 *
 	 * You can set this to false in order disable adding the dominant color to the image.
 	 *
-	 * @since 1.2.0
+	 * @since 1.0.0
 	 *
 	 * @param bool   $add_dominant_color Whether to add the dominant color to the image. default true.
 	 * @param int    $attachment_id      The image attachment ID.
@@ -156,7 +157,7 @@ add_filter( 'wp_content_img_tag', 'dominant_color_img_tag_add_dominant_color', 2
 /**
  * Add CSS needed for to show the dominant color as an image background.
  *
- * @since 1.2.0
+ * @since 1.0.0
  */
 function dominant_color_add_inline_style() {
 	$handle = 'dominant-color-styles';
@@ -174,7 +175,7 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  *
  * See {@see 'wp_head'}.
  *
- * @since 2.3.0
+ * @since 1.0.0
  */
 function dominant_color_render_generator() {
 	if (
