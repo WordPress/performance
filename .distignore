@@ -1,0 +1,67 @@
+############
+## VCS and Vendors
+############
+.git
+.github
+.wordpress-org
+.husky
+node_modules
+vendor
+
+############
+## Helpers
+############
+bin
+docs
+tests
+plugin-tests
+
+############
+## OSes
+############
+[Tt]humbs.db
+[Dd]esktop.ini
+*.DS_store
+.DS_store?
+
+############
+## Tools and CS
+############
+build-cs
+.editorconfig
+.eslintrc.js
+.nvmrc
+.wp-env.json
+composer.json
+composer.lock
+package.json
+package-lock.json
+phpcs.xml.dist
+phpstan.neon.dist
+phpunit.xml.dist
+webpack.config.js
+
+############
+## Community Files
+############
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+SECURITY.md
+README.md
+
+############
+## Ignore Files
+############
+.distignore
+.gitignore
+
+############
+## Build directories
+############
+build
+dist
+
+############
+## Standalone Plugins
+############
+plugins
