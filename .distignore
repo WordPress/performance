@@ -65,13 +65,11 @@ dist
 ############
 ## Standalone Plugins
 ############
-plugins
 plugins.json
 
 ############
 ## Misc
 ############
-
 tests/logs
 tmp/
 *.tmp
