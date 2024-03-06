@@ -18,6 +18,7 @@
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
     "lodash": "4.17.21",
+    "npm-run-all": "^4.1.5",
     "webpackbar": "^6.0.1"
   },
   "scripts": {
@@ -25,6 +26,7 @@
     "since": "./bin/plugin/cli.js since",
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
+    "build-plugins": "npm-run-all build:plugin:*",
     "build:plugin:performance-lab": "webpack --mode production --env plugin=performance-lab",
     "build:plugin:auto-sizes": "webpack --mode production --env plugin=auto-sizes",
     "build:plugin:dominant-color-images": "webpack --mode production --env plugin=dominant-color-images",
