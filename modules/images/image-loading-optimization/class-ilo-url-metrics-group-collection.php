@@ -112,10 +112,8 @@ final class ILO_URL_Metrics_Group_Collection {
 		}
 		$this->freshness_ttl = $freshness_ttl;
 
-		// Create groups.
+		// Create groups and the URL metrics to them.
 		$this->groups = $this->create_groups();
-
-		// Add the URL metrics to the groups.
 		foreach ( $url_metrics as $url_metric ) {
 			$this->add_url_metric( $url_metric );
 		}
