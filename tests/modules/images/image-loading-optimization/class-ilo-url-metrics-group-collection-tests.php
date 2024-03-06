@@ -356,20 +356,20 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 			'none-needed'            => array_merge(
 				$none_needed_data,
 				array(
-					'expected_return'           => array(
+					'expected_return'            => array(
 						array(
 							'minimumViewportWidth' => 0,
-							'lacking'              => false,
+							'complete'             => true,
 						),
 						array(
 							'minimumViewportWidth' => 481,
-							'lacking'              => false,
+							'complete'             => true,
 						),
 					),
-					'expected_is_group_lacking' => array(
-						400 => false,
-						480 => false,
-						600 => false,
+					'expected_is_group_complete' => array(
+						400 => true,
+						480 => true,
+						600 => true,
 					),
 				)
 			),
@@ -380,21 +380,21 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 					'sample_size' => $none_needed_data['sample_size'] + 1,
 				),
 				array(
-					'expected_return'           => array(
+					'expected_return'            => array(
 						array(
 							'minimumViewportWidth' => 0,
-							'lacking'              => true,
+							'complete'             => false,
 						),
 						array(
 							'minimumViewportWidth' => 481,
-							'lacking'              => true,
+							'complete'             => false,
 						),
 					),
-					'expected_is_group_lacking' => array(
-						200 => true,
-						480 => true,
-						481 => true,
-						500 => true,
+					'expected_is_group_complete' => array(
+						200 => false,
+						480 => false,
+						481 => false,
+						500 => false,
 					),
 				)
 			),
@@ -407,22 +407,22 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 					return $data;
 				} )( $none_needed_data ),
 				array(
-					'expected_return'           => array(
+					'expected_return'            => array(
 						array(
 							'minimumViewportWidth' => 0,
-							'lacking'              => true,
+							'complete'             => false,
 						),
 						array(
 							'minimumViewportWidth' => 481,
-							'lacking'              => false,
+							'complete'             => true,
 						),
 					),
-					'expected_is_group_lacking' => array(
-						200 => true,
-						400 => true,
-						480 => true,
-						481 => false,
-						500 => false,
+					'expected_is_group_complete' => array(
+						200 => false,
+						400 => false,
+						480 => false,
+						481 => true,
+						500 => true,
 					),
 				)
 			),
@@ -434,12 +434,12 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::get_group_for_viewport_width
 	 * @covers ::get_groups
-	 * @covers ILO_URL_Metrics_Group::is_lacking
+	 * @covers ILO_URL_Metrics_Group::is_complete
 	 * @covers ILO_URL_Metrics_Group::get_minimum_viewport_width
 	 *
 	 * @dataProvider data_provider_test_get_group_for_viewport_width
 	 */
-	public function test_get_group_for_viewport_width( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_lacking ) {
+	public function test_get_group_for_viewport_width( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_complete ) {
 		$group_collection = new ILO_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertSame(
 			$expected_return,
@@ -447,17 +447,17 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 				static function ( ILO_URL_Metrics_Group $group ) {
 					return array(
 						'minimumViewportWidth' => $group->get_minimum_viewport_width(),
-						'lacking'              => $group->is_lacking(),
+						'complete'             => $group->is_complete(),
 					);
 				},
 				$group_collection->get_groups()
 			)
 		);
 
-		foreach ( $expected_is_group_lacking as $viewport_width => $expected ) {
+		foreach ( $expected_is_group_complete as $viewport_width => $expected ) {
 			$this->assertSame(
 				$expected,
-				$group_collection->get_group_for_viewport_width( $viewport_width )->is_lacking(),
+				$group_collection->get_group_for_viewport_width( $viewport_width )->is_complete(),
 				"Unexpected value for viewport width of $viewport_width"
 			);
 		}

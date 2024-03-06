@@ -50,7 +50,7 @@ function ilo_get_detection_script( string $slug, ILO_URL_Metrics_Group_Collectio
 			static function ( ILO_URL_Metrics_Group $group ): array {
 				return array(
 					'minimumViewportWidth' => $group->get_minimum_viewport_width(),
-					'lacking'              => $group->is_lacking(),
+					'complete'             => $group->is_complete(),
 				);
 			},
 			$group_collection->get_groups()

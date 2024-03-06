@@ -98,7 +98,7 @@ function error( ...message ) {
 /**
  * @typedef {Object} URLMetricsGroupStatus
  * @property {number}  minimumViewportWidth - Minimum viewport width.
- * @property {boolean} lacking              - Whether viewport group is lacking URL metrics.
+ * @property {boolean} complete             - Whether viewport group is complete.
  */
 
 /**
@@ -110,9 +110,12 @@ function error( ...message ) {
  */
 function isViewportNeeded( viewportWidth, urlMetricsGroupStatuses ) {
 	let lastWasLacking = false;
-	for ( const { minimumViewportWidth, lacking } of urlMetricsGroupStatuses ) {
+	for ( const {
+		minimumViewportWidth,
+		complete,
+	} of urlMetricsGroupStatuses ) {
 		if ( viewportWidth >= minimumViewportWidth ) {
-			lastWasLacking = lacking;
+			lastWasLacking = ! complete;
 		} else {
 			break;
 		}

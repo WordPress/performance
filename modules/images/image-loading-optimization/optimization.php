@@ -159,7 +159,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = false;
 	foreach ( $group_collection->get_groups() as $group ) {
-		if ( $group->is_lacking() ) {
+		if ( ! $group->is_complete() ) {
 			$needs_detection = true;
 			break;
 		}

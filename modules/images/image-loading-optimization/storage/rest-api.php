@@ -132,10 +132,10 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 			$exception->getMessage()
 		);
 	}
-	if ( ! $group->is_lacking() ) {
+	if ( $group->is_complete() ) {
 		return new WP_Error(
-			'no_url_metric_needed',
-			__( 'No URL metric needed for the provided viewport width.', 'performance-lab' ),
+			'url_metrics_group_complete',
+			__( 'The URL metrics group for the provided viewport is already complete.', 'performance-lab' ),
 			array( 'status' => 403 )
 		);
 	}

@@ -9,11 +9,6 @@
 /**
  * URL metrics grouped by viewport according to breakpoints.
  *
- * @phpstan-type Data array{
- *                        minimumViewportWidth: int,
- *                        isLacking: bool,
- *                    }
- *
  * @since n.e.x.t
  * @access private
  */
@@ -137,24 +132,24 @@ final class ILO_URL_Metrics_Group {
 	}
 
 	/**
-	 *  Determines whether the URL metrics group is lacking URL metrics.
+	 * Determines whether the URL metrics group is complete.
 	 *
-	 *  Either the group does not have enough URL metrics for the desired sample size,
-	 *  or some of the URL metrics are stale.
+	 * A group is complete if it has the full sample size of URL metrics
+	 * and all of these URL metrics are fresh.
 	 *
-	 * @return bool Whether lacking.
+	 * @return bool Whether complete.
 	 */
-	public function is_lacking(): bool {
+	public function is_complete(): bool {
 		if ( count( $this->url_metrics ) < $this->sample_size ) {
-			return true;
+			return false;
 		}
 		$current_time = microtime( true );
 		foreach ( $this->url_metrics as $url_metric ) {
 			if ( $current_time > $url_metric->get_timestamp() + $this->freshness_ttl ) {
-				return true;
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	/**

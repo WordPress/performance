@@ -73,6 +73,6 @@ class ILO_Detection_Tests extends WP_UnitTestCase {
 		$this->assertStringContainsString( '"minimumViewportWidth":481', $script );
 		$this->assertStringContainsString( '"minimumViewportWidth":601', $script );
 		$this->assertStringContainsString( '"minimumViewportWidth":783', $script );
-		$this->assertStringContainsString( '"lacking":true', $script );
+		$this->assertStringContainsString( '"complete":false', $script );
 	}
 }
