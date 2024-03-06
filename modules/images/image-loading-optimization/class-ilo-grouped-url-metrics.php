@@ -118,6 +118,23 @@ final class ILO_Grouped_URL_Metrics {
 	}
 
 	/**
+	 * Adds a new URL metric to a group.
+	 *
+	 * Once a group reaches the sample size, the oldest URL metric is pushed out.
+	 *
+	 * @param ILO_URL_Metric $new_url_metric New URL metric.
+	 * @return bool Whether the URL metric was added to a group.
+	 */
+	public function add_url_metric( ILO_URL_Metric $new_url_metric ): bool {
+		foreach ( $this->groups as $group ) {
+			if ( $group->add_url_metric( $new_url_metric ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Gets grouped keyed by the minimum viewport width.
 	 *
 	 * @return ILO_URL_Metrics_Group[] Groups.
@@ -149,23 +166,6 @@ final class ILO_Grouped_URL_Metrics {
 				)
 			)
 		);
-	}
-
-	/**
-	 * Adds a new URL metric to a group.
-	 *
-	 * Once a group reaches the sample size, the oldest URL metric is pushed out.
-	 *
-	 * @param ILO_URL_Metric $new_url_metric New URL metric.
-	 * @return bool Whether the URL metric was added to a group.
-	 */
-	public function add_url_metric( ILO_URL_Metric $new_url_metric ): bool {
-		foreach ( $this->groups as $group ) {
-			if ( $group->add_url_metric( $new_url_metric ) ) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**

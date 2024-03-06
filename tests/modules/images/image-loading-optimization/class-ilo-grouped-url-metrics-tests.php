@@ -15,6 +15,81 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
+	 * @return array
+	 */
+	public function data_provider_test_construction(): array {
+		return array(
+			'no_breakpoints_ok'          => array(
+				'url_metrics'   => array(),
+				'breakpoints'   => array(),
+				'sample_size'   => 3,
+				'freshness_ttl' => HOUR_IN_SECONDS,
+				'exception'     => '',
+			),
+			'negative_breakpoint_bad'    => array(
+				'url_metrics'   => array(),
+				'breakpoints'   => array( -1 ),
+				'sample_size'   => 3,
+				'freshness_ttl' => HOUR_IN_SECONDS,
+				'exception'     => InvalidArgumentException::class,
+			),
+			'string_breakpoint_bad'      => array(
+				'url_metrics'   => array(),
+				'breakpoints'   => array( 'narrow' ),
+				'sample_size'   => 3,
+				'freshness_ttl' => HOUR_IN_SECONDS,
+				'exception'     => TypeError::class,
+			),
+			'negative_sample_size_bad'   => array(
+				'url_metrics'   => array(),
+				'breakpoints'   => array( 400 ),
+				'sample_size'   => -3,
+				'freshness_ttl' => HOUR_IN_SECONDS,
+				'exception'     => InvalidArgumentException::class,
+			),
+			'negative_freshness_tll_bad' => array(
+				'url_metrics'   => array(),
+				'breakpoints'   => array( 400 ),
+				'sample_size'   => 3,
+				'freshness_ttl' => -HOUR_IN_SECONDS,
+				'exception'     => InvalidArgumentException::class,
+			),
+			'invalid_url_metrics_bad'    => array(
+				'url_metrics'   => array( 'bad' ),
+				'breakpoints'   => array( 400 ),
+				'sample_size'   => 3,
+				'freshness_ttl' => HOUR_IN_SECONDS,
+				'exception'     => TypeError::class,
+			),
+			'all_arguments_good'         => array(
+				'url_metrics'   => array(
+					$this->get_validated_url_metric( 200 ),
+					$this->get_validated_url_metric( 400 ),
+				),
+				'breakpoints'   => array( 400 ),
+				'sample_size'   => 3,
+				'freshness_ttl' => HOUR_IN_SECONDS,
+				'exception'     => '',
+			),
+		);
+	}
+
+	/**
+	 * @covers ::__construct
+	 *
+	 * @dataProvider data_provider_test_construction
+	 */
+	public function test_construction( array $url_metrics, array $breakpoints, int $sample_size, int $freshness_ttl, string $exception ) {
+		if ( $exception ) {
+			$this->expectException( $exception );
+		}
+		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
+		$this->assertCount( count( $breakpoints ) + 1, $grouped_url_metrics->get_groups() );
+	}
+
+	/**
+	 * Data provider.
+	 *
 	 * @return array[]
 	 */
 	public function data_provider_sample_size_and_breakpoints(): array {
@@ -100,7 +175,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that add() pushes out old metrics.
+	 * Test that add_url_metric() pushes out old metrics.
 	 *
 	 * @covers ::add_url_metric
 	 *
@@ -243,7 +318,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array[]
 	 */
-	public function data_provider_test_get_group_statuses(): array {
+	public function data_provider_test_get_group_for_viewport_width(): array {
 		$current_time = microtime( true );
 
 		$none_needed_data = array(
@@ -355,14 +430,14 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test getting statuses for groups.
+	 * Test get_minimum_viewport_width().
 	 *
 	 * @covers ::get_group_for_viewport_width
 	 * @covers ::get_groups
 	 * @covers ILO_URL_Metrics_Group::is_lacking
 	 * @covers ILO_URL_Metrics_Group::get_minimum_viewport_width
 	 *
-	 * @dataProvider data_provider_test_get_group_statuses
+	 * @dataProvider data_provider_test_get_group_for_viewport_width
 	 */
 	public function test_get_group_for_viewport_width( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_lacking ) {
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
