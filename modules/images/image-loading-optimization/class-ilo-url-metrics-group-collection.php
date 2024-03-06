@@ -113,18 +113,28 @@ final class ILO_URL_Metrics_Group_Collection {
 		$this->freshness_ttl = $freshness_ttl;
 
 		// Create groups.
-		$this->groups           = array();
-		$minimum_viewport_width = 0;
-		foreach ( $this->breakpoints as $maximum_viewport_width ) {
-			$this->groups[]         = new ILO_URL_Metrics_Group( array(), $minimum_viewport_width, $maximum_viewport_width, $this->sample_size, $this->freshness_ttl );
-			$minimum_viewport_width = $maximum_viewport_width + 1;
-		}
-		$this->groups[] = new ILO_URL_Metrics_Group( array(), $minimum_viewport_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl );
+		$this->groups = $this->create_groups();
 
 		// Add the URL metrics to the groups.
 		foreach ( $url_metrics as $url_metric ) {
 			$this->add_url_metric( $url_metric );
 		}
+	}
+
+	/**
+	 * Create groups.
+	 *
+	 * @return ILO_URL_Metrics_Group[] Groups.
+	 */
+	private function create_groups(): array {
+		$groups    = array();
+		$min_width = 0;
+		foreach ( $this->breakpoints as $max_width ) {
+			$groups[]  = new ILO_URL_Metrics_Group( array(), $min_width, $max_width, $this->sample_size, $this->freshness_ttl );
+			$min_width = $max_width + 1;
+		}
+		$groups[] = new ILO_URL_Metrics_Group( array(), $min_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl );
+		return $groups;
 	}
 
 	/**
