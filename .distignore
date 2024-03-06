@@ -36,6 +36,7 @@ composer.json
 composer.lock
 package.json
 package-lock.json
+phpcs.ruleset.xml
 phpcs.xml.dist
 phpstan.neon.dist
 phpunit.xml.dist
@@ -65,3 +66,24 @@ dist
 ## Standalone Plugins
 ############
 plugins
+plugins.json
+
+############
+## Misc
+############
+
+tests/logs
+tmp/
+*.tmp
+*.bak
+*.log
+*.[Cc]ache
+*.cpr
+*.orig
+*.php.in
+.idea/
+.sass-cache/*
+temp/
+._*
+.Trashes
+.svn
