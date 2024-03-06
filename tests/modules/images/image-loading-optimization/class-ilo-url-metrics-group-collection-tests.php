@@ -136,6 +136,17 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 					481 => 1,
 				),
 			),
+			'2 sample size and 0 breakpoints' => array(
+				'sample_size'     => 2,
+				'breakpoints'     => array(),
+				'viewport_widths' => array(
+					400 => 1,
+					600 => 1,
+				),
+				'expected_counts' => array(
+					0 => 2,
+				),
+			),
 		);
 	}
 
@@ -168,6 +179,7 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 			sprintf( 'Expected there to be at most sample size (%d) times the number of breakpoint groups (which is %d + 1)', $sample_size, count( $breakpoints ) )
 		);
 
+		$this->assertCount( count( $expected_counts ), $group_collection->get_groups() );
 		foreach ( $expected_counts as $minimum_viewport_width => $count ) {
 			$group = $group_collection->get_group_for_viewport_width( $minimum_viewport_width );
 			$this->assertSame( $count, $group->count(), "Expected equal count for $minimum_viewport_width minimum viewport width." );

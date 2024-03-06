@@ -17,7 +17,14 @@ final class ILO_URL_Metrics_Group_Collection {
 	/**
 	 * URL metrics groups.
 	 *
+	 * The number of groups corresponds to one greater than the number of
+	 * breakpoints. This is because breakpoints are the dividing line between
+	 * the groups of URL metrics with specific viewport widths. This extends
+	 * even to when there are zero breakpoints: there will still be one group
+	 * in this case, in which every single URL metric is added.
+	 *
 	 * @var ILO_URL_Metrics_Group[]
+	 * @phpstan-var non-empty-array<ILO_URL_Metrics_Group>
 	 */
 	private $groups;
 
