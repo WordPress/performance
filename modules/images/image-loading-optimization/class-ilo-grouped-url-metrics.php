@@ -25,6 +25,7 @@ final class ILO_Grouped_URL_Metrics {
 	 * Breakpoints in max widths.
 	 *
 	 * @var int[]
+	 * @phpstan-var int<1, max>[]
 	 */
 	private $breakpoints;
 
@@ -32,6 +33,7 @@ final class ILO_Grouped_URL_Metrics {
 	 * Sample size for URL metrics for a given breakpoint.
 	 *
 	 * @var int
+	 * @phpstan-var int<1, max>
 	 */
 	private $sample_size;
 
@@ -39,6 +41,7 @@ final class ILO_Grouped_URL_Metrics {
 	 * Freshness age (TTL) for a given URL metric.
 	 *
 	 * @var int
+	 * @phpstan-var int<0, max>
 	 */
 	private $freshness_ttl;
 

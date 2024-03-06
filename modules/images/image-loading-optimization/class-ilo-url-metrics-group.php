@@ -30,6 +30,7 @@ final class ILO_URL_Metrics_Group {
 	 * Minimum possible viewport width for the group (inclusive).
 	 *
 	 * @var int
+	 * @phpstan-var int<0, max>
 	 */
 	private $minimum_viewport_width;
 
@@ -37,6 +38,7 @@ final class ILO_URL_Metrics_Group {
 	 * Maximum possible viewport width for the group (inclusive).
 	 *
 	 * @var int
+	 * @phpstan-var int<1, max>
 	 */
 	private $maximum_viewport_width;
 
@@ -44,6 +46,7 @@ final class ILO_URL_Metrics_Group {
 	 * Sample size for URL metrics for a given breakpoint.
 	 *
 	 * @var int
+	 * @phpstan-var int<1, max>
 	 */
 	private $sample_size;
 
@@ -51,6 +54,7 @@ final class ILO_URL_Metrics_Group {
 	 * Freshness age (TTL) for a given URL metric.
 	 *
 	 * @var int
+	 * @phpstan-var int<0, max>
 	 */
 	private $freshness_ttl;
 
