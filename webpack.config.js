@@ -58,7 +58,7 @@ const buildPlugin = ( env ) => {
 
 	// If plugin is not `perflab` or not exists in `plugins.json` then return.
 	if (
-		'perflab' !== env.plugin &&
+		'performance-lab' !== env.plugin &&
 		! standalonePlugins.includes( env.plugin )
 	) {
 		// eslint-disable-next-line no-console
@@ -72,9 +72,9 @@ const buildPlugin = ( env ) => {
 
 	let from = '';
 	const ignore = [];
-	const to = path.resolve( __dirname, 'build' );
+	const to = path.resolve( __dirname, 'build', env.plugin );
 
-	if ( env.plugin === 'perflab' ) {
+	if ( env.plugin === 'performance-lab' ) {
 		from = path.resolve( __dirname );
 
 		// Ignore plugins directory manually since we can't include it in .distignore.

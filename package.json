@@ -25,7 +25,7 @@
     "since": "./bin/plugin/cli.js since",
     "readme": "./bin/plugin/cli.js readme",
     "translations": "./bin/plugin/cli.js translations",
-    "build:plugin:perflab": "webpack --mode production --env plugin=perflab",
+    "build:plugin:performance-lab": "webpack --mode production --env plugin=performance-lab",
     "build:plugin:auto-sizes": "webpack --mode production --env plugin=auto-sizes",
     "build:plugin:dominant-color-images": "webpack --mode production --env plugin=dominant-color-images",
     "build:plugin:speculation-rules": "webpack --mode production --env plugin=speculation-rules",
