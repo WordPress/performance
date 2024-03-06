@@ -2,7 +2,8 @@ name: Deploy standalone plugins to WordPress.org
 
 on:
   release:
-    types: [published]
+    types:
+      - published
   workflow_dispatch:
     inputs:
       slug:
@@ -12,88 +13,81 @@ on:
         type: boolean
         description: 'Debug mode (run without publishing).'
         default: false
+
 jobs:
-  release:
-    name: Prepare Deployment
+  pre-run:
+    name: Pre-run
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.set-matrix.outputs.json }}
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
+
       - name: Setup Node.js (.nvmrc)
         uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           cache: npm
+
       - name: Install npm dependencies
         run: npm ci
+
       - name: Get directory
         id: get-plugin-directory
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           echo "directory=$(node ./bin/plugin/cli.js get-plugin-dir --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
-      - name: Get plugin version
-        id: get-version
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          echo "version=$(node ./bin/plugin/cli.js get-plugin-version --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
+
       - name: Set matrix
         id: set-matrix
         run: |
+          PLUGINS=$(jq -r '.plugins' plugins.json)
           if ${{ github.event_name == 'workflow_dispatch' }}; then
-            result=$(echo "${{ steps.get-version.outputs.version }}" | awk '/^(\*|[0-9]+(\.[0-9]+){0,2}(-[a-zA-Z0-9.]+)?)$/ {print "Matched"}')
-            if [[ -n "$result" ]]; then
-              # Set the manual input values in JSON format for use in the matrix.
-              echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ steps.get-version.outputs.version }}\",\"directory\":\"${{ steps.get-plugin-directory.outputs.directory }}\",\"dry-run\":\"${{ inputs.dry-run }}\"}]}" >> $GITHUB_OUTPUT
-            else
-              echo "The ${{ inputs.slug }} module slug is missing in the file plugins.json."
+            SLUG=${{ inputs.slug }}
+
+            # Check if the slug is valid
+            if [[ ! " $PLUGINS " =~ " $SLUG " ]]; then
+              echo "Invalid slug: $SLUG"
               exit 1
             fi
-          else
-            # Load the JSON file and parse from "{name: {slug, version}, ...}" to "include: [{ name, slug, version }, ...]"
-            # for use in the matrix.
-            # For plugins, the "version" parameter is not included here; it will dynamically get it in its own job.
 
-            # The "dry-run" parameter is included here to set the deployment mode.
-            # When running the manual (workflow_dispatch) workflow, this value will be set from manual input type.
-            echo "matrix=$(jq -c '{include: ([.modules | to_entries[] | {name:.key, slug: .value.slug, version: .value.version, directory: "build", "dry-run": false}] + ([.plugins[] | {name:. , slug:. , directory: "plugins", "dry-run": false}]))}' plugins.json)" >> $GITHUB_OUTPUT
+            PLUGINS="[ \"$SLUG\" ]"
           fi
+
+          # Set the matrix
+          echo "json=$(echo $PLUGINS | jq -c .)" >> $GITHUB_OUTPUT
+
   deploy:
     name: Deploy Plugin
-    needs: release
+    needs: pre-run
     runs-on: ubuntu-latest
     strategy:
-      matrix: ${{ fromJSON(needs.release.outputs.matrix) }}
+      matrix:
+        plugin: ${{ fromJSON(needs.pre-run.outputs.matrix) }}
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
+
       - name: Setup Node.js (.nvmrc)
         uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
           cache: npm
+
       - name: Install npm dependencies
-        run: npm ci
-      - name: Building standalone plugins
-        if: ${{ matrix.directory != 'plugins' }}
-        run: npm run build-plugins
-      - name: Set version
-        id: set_version
-        run: |
-          if [ -z "${{ matrix.version }}" ]; then
-            echo "version=$(node ./bin/plugin/cli.js get-plugin-version --slug=${{ matrix.slug }})" >> $GITHUB_OUTPUT
-          else
-            echo "version=${{ matrix.version }})" >> $GITHUB_OUTPUT
-          fi
-      - name: Deploy Standalone Plugin - ${{ matrix.slug }}
+        run: npm
+
+      - name: Building standalone plugin
+        run: npm run build:plugin:${{ matrix.plugin }}
+
+      - name: Deploy Standalone Plugin - ${{ matrix.plugin }}
         uses: 10up/action-wordpress-plugin-deploy@stable
         with:
-          dry-run: ${{ matrix.dry-run }}
+          dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || false }}
         env:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-          SLUG: ${{ matrix.slug }}
-          VERSION: ${{ steps.set_version.outputs.version }}
-          BUILD_DIR: ./${{ matrix.directory }}/${{ matrix.slug }}
-          ASSETS_DIR: ./${{ matrix.directory }}/${{ matrix.slug }}/.wordpress-org
+          SLUG: ${{ matrix.plugin }}
+          BUILD_DIR: ./build/${{ matrix.plugin }}
+          ASSETS_DIR: ./plugins/${{ matrix.plugin }}/.wordpress-org
