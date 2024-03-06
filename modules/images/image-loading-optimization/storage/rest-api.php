@@ -121,16 +121,12 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	);
 
 	// Block the request if URL metrics aren't needed for the provided viewport width.
-	// This logic is the same as the isViewportNeeded() function in detect.js.
 	try {
 		$group = $group_collection->get_group_for_viewport_width(
 			$request->get_param( 'viewport' )['width']
 		);
 	} catch ( InvalidArgumentException $exception ) {
-		return new WP_Error(
-			'invalid_viewport_width',
-			$exception->getMessage()
-		);
+		return new WP_Error( 'invalid_viewport_width', $exception->getMessage() );
 	}
 	if ( $group->is_complete() ) {
 		return new WP_Error(
