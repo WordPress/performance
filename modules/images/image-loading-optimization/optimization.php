@@ -149,7 +149,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
 	$post = ilo_get_url_metrics_post( $slug );
 
-	$grouped_url_metrics = new ILO_Grouped_URL_Metrics(
+	$group_collection = new ILO_URL_Metrics_Group_Collection(
 		$post ? ilo_parse_stored_url_metrics( $post ) : array(),
 		ilo_get_breakpoint_max_widths(),
 		ilo_get_url_metrics_breakpoint_sample_size(),
@@ -158,15 +158,15 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = false;
-	foreach ( $grouped_url_metrics->get_groups() as $group ) {
+	foreach ( $group_collection->get_groups() as $group ) {
 		if ( $group->is_lacking() ) {
 			$needs_detection = true;
 			break;
 		}
 	}
 
-	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $grouped_url_metrics );
-	$all_breakpoints_have_url_metrics        = $grouped_url_metrics->is_every_group_populated();
+	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
+	$all_breakpoints_have_url_metrics        = $group_collection->is_every_group_populated();
 
 	/**
 	 * Optimized lookup of the LCP element viewport widths by XPath.
@@ -314,7 +314,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-ilo-xpath attributes.
 	if ( $needs_detection ) {
-		$head_injection .= ilo_get_detection_script( $slug, $grouped_url_metrics );
+		$head_injection .= ilo_get_detection_script( $slug, $group_collection );
 	}
 
 	if ( $head_injection ) {

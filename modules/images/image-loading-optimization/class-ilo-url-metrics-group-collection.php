@@ -1,18 +1,18 @@
 <?php
 /**
- * Image Loading Optimization: ILO_Grouped_URL_Metrics class
+ * Image Loading Optimization: ILO_URL_Metrics_Group_Collection class
  *
  * @package performance-lab
  * @since n.e.x.t
  */
 
 /**
- * URL metrics grouped by minimum viewport width for the provided breakpoints.
+ * Collection of URL groups according to the breakpoints.
  *
  * @since n.e.x.t
  * @access private
  */
-final class ILO_Grouped_URL_Metrics {
+final class ILO_URL_Metrics_Group_Collection {
 
 	/**
 	 * URL metrics groups.

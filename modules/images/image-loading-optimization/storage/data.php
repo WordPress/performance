@@ -197,12 +197,12 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
  * @since n.e.x.t
  * @access private
  *
- * @param ILO_Grouped_URL_Metrics $grouped_url_metrics Grouped URL metrics.
+ * @param ILO_URL_Metrics_Group_Collection $group_collection URL metrics group collection.
  * @return array LCP elements keyed by its minimum viewport width. If there is no supported LCP element at a breakpoint, then `false` is used.
  */
-function ilo_get_lcp_elements_by_minimum_viewport_widths( ILO_Grouped_URL_Metrics $grouped_url_metrics ): array {
+function ilo_get_lcp_elements_by_minimum_viewport_widths( ILO_URL_Metrics_Group_Collection $group_collection ): array {
 	$lcp_element_by_viewport_minimum_width = array();
-	foreach ( $grouped_url_metrics->get_groups() as $group ) {
+	foreach ( $group_collection->get_groups() as $group ) {
 
 		// The following arrays all share array indices.
 		$seen_breadcrumbs   = array();

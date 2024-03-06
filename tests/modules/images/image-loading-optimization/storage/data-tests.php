@@ -299,9 +299,9 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	 * @dataProvider data_provider_test_get_lcp_elements_by_minimum_viewport_widths
 	 */
 	public function test_get_lcp_elements_by_minimum_viewport_widths( array $breakpoints, array $url_metrics, array $expected_lcp_element_xpaths ) {
-		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, 10, HOUR_IN_SECONDS );
+		$group_collection = new ILO_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, 10, HOUR_IN_SECONDS );
 
-		$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $grouped_url_metrics );
+		$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
 
 		$lcp_element_xpaths_by_minimum_viewport_widths = array();
 		foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {

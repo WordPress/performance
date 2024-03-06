@@ -113,7 +113,7 @@ add_action( 'rest_api_init', 'ilo_register_endpoint' );
 function ilo_handle_rest_request( WP_REST_Request $request ) {
 	$post = ilo_get_url_metrics_post( $request->get_param( 'slug' ) );
 
-	$grouped_url_metrics = new ILO_Grouped_URL_Metrics(
+	$group_collection = new ILO_URL_Metrics_Group_Collection(
 		$post ? ilo_parse_stored_url_metrics( $post ) : array(),
 		ilo_get_breakpoint_max_widths(),
 		ilo_get_url_metrics_breakpoint_sample_size(),
@@ -123,7 +123,7 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	// Block the request if URL metrics aren't needed for the provided viewport width.
 	// This logic is the same as the isViewportNeeded() function in detect.js.
 	try {
-		$group = $grouped_url_metrics->get_group_for_viewport_width(
+		$group = $group_collection->get_group_for_viewport_width(
 			$request->get_param( 'viewport' )['width']
 		);
 	} catch ( InvalidArgumentException $exception ) {

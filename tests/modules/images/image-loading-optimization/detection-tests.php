@@ -59,10 +59,10 @@ class ILO_Detection_Tests extends WP_UnitTestCase {
 		$set_up();
 		$slug = ilo_get_url_metrics_slug( array( 'p' => '1' ) );
 
-		$breakpoints         = array( 480, 600, 782 );
-		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( array(), $breakpoints, 3, HOUR_IN_SECONDS );
+		$breakpoints      = array( 480, 600, 782 );
+		$group_collection = new ILO_URL_Metrics_Group_Collection( array(), $breakpoints, 3, HOUR_IN_SECONDS );
 
-		$script = ilo_get_detection_script( $slug, $grouped_url_metrics );
+		$script = ilo_get_detection_script( $slug, $group_collection );
 
 		$this->assertStringContainsString( '<script type="module">', $script );
 		$this->assertStringContainsString( 'import detect from', $script );

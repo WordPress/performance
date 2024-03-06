@@ -16,10 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  *
- * @param string                  $slug                URL metrics slug.
- * @param ILO_Grouped_URL_Metrics $grouped_url_metrics Grouped URL metrics.
+ * @param string                           $slug             URL metrics slug.
+ * @param ILO_URL_Metrics_Group_Collection $group_collection URL metrics group collection.
  */
-function ilo_get_detection_script( string $slug, ILO_Grouped_URL_Metrics $grouped_url_metrics ): string {
+function ilo_get_detection_script( string $slug, ILO_URL_Metrics_Group_Collection $group_collection ): string {
 	/**
 	 * Filters the time window between serve time and run time in which loading detection is allowed to run.
 	 *
@@ -53,7 +53,7 @@ function ilo_get_detection_script( string $slug, ILO_Grouped_URL_Metrics $groupe
 					'lacking'              => $group->is_lacking(),
 				);
 			},
-			$grouped_url_metrics->get_groups()
+			$group_collection->get_groups()
 		),
 		'storageLockTTL'          => ilo_get_url_metric_storage_lock_ttl(),
 		'webVitalsLibrarySrc'     => $web_vitals_lib_src,

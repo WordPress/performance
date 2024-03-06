@@ -271,13 +271,13 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		);
 
 		// Sanity check that the groups were constructed as expected.
-		$grouped_url_metrics = new ILO_Grouped_URL_Metrics(
+		$group_collection  = new ILO_URL_Metrics_Group_Collection(
 			ilo_parse_stored_url_metrics( ilo_get_url_metrics_post( ilo_get_url_metrics_slug( array() ) ) ),
 			ilo_get_breakpoint_max_widths(),
 			ilo_get_url_metrics_breakpoint_sample_size(),
 			HOUR_IN_SECONDS
 		);
-		$url_metric_groups   = $grouped_url_metrics->get_groups();
+		$url_metric_groups = $group_collection->get_groups();
 		$this->assertSame(
 			array( 0, $breakpoint_width + 1 ),
 			array_map(

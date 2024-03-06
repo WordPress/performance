@@ -1,16 +1,16 @@
 <?php
 /**
- * Tests for ILO_Grouped_URL_Metrics.
+ * Tests for ILO_URL_Metrics_Group_Collection.
  *
  * @package performance-lab
  * @group   image-loading-optimization
  *
  * @noinspection PhpUnhandledExceptionInspection
  *
- * @coversDefaultClass ILO_Grouped_URL_Metrics
+ * @coversDefaultClass ILO_URL_Metrics_Group_Collection
  */
 
-class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
+class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.
@@ -83,8 +83,8 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 		if ( $exception ) {
 			$this->expectException( $exception );
 		}
-		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
-		$this->assertCount( count( $breakpoints ) + 1, $grouped_url_metrics->get_groups() );
+		$group_collection = new ILO_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
+		$this->assertCount( count( $breakpoints ) + 1, $group_collection->get_groups() );
 	}
 
 	/**
@@ -153,23 +153,23 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 * @throws ILO_Data_Validation_Exception When failing to instantiate a URL metric.
 	 */
 	public function test_add_url_metric( int $sample_size, array $breakpoints, array $viewport_widths, array $expected_counts ) {
-		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
+		$group_collection = new ILO_URL_Metrics_Group_Collection( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
 
 		// Over-populate the sample size for the breakpoints by a dozen.
 		foreach ( $viewport_widths as $viewport_width => $count ) {
 			for ( $i = 0; $i < $count; $i++ ) {
-				$grouped_url_metrics->add_url_metric( $this->get_validated_url_metric( $viewport_width ) );
+				$group_collection->add_url_metric( $this->get_validated_url_metric( $viewport_width ) );
 			}
 		}
 
 		$this->assertLessThanOrEqual(
 			$sample_size * ( count( $breakpoints ) + 1 ),
-			count( $grouped_url_metrics->get_merged_url_metrics() ),
+			count( $group_collection->get_merged_url_metrics() ),
 			sprintf( 'Expected there to be at most sample size (%d) times the number of breakpoint groups (which is %d + 1)', $sample_size, count( $breakpoints ) )
 		);
 
 		foreach ( $expected_counts as $minimum_viewport_width => $count ) {
-			$group = $grouped_url_metrics->get_group_for_viewport_width( $minimum_viewport_width );
+			$group = $group_collection->get_group_for_viewport_width( $minimum_viewport_width );
 			$this->assertSame( $count, $group->count(), "Expected equal count for $minimum_viewport_width minimum viewport width." );
 		}
 	}
@@ -182,9 +182,9 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 * @throws ILO_Data_Validation_Exception When failing to instantiate a URL metric.
 	 */
 	public function test_adding_pushes_out_old_metrics() {
-		$sample_size         = 3;
-		$breakpoints         = array( 400, 600 );
-		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
+		$sample_size      = 3;
+		$breakpoints      = array( 400, 600 );
+		$group_collection = new ILO_URL_Metrics_Group_Collection( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
 
 		// Populate the groups with stale URL metrics.
 		$viewport_widths = array( 300, 500, 700 );
@@ -192,7 +192,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 
 		foreach ( $viewport_widths as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
-				$grouped_url_metrics->add_url_metric(
+				$group_collection->add_url_metric(
 					new ILO_URL_Metric(
 						array_merge(
 							$this->get_validated_url_metric( $viewport_width )->jsonSerialize(),
@@ -207,17 +207,17 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 
 		// Try adding one URL metric for each breakpoint group.
 		foreach ( $viewport_widths as $viewport_width ) {
-			$grouped_url_metrics->add_url_metric( $this->get_validated_url_metric( $viewport_width ) );
+			$group_collection->add_url_metric( $this->get_validated_url_metric( $viewport_width ) );
 		}
 
 		$max_possible_url_metrics_count = $sample_size * ( count( $breakpoints ) + 1 );
 		$this->assertCount(
 			$max_possible_url_metrics_count,
-			$grouped_url_metrics->get_merged_url_metrics(),
+			$group_collection->get_merged_url_metrics(),
 			'Expected the total count of URL metrics to not exceed the multiple of the sample size.'
 		);
 		$new_count = 0;
-		foreach ( $grouped_url_metrics->get_merged_url_metrics() as $url_metric ) {
+		foreach ( $group_collection->get_merged_url_metrics() as $url_metric ) {
 			if ( $url_metric->get_timestamp() > $old_timestamp ) {
 				++$new_count;
 			}
@@ -288,16 +288,16 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 			$viewport_widths
 		);
 
-		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, 3, HOUR_IN_SECONDS );
+		$group_collection = new ILO_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, 3, HOUR_IN_SECONDS );
 
 		$this->assertCount(
 			count( $breakpoints ) + 1,
-			$grouped_url_metrics->get_groups(),
+			$group_collection->get_groups(),
 			'Expected number of breakpoint groups to always be one greater than the number of breakpoints.'
 		);
 
 		$actual_groups = array();
-		foreach ( $grouped_url_metrics->get_groups() as $group ) {
+		foreach ( $group_collection->get_groups() as $group ) {
 			$actual_groups[] = array(
 				'minimum_viewport_width'     => $group->get_minimum_viewport_width(),
 				'maximum_viewport_width'     => $group->get_maximum_viewport_width(),
@@ -440,7 +440,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 * @dataProvider data_provider_test_get_group_for_viewport_width
 	 */
 	public function test_get_group_for_viewport_width( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_lacking ) {
-		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
+		$group_collection = new ILO_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertSame(
 			$expected_return,
 			array_map(
@@ -450,14 +450,14 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 						'lacking'              => $group->is_lacking(),
 					);
 				},
-				$grouped_url_metrics->get_groups()
+				$group_collection->get_groups()
 			)
 		);
 
 		foreach ( $expected_is_group_lacking as $viewport_width => $expected ) {
 			$this->assertSame(
 				$expected,
-				$grouped_url_metrics->get_group_for_viewport_width( $viewport_width )->is_lacking(),
+				$group_collection->get_group_for_viewport_width( $viewport_width )->is_lacking(),
 				"Unexpected value for viewport width of $viewport_width"
 			);
 		}
@@ -469,19 +469,19 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	 * @covers ::is_every_group_populated
 	 */
 	public function test_is_every_group_populated() {
-		$grouped_url_metrics = new ILO_Grouped_URL_Metrics(
+		$group_collection = new ILO_URL_Metrics_Group_Collection(
 			array(),
 			array( 480, 800 ),
 			3,
 			HOUR_IN_SECONDS
 		);
-		$this->assertFalse( $grouped_url_metrics->is_every_group_populated() );
-		$grouped_url_metrics->add_url_metric( $this->get_validated_url_metric( 200 ) );
-		$this->assertFalse( $grouped_url_metrics->is_every_group_populated() );
-		$grouped_url_metrics->add_url_metric( $this->get_validated_url_metric( 500 ) );
-		$this->assertFalse( $grouped_url_metrics->is_every_group_populated() );
-		$grouped_url_metrics->add_url_metric( $this->get_validated_url_metric( 900 ) );
-		$this->assertTrue( $grouped_url_metrics->is_every_group_populated() );
+		$this->assertFalse( $group_collection->is_every_group_populated() );
+		$group_collection->add_url_metric( $this->get_validated_url_metric( 200 ) );
+		$this->assertFalse( $group_collection->is_every_group_populated() );
+		$group_collection->add_url_metric( $this->get_validated_url_metric( 500 ) );
+		$this->assertFalse( $group_collection->is_every_group_populated() );
+		$group_collection->add_url_metric( $this->get_validated_url_metric( 900 ) );
+		$this->assertTrue( $group_collection->is_every_group_populated() );
 	}
 
 	/**
@@ -496,14 +496,14 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 			$this->get_validated_url_metric( 800 ),
 		);
 
-		$grouped_url_metrics = new ILO_Grouped_URL_Metrics(
+		$group_collection = new ILO_URL_Metrics_Group_Collection(
 			$url_metrics,
 			array( 500, 700 ),
 			3,
 			HOUR_IN_SECONDS
 		);
 
-		$this->assertEquals( $url_metrics, $grouped_url_metrics->get_merged_url_metrics() );
+		$this->assertEquals( $url_metrics, $group_collection->get_merged_url_metrics() );
 	}
 
 	/**
