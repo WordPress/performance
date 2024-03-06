@@ -5,7 +5,7 @@
  * Description: Creates WebP versions for new JPEG image uploads if supported by the server.
  * Requires at least: 6.3
  * Requires PHP: 7.0
- * Version: 1.0.5
+ * Version: 1.0.6
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -25,7 +25,7 @@ if ( defined( 'WEBP_UPLOADS_VERSION' ) ) {
 	return;
 }
 
-define( 'WEBP_UPLOADS_VERSION', '1.0.5' );
+define( 'WEBP_UPLOADS_VERSION', '1.0.6' );
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/rest-api.php';
