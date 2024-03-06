@@ -183,7 +183,7 @@ function ilo_store_url_metric( string $url, string $slug, ILO_URL_Metric $new_ur
 			static function ( ILO_URL_Metric $url_metric ): array {
 				return $url_metric->jsonSerialize();
 			},
-			$grouped_url_metrics->flatten()
+			$grouped_url_metrics->get_merged_url_metrics()
 		),
 		JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES // TODO: No need for pretty-printing.
 	);

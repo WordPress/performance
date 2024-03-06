@@ -164,7 +164,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 
 		$this->assertLessThanOrEqual(
 			$sample_size * ( count( $breakpoints ) + 1 ),
-			count( $grouped_url_metrics->flatten() ),
+			count( $grouped_url_metrics->get_merged_url_metrics() ),
 			sprintf( 'Expected there to be at most sample size (%d) times the number of breakpoint groups (which is %d + 1)', $sample_size, count( $breakpoints ) )
 		);
 
@@ -213,11 +213,11 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 		$max_possible_url_metrics_count = $sample_size * ( count( $breakpoints ) + 1 );
 		$this->assertCount(
 			$max_possible_url_metrics_count,
-			$grouped_url_metrics->flatten(),
+			$grouped_url_metrics->get_merged_url_metrics(),
 			'Expected the total count of URL metrics to not exceed the multiple of the sample size.'
 		);
 		$new_count = 0;
-		foreach ( $grouped_url_metrics->flatten() as $url_metric ) {
+		foreach ( $grouped_url_metrics->get_merged_url_metrics() as $url_metric ) {
 			if ( $url_metric->get_timestamp() > $old_timestamp ) {
 				++$new_count;
 			}
@@ -485,11 +485,11 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test flatten().
+	 * Test get_merged_url_metrics().
 	 *
-	 * @covers ::flatten
+	 * @covers ::get_merged_url_metrics
 	 */
-	public function test_flatten() {
+	public function test_get_merged_url_metrics() {
 		$url_metrics = array(
 			$this->get_validated_url_metric( 400 ),
 			$this->get_validated_url_metric( 600 ),
@@ -503,7 +503,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 			HOUR_IN_SECONDS
 		);
 
-		$this->assertEquals( $url_metrics, $grouped_url_metrics->flatten() );
+		$this->assertEquals( $url_metrics, $grouped_url_metrics->get_merged_url_metrics() );
 	}
 
 	/**
