@@ -65,7 +65,7 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add().
+	 * Test add_url_metric().
 	 *
 	 * @covers ::add_url_metric
 	 *
@@ -355,16 +355,16 @@ class ILO_Grouped_URL_Metrics_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test statuses().
+	 * Test getting statuses for groups.
 	 *
-	 * @covers ::get_groups
 	 * @covers ::get_group_for_viewport_width
+	 * @covers ::get_groups
 	 * @covers ILO_URL_Metrics_Group::is_lacking
 	 * @covers ILO_URL_Metrics_Group::get_minimum_viewport_width
 	 *
 	 * @dataProvider data_provider_test_get_group_statuses
 	 */
-	public function test_get_group_statuses( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_lacking ) {
+	public function test_get_group_for_viewport_width( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_lacking ) {
 		$grouped_url_metrics = new ILO_Grouped_URL_Metrics( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertSame(
 			$expected_return,

@@ -102,8 +102,19 @@ final class ILO_Grouped_URL_Metrics {
 		}
 		$this->freshness_ttl = $freshness_ttl;
 
-		// Set groups.
-		$this->groups = $this->group_url_metrics_by_breakpoint( $url_metrics );
+		// Create groups.
+		$this->groups           = array();
+		$minimum_viewport_width = 0;
+		foreach ( $this->breakpoints as $maximum_viewport_width ) {
+			$this->groups[]         = new ILO_URL_Metrics_Group( array(), $minimum_viewport_width, $maximum_viewport_width, $this->sample_size, $this->freshness_ttl );
+			$minimum_viewport_width = $maximum_viewport_width + 1;
+		}
+		$this->groups[] = new ILO_URL_Metrics_Group( array(), $minimum_viewport_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl );
+
+		// Add the URL metrics to the groups.
+		foreach ( $url_metrics as $url_metric ) {
+			$this->add_url_metric( $url_metric );
+		}
 	}
 
 	/**
@@ -155,37 +166,6 @@ final class ILO_Grouped_URL_Metrics {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Groups URL metrics by breakpoint.
-	 *
-	 * @since n.e.x.t
-	 * @access private
-	 *
-	 * @param ILO_URL_Metric[] $url_metrics URL metrics.
-	 * @return ILO_URL_Metrics_Group[] URL metrics grouped by breakpoint.
-	 */
-	private function group_url_metrics_by_breakpoint( array $url_metrics ): array {
-		$url_metrics_groups     = array();
-		$minimum_viewport_width = 0;
-		foreach ( $this->breakpoints as $maximum_viewport_width ) {
-			$url_metrics_groups[]   = new ILO_URL_Metrics_Group( array(), $minimum_viewport_width, $maximum_viewport_width, $this->sample_size, $this->freshness_ttl );
-			$minimum_viewport_width = $maximum_viewport_width + 1;
-		}
-		$url_metrics_groups[] = new ILO_URL_Metrics_Group( array(), $minimum_viewport_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl );
-
-		// Now add the URL metrics to the groups.
-		foreach ( $url_metrics as $url_metric ) {
-			foreach ( $url_metrics_groups as $url_metrics_group ) {
-				if ( $url_metrics_group->add_url_metric( $url_metric ) ) {
-					// Skip to the next URL metric once successfully added to a group.
-					continue 2;
-				}
-			}
-		}
-
-		return $url_metrics_groups;
 	}
 
 	/**
