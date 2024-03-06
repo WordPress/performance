@@ -39,10 +39,6 @@ const {
 	options: translationsOptions,
 } = require( './commands/translations' );
 const {
-	handler: buildPluginsHandler,
-	options: buildPluginsOptions,
-} = require( './commands/build-plugins' );
-const {
 	handler: testPluginsHandler,
 	options: testPluginsOptions,
 } = require( './commands/test-plugins' );
@@ -84,14 +80,6 @@ withOptions( program.command( 'module-translations' ), translationsOptions )
 		'Generates a PHP file from module header translation strings'
 	)
 	.action( catchException( translationsHandler ) );
-
-withOptions(
-	program.command( 'build-standalone-plugins' ),
-	buildPluginsOptions
-)
-	.alias( 'build-plugins' )
-	.description( 'Build standalone plugins' )
-	.action( catchException( buildPluginsHandler ) );
 
 withOptions( program.command( 'test-standalone-plugins' ), testPluginsOptions )
 	.alias( 'test-plugins' )
