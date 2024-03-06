@@ -464,24 +464,39 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test is_every_group_populated().
+	 * Test is_every_group_populated() and is_every_group_complete()..
 	 *
 	 * @covers ::is_every_group_populated
+	 * @covers ::is_every_group_complete
 	 */
 	public function test_is_every_group_populated() {
+		$breakpoints      = array( 480, 800 );
+		$sample_size      = 3;
 		$group_collection = new ILO_URL_Metrics_Group_Collection(
 			array(),
-			array( 480, 800 ),
-			3,
+			$breakpoints,
+			$sample_size,
 			HOUR_IN_SECONDS
 		);
 		$this->assertFalse( $group_collection->is_every_group_populated() );
+		$this->assertFalse( $group_collection->is_every_group_complete() );
 		$group_collection->add_url_metric( $this->get_validated_url_metric( 200 ) );
 		$this->assertFalse( $group_collection->is_every_group_populated() );
+		$this->assertFalse( $group_collection->is_every_group_complete() );
 		$group_collection->add_url_metric( $this->get_validated_url_metric( 500 ) );
 		$this->assertFalse( $group_collection->is_every_group_populated() );
+		$this->assertFalse( $group_collection->is_every_group_complete() );
 		$group_collection->add_url_metric( $this->get_validated_url_metric( 900 ) );
 		$this->assertTrue( $group_collection->is_every_group_populated() );
+		$this->assertFalse( $group_collection->is_every_group_complete() );
+
+		// Now finish completing all the groups.
+		foreach ( array_merge( $breakpoints, array( 1000 ) ) as $viewport_width ) {
+			for ( $i = 0; $i < $sample_size; $i++ ) {
+				$group_collection->add_url_metric( $this->get_validated_url_metric( $viewport_width ) );
+			}
+		}
+		$this->assertTrue( $group_collection->is_every_group_complete() );
 	}
 
 	/**

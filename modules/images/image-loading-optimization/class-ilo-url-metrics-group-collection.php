@@ -175,12 +175,33 @@ final class ILO_URL_Metrics_Group_Collection {
 	 * Checks whether every group is populated with at least one URL metric each.
 	 *
 	 * They aren't necessarily filled to the sample size, however.
+	 * The URL metrics may also be stale (non-fresh). This method
+	 * should be contrasted with the `is_every_group_complete()`
+	 * method below.
 	 *
-	 * @return bool Whether all groups have URL metrics.
+	 * @see ILO_URL_Metrics_Group_Collection::is_every_group_complete()
+	 *
+	 * @return bool Whether all groups have some URL metrics.
 	 */
 	public function is_every_group_populated(): bool {
 		foreach ( $this->groups as $group ) {
 			if ( $group->count() === 0 ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Checks whether every group is complete.
+	 *
+	 * @see ILO_URL_Metrics_Group::is_complete()
+	 *
+	 * @return bool Whether all groups are complete.
+	 */
+	public function is_every_group_complete(): bool {
+		foreach ( $this->groups as $group ) {
+			if ( ! $group->is_complete() ) {
 				return false;
 			}
 		}
