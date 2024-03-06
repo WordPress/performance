@@ -24,21 +24,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Node.js (.nvmrc)
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-
-      - name: Install npm dependencies
-        run: npm ci
-
-      - name: Get directory
-        id: get-plugin-directory
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          echo "directory=$(node ./bin/plugin/cli.js get-plugin-dir --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
-
       - name: Set matrix
         id: set-matrix
         run: |
@@ -46,13 +31,12 @@ jobs:
           if ${{ github.event_name == 'workflow_dispatch' }}; then
             SLUG=${{ inputs.slug }}
 
-            # Check if the slug is valid
-            if [[ ! " $PLUGINS " =~ " $SLUG " ]]; then
-              echo "Invalid slug: $SLUG"
+            if echo $PLUGINS | jq -e '.[] | select(. == "'$SLUG'")' > /dev/null; then
+              PLUGINS="[ \"$SLUG\" ]"
+            else
+              echo "The plugin $SLUG is not in the list of plugins to deploy."
               exit 1
             fi
-
-            PLUGINS="[ \"$SLUG\" ]"
           fi
 
           # Set the matrix
@@ -76,7 +60,7 @@ jobs:
           cache: npm
 
       - name: Install npm dependencies
-        run: npm
+        run: npm ci
 
       - name: Building standalone plugin
         run: npm run build:plugin:${{ matrix.plugin }}
@@ -86,8 +70,8 @@ jobs:
         with:
           dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || false }}
         env:
-          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SLUG: ${{ matrix.plugin }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           BUILD_DIR: ./build/${{ matrix.plugin }}
           ASSETS_DIR: ./plugins/${{ matrix.plugin }}/.wordpress-org
