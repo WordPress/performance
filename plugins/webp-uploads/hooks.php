@@ -784,7 +784,7 @@ add_action( 'wp_head', 'webp_uploads_render_generator' );
  * @since 1.0.6
  *
  * @param array $links An array of plugin action links.
- * @return array Plugin action links.
+ * @return array The modified list of actions.
  */
 function webp_uploads_settings_link( $links ) {
 	if ( ! is_array( $links ) ) {
