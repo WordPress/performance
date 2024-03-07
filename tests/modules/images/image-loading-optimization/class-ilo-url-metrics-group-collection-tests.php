@@ -331,7 +331,7 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 					static function ( ILO_URL_Metric $url_metric ) {
 						return $url_metric->get_viewport()['width'];
 					},
-					$group->get_url_metrics()
+					iterator_to_array( $group )
 				),
 			);
 		}

@@ -9,10 +9,12 @@
 /**
  * URL metrics grouped by viewport according to breakpoints.
  *
+ * @implements IteratorAggregate<int, ILO_URL_Metric>
+ *
  * @since n.e.x.t
  * @access private
  */
-final class ILO_URL_Metrics_Group implements Countable {
+final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 
 	/**
 	 * URL metrics.
@@ -197,10 +199,10 @@ final class ILO_URL_Metrics_Group implements Countable {
 	/**
 	 * Gets the URL metrics in the group.
 	 *
-	 * @return ILO_URL_Metric[] URL metrics in group.
+	 * @return ArrayIterator<int, ILO_URL_Metric> ArrayIterator for ILO_URL_Metric instances.
 	 */
-	public function get_url_metrics(): array {
-		return $this->url_metrics;
+	public function getIterator(): ArrayIterator {
+		return new ArrayIterator( $this->url_metrics );
 	}
 
 	/**

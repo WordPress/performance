@@ -236,7 +236,7 @@ final class ILO_URL_Metrics_Group_Collection {
 		return array_merge(
 			...array_map(
 				static function ( ILO_URL_Metrics_Group $group ): array {
-					return $group->get_url_metrics();
+					return iterator_to_array( $group );
 				},
 				$this->groups
 			)

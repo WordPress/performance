@@ -279,7 +279,7 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( ILO_URL_Metrics_Group_
 		$breadcrumb_counts  = array();
 		$breadcrumb_element = array();
 
-		foreach ( $group->get_url_metrics() as $url_metric ) {
+		foreach ( $group as $url_metric ) {
 			foreach ( $url_metric->get_elements() as $element ) {
 				if ( ! $element['isLCP'] ) {
 					continue;
