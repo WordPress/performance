@@ -24,11 +24,31 @@ function ilo_get_url_metric_freshness_ttl(): int {
 	/**
 	 * Filters the freshness age (TTL) for a given URL metric.
 	 *
+	 * The freshness TTL must be at least zero, in which it considers URL metrics to always be stale.
+	 * In practice, the value should be at least an hour.
+	 *
 	 * @since n.e.x.t
 	 *
-	 * @param int $ttl Expiration TTL in seconds.
+	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 day.
 	 */
-	return (int) apply_filters( 'ilo_url_metric_freshness_ttl', DAY_IN_SECONDS );
+	$freshness_ttl = (int) apply_filters( 'ilo_url_metric_freshness_ttl', DAY_IN_SECONDS );
+
+	if ( $freshness_ttl <= 0 ) {
+		_doing_it_wrong(
+			__FUNCTION__,
+			esc_html(
+				sprintf(
+					/* translators: %s is the TTL freshness */
+					__( 'Freshness TTL must be at least zero, but saw "%s".', 'performance-lab' ),
+					$freshness_ttl
+				)
+			),
+			''
+		);
+		$freshness_ttl = 0;
+	}
+
+	return $freshness_ttl;
 }
 
 /**
@@ -142,21 +162,53 @@ function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): bo
  * @return int[] Breakpoint max widths, sorted in ascending order.
  */
 function ilo_get_breakpoint_max_widths(): array {
+	$function_name = __FUNCTION__;
 
 	$breakpoint_max_widths = array_map(
-		static function ( $breakpoint_max_width ) {
-			return (int) $breakpoint_max_width;
+		static function ( $original_breakpoint ) use ( $function_name ): int {
+			$breakpoint = (int) $original_breakpoint;
+			if ( PHP_INT_MAX === $breakpoint ) {
+				$breakpoint = PHP_INT_MAX - 1;
+				_doing_it_wrong(
+					esc_html( $function_name ),
+					esc_html(
+						sprintf(
+							/* translators: %s is the actual breakpoint max width */
+							__( 'Breakpoint must be less than PHP_INT_MAX, but saw "%s".', 'performance-lab' ),
+							$original_breakpoint
+						)
+					),
+					''
+				);
+			} elseif ( $breakpoint <= 0 ) {
+				$breakpoint = 1;
+				_doing_it_wrong(
+					esc_html( $function_name ),
+					esc_html(
+						sprintf(
+							/* translators: %s is the actual breakpoint max width */
+							__( 'Breakpoint must be greater zero, but saw "%s".', 'performance-lab' ),
+							$original_breakpoint
+						)
+					),
+					''
+				);
+			}
+			return $breakpoint;
 		},
 		/**
 		 * Filters the breakpoint max widths to group URL metrics for various viewports.
 		 *
+		 * A breakpoint must be greater than zero and less than PHP_INT_MAX.
+		 *
 		 * @since n.e.x.t
 		 *
-		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints.
+		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
 		 */
 		(array) apply_filters( 'ilo_breakpoint_max_widths', array( 480, 600, 782 ) )
 	);
 
+	$breakpoint_max_widths = array_unique( $breakpoint_max_widths, SORT_NUMERIC );
 	sort( $breakpoint_max_widths );
 	return $breakpoint_max_widths;
 }
@@ -177,9 +229,109 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
 	/**
 	 * Filters the sample size for a breakpoint's URL metrics on a given URL.
 	 *
+	 * The sample size must greater than zero.
+	 *
 	 * @since n.e.x.t
 	 *
-	 * @param int $sample_size Sample size.
+	 * @param int $sample_size Sample size. Defaults to 3.
 	 */
-	return (int) apply_filters( 'ilo_url_metrics_breakpoint_sample_size', 3 );
+	$sample_size = (int) apply_filters( 'ilo_url_metrics_breakpoint_sample_size', 3 );
+
+	if ( $sample_size <= 0 ) {
+		_doing_it_wrong(
+			__FUNCTION__,
+			esc_html(
+				sprintf(
+					/* translators: %s is the sample size */
+					__( 'Sample size must greater than zero, but saw "%s".', 'performance-lab' ),
+					$sample_size
+				)
+			),
+			''
+		);
+		$sample_size = 1;
+	}
+
+	return $sample_size;
+}
+
+/**
+ * Gets the LCP element for each breakpoint.
+ *
+ * The array keys are the minimum viewport width required for the element to be LCP. If there are URL metrics for a
+ * given breakpoint and yet there is no supported LCP element, then the array value is `false`. (Currently only IMG is
+ * a supported LCP element.) If there is a supported LCP element at the breakpoint, then the array value is an array
+ * representing that element, including its breadcrumbs. If two adjoining breakpoints have the same value, then the
+ * latter is dropped.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param ILO_URL_Metrics_Group_Collection $group_collection URL metrics group collection.
+ * @return array LCP elements keyed by its minimum viewport width. If there is no supported LCP element at a breakpoint, then `false` is used.
+ */
+function ilo_get_lcp_elements_by_minimum_viewport_widths( ILO_URL_Metrics_Group_Collection $group_collection ): array {
+	$lcp_element_by_viewport_minimum_width = array();
+	foreach ( $group_collection->get_groups() as $group ) {
+
+		// The following arrays all share array indices.
+		$seen_breadcrumbs   = array();
+		$breadcrumb_counts  = array();
+		$breadcrumb_element = array();
+
+		foreach ( $group as $url_metric ) {
+			foreach ( $url_metric->get_elements() as $element ) {
+				if ( ! $element['isLCP'] ) {
+					continue;
+				}
+
+				$i = array_search( $element['xpath'], $seen_breadcrumbs, true );
+				if ( false === $i ) {
+					$i                       = count( $seen_breadcrumbs );
+					$seen_breadcrumbs[ $i ]  = $element['xpath'];
+					$breadcrumb_counts[ $i ] = 0;
+				}
+
+				$breadcrumb_counts[ $i ] += 1;
+				$breadcrumb_element[ $i ] = $element;
+				break; // We found the LCP element for the URL metric, go to the next URL metric.
+			}
+		}
+
+		// Now sort by the breadcrumb counts in descending order, so the remaining first key is the most common breadcrumb.
+		if ( $seen_breadcrumbs ) {
+			arsort( $breadcrumb_counts );
+			$most_common_breadcrumb_index = key( $breadcrumb_counts );
+
+			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = $breadcrumb_element[ $most_common_breadcrumb_index ];
+		} elseif ( count( $group ) > 0 ) {
+			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = false; // No LCP image at this breakpoint.
+		}
+	}
+
+	// Now merge the breakpoints when there is an LCP element common between them.
+	$prev_lcp_element = null;
+	return array_filter(
+		$lcp_element_by_viewport_minimum_width,
+		static function ( $lcp_element ) use ( &$prev_lcp_element ) {
+			$include = (
+				// First element in list.
+				null === $prev_lcp_element
+				||
+				( is_array( $prev_lcp_element ) && is_array( $lcp_element )
+					?
+					// This breakpoint and previous breakpoint had LCP element, and they were not the same element.
+					$prev_lcp_element['xpath'] !== $lcp_element['xpath']
+					:
+					// This LCP element and the last LCP element were not the same. In this case, either variable may be
+					// false or an array, but both cannot be an array. If both are false, we don't want to include since
+					// it is the same. If one is an array and the other is false, then do want to include because this
+					// indicates a difference at this breakpoint.
+					$prev_lcp_element !== $lcp_element
+				)
+			);
+			$prev_lcp_element = $lcp_element;
+			return $include;
+		}
+	);
 }

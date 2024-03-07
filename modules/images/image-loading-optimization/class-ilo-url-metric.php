@@ -9,6 +9,21 @@
 /**
  * Representation of the measurements taken from a single client's visit to a specific URL.
  *
+ * @phpstan-type RectData    array{ width: int, height: int }
+ * @phpstan-type ElementData array{
+ *                               isLCP: bool,
+ *                               isLCPCandidate: bool,
+ *                               xpath: string,
+ *                               intersectionRatio: float,
+ *                               intersectionRect: RectData,
+ *                               boundingClientRect: RectData,
+ *                           }
+ * @phpstan-type Data        array{
+ *                               timestamp: int,
+ *                               viewport: RectData,
+ *                               elements: ElementData[]
+ *                           }
+ *
  * @since n.e.x.t
  * @access private
  */
@@ -17,35 +32,21 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Data.
 	 *
-	 * @var array{
-	 *          timestamp: int,
-	 *          viewport: array{ width: int, height: int },
-	 *          elements: array<array{
-	 *              isLCP: bool,
-	 *              isLCPCandidate: bool,
-	 *              xpath: string,
-	 *              intersectionRatio: float,
-	 *              intersectionRect: array{ width: int, height: int },
-	 *              boundingClientRect: array{ width: int, height: int },
-	 *          }>
-	 *      }
+	 * @var Data
 	 */
 	private $data;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param array $data      URL metric data.
-	 * @param bool  $validated Whether the data was already validated.
+	 * @param array $data URL metric data.
 	 *
-	 * @throws Exception When the input is invalid.
+	 * @throws ILO_Data_Validation_Exception When the input is invalid.
 	 */
-	public function __construct( array $data, bool $validated = false ) {
-		if ( ! $validated ) {
-			$valid = rest_validate_object_value_from_schema( $data, self::get_json_schema(), self::class );
-			if ( is_wp_error( $valid ) ) {
-				throw new Exception( esc_html( $valid->get_error_message() ) );
-			}
+	public function __construct( array $data ) {
+		$valid = rest_validate_object_value_from_schema( $data, self::get_json_schema(), self::class );
+		if ( is_wp_error( $valid ) ) {
+			throw new ILO_Data_Validation_Exception( esc_html( $valid->get_error_message() ) );
 		}
 		$this->data = $data;
 	}
@@ -53,7 +54,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets JSON schema for URL Metric.
 	 *
-	 * @return array
+	 * @return array Schema.
 	 */
 	public static function get_json_schema(): array {
 		$dom_rect_schema = array(
@@ -98,6 +99,8 @@ final class ILO_URL_Metric implements JsonSerializable {
 					'description' => __( 'Timestamp at which the URL metric was captured.', 'performance-lab' ),
 					'type'        => 'number',
 					'required'    => true,
+					'readonly'    => true, // Omit from REST API.
+					'default'     => microtime( true ), // Value provided when instantiating ILO_URL_Metric in REST API.
 					'minimum'     => 0,
 				),
 				'elements'  => array(
@@ -138,9 +141,9 @@ final class ILO_URL_Metric implements JsonSerializable {
 	}
 
 	/**
-	 * Gets viewport width.
+	 * Gets viewport data.
 	 *
-	 * @return array{ width: int, height: int }
+	 * @return RectData Viewport data.
 	 */
 	public function get_viewport(): array {
 		return $this->data['viewport'];
@@ -149,7 +152,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets timestamp.
 	 *
-	 * @return float
+	 * @return float Timestamp.
 	 */
 	public function get_timestamp(): float {
 		return $this->data['timestamp'];
@@ -158,14 +161,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets elements.
 	 *
-	 * @return array<array{
-	 *             isLCP: bool,
-	 *             isLCPCandidate: bool,
-	 *             xpath: string,
-	 *             intersectionRatio: float,
-	 *             intersectionRect: array{ width: int, height: int },
-	 *             boundingClientRect: array{ width: int, height: int },
-	 *         }>
+	 * @return ElementData[] Elements.
 	 */
 	public function get_elements(): array {
 		return $this->data['elements'];
@@ -174,7 +170,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Specifies data which should be serialized to JSON.
 	 *
-	 * @return array Data which can be serialized by json_encode().
+	 * @return Data Exports to be serialized by json_encode().
 	 */
 	public function jsonSerialize(): array {
 		return $this->data;

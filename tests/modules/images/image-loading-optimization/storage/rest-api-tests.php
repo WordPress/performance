@@ -139,6 +139,39 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+
+		$this->assertNull( ilo_get_url_metrics_post( $params['slug'] ) );
+	}
+
+	/**
+	 * Test timestamp ignored.
+	 *
+	 * @covers ::ilo_register_endpoint
+	 * @covers ::ilo_handle_rest_request
+	 */
+	public function test_rest_request_timestamp_ignored() {
+		$initial_microtime = microtime( true );
+
+		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$params  = $this->get_valid_params(
+			array(
+				// Timestamp should cause to be ignored.
+				'timestamp' => microtime( true ) - HOUR_IN_SECONDS,
+			)
+		);
+		$request->set_body_params( $params );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
+
+		$post = ilo_get_url_metrics_post( $params['slug'] );
+		$this->assertInstanceOf( WP_Post::class, $post );
+
+		$url_metrics = ilo_parse_stored_url_metrics( $post );
+		$this->assertCount( 1, $url_metrics );
+		$url_metric = $url_metrics[0];
+		$this->assertNotEquals( $params['timestamp'], $url_metric->get_timestamp() );
+		$this->assertGreaterThanOrEqual( $initial_microtime, $url_metric->get_timestamp() );
 	}
 
 	/**
@@ -159,7 +192,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test sending viewport data that isn't needed for a specific breakpoint.
+	 * Test sending viewport data that isn't needed for any breakpoint.
 	 *
 	 * @covers ::ilo_register_endpoint
 	 * @covers ::ilo_handle_rest_request
@@ -171,17 +204,13 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$sample_size     = ilo_get_url_metrics_breakpoint_sample_size();
 		$viewport_widths = array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) );
 		foreach ( $viewport_widths as $viewport_width ) {
-			for ( $i = 0; $i < $sample_size; $i++ ) {
-				$valid_params                      = $this->get_valid_params();
-				$valid_params['viewport']['width'] = $viewport_width;
-				$request                           = new WP_REST_Request( 'POST', self::ROUTE );
-				$request->set_body_params( $valid_params );
-				$response = rest_get_server()->dispatch( $request );
-				$this->assertSame( 200, $response->get_status() );
-			}
+			$this->populate_url_metrics(
+				$sample_size,
+				$this->get_valid_params( array( 'viewport' => array( 'width' => $viewport_width ) ) )
+			);
 		}
 
-		// The next request with the same sample size will be rejected.
+		// The next request will be rejected because all groups are fully populated with samples.
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params( $this->get_valid_params() );
 		$response = rest_get_server()->dispatch( $request );
@@ -189,7 +218,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test sending viewport data that isn't needed for any breakpoint.
+	 * Test sending viewport data that isn't needed for a specific breakpoint.
 	 *
 	 * @covers ::ilo_register_endpoint
 	 * @covers ::ilo_handle_rest_request
@@ -197,30 +226,135 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	public function test_rest_request_breakpoint_not_needed_for_specific_breakpoint() {
 		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
 
+		$valid_params = $this->get_valid_params( array( 'viewport' => array( 'width' => 480 ) ) );
+
 		// First fully populate the sample for a given breakpoint.
 		$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
-		for ( $i = 0; $i < $sample_size; $i++ ) {
-			$valid_params                      = $this->get_valid_params();
-			$valid_params['viewport']['width'] = 480;
-			$request                           = new WP_REST_Request( 'POST', self::ROUTE );
-			$request->set_body_params( $valid_params );
-			$response = rest_get_server()->dispatch( $request );
-			$this->assertSame( 200, $response->get_status() );
-		}
+		$this->populate_url_metrics(
+			$sample_size,
+			$valid_params
+		);
 
-		// The next request with the same sample size will be rejected.
+		// The next request will be rejected because the one group is fully populated with the needed sample size.
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
-		$request->set_body_params( $this->get_valid_params() );
+		$request->set_body_params( $valid_params );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 403, $response->get_status() );
 	}
 
 	/**
+	 * Test fully populating the wider viewport group and then adding one more.
+	 *
+	 * @covers ::ilo_register_endpoint
+	 * @covers ::ilo_handle_rest_request
+	 */
+	public function test_rest_request_over_populate_wider_viewport_group() {
+		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
+
+		// First establish a single breakpoint, so there are two groups of URL metrics
+		// with viewport widths 0-480 and >481.
+		$breakpoint_width = 480;
+		add_filter(
+			'ilo_breakpoint_max_widths',
+			static function () use ( $breakpoint_width ): array {
+				return array( $breakpoint_width );
+			}
+		);
+
+		$wider_viewport_params = $this->get_valid_params( array( 'viewport' => array( 'width' => $breakpoint_width + 1 ) ) );
+
+		// Fully populate the wider viewport group, leaving the narrower one empty.
+		$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
+		$this->populate_url_metrics(
+			$sample_size,
+			$wider_viewport_params
+		);
+
+		// Sanity check that the groups were constructed as expected.
+		$group_collection  = new ILO_URL_Metrics_Group_Collection(
+			ilo_parse_stored_url_metrics( ilo_get_url_metrics_post( ilo_get_url_metrics_slug( array() ) ) ),
+			ilo_get_breakpoint_max_widths(),
+			ilo_get_url_metrics_breakpoint_sample_size(),
+			HOUR_IN_SECONDS
+		);
+		$url_metric_groups = $group_collection->get_groups();
+		$this->assertSame(
+			array( 0, $breakpoint_width + 1 ),
+			array_map(
+				static function ( ILO_URL_Metrics_Group $group ) {
+					return $group->get_minimum_viewport_width();
+				},
+				$url_metric_groups
+			)
+		);
+		$this->assertCount( 0, $url_metric_groups[0], 'Expected first group to be empty.' );
+		$this->assertCount( $sample_size, end( $url_metric_groups ), 'Expected last group to be fully populated.' );
+
+		// Now attempt to store one more URL metric for the wider viewport group.
+		// This should fail because the group is already fully populated to the sample size.
+		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params( $wider_viewport_params );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 403, $response->get_status(), 'Response: ' . wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
+	 * Test fully populating the narrower viewport group and then adding one more.
+	 *
+	 * @covers ::ilo_register_endpoint
+	 * @covers ::ilo_handle_rest_request
+	 */
+	public function test_rest_request_over_populate_narrower_viewport_group() {
+		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
+
+		// First establish a single breakpoint, so there are two groups of URL metrics
+		// with viewport widths 0-480 and >481.
+		$breakpoint_width = 480;
+		add_filter(
+			'ilo_breakpoint_max_widths',
+			static function () use ( $breakpoint_width ): array {
+				return array( $breakpoint_width );
+			}
+		);
+
+		$narrower_viewport_params = $this->get_valid_params( array( 'viewport' => array( 'width' => $breakpoint_width ) ) );
+
+		// Fully populate the narrower viewport group, leaving the wider one empty.
+		$this->populate_url_metrics(
+			ilo_get_url_metrics_breakpoint_sample_size(),
+			$narrower_viewport_params
+		);
+
+		// Now attempt to store one more URL metric for the narrower viewport group.
+		// This should fail because the group is already fully populated to the sample size.
+		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params( $narrower_viewport_params );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 403, $response->get_status(), 'Response: ' . wp_json_encode( $response->get_data() ) );
+	}
+
+	/**
+	 * Populate URL metrics.
+	 *
+	 * @param int   $count  Count of URL metrics to populate.
+	 * @param array $params Params for URL metric.
+	 */
+	private function populate_url_metrics( int $count, array $params ) {
+		for ( $i = 0; $i < $count; $i++ ) {
+			$request = new WP_REST_Request( 'POST', self::ROUTE );
+			$request->set_body_params( $params );
+			$response = rest_get_server()->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+		}
+	}
+
+	/**
 	 * Gets valid params.
 	 *
-	 * @return array
+	 * @param array $extras Extra params which are recursively merged on top of the valid params.
+	 * @return array Params.
 	 */
-	private function get_valid_params(): array {
+	private function get_valid_params( array $extras = array() ): array {
 		$slug = ilo_get_url_metrics_slug( array() );
 		$data = array_merge(
 			array(
@@ -230,8 +364,35 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 			),
 			$this->get_sample_validated_url_metric()
 		);
-		unset( $data['timestamp'] ); // Since provided by request handler.
+		unset( $data['timestamp'] ); // Since provided by default args.
+		if ( $extras ) {
+			$data = $this->recursive_merge( $data, $extras );
+		}
 		return $data;
+	}
+
+	/**
+	 * Merges arrays recursively non-array values being overridden.
+	 *
+	 * This is on contrast with `array_merge_recursive()` which creates arrays for colliding values.
+	 *
+	 * @param array $base_array   Base array.
+	 * @param array $sparse_array Sparse array.
+	 * @return array Merged array.
+	 */
+	private function recursive_merge( array $base_array, array $sparse_array ): array {
+		foreach ( $sparse_array as $key => $value ) {
+			if (
+				array_key_exists( $key, $base_array ) &&
+				is_array( $base_array[ $key ] ) &&
+				is_array( $value )
+			) {
+				$base_array[ $key ] = $this->recursive_merge( $base_array[ $key ], $value );
+			} else {
+				$base_array[ $key ] = $value;
+			}
+		}
+		return $base_array;
 	}
 
 	/**

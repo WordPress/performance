@@ -93,9 +93,10 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 	if ( json_last_error() ) {
 		$trigger_error(
 			sprintf(
-				/* translators: 1: Post type slug, 2: JSON error message */
-				__( 'Contents of %1$s post type not valid JSON: %2$s', 'performance-lab' ),
+				/* translators: 1: Post type slug, 2: Post ID, 3: JSON error message */
+				__( 'Contents of %1$s post type (ID: %2$s) not valid JSON: %3$s', 'performance-lab' ),
 				ILO_URL_METRICS_POST_TYPE,
+				$post->ID,
 				json_last_error_msg()
 			)
 		);
@@ -120,14 +121,14 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 					}
 
 					try {
-						// TODO: This is re-validating the data which has been stored in the post type. This ensures it remains valid, but is it overkill?
 						return new ILO_URL_Metric( $url_metric_data );
-					} catch ( Exception $e ) {
+					} catch ( ILO_Data_Validation_Exception $e ) {
 						$trigger_error(
 							sprintf(
-								/* translators: %s is post type slug */
-								__( 'Unexpected shape to JSON array in post_content of %s post type.', 'performance-lab' ),
-								ILO_URL_METRICS_POST_TYPE
+								/* translators: 1: Post type slug. 2: Exception message. */
+								__( 'Unexpected shape to JSON array in post_content of %1$s post type: %2$s', 'performance-lab' ),
+								ILO_URL_METRICS_POST_TYPE,
+								$e->getMessage()
 							)
 						);
 						return null;
@@ -168,21 +169,26 @@ function ilo_store_url_metric( string $url, string $slug, ILO_URL_Metric $new_ur
 		$url_metrics            = array();
 	}
 
-	$grouped_url_metrics = new ILO_Grouped_URL_Metrics(
+	$group_collection = new ILO_URL_Metrics_Group_Collection(
 		$url_metrics,
 		ilo_get_breakpoint_max_widths(),
 		ilo_get_url_metrics_breakpoint_sample_size(),
 		ilo_get_url_metric_freshness_ttl()
 	);
 
-	$grouped_url_metrics->add( $new_url_metric );
+	try {
+		$group = $group_collection->get_group_for_viewport_width( $new_url_metric->get_viewport()['width'] );
+		$group->add_url_metric( $new_url_metric );
+	} catch ( InvalidArgumentException $e ) {
+		return new WP_Error( 'invalid_url_metric', $e->getMessage() );
+	}
 
 	$post_data['post_content'] = wp_json_encode(
 		array_map(
 			static function ( ILO_URL_Metric $url_metric ): array {
 				return $url_metric->jsonSerialize();
 			},
-			$grouped_url_metrics->flatten()
+			$group_collection->get_flattened_url_metrics()
 		),
 		JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES // TODO: No need for pretty-printing.
 	);
