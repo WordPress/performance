@@ -21,6 +21,8 @@ on:
         description: 'Debug mode (run without publishing).'
         default: false
 
+permissions: {}
+
 jobs:
   pre-run:
     name: Pre-run
@@ -58,6 +60,9 @@ jobs:
     name: "Deploy Plugin: ${{ matrix.plugin }}"
     needs: pre-run
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      deployments: write
     strategy:
       matrix:
         plugin: ${{ fromJSON(needs.pre-run.outputs.matrix) }}
@@ -102,6 +107,14 @@ jobs:
           name: ${{ matrix.plugin }}
           path: ./build/dist
 
+      - name: Start deployment
+        uses: bobheadxi/deployments@v1
+        id: wporg-deployment
+        with:
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: "WPOrg Plugin Release: ${{ matrix.plugin }}"
+
       - name: Deploy Standalone Plugin - ${{ matrix.plugin }}
         uses: 10up/action-wordpress-plugin-deploy@stable
         with:
@@ -114,10 +127,23 @@ jobs:
           BUILD_DIR: ./build/${{ matrix.plugin }}
           ASSETS_DIR: ./plugins/${{ matrix.plugin }}/.wordpress-org
 
+      - name: Finish deployment
+        if: always()
+        uses: bobheadxi/deployments@v1
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          deployment_id: ${{ steps.wporg-deployment.outputs.deployment_id }}
+          env: "WPOrg Plugin Release: ${{ matrix.plugin }}"
+          env_url: "https://wordpress.org/plugins/${{ matrix.plugin }}/"
+
   release-assets:
     name: Add release assets
     needs: [ pre-run, deploy ]
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
     if: github.event_name == 'release'
     strategy:
       matrix:
