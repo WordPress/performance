@@ -26,6 +26,7 @@ if ( defined( 'WEBP_UPLOADS_VERSION' ) ) {
 }
 
 define( 'WEBP_UPLOADS_VERSION', '1.0.6' );
+define( 'WEBP_UPLOADS_MAIN_FILE', plugin_basename( __FILE__ ) );
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/rest-api.php';
