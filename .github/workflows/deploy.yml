@@ -79,7 +79,7 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Building standalone plugin
+      - name: Build plugin
         run: npm run build:plugin:${{ matrix.plugin }}
 
       - name: Set plugin version
@@ -113,9 +113,9 @@ jobs:
         with:
           step: start
           token: ${{ secrets.GITHUB_TOKEN }}
-          env: "WPOrg Plugin Release: ${{ matrix.plugin }}"
+          env: "wp.org plugin: ${{ matrix.plugin }}"
 
-      - name: Deploy Standalone Plugin - ${{ matrix.plugin }}
+      - name: Deploy Plugin - ${{ matrix.plugin }}
         uses: 10up/action-wordpress-plugin-deploy@stable
         with:
           dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || false }}
@@ -135,7 +135,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           status: ${{ job.status }}
           deployment_id: ${{ steps.wporg-deployment.outputs.deployment_id }}
-          env: "WPOrg Plugin Release: ${{ matrix.plugin }}"
+          env: "wp.org plugin: ${{ matrix.plugin }}"
           env_url: "https://wordpress.org/plugins/${{ matrix.plugin }}/"
 
   release-assets:
