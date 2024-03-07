@@ -1,5 +1,5 @@
 ---
-name: Deploy to WordPress.org
+name: Deploy Standalone Plugin(s) to WordPress.org
 
 on:
   release:
@@ -8,14 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       plugin:
-        type: choice
+        type: string
         description: 'The slug of the plugin to deploy'
-        options: [
-            'auto-sizes',
-            'dominant-color-images',
-            'speculation-rules',
-            'webp-uploads'
-          ]
+        required: true
       dry-run:
         type: boolean
         description: 'Debug mode (run without publishing).'
@@ -31,7 +26,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.plugins }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set matrix
         id: set-matrix
@@ -45,15 +40,10 @@ jobs:
               echo "::error::The plugin $SLUG is not in the list of plugins to deploy."
               exit 1
             fi
-          else
-            # If it's the release event, include `performance-lab` plugin in the matrix as well
-            PLUGINS=$(echo $PLUGINS | jq -c '. + ["performance-lab"]')
           fi
 
-          # Log notice
+          # Set the matrix.
           echo "::notice::Deploying the following plugins: $PLUGINS"
-
-          # Set the matrix
           echo "plugins=$(echo $PLUGINS | jq -c .)" >> $GITHUB_OUTPUT
 
   deploy:
@@ -68,10 +58,10 @@ jobs:
         plugin: ${{ fromJSON(needs.pre-run.outputs.matrix) }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js (.nvmrc)
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: npm
