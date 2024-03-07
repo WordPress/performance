@@ -785,7 +785,7 @@ add_action( 'wp_head', 'webp_uploads_render_generator' );
  * @return array Plugin action links.
  */
 function webp_uploads_settings_link( $links ) {
-	if ( ! \is_array( $links ) ) {
+	if ( ! is_array( $links ) ) {
 		return $links;
 	}
 	$url     = get_admin_url( null, 'options-media.php#perflab_generate_webp_and_jpeg' );
