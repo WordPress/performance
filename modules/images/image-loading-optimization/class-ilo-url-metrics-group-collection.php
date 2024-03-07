@@ -228,11 +228,11 @@ final class ILO_URL_Metrics_Group_Collection {
 	}
 
 	/**
-	 * Gets URL metrics from all groups merged into one list.
+	 * Gets URL metrics from all groups flattened into one list.
 	 *
 	 * @return ILO_URL_Metric[] All URL metrics.
 	 */
-	public function get_merged_url_metrics(): array {
+	public function get_flattened_url_metrics(): array {
 		return array_merge(
 			...array_map(
 				static function ( ILO_URL_Metrics_Group $group ): array {
