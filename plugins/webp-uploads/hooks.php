@@ -784,11 +784,11 @@ add_action( 'wp_head', 'webp_uploads_render_generator' );
  * @param array $links An array of plugin action links.
  * @return mixed An array of plugin action links.
  */
-function webp_uploads_settings_link($links) {
+function webp_uploads_settings_link( $links ) {
 	if ( ! \is_array( $links ) ) {
 		return $links;
 	}
-	$url     = get_admin_url( null,'options-media.php#perflab_generate_webp_and_jpeg');
+	$url     = get_admin_url( null, 'options-media.php#perflab_generate_webp_and_jpeg' );
 	$links[] = sprintf(
 		'<a href="%s">%s</a>',
 		esc_url( $url ),
@@ -796,4 +796,4 @@ function webp_uploads_settings_link($links) {
 	);
 	return $links;
 }
-add_filter('plugin_action_links_' . WEBP_UPLOADS_MAIN_FILE, 'webp_uploads_settings_link');
+add_filter( 'plugin_action_links_' . WEBP_UPLOADS_MAIN_FILE, 'webp_uploads_settings_link' );
