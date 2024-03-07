@@ -31,8 +31,10 @@ final class ILO_URL_Metrics_Group_Collection {
 	/**
 	 * Breakpoints in max widths.
 	 *
+	 * Valid values are from 1 to PHP_INT_MAX.
+	 *
 	 * @var int[]
-	 * @phpstan-var int<1, max>[]
+	 * @phpstan-var positive-int[]
 	 */
 	private $breakpoints;
 
@@ -40,15 +42,17 @@ final class ILO_URL_Metrics_Group_Collection {
 	 * Sample size for URL metrics for a given breakpoint.
 	 *
 	 * @var int
-	 * @phpstan-var int<1, max>
+	 * @phpstan-var positive-int
 	 */
 	private $sample_size;
 
 	/**
 	 * Freshness age (TTL) for a given URL metric.
 	 *
+	 * A freshness age of zero means a URL metric will always be considered stale.
+	 *
 	 * @var int
-	 * @phpstan-var int<0, max>
+	 * @phpstan-var 0|positive-int
 	 */
 	private $freshness_ttl;
 
@@ -67,13 +71,13 @@ final class ILO_URL_Metrics_Group_Collection {
 		sort( $breakpoints );
 		$breakpoints = array_values( array_unique( $breakpoints, SORT_NUMERIC ) );
 		foreach ( $breakpoints as $breakpoint ) {
-			if ( $breakpoint <= 0 ) {
+			if ( $breakpoint <= 1 || PHP_INT_MAX === $breakpoint ) {
 				throw new InvalidArgumentException(
 					esc_html(
 						sprintf(
 							/* translators: %d is the invalid breakpoint */
 							__(
-								'Each of the breakpoints must be greater than zero, but encountered: %d',
+								'Each of the breakpoints must be greater than zero and less than PHP_INT_MAX, but encountered: %d',
 								'performance-lab'
 							),
 							$breakpoint

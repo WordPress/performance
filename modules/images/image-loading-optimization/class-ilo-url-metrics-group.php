@@ -25,7 +25,7 @@ final class ILO_URL_Metrics_Group {
 	 * Minimum possible viewport width for the group (inclusive).
 	 *
 	 * @var int
-	 * @phpstan-var int<0, max>
+	 * @phpstan-var 0|positive-int
 	 */
 	private $minimum_viewport_width;
 
@@ -33,7 +33,7 @@ final class ILO_URL_Metrics_Group {
 	 * Maximum possible viewport width for the group (inclusive).
 	 *
 	 * @var int
-	 * @phpstan-var int<1, max>
+	 * @phpstan-var positive-int
 	 */
 	private $maximum_viewport_width;
 
@@ -41,7 +41,7 @@ final class ILO_URL_Metrics_Group {
 	 * Sample size for URL metrics for a given breakpoint.
 	 *
 	 * @var int
-	 * @phpstan-var int<1, max>
+	 * @phpstan-var positive-int
 	 */
 	private $sample_size;
 
@@ -49,25 +49,42 @@ final class ILO_URL_Metrics_Group {
 	 * Freshness age (TTL) for a given URL metric.
 	 *
 	 * @var int
-	 * @phpstan-var int<0, max>
+	 * @phpstan-var 0|positive-int
 	 */
 	private $freshness_ttl;
 
 	/**
 	 * Constructor.
 	 *
+	 * @throws InvalidArgumentException If arguments are valid.
+	 *
 	 * @param ILO_URL_Metric[] $url_metrics            URL metrics to add to the group.
-	 * @param int              $minimum_viewport_width Minimum possible viewport width for the group.
-	 * @param int              $maximum_viewport_width Maximum possible viewport width for the group.
+	 * @param int              $minimum_viewport_width Minimum possible viewport width for the group. Must be zero or greater.
+	 * @param int              $maximum_viewport_width Maximum possible viewport width for the group. Must be greater than zero and the minimum viewport width.
 	 * @param int              $sample_size            Sample size for the maximum number of viewports in a group between breakpoints.
 	 * @param int              $freshness_ttl          Freshness age (TTL) for a given URL metric.
 	 */
 	public function __construct( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl ) {
-		$this->url_metrics            = $url_metrics;
+		if ( $minimum_viewport_width < 0 ) {
+			throw new InvalidArgumentException(
+				esc_html__( 'The minimum viewport width must be at least zero.', 'performance-lab' )
+			);
+		}
+		if ( $maximum_viewport_width < 1 ) {
+			throw new InvalidArgumentException(
+				esc_html__( 'The maximum viewport width must be greater than zero.', 'performance-lab' )
+			);
+		}
+		if ( $minimum_viewport_width >= $maximum_viewport_width ) {
+			throw new InvalidArgumentException(
+				esc_html__( 'The minimum viewport width must be larger than the maximum viewport width.', 'performance-lab' )
+			);
+		}
 		$this->minimum_viewport_width = $minimum_viewport_width;
 		$this->maximum_viewport_width = $maximum_viewport_width;
 		$this->sample_size            = $sample_size;
 		$this->freshness_ttl          = $freshness_ttl;
+		$this->url_metrics            = $url_metrics;
 	}
 
 	/**

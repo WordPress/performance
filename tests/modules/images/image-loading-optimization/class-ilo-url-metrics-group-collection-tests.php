@@ -33,6 +33,20 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 				'freshness_ttl' => HOUR_IN_SECONDS,
 				'exception'     => InvalidArgumentException::class,
 			),
+			'zero_breakpoint_bad'        => array(
+				'url_metrics'   => array(),
+				'breakpoints'   => array( 0 ),
+				'sample_size'   => 3,
+				'freshness_ttl' => HOUR_IN_SECONDS,
+				'exception'     => InvalidArgumentException::class,
+			),
+			'max_breakpoint_bad'         => array(
+				'url_metrics'   => array(),
+				'breakpoints'   => array( PHP_INT_MAX ),
+				'sample_size'   => 3,
+				'freshness_ttl' => HOUR_IN_SECONDS,
+				'exception'     => InvalidArgumentException::class,
+			),
 			'string_breakpoint_bad'      => array(
 				'url_metrics'   => array(),
 				'breakpoints'   => array( 'narrow' ),
