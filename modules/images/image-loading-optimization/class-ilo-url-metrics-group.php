@@ -146,14 +146,17 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	}
 
 	/**
-	 * Adds a URL metric to the group if it is in the bounds of the max and min viewport width.
+	 * Adds a URL metric to the group.
+	 *
+	 * @throws InvalidArgumentException If the viewport width of the URL metric is not within the min/max bounds of the group.
 	 *
 	 * @param ILO_URL_Metric $url_metric URL metric.
-	 * @return bool Whether the URL metric was added.
 	 */
-	public function add_url_metric( ILO_URL_Metric $url_metric ): bool {
+	public function add_url_metric( ILO_URL_Metric $url_metric ) {
 		if ( ! $this->is_viewport_width_in_range( $url_metric->get_viewport()['width'] ) ) {
-			return false;
+			throw new InvalidArgumentException(
+				esc_html__( 'URL metric is not in the viewport range for group.', 'performance-lab' )
+			);
 		}
 
 		$this->url_metrics[] = $url_metric;
@@ -172,7 +175,6 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 			// Only keep the sample size of the newest URL metrics.
 			$this->url_metrics = array_slice( $this->url_metrics, 0, $this->sample_size );
 		}
-		return true;
 	}
 
 	/**

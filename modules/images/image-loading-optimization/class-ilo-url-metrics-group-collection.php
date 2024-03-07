@@ -144,16 +144,20 @@ final class ILO_URL_Metrics_Group_Collection {
 	 *
 	 * Once a group reaches the sample size, the oldest URL metric is pushed out.
 	 *
+	 * @throws InvalidArgumentException If there is no group available to add a URL metric to.
+	 *
 	 * @param ILO_URL_Metric $new_url_metric New URL metric.
-	 * @return bool Whether the URL metric was added to a group.
 	 */
-	public function add_url_metric( ILO_URL_Metric $new_url_metric ): bool {
+	public function add_url_metric( ILO_URL_Metric $new_url_metric ) {
 		foreach ( $this->groups as $group ) {
-			if ( $group->add_url_metric( $new_url_metric ) ) {
-				return true;
+			if ( $group->is_viewport_width_in_range( $new_url_metric->get_viewport()['width'] ) ) {
+				$group->add_url_metric( $new_url_metric );
+				return;
 			}
 		}
-		return false;
+		throw new InvalidArgumentException(
+			esc_html__( 'No group available to add URL metric to.', 'performance-lab' )
+		);
 	}
 
 	/**

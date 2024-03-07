@@ -176,7 +176,12 @@ function ilo_store_url_metric( string $url, string $slug, ILO_URL_Metric $new_ur
 		ilo_get_url_metric_freshness_ttl()
 	);
 
-	$group_collection->add_url_metric( $new_url_metric );
+	try {
+		$group = $group_collection->get_group_for_viewport_width( $new_url_metric->get_viewport()['width'] );
+		$group->add_url_metric( $new_url_metric );
+	} catch ( InvalidArgumentException $e ) {
+		return new WP_Error( 'invalid_url_metric', $e->getMessage() );
+	}
 
 	$post_data['post_content'] = wp_json_encode(
 		array_map(
