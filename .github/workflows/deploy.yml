@@ -40,13 +40,16 @@ jobs:
             if echo $PLUGINS | jq -e '.[] | select(. == "'$SLUG'")' > /dev/null; then
               PLUGINS="[ \"$SLUG\" ]"
             else
-              echo "The plugin $SLUG is not in the list of plugins to deploy."
+              echo "::error::The plugin $SLUG is not in the list of plugins to deploy."
               exit 1
             fi
           else
             # If it's the release event, include `performance-lab` plugin in the matrix as well
             PLUGINS=$(echo $PLUGINS | jq -c '. + ["performance-lab"]')
           fi
+
+          # Log notice
+          echo "::notice::Deploying the following plugins: $PLUGINS"
 
           # Set the matrix
           echo "plugins=$(echo $PLUGINS | jq -c .)" >> $GITHUB_OUTPUT
