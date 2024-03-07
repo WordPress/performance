@@ -133,6 +133,7 @@ jobs:
         with:
           step: finish
           token: ${{ secrets.GITHUB_TOKEN }}
+          status: ${{ job.status }}
           deployment_id: ${{ steps.wporg-deployment.outputs.deployment_id }}
           env: "WPOrg Plugin Release: ${{ matrix.plugin }}"
           env_url: "https://wordpress.org/plugins/${{ matrix.plugin }}/"
