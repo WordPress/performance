@@ -68,12 +68,6 @@ const buildPlugin = ( env ) => {
 		from = path.resolve( __dirname, 'plugins', env.plugin );
 	}
 
-	// Generate build manifest for the plugin.
-	generateBuildManifest( env.plugin, from );
-
-	// Delete the build directory if it exists.
-	deleteFileOrDirectory( to );
-
 	return {
 		...sharedConfig,
 		name: 'build-plugin',
@@ -91,6 +85,19 @@ const buildPlugin = ( env ) => {
 					},
 				],
 			} ),
+			{
+				apply: ( compiler ) => {
+					// Before run, delete the build directory.
+					compiler.hooks.beforeRun.tap( 'BeforeRunPlugin', () => {
+						deleteFileOrDirectory( to );
+					} );
+
+					// After emit, generate build manifest.
+					compiler.hooks.afterEmit.tap( 'AfterEmitPlugin', () => {
+						generateBuildManifest( env.plugin, from );
+					} );
+				},
+			},
 			new WebpackBar( {
 				name: `Building ${ env.plugin }`,
 				color: '#4caf50',
