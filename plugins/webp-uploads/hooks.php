@@ -782,7 +782,7 @@ add_action( 'wp_head', 'webp_uploads_render_generator' );
  * Adds a settings link to the plugin page.
  *
  * @param array $links An array of plugin action links.
- * @return mixed An array of plugin action links.
+ * @return array Plugin action links.
  */
 function webp_uploads_settings_link( $links ) {
 	if ( ! \is_array( $links ) ) {
