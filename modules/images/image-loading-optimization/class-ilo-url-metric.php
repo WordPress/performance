@@ -9,6 +9,21 @@
 /**
  * Representation of the measurements taken from a single client's visit to a specific URL.
  *
+ * @phpstan-type RectData    array{ width: int, height: int }
+ * @phpstan-type ElementData array{
+ *                               isLCP: bool,
+ *                               isLCPCandidate: bool,
+ *                               xpath: string,
+ *                               intersectionRatio: float,
+ *                               intersectionRect: RectData,
+ *                               boundingClientRect: RectData,
+ *                           }
+ * @phpstan-type Data        array{
+ *                               timestamp: int,
+ *                               viewport: RectData,
+ *                               elements: ElementData[]
+ *                           }
+ *
  * @since n.e.x.t
  * @access private
  */
@@ -17,18 +32,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Data.
 	 *
-	 * @var array{
-	 *          timestamp: int,
-	 *          viewport: array{ width: int, height: int },
-	 *          elements: array<array{
-	 *              isLCP: bool,
-	 *              isLCPCandidate: bool,
-	 *              xpath: string,
-	 *              intersectionRatio: float,
-	 *              intersectionRect: array{ width: int, height: int },
-	 *              boundingClientRect: array{ width: int, height: int },
-	 *          }>
-	 *      }
+	 * @var Data
 	 */
 	private $data;
 
@@ -137,9 +141,9 @@ final class ILO_URL_Metric implements JsonSerializable {
 	}
 
 	/**
-	 * Gets viewport width.
+	 * Gets viewport data.
 	 *
-	 * @return array{ width: int, height: int }
+	 * @return RectData Viewport data.
 	 */
 	public function get_viewport(): array {
 		return $this->data['viewport'];
@@ -148,7 +152,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets timestamp.
 	 *
-	 * @return float
+	 * @return float Timestamp.
 	 */
 	public function get_timestamp(): float {
 		return $this->data['timestamp'];
@@ -157,23 +161,16 @@ final class ILO_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets elements.
 	 *
-	 * @return array<array{
-	 *             isLCP: bool,
-	 *             isLCPCandidate: bool,
-	 *             xpath: string,
-	 *             intersectionRatio: float,
-	 *             intersectionRect: array{ width: int, height: int },
-	 *             boundingClientRect: array{ width: int, height: int },
-	 *         }>
+	 * @return ElementData[] Elements.
 	 */
 	public function get_elements(): array {
 		return $this->data['elements'];
 	}
 
 	/**
-	 * Gets the JSON representation of the object.
+	 * Specifies data which should be serialized to JSON.
 	 *
-	 * @return array
+	 * @return Data Exports to be serialized by json_encode().
 	 */
 	public function jsonSerialize(): array {
 		return $this->data;

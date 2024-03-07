@@ -57,18 +57,22 @@ class ILO_Detection_Tests extends WP_UnitTestCase {
 	 */
 	public function test_ilo_get_detection_script_returns_script( Closure $set_up, array $expected_exports ) {
 		$set_up();
-		$slug                           = ilo_get_url_metrics_slug( array( 'p' => '1' ) );
-		$needed_minimum_viewport_widths = array(
-			array( 480, false ),
-			array( 600, false ),
-			array( 782, true ),
-		);
-		$script                         = ilo_get_detection_script( $slug, $needed_minimum_viewport_widths );
+		$slug = ilo_get_url_metrics_slug( array( 'p' => '1' ) );
+
+		$breakpoints      = array( 480, 600, 782 );
+		$group_collection = new ILO_URL_Metrics_Group_Collection( array(), $breakpoints, 3, HOUR_IN_SECONDS );
+
+		$script = ilo_get_detection_script( $slug, $group_collection );
 
 		$this->assertStringContainsString( '<script type="module">', $script );
 		$this->assertStringContainsString( 'import detect from', $script );
 		foreach ( $expected_exports as $key => $value ) {
 			$this->assertStringContainsString( sprintf( '%s:%s', wp_json_encode( $key ), wp_json_encode( $value ) ), $script );
 		}
+		$this->assertStringContainsString( '"minimumViewportWidth":0', $script );
+		$this->assertStringContainsString( '"minimumViewportWidth":481', $script );
+		$this->assertStringContainsString( '"minimumViewportWidth":601', $script );
+		$this->assertStringContainsString( '"minimumViewportWidth":783', $script );
+		$this->assertStringContainsString( '"complete":false', $script );
 	}
 }

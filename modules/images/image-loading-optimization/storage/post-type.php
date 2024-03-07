@@ -169,12 +169,27 @@ function ilo_store_url_metric( string $url, string $slug, ILO_URL_Metric $new_ur
 		$url_metrics            = array();
 	}
 
-	$breakpoints = ilo_get_breakpoint_max_widths();
-	$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
-	$url_metrics = ilo_unshift_url_metrics( $url_metrics, $new_url_metric, $breakpoints, $sample_size );
+	$group_collection = new ILO_URL_Metrics_Group_Collection(
+		$url_metrics,
+		ilo_get_breakpoint_max_widths(),
+		ilo_get_url_metrics_breakpoint_sample_size(),
+		ilo_get_url_metric_freshness_ttl()
+	);
+
+	try {
+		$group = $group_collection->get_group_for_viewport_width( $new_url_metric->get_viewport()['width'] );
+		$group->add_url_metric( $new_url_metric );
+	} catch ( InvalidArgumentException $e ) {
+		return new WP_Error( 'invalid_url_metric', $e->getMessage() );
+	}
 
 	$post_data['post_content'] = wp_json_encode(
-		$url_metrics,
+		array_map(
+			static function ( ILO_URL_Metric $url_metric ): array {
+				return $url_metric->jsonSerialize();
+			},
+			$group_collection->get_flattened_url_metrics()
+		),
 		JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES // TODO: No need for pretty-printing.
 	);
 

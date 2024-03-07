@@ -149,28 +149,18 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
 	$post = ilo_get_url_metrics_post( $slug );
 
-	$url_metrics = $post ? ilo_parse_stored_url_metrics( $post ) : array();
-
-	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths(
-		$url_metrics,
-		microtime( true ),
+	$group_collection = new ILO_URL_Metrics_Group_Collection(
+		$post ? ilo_parse_stored_url_metrics( $post ) : array(),
 		ilo_get_breakpoint_max_widths(),
 		ilo_get_url_metrics_breakpoint_sample_size(),
 		ilo_get_url_metric_freshness_ttl()
 	);
 
 	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
-	$needs_detection = in_array(
-		true,
-		// Each array item is array{int, bool}, with the second item being whether the viewport width is needed.
-		array_column( $needed_minimum_viewport_widths, 1 ),
-		true
-	);
+	$needs_detection = ! $group_collection->is_every_group_complete();
 
-	$breakpoint_max_widths                   = ilo_get_breakpoint_max_widths();
-	$url_metrics_grouped_by_breakpoint       = ilo_group_url_metrics_by_breakpoint( $url_metrics, $breakpoint_max_widths );
-	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $url_metrics_grouped_by_breakpoint );
-	$all_breakpoints_have_url_metrics        = count( array_filter( $url_metrics_grouped_by_breakpoint ) ) === count( $breakpoint_max_widths ) + 1;
+	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
+	$all_breakpoints_have_url_metrics        = $group_collection->is_every_group_populated();
 
 	/**
 	 * Optimized lookup of the LCP element viewport widths by XPath.
@@ -318,7 +308,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-ilo-xpath attributes.
 	if ( $needs_detection ) {
-		$head_injection .= ilo_get_detection_script( $slug, $needed_minimum_viewport_widths );
+		$head_injection .= ilo_get_detection_script( $slug, $group_collection );
 	}
 
 	if ( $head_injection ) {

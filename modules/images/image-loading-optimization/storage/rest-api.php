@@ -113,29 +113,25 @@ add_action( 'rest_api_init', 'ilo_register_endpoint' );
 function ilo_handle_rest_request( WP_REST_Request $request ) {
 	$post = ilo_get_url_metrics_post( $request->get_param( 'slug' ) );
 
-	$needed_minimum_viewport_widths = ilo_get_needed_minimum_viewport_widths(
+	$group_collection = new ILO_URL_Metrics_Group_Collection(
 		$post ? ilo_parse_stored_url_metrics( $post ) : array(),
-		microtime( true ),
 		ilo_get_breakpoint_max_widths(),
 		ilo_get_url_metrics_breakpoint_sample_size(),
 		ilo_get_url_metric_freshness_ttl()
 	);
 
 	// Block the request if URL metrics aren't needed for the provided viewport width.
-	// This logic is the same as the isViewportNeeded() function in detect.js.
-	$viewport_width  = $request->get_param( 'viewport' )['width'];
-	$last_was_needed = false;
-	foreach ( $needed_minimum_viewport_widths as list( $minimum_viewport_width, $is_needed ) ) {
-		if ( $viewport_width >= $minimum_viewport_width ) {
-			$last_was_needed = $is_needed;
-		} else {
-			break;
-		}
+	try {
+		$group = $group_collection->get_group_for_viewport_width(
+			$request->get_param( 'viewport' )['width']
+		);
+	} catch ( InvalidArgumentException $exception ) {
+		return new WP_Error( 'invalid_viewport_width', $exception->getMessage() );
 	}
-	if ( ! $last_was_needed ) {
+	if ( $group->is_complete() ) {
 		return new WP_Error(
-			'no_url_metric_needed',
-			__( 'No URL metric needed for the provided viewport width.', 'performance-lab' ),
+			'url_metrics_group_complete',
+			__( 'The URL metrics group for the provided viewport is already complete.', 'performance-lab' ),
 			array( 'status' => 403 )
 		);
 	}
