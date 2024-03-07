@@ -790,10 +790,9 @@ function webp_uploads_settings_link( $links ) {
 	if ( ! is_array( $links ) ) {
 		return $links;
 	}
-	$url     = get_admin_url( null, 'options-media.php#perflab_generate_webp_and_jpeg' );
 	$links[] = sprintf(
-		'<a href="%s">%s</a>',
-		esc_url( $url ),
+		'<a href="%1$s">%2$s</a>',
+		esc_url( admin_url( 'options-media.php#perflab_generate_webp_and_jpeg' ) ),
 		esc_html__( 'Settings', 'webp-uploads' )
 	);
 	return $links;
