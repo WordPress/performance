@@ -2,7 +2,7 @@
 
 Contributors:      wordpressdotorg
 Requires at least: 6.3
-Tested up to:      6.4
+Tested up to:      6.5
 Requires PHP:      7.0
 Stable tag:        2.9.0
 License:           GPLv2 or later
@@ -465,6 +465,10 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 * Infrastructure: Define module specification in documentation. ([26](https://github.com/WordPress/performance/pull/26))
 
 == Upgrade Notice ==
+
+= 3.0.0 =
+
+Starting with this release, modules such as Dominant Color Images and WebP Uploads are only available as standalone plugins as opposed to bundled modules. After updating, you will be able to easily migrate to this new structure.
 
 = 2.5.0 =
 
