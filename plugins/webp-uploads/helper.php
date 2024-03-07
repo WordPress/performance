@@ -173,7 +173,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 }
 
 /**
- * Generate a file name for an image with a different extension.
+ * Generates a file name for an image with a different extension.
  *
  * @param WP_Image_Editor $editor    The image editor that handle the image manipulation.
  * @param string          $file      Full path to the image file.
@@ -182,7 +182,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
  *
  * @since n.e.x.t
  *
- * @return string
+ * @return string File name with a different extension.
  */
 function webp_uploads_generate_filename( $editor, $file, $size, $extension ) {
 	$ext = pathinfo( $file, PATHINFO_EXTENSION );
