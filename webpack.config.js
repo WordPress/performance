@@ -1,10 +1,13 @@
 /**
  * External dependencies
  */
-const fs = require( 'fs' );
 const path = require( 'path' );
 const WebpackBar = require( 'webpackbar' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const {
+	deleteFileOrDirectory,
+	generateBuildManifest,
+} = require( './bin/webpack/utils' );
 
 /**
  * Internal dependencies
@@ -20,25 +23,6 @@ const sharedConfig = {
 	...defaultConfig,
 	entry: {},
 	output: {},
-};
-
-/**
- * Delete a file or directory.
- *
- * @param {string} _path The path to the file or directory.
- *
- * @return {void}
- */
-const deleteFileOrDirectory = ( _path ) => {
-	try {
-		if ( fs.existsSync( _path ) ) {
-			fs.rmSync( _path, { recursive: true } );
-		}
-	} catch ( error ) {
-		// eslint-disable-next-line no-console
-		console.error( error );
-		process.exit( 1 );
-	}
 };
 
 /**
@@ -83,6 +67,9 @@ const buildPlugin = ( env ) => {
 	} else {
 		from = path.resolve( __dirname, 'plugins', env.plugin );
 	}
+
+	// Generate build manifest for the plugin.
+	generateBuildManifest( env.plugin, from );
 
 	// Delete the build directory if it exists.
 	deleteFileOrDirectory( to );
