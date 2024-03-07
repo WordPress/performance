@@ -87,7 +87,7 @@ function ilo_register_endpoint() {
 			},
 			'permission_callback' => static function () {
 				// Needs to be available to unauthenticated visitors.
-				if ( ilo_is_url_metric_storage_locked() ) {
+				if ( ILO_Storage_Lock::is_locked() ) {
 					return new WP_Error(
 						'url_metric_storage_locked',
 						__( 'URL metric storage is presently locked for the current IP.', 'performance-lab' ),
@@ -136,7 +136,7 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
-	ilo_set_url_metric_storage_lock();
+	ILO_Storage_Lock::set_lock();
 
 	try {
 		$properties = ILO_URL_Metric::get_json_schema()['properties'];

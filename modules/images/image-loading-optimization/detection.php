@@ -55,7 +55,7 @@ function ilo_get_detection_script( string $slug, ILO_URL_Metrics_Group_Collectio
 			},
 			$group_collection->get_groups()
 		),
-		'storageLockTTL'          => ilo_get_url_metric_storage_lock_ttl(),
+		'storageLockTTL'          => ILO_Storage_Lock::get_ttl(),
 		'webVitalsLibrarySrc'     => $web_vitals_lib_src,
 	);
 
