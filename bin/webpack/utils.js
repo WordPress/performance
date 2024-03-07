@@ -70,13 +70,21 @@ const generateBuildManifest = ( slug, from ) => {
 	}
 
 	const buildDir = path.resolve( getPluginRootPath(), 'build' );
+
+	try {
+		if ( ! fs.existsSync( buildDir ) ) {
+			fs.mkdirSync( buildDir );
+		}
+	} catch ( error ) {
+		throw new Error( error );
+	}
+
 	const manifestPath = path.resolve( buildDir, 'manifest.json' );
 
 	let manifest = {};
 
 	try {
 		if ( fs.existsSync( manifestPath ) ) {
-			// manifest = JSON.parse( fs.readFileSync( manifestPath, 'utf-8' ) );
 			manifest = require( manifestPath );
 		}
 	} catch ( error ) {
