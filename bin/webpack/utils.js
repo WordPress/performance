@@ -18,14 +18,8 @@ const getPluginRootPath = () => {
  * @return {void}
  */
 const deleteFileOrDirectory = ( _path ) => {
-	try {
-		if ( fs.existsSync( _path ) ) {
-			fs.rmSync( _path, { recursive: true } );
-		}
-	} catch ( error ) {
-		// eslint-disable-next-line no-console
-		console.error( error );
-		process.exit( 1 );
+	if ( fs.existsSync( _path ) ) {
+		fs.rmSync( _path, { recursive: true } );
 	}
 };
 
@@ -39,16 +33,12 @@ const deleteFileOrDirectory = ( _path ) => {
 const getPluginVersion = ( pluginPath ) => {
 	const readmePath = path.resolve( pluginPath, 'readme.txt' );
 
-	try {
-		const fileContent = fs.readFileSync( readmePath, 'utf-8' );
-		const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+)/i;
-		const match = versionRegex.exec( fileContent );
+	const fileContent = fs.readFileSync( readmePath, 'utf-8' );
+	const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+)/i;
+	const match = versionRegex.exec( fileContent );
 
-		if ( match ) {
-			return match[ 1 ];
-		}
-	} catch ( error ) {
-		throw new Error( error );
+	if ( match ) {
+		return match[ 1 ];
 	}
 
 	return false;
@@ -71,33 +61,20 @@ const generateBuildManifest = ( slug, from ) => {
 
 	const buildDir = path.resolve( getPluginRootPath(), 'build' );
 
-	try {
-		if ( ! fs.existsSync( buildDir ) ) {
-			fs.mkdirSync( buildDir );
-		}
-	} catch ( error ) {
-		throw new Error( error );
+	if ( ! fs.existsSync( buildDir ) ) {
+		fs.mkdirSync( buildDir );
 	}
 
+	let manifest = {};
 	const manifestPath = path.resolve( buildDir, 'manifest.json' );
 
-	let manifest = {};
-
-	try {
-		if ( fs.existsSync( manifestPath ) ) {
-			manifest = require( manifestPath );
-		}
-	} catch ( error ) {
-		throw new Error( error );
+	if ( fs.existsSync( manifestPath ) ) {
+		manifest = require( manifestPath );
 	}
 
 	manifest[ slug ] = version;
 
-	try {
-		fs.writeFileSync( manifestPath, JSON.stringify( manifest, null, 2 ) );
-	} catch ( error ) {
-		throw new Error( error );
-	}
+	fs.writeFileSync( manifestPath, JSON.stringify( manifest, null, 2 ) );
 };
 
 module.exports = {
