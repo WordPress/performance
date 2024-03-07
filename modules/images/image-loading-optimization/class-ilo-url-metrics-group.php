@@ -12,7 +12,7 @@
  * @since n.e.x.t
  * @access private
  */
-final class ILO_URL_Metrics_Group {
+final class ILO_URL_Metrics_Group implements Countable {
 
 	/**
 	 * URL metrics.
@@ -82,9 +82,34 @@ final class ILO_URL_Metrics_Group {
 		}
 		$this->minimum_viewport_width = $minimum_viewport_width;
 		$this->maximum_viewport_width = $maximum_viewport_width;
-		$this->sample_size            = $sample_size;
-		$this->freshness_ttl          = $freshness_ttl;
-		$this->url_metrics            = $url_metrics;
+
+		if ( $sample_size <= 0 ) {
+			throw new InvalidArgumentException(
+				esc_html(
+					sprintf(
+						/* translators: %d is the invalid sample size */
+						__( 'Sample size must be greater than zero, but provided: %d', 'performance-lab' ),
+						$sample_size
+					)
+				)
+			);
+		}
+		$this->sample_size = $sample_size;
+
+		if ( $freshness_ttl < 0 ) {
+			throw new InvalidArgumentException(
+				esc_html(
+					sprintf(
+						/* translators: %d is the invalid sample size */
+						__( 'Freshness TTL must be at least zero, but provided: %d', 'performance-lab' ),
+						$freshness_ttl
+					)
+				)
+			);
+		}
+		$this->freshness_ttl = $freshness_ttl;
+
+		$this->url_metrics = $url_metrics;
 	}
 
 	/**

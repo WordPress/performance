@@ -204,7 +204,7 @@ final class ILO_URL_Metrics_Group_Collection {
 	 */
 	public function is_every_group_populated(): bool {
 		foreach ( $this->groups as $group ) {
-			if ( $group->count() === 0 ) {
+			if ( count( $group ) === 0 ) {
 				return false;
 			}
 		}

@@ -196,7 +196,7 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 		$this->assertCount( count( $expected_counts ), $group_collection->get_groups() );
 		foreach ( $expected_counts as $minimum_viewport_width => $count ) {
 			$group = $group_collection->get_group_for_viewport_width( $minimum_viewport_width );
-			$this->assertSame( $count, $group->count(), "Expected equal count for $minimum_viewport_width minimum viewport width." );
+			$this->assertCount( $count, $group, "Expected equal count for $minimum_viewport_width minimum viewport width." );
 		}
 	}
 

@@ -304,7 +304,7 @@ function ilo_get_lcp_elements_by_minimum_viewport_widths( ILO_URL_Metrics_Group_
 			$most_common_breadcrumb_index = key( $breadcrumb_counts );
 
 			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = $breadcrumb_element[ $most_common_breadcrumb_index ];
-		} elseif ( $group->count() > 0 ) {
+		} elseif ( count( $group ) > 0 ) {
 			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = false; // No LCP image at this breakpoint.
 		}
 	}

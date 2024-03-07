@@ -287,8 +287,8 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 				$url_metric_groups
 			)
 		);
-		$this->assertSame( 0, $url_metric_groups[0]->count(), 'Expected first group to be empty.' );
-		$this->assertSame( $sample_size, end( $url_metric_groups )->count(), 'Expected last group to be fully populated.' );
+		$this->assertCount( 0, $url_metric_groups[0], 'Expected first group to be empty.' );
+		$this->assertCount( $sample_size, end( $url_metric_groups ), 'Expected last group to be fully populated.' );
 
 		// Now attempt to store one more URL metric for the wider viewport group.
 		// This should fail because the group is already fully populated to the sample size.
