@@ -162,7 +162,7 @@ final class ILO_URL_Metrics_Group_Collection {
 	}
 
 	/**
-	 * Get group for viewport width.
+	 * Gets group for viewport width.
 	 *
 	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
 	 *
