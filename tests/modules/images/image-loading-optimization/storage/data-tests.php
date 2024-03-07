@@ -45,6 +45,23 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test bad ilo_get_url_metric_freshness_ttl().
+	 *
+	 * @expectedIncorrectUsage ilo_get_url_metric_freshness_ttl
+	 * @covers ::ilo_get_url_metric_freshness_ttl
+	 */
+	public function test_bad_ilo_get_url_metric_freshness_ttl() {
+		add_filter(
+			'ilo_url_metric_freshness_ttl',
+			static function (): int {
+				return -1;
+			}
+		);
+
+		$this->assertSame( 0, ilo_get_url_metric_freshness_ttl() );
+	}
+
+	/**
 	 * Data provider.
 	 *
 	 * @return array
@@ -174,7 +191,6 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		}
 	}
 
-
 	/**
 	 * Test ilo_get_breakpoint_max_widths().
 	 *
@@ -201,6 +217,51 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider.
+	 *
+	 * @return array
+	 */
+	public function data_provider_test_bad_ilo_get_breakpoint_max_widths(): array {
+		return array(
+			'negative' => array(
+				'breakpoints' => array( -1 ),
+				'expected'    => array( 1 ),
+			),
+			'zero'     => array(
+				'breakpoints' => array( 0 ),
+				'expected'    => array( 1 ),
+			),
+			'max'      => array(
+				'breakpoints' => array( PHP_INT_MAX ),
+				'expected'    => array( PHP_INT_MAX - 1 ),
+			),
+			'multiple' => array(
+				'breakpoints' => array( -1, 0, 10, PHP_INT_MAX ),
+				'expected'    => array( 1, 10, PHP_INT_MAX - 1 ),
+			),
+		);
+	}
+
+	/**
+	 * Test bad ilo_get_breakpoint_max_widths().
+	 *
+	 * @covers ::ilo_get_breakpoint_max_widths
+	 *
+	 * @expectedIncorrectUsage ilo_get_breakpoint_max_widths
+	 * @dataProvider data_provider_test_bad_ilo_get_breakpoint_max_widths
+	 */
+	public function test_bad_ilo_get_breakpoint_max_widths( array $breakpoints, array $expected ) {
+		add_filter(
+			'ilo_breakpoint_max_widths',
+			static function () use ( $breakpoints ) {
+				return $breakpoints;
+			}
+		);
+
+		$this->assertSame( $expected, ilo_get_breakpoint_max_widths() );
+	}
+
+	/**
 	 * Test ilo_get_url_metrics_breakpoint_sample_size().
 	 *
 	 * @covers ::ilo_get_url_metrics_breakpoint_sample_size
@@ -218,6 +279,22 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		$this->assertSame( 1, ilo_get_url_metrics_breakpoint_sample_size() );
 	}
 
+	/**
+	 * Test bad ilo_get_url_metrics_breakpoint_sample_size().
+	 *
+	 * @expectedIncorrectUsage ilo_get_url_metrics_breakpoint_sample_size
+	 * @covers ::ilo_get_url_metrics_breakpoint_sample_size
+	 */
+	public function test_bad_ilo_get_url_metrics_breakpoint_sample_size() {
+		add_filter(
+			'ilo_url_metrics_breakpoint_sample_size',
+			static function (): int {
+				return 0;
+			}
+		);
+
+		$this->assertSame( 1, ilo_get_url_metrics_breakpoint_sample_size() );
+	}
 
 	/**
 	 * Data provider.

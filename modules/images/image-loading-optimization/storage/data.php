@@ -24,11 +24,31 @@ function ilo_get_url_metric_freshness_ttl(): int {
 	/**
 	 * Filters the freshness age (TTL) for a given URL metric.
 	 *
+	 * The freshness TTL must be at least zero, in which it considers URL metrics to always be stale.
+	 * In practice, the value should be at least an hour.
+	 *
 	 * @since n.e.x.t
 	 *
-	 * @param int $ttl Expiration TTL in seconds.
+	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 day.
 	 */
-	return (int) apply_filters( 'ilo_url_metric_freshness_ttl', DAY_IN_SECONDS );
+	$freshness_ttl = (int) apply_filters( 'ilo_url_metric_freshness_ttl', DAY_IN_SECONDS );
+
+	if ( $freshness_ttl <= 0 ) {
+		_doing_it_wrong(
+			__FUNCTION__,
+			esc_html(
+				sprintf(
+					/* translators: %s is the TTL freshness */
+					__( 'Freshness TTL must be at least zero, but saw "%s".', 'performance-lab' ),
+					$freshness_ttl
+				)
+			),
+			''
+		);
+		$freshness_ttl = 0;
+	}
+
+	return $freshness_ttl;
 }
 
 /**
@@ -142,21 +162,53 @@ function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): bo
  * @return int[] Breakpoint max widths, sorted in ascending order.
  */
 function ilo_get_breakpoint_max_widths(): array {
+	$function_name = __FUNCTION__;
 
 	$breakpoint_max_widths = array_map(
-		static function ( $breakpoint_max_width ) {
-			return (int) $breakpoint_max_width;
+		static function ( $original_breakpoint ) use ( $function_name ): int {
+			$breakpoint = (int) $original_breakpoint;
+			if ( PHP_INT_MAX === $breakpoint ) {
+				$breakpoint = PHP_INT_MAX - 1;
+				_doing_it_wrong(
+					esc_html( $function_name ),
+					esc_html(
+						sprintf(
+							/* translators: %s is the actual breakpoint max width */
+							__( 'Breakpoint must be less than PHP_INT_MAX, but saw "%s".', 'performance-lab' ),
+							$original_breakpoint
+						)
+					),
+					''
+				);
+			} elseif ( $breakpoint <= 0 ) {
+				$breakpoint = 1;
+				_doing_it_wrong(
+					esc_html( $function_name ),
+					esc_html(
+						sprintf(
+							/* translators: %s is the actual breakpoint max width */
+							__( 'Breakpoint must be greater zero, but saw "%s".', 'performance-lab' ),
+							$original_breakpoint
+						)
+					),
+					''
+				);
+			}
+			return $breakpoint;
 		},
 		/**
 		 * Filters the breakpoint max widths to group URL metrics for various viewports.
 		 *
+		 * A breakpoint must be greater than zero and less than PHP_INT_MAX.
+		 *
 		 * @since n.e.x.t
 		 *
-		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints.
+		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
 		 */
 		(array) apply_filters( 'ilo_breakpoint_max_widths', array( 480, 600, 782 ) )
 	);
 
+	$breakpoint_max_widths = array_unique( $breakpoint_max_widths, SORT_NUMERIC );
 	sort( $breakpoint_max_widths );
 	return $breakpoint_max_widths;
 }
@@ -177,13 +229,31 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
 	/**
 	 * Filters the sample size for a breakpoint's URL metrics on a given URL.
 	 *
+	 * The sample size must greater than zero.
+	 *
 	 * @since n.e.x.t
 	 *
-	 * @param int $sample_size Sample size.
+	 * @param int $sample_size Sample size. Defaults to 3.
 	 */
-	return (int) apply_filters( 'ilo_url_metrics_breakpoint_sample_size', 3 );
-}
+	$sample_size = (int) apply_filters( 'ilo_url_metrics_breakpoint_sample_size', 3 );
 
+	if ( $sample_size <= 0 ) {
+		_doing_it_wrong(
+			__FUNCTION__,
+			esc_html(
+				sprintf(
+					/* translators: %s is the sample size */
+					__( 'Sample size must greater than zero, but saw "%s".', 'performance-lab' ),
+					$sample_size
+				)
+			),
+			''
+		);
+		$sample_size = 1;
+	}
+
+	return $sample_size;
+}
 
 /**
  * Gets the LCP element for each breakpoint.
