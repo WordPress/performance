@@ -150,11 +150,8 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	$editor->resize( $width, $height, $crop );
 
 	if ( null === $destination_file_name ) {
-		$ext                   = pathinfo( $image_path, PATHINFO_EXTENSION );
-		$suffix                = $editor->get_suffix();
-		$suffix               .= "-{$ext}";
 		$extension             = explode( '|', $allowed_mimes[ $mime ] );
-		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
+		$destination_file_name = webp_uploads_generate_filename( $editor, $image_path, $image_size, $extension[0] );
 	}
 
 	remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
@@ -173,6 +170,45 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 		'file'     => $image['file'],
 		'filesize' => isset( $image['path'] ) ? wp_filesize( $image['path'] ) : 0,
 	);
+}
+
+/**
+ * Generate a file name for an image with a different extension.
+ *
+ * @param WP_Image_Editor $editor    The image editor that handle the image manipulation.
+ * @param string          $file      Full path to the image file.
+ * @param string          $size      The image size.
+ * @param string          $extension The image extension.
+ *
+ * @since n.e.x.t
+ *
+ * @return string
+ */
+function webp_uploads_generate_filename( $editor, $file, $size, $extension ) {
+	$ext = pathinfo( $file, PATHINFO_EXTENSION );
+	if ( $extension === $ext ) {
+		return $file;
+	}
+
+	$dir  = pathinfo( $file, PATHINFO_DIRNAME );
+	$name = wp_basename( $file, ".$ext" );
+
+	/**
+	 * Filters whether image extensions are allowed for image names.
+	 *
+	 * By default the performance lab plugin will use the image extension for uniqueness
+	 * purposes for the additional mime type image name.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $allowed_image_extension Add the image extension to the file name. Default true.
+	 */
+	$allowed_image_extension = apply_filters( 'webp_uploads_image_name_with_extension', true );
+
+	$suffix  = 'full' === $size ? '' : '-' . $editor->get_suffix();
+	$suffix .= $allowed_image_extension ? "-{$ext}" : '';
+
+	return trailingslashit( $dir ) . "{$name}{$suffix}.{$extension}";
 }
 
 /**
