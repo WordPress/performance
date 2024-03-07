@@ -1,0 +1,134 @@
+---
+name: Deploy to WordPress.org
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      plugin:
+        type: choice
+        description: 'The slug of the plugin to deploy'
+        options: [
+            'auto-sizes',
+            'dominant-color-images',
+            'speculation-rules',
+            'webp-uploads'
+          ]
+      dry-run:
+        type: boolean
+        description: 'Debug mode (run without publishing).'
+        default: false
+
+jobs:
+  pre-run:
+    name: Pre-run
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.plugins }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          PLUGINS=$(jq -r '.plugins' plugins.json)
+          if ${{ github.event_name == 'workflow_dispatch' }}; then
+            SLUG=${{ inputs.plugin }}
+            if echo $PLUGINS | jq -e '.[] | select(. == "'$SLUG'")' > /dev/null; then
+              PLUGINS="[ \"$SLUG\" ]"
+            else
+              echo "The plugin $SLUG is not in the list of plugins to deploy."
+              exit 1
+            fi
+          else
+            # If it's the release event, include `performance-lab` plugin in the matrix as well
+            PLUGINS=$(echo $PLUGINS | jq -c '. + ["performance-lab"]')
+          fi
+
+          # Set the matrix
+          echo "plugins=$(echo $PLUGINS | jq -c .)" >> $GITHUB_OUTPUT
+
+  deploy:
+    name: "Deploy Plugin: ${{ matrix.plugin }}"
+    needs: pre-run
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        plugin: ${{ fromJSON(needs.pre-run.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js (.nvmrc)
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Building standalone plugin
+        run: npm run build:plugin:${{ matrix.plugin }}
+
+      - name: Set plugin version
+        working-directory: ./build
+        run: |
+          echo "PLUGIN_VERSION=$(jq -r '."${{ matrix.plugin }}"' manifest.json)" >> $GITHUB_ENV
+
+      - name: Create zip file
+        run: |
+          mkdir -p ./build/dist
+          cd ./build/${{ matrix.plugin }}
+          zip -r ../dist/${{ matrix.plugin }}.zip .
+
+      - name: Generate checksum
+        working-directory: ./build/dist
+        run: |
+          mkdir -p $RUNNER_TEMP/plugin-checksums
+          find . -type f -print0 | sort -z | xargs -r0 shasum -a 256 -b | sed 's# \*\./# *#' > $RUNNER_TEMP/plugin-checksums/checksums.txt
+          shasum -a 256 -U -c $RUNNER_TEMP/plugin-checksums/checksums.txt
+          cat $RUNNER_TEMP/plugin-checksums/checksums.txt | while read sum file; do echo "$sum $file" > ${file#\*}.sha256; done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.plugin }}
+          path: ./build/dist
+
+      - name: Deploy Standalone Plugin - ${{ matrix.plugin }}
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        with:
+          dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || false }}
+        env:
+          SLUG: ${{ matrix.plugin }}
+          VERSION: ${{ env.PLUGIN_VERSION }}
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          BUILD_DIR: ./build/${{ matrix.plugin }}
+          ASSETS_DIR: ./plugins/${{ matrix.plugin }}/.wordpress-org
+
+  release-assets:
+    name: Add release assets
+    needs: [ pre-run, deploy ]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    strategy:
+      matrix:
+        plugin: ${{ fromJSON(needs.pre-run.outputs.matrix) }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.plugin }}
+          path: ./build/dist
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./build/dist/${{ matrix.plugin }}.zip
+            ./build/dist/${{ matrix.plugin }}.zip.sha256
