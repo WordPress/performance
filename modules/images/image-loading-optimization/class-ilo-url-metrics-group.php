@@ -153,7 +153,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	 * @param ILO_URL_Metric $url_metric URL metric.
 	 */
 	public function add_url_metric( ILO_URL_Metric $url_metric ) {
-		if ( ! $this->is_viewport_width_in_range( $url_metric->get_viewport()['width'] ) ) {
+		if ( ! $this->is_viewport_width_in_range( $url_metric->get_viewport_width() ) ) {
 			throw new InvalidArgumentException(
 				esc_html__( 'URL metric is not in the viewport range for group.', 'performance-lab' )
 			);

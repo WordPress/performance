@@ -152,7 +152,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 	 */
 	public function add_url_metric( ILO_URL_Metric $new_url_metric ) {
 		foreach ( $this->groups as $group ) {
-			if ( $group->is_viewport_width_in_range( $new_url_metric->get_viewport()['width'] ) ) {
+			if ( $group->is_viewport_width_in_range( $new_url_metric->get_viewport_width() ) ) {
 				$group->add_url_metric( $new_url_metric );
 				return;
 			}

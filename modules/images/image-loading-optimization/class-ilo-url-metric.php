@@ -150,6 +150,15 @@ final class ILO_URL_Metric implements JsonSerializable {
 	}
 
 	/**
+	 * Gets viewport width.
+	 *
+	 * @return int Viewport width.
+	 */
+	public function get_viewport_width(): int {
+		return $this->data['viewport']['width'];
+	}
+
+	/**
 	 * Gets timestamp.
 	 *
 	 * @return float Timestamp.

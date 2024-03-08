@@ -328,8 +328,8 @@ class ILO_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 				'minimum_viewport_width'     => $group->get_minimum_viewport_width(),
 				'maximum_viewport_width'     => $group->get_maximum_viewport_width(),
 				'url_metric_viewport_widths' => array_map(
-					static function ( ILO_URL_Metric $url_metric ) {
-						return $url_metric->get_viewport()['width'];
+					static function ( ILO_URL_Metric $url_metric ): int {
+						return $url_metric->get_viewport_width();
 					},
 					iterator_to_array( $group )
 				),

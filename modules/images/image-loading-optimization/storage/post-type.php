@@ -177,7 +177,7 @@ function ilo_store_url_metric( string $url, string $slug, ILO_URL_Metric $new_ur
 	);
 
 	try {
-		$group = $group_collection->get_group_for_viewport_width( $new_url_metric->get_viewport()['width'] );
+		$group = $group_collection->get_group_for_viewport_width( $new_url_metric->get_viewport_width() );
 		$group->add_url_metric( $new_url_metric );
 	} catch ( InvalidArgumentException $e ) {
 		return new WP_Error( 'invalid_url_metric', $e->getMessage() );
