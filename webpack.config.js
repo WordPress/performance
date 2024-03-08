@@ -40,13 +40,9 @@ const buildPlugin = ( env ) => {
 		};
 	}
 
-	// If plugin is not `perflab` or not exists in `plugins.json` then return.
-	if (
-		'performance-lab' !== env.plugin &&
-		! standalonePlugins.includes( env.plugin )
-	) {
+	if ( ! standalonePlugins.includes( env.plugin ) ) {
 		// eslint-disable-next-line no-console
-		console.error( `Plugin "${ env.plugin }" not found.` );
+		console.error( `Plugin "${ env.plugin }" not found. Aborting.` );
 
 		return {
 			entry: {},
@@ -54,19 +50,8 @@ const buildPlugin = ( env ) => {
 		};
 	}
 
-	let from = '';
-	const ignore = [];
 	const to = path.resolve( __dirname, 'build', env.plugin );
-
-	if ( env.plugin === 'performance-lab' ) {
-		from = path.resolve( __dirname );
-
-		// Ignore plugins directory manually since we can't include it in .distignore.
-		// If we include it in .distignore, standalone plugins will not be copied.
-		ignore.push( '**/plugins' );
-	} else {
-		from = path.resolve( __dirname, 'plugins', env.plugin );
-	}
+	const from = path.resolve( __dirname, 'plugins', env.plugin );
 
 	return {
 		...sharedConfig,
@@ -79,8 +64,11 @@ const buildPlugin = ( env ) => {
 						to,
 						globOptions: {
 							dot: true,
-							ignoreFiles: '.distignore',
-							ignore,
+							ignore: [
+								'**/.wordpress-org',
+								'**/phpcs.xml.dist',
+								'**/*.[Cc]ache',
+							],
 						},
 					},
 				],
