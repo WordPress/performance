@@ -230,6 +230,9 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 	 * @return ILO_URL_Metric[] All URL metrics.
 	 */
 	public function get_flattened_url_metrics(): array {
+		// The duplication of iterator_to_array is not a mistake. This collection is an
+		// iterator and the collection contains iterator instances. So to flatten the
+		// two levels of iterators we need to nest calls to iterator_to_array().
 		return array_merge(
 			...array_map(
 				'iterator_to_array',
