@@ -79,7 +79,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 		}
 		if ( $minimum_viewport_width >= $maximum_viewport_width ) {
 			throw new InvalidArgumentException(
-				esc_html__( 'The minimum viewport width must smaller larger than the maximum viewport width.', 'performance-lab' )
+				esc_html__( 'The minimum viewport width must be smaller than the maximum viewport width.', 'performance-lab' )
 			);
 		}
 		$this->minimum_viewport_width = $minimum_viewport_width;
