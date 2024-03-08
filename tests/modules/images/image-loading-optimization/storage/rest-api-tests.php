@@ -46,7 +46,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$url_metrics = ilo_parse_stored_url_metrics( $post );
 		$this->assertCount( 1, $url_metrics, 'Expected number of URL metrics stored.' );
 		$this->assertSame( $valid_params['elements'], $url_metrics[0]->get_elements() );
-		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport()['width'] );
+		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
 	}
 
 	/**
@@ -277,7 +277,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 			ilo_get_url_metrics_breakpoint_sample_size(),
 			HOUR_IN_SECONDS
 		);
-		$url_metric_groups = $group_collection->get_groups();
+		$url_metric_groups = iterator_to_array( $group_collection );
 		$this->assertSame(
 			array( 0, $breakpoint_width + 1 ),
 			array_map(

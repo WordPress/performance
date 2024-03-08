@@ -272,7 +272,7 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
  */
 function ilo_get_lcp_elements_by_minimum_viewport_widths( ILO_URL_Metrics_Group_Collection $group_collection ): array {
 	$lcp_element_by_viewport_minimum_width = array();
-	foreach ( $group_collection->get_groups() as $group ) {
+	foreach ( $group_collection as $group ) {
 
 		// The following arrays all share array indices.
 		$seen_breadcrumbs   = array();

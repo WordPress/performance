@@ -79,7 +79,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 		}
 		if ( $minimum_viewport_width >= $maximum_viewport_width ) {
 			throw new InvalidArgumentException(
-				esc_html__( 'The minimum viewport width must be larger than the maximum viewport width.', 'performance-lab' )
+				esc_html__( 'The minimum viewport width must be smaller than the maximum viewport width.', 'performance-lab' )
 			);
 		}
 		$this->minimum_viewport_width = $minimum_viewport_width;
@@ -153,7 +153,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	 * @param ILO_URL_Metric $url_metric URL metric.
 	 */
 	public function add_url_metric( ILO_URL_Metric $url_metric ) {
-		if ( ! $this->is_viewport_width_in_range( $url_metric->get_viewport()['width'] ) ) {
+		if ( ! $this->is_viewport_width_in_range( $url_metric->get_viewport_width() ) ) {
 			throw new InvalidArgumentException(
 				esc_html__( 'URL metric is not in the viewport range for group.', 'performance-lab' )
 			);
@@ -199,7 +199,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	}
 
 	/**
-	 * Gets the URL metrics in the group.
+	 * Returns an iterator for the URL metrics in the group.
 	 *
 	 * @return ArrayIterator<int, ILO_URL_Metric> ArrayIterator for ILO_URL_Metric instances.
 	 */
@@ -210,7 +210,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	/**
 	 * Counts the URL metrics in the group.
 	 *
-	 * @return int Count of URL metrics in the group.
+	 * @return int URL metric count.
 	 */
 	public function count(): int {
 		return count( $this->url_metrics );

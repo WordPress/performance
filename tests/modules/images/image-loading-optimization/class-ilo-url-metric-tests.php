@@ -101,6 +101,7 @@ class ILO_URL_Metric_Tests extends WP_UnitTestCase {
 	 * Tests construction.
 	 *
 	 * @covers ::get_viewport
+	 * @covers ::get_viewport_width
 	 * @covers ::get_timestamp
 	 * @covers ::get_elements
 	 * @covers ::jsonSerialize
@@ -114,6 +115,7 @@ class ILO_URL_Metric_Tests extends WP_UnitTestCase {
 		}
 		$url_metric = new ILO_URL_Metric( $data );
 		$this->assertSame( $data['viewport'], $url_metric->get_viewport() );
+		$this->assertSame( $data['viewport']['width'], $url_metric->get_viewport_width() );
 		$this->assertSame( $data['timestamp'], $url_metric->get_timestamp() );
 		$this->assertSame( $data['elements'], $url_metric->get_elements() );
 		$this->assertEquals( $data, $url_metric->jsonSerialize() );

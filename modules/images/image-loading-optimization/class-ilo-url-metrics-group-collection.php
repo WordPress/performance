@@ -9,10 +9,12 @@
 /**
  * Collection of URL groups according to the breakpoints.
  *
+ * @implements IteratorAggregate<int, ILO_URL_Metrics_Group>
+ *
  * @since n.e.x.t
  * @access private
  */
-final class ILO_URL_Metrics_Group_Collection {
+final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggregate {
 
 	/**
 	 * URL metrics groups.
@@ -150,7 +152,7 @@ final class ILO_URL_Metrics_Group_Collection {
 	 */
 	public function add_url_metric( ILO_URL_Metric $new_url_metric ) {
 		foreach ( $this->groups as $group ) {
-			if ( $group->is_viewport_width_in_range( $new_url_metric->get_viewport()['width'] ) ) {
+			if ( $group->is_viewport_width_in_range( $new_url_metric->get_viewport_width() ) ) {
 				$group->add_url_metric( $new_url_metric );
 				return;
 			}
@@ -158,15 +160,6 @@ final class ILO_URL_Metrics_Group_Collection {
 		throw new InvalidArgumentException(
 			esc_html__( 'No group available to add URL metric to.', 'performance-lab' )
 		);
-	}
-
-	/**
-	 * Gets grouped keyed by the minimum viewport width.
-	 *
-	 * @return ILO_URL_Metrics_Group[] Groups.
-	 */
-	public function get_groups(): array {
-		return $this->groups;
 	}
 
 	/**
@@ -237,13 +230,32 @@ final class ILO_URL_Metrics_Group_Collection {
 	 * @return ILO_URL_Metric[] All URL metrics.
 	 */
 	public function get_flattened_url_metrics(): array {
+		// The duplication of iterator_to_array is not a mistake. This collection is an
+		// iterator and the collection contains iterator instances. So to flatten the
+		// two levels of iterators we need to nest calls to iterator_to_array().
 		return array_merge(
 			...array_map(
-				static function ( ILO_URL_Metrics_Group $group ): array {
-					return iterator_to_array( $group );
-				},
-				$this->groups
+				'iterator_to_array',
+				iterator_to_array( $this )
 			)
 		);
+	}
+
+	/**
+	 * Returns an iterator for the groups of URL metrics.
+	 *
+	 * @return ArrayIterator<int, ILO_URL_Metrics_Group> Array iterator for ILO_URL_Metric_Group instances.
+	 */
+	public function getIterator(): ArrayIterator {
+		return new ArrayIterator( $this->groups );
+	}
+
+	/**
+	 * Counts the URL metrics groups in the collection.
+	 *
+	 * @return int Group count.
+	 */
+	public function count(): int {
+		return count( $this->groups );
 	}
 }

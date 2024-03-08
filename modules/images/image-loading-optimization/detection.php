@@ -53,7 +53,7 @@ function ilo_get_detection_script( string $slug, ILO_URL_Metrics_Group_Collectio
 					'complete'             => $group->is_complete(),
 				);
 			},
-			$group_collection->get_groups()
+			iterator_to_array( $group_collection )
 		),
 		'storageLockTTL'          => ILO_Storage_Lock::get_ttl(),
 		'webVitalsLibrarySrc'     => $web_vitals_lib_src,
