@@ -189,25 +189,11 @@ function webp_uploads_generate_filename( $editor, $file, $size, $extension ) {
 		return $file;
 	}
 
-	$dir  = pathinfo( $file, PATHINFO_DIRNAME );
-	$name = wp_basename( $file, ".$ext" );
+	$dir    = trailingslashit( pathinfo( $file, PATHINFO_DIRNAME ) );
+	$name   = wp_basename( $file, ".$ext" );
+	$suffix = 'full' === $size ? '' : '-' . $editor->get_suffix();
 
-	/**
-	 * Filters whether image extensions are allowed for image names.
-	 *
-	 * By default the performance lab plugin will use the image extension for uniqueness
-	 * purposes for the additional mime type image name.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param bool $allowed_image_extension Add the image extension to the file name. Default true.
-	 */
-	$allowed_image_extension = apply_filters( 'webp_uploads_image_name_with_extension', true );
-
-	$suffix  = 'full' === $size ? '' : '-' . $editor->get_suffix();
-	$suffix .= $allowed_image_extension ? "-{$ext}" : '';
-
-	return trailingslashit( $dir ) . "{$name}{$suffix}.{$extension}";
+	return "{$dir}{$name}{$suffix}.{$extension}";
 }
 
 /**
