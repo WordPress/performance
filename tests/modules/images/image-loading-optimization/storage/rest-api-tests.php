@@ -277,7 +277,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 			ilo_get_url_metrics_breakpoint_sample_size(),
 			HOUR_IN_SECONDS
 		);
-		$url_metric_groups = $group_collection->get_groups();
+		$url_metric_groups = iterator_to_array( $group_collection );
 		$this->assertSame(
 			array( 0, $breakpoint_width + 1 ),
 			array_map(

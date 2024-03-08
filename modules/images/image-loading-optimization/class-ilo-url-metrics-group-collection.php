@@ -9,10 +9,12 @@
 /**
  * Collection of URL groups according to the breakpoints.
  *
+ * @implements IteratorAggregate<int, ILO_URL_Metrics_Group>
+ *
  * @since n.e.x.t
  * @access private
  */
-final class ILO_URL_Metrics_Group_Collection {
+final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggregate {
 
 	/**
 	 * URL metrics groups.
@@ -161,15 +163,6 @@ final class ILO_URL_Metrics_Group_Collection {
 	}
 
 	/**
-	 * Gets grouped keyed by the minimum viewport width.
-	 *
-	 * @return ILO_URL_Metrics_Group[] Groups.
-	 */
-	public function get_groups(): array {
-		return $this->groups;
-	}
-
-	/**
 	 * Gets group for viewport width.
 	 *
 	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
@@ -239,11 +232,27 @@ final class ILO_URL_Metrics_Group_Collection {
 	public function get_flattened_url_metrics(): array {
 		return array_merge(
 			...array_map(
-				static function ( ILO_URL_Metrics_Group $group ): array {
-					return iterator_to_array( $group );
-				},
-				$this->groups
+				'iterator_to_array',
+				iterator_to_array( $this )
 			)
 		);
+	}
+
+	/**
+	 * Returns an iterator for the groups of URL metrics.
+	 *
+	 * @return ArrayIterator<int, ILO_URL_Metrics_Group> Array iterator for ILO_URL_Metric_Group instances.
+	 */
+	public function getIterator(): ArrayIterator {
+		return new ArrayIterator( $this->groups );
+	}
+
+	/**
+	 * Counts the URL metrics groups in the collection.
+	 *
+	 * @return int Group count.
+	 */
+	public function count(): int {
+		return count( $this->groups );
 	}
 }

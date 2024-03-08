@@ -199,7 +199,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	}
 
 	/**
-	 * Gets the URL metrics in the group.
+	 * Returns an iterator for the URL metrics in the group.
 	 *
 	 * @return ArrayIterator<int, ILO_URL_Metric> ArrayIterator for ILO_URL_Metric instances.
 	 */
@@ -210,7 +210,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	/**
 	 * Counts the URL metrics in the group.
 	 *
-	 * @return int Count of URL metrics in the group.
+	 * @return int URL metric count.
 	 */
 	public function count(): int {
 		return count( $this->url_metrics );
