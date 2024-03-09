@@ -33,7 +33,7 @@ build-cs/composer.lock
 
 node_modules/
 vendor/
-modules/images/image-loading-optimization/detection/web-vitals*
+plugins/image-loading-optimization/detection/web-vitals*
 
 ############
 ## OSes
