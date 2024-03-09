@@ -2,8 +2,7 @@
 /**
  * Tests for image-loading-optimization class ILO_HTML_Tag_Processor.
  *
- * @package performance-lab
- * @group   image-loading-optimization
+ * @packageimage-loading-optimization
  *
  * @coversDefaultClass ILO_HTML_Tag_Processor
  *

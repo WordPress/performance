@@ -2,7 +2,7 @@
 /**
  * REST API integration for the module.
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 
@@ -40,12 +40,12 @@ function ilo_register_endpoint() {
 	$args = array(
 		'url'   => array(
 			'type'              => 'string',
-			'description'       => __( 'The URL for which the metric was obtained.', 'performance-lab' ),
+			'description'       => __( 'The URL for which the metric was obtained.', 'image-loading-optimization' ),
 			'required'          => true,
 			'format'            => 'uri',
 			'validate_callback' => static function ( $url ) {
 				if ( ! wp_validate_redirect( $url ) ) {
-					return new WP_Error( 'non_origin_url', __( 'URL for another site provided.', 'performance-lab' ) );
+					return new WP_Error( 'non_origin_url', __( 'URL for another site provided.', 'image-loading-optimization' ) );
 				}
 				// TODO: This is not validated as corresponding to the slug in any way. True it is not used for anything but metadata.
 				return true;
@@ -53,7 +53,7 @@ function ilo_register_endpoint() {
 		),
 		'slug'  => array(
 			'type'        => 'string',
-			'description' => __( 'An MD5 hash of the query args.', 'performance-lab' ),
+			'description' => __( 'An MD5 hash of the query args.', 'image-loading-optimization' ),
 			'required'    => true,
 			'pattern'     => '^[0-9a-f]{32}$',
 			// This is validated via the nonce validate_callback, as it is provided as input to create the nonce by the server
@@ -61,12 +61,12 @@ function ilo_register_endpoint() {
 		),
 		'nonce' => array(
 			'type'              => 'string',
-			'description'       => __( 'Nonce originally computed by server required to authorize the request.', 'performance-lab' ),
+			'description'       => __( 'Nonce originally computed by server required to authorize the request.', 'image-loading-optimization' ),
 			'required'          => true,
 			'pattern'           => '^[0-9a-f]+$',
 			'validate_callback' => static function ( $nonce, WP_REST_Request $request ) {
 				if ( ! ilo_verify_url_metrics_storage_nonce( $nonce, $request->get_param( 'slug' ) ) ) {
-					return new WP_Error( 'invalid_nonce', __( 'URL metrics nonce verification failure.', 'performance-lab' ) );
+					return new WP_Error( 'invalid_nonce', __( 'URL metrics nonce verification failure.', 'image-loading-optimization' ) );
 				}
 				return true;
 			},
@@ -90,7 +90,7 @@ function ilo_register_endpoint() {
 				if ( ILO_Storage_Lock::is_locked() ) {
 					return new WP_Error(
 						'url_metric_storage_locked',
-						__( 'URL metric storage is presently locked for the current IP.', 'performance-lab' ),
+						__( 'URL metric storage is presently locked for the current IP.', 'image-loading-optimization' ),
 						array( 'status' => 403 )
 					);
 				}
@@ -131,7 +131,7 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 	if ( $group->is_complete() ) {
 		return new WP_Error(
 			'url_metrics_group_complete',
-			__( 'The URL metrics group for the provided viewport is already complete.', 'performance-lab' ),
+			__( 'The URL metrics group for the provided viewport is already complete.', 'image-loading-optimization' ),
 			array( 'status' => 403 )
 		);
 	}
@@ -158,7 +158,7 @@ function ilo_handle_rest_request( WP_REST_Request $request ) {
 			'url_metric_exception',
 			sprintf(
 				/* translators: %s is exception name */
-				__( 'Failed to validate URL metric: %s', 'performance-lab' ),
+				__( 'Failed to validate URL metric: %s', 'image-loading-optimization' ),
 				$e->getMessage()
 			)
 		);

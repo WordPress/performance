@@ -2,8 +2,7 @@
 /**
  * Tests for image-loading-optimization module hooks.php.
  *
- * @package performance-lab
- * @group   image-loading-optimization
+ * @packageimage-loading-optimization
  */
 
 class ILO_Hooks_Tests extends WP_UnitTestCase {

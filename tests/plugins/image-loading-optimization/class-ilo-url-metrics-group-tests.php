@@ -2,8 +2,7 @@
 /**
  * Tests for ILO_URL_Metrics_Group.
  *
- * @package performance-lab
- * @group   image-loading-optimization
+ * @packageimage-loading-optimization
  *
  * @noinspection PhpUnhandledExceptionInspection
  *

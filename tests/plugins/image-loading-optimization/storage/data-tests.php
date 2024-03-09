@@ -2,8 +2,7 @@
 /**
  * Tests for image-loading-optimization module storage/data.php.
  *
- * @package performance-lab
- * @group   image-loading-optimization
+ * @packageimage-loading-optimization
  *
  * @noinspection PhpUnhandledExceptionInspection
  */

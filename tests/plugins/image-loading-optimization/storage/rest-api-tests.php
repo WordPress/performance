@@ -2,8 +2,7 @@
 /**
  * Tests for image-loading-optimization module storage/rest-api.php.
  *
- * @package performance-lab
- * @group   image-loading-optimization
+ * @packageimage-loading-optimization
  */
 
 class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {

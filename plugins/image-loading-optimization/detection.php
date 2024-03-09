@@ -2,7 +2,7 @@
 /**
  * Detection for image loading optimization.
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 

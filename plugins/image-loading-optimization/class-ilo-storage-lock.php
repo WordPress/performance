@@ -2,7 +2,7 @@
 /**
  * Image Loading Optimization: ILO_Storage_Lock class
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 

@@ -2,7 +2,7 @@
 /**
  * Optimizing for image loading optimization.
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 
@@ -104,7 +104,7 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 			_doing_it_wrong(
 				__FUNCTION__,
 				esc_html(
-					__( 'Attempted to construct preload link without an available href or imagesrcset. Supplied LCP element: ', 'performance-lab' ) . wp_json_encode( $lcp_element )
+					__( 'Attempted to construct preload link without an available href or imagesrcset. Supplied LCP element: ', 'image-loading-optimization' ) . wp_json_encode( $lcp_element )
 				),
 				''
 			);

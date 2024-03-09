@@ -2,7 +2,7 @@
 /**
  * Hook callbacks used for Image Loading Optimization.
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 

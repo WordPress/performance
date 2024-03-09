@@ -2,7 +2,7 @@
 /**
  * Metrics storage data.
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 
@@ -39,7 +39,7 @@ function ilo_get_url_metric_freshness_ttl(): int {
 			esc_html(
 				sprintf(
 					/* translators: %s is the TTL freshness */
-					__( 'Freshness TTL must be at least zero, but saw "%s".', 'performance-lab' ),
+					__( 'Freshness TTL must be at least zero, but saw "%s".', 'image-loading-optimization' ),
 					$freshness_ttl
 				)
 			),
@@ -174,7 +174,7 @@ function ilo_get_breakpoint_max_widths(): array {
 					esc_html(
 						sprintf(
 							/* translators: %s is the actual breakpoint max width */
-							__( 'Breakpoint must be less than PHP_INT_MAX, but saw "%s".', 'performance-lab' ),
+							__( 'Breakpoint must be less than PHP_INT_MAX, but saw "%s".', 'image-loading-optimization' ),
 							$original_breakpoint
 						)
 					),
@@ -187,7 +187,7 @@ function ilo_get_breakpoint_max_widths(): array {
 					esc_html(
 						sprintf(
 							/* translators: %s is the actual breakpoint max width */
-							__( 'Breakpoint must be greater zero, but saw "%s".', 'performance-lab' ),
+							__( 'Breakpoint must be greater zero, but saw "%s".', 'image-loading-optimization' ),
 							$original_breakpoint
 						)
 					),
@@ -243,7 +243,7 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
 			esc_html(
 				sprintf(
 					/* translators: %s is the sample size */
-					__( 'Sample size must greater than zero, but saw "%s".', 'performance-lab' ),
+					__( 'Sample size must greater than zero, but saw "%s".', 'image-loading-optimization' ),
 					$sample_size
 				)
 			),

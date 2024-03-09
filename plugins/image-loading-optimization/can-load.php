@@ -3,7 +3,7 @@
  * Can load function to determine if ILO can load.
  *
  * @since   n.e.x.t
- * @package performance-lab
+ * @package image-loading-optimization
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,7 +19,7 @@ return static function () {
 			'perflab_missing_web_vitals_library',
 			sprintf(
 				/* translators: npm command. */
-				__( 'The Web Vitals library is missing. Please do "%s" to finish installing the plugin.', 'performance-lab' ),
+				__( 'The Web Vitals library is missing. Please do "%s" to finish installing the plugin.', 'image-loading-optimization' ),
 				'npm install && npm run build'
 			)
 		);

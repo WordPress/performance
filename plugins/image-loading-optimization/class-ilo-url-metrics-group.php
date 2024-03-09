@@ -2,7 +2,7 @@
 /**
  * Image Loading Optimization: ILO_URL_Metrics_Group class
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 
@@ -69,17 +69,17 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	public function __construct( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl ) {
 		if ( $minimum_viewport_width < 0 ) {
 			throw new InvalidArgumentException(
-				esc_html__( 'The minimum viewport width must be at least zero.', 'performance-lab' )
+				esc_html__( 'The minimum viewport width must be at least zero.', 'image-loading-optimization' )
 			);
 		}
 		if ( $maximum_viewport_width < 1 ) {
 			throw new InvalidArgumentException(
-				esc_html__( 'The maximum viewport width must be greater than zero.', 'performance-lab' )
+				esc_html__( 'The maximum viewport width must be greater than zero.', 'image-loading-optimization' )
 			);
 		}
 		if ( $minimum_viewport_width >= $maximum_viewport_width ) {
 			throw new InvalidArgumentException(
-				esc_html__( 'The minimum viewport width must be smaller than the maximum viewport width.', 'performance-lab' )
+				esc_html__( 'The minimum viewport width must be smaller than the maximum viewport width.', 'image-loading-optimization' )
 			);
 		}
 		$this->minimum_viewport_width = $minimum_viewport_width;
@@ -90,7 +90,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 				esc_html(
 					sprintf(
 						/* translators: %d is the invalid sample size */
-						__( 'Sample size must be greater than zero, but provided: %d', 'performance-lab' ),
+						__( 'Sample size must be greater than zero, but provided: %d', 'image-loading-optimization' ),
 						$sample_size
 					)
 				)
@@ -103,7 +103,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 				esc_html(
 					sprintf(
 						/* translators: %d is the invalid sample size */
-						__( 'Freshness TTL must be at least zero, but provided: %d', 'performance-lab' ),
+						__( 'Freshness TTL must be at least zero, but provided: %d', 'image-loading-optimization' ),
 						$freshness_ttl
 					)
 				)
@@ -155,7 +155,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	public function add_url_metric( ILO_URL_Metric $url_metric ) {
 		if ( ! $this->is_viewport_width_in_range( $url_metric->get_viewport_width() ) ) {
 			throw new InvalidArgumentException(
-				esc_html__( 'URL metric is not in the viewport range for group.', 'performance-lab' )
+				esc_html__( 'URL metric is not in the viewport range for group.', 'image-loading-optimization' )
 			);
 		}
 

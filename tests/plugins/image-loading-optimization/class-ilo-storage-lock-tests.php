@@ -2,8 +2,7 @@
 /**
  * Tests for ILO_Storage_Lock.
  *
- * @package performance-lab
- * @group   image-loading-optimization
+ * @packageimage-loading-optimization
  *
  * @coversDefaultClass ILO_Storage_Lock
  */

@@ -2,7 +2,7 @@
 /**
  * Image Loading Optimization: ILO_HTML_Tag_Processor class
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 
@@ -243,7 +243,7 @@ final class ILO_HTML_Tag_Processor {
 					$this->warn(
 						sprintf(
 							/* translators: 1: Popped tag name, 2: Closing tag name */
-							__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'performance-lab' ),
+							__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'image-loading-optimization' ),
 							$popped_tag_name,
 							$tag_name
 						)

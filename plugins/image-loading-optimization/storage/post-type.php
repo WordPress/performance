@@ -2,7 +2,7 @@
 /**
  * Metrics storage post type.
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 
@@ -25,8 +25,8 @@ function ilo_register_url_metrics_post_type() {
 		ILO_URL_METRICS_POST_TYPE,
 		array(
 			'labels'           => array(
-				'name'          => __( 'URL Metrics', 'performance-lab' ),
-				'singular_name' => __( 'URL Metrics', 'performance-lab' ),
+				'name'          => __( 'URL Metrics', 'image-loading-optimization' ),
+				'singular_name' => __( 'URL Metrics', 'image-loading-optimization' ),
 			),
 			'public'           => false,
 			'hierarchical'     => false,
@@ -94,7 +94,7 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 		$trigger_error(
 			sprintf(
 				/* translators: 1: Post type slug, 2: Post ID, 3: JSON error message */
-				__( 'Contents of %1$s post type (ID: %2$s) not valid JSON: %3$s', 'performance-lab' ),
+				__( 'Contents of %1$s post type (ID: %2$s) not valid JSON: %3$s', 'image-loading-optimization' ),
 				ILO_URL_METRICS_POST_TYPE,
 				$post->ID,
 				json_last_error_msg()
@@ -105,7 +105,7 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 		$trigger_error(
 			sprintf(
 				/* translators: %s is post type slug */
-				__( 'Contents of %s post type was not a JSON array.', 'performance-lab' ),
+				__( 'Contents of %s post type was not a JSON array.', 'image-loading-optimization' ),
 				ILO_URL_METRICS_POST_TYPE
 			)
 		);
@@ -126,7 +126,7 @@ function ilo_parse_stored_url_metrics( WP_Post $post ): array {
 						$trigger_error(
 							sprintf(
 								/* translators: 1: Post type slug. 2: Exception message. */
-								__( 'Unexpected shape to JSON array in post_content of %1$s post type: %2$s', 'performance-lab' ),
+								__( 'Unexpected shape to JSON array in post_content of %1$s post type: %2$s', 'image-loading-optimization' ),
 								ILO_URL_METRICS_POST_TYPE,
 								$e->getMessage()
 							)

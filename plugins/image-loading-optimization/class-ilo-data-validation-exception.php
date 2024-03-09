@@ -2,7 +2,7 @@
 /**
  * Image Loading Optimization: ILO_Data_Validation_Exception class
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 

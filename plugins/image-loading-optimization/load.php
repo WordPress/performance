@@ -12,8 +12,7 @@
  * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * Text Domain: image-loading-optimization
  *
- * @package performance-lab
- * @since n.e.x.t
+ * @package image-loading-optimization
  */
 
 // Define the constant.
@@ -21,7 +20,7 @@ if ( defined( 'IMAGE_LOADING_OPTIMIZATION_VERSION' ) ) {
 	return;
 }
 
-define( 'IMAGE_LOADING_OPTIMIZATION_VERSION', 'Performance Lab ' . PERFLAB_VERSION );
+define( 'IMAGE_LOADING_OPTIMIZATION_VERSION', '0.1.0' );
 
 require_once __DIR__ . '/hooks.php';
 

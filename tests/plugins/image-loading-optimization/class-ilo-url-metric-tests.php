@@ -2,8 +2,7 @@
 /**
  * Tests for image-loading-optimization class ILO_URL_Metric.
  *
- * @package performance-lab
- * @group   image-loading-optimization
+ * @packageimage-loading-optimization
  *
  * @coversDefaultClass ILO_URL_Metric
  */

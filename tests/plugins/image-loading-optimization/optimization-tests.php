@@ -2,8 +2,7 @@
 /**
  * Tests for image-loading-optimization module optimization.php.
  *
- * @package performance-lab
- * @group   image-loading-optimization
+ * @packageimage-loading-optimization
  *
  * @todo There are "Cannot resolve ..." errors and "Element img doesn't have a required attribute src" warnings that should be excluded from inspection.
  */

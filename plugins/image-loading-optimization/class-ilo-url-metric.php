@@ -2,7 +2,7 @@
 /**
  * Image Loading Optimization: ILO_URL_Metric class
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 
@@ -79,7 +79,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 			'type'                 => 'object',
 			'properties'           => array(
 				'viewport'  => array(
-					'description' => __( 'Viewport dimensions', 'performance-lab' ),
+					'description' => __( 'Viewport dimensions', 'image-loading-optimization' ),
 					'type'        => 'object',
 					'required'    => true,
 					'properties'  => array(
@@ -96,7 +96,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 					),
 				),
 				'timestamp' => array(
-					'description' => __( 'Timestamp at which the URL metric was captured.', 'performance-lab' ),
+					'description' => __( 'Timestamp at which the URL metric was captured.', 'image-loading-optimization' ),
 					'type'        => 'number',
 					'required'    => true,
 					'readonly'    => true, // Omit from REST API.
@@ -104,7 +104,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 					'minimum'     => 0,
 				),
 				'elements'  => array(
-					'description' => __( 'Element metrics', 'performance-lab' ),
+					'description' => __( 'Element metrics', 'image-loading-optimization' ),
 					'type'        => 'array',
 					'required'    => true,
 					'items'       => array(

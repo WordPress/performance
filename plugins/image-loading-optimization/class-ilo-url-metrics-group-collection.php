@@ -2,7 +2,7 @@
 /**
  * Image Loading Optimization: ILO_URL_Metrics_Group_Collection class
  *
- * @package performance-lab
+ * @package image-loading-optimization
  * @since n.e.x.t
  */
 
@@ -80,7 +80,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 							/* translators: %d is the invalid breakpoint */
 							__(
 								'Each of the breakpoints must be greater than zero and less than PHP_INT_MAX, but encountered: %d',
-								'performance-lab'
+								'image-loading-optimization'
 							),
 							$breakpoint
 						)
@@ -96,7 +96,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 				esc_html(
 					sprintf(
 						/* translators: %d is the invalid sample size */
-						__( 'Sample size must be greater than zero, but provided: %d', 'performance-lab' ),
+						__( 'Sample size must be greater than zero, but provided: %d', 'image-loading-optimization' ),
 						$sample_size
 					)
 				)
@@ -110,7 +110,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 				esc_html(
 					sprintf(
 						/* translators: %d is the invalid sample size */
-						__( 'Freshness TTL must be at least zero, but provided: %d', 'performance-lab' ),
+						__( 'Freshness TTL must be at least zero, but provided: %d', 'image-loading-optimization' ),
 						$freshness_ttl
 					)
 				)
@@ -158,7 +158,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 			}
 		}
 		throw new InvalidArgumentException(
-			esc_html__( 'No group available to add URL metric to.', 'performance-lab' )
+			esc_html__( 'No group available to add URL metric to.', 'image-loading-optimization' )
 		);
 	}
 
@@ -180,7 +180,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 			esc_html(
 				sprintf(
 					/* translators: %d is viewport width */
-					__( 'No URL metrics group found for viewport width: %d', 'performance-lab' ),
+					__( 'No URL metrics group found for viewport width: %d', 'image-loading-optimization' ),
 					$viewport_width
 				)
 			)
