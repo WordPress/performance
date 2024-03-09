@@ -40,7 +40,7 @@ const webVitals = () => {
 	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
 	const destination = path.resolve(
 		__dirname,
-		'modules/images/image-loading-optimization/detection'
+		'plugins/image-loading-optimization/detection'
 	);
 
 	return {
