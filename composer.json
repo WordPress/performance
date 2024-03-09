@@ -31,11 +31,13 @@
       "@lint",
       "@lint:auto-sizes",
       "@lint:dominant-color-images",
+      "@lint:image-loading-optimization",
       "@lint:speculation-rules",
       "@lint:webp-uploads"
     ],
     "lint:auto-sizes": "@lint -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
     "lint:dominant-color-images": "@lint -- ./plugins/dominant-color-images --standard=./plugins/dominant-color-images/phpcs.xml.dist",
+    "lint:image-loading-optimization": "@lint -- ./plugins/image-loading-optimization --standard=./plugins/image-loading-optimization/phpcs.xml.dist",
     "lint:speculation-rules": "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
     "lint:webp-uploads": "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
     "test": "phpunit --verbose --testsuite performance-lab",
@@ -51,12 +53,14 @@
     "test:plugins": [
       "@test:auto-sizes",
       "@test:dominant-color-images",
+      "@test:image-loading-optimization",
       "@test:speculation-rules",
       "@test:webp-uploads"
     ],
     "test-multisite:plugins": [
       "@test-multisite:auto-sizes",
       "@test-multisite:dominant-color-images",
+      "@test-multisite:image-loading-optimization",
       "@test-multisite:speculation-rules",
       "@test-multisite:webp-uploads"
     ],
@@ -64,6 +68,8 @@
     "test-multisite:auto-sizes": "phpunit -c tests/multisite.xml --verbose --testsuite auto-sizes",
     "test:dominant-color-images": "phpunit --verbose --testsuite dominant-color-images",
     "test-multisite:dominant-color-images": "phpunit -c tests/multisite.xml --verbose --testsuite dominant-color-images",
+    "test:image-loading-optimization": "phpunit --verbose --testsuite image-loading-optimization",
+    "test-multisite:image-loading-optimization": "phpunit -c tests/multisite.xml --verbose --testsuite image-loading-optimization",
     "test:speculation-rules": "phpunit --verbose --testsuite speculation-rules",
     "test-multisite:speculation-rules": "phpunit -c tests/multisite.xml --verbose --testsuite speculation-rules",
     "test:webp-uploads": "phpunit --verbose --testsuite webp-uploads",

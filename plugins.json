@@ -3,6 +3,7 @@
   "plugins": [
     "auto-sizes",
     "dominant-color-images",
+    "image-loading-optimization",
     "speculation-rules",
     "webp-uploads"
   ]
