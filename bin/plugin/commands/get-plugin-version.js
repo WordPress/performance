@@ -19,61 +19,78 @@ exports.options = [
 /**
  * Command to get the plugin version based on the slug.
  *
- * @param {Object} opt Command options.
+ * @param {Object} opt      Command options.
+ * @param {string} opt.slug Plugin/module slug.
  */
 exports.handler = async ( opt ) => {
 	doRunGetPluginVersion( {
 		pluginsJsonFile: 'plugins.json', // Path to plugins.json file.
-		slug: opt.slug, // Plugin slug.
+		slug: opt.slug,
 	} );
 };
 
 /**
  * Returns the match plugin version from plugins.json file.
  *
- * @param {Object} settings Plugin settings.
+ * @param {Object} settings                 Plugin settings.
+ * @param {string} settings.pluginsJsonFile Path to plugins JSON file.
+ * @param {string} settings.slug            Slug for the plugin or module.
  */
 function doRunGetPluginVersion( settings ) {
 	if ( settings.slug === undefined ) {
 		throw Error( 'A slug must be provided via the --slug (-s) argument.' );
 	}
 
-	const pluginsFile = path.join( '.', settings.pluginsJsonFile );
-
-	// Buffer contents of plugins JSON file.
-	let pluginsFileContent = '';
+	// Resolve the absolute path to the plugins.json file.
+	const pluginsFile = path.join(
+		__dirname,
+		'../../../' + settings.pluginsJsonFile
+	);
 
 	try {
-		pluginsFileContent = fs.readFileSync( pluginsFile, 'utf-8' );
-	} catch ( e ) {
-		throw Error( `Error reading file at "${ pluginsFile }": ${ e }` );
-	}
+		// Read the plugins.json file synchronously.
+		const { modules, plugins } = require( pluginsFile );
 
-	// Validate that the plugins JSON file contains content before proceeding.
-	if ( ! pluginsFileContent ) {
-		throw Error(
-			`Contents of file at "${ pluginsFile }" could not be read, or are empty.`
-		);
-	}
-
-	const plugins = JSON.parse( pluginsFileContent );
-
-	// Check for valid and not empty object resulting from plugins JSON file parse.
-	if ( 'object' !== typeof plugins || 0 === Object.keys( plugins ).length ) {
-		throw Error(
-			`File at "${ pluginsFile }" parsed, but detected empty/non valid JSON object.`
-		);
-	}
-
-	for ( const moduleDir in plugins ) {
-		const pluginVersion = plugins[ moduleDir ]?.version;
-		const pluginSlug = plugins[ moduleDir ]?.slug;
-		if ( pluginVersion && pluginSlug && settings.slug === pluginSlug ) {
-			return log( pluginVersion );
+		for ( const module of Object.values( modules ) ) {
+			if ( settings.slug === module.slug ) {
+				log( module.version );
+				return;
+			}
 		}
+
+		for ( const plugin of Object.values( plugins ) ) {
+			if ( settings.slug === plugin ) {
+				const readmeFile = path.join(
+					__dirname,
+					'../../../plugins/' + plugin + '/readme.txt'
+				);
+
+				let fileContent = '';
+				try {
+					fileContent = fs.readFileSync( readmeFile, 'utf-8' );
+				} catch ( err ) {
+					throw Error(
+						`Error reading the file "${ readmeFile }": "${ err }"`
+					);
+				}
+
+				if ( fileContent === '' ) {
+					throw Error( `Error reading the file "${ readmeFile }"` );
+				}
+
+				const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+)/i;
+				const match = versionRegex.exec( fileContent );
+				if ( match ) {
+					log( match[ 1 ] );
+					return;
+				}
+			}
+		}
+	} catch ( error ) {
+		throw Error( `Error reading file at "${ pluginsFile }": ${ error }` );
 	}
 
 	throw Error(
-		`The "${ settings.slug }" module slug is missing in the file "${ pluginsFile }".`
+		`The "${ settings.slug }" module/plugin slug is missing in the file "${ pluginsFile }".`
 	);
 }

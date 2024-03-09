@@ -124,7 +124,6 @@ class Load_Tests extends WP_UnitTestCase {
 			array( 'site-health/audit-autoloaded-options', 'database/audit-autoloaded-options' ),
 			array( 'site-health/audit-enqueued-assets', 'js-and-css/audit-enqueued-assets' ),
 			array( 'site-health/webp-support', 'images/webp-support' ),
-			array( 'images/dominant-color', 'images/dominant-color-images' ),
 		);
 	}
 

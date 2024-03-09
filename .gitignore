@@ -45,6 +45,13 @@ modules/images/image-loading-optimization/detection/web-vitals*
 .DS_store?
 
 ############
+## Config overrides for CS tools
+############
+phpcs.xml
+phpunit.xml
+phpstan.neon
+
+############
 ## Misc
 ############
 
