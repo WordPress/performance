@@ -1,4 +1,4 @@
-=== Image Loading Optimization ===
+=== Optimization Detective ===
 
 Contributors:      wordpressdotorg
 Requires at least: 6.3
@@ -20,20 +20,20 @@ Improves accuracy of optimizing the loading of the LCP image by leveraging clien
 = Installation from within WordPress =
 
 1. Visit **Plugins > Add New**.
-2. Search for **Image Loading Optimization**.
-3. Install and activate the **Image Loading Optimization** plugin.
+2. Search for **Optimization Detective**.
+3. Install and activate the **Optimization Detective** plugin.
 
 = Manual installation =
 
-1. Upload the entire `image-loading-optimization` folder to the `/wp-content/plugins/` directory.
+1. Upload the entire `optimization-detective` folder to the `/wp-content/plugins/` directory.
 2. Visit **Plugins**.
-3. Activate the **Image Loading Optimization** plugin.
+3. Activate the **Optimization Detective** plugin.
 
 == Frequently Asked Questions ==
 
 = Where can I submit my plugin feedback? =
 
-Feedback is encouraged and much appreciated, especially since this plugin may contain future WordPress core features. If you have suggestions or requests for new features, you can [submit them as an issue in the WordPress Performance Team's GitHub repository](https://github.com/WordPress/performance/issues/new/choose). If you need help with troubleshooting or have a question about the plugin, please [create a new topic on our support forum](https://wordpress.org/support/plugin/image-loading-optimization/#new-topic-0).
+Feedback is encouraged and much appreciated, especially since this plugin may contain future WordPress core features. If you have suggestions or requests for new features, you can [submit them as an issue in the WordPress Performance Team's GitHub repository](https://github.com/WordPress/performance/issues/new/choose). If you need help with troubleshooting or have a question about the plugin, please [create a new topic on our support forum](https://wordpress.org/support/plugin/optimization-detective/#new-topic-0).
 
 = Where can I report security bugs? =
 

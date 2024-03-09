@@ -1,8 +1,8 @@
 <?php
 /**
- * Image Loading Optimization: ILO_URL_Metrics_Group class
+ * Optimization Detective: OD_URL_Metrics_Group class
  *
- * @package image-loading-optimization
+ * @package optimization-detective
  * @since n.e.x.t
  */
 
@@ -14,17 +14,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * URL metrics grouped by viewport according to breakpoints.
  *
- * @implements IteratorAggregate<int, ILO_URL_Metric>
+ * @implements IteratorAggregate<int, OD_URL_Metric>
  *
  * @since n.e.x.t
  * @access private
  */
-final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
+final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 
 	/**
 	 * URL metrics.
 	 *
-	 * @var ILO_URL_Metric[]
+	 * @var OD_URL_Metric[]
 	 */
 	private $url_metrics;
 
@@ -65,7 +65,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	 *
 	 * @throws InvalidArgumentException If arguments are valid.
 	 *
-	 * @param ILO_URL_Metric[] $url_metrics            URL metrics to add to the group.
+	 * @param OD_URL_Metric[] $url_metrics            URL metrics to add to the group.
 	 * @param int              $minimum_viewport_width Minimum possible viewport width for the group. Must be zero or greater.
 	 * @param int              $maximum_viewport_width Maximum possible viewport width for the group. Must be greater than zero and the minimum viewport width.
 	 * @param int              $sample_size            Sample size for the maximum number of viewports in a group between breakpoints.
@@ -74,17 +74,17 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	public function __construct( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl ) {
 		if ( $minimum_viewport_width < 0 ) {
 			throw new InvalidArgumentException(
-				esc_html__( 'The minimum viewport width must be at least zero.', 'image-loading-optimization' )
+				esc_html__( 'The minimum viewport width must be at least zero.', 'optimization-detective' )
 			);
 		}
 		if ( $maximum_viewport_width < 1 ) {
 			throw new InvalidArgumentException(
-				esc_html__( 'The maximum viewport width must be greater than zero.', 'image-loading-optimization' )
+				esc_html__( 'The maximum viewport width must be greater than zero.', 'optimization-detective' )
 			);
 		}
 		if ( $minimum_viewport_width >= $maximum_viewport_width ) {
 			throw new InvalidArgumentException(
-				esc_html__( 'The minimum viewport width must be smaller than the maximum viewport width.', 'image-loading-optimization' )
+				esc_html__( 'The minimum viewport width must be smaller than the maximum viewport width.', 'optimization-detective' )
 			);
 		}
 		$this->minimum_viewport_width = $minimum_viewport_width;
@@ -95,7 +95,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 				esc_html(
 					sprintf(
 						/* translators: %d is the invalid sample size */
-						__( 'Sample size must be greater than zero, but provided: %d', 'image-loading-optimization' ),
+						__( 'Sample size must be greater than zero, but provided: %d', 'optimization-detective' ),
 						$sample_size
 					)
 				)
@@ -108,7 +108,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 				esc_html(
 					sprintf(
 						/* translators: %d is the invalid sample size */
-						__( 'Freshness TTL must be at least zero, but provided: %d', 'image-loading-optimization' ),
+						__( 'Freshness TTL must be at least zero, but provided: %d', 'optimization-detective' ),
 						$freshness_ttl
 					)
 				)
@@ -155,12 +155,12 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	 *
 	 * @throws InvalidArgumentException If the viewport width of the URL metric is not within the min/max bounds of the group.
 	 *
-	 * @param ILO_URL_Metric $url_metric URL metric.
+	 * @param OD_URL_Metric $url_metric URL metric.
 	 */
-	public function add_url_metric( ILO_URL_Metric $url_metric ) {
+	public function add_url_metric( OD_URL_Metric $url_metric ) {
 		if ( ! $this->is_viewport_width_in_range( $url_metric->get_viewport_width() ) ) {
 			throw new InvalidArgumentException(
-				esc_html__( 'URL metric is not in the viewport range for group.', 'image-loading-optimization' )
+				esc_html__( 'URL metric is not in the viewport range for group.', 'optimization-detective' )
 			);
 		}
 
@@ -172,7 +172,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 			// Sort URL metrics in descending order by timestamp.
 			usort(
 				$this->url_metrics,
-				static function ( ILO_URL_Metric $a, ILO_URL_Metric $b ): int {
+				static function ( OD_URL_Metric $a, OD_URL_Metric $b ): int {
 					return $b->get_timestamp() <=> $a->get_timestamp();
 				}
 			);
@@ -206,7 +206,7 @@ final class ILO_URL_Metrics_Group implements IteratorAggregate, Countable {
 	/**
 	 * Returns an iterator for the URL metrics in the group.
 	 *
-	 * @return ArrayIterator<int, ILO_URL_Metric> ArrayIterator for ILO_URL_Metric instances.
+	 * @return ArrayIterator<int, OD_URL_Metric> ArrayIterator for OD_URL_Metric instances.
 	 */
 	public function getIterator(): ArrayIterator {
 		return new ArrayIterator( $this->url_metrics );

@@ -1,8 +1,8 @@
 <?php
 /**
- * Image Loading Optimization: ILO_Storage_Lock class
+ * Optimization Detective: OD_Storage_Lock class
  *
- * @package image-loading-optimization
+ * @package optimization-detective
  * @since n.e.x.t
  */
 
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  */
-final class ILO_Storage_Lock {
+final class OD_Storage_Lock {
 
 	/**
 	 * Gets the TTL (in seconds) for the URL metric storage lock.
@@ -35,7 +35,7 @@ final class ILO_Storage_Lock {
 		 * Filtering the TTL to zero will disable any metric storage locking. This is useful, for example, to disable
 		 * locking when a user is logged-in with code like the following:
 		 *
-		 *     add_filter( 'ilo_metrics_storage_lock_ttl', static function ( $ttl ) {
+		 *     add_filter( 'od_metrics_storage_lock_ttl', static function ( $ttl ) {
 		 *         return is_user_logged_in() ? 0 : $ttl;
 		 *     } );
 		 *
@@ -43,7 +43,7 @@ final class ILO_Storage_Lock {
 		 *
 		 * @param int $ttl TTL.
 		 */
-		$ttl = (int) apply_filters( 'ilo_url_metric_storage_lock_ttl', MINUTE_IN_SECONDS );
+		$ttl = (int) apply_filters( 'od_url_metric_storage_lock_ttl', MINUTE_IN_SECONDS );
 		return max( 0, $ttl );
 	}
 

@@ -1,23 +1,23 @@
 <?php
 /**
- * Tests for image-loading-optimization module hooks.php.
+ * Tests for optimization-detective module hooks.php.
  *
- * @packageimage-loading-optimization
+ * @packageoptimization-detective
  */
 
-class ILO_Hooks_Tests extends WP_UnitTestCase {
+class OD_Hooks_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Make sure the hook is added.
 	 */
 	public function test_hooking_output_buffering_at_template_include() {
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'template_include', 'ilo_buffer_output' ) );
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'template_include', 'od_buffer_output' ) );
 	}
 
 	/**
 	 * Make output is buffered and that it is also filtered.
 	 *
-	 * @covers ::ilo_buffer_output
+	 * @covers ::od_buffer_output
 	 */
 	public function test_buffering_and_filtering_output() {
 		$original = 'Hello World!';
@@ -28,7 +28,7 @@ class ILO_Hooks_Tests extends WP_UnitTestCase {
 		ob_start();
 
 		add_filter(
-			'ilo_template_output_buffer',
+			'od_template_output_buffer',
 			function ( $buffer ) use ( $original, $expected ) {
 				$this->assertSame( $original, $buffer );
 				return $expected;
@@ -36,7 +36,7 @@ class ILO_Hooks_Tests extends WP_UnitTestCase {
 		);
 
 		$original_ob_level = ob_get_level();
-		ilo_buffer_output( '' );
+		od_buffer_output( '' );
 		$this->assertSame( $original_ob_level + 1, ob_get_level(), 'Expected call to ob_start().' );
 		echo $original;
 

@@ -1,8 +1,8 @@
 <?php
 /**
- * Hook callbacks used for Image Loading Optimization.
+ * Hook callbacks used for Optimization Detective.
  *
- * @package image-loading-optimization
+ * @package optimization-detective
  * @since n.e.x.t
  */
 
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $passthrough Optional. Filter value. Default null.
  * @return string Unmodified value of $passthrough.
  */
-function ilo_buffer_output( string $passthrough ): string {
+function od_buffer_output( string $passthrough ): string {
 	ob_start(
 		static function ( string $output ): string {
 			/**
@@ -41,9 +41,9 @@ function ilo_buffer_output( string $passthrough ): string {
 			 * @param string $output Output buffer.
 			 * @return string Filtered output buffer.
 			 */
-			return (string) apply_filters( 'ilo_template_output_buffer', $output );
+			return (string) apply_filters( 'od_template_output_buffer', $output );
 		}
 	);
 	return $passthrough;
 }
-add_filter( 'template_include', 'ilo_buffer_output', PHP_INT_MAX );
+add_filter( 'template_include', 'od_buffer_output', PHP_INT_MAX );

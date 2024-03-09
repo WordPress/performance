@@ -1,8 +1,8 @@
 <?php
 /**
- * Optimizing for image loading optimization.
+ * Optimizing for Optimization Detective.
  *
- * @package image-loading-optimization
+ * @package optimization-detective
  * @since n.e.x.t
  */
 
@@ -16,17 +16,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  */
-function ilo_maybe_add_template_output_buffer_filter() {
-	if ( ! ilo_can_optimize_response() ) {
+function od_maybe_add_template_output_buffer_filter() {
+	if ( ! od_can_optimize_response() ) {
 		return;
 	}
-	$callback = 'ilo_optimize_template_output_buffer';
+	$callback = 'od_optimize_template_output_buffer';
 	if ( function_exists( 'perflab_wrap_server_timing' ) ) {
-		$callback = perflab_wrap_server_timing( $callback, 'image-loading-optimization', 'exist' );
+		$callback = perflab_wrap_server_timing( $callback, 'optimization-detective', 'exist' );
 	}
-	add_filter( 'ilo_template_output_buffer', $callback );
+	add_filter( 'od_template_output_buffer', $callback );
 }
-add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
+add_action( 'wp', 'od_maybe_add_template_output_buffer_filter' );
 
 /**
  * Determines whether the current response can be optimized.
@@ -36,7 +36,7 @@ add_action( 'wp', 'ilo_maybe_add_template_output_buffer_filter' );
  *
  * @return bool Whether response can be optimized.
  */
-function ilo_can_optimize_response(): bool {
+function od_can_optimize_response(): bool {
 	$able = ! (
 		// Since there is no predictability in whether posts in the loop will have featured images assigned or not. If a
 		// theme template for search results doesn't even show featured images, then this wouldn't be an issue.
@@ -47,7 +47,7 @@ function ilo_can_optimize_response(): bool {
 		'GET' !== $_SERVER['REQUEST_METHOD'] ||
 		// The aim is to optimize pages for the majority of site visitors, not those who administer the site. For admin
 		// users, additional elements will be present like the script from wp_customize_support_script() which will
-		// interfere with the XPath indices. Note that ilo_get_normalized_query_vars() is varied by is_user_logged_in()
+		// interfere with the XPath indices. Note that od_get_normalized_query_vars() is varied by is_user_logged_in()
 		// so membership sites and e-commerce sites will still be able to be optimized for their normal visitors.
 		current_user_can( 'customize' )
 	);
@@ -59,7 +59,7 @@ function ilo_can_optimize_response(): bool {
 	 *
 	 * @param bool $able Whether response can be optimized.
 	 */
-	return (bool) apply_filters( 'ilo_can_optimize_response', $able );
+	return (bool) apply_filters( 'od_can_optimize_response', $able );
 }
 
 /**
@@ -71,7 +71,7 @@ function ilo_can_optimize_response(): bool {
  * @param array<int, array{background_image?: string, img_attributes?: array{src?: string, srcset?: string, sizes?: string, crossorigin?: string}}|false> $lcp_elements_by_minimum_viewport_widths LCP elements keyed by minimum viewport width, amended with element details.
  * @return string Markup for zero or more preload link tags.
  */
-function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths ): string {
+function od_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths ): string {
 	$preload_links = array();
 
 	// This uses a for loop to be able to access the following element within the iteration, using a numeric index.
@@ -104,7 +104,7 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 			_doing_it_wrong(
 				__FUNCTION__,
 				esc_html(
-					__( 'Attempted to construct preload link without an available href or imagesrcset. Supplied LCP element: ', 'image-loading-optimization' ) . wp_json_encode( $lcp_element )
+					__( 'Attempted to construct preload link without an available href or imagesrcset. Supplied LCP element: ', 'optimization-detective' ) . wp_json_encode( $lcp_element )
 				),
 				''
 			);
@@ -124,7 +124,7 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
 		$link_attributes['media'] = implode( ' and ', $media_features );
 
 		// Construct preload link.
-		$link_tag = '<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image"';
+		$link_tag = '<link data-od-added-tag rel="preload" fetchpriority="high" as="image"';
 		foreach ( $link_attributes as $name => $value ) {
 			$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
 		}
@@ -145,21 +145,21 @@ function ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_wi
  * @param string $buffer Template output buffer.
  * @return string Filtered template output buffer.
  */
-function ilo_optimize_template_output_buffer( string $buffer ): string {
-	$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
-	$post = ilo_get_url_metrics_post( $slug );
+function od_optimize_template_output_buffer( string $buffer ): string {
+	$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+	$post = od_get_url_metrics_post( $slug );
 
-	$group_collection = new ILO_URL_Metrics_Group_Collection(
-		$post ? ilo_parse_stored_url_metrics( $post ) : array(),
-		ilo_get_breakpoint_max_widths(),
-		ilo_get_url_metrics_breakpoint_sample_size(),
-		ilo_get_url_metric_freshness_ttl()
+	$group_collection = new OD_URL_Metrics_Group_Collection(
+		$post ? od_parse_stored_url_metrics( $post ) : array(),
+		od_get_breakpoint_max_widths(),
+		od_get_url_metrics_breakpoint_sample_size(),
+		od_get_url_metric_freshness_ttl()
 	);
 
-	// Whether we need to add the data-ilo-xpath attribute to elements and whether the detection script should be injected.
+	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
-	$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
+	$lcp_elements_by_minimum_viewport_widths = od_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
 	$all_breakpoints_have_url_metrics        = $group_collection->is_every_group_populated();
 
 	/**
@@ -201,7 +201,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 	$detected_lcp_element_xpaths = array();
 
 	// Walk over all tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes or background-image for preloading.
-	$processor = new ILO_HTML_Tag_Processor( $buffer );
+	$processor = new OD_HTML_Tag_Processor( $buffer );
 	foreach ( $processor->open_tags() as $tag_name ) {
 		$is_img_tag = (
 			'IMG' === $tag_name
@@ -241,21 +241,21 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		if ( $is_img_tag ) {
 			if ( $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
 				if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
-					$processor->set_attribute( 'data-ilo-fetchpriority-already-added', true );
+					$processor->set_attribute( 'data-od-fetchpriority-already-added', true );
 				} else {
 					$processor->set_attribute( 'fetchpriority', 'high' );
-					$processor->set_attribute( 'data-ilo-added-fetchpriority', true );
+					$processor->set_attribute( 'data-od-added-fetchpriority', true );
 				}
 
 				// Never include loading=lazy on the LCP image common across all breakpoints.
 				if ( 'lazy' === $processor->get_attribute( 'loading' ) ) {
-					$processor->set_attribute( 'data-ilo-removed-loading', $processor->get_attribute( 'loading' ) );
+					$processor->set_attribute( 'data-od-removed-loading', $processor->get_attribute( 'loading' ) );
 					$processor->remove_attribute( 'loading' );
 				}
 			} elseif ( $all_breakpoints_have_url_metrics && $processor->get_attribute( 'fetchpriority' ) ) {
 				// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
 				// continue to apply while waiting for all breakpoints to have metrics collected for them.
-				$processor->set_attribute( 'data-ilo-removed-fetchpriority', $processor->get_attribute( 'fetchpriority' ) );
+				$processor->set_attribute( 'data-od-removed-fetchpriority', $processor->get_attribute( 'fetchpriority' ) );
 				$processor->remove_attribute( 'fetchpriority' );
 			}
 		}
@@ -286,7 +286,7 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		if ( $needs_detection ) {
-			$processor->set_attribute( 'data-ilo-xpath', $xpath );
+			$processor->set_attribute( 'data-od-xpath', $xpath );
 		}
 	}
 	$buffer = $processor->get_updated_html();
@@ -303,12 +303,12 @@ function ilo_optimize_template_output_buffer( string $buffer ): string {
 
 	// Inject any preload links at the end of the HEAD. In the future, WP_HTML_Processor could be used to do this injection.
 	// However, given the simple replacement here this is not essential.
-	$head_injection = ilo_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
+	$head_injection = od_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
 
 	// Inject detection script.
-	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-ilo-xpath attributes.
+	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
 	if ( $needs_detection ) {
-		$head_injection .= ilo_get_detection_script( $slug, $group_collection );
+		$head_injection .= od_get_detection_script( $slug, $group_collection );
 	}
 
 	if ( $head_injection ) {

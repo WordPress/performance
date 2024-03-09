@@ -1,13 +1,13 @@
 <?php
 /**
- * Tests for ILO_Storage_Lock.
+ * Tests for OD_Storage_Lock.
  *
- * @packageimage-loading-optimization
+ * @packageoptimization-detective
  *
- * @coversDefaultClass ILO_Storage_Lock
+ * @coversDefaultClass OD_Storage_Lock
  */
 
-class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
+class OD_Storage_Lock_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Tear down.
@@ -31,7 +31,7 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 			'filtered_hour'     => array(
 				'set_up'   => static function () {
 					add_filter(
-						'ilo_url_metric_storage_lock_ttl',
+						'od_url_metric_storage_lock_ttl',
 						static function (): int {
 							return HOUR_IN_SECONDS;
 						}
@@ -42,7 +42,7 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 			'filtered_negative' => array(
 				'set_up'   => static function () {
 					add_filter(
-						'ilo_url_metric_storage_lock_ttl',
+						'od_url_metric_storage_lock_ttl',
 						static function (): int {
 							return -100;
 						}
@@ -65,7 +65,7 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 	 */
 	public function test_get_ttl( Closure $set_up, int $expected ) {
 		$set_up();
-		$this->assertSame( $expected, ILO_Storage_Lock::get_ttl() );
+		$this->assertSame( $expected, OD_Storage_Lock::get_ttl() );
 	}
 
 	/**
@@ -77,11 +77,11 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 		unset( $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_X_FORWARDED_FOR'] );
 
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-		$first_key              = ILO_Storage_Lock::get_transient_key();
+		$first_key              = OD_Storage_Lock::get_transient_key();
 		$this->assertStringStartsWith( 'url_metrics_storage_lock_', $first_key );
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '127.0.0.2';
-		$second_key                      = ILO_Storage_Lock::get_transient_key();
+		$second_key                      = OD_Storage_Lock::get_transient_key();
 		$this->assertStringStartsWith( 'url_metrics_storage_lock_', $second_key );
 
 		$this->assertNotEquals( $second_key, $first_key, 'Expected setting HTTP_X_FORWARDED_FOR header to take precedence over REMOTE_ADDR.' );
@@ -96,8 +96,8 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 	 * @covers ::get_ttl
 	 */
 	public function test_set_lock_and_is_locked() {
-		$key = ILO_Storage_Lock::get_transient_key();
-		$ttl = ILO_Storage_Lock::get_ttl();
+		$key = OD_Storage_Lock::get_transient_key();
+		$ttl = OD_Storage_Lock::get_ttl();
 
 		$transient_value      = null;
 		$transient_expiration = null;
@@ -113,20 +113,20 @@ class ILO_Storage_Lock_Tests extends WP_UnitTestCase {
 		);
 
 		// Set the lock.
-		ILO_Storage_Lock::set_lock();
+		OD_Storage_Lock::set_lock();
 		$this->assertSame( $ttl, $transient_expiration );
 		$this->assertLessThanOrEqual( microtime( true ), $transient_value );
 		$this->assertEquals( $transient_value, get_transient( $key ) );
-		$this->assertTrue( ILO_Storage_Lock::is_locked() );
+		$this->assertTrue( OD_Storage_Lock::is_locked() );
 
 		// Simulate expired lock.
 		set_transient( $key, microtime( true ) - HOUR_IN_SECONDS );
-		$this->assertFalse( ILO_Storage_Lock::is_locked() );
+		$this->assertFalse( OD_Storage_Lock::is_locked() );
 
 		// Clear the lock.
-		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
-		ILO_Storage_Lock::set_lock();
+		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
+		OD_Storage_Lock::set_lock();
 		$this->assertFalse( get_transient( $key ) );
-		$this->assertFalse( ILO_Storage_Lock::is_locked() );
+		$this->assertFalse( OD_Storage_Lock::is_locked() );
 	}
 }

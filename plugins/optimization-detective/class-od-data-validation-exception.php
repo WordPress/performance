@@ -1,8 +1,8 @@
 <?php
 /**
- * Image Loading Optimization: ILO_Data_Validation_Exception class
+ * Optimization Detective: OD_Data_Validation_Exception class
  *
- * @package image-loading-optimization
+ * @package optimization-detective
  * @since n.e.x.t
  */
 
@@ -17,4 +17,4 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  */
-final class ILO_Data_Validation_Exception extends Exception {}
+final class OD_Data_Validation_Exception extends Exception {}

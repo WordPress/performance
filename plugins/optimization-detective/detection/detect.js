@@ -3,7 +3,7 @@
 const win = window;
 const doc = win.document;
 
-const consoleLogPrefix = '[Image Loading Optimization]';
+const consoleLogPrefix = '[Optimization Detective]';
 
 const storageLockTimeSessionKey = 'iloStorageLockTime';
 
@@ -204,8 +204,8 @@ export default async function detect( {
 		} );
 	}
 
-	// As an alternative to this, the ilo_print_detection_script() function can short-circuit if the
-	// ilo_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
+	// As an alternative to this, the od_print_detection_script() function can short-circuit if the
+	// od_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
 	// result in metrics missed from being gathered when a user navigates around a site and primes the page cache.
 	if ( isStorageLocked( currentTime, storageLockTTL ) ) {
 		if ( isDebug ) {
@@ -229,7 +229,7 @@ export default async function detect( {
 	}
 
 	const breadcrumbedElements =
-		doc.body.querySelectorAll( '[data-ilo-xpath]' );
+		doc.body.querySelectorAll( '[data-od-xpath]' );
 
 	/** @type {Map<HTMLElement, string>} */
 	const breadcrumbedElementsMap = new Map(

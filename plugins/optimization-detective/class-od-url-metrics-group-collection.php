@@ -1,8 +1,8 @@
 <?php
 /**
- * Image Loading Optimization: ILO_URL_Metrics_Group_Collection class
+ * Optimization Detective: OD_URL_Metrics_Group_Collection class
  *
- * @package image-loading-optimization
+ * @package optimization-detective
  * @since n.e.x.t
  */
 
@@ -14,12 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Collection of URL groups according to the breakpoints.
  *
- * @implements IteratorAggregate<int, ILO_URL_Metrics_Group>
+ * @implements IteratorAggregate<int, OD_URL_Metrics_Group>
  *
  * @since n.e.x.t
  * @access private
  */
-final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggregate {
+final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggregate {
 
 	/**
 	 * URL metrics groups.
@@ -30,8 +30,8 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 	 * even to when there are zero breakpoints: there will still be one group
 	 * in this case, in which every single URL metric is added.
 	 *
-	 * @var ILO_URL_Metrics_Group[]
-	 * @phpstan-var non-empty-array<ILO_URL_Metrics_Group>
+	 * @var OD_URL_Metrics_Group[]
+	 * @phpstan-var non-empty-array<OD_URL_Metrics_Group>
 	 */
 	private $groups;
 
@@ -68,7 +68,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 	 *
 	 * @throws InvalidArgumentException When an invalid argument is supplied.
 	 *
-	 * @param ILO_URL_Metric[] $url_metrics   URL metrics.
+	 * @param OD_URL_Metric[] $url_metrics   URL metrics.
 	 * @param int[]            $breakpoints   Breakpoints in max widths.
 	 * @param int              $sample_size   Sample size for the maximum number of viewports in a group between breakpoints.
 	 * @param int              $freshness_ttl Freshness age (TTL) for a given URL metric.
@@ -85,7 +85,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 							/* translators: %d is the invalid breakpoint */
 							__(
 								'Each of the breakpoints must be greater than zero and less than PHP_INT_MAX, but encountered: %d',
-								'image-loading-optimization'
+								'optimization-detective'
 							),
 							$breakpoint
 						)
@@ -101,7 +101,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 				esc_html(
 					sprintf(
 						/* translators: %d is the invalid sample size */
-						__( 'Sample size must be greater than zero, but provided: %d', 'image-loading-optimization' ),
+						__( 'Sample size must be greater than zero, but provided: %d', 'optimization-detective' ),
 						$sample_size
 					)
 				)
@@ -115,7 +115,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 				esc_html(
 					sprintf(
 						/* translators: %d is the invalid sample size */
-						__( 'Freshness TTL must be at least zero, but provided: %d', 'image-loading-optimization' ),
+						__( 'Freshness TTL must be at least zero, but provided: %d', 'optimization-detective' ),
 						$freshness_ttl
 					)
 				)
@@ -133,16 +133,16 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 	/**
 	 * Create groups.
 	 *
-	 * @return ILO_URL_Metrics_Group[] Groups.
+	 * @return OD_URL_Metrics_Group[] Groups.
 	 */
 	private function create_groups(): array {
 		$groups    = array();
 		$min_width = 0;
 		foreach ( $this->breakpoints as $max_width ) {
-			$groups[]  = new ILO_URL_Metrics_Group( array(), $min_width, $max_width, $this->sample_size, $this->freshness_ttl );
+			$groups[]  = new OD_URL_Metrics_Group( array(), $min_width, $max_width, $this->sample_size, $this->freshness_ttl );
 			$min_width = $max_width + 1;
 		}
-		$groups[] = new ILO_URL_Metrics_Group( array(), $min_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl );
+		$groups[] = new OD_URL_Metrics_Group( array(), $min_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl );
 		return $groups;
 	}
 
@@ -153,9 +153,9 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 	 *
 	 * @throws InvalidArgumentException If there is no group available to add a URL metric to.
 	 *
-	 * @param ILO_URL_Metric $new_url_metric New URL metric.
+	 * @param OD_URL_Metric $new_url_metric New URL metric.
 	 */
-	public function add_url_metric( ILO_URL_Metric $new_url_metric ) {
+	public function add_url_metric( OD_URL_Metric $new_url_metric ) {
 		foreach ( $this->groups as $group ) {
 			if ( $group->is_viewport_width_in_range( $new_url_metric->get_viewport_width() ) ) {
 				$group->add_url_metric( $new_url_metric );
@@ -163,7 +163,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 			}
 		}
 		throw new InvalidArgumentException(
-			esc_html__( 'No group available to add URL metric to.', 'image-loading-optimization' )
+			esc_html__( 'No group available to add URL metric to.', 'optimization-detective' )
 		);
 	}
 
@@ -173,9 +173,9 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
 	 *
 	 * @param int $viewport_width Viewport width.
-	 * @return ILO_URL_Metrics_Group URL metrics group for the viewport width.
+	 * @return OD_URL_Metrics_Group URL metrics group for the viewport width.
 	 */
-	public function get_group_for_viewport_width( int $viewport_width ): ILO_URL_Metrics_Group {
+	public function get_group_for_viewport_width( int $viewport_width ): OD_URL_Metrics_Group {
 		foreach ( $this->groups as $group ) {
 			if ( $group->is_viewport_width_in_range( $viewport_width ) ) {
 				return $group;
@@ -185,7 +185,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 			esc_html(
 				sprintf(
 					/* translators: %d is viewport width */
-					__( 'No URL metrics group found for viewport width: %d', 'image-loading-optimization' ),
+					__( 'No URL metrics group found for viewport width: %d', 'optimization-detective' ),
 					$viewport_width
 				)
 			)
@@ -200,7 +200,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 	 * should be contrasted with the `is_every_group_complete()`
 	 * method below.
 	 *
-	 * @see ILO_URL_Metrics_Group_Collection::is_every_group_complete()
+	 * @see OD_URL_Metrics_Group_Collection::is_every_group_complete()
 	 *
 	 * @return bool Whether all groups have some URL metrics.
 	 */
@@ -216,7 +216,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 	/**
 	 * Checks whether every group is complete.
 	 *
-	 * @see ILO_URL_Metrics_Group::is_complete()
+	 * @see OD_URL_Metrics_Group::is_complete()
 	 *
 	 * @return bool Whether all groups are complete.
 	 */
@@ -232,7 +232,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 	/**
 	 * Gets URL metrics from all groups flattened into one list.
 	 *
-	 * @return ILO_URL_Metric[] All URL metrics.
+	 * @return OD_URL_Metric[] All URL metrics.
 	 */
 	public function get_flattened_url_metrics(): array {
 		// The duplication of iterator_to_array is not a mistake. This collection is an
@@ -249,7 +249,7 @@ final class ILO_URL_Metrics_Group_Collection implements Countable, IteratorAggre
 	/**
 	 * Returns an iterator for the groups of URL metrics.
 	 *
-	 * @return ArrayIterator<int, ILO_URL_Metrics_Group> Array iterator for ILO_URL_Metric_Group instances.
+	 * @return ArrayIterator<int, OD_URL_Metrics_Group> Array iterator for OD_URL_Metric_Group instances.
 	 */
 	public function getIterator(): ArrayIterator {
 		return new ArrayIterator( $this->groups );

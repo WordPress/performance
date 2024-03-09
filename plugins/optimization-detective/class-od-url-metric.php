@@ -1,8 +1,8 @@
 <?php
 /**
- * Image Loading Optimization: ILO_URL_Metric class
+ * Optimization Detective: OD_URL_Metric class
  *
- * @package image-loading-optimization
+ * @package optimization-detective
  * @since n.e.x.t
  */
 
@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  */
-final class ILO_URL_Metric implements JsonSerializable {
+final class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Data.
@@ -46,12 +46,12 @@ final class ILO_URL_Metric implements JsonSerializable {
 	 *
 	 * @param array $data URL metric data.
 	 *
-	 * @throws ILO_Data_Validation_Exception When the input is invalid.
+	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 */
 	public function __construct( array $data ) {
 		$valid = rest_validate_object_value_from_schema( $data, self::get_json_schema(), self::class );
 		if ( is_wp_error( $valid ) ) {
-			throw new ILO_Data_Validation_Exception( esc_html( $valid->get_error_message() ) );
+			throw new OD_Data_Validation_Exception( esc_html( $valid->get_error_message() ) );
 		}
 		$this->data = $data;
 	}
@@ -80,11 +80,11 @@ final class ILO_URL_Metric implements JsonSerializable {
 
 		return array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => 'ilo-url-metric',
+			'title'                => 'od-url-metric',
 			'type'                 => 'object',
 			'properties'           => array(
 				'viewport'  => array(
-					'description' => __( 'Viewport dimensions', 'image-loading-optimization' ),
+					'description' => __( 'Viewport dimensions', 'optimization-detective' ),
 					'type'        => 'object',
 					'required'    => true,
 					'properties'  => array(
@@ -101,15 +101,15 @@ final class ILO_URL_Metric implements JsonSerializable {
 					),
 				),
 				'timestamp' => array(
-					'description' => __( 'Timestamp at which the URL metric was captured.', 'image-loading-optimization' ),
+					'description' => __( 'Timestamp at which the URL metric was captured.', 'optimization-detective' ),
 					'type'        => 'number',
 					'required'    => true,
 					'readonly'    => true, // Omit from REST API.
-					'default'     => microtime( true ), // Value provided when instantiating ILO_URL_Metric in REST API.
+					'default'     => microtime( true ), // Value provided when instantiating OD_URL_Metric in REST API.
 					'minimum'     => 0,
 				),
 				'elements'  => array(
-					'description' => __( 'Element metrics', 'image-loading-optimization' ),
+					'description' => __( 'Element metrics', 'optimization-detective' ),
 					'type'        => 'array',
 					'required'    => true,
 					'items'       => array(
@@ -126,7 +126,7 @@ final class ILO_URL_Metric implements JsonSerializable {
 							'xpath'              => array(
 								'type'     => 'string',
 								'required' => true,
-								'pattern'  => ILO_HTML_Tag_Processor::XPATH_PATTERN,
+								'pattern'  => OD_HTML_Tag_Processor::XPATH_PATTERN,
 							),
 							'intersectionRatio'  => array(
 								'type'     => 'number',

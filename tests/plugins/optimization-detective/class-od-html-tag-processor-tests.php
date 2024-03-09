@@ -1,10 +1,10 @@
 <?php
 /**
- * Tests for image-loading-optimization class ILO_HTML_Tag_Processor.
+ * Tests for optimization-detective class OD_HTML_Tag_Processor.
  *
- * @packageimage-loading-optimization
+ * @packageoptimization-detective
  *
- * @coversDefaultClass ILO_HTML_Tag_Processor
+ * @coversDefaultClass OD_HTML_Tag_Processor
  *
  * @noinspection HtmlRequiredTitleElement
  * @noinspection HtmlRequiredAltAttribute
@@ -14,7 +14,7 @@
  * @noinspection HtmlExtraClosingTag
  * @todo What are the other inspection IDs which can turn off inspections for the other irrelevant warnings? Remaining is "The tag is marked as deprecated."
  */
-class ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
+class OD_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 
 	public function data_provider_sample_documents(): array {
 		return array(
@@ -303,7 +303,7 @@ class ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 	 * @dataProvider data_provider_sample_documents
 	 */
 	public function test_open_tags_and_get_xpath( string $document, array $open_tags, array $xpaths ) {
-		$p = new ILO_HTML_Tag_Processor( $document );
+		$p = new OD_HTML_Tag_Processor( $document );
 		$this->assertSame( '', $p->get_xpath(), 'Expected empty XPath since iteration has not started.' );
 		$actual_open_tags = array();
 		$actual_xpaths    = array();
@@ -325,7 +325,7 @@ class ILO_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 	 * @covers ::get_updated_html
 	 */
 	public function test_html_tag_processor_wrapper_methods() {
-		$processor = new ILO_HTML_Tag_Processor( '<html lang="en" xml:lang="en"></html>' );
+		$processor = new OD_HTML_Tag_Processor( '<html lang="en" xml:lang="en"></html>' );
 		foreach ( $processor->open_tags() as $open_tag ) {
 			if ( 'HTML' === $open_tag ) {
 				$this->assertSame( 'en', $processor->get_attribute( 'lang' ) );

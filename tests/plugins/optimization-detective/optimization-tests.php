@@ -1,13 +1,13 @@
 <?php
 /**
- * Tests for image-loading-optimization module optimization.php.
+ * Tests for optimization-detective module optimization.php.
  *
- * @packageimage-loading-optimization
+ * @packageoptimization-detective
  *
  * @todo There are "Cannot resolve ..." errors and "Element img doesn't have a required attribute src" warnings that should be excluded from inspection.
  */
 
-class ILO_Optimization_Tests extends WP_UnitTestCase {
+class OD_Optimization_Tests extends WP_UnitTestCase {
 
 	/**
 	 * @var string
@@ -33,23 +33,23 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ilo_maybe_add_template_output_buffer_filter().
+	 * Test od_maybe_add_template_output_buffer_filter().
 	 *
-	 * @covers ::ilo_maybe_add_template_output_buffer_filter
+	 * @covers ::od_maybe_add_template_output_buffer_filter
 	 */
-	public function test_ilo_maybe_add_template_output_buffer_filter() {
-		$this->assertFalse( has_filter( 'ilo_template_output_buffer' ) );
+	public function test_od_maybe_add_template_output_buffer_filter() {
+		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
 
-		add_filter( 'ilo_can_optimize_response', '__return_false', 1 );
-		ilo_maybe_add_template_output_buffer_filter();
-		$this->assertFalse( ilo_can_optimize_response() );
-		$this->assertFalse( has_filter( 'ilo_template_output_buffer' ) );
+		add_filter( 'od_can_optimize_response', '__return_false', 1 );
+		od_maybe_add_template_output_buffer_filter();
+		$this->assertFalse( od_can_optimize_response() );
+		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
 
-		add_filter( 'ilo_can_optimize_response', '__return_true', 2 );
+		add_filter( 'od_can_optimize_response', '__return_true', 2 );
 		$this->go_to( home_url( '/' ) );
-		$this->assertTrue( ilo_can_optimize_response() );
-		ilo_maybe_add_template_output_buffer_filter();
-		$this->assertTrue( has_filter( 'ilo_template_output_buffer' ) );
+		$this->assertTrue( od_can_optimize_response() );
+		od_maybe_add_template_output_buffer_filter();
+		$this->assertTrue( has_filter( 'od_template_output_buffer' ) );
 	}
 
 	/**
@@ -57,7 +57,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array
 	 */
-	public function data_provider_test_ilo_can_optimize_response(): array {
+	public function data_provider_test_od_can_optimize_response(): array {
 		return array(
 			'homepage'           => array(
 				'set_up'   => function () {
@@ -68,7 +68,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 			'homepage_filtered'  => array(
 				'set_up'   => function () {
 					$this->go_to( home_url( '/' ) );
-					add_filter( 'ilo_can_optimize_response', '__return_false' );
+					add_filter( 'od_can_optimize_response', '__return_false' );
 				},
 				'expected' => false,
 			),
@@ -114,15 +114,15 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ilo_can_optimize_response().
+	 * Test od_can_optimize_response().
 	 *
-	 * @covers ::ilo_can_optimize_response
+	 * @covers ::od_can_optimize_response
 	 *
-	 * @dataProvider data_provider_test_ilo_can_optimize_response
+	 * @dataProvider data_provider_test_od_can_optimize_response
 	 */
-	public function test_ilo_can_optimize_response( Closure $set_up, bool $expected ) {
+	public function test_od_can_optimize_response( Closure $set_up, bool $expected ) {
 		$set_up();
-		$this->assertSame( $expected, ilo_can_optimize_response() );
+		$this->assertSame( $expected, od_can_optimize_response() );
 	}
 
 	/**
@@ -130,7 +130,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array[]
 	 */
-	public function data_provider_test_ilo_construct_preload_links(): array {
+	public function data_provider_test_od_construct_preload_links(): array {
 		return array(
 			'no-lcp-image'                              => array(
 				'lcp_elements_by_minimum_viewport_widths' => array(
@@ -147,7 +147,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg" media="screen">
+					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg" media="screen">
 				',
 			),
 			'one-responsive-lcp-image'                  => array(
@@ -162,7 +162,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen">
+					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen">
 				',
 			),
 			'two-breakpoint-responsive-lcp-images'      => array(
@@ -185,8 +185,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 600px)">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/alt-elva-fairy-800w.jpg" imagesrcset="https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
+					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 600px)">
+					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/alt-elva-fairy-800w.jpg" imagesrcset="https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
 				',
 			),
 			'two-non-consecutive-responsive-lcp-images' => array(
@@ -210,8 +210,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/alt-elva-fairy-800w.jpg" imagesrcset="https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
+					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
+					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/alt-elva-fairy-800w.jpg" imagesrcset="https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
 				',
 			),
 			'one-background-lcp-image'                  => array(
@@ -221,7 +221,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg" media="screen">
+					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg" media="screen">
 				',
 			),
 			'two-background-lcp-images'                 => array(
@@ -234,8 +234,8 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile.jpg" media="screen and (max-width: 480px)">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="screen and (min-width: 481px)">
+					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile.jpg" media="screen and (max-width: 480px)">
+					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="screen and (min-width: 481px)">
 				',
 			),
 			'one-bg-image-one-img-element'              => array(
@@ -253,24 +253,24 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					),
 				),
 				'expected'                                => '
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-800w.jpg" imagesrcset="https://example.com/mobile-480w.jpg 480w, https://example.com/mobile-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
-					<link data-ilo-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="screen and (min-width: 481px)">
+					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-800w.jpg" imagesrcset="https://example.com/mobile-480w.jpg 480w, https://example.com/mobile-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
+					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="screen and (min-width: 481px)">
 				',
 			),
 		);
 	}
 
 	/**
-	 * Test ilo_construct_preload_links().
+	 * Test od_construct_preload_links().
 	 *
-	 * @covers ::ilo_construct_preload_links
+	 * @covers ::od_construct_preload_links
 	 *
-	 * @dataProvider data_provider_test_ilo_construct_preload_links
+	 * @dataProvider data_provider_test_od_construct_preload_links
 	 */
-	public function test_ilo_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths, string $expected ) {
+	public function test_od_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths, string $expected ) {
 		$this->assertSame(
 			$this->normalize_whitespace( $expected ),
-			$this->normalize_whitespace( ilo_construct_preload_links( $lcp_elements_by_minimum_viewport_widths ) )
+			$this->normalize_whitespace( od_construct_preload_links( $lcp_elements_by_minimum_viewport_widths ) )
 		);
 	}
 
@@ -279,7 +279,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array[]
 	 */
-	public function data_provider_test_ilo_optimize_template_output_buffer(): array {
+	public function data_provider_test_od_optimize_template_output_buffer(): array {
 		return array(
 			'no-url-metrics'                              => array(
 				'set_up'   => static function () {},
@@ -302,7 +302,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
-							<img data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
 						</body>
 					</html>
 				',
@@ -322,7 +322,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						</body>
 					</html>
 				',
-				// There should be no data-ilo-xpath added to the DIV because it is using a data: URL for the background-image.
+				// There should be no data-od-xpath added to the DIV because it is using a data: URL for the background-image.
 				'expected' => '
 					<html lang="en">
 						<head>
@@ -351,7 +351,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						</body>
 					</html>
 				',
-				// There should be no data-ilo-xpath added to the IMG because it is using a data: URL.
+				// There should be no data-od-xpath added to the IMG because it is using a data: URL.
 				'expected' => '
 					<html lang="en">
 						<head>
@@ -397,11 +397,11 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 
 			'common-lcp-image-with-fully-populated-sample-data' => array(
 				'set_up'   => function () {
-					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
-					$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
-					foreach ( array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+					$sample_size = od_get_url_metrics_breakpoint_sample_size();
+					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 						for ( $i = 0; $i < $sample_size; $i++ ) {
-							ilo_store_url_metric(
+							od_store_url_metric(
 								home_url( '/' ),
 								$slug,
 								$this->get_validated_url_metric(
@@ -438,11 +438,11 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload" media="screen">
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload" media="screen">
 						</head>
 						<body>
-							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" fetchpriority="high" data-ilo-added-fetchpriority data-ilo-removed-loading="lazy">
-							<img src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" data-ilo-removed-fetchpriority="high">
+							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" fetchpriority="high" data-od-added-fetchpriority data-od-removed-loading="lazy">
+							<img src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" data-od-removed-fetchpriority="high">
 						</body>
 					</html>
 				',
@@ -450,11 +450,11 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 
 			'common-lcp-image-with-stale-sample-data'     => array(
 				'set_up'   => function () {
-					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
-					$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
-					foreach ( array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+					$sample_size = od_get_url_metrics_breakpoint_sample_size();
+					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 						for ( $i = 0; $i < $sample_size; $i++ ) {
-							ilo_store_url_metric(
+							od_store_url_metric(
 								home_url( '/' ),
 								$slug,
 								$this->get_validated_url_metric(
@@ -499,11 +499,11 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 
 			'common-lcp-background-image-with-fully-populated-sample-data' => array(
 				'set_up'   => function () {
-					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
-					$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
-					foreach ( array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+					$sample_size = od_get_url_metrics_breakpoint_sample_size();
+					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 						for ( $i = 0; $i < $sample_size; $i++ ) {
-							ilo_store_url_metric(
+							od_store_url_metric(
 								home_url( '/' ),
 								$slug,
 								$this->get_validated_url_metric(
@@ -535,7 +535,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo-bg.jpg" rel="preload" media="screen">
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/foo-bg.jpg" rel="preload" media="screen">
 						</head>
 						<body>
 							<div style="background-image:url(https://example.com/foo-bg.jpg); width:100%; height: 200px;">This is so background!</div>
@@ -550,14 +550,14 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 					$tablet_breakpoint  = 600;
 					$desktop_breakpoint = 782;
 					add_filter(
-						'ilo_breakpoint_max_widths',
+						'od_breakpoint_max_widths',
 						static function () use ( $mobile_breakpoint, $tablet_breakpoint ): array {
 							return array( $mobile_breakpoint, $tablet_breakpoint );
 						}
 					);
-					$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
+					$sample_size = od_get_url_metrics_breakpoint_sample_size();
 
-					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
+					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 					$div_index_to_viewport_width_mapping = array(
 						0 => $desktop_breakpoint,
 						1 => $tablet_breakpoint,
@@ -566,7 +566,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 
 					foreach ( $div_index_to_viewport_width_mapping as $div_index => $viewport_width ) {
 						for ( $i = 0; $i < $sample_size; $i++ ) {
-							ilo_store_url_metric(
+							od_store_url_metric(
 								home_url( '/' ),
 								$slug,
 								$this->get_validated_url_metric(
@@ -602,9 +602,9 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							<meta charset="utf-8">
 							<title>...</title>
 							<style>/* responsive styles to show only one div.header at a time... */</style>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-bg.jpg" media="screen and (max-width: 480px)" rel="preload">
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/tablet-bg.jpg" media="screen and (min-width: 481px) and (max-width: 600px)" rel="preload">
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/desktop-bg.jpg" media="screen and (min-width: 601px)" rel="preload">
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/mobile-bg.jpg" media="screen and (max-width: 480px)" rel="preload">
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/tablet-bg.jpg" media="screen and (min-width: 481px) and (max-width: 600px)" rel="preload">
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/desktop-bg.jpg" media="screen and (min-width: 601px)" rel="preload">
 						</head>
 						<body>
 							<div class="header desktop" style="background: red no-repeat center/80% url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>
@@ -617,11 +617,11 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 
 			'fetch-priority-high-already-on-common-lcp-image-with-fully-populated-sample-data' => array(
 				'set_up'   => function () {
-					$slug = ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() );
-					$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
-					foreach ( array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+					$sample_size = od_get_url_metrics_breakpoint_sample_size();
+					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 						for ( $i = 0; $i < $sample_size; $i++ ) {
-							ilo_store_url_metric(
+							od_store_url_metric(
 								home_url( '/' ),
 								$slug,
 								$this->get_validated_url_metric(
@@ -653,10 +653,10 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload" media="screen">
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload" media="screen">
 						</head>
 						<body>
-							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" fetchpriority="high" data-ilo-fetchpriority-already-added>
+							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" fetchpriority="high" data-od-fetchpriority-already-added>
 						</body>
 					</html>
 				',
@@ -664,9 +664,9 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 
 			'url-metric-only-captured-for-one-breakpoint' => array(
 				'set_up'   => function () {
-					ilo_store_url_metric(
+					od_store_url_metric(
 						home_url( '/' ),
-						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							400,
 							array(
@@ -694,11 +694,11 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload" media="screen">
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload" media="screen">
 							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
-							<img data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
 						</body>
 					</html>
 				',
@@ -706,9 +706,9 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 
 			'different-lcp-elements-for-different-breakpoints' => array(
 				'set_up'   => function () {
-					ilo_store_url_metric(
+					od_store_url_metric(
 						home_url( '/' ),
-						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							400,
 							array(
@@ -723,9 +723,9 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					ilo_store_url_metric(
+					od_store_url_metric(
 						home_url( '/' ),
-						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							800,
 							array(
@@ -758,13 +758,13 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (max-width: 782px)" rel="preload">
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/desktop-logo.png" media="screen and (min-width: 783px)" rel="preload">
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (max-width: 782px)" rel="preload">
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/desktop-logo.png" media="screen and (min-width: 783px)" rel="preload">
 							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
-							<img alt="Mobile Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
-							<img alt="Desktop Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
+							<img alt="Mobile Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
+							<img alt="Desktop Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
 						</body>
 					</html>
 				',
@@ -773,15 +773,15 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 			'different-lcp-elements-for-two-non-consecutive-breakpoints' => array(
 				'set_up'   => function () {
 					add_filter(
-						'ilo_breakpoint_max_widths',
+						'od_breakpoint_max_widths',
 						static function () {
 							return array( 480, 600, 782 );
 						}
 					);
 
-					ilo_store_url_metric(
+					od_store_url_metric(
 						home_url( '/' ),
-						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							400,
 							array(
@@ -796,9 +796,9 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					ilo_store_url_metric(
+					od_store_url_metric(
 						home_url( '/' ),
-						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							500,
 							array(
@@ -813,9 +813,9 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					ilo_store_url_metric(
+					od_store_url_metric(
 						home_url( '/' ),
-						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							700,
 							array(
@@ -830,9 +830,9 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					ilo_store_url_metric(
+					od_store_url_metric(
 						home_url( '/' ),
-						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							800,
 							array(
@@ -865,13 +865,13 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (max-width: 480px)" rel="preload"/>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/desktop-logo.png" media="screen and (min-width: 601px) and (max-width: 782px)" rel="preload"/>
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (max-width: 480px)" rel="preload"/>
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/desktop-logo.png" media="screen and (min-width: 601px) and (max-width: 782px)" rel="preload"/>
 							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
-							<img alt="Mobile Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
-							<img alt="Desktop Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
+							<img alt="Mobile Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
+							<img alt="Desktop Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
 						</body>
 					</html>
 				',
@@ -880,15 +880,15 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 			'different-lcp-elements-for-two-non-consecutive-breakpoints-and-one-is-stale' => array(
 				'set_up'   => function () {
 					add_filter(
-						'ilo_breakpoint_max_widths',
+						'od_breakpoint_max_widths',
 						static function () {
 							return array( 480, 600, 782 );
 						}
 					);
 
-					ilo_store_url_metric(
+					od_store_url_metric(
 						home_url( '/' ),
-						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							500,
 							array(
@@ -903,9 +903,9 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					ilo_store_url_metric(
+					od_store_url_metric(
 						home_url( '/' ),
-						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							650,
 							array(
@@ -920,9 +920,9 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					ilo_store_url_metric(
+					od_store_url_metric(
 						home_url( '/' ),
-						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							800,
 							array(
@@ -937,9 +937,9 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					ilo_store_url_metric(
+					od_store_url_metric(
 						home_url( '/' ),
-						ilo_get_url_metrics_slug( ilo_get_normalized_query_vars() ),
+						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							800,
 							array(
@@ -973,13 +973,13 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link as="image" data-ilo-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (min-width: 481px) and (max-width: 600px)" rel="preload"/>
+							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (min-width: 481px) and (max-width: 600px)" rel="preload"/>
 							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
-							<img alt="Mobile Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
+							<img alt="Mobile Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
 							<p>New paragraph since URL Metrics were captured!</p>
-							<img alt="Desktop Logo" data-ilo-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[2][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
+							<img alt="Desktop Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[2][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
 						</body>
 					</html>
 				',
@@ -988,17 +988,17 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ilo_optimize_template_output_buffer().
+	 * Test od_optimize_template_output_buffer().
 	 *
-	 * @covers ::ilo_optimize_template_output_buffer
+	 * @covers ::od_optimize_template_output_buffer
 	 *
-	 * @dataProvider data_provider_test_ilo_optimize_template_output_buffer
+	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
 	 */
-	public function test_ilo_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ) {
+	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ) {
 		$set_up();
 		$this->assertEquals(
 			$this->parse_html_document( $expected ),
-			$this->parse_html_document( ilo_optimize_template_output_buffer( $buffer ) )
+			$this->parse_html_document( od_optimize_template_output_buffer( $buffer ) )
 		);
 	}
 
@@ -1016,10 +1016,10 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 	 * Gets a validated URL metric.
 	 *
 	 * @param int $viewport_width Viewport width for the URL metric.
-	 * @return ILO_URL_Metric URL metric.
-	 * @throws Exception From ILO_URL_Metric if there is a parse error, but there won't be.
+	 * @return OD_URL_Metric URL metric.
+	 * @throws Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
-	private function get_validated_url_metric( int $viewport_width, array $elements = array() ): ILO_URL_Metric {
+	private function get_validated_url_metric( int $viewport_width, array $elements = array() ): OD_URL_Metric {
 		$data = array(
 			'viewport'  => array(
 				'width'  => $viewport_width,
@@ -1039,7 +1039,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 				$elements
 			),
 		);
-		return new ILO_URL_Metric( $data );
+		return new OD_URL_Metric( $data );
 	}
 
 	/**
@@ -1067,7 +1067,7 @@ class ILO_Optimization_Tests extends WP_UnitTestCase {
 			$node->parentNode->insertBefore( $dom->createTextNode( "\n" ), $node );
 		}
 
-		// Normalize contents of module script output by ilo_get_detection_script().
+		// Normalize contents of module script output by od_get_detection_script().
 		foreach ( $xpath->query( '//script[ contains( text(), "import detect" ) ]' ) as $script ) {
 			$script->textContent = '/* import detect ... */';
 		}

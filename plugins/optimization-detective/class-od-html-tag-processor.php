@@ -1,8 +1,8 @@
 <?php
 /**
- * Image Loading Optimization: ILO_HTML_Tag_Processor class
+ * Optimization Detective: OD_HTML_Tag_Processor class
  *
- * @package image-loading-optimization
+ * @package optimization-detective
  * @since n.e.x.t
  */
 
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  */
-final class ILO_HTML_Tag_Processor {
+final class OD_HTML_Tag_Processor {
 
 	/**
 	 * HTML void tags (i.e. those which are self-closing).
@@ -248,7 +248,7 @@ final class ILO_HTML_Tag_Processor {
 					$this->warn(
 						sprintf(
 							/* translators: 1: Popped tag name, 2: Closing tag name */
-							__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'image-loading-optimization' ),
+							__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'optimization-detective' ),
 							$popped_tag_name,
 							$tag_name
 						)

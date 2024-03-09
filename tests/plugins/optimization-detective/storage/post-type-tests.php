@@ -1,62 +1,62 @@
 <?php
 /**
- * Tests for image-loading-optimization module storage/post-type.php.
+ * Tests for optimization-detective module storage/post-type.php.
  *
- * @packageimage-loading-optimization
+ * @packageoptimization-detective
  *
  * @noinspection PhpUnhandledExceptionInspection
  */
 
-class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
+class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 
 	/**
-	 * Test ilo_register_url_metrics_post_type().
+	 * Test od_register_url_metrics_post_type().
 	 *
-	 * @covers ::ilo_register_url_metrics_post_type
+	 * @covers ::od_register_url_metrics_post_type
 	 */
-	public function test_ilo_register_url_metrics_post_type() {
-		$this->assertSame( 10, has_action( 'init', 'ilo_register_url_metrics_post_type' ) );
-		$post_type_object = get_post_type_object( ILO_URL_METRICS_POST_TYPE );
+	public function test_od_register_url_metrics_post_type() {
+		$this->assertSame( 10, has_action( 'init', 'od_register_url_metrics_post_type' ) );
+		$post_type_object = get_post_type_object( OD_URL_METRICS_POST_TYPE );
 		$this->assertInstanceOf( WP_Post_Type::class, $post_type_object );
 		$this->assertFalse( $post_type_object->public );
 	}
 
 	/**
-	 * Test ilo_get_url_metrics_post() when there is no post.
+	 * Test od_get_url_metrics_post() when there is no post.
 	 *
-	 * @covers ::ilo_get_url_metrics_post
+	 * @covers ::od_get_url_metrics_post
 	 */
-	public function test_ilo_get_url_metrics_post_when_absent() {
-		$slug = ilo_get_url_metrics_slug( array( 'p' => '1' ) );
-		$this->assertNull( ilo_get_url_metrics_post( $slug ) );
+	public function test_od_get_url_metrics_post_when_absent() {
+		$slug = od_get_url_metrics_slug( array( 'p' => '1' ) );
+		$this->assertNull( od_get_url_metrics_post( $slug ) );
 	}
 
 	/**
-	 * Test ilo_get_url_metrics_post() when there is a post.
+	 * Test od_get_url_metrics_post() when there is a post.
 	 *
-	 * @covers ::ilo_get_url_metrics_post
+	 * @covers ::od_get_url_metrics_post
 	 */
-	public function test_ilo_get_url_metrics_post_when_present() {
-		$slug = ilo_get_url_metrics_slug( array( 'p' => '1' ) );
+	public function test_od_get_url_metrics_post_when_present() {
+		$slug = od_get_url_metrics_slug( array( 'p' => '1' ) );
 
 		$post_id = self::factory()->post->create(
 			array(
-				'post_type' => ILO_URL_METRICS_POST_TYPE,
+				'post_type' => OD_URL_METRICS_POST_TYPE,
 				'post_name' => $slug,
 			)
 		);
 
-		$post = ilo_get_url_metrics_post( $slug );
+		$post = od_get_url_metrics_post( $slug );
 		$this->assertInstanceOf( WP_Post::class, $post );
 		$this->assertSame( $post_id, $post->ID );
 	}
 
 	/**
-	 * Data provider for test_ilo_parse_stored_url_metrics.
+	 * Data provider for test_od_parse_stored_url_metrics.
 	 *
 	 * @return array<string, array{post_content: string, expected_value: array}>
 	 */
-	public function data_provider_test_ilo_parse_stored_url_metrics(): array {
+	public function data_provider_test_od_parse_stored_url_metrics(): array {
 		$valid_content = array(
 			array(
 				'viewport'  => array(
@@ -89,40 +89,40 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ilo_parse_stored_url_metrics().
+	 * Test od_parse_stored_url_metrics().
 	 *
-	 * @covers ::ilo_parse_stored_url_metrics
+	 * @covers ::od_parse_stored_url_metrics
 	 *
-	 * @dataProvider data_provider_test_ilo_parse_stored_url_metrics
+	 * @dataProvider data_provider_test_od_parse_stored_url_metrics
 	 */
-	public function test_ilo_parse_stored_url_metrics( string $post_content, array $expected_value ) {
+	public function test_od_parse_stored_url_metrics( string $post_content, array $expected_value ) {
 		$post = self::factory()->post->create_and_get(
 			array(
-				'post_type'    => ILO_URL_METRICS_POST_TYPE,
+				'post_type'    => OD_URL_METRICS_POST_TYPE,
 				'post_content' => $post_content,
 			)
 		);
 
 		$url_metrics = array_map(
-			static function ( ILO_URL_Metric $url_metric ): array {
+			static function ( OD_URL_Metric $url_metric ): array {
 				return $url_metric->jsonSerialize();
 			},
-			ilo_parse_stored_url_metrics( $post )
+			od_parse_stored_url_metrics( $post )
 		);
 
 		$this->assertSame( $expected_value, $url_metrics );
 	}
 
 	/**
-	 * Test ilo_store_url_metric().
+	 * Test od_store_url_metric().
 	 *
-	 * @covers ::ilo_store_url_metric
+	 * @covers ::od_store_url_metric
 	 */
-	public function test_ilo_store_url_metric() {
+	public function test_od_store_url_metric() {
 		$url  = home_url( '/' );
-		$slug = ilo_get_url_metrics_slug( array( 'p' => 1 ) );
+		$slug = od_get_url_metrics_slug( array( 'p' => 1 ) );
 
-		$validated_url_metric = new ILO_URL_Metric(
+		$validated_url_metric = new OD_URL_Metric(
 			array(
 				'viewport'  => array(
 					'width'  => 480,
@@ -140,20 +140,20 @@ class ILO_Storage_Post_Type_Tests extends WP_UnitTestCase {
 			)
 		);
 
-		$post_id = ilo_store_url_metric( $url, $slug, $validated_url_metric );
+		$post_id = od_store_url_metric( $url, $slug, $validated_url_metric );
 		$this->assertIsInt( $post_id );
 
-		$post = ilo_get_url_metrics_post( $slug );
+		$post = od_get_url_metrics_post( $slug );
 		$this->assertInstanceOf( WP_Post::class, $post );
 		$this->assertSame( $post_id, $post->ID );
 
-		$url_metrics = ilo_parse_stored_url_metrics( $post );
+		$url_metrics = od_parse_stored_url_metrics( $post );
 		$this->assertCount( 1, $url_metrics );
 
-		$again_post_id = ilo_store_url_metric( $url, $slug, $validated_url_metric );
+		$again_post_id = od_store_url_metric( $url, $slug, $validated_url_metric );
 		$post          = get_post( $again_post_id );
 		$this->assertSame( $post_id, $again_post_id );
-		$url_metrics = ilo_parse_stored_url_metrics( $post );
+		$url_metrics = od_parse_stored_url_metrics( $post );
 		$this->assertCount( 2, $url_metrics );
 	}
 }

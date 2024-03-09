@@ -1,36 +1,36 @@
 <?php
 /**
- * Tests for image-loading-optimization module storage/rest-api.php.
+ * Tests for optimization-detective module storage/rest-api.php.
  *
- * @packageimage-loading-optimization
+ * @packageoptimization-detective
  */
 
-class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
+class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 
 	/**
 	 * @var string
 	 */
-	const ROUTE = '/' . ILO_REST_API_NAMESPACE . ILO_URL_METRICS_ROUTE;
+	const ROUTE = '/' . OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE;
 
 	/**
-	 * Test ilo_register_endpoint().
+	 * Test od_register_endpoint().
 	 *
-	 * @covers ::ilo_register_endpoint
+	 * @covers ::od_register_endpoint
 	 */
-	public function test_ilo_register_endpoint_hooked() {
-		$this->assertSame( 10, has_action( 'rest_api_init', 'ilo_register_endpoint' ) );
+	public function test_od_register_endpoint_hooked() {
+		$this->assertSame( 10, has_action( 'rest_api_init', 'od_register_endpoint' ) );
 	}
 
 	/**
 	 * Test good params.
 	 *
-	 * @covers ::ilo_register_endpoint
-	 * @covers ::ilo_handle_rest_request
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
 	 */
 	public function test_rest_request_good_params() {
 		$request      = new WP_REST_Request( 'POST', self::ROUTE );
 		$valid_params = $this->get_valid_params();
-		$this->assertCount( 0, get_posts( array( 'post_type' => ILO_URL_METRICS_POST_TYPE ) ) );
+		$this->assertCount( 0, get_posts( array( 'post_type' => OD_URL_METRICS_POST_TYPE ) ) );
 		$request->set_body_params( $valid_params );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 200, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
@@ -38,11 +38,11 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$data = $response->get_data();
 		$this->assertTrue( $data['success'] );
 
-		$this->assertCount( 1, get_posts( array( 'post_type' => ILO_URL_METRICS_POST_TYPE ) ) );
-		$post = ilo_get_url_metrics_post( $valid_params['slug'] );
+		$this->assertCount( 1, get_posts( array( 'post_type' => OD_URL_METRICS_POST_TYPE ) ) );
+		$post = od_get_url_metrics_post( $valid_params['slug'] );
 		$this->assertInstanceOf( WP_Post::class, $post );
 
-		$url_metrics = ilo_parse_stored_url_metrics( $post );
+		$url_metrics = od_parse_stored_url_metrics( $post );
 		$this->assertCount( 1, $url_metrics, 'Expected number of URL metrics stored.' );
 		$this->assertSame( $valid_params['elements'], $url_metrics[0]->get_elements() );
 		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
@@ -76,7 +76,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 					'nonce' => 'not even a hash',
 				),
 				'invalid_nonce'                            => array(
-					'nonce' => ilo_get_url_metrics_storage_nonce( ilo_get_url_metrics_slug( array( 'different' => 'query vars' ) ) ),
+					'nonce' => od_get_url_metrics_storage_nonce( od_get_url_metrics_slug( array( 'different' => 'query vars' ) ) ),
 				),
 				'invalid_viewport_type'                    => array(
 					'viewport' => '640x480',
@@ -127,8 +127,8 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test bad params.
 	 *
-	 * @covers ::ilo_register_endpoint
-	 * @covers ::ilo_handle_rest_request
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
 	 *
 	 * @dataProvider data_provider_invalid_params
 	 */
@@ -139,14 +139,14 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
 
-		$this->assertNull( ilo_get_url_metrics_post( $params['slug'] ) );
+		$this->assertNull( od_get_url_metrics_post( $params['slug'] ) );
 	}
 
 	/**
 	 * Test timestamp ignored.
 	 *
-	 * @covers ::ilo_register_endpoint
-	 * @covers ::ilo_handle_rest_request
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
 	 */
 	public function test_rest_request_timestamp_ignored() {
 		$initial_microtime = microtime( true );
@@ -163,10 +163,10 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 
 		$this->assertSame( 200, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 
-		$post = ilo_get_url_metrics_post( $params['slug'] );
+		$post = od_get_url_metrics_post( $params['slug'] );
 		$this->assertInstanceOf( WP_Post::class, $post );
 
-		$url_metrics = ilo_parse_stored_url_metrics( $post );
+		$url_metrics = od_parse_stored_url_metrics( $post );
 		$this->assertCount( 1, $url_metrics );
 		$url_metric = $url_metrics[0];
 		$this->assertNotEquals( $params['timestamp'], $url_metric->get_timestamp() );
@@ -176,11 +176,11 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test REST API request when metric storage is locked.
 	 *
-	 * @covers ::ilo_register_endpoint
-	 * @covers ::ilo_handle_rest_request
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
 	 */
 	public function test_rest_request_locked() {
-		ILO_Storage_Lock::set_lock();
+		OD_Storage_Lock::set_lock();
 
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params( $this->get_valid_params() );
@@ -193,15 +193,15 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test sending viewport data that isn't needed for any breakpoint.
 	 *
-	 * @covers ::ilo_register_endpoint
-	 * @covers ::ilo_handle_rest_request
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
 	 */
 	public function test_rest_request_breakpoint_not_needed_for_any_breakpoint() {
-		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
+		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
 
 		// First fully populate the sample for all breakpoints.
-		$sample_size     = ilo_get_url_metrics_breakpoint_sample_size();
-		$viewport_widths = array_merge( ilo_get_breakpoint_max_widths(), array( 1000 ) );
+		$sample_size     = od_get_url_metrics_breakpoint_sample_size();
+		$viewport_widths = array_merge( od_get_breakpoint_max_widths(), array( 1000 ) );
 		foreach ( $viewport_widths as $viewport_width ) {
 			$this->populate_url_metrics(
 				$sample_size,
@@ -219,16 +219,16 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test sending viewport data that isn't needed for a specific breakpoint.
 	 *
-	 * @covers ::ilo_register_endpoint
-	 * @covers ::ilo_handle_rest_request
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
 	 */
 	public function test_rest_request_breakpoint_not_needed_for_specific_breakpoint() {
-		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
+		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
 
 		$valid_params = $this->get_valid_params( array( 'viewport' => array( 'width' => 480 ) ) );
 
 		// First fully populate the sample for a given breakpoint.
-		$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
+		$sample_size = od_get_url_metrics_breakpoint_sample_size();
 		$this->populate_url_metrics(
 			$sample_size,
 			$valid_params
@@ -244,17 +244,17 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test fully populating the wider viewport group and then adding one more.
 	 *
-	 * @covers ::ilo_register_endpoint
-	 * @covers ::ilo_handle_rest_request
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
 	 */
 	public function test_rest_request_over_populate_wider_viewport_group() {
-		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
+		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
 
 		// First establish a single breakpoint, so there are two groups of URL metrics
 		// with viewport widths 0-480 and >481.
 		$breakpoint_width = 480;
 		add_filter(
-			'ilo_breakpoint_max_widths',
+			'od_breakpoint_max_widths',
 			static function () use ( $breakpoint_width ): array {
 				return array( $breakpoint_width );
 			}
@@ -263,24 +263,24 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$wider_viewport_params = $this->get_valid_params( array( 'viewport' => array( 'width' => $breakpoint_width + 1 ) ) );
 
 		// Fully populate the wider viewport group, leaving the narrower one empty.
-		$sample_size = ilo_get_url_metrics_breakpoint_sample_size();
+		$sample_size = od_get_url_metrics_breakpoint_sample_size();
 		$this->populate_url_metrics(
 			$sample_size,
 			$wider_viewport_params
 		);
 
 		// Sanity check that the groups were constructed as expected.
-		$group_collection  = new ILO_URL_Metrics_Group_Collection(
-			ilo_parse_stored_url_metrics( ilo_get_url_metrics_post( ilo_get_url_metrics_slug( array() ) ) ),
-			ilo_get_breakpoint_max_widths(),
-			ilo_get_url_metrics_breakpoint_sample_size(),
+		$group_collection  = new OD_URL_Metrics_Group_Collection(
+			od_parse_stored_url_metrics( od_get_url_metrics_post( od_get_url_metrics_slug( array() ) ) ),
+			od_get_breakpoint_max_widths(),
+			od_get_url_metrics_breakpoint_sample_size(),
 			HOUR_IN_SECONDS
 		);
 		$url_metric_groups = iterator_to_array( $group_collection );
 		$this->assertSame(
 			array( 0, $breakpoint_width + 1 ),
 			array_map(
-				static function ( ILO_URL_Metrics_Group $group ) {
+				static function ( OD_URL_Metrics_Group $group ) {
 					return $group->get_minimum_viewport_width();
 				},
 				$url_metric_groups
@@ -300,17 +300,17 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Test fully populating the narrower viewport group and then adding one more.
 	 *
-	 * @covers ::ilo_register_endpoint
-	 * @covers ::ilo_handle_rest_request
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
 	 */
 	public function test_rest_request_over_populate_narrower_viewport_group() {
-		add_filter( 'ilo_url_metric_storage_lock_ttl', '__return_zero' );
+		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
 
 		// First establish a single breakpoint, so there are two groups of URL metrics
 		// with viewport widths 0-480 and >481.
 		$breakpoint_width = 480;
 		add_filter(
-			'ilo_breakpoint_max_widths',
+			'od_breakpoint_max_widths',
 			static function () use ( $breakpoint_width ): array {
 				return array( $breakpoint_width );
 			}
@@ -320,7 +320,7 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 
 		// Fully populate the narrower viewport group, leaving the wider one empty.
 		$this->populate_url_metrics(
-			ilo_get_url_metrics_breakpoint_sample_size(),
+			od_get_url_metrics_breakpoint_sample_size(),
 			$narrower_viewport_params
 		);
 
@@ -354,12 +354,12 @@ class ILO_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 * @return array Params.
 	 */
 	private function get_valid_params( array $extras = array() ): array {
-		$slug = ilo_get_url_metrics_slug( array() );
+		$slug = od_get_url_metrics_slug( array() );
 		$data = array_merge(
 			array(
 				'url'   => home_url( '/' ),
 				'slug'  => $slug,
-				'nonce' => ilo_get_url_metrics_storage_nonce( $slug ),
+				'nonce' => od_get_url_metrics_storage_nonce( $slug ),
 			),
 			$this->get_sample_validated_url_metric()
 		);

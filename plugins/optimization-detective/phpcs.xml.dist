@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<ruleset name="WPP-ImageLoadingOptimization">
-	<description>WordPress Coding Standards for Image Loading Optimization Plugin</description>
+<ruleset name="WPP-OptimizationDetective">
+	<description>WordPress Coding Standards for Optimization Detective Plugin</description>
 
 	<rule ref="../../phpcs.ruleset.xml"/>
 
-	<config name="text_domain" value="image-loading-optimization"/>
+	<config name="text_domain" value="optimization-detective"/>
 
 	<file>.</file>
 </ruleset>

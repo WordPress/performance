@@ -2,7 +2,7 @@
 /**
  * Metrics storage data.
  *
- * @package image-loading-optimization
+ * @package optimization-detective
  * @since n.e.x.t
  */
 
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return int Expiration TTL in seconds.
  */
-function ilo_get_url_metric_freshness_ttl(): int {
+function od_get_url_metric_freshness_ttl(): int {
 	/**
 	 * Filters the freshness age (TTL) for a given URL metric.
 	 *
@@ -31,7 +31,7 @@ function ilo_get_url_metric_freshness_ttl(): int {
 	 *
 	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 day.
 	 */
-	$freshness_ttl = (int) apply_filters( 'ilo_url_metric_freshness_ttl', DAY_IN_SECONDS );
+	$freshness_ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', DAY_IN_SECONDS );
 
 	if ( $freshness_ttl <= 0 ) {
 		_doing_it_wrong(
@@ -39,7 +39,7 @@ function ilo_get_url_metric_freshness_ttl(): int {
 			esc_html(
 				sprintf(
 					/* translators: %s is the TTL freshness */
-					__( 'Freshness TTL must be at least zero, but saw "%s".', 'image-loading-optimization' ),
+					__( 'Freshness TTL must be at least zero, but saw "%s".', 'optimization-detective' ),
 					$freshness_ttl
 				)
 			),
@@ -63,7 +63,7 @@ function ilo_get_url_metric_freshness_ttl(): int {
  *
  * @return array Normalized query vars.
  */
-function ilo_get_normalized_query_vars(): array {
+function od_get_normalized_query_vars(): array {
 	global $wp;
 
 	// Note that the order of this array is naturally normalized since it is
@@ -91,12 +91,12 @@ function ilo_get_normalized_query_vars(): array {
  * @since n.e.x.t
  * @access private
  *
- * @see ilo_get_normalized_query_vars()
+ * @see od_get_normalized_query_vars()
  *
  * @param array $query_vars Normalized query vars.
  * @return string Slug.
  */
-function ilo_get_url_metrics_slug( array $query_vars ): string {
+function od_get_url_metrics_slug( array $query_vars ): string {
 	return md5( wp_json_encode( $query_vars ) );
 }
 
@@ -109,12 +109,12 @@ function ilo_get_url_metrics_slug( array $query_vars ): string {
  * @access private
  *
  * @see wp_create_nonce()
- * @see ilo_verify_url_metrics_storage_nonce()
+ * @see od_verify_url_metrics_storage_nonce()
  *
  * @param string $slug URL metrics slug.
  * @return string Nonce.
  */
-function ilo_get_url_metrics_storage_nonce( string $slug ): string {
+function od_get_url_metrics_storage_nonce( string $slug ): string {
 	return wp_create_nonce( "store_url_metrics:$slug" );
 }
 
@@ -125,13 +125,13 @@ function ilo_get_url_metrics_storage_nonce( string $slug ): string {
  * @access private
  *
  * @see wp_verify_nonce()
- * @see ilo_get_url_metrics_storage_nonce()
+ * @see od_get_url_metrics_storage_nonce()
  *
  * @param string $nonce URL metrics storage nonce.
  * @param string $slug  URL metrics slug.
  * @return bool Whether the nonce is valid.
  */
-function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): bool {
+function od_verify_url_metrics_storage_nonce( string $nonce, string $slug ): bool {
 	return (bool) wp_verify_nonce( $nonce, "store_url_metrics:$slug" );
 }
 
@@ -161,7 +161,7 @@ function ilo_verify_url_metrics_storage_nonce( string $nonce, string $slug ): bo
  *
  * @return int[] Breakpoint max widths, sorted in ascending order.
  */
-function ilo_get_breakpoint_max_widths(): array {
+function od_get_breakpoint_max_widths(): array {
 	$function_name = __FUNCTION__;
 
 	$breakpoint_max_widths = array_map(
@@ -174,7 +174,7 @@ function ilo_get_breakpoint_max_widths(): array {
 					esc_html(
 						sprintf(
 							/* translators: %s is the actual breakpoint max width */
-							__( 'Breakpoint must be less than PHP_INT_MAX, but saw "%s".', 'image-loading-optimization' ),
+							__( 'Breakpoint must be less than PHP_INT_MAX, but saw "%s".', 'optimization-detective' ),
 							$original_breakpoint
 						)
 					),
@@ -187,7 +187,7 @@ function ilo_get_breakpoint_max_widths(): array {
 					esc_html(
 						sprintf(
 							/* translators: %s is the actual breakpoint max width */
-							__( 'Breakpoint must be greater zero, but saw "%s".', 'image-loading-optimization' ),
+							__( 'Breakpoint must be greater zero, but saw "%s".', 'optimization-detective' ),
 							$original_breakpoint
 						)
 					),
@@ -205,7 +205,7 @@ function ilo_get_breakpoint_max_widths(): array {
 		 *
 		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
 		 */
-		(array) apply_filters( 'ilo_breakpoint_max_widths', array( 480, 600, 782 ) )
+		(array) apply_filters( 'od_breakpoint_max_widths', array( 480, 600, 782 ) )
 	);
 
 	$breakpoint_max_widths = array_unique( $breakpoint_max_widths, SORT_NUMERIC );
@@ -225,7 +225,7 @@ function ilo_get_breakpoint_max_widths(): array {
  *
  * @return int Sample size.
  */
-function ilo_get_url_metrics_breakpoint_sample_size(): int {
+function od_get_url_metrics_breakpoint_sample_size(): int {
 	/**
 	 * Filters the sample size for a breakpoint's URL metrics on a given URL.
 	 *
@@ -235,7 +235,7 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
 	 *
 	 * @param int $sample_size Sample size. Defaults to 3.
 	 */
-	$sample_size = (int) apply_filters( 'ilo_url_metrics_breakpoint_sample_size', 3 );
+	$sample_size = (int) apply_filters( 'od_url_metrics_breakpoint_sample_size', 3 );
 
 	if ( $sample_size <= 0 ) {
 		_doing_it_wrong(
@@ -243,7 +243,7 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
 			esc_html(
 				sprintf(
 					/* translators: %s is the sample size */
-					__( 'Sample size must greater than zero, but saw "%s".', 'image-loading-optimization' ),
+					__( 'Sample size must greater than zero, but saw "%s".', 'optimization-detective' ),
 					$sample_size
 				)
 			),
@@ -267,10 +267,10 @@ function ilo_get_url_metrics_breakpoint_sample_size(): int {
  * @since n.e.x.t
  * @access private
  *
- * @param ILO_URL_Metrics_Group_Collection $group_collection URL metrics group collection.
+ * @param OD_URL_Metrics_Group_Collection $group_collection URL metrics group collection.
  * @return array LCP elements keyed by its minimum viewport width. If there is no supported LCP element at a breakpoint, then `false` is used.
  */
-function ilo_get_lcp_elements_by_minimum_viewport_widths( ILO_URL_Metrics_Group_Collection $group_collection ): array {
+function od_get_lcp_elements_by_minimum_viewport_widths( OD_URL_Metrics_Group_Collection $group_collection ): array {
 	$lcp_element_by_viewport_minimum_width = array();
 	foreach ( $group_collection as $group ) {
 

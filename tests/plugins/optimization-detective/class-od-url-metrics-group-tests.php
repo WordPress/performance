@@ -1,20 +1,20 @@
 <?php
 /**
- * Tests for ILO_URL_Metrics_Group.
+ * Tests for OD_URL_Metrics_Group.
  *
- * @packageimage-loading-optimization
+ * @packageoptimization-detective
  *
  * @noinspection PhpUnhandledExceptionInspection
  *
- * @coversDefaultClass ILO_URL_Metrics_Group
+ * @coversDefaultClass OD_URL_Metrics_Group
  */
 
-class ILO_URL_Metrics_Group_Tests extends WP_UnitTestCase {
+class OD_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.
 	 *
-	 * @throws ILO_Data_Validation_Exception If bad arguments are provided to ILO_URL_Metric.
+	 * @throws OD_Data_Validation_Exception If bad arguments are provided to OD_URL_Metric.
 	 * @return array
 	 */
 	public function data_provider_test_construction(): array {
@@ -69,7 +69,7 @@ class ILO_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 			),
 			'good_one_url_metric'              => array(
 				'url_metrics'            => array(
-					new ILO_URL_Metric(
+					new OD_URL_Metric(
 						array(
 							'viewport'  => array(
 								'width'  => 1,
@@ -102,7 +102,7 @@ class ILO_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 		if ( $exception ) {
 			$this->expectException( $exception );
 		}
-		$group = new ILO_URL_Metrics_Group( $url_metrics, $minimum_viewport_width, $maximum_viewport_width, $sample_size, $freshness_ttl );
+		$group = new OD_URL_Metrics_Group( $url_metrics, $minimum_viewport_width, $maximum_viewport_width, $sample_size, $freshness_ttl );
 
 		$this->assertCount( count( $url_metrics ), $group );
 		$this->assertSame( $minimum_viewport_width, $group->get_minimum_viewport_width() );
@@ -152,7 +152,7 @@ class ILO_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 	 * @dataProvider data_provider_test_is_viewport_width_in_range
 	 */
 	public function test_is_viewport_width_in_range( int $minimum_viewport_width, int $maximum_viewport_width, array $viewport_widths_expected ) {
-		$group = new ILO_URL_Metrics_Group( array(), $minimum_viewport_width, $maximum_viewport_width, 3, HOUR_IN_SECONDS );
+		$group = new OD_URL_Metrics_Group( array(), $minimum_viewport_width, $maximum_viewport_width, 3, HOUR_IN_SECONDS );
 		foreach ( $viewport_widths_expected as $viewport_width => $expected ) {
 			$this->assertSame( $expected, $group->is_viewport_width_in_range( $viewport_width ), "Failed for viewport width of $viewport_width" );
 		}
@@ -186,11 +186,11 @@ class ILO_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 		if ( $exception ) {
 			$this->expectException( $exception );
 		}
-		$group = new ILO_URL_Metrics_Group( array(), 100, 200, 1, HOUR_IN_SECONDS );
+		$group = new OD_URL_Metrics_Group( array(), 100, 200, 1, HOUR_IN_SECONDS );
 
 		$this->assertFalse( $group->is_complete() );
 		$group->add_url_metric(
-			new ILO_URL_Metric(
+			new OD_URL_Metric(
 				array(
 					'viewport'  => array(
 						'width'  => $viewport_width,

@@ -1,12 +1,12 @@
 <?php
 /**
- * Tests for image-loading-optimization class ILO_URL_Metric.
+ * Tests for optimization-detective class OD_URL_Metric.
  *
- * @packageimage-loading-optimization
+ * @packageoptimization-detective
  *
- * @coversDefaultClass ILO_URL_Metric
+ * @coversDefaultClass OD_URL_Metric
  */
-class ILO_URL_Metric_Tests extends WP_UnitTestCase {
+class OD_URL_Metric_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.
@@ -46,7 +46,7 @@ class ILO_URL_Metric_Tests extends WP_UnitTestCase {
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
 				),
-				'error' => 'viewport is a required property of ILO_URL_Metric.',
+				'error' => 'viewport is a required property of OD_URL_Metric.',
 			),
 			'missing_viewport_width' => array(
 				'data'  => array(
@@ -54,7 +54,7 @@ class ILO_URL_Metric_Tests extends WP_UnitTestCase {
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
 				),
-				'error' => 'width is a required property of ILO_URL_Metric[viewport].',
+				'error' => 'width is a required property of OD_URL_Metric[viewport].',
 			),
 			'bad_viewport'           => array(
 				'data'  => array(
@@ -65,21 +65,21 @@ class ILO_URL_Metric_Tests extends WP_UnitTestCase {
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
 				),
-				'error' => 'ILO_URL_Metric[viewport][height] is not of type integer.',
+				'error' => 'OD_URL_Metric[viewport][height] is not of type integer.',
 			),
 			'missing_timestamp'      => array(
 				'data'  => array(
 					'viewport' => $viewport,
 					'elements' => array(),
 				),
-				'error' => 'timestamp is a required property of ILO_URL_Metric.',
+				'error' => 'timestamp is a required property of OD_URL_Metric.',
 			),
 			'missing_elements'       => array(
 				'data'  => array(
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 				),
-				'error' => 'elements is a required property of ILO_URL_Metric.',
+				'error' => 'elements is a required property of OD_URL_Metric.',
 			),
 			'bad_elements'           => array(
 				'data'  => array(
@@ -91,7 +91,7 @@ class ILO_URL_Metric_Tests extends WP_UnitTestCase {
 						),
 					),
 				),
-				'error' => 'isLCP is a required property of ILO_URL_Metric[elements][0].',
+				'error' => 'isLCP is a required property of OD_URL_Metric[elements][0].',
 			),
 		);
 	}
@@ -109,10 +109,10 @@ class ILO_URL_Metric_Tests extends WP_UnitTestCase {
 	 */
 	public function test_constructor( array $data, string $error = '' ) {
 		if ( $error ) {
-			$this->expectException( ILO_Data_Validation_Exception::class );
+			$this->expectException( OD_Data_Validation_Exception::class );
 			$this->expectExceptionMessage( $error );
 		}
-		$url_metric = new ILO_URL_Metric( $data );
+		$url_metric = new OD_URL_Metric( $data );
 		$this->assertSame( $data['viewport'], $url_metric->get_viewport() );
 		$this->assertSame( $data['viewport']['width'], $url_metric->get_viewport_width() );
 		$this->assertSame( $data['timestamp'], $url_metric->get_timestamp() );
@@ -126,7 +126,7 @@ class ILO_URL_Metric_Tests extends WP_UnitTestCase {
 	 * @covers ::get_json_schema
 	 */
 	public function test_get_json_schema() {
-		$schema = ILO_URL_Metric::get_json_schema();
+		$schema = OD_URL_Metric::get_json_schema();
 		$this->assertArrayHasKey( 'properties', $schema );
 	}
 }

@@ -1,13 +1,13 @@
 <?php
 /**
- * Tests for image-loading-optimization module storage/data.php.
+ * Tests for optimization-detective module storage/data.php.
  *
- * @packageimage-loading-optimization
+ * @packageoptimization-detective
  *
  * @noinspection PhpUnhandledExceptionInspection
  */
 
-class ILO_Storage_Data_Tests extends WP_UnitTestCase {
+class OD_Storage_Data_Tests extends WP_UnitTestCase {
 
 	/**
 	 * @var string
@@ -26,38 +26,38 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ilo_get_url_metric_freshness_ttl().
+	 * Test od_get_url_metric_freshness_ttl().
 	 *
-	 * @covers ::ilo_get_url_metric_freshness_ttl
+	 * @covers ::od_get_url_metric_freshness_ttl
 	 */
-	public function test_ilo_get_url_metric_freshness_ttl() {
-		$this->assertSame( DAY_IN_SECONDS, ilo_get_url_metric_freshness_ttl() );
+	public function test_od_get_url_metric_freshness_ttl() {
+		$this->assertSame( DAY_IN_SECONDS, od_get_url_metric_freshness_ttl() );
 
 		add_filter(
-			'ilo_url_metric_freshness_ttl',
+			'od_url_metric_freshness_ttl',
 			static function (): int {
 				return HOUR_IN_SECONDS;
 			}
 		);
 
-		$this->assertSame( HOUR_IN_SECONDS, ilo_get_url_metric_freshness_ttl() );
+		$this->assertSame( HOUR_IN_SECONDS, od_get_url_metric_freshness_ttl() );
 	}
 
 	/**
-	 * Test bad ilo_get_url_metric_freshness_ttl().
+	 * Test bad od_get_url_metric_freshness_ttl().
 	 *
-	 * @expectedIncorrectUsage ilo_get_url_metric_freshness_ttl
-	 * @covers ::ilo_get_url_metric_freshness_ttl
+	 * @expectedIncorrectUsage od_get_url_metric_freshness_ttl
+	 * @covers ::od_get_url_metric_freshness_ttl
 	 */
-	public function test_bad_ilo_get_url_metric_freshness_ttl() {
+	public function test_bad_od_get_url_metric_freshness_ttl() {
 		add_filter(
-			'ilo_url_metric_freshness_ttl',
+			'od_url_metric_freshness_ttl',
 			static function (): int {
 				return -1;
 			}
 		);
 
-		$this->assertSame( 0, ilo_get_url_metric_freshness_ttl() );
+		$this->assertSame( 0, od_get_url_metric_freshness_ttl() );
 	}
 
 	/**
@@ -65,7 +65,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array
 	 */
-	public function data_provider_test_ilo_get_normalized_query_vars(): array {
+	public function data_provider_test_od_get_normalized_query_vars(): array {
 		return array(
 			'homepage'     => array(
 				'set_up' => function (): array {
@@ -120,25 +120,25 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ilo_get_normalized_query_vars().
+	 * Test od_get_normalized_query_vars().
 	 *
-	 * @covers ::ilo_get_normalized_query_vars
+	 * @covers ::od_get_normalized_query_vars
 	 *
-	 * @dataProvider data_provider_test_ilo_get_normalized_query_vars
+	 * @dataProvider data_provider_test_od_get_normalized_query_vars
 	 */
-	public function test_ilo_get_normalized_query_vars( Closure $set_up ) {
+	public function test_od_get_normalized_query_vars( Closure $set_up ) {
 		$expected = $set_up();
-		$this->assertSame( $expected, ilo_get_normalized_query_vars() );
+		$this->assertSame( $expected, od_get_normalized_query_vars() );
 	}
 
 	/**
-	 * Test ilo_get_url_metrics_slug().
+	 * Test od_get_url_metrics_slug().
 	 *
-	 * @covers ::ilo_get_url_metrics_slug
+	 * @covers ::od_get_url_metrics_slug
 	 */
-	public function test_ilo_get_url_metrics_slug() {
-		$first  = ilo_get_url_metrics_slug( array() );
-		$second = ilo_get_url_metrics_slug( array( 'p' => 1 ) );
+	public function test_od_get_url_metrics_slug() {
+		$first  = od_get_url_metrics_slug( array() );
+		$second = od_get_url_metrics_slug( array( 'p' => 1 ) );
 		$this->assertNotEquals( $second, $first );
 		foreach ( array( $first, $second ) as $slug ) {
 			$this->assertMatchesRegularExpression( '/^[0-9a-f]{32}$/', $slug );
@@ -146,12 +146,12 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ilo_get_url_metrics_storage_nonce().
+	 * Test od_get_url_metrics_storage_nonce().
 	 *
-	 * @covers ::ilo_get_url_metrics_storage_nonce
-	 * @covers ::ilo_verify_url_metrics_storage_nonce
+	 * @covers ::od_get_url_metrics_storage_nonce
+	 * @covers ::od_verify_url_metrics_storage_nonce
 	 */
-	public function test_ilo_get_url_metrics_storage_nonce_and_ilo_verify_url_metrics_storage_nonce() {
+	public function test_od_get_url_metrics_storage_nonce_and_od_verify_url_metrics_storage_nonce() {
 		$user_id = self::factory()->user->create();
 
 		$nonce_life_actions = array();
@@ -166,23 +166,23 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 		);
 
 		// Create first nonce for unauthenticated user.
-		$slug   = ilo_get_url_metrics_slug( array() );
-		$nonce1 = ilo_get_url_metrics_storage_nonce( $slug );
+		$slug   = od_get_url_metrics_slug( array() );
+		$nonce1 = od_get_url_metrics_storage_nonce( $slug );
 		$this->assertMatchesRegularExpression( '/^[0-9a-f]{10}$/', $nonce1 );
-		$this->assertTrue( ilo_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
+		$this->assertTrue( od_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
 		$this->assertCount( 2, $nonce_life_actions );
 
 		// Create second nonce for unauthenticated user.
-		$nonce2 = ilo_get_url_metrics_storage_nonce( $slug );
+		$nonce2 = od_get_url_metrics_storage_nonce( $slug );
 		$this->assertSame( $nonce1, $nonce2 );
 		$this->assertCount( 3, $nonce_life_actions );
 
 		// Create third nonce, this time for authenticated user.
 		wp_set_current_user( $user_id );
-		$nonce3 = ilo_get_url_metrics_storage_nonce( $slug );
+		$nonce3 = od_get_url_metrics_storage_nonce( $slug );
 		$this->assertNotEquals( $nonce3, $nonce2 );
-		$this->assertFalse( ilo_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
-		$this->assertTrue( ilo_verify_url_metrics_storage_nonce( $nonce3, $slug ) );
+		$this->assertFalse( od_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
+		$this->assertTrue( od_verify_url_metrics_storage_nonce( $nonce3, $slug ) );
 		$this->assertCount( 6, $nonce_life_actions );
 
 		foreach ( $nonce_life_actions as $nonce_life_action ) {
@@ -191,20 +191,20 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ilo_get_breakpoint_max_widths().
+	 * Test od_get_breakpoint_max_widths().
 	 *
-	 * @covers ::ilo_get_breakpoint_max_widths
+	 * @covers ::od_get_breakpoint_max_widths
 	 */
-	public function test_ilo_get_breakpoint_max_widths() {
+	public function test_od_get_breakpoint_max_widths() {
 		$this->assertSame(
 			array( 480, 600, 782 ),
-			ilo_get_breakpoint_max_widths()
+			od_get_breakpoint_max_widths()
 		);
 
 		$filtered_breakpoints = array( 2000, 500, '1000', 3000 );
 
 		add_filter(
-			'ilo_breakpoint_max_widths',
+			'od_breakpoint_max_widths',
 			static function () use ( $filtered_breakpoints ) {
 				return $filtered_breakpoints;
 			}
@@ -212,7 +212,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 
 		$filtered_breakpoints = array_map( 'intval', $filtered_breakpoints );
 		sort( $filtered_breakpoints );
-		$this->assertSame( $filtered_breakpoints, ilo_get_breakpoint_max_widths() );
+		$this->assertSame( $filtered_breakpoints, od_get_breakpoint_max_widths() );
 	}
 
 	/**
@@ -220,7 +220,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array
 	 */
-	public function data_provider_test_bad_ilo_get_breakpoint_max_widths(): array {
+	public function data_provider_test_bad_od_get_breakpoint_max_widths(): array {
 		return array(
 			'negative' => array(
 				'breakpoints' => array( -1 ),
@@ -242,63 +242,63 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test bad ilo_get_breakpoint_max_widths().
+	 * Test bad od_get_breakpoint_max_widths().
 	 *
-	 * @covers ::ilo_get_breakpoint_max_widths
+	 * @covers ::od_get_breakpoint_max_widths
 	 *
-	 * @expectedIncorrectUsage ilo_get_breakpoint_max_widths
-	 * @dataProvider data_provider_test_bad_ilo_get_breakpoint_max_widths
+	 * @expectedIncorrectUsage od_get_breakpoint_max_widths
+	 * @dataProvider data_provider_test_bad_od_get_breakpoint_max_widths
 	 */
-	public function test_bad_ilo_get_breakpoint_max_widths( array $breakpoints, array $expected ) {
+	public function test_bad_od_get_breakpoint_max_widths( array $breakpoints, array $expected ) {
 		add_filter(
-			'ilo_breakpoint_max_widths',
+			'od_breakpoint_max_widths',
 			static function () use ( $breakpoints ) {
 				return $breakpoints;
 			}
 		);
 
-		$this->assertSame( $expected, ilo_get_breakpoint_max_widths() );
+		$this->assertSame( $expected, od_get_breakpoint_max_widths() );
 	}
 
 	/**
-	 * Test ilo_get_url_metrics_breakpoint_sample_size().
+	 * Test od_get_url_metrics_breakpoint_sample_size().
 	 *
-	 * @covers ::ilo_get_url_metrics_breakpoint_sample_size
+	 * @covers ::od_get_url_metrics_breakpoint_sample_size
 	 */
-	public function test_ilo_get_url_metrics_breakpoint_sample_size() {
-		$this->assertSame( 3, ilo_get_url_metrics_breakpoint_sample_size() );
+	public function test_od_get_url_metrics_breakpoint_sample_size() {
+		$this->assertSame( 3, od_get_url_metrics_breakpoint_sample_size() );
 
 		add_filter(
-			'ilo_url_metrics_breakpoint_sample_size',
+			'od_url_metrics_breakpoint_sample_size',
 			static function () {
 				return '1';
 			}
 		);
 
-		$this->assertSame( 1, ilo_get_url_metrics_breakpoint_sample_size() );
+		$this->assertSame( 1, od_get_url_metrics_breakpoint_sample_size() );
 	}
 
 	/**
-	 * Test bad ilo_get_url_metrics_breakpoint_sample_size().
+	 * Test bad od_get_url_metrics_breakpoint_sample_size().
 	 *
-	 * @expectedIncorrectUsage ilo_get_url_metrics_breakpoint_sample_size
-	 * @covers ::ilo_get_url_metrics_breakpoint_sample_size
+	 * @expectedIncorrectUsage od_get_url_metrics_breakpoint_sample_size
+	 * @covers ::od_get_url_metrics_breakpoint_sample_size
 	 */
-	public function test_bad_ilo_get_url_metrics_breakpoint_sample_size() {
+	public function test_bad_od_get_url_metrics_breakpoint_sample_size() {
 		add_filter(
-			'ilo_url_metrics_breakpoint_sample_size',
+			'od_url_metrics_breakpoint_sample_size',
 			static function (): int {
 				return 0;
 			}
 		);
 
-		$this->assertSame( 1, ilo_get_url_metrics_breakpoint_sample_size() );
+		$this->assertSame( 1, od_get_url_metrics_breakpoint_sample_size() );
 	}
 
 	/**
 	 * Data provider.
 	 *
-	 * @throws ILO_Data_Validation_Exception When failing to instantiate a URL metric.
+	 * @throws OD_Data_Validation_Exception When failing to instantiate a URL metric.
 	 * @return array[]
 	 */
 	public function data_provider_test_get_lcp_elements_by_minimum_viewport_widths(): array {
@@ -371,13 +371,13 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test get_lcp_elements_by_minimum_viewport_widths().
 	 *
-	 * @covers ::ilo_get_lcp_elements_by_minimum_viewport_widths
+	 * @covers ::od_get_lcp_elements_by_minimum_viewport_widths
 	 * @dataProvider data_provider_test_get_lcp_elements_by_minimum_viewport_widths
 	 */
 	public function test_get_lcp_elements_by_minimum_viewport_widths( array $breakpoints, array $url_metrics, array $expected_lcp_element_xpaths ) {
-		$group_collection = new ILO_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, 10, HOUR_IN_SECONDS );
+		$group_collection = new OD_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, 10, HOUR_IN_SECONDS );
 
-		$lcp_elements_by_minimum_viewport_widths = ilo_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
+		$lcp_elements_by_minimum_viewport_widths = od_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
 
 		$lcp_element_xpaths_by_minimum_viewport_widths = array();
 		foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
@@ -403,10 +403,10 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 	 * @param string[] $breadcrumbs    Breadcrumb tags.
 	 * @param bool     $is_lcp         Whether LCP.
 	 *
-	 * @return ILO_URL_Metric Validated URL metric.
-	 * @throws ILO_Data_Validation_Exception From ILO_URL_Metric if there is a parse error, but there won't be.
+	 * @return OD_URL_Metric Validated URL metric.
+	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
-	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): ILO_URL_Metric {
+	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): OD_URL_Metric {
 		$data = array(
 			'viewport'  => array(
 				'width'  => $viewport_width,
@@ -422,7 +422,7 @@ class ILO_Storage_Data_Tests extends WP_UnitTestCase {
 				),
 			),
 		);
-		return new ILO_URL_Metric( $data );
+		return new OD_URL_Metric( $data );
 	}
 
 	/**

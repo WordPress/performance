@@ -1,18 +1,18 @@
 <?php
 /**
- * Tests for image-loading-optimization module detection.php.
+ * Tests for optimization-detective module detection.php.
  *
- * @packageimage-loading-optimization
+ * @packageoptimization-detective
  */
 
-class ILO_Detection_Tests extends WP_UnitTestCase {
+class OD_Detection_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.
 	 *
 	 * @return array<string, array{set_up: Closure, expected_exports: array<string, mixed>}>
 	 */
-	public function data_provider_ilo_get_detection_script(): array {
+	public function data_provider_od_get_detection_script(): array {
 		return array(
 			'unfiltered' => array(
 				'set_up'           => static function () {},
@@ -24,13 +24,13 @@ class ILO_Detection_Tests extends WP_UnitTestCase {
 			'filtered'   => array(
 				'set_up'           => static function () {
 					add_filter(
-						'ilo_detection_time_window',
+						'od_detection_time_window',
 						static function (): int {
 							return 2500;
 						}
 					);
 					add_filter(
-						'ilo_url_metric_storage_lock_ttl',
+						'od_url_metric_storage_lock_ttl',
 						static function (): int {
 							return HOUR_IN_SECONDS;
 						}
@@ -47,21 +47,21 @@ class ILO_Detection_Tests extends WP_UnitTestCase {
 	/**
 	 * Make sure the expected script is printed.
 	 *
-	 * @covers ::ilo_get_detection_script
+	 * @covers ::od_get_detection_script
 	 *
-	 * @dataProvider data_provider_ilo_get_detection_script
+	 * @dataProvider data_provider_od_get_detection_script
 	 *
 	 * @param Closure                                                                       $set_up           Set up callback.
 	 * @param array<string, array{set_up: Closure, expected_exports: array<string, mixed>}> $expected_exports Expected exports.
 	 */
-	public function test_ilo_get_detection_script_returns_script( Closure $set_up, array $expected_exports ) {
+	public function test_od_get_detection_script_returns_script( Closure $set_up, array $expected_exports ) {
 		$set_up();
-		$slug = ilo_get_url_metrics_slug( array( 'p' => '1' ) );
+		$slug = od_get_url_metrics_slug( array( 'p' => '1' ) );
 
 		$breakpoints      = array( 480, 600, 782 );
-		$group_collection = new ILO_URL_Metrics_Group_Collection( array(), $breakpoints, 3, HOUR_IN_SECONDS );
+		$group_collection = new OD_URL_Metrics_Group_Collection( array(), $breakpoints, 3, HOUR_IN_SECONDS );
 
-		$script = ilo_get_detection_script( $slug, $group_collection );
+		$script = od_get_detection_script( $slug, $group_collection );
 
 		$this->assertStringContainsString( '<script type="module">', $script );
 		$this->assertStringContainsString( 'import detect from', $script );
