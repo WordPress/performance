@@ -18,7 +18,7 @@ if ( ! has_filter( 'user_has_cap', 'wp_maybe_grant_site_health_caps' ) ) {
 $site_health_tests = array(
 	'audit-autoloaded-options',
 	'audit-enqueued-assets',
-	'audit-webp-support'
+	'webp-support'
 );
 
 foreach ( $site_health_tests as $test ) {
