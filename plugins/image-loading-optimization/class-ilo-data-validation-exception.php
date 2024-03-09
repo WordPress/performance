@@ -6,6 +6,11 @@
  * @since n.e.x.t
  */
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Exception thrown when failing to validate URL metrics data.
  *

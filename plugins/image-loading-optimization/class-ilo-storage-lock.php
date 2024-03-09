@@ -6,6 +6,11 @@
  * @since n.e.x.t
  */
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Class containing logic for locking storage for new URL metrics.
  *

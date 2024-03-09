@@ -15,6 +15,11 @@
  * @package image-loading-optimization
  */
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 // Define the constant.
 if ( defined( 'IMAGE_LOADING_OPTIMIZATION_VERSION' ) ) {
 	return;

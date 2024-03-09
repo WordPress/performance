@@ -6,6 +6,11 @@
  * @since n.e.x.t
  */
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Processor leveraging WP_HTML_Tag_Processor which gathers breadcrumbs for computing XPaths while iterating the open_tags() generator.
  *

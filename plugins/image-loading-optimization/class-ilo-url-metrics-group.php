@@ -6,6 +6,11 @@
  * @since n.e.x.t
  */
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * URL metrics grouped by viewport according to breakpoints.
  *

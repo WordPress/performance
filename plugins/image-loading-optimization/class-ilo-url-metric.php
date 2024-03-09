@@ -6,6 +6,11 @@
  * @since n.e.x.t
  */
 
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Representation of the measurements taken from a single client's visit to a specific URL.
  *
