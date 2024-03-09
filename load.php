@@ -30,10 +30,10 @@ if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
 	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', false );
 }
 
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing-metric.php';
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing.php';
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/load.php';
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/defaults.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/class-perflab-server-timing-metric.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/class-perflab-server-timing.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/load.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/defaults.php';
 
 /**
  * Registers the performance modules setting.
@@ -122,22 +122,7 @@ function perflab_get_module_settings() {
 	// Even though a default value is registered for this setting, the default must be explicitly
 	// passed here, to support scenarios where this function is called before the 'init' action,
 	// for example when loading the active modules.
-	$module_settings = (array) get_option( PERFLAB_MODULES_SETTING, perflab_get_modules_setting_default() );
-
-	$legacy_module_slugs = array(
-		'site-health/audit-autoloaded-options' => 'database/audit-autoloaded-options',
-		'site-health/audit-enqueued-assets'    => 'js-and-css/audit-enqueued-assets',
-		'site-health/webp-support'             => 'images/webp-support',
-	);
-
-	foreach ( $legacy_module_slugs as $legacy_slug => $current_slug ) {
-		if ( isset( $module_settings[ $legacy_slug ] ) ) {
-			$module_settings[ $current_slug ] = $module_settings[ $legacy_slug ];
-			unset( $module_settings[ $legacy_slug ] );
-		}
-	}
-
-	return $module_settings;
+	return (array) get_option( PERFLAB_MODULES_SETTING, perflab_get_modules_setting_default() );
 }
 
 /**
