@@ -69,9 +69,9 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * @throws InvalidArgumentException When an invalid argument is supplied.
 	 *
 	 * @param OD_URL_Metric[] $url_metrics   URL metrics.
-	 * @param int[]            $breakpoints   Breakpoints in max widths.
-	 * @param int              $sample_size   Sample size for the maximum number of viewports in a group between breakpoints.
-	 * @param int              $freshness_ttl Freshness age (TTL) for a given URL metric.
+	 * @param int[]           $breakpoints   Breakpoints in max widths.
+	 * @param int             $sample_size   Sample size for the maximum number of viewports in a group between breakpoints.
+	 * @param int             $freshness_ttl Freshness age (TTL) for a given URL metric.
 	 */
 	public function __construct( array $url_metrics, array $breakpoints, int $sample_size, int $freshness_ttl ) {
 		// Set breakpoints.

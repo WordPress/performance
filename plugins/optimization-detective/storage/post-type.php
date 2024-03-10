@@ -146,8 +146,8 @@ function od_parse_stored_url_metrics( WP_Post $post ): array {
  * @since n.e.x.t
  * @access private
  *
- * @param string         $url            URL for the URL metrics. This is used purely as metadata.
- * @param string         $slug           URL metrics slug (computed from query vars).
+ * @param string        $url            URL for the URL metrics. This is used purely as metadata.
+ * @param string        $slug           URL metrics slug (computed from query vars).
  * @param OD_URL_Metric $new_url_metric New URL metric.
  * @return int|WP_Error Post ID or WP_Error otherwise.
  */

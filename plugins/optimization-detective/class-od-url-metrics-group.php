@@ -66,10 +66,10 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	 * @throws InvalidArgumentException If arguments are valid.
 	 *
 	 * @param OD_URL_Metric[] $url_metrics            URL metrics to add to the group.
-	 * @param int              $minimum_viewport_width Minimum possible viewport width for the group. Must be zero or greater.
-	 * @param int              $maximum_viewport_width Maximum possible viewport width for the group. Must be greater than zero and the minimum viewport width.
-	 * @param int              $sample_size            Sample size for the maximum number of viewports in a group between breakpoints.
-	 * @param int              $freshness_ttl          Freshness age (TTL) for a given URL metric.
+	 * @param int             $minimum_viewport_width Minimum possible viewport width for the group. Must be zero or greater.
+	 * @param int             $maximum_viewport_width Maximum possible viewport width for the group. Must be greater than zero and the minimum viewport width.
+	 * @param int             $sample_size            Sample size for the maximum number of viewports in a group between breakpoints.
+	 * @param int             $freshness_ttl          Freshness age (TTL) for a given URL metric.
 	 */
 	public function __construct( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl ) {
 		if ( $minimum_viewport_width < 0 ) {

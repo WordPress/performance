@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  *
- * @param string                           $slug             URL metrics slug.
+ * @param string                          $slug             URL metrics slug.
  * @param OD_URL_Metrics_Group_Collection $group_collection URL metrics group collection.
  */
 function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection $group_collection ): string {

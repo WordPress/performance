@@ -67,7 +67,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		// Add filter that adds an exclusion only if the mode is 'prerender'.
 		add_filter(
 			'plsr_speculation_rules_href_exclude_paths',
-			function ( $exclude_paths, $mode ) {
+			static function ( $exclude_paths, $mode ) {
 				if ( 'prerender' === $mode ) {
 					$exclude_paths[] = '/products/*';
 				}
