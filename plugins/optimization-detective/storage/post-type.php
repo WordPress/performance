@@ -190,7 +190,7 @@ function od_store_url_metric( string $slug, OD_URL_Metric $new_url_metric ) {
 			},
 			$group_collection->get_flattened_url_metrics()
 		),
-		JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES // TODO: No need for pretty-printing.
+		JSON_UNESCAPED_SLASHES // No need for escaped slashes since not printed to frontend.
 	);
 
 	$has_kses = false !== has_filter( 'content_save_pre', 'wp_filter_post_kses' );
