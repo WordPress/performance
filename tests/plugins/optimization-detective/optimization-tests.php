@@ -1021,6 +1021,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 */
 	private function get_validated_url_metric( int $viewport_width, array $elements = array() ): OD_URL_Metric {
 		$data = array(
+			'url'       => home_url( '/' ),
 			'viewport'  => array(
 				'width'  => $viewport_width,
 				'height' => 800,

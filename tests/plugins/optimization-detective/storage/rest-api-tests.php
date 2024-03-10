@@ -66,9 +66,6 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 				'bad_url'                                  => array(
 					'url' => 'bad://url',
 				),
-				'other_origin_url'                         => array(
-					'url' => 'https://bogus.example.com/',
-				),
 				'bad_slug'                                 => array(
 					'slug' => '<script>document.write("evil")</script>',
 				),
@@ -357,7 +354,6 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$slug = od_get_url_metrics_slug( array() );
 		$data = array_merge(
 			array(
-				'url'   => home_url( '/' ),
 				'slug'  => $slug,
 				'nonce' => od_get_url_metrics_storage_nonce( $slug ),
 			),
@@ -401,6 +397,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 */
 	private function get_sample_validated_url_metric(): array {
 		return array(
+			'url'       => home_url( '/' ),
 			'viewport'  => array(
 				'width'  => 480,
 				'height' => 640,

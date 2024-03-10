@@ -24,6 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                               boundingClientRect: RectData,
  *                           }
  * @phpstan-type Data        array{
+ *                               url: string,
  *                               timestamp: int,
  *                               viewport: RectData,
  *                               elements: ElementData[]
@@ -83,6 +84,13 @@ final class OD_URL_Metric implements JsonSerializable {
 			'title'                => 'od-url-metric',
 			'type'                 => 'object',
 			'properties'           => array(
+				'url'       => array(
+					'type'        => 'string',
+					'description' => __( 'The URL for which the metric was obtained.', 'optimization-detective' ),
+					'required'    => true,
+					'format'      => 'uri',
+					'pattern'     => '^https?://',
+				),
 				'viewport'  => array(
 					'description' => __( 'Viewport dimensions', 'optimization-detective' ),
 					'type'        => 'object',

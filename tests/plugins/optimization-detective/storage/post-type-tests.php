@@ -59,6 +59,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	public function data_provider_test_od_parse_stored_url_metrics(): array {
 		$valid_content = array(
 			array(
+				'url'       => home_url( '/' ),
 				'viewport'  => array(
 					'width'  => 640,
 					'height' => 480,
@@ -124,6 +125,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 
 		$validated_url_metric = new OD_URL_Metric(
 			array(
+				'url'       => home_url( '/' ),
 				'viewport'  => array(
 					'width'  => 480,
 					'height' => 640,

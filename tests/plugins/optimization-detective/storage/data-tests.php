@@ -408,6 +408,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 */
 	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): OD_URL_Metric {
 		$data = array(
+			'url'       => home_url( '/' ),
 			'viewport'  => array(
 				'width'  => $viewport_width,
 				'height' => 640,

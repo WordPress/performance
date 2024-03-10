@@ -71,6 +71,7 @@ class OD_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 				'url_metrics'            => array(
 					new OD_URL_Metric(
 						array(
+							'url'       => home_url( '/' ),
 							'viewport'  => array(
 								'width'  => 1,
 								'height' => 2,
@@ -192,6 +193,7 @@ class OD_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 		$group->add_url_metric(
 			new OD_URL_Metric(
 				array(
+					'url'       => home_url( '/' ),
 					'viewport'  => array(
 						'width'  => $viewport_width,
 						'height' => 1000,

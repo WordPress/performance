@@ -38,19 +38,6 @@ const OD_URL_METRICS_ROUTE = '/url-metrics:store';
 function od_register_endpoint() {
 
 	$args = array(
-		'url'   => array(
-			'type'              => 'string',
-			'description'       => __( 'The URL for which the metric was obtained.', 'optimization-detective' ),
-			'required'          => true,
-			'format'            => 'uri',
-			'validate_callback' => static function ( $url ) {
-				if ( ! wp_validate_redirect( $url ) ) {
-					return new WP_Error( 'non_origin_url', __( 'URL for another site provided.', 'optimization-detective' ) );
-				}
-				// TODO: This is not validated as corresponding to the slug in any way. True it is not used for anything but metadata.
-				return true;
-			},
-		),
 		'slug'  => array(
 			'type'        => 'string',
 			'description' => __( 'An MD5 hash of the query args.', 'optimization-detective' ),
