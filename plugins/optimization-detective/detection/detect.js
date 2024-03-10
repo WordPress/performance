@@ -5,7 +5,7 @@ const doc = win.document;
 
 const consoleLogPrefix = '[Optimization Detective]';
 
-const storageLockTimeSessionKey = 'iloStorageLockTime';
+const storageLockTimeSessionKey = 'odStorageLockTime';
 
 /**
  * Checks whether storage is locked.
@@ -237,7 +237,7 @@ export default async function detect( {
 			 * @param {HTMLElement} element
 			 * @return {[HTMLElement, string]} Tuple of element and its XPath.
 			 */
-			( element ) => [ element, element.dataset.iloXpath ]
+			( element ) => [ element, element.dataset.odXpath ]
 		)
 	);
 
