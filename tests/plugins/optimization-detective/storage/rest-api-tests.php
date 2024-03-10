@@ -73,7 +73,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 					'nonce' => 'not even a hash',
 				),
 				'invalid_nonce'                            => array(
-					'nonce' => od_get_url_metrics_storage_nonce( od_get_url_metrics_slug( array( 'different' => 'query vars' ) ) ),
+					'nonce' => od_get_url_metrics_storage_nonce( od_get_url_metrics_slug( array( 'different' => 'query vars' ) ), home_url( '/' ) ),
 				),
 				'invalid_viewport_type'                    => array(
 					'viewport' => '640x480',
@@ -352,12 +352,13 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 */
 	private function get_valid_params( array $extras = array() ): array {
 		$slug = od_get_url_metrics_slug( array() );
+		$data = $this->get_sample_validated_url_metric();
 		$data = array_merge(
 			array(
 				'slug'  => $slug,
-				'nonce' => od_get_url_metrics_storage_nonce( $slug ),
+				'nonce' => od_get_url_metrics_storage_nonce( $slug, $data['url'] ),
 			),
-			$this->get_sample_validated_url_metric()
+			$data
 		);
 		unset( $data['timestamp'] ); // Since provided by default args.
 		if ( $extras ) {

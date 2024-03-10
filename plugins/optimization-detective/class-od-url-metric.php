@@ -154,6 +154,15 @@ final class OD_URL_Metric implements JsonSerializable {
 	}
 
 	/**
+	 * Gets URL.
+	 *
+	 * @return string URL.
+	 */
+	public function get_url(): string {
+		return $this->data['url'];
+	}
+
+	/**
 	 * Gets viewport data.
 	 *
 	 * @return RectData Viewport data.

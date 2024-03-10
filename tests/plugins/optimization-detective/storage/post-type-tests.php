@@ -120,7 +120,6 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 * @covers ::od_store_url_metric
 	 */
 	public function test_od_store_url_metric() {
-		$url  = home_url( '/' );
 		$slug = od_get_url_metrics_slug( array( 'p' => 1 ) );
 
 		$validated_url_metric = new OD_URL_Metric(
@@ -142,7 +141,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 			)
 		);
 
-		$post_id = od_store_url_metric( $url, $slug, $validated_url_metric );
+		$post_id = od_store_url_metric( $slug, $validated_url_metric );
 		$this->assertIsInt( $post_id );
 
 		$post = od_get_url_metrics_post( $slug );
@@ -152,7 +151,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 		$url_metrics = od_parse_stored_url_metrics( $post );
 		$this->assertCount( 1, $url_metrics );
 
-		$again_post_id = od_store_url_metric( $url, $slug, $validated_url_metric );
+		$again_post_id = od_store_url_metric( $slug, $validated_url_metric );
 		$post          = get_post( $again_post_id );
 		$this->assertSame( $post_id, $again_post_id );
 		$url_metrics = od_parse_stored_url_metrics( $post );

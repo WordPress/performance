@@ -132,6 +132,147 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider.
+	 *
+	 * @return array
+	 */
+	public function data_provider_test_get_current_url(): array {
+		$assertions = array(
+			'path'                        => function () {
+				$_SERVER['REQUEST_URI'] = wp_slash( '/foo/' );
+				$this->assertEquals(
+					home_url( '/foo/' ),
+					od_get_current_url()
+				);
+			},
+
+			'query'                       => function () {
+				$_SERVER['REQUEST_URI'] = wp_slash( '/bar/?baz=1' );
+				$this->assertEquals(
+					home_url( '/bar/?baz=1' ),
+					od_get_current_url()
+				);
+			},
+
+			'idn_domain'                  => function () {
+				$this->set_home_url_with_filter( 'https://⚡️.example.com' );
+				$this->go_to( '/?s=lightning' );
+				$this->assertEquals( 'https://⚡️.example.com/?s=lightning', od_get_current_url() );
+			},
+
+			'punycode_domain'             => function () {
+				$this->set_home_url_with_filter( 'https://xn--57h.example.com' );
+				$this->go_to( '/?s=thunder' );
+				$this->assertEquals( 'https://xn--57h.example.com/?s=thunder', od_get_current_url() );
+			},
+
+			'ip_host'                     => function () {
+				$this->set_home_url_with_filter( 'http://127.0.0.1:1234' );
+				$this->go_to( '/' );
+				$this->assertEquals( 'http://127.0.0.1:1234/', od_get_current_url() );
+			},
+
+			'permalink'                   => function () {
+				global $wp_rewrite;
+				update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
+				$wp_rewrite->use_trailing_slashes = true;
+				$wp_rewrite->init();
+				$wp_rewrite->flush_rules();
+
+				$permalink = get_permalink( self::factory()->post->create() );
+
+				$this->go_to( $permalink );
+				$this->assertEquals( $permalink, od_get_current_url() );
+			},
+
+			'unset_request_uri'           => function () {
+				unset( $_SERVER['REQUEST_URI'] );
+				$this->assertEquals( home_url( '/' ), od_get_current_url() );
+			},
+
+			'empty_request_uri'           => function () {
+				$_SERVER['REQUEST_URI'] = '';
+				$this->assertEquals( home_url( '/' ), od_get_current_url() );
+			},
+
+			'no_slash_prefix_request_uri' => function () {
+				$_SERVER['REQUEST_URI'] = 'foo/';
+				$this->assertEquals( home_url( '/foo/' ), od_get_current_url() );
+			},
+
+			'reconstructed_home_url'      => function () {
+				$_SERVER['HTTPS']       = 'on';
+				$_SERVER['REQUEST_URI'] = '/about/';
+				$_SERVER['HTTP_HOST']   = 'foo.example.org';
+				$this->set_home_url_with_filter( '/' );
+				$this->assertEquals(
+					'https://foo.example.org/about/',
+					od_get_current_url()
+				);
+			},
+
+			'home_url_with_trimmings'     => function () {
+				$this->set_home_url_with_filter( 'https://example.museum:8080' );
+				$_SERVER['REQUEST_URI'] = '/about/';
+				$this->assertEquals(
+					'https://example.museum:8080/about/',
+					od_get_current_url()
+				);
+			},
+
+			'complete_parse_fail'         => function () {
+				$_SERVER['HTTP_HOST'] = 'env.example.org';
+				unset( $_SERVER['REQUEST_URI'] );
+				$this->set_home_url_with_filter( ':' );
+				$this->assertEquals(
+					( is_ssl() ? 'https:' : 'http:' ) . '//env.example.org/',
+					od_get_current_url()
+				);
+			},
+
+			'default_to_localhost'        => function () {
+				unset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] );
+				$this->set_home_url_with_filter( ':' );
+				$this->assertEquals(
+					( is_ssl() ? 'https:' : 'http:' ) . '//localhost/',
+					od_get_current_url()
+				);
+			},
+		);
+		return array_map(
+			static function ( $assertion ) {
+				return array( $assertion );
+			},
+			$assertions
+		);
+	}
+
+	/**
+	 * Set home_url with filter.
+	 *
+	 * @param string $home_url Home URL.
+	 */
+	private function set_home_url_with_filter( string $home_url ) {
+		add_filter(
+			'home_url',
+			static function () use ( $home_url ): string {
+				return $home_url;
+			}
+		);
+	}
+
+	/**
+	 * Test od_get_current_url().
+	 *
+	 * @covers ::od_get_current_url
+	 *
+	 * @dataProvider data_provider_test_get_current_url
+	 */
+	public function test_od_get_current_url( Closure $assert ) {
+		call_user_func( $assert );
+	}
+
+	/**
 	 * Test od_get_url_metrics_slug().
 	 *
 	 * @covers ::od_get_url_metrics_slug
@@ -166,27 +307,28 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 		);
 
 		// Create first nonce for unauthenticated user.
+		$url    = home_url( '/' );
 		$slug   = od_get_url_metrics_slug( array() );
-		$nonce1 = od_get_url_metrics_storage_nonce( $slug );
+		$nonce1 = od_get_url_metrics_storage_nonce( $slug, $url );
 		$this->assertMatchesRegularExpression( '/^[0-9a-f]{10}$/', $nonce1 );
-		$this->assertTrue( od_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
+		$this->assertTrue( od_verify_url_metrics_storage_nonce( $nonce1, $slug, $url ) );
 		$this->assertCount( 2, $nonce_life_actions );
 
 		// Create second nonce for unauthenticated user.
-		$nonce2 = od_get_url_metrics_storage_nonce( $slug );
+		$nonce2 = od_get_url_metrics_storage_nonce( $slug, $url );
 		$this->assertSame( $nonce1, $nonce2 );
 		$this->assertCount( 3, $nonce_life_actions );
 
 		// Create third nonce, this time for authenticated user.
 		wp_set_current_user( $user_id );
-		$nonce3 = od_get_url_metrics_storage_nonce( $slug );
+		$nonce3 = od_get_url_metrics_storage_nonce( $slug, $url );
 		$this->assertNotEquals( $nonce3, $nonce2 );
-		$this->assertFalse( od_verify_url_metrics_storage_nonce( $nonce1, $slug ) );
-		$this->assertTrue( od_verify_url_metrics_storage_nonce( $nonce3, $slug ) );
+		$this->assertFalse( od_verify_url_metrics_storage_nonce( $nonce1, $slug, $url ) );
+		$this->assertTrue( od_verify_url_metrics_storage_nonce( $nonce3, $slug, $url ) );
 		$this->assertCount( 6, $nonce_life_actions );
 
 		foreach ( $nonce_life_actions as $nonce_life_action ) {
-			$this->assertSame( "store_url_metrics:{$slug}", $nonce_life_action );
+			$this->assertSame( "store_url_metrics:{$slug}:{$url}", $nonce_life_action );
 		}
 	}
 
