@@ -228,8 +228,7 @@ export default async function detect( {
 		log( 'Proceeding with detection' );
 	}
 
-	const breadcrumbedElements =
-		doc.body.querySelectorAll( '[data-od-xpath]' );
+	const breadcrumbedElements = doc.body.querySelectorAll( '[data-od-xpath]' );
 
 	/** @type {Map<HTMLElement, string>} */
 	const breadcrumbedElementsMap = new Map(
