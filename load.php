@@ -29,6 +29,7 @@ define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
 if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
 	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', false );
 }
+define( 'PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION', 2 );
 
 require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing-metric.php';
 require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing.php';
@@ -382,11 +383,6 @@ function perflab_maybe_set_object_cache_dropin() {
 		return;
 	}
 
-	// Bail if already placed.
-	if ( PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
-		return;
-	}
-
 	/**
 	 * Filters whether the Perflab server timing drop-in should be set.
 	 *
@@ -395,6 +391,11 @@ function perflab_maybe_set_object_cache_dropin() {
 	 * @param bool $disabled Whether to disable the server timing drop-in. Default false.
 	 */
 	if ( apply_filters( 'perflab_disable_object_cache_dropin', false ) ) {
+		return;
+	}
+
+	// Bail if already placed in the latest version or newer.
+	if ( PERFLAB_OBJECT_CACHE_DROPIN_VERSION && PERFLAB_OBJECT_CACHE_DROPIN_VERSION >= PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION ) {
 		return;
 	}
 
@@ -410,7 +411,10 @@ function perflab_maybe_set_object_cache_dropin() {
 		$dropin_path = WP_CONTENT_DIR . '/object-cache.php';
 
 		/**
-		 * If there is an actual object-cache.php file, do not replace it.
+		 * If there is an actual object-cache.php file, it is most likely from
+		 * a third party, or it may be an older version of the Performance Lab
+		 * object-cache.php. If it's from a third party, do not replace it.
+		 *
 		 * Previous versions of the Performance Lab plugin were renaming the
 		 * original object-cache.php file and then loading both. However, due
 		 * to other plugins eagerly checking file headers, this caused too many
@@ -419,9 +423,27 @@ function perflab_maybe_set_object_cache_dropin() {
 		 * safest solution.
 		 */
 		if ( $wp_filesystem->exists( $dropin_path ) ) {
-			// Set timeout of 1 day before retrying again (only in case the file already exists).
-			set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
-			return;
+			// If this constant evaluates to `false`, the existing file is for sure from a third party.
+			if ( ! PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
+				// Set timeout of 1 day before retrying again (only in case the file already exists).
+				set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
+				return;
+			}
+
+			// Otherwise, verify that it's actually the Performance Lab drop-in.
+			$test_content = "<?php\n/**\n * Plugin Name: Performance Lab Server Timing Object Cache Drop-In\n";
+			if ( ! str_starts_with( $wp_filesystem->get_contents( $dropin_path ), $test_content ) ) {
+				// Set timeout of 1 day before retrying again (only in case the file already exists).
+				set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
+				return;
+			}
+
+			/*
+			 * If this logic is reached, the existing file is an older version
+			 * of the Performance Lab drop-in, so it can be safely deleted, and
+			 * then be replaced below.
+			 */
+			$wp_filesystem->delete( $dropin_path );
 		}
 
 		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php', $dropin_path );

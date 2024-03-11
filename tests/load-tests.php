@@ -296,6 +296,25 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( $dummy_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
 	}
 
+	public function test_perflab_maybe_set_object_cache_dropin_with_older_version() {
+		global $wp_filesystem;
+
+		$this->set_up_mock_filesystem();
+
+		$latest_file_content = file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php' );
+		$older_file_content  = preg_replace( '/define\( \'PERFLAB_OBJECT_CACHE_DROPIN_VERSION\', (\d+) \)\;/', "define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', 1 );", $latest_file_content );
+		$wp_filesystem->put_contents( WP_CONTENT_DIR . '/object-cache.php', $older_file_content );
+
+		// Ensure older object-cache.php drop-in is present.
+		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertSame( $older_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
+
+		// Run function to place drop-in and ensure it overrides the existing drop-in with the latest version.
+		perflab_maybe_set_object_cache_dropin();
+		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertSame( $latest_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
+	}
+
 	public function test_perflab_object_cache_dropin_may_be_disabled_via_filter() {
 		global $wp_filesystem;
 
