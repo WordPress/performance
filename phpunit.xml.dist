@@ -7,9 +7,25 @@
 	convertWarningsToExceptions="true"
 	>
 	<testsuites>
-		<testsuite name="default">
+		<testsuite name="performance-lab">
 			<directory suffix=".php">./tests</directory>
-    		<exclude>./tests/utils</exclude>
+			<exclude>./tests/utils</exclude>
+			<exclude>./tests/plugins</exclude>
+		</testsuite>
+		<testsuite name="auto-sizes">
+			<directory suffix=".php">./tests/plugins/auto-sizes</directory>
+		</testsuite>
+		<testsuite name="dominant-color-images">
+			<directory suffix=".php">./tests/plugins/dominant-color-images</directory>
+		</testsuite>
+		<testsuite name="image-loading-optimization">
+			<directory suffix=".php">./tests/plugins/image-loading-optimization</directory>
+		</testsuite>
+		<testsuite name="speculation-rules">
+			<directory suffix=".php">./tests/plugins/speculation-rules</directory>
+		</testsuite>
+		<testsuite name="webp-uploads">
+			<directory suffix=".php">./tests/plugins/webp-uploads</directory>
 		</testsuite>
 	</testsuites>
 	<groups>

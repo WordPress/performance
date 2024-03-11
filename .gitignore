@@ -33,7 +33,7 @@ build-cs/composer.lock
 
 node_modules/
 vendor/
-modules/images/image-loading-optimization/detection/web-vitals*
+plugins/image-loading-optimization/detection/web-vitals*
 
 ############
 ## OSes
@@ -43,6 +43,13 @@ modules/images/image-loading-optimization/detection/web-vitals*
 [Dd]esktop.ini
 *.DS_store
 .DS_store?
+
+############
+## Config overrides for CS tools
+############
+phpcs.xml
+phpunit.xml
+phpstan.neon
 
 ############
 ## Misc

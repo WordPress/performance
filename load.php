@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
  * Requires at least: 6.3
  * Requires PHP: 7.0
- * Version: 2.8.0
+ * Version: 2.9.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'PERFLAB_VERSION', '2.8.0' );
+define( 'PERFLAB_VERSION', '2.9.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -128,7 +128,6 @@ function perflab_get_module_settings() {
 		'site-health/audit-autoloaded-options' => 'database/audit-autoloaded-options',
 		'site-health/audit-enqueued-assets'    => 'js-and-css/audit-enqueued-assets',
 		'site-health/webp-support'             => 'images/webp-support',
-		'images/dominant-color'                => 'images/dominant-color-images',
 	);
 
 	foreach ( $legacy_module_slugs as $legacy_slug => $current_slug ) {
@@ -207,7 +206,7 @@ function perflab_is_valid_module( $module ) {
  * This attribute is then used in {@see perflab_render_generator()}.
  *
  * @since 1.1.0
- * @since n.e.x.t The generator tag now includes the active standalone plugin slugs.
+ * @since 2.9.0 The generator tag now includes the active standalone plugin slugs.
  */
 function perflab_get_generator_content() {
 	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
@@ -312,7 +311,7 @@ function perflab_get_standalone_plugins_constants() {
 /**
  * Gets the standalone plugin constants used for each available standalone plugin, or module with a standalone plugin.
  *
- * @since n.e.x.t
+ * @since 2.9.0
  *
  * @param string $source Optional. Either 'plugins' or 'modules'. Default 'plugins'.
  * @return array<string, string> Map of plugin slug / module path and the version constant used.
@@ -323,10 +322,7 @@ function perflab_get_standalone_plugin_version_constants( $source = 'plugins' ) 
 		 * This list includes all modules which are also available as standalone plugins,
 		 * as `$module_dir => $version_constant` pairs.
 		 */
-		return array(
-			'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
-			'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
-		);
+		return array();
 	}
 
 	/*
@@ -334,11 +330,12 @@ function perflab_get_standalone_plugin_version_constants( $source = 'plugins' ) 
 	 * as `$plugin_slug => $version_constant` pairs.
 	 */
 	return array(
-		'webp-uploads'            => 'WEBP_UPLOADS_VERSION',
-		'dominant-color-images'   => 'DOMINANT_COLOR_IMAGES_VERSION',
-		'performant-translations' => 'PERFORMANT_TRANSLATIONS_VERSION',
-		'auto-sizes'              => 'IMAGE_AUTO_SIZES_VERSION',
-		'speculation-rules'       => 'SPECULATION_RULES_VERSION',
+		'webp-uploads'               => 'WEBP_UPLOADS_VERSION',
+		'dominant-color-images'      => 'DOMINANT_COLOR_IMAGES_VERSION',
+		'image-loading-optimization' => 'IMAGE_LOADING_OPTIMIZATION_VERSION',
+		'performant-translations'    => 'PERFORMANT_TRANSLATIONS_VERSION',
+		'auto-sizes'                 => 'IMAGE_AUTO_SIZES_VERSION',
+		'speculation-rules'          => 'SPECULATION_RULES_VERSION',
 	);
 }
 
