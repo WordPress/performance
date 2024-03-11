@@ -151,45 +151,6 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertStringContainsString( $expected, $output );
 	}
 
-	/**
-	 * @dataProvider data_perflab_can_load_module
-	 */
-	public function test_perflab_is_valid_module( $dummy_module, $expected_status ) {
-		$this->assertSame( $expected_status, perflab_is_valid_module( $dummy_module ) );
-	}
-
-	public function data_perflab_is_valid_module() {
-		return array(
-			array( '', false ),
-			array( '../tests/testdata/demo-modules/something/non-existing-module', false ),
-			array( '../tests/testdata/demo-modules/js-and-css/demo-module-1', false ),
-			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
-			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
-			array( '../tests/testdata/demo-modules/check-error/demo-module-4', false ),
-		);
-	}
-
-	/**
-	 * @dataProvider data_perflab_can_load_module
-	 */
-	public function test_perflab_can_load_module( $dummy_module, $expected_status ) {
-		$this->assertSame( $expected_status, perflab_can_load_module( $dummy_module ) );
-	}
-
-	public function data_perflab_can_load_module() {
-		return array(
-			array( '../tests/testdata/demo-modules/js-and-css/demo-module-1', false ),
-			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
-			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
-		);
-	}
-
-	public function test_perflab_can_load_module_with_not_loaded_module() {
-		$can_load_module = perflab_can_load_module( '../tests/testdata/demo-modules/check-error/demo-module-4' );
-		$this->assertInstanceOf( 'WP_Error', $can_load_module );
-		$this->assertSame( 'cannot_load_module', $can_load_module->get_error_code() );
-	}
-
 	public function test_perflab_activate_module() {
 		perflab_activate_module( __DIR__ . '/testdata/demo-modules/something/demo-module-2' );
 		$this->assertSame( 'activated', get_option( 'test_demo_module_activation_status' ) );
@@ -198,19 +159,6 @@ class Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_deactivate_module() {
 		perflab_deactivate_module( __DIR__ . '/testdata/demo-modules/something/demo-module-2' );
 		$this->assertSame( 'deactivated', get_option( 'test_demo_module_activation_status' ) );
-	}
-
-	private function get_expected_default_option() {
-		// This code is essentially copied over from the perflab_register_modules_setting() function.
-		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
-		return array_reduce(
-			$default_enabled_modules,
-			static function ( $module_settings, $module_dir ) {
-				$module_settings[ $module_dir ] = array( 'enabled' => true );
-				return $module_settings;
-			},
-			array()
-		);
 	}
 
 	public function test_perflab_maybe_set_object_cache_dropin_no_conflict() {
