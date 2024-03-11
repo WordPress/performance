@@ -305,6 +305,14 @@ class Load_Tests extends WP_UnitTestCase {
 		$older_file_content  = preg_replace( '/define\( \'PERFLAB_OBJECT_CACHE_DROPIN_VERSION\', (\d+) \)\;/', "define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', 1 );", $latest_file_content );
 		$wp_filesystem->put_contents( WP_CONTENT_DIR . '/object-cache.php', $older_file_content );
 
+		// Simulate PL constant is set to the value from the older file.
+		add_filter(
+			'perflab_object_cache_dropin_version',
+			static function () {
+				return 1;
+			}
+		);
+
 		// Ensure older object-cache.php drop-in is present.
 		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
 		$this->assertSame( $older_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
@@ -313,6 +321,35 @@ class Load_Tests extends WP_UnitTestCase {
 		perflab_maybe_set_object_cache_dropin();
 		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
 		$this->assertSame( $latest_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
+	}
+
+	public function test_perflab_maybe_set_object_cache_dropin_with_latest_version() {
+		global $wp_filesystem;
+
+		$this->set_up_mock_filesystem();
+
+		$latest_file_content = file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php' );
+		$wp_filesystem->put_contents( WP_CONTENT_DIR . '/object-cache.php', $latest_file_content );
+
+		// Simulate PL constant is set to the value from the current file.
+		preg_match( '/define\( \'PERFLAB_OBJECT_CACHE_DROPIN_VERSION\', (\d+) \)\;/', $latest_file_content, $matches );
+		$latest_version = (int) $matches[1];
+		add_filter(
+			'perflab_object_cache_dropin_version',
+			static function () use ( $latest_version ) {
+				return $latest_version;
+			}
+		);
+
+		// Ensure latest object-cache.php drop-in is present.
+		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertSame( $latest_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
+
+		// Run function to place drop-in and ensure it doesn't attempt to replace the file.
+		perflab_maybe_set_object_cache_dropin();
+		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertSame( $latest_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertFalse( get_transient( 'perflab_set_object_cache_dropin' ) );
 	}
 
 	public function test_perflab_object_cache_dropin_may_be_disabled_via_filter() {

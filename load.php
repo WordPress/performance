@@ -394,8 +394,20 @@ function perflab_maybe_set_object_cache_dropin() {
 		return;
 	}
 
+	/**
+	 * Filters the value of the `object-cache.php` drop-in constant.
+	 *
+	 * This filter should not be used outside of tests.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param int|bool $current_dropin_version The drop-in version as defined by the
+	 *                                         `PERFLAB_OBJECT_CACHE_DROPIN_VERSION` constant.
+	 */
+	$current_dropin_version = apply_filters( 'perflab_object_cache_dropin_version', PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
+
 	// Bail if already placed in the latest version or newer.
-	if ( PERFLAB_OBJECT_CACHE_DROPIN_VERSION && PERFLAB_OBJECT_CACHE_DROPIN_VERSION >= PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION ) {
+	if ( $current_dropin_version && $current_dropin_version >= PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION ) {
 		return;
 	}
 
@@ -424,7 +436,7 @@ function perflab_maybe_set_object_cache_dropin() {
 		 */
 		if ( $wp_filesystem->exists( $dropin_path ) ) {
 			// If this constant evaluates to `false`, the existing file is for sure from a third party.
-			if ( ! PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
+			if ( ! $current_dropin_version ) {
 				// Set timeout of 1 day before retrying again (only in case the file already exists).
 				set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
 				return;
