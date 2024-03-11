@@ -16,10 +16,6 @@ on:
       - '**/package.json'
       - 'package-lock.json'
   pull_request:
-    branches:
-      - trunk
-      - 'release/**'
-      - 'feature/**'
     # Only run if JS/JSON/Lint/NVM files changed.
     paths:
       - '.github/workflows/js-lint.yml'
