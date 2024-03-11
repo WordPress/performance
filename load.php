@@ -30,13 +30,13 @@ if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
 	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', false );
 }
 
-// Load server-timing package.
+// Load server-timing API.
 require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/class-perflab-server-timing-metric.php';
 require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/class-perflab-server-timing.php';
 require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/load.php';
 require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/defaults.php';
 
-// Load site health tests.
+// Load site health checks.
 require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/site-health/load.php';
 
 /**
