@@ -17,6 +17,10 @@ on:
       - 'composer.json'
       - 'composer.lock'
   pull_request:
+    branches:
+      - trunk
+      - 'release/**'
+      - 'feature/**'
     # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-test-standalone-plugins.yml'
