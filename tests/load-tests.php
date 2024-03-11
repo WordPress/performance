@@ -173,7 +173,7 @@ class Load_Tests extends WP_UnitTestCase {
 		// Run function to place drop-in and ensure it exists afterwards.
 		perflab_maybe_set_object_cache_dropin();
 		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
-		$this->assertSame( file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php' ), $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertSame( file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/object-cache.copy.php' ), $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
 	}
 
 	public function test_perflab_maybe_set_object_cache_dropin_no_conflict_but_failing() {

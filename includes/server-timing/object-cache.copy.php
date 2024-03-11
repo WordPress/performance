@@ -58,17 +58,17 @@ if ( ! function_exists( 'perflab_load_server_timing_api_from_dropin' ) ) {
 
 		$plugins_dir = defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR : WP_CONTENT_DIR . '/plugins';
 		$plugin_dir  = $plugins_dir . '/performance-lab/';
-		if ( ! file_exists( $plugin_dir . 'server-timing/load.php' ) ) {
+		if ( ! file_exists( $plugin_dir . 'includes/server-timing/load.php' ) ) {
 			$plugin_dir = $plugins_dir . '/performance/';
-			if ( ! file_exists( $plugin_dir . 'server-timing/load.php' ) ) {
+			if ( ! file_exists( $plugin_dir . 'includes/server-timing/load.php' ) ) {
 				return;
 			}
 		}
 
-		require_once $plugin_dir . 'server-timing/class-perflab-server-timing-metric.php';
-		require_once $plugin_dir . 'server-timing/class-perflab-server-timing.php';
-		require_once $plugin_dir . 'server-timing/load.php';
-		require_once $plugin_dir . 'server-timing/defaults.php';
+		require_once $plugin_dir . 'includes/server-timing/class-perflab-server-timing-metric.php';
+		require_once $plugin_dir . 'includes/server-timing/class-perflab-server-timing.php';
+		require_once $plugin_dir . 'includes/server-timing/load.php';
+		require_once $plugin_dir . 'includes/server-timing/defaults.php';
 	}
 }
 perflab_load_server_timing_api_from_dropin();
