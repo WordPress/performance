@@ -101,8 +101,8 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'filesize', $result );
 		$this->assertArrayHasKey( 'file', $result );
-		$this->assertStringEndsWith( '300x300-jpeg.webp', $result['file'] );
-		$this->assertFileExists( "{$directory}{$name}-300x300-jpeg.webp" );
+		$this->assertStringEndsWith( '300x300.webp', $result['file'] );
+		$this->assertFileExists( "{$directory}{$name}-300x300.webp" );
 	}
 
 	/**
@@ -574,8 +574,8 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$this->assertIsArray( $jpeg_image_result );
 		$this->assertIsArray( $jpg_image_result );
-		$this->assertStringEndsWith( '300x300-jpeg.webp', $jpeg_image_result['file'] );
-		$this->assertStringEndsWith( '300x300-jpg.webp', $jpg_image_result['file'] );
+		$this->assertStringEndsWith( '300x300.webp', $jpeg_image_result['file'] );
+		$this->assertStringEndsWith( '-1-300x300.webp', $jpg_image_result['file'] );
 		$this->assertNotSame( $jpeg_image_result['file'], $jpg_image_result['file'] );
 	}
 
