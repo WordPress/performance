@@ -3,7 +3,7 @@
  * Optimization Detective: OD_HTML_Tag_Processor class
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 // Exit if accessed directly.
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Eventually this class should be made largely obsolete once `WP_HTML_Processor` is fully implemented to support all HTML tags.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  */
 final class OD_HTML_Tag_Processor {
@@ -169,7 +169,7 @@ final class OD_HTML_Tag_Processor {
 	 * A generator is used so that when iterating at a specific tag, additional information about the tag at that point
 	 * can be queried from the class. Similarly, mutations may be performed when iterating at an open tag.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 *
 	 * @return Generator<string> Tag name of current open tag.
 	 */
@@ -280,7 +280,7 @@ final class OD_HTML_Tag_Processor {
 	 *
 	 * A breadcrumb consists of a tag name and its sibling index.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 *
 	 * @return Generator<array{string, int}> Breadcrumb.
 	 */
@@ -293,7 +293,7 @@ final class OD_HTML_Tag_Processor {
 	/**
 	 * Determines whether currently inside a foreign element (MATH or SVG).
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 *
 	 * @return bool In foreign element.
 	 */
@@ -312,7 +312,7 @@ final class OD_HTML_Tag_Processor {
 	 * It would be nicer if this were like `/html[1]/body[2]` but in XPath the position() here refers to the
 	 * index of the preceding node set. So it has to rather be written `/*[1][self::html]/*[2][self::body]`.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 *
 	 * @return string XPath.
 	 */
@@ -330,7 +330,7 @@ final class OD_HTML_Tag_Processor {
 	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 * @see WP_HTML_Tag_Processor::get_attribute()
 	 *
 	 * @param string $name Name of attribute whose value is requested.
@@ -346,7 +346,7 @@ final class OD_HTML_Tag_Processor {
 	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 * @see WP_HTML_Tag_Processor::set_attribute()
 	 *
 	 * @param string      $name  The attribute name to target.
@@ -363,7 +363,7 @@ final class OD_HTML_Tag_Processor {
 	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 * @see WP_HTML_Tag_Processor::remove_attribute()
 	 *
 	 * @param string $name The attribute name to remove.
@@ -379,7 +379,7 @@ final class OD_HTML_Tag_Processor {
 	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 * @see WP_HTML_Tag_Processor::get_updated_html()
 	 *
 	 * @return string The processed HTML.

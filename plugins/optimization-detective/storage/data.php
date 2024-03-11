@@ -3,7 +3,7 @@
  * Metrics storage data.
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * When a URL metric expires it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @return int Expiration TTL in seconds.
@@ -27,7 +27,7 @@ function od_get_url_metric_freshness_ttl(): int {
 	 * The freshness TTL must be at least zero, in which it considers URL metrics to always be stale.
 	 * In practice, the value should be at least an hour.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 *
 	 * @param int $ttl Expiration TTL in seconds. Defaults to 1 day.
 	 */
@@ -58,7 +58,7 @@ function od_get_url_metric_freshness_ttl(): int {
  *
  * TODO: For non-singular requests, consider adding the post IDs from The Loop to ensure publishing a new post will invalidate the cache.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @return array Normalized query vars.
@@ -88,7 +88,7 @@ function od_get_normalized_query_vars(): array {
 /**
  * Gets slug for URL metrics.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @see od_get_normalized_query_vars()
@@ -105,7 +105,7 @@ function od_get_url_metrics_slug( array $query_vars ): string {
  *
  * This is used in the REST API to authenticate the storage of new URL metrics from a given URL.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @see wp_create_nonce()
@@ -121,7 +121,7 @@ function od_get_url_metrics_storage_nonce( string $slug ): string {
 /**
  * Verifies nonce for storing URL metrics for a specific slug.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @see wp_verify_nonce()
@@ -155,7 +155,7 @@ function od_verify_url_metrics_storage_nonce( string $nonce, string $slug ): boo
  *
  * These breakpoints appear to be used the most in media queries that affect frontend styles.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  * @link https://github.com/WordPress/gutenberg/blob/093d52cbfd3e2c140843d3fb91ad3d03330320a5/packages/base-styles/_breakpoints.scss#L11-L13
  *
@@ -201,7 +201,7 @@ function od_get_breakpoint_max_widths(): array {
 		 *
 		 * A breakpoint must be greater than zero and less than PHP_INT_MAX.
 		 *
-		 * @since n.e.x.t
+		 * @since 0.1.0
 		 *
 		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
 		 */
@@ -220,7 +220,7 @@ function od_get_breakpoint_max_widths(): array {
  * sample size of 3 and there being just a single breakpoint (480) by default, for a given URL, there would be a maximum
  * total of 6 URL metrics stored for a given URL: 3 for mobile and 3 for desktop.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @return int Sample size.
@@ -231,7 +231,7 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 	 *
 	 * The sample size must greater than zero.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 *
 	 * @param int $sample_size Sample size. Defaults to 3.
 	 */
@@ -264,7 +264,7 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
  * representing that element, including its breadcrumbs. If two adjoining breakpoints have the same value, then the
  * latter is dropped.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @param OD_URL_Metrics_Group_Collection $group_collection URL metrics group collection.

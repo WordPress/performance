@@ -3,7 +3,7 @@
  * Optimization Detective: OD_URL_Metrics_Group class
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 // Exit if accessed directly.
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @implements IteratorAggregate<int, OD_URL_Metric>
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  */
 final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {

@@ -3,7 +3,7 @@
  * Detection for Optimization Detective.
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Prints the script for detecting loaded images and the LCP element.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @param string                          $slug             URL metrics slug.
@@ -28,7 +28,7 @@ function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection 
 	 * This avoids situations in which there is missing detection metrics in which case a site with page caching which
 	 * also has a lot of traffic could result in a cache stampede.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 * @todo The value should probably be something like the 99th percentile of Time To Last Byte (TTLB) for WordPress sites in CrUX.
 	 *
 	 * @param int $detection_time_window Detection time window in milliseconds.

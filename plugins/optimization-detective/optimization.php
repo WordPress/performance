@@ -3,7 +3,7 @@
  * Optimizing for Optimization Detective.
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Adds template output buffer filter for optimization if eligible.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  */
 function od_maybe_add_template_output_buffer_filter() {
@@ -31,7 +31,7 @@ add_action( 'wp', 'od_maybe_add_template_output_buffer_filter' );
 /**
  * Determines whether the current response can be optimized.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @return bool Whether response can be optimized.
@@ -55,7 +55,7 @@ function od_can_optimize_response(): bool {
 	/**
 	 * Filters whether the current response can be optimized.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 *
 	 * @param bool $able Whether response can be optimized.
 	 */
@@ -65,7 +65,7 @@ function od_can_optimize_response(): bool {
 /**
  * Constructs preload links.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @param array<int, array{background_image?: string, img_attributes?: array{src?: string, srcset?: string, sizes?: string, crossorigin?: string}}|false> $lcp_elements_by_minimum_viewport_widths LCP elements keyed by minimum viewport width, amended with element details.
@@ -139,7 +139,7 @@ function od_construct_preload_links( array $lcp_elements_by_minimum_viewport_wid
 /**
  * Optimizes template output buffer.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @param string $buffer Template output buffer.
