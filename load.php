@@ -413,7 +413,7 @@ function perflab_maybe_set_object_cache_dropin() {
 			return;
 		}
 
-		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php', $dropin_path );
+		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/object-cache.copy.php', $dropin_path );
 	}
 
 	// Set timeout of 1 hour before retrying again (only relevant in case the above failed).
