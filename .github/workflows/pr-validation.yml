@@ -2,6 +2,10 @@ name: Pull Request Validation
 
 on:
   pull_request:
+    branches:
+      - trunk
+      - 'release/**'
+      - 'feature/**'
     types:
       - labeled
       - unlabeled
