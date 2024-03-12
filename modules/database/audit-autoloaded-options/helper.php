@@ -160,9 +160,9 @@ function perflab_aao_get_autoloaded_options_table() {
 }
 
 /**
- * Gets formatted autoload options table.
+ * Gets disabled autoload options table.
  *
- * @since 1.5.0
+ * @since n.e.x.t
  *
  * @return string HTML formatted table.
  */
