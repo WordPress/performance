@@ -6,9 +6,3 @@ Fixes #
 ## Relevant technical choices
 
 <!-- Please describe your changes. -->
-
-## Checklist
-
-- [ ] PR has either `[Focus]` or `Infrastructure` label.
-- [ ] PR has a `[Type]` label.
-- [ ] PR has a milestone or the `no milestone` label.
