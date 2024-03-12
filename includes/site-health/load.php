@@ -10,10 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-if ( ! has_filter( 'user_has_cap', 'wp_maybe_grant_site_health_caps' ) ) {
-	return;
-}
-
 // Audit Autoloaded Options site health check.
 require_once __DIR__ . '/audit-autoloaded-options/helper.php';
 require_once __DIR__ . '/audit-autoloaded-options/hooks.php';
