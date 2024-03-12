@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Set constant to be able to later check for whether this file was loaded.
 if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
-	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', 2 );
+	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', 3 );
 }
 
 if ( ! function_exists( 'perflab_load_server_timing_api_from_dropin' ) ) {
