@@ -422,7 +422,7 @@ function perflab_maybe_set_object_cache_dropin() {
 	if ( $wp_filesystem || WP_Filesystem() ) {
 		$dropin_path = WP_CONTENT_DIR . '/object-cache.php';
 
-		/**
+		/*
 		 * If there is an actual object-cache.php file, it is most likely from
 		 * a third party, or it may be an older version of the Performance Lab
 		 * object-cache.php. If it's from a third party, do not replace it.

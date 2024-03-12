@@ -369,6 +369,20 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertFalse( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
 	}
 
+	public function test_perflab_object_cache_dropin_version_matches_latest() {
+		$file_content = file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php' );
+
+		// Get the version from the file header and the constant.
+		preg_match( '/^ \* Version: (\d+)$/m', $file_content, $matches );
+		$file_header_version = (int) $matches[1];
+		preg_match( '/define\( \'PERFLAB_OBJECT_CACHE_DROPIN_VERSION\', (\d+) \)\;/', $file_content, $matches );
+		$file_constant_version = (int) $matches[1];
+
+		// Assert the versions are in sync.
+		$this->assertSame( PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION, $file_header_version );
+		$this->assertSame( PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION, $file_constant_version );
+	}
+
 	private function set_up_mock_filesystem() {
 		global $wp_filesystem;
 
