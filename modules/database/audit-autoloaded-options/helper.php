@@ -61,7 +61,7 @@ function perflab_aao_autoloaded_options_test() {
 		'<p>' . esc_html( $base_description ) . ' ' . __( 'Your site has %1$s autoloaded options (size: %2$s) in the options table, which could cause your site to be slow. You can reduce the number of autoloaded options by cleaning up your site\'s options table.', 'performance-lab' ) . '</p>',
 		$autoloaded_options_count,
 		size_format( $autoloaded_options_size )
-	) . perflab_aao_get_autoloaded_options_table();
+	) . perflab_aao_get_autoloaded_options_table() . perflab_aao_get_disabled_autoloaded_options_table();
 
 	/**
 	 * Filters description to be shown on Site Health warning when threshold is met.
@@ -144,13 +144,45 @@ function perflab_aao_get_autoloaded_options_table() {
 	$autoload_summary = perflab_aao_query_autoloaded_options();
 
 	$html_table = sprintf(
-		'<table class="widefat striped"><thead><tr><th scope="col">%s</th><th scope="col">%s</th></tr></thead><tbody>',
+		'<table class="widefat striped"><thead><tr><th scope="col">%s</th><th scope="col">%s</th><th scope="col">%s</th></tr></thead><tbody>',
 		__( 'Option Name', 'performance-lab' ),
-		__( 'Size', 'performance-lab' )
+		__( 'Size', 'performance-lab' ),
+		__( 'Action', 'performance-lab' )
 	);
 
 	foreach ( $autoload_summary as $value ) {
-		$html_table .= sprintf( '<tr><td>%s</td><td>%s</td></tr>', $value->option_name, size_format( $value->option_value_length, 2 ) );
+		$disable_button = sprintf( '<a class="button update-autoload" data-option-name="%s" data-autoload="no" data-value="%s" href="#">%s</a>', esc_attr( $value->option_name ), esc_attr( $value->option_value_length ), __( 'Disable Autoload', 'performance-lab' ) );
+		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', $value->option_name, size_format( $value->option_value_length, 2 ), $disable_button );
+	}
+	$html_table .= '</tbody></table>';
+
+	return $html_table;
+}
+
+/**
+ * Gets formatted autoload options table.
+ *
+ * @since 1.5.0
+ *
+ * @return string HTML formatted table.
+ */
+function perflab_aao_get_disabled_autoloaded_options_table() {
+	$perflab_aao_disabled_options = get_option( 'perflab_aao_modified_options', array() );
+
+	if ( empty( $perflab_aao_disabled_options ) ) {
+		return;
+	}
+
+	$html_table = sprintf(
+		'<br><br><table class="widefat striped"><thead><tr><th scope="col">%s</th><th scope="col">%s</th><th scope="col">%s</th></tr></thead><tbody>',
+		__( 'Option Name', 'performance-lab' ),
+		__( 'Size', 'performance-lab' ),
+		__( 'Action', 'performance-lab' )
+	);
+
+	foreach ( $perflab_aao_disabled_options as $option_name => $value ) {
+		$disable_button = sprintf( '<a class="button update-autoload" data-option-name="%s" data-autoload="yes" href="#">%s</a>', esc_attr( $option_name ), __( 'Revert to Autoload', 'performance-lab' ) );
+		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', $option_name, size_format( $value, 2 ), $disable_button );
 	}
 	$html_table .= '</tbody></table>';
 
