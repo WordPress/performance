@@ -400,6 +400,7 @@ function perflab_maybe_set_object_cache_dropin() {
 	 * This filter should not be used outside of tests.
 	 *
 	 * @since n.e.x.t
+	 * @internal
 	 *
 	 * @param int|bool $current_dropin_version The drop-in version as defined by the
 	 *                                         `PERFLAB_OBJECT_CACHE_DROPIN_VERSION` constant.
