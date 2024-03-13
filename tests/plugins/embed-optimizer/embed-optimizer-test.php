@@ -1,9 +1,8 @@
 <?php
 /**
- * Tests for embed optimizer.
+ * Tests for Embed Optimizer.
  *
- * @package performance-lab
- * @group embed-optimizer
+ * @package embed-optimizer
  */
 
 class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {

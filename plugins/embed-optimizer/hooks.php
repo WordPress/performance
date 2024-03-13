@@ -1,9 +1,9 @@
 <?php
 /**
- * Hook callbacks used for Optimize Embeds.
+ * Hook callbacks used for Embed Optimizer.
  *
  * @since n.e.x.t
- * @package performance-lab
+ * @package embed-optimizer
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,7 +43,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			if ( empty( $loading_value ) ) {
 				++$iframe_count;
 				if ( ! $p->set_bookmark( 'iframe' ) ) {
-					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set iframe bookmark.', 'performance-lab' ) );
+					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set iframe bookmark.', 'embed-optimizer' ) );
 					return $html;
 				}
 			}
@@ -53,7 +53,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			} else {
 				++$script_count;
 				if ( ! $p->set_bookmark( 'script' ) ) {
-					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set script bookmark.', 'performance-lab' ) );
+					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set script bookmark.', 'embed-optimizer' ) );
 					return $html;
 				}
 			}
@@ -68,7 +68,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			}
 			$p->set_attribute( 'type', 'application/vnd.embed-optimizer.javascript' );
 		} else {
-			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to script bookmark.', 'performance-lab' ) );
+			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to script bookmark.', 'embed-optimizer' ) );
 		}
 	}
 	// If there was only one iframe, make it lazy.
@@ -76,7 +76,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 		if ( $p->seek( 'iframe' ) ) {
 			$p->set_attribute( 'loading', 'lazy' );
 		} else {
-			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to iframe bookmark.', 'performance-lab' ) );
+			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to iframe bookmark.', 'embed-optimizer' ) );
 		}
 	}
 	return $p->get_updated_html();
@@ -135,6 +135,8 @@ JS;
  * Generates a user-level error/warning/notice/deprecation message.
  *
  * Generates the message when `WP_DEBUG` is true.
+ *
+ * @since n.e.x.t
  *
  * @param string $function_name The function that triggered the error.
  * @param string $message       The message explaining the error.
