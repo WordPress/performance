@@ -250,7 +250,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$wp_filesystem->put_contents( WP_CONTENT_DIR . '/object-cache.php', $latest_file_content );
 
 		// Simulate PL constant is set to the value from the current file.
-		preg_match( '/define\( \'PERFLAB_OBJECT_CACHE_DROPIN_VERSION\', (\d+) \)\;/', $latest_file_content, $matches );
+		$this->assertTrue( (bool) preg_match( '/define\( \'PERFLAB_OBJECT_CACHE_DROPIN_VERSION\', (\d+) \)\;/', $latest_file_content, $matches ) );
 		$latest_version = (int) $matches[1];
 		add_filter(
 			'perflab_object_cache_dropin_version',
@@ -291,9 +291,9 @@ class Load_Tests extends WP_UnitTestCase {
 		$file_content = file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php' );
 
 		// Get the version from the file header and the constant.
-		preg_match( '/^ \* Version: (\d+)$/m', $file_content, $matches );
+		$this->assertTrue( (bool) preg_match( '/^ \* Version: (\d+)$/m', $file_content, $matches ) );
 		$file_header_version = (int) $matches[1];
-		preg_match( '/define\( \'PERFLAB_OBJECT_CACHE_DROPIN_VERSION\', (\d+) \)\;/', $file_content, $matches );
+		$this->assertTrue( (bool) preg_match( '/define\( \'PERFLAB_OBJECT_CACHE_DROPIN_VERSION\', (\d+) \)\;/', $file_content, $matches ) );
 		$file_constant_version = (int) $matches[1];
 
 		// Assert the versions are in sync.
