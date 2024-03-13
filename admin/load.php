@@ -912,3 +912,38 @@ function perflab_print_modules_page_style() {
 </style>
 	<?php
 }
+
+/**
+ * Filters all plugins to prefix Performance Lab standalone plugins with "PL".
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, array{ Name: string }> $plugins Plugins.
+ * @return array<string, array{ Name: string }> Filtered plugins.
+ */
+function perflab_filter_plugins_list( array $plugins ): array {
+	$standalone_plugins = perflab_get_standalone_plugins();
+
+	$did_prefix  = false;
+	$name_prefix = __( 'PL', 'performance-lab' ) . ' ';
+	foreach ( array_keys( $plugins ) as $plugin_basename ) {
+		if ( in_array( strtok( $plugin_basename, '/' ), $standalone_plugins, true ) ) {
+			$plugins[ $plugin_basename ]['Name'] = $name_prefix . $plugins[ $plugin_basename ]['Name'];
+
+			$did_prefix = true;
+		}
+	}
+
+	// Re-sort by name if prefixed.
+	if ( $did_prefix ) {
+		uasort(
+			$plugins,
+			static function ( array $a, array $b ) {
+				return strnatcasecmp( $a['Name'], $b['Name'] );
+			}
+		);
+	}
+
+	return $plugins;
+}
+add_filter( 'all_plugins', 'perflab_filter_plugins_list' );
