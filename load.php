@@ -29,7 +29,7 @@ define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
 if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
 	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', false );
 }
-define( 'PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION', 2 );
+define( 'PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION', 3 );
 
 // Load server-timing API.
 require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/class-perflab-server-timing-metric.php';
