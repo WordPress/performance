@@ -99,7 +99,7 @@ function embed_optimizer_lazy_load_scripts() {
 				for ( const entry of entries ) {
 					if ( entry.isIntersecting ) {
 						const lazyEmbedParent = entry.target;
-						const lazyEmbedScript = lazyEmbedScriptsByParents.get( lazyEmbedParent );
+						const lazyEmbedScript = /** @type {HTMLScriptElement} */ lazyEmbedScriptsByParents.get( lazyEmbedParent );
 						const embedScript = document.createElement( 'script' );
 						for ( const attr of lazyEmbedScript.attributes ) {
 							if ( attr.nodeName === 'type' ) {
@@ -123,7 +123,7 @@ function embed_optimizer_lazy_load_scripts() {
 		);
 
 		for ( const lazyEmbedScript of lazyEmbedsScripts ) {
-			const lazyEmbedParent = lazyEmbedScript.parentNode;
+			const lazyEmbedParent = /** @type {HTMLElement} */ lazyEmbedScript.parentNode;
 			lazyEmbedScriptsByParents.set( lazyEmbedParent, lazyEmbedScript );
 			lazyEmbedObserver.observe( lazyEmbedParent );
 		}
