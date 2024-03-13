@@ -1,4 +1,4 @@
-/* eslint camelcase: "off", no-alert: "off" */
+/* eslint camelcase: "off" */
 /* global jQuery:false, perflabAutoloadSettings:false */
 
 ( function ( $, document ) {
@@ -16,20 +16,29 @@
 
 		$.ajax( {
 			url:
-				perflabAutoloadSettings.root +
-				'perflab-aao/v1/update-autoload/' +
-				optionName,
+				perflabAutoloadSettings.root + 'perflab-aao/v1/update-autoload',
 			method: 'POST',
 			data,
 			success( response ) {
 				if ( response.success ) {
 					button.attr( 'disabled', true );
 				} else {
-					alert( response.message );
+					button.append(
+						'<span class=""> ' + response.message + '</span>'
+					);
+					$(
+						'<div style="margin-top:5px;border:1px solid #d63638;padding-left:5px;">' +
+							response.message +
+							'</div>'
+					).insertAfter( button );
 				}
 			},
 			error( error ) {
-				alert( error.errorMessage );
+				$(
+					'<div style="margin-top:5px;border:1px solid #d63638;padding-left:5px;">' +
+						error.responseJSON.message +
+						'</div>'
+				).insertAfter( button );
 			},
 		} );
 	} );

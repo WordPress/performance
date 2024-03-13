@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function perflab_aao_add_autoloaded_options_test( $tests ) {
 	$tests['direct']['autoloaded_options'] = array(
-		'label' => __( 'Autoloaded options', 'performance-lab' ),
+		'label' => esc_html__( 'Autoloaded options', 'performance-lab' ),
 		'test'  => 'perflab_aao_autoloaded_options_test',
 	);
 	return $tests;
@@ -35,7 +35,7 @@ add_filter( 'site_status_tests', 'perflab_aao_add_autoloaded_options_test' );
 function perflab_aao_register_rest_route() {
 	register_rest_route(
 		'perflab-aao/v1',
-		'/update-autoload/(?P<option_name>[a-zA-Z0-9_-]+)',
+		'/update-autoload',
 		array(
 			'methods'  => 'POST',
 			'callback' => 'perflab_aao_update_autoload_rest',
@@ -61,7 +61,19 @@ function perflab_aao_update_autoload_rest( $request ) {
 		return new WP_REST_Response(
 			array(
 				'success' => false,
-				'message' => __( 'Invalid option name or autoload value.', 'performance-lab' ),
+				'message' => esc_html__( 'Invalid option name or autoload value.', 'performance-lab' ),
+			),
+			400
+		);
+	}
+
+	// Check if the option exists.
+	if ( false === get_option( $option_name ) ) {
+		// Option doesn't exist, return an error or handle the situation accordingly.
+		return new WP_REST_Response(
+			array(
+				'success' => false,
+				'message' => esc_html__( 'The option does not exist.', 'performance-lab' ),
 			),
 			400
 		);
@@ -84,7 +96,7 @@ function perflab_aao_update_autoload_rest( $request ) {
 				'success' => true,
 				'message' => sprintf(
 					/* translators: 1: Autoload value, 2: Option name */
-					__( 'Autoload %1$s for option %2$s.', 'performance-lab' ),
+					esc_html__( 'Autoload %1$s for option %2$s.', 'performance-lab' ),
 					$autoload,
 					$option_name
 				),
@@ -95,7 +107,7 @@ function perflab_aao_update_autoload_rest( $request ) {
 		return new WP_REST_Response(
 			array(
 				'success' => false,
-				'message' => __( 'Failed to update autoload status.', 'performance-lab' ),
+				'message' => esc_html__( 'Failed to update autoload status.', 'performance-lab' ),
 			),
 			500
 		);
