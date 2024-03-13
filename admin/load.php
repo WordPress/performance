@@ -914,14 +914,14 @@ function perflab_print_modules_page_style() {
 }
 
 /**
- * Filters all plugins to prefix Performance Lab standalone plugins with "PL".
+ * Adds "PL" prefix to the names of all Performance Lab standalone plugins.
  *
  * @since n.e.x.t
  *
  * @param array<string, array{ Name: string }> $plugins Plugins.
  * @return array<string, array{ Name: string }> Filtered plugins.
  */
-function perflab_filter_plugins_list( array $plugins ): array {
+function perflab_add_pl_prefix_to_standalone_plugins( array $plugins ): array {
 	$standalone_plugins = perflab_get_standalone_plugins();
 
 	$did_prefix  = false;
@@ -946,4 +946,26 @@ function perflab_filter_plugins_list( array $plugins ): array {
 
 	return $plugins;
 }
-add_filter( 'all_plugins', 'perflab_filter_plugins_list' );
+add_filter( 'all_plugins', 'perflab_add_pl_prefix_to_standalone_plugins' );
+
+/**
+ * Filters plugin row meta to add a Performance Lab link to its settings screen.
+ *
+ * @since n.e.x.t
+ *
+ * @param string[] $plugin_meta  An array of the plugin's metadata, including
+ *                               the version, author, author URI, and plugin URI.
+ * @param string   $plugin_file  Path to the plugin file relative to the plugins directory.
+ * @return string[] Plugin meta.
+ */
+function perflab_filter_plugin_row_meta( array $plugin_meta, string $plugin_file ): array {
+	if ( in_array( strtok( $plugin_file, '/' ), perflab_get_standalone_plugins(), true ) ) {
+		$plugin_meta[] = sprintf(
+			'<a href="%1$s">%2$s</a>',
+			esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ),
+			esc_html__( 'Performance Lab', 'performance-lab' )
+		);
+	}
+	return $plugin_meta;
+}
+add_filter( 'plugin_row_meta', 'perflab_filter_plugin_row_meta', 10, 2 );
