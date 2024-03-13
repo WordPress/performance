@@ -1,6 +1,12 @@
 {
   "core": null,
-  "plugins": [ "." ],
+  "plugins": [
+    ".",
+    "./plugins/auto-sizes",
+    "./plugins/dominant-color-images",
+    "./plugins/speculation-rules",
+    "./plugins/webp-uploads"
+  ],
   "env": {
     "tests": {
       "config": {

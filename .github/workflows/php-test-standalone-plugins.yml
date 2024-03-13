@@ -8,6 +8,7 @@ on:
     # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-test-standalone-plugins.yml'
+      - 'bin/plugin/commands/test-plugins.js'
       - 'plugin-tests/**'
       - '**.php'
       - '.wp-env.json'
@@ -24,6 +25,7 @@ on:
     # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-test-standalone-plugins.yml'
+      - 'bin/plugin/commands/test-plugins.js'
       - 'plugin-tests/**'
       - '**.php'
       - '.wp-env.json'

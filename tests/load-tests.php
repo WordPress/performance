@@ -97,37 +97,6 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertEqualSetsWithIndex( $new_value, $settings );
 	}
 
-	/**
-	 * @dataProvider data_legacy_modules
-	 */
-	public function test_legacy_module_for_perflab_get_module_settings( $legacy_module_slug, $current_module_slug ) {
-		$new_value = array( $legacy_module_slug => array( 'enabled' => true ) );
-		update_option( PERFLAB_MODULES_SETTING, $new_value );
-
-		$settings = perflab_get_module_settings();
-		$this->assertArrayNotHasKey( $legacy_module_slug, $settings, 'The settings do not contain the old legacy module slug in the database' );
-		$this->assertArrayHasKey( $current_module_slug, $settings, 'The settings contain an updated module slug in the database' );
-	}
-
-	/**
-	 * Data provider for test_legacy_module_for_perflab_get_module_settings().
-	 *
-	 * @return array {
-	 *     @type array {
-	 *         @type string $legacy_module_slug  The legacy module slug.
-	 *         @type string $current_module_slug The new/updated module slug.
-	 *     }
-	 * }
-	 */
-	public function data_legacy_modules() {
-		return array(
-			array( 'site-health/audit-autoloaded-options', 'database/audit-autoloaded-options' ),
-			array( 'site-health/audit-enqueued-assets', 'js-and-css/audit-enqueued-assets' ),
-			array( 'site-health/webp-support', 'images/webp-support' ),
-			array( 'images/dominant-color', 'images/dominant-color-images' ),
-		);
-	}
-
 	public function test_perflab_get_active_modules() {
 		// Assert that by default there are no active modules.
 		$active_modules          = perflab_get_active_modules();
@@ -182,45 +151,6 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertStringContainsString( $expected, $output );
 	}
 
-	/**
-	 * @dataProvider data_perflab_can_load_module
-	 */
-	public function test_perflab_is_valid_module( $dummy_module, $expected_status ) {
-		$this->assertSame( $expected_status, perflab_is_valid_module( $dummy_module ) );
-	}
-
-	public function data_perflab_is_valid_module() {
-		return array(
-			array( '', false ),
-			array( '../tests/testdata/demo-modules/something/non-existing-module', false ),
-			array( '../tests/testdata/demo-modules/js-and-css/demo-module-1', false ),
-			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
-			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
-			array( '../tests/testdata/demo-modules/check-error/demo-module-4', false ),
-		);
-	}
-
-	/**
-	 * @dataProvider data_perflab_can_load_module
-	 */
-	public function test_perflab_can_load_module( $dummy_module, $expected_status ) {
-		$this->assertSame( $expected_status, perflab_can_load_module( $dummy_module ) );
-	}
-
-	public function data_perflab_can_load_module() {
-		return array(
-			array( '../tests/testdata/demo-modules/js-and-css/demo-module-1', false ),
-			array( '../tests/testdata/demo-modules/something/demo-module-2', true ),
-			array( '../tests/testdata/demo-modules/images/demo-module-3', true ),
-		);
-	}
-
-	public function test_perflab_can_load_module_with_not_loaded_module() {
-		$can_load_module = perflab_can_load_module( '../tests/testdata/demo-modules/check-error/demo-module-4' );
-		$this->assertInstanceOf( 'WP_Error', $can_load_module );
-		$this->assertSame( 'cannot_load_module', $can_load_module->get_error_code() );
-	}
-
 	public function test_perflab_activate_module() {
 		perflab_activate_module( __DIR__ . '/testdata/demo-modules/something/demo-module-2' );
 		$this->assertSame( 'activated', get_option( 'test_demo_module_activation_status' ) );
@@ -229,19 +159,6 @@ class Load_Tests extends WP_UnitTestCase {
 	public function test_perflab_deactivate_module() {
 		perflab_deactivate_module( __DIR__ . '/testdata/demo-modules/something/demo-module-2' );
 		$this->assertSame( 'deactivated', get_option( 'test_demo_module_activation_status' ) );
-	}
-
-	private function get_expected_default_option() {
-		// This code is essentially copied over from the perflab_register_modules_setting() function.
-		$default_enabled_modules = require PERFLAB_PLUGIN_DIR_PATH . 'default-enabled-modules.php';
-		return array_reduce(
-			$default_enabled_modules,
-			static function ( $module_settings, $module_dir ) {
-				$module_settings[ $module_dir ] = array( 'enabled' => true );
-				return $module_settings;
-			},
-			array()
-		);
 	}
 
 	public function test_perflab_maybe_set_object_cache_dropin_no_conflict() {
@@ -256,7 +173,7 @@ class Load_Tests extends WP_UnitTestCase {
 		// Run function to place drop-in and ensure it exists afterwards.
 		perflab_maybe_set_object_cache_dropin();
 		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
-		$this->assertSame( file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php' ), $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertSame( file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/object-cache.copy.php' ), $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
 	}
 
 	public function test_perflab_maybe_set_object_cache_dropin_no_conflict_but_failing() {
@@ -297,6 +214,62 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( $dummy_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
 	}
 
+	public function test_perflab_maybe_set_object_cache_dropin_with_older_version() {
+		global $wp_filesystem;
+
+		$this->set_up_mock_filesystem();
+
+		$latest_file_content = file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/object-cache.copy.php' );
+		$older_file_content  = preg_replace( '/define\( \'PERFLAB_OBJECT_CACHE_DROPIN_VERSION\', (\d+) \)\;/', "define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', 1 );", $latest_file_content );
+		$wp_filesystem->put_contents( WP_CONTENT_DIR . '/object-cache.php', $older_file_content );
+
+		// Simulate PL constant is set to the value from the older file.
+		add_filter(
+			'perflab_object_cache_dropin_version',
+			static function () {
+				return 1;
+			}
+		);
+
+		// Ensure older object-cache.php drop-in is present.
+		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertSame( $older_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
+
+		// Run function to place drop-in and ensure it overrides the existing drop-in with the latest version.
+		perflab_maybe_set_object_cache_dropin();
+		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertSame( $latest_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
+	}
+
+	public function test_perflab_maybe_set_object_cache_dropin_with_latest_version() {
+		global $wp_filesystem;
+
+		$this->set_up_mock_filesystem();
+
+		$latest_file_content = file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/object-cache.copy.php' );
+		$wp_filesystem->put_contents( WP_CONTENT_DIR . '/object-cache.php', $latest_file_content );
+
+		// Simulate PL constant is set to the value from the current file.
+		$this->assertTrue( (bool) preg_match( '/define\( \'PERFLAB_OBJECT_CACHE_DROPIN_VERSION\', (\d+) \)\;/', $latest_file_content, $matches ) );
+		$latest_version = (int) $matches[1];
+		add_filter(
+			'perflab_object_cache_dropin_version',
+			static function () use ( $latest_version ) {
+				return $latest_version;
+			}
+		);
+
+		// Ensure latest object-cache.php drop-in is present.
+		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertSame( $latest_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
+
+		// Run function to place drop-in and ensure it doesn't attempt to replace the file.
+		perflab_maybe_set_object_cache_dropin();
+		$this->assertTrue( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertSame( $latest_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
+		$this->assertFalse( get_transient( 'perflab_set_object_cache_dropin' ) );
+	}
+
 	public function test_perflab_object_cache_dropin_may_be_disabled_via_filter() {
 		global $wp_filesystem;
 
@@ -312,6 +285,20 @@ class Load_Tests extends WP_UnitTestCase {
 		// Run function to place drop-in and ensure it still doesn't exist afterwards.
 		perflab_maybe_set_object_cache_dropin();
 		$this->assertFalse( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
+	}
+
+	public function test_perflab_object_cache_dropin_version_matches_latest() {
+		$file_content = file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/object-cache.copy.php' );
+
+		// Get the version from the file header and the constant.
+		$this->assertTrue( (bool) preg_match( '/^ \* Version: (\d+)$/m', $file_content, $matches ) );
+		$file_header_version = (int) $matches[1];
+		$this->assertTrue( (bool) preg_match( '/define\( \'PERFLAB_OBJECT_CACHE_DROPIN_VERSION\', (\d+) \)\;/', $file_content, $matches ) );
+		$file_constant_version = (int) $matches[1];
+
+		// Assert the versions are in sync.
+		$this->assertSame( PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION, $file_header_version );
+		$this->assertSame( PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION, $file_constant_version );
 	}
 
 	private function set_up_mock_filesystem() {
@@ -332,6 +319,6 @@ class Load_Tests extends WP_UnitTestCase {
 		WP_Filesystem();
 
 		// Simulate that the original object-cache.copy.php file exists.
-		$wp_filesystem->put_contents( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php', file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php' ) );
+		$wp_filesystem->put_contents( PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/object-cache.copy.php', file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/object-cache.copy.php' ) );
 	}
 }

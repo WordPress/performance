@@ -2,9 +2,9 @@
 
 Contributors:      wordpressdotorg
 Requires at least: 6.3
-Tested up to:      6.4
+Tested up to:      6.5
 Requires PHP:      7.0
-Stable tag:        2.8.0
+Stable tag:        2.9.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
@@ -78,6 +78,20 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.9.0 =
+
+**Features**
+
+* Infrastructure: Add standalone plugin version constants for auto-sizes and speculation-rules. ([958](https://github.com/WordPress/performance/pull/958))
+
+**Enhancements**
+
+* Infrastructure: Include standalone plugin slugs in generator tag. ([949](https://github.com/WordPress/performance/pull/949))
+
+**Bug Fixes**
+
+* Infrastructure: Sanitize metric name for `Server-Timing` header. ([957](https://github.com/WordPress/performance/pull/957))
 
 = 2.8.0 =
 
@@ -451,6 +465,10 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 * Infrastructure: Define module specification in documentation. ([26](https://github.com/WordPress/performance/pull/26))
 
 == Upgrade Notice ==
+
+= 3.0.0 =
+
+Starting with this release, modules such as Dominant Color Images and WebP Uploads are only available as standalone plugins as opposed to bundled modules. After updating, you will be able to easily migrate to this new structure.
 
 = 2.5.0 =
 
