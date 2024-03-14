@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Embed Optimizer
- * Plugin URI: https://github.com/WordPress/performance/issues/888
+ * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer
  * Description: Optimize the performance of embeds.
  * Requires at least: 6.3
  * Requires PHP: 7.0
