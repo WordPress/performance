@@ -170,7 +170,7 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 	$perflab_aao_disabled_options = get_option( 'perflab_aao_modified_options', array() );
 
 	if ( empty( $perflab_aao_disabled_options ) ) {
-		return;
+		return '';
 	}
 
 	$html_table = sprintf(
