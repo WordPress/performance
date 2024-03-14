@@ -7,7 +7,7 @@ Requires PHP:      7.0
 Stable tag:        0.1.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, images
+Tags:              performance, embeds
 
 Optimize the performance of embeds.
 
