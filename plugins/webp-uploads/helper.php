@@ -193,7 +193,13 @@ function webp_uploads_generate_filename( $editor, $file, $size, $extension ) {
 	$name   = wp_basename( $file, ".$ext" );
 	$suffix = 'full' === $size ? '' : '-' . $editor->get_suffix();
 
-	return "{$dir}{$name}{$suffix}.{$extension}";
+	// Add "-{$ext}" to the filename if an image with the same name already exists.
+	$file = "{$dir}{$name}{$suffix}.{$extension}";
+	if ( file_exists( $file ) ) {
+		$file = "{$dir}{$name}{$suffix}-{$ext}.{$extension}";
+	}
+
+	return $file;
 }
 
 /**
