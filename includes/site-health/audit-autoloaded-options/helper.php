@@ -151,7 +151,7 @@ function perflab_aao_get_autoloaded_options_table() {
 	);
 
 	foreach ( $autoload_summary as $value ) {
-		$disable_button = sprintf( '<a class="button update-autoload" data-option-name="%s" data-autoload="no" data-value="%s" href="#">%s</a>', esc_attr( $value->option_name ), esc_attr( $value->option_value_length ), esc_html__( 'Disable Autoload', 'performance-lab' ) );
+		$disable_button = sprintf( '<button class="button update-autoload" data-option-name="%s" data-autoload="no" data-value="%s">%s</button>', esc_attr( $value->option_name ), esc_attr( $value->option_value_length ), esc_html__( 'Disable Autoload', 'performance-lab' ) );
 		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', $value->option_name, size_format( $value->option_value_length, 2 ), $disable_button );
 	}
 	$html_table .= '</tbody></table>';
@@ -181,7 +181,7 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 	);
 
 	foreach ( $perflab_aao_disabled_options as $option_name => $value ) {
-		$disable_button = sprintf( '<a class="button update-autoload" data-option-name="%s" data-autoload="yes" href="#">%s</a>', esc_attr( $option_name ), esc_html__( 'Revert to Autoload', 'performance-lab' ) );
+		$disable_button = sprintf( '<button class="button update-autoload" data-option-name="%s" data-autoload="yes">%s</button>', esc_attr( $option_name ), esc_html__( 'Revert to Autoload', 'performance-lab' ) );
 		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', $option_name, size_format( $value, 2 ), $disable_button );
 	}
 	$html_table .= '</tbody></table>';
