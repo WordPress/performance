@@ -2,7 +2,7 @@
 /**
  * Hook callbacks used for Embed Optimizer.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @package embed-optimizer
  */
 
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Add loading="lazy" to any iframe tags.
  * Lazy load any script tags.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  *
  * @param string $html The oEmbed HTML.
  * @return string
@@ -87,7 +87,7 @@ add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
  * Add a script to the footer if there are lazy loaded embeds.
  * Load the embed's scripts when they approach the viewport using an IntersectionObserver.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  */
 function embed_optimizer_lazy_load_scripts() {
 	$js = <<<JS
@@ -136,7 +136,7 @@ JS;
  *
  * Generates the message when `WP_DEBUG` is true.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  *
  * @param string $function_name The function that triggered the error.
  * @param string $message       The message explaining the error.
