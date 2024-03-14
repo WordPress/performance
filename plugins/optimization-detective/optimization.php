@@ -147,10 +147,10 @@ function od_construct_preload_links( array $lcp_elements_by_minimum_viewport_wid
  */
 function od_optimize_template_output_buffer( string $buffer ): string {
 	$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-	$post = od_get_url_metrics_post( $slug );
+	$post = OD_URL_Metrics_Post_Type::get_post( $slug );
 
 	$group_collection = new OD_URL_Metrics_Group_Collection(
-		$post ? od_parse_stored_url_metrics( $post ) : array(),
+		$post ? OD_URL_Metrics_Post_Type::parse_post_content( $post ) : array(),
 		od_get_breakpoint_max_widths(),
 		od_get_url_metrics_breakpoint_sample_size(),
 		od_get_url_metric_freshness_ttl()

@@ -401,7 +401,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 					$sample_size = od_get_url_metrics_breakpoint_sample_size();
 					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 						for ( $i = 0; $i < $sample_size; $i++ ) {
-							od_store_url_metric(
+							OD_URL_Metrics_Post_Type::store_url_metric(
 								$slug,
 								$this->get_validated_url_metric(
 									$viewport_width,
@@ -453,7 +453,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 					$sample_size = od_get_url_metrics_breakpoint_sample_size();
 					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 						for ( $i = 0; $i < $sample_size; $i++ ) {
-							od_store_url_metric(
+							OD_URL_Metrics_Post_Type::store_url_metric(
 								$slug,
 								$this->get_validated_url_metric(
 									$viewport_width,
@@ -501,7 +501,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 					$sample_size = od_get_url_metrics_breakpoint_sample_size();
 					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 						for ( $i = 0; $i < $sample_size; $i++ ) {
-							od_store_url_metric(
+							OD_URL_Metrics_Post_Type::store_url_metric(
 								$slug,
 								$this->get_validated_url_metric(
 									$viewport_width,
@@ -563,7 +563,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 
 					foreach ( $div_index_to_viewport_width_mapping as $div_index => $viewport_width ) {
 						for ( $i = 0; $i < $sample_size; $i++ ) {
-							od_store_url_metric(
+							OD_URL_Metrics_Post_Type::store_url_metric(
 								$slug,
 								$this->get_validated_url_metric(
 									$viewport_width,
@@ -617,7 +617,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 					$sample_size = od_get_url_metrics_breakpoint_sample_size();
 					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 						for ( $i = 0; $i < $sample_size; $i++ ) {
-							od_store_url_metric(
+							OD_URL_Metrics_Post_Type::store_url_metric(
 								$slug,
 								$this->get_validated_url_metric(
 									$viewport_width,
@@ -659,7 +659,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 
 			'url-metric-only-captured-for-one-breakpoint' => array(
 				'set_up'   => function () {
-					od_store_url_metric(
+					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							400,
@@ -700,7 +700,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 
 			'different-lcp-elements-for-different-breakpoints' => array(
 				'set_up'   => function () {
-					od_store_url_metric(
+					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							400,
@@ -716,7 +716,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					od_store_url_metric(
+					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							800,
@@ -771,7 +771,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						}
 					);
 
-					od_store_url_metric(
+					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							400,
@@ -787,7 +787,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					od_store_url_metric(
+					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							500,
@@ -803,7 +803,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					od_store_url_metric(
+					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							700,
@@ -819,7 +819,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					od_store_url_metric(
+					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							800,
@@ -874,7 +874,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						}
 					);
 
-					od_store_url_metric(
+					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							500,
@@ -890,7 +890,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					od_store_url_metric(
+					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							650,
@@ -906,7 +906,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					od_store_url_metric(
+					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							800,
@@ -922,7 +922,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							)
 						)
 					);
-					od_store_url_metric(
+					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
 							800,
