@@ -2,7 +2,7 @@
 /**
  * Tests for optimization-detective class OD_URL_Metric.
  *
- * @packageoptimization-detective
+ * @package optimization-detective
  *
  * @coversDefaultClass OD_URL_Metric
  */

@@ -2,7 +2,7 @@
 /**
  * Tests for optimization-detective module hooks.php.
  *
- * @packageoptimization-detective
+ * @package optimization-detective
  */
 
 class OD_Hooks_Tests extends WP_UnitTestCase {

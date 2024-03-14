@@ -2,7 +2,7 @@
 /**
  * Tests for OD_URL_Metrics_Group_Collection.
  *
- * @packageoptimization-detective
+ * @package optimization-detective
  *
  * @noinspection PhpUnhandledExceptionInspection
  *

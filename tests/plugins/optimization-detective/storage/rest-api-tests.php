@@ -2,7 +2,7 @@
 /**
  * Tests for optimization-detective module storage/rest-api.php.
  *
- * @packageoptimization-detective
+ * @package optimization-detective
  */
 
 class OD_Storage_REST_API_Tests extends WP_UnitTestCase {

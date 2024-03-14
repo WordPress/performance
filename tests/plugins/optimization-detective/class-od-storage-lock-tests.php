@@ -2,7 +2,7 @@
 /**
  * Tests for OD_Storage_Lock.
  *
- * @packageoptimization-detective
+ * @package optimization-detective
  *
  * @coversDefaultClass OD_Storage_Lock
  */

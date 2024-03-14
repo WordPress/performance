@@ -2,7 +2,7 @@
 /**
  * Tests for optimization-detective module storage/post-type.php.
  *
- * @packageoptimization-detective
+ * @package optimization-detective
  *
  * @noinspection PhpUnhandledExceptionInspection
  */
