@@ -3,7 +3,7 @@
  * Metrics storage post type.
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,7 +17,7 @@ const OD_URL_METRICS_POST_TYPE = 'od_url_metrics';
  *
  * This the configuration for this post type is similar to the oembed_cache in core.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  */
 function od_register_url_metrics_post_type() {
@@ -43,7 +43,7 @@ add_action( 'init', 'od_register_url_metrics_post_type' );
 /**
  * Gets URL metrics post.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @param string $slug URL metrics slug.
@@ -75,7 +75,7 @@ function od_get_url_metrics_post( string $slug ) {
 /**
  * Parses post content in URL metrics post.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @param WP_Post $post URL metrics post.
@@ -143,7 +143,7 @@ function od_parse_stored_url_metrics( WP_Post $post ): array {
 /**
  * Stores URL metric by merging it with the other URL metrics which share the same normalized query vars.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @param string        $slug           Slug (hash of normalized query vars).

@@ -3,7 +3,7 @@
  * Hook callbacks used for Optimization Detective.
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *              include $template;
  *          } elseif ( current_user_can( 'switch_themes' ) ) {
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  * @link https://core.trac.wordpress.org/ticket/43258
  *
@@ -36,7 +36,7 @@ function od_buffer_output( string $passthrough ): string {
 			/**
 			 * Filters the template output buffer prior to sending to the client.
 			 *
-			 * @since n.e.x.t
+			 * @since 0.1.0
 			 *
 			 * @param string $output Output buffer.
 			 * @return string Filtered output buffer.

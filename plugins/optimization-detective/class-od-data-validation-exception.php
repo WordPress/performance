@@ -3,7 +3,7 @@
  * Optimization Detective: OD_Data_Validation_Exception class
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 // Exit if accessed directly.
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Exception thrown when failing to validate URL metrics data.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  */
 final class OD_Data_Validation_Exception extends Exception {}

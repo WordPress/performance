@@ -3,7 +3,7 @@
  * REST API integration for the module.
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -32,7 +32,7 @@ const OD_URL_METRICS_ROUTE = '/url-metrics:store';
 /**
  * Registers endpoint for storage of URL metric.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  */
 function od_register_endpoint() {
@@ -91,7 +91,7 @@ add_action( 'rest_api_init', 'od_register_endpoint' );
 /**
  * Handles REST API request to store metrics.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  *
  * @param WP_REST_Request $request Request.
