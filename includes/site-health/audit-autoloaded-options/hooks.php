@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function perflab_aao_add_autoloaded_options_test( $tests ) {
 	$tests['direct']['autoloaded_options'] = array(
-		'label' => esc_html__( 'Autoloaded options', 'performance-lab' ),
+		'label' => __( 'Autoloaded options', 'performance-lab' ),
 		'test'  => 'perflab_aao_autoloaded_options_test',
 	);
 	return $tests;
@@ -28,55 +28,44 @@ function perflab_aao_add_autoloaded_options_test( $tests ) {
 add_filter( 'site_status_tests', 'perflab_aao_add_autoloaded_options_test' );
 
 /**
- * Register custom REST API route for updating autoload.
+ * Register admin actions for handling autoload enable/disable.
  *
  * @since n.e.x.t
  */
-function perflab_aao_register_rest_route() {
-	register_rest_route(
-		'perflab-aao/v1',
-		'/update-autoload',
-		array(
-			'methods'  => 'POST',
-			'callback' => 'perflab_aao_update_autoload_rest',
-		)
-	);
+function perflab_aao_register_admin_actions() {
+	add_action( 'admin_action_perflab_aao_update_autoload', 'perflab_aao_handle_update_autoload' );
 }
-add_action( 'rest_api_init', 'perflab_aao_register_rest_route' );
+add_action( 'admin_init', 'perflab_aao_register_admin_actions' );
 
 /**
- * Callback for updating autoload via REST API.
+ * Callback for handling disable autoload action.
  *
  * @since n.e.x.t
- *
- * @param WP_REST_Request $request Request object.
- * @return WP_REST_Response
  */
-function perflab_aao_update_autoload_rest( $request ) {
-	$option_name = $request->get_param( 'option_name' );
-	$autoload    = $request->get_param( 'autoload' );
-	$value       = $request->get_param( 'value' );
+function perflab_aao_handle_update_autoload() {
+	// Verify nonce.
+	$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( $_GET['_wpnonce'] ) : '';
+
+	if ( ! wp_verify_nonce( $nonce, 'perflab_aao_update_autoload' ) ) {
+		wp_die( esc_html__( 'Nonce verification failed.', 'performance-lab' ) );
+	}
+
+	$option_name = isset( $_GET['option_name'] ) ? sanitize_text_field( $_GET['option_name'] ) : '';
+	$autoload    = isset( $_GET['autoload'] ) ? sanitize_text_field( $_GET['autoload'] ) : '';
+	$value       = isset( $_GET['value'] ) ? sanitize_text_field( $_GET['value'] ) : '';
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'Permission denied.', 'performance-lab' ) );
+	}
 
 	if ( empty( $option_name ) || empty( $autoload ) ) {
-		return new WP_REST_Response(
-			array(
-				'success' => false,
-				'message' => esc_html__( 'Invalid option name or autoload value.', 'performance-lab' ),
-			),
-			400
-		);
+		wp_die( esc_html__( 'Invalid option name or autoload value.', 'performance-lab' ) );
 	}
 
 	// Check if the option exists.
 	if ( false === get_option( $option_name ) ) {
 		// Option doesn't exist, return an error or handle the situation accordingly.
-		return new WP_REST_Response(
-			array(
-				'success' => false,
-				'message' => esc_html__( 'The option does not exist.', 'performance-lab' ),
-			),
-			400
-		);
+		wp_die( esc_html__( 'The option does not exist.', 'performance-lab' ) );
 	}
 
 	$result = wp_set_option_autoload( $option_name, $autoload );
@@ -91,48 +80,32 @@ function perflab_aao_update_autoload_rest( $request ) {
 		}
 		update_option( 'perflab_aao_modified_options', $modified_options );
 
-		return new WP_REST_Response(
-			array(
-				'success' => true,
-				'message' => sprintf(
-					/* translators: 1: Autoload value, 2: Option name */
-					esc_html__( 'Autoload %1$s for option %2$s.', 'performance-lab' ),
-					$autoload,
-					$option_name
-				),
-			),
-			200
-		);
+		wp_safe_redirect( admin_url( 'site-health.php?autoload_updated=true' ) );
+		exit;
 	} else {
-		return new WP_REST_Response(
-			array(
-				'success' => false,
-				'message' => esc_html__( 'Failed to update autoload status.', 'performance-lab' ),
-			),
-			500
-		);
+		wp_die( esc_html__( 'Failed to disable autoload.', 'performance-lab' ) );
 	}
 }
 
 /**
- * Enqueue JavaScript for disabling autoload.
+ * Callback function hooked to admin_notices to render admin notices on the site health screen.
  *
  * @since n.e.x.t
  *
- * @param string $hook_suffix The current admin page.
+ * @global string $pagenow The filename of the current screen.
  */
-function perflab_aao_enqueue_script( $hook_suffix ) {
-	if ( 'site-health.php' !== $hook_suffix ) {
+function perflab_aao_admin_notices() {
+	if ( 'site-health.php' !== $GLOBALS['pagenow'] ) {
 		return;
 	}
-	wp_enqueue_script( 'perflab-aao-update-autoload', plugin_dir_url( __FILE__ ) . 'update-autoload.js', array( 'jquery' ), 'n.e.x.t', true );
 
-	wp_localize_script(
-		'perflab-aao-update-autoload',
-		'perflabAutoloadSettings',
-		array(
-			'root' => sanitize_url( get_rest_url() ),
-		)
-	);
+	if ( isset( $_GET['autoload_updated'] ) && 'true' === $_GET['autoload_updated'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		wp_admin_notice(
+			esc_html__( 'The option has been successfully updated!', 'performance-lab' ),
+			array(
+				'type' => 'success',
+			)
+		);
+	}
 }
-add_action( 'admin_enqueue_scripts', 'perflab_aao_enqueue_script' );
+add_action( 'admin_notices', 'perflab_aao_admin_notices' );

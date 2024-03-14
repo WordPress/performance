@@ -150,9 +150,22 @@ function perflab_aao_get_autoloaded_options_table() {
 		esc_html__( 'Action', 'performance-lab' )
 	);
 
+	$nonce = wp_create_nonce( 'perflab_aao_update_autoload' );
 	foreach ( $autoload_summary as $value ) {
-		$disable_button = sprintf( '<button class="button update-autoload" data-option-name="%s" data-autoload="no" data-value="%s">%s</button>', esc_attr( $value->option_name ), esc_attr( $value->option_value_length ), esc_html__( 'Disable Autoload', 'performance-lab' ) );
-		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', $value->option_name, size_format( $value->option_value_length, 2 ), $disable_button );
+		$url            = esc_url_raw(
+			add_query_arg(
+				array(
+					'action'      => 'perflab_aao_update_autoload',
+					'_wpnonce'    => $nonce,
+					'option_name' => esc_attr( $value->option_name ),
+					'autoload'    => 'no',
+					'value'       => esc_attr( $value->option_value_length ),
+				),
+				admin_url( 'site-health.php' )
+			)
+		);
+		$disable_button = sprintf( '<a class="button" href="%s">%s</a>', esc_url( $url ), esc_html__( 'Disable Autoload', 'performance-lab' ) );
+		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', esc_html( $value->option_name ), size_format( $value->option_value_length, 2 ), $disable_button );
 	}
 	$html_table .= '</tbody></table>';
 
@@ -180,9 +193,21 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 		esc_html__( 'Action', 'performance-lab' )
 	);
 
+	$nonce = wp_create_nonce( 'perflab_aao_update_autoload' );
 	foreach ( $perflab_aao_disabled_options as $option_name => $value ) {
-		$disable_button = sprintf( '<button class="button update-autoload" data-option-name="%s" data-autoload="yes">%s</button>', esc_attr( $option_name ), esc_html__( 'Revert to Autoload', 'performance-lab' ) );
-		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', $option_name, size_format( $value, 2 ), $disable_button );
+		$url            = esc_url_raw(
+			add_query_arg(
+				array(
+					'action'      => 'perflab_aao_update_autoload',
+					'_wpnonce'    => $nonce,
+					'option_name' => esc_attr( $option_name ),
+					'autoload'    => 'yes',
+				),
+				admin_url( 'site-health.php' )
+			)
+		);
+		$disable_button = sprintf( '<a class="button" href="%s">%s</a>', esc_url( $url ), esc_html__( 'Revert to Autoload', 'performance-lab' ) );
+		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', esc_html( $option_name ), size_format( $value, 2 ), $disable_button );
 	}
 	$html_table .= '</tbody></table>';
 
