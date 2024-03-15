@@ -155,7 +155,7 @@ function embed_optimizer_trigger_error( string $function_name, string $message, 
 }
 
 /**
- * Displays the HTML generator tag for the WebP Uploads plugin.
+ * Displays the HTML generator tag for the Embed Optimizer plugin.
  *
  * See {@see 'wp_head'}.
  *
