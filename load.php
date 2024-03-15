@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
  * Requires at least: 6.3
  * Requires PHP: 7.0
- * Version: 2.8.0
+ * Version: 2.9.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'PERFLAB_VERSION', '2.8.0' );
+define( 'PERFLAB_VERSION', '2.9.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
@@ -29,11 +29,16 @@ define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
 if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
 	define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', false );
 }
+define( 'PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION', 3 );
 
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing-metric.php';
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/class-perflab-server-timing.php';
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/load.php';
-require_once PERFLAB_PLUGIN_DIR_PATH . 'server-timing/defaults.php';
+// Load server-timing API.
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/class-perflab-server-timing-metric.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/class-perflab-server-timing.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/load.php';
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/defaults.php';
+
+// Load site health checks.
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/site-health/load.php';
 
 /**
  * Registers the performance modules setting.
@@ -122,23 +127,7 @@ function perflab_get_module_settings() {
 	// Even though a default value is registered for this setting, the default must be explicitly
 	// passed here, to support scenarios where this function is called before the 'init' action,
 	// for example when loading the active modules.
-	$module_settings = (array) get_option( PERFLAB_MODULES_SETTING, perflab_get_modules_setting_default() );
-
-	$legacy_module_slugs = array(
-		'site-health/audit-autoloaded-options' => 'database/audit-autoloaded-options',
-		'site-health/audit-enqueued-assets'    => 'js-and-css/audit-enqueued-assets',
-		'site-health/webp-support'             => 'images/webp-support',
-		'images/dominant-color'                => 'images/dominant-color-images',
-	);
-
-	foreach ( $legacy_module_slugs as $legacy_slug => $current_slug ) {
-		if ( isset( $module_settings[ $legacy_slug ] ) ) {
-			$module_settings[ $current_slug ] = $module_settings[ $legacy_slug ];
-			unset( $module_settings[ $legacy_slug ] );
-		}
-	}
-
-	return $module_settings;
+	return (array) get_option( PERFLAB_MODULES_SETTING, perflab_get_modules_setting_default() );
 }
 
 /**
@@ -207,7 +196,7 @@ function perflab_is_valid_module( $module ) {
  * This attribute is then used in {@see perflab_render_generator()}.
  *
  * @since 1.1.0
- * @since n.e.x.t The generator tag now includes the active standalone plugin slugs.
+ * @since 2.9.0 The generator tag now includes the active standalone plugin slugs.
  */
 function perflab_get_generator_content() {
 	$active_and_valid_modules = array_filter( perflab_get_active_modules(), 'perflab_is_valid_module' );
@@ -312,7 +301,7 @@ function perflab_get_standalone_plugins_constants() {
 /**
  * Gets the standalone plugin constants used for each available standalone plugin, or module with a standalone plugin.
  *
- * @since n.e.x.t
+ * @since 2.9.0
  *
  * @param string $source Optional. Either 'plugins' or 'modules'. Default 'plugins'.
  * @return array<string, string> Map of plugin slug / module path and the version constant used.
@@ -323,10 +312,7 @@ function perflab_get_standalone_plugin_version_constants( $source = 'plugins' ) 
 		 * This list includes all modules which are also available as standalone plugins,
 		 * as `$module_dir => $version_constant` pairs.
 		 */
-		return array(
-			'images/dominant-color-images' => 'DOMINANT_COLOR_IMAGES_VERSION',
-			'images/webp-uploads'          => 'WEBP_UPLOADS_VERSION',
-		);
+		return array();
 	}
 
 	/*
@@ -336,6 +322,7 @@ function perflab_get_standalone_plugin_version_constants( $source = 'plugins' ) 
 	return array(
 		'webp-uploads'            => 'WEBP_UPLOADS_VERSION',
 		'dominant-color-images'   => 'DOMINANT_COLOR_IMAGES_VERSION',
+		'embed-optimizer'         => 'EMBED_OPTIMIZER_VERSION',
 		'performant-translations' => 'PERFORMANT_TRANSLATIONS_VERSION',
 		'auto-sizes'              => 'IMAGE_AUTO_SIZES_VERSION',
 		'speculation-rules'       => 'SPECULATION_RULES_VERSION',
@@ -386,11 +373,6 @@ function perflab_maybe_set_object_cache_dropin() {
 		return;
 	}
 
-	// Bail if already placed.
-	if ( PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
-		return;
-	}
-
 	/**
 	 * Filters whether the Perflab server timing drop-in should be set.
 	 *
@@ -399,6 +381,24 @@ function perflab_maybe_set_object_cache_dropin() {
 	 * @param bool $disabled Whether to disable the server timing drop-in. Default false.
 	 */
 	if ( apply_filters( 'perflab_disable_object_cache_dropin', false ) ) {
+		return;
+	}
+
+	/**
+	 * Filters the value of the `object-cache.php` drop-in constant.
+	 *
+	 * This filter should not be used outside of tests.
+	 *
+	 * @since n.e.x.t
+	 * @internal
+	 *
+	 * @param int|bool $current_dropin_version The drop-in version as defined by the
+	 *                                         `PERFLAB_OBJECT_CACHE_DROPIN_VERSION` constant.
+	 */
+	$current_dropin_version = apply_filters( 'perflab_object_cache_dropin_version', PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
+
+	// Bail if already placed in the latest version or newer.
+	if ( $current_dropin_version && $current_dropin_version >= PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION ) {
 		return;
 	}
 
@@ -413,8 +413,11 @@ function perflab_maybe_set_object_cache_dropin() {
 	if ( $wp_filesystem || WP_Filesystem() ) {
 		$dropin_path = WP_CONTENT_DIR . '/object-cache.php';
 
-		/**
-		 * If there is an actual object-cache.php file, do not replace it.
+		/*
+		 * If there is an actual object-cache.php file, it is most likely from
+		 * a third party, or it may be an older version of the Performance Lab
+		 * object-cache.php. If it's from a third party, do not replace it.
+		 *
 		 * Previous versions of the Performance Lab plugin were renaming the
 		 * original object-cache.php file and then loading both. However, due
 		 * to other plugins eagerly checking file headers, this caused too many
@@ -423,12 +426,30 @@ function perflab_maybe_set_object_cache_dropin() {
 		 * safest solution.
 		 */
 		if ( $wp_filesystem->exists( $dropin_path ) ) {
-			// Set timeout of 1 day before retrying again (only in case the file already exists).
-			set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
-			return;
+			// If this constant evaluates to `false`, the existing file is for sure from a third party.
+			if ( ! $current_dropin_version ) {
+				// Set timeout of 1 day before retrying again (only in case the file already exists).
+				set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
+				return;
+			}
+
+			// Otherwise, verify that it's actually the Performance Lab drop-in.
+			$test_content = "<?php\n/**\n * Plugin Name: Performance Lab Server Timing Object Cache Drop-In\n";
+			if ( ! str_starts_with( $wp_filesystem->get_contents( $dropin_path ), $test_content ) ) {
+				// Set timeout of 1 day before retrying again (only in case the file already exists).
+				set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
+				return;
+			}
+
+			/*
+			 * If this logic is reached, the existing file is an older version
+			 * of the Performance Lab drop-in, so it can be safely deleted, and
+			 * then be replaced below.
+			 */
+			$wp_filesystem->delete( $dropin_path );
 		}
 
-		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'server-timing/object-cache.copy.php', $dropin_path );
+		$wp_filesystem->copy( PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/object-cache.copy.php', $dropin_path );
 	}
 
 	// Set timeout of 1 hour before retrying again (only relevant in case the above failed).

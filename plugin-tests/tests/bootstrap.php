@@ -34,4 +34,3 @@ if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
 
 // Start up the WP testing environment.
 require $_test_root . '/includes/bootstrap.php';
-

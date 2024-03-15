@@ -17,10 +17,6 @@ on:
       - 'composer.json'
       - 'composer.lock'
   pull_request:
-    branches:
-      - trunk
-      - 'release/**'
-      - 'feature/**'
     # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-test.yml'
@@ -36,6 +32,7 @@ on:
       - opened
       - reopened
       - synchronize
+  workflow_dispatch:
 
 jobs:
   php-test:

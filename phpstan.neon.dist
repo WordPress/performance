@@ -7,8 +7,8 @@ parameters:
 		- default-enabled-modules.php
 		- load.php
 		- module-i18n.php
-		- modules/
-		- server-timing/
+		- includes/
+		- plugins/
 		- tests/
 		- uninstall.php
 	scanDirectories:

@@ -17,16 +17,62 @@
   },
   "require": {
     "composer/installers": "~1.0",
+    "ext-json": "*",
     "php": ">=7|^8"
   },
   "scripts": {
     "post-install-cmd": "if php -r 'exit( version_compare( phpversion(), \"8.1\", \">=\" ) ? 0 : 1 );'; then composer --working-dir=build-cs install --no-interaction; else echo 'Skipping composer install for build-cs since not on PHP 8.1+. You are running: '; php -v;  fi",
     "post-update-cmd": "if php -r 'exit( version_compare( phpversion(), \"8.1\", \">=\" ) ? 0 : 1 );'; then composer --working-dir=build-cs update --no-interaction; else echo 'Skipping composer update for build-cs since not on PHP 8.1+. You are running: '; php -v; fi",
-    "phpstan": "build-cs/vendor/bin/phpstan analyse --memory-limit=2048M -c phpstan.neon.dist",
-    "format": "build-cs/vendor/bin/phpcbf --standard=phpcs.xml.dist --report-summary --report-source",
-    "lint": "build-cs/vendor/bin/phpcs --standard=phpcs.xml.dist",
-    "test": "phpunit -c phpunit.xml.dist --verbose",
-    "test-multisite": "phpunit -c tests/multisite.xml --verbose"
+    "phpstan": "build-cs/vendor/bin/phpstan analyse --memory-limit=2048M",
+    "format": "build-cs/vendor/bin/phpcbf --report-summary --report-source",
+    "lint": "build-cs/vendor/bin/phpcs",
+    "lint:all": [
+      "@lint",
+      "@lint:auto-sizes",
+      "@lint:dominant-color-images",
+      "@lint:embed-optimizer",
+      "@lint:speculation-rules",
+      "@lint:webp-uploads"
+    ],
+    "lint:auto-sizes": "@lint -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
+    "lint:dominant-color-images": "@lint -- ./plugins/dominant-color-images --standard=./plugins/dominant-color-images/phpcs.xml.dist",
+    "lint:embed-optimizer": "@lint -- ./plugins/embed-optimizer --standard=./plugins/embed-optimizer/phpcs.xml.dist",
+    "lint:speculation-rules": "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
+    "lint:webp-uploads": "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
+    "test": "phpunit --verbose --testsuite performance-lab",
+    "test-multisite": "phpunit -c tests/multisite.xml --verbose --testsuite performance-lab",
+    "test:all": [
+      "@test",
+      "@test:plugins"
+    ],
+    "test-multisite:all": [
+      "@test-multisite",
+      "@test-multisite:plugins"
+    ],
+    "test:plugins": [
+      "@test:auto-sizes",
+      "@test:dominant-color-images",
+      "@test:embed-optimizer",
+      "@test:speculation-rules",
+      "@test:webp-uploads"
+    ],
+    "test-multisite:plugins": [
+      "@test-multisite:auto-sizes",
+      "@test-multisite:dominant-color-images",
+      "@test-multisite:embed-optimizer",
+      "@test-multisite:speculation-rules",
+      "@test-multisite:webp-uploads"
+    ],
+    "test:auto-sizes": "phpunit --verbose --testsuite auto-sizes",
+    "test-multisite:auto-sizes": "phpunit -c tests/multisite.xml --verbose --testsuite auto-sizes",
+    "test:dominant-color-images": "phpunit --verbose --testsuite dominant-color-images",
+    "test-multisite:dominant-color-images": "phpunit -c tests/multisite.xml --verbose --testsuite dominant-color-images",
+    "test:embed-optimizer": "phpunit --verbose --testsuite embed-optimizer",
+    "test-multisite:embed-optimizer": "phpunit -c tests/multisite.xml --verbose --testsuite embed-optimizer",
+    "test:speculation-rules": "phpunit --verbose --testsuite speculation-rules",
+    "test-multisite:speculation-rules": "phpunit -c tests/multisite.xml --verbose --testsuite speculation-rules",
+    "test:webp-uploads": "phpunit --verbose --testsuite webp-uploads",
+    "test-multisite:webp-uploads": "phpunit -c tests/multisite.xml --verbose --testsuite webp-uploads"
   },
   "config": {
     "allow-plugins": {
