@@ -45,9 +45,10 @@ add_action( 'admin_init', 'perflab_aao_register_admin_actions' );
 function perflab_aao_handle_update_autoload() {
 	check_admin_referer( 'perflab_aao_update_autoload' );
 
-if ( ! isset( $_GET['option_name'], $_GET['autoload'], $_GET['value'] ) ) {
-	wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
-}
+	if ( ! isset( $_GET['option_name'], $_GET['autoload'], $_GET['value'] ) ) {
+		wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
+	}
+
 	$option_name = sanitize_text_field( wp_unslash( $_GET['option_name'] ) );
 	$autoload    = isset( $_GET['autoload'] ) ? sanitize_text_field( $_GET['autoload'] ) : '';
 	$value       = isset( $_GET['value'] ) ? (int) $_GET['value'] : 0;
