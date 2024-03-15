@@ -156,4 +156,17 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 		$this->assertStringStartsWith( '<script type="module" nonce="abc123">', $script );
 		$this->assertStringEndsWith( '</script>', $script );
 	}
+
+	/**
+	 * Test printing the meta generator tag.
+	 *
+	 * @covers ::embed_optimizer_render_generator
+	 */
+	public function test_embed_optimizer_render_generator() {
+		$this->assertSame( 10, has_action( 'wp_head', 'embed_optimizer_render_generator' ) );
+		$tag = get_echo( 'embed_optimizer_render_generator' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'generator', $tag );
+		$this->assertStringContainsString( EMBED_OPTIMIZER_VERSION, $tag );
+	}
 }
