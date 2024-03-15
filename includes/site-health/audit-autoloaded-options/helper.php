@@ -157,8 +157,8 @@ function perflab_aao_get_autoloaded_options_table() {
 				array(
 					'action'      => 'perflab_aao_update_autoload',
 					'_wpnonce'    => $nonce,
-					'option_name' => esc_attr( $value->option_name ),
-					'autoload'    => 'no',
+					'option_name' => $value->option_name,
+					'autoload'    => 'false',
 					'value'       => esc_attr( $value->option_value_length ),
 				),
 				admin_url( 'site-health.php' )
@@ -200,8 +200,8 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 				array(
 					'action'      => 'perflab_aao_update_autoload',
 					'_wpnonce'    => $nonce,
-					'option_name' => esc_attr( $option_name ),
-					'autoload'    => 'yes',
+					'option_name' => $option_name,
+					'autoload'    => 'true',
 				),
 				admin_url( 'site-health.php' )
 			)

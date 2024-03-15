@@ -43,16 +43,14 @@ add_action( 'admin_init', 'perflab_aao_register_admin_actions' );
  * @since n.e.x.t
  */
 function perflab_aao_handle_update_autoload() {
-	// Verify nonce.
-	$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( $_GET['_wpnonce'] ) : '';
+	check_admin_referer( 'perflab_aao_update_autoload' );
 
-	if ( ! wp_verify_nonce( $nonce, 'perflab_aao_update_autoload' ) ) {
-		wp_die( esc_html__( 'Nonce verification failed.', 'performance-lab' ) );
-	}
-
-	$option_name = isset( $_GET['option_name'] ) ? sanitize_text_field( $_GET['option_name'] ) : '';
+if ( ! isset( $_GET['option_name'], $_GET['autoload'], $_GET['value'] ) ) {
+	wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
+}
+	$option_name = sanitize_text_field( wp_unslash( $_GET['option_name'] ) );
 	$autoload    = isset( $_GET['autoload'] ) ? sanitize_text_field( $_GET['autoload'] ) : '';
-	$value       = isset( $_GET['value'] ) ? sanitize_text_field( $_GET['value'] ) : '';
+	$value       = isset( $_GET['value'] ) ? (int) $_GET['value'] : 0;
 
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Permission denied.', 'performance-lab' ) );
@@ -73,15 +71,16 @@ function perflab_aao_handle_update_autoload() {
 	if ( $result ) {
 		// Update modified options list.
 		$modified_options = get_option( 'perflab_aao_modified_options', array() );
-		if ( 'yes' === $autoload && isset( $modified_options[ $option_name ] ) ) {
+		if ( $autoload && isset( $modified_options[ $option_name ] ) ) {
 			unset( $modified_options[ $option_name ] );
 		} else {
 			$modified_options[ $option_name ] = $value;
 		}
 		update_option( 'perflab_aao_modified_options', $modified_options );
 
-		wp_safe_redirect( admin_url( 'site-health.php?autoload_updated=true' ) );
-		exit;
+		if ( wp_safe_redirect( admin_url( 'site-health.php?autoload_updated=true' ) ) ) {
+			exit;
+		}
 	} else {
 		wp_die( esc_html__( 'Failed to disable autoload.', 'performance-lab' ) );
 	}
@@ -101,7 +100,7 @@ function perflab_aao_admin_notices() {
 
 	if ( isset( $_GET['autoload_updated'] ) && 'true' === $_GET['autoload_updated'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		wp_admin_notice(
-			esc_html__( 'The option has been successfully updated!', 'performance-lab' ),
+			esc_html__( 'The option has been successfully updated.', 'performance-lab' ),
 			array(
 				'type' => 'success',
 			)
