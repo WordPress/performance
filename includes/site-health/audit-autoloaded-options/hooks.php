@@ -45,20 +45,20 @@ add_action( 'admin_init', 'perflab_aao_register_admin_actions' );
 function perflab_aao_handle_update_autoload() {
 	check_admin_referer( 'perflab_aao_update_autoload' );
 
-	if ( ! isset( $_GET['option_name'], $_GET['autoload'], $_GET['value'] ) ) {
+	if ( ! isset( $_GET['option_name'], $_GET['autoload'] ) ) {
 		wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
 	}
 
 	$option_name  = sanitize_text_field( wp_unslash( $_GET['option_name'] ) );
-	$autoload     = isset( $_GET['autoload'] ) ? sanitize_text_field( $_GET['autoload'] ) : '';
+	$autoload     = isset( $_GET['autoload'] ) ? rest_sanitize_boolean( $_GET['autoload'] ) : false;
 	$value_length = isset( $_GET['value_length'] ) ? (int) $_GET['value_length'] : 0;
 
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Permission denied.', 'performance-lab' ) );
 	}
 
-	if ( empty( $option_name ) || empty( $autoload ) ) {
-		wp_die( esc_html__( 'Invalid option name or autoload value.', 'performance-lab' ) );
+	if ( empty( $option_name ) ) {
+		wp_die( esc_html__( 'Invalid option name.', 'performance-lab' ) );
 	}
 
 	// Check if the option exists.
