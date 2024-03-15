@@ -49,9 +49,9 @@ function perflab_aao_handle_update_autoload() {
 		wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
 	}
 
-	$option_name = sanitize_text_field( wp_unslash( $_GET['option_name'] ) );
-	$autoload    = isset( $_GET['autoload'] ) ? sanitize_text_field( $_GET['autoload'] ) : '';
-	$value       = isset( $_GET['value'] ) ? (int) $_GET['value'] : 0;
+	$option_name  = sanitize_text_field( wp_unslash( $_GET['option_name'] ) );
+	$autoload     = isset( $_GET['autoload'] ) ? sanitize_text_field( $_GET['autoload'] ) : '';
+	$value_length = isset( $_GET['value_length'] ) ? (int) $_GET['value_length'] : 0;
 
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Permission denied.', 'performance-lab' ) );
@@ -75,7 +75,7 @@ function perflab_aao_handle_update_autoload() {
 		if ( $autoload && isset( $modified_options[ $option_name ] ) ) {
 			unset( $modified_options[ $option_name ] );
 		} else {
-			$modified_options[ $option_name ] = $value;
+			$modified_options[ $option_name ] = $value_length;
 		}
 		update_option( 'perflab_aao_modified_options', $modified_options );
 

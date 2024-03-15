@@ -155,11 +155,11 @@ function perflab_aao_get_autoloaded_options_table() {
 		$url            = esc_url_raw(
 			add_query_arg(
 				array(
-					'action'      => 'perflab_aao_update_autoload',
-					'_wpnonce'    => $nonce,
-					'option_name' => $value->option_name,
-					'autoload'    => 'false',
-					'value'       => esc_attr( $value->option_value_length ),
+					'action'       => 'perflab_aao_update_autoload',
+					'_wpnonce'     => $nonce,
+					'option_name'  => $value->option_name,
+					'autoload'     => 'false',
+					'value_length' => esc_attr( $value->option_value_length ),
 				),
 				admin_url( 'site-health.php' )
 			)
