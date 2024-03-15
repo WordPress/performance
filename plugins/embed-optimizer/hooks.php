@@ -153,3 +153,19 @@ function embed_optimizer_trigger_error( string $function_name, string $message, 
 	}
 	wp_trigger_error( $function_name, $message, $error_level );
 }
+
+/**
+ * Displays the HTML generator tag for the Embed Optimizer plugin.
+ *
+ * See {@see 'wp_head'}.
+ *
+ * @since 0.1.0
+ */
+function embed_optimizer_render_generator() {
+	if (
+		defined( 'EMBED_OPTIMIZER_VERSION' )
+	) {
+		echo '<meta name="generator" content="Embed Optimizer ' . esc_attr( EMBED_OPTIMIZER_VERSION ) . '">' . "\n";
+	}
+}
+add_action( 'wp_head', 'embed_optimizer_render_generator' );
