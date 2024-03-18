@@ -20,7 +20,7 @@ exports.options = [
  * Command to get the plugin version based on the slug.
  *
  * @param {Object} opt      Command options.
- * @param {string} opt.slug Plugin/module slug.
+ * @param {string} opt.slug Plugin slug.
  */
 exports.handler = async ( opt ) => {
 	doRunGetPluginVersion( {
@@ -34,7 +34,7 @@ exports.handler = async ( opt ) => {
  *
  * @param {Object} settings                 Plugin settings.
  * @param {string} settings.pluginsJsonFile Path to plugins JSON file.
- * @param {string} settings.slug            Slug for the plugin or module.
+ * @param {string} settings.slug            Slug for the plugin.
  */
 function doRunGetPluginVersion( settings ) {
 	if ( settings.slug === undefined ) {
@@ -49,14 +49,7 @@ function doRunGetPluginVersion( settings ) {
 
 	try {
 		// Read the plugins.json file synchronously.
-		const { modules, plugins } = require( pluginsFile );
-
-		for ( const module of Object.values( modules ) ) {
-			if ( settings.slug === module.slug ) {
-				log( module.version );
-				return;
-			}
-		}
+		const { plugins } = require( pluginsFile );
 
 		for ( const plugin of Object.values( plugins ) ) {
 			if ( settings.slug === plugin ) {
@@ -91,6 +84,6 @@ function doRunGetPluginVersion( settings ) {
 	}
 
 	throw Error(
-		`The "${ settings.slug }" module/plugin slug is missing in the file "${ pluginsFile }".`
+		`The "${ settings.slug }" plugin slug is missing in the file "${ pluginsFile }".`
 	);
 }

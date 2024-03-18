@@ -9,19 +9,11 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
 
-Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
+Performance plugin from the WordPress Performance Team, which is a collection of standalone performance plugins.
 
 == Description ==
 
-The Performance Lab plugin is a collection of modules focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin allows to individually enable and test the modules to get their benefits before they become available in WordPress core, and to provide feedback to further improve the solutions.
-
-Currently the plugin includes the following performance modules:
-
-* **Dominant Color Images:** Adds support to store the dominant color of newly uploaded images and create a placeholder background of that color.
-* **WebP Support Health Check:** Adds a WebP support check in Site Health status.
-* **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
-* **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
-* **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
+The Performance Lab plugin is a collection of plugins focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin allows to individually enable and test the plugins to get their benefits before they become available in WordPress core, and to provide feedback to further improve the solutions.
 
 == Installation ==
 
@@ -40,13 +32,13 @@ Currently the plugin includes the following performance modules:
 = After activation =
 
 1. Visit the new **Settings > Performance** menu.
-2. Enable the individual modules you would like to use.
+2. Enable the individual plugins you would like to use.
 
 == Frequently Asked Questions ==
 
 = What is the purpose of this plugin? =
 
-The primary purpose of the Performance Lab plugin is to allow testing of various performance modules for which the goal is to eventually land in WordPress core. It is essentially a collection of "feature plugins", which makes it different from other performance plugins that offer performance features which are not targeted at WordPress core and potentially rely on functionality that would not be feasible to use in WordPress core. The list of available modules will regularly change: Existing modules may be removed after they have been released in WordPress core, while new modules may be added in any release.
+The primary purpose of the Performance Lab plugin is to allow testing of various performance plugins for which the goal is to eventually land in WordPress core. It is essentially a collection of "feature plugins", which makes it different from other performance plugins that offer performance features which are not targeted at WordPress core and potentially rely on functionality that would not be feasible to use in WordPress core. The list of available plugins will regularly change: Existing plugins may be removed after they have been released in WordPress core, while new modules may be added in any release.
 
 = Can I use this plugin on my production site? =
 
