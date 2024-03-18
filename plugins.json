@@ -1,5 +1,4 @@
 {
-  "modules": {},
   "plugins": [
     "auto-sizes",
     "dominant-color-images",

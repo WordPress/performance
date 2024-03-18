@@ -58,13 +58,11 @@ jobs:
               exit 1
             fi
           else
-            # Load the JSON file and parse from "{name: {slug, version}, ...}" to "include: [{ name, slug, version }, ...]"
-            # for use in the matrix.
+            # Load the JSON file and parse plugin information to prepare it for inclusion in the matrix.
             # For plugins, the "version" parameter is not included here; it will dynamically get it in its own job.
-
             # The "dry-run" parameter is included here to set the deployment mode.
             # When running the manual (workflow_dispatch) workflow, this value will be set from manual input type.
-            echo "matrix=$(jq -c '{include: ([.plugins[] | {name:. , slug:. , "dry-run": true}])}' plugins.json)" >> $GITHUB_OUTPUT
+            echo "matrix=$(jq -c '{include: ([.plugins[] | {slug:. , "dry-run": true}])}' plugins.json)" >> $GITHUB_OUTPUT
           fi
   deploy:
     name: Deploy Plugin
