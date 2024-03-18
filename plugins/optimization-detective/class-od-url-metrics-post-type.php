@@ -223,4 +223,42 @@ class OD_URL_Metrics_Post_Type {
 
 		return $result;
 	}
+
+	/**
+	 * Deletes all URL Metrics posts.
+	 *
+	 * This is used during uninstallation.
+	 *
+	 * @since 0.1.0
+	 * @access private
+	 */
+	public static function delete_all_posts() {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		// Delete all related post meta for URL Metrics posts.
+		$wpdb->query(
+			$wpdb->prepare(
+				"
+				DELETE meta
+				FROM $wpdb->postmeta AS meta
+					INNER JOIN $wpdb->posts AS posts
+						ON posts.ID = meta.post_id
+				WHERE posts.post_type = %s;
+				",
+				self::SLUG
+			)
+		);
+
+		// Delete all URL Metrics posts.
+		$wpdb->delete(
+			$wpdb->posts,
+			array(
+				'post_type' => self::SLUG,
+			)
+		);
+
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	}
 }
