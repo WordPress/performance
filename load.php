@@ -330,12 +330,12 @@ function perflab_get_standalone_plugin_version_constants( $source = 'plugins' ) 
 	 * as `$plugin_slug => $version_constant` pairs.
 	 */
 	return array(
-		'webp-uploads'               => 'WEBP_UPLOADS_VERSION',
-		'dominant-color-images'      => 'DOMINANT_COLOR_IMAGES_VERSION',
-		'image-loading-optimization' => 'IMAGE_LOADING_OPTIMIZATION_VERSION',
-		'performant-translations'    => 'PERFORMANT_TRANSLATIONS_VERSION',
-		'auto-sizes'                 => 'IMAGE_AUTO_SIZES_VERSION',
-		'speculation-rules'          => 'SPECULATION_RULES_VERSION',
+		'webp-uploads'            => 'WEBP_UPLOADS_VERSION',
+		'dominant-color-images'   => 'DOMINANT_COLOR_IMAGES_VERSION',
+		// TODO: Add image loading optimization plugin, dependent of Optimization Detective, once ready for end users.
+		'performant-translations' => 'PERFORMANT_TRANSLATIONS_VERSION',
+		'auto-sizes'              => 'IMAGE_AUTO_SIZES_VERSION',
+		'speculation-rules'       => 'SPECULATION_RULES_VERSION',
 	);
 }
 

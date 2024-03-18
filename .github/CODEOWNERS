@@ -60,6 +60,6 @@
 /plugins/dominant-color-images              @pbearne @spacedmonkey
 /tests/plugins/dominant-color-images        @pbearne @spacedmonkey
 
-# Plugin: Image Loading Optimization
-/plugins/image-loading-optimization         @westonruter
-/tests/plugins/image-loading-optimization   @westonruter
+# Plugin: Optimization Detective
+/plugins/optimization-detective             @westonruter @felixarntz
+/tests/plugins/optimization-detective       @westonruter @felixarntz

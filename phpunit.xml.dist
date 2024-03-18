@@ -18,8 +18,8 @@
 		<testsuite name="dominant-color-images">
 			<directory suffix=".php">./tests/plugins/dominant-color-images</directory>
 		</testsuite>
-		<testsuite name="image-loading-optimization">
-			<directory suffix=".php">./tests/plugins/image-loading-optimization</directory>
+		<testsuite name="optimization-detective">
+			<directory suffix=".php">./tests/plugins/optimization-detective</directory>
 		</testsuite>
 		<testsuite name="speculation-rules">
 			<directory suffix=".php">./tests/plugins/speculation-rules</directory>
