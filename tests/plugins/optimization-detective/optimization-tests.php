@@ -2,7 +2,7 @@
 /**
  * Tests for optimization-detective module optimization.php.
  *
- * @packageoptimization-detective
+ * @package optimization-detective
  *
  * @todo There are "Cannot resolve ..." errors and "Element img doesn't have a required attribute src" warnings that should be excluded from inspection.
  */

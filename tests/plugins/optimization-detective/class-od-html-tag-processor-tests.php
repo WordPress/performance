@@ -2,7 +2,7 @@
 /**
  * Tests for optimization-detective class OD_HTML_Tag_Processor.
  *
- * @packageoptimization-detective
+ * @package optimization-detective
  *
  * @coversDefaultClass OD_HTML_Tag_Processor
  *

@@ -61,5 +61,5 @@
 /tests/plugins/dominant-color-images        @pbearne @spacedmonkey
 
 # Plugin: Optimization Detective
-/plugins/optimization-detective             @westonruter
-/tests/plugins/optimization-detective       @westonruter
+/plugins/optimization-detective             @westonruter @felixarntz
+/tests/plugins/optimization-detective       @westonruter @felixarntz
