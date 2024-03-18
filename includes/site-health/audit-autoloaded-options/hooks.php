@@ -72,10 +72,10 @@ function perflab_aao_handle_update_autoload() {
 	if ( $result ) {
 		// Update modified options list.
 		$modified_options = get_option( 'perflab_aao_modified_options', array() );
-		if ( $autoload && isset( $modified_options[ $option_name ] ) ) {
-			unset( $modified_options[ $option_name ] );
-		} else {
+		if ( ! $autoload ) {
 			$modified_options[ $option_name ] = $value_length;
+		} elseif ( isset( $modified_options[ $option_name ] ) ) {
+			unset( $modified_options[ $option_name ] );
 		}
 		update_option( 'perflab_aao_modified_options', $modified_options );
 
