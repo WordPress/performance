@@ -324,6 +324,8 @@ class OD_URL_Metrics_Post_Type {
 			)
 		);
 
+		wp_cache_set_posts_last_changed();
+
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	}
 }
