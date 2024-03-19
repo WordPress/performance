@@ -103,7 +103,9 @@ async function fetchAllPullRequests( octokit, settings ) {
 
 	// Return all pull requests except those with the SKIP_CHANGELOG_LABEL.
 	return issues.filter(
-		( issue ) => issue.pull_request && ! issue.labels.find( ( { name } ) => name === SKIP_CHANGELOG_LABEL )
+		( issue ) =>
+			issue.pull_request &&
+			! issue.labels.find( ( { name } ) => name === SKIP_CHANGELOG_LABEL )
 	);
 }
 
