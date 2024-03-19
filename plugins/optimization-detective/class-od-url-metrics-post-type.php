@@ -18,7 +18,26 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class OD_URL_Metrics_Post_Type {
 
+	/**
+	 * Post type slug.
+	 *
+	 * @var string
+	 */
 	const SLUG = 'od_url_metrics';
+
+	/**
+	 * Event name (hook) for garbage collection of stale URL Metrics posts.
+	 *
+	 * @var string
+	 */
+	const GC_CRON_EVENT_NAME = 'od_url_metrics_gc';
+
+	/**
+	 * Recurrence for garbage collection of stale URL Metrics posts.
+	 *
+	 * @var string
+	 */
+	const GC_CRON_RECURRENCE = 'daily';
 
 	/**
 	 * Registers post type for URL metrics storage.
@@ -46,6 +65,9 @@ class OD_URL_Metrics_Post_Type {
 				// The original URL is stored in the post_title, and the post_name is a hash of the query vars.
 			)
 		);
+
+		add_action( 'admin_init', array( __CLASS__, 'schedule_garbage_collection' ) );
+		add_action( self::GC_CRON_EVENT_NAME, array( __CLASS__, 'delete_stale_posts' ) );
 	}
 
 	/**
@@ -222,6 +244,50 @@ class OD_URL_Metrics_Post_Type {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Schedules garbage collection of stale URL Metrics.
+	 */
+	public static function schedule_garbage_collection() {
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
+		// Unschedule any existing event which had a differing recurrence.
+		$scheduled_event = wp_get_scheduled_event( self::GC_CRON_EVENT_NAME );
+		if ( $scheduled_event && self::GC_CRON_RECURRENCE !== $scheduled_event->schedule ) {
+			wp_unschedule_event( $scheduled_event->timestamp, self::GC_CRON_EVENT_NAME );
+			$scheduled_event = null;
+		}
+
+		if ( ! $scheduled_event ) {
+			wp_schedule_event( time(), self::GC_CRON_RECURRENCE, self::GC_CRON_EVENT_NAME );
+		}
+	}
+
+	/**
+	 * Deletes posts that have not been modified in the past month.
+	 */
+	public static function delete_stale_posts() {
+		$one_month_ago = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) );
+
+		$query = new WP_Query(
+			array(
+				'post_type'      => self::SLUG,
+				'posts_per_page' => 100,
+				'date_query'     => array(
+					'column' => 'post_modified_gmt',
+					'before' => $one_month_ago,
+				),
+			)
+		);
+
+		foreach ( $query->posts as $post ) {
+			if ( self::SLUG === $post->post_type ) { // Sanity check.
+				wp_delete_post( $post->ID, true );
+			}
+		}
 	}
 
 	/**

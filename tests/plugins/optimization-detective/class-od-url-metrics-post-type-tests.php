@@ -29,6 +29,9 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 		$post_type_object = get_post_type_object( OD_URL_Metrics_Post_Type::SLUG );
 		$this->assertInstanceOf( WP_Post_Type::class, $post_type_object );
 		$this->assertFalse( $post_type_object->public );
+
+		$this->assertSame( 10, has_action( 'admin_init', array( OD_URL_Metrics_Post_Type::class, 'schedule_garbage_collection' ) ) );
+		$this->assertSame( 10, has_action( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME, array( OD_URL_Metrics_Post_Type::class, 'delete_stale_posts' ) ) );
 	}
 
 	/**
@@ -152,7 +155,89 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test delete_all_posts()
+	 * Test schedule_garbage_collection() when the user has not logged-in to the admin yet.
+	 *
+	 * @covers ::schedule_garbage_collection
+	 */
+	public function test_schedule_garbage_collection_logged_out() {
+		OD_URL_Metrics_Post_Type::schedule_garbage_collection();
+		$this->assertFalse( wp_get_scheduled_event( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME ), 'Expected scheduling to be skipped because user is not logged-in.' );
+	}
+
+	/**
+	 * Test schedule_garbage_collection() the first time the user logs in to the admin.
+	 *
+	 * @covers ::schedule_garbage_collection
+	 */
+	public function test_schedule_garbage_collection_first_log_in() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		OD_URL_Metrics_Post_Type::schedule_garbage_collection();
+		$scheduled_event = wp_get_scheduled_event( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME );
+		$this->assertIsObject( $scheduled_event );
+		$this->assertEquals( OD_URL_Metrics_Post_Type::GC_CRON_RECURRENCE, $scheduled_event->schedule );
+	}
+
+	/**
+	 * Test schedule_garbage_collection() when the schedule has changed.
+	 *
+	 * @covers ::schedule_garbage_collection
+	 */
+	public function test_schedule_garbage_collection_reschedule() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_schedule_event( time(), 'hourly', OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME );
+		OD_URL_Metrics_Post_Type::schedule_garbage_collection();
+		$scheduled_event = wp_get_scheduled_event( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME );
+		$this->assertIsObject( $scheduled_event );
+		$this->assertEquals( OD_URL_Metrics_Post_Type::GC_CRON_RECURRENCE, $scheduled_event->schedule );
+	}
+
+	/**
+	 * Test delete_stale_posts().
+	 *
+	 * @covers ::delete_stale_posts
+	 */
+	public function test_delete_stale_posts() {
+		global $wpdb;
+
+		$stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) - HOUR_IN_SECONDS );
+
+		$new_generic_post = self::factory()->post->create();
+		$old_generic_post = self::factory()->post->create();
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $stale_timestamp_gmt ),
+				'post_modified_gmt' => $stale_timestamp_gmt,
+			),
+			array( 'ID' => $old_generic_post )
+		);
+		clean_post_cache( $old_generic_post );
+
+		$new_url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $new_generic_post ) );
+		$new_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $new_url_metrics_slug, $this->get_sample_url_metric( get_permalink( $new_generic_post ) ) );
+		$old_url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $old_generic_post ) );
+		$old_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $old_url_metrics_slug, $this->get_sample_url_metric( get_permalink( $old_generic_post ) ) );
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified'     => get_date_from_gmt( $stale_timestamp_gmt ),
+				'post_modified_gmt' => $stale_timestamp_gmt,
+			),
+			array( 'ID' => $old_url_metrics_post )
+		);
+		clean_post_cache( $old_url_metrics_post );
+
+		// Now we delete the stale URL Metrics.
+		OD_URL_Metrics_Post_Type::delete_stale_posts();
+
+		$this->assertInstanceOf( WP_Post::class, get_post( $new_generic_post ), 'Expected new generic post to not have been deleted.' );
+		$this->assertInstanceOf( WP_Post::class, get_post( $old_generic_post ), 'Expected old generic post to not have been deleted.' );
+		$this->assertInstanceOf( WP_Post::class, get_post( $new_url_metrics_post ), 'Expected new URL Metrics post to not have been deleted.' );
+		$this->assertNull( get_post( $old_url_metrics_post ), 'Expected old URL Metrics post to have been deleted.' );
+	}
+
+	/**
+	 * Test delete_all_posts().
 	 *
 	 * @covers ::delete_all_posts
 	 */

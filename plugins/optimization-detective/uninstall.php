@@ -13,8 +13,13 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 require_once __DIR__ . '/class-od-url-metrics-post-type.php';
 
-// Delete all URL Metrics posts for the current site.
-OD_URL_Metrics_Post_Type::delete_all_posts();
+$od_delete_site_data = static function () {
+	// Delete all URL Metrics posts for the current site.
+	OD_URL_Metrics_Post_Type::delete_all_posts();
+	wp_unschedule_hook( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME );
+};
+
+$od_delete_site_data();
 
 /*
  * For a multisite, delete the URL Metrics for all other sites (however limited to 100 sites to avoid memory limit or
@@ -39,7 +44,7 @@ if ( is_multisite() ) {
 	// Delete all other blogs' URL Metrics posts.
 	foreach ( $site_ids as $site_id ) {
 		switch_to_blog( $site_id );
-		OD_URL_Metrics_Post_Type::delete_all_posts();
+		$od_delete_site_data();
 		restore_current_blog();
 	}
 }
