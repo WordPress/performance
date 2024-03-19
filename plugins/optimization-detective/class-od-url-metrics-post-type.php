@@ -45,7 +45,6 @@ class OD_URL_Metrics_Post_Type {
 	 * This the configuration for this post type is similar to the oembed_cache in core.
 	 *
 	 * @since 0.1.0
-	 * @access private
 	 */
 	public static function register() {
 		register_post_type(
@@ -74,7 +73,6 @@ class OD_URL_Metrics_Post_Type {
 	 * Gets URL metrics post.
 	 *
 	 * @since 0.1.0
-	 * @access private
 	 *
 	 * @param string $slug URL metrics slug.
 	 * @return WP_Post|null Post object if exists.
@@ -106,7 +104,6 @@ class OD_URL_Metrics_Post_Type {
 	 * Parses post content in URL metrics post.
 	 *
 	 * @since 0.1.0
-	 * @access private
 	 *
 	 * @param WP_Post $post URL metrics post.
 	 * @return OD_URL_Metric[] URL metrics.
@@ -175,7 +172,6 @@ class OD_URL_Metrics_Post_Type {
 	 * Stores URL metric by merging it with the other URL metrics which share the same normalized query vars.
 	 *
 	 * @since 0.1.0
-	 * @access private
 	 *
 	 * @param string        $slug           Slug (hash of normalized query vars).
 	 * @param OD_URL_Metric $new_url_metric New URL metric.
@@ -248,6 +244,8 @@ class OD_URL_Metrics_Post_Type {
 
 	/**
 	 * Schedules garbage collection of stale URL Metrics.
+	 *
+	 * @since 0.1.0
 	 */
 	public static function schedule_garbage_collection() {
 		if ( ! is_user_logged_in() ) {
@@ -268,6 +266,8 @@ class OD_URL_Metrics_Post_Type {
 
 	/**
 	 * Deletes posts that have not been modified in the past month.
+	 *
+	 * @since 0.1.0
 	 */
 	public static function delete_stale_posts() {
 		$one_month_ago = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) );
@@ -296,7 +296,6 @@ class OD_URL_Metrics_Post_Type {
 	 * This is used during uninstallation.
 	 *
 	 * @since 0.1.0
-	 * @access private
 	 */
 	public static function delete_all_posts() {
 		global $wpdb;
