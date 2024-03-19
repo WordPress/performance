@@ -40,13 +40,24 @@ class OD_URL_Metrics_Post_Type {
 	const GC_CRON_RECURRENCE = 'daily';
 
 	/**
+	 * Adds hooks.
+	 *
+	 * @since 0.1.0
+	 */
+	public static function add_hooks() {
+		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
+		add_action( 'admin_init', array( __CLASS__, 'schedule_garbage_collection' ) );
+		add_action( self::GC_CRON_EVENT_NAME, array( __CLASS__, 'delete_stale_posts' ) );
+	}
+
+	/**
 	 * Registers post type for URL metrics storage.
 	 *
 	 * This the configuration for this post type is similar to the oembed_cache in core.
 	 *
 	 * @since 0.1.0
 	 */
-	public static function register() {
+	public static function register_post_type() {
 		register_post_type(
 			self::SLUG,
 			array(
@@ -64,9 +75,6 @@ class OD_URL_Metrics_Post_Type {
 				// The original URL is stored in the post_title, and the post_name is a hash of the query vars.
 			)
 		);
-
-		add_action( 'admin_init', array( __CLASS__, 'schedule_garbage_collection' ) );
-		add_action( self::GC_CRON_EVENT_NAME, array( __CLASS__, 'delete_stale_posts' ) );
 	}
 
 	/**

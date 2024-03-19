@@ -38,10 +38,9 @@ require_once __DIR__ . '/class-od-storage-lock.php';
 require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
 require_once __DIR__ . '/storage/data.php';
 require_once __DIR__ . '/storage/rest-api.php';
+OD_URL_Metrics_Post_Type::add_hooks();
 
 require_once __DIR__ . '/detection.php';
 
 require_once __DIR__ . '/class-od-html-tag-processor.php';
 require_once __DIR__ . '/optimization.php';
-
-add_action( 'init', array( OD_URL_Metrics_Post_Type::class, 'register' ) );

@@ -11,27 +11,42 @@
 class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 
 	/**
-	 * Test register().
+	 * Test add_hooks().
 	 *
-	 * @covers ::register
+	 * @covers ::add_hooks
 	 */
-	public function test_register() {
+	public function test_add_hooks() {
+		remove_all_actions( 'init' );
+		remove_all_actions( 'admin_init' );
+		remove_all_actions( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME );
+
+		OD_URL_Metrics_Post_Type::add_hooks();
+
 		$this->assertSame(
 			10,
 			has_action(
 				'init',
 				array(
 					OD_URL_Metrics_Post_Type::class,
-					'register',
+					'register_post_type',
 				)
 			)
 		);
+		$this->assertSame( 10, has_action( 'admin_init', array( OD_URL_Metrics_Post_Type::class, 'schedule_garbage_collection' ) ) );
+		$this->assertSame( 10, has_action( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME, array( OD_URL_Metrics_Post_Type::class, 'delete_stale_posts' ) ) );
+	}
+
+	/**
+	 * Test register_post_type().
+	 *
+	 * @covers ::register_post_type
+	 */
+	public function test_register_post_type() {
+		unregister_post_type( OD_URL_Metrics_Post_Type::SLUG );
+		OD_URL_Metrics_Post_Type::register_post_type();
 		$post_type_object = get_post_type_object( OD_URL_Metrics_Post_Type::SLUG );
 		$this->assertInstanceOf( WP_Post_Type::class, $post_type_object );
 		$this->assertFalse( $post_type_object->public );
-
-		$this->assertSame( 10, has_action( 'admin_init', array( OD_URL_Metrics_Post_Type::class, 'schedule_garbage_collection' ) ) );
-		$this->assertSame( 10, has_action( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME, array( OD_URL_Metrics_Post_Type::class, 'delete_stale_posts' ) ) );
 	}
 
 	/**
