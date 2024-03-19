@@ -15,16 +15,14 @@ const {
 const config = require( '../config' );
 
 const MISSING_TYPE = 'MISSING_TYPE';
-const MISSING_FOCUS = 'MISSING_FOCUS';
 const TYPE_PREFIX = '[Type] ';
-const FOCUS_PREFIX = '[Focus] ';
-const INFRASTRUCTURE_LABEL = 'Infrastructure';
 const PRIMARY_TYPE_LABELS = {
 	'[Type] Feature': 'Features',
 	'[Type] Enhancement': 'Enhancements',
 	'[Type] Bug': 'Bug Fixes',
 };
 const PRIMARY_TYPE_ORDER = Object.values( PRIMARY_TYPE_LABELS );
+const SKIP_CHANGELOG_LABEL = 'skip changelog';
 
 /** @typedef {import('@octokit/rest')} GitHub */
 /** @typedef {import('@octokit/rest').IssuesListForRepoResponseItem} IssuesListForRepoResponseItem */
@@ -102,7 +100,11 @@ async function fetchAllPullRequests( octokit, settings ) {
 		milestone.number,
 		'closed'
 	);
-	return issues.filter( ( issue ) => issue.pull_request );
+
+	// Return all pull requests except those with the SKIP_CHANGELOG_LABEL.
+	return issues.filter(
+		( issue ) => issue.pull_request && ! issue.labels.find( ( { name } ) => name === SKIP_CHANGELOG_LABEL )
+	);
 }
 
 /**
@@ -130,30 +132,6 @@ function getIssueType( issue ) {
 }
 
 /**
- * Returns a focus label for a given issue object, or MISSING_FOCUS if focus
- * cannot be determined.
- *
- * @param {IssuesListForRepoResponseItem} issue Issue object.
- *
- * @return {string} Focus label, or MISSING_FOCUS.
- */
-function getIssueFocus( issue ) {
-	const labelNames = issue.labels.map( ( { name } ) => name );
-	const focusLabels = labelNames.filter( ( label ) =>
-		label.startsWith( FOCUS_PREFIX )
-	);
-
-	if ( ! focusLabels.length ) {
-		if ( labelNames.includes( INFRASTRUCTURE_LABEL ) ) {
-			return INFRASTRUCTURE_LABEL;
-		}
-		return MISSING_FOCUS;
-	}
-
-	return focusLabels[ 0 ].replace( FOCUS_PREFIX, '' );
-}
-
-/**
  * Formats the changelog string for a given list of pull requests.
  *
  * @param {string}                          milestone    Milestone title.
@@ -162,7 +140,14 @@ function getIssueFocus( issue ) {
  * @return {string} The formatted changelog string.
  */
 function formatChangelog( milestone, pullRequests ) {
-	let changelog = '= ' + milestone.replace( 'PL Plugin ', '' ) + ' =\n\n';
+	const version = milestone.match( /\d+\.\d+(\.\d+)?(-[A-Za-z0-9\.]+)?/ );
+	if ( ! version ) {
+		throw new Error(
+			`The ${ milestone } milestone does not include a version number.`
+		);
+	}
+
+	let changelog = '= ' + version[ 0 ] + ' =\n\n';
 
 	// Group PRs by type.
 	const typeGroups = groupBy( pullRequests, getIssueType );
@@ -194,62 +179,26 @@ function formatChangelog( milestone, pullRequests ) {
 		// Start a new section within the changelog.
 		changelog += '**' + group + '**\n\n';
 
-		// Group PRs within this section per focus.
-		const focusGroups = groupBy( typeGroups[ group ], getIssueFocus );
-		if ( focusGroups[ MISSING_FOCUS ] ) {
-			const prURLs = focusGroups[ MISSING_FOCUS ].map(
-				( { html_url } ) => html_url // eslint-disable-line camelcase
-			);
-			throw new Error(
-				`The following pull-requests are missing a "${ FOCUS_PREFIX }xyz" or "${ INFRASTRUCTURE_LABEL }" label: ${ prURLs.join(
-					', '
-				) }`
-			);
-		}
-
-		// Sort focuses alphabetically, except infrastructure which comes last.
-		const focusGroupNames = Object.keys( focusGroups ).sort( ( a, b ) => {
-			if (
-				( a !== INFRASTRUCTURE_LABEL && b !== INFRASTRUCTURE_LABEL ) ||
-				a === b
-			) {
-				return a - b;
-			}
-			return a !== INFRASTRUCTURE_LABEL ? -1 : 1;
-		} );
-
-		// Output all PRs within this section.
-		focusGroupNames.forEach( ( featureName ) => {
-			const focusGroupPRs = focusGroups[ featureName ];
-
-			focusGroupPRs
-				.map( ( issue ) => {
-					const title = issue.title
-						// Strip feature name from title if used as prefix.
-						.replace(
-							new RegExp(
-								`^${ featureName.toLowerCase() }: `,
-								'i'
-							),
-							''
-						)
-						// Strip trailing whitespace.
-						.trim()
-						// Ensure first letter is uppercase.
-						.replace( /^([a-z])/, ( _match, firstLetter ) =>
-							firstLetter.toUpperCase()
-						)
-						// Add trailing period.
-						.replace( /\s*\.?$/, '' )
-						.concat( '.' );
-					return `* ${ featureName }: ${ title } ([${ issue.number }](${ issue.html_url }))`; // eslint-disable-line camelcase
-				} )
-				.filter( Boolean )
-				.sort()
-				.forEach( ( entry ) => {
-					changelog += `${ entry }\n`;
-				} );
-		} );
+		const typeGroupPRs = typeGroups[ group ];
+		typeGroupPRs
+			.map( ( issue ) => {
+				const title = issue.title
+					// Strip trailing whitespace.
+					.trim()
+					// Ensure first letter is uppercase.
+					.replace( /^([a-z])/, ( _match, firstLetter ) =>
+						firstLetter.toUpperCase()
+					)
+					// Add trailing period.
+					.replace( /\s*\.?$/, '' )
+					.concat( '.' );
+				return `* ${ title } ([${ issue.number }](${ issue.html_url }))`; // eslint-disable-line camelcase
+			} )
+			.filter( Boolean )
+			.sort()
+			.forEach( ( entry ) => {
+				changelog += `${ entry }\n`;
+			} );
 
 		changelog += '\n';
 	}
