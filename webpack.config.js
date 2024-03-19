@@ -146,7 +146,7 @@ const buildPlugin = ( env ) => {
 			} ),
 		],
 		dependencies: [
-			// Add any dependencies here which should be build before the plugin.
+			// Add any dependencies here which should be built before the plugin.
 		],
 	};
 };

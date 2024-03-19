@@ -34,6 +34,7 @@
     "build:plugin:performance-lab": "rm -rf build/performance-lab && mkdir -p build/performance-lab && git archive HEAD | tar -x -C build/performance-lab",
     "build:plugin:auto-sizes": "webpack --mode production --env plugin=auto-sizes",
     "build:plugin:dominant-color-images": "webpack --mode production --env plugin=dominant-color-images",
+    "build:plugin:optimization-detective": "webpack --mode production --env plugin=optimization-detective",
     "build:plugin:speculation-rules": "webpack --mode production --env plugin=speculation-rules",
     "build:plugin:webp-uploads": "webpack --mode production --env plugin=webp-uploads",
     "test-plugins": "./bin/plugin/cli.js test-plugins",
