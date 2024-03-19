@@ -1,99 +1,201 @@
-name: Deploy standalone plugins to WordPress.org
+---
+name: Deploy Standalone Plugin(s) to WordPress.org
 
 on:
   release:
-    types: [published]
+    types:
+      - published
   workflow_dispatch:
     inputs:
-      slug:
+      plugin:
         type: string
         description: 'The slug of the plugin to deploy'
+        required: true
       dry-run:
         type: boolean
         description: 'Debug mode (run without publishing).'
         default: false
+
+permissions: {}
+
 jobs:
-  release:
-    name: Prepare Deployment
+  pre-run:
+    name: Pre-run
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.set-matrix.outputs.plugins }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Setup Node.js (.nvmrc)
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-      - name: Install npm dependencies
-        run: npm ci
-      - name: Get directory
-        id: get-plugin-directory
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          echo "directory=$(node ./bin/plugin/cli.js get-plugin-dir --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
-      - name: Get plugin version
-        id: get-version
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          echo "version=$(node ./bin/plugin/cli.js get-plugin-version --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Set matrix
         id: set-matrix
         run: |
+          PLUGINS=$(jq -r '.plugins' plugins.json)
           if ${{ github.event_name == 'workflow_dispatch' }}; then
-            result=$(echo "${{ steps.get-version.outputs.version }}" | awk '/^(\*|[0-9]+(\.[0-9]+){0,2}(-[a-zA-Z0-9.]+)?)$/ {print "Matched"}')
-            if [[ -n "$result" ]]; then
-              # Set the manual input values in JSON format for use in the matrix.
-              echo "matrix={\"include\":[{\"slug\":\"${{ inputs.slug }}\",\"version\":\"${{ steps.get-version.outputs.version }}\",\"directory\":\"${{ steps.get-plugin-directory.outputs.directory }}\",\"dry-run\":\"${{ inputs.dry-run }}\"}]}" >> $GITHUB_OUTPUT
+            SLUG=${{ inputs.plugin }}
+            if echo $PLUGINS | jq -e '.[] | select(. == "'$SLUG'")' > /dev/null; then
+              PLUGINS="[ \"$SLUG\" ]"
             else
-              echo "The ${{ inputs.slug }} module slug is missing in the file plugins.json."
+              echo "::error::The plugin $SLUG is not in the list of plugins to deploy."
               exit 1
             fi
-          else
-            # Load the JSON file and parse from "{name: {slug, version}, ...}" to "include: [{ name, slug, version }, ...]"
-            # for use in the matrix.
-            # For plugins, the "version" parameter is not included here; it will dynamically get it in its own job.
-
-            # The "dry-run" parameter is included here to set the deployment mode.
-            # When running the manual (workflow_dispatch) workflow, this value will be set from manual input type.
-            echo "matrix=$(jq -c '{include: ([.modules | to_entries[] | {name:.key, slug: .value.slug, version: .value.version, directory: "build", "dry-run": false}] + ([.plugins[] | {name:. , slug:. , directory: "plugins", "dry-run": false}]))}' plugins.json)" >> $GITHUB_OUTPUT
           fi
+
+          # Set the matrix.
+          echo "::notice::Deploying the following plugins: $(echo ${PLUGINS[@]})"
+          echo "plugins=$(echo $PLUGINS | jq -c .)" >> $GITHUB_OUTPUT
+
   deploy:
-    name: Deploy Plugin
-    needs: release
+    name: "Deploy Plugin: ${{ matrix.plugin }}"
+    needs: pre-run
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      deployments: write
     strategy:
-      matrix: ${{ fromJSON(needs.release.outputs.matrix) }}
+      matrix:
+        plugin: ${{ fromJSON(needs.pre-run.outputs.matrix) }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup Node.js (.nvmrc)
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: npm
+
       - name: Install npm dependencies
         run: npm ci
-      - name: Building standalone plugins
-        if: ${{ matrix.directory != 'plugins' }}
-        run: npm run build-plugins
-      - name: Set version
-        id: set_version
+
+      - name: Build plugin
+        run: npm run build:plugin:${{ matrix.plugin }}
+
+      - name: Set plugin version
+        working-directory: ./build
         run: |
-          if [ -z "${{ matrix.version }}" ]; then
-            echo "version=$(node ./bin/plugin/cli.js get-plugin-version --slug=${{ matrix.slug }})" >> $GITHUB_OUTPUT
-          else
-            echo "version=${{ matrix.version }})" >> $GITHUB_OUTPUT
+          echo "PLUGIN_VERSION=$(jq -r '."${{ matrix.plugin }}"' manifest.json)" >> $GITHUB_ENV
+
+      - name: Check if deployment is needed
+        id: check-deployment
+        run: |
+          PLUGIN_VERSION_WPORG=$(curl -sSL https://api.wordpress.org/plugins/info/1.0/${{ matrix.plugin }}.json --retry 3 --retry-delay 5 --retry-all-errors --fail | jq -r '.version')
+
+          echo "::debug::The ${{ matrix.plugin }} plugin is currently at version $PLUGIN_VERSION_WPORG on WordPress.org."
+
+          # Bail if the plugin version is not found.
+          if [ -z "$PLUGIN_VERSION_WPORG" ]; then
+            echo "::error::Could not retrieve ${{ matrix.plugin }} information from WordPress.org. The plugin may not exist or the API may be down."
+            exit 1
           fi
-      - name: Deploy Standalone Plugin - ${{ matrix.slug }}
+
+          # Bail if the plugin is already up to date.
+          if [ "$PLUGIN_VERSION_WPORG" = "$PLUGIN_VERSION" ]; then
+            echo "::notice::The ${{ matrix.plugin }} plugin is already up to date on WordPress.org. Halting deployment."
+            exit 0
+          fi
+
+          echo "deploy=true" >> $GITHUB_OUTPUT
+
+      - name: Create zip file
+        if: steps.check-deployment.outputs.deploy == 'true'
+        run: |
+          mkdir -p ./build/dist
+          cd ./build/${{ matrix.plugin }}
+          zip -r ../dist/${{ matrix.plugin }}.zip .
+
+      - name: Generate checksum
+        if: steps.check-deployment.outputs.deploy == 'true'
+        working-directory: ./build/dist
+        run: |
+          mkdir -p $RUNNER_TEMP/plugin-checksums
+          find . -type f -print0 | sort -z | xargs -r0 shasum -a 256 -b | sed 's# \*\./# *#' > $RUNNER_TEMP/plugin-checksums/checksums.txt
+          shasum -a 256 -U -c $RUNNER_TEMP/plugin-checksums/checksums.txt
+          cat $RUNNER_TEMP/plugin-checksums/checksums.txt | while read sum file; do echo "$sum $file" > ${file#\*}.sha256; done
+
+      - name: Upload artifact
+        if: steps.check-deployment.outputs.deploy == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.plugin }}
+          path: ./build/dist
+
+      - name: Start deployment
+        if: steps.check-deployment.outputs.deploy == 'true'
+        uses: bobheadxi/deployments@v1
+        id: wporg-deployment
+        with:
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: "wp.org plugin: ${{ matrix.plugin }}"
+
+      - name: Deploy Plugin - ${{ matrix.plugin }}
+        if: steps.check-deployment.outputs.deploy == 'true'
         uses: 10up/action-wordpress-plugin-deploy@stable
         with:
-          dry-run: ${{ matrix.dry-run }}
+          dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || false }}
         env:
-          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: ${{ matrix.plugin }}
+          VERSION: ${{ env.PLUGIN_VERSION }}
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-          SLUG: ${{ matrix.slug }}
-          VERSION: ${{ steps.set_version.outputs.version }}
-          BUILD_DIR: ./${{ matrix.directory }}/${{ matrix.slug }}
-          ASSETS_DIR: ./${{ matrix.directory }}/${{ matrix.slug }}/.wordpress-org
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          BUILD_DIR: ./build/${{ matrix.plugin }}
+          ASSETS_DIR: ./plugins/${{ matrix.plugin }}/.wordpress-org
+
+      - name: Finish deployment
+        if: ${{ steps.wporg-deployment.outputs.deployment_id && always() }}
+        uses: bobheadxi/deployments@v1
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          status: ${{ job.status }}
+          deployment_id: ${{ steps.wporg-deployment.outputs.deployment_id }}
+          env: "wp.org plugin: ${{ matrix.plugin }}"
+          env_url: "https://wordpress.org/plugins/${{ matrix.plugin }}/"
+
+  release-assets:
+    name: Add release assets
+    needs: [ pre-run, deploy ]
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    if: github.event_name == 'release'
+    strategy:
+      matrix:
+        plugin: ${{ fromJSON(needs.pre-run.outputs.matrix) }}
+    steps:
+      - name: Check artifact existence
+        id: artifact-existence
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const getArtifact = await github.request('GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts{?name}', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId,
+              name: "${{ matrix.plugin }}"
+            });
+
+            if (getArtifact.status !== 200) {
+              throw new Error(`Invalid response from GitHub API: ${getArtifact.status}`);
+            }
+
+            core.setOutput('exists', getArtifact.data.artifacts.length > 0);
+            core.debug(`Artifact for ${{ matrix.plugin }} exists: ${core.getInput('exists')} ? "true" : "false"`);
+
+      - name: Download artifact
+        if: steps.artifact-existence.outputs.exists == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.plugin }}
+          path: ./build/dist
+
+      - name: Upload release assets
+        if: steps.artifact-existence.outputs.exists == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./build/dist/${{ matrix.plugin }}.zip
+            ./build/dist/${{ matrix.plugin }}.zip.sha256
