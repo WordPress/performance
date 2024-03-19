@@ -86,7 +86,47 @@ function od_get_normalized_query_vars(): array {
 }
 
 /**
+ * Get the URL for the current request.
+ *
+ * This is essentially the REQUEST_URI prefixed by the scheme and host for the home URL.
+ * This is needed in particular due to subdirectory installs.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @return string Current URL.
+ */
+function od_get_current_url(): string {
+	$parsed_url = wp_parse_url( home_url() );
+	if ( ! is_array( $parsed_url ) ) {
+		$parsed_url = array();
+	}
+
+	if ( empty( $parsed_url['scheme'] ) ) {
+		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
+	}
+	if ( ! isset( $parsed_url['host'] ) ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$parsed_url['host'] = isset( $_SERVER['HTTP_HOST'] ) ? wp_unslash( $_SERVER['HTTP_HOST'] ) : 'localhost';
+	}
+
+	$current_url = $parsed_url['scheme'] . '://' . $parsed_url['host'];
+	if ( isset( $parsed_url['port'] ) ) {
+		$current_url .= ':' . $parsed_url['port'];
+	}
+	$current_url .= '/';
+
+	if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$current_url .= ltrim( wp_unslash( $_SERVER['REQUEST_URI'] ), '/' );
+	}
+	return esc_url_raw( $current_url );
+}
+
+/**
  * Gets slug for URL metrics.
+ *
+ * A slug is the hash of the normalized query vars.
  *
  * @since 0.1.0
  * @access private
@@ -110,12 +150,14 @@ function od_get_url_metrics_slug( array $query_vars ): string {
  *
  * @see wp_create_nonce()
  * @see od_verify_url_metrics_storage_nonce()
+ * @see od_get_url_metrics_slug()
  *
- * @param string $slug URL metrics slug.
+ * @param string $slug Slug (hash of normalized query vars).
+ * @param string $url  URL.
  * @return string Nonce.
  */
-function od_get_url_metrics_storage_nonce( string $slug ): string {
-	return wp_create_nonce( "store_url_metrics:$slug" );
+function od_get_url_metrics_storage_nonce( string $slug, string $url ): string {
+	return wp_create_nonce( "store_url_metrics:$slug:$url" );
 }
 
 /**
@@ -126,13 +168,15 @@ function od_get_url_metrics_storage_nonce( string $slug ): string {
  *
  * @see wp_verify_nonce()
  * @see od_get_url_metrics_storage_nonce()
+ * @see od_get_url_metrics_slug()
  *
- * @param string $nonce URL metrics storage nonce.
- * @param string $slug  URL metrics slug.
+ * @param string $nonce Nonce.
+ * @param string $slug  Slug (hash of normalized query vars).
+ * @param String $url   URL.
  * @return bool Whether the nonce is valid.
  */
-function od_verify_url_metrics_storage_nonce( string $nonce, string $slug ): bool {
-	return (bool) wp_verify_nonce( $nonce, "store_url_metrics:$slug" );
+function od_verify_url_metrics_storage_nonce( string $nonce, string $slug, string $url ): bool {
+	return (bool) wp_verify_nonce( $nonce, "store_url_metrics:$slug:$url" );
 }
 
 /**

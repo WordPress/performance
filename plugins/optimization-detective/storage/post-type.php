@@ -141,25 +141,25 @@ function od_parse_stored_url_metrics( WP_Post $post ): array {
 }
 
 /**
- * Stores URL metric by merging it with the other URL metrics for a given URL.
+ * Stores URL metric by merging it with the other URL metrics which share the same normalized query vars.
  *
  * @since 0.1.0
  * @access private
  *
- * @param string        $url            URL for the URL metrics. This is used purely as metadata.
- * @param string        $slug           URL metrics slug (computed from query vars).
+ * @param string        $slug           Slug (hash of normalized query vars).
  * @param OD_URL_Metric $new_url_metric New URL metric.
  * @return int|WP_Error Post ID or WP_Error otherwise.
  */
-function od_store_url_metric( string $url, string $slug, OD_URL_Metric $new_url_metric ) {
-
-	// TODO: What about storing a version identifier?
+function od_store_url_metric( string $slug, OD_URL_Metric $new_url_metric ) {
 	$post_data = array(
-		'post_title' => $url, // TODO: Should we keep this? It can help with debugging.
+		// The URL is supplied as the post title in order to aid with debugging. Note that an od-url-metrics post stores
+		// multiple URL Metric instances, each of which also contains the URL for which the metric was captured. The URL
+		// appearing in the post title is therefore the most recent URL seen for the URL Metrics which have the same
+		// normalized query vars among them.
+		'post_title' => $new_url_metric->get_url(),
 	);
 
 	$post = od_get_url_metrics_post( $slug );
-
 	if ( $post instanceof WP_Post ) {
 		$post_data['ID']        = $post->ID;
 		$post_data['post_name'] = $post->post_name;
@@ -190,7 +190,7 @@ function od_store_url_metric( string $url, string $slug, OD_URL_Metric $new_url_
 			},
 			$group_collection->get_flattened_url_metrics()
 		),
-		JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES // TODO: No need for pretty-printing.
+		JSON_UNESCAPED_SLASHES // No need for escaped slashes since not printed to frontend.
 	);
 
 	$has_kses = false !== has_filter( 'content_save_pre', 'wp_filter_post_kses' );
@@ -201,10 +201,11 @@ function od_store_url_metric( string $url, string $slug, OD_URL_Metric $new_url_
 
 	$post_data['post_type']   = OD_URL_METRICS_POST_TYPE;
 	$post_data['post_status'] = 'publish';
+	$slashed_post_data        = wp_slash( $post_data );
 	if ( isset( $post_data['ID'] ) ) {
-		$result = wp_update_post( wp_slash( $post_data ), true );
+		$result = wp_update_post( $slashed_post_data, true );
 	} else {
-		$result = wp_insert_post( wp_slash( $post_data ), true );
+		$result = wp_insert_post( $slashed_post_data, true );
 	}
 
 	if ( $has_kses ) {

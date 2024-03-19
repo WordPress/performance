@@ -141,6 +141,7 @@ function getCurrentTime() {
  * @param {boolean}                 args.isDebug                 Whether to show debug messages.
  * @param {string}                  args.restApiEndpoint         URL for where to send the detection data.
  * @param {string}                  args.restApiNonce            Nonce for writing to the REST API.
+ * @param {string}                  args.currentUrl              Current URL.
  * @param {string}                  args.urlMetricsSlug          Slug for URL metrics.
  * @param {string}                  args.urlMetricsNonce         Nonce for URL metrics storage.
  * @param {URLMetricsGroupStatus[]} args.urlMetricsGroupStatuses URL metrics group statuses.
@@ -153,6 +154,7 @@ export default async function detect( {
 	isDebug,
 	restApiEndpoint,
 	restApiNonce,
+	currentUrl,
 	urlMetricsSlug,
 	urlMetricsNonce,
 	urlMetricsGroupStatuses,
@@ -314,7 +316,7 @@ export default async function detect( {
 
 	/** @type {URLMetrics} */
 	const urlMetrics = {
-		url: win.location.href,
+		url: currentUrl,
 		slug: urlMetricsSlug,
 		nonce: urlMetricsNonce,
 		viewport: {

@@ -38,26 +38,13 @@ const OD_URL_METRICS_ROUTE = '/url-metrics:store';
 function od_register_endpoint() {
 
 	$args = array(
-		'url'   => array(
-			'type'              => 'string',
-			'description'       => __( 'The URL for which the metric was obtained.', 'optimization-detective' ),
-			'required'          => true,
-			'format'            => 'uri',
-			'validate_callback' => static function ( $url ) {
-				if ( ! wp_validate_redirect( $url ) ) {
-					return new WP_Error( 'non_origin_url', __( 'URL for another site provided.', 'optimization-detective' ) );
-				}
-				// TODO: This is not validated as corresponding to the slug in any way. True it is not used for anything but metadata.
-				return true;
-			},
-		),
 		'slug'  => array(
 			'type'        => 'string',
 			'description' => __( 'An MD5 hash of the query args.', 'optimization-detective' ),
 			'required'    => true,
 			'pattern'     => '^[0-9a-f]{32}$',
-			// This is validated via the nonce validate_callback, as it is provided as input to create the nonce by the server
-			// which then is verified to match in the REST API request.
+			// This is further validated via the validate_callback for the nonce argument, as it is provided as input
+			// with the 'url' argument to create the nonce by the server. which then is verified to match in the REST API request.
 		),
 		'nonce' => array(
 			'type'              => 'string',
@@ -65,7 +52,7 @@ function od_register_endpoint() {
 			'required'          => true,
 			'pattern'           => '^[0-9a-f]+$',
 			'validate_callback' => static function ( $nonce, WP_REST_Request $request ) {
-				if ( ! od_verify_url_metrics_storage_nonce( $nonce, $request->get_param( 'slug' ) ) ) {
+				if ( ! od_verify_url_metrics_storage_nonce( $nonce, $request->get_param( 'slug' ), $request->get_param( 'url' ) ) ) {
 					return new WP_Error( 'invalid_nonce', __( 'URL metrics nonce verification failure.', 'optimization-detective' ) );
 				}
 				return true;
@@ -165,7 +152,6 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	}
 
 	$result = od_store_url_metric(
-		$request->get_param( 'url' ),
 		$request->get_param( 'slug' ),
 		$url_metric
 	);

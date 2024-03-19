@@ -22,6 +22,7 @@ class OD_URL_Metric_Tests extends WP_UnitTestCase {
 		return array(
 			'valid_minimal'          => array(
 				'data' => array(
+					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -29,6 +30,7 @@ class OD_URL_Metric_Tests extends WP_UnitTestCase {
 			),
 			'valid_with_element'     => array(
 				'data' => array(
+					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(
@@ -43,6 +45,7 @@ class OD_URL_Metric_Tests extends WP_UnitTestCase {
 			),
 			'missing_viewport'       => array(
 				'data'  => array(
+					'url'       => home_url( '/' ),
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
 				),
@@ -50,6 +53,7 @@ class OD_URL_Metric_Tests extends WP_UnitTestCase {
 			),
 			'missing_viewport_width' => array(
 				'data'  => array(
+					'url'       => home_url( '/' ),
 					'viewport'  => array( 'height' => 640 ),
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
@@ -58,6 +62,7 @@ class OD_URL_Metric_Tests extends WP_UnitTestCase {
 			),
 			'bad_viewport'           => array(
 				'data'  => array(
+					'url'       => home_url( '/' ),
 					'viewport'  => array(
 						'height' => 'tall',
 						'width'  => 'wide',
@@ -69,6 +74,7 @@ class OD_URL_Metric_Tests extends WP_UnitTestCase {
 			),
 			'missing_timestamp'      => array(
 				'data'  => array(
+					'url'      => home_url( '/' ),
 					'viewport' => $viewport,
 					'elements' => array(),
 				),
@@ -76,13 +82,23 @@ class OD_URL_Metric_Tests extends WP_UnitTestCase {
 			),
 			'missing_elements'       => array(
 				'data'  => array(
+					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 				),
 				'error' => 'elements is a required property of OD_URL_Metric.',
 			),
+			'missing_url'            => array(
+				'data'  => array(
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+				),
+				'error' => 'url is a required property of OD_URL_Metric.',
+			),
 			'bad_elements'           => array(
 				'data'  => array(
+					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(
