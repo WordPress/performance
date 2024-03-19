@@ -65,11 +65,11 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Data provider for test_parse_post_content.
+	 * Data provider for test_get_url_metrics_from_post.
 	 *
 	 * @return array<string, array{post_content: string, expected_value: array}>
 	 */
-	public function data_provider_test_parse_post_content(): array {
+	public function data_provider_test_get_url_metrics_from_post(): array {
 		$valid_content = array(
 			array(
 				'url'       => home_url( '/' ),
@@ -103,13 +103,13 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test parse_post_content().
+	 * Test get_url_metrics_from_post().
 	 *
-	 * @covers ::parse_post_content
+	 * @covers ::get_url_metrics_from_post
 	 *
-	 * @dataProvider data_provider_test_parse_post_content
+	 * @dataProvider data_provider_test_get_url_metrics_from_post
 	 */
-	public function test_parse_post_content( string $post_content, array $expected_value ) {
+	public function test_get_url_metrics_from_post( string $post_content, array $expected_value ) {
 		$post = self::factory()->post->create_and_get(
 			array(
 				'post_type'    => OD_URL_Metrics_Post_Type::SLUG,
@@ -121,7 +121,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 			static function ( OD_URL_Metric $url_metric ): array {
 				return $url_metric->jsonSerialize();
 			},
-			OD_URL_Metrics_Post_Type::parse_post_content( $post )
+			OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post )
 		);
 
 		$this->assertSame( $expected_value, $url_metrics );
@@ -144,13 +144,13 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 		$this->assertInstanceOf( WP_Post::class, $post );
 		$this->assertSame( $post_id, $post->ID );
 
-		$url_metrics = OD_URL_Metrics_Post_Type::parse_post_content( $post );
+		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
 		$this->assertCount( 1, $url_metrics );
 
 		$again_post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $validated_url_metric );
 		$post          = get_post( $again_post_id );
 		$this->assertSame( $post_id, $again_post_id );
-		$url_metrics = OD_URL_Metrics_Post_Type::parse_post_content( $post );
+		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
 		$this->assertCount( 2, $url_metrics );
 	}
 

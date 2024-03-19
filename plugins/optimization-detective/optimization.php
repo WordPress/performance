@@ -150,7 +150,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$post = OD_URL_Metrics_Post_Type::get_post( $slug );
 
 	$group_collection = new OD_URL_Metrics_Group_Collection(
-		$post ? OD_URL_Metrics_Post_Type::parse_post_content( $post ) : array(),
+		$post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 		od_get_breakpoint_max_widths(),
 		od_get_url_metrics_breakpoint_sample_size(),
 		od_get_url_metric_freshness_ttl()

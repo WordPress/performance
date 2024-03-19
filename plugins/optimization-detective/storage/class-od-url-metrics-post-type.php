@@ -108,7 +108,7 @@ class OD_URL_Metrics_Post_Type {
 	 * @param WP_Post $post URL metrics post.
 	 * @return OD_URL_Metric[] URL metrics.
 	 */
-	public static function parse_post_content( WP_Post $post ): array {
+	public static function get_url_metrics_from_post( WP_Post $post ): array {
 		$this_function = __FUNCTION__;
 		$trigger_error = static function ( $error ) use ( $this_function ) {
 			if ( function_exists( 'wp_trigger_error' ) ) {
@@ -190,7 +190,7 @@ class OD_URL_Metrics_Post_Type {
 		if ( $post instanceof WP_Post ) {
 			$post_data['ID']        = $post->ID;
 			$post_data['post_name'] = $post->post_name;
-			$url_metrics            = self::parse_post_content( $post );
+			$url_metrics            = self::get_url_metrics_from_post( $post );
 		} else {
 			$post_data['post_name'] = $slug;
 			$url_metrics            = array();

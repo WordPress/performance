@@ -42,7 +42,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$post = OD_URL_Metrics_Post_Type::get_post( $valid_params['slug'] );
 		$this->assertInstanceOf( WP_Post::class, $post );
 
-		$url_metrics = OD_URL_Metrics_Post_Type::parse_post_content( $post );
+		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
 		$this->assertCount( 1, $url_metrics, 'Expected number of URL metrics stored.' );
 		$this->assertSame( $valid_params['elements'], $url_metrics[0]->get_elements() );
 		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
@@ -163,7 +163,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$post = OD_URL_Metrics_Post_Type::get_post( $params['slug'] );
 		$this->assertInstanceOf( WP_Post::class, $post );
 
-		$url_metrics = OD_URL_Metrics_Post_Type::parse_post_content( $post );
+		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
 		$this->assertCount( 1, $url_metrics );
 		$url_metric = $url_metrics[0];
 		$this->assertNotEquals( $params['timestamp'], $url_metric->get_timestamp() );
@@ -268,7 +268,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 
 		// Sanity check that the groups were constructed as expected.
 		$group_collection  = new OD_URL_Metrics_Group_Collection(
-			OD_URL_Metrics_Post_Type::parse_post_content( OD_URL_Metrics_Post_Type::get_post( od_get_url_metrics_slug( array() ) ) ),
+			OD_URL_Metrics_Post_Type::get_url_metrics_from_post( OD_URL_Metrics_Post_Type::get_post( od_get_url_metrics_slug( array() ) ) ),
 			od_get_breakpoint_max_widths(),
 			od_get_url_metrics_breakpoint_sample_size(),
 			HOUR_IN_SECONDS
