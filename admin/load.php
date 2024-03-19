@@ -13,37 +13,49 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Adds the modules page to the Settings menu.
  *
  * @since 1.0.0
+ * @since n.e.x.t Renamed to perflab_add_features_page().
  */
-function perflab_add_modules_page() {
+function perflab_add_features_page() {
 	$hook_suffix = add_options_page(
-		__( 'Performance Plugins', 'performance-lab' ),
+		__( 'Performance Features', 'performance-lab' ),
 		__( 'Performance', 'performance-lab' ),
 		'manage_options',
 		PERFLAB_MODULES_SCREEN,
-		'perflab_render_modules_page'
+		'perflab_render_settings_page'
 	);
 
 	// Add the following hooks only if the screen was successfully added.
 	if ( false !== $hook_suffix ) {
-		// Handle script enqueuing for settings page.
-		add_action( 'admin_enqueue_scripts', 'perflab_enqueue_modules_page_scripts' );
-
-		// Handle admin notices for settings page.
-		add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
-
+		add_action( "load-{$hook_suffix}", 'perflab_load_settings_page', 10, 0 );
 		add_filter( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' );
 	}
 
 	return $hook_suffix;
 }
-add_action( 'admin_menu', 'perflab_add_modules_page' );
+add_action( 'admin_menu', 'perflab_add_features_page' );
+
+/**
+ * Initializes settings sections and fields for the modules page.
+ *
+ * @since 1.0.0
+ * @since n.e.x.t Renamed to perflab_load_settings_page(), and the
+ *                $module and $hook_suffix parameters were removed.
+ */
+function perflab_load_settings_page() {
+	// Handle script enqueuing for settings page.
+	add_action( 'admin_enqueue_scripts', 'perflab_enqueue_modules_page_scripts' );
+
+	// Handle admin notices for settings page.
+	add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
+}
 
 /**
  * Renders the plugin page.
  *
  * @since 1.0.0
+ * @since n.e.x.t Renamed to perflab_render_settings_page().
  */
-function perflab_render_modules_page() {
+function perflab_render_settings_page() {
 	?>
 	<div class="wrap">
 		<?php perflab_render_plugins_ui(); ?>
@@ -152,7 +164,7 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
  *
  * @since 1.0.0
  *
- * @see perflab_add_modules_page()
+ * @see perflab_add_features_page()
  *
  * @param array $links List of plugin action links HTML.
  * @return array Modified list of plugin action links HTML.

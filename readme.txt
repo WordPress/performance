@@ -13,7 +13,7 @@ Performance plugin from the WordPress Performance Team, which is a collection of
 
 == Description ==
 
-The Performance Lab plugin is a collection of plugins focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin allows to individually enable and test the plugins to get their benefits before they become available in WordPress core, and to provide feedback to further improve the solutions.
+The Performance Lab plugin is a collection of features focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin allows to individually enable and test the features to get their benefits before they become available in WordPress core, and to provide feedback to further improve the solutions.
 
 == Installation ==
 
@@ -32,13 +32,13 @@ The Performance Lab plugin is a collection of plugins focused on enhancing perfo
 = After activation =
 
 1. Visit the new **Settings > Performance** menu.
-2. Enable the individual plugins you would like to use.
+2. Enable the individual features you would like to use.
 
 == Frequently Asked Questions ==
 
 = What is the purpose of this plugin? =
 
-The primary purpose of the Performance Lab plugin is to allow testing of various performance plugins for which the goal is to eventually land in WordPress core. It is essentially a collection of "feature plugins", which makes it different from other performance plugins that offer performance features which are not targeted at WordPress core and potentially rely on functionality that would not be feasible to use in WordPress core. The list of available plugins will regularly change: Existing plugins may be removed after they have been released in WordPress core, while new modules may be added in any release.
+The primary purpose of the Performance Lab plugin is to allow testing of various performance features for which the goal is to eventually land in WordPress core. It is essentially a collection of "feature plugins", which makes it different from other performance plugins that offer performance features which are not targeted at WordPress core and potentially rely on functionality that would not be feasible to use in WordPress core. The list of available features will regularly change: Existing features may be removed after they have been released in WordPress core, while new features may be added in any release.
 
 = Can I use this plugin on my production site? =
 

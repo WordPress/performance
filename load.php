@@ -47,7 +47,7 @@ require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/site-health/load.php';
  *
  * @since 1.1.0
  * @since 2.9.0 The generator tag now includes the active standalone plugin slugs.
- * @since n.e.x.t Remove modules from the generator tag.
+ * @since n.e.x.t The generator tag no longer includes module slugs.
  */
 function perflab_get_generator_content() {
 	$active_plugins = array();
@@ -82,7 +82,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
  * Gets the standalone plugin constants used for each available standalone plugin.
  *
  * @since 2.9.0
- * @since n.e.x.t Remove $source parameter.
+ * @since n.e.x.t The $source parameter was removed.
  *
  * @return array<string, string> Map of plugin slug / module path and the version constant used.
  */
