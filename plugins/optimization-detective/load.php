@@ -35,7 +35,7 @@ require_once __DIR__ . '/class-od-url-metric.php';
 require_once __DIR__ . '/class-od-url-metrics-group.php';
 require_once __DIR__ . '/class-od-url-metrics-group-collection.php';
 require_once __DIR__ . '/class-od-storage-lock.php';
-require_once __DIR__ . '/class-od-url-metrics-post-type.php';
+require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
 require_once __DIR__ . '/storage/data.php';
 require_once __DIR__ . '/storage/rest-api.php';
 

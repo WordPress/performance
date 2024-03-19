@@ -11,7 +11,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-require_once __DIR__ . '/class-od-url-metrics-post-type.php';
+require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
 
 $od_delete_site_data = static function () {
 	// Delete all URL Metrics posts for the current site.
