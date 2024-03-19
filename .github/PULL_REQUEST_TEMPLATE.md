@@ -7,8 +7,12 @@ Fixes #
 
 <!-- Please describe your changes. -->
 
-## Checklist
 
-- [ ] PR has either `[Focus]` or `Infrastructure` label.
-- [ ] PR has a `[Type]` label.
-- [ ] PR has a milestone or the `no milestone` label.
+
+<!--
+For maintainers only, please make sure:
+
+- PR has either `[Focus]` or `Infrastructure` label.
+- PR has a `[Type]` label.
+- PR has a milestone or the `no milestone` label.
+-->

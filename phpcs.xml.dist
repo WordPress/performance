@@ -12,7 +12,7 @@
 	</rule>
 
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
-		<exclude-pattern>server-timing/object-cache.copy.php</exclude-pattern>
+		<exclude-pattern>includes/server-timing/object-cache.copy.php</exclude-pattern>
 	</rule>
 
 	<!-- Check up to 20 files simultaneously. -->

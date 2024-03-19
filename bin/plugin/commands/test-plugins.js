@@ -441,29 +441,27 @@ function doRunStandalonePluginTests( settings ) {
 				.filter( ( plugin ) => {
 					try {
 						fs.copySync(
-							`${ settings.pluginsDir }${ plugin.slug }/`,
-							`${ settings.builtPluginsDir }${ plugin.slug }/`,
+							`${ settings.pluginsDir }${ plugin }/`,
+							`${ settings.builtPluginsDir }${ plugin }/`,
 							{
 								overwrite: true,
 							}
 						);
 						log(
-							formats.success(
-								`Copied plugin "${ plugin.slug }".\n`
-							)
+							formats.success( `Copied plugin "${ plugin }".\n` )
 						);
 						return true;
 					} catch ( e ) {
 						// Handle the error appropriately
 						log(
 							formats.error(
-								`Error copying plugin "${ plugin.slug }": ${ e.message }`
+								`Error copying plugin "${ plugin }": ${ e.message }`
 							)
 						);
 						return false;
 					}
 				} )
-				.map( ( plugin ) => plugin.slug )
+				.map( ( plugin ) => plugin )
 		);
 	} catch ( error ) {
 		throw Error( `Error reading file at "${ pluginsFile }": ${ error }` );
