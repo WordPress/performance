@@ -27,19 +27,24 @@ if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 
 define( 'OPTIMIZATION_DETECTIVE_VERSION', '0.1.0' );
 
-require_once __DIR__ . '/hooks.php';
-
-// Storage logic.
+// Core infrastructure classes.
 require_once __DIR__ . '/class-od-data-validation-exception.php';
 require_once __DIR__ . '/class-od-url-metric.php';
 require_once __DIR__ . '/class-od-url-metrics-group.php';
 require_once __DIR__ . '/class-od-url-metrics-group-collection.php';
-require_once __DIR__ . '/class-od-storage-lock.php';
-require_once __DIR__ . '/storage/post-type.php';
+
+// Storage logic.
+require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
+require_once __DIR__ . '/storage/class-od-storage-lock.php';
 require_once __DIR__ . '/storage/data.php';
 require_once __DIR__ . '/storage/rest-api.php';
 
+// Detection logic.
 require_once __DIR__ . '/detection.php';
 
+// Optimization logic.
 require_once __DIR__ . '/class-od-html-tag-processor.php';
 require_once __DIR__ . '/optimization.php';
+
+// Add hooks for the above requires.
+require_once __DIR__ . '/hooks.php';

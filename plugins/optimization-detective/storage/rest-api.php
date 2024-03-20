@@ -98,10 +98,10 @@ add_action( 'rest_api_init', 'od_register_endpoint' );
  * @return WP_REST_Response|WP_Error Response.
  */
 function od_handle_rest_request( WP_REST_Request $request ) {
-	$post = od_get_url_metrics_post( $request->get_param( 'slug' ) );
+	$post = OD_URL_Metrics_Post_Type::get_post( $request->get_param( 'slug' ) );
 
 	$group_collection = new OD_URL_Metrics_Group_Collection(
-		$post ? od_parse_stored_url_metrics( $post ) : array(),
+		$post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 		od_get_breakpoint_max_widths(),
 		od_get_url_metrics_breakpoint_sample_size(),
 		od_get_url_metric_freshness_ttl()
@@ -151,7 +151,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
-	$result = od_store_url_metric(
+	$result = OD_URL_Metrics_Post_Type::store_url_metric(
 		$request->get_param( 'slug' ),
 		$url_metric
 	);
