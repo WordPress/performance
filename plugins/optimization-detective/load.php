@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Optimization Detective
  * Plugin URI: https://github.com/WordPress/performance/issues/869
- * Description: Improves accuracy of optimizing the loading of the LCP image by leveraging client-side detection with real user metrics. Also enables output buffering of template rendering which can be filtered.
+ * Description: Uses real user metrics to improve heuristics WordPress applies on the frontend to improve image loading priority.
  * Requires at least: 6.3
  * Requires PHP: 7.0
  * Version: 0.1.0
