@@ -9,7 +9,7 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, embeds
 
-Optimize the performance of embeds by lazy-loading them.
+Optimizes the performance of embeds by lazy-loading iframes and scripts.
 
 == Description ==
 
