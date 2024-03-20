@@ -142,10 +142,10 @@ function getIssueType( issue ) {
  * @return {string} The formatted changelog string.
  */
 function formatChangelog( milestone, pullRequests ) {
-	const version = milestone.match( /\d+\.\d+(\.\d+)?(-[A-Za-z0-9\.]+)?/ );
+	const version = milestone.match( /\d+\.\d+(\.\d+)?(-[A-Za-z0-9\.]+)?$/ );
 	if ( ! version ) {
 		throw new Error(
-			`The ${ milestone } milestone does not include a version number.`
+			`The ${ milestone } milestone does not end with a version number.`
 		);
 	}
 
