@@ -266,9 +266,6 @@ final class OD_HTML_Tag_Processor {
 	 * @param string $message Warning message.
 	 */
 	private function warn( string $message ) {
-		if ( ! function_exists( 'wp_trigger_error' ) ) {
-			return;
-		}
 		wp_trigger_error(
 			__CLASS__ . '::open_tags',
 			esc_html( $message )
