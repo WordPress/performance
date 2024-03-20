@@ -155,11 +155,10 @@ function perflab_aao_get_autoloaded_options_table() {
 		$url            = esc_url_raw(
 			add_query_arg(
 				array(
-					'action'       => 'perflab_aao_update_autoload',
-					'_wpnonce'     => $nonce,
-					'option_name'  => $value->option_name,
-					'autoload'     => 'false',
-					'value_length' => esc_attr( $value->option_value_length ),
+					'action'      => 'perflab_aao_update_autoload',
+					'_wpnonce'    => $nonce,
+					'option_name' => $value->option_name,
+					'autoload'    => 'false',
 				),
 				admin_url( 'site-health.php' )
 			)
@@ -177,14 +176,28 @@ function perflab_aao_get_autoloaded_options_table() {
  *
  * @since n.e.x.t
  *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
  * @return string HTML formatted table.
  */
 function perflab_aao_get_disabled_autoloaded_options_table() {
-	$perflab_aao_disabled_options = get_option( 'perflab_aao_modified_options', array() );
+	global $wpdb;
 
-	if ( empty( $perflab_aao_disabled_options ) ) {
+	$disabled_options = get_option( 'perflab_aao_disabled_options', array() );
+
+	if ( empty( $disabled_options ) ) {
 		return '';
 	}
+
+	$disabled_options_summary = $wpdb->get_results(
+		$wpdb->prepare(
+			sprintf(
+				"SELECT option_name, LENGTH(option_value) AS option_value_length FROM $wpdb->options WHERE option_name IN (%s) ORDER BY option_value_length DESC",
+				implode( ',', array_fill( 0, count( $disabled_options ), '%s' ) )
+			),
+			$disabled_options
+		)
+	);
 
 	$html_table = sprintf(
 		'<br><br><table class="widefat striped"><thead><tr><th scope="col">%s</th><th scope="col">%s</th><th scope="col">%s</th></tr></thead><tbody>',
@@ -194,20 +207,20 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 	);
 
 	$nonce = wp_create_nonce( 'perflab_aao_update_autoload' );
-	foreach ( $perflab_aao_disabled_options as $option_name => $value ) {
+	foreach ( $disabled_options_summary as $value ) {
 		$url            = esc_url_raw(
 			add_query_arg(
 				array(
 					'action'      => 'perflab_aao_update_autoload',
 					'_wpnonce'    => $nonce,
-					'option_name' => $option_name,
+					'option_name' => $value->option_name,
 					'autoload'    => 'true',
 				),
 				admin_url( 'site-health.php' )
 			)
 		);
 		$disable_button = sprintf( '<a class="button" href="%s">%s</a>', esc_url( $url ), esc_html__( 'Revert to Autoload', 'performance-lab' ) );
-		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', esc_html( $option_name ), size_format( $value, 2 ), $disable_button );
+		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', esc_html( $value->option_name ), size_format( $value->option_value_length, 2 ), $disable_button );
 	}
 	$html_table .= '</tbody></table>';
 

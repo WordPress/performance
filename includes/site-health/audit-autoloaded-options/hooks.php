@@ -49,9 +49,8 @@ function perflab_aao_handle_update_autoload() {
 		wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
 	}
 
-	$option_name  = sanitize_text_field( wp_unslash( $_GET['option_name'] ) );
-	$autoload     = isset( $_GET['autoload'] ) ? rest_sanitize_boolean( $_GET['autoload'] ) : false;
-	$value_length = isset( $_GET['value_length'] ) ? (int) $_GET['value_length'] : 0;
+	$option_name = sanitize_text_field( wp_unslash( $_GET['option_name'] ) );
+	$autoload    = isset( $_GET['autoload'] ) ? rest_sanitize_boolean( $_GET['autoload'] ) : false;
 
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Permission denied.', 'performance-lab' ) );
@@ -70,14 +69,15 @@ function perflab_aao_handle_update_autoload() {
 	$result = wp_set_option_autoload( $option_name, $autoload );
 
 	if ( $result ) {
-		// Update modified options list.
-		$modified_options = get_option( 'perflab_aao_modified_options', array() );
+		// Update disabled options list.
+		$disabled_options = get_option( 'perflab_aao_disabled_options', array() );
 		if ( ! $autoload ) {
-			$modified_options[ $option_name ] = $value_length;
-		} elseif ( isset( $modified_options[ $option_name ] ) ) {
-			unset( $modified_options[ $option_name ] );
+			$disabled_options[] = $option_name;
+		} elseif ( in_array( $option_name, $disabled_options, true ) ) {
+			$key = array_search( $option_name, $disabled_options, true );
+			unset( $disabled_options[ $key ] );
 		}
-		update_option( 'perflab_aao_modified_options', $modified_options );
+		update_option( 'perflab_aao_disabled_options', $disabled_options );
 
 		if ( wp_safe_redirect( admin_url( 'site-health.php?autoload_updated=true' ) ) ) {
 			exit;
