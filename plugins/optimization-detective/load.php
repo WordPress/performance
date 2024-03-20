@@ -27,13 +27,15 @@ if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 
 define( 'OPTIMIZATION_DETECTIVE_VERSION', '0.1.0' );
 
+// Core infrastructure classes.
+require_once __DIR__ . '/class-od-data-validation-exception.php';
+require_once __DIR__ . '/class-od-url-metric.php';
+require_once __DIR__ . '/class-od-url-metrics-group.php';
+require_once __DIR__ . '/class-od-url-metrics-group-collection.php';
+
 // Storage logic.
-require_once __DIR__ . '/storage/class-od-data-validation-exception.php';
-require_once __DIR__ . '/storage/class-od-url-metric.php';
-require_once __DIR__ . '/storage/class-od-url-metrics-group.php';
-require_once __DIR__ . '/storage/class-od-url-metrics-group-collection.php';
-require_once __DIR__ . '/storage/class-od-storage-lock.php';
 require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
+require_once __DIR__ . '/storage/class-od-storage-lock.php';
 require_once __DIR__ . '/storage/data.php';
 require_once __DIR__ . '/storage/rest-api.php';
 
