@@ -22,7 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'PERFLAB_VERSION', '2.9.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
-define( 'PERFLAB_MODULES_SETTING', 'perflab_modules_settings' );
 define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
 
 // If the constant isn't defined yet, it means the Performance Lab object cache file is not loaded.
