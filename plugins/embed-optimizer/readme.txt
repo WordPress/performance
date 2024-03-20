@@ -9,11 +9,11 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, embeds
 
-Optimize the performance of embeds.
+Optimizes the performance of embeds by lazy-loading iframes and scripts.
 
 == Description ==
 
-Optimize the performance of embeds.
+This plugin's purpose is to optimize the performance of [embeds in WordPress](https://wordpress.org/documentation/article/embeds/), such as YouTube videos, TikToks, and so on. Initially this is achieved by lazy-loading them only when they come into view. This improves performance because embeds are generally very resource-intensive and so lazy-loading them ensures that they don't compete with resources when the page is loading. [Other optimizations](https://github.com/WordPress/performance/issues?q=is%3Aissue+is%3Aopen+label%3A%22%5BPlugin%5D+Embed+Optimizer%22) are planned for the future.
 
 == Installation ==
 
@@ -44,6 +44,8 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 = How can I contribute to the plugin? =
 
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
+
+The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
 
