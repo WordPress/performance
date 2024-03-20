@@ -25,5 +25,6 @@ class OD_Hooks_Tests extends WP_UnitTestCase {
 				)
 			)
 		);
+		$this->assertEquals( 10, has_action( 'wp_head', 'od_render_generator_meta_tag' ) );
 	}
 }
