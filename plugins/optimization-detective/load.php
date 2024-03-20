@@ -27,6 +27,8 @@ if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 
 define( 'OPTIMIZATION_DETECTIVE_VERSION', '0.1.0' );
 
+require_once __DIR__ . '/helper.php';
+
 // Core infrastructure classes.
 require_once __DIR__ . '/class-od-data-validation-exception.php';
 require_once __DIR__ . '/class-od-url-metric.php';
