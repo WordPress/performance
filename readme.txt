@@ -9,7 +9,7 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
 
-Performance plugin from the WordPress Performance Team, which is a collection of standalone performance plugins.
+Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
 
 == Description ==
 
@@ -42,7 +42,7 @@ The primary purpose of the Performance Lab plugin is to allow testing of various
 
 = Can I use this plugin on my production site? =
 
-Per the primary purpose of the plugin (see above), it can mostly be considered a beta testing plugin for the various performance modules it includes. However, unless a module is explicitly marked as "experimental", it has been tested and established to a degree where it should be okay to use in production. Still, as with every plugin, you are doing so at your own risk.
+Per the primary purpose of the plugin (see above), it can mostly be considered a beta testing plugin for the various performance features it includes. However, it's essential to understand that utilizing it comes with inherent risks. Users are encouraged to proceed with caution and understand that they are doing so at their own risk.
 
 = Where can I submit my plugin feedback? =
 

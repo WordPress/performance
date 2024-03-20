@@ -2,7 +2,7 @@
   "name": "wordpress/performance",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
-  "description": "Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.",
+  "description": "Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.",
   "homepage": "https://wordpress.org/plugins/performance-lab/",
   "keywords": [
     "performance",

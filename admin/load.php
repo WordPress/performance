@@ -26,7 +26,7 @@ function perflab_add_features_page() {
 
 	// Add the following hooks only if the screen was successfully added.
 	if ( false !== $hook_suffix ) {
-		add_action( "load-{$hook_suffix}", 'perflab_load_settings_page', 10, 0 );
+		add_action( "load-{$hook_suffix}", 'perflab_load_features_page', 10, 0 );
 		add_filter( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' );
 	}
 
@@ -38,10 +38,10 @@ add_action( 'admin_menu', 'perflab_add_features_page' );
  * Initializes settings sections and fields for the modules page.
  *
  * @since 1.0.0
- * @since n.e.x.t Renamed to perflab_load_settings_page(), and the
+ * @since n.e.x.t Renamed to perflab_load_features_page(), and the
  *                $module and $hook_suffix parameters were removed.
  */
-function perflab_load_settings_page() {
+function perflab_load_features_page() {
 	// Handle script enqueuing for settings page.
 	add_action( 'admin_enqueue_scripts', 'perflab_enqueue_modules_page_scripts' );
 
