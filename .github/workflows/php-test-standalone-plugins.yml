@@ -51,7 +51,7 @@ jobs:
         wp: [ 'latest' ]
         include:
         - php: '7.4'
-          wp: '6.3'
+          wp: '6.4'
         - php: '8.3'
           wp: 'trunk'
     env:
