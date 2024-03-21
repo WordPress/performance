@@ -299,7 +299,7 @@ add_action( 'admin_init', 'perflab_cleanup_option' );
 
 // Only load admin integration when in admin.
 if ( is_admin() ) {
-	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/load.php';
-	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/server-timing.php';
-	require_once PERFLAB_PLUGIN_DIR_PATH . 'admin/plugins.php';
+	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/load.php';
+	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/server-timing.php';
+	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/plugins.php';
 }
