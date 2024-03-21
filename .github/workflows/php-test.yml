@@ -1,132 +1,85 @@
 ---
-  name: PHP Unit Tests
+name: PHP Unit Tests
 
-  on:
-    push:
-      branches:
-        - trunk
-        - 'release/**'
-    pull_request:
-      types:
-        - opened
-        - reopened
-        - synchronize
+on:
+  push:
+    branches:
+      - trunk
+      - 'release/**'
+    paths:
+      - '.github/workflows/php-test.yml'
+      - '**/*.php'
+      - 'phpunit.xml.dist'
+      - 'composer.json'
+      - 'composer.lock'
+      - '!plugins/**'
+  pull_request:
+    paths:
+      - '.github/workflows/php-test.yml'
+      - '**/*.php'
+      - 'phpunit.xml.dist'
+      - 'composer.json'
+      - 'composer.lock'
+      - '!plugins/**'
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
 
-  permissions: {}
+permissions: {}
 
-  env:
-    WP_CORE_DIR: /tmp/wordpress
-    WP_TESTS_DIR: /tmp/wordpress-tests-lib
-    WP_ENVIRONMENT_TYPE: local
+env:
+  WP_CORE_DIR: /tmp/wordpress
+  WP_TESTS_DIR: /tmp/wordpress-tests-lib
+  WP_ENVIRONMENT_TYPE: local
 
-  jobs:
-    pre-run:
-      name: 'Pre Run'
-      runs-on: ubuntu-latest
-      outputs:
-        plugins: ${{ steps.modified-plugins.outputs.json }}
-        environment: ${{ steps.environment-matrix.outputs.json }}
-      steps:
-        # For push events, checkout the last 2 commits to determine the modified files
-        - name: Checkout (push event)
-          if: ${{ github.base_ref == null }}
-          uses: actions/checkout@v4
-          with:
-            fetch-depth: 2
+jobs:
+  unit-tests:
+    name: "Performance Lab / PHP ${{ matrix.environment.php }} / WP ${{ matrix.environment.wp }} ${{ 'true' == matrix.multisite && '/ Multisite' || ''}}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      mysql:
+        image: mariadb:latest
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
+          MARIADB_DATABASE: wordpress_test
+          MARIADB_MYSQL_LOCALHOST_USER: 1
+          MARIADB_MYSQL_LOCALHOST_GRANTS: USAGE
+        ports:
+          - 3306
+        options: --health-cmd="healthcheck.sh --su-mysql --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+    strategy:
+      fail-fast: false
+      matrix:
+        multisite: ['false', 'true']
+        environment: [
+          { "php": "7.0", "phpunit": "6", "wp": "latest" },
+          { "php": "7.1", "phpunit": "7", "wp": "latest" },
+          { "php": "7.2", "phpunit": "7", "wp": "latest" },
+          { "php": "7.3", "phpunit": "7", "wp": "latest" },
+          { "php": "7.4", "phpunit": "9.3", "wp": "latest" },
+          { "php": "8.0", "phpunit": "9.3", "wp": "latest" },
+          { "php": "8.1", "phpunit": "9.6", "wp": "latest" },
+          { "php": "8.2", "phpunit": "9.6", "wp": "latest" }
+        ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-        - name: Checkout (pull request event)
-          if: ${{ github.base_ref != null }}
-          uses: actions/checkout@v4
+      - name: Setup WP tests
+        uses: ./.github/actions/setup-wp-tests
+        with:
+          wp: ${{ matrix.environment.wp }}
+          php: ${{ matrix.environment.php }}
+          phpunit: ${{ matrix.environment.phpunit }}
+          mysql-port: ${{ job.services.mysql.ports['3306'] }}
 
-        - name: Determine modified files
-          id: modified-files
-          uses: tj-actions/changed-files@v43
-          with:
-            files: |
-              **/*.php
-              .github/workflows/php-test.yml
-              phpunit.xml.dist
-              composer.json
-              composer.lock
-
-        - name: Identify modified plugins
-          if: steps.modified-files.outputs.any_changed == 'true'
-          id: modified-plugins
-          run: |
-            PLUGINS_MODIFIED=()
-            PLUGINS=$(jq -r '.plugins[]' plugins.json)
-            for file in $MODIFIED_FILES; do
-              for plugin in $PLUGINS; do
-                if [[ $file == *"plugins/$plugin/"* && ! " ${PLUGINS_MODIFIED[@]} " =~ " ${plugin} " ]]; then
-                    PLUGINS_MODIFIED+=($plugin)
-                    MODIFIED_FILES=(${MODIFIED_FILES[@]/$file})
-                fi
-              done
-            done
-
-            # Changes apart from `plugins/` directory are `performance-lab` plugin changes.
-            if [ ${#MODIFIED_FILES[@]} -gt 0 ]; then
-              PLUGINS_MODIFIED+=("performance-lab")
-            fi
-
-            PLUGINS_MODIFIED=$(jq -n --arg plugins "${PLUGINS_MODIFIED[*]}" '$plugins | split(" ")')
-            echo "json=$(echo $PLUGINS_MODIFIED | jq -c .)" >> $GITHUB_OUTPUT
-          env:
-            MODIFIED_FILES: ${{ steps.modified-files.outputs.all_changed_files }}
-
-        - name: Create Environment Matrix
-          id: environment-matrix
-          run: |
-            raw_json="[
-                { \"php\": \"7.0\", \"phpunit\": \"6\", \"wp\": \"latest\" },
-                { \"php\": \"7.1\", \"phpunit\": \"7\", \"wp\": \"latest\" },
-                { \"php\": \"7.2\", \"phpunit\": \"7\", \"wp\": \"latest\" },
-                { \"php\": \"7.3\", \"phpunit\": \"7\", \"wp\": \"latest\" },
-                { \"php\": \"7.4\", \"phpunit\": \"9.3\", \"wp\": \"latest\" },
-                { \"php\": \"8.0\", \"phpunit\": \"9.3\", \"wp\": \"latest\" },
-                { \"php\": \"8.1\", \"phpunit\": \"9.6\", \"wp\": \"latest\" },
-                { \"php\": \"8.2\", \"phpunit\": \"9.6\", \"wp\": \"latest\" }
-            ]"
-            echo "json=$(echo $raw_json | jq -c .)" >> $GITHUB_OUTPUT
-
-    phpunit-tests:
-      name: "Plugin: ${{ matrix.plugin }} / PHP ${{ matrix.environment.php }} / WP ${{ matrix.environment.wp }} ${{ 'true' == matrix.multisite && '/ Multisite' || ''}}"
-      needs: pre-run
-      runs-on: ubuntu-latest
-      timeout-minutes: 20
-      services:
-        mysql:
-          image: mariadb:latest
-          env:
-            MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
-            MARIADB_DATABASE: wordpress_test
-            MARIADB_MYSQL_LOCALHOST_USER: 1
-            MARIADB_MYSQL_LOCALHOST_GRANTS: USAGE
-          ports:
-            - 3306
-          options: --health-cmd="healthcheck.sh --su-mysql --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
-      strategy:
-        fail-fast: false
-        matrix:
-          multisite: ['false', 'true']
-          plugin: ${{ fromJson(needs.pre-run.outputs.plugins) }}
-          environment: ${{ fromJson(needs.pre-run.outputs.environment) }}
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
-
-        - name: Setup WP tests
-          uses: ./.github/actions/setup-wp-tests
-          with:
-            wp: ${{ matrix.environment.wp }}
-            php: ${{ matrix.environment.php }}
-            phpunit: ${{ matrix.environment.phpunit }}
-            mysql-port: ${{ job.services.mysql.ports['3306'] }}
-
-        - name: Run ${{ 'true' == matrix.multisite && 'Multisite' || 'Single Site' }} tests
-          shell: bash
-          run: |
-            phpunit ${{ 'true' == matrix.multisite && '--exclude-group=ms-excluded' || '' }} --verbose
-          working-directory:  ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance/${{ 'performance-lab' == matrix.plugin && '' || 'plugins/' }}${{ matrix.plugin }}
-          env:
-            WP_MULTISITE: ${{ 'true' == matrix.multisite && 1 || 0 }}
+      - name: Run ${{ 'true' == matrix.multisite && 'Multisite' || 'Single Site' }} tests
+        shell: bash
+        run: |
+          phpunit ${{ 'true' == matrix.multisite && '--exclude-group=ms-excluded' || '' }} --verbose
+        working-directory:  ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance
+        env:
+          WP_MULTISITE: ${{ 'true' == matrix.multisite && 1 || 0 }}
