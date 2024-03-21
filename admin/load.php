@@ -131,7 +131,7 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
 	<script id="<?php echo esc_attr( $pointer_id ); ?>" type="text/javascript">
 		jQuery( function() {
 			// Pointer Options.
-			var options = {
+			const options = {
 				content: <?php echo wp_json_encode( '<h3>' . esc_html( $args['heading'] ) . '</h3><p>' . wp_kses( $args['content'], $wp_kses_options ) . '</p>' ); ?>,
 				position: {
 					edge:  'left',
