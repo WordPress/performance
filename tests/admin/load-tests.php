@@ -20,7 +20,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		// The default user does not have the 'manage_options' capability.
 		$hook_suffix = perflab_add_features_page();
 		$this->assertFalse( $hook_suffix );
-		$this->assertTrue( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_MODULES_SCREEN ] ) );
+		$this->assertTrue( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_SCREEN ] ) );
 		// Ensure plugin action link is not added.
 		$this->assertFalse( (bool) has_action( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' ) );
 
@@ -32,8 +32,8 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
 		$hook_suffix = perflab_add_features_page();
-		$this->assertSame( get_plugin_page_hookname( PERFLAB_MODULES_SCREEN, 'options-general.php' ), $hook_suffix );
-		$this->assertFalse( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_MODULES_SCREEN ] ) );
+		$this->assertSame( get_plugin_page_hookname( PERFLAB_SCREEN, 'options-general.php' ), $hook_suffix );
+		$this->assertFalse( isset( $_wp_submenu_nopriv['options-general.php'][ PERFLAB_SCREEN ] ) );
 		// Ensure plugin action link is added.
 		$this->assertTrue( (bool) has_action( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' ) );
 
@@ -47,13 +47,13 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		perflab_render_settings_page();
 		$output = ob_get_clean();
 		$this->assertStringContainsString( '<div class="wrap">', $output );
-		$this->assertStringNotContainsString( "<input type='hidden' name='option_page' value='" . PERFLAB_MODULES_SCREEN . "' />", $output );
+		$this->assertStringNotContainsString( "<input type='hidden' name='option_page' value='" . PERFLAB_SCREEN . "' />", $output );
 	}
 
 	public function test_perflab_plugin_action_links_add_settings() {
 		$original_links = array( '<a href="https://wordpress.org">wordpress.org</a>' );
 		$expected_links = array(
-			'<a href="' . admin_url( '/' ) . 'options-general.php?page=' . PERFLAB_MODULES_SCREEN . '">Settings</a>',
+			'<a href="' . admin_url( '/' ) . 'options-general.php?page=' . PERFLAB_SCREEN . '">Settings</a>',
 			$original_links[0],
 		);
 

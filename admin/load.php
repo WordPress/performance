@@ -20,7 +20,7 @@ function perflab_add_features_page() {
 		__( 'Performance Features', 'performance-lab' ),
 		__( 'Performance', 'performance-lab' ),
 		'manage_options',
-		PERFLAB_MODULES_SCREEN,
+		PERFLAB_SCREEN,
 		'perflab_render_settings_page'
 	);
 
@@ -117,7 +117,7 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
 		$args['content'] = sprintf(
 			/* translators: %s: settings page link */
 			esc_html__( 'You can now test upcoming WordPress performance features. Open %s to individually toggle the performance features.', 'performance-lab' ),
-			'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . esc_html__( 'Settings > Performance', 'performance-lab' ) . '</a>'
+			'<a href="' . esc_url( add_query_arg( 'page', PERFLAB_SCREEN, admin_url( 'options-general.php' ) ) ) . '">' . esc_html__( 'Settings > Performance', 'performance-lab' ) . '</a>'
 		);
 	}
 
@@ -173,7 +173,7 @@ function perflab_plugin_action_links_add_settings( $links ) {
 	// Add link as the first plugin action link.
 	$settings_link = sprintf(
 		'<a href="%s">%s</a>',
-		esc_url( add_query_arg( 'page', PERFLAB_MODULES_SCREEN, admin_url( 'options-general.php' ) ) ),
+		esc_url( add_query_arg( 'page', PERFLAB_SCREEN, admin_url( 'options-general.php' ) ) ),
 		esc_html__( 'Settings', 'performance-lab' )
 	);
 	array_unshift( $links, $settings_link );

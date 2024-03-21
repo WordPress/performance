@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'PERFLAB_VERSION', '2.9.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
-define( 'PERFLAB_MODULES_SCREEN', 'perflab-modules' );
+define( 'PERFLAB_SCREEN', 'performance-lab' );
 
 // If the constant isn't defined yet, it means the Performance Lab object cache file is not loaded.
 if ( ! defined( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION' ) ) {
@@ -260,6 +260,41 @@ function perflab_maybe_remove_object_cache_dropin() {
 	delete_transient( 'perflab_set_object_cache_dropin' );
 }
 register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin' );
+
+/**
+ * Redirects module pages to the peformance feature page.
+ *
+ * @since n.e.x.t
+ *
+ * @global $plugin_page
+ */
+function perflab_no_access_redirect_module_to_peformance_feature_page() {
+	global $plugin_page;
+
+	if ( 'perflab-modules' !== $plugin_page ) {
+		return;
+	}
+
+	if ( current_user_can( 'manage_options' ) ) {
+		wp_safe_redirect(
+			add_query_arg( 'page', PERFLAB_SCREEN )
+		);
+		exit;
+	}
+}
+add_action( 'admin_page_access_denied', 'perflab_no_access_redirect_module_to_peformance_feature_page' );
+
+/**
+ * Cleanup function to delete 'perflab_modules_settings' option if present.
+ *
+ * @since n.e.x.t
+ */
+function perflab_cleanup_option() {
+	if ( current_user_can( 'manage_options' ) && get_option( 'perflab_modules_settings' ) ) {
+		delete_option( 'perflab_modules_settings' );
+	}
+}
+add_action( 'admin_init', 'perflab_cleanup_option' );
 
 // Only load admin integration when in admin.
 if ( is_admin() ) {
