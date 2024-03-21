@@ -79,6 +79,10 @@ function detectReadmePath( milestone ) {
 		return 'readme.txt';
 	}
 
+	if ( ! fs.existsSync( path.join( '.', `plugins/${ slug[ 1 ] }` ) ) ) {
+		throw new Error( `Unknown plugin with slug '${ slug[ 1 ] }'` );
+	}
+
 	return `plugins/${ slug[ 1 ] }/readme.txt`;
 }
 
