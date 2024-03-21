@@ -35,17 +35,9 @@ const {
 	options: readmeOptions,
 } = require( './commands/readme' );
 const {
-	handler: translationsHandler,
-	options: translationsOptions,
-} = require( './commands/translations' );
-const {
 	handler: testPluginsHandler,
 	options: testPluginsOptions,
 } = require( './commands/test-plugins' );
-const {
-	handler: enabledModulesHandler,
-	options: enabledModulesOptions,
-} = require( './commands/enabled-modules' );
 const {
 	handler: sinceHandler,
 	options: sinceOptions,
@@ -66,24 +58,9 @@ withOptions( program.command( 'plugin-readme' ), readmeOptions )
 	.description( 'Updates the readme.txt file' )
 	.action( catchException( readmeHandler ) );
 
-withOptions( program.command( 'module-translations' ), translationsOptions )
-	.alias( 'translations' )
-	.description(
-		'Generates a PHP file from module header translation strings'
-	)
-	.action( catchException( translationsHandler ) );
-
 withOptions( program.command( 'test-standalone-plugins' ), testPluginsOptions )
 	.alias( 'test-plugins' )
 	.description( 'Test standalone plugins' )
 	.action( catchException( testPluginsHandler ) );
-
-withOptions(
-	program.command( 'default-enabled-modules' ),
-	enabledModulesOptions
-)
-	.alias( 'enabled-modules' )
-	.description( 'Generates a PHP file with non-experimental module slugs' )
-	.action( catchException( enabledModulesHandler ) );
 
 program.parse( process.argv );

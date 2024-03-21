@@ -24,12 +24,6 @@ jobs:
     steps:
       - if: contains( env.LABELS, '[Type]' ) == false
         run: exit 1
-  check-focus-label:
-    name: Check [Focus] Label
-    runs-on: ubuntu-latest
-    steps:
-      - if: contains( env.LABELS, '[Focus]' ) == false && contains( env.LABELS, 'Infrastructure' ) == false
-        run: exit 1
   check-milestone:
     name: Check Milestone
     runs-on: ubuntu-latest

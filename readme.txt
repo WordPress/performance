@@ -9,19 +9,11 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, javascript, site health, measurement, object caching
 
-Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
+Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
 
 == Description ==
 
-The Performance Lab plugin is a collection of modules focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin allows to individually enable and test the modules to get their benefits before they become available in WordPress core, and to provide feedback to further improve the solutions.
-
-Currently the plugin includes the following performance modules:
-
-* **Dominant Color Images:** Adds support to store the dominant color of newly uploaded images and create a placeholder background of that color.
-* **WebP Support Health Check:** Adds a WebP support check in Site Health status.
-* **WebP Uploads:** Creates WebP versions for new JPEG image uploads if supported by the server.
-* **Enqueued Assets Health Check:** Adds a CSS and JS resource check in Site Health status.
-* **Autoloaded Options Health Check:** Adds a check for autoloaded options in Site Health status.
+The Performance Lab plugin is a collection of features focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin allows to individually enable and test the features to get their benefits before they become available in WordPress core, and to provide feedback to further improve the solutions.
 
 == Installation ==
 
@@ -40,17 +32,17 @@ Currently the plugin includes the following performance modules:
 = After activation =
 
 1. Visit the new **Settings > Performance** menu.
-2. Enable the individual modules you would like to use.
+2. Enable the individual features you would like to use.
 
 == Frequently Asked Questions ==
 
 = What is the purpose of this plugin? =
 
-The primary purpose of the Performance Lab plugin is to allow testing of various performance modules for which the goal is to eventually land in WordPress core. It is essentially a collection of "feature plugins", which makes it different from other performance plugins that offer performance features which are not targeted at WordPress core and potentially rely on functionality that would not be feasible to use in WordPress core. The list of available modules will regularly change: Existing modules may be removed after they have been released in WordPress core, while new modules may be added in any release.
+The primary purpose of the Performance Lab plugin is to allow testing of various performance features for which the goal is to eventually land in WordPress core. It is essentially a collection of "feature plugins", which makes it different from other performance plugins that offer performance features which are not targeted at WordPress core and potentially rely on functionality that would not be feasible to use in WordPress core. The list of available features will regularly change: Existing features may be removed after they have been released in WordPress core, while new features may be added in any release.
 
 = Can I use this plugin on my production site? =
 
-Per the primary purpose of the plugin (see above), it can mostly be considered a beta testing plugin for the various performance modules it includes. However, unless a module is explicitly marked as "experimental", it has been tested and established to a degree where it should be okay to use in production. Still, as with every plugin, you are doing so at your own risk.
+Per the primary purpose of the plugin (see above), it can mostly be considered a beta testing plugin for the various performance features it includes. However, it's essential to understand that utilizing it comes with inherent risks. Users are encouraged to proceed with caution and understand that they are doing so at their own risk.
 
 = Where can I submit my plugin feedback? =
 
