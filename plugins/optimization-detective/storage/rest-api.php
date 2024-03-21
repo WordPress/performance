@@ -38,26 +38,13 @@ const OD_URL_METRICS_ROUTE = '/url-metrics:store';
 function od_register_endpoint() {
 
 	$args = array(
-		'url'   => array(
-			'type'              => 'string',
-			'description'       => __( 'The URL for which the metric was obtained.', 'optimization-detective' ),
-			'required'          => true,
-			'format'            => 'uri',
-			'validate_callback' => static function ( $url ) {
-				if ( ! wp_validate_redirect( $url ) ) {
-					return new WP_Error( 'non_origin_url', __( 'URL for another site provided.', 'optimization-detective' ) );
-				}
-				// TODO: This is not validated as corresponding to the slug in any way. True it is not used for anything but metadata.
-				return true;
-			},
-		),
 		'slug'  => array(
 			'type'        => 'string',
 			'description' => __( 'An MD5 hash of the query args.', 'optimization-detective' ),
 			'required'    => true,
 			'pattern'     => '^[0-9a-f]{32}$',
-			// This is validated via the nonce validate_callback, as it is provided as input to create the nonce by the server
-			// which then is verified to match in the REST API request.
+			// This is further validated via the validate_callback for the nonce argument, as it is provided as input
+			// with the 'url' argument to create the nonce by the server. which then is verified to match in the REST API request.
 		),
 		'nonce' => array(
 			'type'              => 'string',
@@ -65,7 +52,7 @@ function od_register_endpoint() {
 			'required'          => true,
 			'pattern'           => '^[0-9a-f]+$',
 			'validate_callback' => static function ( $nonce, WP_REST_Request $request ) {
-				if ( ! od_verify_url_metrics_storage_nonce( $nonce, $request->get_param( 'slug' ) ) ) {
+				if ( ! od_verify_url_metrics_storage_nonce( $nonce, $request->get_param( 'slug' ), $request->get_param( 'url' ) ) ) {
 					return new WP_Error( 'invalid_nonce', __( 'URL metrics nonce verification failure.', 'optimization-detective' ) );
 				}
 				return true;
@@ -111,10 +98,10 @@ add_action( 'rest_api_init', 'od_register_endpoint' );
  * @return WP_REST_Response|WP_Error Response.
  */
 function od_handle_rest_request( WP_REST_Request $request ) {
-	$post = od_get_url_metrics_post( $request->get_param( 'slug' ) );
+	$post = OD_URL_Metrics_Post_Type::get_post( $request->get_param( 'slug' ) );
 
 	$group_collection = new OD_URL_Metrics_Group_Collection(
-		$post ? od_parse_stored_url_metrics( $post ) : array(),
+		$post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 		od_get_breakpoint_max_widths(),
 		od_get_url_metrics_breakpoint_sample_size(),
 		od_get_url_metric_freshness_ttl()
@@ -164,8 +151,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
-	$result = od_store_url_metric(
-		$request->get_param( 'url' ),
+	$result = OD_URL_Metrics_Post_Type::store_url_metric(
 		$request->get_param( 'slug' ),
 		$url_metric
 	);

@@ -30,7 +30,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	public function test_rest_request_good_params() {
 		$request      = new WP_REST_Request( 'POST', self::ROUTE );
 		$valid_params = $this->get_valid_params();
-		$this->assertCount( 0, get_posts( array( 'post_type' => OD_URL_METRICS_POST_TYPE ) ) );
+		$this->assertCount( 0, get_posts( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) ) );
 		$request->set_body_params( $valid_params );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 200, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
@@ -38,11 +38,11 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$data = $response->get_data();
 		$this->assertTrue( $data['success'] );
 
-		$this->assertCount( 1, get_posts( array( 'post_type' => OD_URL_METRICS_POST_TYPE ) ) );
-		$post = od_get_url_metrics_post( $valid_params['slug'] );
+		$this->assertCount( 1, get_posts( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) ) );
+		$post = OD_URL_Metrics_Post_Type::get_post( $valid_params['slug'] );
 		$this->assertInstanceOf( WP_Post::class, $post );
 
-		$url_metrics = od_parse_stored_url_metrics( $post );
+		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
 		$this->assertCount( 1, $url_metrics, 'Expected number of URL metrics stored.' );
 		$this->assertSame( $valid_params['elements'], $url_metrics[0]->get_elements() );
 		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
@@ -66,9 +66,6 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 				'bad_url'                                  => array(
 					'url' => 'bad://url',
 				),
-				'other_origin_url'                         => array(
-					'url' => 'https://bogus.example.com/',
-				),
 				'bad_slug'                                 => array(
 					'slug' => '<script>document.write("evil")</script>',
 				),
@@ -76,7 +73,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 					'nonce' => 'not even a hash',
 				),
 				'invalid_nonce'                            => array(
-					'nonce' => od_get_url_metrics_storage_nonce( od_get_url_metrics_slug( array( 'different' => 'query vars' ) ) ),
+					'nonce' => od_get_url_metrics_storage_nonce( od_get_url_metrics_slug( array( 'different' => 'query vars' ) ), home_url( '/' ) ),
 				),
 				'invalid_viewport_type'                    => array(
 					'viewport' => '640x480',
@@ -139,7 +136,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
 
-		$this->assertNull( od_get_url_metrics_post( $params['slug'] ) );
+		$this->assertNull( OD_URL_Metrics_Post_Type::get_post( $params['slug'] ) );
 	}
 
 	/**
@@ -163,10 +160,10 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 
 		$this->assertSame( 200, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 
-		$post = od_get_url_metrics_post( $params['slug'] );
+		$post = OD_URL_Metrics_Post_Type::get_post( $params['slug'] );
 		$this->assertInstanceOf( WP_Post::class, $post );
 
-		$url_metrics = od_parse_stored_url_metrics( $post );
+		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
 		$this->assertCount( 1, $url_metrics );
 		$url_metric = $url_metrics[0];
 		$this->assertNotEquals( $params['timestamp'], $url_metric->get_timestamp() );
@@ -271,7 +268,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 
 		// Sanity check that the groups were constructed as expected.
 		$group_collection  = new OD_URL_Metrics_Group_Collection(
-			od_parse_stored_url_metrics( od_get_url_metrics_post( od_get_url_metrics_slug( array() ) ) ),
+			OD_URL_Metrics_Post_Type::get_url_metrics_from_post( OD_URL_Metrics_Post_Type::get_post( od_get_url_metrics_slug( array() ) ) ),
 			od_get_breakpoint_max_widths(),
 			od_get_url_metrics_breakpoint_sample_size(),
 			HOUR_IN_SECONDS
@@ -355,13 +352,13 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 */
 	private function get_valid_params( array $extras = array() ): array {
 		$slug = od_get_url_metrics_slug( array() );
+		$data = $this->get_sample_validated_url_metric();
 		$data = array_merge(
 			array(
-				'url'   => home_url( '/' ),
 				'slug'  => $slug,
-				'nonce' => od_get_url_metrics_storage_nonce( $slug ),
+				'nonce' => od_get_url_metrics_storage_nonce( $slug, $data['url'] ),
 			),
-			$this->get_sample_validated_url_metric()
+			$data
 		);
 		unset( $data['timestamp'] ); // Since provided by default args.
 		if ( $extras ) {
@@ -401,6 +398,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 */
 	private function get_sample_validated_url_metric(): array {
 		return array(
+			'url'       => home_url( '/' ),
 			'viewport'  => array(
 				'width'  => 480,
 				'height' => 640,

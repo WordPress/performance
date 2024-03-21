@@ -8,41 +8,23 @@
 class OD_Hooks_Tests extends WP_UnitTestCase {
 
 	/**
-	 * Make sure the hook is added.
-	 */
-	public function test_hooking_output_buffering_at_template_include() {
-		$this->assertEquals( PHP_INT_MAX, has_filter( 'template_include', 'od_buffer_output' ) );
-	}
-
-	/**
-	 * Make output is buffered and that it is also filtered.
+	 * Make sure the hooks are added in hooks.php.
 	 *
-	 * @covers ::od_buffer_output
+	 * @see OD_Storage_Post_Type_Tests::test_add_hooks()
 	 */
-	public function test_buffering_and_filtering_output() {
-		$original = 'Hello World!';
-		$expected = '¡Hola Mundo!';
-
-		// In order to test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
-		// buffer callback. See <https://stackoverflow.com/a/61439514/93579>.
-		ob_start();
-
-		add_filter(
-			'od_template_output_buffer',
-			function ( $buffer ) use ( $original, $expected ) {
-				$this->assertSame( $original, $buffer );
-				return $expected;
-			}
+	public function test_hooks_added() {
+		$this->assertEquals( PHP_INT_MAX, has_filter( 'template_include', 'od_buffer_output' ) );
+		$this->assertEquals( 10, has_filter( 'wp', 'od_maybe_add_template_output_buffer_filter' ) );
+		$this->assertSame(
+			10,
+			has_action(
+				'init',
+				array(
+					OD_URL_Metrics_Post_Type::class,
+					'register_post_type',
+				)
+			)
 		);
-
-		$original_ob_level = ob_get_level();
-		od_buffer_output( '' );
-		$this->assertSame( $original_ob_level + 1, ob_get_level(), 'Expected call to ob_start().' );
-		echo $original;
-
-		ob_end_flush(); // Flushing invokes the output buffer callback.
-
-		$buffer = ob_get_clean(); // Get the buffer from our wrapper output buffer.
-		$this->assertSame( $expected, $buffer );
+		$this->assertEquals( 10, has_action( 'wp_head', 'od_render_generator_meta_tag' ) );
 	}
 }

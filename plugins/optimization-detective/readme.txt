@@ -9,11 +9,11 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images
 
-Improves accuracy of optimizing the loading of the LCP image by leveraging client-side detection with real user metrics.
+Uses real user metrics to improve heuristics WordPress applies on the frontend to improve image loading priority.
 
 == Description ==
 
-Improves accuracy of optimizing the loading of the LCP image by leveraging client-side detection with real user metrics. For more information, see the [overview issue](https://github.com/WordPress/performance/issues/869) on GitHub.
+This plugin uses real user metrics to improve heuristics WordPress applies on the frontend to improve image loading priority For more information, see the [overview issue](https://github.com/WordPress/performance/issues/869) on GitHub.
 
 == Installation ==
 
@@ -44,6 +44,8 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 = How can I contribute to the plugin? =
 
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
+
+The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
 
