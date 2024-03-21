@@ -1,7 +1,7 @@
 === Speculation Rules ===
 
 Contributors:      wordpressdotorg
-Requires at least: 6.3
+Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.0
 Stable tag:        1.1.0
@@ -103,6 +103,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 = 1.1.0 =
 
 * Allow excluding URL patterns from prerendering or prefetching specifically. ([1025](https://github.com/WordPress/performance/pull/1025))
+* Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 
 = 1.0.1 =
