@@ -2,6 +2,7 @@
   "plugins": [
     "auto-sizes",
     "dominant-color-images",
+    "embed-optimizer",
     "speculation-rules",
     "webp-uploads"
   ]

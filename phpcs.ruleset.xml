@@ -89,5 +89,10 @@
 		</properties>
 	</rule>
 
+	<!-- Do not apply script rules for unit tests -->
+	<rule ref="WordPress.WP.EnqueuedResources.NonEnqueuedScript">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
 	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
 </ruleset>
