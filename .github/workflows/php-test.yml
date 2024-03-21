@@ -17,10 +17,6 @@ on:
       - 'composer.json'
       - 'composer.lock'
   pull_request:
-    branches:
-      - trunk
-      - 'release/**'
-      - 'feature/**'
     # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-test.yml'
@@ -50,7 +46,7 @@ jobs:
         wp: [ 'latest' ]
         include:
           - php: '7.4'
-            wp: '6.3'
+            wp: '6.4'
           - php: '8.3'
             wp: 'trunk'
     env:

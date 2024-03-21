@@ -3,7 +3,7 @@
  * Plugin Name: Auto-sizes for Lazy-loaded Images
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/auto-sizes
  * Description: This plugin implements the HTML spec for adding `sizes="auto"` to lazy-loaded images.
- * Requires at least: 6.3
+ * Requires at least: 6.4
  * Requires PHP: 7.0
  * Version: 1.0.1
  * Author: WordPress Performance Team

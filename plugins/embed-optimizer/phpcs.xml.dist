@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="WPP-EmbedOptimizer">
+	<description>WordPress Coding Standards for Embed Optimizer Plugin</description>
+
+	<rule ref="../../phpcs.ruleset.xml"/>
+
+	<config name="text_domain" value="embed-optimizer"/>
+
+	<file>.</file>
+</ruleset>

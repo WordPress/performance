@@ -50,7 +50,7 @@ class Speculation_Rules_Tests extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'prerender', $rules );
 
 		// Make sure that theme support was restored. This is only relevant to WordPress 6.4 per https://core.trac.wordpress.org/ticket/60320.
-		if ( $html5_support || version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.4', '<' ) ) {
+		if ( $html5_support ) {
 			$this->assertStringNotContainsString( '/* <![CDATA[ */', wp_get_inline_script_tag( '/*...*/' ) );
 		} else {
 			$this->assertStringContainsString( '/* <![CDATA[ */', wp_get_inline_script_tag( '/*...*/' ) );

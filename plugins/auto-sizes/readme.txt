@@ -50,6 +50,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.0.1 =
 
+* Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 
 = 1.0.0 =

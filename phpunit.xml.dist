@@ -18,6 +18,9 @@
 		<testsuite name="dominant-color-images">
 			<directory suffix=".php">./tests/plugins/dominant-color-images</directory>
 		</testsuite>
+		<testsuite name="embed-optimizer">
+			<directory suffix=".php">./tests/plugins/embed-optimizer</directory>
+		</testsuite>
 		<testsuite name="optimization-detective">
 			<directory suffix=".php">./tests/plugins/optimization-detective</directory>
 		</testsuite>

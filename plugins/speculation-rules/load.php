@@ -3,7 +3,7 @@
  * Plugin Name: Speculation Rules
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/speculation-rules
  * Description: Uses the Speculation Rules API to prerender linked URLs upon hover by default.
- * Requires at least: 6.3
+ * Requires at least: 6.4
  * Requires PHP: 7.0
  * Version: 1.1.0
  * Author: WordPress Performance Team

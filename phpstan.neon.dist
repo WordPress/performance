@@ -3,13 +3,9 @@ includes:
 parameters:
 	level: 0
 	paths:
-		- admin/
-		- default-enabled-modules.php
 		- load.php
-		- module-i18n.php
-		- modules/
+		- includes/
 		- plugins/
-		- server-timing/
 		- tests/
 		- uninstall.php
 	scanDirectories:
