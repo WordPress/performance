@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function embed_optimizer_filter_oembed_html( string $html ): string {
-	$p = new WP_HTML_Tag_Processor( $html );
+	$html_processor = new WP_HTML_Tag_Processor( $html );
 
 	/**
 	 * Determine how to lazy load the embed.
@@ -37,22 +37,22 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 	$script_count      = 0;
 	$has_inline_script = false;
 	// Locate the iframes and scripts.
-	while ( $p->next_tag() ) {
-		if ( 'IFRAME' === $p->get_tag() ) {
-			$loading_value = $p->get_attribute( 'loading' );
+	while ( $html_processor->next_tag() ) {
+		if ( 'IFRAME' === $html_processor->get_tag() ) {
+			$loading_value = $html_processor->get_attribute( 'loading' );
 			if ( empty( $loading_value ) ) {
 				++$iframe_count;
-				if ( ! $p->set_bookmark( 'iframe' ) ) {
+				if ( ! $html_processor->set_bookmark( 'iframe' ) ) {
 					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set iframe bookmark.', 'embed-optimizer' ) );
 					return $html;
 				}
 			}
-		} elseif ( 'SCRIPT' === $p->get_tag() ) {
-			if ( ! $p->get_attribute( 'src' ) ) {
+		} elseif ( 'SCRIPT' === $html_processor->get_tag() ) {
+			if ( ! $html_processor->get_attribute( 'src' ) ) {
 				$has_inline_script = true;
 			} else {
 				++$script_count;
-				if ( ! $p->set_bookmark( 'script' ) ) {
+				if ( ! $html_processor->set_bookmark( 'script' ) ) {
 					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set script bookmark.', 'embed-optimizer' ) );
 					return $html;
 				}
@@ -60,26 +60,26 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 		}
 	}
 	// If there was only one non-inline script, make it lazy.
-	if ( 1 === $script_count && ! $has_inline_script && $p->has_bookmark( 'script' ) ) {
+	if ( 1 === $script_count && ! $has_inline_script && $html_processor->has_bookmark( 'script' ) ) {
 		add_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' );
-		if ( $p->seek( 'script' ) ) {
-			if ( $p->get_attribute( 'type' ) ) {
-				$p->set_attribute( 'data-original-type', $p->get_attribute( 'type' ) );
+		if ( $html_processor->seek( 'script' ) ) {
+			if ( $html_processor->get_attribute( 'type' ) ) {
+				$html_processor->set_attribute( 'data-original-type', $html_processor->get_attribute( 'type' ) );
 			}
-			$p->set_attribute( 'type', 'application/vnd.embed-optimizer.javascript' );
+			$html_processor->set_attribute( 'type', 'application/vnd.embed-optimizer.javascript' );
 		} else {
 			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to script bookmark.', 'embed-optimizer' ) );
 		}
 	}
 	// If there was only one iframe, make it lazy.
-	if ( 1 === $iframe_count && $p->has_bookmark( 'iframe' ) ) {
-		if ( $p->seek( 'iframe' ) ) {
-			$p->set_attribute( 'loading', 'lazy' );
+	if ( 1 === $iframe_count && $html_processor->has_bookmark( 'iframe' ) ) {
+		if ( $html_processor->seek( 'iframe' ) ) {
+			$html_processor->set_attribute( 'loading', 'lazy' );
 		} else {
 			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to iframe bookmark.', 'embed-optimizer' ) );
 		}
 	}
-	return $p->get_updated_html();
+	return $html_processor->get_updated_html();
 }
 add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
 
