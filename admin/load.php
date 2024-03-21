@@ -73,7 +73,7 @@ function perflab_render_settings_page() {
  *
  * @param string $hook_suffix The current admin page.
  */
-function perflab_admin_pointer( $hook_suffix ) {
+function perflab_admin_pointer( string $hook_suffix ) {
 	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
 		return;
 	}
@@ -109,7 +109,7 @@ add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
  * @param array  $args       Optional. Pointer arguments. Supports 'heading' and 'content' entries.
  *                           Defaults are the heading and content for the 'perflab-admin-pointer'.
  */
-function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = array() ) {
+function perflab_render_pointer( string $pointer_id = 'perflab-admin-pointer', array $args = array() ) {
 	if ( ! isset( $args['heading'] ) ) {
 		$args['heading'] = __( 'Performance Lab', 'performance-lab' );
 	}
@@ -169,7 +169,7 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
  * @param array $links List of plugin action links HTML.
  * @return array Modified list of plugin action links HTML.
  */
-function perflab_plugin_action_links_add_settings( $links ) {
+function perflab_plugin_action_links_add_settings( array $links ): array {
 	// Add link as the first plugin action link.
 	$settings_link = sprintf(
 		'<a href="%s">%s</a>',
