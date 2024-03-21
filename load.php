@@ -263,13 +263,13 @@ function perflab_maybe_remove_object_cache_dropin() {
 register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin' );
 
 /**
- * Redirects module pages to the peformance feature page.
+ * Redirects module pages to the performance feature page.
  *
  * @since n.e.x.t
  *
  * @global $plugin_page
  */
-function perflab_no_access_redirect_module_to_peformance_feature_page() {
+function perflab_no_access_redirect_module_to_performance_feature_page() {
 	global $plugin_page;
 
 	if ( 'perflab-modules' !== $plugin_page ) {
@@ -283,7 +283,7 @@ function perflab_no_access_redirect_module_to_peformance_feature_page() {
 		exit;
 	}
 }
-add_action( 'admin_page_access_denied', 'perflab_no_access_redirect_module_to_peformance_feature_page' );
+add_action( 'admin_page_access_denied', 'perflab_no_access_redirect_module_to_performance_feature_page' );
 
 /**
  * Cleanup function to delete 'perflab_modules_settings' option if present.
