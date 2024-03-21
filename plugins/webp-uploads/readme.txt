@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.0
-Stable tag:        1.0.7
+Stable tag:        1.0.6
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, webp
@@ -58,13 +58,10 @@ By default, the WebP Uploads plugin will only generate WebP versions of the imag
 
 == Changelog ==
 
-= 1.0.7 =
-
-* Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
-
 = 1.0.6 =
 
 * Add link to WebP settings to plugins table. ([1036](https://github.com/WordPress/performance/pull/1036))
+* Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 
 = 1.0.5 =

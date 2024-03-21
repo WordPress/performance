@@ -5,7 +5,7 @@
  * Description: This plugin implements the HTML spec for adding `sizes="auto"` to lazy-loaded images.
  * Requires at least: 6.4
  * Requires PHP: 7.0
- * Version: 1.0.2
+ * Version: 1.0.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -25,6 +25,6 @@ if ( defined( 'IMAGE_AUTO_SIZES_VERSION' ) ) {
 	return;
 }
 
-define( 'IMAGE_AUTO_SIZES_VERSION', '1.0.2' );
+define( 'IMAGE_AUTO_SIZES_VERSION', '1.0.1' );
 
 require_once __DIR__ . '/hooks.php';
