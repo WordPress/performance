@@ -39,21 +39,9 @@ const {
 	options: translationsOptions,
 } = require( './commands/translations' );
 const {
-	handler: buildPluginsHandler,
-	options: buildPluginsOptions,
-} = require( './commands/build-plugins' );
-const {
 	handler: testPluginsHandler,
 	options: testPluginsOptions,
 } = require( './commands/test-plugins' );
-const {
-	handler: getPluginVersionHandler,
-	options: getPluginVersionOptions,
-} = require( './commands/get-plugin-version' );
-const {
-	handler: getPluginDirHandler,
-	options: getPluginDirOptions,
-} = require( './commands/get-plugin-dir' );
 const {
 	handler: enabledModulesHandler,
 	options: enabledModulesOptions,
@@ -85,31 +73,10 @@ withOptions( program.command( 'module-translations' ), translationsOptions )
 	)
 	.action( catchException( translationsHandler ) );
 
-withOptions(
-	program.command( 'build-standalone-plugins' ),
-	buildPluginsOptions
-)
-	.alias( 'build-plugins' )
-	.description( 'Build standalone plugins' )
-	.action( catchException( buildPluginsHandler ) );
-
 withOptions( program.command( 'test-standalone-plugins' ), testPluginsOptions )
 	.alias( 'test-plugins' )
 	.description( 'Test standalone plugins' )
 	.action( catchException( testPluginsHandler ) );
-
-withOptions(
-	program.command( 'get-standalone-plugin-version' ),
-	getPluginVersionOptions
-)
-	.alias( 'get-plugin-version' )
-	.description( 'Get standalone plugin version' )
-	.action( catchException( getPluginVersionHandler ) );
-
-withOptions( program.command( 'get-plugin-dir' ), getPluginDirOptions )
-	.alias( 'get-plugin-directory' )
-	.description( 'Get plugin directory' )
-	.action( catchException( getPluginDirHandler ) );
 
 withOptions(
 	program.command( 'default-enabled-modules' ),

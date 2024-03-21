@@ -3,7 +3,7 @@
  * Plugin Name: Performance Lab
  * Plugin URI: https://github.com/WordPress/performance
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance modules.
- * Requires at least: 6.3
+ * Requires at least: 6.4
  * Requires PHP: 7.0
  * Version: 2.9.0
  * Author: WordPress Performance Team
@@ -322,6 +322,7 @@ function perflab_get_standalone_plugin_version_constants( $source = 'plugins' ) 
 	return array(
 		'webp-uploads'            => 'WEBP_UPLOADS_VERSION',
 		'dominant-color-images'   => 'DOMINANT_COLOR_IMAGES_VERSION',
+		'embed-optimizer'         => 'EMBED_OPTIMIZER_VERSION',
 		'performant-translations' => 'PERFORMANT_TRANSLATIONS_VERSION',
 		'auto-sizes'              => 'IMAGE_AUTO_SIZES_VERSION',
 		'speculation-rules'       => 'SPECULATION_RULES_VERSION',

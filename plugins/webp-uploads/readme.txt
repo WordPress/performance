@@ -1,10 +1,10 @@
 === WebP Uploads ===
 
 Contributors:      wordpressdotorg
-Requires at least: 6.3
+Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.0
-Stable tag:        1.0.6
+Stable tag:        1.0.7
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, webp
@@ -57,6 +57,10 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the WebP Uploads plugin will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 1.0.7 =
+
+* Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 
 = 1.0.6 =
 
