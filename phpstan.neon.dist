@@ -4,9 +4,7 @@ parameters:
 	level: 0
 	paths:
 		- admin/
-		- default-enabled-modules.php
 		- load.php
-		- module-i18n.php
 		- includes/
 		- plugins/
 		- tests/

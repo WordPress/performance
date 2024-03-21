@@ -76,8 +76,6 @@ jobs:
           node --version
           composer --version
           php -v
-      - name: Building standalone plugins
-        run: npm run build-plugins
       - name: Running single site standalone plugin integration tests
         run: npm run test-plugins
       - name: Running multisite standalone plugin integration tests

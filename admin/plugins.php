@@ -57,24 +57,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
  */
 function perflab_get_standalone_plugins() {
 	return array_keys(
-		perflab_get_standalone_plugin_version_constants( 'plugins' )
-	);
-}
-
-/**
- * Returns an array of standalone plugins with currently active modules.
- *
- * @since 2.8.0
- *
- * @return string[]
- */
-function perflab_get_active_modules_with_standalone_plugins() {
-	$modules = perflab_get_module_settings();
-	return array_filter(
-		array_keys( perflab_get_standalone_plugin_version_constants( 'modules' ) ),
-		static function ( $module ) use ( $modules ) {
-			return ! empty( $modules[ $module ] ) && $modules[ $module ]['enabled'];
-		}
+		perflab_get_standalone_plugin_version_constants()
 	);
 }
 
