@@ -12,7 +12,7 @@ Fixes #
 <!--
 For maintainers only, please make sure:
 
-- PR has either `[Focus]` or `Infrastructure` label.
 - PR has a `[Type]` label.
-- PR has a milestone or the `no milestone` label.
+- PR has a plugin-specific milestone, or the `no milestone` label if it does not apply to any specific plugin.
+- PR has a changelog-friendly title, or the `skip changelog` label if it should not be mentioned in the plugin's changelog.
 -->

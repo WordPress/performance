@@ -4,6 +4,7 @@
     ".",
     "./plugins/auto-sizes",
     "./plugins/dominant-color-images",
+    "./plugins/embed-optimizer",
     "./plugins/optimization-detective",
     "./plugins/speculation-rules",
     "./plugins/webp-uploads"

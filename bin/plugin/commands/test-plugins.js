@@ -414,55 +414,32 @@ function doRunStandalonePluginTests( settings ) {
 
 	try {
 		// Read the plugins.json file synchronously.
-		const { modules, plugins } = require( pluginsFile );
+		const { plugins } = require( pluginsFile );
 
 		// Create an array of plugins from entries in plugins JSON file.
-		builtPlugins = Object.keys( modules )
-			.filter( ( item ) => {
-				if (
-					! fs.pathExistsSync(
-						`${ settings.builtPluginsDir }${ modules[ item ].slug }`
-					)
-				) {
+		builtPlugins = Object.values( plugins )
+			.filter( ( plugin ) => {
+				try {
+					fs.copySync(
+						`${ settings.pluginsDir }${ plugin }/`,
+						`${ settings.builtPluginsDir }${ plugin }/`,
+						{
+							overwrite: true,
+						}
+					);
+					log( formats.success( `Copied plugin "${ plugin }".\n` ) );
+					return true;
+				} catch ( e ) {
+					// Handle the error appropriately
 					log(
 						formats.error(
-							`Built plugin path "${ settings.builtPluginsDir }${ modules[ item ].slug }" not found, skipping and removing from plugin list`
+							`Error copying plugin "${ plugin }": ${ e.message }`
 						)
 					);
 					return false;
 				}
-				return true;
 			} )
-			.map( ( item ) => modules[ item ].slug );
-
-		// Create an array of plugins from entries in plugins JSON file.
-		builtPlugins = builtPlugins.concat(
-			Object.values( plugins )
-				.filter( ( plugin ) => {
-					try {
-						fs.copySync(
-							`${ settings.pluginsDir }${ plugin }/`,
-							`${ settings.builtPluginsDir }${ plugin }/`,
-							{
-								overwrite: true,
-							}
-						);
-						log(
-							formats.success( `Copied plugin "${ plugin }".\n` )
-						);
-						return true;
-					} catch ( e ) {
-						// Handle the error appropriately
-						log(
-							formats.error(
-								`Error copying plugin "${ plugin }": ${ e.message }`
-							)
-						);
-						return false;
-					}
-				} )
-				.map( ( plugin ) => plugin )
-		);
+			.map( ( plugin ) => plugin );
 	} catch ( error ) {
 		throw Error( `Error reading file at "${ pluginsFile }": ${ error }` );
 	}
