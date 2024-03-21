@@ -3,7 +3,7 @@
  * Plugin Name: Optimization Detective
  * Plugin URI: https://github.com/WordPress/performance/issues/869
  * Description: Uses real user metrics to improve heuristics WordPress applies on the frontend to improve image loading priority.
- * Requires at least: 6.3
+ * Requires at least: 6.4
  * Requires PHP: 7.0
  * Version: 0.1.0
  * Author: WordPress Performance Team
