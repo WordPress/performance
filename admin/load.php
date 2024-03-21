@@ -305,17 +305,13 @@ function perflab_deactivate_plugin() {
 	}
 
 	// Deactivate the plugin in question and return to prior screen.
-	$do_plugin_deactivation = deactivate_plugins( $plugin );
-	$referer                = wp_get_referer();
-	if ( ! is_wp_error( $do_plugin_deactivation ) ) {
-		$referer = add_query_arg(
-			array(
-				'deactivate' => true,
-			),
-			$referer
-		);
-	}
-
+	deactivate_plugins( $plugin );
+	$referer = add_query_arg(
+		array(
+			'deactivate' => true,
+		),
+		wp_get_referer()
+	);
 	if ( wp_safe_redirect( $referer ) ) {
 		exit;
 	}
