@@ -37,6 +37,5 @@ perflab_delete_plugin_option();
  * @since 1.4.0
  */
 function perflab_delete_plugin_option() {
-	delete_option( 'perflab_modules_settings' );
 	delete_option( 'perflab_generate_webp_and_jpeg' );
 }
