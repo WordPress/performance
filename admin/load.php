@@ -132,7 +132,7 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
 		jQuery( function() {
 			// Pointer Options.
 			var options = {
-				content: '<h3><?php echo esc_js( $args['heading'] ); ?></h3><p><?php echo wp_kses( $args['content'], $wp_kses_options ); ?></p>',
+				content: <?php echo wp_json_encode( '<h3>' . esc_html( $args['heading'] ) . '</h3><p>' . wp_kses( $args['content'], $wp_kses_options ) . '</p>' ); ?>,
 				position: {
 					edge:  'left',
 					align: 'right',
@@ -143,7 +143,7 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
 					jQuery.post(
 						window.ajaxurl,
 						{
-							pointer: '<?php echo esc_js( $pointer_id ); ?>',
+							pointer: <?php echo wp_json_encode( $pointer_id ); ?>,
 							action:  'dismiss-wp-pointer',
 							_wpnonce: <?php echo wp_json_encode( wp_create_nonce( 'dismiss_pointer' ) ); ?>,
 						}
