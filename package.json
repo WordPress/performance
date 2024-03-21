@@ -36,8 +36,6 @@
     "build:plugin:optimization-detective": "webpack --mode production --env plugin=optimization-detective",
     "build:plugin:speculation-rules": "webpack --mode production --env plugin=speculation-rules",
     "build:plugin:webp-uploads": "webpack --mode production --env plugin=webp-uploads",
-    "test-plugins": "./bin/plugin/cli.js test-plugins",
-    "test-plugins-multisite": "./bin/plugin/cli.js test-plugins --sitetype=multi",
     "format-js": "wp-scripts format",
     "lint-js": "wp-scripts lint-js",
     "format-php": "composer format",

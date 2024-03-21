@@ -69,6 +69,78 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 		$this->assertSame( $autoloaded_options_size + $test_option_string_bytes, perflab_aao_autoloaded_options_size() );
 	}
 
+	public function test_perflab_aao_autoloaded_options_disable_revert_functionality() {
+
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		// Mock wp_redirect to avoid actual redirection.
+		add_filter(
+			'wp_redirect',
+			static function () {
+				return false;
+			}
+		);
+
+		// Add an autoload option with small size length value for testing.
+		$test_option_string       = 'test';
+		$test_option_string_bytes = mb_strlen( $test_option_string, '8bit' );
+		self::set_autoloaded_option( $test_option_string_bytes );
+
+		// Test that the autoloaded option is not displayed in the table because value lower then it's threshold value.
+		$table_html = perflab_aao_get_autoloaded_options_table();
+		$this->assertStringNotContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
+
+		// Delete autoloaded option.
+		self::delete_autoloaded_option();
+
+		// Add an autoload option with bigger size length value for testing.
+		self::set_autoloaded_option( self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES );
+
+		$table_html = perflab_aao_get_autoloaded_options_table();
+		$this->assertStringContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
+
+		// Check disable autoloaded option functionality.
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'perflab_aao_update_autoload' );
+		$_GET['action']       = 'perflab_aao_update_autoload';
+		$_GET['option_name']  = self::AUTOLOADED_OPTION_KEY;
+		$_GET['autoload']     = 'false';
+
+		perflab_aao_handle_update_autoload();
+
+		// Test that the autoloaded option is not displayed in the perflab_aao_get_autoloaded_options_table() after disabling.
+		$table_html = perflab_aao_get_autoloaded_options_table();
+		$this->assertStringNotContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
+
+		// Test that the disabled autoloaded option is displayed in the disabled options perflab_aao_get_disabled_autoloaded_options_table().
+		$table_html = perflab_aao_get_disabled_autoloaded_options_table();
+		$this->assertStringContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
+
+		// Revert the disabled autoloaded option.
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'perflab_aao_update_autoload' );
+		$_GET['action']       = 'perflab_aao_update_autoload';
+		$_GET['option_name']  = self::AUTOLOADED_OPTION_KEY;
+		$_GET['autoload']     = 'true';
+
+		perflab_aao_handle_update_autoload();
+
+		// Test that the disabled autoloaded option is not displayed in the disabled options perflab_aao_get_disabled_autoloaded_options_table() after reverting.
+		$table_html = perflab_aao_get_disabled_autoloaded_options_table();
+		$this->assertStringNotContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
+
+		// Test that the reverted autoloaded option is displayed in the autoloaded options perflab_aao_get_autoloaded_options_table().
+		$table_html = perflab_aao_get_autoloaded_options_table();
+		$this->assertStringContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
+
+		// Remove the mock filter.
+		remove_filter(
+			'wp_redirect',
+			static function () {
+				return false;
+			}
+		);
+	}
+
 	/**
 	 * Sets a test autoloaded option.
 	 *
