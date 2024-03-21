@@ -276,10 +276,10 @@ function perflab_no_access_redirect_module_to_performance_feature_page() {
 		return;
 	}
 
-	if ( current_user_can( 'manage_options' ) ) {
-		wp_safe_redirect(
-			add_query_arg( 'page', PERFLAB_SCREEN )
-		);
+	if ( 
+		current_user_can( 'manage_options' ) && 
+		wp_safe_redirect( add_query_arg( 'page', PERFLAB_SCREEN ) ) 
+	) {
 		exit;
 	}
 }
