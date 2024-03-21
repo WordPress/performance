@@ -71,12 +71,14 @@ function perflab_aao_handle_update_autoload() {
 	if ( $result ) {
 		// Update disabled options list.
 		$disabled_options = get_option( 'perflab_aao_disabled_options', array() );
-		if ( ! $autoload ) {
+
+		$key = array_search( $option_name, $disabled_options, true );
+		if ( ! $autoload && false === $key ) {
 			$disabled_options[] = $option_name;
-		} elseif ( in_array( $option_name, $disabled_options, true ) ) {
-			$key = array_search( $option_name, $disabled_options, true );
+		} elseif ( $autoload && false !== $key ) {
 			unset( $disabled_options[ $key ] );
 		}
+
 		update_option( 'perflab_aao_disabled_options', $disabled_options );
 
 		if ( wp_safe_redirect( admin_url( 'site-health.php?autoload_updated=true' ) ) ) {

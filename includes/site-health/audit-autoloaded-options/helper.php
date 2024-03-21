@@ -200,7 +200,8 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 	);
 
 	$html_table = sprintf(
-		'<br><br><table class="widefat striped"><thead><tr><th scope="col">%s</th><th scope="col">%s</th><th scope="col">%s</th></tr></thead><tbody>',
+		'<p>%s</p><table class="widefat striped"><thead><tr><th scope="col">%s</th><th scope="col">%s</th><th scope="col">%s</th></tr></thead><tbody>',
+		__( 'The following table shows the options for which you have previously disabled Autoload.', 'performance-lab' ),
 		esc_html__( 'Option Name', 'performance-lab' ),
 		esc_html__( 'Size', 'performance-lab' ),
 		esc_html__( 'Action', 'performance-lab' )
