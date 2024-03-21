@@ -291,7 +291,7 @@ add_action( 'admin_page_access_denied', 'perflab_no_access_redirect_module_to_pe
  * @since n.e.x.t
  */
 function perflab_cleanup_option() {
-	if ( current_user_can( 'manage_options' ) && get_option( 'perflab_modules_settings' ) ) {
+	if ( current_user_can( 'manage_options' ) ) {
 		delete_option( 'perflab_modules_settings' );
 	}
 }
