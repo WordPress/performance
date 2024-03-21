@@ -5,7 +5,7 @@
  * Description: Uses the Speculation Rules API to prerender linked URLs upon hover by default.
  * Requires at least: 6.4
  * Requires PHP: 7.0
- * Version: 1.1.1
+ * Version: 1.1.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -25,7 +25,7 @@ if ( defined( 'SPECULATION_RULES_VERSION' ) ) {
 	return;
 }
 
-define( 'SPECULATION_RULES_VERSION', '1.1.1' );
+define( 'SPECULATION_RULES_VERSION', '1.1.0' );
 
 require_once __DIR__ . '/class-plsr-url-pattern-prefixer.php';
 require_once __DIR__ . '/helper.php';
