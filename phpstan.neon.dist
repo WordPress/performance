@@ -11,3 +11,5 @@ parameters:
 		- uninstall.php
 	scanDirectories:
 		- vendor/wp-phpunit/wp-phpunit/
+	dynamicConstantNames:
+		- PERFLAB_OBJECT_CACHE_DROPIN_VERSION
