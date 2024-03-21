@@ -35,10 +35,6 @@ const {
 	options: readmeOptions,
 } = require( './commands/readme' );
 const {
-	handler: testPluginsHandler,
-	options: testPluginsOptions,
-} = require( './commands/test-plugins' );
-const {
 	handler: sinceHandler,
 	options: sinceOptions,
 } = require( './commands/since' );
@@ -57,10 +53,5 @@ withOptions( program.command( 'plugin-readme' ), readmeOptions )
 	.alias( 'readme' )
 	.description( 'Updates the readme.txt file' )
 	.action( catchException( readmeHandler ) );
-
-withOptions( program.command( 'test-standalone-plugins' ), testPluginsOptions )
-	.alias( 'test-plugins' )
-	.description( 'Test standalone plugins' )
-	.action( catchException( testPluginsHandler ) );
 
 program.parse( process.argv );
