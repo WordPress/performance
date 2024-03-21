@@ -1,10 +1,10 @@
 === Embed Optimizer ===
 
 Contributors:      wordpressdotorg
-Requires at least: 6.3
+Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.0
-Stable tag:        0.1.0
+Stable tag:        0.1.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, embeds
@@ -48,6 +48,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.1.1 =
+
+* Bump minimum required WP version to 6.4. ([1076](https://github.com/WordPress/performance/pull/1076))
 
 = 0.1.0 =
 
