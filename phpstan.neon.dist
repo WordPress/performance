@@ -3,7 +3,6 @@ includes:
 parameters:
 	level: 0
 	paths:
-		- admin/
 		- load.php
 		- includes/
 		- plugins/
