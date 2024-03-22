@@ -7,9 +7,26 @@
  * @package dominant-color-images
  */
 
-use PerformanceLab\Tests\TestCase\DominantColorTestCase;
+use Dominant_Color_Image\Tests\TestCase as DominantColorTestCase;
 
 class Dominant_Color_Image_Editor_Imagick_Test extends DominantColorTestCase {
+
+	/**
+	 * Setup before class.
+	 */
+	public static function wpSetUpBeforeClass() {
+		// Setup site options if it's a multisite network.
+		if ( is_multisite() ) {
+			$site_exts = explode( ' ', get_site_option( 'upload_filetypes', 'jpg jpeg png gif' ) );
+
+			// Add `tiff` and `bmp` to the list of allowed file types.
+			// These are removed by default in multisite.
+			$site_exts[] = 'tiff';
+			$site_exts[] = 'bmp';
+
+			update_site_option( 'upload_filetypes', implode( ' ', $site_exts ) );
+		}
+	}
 
 	/**
 	 * Test if the function returns the correct color.
