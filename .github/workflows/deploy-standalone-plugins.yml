@@ -27,25 +27,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node.js (.nvmrc)
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-      - name: Install npm dependencies
-        run: npm ci
-      - name: Build assets
-        run: npm run build
-      - name: Get directory
-        id: get-plugin-directory
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          echo "directory=$(node ./bin/plugin/cli.js get-plugin-dir --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
-      - name: Get plugin version
-        id: get-version
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          echo "version=$(node ./bin/plugin/cli.js get-plugin-version --slug=${{ inputs.slug }})" >> $GITHUB_OUTPUT
+
       - name: Set matrix
         id: set-matrix
         run: |
