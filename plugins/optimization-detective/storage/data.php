@@ -182,9 +182,9 @@ function od_verify_url_metrics_storage_nonce( string $nonce, string $slug, strin
 /**
  * Gets the breakpoint max widths to group URL metrics for various viewports.
  *
- * Each max with represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then
+ * Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then
  * this means there will be two viewport groupings, one for 0<=480, and another >480. If instead there were three
- * provided breakpoints (320, 480, 576) then this means there will be four viewport groupings:
+ * provided breakpoints (320, 480, 576) then this means there will be four groups:
  *
  *  1. 0-320 (small smartphone)
  *  2. 321-480 (normal smartphone)
@@ -273,7 +273,7 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 	/**
 	 * Filters the sample size for a breakpoint's URL metrics on a given URL.
 	 *
-	 * The sample size must greater than zero.
+	 * The sample size must be greater than zero.
 	 *
 	 * @since 0.1.0
 	 *
