@@ -10,7 +10,6 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
  */
 const { plugins: standalonePlugins } = require( './plugins.json' );
 const {
-	assetDataTransformer,
 	deleteFileOrDirectory,
 	generateBuildManifest,
 } = require( './bin/webpack/utils' );
@@ -24,57 +23,6 @@ const sharedConfig = {
 	...defaultConfig,
 	entry: {},
 	output: {},
-};
-
-// Store plugins that require build process.
-const pluginsWithBuild = [ 'optimization-detective' ];
-
-/**
- * Webpack Config: Optimization Detective
- *
- * @param {*} env Webpack environment
- * @return {Object} Webpack configuration
- */
-const optimizationDetective = ( env ) => {
-	if ( env.plugin && env.plugin !== 'optimization-detective' ) {
-		return {
-			entry: {},
-			output: {},
-		};
-	}
-
-	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
-	const destination = path.resolve(
-		__dirname,
-		'plugins/optimization-detective/detection'
-	);
-
-	return {
-		...sharedConfig,
-		name: 'optimization-detective',
-		plugins: [
-			new CopyWebpackPlugin( {
-				patterns: [
-					{
-						from: `${ source }/dist/web-vitals.js`,
-						to: `${ destination }/web-vitals.js`,
-					},
-					{
-						from: `${ source }/package.json`,
-						to: `${ destination }/web-vitals.asset.php`,
-						transform: {
-							transformer: assetDataTransformer,
-							cache: false,
-						},
-					},
-				],
-			} ),
-			new WebpackBar( {
-				name: 'Building Optimization Detective Assets',
-				color: '#2196f3',
-			} ),
-		],
-	};
 };
 
 /**
@@ -104,9 +52,6 @@ const buildPlugin = ( env ) => {
 
 	const to = path.resolve( __dirname, 'build', env.plugin );
 	const from = path.resolve( __dirname, 'plugins', env.plugin );
-	const dependencies = pluginsWithBuild.includes( env.plugin )
-		? [ `${ env.plugin }` ]
-		: [];
 
 	return {
 		...sharedConfig,
@@ -120,9 +65,10 @@ const buildPlugin = ( env ) => {
 						globOptions: {
 							dot: true,
 							ignore: [
+								'**/*.[Cc]ache',
 								'**/.wordpress-org',
 								'**/phpcs.xml.dist',
-								'**/*.[Cc]ache',
+								'**/webpack.config.js',
 							],
 						},
 					},
@@ -146,8 +92,7 @@ const buildPlugin = ( env ) => {
 				color: '#4caf50',
 			} ),
 		],
-		dependencies,
 	};
 };
 
-module.exports = [ optimizationDetective, buildPlugin ];
+module.exports = [ buildPlugin ];
