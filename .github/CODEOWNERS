@@ -63,3 +63,7 @@
 # Plugin: Embed Optimizer
 /plugins/embed-optimizer                    @adamsilverstein @westonruter
 /tests/plugins/embed-optimizer              @adamsilverstein @westonruter
+
+# Plugin: Optimization Detective
+/plugins/optimization-detective             @westonruter @felixarntz
+/tests/plugins/optimization-detective       @westonruter @felixarntz

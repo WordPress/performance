@@ -17,6 +17,7 @@
   },
   "require": {
     "composer/installers": "~1.0",
+    "ext-dom": "*",
     "ext-json": "*",
     "php": ">=7|^8"
   },
@@ -31,12 +32,14 @@
       "@lint:auto-sizes",
       "@lint:dominant-color-images",
       "@lint:embed-optimizer",
+      "@lint:optimization-detective",
       "@lint:speculation-rules",
       "@lint:webp-uploads"
     ],
     "lint:auto-sizes": "@lint -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
     "lint:dominant-color-images": "@lint -- ./plugins/dominant-color-images --standard=./plugins/dominant-color-images/phpcs.xml.dist",
     "lint:embed-optimizer": "@lint -- ./plugins/embed-optimizer --standard=./plugins/embed-optimizer/phpcs.xml.dist",
+    "lint:optimization-detective": "@lint -- ./plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
     "lint:speculation-rules": "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
     "lint:webp-uploads": "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
     "test": "phpunit --verbose --testsuite performance-lab",
@@ -53,6 +56,7 @@
       "@test:auto-sizes",
       "@test:dominant-color-images",
       "@test:embed-optimizer",
+      "@test:optimization-detective",
       "@test:speculation-rules",
       "@test:webp-uploads"
     ],
@@ -60,6 +64,7 @@
       "@test-multisite:auto-sizes",
       "@test-multisite:dominant-color-images",
       "@test-multisite:embed-optimizer",
+      "@test-multisite:optimization-detective",
       "@test-multisite:speculation-rules",
       "@test-multisite:webp-uploads"
     ],
@@ -69,6 +74,8 @@
     "test-multisite:dominant-color-images": "phpunit -c tests/multisite.xml --verbose --testsuite dominant-color-images",
     "test:embed-optimizer": "phpunit --verbose --testsuite embed-optimizer",
     "test-multisite:embed-optimizer": "phpunit -c tests/multisite.xml --verbose --testsuite embed-optimizer",
+    "test:optimization-detective": "phpunit --verbose --testsuite optimization-detective",
+    "test-multisite:optimization-detective": "phpunit -c tests/multisite.xml --verbose --testsuite optimization-detective",
     "test:speculation-rules": "phpunit --verbose --testsuite speculation-rules",
     "test-multisite:speculation-rules": "phpunit -c tests/multisite.xml --verbose --testsuite speculation-rules",
     "test:webp-uploads": "phpunit --verbose --testsuite webp-uploads",

@@ -9,9 +9,13 @@
 		<exclude-pattern>includes/server-timing/object-cache.copy.php</exclude-pattern>
 	</rule>
 
+	<!-- Check up to 20 files simultaneously. -->
+	<arg name="parallel" value="20"/>
+
 	<file>.</file>
 	<exclude-pattern>./build/*</exclude-pattern>
 	<exclude-pattern>./node_modules/*</exclude-pattern>
 	<exclude-pattern>./plugins/*</exclude-pattern>
 	<exclude-pattern>./vendor/*</exclude-pattern>
+	<exclude-pattern>*.asset.php</exclude-pattern>
 </ruleset>

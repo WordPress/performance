@@ -77,8 +77,30 @@ const generateBuildManifest = ( slug, from ) => {
 	fs.writeFileSync( manifestPath, JSON.stringify( manifest, null, 2 ) );
 };
 
+/**
+ * Transformer to get version from package.json and return it as a PHP file.
+ *
+ * @param {Buffer} content      The content as a Buffer of the file being transformed.
+ * @param {string} absoluteFrom The absolute path to the file being transformed.
+ *
+ * @return {Buffer|string} The transformed content.
+ */
+const assetDataTransformer = ( content, absoluteFrom ) => {
+	if ( 'package.json' !== path.basename( absoluteFrom ) ) {
+		return content;
+	}
+
+	const contentAsString = content.toString();
+	const contentAsJson = JSON.parse( contentAsString );
+	const { version } = contentAsJson;
+
+	return `<?php return array('dependencies' => array(), 'version' => '${ version }');`;
+};
+
 module.exports = {
+	getPluginRootPath,
 	deleteFileOrDirectory,
 	getPluginVersion,
 	generateBuildManifest,
+	assetDataTransformer,
 };
