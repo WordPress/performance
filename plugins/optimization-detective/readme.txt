@@ -1,7 +1,7 @@
 === Optimization Detective (Developer Preview) ===
 
 Contributors:      wordpressdotorg
-Requires at least: 6.3
+Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.0
 Stable tag:        0.1.0
