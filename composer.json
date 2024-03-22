@@ -91,6 +91,9 @@
   "autoload-dev": {
     "psr-4": {
       "PerformanceLab\\Tests\\": "tests/utils"
-    }
+    },
+    "classmap": [
+      "plugins/*/tests/"
+    ]
   }
 }
