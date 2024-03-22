@@ -26,7 +26,23 @@ const sharedConfig = {
 	output: {},
 };
 
-const webVitals = () => {
+// Store plugins that require build process.
+const pluginsWithBuild = [ 'optimization-detective' ];
+
+/**
+ * Webpack Config: Optimization Detective
+ *
+ * @param {*} env Webpack environment
+ * @return {Object} Webpack configuration
+ */
+const optimizationDetective = ( env ) => {
+	if ( env.plugin && env.plugin !== 'optimization-detective' ) {
+		return {
+			entry: {},
+			output: {},
+		};
+	}
+
 	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
 	const destination = path.resolve(
 		__dirname,
@@ -35,6 +51,7 @@ const webVitals = () => {
 
 	return {
 		...sharedConfig,
+		name: 'optimization-detective',
 		plugins: [
 			new CopyWebpackPlugin( {
 				patterns: [
@@ -53,8 +70,8 @@ const webVitals = () => {
 				],
 			} ),
 			new WebpackBar( {
-				name: 'Web Vitals',
-				color: '#f5a623',
+				name: 'Building Optimization Detective Assets',
+				color: '#2196f3',
 			} ),
 		],
 	};
@@ -87,6 +104,9 @@ const buildPlugin = ( env ) => {
 
 	const to = path.resolve( __dirname, 'build', env.plugin );
 	const from = path.resolve( __dirname, 'plugins', env.plugin );
+	const dependencies = pluginsWithBuild.includes( env.plugin )
+		? [ `${ env.plugin }` ]
+		: [];
 
 	return {
 		...sharedConfig,
@@ -122,14 +142,12 @@ const buildPlugin = ( env ) => {
 				},
 			},
 			new WebpackBar( {
-				name: `Building ${ env.plugin }`,
+				name: `Building ${ env.plugin } Plugin`,
 				color: '#4caf50',
 			} ),
 		],
-		dependencies: [
-			// Add any dependencies here which should be built before the plugin.
-		],
+		dependencies,
 	};
 };
 
-module.exports = [ webVitals, buildPlugin ];
+module.exports = [ optimizationDetective, buildPlugin ];
