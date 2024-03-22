@@ -43,18 +43,16 @@ add_action( 'admin_menu', 'perflab_add_server_timing_page' );
  * @since 2.6.0
  */
 function perflab_load_server_timing_page() {
-	if ( ! has_filter( 'template_include', 'od_buffer_output' ) ) {
-		/*
-		 * This settings section technically includes a field, however it is directly rendered as part of the section
-		 * callback due to requiring custom markup.
-		 */
-		add_settings_section(
-			'output-buffering',
-			__( 'Output Buffering', 'performance-lab' ),
-			'perflab_render_server_timing_page_output_buffering_section',
-			PERFLAB_SERVER_TIMING_SCREEN
-		);
-	}
+	/*
+	 * This settings section technically includes a field, however it is directly rendered as part of the section
+	 * callback due to requiring custom markup.
+	 */
+	add_settings_section(
+		'output-buffering',
+		__( 'Output Buffering', 'performance-lab' ),
+		'perflab_render_server_timing_page_output_buffering_section',
+		PERFLAB_SERVER_TIMING_SCREEN
+	);
 
 	// Minor style tweaks to improve appearance similar to other core settings screen instances.
 	add_action(
@@ -95,7 +93,7 @@ function perflab_load_server_timing_page() {
 				);
 				?>
 			</p>
-			<?php if ( ! perflab_server_timing_use_output_buffer() && ! has_filter( 'template_include', 'od_buffer_output' ) ) : ?>
+			<?php if ( ! perflab_server_timing_use_output_buffer() ) : ?>
 				<p>
 					<?php
 					echo wp_kses(
