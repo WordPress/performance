@@ -62,8 +62,8 @@ jobs:
           cache: npm
       - name: npm install
         run: npm ci
-      - name: Build assets
-        run: npm run build
+      - name: Remove standalone plugins from wp-env config
+        run: jq '.plugins = [.plugins[0]]' .wp-env.json > .wp-env.override.json
       - name: Install WordPress
         run: npm run wp-env start
         # Note that `composer update` is required instead of `composer install`

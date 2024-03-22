@@ -4,15 +4,16 @@
 const path = require( 'path' );
 const WebpackBar = require( 'webpackbar' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const {
-	deleteFileOrDirectory,
-	generateBuildManifest,
-} = require( './bin/webpack/utils' );
 
 /**
  * Internal dependencies
  */
 const { plugins: standalonePlugins } = require( './plugins.json' );
+const {
+	assetDataTransformer,
+	deleteFileOrDirectory,
+	generateBuildManifest,
+} = require( './bin/webpack/utils' );
 
 /**
  * WordPress dependencies
@@ -25,27 +26,23 @@ const sharedConfig = {
 	output: {},
 };
 
+// Store plugins that require build process.
+const pluginsWithBuild = [ 'optimization-detective' ];
+
 /**
- * Transformer to get version from package.json and return it as a PHP file.
+ * Webpack Config: Optimization Detective
  *
- * @param {Buffer} content      The content as a Buffer of the file being transformed.
- * @param {string} absoluteFrom The absolute path to the file being transformed.
- *
- * @return {Buffer|string} The transformed content.
+ * @param {*} env Webpack environment
+ * @return {Object} Webpack configuration
  */
-const assetDataTransformer = ( content, absoluteFrom ) => {
-	if ( 'package.json' !== path.basename( absoluteFrom ) ) {
-		return content;
+const optimizationDetective = ( env ) => {
+	if ( env.plugin && env.plugin !== 'optimization-detective' ) {
+		return {
+			entry: {},
+			output: {},
+		};
 	}
 
-	const contentAsString = content.toString();
-	const contentAsJson = JSON.parse( contentAsString );
-	const { version } = contentAsJson;
-
-	return `<?php return array('dependencies' => array(), 'version' => '${ version }');`;
-};
-
-const webVitals = () => {
 	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
 	const destination = path.resolve(
 		__dirname,
@@ -54,6 +51,7 @@ const webVitals = () => {
 
 	return {
 		...sharedConfig,
+		name: 'optimization-detective',
 		plugins: [
 			new CopyWebpackPlugin( {
 				patterns: [
@@ -72,8 +70,8 @@ const webVitals = () => {
 				],
 			} ),
 			new WebpackBar( {
-				name: 'Web Vitals',
-				color: '#f5a623',
+				name: 'Building Optimization Detective Assets',
+				color: '#2196f3',
 			} ),
 		],
 	};
@@ -106,6 +104,9 @@ const buildPlugin = ( env ) => {
 
 	const to = path.resolve( __dirname, 'build', env.plugin );
 	const from = path.resolve( __dirname, 'plugins', env.plugin );
+	const dependencies = pluginsWithBuild.includes( env.plugin )
+		? [ `${ env.plugin }` ]
+		: [];
 
 	return {
 		...sharedConfig,
@@ -141,14 +142,12 @@ const buildPlugin = ( env ) => {
 				},
 			},
 			new WebpackBar( {
-				name: `Building ${ env.plugin }`,
+				name: `Building ${ env.plugin } Plugin`,
 				color: '#4caf50',
 			} ),
 		],
-		dependencies: [
-			// Add any dependencies here which should be built before the plugin.
-		],
+		dependencies,
 	};
 };
 
-module.exports = [ webVitals, buildPlugin ];
+module.exports = [ optimizationDetective, buildPlugin ];
