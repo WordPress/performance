@@ -33,7 +33,7 @@ env:
   WP_CORE_DIR: /tmp/wordpress
   WP_TESTS_DIR: /tmp/wordpress-tests-lib
   WP_ENVIRONMENT_TYPE: local
-  # The pattern to match files that should trigger a full test run om all plugins.
+  # The pattern to match files that should trigger a full test run on all plugins.
   GLOBAL_FILE_PATTERNS: 'composer\.json|composer\.lock|.github/workflows/php-test\.yml'
 
 jobs:
