@@ -4,16 +4,16 @@
 const path = require( 'path' );
 const WebpackBar = require( 'webpackbar' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const {
-	assetDataTransformer,
-	deleteFileOrDirectory,
-	generateBuildManifest,
-} = require( './bin/webpack/utils' );
 
 /**
  * Internal dependencies
  */
 const { plugins: standalonePlugins } = require( './plugins.json' );
+const {
+	assetDataTransformer,
+	deleteFileOrDirectory,
+	generateBuildManifest,
+} = require( './bin/webpack/utils' );
 
 /**
  * WordPress dependencies
