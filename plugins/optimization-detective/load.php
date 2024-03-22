@@ -25,7 +25,10 @@ if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 	return;
 }
 
-if ( ! file_exists( __DIR__ . '/detection/web-vitals.asset.php' ) ) {
+if (
+	( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) &&
+	! file_exists( __DIR__ . '/detection/web-vitals.asset.php' )
+) {
 	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 	trigger_error(
 		esc_html(
