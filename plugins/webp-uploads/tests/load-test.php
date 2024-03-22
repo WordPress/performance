@@ -43,7 +43,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_not_create_the_original_mime_type_for_jpeg_images() {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg' );
 
 		// There should be a WebP source, but no JPEG source for the full image.
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
@@ -75,7 +75,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_create_the_original_mime_type_as_well_with_all_the_available_sources_for_the_specified_mime() {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/balloons.webp' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/balloons.webp' );
 
 		// There should be a WebP source, but no JPEG source for the full image.
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
@@ -106,7 +106,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_create_jpeg_and_webp_for_jpeg_images_if_opted_in() {
 		$this->opt_in_to_jpeg_and_webp();
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg' );
 
 		// There should be JPEG and WebP sources for the full image.
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
@@ -137,7 +137,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_create_jpeg_and_webp_for_jpeg_images_if_generate_webp_and_jpeg_set() {
 		update_option( 'perflab_generate_webp_and_jpeg', true );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg' );
 
 		// There should be JPEG and WebP sources for the full image.
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
@@ -169,7 +169,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg'
 		);
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -195,7 +195,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		);
 
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg'
 		);
 
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
@@ -222,7 +222,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		);
 
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/balloons.webp'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/balloons.webp'
 		);
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -241,7 +241,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 */
 	public function it_should_create_a_webp_version_with_all_the_required_properties() {
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg'
 		);
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -271,7 +271,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		add_filter( 'intermediate_image_sizes', '__return_empty_array' );
 		add_filter( 'fallback_intermediate_image_sizes', '__return_empty_array' );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertEmpty( $metadata['sizes'] );
@@ -298,7 +298,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		);
 
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg'
 		);
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$this->assertStringEndsWith( '-scaled.jpg', get_attached_file( $attachment_id ) );
@@ -314,7 +314,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 */
 	public function it_should_remove_the_generated_webp_images_when_the_attachment_is_deleted() {
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg'
 		);
 
 		$file    = get_attached_file( $attachment_id, true );
@@ -349,7 +349,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 */
 	public function it_should_remove_the_attached_webp_version_if_the_attachment_is_force_deleted() {
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg'
 		);
 
 		$file    = get_attached_file( $attachment_id, true );
@@ -378,7 +378,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		add_filter( 'intermediate_image_sizes', '__return_empty_array' );
 		add_filter( 'fallback_intermediate_image_sizes', '__return_empty_array' );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg' );
 
 		$file    = get_attached_file( $attachment_id, true );
 		$dirname = pathinfo( $file, PATHINFO_DIRNAME );
@@ -401,7 +401,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 */
 	public function it_should_remove_the_backup_sizes_and_sources_if_the_attachment_is_deleted_after_edit() {
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg'
 		);
 
 		$file    = get_attached_file( $attachment_id, true );
@@ -471,7 +471,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->opt_in_to_jpeg_and_webp();
 
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/balloons.webp'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/balloons.webp'
 		);
 
 		$tag          = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
@@ -495,7 +495,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 */
 	public function it_should_prevent_replacing_a_jpg_image_if_the_image_does_not_have_the_target_class_name() {
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg'
 		);
 
 		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
@@ -560,8 +560,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	public function provider_replace_images_with_different_extensions() {
-		yield 'An image with a .jpg extension' => array( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg' );
-		yield 'An image with a .jpeg extension' => array( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/car.jpeg' );
+		yield 'An image with a .jpg extension' => array( TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg' );
+		yield 'An image with a .jpeg extension' => array( TESTS_PLUGIN_ROOT . '/tests/data/images/car.jpeg' );
 	}
 
 	/**
@@ -574,7 +574,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->opt_in_to_jpeg_and_webp();
 
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg'
 		);
 
 		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
@@ -599,7 +599,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_prevent_replacing_an_image_with_no_available_sources() {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/car.jpeg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/car.jpeg' );
 
 		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
@@ -623,8 +623,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	public function data_provider_not_supported_webp_images() {
-		yield 'PNG image' => array( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/dice.png' );
-		yield 'GIFT image' => array( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/earth.gif' );
+		yield 'PNG image' => array( TESTS_PLUGIN_ROOT . '/tests/data/images/dice.png' );
+		yield 'GIFT image' => array( TESTS_PLUGIN_ROOT . '/tests/data/images/earth.gif' );
 	}
 
 	/**
@@ -641,7 +641,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			}
 		);
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/paint.jpeg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/paint.jpeg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		foreach ( $metadata['sizes'] as $size ) {
@@ -669,7 +669,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/car.jpeg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/car.jpeg' );
 
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
@@ -698,7 +698,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		$this->assertTrue( wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertArrayHasKey( 'sources', $metadata );
@@ -717,7 +717,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_replace_the_featured_image_to_webp_when_requesting_the_featured_image() {
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/paint.jpeg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/paint.jpeg' );
 		$post_id       = self::factory()->post->create();
 		set_post_thumbnail( $post_id, $attachment_id );
 
@@ -742,7 +742,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			}
 		);
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/car.jpeg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/car.jpeg' );
 
 		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
@@ -760,7 +760,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
 		// Look for an image that contains all of the additional mime type images.
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/car.jpeg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/car.jpeg' );
 		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$expected_tag  = $tag;
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
@@ -800,7 +800,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		add_filter( 'wp_editor_set_quality', array( $this, 'force_webp_image_quality_86' ), PHP_INT_MAX, 2 );
 
 		// Look for an image that contains only full size mime type images.
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg' );
 		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$file          = get_attached_file( $attachment_id, true );
@@ -827,7 +827,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		add_filter( 'wp_editor_set_quality', array( $this, 'force_webp_image_quality_86' ), PHP_INT_MAX, 2 );
 
 		// Look for an image that contains all of the additional mime type images.
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/balloons.webp' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/balloons.webp' );
 		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$expected_tag  = $tag;
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
@@ -859,7 +859,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		remove_all_actions( 'wp_footer' );
 
 		$attachment_id = self::factory()->attachment->create_upload_object(
-			TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg'
+			TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg'
 		);
 
 		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
@@ -912,7 +912,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		add_image_size( 'allowed_size_400x300', 400, 300, true );
 		add_image_size( 'not_allowed_size_200x150', 200, 150, true );
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/car.jpeg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/car.jpeg' );
 
 		remove_image_size( 'allowed_size_400x300' );
 		remove_image_size( 'not_allowed_size_200x150' );
@@ -933,7 +933,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// TODO: This property should later be set via a new parameter on add_image_size().
 		$GLOBALS['_wp_additional_image_sizes']['allowed_size_400x300']['provide_additional_mime_types'] = true;
 
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/car.jpeg' );
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_ROOT . '/tests/data/images/car.jpeg' );
 
 		remove_image_size( 'allowed_size_400x300' );
 		remove_image_size( 'not_allowed_size_200x150' );
@@ -951,7 +951,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// Temporary file path.
 		$file = $this->temp_filename();
 
-		$editor = wp_get_image_editor( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/dice.png', array( 'mime_type' => 'image/png' ) );
+		$editor = wp_get_image_editor( TESTS_PLUGIN_ROOT . '/tests/data/images/dice.png', array( 'mime_type' => 'image/png' ) );
 
 		// Quality setting for the source image. For PNG the fallback default of 82 is used.
 		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for PNG is 82.' );
@@ -960,7 +960,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$editor->save( $file, 'image/webp' );
 		$this->assertSame( 82, $editor->get_quality(), 'Output image format is WebP. Quality setting for it should be 82 universally.' );
 
-		$editor = wp_get_image_editor( TESTS_PLUGIN_ROOT . '/tests/testdata/modules/images/leaves.jpg' );
+		$editor = wp_get_image_editor( TESTS_PLUGIN_ROOT . '/tests/data/images/leaves.jpg' );
 
 		// Quality setting for the source image. For JPG the fallback default of 82 is used.
 		$this->assertSame( 82, $editor->get_quality(), 'Default quality setting for JPG is 82.' );
