@@ -14,28 +14,18 @@
 # Site Health: Enqueued Assets Health Check
 /includes/site-health/audit-enqueued-assets                                 @manuelRod
 /tests/includes/site-health/audit-enqueued-assets                           @manuelRod
-/tests/testdata/modules/site-health/audit-enqueued-assets                   @manuelRod
 
 # Plugin: Auto-sizes for Lazy-Loaded Images
 /plugins/auto-sizes                         @joemcgill
-/tests/plugins/auto-sizes                   @joemcgill
-
-# Plugin: Speculative Loading
-/plugins/speculation-rules                  @felixarntz
-/tests/plugins/speculation-rules            @felixarntz
-
-# Plugin: Modern Image Formats
-/plugins/webp-uploads                       @adamsilverstein @felixarntz
-/tests/plugins/webp-uploads                 @adamsilverstein @felixarntz
 
 # Plugin: Image Placeholders
 /plugins/dominant-color-images              @pbearne @spacedmonkey
-/tests/plugins/dominant-color-images        @pbearne @spacedmonkey
 
 # Plugin: Embed Optimizer
 /plugins/embed-optimizer                    @adamsilverstein @westonruter
-/tests/plugins/embed-optimizer              @adamsilverstein @westonruter
 
-# Plugin: Optimization Detective
-/plugins/optimization-detective             @westonruter @felixarntz
-/tests/plugins/optimization-detective       @westonruter @felixarntz
+# Plugin: Speculative Loading
+/plugins/speculation-rules                  @felixarntz
+
+# Plugin: Modern Image Formats
+/plugins/webp-uploads                       @adamsilverstein @felixarntz
