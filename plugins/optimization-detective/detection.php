@@ -35,8 +35,24 @@ function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection 
 	 */
 	$detection_time_window = apply_filters( 'od_detection_time_window', 5000 );
 
-	$web_vitals_lib_data = require __DIR__ . '/detection/web-vitals.asset.php';
-	$web_vitals_lib_src  = add_query_arg( 'ver', $web_vitals_lib_data['version'], plugin_dir_url( __FILE__ ) . '/detection/web-vitals.js' );
+	try {
+		$web_vitals_lib_data = require __DIR__ . '/detection/web-vitals.asset.php';
+	} catch ( Error $error ) {
+		$error_message  = '[Optimization Detective] ';
+		$error_message .= sprintf(
+			/* translators: 1: File path. 2: CLI command. */
+			__( 'Unable to load %1$s. Please make sure you have run %2$s.', 'optimization-detective' ),
+			'detection/web-vitals.asset.php',
+			'`npm install && npm run build:optimization-detective`'
+		);
+		if ( WP_DEBUG && WP_DEBUG_DISPLAY ) {
+			$error_message .= ' ' . __( 'PHP Error:', 'optimization-detective' ) . ' ' . $error->getMessage();
+		}
+		return wp_get_inline_script_tag(
+			sprintf( 'console.error( %s );', wp_json_encode( $error_message ) )
+		);
+	}
+	$web_vitals_lib_src = add_query_arg( 'ver', $web_vitals_lib_data['version'], plugin_dir_url( __FILE__ ) . '/detection/web-vitals.js' );
 
 	$current_url = od_get_current_url();
 	$detect_args = array(
