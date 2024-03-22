@@ -33,7 +33,7 @@ function od_get_url_metric_freshness_ttl(): int {
 	 */
 	$freshness_ttl = (int) apply_filters( 'od_url_metric_freshness_ttl', DAY_IN_SECONDS );
 
-	if ( $freshness_ttl <= 0 ) {
+	if ( $freshness_ttl < 0 ) {
 		_doing_it_wrong(
 			__FUNCTION__,
 			esc_html(
