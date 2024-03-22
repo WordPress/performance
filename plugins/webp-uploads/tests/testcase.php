@@ -1,10 +1,10 @@
 <?php
 
-namespace PerformanceLab\Tests\TestCase;
+namespace WebP_Uploads\Tests;
 
-use PerformanceLab\Tests\Constraint\ImageHasSizeSource;
-use PerformanceLab\Tests\Constraint\ImageHasSource;
 use WP_UnitTestCase;
+use WebP_Uploads\Tests\ImageHasSource;
+use WebP_Uploads\Tests\ImageHasSizeSource;
 
 /**
  * A test case for image attachments.
@@ -17,7 +17,7 @@ use WP_UnitTestCase;
  * @method void assertFileNameIsNotEdited( string $filename, string $message = '' ) Asserts that the provided file name was edited by WordPress contains an e{WITH_13_DIGITS} on the filename.
  * @method void assertSizeNameIsHashed( string $size_name, string $hashed_size_name, string $message = '' ) Asserts that the provided size name is an edited name that contains a hash with digits.
  */
-abstract class ImagesTestCase extends WP_UnitTestCase {
+abstract class TestCase extends WP_UnitTestCase {
 
 	/**
 	 * Asserts that an image has a source with the specific mime type.
