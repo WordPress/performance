@@ -1,6 +1,6 @@
 <?php
 /**
- * PHPUnit bootstrap file
+ * PHPUnit bootstrap file.
  *
  * @package webp-uploads
  */
