@@ -176,7 +176,7 @@ function perflab_maybe_set_object_cache_dropin() {
 		 * Previous versions of the Performance Lab plugin were renaming the
 		 * original object-cache.php file and then loading both. However, due
 		 * to other plugins eagerly checking file headers, this caused too many
-		 * problems across sites so it was decided to remove this layer.
+		 * problems across sites, so it was decided to remove this layer.
 		 * Only placing the drop-in file if no other one exists yet is the
 		 * safest solution.
 		 */
@@ -248,7 +248,7 @@ function perflab_maybe_remove_object_cache_dropin() {
 		 * override the Performance Lab file. This is only relevant for
 		 * backward-compatibility with previous Performance Lab versions
 		 * which were backing up the file and then loading both.
-		 * Otherwise just delete the Performance Lab file.
+		 * Otherwise, just delete the Performance Lab file.
 		 */
 		if ( $wp_filesystem->exists( $dropin_backup_path ) ) {
 			$wp_filesystem->move( $dropin_backup_path, $dropin_path, true );

@@ -131,8 +131,8 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
 	<script id="<?php echo esc_attr( $pointer_id ); ?>" type="text/javascript">
 		jQuery( function() {
 			// Pointer Options.
-			var options = {
-				content: '<h3><?php echo esc_js( $args['heading'] ); ?></h3><p><?php echo wp_kses( $args['content'], $wp_kses_options ); ?></p>',
+			const options = {
+				content: <?php echo wp_json_encode( '<h3>' . esc_html( $args['heading'] ) . '</h3><p>' . wp_kses( $args['content'], $wp_kses_options ) . '</p>' ); ?>,
 				position: {
 					edge:  'left',
 					align: 'right',
@@ -143,7 +143,7 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
 					jQuery.post(
 						window.ajaxurl,
 						{
-							pointer: '<?php echo esc_js( $pointer_id ); ?>',
+							pointer: <?php echo wp_json_encode( $pointer_id ); ?>,
 							action:  'dismiss-wp-pointer',
 							_wpnonce: <?php echo wp_json_encode( wp_create_nonce( 'dismiss_pointer' ) ); ?>,
 						}
@@ -305,17 +305,13 @@ function perflab_deactivate_plugin() {
 	}
 
 	// Deactivate the plugin in question and return to prior screen.
-	$do_plugin_deactivation = deactivate_plugins( $plugin );
-	$referer                = wp_get_referer();
-	if ( ! is_wp_error( $do_plugin_deactivation ) ) {
-		$referer = add_query_arg(
-			array(
-				'deactivate' => true,
-			),
-			$referer
-		);
-	}
-
+	deactivate_plugins( $plugin );
+	$referer = add_query_arg(
+		array(
+			'deactivate' => true,
+		),
+		wp_get_referer()
+	);
 	if ( wp_safe_redirect( $referer ) ) {
 		exit;
 	}
