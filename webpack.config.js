@@ -5,6 +5,7 @@ const path = require( 'path' );
 const WebpackBar = require( 'webpackbar' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const {
+	assetDataTransformer,
 	deleteFileOrDirectory,
 	generateBuildManifest,
 } = require( './bin/webpack/utils' );
@@ -23,26 +24,6 @@ const sharedConfig = {
 	...defaultConfig,
 	entry: {},
 	output: {},
-};
-
-/**
- * Transformer to get version from package.json and return it as a PHP file.
- *
- * @param {Buffer} content      The content as a Buffer of the file being transformed.
- * @param {string} absoluteFrom The absolute path to the file being transformed.
- *
- * @return {Buffer|string} The transformed content.
- */
-const assetDataTransformer = ( content, absoluteFrom ) => {
-	if ( 'package.json' !== path.basename( absoluteFrom ) ) {
-		return content;
-	}
-
-	const contentAsString = content.toString();
-	const contentAsJson = JSON.parse( contentAsString );
-	const { version } = contentAsJson;
-
-	return `<?php return array('dependencies' => array(), 'version' => '${ version }');`;
 };
 
 const webVitals = () => {
