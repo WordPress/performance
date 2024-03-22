@@ -1,4 +1,4 @@
-=== Optimization Detective ===
+=== Optimization Detective (Developer Preview) ===
 
 Contributors:      wordpressdotorg
 Requires at least: 6.3
