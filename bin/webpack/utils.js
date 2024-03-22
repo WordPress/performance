@@ -98,6 +98,7 @@ const assetDataTransformer = ( content, absoluteFrom ) => {
 };
 
 module.exports = {
+	getPluginRootPath,
 	deleteFileOrDirectory,
 	getPluginVersion,
 	generateBuildManifest,
