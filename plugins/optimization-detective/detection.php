@@ -23,7 +23,7 @@ function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection 
 	/**
 	 * Filters the time window between serve time and run time in which loading detection is allowed to run.
 	 *
-	 * This the allowance of milliseconds between when the page was first generated (and perhaps cached) and when the
+	 * This is the allowance of milliseconds between when the page was first generated (and perhaps cached) and when the
 	 * detect function on the page is allowed to perform its detection logic and submit the request to store the results.
 	 * This avoids situations in which there is missing URL Metrics in which case a site with page caching which
 	 * also has a lot of traffic could result in a cache stampede.
