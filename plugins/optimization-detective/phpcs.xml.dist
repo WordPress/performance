@@ -2,7 +2,7 @@
 <ruleset name="WPP-OptimizationDetective">
 	<description>WordPress Coding Standards for Optimization Detective Plugin</description>
 
-	<rule ref="../../phpcs.ruleset.xml"/>
+	<rule ref="../../bin/phpcs/phpcs.ruleset.xml"/>
 
 	<config name="text_domain" value="optimization-detective"/>
 

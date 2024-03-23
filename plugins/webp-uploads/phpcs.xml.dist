@@ -2,7 +2,7 @@
 <ruleset name="WPP-WebPUploads">
 	<description>WordPress Coding Standards for WebP Uploads Plugin</description>
 
-	<rule ref="../../phpcs.ruleset.xml"/>
+	<rule ref="../../bin/phpcs/phpcs.ruleset.xml"/>
 
 	<config name="text_domain" value="webp-uploads"/>
 
