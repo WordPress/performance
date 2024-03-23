@@ -64,7 +64,7 @@ function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection 
 	return wp_get_inline_script_tag(
 		sprintf(
 			'import detect from %s; detect( %s );',
-			wp_json_encode( add_query_arg( 'ver', OPTIMIZATION_DETECTIVE_VERSION, plugin_dir_url( __FILE__ ) . 'detection/detect.js' ) ),
+			wp_json_encode( add_query_arg( 'ver', OPTIMIZATION_DETECTIVE_VERSION, plugin_dir_url( __FILE__ ) . 'detect.js' ) ),
 			wp_json_encode( $detect_args )
 		),
 		array( 'type' => 'module' )
