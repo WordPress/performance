@@ -46,7 +46,7 @@ const optimizationDetective = ( env ) => {
 	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
 	const destination = path.resolve(
 		__dirname,
-		'plugins/optimization-detective/detection'
+		'plugins/optimization-detective/build'
 	);
 
 	return {

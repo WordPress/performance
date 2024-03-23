@@ -95,4 +95,7 @@
 	</rule>
 
 	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
+
+	<!-- Exclude built plugins and built assets in plugins. -->
+	<exclude-pattern>./build/*</exclude-pattern>
 </ruleset>

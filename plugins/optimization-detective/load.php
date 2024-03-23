@@ -27,7 +27,7 @@ if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 
 if (
 	( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) &&
-	! file_exists( __DIR__ . '/detection/web-vitals.asset.php' )
+	! file_exists( __DIR__ . '/build/web-vitals.asset.php' )
 ) {
 	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 	trigger_error(
@@ -35,7 +35,7 @@ if (
 			sprintf(
 				/* translators: 1: File path. 2: CLI command. */
 				'[Optimization Detective] ' . __( 'Unable to load %1$s. Please make sure you have run %2$s.', 'optimization-detective' ),
-				'detection/web-vitals.asset.php',
+				'build/web-vitals.asset.php',
 				'`npm install && npm run build:optimization-detective`'
 			)
 		),
