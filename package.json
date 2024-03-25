@@ -59,7 +59,7 @@
     "./tests/*.php": [
       "composer run-script lint"
     ],
-    "./{includes,tests/includes}/**/*.php": [
+    "./{includes,tests/includes,tests/testdata,tests/utils}/**/*.php": [
       "composer run-script lint"
     ],
     "./{plugins/auto-sizes,tests/plugins/auto-sizes}/**/*.php": [
