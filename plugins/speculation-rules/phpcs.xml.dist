@@ -2,7 +2,7 @@
 <ruleset name="WPP-SpeculationRules">
 	<description>WordPress Coding Standards for Speculation Rules Plugin</description>
 
-	<rule ref="../../phpcs.ruleset.xml"/>
+	<rule ref="../../bin/phpcs/phpcs.ruleset.xml"/>
 
 	<config name="text_domain" value="speculation-rules"/>
 

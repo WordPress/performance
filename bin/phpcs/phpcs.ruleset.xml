@@ -12,6 +12,9 @@
 	<arg value="ps"/>
 	<arg name="extensions" value="php"/>
 
+	<!-- Check up to 20 files simultaneously. -->
+	<arg name="parallel" value="20"/>
+
 	<!-- Do not require docblocks for unit tests -->
 	<rule ref="Squiz.Commenting.FunctionComment.Missing">
 		<exclude-pattern>tests/*</exclude-pattern>
@@ -95,4 +98,7 @@
 	</rule>
 
 	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
+
+	<!-- Exclude built plugins and built assets in plugins. -->
+	<exclude-pattern>./build/*</exclude-pattern>
 </ruleset>

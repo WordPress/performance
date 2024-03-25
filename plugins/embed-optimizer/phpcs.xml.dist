@@ -2,7 +2,7 @@
 <ruleset name="WPP-EmbedOptimizer">
 	<description>WordPress Coding Standards for Embed Optimizer Plugin</description>
 
-	<rule ref="../../phpcs.ruleset.xml"/>
+	<rule ref="../../bin/phpcs/phpcs.ruleset.xml"/>
 
 	<config name="text_domain" value="embed-optimizer"/>
 
