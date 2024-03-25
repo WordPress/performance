@@ -51,8 +51,34 @@
   },
   "lint-staged": {
     "*.php": [
-      "composer run-script lint",
       "composer run-script phpstan"
+    ],
+    "./*.php": [
+      "composer run-script lint"
+    ],
+    "./tests/*.php": [
+      "composer run-script lint"
+    ],
+    "./{includes,tests/includes}/**/*.php": [
+      "composer run-script lint"
+    ],
+    "./{plugins/auto-sizes,tests/plugins/auto-sizes}/**/*.php": [
+      "composer run-script lint:auto-sizes"
+    ],
+    "./{plugins/dominant-color-images,tests/plugins/dominant-color-images}/**/*.php": [
+      "composer run-script lint:dominant-color-images"
+    ],
+    "./{plugins/embed-optimizer,tests/plugins/embed-optimizer}/**/*.php": [
+      "composer run-script lint:embed-optimizer"
+    ],
+    "./{plugins/optimization-detective,tests/plugins/optimization-detective}/**/*.php": [
+      "composer run-script lint:optimization-detective"
+    ],
+    "./{plugins/speculation-rules,tests/plugins/speculation-rules}/**/*.php": [
+      "composer run-script lint:speculation-rules"
+    ],
+    "./{plugins/webp-uploads,tests/plugins/webp-uploads}/**/*.php": [
+      "composer run-script lint:webp-uploads"
     ],
     "*.js": [
       "npm run lint-js"
