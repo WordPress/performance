@@ -64,14 +64,5 @@
     "test-php-multisite-plugins": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/$(basename $(pwd)) composer test-multisite:plugins",
     "wp-env": "wp-env",
     "prepare": "husky install"
-  },
-  "lint-staged": {
-    "*.php": [
-      "composer run-script lint",
-      "composer run-script phpstan"
-    ],
-    "*.js": [
-      "npm run lint-js"
-    ]
   }
 }
