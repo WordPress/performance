@@ -2,7 +2,7 @@
 name: New plugin proposal
 about: Propose a new plugin for the Performance Lab program
 title: 'Plugin Proposal: '
-labels: [ "[Type] Plugin" ]
+labels: [ "[Type] Plugin Proposal" ]
 
 ---
 
