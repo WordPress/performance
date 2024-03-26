@@ -53,6 +53,6 @@ jobs:
       - name: Composer Install
         run: composer install --no-interaction --no-progress
       - name: PHP Lint
-        run: composer lint:all
+        run: npm run lint:php:all
       - name: PHPStan
         run: composer phpstan
