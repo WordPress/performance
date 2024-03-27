@@ -24,6 +24,9 @@
 # Plugin: Embed Optimizer
 /plugins/embed-optimizer                    @adamsilverstein @westonruter
 
+# Plugin: Optimization Detective
+/plugins/optimization-detective             @westonruter @felixarntz
+
 # Plugin: Speculative Loading
 /plugins/speculation-rules                  @felixarntz
 
