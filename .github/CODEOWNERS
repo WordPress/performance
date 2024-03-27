@@ -4,45 +4,17 @@
 /bin                                        @mukeshpanchal27 @felixarntz
 /.github                                    @mukeshpanchal27 @felixarntz
 
-# Focus: Database
-/modules/database                           @olliejones
-/tests/modules/database                     @olliejones
-/tests/testdata/modules/database            @olliejones
+# Site Health: WebP Support Health Check
+/includes/site-health/webp-support                                          @adamsilverstein
 
-# Focus: Images
-/modules/images                             @adamsilverstein @getsource @joemcgill
-/tests/modules/images                       @adamsilverstein @getsource @joemcgill
-/tests/testdata/modules/images              @adamsilverstein @getsource @joemcgill
+# Site Health: Autoloaded Options Health Check
+/includes/site-health/audit-autoloaded-options                              @manuelRod @felixarntz
+/tests/includes/site-health/audit-autoloaded-options                        @manuelRod @felixarntz
 
-# Focus: JS & CSS
-/modules/js-and-css                         @westonruter
-/tests/modules/js-and-css                   @westonruter
-/tests/testdata/modules/js-and-css          @westonruter
-
-# Focus: Measurement
-/modules/measurement                        @joemcgill
-/tests/modules/measurement                  @joemcgill
-/tests/testdata/modules/measurement         @joemcgill
-
-# Focus: Object Cache
-/modules/object-cache                       @tillkruss @spacedmonkey
-/tests/modules/object-cache                 @tillkruss @spacedmonkey
-/tests/testdata/modules/object-cache        @tillkruss @spacedmonkey
-
-# Module: WebP Support Health Check
-/modules/images/webp-support                                                @adamsilverstein
-/tests/modules/images/webp-support                                          @adamsilverstein
-/tests/testdata/modules/images/webp-support                                 @adamsilverstein
-
-# Module: Autoloaded Options Health Check
-/modules/database/audit-autoloaded-options                                  @manuelRod @felixarntz
-/tests/modules/database/audit-autoloaded-options                            @manuelRod @felixarntz
-/tests/testdata/modules/database/audit-autoloaded-options                   @manuelRod @felixarntz
-
-# Module: Enqueued Assets Health Check
-/modules/js-and-css/audit-enqueued-assets                                   @manuelRod
-/tests/modules/js-and-css/audit-enqueued-assets                             @manuelRod
-/tests/testdata/modules/js-and-css/audit-enqueued-assets                    @manuelRod
+# Site Health: Enqueued Assets Health Check
+/includes/site-health/audit-enqueued-assets                                 @manuelRod
+/tests/includes/site-health/audit-enqueued-assets                           @manuelRod
+/tests/testdata/modules/site-health/audit-enqueued-assets                   @manuelRod
 
 # Plugin: Auto-sizes for Lazy-Loaded Images
 /plugins/auto-sizes                         @joemcgill
