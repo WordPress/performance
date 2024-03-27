@@ -21,3 +21,10 @@ $GLOBALS['wp_tests_options'] = array(
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
+
+// Load tests helpers.
+require_once TESTS_PLUGIN_DIR . '/tests/data/testcase.php';
+require_once TESTS_PLUGIN_DIR . '/tests/data/class-wp-image-edit.php';
+require_once TESTS_PLUGIN_DIR . '/tests/data/class-wp-image-doesnt-support-webp.php';
+require_once TESTS_PLUGIN_DIR . '/tests/data/class-image-has-source-constraint.php';
+require_once TESTS_PLUGIN_DIR . '/tests/data/class-image-has-size-source-constraint.php';
