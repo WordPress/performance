@@ -87,13 +87,5 @@
       "phpstan/extension-installer": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
     }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "PerformanceLab\\Tests\\": "tests/utils"
-    },
-    "classmap": [
-      "plugins/*/tests/"
-    ]
   }
 }
