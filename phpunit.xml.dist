@@ -13,9 +13,4 @@
 			<exclude>./tests/utils</exclude>
 		</testsuite>
 	</testsuites>
-	<groups>
-		<exclude>
-			<group>ms-required</group>
-		</exclude>
-	</groups>
 </phpunit>
