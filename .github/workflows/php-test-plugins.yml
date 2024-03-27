@@ -71,6 +71,6 @@ jobs:
       - name: Composer update
         run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer update --no-interaction
       - name: Running single site unit tests for plugins
-        run: npm run test-php-plugins
+        run: npm run test:php:plugins
       - name: Running multisite unit tests for plugins
-        run: npm run test-php-multisite-plugins
+        run: npm run test:php:multisite:plugins
