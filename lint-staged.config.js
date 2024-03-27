@@ -8,9 +8,20 @@ const micromatch = require( 'micromatch' );
  */
 const { plugins } = require( './plugins.json' );
 
+/**
+ * Join and escape filenames for shell.
+ *
+ * @param {Array} files Files to join.
+ *
+ * @return {string} Joined files.
+ */
+const joinFiles = ( files ) => {
+	return files.map( ( file ) => `'${ file }'` ).join( ' ' );
+};
+
 module.exports = {
 	'**/*.js': ( files ) =>
-		`npm run lint-js ${ files.length > 10 ? '' : files.join( ' ' ) }`,
+		`npm run lint-js ${ files.length > 10 ? '' : joinFiles( files ) }`,
 	'**/*.php': ( files ) => {
 		const commands = [ 'composer phpstan' ];
 
@@ -23,7 +34,7 @@ module.exports = {
 			if ( pluginFiles.length ) {
 				commands.push(
 					`npm run lint:php:${ plugin } ${
-						pluginFiles.length > 10 ? '' : pluginFiles.join( ' ' )
+						pluginFiles.length > 10 ? '' : joinFiles( pluginFiles )
 					}`
 				);
 			}
@@ -34,7 +45,7 @@ module.exports = {
 		if ( otherFiles.length ) {
 			commands.push(
 				`npm run lint:php ${
-					otherFiles.length > 10 ? '' : otherFiles.join( ' ' )
+					otherFiles.length > 10 ? '' : joinFiles( otherFiles )
 				}`
 			);
 		}
