@@ -28,6 +28,11 @@ function init( $plugin_root, $plugin_dir = '' ) {
 		define( 'WP_PLUGIN_DIR', dirname( $plugin_dir ) );
 	}
 
+	// Load the Composer dependencies if applicable.
+	if ( file_exists( $plugin_root . '/vendor/autoload.php' ) ) {
+		require_once $plugin_root . '/vendor/autoload.php';
+	}
+
 	$wp_tests_dir = get_path_to_wp_test_dir();
 
 	// Load the WordPress tests environment.
