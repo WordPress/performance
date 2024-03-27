@@ -141,13 +141,16 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	if ( is_plugin_active( $status['file'] ) ) {
 		$action_links[] = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-			esc_html__( 'Active', 'default' )
+			esc_html( _x( 'Active', 'plugin', 'default' ) )
 		);
 	} elseif (
 		$compatible_php &&
 		$compatible_wp &&
-		current_user_can( 'install_plugins', $status['file'] ) &&
-		current_user_can( 'activate_plugin', $status['file'] )
+		current_user_can( 'activate_plugin', $status['file'] ) &&
+		(
+			'install' !== $status ||
+			current_user_can( 'install_plugins' )
+		)
 	) {
 		$action_links[] = sprintf(
 			'<button type="button" class="button perflab-install-active-plugin" data-slug="%s">%s</button>',
@@ -155,9 +158,10 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			esc_html__( 'Activate', 'default' )
 		);
 	} else {
+		$explanation    = 'install' !== $status || current_user_can( 'install_plugins' ) ? _x( 'Cannot Activate', 'plugin', 'default' ) : _x( 'Cannot Install', 'plugin', 'default' );
 		$action_links[] = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-			esc_html( _x( 'Cannot Install', 'plugin', 'default' ) )
+			esc_html( $explanation )
 		);
 	}
 

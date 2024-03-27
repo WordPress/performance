@@ -271,7 +271,7 @@ function perflab_install_activate_plugins_callback() {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	require_once ABSPATH . 'wp-admin/includes/class-wp-ajax-upgrader-skin.php';
 
-	$plugin = $_REQUEST['slug'];
+	$plugin = isset( $_REQUEST['slug'] ) ? wp_unslash( $_REQUEST['slug'] ) : '';
 	if ( ! $plugin ) {
 		$status['errorMessage'] = __( 'Invalid plugin.', 'performance-lab' );
 		wp_send_json_error( $status );
