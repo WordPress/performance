@@ -51,7 +51,7 @@
     "test:php:optimization-detective": "npm run test-php-plugins --plugin=optimization-detective",
     "test:php:speculation-rules": "npm run test-php-plugins --plugin=speculation-rules",
     "test:php:webp-uploads": "npm run test-php-plugins --plugin=webp-uploads",
-    "test:php:multisite": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance env WP_MULTISITE=1 composer phpunit",
+    "test:php:multisite": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance env WP_MULTISITE=1 composer phpunit -- -- --exclude-group ms-excluded",
     "test-php-multisite-plugins": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance/plugins/$npm_config_plugin env WP_MULTISITE=1 php ../../vendor/bin/phpunit --exclude-group ms-excluded --verbose",
     "test:php:multisite:plugins": "npm-run-all 'test:php:multisite:!(plugins)'",
     "test:php:multisite:auto-sizes": "npm run test-php-multisite-plugins --plugin=auto-sizes",
