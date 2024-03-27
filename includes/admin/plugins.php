@@ -152,9 +152,20 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			current_user_can( 'install_plugins' )
 		)
 	) {
+		$url = esc_url_raw(
+			add_query_arg(
+				array(
+					'action'   => 'perflab_install_activate_plugins',
+					'_wpnonce' => wp_create_nonce( 'perflab_install_activate_plugins' ),
+					'slug'     => $plugin_data['slug'],
+				),
+				admin_url( 'options-general.php' )
+			)
+		);
+
 		$action_links[] = sprintf(
-			'<button type="button" class="button perflab-install-active-plugin" data-slug="%s">%s</button>',
-			esc_attr( $plugin_data['slug'] ),
+			'<a class="button perflab-install-active-plugin" href="%s">%s</a>',
+			esc_url( $url ),
 			esc_html__( 'Activate', 'default' )
 		);
 	} else {
