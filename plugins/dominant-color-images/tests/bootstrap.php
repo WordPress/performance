@@ -21,3 +21,6 @@ $GLOBALS['wp_tests_options'] = array(
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
+
+// Load tests helpers.
+require_once TESTS_PLUGIN_DIR . '/tests/data/testcase.php';
