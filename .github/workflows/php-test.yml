@@ -1,87 +1,77 @@
----
-name: PHP Unit Tests
+name: Unit Testing
 
 on:
   push:
     branches:
       - trunk
       - 'release/**'
+    # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-test.yml'
-      - '**/*.php'
+      - '**.php'
+      - '.wp-env.json'
+      - '**/package.json'
+      - 'package-lock.json'
       - 'phpunit.xml.dist'
+      - 'tests/multisite.xml'
       - 'composer.json'
       - 'composer.lock'
-      - '!plugins/**'
   pull_request:
+    # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-test.yml'
-      - '**/*.php'
+      - '**.php'
+      - '.wp-env.json'
+      - '**/package.json'
+      - 'package-lock.json'
       - 'phpunit.xml.dist'
+      - 'tests/multisite.xml'
       - 'composer.json'
       - 'composer.lock'
-      - '!plugins/**'
     types:
       - opened
       - reopened
       - synchronize
   workflow_dispatch:
 
-permissions: {}
-
-env:
-  WP_CORE_DIR: /tmp/wordpress
-  WP_TESTS_DIR: /tmp/wordpress-tests-lib
-  WP_ENVIRONMENT_TYPE: local
-
 jobs:
-  unit-tests:
-    name: "Performance Lab / PHP ${{ matrix.environment.php }} / WP ${{ matrix.environment.wp }} ${{ 'true' == matrix.multisite && '/ Multisite' || ''}}"
+  php-test:
+    name: "PHP ${{ matrix.php }} / WP ${{ matrix.wp }}"
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    services:
-      mysql:
-        image: mariadb:latest
-        env:
-          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: true
-          MARIADB_DATABASE: wordpress_test
-          MARIADB_MYSQL_LOCALHOST_USER: 1
-          MARIADB_MYSQL_LOCALHOST_GRANTS: USAGE
-        ports:
-          - 3306
-        options: --health-cmd="healthcheck.sh --su-mysql --connect --innodb_initialized" --health-interval=10s --health-timeout=5s --health-retries=3
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        multisite: ['false', 'true']
-        environment: [
-          { "php": "7.0", "phpunit": "6", "wp": "latest" },
-          { "php": "7.1", "phpunit": "7", "wp": "latest" },
-          { "php": "7.2", "phpunit": "7", "wp": "latest" },
-          { "php": "7.3", "phpunit": "7", "wp": "latest" },
-          { "php": "7.4", "phpunit": "9.3", "wp": "latest" },
-          { "php": "7.4", "phpunit": "9.3", "wp": "6.4" },
-          { "php": "8.0", "phpunit": "9.3", "wp": "latest" },
-          { "php": "8.1", "phpunit": "9.6", "wp": "latest" },
-          { "php": "8.2", "phpunit": "9.6", "wp": "latest" },
-          { "php": "8.3", "phpunit": "9.6", "wp": "trunk" }
-        ]
+        php: ['8.2', '8.1', '8.0', '7.4', '7.3', '7.2', '7.1', '7.0']
+        wp: [ 'latest' ]
+        include:
+          - php: '7.4'
+            wp: '6.4'
+          - php: '8.3'
+            wp: 'trunk'
+    env:
+      WP_ENV_PHP_VERSION: ${{ matrix.php }}
+      WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup WP tests
-        uses: ./.github/actions/setup-wp-tests
+      - uses: styfle/cancel-workflow-action@0.11.0
+      - uses: actions/checkout@v3
+      - name: Setup Node.js (.nvmrc)
+        uses: actions/setup-node@v3
         with:
-          wp: ${{ matrix.environment.wp }}
-          php: ${{ matrix.environment.php }}
-          phpunit: ${{ matrix.environment.phpunit }}
-          mysql-port: ${{ job.services.mysql.ports['3306'] }}
-
-      - name: Run ${{ 'true' == matrix.multisite && 'Multisite' || 'Single Site' }} tests
-        shell: bash
-        run: |
-          phpunit ${{ 'true' == matrix.multisite && '--exclude-group=ms-excluded' || '' }} --verbose
-        working-directory:  ${{ env.WP_CORE_DIR }}/src/wp-content/plugins/performance
-        env:
-          WP_MULTISITE: ${{ 'true' == matrix.multisite && 1 || 0 }}
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: npm install
+        run: npm ci
+      - name: Remove standalone plugins from wp-env config
+        run: jq '.plugins = [.plugins[0]]' .wp-env.json > .wp-env.override.json
+      - name: Install WordPress
+        run: npm run wp-env start
+        # Note that `composer update` is required instead of `composer install`
+        # for the sake of PHP versions older than 8.1, which is the version of
+        # PHP that the composer.lock was created for.
+      - name: Composer update
+        run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer update --no-interaction
+      - name: Running single site unit tests
+        run: npm run test-php
+      - name: Running multisite unit tests
+        run: npm run test-php-multisite
