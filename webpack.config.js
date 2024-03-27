@@ -120,9 +120,11 @@ const buildPlugin = ( env ) => {
 						globOptions: {
 							dot: true,
 							ignore: [
+								'**/tests',
+								'**/*.[Cc]ache',
 								'**/.wordpress-org',
 								'**/phpcs.xml.dist',
-								'**/*.[Cc]ache',
+								'**/phpunit.xml.dist',
 							],
 						},
 					},
