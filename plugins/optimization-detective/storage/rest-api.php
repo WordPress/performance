@@ -96,7 +96,7 @@ function od_register_endpoint() {
 			'methods'             => WP_REST_Server::READABLE,
 			'args' => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the object.', 'web-stories' ),
+					'description' => __( 'Unique identifier for the object.', 'optimization-detective' ),
 					'type'        => 'integer',
 				),
 			),

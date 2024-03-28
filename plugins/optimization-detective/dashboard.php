@@ -26,11 +26,7 @@ add_action( 'admin_menu', 'od_add_submenu_page' );
 function od_render_dashboard_page() {
 	$asset_file = plugin_dir_path( __FILE__ ) . 'build/performance-dashboard.asset.php';
 
-	if ( ! file_exists( $asset_file ) ) {
-		return;
-	}
-
-	$asset = include $asset_file;
+	$asset = require $asset_file;
 
 	wp_enqueue_style( 'wp-components' );
 
