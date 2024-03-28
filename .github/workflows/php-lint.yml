@@ -52,7 +52,9 @@ jobs:
         run: composer validate --strict
       - name: Composer Install
         run: composer install --no-interaction --no-progress
+      - name: Install `npm-run-all` utility
+        run: npm install npm-run-all -g
       - name: PHP Lint
-        run: composer lint:all
+        run: npm run lint:php:all
       - name: PHPStan
         run: composer phpstan
