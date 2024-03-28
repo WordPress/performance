@@ -101,7 +101,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 **Documentation**
 
-* Infrastructure: Publish Dominant Color Images standalone plugin. ([842](https://github.com/WordPress/performance/pull/842))
+* Infrastructure: Publish Image Placeholders standalone plugin. ([842](https://github.com/WordPress/performance/pull/842))
 
 = 2.6.1 =
 
@@ -122,7 +122,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 **Enhancements**
 
-* Images: Fix incorrect function prefixes in Dominant Color Images. ([789](https://github.com/WordPress/performance/pull/789))
+* Images: Fix incorrect function prefixes in Image Placeholders. ([789](https://github.com/WordPress/performance/pull/789))
 * Infrastructure: Add early exit clauses to files with procedural code. ([790](https://github.com/WordPress/performance/pull/790))
 * Infrastructure: Allow disabling Server-Timing entirely using `PERFLAB_DISABLE_SERVER_TIMING` constant. ([795](https://github.com/WordPress/performance/pull/795))
 
@@ -157,7 +157,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 **Enhancements**
 
 * Images: Configure `Dominant Color` and `Fetchpriority` modules for their standalone plugins. ([704](https://github.com/WordPress/performance/pull/704))
-* Infrastructure: Temporarily remove Dominant Color Images from standalone `plugins.json` definition. ([719](https://github.com/WordPress/performance/pull/719))
+* Infrastructure: Temporarily remove Image Placeholders from standalone `plugins.json` definition. ([719](https://github.com/WordPress/performance/pull/719))
 * Infrastructure: Use dynamic version from `plugins.json` for manual workflow. ([710](https://github.com/WordPress/performance/pull/710))
 
 **Bug Fixes**
@@ -170,7 +170,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 **Enhancements**
 
 * Images: Remove "experimental" flag from Fetchpriority module. ([702](https://github.com/WordPress/performance/pull/702))
-* Infrastructure: Implement infrastructure for launching standalone plugins from modules, including WebP Uploads. ([699](https://github.com/WordPress/performance/pull/699))
+* Infrastructure: Implement infrastructure for launching standalone plugins from modules, including Modern Image Formats. ([699](https://github.com/WordPress/performance/pull/699))
 * Infrastructure: Include `WordPress-Extra` rules in PHPCS configuration and fix resulting problems. ([695](https://github.com/WordPress/performance/pull/695))
 
 **Bug Fixes**
@@ -449,7 +449,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 3.0.0 =
 
-Starting with this release, modules such as Dominant Color Images and WebP Uploads are only available as standalone plugins as opposed to bundled modules. After updating, you will be able to easily migrate to this new structure.
+Starting with this release, modules such as Image Placeholders and Modern Image Formats are only available as standalone plugins as opposed to bundled modules. After updating, you will be able to easily migrate to this new structure.
 
 = 2.5.0 =
 

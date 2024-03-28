@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Dominant Color Images
+ * Plugin Name: Image Placeholders
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/dominant-color-images
- * Description: Adds support to store the dominant color of newly uploaded images and create a placeholder background of that color.
+ * Description: Displays placeholders based on an image's dominant color while the image is loading.
  * Requires at least: 6.4
  * Requires PHP: 7.0
- * Version: 1.0.2
+ * Version: 1.1.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -25,7 +25,7 @@ if ( defined( 'DOMINANT_COLOR_IMAGES_VERSION' ) ) {
 	return;
 }
 
-define( 'DOMINANT_COLOR_IMAGES_VERSION', '1.0.2' );
+define( 'DOMINANT_COLOR_IMAGES_VERSION', '1.1.0' );
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';

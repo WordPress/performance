@@ -1,15 +1,15 @@
-=== Dominant Color Images ===
+=== Image Placeholders ===
 
 Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.0
-Stable tag:        1.0.2
+Stable tag:        1.1.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, dominant color
 
-Adds support to store the dominant color of newly uploaded images and create a placeholder background of that color.
+Displays placeholders based on an image's dominant color while the image is loading.
 
 == Description ==
 
@@ -20,14 +20,14 @@ This plugin determines and stores the dominant color for newly uploaded images i
 = Installation from within WordPress =
 
 1. Visit **Plugins > Add New**.
-2. Search for **Dominant Color Images**.
-3. Install and activate the **Dominant Color Images** plugin.
+2. Search for **Image Placeholders**.
+3. Install and activate the **Image Placeholders** plugin.
 
 = Manual installation =
 
 1. Upload the entire `dominant-color-images` folder to the `/wp-content/plugins/` directory.
 2. Visit **Plugins**.
-3. Activate the **Dominant Color Images** plugin.
+3. Activate the **Image Placeholders** plugin.
 
 == Frequently Asked Questions ==
 
@@ -47,8 +47,9 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 == Changelog ==
 
-= 1.0.2 =
+= 1.1.0 =
 
+* Rename plugin to "Image Placeholders". ([1101](https://github.com/WordPress/performance/pull/1101))
 * Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 
@@ -58,4 +59,4 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.0.0 =
 
-* Initial release of the Dominant Color Images plugin as a standalone plugin. ([704](https://github.com/WordPress/performance/pull/704))
+* Initial release of the Image Placeholders plugin as a standalone plugin. ([704](https://github.com/WordPress/performance/pull/704))

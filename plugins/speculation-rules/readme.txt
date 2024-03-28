@@ -1,4 +1,4 @@
-=== Speculation Rules ===
+=== Speculative Loading ===
 
 Contributors:      wordpressdotorg
 Requires at least: 6.4
@@ -9,7 +9,7 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, javascript, speculation rules, prerender, prefetch
 
-Uses the Speculation Rules API to prerender linked URLs upon hover by default.
+Enables browsers to speculatively prerender or prefetch pages when hovering over links.
 
 == Description ==
 
@@ -17,7 +17,7 @@ This plugin adds support for the [Speculation Rules API](https://developer.mozil
 
 See the [Speculation Rules WICG specification draft](https://wicg.github.io/nav-speculation/speculation-rules.html).
 
-By default, the plugin is configured to prerender WordPress frontend URLs when the user hovers over a relevant link. This can be customized via the "Speculation Rules" section under _Settings > Reading_.
+By default, the plugin is configured to prerender WordPress frontend URLs when the user hovers over a relevant link. This can be customized via the "Speculative Loading" section under _Settings > Reading_.
 
 A filter can be used to exclude certain URL paths from being eligible for prefetching and prerendering (see FAQ section). Alternatively, you can add the 'no-prerender' CSS class to any link (`<a>` tag) that should not be prerendered.
 
@@ -35,14 +35,14 @@ Other browsers will not see any adverse effects, however the feature will not wo
 = Installation from within WordPress =
 
 1. Visit **Plugins > Add New**.
-2. Search for **Speculation Rules**.
-3. Install and activate the **Speculation Rules** plugin.
+2. Search for **Speculative Loading**.
+3. Install and activate the **Speculative Loading** plugin.
 
 = Manual installation =
 
 1. Upload the entire `speculation-rules` folder to the `/wp-content/plugins/` directory.
 2. Visit **Plugins**.
-3. Activate the **Speculation Rules** plugin.
+3. Activate the **Speculative Loading** plugin.
 
 == Frequently Asked Questions ==
 
@@ -103,6 +103,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 = 1.1.0 =
 
 * Allow excluding URL patterns from prerendering or prefetching specifically. ([1025](https://github.com/WordPress/performance/pull/1025))
+* Rename plugin to "Speculative Loading". ([1101](https://github.com/WordPress/performance/pull/1101))
 * Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 
@@ -114,4 +115,4 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.0.0 =
 
-* Initial release of the Speculation Rules plugin as a standalone plugin. ([733](https://github.com/WordPress/performance/pull/733))
+* Initial release of the Speculative Loading plugin as a standalone plugin. ([733](https://github.com/WordPress/performance/pull/733))

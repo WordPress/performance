@@ -1,15 +1,15 @@
-=== WebP Uploads ===
+=== Modern Image Formats ===
 
 Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.0
-Stable tag:        1.0.6
+Stable tag:        1.1.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, webp
 
-Creates WebP versions for new JPEG image uploads if supported by the server.
+Converts images to more modern formats such as WebP or AVIF during upload.
 
 == Description ==
 
@@ -20,14 +20,14 @@ This plugin adds WebP support for media uploads within the WordPress application
 = Installation from within WordPress =
 
 1. Visit **Plugins > Add New**.
-2. Search for **WebP Uploads**.
-3. Install and activate the **WebP Uploads** plugin.
+2. Search for **Modern Image Formats**.
+3. Install and activate the **Modern Image Formats** plugin.
 
 = Manual installation =
 
 1. Upload the entire `webp-uploads` folder to the `/wp-content/plugins/` directory.
 2. Visit **Plugins**.
-3. Activate the **WebP Uploads** plugin.
+3. Activate the **Modern Image Formats** plugin.
 
 == Frequently Asked Questions ==
 
@@ -45,22 +45,23 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
-= I've activated the WebP Uploads plugin, but WebP images are not always generated when I upload a JPEG image. Why? =
+= I've activated the Modern Image Formats plugin, but WebP images are not always generated when I upload a JPEG image. Why? =
 
 There are two primary reasons that a WebP image may not be generated:
 
-1. The WebP Uploads plugin has identified that the WebP version of the uploaded JPEG image would have a larger file size than the original JPEG image, so it does not generate the WebP version.
+1. The Modern Image Formats plugin has identified that the WebP version of the uploaded JPEG image would have a larger file size than the original JPEG image, so it does not generate the WebP version.
 2. The JPEG image was not uploaded to the [Media Library](https://wordpress.com/support/media/). At this time, WebP versions are only generated for images to the Media Library. WebP versions are not generated for JPEG images that are added to your site in other ways, such as in a template file or the [Customizer](https://wordpress.com/support/customizer/).
 
-= With the WebP Uploads plugin activated, will the plugin generate JPEG and WebP versions of every image that I upload? =
+= With the Modern Image Formats plugin activated, will the plugin generate JPEG and WebP versions of every image that I upload? =
 
-By default, the WebP Uploads plugin will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
+By default, the Modern Image Formats plugin will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
 
-= 1.0.6 =
+= 1.1.0 =
 
 * Add link to WebP settings to plugins table. ([1036](https://github.com/WordPress/performance/pull/1036))
+* Rename plugin to "Modern Image Formats". ([1101](https://github.com/WordPress/performance/pull/1101))
 * Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 
@@ -86,4 +87,4 @@ By default, the WebP Uploads plugin will only generate WebP versions of the imag
 
 = 1.0.0 =
 
-* Initial release of the WebP Uploads plugin as a standalone plugin. ([664](https://github.com/WordPress/performance/pull/664))
+* Initial release of the Modern Image Formats plugin as a standalone plugin. ([664](https://github.com/WordPress/performance/pull/664))

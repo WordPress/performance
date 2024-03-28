@@ -20,15 +20,15 @@
 /plugins/auto-sizes                         @joemcgill
 /tests/plugins/auto-sizes                   @joemcgill
 
-# Plugin: Speculation Rules
+# Plugin: Speculative Loading
 /plugins/speculation-rules                  @felixarntz
 /tests/plugins/speculation-rules            @felixarntz
 
-# Plugin: WebP Uploads
+# Plugin: Modern Image Formats
 /plugins/webp-uploads                       @adamsilverstein @felixarntz
 /tests/plugins/webp-uploads                 @adamsilverstein @felixarntz
 
-# Plugin: Dominant Color Images
+# Plugin: Image Placeholders
 /plugins/dominant-color-images              @pbearne @spacedmonkey
 /tests/plugins/dominant-color-images        @pbearne @spacedmonkey
 
