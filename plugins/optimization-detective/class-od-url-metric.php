@@ -38,7 +38,8 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Data.
 	 *
-	 * @var Data
+	 * @var array
+	 * @phpstan-var Data
 	 */
 	private $data;
 
@@ -193,7 +194,8 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets viewport data.
 	 *
-	 * @return RectData Viewport data.
+	 * @return array Viewport data.
+	 * @phpstan-return RectData
 	 */
 	public function get_viewport(): array {
 		return $this->data['viewport'];
@@ -220,7 +222,8 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets elements.
 	 *
-	 * @return ElementData[] Elements.
+	 * @return array Elements.
+	 * @phpstan-return ElementData[]
 	 */
 	public function get_elements(): array {
 		return $this->data['elements'];
@@ -229,7 +232,8 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Specifies data which should be serialized to JSON.
 	 *
-	 * @return Data Exports to be serialized by json_encode().
+	 * @return array Exports to be serialized by json_encode().
+	 * @phpstan-return Data
 	 */
 	public function jsonSerialize(): array {
 		return $this->data;
