@@ -43,16 +43,26 @@ const optimizationDetective = ( env ) => {
 		};
 	}
 
-	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
-	const destination = path.resolve(
+	const pluginRoot = path.resolve(
 		__dirname,
-		'plugins/optimization-detective/build'
+		'plugins/optimization-detective'
 	);
+
+	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
+	const destination = path.resolve( pluginRoot, 'build' );
 
 	return {
 		...sharedConfig,
 		name: 'optimization-detective',
+		entry: {
+			'performance-dashboard': `${ pluginRoot }/performance-dashboard.js`,
+		},
+		output: {
+			filename: '[name].js',
+			path: destination,
+		},
 		plugins: [
+			...sharedConfig.plugins,
 			new CopyWebpackPlugin( {
 				patterns: [
 					{

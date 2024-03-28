@@ -14,21 +14,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Representation of the measurements taken from a single client's visit to a specific URL.
  *
- * @phpstan-type RectData    array{ width: int, height: int }
- * @phpstan-type ElementData array{
- *                               isLCP: bool,
- *                               isLCPCandidate: bool,
- *                               xpath: string,
- *                               intersectionRatio: float,
- *                               intersectionRect: RectData,
- *                               boundingClientRect: RectData,
- *                           }
- * @phpstan-type Data        array{
- *                               url: string,
- *                               timestamp: int,
- *                               viewport: RectData,
- *                               elements: ElementData[]
- *                           }
+ * @phpstan-type RectData     array{ width: int, height: int }
+ * @phpstan-type ElementData  array{
+ *                                isLCP: bool,
+ *                                isLCPCandidate: bool,
+ *                                xpath: string,
+ *                                intersectionRatio: float,
+ *                                intersectionRect: RectData,
+ *                                boundingClientRect: RectData,
+ *                            }
+ * @phpstan-type Data         array{
+ *                                url: string,
+ *                                timestamp: int,
+ *                                viewport: RectData,
+ *                                elements: ElementData[]
+ *                            }
+ * @phpstan-type WebVitalData array{
+ *                                LCP: int,
+ *                                CLS: int,
+ *                                INP: int,
+ *                                TTFB: int,
+ *                            }
  *
  * @since 0.1.0
  * @access private
@@ -227,6 +233,16 @@ final class OD_URL_Metric implements JsonSerializable {
 	 */
 	public function get_elements(): array {
 		return $this->data['elements'];
+	}
+
+	/**
+	 * Gets web vitals.
+	 *
+	 * @return array Web Vitals.
+	 * @phpstan-return WebVitalData
+	 */
+	public function get_web_vitals(): array {
+		return $this->data['webVitals'];
 	}
 
 	/**
