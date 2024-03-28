@@ -7,11 +7,17 @@
     "npm": ">=10.2.3"
   },
   "dependencies": {
+    "react-google-charts": "^4.0.1",
     "web-vitals": "3.5.0"
   },
   "devDependencies": {
     "@octokit/rest": "^19.0.5",
+    "@wordpress/api-fetch": "^6.51.0",
+    "@wordpress/components": "^27.2.0",
+    "@wordpress/dom-ready": "^3.54.0",
+    "@wordpress/element": "^5.31.0",
     "@wordpress/env": "^8.13.0",
+    "@wordpress/i18n": "^4.54.0",
     "@wordpress/scripts": "^26.19.0",
     "chalk": "^4.1.2",
     "commander": "^9.4.1",
@@ -37,6 +43,7 @@
     "build:plugin:optimization-detective": "webpack --mode production --env plugin=optimization-detective",
     "build:plugin:speculation-rules": "webpack --mode production --env plugin=speculation-rules",
     "build:plugin:webp-uploads": "webpack --mode production --env plugin=webp-uploads",
+    "start:plugin:optimization-detective": "webpack --mode development --watch --env plugin=optimization-detective",
     "format-js": "wp-scripts format",
     "lint-js": "wp-scripts lint-js",
     "format-php": "composer format",

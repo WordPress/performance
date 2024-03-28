@@ -66,5 +66,8 @@ require_once __DIR__ . '/detection.php';
 require_once __DIR__ . '/class-od-html-tag-processor.php';
 require_once __DIR__ . '/optimization.php';
 
+// Performance dashboard logic.
+require_once __DIR__ . '/dashboard.php';
+
 // Add hooks for the above requires.
 require_once __DIR__ . '/hooks.php';

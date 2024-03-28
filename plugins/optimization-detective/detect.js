@@ -1,4 +1,7 @@
 /** @typedef {import("web-vitals").LCPMetric} LCPMetric */
+/** @typedef {import("web-vitals").CLSMetric} CLSMetric */
+/** @typedef {import("web-vitals").INPMetric} INPMetric */
+/** @typedef {import("web-vitals").TTFBMetric} TTFBMetric */
 
 const win = window;
 const doc = win.document;
@@ -87,12 +90,21 @@ function error( ...message ) {
  */
 
 /**
+ * @typedef {Object} WebVitalsMetrics
+ * @property {number} lcp  - Largest contentful paint.
+ * @property {number} cls  - Cumulative layout shift.
+ * @property {number} inp  - Interaction to next paint.
+ * @property {number} ttfb - Time to first byte.
+ */
+
+/**
  * @typedef {Object} URLMetrics
  * @property {string}           url             - URL of the page.
  * @property {Object}           viewport        - Viewport.
  * @property {number}           viewport.width  - Viewport width.
  * @property {number}           viewport.height - Viewport height.
  * @property {ElementMetrics[]} elements        - Metrics for the elements observed on the page.
+ * @property {WebVitalsMetrics} webVitals       - Web vitals metrics of the page.
  */
 
 /**
@@ -287,26 +299,28 @@ export default async function detect( {
 		} );
 	}
 
-	const { onLCP } = await import( webVitalsLibrarySrc );
+	const { onLCP, onCLS, onINP, onTTFB } = await import( webVitalsLibrarySrc );
+	/**
+	 * @type {{LCP: LCPMetric[], INP: INPMetric[], TTFB: TTFBMetric[], CLS: CLSMetric[]}}
+	 */
+	const webVitalsMetrics = {
+		LCP: [],
+		CLS: [],
+		INP: [],
+		TTFB: [],
+	};
 
-	/** @type {LCPMetric[]} */
-	const lcpMetricCandidates = [];
+	const cb = ( measurement ) =>
+		webVitalsMetrics[ measurement.name ].push( measurement );
+	// This avoids needing to click to finalize LCP candidate. While this is helpful for testing, it also
+	// ensures that we always get an LCP candidate reported. Otherwise, the callback may never fire if the
+	// user never does a click or keydown, per <https://github.com/GoogleChrome/web-vitals/blob/07f6f96/src/onLCP.ts#L99-L107>.
+	const reportOpts = { reportAllChanges: true };
 
-	// Obtain at least one LCP candidate. More may be reported before the page finishes loading.
-	await new Promise( ( resolve ) => {
-		onLCP(
-			( metric ) => {
-				lcpMetricCandidates.push( metric );
-				resolve();
-			},
-			{
-				// This avoids needing to click to finalize LCP candidate. While this is helpful for testing, it also
-				// ensures that we always get an LCP candidate reported. Otherwise, the callback may never fire if the
-				// user never does a click or keydown, per <https://github.com/GoogleChrome/web-vitals/blob/07f6f96/src/onLCP.ts#L99-L107>.
-				reportAllChanges: true,
-			}
-		);
-	} );
+	onCLS( cb, reportOpts );
+	onLCP( cb, reportOpts );
+	onINP( cb, reportOpts );
+	onTTFB( cb, reportOpts );
 
 	// Stop observing.
 	disconnectIntersectionObserver();
@@ -324,9 +338,15 @@ export default async function detect( {
 			height: win.innerHeight,
 		},
 		elements: [],
+		webVitals: {
+			LCP: null,
+			CLS: null,
+			INP: null,
+			TTFB: null,
+		},
 	};
 
-	const lcpMetric = lcpMetricCandidates.at( -1 );
+	const lcpMetric = webVitalsMetrics.LCP.at( -1 );
 
 	for ( const elementIntersection of elementIntersections ) {
 		const xpath = breadcrumbedElementsMap.get( elementIntersection.target );
@@ -343,7 +363,7 @@ export default async function detect( {
 		/** @type {ElementMetrics} */
 		const elementMetrics = {
 			isLCP,
-			isLCPCandidate: !! lcpMetricCandidates.find(
+			isLCPCandidate: !! webVitalsMetrics.LCP.find(
 				( lcpMetricCandidate ) =>
 					lcpMetricCandidate.entries[ 0 ]?.element ===
 					elementIntersection.target
@@ -361,39 +381,80 @@ export default async function detect( {
 		log( 'URL metrics:', urlMetrics );
 	}
 
-	// Yield to main before sending data to server to further break up task.
-	await new Promise( ( resolve ) => {
-		setTimeout( resolve, 0 );
-	} );
-
-	try {
-		const response = await fetch( restApiEndpoint, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': restApiNonce,
-			},
-			body: JSON.stringify( urlMetrics ),
-		} );
-
-		if ( response.status === 200 ) {
-			setStorageLock( getCurrentTime() );
+	async function sendData() {
+		// Data likely already sent.
+		if (
+			! webVitalsMetrics.LCP.length &&
+			! webVitalsMetrics.CLS.length &&
+			! webVitalsMetrics.INP.length &&
+			! webVitalsMetrics.TTFB.length
+		) {
+			return;
 		}
 
-		if ( isDebug ) {
-			const body = await response.json();
+		for ( const [ webVital, metric ] of Object.entries(
+			webVitalsMetrics
+		) ) {
+			if ( ! metric.length ) {
+				continue;
+			}
+
+			urlMetrics.webVitals[ webVital ] = metric[ 0 ].value;
+		}
+
+		log( 'Prepared url metrics', urlMetrics );
+
+		try {
+			const response = await fetch( restApiEndpoint, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-WP-Nonce': restApiNonce,
+				},
+				body: JSON.stringify( urlMetrics ),
+				keepalive: true,
+			} );
+
 			if ( response.status === 200 ) {
-				log( 'Response:', body );
-			} else {
-				error( 'Failure:', body );
+				setStorageLock( getCurrentTime() );
+			}
+
+			if ( isDebug ) {
+				const body = await response.json();
+				if ( response.status === 200 ) {
+					log( 'Response:', body );
+				} else {
+					error( 'Failure:', body );
+				}
+			}
+		} catch ( err ) {
+			if ( isDebug ) {
+				error( err );
 			}
 		}
-	} catch ( err ) {
-		if ( isDebug ) {
-			error( err );
-		}
+
+		// Clean up.
+		breadcrumbedElementsMap.clear();
+
+		webVitalsMetrics.LCP = [];
+		webVitalsMetrics.CLS = [];
+		webVitalsMetrics.INP = [];
+		webVitalsMetrics.TTFB = [];
 	}
 
-	// Clean up.
-	breadcrumbedElementsMap.clear();
+	log( 'Adding event listeners for backgrounding and unloading.' );
+
+	// Report all available metrics whenever the page is backgrounded or unloaded.
+	addEventListener( 'visibilitychange', () => {
+		if ( document.visibilityState === 'hidden' ) {
+			sendData();
+		}
+	} );
+
+	// NOTE: Safari does not reliably fire the `visibilitychange` event when the
+	// page is being unloaded. If Safari support is needed, you should also flush
+	// the queue in the `pagehide` event.
+	addEventListener( 'pagehide', () => {
+		sendData();
+	} );
 }
