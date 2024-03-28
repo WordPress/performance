@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for Dominant Color Images module.
+ * Tests for Dominant Color Images plugin.
  *
  * @since 1.2.0
  *

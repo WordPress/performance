@@ -45,7 +45,7 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
-= I've activated the WebP Uploads module, but WebP images are not always generated when I upload a JPEG image. Why? =
+= I've activated the WebP Uploads plugin, but WebP images are not always generated when I upload a JPEG image. Why? =
 
 There are two primary reasons that a WebP image may not be generated:
 

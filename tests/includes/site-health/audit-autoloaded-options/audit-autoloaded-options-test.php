@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for audit-autoloaded-options module.
+ * Tests for audit-autoloaded-options check.
  *
  * @package performance-lab
  */

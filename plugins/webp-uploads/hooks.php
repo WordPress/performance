@@ -607,7 +607,7 @@ function webp_uploads_img_tag_update_mime_type( $original_image, $context, $atta
 					continue;
 				}
 
-				/** This filter is documented in modules/images/webp-uploads/load.php */
+				/** This filter is documented in plugins/webp-uploads/load.php */
 				$filtered_image = (string) apply_filters( 'webp_uploads_pre_replace_additional_image_source', $image, $attachment_id, $size, $target_mime, $context );
 
 				// If filtered image is same as the image, run our own replacement logic, otherwise rely on the filtered image.

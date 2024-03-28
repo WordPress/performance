@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Adds the modules page to the Settings menu.
+ * Adds the features page to the Settings menu.
  *
  * @since 1.0.0
  * @since n.e.x.t Renamed to perflab_add_features_page().
@@ -35,7 +35,7 @@ function perflab_add_features_page() {
 add_action( 'admin_menu', 'perflab_add_features_page' );
 
 /**
- * Initializes settings sections and fields for the modules page.
+ * Initializes functionality for the features page.
  *
  * @since 1.0.0
  * @since n.e.x.t Renamed to perflab_load_features_page(), and the
@@ -158,9 +158,9 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
 }
 
 /**
- * Adds a link to the modules page to the plugin's entry in the plugins list table.
+ * Adds a link to the features page to the plugin's entry in the plugins list table.
  *
- * This function is only used if the modules page exists and is accessible.
+ * This function is only used if the features page exists and is accessible.
  *
  * @since 1.0.0
  *
@@ -188,8 +188,6 @@ function perflab_plugin_action_links_add_settings( $links ) {
  * It runs before the dismiss-wp-pointer AJAX action is performed.
  *
  * @since 2.3.0
- *
- * @see perflab_render_modules_pointer()
  */
 function perflab_dismiss_wp_pointer_wrapper() {
 	if ( isset( $_POST['pointer'] ) && 'perflab-admin-pointer' !== $_POST['pointer'] ) {

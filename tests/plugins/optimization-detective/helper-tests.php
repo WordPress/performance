@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for optimization-detective module helper.php.
+ * Tests for optimization-detective plugin helper.php.
  *
  * @package optimization-detective
  */

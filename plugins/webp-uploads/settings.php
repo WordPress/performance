@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings for the WebP Uploads module.
+ * Settings for the WebP Uploads plugin.
  *
  * @package webp-uploads
  *
