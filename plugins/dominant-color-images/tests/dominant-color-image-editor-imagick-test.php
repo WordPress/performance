@@ -2,12 +2,31 @@
 /**
  * Tests for Dominant Color Images module.
  *
+ * @since 1.2.0
+ *
  * @package dominant-color-images
  */
 
-use PerformanceLab\Tests\TestCase\DominantColorTestCase;
+use Dominant_Color_Image\Tests\TestCase as DominantColorTestCase;
 
-class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
+class Dominant_Color_Image_Editor_Imagick_Test extends DominantColorTestCase {
+
+	/**
+	 * Setup before class.
+	 */
+	public static function wpSetUpBeforeClass() {
+		// Setup site options if it's a multisite network.
+		if ( is_multisite() ) {
+			$site_exts = explode( ' ', get_site_option( 'upload_filetypes', 'jpg jpeg png gif' ) );
+
+			// Add `tiff` and `bmp` to the list of allowed file types.
+			// These are removed by default in multisite.
+			$site_exts[] = 'tiff';
+			$site_exts[] = 'bmp';
+
+			update_site_option( 'upload_filetypes', implode( ' ', $site_exts ) );
+		}
+	}
 
 	/**
 	 * Test if the function returns the correct color.
@@ -17,8 +36,8 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
 	public function test_get_dominant_color( $image_path, $expected_color, $expected_transparency ) {
-		if ( ! extension_loaded( 'gd' ) || ! function_exists( 'gd_info' ) ) {
-			$this->markTestSkipped( 'The GD PHP extension is not loaded.' );
+		if ( ! extension_loaded( 'imagick' ) || ! class_exists( 'Imagick', false ) ) {
+			$this->markTestSkipped( 'The Imagick PHP extension is not loaded.' );
 		}
 
 		$mime_type = wp_check_filetype( $image_path )['type'];
@@ -46,8 +65,8 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
 	public function test_get_dominant_color_invalid( $image_path ) {
-		if ( ! extension_loaded( 'gd' ) || ! function_exists( 'gd_info' ) ) {
-			$this->markTestSkipped( 'The GD PHP extension is not loaded.' );
+		if ( ! extension_loaded( 'imagick' ) || ! class_exists( 'Imagick', false ) ) {
+			$this->markTestSkipped( 'The Imagick PHP extension is not loaded.' );
 		}
 
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
@@ -67,8 +86,8 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
 	public function test_get_dominant_color_none_images( $image_path ) {
-		if ( ! extension_loaded( 'gd' ) || ! function_exists( 'gd_info' ) ) {
-			$this->markTestSkipped( 'The GD PHP extension is not loaded.' );
+		if ( ! extension_loaded( 'imagick' ) || ! class_exists( 'Imagick', false ) ) {
+			$this->markTestSkipped( 'The Imagick PHP extension is not loaded.' );
 		}
 
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );

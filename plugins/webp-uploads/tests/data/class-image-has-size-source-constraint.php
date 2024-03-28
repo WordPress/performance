@@ -1,6 +1,8 @@
 <?php
 
-namespace PerformanceLab\Tests\Constraint;
+namespace WebP_Uploads\Tests;
+
+use WebP_Uploads\Tests\ImageHasSource;
 
 /**
  * A constraint that checks a certain subsize source with provided mime type.

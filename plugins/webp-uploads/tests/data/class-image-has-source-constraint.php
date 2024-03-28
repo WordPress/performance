@@ -1,6 +1,6 @@
 <?php
 
-namespace PerformanceLab\Tests\Constraint;
+namespace WebP_Uploads\Tests;
 
 use PHPUnit\Framework\Constraint\Constraint;
 

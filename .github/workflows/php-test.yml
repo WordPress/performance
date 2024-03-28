@@ -13,7 +13,6 @@ on:
       - '**/package.json'
       - 'package-lock.json'
       - 'phpunit.xml.dist'
-      - 'tests/multisite.xml'
       - 'composer.json'
       - 'composer.lock'
   pull_request:
@@ -25,7 +24,6 @@ on:
       - '**/package.json'
       - 'package-lock.json'
       - 'phpunit.xml.dist'
-      - 'tests/multisite.xml'
       - 'composer.json'
       - 'composer.lock'
     types:
@@ -72,6 +70,6 @@ jobs:
       - name: Composer update
         run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer update --no-interaction
       - name: Running single site unit tests
-        run: npm run test-php
+        run: npm run test:php
       - name: Running multisite unit tests
-        run: npm run test-php-multisite
+        run: npm run test:php:multisite
