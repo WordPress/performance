@@ -20,8 +20,7 @@ const joinFiles = ( files ) => {
 };
 
 module.exports = {
-	'**/*.js': ( files ) =>
-		`npm run lint-js ${ files.length > 10 ? '' : joinFiles( files ) }`,
+	'**/*.js': ( files ) => `npm run lint-js ${ joinFiles( files ) }`,
 	'**/*.php': ( files ) => {
 		const commands = [ 'composer phpstan' ];
 
@@ -33,9 +32,7 @@ module.exports = {
 
 			if ( pluginFiles.length ) {
 				commands.push(
-					`npm run lint:php:${ plugin } ${
-						pluginFiles.length > 10 ? '' : joinFiles( pluginFiles )
-					}`
+					`npm run lint:php:${ plugin } ${ joinFiles( pluginFiles ) }`
 				);
 			}
 		} );
@@ -43,11 +40,7 @@ module.exports = {
 		const otherFiles = micromatch( files, `!plugins/**` );
 
 		if ( otherFiles.length ) {
-			commands.push(
-				`npm run lint:php ${
-					otherFiles.length > 10 ? '' : joinFiles( otherFiles )
-				}`
-			);
+			commands.push( `npm run lint:php ${ joinFiles( otherFiles ) }` );
 		}
 
 		return commands;
