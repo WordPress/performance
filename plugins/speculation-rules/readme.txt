@@ -30,6 +30,8 @@ Other browsers will not see any adverse effects, however the feature will not wo
 * [Browser support for the Speculation Rules API in general](https://caniuse.com/mdn-html_elements_script_type_speculationrules)
 * [Information on document rules syntax support used by the plugin](https://developer.chrome.com/blog/chrome-121-beta#speculation_rules_api)
 
+_This plugin was formerly known as Speculation Rules._
+
 == Installation ==
 
 = Installation from within WordPress =

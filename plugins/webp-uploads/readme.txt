@@ -15,6 +15,8 @@ Converts images to more modern formats such as WebP or AVIF during upload.
 
 This plugin adds WebP support for media uploads within the WordPress application. WebP images will be generated only for new uploads, pre-existing imagery will not be converted to WebP format. By default, WebP images will only be generated for JPEG uploads, only the original uploaded file will still exist as a JPEG image. All generated image sizes will exist as WebP only. If you wish to change this behaviour, there is a checkbox in `Settings > Media` that - when checked - will alter the behaviour of this plugin to generate both JPEG and WebP images for every sub-size (noting again that this will only affect newly uploaded images, i.e. after making said change).
 
+_This plugin was formerly known as WebP Uploads._
+
 == Installation ==
 
 = Installation from within WordPress =

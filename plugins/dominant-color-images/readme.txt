@@ -15,6 +15,8 @@ Displays placeholders based on an image's dominant color while the image is load
 
 This plugin determines and stores the dominant color for newly uploaded images in the media library within WordPress and then uses it to create a placeholder background of that color in the frontend, visible until the image is loaded.
 
+_This plugin was formerly known as Dominant Color Images._
+
 == Installation ==
 
 = Installation from within WordPress =
