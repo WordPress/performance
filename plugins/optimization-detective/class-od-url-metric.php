@@ -148,6 +148,34 @@ final class OD_URL_Metric implements JsonSerializable {
 						'additionalProperties' => false,
 					),
 				),
+				'webVitals'  => array(
+					'description' => __( 'Web vitals metrics', 'optimization-detective' ),
+					'type'        => 'object',
+					'required'    => true,
+					'properties'  => array(
+						// See the URLMetrics in detect.js.
+						'type'                 => 'object',
+						'properties'           => array(
+							'LCP'              => array(
+								'type'     => 'number',
+								'required' => false,
+							),
+							'CLS'              => array(
+								'type'     => 'number',
+								'required' => false,
+							),
+							'TTFB'              => array(
+								'type'     => 'number',
+								'required' => false,
+							),
+							'INP'              => array(
+								'type'     => 'number',
+								'required' => false,
+							),
+						),
+						'additionalProperties' => false,
+					),
+				),
 			),
 			'additionalProperties' => false,
 		);
