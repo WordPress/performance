@@ -20,22 +20,17 @@ function Dashboard() {
 
 	const [ postId, setPostId ] = useState( defaultPostId );
 	const [ data, setData ] = useState( [] );
-	const [ isResolving, setIsResolving ] = useState( Boolean( data ) );
 
 	useEffect( () => {
 		if ( ! postId ) {
-			setIsResolving( false );
 			setData( null );
 			return;
 		}
-
-		setIsResolving( true );
 
 		apiFetch( {
 			path: `/optimization-detective/v1/url-metrics:chart/${ postId }`,
 		} ).then( ( response ) => {
 			setData( response );
-			setIsResolving( false );
 		} );
 	}, [ postId ] );
 
@@ -70,6 +65,7 @@ function Dashboard() {
 		curveType: 'function',
 		legend: { position: 'bottom' },
 		vAxis: { minValue: 0 },
+		colors: [ '#65B25C', '#CDE7CC' ],
 	};
 
 	return (
