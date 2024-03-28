@@ -1,0 +1,12 @@
+div.health-check-accordion.issues > div.health-check-accordion-panel  div.actions > ul.tablelist  {
+	list-style: disc inside;
+}
+div.health-check-accordion.issues > div.health-check-accordion-panel  div.stanza  {
+	margin: 1em 0;
+}
+div.health-check-accordion.issues > div.health-check-accordion-panel  div.actions > ul.tablelist {
+	margin: 0;
+}
+div.health-check-accordion.issues > div.health-check-accordion-panel  div.actions > ul.tablelist > li {
+	line-height: 1.1;
+}
