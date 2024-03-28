@@ -50,9 +50,6 @@ function perflab_load_features_page() {
 
 	// Handle style for settings page.
 	add_action( 'admin_head', 'perflab_print_features_page_style' );
-
-	// Handle script for settings page.
-	add_action( 'admin_footer', 'perflab_print_plugin_activation_script' );
 }
 
 /**
@@ -215,25 +212,17 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
 function perflab_enqueue_features_page_scripts() {
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_style( 'thickbox' );
-}
 
-/**
- * Register admin actions for handling performance feature plugin installation/activation.
- *
- * @since n.e.x.t
- */
-function perflab_register_admin_actions() {
-	add_action( 'admin_action_perflab_install_activate_plugins', 'perflab_install_activate_plugins_callback' );
+	wp_enqueue_script( 'plugin-install' );
 }
-add_action( 'admin_init', 'perflab_register_admin_actions' );
 
 /**
  * Callback for handling installation/activation of plugin.
  *
  * @since n.e.x.t
  */
-function perflab_install_activate_plugins_callback() {
-	check_admin_referer( 'perflab_install_activate_plugins' );
+function perflab_install_activate_plugin_callback() {
+	check_admin_referer( 'perflab_install_activate_plugin' );
 
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
@@ -243,29 +232,28 @@ function perflab_install_activate_plugins_callback() {
 		wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
 	}
 
-	if ( ! current_user_can( 'install_plugins' ) || ! current_user_can( 'activate_plugins' ) ) {
-		wp_die( esc_html__( 'Sorry, you are not allowed to manage plugins for this site. Please contact the administrator.', 'performance-lab' ) );
-	}
+	$plugin_slug = sanitize_text_field( wp_unslash( $_GET['slug'] ) );
 
-	$plugin = sanitize_text_field( wp_unslash( $_GET['slug'] ) );
-
-	if ( ! $plugin ) {
+	if ( ! $plugin_slug ) {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 
-	$api = perflab_query_plugin_info( $plugin );
-
-	// Return early if plugin API return an error.
-	if ( ! $api ) {
-		wp_die( esc_html__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration.', 'performance-lab' ) );
-	}
-
-	$plugins             = get_plugins();
-	$is_plugin_installed = ! ( isset( $plugins[ $plugin . '/load.php' ] ) || isset( $plugins[ $plugin . '/' . $plugin . '.php' ] ) );
-	$status              = array();
+	$is_plugin_installed = ! isset( $_GET['file'] ) || ! $_GET['file'];
 
 	// Install the plugin if it is not installed yet.
 	if ( $is_plugin_installed ) {
+		// Check if the user have plugin installation capability.
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to manage plugins for this site. Please contact the administrator.', 'performance-lab' ) );
+		}
+
+		$api = perflab_query_plugin_info( $plugin_slug );
+
+		// Return early if plugin API returns an error.
+		if ( ! $api ) {
+			wp_die( esc_html__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration.', 'performance-lab' ) );
+		}
+
 		// Replace new Plugin_Installer_Skin with new Quiet_Upgrader_Skin when output needs to be suppressed.
 		$skin     = new WP_Ajax_Upgrader_Skin( array( 'api' => $api ) );
 		$upgrader = new Plugin_Upgrader( $skin );
@@ -278,21 +266,24 @@ function perflab_install_activate_plugins_callback() {
 		} elseif ( $skin->get_errors()->has_errors() ) {
 			wp_die( esc_html( $skin->get_error_messages() ) );
 		}
-	}
 
-	// If `$plugin` is a plugin slug rather than a plugin basename, determine the full plugin basename.
-	if ( ! str_contains( $plugin, '/' ) ) {
-		$plugins = get_plugins( '/' . $plugin );
+		$plugins = get_plugins( '/' . $plugin_slug );
 
 		if ( empty( $plugins ) ) {
 			wp_die( esc_html__( 'Plugin not found.', 'default' ) );
 		}
 
 		$plugin_file_names = array_keys( $plugins );
-		$plugin            = $plugin . '/' . $plugin_file_names[0];
+		$plugin_basename   = $plugin_slug . '/' . $plugin_file_names[0];
+	} else {
+		$plugin_basename = $_GET['file'];
 	}
 
-	$result = activate_plugin( $plugin );
+	if ( ! current_user_can( 'activate_plugin', $plugin_basename ) ) {
+		wp_die( esc_html__( 'Sorry, you are not allowed to manage plugins for this site. Please contact the administrator.', 'performance-lab' ) );
+	}
+
+	$result = activate_plugin( $plugin_basename );
 	if ( is_wp_error( $result ) ) {
 		wp_die( esc_html( $result->get_error_messages() ) );
 	}
@@ -309,6 +300,7 @@ function perflab_install_activate_plugins_callback() {
 		exit;
 	}
 }
+add_action( 'admin_action_perflab_install_activate_plugin', 'perflab_install_activate_plugin_callback' );
 
 /**
  * Callback function to handle admin inline style.
@@ -326,33 +318,6 @@ function perflab_print_features_page_style() {
 	}
 </style>
 	<?php
-}
-
-/**
- * Callback function that print plugin activation script.
- *
- * @since n.e.x.t
- */
-function perflab_print_plugin_activation_script() {
-	$js = <<<JS
-( function ( document ) {
-	document.addEventListener( 'DOMContentLoaded', function () {
-		document.addEventListener( 'click', function ( event ) {
-			if (
-				event.target.classList.contains(
-					'perflab-install-active-plugin'
-				)
-			) {
-				const target = event.target;
-				target.classList.add( 'updating-message' );
-				target.innerHTML = wp.i18n.__( 'Activating…', 'performance-lab' );
-			}
-		} );
-	} );
-} )( document );
-JS;
-
-	wp_print_inline_script_tag( $js );
 }
 
 /**

@@ -146,7 +146,10 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	} elseif (
 		$compatible_php &&
 		$compatible_wp &&
-		current_user_can( 'activate_plugin', $status['file'] ) &&
+		(
+			( $status['file'] && current_user_can( 'activate_plugin', $status['file'] ) ) ||
+			current_user_can( 'activate_plugins' )
+		) &&
 		(
 			'install' !== $status ||
 			current_user_can( 'install_plugins' )
@@ -155,9 +158,10 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		$url = esc_url_raw(
 			add_query_arg(
 				array(
-					'action'   => 'perflab_install_activate_plugins',
-					'_wpnonce' => wp_create_nonce( 'perflab_install_activate_plugins' ),
+					'action'   => 'perflab_install_activate_plugin',
+					'_wpnonce' => wp_create_nonce( 'perflab_install_activate_plugin' ),
 					'slug'     => $plugin_data['slug'],
+					'file'     => $status['file'],
 				),
 				admin_url( 'options-general.php' )
 			)
