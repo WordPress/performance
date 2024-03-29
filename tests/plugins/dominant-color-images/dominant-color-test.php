@@ -2,7 +2,7 @@
 
 use PerformanceLab\Tests\TestCase\DominantColorTestCase;
 /**
- * Tests for Dominant Color Images module.
+ * Tests for Dominant Color Images plugin.
  *
  * @package dominant-color-images
  */

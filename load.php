@@ -83,7 +83,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
  * @since 2.9.0
  * @since n.e.x.t The $source parameter was removed.
  *
- * @return array<string, string> Map of plugin slug / module path and the version constant used.
+ * @return array<string, string> Map of plugin slug and the version constant used.
  */
 function perflab_get_standalone_plugin_version_constants() {
 	/*
@@ -264,7 +264,7 @@ function perflab_maybe_remove_object_cache_dropin() {
 register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin' );
 
 /**
- * Redirects module pages to the performance feature page.
+ * Redirects legacy module page to the performance feature page.
  *
  * @since n.e.x.t
  *
@@ -287,7 +287,7 @@ function perflab_no_access_redirect_module_to_performance_feature_page() {
 add_action( 'admin_page_access_denied', 'perflab_no_access_redirect_module_to_performance_feature_page' );
 
 /**
- * Cleanup function to delete 'perflab_modules_settings' option if present.
+ * Cleanup function to delete legacy 'perflab_modules_settings' option if present.
  *
  * @since n.e.x.t
  */

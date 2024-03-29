@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for optimization-detective module storage/data.php.
+ * Tests for optimization-detective plugin storage/data.php.
  *
  * @package optimization-detective
  *

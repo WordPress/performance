@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for optimization-detective module uninstall.php.
+ * Tests for optimization-detective plugin uninstall.php.
  *
  * @runInSeparateProcess
  * @package optimization-detective

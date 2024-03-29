@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for speculation-rules module.
+ * Tests for speculation-rules plugin.
  *
  * @package speculation-rules
  */

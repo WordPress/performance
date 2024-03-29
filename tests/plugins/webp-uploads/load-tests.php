@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for webp-uploads module load.php.
+ * Tests for webp-uploads plugin load.php.
  *
  * @package webp-uploads
  */
