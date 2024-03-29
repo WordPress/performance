@@ -11,7 +11,7 @@ const { plugins } = require( './plugins.json' );
 /**
  * Join and escape filenames for shell.
  *
- * @param {Array} files Files to join.
+ * @param {string[]} files Files to join.
  *
  * @return {string} Joined files.
  */
