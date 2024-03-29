@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for Dominant Color Images plugin.
+ * Tests for Image Placeholders plugin.
  *
  * @since 1.2.0
  *

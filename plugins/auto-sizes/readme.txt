@@ -9,7 +9,7 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, auto-sizes
 
-Adds support for automatically calculating the sizes attribute for lazy-loaded images.
+Instructs browsers to automatically choose the right image size for lazy-loaded images.
 
 == Description ==
 

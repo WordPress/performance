@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper functions used for Dominant Color Images.
+ * Helper functions used for Image Placeholders.
  *
  * @package dominant-color-images
  *

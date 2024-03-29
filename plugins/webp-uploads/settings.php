@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings for the WebP Uploads plugin.
+ * Settings for the Modern Image Formats plugin.
  *
  * @package webp-uploads
  *
