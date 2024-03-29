@@ -210,9 +210,9 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
  * @since n.e.x.t Renamed to perflab_enqueue_features_page_scripts().
  */
 function perflab_enqueue_features_page_scripts() {
+	// These assets are needed for the "Learn more" popover.
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_style( 'thickbox' );
-
 	wp_enqueue_script( 'plugin-install' );
 }
 
@@ -238,20 +238,29 @@ function perflab_install_activate_plugin_callback() {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 
-	$is_plugin_installed = ! isset( $_GET['file'] ) || ! $_GET['file'];
+	$is_plugin_installed = isset( $_GET['file'] ) && $_GET['file'];
 
 	// Install the plugin if it is not installed yet.
-	if ( $is_plugin_installed ) {
+	if ( ! $is_plugin_installed ) {
 		// Check if the user have plugin installation capability.
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			wp_die( esc_html__( 'Sorry, you are not allowed to manage plugins for this site. Please contact the administrator.', 'performance-lab' ) );
+			wp_die( esc_html__( 'Sorry, you are not allowed to install plugins on this site.', 'default' ) );
 		}
 
 		$api = perflab_query_plugin_info( $plugin_slug );
 
 		// Return early if plugin API returns an error.
 		if ( ! $api ) {
-			wp_die( esc_html__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration.', 'performance-lab' ) );
+			wp_die(
+				wp_kses(
+					sprintf(
+						/* translators: %s: Support forums URL. */
+						__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="%s">support forums</a>.', 'default' ),
+						__( 'https://wordpress.org/support/forums/', 'default' )
+					),
+					array( 'a' => array( 'href' => true ) )
+				)
+			);
 		}
 
 		// Replace new Plugin_Installer_Skin with new Quiet_Upgrader_Skin when output needs to be suppressed.
@@ -280,7 +289,7 @@ function perflab_install_activate_plugin_callback() {
 	}
 
 	if ( ! current_user_can( 'activate_plugin', $plugin_basename ) ) {
-		wp_die( esc_html__( 'Sorry, you are not allowed to manage plugins for this site. Please contact the administrator.', 'performance-lab' ) );
+		wp_die( esc_html__( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
 	}
 
 	$result = activate_plugin( $plugin_basename );
