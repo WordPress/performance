@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for webp-uploads module image-edit.php.
+ * Tests for webp-uploads plugin image-edit.php.
  *
  * @package webp-uploads
  * @subpackage image-edit

@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Speculation Rules
+ * Plugin Name: Speculative Loading
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/speculation-rules
- * Description: Uses the Speculation Rules API to prerender linked URLs upon hover by default.
+ * Description: Enables browsers to speculatively prerender or prefetch pages when hovering over links.
  * Requires at least: 6.4
  * Requires PHP: 7.0
  * Version: 1.1.0

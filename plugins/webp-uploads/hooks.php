@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook callbacks used for WebP Uploads.
+ * Hook callbacks used for Modern Image Formats.
  *
  * @package webp-uploads
  *
@@ -607,7 +607,7 @@ function webp_uploads_img_tag_update_mime_type( $original_image, $context, $atta
 					continue;
 				}
 
-				/** This filter is documented in modules/images/webp-uploads/load.php */
+				/** This filter is documented in plugins/webp-uploads/load.php */
 				$filtered_image = (string) apply_filters( 'webp_uploads_pre_replace_additional_image_source', $image, $attachment_id, $size, $target_mime, $context );
 
 				// If filtered image is same as the image, run our own replacement logic, otherwise rely on the filtered image.
@@ -763,21 +763,21 @@ function webp_uploads_modify_webp_quality( $quality, $mime_type ) {
 add_filter( 'wp_editor_set_quality', 'webp_uploads_modify_webp_quality', 10, 2 );
 
 /**
- * Displays the HTML generator tag for the WebP Uploads plugin.
+ * Displays the HTML generator tag for the Modern Image Formats plugin.
  *
  * See {@see 'wp_head'}.
  *
  * @since 1.0.0
  */
 function webp_uploads_render_generator() {
-	echo '<meta name="generator" content="WebP Uploads ' . esc_attr( WEBP_UPLOADS_VERSION ) . '">' . "\n";
+	echo '<meta name="generator" content="Modern Image Formats ' . esc_attr( WEBP_UPLOADS_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'webp_uploads_render_generator' );
 
 /**
  * Adds a settings link to the plugin's action links.
  *
- * @since 1.0.6
+ * @since 1.1.0
  *
  * @param array $links An array of plugin action links.
  * @return array The modified list of actions.

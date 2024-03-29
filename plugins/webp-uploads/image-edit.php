@@ -1,6 +1,6 @@
 <?php
 /**
- * Edit images integration for the module, including backup and restore support.
+ * Edit images integration for the plugin, including backup and restore support.
  *
  * @package webp-uploads
  *

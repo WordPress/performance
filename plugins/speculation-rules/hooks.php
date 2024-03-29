@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook callbacks used for Speculation Rules.
+ * Hook callbacks used for Speculative Loading.
  *
  * @package speculation-rules
  * @since 1.0.0

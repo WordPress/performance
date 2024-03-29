@@ -126,7 +126,7 @@ function updateReadmeChangelog( changelog, settings ) {
 }
 
 /**
- * Updates the `readme.txt` file with latest module description list and optionally a specific release changelog.
+ * Updates the `readme.txt` file with a specific release changelog.
  *
  * @param {WPReadmeSettings} settings Readme settings.
  */

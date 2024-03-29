@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="WPP-SpeculationRules">
-	<description>WordPress Coding Standards for Speculation Rules Plugin</description>
+	<description>WordPress Coding Standards for Speculative Loading Plugin</description>
 
 	<rule ref="../../bin/phpcs/phpcs.ruleset.xml"/>
 

@@ -58,17 +58,6 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
-= I've activated the WebP Uploads module, but WebP images are not always generated when I upload a JPEG image. Why? =
-
-There are two primary reasons that a WebP image may not be generated:
-
-1. Performance Lab has identified that the WebP version of the uploaded JPEG image would have a larger file size than the original JPEG image, so it does not generate the WebP version.
-2. The JPEG image was not uploaded to the [Media Library](https://wordpress.com/support/media/). At this time, WebP versions are only generated for images to the Media Library. WebP versions are not generated for JPEG images that are added to your site in other ways, such as in a template file or the [Customizer](https://wordpress.com/support/customizer/).
-
-= With the WebP Uploads module activated, will the plugin generate JPEG and WebP versions of every image that I upload? =
-
-By default, the WebP Uploads module will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
-
 == Changelog ==
 
 = 2.9.0 =
@@ -112,7 +101,7 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 **Documentation**
 
-* Infrastructure: Publish Dominant Color Images standalone plugin. ([842](https://github.com/WordPress/performance/pull/842))
+* Infrastructure: Publish Image Placeholders standalone plugin. ([842](https://github.com/WordPress/performance/pull/842))
 
 = 2.6.1 =
 
@@ -133,7 +122,7 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 **Enhancements**
 
-* Images: Fix incorrect function prefixes in Dominant Color Images. ([789](https://github.com/WordPress/performance/pull/789))
+* Images: Fix incorrect function prefixes in Image Placeholders. ([789](https://github.com/WordPress/performance/pull/789))
 * Infrastructure: Add early exit clauses to files with procedural code. ([790](https://github.com/WordPress/performance/pull/790))
 * Infrastructure: Allow disabling Server-Timing entirely using `PERFLAB_DISABLE_SERVER_TIMING` constant. ([795](https://github.com/WordPress/performance/pull/795))
 
@@ -168,7 +157,7 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 **Enhancements**
 
 * Images: Configure `Dominant Color` and `Fetchpriority` modules for their standalone plugins. ([704](https://github.com/WordPress/performance/pull/704))
-* Infrastructure: Temporarily remove Dominant Color Images from standalone `plugins.json` definition. ([719](https://github.com/WordPress/performance/pull/719))
+* Infrastructure: Temporarily remove Image Placeholders from standalone `plugins.json` definition. ([719](https://github.com/WordPress/performance/pull/719))
 * Infrastructure: Use dynamic version from `plugins.json` for manual workflow. ([710](https://github.com/WordPress/performance/pull/710))
 
 **Bug Fixes**
@@ -181,7 +170,7 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 **Enhancements**
 
 * Images: Remove "experimental" flag from Fetchpriority module. ([702](https://github.com/WordPress/performance/pull/702))
-* Infrastructure: Implement infrastructure for launching standalone plugins from modules, including WebP Uploads. ([699](https://github.com/WordPress/performance/pull/699))
+* Infrastructure: Implement infrastructure for launching standalone plugins from modules, including Modern Image Formats. ([699](https://github.com/WordPress/performance/pull/699))
 * Infrastructure: Include `WordPress-Extra` rules in PHPCS configuration and fix resulting problems. ([695](https://github.com/WordPress/performance/pull/695))
 
 **Bug Fixes**
@@ -460,7 +449,7 @@ By default, the WebP Uploads module will only generate WebP versions of the imag
 
 = 3.0.0 =
 
-Starting with this release, modules such as Dominant Color Images and WebP Uploads are only available as standalone plugins as opposed to bundled modules. After updating, you will be able to easily migrate to this new structure.
+Starting with this release, modules such as Image Placeholders and Modern Image Formats are only available as standalone plugins as opposed to bundled modules. After updating, you will be able to easily migrate to this new structure.
 
 = 2.5.0 =
 

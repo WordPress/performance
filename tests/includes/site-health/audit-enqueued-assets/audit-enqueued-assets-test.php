@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for audit-enqueued-assets module.
+ * Tests for audit-enqueued-assets check.
  *
  * @package performance-lab
  * @group audit-enqueued-assets

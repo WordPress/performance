@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for webp-uploads module rest-api.php.
+ * Tests for webp-uploads plugin rest-api.php.
  *
  * @package webp-uploads
  */
