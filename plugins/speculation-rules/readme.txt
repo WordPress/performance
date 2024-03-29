@@ -106,6 +106,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 * Allow excluding URL patterns from prerendering or prefetching specifically. ([1025](https://github.com/WordPress/performance/pull/1025))
 * Rename plugin to "Speculative Loading". ([1101](https://github.com/WordPress/performance/pull/1101))
+* Add Speculative Loading generator tag. ([1102](https://github.com/WordPress/performance/pull/1102))
 * Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 

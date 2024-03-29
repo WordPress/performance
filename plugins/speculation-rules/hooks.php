@@ -45,3 +45,15 @@ function plsr_print_speculation_rules() {
 	}
 }
 add_action( 'wp_footer', 'plsr_print_speculation_rules' );
+
+/**
+ * Displays the HTML generator meta tag for the Speculative Loading plugin.
+ *
+ * See {@see 'wp_head'}.
+ *
+ * @since 1.1.0
+ */
+function plsr_render_generator_meta_tag() {
+	echo '<meta name="generator" content="Speculative Loading ' . esc_attr( SPECULATION_RULES_VERSION ) . '">' . "\n";
+}
+add_action( 'wp_head', 'plsr_render_generator_meta_tag' );
