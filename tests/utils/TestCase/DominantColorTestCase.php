@@ -96,7 +96,7 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 				'expected_transparency' => true,
 			),
 			'balloons_webp' => array(
-				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/plugins/images/balloons.webp',
+				'image_path'            => TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp',
 				'expected_color'        => array( 'c1bbb9', 'c0bbb9', 'c0bab8', 'c3bdbd', 'bfbab8' ),
 				'expected_transparency' => false,
 			),
