@@ -80,10 +80,10 @@ function get_path_to_wp_test_dir() {
 	/*
 	* If neither of the constants was set, check whether the plugin is installed
 	* in `src/wp-content/plugins`. In that case, this file would be in
-	* `src/wp-content/plugins/plugin-name/vendor/yoast/wp-test-utils/src/WPIntegration`.
+	* `src/wp-content/plugins/performance/tests`.
 	*/
-	if ( file_exists( __DIR__ . '/../../../../../../../../../tests/phpunit/includes/bootstrap.php' ) ) {
-		$tests_dir = __DIR__ . '/../../../../../../../../../tests/phpunit/';
+	if ( file_exists( __DIR__ . '/../../../../../tests/phpunit/includes/bootstrap.php' ) ) {
+		$tests_dir = __DIR__ . '/../../../../../tests/phpunit/';
 		$tests_dir = realpath( $tests_dir );
 		if ( false !== $tests_dir ) {
 			return normalize_path( $tests_dir ) . '/';
