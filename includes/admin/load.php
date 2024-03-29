@@ -285,7 +285,7 @@ function perflab_install_activate_plugin_callback() {
 		$plugin_file_names = array_keys( $plugins );
 		$plugin_basename   = $plugin_slug . '/' . $plugin_file_names[0];
 	} else {
-		$plugin_basename = $_GET['file'];
+		$plugin_basename = sanitize_text_field( wp_unslash( $_GET['file'] ) );
 	}
 
 	if ( ! current_user_can( 'activate_plugin', $plugin_basename ) ) {
