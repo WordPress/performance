@@ -52,6 +52,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 = 1.1.0 =
 
 * Rename plugin to "Image Placeholders". ([1101](https://github.com/WordPress/performance/pull/1101))
+* Use plugin slug for generator tag. ([1103](https://github.com/WordPress/performance/pull/1103))
 * Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 
