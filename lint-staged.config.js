@@ -27,7 +27,8 @@ module.exports = {
 		plugins.forEach( ( plugin ) => {
 			const pluginFiles = micromatch(
 				files,
-				`**/plugins/${ plugin }/**`
+				`**/plugins/${ plugin }/**`,
+				{ dot: true }
 			);
 
 			if ( pluginFiles.length ) {
@@ -37,7 +38,7 @@ module.exports = {
 			}
 		} );
 
-		const otherFiles = micromatch( files, `!plugins/**` );
+		const otherFiles = micromatch( files, `!plugins/**`, { dot: true } );
 
 		if ( otherFiles.length ) {
 			commands.push( `npm run lint:php ${ joinFiles( otherFiles ) }` );
