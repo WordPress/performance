@@ -770,7 +770,8 @@ add_filter( 'wp_editor_set_quality', 'webp_uploads_modify_webp_quality', 10, 2 )
  * @since 1.0.0
  */
 function webp_uploads_render_generator() {
-	echo '<meta name="generator" content="Modern Image Formats ' . esc_attr( WEBP_UPLOADS_VERSION ) . '">' . "\n";
+	// Use the plugin slug as it is immutable.
+	echo '<meta name="generator" content="webp-uploads ' . esc_attr( WEBP_UPLOADS_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'webp_uploads_render_generator' );
 

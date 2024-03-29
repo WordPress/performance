@@ -16,6 +16,6 @@ class OD_Helper_Tests extends WP_UnitTestCase {
 		$tag = get_echo( 'od_render_generator_meta_tag' );
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
-		$this->assertStringContainsString( 'Optimization Detective ' . OPTIMIZATION_DETECTIVE_VERSION, $tag );
+		$this->assertStringContainsString( 'optimization-detective ' . OPTIMIZATION_DETECTIVE_VERSION, $tag );
 	}
 }

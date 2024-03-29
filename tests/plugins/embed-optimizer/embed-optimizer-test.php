@@ -167,6 +167,6 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 		$tag = get_echo( 'embed_optimizer_render_generator' );
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
-		$this->assertStringContainsString( EMBED_OPTIMIZER_VERSION, $tag );
+		$this->assertStringContainsString( 'embed-optimizer ' . EMBED_OPTIMIZER_VERSION, $tag );
 	}
 }
