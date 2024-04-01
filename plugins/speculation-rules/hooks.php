@@ -54,6 +54,7 @@ add_action( 'wp_footer', 'plsr_print_speculation_rules' );
  * @since 1.1.0
  */
 function plsr_render_generator_meta_tag() {
-	echo '<meta name="generator" content="Speculative Loading ' . esc_attr( SPECULATION_RULES_VERSION ) . '">' . "\n";
+	// Use the plugin slug as it is immutable.
+	echo '<meta name="generator" content="speculation-rules ' . esc_attr( SPECULATION_RULES_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'plsr_render_generator_meta_tag' );

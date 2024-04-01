@@ -7,6 +7,11 @@
 
 class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 
+	public function test_hooks() {
+		$this->assertSame( 10, has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' ) );
+		$this->assertSame( 10, has_action( 'wp_head', 'embed_optimizer_render_generator' ) );
+	}
+
 	/**
 	 * Test that the oEmbed HTML is filtered.
 	 *
@@ -163,10 +168,9 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 	 * @covers ::embed_optimizer_render_generator
 	 */
 	public function test_embed_optimizer_render_generator() {
-		$this->assertSame( 10, has_action( 'wp_head', 'embed_optimizer_render_generator' ) );
 		$tag = get_echo( 'embed_optimizer_render_generator' );
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
-		$this->assertStringContainsString( EMBED_OPTIMIZER_VERSION, $tag );
+		$this->assertStringContainsString( 'embed-optimizer ' . EMBED_OPTIMIZER_VERSION, $tag );
 	}
 }

@@ -178,6 +178,7 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  * @since 1.0.0
  */
 function dominant_color_render_generator() {
-	echo '<meta name="generator" content="Image Placeholders ' . esc_attr( DOMINANT_COLOR_IMAGES_VERSION ) . '">' . "\n";
+	// Use the plugin slug as it is immutable.
+	echo '<meta name="generator" content="dominant-color-images ' . esc_attr( DOMINANT_COLOR_IMAGES_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'dominant_color_render_generator' );

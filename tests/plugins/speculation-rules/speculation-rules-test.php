@@ -19,6 +19,11 @@ class Speculation_Rules_Tests extends WP_UnitTestCase {
 		parent::tear_down();
 	}
 
+	public function test_hooks() {
+		$this->assertSame( 10, has_action( 'wp_footer', 'plsr_print_speculation_rules' ) );
+		$this->assertSame( 10, has_action( 'wp_head', 'plsr_render_generator_meta_tag' ) );
+	}
+
 	public function data_provider_to_test_print_speculation_rules(): array {
 		return array(
 			'xhtml' => array(
@@ -55,5 +60,17 @@ class Speculation_Rules_Tests extends WP_UnitTestCase {
 		} else {
 			$this->assertStringContainsString( '/* <![CDATA[ */', wp_get_inline_script_tag( '/*...*/' ) );
 		}
+	}
+
+	/**
+	 * Test printing the meta generator tag.
+	 *
+	 * @covers ::plsr_render_generator_meta_tag
+	 */
+	public function test_plsr_render_generator_meta_tag() {
+		$tag = get_echo( 'plsr_render_generator_meta_tag' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'generator', $tag );
+		$this->assertStringContainsString( 'speculation-rules ' . SPECULATION_RULES_VERSION, $tag );
 	}
 }

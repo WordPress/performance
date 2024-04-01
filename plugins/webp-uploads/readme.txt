@@ -64,6 +64,7 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 * Add link to WebP settings to plugins table. ([1036](https://github.com/WordPress/performance/pull/1036))
 * Rename plugin to "Modern Image Formats". ([1101](https://github.com/WordPress/performance/pull/1101))
+* Use plugin slug for generator tag. ([1103](https://github.com/WordPress/performance/pull/1103))
 * Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 

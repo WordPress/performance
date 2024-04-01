@@ -985,6 +985,18 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
+	 * Test printing the meta generator tag.
+	 *
+	 * @covers ::webp_uploads_render_generator
+	 */
+	public function test_webp_uploads_render_generator() {
+		$tag = get_echo( 'webp_uploads_render_generator' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'generator', $tag );
+		$this->assertStringContainsString( 'webp-uploads ' . WEBP_UPLOADS_VERSION, $tag );
+	}
+
+	/**
 	 * Runs (empty) hooks to satisfy webp_uploads_in_frontend_body() conditions.
 	 */
 	private function mock_frontend_body_hooks() {
