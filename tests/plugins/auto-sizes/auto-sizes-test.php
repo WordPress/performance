@@ -87,4 +87,16 @@ class AutoSizesTests extends WP_UnitTestCase {
 			wp_filter_content_tags( $this->get_image_tag( self::$image_id ) )
 		);
 	}
+
+	/**
+	 * Test printing the meta generator tag.
+	 *
+	 * @covers ::auto_sizes_render_generator
+	 */
+	public function test_auto_sizes_render_generator() {
+		$tag = get_echo( 'auto_sizes_render_generator' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'generator', $tag );
+		$this->assertStringContainsString( 'auto-sizes ' . IMAGE_AUTO_SIZES_VERSION, $tag );
+	}
 }

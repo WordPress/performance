@@ -69,3 +69,16 @@ function auto_sizes_update_content_img_tag( $html ) {
 	return $html;
 }
 add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+
+/**
+ * Displays the HTML generator tag for the plugin.
+ *
+ * See {@see 'wp_head'}.
+ *
+ * @since 1.0.1
+ */
+function auto_sizes_render_generator() {
+	// Use the plugin slug as it is immutable.
+	echo '<meta name="generator" content="auto-sizes ' . esc_attr( IMAGE_AUTO_SIZES_VERSION ) . '">' . "\n";
+}
+add_action( 'wp_head', 'auto_sizes_render_generator' );
