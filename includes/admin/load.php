@@ -43,10 +43,13 @@ add_action( 'admin_menu', 'perflab_add_features_page' );
  */
 function perflab_load_features_page() {
 	// Handle script enqueuing for settings page.
-	add_action( 'admin_enqueue_scripts', 'perflab_enqueue_modules_page_scripts' );
+	add_action( 'admin_enqueue_scripts', 'perflab_enqueue_features_page_scripts' );
 
 	// Handle admin notices for settings page.
 	add_action( 'admin_notices', 'perflab_plugin_admin_notices' );
+
+	// Handle style for settings page.
+	add_action( 'admin_head', 'perflab_print_features_page_style' );
 }
 
 /**
@@ -202,119 +205,129 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
  * Callback function to handle admin scripts.
  *
  * @since 2.8.0
+ * @since n.e.x.t Renamed to perflab_enqueue_features_page_scripts().
  */
-function perflab_enqueue_modules_page_scripts() {
-	wp_enqueue_script( 'updates' );
-
-	wp_localize_script(
-		'updates',
-		'_wpUpdatesItemCounts',
-		array(
-			'settings' => array(
-				'totals' => wp_get_update_data(),
-			),
-		)
-	);
-
+function perflab_enqueue_features_page_scripts() {
+	// These assets are needed for the "Learn more" popover.
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_style( 'thickbox' );
-
 	wp_enqueue_script( 'plugin-install' );
-
-	wp_enqueue_script(
-		'perflab-plugin-management',
-		plugin_dir_url( __FILE__ ) . 'js/perflab-plugin-management.js',
-		array( 'jquery' ),
-		'1.0.0',
-		array(
-			'in_footer' => true,
-			'strategy'  => 'defer',
-		)
-	);
 }
 
 /**
- * Callback function hooked to admin_action_perflab_activate_plugin to handle plugin activation.
+ * Callback for handling installation/activation of plugin.
  *
- * @since 2.8.0
+ * @since n.e.x.t
  */
-function perflab_activate_plugin() {
-	// Do not proceed if plugin query arg is not present.
-	if ( empty( $_GET['plugin'] ) ) {
-		return;
+function perflab_install_activate_plugin_callback() {
+	check_admin_referer( 'perflab_install_activate_plugin' );
+
+	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+	require_once ABSPATH . 'wp-admin/includes/class-wp-ajax-upgrader-skin.php';
+
+	if ( ! isset( $_GET['slug'] ) ) {
+		wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
 	}
 
-	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
+	$plugin_slug = sanitize_text_field( wp_unslash( $_GET['slug'] ) );
 
-	check_admin_referer( "perflab_activate_plugin_{$plugin}" );
+	if ( ! $plugin_slug ) {
+		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
+	}
 
-	// If `$plugin` is a plugin slug rather than a plugin basename, determine the full plugin basename.
-	if ( ! str_contains( $plugin, '/' ) ) {
-		$plugins = get_plugins( '/' . $plugin );
+	$is_plugin_installed = isset( $_GET['file'] ) && $_GET['file'];
+
+	// Install the plugin if it is not installed yet.
+	if ( ! $is_plugin_installed ) {
+		// Check if the user have plugin installation capability.
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to install plugins on this site.', 'default' ) );
+		}
+
+		$api = perflab_query_plugin_info( $plugin_slug );
+
+		// Return early if plugin API returns an error.
+		if ( ! $api ) {
+			wp_die(
+				wp_kses(
+					sprintf(
+						/* translators: %s: Support forums URL. */
+						__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="%s">support forums</a>.', 'default' ),
+						__( 'https://wordpress.org/support/forums/', 'default' )
+					),
+					array( 'a' => array( 'href' => true ) )
+				)
+			);
+		}
+
+		// Replace new Plugin_Installer_Skin with new Quiet_Upgrader_Skin when output needs to be suppressed.
+		$skin     = new WP_Ajax_Upgrader_Skin( array( 'api' => $api ) );
+		$upgrader = new Plugin_Upgrader( $skin );
+		$result   = $upgrader->install( $api['download_link'] );
+
+		if ( is_wp_error( $result ) ) {
+			wp_die( esc_html( $result->get_error_message() ) );
+		} elseif ( is_wp_error( $skin->result ) ) {
+			wp_die( esc_html( $skin->result->get_error_message() ) );
+		} elseif ( $skin->get_errors()->has_errors() ) {
+			wp_die( esc_html( $skin->get_error_messages() ) );
+		}
+
+		$plugins = get_plugins( '/' . $plugin_slug );
 
 		if ( empty( $plugins ) ) {
 			wp_die( esc_html__( 'Plugin not found.', 'default' ) );
 		}
 
 		$plugin_file_names = array_keys( $plugins );
-		$plugin            = $plugin . '/' . $plugin_file_names[0];
+		$plugin_basename   = $plugin_slug . '/' . $plugin_file_names[0];
+	} else {
+		$plugin_basename = sanitize_text_field( wp_unslash( $_GET['file'] ) );
 	}
 
-	if ( ! current_user_can( 'activate_plugin', $plugin ) ) {
+	if ( ! current_user_can( 'activate_plugin', $plugin_basename ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
 	}
 
-	// Activate the plugin in question and return to prior screen.
-	$do_plugin_activation = activate_plugins( $plugin );
-	$referer              = wp_get_referer();
-	if ( ! is_wp_error( $do_plugin_activation ) ) {
-		$referer = add_query_arg(
-			array(
-				'activate' => true,
-			),
-			$referer
-		);
+	$result = activate_plugin( $plugin_basename );
+	if ( is_wp_error( $result ) ) {
+		wp_die( esc_html( $result->get_error_messages() ) );
 	}
 
-	if ( wp_safe_redirect( $referer ) ) {
+	$url = add_query_arg(
+		array(
+			'page'     => PERFLAB_SCREEN,
+			'activate' => 'true',
+		),
+		admin_url( 'options-general.php' )
+	);
+
+	if ( wp_safe_redirect( $url ) ) {
 		exit;
 	}
 }
-add_action( 'admin_action_perflab_activate_plugin', 'perflab_activate_plugin' );
+add_action( 'admin_action_perflab_install_activate_plugin', 'perflab_install_activate_plugin_callback' );
 
 /**
- * Callback function hooked to admin_action_perflab_deactivate_plugin to handle plugin deactivation.
+ * Callback function to handle admin inline style.
  *
- * @since 2.8.0
+ * @since n.e.x.t
  */
-function perflab_deactivate_plugin() {
-	// Do not proceed if plugin query arg is not present.
-	if ( empty( $_GET['plugin'] ) ) {
-		return;
+function perflab_print_features_page_style() {
+	?>
+<style type="text/css">
+	.plugin-card .name,
+	.plugin-card .desc, /* For WP <6.5 versions */
+	.plugin-card .desc > p {
+		margin-left: 0;
 	}
-
-	// The plugin being deactivated.
-	$plugin = sanitize_text_field( wp_unslash( $_GET['plugin'] ) );
-
-	check_admin_referer( "perflab_deactivate_plugin_{$plugin}" );
-
-	if ( ! current_user_can( 'deactivate_plugin', $plugin ) ) {
-		wp_die( esc_html__( 'Sorry, you are not allowed to deactivate this plugin.', 'default' ) );
+	.plugin-card-top {
+		min-height: auto;
 	}
-
-	// Deactivate the plugin in question and return to prior screen.
-	deactivate_plugins( $plugin );
-	$referer = add_query_arg(
-		array(
-			'deactivate' => true,
-		),
-		wp_get_referer()
-	);
-	if ( wp_safe_redirect( $referer ) ) {
-		exit;
-	}
+</style>
+	<?php
 }
-add_action( 'admin_action_perflab_deactivate_plugin', 'perflab_deactivate_plugin' );
 
 /**
  * Callback function hooked to admin_notices to render admin notices on the plugin's screen.
@@ -322,17 +335,23 @@ add_action( 'admin_action_perflab_deactivate_plugin', 'perflab_deactivate_plugin
  * @since 2.8.0
  */
 function perflab_plugin_admin_notices() {
+	if ( ! current_user_can( 'install_plugins' ) ) {
+		wp_admin_notice(
+			esc_html__( 'Due to your site\'s configuration, you may not be able to activate the performance features, unless the underlying plugin is already installed. Please install the relevant plugins manually.', 'performance-lab' ),
+			array(
+				'type' => 'warning',
+			)
+		);
+		return;
+	}
+
 	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		?>
-		<div class="notice notice-success is-dismissible">
-			<p><?php esc_html_e( 'Plugin activated.', 'default' ); ?></p>
-		</div>
-		<?php
-	} elseif ( isset( $_GET['deactivate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		?>
-		<div class="notice notice-success is-dismissible">
-			<p><?php esc_html_e( 'Plugin deactivated.', 'default' ); ?></p>
-		</div>
-		<?php
+		wp_admin_notice(
+			esc_html__( 'Feature activated.', 'performance-lab' ),
+			array(
+				'type'        => 'success',
+				'dismissible' => true,
+			)
+		);
 	}
 }
