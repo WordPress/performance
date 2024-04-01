@@ -317,7 +317,9 @@ add_action( 'admin_action_perflab_install_activate_plugin', 'perflab_install_act
 function perflab_print_features_page_style() {
 	?>
 <style type="text/css">
-	.plugin-card .name, .plugin-card .desc {
+	.plugin-card .name,
+	.plugin-card .desc, /* For WP <6.5 versions */
+	.plugin-card .desc > p {
 		margin-left: 0;
 	}
 	.plugin-card-top {
