@@ -69,7 +69,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 		$autoloaded_options_size = $wpdb->get_var(
 			$wpdb->prepare(
 				sprintf(
-					'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload IN (%s)',
+					"SELECT SUM(LENGTH(option_value)) FROM $wpdb->options WHERE autoload IN (%s)",
 					implode( ',', array_fill( 0, count( $autoload_values ), '%s' ) )
 				),
 				$autoload_values
