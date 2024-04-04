@@ -79,7 +79,7 @@ function perflab_render_generator() {
 add_action( 'wp_head', 'perflab_render_generator' );
 
 /**
- * Gets the standalone plugins recommended by Performance Lab and their data.
+ * Gets the standalone plugins and their data.
  *
  * @since n.e.x.t
  *
@@ -87,7 +87,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
  */
 function perflab_get_standalone_plugin_data() {
 	/*
-	 * Alphabetically sorted list of plugin slugs recommended by Performance Lab and their data.
+	 * Alphabetically sorted list of plugin slugs and their data.
 	 * Supported keys per plugin are:
 	 * - 'constant' (string, required)
 	 * - 'experimental' (boolean, optional)
