@@ -30,6 +30,18 @@ function od_get_detection_script_placeholder(): string {
 }
 
 /**
+ * Prints the detection script placeholder.
+ *
+ * @see wp_print_footer_scripts()
+ *
+ * @since 0.1.1
+ * @access private
+ */
+function od_print_detection_script_placeholder() {
+	echo esc_html( od_get_detection_script_placeholder() );
+}
+
+/**
  * Starts output buffering at the end of the 'template_include' filter.
  *
  * This is to implement #43258 in core.
@@ -82,18 +94,6 @@ function od_maybe_add_template_output_buffer_filter() {
 	}
 	add_filter( 'od_template_output_buffer', $callback );
 	add_action( 'wp_print_footer_scripts', 'od_print_detection_script_placeholder' );
-}
-
-/**
- * Prints the detection script placeholder.
- *
- * @see wp_print_footer_scripts()
- *
- * @since 0.1.1
- * @access private
- */
-function od_print_detection_script_placeholder() {
-	echo esc_html( od_get_detection_script_placeholder() );
 }
 
 /**
