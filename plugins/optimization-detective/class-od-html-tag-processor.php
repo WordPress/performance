@@ -134,6 +134,20 @@ final class OD_HTML_Tag_Processor {
 	const XPATH_PATTERN = '^(/\*\[\d+\]\[self::.+?\])+$';
 
 	/**
+	 * Bookmark for the end of the HEAD.
+	 *
+	 * @var string
+	 */
+	const END_OF_HEAD_BOOKMARK = 'end_of_head';
+
+	/**
+	 * Bookmark for the end of the BODY.
+	 *
+	 * @var string
+	 */
+	const END_OF_BODY_BOOKMARK = 'end_of_body';
+
+	/**
 	 * Open stack tags.
 	 *
 	 * @var string[]
@@ -160,7 +174,31 @@ final class OD_HTML_Tag_Processor {
 	 * @param string $html HTML to process.
 	 */
 	public function __construct( string $html ) {
-		$this->processor = new WP_HTML_Tag_Processor( $html );
+
+		$processor = new class( $html ) extends WP_HTML_Tag_Processor {
+
+			/**
+			 * Appends HTML to the provided bookmark.
+			 *
+			 * @param string $bookmark Bookmark.
+			 * @param string $html     HTML to inject.
+			 * @return bool Whether the HTML was appended.
+			 */
+			public function append_html( string $bookmark, string $html ): bool {
+				if ( ! $this->has_bookmark( $bookmark ) ) {
+					return false;
+				}
+
+				$this->lexical_updates[] = new WP_HTML_Text_Replacement(
+					$this->bookmarks[ $bookmark ]->start,
+					0,
+					$html
+				);
+				return true;
+			}
+		};
+
+		$this->processor = new $processor( $html );
 	}
 
 	/**
@@ -253,6 +291,13 @@ final class OD_HTML_Tag_Processor {
 							$tag_name
 						)
 					);
+				}
+
+				// Set bookmarks for insertion of preload links and the detection script module.
+				if ( 'HEAD' === $popped_tag_name ) {
+					$p->set_bookmark( self::END_OF_HEAD_BOOKMARK );
+				} elseif ( 'BODY' === $popped_tag_name ) {
+					$p->set_bookmark( self::END_OF_BODY_BOOKMARK );
 				}
 
 				array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) + 1 );
@@ -368,6 +413,36 @@ final class OD_HTML_Tag_Processor {
 	 */
 	public function remove_attribute( string $name ): bool {
 		return $this->processor->remove_attribute( $name );
+	}
+
+	/**
+	 * Append HTML to the HEAD.
+	 *
+	 * @param string $html HTML to inject.
+	 * @return bool Whether successful.
+	 */
+	public function append_head_html( string $html ): bool {
+		// @phpstan-ignore-next-line
+		$success = $this->processor->append_html( self::END_OF_HEAD_BOOKMARK, $html );
+		if ( ! $success ) {
+			$this->warn( __( 'Unable to append markup to the HEAD.', 'optimization-detective' ) );
+		}
+		return $success;
+	}
+
+	/**
+	 * Append HTML to the BODY.
+	 *
+	 * @param string $html HTML to inject.
+	 * @return bool Whether successful.
+	 */
+	public function append_body_html( string $html ): bool {
+		// @phpstan-ignore-next-line
+		$success = $this->processor->append_html( self::END_OF_BODY_BOOKMARK, $html );
+		if ( ! $success ) {
+			$this->warn( __( 'Unable to append markup to the BODY.', 'optimization-detective' ) );
+		}
+		return $success;
 	}
 
 	/**

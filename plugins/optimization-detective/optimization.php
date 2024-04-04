@@ -11,37 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Gets placeholder for injected detection script.
- *
- * Once supported by the HTML API, the WP_HTML_Processor should be used to inject the script at the end of the BODY element.
- * It should also be used to inject the links in the HEAD.
- *
- * @since  0.1.1
- * @access private
- *
- * @return string Placeholder.
- */
-function od_get_detection_script_placeholder(): string {
-	static $placeholder = null;
-	if ( null === $placeholder ) {
-		$placeholder = sprintf( '{{{OPTIMIZATION_DETECTIVE_DETECTION_SCRIPT-%s}}}', wp_rand() );
-	}
-	return $placeholder;
-}
-
-/**
- * Prints the detection script placeholder.
- *
- * @see wp_print_footer_scripts()
- *
- * @since 0.1.1
- * @access private
- */
-function od_print_detection_script_placeholder() {
-	echo esc_html( od_get_detection_script_placeholder() );
-}
-
-/**
  * Starts output buffering at the end of the 'template_include' filter.
  *
  * This is to implement #43258 in core.
@@ -93,7 +62,6 @@ function od_maybe_add_template_output_buffer_filter() {
 		$callback = perflab_wrap_server_timing( $callback, 'optimization-detective', 'exist' );
 	}
 	add_filter( 'od_template_output_buffer', $callback );
-	add_action( 'wp_print_footer_scripts', 'od_print_detection_script_placeholder' );
 }
 
 /**
@@ -357,7 +325,6 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 			$processor->set_attribute( 'data-od-xpath', $xpath );
 		}
 	}
-	$buffer = $processor->get_updated_html();
 
 	// If there were any LCP elements captured in URL Metrics that no longer exist in the document, we need to behave as
 	// if they didn't exist in the first place as there is nothing that can be preloaded.
@@ -370,23 +337,16 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	}
 
 	// Inject any preload links at the end of the HEAD.
-	// TODO: In the future, WP_HTML_Processor could be used to do this injection more safely, since "</head>" may appear in a comment.
 	$head_injection = od_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
 	if ( $head_injection ) {
-		$buffer = preg_replace(
-			'#(?=</HEAD>)#i',
-			$head_injection,
-			$buffer,
-			1
-		);
+		$processor->append_head_html( $head_injection );
 	}
 
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
-	// TODO: In the future, when it is supported, this injection should be done with the HTML Processor.
-	return str_replace(
-		esc_html( od_get_detection_script_placeholder() ),
-		$needs_detection ? od_get_detection_script( $slug, $group_collection ) : '',
-		$buffer
-	);
+	if ( $needs_detection ) {
+		$processor->append_body_html( od_get_detection_script( $slug, $group_collection ) );
+	}
+
+	return $processor->get_updated_html();
 }

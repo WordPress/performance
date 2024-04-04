@@ -33,19 +33,6 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests od_get_detection_script_placeholder() and od_print_detection_script_placeholder().
-	 *
-	 * @covers ::od_get_detection_script_placeholder
-	 * @covers ::od_print_detection_script_placeholder
-	 */
-	public function test_od_get_and_print_detection_script_placeholder() {
-		$placeholder = od_get_detection_script_placeholder();
-		$this->assertMatchesRegularExpression( '/^{{{OPTIMIZATION_DETECTIVE_DETECTION_SCRIPT-\d+}}}$/', $placeholder );
-		$this->assertSame( $placeholder, od_get_detection_script_placeholder() );
-		$this->assertSame( $placeholder, get_echo( 'od_print_detection_script_placeholder' ) );
-	}
-
-	/**
 	 * Make output is buffered and that it is also filtered.
 	 *
 	 * @covers ::od_buffer_output
@@ -89,14 +76,12 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 		od_maybe_add_template_output_buffer_filter();
 		$this->assertFalse( od_can_optimize_response() );
 		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
-		$this->assertFalse( has_action( 'wp_print_footer_scripts', 'od_print_detection_script_placeholder' ) );
 
 		add_filter( 'od_can_optimize_response', '__return_true', 2 );
 		$this->go_to( home_url( '/' ) );
 		$this->assertTrue( od_can_optimize_response() );
 		od_maybe_add_template_output_buffer_filter();
 		$this->assertTrue( has_filter( 'od_template_output_buffer' ) );
-		$this->assertSame( 10, has_action( 'wp_print_footer_scripts', 'od_print_detection_script_placeholder' ) );
 	}
 
 	/**
@@ -1027,10 +1012,6 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 */
 	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ) {
 		$set_up();
-
-		// Simulate wp_print_footer_scripts().
-		$buffer = preg_replace( ':(?=</body>):', get_echo( 'od_print_detection_script_placeholder' ), $buffer );
-
 		$this->assertEquals(
 			$this->parse_html_document( $expected ),
 			$this->parse_html_document( od_optimize_template_output_buffer( $buffer ) )
