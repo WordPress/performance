@@ -57,7 +57,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
  */
 function perflab_get_standalone_plugins() {
 	return array_keys(
-		perflab_get_standalone_plugin_version_constants()
+		perflab_get_standalone_plugin_data()
 	);
 }
 
@@ -70,14 +70,24 @@ function perflab_render_plugins_ui() {
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	$standalone_plugins = array();
-	foreach ( perflab_get_standalone_plugins() as $managed_standalone_plugin_slug ) {
-		$standalone_plugins[ $managed_standalone_plugin_slug ] = array(
-			'plugin_data' => perflab_query_plugin_info( $managed_standalone_plugin_slug ),
+	$plugins              = array();
+	$experimental_plugins = array();
+
+	foreach ( perflab_get_standalone_plugin_data() as $plugin_slug => $plugin_data ) {
+		$plugin_data = array_merge(
+			$plugin_data, // Data defined within Performance Lab.
+			perflab_query_plugin_info( $plugin_slug ) // Data from wordpress.org.
 		);
+
+		// Separate experimental plugins so that they're displayed after non-experimental plugins.
+		if ( isset( $plugin_data['experimental'] ) && $plugin_data['experimental'] ) {
+			$experimental_plugins[ $plugin_slug ] = $plugin_data;
+		} else {
+			$plugins[ $plugin_slug ] = $plugin_data;
+		}
 	}
 
-	if ( empty( $standalone_plugins ) ) {
+	if ( empty( $plugins ) ) {
 		return;
 	}
 	?>
@@ -89,8 +99,11 @@ function perflab_render_plugins_ui() {
 					<h2 class="screen-reader-text"><?php esc_html_e( 'Plugins list', 'default' ); ?></h2>
 					<div id="the-list">
 						<?php
-						foreach ( $standalone_plugins as $standalone_plugin ) {
-							perflab_render_plugin_card( $standalone_plugin['plugin_data'] );
+						foreach ( $plugins as $plugin_data ) {
+							perflab_render_plugin_card( $plugin_data );
+						}
+						foreach ( $experimental_plugins as $plugin_data ) {
+							perflab_render_plugin_card( $plugin_data );
 						}
 						?>
 					</div>
@@ -269,6 +282,15 @@ function perflab_render_plugin_card( array $plugin_data ) {
 					<a href="<?php echo esc_url( $details_link ); ?>" class="thickbox open-plugin-details-modal">
 						<?php echo wp_kses_post( $title ); ?>
 					</a>
+					<?php
+					if ( isset( $plugin_data['experimental'] ) && $plugin_data['experimental'] ) {
+						?>
+						<em class="perflab-plugin-experimental">
+							<?php echo esc_html( _x( '(experimental)', 'plugin suffix', 'performance-lab' ) ); ?>
+						</em>
+						<?php
+					}
+					?>
 				</h3>
 			</div>
 			<div class="action-links">
