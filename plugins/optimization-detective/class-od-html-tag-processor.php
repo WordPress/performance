@@ -164,7 +164,12 @@ final class OD_HTML_Tag_Processor {
 	/**
 	 * Processor.
 	 *
-	 * @var WP_HTML_Tag_Processor
+	 * This contains an instance of an anonymous subclass of WP_HTML_Tag_Processor which adds an append_html method.
+	 * The use of the mixed type is due to the lack of typing being available for such an anonymous class. PHPCS
+	 * requires that there be a type provided, and yet if it is just WP_HTML_Tag_Processor then PHPStan complains about
+	 * the append_html method not being defined.
+	 *
+	 * @var WP_HTML_Tag_Processor|mixed
 	 */
 	private $processor;
 
@@ -422,7 +427,6 @@ final class OD_HTML_Tag_Processor {
 	 * @return bool Whether successful.
 	 */
 	public function append_head_html( string $html ): bool {
-		// @phpstan-ignore-next-line
 		$success = $this->processor->append_html( self::END_OF_HEAD_BOOKMARK, $html );
 		if ( ! $success ) {
 			$this->warn( __( 'Unable to append markup to the HEAD.', 'optimization-detective' ) );
@@ -437,7 +441,6 @@ final class OD_HTML_Tag_Processor {
 	 * @return bool Whether successful.
 	 */
 	public function append_body_html( string $html ): bool {
-		// @phpstan-ignore-next-line
 		$success = $this->processor->append_html( self::END_OF_BODY_BOOKMARK, $html );
 		if ( ! $success ) {
 			$this->warn( __( 'Unable to append markup to the BODY.', 'optimization-detective' ) );
