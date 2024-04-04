@@ -1071,6 +1071,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 */
 	protected function parse_html_document( string $markup ): DOMDocument {
 		$dom = new DOMDocument();
+		libxml_use_internal_errors( true );
 		$dom->loadHTML( trim( $markup ) );
 
 		// Remove all whitespace nodes.
