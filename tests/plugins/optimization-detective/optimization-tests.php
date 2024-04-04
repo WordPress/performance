@@ -709,10 +709,14 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
+							<!--</head>-->
 						</head>
+						<!--</head>-->
 						<body>
 							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+							<!--</body>-->
 						</body>
+						<!--</body>-->
 					</html>
 				',
 				'expected' => '
