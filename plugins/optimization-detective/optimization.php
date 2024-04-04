@@ -16,6 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Once supported by the HTML API, the WP_HTML_Processor should be used to inject the script at the end of the BODY element.
  * It should also be used to inject the links in the HEAD.
  *
+ * @since  0.1.1
+ * @access private
+ *
  * @return string Placeholder.
  */
 function od_get_detection_script_placeholder(): string {
