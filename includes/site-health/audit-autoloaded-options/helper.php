@@ -101,7 +101,22 @@ function perflab_aao_autoloaded_options_test() {
  */
 function perflab_aao_autoloaded_options_size() {
 	global $wpdb;
-	return (int) $wpdb->get_var( 'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload = \'yes\'' );
+
+	if ( function_exists( 'wp_autoload_values_to_autoload' ) ) {
+		$autoload_values = wp_autoload_values_to_autoload();
+	} else {
+		$autoload_values = array( 'yes' );
+	}
+
+	return (int) $wpdb->get_var(
+		$wpdb->prepare(
+			sprintf(
+				'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload IN (%s)',
+				implode( ',', array_fill( 0, count( $autoload_values ), '%s' ) )
+			),
+			$autoload_values
+		)
+	);
 }
 
 /**
@@ -130,7 +145,21 @@ function perflab_aao_query_autoloaded_options() {
 	 */
 	$option_threshold = apply_filters( 'perflab_aao_autoloaded_options_table_threshold', 100 );
 
-	return $wpdb->get_results( $wpdb->prepare( "SELECT option_name, LENGTH(option_value) AS option_value_length FROM {$wpdb->options} WHERE autoload='yes' AND LENGTH(option_value) > %d ORDER BY option_value_length DESC LIMIT 20", $option_threshold ) );
+	if ( function_exists( 'wp_autoload_values_to_autoload' ) ) {
+		$autoload_values = wp_autoload_values_to_autoload();
+	} else {
+		$autoload_values = array( 'yes' );
+	}
+
+	return $wpdb->get_results(
+		$wpdb->prepare(
+			sprintf(
+				"SELECT option_name, LENGTH(option_value) AS option_value_length FROM {$wpdb->options} WHERE autoload IN (%s)",
+				implode( ',', array_fill( 0, count( $autoload_values ), '%s' ) )
+			) . ' AND LENGTH(option_value) > %d ORDER BY option_value_length DESC LIMIT 20',
+			array_merge( $autoload_values, array( $option_threshold ) )
+		)
+	);
 }
 
 /**
