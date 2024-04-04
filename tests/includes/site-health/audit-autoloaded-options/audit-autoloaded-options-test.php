@@ -60,11 +60,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	public function test_perflab_aao_autoloaded_options_size() {
 		global $wpdb;
 
-		if ( function_exists( 'wp_autoload_values_to_autoload' ) ) {
-			$autoload_values = wp_autoload_values_to_autoload();
-		} else {
-			$autoload_values = array( 'yes' );
-		}
+		$autoload_values = perflab_aao_get_autoload_values_to_autoload();
 
 		$autoloaded_options_size = $wpdb->get_var(
 			$wpdb->prepare(

@@ -102,11 +102,7 @@ function perflab_aao_autoloaded_options_test() {
 function perflab_aao_autoloaded_options_size() {
 	global $wpdb;
 
-	if ( function_exists( 'wp_autoload_values_to_autoload' ) ) {
-		$autoload_values = wp_autoload_values_to_autoload();
-	} else {
-		$autoload_values = array( 'yes' );
-	}
+	$autoload_values = perflab_aao_get_autoload_values_to_autoload();
 
 	return (int) $wpdb->get_var(
 		$wpdb->prepare(
@@ -145,11 +141,7 @@ function perflab_aao_query_autoloaded_options() {
 	 */
 	$option_threshold = apply_filters( 'perflab_aao_autoloaded_options_table_threshold', 100 );
 
-	if ( function_exists( 'wp_autoload_values_to_autoload' ) ) {
-		$autoload_values = wp_autoload_values_to_autoload();
-	} else {
-		$autoload_values = array( 'yes' );
-	}
+	$autoload_values = perflab_aao_get_autoload_values_to_autoload();
 
 	return $wpdb->get_results(
 		$wpdb->prepare(
@@ -255,4 +247,19 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 	$html_table .= '</tbody></table>';
 
 	return $html_table;
+}
+
+/**
+ * Gets the autoload values in the database that should trigger their option to be autoloaded.
+ *
+ * @since n.e.x.t
+ *
+ * @return array List of autoload values.
+ */
+function perflab_aao_get_autoload_values_to_autoload() {
+	if ( function_exists( 'wp_autoload_values_to_autoload' ) ) {
+		return wp_autoload_values_to_autoload();
+	}
+
+	return array( 'yes' );
 }
