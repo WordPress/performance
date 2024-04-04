@@ -148,7 +148,9 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	 */
 	public static function set_autoloaded_option( $bytes = 800000 ) {
 		$heavy_option_string = wp_generate_password( $bytes );
-		add_option( self::AUTOLOADED_OPTION_KEY, $heavy_option_string );
+
+		// Force autoloading so that WordPress core does not override it. See https://core.trac.wordpress.org/changeset/57920.
+		add_option( self::AUTOLOADED_OPTION_KEY, $heavy_option_string, '', true );
 	}
 
 	/**
