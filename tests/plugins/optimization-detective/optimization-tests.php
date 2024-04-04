@@ -331,10 +331,10 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
 							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -360,10 +360,10 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
 							<div style="background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==); width:100%; height: 200px;">This is so background!</div>
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -389,10 +389,10 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
 							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==" alt="">
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -417,11 +417,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
 							<img id="no-src" alt="">
 							<img id="empty-src" src="" alt="">
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -721,10 +721,10 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<meta charset="utf-8">
 							<title>...</title>
 							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/foo.jpg" rel="preload" media="screen">
-							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
 							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -784,11 +784,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<title>...</title>
 							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (max-width: 782px)" rel="preload">
 							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/desktop-logo.png" media="screen and (min-width: 783px)" rel="preload">
-							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
 							<img alt="Mobile Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
 							<img alt="Desktop Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -887,11 +887,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<title>...</title>
 							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (max-width: 480px)" rel="preload"/>
 							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/desktop-logo.png" media="screen and (min-width: 601px) and (max-width: 782px)" rel="preload"/>
-							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
 							<img alt="Mobile Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
 							<img alt="Desktop Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -990,12 +990,12 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<meta charset="utf-8">
 							<title>...</title>
 							<link as="image" data-od-added-tag="" fetchpriority="high" href="https://example.com/mobile-logo.png" media="screen and (min-width: 481px) and (max-width: 600px)" rel="preload"/>
-							<script type="module">/* import detect ... */</script>
 						</head>
 						<body>
 							<img alt="Mobile Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" height="600" src="https://example.com/mobile-logo.png" width="600"/>
 							<p>New paragraph since URL Metrics were captured!</p>
 							<img alt="Desktop Logo" data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[2][self::IMG]" height="600" src="https://example.com/desktop-logo.png" width="600"/>
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -1012,6 +1012,10 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 */
 	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ) {
 		$set_up();
+
+		// Simulate wp_print_footer_scripts().
+		$buffer = preg_replace( ':(?=</body>):', get_echo( 'od_print_detection_script_placeholder' ), $buffer );
+
 		$this->assertEquals(
 			$this->parse_html_document( $expected ),
 			$this->parse_html_document( od_optimize_template_output_buffer( $buffer ) )

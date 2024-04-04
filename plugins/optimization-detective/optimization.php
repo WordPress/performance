@@ -78,12 +78,19 @@ function od_maybe_add_template_output_buffer_filter() {
 		$callback = perflab_wrap_server_timing( $callback, 'optimization-detective', 'exist' );
 	}
 	add_filter( 'od_template_output_buffer', $callback );
-	add_action(
-		'wp_print_footer_scripts',
-		static function () {
-			echo esc_html( od_get_detection_script_placeholder() );
-		}
-	);
+	add_action( 'wp_print_footer_scripts', 'od_print_detection_script_placeholder' );
+}
+
+/**
+ * Prints the detection script placeholder.
+ *
+ * @see wp_print_footer_scripts()
+ *
+ * @since 0.1.1
+ * @access private
+ */
+function od_print_detection_script_placeholder() {
+	echo esc_html( od_get_detection_script_placeholder() );
 }
 
 /**
@@ -373,14 +380,10 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
-	if ( $needs_detection ) {
-		// TODO: In the future, when it is supported, this injection should be done with the HTML Processor.
-		$buffer = str_replace(
-			esc_html( od_get_detection_script_placeholder() ),
-			od_get_detection_script( $slug, $group_collection ),
-			$buffer
-		);
-	}
-
-	return $buffer;
+	// TODO: In the future, when it is supported, this injection should be done with the HTML Processor.
+	return str_replace(
+		esc_html( od_get_detection_script_placeholder() ),
+		$needs_detection ? od_get_detection_script( $slug, $group_collection ) : '',
+		$buffer
+	);
 }
