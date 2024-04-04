@@ -12,8 +12,6 @@
     "issues": "https://github.com/WordPress/performance/issues"
   },
   "require-dev": {
-    "ext-dom": "*",
-    "ext-libxml": "*",
     "wp-phpunit/wp-phpunit": "^5.8",
     "yoast/phpunit-polyfills": "^1.0"
   },
