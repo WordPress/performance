@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-const OD_DETECTION_SCRIPT_PLACEHOLDER_COMMENT = '<!--OPTIMIZATION_DETECTIVE_DETECTION_SCRIPT-->';
+const OD_DETECTION_SCRIPT_PLACEHOLDER = '{{{OPTIMIZATION_DETECTIVE_DETECTION_SCRIPT}}}';
 
 /**
  * Starts output buffering at the end of the 'template_include' filter.
@@ -67,7 +67,7 @@ function od_maybe_add_template_output_buffer_filter() {
 	add_action(
 		'wp_print_footer_scripts',
 		static function () {
-			echo OD_DETECTION_SCRIPT_PLACEHOLDER_COMMENT; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo OD_DETECTION_SCRIPT_PLACEHOLDER; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	);
 }
@@ -361,7 +361,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
 	if ( $needs_detection ) {
 		$buffer = str_replace(
-			OD_DETECTION_SCRIPT_PLACEHOLDER_COMMENT,
+			OD_DETECTION_SCRIPT_PLACEHOLDER,
 			od_get_detection_script( $slug, $group_collection ),
 			$buffer
 		);
