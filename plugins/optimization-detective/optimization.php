@@ -10,7 +10,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-const OD_DETECTION_SCRIPT_PLACEHOLDER = '{{{OPTIMIZATION_DETECTIVE_DETECTION_SCRIPT}}}';
+/**
+ * Gets placeholder for injected detection script.
+ *
+ * Once supported by the HTML API, the WP_HTML_Processor should be used to inject the script at the end of the BODY element.
+ * It should also be used to inject the links in the HEAD.
+ *
+ * @return string Placeholder.
+ */
+function od_get_detection_script_placeholder(): string {
+	static $placeholder = null;
+	if ( null === $placeholder ) {
+		$placeholder = sprintf( '{{{OPTIMIZATION_DETECTIVE_DETECTION_SCRIPT-%s}}}', wp_rand() );
+	}
+	return $placeholder;
+}
 
 /**
  * Starts output buffering at the end of the 'template_include' filter.
@@ -67,7 +81,7 @@ function od_maybe_add_template_output_buffer_filter() {
 	add_action(
 		'wp_print_footer_scripts',
 		static function () {
-			echo OD_DETECTION_SCRIPT_PLACEHOLDER; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo esc_html( od_get_detection_script_placeholder() );
 		}
 	);
 }
@@ -345,8 +359,8 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 	}
 
-	// Inject any preload links at the end of the HEAD. In the future, WP_HTML_Processor could be used to do this injection.
-	// However, given the simple replacement here this is not essential.
+	// Inject any preload links at the end of the HEAD.
+	// TODO: In the future, WP_HTML_Processor could be used to do this injection more safely, since "</head>" may appear in a comment.
 	$head_injection = od_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
 	if ( $head_injection ) {
 		$buffer = preg_replace(
@@ -360,8 +374,9 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
 	if ( $needs_detection ) {
+		// TODO: In the future, when it is supported, this injection should be done with the HTML Processor.
 		$buffer = str_replace(
-			OD_DETECTION_SCRIPT_PLACEHOLDER,
+			esc_html( od_get_detection_script_placeholder() ),
 			od_get_detection_script( $slug, $group_collection ),
 			$buffer
 		);
