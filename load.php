@@ -83,7 +83,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
  *
  * @since n.e.x.t
  *
- * @return array Associative array of $plugin_slug => $plugin_data pairs.
+ * @return array<string, array{'constant': string, 'experimental'?: bool}> Associative array of $plugin_slug => $plugin_data pairs.
  */
 function perflab_get_standalone_plugin_data() {
 	/*
