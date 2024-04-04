@@ -59,7 +59,22 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	 */
 	public function test_perflab_aao_autoloaded_options_size() {
 		global $wpdb;
-		$autoloaded_options_size = $wpdb->get_var( 'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload = \'yes\'' );
+
+		if ( function_exists( 'wp_autoload_values_to_autoload' ) ) {
+			$autoload_values = wp_autoload_values_to_autoload();
+		} else {
+			$autoload_values = array( 'yes' );
+		}
+
+		$autoloaded_options_size = $wpdb->get_var(
+			$wpdb->prepare(
+				sprintf(
+					'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload IN (%s)',
+					implode( ',', array_fill( 0, count( $autoload_values ), '%s' ) )
+				),
+				$autoload_values
+			)
+		);
 		$this->assertEquals( $autoloaded_options_size, perflab_aao_autoloaded_options_size() );
 
 		// Add autoload option.
