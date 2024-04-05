@@ -325,6 +325,10 @@ function perflab_print_features_page_style() {
 	.plugin-card-top {
 		min-height: auto;
 	}
+	.plugin-card .perflab-plugin-experimental {
+		font-size: 80%;
+		font-weight: normal;
+	}
 </style>
 	<?php
 }
