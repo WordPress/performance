@@ -194,9 +194,12 @@ final class OD_HTML_Tag_Processor {
 					return false;
 				}
 
+				$start = $this->bookmarks[ $bookmark ]->start;
+
 				$this->lexical_updates[] = new WP_HTML_Text_Replacement(
-					$this->bookmarks[ $bookmark ]->start,
-					0,
+					$start,
+					// In WordPress 6.5, the signature was changed from $end to $length.
+					version_compare( get_bloginfo( 'version' ), '6.5', '<' ) ? $start : 0,
 					$html
 				);
 				return true;
