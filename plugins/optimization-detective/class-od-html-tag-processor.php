@@ -180,7 +180,7 @@ final class OD_HTML_Tag_Processor {
 	 */
 	public function __construct( string $html ) {
 
-		$processor = new class( $html ) extends WP_HTML_Tag_Processor {
+		$this->processor = new class( $html ) extends WP_HTML_Tag_Processor {
 
 			/**
 			 * Appends HTML to the provided bookmark.
@@ -202,8 +202,6 @@ final class OD_HTML_Tag_Processor {
 				return true;
 			}
 		};
-
-		$this->processor = new $processor( $html );
 	}
 
 	/**
