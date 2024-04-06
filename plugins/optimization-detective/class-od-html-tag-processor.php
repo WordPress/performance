@@ -22,36 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class OD_HTML_Tag_Processor {
 
 	/**
-	 * HTML void tags (i.e. those which are self-closing).
-	 *
-	 * @link https://html.spec.whatwg.org/multipage/syntax.html#void-elements
-	 * @see WP_HTML_Processor::is_void()
-	 * @todo Reuse `WP_HTML_Processor::is_void()` once WordPress 6.4 is the minimum-supported version.
-	 *
-	 * @var string[]
-	 */
-	const VOID_TAGS = array(
-		'AREA',
-		'BASE',
-		'BASEFONT', // Obsolete.
-		'BGSOUND', // Obsolete.
-		'BR',
-		'COL',
-		'EMBED',
-		'FRAME', // Deprecated.
-		'HR',
-		'IMG',
-		'INPUT',
-		'KEYGEN', // Obsolete.
-		'LINK',
-		'META',
-		'PARAM', // Deprecated.
-		'SOURCE',
-		'TRACK',
-		'WBR',
-	);
-
-	/**
 	 * Raw text tags.
 	 *
 	 * These are treated like void tags for the purposes of walking over the document since we do not process any text
@@ -225,7 +195,7 @@ final class OD_HTML_Tag_Processor {
 
 				// Immediately pop off self-closing and raw text tags.
 				if (
-					in_array( $tag_name, self::VOID_TAGS, true )
+					WP_HTML_Processor::is_void( $tag_name )
 					||
 					in_array( $tag_name, self::RAW_TEXT_TAGS, true )
 					||
@@ -236,7 +206,7 @@ final class OD_HTML_Tag_Processor {
 			} else {
 				// If the closing tag is for self-closing or raw text tag, we ignore it since it was already handled above.
 				if (
-					in_array( $tag_name, self::VOID_TAGS, true )
+					WP_HTML_Processor::is_void( $tag_name )
 					||
 					in_array( $tag_name, self::RAW_TEXT_TAGS, true )
 				) {

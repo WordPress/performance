@@ -140,6 +140,7 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 = 0.1.1 =
 
 * Use plugin slug for generator tag. ([1103](https://github.com/WordPress/performance/pull/1103))
+* Reuse `WP_HTML_Processor::is_void()` now that WP 6.4 is minimum supported version. ([1115](https://github.com/WordPress/performance/pull/1115))
 
 = 0.1.0 =
 
