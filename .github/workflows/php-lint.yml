@@ -54,6 +54,8 @@ jobs:
         run: composer validate --strict
       - name: Composer Install
         run: composer install --no-interaction --no-progress
+      - name: Install cross-env package # Required by NPM wrapper.
+        run: npm install -g cross-env
       - name: PHP Lint
         run: composer lint:all
       - name: PHPStan
