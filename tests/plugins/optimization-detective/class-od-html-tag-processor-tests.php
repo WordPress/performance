@@ -124,27 +124,19 @@ class OD_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 						<body>
 							<area>
 							<base>
-							<!-- TODO: Add these deprecated/non-standard tags to WP_HTML_Processor::is_void(). See <https://core.trac.wordpress.org/ticket/60961>.
 							<basefont>
 							<bgsound>
-							-->
 							<br>
 							<col>
 							<embed>
-							<!-- TODO: See above.
 							<frame>
-							-->
 							<hr>
 							<img src="">
 							<input>
-							<!-- TODO: See above.
 							<keygen>
-							-->
 							<link>
 							<meta>
-							<!-- TODO: See above.
 							<param name="foo" value="bar">
-							-->
 							<source>
 							<track src="https://example.com/track">
 							<wbr>
@@ -156,27 +148,32 @@ class OD_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 						</body>
 					</html>
 				',
-				'open_tags' => array( 'HTML', 'HEAD', 'BODY', 'AREA', 'BASE', 'BR', 'COL', 'EMBED', 'HR', 'IMG', 'INPUT', 'LINK', 'META', 'SOURCE', 'TRACK', 'WBR', 'DIV', 'SPAN', 'EM' ),
+				'open_tags' => array( 'HTML', 'HEAD', 'BODY', 'AREA', 'BASE', 'BASEFONT', 'BGSOUND', 'BR', 'COL', 'EMBED', 'FRAME', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR', 'DIV', 'SPAN', 'EM' ),
 				'xpaths'    => array(
 					'/*[0][self::HTML]',
 					'/*[0][self::HTML]/*[0][self::HEAD]',
 					'/*[0][self::HTML]/*[1][self::BODY]',
 					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::AREA]',
 					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::BASE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[2][self::BR]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[3][self::COL]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[4][self::EMBED]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[5][self::HR]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[6][self::IMG]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[7][self::INPUT]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[8][self::LINK]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[9][self::META]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[10][self::SOURCE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[11][self::TRACK]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[12][self::WBR]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[13][self::DIV]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[13][self::DIV]/*[0][self::SPAN]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[13][self::DIV]/*[0][self::SPAN]/*[0][self::EM]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[2][self::BASEFONT]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[3][self::BGSOUND]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[4][self::BR]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[5][self::COL]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[6][self::EMBED]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[7][self::FRAME]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[8][self::HR]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[9][self::IMG]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[10][self::INPUT]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[11][self::KEYGEN]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[12][self::LINK]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[13][self::META]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[14][self::PARAM]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[15][self::SOURCE]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[16][self::TRACK]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[17][self::WBR]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[18][self::DIV]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[18][self::DIV]/*[0][self::SPAN]',
+					'/*[0][self::HTML]/*[1][self::BODY]/*[18][self::DIV]/*[0][self::SPAN]/*[0][self::EM]',
 				),
 			),
 			'optional-closing-p' => array(
