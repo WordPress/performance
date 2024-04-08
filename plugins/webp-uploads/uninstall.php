@@ -2,8 +2,8 @@
 /**
  * Plugin uninstaller logic.
  *
- * @package performance-lab
- * @since 1.2.0
+ * @package webp-uploads
+ * @since n.e.x.t
  */
 
 // If uninstall.php is not called by WordPress, bail.
@@ -24,18 +24,18 @@ if ( is_multisite() ) {
 
 	foreach ( $site_ids as $site_id ) {
 		switch_to_blog( $site_id );
-		perflab_delete_plugin_option();
+		webp_uploads_delete_plugin_option();
 		restore_current_blog();
 	}
 }
 
-perflab_delete_plugin_option();
+webp_uploads_delete_plugin_option();
 
 /**
  * Delete the current site's option.
  *
- * @since 1.4.0
+ * @since n.e.x.t
  */
-function perflab_delete_plugin_option() {
+function webp_uploads_delete_plugin_option() {
 	delete_option( 'perflab_generate_webp_and_jpeg' );
 }
