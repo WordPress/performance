@@ -33,15 +33,17 @@ module.exports = {
 
 			if ( pluginFiles.length ) {
 				commands.push(
-					`npm run lint:php:${ plugin } ${ joinFiles( pluginFiles ) }`
+					`npm run lint:php:plugins --plugin=${ plugin } ${ joinFiles(
+						pluginFiles
+					) }`
 				);
 			}
 		} );
 
-		const otherFiles = micromatch( files, `!plugins/**`, { dot: true } );
+		const otherFiles = micromatch( files, `!**/plugins/**`, { dot: true } );
 
 		if ( otherFiles.length ) {
-			commands.push( `npm run lint:php ${ joinFiles( otherFiles ) }` );
+			commands.push( `composer lint ${ joinFiles( otherFiles ) }` );
 		}
 
 		return commands;
