@@ -13,6 +13,7 @@ on:
       - 'phpstan.neon.dist'
       - 'composer.json'
       - 'composer.lock'
+      - 'bin/phpcs'
   pull_request:
     # Only run if PHP-related files changed.
     paths:
@@ -22,6 +23,7 @@ on:
       - 'phpstan.neon.dist'
       - 'composer.json'
       - 'composer.lock'
+      - 'bin/phpcs'
     types:
       - opened
       - reopened
@@ -52,9 +54,7 @@ jobs:
         run: composer validate --strict
       - name: Composer Install
         run: composer install --no-interaction --no-progress
-      - name: Install `npm-run-all` utility
-        run: npm install npm-run-all -g
       - name: PHP Lint
-        run: npm run lint:php:all
+        run: composer lint:all
       - name: PHPStan
         run: composer phpstan
