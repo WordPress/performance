@@ -22,6 +22,7 @@
  */
 
 // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 // phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.system_calls_passthru
 // phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
