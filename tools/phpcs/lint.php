@@ -37,6 +37,7 @@ $plugins_path    = $plugin_root . '/plugins';
 $vendor_bin      = $plugin_root . '/build-cs/vendor/bin';
 $fix             = getenv( 'WPP_FIX' );
 $plugins_to_lint = getenv( 'WPP_PLUGIN' );
+$exit_code       = 0;
 
 if ( empty( $plugins_to_lint ) ) {
 	$plugins_to_lint = $plugins;
@@ -73,8 +74,14 @@ foreach ( $plugins_to_lint as $plugin ) {
 
 	logger( $fix ? "> Formatting $plugin\n" : "> Linting $plugin\n", 'i' );
 
-	passthru( $cmd . ' ' . implode( ' ', $args ) );
+	passthru( $cmd . ' ' . implode( ' ', $args ), $result_code );
+
+	if ( 0 !== $result_code ) {
+		$exit_code = $result_code;
+	}
 }
+
+exit( $exit_code );
 
 /**
  * Log messages with colors.
