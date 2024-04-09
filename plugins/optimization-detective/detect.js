@@ -91,10 +91,10 @@ function error( ...message ) {
 
 /**
  * @typedef {Object} WebVitalsMetrics
- * @property {number} lcp  - Largest contentful paint.
- * @property {number} cls  - Cumulative layout shift.
- * @property {number} inp  - Interaction to next paint.
- * @property {number} ttfb - Time to first byte.
+ * @property {?number} LCP  - Largest contentful paint.
+ * @property {?number} CLS  - Cumulative layout shift.
+ * @property {?number} INP  - Interaction to next paint.
+ * @property {?number} TTFB - Time to first byte.
  */
 
 /**

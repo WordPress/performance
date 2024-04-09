@@ -25,15 +25,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                            }
  * @phpstan-type Data         array{
  *                                url: string,
- *                                timestamp: int,
+ *                                timestamp: float,
  *                                viewport: RectData,
  *                                elements: ElementData[]
  *                            }
  * @phpstan-type WebVitalData array{
- *                                LCP: int,
- *                                CLS: int,
- *                                INP: int,
- *                                TTFB: int,
+ *                                LCP: float,
+ *                                CLS: float,
+ *                                INP: float|null,
+ *                                TTFB: float,
  *                            }
  *
  * @since 0.1.0
@@ -166,18 +166,22 @@ final class OD_URL_Metric implements JsonSerializable {
 							'LCP'              => array(
 								'type'     => 'number',
 								'required' => false,
+								'minimum'  => 0,
 							),
 							'CLS'              => array(
 								'type'     => 'number',
 								'required' => false,
+								'minimum'  => 0,
 							),
 							'TTFB'              => array(
 								'type'     => 'number',
 								'required' => false,
+								'minimum'  => 0,
 							),
 							'INP'              => array(
 								'type'     => 'number',
 								'required' => false,
+								'minimum'  => 0,
 							),
 						),
 						'additionalProperties' => false,
