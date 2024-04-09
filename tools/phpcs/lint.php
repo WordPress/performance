@@ -93,13 +93,20 @@ exit( $exit_code );
  * @return void
  */
 function logger( $str, $type = 'i' ) {
-	$str = match ( $type ) {
-		'e' => "\033[31m$str \033[0m\n",
-		's' => "\033[32m$str \033[0m\n",
-		'w' => "\033[33m$str \033[0m\n",
-		'i' => "\033[36m$str \033[0m\n",
-		default => $str,
-	};
+	switch ( $type ) {
+		case 'e': // Error.
+			$str = "\033[31m$str \033[0m\n";
+			break;
+		case 's': // Success.
+			$str = "\033[32m$str \033[0m\n";
+			break;
+		case 'w': // Warning.
+			$str = "\033[33m$str \033[0m\n";
+			break;
+		case 'i': // Info.
+			$str = "\033[36m$str \033[0m\n";
+			break;
+	}
 
 	echo $str;
 }
