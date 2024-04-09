@@ -75,7 +75,6 @@ function od_register_endpoint() {
 				return od_handle_rest_request( $request );
 			},
 			'permission_callback' => static function () {
-				return true;
 				// Needs to be available to unauthenticated visitors.
 				if ( OD_Storage_Lock::is_locked() ) {
 					return new WP_Error(
