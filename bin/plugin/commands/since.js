@@ -9,6 +9,7 @@ const fs = require( 'fs' );
  * Internal dependencies
  */
 const { log, formats } = require( '../lib/logger' );
+const { plugins } = require( '../../../plugins.json' );
 
 /**
  * @typedef WPSinceCommandOptions
@@ -37,6 +38,15 @@ exports.handler = async ( opt ) => {
 		log(
 			formats.error(
 				'The release version must be provided via the --release (-r) argument.'
+			)
+		);
+		return;
+	}
+
+	if ( opt.plugin && ! plugins.includes( opt.plugin ) ) {
+		log(
+			formats.error(
+				`The plugin "${ opt.plugin }" is not found in the plugins.json file.`
 			)
 		);
 		return;
