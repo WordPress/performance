@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+const path = require( 'path' );
 const micromatch = require( 'micromatch' );
 
 /**
@@ -19,6 +20,10 @@ const joinFiles = ( files ) => {
 	return files.map( ( file ) => `'${ file }'` ).join( ' ' );
 };
 
+// Get plugin base name to match regex more accurately.
+// Else it can cause issues when this plugin is places in `wp-content/plugins` directory.
+const PLUGIN_BASE_NAME = path.basename( __dirname );
+
 module.exports = {
 	'**/*.js': ( files ) => `npm run lint-js ${ joinFiles( files ) }`,
 	'**/*.php': ( files ) => {
@@ -27,7 +32,7 @@ module.exports = {
 		plugins.forEach( ( plugin ) => {
 			const pluginFiles = micromatch(
 				files,
-				`**/plugins/${ plugin }/**`,
+				`**/${ PLUGIN_BASE_NAME }/plugins/${ plugin }/**`,
 				{ dot: true }
 			);
 
@@ -40,7 +45,11 @@ module.exports = {
 			}
 		} );
 
-		const otherFiles = micromatch( files, `!**/plugins/**`, { dot: true } );
+		const otherFiles = micromatch(
+			files,
+			`!**/${ PLUGIN_BASE_NAME }/plugins/**`,
+			{ dot: true }
+		);
 
 		if ( otherFiles.length ) {
 			commands.push( `composer lint ${ joinFiles( otherFiles ) }` );
