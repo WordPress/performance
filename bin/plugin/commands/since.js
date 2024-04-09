@@ -18,6 +18,10 @@ const { log, formats } = require( '../lib/logger' );
 
 exports.options = [
 	{
+		argname: '-p, --plugin <plugin>',
+		description: 'Plugin name',
+	},
+	{
 		argname: '-r, --release <release>',
 		description: 'Release version number',
 	},
@@ -38,13 +42,23 @@ exports.handler = async ( opt ) => {
 		return;
 	}
 
-	const patterns = [
-		path.resolve( __dirname, '../../../**/*.php' ),
-		path.resolve( __dirname, '../../../**/*.js' ),
-	];
+	const patterns = [];
+	const pluginRoot = path.resolve( __dirname, '../../../' );
+	const ignore = [ '**/node_modules', '**/vendor', '**/bin', '**/build' ];
+
+	if ( opt.plugin ) {
+		const pluginPath = path.resolve( pluginRoot, 'plugins', opt.plugin );
+
+		patterns.push( `${ pluginPath }/**/*.php` );
+		patterns.push( `${ pluginPath }/**/*.js` );
+	} else {
+		ignore.push( '**/plugins' );
+		patterns.push( `${ pluginRoot }/**/*.php` );
+		patterns.push( `${ pluginRoot }/**/*.js` );
+	}
 
 	const files = await glob( patterns, {
-		ignore: [ __filename, '**/node_modules', '**/vendor' ],
+		ignore,
 	} );
 
 	const regexp = new RegExp( '@since(\\s+)n.e.x.t', 'g' );
