@@ -7,7 +7,6 @@ parameters:
 		- includes/
 		- plugins/
 		- tests/
-		- uninstall.php
 	scanDirectories:
 		- vendor/wp-phpunit/wp-phpunit/
 	dynamicConstantNames:
