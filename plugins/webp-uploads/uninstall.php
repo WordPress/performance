@@ -3,7 +3,7 @@
  * Plugin uninstaller logic.
  *
  * @package webp-uploads
- * @since n.e.x.t
+ * @since 1.1.0
  */
 
 // If uninstall.php is not called by WordPress, bail.
@@ -34,7 +34,7 @@ webp_uploads_delete_plugin_option();
 /**
  * Delete the current site's option.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  */
 function webp_uploads_delete_plugin_option() {
 	delete_option( 'perflab_generate_webp_and_jpeg' );
