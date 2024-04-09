@@ -9,7 +9,7 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images, auto-sizes
 
-Adds support for automatically calculating the sizes attribute for lazy-loaded images.
+Instructs browsers to automatically choose the right image size for lazy-loaded images.
 
 == Description ==
 
@@ -50,6 +50,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.0.1 =
 
+* Add auto-sizes generator tag. ([1105](https://github.com/WordPress/performance/pull/1105))
 * Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 

@@ -2,7 +2,7 @@
 
 use PerformanceLab\Tests\TestCase\DominantColorTestCase;
 /**
- * Tests for Dominant Color Images module.
+ * Tests for Image Placeholders plugin.
  *
  * @package dominant-color-images
  */
@@ -370,5 +370,17 @@ class Dominant_Color_Test extends DominantColorTestCase {
 				'hex'   => null,
 			),
 		);
+	}
+
+	/**
+	 * Test printing the meta generator tag.
+	 *
+	 * @covers ::dominant_color_render_generator
+	 */
+	public function test_dominant_color_render_generator() {
+		$tag = get_echo( 'dominant_color_render_generator' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'generator', $tag );
+		$this->assertStringContainsString( 'dominant-color-images ' . DOMINANT_COLOR_IMAGES_VERSION, $tag );
 	}
 }

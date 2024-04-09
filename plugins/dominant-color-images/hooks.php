@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook callbacks used for Dominant Color Images.
+ * Hook callbacks used for Image Placeholders.
  *
  * @package dominant-color-images
  *
@@ -171,18 +171,14 @@ function dominant_color_add_inline_style() {
 add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
 
 /**
- * Displays the HTML generator tag for the Dominant Color Images plugin.
+ * Displays the HTML generator tag for the Image Placeholders plugin.
  *
  * See {@see 'wp_head'}.
  *
  * @since 1.0.0
  */
 function dominant_color_render_generator() {
-	if (
-		defined( 'DOMINANT_COLOR_IMAGES_VERSION' ) &&
-		! str_starts_with( DOMINANT_COLOR_IMAGES_VERSION, 'Performance Lab ' )
-	) {
-		echo '<meta name="generator" content="Dominant Color Images ' . esc_attr( DOMINANT_COLOR_IMAGES_VERSION ) . '">' . "\n";
-	}
+	// Use the plugin slug as it is immutable.
+	echo '<meta name="generator" content="dominant-color-images ' . esc_attr( DOMINANT_COLOR_IMAGES_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'dominant_color_render_generator' );

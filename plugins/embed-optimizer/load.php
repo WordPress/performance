@@ -22,5 +22,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'EMBED_OPTIMIZER_VERSION', '0.1.1' );
 
-// Load in the Embed Optimizer module hooks.
+// Load in the Embed Optimizer plugin hooks.
 require_once __DIR__ . '/hooks.php';

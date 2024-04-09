@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="WPP-DominantColorImages">
-	<description>WordPress Coding Standards for Dominant Color Images Plugin</description>
+	<description>WordPress Coding Standards for Image Placeholders Plugin</description>
 
 	<rule ref="../../bin/phpcs/phpcs.ruleset.xml"/>
 

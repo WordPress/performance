@@ -51,6 +51,7 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 0.1.1 =
 
+* Use plugin slug for generator tag. ([1103](https://github.com/WordPress/performance/pull/1103))
 * Bump minimum required WP version to 6.4. ([1076](https://github.com/WordPress/performance/pull/1076))
 
 = 0.1.0 =

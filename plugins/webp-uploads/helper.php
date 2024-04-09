@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper functions used for WebP Uploads.
+ * Helper functions used for Modern Image Formats.
  *
  * @package webp-uploads
  *

@@ -1,6 +1,6 @@
 <?php
 /**
- * REST API integration for the module.
+ * REST API integration for the plugin.
  *
  * @package optimization-detective
  * @since 0.1.0

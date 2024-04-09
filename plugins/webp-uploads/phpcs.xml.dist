@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="WPP-WebPUploads">
-	<description>WordPress Coding Standards for WebP Uploads Plugin</description>
+	<description>WordPress Coding Standards for Modern Image Formats Plugin</description>
 
 	<rule ref="../../bin/phpcs/phpcs.ruleset.xml"/>
 

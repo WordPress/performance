@@ -1,6 +1,6 @@
 <?php
 /**
- * Helper functions used for Speculation Rules.
+ * Helper functions used for Speculative Loading.
  *
  * @package speculation-rules
  * @since 1.0.0

@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for optimization-detective module storage/rest-api.php.
+ * Tests for optimization-detective plugin storage/rest-api.php.
  *
  * @package optimization-detective
  */

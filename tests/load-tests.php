@@ -8,13 +8,13 @@
 class Load_Tests extends WP_UnitTestCase {
 
 	public function test_perflab_get_generator_content() {
-		$expected = 'Performance Lab ' . PERFLAB_VERSION . '; plugins: ';
+		$expected = 'performance-lab ' . PERFLAB_VERSION . '; plugins: ';
 		$content  = perflab_get_generator_content();
 		$this->assertSame( $expected, $content );
 	}
 
 	public function test_perflab_render_generator() {
-		$expected = '<meta name="generator" content="Performance Lab ' . PERFLAB_VERSION . '; plugins: ">' . "\n";
+		$expected = '<meta name="generator" content="performance-lab ' . PERFLAB_VERSION . '; plugins: ">' . "\n";
 		$output   = get_echo( 'perflab_render_generator' );
 		$this->assertSame( $expected, $output );
 

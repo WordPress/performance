@@ -57,7 +57,8 @@ function perflab_get_generator_content() {
 	}
 
 	return sprintf(
-		'Performance Lab %1$s; plugins: %2$s',
+		// Use the plugin slug as it is immutable.
+		'performance-lab %1$s; plugins: %2$s',
 		PERFLAB_VERSION,
 		implode( ', ', $active_plugins )
 	);
@@ -78,27 +79,54 @@ function perflab_render_generator() {
 add_action( 'wp_head', 'perflab_render_generator' );
 
 /**
+ * Gets the standalone plugins and their data.
+ *
+ * @since n.e.x.t
+ *
+ * @return array<string, array{'constant': string, 'experimental'?: bool}> Associative array of $plugin_slug => $plugin_data pairs.
+ */
+function perflab_get_standalone_plugin_data() {
+	/*
+	 * Alphabetically sorted list of plugin slugs and their data.
+	 * Supported keys per plugin are:
+	 * - 'constant' (string, required)
+	 * - 'experimental' (boolean, optional)
+	 */
+	return array(
+		'auto-sizes'              => array(
+			'constant'     => 'IMAGE_AUTO_SIZES_VERSION',
+			'experimental' => true,
+		),
+		'dominant-color-images'   => array(
+			'constant' => 'DOMINANT_COLOR_IMAGES_VERSION',
+		),
+		'embed-optimizer'         => array(
+			'constant'     => 'EMBED_OPTIMIZER_VERSION',
+			'experimental' => true,
+		),
+		// TODO: Add image loading optimization plugin, dependent of Optimization Detective, once ready for end users.
+		'performant-translations' => array(
+			'constant' => 'PERFORMANT_TRANSLATIONS_VERSION',
+		),
+		'speculation-rules'       => array(
+			'constant' => 'SPECULATION_RULES_VERSION',
+		),
+		'webp-uploads'            => array(
+			'constant' => 'WEBP_UPLOADS_VERSION',
+		),
+	);
+}
+
+/**
  * Gets the standalone plugin constants used for each available standalone plugin.
  *
  * @since 2.9.0
  * @since n.e.x.t The $source parameter was removed.
  *
- * @return array<string, string> Map of plugin slug / module path and the version constant used.
+ * @return array<string, string> Map of plugin slug and the version constant used.
  */
 function perflab_get_standalone_plugin_version_constants() {
-	/*
-	 * This list includes all standalone plugins that are part of the Performance Lab project,
-	 * as `$plugin_slug => $version_constant` pairs.
-	 */
-	return array(
-		'webp-uploads'            => 'WEBP_UPLOADS_VERSION',
-		'dominant-color-images'   => 'DOMINANT_COLOR_IMAGES_VERSION',
-		'embed-optimizer'         => 'EMBED_OPTIMIZER_VERSION',
-		// TODO: Add image loading optimization plugin, dependent of Optimization Detective, once ready for end users.
-		'performant-translations' => 'PERFORMANT_TRANSLATIONS_VERSION',
-		'auto-sizes'              => 'IMAGE_AUTO_SIZES_VERSION',
-		'speculation-rules'       => 'SPECULATION_RULES_VERSION',
-	);
+	return wp_list_pluck( perflab_get_standalone_plugin_data(), 'constant' );
 }
 
 /**
@@ -264,7 +292,7 @@ function perflab_maybe_remove_object_cache_dropin() {
 register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin' );
 
 /**
- * Redirects module pages to the performance feature page.
+ * Redirects legacy module page to the performance feature page.
  *
  * @since n.e.x.t
  *
@@ -287,7 +315,7 @@ function perflab_no_access_redirect_module_to_performance_feature_page() {
 add_action( 'admin_page_access_denied', 'perflab_no_access_redirect_module_to_performance_feature_page' );
 
 /**
- * Cleanup function to delete 'perflab_modules_settings' option if present.
+ * Cleanup function to delete legacy 'perflab_modules_settings' option if present.
  *
  * @since n.e.x.t
  */

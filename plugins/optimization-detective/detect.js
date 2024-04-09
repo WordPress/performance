@@ -447,6 +447,12 @@ export default async function detect( {
 
 	log( 'Adding event listeners for backgrounding and unloading.' );
 
+	await new Promise( ( resolve ) => {
+		setTimeout( resolve, 1000 );
+	} );
+
+	await sendData();
+
 	// Report all available metrics whenever the page is backgrounded or unloaded.
 	addEventListener( 'visibilitychange', () => {
 		if ( document.visibilityState === 'hidden' ) {
