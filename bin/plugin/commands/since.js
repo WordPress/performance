@@ -61,6 +61,10 @@ exports.handler = async ( opt ) => {
 	const pluginRoot = path.resolve( __dirname, '../../../' );
 	const ignore = [ '**/node_modules', '**/vendor', '**/bin', '**/build' ];
 
+	/*
+	 * For a standalone plugin, use the specific plugin directory.
+	 * For Performance Lab, use the root directory and ignore the standalone plugin directories.
+	 */
 	if ( opt.plugin !== 'performance-lab' ) {
 		const pluginPath = path.resolve( pluginRoot, 'plugins', opt.plugin );
 
