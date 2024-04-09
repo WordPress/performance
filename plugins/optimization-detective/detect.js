@@ -182,7 +182,7 @@ export default async function detect( {
 				'Aborted detection due to being outside detection time window.'
 			);
 		}
-		return;
+		// return;
 	}
 
 	// Abort if the current viewport is not among those which need URL metrics.
@@ -190,7 +190,7 @@ export default async function detect( {
 		if ( isDebug ) {
 			log( 'No need for URL metrics from the current viewport.' );
 		}
-		return;
+		// return;
 	}
 
 	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
@@ -225,17 +225,18 @@ export default async function detect( {
 		if ( isDebug ) {
 			warn( 'Aborted detection due to storage being locked.' );
 		}
-		return;
+		// return;
 	}
 
 	// Prevent detection when page is not scrolled to the initial viewport.
+	// TODO: Change this. Web vitals should always get reported.
 	if ( doc.documentElement.scrollTop > 0 ) {
 		if ( isDebug ) {
 			warn(
 				'Aborted detection since initial scroll position of page is not at the top.'
 			);
 		}
-		return;
+		// return;
 	}
 
 	if ( isDebug ) {
@@ -312,9 +313,11 @@ export default async function detect( {
 
 	const cb = ( measurement ) =>
 		webVitalsMetrics[ measurement.name ].push( measurement );
-	// This avoids needing to click to finalize LCP candidate. While this is helpful for testing, it also
-	// ensures that we always get an LCP candidate reported. Otherwise, the callback may never fire if the
-	// user never does a click or keydown, per <https://github.com/GoogleChrome/web-vitals/blob/07f6f96/src/onLCP.ts#L99-L107>.
+	/*
+	 This avoids needing to click to finalize LCP candidate. While this is helpful for testing, it also
+	 ensures that we always get an LCP candidate reported. Otherwise, the callback may never fire if the
+	 user never does a click or keydown, per <https://github.com/GoogleChrome/web-vitals/blob/07f6f96/src/onLCP.ts#L99-L107>.
+	*/
 	const reportOpts = { reportAllChanges: true };
 
 	onCLS( cb, reportOpts );
@@ -346,8 +349,6 @@ export default async function detect( {
 		},
 	};
 
-	const lcpMetric = webVitalsMetrics.LCP.at( -1 );
-
 	for ( const elementIntersection of elementIntersections ) {
 		const xpath = breadcrumbedElementsMap.get( elementIntersection.target );
 		if ( ! xpath ) {
@@ -357,28 +358,16 @@ export default async function detect( {
 			continue;
 		}
 
-		const isLCP =
-			elementIntersection.target === lcpMetric?.entries[ 0 ]?.element;
-
 		/** @type {ElementMetrics} */
 		const elementMetrics = {
-			isLCP,
-			isLCPCandidate: !! webVitalsMetrics.LCP.find(
-				( lcpMetricCandidate ) =>
-					lcpMetricCandidate.entries[ 0 ]?.element ===
-					elementIntersection.target
-			),
 			xpath,
+			target: elementIntersection.target,
 			intersectionRatio: elementIntersection.intersectionRatio,
 			intersectionRect: elementIntersection.intersectionRect,
 			boundingClientRect: elementIntersection.boundingClientRect,
 		};
 
 		urlMetrics.elements.push( elementMetrics );
-	}
-
-	if ( isDebug ) {
-		log( 'URL metrics:', urlMetrics );
 	}
 
 	async function sendData() {
@@ -402,7 +391,21 @@ export default async function detect( {
 			urlMetrics.webVitals[ webVital ] = metric[ 0 ].value;
 		}
 
-		log( 'Prepared url metrics', urlMetrics );
+		const lcpMetric = webVitalsMetrics.LCP.at( -1 );
+
+		for ( const i in urlMetrics.elements ) {
+			const elementMetrics = urlMetrics.elements[ i ];
+
+			elementMetrics.isLCP =
+				elementMetrics.target === lcpMetric?.entries[ 0 ]?.element;
+			elementMetrics.isLCPCandidate = webVitalsMetrics.LCP.some(
+				( lcpMetricCandidate ) =>
+					lcpMetricCandidate.entries[ 0 ]?.element ===
+					elementMetrics.target
+			);
+		}
+
+		log( 'Prepared URL metrics', urlMetrics );
 
 		try {
 			const response = await fetch( restApiEndpoint, {
