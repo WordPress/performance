@@ -20,7 +20,7 @@ const { plugins } = require( '../../../plugins.json' );
 exports.options = [
 	{
 		argname: '-p, --plugin <plugin>',
-		description: 'Plugin name',
+		description: 'Plugin slug',
 		defaults: 'performance-lab',
 	},
 	{
