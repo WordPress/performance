@@ -21,6 +21,7 @@ exports.options = [
 	{
 		argname: '-p, --plugin <plugin>',
 		description: 'Plugin name',
+		defaults: 'performance-lab',
 	},
 	{
 		argname: '-r, --release <release>',
@@ -43,7 +44,7 @@ exports.handler = async ( opt ) => {
 		return;
 	}
 
-	if ( opt.plugin && ! plugins.includes( opt.plugin ) ) {
+	if ( opt.plugin !== 'performance-lab' && ! plugins.includes( opt.plugin ) ) {
 		log(
 			formats.error(
 				`The plugin "${ opt.plugin }" is not found in the plugins.json file.`
@@ -56,7 +57,7 @@ exports.handler = async ( opt ) => {
 	const pluginRoot = path.resolve( __dirname, '../../../' );
 	const ignore = [ '**/node_modules', '**/vendor', '**/bin', '**/build' ];
 
-	if ( opt.plugin ) {
+	if ( opt.plugin !== 'performance-lab' ) {
 		const pluginPath = path.resolve( pluginRoot, 'plugins', opt.plugin );
 
 		patterns.push( `${ pluginPath }/**/*.php` );
