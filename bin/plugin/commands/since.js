@@ -47,7 +47,7 @@ exports.handler = async ( opt ) => {
 	if ( opt.plugin !== 'performance-lab' && ! plugins.includes( opt.plugin ) ) {
 		log(
 			formats.error(
-				`The plugin "${ opt.plugin }" is not found in the plugins.json file.`
+				`The plugin "${ opt.plugin }" is not a valid plugin managed as part of this project.`
 			)
 		);
 		return;
