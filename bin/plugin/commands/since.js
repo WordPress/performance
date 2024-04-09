@@ -14,7 +14,8 @@ const { plugins } = require( '../../../plugins.json' );
 /**
  * @typedef WPSinceCommandOptions
  *
- * @property {string} version Version number.
+ * @property {string} plugin  Plugin slug.
+ * @property {string} release Release version number.
  */
 
 exports.options = [
