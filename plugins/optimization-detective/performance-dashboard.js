@@ -83,6 +83,7 @@ function Dashboard() {
 							}
 							value={ postId }
 							onChange={ setPostId }
+							allowReset={ false }
 						/>
 					</div>
 				</div>
@@ -91,7 +92,7 @@ function Dashboard() {
 						<div className="postbox-header">
 							<h2 className="hndle">
 								{ __(
-									'Time to first byte (TTFB)',
+									'Time to First Byte (TTFB)',
 									'optimization-detective'
 								) }
 							</h2>

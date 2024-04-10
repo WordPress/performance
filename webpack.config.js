@@ -56,6 +56,7 @@ const optimizationDetective = ( env ) => {
 		name: 'optimization-detective',
 		entry: {
 			'performance-dashboard': `${ pluginRoot }/performance-dashboard.js`,
+			'performance-dashboard-widget': `${ pluginRoot }/performance-dashboard-widget.js`,
 		},
 		output: {
 			filename: '[name].js',

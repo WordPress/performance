@@ -28,7 +28,7 @@ function od_render_dashboard_widget() {
 	wp_enqueue_style( 'wp-components' );
 
 	wp_enqueue_script(
-		'od-performance-dashboard',
+		'od-performance-dashboard-widget',
 		plugin_dir_url( __FILE__ ) . 'build/performance-dashboard-widget.js',
 		$asset['dependencies'],
 		$asset['version'],
@@ -74,7 +74,6 @@ function od_render_dashboard_widget() {
 	</div>
 	<?php
 }
-
 
 function od_add_submenu_page() {
 	add_submenu_page(
