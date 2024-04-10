@@ -7,6 +7,7 @@ const title = chalk.bold;
 const error = chalk.bold.red;
 const warning = chalk.bold.keyword( 'orange' );
 const success = chalk.bold.green;
+const info = chalk.bold.blue;
 
 const log = console.log; // eslint-disable-line no-console
 
@@ -17,5 +18,6 @@ module.exports = {
 		error,
 		warning,
 		success,
+		info,
 	},
 };
