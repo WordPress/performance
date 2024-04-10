@@ -71,4 +71,4 @@ jobs:
       - name: Running single site unit tests for plugins
         run: npm run test:php:plugins
       - name: Running multisite unit tests for plugins
-        run: npm run test:php:multisite:plugins
+        run: npm run test:php:plugins:multisite
