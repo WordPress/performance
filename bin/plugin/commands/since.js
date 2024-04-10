@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
+const fs = require( 'fs' );
 const path = require( 'path' );
 const glob = require( 'fast-glob' );
-const fs = require( 'fs' );
 
 /**
  * Internal dependencies
@@ -42,7 +42,8 @@ exports.handler = async ( opt ) => {
 				'The release version must be provided via the --release (-r) argument.'
 			)
 		);
-		return;
+
+		process.exit( 1 );
 	}
 
 	if (
@@ -54,7 +55,8 @@ exports.handler = async ( opt ) => {
 				`The plugin "${ opt.plugin }" is not a valid plugin managed as part of this project.`
 			)
 		);
-		return;
+
+		process.exit( 1 );
 	}
 
 	const patterns = [];
