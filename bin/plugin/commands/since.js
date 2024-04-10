@@ -8,7 +8,6 @@ const glob = require( 'fast-glob' );
 /**
  * Internal dependencies
  */
-const { log, formats } = require( '../lib/logger' );
 const { plugins } = require( '../../../plugins.json' );
 
 /**
@@ -37,26 +36,18 @@ exports.options = [
  */
 exports.handler = async ( opt ) => {
 	if ( ! opt.release ) {
-		log(
-			formats.error(
-				'The release version must be provided via the --release (-r) argument.'
-			)
+		throw new Error(
+			'The release version must be provided via the --release (-r) argument.'
 		);
-
-		process.exit( 1 );
 	}
 
 	if (
 		opt.plugin !== 'performance-lab' &&
 		! plugins.includes( opt.plugin )
 	) {
-		log(
-			formats.error(
-				`The plugin "${ opt.plugin }" is not a valid plugin managed as part of this project.`
-			)
+		throw new Error(
+			`The plugin "${ opt.plugin }" is not a valid plugin managed as part of this project.`
 		);
-
-		process.exit( 1 );
 	}
 
 	const patterns = [];
