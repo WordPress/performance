@@ -237,14 +237,14 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$detected_lcp_element_xpaths = array();
 
 	// Walk over all tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes or background-image for preloading.
-	$processor = new OD_HTML_Tag_Processor( $buffer );
-	foreach ( $processor->open_tags() as $tag_name ) {
+	$walker = new OD_HTML_Tag_Walker( $buffer );
+	foreach ( $walker->open_tags() as $tag_name ) {
 		$is_img_tag = (
 			'IMG' === $tag_name
 			&&
-			$processor->get_attribute( 'src' )
+			$walker->get_attribute( 'src' )
 			&&
-			! str_starts_with( $processor->get_attribute( 'src' ), 'data:' )
+			! str_starts_with( $walker->get_attribute( 'src' ), 'data:' )
 		);
 
 		/*
@@ -256,7 +256,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		 * parser of the `url()` functions from the property value.
 		 */
 		$background_image_url = null;
-		$style                = $processor->get_attribute( 'style' );
+		$style                = $walker->get_attribute( 'style' );
 		if (
 			$style
 			&&
@@ -271,28 +271,28 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 			continue;
 		}
 
-		$xpath = $processor->get_xpath();
+		$xpath = $walker->get_xpath();
 
 		// Ensure the fetchpriority attribute is set on the element properly.
 		if ( $is_img_tag ) {
 			if ( $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
-				if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
-					$processor->set_attribute( 'data-od-fetchpriority-already-added', true );
+				if ( 'high' === $walker->get_attribute( 'fetchpriority' ) ) {
+					$walker->set_attribute( 'data-od-fetchpriority-already-added', true );
 				} else {
-					$processor->set_attribute( 'fetchpriority', 'high' );
-					$processor->set_attribute( 'data-od-added-fetchpriority', true );
+					$walker->set_attribute( 'fetchpriority', 'high' );
+					$walker->set_attribute( 'data-od-added-fetchpriority', true );
 				}
 
 				// Never include loading=lazy on the LCP image common across all breakpoints.
-				if ( 'lazy' === $processor->get_attribute( 'loading' ) ) {
-					$processor->set_attribute( 'data-od-removed-loading', $processor->get_attribute( 'loading' ) );
-					$processor->remove_attribute( 'loading' );
+				if ( 'lazy' === $walker->get_attribute( 'loading' ) ) {
+					$walker->set_attribute( 'data-od-removed-loading', $walker->get_attribute( 'loading' ) );
+					$walker->remove_attribute( 'loading' );
 				}
-			} elseif ( $all_breakpoints_have_url_metrics && $processor->get_attribute( 'fetchpriority' ) ) {
+			} elseif ( $all_breakpoints_have_url_metrics && $walker->get_attribute( 'fetchpriority' ) ) {
 				// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
 				// continue to apply while waiting for all breakpoints to have metrics collected for them.
-				$processor->set_attribute( 'data-od-removed-fetchpriority', $processor->get_attribute( 'fetchpriority' ) );
-				$processor->remove_attribute( 'fetchpriority' );
+				$walker->set_attribute( 'data-od-removed-fetchpriority', $walker->get_attribute( 'fetchpriority' ) );
+				$walker->remove_attribute( 'fetchpriority' );
 			}
 		}
 
@@ -306,7 +306,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 			if ( $is_img_tag ) {
 				$img_attributes = array();
 				foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin' ) as $attr_name ) {
-					$value = $processor->get_attribute( $attr_name );
+					$value = $walker->get_attribute( $attr_name );
 					if ( null !== $value ) {
 						$img_attributes[ $attr_name ] = $value;
 					}
@@ -322,7 +322,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		if ( $needs_detection ) {
-			$processor->set_attribute( 'data-od-xpath', $xpath );
+			$walker->set_attribute( 'data-od-xpath', $xpath );
 		}
 	}
 
@@ -339,14 +339,14 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// Inject any preload links at the end of the HEAD.
 	$head_injection = od_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
 	if ( $head_injection ) {
-		$processor->append_head_html( $head_injection );
+		$walker->append_head_html( $head_injection );
 	}
 
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
 	if ( $needs_detection ) {
-		$processor->append_body_html( od_get_detection_script( $slug, $group_collection ) );
+		$walker->append_body_html( od_get_detection_script( $slug, $group_collection ) );
 	}
 
-	return $processor->get_updated_html();
+	return $walker->get_updated_html();
 }

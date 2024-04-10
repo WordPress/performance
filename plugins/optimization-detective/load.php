@@ -63,7 +63,7 @@ require_once __DIR__ . '/storage/rest-api.php';
 require_once __DIR__ . '/detection.php';
 
 // Optimization logic.
-require_once __DIR__ . '/class-od-html-tag-processor.php';
+require_once __DIR__ . '/class-od-html-tag-walker.php';
 require_once __DIR__ . '/optimization.php';
 
 // Add hooks for the above requires.

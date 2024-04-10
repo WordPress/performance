@@ -1,9 +1,9 @@
 <?php
 /**
- * Optimization Detective: OD_HTML_Tag_Processor class
+ * Optimization Detective: OD_HTML_Tag_Walker class
  *
  * @package optimization-detective
- * @since 0.1.0
+ * @since 0.1.1
  */
 
 // Exit if accessed directly.
@@ -17,9 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Eventually this class should be made largely obsolete once `WP_HTML_Processor` is fully implemented to support all HTML tags.
  *
  * @since 0.1.0
+ * @since 0.1.1 Renamed from OD_HTML_Tag_Processor to OD_HTML_Tag_Walker
  * @access private
  */
-final class OD_HTML_Tag_Processor {
+final class OD_HTML_Tag_Walker {
 
 	/**
 	 * HTML void tags (i.e. those which are self-closing).
