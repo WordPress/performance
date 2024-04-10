@@ -194,12 +194,17 @@ final class OD_HTML_Tag_Processor {
 					return false;
 				}
 
+				// WordPress 6.5 changed the $end arg in the WP_HTML_Text_Replacement constructor to $length.
+				static $is_old_text_replacement_signature = null;
+				if ( null === $is_old_text_replacement_signature ) {
+					$is_old_text_replacement_signature = version_compare( get_bloginfo( 'version' ), '6.5', '<' );
+				}
+
 				$start = $this->bookmarks[ $bookmark ]->start;
 
 				$this->lexical_updates[] = new WP_HTML_Text_Replacement(
 					$start,
-					// In WordPress 6.5, the signature was changed from $end to $length.
-					version_compare( get_bloginfo( 'version' ), '6.5', '<' ) ? $start : 0,
+					$is_old_text_replacement_signature ? $start : 0,
 					$html
 				);
 				return true;
