@@ -165,12 +165,7 @@ final class OD_HTML_Tag_Walker {
 	/**
 	 * Processor.
 	 *
-	 * This contains an instance of an anonymous subclass of WP_HTML_Tag_Processor which adds an append_html method.
-	 * The use of the mixed type is due to the lack of typing being available for such an anonymous class. PHPCS
-	 * requires that there be a type provided, and yet if it is just WP_HTML_Tag_Processor then PHPStan complains about
-	 * the append_html method not being defined.
-	 *
-	 * @var WP_HTML_Tag_Processor|mixed
+	 * @var OD_HTML_Tag_Processor
 	 */
 	private $processor;
 
@@ -180,37 +175,7 @@ final class OD_HTML_Tag_Walker {
 	 * @param string $html HTML to process.
 	 */
 	public function __construct( string $html ) {
-
-		$this->processor = new class( $html ) extends WP_HTML_Tag_Processor {
-
-			/**
-			 * Appends HTML to the provided bookmark.
-			 *
-			 * @param string $bookmark Bookmark.
-			 * @param string $html     HTML to inject.
-			 * @return bool Whether the HTML was appended.
-			 */
-			public function append_html( string $bookmark, string $html ): bool {
-				if ( ! $this->has_bookmark( $bookmark ) ) {
-					return false;
-				}
-
-				// WordPress 6.5 changed the $end arg in the WP_HTML_Text_Replacement constructor to $length.
-				static $is_old_text_replacement_signature = null;
-				if ( null === $is_old_text_replacement_signature ) {
-					$is_old_text_replacement_signature = version_compare( get_bloginfo( 'version' ), '6.5', '<' );
-				}
-
-				$start = $this->bookmarks[ $bookmark ]->start;
-
-				$this->lexical_updates[] = new WP_HTML_Text_Replacement(
-					$start,
-					$is_old_text_replacement_signature ? $start : 0,
-					$html
-				);
-				return true;
-			}
-		};
+		$this->processor = new OD_HTML_Tag_Processor( $html );
 	}
 
 	/**
@@ -379,6 +344,40 @@ final class OD_HTML_Tag_Walker {
 	}
 
 	/**
+	 * Append HTML to the HEAD.
+	 *
+	 * Before this can be called, the document must first have been iterated over with
+	 * {@see OD_HTML_Tag_Walker::open_tags()} so that the bookmark for the HEAD end tag is set.
+	 *
+	 * @param string $html HTML to inject.
+	 * @return bool Whether successful.
+	 */
+	public function append_head_html( string $html ): bool {
+		$success = $this->processor->append_html( self::END_OF_HEAD_BOOKMARK, $html );
+		if ( ! $success ) {
+			$this->warn( __( 'Unable to append markup to the HEAD.', 'optimization-detective' ) );
+		}
+		return $success;
+	}
+
+	/**
+	 * Append HTML to the BODY.
+	 *
+	 * Before this can be called, the document must first have been iterated over with
+	 * {@see OD_HTML_Tag_Walker::open_tags()} so that the bookmark for the BODY end tag is set.
+	 *
+	 * @param string $html HTML to inject.
+	 * @return bool Whether successful.
+	 */
+	public function append_body_html( string $html ): bool {
+		$success = $this->processor->append_html( self::END_OF_BODY_BOOKMARK, $html );
+		if ( ! $success ) {
+			$this->warn( __( 'Unable to append markup to the BODY.', 'optimization-detective' ) );
+		}
+		return $success;
+	}
+
+	/**
 	 * Returns the value of a requested attribute from a matched tag opener if that attribute exists.
 	 *
 	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
@@ -425,34 +424,6 @@ final class OD_HTML_Tag_Walker {
 	 */
 	public function remove_attribute( string $name ): bool {
 		return $this->processor->remove_attribute( $name );
-	}
-
-	/**
-	 * Append HTML to the HEAD.
-	 *
-	 * @param string $html HTML to inject.
-	 * @return bool Whether successful.
-	 */
-	public function append_head_html( string $html ): bool {
-		$success = $this->processor->append_html( self::END_OF_HEAD_BOOKMARK, $html );
-		if ( ! $success ) {
-			$this->warn( __( 'Unable to append markup to the HEAD.', 'optimization-detective' ) );
-		}
-		return $success;
-	}
-
-	/**
-	 * Append HTML to the BODY.
-	 *
-	 * @param string $html HTML to inject.
-	 * @return bool Whether successful.
-	 */
-	public function append_body_html( string $html ): bool {
-		$success = $this->processor->append_html( self::END_OF_BODY_BOOKMARK, $html );
-		if ( ! $success ) {
-			$this->warn( __( 'Unable to append markup to the BODY.', 'optimization-detective' ) );
-		}
-		return $success;
 	}
 
 	/**

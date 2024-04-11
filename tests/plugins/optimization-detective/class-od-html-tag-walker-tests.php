@@ -317,6 +317,112 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test append_head_html().
+	 *
+	 * @covers ::append_head_html
+	 * @covers OD_HTML_Tag_Processor::append_html
+	 */
+	public function test_append_head_html() {
+		$html     = '
+			<html>
+				<head>
+					<meta charset=utf-8>
+					<!-- </head> -->
+				</head>
+				<!--</HEAD>-->
+				<body>
+					<h1>Hello World</h1>
+				</body>
+			</html>
+		';
+		$injected = '<meta name="generator" content="optimization-detective">';
+		$walker   = new OD_HTML_Tag_Walker( $html );
+		$this->assertFalse( $walker->append_head_html( $injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
+
+		$saw_head = false;
+		foreach ( $walker->open_tags() as $tag ) {
+			if ( 'HEAD' === $tag ) {
+				$saw_head = true;
+			}
+		}
+		$this->assertTrue( $saw_head );
+
+		$this->assertTrue( $walker->append_head_html( $injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
+		$expected = "
+			<html>
+				<head>
+					<meta charset=utf-8>
+					<!-- </head> -->
+				{$injected}</head>
+				<!--</HEAD>-->
+				<body>
+					<h1>Hello World</h1>
+				</body>
+			</html>
+		";
+		$this->assertSame( $expected, $walker->get_updated_html() );
+	}
+
+	/**
+	 * Test both append_head_html() and append_body_html().
+	 *
+	 * @covers ::append_head_html
+	 * @covers ::append_body_html
+	 * @covers OD_HTML_Tag_Processor::append_html
+	 */
+	public function test_append_head_and_body_html() {
+		$html          = '
+			<html>
+				<head>
+					<meta charset=utf-8>
+					<!-- </head> -->
+				</head>
+				<!--</HEAD>-->
+				<body>
+					<h1>Hello World</h1>
+					<!-- </body> -->
+				</body>
+				<!--</BODY>-->
+			</html>
+		';
+		$head_injected = '<link rel="home" href="/">';
+		$body_injected = '<script>document.write("Goodbye!")</script>';
+		$walker        = new OD_HTML_Tag_Walker( $html );
+		$this->assertFalse( $walker->append_head_html( $head_injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
+		$this->assertFalse( $walker->append_body_html( $body_injected ), 'Expected injection to fail because the BODY closing tag has not been encountered yet.' );
+
+		$saw_head = false;
+		$saw_body = false;
+		foreach ( $walker->open_tags() as $tag ) {
+			if ( 'HEAD' === $tag ) {
+				$saw_head = true;
+			} elseif ( 'BODY' === $tag ) {
+				$saw_body = true;
+			}
+		}
+		$this->assertTrue( $saw_head );
+		$this->assertTrue( $saw_body );
+
+		$this->assertTrue( $walker->append_head_html( $head_injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
+		$this->assertTrue( $walker->append_body_html( $body_injected ), 'Expected injection to succeed because the BODY closing tag has been encountered.' );
+		$expected = "
+			<html>
+				<head>
+					<meta charset=utf-8>
+					<!-- </head> -->
+				{$head_injected}</head>
+				<!--</HEAD>-->
+				<body>
+					<h1>Hello World</h1>
+					<!-- </body> -->
+				{$body_injected}</body>
+				<!--</BODY>-->
+			</html>
+		";
+		$this->assertSame( $expected, $walker->get_updated_html() );
+	}
+
+	/**
 	 * Test get_attribute(), set_attribute(), remove_attribute(), and get_updated_html().
 	 *
 	 * @covers ::get_attribute
