@@ -73,6 +73,10 @@ function od_maybe_add_template_output_buffer_filter() {
  * @return bool Whether response can be optimized.
  */
 function od_can_optimize_response(): bool {
+
+	// Retrieve the sanitized value of the 'REQUEST_METHOD' server variable.
+	$method = filter_input( INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_STRING );
+	
 	$able = ! (
 		// Since there is no predictability in whether posts in the loop will have featured images assigned or not. If a
 		// theme template for search results doesn't even show featured images, then this wouldn't be an issue.
@@ -80,7 +84,7 @@ function od_can_optimize_response(): bool {
 		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
 		is_customize_preview() ||
 		// Since the images detected in the response body of a POST request cannot, by definition, be cached.
-		'GET' !== $_SERVER['REQUEST_METHOD'] ||
+		( isset( $method ) && 'GET' !== $method ) ||
 		// The aim is to optimize pages for the majority of site visitors, not those who administer the site. For admin
 		// users, additional elements will be present like the script from wp_customize_support_script() which will
 		// interfere with the XPath indices. Note that od_get_normalized_query_vars() is varied by is_user_logged_in()
