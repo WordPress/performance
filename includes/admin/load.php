@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Adds the features page to the Settings menu.
  *
  * @since 1.0.0
- * @since n.e.x.t Renamed to perflab_add_features_page().
+ * @since 3.0.0 Renamed to perflab_add_features_page().
  */
 function perflab_add_features_page() {
 	$hook_suffix = add_options_page(
@@ -38,7 +38,7 @@ add_action( 'admin_menu', 'perflab_add_features_page' );
  * Initializes functionality for the features page.
  *
  * @since 1.0.0
- * @since n.e.x.t Renamed to perflab_load_features_page(), and the
+ * @since 3.0.0 Renamed to perflab_load_features_page(), and the
  *                $module and $hook_suffix parameters were removed.
  */
 function perflab_load_features_page() {
@@ -56,7 +56,7 @@ function perflab_load_features_page() {
  * Renders the plugin page.
  *
  * @since 1.0.0
- * @since n.e.x.t Renamed to perflab_render_settings_page().
+ * @since 3.0.0 Renamed to perflab_render_settings_page().
  */
 function perflab_render_settings_page() {
 	?>
@@ -205,7 +205,7 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
  * Callback function to handle admin scripts.
  *
  * @since 2.8.0
- * @since n.e.x.t Renamed to perflab_enqueue_features_page_scripts().
+ * @since 3.0.0 Renamed to perflab_enqueue_features_page_scripts().
  */
 function perflab_enqueue_features_page_scripts() {
 	// These assets are needed for the "Learn more" popover.
@@ -217,7 +217,7 @@ function perflab_enqueue_features_page_scripts() {
 /**
  * Callback for handling installation/activation of plugin.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  */
 function perflab_install_activate_plugin_callback() {
 	check_admin_referer( 'perflab_install_activate_plugin' );
@@ -312,7 +312,7 @@ add_action( 'admin_action_perflab_install_activate_plugin', 'perflab_install_act
 /**
  * Callback function to handle admin inline style.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  */
 function perflab_print_features_page_style() {
 	?>
