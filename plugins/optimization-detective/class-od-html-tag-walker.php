@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Processor leveraging WP_HTML_Tag_Processor which gathers breadcrumbs for computing XPaths while iterating the open_tags() generator.
+ * Walker leveraging WP_HTML_Tag_Processor which gathers breadcrumbs for computing XPaths while iterating the open_tags() generator.
  *
  * Eventually this class should be made largely obsolete once `WP_HTML_Processor` is fully implemented to support all HTML tags.
  *
@@ -380,7 +380,7 @@ final class OD_HTML_Tag_Walker {
 	/**
 	 * Returns the value of a requested attribute from a matched tag opener if that attribute exists.
 	 *
-	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
+	 * This is a wrapper around the underlying WP_HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
 	 * @since 0.1.0
@@ -396,7 +396,7 @@ final class OD_HTML_Tag_Walker {
 	/**
 	 * Updates or creates a new attribute on the currently matched tag with the passed value.
 	 *
-	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
+	 * This is a wrapper around the underlying WP_HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
 	 * @since 0.1.0
@@ -413,7 +413,7 @@ final class OD_HTML_Tag_Walker {
 	/**
 	 * Removes an attribute from the currently-matched tag.
 	 *
-	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of
+	 * This is a wrapper around the underlying WP_HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
 	 * @since 0.1.0
