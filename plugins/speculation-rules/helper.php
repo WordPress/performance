@@ -104,3 +104,21 @@ function plsr_get_speculation_rules() {
 
 	return array( $mode => $rules );
 }
+
+
+
+ function addclassRules(array &$rules)
+{
+
+ 
+	foreach (['prefetch', 'prerender'] as $mode) {
+		$rules[$mode] ??= [];
+		foreach (["conservative", "moderate", "eager"] as $eagerness) {
+
+			$rules[$mode][] =  [
+				"where" => ["selector_matches" => ".$mode-$eagerness"],
+				"eagerness" => "$eagerness"
+			];
+		}
+	}
+}
