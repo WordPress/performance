@@ -93,7 +93,7 @@ function plsr_get_speculation_rules() {
 		),
 	);
 
-	// Allow adding a class on any links to prevent prerendering.
+	// Allow adding a class on any links to prevent pre-rendering.
 	if ( 'prerender' === $mode ) {
 		$rules[0]['where']['and'][] = array(
 			'not' => array(
