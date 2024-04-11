@@ -80,7 +80,7 @@ function od_can_optimize_response(): bool {
 		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
 		is_customize_preview() ||
 		// Since the images detected in the response body of a POST request cannot, by definition, be cached.
-		'GET' !== $_SERVER['REQUEST_METHOD'] ||
+		( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) ||
 		// The aim is to optimize pages for the majority of site visitors, not those who administer the site. For admin
 		// users, additional elements will be present like the script from wp_customize_support_script() which will
 		// interfere with the XPath indices. Note that od_get_normalized_query_vars() is varied by is_user_logged_in()
