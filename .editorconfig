@@ -31,6 +31,7 @@ indent_size = 2
 
 [*.yml]
 insert_final_newline = false
+quote_type = single
 indent_style = space
 indent_size = 2
 
