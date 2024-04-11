@@ -49,6 +49,7 @@ require_once __DIR__ . '/helper.php';
 
 // Core infrastructure classes.
 require_once __DIR__ . '/class-od-data-validation-exception.php';
+require_once __DIR__ . '/class-od-html-tag-processor.php';
 require_once __DIR__ . '/class-od-url-metric.php';
 require_once __DIR__ . '/class-od-url-metrics-group.php';
 require_once __DIR__ . '/class-od-url-metrics-group-collection.php';
@@ -63,7 +64,7 @@ require_once __DIR__ . '/storage/rest-api.php';
 require_once __DIR__ . '/detection.php';
 
 // Optimization logic.
-require_once __DIR__ . '/class-od-html-tag-processor.php';
+require_once __DIR__ . '/class-od-html-tag-walker.php';
 require_once __DIR__ . '/optimization.php';
 
 // Add hooks for the above requires.

@@ -140,6 +140,7 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 = 0.1.1 =
 
 * Use plugin slug for generator tag. ([1103](https://github.com/WordPress/performance/pull/1103))
+* Prevent detection script injection from breaking import maps in classic themes. ([1084](https://github.com/WordPress/performance/pull/1084))
 
 = 0.1.0 =
 

@@ -1,10 +1,10 @@
 <?php
 /**
- * Tests for optimization-detective class OD_HTML_Tag_Processor.
+ * Tests for optimization-detective class OD_HTML_Tag_Walker.
  *
  * @package optimization-detective
  *
- * @coversDefaultClass OD_HTML_Tag_Processor
+ * @coversDefaultClass OD_HTML_Tag_Walker
  *
  * @noinspection HtmlRequiredTitleElement
  * @noinspection HtmlRequiredAltAttribute
@@ -14,7 +14,7 @@
  * @noinspection HtmlExtraClosingTag
  * @todo What are the other inspection IDs which can turn off inspections for the other irrelevant warnings? Remaining is "The tag is marked as deprecated."
  */
-class OD_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
+class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 
 	public function data_provider_sample_documents(): array {
 		return array(
@@ -303,7 +303,7 @@ class OD_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 	 * @dataProvider data_provider_sample_documents
 	 */
 	public function test_open_tags_and_get_xpath( string $document, array $open_tags, array $xpaths ) {
-		$p = new OD_HTML_Tag_Processor( $document );
+		$p = new OD_HTML_Tag_Walker( $document );
 		$this->assertSame( '', $p->get_xpath(), 'Expected empty XPath since iteration has not started.' );
 		$actual_open_tags = array();
 		$actual_xpaths    = array();
@@ -317,6 +317,112 @@ class OD_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test append_head_html().
+	 *
+	 * @covers ::append_head_html
+	 * @covers OD_HTML_Tag_Processor::append_html
+	 */
+	public function test_append_head_html() {
+		$html     = '
+			<html>
+				<head>
+					<meta charset=utf-8>
+					<!-- </head> -->
+				</head>
+				<!--</HEAD>-->
+				<body>
+					<h1>Hello World</h1>
+				</body>
+			</html>
+		';
+		$injected = '<meta name="generator" content="optimization-detective">';
+		$walker   = new OD_HTML_Tag_Walker( $html );
+		$this->assertFalse( $walker->append_head_html( $injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
+
+		$saw_head = false;
+		foreach ( $walker->open_tags() as $tag ) {
+			if ( 'HEAD' === $tag ) {
+				$saw_head = true;
+			}
+		}
+		$this->assertTrue( $saw_head );
+
+		$this->assertTrue( $walker->append_head_html( $injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
+		$expected = "
+			<html>
+				<head>
+					<meta charset=utf-8>
+					<!-- </head> -->
+				{$injected}</head>
+				<!--</HEAD>-->
+				<body>
+					<h1>Hello World</h1>
+				</body>
+			</html>
+		";
+		$this->assertSame( $expected, $walker->get_updated_html() );
+	}
+
+	/**
+	 * Test both append_head_html() and append_body_html().
+	 *
+	 * @covers ::append_head_html
+	 * @covers ::append_body_html
+	 * @covers OD_HTML_Tag_Processor::append_html
+	 */
+	public function test_append_head_and_body_html() {
+		$html          = '
+			<html>
+				<head>
+					<meta charset=utf-8>
+					<!-- </head> -->
+				</head>
+				<!--</HEAD>-->
+				<body>
+					<h1>Hello World</h1>
+					<!-- </body> -->
+				</body>
+				<!--</BODY>-->
+			</html>
+		';
+		$head_injected = '<link rel="home" href="/">';
+		$body_injected = '<script>document.write("Goodbye!")</script>';
+		$walker        = new OD_HTML_Tag_Walker( $html );
+		$this->assertFalse( $walker->append_head_html( $head_injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
+		$this->assertFalse( $walker->append_body_html( $body_injected ), 'Expected injection to fail because the BODY closing tag has not been encountered yet.' );
+
+		$saw_head = false;
+		$saw_body = false;
+		foreach ( $walker->open_tags() as $tag ) {
+			if ( 'HEAD' === $tag ) {
+				$saw_head = true;
+			} elseif ( 'BODY' === $tag ) {
+				$saw_body = true;
+			}
+		}
+		$this->assertTrue( $saw_head );
+		$this->assertTrue( $saw_body );
+
+		$this->assertTrue( $walker->append_head_html( $head_injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
+		$this->assertTrue( $walker->append_body_html( $body_injected ), 'Expected injection to succeed because the BODY closing tag has been encountered.' );
+		$expected = "
+			<html>
+				<head>
+					<meta charset=utf-8>
+					<!-- </head> -->
+				{$head_injected}</head>
+				<!--</HEAD>-->
+				<body>
+					<h1>Hello World</h1>
+					<!-- </body> -->
+				{$body_injected}</body>
+				<!--</BODY>-->
+			</html>
+		";
+		$this->assertSame( $expected, $walker->get_updated_html() );
+	}
+
+	/**
 	 * Test get_attribute(), set_attribute(), remove_attribute(), and get_updated_html().
 	 *
 	 * @covers ::get_attribute
@@ -325,7 +431,7 @@ class OD_HTML_Tag_Processor_Tests extends WP_UnitTestCase {
 	 * @covers ::get_updated_html
 	 */
 	public function test_html_tag_processor_wrapper_methods() {
-		$processor = new OD_HTML_Tag_Processor( '<html lang="en" xml:lang="en"></html>' );
+		$processor = new OD_HTML_Tag_Walker( '<html lang="en" xml:lang="en"></html>' );
 		foreach ( $processor->open_tags() as $open_tag ) {
 			if ( 'HTML' === $open_tag ) {
 				$this->assertSame( 'en', $processor->get_attribute( 'lang' ) );
