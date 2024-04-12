@@ -60,6 +60,24 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 == Changelog ==
 
+= 3.0.0 =
+
+**Enhancements**
+
+* Add caching to the wordpress.org query to get plugin information. ([1022](https://github.com/WordPress/performance/pull/1022))
+* Add support for autoloading enhancements in WordPress 6.6 trunk to autoloaded options Site Health check. ([1112](https://github.com/WordPress/performance/pull/1112))
+* Bump minimum required WordPress version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
+* Enhance `object-cache.php` drop-in placement logic to support updating to a newer version of the file. ([1047](https://github.com/WordPress/performance/pull/1047))
+* Implement support for annotating certain plugins as experimental. ([1111](https://github.com/WordPress/performance/pull/1111))
+* Migrate Site Health checks from being modules to becoming part of the plugin core. ([1042](https://github.com/WordPress/performance/pull/1042))
+* Remove modules infrastructure and UI from the plugin. ([1060](https://github.com/WordPress/performance/pull/1060))
+* Support changing autoload value for largest autoloaded options in Site Health check. ([1048](https://github.com/WordPress/performance/pull/1048))
+* Use plugin slug for generator tag. ([1103](https://github.com/WordPress/performance/pull/1103))
+
+**Documentation**
+
+* Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
+
 = 2.9.0 =
 
 **Features**
@@ -449,21 +467,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 3.0.0 =
 
-**Enhancements**
-
-* Add caching to the wordpress.org query to get plugin information. ([1022](https://github.com/WordPress/performance/pull/1022))
-* Add support for autoloading enhancements in WordPress 6.6 trunk to autoloaded options Site Health check. ([1112](https://github.com/WordPress/performance/pull/1112))
-* Bump minimum required WordPress version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
-* Enhance `object-cache.php` drop-in placement logic to support updating to a newer version of the file. ([1047](https://github.com/WordPress/performance/pull/1047))
-* Implement support for annotating certain plugins as experimental. ([1111](https://github.com/WordPress/performance/pull/1111))
-* Migrate Site Health checks from being modules to becoming part of the plugin core. ([1042](https://github.com/WordPress/performance/pull/1042))
-* Remove modules infrastructure and UI from the plugin. ([1060](https://github.com/WordPress/performance/pull/1060))
-* Support changing autoload value for largest autoloaded options in Site Health check. ([1048](https://github.com/WordPress/performance/pull/1048))
-* Use plugin slug for generator tag. ([1103](https://github.com/WordPress/performance/pull/1103))
-
-**Documentation**
-
-* Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
+Starting with this release, modules such as Image Placeholders and Modern Image Formats are only available as standalone plugins as opposed to bundled modules. After updating, you will be able to easily migrate to this new structure.
 
 = 2.5.0 =
 
