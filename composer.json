@@ -12,7 +12,7 @@
     "issues": "https://github.com/WordPress/performance/issues"
   },
   "require": {
-    "php": "^7.0 || ^8.0",
+    "php": "^7.2 || ^8.0",
     "ext-dom": "*",
     "ext-json": "*"
   },
@@ -38,6 +38,9 @@
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "phpstan/extension-installer": true
+    },
+    "platform": {
+      "php": "7.2"
     }
   },
   "scripts": {
