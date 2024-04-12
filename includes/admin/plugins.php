@@ -164,7 +164,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			current_user_can( 'activate_plugins' )
 		) &&
 		(
-			'install' !== $status ||
+			'install' !== $status['status'] ||
 			current_user_can( 'install_plugins' )
 		)
 	) {
@@ -186,7 +186,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			esc_html__( 'Activate', 'default' )
 		);
 	} else {
-		$explanation    = 'install' !== $status || current_user_can( 'install_plugins' ) ? _x( 'Cannot Activate', 'plugin', 'default' ) : _x( 'Cannot Install', 'plugin', 'default' );
+		$explanation    = 'install' !== $status['status'] || current_user_can( 'install_plugins' ) ? _x( 'Cannot Activate', 'plugin', 'default' ) : _x( 'Cannot Install', 'plugin', 'default' );
 		$action_links[] = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
 			esc_html( $explanation )

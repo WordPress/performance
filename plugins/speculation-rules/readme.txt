@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.0
-Stable tag:        1.1.0
+Stable tag:        1.2.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, javascript, speculation rules, prerender, prefetch
@@ -101,6 +101,10 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.2.0 =
+
+* Add missing uninstall.php to remove plugin's database option. ([1128](https://github.com/WordPress/performance/pull/1128))
 
 = 1.1.0 =
 
