@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.1', '8.0', '7.4', '7.3', '7.2', '7.1', '7.0']
+        php: ['8.2', '8.1', '8.0', '7.4', '7.3', '7.2']
         wp: [ 'latest' ]
         include:
           - php: '7.4'
@@ -66,7 +66,7 @@ jobs:
         run: jq '.plugins = [.plugins[0]]' .wp-env.json > .wp-env.override.json
       - name: Install WordPress
         run: npm run wp-env start
-      - name: Composer install
+      - name: Composer Install
         run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
       - name: Running single site unit tests
         run: npm run test-php
