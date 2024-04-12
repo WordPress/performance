@@ -41,10 +41,8 @@
     }
   },
   "scripts": {
-    "post-install-cmd": "if php -r 'exit( version_compare( phpversion(), \"8.1\", \">=\" ) ? 0 : 1 );'; then composer --working-dir=build-cs install --no-interaction; else echo 'Skipping composer install for build-cs since not on PHP 8.1+. You are running: '; php -v;  fi",
-    "post-update-cmd": "if php -r 'exit( version_compare( phpversion(), \"8.1\", \">=\" ) ? 0 : 1 );'; then composer --working-dir=build-cs update --no-interaction; else echo 'Skipping composer update for build-cs since not on PHP 8.1+. You are running: '; php -v; fi",
-    "format": "build-cs/vendor/bin/phpcbf --report-summary --report-source",
-    "lint": "build-cs/vendor/bin/phpcs",
+    "format": "phpcbf --report-summary --report-source",
+    "lint": "phpcs",
     "lint:all": [
       "@lint",
       "@lint:auto-sizes",
@@ -60,7 +58,7 @@
     "lint:optimization-detective": "@lint -- ./plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
     "lint:speculation-rules": "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
     "lint:webp-uploads": "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
-    "phpstan": "build-cs/vendor/bin/phpstan analyse --memory-limit=2048M",
+    "phpstan": "phpstan analyse --memory-limit=2048M",
     "test": "phpunit --verbose --testsuite performance-lab",
     "test-multisite": "phpunit -c tests/multisite.xml --verbose --testsuite performance-lab",
     "test-multisite:all": [
