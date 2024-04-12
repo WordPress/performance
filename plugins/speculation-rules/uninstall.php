@@ -3,7 +3,7 @@
  * Plugin uninstaller logic.
  *
  * @package speculation-rules
- * @since 1.1.0
+ * @since 1.2.0
  */
 
 // If uninstall.php is not called by WordPress, bail.
@@ -34,7 +34,7 @@ speculation_rules_delete_plugin_option();
 /**
  * Delete the current site's option.
  *
- * @since 1.1.0
+ * @since 1.2.0
  */
 function speculation_rules_delete_plugin_option() {
 	delete_option( 'plsr_speculation_rules' );
