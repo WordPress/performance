@@ -12,7 +12,7 @@
     "issues": "https://github.com/WordPress/performance/issues"
   },
   "require": {
-    "php": ">=7 || ^8",
+    "php": "^7.0 || ^8.0",
     "ext-dom": "*",
     "ext-json": "*"
   },
