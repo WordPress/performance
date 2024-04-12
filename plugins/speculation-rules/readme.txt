@@ -104,8 +104,6 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.2.0 =
 
-**Enhancements**
-
 * Add missing uninstall.php to remove plugin's database option. ([1128](https://github.com/WordPress/performance/pull/1128))
 
 = 1.1.0 =
