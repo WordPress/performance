@@ -102,6 +102,12 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 == Changelog ==
 
+= 1.2.0 =
+
+**Enhancements**
+
+* Add missing uninstall.php to remove plugin's database option. ([1128](https://github.com/WordPress/performance/pull/1128))
+
 = 1.1.0 =
 
 * Allow excluding URL patterns from prerendering or prefetching specifically. ([1025](https://github.com/WordPress/performance/pull/1025))
