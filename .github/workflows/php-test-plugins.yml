@@ -65,11 +65,8 @@ jobs:
         run: npm run build
       - name: Install WordPress
         run: npm run wp-env start
-        # Note that `composer update` is required instead of `composer install`
-        # for the sake of PHP versions older than 8.1, which is the version of
-        # PHP that the composer.lock was created for.
       - name: Composer update
-        run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer update --no-interaction
+        run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
       - name: Running single site unit tests for plugins
         run: npm run test-php-plugins
       - name: Running multisite unit tests for plugins
