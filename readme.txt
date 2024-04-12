@@ -7,7 +7,7 @@ Requires PHP:      7.0
 Stable tag:        3.0.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, site health, measurement
+Tags:              performance, site health, measurement, optimization, diagnostics
 
 Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
 
