@@ -29,7 +29,6 @@ build
 ## Vendor
 ############
 
-composer.lock
 node_modules/
 vendor/
 plugins/optimization-detective/detection/web-vitals*
