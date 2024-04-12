@@ -24,18 +24,18 @@ if ( is_multisite() ) {
 
 	foreach ( $site_ids as $site_id ) {
 		switch_to_blog( $site_id );
-		speculation_rules_delete_plugin_option();
+		plsr_delete_plugin_option();
 		restore_current_blog();
 	}
 }
 
-speculation_rules_delete_plugin_option();
+plsr_delete_plugin_option();
 
 /**
  * Delete the current site's option.
  *
  * @since 1.2.0
  */
-function speculation_rules_delete_plugin_option() {
+function plsr_delete_plugin_option() {
 	delete_option( 'plsr_speculation_rules' );
 }
