@@ -39,7 +39,7 @@ add_action( 'admin_menu', 'perflab_add_features_page' );
  *
  * @since 1.0.0
  * @since 3.0.0 Renamed to perflab_load_features_page(), and the
- *                $module and $hook_suffix parameters were removed.
+ *              $module and $hook_suffix parameters were removed.
  */
 function perflab_load_features_page() {
 	// Handle script enqueuing for settings page.
