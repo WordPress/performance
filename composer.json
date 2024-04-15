@@ -1,31 +1,50 @@
 {
   "name": "wordpress/performance",
-  "type": "wordpress-plugin",
-  "license": "GPL-2.0-or-later",
   "description": "Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.",
-  "homepage": "https://wordpress.org/plugins/performance-lab/",
+  "license": "GPL-2.0-or-later",
+  "type": "wordpress-plugin",
   "keywords": [
     "performance",
     "wordpress"
   ],
+  "homepage": "https://wordpress.org/plugins/performance-lab/",
   "support": {
     "issues": "https://github.com/WordPress/performance/issues"
   },
+  "require": {
+    "php": "^7.2 || ^8.0",
+    "ext-json": "*"
+  },
   "require-dev": {
-    "wp-phpunit/wp-phpunit": "^5.8",
+    "phpcompatibility/php-compatibility": "^9.3",
+    "phpstan/extension-installer": "^1.3",
+    "phpstan/phpstan": "^1.10",
+    "phpstan/phpstan-deprecation-rules": "^1.1",
+    "phpstan/phpstan-phpunit": "^1.3",
+    "slevomat/coding-standard": "^8.0",
+    "squizlabs/php_codesniffer": "^3.9",
+    "szepeviktor/phpstan-wordpress": "^1.3",
+    "wp-coding-standards/wpcs": "^3.1",
+    "wp-phpunit/wp-phpunit": "^6.5",
     "yoast/phpunit-polyfills": "^1.0"
   },
-  "require": {
-    "composer/installers": "~1.0",
-    "ext-json": "*",
-    "php": ">=7|^8"
+  "autoload-dev": {
+    "psr-4": {
+      "PerformanceLab\\Tests\\": "tests/utils"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": true
+    },
+    "platform": {
+      "php": "7.2"
+    }
   },
   "scripts": {
-    "post-install-cmd": "if php -r 'exit( version_compare( phpversion(), \"8.1\", \">=\" ) ? 0 : 1 );'; then composer --working-dir=build-cs install --no-interaction; else echo 'Skipping composer install for build-cs since not on PHP 8.1+. You are running: '; php -v;  fi",
-    "post-update-cmd": "if php -r 'exit( version_compare( phpversion(), \"8.1\", \">=\" ) ? 0 : 1 );'; then composer --working-dir=build-cs update --no-interaction; else echo 'Skipping composer update for build-cs since not on PHP 8.1+. You are running: '; php -v; fi",
-    "phpstan": "build-cs/vendor/bin/phpstan analyse --memory-limit=2048M",
-    "format": "build-cs/vendor/bin/phpcbf --report-summary --report-source",
-    "lint": "build-cs/vendor/bin/phpcs",
+    "format": "phpcbf --report-summary --report-source",
+    "lint": "phpcs",
     "lint:all": [
       "@lint",
       "@lint:auto-sizes",
@@ -41,24 +60,17 @@
     "lint:optimization-detective": "@lint -- ./plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
     "lint:speculation-rules": "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
     "lint:webp-uploads": "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
+    "phpstan": "phpstan analyse --memory-limit=2048M",
     "test": "phpunit --verbose --testsuite performance-lab",
     "test-multisite": "phpunit -c tests/multisite.xml --verbose --testsuite performance-lab",
-    "test:all": [
-      "@test",
-      "@test:plugins"
-    ],
     "test-multisite:all": [
       "@test-multisite",
       "@test-multisite:plugins"
     ],
-    "test:plugins": [
-      "@test:auto-sizes",
-      "@test:dominant-color-images",
-      "@test:embed-optimizer",
-      "@test:optimization-detective",
-      "@test:speculation-rules",
-      "@test:webp-uploads"
-    ],
+    "test-multisite:auto-sizes": "phpunit -c tests/multisite.xml --verbose --testsuite auto-sizes",
+    "test-multisite:dominant-color-images": "phpunit -c tests/multisite.xml --verbose --testsuite dominant-color-images",
+    "test-multisite:embed-optimizer": "phpunit -c tests/multisite.xml --verbose --testsuite embed-optimizer",
+    "test-multisite:optimization-detective": "phpunit -c tests/multisite.xml --verbose --testsuite optimization-detective",
     "test-multisite:plugins": [
       "@test-multisite:auto-sizes",
       "@test-multisite:dominant-color-images",
@@ -67,29 +79,25 @@
       "@test-multisite:speculation-rules",
       "@test-multisite:webp-uploads"
     ],
-    "test:auto-sizes": "phpunit --verbose --testsuite auto-sizes",
-    "test-multisite:auto-sizes": "phpunit -c tests/multisite.xml --verbose --testsuite auto-sizes",
-    "test:dominant-color-images": "phpunit --verbose --testsuite dominant-color-images",
-    "test-multisite:dominant-color-images": "phpunit -c tests/multisite.xml --verbose --testsuite dominant-color-images",
-    "test:embed-optimizer": "phpunit --verbose --testsuite embed-optimizer",
-    "test-multisite:embed-optimizer": "phpunit -c tests/multisite.xml --verbose --testsuite embed-optimizer",
-    "test:optimization-detective": "phpunit --verbose --testsuite optimization-detective",
-    "test-multisite:optimization-detective": "phpunit -c tests/multisite.xml --verbose --testsuite optimization-detective",
-    "test:speculation-rules": "phpunit --verbose --testsuite speculation-rules",
     "test-multisite:speculation-rules": "phpunit -c tests/multisite.xml --verbose --testsuite speculation-rules",
-    "test:webp-uploads": "phpunit --verbose --testsuite webp-uploads",
-    "test-multisite:webp-uploads": "phpunit -c tests/multisite.xml --verbose --testsuite webp-uploads"
-  },
-  "config": {
-    "allow-plugins": {
-      "composer/installers": true,
-      "phpstan/extension-installer": true,
-      "dealerdirect/phpcodesniffer-composer-installer": true
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "PerformanceLab\\Tests\\": "tests/utils"
-    }
+    "test-multisite:webp-uploads": "phpunit -c tests/multisite.xml --verbose --testsuite webp-uploads",
+    "test:all": [
+      "@test",
+      "@test:plugins"
+    ],
+    "test:auto-sizes": "phpunit --verbose --testsuite auto-sizes",
+    "test:dominant-color-images": "phpunit --verbose --testsuite dominant-color-images",
+    "test:embed-optimizer": "phpunit --verbose --testsuite embed-optimizer",
+    "test:optimization-detective": "phpunit --verbose --testsuite optimization-detective",
+    "test:plugins": [
+      "@test:auto-sizes",
+      "@test:dominant-color-images",
+      "@test:embed-optimizer",
+      "@test:optimization-detective",
+      "@test:speculation-rules",
+      "@test:webp-uploads"
+    ],
+    "test:speculation-rules": "phpunit --verbose --testsuite speculation-rules",
+    "test:webp-uploads": "phpunit --verbose --testsuite webp-uploads"
   }
 }

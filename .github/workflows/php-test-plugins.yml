@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.1', '8.0', '7.4', '7.3', '7.2', '7.1', '7.0']
+        php: ['8.2', '8.1', '8.0', '7.4', '7.3', '7.2']
         wp: [ 'latest' ]
         include:
           - php: '7.4'
@@ -65,11 +65,8 @@ jobs:
         run: npm run build
       - name: Install WordPress
         run: npm run wp-env start
-        # Note that `composer update` is required instead of `composer install`
-        # for the sake of PHP versions older than 8.1, which is the version of
-        # PHP that the composer.lock was created for.
-      - name: Composer update
-        run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer update --no-interaction
+      - name: Composer Install
+        run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
       - name: Running single site unit tests for plugins
         run: npm run test-php-plugins
       - name: Running multisite unit tests for plugins

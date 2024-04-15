@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/WordPress/performance/issues/869
  * Description: Uses real user metrics to improve heuristics WordPress applies on the frontend to improve image loading priority.
  * Requires at least: 6.4
- * Requires PHP: 7.0
+ * Requires PHP: 7.2
  * Version: 0.1.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/

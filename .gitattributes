@@ -10,7 +10,6 @@
 /tests export-ignore
 /plugin-tests export-ignore
 /plugins export-ignore
-/build-cs export-ignore
 
 /*.DS_store export-ignore
 /.DS_store? export-ignore
