@@ -30,7 +30,7 @@ add_filter( 'site_status_tests', 'perflab_aao_add_autoloaded_options_test' );
 /**
  * Register admin actions for handling autoload enable/disable.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  */
 function perflab_aao_register_admin_actions() {
 	add_action( 'admin_action_perflab_aao_update_autoload', 'perflab_aao_handle_update_autoload' );
@@ -40,7 +40,7 @@ add_action( 'admin_init', 'perflab_aao_register_admin_actions' );
 /**
  * Callback for handling disable autoload action.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  */
 function perflab_aao_handle_update_autoload() {
 	check_admin_referer( 'perflab_aao_update_autoload' );
@@ -92,7 +92,7 @@ function perflab_aao_handle_update_autoload() {
 /**
  * Callback function hooked to admin_notices to render admin notices on the site health screen.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  *
  * @global string $pagenow The filename of the current screen.
  */
