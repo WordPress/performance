@@ -11,3 +11,16 @@ parameters:
 		- vendor/wp-phpunit/wp-phpunit/
 	dynamicConstantNames:
 		- PERFLAB_OBJECT_CACHE_DROPIN_VERSION
+	ignoreErrors:
+		# False positive as WordPress ships with a polyfill.
+		-
+			message: "#^Function str_starts_with not found\\.$#"
+			paths:
+				- load.php
+				- plugins/optimization-detective/optimization.php
+				- plugins/speculation-rules/class-plsr-url-pattern-prefixer.php
+		-
+			message: "#^Function str_contains not found\\.$#"
+			paths:
+				- plugins/auto-sizes/hooks.php
+				- plugins/dominant-color-images/hooks.php
