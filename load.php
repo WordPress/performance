@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/WordPress/performance
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
  * Requires at least: 6.4
- * Requires PHP: 7.0
+ * Requires PHP: 7.2
  * Version: 3.0.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/

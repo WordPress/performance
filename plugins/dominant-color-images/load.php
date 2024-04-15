@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/dominant-color-images
  * Description: Displays placeholders based on an image's dominant color while the image is loading.
  * Requires at least: 6.4
- * Requires PHP: 7.0
+ * Requires PHP: 7.2
  * Version: 1.1.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
