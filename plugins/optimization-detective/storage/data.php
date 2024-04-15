@@ -91,7 +91,7 @@ function od_get_normalized_query_vars(): array {
  * This is essentially the REQUEST_URI prefixed by the scheme and host for the home URL.
  * This is needed in particular due to subdirectory installs.
  *
- * @since n.e.x.t
+ * @since 0.1.1
  * @access private
  *
  * @return string Current URL.

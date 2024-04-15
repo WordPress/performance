@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
  * Requires at least: 6.4
  * Requires PHP: 7.0
- * Version: 2.9.0
+ * Version: 3.0.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'PERFLAB_VERSION', '2.9.0' );
+define( 'PERFLAB_VERSION', '3.0.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_SCREEN', 'performance-lab' );
@@ -46,7 +46,7 @@ require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/site-health/load.php';
  *
  * @since 1.1.0
  * @since 2.9.0 The generator tag now includes the active standalone plugin slugs.
- * @since n.e.x.t The generator tag no longer includes module slugs.
+ * @since 3.0.0 The generator tag no longer includes module slugs.
  */
 function perflab_get_generator_content() {
 	$active_plugins = array();
@@ -81,7 +81,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
 /**
  * Gets the standalone plugins and their data.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  *
  * @return array<string, array{'constant': string, 'experimental'?: bool}> Associative array of $plugin_slug => $plugin_data pairs.
  */
@@ -121,7 +121,7 @@ function perflab_get_standalone_plugin_data() {
  * Gets the standalone plugin constants used for each available standalone plugin.
  *
  * @since 2.9.0
- * @since n.e.x.t The $source parameter was removed.
+ * @since 3.0.0 The $source parameter was removed.
  *
  * @return array<string, string> Map of plugin slug and the version constant used.
  */
@@ -173,7 +173,7 @@ function perflab_maybe_set_object_cache_dropin() {
 	 *
 	 * This filter should not be used outside of tests.
 	 *
-	 * @since n.e.x.t
+	 * @since 3.0.0
 	 * @internal
 	 *
 	 * @param int|bool $current_dropin_version The drop-in version as defined by the
@@ -294,7 +294,7 @@ register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin'
 /**
  * Redirects legacy module page to the performance feature page.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  *
  * @global $plugin_page
  */
@@ -317,7 +317,7 @@ add_action( 'admin_page_access_denied', 'perflab_no_access_redirect_module_to_pe
 /**
  * Cleanup function to delete legacy 'perflab_modules_settings' option if present.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  */
 function perflab_cleanup_option() {
 	if ( current_user_can( 'manage_options' ) ) {

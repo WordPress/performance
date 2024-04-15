@@ -17,7 +17,6 @@
   },
   "require": {
     "composer/installers": "~1.0",
-    "ext-dom": "*",
     "ext-json": "*",
     "php": ">=7|^8"
   },

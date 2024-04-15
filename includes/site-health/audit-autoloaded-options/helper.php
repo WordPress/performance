@@ -195,7 +195,7 @@ function perflab_aao_get_autoloaded_options_table() {
 /**
  * Gets disabled autoload options table.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
@@ -252,7 +252,7 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 /**
  * Gets the autoload values in the database that should trigger their option to be autoloaded.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  *
  * @return array List of autoload values.
  */

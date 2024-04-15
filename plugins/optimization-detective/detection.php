@@ -36,7 +36,7 @@ function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection 
 	$detection_time_window = apply_filters( 'od_detection_time_window', 5000 );
 
 	$web_vitals_lib_data = require __DIR__ . '/build/web-vitals.asset.php';
-	$web_vitals_lib_src  = add_query_arg( 'ver', $web_vitals_lib_data['version'], plugin_dir_url( __FILE__ ) . '/build/web-vitals.js' );
+	$web_vitals_lib_src  = add_query_arg( 'ver', $web_vitals_lib_data['version'], plugin_dir_url( __FILE__ ) . 'build/web-vitals.js' );
 
 	$current_url = od_get_current_url();
 	$detect_args = array(
