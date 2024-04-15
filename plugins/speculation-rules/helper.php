@@ -77,7 +77,7 @@ function plsr_get_speculation_rules() {
 			'source'    => 'document',
 			'where'     => array(
 				'and' => array(
-					// Prerender any URLs within the same site.
+					// Include any URLs within the same site.
 					array(
 						'href_matches' => $prefixer->prefix_path_pattern( '/*' ),
 					),
@@ -85,6 +85,12 @@ function plsr_get_speculation_rules() {
 					array(
 						'not' => array(
 							'href_matches' => $href_exclude_paths,
+						),
+					),
+					// Also exclude rel=nofollow links, as plugins like WooCommerce attribute their add-to-cart links (which should buttons).
+					array(
+						'not' => array(
+							'selector_matches' => 'a[rel=nofollow]',
 						),
 					),
 				),
