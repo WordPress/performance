@@ -42,6 +42,7 @@ function plsr_get_speculation_rules() {
 	$base_href_exclude_paths = array(
 		$prefixer->prefix_path_pattern( '/wp-login.php', 'site' ),
 		$prefixer->prefix_path_pattern( '/wp-admin/*', 'site' ),
+		$prefixer->prefix_path_pattern( '/*\\?*(^|&)_wpnonce=*', 'site' ),
 	);
 	$href_exclude_paths      = $base_href_exclude_paths;
 
