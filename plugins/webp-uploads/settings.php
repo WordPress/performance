@@ -87,3 +87,30 @@ function webp_uploads_media_setting_style() {
 	<?php
 }
 add_action( 'admin_head-options-media.php', 'webp_uploads_media_setting_style' );
+
+/**
+ * Adds a settings link to the plugin's action links.
+ *
+ * @since 1.1.0
+ * @since n.e.x.t Renamed from webp_uploads_settings_link() to webp_uploads_add_settings_action_link()
+ *
+ * @param string[]|mixed $links An array of plugin action links.
+ * @return string[]|mixed The modified list of actions.
+ */
+function webp_uploads_add_settings_action_link( $links ) {
+	if ( ! is_array( $links ) ) {
+		return $links;
+	}
+
+	return array_merge(
+		array(
+			'settings' => sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( admin_url( 'options-media.php#perflab_generate_webp_and_jpeg' ) ),
+				esc_html__( 'Settings', 'webp-uploads' )
+			),
+		),
+		$links
+	);
+}
+add_filter( 'plugin_action_links_' . WEBP_UPLOADS_MAIN_FILE, 'webp_uploads_add_settings_action_link' );
