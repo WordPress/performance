@@ -77,7 +77,16 @@ function perflab_render_settings_page() {
  * @param string $hook_suffix The current admin page.
  */
 function perflab_admin_pointer( $hook_suffix ) {
+	$current_user = get_current_user_id();
+
 	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
+
+		// Do not show on the settings page and dismiss the pointer
+		if ( !empty( $_GET['page'] ) && $_GET['page'] === PERFLAB_SCREEN ) {
+			$dismissed[] = 'perflab-admin-pointer';
+			update_user_meta( $current_user, 'dismissed_wp_pointers', implode( ',', $dismissed ) );
+		}
+
 		return;
 	}
 
@@ -86,7 +95,6 @@ function perflab_admin_pointer( $hook_suffix ) {
 		return;
 	}
 
-	$current_user = get_current_user_id();
 	$dismissed    = explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) );
 
 	if ( in_array( 'perflab-admin-pointer', $dismissed, true ) ) {
