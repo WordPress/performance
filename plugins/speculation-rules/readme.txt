@@ -107,6 +107,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 **Enhancements**
 
 * Add settings link to Speculative Loading plugin action links. ([1145](https://github.com/WordPress/performance/pull/1145))
+* Bump minimum PHP version to 7.2. ([1130](https://github.com/WordPress/performance/pull/1130))
 
 **Bug Fixes**
 
