@@ -149,7 +149,11 @@ function plsr_add_setting_ui() {
 			</p>
 			<?php
 		},
-		'reading'
+		'reading',
+		array(
+			'before_section' => '<div id="speculative-loading">',
+			'after_section'  => '</div>',
+		)
 	);
 
 	$fields = array(
@@ -236,3 +240,29 @@ function plsr_render_settings_field( array $args ) {
 	</fieldset>
 	<?php
 }
+
+/**
+ * Adds a settings link to the plugin's action links.
+ *
+ * @since n.e.x.t
+ *
+ * @param string[]|mixed $links An array of plugin action links.
+ * @return string[]|mixed The modified list of actions.
+ */
+function plsr_add_settings_action_link( $links ) {
+	if ( ! is_array( $links ) ) {
+		return $links;
+	}
+
+	return array_merge(
+		array(
+			'settings' => sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( admin_url( 'options-reading.php#speculative-loading' ) ),
+				esc_html__( 'Settings', 'speculation-rules' )
+			),
+		),
+		$links
+	);
+}
+add_filter( 'plugin_action_links_' . SPECULATION_RULES_MAIN_FILE, 'plsr_add_settings_action_link' );
