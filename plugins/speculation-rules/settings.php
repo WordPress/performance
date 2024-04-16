@@ -253,11 +253,16 @@ function plsr_add_settings_action_link( $links ) {
 	if ( ! is_array( $links ) ) {
 		return $links;
 	}
-	$links['settings'] = sprintf(
-		'<a href="%1$s">%2$s</a>',
-		esc_url( admin_url( 'options-reading.php#speculative-loading' ) ),
-		esc_html__( 'Settings', 'speculation-rules' )
+
+	return array_merge(
+		array(
+			'settings' => sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( admin_url( 'options-reading.php#speculative-loading' ) ),
+				esc_html__( 'Settings', 'speculation-rules' )
+			),
+		),
+		$links
 	);
-	return $links;
 }
 add_filter( 'plugin_action_links_' . SPECULATION_RULES_MAIN_FILE, 'plsr_add_settings_action_link' );

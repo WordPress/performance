@@ -113,10 +113,10 @@ class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
 
 		$this->assertSame(
 			array_merge(
-				$default_action_links,
 				array(
 					'settings' => '<a href="' . esc_url( admin_url( 'options-reading.php#speculative-loading' ) ) . '">Settings</a>',
-				)
+				),
+				$default_action_links
 			),
 			plsr_add_settings_action_link( $default_action_links )
 		);
