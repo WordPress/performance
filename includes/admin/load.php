@@ -340,13 +340,23 @@ function perflab_print_features_page_style() {
  */
 function perflab_plugin_admin_notices() {
 	if ( ! current_user_can( 'install_plugins' ) ) {
-		wp_admin_notice(
-			esc_html__( 'Due to your site\'s configuration, you may not be able to activate the performance features, unless the underlying plugin is already installed. Please install the relevant plugins manually.', 'performance-lab' ),
-			array(
-				'type' => 'warning',
-			)
-		);
-		return;
+		$is_all_plugins_actived = true;
+		foreach ( perflab_get_standalone_plugin_version_constants() as $plugin_slug => $constant_name ) {
+			if ( ! defined( $constant_name ) ) {
+				$is_all_plugins_actived = false;
+				break;
+			}
+		}
+
+		if ( ! $is_all_plugins_actived ) {
+			wp_admin_notice(
+				esc_html__( 'Due to your site\'s configuration, you may not be able to activate the performance features, unless the underlying plugin is already installed. Please install the relevant plugins manually.', 'performance-lab' ),
+				array(
+					'type' => 'warning',
+				)
+			);
+			return;
+		}
 	}
 
 	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
