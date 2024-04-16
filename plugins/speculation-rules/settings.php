@@ -244,7 +244,7 @@ function plsr_render_settings_field( array $args ) {
 /**
  * Adds a settings link to the plugin's action links.
  *
- * @since n.e.x.t
+ * @since 1.2.1
  *
  * @param string[]|mixed $links An array of plugin action links.
  * @return string[]|mixed The modified list of actions.
