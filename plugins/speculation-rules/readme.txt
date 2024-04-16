@@ -88,6 +88,16 @@ add_filter(
 
 As mentioned above, adding the `no-prerender` CSS class to a link will prevent it from being prerendered (but not prefetched). Additionally, links with `rel=nofollow` will neither be prefetched nor prerendered because some plugins add this to non-idempotent links (e.g. add to cart); such links ideally should rather be buttons which trigger a POST request or at least they should use `wp_nonce_url()`.
 
+= How will this impact analytics and personalization? =
+
+Prerendering can affect analytics and personalization.
+
+For client-side JavaScript, is recommended to delay these until the page clicks and some solutions (like Google Analytics) already do this automatically for prerender. See [Impact on Analytics](https://developer.chrome.com/docs/web-platform/prerender-pages#impact-on-analytics). Additionally, cross-origin iframes are not loaded until activation which can further avoid issues here.
+
+Speculating on hover (moderate) increases the chance the page will be loaded, over preloading without this signal, and thus reduces the risk here. Alternatively, the plugin offers to only speculate on mouse/pointer down (conservative) which further reduces the risk here and is an option for sites which are concerned about this, at the cost of having less of a lead time and so less of a performance gain.
+
+A prerendered page is linked to the page that prerenders it, so personalisation may already be known by this point and changes (e.g. browsing other products, or logging in/out) may require a new page load, and hence a new prerender anyway, which will take these into account. But it definitely is something to be aware of and test!
+
 = Where can I submit my plugin feedback? =
 
 Feedback is encouraged and much appreciated, especially since this plugin may contain future WordPress core features. If you have suggestions or requests for new features, you can [submit them as an issue in the WordPress Performance Team's GitHub repository](https://github.com/WordPress/performance/issues/new/choose). If you need help with troubleshooting or have a question about the plugin, please [create a new topic on our support forum](https://wordpress.org/support/plugin/speculation-rules/#new-topic-0).
