@@ -26,6 +26,7 @@ if ( defined( 'SPECULATION_RULES_VERSION' ) ) {
 }
 
 define( 'SPECULATION_RULES_VERSION', '1.2.0' );
+define( 'SPECULATION_RULES_MAIN_FILE', plugin_basename( __FILE__ ) );
 
 require_once __DIR__ . '/class-plsr-url-pattern-prefixer.php';
 require_once __DIR__ . '/helper.php';

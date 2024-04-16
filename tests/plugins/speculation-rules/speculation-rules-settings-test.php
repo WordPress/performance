@@ -7,6 +7,9 @@
 
 class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
 
+	/**
+	 * @covers ::plsr_register_setting
+	 */
 	public function test_plsr_register_setting() {
 		unregister_setting( 'reading', 'plsr_speculation_rules' );
 		$settings = get_registered_settings();
@@ -18,7 +21,11 @@ class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers ::plsr_sanitize_setting
 	 * @dataProvider data_plsr_sanitize_setting
+	 *
+	 * @param mixed $input    Input.
+	 * @param array $expected Expected.
 	 */
 	public function test_plsr_sanitize_setting( $input, array $expected ) {
 		$this->assertSameSets(
@@ -27,7 +34,7 @@ class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
 		);
 	}
 
-	public function data_plsr_sanitize_setting() {
+	public function data_plsr_sanitize_setting(): array {
 		$default_value = array(
 			'mode'      => 'prerender',
 			'eagerness' => 'moderate',
@@ -90,6 +97,28 @@ class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
 					'eagerness' => 'conservative',
 				),
 			),
+		);
+	}
+
+	/**
+	 * @covers ::plsr_add_settings_action_link
+	 */
+	public function test_plsr_add_settings_action_link() {
+		$this->assertSame( 10, has_filter( 'plugin_action_links_' . SPECULATION_RULES_MAIN_FILE, 'plsr_add_settings_action_link' ) );
+		$this->assertFalse( plsr_add_settings_action_link( false ) );
+
+		$default_action_links = array(
+			'deactivate' => '<a href="plugins.php?action=deactivate&amp;plugin=speculation-rules%2Fload.php&amp;plugin_status=all&amp;paged=1&amp;s&amp;_wpnonce=48f74bdd74" id="deactivate-speculation-rules" aria-label="Deactivate Speculative Loading">Deactivate</a>',
+		);
+
+		$this->assertSame(
+			array_merge(
+				array(
+					'settings' => '<a href="' . esc_url( admin_url( 'options-reading.php#speculative-loading' ) ) . '">Settings</a>',
+				),
+				$default_action_links
+			),
+			plsr_add_settings_action_link( $default_action_links )
 		);
 	}
 }

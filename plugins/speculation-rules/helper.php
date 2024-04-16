@@ -88,7 +88,7 @@ function plsr_get_speculation_rules() {
 							'href_matches' => $href_exclude_paths,
 						),
 					),
-					// Also exclude rel=nofollow links, as plugins like WooCommerce attribute their add-to-cart links (which should buttons).
+					// Also exclude rel=nofollow links, as plugins like WooCommerce use that on their add-to-cart links.
 					array(
 						'not' => array(
 							'selector_matches' => 'a[rel=nofollow]',
