@@ -102,14 +102,14 @@ function webp_uploads_add_settings_action_link( $links ) {
 		return $links;
 	}
 
+	$settings_link = sprintf(
+		'<a href="%1$s">%2$s</a>',
+		esc_url( admin_url( 'options-media.php#perflab_generate_webp_and_jpeg' ) ),
+		esc_html__( 'Settings', 'webp-uploads' )
+	);
+
 	return array_merge(
-		array(
-			'settings' => sprintf(
-				'<a href="%1$s">%2$s</a>',
-				esc_url( admin_url( 'options-media.php#perflab_generate_webp_and_jpeg' ) ),
-				esc_html__( 'Settings', 'webp-uploads' )
-			),
-		),
+		array( 'settings' => $settings_link ),
 		$links
 	);
 }
