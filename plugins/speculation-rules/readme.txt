@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.2
-Stable tag:        1.2.0
+Stable tag:        1.2.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, javascript, speculation rules, prerender, prefetch
@@ -19,7 +19,7 @@ See the [Speculation Rules WICG specification draft](https://wicg.github.io/nav-
 
 By default, the plugin is configured to prerender WordPress frontend URLs when the user hovers over a relevant link. This can be customized via the "Speculative Loading" section under _Settings > Reading_.
 
-A filter can be used to exclude certain URL paths from being eligible for prefetching and prerendering (see FAQ section). Alternatively, you can add the 'no-prerender' CSS class to any link (`<a>` tag) that should not be prerendered.
+A filter can be used to exclude certain URL paths from being eligible for prefetching and prerendering (see FAQ section). Alternatively, you can add the 'no-prerender' CSS class to any link (`<a>` tag) that should not be prerendered. See FAQ for more information.
 
 = Browser support =
 
@@ -50,7 +50,7 @@ _This plugin was formerly known as Speculation Rules._
 
 = How can I prevent certain URLs from being prefetched and prerendered? =
 
-Not every URL can be reasonably prerendered. Prerendering static content is typically reliable, however prerendering interactive content, such as a logout URL, can lead to issues. For this reason, certain WordPress core URLs such as `/wp-login.php` and `/wp-admin/*` are excluded from prefetching and prerendering. You can exclude additional URL patterns by using the `plsr_speculation_rules_href_exclude_paths` filter.
+Not every URL can be reasonably prerendered. Prerendering static content is typically reliable, however prerendering interactive content, such as a logout URL, can lead to issues. For this reason, certain WordPress core URLs such as `/wp-login.php` and `/wp-admin/*` are excluded from prefetching and prerendering. Additionally, any URL generated with `wp_nonce_url()` (or which contain the `_wpnonce` query var) is also ignored. You can exclude additional URL patterns by using the `plsr_speculation_rules_href_exclude_paths` filter.
 
 This example would ensure that URLs like `https://example.com/cart/` or `https://example.com/cart/foo` would be excluded from prefetching and prerendering.
 `
@@ -86,6 +86,8 @@ add_filter(
 );
 `
 
+As mentioned above, adding the `no-prerender` CSS class to a link will prevent it from being prerendered (but not prefetched). Additionally, links with `rel=nofollow` will neither be prefetched nor prerendered because some plugins add this to non-idempotent links (e.g. add to cart); such links ideally should rather be buttons which trigger a POST request or at least they should use `wp_nonce_url()`.
+
 = Where can I submit my plugin feedback? =
 
 Feedback is encouraged and much appreciated, especially since this plugin may contain future WordPress core features. If you have suggestions or requests for new features, you can [submit them as an issue in the WordPress Performance Team's GitHub repository](https://github.com/WordPress/performance/issues/new/choose). If you need help with troubleshooting or have a question about the plugin, please [create a new topic on our support forum](https://wordpress.org/support/plugin/speculation-rules/#new-topic-0).
@@ -101,6 +103,18 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.2.1 =
+
+**Enhancements**
+
+* Add settings link to Speculative Loading plugin action links. ([1145](https://github.com/WordPress/performance/pull/1145))
+* Bump minimum PHP version to 7.2. ([1130](https://github.com/WordPress/performance/pull/1130))
+
+**Bug Fixes**
+
+* Exclude _wpnonce URLs in speculation rules. ([1143](https://github.com/WordPress/performance/pull/1143))
+* Exclude rel=nofollow links from prefetch/prerender. ([1142](https://github.com/WordPress/performance/pull/1142))
 
 = 1.2.0 =
 
