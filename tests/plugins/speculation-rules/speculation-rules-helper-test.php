@@ -34,6 +34,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 			array(
 				'/wp-login.php',
 				'/wp-admin/*',
+				'/*\\?*(^|&)_wpnonce=*',
 			),
 			$href_exclude_paths
 		);
@@ -54,6 +55,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 			array(
 				'/wp-login.php',
 				'/wp-admin/*',
+				'/*\\?*(^|&)_wpnonce=*',
 				'/custom-file.php',
 			),
 			$href_exclude_paths
