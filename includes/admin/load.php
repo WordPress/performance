@@ -169,19 +169,25 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
  *
  * @see perflab_add_features_page()
  *
- * @param array $links List of plugin action links HTML.
- * @return array Modified list of plugin action links HTML.
+ * @param string[]|mixed $links List of plugin action links HTML.
+ * @return string[]|mixed Modified list of plugin action links HTML.
  */
 function perflab_plugin_action_links_add_settings( $links ) {
+	if ( ! is_array( $links ) ) {
+		return $links;
+	}
+
 	// Add link as the first plugin action link.
 	$settings_link = sprintf(
 		'<a href="%s">%s</a>',
 		esc_url( add_query_arg( 'page', PERFLAB_SCREEN, admin_url( 'options-general.php' ) ) ),
 		esc_html__( 'Settings', 'performance-lab' )
 	);
-	array_unshift( $links, $settings_link );
 
-	return $links;
+	return array_merge(
+		array( 'settings' => $settings_link ),
+		$links
+	);
 }
 
 /**

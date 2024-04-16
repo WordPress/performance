@@ -51,10 +51,14 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_perflab_plugin_action_links_add_settings() {
-		$original_links = array( '<a href="https://wordpress.org">wordpress.org</a>' );
-		$expected_links = array(
-			'<a href="' . admin_url( '/' ) . 'options-general.php?page=' . PERFLAB_SCREEN . '">Settings</a>',
-			$original_links[0],
+		$original_links = array(
+			'deactivate' => '<a href="#">Deactivate</a>',
+		);
+		$expected_links = array_merge(
+			array(
+				'settings' => '<a href="' . admin_url( '/' ) . 'options-general.php?page=' . PERFLAB_SCREEN . '">Settings</a>',
+			),
+			$original_links
 		);
 
 		$actual_links = perflab_plugin_action_links_add_settings( $original_links );
