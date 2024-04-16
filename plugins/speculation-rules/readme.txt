@@ -102,6 +102,17 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 == Changelog ==
 
+= 1.2.1 =
+
+**Enhancements**
+
+* Add settings link to Speculative Loading plugin action links. ([1145](https://github.com/WordPress/performance/pull/1145))
+
+**Bug Fixes**
+
+* Exclude _wpnonce URLs in speculation rules. ([1143](https://github.com/WordPress/performance/pull/1143))
+* Exclude rel=nofollow links from prefetch/prerender. ([1142](https://github.com/WordPress/performance/pull/1142))
+
 = 1.2.0 =
 
 * Add missing uninstall.php to remove plugin's database option. ([1128](https://github.com/WordPress/performance/pull/1128))
