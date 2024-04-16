@@ -340,15 +340,15 @@ function perflab_print_features_page_style() {
  */
 function perflab_plugin_admin_notices() {
 	if ( ! current_user_can( 'install_plugins' ) ) {
-		$is_all_plugins_activated = true;
+		$are_all_plugins_active = true;
 		foreach ( perflab_get_standalone_plugin_version_constants() as $plugin_slug => $constant_name ) {
 			if ( ! defined( $constant_name ) ) {
-				$is_all_plugins_activated = false;
+				$are_all_plugins_active = false;
 				break;
 			}
 		}
 
-		if ( ! $is_all_plugins_activated ) {
+		if ( ! $are_all_plugins_active ) {
 			wp_admin_notice(
 				esc_html__( 'Due to your site\'s configuration, you may not be able to activate the performance features, unless the underlying plugin is already installed. Please install the relevant plugins manually.', 'performance-lab' ),
 				array(
