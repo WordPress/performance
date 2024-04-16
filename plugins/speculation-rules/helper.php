@@ -42,6 +42,7 @@ function plsr_get_speculation_rules() {
 	$base_href_exclude_paths = array(
 		$prefixer->prefix_path_pattern( '/wp-login.php', 'site' ),
 		$prefixer->prefix_path_pattern( '/wp-admin/*', 'site' ),
+		$prefixer->prefix_path_pattern( '/*\\?*(^|&)_wpnonce=*', 'site' ),
 	);
 	$href_exclude_paths      = $base_href_exclude_paths;
 
@@ -77,7 +78,7 @@ function plsr_get_speculation_rules() {
 			'source'    => 'document',
 			'where'     => array(
 				'and' => array(
-					// Prerender any URLs within the same site.
+					// Include any URLs within the same site.
 					array(
 						'href_matches' => $prefixer->prefix_path_pattern( '/*' ),
 					),
@@ -85,6 +86,12 @@ function plsr_get_speculation_rules() {
 					array(
 						'not' => array(
 							'href_matches' => $href_exclude_paths,
+						),
+					),
+					// Also exclude rel=nofollow links, as plugins like WooCommerce use that on their add-to-cart links.
+					array(
+						'not' => array(
+							'selector_matches' => 'a[rel=nofollow]',
 						),
 					),
 				),

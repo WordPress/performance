@@ -34,6 +34,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 			array(
 				'/wp-login.php',
 				'/wp-admin/*',
+				'/*\\?*(^|&)_wpnonce=*',
 			),
 			$href_exclude_paths
 		);
@@ -54,6 +55,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 			array(
 				'/wp-login.php',
 				'/wp-admin/*',
+				'/*\\?*(^|&)_wpnonce=*',
 				'/custom-file.php',
 			),
 			$href_exclude_paths
@@ -100,7 +102,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		$rules = plsr_get_speculation_rules();
 
 		$this->assertArrayHasKey( 'prerender', $rules );
-		$this->assertCount( 3, $rules['prerender'][0]['where']['and'] );
+		$this->assertCount( 4, $rules['prerender'][0]['where']['and'] );
 	}
 
 	/**
@@ -112,7 +114,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		$rules = plsr_get_speculation_rules();
 
 		$this->assertArrayHasKey( 'prefetch', $rules );
-		$this->assertCount( 2, $rules['prefetch'][0]['where']['and'] );
+		$this->assertCount( 3, $rules['prefetch'][0]['where']['and'] );
 	}
 
 	/**
