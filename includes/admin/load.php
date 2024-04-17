@@ -78,7 +78,7 @@ function perflab_render_settings_page() {
  */
 function perflab_admin_pointer( $hook_suffix ) {
 	$current_user = get_current_user_id();
-	$dismissed = array_filter( explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) ) );
+	$dismissed    = array_filter( explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) ) );
 
 	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
 
