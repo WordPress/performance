@@ -23,7 +23,7 @@ A filter can be used to exclude certain URL paths from being eligible for prefet
 
 = Browser support =
 
-The Speculation Rules API is a new web API, and the specific syntax used by the plugin currently requires using Chrome 121+.
+The Speculation Rules API is a new web API, and the specific syntax used by the plugin currently requires using Chrome or Edge (specifically Chromium 121+); other Chromium-based browsers like Opera should also work, although Arc and Brave may not work if uBlock Origin is enabled.
 
 Other browsers will not see any adverse effects, however the feature will not work for those clients.
 
