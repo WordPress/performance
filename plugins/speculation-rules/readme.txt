@@ -23,7 +23,7 @@ A filter can be used to exclude certain URL paths from being eligible for prefet
 
 = Browser support =
 
-The Speculation Rules API is a new web API, and the specific syntax used by the plugin currently requires using Chrome or Edge (specifically Chromium 121+); other Chromium-based browsers like Opera should also work, although Arc and Brave may not work if uBlock Origin is enabled.
+The Speculation Rules API is a new web API, and the functionality used by the plugin is supported in Chromium-based browsers such as Chrome, Edge, or Opera using version 121 or above. Other browsers such as Safari and Firefox will ignore the functionality with no ill effects but will not benefit from the speculative loading. Note that extensions may disable preloading by default (for example, uBlock Origin does this) .
 
 Other browsers will not see any adverse effects, however the feature will not work for those clients.
 
