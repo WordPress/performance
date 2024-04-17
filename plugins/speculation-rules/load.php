@@ -5,7 +5,7 @@
  * Description: Enables browsers to speculatively prerender or prefetch pages when hovering over links.
  * Requires at least: 6.4
  * Requires PHP: 7.2
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -25,7 +25,7 @@ if ( defined( 'SPECULATION_RULES_VERSION' ) ) {
 	return;
 }
 
-define( 'SPECULATION_RULES_VERSION', '1.2.0' );
+define( 'SPECULATION_RULES_VERSION', '1.2.1' );
 define( 'SPECULATION_RULES_MAIN_FILE', plugin_basename( __FILE__ ) );
 
 require_once __DIR__ . '/class-plsr-url-pattern-prefixer.php';
