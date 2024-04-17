@@ -78,11 +78,12 @@ function perflab_render_settings_page() {
  */
 function perflab_admin_pointer( $hook_suffix ) {
 	$current_user = get_current_user_id();
+	$dismissed = array_filter( explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) ) );
 
 	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
 
-		// Dismiss the admin pointer once the user reaches the settings screen.
-		if ( ! empty( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// Do not show on the settings page and dismiss the pointer.
+		if ( ! empty( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] && ( ! in_array( 'perflab-admin-pointer', $dismissed, true ))) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$dismissed[] = 'perflab-admin-pointer';
 			update_user_meta( $current_user, 'dismissed_wp_pointers', implode( ',', $dismissed ) );
 		}
@@ -94,8 +95,6 @@ function perflab_admin_pointer( $hook_suffix ) {
 	if ( is_network_admin() || is_user_admin() ) {
 		return;
 	}
-
-	$dismissed = explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) );
 
 	if ( in_array( 'perflab-admin-pointer', $dismissed, true ) ) {
 		return;
