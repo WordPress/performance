@@ -8,7 +8,7 @@ parameters:
 		- plugins/
 		- tests/
 	bootstrapFiles:
-		- plugins/speculation-rules/load.php
+		- bin/phpstan/constants.php
 	scanDirectories:
 		- vendor/wp-phpunit/wp-phpunit/
 	dynamicConstantNames:
