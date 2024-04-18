@@ -193,10 +193,10 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		);
 	}
 
-	$title_attr = '';
+	$title_link_attr = '';
 	if ( isset( $plugin_data['slug'] ) && current_user_can( 'install_plugins' ) ) {
-		$title_attr   = ' class="thickbox open-plugin-details-modal"';
-		$details_link = esc_url_raw(
+		$title_link_attr = ' class="thickbox open-plugin-details-modal"';
+		$details_link    = esc_url_raw(
 			add_query_arg(
 				array(
 					'tab'       => 'plugin-information',
@@ -218,7 +218,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			esc_html__( 'Learn more', 'performance-lab' )
 		);
 	} elseif ( ! empty( $plugin_data['homepage'] ) ) {
-		$title_attr = ' target="_blank"';
+		$title_link_attr = ' target="_blank"';
 
 		/* translators: %s: Plugin name. */
 		$aria_label = sprintf( __( 'Visit plugin site for %s', 'default' ), $name );
@@ -297,7 +297,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		<div class="plugin-card-top">
 			<div class="name column-name">
 				<h3>
-					<a href="<?php echo esc_url( $details_link ); ?>"<?php echo $title_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+					<a href="<?php echo esc_url( $details_link ); ?>"<?php echo $title_link_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 						<?php echo wp_kses_post( $title ); ?>
 					</a>
 					<?php
