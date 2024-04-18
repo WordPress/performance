@@ -61,7 +61,7 @@ function od_get_url_metric_freshness_ttl(): int {
  * @since 0.1.0
  * @access private
  *
- * @return array Normalized query vars.
+ * @return array<string, mixed> Normalized query vars.
  */
 function od_get_normalized_query_vars(): array {
 	global $wp;
@@ -133,7 +133,7 @@ function od_get_current_url(): string {
  *
  * @see od_get_normalized_query_vars()
  *
- * @param array $query_vars Normalized query vars.
+ * @param array<string, mixed> $query_vars Normalized query vars.
  * @return string Slug.
  */
 function od_get_url_metrics_slug( array $query_vars ): string {
