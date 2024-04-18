@@ -287,7 +287,7 @@ final class OD_HTML_Tag_Walker {
 	 *
 	 * @param string $message Warning message.
 	 */
-	private function warn( string $message ) {
+	private function warn( string $message ): void {
 		wp_trigger_error(
 			__CLASS__ . '::open_tags',
 			esc_html( $message )

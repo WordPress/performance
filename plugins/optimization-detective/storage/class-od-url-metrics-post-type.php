@@ -44,7 +44,7 @@ class OD_URL_Metrics_Post_Type {
 	 *
 	 * @since 0.1.0
 	 */
-	public static function add_hooks() {
+	public static function add_hooks(): void {
 		add_action( 'init', array( __CLASS__, 'register_post_type' ) );
 		add_action( 'admin_init', array( __CLASS__, 'schedule_garbage_collection' ) );
 		add_action( self::GC_CRON_EVENT_NAME, array( __CLASS__, 'delete_stale_posts' ) );
@@ -57,7 +57,7 @@ class OD_URL_Metrics_Post_Type {
 	 *
 	 * @since 0.1.0
 	 */
-	public static function register_post_type() {
+	public static function register_post_type(): void {
 		register_post_type(
 			self::SLUG,
 			array(
@@ -85,7 +85,7 @@ class OD_URL_Metrics_Post_Type {
 	 * @param string $slug URL metrics slug.
 	 * @return WP_Post|null Post object if exists.
 	 */
-	public static function get_post( string $slug ) {
+	public static function get_post( string $slug ): ?WP_Post {
 		$post_query = new WP_Query(
 			array(
 				'post_type'              => self::SLUG,
@@ -253,7 +253,7 @@ class OD_URL_Metrics_Post_Type {
 	 *
 	 * @since 0.1.0
 	 */
-	public static function schedule_garbage_collection() {
+	public static function schedule_garbage_collection(): void {
 		if ( ! is_user_logged_in() ) {
 			return;
 		}
@@ -275,7 +275,7 @@ class OD_URL_Metrics_Post_Type {
 	 *
 	 * @since 0.1.0
 	 */
-	public static function delete_stale_posts() {
+	public static function delete_stale_posts(): void {
 		$one_month_ago = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) );
 
 		$query = new WP_Query(
@@ -303,7 +303,7 @@ class OD_URL_Metrics_Post_Type {
 	 *
 	 * @since 0.1.0
 	 */
-	public static function delete_all_posts() {
+	public static function delete_all_posts(): void {
 		global $wpdb;
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching

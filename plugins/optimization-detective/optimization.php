@@ -53,7 +53,7 @@ function od_buffer_output( string $passthrough ): string {
  * @since 0.1.0
  * @access private
  */
-function od_maybe_add_template_output_buffer_filter() {
+function od_maybe_add_template_output_buffer_filter(): void {
 	if ( ! od_can_optimize_response() ) {
 		return;
 	}

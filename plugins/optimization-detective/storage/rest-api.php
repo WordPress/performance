@@ -35,7 +35,7 @@ const OD_URL_METRICS_ROUTE = '/url-metrics:store';
  * @since 0.1.0
  * @access private
  */
-function od_register_endpoint() {
+function od_register_endpoint(): void {
 
 	$args = array(
 		'slug'  => array(
