@@ -193,27 +193,45 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		);
 	}
 
-	$details_link = esc_url_raw(
-		add_query_arg(
-			array(
-				'tab'       => 'plugin-information',
-				'plugin'    => $plugin_data['slug'],
-				'TB_iframe' => 'true',
-				'width'     => 600,
-				'height'    => 550,
-			),
-			admin_url( 'plugin-install.php' )
-		)
-	);
+	$title_attr = '';
+	if ( isset( $plugin_data['slug'] ) && current_user_can( 'install_plugins' ) ) {
+		$title_attr   = ' class="thickbox open-plugin-details-modal"';
+		$details_link = esc_url_raw(
+			add_query_arg(
+				array(
+					'tab'       => 'plugin-information',
+					'plugin'    => $plugin_data['slug'],
+					'TB_iframe' => 'true',
+					'width'     => 600,
+					'height'    => 550,
+				),
+				admin_url( 'plugin-install.php' )
+			)
+		);
 
-	$action_links[] = sprintf(
-		'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s" data-title="%s">%s</a>',
-		esc_url( $details_link ),
-		/* translators: %s: Plugin name and version. */
-		esc_attr( sprintf( __( 'More information about %s', 'default' ), $name ) ),
-		esc_attr( $name ),
-		esc_html__( 'Learn more', 'performance-lab' )
-	);
+		$action_links[] = sprintf(
+			'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s" data-title="%s">%s</a>',
+			esc_url( $details_link ),
+			/* translators: %s: Plugin name and version. */
+			esc_attr( sprintf( __( 'More information about %s', 'default' ), $name ) ),
+			esc_attr( $name ),
+			esc_html__( 'Learn more', 'performance-lab' )
+		);
+	} elseif ( ! empty( $plugin_data['homepage'] ) ) {
+		$title_attr = ' target="_blank"';
+
+		/* translators: %s: Plugin name. */
+		$aria_label = sprintf( __( 'Visit plugin site for %s', 'default' ), $name );
+
+		$details_link = $plugin_data['homepage'];
+
+		$action_links[] = sprintf(
+			'<a href="%s" aria-label="%s" target="_blank">%s</a>',
+			esc_url( $details_link ),
+			esc_attr( $aria_label ),
+			__( 'Visit plugin site', 'default' )
+		);
+	}
 	?>
 	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>">
 		<?php
@@ -279,7 +297,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		<div class="plugin-card-top">
 			<div class="name column-name">
 				<h3>
-					<a href="<?php echo esc_url( $details_link ); ?>" class="thickbox open-plugin-details-modal">
+					<a href="<?php echo esc_url( $details_link ); ?>"<?php echo wp_kses_post( $title_attr ); ?>>
 						<?php echo wp_kses_post( $title ); ?>
 					</a>
 					<?php
