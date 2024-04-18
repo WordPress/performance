@@ -229,7 +229,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			'<a href="%s" aria-label="%s" target="_blank">%s</a>',
 			esc_url( $details_link ),
 			esc_attr( $aria_label ),
-			__( 'Visit plugin site', 'default' )
+			esc_html__( 'Visit plugin site', 'default' )
 		);
 	}
 	?>
@@ -297,7 +297,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		<div class="plugin-card-top">
 			<div class="name column-name">
 				<h3>
-					<a href="<?php echo esc_url( $details_link ); ?>"<?php echo wp_kses_post( $title_attr ); ?>>
+					<a href="<?php echo esc_url( $details_link ); ?>"<?php echo $title_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 						<?php echo wp_kses_post( $title ); ?>
 					</a>
 					<?php
