@@ -312,7 +312,10 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
  * @access private
  *
  * @param OD_URL_Metrics_Group_Collection $group_collection URL metrics group collection.
- * @return array LCP elements keyed by its minimum viewport width. If there is no supported LCP element at a breakpoint, then `false` is used.
+ * @return array<int, array{xpath: string}|false> LCP elements keyed by its minimum viewport width. If there is no
+ *                                                supported LCP element at a breakpoint, then `false` is used. Note that
+ *                                                the array shape is actually an ElementData from OD_URL_Metric but
+ *                                                PHPStan does not support importing a type onto a function.
  */
 function od_get_lcp_elements_by_minimum_viewport_widths( OD_URL_Metrics_Group_Collection $group_collection ): array {
 	$lcp_element_by_viewport_minimum_width = array();
