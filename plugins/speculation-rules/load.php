@@ -32,13 +32,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		if ( ! isset( $GLOBALS[ $global_var_name ] ) ) {
 			$bootstrap = static function () use ( $global_var_name ) {
 				if (
-					isset( $GLOBALS[ $global_var_name ]['load'], $GLOBALS[ $global_var_name ]['version'] )
+					isset( $GLOBALS[ $global_var_name ]['load'] )
 					&&
 					$GLOBALS[ $global_var_name ]['load'] instanceof Closure
-					&&
-					is_string( $GLOBALS[ $global_var_name ]['version'] )
 				) {
-					call_user_func( $GLOBALS[ $global_var_name ]['load'], $GLOBALS[ $global_var_name ]['version'] );
+					call_user_func( $GLOBALS[ $global_var_name ]['load'] );
 					unset( $GLOBALS[ $global_var_name ] );
 				}
 			};
@@ -70,14 +68,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 )(
 	'plsr_pending_plugin_info',
 	'1.2.1',
-	static function ( string $version ) {
+	static function () {
 
 		// Define the constant.
 		if ( defined( 'SPECULATION_RULES_VERSION' ) ) {
 			return;
 		}
 
-		define( 'SPECULATION_RULES_VERSION', $version );
+		define( 'SPECULATION_RULES_VERSION', '1.2.1' );
 		define( 'SPECULATION_RULES_MAIN_FILE', plugin_basename( __FILE__ ) );
 
 		require_once __DIR__ . '/class-plsr-url-pattern-prefixer.php';
