@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @access private
  * @link https://core.trac.wordpress.org/ticket/43258
  *
- * @param string $passthrough Optional. Filter value. Default null.
+ * @param string $passthrough Optional. Filter value.
  * @return string Unmodified value of $passthrough.
  */
 function od_buffer_output( string $passthrough ): string {
