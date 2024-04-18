@@ -91,7 +91,7 @@ function perflab_admin_pointer( $hook_suffix ) {
 	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
 
 		// Do not show on the settings page and dismiss the pointer.
-		if ( ! empty( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] && ( ! in_array( 'perflab-admin-pointer', $dismissed, true ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] && ( ! in_array( 'perflab-admin-pointer', $dismissed, true ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$dismissed[] = 'perflab-admin-pointer';
 			update_user_meta( $current_user, 'dismissed_wp_pointers', implode( ',', $dismissed ) );
 		}
