@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @access private
  * @link https://core.trac.wordpress.org/ticket/43258
  *
- * @param string $passthrough Optional. Filter value.
+ * @param string $passthrough Value for the template_include filter which is passed through.
  * @return string Unmodified value of $passthrough.
  */
 function od_buffer_output( string $passthrough ): string {
