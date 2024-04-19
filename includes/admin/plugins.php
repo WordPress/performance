@@ -193,7 +193,6 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		);
 	}
 
-	$title_link_attr = '';
 	if ( isset( $plugin_data['slug'] ) && current_user_can( 'install_plugins' ) ) {
 		$title_link_attr = ' class="thickbox open-plugin-details-modal"';
 		$details_link    = esc_url_raw(
@@ -217,13 +216,13 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			esc_attr( $name ),
 			esc_html__( 'Learn more', 'performance-lab' )
 		);
-	} elseif ( ! empty( $plugin_data['homepage'] ) ) {
+	} else {
 		$title_link_attr = ' target="_blank"';
 
 		/* translators: %s: Plugin name. */
 		$aria_label = sprintf( __( 'Visit plugin site for %s', 'default' ), $name );
 
-		$details_link = $plugin_data['homepage'];
+		$details_link = __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_data['slug'];
 
 		$action_links[] = sprintf(
 			'<a href="%s" aria-label="%s" target="_blank">%s</a>',
