@@ -34,10 +34,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if (
 					isset( $GLOBALS[ $global_var_name ]['load'] )
 					&&
+					! isset( $GLOBALS[ $global_var_name ]['loaded'] )
+					&&
 					$GLOBALS[ $global_var_name ]['load'] instanceof Closure
 				) {
 					call_user_func( $GLOBALS[ $global_var_name ]['load'] );
-					unset( $GLOBALS[ $global_var_name ] );
+					$GLOBALS[ $global_var_name ]['loaded'] = true;
 				}
 			};
 
