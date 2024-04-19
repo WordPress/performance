@@ -68,10 +68,12 @@ function plsr_get_speculation_rules() {
 	// 3. The array has sequential keys (i.e. array_is_list()).
 	$href_exclude_paths = array_values(
 		array_unique(
-			array_map(
-				array( $prefixer, 'prefix_path_pattern' ),
-				array_merge(
-					$base_href_exclude_paths,
+			array_merge(
+				$base_href_exclude_paths,
+				array_map(
+					static function ( string $href_exclude_path ) use ( $prefixer ): string {
+						return $prefixer->prefix_path_pattern( $href_exclude_path );
+					},
 					$href_exclude_paths
 				)
 			)
