@@ -69,7 +69,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback() {
 }
 
 /**
- * Adds custom style for media settings.
+ * Adds custom styles to hide specific elements in media settings.
  *
  * @since 1.0.0
  */
