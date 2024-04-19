@@ -44,7 +44,6 @@ function plsr_get_speculation_rules() {
 		$prefixer->prefix_path_pattern( '/wp-admin/*', 'site' ),
 		$prefixer->prefix_path_pattern( '/*\\?*(^|&)_wpnonce=*', 'site' ),
 	);
-	$href_exclude_paths      = $base_href_exclude_paths;
 
 	/**
 	 * Filters the paths for which speculative prerendering should be disabled.
@@ -57,10 +56,11 @@ function plsr_get_speculation_rules() {
 	 * @since 1.0.0
 	 * @since 1.1.0 The $mode parameter was added.
 	 *
-	 * @param array  $href_exclude_paths Paths to disable speculative prerendering for.
-	 * @param string $mode               Mode used to apply speculative prerendering. Either 'prefetch' or 'prerender'.
+	 * @param string[] $href_exclude_paths Additional paths to disable speculative prerendering for. The base exclude paths,
+	 *                                     such as for wp-admin, cannot be removed.
+	 * @param string $mode                 Mode used to apply speculative prerendering. Either 'prefetch' or 'prerender'.
 	 */
-	$href_exclude_paths = (array) apply_filters( 'plsr_speculation_rules_href_exclude_paths', $href_exclude_paths, $mode );
+	$href_exclude_paths = (array) apply_filters( 'plsr_speculation_rules_href_exclude_paths', array(), $mode );
 
 	// Ensure that:
 	// 1. There are no duplicates.
