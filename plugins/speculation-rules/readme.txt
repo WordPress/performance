@@ -23,7 +23,7 @@ A filter can be used to exclude certain URL paths from being eligible for prefet
 
 = Browser support =
 
-The Speculation Rules API is a new web API, and the specific syntax used by the plugin currently requires using Chrome 121+.
+The Speculation Rules API is a new web API, and the functionality used by the plugin is supported in Chromium-based browsers such as Chrome, Edge, or Opera using version 121 or above. Other browsers such as Safari and Firefox will ignore the functionality with no ill effects but will not benefit from the speculative loading. Note that extensions may disable preloading by default (for example, uBlock Origin does this).
 
 Other browsers will not see any adverse effects, however the feature will not work for those clients.
 
@@ -87,6 +87,16 @@ add_filter(
 `
 
 As mentioned above, adding the `no-prerender` CSS class to a link will prevent it from being prerendered (but not prefetched). Additionally, links with `rel=nofollow` will neither be prefetched nor prerendered because some plugins add this to non-idempotent links (e.g. add to cart); such links ideally should rather be buttons which trigger a POST request or at least they should use `wp_nonce_url()`.
+
+= How will this impact analytics and personalization? =
+
+Prerendering can affect analytics and personalization.
+
+For client-side JavaScript, is recommended to delay these until the page clicks and some solutions (like Google Analytics) already do this automatically for prerender. See [Impact on Analytics](https://developer.chrome.com/docs/web-platform/prerender-pages#impact-on-analytics). Additionally, cross-origin iframes are not loaded until activation which can further avoid issues here.
+
+Speculating on hover (moderate) increases the chance the page will be loaded, over preloading without this signal, and thus reduces the risk here. Alternatively, the plugin offers to only speculate on mouse/pointer down (conservative) which further reduces the risk here and is an option for sites which are concerned about this, at the cost of having less of a lead time and so less of a performance gain.
+
+A prerendered page is linked to the page that prerenders it, so personalisation may already be known by this point and changes (e.g. browsing other products, or logging in/out) may require a new page load, and hence a new prerender anyway, which will take these into account. But it definitely is something to be aware of and test!
 
 = Where can I submit my plugin feedback? =
 
