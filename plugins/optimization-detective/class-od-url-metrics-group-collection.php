@@ -155,7 +155,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 *
 	 * @param OD_URL_Metric $new_url_metric New URL metric.
 	 */
-	public function add_url_metric( OD_URL_Metric $new_url_metric ) {
+	public function add_url_metric( OD_URL_Metric $new_url_metric ): void {
 		foreach ( $this->groups as $group ) {
 			if ( $group->is_viewport_width_in_range( $new_url_metric->get_viewport_width() ) ) {
 				$group->add_url_metric( $new_url_metric );

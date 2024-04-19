@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @access private
  * @link https://core.trac.wordpress.org/ticket/43258
  *
- * @param string $passthrough Optional. Filter value. Default null.
+ * @param string $passthrough Value for the template_include filter which is passed through.
  * @return string Unmodified value of $passthrough.
  */
 function od_buffer_output( string $passthrough ): string {
@@ -53,7 +53,7 @@ function od_buffer_output( string $passthrough ): string {
  * @since 0.1.0
  * @access private
  */
-function od_maybe_add_template_output_buffer_filter() {
+function od_maybe_add_template_output_buffer_filter(): void {
 	if ( ! od_can_optimize_response() ) {
 		return;
 	}

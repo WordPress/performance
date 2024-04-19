@@ -45,6 +45,8 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Constructor.
 	 *
+	 * @phpstan-param Data $data URL metric data.
+	 *
 	 * @param array $data URL metric data.
 	 *
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
@@ -60,7 +62,7 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets JSON schema for URL Metric.
 	 *
-	 * @return array Schema.
+	 * @return array<string, mixed> Schema.
 	 */
 	public static function get_json_schema(): array {
 		$dom_rect_schema = array(

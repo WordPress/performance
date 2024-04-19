@@ -42,9 +42,8 @@ function plsr_get_speculation_rules() {
 	$base_href_exclude_paths = array(
 		$prefixer->prefix_path_pattern( '/wp-login.php', 'site' ),
 		$prefixer->prefix_path_pattern( '/wp-admin/*', 'site' ),
-		$prefixer->prefix_path_pattern( '/*\\?*(^|&)_wpnonce=*', 'site' ),
+		$prefixer->prefix_path_pattern( '/*\\?*(^|&)_wpnonce=*', 'home' ),
 	);
-	$href_exclude_paths      = $base_href_exclude_paths;
 
 	/**
 	 * Filters the paths for which speculative prerendering should be disabled.
@@ -57,18 +56,26 @@ function plsr_get_speculation_rules() {
 	 * @since 1.0.0
 	 * @since 1.1.0 The $mode parameter was added.
 	 *
-	 * @param array  $href_exclude_paths Paths to disable speculative prerendering for.
-	 * @param string $mode               Mode used to apply speculative prerendering. Either 'prefetch' or 'prerender'.
+	 * @param string[] $href_exclude_paths Additional paths to disable speculative prerendering for. The base exclude paths,
+	 *                                     such as for wp-admin, cannot be removed.
+	 * @param string   $mode               Mode used to apply speculative prerendering. Either 'prefetch' or 'prerender'.
 	 */
-	$href_exclude_paths = (array) apply_filters( 'plsr_speculation_rules_href_exclude_paths', $href_exclude_paths, $mode );
+	$href_exclude_paths = (array) apply_filters( 'plsr_speculation_rules_href_exclude_paths', array(), $mode );
 
-	// Ensure that there are no duplicates and that the base paths cannot be removed.
-	$href_exclude_paths = array_unique(
-		array_map(
-			array( $prefixer, 'prefix_path_pattern' ),
+	// Ensure that:
+	// 1. There are no duplicates.
+	// 2. The base paths cannot be removed.
+	// 3. The array has sequential keys (i.e. array_is_list()).
+	$href_exclude_paths = array_values(
+		array_unique(
 			array_merge(
 				$base_href_exclude_paths,
-				$href_exclude_paths
+				array_map(
+					static function ( string $href_exclude_path ) use ( $prefixer ): string {
+						return $prefixer->prefix_path_pattern( $href_exclude_path );
+					},
+					$href_exclude_paths
+				)
 			)
 		)
 	);

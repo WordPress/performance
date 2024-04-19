@@ -61,7 +61,7 @@ function od_get_url_metric_freshness_ttl(): int {
  * @since 0.1.0
  * @access private
  *
- * @return array Normalized query vars.
+ * @return array<string, mixed> Normalized query vars.
  */
 function od_get_normalized_query_vars(): array {
 	global $wp;
@@ -133,7 +133,7 @@ function od_get_current_url(): string {
  *
  * @see od_get_normalized_query_vars()
  *
- * @param array $query_vars Normalized query vars.
+ * @param array<string, mixed> $query_vars Normalized query vars.
  * @return string Slug.
  */
 function od_get_url_metrics_slug( array $query_vars ): string {
@@ -312,7 +312,10 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
  * @access private
  *
  * @param OD_URL_Metrics_Group_Collection $group_collection URL metrics group collection.
- * @return array LCP elements keyed by its minimum viewport width. If there is no supported LCP element at a breakpoint, then `false` is used.
+ * @return array<int, array{xpath: string}|false> LCP elements keyed by its minimum viewport width. If there is no
+ *                                                supported LCP element at a breakpoint, then `false` is used. Note that
+ *                                                the array shape is actually an ElementData from OD_URL_Metric but
+ *                                                PHPStan does not support importing a type onto a function.
  */
 function od_get_lcp_elements_by_minimum_viewport_widths( OD_URL_Metrics_Group_Collection $group_collection ): array {
 	$lcp_element_by_viewport_minimum_width = array();

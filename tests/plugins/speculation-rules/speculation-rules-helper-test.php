@@ -83,7 +83,16 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		$href_exclude_paths = $rules['prerender'][0]['where']['and'][1]['not']['href_matches'];
 
 		// Ensure the additional exclusion is present because the mode is 'prerender'.
-		$this->assertContains( '/products/*', $href_exclude_paths );
+		// Also ensure keys are sequential starting from 0 (that is, that array_is_list()).
+		$this->assertSame(
+			array(
+				0 => '/wp-login.php',
+				1 => '/wp-admin/*',
+				2 => '/*\\?*(^|&)_wpnonce=*',
+				3 => '/products/*',
+			),
+			$href_exclude_paths
+		);
 
 		// Update mode to be 'prefetch'.
 		update_option( 'plsr_speculation_rules', array( 'mode' => 'prefetch' ) );
@@ -92,7 +101,85 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		$href_exclude_paths = $rules['prefetch'][0]['where']['and'][1]['not']['href_matches'];
 
 		// Ensure the additional exclusion is not present because the mode is 'prefetch'.
-		$this->assertNotContains( '/products/*', $href_exclude_paths );
+		$this->assertSame(
+			array(
+				0 => '/wp-login.php',
+				1 => '/wp-admin/*',
+				2 => '/*\\?*(^|&)_wpnonce=*',
+			),
+			$href_exclude_paths
+		);
+	}
+
+	/**
+	 * Tests filter that explicitly adds non-sequential keys.
+	 *
+	 * @covers ::plsr_get_speculation_rules
+	 */
+	public function test_plsr_get_speculation_rules_with_filtering_bad_keys() {
+
+		add_filter(
+			'plsr_speculation_rules_href_exclude_paths',
+			static function ( array $exclude_paths ): array {
+				$exclude_paths[] = '/next/';
+				array_unshift( $exclude_paths, '/unshifted/' );
+				$exclude_paths[-1]  = '/negative-one/';
+				$exclude_paths[100] = '/one-hundred/';
+				$exclude_paths['a'] = '/letter-a/';
+				return $exclude_paths;
+			}
+		);
+
+		$this->assertSame(
+			array(
+				0 => '/wp-login.php',
+				1 => '/wp-admin/*',
+				2 => '/*\\?*(^|&)_wpnonce=*',
+				3 => '/unshifted/',
+				4 => '/next/',
+				5 => '/negative-one/',
+				6 => '/one-hundred/',
+				7 => '/letter-a/',
+			),
+			plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches']
+		);
+	}
+
+	/**
+	 * Tests scenario when the home_url and site_url have different paths.
+	 *
+	 * @covers ::plsr_get_speculation_rules
+	 */
+	public function test_plsr_get_speculation_rules_different_home_and_site_urls() {
+		add_filter(
+			'site_url',
+			static function (): string {
+				return 'https://example.com/wp/';
+			}
+		);
+		add_filter(
+			'home_url',
+			static function (): string {
+				return 'https://example.com/blog/';
+			}
+		);
+		add_filter(
+			'plsr_speculation_rules_href_exclude_paths',
+			static function ( array $exclude_paths ): array {
+				$exclude_paths[] = '/store/*';
+				return $exclude_paths;
+			}
+		);
+
+		$this->assertSame(
+			array(
+				0 => '/wp/wp-login.php',
+				1 => '/wp/wp-admin/*',
+				2 => '/blog/*\\?*(^|&)_wpnonce=*',
+				3 => '/blog/store/*',
+			),
+			plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches']
+		);
 	}
 
 	/**
