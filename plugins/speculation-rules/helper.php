@@ -62,13 +62,18 @@ function plsr_get_speculation_rules() {
 	 */
 	$href_exclude_paths = (array) apply_filters( 'plsr_speculation_rules_href_exclude_paths', $href_exclude_paths, $mode );
 
-	// Ensure that there are no duplicates and that the base paths cannot be removed.
-	$href_exclude_paths = array_unique(
-		array_map(
-			array( $prefixer, 'prefix_path_pattern' ),
-			array_merge(
-				$base_href_exclude_paths,
-				$href_exclude_paths
+	// Ensure that:
+	// 1. There are no duplicates.
+	// 2. The base paths cannot be removed.
+	// 3. The array has sequential keys (i.e. array_is_list()).
+	$href_exclude_paths = array_values(
+		array_unique(
+			array_map(
+				array( $prefixer, 'prefix_path_pattern' ),
+				array_merge(
+					$base_href_exclude_paths,
+					$href_exclude_paths
+				)
 			)
 		)
 	);
