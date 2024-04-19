@@ -45,8 +45,9 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Constructor.
 	 *
-	 * @param array $data URL metric data.
 	 * @phpstan-param Data $data URL metric data.
+	 *
+	 * @param array $data URL metric data.
 	 *
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 */
