@@ -43,6 +43,7 @@ function plsr_get_speculation_rules() {
 		$prefixer->prefix_path_pattern( '/wp-login.php', 'site' ),
 		$prefixer->prefix_path_pattern( '/wp-admin/*', 'site' ),
 		$prefixer->prefix_path_pattern( '/*\\?*(^|&)_wpnonce=*', 'home' ),
+		$prefixer->prefix_path_pattern( '/*', 'uploads' ),
 	);
 
 	/**

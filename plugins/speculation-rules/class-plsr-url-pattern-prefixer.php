@@ -107,8 +107,9 @@ class PLSR_URL_Pattern_Prefixer {
 	 */
 	public static function get_default_contexts(): array {
 		return array(
-			'home' => self::escape_pattern_string( trailingslashit( wp_parse_url( home_url( '/' ), PHP_URL_PATH ) ) ),
-			'site' => self::escape_pattern_string( trailingslashit( wp_parse_url( site_url( '/' ), PHP_URL_PATH ) ) ),
+			'home'    => self::escape_pattern_string( trailingslashit( wp_parse_url( home_url( '/' ), PHP_URL_PATH ) ) ),
+			'site'    => self::escape_pattern_string( trailingslashit( wp_parse_url( site_url( '/' ), PHP_URL_PATH ) ) ),
+			'uploads' => self::escape_pattern_string( trailingslashit( wp_parse_url( wp_upload_dir( null, false )['baseurl'], PHP_URL_PATH ) ) ),
 		);
 	}
 

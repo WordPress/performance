@@ -35,6 +35,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 				'/wp-login.php',
 				'/wp-admin/*',
 				'/*\\?*(^|&)_wpnonce=*',
+				'/wp-content/uploads/*',
 			),
 			$href_exclude_paths
 		);
@@ -56,6 +57,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 				'/wp-login.php',
 				'/wp-admin/*',
 				'/*\\?*(^|&)_wpnonce=*',
+				'/wp-content/uploads/*',
 				'/custom-file.php',
 			),
 			$href_exclude_paths
@@ -89,7 +91,8 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 				0 => '/wp-login.php',
 				1 => '/wp-admin/*',
 				2 => '/*\\?*(^|&)_wpnonce=*',
-				3 => '/products/*',
+				3 => '/wp-content/uploads/*',
+				4 => '/products/*',
 			),
 			$href_exclude_paths
 		);
@@ -106,6 +109,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 				0 => '/wp-login.php',
 				1 => '/wp-admin/*',
 				2 => '/*\\?*(^|&)_wpnonce=*',
+				3 => '/wp-content/uploads/*',
 			),
 			$href_exclude_paths
 		);
@@ -135,11 +139,12 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 				0 => '/wp-login.php',
 				1 => '/wp-admin/*',
 				2 => '/*\\?*(^|&)_wpnonce=*',
-				3 => '/unshifted/',
-				4 => '/next/',
-				5 => '/negative-one/',
-				6 => '/one-hundred/',
-				7 => '/letter-a/',
+				3 => '/wp-content/uploads/*',
+				4 => '/unshifted/',
+				5 => '/next/',
+				6 => '/negative-one/',
+				7 => '/one-hundred/',
+				8 => '/letter-a/',
 			),
 			plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches']
 		);
@@ -176,7 +181,8 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 				0 => '/wp/wp-login.php',
 				1 => '/wp/wp-admin/*',
 				2 => '/blog/*\\?*(^|&)_wpnonce=*',
-				3 => '/blog/store/*',
+				3 => '/wp-content/uploads/*',
+				4 => '/blog/store/*',
 			),
 			plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches']
 		);
