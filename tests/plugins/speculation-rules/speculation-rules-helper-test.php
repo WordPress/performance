@@ -174,7 +174,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 			array(
 				0 => '/wp/wp-login.php',
 				1 => '/wp/wp-admin/*',
-				2 => '/wp/*\\?*(^|&)_wpnonce=*',
+				2 => '/blog/*\\?*(^|&)_wpnonce=*',
 				3 => '/blog/store/*',
 			),
 			plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches']
