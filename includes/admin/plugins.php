@@ -222,7 +222,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		/* translators: %s: Plugin name. */
 		$aria_label = sprintf( __( 'Visit plugin site for %s', 'default' ), $name );
 
-		$details_link = __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_data['slug'];
+		$details_link = __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_data['slug'] . '/';
 
 		$action_links[] = sprintf(
 			'<a href="%s" aria-label="%s" target="_blank">%s</a>',
