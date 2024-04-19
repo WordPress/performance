@@ -9,6 +9,7 @@ parameters:
 		- tests/
 	bootstrapFiles:
 		- plugins/speculation-rules/load.php
+		- plugins/webp-uploads/load.php
 	scanDirectories:
 		- vendor/wp-phpunit/wp-phpunit/
 	dynamicConstantNames:
