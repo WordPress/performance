@@ -34,21 +34,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if (
 					isset( $GLOBALS[ $global_var_name ]['load'] )
 					&&
-					! isset( $GLOBALS[ $global_var_name ]['loaded'] )
-					&&
 					$GLOBALS[ $global_var_name ]['load'] instanceof Closure
 				) {
 					call_user_func( $GLOBALS[ $global_var_name ]['load'] );
-					$GLOBALS[ $global_var_name ]['loaded'] = true;
+					unset( $GLOBALS[ $global_var_name ] );
 				}
 			};
 
-			// Handle either where the plugin is installed as a regular plugin or is embedded in another plugin or in a theme.
-			if ( ! did_action( 'plugins_loaded' ) ) {
-				add_action( 'plugins_loaded', $bootstrap, 0 );
-			}
-
-			// Handle case where plugin is embedded in a theme.
+			// Wait until after the plugins have loaded and the theme has loaded.
 			add_action( 'after_setup_theme', $bootstrap, 0 );
 		}
 
