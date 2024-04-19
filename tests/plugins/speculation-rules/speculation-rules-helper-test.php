@@ -111,6 +111,41 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		);
 	}
 
+
+	/**
+	 * @covers ::plsr_get_speculation_rules
+	 */
+	public function test_plsr_get_speculation_rules_with_filtering_bad_keys() {
+
+		// Filter that explicitly adds bogus keys.
+		add_filter(
+			'plsr_speculation_rules_href_exclude_paths',
+			static function ( array $exclude_paths ): array {
+				$exclude_paths[] = '/next/';
+				array_unshift( $exclude_paths, '/unshifted/' );
+				$exclude_paths[-1]  = '/negative-one/';
+				$exclude_paths[100] = '/one-hundred/';
+				$exclude_paths['a'] = '/letter-a/';
+				return $exclude_paths;
+			}
+		);
+
+		// Ensure the additional exclusion is not present because the mode is 'prefetch'.
+		$this->assertSame(
+			array(
+				0 => '/wp-login.php',
+				1 => '/wp-admin/*',
+				2 => '/*\\?*(^|&)_wpnonce=*',
+				3 => '/unshifted/',
+				4 => '/next/',
+				5 => '/negative-one/',
+				6 => '/one-hundred/',
+				7 => '/letter-a/',
+			),
+			plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches']
+		);
+	}
+
 	/**
 	 * @covers ::plsr_get_speculation_rules
 	 */
