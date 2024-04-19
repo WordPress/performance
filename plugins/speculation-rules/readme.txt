@@ -114,6 +114,16 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 == Changelog ==
 
+= 1.2.2 =
+
+**Bug Fixes**
+
+* Fix composition of href exclude paths to account for JSON encoding and differing site/home URLs. ([1164](https://github.com/WordPress/performance/pull/1164))
+
+**Documentation**
+
+* Update readme with browser support and FAQ section about analytics and personalization. ([1155](https://github.com/WordPress/performance/pull/1155))
+
 = 1.2.1 =
 
 **Enhancements**
