@@ -83,7 +83,16 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		$href_exclude_paths = $rules['prerender'][0]['where']['and'][1]['not']['href_matches'];
 
 		// Ensure the additional exclusion is present because the mode is 'prerender'.
-		$this->assertContains( '/products/*', $href_exclude_paths );
+		// Also ensure keys are sequential starting from 0 (that is, that array_is_list()).
+		$this->assertSame(
+			array(
+				0 => '/wp-login.php',
+				1 => '/wp-admin/*',
+				2 => '/*\\?*(^|&)_wpnonce=*',
+				3 => '/products/*',
+			),
+			$href_exclude_paths
+		);
 
 		// Update mode to be 'prefetch'.
 		update_option( 'plsr_speculation_rules', array( 'mode' => 'prefetch' ) );
@@ -92,7 +101,14 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		$href_exclude_paths = $rules['prefetch'][0]['where']['and'][1]['not']['href_matches'];
 
 		// Ensure the additional exclusion is not present because the mode is 'prefetch'.
-		$this->assertNotContains( '/products/*', $href_exclude_paths );
+		$this->assertSame(
+			array(
+				0 => '/wp-login.php',
+				1 => '/wp-admin/*',
+				2 => '/*\\?*(^|&)_wpnonce=*',
+			),
+			$href_exclude_paths
+		);
 	}
 
 	/**
