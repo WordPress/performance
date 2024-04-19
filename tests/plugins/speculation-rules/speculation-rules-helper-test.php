@@ -111,13 +111,13 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		);
 	}
 
-
 	/**
+	 * Tests filter that explicitly adds non-sequential keys.
+	 *
 	 * @covers ::plsr_get_speculation_rules
 	 */
 	public function test_plsr_get_speculation_rules_with_filtering_bad_keys() {
 
-		// Filter that explicitly adds bogus keys.
 		add_filter(
 			'plsr_speculation_rules_href_exclude_paths',
 			static function ( array $exclude_paths ): array {
@@ -130,7 +130,6 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 			}
 		);
 
-		// Ensure the additional exclusion is not present because the mode is 'prefetch'.
 		$this->assertSame(
 			array(
 				0 => '/wp-login.php',
@@ -147,6 +146,8 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests scenario when the home_url and site_url have different paths.
+	 *
 	 * @covers ::plsr_get_speculation_rules
 	 */
 	public function test_plsr_get_speculation_rules_different_home_and_site_urls() {
