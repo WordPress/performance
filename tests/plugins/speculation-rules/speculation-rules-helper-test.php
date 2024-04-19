@@ -149,6 +149,41 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::plsr_get_speculation_rules
 	 */
+	public function test_plsr_get_speculation_rules_different_home_and_site_urls() {
+		add_filter(
+			'site_url',
+			static function (): string {
+				return 'https://example.com/wp/';
+			}
+		);
+		add_filter(
+			'home_url',
+			static function (): string {
+				return 'https://example.com/blog/';
+			}
+		);
+		add_filter(
+			'plsr_speculation_rules_href_exclude_paths',
+			static function ( array $exclude_paths ): array {
+				$exclude_paths[] = '/store/*';
+				return $exclude_paths;
+			}
+		);
+
+		$this->assertSame(
+			array(
+				0 => '/wp/wp-login.php',
+				1 => '/wp/wp-admin/*',
+				2 => '/wp/*\\?*(^|&)_wpnonce=*',
+				3 => '/blog/store/*',
+			),
+			plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches']
+		);
+	}
+
+	/**
+	 * @covers ::plsr_get_speculation_rules
+	 */
 	public function test_plsr_get_speculation_rules_prerender() {
 		$rules = plsr_get_speculation_rules();
 
