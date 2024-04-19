@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.2
-Stable tag:        1.2.1
+Stable tag:        1.2.2
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, javascript, speculation rules, prerender, prefetch
