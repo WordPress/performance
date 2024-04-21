@@ -1,11 +1,11 @@
 {
   "core": null,
   "plugins": [
-    ".",
     "./plugins/auto-sizes",
     "./plugins/dominant-color-images",
     "./plugins/embed-optimizer",
     "./plugins/optimization-detective",
+    "./plugins/performance-lab",
     "./plugins/speculation-rules",
     "./plugins/webp-uploads"
   ],
