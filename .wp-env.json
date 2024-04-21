@@ -1,6 +1,7 @@
 {
   "core": null,
   "plugins": [
+    ".",
     "./plugins/auto-sizes",
     "./plugins/dominant-color-images",
     "./plugins/embed-optimizer",
