@@ -40,7 +40,6 @@ foreach ( $_SERVER['argv'] as $index => $arg ) {
 	if (
 		'--testsuite' === $arg &&
 		isset( $_SERVER['argv'][ $index + 1 ] ) &&
-		'performance-lab' !== $_SERVER['argv'][ $index + 1 ] &&
 		file_exists( TESTS_PLUGIN_DIR . '/plugins/' . $_SERVER['argv'][ $index + 1 ] )
 	) {
 		$plugin_name = $_SERVER['argv'][ $index + 1 ];
@@ -65,22 +64,19 @@ if ( $plugin_name ) {
 		},
 		1
 	);
-} else {
-	// Force plugin to be active.
-	$GLOBALS['wp_tests_options'] = array(
-		'active_plugins' => array( basename( TESTS_PLUGIN_DIR ) . '/load.php' ),
-	);
 
-	// Add filter to ensure the plugin's admin integration is loaded for tests.
-	tests_add_filter(
-		'plugins_loaded',
-		static function (): void {
-			require_once TESTS_PLUGIN_DIR . '/includes/admin/load.php';
-			require_once TESTS_PLUGIN_DIR . '/includes/admin/server-timing.php';
-			require_once TESTS_PLUGIN_DIR . '/includes/admin/plugins.php';
-		},
-		1
-	);
+	if ( 'performance-lab' === $plugin_name ) {
+		// Add filter to ensure the plugin's admin integration is loaded for tests.
+		tests_add_filter(
+			'plugins_loaded',
+			static function () use ( $plugin_name ) {
+				require_once TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name . '/includes/admin/load.php';
+				require_once TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name . '/includes/admin/server-timing.php';
+				require_once TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name . '/includes/admin/plugins.php';
+			},
+			1
+		);
+	}
 }
 
 // Start up the WP testing environment.
