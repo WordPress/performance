@@ -65,6 +65,10 @@
     "format:speculation-rules": "@format -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
     "format:webp-uploads": "@format -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
     "lint": "phpcs",
+    "lint:all": [
+      "@lint",
+      "@lint:plugins"
+    ],
     "lint:plugins": [
       "@lint:auto-sizes",
       "@lint:dominant-color-images",
