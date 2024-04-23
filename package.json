@@ -35,6 +35,7 @@
     "build:plugin:auto-sizes": "webpack --mode production --env plugin=auto-sizes",
     "build:plugin:dominant-color-images": "webpack --mode production --env plugin=dominant-color-images",
     "build:plugin:embed-optimizer": "webpack --mode production --env plugin=embed-optimizer",
+    "build:plugin:image-prioritizer": "webpack --mode production --env plugin=image-prioritizer",
     "build:plugin:optimization-detective": "webpack --mode production --env plugin=optimization-detective",
     "build:plugin:speculation-rules": "webpack --mode production --env plugin=speculation-rules",
     "build:plugin:webp-uploads": "webpack --mode production --env plugin=webp-uploads",

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="WPP-ImagePrioritizer">
+	<description>WordPress Coding Standards for Image Prioritizer Plugin</description>
+
+	<rule ref="../../tools/phpcs/phpcs.ruleset.xml"/>
+
+	<config name="text_domain" value="image-prioritizer"/>
+
+	<file>.</file>
+</ruleset>
