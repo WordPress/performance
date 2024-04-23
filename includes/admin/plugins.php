@@ -305,23 +305,19 @@ function perflab_render_plugin_card( array $plugin_data ) {
 					<a href="<?php echo esc_url( $details_link ); ?>"<?php echo $title_link_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 						<?php echo wp_kses_post( $title ); ?>
 					</a>
-					<?php
-					if ( isset( $plugin_data['experimental'] ) && $plugin_data['experimental'] ) {
-						?>
+					<?php if ( $plugin_data['experimental'] ) : ?>
 						<em class="perflab-plugin-experimental">
 							<?php echo esc_html( _x( '(experimental)', 'plugin suffix', 'performance-lab' ) ); ?>
 						</em>
-						<?php
-					}
-					?>
+					<?php endif; ?>
 				</h3>
 			</div>
 			<div class="action-links">
-				<?php
-				if ( ! empty( $action_links ) ) {
-					echo wp_kses_post( '<ul class="plugin-action-buttons"><li>' . implode( '</li><li>', $action_links ) . '</li></ul>' );
-				}
-				?>
+				<ul class="plugin-action-buttons">
+					<?php foreach ( $action_links as $action_link ) : ?>
+						<li><?php echo wp_kses_post( $action_link ); ?></li>
+					<?php endforeach; ?>
+				</ul>
 			</div>
 			<div class="desc column-description">
 				<p><?php echo wp_kses_post( $description ); ?></p>
