@@ -15,25 +15,29 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Registers setting for generating JPEG in addition to the selected modern format for image uploads.
  *
  * @since 1.0.0
- * @since n.e.x.t The setting was made more general to cover all modern formats. The "webp" option naming was left unchanged.
+ * @since n.e.x.t The setting was made more general to coveroutputting JPEG as a secondary type. The "webp" option naming
+ *        was left unchanged for backward compatibility.
+ * @since n.e.x.t The `perflab_generate_avif_and_webp` was added to enable selecting between AVIF and WebP output.
  */
 function webp_uploads_register_media_settings_field() {
+	if ( wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
+		register_setting(
+			'media',
+			'perflab_generate_avif_and_webp',
+			array(
+				'type'         => 'string',
+				'default'      => 'avif',
+				'show_in_rest' => false,
+			)
+		);
+	}
+
 	register_setting(
 		'media',
 		'perflab_generate_webp_and_jpeg',
 		array(
 			'type'         => 'boolean',
 			'default'      => false,
-			'show_in_rest' => false,
-		)
-	);
-
-	register_setting(
-		'media',
-		'perflab_generate_avif_and_webp',
-		array(
-			'type'         => 'string',
-			'default'      => wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ?  'avif' : 'webp',
 			'show_in_rest' => false,
 		)
 	);
