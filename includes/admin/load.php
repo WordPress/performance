@@ -248,19 +248,18 @@ function perflab_install_activate_plugin_callback() {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 
-	// Check if installed and determine the plugin basename.
-	$is_plugin_installed = false;
-	$plugin_file         = null;
+	// Check if plugin (by slug) is installed by obtaining the plugin file.
+	// Remember a plugin file typically looks like "{slug}/load.php" or "{slug}/{slug}.php".
+	$plugin_file = null;
 	foreach ( array_keys( get_plugins() ) as $installed_plugin_file ) {
 		if ( strtok( $installed_plugin_file, '/' ) === $plugin_slug ) {
-			$is_plugin_installed = true;
-			$plugin_file         = $installed_plugin_file;
+			$plugin_file = $installed_plugin_file;
 			break;
 		}
 	}
 
-	// Install the plugin if it is not installed yet.
-	if ( ! $is_plugin_installed ) {
+	// Install the plugin if it is not installed yet (in which case the plugin file could not be discovered above).
+	if ( ! isset( $plugin_file ) ) {
 		// Check if the user have plugin installation capability.
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			wp_die( esc_html__( 'Sorry, you are not allowed to install plugins on this site.', 'default' ) );
