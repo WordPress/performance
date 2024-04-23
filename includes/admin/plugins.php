@@ -74,13 +74,23 @@ function perflab_render_plugins_ui() {
 	$experimental_plugins = array();
 
 	foreach ( perflab_get_standalone_plugin_data() as $plugin_slug => $plugin_data ) {
+		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from wordpress.org.
+
+		// Skip if the plugin is not on WordPress.org or there was a network error.
+		if ( ! $api_data ) {
+			continue;
+		}
+
 		$plugin_data = array_merge(
+			array(
+				'experimental' => false,
+			),
 			$plugin_data, // Data defined within Performance Lab.
-			perflab_query_plugin_info( $plugin_slug ) // Data from wordpress.org.
+			$api_data
 		);
 
 		// Separate experimental plugins so that they're displayed after non-experimental plugins.
-		if ( isset( $plugin_data['experimental'] ) && $plugin_data['experimental'] ) {
+		if ( $plugin_data['experimental'] ) {
 			$experimental_plugins[ $plugin_slug ] = $plugin_data;
 		} else {
 			$plugins[ $plugin_slug ] = $plugin_data;
@@ -125,13 +135,9 @@ function perflab_render_plugins_ui() {
  * @see WP_Plugin_Install_List_Table::display_rows()
  * @link https://github.com/WordPress/wordpress-develop/blob/0b8ca16ea3bd9722bd1a38f8ab68901506b1a0e7/src/wp-admin/includes/class-wp-plugin-install-list-table.php#L467-L830
  *
- * @param array $plugin_data Plugin data from the WordPress.org API.
+ * @param array{name: string, slug: string, short_description: string, requires_php: ?string, requires: ?string, version: string, experimental: bool} $plugin_data Plugin data augmenting data from the WordPress.org API.
  */
 function perflab_render_plugin_card( array $plugin_data ) {
-	// If no plugin data is returned, return.
-	if ( empty( $plugin_data ) ) {
-		return;
-	}
 
 	// Remove any HTML from the description.
 	$description = wp_strip_all_tags( $plugin_data['short_description'] );
@@ -193,7 +199,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		);
 	}
 
-	if ( isset( $plugin_data['slug'] ) && current_user_can( 'install_plugins' ) ) {
+	if ( current_user_can( 'install_plugins' ) ) {
 		$title_link_attr = ' class="thickbox open-plugin-details-modal"';
 		$details_link    = esc_url_raw(
 			add_query_arg(
