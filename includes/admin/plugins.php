@@ -108,7 +108,7 @@ function perflab_render_plugins_ui() {
 		}
 	}
 
-	if ( empty( $plugins ) ) {
+	if ( ! $plugins && ! $experimental_plugins ) {
 		return;
 	}
 	?>
