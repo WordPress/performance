@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 2.8.0
  *
  * @param string $plugin_slug The string identifier for the plugin in questions slug.
- * @return array Array of plugin data, or empty if none/error.
+ * @return array|WP_Error Array of plugin data or WP_Error if failed.
  */
 function perflab_query_plugin_info( string $plugin_slug ) {
 	$plugin = get_transient( 'perflab_plugin_info_' . $plugin_slug );
@@ -36,7 +36,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	);
 
 	if ( is_wp_error( $plugin ) ) {
-		return array();
+		return $plugin;
 	}
 
 	if ( is_object( $plugin ) ) {
@@ -77,7 +77,18 @@ function perflab_render_plugins_ui() {
 		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from wordpress.org.
 
 		// Skip if the plugin is not on WordPress.org or there was a network error.
-		if ( ! $api_data ) {
+		if ( $api_data instanceof WP_Error ) {
+			wp_admin_notice(
+				esc_html(
+					sprintf(
+						/* translators: %s is the plugin slug */
+						__( 'Failed to query WordPress.org Plugin Directory for plugin "%s".', 'performance-lab' ) . ' %s',
+						$plugin_slug,
+						$api_data->get_error_message()
+					)
+				),
+				array( 'type' => 'error' )
+			);
 			continue;
 		}
 
