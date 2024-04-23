@@ -260,14 +260,14 @@ function perflab_install_activate_plugin_callback() {
 		$api = perflab_query_plugin_info( $plugin_slug );
 
 		// Return early if plugin API returns an error.
-		if ( ! $api ) {
+		if ( $api instanceof WP_Error ) {
 			wp_die(
 				wp_kses(
 					sprintf(
 						/* translators: %s: Support forums URL. */
 						__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="%s">support forums</a>.', 'default' ),
 						__( 'https://wordpress.org/support/forums/', 'default' )
-					),
+					) . ' ' . $api->get_error_message(),
 					array( 'a' => array( 'href' => true ) )
 				)
 			);
