@@ -174,7 +174,6 @@ function perflab_render_plugin_card( array $plugin_data ) {
 					'action'   => 'perflab_install_activate_plugin',
 					'_wpnonce' => wp_create_nonce( 'perflab_install_activate_plugin' ),
 					'slug'     => $plugin_data['slug'],
-					'file'     => $status['file'],
 				),
 				admin_url( 'options-general.php' )
 			)

@@ -234,6 +234,7 @@ function perflab_enqueue_features_page_scripts() {
 function perflab_install_activate_plugin_callback() {
 	check_admin_referer( 'perflab_install_activate_plugin' );
 
+	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	require_once ABSPATH . 'wp-admin/includes/class-wp-ajax-upgrader-skin.php';
@@ -241,14 +242,22 @@ function perflab_install_activate_plugin_callback() {
 	if ( ! isset( $_GET['slug'] ) ) {
 		wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
 	}
-
-	$plugin_slug = sanitize_text_field( wp_unslash( $_GET['slug'] ) );
-
-	if ( ! $plugin_slug ) {
+	$all_plugin_slugs = json_decode( file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'plugins.json' ), true )['plugins']; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	$plugin_slug      = sanitize_text_field( wp_unslash( $_GET['slug'] ) );
+	if ( ! in_array( $plugin_slug, $all_plugin_slugs, true ) ) {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 
-	$is_plugin_installed = isset( $_GET['file'] ) && $_GET['file'];
+	// Check if installed and determine the plugin basename.
+	$is_plugin_installed = false;
+	$plugin_basename     = null;
+	foreach ( array_keys( get_plugins() ) as $plugin_file ) {
+		if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
+			$is_plugin_installed = true;
+			$plugin_basename     = $plugin_file; // TODO: The variable name "$plugin_basename" seems misleading. To follow core convention, it should be "$plugin_file", right?
+			break;
+		}
+	}
 
 	// Install the plugin if it is not installed yet.
 	if ( ! $is_plugin_installed ) {
@@ -294,8 +303,6 @@ function perflab_install_activate_plugin_callback() {
 
 		$plugin_file_names = array_keys( $plugins );
 		$plugin_basename   = $plugin_slug . '/' . $plugin_file_names[0];
-	} else {
-		$plugin_basename = sanitize_text_field( wp_unslash( $_GET['file'] ) );
 	}
 
 	if ( ! current_user_can( 'activate_plugin', $plugin_basename ) ) {
