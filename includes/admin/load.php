@@ -304,7 +304,7 @@ function perflab_install_activate_plugin_callback() {
 
 	$result = activate_plugin( $plugin_basename );
 	if ( is_wp_error( $result ) ) {
-		wp_die( esc_html( $result->get_error_message() ) );
+		wp_die( wp_kses_post( $result->get_error_message() ) );
 	}
 
 	$url = add_query_arg(
