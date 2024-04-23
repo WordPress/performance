@@ -16,20 +16,24 @@ if ( ! defined( 'ABSPATH' ) ) {
  * for example an image/jpeg can be converted into an image/webp.
  *
  * @since 1.0.0
+ * @since n.e.x.t Added support for AVIF.
  *
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
 function webp_uploads_get_upload_image_mime_transforms() {
+
+	// Check the selected output format.
+	$output_format = get_option( 'perflab_generate_avif_and_webp', wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ?  'avif' : 'webp' );
+
 	$default_transforms = array(
-		'image/jpeg' => array( 'image/webp' ),
-		'image/webp' => array( 'image/webp' ),
+		'image/jpeg' => array( 'image/' . $output_format ),
 	);
 
-	// Check setting for whether to generate both JPEG and WebP.
+	// Check setting for whether to generate both JPEG and the modern output format.
 	if ( true === (bool) get_option( 'perflab_generate_webp_and_jpeg' ) ) {
 		$default_transforms = array(
-			'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
-			'image/webp' => array( 'image/webp', 'image/jpeg' ),
+			'image/jpeg' => array( 'image/jpeg', 'image/' . $output_format ),
+			'image/' . $output_format => array( 'image/' . $output_format, 'image/jpeg' ),
 		);
 	}
 
