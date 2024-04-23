@@ -248,7 +248,7 @@ function perflab_install_activate_plugin_callback() {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 
-	$is_plugin_installed = isset( $_GET['file'] ) && sanitize_text_field( wp_unslash( $_GET['file'] ) );
+	$is_plugin_installed = isset( $_GET['file'] ) && $_GET['file'];
 
 	// Install the plugin if it is not installed yet.
 	if ( ! $is_plugin_installed ) {
