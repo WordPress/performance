@@ -146,7 +146,7 @@ function perflab_render_plugins_ui() {
  * @see WP_Plugin_Install_List_Table::display_rows()
  * @link https://github.com/WordPress/wordpress-develop/blob/0b8ca16ea3bd9722bd1a38f8ab68901506b1a0e7/src/wp-admin/includes/class-wp-plugin-install-list-table.php#L467-L830
  *
- * @param array{name: string, slug: string, short_description: string, requires_php: ?string, requires: ?string, version: string, experimental: bool} $plugin_data Plugin data augmenting data from the WordPress.org API.
+ * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string, experimental: bool} $plugin_data Plugin data augmenting data from the WordPress.org API.
  */
 function perflab_render_plugin_card( array $plugin_data ) {
 
