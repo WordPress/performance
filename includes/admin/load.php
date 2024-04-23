@@ -250,11 +250,11 @@ function perflab_install_activate_plugin_callback() {
 
 	// Check if installed and determine the plugin basename.
 	$is_plugin_installed = false;
-	$plugin_basename     = null;
-	foreach ( array_keys( get_plugins() ) as $plugin_file ) {
-		if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
+	$plugin_file         = null;
+	foreach ( array_keys( get_plugins() ) as $installed_plugin_file ) {
+		if ( strtok( $installed_plugin_file, '/' ) === $plugin_slug ) {
 			$is_plugin_installed = true;
-			$plugin_basename     = $plugin_file; // TODO: The variable name "$plugin_basename" seems misleading. To follow core convention, it should be "$plugin_file", right?
+			$plugin_file         = $installed_plugin_file;
 			break;
 		}
 	}
@@ -302,14 +302,14 @@ function perflab_install_activate_plugin_callback() {
 		}
 
 		$plugin_file_names = array_keys( $plugins );
-		$plugin_basename   = $plugin_slug . '/' . $plugin_file_names[0];
+		$plugin_file       = $plugin_slug . '/' . $plugin_file_names[0];
 	}
 
-	if ( ! current_user_can( 'activate_plugin', $plugin_basename ) ) {
+	if ( ! current_user_can( 'activate_plugin', $plugin_file ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
 	}
 
-	$result = activate_plugin( $plugin_basename );
+	$result = activate_plugin( $plugin_file );
 	if ( is_wp_error( $result ) ) {
 		wp_die( esc_html( $result->get_error_message() ) );
 	}
