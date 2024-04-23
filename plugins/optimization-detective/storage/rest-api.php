@@ -93,7 +93,7 @@ function od_register_endpoint(): void {
 		OD_CHART_ROUTE . '/(?P<id>[\d]+)',
 		array(
 			'methods'             => WP_REST_Server::READABLE,
-			'args' => array(
+			'args'                => array(
 				'id' => array(
 					'description' => __( 'Unique identifier for the object.', 'optimization-detective' ),
 					'type'        => 'integer',
@@ -208,7 +208,7 @@ function od_handle_chart_rest_request( WP_REST_Request $request ) {
 
 	foreach ( $metrics as $metric ) {
 		$data[] = array(
-			'date' => wp_date( 'Y-m-d H:i',$metric->get_timestamp() ),
+			'date'      => wp_date( 'Y-m-d H:i', $metric->get_timestamp() ),
 			'webVitals' => $metric->get_web_vitals(),
 		);
 	}

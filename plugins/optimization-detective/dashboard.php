@@ -23,7 +23,10 @@ add_action( 'wp_dashboard_setup', 'od_add_dashboard_widget' );
 function od_render_dashboard_widget() {
 	$asset_file = plugin_dir_path( __FILE__ ) . 'build/performance-dashboard-widget.asset.php';
 
-	$asset = file_exists( $asset_file ) ? require $asset_file : array( 'dependencies' => array(), 'version' => false );
+	$asset = file_exists( $asset_file ) ? require $asset_file : array(
+		'dependencies' => array(),
+		'version'      => false,
+	);
 
 	wp_enqueue_style( 'wp-components' );
 
@@ -52,12 +55,15 @@ function od_render_dashboard_widget() {
 		)
 	);
 
-	$options = array_map( function( $entry ) {
-		return array(
-			'value' => $entry->ID,
-			'label' => $entry->post_title,
-		);
-	}, $recent_entries );
+	$options = array_map(
+		static function ( $entry ) {
+				return array(
+					'value' => $entry->ID,
+					'label' => $entry->post_title,
+				);
+		},
+		$recent_entries
+	);
 
 	wp_localize_script(
 		'od-performance-dashboard-widget',
@@ -91,7 +97,10 @@ add_action( 'admin_menu', 'od_add_submenu_page' );
 function od_render_dashboard_page() {
 	$asset_file = plugin_dir_path( __FILE__ ) . 'build/performance-dashboard.asset.php';
 
-	$asset = file_exists( $asset_file ) ? require $asset_file : array( 'dependencies' => array(), 'version' => false );
+	$asset = file_exists( $asset_file ) ? require $asset_file : array(
+		'dependencies' => array(),
+		'version'      => false,
+	);
 
 	wp_enqueue_style( 'wp-components' );
 
@@ -120,12 +129,15 @@ function od_render_dashboard_page() {
 		)
 	);
 
-	$options = array_map( function( $entry ) {
-		return array(
-			'value' => $entry->ID,
-			'label' => $entry->post_title,
-		);
-	}, $recent_entries );
+	$options = array_map(
+		static function ( $entry ) {
+				return array(
+					'value' => $entry->ID,
+					'label' => $entry->post_title,
+				);
+		},
+		$recent_entries
+	);
 
 	wp_localize_script(
 		'od-performance-dashboard',
