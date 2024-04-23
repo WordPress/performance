@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 2.8.0
  *
  * @param string $plugin_slug The string identifier for the plugin in questions slug.
- * @return array|WP_Error Array of plugin data or WP_Error if failed.
+ * @return array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string}|WP_Error Array of plugin data or WP_Error if failed.
  */
 function perflab_query_plugin_info( string $plugin_slug ) {
 	$plugin = get_transient( 'perflab_plugin_info_' . $plugin_slug );
@@ -29,8 +29,13 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		array(
 			'slug'   => $plugin_slug,
 			'fields' => array(
+				'name'              => true,
+				'slug'              => true,
 				'short_description' => true,
-				'icons'             => true,
+				'requires'          => true,
+				'requires_php'      => true,
+				'requires_plugins'  => true,
+				'download_link'     => true,
 			),
 		)
 	);
@@ -146,18 +151,15 @@ function perflab_render_plugins_ui() {
  * @see WP_Plugin_Install_List_Table::display_rows()
  * @link https://github.com/WordPress/wordpress-develop/blob/0b8ca16ea3bd9722bd1a38f8ab68901506b1a0e7/src/wp-admin/includes/class-wp-plugin-install-list-table.php#L467-L830
  *
- * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string, experimental: bool} $plugin_data Plugin data augmenting data from the WordPress.org API.
+ * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], experimental: bool} $plugin_data Plugin data augmenting data from the WordPress.org API.
  */
 function perflab_render_plugin_card( array $plugin_data ) {
 
-	// Remove any HTML from the description.
+	$name        = wp_strip_all_tags( $plugin_data['name'] );
 	$description = wp_strip_all_tags( $plugin_data['short_description'] );
-	$title       = $plugin_data['name'];
 
 	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
 	$description = apply_filters( 'plugin_install_description', $description, $plugin_data );
-	$version     = $plugin_data['version'];
-	$name        = wp_strip_all_tags( $title . ' ' . $version );
 
 	$requires_php = isset( $plugin_data['requires_php'] ) ? $plugin_data['requires_php'] : null;
 	$requires_wp  = isset( $plugin_data['requires'] ) ? $plugin_data['requires'] : null;
@@ -314,7 +316,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			<div class="name column-name">
 				<h3>
 					<a href="<?php echo esc_url( $details_link ); ?>"<?php echo $title_link_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-						<?php echo wp_kses_post( $title ); ?>
+						<?php echo wp_kses_post( $name ); ?>
 					</a>
 					<?php if ( $plugin_data['experimental'] ) : ?>
 						<em class="perflab-plugin-experimental">
