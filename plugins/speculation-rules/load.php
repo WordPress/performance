@@ -43,7 +43,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 			// Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action is used
 			// because it is the first action that fires once the theme is loaded.
-			add_action( 'after_setup_theme', $bootstrap, 0 );
+			add_action( 'after_setup_theme', $bootstrap, PHP_INT_MIN );
 		}
 
 		// Register this copy of the plugin.
