@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 (
 	/**
-	 * Register this copy of the plugin among other potential copies.
+	 * Register this copy of the plugin among other potential copies embedded in plugins or themes.
 	 *
 	 * @param string  $global_var_name Global variable name for storing the plugin pending loading.
 	 * @param string  $version         Version.
@@ -41,7 +41,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 			};
 
-			// Wait until after the plugins have loaded and the theme has loaded.
+			// Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action is used
+			// because it is the first action that fires once the theme is loaded.
 			add_action( 'after_setup_theme', $bootstrap, 0 );
 		}
 
