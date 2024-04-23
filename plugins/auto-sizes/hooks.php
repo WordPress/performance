@@ -30,7 +30,7 @@ function auto_sizes_update_image_attributes( $attr ) {
 	}
 
 	// Don't add 'auto' to the sizes attribute if it already exists.
-	if ( false !== strpos( $attr['sizes'], 'auto,' ) ) {
+	if ( str_contains( $attr['sizes'], 'auto,' ) ) {
 		return $attr;
 	}
 

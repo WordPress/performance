@@ -2,7 +2,7 @@
 /**
  * Plugin uninstaller logic.
  *
- * @package performance-lab
+ * @package speculation-rules
  * @since 1.2.0
  */
 
@@ -24,18 +24,18 @@ if ( is_multisite() ) {
 
 	foreach ( $site_ids as $site_id ) {
 		switch_to_blog( $site_id );
-		perflab_delete_plugin_option();
+		plsr_delete_plugin_option();
 		restore_current_blog();
 	}
 }
 
-perflab_delete_plugin_option();
+plsr_delete_plugin_option();
 
 /**
  * Delete the current site's option.
  *
- * @since 1.4.0
+ * @since 1.2.0
  */
-function perflab_delete_plugin_option() {
-	delete_option( 'perflab_generate_webp_and_jpeg' );
+function plsr_delete_plugin_option() {
+	delete_option( 'plsr_speculation_rules' );
 }

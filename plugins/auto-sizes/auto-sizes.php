@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/auto-sizes
  * Description: Instructs browsers to automatically choose the right image size for lazy-loaded images.
  * Requires at least: 6.4
- * Requires PHP: 7.0
+ * Requires PHP: 7.2
  * Version: 1.0.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/

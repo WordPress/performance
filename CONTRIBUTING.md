@@ -7,7 +7,7 @@ Thank you for your interest in contributing to the Performance Lab plugin! Compl
 In general, all code must follow the [WordPress Coding Standards and best practices](https://developer.wordpress.org/coding-standards/). All code in the Performance Lab plugin must follow these requirements:
 
 - **WordPress**: As of Performance Lab v3.0.0, released April 15, 2024, the plugin's minimum WordPress version requirement is 6.4.
-- **PHP**: Always match the latest WordPress version. The minimum required version right now is 7.0.
+- **PHP**: Always match the latest WordPress version. The minimum required version right now is 7.2.
 
 
 ## Guidelines

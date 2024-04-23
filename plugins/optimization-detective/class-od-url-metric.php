@@ -52,6 +52,8 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Constructor.
 	 *
+	 * @phpstan-param Data $data URL metric data.
+	 *
 	 * @param array $data URL metric data.
 	 *
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
@@ -67,7 +69,7 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets JSON schema for URL Metric.
 	 *
-	 * @return array Schema.
+	 * @return array<string, mixed> Schema.
 	 */
 	public static function get_json_schema(): array {
 		$dom_rect_schema = array(
@@ -141,7 +143,7 @@ final class OD_URL_Metric implements JsonSerializable {
 							'xpath'              => array(
 								'type'     => 'string',
 								'required' => true,
-								'pattern'  => OD_HTML_Tag_Processor::XPATH_PATTERN,
+								'pattern'  => OD_HTML_Tag_Walker::XPATH_PATTERN,
 							),
 							'intersectionRatio'  => array(
 								'type'     => 'number',

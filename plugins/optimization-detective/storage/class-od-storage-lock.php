@@ -67,7 +67,7 @@ final class OD_Storage_Lock {
 	 * @since 0.1.0
 	 * @access private
 	 */
-	public static function set_lock() {
+	public static function set_lock(): void {
 		$ttl = self::get_ttl();
 		$key = self::get_transient_key();
 		if ( 0 === $ttl ) {

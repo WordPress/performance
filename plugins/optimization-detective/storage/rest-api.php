@@ -37,7 +37,7 @@ const OD_CHART_ROUTE = '/url-metrics:chart';
  * @since 0.1.0
  * @access private
  */
-function od_register_endpoint() {
+function od_register_endpoint(): void {
 
 	$args = array(
 		'slug'  => array(

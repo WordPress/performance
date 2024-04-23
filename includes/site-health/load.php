@@ -3,7 +3,7 @@
  * Site Health checks loader.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

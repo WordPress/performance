@@ -157,7 +157,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	 *
 	 * @param OD_URL_Metric $url_metric URL metric.
 	 */
-	public function add_url_metric( OD_URL_Metric $url_metric ) {
+	public function add_url_metric( OD_URL_Metric $url_metric ): void {
 		if ( ! $this->is_viewport_width_in_range( $url_metric->get_viewport_width() ) ) {
 			throw new InvalidArgumentException(
 				esc_html__( 'URL metric is not in the viewport range for group.', 'optimization-detective' )

@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/WordPress/performance/issues/869
  * Description: Uses real user metrics to improve heuristics WordPress applies on the frontend to improve image loading priority.
  * Requires at least: 6.4
- * Requires PHP: 7.0
+ * Requires PHP: 7.2
  * Version: 0.1.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
@@ -49,6 +49,7 @@ require_once __DIR__ . '/helper.php';
 
 // Core infrastructure classes.
 require_once __DIR__ . '/class-od-data-validation-exception.php';
+require_once __DIR__ . '/class-od-html-tag-processor.php';
 require_once __DIR__ . '/class-od-url-metric.php';
 require_once __DIR__ . '/class-od-url-metrics-group.php';
 require_once __DIR__ . '/class-od-url-metrics-group-collection.php';
@@ -63,7 +64,7 @@ require_once __DIR__ . '/storage/rest-api.php';
 require_once __DIR__ . '/detection.php';
 
 // Optimization logic.
-require_once __DIR__ . '/class-od-html-tag-processor.php';
+require_once __DIR__ . '/class-od-html-tag-walker.php';
 require_once __DIR__ . '/optimization.php';
 
 // Performance dashboard logic.

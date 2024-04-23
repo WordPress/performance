@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Adds the features page to the Settings menu.
  *
  * @since 1.0.0
- * @since n.e.x.t Renamed to perflab_add_features_page().
+ * @since 3.0.0 Renamed to perflab_add_features_page().
  */
 function perflab_add_features_page() {
 	$hook_suffix = add_options_page(
@@ -38,8 +38,8 @@ add_action( 'admin_menu', 'perflab_add_features_page' );
  * Initializes functionality for the features page.
  *
  * @since 1.0.0
- * @since n.e.x.t Renamed to perflab_load_features_page(), and the
- *                $module and $hook_suffix parameters were removed.
+ * @since 3.0.0 Renamed to perflab_load_features_page(), and the
+ *              $module and $hook_suffix parameters were removed.
  */
 function perflab_load_features_page() {
 	// Handle script enqueuing for settings page.
@@ -56,7 +56,7 @@ function perflab_load_features_page() {
  * Renders the plugin page.
  *
  * @since 1.0.0
- * @since n.e.x.t Renamed to perflab_render_settings_page().
+ * @since 3.0.0 Renamed to perflab_render_settings_page().
  */
 function perflab_render_settings_page() {
 	?>
@@ -77,19 +77,25 @@ function perflab_render_settings_page() {
  * @param string $hook_suffix The current admin page.
  */
 function perflab_admin_pointer( $hook_suffix ) {
-	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
-		return;
-	}
-
 	// Do not show admin pointer in multisite Network admin or User admin UI.
 	if ( is_network_admin() || is_user_admin() ) {
 		return;
 	}
-
 	$current_user = get_current_user_id();
-	$dismissed    = explode( ',', (string) get_user_meta( $current_user, 'dismissed_wp_pointers', true ) );
+	$dismissed    = array_filter( explode( ',', (string) get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true ) ) );
 
 	if ( in_array( 'perflab-admin-pointer', $dismissed, true ) ) {
+		return;
+	}
+
+	if ( ! in_array( $hook_suffix, array( 'index.php', 'plugins.php' ), true ) ) {
+
+		// Do not show on the settings page and dismiss the pointer.
+		if ( isset( $_GET['page'] ) && PERFLAB_SCREEN === $_GET['page'] && ( ! in_array( 'perflab-admin-pointer', $dismissed, true ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$dismissed[] = 'perflab-admin-pointer';
+			update_user_meta( $current_user, 'dismissed_wp_pointers', implode( ',', $dismissed ) );
+		}
+
 		return;
 	}
 
@@ -169,19 +175,25 @@ function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = 
  *
  * @see perflab_add_features_page()
  *
- * @param array $links List of plugin action links HTML.
- * @return array Modified list of plugin action links HTML.
+ * @param string[]|mixed $links List of plugin action links HTML.
+ * @return string[]|mixed Modified list of plugin action links HTML.
  */
 function perflab_plugin_action_links_add_settings( $links ) {
+	if ( ! is_array( $links ) ) {
+		return $links;
+	}
+
 	// Add link as the first plugin action link.
 	$settings_link = sprintf(
 		'<a href="%s">%s</a>',
 		esc_url( add_query_arg( 'page', PERFLAB_SCREEN, admin_url( 'options-general.php' ) ) ),
 		esc_html__( 'Settings', 'performance-lab' )
 	);
-	array_unshift( $links, $settings_link );
 
-	return $links;
+	return array_merge(
+		array( 'settings' => $settings_link ),
+		$links
+	);
 }
 
 /**
@@ -205,7 +217,7 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
  * Callback function to handle admin scripts.
  *
  * @since 2.8.0
- * @since n.e.x.t Renamed to perflab_enqueue_features_page_scripts().
+ * @since 3.0.0 Renamed to perflab_enqueue_features_page_scripts().
  */
 function perflab_enqueue_features_page_scripts() {
 	// These assets are needed for the "Learn more" popover.
@@ -217,7 +229,7 @@ function perflab_enqueue_features_page_scripts() {
 /**
  * Callback for handling installation/activation of plugin.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  */
 function perflab_install_activate_plugin_callback() {
 	check_admin_referer( 'perflab_install_activate_plugin' );
@@ -292,7 +304,7 @@ function perflab_install_activate_plugin_callback() {
 
 	$result = activate_plugin( $plugin_basename );
 	if ( is_wp_error( $result ) ) {
-		wp_die( esc_html( $result->get_error_messages() ) );
+		wp_die( esc_html( $result->get_error_message() ) );
 	}
 
 	$url = add_query_arg(
@@ -312,7 +324,7 @@ add_action( 'admin_action_perflab_install_activate_plugin', 'perflab_install_act
 /**
  * Callback function to handle admin inline style.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  */
 function perflab_print_features_page_style() {
 	?>
@@ -340,13 +352,29 @@ function perflab_print_features_page_style() {
  */
 function perflab_plugin_admin_notices() {
 	if ( ! current_user_can( 'install_plugins' ) ) {
-		wp_admin_notice(
-			esc_html__( 'Due to your site\'s configuration, you may not be able to activate the performance features, unless the underlying plugin is already installed. Please install the relevant plugins manually.', 'performance-lab' ),
-			array(
-				'type' => 'warning',
-			)
+		$are_all_plugins_installed = true;
+		$installed_plugin_slugs    = array_map(
+			static function ( $name ) {
+				return strtok( $name, '/' );
+			},
+			array_keys( get_plugins() )
 		);
-		return;
+		foreach ( perflab_get_standalone_plugin_version_constants() as $plugin_slug => $constant_name ) {
+			if ( ! in_array( $plugin_slug, $installed_plugin_slugs, true ) ) {
+				$are_all_plugins_installed = false;
+				break;
+			}
+		}
+
+		if ( ! $are_all_plugins_installed ) {
+			wp_admin_notice(
+				esc_html__( 'Due to your site\'s configuration, you may not be able to activate the performance features, unless the underlying plugin is already installed. Please install the relevant plugins manually.', 'performance-lab' ),
+				array(
+					'type' => 'warning',
+				)
+			);
+			return;
+		}
 	}
 
 	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended

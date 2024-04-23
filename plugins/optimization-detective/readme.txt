@@ -3,7 +3,7 @@
 Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
-Requires PHP:      7.0
+Requires PHP:      7.2
 Stable tag:        0.1.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -140,6 +140,7 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 = 0.1.1 =
 
 * Use plugin slug for generator tag. ([1103](https://github.com/WordPress/performance/pull/1103))
+* Prevent detection script injection from breaking import maps in classic themes. ([1084](https://github.com/WordPress/performance/pull/1084))
 
 = 0.1.0 =
 

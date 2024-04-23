@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 0.1.0
  */
-function od_render_generator_meta_tag() {
+function od_render_generator_meta_tag(): void {
 	// Use the plugin slug as it is immutable.
 	echo '<meta name="generator" content="optimization-detective ' . esc_attr( OPTIMIZATION_DETECTIVE_VERSION ) . '">' . "\n";
 }
