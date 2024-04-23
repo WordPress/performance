@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 2.8.0
  *
  * @param string $plugin_slug The string identifier for the plugin in questions slug.
- * @return array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string}|WP_Error Array of plugin data or WP_Error if failed.
+ * @return array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string}|WP_Error Array of plugin data or WP_Error if failed.
  */
 function perflab_query_plugin_info( string $plugin_slug ) {
 	$plugin = get_transient( 'perflab_plugin_info_' . $plugin_slug );
@@ -24,19 +24,22 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return $plugin;
 	}
 
+	$fields = array(
+		'name',
+		'slug',
+		'short_description',
+		'requires',
+		'requires_php',
+		'requires_plugins',
+		'download_link',
+		'version', // Needed by install_plugin_install_status().
+	);
+
 	$plugin = plugins_api(
 		'plugin_information',
 		array(
 			'slug'   => $plugin_slug,
-			'fields' => array(
-				'name'              => true,
-				'slug'              => true,
-				'short_description' => true,
-				'requires'          => true,
-				'requires_php'      => true,
-				'requires_plugins'  => true,
-				'download_link'     => true,
-			),
+			'fields' => array_fill_keys( $fields, true ),
 		)
 	);
 
@@ -47,6 +50,12 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	if ( is_object( $plugin ) ) {
 		$plugin = (array) $plugin;
 	}
+
+	// Only store what we need.
+	$plugin = wp_array_slice_assoc( $plugin, $fields );
+
+	// Make sure all fields default to false in case another plugin is modifying the response from WordPress.org via the plugins_api filter.
+	$plugin = array_merge( array_fill_keys( $fields, false ), $plugin );
 
 	set_transient( 'perflab_plugin_info_' . $plugin_slug, $plugin, HOUR_IN_SECONDS );
 
@@ -151,7 +160,7 @@ function perflab_render_plugins_ui() {
  * @see WP_Plugin_Install_List_Table::display_rows()
  * @link https://github.com/WordPress/wordpress-develop/blob/0b8ca16ea3bd9722bd1a38f8ab68901506b1a0e7/src/wp-admin/includes/class-wp-plugin-install-list-table.php#L467-L830
  *
- * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], experimental: bool} $plugin_data Plugin data augmenting data from the WordPress.org API.
+ * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string, experimental: bool} $plugin_data Plugin data augmenting data from the WordPress.org API.
  */
 function perflab_render_plugin_card( array $plugin_data ) {
 
