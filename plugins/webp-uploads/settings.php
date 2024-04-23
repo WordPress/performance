@@ -114,22 +114,6 @@ function webp_uploads_generate_webp_jpeg_setting_callback() {
 }
 
 /**
- * Adds custom styles to hide specific elements in media settings.
- *
- * @since 1.0.0
- */
-function webp_uploads_media_setting_style() {
-	if ( is_multisite() ) {
-		return;
-	}
-	?>
-	<style>
-	</style>
-	<?php
-}
-add_action( 'admin_head-options-media.php', 'webp_uploads_media_setting_style' );
-
-/**
  * Adds a settings link to the plugin's action links.
  *
  * @since 1.1.0
