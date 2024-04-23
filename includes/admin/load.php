@@ -242,7 +242,8 @@ function perflab_install_activate_plugin_callback() {
 	if ( ! isset( $_GET['slug'] ) ) {
 		wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
 	}
-	$all_plugin_slugs = json_decode( file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'plugins.json' ), true )['plugins']; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+	$all_plugin_slugs = array_keys( perflab_get_standalone_plugin_data() );
 	$plugin_slug      = sanitize_text_field( wp_unslash( $_GET['slug'] ) );
 	if ( ! in_array( $plugin_slug, $all_plugin_slugs, true ) ) {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
