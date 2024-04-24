@@ -234,6 +234,7 @@ function perflab_enqueue_features_page_scripts() {
 function perflab_install_activate_plugin_callback() {
 	check_admin_referer( 'perflab_install_activate_plugin' );
 
+	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
 	require_once ABSPATH . 'wp-admin/includes/class-wp-ajax-upgrader-skin.php';
@@ -243,15 +244,22 @@ function perflab_install_activate_plugin_callback() {
 	}
 
 	$plugin_slug = sanitize_text_field( wp_unslash( $_GET['slug'] ) );
-
-	if ( ! $plugin_slug ) {
+	if ( ! in_array( $plugin_slug, perflab_get_standalone_plugins(), true ) ) {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 
-	$is_plugin_installed = isset( $_GET['file'] ) && $_GET['file'];
+	// Check if plugin (by slug) is installed by obtaining the plugin file.
+	// Remember a plugin file typically looks like "{slug}/load.php" or "{slug}/{slug}.php".
+	$plugin_file = null;
+	foreach ( array_keys( get_plugins() ) as $installed_plugin_file ) {
+		if ( strtok( $installed_plugin_file, '/' ) === $plugin_slug ) {
+			$plugin_file = $installed_plugin_file;
+			break;
+		}
+	}
 
-	// Install the plugin if it is not installed yet.
-	if ( ! $is_plugin_installed ) {
+	// Install the plugin if it is not installed yet (in which case the plugin file could not be discovered above).
+	if ( ! isset( $plugin_file ) ) {
 		// Check if the user have plugin installation capability.
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			wp_die( esc_html__( 'Sorry, you are not allowed to install plugins on this site.', 'default' ) );
@@ -293,16 +301,14 @@ function perflab_install_activate_plugin_callback() {
 		}
 
 		$plugin_file_names = array_keys( $plugins );
-		$plugin_basename   = $plugin_slug . '/' . $plugin_file_names[0];
-	} else {
-		$plugin_basename = sanitize_text_field( wp_unslash( $_GET['file'] ) );
+		$plugin_file       = $plugin_slug . '/' . $plugin_file_names[0];
 	}
 
-	if ( ! current_user_can( 'activate_plugin', $plugin_basename ) ) {
+	if ( ! current_user_can( 'activate_plugin', $plugin_file ) ) {
 		wp_die( esc_html__( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
 	}
 
-	$result = activate_plugin( $plugin_basename );
+	$result = activate_plugin( $plugin_file );
 	if ( is_wp_error( $result ) ) {
 		wp_die( esc_html( $result->get_error_message() ) );
 	}

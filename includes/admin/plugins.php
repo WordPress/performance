@@ -53,9 +53,9 @@ function perflab_query_plugin_info( string $plugin_slug ) {
  *
  * @since 2.8.0
  *
- * @return array List of WPP standalone plugins as slugs.
+ * @return string[] List of WPP standalone plugins as slugs.
  */
-function perflab_get_standalone_plugins() {
+function perflab_get_standalone_plugins(): array {
 	return array_keys(
 		perflab_get_standalone_plugin_data()
 	);
@@ -171,7 +171,6 @@ function perflab_render_plugin_card( array $plugin_data ) {
 					'action'   => 'perflab_install_activate_plugin',
 					'_wpnonce' => wp_create_nonce( 'perflab_install_activate_plugin' ),
 					'slug'     => $plugin_data['slug'],
-					'file'     => $status['file'],
 				),
 				admin_url( 'options-general.php' )
 			)
