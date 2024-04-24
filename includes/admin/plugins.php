@@ -142,11 +142,8 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	$version     = $plugin_data['version'];
 	$name        = wp_strip_all_tags( $title . ' ' . $version );
 
-	$requires_php = $plugin_data['requires_php'] ?? null;
-	$requires_wp  = $plugin_data['requires'] ?? null;
-
-	$compatible_php = is_php_version_compatible( $requires_php );
-	$compatible_wp  = is_wp_version_compatible( $requires_wp );
+	$compatible_php = is_php_version_compatible( $plugin_data['requires_php'] );
+	$compatible_wp  = is_wp_version_compatible( $plugin_data['requires'] );
 	$action_links   = array();
 
 	$status = install_plugin_install_status( $plugin_data );
