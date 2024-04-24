@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 2.8.0
  *
  * @param string $plugin_slug The string identifier for the plugin in questions slug.
- * @return array Array of plugin data, or empty if none/error.
+ * @return array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string}|WP_Error Array of plugin data or WP_Error if failed.
  */
 function perflab_query_plugin_info( string $plugin_slug ) {
 	$plugin = get_transient( 'perflab_plugin_info_' . $plugin_slug );
@@ -24,24 +24,38 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return $plugin;
 	}
 
+	$fields = array(
+		'name',
+		'slug',
+		'short_description',
+		'requires',
+		'requires_php',
+		'requires_plugins',
+		'download_link',
+		'version', // Needed by install_plugin_install_status().
+	);
+
 	$plugin = plugins_api(
 		'plugin_information',
 		array(
 			'slug'   => $plugin_slug,
-			'fields' => array(
-				'short_description' => true,
-				'icons'             => true,
-			),
+			'fields' => array_fill_keys( $fields, true ),
 		)
 	);
 
 	if ( is_wp_error( $plugin ) ) {
-		return array();
+		return $plugin;
 	}
 
 	if ( is_object( $plugin ) ) {
 		$plugin = (array) $plugin;
 	}
+
+	// Only store what we need.
+	$plugin = wp_array_slice_assoc( $plugin, $fields );
+
+	// Make sure all fields default to false in case another plugin is modifying the response from WordPress.org via the plugins_api filter.
+	$plugin = array_merge( array_fill_keys( $fields, false ), $plugin );
 
 	set_transient( 'perflab_plugin_info_' . $plugin_slug, $plugin, HOUR_IN_SECONDS );
 
@@ -74,20 +88,41 @@ function perflab_render_plugins_ui() {
 	$experimental_plugins = array();
 
 	foreach ( perflab_get_standalone_plugin_data() as $plugin_slug => $plugin_data ) {
+		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from wordpress.org.
+
+		// Skip if the plugin is not on WordPress.org or there was a network error.
+		if ( $api_data instanceof WP_Error ) {
+			wp_admin_notice(
+				esc_html(
+					sprintf(
+						/* translators: 1: plugin slug. 2: error message. */
+						__( 'Failed to query WordPress.org Plugin Directory for plugin "%1$s". %2$s', 'performance-lab' ),
+						$plugin_slug,
+						$api_data->get_error_message()
+					)
+				),
+				array( 'type' => 'error' )
+			);
+			continue;
+		}
+
 		$plugin_data = array_merge(
+			array(
+				'experimental' => false,
+			),
 			$plugin_data, // Data defined within Performance Lab.
-			perflab_query_plugin_info( $plugin_slug ) // Data from wordpress.org.
+			$api_data
 		);
 
 		// Separate experimental plugins so that they're displayed after non-experimental plugins.
-		if ( isset( $plugin_data['experimental'] ) && $plugin_data['experimental'] ) {
+		if ( $plugin_data['experimental'] ) {
 			$experimental_plugins[ $plugin_slug ] = $plugin_data;
 		} else {
 			$plugins[ $plugin_slug ] = $plugin_data;
 		}
 	}
 
-	if ( empty( $plugins ) ) {
+	if ( ! $plugins && ! $experimental_plugins ) {
 		return;
 	}
 	?>
@@ -125,22 +160,15 @@ function perflab_render_plugins_ui() {
  * @see WP_Plugin_Install_List_Table::display_rows()
  * @link https://github.com/WordPress/wordpress-develop/blob/0b8ca16ea3bd9722bd1a38f8ab68901506b1a0e7/src/wp-admin/includes/class-wp-plugin-install-list-table.php#L467-L830
  *
- * @param array $plugin_data Plugin data from the WordPress.org API.
+ * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string, experimental: bool} $plugin_data Plugin data augmenting data from the WordPress.org API.
  */
 function perflab_render_plugin_card( array $plugin_data ) {
-	// If no plugin data is returned, return.
-	if ( empty( $plugin_data ) ) {
-		return;
-	}
 
-	// Remove any HTML from the description.
+	$name        = wp_strip_all_tags( $plugin_data['name'] );
 	$description = wp_strip_all_tags( $plugin_data['short_description'] );
-	$title       = $plugin_data['name'];
 
 	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
 	$description = apply_filters( 'plugin_install_description', $description, $plugin_data );
-	$version     = $plugin_data['version'];
-	$name        = wp_strip_all_tags( $title . ' ' . $version );
 
 	$compatible_php = ! $plugin_data['requires_php'] || is_php_version_compatible( $plugin_data['requires_php'] );
 	$compatible_wp  = ! $plugin_data['requires'] || is_wp_version_compatible( $plugin_data['requires'] );
@@ -189,7 +217,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		);
 	}
 
-	if ( isset( $plugin_data['slug'] ) && current_user_can( 'install_plugins' ) ) {
+	if ( current_user_can( 'install_plugins' ) ) {
 		$title_link_attr = ' class="thickbox open-plugin-details-modal"';
 		$details_link    = esc_url_raw(
 			add_query_arg(
@@ -293,25 +321,21 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			<div class="name column-name">
 				<h3>
 					<a href="<?php echo esc_url( $details_link ); ?>"<?php echo $title_link_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-						<?php echo wp_kses_post( $title ); ?>
+						<?php echo wp_kses_post( $name ); ?>
 					</a>
-					<?php
-					if ( isset( $plugin_data['experimental'] ) && $plugin_data['experimental'] ) {
-						?>
+					<?php if ( $plugin_data['experimental'] ) : ?>
 						<em class="perflab-plugin-experimental">
 							<?php echo esc_html( _x( '(experimental)', 'plugin suffix', 'performance-lab' ) ); ?>
 						</em>
-						<?php
-					}
-					?>
+					<?php endif; ?>
 				</h3>
 			</div>
 			<div class="action-links">
-				<?php
-				if ( ! empty( $action_links ) ) {
-					echo wp_kses_post( '<ul class="plugin-action-buttons"><li>' . implode( '</li><li>', $action_links ) . '</li></ul>' );
-				}
-				?>
+				<ul class="plugin-action-buttons">
+					<?php foreach ( $action_links as $action_link ) : ?>
+						<li><?php echo wp_kses_post( $action_link ); ?></li>
+					<?php endforeach; ?>
+				</ul>
 			</div>
 			<div class="desc column-description">
 				<p><?php echo wp_kses_post( $description ); ?></p>
