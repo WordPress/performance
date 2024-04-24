@@ -95,8 +95,8 @@ function perflab_render_plugins_ui() {
 			wp_admin_notice(
 				esc_html(
 					sprintf(
-						/* translators: %s is the plugin slug */
-						__( 'Failed to query WordPress.org Plugin Directory for plugin "%s".', 'performance-lab' ) . ' %s',
+						/* translators: 1: plugin slug. 2: error message. */
+						__( 'Failed to query WordPress.org Plugin Directory for plugin "%1$s". %2$s', 'performance-lab' ),
 						$plugin_slug,
 						$api_data->get_error_message()
 					)
