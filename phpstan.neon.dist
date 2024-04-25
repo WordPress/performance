@@ -4,13 +4,12 @@ parameters:
 	level: 8
 	treatPhpDocTypesAsCertain: false
 	paths:
-		- load.php
-		- includes/
+		- performance.php
 		- plugins/
 		- tests/
 	bootstrapFiles:
-		- load.php
 		- bin/phpstan/constants.php
+		- plugins/performance-lab/load.php
 		- plugins/webp-uploads/load.php
 	scanDirectories:
 		- vendor/wp-phpunit/wp-phpunit/
