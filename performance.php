@@ -5,7 +5,7 @@
  * Description: The Performance Monorepo is not a plugin rather a collection of performance features as plugins. Download <a href="https://wordpress.org/plugins/performance-lab/" to install performance features instead.
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
- * Text Domain: performance
+ * Text Domain: performance-lab
  *
  * @package performance
  */
@@ -23,7 +23,7 @@ function perflab_monorepo_is_not_a_plugin() {
 	printf(
 		wp_kses(
 			/* translators: Link to the Performance Lab plugin on WordPress.org */
-			__( 'The Performance Monorepo is not a plugin, and should not be installed as one. Download the <a href="%s">Performance Lab</a> plugin to install performance features instead.', 'performance' ),
+			__( 'The Performance Monorepo is not a plugin, and should not be installed as one. Download the <a href="%s">Performance Lab</a> plugin to install performance features instead.', 'performance-lab' ),
 			array(
 				'a' => array( 'href' => array() ),
 			)

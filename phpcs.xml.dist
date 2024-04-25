@@ -3,7 +3,7 @@
 	<description>WordPress Coding Standards for the Performance Features.</description>
 	<rule ref="bin/phpcs/phpcs.ruleset.xml"/>
 
-	<config name="text_domain" value="performance,default"/>
+	<config name="text_domain" value="performance-lab,default"/>
 
 	<file>.</file>
 
