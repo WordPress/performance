@@ -3,7 +3,7 @@
  * Helper functions used for AVIF Support.
  *
  * @package performance-lab
- * @since 3.0.0
+ * @since n.e.x.t
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Callback for avif_enabled test.
  *
- * @since 1.0.0
+ * @since n.e.x.t
  *
  * @return array
  */
