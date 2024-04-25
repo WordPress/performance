@@ -83,7 +83,7 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
  */
 function webp_uploads_generate_avif_webp_setting_callback() {
 
-	$selected = get_option( 'perflab_generate_avif_and_webp', 'avif' );
+	$selected = get_option( 'perflab_generate_avif_and_webp' );
 	?>
 			<label for="perflab_generate_avif_and_webp">
 				<select name="perflab_generate_avif_and_webp" id="perflab_generate_avif_and_webp" aria-describedby="perflab_generate_avif_and_webp_description">
