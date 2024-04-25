@@ -8,6 +8,7 @@ parameters:
 		- plugins/
 		- tests/
 	bootstrapFiles:
+		- load.php
 		- bin/phpstan/constants.php
 		- plugins/webp-uploads/load.php
 	scanDirectories:
