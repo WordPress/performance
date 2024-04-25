@@ -44,10 +44,10 @@ function plsr_get_speculation_rules() {
 		$prefixer->prefix_path_pattern( '/wp-admin/*', 'site' ),
 		$prefixer->prefix_path_pattern( '/*\\?*(^|&)_wpnonce=*', 'home' ),
 		$prefixer->prefix_path_pattern( '/*', 'uploads' ),
-		trailingslashit( wp_parse_url( content_url(), PHP_URL_PATH ) ) . '*',
-		trailingslashit( wp_parse_url( plugins_url(), PHP_URL_PATH ) ) . '*',
-		trailingslashit( wp_parse_url( get_stylesheet_directory_uri(), PHP_URL_PATH ) ) . '*',
-		trailingslashit( wp_parse_url( get_template_directory_uri(), PHP_URL_PATH ) ) . '*',
+		$prefixer->prefix_path_pattern( '/*', 'content' ),
+		$prefixer->prefix_path_pattern( '/*', 'plugins' ),
+		$prefixer->prefix_path_pattern( '/*', 'template' ),
+		$prefixer->prefix_path_pattern( '/*', 'stylesheet' ),
 	);
 
 	/**
