@@ -382,7 +382,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$default_transforms = array(
 			'image/jpeg' => array( 'image/webp' ),
-			'image/webp' => array( 'image/webp' ),
 		);
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
