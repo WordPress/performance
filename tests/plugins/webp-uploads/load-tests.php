@@ -641,7 +641,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 				return 1500;
 			}
 		);
-
+		update_option( 'perflab_generate_avif_and_webp', 'webp' );
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
