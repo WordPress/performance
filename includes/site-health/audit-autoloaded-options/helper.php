@@ -133,13 +133,14 @@ function perflab_aao_query_autoloaded_options() {
 		if ( strlen( $option_value ) > $option_threshold ) {
 			$large_options[] = (object) array(
 				'option_name'         => $option_name,
-				'option_value_length' => strlen( $option_value )
+				'option_value_length' => strlen( $option_value ),
 			);
 		}
 	}
 
-	usort( $large_options, function( $a, $b ) {
-		return $b->option_value_length - $a->option_value_length; });
+	usort($large_options, static function ($a, $b) {
+		return $b->option_value_length - $a->option_value_length;
+	});
 
 	return array_slice( $large_options, 0, 20 );
 }
@@ -222,7 +223,7 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 	$nonce = wp_create_nonce( 'perflab_aao_update_autoload' );
 
 	foreach ( $disabled_options_summary as $option_name => $option_length ) {
-		$url = esc_url_raw(
+		$url            = esc_url_raw(
 			add_query_arg(
 				array(
 					'action'      => 'perflab_aao_update_autoload',
@@ -233,12 +234,12 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 				admin_url( 'site-health.php' )
 			)
 		);
-        $disable_button = sprintf( '<a class="button" href="%s">%s</a>', esc_url( $url ), esc_html__( 'Revert to Autoload', 'performance-lab' ) );
-        $html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', esc_html( $option_name ), size_format( $option_length, 2 ), $disable_button );
+		$disable_button = sprintf( '<a class="button" href="%s">%s</a>', esc_url( $url ), esc_html__( 'Revert to Autoload', 'performance-lab' ) );
+		$html_table    .= sprintf( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>', esc_html( $option_name ), size_format( $option_length, 2 ), $disable_button );
 	}
 
 	$html_table .= '</tbody></table>';
-	
+
 	return $html_table;
 }
 
