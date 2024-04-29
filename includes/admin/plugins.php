@@ -3,6 +3,7 @@
  * Admin settings helper functions.
  *
  * @package performance-lab
+ * @noinspection PhpRedundantOptionalArgumentInspection
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
