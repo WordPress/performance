@@ -64,7 +64,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 	}
 )(
-	'od_pending_plugin_info',
+	'optimization_detective_pending_plugin',
 	'0.1.1',
 	static function ( string $version ) {
 
