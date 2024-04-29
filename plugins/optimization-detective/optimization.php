@@ -33,6 +33,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 function od_buffer_output( string $passthrough ): string {
 	ob_start(
 		static function ( string $output ): string {
+			$is_html_content_type = false;
+			foreach ( headers_list() as $header ) {
+				$header_parts = preg_split( '/\s*[:;]\s*/', strtolower( $header ) );
+				if ( count( $header_parts ) >= 2 && 'content-type' === $header_parts[0] ) {
+					$is_html_content_type = in_array( $header_parts[1], array( 'text/html', 'application/xhtml+xml' ), true );
+				}
+			}
+			if ( ! $is_html_content_type ) {
+				return $output;
+			}
+
 			/**
 			 * Filters the template output buffer prior to sending to the client.
 			 *
