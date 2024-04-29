@@ -6,6 +6,27 @@
  */
 
 class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
+	/**
+	 * Runs the routine before each test is executed.
+	 */
+	public function set_up() {
+		parent::set_up();
+
+		add_filter(
+			'template_directory_uri',
+			static function () {
+				return trailingslashit( WP_CONTENT_URL ) . 'themes/template';
+			}
+		);
+
+		add_filter(
+			'stylesheet_directory_uri',
+			static function () {
+				return trailingslashit( WP_CONTENT_URL ) . 'themes/stylesheet';
+			}
+		);
+	}
+
 
 	/**
 	 * @covers ::plsr_get_speculation_rules
@@ -32,11 +53,17 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 
 		$this->assertSameSets(
 			array(
-				'/wp-login.php',
-				'/wp-admin/*',
-				'/*\\?*(^|&)_wpnonce=*',
+				0 => '/wp-login.php',
+				1 => '/wp-admin/*',
+				2 => '/*\\?*(^|&)_wpnonce=*',
+				3 => '/wp-content/uploads/*',
+				4 => '/wp-content/*',
+				5 => '/wp-content/plugins/*',
+				6 => '/wp-content/themes/stylesheet/*',
+				7 => '/wp-content/themes/template/*',
 			),
-			$href_exclude_paths
+			$href_exclude_paths,
+			'Snapshot: ' . var_export( $href_exclude_paths, true )
 		);
 
 		// Add filter that attempts to replace base exclude paths with a custom path to exclude.
@@ -53,12 +80,18 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		// Ensure the base exclude paths are still present and that the custom path was formatted correctly.
 		$this->assertSameSets(
 			array(
-				'/wp-login.php',
-				'/wp-admin/*',
-				'/*\\?*(^|&)_wpnonce=*',
-				'/custom-file.php',
+				0 => '/wp-login.php',
+				1 => '/wp-admin/*',
+				2 => '/*\\?*(^|&)_wpnonce=*',
+				3 => '/wp-content/uploads/*',
+				4 => '/wp-content/*',
+				5 => '/wp-content/plugins/*',
+				6 => '/wp-content/themes/stylesheet/*',
+				7 => '/wp-content/themes/template/*',
+				8 => '/custom-file.php',
 			),
-			$href_exclude_paths
+			$href_exclude_paths,
+			'Snapshot: ' . var_export( $href_exclude_paths, true )
 		);
 	}
 
@@ -89,9 +122,15 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 				0 => '/wp-login.php',
 				1 => '/wp-admin/*',
 				2 => '/*\\?*(^|&)_wpnonce=*',
-				3 => '/products/*',
+				3 => '/wp-content/uploads/*',
+				4 => '/wp-content/*',
+				5 => '/wp-content/plugins/*',
+				6 => '/wp-content/themes/stylesheet/*',
+				7 => '/wp-content/themes/template/*',
+				8 => '/products/*',
 			),
-			$href_exclude_paths
+			$href_exclude_paths,
+			'Snapshot: ' . var_export( $href_exclude_paths, true )
 		);
 
 		// Update mode to be 'prefetch'.
@@ -106,8 +145,14 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 				0 => '/wp-login.php',
 				1 => '/wp-admin/*',
 				2 => '/*\\?*(^|&)_wpnonce=*',
+				3 => '/wp-content/uploads/*',
+				4 => '/wp-content/*',
+				5 => '/wp-content/plugins/*',
+				6 => '/wp-content/themes/stylesheet/*',
+				7 => '/wp-content/themes/template/*',
 			),
-			$href_exclude_paths
+			$href_exclude_paths,
+			'Snapshot: ' . var_export( $href_exclude_paths, true )
 		);
 	}
 
@@ -130,18 +175,25 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 			}
 		);
 
+		$actual = plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches'];
 		$this->assertSame(
 			array(
 				0 => '/wp-login.php',
 				1 => '/wp-admin/*',
 				2 => '/*\\?*(^|&)_wpnonce=*',
-				3 => '/unshifted/',
-				4 => '/next/',
-				5 => '/negative-one/',
-				6 => '/one-hundred/',
-				7 => '/letter-a/',
+				3 => '/wp-content/uploads/*',
+				4 => '/wp-content/*',
+				5 => '/wp-content/plugins/*',
+				6 => '/wp-content/themes/stylesheet/*',
+				7 => '/wp-content/themes/template/*',
+				8 => '/unshifted/',
+				9 => '/next/',
+				10 => '/negative-one/',
+				11 => '/one-hundred/',
+				12 => '/letter-a/',
 			),
-			plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches']
+			$actual,
+			'Snapshot: ' . var_export( $actual, true )
 		);
 	}
 
@@ -171,14 +223,21 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 			}
 		);
 
+		$actual = plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches'];
 		$this->assertSame(
 			array(
 				0 => '/wp/wp-login.php',
 				1 => '/wp/wp-admin/*',
 				2 => '/blog/*\\?*(^|&)_wpnonce=*',
-				3 => '/blog/store/*',
+				3 => '/wp-content/uploads/*',
+				4 => '/wp-content/*',
+				5 => '/wp-content/plugins/*',
+				6 => '/wp-content/themes/stylesheet/*',
+				7 => '/wp-content/themes/template/*',
+				8 => '/blog/store/*',
 			),
-			plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches']
+			$actual,
+			'Snapshot: ' . var_export( $actual, true )
 		);
 	}
 
