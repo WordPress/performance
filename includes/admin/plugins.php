@@ -156,28 +156,21 @@ function perflab_render_plugins_ui() {
  * @since n.e.x.t
  *
  * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string} $plugin_data Plugin data from the WordPress.org API.
- * @return array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool, dependency_errors: string[], available: bool} Availability.
+ * @return array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool} Availability.
  */
 function perflab_get_plugin_availability( array $plugin_data ): array {
 	$availability = array(
-		'compatible_php'    => (
+		'compatible_php' => (
 			! $plugin_data['requires_php'] ||
 			is_php_version_compatible( $plugin_data['requires_php'] )
 		),
-		'compatible_wp'     => (
+		'compatible_wp'  => (
 			! $plugin_data['requires'] ||
 			is_wp_version_compatible( $plugin_data['requires'] )
 		),
-		'dependency_errors' => array(),
 	);
 
 	$plugin_status = install_plugin_install_status( $plugin_data );
-
-	// The plugin is installed and the user can activate it, or the use can activate plugins in general.
-	$availability['can_activate'] = (
-		( $plugin_status['file'] && current_user_can( 'activate_plugin', $plugin_status['file'] ) ) ||
-		current_user_can( 'activate_plugins' )
-	);
 
 	// The plugin is already installed or the user can install plugins.
 	$availability['can_install'] = (
@@ -185,45 +178,23 @@ function perflab_get_plugin_availability( array $plugin_data ): array {
 		current_user_can( 'install_plugins' )
 	);
 
+	// The plugin is installed and the user can activate it, or the use can activate plugins in general.
+	$availability['can_activate'] = (
+		( $plugin_status['file'] && current_user_can( 'activate_plugin', $plugin_status['file'] ) ) ||
+		current_user_can( 'activate_plugins' )
+	);
+
 	foreach ( $plugin_data['requires_plugins'] as $requires_plugin ) {
 		$dependency_plugin_data = perflab_query_plugin_info( $requires_plugin );
 		if ( $dependency_plugin_data instanceof WP_Error ) {
-			$availability['dependency_errors'][] = sprintf(
-				/* translators: %s is plugin slug */
-				__( 'Unable to look up dependency "%s".', 'performance-lab' ),
-				$requires_plugin
-			);
 			continue;
 		}
 
 		$dependency_availability = perflab_get_plugin_availability( $dependency_plugin_data );
-
-		$availability['dependency_errors'] = array_merge(
-			$availability['dependency_errors'],
-			$dependency_availability['dependency_errors']
-		);
-		if ( ! $dependency_availability['available'] ) {
-			$availability['dependency_errors'][] = sprintf(
-				/* translators: %s is a link to the plugin on the directory. */
-				__( 'Dependency plugin %s is not available.', 'performance-lab' ),
-				sprintf(
-					'<a href="%s" target="_blank">%s</a>',
-					esc_url(
-						__( 'https://wordpress.org/plugins/', 'default' ) . $requires_plugin . '/'
-					),
-					esc_html( $plugin_data['name'] )
-				)
-			);
+		foreach ( array( 'compatible_php', 'compatible_wp', 'can_install', 'can_activate' ) as $key ) {
+			$availability[ $key ] = $availability[ $key ] && $dependency_availability[ $key ];
 		}
 	}
-
-	$availability['available'] = (
-		$availability['compatible_php'] &&
-		$availability['compatible_wp'] &&
-		$availability['can_activate'] &&
-		$availability['can_install'] &&
-		count( $availability['dependency_errors'] ) === 0
-	);
 
 	return $availability;
 }
@@ -255,14 +226,14 @@ function perflab_render_plugin_card( array $plugin_data ) {
 
 	$action_links = array();
 
-	$status = install_plugin_install_status( $plugin_data ); // TODO: Incorporate active state into availability.
+	$status = install_plugin_install_status( $plugin_data );
 
 	if ( is_plugin_active( $status['file'] ) ) {
 		$action_links[] = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
 			esc_html( _x( 'Active', 'plugin', 'default' ) )
 		);
-	} elseif ( $availability['available'] ) {
+	} elseif ( ! in_array( false, $availability, true ) ) {
 		$url = esc_url_raw(
 			add_query_arg(
 				array(
@@ -385,13 +356,6 @@ function perflab_render_plugin_card( array $plugin_data ) {
 				}
 			}
 			echo '</div>';
-		}
-		if ( $availability['dependency_errors'] ) {
-			echo '<div class="notice inline notice-error notice-alt"><p>';
-			foreach ( $availability['dependency_errors'] as $dependency_error ) {
-				echo wp_kses_post( $dependency_error ) . ' ';
-			}
-			echo '</p></div>';
 		}
 		?>
 		<div class="plugin-card-top">
