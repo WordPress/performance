@@ -204,7 +204,7 @@ function perflab_get_plugin_availability( array $plugin_data ): array {
 /**
  * Installs and activates a plugin by its slug.
  *
- * Dependencies are recursively installed as well.
+ * Dependencies are recursively installed and activated as well.
  *
  * @since n.e.x.t
  * @see perflab_get_plugin_availability()
