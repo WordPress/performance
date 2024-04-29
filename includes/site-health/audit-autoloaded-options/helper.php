@@ -138,9 +138,12 @@ function perflab_aao_query_autoloaded_options() {
 		}
 	}
 
-	usort( $large_options, static function ( $a, $b ) {
-		return $b->option_value_length - $a->option_value_length;
-	});
+	usort(
+		$large_options,
+		static function ( $a, $b ) {
+			return $b->option_value_length - $a->option_value_length;
+		}
+	);
 
 	return array_slice( $large_options, 0, 20 );
 }
