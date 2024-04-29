@@ -9,7 +9,7 @@ parameters:
 		- tests/
 	bootstrapFiles:
 		- load.php
-		- plugins/speculation-rules/load.php
+		- bin/phpstan/constants.php
 		- plugins/webp-uploads/load.php
 	scanDirectories:
 		- vendor/wp-phpunit/wp-phpunit/
