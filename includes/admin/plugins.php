@@ -81,7 +81,7 @@ function perflab_get_standalone_plugins(): array {
  *
  * @since 2.8.0
  */
-function perflab_render_plugins_ui() {
+function perflab_render_plugins_ui(): void {
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
@@ -283,7 +283,7 @@ function perflab_install_and_activate_plugin( string $plugin_slug ): ?WP_Error {
  *
  * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string, experimental: bool} $plugin_data Plugin data augmenting data from the WordPress.org API.
  */
-function perflab_render_plugin_card( array $plugin_data ) {
+function perflab_render_plugin_card( array $plugin_data ): void {
 
 	$name        = wp_strip_all_tags( $plugin_data['name'] );
 	$description = wp_strip_all_tags( $plugin_data['short_description'] );

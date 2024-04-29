@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  * @since 3.0.0 Renamed to perflab_add_features_page().
+ *
+ * @return string|false Hook suffix.
  */
 function perflab_add_features_page() {
 	$hook_suffix = add_options_page(
@@ -32,6 +34,8 @@ function perflab_add_features_page() {
 
 	return $hook_suffix;
 }
+
+// @phpstan-ignore-next-line
 add_action( 'admin_menu', 'perflab_add_features_page' );
 
 /**
@@ -41,7 +45,7 @@ add_action( 'admin_menu', 'perflab_add_features_page' );
  * @since 3.0.0 Renamed to perflab_load_features_page(), and the
  *              $module and $hook_suffix parameters were removed.
  */
-function perflab_load_features_page() {
+function perflab_load_features_page(): void {
 	// Handle script enqueuing for settings page.
 	add_action( 'admin_enqueue_scripts', 'perflab_enqueue_features_page_scripts' );
 
@@ -58,7 +62,7 @@ function perflab_load_features_page() {
  * @since 1.0.0
  * @since 3.0.0 Renamed to perflab_render_settings_page().
  */
-function perflab_render_settings_page() {
+function perflab_render_settings_page(): void {
 	?>
 	<div class="wrap">
 		<?php perflab_render_plugins_ui(); ?>
@@ -76,7 +80,7 @@ function perflab_render_settings_page() {
  *
  * @param string $hook_suffix The current admin page.
  */
-function perflab_admin_pointer( $hook_suffix ) {
+function perflab_admin_pointer( string $hook_suffix ): void {
 	// Do not show admin pointer in multisite Network admin or User admin UI.
 	if ( is_network_admin() || is_user_admin() ) {
 		return;
@@ -114,11 +118,11 @@ add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
  * @since 1.0.0
  * @since 2.4.0 Optional arguments were added to make the function reusable for different pointers.
  *
- * @param string $pointer_id Optional. ID of the pointer. Default 'perflab-admin-pointer'.
- * @param array  $args       Optional. Pointer arguments. Supports 'heading' and 'content' entries.
- *                           Defaults are the heading and content for the 'perflab-admin-pointer'.
+ * @param string                                    $pointer_id Optional. ID of the pointer. Default 'perflab-admin-pointer'.
+ * @param array{heading?: string, content?: string} $args       Optional. Pointer arguments. Supports 'heading' and 'content' entries.
+ *                                                              Defaults are the heading and content for the 'perflab-admin-pointer'.
  */
-function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = array() ) {
+function perflab_render_pointer( string $pointer_id = 'perflab-admin-pointer', array $args = array() ): void {
 	if ( ! isset( $args['heading'] ) ) {
 		$args['heading'] = __( 'Performance Lab', 'performance-lab' );
 	}
@@ -204,7 +208,7 @@ function perflab_plugin_action_links_add_settings( $links ) {
  *
  * @since 2.3.0
  */
-function perflab_dismiss_wp_pointer_wrapper() {
+function perflab_dismiss_wp_pointer_wrapper(): void {
 	if ( isset( $_POST['pointer'] ) && 'perflab-admin-pointer' !== $_POST['pointer'] ) {
 		// Another plugin's pointer, do nothing.
 		return;
@@ -219,7 +223,7 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
  * @since 2.8.0
  * @since 3.0.0 Renamed to perflab_enqueue_features_page_scripts().
  */
-function perflab_enqueue_features_page_scripts() {
+function perflab_enqueue_features_page_scripts(): void {
 	// These assets are needed for the "Learn more" popover.
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_style( 'thickbox' );
@@ -231,7 +235,7 @@ function perflab_enqueue_features_page_scripts() {
  *
  * @since 3.0.0
  */
-function perflab_install_activate_plugin_callback() {
+function perflab_install_activate_plugin_callback(): void {
 	check_admin_referer( 'perflab_install_activate_plugin' );
 
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -273,9 +277,9 @@ add_action( 'admin_action_perflab_install_activate_plugin', 'perflab_install_act
  *
  * @since 3.0.0
  */
-function perflab_print_features_page_style() {
+function perflab_print_features_page_style(): void {
 	?>
-<style type="text/css">
+<style>
 	.plugin-card .name,
 	.plugin-card .desc, /* For WP <6.5 versions */
 	.plugin-card .desc > p {
@@ -297,7 +301,7 @@ function perflab_print_features_page_style() {
  *
  * @since 2.8.0
  */
-function perflab_plugin_admin_notices() {
+function perflab_plugin_admin_notices(): void {
 	if ( ! current_user_can( 'install_plugins' ) ) {
 		$are_all_plugins_installed = true;
 		$installed_plugin_slugs    = array_map(

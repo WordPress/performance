@@ -26,8 +26,10 @@ define( 'PERFLAB_SERVER_TIMING_SCREEN', 'perflab-server-timing' );
  * its action hooks as expected.
  *
  * @since 1.8.0
+ *
+ * @return Perflab_Server_Timing
  */
-function perflab_server_timing() {
+function perflab_server_timing(): Perflab_Server_Timing {
 	static $server_timing;
 
 	if ( null === $server_timing ) {
@@ -48,6 +50,8 @@ function perflab_server_timing() {
 
 	return $server_timing;
 }
+
+// @phpstan-ignore-next-line
 add_action( 'wp_loaded', 'perflab_server_timing' );
 
 /**
@@ -57,8 +61,8 @@ add_action( 'wp_loaded', 'perflab_server_timing' );
  *
  * @since 1.8.0
  *
- * @param string $metric_slug The metric slug.
- * @param array  $args        {
+ * @param string                                                $metric_slug The metric slug.
+ * @param array{measure_callback: callable, access_cap: string} $args        {
  *     Arguments for the metric.
  *
  *     @type callable $measure_callback The callback that initiates calculating the metric value. It will receive
@@ -69,7 +73,7 @@ add_action( 'wp_loaded', 'perflab_server_timing' );
  *                                      needs to be set to "exist".
  * }
  */
-function perflab_server_timing_register_metric( $metric_slug, array $args ) {
+function perflab_server_timing_register_metric( string $metric_slug, array $args ): void {
 	perflab_server_timing()->register_metric( $metric_slug, $args );
 }
 
@@ -80,7 +84,7 @@ function perflab_server_timing_register_metric( $metric_slug, array $args ) {
  *
  * @return bool True if an output buffer should be used, false otherwise.
  */
-function perflab_server_timing_use_output_buffer() {
+function perflab_server_timing_use_output_buffer(): bool {
 	return perflab_server_timing()->use_output_buffer();
 }
 
@@ -93,9 +97,9 @@ function perflab_server_timing_use_output_buffer() {
  * @param string   $metric_slug The metric slug to use within the Server-Timing header.
  * @param string   $access_cap  Capability required to view the metric. If this is a public metric, this needs to be
  *                              set to "exist".
- * @return callable Callback function that will run $callback and measure its execution time once called.
+ * @return Closure Callback function that will run $callback and measure its execution time once called.
  */
-function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
+function perflab_wrap_server_timing( callable $callback, string $metric_slug, string $access_cap ): Closure {
 	return static function ( ...$callback_args ) use ( $callback, $metric_slug, $access_cap ) {
 		// Gain access to Perflab_Server_Timing_Metric instance.
 		$server_timing_metric = null;
@@ -134,18 +138,33 @@ function perflab_wrap_server_timing( $callback, $metric_slug, $access_cap ) {
 }
 
 /**
+ * Gets default value for server timing setting.
+ *
+ * @since n.e.x.t
+ *
+ * @return array{benchmarking_actions: string[], benchmarking_filters: string[], output_buffering: bool} Default value.
+ */
+function perflab_get_server_timing_setting_default_value(): array {
+	return array(
+		'benchmarking_actions' => array(),
+		'benchmarking_filters' => array(),
+		'output_buffering'     => false,
+	);
+}
+
+/**
  * Registers the Server-Timing setting.
  *
  * @since 2.6.0
  */
-function perflab_register_server_timing_setting() {
+function perflab_register_server_timing_setting(): void {
 	register_setting(
 		PERFLAB_SERVER_TIMING_SCREEN,
 		PERFLAB_SERVER_TIMING_SETTING,
 		array(
 			'type'              => 'object',
 			'sanitize_callback' => 'perflab_sanitize_server_timing_setting',
-			'default'           => array(),
+			'default'           => perflab_get_server_timing_setting_default_value(),
 		)
 	);
 }
@@ -156,21 +175,17 @@ add_action( 'init', 'perflab_register_server_timing_setting' );
  *
  * @since 2.6.0
  *
- * @param mixed $value Server-Timing setting value.
- * @return array Sanitized Server-Timing setting value.
+ * @param array|mixed $value Server-Timing setting value.
+ * @return array{benchmarking_actions: string[], benchmarking_filters: string[], output_buffering: bool} Sanitized Server-Timing setting value.
  */
-function perflab_sanitize_server_timing_setting( $value ) {
-	static $allowed_keys = array(
-		'benchmarking_actions' => true,
-		'benchmarking_filters' => true,
-		'output_buffering'     => true,
-	);
-
+function perflab_sanitize_server_timing_setting( $value ): array {
 	if ( ! is_array( $value ) ) {
-		return array();
+		$value = array();
 	}
-
-	$value = array_intersect_key( $value, $allowed_keys );
+	$value = wp_array_slice_assoc(
+		array_merge( perflab_get_server_timing_setting_default_value(), $value ),
+		array_keys( perflab_get_server_timing_setting_default_value() )
+	);
 
 	/*
 	 * Ensure that every element is an indexed array of hook names.
@@ -184,7 +199,7 @@ function perflab_sanitize_server_timing_setting( $value ) {
 			array_unique(
 				array_filter(
 					array_map(
-						static function ( $hookname ) {
+						static function ( $hook_name ) {
 							/*
 							 * Allow any characters except whitespace.
 							 * While most hooks use a limited set of characters, hook names in plugins are not
@@ -194,7 +209,7 @@ function perflab_sanitize_server_timing_setting( $value ) {
 							return preg_replace(
 								'/\s/',
 								'',
-								sanitize_text_field( $hookname )
+								sanitize_text_field( $hook_name )
 							);
 						},
 						$hooks
@@ -204,7 +219,7 @@ function perflab_sanitize_server_timing_setting( $value ) {
 		);
 	}
 
-	$value['output_buffering'] = ! empty( $value['output_buffering'] );
+	$value['output_buffering'] = (bool) $value['output_buffering'];
 
 	return $value;
 }

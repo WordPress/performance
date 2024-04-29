@@ -17,7 +17,7 @@ class Perflab_Server_Timing {
 	 * Map of registered metric slugs and their metric instances.
 	 *
 	 * @since 1.8.0
-	 * @var array
+	 * @var array<string, Perflab_Server_Timing_Metric>
 	 */
 	private $registered_metrics = array();
 
@@ -25,7 +25,7 @@ class Perflab_Server_Timing {
 	 * Map of registered metric slugs and their registered data.
 	 *
 	 * @since 1.8.0
-	 * @var array
+	 * @var array<string, array{measure_callback: callable, access_cap: string}>
 	 */
 	private $registered_metrics_data = array();
 
@@ -36,8 +36,8 @@ class Perflab_Server_Timing {
 	 *
 	 * @since 1.8.0
 	 *
-	 * @param string $metric_slug The metric slug.
-	 * @param array  $args        {
+	 * @param string                                                $metric_slug The metric slug.
+	 * @param array{measure_callback: callable, access_cap: string} $args        {
 	 *     Arguments for the metric.
 	 *
 	 *     @type callable $measure_callback The callback that initiates calculating the metric value. It will receive
@@ -48,7 +48,7 @@ class Perflab_Server_Timing {
 	 *                                      needs to be set to "exist".
 	 * }
 	 */
-	public function register_metric( $metric_slug, array $args ) {
+	public function register_metric( string $metric_slug, array $args ): void {
 		if ( isset( $this->registered_metrics[ $metric_slug ] ) ) {
 			_doing_it_wrong(
 				__METHOD__,
@@ -98,7 +98,7 @@ class Perflab_Server_Timing {
 		$this->registered_metrics[ $metric_slug ]      = new Perflab_Server_Timing_Metric( $metric_slug );
 		$this->registered_metrics_data[ $metric_slug ] = $args;
 
-		// If the current user has already been determined and they lack the necessary access,
+		// If the current user has already been determined, and they lack the necessary access,
 		// do not even attempt to calculate the metric.
 		if ( did_action( 'set_current_user' ) && ! current_user_can( $args['access_cap'] ) ) {
 			return;
@@ -116,7 +116,7 @@ class Perflab_Server_Timing {
 	 * @param string $metric_slug The metric slug.
 	 * @return bool True if registered, false otherwise.
 	 */
-	public function has_registered_metric( $metric_slug ) {
+	public function has_registered_metric( string $metric_slug ): bool {
 		return isset( $this->registered_metrics[ $metric_slug ] ) && isset( $this->registered_metrics_data[ $metric_slug ] );
 	}
 
@@ -127,7 +127,7 @@ class Perflab_Server_Timing {
 	 *
 	 * @since 1.8.0
 	 */
-	public function send_header() {
+	public function send_header(): void {
 		if ( headers_sent() ) {
 			_doing_it_wrong(
 				__METHOD__,
@@ -161,7 +161,7 @@ class Perflab_Server_Timing {
 	 *
 	 * @return string The Server-Timing header value.
 	 */
-	public function get_header() {
+	public function get_header(): string {
 		// Get all metric header values, as long as the current user has access to the metric.
 		$metric_header_values = array_filter(
 			array_map(
@@ -187,14 +187,14 @@ class Perflab_Server_Timing {
 	 * Returns whether an output buffer should be used to gather Server-Timing metrics during template rendering.
 	 *
 	 * Without an output buffer, it is only possible to cover metrics from before serving the template, i.e. before
-	 * the HTML output starts. Therefore sites that would like to gather metrics while serving the template should
+	 * the HTML output starts. Therefore, sites that would like to gather metrics while serving the template should
 	 * enable this via the {@see 'perflab_server_timing_use_output_buffer'} filter.
 	 *
 	 * @since 1.8.0
 	 *
 	 * @return bool True if an output buffer should be used, false otherwise.
 	 */
-	public function use_output_buffer() {
+	public function use_output_buffer(): bool {
 		$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
 		$enabled = ! empty( $options['output_buffering'] );
 
@@ -202,7 +202,7 @@ class Perflab_Server_Timing {
 		 * Filters whether an output buffer should be used to be able to gather additional Server-Timing metrics.
 		 *
 		 * Without an output buffer, it is only possible to cover metrics from before serving the template, i.e. before
-		 * the HTML output starts. Therefore sites that would like to gather metrics while serving the template should
+		 * the HTML output starts. Therefore, sites that would like to gather metrics while serving the template should
 		 * enable this.
 		 *
 		 * @since 1.8.0
@@ -247,7 +247,7 @@ class Perflab_Server_Timing {
 	 * @param Perflab_Server_Timing_Metric $metric The metric to format.
 	 * @return string|null Segment for the Server-Timing header, or null if no value set.
 	 */
-	private function format_metric_header_value( Perflab_Server_Timing_Metric $metric ) {
+	private function format_metric_header_value( Perflab_Server_Timing_Metric $metric ): ?string {
 		$value = $metric->get_value();
 
 		// If no value is set, make sure it's just passed through.
