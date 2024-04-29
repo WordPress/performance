@@ -16,6 +16,7 @@ local.properties
 .cproject
 .buildpath
 nbproject/
+.vscode
 
 ############
 ## Build
@@ -33,6 +34,7 @@ build-cs/composer.lock
 node_modules/
 vendor/
 
+modules/js-and-css/partytown-web-worker/assets/js/partytown
 ############
 ## OSes
 ############

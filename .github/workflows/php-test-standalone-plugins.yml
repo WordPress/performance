@@ -68,6 +68,8 @@ jobs:
           cache: npm
       - name: npm install
         run: npm ci
+      - name: Build plugin assets
+        run: npm run build
       - name: General debug information
         run: |
           npm --version
