@@ -50,6 +50,9 @@ function perflab_load_features_page() {
 
 	// Handle style for settings page.
 	add_action( 'admin_head', 'perflab_print_features_page_style' );
+
+	// Handle script for settings page.
+	add_action( 'admin_footer', 'perflab_print_plugin_progress_indicator_script' );
 }
 
 /**
@@ -224,6 +227,9 @@ function perflab_enqueue_features_page_scripts() {
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_style( 'thickbox' );
 	wp_enqueue_script( 'plugin-install' );
+
+	// Enqueue the a11y script.
+	wp_enqueue_script( 'wp-a11y' );
 }
 
 /**
@@ -392,4 +398,40 @@ function perflab_plugin_admin_notices() {
 			)
 		);
 	}
+}
+
+/**
+ * Callback function that print plugin progress indicator script.
+ *
+ * @since n.e.x.t
+ */
+function perflab_print_plugin_progress_indicator_script() {
+	$js_function = <<<JS
+		function addPluginProgressIndicator( message ) {
+			document.addEventListener( 'DOMContentLoaded', function () {
+				document.addEventListener( 'click', function ( event ) {
+					if (
+						event.target.classList.contains(
+							'perflab-install-active-plugin'
+						)
+					) {
+						const target = event.target;
+						target.classList.add( 'updating-message' );
+						target.textContent = message;
+
+						wp.a11y.speak(message);
+					}
+				} );
+			} );
+		}
+JS;
+
+	wp_print_inline_script_tag(
+		sprintf(
+			'( %s )( %s );',
+			$js_function,
+			wp_json_encode( __( 'Activating…', 'default' ) )
+		),
+		array( 'type' => 'module' )
+	);
 }
