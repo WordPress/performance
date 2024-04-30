@@ -180,7 +180,7 @@ function perflab_get_plugin_availability( array $plugin_data ): array {
 		current_user_can( 'install_plugins' )
 	);
 
-	// The plugin is installed and the user can activate it, or the use can activate plugins in general.
+	// The plugin is installed and the user can activate it, or the user can activate plugins in general.
 	$availability['can_activate'] = (
 		( $plugin_status['file'] && current_user_can( 'activate_plugin', $plugin_status['file'] ) ) ||
 		current_user_can( 'activate_plugins' )
