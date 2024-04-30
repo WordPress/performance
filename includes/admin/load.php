@@ -227,6 +227,9 @@ function perflab_enqueue_features_page_scripts() {
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_style( 'thickbox' );
 	wp_enqueue_script( 'plugin-install' );
+
+	// Enqueue the a11y script.
+	wp_enqueue_script( 'wp-a11y' );
 }
 
 /**
