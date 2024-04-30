@@ -76,6 +76,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 */
 	public function it_should_create_the_original_mime_type_as_well_with_all_the_available_sources_for_the_specified_mime() {
 		update_option( 'perflab_generate_webp_and_jpeg', false );
+		update_option( 'perflab_generate_avif_and_webp', 'webp' );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );
 		// There should be a WebP source, but no JPEG source for the full image.
