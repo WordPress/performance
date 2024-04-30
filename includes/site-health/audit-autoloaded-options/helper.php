@@ -201,7 +201,7 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 	}
 
 	$disabled_options_summary = array();
-	wp_prime_option_caches($disabled_options);
+	wp_prime_option_caches( $disabled_options );
 
 	foreach ( $disabled_options as $option_name ) {
 		$option_value = get_option( $option_name );
