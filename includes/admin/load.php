@@ -403,23 +403,30 @@ function perflab_plugin_admin_notices() {
  * @since n.e.x.t
  */
 function perflab_print_plugin_progress_indicator_script() {
-	$js = <<<JS
-( function ( document ) {
-	document.addEventListener( 'DOMContentLoaded', function () {
-		document.addEventListener( 'click', function ( event ) {
-			if (
-				event.target.classList.contains(
-					'perflab-install-active-plugin'
-				)
-			) {
-				const target = event.target;
-				target.classList.add( 'updating-message' );
-				target.innerHTML = wp.i18n.__( 'Activating…' );
-			}
-		} );
-	} );
-} )( document );
+	$js_function = <<<JS
+		function addPluginProgressIndicator( message ) {
+			document.addEventListener( 'DOMContentLoaded', function () {
+				document.addEventListener( 'click', function ( event ) {
+					if (
+						event.target.classList.contains(
+							'perflab-install-active-plugin'
+						)
+					) {
+						const target = event.target;
+						target.classList.add( 'updating-message' );
+						target.textContent = message;
+					}
+				} );
+			} );
+		}
 JS;
 
-	wp_print_inline_script_tag( $js );
+	wp_print_inline_script_tag(
+		sprintf(
+			'( %s )( %s );',
+			$js_function,
+			wp_json_encode( __( 'Activating…', 'default' ) )
+		),
+		array( 'type' => 'module' )
+	);
 }
