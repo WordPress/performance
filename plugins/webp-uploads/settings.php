@@ -26,7 +26,7 @@ function webp_uploads_register_media_settings_field() {
 			'perflab_generate_avif_and_webp',
 			array(
 				'type'         => 'string',
-				'default'      => 'avif', // AVIF is the default if the editor supports it for new installs
+				'default'      => 'avif', // AVIF is the default if the editor supports it for new installs.
 				'show_in_rest' => false,
 			)
 		);
