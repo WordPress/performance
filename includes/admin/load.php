@@ -50,6 +50,9 @@ function perflab_load_features_page() {
 
 	// Handle style for settings page.
 	add_action( 'admin_head', 'perflab_print_features_page_style' );
+
+	// Handle script for settings page.
+	add_action( 'admin_footer', 'perflab_print_plugin_progress_indicator_script' );
 }
 
 /**
@@ -392,4 +395,31 @@ function perflab_plugin_admin_notices() {
 			)
 		);
 	}
+}
+
+/**
+ * Callback function that print plugin progress indicator script.
+ *
+ * @since n.e.x.t
+ */
+function perflab_print_plugin_progress_indicator_script() {
+	$js = <<<JS
+( function ( document ) {
+	document.addEventListener( 'DOMContentLoaded', function () {
+		document.addEventListener( 'click', function ( event ) {
+			if (
+				event.target.classList.contains(
+					'perflab-install-active-plugin'
+				)
+			) {
+				const target = event.target;
+				target.classList.add( 'updating-message' );
+				target.innerHTML = wp.i18n.__( 'Activating…' );
+			}
+		} );
+	} );
+} )( document );
+JS;
+
+	wp_print_inline_script_tag( $js );
 }
