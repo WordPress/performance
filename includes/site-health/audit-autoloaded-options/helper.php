@@ -100,9 +100,7 @@ function perflab_aao_autoloaded_options_test() {
  * @return int autoloaded data in bytes.
  */
 function perflab_aao_autoloaded_options_size() {
-	wp_load_alloptions();
-
-	$all_options = wp_cache_get( 'alloptions', 'options' );
+	$all_options = wp_load_alloptions();
 
 	$total_length = 0;
 
@@ -203,6 +201,7 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
 	}
 
 	$disabled_options_summary = array();
+	wp_prime_option_caches($disabled_options);
 
 	foreach ( $disabled_options as $option_name ) {
 		$option_value = get_option( $option_name );
