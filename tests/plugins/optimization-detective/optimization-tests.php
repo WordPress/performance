@@ -1050,7 +1050,8 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Gets a validated URL metric.
 	 *
-	 * @param int $viewport_width Viewport width for the URL metric.
+	 * @param int                                      $viewport_width Viewport width for the URL metric.
+	 * @param array<array{xpath: string, isLCP: bool}> $elements       Elements.
 	 * @return OD_URL_Metric URL metric.
 	 * @throws Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
@@ -1061,13 +1062,21 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 				'width'  => $viewport_width,
 				'height' => 800,
 			),
-			'timestamp' => microtime( true ),
+			'timestamp' => (int) microtime( true ),
 			'elements'  => array_map(
 				static function ( array $element ): array {
 					return array_merge(
 						array(
-							'isLCPCandidate'    => true,
-							'intersectionRatio' => 1,
+							'isLCPCandidate'     => true,
+							'intersectionRatio'  => 1,
+							'intersectionRect'   => array(
+								'width'  => 100,
+								'height' => 100,
+							),
+							'boundingClientRect' => array(
+								'width'  => 100,
+								'height' => 100,
+							),
 						),
 						$element
 					);
