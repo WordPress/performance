@@ -54,7 +54,7 @@ function od_buffer_output( string $passthrough ): string {
  * @access private
  */
 function od_maybe_add_template_output_buffer_filter(): void {
-	if ( ! od_can_optimize_response() ) {
+	if ( ! od_can_optimize_response() || isset( $_GET['optimization_detective_disabled'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return;
 	}
 	$callback = 'od_optimize_template_output_buffer';

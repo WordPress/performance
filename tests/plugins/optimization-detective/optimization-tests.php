@@ -83,6 +83,20 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 		od_maybe_add_template_output_buffer_filter();
 		$this->assertTrue( has_filter( 'od_template_output_buffer' ) );
 	}
+	/**
+	 * Test od_maybe_add_template_output_buffer_filter().
+	 *
+	 * @covers ::od_maybe_add_template_output_buffer_filter
+	 */
+	public function test_od_maybe_add_template_output_buffer_filter_with_query_var_to_disable() {
+		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
+
+		add_filter( 'od_can_optimize_response', '__return_true' );
+		$this->go_to( home_url( '/?optimization_detective_disabled=1' ) );
+		$this->assertTrue( od_can_optimize_response() );
+		od_maybe_add_template_output_buffer_filter();
+		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
+	}
 
 	/**
 	 * Data provider.
