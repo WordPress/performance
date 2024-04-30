@@ -415,6 +415,8 @@ function perflab_print_plugin_progress_indicator_script() {
 						const target = event.target;
 						target.classList.add( 'updating-message' );
 						target.textContent = message;
+
+						wp.a11y.speak(message);
 					}
 				} );
 			} );
