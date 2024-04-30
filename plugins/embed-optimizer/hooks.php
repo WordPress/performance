@@ -75,6 +75,21 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 	if ( 1 === $iframe_count && $html_processor->has_bookmark( 'iframe' ) ) {
 		if ( $html_processor->seek( 'iframe' ) ) {
 			$html_processor->set_attribute( 'loading', 'lazy' );
+
+			// For post embeds, let them be transparent instead of almost completely clipped, since Chromium at least
+			// loads transparent lazy-loaded iframes while it does not load clipped lazy-loaded iframes.
+			if ( $html_processor->has_class( 'wp-embedded-content' ) ) {
+				$style = $html_processor->get_attribute( 'style' );
+				if ( $style ) {
+					// WordPress core injects this clip CSS property:
+					// <https://github.com/WordPress/wordpress-develop/blob/6974b994de5/src/wp-includes/embed.php#L968>.
+					$style = str_replace( 'clip: rect(1px, 1px, 1px, 1px);', 'opacity: 0;', $style );
+
+					// Note: wp-embed.js removes the style attribute entirely when the iframe is loaded:
+					// <https://github.com/WordPress/wordpress-develop/blob/6974b994d/src/js/_enqueues/wp/embed.js#L60>.
+					$html_processor->set_attribute( 'style', $style );
+				}
+			}
 		} else {
 			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to iframe bookmark.', 'embed-optimizer' ) );
 		}
