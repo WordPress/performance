@@ -33,17 +33,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 function od_buffer_output( string $passthrough ): string {
 	ob_start(
 		static function ( string $output ): string {
-			$is_html_content_type = false;
-			foreach ( headers_list() as $header ) {
-				$header_parts = preg_split( '/\s*[:;]\s*/', strtolower( $header ) );
-				if ( count( $header_parts ) >= 2 && 'content-type' === $header_parts[0] ) {
-					$is_html_content_type = in_array( $header_parts[1], array( 'text/html', 'application/xhtml+xml' ), true );
-				}
-			}
-			if ( ! $is_html_content_type ) {
-				return $output;
-			}
-
 			/**
 			 * Filters the template output buffer prior to sending to the client.
 			 *
@@ -184,6 +173,31 @@ function od_construct_preload_links( array $lcp_elements_by_minimum_viewport_wid
 }
 
 /**
+ * Determines whether the response has an HTML Content-Type.
+ *
+ * @since n.e.x.t
+ * @private
+ *
+ * @return bool Whether Content-Type is HTML.
+ */
+function od_is_response_html_content_type(): bool {
+	$is_html_content_type = false;
+
+	$headers_list = array_merge(
+		array( 'Content-Type: ' . ini_get( 'default_mimetype' ) ),
+		headers_list()
+	);
+	foreach ( $headers_list as $header ) {
+		$header_parts = preg_split( '/\s*[:;]\s*/', strtolower( $header ) );
+		if ( count( $header_parts ) >= 2 && 'content-type' === $header_parts[0] ) {
+			$is_html_content_type = in_array( $header_parts[1], array( 'text/html', 'application/xhtml+xml' ), true );
+		}
+	}
+
+	return $is_html_content_type;
+}
+
+/**
  * Optimizes template output buffer.
  *
  * @since 0.1.0
@@ -193,6 +207,10 @@ function od_construct_preload_links( array $lcp_elements_by_minimum_viewport_wid
  * @return string Filtered template output buffer.
  */
 function od_optimize_template_output_buffer( string $buffer ): string {
+	if ( ! od_is_response_html_content_type() ) {
+		return $buffer;
+	}
+
 	$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 	$post = OD_URL_Metrics_Post_Type::get_post( $slug );
 
