@@ -666,11 +666,11 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
  */
 function webp_uploads_wepb_fallback() {
 	// Get mime type transforms for the site.
-	$transforms = webp_uploads_get_upload_image_mime_transforms();
+	$transforms   = webp_uploads_get_upload_image_mime_transforms();
 	$image_format = get_option( 'perflab_modern_image_format' );
 
 	// We need to add fallback only if jpeg alternatives for the image_format images are enabled for the server.
-	$preserve_jpegs_for_jpeg_transforms = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/' . $image_format, $transforms['image/jpeg'], true );
+	$preserve_jpegs_for_jpeg_transforms       = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/' . $image_format, $transforms['image/jpeg'], true );
 	$preserve_jpegs_for_image_type_transforms = isset( $transforms[ 'image/' . $image_format ] ) && in_array( 'image/jpeg', $transforms[ 'image/' . $image_format ], true ) && in_array( 'image/' . $image_format, $transforms[ 'image/' . $image_format ], true );
 	if ( ! $preserve_jpegs_for_jpeg_transforms && ! $preserve_jpegs_for_image_type_transforms ) {
 		return;
