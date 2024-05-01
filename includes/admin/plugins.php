@@ -151,6 +151,8 @@ function perflab_render_plugins_ui() {
 	<?php
 }
 
+global $perflab_get_plugin_availability_plugins_checked;
+
 /**
  * Checks if a given plugin is available.
  *
@@ -161,6 +163,12 @@ function perflab_render_plugins_ui() {
  * @return array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool} Availability.
  */
 function perflab_get_plugin_availability( array $plugin_data ): array {
+	if ( empty( $perflab_get_plugin_availability_plugins_checked ) ) {
+		$perflab_get_plugin_availability_plugins_checked = array();
+	}
+	if ( ! empty( $perflab_get_plugin_availability_plugins_checked[ $plugin_data['slug'] ] ) ) {
+		return $perflab_get_plugin_availability_plugins_checked[ $plugin_data['slug'] ];
+	}
 	$availability = array(
 		'compatible_php' => (
 			! $plugin_data['requires_php'] ||
@@ -198,8 +206,12 @@ function perflab_get_plugin_availability( array $plugin_data ): array {
 		}
 	}
 
+	$perflab_get_plugin_availability_plugins_checked[ $plugin_data['slug'] ] = $availability;
+
 	return $availability;
 }
+
+global $perflab_install_and_activate_plugin_plugins_activated;
 
 /**
  * Installs and activates a plugin by its slug.
@@ -213,6 +225,9 @@ function perflab_get_plugin_availability( array $plugin_data ): array {
  * @return WP_Error|null WP_Error on failure.
  */
 function perflab_install_and_activate_plugin( string $plugin_slug ): ?WP_Error {
+	if ( isset( $perflab_install_and_activate_plugin_plugins_activated[ $plugin_slug ] ) ) {
+		return null;
+	}
 	$plugin_data = perflab_query_plugin_info( $plugin_slug );
 	if ( $plugin_data instanceof WP_Error ) {
 		return $plugin_data;
@@ -267,6 +282,11 @@ function perflab_install_and_activate_plugin( string $plugin_slug ): ?WP_Error {
 			return $result;
 		}
 	}
+
+	if ( empty( $perflab_install_and_activate_plugin_plugins_activated ) ) {
+		$perflab_install_and_activate_plugin_plugins_activated = array();
+	}
+	$perflab_install_and_activate_plugin_plugins_activated[ $plugin_slug ] = true;
 
 	return null;
 }
