@@ -694,7 +694,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			static function () {
 				// WP core does not choose the WP_Image_Editor instance based on MIME type support,
 				// therefore the one that does support WebP needs to be first in this list.
-				return array( 'WP_Image_Editor_GD', 'WP_Image_Doesnt_Support_WebP' );
+				return array( 'WP_Image_Doesnt_Support_WebP', 'WP_Image_Editor_GD' );
 			}
 		);
 
