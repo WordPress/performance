@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function webp_uploads_get_upload_image_mime_transforms() {
 
 	// Check the selected output format.
-	$output_format = webp_uploads_avif_supported() ? get_option( 'perflab_generate_avif_and_webp' ) : 'webp';
+	$output_format = webp_uploads_avif_supported() ? get_option( 'perflab_modern_image_format' ) : 'webp';
 
 	$default_transforms = array(
 		'image/jpeg' => array( 'image/' . $output_format ),

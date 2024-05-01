@@ -187,7 +187,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
-		update_option( 'perflab_generate_avif_and_webp', 'webp' );
+		update_option( 'perflab_modern_image_format', 'webp' );
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
@@ -216,7 +216,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
 
-		update_option( 'perflab_generate_avif_and_webp', 'webp' );
+		update_option( 'perflab_modern_image_format', 'webp' );
 		// Make sure no editor is available.
 		add_filter( 'wp_image_editors', '__return_empty_array' );
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
@@ -244,7 +244,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_to_process_an_image_when_the_editor_does_not_support_the_format() {
-		update_option( 'perflab_generate_avif_and_webp', 'webp' );
+		update_option( 'perflab_modern_image_format', 'webp' );
 		// Make sure no editor is available.
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
