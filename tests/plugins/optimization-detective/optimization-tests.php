@@ -1062,7 +1062,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 				'width'  => $viewport_width,
 				'height' => 800,
 			),
-			'timestamp' => (int) microtime( true ),
+			'timestamp' => microtime( true ),
 			'elements'  => array_map(
 				static function ( array $element ): array {
 					return array_merge(
