@@ -58,7 +58,13 @@ function od_maybe_add_template_output_buffer_filter(): void {
 		return;
 	}
 	$callback = 'od_optimize_template_output_buffer';
-	if ( function_exists( 'perflab_wrap_server_timing' ) ) {
+	if (
+		function_exists( 'perflab_wrap_server_timing' )
+		&&
+		function_exists( 'perflab_server_timing_use_output_buffer' )
+		&&
+		perflab_server_timing_use_output_buffer()
+	) {
 		$callback = perflab_wrap_server_timing( $callback, 'optimization-detective', 'exist' );
 	}
 	add_filter( 'od_template_output_buffer', $callback );
