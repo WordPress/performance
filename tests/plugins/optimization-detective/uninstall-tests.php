@@ -11,7 +11,7 @@ class OD_Uninstall_Tests extends WP_UnitTestCase {
 	/**
 	 * Runs the routine before setting up all tests.
 	 */
-	public static function set_up_before_class() {
+	public static function set_up_before_class(): void {
 		parent::set_up_before_class();
 
 		// Mock uninstall const.
@@ -23,14 +23,14 @@ class OD_Uninstall_Tests extends WP_UnitTestCase {
 	/**
 	 * Load uninstall.php.
 	 */
-	private function require_uninstall() {
+	private function require_uninstall(): void {
 		require __DIR__ . '/../../../plugins/optimization-detective/uninstall.php';
 	}
 
 	/**
 	 * Make sure post deletion is happening.
 	 */
-	public function test_post_deletion() {
+	public function test_post_deletion(): void {
 
 		$post_id             = self::factory()->post->create();
 		$url_metrics_post_id = self::factory()->post->create( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) );
@@ -45,7 +45,7 @@ class OD_Uninstall_Tests extends WP_UnitTestCase {
 	/**
 	 * Test scheduled event removal.
 	 */
-	public function test_event_removal() {
+	public function test_event_removal(): void {
 		$user = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user );
 		OD_URL_Metrics_Post_Type::schedule_garbage_collection();
