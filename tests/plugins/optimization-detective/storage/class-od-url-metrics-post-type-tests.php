@@ -340,10 +340,18 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 				'timestamp' => microtime( true ),
 				'elements'  => array(
 					array(
-						'isLCP'             => true,
-						'isLCPCandidate'    => true,
-						'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
-						'intersectionRatio' => 1,
+						'isLCP'              => true,
+						'isLCPCandidate'     => true,
+						'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
+						'intersectionRatio'  => 1,
+						'intersectionRect'   => array(
+							'width'  => 100,
+							'height' => 100,
+						),
+						'boundingClientRect' => array(
+							'width'  => 100,
+							'height' => 100,
+						),
 					),
 				),
 			)

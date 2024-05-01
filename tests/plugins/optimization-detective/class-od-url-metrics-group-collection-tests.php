@@ -573,6 +573,14 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 					'isLCPCandidate'    => true,
 					'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]',
 					'intersectionRatio' => 1,
+					'intersectionRect'  => array(
+						'width'  => 100,
+						'height' => 100,
+					),
+					'boundingClientRect'  => array(
+						'width'  => 100,
+						'height' => 100,
+					),
 				),
 			),
 		);

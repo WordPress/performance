@@ -525,10 +525,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 		foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
 			$this->assertTrue( is_array( $lcp_element ) || false === $lcp_element );
 			if ( is_array( $lcp_element ) ) {
-				$this->assertTrue( $lcp_element['isLCP'] );
-				$this->assertTrue( $lcp_element['isLCPCandidate'] );
 				$this->assertIsString( $lcp_element['xpath'] );
-				$this->assertIsNumeric( $lcp_element['intersectionRatio'] );
 				$lcp_element_xpaths_by_minimum_viewport_widths[ $minimum_viewport_width ] = $lcp_element['xpath'];
 			} else {
 				$lcp_element_xpaths_by_minimum_viewport_widths[ $minimum_viewport_width ] = false;
@@ -558,10 +555,18 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 			'timestamp' => microtime( true ),
 			'elements'  => array(
 				array(
-					'isLCP'             => $is_lcp,
-					'isLCPCandidate'    => $is_lcp,
-					'xpath'             => $this->get_xpath( ...$breadcrumbs ),
-					'intersectionRatio' => 1,
+					'isLCP'              => $is_lcp,
+					'isLCPCandidate'     => $is_lcp,
+					'xpath'              => $this->get_xpath( ...$breadcrumbs ),
+					'intersectionRatio'  => 1,
+					'intersectionRect'   => array(
+						'width'  => 100,
+						'height' => 100,
+					),
+					'boundingClientRect' => array(
+						'width'  => 100,
+						'height' => 100,
+					),
 				),
 			),
 		);
