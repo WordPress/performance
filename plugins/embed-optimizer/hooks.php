@@ -77,7 +77,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			$html_processor->set_attribute( 'loading', 'lazy' );
 
 			// For post embeds, let them be transparent instead of almost completely clipped, since Chromium at least
-			// loads transparent lazy-loaded iframes while it does not load clipped lazy-loaded iframes.
+			// loads transparent lazy-loaded iframes while it does not load clipped lazy-loaded iframes reliably.
 			if ( $html_processor->has_class( 'wp-embedded-content' ) ) {
 				$style = $html_processor->get_attribute( 'style' );
 				if ( $style ) {
