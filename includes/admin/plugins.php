@@ -158,7 +158,7 @@ function perflab_render_plugins_ui() {
  * @see perflab_install_and_activate_plugin()
  *
  * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string} $plugin_data Plugin data from the WordPress.org API.
- * @return array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool} Availability.
+ * @return array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool, activated: bool, installed: bool} Availability.
  */
 function perflab_get_plugin_availability( array $plugin_data ): array {
 	$availability = array(
@@ -174,16 +174,21 @@ function perflab_get_plugin_availability( array $plugin_data ): array {
 
 	$plugin_status = install_plugin_install_status( $plugin_data );
 
+	$availability['installed'] = ( 'install' !== $plugin_status['status'] );
+	$availability['activated'] = $plugin_status['file'] && is_plugin_active( $plugin_status['file'] );
+
 	// The plugin is already installed or the user can install plugins.
 	$availability['can_install'] = (
-		'install' !== $plugin_status['status'] ||
+		$availability['installed'] ||
 		current_user_can( 'install_plugins' )
 	);
 
-	// The plugin is installed and the user can activate it, or the user can activate plugins in general.
+	// The plugin is activated or the user can activate plugins.
 	$availability['can_activate'] = (
-		( $plugin_status['file'] && current_user_can( 'activate_plugin', $plugin_status['file'] ) ) ||
-		current_user_can( 'activate_plugins' )
+		$availability['activated'] ||
+		$plugin_status['file'] // When not false, the plugin is installed.
+			? current_user_can( 'activate_plugin', $plugin_status['file'] )
+			: current_user_can( 'activate_plugins' )
 	);
 
 	foreach ( $plugin_data['requires_plugins'] as $requires_plugin ) {
@@ -193,7 +198,7 @@ function perflab_get_plugin_availability( array $plugin_data ): array {
 		}
 
 		$dependency_availability = perflab_get_plugin_availability( $dependency_plugin_data );
-		foreach ( array( 'compatible_php', 'compatible_wp', 'can_install', 'can_activate' ) as $key ) {
+		foreach ( array( 'compatible_php', 'compatible_wp', 'can_install', 'can_activate', 'installed', 'activated' ) as $key ) {
 			$availability[ $key ] = $availability[ $key ] && $dependency_availability[ $key ];
 		}
 	}
@@ -298,14 +303,17 @@ function perflab_render_plugin_card( array $plugin_data ) {
 
 	$action_links = array();
 
-	$status = install_plugin_install_status( $plugin_data );
-
-	if ( is_plugin_active( $status['file'] ) ) {
+	if ( $availability['activated'] ) {
 		$action_links[] = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
 			esc_html( _x( 'Active', 'plugin', 'default' ) )
 		);
-	} elseif ( ! in_array( false, $availability, true ) ) {
+	} elseif (
+		$availability['compatible_php'] &&
+		$availability['compatible_wp'] &&
+		$availability['can_install'] &&
+		$availability['can_activate']
+	) {
 		$url = esc_url_raw(
 			add_query_arg(
 				array(
