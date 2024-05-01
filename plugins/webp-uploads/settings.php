@@ -24,7 +24,7 @@ function webp_uploads_register_media_settings_field() {
 	if ( wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
 		register_setting(
 			'media',
-			'perflab_generate_avif_and_webp',
+			'perflab_modern_image_format',
 			array(
 				'type'         => 'string',
 				'default'      => 'avif', // AVIF is the default if the editor supports it.
@@ -55,7 +55,7 @@ function webp_uploads_add_media_settings_field() {
 	// If AVIF is supported, add a dropdown to select the output format between AVIF and WebP.
 	if ( wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
 		add_settings_field(
-			'perflab_generate_avif_and_webp',
+			'perflab_modern_image_format',
 			__( 'Modern image format', 'webp-uploads' ),
 			'webp_uploads_generate_avif_webp_setting_callback',
 			'media',
@@ -78,16 +78,16 @@ function webp_uploads_add_media_settings_field() {
 add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
 
 /**
- * Renders the settings field for the 'perflab_generate_avif_and_webp' setting.
+ * Renders the settings field for the 'perflab_modern_image_format' setting.
  *
  * @since n.e.x.t
  */
 function webp_uploads_generate_avif_webp_setting_callback() {
 
-	$selected = get_option( 'perflab_generate_avif_and_webp' );
+	$selected = get_option( 'perflab_modern_image_format' );
 	?>
-			<label for="perflab_generate_avif_and_webp">
-				<select name="perflab_generate_avif_and_webp" id="perflab_generate_avif_and_webp" aria-describedby="perflab_generate_avif_and_webp_description">
+			<label for="perflab_modern_image_format">
+				<select name="perflab_modern_image_format" id="perflab_modern_image_format" aria-describedby="perflab_generate_avif_and_webp_description">
 					<option value="webp"<?php selected( 'webp', $selected ); ?>><?php esc_html_e( 'WebP', 'webp-uploads' ); ?></option>
 					<option value="avif"<?php selected( 'avif', $selected ); ?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
 				</select>
