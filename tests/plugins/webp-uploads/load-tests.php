@@ -716,17 +716,35 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Replace the featured image to WebP when requesting the featured image
+	 * Replace the featured image to the proper type when requesting the featured image.
 	 *
 	 * @test
+	 * @param string $image_type
+	 * @dataProvider data_provider_supported_image_types
 	 */
-	public function it_should_replace_the_featured_image_to_webp_when_requesting_the_featured_image() {
+	public function it_should_replace_the_featured_image_to_webp_when_requesting_the_featured_image( $image_type ) {
+
+		// Set the image format using the filter.
+		update_option( 'perflab_modern_image_format', $image_type );
+
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
 		$post_id       = self::factory()->post->create();
 		set_post_thumbnail( $post_id, $attachment_id );
 
 		$featured_image = get_the_post_thumbnail( $post_id );
-		$this->assertMatchesRegularExpression( '/<img .*?src=".*?\.webp".*>/', $featured_image );
+		$this->assertMatchesRegularExpression( '/<img .*?src=".*?\.' . $image_type . '".*>/', $featured_image );
+	}
+
+	/**
+	 * Data provider for tests returns the supported image types to run the tests against.
+	 *
+	 * @return array
+	 */
+	public function data_provider_supported_image_types() {
+		return array(
+			 'webp',
+			 'avif'
+		);
 	}
 
 	/**
