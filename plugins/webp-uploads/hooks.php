@@ -667,11 +667,23 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
 function webp_uploads_wepb_fallback() {
 	// Get mime type transforms for the site.
 	$transforms = webp_uploads_get_upload_image_mime_transforms();
+	$image_format = get_option( 'perflab_modern_image_format' );
 
-	// We need to add fallback only if jpeg alternatives for the webp images are enabled for the server.
-	$preserve_jpegs_for_jpeg_transforms = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/webp', $transforms['image/jpeg'], true );
-	$preserve_jpegs_for_webp_transforms = isset( $transforms['image/webp'] ) && in_array( 'image/jpeg', $transforms['image/webp'], true ) && in_array( 'image/webp', $transforms['image/webp'], true );
-	if ( ! $preserve_jpegs_for_jpeg_transforms && ! $preserve_jpegs_for_webp_transforms ) {
+	// We need to add fallback only if jpeg alternatives for the image_format images are enabled for the server.
+	$preserve_jpegs_for_jpeg_transforms = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/' . $image_format, $transforms['image/jpeg'], true );
+	$preserve_jpegs_for_image_type_transforms = isset( $transforms[ 'image/' . $image_format ] ) && in_array( 'image/jpeg', $transforms[ 'image/' . $image_format ], true ) && in_array( 'image/' . $image_format, $transforms[ 'image/' . $image_format ], true );
+	if ( ! $preserve_jpegs_for_jpeg_transforms && ! $preserve_jpegs_for_image_type_transforms ) {
+		return;
+	}
+
+	$detection_string = '';
+	if ( 'webp' === $image_format ) {
+		$detection_string = 'data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
+	} elseif ( 'avif' === $image_format ) {
+		$detection_string = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgANogQEAwgMg8f8D///8WfhwB8+ErK42A=';
+	}
+
+	if ( empty( $detection_string ) ) {
 		return;
 	}
 
@@ -683,16 +695,17 @@ function webp_uploads_wepb_fallback() {
 		s.src = '<?php echo esc_url_raw( plugins_url( '/fallback.js', __FILE__ ) ); ?>';
 
 		i = d.createElement( i );
-		i.src = p + 'jIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
+		i.src = p;
 		i.onload = function() {
 			i.onload = undefined;
-			i.src = p + 'h4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
+			i.src = 'data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
 		};
 
 		i.onerror = function() {
 			d.body.appendChild( s );
 		};
-	} )( document, 'img', 'script', 'data:image/webp;base64,UklGR' );
+	} )( document, 'img', 'script', '<?php echo esc_html( $detection_string ); ?>' );
+	<?' );
 	<?php
 	$javascript = ob_get_clean();
 
