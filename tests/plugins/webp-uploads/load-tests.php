@@ -790,6 +790,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
+		// Use webp as the output format.
+		update_option( 'perflab_modern_image_format', 'webp' );
+
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
 		// Look for an image that contains all of the additional mime type images.
@@ -829,6 +832,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
+		// Use webp as the output format.
+		update_option( 'perflab_modern_image_format', 'webp' );
+
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 		add_filter( 'wp_editor_set_quality', array( $this, 'force_webp_image_quality_86' ), PHP_INT_MAX, 2 );
 
@@ -855,6 +861,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_create_webp_for_some_sizes_which_are_smaller_in_webp_format() {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
+
+		// Use webp as the output format.
+		update_option( 'perflab_modern_image_format', 'webp' );
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 		add_filter( 'wp_editor_set_quality', array( $this, 'force_webp_image_quality_86' ), PHP_INT_MAX, 2 );
