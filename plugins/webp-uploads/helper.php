@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function webp_uploads_get_upload_image_mime_transforms() {
 
 	// Check the selected output format.
-	$output_format = wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ? get_option( 'perflab_generate_avif_and_webp' ) : 'webp';
+	$output_format = webp_uploads_avif_supported() ? get_option( 'perflab_generate_avif_and_webp' ) : 'webp';
 
 	$default_transforms = array(
 		'image/jpeg' => array( 'image/' . $output_format ),
@@ -343,4 +343,15 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 		}
 	}
 	return false;
+}
+
+/**
+ * Helper function that checks if AVIF is supported by the server.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool Whether the server supports AVIF.
+ */
+function webp_uploads_avif_supported() {
+	return wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) );
 }
