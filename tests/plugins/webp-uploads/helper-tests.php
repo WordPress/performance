@@ -253,7 +253,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		add_filter(
 			'wp_image_editors',
 			static function () {
-				return array( 'WP_Image_Doesnt_Support_WebP' );
+				return array( 'WP_Image_Doesnt_Support_Modern_Images' );
 			}
 		);
 

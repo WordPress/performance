@@ -1,6 +1,6 @@
 <?php
 /**
- * A WP_Image_Editor mock that doesn't support WebP.
+ * A WP_Image_Editor mock that doesn't support Modern Images.
  *
  * @package webp-uploads
  * @since 1.0.0
@@ -12,11 +12,11 @@ if ( ! class_exists( 'WP_Image_Editor_Imagick' ) ) {
 }
 
 /**
- * Class WP_Image_Doesnt_Support_WebP mocks a WP_Image_Editor that doesn't support WebP.
+ * Class WP_Image_Doesnt_Support_Modern_Images mocks a WP_Image_Editor that doesn't support Modern Images.
  *
  * @since 1.0.0
  */
-class WP_Image_Doesnt_Support_WebP extends WP_Image_Editor_Imagick {
+class WP_Image_Doesnt_Support_Modern_Images extends WP_Image_Editor_Imagick {
 	/**
 	 * Checks to see if editor supports the mime-type specified.
 	 *
@@ -24,6 +24,9 @@ class WP_Image_Doesnt_Support_WebP extends WP_Image_Editor_Imagick {
 	 * @return bool
 	 */
 	public static function supports_mime_type( $mime_type ) {
-		return 'image/webp' !== $mime_type;
+		return (
+			'image/webp' !== $mime_type &&
+			'image/avif' !== $mime_type
+			);;
 	}
 }

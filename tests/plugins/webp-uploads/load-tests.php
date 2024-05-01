@@ -684,24 +684,30 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Allow the upload of a WebP image if at least one editor supports the format
+	 * Allow the upload of an image if at least one editor supports the image type
 	 *
 	 * @test
 	 */
-	public function it_should_allow_the_upload_of_a_webp_image_if_at_least_one_editor_supports_the_format() {
+	public function it_should_create_images_only_of_specified_type_if_at_least_one_editor_supports_the_type( $image_type ) {
+
+		// Skip the tesst if no editors support the image type.
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/' . $image_type ) ) ) {
+			$this->markTestSkipped( 'No editors support the image type: ' . $image_type );
+		}
+
 		add_filter(
 			'wp_image_editors',
-			static function () {
+			static function ( $editors ) {
 				// WP core does not choose the WP_Image_Editor instance based on MIME type support,
 				// therefore the one that does support WebP needs to be first in this list.
-				return array( 'WP_Image_Doesnt_Support_WebP', 'WP_Image_Editor_GD' );
+				return array_unshift( $editors, 'WP_Image_Doesnt_Support_Modern_Images' );
 			}
 		);
 
-		$this->assertTrue( wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) );
+		$this->assertTrue( wp_image_editor_supports( array( 'mime_type' => 'image/' . $image_type ) ) );
 
 		// Ensure the output type is WebP for this test.
-		update_option( 'perflab_modern_image_format', 'webp' );
+		update_option( 'perflab_modern_image_format', $image_type );
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
@@ -709,10 +715,10 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertIsArray( $metadata['sources'] );
 
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
-		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+		$this->assertImageHasSource( $attachment_id, 'image/' . $image_type );
 
 		$this->assertImageNotHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
-		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
+		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/' . $image_type );
 	}
 
 	/**
@@ -722,7 +728,12 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @param string $image_type
 	 * @dataProvider data_provider_supported_image_types
 	 */
-	public function it_should_replace_the_featured_image_to_webp_when_requesting_the_featured_image( $image_type ) {
+	public function it_should_replace_the_featured_image_to_image_type_when_requesting_the_featured_image( $image_type ) {
+
+		// Skip this test if the image editor doesn't support the image type.
+		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/' . $image_type ) ) ) {
+				$this->markTestSkipped( 'The image editor does not support the image type: ' . $image_type );
+		}
 
 		// Set the image format using the filter.
 		update_option( 'perflab_modern_image_format', $image_type );
