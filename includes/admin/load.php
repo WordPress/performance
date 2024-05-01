@@ -346,7 +346,7 @@ function perflab_plugin_admin_notices() {
  *
  * @since n.e.x.t
  */
-function perflab_print_plugin_progress_indicator_script() {
+function perflab_print_plugin_progress_indicator_script(): void {
 	$js_function = <<<JS
 		function addPluginProgressIndicator( message ) {
 			document.addEventListener( 'DOMContentLoaded', function () {
@@ -360,7 +360,7 @@ function perflab_print_plugin_progress_indicator_script() {
 						target.classList.add( 'updating-message' );
 						target.textContent = message;
 
-						wp.a11y.speak(message);
+						wp.a11y.speak( message );
 					}
 				} );
 			} );
@@ -371,7 +371,7 @@ JS;
 		sprintf(
 			'( %s )( %s );',
 			$js_function,
-			wp_json_encode( __( 'Activating…', 'default' ) )
+			wp_json_encode( __( 'Activating...', 'default' ) )
 		),
 		array( 'type' => 'module' )
 	);
