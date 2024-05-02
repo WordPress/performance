@@ -383,11 +383,19 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		/** @phpstan-ignore-next-line */
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_null' );
 
-		$default_transforms = array(
-			'image/jpeg' => array( 'image/avif' ),
-			'image/webp' => array( 'image/webp' ),
-			'image/avif' => array( 'image/avif' ),
-		);
+		if ( wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
+			$default_transforms = array(
+				'image/jpeg' => array( 'image/avif' ),
+				'image/webp' => array( 'image/webp' ),
+				'image/avif' => array( 'image/avif' ),
+			);
+		} else {
+			$default_transforms = array(
+				'image/jpeg' => array( 'image/webp' ),
+				'image/webp' => array( 'image/webp' ),
+				'image/avif' => array( 'image/avif' ),
+			);
+		}
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
