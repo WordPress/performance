@@ -225,6 +225,7 @@ global $perflab_install_and_activate_plugin_plugins_activated;
  * @return WP_Error|null WP_Error on failure.
  */
 function perflab_install_and_activate_plugin( string $plugin_slug ): ?WP_Error {
+	global $perflab_install_and_activate_plugin_plugins_activated;
 	if ( isset( $perflab_install_and_activate_plugin_plugins_activated[ $plugin_slug ] ) ) {
 		return null;
 	}
