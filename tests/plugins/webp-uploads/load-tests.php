@@ -24,6 +24,9 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
+
+		// Default to webp output for tests.
+		$this->set_image_output_type( 'webp' );
 	}
 
 	public function tear_down() {
