@@ -170,6 +170,16 @@ final class OD_HTML_Tag_Walker {
 	private $processor;
 
 	/**
+	 * XPath for the current tag.
+	 *
+	 * This is used so that repeated calls to {@see self::get_xpath()} won't needlessly reconstruct the string. This
+	 * gets cleared whenever {@see self::open_tags()} iterates to the next tag.
+	 *
+	 * @var string|null
+	 */
+	private $current_xpath = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $html HTML to process.
@@ -236,6 +246,8 @@ final class OD_HTML_Tag_Walker {
 				} else {
 					++$this->open_stack_indices[ $level ];
 				}
+
+				$this->current_xpath = null; // Clear cache.
 
 				// Now that the breadcrumbs are constructed, yield the tag name so that they can be queried if desired.
 				// Other mutations may be performed to the open tag's attributes by the callee at this point as well.
@@ -339,11 +351,13 @@ final class OD_HTML_Tag_Walker {
 	 * @return string XPath.
 	 */
 	public function get_xpath(): string {
-		$xpath = '';
-		foreach ( $this->get_breadcrumbs() as list( $tag_name, $index ) ) {
-			$xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
+		if ( null === $this->current_xpath ) {
+			$this->current_xpath = '';
+			foreach ( $this->get_breadcrumbs() as list( $tag_name, $index ) ) {
+				$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
+			}
 		}
-		return $xpath;
+		return $this->current_xpath;
 	}
 
 	/**
