@@ -432,8 +432,9 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_attribute(), set_attribute(), remove_attribute(), and get_updated_html().
+	 * Test get_tag(), get_attribute(), set_attribute(), remove_attribute(), and get_updated_html().
 	 *
+	 * @covers ::get_tag
 	 * @covers ::get_attribute
 	 * @covers ::set_attribute
 	 * @covers ::remove_attribute
@@ -443,6 +444,7 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 		$processor = new OD_HTML_Tag_Walker( '<html lang="en" xml:lang="en"></html>' );
 		foreach ( $processor->open_tags() as $open_tag ) {
 			if ( 'HTML' === $open_tag ) {
+				$this->assertSame( $open_tag, $processor->get_tag() );
 				$this->assertSame( 'en', $processor->get_attribute( 'lang' ) );
 				$processor->set_attribute( 'lang', 'es' );
 				$processor->remove_attribute( 'xml:lang' );

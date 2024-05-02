@@ -381,6 +381,21 @@ final class OD_HTML_Tag_Walker {
 	}
 
 	/**
+	 * Returns the uppercase name of the matched tag.
+	 *
+	 * This is a wrapper around the underlying WP_HTML_Tag_Processor method of the same name since only a limited number of
+	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
+	 *
+	 * @since n.e.x.t
+	 * @see WP_HTML_Tag_Processor::get_tag()
+	 *
+	 * @return string|null Name of currently matched tag in input HTML, or `null` if none found.
+	 */
+	public function get_tag(): ?string {
+		return $this->processor->get_tag();
+	}
+
+	/**
 	 * Returns the value of a requested attribute from a matched tag opener if that attribute exists.
 	 *
 	 * This is a wrapper around the underlying WP_HTML_Tag_Processor method of the same name since only a limited number of
