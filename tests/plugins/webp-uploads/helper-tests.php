@@ -447,13 +447,25 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
 		$this->assertIsArray( $transforms );
-		$this->assertSame(
-			array(
-				'image/jpeg' => array( 'image/jpeg', 'image/avif' ),
-				'image/avif' => array( 'image/avif', 'image/jpeg' ),
-			),
-			$transforms
-		);
+
+		// The returned value depends on whether the server supports AVIF.
+		if ( wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
+			$this->assertSame(
+				array(
+					'image/jpeg' => array( 'image/jpeg', 'image/avif' ),
+					'image/avif' => array( 'image/avif', 'image/jpeg' ),
+				),
+				$transforms
+			);
+		} else {
+			$this->assertSame(
+				array(
+					'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
+					'image/webp' => array( 'image/webp', 'image/jpeg' ),
+				),
+				$transforms
+			);
+		}
 	}
 
 	/**
