@@ -163,6 +163,7 @@ global $perflab_get_plugin_availability_plugins_checked;
  * @return array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool} Availability.
  */
 function perflab_get_plugin_availability( array $plugin_data ): array {
+	global $perflab_get_plugin_availability_plugins_checked;
 	if ( empty( $perflab_get_plugin_availability_plugins_checked ) ) {
 		$perflab_get_plugin_availability_plugins_checked = array();
 	}
