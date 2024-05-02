@@ -705,7 +705,6 @@ function webp_uploads_wepb_fallback() {
 			d.body.appendChild( s );
 		};
 	} )( document, 'img', 'script', '<?php echo esc_html( $detection_string ); ?>' );
-	<?' );
 	<?php
 	$javascript = ob_get_clean();
 
