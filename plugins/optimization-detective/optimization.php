@@ -256,9 +256,9 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		// All breakpoints have URL metrics being reported.
 		$all_breakpoints_have_url_metrics
 	) {
-		$common_lcp_element = current( $lcp_elements_by_minimum_viewport_widths );
+		$common_lcp_xpath = current( $lcp_elements_by_minimum_viewport_widths )['xpath'];
 	} else {
-		$common_lcp_element = null;
+		$common_lcp_xpath = null;
 	}
 
 	/**
@@ -310,7 +310,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 		// Ensure the fetchpriority attribute is set on the element properly.
 		if ( $is_img_tag ) {
-			if ( $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
+			if ( $common_lcp_xpath && $xpath === $common_lcp_xpath ) {
 				if ( 'high' === $walker->get_attribute( 'fetchpriority' ) ) {
 					$walker->set_attribute( 'data-od-fetchpriority-already-added', true );
 				} else {
