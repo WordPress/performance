@@ -383,7 +383,9 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_null' );
 
 		$default_transforms = array(
-			'image/jpeg' => array( 'image/webp' ),
+			'image/jpeg' => array( 'image/avif' ),
+			'image/webp' => array( 'image/webp' ),
+			'image/avif' => array( 'image/avif' ),
 		);
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
@@ -417,6 +419,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_return_custom_transforms_when_overwritten_by_filter() {
+		$this->set_image_output_type( 'webp' );
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
 			static function () {
@@ -445,8 +448,8 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$this->assertIsArray( $transforms );
 		$this->assertSame(
 			array(
-				'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
-				'image/webp' => array( 'image/webp', 'image/jpeg' ),
+				'image/jpeg' => array( 'image/jpeg', 'image/avif' ),
+				'image/avif' => array( 'image/avif', 'image/jpeg' ),
 			),
 			$transforms
 		);
