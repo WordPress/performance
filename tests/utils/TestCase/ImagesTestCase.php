@@ -123,4 +123,11 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 			}
 		);
 	}
+
+	/**
+	 * Simple helper to set the output format for image generation.
+	 */
+	public function set_image_output_type( $format ) {
+		update_option( 'perflab_modern_image_format', $format );
+	}
 }
