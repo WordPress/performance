@@ -43,21 +43,28 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	/**
 	 * Don't create the original mime type for JPEG images.
 	 *
+	 * @dataProvider data_provider_supported_image_types
+	 *
 	 * @test
 	 */
-	public function it_should_not_create_the_original_mime_type_for_jpeg_images() {
+	public function it_should_not_create_the_original_mime_type_for_jpeg_images( $image_type ) {
+		$mime_type = 'image/' . $image_type;
+		$this->set_image_output_type( $image_type );
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 
 		// There should be a WebP source, but no JPEG source for the full image.
-		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+		$this->assertImageHasSource( $attachment_id, $mime_type );
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		// The full image should be a WebP.
 		$this->assertArrayHasKey( 'file', $metadata );
-		$this->assertStringEndsWith( $metadata['sources']['image/webp']['file'], $metadata['file'] );
-		$this->assertStringEndsWith( $metadata['sources']['image/webp']['file'], get_attached_file( $attachment_id ) );
+		$this->assertStringEndsWith( $metadata['sources'][ $mime_type ]['file'], $metadata['file'] );
+		$this->assertStringEndsWith( $metadata['sources'][ $mime_type ]['file'], get_attached_file( $attachment_id ) );
 
 		// The original JPEG should be backed up.
 		$this->assertStringEndsWith( '.jpg', wp_get_original_image_path( $attachment_id ) );
@@ -67,7 +74,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		// There should be a WebP source, but no JPEG source for all sizes.
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
-			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, $mime_type );
 			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 		}
 	}
@@ -79,9 +86,11 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 */
 	public function it_should_create_the_original_mime_type_as_well_with_all_the_available_sources_for_the_specified_mime() {
 		update_option( 'perflab_generate_webp_and_jpeg', false );
-		update_option( 'perflab_modern_image_format', 'webp' );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
 		// There should be a WebP source, but no JPEG source for the full image.
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
@@ -104,18 +113,26 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	}
 
 	/**
-	 * Create JPEG and WebP for JPEG images, if opted in.
+	 * Create JPEG and output type for JPEG images, if opted in.
+	 *
+	 * @dataProvider data_provider_supported_image_types
 	 *
 	 * @test
 	 */
-	public function it_should_create_jpeg_and_webp_for_jpeg_images_if_opted_in() {
-		$this->opt_in_to_jpeg_and_webp();
+	public function it_should_create_jpeg_and_output_format_for_jpeg_images_if_opted_in( $image_type ) {
+		$mime_type = 'image/' . $image_type;
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+		$this->set_image_output_type( $image_type );
+
+		update_option( 'perflab_generate_webp_and_jpeg', true );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 
-		// There should be JPEG and WebP sources for the full image.
+		// There should be JPEG and mime_type sources for the full image.
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
-		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+		$this->assertImageHasSource( $attachment_id, $mime_type );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
@@ -130,23 +147,31 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// There should be JPEG and WebP sources for all sizes.
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
-			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, $mime_type );
 		}
 	}
 
 	/**
-	 * Create JPEG and WebP for JPEG images, if perflab_generate_webp_and_jpeg option set.
+	 * Create JPEG and output format for JPEG images, if perflab_generate_webp_and_jpeg option set.
+	 *
+	 * @dataProvider data_provider_supported_image_types
 	 *
 	 * @test
 	 */
-	public function it_should_create_jpeg_and_webp_for_jpeg_images_if_generate_webp_and_jpeg_set() {
+	public function it_should_create_jpeg_and_output_format_for_jpeg_images_if_generate_webp_and_jpeg_set( $image_type ) {
+		$mime_type = 'image/' . $image_type;
+
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+		$this->set_image_output_type( $image_type );
 		update_option( 'perflab_generate_webp_and_jpeg', true );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 
 		// There should be JPEG and WebP sources for the full image.
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
-		$this->assertImageHasSource( $attachment_id, 'image/webp' );
+		$this->assertImageHasSource( $attachment_id, $mime_type );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
@@ -161,7 +186,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// There should be JPEG and WebP sources for all sizes.
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
-			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
+			$this->assertImageHasSizeSource( $attachment_id, $size_name, $mime_type );
 		}
 	}
 
@@ -645,7 +670,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 				return 1500;
 			}
 		);
-		update_option( 'perflab_modern_image_format', 'webp' );
+
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
@@ -689,12 +714,17 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	/**
 	 * Allow the upload of an image if at least one editor supports the image type
 	 *
+	 * @dataProvider data_provider_supported_image_types
+	 *
+	 * @group current1
+	 *
 	 * @test
 	 */
 	public function it_should_create_images_only_of_specified_type_if_at_least_one_editor_supports_the_type( $image_type ) {
+		$mime_type = 'image/' . $image_type;
 
-		// Skip the tesst if no editors support the image type.
-		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/' . $image_type ) ) ) {
+		// Skip the test if no editors support the image type.
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( 'No editors support the image type: ' . $image_type );
 		}
 
@@ -702,15 +732,16 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			'wp_image_editors',
 			static function ( $editors ) {
 				// WP core does not choose the WP_Image_Editor instance based on MIME type support,
-				// therefore the one that does support WebP needs to be first in this list.
-				return array_unshift( $editors, 'WP_Image_Doesnt_Support_Modern_Images' );
+				// therefore the one that does support modern images needs to be first in this list.
+				array_unshift( $editors, 'WP_Image_Doesnt_Support_Modern_Images' );
+				return $editors;
 			}
 		);
 
-		$this->assertTrue( wp_image_editor_supports( array( 'mime_type' => 'image/' . $image_type ) ) );
+		$this->assertTrue( wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) );
 
 		// Ensure the output type is WebP for this test.
-		update_option( 'perflab_modern_image_format', $image_type );
+		$this->set_image_output_type( $image_type );
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
@@ -727,9 +758,10 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	/**
 	 * Replace the featured image to the proper type when requesting the featured image.
 	 *
+	 * @dataProvider data_provider_supported_image_types
+	 *
 	 * @test
 	 * @param string $image_type
-	 * @dataProvider data_provider_supported_image_types
 	 */
 	public function it_should_replace_the_featured_image_to_image_type_when_requesting_the_featured_image( $image_type ) {
 
@@ -738,8 +770,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 				$this->markTestSkipped( 'The image editor does not support the image type: ' . $image_type );
 		}
 
-		// Set the image format using the filter.
-		update_option( 'perflab_modern_image_format', $image_type );
+		// Set the image output format.
+		$this->set_image_output_type( $image_type );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
 		$post_id       = self::factory()->post->create();
@@ -752,12 +784,13 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	/**
 	 * Data provider for tests returns the supported image types to run the tests against.
 	 *
-	 * @return array
+	 * @return array {
+	 *    @type string Supported image types.}
 	 */
 	public function data_provider_supported_image_types() {
 		return array(
-			 'webp',
-			 'avif'
+			array( 'webp' ),
+			array ( 'avif' ),
 		);
 	}
 
@@ -792,9 +825,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_create_webp_when_webp_is_smaller_than_jpegs() {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
-
-		// Use webp as the output format.
-		update_option( 'perflab_modern_image_format', 'webp' );
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
@@ -835,9 +865,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
-		// Use webp as the output format.
-		update_option( 'perflab_modern_image_format', 'webp' );
-
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 		add_filter( 'wp_editor_set_quality', array( $this, 'force_webp_image_quality_86' ), PHP_INT_MAX, 2 );
 
@@ -864,9 +891,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_create_webp_for_some_sizes_which_are_smaller_in_webp_format() {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
-
-		// Use webp as the output format.
-		update_option( 'perflab_modern_image_format', 'webp' );
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 		add_filter( 'wp_editor_set_quality', array( $this, 'force_webp_image_quality_86' ), PHP_INT_MAX, 2 );
