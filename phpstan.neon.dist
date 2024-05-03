@@ -13,10 +13,7 @@ parameters:
 		- plugins/webp-uploads/load.php
 	scanDirectories:
 		- vendor/wp-phpunit/wp-phpunit/
+	scanFiles:
+		- bin/phpstan/functions.stub
 	dynamicConstantNames:
 		- PERFLAB_OBJECT_CACHE_DROPIN_VERSION
-	reportUnmatchedIgnoredErrors: false
-	ignoreErrors:
-		# False positive as WordPress ships with a polyfill.
-		- "#^Function str_starts_with not found\\.$#"
-		- "#^Function str_contains not found\\.$#"
