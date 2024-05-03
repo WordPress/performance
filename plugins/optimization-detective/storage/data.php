@@ -352,7 +352,7 @@ function od_get_lcp_elements_by_minimum_viewport_widths( OD_URL_Metrics_Group_Co
 
 			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = $breadcrumb_element[ $most_common_breadcrumb_index ];
 		} elseif ( count( $group ) > 0 ) {
-			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = false; // No LCP image at this breakpoint.
+			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = false; // No LCP image at this breakpoint. TODO: But there would be a non-image LCP element.
 		}
 	}
 

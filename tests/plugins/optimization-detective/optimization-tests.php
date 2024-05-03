@@ -183,158 +183,6 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @return array<string, mixed> Data.
 	 */
-	public function data_provider_test_od_construct_preload_links(): array {
-		return array(
-			'no-lcp-image'                              => array(
-				'lcp_elements_by_minimum_viewport_widths' => array(
-					0 => false,
-				),
-				'expected'                                => '',
-			),
-			'one-non-responsive-lcp-image'              => array(
-				'lcp_elements_by_minimum_viewport_widths' => array(
-					0 => array(
-						'img_attributes' => array(
-							'src' => 'https://example.com/image.jpg',
-						),
-					),
-				),
-				'expected'                                => '
-					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg" media="screen">
-				',
-			),
-			'one-responsive-lcp-image'                  => array(
-				'lcp_elements_by_minimum_viewport_widths' => array(
-					0 => array(
-						'img_attributes' => array(
-							'src'         => 'https://example.com/elva-fairy-800w.jpg',
-							'srcset'      => 'https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w',
-							'sizes'       => '(max-width: 600px) 480px, 800px',
-							'crossorigin' => 'anonymous',
-						),
-					),
-				),
-				'expected'                                => '
-					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen">
-				',
-			),
-			'two-breakpoint-responsive-lcp-images'      => array(
-				'lcp_elements_by_minimum_viewport_widths' => array(
-					0   => array(
-						'img_attributes' => array(
-							'src'         => 'https://example.com/elva-fairy-800w.jpg',
-							'srcset'      => 'https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w',
-							'sizes'       => '(max-width: 600px) 480px, 800px',
-							'crossorigin' => 'anonymous',
-						),
-					),
-					601 => array(
-						'img_attributes' => array(
-							'src'         => 'https://example.com/alt-elva-fairy-800w.jpg',
-							'srcset'      => 'https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w',
-							'sizes'       => '(max-width: 600px) 480px, 800px',
-							'crossorigin' => 'anonymous',
-						),
-					),
-				),
-				'expected'                                => '
-					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 600px)">
-					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/alt-elva-fairy-800w.jpg" imagesrcset="https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
-				',
-			),
-			'two-non-consecutive-responsive-lcp-images' => array(
-				'lcp_elements_by_minimum_viewport_widths' => array(
-					0   => array(
-						'img_attributes' => array(
-							'src'         => 'https://example.com/elva-fairy-800w.jpg',
-							'srcset'      => 'https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w',
-							'sizes'       => '(max-width: 600px) 480px, 800px',
-							'crossorigin' => 'anonymous',
-						),
-					),
-					481 => false,
-					601 => array(
-						'img_attributes' => array(
-							'src'         => 'https://example.com/alt-elva-fairy-800w.jpg',
-							'srcset'      => 'https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w',
-							'sizes'       => '(max-width: 600px) 480px, 800px',
-							'crossorigin' => 'anonymous',
-						),
-					),
-				),
-				'expected'                                => '
-					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/elva-fairy-800w.jpg" imagesrcset="https://example.com/elva-fairy-480w.jpg 480w, https://example.com/elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
-					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/alt-elva-fairy-800w.jpg" imagesrcset="https://example.com/alt-elva-fairy-480w.jpg 480w, https://example.com/alt-elva-fairy-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (min-width: 601px)">
-				',
-			),
-			'one-background-lcp-image'                  => array(
-				'lcp_elements_by_minimum_viewport_widths' => array(
-					0 => array(
-						'background_image' => 'https://example.com/image.jpg',
-					),
-				),
-				'expected'                                => '
-					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/image.jpg" media="screen">
-				',
-			),
-			'two-background-lcp-images'                 => array(
-				'lcp_elements_by_minimum_viewport_widths' => array(
-					0   => array(
-						'background_image' => 'https://example.com/mobile.jpg',
-					),
-					481 => array(
-						'background_image' => 'https://example.com/desktop.jpg',
-					),
-				),
-				'expected'                                => '
-					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile.jpg" media="screen and (max-width: 480px)">
-					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="screen and (min-width: 481px)">
-				',
-			),
-			'one-bg-image-one-img-element'              => array(
-				'lcp_elements_by_minimum_viewport_widths' => array(
-					0   => array(
-						'img_attributes' => array(
-							'src'         => 'https://example.com/mobile-800w.jpg',
-							'srcset'      => 'https://example.com/mobile-480w.jpg 480w, https://example.com/mobile-800w.jpg 800w',
-							'sizes'       => '(max-width: 600px) 480px, 800px',
-							'crossorigin' => 'anonymous',
-						),
-					),
-					481 => array(
-						'background_image' => 'https://example.com/desktop.jpg',
-					),
-				),
-				'expected'                                => '
-					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-800w.jpg" imagesrcset="https://example.com/mobile-480w.jpg 480w, https://example.com/mobile-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen and (max-width: 480px)">
-					<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop.jpg" media="screen and (min-width: 481px)">
-				',
-			),
-		);
-	}
-
-	/**
-	 * Test od_construct_preload_links().
-	 *
-	 * @covers ::od_construct_preload_links
-	 *
-	 * @dataProvider data_provider_test_od_construct_preload_links
-	 *
-	 * @param array<int, mixed> $lcp_elements_by_minimum_viewport_widths LCP elements by minimum viewport widths.
-	 * @param string            $expected Expected return value.
-	 */
-	public function test_od_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths, string $expected ): void {
-		$this->assertSame(
-			$this->normalize_whitespace( $expected ),
-			$this->normalize_whitespace( od_construct_preload_links( $lcp_elements_by_minimum_viewport_widths ) )
-		);
-	}
-
-	/**
-	 * Data provider.
-	 *
-	 * @return array<string, mixed> Data.
-	 */
 	public function data_provider_test_od_optimize_template_output_buffer(): array {
 		return array(
 			'no-url-metrics'                              => array(
@@ -453,6 +301,51 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 				',
 			),
 
+			'no-lcp-image-with-populated-url-metrics'     => array(
+				'set_up'   => function () {
+					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+					$sample_size = od_get_url_metrics_breakpoint_sample_size();
+					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+						for ( $i = 0; $i < $sample_size; $i++ ) {
+							OD_URL_Metrics_Post_Type::store_url_metric(
+								$slug,
+								$this->get_validated_url_metric(
+									$viewport_width,
+									array(
+										array(
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::H1]',
+											'isLCP' => true,
+										),
+									)
+								)
+							);
+						}
+					}
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<h1>Hello World</h1>
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<h1>Hello World</h1>
+						</body>
+					</html>
+				',
+			),
+
 			'common-lcp-image-with-fully-populated-sample-data' => array(
 				'set_up'   => function (): void {
 					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
@@ -485,7 +378,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
 							<img src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" fetchpriority="high">
 						</body>
 					</html>
@@ -495,10 +388,10 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen">
+							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" imagesrcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen">
 						</head>
 						<body>
-							<img data-od-added-fetchpriority data-od-removed-loading="lazy" fetchpriority="high" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" >
+							<img data-od-added-fetchpriority data-od-removed-loading="lazy" fetchpriority="high" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
 							<img data-od-removed-fetchpriority="high" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" >
 						</body>
 					</html>
@@ -656,9 +549,9 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<meta charset="utf-8">
 							<title>...</title>
 							<style>/* responsive styles to show only one div.header at a time... */</style>
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-bg.jpg" media="screen and (max-width: 480px)">
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/tablet-bg.jpg" media="screen and (min-width: 481px) and (max-width: 600px)">
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-bg.jpg" media="screen and (min-width: 601px)">
+							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/tablet-bg.jpg" media="screen and (min-width: 481px) and (max-width: 600px)">
+							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-bg.jpg" media="screen and (max-width: 480px)">
 						</head>
 						<body>
 							<div class="header desktop" style="background: red no-repeat center/80% url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>
@@ -1125,16 +1018,6 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals( $expected, $buffer );
-	}
-
-	/**
-	 * Normalizes whitespace.
-	 *
-	 * @param string $str String to normalize.
-	 * @return string Normalized string.
-	 */
-	private function normalize_whitespace( string $str ): string {
-		return (string) preg_replace( '/\s+/', ' ', trim( $str ) );
 	}
 
 	/**
