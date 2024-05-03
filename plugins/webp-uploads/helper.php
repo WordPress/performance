@@ -157,7 +157,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
 	}
 
-	remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
+	remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10 );
 	$image = $editor->save( $destination_file_name, $mime );
 	add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 
