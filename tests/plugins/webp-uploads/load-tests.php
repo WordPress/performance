@@ -52,7 +52,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_not_create_the_original_mime_type_for_jpeg_images( $image_type ) {
 		$mime_type = 'image/' . $image_type;
 		$this->set_image_output_type( $image_type );
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+		if ( ! webp_uploads_mime_type_supported( $mime_type ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
@@ -123,7 +123,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 */
 	public function it_should_create_jpeg_and_output_format_for_jpeg_images_if_opted_in( $image_type ) {
 		$mime_type = 'image/' . $image_type;
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+		if ( ! webp_uploads_mime_type_supported( $mime_type ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 		$this->set_image_output_type( $image_type );
@@ -163,7 +163,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function it_should_create_jpeg_and_output_format_for_jpeg_images_if_generate_webp_and_jpeg_set( $image_type ) {
 		$mime_type = 'image/' . $image_type;
 
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+		if ( ! webp_uploads_mime_type_supported( $mime_type ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 		$this->set_image_output_type( $image_type );
@@ -726,7 +726,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$mime_type = 'image/' . $image_type;
 
 		// Skip the test if no editors support the image type.
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+		if ( ! webp_uploads_mime_type_supported( $mime_type ) ) {
 			$this->markTestSkipped( 'No editors support the image type: ' . $image_type );
 		}
 
@@ -766,9 +766,10 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @param string $image_type
 	 */
 	public function it_should_replace_the_featured_image_to_image_type_when_requesting_the_featured_image( $image_type ) {
+		$mime_type = 'image/' . $image_type;
 
 		// Skip this test if the image editor doesn't support the image type.
-		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/' . $image_type ) ) ) {
+		if ( ! webp_uploads_mime_type_supported( $mime_type ) ) {
 				$this->markTestSkipped( 'The image editor does not support the image type: ' . $image_type );
 		}
 

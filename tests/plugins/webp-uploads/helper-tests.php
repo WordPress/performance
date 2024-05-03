@@ -250,7 +250,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_prevent_to_process_an_image_when_the_editor_does_not_support_the_format() {
-		update_option( 'perflab_modern_image_format', 'webp' );
 		// Make sure no editor is available.
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
@@ -389,6 +388,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_null' );
 
 		if ( wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
+			$this->set_image_output_type( 'avif' );
 			$default_transforms = array(
 				'image/jpeg' => array( 'image/avif' ),
 				'image/webp' => array( 'image/webp' ),
@@ -453,7 +453,9 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 */
 	public function it_should_return_jpeg_and_webp_transforms_when_option_generate_webp_and_jpeg_set() {
 		remove_all_filters( 'webp_uploads_get_upload_image_mime_transforms' );
-
+		if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$this->set_image_output_type( 'avif' );
+		}
 		update_option( 'perflab_generate_webp_and_jpeg', true );
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
@@ -461,7 +463,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$this->assertIsArray( $transforms );
 
 		// The returned value depends on whether the server supports AVIF.
-		if ( wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
+		if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
 			$this->assertSame(
 				array(
 					'image/jpeg' => array( 'image/jpeg', 'image/avif' ),

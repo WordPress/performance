@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function webp_uploads_get_upload_image_mime_transforms() {
 
 	// Check the selected output format.
-	$output_format = webp_uploads_avif_supported() ? get_option( 'perflab_modern_image_format' ) : 'webp';
+	$output_format = webp_uploads_mime_type_supported( 'image/avif' ) ? get_option( 'perflab_modern_image_format' ) : 'webp';
 
 	$default_transforms = array(
 		'image/jpeg' => array( 'image/' . $output_format ),
@@ -348,12 +348,26 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 }
 
 /**
- * Helper function that checks if AVIF is supported by the server.
+ * Helper function that checks if a mime type is supported by the server.
+ *
+ * Includes special handling for false positives on AVIF support.
  *
  * @since n.e.x.t
  *
- * @return bool Whether the server supports AVIF.
+ * @param string $mime_type The mime type to check.
+ *
+ * @return bool Whether the server supports a given mime type.
  */
-function webp_uploads_avif_supported() {
-	return wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) );
+function webp_uploads_mime_type_supported( $mime_type ) {
+	if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+		return false;
+	}
+
+	// In certain server environments GD can report a false positive for AVIF support, see https://github.com/php/php-src/issues/12197.
+	// To ensure the server actually supports AVIF, test for the function used by core..
+	if ( 'image/avif' === $mime_type ) {
+		return function_exists( 'imageavif' );
+	}
+
+	return true;
 }
