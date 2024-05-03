@@ -3,6 +3,7 @@
  * Tests for webp-uploads plugin helper.php.
  *
  * @group images
+ *
  * @package webp-uploads
  */
 
