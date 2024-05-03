@@ -2,7 +2,7 @@
 /**
  * Constants for PHPStan static analysis.
  *
- * @package speculation-rules
+ * @package performance-lab
  */
 
 define( 'SPECULATION_RULES_VERSION', '0.0.0' );
