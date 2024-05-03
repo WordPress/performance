@@ -57,13 +57,13 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		}
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 
-		// There should be a WebP source, but no JPEG source for the full image.
+		// There should be an image_type source, but no JPEG source for the full image.
 		$this->assertImageHasSource( $attachment_id, $mime_type );
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
-		// The full image should be a WebP.
+		// The full image should be an image_type.
 		$this->assertArrayHasKey( 'file', $metadata );
 		$this->assertStringEndsWith( $metadata['sources'][ $mime_type ]['file'], $metadata['file'] );
 		$this->assertStringEndsWith( $metadata['sources'][ $mime_type ]['file'], get_attached_file( $attachment_id ) );
