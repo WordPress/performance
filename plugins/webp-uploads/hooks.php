@@ -28,7 +28,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @param array $metadata      An array with the metadata from this attachment.
  * @param int   $attachment_id The ID of the attachment where the hook was dispatched.
- * @return array An array with the updated structure for the metadata before is stored in the database.
+ * @return array{
+ *     width: int,
+ *     height: int,
+ *     file: non-falsy-string,
+ *     sizes: array,
+ *     image_meta: array,
+ *     filesize: int,
+ *     sources?: array<string, array{
+ *         file: string,
+ *         filesize: int
+ *     }>
+ * } An array with the updated structure for the metadata before is stored in the database.
  */
 function webp_uploads_create_sources_property( array $metadata, $attachment_id ) {
 	// This should take place only on the JPEG image.
@@ -538,7 +549,27 @@ add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
  * @return string The updated img tag.
  */
 function webp_uploads_img_tag_update_mime_type( $original_image, $context, $attachment_id ) {
-	$image    = $original_image;
+	$image = $original_image;
+
+	/**
+	 * Metadata potentially amended by webp_uploads_create_sources_property().
+	 *
+	 * Note the sources key is not normally present in the response for wp_get_attachment_metadata(). The sources
+	 * key here, however, is being injected via the 'wp_generate_attachment_metadata' filter via the
+	 * webp_uploads_create_sources_property() function.
+	 *
+	 * @see webp_uploads_create_sources_property()
+	 *
+	 * @var array{
+	 *          width: int,
+	 *          height: int,
+	 *          file: non-falsy-string,
+	 *          sizes: array,
+	 *          image_meta: array,
+	 *          filesize: int,
+	 *          sources?: array<string, array{ file: string, filesize: int }>
+	 *      } $metadata
+	 */
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 
 	if ( empty( $metadata['file'] ) ) {
@@ -553,10 +584,6 @@ function webp_uploads_img_tag_update_mime_type( $original_image, $context, $atta
 			continue;
 		}
 
-		// Note the sources key is not normally present in the response for wp_get_attachment_metadata(). The sources
-		// key here, however, is being injected via the 'wp_generate_attachment_metadata' filter via the
-		// webp_uploads_create_sources_property() function. This is why there is a PHPStan error and why it is ignored.
-		// @phpstan-ignore-next-line -- The 'sources' key is added by this plugin.
 		if ( ! isset( $metadata['sources'][ $target_mime ]['file'] ) ) {
 			continue;
 		}
