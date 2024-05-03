@@ -387,7 +387,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		/** @phpstan-ignore-next-line */
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_null' );
 
-		if ( wp_image_editor_supports( array( 'mime_type' => 'image/avif' ) ) ) {
+		if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
 			$this->set_image_output_type( 'avif' );
 			$default_transforms = array(
 				'image/jpeg' => array( 'image/avif' ),
