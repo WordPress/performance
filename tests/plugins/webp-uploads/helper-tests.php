@@ -11,6 +11,11 @@ use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
 class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
+	public function set_up() {
+		parent::set_up();
+		$this->set_image_output_type( 'webp' );
+	}
+
 	/**
 	 * Return an error when creating an additional image source with invalid parameters
 	 *
@@ -189,7 +194,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
-		update_option( 'perflab_modern_image_format', 'webp' );
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
@@ -429,7 +433,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @test
 	 */
 	public function it_should_return_custom_transforms_when_overwritten_by_filter() {
-		$this->set_image_output_type( 'webp' );
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
 			static function () {
