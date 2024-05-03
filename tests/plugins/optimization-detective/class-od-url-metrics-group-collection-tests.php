@@ -14,7 +14,8 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array
+	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_construction(): array {
 		return array(
@@ -91,8 +92,12 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	 * @covers ::__construct
 	 *
 	 * @dataProvider data_provider_test_construction
+	 *
+	 * @param OD_URL_Metric[] $url_metrics URL Metrics.
+	 * @param int[]           $breakpoints Breakpoints.
+	 * @param int             $sample_size Sample size.
 	 */
-	public function test_construction( array $url_metrics, array $breakpoints, int $sample_size, int $freshness_ttl, string $exception ) {
+	public function test_construction( array $url_metrics, array $breakpoints, int $sample_size, int $freshness_ttl, string $exception ): void {
 		if ( $exception ) {
 			$this->expectException( $exception );
 		}
@@ -103,7 +108,7 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array[]
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_sample_size_and_breakpoints(): array {
 		return array(
@@ -169,14 +174,14 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	 * @covers ::add_url_metric
 	 *
 	 * @param int             $sample_size     Sample size.
-	 * @param array           $breakpoints     Breakpoints.
+	 * @param int[]           $breakpoints     Breakpoints.
 	 * @param array<int, int> $viewport_widths Viewport widths mapped to the number of URL metrics to instantiate.
 	 * @param array<int, int> $expected_counts Minimum viewport widths mapped to the expected counts in each group.
 	 *
 	 * @dataProvider data_provider_sample_size_and_breakpoints
 	 * @throws OD_Data_Validation_Exception When failing to instantiate a URL metric.
 	 */
-	public function test_add_url_metric( int $sample_size, array $breakpoints, array $viewport_widths, array $expected_counts ) {
+	public function test_add_url_metric( int $sample_size, array $breakpoints, array $viewport_widths, array $expected_counts ): void {
 		$group_collection = new OD_URL_Metrics_Group_Collection( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
 
 		// Over-populate the sample size for the breakpoints by a dozen.
@@ -206,7 +211,7 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	 *
 	 * @throws OD_Data_Validation_Exception When failing to instantiate a URL metric.
 	 */
-	public function test_adding_pushes_out_old_metrics() {
+	public function test_adding_pushes_out_old_metrics(): void {
 		$sample_size      = 3;
 		$breakpoints      = array( 400, 600 );
 		$group_collection = new OD_URL_Metrics_Group_Collection( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
@@ -254,7 +259,7 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array[]
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_get_iterator(): array {
 		return array(
@@ -304,8 +309,13 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	 * @covers ::getIterator
 	 *
 	 * @dataProvider data_provider_test_get_iterator
+	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
+	 *
+	 * @param int[]             $breakpoints Breakpoints.
+	 * @param int[]             $viewport_widths Viewport widths.
+	 * @param array<int, mixed> $expected_groups Expected groups.
 	 */
-	public function test_get_iterator( array $breakpoints, array $viewport_widths, array $expected_groups ) {
+	public function test_get_iterator( array $breakpoints, array $viewport_widths, array $expected_groups ): void {
 		$url_metrics = array_map(
 			function ( $viewport_width ) {
 				return $this->get_validated_url_metric( $viewport_width );
@@ -341,7 +351,7 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array[]
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_get_group_for_viewport_width(): array {
 		$current_time = microtime( true );
@@ -463,13 +473,21 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	 * @covers OD_URL_Metrics_Group::get_minimum_viewport_width
 	 *
 	 * @dataProvider data_provider_test_get_group_for_viewport_width
+	 *
+	 * @param OD_URL_Metric[]   $url_metrics URL Metrics.
+	 * @param float             $current_time Current time.
+	 * @param int[]             $breakpoints Breakpoints.
+	 * @param int               $sample_size Sample size.
+	 * @param int               $freshness_ttl Freshness TTL.
+	 * @param array<int, mixed> $expected_return Expected return.
+	 * @param array<int, bool>  $expected_is_group_complete Expected is group complete.
 	 */
-	public function test_get_group_for_viewport_width( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_complete ) {
+	public function test_get_group_for_viewport_width( array $url_metrics, float $current_time, array $breakpoints, int $sample_size, int $freshness_ttl, array $expected_return, array $expected_is_group_complete ): void {
 		$group_collection = new OD_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertSame(
 			$expected_return,
 			array_map(
-				static function ( OD_URL_Metrics_Group $group ) {
+				static function ( OD_URL_Metrics_Group $group ): array {
 					return array(
 						'minimumViewportWidth' => $group->get_minimum_viewport_width(),
 						'complete'             => $group->is_complete(),
@@ -489,12 +507,12 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test is_every_group_populated() and is_every_group_complete()..
+	 * Test is_every_group_populated() and is_every_group_complete().
 	 *
 	 * @covers ::is_every_group_populated
 	 * @covers ::is_every_group_complete
 	 */
-	public function test_is_every_group_populated() {
+	public function test_is_every_group_populated(): void {
 		$breakpoints      = array( 480, 800 );
 		$sample_size      = 3;
 		$group_collection = new OD_URL_Metrics_Group_Collection(
@@ -529,7 +547,7 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::get_flattened_url_metrics
 	 */
-	public function test_get_flattened_url_metrics() {
+	public function test_get_flattened_url_metrics(): void {
 		$url_metrics = array(
 			$this->get_validated_url_metric( 400 ),
 			$this->get_validated_url_metric( 600 ),
@@ -569,10 +587,18 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 			'timestamp' => microtime( true ),
 			'elements'  => array(
 				array(
-					'isLCP'             => true,
-					'isLCPCandidate'    => true,
-					'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]',
-					'intersectionRatio' => 1,
+					'isLCP'              => true,
+					'isLCPCandidate'     => true,
+					'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]',
+					'intersectionRatio'  => 1,
+					'intersectionRect'   => array(
+						'width'  => 100,
+						'height' => 100,
+					),
+					'boundingClientRect' => array(
+						'width'  => 100,
+						'height' => 100,
+					),
 				),
 			),
 		);

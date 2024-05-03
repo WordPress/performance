@@ -37,7 +37,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_buffer_output
 	 */
-	public function test_od_buffer_output() {
+	public function test_od_buffer_output(): void {
 		$original = 'Hello World!';
 		$expected = '¡Hola Mundo!';
 
@@ -69,7 +69,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_maybe_add_template_output_buffer_filter
 	 */
-	public function test_od_maybe_add_template_output_buffer_filter() {
+	public function test_od_maybe_add_template_output_buffer_filter(): void {
 		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
 
 		add_filter( 'od_can_optimize_response', '__return_false', 1 );
@@ -87,7 +87,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_od_can_optimize_response(): array {
 		return array(
@@ -152,7 +152,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_test_od_can_optimize_response
 	 */
-	public function test_od_can_optimize_response( Closure $set_up, bool $expected ) {
+	public function test_od_can_optimize_response( Closure $set_up, bool $expected ): void {
 		$set_up();
 		$this->assertSame( $expected, od_can_optimize_response() );
 	}
@@ -160,7 +160,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array[]
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_od_construct_preload_links(): array {
 		return array(
@@ -298,8 +298,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 * @covers ::od_construct_preload_links
 	 *
 	 * @dataProvider data_provider_test_od_construct_preload_links
+	 *
+	 * @param array<int, mixed> $lcp_elements_by_minimum_viewport_widths LCP elements by minimum viewport widths.
+	 * @param string            $expected Expected return value.
 	 */
-	public function test_od_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths, string $expected ) {
+	public function test_od_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths, string $expected ): void {
 		$this->assertSame(
 			$this->normalize_whitespace( $expected ),
 			$this->normalize_whitespace( od_construct_preload_links( $lcp_elements_by_minimum_viewport_widths ) )
@@ -309,7 +312,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array[]
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_od_optimize_template_output_buffer(): array {
 		return array(
@@ -1018,7 +1021,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
 	 */
-	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ) {
+	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ): void {
 		$set_up();
 
 		$remove_initial_tabs = static function ( string $input ): string {
@@ -1050,7 +1053,8 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Gets a validated URL metric.
 	 *
-	 * @param int $viewport_width Viewport width for the URL metric.
+	 * @param int                                      $viewport_width Viewport width for the URL metric.
+	 * @param array<array{xpath: string, isLCP: bool}> $elements       Elements.
 	 * @return OD_URL_Metric URL metric.
 	 * @throws Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
@@ -1066,8 +1070,16 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 				static function ( array $element ): array {
 					return array_merge(
 						array(
-							'isLCPCandidate'    => true,
-							'intersectionRatio' => 1,
+							'isLCPCandidate'     => true,
+							'intersectionRatio'  => 1,
+							'intersectionRect'   => array(
+								'width'  => 100,
+								'height' => 100,
+							),
+							'boundingClientRect' => array(
+								'width'  => 100,
+								'height' => 100,
+							),
 						),
 						$element
 					);

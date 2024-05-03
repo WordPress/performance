@@ -16,6 +16,11 @@
  */
 class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed> Data.
+	 */
 	public function data_provider_sample_documents(): array {
 		return array(
 			'well-formed-html'   => array(
@@ -301,8 +306,12 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	 * @covers ::get_xpath
 	 *
 	 * @dataProvider data_provider_sample_documents
+	 *
+	 * @param string   $document Document.
+	 * @param string[] $open_tags Open tags.
+	 * @param string[] $xpaths XPaths.
 	 */
-	public function test_open_tags_and_get_xpath( string $document, array $open_tags, array $xpaths ) {
+	public function test_open_tags_and_get_xpath( string $document, array $open_tags, array $xpaths ): void {
 		$p = new OD_HTML_Tag_Walker( $document );
 		$this->assertSame( '', $p->get_xpath(), 'Expected empty XPath since iteration has not started.' );
 		$actual_open_tags = array();
@@ -322,7 +331,7 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	 * @covers ::append_head_html
 	 * @covers OD_HTML_Tag_Processor::append_html
 	 */
-	public function test_append_head_html() {
+	public function test_append_head_html(): void {
 		$html     = '
 			<html>
 				<head>
@@ -370,7 +379,7 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	 * @covers ::append_body_html
 	 * @covers OD_HTML_Tag_Processor::append_html
 	 */
-	public function test_append_head_and_body_html() {
+	public function test_append_head_and_body_html(): void {
 		$html          = '
 			<html>
 				<head>
@@ -430,7 +439,7 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	 * @covers ::remove_attribute
 	 * @covers ::get_updated_html
 	 */
-	public function test_html_tag_processor_wrapper_methods() {
+	public function test_html_tag_processor_wrapper_methods(): void {
 		$processor = new OD_HTML_Tag_Walker( '<html lang="en" xml:lang="en"></html>' );
 		foreach ( $processor->open_tags() as $open_tag ) {
 			if ( 'HTML' === $open_tag ) {
@@ -444,6 +453,10 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Export an array as a PHP literal to use as a snapshot.
+	 *
+	 * @param array<int|string, mixed> $data Data.
+	 * @param bool                     $one_line One line.
+	 * @return string Snapshot.
 	 */
 	private function export_array_snapshot( array $data, bool $one_line = false ): string {
 		$php = preg_replace( '/^\s*\d+\s*=>\s*/m', '', var_export( $data, true ) );
