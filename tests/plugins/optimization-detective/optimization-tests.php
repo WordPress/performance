@@ -19,15 +19,22 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 */
 	private $original_request_method;
 
+	/**
+	 * @var string
+	 */
+	private $default_mimetype;
+
 	public function set_up() {
 		$this->original_request_uri    = $_SERVER['REQUEST_URI'];
 		$this->original_request_method = $_SERVER['REQUEST_METHOD'];
+		$this->default_mimetype        = ini_get( 'default_mimetype' );
 		parent::set_up();
 	}
 
 	public function tear_down() {
 		$_SERVER['REQUEST_URI']    = $this->original_request_uri;
 		$_SERVER['REQUEST_METHOD'] = $this->original_request_method;
+		ini_set( 'default_mimetype', $this->default_mimetype ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 		unset( $GLOBALS['wp_customize'] );
 		parent::tear_down();
 	}
@@ -344,7 +351,9 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'no-url-metrics-with-data-url-background-image' => array(
-				'set_up'   => static function () {},
+				'set_up'   => static function () {
+					ini_set( 'default_mimetype', 'text/html; charset=utf-8' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+				},
 				// Smallest PNG courtesy of <https://evanhahn.com/worlds-smallest-png/>.
 				'buffer'   => '
 					<html lang="en">
@@ -1011,6 +1020,69 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 					</html>
 				',
 			),
+
+			'rss-response'                                => array(
+				'set_up'   => static function () {
+					ini_set( 'default_mimetype', 'application/rss+xml' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+				},
+				'buffer'   => '<?xml version="1.0" encoding="UTF-8"?>
+					<rss version="2.0">
+						<channel>
+							<title>Example Blog</title>
+							<link>https://www.example.com</link>
+							<description>
+								<img src="https://www.example.com/logo.jpg" alt="Example Blog Logo" />
+								A blog about technology, design, and culture.
+							</description>
+							<language>en-us</language>
+						</channel>
+					</rss>
+				',
+				'expected' => '<?xml version="1.0" encoding="UTF-8"?>
+					<rss version="2.0">
+						<channel>
+							<title>Example Blog</title>
+							<link>https://www.example.com</link>
+							<description>
+								<img src="https://www.example.com/logo.jpg" alt="Example Blog Logo" />
+								A blog about technology, design, and culture.
+							</description>
+							<language>en-us</language>
+						</channel>
+					</rss>
+				',
+			),
+
+			'xhtml-response'                              => array(
+				'set_up'   => static function () {
+					ini_set( 'default_mimetype', 'application/xhtml+xml; charset=utf-8' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+				},
+				'buffer'   => '<?xml version="1.0" encoding="UTF-8"?>
+					<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+					<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+						<head>
+						  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+						  <title>XHTML 1.0 Strict Example</title>
+						</head>
+						<body>
+							<p><img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" /></p>
+						</body>
+					</html>
+				',
+				'expected' => '<?xml version="1.0" encoding="UTF-8"?>
+					<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+					<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+						<head>
+						  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+						  <title>XHTML 1.0 Strict Example</title>
+						</head>
+						<body>
+							<p><img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::P]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" /></p>
+							<script type="module">/* import detect ... */</script>
+						</body>
+					</html>
+				',
+			),
 		);
 	}
 
@@ -1018,6 +1090,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 * Test od_optimize_template_output_buffer().
 	 *
 	 * @covers ::od_optimize_template_output_buffer
+	 * @covers ::od_is_response_html_content_type
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
 	 */
