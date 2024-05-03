@@ -333,7 +333,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -439,11 +439,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 									$viewport_width,
 									array(
 										array(
-											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 											'isLCP' => true,
 										),
 										array(
-											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 											'isLCP' => false,
 										),
 									)
@@ -491,7 +491,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 									$viewport_width,
 									array(
 										array(
-											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 											'isLCP' => true,
 										),
 									)
@@ -539,7 +539,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 									$viewport_width,
 									array(
 										array(
-											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::DIV]',
 											'isLCP' => true,
 										),
 									)
@@ -601,7 +601,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 									$viewport_width,
 									array(
 										array(
-											'xpath' => "/*[0][self::HTML]/*[1][self::BODY]/*[{$div_index}][self::DIV]",
+											'xpath' => sprintf( '/*[1][self::HTML]/*[2][self::BODY]/*[%d][self::DIV]', $div_index + 1 ),
 											'isLCP' => true,
 										),
 									)
@@ -656,7 +656,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 									array(
 										array(
 											'isLCP' => true,
-											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 										),
 									)
 								)
@@ -698,7 +698,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 							)
 						)
@@ -729,7 +729,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						</head>
 						<!--</head>-->
 						<body>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
 							<!--</body>-->
 							<script type="module">/* import detect ... */</script>
 						</body>
@@ -747,11 +747,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -763,11 +763,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -794,8 +794,8 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-logo.png" media="screen and (min-width: 783px)">
 						</head>
 						<body>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -818,11 +818,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -834,11 +834,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -850,11 +850,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -866,11 +866,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -897,8 +897,8 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-logo.png" media="screen and (min-width: 601px) and (max-width: 782px)">
 						</head>
 						<body>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -921,11 +921,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -937,11 +937,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -953,11 +953,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -969,11 +969,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -1000,9 +1000,9 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" media="screen and (min-width: 481px) and (max-width: 600px)">
 						</head>
 						<body>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
 							<p>New paragraph since URL Metrics were captured!</p>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[2][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>

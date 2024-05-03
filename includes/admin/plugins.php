@@ -157,10 +157,16 @@ function perflab_render_plugins_ui(): void {
  * @since n.e.x.t
  * @see perflab_install_and_activate_plugin()
  *
- * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string} $plugin_data Plugin data from the WordPress.org API.
- * @return array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool} Availability.
+ * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string} $plugin_data                     Plugin data from the WordPress.org API.
+ * @param array<string, array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool, activated: bool, installed: bool}>                      $processed_plugin_availabilities Plugin availabilities already processed. This param is only used by recursive calls.
+ * @return array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool, activated: bool, installed: bool} Availability.
  */
-function perflab_get_plugin_availability( array $plugin_data ): array {
+function perflab_get_plugin_availability( array $plugin_data, array &$processed_plugin_availabilities = array() ): array {
+	if ( array_key_exists( $plugin_data['slug'], $processed_plugin_availabilities ) ) {
+		// Prevent infinite recursion by returning the previously-computed value.
+		return $processed_plugin_availabilities[ $plugin_data['slug'] ];
+	}
+
 	$availability = array(
 		'compatible_php' => (
 			! $plugin_data['requires_php'] ||
@@ -174,17 +180,25 @@ function perflab_get_plugin_availability( array $plugin_data ): array {
 
 	$plugin_status = install_plugin_install_status( $plugin_data );
 
+	$availability['installed'] = ( 'install' !== $plugin_status['status'] );
+	$availability['activated'] = $plugin_status['file'] && is_plugin_active( $plugin_status['file'] );
+
 	// The plugin is already installed or the user can install plugins.
 	$availability['can_install'] = (
-		'install' !== $plugin_status['status'] ||
+		$availability['installed'] ||
 		current_user_can( 'install_plugins' )
 	);
 
-	// The plugin is installed and the user can activate it, or the use can activate plugins in general.
+	// The plugin is activated or the user can activate plugins.
 	$availability['can_activate'] = (
-		( $plugin_status['file'] && current_user_can( 'activate_plugin', $plugin_status['file'] ) ) ||
-		current_user_can( 'activate_plugins' )
+		$availability['activated'] ||
+		$plugin_status['file'] // When not false, the plugin is installed.
+			? current_user_can( 'activate_plugin', $plugin_status['file'] )
+			: current_user_can( 'activate_plugins' )
 	);
+
+	// Store pending availability before recursing.
+	$processed_plugin_availabilities[ $plugin_data['slug'] ] = $availability;
 
 	foreach ( $plugin_data['requires_plugins'] as $requires_plugin ) {
 		$dependency_plugin_data = perflab_query_plugin_info( $requires_plugin );
@@ -193,11 +207,12 @@ function perflab_get_plugin_availability( array $plugin_data ): array {
 		}
 
 		$dependency_availability = perflab_get_plugin_availability( $dependency_plugin_data );
-		foreach ( array( 'compatible_php', 'compatible_wp', 'can_install', 'can_activate' ) as $key ) {
+		foreach ( array( 'compatible_php', 'compatible_wp', 'can_install', 'can_activate', 'installed', 'activated' ) as $key ) {
 			$availability[ $key ] = $availability[ $key ] && $dependency_availability[ $key ];
 		}
 	}
 
+	$processed_plugin_availabilities[ $plugin_data['slug'] ] = $availability;
 	return $availability;
 }
 
@@ -209,10 +224,17 @@ function perflab_get_plugin_availability( array $plugin_data ): array {
  * @since n.e.x.t
  * @see perflab_get_plugin_availability()
  *
- * @param string $plugin_slug Plugin slug.
+ * @param string   $plugin_slug       Plugin slug.
+ * @param string[] $processed_plugins Slugs for plugins which have already been processed. This param is only used by recursive calls.
  * @return WP_Error|null WP_Error on failure.
  */
-function perflab_install_and_activate_plugin( string $plugin_slug ): ?WP_Error {
+function perflab_install_and_activate_plugin( string $plugin_slug, array &$processed_plugins = array() ): ?WP_Error {
+	if ( in_array( $plugin_slug, $processed_plugins, true ) ) {
+		// Prevent infinite recursion from possible circular dependency.
+		return null;
+	}
+	$processed_plugins[] = $plugin_slug;
+
 	$plugin_data = perflab_query_plugin_info( $plugin_slug );
 	if ( $plugin_data instanceof WP_Error ) {
 		return $plugin_data;
@@ -298,14 +320,17 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 
 	$action_links = array();
 
-	$status = install_plugin_install_status( $plugin_data );
-
-	if ( is_plugin_active( $status['file'] ) ) {
+	if ( $availability['activated'] ) {
 		$action_links[] = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
 			esc_html( _x( 'Active', 'plugin', 'default' ) )
 		);
-	} elseif ( ! in_array( false, $availability, true ) ) {
+	} elseif (
+		$availability['compatible_php'] &&
+		$availability['compatible_wp'] &&
+		$availability['can_install'] &&
+		$availability['can_activate']
+	) {
 		$url = esc_url_raw(
 			add_query_arg(
 				array(
