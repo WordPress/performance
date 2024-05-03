@@ -3,6 +3,7 @@
  * Admin settings helper functions.
  *
  * @package performance-lab
+ * @noinspection PhpRedundantOptionalArgumentInspection
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -151,6 +152,148 @@ function perflab_render_plugins_ui() {
 }
 
 /**
+ * Checks if a given plugin is available.
+ *
+ * @since n.e.x.t
+ * @see perflab_install_and_activate_plugin()
+ *
+ * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string} $plugin_data                     Plugin data from the WordPress.org API.
+ * @param array<string, array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool, activated: bool, installed: bool}>                      $processed_plugin_availabilities Plugin availabilities already processed. This param is only used by recursive calls.
+ * @return array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool, activated: bool, installed: bool} Availability.
+ */
+function perflab_get_plugin_availability( array $plugin_data, array &$processed_plugin_availabilities = array() ): array {
+	if ( array_key_exists( $plugin_data['slug'], $processed_plugin_availabilities ) ) {
+		// Prevent infinite recursion by returning the previously-computed value.
+		return $processed_plugin_availabilities[ $plugin_data['slug'] ];
+	}
+
+	$availability = array(
+		'compatible_php' => (
+			! $plugin_data['requires_php'] ||
+			is_php_version_compatible( $plugin_data['requires_php'] )
+		),
+		'compatible_wp'  => (
+			! $plugin_data['requires'] ||
+			is_wp_version_compatible( $plugin_data['requires'] )
+		),
+	);
+
+	$plugin_status = install_plugin_install_status( $plugin_data );
+
+	$availability['installed'] = ( 'install' !== $plugin_status['status'] );
+	$availability['activated'] = $plugin_status['file'] && is_plugin_active( $plugin_status['file'] );
+
+	// The plugin is already installed or the user can install plugins.
+	$availability['can_install'] = (
+		$availability['installed'] ||
+		current_user_can( 'install_plugins' )
+	);
+
+	// The plugin is activated or the user can activate plugins.
+	$availability['can_activate'] = (
+		$availability['activated'] ||
+		$plugin_status['file'] // When not false, the plugin is installed.
+			? current_user_can( 'activate_plugin', $plugin_status['file'] )
+			: current_user_can( 'activate_plugins' )
+	);
+
+	// Store pending availability before recursing.
+	$processed_plugin_availabilities[ $plugin_data['slug'] ] = $availability;
+
+	foreach ( $plugin_data['requires_plugins'] as $requires_plugin ) {
+		$dependency_plugin_data = perflab_query_plugin_info( $requires_plugin );
+		if ( $dependency_plugin_data instanceof WP_Error ) {
+			continue;
+		}
+
+		$dependency_availability = perflab_get_plugin_availability( $dependency_plugin_data );
+		foreach ( array( 'compatible_php', 'compatible_wp', 'can_install', 'can_activate', 'installed', 'activated' ) as $key ) {
+			$availability[ $key ] = $availability[ $key ] && $dependency_availability[ $key ];
+		}
+	}
+
+	$processed_plugin_availabilities[ $plugin_data['slug'] ] = $availability;
+	return $availability;
+}
+
+/**
+ * Installs and activates a plugin by its slug.
+ *
+ * Dependencies are recursively installed and activated as well.
+ *
+ * @since n.e.x.t
+ * @see perflab_get_plugin_availability()
+ *
+ * @param string   $plugin_slug       Plugin slug.
+ * @param string[] $processed_plugins Slugs for plugins which have already been processed. This param is only used by recursive calls.
+ * @return WP_Error|null WP_Error on failure.
+ */
+function perflab_install_and_activate_plugin( string $plugin_slug, array &$processed_plugins = array() ): ?WP_Error {
+	if ( in_array( $plugin_slug, $processed_plugins, true ) ) {
+		// Prevent infinite recursion from possible circular dependency.
+		return null;
+	}
+	$processed_plugins[] = $plugin_slug;
+
+	$plugin_data = perflab_query_plugin_info( $plugin_slug );
+	if ( $plugin_data instanceof WP_Error ) {
+		return $plugin_data;
+	}
+
+	// Install and activate plugin dependencies first.
+	foreach ( $plugin_data['requires_plugins'] as $requires_plugin_slug ) {
+		$result = perflab_install_and_activate_plugin( $requires_plugin_slug );
+		if ( $result instanceof WP_Error ) {
+			return $result;
+		}
+	}
+
+	// Install the plugin.
+	$plugin_status = install_plugin_install_status( $plugin_data );
+	$plugin_file   = $plugin_status['file'];
+	if ( 'install' === $plugin_status['status'] ) {
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return new WP_Error( 'cannot_install_plugin', __( 'Sorry, you are not allowed to install plugins on this site.', 'default' ) );
+		}
+
+		// Replace new Plugin_Installer_Skin with new Quiet_Upgrader_Skin when output needs to be suppressed.
+		$skin     = new WP_Ajax_Upgrader_Skin( array( 'api' => $plugin_data ) );
+		$upgrader = new Plugin_Upgrader( $skin );
+		$result   = $upgrader->install( $plugin_data['download_link'] );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		} elseif ( is_wp_error( $skin->result ) ) {
+			return $skin->result;
+		} elseif ( $skin->get_errors()->has_errors() ) {
+			return $skin->get_errors();
+		}
+
+		$plugins = get_plugins( '/' . $plugin_slug );
+		if ( empty( $plugins ) ) {
+			return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'default' ) );
+		}
+
+		$plugin_file_names = array_keys( $plugins );
+		$plugin_file       = $plugin_slug . '/' . $plugin_file_names[0];
+	}
+
+	// Activate the plugin.
+	if ( ! is_plugin_active( $plugin_file ) ) {
+		if ( ! current_user_can( 'activate_plugin', $plugin_file ) ) {
+			return new WP_Error( 'cannot_activate_plugin', __( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
+		}
+
+		$result = activate_plugin( $plugin_file );
+		if ( $result instanceof WP_Error ) {
+			return $result;
+		}
+	}
+
+	return null;
+}
+
+/**
  * Renders individual plugin cards.
  *
  * This is adapted from `WP_Plugin_Install_List_Table::display_rows()` in core.
@@ -170,28 +313,23 @@ function perflab_render_plugin_card( array $plugin_data ) {
 	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
 	$description = apply_filters( 'plugin_install_description', $description, $plugin_data );
 
-	$compatible_php = ! $plugin_data['requires_php'] || is_php_version_compatible( $plugin_data['requires_php'] );
-	$compatible_wp  = ! $plugin_data['requires'] || is_wp_version_compatible( $plugin_data['requires'] );
-	$action_links   = array();
+	$availability = perflab_get_plugin_availability( $plugin_data );
 
-	$status = install_plugin_install_status( $plugin_data );
+	$compatible_php = $availability['compatible_php'];
+	$compatible_wp  = $availability['compatible_wp'];
 
-	if ( is_plugin_active( $status['file'] ) ) {
+	$action_links = array();
+
+	if ( $availability['activated'] ) {
 		$action_links[] = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
 			esc_html( _x( 'Active', 'plugin', 'default' ) )
 		);
 	} elseif (
-		$compatible_php &&
-		$compatible_wp &&
-		(
-			( $status['file'] && current_user_can( 'activate_plugin', $status['file'] ) ) ||
-			current_user_can( 'activate_plugins' )
-		) &&
-		(
-			'install' !== $status['status'] ||
-			current_user_can( 'install_plugins' )
-		)
+		$availability['compatible_php'] &&
+		$availability['compatible_wp'] &&
+		$availability['can_install'] &&
+		$availability['can_activate']
 	) {
 		$url = esc_url_raw(
 			add_query_arg(
@@ -210,7 +348,7 @@ function perflab_render_plugin_card( array $plugin_data ) {
 			esc_html__( 'Activate', 'default' )
 		);
 	} else {
-		$explanation    = 'install' !== $status['status'] || current_user_can( 'install_plugins' ) ? _x( 'Cannot Activate', 'plugin', 'default' ) : _x( 'Cannot Install', 'plugin', 'default' );
+		$explanation    = $availability['can_install'] ? _x( 'Cannot Activate', 'plugin', 'default' ) : _x( 'Cannot Install', 'plugin', 'default' );
 		$action_links[] = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
 			esc_html( $explanation )

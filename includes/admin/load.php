@@ -254,68 +254,9 @@ function perflab_install_activate_plugin_callback() {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 
-	// Check if plugin (by slug) is installed by obtaining the plugin file.
-	// Remember a plugin file typically looks like "{slug}/load.php" or "{slug}/{slug}.php".
-	$plugin_file = null;
-	foreach ( array_keys( get_plugins() ) as $installed_plugin_file ) {
-		if ( strtok( $installed_plugin_file, '/' ) === $plugin_slug ) {
-			$plugin_file = $installed_plugin_file;
-			break;
-		}
-	}
-
-	// Install the plugin if it is not installed yet (in which case the plugin file could not be discovered above).
-	if ( ! isset( $plugin_file ) ) {
-		// Check if the user have plugin installation capability.
-		if ( ! current_user_can( 'install_plugins' ) ) {
-			wp_die( esc_html__( 'Sorry, you are not allowed to install plugins on this site.', 'default' ) );
-		}
-
-		$api = perflab_query_plugin_info( $plugin_slug );
-
-		// Return early if plugin API returns an error.
-		if ( $api instanceof WP_Error ) {
-			wp_die(
-				wp_kses(
-					sprintf(
-						/* translators: %s: Support forums URL. */
-						__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="%s">support forums</a>.', 'default' ),
-						__( 'https://wordpress.org/support/forums/', 'default' )
-					) . ' ' . $api->get_error_message(),
-					array( 'a' => array( 'href' => true ) )
-				)
-			);
-		}
-
-		// Replace new Plugin_Installer_Skin with new Quiet_Upgrader_Skin when output needs to be suppressed.
-		$skin     = new WP_Ajax_Upgrader_Skin( array( 'api' => $api ) );
-		$upgrader = new Plugin_Upgrader( $skin );
-		$result   = $upgrader->install( $api['download_link'] );
-
-		if ( is_wp_error( $result ) ) {
-			wp_die( esc_html( $result->get_error_message() ) );
-		} elseif ( is_wp_error( $skin->result ) ) {
-			wp_die( esc_html( $skin->result->get_error_message() ) );
-		} elseif ( $skin->get_errors()->has_errors() ) {
-			wp_die( esc_html( $skin->get_error_messages() ) );
-		}
-
-		$plugins = get_plugins( '/' . $plugin_slug );
-
-		if ( empty( $plugins ) ) {
-			wp_die( esc_html__( 'Plugin not found.', 'default' ) );
-		}
-
-		$plugin_file_names = array_keys( $plugins );
-		$plugin_file       = $plugin_slug . '/' . $plugin_file_names[0];
-	}
-
-	if ( ! current_user_can( 'activate_plugin', $plugin_file ) ) {
-		wp_die( esc_html__( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
-	}
-
-	$result = activate_plugin( $plugin_file );
-	if ( is_wp_error( $result ) ) {
+	// Install and activate the plugin and its dependencies.
+	$result = perflab_install_and_activate_plugin( $plugin_slug );
+	if ( $result instanceof WP_Error ) {
 		wp_die( wp_kses_post( $result->get_error_message() ) );
 	}
 
