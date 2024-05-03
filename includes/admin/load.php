@@ -14,10 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  * @since 3.0.0 Renamed to perflab_add_features_page().
- *
- * @return string|false Hook suffix.
  */
-function perflab_add_features_page() {
+function perflab_add_features_page(): void {
 	$hook_suffix = add_options_page(
 		__( 'Performance Features', 'performance-lab' ),
 		__( 'Performance', 'performance-lab' ),
@@ -31,11 +29,8 @@ function perflab_add_features_page() {
 		add_action( "load-{$hook_suffix}", 'perflab_load_features_page', 10, 0 );
 		add_filter( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' );
 	}
-
-	return $hook_suffix;
 }
 
-// @phpstan-ignore-next-line
 add_action( 'admin_menu', 'perflab_add_features_page' );
 
 /**
