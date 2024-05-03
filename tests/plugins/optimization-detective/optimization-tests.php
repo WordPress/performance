@@ -1077,7 +1077,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						  <title>XHTML 1.0 Strict Example</title>
 						</head>
 						<body>
-							<p><img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::P]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" /></p>
+							<p><img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::P]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" /></p>
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
