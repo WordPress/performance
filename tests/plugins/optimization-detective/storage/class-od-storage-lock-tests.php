@@ -63,7 +63,7 @@ class OD_Storage_Lock_Tests extends WP_UnitTestCase {
 	 * @param Closure $set_up   Set up.
 	 * @param int     $expected Expected value.
 	 */
-	public function test_get_ttl( Closure $set_up, int $expected ) {
+	public function test_get_ttl( Closure $set_up, int $expected ): void {
 		$set_up();
 		$this->assertSame( $expected, OD_Storage_Lock::get_ttl() );
 	}
@@ -73,7 +73,7 @@ class OD_Storage_Lock_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::get_transient_key
 	 */
-	public function test_get_transient_key() {
+	public function test_get_transient_key(): void {
 		unset( $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_X_FORWARDED_FOR'] );
 
 		$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
@@ -95,7 +95,7 @@ class OD_Storage_Lock_Tests extends WP_UnitTestCase {
 	 * @covers ::get_transient_key
 	 * @covers ::get_ttl
 	 */
-	public function test_set_lock_and_is_locked() {
+	public function test_set_lock_and_is_locked(): void {
 		$key = OD_Storage_Lock::get_transient_key();
 		$ttl = OD_Storage_Lock::get_ttl();
 

@@ -17,7 +17,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_register_endpoint
 	 */
-	public function test_od_register_endpoint_hooked() {
+	public function test_od_register_endpoint_hooked(): void {
 		$this->assertSame( 10, has_action( 'rest_api_init', 'od_register_endpoint' ) );
 	}
 
@@ -27,7 +27,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 */
-	public function test_rest_request_good_params() {
+	public function test_rest_request_good_params(): void {
 		$request      = new WP_REST_Request( 'POST', self::ROUTE );
 		$valid_params = $this->get_valid_params();
 		$this->assertCount( 0, get_posts( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) ) );
@@ -51,7 +51,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider for test_rest_request_bad_params.
 	 *
-	 * @return array
+	 * @return array<string, mixed> Test data.
 	 */
 	public function data_provider_invalid_params(): array {
 		$valid_element = $this->get_valid_params()['elements'][0];
@@ -128,8 +128,10 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 * @covers ::od_handle_rest_request
 	 *
 	 * @dataProvider data_provider_invalid_params
+	 *
+	 * @param array<string, mixed> $params Params.
 	 */
-	public function test_rest_request_bad_params( array $params ) {
+	public function test_rest_request_bad_params( array $params ): void {
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params( $params );
 		$response = rest_get_server()->dispatch( $request );
@@ -145,7 +147,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 */
-	public function test_rest_request_timestamp_ignored() {
+	public function test_rest_request_timestamp_ignored(): void {
 		$initial_microtime = microtime( true );
 
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
@@ -176,7 +178,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 */
-	public function test_rest_request_locked() {
+	public function test_rest_request_locked(): void {
 		OD_Storage_Lock::set_lock();
 
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
@@ -193,7 +195,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 */
-	public function test_rest_request_breakpoint_not_needed_for_any_breakpoint() {
+	public function test_rest_request_breakpoint_not_needed_for_any_breakpoint(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
 
 		// First fully populate the sample for all breakpoints.
@@ -219,7 +221,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 */
-	public function test_rest_request_breakpoint_not_needed_for_specific_breakpoint() {
+	public function test_rest_request_breakpoint_not_needed_for_specific_breakpoint(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
 
 		$valid_params = $this->get_valid_params( array( 'viewport' => array( 'width' => 480 ) ) );
@@ -244,7 +246,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 */
-	public function test_rest_request_over_populate_wider_viewport_group() {
+	public function test_rest_request_over_populate_wider_viewport_group(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
 
 		// First establish a single breakpoint, so there are two groups of URL metrics
@@ -300,7 +302,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 */
-	public function test_rest_request_over_populate_narrower_viewport_group() {
+	public function test_rest_request_over_populate_narrower_viewport_group(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
 
 		// First establish a single breakpoint, so there are two groups of URL metrics
@@ -332,10 +334,10 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Populate URL metrics.
 	 *
-	 * @param int   $count  Count of URL metrics to populate.
-	 * @param array $params Params for URL metric.
+	 * @param int                  $count  Count of URL metrics to populate.
+	 * @param array<string, mixed> $params Params for URL metric.
 	 */
-	private function populate_url_metrics( int $count, array $params ) {
+	private function populate_url_metrics( int $count, array $params ): void {
 		for ( $i = 0; $i < $count; $i++ ) {
 			$request = new WP_REST_Request( 'POST', self::ROUTE );
 			$request->set_body_params( $params );
@@ -347,8 +349,8 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Gets valid params.
 	 *
-	 * @param array $extras Extra params which are recursively merged on top of the valid params.
-	 * @return array Params.
+	 * @param array<string, mixed> $extras Extra params which are recursively merged on top of the valid params.
+	 * @return array<string, mixed> Params.
 	 */
 	private function get_valid_params( array $extras = array() ): array {
 		$slug = od_get_url_metrics_slug( array() );
@@ -372,9 +374,9 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	 *
 	 * This is on contrast with `array_merge_recursive()` which creates arrays for colliding values.
 	 *
-	 * @param array $base_array   Base array.
-	 * @param array $sparse_array Sparse array.
-	 * @return array Merged array.
+	 * @param array<string, mixed> $base_array   Base array.
+	 * @param array<string, mixed> $sparse_array Sparse array.
+	 * @return array<string, mixed> Merged array.
 	 */
 	private function recursive_merge( array $base_array, array $sparse_array ): array {
 		foreach ( $sparse_array as $key => $value ) {
@@ -394,7 +396,7 @@ class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
 	/**
 	 * Gets sample validated URL metric data.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	private function get_sample_validated_url_metric(): array {
 		return array(

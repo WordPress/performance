@@ -54,7 +54,7 @@ class OD_Detection_Tests extends WP_UnitTestCase {
 	 * @param Closure                                                                       $set_up           Set up callback.
 	 * @param array<string, array{set_up: Closure, expected_exports: array<string, mixed>}> $expected_exports Expected exports.
 	 */
-	public function test_od_get_detection_script_returns_script( Closure $set_up, array $expected_exports ) {
+	public function test_od_get_detection_script_returns_script( Closure $set_up, array $expected_exports ): void {
 		$set_up();
 		$slug = od_get_url_metrics_slug( array( 'p' => '1' ) );
 
