@@ -48,7 +48,7 @@ require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/site-health/load.php';
  * @since 2.9.0 The generator tag now includes the active standalone plugin slugs.
  * @since 3.0.0 The generator tag no longer includes module slugs.
  */
-function perflab_get_generator_content() {
+function perflab_get_generator_content(): string {
 	$active_plugins = array();
 	foreach ( perflab_get_standalone_plugin_version_constants() as $plugin_slug => $constant_name ) {
 		if ( defined( $constant_name ) && ! str_starts_with( constant( $constant_name ), 'Performance Lab ' ) ) {
@@ -71,7 +71,7 @@ function perflab_get_generator_content() {
  *
  * @since 1.1.0
  */
-function perflab_render_generator() {
+function perflab_render_generator(): void {
 	$content = perflab_get_generator_content();
 
 	echo '<meta name="generator" content="' . esc_attr( $content ) . '">' . "\n";
@@ -85,7 +85,7 @@ add_action( 'wp_head', 'perflab_render_generator' );
  *
  * @return array<string, array{'constant': string, 'experimental'?: bool}> Associative array of $plugin_slug => $plugin_data pairs.
  */
-function perflab_get_standalone_plugin_data() {
+function perflab_get_standalone_plugin_data(): array {
 	/*
 	 * Alphabetically sorted list of plugin slugs and their data.
 	 * Supported keys per plugin are:
@@ -125,7 +125,7 @@ function perflab_get_standalone_plugin_data() {
  *
  * @return array<string, string> Map of plugin slug and the version constant used.
  */
-function perflab_get_standalone_plugin_version_constants() {
+function perflab_get_standalone_plugin_version_constants(): array {
 	return wp_list_pluck( perflab_get_standalone_plugin_data(), 'constant' );
 }
 
@@ -144,7 +144,7 @@ function perflab_get_standalone_plugin_version_constants() {
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
-function perflab_maybe_set_object_cache_dropin() {
+function perflab_maybe_set_object_cache_dropin(): void {
 	global $wp_filesystem;
 
 	// Bail if Server-Timing is disabled entirely.
@@ -255,7 +255,7 @@ add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
-function perflab_maybe_remove_object_cache_dropin() {
+function perflab_maybe_remove_object_cache_dropin(): void {
 	global $wp_filesystem;
 
 	// Bail if disabled via constant.
@@ -298,7 +298,7 @@ register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin'
  *
  * @global $plugin_page
  */
-function perflab_no_access_redirect_module_to_performance_feature_page() {
+function perflab_no_access_redirect_module_to_performance_feature_page(): void {
 	global $plugin_page;
 
 	if ( 'perflab-modules' !== $plugin_page ) {
@@ -319,7 +319,7 @@ add_action( 'admin_page_access_denied', 'perflab_no_access_redirect_module_to_pe
  *
  * @since 3.0.0
  */
-function perflab_cleanup_option() {
+function perflab_cleanup_option(): void {
 	if ( current_user_can( 'manage_options' ) ) {
 		delete_option( 'perflab_modules_settings' );
 	}

@@ -175,7 +175,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Test perflab_aea_enqueued_js_assets_test() no transient saved.
 	 */
 	public function test_perflab_aea_enqueued_js_assets_test_no_transient() {
-		$this->assertEqualSets( array(), perflab_aea_enqueued_js_assets_test() );
+		$this->assertSame( array( 'omitted' => true ), perflab_aea_enqueued_js_assets_test() );
 	}
 
 	/**
@@ -200,7 +200,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Test perflab_aea_enqueued_css_assets_test() no transient saved.
 	 */
 	public function test_perflab_aea_enqueued_css_assets_test_no_transient() {
-		$this->assertEqualSets( array(), perflab_aea_enqueued_css_assets_test() );
+		$this->assertSame( array( 'omitted' => true ), perflab_aea_enqueued_css_assets_test() );
 	}
 
 	/**

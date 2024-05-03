@@ -18,6 +18,8 @@ if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING
  * Adds the Server-Timing page to the Tools menu.
  *
  * @since 2.6.0
+ *
+ * @return string|false Hook suffix.
  */
 function perflab_add_server_timing_page() {
 	$hook_suffix = add_management_page(
@@ -35,6 +37,8 @@ function perflab_add_server_timing_page() {
 
 	return $hook_suffix;
 }
+
+// @phpstan-ignore-next-line
 add_action( 'admin_menu', 'perflab_add_server_timing_page' );
 
 /**
@@ -42,7 +46,7 @@ add_action( 'admin_menu', 'perflab_add_server_timing_page' );
  *
  * @since 2.6.0
  */
-function perflab_load_server_timing_page() {
+function perflab_load_server_timing_page(): void {
 	/*
 	 * This settings section technically includes a field, however it is directly rendered as part of the section
 	 * callback due to requiring custom markup.
@@ -149,7 +153,7 @@ function perflab_load_server_timing_page() {
  *
  * @since 2.6.0
  */
-function perflab_render_server_timing_page() {
+function perflab_render_server_timing_page(): void {
 	?>
 	<div class="wrap">
 		<?php settings_errors(); ?>
@@ -173,7 +177,7 @@ function perflab_render_server_timing_page() {
  *
  * @param string $slug Slug of the field and sub-key in the Server-Timing option.
  */
-function perflab_render_server_timing_page_hooks_field( $slug ) {
+function perflab_render_server_timing_page_hooks_field( string $slug ): void {
 	$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
 
 	// Value for the sub-key is an array of hook names.
@@ -205,7 +209,7 @@ function perflab_render_server_timing_page_hooks_field( $slug ) {
  *
  * @since 2.6.0
  */
-function perflab_render_server_timing_page_output_buffering_section() {
+function perflab_render_server_timing_page_output_buffering_section(): void {
 	$slug           = 'output_buffering';
 	$field_id       = "server_timing_{$slug}";
 	$field_name     = PERFLAB_SERVER_TIMING_SETTING . '[' . $slug . ']';

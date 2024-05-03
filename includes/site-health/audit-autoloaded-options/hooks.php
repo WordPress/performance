@@ -15,10 +15,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @param array $tests Site Health Tests.
- * @return array
+ * @param array{direct: array<string, array{label: string, test: string}>} $tests Site Health Tests.
+ * @return array{direct: array<string, array{label: string, test: string}>} Amended tests.
  */
-function perflab_aao_add_autoloaded_options_test( $tests ) {
+function perflab_aao_add_autoloaded_options_test( array $tests ): array {
 	$tests['direct']['autoloaded_options'] = array(
 		'label' => __( 'Autoloaded options', 'performance-lab' ),
 		'test'  => 'perflab_aao_autoloaded_options_test',
@@ -32,7 +32,7 @@ add_filter( 'site_status_tests', 'perflab_aao_add_autoloaded_options_test' );
  *
  * @since 3.0.0
  */
-function perflab_aao_register_admin_actions() {
+function perflab_aao_register_admin_actions(): void {
 	add_action( 'admin_action_perflab_aao_update_autoload', 'perflab_aao_handle_update_autoload' );
 }
 add_action( 'admin_init', 'perflab_aao_register_admin_actions' );
@@ -42,7 +42,7 @@ add_action( 'admin_init', 'perflab_aao_register_admin_actions' );
  *
  * @since 3.0.0
  */
-function perflab_aao_handle_update_autoload() {
+function perflab_aao_handle_update_autoload(): void {
 	check_admin_referer( 'perflab_aao_update_autoload' );
 
 	if ( ! isset( $_GET['option_name'], $_GET['autoload'] ) ) {
@@ -50,7 +50,7 @@ function perflab_aao_handle_update_autoload() {
 	}
 
 	$option_name = sanitize_text_field( wp_unslash( $_GET['option_name'] ) );
-	$autoload    = isset( $_GET['autoload'] ) ? rest_sanitize_boolean( $_GET['autoload'] ) : false;
+	$autoload    = rest_sanitize_boolean( $_GET['autoload'] );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'Permission denied.', 'performance-lab' ) );
@@ -96,7 +96,7 @@ function perflab_aao_handle_update_autoload() {
  *
  * @global string $pagenow The filename of the current screen.
  */
-function perflab_aao_admin_notices() {
+function perflab_aao_admin_notices(): void {
 	if ( 'site-health.php' !== $GLOBALS['pagenow'] ) {
 		return;
 	}
