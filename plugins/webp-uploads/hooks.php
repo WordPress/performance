@@ -553,6 +553,10 @@ function webp_uploads_img_tag_update_mime_type( $original_image, $context, $atta
 			continue;
 		}
 
+		// Note the sources key is not normally present in the response for wp_get_attachment_metadata(). The sources
+		// key here, however, is being injected via the 'wp_generate_attachment_metadata' filter via the
+		// webp_uploads_create_sources_property() function. This is why there is a PHPStan error and why it is ignored.
+		// @phpstan-ignore-next-line -- The 'sources' key is added by this plugin.
 		if ( ! isset( $metadata['sources'][ $target_mime ]['file'] ) ) {
 			continue;
 		}
