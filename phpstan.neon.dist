@@ -2,6 +2,7 @@ includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
 	level: 4
+	treatPhpDocTypesAsCertain: false
 	paths:
 		- load.php
 		- includes/
