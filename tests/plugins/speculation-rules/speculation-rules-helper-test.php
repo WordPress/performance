@@ -15,14 +15,14 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		add_filter(
 			'template_directory_uri',
 			static function () {
-				return trailingslashit( WP_CONTENT_URL ) . 'themes/template';
+				return content_url( 'themes/template' );
 			}
 		);
 
 		add_filter(
 			'stylesheet_directory_uri',
 			static function () {
-				return trailingslashit( WP_CONTENT_URL ) . 'themes/stylesheet';
+				return content_url( 'themes/stylesheet' );
 			}
 		);
 	}

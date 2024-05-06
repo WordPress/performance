@@ -18,10 +18,8 @@ if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING
  * Adds the Server-Timing page to the Tools menu.
  *
  * @since 2.6.0
- *
- * @return string|false Hook suffix.
  */
-function perflab_add_server_timing_page() {
+function perflab_add_server_timing_page(): void {
 	$hook_suffix = add_management_page(
 		__( 'Server-Timing', 'performance-lab' ),
 		__( 'Server-Timing', 'performance-lab' ),
@@ -34,11 +32,8 @@ function perflab_add_server_timing_page() {
 	if ( false !== $hook_suffix ) {
 		add_action( "load-{$hook_suffix}", 'perflab_load_server_timing_page' );
 	}
-
-	return $hook_suffix;
 }
 
-// @phpstan-ignore-next-line
 add_action( 'admin_menu', 'perflab_add_server_timing_page' );
 
 /**

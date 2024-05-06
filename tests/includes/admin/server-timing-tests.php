@@ -11,6 +11,9 @@
  */
 class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 
+	/**
+	 * @covers ::perflab_add_server_timing_page
+	 */
 	public function test_perflab_add_server_timing_page() {
 		global $_wp_submenu_nopriv;
 
@@ -21,11 +24,16 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		// Rely on current user to be an administrator (with 'manage_options' capability).
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
-		$hook_suffix = perflab_add_server_timing_page();
-		$this->assertSame( get_plugin_page_hookname( PERFLAB_SERVER_TIMING_SCREEN, 'tools.php' ), $hook_suffix );
-		$this->assertFalse( isset( $_wp_submenu_nopriv['tools.php'][ PERFLAB_SERVER_TIMING_SCREEN ] ) );
+		$hook_suffix = get_plugin_page_hookname( PERFLAB_SERVER_TIMING_SCREEN, 'tools.php' );
+		$this->assertFalse( has_action( "load-{$hook_suffix}", 'perflab_load_server_timing_page' ) );
+		perflab_add_server_timing_page();
+		$this->assertSame( 10, has_action( "load-{$hook_suffix}", 'perflab_load_server_timing_page' ) );
+		$this->assertArrayNotHasKey( 'tools.php', $_wp_submenu_nopriv );
 	}
 
+	/**
+	 * @covers ::perflab_add_server_timing_page
+	 */
 	public function test_perflab_add_server_timing_page_missing_caps() {
 		global $_wp_submenu_nopriv;
 
@@ -34,9 +42,12 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		remove_all_filters( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ) );
 
 		// The default user does not have the 'manage_options' capability.
-		$hook_suffix = perflab_add_server_timing_page();
-		$this->assertFalse( $hook_suffix );
-		$this->assertTrue( isset( $_wp_submenu_nopriv['tools.php'][ PERFLAB_SERVER_TIMING_SCREEN ] ) );
+		$hook_suffix = get_plugin_page_hookname( PERFLAB_SERVER_TIMING_SCREEN, 'tools.php' );
+		$this->assertFalse( has_action( "load-{$hook_suffix}", 'perflab_load_server_timing_page' ) );
+		perflab_add_server_timing_page();
+		$this->assertFalse( has_action( "load-{$hook_suffix}", 'perflab_load_server_timing_page' ) );
+		$this->assertArrayHasKey( 'tools.php', $_wp_submenu_nopriv );
+		$this->assertArrayHasKey( PERFLAB_SERVER_TIMING_SCREEN, $_wp_submenu_nopriv['tools.php'] );
 	}
 
 	public function test_perflab_load_server_timing_page() {
