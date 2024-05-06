@@ -699,6 +699,7 @@ function webp_uploads_wepb_fallback() {
 	// Get mime type transforms for the site.
 	$transforms   = webp_uploads_get_upload_image_mime_transforms();
 	$image_format = get_option( 'perflab_modern_image_format' );
+	$image_format = empty( $image_format ) ? 'webp' : $image_format;
 
 	// We need to add fallback only if jpeg alternatives for the image_format images are enabled for the server.
 	$preserve_jpegs_for_jpeg_transforms       = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/' . $image_format, $transforms['image/jpeg'], true );
@@ -735,7 +736,7 @@ function webp_uploads_wepb_fallback() {
 		i.onerror = function() {
 			d.body.appendChild( s );
 		};
-	} )( document, 'img', 'script', <?php echo wp_json_encode( $detection_string ) ); ?> );
+	} )( document, 'img', 'script', <?php echo wp_json_encode( $detection_string ); ?> );
 	<?php
 	$javascript = ob_get_clean();
 
