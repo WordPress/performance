@@ -348,7 +348,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 }
 
 /**
- * Helper function that checks if a mime type is supported by the server.
+ * Checks if a mime type is supported by the server.
  *
  * Includes special handling for false positives on AVIF support.
  *
