@@ -367,7 +367,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 			}
 
 			$intermediate_file = str_replace( $basename, $properties['file'], $file );
-			if ( empty( $intermediate_file ) ) {
+			if ( ! $intermediate_file ) {
 				continue;
 			}
 
@@ -399,7 +399,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 		}
 
 		$full_size = str_replace( $basename, $properties['file'], $file );
-		if ( empty( $full_size ) ) {
+		if ( ! $full_size ) {
 			continue;
 		}
 
