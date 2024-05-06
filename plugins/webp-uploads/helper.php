@@ -364,7 +364,7 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 	}
 
 	// In certain server environments GD can report a false positive for AVIF support, see https://github.com/php/php-src/issues/12197.
-	// To ensure the server actually supports AVIF, test for the function used by core..
+	// To ensure the server actually supports AVIF, test for the function used by core.
 	if ( 'image/avif' === $mime_type ) {
 		return function_exists( 'imageavif' );
 	}
