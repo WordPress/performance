@@ -692,7 +692,7 @@ function webp_uploads_wepb_fallback() {
 	?>
 	( function( d, i, s, p ) {
 		s = d.createElement( s );
-		s.src = '<?php echo esc_url_raw( plugins_url( '/fallback.js', __FILE__ ) ); ?>';
+		s.src = <?php echo wp_json_encode( esc_url_raw( plugins_url( '/fallback.js', __FILE__ ) ) ); ?>;
 
 		i = d.createElement( i );
 		i.src = p;
