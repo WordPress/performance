@@ -719,12 +719,10 @@ function webp_uploads_wepb_fallback() {
 		return;
 	}
 
-	ob_start();
-
-	?>
-	( function( d, i, s, p ) {
+	$js_function = <<<JS
+	function webpUploadsDetectFallback( d, i, s, p, fallbackSrc ) {
 		s = d.createElement( s );
-		s.src = <?php echo wp_json_encode( esc_url_raw( plugins_url( '/fallback.js', __FILE__ ) ) ); ?>;
+		s.src = fallbackSrc;
 
 		i = d.createElement( i );
 		i.src = p;
@@ -736,12 +734,16 @@ function webp_uploads_wepb_fallback() {
 		i.onerror = function() {
 			d.body.appendChild( s );
 		};
-	} )( document, 'img', 'script', <?php echo wp_json_encode( $detection_string ); ?> );
-	<?php
-	$javascript = ob_get_clean();
+	}
+	JS;
 
 	wp_print_inline_script_tag(
-		preg_replace( '/\s+/', '', $javascript ),
+		sprintf(
+			'( %s )( "document", "img", "script", %s, %s )',
+			preg_replace( '/\s+/', '', $js_function ),
+			wp_json_encode( $detection_string ),
+			wp_json_encode( plugins_url( '/fallback.js', __FILE__ ) )
+		),
 		array(
 			'id'            => 'webpUploadsFallbackWebpImages',
 			'data-rest-api' => esc_url_raw( trailingslashit( get_rest_url() ) ),
