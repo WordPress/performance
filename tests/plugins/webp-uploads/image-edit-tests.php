@@ -489,9 +489,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$this->assertIsArray( $backup_sources );
 		$this->assertCount( 2, $backup_sources );
 		foreach ( array_keys( $backup_sources ) as $name ) {
-			if ( 'full-orig' === $name ) {
-				$this->assertSame( 'full-orig', $name );
-			} else {
+			if ( 'full-orig' !== $name ) {
 				$this->assertSizeNameIsHashed( '', $name );
 			}
 		}

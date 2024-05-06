@@ -164,7 +164,6 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Make sure perflab_aea_add_enqueued_assets_test adds the right information.
 	 */
 	public function test_perflab_aea_add_enqueued_assets_test() {
-		$this->assertIsArray( perflab_aea_add_enqueued_assets_test( array() ) );
 		$this->assertEqualSets(
 			perflab_aea_add_enqueued_assets_test( array() ),
 			Site_Health_Mock_Responses::return_added_test_info_site_health()

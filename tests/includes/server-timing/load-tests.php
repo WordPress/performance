@@ -16,7 +16,6 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		$this->assertTrue( has_filter( 'template_include' ) );
 
 		$server_timing = perflab_server_timing();
-		$this->assertInstanceOf( Perflab_Server_Timing::class, $server_timing );
 		$this->assertSame( PHP_INT_MAX, has_filter( 'template_include', array( $server_timing, 'on_template_include' ) ), 'template_include filter not added' );
 
 		$server_timing2 = perflab_server_timing();
