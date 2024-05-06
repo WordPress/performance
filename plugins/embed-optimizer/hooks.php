@@ -83,7 +83,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 				if ( $style ) {
 					// WordPress core injects this clip CSS property:
 					// <https://github.com/WordPress/wordpress-develop/blob/6974b994de5/src/wp-includes/embed.php#L968>.
-					$style = str_replace( 'clip: rect(1px, 1px, 1px, 1px);', 'opacity: 0; pointer-events: none;', $style );
+					$style = str_replace( 'clip: rect(1px, 1px, 1px, 1px);', 'visibility: hidden;', $style );
 
 					// Note: wp-embed.js removes the style attribute entirely when the iframe is loaded:
 					// <https://github.com/WordPress/wordpress-develop/blob/6974b994d/src/js/_enqueues/wp/embed.js#L60>.
