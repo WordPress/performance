@@ -21,17 +21,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                Currently includes AVIF and WebP.
  */
 function webp_uploads_register_media_settings_field() {
-	if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
-		register_setting(
-			'media',
-			'perflab_modern_image_format',
-			array(
-				'type'         => 'string',
-				'default'      => 'avif', // AVIF is the default if the editor supports it.
-				'show_in_rest' => false,
-			)
-		);
-	}
+	register_setting(
+		'media',
+		'perflab_modern_image_format',
+		array(
+			'type'         => 'string',
+			'default'      => 'avif', // AVIF is the default if the editor supports it.
+			'show_in_rest' => false,
+		)
+	);
 
 	register_setting(
 		'media',
