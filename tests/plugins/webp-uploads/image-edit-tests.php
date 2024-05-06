@@ -36,8 +36,12 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 
-		$this->assertNotEmpty( $backup_sizes );
 		$this->assertIsArray( $backup_sizes );
+		$this->assertArrayHasKey( 'full-orig', $backup_sizes );
+		$this->assertArrayHasKey( 'thumbnail-orig', $backup_sizes );
+		$this->assertArrayHasKey( 'medium-orig', $backup_sizes );
+		$this->assertArrayHasKey( 'medium_large-orig', $backup_sizes );
+		$this->assertArrayHasKey( 'large-orig', $backup_sizes );
 
 		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 		$this->assertIsArray( $backup_sources );

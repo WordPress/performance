@@ -81,7 +81,7 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		$this->assertTrue( isset( $settings[ PERFLAB_SERVER_TIMING_SETTING ] ) );
 
 		// Assert that the setting is allowlisted for the relevant screen.
-		$this->assertTrue( isset( $new_allowed_options[ PERFLAB_SERVER_TIMING_SCREEN ] ) );
+		$this->assertArrayHasKey( PERFLAB_SERVER_TIMING_SCREEN, $new_allowed_options );
 		$this->assertSame( array( PERFLAB_SERVER_TIMING_SETTING ), $new_allowed_options[ PERFLAB_SERVER_TIMING_SCREEN ] );
 
 		$expected_default = array(
