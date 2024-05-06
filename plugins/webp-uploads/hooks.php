@@ -553,27 +553,7 @@ add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
  * @return string The updated img tag.
  */
 function webp_uploads_img_tag_update_mime_type( $original_image, $context, $attachment_id ) {
-	$image = $original_image;
-
-	/**
-	 * Metadata potentially amended by webp_uploads_create_sources_property().
-	 *
-	 * Note the sources key is not normally present in the response for wp_get_attachment_metadata(). The sources
-	 * key here, however, is being injected via the 'wp_generate_attachment_metadata' filter via the
-	 * webp_uploads_create_sources_property() function.
-	 *
-	 * @see webp_uploads_create_sources_property()
-	 *
-	 * @var array{
-	 *          width: int,
-	 *          height: int,
-	 *          file: non-falsy-string,
-	 *          sizes: array,
-	 *          image_meta: array,
-	 *          filesize: int,
-	 *          sources?: array<string, array{ file: string, filesize: int }>
-	 *      } $metadata
-	 */
+	$image    = $original_image;
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 
 	if ( empty( $metadata['file'] ) ) {

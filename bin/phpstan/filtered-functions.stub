@@ -1,0 +1,32 @@
+<?php
+/**
+ * Functions with filtered return values that extend what core returns.
+ *
+ * @package performance-lab
+ */
+
+/**
+ * Retrieves attachment metadata for attachment ID.
+ *
+ * This is a wrapper for {@see wp_get_attachment_metadata()} to add the typing which is augmented by the
+ * `wp_generate_attachment_metadata` via {@see dominant_color_metadata()} and {@see webp_uploads_create_sources_property()}.
+ *
+ * @since 2.1.0
+ * @since 6.0.0 The `$filesize` value was added to the returned array.
+ *
+ * @param int $attachment_id Attachment post ID. Defaults to global $post.
+ * @param bool $unfiltered    Optional. If true, filters are not run. Default false.
+ *
+ * @return array{
+ *     width: int,
+ *     height: int,
+ *     file: string,
+ *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
+ *     image_meta: array<string, mixed>,
+ *     filesize: int,
+ *     sources?: array<string, array{ file: string, filesize: int }>,
+ *     has_transparency?: bool,
+ *     dominant_color?: string
+ * }|null Attachment metadata. Null on failure.
+ */
+function wp_get_attachment_metadata( int $attachment_id = 0, bool $unfiltered = false ): ?array {}
