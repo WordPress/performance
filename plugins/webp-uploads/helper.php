@@ -358,7 +358,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
  *
  * @return bool Whether the server supports a given mime type.
  */
-function webp_uploads_mime_type_supported( $mime_type ) {
+function webp_uploads_mime_type_supported( string $mime_type ): bool {
 	if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 		return false;
 	}
