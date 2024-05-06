@@ -80,14 +80,15 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
 function webp_uploads_generate_avif_webp_setting_callback() {
 
 	$selected = get_option( 'perflab_modern_image_format' );
+	$avif_supported = webp_uploads_mime_type_supported( 'image/avif' );
 	?>
 			<label for="perflab_modern_image_format">
 				<select name="perflab_modern_image_format" id="perflab_modern_image_format" aria-describedby="perflab_modern_image_format_description">
 					<option value="webp"<?php selected( 'webp', $selected ); ?>><?php esc_html_e( 'WebP', 'webp-uploads' ); ?></option>
-					<option value="avif"<?php selected( 'avif', $selected ); ?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
+					<option value="avif"<?php selected( 'avif', $selected ); echo $avif_supported ? '' : ' disabled';?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
 				</select>
 				<?php esc_html_e( 'Generate images in this format', 'webp-uploads' ); ?>
-			</label>
+				</label>
 		<p class="description" id="perflab_modern_image_format_description"><?php esc_html_e( 'Select the format to use when generating new images from uploaded JPEGs.', 'webp-uploads' ); ?></p>
 	<?php
 }
