@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                           }
  * @phpstan-type Data        array{
  *                               url: string,
- *                               timestamp: int,
+ *                               timestamp: float,
  *                               viewport: RectData,
  *                               elements: ElementData[]
  *                           }

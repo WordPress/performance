@@ -47,7 +47,7 @@ if ( ! function_exists( 'perflab_load_server_timing_api_from_dropin' ) ) {
 	 *
 	 * @since 1.8.0
 	 */
-	function perflab_load_server_timing_api_from_dropin() {
+	function perflab_load_server_timing_api_from_dropin(): void {
 		if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING ) {
 			return;
 		}

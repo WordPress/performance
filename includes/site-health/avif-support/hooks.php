@@ -15,10 +15,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since n.e.x.t
  *
- * @param array $tests Site Health Tests.
- * @return array
+ * @param array{direct: array<string, array{label: string, test: string}>} $tests Site Health Tests.
+ * @return array{direct: array<string, array{label: string, test: string}>} Amended tests.
  */
-function avif_uploads_add_is_avif_supported_test( $tests ) {
+function avif_uploads_add_is_avif_supported_test( array $tests ): array {
 	$tests['direct']['avif_supported'] = array(
 		'label' => __( 'AVIF Support', 'performance-lab' ),
 		'test'  => 'avif_uploads_check_avif_supported_test',

@@ -15,10 +15,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @param array $tests Site Health Tests.
- * @return array
+ * @param array{direct: array<string, array{label: string, test: string}>} $tests Site Health Tests.
+ * @return array{direct: array<string, array{label: string, test: string}>} Amended tests.
  */
-function webp_uploads_add_is_webp_supported_test( $tests ) {
+function webp_uploads_add_is_webp_supported_test( array $tests ): array {
 	$tests['direct']['webp_supported'] = array(
 		'label' => __( 'WebP Support', 'performance-lab' ),
 		'test'  => 'webp_uploads_check_webp_supported_test',

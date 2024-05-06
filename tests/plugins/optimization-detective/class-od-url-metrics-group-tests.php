@@ -15,7 +15,7 @@ class OD_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 	 * Data provider.
 	 *
 	 * @throws OD_Data_Validation_Exception If bad arguments are provided to OD_URL_Metric.
-	 * @return array
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_construction(): array {
 		return array(
@@ -98,8 +98,15 @@ class OD_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 	 * @covers ::count
 	 *
 	 * @dataProvider data_provider_test_construction
+	 *
+	 * @param OD_URL_Metric[] $url_metrics URL Metrics.
+	 * @param int             $minimum_viewport_width Minimum viewport width.
+	 * @param int             $maximum_viewport_width Maximum viewport width.
+	 * @param int             $sample_size Sample size.
+	 * @param int             $freshness_ttl Freshness TTL.
+	 * @param string          $exception Expected exception.
 	 */
-	public function test_construction( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl, string $exception ) {
+	public function test_construction( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl, string $exception ): void {
 		if ( $exception ) {
 			$this->expectException( $exception );
 		}
@@ -115,7 +122,7 @@ class OD_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_is_viewport_width_in_range(): array {
 		return array(
@@ -151,8 +158,12 @@ class OD_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 	 * @covers ::is_viewport_width_in_range
 	 *
 	 * @dataProvider data_provider_test_is_viewport_width_in_range
+	 *
+	 * @param int              $minimum_viewport_width Minimum viewport width.
+	 * @param int              $maximum_viewport_width Maximum viewport width.
+	 * @param array<int, bool> $viewport_widths_expected Viewport widths expected.
 	 */
-	public function test_is_viewport_width_in_range( int $minimum_viewport_width, int $maximum_viewport_width, array $viewport_widths_expected ) {
+	public function test_is_viewport_width_in_range( int $minimum_viewport_width, int $maximum_viewport_width, array $viewport_widths_expected ): void {
 		$group = new OD_URL_Metrics_Group( array(), $minimum_viewport_width, $maximum_viewport_width, 3, HOUR_IN_SECONDS );
 		foreach ( $viewport_widths_expected as $viewport_width => $expected ) {
 			$this->assertSame( $expected, $group->is_viewport_width_in_range( $viewport_width ), "Failed for viewport width of $viewport_width" );
@@ -162,7 +173,7 @@ class OD_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_add_url_metric(): array {
 		return array(
@@ -183,7 +194,7 @@ class OD_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_test_add_url_metric
 	 */
-	public function test_add_url_metric( int $viewport_width, string $exception ) {
+	public function test_add_url_metric( int $viewport_width, string $exception ): void {
 		if ( $exception ) {
 			$this->expectException( $exception );
 		}
