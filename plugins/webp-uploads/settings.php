@@ -109,7 +109,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback() {
 			<input name="perflab_generate_webp_and_jpeg" type="checkbox" id="perflab_generate_webp_and_jpeg" aria-describedby="perflab_generate_webp_and_jpeg_description" value="1"<?php checked( '1', get_option( 'perflab_generate_webp_and_jpeg' ) ); ?> />
 			<?php esc_html_e( 'Output JPEG images in addition to the modern format', 'webp-uploads' ); ?>
 		</label>
-		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG in addition to AVIF or WebP can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
+		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
 	<?php
 }
 
