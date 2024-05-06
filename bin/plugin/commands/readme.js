@@ -9,14 +9,13 @@ const fs = require( 'fs' );
  */
 const { log, formats } = require( '../lib/logger' );
 const config = require( '../config' );
-const { getModuleData } = require( './common' );
 const { getChangelog } = require( './changelog' );
 
 /**
  * @typedef WPReadmeCommandOptions
  *
- * @property {string=} directory Optional directory, default is the root `/modules` directory.
  * @property {string=} milestone Optional milestone title, to update the changelog in the readme.
+ * @property {string=} path      Optional path to the readme.txt file to update. If omitted, it will be detected via --milestone.
  * @property {string=} token     Optional personal GitHub access token, only relevant for changelog updates.
  */
 
@@ -25,19 +24,20 @@ const { getChangelog } = require( './changelog' );
  *
  * @property {string}  owner     GitHub repository owner.
  * @property {string}  repo      GitHub repository name.
- * @property {string}  directory Modules directory.
  * @property {string=} milestone Optional milestone title, to update the changelog in the readme.
+ * @property {string=} path      Optional path to the readme.txt file to update.
  * @property {string=} token     Optional personal GitHub access token, only relevant for changelog updates.
  */
 
 exports.options = [
 	{
-		argname: '-d, --directory <directory>',
-		description: 'Modules directory',
-	},
-	{
 		argname: '-m, --milestone <milestone>',
 		description: 'Milestone title, to update the changelog',
+	},
+	{
+		argname: '-p, --path <path>',
+		description:
+			'Path to the readme.txt file to update; if omitted, it will be detected via --milestone',
 	},
 	{
 		argname: '-t, --token <token>',
@@ -54,44 +54,36 @@ exports.handler = async ( opt ) => {
 	await updateReadme( {
 		owner: config.githubRepositoryOwner,
 		repo: config.githubRepositoryName,
-		directory: opt.directory || 'modules',
 		milestone: opt.milestone,
+		path: opt.path,
 		token: opt.token,
 	} );
 };
 
 /**
- * Returns a promise resolving to the module description list string for the `readme.txt` file.
+ * Detects the path to the readme.txt file to update based on the milestone title.
  *
- * @param {WPReadmeSettings} settings Readme settings.
+ * @param {string} milestone Milestone title.
  *
- * @return {Promise<string>} Promise resolving to module description list in markdown, with trailing newline.
+ * @return {string} Detected readme.txt path.
  */
-async function getModuleDescriptionList( settings ) {
-	const modulesData = await getModuleData( settings.directory );
+function detectReadmePath( milestone ) {
+	const slug = milestone.match( /^([a-z0-9-]+) / );
+	if ( ! slug ) {
+		throw new Error(
+			`The ${ milestone } milestone does not start with a valid plugin slug.`
+		);
+	}
 
-	return modulesData
-		.map(
-			( moduleData ) =>
-				`* **${ moduleData.name }:** ${ moduleData.description }`
-		)
-		.join( '\n' )
-		.concat( '\n' );
-}
+	if ( 'performance-lab' === slug[ 1 ] ) {
+		return 'readme.txt';
+	}
 
-/**
- * Updates the `readme.txt` file with the given module description list.
- *
- * @param {string} moduleList Module description list in markdown, with trailing newline.
- */
-function updateReadmeModuleDescriptionList( moduleList ) {
-	const readmeFile = path.join( '.', 'readme.txt' );
-	const fileContent = fs.readFileSync( readmeFile, 'utf8' );
-	const newContent = fileContent.replace(
-		/(the following performance modules:\s+)((\*.*\n)+)/,
-		( match, prefix ) => `${ prefix }${ moduleList }`
-	);
-	fs.writeFileSync( readmeFile, newContent );
+	if ( ! fs.existsSync( path.join( '.', `plugins/${ slug[ 1 ] }` ) ) ) {
+		throw new Error( `Unknown plugin with slug '${ slug[ 1 ] }'` );
+	}
+
+	return `plugins/${ slug[ 1 ] }/readme.txt`;
 }
 
 /**
@@ -101,9 +93,19 @@ function updateReadmeModuleDescriptionList( moduleList ) {
  * @param {WPReadmeSettings} settings  Readme settings.
  */
 function updateReadmeChangelog( changelog, settings ) {
-	const regex = new RegExp( `= ${ settings.milestone } =[^=]+` );
+	// Detect the version number to replace it in readme changelog, if already present.
+	const version = settings.milestone.match(
+		/\d+\.\d+(\.\d+)?(-[A-Za-z0-9.]+)?$/
+	);
+	if ( ! version ) {
+		throw new Error(
+			`The ${ settings.milestone } milestone does not end with a version number.`
+		);
+	}
 
-	const readmeFile = path.join( '.', 'readme.txt' );
+	const regex = new RegExp( `= ${ version[ 0 ] } =[^=]+` );
+
+	const readmeFile = path.join( '.', settings.path );
 	const fileContent = fs.readFileSync( readmeFile, 'utf8' );
 
 	let newContent;
@@ -124,7 +126,7 @@ function updateReadmeChangelog( changelog, settings ) {
 }
 
 /**
- * Updates the `readme.txt` file with latest module description list and optionally a specific release changelog.
+ * Updates the `readme.txt` file with a specific release changelog.
  *
  * @param {WPReadmeSettings} settings Readme settings.
  */
@@ -132,29 +134,15 @@ async function updateReadme( settings ) {
 	if ( settings.milestone ) {
 		log(
 			formats.title(
-				`\n💃Updating readme.txt for "${ settings.directory }" and changelog for milestone "${ settings.milestone }"\n\n`
+				`\n💃Updating readme.txt changelog for milestone "${ settings.milestone }"\n\n`
 			)
 		);
-	} else {
-		log(
-			formats.title(
-				`\n💃Updating readme.txt for "${ settings.directory }"\n\n`
-			)
-		);
-	}
 
-	try {
-		const moduleList = await getModuleDescriptionList( settings );
-		updateReadmeModuleDescriptionList( moduleList );
-	} catch ( error ) {
-		if ( error instanceof Error ) {
-			log( formats.error( error.stack ) );
-			return;
-		}
-	}
-
-	if ( settings.milestone ) {
 		try {
+			if ( ! settings.path ) {
+				settings.path = detectReadmePath( settings.milestone );
+			}
+
 			const changelog = await getChangelog( {
 				owner: settings.owner,
 				repo: settings.repo,
@@ -168,7 +156,8 @@ async function updateReadme( settings ) {
 				return;
 			}
 		}
+		log(
+			formats.success( `\n💃${ settings.path } successfully updated\n\n` )
+		);
 	}
-
-	log( formats.success( `\n💃readme.txt successfully updated\n\n` ) );
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings functions used for Speculation Rules.
+ * Settings functions used for Speculative Loading.
  *
  * @package speculation-rules
  * @since 1.0.0
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Returns the available options for the Speculation Rules mode and their labels.
+ * Returns the available options for the Speculative Loading mode and their labels.
  *
  * @since 1.0.0
  *
@@ -26,7 +26,7 @@ function plsr_get_mode_labels() {
 }
 
 /**
- * Returns the available options for the Speculation Rules eagerness and their labels.
+ * Returns the available options for the Speculative Loading eagerness and their labels.
  *
  * @since 1.0.0
  *
@@ -41,7 +41,7 @@ function plsr_get_eagerness_labels() {
 }
 
 /**
- * Returns the default setting value for Speculation Rules configuration.
+ * Returns the default setting value for Speculative Loading configuration.
  *
  * @since 1.0.0
  *
@@ -60,7 +60,7 @@ function plsr_get_setting_default() {
 }
 
 /**
- * Sanitizes the setting for Speculation Rules configuration.
+ * Sanitizes the setting for Speculative Loading configuration.
  *
  * @since 1.0.0
  *
@@ -97,7 +97,7 @@ function plsr_sanitize_setting( $input ) {
 }
 
 /**
- * Registers setting to control Speculation Rules configuration.
+ * Registers setting to control Speculative Loading configuration.
  *
  * @since 1.0.0
  * @access private
@@ -133,7 +133,7 @@ function plsr_register_setting() {
 add_action( 'init', 'plsr_register_setting' );
 
 /**
- * Adds the settings sections and fields for the Speculation Rules configuration.
+ * Adds the settings sections and fields for the Speculative Loading configuration.
  *
  * @since 1.0.0
  * @access private
@@ -141,7 +141,7 @@ add_action( 'init', 'plsr_register_setting' );
 function plsr_add_setting_ui() {
 	add_settings_section(
 		'plsr_speculation_rules',
-		__( 'Speculation Rules', 'speculation-rules' ),
+		__( 'Speculative Loading', 'speculation-rules' ),
 		static function () {
 			?>
 			<p class="description">
@@ -149,7 +149,11 @@ function plsr_add_setting_ui() {
 			</p>
 			<?php
 		},
-		'reading'
+		'reading',
+		array(
+			'before_section' => '<div id="speculative-loading">',
+			'after_section'  => '</div>',
+		)
 	);
 
 	$fields = array(
@@ -179,7 +183,7 @@ function plsr_add_setting_ui() {
 add_action( 'load-options-reading.php', 'plsr_add_setting_ui' );
 
 /**
- * Renders a settings field for the Speculation Rules configuration.
+ * Renders a settings field for the Speculative Loading configuration.
  *
  * @since 1.0.0
  * @access private
@@ -236,3 +240,29 @@ function plsr_render_settings_field( array $args ) {
 	</fieldset>
 	<?php
 }
+
+/**
+ * Adds a settings link to the plugin's action links.
+ *
+ * @since 1.2.1
+ *
+ * @param string[]|mixed $links An array of plugin action links.
+ * @return string[]|mixed The modified list of actions.
+ */
+function plsr_add_settings_action_link( $links ) {
+	if ( ! is_array( $links ) ) {
+		return $links;
+	}
+
+	return array_merge(
+		array(
+			'settings' => sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( admin_url( 'options-reading.php#speculative-loading' ) ),
+				esc_html__( 'Settings', 'speculation-rules' )
+			),
+		),
+		$links
+	);
+}
+add_filter( 'plugin_action_links_' . SPECULATION_RULES_MAIN_FILE, 'plsr_add_settings_action_link' );

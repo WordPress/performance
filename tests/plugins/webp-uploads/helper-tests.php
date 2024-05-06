@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for webp-uploads module helper.php.
+ * Tests for webp-uploads plugin helper.php.
  *
  * @package webp-uploads
  */

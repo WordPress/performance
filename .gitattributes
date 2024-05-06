@@ -10,6 +10,7 @@
 /tests export-ignore
 /plugin-tests export-ignore
 /plugins export-ignore
+/plugins.json export-ignore
 
 /*.DS_store export-ignore
 /.DS_store? export-ignore
@@ -23,9 +24,9 @@
 /package.json export-ignore
 /package-lock.json export-ignore
 phpcs.xml.dist export-ignore
-/phpcs.ruleset.xml export-ignore
 /phpstan.neon.dist export-ignore
 /phpunit.xml.dist export-ignore
+/webpack.config.js export-ignore
 
 /CONTRIBUTING.md export-ignore
 /SECURITY.md export-ignore

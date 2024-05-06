@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for speculation-rules module.
+ * Tests for speculation-rules plugin.
  *
  * @package speculation-rules
  */
@@ -17,6 +17,11 @@ class Speculation_Rules_Tests extends WP_UnitTestCase {
 	public function tear_down() {
 		$GLOBALS['_wp_theme_features'] = $this->original_wp_theme_features;
 		parent::tear_down();
+	}
+
+	public function test_hooks() {
+		$this->assertSame( 10, has_action( 'wp_footer', 'plsr_print_speculation_rules' ) );
+		$this->assertSame( 10, has_action( 'wp_head', 'plsr_render_generator_meta_tag' ) );
 	}
 
 	public function data_provider_to_test_print_speculation_rules(): array {
@@ -49,11 +54,23 @@ class Speculation_Rules_Tests extends WP_UnitTestCase {
 		$this->assertIsArray( $rules );
 		$this->assertArrayHasKey( 'prerender', $rules );
 
-		// Make sure that theme support was restored. This is only relevant to WordPres 6.4 per https://core.trac.wordpress.org/ticket/60320.
-		if ( $html5_support || version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.4', '<' ) ) {
+		// Make sure that theme support was restored. This is only relevant to WordPress 6.4 per https://core.trac.wordpress.org/ticket/60320.
+		if ( $html5_support ) {
 			$this->assertStringNotContainsString( '/* <![CDATA[ */', wp_get_inline_script_tag( '/*...*/' ) );
 		} else {
 			$this->assertStringContainsString( '/* <![CDATA[ */', wp_get_inline_script_tag( '/*...*/' ) );
 		}
+	}
+
+	/**
+	 * Test printing the meta generator tag.
+	 *
+	 * @covers ::plsr_render_generator_meta_tag
+	 */
+	public function test_plsr_render_generator_meta_tag() {
+		$tag = get_echo( 'plsr_render_generator_meta_tag' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'generator', $tag );
+		$this->assertStringContainsString( 'speculation-rules ' . SPECULATION_RULES_VERSION, $tag );
 	}
 }

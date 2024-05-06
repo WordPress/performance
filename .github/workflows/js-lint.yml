@@ -16,10 +16,6 @@ on:
       - '**/package.json'
       - 'package-lock.json'
   pull_request:
-    branches:
-      - trunk
-      - 'release/**'
-      - 'feature/**'
     # Only run if JS/JSON/Lint/NVM files changed.
     paths:
       - '.github/workflows/js-lint.yml'
@@ -41,10 +37,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: styfle/cancel-workflow-action@0.11.0
-      - uses: actions/checkout@v3
+      - uses: styfle/cancel-workflow-action@0.12.1
+      - uses: actions/checkout@v4
       - name: Setup Node.js (via .nvmrc)
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: npm

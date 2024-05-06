@@ -14,10 +14,6 @@ on:
       - 'composer.json'
       - 'composer.lock'
   pull_request:
-    branches:
-      - trunk
-      - 'release/**'
-      - 'feature/**'
     # Only run if PHP-related files changed.
     paths:
       - '.github/workflows/php-lint.yml'
@@ -37,8 +33,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: styfle/cancel-workflow-action@0.11.0
-      - uses: actions/checkout@v3
+      - uses: styfle/cancel-workflow-action@0.12.1
+      - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
           php-version: latest

@@ -1,22 +1,28 @@
 /**
  * External dependencies
  */
+const fs = require( 'fs' );
 const path = require( 'path' );
 const glob = require( 'fast-glob' );
-const fs = require( 'fs' );
 
 /**
  * Internal dependencies
  */
-const { log, formats } = require( '../lib/logger' );
+const { plugins } = require( '../../../plugins.json' );
 
 /**
  * @typedef WPSinceCommandOptions
  *
- * @property {string} version Version number.
+ * @property {string} plugin  Plugin slug.
+ * @property {string} release Release version number.
  */
 
 exports.options = [
+	{
+		argname: '-p, --plugin <plugin>',
+		description: 'Plugin slug',
+		defaults: 'performance-lab',
+	},
 	{
 		argname: '-r, --release <release>',
 		description: 'Release version number',
@@ -30,21 +36,41 @@ exports.options = [
  */
 exports.handler = async ( opt ) => {
 	if ( ! opt.release ) {
-		log(
-			formats.error(
-				'The release version must be provided via the --release (-r) argument.'
-			)
+		throw new Error(
+			'The release version must be provided via the --release (-r) argument.'
 		);
-		return;
 	}
 
-	const patterns = [
-		path.resolve( __dirname, '../../../**/*.php' ),
-		path.resolve( __dirname, '../../../**/*.js' ),
-	];
+	if (
+		opt.plugin !== 'performance-lab' &&
+		! plugins.includes( opt.plugin )
+	) {
+		throw new Error(
+			`The plugin "${ opt.plugin }" is not a valid plugin managed as part of this project.`
+		);
+	}
+
+	const patterns = [];
+	const pluginRoot = path.resolve( __dirname, '../../../' );
+	const ignore = [ '**/node_modules', '**/vendor', '**/bin', '**/build' ];
+
+	/*
+	 * For a standalone plugin, use the specific plugin directory.
+	 * For Performance Lab, use the root directory and ignore the standalone plugin directories.
+	 */
+	if ( opt.plugin !== 'performance-lab' ) {
+		const pluginPath = path.resolve( pluginRoot, 'plugins', opt.plugin );
+
+		patterns.push( `${ pluginPath }/**/*.php` );
+		patterns.push( `${ pluginPath }/**/*.js` );
+	} else {
+		ignore.push( '**/plugins' );
+		patterns.push( `${ pluginRoot }/**/*.php` );
+		patterns.push( `${ pluginRoot }/**/*.js` );
+	}
 
 	const files = await glob( patterns, {
-		ignore: [ __filename, '**/node_modules', '**/vendor' ],
+		ignore,
 	} );
 
 	const regexp = new RegExp( '@since(\\s+)n.e.x.t', 'g' );

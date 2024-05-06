@@ -5,6 +5,11 @@
  */
 const program = require( 'commander' );
 
+/**
+ * Internal dependencies
+ */
+const { formats } = require( './lib/logger' );
+
 const withOptions = ( command, options ) => {
 	options.forEach( ( { description, argname, defaults } ) => {
 		command = command.option( argname, description, defaults );
@@ -17,7 +22,7 @@ const catchException = ( handler ) => {
 		try {
 			await handler( ...args );
 		} catch ( error ) {
-			console.error( error ); // eslint-disable-line no-console
+			console.error( formats.error( error.message ) ); // eslint-disable-line no-console
 			process.exitCode = 1;
 		}
 	};
@@ -34,30 +39,6 @@ const {
 	handler: readmeHandler,
 	options: readmeOptions,
 } = require( './commands/readme' );
-const {
-	handler: translationsHandler,
-	options: translationsOptions,
-} = require( './commands/translations' );
-const {
-	handler: buildPluginsHandler,
-	options: buildPluginsOptions,
-} = require( './commands/build-plugins' );
-const {
-	handler: testPluginsHandler,
-	options: testPluginsOptions,
-} = require( './commands/test-plugins' );
-const {
-	handler: getPluginVersionHandler,
-	options: getPluginVersionOptions,
-} = require( './commands/get-plugin-version' );
-const {
-	handler: getPluginDirHandler,
-	options: getPluginDirOptions,
-} = require( './commands/get-plugin-dir' );
-const {
-	handler: enabledModulesHandler,
-	options: enabledModulesOptions,
-} = require( './commands/enabled-modules' );
 const {
 	handler: sinceHandler,
 	options: sinceOptions,
@@ -77,46 +58,5 @@ withOptions( program.command( 'plugin-readme' ), readmeOptions )
 	.alias( 'readme' )
 	.description( 'Updates the readme.txt file' )
 	.action( catchException( readmeHandler ) );
-
-withOptions( program.command( 'module-translations' ), translationsOptions )
-	.alias( 'translations' )
-	.description(
-		'Generates a PHP file from module header translation strings'
-	)
-	.action( catchException( translationsHandler ) );
-
-withOptions(
-	program.command( 'build-standalone-plugins' ),
-	buildPluginsOptions
-)
-	.alias( 'build-plugins' )
-	.description( 'Build standalone plugins' )
-	.action( catchException( buildPluginsHandler ) );
-
-withOptions( program.command( 'test-standalone-plugins' ), testPluginsOptions )
-	.alias( 'test-plugins' )
-	.description( 'Test standalone plugins' )
-	.action( catchException( testPluginsHandler ) );
-
-withOptions(
-	program.command( 'get-standalone-plugin-version' ),
-	getPluginVersionOptions
-)
-	.alias( 'get-plugin-version' )
-	.description( 'Get standalone plugin version' )
-	.action( catchException( getPluginVersionHandler ) );
-
-withOptions( program.command( 'get-plugin-dir' ), getPluginDirOptions )
-	.alias( 'get-plugin-directory' )
-	.description( 'Get plugin directory' )
-	.action( catchException( getPluginDirHandler ) );
-
-withOptions(
-	program.command( 'default-enabled-modules' ),
-	enabledModulesOptions
-)
-	.alias( 'enabled-modules' )
-	.description( 'Generates a PHP file with non-experimental module slugs' )
-	.action( catchException( enabledModulesHandler ) );
 
 program.parse( process.argv );

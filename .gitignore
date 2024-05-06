@@ -23,8 +23,7 @@ nbproject/
 
 build
 .wp-env.override.json
-build-cs/vendor/
-build-cs/composer.lock
+*.asset.php
 
 ############
 ## Vendor
@@ -32,6 +31,7 @@ build-cs/composer.lock
 
 node_modules/
 vendor/
+plugins/optimization-detective/detection/web-vitals*
 
 ############
 ## OSes
