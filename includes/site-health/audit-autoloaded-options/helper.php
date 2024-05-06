@@ -118,7 +118,7 @@ function perflab_aao_autoloaded_options_size(): int {
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
- * @return array<string, object{option_name: string, option_value_length: int}> Autoloaded data as option names and their sizes.
+ * @return array<object{option_name: string, option_value_length: int}> Autoloaded data as option names and their sizes.
  */
 function perflab_aao_query_autoloaded_options(): array {
 
