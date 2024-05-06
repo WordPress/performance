@@ -11,6 +11,10 @@
 class Server_Timing_Load_Tests extends WP_UnitTestCase {
 
 	public function test_perflab_server_timing() {
+		$this->assertSame( 10, has_action( 'wp_loaded', 'perflab_server_timing_init' ) );
+		perflab_server_timing_init(); // Already called during bootstrap.
+		$this->assertTrue( has_filter( 'template_include' ) );
+
 		$server_timing = perflab_server_timing();
 		$this->assertInstanceOf( Perflab_Server_Timing::class, $server_timing );
 		$this->assertSame( PHP_INT_MAX, has_filter( 'template_include', array( $server_timing, 'on_template_include' ) ), 'template_include filter not added' );
