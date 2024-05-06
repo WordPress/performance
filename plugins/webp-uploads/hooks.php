@@ -704,7 +704,7 @@ function webp_uploads_wepb_fallback() {
 		i.onerror = function() {
 			d.body.appendChild( s );
 		};
-	} )( document, 'img', 'script', '<?php echo esc_html( $detection_string ); ?>' );
+	} )( document, 'img', 'script', <?php echo wp_json_encode( $detection_string ) ); ?> );
 	<?php
 	$javascript = ob_get_clean();
 
