@@ -53,21 +53,31 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_register_metric_runs_measure_callback_based_on_access_cap() {
-		$called = false;
-		$args   = array(
-			'measure_callback' => static function () use ( &$called ) {
-				$called = true;
-			},
-			'access_cap'       => 'manage_options', // Admin capability.
+		$called     = false;
+		$access_cap = 'manage_options'; // Admin capability.
+		$this->server_timing->register_metric(
+			'test-metric',
+			array(
+				'measure_callback' => static function () use ( &$called ) {
+					$called = true;
+				},
+				'access_cap'       => $access_cap,
+			)
 		);
-
-		$this->server_timing->register_metric( 'test-metric', $args );
 
 		$this->assertTrue( $this->server_timing->has_registered_metric( 'test-metric' ), 'Metric without cap should still be registered' );
 		$this->assertFalse( $called, 'Measure callback without cap must not be run' );
 
 		wp_set_current_user( self::$admin_id );
-		$this->server_timing->register_metric( 'test-metric-2', $args );
+		$this->server_timing->register_metric(
+			'test-metric-2',
+			array(
+				'measure_callback' => static function () use ( &$called ) {
+					$called = true;
+				},
+				'access_cap'       => $access_cap,
+			)
+		);
 
 		$this->assertTrue( $this->server_timing->has_registered_metric( 'test-metric-2' ), 'Metric with cap should be registered' );
 		$this->assertTrue( $called, 'Measure callback with cap should be run' );
