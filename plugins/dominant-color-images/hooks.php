@@ -16,15 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @param array|mixed $metadata      The attachment metadata.
- * @param int         $attachment_id The attachment ID.
- * @return array{ has_transparency?: bool, dominant_color?: string } The amended attachment metadata.
+ * @param array $metadata      The attachment metadata.
+ * @param int   $attachment_id The attachment ID.
+ * @return array $metadata The attachment metadata.
  */
-function dominant_color_metadata( $metadata, int $attachment_id ): array {
-	if ( ! is_array( $metadata ) ) {
-		$metadata = array();
-	}
-
+function dominant_color_metadata( $metadata, $attachment_id ) {
 	$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 	if ( ! is_wp_error( $dominant_color_data ) ) {
 		if ( isset( $dominant_color_data['dominant_color'] ) ) {
@@ -41,31 +37,6 @@ function dominant_color_metadata( $metadata, int $attachment_id ): array {
 add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 );
 
 /**
- * Retrieves attachment metadata for attachment ID.
- *
- * This is a wrapper for {@see wp_get_attachment_metadata()} to add the typing which is augmented by the
- * `wp_generate_attachment_metadata` via {@see dominant_color_metadata()}.
- *
- * @since n.e.x.t
- *
- * @param int $attachment_id Attachment post ID. Defaults to global $post.
- * @return array{
- *     width: int,
- *     height: int,
- *     file: string,
- *     sizes: array,
- *     image_meta: array,
- *     filesize: int,
- *     has_transparency?: bool,
- *     dominant_color?: string
- * }|null Attachment metadata. Null on failure.
- */
-function dominant_color_get_attachment_metadata( int $attachment_id = 0 ): ?array {
-	$metadata = wp_get_attachment_metadata( $attachment_id );
-	return is_array( $metadata ) ? $metadata : null;
-}
-
-/**
  * Filters various image attributes to add the dominant color to the image.
  *
  * @since 1.0.0
@@ -75,7 +46,7 @@ function dominant_color_get_attachment_metadata( int $attachment_id = 0 ): ?arra
  * @return mixed $attr Attributes for the image markup.
  */
 function dominant_color_update_attachment_image_attributes( $attr, $attachment ) {
-	$image_meta = dominant_color_get_attachment_metadata( $attachment->ID );
+	$image_meta = wp_get_attachment_metadata( $attachment->ID );
 	if ( ! is_array( $image_meta ) ) {
 		return $attr;
 	}
@@ -129,7 +100,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 		return $filtered_image;
 	}
 
-	$image_meta = dominant_color_get_attachment_metadata( $attachment_id );
+	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $image_meta ) ) {
 		return $filtered_image;
 	}
