@@ -52,17 +52,15 @@ add_action( 'init', 'webp_uploads_register_media_settings_field' );
  */
 function webp_uploads_add_media_settings_field() {
 
-	// If AVIF is supported, add a dropdown to select the output format between AVIF and WebP.
-	if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
-		add_settings_field(
-			'perflab_modern_image_format',
-			__( 'Modern image format', 'webp-uploads' ),
-			'webp_uploads_generate_avif_webp_setting_callback',
-			'media',
-			is_multisite() ? 'default' : 'uploads',
-			array( 'class' => 'perflab-generate-avif-and-webp' )
-		);
-	}
+	// Add a dropdown to select the output format between AVIF and WebP output.
+	add_settings_field(
+		'perflab_modern_image_format',
+		__( 'Modern image format', 'webp-uploads' ),
+		'webp_uploads_generate_avif_webp_setting_callback',
+		'media',
+		is_multisite() ? 'default' : 'uploads',
+		array( 'class' => 'perflab-generate-avif-and-webp' )
+	);
 
 	// Add settings field.
 	add_settings_field(
