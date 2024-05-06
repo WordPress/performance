@@ -367,7 +367,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 			}
 
 			$intermediate_file = str_replace( $basename, $properties['file'], $file );
-			if ( empty( $intermediate_file ) ) {
+			if ( ! $intermediate_file ) {
 				continue;
 			}
 
@@ -399,7 +399,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 		}
 
 		$full_size = str_replace( $basename, $properties['file'], $file );
-		if ( empty( $full_size ) ) {
+		if ( ! $full_size ) {
 			continue;
 		}
 
@@ -542,30 +542,6 @@ function webp_uploads_update_image_references( $content ) {
 add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
 
 /**
- * Retrieves attachment metadata for attachment ID.
- *
- * This is a wrapper for {@see wp_get_attachment_metadata()} to add the typing which is augmented by the
- * `wp_generate_attachment_metadata` via {@see webp_uploads_create_sources_property()}.
- *
- * @since n.e.x.t
- *
- * @param int $attachment_id Attachment post ID. Defaults to global $post.
- * @return array{
- *     width: int,
- *     height: int,
- *     file: string,
- *     sizes: array,
- *     image_meta: array,
- *     filesize: int,
- *     sources?: array<string, array{ file: string, filesize: int }>
- * }|null Attachment metadata. Null on failure.
- */
-function webp_uploads_get_attachment_metadata( int $attachment_id = 0 ): ?array {
-	$metadata = wp_get_attachment_metadata( $attachment_id );
-	return is_array( $metadata ) ? $metadata : null;
-}
-
-/**
  * Finds all the urls with *.jpg and *.jpeg extension and updates with *.webp version for the provided image
  * for the specified image sizes, the *.webp references are stored inside of each size.
  *
@@ -578,7 +554,7 @@ function webp_uploads_get_attachment_metadata( int $attachment_id = 0 ): ?array 
  */
 function webp_uploads_img_tag_update_mime_type( $original_image, $context, $attachment_id ) {
 	$image    = $original_image;
-	$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+	$metadata = wp_get_attachment_metadata( $attachment_id );
 
 	if ( empty( $metadata['file'] ) ) {
 		return $image;

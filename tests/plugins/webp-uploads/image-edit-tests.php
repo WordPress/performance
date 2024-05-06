@@ -24,7 +24,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	public function it_should_backup_the_sources_structure_alongside_the_full_size() {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertEmpty( get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true ) );
 		$this->assertEmpty( get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
 
@@ -55,7 +55,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 			$this->assertSame( $metadata['sizes'][ $size_name ]['sources'], $properties['sources'] );
 		}
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 	}
 
 	/**
@@ -69,7 +69,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		}
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
-		$metadata      = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		$editor = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
@@ -85,7 +85,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 
-		$metadata               = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata               = wp_get_attachment_metadata( $attachment_id );
 		$updated_backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 
 		$this->assertSame( $backup_sources['full-orig'], $metadata['sources'] );
@@ -123,7 +123,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
-		$metadata      = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertArrayNotHasKey( 'sources', $metadata );
 
@@ -156,7 +156,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$this->opt_in_to_jpeg_and_webp();
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
-		$metadata      = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$this->assertArrayHasKey( 'sources', $metadata );
 
 		$editor = new WP_Image_Edit( $attachment_id );
@@ -172,7 +172,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$this->assertArrayHasKey( 'thumbnail-orig', $backup_sizes );
 		$this->assertArrayHasKey( 'sources', $backup_sizes['thumbnail-orig'] );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
@@ -208,7 +208,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		}
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
-		$metadata      = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		$editor = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_left()->all_except_thumbnail()->save();
@@ -219,7 +219,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$this->assertArrayHasKey( 'full-orig', $backup_sources );
 		$this->assertSame( $metadata['sources'], $backup_sources['full-orig'] );
 
-		$updated_metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$updated_metadata = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertArrayHasKey( 'sources', $updated_metadata );
 		$this->assertNotSame( $metadata['sources'], $updated_metadata['sources'] );
@@ -272,7 +272,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 		$this->assertTrue( $editor->success() );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertArrayHasKey( 'original_image', $metadata );
 		$this->assertArrayHasKey( 'sources', $metadata );
@@ -319,7 +319,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertFileNameIsEdited( $metadata['sources']['image/webp']['file'] );
 
