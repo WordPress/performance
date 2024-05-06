@@ -90,6 +90,18 @@ function webp_uploads_generate_avif_webp_setting_callback() {
 				<?php esc_html_e( 'Generate images in this format', 'webp-uploads' ); ?>
 				</label>
 		<p class="description" id="perflab_modern_image_format_description"><?php esc_html_e( 'Select the format to use when generating new images from uploaded JPEGs.', 'webp-uploads' ); ?></p>
+		<?php
+			// Alert users if they lack AVIF support using a wp-admin notice.
+			if( ! $avif_supported ) {
+				?>
+				<br />
+				<div class="notice notice-warning is-dismissible inline">
+					<p><b><?php esc_html_e( 'AVIF support is not available.' );?></b></p>
+					<p><?php esc_html_e( 'AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
+				</div>
+				<?php
+			}
+		?>
 	<?php
 }
 
