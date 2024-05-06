@@ -19,15 +19,22 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 */
 	private $original_request_method;
 
+	/**
+	 * @var string
+	 */
+	private $default_mimetype;
+
 	public function set_up() {
 		$this->original_request_uri    = $_SERVER['REQUEST_URI'];
 		$this->original_request_method = $_SERVER['REQUEST_METHOD'];
+		$this->default_mimetype        = ini_get( 'default_mimetype' );
 		parent::set_up();
 	}
 
 	public function tear_down() {
 		$_SERVER['REQUEST_URI']    = $this->original_request_uri;
 		$_SERVER['REQUEST_METHOD'] = $this->original_request_method;
+		ini_set( 'default_mimetype', $this->default_mimetype ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 		unset( $GLOBALS['wp_customize'] );
 		parent::tear_down();
 	}
@@ -37,7 +44,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_buffer_output
 	 */
-	public function test_od_buffer_output() {
+	public function test_od_buffer_output(): void {
 		$original = 'Hello World!';
 		$expected = '¡Hola Mundo!';
 
@@ -69,7 +76,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_maybe_add_template_output_buffer_filter
 	 */
-	public function test_od_maybe_add_template_output_buffer_filter() {
+	public function test_od_maybe_add_template_output_buffer_filter(): void {
 		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
 
 		add_filter( 'od_can_optimize_response', '__return_false', 1 );
@@ -83,11 +90,25 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 		od_maybe_add_template_output_buffer_filter();
 		$this->assertTrue( has_filter( 'od_template_output_buffer' ) );
 	}
+	/**
+	 * Test od_maybe_add_template_output_buffer_filter().
+	 *
+	 * @covers ::od_maybe_add_template_output_buffer_filter
+	 */
+	public function test_od_maybe_add_template_output_buffer_filter_with_query_var_to_disable() {
+		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
+
+		add_filter( 'od_can_optimize_response', '__return_true' );
+		$this->go_to( home_url( '/?optimization_detective_disabled=1' ) );
+		$this->assertTrue( od_can_optimize_response() );
+		od_maybe_add_template_output_buffer_filter();
+		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
+	}
 
 	/**
 	 * Data provider.
 	 *
-	 * @return array
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_od_can_optimize_response(): array {
 		return array(
@@ -152,7 +173,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_test_od_can_optimize_response
 	 */
-	public function test_od_can_optimize_response( Closure $set_up, bool $expected ) {
+	public function test_od_can_optimize_response( Closure $set_up, bool $expected ): void {
 		$set_up();
 		$this->assertSame( $expected, od_can_optimize_response() );
 	}
@@ -160,7 +181,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array[]
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_od_construct_preload_links(): array {
 		return array(
@@ -298,8 +319,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 * @covers ::od_construct_preload_links
 	 *
 	 * @dataProvider data_provider_test_od_construct_preload_links
+	 *
+	 * @param array<int, mixed> $lcp_elements_by_minimum_viewport_widths LCP elements by minimum viewport widths.
+	 * @param string            $expected Expected return value.
 	 */
-	public function test_od_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths, string $expected ) {
+	public function test_od_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths, string $expected ): void {
 		$this->assertSame(
 			$this->normalize_whitespace( $expected ),
 			$this->normalize_whitespace( od_construct_preload_links( $lcp_elements_by_minimum_viewport_widths ) )
@@ -309,7 +333,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array[]
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_od_optimize_template_output_buffer(): array {
 		return array(
@@ -333,7 +357,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -341,7 +365,9 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'no-url-metrics-with-data-url-background-image' => array(
-				'set_up'   => static function () {},
+				'set_up'   => static function () {
+					ini_set( 'default_mimetype', 'text/html; charset=utf-8' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+				},
 				// Smallest PNG courtesy of <https://evanhahn.com/worlds-smallest-png/>.
 				'buffer'   => '
 					<html lang="en">
@@ -439,11 +465,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 									$viewport_width,
 									array(
 										array(
-											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 											'isLCP' => true,
 										),
 										array(
-											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 											'isLCP' => false,
 										),
 									)
@@ -491,7 +517,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 									$viewport_width,
 									array(
 										array(
-											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 											'isLCP' => true,
 										),
 									)
@@ -539,7 +565,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 									$viewport_width,
 									array(
 										array(
-											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::DIV]',
 											'isLCP' => true,
 										),
 									)
@@ -601,7 +627,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 									$viewport_width,
 									array(
 										array(
-											'xpath' => "/*[0][self::HTML]/*[1][self::BODY]/*[{$div_index}][self::DIV]",
+											'xpath' => sprintf( '/*[1][self::HTML]/*[2][self::BODY]/*[%d][self::DIV]', $div_index + 1 ),
 											'isLCP' => true,
 										),
 									)
@@ -656,7 +682,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 									array(
 										array(
 											'isLCP' => true,
-											'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 										),
 									)
 								)
@@ -698,7 +724,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 							)
 						)
@@ -729,7 +755,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						</head>
 						<!--</head>-->
 						<body>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
 							<!--</body>-->
 							<script type="module">/* import detect ... */</script>
 						</body>
@@ -747,11 +773,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -763,11 +789,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -794,8 +820,8 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-logo.png" media="screen and (min-width: 783px)">
 						</head>
 						<body>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -818,11 +844,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -834,11 +860,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -850,11 +876,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -866,11 +892,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -897,8 +923,8 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-logo.png" media="screen and (min-width: 601px) and (max-width: 782px)">
 						</head>
 						<body>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -921,11 +947,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -937,11 +963,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -953,11 +979,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => true,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -969,11 +995,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							array(
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 								),
 								array(
 									'isLCP' => false,
-									'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[1][self::IMG]',
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
 								),
 							)
 						)
@@ -1000,9 +1026,72 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" media="screen and (min-width: 481px) and (max-width: 600px)">
 						</head>
 						<body>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
 							<p>New paragraph since URL Metrics were captured!</p>
-							<img data-od-xpath="/*[0][self::HTML]/*[1][self::BODY]/*[2][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+							<script type="module">/* import detect ... */</script>
+						</body>
+					</html>
+				',
+			),
+
+			'rss-response'                                => array(
+				'set_up'   => static function () {
+					ini_set( 'default_mimetype', 'application/rss+xml' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+				},
+				'buffer'   => '<?xml version="1.0" encoding="UTF-8"?>
+					<rss version="2.0">
+						<channel>
+							<title>Example Blog</title>
+							<link>https://www.example.com</link>
+							<description>
+								<img src="https://www.example.com/logo.jpg" alt="Example Blog Logo" />
+								A blog about technology, design, and culture.
+							</description>
+							<language>en-us</language>
+						</channel>
+					</rss>
+				',
+				'expected' => '<?xml version="1.0" encoding="UTF-8"?>
+					<rss version="2.0">
+						<channel>
+							<title>Example Blog</title>
+							<link>https://www.example.com</link>
+							<description>
+								<img src="https://www.example.com/logo.jpg" alt="Example Blog Logo" />
+								A blog about technology, design, and culture.
+							</description>
+							<language>en-us</language>
+						</channel>
+					</rss>
+				',
+			),
+
+			'xhtml-response'                              => array(
+				'set_up'   => static function () {
+					ini_set( 'default_mimetype', 'application/xhtml+xml; charset=utf-8' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+				},
+				'buffer'   => '<?xml version="1.0" encoding="UTF-8"?>
+					<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+					<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+						<head>
+						  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+						  <title>XHTML 1.0 Strict Example</title>
+						</head>
+						<body>
+							<p><img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" /></p>
+						</body>
+					</html>
+				',
+				'expected' => '<?xml version="1.0" encoding="UTF-8"?>
+					<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+					<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+						<head>
+						  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
+						  <title>XHTML 1.0 Strict Example</title>
+						</head>
+						<body>
+							<p><img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::P]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" /></p>
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -1015,10 +1104,11 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 * Test od_optimize_template_output_buffer().
 	 *
 	 * @covers ::od_optimize_template_output_buffer
+	 * @covers ::od_is_response_html_content_type
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
 	 */
-	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ) {
+	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ): void {
 		$set_up();
 
 		$remove_initial_tabs = static function ( string $input ): string {
@@ -1050,7 +1140,8 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	/**
 	 * Gets a validated URL metric.
 	 *
-	 * @param int $viewport_width Viewport width for the URL metric.
+	 * @param int                                      $viewport_width Viewport width for the URL metric.
+	 * @param array<array{xpath: string, isLCP: bool}> $elements       Elements.
 	 * @return OD_URL_Metric URL metric.
 	 * @throws Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
@@ -1066,8 +1157,16 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 				static function ( array $element ): array {
 					return array_merge(
 						array(
-							'isLCPCandidate'    => true,
-							'intersectionRatio' => 1,
+							'isLCPCandidate'     => true,
+							'intersectionRatio'  => 1,
+							'intersectionRect'   => array(
+								'width'  => 100,
+								'height' => 100,
+							),
+							'boundingClientRect' => array(
+								'width'  => 100,
+								'height' => 100,
+							),
 						),
 						$element
 					);

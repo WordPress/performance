@@ -59,6 +59,11 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( 123, $wrapped(), 'Calling wrapped callback multiple times should not result in warning' );
 	}
 
+	/**
+	 * @covers ::perflab_get_server_timing_setting_default_value
+	 * @covers ::perflab_register_server_timing_setting
+	 * @covers ::perflab_sanitize_server_timing_setting
+	 */
 	public function test_perflab_register_server_timing_setting() {
 		global $new_allowed_options, $wp_registered_settings;
 
@@ -76,12 +81,19 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		$this->assertTrue( isset( $new_allowed_options[ PERFLAB_SERVER_TIMING_SCREEN ] ) );
 		$this->assertSame( array( PERFLAB_SERVER_TIMING_SETTING ), $new_allowed_options[ PERFLAB_SERVER_TIMING_SCREEN ] );
 
+		$expected_default = array(
+			'benchmarking_actions' => array(),
+			'benchmarking_filters' => array(),
+			'output_buffering'     => false,
+		);
+		$this->assertSame( $expected_default, perflab_get_server_timing_setting_default_value() );
+
 		// Assert that registered default works correctly.
-		$this->assertSame( array(), get_option( PERFLAB_SERVER_TIMING_SETTING ) );
+		$this->assertSame( $expected_default, get_option( PERFLAB_SERVER_TIMING_SETTING ) );
 
 		// Assert that most basic sanitization works correctly (an array is required).
 		update_option( PERFLAB_SERVER_TIMING_SETTING, 'invalid' );
-		$this->assertSame( array(), get_option( PERFLAB_SERVER_TIMING_SETTING ) );
+		$this->assertSame( $expected_default, get_option( PERFLAB_SERVER_TIMING_SETTING ) );
 	}
 
 	/**
@@ -96,74 +108,104 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 	}
 
 	public function data_perflab_sanitize_server_timing_setting() {
+		$default = array(
+			'benchmarking_actions' => array(),
+			'benchmarking_filters' => array(),
+			'output_buffering'     => false,
+		);
+
 		return array(
 			'invalid type'                                => array(
 				'invalid',
-				array(),
+				$default,
 			),
 			'empty list, array'                           => array(
 				array( 'benchmarking_actions' => array() ),
-				array(
-					'benchmarking_actions' => array(),
-					'output_buffering'     => false,
+				array_merge(
+					$default,
+					array(
+						'benchmarking_actions' => array(),
+						'output_buffering'     => false,
+					)
 				),
 			),
 			'empty list, string'                          => array(
 				array( 'benchmarking_actions' => '' ),
-				array(
-					'benchmarking_actions' => array(),
-					'output_buffering'     => false,
+				array_merge(
+					$default,
+					array(
+						'benchmarking_actions' => array(),
+						'output_buffering'     => false,
+					)
 				),
 			),
 			'empty list, string with whitespace'          => array(
 				array( 'benchmarking_actions' => ' ' ),
-				array(
-					'benchmarking_actions' => array(),
-					'output_buffering'     => false,
+				array_merge(
+					$default,
+					array(
+						'benchmarking_actions' => array(),
+						'output_buffering'     => false,
+					)
 				),
 			),
 			'regular list, array'                         => array(
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
-				array(
-					'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ),
-					'output_buffering'     => false,
+				array_merge(
+					$default,
+					array(
+						'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ),
+						'output_buffering'     => false,
+					)
 				),
 			),
 			'regular list, string'                        => array(
 				array( 'benchmarking_actions' => "after_setup_theme\ninit\nwp_loaded" ),
-				array(
-					'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ),
-					'output_buffering'     => false,
+				array_merge(
+					$default,
+					array(
+						'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ),
+						'output_buffering'     => false,
+					)
 				),
 			),
 			'regular list, string with whitespace'        => array(
 				array( 'benchmarking_actions' => "after_setup_  theme \ninit \n\nwp_loaded\n" ),
-				array(
-					'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ),
-					'output_buffering'     => false,
+				array_merge(
+					$default,
+					array(
+						'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ),
+						'output_buffering'     => false,
+					)
 				),
 			),
 			'regular list, array with duplicates'         => array(
 				array( 'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded', 'init' ) ),
-				array(
-					'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ),
-					'output_buffering'     => false,
+				array_merge(
+					$default,
+					array(
+						'benchmarking_actions' => array( 'after_setup_theme', 'init', 'wp_loaded' ),
+						'output_buffering'     => false,
+					)
 				),
 			),
 			'regular list, array with special hook chars' => array(
 				array( 'benchmarking_actions' => array( 'namespace/hookname', 'namespace.hookname' ) ),
-				array(
-					'benchmarking_actions' => array( 'namespace/hookname', 'namespace.hookname' ),
-					'output_buffering'     => false,
+				array_merge(
+					$default,
+					array(
+						'benchmarking_actions' => array( 'namespace/hookname', 'namespace.hookname' ),
+						'output_buffering'     => false,
+					)
 				),
 			),
 			'output buffering enabled'                    => array(
 				array( 'output_buffering' => 'on' ),
-				array( 'output_buffering' => true ),
+				array_merge( $default, array( 'output_buffering' => true ) ),
 			),
 			'regular list, disallowed key'                => array(
 				array( 'not_allowed' => array( 'after_setup_theme', 'init', 'wp_loaded' ) ),
-				array( 'output_buffering' => false ),
+				array_merge( $default, array( 'output_buffering' => false ) ),
 			),
 		);
 	}

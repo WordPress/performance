@@ -44,7 +44,7 @@ class Perflab_Server_Timing_Metric {
 	 *
 	 * @param string $slug The metric slug.
 	 */
-	public function __construct( $slug ) {
+	public function __construct( string $slug ) {
 		$this->slug = $slug;
 	}
 
@@ -55,7 +55,7 @@ class Perflab_Server_Timing_Metric {
 	 *
 	 * @return string The metric slug.
 	 */
-	public function get_slug() {
+	public function get_slug(): string {
 		return $this->slug;
 	}
 
@@ -67,9 +67,9 @@ class Perflab_Server_Timing_Metric {
 	 *
 	 * @since 1.8.0
 	 *
-	 * @param int|float $value The metric value to set, in milliseconds.
+	 * @param int|float|mixed $value The metric value to set, in milliseconds.
 	 */
-	public function set_value( $value ) {
+	public function set_value( $value ): void {
 		if ( ! is_numeric( $value ) ) {
 			_doing_it_wrong(
 				__METHOD__,
@@ -110,14 +110,14 @@ class Perflab_Server_Timing_Metric {
 	}
 
 	/**
-	 * Captures the current time, as a reference point to calculate the duration of a task afterwards.
+	 * Captures the current time, as a reference point to calculate the duration of a task afterward.
 	 *
 	 * This should be used in combination with {@see Perflab_Server_Timing_Metric::measure_after()}. Alternatively,
 	 * {@see Perflab_Server_Timing_Metric::set_value()} can be used to set a calculated value manually.
 	 *
 	 * @since 1.8.0
 	 */
-	public function measure_before() {
+	public function measure_before(): void {
 		$this->before_value = microtime( true );
 	}
 
@@ -129,7 +129,7 @@ class Perflab_Server_Timing_Metric {
 	 *
 	 * @since 1.8.0
 	 */
-	public function measure_after() {
+	public function measure_after(): void {
 		if ( ! $this->before_value ) {
 			_doing_it_wrong(
 				__METHOD__,

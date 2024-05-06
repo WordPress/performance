@@ -338,7 +338,7 @@ final class OD_HTML_Tag_Walker {
 	public function get_xpath(): string {
 		$xpath = '';
 		foreach ( $this->get_breadcrumbs() as list( $tag_name, $index ) ) {
-			$xpath .= sprintf( '/*[%d][self::%s]', $index, $tag_name );
+			$xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
 		}
 		return $xpath;
 	}

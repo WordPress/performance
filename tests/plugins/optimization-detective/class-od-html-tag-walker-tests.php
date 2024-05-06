@@ -16,6 +16,11 @@
  */
 class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed> Data.
+	 */
 	public function data_provider_sample_documents(): array {
 		return array(
 			'well-formed-html'   => array(
@@ -42,20 +47,20 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 				',
 				'open_tags' => array( 'HTML', 'HEAD', 'META', 'TITLE', 'SCRIPT', 'STYLE', 'BODY', 'IFRAME', 'P', 'BR', 'IMG', 'FORM', 'TEXTAREA', 'FOOTER' ),
 				'xpaths'    => array(
-					'/*[0][self::HTML]',
-					'/*[0][self::HTML]/*[0][self::HEAD]',
-					'/*[0][self::HTML]/*[0][self::HEAD]/*[0][self::META]',
-					'/*[0][self::HTML]/*[0][self::HEAD]/*[1][self::TITLE]',
-					'/*[0][self::HTML]/*[0][self::HEAD]/*[2][self::SCRIPT]',
-					'/*[0][self::HTML]/*[0][self::HEAD]/*[3][self::STYLE]',
-					'/*[0][self::HTML]/*[1][self::BODY]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IFRAME]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]/*[0][self::BR]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]/*[1][self::IMG]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[2][self::FORM]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[2][self::FORM]/*[0][self::TEXTAREA]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[3][self::FOOTER]',
+					'/*[1][self::HTML]',
+					'/*[1][self::HTML]/*[1][self::HEAD]',
+					'/*[1][self::HTML]/*[1][self::HEAD]/*[1][self::META]',
+					'/*[1][self::HTML]/*[1][self::HEAD]/*[2][self::TITLE]',
+					'/*[1][self::HTML]/*[1][self::HEAD]/*[3][self::SCRIPT]',
+					'/*[1][self::HTML]/*[1][self::HEAD]/*[4][self::STYLE]',
+					'/*[1][self::HTML]/*[2][self::BODY]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IFRAME]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]/*[1][self::BR]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]/*[2][self::IMG]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[3][self::FORM]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[3][self::FORM]/*[1][self::TEXTAREA]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[4][self::FOOTER]',
 				),
 			),
 			'foreign-elements'   => array(
@@ -81,19 +86,19 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 				',
 				'open_tags' => array( 'HTML', 'HEAD', 'BODY', 'SVG', 'G', 'PATH', 'CIRCLE', 'G', 'RECT', 'MATH', 'MN', 'MSPACE', 'MN' ),
 				'xpaths'    => array(
-					'/*[0][self::HTML]',
-					'/*[0][self::HTML]/*[0][self::HEAD]',
-					'/*[0][self::HTML]/*[1][self::BODY]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::SVG]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::SVG]/*[0][self::G]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::SVG]/*[0][self::G]/*[0][self::PATH]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::SVG]/*[0][self::G]/*[1][self::CIRCLE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::SVG]/*[0][self::G]/*[2][self::G]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::SVG]/*[0][self::G]/*[3][self::RECT]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::MATH]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::MATH]/*[0][self::MN]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::MATH]/*[1][self::MSPACE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::MATH]/*[2][self::MN]',
+					'/*[1][self::HTML]',
+					'/*[1][self::HTML]/*[1][self::HEAD]',
+					'/*[1][self::HTML]/*[2][self::BODY]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]/*[1][self::G]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]/*[1][self::G]/*[1][self::PATH]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]/*[1][self::G]/*[2][self::CIRCLE]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]/*[1][self::G]/*[3][self::G]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]/*[1][self::G]/*[4][self::RECT]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::MATH]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::MATH]/*[1][self::MN]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::MATH]/*[2][self::MSPACE]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::MATH]/*[3][self::MN]',
 				),
 			),
 			'closing-void-tag'   => array(
@@ -109,12 +114,12 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 				',
 				'open_tags' => array( 'HTML', 'HEAD', 'BODY', 'SPAN', 'BR', 'SPAN' ),
 				'xpaths'    => array(
-					'/*[0][self::HTML]',
-					'/*[0][self::HTML]/*[0][self::HEAD]',
-					'/*[0][self::HTML]/*[1][self::BODY]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::SPAN]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::BR]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[2][self::SPAN]',
+					'/*[1][self::HTML]',
+					'/*[1][self::HTML]/*[1][self::HEAD]',
+					'/*[1][self::HTML]/*[2][self::BODY]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SPAN]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::BR]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[3][self::SPAN]',
 				),
 			),
 			'void-tags'          => array(
@@ -150,30 +155,30 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 				',
 				'open_tags' => array( 'HTML', 'HEAD', 'BODY', 'AREA', 'BASE', 'BASEFONT', 'BGSOUND', 'BR', 'COL', 'EMBED', 'FRAME', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR', 'DIV', 'SPAN', 'EM' ),
 				'xpaths'    => array(
-					'/*[0][self::HTML]',
-					'/*[0][self::HTML]/*[0][self::HEAD]',
-					'/*[0][self::HTML]/*[1][self::BODY]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::AREA]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::BASE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[2][self::BASEFONT]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[3][self::BGSOUND]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[4][self::BR]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[5][self::COL]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[6][self::EMBED]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[7][self::FRAME]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[8][self::HR]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[9][self::IMG]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[10][self::INPUT]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[11][self::KEYGEN]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[12][self::LINK]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[13][self::META]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[14][self::PARAM]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[15][self::SOURCE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[16][self::TRACK]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[17][self::WBR]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[18][self::DIV]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[18][self::DIV]/*[0][self::SPAN]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[18][self::DIV]/*[0][self::SPAN]/*[0][self::EM]',
+					'/*[1][self::HTML]',
+					'/*[1][self::HTML]/*[1][self::HEAD]',
+					'/*[1][self::HTML]/*[2][self::BODY]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::AREA]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::BASE]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[3][self::BASEFONT]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[4][self::BGSOUND]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[5][self::BR]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[6][self::COL]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[7][self::EMBED]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[8][self::FRAME]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[9][self::HR]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[10][self::IMG]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[11][self::INPUT]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[12][self::KEYGEN]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[13][self::LINK]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[14][self::META]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[15][self::PARAM]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[16][self::SOURCE]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[17][self::TRACK]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[18][self::WBR]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[19][self::DIV]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[19][self::DIV]/*[1][self::SPAN]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[19][self::DIV]/*[1][self::SPAN]/*[1][self::EM]',
 				),
 			),
 			'optional-closing-p' => array(
@@ -222,73 +227,73 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 				',
 				'open_tags' => array( 'HTML', 'HEAD', 'BODY', 'P', 'P', 'EM', 'P', 'P', 'ADDRESS', 'P', 'ARTICLE', 'P', 'ASIDE', 'P', 'BLOCKQUOTE', 'P', 'DETAILS', 'P', 'DIV', 'P', 'DL', 'P', 'FIELDSET', 'P', 'FIGCAPTION', 'P', 'FIGURE', 'P', 'FOOTER', 'P', 'FORM', 'P', 'H1', 'P', 'H2', 'P', 'H3', 'P', 'H4', 'P', 'H5', 'P', 'H6', 'P', 'HEADER', 'P', 'HGROUP', 'P', 'HR', 'P', 'MAIN', 'P', 'MENU', 'P', 'NAV', 'P', 'OL', 'P', 'PRE', 'P', 'SEARCH', 'P', 'SECTION', 'P', 'TABLE', 'P', 'UL' ),
 				'xpaths'    => array(
-					'/*[0][self::HTML]',
-					'/*[0][self::HTML]/*[0][self::HEAD]',
-					'/*[0][self::HTML]/*[1][self::BODY]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::P]/*[0][self::EM]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::ADDRESS]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::ARTICLE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::ASIDE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::BLOCKQUOTE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DETAILS]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DL]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::FIELDSET]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::FIGCAPTION]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::FIGURE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::FOOTER]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::FORM]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::H1]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::H2]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::H3]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::H4]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::H5]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::H6]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::HEADER]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::HGROUP]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::HR]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::MAIN]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::MENU]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::NAV]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::OL]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::PRE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::SEARCH]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::SECTION]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::TABLE]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[1][self::P]',
-					'/*[0][self::HTML]/*[1][self::BODY]/*[0][self::UL]',
+					'/*[1][self::HTML]',
+					'/*[1][self::HTML]/*[1][self::HEAD]',
+					'/*[1][self::HTML]/*[2][self::BODY]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::P]/*[1][self::EM]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::ADDRESS]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::ARTICLE]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::ASIDE]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::BLOCKQUOTE]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::DETAILS]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::DIV]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::DL]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIELDSET]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGCAPTION]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FOOTER]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FORM]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::H1]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::H2]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::H3]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::H4]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::H5]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::H6]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::HEADER]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::HGROUP]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::HR]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::MAIN]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::MENU]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::NAV]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::OL]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::PRE]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SEARCH]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SECTION]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::TABLE]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::UL]',
 				),
 			),
 		);
@@ -301,8 +306,12 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	 * @covers ::get_xpath
 	 *
 	 * @dataProvider data_provider_sample_documents
+	 *
+	 * @param string   $document Document.
+	 * @param string[] $open_tags Open tags.
+	 * @param string[] $xpaths XPaths.
 	 */
-	public function test_open_tags_and_get_xpath( string $document, array $open_tags, array $xpaths ) {
+	public function test_open_tags_and_get_xpath( string $document, array $open_tags, array $xpaths ): void {
 		$p = new OD_HTML_Tag_Walker( $document );
 		$this->assertSame( '', $p->get_xpath(), 'Expected empty XPath since iteration has not started.' );
 		$actual_open_tags = array();
@@ -322,7 +331,7 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	 * @covers ::append_head_html
 	 * @covers OD_HTML_Tag_Processor::append_html
 	 */
-	public function test_append_head_html() {
+	public function test_append_head_html(): void {
 		$html     = '
 			<html>
 				<head>
@@ -370,7 +379,7 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	 * @covers ::append_body_html
 	 * @covers OD_HTML_Tag_Processor::append_html
 	 */
-	public function test_append_head_and_body_html() {
+	public function test_append_head_and_body_html(): void {
 		$html          = '
 			<html>
 				<head>
@@ -430,7 +439,7 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	 * @covers ::remove_attribute
 	 * @covers ::get_updated_html
 	 */
-	public function test_html_tag_processor_wrapper_methods() {
+	public function test_html_tag_processor_wrapper_methods(): void {
 		$processor = new OD_HTML_Tag_Walker( '<html lang="en" xml:lang="en"></html>' );
 		foreach ( $processor->open_tags() as $open_tag ) {
 			if ( 'HTML' === $open_tag ) {
@@ -444,6 +453,10 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Export an array as a PHP literal to use as a snapshot.
+	 *
+	 * @param array<int|string, mixed> $data Data.
+	 * @param bool                     $one_line One line.
+	 * @return string Snapshot.
 	 */
 	private function export_array_snapshot( array $data, bool $one_line = false ): string {
 		$php = preg_replace( '/^\s*\d+\s*=>\s*/m', '', var_export( $data, true ) );

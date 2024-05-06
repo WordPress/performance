@@ -15,9 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @return array
+ * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, actions: string, test: string} Result.
  */
-function perflab_aao_autoloaded_options_test() {
+function perflab_aao_autoloaded_options_test(): array {
 
 	$autoloaded_options_size  = perflab_aao_autoloaded_options_size();
 	$autoloaded_options_count = count( wp_load_alloptions() );
@@ -73,7 +73,7 @@ function perflab_aao_autoloaded_options_test() {
 	$result['description'] = apply_filters( 'perflab_aao_autoloaded_options_limit_description', $result['description'] );
 
 	$result['actions'] = sprintf(
-	/* translators: 1: HelpHub URL. 2: Link description. */
+		/* translators: 1: HelpHub URL. 2: Link description. */
 		'<p><a target="_blank" href="%1$s">%2$s</a></p>',
 		esc_url( __( 'https://wordpress.org/support/article/optimization/#autoloaded-options', 'performance-lab' ) ),
 		__( 'More info about performance optimization', 'performance-lab' )
@@ -99,7 +99,7 @@ function perflab_aao_autoloaded_options_test() {
  *
  * @return int autoloaded data in bytes.
  */
-function perflab_aao_autoloaded_options_size() {
+function perflab_aao_autoloaded_options_size(): int {
 	$all_options = wp_load_alloptions();
 
 	$total_length = 0;
@@ -118,9 +118,22 @@ function perflab_aao_autoloaded_options_size() {
  *
  * @global wpdb $wpdb WordPress database abstraction object.
  *
- * @return array Autoloaded data as option names and their sizes.
+ * @return array<string, object{option_name: string, option_value_length: int}> Autoloaded data as option names and their sizes.
  */
-function perflab_aao_query_autoloaded_options() {
+function perflab_aao_query_autoloaded_options(): array {
+
+	/**
+	 * Filters the threshold for an autoloaded option to be considered large.
+	 *
+	 * The Site Health report will show users a notice if any of their autoloaded
+	 * options exceed the threshold for being considered large. This filters the value
+	 * for what is considered a large option.
+	 *
+	 * @since 1.5.0
+	 *
+	 * @param int $option_threshold Threshold for an option's value to be considered
+	 *                              large, in bytes. Default 100.
+	 */
 	$option_threshold = apply_filters( 'perflab_aao_autoloaded_options_table_threshold', 100 );
 
 	$all_options = wp_load_alloptions();
@@ -153,7 +166,7 @@ function perflab_aao_query_autoloaded_options() {
  *
  * @return string HTML formatted table.
  */
-function perflab_aao_get_autoloaded_options_table() {
+function perflab_aao_get_autoloaded_options_table(): string {
 	$autoload_summary = perflab_aao_query_autoloaded_options();
 
 	$html_table = sprintf(
@@ -193,7 +206,7 @@ function perflab_aao_get_autoloaded_options_table() {
  *
  * @return string HTML formatted table.
  */
-function perflab_aao_get_disabled_autoloaded_options_table() {
+function perflab_aao_get_disabled_autoloaded_options_table(): string {
 	$disabled_options = get_option( 'perflab_aao_disabled_options', array() );
 
 	if ( empty( $disabled_options ) ) {
@@ -250,9 +263,9 @@ function perflab_aao_get_disabled_autoloaded_options_table() {
  *
  * @since 3.0.0
  *
- * @return array List of autoload values.
+ * @return string[] List of autoload values.
  */
-function perflab_aao_get_autoload_values_to_autoload() {
+function perflab_aao_get_autoload_values_to_autoload(): array {
 	if ( function_exists( 'wp_autoload_values_to_autoload' ) ) {
 		return wp_autoload_values_to_autoload();
 	}

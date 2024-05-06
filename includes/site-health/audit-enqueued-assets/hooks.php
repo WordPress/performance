@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @global WP_Scripts $wp_scripts
  */
-function perflab_aea_audit_enqueued_scripts() {
+function perflab_aea_audit_enqueued_scripts(): void {
 	if ( ! is_admin() && is_front_page() && current_user_can( 'view_site_health_checks' ) && false === get_transient( 'aea_enqueued_front_page_scripts' ) ) {
 		global $wp_scripts;
 		$enqueued_scripts = array();
@@ -64,7 +64,7 @@ add_action( 'wp_footer', 'perflab_aea_audit_enqueued_scripts', PHP_INT_MAX );
  *
  * @global WP_Styles $wp_styles The WP_Styles current instance.
  */
-function perflab_aea_audit_enqueued_styles() {
+function perflab_aea_audit_enqueued_styles(): void {
 	if ( ! is_admin() && is_front_page() && current_user_can( 'view_site_health_checks' ) && false === get_transient( 'aea_enqueued_front_page_styles' ) ) {
 		global $wp_styles;
 		$enqueued_styles = array();
@@ -108,10 +108,10 @@ add_action( 'wp_footer', 'perflab_aea_audit_enqueued_styles', PHP_INT_MAX );
  *
  * @since 1.0.0
  *
- * @param array $tests Site Health Tests.
- * @return array
+ * @param array{direct: array<string, array{label: string, test: string}>} $tests Site Health Tests.
+ * @return array{direct: array<string, array{label: string, test: string}>} Amended tests.
  */
-function perflab_aea_add_enqueued_assets_test( $tests ) {
+function perflab_aea_add_enqueued_assets_test( array $tests ): array {
 	$tests['direct']['enqueued_js_assets']  = array(
 		'label' => __( 'JS assets', 'performance-lab' ),
 		'test'  => 'perflab_aea_enqueued_js_assets_test',
@@ -131,7 +131,7 @@ add_filter( 'site_status_tests', 'perflab_aea_add_enqueued_assets_test' );
  *
  * @since 1.0.0
  */
-function perflab_aea_clean_aea_audit_action() {
+function perflab_aea_clean_aea_audit_action(): void {
 	if ( isset( $_GET['action'] ) && 'clean_aea_audit' === $_GET['action'] && current_user_can( 'view_site_health_checks' ) ) {
 		check_admin_referer( 'clean_aea_audit' );
 		perflab_aea_invalidate_cache_transients();
@@ -145,7 +145,7 @@ add_action( 'admin_init', 'perflab_aea_clean_aea_audit_action' );
  *
  * @since 1.0.0
  */
-function perflab_aea_invalidate_cache_transients() {
+function perflab_aea_invalidate_cache_transients(): void {
 	delete_transient( 'aea_enqueued_front_page_scripts' );
 	delete_transient( 'aea_enqueued_front_page_styles' );
 }

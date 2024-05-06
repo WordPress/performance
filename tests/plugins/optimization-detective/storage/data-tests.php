@@ -14,12 +14,12 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 */
 	private $original_request_uri;
 
-	public function set_up() {
+	public function set_up(): void {
 		$this->original_request_uri = $_SERVER['REQUEST_URI'];
 		parent::set_up();
 	}
 
-	public function tear_down() {
+	public function tear_down(): void {
 		$_SERVER['REQUEST_URI'] = $this->original_request_uri;
 		unset( $GLOBALS['wp_customize'] );
 		parent::tear_down();
@@ -30,7 +30,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_get_url_metric_freshness_ttl
 	 */
-	public function test_od_get_url_metric_freshness_ttl() {
+	public function test_od_get_url_metric_freshness_ttl(): void {
 		$this->assertSame( DAY_IN_SECONDS, od_get_url_metric_freshness_ttl() );
 
 		add_filter(
@@ -49,7 +49,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 * @expectedIncorrectUsage od_get_url_metric_freshness_ttl
 	 * @covers ::od_get_url_metric_freshness_ttl
 	 */
-	public function test_bad_od_get_url_metric_freshness_ttl() {
+	public function test_bad_od_get_url_metric_freshness_ttl(): void {
 		add_filter(
 			'od_url_metric_freshness_ttl',
 			static function (): int {
@@ -63,7 +63,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_od_get_normalized_query_vars(): array {
 		return array(
@@ -103,14 +103,14 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 					);
 				},
 			),
-			'404'          => array(
-				'set_up' => function () {
+			'not-found'    => array(
+				'set_up' => function (): array {
 					$this->go_to( home_url( '/?p=1000000' ) );
 					return array( 'error' => 404 );
 				},
 			),
 			'logged-in'    => array(
-				'set_up' => function () {
+				'set_up' => function (): array {
 					wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
 					$this->go_to( home_url( '/' ) );
 					return array( 'user_logged_in' => true );
@@ -126,7 +126,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_test_od_get_normalized_query_vars
 	 */
-	public function test_od_get_normalized_query_vars( Closure $set_up ) {
+	public function test_od_get_normalized_query_vars( Closure $set_up ): void {
 		$expected = $set_up();
 		$this->assertSame( $expected, od_get_normalized_query_vars() );
 	}
@@ -134,11 +134,11 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
 	public function data_provider_test_get_current_url(): array {
 		$assertions = array(
-			'path'                        => function () {
+			'path'                        => function (): void {
 				$_SERVER['REQUEST_URI'] = wp_slash( '/foo/' );
 				$this->assertEquals(
 					home_url( '/foo/' ),
@@ -146,7 +146,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 				);
 			},
 
-			'query'                       => function () {
+			'query'                       => function (): void {
 				$_SERVER['REQUEST_URI'] = wp_slash( '/bar/?baz=1' );
 				$this->assertEquals(
 					home_url( '/bar/?baz=1' ),
@@ -154,25 +154,25 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 				);
 			},
 
-			'idn_domain'                  => function () {
+			'idn_domain'                  => function (): void {
 				$this->set_home_url_with_filter( 'https://⚡️.example.com' );
 				$this->go_to( '/?s=lightning' );
 				$this->assertEquals( 'https://⚡️.example.com/?s=lightning', od_get_current_url() );
 			},
 
-			'punycode_domain'             => function () {
+			'punycode_domain'             => function (): void {
 				$this->set_home_url_with_filter( 'https://xn--57h.example.com' );
 				$this->go_to( '/?s=thunder' );
 				$this->assertEquals( 'https://xn--57h.example.com/?s=thunder', od_get_current_url() );
 			},
 
-			'ip_host'                     => function () {
+			'ip_host'                     => function (): void {
 				$this->set_home_url_with_filter( 'http://127.0.0.1:1234' );
 				$this->go_to( '/' );
 				$this->assertEquals( 'http://127.0.0.1:1234/', od_get_current_url() );
 			},
 
-			'permalink'                   => function () {
+			'permalink'                   => function (): void {
 				global $wp_rewrite;
 				update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
 				$wp_rewrite->use_trailing_slashes = true;
@@ -185,22 +185,22 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 				$this->assertEquals( $permalink, od_get_current_url() );
 			},
 
-			'unset_request_uri'           => function () {
+			'unset_request_uri'           => function (): void {
 				unset( $_SERVER['REQUEST_URI'] );
 				$this->assertEquals( home_url( '/' ), od_get_current_url() );
 			},
 
-			'empty_request_uri'           => function () {
+			'empty_request_uri'           => function (): void {
 				$_SERVER['REQUEST_URI'] = '';
 				$this->assertEquals( home_url( '/' ), od_get_current_url() );
 			},
 
-			'no_slash_prefix_request_uri' => function () {
+			'no_slash_prefix_request_uri' => function (): void {
 				$_SERVER['REQUEST_URI'] = 'foo/';
 				$this->assertEquals( home_url( '/foo/' ), od_get_current_url() );
 			},
 
-			'reconstructed_home_url'      => function () {
+			'reconstructed_home_url'      => function (): void {
 				$_SERVER['HTTPS']       = 'on';
 				$_SERVER['REQUEST_URI'] = '/about/';
 				$_SERVER['HTTP_HOST']   = 'foo.example.org';
@@ -211,7 +211,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 				);
 			},
 
-			'home_url_with_trimmings'     => function () {
+			'home_url_with_trimmings'     => function (): void {
 				$this->set_home_url_with_filter( 'https://example.museum:8080' );
 				$_SERVER['REQUEST_URI'] = '/about/';
 				$this->assertEquals(
@@ -220,7 +220,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 				);
 			},
 
-			'complete_parse_fail'         => function () {
+			'complete_parse_fail'         => function (): void {
 				$_SERVER['HTTP_HOST'] = 'env.example.org';
 				unset( $_SERVER['REQUEST_URI'] );
 				$this->set_home_url_with_filter( ':' );
@@ -230,7 +230,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 				);
 			},
 
-			'default_to_localhost'        => function () {
+			'default_to_localhost'        => function (): void {
 				unset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] );
 				$this->set_home_url_with_filter( ':' );
 				$this->assertEquals(
@@ -240,7 +240,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 			},
 		);
 		return array_map(
-			static function ( $assertion ) {
+			static function ( Closure $assertion ): array {
 				return array( $assertion );
 			},
 			$assertions
@@ -252,7 +252,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @param string $home_url Home URL.
 	 */
-	private function set_home_url_with_filter( string $home_url ) {
+	private function set_home_url_with_filter( string $home_url ): void {
 		add_filter(
 			'home_url',
 			static function () use ( $home_url ): string {
@@ -268,7 +268,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_test_get_current_url
 	 */
-	public function test_od_get_current_url( Closure $assert ) {
+	public function test_od_get_current_url( Closure $assert ): void {
 		call_user_func( $assert );
 	}
 
@@ -277,7 +277,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_get_url_metrics_slug
 	 */
-	public function test_od_get_url_metrics_slug() {
+	public function test_od_get_url_metrics_slug(): void {
 		$first  = od_get_url_metrics_slug( array() );
 		$second = od_get_url_metrics_slug( array( 'p' => 1 ) );
 		$this->assertNotEquals( $second, $first );
@@ -292,7 +292,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 * @covers ::od_get_url_metrics_storage_nonce
 	 * @covers ::od_verify_url_metrics_storage_nonce
 	 */
-	public function test_od_get_url_metrics_storage_nonce_and_od_verify_url_metrics_storage_nonce() {
+	public function test_od_get_url_metrics_storage_nonce_and_od_verify_url_metrics_storage_nonce(): void {
 		$user_id = self::factory()->user->create();
 
 		$nonce_life_actions = array();
@@ -337,7 +337,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_get_breakpoint_max_widths
 	 */
-	public function test_od_get_breakpoint_max_widths() {
+	public function test_od_get_breakpoint_max_widths(): void {
 		$this->assertSame(
 			array( 480, 600, 782 ),
 			od_get_breakpoint_max_widths()
@@ -347,7 +347,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 
 		add_filter(
 			'od_breakpoint_max_widths',
-			static function () use ( $filtered_breakpoints ) {
+			static function () use ( $filtered_breakpoints ): array {
 				return $filtered_breakpoints;
 			}
 		);
@@ -360,7 +360,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_bad_od_get_breakpoint_max_widths(): array {
 		return array(
@@ -390,11 +390,14 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @expectedIncorrectUsage od_get_breakpoint_max_widths
 	 * @dataProvider data_provider_test_bad_od_get_breakpoint_max_widths
+	 *
+	 * @param int[] $breakpoints Breakpoints.
+	 * @param int[] $expected Expected breakpoints.
 	 */
-	public function test_bad_od_get_breakpoint_max_widths( array $breakpoints, array $expected ) {
+	public function test_bad_od_get_breakpoint_max_widths( array $breakpoints, array $expected ): void {
 		add_filter(
 			'od_breakpoint_max_widths',
-			static function () use ( $breakpoints ) {
+			static function () use ( $breakpoints ): array {
 				return $breakpoints;
 			}
 		);
@@ -407,12 +410,12 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_get_url_metrics_breakpoint_sample_size
 	 */
-	public function test_od_get_url_metrics_breakpoint_sample_size() {
+	public function test_od_get_url_metrics_breakpoint_sample_size(): void {
 		$this->assertSame( 3, od_get_url_metrics_breakpoint_sample_size() );
 
 		add_filter(
 			'od_url_metrics_breakpoint_sample_size',
-			static function () {
+			static function (): string {
 				return '1';
 			}
 		);
@@ -426,7 +429,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 * @expectedIncorrectUsage od_get_url_metrics_breakpoint_sample_size
 	 * @covers ::od_get_url_metrics_breakpoint_sample_size
 	 */
-	public function test_bad_od_get_url_metrics_breakpoint_sample_size() {
+	public function test_bad_od_get_url_metrics_breakpoint_sample_size(): void {
 		add_filter(
 			'od_url_metrics_breakpoint_sample_size',
 			static function (): int {
@@ -441,7 +444,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 * Data provider.
 	 *
 	 * @throws OD_Data_Validation_Exception When failing to instantiate a URL metric.
-	 * @return array[]
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_get_lcp_elements_by_minimum_viewport_widths(): array {
 		return array(
@@ -515,8 +518,12 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_get_lcp_elements_by_minimum_viewport_widths
 	 * @dataProvider data_provider_test_get_lcp_elements_by_minimum_viewport_widths
+	 *
+	 * @param int[]              $breakpoints Breakpoints.
+	 * @param OD_URL_Metric[]    $url_metrics URL Metrics.
+	 * @param array<int, string> $expected_lcp_element_xpaths Expected XPaths.
 	 */
-	public function test_get_lcp_elements_by_minimum_viewport_widths( array $breakpoints, array $url_metrics, array $expected_lcp_element_xpaths ) {
+	public function test_get_lcp_elements_by_minimum_viewport_widths( array $breakpoints, array $url_metrics, array $expected_lcp_element_xpaths ): void {
 		$group_collection = new OD_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, 10, HOUR_IN_SECONDS );
 
 		$lcp_elements_by_minimum_viewport_widths = od_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
@@ -525,10 +532,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 		foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
 			$this->assertTrue( is_array( $lcp_element ) || false === $lcp_element );
 			if ( is_array( $lcp_element ) ) {
-				$this->assertTrue( $lcp_element['isLCP'] );
-				$this->assertTrue( $lcp_element['isLCPCandidate'] );
 				$this->assertIsString( $lcp_element['xpath'] );
-				$this->assertIsNumeric( $lcp_element['intersectionRatio'] );
 				$lcp_element_xpaths_by_minimum_viewport_widths[ $minimum_viewport_width ] = $lcp_element['xpath'];
 			} else {
 				$lcp_element_xpaths_by_minimum_viewport_widths[ $minimum_viewport_width ] = false;
@@ -558,10 +562,18 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 			'timestamp' => microtime( true ),
 			'elements'  => array(
 				array(
-					'isLCP'             => $is_lcp,
-					'isLCPCandidate'    => $is_lcp,
-					'xpath'             => $this->get_xpath( ...$breadcrumbs ),
-					'intersectionRatio' => 1,
+					'isLCP'              => $is_lcp,
+					'isLCPCandidate'     => $is_lcp,
+					'xpath'              => $this->get_xpath( ...$breadcrumbs ),
+					'intersectionRatio'  => 1,
+					'intersectionRect'   => array(
+						'width'  => 100,
+						'height' => 100,
+					),
+					'boundingClientRect' => array(
+						'width'  => 100,
+						'height' => 100,
+					),
 				),
 			),
 		);
@@ -578,7 +590,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 		return implode(
 			'',
 			array_map(
-				static function ( $tag ) {
+				static function ( $tag ): string {
 					return sprintf( '/*[0][self::%s]', strtoupper( $tag ) );
 				},
 				$breadcrumbs

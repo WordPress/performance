@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.0.0
  * @since 3.0.0 Renamed to perflab_add_features_page().
  */
-function perflab_add_features_page() {
+function perflab_add_features_page(): void {
 	$hook_suffix = add_options_page(
 		__( 'Performance Features', 'performance-lab' ),
 		__( 'Performance', 'performance-lab' ),
@@ -29,9 +29,8 @@ function perflab_add_features_page() {
 		add_action( "load-{$hook_suffix}", 'perflab_load_features_page', 10, 0 );
 		add_filter( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ), 'perflab_plugin_action_links_add_settings' );
 	}
-
-	return $hook_suffix;
 }
+
 add_action( 'admin_menu', 'perflab_add_features_page' );
 
 /**
@@ -41,7 +40,7 @@ add_action( 'admin_menu', 'perflab_add_features_page' );
  * @since 3.0.0 Renamed to perflab_load_features_page(), and the
  *              $module and $hook_suffix parameters were removed.
  */
-function perflab_load_features_page() {
+function perflab_load_features_page(): void {
 	// Handle script enqueuing for settings page.
 	add_action( 'admin_enqueue_scripts', 'perflab_enqueue_features_page_scripts' );
 
@@ -50,6 +49,9 @@ function perflab_load_features_page() {
 
 	// Handle style for settings page.
 	add_action( 'admin_head', 'perflab_print_features_page_style' );
+
+	// Handle script for settings page.
+	add_action( 'admin_footer', 'perflab_print_plugin_progress_indicator_script' );
 }
 
 /**
@@ -58,7 +60,7 @@ function perflab_load_features_page() {
  * @since 1.0.0
  * @since 3.0.0 Renamed to perflab_render_settings_page().
  */
-function perflab_render_settings_page() {
+function perflab_render_settings_page(): void {
 	?>
 	<div class="wrap">
 		<?php perflab_render_plugins_ui(); ?>
@@ -76,7 +78,7 @@ function perflab_render_settings_page() {
  *
  * @param string $hook_suffix The current admin page.
  */
-function perflab_admin_pointer( $hook_suffix ) {
+function perflab_admin_pointer( string $hook_suffix ): void {
 	// Do not show admin pointer in multisite Network admin or User admin UI.
 	if ( is_network_admin() || is_user_admin() ) {
 		return;
@@ -114,11 +116,11 @@ add_action( 'admin_enqueue_scripts', 'perflab_admin_pointer' );
  * @since 1.0.0
  * @since 2.4.0 Optional arguments were added to make the function reusable for different pointers.
  *
- * @param string $pointer_id Optional. ID of the pointer. Default 'perflab-admin-pointer'.
- * @param array  $args       Optional. Pointer arguments. Supports 'heading' and 'content' entries.
- *                           Defaults are the heading and content for the 'perflab-admin-pointer'.
+ * @param string                                    $pointer_id Optional. ID of the pointer. Default 'perflab-admin-pointer'.
+ * @param array{heading?: string, content?: string} $args       Optional. Pointer arguments. Supports 'heading' and 'content' entries.
+ *                                                              Defaults are the heading and content for the 'perflab-admin-pointer'.
  */
-function perflab_render_pointer( $pointer_id = 'perflab-admin-pointer', $args = array() ) {
+function perflab_render_pointer( string $pointer_id = 'perflab-admin-pointer', array $args = array() ): void {
 	if ( ! isset( $args['heading'] ) ) {
 		$args['heading'] = __( 'Performance Lab', 'performance-lab' );
 	}
@@ -204,7 +206,7 @@ function perflab_plugin_action_links_add_settings( $links ) {
  *
  * @since 2.3.0
  */
-function perflab_dismiss_wp_pointer_wrapper() {
+function perflab_dismiss_wp_pointer_wrapper(): void {
 	if ( isset( $_POST['pointer'] ) && 'perflab-admin-pointer' !== $_POST['pointer'] ) {
 		// Another plugin's pointer, do nothing.
 		return;
@@ -219,11 +221,14 @@ add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 
  * @since 2.8.0
  * @since 3.0.0 Renamed to perflab_enqueue_features_page_scripts().
  */
-function perflab_enqueue_features_page_scripts() {
+function perflab_enqueue_features_page_scripts(): void {
 	// These assets are needed for the "Learn more" popover.
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_style( 'thickbox' );
 	wp_enqueue_script( 'plugin-install' );
+
+	// Enqueue the a11y script.
+	wp_enqueue_script( 'wp-a11y' );
 }
 
 /**
@@ -231,7 +236,7 @@ function perflab_enqueue_features_page_scripts() {
  *
  * @since 3.0.0
  */
-function perflab_install_activate_plugin_callback() {
+function perflab_install_activate_plugin_callback(): void {
 	check_admin_referer( 'perflab_install_activate_plugin' );
 
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -248,68 +253,9 @@ function perflab_install_activate_plugin_callback() {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 
-	// Check if plugin (by slug) is installed by obtaining the plugin file.
-	// Remember a plugin file typically looks like "{slug}/load.php" or "{slug}/{slug}.php".
-	$plugin_file = null;
-	foreach ( array_keys( get_plugins() ) as $installed_plugin_file ) {
-		if ( strtok( $installed_plugin_file, '/' ) === $plugin_slug ) {
-			$plugin_file = $installed_plugin_file;
-			break;
-		}
-	}
-
-	// Install the plugin if it is not installed yet (in which case the plugin file could not be discovered above).
-	if ( ! isset( $plugin_file ) ) {
-		// Check if the user have plugin installation capability.
-		if ( ! current_user_can( 'install_plugins' ) ) {
-			wp_die( esc_html__( 'Sorry, you are not allowed to install plugins on this site.', 'default' ) );
-		}
-
-		$api = perflab_query_plugin_info( $plugin_slug );
-
-		// Return early if plugin API returns an error.
-		if ( $api instanceof WP_Error ) {
-			wp_die(
-				wp_kses(
-					sprintf(
-						/* translators: %s: Support forums URL. */
-						__( 'An unexpected error occurred. Something may be wrong with WordPress.org or this server&#8217;s configuration. If you continue to have problems, please try the <a href="%s">support forums</a>.', 'default' ),
-						__( 'https://wordpress.org/support/forums/', 'default' )
-					) . ' ' . $api->get_error_message(),
-					array( 'a' => array( 'href' => true ) )
-				)
-			);
-		}
-
-		// Replace new Plugin_Installer_Skin with new Quiet_Upgrader_Skin when output needs to be suppressed.
-		$skin     = new WP_Ajax_Upgrader_Skin( array( 'api' => $api ) );
-		$upgrader = new Plugin_Upgrader( $skin );
-		$result   = $upgrader->install( $api['download_link'] );
-
-		if ( is_wp_error( $result ) ) {
-			wp_die( esc_html( $result->get_error_message() ) );
-		} elseif ( is_wp_error( $skin->result ) ) {
-			wp_die( esc_html( $skin->result->get_error_message() ) );
-		} elseif ( $skin->get_errors()->has_errors() ) {
-			wp_die( esc_html( $skin->get_error_messages() ) );
-		}
-
-		$plugins = get_plugins( '/' . $plugin_slug );
-
-		if ( empty( $plugins ) ) {
-			wp_die( esc_html__( 'Plugin not found.', 'default' ) );
-		}
-
-		$plugin_file_names = array_keys( $plugins );
-		$plugin_file       = $plugin_slug . '/' . $plugin_file_names[0];
-	}
-
-	if ( ! current_user_can( 'activate_plugin', $plugin_file ) ) {
-		wp_die( esc_html__( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
-	}
-
-	$result = activate_plugin( $plugin_file );
-	if ( is_wp_error( $result ) ) {
+	// Install and activate the plugin and its dependencies.
+	$result = perflab_install_and_activate_plugin( $plugin_slug );
+	if ( $result instanceof WP_Error ) {
 		wp_die( wp_kses_post( $result->get_error_message() ) );
 	}
 
@@ -332,9 +278,9 @@ add_action( 'admin_action_perflab_install_activate_plugin', 'perflab_install_act
  *
  * @since 3.0.0
  */
-function perflab_print_features_page_style() {
+function perflab_print_features_page_style(): void {
 	?>
-<style type="text/css">
+<style>
 	.plugin-card .name,
 	.plugin-card .desc, /* For WP <6.5 versions */
 	.plugin-card .desc > p {
@@ -356,7 +302,7 @@ function perflab_print_features_page_style() {
  *
  * @since 2.8.0
  */
-function perflab_plugin_admin_notices() {
+function perflab_plugin_admin_notices(): void {
 	if ( ! current_user_can( 'install_plugins' ) ) {
 		$are_all_plugins_installed = true;
 		$installed_plugin_slugs    = array_map(
@@ -392,4 +338,40 @@ function perflab_plugin_admin_notices() {
 			)
 		);
 	}
+}
+
+/**
+ * Callback function that print plugin progress indicator script.
+ *
+ * @since n.e.x.t
+ */
+function perflab_print_plugin_progress_indicator_script(): void {
+	$js_function = <<<JS
+		function addPluginProgressIndicator( message ) {
+			document.addEventListener( 'DOMContentLoaded', function () {
+				document.addEventListener( 'click', function ( event ) {
+					if (
+						event.target.classList.contains(
+							'perflab-install-active-plugin'
+						)
+					) {
+						const target = event.target;
+						target.classList.add( 'updating-message' );
+						target.textContent = message;
+
+						wp.a11y.speak( message );
+					}
+				} );
+			} );
+		}
+JS;
+
+	wp_print_inline_script_tag(
+		sprintf(
+			'( %s )( %s );',
+			$js_function,
+			wp_json_encode( __( 'Activating...', 'default' ) )
+		),
+		array( 'type' => 'module' )
+	);
 }
