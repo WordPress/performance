@@ -542,30 +542,6 @@ function webp_uploads_update_image_references( $content ) {
 add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
 
 /**
- * Retrieves attachment metadata for attachment ID.
- *
- * This is a wrapper for {@see wp_get_attachment_metadata()} to add the typing which is augmented by the
- * `wp_generate_attachment_metadata` via {@see webp_uploads_create_sources_property()}.
- *
- * @since n.e.x.t
- *
- * @param int $attachment_id Attachment post ID. Defaults to global $post.
- * @return array{
- *     width: int,
- *     height: int,
- *     file: string,
- *     sizes: array,
- *     image_meta: array,
- *     filesize: int,
- *     sources?: array<string, array{ file: string, filesize: int }>
- * }|null Attachment metadata. Null on failure.
- */
-function webp_uploads_get_attachment_metadata( int $attachment_id = 0 ): ?array {
-	$metadata = wp_get_attachment_metadata( $attachment_id );
-	return is_array( $metadata ) ? $metadata : null;
-}
-
-/**
  * Finds all the urls with *.jpg and *.jpeg extension and updates with *.webp version for the provided image
  * for the specified image sizes, the *.webp references are stored inside of each size.
  *
@@ -577,8 +553,28 @@ function webp_uploads_get_attachment_metadata( int $attachment_id = 0 ): ?array 
  * @return string The updated img tag.
  */
 function webp_uploads_img_tag_update_mime_type( $original_image, $context, $attachment_id ) {
-	$image    = $original_image;
-	$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+	$image = $original_image;
+
+	/**
+	 * Metadata potentially amended by webp_uploads_create_sources_property().
+	 *
+	 * Note the sources key is not normally present in the response for wp_get_attachment_metadata(). The sources
+	 * key here, however, is being injected via the 'wp_generate_attachment_metadata' filter via the
+	 * webp_uploads_create_sources_property() function.
+	 *
+	 * @see webp_uploads_create_sources_property()
+	 *
+	 * @var array{
+	 *          width: int,
+	 *          height: int,
+	 *          file: non-falsy-string,
+	 *          sizes: array,
+	 *          image_meta: array,
+	 *          filesize: int,
+	 *          sources?: array<string, array{ file: string, filesize: int }>
+	 *      } $metadata
+	 */
+	$metadata = wp_get_attachment_metadata( $attachment_id );
 
 	if ( empty( $metadata['file'] ) ) {
 		return $image;

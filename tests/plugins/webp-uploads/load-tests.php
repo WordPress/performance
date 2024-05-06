@@ -49,7 +49,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		// The full image should be a WebP.
 		$this->assertArrayHasKey( 'file', $metadata );
@@ -81,7 +81,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		// The full image should be a WebP.
 		$this->assertArrayHasKey( 'file', $metadata );
@@ -112,7 +112,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		// The full image should be a JPEG.
 		$this->assertArrayHasKey( 'file', $metadata );
@@ -143,7 +143,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		// The full image should be a JPEG.
 		$this->assertArrayHasKey( 'file', $metadata );
@@ -172,7 +172,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertIsArray( $metadata );
 		$this->assertArrayNotHasKey( 'sources', $metadata );
@@ -201,7 +201,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
 		$this->assertImageNotHasSource( $attachment_id, 'image/webp' );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/webp' );
@@ -225,7 +225,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
 		);
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertIsArray( $metadata );
 		$this->assertArrayNotHasKey( 'sources', $metadata );
@@ -244,7 +244,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertArrayHasKey( 'sources', $metadata );
 		$this->assertIsArray( $metadata['sources'] );
@@ -273,7 +273,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertEmpty( $metadata['sizes'] );
 
 		$this->assertImageNotHasSource( $attachment_id, 'image/jpeg' );
@@ -300,7 +300,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
-		$metadata      = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$this->assertStringEndsWith( '-scaled.jpg', get_attached_file( $attachment_id ) );
 		$this->assertImageHasSizeSource( $attachment_id, 'medium', 'image/webp' );
 		$this->assertStringEndsNotWith( '-scaled.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
@@ -323,7 +323,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertIsString( $file );
 		$this->assertFileExists( $file );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$sizes    = array( 'thumbnail', 'medium' );
 
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
@@ -358,7 +358,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertIsString( $file );
 		$this->assertFileExists( $file );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertFileExists( path_join( $dirname, $metadata['sources']['image/webp']['file'] ) );
 		$this->assertFileExists( path_join( $dirname, $metadata['sizes']['thumbnail']['sources']['image/webp']['file'] ) );
@@ -383,7 +383,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$file    = get_attached_file( $attachment_id, true );
 		$dirname = pathinfo( $file, PATHINFO_DIRNAME );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertEmpty( $metadata['sizes'] );
 		$this->assertFileExists( $file );
@@ -476,7 +476,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		$tag          = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$expected_tag = $tag;
-		$metadata     = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata     = wp_get_attachment_metadata( $attachment_id );
 		foreach ( $metadata['sizes'] as $size => $properties ) {
 			$expected_tag = str_replace( $properties['sources']['image/webp']['file'], $properties['sources']['image/jpeg']['file'], $expected_tag );
 		}
@@ -522,7 +522,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 
 		$tag          = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$expected_tag = $tag;
-		$metadata     = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata     = wp_get_attachment_metadata( $attachment_id );
 		foreach ( $metadata['sizes'] as $size => $properties ) {
 			$expected_tag = str_replace( $properties['sources']['image/jpeg']['file'], $properties['sources']['image/webp']['file'], $expected_tag );
 		}
@@ -583,7 +583,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			'ext'  => 'jpg',
 			'type' => 'image/jpeg',
 		);
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertSame( $expected, wp_check_filetype( get_attached_file( $attachment_id ) ) );
 		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->assertStringContainsString( $metadata['sources']['image/webp']['file'], webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
@@ -642,7 +642,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		);
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/paint.jpeg' );
-		$metadata      = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		foreach ( $metadata['sizes'] as $size ) {
 			if ( ! isset( $size['sources'] ) ) {
@@ -674,7 +674,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertImageHasSource( $attachment_id, 'image/jpeg' );
 
-		$metadata = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata = wp_get_attachment_metadata( $attachment_id );
 		foreach ( array_keys( $metadata['sizes'] ) as $size_name ) {
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
@@ -699,7 +699,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertTrue( wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
-		$metadata      = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
 		$this->assertArrayHasKey( 'sources', $metadata );
 		$this->assertIsArray( $metadata['sources'] );
@@ -763,7 +763,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$expected_tag  = $tag;
-		$metadata      = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$file          = get_attached_file( $attachment_id, true );
 		$dirname       = pathinfo( $file, PATHINFO_DIRNAME );
 		$result        = webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id );
@@ -802,7 +802,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		// Look for an image that contains only full size mime type images.
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
-		$metadata      = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$file          = get_attached_file( $attachment_id, true );
 		$dirname       = pathinfo( $file, PATHINFO_DIRNAME );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
@@ -830,7 +830,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp' );
 		$tag           = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$expected_tag  = $tag;
-		$metadata      = webp_uploads_get_attachment_metadata( $attachment_id );
+		$metadata      = wp_get_attachment_metadata( $attachment_id );
 		$file          = get_attached_file( $attachment_id, true );
 		$dirname       = pathinfo( $file, PATHINFO_DIRNAME );
 		$updated_tag   = webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id );
