@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
-function webp_uploads_get_upload_image_mime_transforms() {
+function webp_uploads_get_upload_image_mime_transforms(): array {
 
 	// Check the selected output format.
 	$output_format = webp_uploads_mime_type_supported( 'image/avif' ) ? get_option( 'perflab_modern_image_format' ) : 'webp';
