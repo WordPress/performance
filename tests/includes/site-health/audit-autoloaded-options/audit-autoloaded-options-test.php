@@ -18,13 +18,18 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 			'test'  => 'perflab_aao_autoloaded_options_test',
 		);
 
+		$initial_test = array(
+			'label' => 'Label',
+			'test'  => 'initial_test',
+		);
 		$this->assertEquals(
 			array(
 				'direct' => array(
+					'initial'            => $initial_test,
 					'autoloaded_options' => $expected_test,
 				),
 			),
-			perflab_aao_add_autoloaded_options_test( array() )
+			perflab_aao_add_autoloaded_options_test( array( 'direct' => array( 'initial' => $initial_test ) ) )
 		);
 	}
 

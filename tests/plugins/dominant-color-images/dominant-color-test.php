@@ -234,7 +234,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	public function test_dominant_color_update_attachment_image_attributes( $style_attr, $expected ) {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/plugins/dominant-color-images/data/images/red.jpg' );
 
-		$attachment_image = wp_get_attachment_image( $attachment_id, 'full', '', array( 'style' => $style_attr ) );
+		$attachment_image = wp_get_attachment_image( $attachment_id, 'full', false, array( 'style' => $style_attr ) );
 		$this->assertStringContainsString( $expected, $attachment_image );
 	}
 
