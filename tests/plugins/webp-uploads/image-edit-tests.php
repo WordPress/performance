@@ -397,7 +397,11 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
 		$editor->rotate_right()->save();
-		$this->assertSizeNameIsHashed( 'full', webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) );
+
+		$full_size_key = webp_uploads_get_next_full_size_key_from_backup( $attachment_id );
+		// @phpstan-ignore-next-line -- Work around PHPStan remembering the return value above being null but now being a string. This is instead of adding rememberPossiblyImpureFunctionValues:false to the config.
+		$this->assertIsString( $full_size_key );
+		$this->assertSizeNameIsHashed( 'full', $full_size_key );
 	}
 
 	/**
