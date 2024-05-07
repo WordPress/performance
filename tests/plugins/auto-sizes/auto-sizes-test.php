@@ -46,7 +46,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	public function test_image_with_lazy_loading_has_auto_sizes() {
 		$this->assertStringContainsString(
 			'sizes="auto, ',
-			wp_get_attachment_image( self::$image_id, 'large', null, array( 'loading' => 'lazy' ) )
+			wp_get_attachment_image( self::$image_id, 'large', false, array( 'loading' => 'lazy' ) )
 		);
 	}
 
@@ -58,7 +58,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	public function test_image_without_lazy_loading_does_not_have_auto_sizes() {
 		$this->assertStringContainsString(
 			'sizes="(max-width: 1024px) 100vw, 1024px"',
-			wp_get_attachment_image( self::$image_id, 'large', null, array( 'loading' => '' ) )
+			wp_get_attachment_image( self::$image_id, 'large', false, array( 'loading' => '' ) )
 		);
 	}
 

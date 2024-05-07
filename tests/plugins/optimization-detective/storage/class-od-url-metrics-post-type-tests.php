@@ -15,7 +15,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::add_hooks
 	 */
-	public function test_add_hooks() {
+	public function test_add_hooks(): void {
 		remove_all_actions( 'init' );
 		remove_all_actions( 'admin_init' );
 		remove_all_actions( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME );
@@ -41,7 +41,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::register_post_type
 	 */
-	public function test_register_post_type() {
+	public function test_register_post_type(): void {
 		unregister_post_type( OD_URL_Metrics_Post_Type::SLUG );
 		OD_URL_Metrics_Post_Type::register_post_type();
 		$post_type_object = get_post_type_object( OD_URL_Metrics_Post_Type::SLUG );
@@ -54,7 +54,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::get_post
 	 */
-	public function test_od_post_when_absent() {
+	public function test_od_post_when_absent(): void {
 		$slug = od_get_url_metrics_slug( array( 'p' => '1' ) );
 		$this->assertNull( OD_URL_Metrics_Post_Type::get_post( $slug ) );
 	}
@@ -64,7 +64,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::get_post
 	 */
-	public function test_od_post_when_present() {
+	public function test_od_post_when_present(): void {
 		$slug = od_get_url_metrics_slug( array( 'p' => '1' ) );
 
 		$post_id = self::factory()->post->create(
@@ -82,7 +82,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider for test_get_url_metrics_from_post.
 	 *
-	 * @return array<string, array{post_content: string, expected_value: array}>
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_get_url_metrics_from_post(): array {
 		$valid_content = array(
@@ -123,8 +123,11 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 * @covers ::get_url_metrics_from_post
 	 *
 	 * @dataProvider data_provider_test_get_url_metrics_from_post
+	 *
+	 * @param string               $post_content Post content.
+	 * @param array<string, mixed> $expected_value Expected value.
 	 */
-	public function test_get_url_metrics_from_post( string $post_content, array $expected_value ) {
+	public function test_get_url_metrics_from_post( string $post_content, array $expected_value ): void {
 		$post = self::factory()->post->create_and_get(
 			array(
 				'post_type'    => OD_URL_Metrics_Post_Type::SLUG,
@@ -147,7 +150,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::store_url_metric
 	 */
-	public function test_store_url_metric() {
+	public function test_store_url_metric(): void {
 		$slug = od_get_url_metrics_slug( array( 'p' => 1 ) );
 
 		$validated_url_metric = $this->get_sample_url_metric( home_url( '/' ) );
@@ -174,7 +177,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::schedule_garbage_collection
 	 */
-	public function test_schedule_garbage_collection_logged_out() {
+	public function test_schedule_garbage_collection_logged_out(): void {
 		OD_URL_Metrics_Post_Type::schedule_garbage_collection();
 		$this->assertFalse( wp_get_scheduled_event( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME ), 'Expected scheduling to be skipped because user is not logged-in.' );
 	}
@@ -184,7 +187,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::schedule_garbage_collection
 	 */
-	public function test_schedule_garbage_collection_first_log_in() {
+	public function test_schedule_garbage_collection_first_log_in(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		OD_URL_Metrics_Post_Type::schedule_garbage_collection();
 		$scheduled_event = wp_get_scheduled_event( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME );
@@ -197,7 +200,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::schedule_garbage_collection
 	 */
-	public function test_schedule_garbage_collection_reschedule() {
+	public function test_schedule_garbage_collection_reschedule(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		wp_schedule_event( time(), 'hourly', OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME );
 		OD_URL_Metrics_Post_Type::schedule_garbage_collection();
@@ -211,7 +214,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::delete_stale_posts
 	 */
-	public function test_delete_stale_posts() {
+	public function test_delete_stale_posts(): void {
 		global $wpdb;
 
 		$stale_timestamp_gmt = gmdate( 'Y-m-d H:i:s', strtotime( '-1 month' ) - HOUR_IN_SECONDS );
@@ -256,7 +259,7 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::delete_all_posts
 	 */
-	public function test_delete_all_posts() {
+	public function test_delete_all_posts(): void {
 		global $wpdb;
 
 		$other_post_meta_key       = 'foo';
@@ -340,10 +343,18 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 				'timestamp' => microtime( true ),
 				'elements'  => array(
 					array(
-						'isLCP'             => true,
-						'isLCPCandidate'    => true,
-						'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
-						'intersectionRatio' => 1,
+						'isLCP'              => true,
+						'isLCPCandidate'     => true,
+						'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
+						'intersectionRatio'  => 1,
+						'intersectionRect'   => array(
+							'width'  => 100,
+							'height' => 100,
+						),
+						'boundingClientRect' => array(
+							'width'  => 100,
+							'height' => 100,
+						),
 					),
 				),
 			)

@@ -21,3 +21,7 @@ require_once __DIR__ . '/audit-enqueued-assets/hooks.php';
 // WebP Support site health check.
 require_once __DIR__ . '/webp-support/helper.php';
 require_once __DIR__ . '/webp-support/hooks.php';
+
+// AVIF Support site health check.
+require_once __DIR__ . '/avif-support/helper.php';
+require_once __DIR__ . '/avif-support/hooks.php';

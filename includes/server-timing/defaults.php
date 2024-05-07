@@ -22,7 +22,7 @@ if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING
  *
  * @since 1.8.0
  */
-function perflab_register_default_server_timing_before_template_metrics() {
+function perflab_register_default_server_timing_before_template_metrics(): void {
 	$calculate_before_template_metrics = static function () {
 		// WordPress execution prior to serving the template.
 		perflab_server_timing_register_metric(
@@ -135,7 +135,7 @@ perflab_register_default_server_timing_before_template_metrics();
  *
  * @since 1.8.0
  */
-function perflab_register_default_server_timing_template_metrics() {
+function perflab_register_default_server_timing_template_metrics(): void {
 	// Template-related metrics can only be recorded if output buffering is used.
 	if ( ! perflab_server_timing_use_output_buffer() ) {
 		return;
@@ -225,7 +225,7 @@ add_action( 'wp_loaded', 'perflab_register_default_server_timing_template_metric
  *
  * @since 2.6.0
  */
-function perflab_register_additional_server_timing_metrics_from_setting() {
+function perflab_register_additional_server_timing_metrics_from_setting(): void {
 	$options = (array) get_option( PERFLAB_SERVER_TIMING_SETTING, array() );
 
 	$hooks_to_measure = array();

@@ -142,11 +142,11 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $
 		$extra_class  = $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent';
 	}
 
-	if ( ! empty( $data ) ) {
+	if ( $data ) {
 		$filtered_image = str_replace( '<img ', '<img ' . $data, $filtered_image );
 	}
 
-	if ( ! empty( $extra_class ) ) {
+	if ( $extra_class ) {
 		$filtered_image = str_replace( ' class="', ' class="' . $extra_class . ' ', $filtered_image );
 	}
 

@@ -164,10 +164,24 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Make sure perflab_aea_add_enqueued_assets_test adds the right information.
 	 */
 	public function test_perflab_aea_add_enqueued_assets_test() {
-		$this->assertIsArray( perflab_aea_add_enqueued_assets_test( array() ) );
+		$initial_tests = array(
+			'direct' => array(
+				'initial' => array(
+					'label' => 'Label',
+					'test'  => 'test',
+				),
+			),
+		);
+
+		$expected           = $initial_tests;
+		$expected['direct'] = array_merge(
+			$expected['direct'],
+			Site_Health_Mock_Responses::return_added_test_info_site_health()['direct']
+		);
+
 		$this->assertEqualSets(
-			perflab_aea_add_enqueued_assets_test( array() ),
-			Site_Health_Mock_Responses::return_added_test_info_site_health()
+			$expected,
+			perflab_aea_add_enqueued_assets_test( $initial_tests )
 		);
 	}
 
@@ -175,7 +189,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Test perflab_aea_enqueued_js_assets_test() no transient saved.
 	 */
 	public function test_perflab_aea_enqueued_js_assets_test_no_transient() {
-		$this->assertEqualSets( array(), perflab_aea_enqueued_js_assets_test() );
+		$this->assertSame( array( 'omitted' => true ), perflab_aea_enqueued_js_assets_test() );
 	}
 
 	/**
@@ -200,7 +214,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Test perflab_aea_enqueued_css_assets_test() no transient saved.
 	 */
 	public function test_perflab_aea_enqueued_css_assets_test_no_transient() {
-		$this->assertEqualSets( array(), perflab_aea_enqueued_css_assets_test() );
+		$this->assertSame( array( 'omitted' => true ), perflab_aea_enqueued_css_assets_test() );
 	}
 
 	/**

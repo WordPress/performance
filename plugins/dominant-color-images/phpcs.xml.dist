@@ -4,7 +4,7 @@
 
 	<rule ref="../../bin/phpcs/phpcs.ruleset.xml"/>
 
-	<config name="text_domain" value="dominant-color-images"/>
+	<config name="text_domain" value="dominant-color-images,default"/>
 
 	<file>.</file>
 </ruleset>
