@@ -735,7 +735,7 @@ function webp_uploads_wepb_fallback() {
 			d.body.appendChild( s );
 		};
 	}
-	JS;
+JS;
 
 	wp_print_inline_script_tag(
 		sprintf(
