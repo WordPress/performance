@@ -363,7 +363,6 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
  * @since n.e.x.t
  *
  * @param string $mime_type The mime type to check.
- *
  * @return bool Whether the server supports a given mime type.
  */
 function webp_uploads_mime_type_supported( string $mime_type ): bool {
