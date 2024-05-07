@@ -7,6 +7,8 @@ use WP_UnitTestCase;
 abstract class DominantColorTestCase extends WP_UnitTestCase {
 	/**
 	 * Data provider for test_get_dominant_color_GD.
+	 *
+	 * @return array<string, mixed>
 	 */
 	public function provider_get_dominant_color(): array {
 		return array(
@@ -103,6 +105,8 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 
 	/**
 	 * Data provider for test_get_dominant_color_GD.
+	 *
+	 * @return array<string, mixed>
 	 */
 	public function provider_get_dominant_color_invalid_images(): array {
 		return array(
@@ -117,6 +121,8 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 
 	/**
 	 * Data provider for test_get_dominant_color_GD.
+	 *
+	 * @return array<string, mixed>
 	 */
 	public function provider_get_dominant_color_none_images(): array {
 		return array(

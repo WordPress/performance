@@ -84,7 +84,7 @@ class ImageHasSource extends Constraint {
 	/**
 	 * Verifies the sources to have the requested mime type.
 	 *
-	 * @param array $sources The sources array.
+	 * @param array<string, array{ file: string, filesize: int }> $sources The sources array.
 	 * @return bool TRUE if the sources array contains the correct mime type source, otherwise FALSE.
 	 */
 	protected function verify_sources( array $sources ): bool {
