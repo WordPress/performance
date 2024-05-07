@@ -45,6 +45,21 @@
   },
   "scripts": {
     "format": "phpcbf --report-summary --report-source",
+    "format:all": [
+      "@format",
+      "@format:auto-sizes",
+      "@format:dominant-color-images",
+      "@format:embed-optimizer",
+      "@format:optimization-detective",
+      "@format:speculation-rules",
+      "@format:webp-uploads"
+    ],
+    "format:auto-sizes": "@format -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
+    "format:dominant-color-images": "@format -- ./plugins/dominant-color-images --standard=./plugins/dominant-color-images/phpcs.xml.dist",
+    "format:embed-optimizer": "@format -- ./plugins/embed-optimizer --standard=./plugins/embed-optimizer/phpcs.xml.dist",
+    "format:optimization-detective": "@format -- ./plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
+    "format:speculation-rules": "@format -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
+    "format:webp-uploads": "@format -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
     "lint": "phpcs",
     "lint:all": [
       "@lint",
