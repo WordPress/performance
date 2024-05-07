@@ -27,6 +27,6 @@ class WP_Image_Doesnt_Support_Modern_Images extends WP_Image_Editor_Imagick {
 		return (
 			'image/webp' !== $mime_type &&
 			'image/avif' !== $mime_type
-			);;
+		);
 	}
 }
