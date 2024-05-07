@@ -313,8 +313,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
 	$description = apply_filters( 'plugin_install_description', $description, $plugin_data );
 
-	$availability = perflab_get_plugin_availability( $plugin_data );
-
+	$availability   = perflab_get_plugin_availability( $plugin_data );
 	$compatible_php = $availability['compatible_php'];
 	$compatible_wp  = $availability['compatible_wp'];
 
@@ -325,6 +324,12 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
 			esc_html( _x( 'Active', 'plugin', 'default' ) )
 		);
+		$plugin_path    = $plugin_data['slug'] . '/load.php';
+		$plugin_links   = apply_filters( "plugin_action_links_{$plugin_path}", array() );
+
+		if ( array_key_exists( 'settings', $plugin_links ) ) {
+			$action_links[] = $plugin_links['settings'];
+		}
 	} elseif (
 		$availability['compatible_php'] &&
 		$availability['compatible_wp'] &&
