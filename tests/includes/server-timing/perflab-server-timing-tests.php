@@ -271,7 +271,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	 * @param callable $set_up   Set up.
 	 * @param bool     $expected Expected value.
 	 */
-	public function test_use_output_buffer( callable $set_up, $expected ): void {
+	public function test_use_output_buffer( callable $set_up, bool $expected ): void {
 		$set_up();
 		$this->assertSame( $expected, $this->server_timing->use_output_buffer() );
 	}

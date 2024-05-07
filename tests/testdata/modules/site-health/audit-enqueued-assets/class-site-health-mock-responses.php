@@ -32,7 +32,7 @@ class Site_Health_Mock_Responses {
 	 *
 	 * @param int $enqueued_scripts Number of scripts enqueued.
 	 */
-	public static function return_aea_enqueued_js_assets_test_callback_less_than_threshold( $enqueued_scripts = 1 ): array {
+	public static function return_aea_enqueued_js_assets_test_callback_less_than_threshold( int $enqueued_scripts = 1 ): array {
 		$result = array(
 			'label'       => esc_html__( 'Enqueued scripts', 'performance-lab' ),
 			'status'      => 'good',
@@ -67,7 +67,7 @@ class Site_Health_Mock_Responses {
 	 *
 	 * @param int $enqueued_scripts Number of scripts enqueued.
 	 */
-	public static function return_aea_enqueued_js_assets_test_callback_more_than_threshold( $enqueued_scripts ): array {
+	public static function return_aea_enqueued_js_assets_test_callback_more_than_threshold( int $enqueued_scripts ): array {
 		$result                = self::return_aea_enqueued_js_assets_test_callback_less_than_threshold();
 		$result['status']      = 'recommended';
 		$result['description'] = sprintf(
@@ -102,7 +102,7 @@ class Site_Health_Mock_Responses {
 	 *
 	 * @param int $enqueued_styles Number of styles enqueued.
 	 */
-	public static function return_aea_enqueued_css_assets_test_callback_less_than_threshold( $enqueued_styles = 1 ): array {
+	public static function return_aea_enqueued_css_assets_test_callback_less_than_threshold( int $enqueued_styles = 1 ): array {
 		$result = array(
 			'label'       => esc_html__( 'Enqueued styles', 'performance-lab' ),
 			'status'      => 'good',
@@ -137,7 +137,7 @@ class Site_Health_Mock_Responses {
 	 *
 	 * @param int $enqueued_styles Number of styles enqueued.
 	 */
-	public static function return_aea_enqueued_css_assets_test_callback_more_than_threshold( $enqueued_styles ): array {
+	public static function return_aea_enqueued_css_assets_test_callback_more_than_threshold( int $enqueued_styles ): array {
 		$result                = self::return_aea_enqueued_css_assets_test_callback_less_than_threshold();
 		$result['status']      = 'recommended';
 		$result['description'] = sprintf(

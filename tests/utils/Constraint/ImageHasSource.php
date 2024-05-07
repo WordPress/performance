@@ -28,7 +28,7 @@ class ImageHasSource extends Constraint {
 	 *
 	 * @param string $mime_type The requested mime type.
 	 */
-	public function __construct( $mime_type ) {
+	public function __construct( string $mime_type ) {
 		$this->is_not    = false;
 		$this->mime_type = $mime_type;
 	}
@@ -59,7 +59,7 @@ class ImageHasSource extends Constraint {
 	 * @param int $attachment_id Attachment ID.
 	 * @return bool TRUE if the attachment has a source for the requested mime type, otherwise FALSE.
 	 */
-	protected function matches( $attachment_id ): bool {
+	protected function matches( int $attachment_id ): bool {
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		// Fail if there is no metadata for the provided attachment ID.
@@ -84,7 +84,7 @@ class ImageHasSource extends Constraint {
 	 * @param array $sources The sources array.
 	 * @return bool TRUE if the sources array contains the correct mime type source, otherwise FALSE.
 	 */
-	protected function verify_sources( $sources ): bool {
+	protected function verify_sources( array $sources ): bool {
 		// Fail if the mime type is supposed not to exist, but it is set.
 		if ( $this->is_not ) {
 			return ! isset( $sources[ $this->mime_type ] );
@@ -133,7 +133,7 @@ class ImageHasSource extends Constraint {
 	 * @param int $attachment_id Attachment ID.
 	 * @return string The description of the failure.
 	 */
-	protected function failureDescription( $attachment_id ): string {
+	protected function failureDescription( int $attachment_id ): string {
 		return sprintf( 'an image %s', $this->toString() );
 	}
 }

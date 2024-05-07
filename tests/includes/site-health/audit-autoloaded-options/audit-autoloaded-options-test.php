@@ -162,7 +162,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	 *
 	 * @param int $bytes bytes to load in options.
 	 */
-	public static function set_autoloaded_option( $bytes = 800000 ): void {
+	public static function set_autoloaded_option( int $bytes = 800000 ): void {
 		$heavy_option_string = wp_generate_password( $bytes );
 
 		// Force autoloading so that WordPress core does not override it. See https://core.trac.wordpress.org/changeset/57920.

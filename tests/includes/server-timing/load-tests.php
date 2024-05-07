@@ -105,7 +105,7 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 	 * @param mixed $unsanitized Unsanitized input.
 	 * @param array $expected    Expected sanitized output.
 	 */
-	public function test_perflab_sanitize_server_timing_setting( $unsanitized, $expected ): void {
+	public function test_perflab_sanitize_server_timing_setting( $unsanitized, array $expected ): void {
 		$sanitized = perflab_sanitize_server_timing_setting( $unsanitized );
 		$this->assertSame( $expected, $sanitized );
 	}

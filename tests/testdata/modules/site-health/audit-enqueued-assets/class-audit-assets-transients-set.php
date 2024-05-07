@@ -19,7 +19,7 @@ class Audit_Assets_Transients_Set {
 	 *
 	 * @param int $number_of_assets Number of assets to mock.
 	 */
-	public static function set_script_transient_with_data( $number_of_assets = 5 ): void {
+	public static function set_script_transient_with_data( int $number_of_assets = 5 ): void {
 		$scripts = array_fill(
 			0,
 			$number_of_assets,
@@ -43,7 +43,7 @@ class Audit_Assets_Transients_Set {
 	 *
 	 * @param int $number_of_assets Number of assets to mock.
 	 */
-	public static function set_style_transient_with_data( $number_of_assets = 5 ): void {
+	public static function set_style_transient_with_data( int $number_of_assets = 5 ): void {
 		$styles = array_fill(
 			0,
 			$number_of_assets,
