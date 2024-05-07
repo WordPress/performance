@@ -1,7 +1,7 @@
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
-	level: 2
+	level: 3
 	paths:
 		- load.php
 		- includes/
@@ -18,5 +18,7 @@ parameters:
 		# See <https://github.com/php-stubs/wordpress-stubs/issues/100>.
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
+	stubFiles:
+		- bin/phpstan/filtered-functions.stub
 	dynamicConstantNames:
 		- PERFLAB_OBJECT_CACHE_DROPIN_VERSION

@@ -280,12 +280,16 @@ add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_
  *
  * @since 1.0.0
  *
- * @param string $output_format The image editor default output format mapping.
- * @param string $filename      Path to the image.
- * @param string $mime_type     The source image mime type.
- * @return string The new output format mapping.
+ * @param array<string, string>|mixed $output_format An array of mime type mappings. Maps a source mime type to a new destination mime type. Default empty array.
+ * @param string|null                 $filename      Path to the image.
+ * @param string|null                 $mime_type     The source image mime type.
+ * @return array<string, string> The new output format mapping.
  */
-function webp_uploads_filter_image_editor_output_format( $output_format, $filename, $mime_type ) {
+function webp_uploads_filter_image_editor_output_format( $output_format, ?string $filename, ?string $mime_type ): array {
+	if ( ! is_array( $output_format ) ) {
+		$output_format = array();
+	}
+
 	// Use the original mime type if this type is allowed.
 	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
 	if (
@@ -363,7 +367,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 			}
 
 			$intermediate_file = str_replace( $basename, $properties['file'], $file );
-			if ( empty( $intermediate_file ) ) {
+			if ( ! $intermediate_file ) {
 				continue;
 			}
 
@@ -395,7 +399,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 		}
 
 		$full_size = str_replace( $basename, $properties['file'], $file );
-		if ( empty( $full_size ) ) {
+		if ( ! $full_size ) {
 			continue;
 		}
 
@@ -549,27 +553,7 @@ add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
  * @return string The updated img tag.
  */
 function webp_uploads_img_tag_update_mime_type( $original_image, $context, $attachment_id ) {
-	$image = $original_image;
-
-	/**
-	 * Metadata potentially amended by webp_uploads_create_sources_property().
-	 *
-	 * Note the sources key is not normally present in the response for wp_get_attachment_metadata(). The sources
-	 * key here, however, is being injected via the 'wp_generate_attachment_metadata' filter via the
-	 * webp_uploads_create_sources_property() function.
-	 *
-	 * @see webp_uploads_create_sources_property()
-	 *
-	 * @var array{
-	 *          width: int,
-	 *          height: int,
-	 *          file: non-falsy-string,
-	 *          sizes: array,
-	 *          image_meta: array,
-	 *          filesize: int,
-	 *          sources?: array<string, array{ file: string, filesize: int }>
-	 *      } $metadata
-	 */
+	$image    = $original_image;
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 
 	if ( empty( $metadata['file'] ) ) {
