@@ -294,6 +294,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 
 	/**
 	 * @param int $number_of_assets Number of assets mocked.
+	 * @return array<string, mixed>
 	 */
 	public function mock_data_perflab_aea_enqueued_js_assets_test_callback( int $number_of_assets = 5 ): array {
 		if ( $number_of_assets < self::WARNING_SCRIPTS_THRESHOLD ) {
@@ -304,6 +305,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 
 	/**
 	 * @param int $number_of_assets Number of styles mocked.
+	 * @return array<string, mixed>
 	 */
 	public function mock_data_perflab_aea_enqueued_css_assets_test_callback( int $number_of_assets = 5 ): array {
 		if ( $number_of_assets < self::WARNING_STYLES_THRESHOLD ) {

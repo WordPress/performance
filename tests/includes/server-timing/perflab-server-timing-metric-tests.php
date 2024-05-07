@@ -10,6 +10,7 @@
  */
 class Perflab_Server_Timing_Metric_Tests extends WP_UnitTestCase {
 
+	/** @var Perflab_Server_Timing_Metric */
 	private $metric;
 
 	public function set_up(): void {

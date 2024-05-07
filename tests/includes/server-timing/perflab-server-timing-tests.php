@@ -15,7 +15,10 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	 */
 	private $server_timing;
 
+	/** @var int */
 	private static $admin_id;
+
+	/** @var array<string, mixed> */
 	private static $dummy_args;
 
 	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
@@ -149,6 +152,8 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
 	/**
 	 * @dataProvider data_get_header
+	 *
+	 * @phpstan-param array<string, mixed> $metrics
 	 */
 	public function test_get_header( string $expected, array $metrics ): void {
 		foreach ( $metrics as $metric_slug => $args ) {
