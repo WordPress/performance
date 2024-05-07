@@ -3,7 +3,6 @@ includes:
 parameters:
 	level: 6
 	treatPhpDocTypesAsCertain: false
-	checkGenericClassInNonGenericObjectType: false
 	paths:
 		- load.php
 		- includes/

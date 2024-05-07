@@ -94,6 +94,8 @@ add_action( 'rest_api_init', 'od_register_endpoint' );
  * @since 0.1.0
  * @access private
  *
+ * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+ *
  * @param WP_REST_Request $request Request.
  * @return WP_REST_Response|WP_Error Response.
  */
