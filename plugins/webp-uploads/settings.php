@@ -25,10 +25,12 @@ function webp_uploads_register_media_settings_field() {
 		'media',
 		'perflab_modern_image_format',
 		array(
-			'sanitize_callback' => static function ( $image_format ): string { return in_array( $image_format, array( 'webp', 'avif' ), true ) ? $image_format : 'webp'; },
-			'type'         => 'string',
-			'default'      => 'avif', // AVIF is the default if the editor supports it.
-			'show_in_rest' => false,
+			'sanitize_callback' => static function ( $image_format ): string {
+				return in_array( $image_format, array( 'webp', 'avif' ), true ) ? $image_format : 'webp';
+			},
+			'type'              => 'string',
+			'default'           => 'avif',                                                                                                                                    // AVIF is the default if the editor supports it.
+			'show_in_rest'      => false,
 		)
 	);
 
