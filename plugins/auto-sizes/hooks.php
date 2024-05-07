@@ -15,8 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @param array|mixed $attr Attributes for the image markup.
- * @return array The filtered attributes for the image markup.
+ * @param array<string, string>|mixed $attr Attributes for the image markup.
+ * @return array<string, string> The filtered attributes for the image markup.
  */
 function auto_sizes_update_image_attributes( $attr ): array {
 	if ( ! is_array( $attr ) ) {
