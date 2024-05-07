@@ -15,10 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @param array $attr Attributes for the image markup.
+ * @param array|mixed $attr Attributes for the image markup.
  * @return array The filtered attributes for the image markup.
  */
 function auto_sizes_update_image_attributes( $attr ): array {
+	if ( ! is_array( $attr ) ) {
+		$attr = array();
+	}
+
 	// Bail early if the image is not lazy-loaded.
 	if ( ! isset( $attr['loading'] ) || 'lazy' !== $attr['loading'] ) {
 		return $attr;
@@ -45,10 +49,14 @@ add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attri
  *
  * @since 1.0.0
  *
- * @param string $html The HTML image tag markup being filtered.
+ * @param string|mixed $html The HTML image tag markup being filtered.
  * @return string The filtered HTML image tag markup.
  */
 function auto_sizes_update_content_img_tag( $html ): string {
+	if ( ! is_string( $html ) ) {
+		$html = '';
+	}
+
 	// Bail early if the image is not lazy-loaded.
 	if ( false === strpos( $html, 'loading="lazy"' ) ) {
 		return $html;

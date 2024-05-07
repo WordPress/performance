@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param array $subsized_images       Path of all subsized image file of all mime types.
  * @return array Metadata with sources added.
  */
-function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_images, $subsized_images ): array {
+function webp_uploads_update_sources( array $metadata, array $valid_mime_transforms, array $main_images, array $subsized_images ): array {
 	foreach ( $valid_mime_transforms as $targeted_mime ) {
 		// Make sure the path and file exists as those values are required.
 		$image_directory = null;
@@ -86,21 +86,21 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_i
  *
  * @since 1.0.0
  *
- * @param bool|null       $override  Value to return instead of saving. Default null.
+ * @param bool|null|mixed $override  Value to return instead of saving. Default null.
  * @param string          $file_path Name of the file to be saved.
  * @param WP_Image_Editor $editor    The image editor instance.
  * @param string          $mime_type The mime type of the image.
  * @param int             $post_id   Attachment post ID.
  * @return bool|null Potentially modified $override value.
  */
-function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mime_type, $post_id ): ?bool {
+function webp_uploads_update_image_onchange( $override, string $file_path, WP_Image_Editor $editor, string $mime_type, int $post_id ): ?bool {
 	if ( null !== $override ) {
-		return $override;
+		return (bool) $override;
 	}
 
 	$transforms = webp_uploads_get_upload_image_mime_transforms();
 	if ( empty( $transforms[ $mime_type ] ) ) {
-		return $override;
+		return null;
 	}
 
 	$mime_transforms = $transforms[ $mime_type ];
@@ -227,7 +227,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 		2
 	);
 
-	return $override;
+	return null;
 }
 add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 10, 5 );
 
@@ -244,7 +244,7 @@ add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 1
  * @param int   $attachment_id The ID of the current attachment.
  * @return array The updated metadata for the attachment to be stored in the meta table.
  */
-function webp_uploads_update_attachment_metadata( $data, $attachment_id ): array {
+function webp_uploads_update_attachment_metadata( array $data, int $attachment_id ): array {
 	// PHPCS ignore reason: Update the attachment's metadata by either restoring or editing it.
 	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
 	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
@@ -277,7 +277,7 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  * @param array $data          The current metadata of the attachment.
  * @return array The updated metadata for the attachment.
  */
-function webp_uploads_backup_sources( $attachment_id, $data ): array {
+function webp_uploads_backup_sources( int $attachment_id, array $data ): array {
 	// PHPCS ignore reason: A nonce check is not necessary here as this logic directly ties in with WordPress core
 	// function `wp_ajax_image_editor()` which already has one.
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -336,7 +336,7 @@ function webp_uploads_backup_sources( $attachment_id, $data ): array {
  * @param int   $attachment_id The ID of the attachment.
  * @param array $sources       An array with the full sources to be stored on the next available key.
  */
-function webp_uploads_backup_full_image_sources( $attachment_id, $sources ): void {
+function webp_uploads_backup_full_image_sources( int $attachment_id, array $sources ): void {
 	if ( empty( $sources ) ) {
 		return;
 	}
@@ -363,7 +363,7 @@ function webp_uploads_backup_full_image_sources( $attachment_id, $sources ): voi
  * @param int $attachment_id The ID of the attachment.
  * @return null|string The next available full size name.
  */
-function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ): ?string {
+function webp_uploads_get_next_full_size_key_from_backup( int $attachment_id ): ?string {
 	$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 	$backup_sizes = is_array( $backup_sizes ) ? $backup_sizes : array();
 
@@ -401,7 +401,7 @@ function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ): ?str
  * @param array $data          The current metadata to be stored in the attachment.
  * @return array The updated metadata of the attachment.
  */
-function webp_uploads_restore_image( $attachment_id, $data ): array {
+function webp_uploads_restore_image( int $attachment_id, array $data ): array {
 	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 	if ( ! is_array( $backup_sources ) ) {
 		$backup_sources = array();

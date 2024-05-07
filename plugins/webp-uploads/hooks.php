@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *     }>
  * } An array with the updated structure for the metadata before is stored in the database.
  */
-function webp_uploads_create_sources_property( array $metadata, $attachment_id ): array {
+function webp_uploads_create_sources_property( array $metadata, int $attachment_id ): array {
 	// This should take place only on the JPEG image.
 	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
 
@@ -238,7 +238,7 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
  * @param int   $attachment_id The ID of the attachment.
  * @return array Associative array of arrays of image sub-sizes.
  */
-function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta, $attachment_id ): array {
+function webp_uploads_wp_get_missing_image_subsizes( array $missing_sizes, array $image_meta, int $attachment_id ): array {
 	// Only setup the trace array if we no longer have more sizes.
 	if ( ! empty( $missing_sizes ) ) {
 		return $missing_sizes;
@@ -324,7 +324,7 @@ add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_outp
  *
  * @param int $attachment_id The ID of the attachment the sources are going to be deleted.
  */
-function webp_uploads_remove_sources_files( $attachment_id ): void {
+function webp_uploads_remove_sources_files( int $attachment_id ): void {
 	$file = get_attached_file( $attachment_id );
 
 	if ( empty( $file ) ) {
@@ -492,7 +492,7 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  * @param string $content The content of the current post.
  * @return string The content with the updated references to the images.
  */
-function webp_uploads_update_image_references( $content ): string {
+function webp_uploads_update_image_references( string $content ): string {
 	// Bail early if request is not for the frontend.
 	if ( ! webp_uploads_in_frontend_body() ) {
 		return $content;
@@ -552,7 +552,7 @@ add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
  * @param int    $attachment_id  The ID of the attachment being modified.
  * @return string The updated img tag.
  */
-function webp_uploads_img_tag_update_mime_type( $original_image, $context, $attachment_id ): string {
+function webp_uploads_img_tag_update_mime_type( string $original_image, string $context, int $attachment_id ): string {
 	$image    = $original_image;
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 
@@ -669,7 +669,7 @@ function webp_uploads_img_tag_update_mime_type( $original_image, $context, $atta
  * @param int    $attachment_id The ID of the attachment image.
  * @return string The updated HTML markup.
  */
-function webp_uploads_update_featured_image( $html, $post_id, $attachment_id ): string {
+function webp_uploads_update_featured_image( string $html, int $post_id, int $attachment_id ): string {
 	return webp_uploads_img_tag_update_mime_type( $html, 'post_thumbnail_html', $attachment_id );
 }
 add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );
@@ -766,7 +766,7 @@ function webp_uploads_get_image_sizes_additional_mime_type_support(): array {
  * @param string $mime_type Image mime type.
  * @return int The updated quality for mime types.
  */
-function webp_uploads_modify_webp_quality( $quality, $mime_type ): int {
+function webp_uploads_modify_webp_quality( int $quality, string $mime_type ): int {
 	// For WebP images, always return 82 (other MIME types were already using 82 by default anyway).
 	if ( 'image/webp' === $mime_type ) {
 		return 82;

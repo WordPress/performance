@@ -79,7 +79,7 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
  *
  * @return array{ file: string, filesize: int }|WP_Error An array with the file and filesize if the image was created correctly, otherwise a WP_Error.
  */
-function webp_uploads_generate_additional_image_source( $attachment_id, $image_size, array $size_data, $mime, $destination_file_name = null ) {
+function webp_uploads_generate_additional_image_source( int $attachment_id, string $image_size, array $size_data, string $mime, ?string $destination_file_name = null ) {
 	/**
 	 * Filter to allow the generation of additional image sources, in which a defined mime type
 	 * can be transformed and create additional mime types for the file.
@@ -198,7 +198,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
  *
  * @return array{ file: string, filesize: int }|WP_Error
  */
-function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
+function webp_uploads_generate_image_size( int $attachment_id, string $size, string $mime ) {
 	$sizes    = wp_get_registered_image_subsizes();
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 
@@ -244,7 +244,7 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
  * @param string $size          The attachment size.
  * @return array The attachment sources array.
  */
-function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail' ): array {
+function webp_uploads_get_attachment_sources( int $attachment_id, string $size = 'thumbnail' ): array {
 	// Check for the sources attribute in attachment metadata.
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 
@@ -271,7 +271,7 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
  * @param string $context       The current context.
  * @return array Mime types to use for the image.
  */
-function webp_uploads_get_content_image_mimes( $attachment_id, $context ): array {
+function webp_uploads_get_content_image_mimes( int $attachment_id, string $context ): array {
 	$target_mimes = array( 'image/webp', 'image/jpeg' );
 
 	/**

@@ -150,7 +150,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	/**
 	 * @dataProvider data_get_header
 	 */
-	public function test_get_header( $expected, $metrics ): void {
+	public function test_get_header( string $expected, array $metrics ): void {
 		foreach ( $metrics as $metric_slug => $args ) {
 			$this->server_timing->register_metric( $metric_slug, $args );
 		}

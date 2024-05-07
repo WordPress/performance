@@ -33,7 +33,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @param string $html HTML to process.
 	 */
-	public function __construct( $html ) {
+	public function __construct( string $html ) {
 		$this->old_text_replacement_signature_needed = version_compare( get_bloginfo( 'version' ), '6.5', '<' );
 		parent::__construct( $html );
 	}
