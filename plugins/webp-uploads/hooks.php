@@ -725,7 +725,7 @@ JS;
 	wp_print_inline_script_tag(
 		sprintf(
 			'( %s )( "document", "img", "script", %s, %s )',
-			preg_replace( '/\s+/', '', $js_function ),
+			preg_replace( '/\s+/', ' ', $js_function ),
 			wp_json_encode( $detection_string ),
 			wp_json_encode( plugins_url( '/fallback.js', __FILE__ ) )
 		),
