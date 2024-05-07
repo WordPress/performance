@@ -250,10 +250,6 @@ function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
 	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
 
 	foreach ( $trace as $element ) {
-		if ( ! isset( $element['function'] ) ) {
-			continue;
-		}
-
 		switch ( $element['function'] ) {
 			case 'wp_save_image':
 				// Right after an image has been edited.
