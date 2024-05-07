@@ -22,7 +22,8 @@ function perflab_aea_enqueued_js_assets_test(): array {
 	 * If the test didn't run yet, deactivate.
 	 */
 	$enqueued_scripts = perflab_aea_get_total_enqueued_scripts();
-	if ( false === $enqueued_scripts ) {
+	$bytes_enqueued   = perflab_aea_get_total_size_bytes_enqueued_scripts();
+	if ( false === $enqueued_scripts || false === $bytes_enqueued ) {
 		// The return value is validated in JavaScript at:
 		// <https://github.com/WordPress/wordpress-develop/blob/d1e0a6241dcc34f4a5ed464a741116461a88d43b/src/js/_enqueues/admin/site-health.js#L65-L114>
 		// If the value lacks the required keys of test, label, and description then it is omitted.
@@ -48,7 +49,7 @@ function perflab_aea_enqueued_js_assets_test(): array {
 						'performance-lab'
 					),
 					$enqueued_scripts,
-					size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+					size_format( $bytes_enqueued )
 				)
 			)
 		),
@@ -74,7 +75,7 @@ function perflab_aea_enqueued_js_assets_test(): array {
 	 */
 	$scripts_size_threshold = apply_filters( 'perflab_aea_enqueued_scripts_byte_size_threshold', 300000 );
 
-	if ( $enqueued_scripts > $scripts_threshold || perflab_aea_get_total_size_bytes_enqueued_scripts() > $scripts_size_threshold ) {
+	if ( $enqueued_scripts > $scripts_threshold || $bytes_enqueued > $scripts_size_threshold ) {
 		$result['status'] = 'recommended';
 
 		$result['description'] = sprintf(
@@ -89,7 +90,7 @@ function perflab_aea_enqueued_js_assets_test(): array {
 						'performance-lab'
 					),
 					$enqueued_scripts,
-					size_format( perflab_aea_get_total_size_bytes_enqueued_scripts() )
+					size_format( $bytes_enqueued )
 				)
 			)
 		);
@@ -117,7 +118,8 @@ function perflab_aea_enqueued_js_assets_test(): array {
 function perflab_aea_enqueued_css_assets_test(): array {
 	// Omit if the test didn't run yet, omit.
 	$enqueued_styles = perflab_aea_get_total_enqueued_styles();
-	if ( false === $enqueued_styles ) {
+	$bytes_enqueued  = perflab_aea_get_total_size_bytes_enqueued_styles();
+	if ( false === $enqueued_styles || false === $bytes_enqueued ) {
 		// The return value is validated in JavaScript at:
 		// <https://github.com/WordPress/wordpress-develop/blob/d1e0a6241dcc34f4a5ed464a741116461a88d43b/src/js/_enqueues/admin/site-health.js#L65-L114>
 		// If the value lacks the required keys of test, label, and description then it is omitted.
@@ -142,7 +144,7 @@ function perflab_aea_enqueued_css_assets_test(): array {
 						'performance-lab'
 					),
 					$enqueued_styles,
-					size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+					size_format( $bytes_enqueued )
 				)
 			)
 		),
@@ -182,7 +184,7 @@ function perflab_aea_enqueued_css_assets_test(): array {
 						'performance-lab'
 					),
 					$enqueued_styles,
-					size_format( perflab_aea_get_total_size_bytes_enqueued_styles() )
+					size_format( $bytes_enqueued )
 				)
 			)
 		);
@@ -210,7 +212,7 @@ function perflab_aea_enqueued_css_assets_test(): array {
 function perflab_aea_get_total_enqueued_scripts() {
 	$enqueued_scripts      = false;
 	$list_enqueued_scripts = get_transient( 'aea_enqueued_front_page_scripts' );
-	if ( $list_enqueued_scripts ) {
+	if ( is_array( $list_enqueued_scripts ) ) {
 		$enqueued_scripts = count( $list_enqueued_scripts );
 	}
 	return $enqueued_scripts;
@@ -226,10 +228,12 @@ function perflab_aea_get_total_enqueued_scripts() {
 function perflab_aea_get_total_size_bytes_enqueued_scripts() {
 	$total_size            = false;
 	$list_enqueued_scripts = get_transient( 'aea_enqueued_front_page_scripts' );
-	if ( $list_enqueued_scripts ) {
+	if ( is_array( $list_enqueued_scripts ) ) {
 		$total_size = 0;
 		foreach ( $list_enqueued_scripts as $enqueued_script ) {
-			$total_size += $enqueued_script['size'];
+			if ( is_array( $enqueued_script ) && array_key_exists( 'size', $enqueued_script ) && is_int( $enqueued_script['size'] ) ) {
+				$total_size += $enqueued_script['size'];
+			}
 		}
 	}
 	return $total_size;
@@ -261,10 +265,12 @@ function perflab_aea_get_total_enqueued_styles() {
 function perflab_aea_get_total_size_bytes_enqueued_styles() {
 	$total_size           = false;
 	$list_enqueued_styles = get_transient( 'aea_enqueued_front_page_styles' );
-	if ( $list_enqueued_styles ) {
+	if ( is_array( $list_enqueued_styles ) ) {
 		$total_size = 0;
 		foreach ( $list_enqueued_styles as $enqueued_style ) {
-			$total_size += $enqueued_style['size'];
+			if ( is_array( $enqueued_style ) && array_key_exists( 'size', $enqueued_style ) && is_int( $enqueued_style['size'] ) ) {
+				$total_size += $enqueued_style['size'];
+			}
 		}
 	}
 	return $total_size;

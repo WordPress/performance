@@ -148,7 +148,7 @@ function perflab_register_default_server_timing_template_metrics(): void {
 			perflab_server_timing_register_metric(
 				'template',
 				array(
-					'measure_callback' => static function ( $metric ): void {
+					'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
 						$metric->measure_before();
 						add_action( 'perflab_server_timing_send_header', array( $metric, 'measure_after' ), PHP_INT_MAX );
 					},

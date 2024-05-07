@@ -60,6 +60,11 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 
 	set_transient( 'perflab_plugin_info_' . $plugin_slug, $plugin, HOUR_IN_SECONDS );
 
+	/**
+	 * Validated (mostly) plugin data.
+	 *
+	 * @var array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string} $plugin
+	 */
 	return $plugin;
 }
 

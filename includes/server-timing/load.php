@@ -227,5 +227,10 @@ function perflab_sanitize_server_timing_setting( $value ): array {
 
 	$value['output_buffering'] = (bool) $value['output_buffering'];
 
+	/**
+	 * Validated value.
+	 *
+	 * @var array{benchmarking_actions: string[], benchmarking_filters: string[], output_buffering: bool} $value
+	 */
 	return $value;
 }
