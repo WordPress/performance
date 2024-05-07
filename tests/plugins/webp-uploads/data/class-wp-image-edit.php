@@ -22,7 +22,7 @@ class WP_Image_Edit {
 	 *
 	 * @param int $attachment_id ID of the attachment for the image.
 	 */
-	public function __construct( $attachment_id ) {
+	public function __construct( int $attachment_id ) {
 		$this->attachment_id = $attachment_id;
 	}
 
@@ -88,7 +88,7 @@ class WP_Image_Edit {
 	 *
 	 * @return $this
 	 */
-	public function crop( $width, $height, $x, $y ) {
+	public function crop( int $width, int $height, int $x, int $y ) {
 		$this->changes[] = array(
 			'c' => array(
 				'x' => (int) $x,
@@ -142,7 +142,7 @@ class WP_Image_Edit {
 	 *
 	 * @return stdClass The operation resulted from calling `wp_save_image`
 	 */
-	public function save() {
+	public function save(): stdClass {
 		$_REQUEST['target']  = $this->target;
 		$_REQUEST['history'] = wp_slash( wp_json_encode( $this->changes ) );
 
@@ -160,7 +160,7 @@ class WP_Image_Edit {
 	 *
 	 * @return bool whether the operation to save the image was successfully or not.
 	 */
-	public function success() {
+	public function success(): bool {
 		if ( ! is_object( $this->result ) ) {
 			return false;
 		}

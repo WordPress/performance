@@ -7,7 +7,7 @@
 
 class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 
-	public function set_up() {
+	public function set_up(): void {
 		parent::set_up();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
@@ -18,7 +18,7 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_add_sources_to_rest_response() {
+	public function it_should_add_sources_to_rest_response(): void {
 		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
 
 		add_filter(
@@ -75,7 +75,7 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_check_media_details_in_rest_response() {
+	public function it_should_check_media_details_in_rest_response(): void {
 		$file_location = TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg';
 		$attachment_id = self::factory()->attachment->create_upload_object( $file_location );
 

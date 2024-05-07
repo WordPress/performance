@@ -18,7 +18,7 @@ class Dominant_Color_Image_Editor_Imagick_Test extends DominantColorTestCase {
 	 *
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
-	public function test_get_dominant_color( $image_path, $expected_color, $expected_transparency ) {
+	public function test_get_dominant_color( $image_path, $expected_color, $expected_transparency ): void {
 		if ( ! extension_loaded( 'imagick' ) || ! class_exists( 'Imagick', false ) ) {
 			$this->markTestSkipped( 'The Imagick PHP extension is not loaded.' );
 		}
@@ -47,7 +47,7 @@ class Dominant_Color_Image_Editor_Imagick_Test extends DominantColorTestCase {
 	 *
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
-	public function test_get_dominant_color_invalid( $image_path ) {
+	public function test_get_dominant_color_invalid( $image_path ): void {
 		if ( ! extension_loaded( 'imagick' ) || ! class_exists( 'Imagick', false ) ) {
 			$this->markTestSkipped( 'The Imagick PHP extension is not loaded.' );
 		}
@@ -68,7 +68,7 @@ class Dominant_Color_Image_Editor_Imagick_Test extends DominantColorTestCase {
 	 *
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
-	public function test_get_dominant_color_none_images( $image_path ) {
+	public function test_get_dominant_color_none_images( $image_path ): void {
 		if ( ! extension_loaded( 'imagick' ) || ! class_exists( 'Imagick', false ) ) {
 			$this->markTestSkipped( 'The Imagick PHP extension is not loaded.' );
 		}

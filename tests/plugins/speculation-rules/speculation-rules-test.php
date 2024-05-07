@@ -9,17 +9,17 @@ class Speculation_Rules_Tests extends WP_UnitTestCase {
 
 	private $original_wp_theme_features = array();
 
-	public function set_up() {
+	public function set_up(): void {
 		parent::set_up();
 		$this->original_wp_theme_features = $GLOBALS['_wp_theme_features'];
 	}
 
-	public function tear_down() {
+	public function tear_down(): void {
 		$GLOBALS['_wp_theme_features'] = $this->original_wp_theme_features;
 		parent::tear_down();
 	}
 
-	public function test_hooks() {
+	public function test_hooks(): void {
 		$this->assertSame( 10, has_action( 'wp_footer', 'plsr_print_speculation_rules' ) );
 		$this->assertSame( 10, has_action( 'wp_head', 'plsr_render_generator_meta_tag' ) );
 	}
@@ -39,7 +39,7 @@ class Speculation_Rules_Tests extends WP_UnitTestCase {
 	 * @dataProvider data_provider_to_test_print_speculation_rules
 	 * @covers ::plsr_print_speculation_rules
 	 */
-	public function test_plsr_print_speculation_rules_without_html5_support( bool $html5_support ) {
+	public function test_plsr_print_speculation_rules_without_html5_support( bool $html5_support ): void {
 		if ( $html5_support ) {
 			add_theme_support( 'html5', array( 'script' ) );
 		} else {
@@ -67,7 +67,7 @@ class Speculation_Rules_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::plsr_render_generator_meta_tag
 	 */
-	public function test_plsr_render_generator_meta_tag() {
+	public function test_plsr_render_generator_meta_tag(): void {
 		$tag = get_echo( 'plsr_render_generator_meta_tag' );
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );

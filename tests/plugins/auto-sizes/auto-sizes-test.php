@@ -18,7 +18,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	/**
 	 * Setup shared fixtures.
 	 */
-	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ) {
+	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
 		self::$image_id = $factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 	}
 
@@ -28,11 +28,11 @@ class AutoSizesTests extends WP_UnitTestCase {
 	 * @param int $attachment_id Attachment ID.
 	 * @return string Image markup.
 	 */
-	public function get_image_tag( $attachment_id ) {
+	public function get_image_tag( int $attachment_id ): string {
 		return get_image_tag( $attachment_id, '', '', '', 'large' );
 	}
 
-	public function test_hooks() {
+	public function test_hooks(): void {
 		$this->assertSame( 10, has_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' ) );
 		$this->assertSame( 10, has_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' ) );
 		$this->assertSame( 10, has_action( 'wp_head', 'auto_sizes_render_generator' ) );
@@ -43,7 +43,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	 *
 	 * @covers ::auto_sizes_update_image_attributes
 	 */
-	public function test_image_with_lazy_loading_has_auto_sizes() {
+	public function test_image_with_lazy_loading_has_auto_sizes(): void {
 		$this->assertStringContainsString(
 			'sizes="auto, ',
 			wp_get_attachment_image( self::$image_id, 'large', false, array( 'loading' => 'lazy' ) )
@@ -55,7 +55,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	 *
 	 * @covers ::auto_sizes_update_image_attributes
 	 */
-	public function test_image_without_lazy_loading_does_not_have_auto_sizes() {
+	public function test_image_without_lazy_loading_does_not_have_auto_sizes(): void {
 		$this->assertStringContainsString(
 			'sizes="(max-width: 1024px) 100vw, 1024px"',
 			wp_get_attachment_image( self::$image_id, 'large', false, array( 'loading' => '' ) )
@@ -67,7 +67,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	 *
 	 * @covers ::auto_sizes_update_content_img_tag
 	 */
-	public function test_content_image_with_lazy_loading_has_auto_sizes() {
+	public function test_content_image_with_lazy_loading_has_auto_sizes(): void {
 		// Force lazy loading attribute.
 		add_filter( 'wp_img_tag_add_loading_attr', '__return_true' );
 
@@ -84,7 +84,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	 *
 	 * @covers ::auto_sizes_update_content_img_tag
 	 */
-	public function test_content_image_without_lazy_loading_does_not_have_auto_sizes() {
+	public function test_content_image_without_lazy_loading_does_not_have_auto_sizes(): void {
 		// Disable lazy loading attribute.
 		add_filter( 'wp_img_tag_add_loading_attr', '__return_false' );
 
@@ -99,7 +99,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	 *
 	 * @covers ::auto_sizes_render_generator
 	 */
-	public function test_auto_sizes_render_generator() {
+	public function test_auto_sizes_render_generator(): void {
 		$tag = get_echo( 'auto_sizes_render_generator' );
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );

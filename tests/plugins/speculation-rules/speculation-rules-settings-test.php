@@ -10,7 +10,7 @@ class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::plsr_register_setting
 	 */
-	public function test_plsr_register_setting() {
+	public function test_plsr_register_setting(): void {
 		unregister_setting( 'reading', 'plsr_speculation_rules' );
 		$settings = get_registered_settings();
 		$this->assertArrayNotHasKey( 'plsr_speculation_rules', $settings );
@@ -27,7 +27,7 @@ class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
 	 * @param mixed $input    Input.
 	 * @param array $expected Expected.
 	 */
-	public function test_plsr_sanitize_setting( $input, array $expected ) {
+	public function test_plsr_sanitize_setting( $input, array $expected ): void {
 		$this->assertSameSets(
 			$expected,
 			plsr_sanitize_setting( $input )
@@ -103,7 +103,7 @@ class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::plsr_add_settings_action_link
 	 */
-	public function test_plsr_add_settings_action_link() {
+	public function test_plsr_add_settings_action_link(): void {
 		$this->assertSame( 10, has_filter( 'plugin_action_links_' . SPECULATION_RULES_MAIN_FILE, 'plsr_add_settings_action_link' ) );
 		$this->assertFalse( plsr_add_settings_action_link( false ) );
 

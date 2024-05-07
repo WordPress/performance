@@ -16,7 +16,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_an_error_when_creating_an_additional_image_source_with_invalid_parameters( $attachment_id, $size_data, $mime, $destination_file = null ) {
+	public function it_should_return_an_error_when_creating_an_additional_image_source_with_invalid_parameters( $attachment_id, $size_data, $mime, $destination_file = null ): void {
 		$this->assertInstanceOf( WP_Error::class, webp_uploads_generate_additional_image_source( $attachment_id, $size_data, $mime, $destination_file ) );
 	}
 
@@ -77,7 +77,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_create_an_image_with_the_default_suffix_in_the_same_location_when_no_destination_is_specified() {
+	public function it_should_create_an_image_with_the_default_suffix_in_the_same_location_when_no_destination_is_specified(): void {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
@@ -109,7 +109,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_create_a_file_in_the_specified_location_with_the_specified_name() {
+	public function it_should_create_a_file_in_the_specified_location_with_the_specified_name(): void {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
@@ -137,7 +137,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_prevent_processing_an_image_with_corrupted_metadata( callable $callback, $size ) {
+	public function it_should_prevent_processing_an_image_with_corrupted_metadata( callable $callback, $size ): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
 		);
@@ -181,7 +181,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_prevent_to_create_an_image_size_when_attached_file_does_not_exists() {
+	public function it_should_prevent_to_create_an_image_size_when_attached_file_does_not_exists(): void {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
@@ -209,7 +209,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_prevent_to_create_a_subsize_if_the_image_editor_does_not_exists() {
+	public function it_should_prevent_to_create_a_subsize_if_the_image_editor_does_not_exists(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
@@ -226,7 +226,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_prevent_to_upload_a_mime_that_is_not_supported_by_wordpress() {
+	public function it_should_prevent_to_upload_a_mime_that_is_not_supported_by_wordpress(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
 		);
@@ -240,7 +240,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_prevent_to_process_an_image_when_the_editor_does_not_support_the_format() {
+	public function it_should_prevent_to_process_an_image_when_the_editor_does_not_support_the_format(): void {
 		// Make sure no editor is available.
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg'
@@ -263,7 +263,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_create_an_image_with_filter_webp_uploads_pre_generate_additional_image_source() {
+	public function it_should_create_an_image_with_filter_webp_uploads_pre_generate_additional_image_source(): void {
 		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
@@ -297,7 +297,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_use_filesize_when_filter_webp_uploads_pre_generate_additional_image_source_returns_filesize() {
+	public function it_should_use_filesize_when_filter_webp_uploads_pre_generate_additional_image_source_returns_filesize(): void {
 		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
@@ -332,7 +332,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_an_error_when_filter_webp_uploads_pre_generate_additional_image_source_returns_wp_error() {
+	public function it_should_return_an_error_when_filter_webp_uploads_pre_generate_additional_image_source_returns_wp_error(): void {
 		remove_all_filters( 'webp_uploads_pre_generate_additional_image_source' );
 
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
@@ -360,7 +360,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_empty_array_when_filter_returns_empty_array() {
+	public function it_should_return_empty_array_when_filter_returns_empty_array(): void {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
@@ -374,7 +374,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_default_transforms_when_filter_returns_non_array_type() {
+	public function it_should_return_default_transforms_when_filter_returns_non_array_type(): void {
 		/** @phpstan-ignore-next-line */
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_null' );
 
@@ -394,7 +394,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_fallback_transforms_when_overwritten_invalid_transforms() {
+	public function it_should_return_fallback_transforms_when_overwritten_invalid_transforms(): void {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
 			static function () {
@@ -413,7 +413,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_custom_transforms_when_overwritten_by_filter() {
+	public function it_should_return_custom_transforms_when_overwritten_by_filter(): void {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
 			static function () {
@@ -432,7 +432,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_jpeg_and_webp_transforms_when_option_generate_webp_and_jpeg_set() {
+	public function it_should_return_jpeg_and_webp_transforms_when_option_generate_webp_and_jpeg_set(): void {
 		remove_all_filters( 'webp_uploads_get_upload_image_mime_transforms' );
 
 		update_option( 'perflab_generate_webp_and_jpeg', true );
@@ -454,7 +454,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_discard_additional_image_if_larger_than_the_original_image( $original_filesize, $additional_filesize, $expected_status ) {
+	public function it_should_discard_additional_image_if_larger_than_the_original_image( $original_filesize, $additional_filesize, $expected_status ): void {
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
 		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
@@ -486,45 +486,45 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_never_discard_additional_image_if_filter_is_false( $original_filesize, $additional_filesize ) {
+	public function it_should_never_discard_additional_image_if_filter_is_false( $original_filesize, $additional_filesize ): void {
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
 
 		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
 		$this->assertFalse( $output );
 	}
 
-	public function test_webp_uploads_in_frontend_body_without_wp_query() {
+	public function test_webp_uploads_in_frontend_body_without_wp_query(): void {
 		unset( $GLOBALS['wp_query'] );
 
 		$this->assertFalse( webp_uploads_in_frontend_body() );
 	}
 
-	public function test_webp_uploads_in_frontend_body_with_feed() {
+	public function test_webp_uploads_in_frontend_body_with_feed(): void {
 		$this->mock_empty_action( 'template_redirect' );
 		$GLOBALS['wp_query']->is_feed = true;
 
 		$this->assertFalse( webp_uploads_in_frontend_body() );
 	}
 
-	public function test_webp_uploads_in_frontend_body_without_template_redirect() {
+	public function test_webp_uploads_in_frontend_body_without_template_redirect(): void {
 		$this->assertFalse( webp_uploads_in_frontend_body() );
 	}
 
-	public function test_webp_uploads_in_frontend_body_before_template_redirect() {
+	public function test_webp_uploads_in_frontend_body_before_template_redirect(): void {
 		$result = webp_uploads_in_frontend_body();
 		$this->mock_empty_action( 'template_redirect' );
 
 		$this->assertFalse( $result );
 	}
 
-	public function test_webp_uploads_in_frontend_body_after_template_redirect() {
+	public function test_webp_uploads_in_frontend_body_after_template_redirect(): void {
 		$this->mock_empty_action( 'template_redirect' );
 		$result = webp_uploads_in_frontend_body();
 
 		$this->assertTrue( $result );
 	}
 
-	public function test_webp_uploads_in_frontend_body_within_wp_head() {
+	public function test_webp_uploads_in_frontend_body_within_wp_head(): void {
 		$this->mock_empty_action( 'template_redirect' );
 
 		// Call function within a 'wp_head' callback.
@@ -532,7 +532,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$result = null;
 		add_action(
 			'wp_head',
-			static function () use ( &$result ) {
+			static function () use ( &$result ): void {
 				$result = webp_uploads_in_frontend_body();
 			}
 		);
@@ -541,7 +541,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$this->assertFalse( $result );
 	}
 
-	private function mock_empty_action( $action ) {
+	private function mock_empty_action( $action ): void {
 		remove_all_actions( $action );
 		do_action( $action );
 	}
@@ -553,7 +553,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_add_original_image_extension_to_the_webp_file_name_to_ensure_it_is_unique( $jpeg_image, $jpg_image ) {
+	public function it_should_add_original_image_extension_to_the_webp_file_name_to_ensure_it_is_unique( $jpeg_image, $jpg_image ): void {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}

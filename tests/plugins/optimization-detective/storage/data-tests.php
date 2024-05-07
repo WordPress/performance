@@ -586,7 +586,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	 * @param string ...$breadcrumbs List of tags.
 	 * @return string XPath.
 	 */
-	private function get_xpath( ...$breadcrumbs ): string {
+	private function get_xpath( string ...$breadcrumbs ): string {
 		return implode(
 			'',
 			array_map(

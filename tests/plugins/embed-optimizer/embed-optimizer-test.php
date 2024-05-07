@@ -7,7 +7,7 @@
 
 class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 
-	public function test_hooks() {
+	public function test_hooks(): void {
 		$this->assertSame( 10, has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' ) );
 		$this->assertSame( 10, has_action( 'wp_head', 'embed_optimizer_render_generator' ) );
 	}
@@ -18,7 +18,7 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 	 * @covers ::embed_optimizer_filter_oembed_html
 	 * @dataProvider get_data_to_test_filter_oembed_html_data
 	 */
-	public function test_embed_optimizer_filter_oembed_html( string $html, string $expected = null ) {
+	public function test_embed_optimizer_filter_oembed_html( string $html, string $expected = null ): void {
 		if ( null === $expected ) {
 			$expected = $html; // No change.
 		}
@@ -27,8 +27,6 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Data provider for oEmbed HTML tests.
-	 *
-	 * @return array
 	 */
 	public function get_data_to_test_filter_oembed_html_data(): array {
 		return array(
@@ -140,7 +138,7 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::embed_optimizer_lazy_load_scripts
 	 */
-	public function test_embed_optimizer_lazy_load_scripts() {
+	public function test_embed_optimizer_lazy_load_scripts(): void {
 		$script = trim( get_echo( 'embed_optimizer_lazy_load_scripts' ) );
 		$this->assertStringStartsWith( '<script type="module">', $script );
 		$this->assertStringContainsString( 'IntersectionObserver', $script );
@@ -167,7 +165,7 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::embed_optimizer_render_generator
 	 */
-	public function test_embed_optimizer_render_generator() {
+	public function test_embed_optimizer_render_generator(): void {
 		$tag = get_echo( 'embed_optimizer_render_generator' );
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );

@@ -15,14 +15,14 @@ class OD_Detection_Tests extends WP_UnitTestCase {
 	public function data_provider_od_get_detection_script(): array {
 		return array(
 			'unfiltered' => array(
-				'set_up'           => static function () {},
+				'set_up'           => static function (): void {},
 				'expected_exports' => array(
 					'detectionTimeWindow' => 5000,
 					'storageLockTTL'      => MINUTE_IN_SECONDS,
 				),
 			),
 			'filtered'   => array(
-				'set_up'           => static function () {
+				'set_up'           => static function (): void {
 					add_filter(
 						'od_detection_time_window',
 						static function (): int {

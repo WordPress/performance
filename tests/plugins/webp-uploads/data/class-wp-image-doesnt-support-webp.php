@@ -21,9 +21,8 @@ class WP_Image_Doesnt_Support_WebP extends WP_Image_Editor_Imagick {
 	 * Checks to see if editor supports the mime-type specified.
 	 *
 	 * @param string $mime_type The mime type to check.
-	 * @return bool
 	 */
-	public static function supports_mime_type( $mime_type ) {
+	public static function supports_mime_type( string $mime_type ): bool {
 		return 'image/webp' !== $mime_type;
 	}
 }
