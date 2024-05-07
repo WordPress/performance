@@ -14,9 +14,8 @@
  * @since 2.1.0
  * @since 6.0.0 The `$filesize` value was added to the returned array.
  *
- * @param int $attachment_id Attachment post ID. Defaults to global $post.
+ * @param int  $attachment_id Attachment post ID. Defaults to global $post.
  * @param bool $unfiltered    Optional. If true, filters are not run. Default false.
- *
  * @return array{
  *     width: int,
  *     height: int,
