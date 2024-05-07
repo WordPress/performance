@@ -25,7 +25,10 @@ class Perflab_Server_Timing {
 	 * Map of registered metric slugs and their registered data.
 	 *
 	 * @since 1.8.0
-	 * @var array<string, array{measure_callback: callable, access_cap: string}>
+	 * @var array<string, array{
+	 *          measure_callback: callable( Perflab_Server_Timing_Metric ): bool,
+	 *          access_cap: string
+	 *      }>
 	 */
 	private $registered_metrics_data = array();
 
