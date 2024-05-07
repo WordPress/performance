@@ -49,6 +49,6 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 		unset( $data['media_details']['sources'] );
 	}
 
-	return rest_ensure_response( $data );
+	return new WP_REST_Response( $data );
 }
 add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 2 );

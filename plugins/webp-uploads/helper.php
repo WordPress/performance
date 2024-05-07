@@ -109,18 +109,18 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 
 	if (
 		is_array( $image ) &&
-		! empty( $image['file'] ) &&
-		(
-			! empty( $image['path'] ) ||
-			array_key_exists( 'filesize', $image )
-		)
+		array_key_exists( 'file', $image ) &&
+		is_string( $image['file'] )
 	) {
-		return array(
-			'file'     => $image['file'],
-			'filesize' => array_key_exists( 'filesize', $image )
-				? $image['filesize']
-				: wp_filesize( $image['path'] ),
-		);
+		if ( array_key_exists( 'filesize', $image ) && is_int( $image['filesize'] ) ) {
+			return $image;
+		}
+		if ( array_key_exists( 'path', $image ) ) {
+			return array(
+				'file'     => $image['file'],
+				'filesize' => wp_filesize( $image['path'] ),
+			);
+		}
 	}
 
 	$allowed_mimes = array_flip( wp_get_mime_types() );
@@ -133,7 +133,7 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	}
 
 	$image_path = wp_get_original_image_path( $attachment_id );
-	if ( ! file_exists( $image_path ) ) {
+	if ( ! $image_path || ! file_exists( $image_path ) ) {
 		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'webp-uploads' ) );
 	}
 
