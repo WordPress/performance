@@ -13,7 +13,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
 
-$od_delete_site_data = static function () {
+$od_delete_site_data = static function (): void {
 	// Delete all URL Metrics posts for the current site.
 	OD_URL_Metrics_Post_Type::delete_all_posts();
 	wp_unschedule_hook( OD_URL_Metrics_Post_Type::GC_CRON_EVENT_NAME );

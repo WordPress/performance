@@ -7,10 +7,8 @@ use WP_UnitTestCase;
 abstract class DominantColorTestCase extends WP_UnitTestCase {
 	/**
 	 * Data provider for test_get_dominant_color_GD.
-	 *
-	 * @return array
 	 */
-	public function provider_get_dominant_color() {
+	public function provider_get_dominant_color(): array {
 		return array(
 			'animated_gif'  => array(
 				'image_path'            => TESTS_PLUGIN_DIR . '/tests/plugins/dominant-color-images/data/images/animated.gif',
@@ -105,10 +103,8 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 
 	/**
 	 * Data provider for test_get_dominant_color_GD.
-	 *
-	 * @return array
 	 */
-	public function provider_get_dominant_color_invalid_images() {
+	public function provider_get_dominant_color_invalid_images(): array {
 		return array(
 			'tiff' => array(
 				'image_path' => TESTS_PLUGIN_DIR . '/tests/plugins/dominant-color-images/data/images/test-image.tiff',
@@ -121,10 +117,8 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 
 	/**
 	 * Data provider for test_get_dominant_color_GD.
-	 *
-	 * @return array
 	 */
-	public function provider_get_dominant_color_none_images() {
+	public function provider_get_dominant_color_none_images(): array {
 		return array(
 			'pdf' => array(
 				'files_path' => TESTS_PLUGIN_DIR . '/tests/plugins/dominant-color-images/data/images/wordpress-gsoc-flyer.pdf',

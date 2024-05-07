@@ -36,7 +36,7 @@ class ImageHasSource extends Constraint {
 	/**
 	 * Tells to check for absence of the mime type.
 	 */
-	public function isNot() {
+	public function isNot(): void {
 		$this->is_not = true;
 	}
 
@@ -84,7 +84,7 @@ class ImageHasSource extends Constraint {
 	 * @param array $sources The sources array.
 	 * @return bool TRUE if the sources array contains the correct mime type source, otherwise FALSE.
 	 */
-	protected function verify_sources( $sources ) {
+	protected function verify_sources( $sources ): bool {
 		// Fail if the mime type is supposed not to exist, but it is set.
 		if ( $this->is_not ) {
 			return ! isset( $sources[ $this->mime_type ] );

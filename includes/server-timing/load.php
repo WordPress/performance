@@ -26,8 +26,6 @@ define( 'PERFLAB_SERVER_TIMING_SCREEN', 'perflab-server-timing' );
  * its action hooks as expected.
  *
  * @since 1.8.0
- *
- * @return Perflab_Server_Timing
  */
 function perflab_server_timing(): Perflab_Server_Timing {
 	static $server_timing;
@@ -118,7 +116,7 @@ function perflab_wrap_server_timing( callable $callback, string $metric_slug, st
 			perflab_server_timing_register_metric(
 				$metric_slug,
 				array(
-					'measure_callback' => static function ( $metric ) use ( &$server_timing_metric ) {
+					'measure_callback' => static function ( $metric ) use ( &$server_timing_metric ): void {
 						$server_timing_metric = $metric;
 					},
 					'access_cap'       => $access_cap,

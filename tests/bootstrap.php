@@ -51,7 +51,7 @@ if ( $plugin_name ) {
 	$plugin_test_path = TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name;
 	tests_add_filter(
 		'plugins_loaded',
-		static function () use ( $plugin_test_path, $plugin_name ) {
+		static function () use ( $plugin_test_path, $plugin_name ): void {
 			// Check if plugin has a "plugin/plugin.php" file.
 			if ( file_exists( $plugin_test_path . '/' . $plugin_name . '.php' ) ) {
 				require_once $plugin_test_path . '/' . $plugin_name . '.php';
@@ -74,7 +74,7 @@ if ( $plugin_name ) {
 	// Add filter to ensure the plugin's admin integration is loaded for tests.
 	tests_add_filter(
 		'plugins_loaded',
-		static function () {
+		static function (): void {
 			require_once TESTS_PLUGIN_DIR . '/includes/admin/load.php';
 			require_once TESTS_PLUGIN_DIR . '/includes/admin/server-timing.php';
 			require_once TESTS_PLUGIN_DIR . '/includes/admin/plugins.php';

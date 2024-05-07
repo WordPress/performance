@@ -14,7 +14,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aea_audit_enqueued_scripts() when transient is already set.
 	 */
-	public function test_perflab_aea_audit_enqueued_scripts_transient_already_set() {
+	public function test_perflab_aea_audit_enqueued_scripts_transient_already_set(): void {
 		/**
 		 * Prepare scenario for test.
 		 */
@@ -49,7 +49,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Tests perflab_aea_audit_enqueued_scripts() with no transient.
 	 * Enqueued scripts ( not belonging to core /wp-includes/ ) will be saved in transient.
 	 */
-	public function test_perflab_aea_audit_enqueued_scripts() {
+	public function test_perflab_aea_audit_enqueued_scripts(): void {
 		/**
 		 * Prepare scenario for test.
 		 */
@@ -83,7 +83,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aea_audit_enqueued_styles() when transient is already set.
 	 */
-	public function test_perflab_aea_audit_enqueued_styles_transient_already_set() {
+	public function test_perflab_aea_audit_enqueued_styles_transient_already_set(): void {
 		/**
 		 * Prepare scenario for test.
 		 */
@@ -123,7 +123,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	 * Tests perflab_aea_audit_enqueued_styles() with no transient.
 	 * Enqueued styles ( not belonging to core /wp-includes/ ) will be saved in transient.
 	 */
-	public function test_perflab_aea_audit_enqueued_styles() {
+	public function test_perflab_aea_audit_enqueued_styles(): void {
 		/**
 		 * Prepare scenario for test.
 		 */
@@ -163,7 +163,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	/**
 	 * Make sure perflab_aea_add_enqueued_assets_test adds the right information.
 	 */
-	public function test_perflab_aea_add_enqueued_assets_test() {
+	public function test_perflab_aea_add_enqueued_assets_test(): void {
 		$initial_tests = array(
 			'direct' => array(
 				'initial' => array(
@@ -188,14 +188,14 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	/**
 	 * Test perflab_aea_enqueued_js_assets_test() no transient saved.
 	 */
-	public function test_perflab_aea_enqueued_js_assets_test_no_transient() {
+	public function test_perflab_aea_enqueued_js_assets_test_no_transient(): void {
 		$this->assertSame( array( 'omitted' => true ), perflab_aea_enqueued_js_assets_test() );
 	}
 
 	/**
 	 * Test perflab_aea_enqueued_js_assets_test() with data in transient ( less than WARNING_SCRIPTS_threshold ).
 	 */
-	public function test_perflab_aea_enqueued_js_assets_test_with_assets_less_than_threshold() {
+	public function test_perflab_aea_enqueued_js_assets_test_with_assets_less_than_threshold(): void {
 		Audit_Assets_Transients_Set::set_script_transient_with_data( 1 );
 		$mocked_data = $this->mock_data_perflab_aea_enqueued_js_assets_test_callback( 1 );
 		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_js_assets_test() );
@@ -204,7 +204,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	/**
 	 * Test perflab_aea_enqueued_js_assets_test() with data in transient ( more than WARNING_SCRIPTS_threshold ).
 	 */
-	public function test_perflab_aea_enqueued_js_assets_test_with_assets_more_than_threshold() {
+	public function test_perflab_aea_enqueued_js_assets_test_with_assets_more_than_threshold(): void {
 		Audit_Assets_Transients_Set::set_script_transient_with_data( self::WARNING_SCRIPTS_THRESHOLD );
 		$mocked_data = $this->mock_data_perflab_aea_enqueued_js_assets_test_callback( self::WARNING_SCRIPTS_THRESHOLD );
 		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_js_assets_test() );
@@ -213,14 +213,14 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	/**
 	 * Test perflab_aea_enqueued_css_assets_test() no transient saved.
 	 */
-	public function test_perflab_aea_enqueued_css_assets_test_no_transient() {
+	public function test_perflab_aea_enqueued_css_assets_test_no_transient(): void {
 		$this->assertSame( array( 'omitted' => true ), perflab_aea_enqueued_css_assets_test() );
 	}
 
 	/**
 	 * Test perflab_aea_enqueued_css_assets_test() with data in transient ( less than WARNING_STYLES_threshold ).
 	 */
-	public function test_perflab_aea_enqueued_css_assets_test_with_assets_less_than_threshold() {
+	public function test_perflab_aea_enqueued_css_assets_test_with_assets_less_than_threshold(): void {
 		Audit_Assets_Transients_Set::set_style_transient_with_data( 1 );
 		$mocked_data = $this->mock_data_perflab_aea_enqueued_css_assets_test_callback( 1 );
 		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_css_assets_test() );
@@ -229,7 +229,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	/**
 	 * Test perflab_aea_enqueued_css_assets_test() with data in transient ( more than WARNING_STYLES_threshold ).
 	 */
-	public function test_aea_enqueued_cdd_assets_test_with_assets_more_than_threshold() {
+	public function test_aea_enqueued_cdd_assets_test_with_assets_more_than_threshold(): void {
 		Audit_Assets_Transients_Set::set_style_transient_with_data( self::WARNING_STYLES_THRESHOLD );
 		$mocked_data = $this->mock_data_perflab_aea_enqueued_css_assets_test_callback( self::WARNING_STYLES_THRESHOLD );
 		$this->assertEqualSets( $mocked_data, perflab_aea_enqueued_css_assets_test() );
@@ -238,7 +238,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aea_invalidate_cache_transients() functionality.
 	 */
-	public function test_perflab_aea_invalidate_cache_transients() {
+	public function test_perflab_aea_invalidate_cache_transients(): void {
 		Audit_Assets_Transients_Set::set_script_transient_with_data();
 		Audit_Assets_Transients_Set::set_style_transient_with_data();
 		perflab_aea_invalidate_cache_transients();
@@ -249,7 +249,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aea_clean_aea_audit_action() functionality.
 	 */
-	public function test_perflab_aea_clean_aea_audit_action() {
+	public function test_perflab_aea_clean_aea_audit_action(): void {
 		Audit_Assets_Transients_Set::set_script_transient_with_data();
 		Audit_Assets_Transients_Set::set_style_transient_with_data();
 		$_REQUEST['_wpnonce'] = wp_create_nonce( 'clean_aea_audit' );
@@ -279,7 +279,7 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	/**
 	 * Mock is_home in $wp_query.
 	 */
-	public function mock_is_front_page() {
+	public function mock_is_front_page(): void {
 		global $wp_query;
 		$wp_query->is_home = true;
 	}
@@ -287,17 +287,15 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 	/**
 	 * Adds view_site_health_checks capability to current user.
 	 */
-	public function current_user_can_view_site_health_checks_cap() {
+	public function current_user_can_view_site_health_checks_cap(): void {
 		$current_user = wp_get_current_user();
 		$current_user->add_cap( 'view_site_health_checks' );
 	}
 
 	/**
 	 * @param int $number_of_assets Number of assets mocked.
-	 *
-	 * @return array
 	 */
-	public function mock_data_perflab_aea_enqueued_js_assets_test_callback( $number_of_assets = 5 ) {
+	public function mock_data_perflab_aea_enqueued_js_assets_test_callback( $number_of_assets = 5 ): array {
 		if ( $number_of_assets < self::WARNING_SCRIPTS_THRESHOLD ) {
 			return Site_Health_Mock_Responses::return_aea_enqueued_js_assets_test_callback_less_than_threshold( $number_of_assets );
 		}
@@ -306,10 +304,8 @@ class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
 
 	/**
 	 * @param int $number_of_assets Number of styles mocked.
-	 *
-	 * @return array
 	 */
-	public function mock_data_perflab_aea_enqueued_css_assets_test_callback( $number_of_assets = 5 ) {
+	public function mock_data_perflab_aea_enqueued_css_assets_test_callback( $number_of_assets = 5 ): array {
 		if ( $number_of_assets < self::WARNING_STYLES_THRESHOLD ) {
 			return Site_Health_Mock_Responses::return_aea_enqueued_css_assets_test_callback_less_than_threshold( $number_of_assets );
 		}

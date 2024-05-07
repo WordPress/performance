@@ -15,7 +15,7 @@
  * @param string[] $editors Array of available image editor class names. Defaults are 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD'.
  * @return string[] Registered image editors class names.
  */
-function dominant_color_set_image_editors( $editors ) {
+function dominant_color_set_image_editors( $editors ): array {
 	if ( ! class_exists( 'Dominant_Color_Image_Editor_GD' ) ) {
 		require_once __DIR__ . '/class-dominant-color-image-editor-gd.php';
 	}
@@ -133,7 +133,7 @@ function dominant_color_get_attachment_file_path( $attachment_id, $size = 'mediu
  * @param int $attachment_id Attachment ID for image.
  * @return string|null Hex value of dominant color or null if not set.
  */
-function dominant_color_get_dominant_color( $attachment_id ) {
+function dominant_color_get_dominant_color( $attachment_id ): ?string {
 	if ( ! wp_attachment_is_image( $attachment_id ) ) {
 		return null;
 	}
@@ -157,7 +157,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
  * @param int $attachment_id Attachment ID for image.
  * @return bool|null Whether the image has transparency, or null if not set.
  */
-function dominant_color_has_transparency( $attachment_id ) {
+function dominant_color_has_transparency( $attachment_id ): ?bool {
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $image_meta ) ) {
 		return null;
@@ -182,7 +182,7 @@ function dominant_color_has_transparency( $attachment_id ) {
  *
  * @return string|null Hex color or null if error.
  */
-function dominant_color_rgb_to_hex( $red, $green, $blue ) {
+function dominant_color_rgb_to_hex( $red, $green, $blue ): ?string {
 	$range = range( 0, 255 );
 	if ( ! in_array( $red, $range, true ) || ! in_array( $green, $range, true ) || ! in_array( $blue, $range, true ) ) {
 		return null;

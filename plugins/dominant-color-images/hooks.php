@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param int   $attachment_id The attachment ID.
  * @return array $metadata The attachment metadata.
  */
-function dominant_color_metadata( $metadata, $attachment_id ) {
+function dominant_color_metadata( $metadata, $attachment_id ): array {
 	$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 	if ( ! is_wp_error( $dominant_color_data ) ) {
 		if ( isset( $dominant_color_data['dominant_color'] ) ) {
@@ -82,7 +82,7 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_update_attachm
  * @param int    $attachment_id  The attachment ID.
  * @return string image tag
  */
-function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id ) {
+function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id ): string {
 
 	// Only apply this in `the_content` for now, since otherwise it can result in duplicate runs due to a problem with full site editing logic.
 	if ( 'the_content' !== $context ) {
@@ -159,7 +159,7 @@ add_filter( 'wp_content_img_tag', 'dominant_color_img_tag_add_dominant_color', 2
  *
  * @since 1.0.0
  */
-function dominant_color_add_inline_style() {
+function dominant_color_add_inline_style(): void {
 	$handle = 'dominant-color-styles';
 	// PHPCS ignore reason: Version not used since this handle is only registered for adding an inline style.
 	// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
@@ -177,7 +177,7 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  *
  * @since 1.0.0
  */
-function dominant_color_render_generator() {
+function dominant_color_render_generator(): void {
 	// Use the plugin slug as it is immutable.
 	echo '<meta name="generator" content="dominant-color-images ' . esc_attr( DOMINANT_COLOR_IMAGES_VERSION ) . '">' . "\n";
 }

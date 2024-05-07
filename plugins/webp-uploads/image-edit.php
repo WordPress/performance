@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param array $subsized_images       Path of all subsized image file of all mime types.
  * @return array Metadata with sources added.
  */
-function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_images, $subsized_images ) {
+function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_images, $subsized_images ): array {
 	foreach ( $valid_mime_transforms as $targeted_mime ) {
 		// Make sure the path and file exists as those values are required.
 		$image_directory = null;
@@ -93,7 +93,7 @@ function webp_uploads_update_sources( $metadata, $valid_mime_transforms, $main_i
  * @param int             $post_id   Attachment post ID.
  * @return bool|null Potentially modified $override value.
  */
-function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mime_type, $post_id ) {
+function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mime_type, $post_id ): ?bool {
 	if ( null !== $override ) {
 		return $override;
 	}
@@ -244,7 +244,7 @@ add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 1
  * @param int   $attachment_id The ID of the current attachment.
  * @return array The updated metadata for the attachment to be stored in the meta table.
  */
-function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
+function webp_uploads_update_attachment_metadata( $data, $attachment_id ): array {
 	// PHPCS ignore reason: Update the attachment's metadata by either restoring or editing it.
 	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
 	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
@@ -277,7 +277,7 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  * @param array $data          The current metadata of the attachment.
  * @return array The updated metadata for the attachment.
  */
-function webp_uploads_backup_sources( $attachment_id, $data ) {
+function webp_uploads_backup_sources( $attachment_id, $data ): array {
 	// PHPCS ignore reason: A nonce check is not necessary here as this logic directly ties in with WordPress core
 	// function `wp_ajax_image_editor()` which already has one.
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -298,7 +298,7 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
 	// Prevent execution of the callbacks more than once if the callback was already executed.
 	$has_been_processed = false;
 
-	$hook = static function ( $meta_id, $post_id, $meta_name ) use ( $attachment_id, $sources, &$has_been_processed ) {
+	$hook = static function ( $meta_id, $post_id, $meta_name ) use ( $attachment_id, $sources, &$has_been_processed ): void {
 		// Make sure this hook is only executed in the same context for the provided $attachment_id.
 		if ( $post_id !== $attachment_id ) {
 			return;
@@ -336,7 +336,7 @@ function webp_uploads_backup_sources( $attachment_id, $data ) {
  * @param int   $attachment_id The ID of the attachment.
  * @param array $sources       An array with the full sources to be stored on the next available key.
  */
-function webp_uploads_backup_full_image_sources( $attachment_id, $sources ) {
+function webp_uploads_backup_full_image_sources( $attachment_id, $sources ): void {
 	if ( empty( $sources ) ) {
 		return;
 	}
@@ -363,7 +363,7 @@ function webp_uploads_backup_full_image_sources( $attachment_id, $sources ) {
  * @param int $attachment_id The ID of the attachment.
  * @return null|string The next available full size name.
  */
-function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) {
+function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ): ?string {
 	$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 	$backup_sizes = is_array( $backup_sizes ) ? $backup_sizes : array();
 
@@ -401,7 +401,7 @@ function webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) {
  * @param array $data          The current metadata to be stored in the attachment.
  * @return array The updated metadata of the attachment.
  */
-function webp_uploads_restore_image( $attachment_id, $data ) {
+function webp_uploads_restore_image( $attachment_id, $data ): array {
 	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 	if ( ! is_array( $backup_sources ) ) {
 		$backup_sources = array();
@@ -430,7 +430,7 @@ function webp_uploads_restore_image( $attachment_id, $data ) {
  *
  * @return bool True if editing image thumbnails is enabled, false otherwise.
  */
-function webp_uploads_image_edit_thumbnails_separately() {
+function webp_uploads_image_edit_thumbnails_separately(): bool {
 	/** This filter is documented in wp-admin/includes/image-edit.php */
 	return (bool) apply_filters( 'image_edit_thumbnails_separately', false );
 }

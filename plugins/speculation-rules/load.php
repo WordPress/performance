@@ -28,9 +28,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param string  $version         Version.
 	 * @param Closure $load            Callback that loads the plugin.
 	 */
-	static function ( string $global_var_name, string $version, Closure $load ) {
+	static function ( string $global_var_name, string $version, Closure $load ): void {
 		if ( ! isset( $GLOBALS[ $global_var_name ] ) ) {
-			$bootstrap = static function () use ( $global_var_name ) {
+			$bootstrap = static function () use ( $global_var_name ): void {
 				if (
 					isset( $GLOBALS[ $global_var_name ]['load'], $GLOBALS[ $global_var_name ]['version'] )
 					&&
@@ -66,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 )(
 	'plsr_pending_plugin_info',
 	'1.2.2',
-	static function ( string $version ) {
+	static function ( string $version ): void {
 
 		// Define the constant.
 		if ( defined( 'SPECULATION_RULES_VERSION' ) ) {
