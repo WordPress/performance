@@ -649,7 +649,7 @@ function webp_uploads_img_tag_update_mime_type( $original_image, $context, $atta
 			$image !== $original_image &&
 			'the_content' === $context &&
 			'image/jpeg' === $original_mime &&
-			'image/webp' === $target_mime
+			$target_mime ==='image/' . webp_uploads_get_image_output_format()
 		) {
 			add_action( 'wp_footer', 'webp_uploads_wepb_fallback' );
 		}
@@ -682,8 +682,7 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
 function webp_uploads_wepb_fallback() {
 	// Get mime type transforms for the site.
 	$transforms   = webp_uploads_get_upload_image_mime_transforms();
-	$image_format = get_option( 'perflab_modern_image_format' );
-	$image_format = in_array( $image_format, array( 'webp', 'avif' ), true ) ? $image_format : 'webp';
+	$image_format = webp_uploads_get_image_output_format();
 
 	// We need to add fallback only if jpeg alternatives for the image_format images are enabled for the server.
 	$preserve_jpegs_for_jpeg_transforms       = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/' . $image_format, $transforms['image/jpeg'], true );
@@ -692,11 +691,15 @@ function webp_uploads_wepb_fallback() {
 		return;
 	}
 
+	$detection_string = '';
 	// The fallback script can only handle a single image format at a time.
 	if ( 'webp' === $image_format ) {
 		$detection_string = 'data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
 	} elseif ( 'avif' === $image_format ) {
 		$detection_string = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgANogQEAwgMg8f8D///8WfhwB8+ErK42A=';
+	}
+	if ( '' === $detection_string ) {
+		return;
 	}
 
 	$js_function = <<<JS

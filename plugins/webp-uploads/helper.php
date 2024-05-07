@@ -278,7 +278,7 @@ function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail
  * @return array Mime types to use for the image.
  */
 function webp_uploads_get_content_image_mimes( $attachment_id, $context ) {
-	$target_mimes = array( 'image/webp', 'image/jpeg' );
+	$target_mimes = array( 'image/' . webp_uploads_get_image_output_format(), 'image/jpeg' );
 
 	/**
 	 * Filters mime types that should be used to update all images in the content. The order of
@@ -382,4 +382,16 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 	}
 
 	return true;
+}
+
+/**
+ * Get the image output format from the option, falling back to webp.
+ *
+ * @since n.e.x.t
+ *
+ * @return string The image output format. One of 'webp' or 'avif'.
+ */
+function webp_uploads_get_image_output_format(): string {
+	$image_format = get_option( 'perflab_modern_image_format' );
+	return in_array( $image_format, array( 'webp', 'avif' ), true ) ? $image_format : 'webp';
 }
