@@ -371,10 +371,15 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 		return false;
 	}
 
-	// In certain server environments GD can report a false positive for AVIF support, see https://github.com/php/php-src/issues/12197.
-	// To ensure the server actually supports AVIF, test for the function used by core.
-	if ( 'image/avif' === $mime_type && 'WP_Image_Editor_GD' === _wp_image_editor_choose( 'image/avif' ) ) {
+	// In certain server environments Image editors can report a false positive for AVIF support.
+	if ( 'image/avif' === $mime_type ) {
+		$editor = _wp_image_editor_choose( 'image/avif' );
+		if ( 'WP_Image_Editor_GD' === $editor ) {
 			return function_exists( 'imageavif' );
+		}
+		if ( 'WP_Image_Editor_Imagick' === $editor ) {
+			return defined( 'imagick::COMPRESSION_AVIF' );
+		}
 	}
 
 	return true;
