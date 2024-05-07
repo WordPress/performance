@@ -2,7 +2,7 @@
 /**
  * Hook callbacks used for Server Timing.
  *
- * @package dominant-color-images
+ * @package performance-lab
  *
  * @since 1.0.0
  */
