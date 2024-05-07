@@ -56,11 +56,14 @@ class ImageHasSource extends Constraint {
 	/**
 	 * Evaluates the constraint for the provided attachment ID.
 	 *
-	 * @param int $attachment_id Attachment ID.
+	 * @param mixed $other Attachment ID.
 	 * @return bool TRUE if the attachment has a source for the requested mime type, otherwise FALSE.
 	 */
-	protected function matches( int $attachment_id ): bool {
-		$metadata = wp_get_attachment_metadata( $attachment_id );
+	protected function matches( $other ): bool {
+		if ( ! is_int( $other ) ) {
+			return false;
+		}
+		$metadata = wp_get_attachment_metadata( $other );
 
 		// Fail if there is no metadata for the provided attachment ID.
 		if ( ! is_array( $metadata ) ) {
@@ -130,10 +133,10 @@ class ImageHasSource extends Constraint {
 	/**
 	 * Returns the description of the failure.
 	 *
-	 * @param int $attachment_id Attachment ID.
+	 * @param mixed $other Attachment ID.
 	 * @return string The description of the failure.
 	 */
-	protected function failureDescription( int $attachment_id ): string {
+	protected function failureDescription( $other ): string {
 		return sprintf( 'an image %s', $this->toString() );
 	}
 }
