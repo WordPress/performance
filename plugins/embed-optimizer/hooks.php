@@ -81,7 +81,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			// by preventing links in the hidden iframe from receiving focus.
 			if ( $html_processor->has_class( 'wp-embedded-content' ) ) {
 				$style = $html_processor->get_attribute( 'style' );
-				if ( $style ) {
+				if ( is_string( $style ) ) {
 					// WordPress core injects this clip CSS property:
 					// <https://github.com/WordPress/wordpress-develop/blob/6974b994de5/src/wp-includes/embed.php#L968>.
 					$style = str_replace( 'clip: rect(1px, 1px, 1px, 1px);', 'visibility: hidden;', $style );
