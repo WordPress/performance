@@ -220,7 +220,7 @@ final class OD_HTML_Tag_Walker {
 				if ( in_array( $tag_name, self::P_CLOSING_TAGS, true ) ) {
 					$i = array_search( 'P', $this->open_stack_tags, true );
 					if ( false !== $i ) {
-						array_splice( $this->open_stack_tags, $i );
+						array_splice( $this->open_stack_tags, (int) $i );
 						array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) );
 					}
 				}

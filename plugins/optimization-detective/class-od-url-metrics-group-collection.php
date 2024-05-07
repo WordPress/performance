@@ -78,7 +78,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 		sort( $breakpoints );
 		$breakpoints = array_values( array_unique( $breakpoints, SORT_NUMERIC ) );
 		foreach ( $breakpoints as $breakpoint ) {
-			if ( $breakpoint <= 1 || PHP_INT_MAX === $breakpoint ) {
+			if ( $breakpoint <= 1 || PHP_INT_MAX === $breakpoint ) { // TODO: This is wrong? It should be `$breakpoint < 1`?
 				throw new InvalidArgumentException(
 					esc_html(
 						sprintf(
@@ -93,6 +93,11 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 				);
 			}
 		}
+		/**
+		 * Validated breakpoints.
+		 *
+		 * @var int<1, max>[] $breakpoints
+		 */
 		$this->breakpoints = $breakpoints;
 
 		// Set sample size.
@@ -132,6 +137,8 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 
 	/**
 	 * Create groups.
+	 *
+	 * @phpstan-return non-empty-array<OD_URL_Metrics_Group>
 	 *
 	 * @return OD_URL_Metrics_Group[] Groups.
 	 */

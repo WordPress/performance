@@ -154,6 +154,7 @@ class OD_URL_Metrics_Post_Type {
 						}
 
 						try {
+							// @phpstan-ignore-next-line -- Invalid data will be validated in the constructor.
 							return new OD_URL_Metric( $url_metric_data );
 						} catch ( OD_Data_Validation_Exception $e ) {
 							$trigger_warning(
@@ -225,6 +226,9 @@ class OD_URL_Metrics_Post_Type {
 			),
 			JSON_UNESCAPED_SLASHES // No need for escaped slashes since not printed to frontend.
 		);
+		if ( ! is_string( $post_data['post_content'] ) ) {
+			return new WP_Error( 'json_encode_error', json_last_error_msg() );
+		}
 
 		$has_kses = false !== has_filter( 'content_save_pre', 'wp_filter_post_kses' );
 		if ( $has_kses ) {
@@ -290,7 +294,7 @@ class OD_URL_Metrics_Post_Type {
 		);
 
 		foreach ( $query->posts as $post ) {
-			if ( self::SLUG === $post->post_type ) { // Sanity check.
+			if ( $post instanceof WP_Post && self::SLUG === $post->post_type ) { // Sanity check.
 				wp_delete_post( $post->ID, true );
 			}
 		}
