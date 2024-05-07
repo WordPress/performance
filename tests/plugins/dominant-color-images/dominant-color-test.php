@@ -343,7 +343,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 *
 	 * @covers ::dominant_color_rgb_to_hex
 	 */
-	public function test_dominant_color_rgb_to_hex( int $red, int $green, int $blue, string $hex ): void {
+	public function test_dominant_color_rgb_to_hex( int $red, int $green, int $blue, ?string $hex ): void {
 		$this->assertSame( $hex, dominant_color_rgb_to_hex( $red, $green, $blue ) );
 	}
 

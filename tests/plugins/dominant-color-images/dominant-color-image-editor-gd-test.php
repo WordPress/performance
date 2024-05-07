@@ -15,8 +15,10 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 	 * @dataProvider provider_get_dominant_color
 	 *
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
+	 *
+	 * @phpstan-param string[] $expected_color
 	 */
-	public function test_get_dominant_color( string $image_path, string $expected_color, bool $expected_transparency ): void {
+	public function test_get_dominant_color( string $image_path, array $expected_color, bool $expected_transparency ): void {
 		if ( ! extension_loaded( 'gd' ) || ! function_exists( 'gd_info' ) ) {
 			$this->markTestSkipped( 'The GD PHP extension is not loaded.' );
 		}
