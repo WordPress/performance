@@ -110,7 +110,10 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( $expected, $sanitized );
 	}
 
-	public function data_perflab_sanitize_server_timing_setting() {
+	/**
+	 * @return array<string, mixed>
+	 */
+	public function data_perflab_sanitize_server_timing_setting(): array {
 		$default = array(
 			'benchmarking_actions' => array(),
 			'benchmarking_filters' => array(),

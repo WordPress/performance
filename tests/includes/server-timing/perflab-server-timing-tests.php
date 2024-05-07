@@ -157,7 +157,10 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->assertSame( $expected, $this->server_timing->get_header() );
 	}
 
-	public function data_get_header() {
+	/**
+	 * @return array<string, mixed>
+	 */
+	public function data_get_header(): array {
 		$measure_42         = static function ( $metric ): void {
 			$metric->set_value( 42 );
 		};
@@ -215,7 +218,10 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 		);
 	}
 
-	public function get_data_to_test_use_output_buffer() {
+	/**
+	 * @return array<string, mixed>
+	 */
+	public function get_data_to_test_use_output_buffer(): array {
 		$enable_option  = static function (): void {
 			$option                     = (array) get_option( PERFLAB_SERVER_TIMING_SETTING );
 			$option['output_buffering'] = true;

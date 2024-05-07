@@ -19,6 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  *
  * @param string $html The oEmbed HTML.
+ * @return string Filtered oEmbed HTML.
  */
 function embed_optimizer_filter_oembed_html( string $html ): string {
 	$html_processor = new WP_HTML_Tag_Processor( $html );
