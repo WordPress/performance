@@ -239,10 +239,11 @@ function webp_uploads_generate_image_size( int $attachment_id, string $size, str
  * Returns the attachment sources array ordered by filesize.
  *
  * @since 1.0.0
+ * @todo This function is not used anywhere.
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $size          The attachment size.
- * @return array The attachment sources array.
+ * @return array<string, array{ file: string, filesize: int }> The attachment sources array.
  */
 function webp_uploads_get_attachment_sources( int $attachment_id, string $size = 'thumbnail' ): array {
 	// Check for the sources attribute in attachment metadata.
@@ -269,7 +270,7 @@ function webp_uploads_get_attachment_sources( int $attachment_id, string $size =
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $context       The current context.
- * @return array Mime types to use for the image.
+ * @return string[] Mime types to use for the image.
  */
 function webp_uploads_get_content_image_mimes( int $attachment_id, string $context ): array {
 	$target_mimes = array( 'image/webp', 'image/jpeg' );
@@ -322,8 +323,8 @@ function webp_uploads_in_frontend_body(): bool {
  *
  * @since 1.0.0
  *
- * @param array $original   An array with the metadata of the attachment.
- * @param array $additional An array containing the filename and file size for additional mime.
+ * @param array{ filesize?: int } $original   An array with the metadata of the attachment.
+ * @param array{ filesize?: int } $additional An array containing the filename and file size for additional mime.
  * @return bool True if the additional image is larger than the original image, otherwise false.
  */
 function webp_uploads_should_discard_additional_image_file( array $original, array $additional ): bool {

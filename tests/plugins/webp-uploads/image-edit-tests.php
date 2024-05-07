@@ -414,7 +414,12 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$editor->rotate_right()->save();
 		$this->assertTrue( $editor->success() );
 
-		$sources = array( 'image/webp' => 'leaves.webp' );
+		$sources = array(
+			'image/webp' => array(
+				'file'     => 'leaves.webp',
+				'filesize' => 1234,
+			),
+		);
 		webp_uploads_backup_full_image_sources( $attachment_id, $sources );
 
 		$this->assertSame( array( 'full-orig' => $sources ), get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
@@ -440,7 +445,12 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$editor->rotate_right()->save();
 		$this->assertTrue( $editor->success() );
 
-		$sources = array( 'image/webp' => 'leaves.webp' );
+		$sources = array(
+			'image/webp' => array(
+				'file'     => 'leaves.webp',
+				'filesize' => 1234,
+			),
+		);
 		webp_uploads_backup_full_image_sources( $attachment_id, $sources );
 
 		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );

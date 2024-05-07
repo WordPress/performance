@@ -12,9 +12,25 @@
  * @since 1.0.0
  */
 class WP_Image_Edit {
-	protected $changes       = array();
-	protected $target        = 'all';
+
+	/**
+	 * @var array<string, int|array<string, int>>
+	 */
+	protected $changes = array();
+
+	/**
+	 * @var string
+	 */
+	protected $target = 'all';
+
+	/**
+	 * @var int
+	 */
 	protected $attachment_id = 0;
+
+	/**
+	 * @var object
+	 */
 	protected $result;
 
 	/**

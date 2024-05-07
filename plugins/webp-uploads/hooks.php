@@ -26,14 +26,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @see   wp_generate_attachment_metadata()
  * @see   webp_uploads_get_upload_image_mime_transforms()
  *
- * @param array $metadata      An array with the metadata from this attachment.
- * @param int   $attachment_id The ID of the attachment where the hook was dispatched.
+ * @param array<string, mixed> $metadata      An array with the metadata from this attachment.
+ * @param int                  $attachment_id The ID of the attachment where the hook was dispatched.
  * @return array{
  *     width: int,
  *     height: int,
  *     file: non-falsy-string,
- *     sizes: array,
- *     image_meta: array,
+ *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
+ *     image_meta: array<string, mixed>,
  *     filesize: int,
  *     sources?: array<string, array{
  *         file: string,
@@ -233,12 +233,16 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
  *
  * @see wp_get_missing_image_subsizes()
  *
- * @param array $missing_sizes Associative array of arrays of image sub-sizes.
- * @param array $image_meta The metadata from the image.
- * @param int   $attachment_id The ID of the attachment.
- * @return array Associative array of arrays of image sub-sizes.
+ * @param array|mixed          $missing_sizes Associative array of arrays of image sub-sizes.
+ * @param array<string, mixed> $image_meta    The metadata from the image.
+ * @param int                  $attachment_id The ID of the attachment.
+ * @return array<string, array{ width: int, height: int, crop: bool }> Associative array of arrays of image sub-sizes.
  */
-function webp_uploads_wp_get_missing_image_subsizes( array $missing_sizes, array $image_meta, int $attachment_id ): array {
+function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, array $image_meta, int $attachment_id ): array {
+	if ( ! is_array( $missing_sizes ) ) {
+		$missing_sizes = array();
+	}
+
 	// Only setup the trace array if we no longer have more sizes.
 	if ( ! empty( $missing_sizes ) ) {
 		return $missing_sizes;
@@ -729,7 +733,7 @@ function webp_uploads_wepb_fallback(): void {
  *
  * @since 1.0.0
  *
- * @return array An array of image sizes that can have additional mime types.
+ * @return array<string, bool> An array of image sizes that can have additional mime types.
  */
 function webp_uploads_get_image_sizes_additional_mime_type_support(): array {
 	$additional_sizes = wp_get_additional_image_sizes();
@@ -750,9 +754,9 @@ function webp_uploads_get_image_sizes_additional_mime_type_support(): array {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $allowed_sizes A map of image size names and whether they are allowed to have additional mime types.
+	 * @param array<string, bool> $allowed_sizes A map of image size names and whether they are allowed to have additional mime types.
 	 */
-	$allowed_sizes = apply_filters( 'webp_uploads_image_sizes_with_additional_mime_type_support', $allowed_sizes );
+	$allowed_sizes = (array) apply_filters( 'webp_uploads_image_sizes_with_additional_mime_type_support', $allowed_sizes );
 
 	return $allowed_sizes;
 }

@@ -15,12 +15,17 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @dataProvider data_provider_invalid_arguments_for_webp_uploads_generate_additional_image_source
 	 *
 	 * @test
+	 *
+	 * @param int                                          $attachment_id The ID of the attachment from where this image would be created.
+	 * @param string                                       $image_size    The size name that would be used to create this image, out of the registered subsizes.
+	 * @param array{ width: int, height: int, crop: bool } $size_data     An array with the dimensions of the image.
+	 * @param string                                       $mime          The target mime in which the image should be created.
 	 */
-	public function it_should_return_an_error_when_creating_an_additional_image_source_with_invalid_parameters( $attachment_id, $size_data, $mime, $destination_file = null ): void {
-		$this->assertInstanceOf( WP_Error::class, webp_uploads_generate_additional_image_source( $attachment_id, $size_data, $mime, $destination_file ) );
+	public function it_should_return_an_error_when_creating_an_additional_image_source_with_invalid_parameters( int $attachment_id, string $image_size, array $size_data, string $mime ): void {
+		$this->assertInstanceOf( WP_Error::class, webp_uploads_generate_additional_image_source( $attachment_id, $image_size, $size_data, $mime ) );
 	}
 
-	public function data_provider_invalid_arguments_for_webp_uploads_generate_additional_image_source() {
+	public function data_provider_invalid_arguments_for_webp_uploads_generate_additional_image_source(): Generator {
 		yield 'when trying to use an attachment ID that does not exists' => array(
 			PHP_INT_MAX,
 			'medium',
@@ -137,7 +142,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_prevent_processing_an_image_with_corrupted_metadata( callable $callback, $size ): void {
+	public function it_should_prevent_processing_an_image_with_corrupted_metadata( callable $callback, string $size ): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/balloons.webp'
 		);
@@ -149,7 +154,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$this->assertSame( 'image_mime_type_invalid_metadata', $result->get_error_code() );
 	}
 
-	public function provider_with_modified_metadata() {
+	public function provider_with_modified_metadata(): Generator {
 		yield 'using a size that does not exists' => array(
 			static function ( $metadata ) {
 				return $metadata;
@@ -365,7 +370,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
-		$this->assertIsArray( $transforms );
 		$this->assertSame( array(), $transforms );
 	}
 
@@ -385,7 +389,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
-		$this->assertIsArray( $transforms );
 		$this->assertSame( $default_transforms, $transforms );
 	}
 
@@ -404,7 +407,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
-		$this->assertIsArray( $transforms );
 		$this->assertSame( array( 'image/jpeg' => array( 'image/jpeg' ) ), $transforms );
 	}
 
@@ -423,7 +425,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
-		$this->assertIsArray( $transforms );
 		$this->assertSame( array( 'image/jpeg' => array( 'image/jpeg', 'image/webp' ) ), $transforms );
 	}
 
@@ -439,7 +440,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
-		$this->assertIsArray( $transforms );
 		$this->assertSame(
 			array(
 				'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
@@ -453,15 +453,20 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @dataProvider data_provider_image_filesize
 	 *
 	 * @test
+	 *
+	 * @param array{ filesize?: int } $original_filesize   Original filesize.
+	 * @param array{ filesize?: int } $additional_filesize Original filesize.
+	 * @param bool                    $expected_status     Expected status.
 	 */
-	public function it_should_discard_additional_image_if_larger_than_the_original_image( $original_filesize, $additional_filesize, $expected_status ): void {
+	public function it_should_discard_additional_image_if_larger_than_the_original_image( array $original_filesize, array $additional_filesize, bool $expected_status ): void {
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_true' );
 
 		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
 		$this->assertSame( $output, $expected_status );
 	}
 
-	public function data_provider_image_filesize() {
+	/** @return array<int, mixed> */
+	public function data_provider_image_filesize(): array {
 		return array(
 			array(
 				array( 'filesize' => 120101 ),
@@ -485,8 +490,11 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 * @dataProvider data_provider_image_filesize
 	 *
 	 * @test
+	 *
+	 * @param array{ filesize?: int } $original_filesize   Original filesize.
+	 * @param array{ filesize?: int } $additional_filesize Original filesize.
 	 */
-	public function it_should_never_discard_additional_image_if_filter_is_false( $original_filesize, $additional_filesize ): void {
+	public function it_should_never_discard_additional_image_if_filter_is_false( array $original_filesize, array $additional_filesize ): void {
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
 
 		$output = webp_uploads_should_discard_additional_image_file( $original_filesize, $additional_filesize );
@@ -541,7 +549,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$this->assertFalse( $result );
 	}
 
-	private function mock_empty_action( $action ): void {
+	private function mock_empty_action( string $action ): void {
 		remove_all_actions( $action );
 		do_action( $action );
 	}
@@ -553,7 +561,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_add_original_image_extension_to_the_webp_file_name_to_ensure_it_is_unique( $jpeg_image, $jpg_image ): void {
+	public function it_should_add_original_image_extension_to_the_webp_file_name_to_ensure_it_is_unique( string $jpeg_image, string $jpg_image ): void {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
@@ -577,7 +585,8 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		$this->assertNotSame( $jpeg_image_result['file'], $jpg_image_result['file'] );
 	}
 
-	public function data_provider_same_image_name() {
+	/** @return array<int, mixed> */
+	public function data_provider_same_image_name(): array {
 		return array(
 			array(
 				TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/image.jpeg',

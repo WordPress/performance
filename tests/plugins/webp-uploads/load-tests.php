@@ -12,7 +12,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	/**
 	 * To unlink files.
 	 *
-	 * @var array
+	 * @var string[]
 	 */
 	protected $to_unlink = array();
 
@@ -29,7 +29,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function tear_down(): void {
 		$this->to_unlink = array_filter(
 			$this->to_unlink,
-			static function ( $filename ) {
+			static function ( string $filename ) {
 				return unlink( $filename );
 			}
 		);
@@ -514,7 +514,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_replace_references_to_a_jpg_image_to_a_webp_version( $image_path ): void {
+	public function it_should_replace_references_to_a_jpg_image_to_a_webp_version( string $image_path ): void {
 		// Create JPEG and WebP to check replacement of JPEG => WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
@@ -542,7 +542,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_not_replace_the_references_to_a_jpg_image_when_disabled_via_filter( $image_path ): void {
+	public function it_should_not_replace_the_references_to_a_jpg_image_when_disabled_via_filter( string $image_path ): void {
 		remove_all_filters( 'webp_uploads_content_image_mimes' );
 
 		add_filter(
@@ -559,7 +559,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
-	public function provider_replace_images_with_different_extensions() {
+	public function provider_replace_images_with_different_extensions(): Generator {
 		yield 'An image with a .jpg extension' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		yield 'An image with a .jpeg extension' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/car.jpeg' );
 	}
@@ -613,7 +613,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_prevent_update_not_supported_images_with_no_available_sources( $image_path ): void {
+	public function it_should_prevent_update_not_supported_images_with_no_available_sources( string $image_path ): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 
 		$this->assertIsNumeric( $attachment_id );
@@ -622,7 +622,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 	}
 
-	public function data_provider_not_supported_webp_images() {
+	public function data_provider_not_supported_webp_images(): Generator {
 		yield 'PNG image' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/dice.png' );
 		yield 'GIFT image' => array( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/earth.gif' );
 	}
@@ -1007,7 +1007,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	/**
 	 * Force return WebP image quality 86 for testing.
 	 */
-	public function force_webp_image_quality_86( $quality, $mime_type ) {
+	public function force_webp_image_quality_86( int $quality, string $mime_type ): int {
 		if ( 'image/webp' === $mime_type ) {
 			return 86;
 		}
