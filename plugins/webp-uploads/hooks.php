@@ -683,7 +683,7 @@ function webp_uploads_wepb_fallback() {
 	// Get mime type transforms for the site.
 	$transforms   = webp_uploads_get_upload_image_mime_transforms();
 	$image_format = get_option( 'perflab_modern_image_format' );
-	$image_format = empty( $image_format ) ? 'webp' : $image_format;
+	$image_format = in_array( $image_format, array( 'webp', 'avif' ), true ) ? $image_format : 'webp';
 
 	// We need to add fallback only if jpeg alternatives for the image_format images are enabled for the server.
 	$preserve_jpegs_for_jpeg_transforms       = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/' . $image_format, $transforms['image/jpeg'], true );
