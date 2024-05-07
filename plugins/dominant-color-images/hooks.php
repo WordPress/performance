@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @param array|mixed $metadata      The attachment metadata.
  * @param int         $attachment_id The attachment ID.
- * @return array $metadata The attachment metadata.
+ * @return array{ has_transparency?: bool, dominant_color?: string } $metadata The attachment metadata.
  */
 function dominant_color_metadata( $metadata, int $attachment_id ): array {
 	if ( ! is_array( $metadata ) ) {
@@ -47,7 +47,7 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
  *
  * @param array|mixed $attr       Attributes for the image markup.
  * @param WP_Post     $attachment Image attachment post.
- * @return array $attr Attributes for the image markup.
+ * @return array{ 'data-has-transparency'?: string, class?: string, 'data-dominant-color'?: string, style?: string } Attributes for the image markup.
  */
 function dominant_color_update_attachment_image_attributes( $attr, WP_Post $attachment ): array {
 	if ( ! is_array( $attr ) ) {
@@ -179,7 +179,7 @@ function dominant_color_add_inline_style(): void {
 	$custom_css = 'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }';
 	wp_add_inline_style( $handle, $custom_css );
 }
-add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
+add_action( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
 
 /**
  * Displays the HTML generator tag for the Image Placeholders plugin.

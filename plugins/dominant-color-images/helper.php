@@ -46,7 +46,7 @@ function dominant_color_set_image_editors( array $editors ): array {
  * @access private
  *
  * @param int $attachment_id The attachment ID.
- * @return array|WP_Error Array with the dominant color and has transparency values or WP_Error on error.
+ * @return array{ has_transparency?: bool, dominant_color?: string }|WP_Error Array with the dominant color and has transparency values or WP_Error on error.
  */
 function dominant_color_get_dominant_color_data( int $attachment_id ) {
 	$mime_type = get_post_mime_type( $attachment_id );

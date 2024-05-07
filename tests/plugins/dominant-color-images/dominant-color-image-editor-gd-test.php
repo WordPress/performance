@@ -16,7 +16,7 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 	 *
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
-	public function test_get_dominant_color( $image_path, $expected_color, $expected_transparency ): void {
+	public function test_get_dominant_color( string $image_path, string $expected_color, bool $expected_transparency ): void {
 		if ( ! extension_loaded( 'gd' ) || ! function_exists( 'gd_info' ) ) {
 			$this->markTestSkipped( 'The GD PHP extension is not loaded.' );
 		}
@@ -45,7 +45,7 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 	 *
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
-	public function test_get_dominant_color_invalid( $image_path ): void {
+	public function test_get_dominant_color_invalid( string $image_path ): void {
 		if ( ! extension_loaded( 'gd' ) || ! function_exists( 'gd_info' ) ) {
 			$this->markTestSkipped( 'The GD PHP extension is not loaded.' );
 		}
@@ -66,7 +66,7 @@ class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
 	 *
 	 * @covers       Dominant_Color_Image_Editor_GD::get_dominant_color
 	 */
-	public function test_get_dominant_color_none_images( $image_path ): void {
+	public function test_get_dominant_color_none_images( string $image_path ): void {
 		if ( ! extension_loaded( 'gd' ) || ! function_exists( 'gd_info' ) ) {
 			$this->markTestSkipped( 'The GD PHP extension is not loaded.' );
 		}

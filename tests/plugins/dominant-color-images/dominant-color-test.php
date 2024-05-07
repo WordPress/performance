@@ -14,8 +14,11 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @dataProvider provider_get_dominant_color
 	 *
 	 * @covers ::dominant_color_metadata
+	 *
+	 * @param string   $image_path Image path.
+	 * @param string[] $expected_color Expected color.
 	 */
-	public function test_dominant_color_metadata( $image_path, $expected_color, $expected_transparency ): void {
+	public function test_dominant_color_metadata( string $image_path, array $expected_color ): void {
 		$mime_type = wp_check_filetype( $image_path )['type'];
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
@@ -40,8 +43,11 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @dataProvider provider_get_dominant_color
 	 *
 	 * @covers ::dominant_color_get_dominant_color
+	 *
+	 * @param string   $image_path Image path.
+	 * @param string[] $expected_color Expected color.
 	 */
-	public function test_dominant_color_get_dominant_color( $image_path, $expected_color, $expected_transparency ): void {
+	public function test_dominant_color_get_dominant_color( string $image_path, array $expected_color ): void {
 		$mime_type = wp_check_filetype( $image_path )['type'];
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
@@ -58,8 +64,12 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @dataProvider provider_get_dominant_color
 	 *
 	 * @covers ::dominant_color_metadata
+	 *
+	 * @param string   $image_path Image path.
+	 * @param string[] $expected_color Expected color.
+	 * @param bool     $expected_transparency Expected transparency.
 	 */
-	public function test_has_transparency_metadata( $image_path, $expected_color, $expected_transparency ): void {
+	public function test_has_transparency_metadata( string $image_path, array $expected_color, bool $expected_transparency ): void {
 		$mime_type = wp_check_filetype( $image_path )['type'];
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
@@ -82,8 +92,12 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @dataProvider provider_get_dominant_color
 	 *
 	 * @covers ::dominant_color_get_dominant_color
+	 *
+	 * @param string   $image_path Image path.
+	 * @param string[] $expected_color Expected color.
+	 * @param bool     $expected_transparency Expected transparency.
 	 */
-	public function test_dominant_color_has_transparency( $image_path, $expected_color, $expected_transparency ): void {
+	public function test_dominant_color_has_transparency( string $image_path, array $expected_color, bool $expected_transparency ): void {
 		$mime_type = wp_check_filetype( $image_path )['type'];
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
@@ -100,8 +114,12 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @dataProvider provider_get_dominant_color
 	 *
 	 * @covers ::dominant_color_img_tag_add_dominant_color
+	 *
+	 * @param string   $image_path Image path.
+	 * @param string[] $expected_color Expected color.
+	 * @param bool     $expected_transparency Expected transparency.
 	 */
-	public function test_tag_add_adjust_to_image_attributes( $image_path, $expected_color, $expected_transparency ): void {
+	public function test_tag_add_adjust_to_image_attributes( string $image_path, array $expected_color, bool $expected_transparency ): void {
 		$mime_type = wp_check_filetype( $image_path )['type'];
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
@@ -120,8 +138,8 @@ class Dominant_Color_Test extends DominantColorTestCase {
 
 		foreach ( $expected_color as $color ) {
 			if ( false !== strpos( $color, $filtered_image_tags_added ) ) {
-				$this->assertStringContainsString( 'style="--dominant-color: #' . $expected_color . ';"', $filtered_image_tags_added );
-				$this->assertStringContainsString( 'data-dominant-color="' . $expected_color . '"', $filtered_image_tags_added );
+				$this->assertStringContainsString( 'style="--dominant-color: #' . $color . ';"', $filtered_image_tags_added );
+				$this->assertStringContainsString( 'data-dominant-color="' . $color . '"', $filtered_image_tags_added );
 				break;
 			}
 		}
@@ -161,7 +179,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	/**
 	 * Data provider for test_dominant_color_img_tag_add_dominant_color_requires_proper_quotes();
 	 *
-	 * @return array[]
+	 * @return array<string, mixed>
 	 */
 	public function data_dominant_color_img_tag_add_dominant_color_requires_proper_quotes(): array {
 		return array(
@@ -208,7 +226,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	/**
 	 * Data provider for test_dominant_color_img_tag_add_dominant_color_should_add_dominant_color_inline_style().
 	 *
-	 * @return array[]
+	 * @return array<string, mixed>
 	 */
 	public function data_provider_dominant_color_check_inline_style(): array {
 		return array(
@@ -241,7 +259,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	/**
 	 * Data provider for test_dominant_color_update_attachment_image_attributes().
 	 *
-	 * @return array[]
+	 * @return array<string, mixed>
 	 */
 	public function data_provider_dominant_color_filter_check_inline_style(): array {
 		return array(
@@ -266,12 +284,16 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 * @dataProvider provider_dominant_color_set_image_editors
 	 *
 	 * @covers ::dominant_color_set_image_editors
+	 *
+	 * @param array<string, mixed> $existing Existing.
+	 * @param array<string, mixed> $expected Expected.
 	 */
-	public function test_dominant_color_set_image_editors( $existing, $expected ): void {
+	public function test_dominant_color_set_image_editors( array $existing, array $expected ): void {
 		$this->assertEqualSets( dominant_color_set_image_editors( $existing ), $expected );
 	}
 
-	public function provider_dominant_color_set_image_editors() {
+	/** @return array<string, mixed> */
+	public function provider_dominant_color_set_image_editors(): array {
 		return array(
 			'default'  => array(
 				'existing' => array(
@@ -321,11 +343,12 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	 *
 	 * @covers ::dominant_color_rgb_to_hex
 	 */
-	public function test_dominant_color_rgb_to_hex( $red, $green, $blue, $hex ): void {
+	public function test_dominant_color_rgb_to_hex( int $red, int $green, int $blue, string $hex ): void {
 		$this->assertSame( $hex, dominant_color_rgb_to_hex( $red, $green, $blue ) );
 	}
 
-	public function provider_get_hex_color() {
+	/** @return array<string, mixed> */
+	public function provider_get_hex_color(): array {
 		return array(
 			'black'   => array(
 				'red'   => 0,
