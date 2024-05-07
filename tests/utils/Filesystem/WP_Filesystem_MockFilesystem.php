@@ -5,6 +5,9 @@
  * @package performance-lab
  */
 
+// phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingAnyTypeHint
+// phpcs:disable SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingAnyTypeHint
+
 /**
  * Simple mock filesystem, limited to working with concrete file paths.
  * No support for hierarchy or parent directories etc.
@@ -13,14 +16,8 @@
  */
 class WP_Filesystem_MockFilesystem extends WP_Filesystem_Base {
 
-	/**
-	 * @var array<string, string>
-	 */
 	private $file_contents = array();
 
-	/**
-	 * @return string|false
-	 */
 	public function get_contents( $file ) {
 		if ( isset( $this->file_contents[ $file ] ) ) {
 			return $this->file_contents[ $file ];
@@ -28,9 +25,6 @@ class WP_Filesystem_MockFilesystem extends WP_Filesystem_Base {
 		return false;
 	}
 
-	/**
-	 * @return string[]|false
-	 */
 	public function get_contents_array( $file ) {
 		if ( isset( $this->file_contents[ $file ] ) ) {
 			return array( $this->file_contents[ $file ] );
@@ -38,36 +32,36 @@ class WP_Filesystem_MockFilesystem extends WP_Filesystem_Base {
 		return false;
 	}
 
-	public function put_contents( $file, $contents, $mode = false ): bool {
+	public function put_contents( $file, $contents, $mode = false ) {
 		$this->file_contents[ $file ] = $contents;
 		return true;
 	}
 
-	public function cwd(): bool {
+	public function cwd() {
 		return false;
 	}
 
-	public function chdir( $dir ): bool {
+	public function chdir( $dir ) {
 		return false;
 	}
 
-	public function chgrp( $file, $group, $recursive = false ): bool {
+	public function chgrp( $file, $group, $recursive = false ) {
 		return false;
 	}
 
-	public function chmod( $file, $mode = false, $recursive = false ): bool {
+	public function chmod( $file, $mode = false, $recursive = false ) {
 		return false;
 	}
 
-	public function owner( $file ): bool {
+	public function owner( $file ) {
 		return false;
 	}
 
-	public function group( $file ): bool {
+	public function group( $file ) {
 		return false;
 	}
 
-	public function copy( $source, $destination, $overwrite = false, $mode = false ): bool {
+	public function copy( $source, $destination, $overwrite = false, $mode = false ) {
 		if ( ! isset( $this->file_contents[ $source ] ) ) {
 			return false;
 		}
@@ -78,71 +72,71 @@ class WP_Filesystem_MockFilesystem extends WP_Filesystem_Base {
 		return true;
 	}
 
-	public function move( $source, $destination, $overwrite = false ): bool {
+	public function move( $source, $destination, $overwrite = false ) {
 		if ( $this->copy( $source, $destination, $overwrite, false ) ) {
 			return $this->delete( $source );
 		}
 		return false;
 	}
 
-	public function delete( $file, $recursive = false, $type = false ): bool {
+	public function delete( $file, $recursive = false, $type = false ) {
 		if ( isset( $this->file_contents[ $file ] ) ) {
 			unset( $this->file_contents[ $file ] );
 		}
 		return true;
 	}
 
-	public function exists( $path ): bool {
+	public function exists( $path ) {
 		return isset( $this->file_contents[ $path ] );
 	}
 
-	public function is_file( $file ): bool {
+	public function is_file( $file ) {
 		return isset( $this->file_contents[ $file ] );
 	}
 
-	public function is_dir( $path ): bool {
+	public function is_dir( $path ) {
 		return false;
 	}
 
-	public function is_readable( $file ): bool {
+	public function is_readable( $file ) {
 		return isset( $this->file_contents[ $file ] );
 	}
 
-	public function is_writable( $path ): bool {
+	public function is_writable( $path ) {
 		return true;
 	}
 
-	public function atime( $file ): bool {
+	public function atime( $file ) {
 		return false;
 	}
 
-	public function mtime( $file ): bool {
+	public function mtime( $file ) {
 		return false;
 	}
 
-	public function size( $file ): bool {
+	public function size( $file ) {
 		if ( isset( $this->file_contents[ $file ] ) ) {
 			return strlen( $this->file_contents[ $file ] );
 		}
 		return false;
 	}
 
-	public function touch( $file, $time = 0, $atime = 0 ): bool {
+	public function touch( $file, $time = 0, $atime = 0 ) {
 		if ( ! isset( $this->file_contents[ $file ] ) ) {
 			$this->file_contents[ $file ] = '';
 		}
 		return true;
 	}
 
-	public function mkdir( $path, $chmod = false, $chown = false, $chgrp = false ): bool {
+	public function mkdir( $path, $chmod = false, $chown = false, $chgrp = false ) {
 		return false;
 	}
 
-	public function rmdir( $path, $recursive = false ): bool {
+	public function rmdir( $path, $recursive = false ) {
 		return false;
 	}
 
-	public function dirlist( $path, $include_hidden = true, $recursive = false ): bool {
+	public function dirlist( $path, $include_hidden = true, $recursive = false ) {
 		return false;
 	}
 }
