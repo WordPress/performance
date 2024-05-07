@@ -709,6 +709,7 @@ function webp_uploads_wepb_fallback() {
 	}
 
 	$detection_string = '';
+	// The fallback script can only handle a single image format at a time.
 	if ( 'webp' === $image_format ) {
 		$detection_string = 'data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
 	} elseif ( 'avif' === $image_format ) {

@@ -81,6 +81,10 @@ function webp_uploads_generate_avif_webp_setting_callback() {
 
 	$selected       = get_option( 'perflab_modern_image_format' );
 	$avif_supported = webp_uploads_mime_type_supported( 'image/avif' );
+	// Ensure WebP selected if AVIF is not supported.
+	if ( ! $avif_supported ) {
+		$selected = 'webp';
+	}
 	?>
 			<label for="perflab_modern_image_format">
 				<select name="perflab_modern_image_format" id="perflab_modern_image_format" aria-describedby="perflab_modern_image_format_description">
