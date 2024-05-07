@@ -24,8 +24,8 @@ class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
 	 * @covers ::plsr_sanitize_setting
 	 * @dataProvider data_plsr_sanitize_setting
 	 *
-	 * @param mixed $input    Input.
-	 * @param array $expected Expected.
+	 * @param mixed                $input    Input.
+	 * @param array<string, mixed> $expected Expected.
 	 */
 	public function test_plsr_sanitize_setting( $input, array $expected ): void {
 		$this->assertSameSets(
@@ -34,6 +34,7 @@ class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
 		);
 	}
 
+	/** @return array<string, mixed> */
 	public function data_plsr_sanitize_setting(): array {
 		$default_value = array(
 			'mode'      => 'prerender',

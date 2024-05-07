@@ -7,6 +7,7 @@
 
 class Speculation_Rules_Tests extends WP_UnitTestCase {
 
+	/** @var array<string, mixed> */
 	private $original_wp_theme_features = array();
 
 	public function set_up(): void {
@@ -24,6 +25,7 @@ class Speculation_Rules_Tests extends WP_UnitTestCase {
 		$this->assertSame( 10, has_action( 'wp_head', 'plsr_render_generator_meta_tag' ) );
 	}
 
+	/** @return array<string, array{ html5_support: bool }> */
 	public function data_provider_to_test_print_speculation_rules(): array {
 		return array(
 			'xhtml' => array(

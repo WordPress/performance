@@ -34,7 +34,6 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	public function test_plsr_get_speculation_rules(): void {
 		$rules = plsr_get_speculation_rules();
 
-		$this->assertIsArray( $rules );
 		$this->assertArrayHasKey( 'prerender', $rules );
 		$this->assertIsArray( $rules['prerender'] );
 		foreach ( $rules['prerender'] as $entry ) {
@@ -276,7 +275,8 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		$this->assertSame( $eagerness, $rules['prerender'][0]['eagerness'] );
 	}
 
-	public function data_plsr_get_speculation_rules_with_eagerness() {
+	/** @return array<int, string[]> */
+	public function data_plsr_get_speculation_rules_with_eagerness(): array {
 		return array(
 			array( 'conservative' ),
 			array( 'moderate' ),
