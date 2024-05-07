@@ -107,13 +107,13 @@ class PLSR_URL_Pattern_Prefixer {
 	 */
 	public static function get_default_contexts(): array {
 		return array(
-			'home'       => self::escape_pattern_string( trailingslashit( wp_parse_url( home_url( '/' ), PHP_URL_PATH ) ) ),
-			'site'       => self::escape_pattern_string( trailingslashit( wp_parse_url( site_url( '/' ), PHP_URL_PATH ) ) ),
-			'uploads'    => self::escape_pattern_string( trailingslashit( wp_parse_url( wp_upload_dir( null, false )['baseurl'], PHP_URL_PATH ) ) ),
-			'content'    => self::escape_pattern_string( trailingslashit( wp_parse_url( content_url(), PHP_URL_PATH ) ) ),
-			'plugins'    => self::escape_pattern_string( trailingslashit( wp_parse_url( plugins_url(), PHP_URL_PATH ) ) ),
-			'template'   => self::escape_pattern_string( trailingslashit( wp_parse_url( get_stylesheet_directory_uri(), PHP_URL_PATH ) ) ),
-			'stylesheet' => self::escape_pattern_string( trailingslashit( wp_parse_url( get_template_directory_uri(), PHP_URL_PATH ) ) ),
+			'home'       => self::escape_pattern_string( trailingslashit( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ) ) ),
+			'site'       => self::escape_pattern_string( trailingslashit( (string) wp_parse_url( site_url( '/' ), PHP_URL_PATH ) ) ),
+			'uploads'    => self::escape_pattern_string( trailingslashit( (string) wp_parse_url( wp_upload_dir( null, false )['baseurl'], PHP_URL_PATH ) ) ),
+			'content'    => self::escape_pattern_string( trailingslashit( (string) wp_parse_url( content_url(), PHP_URL_PATH ) ) ),
+			'plugins'    => self::escape_pattern_string( trailingslashit( (string) wp_parse_url( plugins_url(), PHP_URL_PATH ) ) ),
+			'template'   => self::escape_pattern_string( trailingslashit( (string) wp_parse_url( get_stylesheet_directory_uri(), PHP_URL_PATH ) ) ),
+			'stylesheet' => self::escape_pattern_string( trailingslashit( (string) wp_parse_url( get_template_directory_uri(), PHP_URL_PATH ) ) ),
 		);
 	}
 

@@ -206,8 +206,12 @@ function plsr_render_settings_field( array $args ): void {
 		return;
 	}
 
-	$value   = $option[ $args['field'] ];
-	$choices = call_user_func( "plsr_get_{$args['field']}_labels" );
+	$value    = $option[ $args['field'] ];
+	$callback = "plsr_get_{$args['field']}_labels";
+	if ( ! is_callable( $callback ) ) {
+		return;
+	}
+	$choices = call_user_func( $callback );
 
 	?>
 	<fieldset>
