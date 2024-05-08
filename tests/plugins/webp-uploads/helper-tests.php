@@ -374,7 +374,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
-		$this->assertIsArray( $transforms );
 		$this->assertSame( array(), $transforms );
 	}
 
@@ -404,7 +403,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
-		$this->assertIsArray( $transforms );
 		$this->assertSame( $default_transforms, $transforms );
 	}
 
@@ -423,7 +421,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
-		$this->assertIsArray( $transforms );
 		$this->assertSame( array( 'image/jpeg' => array( 'image/jpeg' ) ), $transforms );
 	}
 
@@ -442,7 +439,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
-		$this->assertIsArray( $transforms );
 		$this->assertSame( array( 'image/jpeg' => array( 'image/jpeg', 'image/webp' ) ), $transforms );
 	}
 
@@ -459,8 +455,6 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		update_option( 'perflab_generate_webp_and_jpeg', true );
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
-
-		$this->assertIsArray( $transforms );
 
 		// The returned value depends on whether the server supports AVIF.
 		if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
