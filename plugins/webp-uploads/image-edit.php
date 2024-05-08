@@ -196,7 +196,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 					$target_file_name     = preg_replace( "/\.$current_extension$/", ".$extension", $thumbnail_file );
 					$target_file_location = path_join( $original_directory, $target_file_name );
 
-					remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
+					remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10 );
 					$result = $editor->save( $target_file_location, $targeted_mime );
 					add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 
@@ -208,7 +208,7 @@ function webp_uploads_update_image_onchange( $override, $file_path, $editor, $mi
 				} else {
 					$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension}";
 
-					remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
+					remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10 );
 					$result = $editor->save( $destination, $targeted_mime );
 					add_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10, 3 );
 
@@ -250,10 +250,6 @@ function webp_uploads_update_attachment_metadata( $data, $attachment_id ) {
 	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
 
 	foreach ( $trace as $element ) {
-		if ( ! isset( $element['function'] ) ) {
-			continue;
-		}
-
 		switch ( $element['function'] ) {
 			case 'wp_save_image':
 				// Right after an image has been edited.

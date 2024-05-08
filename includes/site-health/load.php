@@ -3,7 +3,7 @@
  * Site Health checks loader.
  *
  * @package performance-lab
- * @since n.e.x.t
+ * @since 3.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -21,3 +21,7 @@ require_once __DIR__ . '/audit-enqueued-assets/hooks.php';
 // WebP Support site health check.
 require_once __DIR__ . '/webp-support/helper.php';
 require_once __DIR__ . '/webp-support/hooks.php';
+
+// AVIF Support site health check.
+require_once __DIR__ . '/avif-support/helper.php';
+require_once __DIR__ . '/avif-support/hooks.php';

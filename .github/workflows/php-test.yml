@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.1', '8.0', '7.4', '7.3', '7.2', '7.1', '7.0']
+        php: ['8.2', '8.1', '8.0', '7.4', '7.3', '7.2']
         wp: [ 'latest' ]
         include:
           - php: '7.4'
@@ -53,10 +53,10 @@ jobs:
       WP_ENV_PHP_VERSION: ${{ matrix.php }}
       WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
     steps:
-      - uses: styfle/cancel-workflow-action@0.11.0
-      - uses: actions/checkout@v3
+      - uses: styfle/cancel-workflow-action@0.12.1
+      - uses: actions/checkout@v4
       - name: Setup Node.js (.nvmrc)
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: npm
@@ -66,11 +66,8 @@ jobs:
         run: jq '.plugins = [.plugins[0]]' .wp-env.json > .wp-env.override.json
       - name: Install WordPress
         run: npm run wp-env start
-        # Note that `composer update` is required instead of `composer install`
-        # for the sake of PHP versions older than 8.1, which is the version of
-        # PHP that the composer.lock was created for.
-      - name: Composer update
-        run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer update --no-interaction
+      - name: Composer Install
+        run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
       - name: Running single site unit tests
         run: npm run test-php
       - name: Running multisite unit tests

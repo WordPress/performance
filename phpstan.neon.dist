@@ -1,14 +1,26 @@
 includes:
-	- build-cs/vendor/phpstan/phpstan/conf/bleedingEdge.neon
+	- phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
-	level: 0
+	level: 5
+	treatPhpDocTypesAsCertain: false
+	rememberPossiblyImpureFunctionValues: false
 	paths:
 		- load.php
 		- includes/
 		- plugins/
 		- tests/
-		- uninstall.php
+	bootstrapFiles:
+		- load.php
+		- bin/phpstan/constants.php
+		- plugins/webp-uploads/load.php
 	scanDirectories:
 		- vendor/wp-phpunit/wp-phpunit/
+	scanFiles:
+		# These are needed due config.platform.php being 7.2 in composer.json and wordpress-stubs not including polyfills.
+		# See <https://github.com/php-stubs/wordpress-stubs/issues/100>.
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
+	stubFiles:
+		- bin/phpstan/filtered-functions.stub
 	dynamicConstantNames:
 		- PERFLAB_OBJECT_CACHE_DROPIN_VERSION

@@ -28,7 +28,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @param array $metadata      An array with the metadata from this attachment.
  * @param int   $attachment_id The ID of the attachment where the hook was dispatched.
- * @return array An array with the updated structure for the metadata before is stored in the database.
+ * @return array{
+ *     width: int,
+ *     height: int,
+ *     file: non-falsy-string,
+ *     sizes: array,
+ *     image_meta: array,
+ *     filesize: int,
+ *     sources?: array<string, array{
+ *         file: string,
+ *         filesize: int
+ *     }>
+ * } An array with the updated structure for the metadata before is stored in the database.
  */
 function webp_uploads_create_sources_property( array $metadata, $attachment_id ) {
 	// This should take place only on the JPEG image.
@@ -252,7 +263,7 @@ function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta
 	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
 
 	foreach ( $trace as $element ) {
-		if ( isset( $element['function'] ) && 'wp_update_image_subsizes' === $element['function'] ) {
+		if ( 'wp_update_image_subsizes' === $element['function'] ) {
 			webp_uploads_create_sources_property( $image_meta, $attachment_id );
 			break;
 		}
@@ -269,12 +280,16 @@ add_filter( 'wp_get_missing_image_subsizes', 'webp_uploads_wp_get_missing_image_
  *
  * @since 1.0.0
  *
- * @param string $output_format The image editor default output format mapping.
- * @param string $filename      Path to the image.
- * @param string $mime_type     The source image mime type.
- * @return string The new output format mapping.
+ * @param array<string, string>|mixed $output_format An array of mime type mappings. Maps a source mime type to a new destination mime type. Default empty array.
+ * @param string|null                 $filename      Path to the image.
+ * @param string|null                 $mime_type     The source image mime type.
+ * @return array<string, string> The new output format mapping.
  */
-function webp_uploads_filter_image_editor_output_format( $output_format, $filename, $mime_type ) {
+function webp_uploads_filter_image_editor_output_format( $output_format, ?string $filename, ?string $mime_type ): array {
+	if ( ! is_array( $output_format ) ) {
+		$output_format = array();
+	}
+
 	// Use the original mime type if this type is allowed.
 	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
 	if (
@@ -352,7 +367,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 			}
 
 			$intermediate_file = str_replace( $basename, $properties['file'], $file );
-			if ( empty( $intermediate_file ) ) {
+			if ( ! $intermediate_file ) {
 				continue;
 			}
 
@@ -384,7 +399,7 @@ function webp_uploads_remove_sources_files( $attachment_id ) {
 		}
 
 		$full_size = str_replace( $basename, $properties['file'], $file );
-		if ( empty( $full_size ) ) {
+		if ( ! $full_size ) {
 			continue;
 		}
 
@@ -770,27 +785,7 @@ add_filter( 'wp_editor_set_quality', 'webp_uploads_modify_webp_quality', 10, 2 )
  * @since 1.0.0
  */
 function webp_uploads_render_generator() {
-	echo '<meta name="generator" content="Modern Image Formats ' . esc_attr( WEBP_UPLOADS_VERSION ) . '">' . "\n";
+	// Use the plugin slug as it is immutable.
+	echo '<meta name="generator" content="webp-uploads ' . esc_attr( WEBP_UPLOADS_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'webp_uploads_render_generator' );
-
-/**
- * Adds a settings link to the plugin's action links.
- *
- * @since 1.1.0
- *
- * @param array $links An array of plugin action links.
- * @return array The modified list of actions.
- */
-function webp_uploads_settings_link( $links ) {
-	if ( ! is_array( $links ) ) {
-		return $links;
-	}
-	$links[] = sprintf(
-		'<a href="%1$s">%2$s</a>',
-		esc_url( admin_url( 'options-media.php#perflab_generate_webp_and_jpeg' ) ),
-		esc_html__( 'Settings', 'webp-uploads' )
-	);
-	return $links;
-}
-add_filter( 'plugin_action_links_' . WEBP_UPLOADS_MAIN_FILE, 'webp_uploads_settings_link' );

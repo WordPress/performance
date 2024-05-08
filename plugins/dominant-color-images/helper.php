@@ -24,8 +24,8 @@ function dominant_color_set_image_editors( $editors ) {
 	}
 
 	$replaces = array(
-		'WP_Image_Editor_GD'      => 'Dominant_Color_Image_Editor_GD',
-		'WP_Image_Editor_Imagick' => 'Dominant_Color_Image_Editor_Imagick',
+		WP_Image_Editor_GD::class      => Dominant_Color_Image_Editor_GD::class,
+		WP_Image_Editor_Imagick::class => Dominant_Color_Image_Editor_Imagick::class,
 	);
 
 	foreach ( $replaces as $old => $new ) {
@@ -58,6 +58,13 @@ function dominant_color_get_dominant_color_data( $attachment_id ) {
 		$file = get_attached_file( $attachment_id );
 	}
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
+
+	/**
+	 * Editor.
+	 *
+	 * @see dominant_color_set_image_editors()
+	 * @var WP_Image_Editor|Dominant_Color_Image_Editor_GD|Dominant_Color_Image_Editor_Imagick|WP_Error $editor
+	 */
 	$editor = wp_get_image_editor(
 		$file,
 		array(
@@ -71,6 +78,10 @@ function dominant_color_get_dominant_color_data( $attachment_id ) {
 
 	if ( is_wp_error( $editor ) ) {
 		return $editor;
+	}
+
+	if ( ! ( $editor instanceof Dominant_Color_Image_Editor_GD || $editor instanceof Dominant_Color_Image_Editor_Imagick ) ) {
+		return new WP_Error( 'image_no_editor', __( 'No editor could be selected.', 'default' ) );
 	}
 
 	$has_transparency = $editor->has_transparency();

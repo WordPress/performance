@@ -2,7 +2,10 @@
 /admin                                      @mukeshpanchal27 @felixarntz
 /tests/admin                                @mukeshpanchal27 @felixarntz
 /bin                                        @mukeshpanchal27 @felixarntz
-/.github                                    @mukeshpanchal27 @felixarntz
+/.github                                    @mukeshpanchal27 @felixarntz @thelovekesh
+
+# Site Health: AVIF Support Health Check
+/includes/site-health/avif-support                                          @adamsilverstein
 
 # Site Health: WebP Support Health Check
 /includes/site-health/webp-support                                          @adamsilverstein

@@ -3,6 +3,7 @@
  * Admin settings helper functions.
  *
  * @package performance-lab
+ * @noinspection PhpRedundantOptionalArgumentInspection
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 2.8.0
  *
  * @param string $plugin_slug The string identifier for the plugin in questions slug.
- * @return array Array of plugin data, or empty if none/error.
+ * @return array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string}|WP_Error Array of plugin data or WP_Error if failed.
  */
 function perflab_query_plugin_info( string $plugin_slug ) {
 	$plugin = get_transient( 'perflab_plugin_info_' . $plugin_slug );
@@ -24,24 +25,38 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return $plugin;
 	}
 
+	$fields = array(
+		'name',
+		'slug',
+		'short_description',
+		'requires',
+		'requires_php',
+		'requires_plugins',
+		'download_link',
+		'version', // Needed by install_plugin_install_status().
+	);
+
 	$plugin = plugins_api(
 		'plugin_information',
 		array(
 			'slug'   => $plugin_slug,
-			'fields' => array(
-				'short_description' => true,
-				'icons'             => true,
-			),
+			'fields' => array_fill_keys( $fields, true ),
 		)
 	);
 
 	if ( is_wp_error( $plugin ) ) {
-		return array();
+		return $plugin;
 	}
 
 	if ( is_object( $plugin ) ) {
 		$plugin = (array) $plugin;
 	}
+
+	// Only store what we need.
+	$plugin = wp_array_slice_assoc( $plugin, $fields );
+
+	// Make sure all fields default to false in case another plugin is modifying the response from WordPress.org via the plugins_api filter.
+	$plugin = array_merge( array_fill_keys( $fields, false ), $plugin );
 
 	set_transient( 'perflab_plugin_info_' . $plugin_slug, $plugin, HOUR_IN_SECONDS );
 
@@ -53,11 +68,11 @@ function perflab_query_plugin_info( string $plugin_slug ) {
  *
  * @since 2.8.0
  *
- * @return array List of WPP standalone plugins as slugs.
+ * @return string[] List of WPP standalone plugins as slugs.
  */
-function perflab_get_standalone_plugins() {
+function perflab_get_standalone_plugins(): array {
 	return array_keys(
-		perflab_get_standalone_plugin_version_constants()
+		perflab_get_standalone_plugin_data()
 	);
 }
 
@@ -66,32 +81,65 @@ function perflab_get_standalone_plugins() {
  *
  * @since 2.8.0
  */
-function perflab_render_plugins_ui() {
+function perflab_render_plugins_ui(): void {
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	$standalone_plugins = array();
-	foreach ( perflab_get_standalone_plugins() as $managed_standalone_plugin_slug ) {
-		$standalone_plugins[ $managed_standalone_plugin_slug ] = array(
-			'plugin_data' => perflab_query_plugin_info( $managed_standalone_plugin_slug ),
+	$plugins              = array();
+	$experimental_plugins = array();
+
+	foreach ( perflab_get_standalone_plugin_data() as $plugin_slug => $plugin_data ) {
+		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from wordpress.org.
+
+		// Skip if the plugin is not on WordPress.org or there was a network error.
+		if ( $api_data instanceof WP_Error ) {
+			wp_admin_notice(
+				esc_html(
+					sprintf(
+						/* translators: 1: plugin slug. 2: error message. */
+						__( 'Failed to query WordPress.org Plugin Directory for plugin "%1$s". %2$s', 'performance-lab' ),
+						$plugin_slug,
+						$api_data->get_error_message()
+					)
+				),
+				array( 'type' => 'error' )
+			);
+			continue;
+		}
+
+		$plugin_data = array_merge(
+			array(
+				'experimental' => false,
+			),
+			$plugin_data, // Data defined within Performance Lab.
+			$api_data
 		);
+
+		// Separate experimental plugins so that they're displayed after non-experimental plugins.
+		if ( $plugin_data['experimental'] ) {
+			$experimental_plugins[ $plugin_slug ] = $plugin_data;
+		} else {
+			$plugins[ $plugin_slug ] = $plugin_data;
+		}
 	}
 
-	if ( empty( $standalone_plugins ) ) {
+	if ( ! $plugins && ! $experimental_plugins ) {
 		return;
 	}
 	?>
 	<div class="wrap plugin-install-php">
-		<h1><?php esc_html_e( 'Performance Plugins', 'performance-lab' ); ?></h1>
-		<p><?php esc_html_e( 'The following standalone performance plugins are available for installation.', 'performance-lab' ); ?></p>
+		<h1><?php esc_html_e( 'Performance Features', 'performance-lab' ); ?></h1>
 		<div class="wrap">
 			<form id="plugin-filter" method="post">
 				<div class="wp-list-table widefat plugin-install wpp-standalone-plugins">
 					<h2 class="screen-reader-text"><?php esc_html_e( 'Plugins list', 'default' ); ?></h2>
 					<div id="the-list">
 						<?php
-						foreach ( $standalone_plugins as $standalone_plugin ) {
-							perflab_render_plugin_card( $standalone_plugin['plugin_data'] );
+						foreach ( $plugins as $plugin_data ) {
+							perflab_render_plugin_card( $plugin_data );
+						}
+						foreach ( $experimental_plugins as $plugin_data ) {
+							perflab_render_plugin_card( $plugin_data );
 						}
 						?>
 					</div>
@@ -104,6 +152,148 @@ function perflab_render_plugins_ui() {
 }
 
 /**
+ * Checks if a given plugin is available.
+ *
+ * @since n.e.x.t
+ * @see perflab_install_and_activate_plugin()
+ *
+ * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string} $plugin_data                     Plugin data from the WordPress.org API.
+ * @param array<string, array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool, activated: bool, installed: bool}>                      $processed_plugin_availabilities Plugin availabilities already processed. This param is only used by recursive calls.
+ * @return array{compatible_php: bool, compatible_wp: bool, can_install: bool, can_activate: bool, activated: bool, installed: bool} Availability.
+ */
+function perflab_get_plugin_availability( array $plugin_data, array &$processed_plugin_availabilities = array() ): array {
+	if ( array_key_exists( $plugin_data['slug'], $processed_plugin_availabilities ) ) {
+		// Prevent infinite recursion by returning the previously-computed value.
+		return $processed_plugin_availabilities[ $plugin_data['slug'] ];
+	}
+
+	$availability = array(
+		'compatible_php' => (
+			! $plugin_data['requires_php'] ||
+			is_php_version_compatible( $plugin_data['requires_php'] )
+		),
+		'compatible_wp'  => (
+			! $plugin_data['requires'] ||
+			is_wp_version_compatible( $plugin_data['requires'] )
+		),
+	);
+
+	$plugin_status = install_plugin_install_status( $plugin_data );
+
+	$availability['installed'] = ( 'install' !== $plugin_status['status'] );
+	$availability['activated'] = $plugin_status['file'] && is_plugin_active( $plugin_status['file'] );
+
+	// The plugin is already installed or the user can install plugins.
+	$availability['can_install'] = (
+		$availability['installed'] ||
+		current_user_can( 'install_plugins' )
+	);
+
+	// The plugin is activated or the user can activate plugins.
+	$availability['can_activate'] = (
+		$availability['activated'] ||
+		$plugin_status['file'] // When not false, the plugin is installed.
+			? current_user_can( 'activate_plugin', $plugin_status['file'] )
+			: current_user_can( 'activate_plugins' )
+	);
+
+	// Store pending availability before recursing.
+	$processed_plugin_availabilities[ $plugin_data['slug'] ] = $availability;
+
+	foreach ( $plugin_data['requires_plugins'] as $requires_plugin ) {
+		$dependency_plugin_data = perflab_query_plugin_info( $requires_plugin );
+		if ( $dependency_plugin_data instanceof WP_Error ) {
+			continue;
+		}
+
+		$dependency_availability = perflab_get_plugin_availability( $dependency_plugin_data );
+		foreach ( array( 'compatible_php', 'compatible_wp', 'can_install', 'can_activate', 'installed', 'activated' ) as $key ) {
+			$availability[ $key ] = $availability[ $key ] && $dependency_availability[ $key ];
+		}
+	}
+
+	$processed_plugin_availabilities[ $plugin_data['slug'] ] = $availability;
+	return $availability;
+}
+
+/**
+ * Installs and activates a plugin by its slug.
+ *
+ * Dependencies are recursively installed and activated as well.
+ *
+ * @since n.e.x.t
+ * @see perflab_get_plugin_availability()
+ *
+ * @param string   $plugin_slug       Plugin slug.
+ * @param string[] $processed_plugins Slugs for plugins which have already been processed. This param is only used by recursive calls.
+ * @return WP_Error|null WP_Error on failure.
+ */
+function perflab_install_and_activate_plugin( string $plugin_slug, array &$processed_plugins = array() ): ?WP_Error {
+	if ( in_array( $plugin_slug, $processed_plugins, true ) ) {
+		// Prevent infinite recursion from possible circular dependency.
+		return null;
+	}
+	$processed_plugins[] = $plugin_slug;
+
+	$plugin_data = perflab_query_plugin_info( $plugin_slug );
+	if ( $plugin_data instanceof WP_Error ) {
+		return $plugin_data;
+	}
+
+	// Install and activate plugin dependencies first.
+	foreach ( $plugin_data['requires_plugins'] as $requires_plugin_slug ) {
+		$result = perflab_install_and_activate_plugin( $requires_plugin_slug );
+		if ( $result instanceof WP_Error ) {
+			return $result;
+		}
+	}
+
+	// Install the plugin.
+	$plugin_status = install_plugin_install_status( $plugin_data );
+	$plugin_file   = $plugin_status['file'];
+	if ( 'install' === $plugin_status['status'] ) {
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return new WP_Error( 'cannot_install_plugin', __( 'Sorry, you are not allowed to install plugins on this site.', 'default' ) );
+		}
+
+		// Replace new Plugin_Installer_Skin with new Quiet_Upgrader_Skin when output needs to be suppressed.
+		$skin     = new WP_Ajax_Upgrader_Skin( array( 'api' => $plugin_data ) );
+		$upgrader = new Plugin_Upgrader( $skin );
+		$result   = $upgrader->install( $plugin_data['download_link'] );
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		} elseif ( is_wp_error( $skin->result ) ) {
+			return $skin->result;
+		} elseif ( $skin->get_errors()->has_errors() ) {
+			return $skin->get_errors();
+		}
+
+		$plugins = get_plugins( '/' . $plugin_slug );
+		if ( empty( $plugins ) ) {
+			return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'default' ) );
+		}
+
+		$plugin_file_names = array_keys( $plugins );
+		$plugin_file       = $plugin_slug . '/' . $plugin_file_names[0];
+	}
+
+	// Activate the plugin.
+	if ( ! is_plugin_active( $plugin_file ) ) {
+		if ( ! current_user_can( 'activate_plugin', $plugin_file ) ) {
+			return new WP_Error( 'cannot_activate_plugin', __( 'Sorry, you are not allowed to activate this plugin.', 'default' ) );
+		}
+
+		$result = activate_plugin( $plugin_file );
+		if ( $result instanceof WP_Error ) {
+			return $result;
+		}
+	}
+
+	return null;
+}
+
+/**
  * Renders individual plugin cards.
  *
  * This is adapted from `WP_Plugin_Install_List_Table::display_rows()` in core.
@@ -113,162 +303,96 @@ function perflab_render_plugins_ui() {
  * @see WP_Plugin_Install_List_Table::display_rows()
  * @link https://github.com/WordPress/wordpress-develop/blob/0b8ca16ea3bd9722bd1a38f8ab68901506b1a0e7/src/wp-admin/includes/class-wp-plugin-install-list-table.php#L467-L830
  *
- * @param array $plugin_data Plugin data from the WordPress.org API.
+ * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string, experimental: bool} $plugin_data Plugin data augmenting data from the WordPress.org API.
  */
-function perflab_render_plugin_card( array $plugin_data ) {
-	// If no plugin data is returned, return.
-	if ( empty( $plugin_data ) ) {
-		return;
-	}
+function perflab_render_plugin_card( array $plugin_data ): void {
 
-	// Remove any HTML from the description.
+	$name        = wp_strip_all_tags( $plugin_data['name'] );
 	$description = wp_strip_all_tags( $plugin_data['short_description'] );
-	$title       = $plugin_data['name'];
 
 	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
 	$description = apply_filters( 'plugin_install_description', $description, $plugin_data );
-	$version     = $plugin_data['version'];
-	$name        = wp_strip_all_tags( $title . ' ' . $version );
-	$author      = $plugin_data['author'];
-	if ( ! empty( $author ) ) {
-		/* translators: %s: Plugin author. */
-		$author = ' <cite>' . sprintf( __( 'By %s', 'default' ), $author ) . '</cite>';
-	}
 
-	$requires_php = isset( $plugin_data['requires_php'] ) ? $plugin_data['requires_php'] : null;
-	$requires_wp  = isset( $plugin_data['requires'] ) ? $plugin_data['requires'] : null;
+	$availability = perflab_get_plugin_availability( $plugin_data );
 
-	$compatible_php = is_php_version_compatible( $requires_php );
-	$compatible_wp  = is_wp_version_compatible( $requires_wp );
-	$tested_wp      = ( empty( $plugin_data['tested'] ) || version_compare( get_bloginfo( 'version' ), $plugin_data['tested'], '<=' ) );
-	$action_links   = array();
+	$compatible_php = $availability['compatible_php'];
+	$compatible_wp  = $availability['compatible_wp'];
 
-	$status = install_plugin_install_status( $plugin_data );
+	$action_links = array();
 
-	switch ( $status['status'] ) {
-		case 'install':
-			if ( $status['url'] ) {
-				if ( $compatible_php && $compatible_wp && current_user_can( 'install_plugins' ) ) {
-					$action_links[] = sprintf(
-						'<a class="install-now button" data-slug="%s" href="%s" aria-label="%s" data-name="%s" data-plugin-activation-nonce="%s">%s</a>',
-						esc_attr( $plugin_data['slug'] ),
-						esc_url( $status['url'] ),
-						/* translators: %s: Plugin name and version. */
-						esc_attr( sprintf( _x( 'Install %s now', 'plugin', 'default' ), $name ) ),
-						esc_attr( $name ),
-						esc_attr( wp_create_nonce( 'perflab_activate_plugin_' . $plugin_data['slug'] ) ),
-						esc_html__( 'Install Now', 'default' )
-					);
-				} else {
-					$action_links[] = sprintf(
-						'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-						esc_html( _x( 'Cannot Install', 'plugin', 'default' ) )
-					);
-				}
-			}
-			break;
+	if ( $availability['activated'] ) {
+		$action_links[] = sprintf(
+			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+			esc_html( _x( 'Active', 'plugin', 'default' ) )
+		);
+	} elseif (
+		$availability['compatible_php'] &&
+		$availability['compatible_wp'] &&
+		$availability['can_install'] &&
+		$availability['can_activate']
+	) {
+		$url = esc_url_raw(
+			add_query_arg(
+				array(
+					'action'   => 'perflab_install_activate_plugin',
+					'_wpnonce' => wp_create_nonce( 'perflab_install_activate_plugin' ),
+					'slug'     => $plugin_data['slug'],
+				),
+				admin_url( 'options-general.php' )
+			)
+		);
 
-		case 'update_available':
-		case 'latest_installed':
-		case 'newer_installed':
-			if ( is_plugin_active( $status['file'] ) ) {
-				$action_links[] = sprintf(
-					'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-					esc_html( _x( 'Active', 'plugin', 'default' ) )
-				);
-				if ( current_user_can( 'deactivate_plugin', $status['file'] ) ) {
-					$s       = isset( $_REQUEST['s'] ) ? $_REQUEST['s'] : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					$context = $status['status'];
-
-					$action_links[] = sprintf(
-						'<a href="%s" id="deactivate-%s" aria-label="%s">%s</a>',
-						esc_url(
-							add_query_arg(
-								array(
-									'_wpnonce' => wp_create_nonce( 'perflab_deactivate_plugin_' . $status['file'] ),
-									'action'   => 'perflab_deactivate_plugin',
-									'plugin'   => $status['file'],
-								),
-								network_admin_url( 'plugins.php' )
-							)
-						),
-						esc_attr( $plugin_data['slug'] ),
-						/* translators: %s: Plugin name. */
-						esc_attr( sprintf( _x( 'Deactivate %s', 'plugin', 'default' ), $plugin_data['slug'] ) ),
-						esc_html__( 'Deactivate', 'default' )
-					);
-				}
-			} elseif ( current_user_can( 'activate_plugin', $status['file'] ) ) {
-				if ( $compatible_php && $compatible_wp ) {
-					$button_text = __( 'Activate', 'default' );
-					/* translators: %s: Plugin name. */
-					$button_label = _x( 'Activate %s', 'plugin', 'default' );
-					$activate_url = add_query_arg(
-						array(
-							'_wpnonce' => wp_create_nonce( 'perflab_activate_plugin_' . $status['file'] ),
-							'action'   => 'perflab_activate_plugin',
-							'plugin'   => $status['file'],
-						),
-						network_admin_url( 'plugins.php' )
-					);
-
-					$action_links[] = sprintf(
-						'<a href="%1$s" class="button activate-now" aria-label="%2$s">%3$s</a>',
-						esc_url( $activate_url ),
-						esc_attr( sprintf( $button_label, $plugin_data['name'] ) ),
-						esc_html( $button_text )
-					);
-				} else {
-					$action_links[] = sprintf(
-						'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-						esc_html( _x( 'Cannot Activate', 'plugin', 'default' ) )
-					);
-				}
-			} else {
-				$action_links[] = sprintf(
-					'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
-					esc_html( _x( 'Installed', 'plugin', 'default' ) )
-				);
-			}
-			break;
-	}
-
-	$details_link = esc_url_raw(
-		add_query_arg(
-			array(
-				'tab'       => 'plugin-information',
-				'plugin'    => $plugin_data['slug'],
-				'TB_iframe' => 'true',
-				'width'     => 600,
-				'height'    => 550,
-			),
-			admin_url( 'plugin-install.php' )
-		)
-	);
-
-	$action_links[] = sprintf(
-		'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s" data-title="%s">%s</a>',
-		esc_url( $details_link ),
-		/* translators: %s: Plugin name and version. */
-		esc_attr( sprintf( __( 'More information about %s', 'default' ), $name ) ),
-		esc_attr( $name ),
-		esc_html__( 'More Details', 'default' )
-	);
-
-	if ( ! empty( $plugin_data['icons']['svg'] ) ) {
-		$plugin_icon_url = $plugin_data['icons']['svg'];
-	} elseif ( ! empty( $plugin_data['icons']['2x'] ) ) {
-		$plugin_icon_url = $plugin_data['icons']['2x'];
-	} elseif ( ! empty( $plugin_data['icons']['1x'] ) ) {
-		$plugin_icon_url = $plugin_data['icons']['1x'];
+		$action_links[] = sprintf(
+			'<a class="button perflab-install-active-plugin" href="%s">%s</a>',
+			esc_url( $url ),
+			esc_html__( 'Activate', 'default' )
+		);
 	} else {
-		$plugin_icon_url = $plugin_data['icons']['default'];
+		$explanation    = $availability['can_install'] ? _x( 'Cannot Activate', 'plugin', 'default' ) : _x( 'Cannot Install', 'plugin', 'default' );
+		$action_links[] = sprintf(
+			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
+			esc_html( $explanation )
+		);
 	}
 
-	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
-	$action_links = apply_filters( 'plugin_install_action_links', $action_links, $plugin_data );
+	if ( current_user_can( 'install_plugins' ) ) {
+		$title_link_attr = ' class="thickbox open-plugin-details-modal"';
+		$details_link    = esc_url_raw(
+			add_query_arg(
+				array(
+					'tab'       => 'plugin-information',
+					'plugin'    => $plugin_data['slug'],
+					'TB_iframe' => 'true',
+					'width'     => 600,
+					'height'    => 550,
+				),
+				admin_url( 'plugin-install.php' )
+			)
+		);
 
-	$last_updated_timestamp = strtotime( $plugin_data['last_updated'] );
+		$action_links[] = sprintf(
+			'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s" data-title="%s">%s</a>',
+			esc_url( $details_link ),
+			/* translators: %s: Plugin name and version. */
+			esc_attr( sprintf( __( 'More information about %s', 'default' ), $name ) ),
+			esc_attr( $name ),
+			esc_html__( 'Learn more', 'performance-lab' )
+		);
+	} else {
+		$title_link_attr = ' target="_blank"';
+
+		/* translators: %s: Plugin name. */
+		$aria_label = sprintf( __( 'Visit plugin site for %s', 'default' ), $name );
+
+		$details_link = __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_data['slug'] . '/';
+
+		$action_links[] = sprintf(
+			'<a href="%s" aria-label="%s" target="_blank">%s</a>',
+			esc_url( $details_link ),
+			esc_attr( $aria_label ),
+			esc_html__( 'Visit plugin site', 'default' )
+		);
+	}
 	?>
 	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>">
 		<?php
@@ -334,75 +458,25 @@ function perflab_render_plugin_card( array $plugin_data ) {
 		<div class="plugin-card-top">
 			<div class="name column-name">
 				<h3>
-					<a href="<?php echo esc_url( $details_link ); ?>" class="thickbox open-plugin-details-modal">
-						<?php echo wp_kses_post( $title ); ?>
-						<img src="<?php echo esc_url( $plugin_icon_url ); ?>" class="plugin-icon" alt="" />
+					<a href="<?php echo esc_url( $details_link ); ?>"<?php echo $title_link_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+						<?php echo wp_kses_post( $name ); ?>
 					</a>
+					<?php if ( $plugin_data['experimental'] ) : ?>
+						<em class="perflab-plugin-experimental">
+							<?php echo esc_html( _x( '(experimental)', 'plugin suffix', 'performance-lab' ) ); ?>
+						</em>
+					<?php endif; ?>
 				</h3>
 			</div>
 			<div class="action-links">
-				<?php
-				if ( ! empty( $action_links ) ) {
-					echo wp_kses_post( '<ul class="plugin-action-buttons"><li>' . implode( '</li><li>', $action_links ) . '</li></ul>' );
-				}
-				?>
+				<ul class="plugin-action-buttons">
+					<?php foreach ( $action_links as $action_link ) : ?>
+						<li><?php echo wp_kses_post( $action_link ); ?></li>
+					<?php endforeach; ?>
+				</ul>
 			</div>
 			<div class="desc column-description">
 				<p><?php echo wp_kses_post( $description ); ?></p>
-				<p class="authors"><?php echo wp_kses_post( $author ); ?></p>
-			</div>
-		</div>
-		<div class="plugin-card-bottom">
-			<div class="vers column-rating">
-				<?php
-				wp_star_rating(
-					array(
-						'rating' => $plugin_data['rating'],
-						'type'   => 'percent',
-						'number' => $plugin_data['num_ratings'],
-					)
-				);
-				?>
-				<span class="num-ratings" aria-hidden="true">(<?php echo esc_html( number_format_i18n( $plugin_data['num_ratings'] ) ); ?>)</span>
-			</div>
-			<div class="column-updated">
-				<strong><?php esc_html_e( 'Last Updated:', 'default' ); ?></strong>
-				<?php
-				printf(
-					/* translators: %s: Human-readable time difference. */
-					esc_html__( '%s ago', 'performance-lab' ),
-					esc_html( human_time_diff( $last_updated_timestamp ) )
-				);
-				?>
-			</div>
-			<div class="column-downloaded">
-				<?php
-				if ( $plugin_data['active_installs'] >= 1000000 ) {
-					$active_installs_millions = (int) floor( $plugin_data['active_installs'] / 1000000 );
-					$active_installs_text     = sprintf(
-						/* translators: %s: Number of millions. */
-						_nx( '%s+ Million', '%s+ Million', $active_installs_millions, 'Active plugin installations', 'default' ),
-						number_format_i18n( $active_installs_millions )
-					);
-				} elseif ( 0 === $plugin_data['active_installs'] ) {
-					$active_installs_text = _x( 'Less Than 10', 'Active plugin installations', 'default' );
-				} else {
-					$active_installs_text = number_format_i18n( $plugin_data['active_installs'] ) . '+';
-				}
-				/* translators: %s: Number of installations. */
-				printf( esc_html__( '%s Active Installations', 'default' ), esc_html( $active_installs_text ) );
-				?>
-			</div>
-			<div class="column-compatibility">
-				<?php
-				if ( ! $tested_wp ) {
-					echo '<span class="compatibility-untested">' . esc_html__( 'Untested with your version of WordPress', 'default' ) . '</span>';
-				} elseif ( ! $compatible_wp ) {
-					echo '<span class="compatibility-incompatible">' . wp_kses_post( __( '<strong>Incompatible</strong> with your version of WordPress', 'default' ) ) . '</span>';
-				} else {
-					echo '<span class="compatibility-compatible">' . wp_kses_post( __( '<strong>Compatible</strong> with your version of WordPress', 'default' ) ) . '</span>';
-				}
-				?>
 			</div>
 		</div>
 	</div>

@@ -33,8 +33,8 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( $file_location );
 		$metadata      = wp_get_attachment_metadata( $attachment_id );
 
-		$request       = new WP_REST_Request();
-		$request['id'] = $attachment_id;
+		$request = new WP_REST_Request();
+		$request->set_param( 'id', $attachment_id );
 
 		$controller = new WP_REST_Attachments_Controller( 'attachment' );
 		$response   = $controller->get_item( $request );
@@ -79,8 +79,8 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 		$file_location = TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg';
 		$attachment_id = self::factory()->attachment->create_upload_object( $file_location );
 
-		$request       = new WP_REST_Request();
-		$request['id'] = $attachment_id;
+		$request = new WP_REST_Request();
+		$request->set_param( 'id', $attachment_id );
 
 		$controller = new WP_REST_Attachments_Controller( 'attachment' );
 		$response   = $controller->get_item( $request );

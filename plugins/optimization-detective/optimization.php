@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @access private
  * @link https://core.trac.wordpress.org/ticket/43258
  *
- * @param string $passthrough Optional. Filter value. Default null.
+ * @param string $passthrough Value for the template_include filter which is passed through.
  * @return string Unmodified value of $passthrough.
  */
 function od_buffer_output( string $passthrough ): string {
@@ -53,12 +53,18 @@ function od_buffer_output( string $passthrough ): string {
  * @since 0.1.0
  * @access private
  */
-function od_maybe_add_template_output_buffer_filter() {
-	if ( ! od_can_optimize_response() ) {
+function od_maybe_add_template_output_buffer_filter(): void {
+	if ( ! od_can_optimize_response() || isset( $_GET['optimization_detective_disabled'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return;
 	}
 	$callback = 'od_optimize_template_output_buffer';
-	if ( function_exists( 'perflab_wrap_server_timing' ) ) {
+	if (
+		function_exists( 'perflab_wrap_server_timing' )
+		&&
+		function_exists( 'perflab_server_timing_use_output_buffer' )
+		&&
+		perflab_server_timing_use_output_buffer()
+	) {
 		$callback = perflab_wrap_server_timing( $callback, 'optimization-detective', 'exist' );
 	}
 	add_filter( 'od_template_output_buffer', $callback );
@@ -80,7 +86,7 @@ function od_can_optimize_response(): bool {
 		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
 		is_customize_preview() ||
 		// Since the images detected in the response body of a POST request cannot, by definition, be cached.
-		'GET' !== $_SERVER['REQUEST_METHOD'] ||
+		( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) ||
 		// The aim is to optimize pages for the majority of site visitors, not those who administer the site. For admin
 		// users, additional elements will be present like the script from wp_customize_support_script() which will
 		// interfere with the XPath indices. Note that od_get_normalized_query_vars() is varied by is_user_logged_in()
@@ -173,6 +179,31 @@ function od_construct_preload_links( array $lcp_elements_by_minimum_viewport_wid
 }
 
 /**
+ * Determines whether the response has an HTML Content-Type.
+ *
+ * @since n.e.x.t
+ * @private
+ *
+ * @return bool Whether Content-Type is HTML.
+ */
+function od_is_response_html_content_type(): bool {
+	$is_html_content_type = false;
+
+	$headers_list = array_merge(
+		array( 'Content-Type: ' . ini_get( 'default_mimetype' ) ),
+		headers_list()
+	);
+	foreach ( $headers_list as $header ) {
+		$header_parts = preg_split( '/\s*[:;]\s*/', strtolower( $header ) );
+		if ( count( $header_parts ) >= 2 && 'content-type' === $header_parts[0] ) {
+			$is_html_content_type = in_array( $header_parts[1], array( 'text/html', 'application/xhtml+xml' ), true );
+		}
+	}
+
+	return $is_html_content_type;
+}
+
+/**
  * Optimizes template output buffer.
  *
  * @since 0.1.0
@@ -182,6 +213,10 @@ function od_construct_preload_links( array $lcp_elements_by_minimum_viewport_wid
  * @return string Filtered template output buffer.
  */
 function od_optimize_template_output_buffer( string $buffer ): string {
+	if ( ! od_is_response_html_content_type() ) {
+		return $buffer;
+	}
+
 	$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 	$post = OD_URL_Metrics_Post_Type::get_post( $slug );
 
@@ -237,14 +272,14 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$detected_lcp_element_xpaths = array();
 
 	// Walk over all tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes or background-image for preloading.
-	$processor = new OD_HTML_Tag_Processor( $buffer );
-	foreach ( $processor->open_tags() as $tag_name ) {
+	$walker = new OD_HTML_Tag_Walker( $buffer );
+	foreach ( $walker->open_tags() as $tag_name ) {
 		$is_img_tag = (
 			'IMG' === $tag_name
 			&&
-			$processor->get_attribute( 'src' )
+			$walker->get_attribute( 'src' )
 			&&
-			! str_starts_with( $processor->get_attribute( 'src' ), 'data:' )
+			! str_starts_with( $walker->get_attribute( 'src' ), 'data:' )
 		);
 
 		/*
@@ -256,7 +291,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		 * parser of the `url()` functions from the property value.
 		 */
 		$background_image_url = null;
-		$style                = $processor->get_attribute( 'style' );
+		$style                = $walker->get_attribute( 'style' );
 		if (
 			$style
 			&&
@@ -271,28 +306,28 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 			continue;
 		}
 
-		$xpath = $processor->get_xpath();
+		$xpath = $walker->get_xpath();
 
 		// Ensure the fetchpriority attribute is set on the element properly.
 		if ( $is_img_tag ) {
 			if ( $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
-				if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
-					$processor->set_attribute( 'data-od-fetchpriority-already-added', true );
+				if ( 'high' === $walker->get_attribute( 'fetchpriority' ) ) {
+					$walker->set_attribute( 'data-od-fetchpriority-already-added', true );
 				} else {
-					$processor->set_attribute( 'fetchpriority', 'high' );
-					$processor->set_attribute( 'data-od-added-fetchpriority', true );
+					$walker->set_attribute( 'fetchpriority', 'high' );
+					$walker->set_attribute( 'data-od-added-fetchpriority', true );
 				}
 
 				// Never include loading=lazy on the LCP image common across all breakpoints.
-				if ( 'lazy' === $processor->get_attribute( 'loading' ) ) {
-					$processor->set_attribute( 'data-od-removed-loading', $processor->get_attribute( 'loading' ) );
-					$processor->remove_attribute( 'loading' );
+				if ( 'lazy' === $walker->get_attribute( 'loading' ) ) {
+					$walker->set_attribute( 'data-od-removed-loading', $walker->get_attribute( 'loading' ) );
+					$walker->remove_attribute( 'loading' );
 				}
-			} elseif ( $all_breakpoints_have_url_metrics && $processor->get_attribute( 'fetchpriority' ) ) {
+			} elseif ( $all_breakpoints_have_url_metrics && $walker->get_attribute( 'fetchpriority' ) ) {
 				// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
 				// continue to apply while waiting for all breakpoints to have metrics collected for them.
-				$processor->set_attribute( 'data-od-removed-fetchpriority', $processor->get_attribute( 'fetchpriority' ) );
-				$processor->remove_attribute( 'fetchpriority' );
+				$walker->set_attribute( 'data-od-removed-fetchpriority', $walker->get_attribute( 'fetchpriority' ) );
+				$walker->remove_attribute( 'fetchpriority' );
 			}
 		}
 
@@ -306,7 +341,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 			if ( $is_img_tag ) {
 				$img_attributes = array();
 				foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin' ) as $attr_name ) {
-					$value = $processor->get_attribute( $attr_name );
+					$value = $walker->get_attribute( $attr_name );
 					if ( null !== $value ) {
 						$img_attributes[ $attr_name ] = $value;
 					}
@@ -322,10 +357,9 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		if ( $needs_detection ) {
-			$processor->set_attribute( 'data-od-xpath', $xpath );
+			$walker->set_attribute( 'data-od-xpath', $xpath );
 		}
 	}
-	$buffer = $processor->get_updated_html();
 
 	// If there were any LCP elements captured in URL Metrics that no longer exist in the document, we need to behave as
 	// if they didn't exist in the first place as there is nothing that can be preloaded.
@@ -337,24 +371,17 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 	}
 
-	// Inject any preload links at the end of the HEAD. In the future, WP_HTML_Processor could be used to do this injection.
-	// However, given the simple replacement here this is not essential.
+	// Inject any preload links at the end of the HEAD.
 	$head_injection = od_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
+	if ( $head_injection ) {
+		$walker->append_head_html( $head_injection );
+	}
 
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
 	if ( $needs_detection ) {
-		$head_injection .= od_get_detection_script( $slug, $group_collection );
+		$walker->append_body_html( od_get_detection_script( $slug, $group_collection ) );
 	}
 
-	if ( $head_injection ) {
-		$buffer = preg_replace(
-			'#(?=</HEAD>)#i',
-			$head_injection,
-			$buffer,
-			1
-		);
-	}
-
-	return $buffer;
+	return $walker->get_updated_html();
 }

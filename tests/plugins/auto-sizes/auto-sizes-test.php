@@ -32,6 +32,12 @@ class AutoSizesTests extends WP_UnitTestCase {
 		return get_image_tag( $attachment_id, '', '', '', 'large' );
 	}
 
+	public function test_hooks() {
+		$this->assertSame( 10, has_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' ) );
+		$this->assertSame( 10, has_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' ) );
+		$this->assertSame( 10, has_action( 'wp_head', 'auto_sizes_render_generator' ) );
+	}
+
 	/**
 	 * Test generated markup for an image with lazy loading gets auto-sizes.
 	 *
@@ -40,7 +46,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	public function test_image_with_lazy_loading_has_auto_sizes() {
 		$this->assertStringContainsString(
 			'sizes="auto, ',
-			wp_get_attachment_image( self::$image_id, 'large', null, array( 'loading' => 'lazy' ) )
+			wp_get_attachment_image( self::$image_id, 'large', false, array( 'loading' => 'lazy' ) )
 		);
 	}
 
@@ -52,7 +58,7 @@ class AutoSizesTests extends WP_UnitTestCase {
 	public function test_image_without_lazy_loading_does_not_have_auto_sizes() {
 		$this->assertStringContainsString(
 			'sizes="(max-width: 1024px) 100vw, 1024px"',
-			wp_get_attachment_image( self::$image_id, 'large', null, array( 'loading' => '' ) )
+			wp_get_attachment_image( self::$image_id, 'large', false, array( 'loading' => '' ) )
 		);
 	}
 
@@ -86,5 +92,17 @@ class AutoSizesTests extends WP_UnitTestCase {
 			'sizes="(max-width: 1024px) 100vw, 1024px"',
 			wp_filter_content_tags( $this->get_image_tag( self::$image_id ) )
 		);
+	}
+
+	/**
+	 * Test printing the meta generator tag.
+	 *
+	 * @covers ::auto_sizes_render_generator
+	 */
+	public function test_auto_sizes_render_generator() {
+		$tag = get_echo( 'auto_sizes_render_generator' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'generator', $tag );
+		$this->assertStringContainsString( 'auto-sizes ' . IMAGE_AUTO_SIZES_VERSION, $tag );
 	}
 }

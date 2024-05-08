@@ -3,8 +3,8 @@
 Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
-Requires PHP:      7.0
-Stable tag:        0.1.0
+Requires PHP:      7.2
+Stable tag:        0.1.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images
@@ -136,6 +136,11 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.1.1 =
+
+* Use plugin slug for generator tag. ([1103](https://github.com/WordPress/performance/pull/1103))
+* Prevent detection script injection from breaking import maps in classic themes. ([1084](https://github.com/WordPress/performance/pull/1084))
 
 = 0.1.0 =
 

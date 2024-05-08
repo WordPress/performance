@@ -4,8 +4,8 @@
  * Plugin URI: https://github.com/WordPress/performance
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
  * Requires at least: 6.4
- * Requires PHP: 7.0
- * Version: 2.9.0
+ * Requires PHP: 7.2
+ * Version: 3.0.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'PERFLAB_VERSION', '2.9.0' );
+define( 'PERFLAB_VERSION', '3.0.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_SCREEN', 'performance-lab' );
@@ -46,9 +46,9 @@ require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/site-health/load.php';
  *
  * @since 1.1.0
  * @since 2.9.0 The generator tag now includes the active standalone plugin slugs.
- * @since n.e.x.t The generator tag no longer includes module slugs.
+ * @since 3.0.0 The generator tag no longer includes module slugs.
  */
-function perflab_get_generator_content() {
+function perflab_get_generator_content(): string {
 	$active_plugins = array();
 	foreach ( perflab_get_standalone_plugin_version_constants() as $plugin_slug => $constant_name ) {
 		if ( defined( $constant_name ) && ! str_starts_with( constant( $constant_name ), 'Performance Lab ' ) ) {
@@ -57,7 +57,8 @@ function perflab_get_generator_content() {
 	}
 
 	return sprintf(
-		'Performance Lab %1$s; plugins: %2$s',
+		// Use the plugin slug as it is immutable.
+		'performance-lab %1$s; plugins: %2$s',
 		PERFLAB_VERSION,
 		implode( ', ', $active_plugins )
 	);
@@ -70,7 +71,7 @@ function perflab_get_generator_content() {
  *
  * @since 1.1.0
  */
-function perflab_render_generator() {
+function perflab_render_generator(): void {
 	$content = perflab_get_generator_content();
 
 	echo '<meta name="generator" content="' . esc_attr( $content ) . '">' . "\n";
@@ -78,27 +79,54 @@ function perflab_render_generator() {
 add_action( 'wp_head', 'perflab_render_generator' );
 
 /**
+ * Gets the standalone plugins and their data.
+ *
+ * @since 3.0.0
+ *
+ * @return array<string, array{'constant': string, 'experimental'?: bool}> Associative array of $plugin_slug => $plugin_data pairs.
+ */
+function perflab_get_standalone_plugin_data(): array {
+	/*
+	 * Alphabetically sorted list of plugin slugs and their data.
+	 * Supported keys per plugin are:
+	 * - 'constant' (string, required)
+	 * - 'experimental' (boolean, optional)
+	 */
+	return array(
+		'auto-sizes'              => array(
+			'constant'     => 'IMAGE_AUTO_SIZES_VERSION',
+			'experimental' => true,
+		),
+		'dominant-color-images'   => array(
+			'constant' => 'DOMINANT_COLOR_IMAGES_VERSION',
+		),
+		'embed-optimizer'         => array(
+			'constant'     => 'EMBED_OPTIMIZER_VERSION',
+			'experimental' => true,
+		),
+		// TODO: Add image loading optimization plugin, dependent of Optimization Detective, once ready for end users.
+		'performant-translations' => array(
+			'constant' => 'PERFORMANT_TRANSLATIONS_VERSION',
+		),
+		'speculation-rules'       => array(
+			'constant' => 'SPECULATION_RULES_VERSION',
+		),
+		'webp-uploads'            => array(
+			'constant' => 'WEBP_UPLOADS_VERSION',
+		),
+	);
+}
+
+/**
  * Gets the standalone plugin constants used for each available standalone plugin.
  *
  * @since 2.9.0
- * @since n.e.x.t The $source parameter was removed.
+ * @since 3.0.0 The $source parameter was removed.
  *
  * @return array<string, string> Map of plugin slug and the version constant used.
  */
-function perflab_get_standalone_plugin_version_constants() {
-	/*
-	 * This list includes all standalone plugins that are part of the Performance Lab project,
-	 * as `$plugin_slug => $version_constant` pairs.
-	 */
-	return array(
-		'webp-uploads'            => 'WEBP_UPLOADS_VERSION',
-		'dominant-color-images'   => 'DOMINANT_COLOR_IMAGES_VERSION',
-		'embed-optimizer'         => 'EMBED_OPTIMIZER_VERSION',
-		// TODO: Add image loading optimization plugin, dependent of Optimization Detective, once ready for end users.
-		'performant-translations' => 'PERFORMANT_TRANSLATIONS_VERSION',
-		'auto-sizes'              => 'IMAGE_AUTO_SIZES_VERSION',
-		'speculation-rules'       => 'SPECULATION_RULES_VERSION',
-	);
+function perflab_get_standalone_plugin_version_constants(): array {
+	return wp_list_pluck( perflab_get_standalone_plugin_data(), 'constant' );
 }
 
 /**
@@ -116,7 +144,7 @@ function perflab_get_standalone_plugin_version_constants() {
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
-function perflab_maybe_set_object_cache_dropin() {
+function perflab_maybe_set_object_cache_dropin(): void {
 	global $wp_filesystem;
 
 	// Bail if Server-Timing is disabled entirely.
@@ -145,7 +173,7 @@ function perflab_maybe_set_object_cache_dropin() {
 	 *
 	 * This filter should not be used outside of tests.
 	 *
-	 * @since n.e.x.t
+	 * @since 3.0.0
 	 * @internal
 	 *
 	 * @param int|bool $current_dropin_version The drop-in version as defined by the
@@ -227,7 +255,7 @@ add_action( 'admin_init', 'perflab_maybe_set_object_cache_dropin' );
  *
  * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
  */
-function perflab_maybe_remove_object_cache_dropin() {
+function perflab_maybe_remove_object_cache_dropin(): void {
 	global $wp_filesystem;
 
 	// Bail if disabled via constant.
@@ -266,11 +294,11 @@ register_deactivation_hook( __FILE__, 'perflab_maybe_remove_object_cache_dropin'
 /**
  * Redirects legacy module page to the performance feature page.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  *
  * @global $plugin_page
  */
-function perflab_no_access_redirect_module_to_performance_feature_page() {
+function perflab_no_access_redirect_module_to_performance_feature_page(): void {
 	global $plugin_page;
 
 	if ( 'perflab-modules' !== $plugin_page ) {
@@ -289,9 +317,9 @@ add_action( 'admin_page_access_denied', 'perflab_no_access_redirect_module_to_pe
 /**
  * Cleanup function to delete legacy 'perflab_modules_settings' option if present.
  *
- * @since n.e.x.t
+ * @since 3.0.0
  */
-function perflab_cleanup_option() {
+function perflab_cleanup_option(): void {
 	if ( current_user_can( 'manage_options' ) ) {
 		delete_option( 'perflab_modules_settings' );
 	}

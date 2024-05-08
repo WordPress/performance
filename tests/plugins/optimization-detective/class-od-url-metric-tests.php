@@ -11,7 +11,7 @@ class OD_URL_Metric_Tests extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array
+	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider(): array {
 		$viewport = array(
@@ -122,8 +122,11 @@ class OD_URL_Metric_Tests extends WP_UnitTestCase {
 	 * @covers ::jsonSerialize
 	 *
 	 * @dataProvider data_provider
+	 *
+	 * @param array<string, mixed> $data Data.
+	 * @param string               $error Error.
 	 */
-	public function test_constructor( array $data, string $error = '' ) {
+	public function test_constructor( array $data, string $error = '' ): void {
 		if ( $error ) {
 			$this->expectException( OD_Data_Validation_Exception::class );
 			$this->expectExceptionMessage( $error );
@@ -141,7 +144,7 @@ class OD_URL_Metric_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::get_json_schema
 	 */
-	public function test_get_json_schema() {
+	public function test_get_json_schema(): void {
 		$schema = OD_URL_Metric::get_json_schema();
 		$this->assertArrayHasKey( 'properties', $schema );
 	}

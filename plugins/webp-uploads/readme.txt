@@ -3,7 +3,7 @@
 Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
-Requires PHP:      7.0
+Requires PHP:      7.2
 Stable tag:        1.1.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -64,6 +64,8 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 * Add link to WebP settings to plugins table. ([1036](https://github.com/WordPress/performance/pull/1036))
 * Rename plugin to "Modern Image Formats". ([1101](https://github.com/WordPress/performance/pull/1101))
+* Use plugin slug for generator tag. ([1103](https://github.com/WordPress/performance/pull/1103))
+* Delete option when uninstalling the Modern Image Formats plugin. ([1116](https://github.com/WordPress/performance/pull/1116))
 * Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 

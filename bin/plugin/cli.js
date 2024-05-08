@@ -5,6 +5,11 @@
  */
 const program = require( 'commander' );
 
+/**
+ * Internal dependencies
+ */
+const { formats } = require( './lib/logger' );
+
 const withOptions = ( command, options ) => {
 	options.forEach( ( { description, argname, defaults } ) => {
 		command = command.option( argname, description, defaults );
@@ -17,7 +22,7 @@ const catchException = ( handler ) => {
 		try {
 			await handler( ...args );
 		} catch ( error ) {
-			console.error( error ); // eslint-disable-line no-console
+			console.error( formats.error( error.message ) ); // eslint-disable-line no-console
 			process.exitCode = 1;
 		}
 	};

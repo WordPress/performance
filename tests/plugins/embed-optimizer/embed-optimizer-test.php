@@ -7,6 +7,11 @@
 
 class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 
+	public function test_hooks() {
+		$this->assertSame( 10, has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' ) );
+		$this->assertSame( 10, has_action( 'wp_head', 'embed_optimizer_render_generator' ) );
+	}
+
 	/**
 	 * Test that the oEmbed HTML is filtered.
 	 *
@@ -78,7 +83,7 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 			// Another post embed.
 			array(
 				'<blockquote class="wp-embedded-content" data-secret="vk2NMdp5d9"><a href="https://oembeds-test.instawp.xyz/hello-world/">Hello world!</a></blockquote><iframe class="wp-embedded-content" sandbox="allow-scripts" security="restricted" style="position: absolute; clip: rect(1px, 1px, 1px, 1px);" title="&#8220;Hello world!&#8221; &#8212; oEmbed Test Site" src="https://oembeds-test.instawp.xyz/hello-world/embed/#?secret=Ficznaefos#?secret=vk2NMdp5d9" data-secret="vk2NMdp5d9" width="500" height="282" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>',
-				'<blockquote class="wp-embedded-content" data-secret="vk2NMdp5d9"><a href="https://oembeds-test.instawp.xyz/hello-world/">Hello world!</a></blockquote><iframe loading="lazy" class="wp-embedded-content" sandbox="allow-scripts" security="restricted" style="position: absolute; clip: rect(1px, 1px, 1px, 1px);" title="&#8220;Hello world!&#8221; &#8212; oEmbed Test Site" src="https://oembeds-test.instawp.xyz/hello-world/embed/#?secret=Ficznaefos#?secret=vk2NMdp5d9" data-secret="vk2NMdp5d9" width="500" height="282" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>',
+				'<blockquote class="wp-embedded-content" data-secret="vk2NMdp5d9"><a href="https://oembeds-test.instawp.xyz/hello-world/">Hello world!</a></blockquote><iframe loading="lazy" class="wp-embedded-content" sandbox="allow-scripts" security="restricted" style="position: absolute; visibility: hidden;" title="&#8220;Hello world!&#8221; &#8212; oEmbed Test Site" src="https://oembeds-test.instawp.xyz/hello-world/embed/#?secret=Ficznaefos#?secret=vk2NMdp5d9" data-secret="vk2NMdp5d9" width="500" height="282" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>',
 			),
 
 			// Reddit embed.
@@ -163,10 +168,9 @@ class Embed_Optimizer_Helper_Tests extends WP_UnitTestCase {
 	 * @covers ::embed_optimizer_render_generator
 	 */
 	public function test_embed_optimizer_render_generator() {
-		$this->assertSame( 10, has_action( 'wp_head', 'embed_optimizer_render_generator' ) );
 		$tag = get_echo( 'embed_optimizer_render_generator' );
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
-		$this->assertStringContainsString( EMBED_OPTIMIZER_VERSION, $tag );
+		$this->assertStringContainsString( 'embed-optimizer ' . EMBED_OPTIMIZER_VERSION, $tag );
 	}
 }

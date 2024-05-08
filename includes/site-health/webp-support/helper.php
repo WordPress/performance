@@ -15,9 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @return array
+ * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, actions: string, test: string} Result.
  */
-function webp_uploads_check_webp_supported_test() {
+function webp_uploads_check_webp_supported_test(): array {
 	$result = array(
 		'label'       => __( 'Your site supports WebP', 'performance-lab' ),
 		'status'      => 'good',

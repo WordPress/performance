@@ -18,13 +18,18 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 			'test'  => 'perflab_aao_autoloaded_options_test',
 		);
 
+		$initial_test = array(
+			'label' => 'Label',
+			'test'  => 'initial_test',
+		);
 		$this->assertEquals(
 			array(
 				'direct' => array(
+					'initial'            => $initial_test,
 					'autoloaded_options' => $expected_test,
 				),
 			),
-			perflab_aao_add_autoloaded_options_test( array() )
+			perflab_aao_add_autoloaded_options_test( array( 'direct' => array( 'initial' => $initial_test ) ) )
 		);
 	}
 
@@ -59,7 +64,18 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	 */
 	public function test_perflab_aao_autoloaded_options_size() {
 		global $wpdb;
-		$autoloaded_options_size = $wpdb->get_var( 'SELECT SUM(LENGTH(option_value)) FROM ' . $wpdb->prefix . 'options WHERE autoload = \'yes\'' );
+
+		$autoload_values = perflab_aao_get_autoload_values_to_autoload();
+
+		$autoloaded_options_size = $wpdb->get_var(
+			$wpdb->prepare(
+				sprintf(
+					"SELECT SUM(LENGTH(option_value)) FROM $wpdb->options WHERE autoload IN (%s)",
+					implode( ',', array_fill( 0, count( $autoload_values ), '%s' ) )
+				),
+				$autoload_values
+			)
+		);
 		$this->assertEquals( $autoloaded_options_size, perflab_aao_autoloaded_options_size() );
 
 		// Add autoload option.
@@ -148,7 +164,9 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	 */
 	public static function set_autoloaded_option( $bytes = 800000 ) {
 		$heavy_option_string = wp_generate_password( $bytes );
-		add_option( self::AUTOLOADED_OPTION_KEY, $heavy_option_string );
+
+		// Force autoloading so that WordPress core does not override it. See https://core.trac.wordpress.org/changeset/57920.
+		add_option( self::AUTOLOADED_OPTION_KEY, $heavy_option_string, '', true );
 	}
 
 	/**

@@ -3,7 +3,7 @@
 Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
-Requires PHP:      7.0
+Requires PHP:      7.2
 Stable tag:        1.0.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -50,6 +50,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.0.1 =
 
+* Add auto-sizes generator tag. ([1105](https://github.com/WordPress/performance/pull/1105))
 * Bump minimum required WP version to 6.4. ([1062](https://github.com/WordPress/performance/pull/1062))
 * Update tested WordPress version to 6.5. ([1027](https://github.com/WordPress/performance/pull/1027))
 

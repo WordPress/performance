@@ -650,8 +650,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			}
 
 			$this->assertIsString( $size['sources']['image/webp']['file'] );
-			$this->assertStringContainsString( $size['width'], $size['sources']['image/webp']['file'] );
-			$this->assertStringContainsString( $size['height'], $size['sources']['image/webp']['file'] );
+			$this->assertStringContainsString( (string) $size['width'], $size['sources']['image/webp']['file'] );
+			$this->assertStringContainsString( (string) $size['height'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString(
 				// Remove the extension from the file.
 				substr( $size['sources']['image/webp']['file'], 0, -13 ),
@@ -982,6 +982,18 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 		$this->assertSame( 82, webp_uploads_modify_webp_quality( 90, 'image/webp' ), 'WebP image quality should always be 82.' );
 		$this->assertSame( 82, webp_uploads_modify_webp_quality( 82, 'image/webp' ), 'WebP image quality should always be 82.' );
 		$this->assertSame( 80, webp_uploads_modify_webp_quality( 80, 'image/jpeg' ), 'JPEG image quality should return default quality provided from WP filter wp_editor_set_quality.' );
+	}
+
+	/**
+	 * Test printing the meta generator tag.
+	 *
+	 * @covers ::webp_uploads_render_generator
+	 */
+	public function test_webp_uploads_render_generator() {
+		$tag = get_echo( 'webp_uploads_render_generator' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'generator', $tag );
+		$this->assertStringContainsString( 'webp-uploads ' . WEBP_UPLOADS_VERSION, $tag );
 	}
 
 	/**
