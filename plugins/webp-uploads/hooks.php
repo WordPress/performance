@@ -727,7 +727,7 @@ JS;
 			'( %s )( document, "img", "script", %s, %s )',
 			preg_replace( '/\s+/', ' ', $js_function ),
 			wp_json_encode( $detection_string ),
-			wp_json_encode( plugins_url( '/fallback.js', __FILE__ ) ),
+			wp_json_encode( plugins_url( '/fallback.js', __FILE__ ) )
 		),
 		array(
 			'id'            => 'webpUploadsFallbackWebpImages',
