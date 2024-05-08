@@ -650,8 +650,8 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 			}
 
 			$this->assertIsString( $size['sources']['image/webp']['file'] );
-			$this->assertStringContainsString( $size['width'], $size['sources']['image/webp']['file'] );
-			$this->assertStringContainsString( $size['height'], $size['sources']['image/webp']['file'] );
+			$this->assertStringContainsString( (string) $size['width'], $size['sources']['image/webp']['file'] );
+			$this->assertStringContainsString( (string) $size['height'], $size['sources']['image/webp']['file'] );
 			$this->assertStringContainsString(
 				// Remove the extension from the file.
 				substr( $size['sources']['image/webp']['file'], 0, -13 ),

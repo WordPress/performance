@@ -53,8 +53,16 @@ function perflab_server_timing(): Perflab_Server_Timing {
 	return $server_timing;
 }
 
-// @phpstan-ignore-next-line
-add_action( 'wp_loaded', 'perflab_server_timing' );
+/**
+ * Initializes the Server-Timing API.
+ *
+ * @since n.e.x.t
+ */
+function perflab_server_timing_init(): void {
+	perflab_server_timing();
+}
+
+add_action( 'wp_loaded', 'perflab_server_timing_init' );
 
 /**
  * Registers a metric to calculate for the Server-Timing header.

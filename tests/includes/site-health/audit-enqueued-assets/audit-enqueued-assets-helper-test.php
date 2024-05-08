@@ -88,7 +88,7 @@ class Audit_Enqueued_Assets_Helper_Tests extends WP_UnitTestCase {
 	 * Tests perflab_aea_get_path_from_resource_url() functionality empty $url.
 	 */
 	public function test_perflab_aea_get_path_from_resource_url_empty_url() {
-		$test_url      = false;
+		$test_url      = '';
 		$expected_path = '';
 		$this->assertSame( $expected_path, perflab_aea_get_path_from_resource_url( $test_url ) );
 	}

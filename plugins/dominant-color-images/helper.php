@@ -183,8 +183,12 @@ function dominant_color_has_transparency( $attachment_id ) {
  * @return string|null Hex color or null if error.
  */
 function dominant_color_rgb_to_hex( $red, $green, $blue ) {
-	$range = range( 0, 255 );
-	if ( ! in_array( $red, $range, true ) || ! in_array( $green, $range, true ) || ! in_array( $blue, $range, true ) ) {
+	if ( ! (
+		\is_int( $red ) && \is_int( $green ) && \is_int( $blue )
+		&& $red >= 0 && $red <= 255
+		&& $green >= 0 && $green <= 255
+		&& $blue >= 0 && $blue <= 255
+	) ) {
 		return null;
 	}
 

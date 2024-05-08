@@ -263,7 +263,7 @@ function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, $image_meta
 	$trace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
 
 	foreach ( $trace as $element ) {
-		if ( isset( $element['function'] ) && 'wp_update_image_subsizes' === $element['function'] ) {
+		if ( 'wp_update_image_subsizes' === $element['function'] ) {
 			webp_uploads_create_sources_property( $image_meta, $attachment_id );
 			break;
 		}
