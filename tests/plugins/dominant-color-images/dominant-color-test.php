@@ -234,7 +234,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	public function test_dominant_color_update_attachment_image_attributes( $style_attr, $expected ) {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/plugins/dominant-color-images/data/images/red.jpg' );
 
-		$attachment_image = wp_get_attachment_image( $attachment_id, 'full', '', array( 'style' => $style_attr ) );
+		$attachment_image = wp_get_attachment_image( $attachment_id, 'full', false, array( 'style' => $style_attr ) );
 		$this->assertStringContainsString( $expected, $attachment_image );
 	}
 
@@ -327,46 +327,52 @@ class Dominant_Color_Test extends DominantColorTestCase {
 
 	public function provider_get_hex_color() {
 		return array(
-			'black'   => array(
+			'black'    => array(
 				'red'   => 0,
 				'green' => 0,
 				'blue'  => 0,
 				'hex'   => '000000',
 			),
-			'white'   => array(
+			'white'    => array(
 				'red'   => 255,
 				'green' => 255,
 				'blue'  => 255,
 				'hex'   => 'ffffff',
 			),
-			'blue'    => array(
+			'blue'     => array(
 				'red'   => 255,
 				'green' => 0,
 				'blue'  => 0,
 				'hex'   => 'ff0000',
 			),
-			'teal'    => array(
+			'teal'     => array(
 				'red'   => 255,
 				'green' => 255,
 				'blue'  => 0,
 				'hex'   => 'ffff00',
 			),
-			'pink'    => array(
+			'pink'     => array(
 				'red'   => 255,
 				'green' => 0,
 				'blue'  => 255,
 				'hex'   => 'ff00ff',
 			),
-			'purple'  => array(
+			'purple'   => array(
 				'red'   => 88,
 				'green' => 42,
 				'blue'  => 158,
 				'hex'   => '582a9e',
 			),
-			'invalid' => array(
+			'invalid1' => array(
 				'red'   => -1,
 				'green' => -1,
 				'blue'  => -1,
+				'hex'   => null,
+			),
+			'invalid2' => array(
+				'red'   => 256,
+				'green' => 256,
+				'blue'  => 256,
 				'hex'   => null,
 			),
 		);
