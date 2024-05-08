@@ -239,13 +239,15 @@ function webp_uploads_generate_image_size( int $attachment_id, string $size, str
  * Returns the attachment sources array ordered by filesize.
  *
  * @since 1.0.0
- * @todo This function is not used anywhere.
+ * @deprecated This function is not used anymore as of Performance Lab 1.1.0 when this was still part of the WebP Uploads module. It should have been removed as part of <https://github.com/WordPress/performance/pull/302>.
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $size          The attachment size.
  * @return array<string, array{ file: string, filesize: int }> The attachment sources array.
  */
 function webp_uploads_get_attachment_sources( int $attachment_id, string $size = 'thumbnail' ): array {
+	_deprecated_function( __FUNCTION__, 'Performance Lab 1.1.0' );
+
 	// Check for the sources attribute in attachment metadata.
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 
