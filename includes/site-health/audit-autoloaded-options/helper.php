@@ -95,8 +95,6 @@ function perflab_aao_autoloaded_options_test(): array {
  *
  * @since 1.0.0
  *
- * @global wpdb $wpdb WordPress database abstraction object.
- *
  * @return int autoloaded data in bytes.
  */
 function perflab_aao_autoloaded_options_size(): int {
@@ -115,8 +113,6 @@ function perflab_aao_autoloaded_options_size(): int {
  * Fetches autoload top list.
  *
  * @since 1.5.0
- *
- * @global wpdb $wpdb WordPress database abstraction object.
  *
  * @return array<object{option_name: string, option_value_length: int}> Autoloaded data as option names and their sizes.
  */
@@ -201,8 +197,6 @@ function perflab_aao_get_autoloaded_options_table(): string {
  * Gets disabled autoload options table.
  *
  * @since 3.0.0
- *
- * @global wpdb $wpdb WordPress database abstraction object.
  *
  * @return string HTML formatted table.
  */
