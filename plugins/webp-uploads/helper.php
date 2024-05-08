@@ -191,7 +191,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
  * @param string          $extension The image extension.
  * @return string File name with a different extension.
  */
-function webp_uploads_generate_filename( $editor, $file, $size, $extension ) {
+function webp_uploads_generate_filename( WP_Image_Editor $editor, string $file, string $size, string $extension ): string {
 	$ext = pathinfo( $file, PATHINFO_EXTENSION );
 	if ( $extension === $ext ) {
 		return $file;
