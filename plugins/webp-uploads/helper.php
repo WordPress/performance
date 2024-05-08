@@ -376,7 +376,7 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 		if ( is_a( $editor, WP_Image_Editor_GD::class, true ) ) {
 			return function_exists( 'imageavif' );
 		}
-		if ( 'WP_Image_Editor_Imagick' === $editor ) {
+		if ( is_a( $editor, WP_Image_Editor_Imagick::class, true ) && class_exists( 'Imagick' ) ) {
 			return 0 !== count( Imagick::queryFormats( 'AVIF' ) );
 		}
 	}
