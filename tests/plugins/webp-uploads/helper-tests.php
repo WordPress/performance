@@ -454,8 +454,8 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 *
-	 * @param array{ filesize?: int } $original_filesize   Original filesize.
-	 * @param array{ filesize?: int } $additional_filesize Original filesize.
+	 * @param array{ filesize?: int } $original_filesize   Original file size.
+	 * @param array{ filesize?: int } $additional_filesize Additional file size.
 	 * @param bool                    $expected_status     Expected status.
 	 */
 	public function it_should_discard_additional_image_if_larger_than_the_original_image( array $original_filesize, array $additional_filesize, bool $expected_status ): void {
@@ -491,8 +491,8 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 *
-	 * @param array{ filesize?: int } $original_filesize   Original filesize.
-	 * @param array{ filesize?: int } $additional_filesize Original filesize.
+	 * @param array{ filesize?: int } $original_filesize   Original file size.
+	 * @param array{ filesize?: int } $additional_filesize Additional file size.
 	 */
 	public function it_should_never_discard_additional_image_if_filter_is_false( array $original_filesize, array $additional_filesize ): void {
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
