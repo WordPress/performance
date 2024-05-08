@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *      filesize: int,
  *      sources?: array<string, array{ file: string, filesize: int }>,
  *      original_image?: string
- *  } $metadata
+ * } $metadata
  * @phpstan-param array<string, array{ file: string, path: string }> $main_images
  * @phpstan-param array<string, array<string, array{ file: string }>> $subsized_images
  *
@@ -35,15 +35,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param array    $subsized_images       Path of all subsized image file of all mime types.
  *
  * @return array{
- *       width: int,
- *       height: int,
- *       file: string,
- *       sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
- *       image_meta: array<string, mixed>,
- *       filesize: int,
- *       original_image?: string,
- *       sources: array<string, array{ file: string, filesize: int }>
- *   } Metadata with sources added.
+ *     width: int,
+ *     height: int,
+ *     file: string,
+ *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
+ *     image_meta: array<string, mixed>,
+ *     filesize: int,
+ *     original_image?: string,
+ *     sources: array<string, array{ file: string, filesize: int }>
+ * } Metadata with sources added.
  */
 function webp_uploads_update_sources( array $metadata, array $valid_mime_transforms, array $main_images, array $subsized_images ): array {
 	foreach ( $valid_mime_transforms as $targeted_mime ) {
@@ -267,14 +267,14 @@ add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 1
  * @param int                  $attachment_id The ID of the current attachment.
  *
  * @return array{
- *       width: int,
- *       height: int,
- *       file: string,
- *       sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
- *       image_meta: array<string, mixed>,
- *       filesize: int,
- *       original_image: string
- *   } The updated metadata for the attachment to be stored in the meta table.
+ *     width: int,
+ *     height: int,
+ *     file: string,
+ *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
+ *     image_meta: array<string, mixed>,
+ *     filesize: int,
+ *     original_image: string
+ * } The updated metadata for the attachment to be stored in the meta table.
  */
 function webp_uploads_update_attachment_metadata( array $data, int $attachment_id ): array {
 	// PHPCS ignore reason: Update the attachment's metadata by either restoring or editing it.
@@ -308,14 +308,14 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  * @param int                  $attachment_id The ID representing the attachment.
  * @param array<string, mixed> $data          The current metadata of the attachment.
  * @return array{
- *      width: int,
- *      height: int,
- *      file: string,
- *      sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
- *      image_meta: array<string, mixed>,
- *      filesize: int,
- *      original_image: string
- *  } The updated metadata for the attachment.
+ *     width: int,
+ *     height: int,
+ *     file: string,
+ *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
+ *     image_meta: array<string, mixed>,
+ *     filesize: int,
+ *     original_image: string
+ * } The updated metadata for the attachment.
  */
 function webp_uploads_backup_sources( int $attachment_id, array $data ): array {
 	// PHPCS ignore reason: A nonce check is not necessary here as this logic directly ties in with WordPress core
@@ -441,14 +441,14 @@ function webp_uploads_get_next_full_size_key_from_backup( int $attachment_id ): 
  * @param array<string, mixed> $data          The current metadata to be stored in the attachment.
  *
  * @return array{
- *       width: int,
- *       height: int,
- *       file: string,
- *       sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
- *       image_meta: array<string, mixed>,
- *       filesize: int,
- *       original_image: string
- *   } The updated metadata of the attachment.
+ *     width: int,
+ *     height: int,
+ *     file: string,
+ *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
+ *     image_meta: array<string, mixed>,
+ *     filesize: int,
+ *     original_image: string
+ * } The updated metadata of the attachment.
  */
 function webp_uploads_restore_image( int $attachment_id, array $data ): array {
 	$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
