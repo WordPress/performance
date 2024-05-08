@@ -703,7 +703,10 @@ function webp_uploads_wepb_fallback() {
 	}
 
 	$js_function = <<<JS
-	function webpUploadsDetectFallback( d, i, s, p, fallbackSrc, webpUploadsOutputFormat ) {
+	/**
+	 * Detect if the browser supports the current output format and if not loads the fallback.js script.
+	 */
+	function webpUploadsDetectFallback( d, i, s, p, fallbackSrc ) {
 		s = d.createElement( s );
 		s.src = fallbackSrc;
 
@@ -721,15 +724,15 @@ JS;
 
 	wp_print_inline_script_tag(
 		sprintf(
-			'( %s )( document, "img", "script", %s, %s, %s )',
+			'( %s )( document, "img", "script", %s, %s )',
 			preg_replace( '/\s+/', ' ', $js_function ),
 			wp_json_encode( $detection_string ),
 			wp_json_encode( plugins_url( '/fallback.js', __FILE__ ) ),
-			wp_json_encode( webp_uploads_get_image_output_format() )
 		),
 		array(
 			'id'            => 'webpUploadsFallbackWebpImages',
 			'data-rest-api' => esc_url_raw( trailingslashit( get_rest_url() ) ),
+			'output-format' => webp_uploads_get_image_output_format(),
 		)
 	);
 }

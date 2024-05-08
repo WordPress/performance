@@ -2,7 +2,10 @@
 
 window.wpPerfLab = window.wpPerfLab || {};
 
-( function ( document, webpUploadsOutputFormat ) {
+( function ( document ) {
+	const webpUploadsOutputFormat = document
+		.getElementById( 'webpUploadsFallbackWebpImages' )
+		.getAttribute( 'output-format' );
 	window.wpPerfLab.webpUploadsFallbackWebpImages = function ( media ) {
 		for ( let i = 0; i < media.length; i++ ) {
 			try {
@@ -167,4 +170,4 @@ window.wpPerfLab = window.wpPerfLab || {};
 			childList: true,
 		} );
 	} catch ( e ) {}
-} )( document, webpUploadsOutputFormat );
+} )( document );
