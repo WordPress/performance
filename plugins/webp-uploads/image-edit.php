@@ -22,7 +22,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *      file: string,
  *      sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
  *      image_meta: array<string, mixed>,
- *      filesize: int
+ *      filesize: int,
+ *      sources?: array<string, array{ file: string, filesize: int }>,
+ *      original_image?: string
  *  } $metadata
  * @phpstan-param array<string, array{ file: string, path: string }> $main_images
  * @phpstan-param array<string, array<string, array{ file: string }>> $subsized_images
@@ -39,6 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *       sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
  *       image_meta: array<string, mixed>,
  *       filesize: int,
+ *       original_image?: string,
  *       sources: array<string, array{ file: string, filesize: int }>
  *   } Metadata with sources added.
  */
