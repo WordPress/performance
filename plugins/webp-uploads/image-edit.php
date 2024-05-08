@@ -439,7 +439,6 @@ function webp_uploads_get_next_full_size_key_from_backup( int $attachment_id ): 
  *
  * @param int                  $attachment_id The ID of the attachment.
  * @param array<string, mixed> $data          The current metadata to be stored in the attachment.
- *
  * @return array{
  *     width: int,
  *     height: int,
@@ -447,6 +446,7 @@ function webp_uploads_get_next_full_size_key_from_backup( int $attachment_id ): 
  *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
  *     image_meta: array<string, mixed>,
  *     filesize: int,
+ *     sources: array<string, array{ file: string, filesize: int }>,
  *     original_image: string
  * } The updated metadata of the attachment.
  */
