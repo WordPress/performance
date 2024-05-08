@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Adds server timing to REST API response.
  *
+ * @since n.e.x.t
+ *
  * @param WP_REST_Response|WP_Error $response Result to send to the client. Usually a `WP_REST_Response`.
  * @return WP_REST_Response|WP_Error Filtered response.
  */
