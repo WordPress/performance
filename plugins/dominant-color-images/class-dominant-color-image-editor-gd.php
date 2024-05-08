@@ -35,6 +35,9 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, imagesx( $this->image ), imagesy( $this->image ) );
 
 		$rgb = imagecolorat( $shorted_image, 0, 0 );
+		if ( false === $rgb ) {
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
+		}
 		$r   = ( $rgb >> 16 ) & 0xFF;
 		$g   = ( $rgb >> 8 ) & 0xFF;
 		$b   = $rgb & 0xFF;
