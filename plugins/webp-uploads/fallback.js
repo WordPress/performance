@@ -1,8 +1,8 @@
-/* eslint no-var: "off", camelcase: "off" */
+/* eslint no-var: "off", camelcase: "off", no-undef: "off" */
 
 window.wpPerfLab = window.wpPerfLab || {};
 
-( function ( document ) {
+( function ( document, webpUploadsOutputFormat ) {
 	window.wpPerfLab.webpUploadsFallbackWebpImages = function ( media ) {
 		for ( let i = 0; i < media.length; i++ ) {
 			try {
@@ -29,11 +29,15 @@ window.wpPerfLab = window.wpPerfLab || {};
 						// Only modify src if available and the relevant sources are set.
 						if (
 							src &&
-							media_sources[ 'image/webp' ] &&
+							media_sources[
+								'image/' + webpUploadsOutputFormat
+							] &&
 							media_sources[ 'image/jpeg' ]
 						) {
 							src = src.replace(
-								media_sources[ 'image/webp' ].file,
+								media_sources[
+									'image/' + webpUploadsOutputFormat
+								].file,
 								media_sources[ 'image/jpeg' ].file
 							);
 							images[ j ].setAttribute( 'src', src );
@@ -48,7 +52,9 @@ window.wpPerfLab = window.wpPerfLab || {};
 							sizes[ sizes_keys[ k ] ].sources;
 						if (
 							! media_sizes_sources ||
-							! media_sizes_sources[ 'image/webp' ] ||
+							! media_sizes_sources[
+								'image/' + webpUploadsOutputFormat
+							] ||
 							! media_sizes_sources[ 'image/jpeg' ]
 						) {
 							continue;
@@ -56,8 +62,9 @@ window.wpPerfLab = window.wpPerfLab || {};
 
 						// Check to see if the image src has any size set, then update it.
 						if (
-							media_sizes_sources[ 'image/webp' ].source_url ===
-							src
+							media_sizes_sources[
+								'image/' + webpUploadsOutputFormat
+							].source_url === src
 						) {
 							src =
 								media_sizes_sources[ 'image/jpeg' ].source_url;
@@ -70,7 +77,9 @@ window.wpPerfLab = window.wpPerfLab || {};
 
 						if ( srcset ) {
 							srcset = srcset.replace(
-								media_sizes_sources[ 'image/webp' ].source_url,
+								media_sizes_sources[
+									'image/' + webpUploadsOutputFormat
+								].source_url,
 								media_sizes_sources[ 'image/jpeg' ].source_url
 							);
 						}
@@ -100,8 +109,12 @@ window.wpPerfLab = window.wpPerfLab || {};
 
 			if (
 				node.nodeName !== 'IMG' ||
-				( ! node.src.match( /\.webp$/i ) &&
-					! srcset.match( /\.webp\s+/ ) )
+				( 'webp' === webpUploadsOutputFormat &&
+					! node.src.match( /\.webp$/i ) &&
+					! srcset.match( /\.webp\s+/ ) ) ||
+				( 'avif' === webpUploadsOutputFormat &&
+					! node.src.match( /\.avif$/i ) &&
+					! srcset.match( /\.avif\s+/ ) )
 			) {
 				continue;
 			}
@@ -154,4 +167,4 @@ window.wpPerfLab = window.wpPerfLab || {};
 			childList: true,
 		} );
 	} catch ( e ) {}
-} )( document );
+} )( document, webpUploadsOutputFormat );
