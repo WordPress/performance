@@ -137,7 +137,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$this->assertStringContainsString( 'data-has-transparency="' . wp_json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
 
 		foreach ( $expected_color as $color ) {
-			if ( false !== strpos( $color, $filtered_image_tags_added ) ) {
+			if ( str_contains( $filtered_image_tags_added, $color ) ) {
 				$this->assertStringContainsString( 'style="--dominant-color: #' . $color . ';"', $filtered_image_tags_added );
 				$this->assertStringContainsString( 'data-dominant-color="' . $color . '"', $filtered_image_tags_added );
 				break;
