@@ -26,7 +26,6 @@ function rest_post_dispatch_add_server_timing( $response ) {
 	$server_timing = perflab_server_timing();
 
 	/** This filter is documented in includes/server-timing/class-perflab-server-timing.php */
-	/** This filter is documented in includes/server-timing/class-perflab-server-timing.php */
 	do_action( 'perflab_server_timing_send_header' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
 
 	$response->header( 'Server-Timing', $server_timing->get_header() );
