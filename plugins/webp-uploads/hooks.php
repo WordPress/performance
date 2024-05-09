@@ -730,8 +730,8 @@ JS;
 			wp_json_encode( plugins_url( '/fallback.js', __FILE__ ) )
 		),
 		array(
-			'id'            => 'webpUploadsFallbackWebpImages',
-			'data-rest-api' => esc_url_raw( trailingslashit( get_rest_url() ) ),
+			'id'                 => 'webpUploadsFallbackWebpImages',
+			'data-rest-api'      => esc_url_raw( trailingslashit( get_rest_url() ) ),
 			'data-output-format' => webp_uploads_get_image_output_format(),
 		)
 	);
