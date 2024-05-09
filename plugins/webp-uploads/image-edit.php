@@ -153,15 +153,19 @@ function webp_uploads_update_image_onchange( $override, string $file_path, WP_Im
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$target = isset( $_REQUEST['target'] ) ? sanitize_key( $_REQUEST['target'] ) : 'all';
 
-			foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
-				// If the target is 'nothumb', skip generating the 'thumbnail' size.
-				if ( webp_uploads_image_edit_thumbnails_separately() && 'nothumb' === $target && 'thumbnail' === $size_name ) {
-					continue;
-				}
+			if ( isset( $old_metadata['sizes'] ) ) {
+				foreach ( $old_metadata['sizes'] as $size_name => $size_details ) {
+					// If the target is 'nothumb', skip generating the 'thumbnail' size.
+					if ( webp_uploads_image_edit_thumbnails_separately() && 'nothumb' === $target && 'thumbnail' === $size_name ) {
+						continue;
+					}
 
-				if ( isset( $metadata['sizes'][ $size_name ] ) && ! empty( $metadata['sizes'][ $size_name ] ) &&
-					$metadata['sizes'][ $size_name ]['file'] !== $old_metadata['sizes'][ $size_name ]['file'] ) {
-					$resize_sizes[ $size_name ] = $metadata['sizes'][ $size_name ];
+					if (
+						isset( $metadata['sizes'][ $size_name ] ) && ! empty( $metadata['sizes'][ $size_name ] ) &&
+						$metadata['sizes'][ $size_name ]['file'] !== $old_metadata['sizes'][ $size_name ]['file']
+					) {
+						$resize_sizes[ $size_name ] = $metadata['sizes'][ $size_name ];
+					}
 				}
 			}
 

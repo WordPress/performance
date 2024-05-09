@@ -459,7 +459,7 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	 * @return string Snapshot.
 	 */
 	private function export_array_snapshot( array $data, bool $one_line = false ): string {
-		$php = preg_replace( '/^\s*\d+\s*=>\s*/m', '', var_export( $data, true ) );
+		$php = (string) preg_replace( '/^\s*\d+\s*=>\s*/m', '', var_export( $data, true ) );
 		if ( $one_line ) {
 			$php = str_replace( "\n", ' ', $php );
 		}

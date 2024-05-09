@@ -742,7 +742,7 @@ function webp_uploads_wepb_fallback(): void {
 	$javascript = ob_get_clean();
 
 	wp_print_inline_script_tag(
-		preg_replace( '/\s+/', '', (string) $javascript ),
+		(string) preg_replace( '/\s+/', '', (string) $javascript ),
 		array(
 			'id'            => 'webpUploadsFallbackWebpImages',
 			'data-rest-api' => esc_url_raw( trailingslashit( get_rest_url() ) ),
