@@ -5,7 +5,7 @@ window.wpPerfLab = window.wpPerfLab || {};
 ( function ( document ) {
 	const webpUploadsOutputFormat = document
 		.getElementById( 'webpUploadsFallbackWebpImages' )
-		.getAttribute( 'output-format' );
+		.getAttribute( 'data-output-format' );
 	window.wpPerfLab.webpUploadsFallbackWebpImages = function ( media ) {
 		for ( let i = 0; i < media.length; i++ ) {
 			try {
