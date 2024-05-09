@@ -732,7 +732,7 @@ JS;
 		array(
 			'id'            => 'webpUploadsFallbackWebpImages',
 			'data-rest-api' => esc_url_raw( trailingslashit( get_rest_url() ) ),
-			'output-format' => webp_uploads_get_image_output_format(),
+			'data-output-format' => webp_uploads_get_image_output_format(),
 		)
 	);
 }
