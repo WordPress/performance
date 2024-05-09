@@ -277,8 +277,8 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 			'webp_uploads_pre_generate_additional_image_source',
 			static function () {
 				return array(
-					'file' => 'image.webp',
-					'path' => '/tmp/image.webp',
+					'file'     => 'image.webp',
+					'filesize' => 1024,
 				);
 			}
 		);
