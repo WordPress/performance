@@ -273,7 +273,6 @@ add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 1
  *        original_image: string
  *    } $data
  *
- *
  * @param array<string, mixed> $data          The current metadata of the attachment.
  * @param int                  $attachment_id The ID of the current attachment.
  *
