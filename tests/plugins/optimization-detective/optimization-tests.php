@@ -27,7 +27,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	public function set_up(): void {
 		$this->original_request_uri    = $_SERVER['REQUEST_URI'];
 		$this->original_request_method = $_SERVER['REQUEST_METHOD'];
-		$this->default_mimetype        = ini_get( 'default_mimetype' );
+		$this->default_mimetype        = (string) ini_get( 'default_mimetype' );
 		parent::set_up();
 	}
 

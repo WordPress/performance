@@ -23,3 +23,35 @@ parameters:
 		- bin/phpstan/filtered-functions.stub
 	dynamicConstantNames:
 		- PERFLAB_OBJECT_CACHE_DROPIN_VERSION
+	ignoreErrors:
+		# TODO: Use error identifiers instead of messages once PHPStan 1.11 is out: <https://github.com/WordPress/performance/issues/1209>.
+		-
+			message: '/Parameter #\d.+given./'
+			path: tests/*
+		-
+			message: '/Cannot use array destructuring/'
+			path: tests/*
+		-
+			message: '/Call to an undefined method/'
+			path: tests/*
+		-
+			message: '/Offset .+ might not exist on array/'
+			path: tests/*
+		-
+			message: '/Part .+ of encapsed string cannot be cast to string/'
+			path: tests/*
+		-
+			message: '/Possibly invalid array key type/'
+			path: tests/*
+		-
+			message: '/Static property .+ does not accept .+/'
+			path: tests/*
+		-
+			message: '/Cannot call method format\(\) on DateTimeImmutable\|false/'
+			path: tests/*
+		-
+			message: '/Property .+ does not accept array.+/'
+			path: tests/*
+		-
+			message: '/Cannot cast .+ to string/'
+			path: tests/*
