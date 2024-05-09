@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  */
-function webp_uploads_register_media_settings_field() {
+function webp_uploads_register_media_settings_field(): void {
 	register_setting(
 		'media',
 		'perflab_generate_webp_and_jpeg',
@@ -34,7 +34,7 @@ add_action( 'init', 'webp_uploads_register_media_settings_field' );
  *
  * @since 1.0.0
  */
-function webp_uploads_add_media_settings_field() {
+function webp_uploads_add_media_settings_field(): void {
 	// Add settings field.
 	add_settings_field(
 		'perflab_generate_webp_and_jpeg',
@@ -52,7 +52,7 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
  *
  * @since 1.0.0
  */
-function webp_uploads_generate_webp_jpeg_setting_callback() {
+function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 	if ( ! is_multisite() ) {
 		?>
 			</td>
@@ -73,7 +73,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback() {
  *
  * @since 1.0.0
  */
-function webp_uploads_media_setting_style() {
+function webp_uploads_media_setting_style(): void {
 	if ( is_multisite() ) {
 		return;
 	}

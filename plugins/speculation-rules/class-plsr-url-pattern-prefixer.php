@@ -22,7 +22,7 @@ class PLSR_URL_Pattern_Prefixer {
 	 * Map of `$context_string => $base_path` pairs.
 	 *
 	 * @since 1.0.0
-	 * @var array
+	 * @var array<string, string>
 	 */
 	private $contexts;
 
@@ -31,8 +31,8 @@ class PLSR_URL_Pattern_Prefixer {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param array $contexts Optional. Map of `$context_string => $base_path` pairs. Default is the contexts returned
-	 *                        by the {@see PLSR_URL_Pattern_Prefixer::get_default_contexts()} method.
+	 * @param array<string, string> $contexts Optional. Map of `$context_string => $base_path` pairs. Default is the contexts returned
+	 *                                        by the {@see PLSR_URL_Pattern_Prefixer::get_default_contexts()} method.
 	 */
 	public function __construct( array $contexts = array() ) {
 		if ( $contexts ) {
@@ -103,7 +103,7 @@ class PLSR_URL_Pattern_Prefixer {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @return array Map of `$context_string => $base_path` pairs.
+	 * @return array<string, string> Map of `$context_string => $base_path` pairs.
 	 */
 	public static function get_default_contexts(): array {
 		return array(

@@ -36,6 +36,6 @@ webp_uploads_delete_plugin_option();
  *
  * @since 1.1.0
  */
-function webp_uploads_delete_plugin_option() {
+function webp_uploads_delete_plugin_option(): void {
 	delete_option( 'perflab_generate_webp_and_jpeg' );
 }

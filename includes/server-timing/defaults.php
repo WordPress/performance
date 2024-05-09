@@ -23,12 +23,12 @@ if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING
  * @since 1.8.0
  */
 function perflab_register_default_server_timing_before_template_metrics(): void {
-	$calculate_before_template_metrics = static function () {
+	$calculate_before_template_metrics = static function (): void {
 		// WordPress execution prior to serving the template.
 		perflab_server_timing_register_metric(
 			'before-template',
 			array(
-				'measure_callback' => static function ( $metric ) {
+				'measure_callback' => static function ( $metric ): void {
 					// The 'timestart' global is set right at the beginning of WordPress execution.
 					$metric->set_value( ( microtime( true ) - $GLOBALS['timestart'] ) * 1000.0 );
 				},
@@ -42,7 +42,7 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 			perflab_server_timing_register_metric(
 				'before-template-db-queries',
 				array(
-					'measure_callback' => static function ( $metric ) {
+					'measure_callback' => static function ( $metric ): void {
 						// This should never happen, but some odd database implementations may be doing it wrong.
 						if ( ! isset( $GLOBALS['wpdb']->queries ) || ! is_array( $GLOBALS['wpdb']->queries ) ) {
 							return;
@@ -80,7 +80,7 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 	);
 	add_action(
 		'perflab_server_timing_send_header',
-		static function () use ( $calculate_before_template_metrics ) {
+		static function () use ( $calculate_before_template_metrics ): void {
 			if ( ! perflab_server_timing_use_output_buffer() ) {
 				$calculate_before_template_metrics();
 			}
@@ -106,7 +106,7 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 				perflab_server_timing_register_metric(
 					'load-alloptions-query',
 					array(
-						'measure_callback' => static function ( $metric ) {
+						'measure_callback' => static function ( $metric ): void {
 							$metric->measure_before();
 							add_filter(
 								'pre_cache_alloptions',
@@ -148,7 +148,7 @@ function perflab_register_default_server_timing_template_metrics(): void {
 			perflab_server_timing_register_metric(
 				'template',
 				array(
-					'measure_callback' => static function ( $metric ) {
+					'measure_callback' => static function ( $metric ): void {
 						$metric->measure_before();
 						add_action( 'perflab_server_timing_send_header', array( $metric, 'measure_after' ), PHP_INT_MAX );
 					},
@@ -163,12 +163,12 @@ function perflab_register_default_server_timing_template_metrics(): void {
 
 	add_action(
 		'perflab_server_timing_send_header',
-		static function () {
+		static function (): void {
 			// WordPress total load time.
 			perflab_server_timing_register_metric(
 				'total',
 				array(
-					'measure_callback' => static function ( $metric ) {
+					'measure_callback' => static function ( $metric ): void {
 						// The 'timestart' global is set right at the beginning of WordPress execution.
 						$metric->set_value( ( microtime( true ) - $GLOBALS['timestart'] ) * 1000.0 );
 					},
@@ -182,12 +182,12 @@ function perflab_register_default_server_timing_template_metrics(): void {
 	if ( defined( 'SAVEQUERIES' ) && SAVEQUERIES ) {
 		add_action(
 			'perflab_server_timing_send_header',
-			static function () {
+			static function (): void {
 				// WordPress database query time within template.
 				perflab_server_timing_register_metric(
 					'template-db-queries',
 					array(
-						'measure_callback' => static function ( $metric ) {
+						'measure_callback' => static function ( $metric ): void {
 							// This global should typically be set when this is called, but check just in case.
 							if ( ! isset( $GLOBALS['perflab_query_time_before_template'] ) ) {
 								return;
@@ -265,7 +265,7 @@ function perflab_register_additional_server_timing_metrics_from_setting(): void 
 	 */
 	add_action(
 		'all',
-		static function ( $hook_name ) use ( $hooks_to_measure ) {
+		static function ( $hook_name ) use ( $hooks_to_measure ): void {
 			if ( ! isset( $hooks_to_measure[ $hook_name ] ) ) {
 				return;
 			}
@@ -277,11 +277,11 @@ function perflab_register_additional_server_timing_metrics_from_setting(): void 
 				return;
 			}
 
-			$measure_callback = static function ( $metric ) use ( $hook_name, $hook_type ) {
+			$measure_callback = static function ( $metric ) use ( $hook_name, $hook_type ): void {
 				$metric->measure_before();
 
 				if ( 'action' === $hook_type ) {
-					$cb = static function () use ( $metric, $hook_name, &$cb ) {
+					$cb = static function () use ( $metric, $hook_name, &$cb ): void {
 						$metric->measure_after();
 						remove_action( $hook_name, $cb, PHP_INT_MAX );
 					};

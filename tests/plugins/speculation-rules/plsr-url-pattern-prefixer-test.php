@@ -10,7 +10,7 @@ class PLSR_URL_Pattern_Prefixer_Tests extends WP_UnitTestCase {
 	/**
 	 * @dataProvider data_prefix_path_pattern
 	 */
-	public function test_prefix_path_pattern( $base_path, $path_pattern, $expected ) {
+	public function test_prefix_path_pattern( string $base_path, string $path_pattern, string $expected ): void {
 		$p = new PLSR_URL_Pattern_Prefixer( array( 'demo' => $base_path ) );
 
 		$this->assertSame(
@@ -19,7 +19,8 @@ class PLSR_URL_Pattern_Prefixer_Tests extends WP_UnitTestCase {
 		);
 	}
 
-	public function data_prefix_path_pattern() {
+	/** @return array<int, mixed> */
+	public function data_prefix_path_pattern(): array {
 		return array(
 			array( '/', '/my-page/', '/my-page/' ),
 			array( '/', 'my-page/', '/my-page/' ),
@@ -37,7 +38,7 @@ class PLSR_URL_Pattern_Prefixer_Tests extends WP_UnitTestCase {
 		);
 	}
 
-	public function test_get_default_contexts() {
+	public function test_get_default_contexts(): void {
 		$contexts = PLSR_URL_Pattern_Prefixer::get_default_contexts();
 
 		$this->assertArrayHasKey( 'home', $contexts );
@@ -49,7 +50,7 @@ class PLSR_URL_Pattern_Prefixer_Tests extends WP_UnitTestCase {
 	/**
 	 * @dataProvider data_default_contexts_with_subdirectories
 	 */
-	public function test_get_default_contexts_with_subdirectories( $context, $unescaped, $expected ) {
+	public function test_get_default_contexts_with_subdirectories( string $context, string $unescaped, string $expected ): void {
 		add_filter(
 			$context . '_url',
 			static function () use ( $unescaped ) {
@@ -63,7 +64,8 @@ class PLSR_URL_Pattern_Prefixer_Tests extends WP_UnitTestCase {
 		$this->assertSame( $expected, $contexts[ $context ] );
 	}
 
-	public function data_default_contexts_with_subdirectories() {
+	/** @return array<int, mixed> */
+	public function data_default_contexts_with_subdirectories(): array {
 		return array(
 			array( 'home', 'https://example.com/subdir/', '/subdir/' ),
 			array( 'site', 'https://example.com/subdir/wp/', '/subdir/wp/' ),

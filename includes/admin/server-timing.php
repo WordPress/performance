@@ -56,7 +56,7 @@ function perflab_load_server_timing_page(): void {
 	// Minor style tweaks to improve appearance similar to other core settings screen instances.
 	add_action(
 		'admin_print_styles',
-		static function () {
+		static function (): void {
 			?>
 			<style>
 				.wrap p {
@@ -73,7 +73,7 @@ function perflab_load_server_timing_page(): void {
 	add_settings_section(
 		'benchmarking',
 		__( 'Benchmarking', 'performance-lab' ),
-		static function () {
+		static function (): void {
 			?>
 			<p>
 				<?php
@@ -124,7 +124,7 @@ function perflab_load_server_timing_page(): void {
 	add_settings_field(
 		'benchmarking_actions',
 		__( 'Actions', 'performance-lab' ),
-		static function () {
+		static function (): void {
 			perflab_render_server_timing_page_hooks_field( 'benchmarking_actions' );
 		},
 		PERFLAB_SERVER_TIMING_SCREEN,
@@ -134,7 +134,7 @@ function perflab_load_server_timing_page(): void {
 	add_settings_field(
 		'benchmarking_filters',
 		__( 'Filters', 'performance-lab' ),
-		static function () {
+		static function (): void {
 			perflab_render_server_timing_page_hooks_field( 'benchmarking_filters' );
 		},
 		PERFLAB_SERVER_TIMING_SCREEN,

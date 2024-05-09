@@ -98,6 +98,36 @@
 	</rule>
 
 	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
+	<rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint">
+		<properties>
+			<property name="enableStaticTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
+			<property name="enableNeverTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
+			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in PHP 8.2+ -->
+		</properties>
+		<exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingTraversableTypeHintSpecification" /><!-- TODO: Investigate this -->
+	</rule>
+	<rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint">
+		<properties>
+			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
+			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in PHP 8.2+ -->
+		</properties>
+		<exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingTraversableTypeHintSpecification" /><!-- TODO: Investigate this -->
+	</rule>
+	<rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint">
+		<properties>
+			<property name="enableNativeTypeHint" value="false" /><!-- Only available in PHP 7.4+ -->
+			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
+			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in PHP 8.2+ -->
+		</properties>
+		<exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingTraversableTypeHintSpecification" /><!-- TODO: Investigate this -->
+	</rule>
 
 	<!-- Exclude built plugins and built assets in plugins. -->
 	<exclude-pattern>./build/*</exclude-pattern>
