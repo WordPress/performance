@@ -262,7 +262,6 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
  * @param array|mixed          $missing_sizes Associative array of arrays of image sub-sizes.
  * @param array<string, mixed> $image_meta    The metadata from the image.
  * @param int                  $attachment_id The ID of the attachment.
- *
  * @return array<string, array{ width: int, height: int, crop: bool }> Associative array of arrays of image sub-sizes.
  */
 function webp_uploads_wp_get_missing_image_subsizes( $missing_sizes, array $image_meta, int $attachment_id ): array {

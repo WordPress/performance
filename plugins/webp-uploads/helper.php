@@ -106,20 +106,21 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	if ( is_wp_error( $image ) ) {
 		return $image;
 	}
-
-	if (
-		is_array( $image ) &&
-		array_key_exists( 'file', $image ) &&
-		is_string( $image['file'] )
-	) {
-		if ( array_key_exists( 'filesize', $image ) && is_int( $image['filesize'] ) ) {
+	if ( is_array( $image ) && array_key_exists( 'file', $image ) && is_string( $image['file'] ) ) {
+		// The filtered image provided all we need to short-circuit here.
+		if ( array_key_exists( 'filesize', $image ) && is_int( $image['filesize'] ) && $image['filesize'] > 0 ) {
 			return $image;
 		}
-		if ( array_key_exists( 'path', $image ) ) {
-			return array(
-				'file'     => $image['file'],
-				'filesize' => wp_filesize( $image['path'] ),
-			);
+
+		// Supply the filesize based on the filter-provided path.
+		if ( array_key_exists( 'path', $image ) && is_int( $image['path'] ) ) {
+			$filesize = wp_filesize( $image['path'] );
+			if ( $filesize > 0 ) {
+				return array(
+					'file'     => $image['file'],
+					'filesize' => $filesize,
+				);
+			}
 		}
 	}
 
