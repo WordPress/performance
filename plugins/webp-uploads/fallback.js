@@ -1,4 +1,4 @@
-/* eslint no-var: "off", camelcase: "off", no-undef: "off" */
+/* eslint no-var: "off", camelcase: "off" */
 
 window.wpPerfLab = window.wpPerfLab || {};
 
