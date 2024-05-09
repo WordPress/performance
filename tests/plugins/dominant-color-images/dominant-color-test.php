@@ -137,7 +137,7 @@ class Dominant_Color_Test extends DominantColorTestCase {
 		$this->assertStringContainsString( 'data-has-transparency="' . wp_json_encode( $expected_transparency ) . '"', $filtered_image_tags_added );
 
 		foreach ( $expected_color as $color ) {
-			if ( false !== strpos( $color, $filtered_image_tags_added ) ) {
+			if ( str_contains( $filtered_image_tags_added, $color ) ) {
 				$this->assertStringContainsString( 'style="--dominant-color: #' . $color . ';"', $filtered_image_tags_added );
 				$this->assertStringContainsString( 'data-dominant-color="' . $color . '"', $filtered_image_tags_added );
 				break;
@@ -350,46 +350,52 @@ class Dominant_Color_Test extends DominantColorTestCase {
 	/** @return array<string, mixed> */
 	public function provider_get_hex_color(): array {
 		return array(
-			'black'   => array(
+			'black'    => array(
 				'red'   => 0,
 				'green' => 0,
 				'blue'  => 0,
 				'hex'   => '000000',
 			),
-			'white'   => array(
+			'white'    => array(
 				'red'   => 255,
 				'green' => 255,
 				'blue'  => 255,
 				'hex'   => 'ffffff',
 			),
-			'blue'    => array(
+			'blue'     => array(
 				'red'   => 255,
 				'green' => 0,
 				'blue'  => 0,
 				'hex'   => 'ff0000',
 			),
-			'teal'    => array(
+			'teal'     => array(
 				'red'   => 255,
 				'green' => 255,
 				'blue'  => 0,
 				'hex'   => 'ffff00',
 			),
-			'pink'    => array(
+			'pink'     => array(
 				'red'   => 255,
 				'green' => 0,
 				'blue'  => 255,
 				'hex'   => 'ff00ff',
 			),
-			'purple'  => array(
+			'purple'   => array(
 				'red'   => 88,
 				'green' => 42,
 				'blue'  => 158,
 				'hex'   => '582a9e',
 			),
-			'invalid' => array(
+			'invalid1' => array(
 				'red'   => -1,
 				'green' => -1,
 				'blue'  => -1,
+				'hex'   => null,
+			),
+			'invalid2' => array(
+				'red'   => 256,
+				'green' => 256,
+				'blue'  => 256,
 				'hex'   => null,
 			),
 		);

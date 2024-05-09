@@ -236,34 +236,6 @@ function webp_uploads_generate_image_size( int $attachment_id, string $size, str
 }
 
 /**
- * Returns the attachment sources array ordered by filesize.
- *
- * @since 1.0.0
- * @todo This function is not used anywhere.
- *
- * @param int    $attachment_id The attachment ID.
- * @param string $size          The attachment size.
- * @return array<string, array{ file: string, filesize: int }> The attachment sources array.
- */
-function webp_uploads_get_attachment_sources( int $attachment_id, string $size = 'thumbnail' ): array {
-	// Check for the sources attribute in attachment metadata.
-	$metadata = wp_get_attachment_metadata( $attachment_id );
-
-	// Return full image size sources.
-	if ( 'full' === $size && ! empty( $metadata['sources'] ) ) {
-		return $metadata['sources'];
-	}
-
-	// Return the resized image sources.
-	if ( ! empty( $metadata['sizes'][ $size ]['sources'] ) ) {
-		return $metadata['sizes'][ $size ]['sources'];
-	}
-
-	// Return an empty array if no sources found.
-	return array();
-}
-
-/**
  * Returns mime types that should be used for an image in the specific context.
  *
  * @since 1.0.0
