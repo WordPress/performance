@@ -342,16 +342,20 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 				$img_attributes = array();
 				foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin' ) as $attr_name ) {
 					$value = $walker->get_attribute( $attr_name );
-					if ( null !== $value ) {
+					if ( is_string( $value ) ) {
 						$img_attributes[ $attr_name ] = $value;
 					}
 				}
 				foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
-					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['img_attributes'] = $img_attributes;
+					if ( is_array( $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ] ) ) {
+						$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['img_attributes'] = $img_attributes;
+					}
 				}
 			} elseif ( $background_image_url ) {
 				foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
-					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['background_image'] = $background_image_url;
+					if ( is_array( $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ] ) ) {
+						$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['background_image'] = $background_image_url;
+					}
 				}
 			}
 		}
