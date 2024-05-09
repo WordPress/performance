@@ -61,3 +61,12 @@ parameters:
 		-
 			message: '/Cannot cast .+ to string/'
 			path: tests/*
+		-
+			message: '/Cannot access offset .+ on mixed\./'
+			path: tests/*
+		-
+			message: '/Argument of an invalid type mixed supplied for foreach, only iterables are supported./'
+			path: tests/*
+		-
+			message: '/Property .+ does not accept mixed\./'
+			path: tests/*
