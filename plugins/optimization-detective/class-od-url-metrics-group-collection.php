@@ -38,7 +38,12 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	/**
 	 * Breakpoints in max widths.
 	 *
-	 * Valid values are from 1 to PHP_INT_MAX.
+	 * Valid values are from 1 to PHP_INT_MAX - 1. This is because:
+	 *
+	 * 1. It doesn't make sense for there to be a viewport width of zero, so the first breakpoint (max width) must be at least 1.
+	 * 2. After the last breakpoint, the final breakpoint group is set to be spanning one plus the last breakpoint max width up
+	 *    until PHP_INT_MAX. So a breakpoint cannot be PHP_INT_MAX because then the minimum viewport width for the final group
+	 *    would end up being larger than PHP_INT_MAX.
 	 *
 	 * @var int[]
 	 * @phpstan-var positive-int[]
@@ -78,7 +83,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 		sort( $breakpoints );
 		$breakpoints = array_values( array_unique( $breakpoints, SORT_NUMERIC ) );
 		foreach ( $breakpoints as $breakpoint ) {
-			if ( $breakpoint <= 1 || PHP_INT_MAX === $breakpoint ) { // TODO: This is wrong? It should be `$breakpoint < 1`?
+			if ( ! is_int( $breakpoint ) || $breakpoint < 1 || PHP_INT_MAX === $breakpoint ) {
 				throw new InvalidArgumentException(
 					esc_html(
 						sprintf(
@@ -96,7 +101,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 		/**
 		 * Validated breakpoints.
 		 *
-		 * @var int<1, max>[] $breakpoints
+		 * @var positive-int[] $breakpoints
 		 */
 		$this->breakpoints = $breakpoints;
 
