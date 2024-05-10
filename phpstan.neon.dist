@@ -1,7 +1,7 @@
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
-	level: 6
+	level: 7
 	treatPhpDocTypesAsCertain: false
 	paths:
 		- load.php
@@ -23,3 +23,41 @@ parameters:
 		- bin/phpstan/filtered-functions.stub
 	dynamicConstantNames:
 		- PERFLAB_OBJECT_CACHE_DROPIN_VERSION
+	ignoreErrors:
+		-
+			# Ignore error related to PHP 8 using a GdImage but PHP 7 using a resource.
+			message: '/^Parameter .+? of function .+? expects resource, GdImage\|resource given\.$/'
+			path: plugins/dominant-color-images/*.php
+
+		# The following ignored errors are all for tests. They are likely excessively strict and do not warrant being fixed.
+		# TODO: Use error identifiers instead of messages once PHPStan 1.11 is out: <https://github.com/WordPress/performance/issues/1209>.
+		-
+			message: '/Parameter #\d.+given./'
+			path: tests/*
+		-
+			message: '/Cannot use array destructuring/'
+			path: tests/*
+		-
+			message: '/Call to an undefined method/'
+			path: tests/*
+		-
+			message: '/Offset .+ might not exist on array/'
+			path: tests/*
+		-
+			message: '/Part .+ of encapsed string cannot be cast to string/'
+			path: tests/*
+		-
+			message: '/Possibly invalid array key type/'
+			path: tests/*
+		-
+			message: '/Static property .+ does not accept .+/'
+			path: tests/*
+		-
+			message: '/Cannot call method format\(\) on DateTimeImmutable\|false/'
+			path: tests/*
+		-
+			message: '/Property .+ does not accept array.+/'
+			path: tests/*
+		-
+			message: '/Cannot cast .+ to string/'
+			path: tests/*

@@ -44,7 +44,8 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->server_timing->register_metric(
 			'test-metric',
 			array(
-				'measure_callback' => static function () use ( &$called ): void {
+				'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ) use ( &$called ): void {
+					unset( $metric );
 					$called = true;
 				},
 				'access_cap'       => 'exist',
@@ -61,7 +62,8 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->server_timing->register_metric(
 			'test-metric',
 			array(
-				'measure_callback' => static function () use ( &$called ): void {
+				'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ) use ( &$called ): void {
+					unset( $metric );
 					$called = true;
 				},
 				'access_cap'       => $access_cap,
@@ -75,7 +77,8 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->server_timing->register_metric(
 			'test-metric-2',
 			array(
-				'measure_callback' => static function () use ( &$called ): void {
+				'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ) use ( &$called ): void {
+					unset( $metric );
 					$called = true;
 				},
 				'access_cap'       => $access_cap,
@@ -141,7 +144,7 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->server_timing->register_metric(
 			'foo/bar/baz',
 			array(
-				'measure_callback' => static function ( $metric ): void {
+				'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
 					$metric->set_value( 123 );
 				},
 				'access_cap'       => 'exist',
@@ -166,13 +169,13 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 	 * @return array<string, mixed>
 	 */
 	public function data_get_header(): array {
-		$measure_42         = static function ( $metric ): void {
+		$measure_42         = static function ( Perflab_Server_Timing_Metric $metric ): void {
 			$metric->set_value( 42 );
 		};
-		$measure_300        = static function ( $metric ): void {
+		$measure_300        = static function ( Perflab_Server_Timing_Metric $metric ): void {
 			$metric->set_value( 300 );
 		};
-		$measure_12point345 = static function ( $metric ): void {
+		$measure_12point345 = static function ( Perflab_Server_Timing_Metric $metric ): void {
 			$metric->set_value( 12.345 );
 		};
 

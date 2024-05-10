@@ -106,21 +106,22 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	if ( is_wp_error( $image ) ) {
 		return $image;
 	}
+	if ( is_array( $image ) && array_key_exists( 'file', $image ) && is_string( $image['file'] ) ) {
+		// The filtered image provided all we need to short-circuit here.
+		if ( array_key_exists( 'filesize', $image ) && is_int( $image['filesize'] ) && $image['filesize'] > 0 ) {
+			return $image;
+		}
 
-	if (
-		is_array( $image ) &&
-		! empty( $image['file'] ) &&
-		(
-			! empty( $image['path'] ) ||
-			array_key_exists( 'filesize', $image )
-		)
-	) {
-		return array(
-			'file'     => $image['file'],
-			'filesize' => array_key_exists( 'filesize', $image )
-				? $image['filesize']
-				: wp_filesize( $image['path'] ),
-		);
+		// Supply the filesize based on the filter-provided path.
+		if ( array_key_exists( 'path', $image ) && is_int( $image['path'] ) ) {
+			$filesize = wp_filesize( $image['path'] );
+			if ( $filesize > 0 ) {
+				return array(
+					'file'     => $image['file'],
+					'filesize' => $filesize,
+				);
+			}
+		}
 	}
 
 	$allowed_mimes = array_flip( wp_get_mime_types() );
@@ -133,7 +134,7 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	}
 
 	$image_path = wp_get_original_image_path( $attachment_id );
-	if ( ! file_exists( $image_path ) ) {
+	if ( ! $image_path || ! file_exists( $image_path ) ) {
 		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'webp-uploads' ) );
 	}
 

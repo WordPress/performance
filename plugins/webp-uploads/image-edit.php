@@ -42,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *     image_meta: array<string, mixed>,
  *     filesize: int,
  *     original_image?: string,
- *     sources: array<string, array{ file: string, filesize: int }>
+ *     sources?: array<string, array{ file: string, filesize: int }>
  * } Metadata with sources added.
  */
 function webp_uploads_update_sources( array $metadata, array $valid_mime_transforms, array $main_images, array $subsized_images ): array {
@@ -194,7 +194,7 @@ function webp_uploads_update_image_onchange( $override, string $file_path, WP_Im
 					continue;
 				}
 
-				if ( ! $editor::supports_mime_type( $targeted_mime ) ) {
+				if ( $editor instanceof WP_Image_Editor && ! $editor::supports_mime_type( $targeted_mime ) ) {
 					continue;
 				}
 
@@ -228,7 +228,7 @@ function webp_uploads_update_image_onchange( $override, string $file_path, WP_Im
 					}
 
 					$subsized_images[ $targeted_mime ] = array( 'thumbnail' => $result );
-				} else {
+				} elseif ( $editor instanceof WP_Image_Editor ) {
 					$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension}";
 
 					remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10 );
@@ -262,6 +262,16 @@ add_filter( 'wp_save_image_editor_file', 'webp_uploads_update_image_onchange', 1
  * @since 1.0.0
  *
  * @see wp_update_attachment_metadata()
+ *
+ * @phpstan-param array{
+ *        width: int,
+ *        height: int,
+ *        file: string,
+ *        sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
+ *        image_meta: array<string, mixed>,
+ *        filesize: int,
+ *        original_image: string
+ *    } $data
  *
  * @param array<string, mixed> $data          The current metadata of the attachment.
  * @param int                  $attachment_id The ID of the current attachment.
@@ -305,8 +315,20 @@ add_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_met
  *
  * @since 1.0.0
  *
+ * @phpstan-param array{
+ *       width: int,
+ *       height: int,
+ *       file: string,
+ *       sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
+ *       image_meta: array<string, mixed>,
+ *       filesize: int,
+ *       original_image: string,
+ *       sources?: array<string, array{ file: string, filesize: int }>
+ *   } $data
+ *
  * @param int                  $attachment_id The ID representing the attachment.
  * @param array<string, mixed> $data          The current metadata of the attachment.
+ *
  * @return array{
  *     width: int,
  *     height: int,
@@ -437,6 +459,16 @@ function webp_uploads_get_next_full_size_key_from_backup( int $attachment_id ): 
  *
  * @since 1.0.0
  *
+ * @phpstan-param array{
+ *        width: int,
+ *        height: int,
+ *        file: string,
+ *        sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
+ *        image_meta: array<string, mixed>,
+ *        filesize: int,
+ *        original_image: string
+ *    } $data
+ *
  * @param int                  $attachment_id The ID of the attachment.
  * @param array<string, mixed> $data          The current metadata to be stored in the attachment.
  * @return array{
@@ -446,7 +478,7 @@ function webp_uploads_get_next_full_size_key_from_backup( int $attachment_id ): 
  *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
  *     image_meta: array<string, mixed>,
  *     filesize: int,
- *     sources: array<string, array{ file: string, filesize: int }>,
+ *     sources?: array<string, array{ file: string, filesize: int }>,
  *     original_image: string
  * } The updated metadata of the attachment.
  */

@@ -195,7 +195,7 @@ function od_is_response_html_content_type(): bool {
 	);
 	foreach ( $headers_list as $header ) {
 		$header_parts = preg_split( '/\s*[:;]\s*/', strtolower( $header ) );
-		if ( count( $header_parts ) >= 2 && 'content-type' === $header_parts[0] ) {
+		if ( is_array( $header_parts ) && count( $header_parts ) >= 2 && 'content-type' === $header_parts[0] ) {
 			$is_html_content_type = in_array( $header_parts[1], array( 'text/html', 'application/xhtml+xml' ), true );
 		}
 	}
@@ -279,7 +279,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 			&&
 			$walker->get_attribute( 'src' )
 			&&
-			! str_starts_with( $walker->get_attribute( 'src' ), 'data:' )
+			! str_starts_with( (string) $walker->get_attribute( 'src' ), 'data:' )
 		);
 
 		/*
@@ -295,7 +295,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		if (
 			$style
 			&&
-			preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?(?<background_image>.+?)[\'"]?\s*\)/', $style, $matches )
+			preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?(?<background_image>.+?)[\'"]?\s*\)/', (string) $style, $matches )
 			&&
 			! str_starts_with( $matches['background_image'], 'data:' )
 		) {
@@ -342,16 +342,20 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 				$img_attributes = array();
 				foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin' ) as $attr_name ) {
 					$value = $walker->get_attribute( $attr_name );
-					if ( null !== $value ) {
+					if ( is_string( $value ) ) {
 						$img_attributes[ $attr_name ] = $value;
 					}
 				}
 				foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
-					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['img_attributes'] = $img_attributes;
+					if ( is_array( $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ] ) ) {
+						$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['img_attributes'] = $img_attributes;
+					}
 				}
 			} elseif ( $background_image_url ) {
 				foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
-					$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['background_image'] = $background_image_url;
+					if ( is_array( $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ] ) ) {
+						$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['background_image'] = $background_image_url;
+					}
 				}
 			}
 		}

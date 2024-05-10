@@ -205,7 +205,7 @@ function perflab_sanitize_server_timing_setting( $value ): array {
 			array_unique(
 				array_filter(
 					array_map(
-						static function ( $hook_name ) {
+						static function ( string $hook_name ): string {
 							/*
 							 * Allow any characters except whitespace.
 							 * While most hooks use a limited set of characters, hook names in plugins are not
@@ -227,5 +227,10 @@ function perflab_sanitize_server_timing_setting( $value ): array {
 
 	$value['output_buffering'] = (bool) $value['output_buffering'];
 
+	/**
+	 * Validated value.
+	 *
+	 * @var array{benchmarking_actions: string[], benchmarking_filters: string[], output_buffering: bool} $value
+	 */
 	return $value;
 }
