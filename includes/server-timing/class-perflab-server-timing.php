@@ -9,6 +9,11 @@
 /**
  * Class controlling the Server-Timing header.
  *
+ * @phpstan-type MetricArguments array{
+ *                   measure_callback: callable( Perflab_Server_Timing_Metric ): void,
+ *                   access_cap: string
+ *               }
+ *
  * @since 1.8.0
  */
 class Perflab_Server_Timing {
@@ -25,10 +30,8 @@ class Perflab_Server_Timing {
 	 * Map of registered metric slugs and their registered data.
 	 *
 	 * @since 1.8.0
-	 * @var array<string, array{
-	 *          measure_callback: callable( Perflab_Server_Timing_Metric ): void,
-	 *          access_cap: string
-	 *      }>
+	 * @phpstan-var array<string, MetricArguments>
+	 * @var array<string, array>
 	 */
 	private $registered_metrics_data = array();
 
@@ -39,10 +42,7 @@ class Perflab_Server_Timing {
 	 *
 	 * @since 1.8.0
 	 *
-	 * @phpstan-param array{
-	 *     measure_callback: callable( Perflab_Server_Timing_Metric ): void,
-	 *     access_cap: string
-	 * } $args
+	 * @phpstan-param MetricArguments $args
 	 *
 	 * @param string                         $metric_slug The metric slug.
 	 * @param array<string, callable|string> $args        {
@@ -105,7 +105,7 @@ class Perflab_Server_Timing {
 		/**
 		 * Validated args.
 		 *
-		 * @var array{measure_callback: callable( Perflab_Server_Timing_Metric ): void, access_cap: string} $args
+		 * @var MetricArguments $args
 		 */
 
 		$this->registered_metrics[ $metric_slug ]      = new Perflab_Server_Timing_Metric( $metric_slug );
