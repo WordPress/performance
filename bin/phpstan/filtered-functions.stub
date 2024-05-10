@@ -31,20 +31,6 @@
 function wp_get_attachment_metadata( int $attachment_id = 0, bool $unfiltered = false ): ?array {}
 
 /**
- * Retrieves the file type from the file name.
- *
- * You can optionally define the mime array, if needed.
- *
- * @since 2.0.4
- *
- * @param string                     $filename File name or path.
- * @param array<string, string>|null $mimes    Optional. Array of allowed mime types keyed by their file extension regex.
- *                                             Defaults to the result of get_allowed_mime_types().
- * @return array{ ext: string|false, type: string|false }
- */
-function wp_check_filetype( $filename, $mimes = null ) {}
-
-/**
  * Updates the attached file and image meta data when the original image was edited.
  *
  * @since 5.3.0
