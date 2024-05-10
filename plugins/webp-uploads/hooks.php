@@ -26,12 +26,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @see   wp_generate_attachment_metadata()
  * @see   webp_uploads_get_upload_image_mime_transforms()
  *
+ * @phpstan-param array{
+ *      width: int,
+ *      height: int,
+ *      file: string,
+ *      sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string }>,
+ *      image_meta: array<string, mixed>,
+ *      filesize: int
+ *  } $metadata
+ *
  * @param array<string, mixed> $metadata      An array with the metadata from this attachment.
  * @param int                  $attachment_id The ID of the attachment where the hook was dispatched.
+ *
  * @return array{
  *     width: int,
  *     height: int,
- *     file: non-falsy-string,
+ *     file: string,
  *     sizes: array<string, array{ file: string, width: int, height: int, 'mime-type': string, sources?: array<string, array{ file: string, filesize: int }> }>,
  *     image_meta: array<string, mixed>,
  *     filesize: int,
@@ -47,13 +57,13 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 
 	// Not a supported mime type to create the sources property.
 	$mime_type = get_post_mime_type( $attachment_id );
-	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
+	if ( ! is_string( $mime_type ) || ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
 		return $metadata;
 	}
 
 	$file = get_attached_file( $attachment_id, true );
 	// File does not exist.
-	if ( ! file_exists( $file ) ) {
+	if ( ! $file || ! file_exists( $file ) ) {
 		return $metadata;
 	}
 
@@ -116,7 +126,9 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 	if (
 		! in_array( $mime_type, $valid_mime_transforms[ $mime_type ], true ) &&
 		isset( $valid_mime_transforms[ $mime_type ][0] ) &&
-		isset( $allowed_mimes[ $mime_type ] )
+		isset( $allowed_mimes[ $mime_type ] ) &&
+		array_key_exists( 'file', $metadata ) &&
+		is_string( $metadata['file'] )
 	) {
 		$valid_mime_type = $valid_mime_transforms[ $mime_type ][0];
 
@@ -134,12 +146,17 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 
 			// If WordPress already modified the original itself, keep the original and discard WordPress's generated version.
 			if ( ! empty( $metadata['original_image'] ) ) {
-				$uploadpath = wp_get_upload_dir();
-				wp_delete_file_from_directory( get_attached_file( $attachment_id ), $uploadpath['basedir'] );
+				$uploadpath    = wp_get_upload_dir();
+				$attached_file = get_attached_file( $attachment_id );
+				if ( $attached_file ) {
+					wp_delete_file_from_directory( $attached_file, $uploadpath['basedir'] );
+				}
 			}
 
 			// Replace the attached file with the custom MIME type version.
-			$metadata = _wp_image_meta_replace_original( $saved_data, $original_image, $metadata, $attachment_id );
+			if ( $original_image ) {
+				$metadata = _wp_image_meta_replace_original( $saved_data, $original_image, $metadata, $attachment_id );
+			}
 
 			// Unset sources entry for the original MIME type, then save (to avoid inconsistent data
 			// in case of an error after this logic).
@@ -232,6 +249,15 @@ add_filter( 'wp_generate_attachment_metadata', 'webp_uploads_create_sources_prop
  * @since 1.0.0
  *
  * @see wp_get_missing_image_subsizes()
+ *
+ * @phpstan-param array{
+ *     width: int,
+ *     height: int,
+ *     file: string,
+ *     sizes: array<string, array{file: string, width: int, height: int, mime-type: string}>,
+ *     image_meta: array<string, mixed>,
+ *     filesize: int
+ * } $image_meta
  *
  * @param array|mixed          $missing_sizes Associative array of arrays of image sub-sizes.
  * @param array<string, mixed> $image_meta    The metadata from the image.
@@ -729,7 +755,7 @@ JS;
 	wp_print_inline_script_tag(
 		sprintf(
 			'( %s )( document, "img", "script", %s, %s )',
-			preg_replace( '/\s+/', ' ', $js_function ),
+			(string) preg_replace( '/\s+/', '', (string) $js_function ),
 			wp_json_encode( $detection_string ),
 			wp_json_encode( plugins_url( '/fallback.js', __FILE__ ) )
 		),

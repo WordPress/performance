@@ -27,7 +27,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	public function set_up(): void {
 		$this->original_request_uri    = $_SERVER['REQUEST_URI'];
 		$this->original_request_method = $_SERVER['REQUEST_METHOD'];
-		$this->default_mimetype        = ini_get( 'default_mimetype' );
+		$this->default_mimetype        = (string) ini_get( 'default_mimetype' );
 		parent::set_up();
 	}
 
@@ -1112,7 +1112,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 		$set_up();
 
 		$remove_initial_tabs = static function ( string $input ): string {
-			return preg_replace( '/^\t+/m', '', $input );
+			return (string) preg_replace( '/^\t+/m', '', $input );
 		};
 
 		$expected = $remove_initial_tabs( $expected );
@@ -1134,7 +1134,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 * @return string Normalized string.
 	 */
 	private function normalize_whitespace( string $str ): string {
-		return preg_replace( '/\s+/', ' ', trim( $str ) );
+		return (string) preg_replace( '/\s+/', ' ', trim( $str ) );
 	}
 
 	/**
