@@ -19,9 +19,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @return array Associative array of speculation rules by type.
+ * @return array<string, mixed> Associative array of speculation rules by type.
  */
-function plsr_get_speculation_rules() {
+function plsr_get_speculation_rules(): array {
 	$option = get_option( 'plsr_speculation_rules' );
 
 	/*

@@ -12,7 +12,7 @@ class OD_Storage_Lock_Tests extends WP_UnitTestCase {
 	/**
 	 * Tear down.
 	 */
-	public function tear_down() {
+	public function tear_down(): void {
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 		parent::tear_down();
 	}
@@ -25,11 +25,11 @@ class OD_Storage_Lock_Tests extends WP_UnitTestCase {
 	public function data_provider_get_ttl(): array {
 		return array(
 			'unfiltered'        => array(
-				'set_up'   => static function () {},
+				'set_up'   => static function (): void {},
 				'expected' => MINUTE_IN_SECONDS,
 			),
 			'filtered_hour'     => array(
-				'set_up'   => static function () {
+				'set_up'   => static function (): void {
 					add_filter(
 						'od_url_metric_storage_lock_ttl',
 						static function (): int {
@@ -40,7 +40,7 @@ class OD_Storage_Lock_Tests extends WP_UnitTestCase {
 				'expected' => HOUR_IN_SECONDS,
 			),
 			'filtered_negative' => array(
-				'set_up'   => static function () {
+				'set_up'   => static function (): void {
 					add_filter(
 						'od_url_metric_storage_lock_ttl',
 						static function (): int {

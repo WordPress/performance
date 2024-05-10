@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t The `perflab_modern_image_format` was added to enable selecting an output format.
  *                Currently includes AVIF and WebP.
  */
-function webp_uploads_register_media_settings_field() {
+function webp_uploads_register_media_settings_field(): void {
 	register_setting(
 		'media',
 		'perflab_modern_image_format',
@@ -51,7 +51,7 @@ add_action( 'init', 'webp_uploads_register_media_settings_field' );
  *
  * @since 1.0.0
  */
-function webp_uploads_add_media_settings_field() {
+function webp_uploads_add_media_settings_field(): void {
 
 	// Add a dropdown to select the output format between AVIF and WebP output.
 	add_settings_field(
@@ -80,7 +80,7 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
  *
  * @since n.e.x.t
  */
-function webp_uploads_generate_avif_webp_setting_callback() {
+function webp_uploads_generate_avif_webp_setting_callback(): void {
 
 	$selected       = get_option( 'perflab_modern_image_format' );
 	$avif_supported = webp_uploads_mime_type_supported( 'image/avif' );
@@ -117,7 +117,7 @@ function webp_uploads_generate_avif_webp_setting_callback() {
  *
  * @since 1.0.0
  */
-function webp_uploads_generate_webp_jpeg_setting_callback() {
+function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 
 	?>
 
@@ -126,6 +126,25 @@ function webp_uploads_generate_webp_jpeg_setting_callback() {
 			<?php esc_html_e( 'Output JPEG images in addition to the modern format', 'webp-uploads' ); ?>
 		</label>
 		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
+	<?php
+}
+
+/**
+ * Adds custom styles to hide specific elements in media settings.
+ *
+ * @since 1.0.0
+ */
+function webp_uploads_media_setting_style(): void {
+	if ( is_multisite() ) {
+		return;
+	}
+	?>
+	<style>
+		.form-table .perflab-generate-webp-and-jpeg th,
+		.form-table .perflab-generate-webp-and-jpeg td:not(.td-full) {
+			display: none;
+		}
+	</style>
 	<?php
 }
 

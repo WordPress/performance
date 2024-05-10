@@ -12,7 +12,7 @@ class WebP_Uploads_Settings_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::webp_uploads_add_settings_action_link
 	 */
-	public function test_webp_uploads_add_settings_action_link() {
+	public function test_webp_uploads_add_settings_action_link(): void {
 		$this->assertSame( 10, has_filter( 'plugin_action_links_' . WEBP_UPLOADS_MAIN_FILE, 'webp_uploads_add_settings_action_link' ) );
 		$this->assertFalse( webp_uploads_add_settings_action_link( false ) );
 

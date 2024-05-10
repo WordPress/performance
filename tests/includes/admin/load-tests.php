@@ -13,7 +13,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::perflab_add_features_page
 	 */
-	public function test_perflab_add_features_page() {
+	public function test_perflab_add_features_page(): void {
 		global $_wp_submenu_nopriv;
 
 		// Reset relevant globals and filters.
@@ -51,7 +51,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		remove_all_filters( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ) );
 	}
 
-	public function test_perflab_render_settings_page() {
+	public function test_perflab_render_settings_page(): void {
 		ob_start();
 		perflab_render_settings_page();
 		$output = ob_get_clean();
@@ -59,7 +59,7 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( "<input type='hidden' name='option_page' value='" . PERFLAB_SCREEN . "' />", $output );
 	}
 
-	public function test_perflab_plugin_action_links_add_settings() {
+	public function test_perflab_plugin_action_links_add_settings(): void {
 		$original_links = array(
 			'deactivate' => '<a href="#">Deactivate</a>',
 		);

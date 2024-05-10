@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  */
-function plsr_print_speculation_rules() {
+function plsr_print_speculation_rules(): void {
 	$rules = plsr_get_speculation_rules();
 	if ( empty( $rules ) ) {
 		return;
@@ -53,7 +53,7 @@ add_action( 'wp_footer', 'plsr_print_speculation_rules' );
  *
  * @since 1.1.0
  */
-function plsr_render_generator_meta_tag() {
+function plsr_render_generator_meta_tag(): void {
 	// Use the plugin slug as it is immutable.
 	echo '<meta name="generator" content="speculation-rules ' . esc_attr( SPECULATION_RULES_VERSION ) . '">' . "\n";
 }
