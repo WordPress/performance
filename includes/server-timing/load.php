@@ -212,7 +212,7 @@ function perflab_sanitize_server_timing_setting( $value ): array {
 							 * restricted to them, therefore the sanitization does not limit the characters
 							 * used.
 							 */
-							return preg_replace(
+							return (string) preg_replace(
 								'/\s/',
 								'',
 								sanitize_text_field( $hook_name )
