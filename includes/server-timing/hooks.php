@@ -11,7 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-
 /**
  * Adds server timing to REST API response.
  *
@@ -20,18 +19,23 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param WP_REST_Response|WP_Error $response Result to send to the client. Usually a `WP_REST_Response`.
  * @return WP_REST_Response|WP_Error Filtered response.
  */
-function rest_post_dispatch_add_server_timing( $response ) {
-	if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST || ! function_exists( 'perflab_server_timing' ) || ! $response instanceof WP_REST_Response ) {
+function perflab_rest_post_dispatch_add_server_timing( $response ) {
+	// TODO: Change condition to use wp_is_rest_endpoint() once minimum-supported version is WordPress 6.5.
+	if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST || ! $response instanceof WP_REST_Response ) {
 		return $response;
 	}
 
 	$server_timing = perflab_server_timing();
 
 	/** This filter is documented in includes/server-timing/class-perflab-server-timing.php */
-	do_action( 'perflab_server_timing_send_header' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+	do_action( 'perflab_server_timing_send_header' );
 
-	$response->header( 'Server-Timing', $server_timing->get_header() );
+	$header_value = $server_timing->get_header();
+
+	if ( $header_value ) {
+		$response->header( 'Server-Timing', $header_value );
+	}
 
 	return $response;
 }
-add_filter( 'rest_post_dispatch', 'rest_post_dispatch_add_server_timing', PHP_INT_MAX );
+add_filter( 'rest_post_dispatch', 'perflab_rest_post_dispatch_add_server_timing', PHP_INT_MAX );
