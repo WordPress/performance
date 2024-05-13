@@ -26,8 +26,6 @@ define( 'PERFLAB_SERVER_TIMING_SCREEN', 'perflab-server-timing' );
  * its action hooks as expected.
  *
  * @since 1.8.0
- *
- * @return Perflab_Server_Timing
  */
 function perflab_server_timing(): Perflab_Server_Timing {
 	static $server_timing;
@@ -51,8 +49,16 @@ function perflab_server_timing(): Perflab_Server_Timing {
 	return $server_timing;
 }
 
-// @phpstan-ignore-next-line
-add_action( 'wp_loaded', 'perflab_server_timing' );
+/**
+ * Initializes the Server-Timing API.
+ *
+ * @since n.e.x.t
+ */
+function perflab_server_timing_init(): void {
+	perflab_server_timing();
+}
+
+add_action( 'wp_loaded', 'perflab_server_timing_init' );
 
 /**
  * Registers a metric to calculate for the Server-Timing header.
@@ -110,7 +116,7 @@ function perflab_wrap_server_timing( callable $callback, string $metric_slug, st
 			perflab_server_timing_register_metric(
 				$metric_slug,
 				array(
-					'measure_callback' => static function ( $metric ) use ( &$server_timing_metric ) {
+					'measure_callback' => static function ( $metric ) use ( &$server_timing_metric ): void {
 						$server_timing_metric = $metric;
 					},
 					'access_cap'       => $access_cap,
@@ -199,14 +205,14 @@ function perflab_sanitize_server_timing_setting( $value ): array {
 			array_unique(
 				array_filter(
 					array_map(
-						static function ( $hook_name ) {
+						static function ( string $hook_name ): string {
 							/*
 							 * Allow any characters except whitespace.
 							 * While most hooks use a limited set of characters, hook names in plugins are not
 							 * restricted to them, therefore the sanitization does not limit the characters
 							 * used.
 							 */
-							return preg_replace(
+							return (string) preg_replace(
 								'/\s/',
 								'',
 								sanitize_text_field( $hook_name )
@@ -221,5 +227,10 @@ function perflab_sanitize_server_timing_setting( $value ): array {
 
 	$value['output_buffering'] = (bool) $value['output_buffering'];
 
+	/**
+	 * Validated value.
+	 *
+	 * @var array{benchmarking_actions: string[], benchmarking_filters: string[], output_buffering: bool} $value
+	 */
 	return $value;
 }

@@ -5,6 +5,10 @@
  * @package performance-lab
  */
 
+// phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingAnyTypeHint
+// phpcs:disable SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingAnyTypeHint
+// phpcs:disable SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingNativeTypeHint
+
 /**
  * Simple mock filesystem, limited to working with concrete file paths.
  * No support for hierarchy or parent directories etc.
@@ -13,6 +17,7 @@
  */
 class WP_Filesystem_MockFilesystem extends WP_Filesystem_Base {
 
+	/** @var array<string, string> */
 	private $file_contents = array();
 
 	public function get_contents( $file ) {
@@ -22,6 +27,7 @@ class WP_Filesystem_MockFilesystem extends WP_Filesystem_Base {
 		return false;
 	}
 
+	/** @return string[]|false */
 	public function get_contents_array( $file ) {
 		if ( isset( $this->file_contents[ $file ] ) ) {
 			return array( $this->file_contents[ $file ] );
@@ -133,6 +139,7 @@ class WP_Filesystem_MockFilesystem extends WP_Filesystem_Base {
 		return false;
 	}
 
+	/** @return false */
 	public function dirlist( $path, $include_hidden = true, $recursive = false ) {
 		return false;
 	}

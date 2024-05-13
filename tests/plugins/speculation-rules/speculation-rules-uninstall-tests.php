@@ -11,7 +11,7 @@ class Speculation_Rules_Uninstall_Tests extends WP_UnitTestCase {
 	/**
 	 * Runs the routine before setting up all tests.
 	 */
-	public static function set_up_before_class() {
+	public static function set_up_before_class(): void {
 		parent::set_up_before_class();
 
 		// Mock uninstall const.
@@ -23,7 +23,7 @@ class Speculation_Rules_Uninstall_Tests extends WP_UnitTestCase {
 	/**
 	 * Load uninstall.php.
 	 */
-	private function require_uninstall() {
+	private function require_uninstall(): void {
 		require __DIR__ . '/../../../plugins/speculation-rules/uninstall.php';
 	}
 
@@ -32,7 +32,7 @@ class Speculation_Rules_Uninstall_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::plsr_delete_plugin_option
 	 */
-	public function test_delete_plugin_option() {
+	public function test_delete_plugin_option(): void {
 		unregister_setting( 'reading', 'plsr_speculation_rules' );
 		$test_blogname = 'Hello World';
 		update_option( 'blogname', $test_blogname );

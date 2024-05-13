@@ -15,7 +15,7 @@
  * @param string[] $editors Array of available image editor class names. Defaults are 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD'.
  * @return string[] Registered image editors class names.
  */
-function dominant_color_set_image_editors( $editors ) {
+function dominant_color_set_image_editors( array $editors ): array {
 	if ( ! class_exists( 'Dominant_Color_Image_Editor_GD' ) ) {
 		require_once __DIR__ . '/class-dominant-color-image-editor-gd.php';
 	}
@@ -46,9 +46,9 @@ function dominant_color_set_image_editors( $editors ) {
  * @access private
  *
  * @param int $attachment_id The attachment ID.
- * @return array|WP_Error Array with the dominant color and has transparency values or WP_Error on error.
+ * @return array{ has_transparency?: bool, dominant_color?: string }|WP_Error Array with the dominant color and has transparency values or WP_Error on error.
  */
-function dominant_color_get_dominant_color_data( $attachment_id ) {
+function dominant_color_get_dominant_color_data( int $attachment_id ) {
 	$mime_type = get_post_mime_type( $attachment_id );
 	if ( 'application/pdf' === $mime_type ) {
 		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'dominant-color-images' ) );
@@ -56,6 +56,9 @@ function dominant_color_get_dominant_color_data( $attachment_id ) {
 	$file = dominant_color_get_attachment_file_path( $attachment_id );
 	if ( ! $file ) {
 		$file = get_attached_file( $attachment_id );
+	}
+	if ( ! $file ) {
+		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'dominant-color-images' ) );
 	}
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
 
@@ -108,7 +111,7 @@ function dominant_color_get_dominant_color_data( $attachment_id ) {
  * @param string $size          Optional. Image size. Default 'medium'.
  * @return false|string Path to an image or false if not found.
  */
-function dominant_color_get_attachment_file_path( $attachment_id, $size = 'medium' ) {
+function dominant_color_get_attachment_file_path( int $attachment_id, string $size = 'medium' ) {
 	$imagedata = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $imagedata ) ) {
 		return false;
@@ -119,6 +122,9 @@ function dominant_color_get_attachment_file_path( $attachment_id, $size = 'mediu
 	}
 
 	$file = get_attached_file( $attachment_id );
+	if ( ! $file ) {
+		return false;
+	}
 
 	$filepath = str_replace( wp_basename( $file ), $imagedata['sizes'][ $size ]['file'], $file );
 
@@ -133,7 +139,7 @@ function dominant_color_get_attachment_file_path( $attachment_id, $size = 'mediu
  * @param int $attachment_id Attachment ID for image.
  * @return string|null Hex value of dominant color or null if not set.
  */
-function dominant_color_get_dominant_color( $attachment_id ) {
+function dominant_color_get_dominant_color( int $attachment_id ): ?string {
 	if ( ! wp_attachment_is_image( $attachment_id ) ) {
 		return null;
 	}
@@ -157,7 +163,7 @@ function dominant_color_get_dominant_color( $attachment_id ) {
  * @param int $attachment_id Attachment ID for image.
  * @return bool|null Whether the image has transparency, or null if not set.
  */
-function dominant_color_has_transparency( $attachment_id ) {
+function dominant_color_has_transparency( int $attachment_id ): ?bool {
 	$image_meta = wp_get_attachment_metadata( $attachment_id );
 	if ( ! is_array( $image_meta ) ) {
 		return null;
@@ -182,9 +188,12 @@ function dominant_color_has_transparency( $attachment_id ) {
  *
  * @return string|null Hex color or null if error.
  */
-function dominant_color_rgb_to_hex( $red, $green, $blue ) {
-	$range = range( 0, 255 );
-	if ( ! in_array( $red, $range, true ) || ! in_array( $green, $range, true ) || ! in_array( $blue, $range, true ) ) {
+function dominant_color_rgb_to_hex( int $red, int $green, int $blue ): ?string {
+	if ( ! (
+		$red >= 0 && $red <= 255
+		&& $green >= 0 && $green <= 255
+		&& $blue >= 0 && $blue <= 255
+	) ) {
 		return null;
 	}
 

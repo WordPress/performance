@@ -10,7 +10,7 @@ use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
 class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
-	public function set_up() {
+	public function set_up(): void {
 		parent::set_up();
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
@@ -21,7 +21,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_backup_the_sources_structure_alongside_the_full_size() {
+	public function it_should_backup_the_sources_structure_alongside_the_full_size(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -36,8 +36,12 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 
-		$this->assertNotEmpty( $backup_sizes );
 		$this->assertIsArray( $backup_sizes );
+		$this->assertArrayHasKey( 'full-orig', $backup_sizes );
+		$this->assertArrayHasKey( 'thumbnail-orig', $backup_sizes );
+		$this->assertArrayHasKey( 'medium-orig', $backup_sizes );
+		$this->assertArrayHasKey( 'medium_large-orig', $backup_sizes );
+		$this->assertArrayHasKey( 'large-orig', $backup_sizes );
 
 		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
 		$this->assertIsArray( $backup_sources );
@@ -63,7 +67,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_restore_the_sources_array_from_the_backup_when_an_image_is_edited() {
+	public function it_should_restore_the_sources_array_from_the_backup_when_an_image_is_edited(): void {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
@@ -118,7 +122,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_prevent_to_back_up_the_sources_when_the_sources_attributes_does_not_exists() {
+	public function it_should_prevent_to_back_up_the_sources_when_the_sources_attributes_does_not_exists(): void {
 		// Disable the generation of the sources attributes.
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
@@ -147,7 +151,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_prevent_to_backup_the_full_size_image_if_only_the_thumbnail_is_edited() {
+	public function it_should_prevent_to_backup_the_full_size_image_if_only_the_thumbnail_is_edited(): void {
 		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
 			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
 		}
@@ -202,7 +206,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_backup_the_image_when_all_images_except_the_thumbnail_are_updated() {
+	public function it_should_backup_the_image_when_all_images_except_the_thumbnail_are_updated(): void {
 		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
 			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
 		}
@@ -247,7 +251,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_use_the_attached_image_when_updating_subsequent_images_not_the_original_version() {
+	public function it_should_use_the_attached_image_when_updating_subsequent_images_not_the_original_version(): void {
 		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
 			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
 		}
@@ -305,7 +309,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_validate_source_attribute_update_when_webp_edited() {
+	public function it_should_validate_source_attribute_update_when_webp_edited(): void {
 		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
 			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
 		}
@@ -338,7 +342,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_not_return_a_target_if_no_backup_image_exists() {
+	public function it_should_not_return_a_target_if_no_backup_image_exists(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$this->assertNull( webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) );
 	}
@@ -348,7 +352,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_the_full_orig_target_key_when_only_one_edit_image_exists() {
+	public function it_should_return_the_full_orig_target_key_when_only_one_edit_image_exists(): void {
 		// Remove the filter to prevent the usage of the next target.
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
@@ -365,7 +369,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_return_null_when_looking_for_a_target_that_is_already_used() {
+	public function it_should_return_null_when_looking_for_a_target_that_is_already_used(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/testdata/modules/images/leaves.jpg' );
 		$editor        = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
@@ -379,7 +383,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_use_the_next_available_hash_for_the_full_size_image_on_multiple_image_edits() {
+	public function it_should_use_the_next_available_hash_for_the_full_size_image_on_multiple_image_edits(): void {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
@@ -393,7 +397,11 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
 		$editor->rotate_right()->save();
-		$this->assertSizeNameIsHashed( 'full', webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) );
+
+		$full_size_key = webp_uploads_get_next_full_size_key_from_backup( $attachment_id );
+		// @phpstan-ignore-next-line -- Work around PHPStan remembering the return value above being null but now being a string. This is instead of adding rememberPossiblyImpureFunctionValues:false to the config.
+		$this->assertIsString( $full_size_key );
+		$this->assertSizeNameIsHashed( 'full', $full_size_key );
 	}
 
 	/**
@@ -401,7 +409,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_save_populate_the_backup_sources_with_the_next_target() {
+	public function it_should_save_populate_the_backup_sources_with_the_next_target(): void {
 		// Remove the filter to prevent the usage of the next target.
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
@@ -410,7 +418,12 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$editor->rotate_right()->save();
 		$this->assertTrue( $editor->success() );
 
-		$sources = array( 'image/webp' => 'leaves.webp' );
+		$sources = array(
+			'image/webp' => array(
+				'file'     => 'leaves.webp',
+				'filesize' => 1234,
+			),
+		);
 		webp_uploads_backup_full_image_sources( $attachment_id, $sources );
 
 		$this->assertSame( array( 'full-orig' => $sources ), get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true ) );
@@ -421,7 +434,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_store_the_metadata_on_the_next_available_hash() {
+	public function it_should_store_the_metadata_on_the_next_available_hash(): void {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
@@ -436,7 +449,12 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$editor->rotate_right()->save();
 		$this->assertTrue( $editor->success() );
 
-		$sources = array( 'image/webp' => 'leaves.webp' );
+		$sources = array(
+			'image/webp' => array(
+				'file'     => 'leaves.webp',
+				'filesize' => 1234,
+			),
+		);
 		webp_uploads_backup_full_image_sources( $attachment_id, $sources );
 
 		$backup_sources = get_post_meta( $attachment_id, '_wp_attachment_backup_sources', true );
@@ -453,7 +471,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_prevent_to_store_an_empty_set_of_sources() {
+	public function it_should_prevent_to_store_an_empty_set_of_sources(): void {
 		// Remove the filter to prevent the usage of the next target.
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
@@ -472,7 +490,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_store_the_next_image_hash_on_the_backup_sources() {
+	public function it_should_store_the_next_image_hash_on_the_backup_sources(): void {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
@@ -489,9 +507,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 		$this->assertIsArray( $backup_sources );
 		$this->assertCount( 2, $backup_sources );
 		foreach ( array_keys( $backup_sources ) as $name ) {
-			if ( 'full-orig' === $name ) {
-				$this->assertSame( 'full-orig', $name );
-			} else {
+			if ( 'full-orig' !== $name ) {
 				$this->assertSizeNameIsHashed( '', $name );
 			}
 		}
@@ -502,7 +518,7 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 	 *
 	 * @test
 	 */
-	public function it_should_create_backup_of_full_size_images_with_the_same_hash_keys_as_the_edited_images() {
+	public function it_should_create_backup_of_full_size_images_with_the_same_hash_keys_as_the_edited_images(): void {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 

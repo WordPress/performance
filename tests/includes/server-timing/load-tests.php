@@ -10,22 +10,25 @@
  */
 class Server_Timing_Load_Tests extends WP_UnitTestCase {
 
-	public function test_perflab_server_timing() {
+	public function test_perflab_server_timing(): void {
+		$this->assertSame( 10, has_action( 'wp_loaded', 'perflab_server_timing_init' ) );
+		perflab_server_timing_init(); // Already called during bootstrap.
+		$this->assertTrue( has_filter( 'template_include' ) );
+
 		$server_timing = perflab_server_timing();
-		$this->assertInstanceOf( Perflab_Server_Timing::class, $server_timing );
 		$this->assertSame( PHP_INT_MAX, has_filter( 'template_include', array( $server_timing, 'on_template_include' ) ), 'template_include filter not added' );
 
 		$server_timing2 = perflab_server_timing();
 		$this->assertSame( $server_timing, $server_timing2, 'Different instance returned' );
 	}
 
-	public function test_perflab_server_timing_register_metric() {
+	public function test_perflab_server_timing_register_metric(): void {
 		$this->assertFalse( perflab_server_timing()->has_registered_metric( 'test-metric' ) );
 
 		perflab_server_timing_register_metric(
 			'test-metric',
 			array(
-				'measure_callback' => static function ( $metric ) {
+				'measure_callback' => static function ( $metric ): void {
 					$metric->set_value( 100 );
 				},
 				'access_cap'       => 'exist',
@@ -34,14 +37,14 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		$this->assertTrue( perflab_server_timing()->has_registered_metric( 'test-metric' ) );
 	}
 
-	public function test_perflab_server_timing_use_output_buffer() {
+	public function test_perflab_server_timing_use_output_buffer(): void {
 		$this->assertFalse( perflab_server_timing_use_output_buffer() );
 
 		add_filter( 'perflab_server_timing_use_output_buffer', '__return_true' );
 		$this->assertTrue( perflab_server_timing_use_output_buffer() );
 	}
 
-	public function test_perflab_wrap_server_timing() {
+	public function test_perflab_wrap_server_timing(): void {
 		$cb = static function () {
 			return 123;
 		};
@@ -64,7 +67,7 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 	 * @covers ::perflab_register_server_timing_setting
 	 * @covers ::perflab_sanitize_server_timing_setting
 	 */
-	public function test_perflab_register_server_timing_setting() {
+	public function test_perflab_register_server_timing_setting(): void {
 		global $new_allowed_options, $wp_registered_settings;
 
 		// Reset relevant globals.
@@ -78,7 +81,7 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 		$this->assertTrue( isset( $settings[ PERFLAB_SERVER_TIMING_SETTING ] ) );
 
 		// Assert that the setting is allowlisted for the relevant screen.
-		$this->assertTrue( isset( $new_allowed_options[ PERFLAB_SERVER_TIMING_SCREEN ] ) );
+		$this->assertArrayHasKey( PERFLAB_SERVER_TIMING_SCREEN, $new_allowed_options );
 		$this->assertSame( array( PERFLAB_SERVER_TIMING_SETTING ), $new_allowed_options[ PERFLAB_SERVER_TIMING_SCREEN ] );
 
 		$expected_default = array(
@@ -99,15 +102,18 @@ class Server_Timing_Load_Tests extends WP_UnitTestCase {
 	/**
 	 * @dataProvider data_perflab_sanitize_server_timing_setting
 	 *
-	 * @param mixed $unsanitized Unsanitized input.
-	 * @param array $expected    Expected sanitized output.
+	 * @param mixed                $unsanitized Unsanitized input.
+	 * @param array<string, mixed> $expected    Expected sanitized output.
 	 */
-	public function test_perflab_sanitize_server_timing_setting( $unsanitized, $expected ) {
+	public function test_perflab_sanitize_server_timing_setting( $unsanitized, array $expected ): void {
 		$sanitized = perflab_sanitize_server_timing_setting( $unsanitized );
 		$this->assertSame( $expected, $sanitized );
 	}
 
-	public function data_perflab_sanitize_server_timing_setting() {
+	/**
+	 * @return array<string, mixed>
+	 */
+	public function data_perflab_sanitize_server_timing_setting(): array {
 		$default = array(
 			'benchmarking_actions' => array(),
 			'benchmarking_filters' => array(),

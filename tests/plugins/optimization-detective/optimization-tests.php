@@ -24,14 +24,14 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 */
 	private $default_mimetype;
 
-	public function set_up() {
+	public function set_up(): void {
 		$this->original_request_uri    = $_SERVER['REQUEST_URI'];
 		$this->original_request_method = $_SERVER['REQUEST_METHOD'];
-		$this->default_mimetype        = ini_get( 'default_mimetype' );
+		$this->default_mimetype        = (string) ini_get( 'default_mimetype' );
 		parent::set_up();
 	}
 
-	public function tear_down() {
+	public function tear_down(): void {
 		$_SERVER['REQUEST_URI']    = $this->original_request_uri;
 		$_SERVER['REQUEST_METHOD'] = $this->original_request_method;
 		ini_set( 'default_mimetype', $this->default_mimetype ); // phpcs:ignore WordPress.PHP.IniSet.Risky
@@ -95,7 +95,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_maybe_add_template_output_buffer_filter
 	 */
-	public function test_od_maybe_add_template_output_buffer_filter_with_query_var_to_disable() {
+	public function test_od_maybe_add_template_output_buffer_filter_with_query_var_to_disable(): void {
 		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
 
 		add_filter( 'od_can_optimize_response', '__return_true' );
@@ -113,27 +113,27 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	public function data_provider_test_od_can_optimize_response(): array {
 		return array(
 			'homepage'           => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					$this->go_to( home_url( '/' ) );
 				},
 				'expected' => true,
 			),
 			'homepage_filtered'  => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					$this->go_to( home_url( '/' ) );
 					add_filter( 'od_can_optimize_response', '__return_false' );
 				},
 				'expected' => false,
 			),
 			'search'             => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					self::factory()->post->create( array( 'post_title' => 'Hello' ) );
 					$this->go_to( home_url( '?s=Hello' ) );
 				},
 				'expected' => false,
 			),
 			'customizer_preview' => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					$this->go_to( home_url( '/' ) );
 					global $wp_customize;
 					require_once ABSPATH . 'wp-includes/class-wp-customize-manager.php';
@@ -143,21 +143,21 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 				'expected' => false,
 			),
 			'post_request'       => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					$this->go_to( home_url( '/' ) );
 					$_SERVER['REQUEST_METHOD'] = 'POST';
 				},
 				'expected' => false,
 			),
 			'subscriber_user'    => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
 					$this->go_to( home_url( '/' ) );
 				},
 				'expected' => true,
 			),
 			'admin_user'         => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 					$this->go_to( home_url( '/' ) );
 				},
@@ -338,7 +338,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	public function data_provider_test_od_optimize_template_output_buffer(): array {
 		return array(
 			'no-url-metrics'                              => array(
-				'set_up'   => static function () {},
+				'set_up'   => static function (): void {},
 				'buffer'   => '
 					<html lang="en">
 						<head>
@@ -365,7 +365,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'no-url-metrics-with-data-url-background-image' => array(
-				'set_up'   => static function () {
+				'set_up'   => static function (): void {
 					ini_set( 'default_mimetype', 'text/html; charset=utf-8' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 				},
 				// Smallest PNG courtesy of <https://evanhahn.com/worlds-smallest-png/>.
@@ -396,7 +396,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'no-url-metrics-with-data-url-image'          => array(
-				'set_up'   => static function () {},
+				'set_up'   => static function (): void {},
 				// Smallest PNG courtesy of <https://evanhahn.com/worlds-smallest-png/>.
 				'buffer'   => '
 					<html lang="en">
@@ -425,7 +425,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'no-url-metrics-for-image-without-src'        => array(
-				'set_up'   => static function () {},
+				'set_up'   => static function (): void {},
 				'buffer'   => '
 					<html lang="en">
 						<head>
@@ -454,7 +454,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'common-lcp-image-with-fully-populated-sample-data' => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 					$sample_size = od_get_url_metrics_breakpoint_sample_size();
 					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
@@ -506,7 +506,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'common-lcp-image-with-stale-sample-data'     => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 					$sample_size = od_get_url_metrics_breakpoint_sample_size();
 					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
@@ -554,7 +554,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'common-lcp-background-image-with-fully-populated-sample-data' => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 					$sample_size = od_get_url_metrics_breakpoint_sample_size();
 					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
@@ -600,7 +600,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'responsive-background-images'                => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					$mobile_breakpoint  = 480;
 					$tablet_breakpoint  = 600;
 					$desktop_breakpoint = 782;
@@ -670,7 +670,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'fetch-priority-high-already-on-common-lcp-image-with-fully-populated-sample-data' => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 					$sample_size = od_get_url_metrics_breakpoint_sample_size();
 					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
@@ -716,7 +716,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'url-metric-only-captured-for-one-breakpoint' => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
@@ -765,7 +765,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'different-lcp-elements-for-different-breakpoints' => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 						$this->get_validated_url_metric(
@@ -829,7 +829,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'different-lcp-elements-for-two-non-consecutive-breakpoints' => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					add_filter(
 						'od_breakpoint_max_widths',
 						static function () {
@@ -932,7 +932,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'different-lcp-elements-for-two-non-consecutive-breakpoints-and-one-is-stale' => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					add_filter(
 						'od_breakpoint_max_widths',
 						static function () {
@@ -1036,7 +1036,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'rss-response'                                => array(
-				'set_up'   => static function () {
+				'set_up'   => static function (): void {
 					ini_set( 'default_mimetype', 'application/rss+xml' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 				},
 				'buffer'   => '<?xml version="1.0" encoding="UTF-8"?>
@@ -1068,7 +1068,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 			),
 
 			'xhtml-response'                              => array(
-				'set_up'   => static function () {
+				'set_up'   => static function (): void {
 					ini_set( 'default_mimetype', 'application/xhtml+xml; charset=utf-8' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 				},
 				'buffer'   => '<?xml version="1.0" encoding="UTF-8"?>
@@ -1112,7 +1112,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 		$set_up();
 
 		$remove_initial_tabs = static function ( string $input ): string {
-			return preg_replace( '/^\t+/m', '', $input );
+			return (string) preg_replace( '/^\t+/m', '', $input );
 		};
 
 		$expected = $remove_initial_tabs( $expected );
@@ -1134,7 +1134,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 	 * @return string Normalized string.
 	 */
 	private function normalize_whitespace( string $str ): string {
-		return preg_replace( '/\s+/', ' ', trim( $str ) );
+		return (string) preg_replace( '/\s+/', ' ', trim( $str ) );
 	}
 
 	/**

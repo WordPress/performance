@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  *
  * @param string $html The oEmbed HTML.
- * @return string
+ * @return string Filtered oEmbed HTML.
  */
 function embed_optimizer_filter_oembed_html( string $html ): string {
 	$html_processor = new WP_HTML_Tag_Processor( $html );
@@ -81,7 +81,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			// by preventing links in the hidden iframe from receiving focus.
 			if ( $html_processor->has_class( 'wp-embedded-content' ) ) {
 				$style = $html_processor->get_attribute( 'style' );
-				if ( $style ) {
+				if ( is_string( $style ) ) {
 					// WordPress core injects this clip CSS property:
 					// <https://github.com/WordPress/wordpress-develop/blob/6974b994de5/src/wp-includes/embed.php#L968>.
 					$style = str_replace( 'clip: rect(1px, 1px, 1px, 1px);', 'visibility: hidden;', $style );
@@ -105,7 +105,7 @@ add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
  *
  * @since 0.1.0
  */
-function embed_optimizer_lazy_load_scripts() {
+function embed_optimizer_lazy_load_scripts(): void {
 	$js = <<<JS
 		const lazyEmbedsScripts = document.querySelectorAll( 'script[type="application/vnd.embed-optimizer.javascript"]' );
 		const lazyEmbedScriptsByParents = new Map();
@@ -163,7 +163,7 @@ JS;
  * @param int    $error_level   Optional. The designated error type for this error.
  *                              Only works with E_USER family of constants. Default E_USER_NOTICE.
  */
-function embed_optimizer_trigger_error( string $function_name, string $message, int $error_level = E_USER_NOTICE ) {
+function embed_optimizer_trigger_error( string $function_name, string $message, int $error_level = E_USER_NOTICE ): void {
 	if ( ! function_exists( 'wp_trigger_error' ) ) {
 		return;
 	}
@@ -177,7 +177,7 @@ function embed_optimizer_trigger_error( string $function_name, string $message, 
  *
  * @since 0.1.0
  */
-function embed_optimizer_render_generator() {
+function embed_optimizer_render_generator(): void {
 	// Use the plugin slug as it is immutable.
 	echo '<meta name="generator" content="embed-optimizer ' . esc_attr( EMBED_OPTIMIZER_VERSION ) . '">' . "\n";
 }

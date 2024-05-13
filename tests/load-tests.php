@@ -7,13 +7,13 @@
 
 class Load_Tests extends WP_UnitTestCase {
 
-	public function test_perflab_get_generator_content() {
+	public function test_perflab_get_generator_content(): void {
 		$expected = 'performance-lab ' . PERFLAB_VERSION . '; plugins: ';
 		$content  = perflab_get_generator_content();
 		$this->assertSame( $expected, $content );
 	}
 
-	public function test_perflab_render_generator() {
+	public function test_perflab_render_generator(): void {
 		$expected = '<meta name="generator" content="performance-lab ' . PERFLAB_VERSION . '; plugins: ">' . "\n";
 		$output   = get_echo( 'perflab_render_generator' );
 		$this->assertSame( $expected, $output );
@@ -25,7 +25,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertStringContainsString( $expected, $output );
 	}
 
-	public function test_perflab_maybe_set_object_cache_dropin_no_conflict() {
+	public function test_perflab_maybe_set_object_cache_dropin_no_conflict(): void {
 		global $wp_filesystem;
 
 		$this->set_up_mock_filesystem();
@@ -40,7 +40,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/object-cache.copy.php' ), $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
 	}
 
-	public function test_perflab_maybe_set_object_cache_dropin_no_conflict_but_failing() {
+	public function test_perflab_maybe_set_object_cache_dropin_no_conflict_but_failing(): void {
 		global $wp_filesystem;
 
 		$this->set_up_mock_filesystem();
@@ -60,7 +60,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertFalse( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
 	}
 
-	public function test_perflab_maybe_set_object_cache_dropin_with_conflict() {
+	public function test_perflab_maybe_set_object_cache_dropin_with_conflict(): void {
 		global $wp_filesystem;
 
 		$this->set_up_mock_filesystem();
@@ -78,7 +78,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( $dummy_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
 	}
 
-	public function test_perflab_maybe_set_object_cache_dropin_with_older_version() {
+	public function test_perflab_maybe_set_object_cache_dropin_with_older_version(): void {
 		global $wp_filesystem;
 
 		$this->set_up_mock_filesystem();
@@ -105,7 +105,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( $latest_file_content, $wp_filesystem->get_contents( WP_CONTENT_DIR . '/object-cache.php' ) );
 	}
 
-	public function test_perflab_maybe_set_object_cache_dropin_with_latest_version() {
+	public function test_perflab_maybe_set_object_cache_dropin_with_latest_version(): void {
 		global $wp_filesystem;
 
 		$this->set_up_mock_filesystem();
@@ -134,7 +134,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertFalse( get_transient( 'perflab_set_object_cache_dropin' ) );
 	}
 
-	public function test_perflab_object_cache_dropin_may_be_disabled_via_filter() {
+	public function test_perflab_object_cache_dropin_may_be_disabled_via_filter(): void {
 		global $wp_filesystem;
 
 		$this->set_up_mock_filesystem();
@@ -151,7 +151,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertFalse( $wp_filesystem->exists( WP_CONTENT_DIR . '/object-cache.php' ) );
 	}
 
-	public function test_perflab_object_cache_dropin_version_matches_latest() {
+	public function test_perflab_object_cache_dropin_version_matches_latest(): void {
 		$file_content = file_get_contents( PERFLAB_PLUGIN_DIR_PATH . 'includes/server-timing/object-cache.copy.php' );
 
 		// Get the version from the file header and the constant.
@@ -165,7 +165,7 @@ class Load_Tests extends WP_UnitTestCase {
 		$this->assertSame( PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION, $file_constant_version );
 	}
 
-	private function set_up_mock_filesystem() {
+	private function set_up_mock_filesystem(): void {
 		global $wp_filesystem;
 
 		add_filter(

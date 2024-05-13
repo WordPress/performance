@@ -12,26 +12,31 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aao_add_autoloaded_options_test()
 	 */
-	public function test_perflab_aao_add_autoloaded_options_test() {
+	public function test_perflab_aao_add_autoloaded_options_test(): void {
 		$expected_test = array(
 			'label' => esc_html__( 'Autoloaded options', 'performance-lab' ),
 			'test'  => 'perflab_aao_autoloaded_options_test',
 		);
 
+		$initial_test = array(
+			'label' => 'Label',
+			'test'  => 'initial_test',
+		);
 		$this->assertEquals(
 			array(
 				'direct' => array(
+					'initial'            => $initial_test,
 					'autoloaded_options' => $expected_test,
 				),
 			),
-			perflab_aao_add_autoloaded_options_test( array() )
+			perflab_aao_add_autoloaded_options_test( array( 'direct' => array( 'initial' => $initial_test ) ) )
 		);
 	}
 
 	/**
 	 * Tests perflab_aao_autoloaded_options_test() when autoloaded options less than warning size.
 	 */
-	public function test_perflab_aao_autoloaded_options_test_no_warning() {
+	public function test_perflab_aao_autoloaded_options_test_no_warning(): void {
 		$expected_label  = esc_html__( 'Autoloaded options are acceptable', 'performance-lab' );
 		$expected_status = 'good';
 
@@ -43,7 +48,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aao_autoloaded_options_test() when autoloaded options more than warning size.
 	 */
-	public function test_perflab_aao_autoloaded_options_test_warning() {
+	public function test_perflab_aao_autoloaded_options_test_warning(): void {
 		self::set_autoloaded_option( self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES );
 
 		$expected_label  = esc_html__( 'Autoloaded options could affect performance', 'performance-lab' );
@@ -57,7 +62,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	/**
 	 * Tests perflab_aao_autoloaded_options_size()
 	 */
-	public function test_perflab_aao_autoloaded_options_size() {
+	public function test_perflab_aao_autoloaded_options_size(): void {
 		global $wpdb;
 
 		$autoload_values = perflab_aao_get_autoload_values_to_autoload();
@@ -80,7 +85,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 		$this->assertSame( $autoloaded_options_size + $test_option_string_bytes, perflab_aao_autoloaded_options_size() );
 	}
 
-	public function test_perflab_aao_autoloaded_options_disable_revert_functionality() {
+	public function test_perflab_aao_autoloaded_options_disable_revert_functionality(): void {
 
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $user_id );
@@ -157,7 +162,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	 *
 	 * @param int $bytes bytes to load in options.
 	 */
-	public static function set_autoloaded_option( $bytes = 800000 ) {
+	public static function set_autoloaded_option( int $bytes = 800000 ): void {
 		$heavy_option_string = wp_generate_password( $bytes );
 
 		// Force autoloading so that WordPress core does not override it. See https://core.trac.wordpress.org/changeset/57920.
@@ -167,7 +172,7 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 	/**
 	 * Deletes test autoloaded option.
 	 */
-	public static function delete_autoloaded_option() {
+	public static function delete_autoloaded_option(): void {
 		delete_option( self::AUTOLOADED_OPTION_KEY );
 	}
 }

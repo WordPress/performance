@@ -28,7 +28,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $mime_type     The mime type of the source.
 	 * @param string $message       An optional message to show on failure.
 	 */
-	public static function assertImageHasSource( $attachment_id, $mime_type, $message = '' ) {
+	public static function assertImageHasSource( int $attachment_id, string $mime_type, string $message = '' ): void {
 		$constraint = new ImageHasSource( $mime_type );
 		self::assertThat( $attachment_id, $constraint, $message );
 	}
@@ -42,7 +42,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $mime_type     The mime type of the source.
 	 * @param string $message       An optional message to show on failure.
 	 */
-	public static function assertImageNotHasSource( $attachment_id, $mime_type, $message = '' ) {
+	public static function assertImageNotHasSource( int $attachment_id, string $mime_type, string $message = '' ): void {
 		$constraint = new ImageHasSource( $mime_type );
 		$constraint->isNot();
 		self::assertThat( $attachment_id, $constraint, $message );
@@ -58,7 +58,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $mime_type     The mime type of the source.
 	 * @param string $message       An optional message to show on failure.
 	 */
-	public static function assertImageHasSizeSource( $attachment_id, $size_name, $mime_type, $message = '' ) {
+	public static function assertImageHasSizeSource( int $attachment_id, string $size_name, string $mime_type, string $message = '' ): void {
 		$constraint = new ImageHasSizeSource( $mime_type, $size_name );
 		self::assertThat( $attachment_id, $constraint, $message );
 	}
@@ -73,7 +73,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $mime_type     The mime type of the source.
 	 * @param string $message       An optional message to show on failure.
 	 */
-	public static function assertImageNotHasSizeSource( $attachment_id, $size_name, $mime_type, $message = '' ) {
+	public static function assertImageNotHasSizeSource( int $attachment_id, string $size_name, string $mime_type, string $message = '' ): void {
 		$constraint = new ImageHasSizeSource( $mime_type, $size_name );
 		$constraint->isNot();
 		self::assertThat( $attachment_id, $constraint, $message );
@@ -85,7 +85,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $filename The name of the filename to be asserted.
 	 * @param string $message  The Error message used to display when the assertion fails.
 	 */
-	public static function assertFileNameIsEdited( $filename, $message = '' ) {
+	public static function assertFileNameIsEdited( string $filename, string $message = '' ): void {
 		self::assertMatchesRegularExpression( '/e\d{13}/', $filename, $message );
 	}
 
@@ -95,7 +95,7 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $filename The name of the filename to be asserted.
 	 * @param string $message  The Error message used to display when the assertion fails.
 	 */
-	public static function assertFileNameIsNotEdited( $filename, $message = '' ) {
+	public static function assertFileNameIsNotEdited( string $filename, string $message = '' ): void {
 		self::assertDoesNotMatchRegularExpression( '/e\d{13}/', $filename, $message );
 	}
 
@@ -106,14 +106,14 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * @param string $hashed_size_name The current size name we are comparing against.
 	 * @param string $message          The Error message used to display when the assertion fails.
 	 */
-	public static function assertSizeNameIsHashed( $size_name, $hashed_size_name, $message = '' ) {
+	public static function assertSizeNameIsHashed( string $size_name, string $hashed_size_name, string $message = '' ): void {
 		self::assertMatchesRegularExpression( "/{$size_name}-\d{13}/", $hashed_size_name, $message );
 	}
 
 	/**
 	 * Adds filter so that for a JPEG upload both JPEG and WebP versions are generated.
 	 */
-	public function opt_in_to_jpeg_and_webp() {
+	public function opt_in_to_jpeg_and_webp(): void {
 		add_filter(
 			'webp_uploads_upload_image_mime_transforms',
 			static function ( $transforms ) {
