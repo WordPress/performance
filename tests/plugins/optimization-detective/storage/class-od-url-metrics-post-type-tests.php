@@ -329,7 +329,6 @@ class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
 	 *
 	 * @param string $url URL.
 	 *
-	 * @return OD_URL_Metric
 	 * @throws OD_Data_Validation_Exception When invalid data (but there won't be).
 	 */
 	private function get_sample_url_metric( string $url ): OD_URL_Metric {

@@ -11,6 +11,8 @@ if ( ! class_exists( 'WP_Image_Editor_Imagick' ) ) {
 	require_once ABSPATH . WPINC . '/class-wp-image-editor-imagick.php';
 }
 
+// phpcs:disable SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint -- Because the subclass needs to be compatible with the base class.
+
 /**
  * Class WP_Image_Doesnt_Support_WebP mocks a WP_Image_Editor that doesn't support WebP.
  *
@@ -21,9 +23,9 @@ class WP_Image_Doesnt_Support_WebP extends WP_Image_Editor_Imagick {
 	 * Checks to see if editor supports the mime-type specified.
 	 *
 	 * @param string $mime_type The mime type to check.
-	 * @return bool
+	 * @return bool Supports.
 	 */
-	public static function supports_mime_type( $mime_type ) {
+	public static function supports_mime_type( $mime_type ): bool {
 		return 'image/webp' !== $mime_type;
 	}
 }

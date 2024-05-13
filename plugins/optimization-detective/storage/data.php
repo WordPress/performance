@@ -137,7 +137,7 @@ function od_get_current_url(): string {
  * @return string Slug.
  */
 function od_get_url_metrics_slug( array $query_vars ): string {
-	return md5( wp_json_encode( $query_vars ) );
+	return md5( (string) wp_json_encode( $query_vars ) );
 }
 
 /**

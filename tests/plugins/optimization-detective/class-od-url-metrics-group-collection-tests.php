@@ -52,7 +52,7 @@ class OD_URL_Metrics_Group_Collection_Tests extends WP_UnitTestCase {
 				'breakpoints'   => array( 'narrow' ),
 				'sample_size'   => 3,
 				'freshness_ttl' => HOUR_IN_SECONDS,
-				'exception'     => PHP_MAJOR_VERSION >= 8 ? TypeError::class : InvalidArgumentException::class,
+				'exception'     => InvalidArgumentException::class,
 			),
 			'negative_sample_size_bad'   => array(
 				'url_metrics'   => array(),
