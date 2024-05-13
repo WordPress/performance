@@ -82,7 +82,7 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
  */
 function webp_uploads_generate_avif_webp_setting_callback(): void {
 
-	$selected       = get_option( 'perflab_modern_image_format' );
+	$selected       = webp_uploads_get_image_output_format();
 	$avif_supported = webp_uploads_mime_type_supported( 'image/avif' );
 	// Ensure WebP selected if AVIF is not supported.
 	if ( ! $avif_supported ) {
