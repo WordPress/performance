@@ -203,7 +203,7 @@ function perflab_aao_get_autoloaded_options_table(): string {
 function perflab_aao_get_disabled_autoloaded_options_table(): string {
 	$disabled_options = get_option( 'perflab_aao_disabled_options', array() );
 
-	if ( empty( $disabled_options ) ) {
+	if ( ! is_array( $disabled_options ) ) {
 		return '';
 	}
 
@@ -211,6 +211,9 @@ function perflab_aao_get_disabled_autoloaded_options_table(): string {
 	wp_prime_option_caches( $disabled_options );
 
 	foreach ( $disabled_options as $option_name ) {
+		if ( ! is_string( $option_name ) ) {
+			continue;
+		}
 		$option_value = get_option( $option_name );
 
 		if ( false !== $option_value ) {
