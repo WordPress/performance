@@ -319,25 +319,14 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 
 	$action_links = array();
 
+	$show_settings_link = false;
+
 	if ( $availability['activated'] ) {
-		$action_links[] = sprintf(
+		$action_links[]     = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
 			esc_html( _x( 'Active', 'plugin', 'default' ) )
 		);
-		$all_plugins    = array_keys( get_plugins() );
-		$plugin_slug    = $plugin_data['slug'];
-		$plugin_path    = '';
-		foreach ( $all_plugins as $path ) {
-			if ( strpos( $path, $plugin_slug ) !== false ) {
-				$plugin_path = $path;
-				break;
-			}
-		}
-		$plugin_links = apply_filters( "plugin_action_links_{$plugin_path}", array() );
-
-		if ( array_key_exists( 'settings', $plugin_links ) ) {
-			$action_links[] = $plugin_links['settings'];
-		}
+		$show_settings_link = true;
 	} elseif (
 		$availability['compatible_php'] &&
 		$availability['compatible_wp'] &&
@@ -366,6 +355,24 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
 			esc_html( $explanation )
 		);
+	}
+
+	if ( $show_settings_link ) {
+		$plugin_file = '';
+		foreach ( array_keys( get_plugins() ) as $file ) {
+			if ( strtok( $file, '/' ) === $plugin_data['slug'] ) {
+				$plugin_file = $file;
+				break;
+			}
+		}
+		if ( ! empty( $plugin_file ) ) {
+			/** This filter is documented in wp-admin/includes/class-wp-plugins-list-table.php */
+			$plugin_links = apply_filters( "plugin_action_links_{$plugin_file}", array() );
+
+			if ( array_key_exists( 'settings', $plugin_links ) ) {
+				$action_links[] = $plugin_links['settings'];
+			}
+		}
 	}
 
 	if ( current_user_can( 'install_plugins' ) ) {
