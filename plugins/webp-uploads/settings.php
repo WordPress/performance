@@ -92,7 +92,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 			<label for="perflab_modern_image_format">
 				<select name="perflab_modern_image_format" id="perflab_modern_image_format" aria-describedby="perflab_modern_image_format_description">
 					<option value="webp"<?php selected( 'webp', $selected ); ?>><?php esc_html_e( 'WebP', 'webp-uploads' ); ?></option>
-					<option value="avif"<?php selected( 'avif', $selected ); ?><?php echo $avif_supported ? '' : ' disabled'; ?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
+					<option value="avif"<?php selected( 'avif', $selected ); ?><?php disabled( ! $avif_supported ); ?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
 				</select>
 				<?php esc_html_e( 'Generate images in this format', 'webp-uploads' ); ?>
 				</label>
