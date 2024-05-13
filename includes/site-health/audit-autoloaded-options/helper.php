@@ -222,6 +222,10 @@ function perflab_aao_get_disabled_autoloaded_options_table(): string {
 		}
 	}
 
+	if ( count( $disabled_options_summary ) === 0 ) {
+		return '';
+	}
+
 	arsort( $disabled_options_summary );
 
 	$html_table = sprintf(
