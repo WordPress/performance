@@ -36,6 +36,6 @@ plsr_delete_plugin_option();
  *
  * @since 1.2.0
  */
-function plsr_delete_plugin_option() {
+function plsr_delete_plugin_option(): void {
 	delete_option( 'plsr_speculation_rules' );
 }

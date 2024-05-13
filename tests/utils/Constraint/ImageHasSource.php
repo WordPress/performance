@@ -28,7 +28,7 @@ class ImageHasSource extends Constraint {
 	 *
 	 * @param string $mime_type The requested mime type.
 	 */
-	public function __construct( $mime_type ) {
+	public function __construct( string $mime_type ) {
 		$this->is_not    = false;
 		$this->mime_type = $mime_type;
 	}
@@ -36,7 +36,7 @@ class ImageHasSource extends Constraint {
 	/**
 	 * Tells to check for absence of the mime type.
 	 */
-	public function isNot() {
+	public function isNot(): void {
 		$this->is_not = true;
 	}
 
@@ -56,11 +56,14 @@ class ImageHasSource extends Constraint {
 	/**
 	 * Evaluates the constraint for the provided attachment ID.
 	 *
-	 * @param int $attachment_id Attachment ID.
+	 * @param mixed $other Attachment ID.
 	 * @return bool TRUE if the attachment has a source for the requested mime type, otherwise FALSE.
 	 */
-	protected function matches( $attachment_id ): bool {
-		$metadata = wp_get_attachment_metadata( $attachment_id );
+	protected function matches( $other ): bool {
+		if ( ! is_int( $other ) ) {
+			return false;
+		}
+		$metadata = wp_get_attachment_metadata( $other );
 
 		// Fail if there is no metadata for the provided attachment ID.
 		if ( ! is_array( $metadata ) ) {
@@ -81,10 +84,10 @@ class ImageHasSource extends Constraint {
 	/**
 	 * Verifies the sources to have the requested mime type.
 	 *
-	 * @param array $sources The sources array.
+	 * @param array<string, array{ file: string, filesize: int }> $sources The sources array.
 	 * @return bool TRUE if the sources array contains the correct mime type source, otherwise FALSE.
 	 */
-	protected function verify_sources( $sources ) {
+	protected function verify_sources( array $sources ): bool {
 		// Fail if the mime type is supposed not to exist, but it is set.
 		if ( $this->is_not ) {
 			return ! isset( $sources[ $this->mime_type ] );
@@ -130,10 +133,10 @@ class ImageHasSource extends Constraint {
 	/**
 	 * Returns the description of the failure.
 	 *
-	 * @param int $attachment_id Attachment ID.
+	 * @param mixed $other Attachment ID.
 	 * @return string The description of the failure.
 	 */
-	protected function failureDescription( $attachment_id ): string {
+	protected function failureDescription( $other ): string {
 		return sprintf( 'an image %s', $this->toString() );
 	}
 }

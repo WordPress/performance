@@ -14,9 +14,9 @@ class Site_Health_Mock_Responses {
 	/**
 	 * This is the information we are adding into site_status_tests hook.
 	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	public static function return_added_test_info_site_health() {
+	public static function return_added_test_info_site_health(): array {
 		$added_tests                                  = array();
 		$added_tests['direct']['enqueued_js_assets']  = array(
 			'label' => esc_html__( 'JS assets', 'performance-lab' ),
@@ -33,10 +33,9 @@ class Site_Health_Mock_Responses {
 	 * Callback response for aea_enqueued_js_assets_test if assets are less than the threshold.
 	 *
 	 * @param int $enqueued_scripts Number of scripts enqueued.
-	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	public static function return_aea_enqueued_js_assets_test_callback_less_than_threshold( $enqueued_scripts = 1 ) {
+	public static function return_aea_enqueued_js_assets_test_callback_less_than_threshold( int $enqueued_scripts = 1 ): array {
 		$result = array(
 			'label'       => esc_html__( 'Enqueued scripts', 'performance-lab' ),
 			'status'      => 'good',
@@ -70,10 +69,9 @@ class Site_Health_Mock_Responses {
 	 * Callback response for aea_enqueued_js_assets_test if assets are more than the threshold.
 	 *
 	 * @param int $enqueued_scripts Number of scripts enqueued.
-	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	public static function return_aea_enqueued_js_assets_test_callback_more_than_threshold( $enqueued_scripts ) {
+	public static function return_aea_enqueued_js_assets_test_callback_more_than_threshold( int $enqueued_scripts ): array {
 		$result                = self::return_aea_enqueued_js_assets_test_callback_less_than_threshold();
 		$result['status']      = 'recommended';
 		$result['description'] = sprintf(
@@ -107,10 +105,9 @@ class Site_Health_Mock_Responses {
 	 * Callback response for aea_enqueued_css_assets_test if assets are less than the threshold.
 	 *
 	 * @param int $enqueued_styles Number of styles enqueued.
-	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	public static function return_aea_enqueued_css_assets_test_callback_less_than_threshold( $enqueued_styles = 1 ) {
+	public static function return_aea_enqueued_css_assets_test_callback_less_than_threshold( int $enqueued_styles = 1 ): array {
 		$result = array(
 			'label'       => esc_html__( 'Enqueued styles', 'performance-lab' ),
 			'status'      => 'good',
@@ -144,10 +141,9 @@ class Site_Health_Mock_Responses {
 	 * Callback response for aea_enqueued_css_assets_test if assets are more than the threshold.
 	 *
 	 * @param int $enqueued_styles Number of styles enqueued.
-	 *
-	 * @return array
+	 * @return array<string, mixed>
 	 */
-	public static function return_aea_enqueued_css_assets_test_callback_more_than_threshold( $enqueued_styles ) {
+	public static function return_aea_enqueued_css_assets_test_callback_more_than_threshold( int $enqueued_styles ): array {
 		$result                = self::return_aea_enqueued_css_assets_test_callback_less_than_threshold();
 		$result['status']      = 'recommended';
 		$result['description'] = sprintf(

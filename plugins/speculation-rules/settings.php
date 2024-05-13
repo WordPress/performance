@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return array<string, string> Associative array of `$mode => $label` pairs.
  */
-function plsr_get_mode_labels() {
+function plsr_get_mode_labels(): array {
 	return array(
 		'prefetch'  => _x( 'Prefetch', 'setting label', 'speculation-rules' ),
 		'prerender' => _x( 'Prerender', 'setting label', 'speculation-rules' ),
@@ -32,7 +32,7 @@ function plsr_get_mode_labels() {
  *
  * @return array<string, string> Associative array of `$eagerness => $label` pairs.
  */
-function plsr_get_eagerness_labels() {
+function plsr_get_eagerness_labels(): array {
 	return array(
 		'conservative' => _x( 'Conservative (typically on click)', 'setting label', 'speculation-rules' ),
 		'moderate'     => _x( 'Moderate (typically on hover)', 'setting label', 'speculation-rules' ),
@@ -52,7 +52,7 @@ function plsr_get_eagerness_labels() {
  *     @type string $eagerness Eagerness.
  * }
  */
-function plsr_get_setting_default() {
+function plsr_get_setting_default(): array {
 	return array(
 		'mode'      => 'prerender',
 		'eagerness' => 'moderate',
@@ -72,7 +72,7 @@ function plsr_get_setting_default() {
  *     @type string $eagerness Eagerness.
  * }
  */
-function plsr_sanitize_setting( $input ) {
+function plsr_sanitize_setting( $input ): array {
 	$default_value = plsr_get_setting_default();
 
 	if ( ! is_array( $input ) ) {
@@ -102,7 +102,7 @@ function plsr_sanitize_setting( $input ) {
  * @since 1.0.0
  * @access private
  */
-function plsr_register_setting() {
+function plsr_register_setting(): void {
 	register_setting(
 		'reading',
 		'plsr_speculation_rules',
@@ -138,11 +138,11 @@ add_action( 'init', 'plsr_register_setting' );
  * @since 1.0.0
  * @access private
  */
-function plsr_add_setting_ui() {
+function plsr_add_setting_ui(): void {
 	add_settings_section(
 		'plsr_speculation_rules',
 		__( 'Speculative Loading', 'speculation-rules' ),
-		static function () {
+		static function (): void {
 			?>
 			<p class="description">
 				<?php esc_html_e( 'This section allows you to control how URLs that your users navigate to are speculatively loaded to improve performance.', 'speculation-rules' ); ?>
@@ -196,7 +196,7 @@ add_action( 'load-options-reading.php', 'plsr_add_setting_ui' );
  *     @type string $description Optional. A description to show for the field.
  * }
  */
-function plsr_render_settings_field( array $args ) {
+function plsr_render_settings_field( array $args ): void {
 	if ( empty( $args['field'] ) || empty( $args['title'] ) ) { // Invalid.
 		return;
 	}
@@ -206,8 +206,12 @@ function plsr_render_settings_field( array $args ) {
 		return;
 	}
 
-	$value   = $option[ $args['field'] ];
-	$choices = call_user_func( "plsr_get_{$args['field']}_labels" );
+	$value    = $option[ $args['field'] ];
+	$callback = "plsr_get_{$args['field']}_labels";
+	if ( ! is_callable( $callback ) ) {
+		return;
+	}
+	$choices = call_user_func( $callback );
 
 	?>
 	<fieldset>

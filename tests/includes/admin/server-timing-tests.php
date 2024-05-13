@@ -14,7 +14,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::perflab_add_server_timing_page
 	 */
-	public function test_perflab_add_server_timing_page() {
+	public function test_perflab_add_server_timing_page(): void {
 		global $_wp_submenu_nopriv;
 
 		// Reset relevant globals and filters.
@@ -34,7 +34,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::perflab_add_server_timing_page
 	 */
-	public function test_perflab_add_server_timing_page_missing_caps() {
+	public function test_perflab_add_server_timing_page_missing_caps(): void {
 		global $_wp_submenu_nopriv;
 
 		// Reset relevant globals and filters.
@@ -50,7 +50,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->assertArrayHasKey( PERFLAB_SERVER_TIMING_SCREEN, $_wp_submenu_nopriv['tools.php'] );
 	}
 
-	public function test_perflab_load_server_timing_page() {
+	public function test_perflab_load_server_timing_page(): void {
 		global $wp_settings_sections, $wp_settings_fields;
 
 		// Reset relevant globals.
@@ -78,7 +78,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		);
 	}
 
-	public function test_perflab_render_server_timing_page() {
+	public function test_perflab_render_server_timing_page(): void {
 		ob_start();
 		perflab_render_server_timing_page();
 		$output = ob_get_clean();
@@ -87,7 +87,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->assertStringContainsString( "<input type='hidden' name='option_page' value='" . PERFLAB_SERVER_TIMING_SCREEN . "' />", $output );
 	}
 
-	public function test_perflab_render_server_timing_page_field() {
+	public function test_perflab_render_server_timing_page_field(): void {
 		$slug = 'benchmarking_actions';
 
 		ob_start();
@@ -99,7 +99,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'name="' . PERFLAB_SERVER_TIMING_SETTING . '[' . $slug . ']"', $output );
 	}
 
-	public function test_perflab_render_server_timing_page_field_empty_option() {
+	public function test_perflab_render_server_timing_page_field_empty_option(): void {
 		delete_option( PERFLAB_SERVER_TIMING_SETTING );
 
 		ob_start();
@@ -109,7 +109,7 @@ class Admin_Server_Timing_Tests extends WP_UnitTestCase {
 		$this->assertStringContainsString( '></textarea>', $output );
 	}
 
-	public function test_perflab_render_server_timing_page_field_populated_option() {
+	public function test_perflab_render_server_timing_page_field_populated_option(): void {
 		update_option(
 			PERFLAB_SERVER_TIMING_SETTING,
 			array( 'benchmarking_actions' => array( 'init', 'wp_loaded' ) )
