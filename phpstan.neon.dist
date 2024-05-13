@@ -26,13 +26,12 @@ parameters:
 	ignoreErrors:
 		-
 			# Ignore error related to PHP 8 using a GdImage but PHP 7 using a resource.
-			identifier: argument.type
+			message: '/^Parameter .+? of function .+? expects resource, GdImage\|resource given\.$/'
 			path: plugins/dominant-color-images/*.php
 
 		# The following ignored errors are all for tests. They are likely excessively strict and do not warrant being fixed.
 		-
-			# TODO: For some reason, using `identifier: argument.type` here doesn't work.
-			message: '/Parameter #\d.+given./'
+			identifier: argument.type
 			path: tests/*
 		-
 			identifier: offsetAccess.nonArray
