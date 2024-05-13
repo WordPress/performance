@@ -26,38 +26,35 @@ parameters:
 	ignoreErrors:
 		-
 			# Ignore error related to PHP 8 using a GdImage but PHP 7 using a resource.
-			message: '/^Parameter .+? of function .+? expects resource, GdImage\|resource given\.$/'
+			identifier: argument.type
 			path: plugins/dominant-color-images/*.php
 
 		# The following ignored errors are all for tests. They are likely excessively strict and do not warrant being fixed.
-		# TODO: Use error identifiers instead of messages once PHPStan 1.11 is out: <https://github.com/WordPress/performance/issues/1209>.
 		-
+			# TODO: For some reason, using `identifier: argument.type` here doesn't work.
 			message: '/Parameter #\d.+given./'
 			path: tests/*
 		-
-			message: '/Cannot use array destructuring/'
+			identifier: offsetAccess.nonArray
 			path: tests/*
 		-
-			message: '/Call to an undefined method/'
+			identifier: method.notFound
 			path: tests/*
 		-
-			message: '/Offset .+ might not exist on array/'
+			identifier: offsetAccess.notFound
 			path: tests/*
 		-
-			message: '/Part .+ of encapsed string cannot be cast to string/'
+			identifier: encapsedStringPart.nonString
 			path: tests/*
 		-
-			message: '/Possibly invalid array key type/'
+			identifier: offsetAccess.invalidOffset
 			path: tests/*
 		-
-			message: '/Static property .+ does not accept .+/'
+			identifier: assign.propertyType
 			path: tests/*
 		-
-			message: '/Cannot call method format\(\) on DateTimeImmutable\|false/'
+			identifier: method.nonObject
 			path: tests/*
 		-
-			message: '/Property .+ does not accept array.+/'
-			path: tests/*
-		-
-			message: '/Cannot cast .+ to string/'
+			identifier: cast.string
 			path: tests/*
