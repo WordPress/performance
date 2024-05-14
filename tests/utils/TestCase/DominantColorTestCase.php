@@ -100,6 +100,11 @@ abstract class DominantColorTestCase extends WP_UnitTestCase {
 				'expected_color'        => array( 'c1bbb9', 'c0bbb9', 'c0bab8', 'c3bdbd', 'bfbab8' ),
 				'expected_transparency' => false,
 			),
+			'half_opaque'   => array(
+				'image_path'            => TESTS_PLUGIN_DIR . '/tests/plugins/dominant-color-images/data/images/half-opaque.png',
+				'expected_color'        => array( '7e7e7e' ),
+				'expected_transparency' => true,
+			),
 		);
 	}
 
