@@ -9,7 +9,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	/**
 	 * Runs the routine before each test is executed.
 	 */
-	public function set_up() {
+	public function set_up(): void {
 		parent::set_up();
 
 		add_filter(
@@ -31,10 +31,9 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::plsr_get_speculation_rules
 	 */
-	public function test_plsr_get_speculation_rules() {
+	public function test_plsr_get_speculation_rules(): void {
 		$rules = plsr_get_speculation_rules();
 
-		$this->assertIsArray( $rules );
 		$this->assertArrayHasKey( 'prerender', $rules );
 		$this->assertIsArray( $rules['prerender'] );
 		foreach ( $rules['prerender'] as $entry ) {
@@ -47,7 +46,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::plsr_get_speculation_rules
 	 */
-	public function test_plsr_get_speculation_rules_href_exclude_paths() {
+	public function test_plsr_get_speculation_rules_href_exclude_paths(): void {
 		$rules              = plsr_get_speculation_rules();
 		$href_exclude_paths = $rules['prerender'][0]['where']['and'][1]['not']['href_matches'];
 
@@ -98,7 +97,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::plsr_get_speculation_rules
 	 */
-	public function test_plsr_get_speculation_rules_href_exclude_paths_with_mode() {
+	public function test_plsr_get_speculation_rules_href_exclude_paths_with_mode(): void {
 		// Add filter that adds an exclusion only if the mode is 'prerender'.
 		add_filter(
 			'plsr_speculation_rules_href_exclude_paths',
@@ -161,7 +160,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::plsr_get_speculation_rules
 	 */
-	public function test_plsr_get_speculation_rules_with_filtering_bad_keys() {
+	public function test_plsr_get_speculation_rules_with_filtering_bad_keys(): void {
 
 		add_filter(
 			'plsr_speculation_rules_href_exclude_paths',
@@ -178,16 +177,16 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		$actual = plsr_get_speculation_rules()['prerender'][0]['where']['and'][1]['not']['href_matches'];
 		$this->assertSame(
 			array(
-				0 => '/wp-login.php',
-				1 => '/wp-admin/*',
-				2 => '/*\\?*(^|&)_wpnonce=*',
-				3 => '/wp-content/uploads/*',
-				4 => '/wp-content/*',
-				5 => '/wp-content/plugins/*',
-				6 => '/wp-content/themes/stylesheet/*',
-				7 => '/wp-content/themes/template/*',
-				8 => '/unshifted/',
-				9 => '/next/',
+				0  => '/wp-login.php',
+				1  => '/wp-admin/*',
+				2  => '/*\\?*(^|&)_wpnonce=*',
+				3  => '/wp-content/uploads/*',
+				4  => '/wp-content/*',
+				5  => '/wp-content/plugins/*',
+				6  => '/wp-content/themes/stylesheet/*',
+				7  => '/wp-content/themes/template/*',
+				8  => '/unshifted/',
+				9  => '/next/',
 				10 => '/negative-one/',
 				11 => '/one-hundred/',
 				12 => '/letter-a/',
@@ -202,7 +201,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	 *
 	 * @covers ::plsr_get_speculation_rules
 	 */
-	public function test_plsr_get_speculation_rules_different_home_and_site_urls() {
+	public function test_plsr_get_speculation_rules_different_home_and_site_urls(): void {
 		add_filter(
 			'site_url',
 			static function (): string {
@@ -244,7 +243,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::plsr_get_speculation_rules
 	 */
-	public function test_plsr_get_speculation_rules_prerender() {
+	public function test_plsr_get_speculation_rules_prerender(): void {
 		$rules = plsr_get_speculation_rules();
 
 		$this->assertArrayHasKey( 'prerender', $rules );
@@ -254,7 +253,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	/**
 	 * @covers ::plsr_get_speculation_rules
 	 */
-	public function test_plsr_get_speculation_rules_prefetch() {
+	public function test_plsr_get_speculation_rules_prefetch(): void {
 		update_option( 'plsr_speculation_rules', array( 'mode' => 'prefetch' ) );
 
 		$rules = plsr_get_speculation_rules();
@@ -267,7 +266,7 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 	 * @covers ::plsr_get_speculation_rules
 	 * @dataProvider data_plsr_get_speculation_rules_with_eagerness
 	 */
-	public function test_plsr_get_speculation_rules_with_eagerness( string $eagerness ) {
+	public function test_plsr_get_speculation_rules_with_eagerness( string $eagerness ): void {
 		update_option( 'plsr_speculation_rules', array( 'eagerness' => $eagerness ) );
 
 		$rules = plsr_get_speculation_rules();
@@ -276,7 +275,8 @@ class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
 		$this->assertSame( $eagerness, $rules['prerender'][0]['eagerness'] );
 	}
 
-	public function data_plsr_get_speculation_rules_with_eagerness() {
+	/** @return array<int, string[]> */
+	public function data_plsr_get_speculation_rules_with_eagerness(): array {
 		return array(
 			array( 'conservative' ),
 			array( 'moderate' ),

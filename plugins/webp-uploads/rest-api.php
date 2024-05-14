@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param WP_Post          $post     The post object.
  * @return WP_REST_Response A new response object for the attachment with additional sources.
  */
-function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Post $post ) {
+function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Post $post ): WP_REST_Response {
 	$data = $response->get_data();
 	if ( ! isset( $data['media_details'] ) || ! is_array( $data['media_details'] ) || ! isset( $data['media_details']['sizes'] ) || ! is_array( $data['media_details']['sizes'] ) ) {
 		return $response;
@@ -49,6 +49,6 @@ function webp_uploads_update_rest_attachment( WP_REST_Response $response, WP_Pos
 		unset( $data['media_details']['sources'] );
 	}
 
-	return rest_ensure_response( $data );
+	return new WP_REST_Response( $data );
 }
 add_filter( 'rest_prepare_attachment', 'webp_uploads_update_rest_attachment', 10, 2 );

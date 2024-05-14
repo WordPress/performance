@@ -20,7 +20,7 @@ class ImageHasSizeSource extends ImageHasSource {
 	 * @param string $mime_type The requested mime type.
 	 * @param string $size The requested size.
 	 */
-	public function __construct( $mime_type, $size ) {
+	public function __construct( string $mime_type, string $size ) {
 		parent::__construct( $mime_type );
 		$this->size = $size;
 	}
@@ -42,11 +42,14 @@ class ImageHasSizeSource extends ImageHasSource {
 	/**
 	 * Evaluates the constraint for the provided attachment ID.
 	 *
-	 * @param int $attachment_id Attachment ID.
+	 * @param mixed $other Attachment ID.
 	 * @return bool TRUE if the attachment has a source with the requested mime type for the subsize, otherwise FALSE.
 	 */
-	protected function matches( $attachment_id ): bool {
-		$metadata = wp_get_attachment_metadata( $attachment_id );
+	protected function matches( $other ): bool {
+		if ( ! is_int( $other ) ) {
+			return false;
+		}
+		$metadata = wp_get_attachment_metadata( $other );
 
 		// Fail if there is no metadata for the provided attachment ID.
 		if ( ! is_array( $metadata ) ) {

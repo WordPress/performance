@@ -94,6 +94,8 @@ add_action( 'rest_api_init', 'od_register_endpoint' );
  * @since 0.1.0
  * @access private
  *
+ * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+ *
  * @param WP_REST_Request $request Request.
  * @return WP_REST_Response|WP_Error Response.
  */
@@ -128,6 +130,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	try {
 		$properties = OD_URL_Metric::get_json_schema()['properties'];
 		$url_metric = new OD_URL_Metric(
+			// @phpstan-ignore-next-line -- Array shape is validated by the constructor.
 			array_merge(
 				wp_array_slice_assoc(
 					$request->get_params(),
