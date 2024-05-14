@@ -26,6 +26,16 @@ function webp_uploads_register_media_settings_field(): void {
 			'show_in_rest' => false,
 		)
 	);
+	// Add a setting to use the picture element.
+	register_setting(
+		'media',
+		'webp_uploads_use_picture_element',
+		array(
+			'type'         => 'boolean',
+			'default'      => false,
+			'show_in_rest' => false,
+		)
+	);
 }
 add_action( 'init', 'webp_uploads_register_media_settings_field' );
 
@@ -34,7 +44,7 @@ add_action( 'init', 'webp_uploads_register_media_settings_field' );
  *
  * @since 1.0.0
  */
-function webp_uploads_add_media_settings_field(): void {
+function webp_uploads_add_media_settings_fields(): void {
 	// Add settings field.
 	add_settings_field(
 		'perflab_generate_webp_and_jpeg',
@@ -44,8 +54,18 @@ function webp_uploads_add_media_settings_field(): void {
 		is_multisite() ? 'default' : 'uploads',
 		array( 'class' => 'perflab-generate-webp-and-jpeg' )
 	);
+
+	// Add settings field.
+	add_settings_field(
+		'webp_uploads_use_picture_element',
+		__( 'Picture Element', 'webp-uploads' ),
+		'webp_uploads_use_picture_element_callback',
+		'media',
+		is_multisite() ? 'default' : 'uploads',
+		array( 'class' => 'webp-uploads-use-picture-element' )
+	);
 }
-add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
+add_action( 'admin_init', 'webp_uploads_add_media_settings_fields' );
 
 /**
  * Renders the settings field for the 'perflab_generate_webp_and_jpeg' setting.
@@ -53,40 +73,38 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_field' );
  * @since 1.0.0
  */
 function webp_uploads_generate_webp_jpeg_setting_callback(): void {
-	if ( ! is_multisite() ) {
-		?>
-			</td>
-			<td class="td-full">
-		<?php
-	}
+
 	?>
+	<tr><td colspan="2" class="td-full">
 		<label for="perflab_generate_webp_and_jpeg">
 			<input name="perflab_generate_webp_and_jpeg" type="checkbox" id="perflab_generate_webp_and_jpeg" aria-describedby="perflab_generate_webp_and_jpeg_description" value="1"<?php checked( '1', get_option( 'perflab_generate_webp_and_jpeg' ) ); ?> />
 			<?php esc_html_e( 'Generate JPEG files in addition to WebP', 'webp-uploads' ); ?>
 		</label>
 		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG in addition to WebP can improve compatibility, but will effectively double the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
+	</td></tr>
 	<?php
 }
 
 /**
- * Adds custom styles to hide specific elements in media settings.
+ * Renders the settings field for the 'webp_uploads_use_picture_element' setting.
  *
  * @since 1.0.0
  */
-function webp_uploads_media_setting_style(): void {
-	if ( is_multisite() ) {
-		return;
-	}
+function webp_uploads_use_picture_element_callback(): void {
+
+
 	?>
-	<style>
-		.form-table .perflab-generate-webp-and-jpeg th,
-		.form-table .perflab-generate-webp-and-jpeg td:not(.td-full) {
-			display: none;
-		}
-	</style>
+		<tr><td colspan="2" class="td-full">
+			<label for="webp_uploads_use_picture_element">
+			<input name="webp_uploads_use_picture_element" type="checkbox" id="webp_uploads_use_picture_element" aria-describedby="webp_uploads_use_picture_element_description" value="1"<?php checked( '1', get_option( 'webp_uploads_use_picture_element' ) ); ?> />
+			<?php esc_html_e( 'Use Picture Element', 'webp-uploads' ); ?>
+		</label>
+		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'Picture element serves AVIF or WebP with a fallback to JPEG handled by the browser automatically.', 'webp-uploads' ); ?></p>
+		</td></tr>
+
 	<?php
 }
-add_action( 'admin_head-options-media.php', 'webp_uploads_media_setting_style' );
+
 
 /**
  * Adds a settings link to the plugin's action links.

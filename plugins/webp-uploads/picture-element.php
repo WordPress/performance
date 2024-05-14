@@ -1,6 +1,6 @@
 <?php
 /**
- * Module Name: Picture Element
+ * Add Picture Element support
  * Description: Use <picture> element when image has more than one mime type.
  * Experimental: No
  *
@@ -15,7 +15,7 @@
  *
  * @param string $content The content to be filtered.
  */
-function wrap_images_in_picture_element( $content ) {
+function webp_uplaods_wrap_images_in_picture_element( $content ) {
 	$pattern = '/(<img[^>]+>)/';
 	$images  = preg_match_all( $pattern, $content, $matches );
 	if ( $images ) {
@@ -23,7 +23,7 @@ function wrap_images_in_picture_element( $content ) {
 			// Wrap WordPress images where we can extract an attachment id.
 			if ( preg_match( '/wp-image-([0-9]+)/i', $image, $class_id ) ) {
 				$attachment_id = absint( $class_id[1] );
-				$new_image     = wrap_image_in_picture( $image, $attachment_id );
+				$new_image     = webp_uploads_wrap_image_in_picture( $image, $attachment_id );
 				if ( false !== $new_image ) {
 					$content = str_replace( $image, $new_image, $content );
 				}
@@ -33,7 +33,9 @@ function wrap_images_in_picture_element( $content ) {
 
 	return $content;
 }
-add_filter( 'the_content', 'wrap_images_in_picture_element' );
+if ( webp_uploads_picture_element_enabled() ) {
+	add_filter( 'the_content', 'webp_uplaods_wrap_images_in_picture_element' );
+}
 
 /**
  * Wrap an image tag in a picture element.
@@ -45,7 +47,7 @@ add_filter( 'the_content', 'wrap_images_in_picture_element' );
  *
  * @return string The new image tag.
  */
-function wrap_image_in_picture( $image, $attachment_id ) {
+function webp_uploads_wrap_image_in_picture( $image, $attachment_id ) {
 	$image_meta              = wp_get_attachment_metadata( $attachment_id );
 	$original_file_mime_type = get_post_mime_type( $attachment_id );
 	if ( false === $original_file_mime_type ) {
@@ -123,8 +125,18 @@ function wrap_image_in_picture( $image, $attachment_id ) {
 	remove_filter( 'wp_calculate_image_srcset_meta', '__return_false' );
 
 	return sprintf(
-		'<picture>%s %s</picture>',
+		'<picture class=%s>%s %s</picture>',
+		'wp-picture-' . $attachment_id,
 		$picture_sources,
 		$original_image_without_srcset
 	);
+}
+
+/**
+ * Helper function to check if the webp_uploads_picture_element_enabled option is enabled.
+ *
+ * @since n.e.x.t
+ */
+function webp_uploads_get_picture_element_enabled() {
+	return get_option( 'webp_uploads_use_picture_element', false );
 }
