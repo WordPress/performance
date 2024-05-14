@@ -156,6 +156,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
+	// TODO: This should rather get all LCP Elements along with their minimum and maximum viewport widths.
 	$lcp_elements_by_minimum_viewport_widths = od_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
 	$all_breakpoints_have_url_metrics        = $group_collection->is_every_group_populated();
 
@@ -181,12 +182,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$common_lcp_xpath = null;
 	}
 
-	/**
-	 * Preload links.
-	 *
-	 * @var string[] $preload_links
-	 */
-	$preload_links = array();
+	$preload_links = new OD_Preload_Link_Collection();
 
 	// Walk over all tags in the document and ensure fetchpriority is set/removed, and construct preload links for image LCP elements.
 	$walker = new OD_HTML_Tag_Walker( $buffer );
@@ -261,43 +257,40 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 					continue;
 				}
 
-				$minimum_viewport_width = $minimum_viewport_widths[ $i ];
-				$maximum_viewport_width = isset( $minimum_viewport_widths[ $i + 1 ] ) ? $minimum_viewport_widths[ $i + 1 ] - 1 : null;
-				$media_features         = array( 'screen' );
-				if ( $minimum_viewport_width > 0 ) {
-					$media_features[] = sprintf( '(min-width: %dpx)', $minimum_viewport_width );
-				}
-				if ( null !== $maximum_viewport_width ) {
-					$media_features[] = sprintf( '(max-width: %dpx)', $maximum_viewport_width );
-				}
+				$minimum_viewport_width = (int) $minimum_viewport_widths[ $i ];
+				$maximum_viewport_width = isset( $minimum_viewport_widths[ $i + 1 ] ) ? (int) $minimum_viewport_widths[ $i + 1 ] - 1 : null;
 
-				$link_attributes = array();
+				$link_attributes = array(
+					'fetchpriority' => 'high',
+					'as'            => 'image',
+				);
 				if ( $is_img_tag ) {
 					$link_attributes = array_merge(
 						$link_attributes,
 						array_filter(
 							array(
-								'href'        => $walker->get_attribute( 'src' ),
-								'imagesrcset' => $walker->get_attribute( 'srcset' ),
-								'imagesizes'  => $walker->get_attribute( 'sizes' ),
-								'crossorigin' => $walker->get_attribute( 'crossorigin' ),
+								'href'        => (string) $walker->get_attribute( 'src' ),
+								'imagesrcset' => (string) $walker->get_attribute( 'srcset' ),
+								'imagesizes'  => (string) $walker->get_attribute( 'sizes' ),
 							)
 						)
 					);
+
+					$crossorigin = $walker->get_attribute( 'crossorigin' );
+					if ( $crossorigin ) {
+						$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
+					}
 				} elseif ( $background_image_url ) {
 					$link_attributes['href'] = $background_image_url;
 				}
 
-				$link_attributes['media'] = implode( ' and ', $media_features );
-
-				// Construct preload link.
-				$link_tag = '<link data-od-added-tag rel="preload" fetchpriority="high" as="image"';
-				foreach ( $link_attributes as $name => $value ) {
-					$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( (string) $value ) );
+				// TODO: The additional type checks here should not be required if we don't rely on the minimum viewport widths being the array keys above.
+				if (
+					( $minimum_viewport_width >= 0 ) &&
+					( is_null( $maximum_viewport_width ) || $maximum_viewport_width >= 1 )
+				) {
+					$preload_links->add_link( $link_attributes, $minimum_viewport_width, $maximum_viewport_width );
 				}
-				$link_tag .= ">\n";
-
-				$preload_links[] = $link_tag;
 			}
 		}
 
@@ -307,8 +300,8 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	}
 
 	// Inject any preload links at the end of the HEAD.
-	if ( $preload_links ) {
-		$walker->append_head_html( implode( '', $preload_links ) );
+	if ( count( $preload_links ) > 0 ) {
+		$walker->append_head_html( $preload_links->get_html() );
 	}
 
 	// Inject detection script.
