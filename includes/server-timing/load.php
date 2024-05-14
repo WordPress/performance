@@ -18,6 +18,8 @@ if ( defined( 'PERFLAB_DISABLE_SERVER_TIMING' ) && PERFLAB_DISABLE_SERVER_TIMING
 define( 'PERFLAB_SERVER_TIMING_SETTING', 'perflab_server_timing_settings' );
 define( 'PERFLAB_SERVER_TIMING_SCREEN', 'perflab-server-timing' );
 
+require_once __DIR__ . '/hooks.php';
+
 /**
  * Provides access the Server-Timing API.
  *
