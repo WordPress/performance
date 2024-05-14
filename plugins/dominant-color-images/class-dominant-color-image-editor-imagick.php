@@ -82,7 +82,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			for ( $x = 0; $x < $w; $x++ ) {
 				for ( $y = 0; $y < $h; $y++ ) {
 					$pixel = $this->image->getImagePixelColor( $x, $y );
-					$color = $pixel->getColor();
+					$color = $pixel->getColor( 2 );
 					if ( $color['a'] > 0 ) {
 						return true;
 					}
