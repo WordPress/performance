@@ -33,7 +33,7 @@ function perflab_rest_post_dispatch_add_server_timing( $response ) {
 	$header_value = $server_timing->get_header();
 
 	if ( $header_value ) {
-		$response->header( 'Server-Timing', $header_value );
+		$response->header( 'Server-Timing', $header_value, false );
 	}
 
 	return $response;
