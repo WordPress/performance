@@ -262,7 +262,7 @@ function perflab_install_activate_plugin_callback(): void {
 	$url = add_query_arg(
 		array(
 			'page'     => PERFLAB_SCREEN,
-			'activate' => 'true',
+			'activate' => $plugin_slug,
 		),
 		admin_url( 'options-general.php' )
 	);
@@ -330,8 +330,10 @@ function perflab_plugin_admin_notices(): void {
 	}
 
 	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$plugin_settings_link = perflab_get_plugin_settings_link( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		wp_admin_notice(
-			esc_html__( 'Feature activated.', 'performance-lab' ),
+			/* translators: %s: Settings link of the plugin */
+			sprintf( esc_html__( 'Feature activated. Review %s.', 'performance-lab' ), $plugin_settings_link ),
 			array(
 				'type'        => 'success',
 				'dismissible' => true,
@@ -374,4 +376,34 @@ JS;
 		),
 		array( 'type' => 'module' )
 	);
+}
+
+/**
+ * Callback function that returns plugin settings link.
+ *
+ * @param string $plugin_slug Plugin slug passed to generate the settings link.
+ * @return string Either the plugin settings link or empty.
+ * @since n.e.x.t
+ */
+function perflab_get_plugin_settings_link( string $plugin_slug ): string {
+	$plugin_file  = '';
+	$plugin_links = '';
+
+	foreach ( array_keys( get_plugins() ) as $file ) {
+		if ( strtok( $file, '/' ) === $plugin_slug ) {
+			$plugin_file = $file;
+			break;
+		}
+	}
+
+	if ( ! empty( $plugin_file ) ) {
+		/** This filter is documented in wp-admin/includes/class-wp-plugins-list-table.php */
+		$plugin_links = apply_filters( "plugin_action_links_{$plugin_file}", array() );
+	}
+
+	if ( array_key_exists( 'settings', $plugin_links ) ) {
+		return $plugin_links['settings'];
+	}
+
+	return '';
 }
