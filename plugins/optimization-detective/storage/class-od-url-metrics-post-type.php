@@ -154,7 +154,6 @@ class OD_URL_Metrics_Post_Type {
 						}
 
 						try {
-							// @phpstan-ignore-next-line argument.type (Invalid data will be validated in the constructor.)
 							return new OD_URL_Metric( $url_metric_data );
 						} catch ( OD_Data_Validation_Exception $e ) {
 							$trigger_warning(
