@@ -184,15 +184,21 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 	$preload_links = new OD_Preload_Link_Collection();
 
+	$is_data_url = static function ( string $url ): bool {
+		return strtolower( substr( $url, 0, 5 ) ) === 'data:';
+	};
+
 	// Walk over all tags in the document and ensure fetchpriority is set/removed, and construct preload links for image LCP elements.
 	$walker = new OD_HTML_Tag_Walker( $buffer );
 	foreach ( $walker->open_tags() as $tag_name ) {
+		$src = trim( (string) $walker->get_attribute( 'src' ) );
+
 		$is_img_tag = (
 			'IMG' === $tag_name
 			&&
-			$walker->get_attribute( 'src' )
+			$src
 			&&
-			! str_starts_with( (string) $walker->get_attribute( 'src' ), 'data:' )
+			! $is_data_url( $src )
 		);
 
 		/*
@@ -208,9 +214,9 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		if (
 			$style
 			&&
-			preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?(?<background_image>.+?)[\'"]?\s*\)/', (string) $style, $matches )
+			preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', (string) $style, $matches )
 			&&
-			! str_starts_with( $matches['background_image'], 'data:' )
+			! $is_data_url( $matches['background_image'] )
 		) {
 			$background_image_url = $matches['background_image'];
 		}
