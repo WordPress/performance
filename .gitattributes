@@ -1,3 +1,5 @@
+*.stub linguist-language=PHP
+
 /.git export-ignore
 /.github export-ignore
 /.wordpress-org export-ignore
