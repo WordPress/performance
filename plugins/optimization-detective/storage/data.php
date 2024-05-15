@@ -320,39 +320,9 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
 function od_get_lcp_elements_by_minimum_viewport_widths( OD_URL_Metrics_Group_Collection $group_collection ): array {
 	$lcp_element_by_viewport_minimum_width = array();
 	foreach ( $group_collection as $group ) {
-
-		// The following arrays all share array indices.
-		$seen_breadcrumbs   = array();
-		$breadcrumb_counts  = array();
-		$breadcrumb_element = array();
-
-		foreach ( $group as $url_metric ) {
-			foreach ( $url_metric->get_elements() as $element ) {
-				if ( ! $element['isLCP'] ) {
-					continue;
-				}
-
-				$i = array_search( $element['xpath'], $seen_breadcrumbs, true );
-				if ( false === $i ) {
-					$i                       = count( $seen_breadcrumbs );
-					$seen_breadcrumbs[ $i ]  = $element['xpath'];
-					$breadcrumb_counts[ $i ] = 0;
-				}
-
-				$breadcrumb_counts[ $i ] += 1;
-				$breadcrumb_element[ $i ] = $element;
-				break; // We found the LCP element for the URL metric, go to the next URL metric.
-			}
-		}
-
-		// Now sort by the breadcrumb counts in descending order, so the remaining first key is the most common breadcrumb.
-		if ( $seen_breadcrumbs ) {
-			arsort( $breadcrumb_counts );
-			$most_common_breadcrumb_index = key( $breadcrumb_counts );
-
-			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = $breadcrumb_element[ $most_common_breadcrumb_index ];
-		} elseif ( count( $group ) > 0 ) {
-			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = false; // No LCP image at this breakpoint. TODO: But there would be a non-image LCP element.
+		$lcp_element = $group->get_lcp_element();
+		if ( null !== $lcp_element ) {
+			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = $lcp_element;
 		}
 	}
 

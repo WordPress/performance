@@ -204,6 +204,53 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	}
 
 	/**
+	 * Gets the LCP element in the viewport group.
+	 *
+	 * @return array{xpath: string}|false|null LCP element data, false if LCP element not detected, or null if no data.
+	 */
+	public function get_lcp_element() {
+
+		// No metrics have been gathered for this group so there is no LCP element.
+		if ( count( $this->url_metrics ) === 0 ) {
+			return null;
+		}
+
+		// The following arrays all share array indices.
+		$seen_breadcrumbs   = array();
+		$breadcrumb_counts  = array();
+		$breadcrumb_element = array();
+
+		foreach ( $this->url_metrics as $url_metric ) {
+			foreach ( $url_metric->get_elements() as $element ) {
+				if ( ! $element['isLCP'] ) {
+					continue;
+				}
+
+				$i = array_search( $element['xpath'], $seen_breadcrumbs, true );
+				if ( false === $i ) {
+					$i                       = count( $seen_breadcrumbs );
+					$seen_breadcrumbs[ $i ]  = $element['xpath'];
+					$breadcrumb_counts[ $i ] = 0;
+				}
+
+				$breadcrumb_counts[ $i ] += 1;
+				$breadcrumb_element[ $i ] = $element;
+				break; // We found the LCP element for the URL metric, go to the next URL metric.
+			}
+		}
+
+		// Now sort by the breadcrumb counts in descending order, so the remaining first key is the most common breadcrumb.
+		if ( $seen_breadcrumbs ) {
+			arsort( $breadcrumb_counts );
+			$most_common_breadcrumb_index = key( $breadcrumb_counts );
+
+			return $breadcrumb_element[ $most_common_breadcrumb_index ];
+		}
+
+		return false; // No LCP image at this breakpoint. TODO: But there would be a non-image LCP element.
+	}
+
+	/**
 	 * Returns an iterator for the URL metrics in the group.
 	 *
 	 * @return ArrayIterator<int, OD_URL_Metric> ArrayIterator for OD_URL_Metric instances.
