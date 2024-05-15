@@ -158,7 +158,6 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 	// TODO: This should rather get all LCP Elements along with their minimum and maximum viewport widths.
 	$lcp_elements_by_minimum_viewport_widths = $group_collection->get_lcp_elements_by_minimum_viewport_widths();
-	$all_breakpoints_have_url_metrics        = $group_collection->is_every_group_populated();
 
 	// Capture all the XPaths for known LCP elements.
 	$lcp_element_xpaths = array();
@@ -175,7 +174,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		! in_array( null, $lcp_elements_by_minimum_viewport_widths, true )
 		&&
 		// All breakpoints have URL metrics being reported.
-		$all_breakpoints_have_url_metrics
+		$group_collection->is_every_group_populated()
 	) {
 		$common_lcp_xpath = current( $lcp_elements_by_minimum_viewport_widths )['xpath'];
 	} else {
@@ -242,7 +241,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 					$walker->set_attribute( 'data-od-removed-loading', $walker->get_attribute( 'loading' ) );
 					$walker->remove_attribute( 'loading' );
 				}
-			} elseif ( $all_breakpoints_have_url_metrics && $walker->get_attribute( 'fetchpriority' ) ) {
+			} elseif ( $walker->get_attribute( 'fetchpriority' ) && $group_collection->is_every_group_populated() ) {
 				// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
 				// continue to apply while waiting for all breakpoints to have metrics collected for them.
 				$walker->set_attribute( 'data-od-removed-fetchpriority', $walker->get_attribute( 'fetchpriority' ) );
