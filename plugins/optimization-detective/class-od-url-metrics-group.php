@@ -206,13 +206,14 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	/**
 	 * Gets the LCP element in the viewport group.
 	 *
-	 * @return array{xpath: string}|false LCP element data, false if LCP element not detected or there is no data.
+	 * @return array{xpath: string}|null LCP element data or null if not available, either because there are no URL
+	 *                                   metrics or the LCP element type is not supported.
 	 */
-	public function get_lcp_element() {
+	public function get_lcp_element(): ?array {
 
 		// No metrics have been gathered for this group so there is no LCP element.
 		if ( count( $this->url_metrics ) === 0 ) {
-			return false;
+			return null;
 		}
 
 		// The following arrays all share array indices.
@@ -247,7 +248,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 			return $breadcrumb_element[ $most_common_breadcrumb_index ];
 		}
 
-		return false; // No LCP image at this breakpoint. TODO: But there would be a non-image LCP element.
+		return null;
 	}
 
 	/**

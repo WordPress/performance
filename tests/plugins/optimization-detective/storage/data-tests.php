@@ -494,7 +494,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 				),
 				'expected_lcp_element_xpaths' => array(
 					0   => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
-					401 => false, // The (image) element is either not visible at this breakpoint or it is not LCP element.
+					401 => null, // The (image) element is either not visible at this breakpoint or it is not LCP element.
 					601 => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
 				),
 			),
@@ -507,7 +507,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 					$this->get_validated_url_metric( 700, array( 'HTML', 'BODY', 'IMG' ), false ),
 				),
 				'expected_lcp_element_xpaths' => array(
-					0 => false,
+					0 => null,
 				),
 			),
 		);
@@ -530,12 +530,12 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 
 		$lcp_element_xpaths_by_minimum_viewport_widths = array();
 		foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
-			$this->assertTrue( is_array( $lcp_element ) || false === $lcp_element );
+			$this->assertTrue( is_array( $lcp_element ) || null === $lcp_element );
 			if ( is_array( $lcp_element ) ) {
 				$this->assertIsString( $lcp_element['xpath'] );
 				$lcp_element_xpaths_by_minimum_viewport_widths[ $minimum_viewport_width ] = $lcp_element['xpath'];
 			} else {
-				$lcp_element_xpaths_by_minimum_viewport_widths[ $minimum_viewport_width ] = false;
+				$lcp_element_xpaths_by_minimum_viewport_widths[ $minimum_viewport_width ] = null;
 			}
 		}
 

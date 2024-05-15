@@ -171,8 +171,8 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		// All breakpoints share the same LCP element (or all have none at all).
 		1 === count( $lcp_elements_by_minimum_viewport_widths )
 		&&
-		// The breakpoints don't share a common lack of an LCP image.
-		! in_array( false, $lcp_elements_by_minimum_viewport_widths, true )
+		// The breakpoints don't share a common lack of a detected LCP element.
+		! in_array( null, $lcp_elements_by_minimum_viewport_widths, true )
 		&&
 		// All breakpoints have URL metrics being reported.
 		$all_breakpoints_have_url_metrics
@@ -258,7 +258,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 			$minimum_viewport_widths = array_keys( $lcp_elements_by_minimum_viewport_widths );
 			for ( $i = 0, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
 				$lcp_element = $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_widths[ $i ] ];
-				if ( false === $lcp_element || $xpath !== $lcp_element['xpath'] ) {
+				if ( null === $lcp_element || $xpath !== $lcp_element['xpath'] ) {
 					// This LCP element is not at this breakpoint, so nothing to preload.
 					continue;
 				}

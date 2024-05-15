@@ -312,43 +312,41 @@ function od_get_url_metrics_breakpoint_sample_size(): int {
  * @access private
  *
  * @param OD_URL_Metrics_Group_Collection $group_collection URL metrics group collection.
- * @return array<int, array{xpath: string}|false> LCP elements keyed by its minimum viewport width. If there is no
- *                                                supported LCP element at a breakpoint, then `false` is used. Note that
- *                                                the array shape is actually an ElementData from OD_URL_Metric but
- *                                                PHPStan does not support importing a type onto a function.
+ * @return array<int, array{xpath: string}|null> LCP elements keyed by its minimum viewport width. If there is no
+ *                                               supported LCP element at a breakpoint, then `null` is used. Note that
+ *                                               the array shape is actually an ElementData from OD_URL_Metric but
+ *                                               PHPStan does not support importing a type onto a function.
  */
 function od_get_lcp_elements_by_minimum_viewport_widths( OD_URL_Metrics_Group_Collection $group_collection ): array {
 	$lcp_element_by_viewport_minimum_width = array();
 	foreach ( $group_collection as $group ) {
-		$lcp_element = $group->get_lcp_element();
-		if ( null !== $lcp_element ) {
-			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = $lcp_element;
-		}
+		$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = $group->get_lcp_element();
 	}
 
-	// Now merge the breakpoints when there is an LCP element common between them.
-	$prev_lcp_element = null;
-	return array_filter(
-		$lcp_element_by_viewport_minimum_width,
-		static function ( $lcp_element ) use ( &$prev_lcp_element ) {
-			$include = (
-				// First element in list.
-				null === $prev_lcp_element
-				||
-				( is_array( $prev_lcp_element ) && is_array( $lcp_element )
-					?
-					// This breakpoint and previous breakpoint had LCP element, and they were not the same element.
-					$prev_lcp_element['xpath'] !== $lcp_element['xpath']
-					:
-					// This LCP element and the last LCP element were not the same. In this case, either variable may be
-					// false or an array, but both cannot be an array. If both are false, we don't want to include since
-					// it is the same. If one is an array and the other is false, then do want to include because this
-					// indicates a difference at this breakpoint.
-					$prev_lcp_element !== $lcp_element
-				)
-			);
-			$prev_lcp_element = $lcp_element;
-			return $include;
+	if ( count( $lcp_element_by_viewport_minimum_width ) === 0 ) {
+		return $lcp_element_by_viewport_minimum_width;
+	}
+
+	/**
+	 * Get comparison value.
+	 *
+	 * @param array{xpath: string}|null $lcp_element
+	 * @return string|null
+	 */
+	$get_comparison_value = static function ( ?array $lcp_element ): ?string {
+		return is_array( $lcp_element ) ? $lcp_element['xpath'] : null;
+	};
+
+	// Now combine adjacent duplicate values. This reduces the number of preload links which vary only by media attributes with consecutive viewport ranges.
+	$minimum_viewport_widths = array_keys( $lcp_element_by_viewport_minimum_width );
+	$adjacent_deduplicated   = array( $lcp_element_by_viewport_minimum_width[ $minimum_viewport_widths[0] ] );
+	$prev_comparison_value   = $get_comparison_value( $adjacent_deduplicated[0] );
+	for ( $i = 1, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
+		$this_comparison_value = $get_comparison_value( $lcp_element_by_viewport_minimum_width[ $minimum_viewport_widths[ $i ] ] );
+		if ( $prev_comparison_value !== $this_comparison_value ) {
+			$adjacent_deduplicated[ $minimum_viewport_widths[ $i ] ] = $lcp_element_by_viewport_minimum_width[ $minimum_viewport_widths[ $i ] ];
 		}
-	);
+		$prev_comparison_value = $this_comparison_value;
+	}
+	return $adjacent_deduplicated;
 }
