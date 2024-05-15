@@ -516,7 +516,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	/**
 	 * Test get_lcp_elements_by_minimum_viewport_widths().
 	 *
-	 * @covers ::od_get_lcp_elements_by_minimum_viewport_widths
+	 * @covers OD_URL_Metrics_Group_Collection::get_lcp_elements_by_minimum_viewport_widths
 	 * @dataProvider data_provider_test_get_lcp_elements_by_minimum_viewport_widths
 	 *
 	 * @param int[]              $breakpoints Breakpoints.
@@ -526,7 +526,7 @@ class OD_Storage_Data_Tests extends WP_UnitTestCase {
 	public function test_get_lcp_elements_by_minimum_viewport_widths( array $breakpoints, array $url_metrics, array $expected_lcp_element_xpaths ): void {
 		$group_collection = new OD_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, 10, HOUR_IN_SECONDS );
 
-		$lcp_elements_by_minimum_viewport_widths = od_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
+		$lcp_elements_by_minimum_viewport_widths = $group_collection->get_lcp_elements_by_minimum_viewport_widths();
 
 		$lcp_element_xpaths_by_minimum_viewport_widths = array();
 		foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {

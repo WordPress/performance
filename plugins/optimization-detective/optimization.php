@@ -157,7 +157,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
 	// TODO: This should rather get all LCP Elements along with their minimum and maximum viewport widths.
-	$lcp_elements_by_minimum_viewport_widths = od_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
+	$lcp_elements_by_minimum_viewport_widths = $group_collection->get_lcp_elements_by_minimum_viewport_widths();
 	$all_breakpoints_have_url_metrics        = $group_collection->is_every_group_populated();
 
 	// Capture all the XPaths for known LCP elements.

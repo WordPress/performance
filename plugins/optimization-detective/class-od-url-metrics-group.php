@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * URL metrics grouped by viewport according to breakpoints.
  *
  * @implements IteratorAggregate<int, OD_URL_Metric>
+ * @phpstan-import-type ElementData from OD_URL_Metric
  *
  * @since 0.1.0
  * @access private
@@ -206,8 +207,8 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	/**
 	 * Gets the LCP element in the viewport group.
 	 *
-	 * @return array{xpath: string}|null LCP element data or null if not available, either because there are no URL
-	 *                                   metrics or the LCP element type is not supported.
+	 * @return ElementData|null LCP element data or null if not available, either because there are no URL metrics or
+	 *                          the LCP element type is not supported.
 	 */
 	public function get_lcp_element(): ?array {
 
