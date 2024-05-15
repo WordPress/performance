@@ -277,7 +277,6 @@ add_action( 'admin_action_perflab_install_activate_plugin', 'perflab_install_act
  * Callback function to handle admin inline style.
  *
  * @since 3.0.0
- * @phpstan-ignore void.pure (PHPStan isn't apparently aware that this function is printing anything. See https://github.com/phpstan/phpstan/issues/11008)
  */
 function perflab_print_features_page_style(): void {
 	?>
