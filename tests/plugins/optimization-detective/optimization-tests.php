@@ -644,7 +644,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<meta charset="utf-8">
 							<title>...</title>
 							<!--</head>-->
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen">
+							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen and (max-width: 480px)">
 						</head>
 						<!--</head>-->
 						<body>
@@ -657,7 +657,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 				',
 			),
 
-			'different-lcp-elements-for-different-breakpoints' => array(
+			'different-lcp-elements-for-non-consecutive-viewport-groups-with-missing-data-for-middle-group' => array(
 				'set_up'   => function (): void {
 					OD_URL_Metrics_Post_Type::store_url_metric(
 						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
@@ -709,7 +709,7 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" media="screen and (max-width: 782px)">
+							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" media="screen and (max-width: 480px)">
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-logo.png" media="screen and (min-width: 783px)">
 						</head>
 						<body>

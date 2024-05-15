@@ -206,13 +206,13 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	/**
 	 * Gets the LCP element in the viewport group.
 	 *
-	 * @return array{xpath: string}|false|null LCP element data, false if LCP element not detected, or null if no data.
+	 * @return array{xpath: string}|false LCP element data, false if LCP element not detected or there is no data.
 	 */
 	public function get_lcp_element() {
 
 		// No metrics have been gathered for this group so there is no LCP element.
 		if ( count( $this->url_metrics ) === 0 ) {
-			return null;
+			return false;
 		}
 
 		// The following arrays all share array indices.
