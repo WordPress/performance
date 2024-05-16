@@ -329,11 +329,29 @@ function perflab_plugin_admin_notices(): void {
 		}
 	}
 
-	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	/**
+	 * Sanitizes plugin slug.
+	 *
+	 * @param string $unsanitized_plugin_slug Unsanitized plugin slug.
+	 * @return string|null Sanitized plugin slug or null if invalid.
+	 */
+	$sanitize_plugin_slug = static function ( string $unsanitized_plugin_slug ): ?string {
+		if ( in_array( $unsanitized_plugin_slug, perflab_get_standalone_plugins(), true ) ) {
+			return $unsanitized_plugin_slug;
+		} else {
+			return null;
+		}
+	};
+
+	$activated_plugin_slug = null;
+	if ( isset( $_GET['activate'] ) && is_string( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$activated_plugin_slug = $sanitize_plugin_slug( (string) wp_unslash( $_GET['activate'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	}
+
+	if ( $activated_plugin_slug ) {
 		$message = __( 'Feature activated.', 'performance-lab' );
 
-		$plugin_settings_url = perflab_get_plugin_settings_url( wp_unslash( $_GET['activate'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
+		$plugin_settings_url = perflab_get_plugin_settings_url( $activated_plugin_slug );
 		if ( $plugin_settings_url ) {
 			/* translators: %s is the settings URL */
 			$message .= ' ' . sprintf( __( 'Review <a href="%s">settings</a>.', 'performance-lab' ), esc_url( $plugin_settings_url ) );
