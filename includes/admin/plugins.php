@@ -399,10 +399,10 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 	}
 
 	if ( $availability['activated'] ) {
-		$plugin_link = perflab_get_plugin_settings_link( $plugin_data['slug'] );
-		if ( $plugin_link ) {
+		$settings_url = perflab_get_plugin_settings_url( $plugin_data['slug'] );
+		if ( $settings_url ) {
 			/* translators: %s is the settings URL */
-			$action_links[] = sprintf( __( '<a href="%s">Settings</a>', 'performance-lab' ), esc_url( $plugin_link ) );
+			$action_links[] = sprintf( '<a href="%s">%s</a>', esc_url( $settings_url ), esc_html__( 'Settings', 'performance-lab' ) );
 		}
 	}
 	?>
