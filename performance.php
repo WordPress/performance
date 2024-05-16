@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Notify the admin that the Performance Monorepo is not a plugin,
  * if they tried to install it as one.
  */
-function perflab_monorepo_is_not_a_plugin() {
+function perflab_monorepo_is_not_a_plugin(): void {
 	echo '<div class="notice notice-error"><p>';
 	printf(
 		wp_kses(

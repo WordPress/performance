@@ -69,7 +69,7 @@ if ( $plugin_name ) {
 		// Add filter to ensure the plugin's admin integration is loaded for tests.
 		tests_add_filter(
 			'plugins_loaded',
-			static function () use ( $plugin_name ) {
+			static function () use ( $plugin_name ): void {
 				require_once TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name . '/includes/admin/load.php';
 				require_once TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name . '/includes/admin/server-timing.php';
 				require_once TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name . '/includes/admin/plugins.php';
