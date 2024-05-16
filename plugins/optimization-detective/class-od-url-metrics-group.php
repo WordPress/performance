@@ -123,7 +123,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	/**
 	 * Gets the minimum possible viewport width (inclusive).
 	 *
-	 * @return int Minimum viewport width.
+	 * @return int<0, max> Minimum viewport width.
 	 */
 	public function get_minimum_viewport_width(): int {
 		return $this->minimum_viewport_width;
@@ -132,7 +132,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	/**
 	 * Gets the maximum possible viewport width (inclusive).
 	 *
-	 * @return int Minimum viewport width.
+	 * @return int<1, max> Minimum viewport width.
 	 */
 	public function get_maximum_viewport_width(): int {
 		return $this->maximum_viewport_width;

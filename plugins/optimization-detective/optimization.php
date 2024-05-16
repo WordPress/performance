@@ -156,27 +156,30 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
-	// TODO: This should rather get all LCP Elements along with their minimum and maximum viewport widths.
-	$lcp_elements_by_minimum_viewport_widths = $group_collection->get_lcp_elements_by_minimum_viewport_widths();
-
 	// Capture all the XPaths for known LCP elements.
-	$lcp_element_xpaths = array();
-	foreach ( array_filter( $lcp_elements_by_minimum_viewport_widths ) as $lcp_element ) {
-		$lcp_element_xpaths[] = $lcp_element['xpath'];
+	$groups_by_lcp_element_xpath   = array();
+	$group_has_unknown_lcp_element = false;
+	foreach ( $group_collection as $group ) {
+		$lcp_element = $group->get_lcp_element();
+		if ( null !== $lcp_element ) {
+			$groups_by_lcp_element_xpath[ $lcp_element['xpath'] ][] = $group;
+		} else {
+			$group_has_unknown_lcp_element = true;
+		}
 	}
 
 	// Prepare to set fetchpriority attribute on the image when all breakpoints have the same LCP element.
 	if (
 		// All breakpoints share the same LCP element (or all have none at all).
-		1 === count( $lcp_elements_by_minimum_viewport_widths )
+		1 === count( $groups_by_lcp_element_xpath )
 		&&
 		// The breakpoints don't share a common lack of a detected LCP element.
-		! in_array( null, $lcp_elements_by_minimum_viewport_widths, true )
+		! $group_has_unknown_lcp_element
 		&&
 		// All breakpoints have URL metrics being reported.
 		$group_collection->is_every_group_populated()
 	) {
-		$common_lcp_xpath = current( $lcp_elements_by_minimum_viewport_widths )['xpath'];
+		$common_lcp_xpath = key( $groups_by_lcp_element_xpath );
 	} else {
 		$common_lcp_xpath = null;
 	}
@@ -253,18 +256,8 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		// TODO: Conversely, if an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
 
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
-		if ( in_array( $xpath, $lcp_element_xpaths, true ) ) {
-			$minimum_viewport_widths = array_keys( $lcp_elements_by_minimum_viewport_widths );
-			for ( $i = 0, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
-				$lcp_element = $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_widths[ $i ] ];
-				if ( null === $lcp_element || $xpath !== $lcp_element['xpath'] ) {
-					// This LCP element is not at this breakpoint, so nothing to preload.
-					continue;
-				}
-
-				$minimum_viewport_width = (int) $minimum_viewport_widths[ $i ];
-				$maximum_viewport_width = isset( $minimum_viewport_widths[ $i + 1 ] ) ? (int) $minimum_viewport_widths[ $i + 1 ] - 1 : null;
-
+		if ( array_key_exists( $xpath, $groups_by_lcp_element_xpath ) ) {
+			foreach ( $groups_by_lcp_element_xpath[ $xpath ] as $group ) {
 				$link_attributes = array(
 					'fetchpriority' => 'high',
 					'as'            => 'image',
@@ -289,13 +282,11 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 					$link_attributes['href'] = $background_image_url;
 				}
 
-				// TODO: The additional type checks here should not be required if we don't rely on the minimum viewport widths being the array keys above.
-				if (
-					( $minimum_viewport_width >= 0 ) &&
-					( is_null( $maximum_viewport_width ) || $maximum_viewport_width >= 1 )
-				) {
-					$preload_links->add_link( $link_attributes, $minimum_viewport_width, $maximum_viewport_width );
-				}
+				$preload_links->add_link(
+					$link_attributes,
+					$group->get_minimum_viewport_width(),
+					$group->get_maximum_viewport_width()
+				);
 			}
 		}
 

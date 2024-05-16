@@ -14,14 +14,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Collection for preload links added to the document.
  *
+ * @phpstan-type Link array{
+ *                   attributes: LinkAttributes,
+ *                   minimum_viewport_width: int<0, max>|null,
+ *                   maximum_viewport_width: positive-int|null
+ *               }
+ *
  * @phpstan-type LinkAttributes array{
- *     href?: non-falsy-string,
- *     imagesrcset?: non-falsy-string,
- *     imagesizes?: non-falsy-string,
- *     crossorigin?: ''|'anonymous'|'use-credentials',
- *     fetchpriority?: 'high'|'low'|'auto',
- *     as: 'audio'|'document'|'embed'|'fetch'|'font'|'image'|'object'|'script'|'style'|'track'|'video'|'worker'
- * }
+ *                   href?: non-falsy-string,
+ *                   imagesrcset?: non-falsy-string,
+ *                   imagesizes?: non-falsy-string,
+ *                   crossorigin?: ''|'anonymous'|'use-credentials',
+ *                   fetchpriority?: 'high'|'low'|'auto',
+ *                   as: 'audio'|'document'|'embed'|'fetch'|'font'|'image'|'object'|'script'|'style'|'track'|'video'|'worker'
+ *               }
  *
  * @since 0.1.0
  * @access private
@@ -31,11 +37,7 @@ final class OD_Preload_Link_Collection implements Countable {
 	/**
 	 * Links.
 	 *
-	 * @var array<array{
-	 *          attributes: LinkAttributes,
-	 *          minimum_viewport_width: int<0, max>|null,
-	 *          maximum_viewport_width: positive-int|null
-	 *      }>
+	 * @var array<int, Link>
 	 */
 	private $links = array();
 
@@ -74,6 +76,67 @@ final class OD_Preload_Link_Collection implements Countable {
 	}
 
 	/**
+	 * Get adjacent-deduplicated links.
+	 *
+	 * When two links are identical except for their minimum/maximum widths which are also consecutive, then merge them
+	 * together.
+	 *
+	 * @return array<int, Link> Links with adjacent-duplicates merged together.
+	 */
+	private function get_adjacent_deduplicated_links(): array {
+		$links = $this->links;
+
+		usort(
+			$links,
+			/**
+			 * Comparator.
+			 *
+			 * @param Link $a First link.
+			 * @param Link $b Second link.
+			 * @return int Comparison result.
+			 */
+			static function ( array $a, array $b ): int {
+				return $a['minimum_viewport_width'] <=> $b['minimum_viewport_width'];
+			}
+		);
+
+		return array_reduce(
+			$links,
+			/**
+			 * Reducer.
+			 *
+			 * @param array<int, Link> $carry Carry.
+			 * @param Link $link Link.
+			 * @return non-empty-array<int, Link> Potentially-reduced links.
+			 */
+			static function ( array $carry, array $link ): array {
+				/**
+				 * Last link.
+				 *
+				 * @var Link $last_link
+				 */
+				$last_link = end( $carry );
+				if (
+					$last_link
+					&&
+					$last_link['attributes'] === $link['attributes']
+					&&
+					$last_link['maximum_viewport_width'] + 1 === $link['minimum_viewport_width']
+				) {
+					$last_link['maximum_viewport_width'] = max( $last_link['maximum_viewport_width'], $link['maximum_viewport_width'] );
+
+					// Update the last link with the new maximum viewport with.
+					$carry[ count( $carry ) - 1 ] = $last_link;
+				} else {
+					$carry[] = $link;
+				}
+				return $carry;
+			},
+			array()
+		);
+	}
+
+	/**
 	 * Gets the HTML for the link tags.
 	 *
 	 * @return string Link tags HTML.
@@ -81,12 +144,12 @@ final class OD_Preload_Link_Collection implements Countable {
 	public function get_html(): string {
 		$link_tags = array();
 
-		foreach ( $this->links as $link ) {
+		foreach ( $this->get_adjacent_deduplicated_links() as $link ) {
 			$media_features = array( 'screen' );
 			if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
 				$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
 			}
-			if ( null !== $link['maximum_viewport_width'] ) {
+			if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
 				$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
 			}
 			$link['attributes']['media'] = implode( ' and ', $media_features );

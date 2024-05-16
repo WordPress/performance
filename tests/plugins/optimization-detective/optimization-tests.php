@@ -549,9 +549,9 @@ class OD_Optimization_Tests extends WP_UnitTestCase {
 							<meta charset="utf-8">
 							<title>...</title>
 							<style>/* responsive styles to show only one div.header at a time... */</style>
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-bg.jpg" media="screen and (min-width: 601px)">
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/tablet-bg.jpg" media="screen and (min-width: 481px) and (max-width: 600px)">
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-bg.jpg" media="screen and (max-width: 480px)">
+							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/tablet-bg.jpg" media="screen and (min-width: 481px) and (max-width: 600px)">
+							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-bg.jpg" media="screen and (min-width: 601px)">
 						</head>
 						<body>
 							<div class="header desktop" style="background: red no-repeat center/80% url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>

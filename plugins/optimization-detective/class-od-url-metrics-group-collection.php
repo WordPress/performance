@@ -16,6 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @implements IteratorAggregate<int, OD_URL_Metrics_Group>
  * @phpstan-import-type ElementData from OD_URL_Metric
+ * @phpstan-type GroupLcpElement array{
+ *                                   group: OD_URL_Metrics_Group,
+ *                                   element: ElementData|null
+ *                               }
  *
  * @since 0.1.0
  * @access private
@@ -240,53 +244,6 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 			}
 		}
 		return true;
-	}
-
-	/**
-	 * Gets the LCP element for each breakpoint.
-	 *
-	 * The array keys are the minimum viewport width required for the element to be LCP. If there are URL metrics for a
-	 * given breakpoint and yet there is no supported LCP element, then the array value is `false`. (Currently only IMG is
-	 * a supported LCP element.) If there is a supported LCP element at the breakpoint, then the array value is an array
-	 * representing that element, including its breadcrumbs. If two adjoining breakpoints have the same value, then the
-	 * latter is dropped.
-	 *
-	 * @return array<int, ElementData|null> LCP elements keyed by its minimum viewport width. If there are no URL
-	 *                                      metrics collected for a given viewport group, or if the LCP element was not
-	 *                                      detected due to the element type not being supported, then null is used.
-	 */
-	public function get_lcp_elements_by_minimum_viewport_widths(): array {
-		$lcp_element_by_viewport_minimum_width = array();
-		foreach ( $this->groups as $group ) {
-			$lcp_element_by_viewport_minimum_width[ $group->get_minimum_viewport_width() ] = $group->get_lcp_element();
-		}
-
-		if ( count( $lcp_element_by_viewport_minimum_width ) === 0 ) {
-			return $lcp_element_by_viewport_minimum_width;
-		}
-
-		/**
-		 * Get comparison value.
-		 *
-		 * @param ElementData|null $lcp_element
-		 * @return string|null
-		 */
-		$get_comparison_value = static function ( ?array $lcp_element ): ?string {
-			return is_array( $lcp_element ) ? $lcp_element['xpath'] : null;
-		};
-
-		// Now combine adjacent duplicate values. This reduces the number of preload links which vary only by media attributes with consecutive viewport ranges.
-		$minimum_viewport_widths = array_keys( $lcp_element_by_viewport_minimum_width );
-		$adjacent_deduplicated   = array( $lcp_element_by_viewport_minimum_width[ $minimum_viewport_widths[0] ] );
-		$prev_comparison_value   = $get_comparison_value( $adjacent_deduplicated[0] );
-		for ( $i = 1, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
-			$this_comparison_value = $get_comparison_value( $lcp_element_by_viewport_minimum_width[ $minimum_viewport_widths[ $i ] ] );
-			if ( $prev_comparison_value !== $this_comparison_value ) {
-				$adjacent_deduplicated[ $minimum_viewport_widths[ $i ] ] = $lcp_element_by_viewport_minimum_width[ $minimum_viewport_widths[ $i ] ];
-			}
-			$prev_comparison_value = $this_comparison_value;
-		}
-		return $adjacent_deduplicated;
 	}
 
 	/**
