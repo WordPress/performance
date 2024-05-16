@@ -4,9 +4,10 @@ parameters:
 	level: 8
 	treatPhpDocTypesAsCertain: false
 	paths:
+		- plugins
+		- tests
 		- performance.php
-		- plugins/
-		- tests/
+		- plugins/performance-lab/load.php
 	bootstrapFiles:
 		- bin/phpstan/constants.php
 		- plugins/performance-lab/load.php
