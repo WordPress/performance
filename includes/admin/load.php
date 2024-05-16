@@ -333,7 +333,7 @@ function perflab_plugin_admin_notices(): void {
 		$plugin_settings_link = perflab_get_plugin_settings_link( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		wp_admin_notice(
 			/* translators: %s: Settings link of the plugin */
-			sprintf( esc_html__( 'Feature activated. Review %s.', 'performance-lab' ), $plugin_settings_link ),
+			wp_kses( sprintf( __( 'Feature activated. Review %s.', 'performance-lab' ), $plugin_settings_link ), array( 'a' => array( 'href' => array() ) ) ),
 			array(
 				'type'        => 'success',
 				'dismissible' => true,
@@ -382,12 +382,11 @@ JS;
  * Callback function that returns plugin settings link.
  *
  * @param string $plugin_slug Plugin slug passed to generate the settings link.
- * @return string Either the plugin settings link or empty.
+ * @return string|null Either the plugin settings link or null if not available.
  * @since n.e.x.t
  */
-function perflab_get_plugin_settings_link( string $plugin_slug ): string {
-	$plugin_file  = '';
-	$plugin_links = '';
+function perflab_get_plugin_settings_link( string $plugin_slug ): ?string {
+	$plugin_file = null;
 
 	foreach ( array_keys( get_plugins() ) as $file ) {
 		if ( strtok( $file, '/' ) === $plugin_slug ) {
@@ -396,14 +395,16 @@ function perflab_get_plugin_settings_link( string $plugin_slug ): string {
 		}
 	}
 
-	if ( ! empty( $plugin_file ) ) {
-		/** This filter is documented in wp-admin/includes/class-wp-plugins-list-table.php */
-		$plugin_links = apply_filters( "plugin_action_links_{$plugin_file}", array() );
+	if ( null === $plugin_file ) {
+		return null;
 	}
 
-	if ( array_key_exists( 'settings', $plugin_links ) ) {
+	/** This filter is documented in wp-admin/includes/class-wp-plugins-list-table.php */
+	$plugin_links = apply_filters( "plugin_action_links_{$plugin_file}", array() );
+
+	if ( is_array( $plugin_links ) && array_key_exists( 'settings', $plugin_links ) ) {
 		return $plugin_links['settings'];
 	}
 
-	return '';
+	return null;
 }
