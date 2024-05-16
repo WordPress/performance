@@ -330,10 +330,27 @@ function perflab_plugin_admin_notices(): void {
 	}
 
 	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$message = __( 'Feature activated.', 'performance-lab' );
+
 		$plugin_settings_link = perflab_get_plugin_settings_link( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( $plugin_settings_link ) {
+			$p = new WP_HTML_Tag_Processor( $plugin_settings_link );
+			if ( ! empty( $p->next_tag( array( 'tag_name' => 'A' ) ) ) && ! empty( $p->get_attribute( 'href' ) ) && ! is_bool( $p->get_attribute( 'href' ) ) ) {
+				/* translators: %s is the settings URL */
+				$message .= ' ' . sprintf( __( 'Review <a href="%s">settings</a>.', 'performance-lab' ), esc_url( $p->get_attribute( 'href' ) ) );
+			}
+		}
+
 		wp_admin_notice(
-			/* translators: %s: Settings link of the plugin */
-			wp_kses( sprintf( __( 'Feature activated. Review %s.', 'performance-lab' ), $plugin_settings_link ), array( 'a' => array( 'href' => array() ) ) ),
+			wp_kses(
+				$message,
+				array(
+					'a' => array(
+						'href' => array(),
+					),
+				)
+			),
 			array(
 				'type'        => 'success',
 				'dismissible' => true,
@@ -381,9 +398,10 @@ JS;
 /**
  * Callback function that returns plugin settings link.
  *
+ * @since n.e.x.t
+ *
  * @param string $plugin_slug Plugin slug passed to generate the settings link.
  * @return string|null Either the plugin settings link or null if not available.
- * @since n.e.x.t
  */
 function perflab_get_plugin_settings_link( string $plugin_slug ): ?string {
 	$plugin_file = null;
