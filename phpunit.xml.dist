@@ -8,9 +8,7 @@
 	>
 	<testsuites>
 		<testsuite name="performance-lab">
-			<directory suffix=".php">./tests</directory>
-			<exclude>./tests/utils</exclude>
-			<exclude>./tests/plugins</exclude>
+			<directory suffix=".php">./tests/plugins/performance-lab</directory>
 		</testsuite>
 		<testsuite name="auto-sizes">
 			<directory suffix=".php">./tests/plugins/auto-sizes</directory>
