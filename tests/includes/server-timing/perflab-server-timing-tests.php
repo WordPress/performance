@@ -114,7 +114,6 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
 		$this->server_timing->register_metric(
 			'metric-without-measure-callback',
-			// @phpstan-ignore-next-line -- Ignored to test incorrect usage.
 			array( 'access_cap' => 'exist' )
 		);
 
@@ -126,7 +125,6 @@ class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
 
 		$this->server_timing->register_metric(
 			'metric-without-access-cap',
-			// @phpstan-ignore-next-line -- Ignored to test incorrect usage.
 			array( 'measure_callback' => '__return_null' )
 		);
 
