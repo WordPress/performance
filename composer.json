@@ -15,6 +15,10 @@
     "php": "^7.2 || ^8.0",
     "ext-json": "*"
   },
+  "suggest": {
+    "ext-imagick": "Required to use Modern Image Format's Dominant_Color_Image_Editor_Imagick class",
+    "ext-gd": "Required to use Modern Image Format's Dominant_Color_Image_Editor_GD class"
+  },
   "require-dev": {
     "phpcompatibility/php-compatibility": "^9.3",
     "phpstan/extension-installer": "^1.3",
