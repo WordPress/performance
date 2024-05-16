@@ -232,6 +232,22 @@ function perflab_enqueue_features_page_scripts(): void {
 }
 
 /**
+ * Sanitizes a plugin slug.
+ *
+ * @since 3.1.0
+ *
+ * @param mixed $unsanitized_plugin_slug Unsanitized plugin slug.
+ * @return string|null Validated and sanitized slug or else null.
+ */
+function perflab_sanitize_plugin_slug( $unsanitized_plugin_slug ): ?string {
+	if ( in_array( $unsanitized_plugin_slug, perflab_get_standalone_plugins(), true ) ) {
+		return $unsanitized_plugin_slug;
+	} else {
+		return null;
+	}
+}
+
+/**
  * Callback for handling installation/activation of plugin.
  *
  * @since 3.0.0
@@ -248,8 +264,8 @@ function perflab_install_activate_plugin_callback(): void {
 		wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
 	}
 
-	$plugin_slug = sanitize_text_field( wp_unslash( $_GET['slug'] ) );
-	if ( ! in_array( $plugin_slug, perflab_get_standalone_plugins(), true ) ) {
+	$plugin_slug = perflab_sanitize_plugin_slug( wp_unslash( $_GET['slug'] ) );
+	if ( ! $plugin_slug ) {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 
@@ -330,23 +346,9 @@ function perflab_plugin_admin_notices(): void {
 		}
 	}
 
-	/**
-	 * Sanitizes plugin slug.
-	 *
-	 * @param string $unsanitized_plugin_slug Unsanitized plugin slug.
-	 * @return string|null Sanitized plugin slug or null if invalid.
-	 */
-	$sanitize_plugin_slug = static function ( string $unsanitized_plugin_slug ): ?string {
-		if ( in_array( $unsanitized_plugin_slug, perflab_get_standalone_plugins(), true ) ) {
-			return $unsanitized_plugin_slug;
-		} else {
-			return null;
-		}
-	};
-
 	$activated_plugin_slug = null;
-	if ( isset( $_GET['activate'] ) && is_string( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$activated_plugin_slug = $sanitize_plugin_slug( (string) wp_unslash( $_GET['activate'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$activated_plugin_slug = perflab_sanitize_plugin_slug( wp_unslash( $_GET['activate'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	if ( $activated_plugin_slug ) {

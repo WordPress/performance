@@ -51,6 +51,9 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		remove_all_filters( 'plugin_action_links_' . plugin_basename( PERFLAB_MAIN_FILE ) );
 	}
 
+	/**
+	 * @covers ::perflab_render_settings_page
+	 */
 	public function test_perflab_render_settings_page(): void {
 		ob_start();
 		perflab_render_settings_page();
@@ -59,6 +62,9 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 		$this->assertStringNotContainsString( "<input type='hidden' name='option_page' value='" . PERFLAB_SCREEN . "' />", $output );
 	}
 
+	/**
+	 * @covers ::perflab_plugin_action_links_add_settings
+	 */
 	public function test_perflab_plugin_action_links_add_settings(): void {
 		$original_links = array(
 			'deactivate' => '<a href="#">Deactivate</a>',
@@ -72,5 +78,41 @@ class Admin_Load_Tests extends WP_UnitTestCase {
 
 		$actual_links = perflab_plugin_action_links_add_settings( $original_links );
 		$this->assertSame( $expected_links, $actual_links );
+	}
+
+	/**
+	 * @return array<int, mixed>
+	 */
+	public function data_provider_to_test_perflab_sanitize_plugin_slug(): array {
+		return array(
+			array(
+				'webp-uploads',
+				'webp-uploads',
+			),
+			array(
+				'akismet',
+				null,
+			),
+			array(
+				1,
+				null,
+			),
+			array(
+				array( 'speculative-loading' ),
+				null,
+			),
+		);
+	}
+
+	/**
+	 * @covers ::perflab_sanitize_plugin_slug
+	 *
+	 * @dataProvider data_provider_to_test_perflab_sanitize_plugin_slug
+	 *
+	 * @param mixed       $slug     Slug.
+	 * @param string|null $expected Expected.
+	 */
+	public function test_perflab_sanitize_plugin_slug( $slug, ?string $expected ): void {
+		$this->assertSame( $expected, perflab_sanitize_plugin_slug( $slug ) );
 	}
 }
