@@ -287,7 +287,8 @@ function perflab_print_features_page_style(): void {
 		margin-left: 0;
 	}
 	.plugin-card-top {
-		min-height: auto;
+		/* This is required to ensure the Settings link does not extend below the bottom of a plugin card on a wide screen */
+		min-height: 90px;
 	}
 	.plugin-card .perflab-plugin-experimental {
 		font-size: 80%;
