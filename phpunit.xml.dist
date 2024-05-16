@@ -1,10 +1,11 @@
 <phpunit
-	bootstrap="tests/bootstrap.php"
-	backupGlobals="false"
 	colors="true"
+	backupGlobals="false"
+	bootstrap="tests/bootstrap.php"
 	convertErrorsToExceptions="true"
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
+	defaultTestSuite="performance-lab"
 	>
 	<testsuites>
 		<testsuite name="performance-lab">
