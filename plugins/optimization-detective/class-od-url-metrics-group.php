@@ -62,6 +62,13 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	private $freshness_ttl;
 
 	/**
+	 * Cached LCP element data.
+	 *
+	 * @var ElementData|null|false
+	 */
+	private $cached_lcp_element = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @throws InvalidArgumentException If arguments are valid.
@@ -165,6 +172,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 			);
 		}
 
+		$this->clear_caches();
 		$this->url_metrics[] = $url_metric;
 
 		// If we have too many URL metrics now, remove the oldest ones up to the sample size.
@@ -205,12 +213,24 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	}
 
 	/**
+	 * Clear caches.
+	 */
+	private function clear_caches(): void {
+		$this->cached_lcp_element = false;
+	}
+
+	/**
 	 * Gets the LCP element in the viewport group.
 	 *
 	 * @return ElementData|null LCP element data or null if not available, either because there are no URL metrics or
 	 *                          the LCP element type is not supported.
 	 */
 	public function get_lcp_element(): ?array {
+
+		// Return pre-computed value if available.
+		if ( false !== $this->cached_lcp_element ) {
+			return $this->cached_lcp_element;
+		}
 
 		// No metrics have been gathered for this group so there is no LCP element.
 		if ( count( $this->url_metrics ) === 0 ) {
@@ -246,10 +266,14 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 			arsort( $breadcrumb_counts );
 			$most_common_breadcrumb_index = key( $breadcrumb_counts );
 
-			return $breadcrumb_element[ $most_common_breadcrumb_index ];
+			$lcp_element = $breadcrumb_element[ $most_common_breadcrumb_index ];
+		} else {
+			$lcp_element = null;
 		}
 
-		return null;
+		$this->cached_lcp_element = $lcp_element;
+
+		return $lcp_element;
 	}
 
 	/**
