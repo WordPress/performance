@@ -232,6 +232,22 @@ function perflab_enqueue_features_page_scripts(): void {
 }
 
 /**
+ * Sanitizes a plugin slug.
+ *
+ * @since 3.1.0
+ *
+ * @param mixed $unsanitized_plugin_slug Unsanitized plugin slug.
+ * @return string|null Validated and sanitized slug or else null.
+ */
+function perflab_sanitize_plugin_slug( $unsanitized_plugin_slug ): ?string {
+	if ( in_array( $unsanitized_plugin_slug, perflab_get_standalone_plugins(), true ) ) {
+		return $unsanitized_plugin_slug;
+	} else {
+		return null;
+	}
+}
+
+/**
  * Callback for handling installation/activation of plugin.
  *
  * @since 3.0.0
@@ -248,8 +264,8 @@ function perflab_install_activate_plugin_callback(): void {
 		wp_die( esc_html__( 'Missing required parameter.', 'performance-lab' ) );
 	}
 
-	$plugin_slug = sanitize_text_field( wp_unslash( $_GET['slug'] ) );
-	if ( ! in_array( $plugin_slug, perflab_get_standalone_plugins(), true ) ) {
+	$plugin_slug = perflab_sanitize_plugin_slug( wp_unslash( $_GET['slug'] ) );
+	if ( ! $plugin_slug ) {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 
@@ -262,7 +278,7 @@ function perflab_install_activate_plugin_callback(): void {
 	$url = add_query_arg(
 		array(
 			'page'     => PERFLAB_SCREEN,
-			'activate' => 'true',
+			'activate' => $plugin_slug,
 		),
 		admin_url( 'options-general.php' )
 	);
@@ -287,11 +303,30 @@ function perflab_print_features_page_style(): void {
 		margin-left: 0;
 	}
 	.plugin-card-top {
-		min-height: auto;
+		/* This is required to ensure the Settings link does not extend below the bottom of a plugin card on a wide screen. */
+		min-height: 90px;
+	}
+	@media screen and (max-width: 782px) {
+		.plugin-card-top {
+			/* Same reason as above, but now the button is taller to make it easier to tap on touch screens. */
+			min-height: 110px;
+		}
 	}
 	.plugin-card .perflab-plugin-experimental {
 		font-size: 80%;
 		font-weight: normal;
+	}
+
+	@media screen and (max-width: 1100px) and (min-width: 782px), (max-width: 480px) {
+		.plugin-card .action-links {
+			margin-left: auto;
+		}
+		/* Make sure the settings link gets spaced out from the Learn more link. */
+		.plugin-card .plugin-action-buttons > li:nth-child(3) {
+			margin-left: 2ex;
+			border-left: solid 1px;
+			padding-left: 2ex;
+		}
 	}
 </style>
 	<?php
@@ -329,9 +364,29 @@ function perflab_plugin_admin_notices(): void {
 		}
 	}
 
+	$activated_plugin_slug = null;
 	if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$activated_plugin_slug = perflab_sanitize_plugin_slug( wp_unslash( $_GET['activate'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	}
+
+	if ( $activated_plugin_slug ) {
+		$message = __( 'Feature activated.', 'performance-lab' );
+
+		$plugin_settings_url = perflab_get_plugin_settings_url( $activated_plugin_slug );
+		if ( $plugin_settings_url ) {
+			/* translators: %s is the settings URL */
+			$message .= ' ' . sprintf( __( 'Review <a href="%s">settings</a>.', 'performance-lab' ), esc_url( $plugin_settings_url ) );
+		}
+
 		wp_admin_notice(
-			esc_html__( 'Feature activated.', 'performance-lab' ),
+			wp_kses(
+				$message,
+				array(
+					'a' => array(
+						'href' => array(),
+					),
+				)
+			),
 			array(
 				'type'        => 'success',
 				'dismissible' => true,
@@ -374,4 +429,45 @@ JS;
 		),
 		array( 'type' => 'module' )
 	);
+}
+
+/**
+ * Gets the URL to the plugin settings screen if one exists.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $plugin_slug Plugin slug passed to generate the settings link.
+ * @return string|null Either the plugin settings URL or null if not available.
+ */
+function perflab_get_plugin_settings_url( string $plugin_slug ): ?string {
+	$plugin_file = null;
+
+	foreach ( array_keys( get_plugins() ) as $file ) {
+		if ( strtok( $file, '/' ) === $plugin_slug ) {
+			$plugin_file = $file;
+			break;
+		}
+	}
+
+	if ( null === $plugin_file ) {
+		return null;
+	}
+
+	/** This filter is documented in wp-admin/includes/class-wp-plugins-list-table.php */
+	$plugin_links = apply_filters( "plugin_action_links_{$plugin_file}", array() );
+
+	if ( ! is_array( $plugin_links ) || ! array_key_exists( 'settings', $plugin_links ) ) {
+		return null;
+	}
+
+	$p = new WP_HTML_Tag_Processor( $plugin_links['settings'] );
+	if ( ! $p->next_tag( array( 'tag_name' => 'A' ) ) ) {
+		return null;
+	}
+	$href = $p->get_attribute( 'href' );
+	if ( $href && is_string( $href ) ) {
+		return $href;
+	}
+
+	return null;
 }

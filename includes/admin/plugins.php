@@ -318,8 +318,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 	/** This filter is documented in wp-admin/includes/class-wp-plugin-install-list-table.php */
 	$description = apply_filters( 'plugin_install_description', $description, $plugin_data );
 
-	$availability = perflab_get_plugin_availability( $plugin_data );
-
+	$availability   = perflab_get_plugin_availability( $plugin_data );
 	$compatible_php = $availability['compatible_php'];
 	$compatible_wp  = $availability['compatible_wp'];
 
@@ -397,6 +396,14 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 			esc_attr( $aria_label ),
 			esc_html__( 'Visit plugin site', 'default' )
 		);
+	}
+
+	if ( $availability['activated'] ) {
+		$settings_url = perflab_get_plugin_settings_url( $plugin_data['slug'] );
+		if ( $settings_url ) {
+			/* translators: %s is the settings URL */
+			$action_links[] = sprintf( '<a href="%s">%s</a>', esc_url( $settings_url ), esc_html__( 'Settings', 'performance-lab' ) );
+		}
 	}
 	?>
 	<div class="plugin-card plugin-card-<?php echo sanitize_html_class( $plugin_data['slug'] ); ?>">
