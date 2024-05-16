@@ -335,11 +335,8 @@ function perflab_plugin_admin_notices(): void {
 		$plugin_settings_link = perflab_get_plugin_settings_link( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( $plugin_settings_link ) {
-			$p = new WP_HTML_Tag_Processor( $plugin_settings_link );
-			if ( ! empty( $p->next_tag( array( 'tag_name' => 'A' ) ) ) && ! empty( $p->get_attribute( 'href' ) ) && ! is_bool( $p->get_attribute( 'href' ) ) ) {
-				/* translators: %s is the settings URL */
-				$message .= ' ' . sprintf( __( 'Review <a href="%s">settings</a>.', 'performance-lab' ), esc_url( $p->get_attribute( 'href' ) ) );
-			}
+			/* translators: %s is the settings URL */
+			$message .= ' ' . sprintf( __( 'Review <a href="%s">settings</a>.', 'performance-lab' ), esc_url( $plugin_settings_link ) );
 		}
 
 		wp_admin_notice(
@@ -420,8 +417,17 @@ function perflab_get_plugin_settings_link( string $plugin_slug ): ?string {
 	/** This filter is documented in wp-admin/includes/class-wp-plugins-list-table.php */
 	$plugin_links = apply_filters( "plugin_action_links_{$plugin_file}", array() );
 
-	if ( is_array( $plugin_links ) && array_key_exists( 'settings', $plugin_links ) ) {
-		return $plugin_links['settings'];
+	if ( ! is_array( $plugin_links ) || ! array_key_exists( 'settings', $plugin_links ) ) {
+		return null;
+	}
+
+	$p = new WP_HTML_Tag_Processor( $plugin_links['settings'] );
+	if ( ! $p->next_tag( array( 'tag_name' => 'A' ) ) ) {
+		return null;
+	}
+	$href = $p->get_attribute( 'href' );
+	if ( $href && is_string( $href ) ) {
+		return $href;
 	}
 
 	return null;

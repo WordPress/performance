@@ -324,14 +324,11 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 
 	$action_links = array();
 
-	$show_settings_link = false;
-
 	if ( $availability['activated'] ) {
-		$action_links[]     = sprintf(
+		$action_links[] = sprintf(
 			'<button type="button" class="button button-disabled" disabled="disabled">%s</button>',
 			esc_html( _x( 'Active', 'plugin', 'default' ) )
 		);
-		$show_settings_link = true;
 	} elseif (
 		$availability['compatible_php'] &&
 		$availability['compatible_wp'] &&
@@ -401,10 +398,11 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 		);
 	}
 
-	if ( $show_settings_link ) {
+	if ( $availability['activated'] ) {
 		$plugin_link = perflab_get_plugin_settings_link( $plugin_data['slug'] );
-		if ( ! empty( $plugin_link ) ) {
-			$action_links[] = $plugin_link;
+		if ( $plugin_link ) {
+			/* translators: %s is the settings URL */
+			$action_links[] = sprintf( __( '<a href="%s">Settings</a>', 'performance-lab' ), esc_url( $plugin_link ) );
 		}
 	}
 	?>
