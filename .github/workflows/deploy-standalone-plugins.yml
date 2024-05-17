@@ -69,6 +69,9 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
+      - name: Check plugin versions
+        run: npm run versions -- --plugin=${{ matrix.plugin }}
+
       - name: Build plugin
         run: npm run build:plugin:${{ matrix.plugin }}
 
