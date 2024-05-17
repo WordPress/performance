@@ -139,17 +139,10 @@ function getIssueType( issue ) {
  * @param {string}                          milestone    Milestone title.
  * @param {IssuesListForRepoResponseItem[]} pullRequests List of pull requests.
  *
- * @return {string} The formatted changelog string.
+ * @return {string} The formatted changelog string (without the heading).
  */
 function formatChangelog( milestone, pullRequests ) {
-	const version = milestone.match( /\d+\.\d+(\.\d+)?(-[A-Za-z0-9.]+)?$/ );
-	if ( ! version ) {
-		throw new Error(
-			`The ${ milestone } milestone does not end with a version number.`
-		);
-	}
-
-	let changelog = '= ' + version[ 0 ] + ' =\n\n';
+	let changelog = '';
 
 	// Group PRs by type.
 	const typeGroups = groupBy( pullRequests, getIssueType );

@@ -34,16 +34,14 @@ exports.options = [
  * @return {Promise<string>} Consistent version.
  */
 async function checkPluginDirectory( pluginDirectory ) {
-	const readmeContents = fs.readFileSync(
-		path.resolve( pluginDirectory, 'readme.txt' ),
-		'utf-8'
-	);
+	const readmeFilePath = path.resolve( pluginDirectory, 'readme.txt' );
+	const readmeContents = fs.readFileSync( readmeFilePath, 'utf-8' );
 
 	const stableTagVersionMatches = readmeContents.match(
 		/^Stable tag:\s*(\d+\.\d+\.\d+)$/m
 	);
 	if ( ! stableTagVersionMatches ) {
-		throw new Error( 'Unable to locate stable tag in readme.txt' );
+		throw new Error( `Unable to locate stable tag in ${ readmeFilePath }` );
 	}
 	const stableTagVersion = stableTagVersionMatches[ 1 ];
 
