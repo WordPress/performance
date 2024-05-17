@@ -62,6 +62,35 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 3.1.0 =
 
+**Enhancements**
+
+* Add Progress indicator when activating a feature. ([1190](https://github.com/WordPress/performance/pull/1190))
+* Add plugin dependency support for activating performance features. ([1184](https://github.com/WordPress/performance/pull/1184))
+* Add support for AVIF image in site health. ([1177](https://github.com/WordPress/performance/pull/1177))
+* Added server timing to REST API response. ([1206](https://github.com/WordPress/performance/pull/1206))
+* Bump minimum PHP requirement to 7.2. ([1130](https://github.com/WordPress/performance/pull/1130))
+* Fix function stub docs. ([1204](https://github.com/WordPress/performance/pull/1204))
+* Improve static analysis in Performance Lab plugin files. ([1188](https://github.com/WordPress/performance/pull/1188))
+* Refine logic in perflab_install_activate_plugin_callback() to rely only on validated slug. ([1170](https://github.com/WordPress/performance/pull/1170))
+* Update PHPStan to 1.11.1. ([1213](https://github.com/WordPress/performance/pull/1213))
+* Updated code to display plugin settings link in the features screen and fix responsive layout for mobile. ([1208](https://github.com/WordPress/performance/pull/1208))
+
+**Bug Fixes**
+
+* Avoid passing incomplete data to perflab_render_plugin_card() and show error when plugin directory API query fails. ([1175](https://github.com/WordPress/performance/pull/1175))
+* Do not show on the settings page and dismiss the pointer. ([1147](https://github.com/WordPress/performance/pull/1147))
+* Fix `WordPress.DB.DirectDatabaseQuery.DirectQuery` warning for Autoloaded Options Health Check. ([1179](https://github.com/WordPress/performance/pull/1179))
+* Update PHPStan level to 1. ([1198](https://github.com/WordPress/performance/pull/1198))
+* Update PHPStan level to 2. ([1199](https://github.com/WordPress/performance/pull/1199))
+* Update PHPStan level to 3. ([1200](https://github.com/WordPress/performance/pull/1200))
+* Update PHPStan level to 4. ([1201](https://github.com/WordPress/performance/pull/1201))
+* Update PHPStan level to 5. ([1202](https://github.com/WordPress/performance/pull/1202))
+* Update PHPStan level to 6. ([1203](https://github.com/WordPress/performance/pull/1203))
+* Update PHPStan level to 7. ([1205](https://github.com/WordPress/performance/pull/1205))
+* Update PHPStan level to 8. ([1210](https://github.com/WordPress/performance/pull/1210))
+
+**Other**
+
 * Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
 
 = 3.0.0 =

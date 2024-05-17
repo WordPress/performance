@@ -51,6 +51,12 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 0.1.2 =
 
+**Bug Fixes**
+
+* Hide post embed iframes with visibility:hidden instead of clipping. ([1192](https://github.com/WordPress/performance/pull/1192))
+
+**Other**
+
 * Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
 
 = 0.1.1 =

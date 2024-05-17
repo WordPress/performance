@@ -62,6 +62,16 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 = 1.1.1 =
 
+**Enhancements**
+
+* Prepend Settings link in webp-uploads. ([1146](https://github.com/WordPress/performance/pull/1146))
+
+**Documentation**
+
+* Updated inline documentation. ([1160](https://github.com/WordPress/performance/pull/1160))
+
+**Other**
+
 * Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
 
 = 1.1.0 =
