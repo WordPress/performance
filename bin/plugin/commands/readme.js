@@ -48,6 +48,7 @@ exports.handler = async ( opt ) => {
  *
  * @param {string} readmeFile Readme file path.
  * @param {string} changelog  Changelog in markdown.
+ * @return {string} Success status message.
  */
 function updateReadmeChangelog( readmeFile, changelog ) {
 	const fileContent = fs.readFileSync( readmeFile, 'utf-8' );
