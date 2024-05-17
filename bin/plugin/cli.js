@@ -43,6 +43,10 @@ const {
 	handler: sinceHandler,
 	options: sinceOptions,
 } = require( './commands/since' );
+const {
+	handler: versionsHandler,
+	options: versionsOptions,
+} = require( './commands/versions' );
 
 withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 	.alias( 'changelog' )
@@ -58,5 +62,10 @@ withOptions( program.command( 'plugin-readme' ), readmeOptions )
 	.alias( 'readme' )
 	.description( 'Updates the readme.txt file' )
 	.action( catchException( readmeHandler ) );
+
+withOptions( program.command( 'verify-version-consistency' ), versionsOptions )
+	.alias( 'versions' )
+	.description( 'Verifies consistency of versions in plugins' )
+	.action( catchException( versionsHandler ) );
 
 program.parse( process.argv );

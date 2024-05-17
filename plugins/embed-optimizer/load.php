@@ -5,7 +5,7 @@
  * Description: Optimizes the performance of embeds by lazy-loading iframes and scripts.
  * Requires at least: 6.4
  * Requires PHP: 7.2
- * Version: 0.1.1
+ * Version: 0.1.2
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'EMBED_OPTIMIZER_VERSION', '0.1.1' );
+define( 'EMBED_OPTIMIZER_VERSION', '0.1.2' );
 
 // Load in the Embed Optimizer plugin hooks.
 require_once __DIR__ . '/hooks.php';
