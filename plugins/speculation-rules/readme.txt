@@ -118,11 +118,8 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 **Enhancements**
 
-* Facilitate embedding Speculative Loading in other plugins/themes. ([1159](https://github.com/WordPress/performance/pull/1159))
 * Prevent speculatively loading links to the uploads, content, plugins, template, or stylesheet directories. ([1167](https://github.com/WordPress/performance/pull/1167))
-
-**Other**
-
+* Facilitate embedding Speculative Loading in other plugins/themes. ([1159](https://github.com/WordPress/performance/pull/1159))
 * Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
 
 = 1.2.2 =

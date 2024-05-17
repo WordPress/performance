@@ -144,17 +144,13 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 * Add optimization_detective_disabled query var to disable behavior. ([1193](https://github.com/WordPress/performance/pull/1193))
 * Facilitate embedding Optimization Detective in other plugins/themes. ([1185](https://github.com/WordPress/performance/pull/1185))
 * Use PHP 7.2 features in Optimization Detective. ([1162](https://github.com/WordPress/performance/pull/1162))
+* Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
 
 **Bug Fixes**
 
 * Avoid _doing_it_wrong() for Server-Timing in Optimization Detective when output buffering is not enabled. ([1194](https://github.com/WordPress/performance/pull/1194))
 * Ensure only HTML responses are optimized. ([1189](https://github.com/WordPress/performance/pull/1189))
-* Fix PHPStan issues in Optimization Detective. ([1195](https://github.com/WordPress/performance/pull/1195))
 * Fix XPath indices to be 1-based instead of 0-based. ([1191](https://github.com/WordPress/performance/pull/1191))
-
-**Other**
-
-* Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
 
 = 0.1.1 =
 
