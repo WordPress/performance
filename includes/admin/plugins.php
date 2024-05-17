@@ -159,7 +159,7 @@ function perflab_render_plugins_ui(): void {
 /**
  * Checks if a given plugin is available.
  *
- * @since n.e.x.t
+ * @since 3.1.0
  * @see perflab_install_and_activate_plugin()
  *
  * @param array{name: string, slug: string, short_description: string, requires_php: string|false, requires: string|false, requires_plugins: string[], version: string} $plugin_data                     Plugin data from the WordPress.org API.
@@ -226,7 +226,7 @@ function perflab_get_plugin_availability( array $plugin_data, array &$processed_
  *
  * Dependencies are recursively installed and activated as well.
  *
- * @since n.e.x.t
+ * @since 3.1.0
  * @see perflab_get_plugin_availability()
  *
  * @param string   $plugin_slug       Plugin slug.

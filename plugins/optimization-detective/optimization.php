@@ -181,7 +181,7 @@ function od_construct_preload_links( array $lcp_elements_by_minimum_viewport_wid
 /**
  * Determines whether the response has an HTML Content-Type.
  *
- * @since n.e.x.t
+ * @since 0.2.0
  * @private
  *
  * @return bool Whether Content-Type is HTML.

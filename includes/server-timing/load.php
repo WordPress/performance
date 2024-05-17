@@ -54,7 +54,7 @@ function perflab_server_timing(): Perflab_Server_Timing {
 /**
  * Initializes the Server-Timing API.
  *
- * @since n.e.x.t
+ * @since 3.1.0
  */
 function perflab_server_timing_init(): void {
 	perflab_server_timing();
@@ -148,7 +148,7 @@ function perflab_wrap_server_timing( callable $callback, string $metric_slug, st
 /**
  * Gets default value for server timing setting.
  *
- * @since n.e.x.t
+ * @since 3.1.0
  *
  * @return array{benchmarking_actions: string[], benchmarking_filters: string[], output_buffering: bool} Default value.
  */
