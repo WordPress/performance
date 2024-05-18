@@ -10,34 +10,20 @@ const fs = require( 'fs' );
 const { log, formats } = require( '../lib/logger' );
 const config = require( '../config' );
 const { getChangelog } = require( './changelog' );
+const { plugins } = require( '../../../plugins.json' );
 
 /**
  * @typedef WPReadmeCommandOptions
  *
- * @property {string=} milestone Optional milestone title, to update the changelog in the readme.
- * @property {string=} path      Optional path to the readme.txt file to update. If omitted, it will be detected via --milestone.
- * @property {string=} token     Optional personal GitHub access token, only relevant for changelog updates.
- */
-
-/**
- * @typedef WPReadmeSettings
- *
- * @property {string}  owner     GitHub repository owner.
- * @property {string}  repo      GitHub repository name.
- * @property {string=} milestone Optional milestone title, to update the changelog in the readme.
- * @property {string=} path      Optional path to the readme.txt file to update.
- * @property {string=} token     Optional personal GitHub access token, only relevant for changelog updates.
+ * @property {string=} plugin Optional plugin slug to update one a single plugin's readme. If omitted, all plugins are updated.
+ * @property {string=} token  Optional personal GitHub access token.
  */
 
 exports.options = [
 	{
-		argname: '-m, --milestone <milestone>',
-		description: 'Milestone title, to update the changelog',
-	},
-	{
-		argname: '-p, --path <path>',
+		argname: '-p, --plugin <plugin>',
 		description:
-			'Path to the readme.txt file to update; if omitted, it will be detected via --milestone',
+			'The plugin slug to update; if omitted, all plugins are updated',
 	},
 	{
 		argname: '-t, --token <token>',
@@ -52,112 +38,136 @@ exports.options = [
  */
 exports.handler = async ( opt ) => {
 	await updateReadme( {
-		owner: config.githubRepositoryOwner,
-		repo: config.githubRepositoryName,
-		milestone: opt.milestone,
-		path: opt.path,
+		plugin: opt.plugin,
 		token: opt.token,
 	} );
 };
 
 /**
- * Detects the path to the readme.txt file to update based on the milestone title.
+ * Updates the `readme.txt` file with the given changelog.
  *
- * @param {string} milestone Milestone title.
- *
- * @return {string} Detected readme.txt path.
+ * @param {string} readmeFile Readme file path.
+ * @param {string} changelog  Changelog in markdown.
+ * @return {string} Success status message.
  */
-function detectReadmePath( milestone ) {
-	const slug = milestone.match( /^([a-z0-9-]+) / );
-	if ( ! slug ) {
-		throw new Error(
-			`The ${ milestone } milestone does not start with a valid plugin slug.`
-		);
+function updateReadmeChangelog( readmeFile, changelog ) {
+	const fileContent = fs.readFileSync( readmeFile, 'utf-8' );
+
+	const stableTagVersionMatches = fileContent.match(
+		/^Stable tag:\s*(\d+\.\d+\.\d+)$/m
+	);
+	if ( ! stableTagVersionMatches ) {
+		throw new Error( `Unable to locate stable tag in ${ readmeFile }` );
+	}
+	const stableTagVersion = stableTagVersionMatches[ 1 ];
+
+	const regex = new RegExp(
+		`(== Changelog ==\n+)(= ${ stableTagVersion } =\n+)([^=]+)`
+	);
+
+	const versionHeading = `= ${ stableTagVersion } =\n\n`;
+	const normalizedChangelog = changelog.trimEnd() + '\n';
+
+	let status = '';
+
+	// Try to merge the new changelog with the existing changelog.
+	let newContent = fileContent.replace(
+		regex,
+		( match, changelogHeading, _versionHeading, existingChangelog ) => {
+			status =
+				'Merged existing changelog with the new changelog in an Other section.';
+			return `${ changelogHeading }${ _versionHeading }${ normalizedChangelog }\n**Other**\n\n${ existingChangelog }`;
+		}
+	);
+
+	// No replacement was done, so we need to insert a new section.
+	if ( newContent === fileContent ) {
+		newContent = fileContent.replace( /(== Changelog ==\n+)/, ( match ) => {
+			status = 'Added new changelog section.';
+			return `${ match }${ versionHeading }${ normalizedChangelog }\n`;
+		} );
 	}
 
-	if ( 'performance-lab' === slug[ 1 ] ) {
-		return 'readme.txt';
+	if ( newContent === fileContent ) {
+		throw new Error( 'Failed to insert changelog into readme.' );
 	}
 
-	if ( ! fs.existsSync( path.join( '.', `plugins/${ slug[ 1 ] }` ) ) ) {
-		throw new Error( `Unknown plugin with slug '${ slug[ 1 ] }'` );
-	}
+	fs.writeFileSync( readmeFile, newContent );
 
-	return `plugins/${ slug[ 1 ] }/readme.txt`;
+	return status;
 }
 
 /**
- * Updates the `readme.txt` file with the given changelog.
+ * Gets the stable tag from a readme.
  *
- * @param {string}           changelog Changelog in markdown, with trailing newline.
- * @param {WPReadmeSettings} settings  Readme settings.
+ * @param {string} readmeFilePath Readme file path.
+ * @return {string} Stable tag.
  */
-function updateReadmeChangelog( changelog, settings ) {
-	// Detect the version number to replace it in readme changelog, if already present.
-	const version = settings.milestone.match(
-		/\d+\.\d+(\.\d+)?(-[A-Za-z0-9.]+)?$/
+function getStableTag( readmeFilePath ) {
+	const readmeContents = fs.readFileSync( readmeFilePath, 'utf-8' );
+
+	const stableTagVersionMatches = readmeContents.match(
+		/^Stable tag:\s*(\d+\.\d+\.\d+)$/m
 	);
-	if ( ! version ) {
-		throw new Error(
-			`The ${ settings.milestone } milestone does not end with a version number.`
-		);
+	if ( ! stableTagVersionMatches ) {
+		throw new Error( `Unable to locate stable tag in ${ readmeFilePath }` );
 	}
-
-	const regex = new RegExp( `= ${ version[ 0 ] } =[^=]+` );
-
-	const readmeFile = path.join( '.', settings.path );
-	const fileContent = fs.readFileSync( readmeFile, 'utf8' );
-
-	let newContent;
-	if ( fileContent.match( regex ) ) {
-		newContent = fileContent
-			.replace( regex, changelog )
-			.trim()
-			.concat( '\n' );
-	} else {
-		newContent = fileContent.replace(
-			/(== Changelog ==\n\n)/,
-			( match ) => {
-				return `${ match }${ changelog }`;
-			}
-		);
-	}
-	fs.writeFileSync( readmeFile, newContent );
+	return stableTagVersionMatches[ 1 ];
 }
 
 /**
  * Updates the `readme.txt` file with a specific release changelog.
  *
- * @param {WPReadmeSettings} settings Readme settings.
+ * @param {WPReadmeCommandOptions} settings
  */
 async function updateReadme( settings ) {
-	if ( settings.milestone ) {
-		log(
-			formats.title(
-				`\n💃Updating readme.txt changelog for milestone "${ settings.milestone }"\n\n`
-			)
-		);
+	const pluginRoot = path.resolve( __dirname, '../../../' );
 
+	const allPluginSlugs = [
+		'performance-lab', // TODO: Remove as of <https://github.com/WordPress/performance/pull/1182>.
+		...plugins,
+	];
+	if ( settings.plugin && ! allPluginSlugs.includes( settings.plugin ) ) {
+		throw new Error( `Unrecognized plugin: ${ settings.plugin }` );
+	}
+
+	const pluginSlugs = [];
+	if ( settings.plugin ) {
+		pluginSlugs.push( settings.plugin );
+	} else {
+		pluginSlugs.push( ...allPluginSlugs );
+	}
+
+	for ( const pluginSlug of pluginSlugs ) {
 		try {
-			if ( ! settings.path ) {
-				settings.path = detectReadmePath( settings.milestone );
-			}
+			const pluginDirectory =
+				'performance-lab' === pluginSlug // TODO: Remove this condition as of <https://github.com/WordPress/performance/pull/1182>.
+					? pluginRoot
+					: path.resolve( pluginRoot, 'plugins', pluginSlug );
 
+			const readmeFilePath = path.resolve(
+				pluginDirectory,
+				'readme.txt'
+			);
+			const stableTag = getStableTag( readmeFilePath );
 			const changelog = await getChangelog( {
-				owner: settings.owner,
-				repo: settings.repo,
-				milestone: settings.milestone,
+				owner: config.githubRepositoryOwner,
+				repo: config.githubRepositoryName,
+				milestone: `${ pluginSlug } ${ stableTag }`,
 				token: settings.token,
 			} );
-			updateReadmeChangelog( changelog, settings );
+			const status = updateReadmeChangelog( readmeFilePath, changelog );
+			log(
+				formats.success(
+					`💃 ${ pluginSlug } successfully updated for version ${ stableTag }: ${ status }`
+				)
+			);
 		} catch ( error ) {
-			if ( error instanceof Error ) {
-				log( formats.error( error.stack ) );
-				return;
-			}
+			log(
+				formats.error(
+					`${ pluginSlug } failed to update: ${ error.message }`
+				)
+			);
 		}
-		log(
-			formats.success( `\n💃${ settings.path } successfully updated\n\n` )
-		);
 	}
 }
