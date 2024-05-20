@@ -4,7 +4,7 @@
  *
  * @package performance-lab
  *
- * @since n.e.x.t
+ * @since 3.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Adds server timing to REST API response.
  *
- * @since n.e.x.t
+ * @since 3.1.0
  *
  * @param WP_REST_Response|WP_Error $response Result to send to the client. Usually a `WP_REST_Response`.
  * @return WP_REST_Response|WP_Error Filtered response.
