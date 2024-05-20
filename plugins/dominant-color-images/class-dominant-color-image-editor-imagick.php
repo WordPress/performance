@@ -32,7 +32,6 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 		}
 
 		try {
-			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			// The logic here is resize the image to 1x1 pixel, then get the color of that pixel.
 			$this->image->resizeImage( 1, 1, Imagick::FILTER_LANCZOS, 1 );
 			$pixel = $this->image->getImagePixelColor( 0, 0 );
