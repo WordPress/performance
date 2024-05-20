@@ -141,7 +141,15 @@ exports.handler = async ( opt ) => {
 		const slug = path.basename( pluginDirectory );
 		try {
 			const version = await checkPluginDirectory( pluginDirectory );
-			log( formats.success( `✅ ${ slug }: ${ version } ` ) );
+			if ( version.includes( '-' ) ) {
+				log(
+					formats.warning(
+						`⚠ ${ slug }: ${ version } (pre-release identifier is present)`
+					)
+				);
+			} else {
+				log( formats.success( `✅ ${ slug }: ${ version } ` ) );
+			}
 		} catch ( error ) {
 			errorCount++;
 			log( formats.error( `❌ ${ slug }: ${ error.message }` ) );
