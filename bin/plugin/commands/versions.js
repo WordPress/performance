@@ -97,12 +97,16 @@ async function checkPluginDirectory( pluginDirectory ) {
 
 	if ( ! allVersions.every( ( version ) => version === stableTagVersion ) ) {
 		throw new Error(
-			`Version mismatch: ${ JSON.stringify( {
-				latestChangelogVersion,
-				headerVersion,
-				stableTagVersion,
-				phpLiteralVersion,
-			} ) }`
+			`Version mismatch: ${ JSON.stringify(
+				{
+					latestChangelogVersion,
+					headerVersion,
+					stableTagVersion,
+					phpLiteralVersion,
+				},
+				null,
+				4
+			) }`
 		);
 	}
 
