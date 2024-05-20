@@ -51,7 +51,14 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 0.1.2 =
 
+**Enhancements**
+
 * Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
+* Bump minimum PHP requirement to 7.2. ([1130](https://github.com/WordPress/performance/pull/1130))
+
+**Bug Fixes**
+
+* Hide post embed iframes with visibility:hidden instead of clipping. ([1192](https://github.com/WordPress/performance/pull/1192))
 
 = 0.1.1 =
 
