@@ -54,6 +54,7 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 **Enhancements**
 
 * Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
+* Bump minimum PHP requirement to 7.2. ([1130](https://github.com/WordPress/performance/pull/1130))
 
 **Bug Fixes**
 
