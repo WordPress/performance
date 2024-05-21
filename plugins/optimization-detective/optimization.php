@@ -137,6 +137,8 @@ function od_is_response_html_content_type(): bool {
  *
  * @param string $buffer Template output buffer.
  * @return string Filtered template output buffer.
+ *
+ * @throws Exception Except it won't really.
  */
 function od_optimize_template_output_buffer( string $buffer ): string {
 	if ( ! od_is_response_html_content_type() ) {

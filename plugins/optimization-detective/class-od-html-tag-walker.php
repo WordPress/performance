@@ -180,6 +180,13 @@ final class OD_HTML_Tag_Walker {
 	private $current_xpath = null;
 
 	/**
+	 * Whether walking has started.
+	 *
+	 * @var bool
+	 */
+	private $did_start_walking = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $html HTML to process.
@@ -197,8 +204,15 @@ final class OD_HTML_Tag_Walker {
 	 * @since 0.1.0
 	 *
 	 * @return Generator<string> Tag name of current open tag.
+	 *
+	 * @throws Exception When walking has already started.
 	 */
 	public function open_tags(): Generator {
+		if ( $this->did_start_walking ) {
+			throw new Exception( esc_html__( 'Open tags may only be iterated over once per instance.', 'optimization-detective' ) );
+		}
+		$this->did_start_walking = true;
+
 		$p = $this->processor;
 
 		/*

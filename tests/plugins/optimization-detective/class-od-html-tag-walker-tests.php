@@ -326,6 +326,24 @@ class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test open_tags() throwing exception when called more than once.
+	 *
+	 * @covers ::open_tags
+	 */
+	public function test_open_tags_throwing_exception(): void {
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Open tags may only be iterated over once per instance.' );
+		$p = new OD_HTML_Tag_Walker( '<html><body><p>Hello world</p></body></html>' );
+
+		$this->assertSame(
+			array( 'HTML', 'BODY', 'P' ),
+			iterator_to_array( $p->open_tags() )
+		);
+
+		iterator_to_array( $p->open_tags() );
+	}
+
+	/**
 	 * Test append_head_html().
 	 *
 	 * @covers ::append_head_html
