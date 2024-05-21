@@ -15,7 +15,7 @@
  *
  * @param string $content The content to be filtered.
  */
-function webp_uplaods_wrap_images_in_picture_element( $content ) {
+function webp_uplaods_wrap_images_in_picture_element( $content ): string {
 	$pattern = '/(<img[^>]+>)/';
 	$images  = preg_match_all( $pattern, $content, $matches );
 	if ( $images ) {
@@ -50,8 +50,8 @@ if ( webp_uploads_picture_element_enabled() ) {
 function webp_uploads_wrap_image_in_picture( $image, $attachment_id ) {
 	$image_meta              = wp_get_attachment_metadata( $attachment_id );
 	$original_file_mime_type = get_post_mime_type( $attachment_id );
-	if ( false === $original_file_mime_type ) {
-		return false;
+	if ( false === $original_file_mime_type || ! isset( $image_meta['sizes'] ) ) {
+		return $image;
 	}
 
 	// Collect all of the sub size image mime types.
@@ -70,8 +70,8 @@ function webp_uploads_wrap_image_in_picture( $image, $attachment_id ) {
 	 * The original image will be used as the fallback.
 	 *
 	 * @since n.e.x.t
-	 * @param string[] mime types than can be used.
-	 * @param int $attachment_id The id of the image being evaluated.
+	 * @param array<string> $mime_types    Mime types than can be used.
+	 * @param int           $attachment_id The id of the image being evaluated.
 	 */
 	$enabled_mime_types = apply_filters(
 		'wp_picture_element_mime_types',
@@ -90,23 +90,25 @@ function webp_uploads_wrap_image_in_picture( $image, $attachment_id ) {
 
 	// No eligible mime types.
 	if ( ! $mime_types ) {
-		return false;
+		return $image;
 	}
 
 	// If the original mime types is the only one available, no picture element is needed.
 	if ( 1 === count( $mime_types ) && $mime_types[0] === $original_file_mime_type ) {
-		return false;
+		return $image;
 	}
 
 	// Add each mime type to the picture's sources.
-	$picture_sources              = '';
-	$image                        = wp_get_attachment_image_src( $attachment_id, 'full', false );
-	list( $src, $width, $height ) = $image;
+	$picture_sources = '';
+	$image_src       = wp_get_attachment_image_src( $attachment_id, 'full', false );
+	if ( ! $image_src ) {
+		return $image;
+	}
+	list( $src, $width, $height ) = $image_src;
 	$size_array                   = array( absint( $width ), absint( $height ) );
 
 	foreach ( $mime_types as $image_mime_type ) {
 		// @TODO limit by mime type when multiple mime types are supported.
-		// @TODO use sizes array, not medium.
 		$sizes            = wp_calculate_image_sizes( $size_array, $src, $image_meta, $attachment_id );
 		$image_srcset     = wp_get_attachment_image_srcset( $attachment_id, $size_array, $image_meta );
 		$picture_sources .= sprintf(
@@ -118,8 +120,12 @@ function webp_uploads_wrap_image_in_picture( $image, $attachment_id ) {
 	}
 
 	// Fall back to the original image without a srcset.
-	$original_sizes = array( $image[1], $image[2] );
+	$original_sizes = array( $image_src[1], $image_src[2] );
 	$original_image = wp_get_original_image_url( $attachment_id );
+	// Fail gracefully if the original image is not found.
+	if ( ! $original_image ) {
+		return $image;
+	}
 	add_filter( 'wp_calculate_image_srcset_meta', '__return_false' );
 	$original_image_without_srcset = wp_get_attachment_image( $attachment_id, $original_sizes, false, array( 'src' => $original_image ) );
 	remove_filter( 'wp_calculate_image_srcset_meta', '__return_false' );
@@ -133,10 +139,12 @@ function webp_uploads_wrap_image_in_picture( $image, $attachment_id ) {
 }
 
 /**
- * Helper function to check if the webp_uploads_picture_element_enabled option is enabled.
+ * Helper function to check if the `webp_uploads_picture_element_enabled` option is enabled.
  *
  * @since n.e.x.t
+ *
+ * @return bool True if the option is enabled, false otherwise.
  */
-function webp_uploads_get_picture_element_enabled() {
+function webp_uploads_picture_element_enabled(): bool {
 	return get_option( 'webp_uploads_use_picture_element', false );
 }
