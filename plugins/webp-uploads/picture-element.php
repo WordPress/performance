@@ -15,7 +15,7 @@
  *
  * @param string $content The content to be filtered.
  */
-function webp_uplaods_wrap_images_in_picture_element( $content ): string {
+function webp_uploads_wrap_images_in_picture_element( $content ): string {
 	$pattern = '/(<img[^>]+>)/';
 	$images  = preg_match_all( $pattern, $content, $matches );
 	if ( $images ) {
@@ -34,7 +34,7 @@ function webp_uplaods_wrap_images_in_picture_element( $content ): string {
 	return $content;
 }
 if ( webp_uploads_picture_element_enabled() ) {
-	add_filter( 'the_content', 'webp_uplaods_wrap_images_in_picture_element' );
+	add_filter( 'the_content', 'webp_uploads_wrap_images_in_picture_element' );
 }
 
 /**
