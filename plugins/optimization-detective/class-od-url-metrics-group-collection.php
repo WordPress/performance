@@ -15,11 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Collection of URL groups according to the breakpoints.
  *
  * @implements IteratorAggregate<int, OD_URL_Metrics_Group>
- * @phpstan-import-type ElementData from OD_URL_Metric
- * @phpstan-type GroupLcpElement array{
- *                                   group: OD_URL_Metrics_Group,
- *                                   element: ElementData|null
- *                               }
  *
  * @since 0.1.0
  * @access private
