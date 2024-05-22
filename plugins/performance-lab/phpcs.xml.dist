@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="WPP-PerfLab">
+<ruleset name="WPP-PerformanceLab">
 	<description>WordPress Coding Standards for the Performance Lab Plugin</description>
 	<rule ref="bin/phpcs/phpcs.ruleset.xml"/>
 

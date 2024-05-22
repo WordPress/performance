@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="WPP-Performance">
+<ruleset name="WPP">
 	<description>WordPress Coding Standards for the Performance Features.</description>
 	<rule ref="bin/phpcs/phpcs.ruleset.xml"/>
 
