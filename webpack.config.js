@@ -21,10 +21,16 @@ const {
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
+const defaultBuildConfig = {
+	entry: {},
+	output: {
+		path: path.resolve( __dirname, 'build' ),
+	},
+};
+
 const sharedConfig = {
 	...defaultConfig,
-	entry: {},
-	output: {},
+	...defaultBuildConfig,
 };
 
 // Store plugins that require build process.
@@ -38,10 +44,7 @@ const pluginsWithBuild = [ 'optimization-detective' ];
  */
 const optimizationDetective = ( env ) => {
 	if ( env.plugin && env.plugin !== 'optimization-detective' ) {
-		return {
-			entry: {},
-			output: {},
-		};
+		return defaultBuildConfig;
 	}
 
 	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
@@ -87,20 +90,14 @@ const optimizationDetective = ( env ) => {
  */
 const buildPlugin = ( env ) => {
 	if ( ! env.plugin ) {
-		return {
-			entry: {},
-			output: {},
-		};
+		return defaultBuildConfig;
 	}
 
 	if ( ! standalonePlugins.includes( env.plugin ) ) {
 		// eslint-disable-next-line no-console
 		console.error( `Plugin "${ env.plugin }" not found. Aborting.` );
 
-		return {
-			entry: {},
-			output: {},
-		};
+		return defaultBuildConfig;
 	}
 
 	const buildDir = path.resolve( __dirname, 'build' );
