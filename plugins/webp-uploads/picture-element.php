@@ -15,7 +15,7 @@
  *
  * @param string $content The content to be filtered.
  */
-function webp_uploads_wrap_images_in_picture_element( $content ): string {
+function webp_uploads_wrap_images_in_picture_element( string $content ): string {
 	$pattern = '/(<img[^>]+>)/';
 	$images  = preg_match_all( $pattern, $content, $matches );
 	if ( $images ) {
@@ -24,7 +24,7 @@ function webp_uploads_wrap_images_in_picture_element( $content ): string {
 			if ( preg_match( '/wp-image-([0-9]+)/i', $image, $class_id ) ) {
 				$attachment_id = absint( $class_id[1] );
 				$new_image     = webp_uploads_wrap_image_in_picture( $image, $attachment_id );
-				if ( false !== $new_image ) {
+				if ( $image !== $new_image ) {
 					$content = str_replace( $image, $new_image, $content );
 				}
 			}
@@ -47,7 +47,7 @@ if ( webp_uploads_picture_element_enabled() ) {
  *
  * @return string The new image tag.
  */
-function webp_uploads_wrap_image_in_picture( $image, $attachment_id ) {
+function webp_uploads_wrap_image_in_picture( string $image, int $attachment_id ): string {
 	$image_meta              = wp_get_attachment_metadata( $attachment_id );
 	$original_file_mime_type = get_post_mime_type( $attachment_id );
 	if ( false === $original_file_mime_type || ! isset( $image_meta['sizes'] ) ) {
@@ -83,7 +83,7 @@ function webp_uploads_wrap_image_in_picture( $image, $attachment_id ) {
 
 	$mime_types = array_filter(
 		$sub_size_mime_types,
-		function( $mime_type ) use ( $enabled_mime_types ) {
+		static function ( $mime_type ) use ( $enabled_mime_types ) {
 			return in_array( $mime_type, $enabled_mime_types, true );
 		}
 	);

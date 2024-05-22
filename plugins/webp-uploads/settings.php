@@ -92,8 +92,6 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
  * @since 1.0.0
  */
 function webp_uploads_use_picture_element_callback(): void {
-
-
 	?>
 		<tr><td colspan="2" class="td-full">
 			<label for="webp_uploads_use_picture_element">
@@ -102,7 +100,6 @@ function webp_uploads_use_picture_element_callback(): void {
 		</label>
 		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'Picture element serves AVIF or WebP with a fallback to JPEG handled by the browser automatically.', 'webp-uploads' ); ?></p>
 		</td></tr>
-
 	<?php
 }
 
