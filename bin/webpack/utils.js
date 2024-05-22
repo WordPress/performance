@@ -1,7 +1,7 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
 const { chdir } = require( 'process' );
-const { execSync } = require( 'child_process' );
+const { spawnSync } = require( 'child_process' );
 
 /**
  * Return plugin root path.
@@ -109,7 +109,18 @@ const assetDataTransformer = ( content, absoluteFrom ) => {
  */
 const createPluginZip = ( pluginPath, pluginName ) => {
 	chdir( pluginPath );
-	execSync( 'zip', [ '-r', `${ pluginName }.zip`, pluginName ] );
+
+	const proc = spawnSync( 'zip', [
+		'-r',
+		`${ pluginName }.zip`,
+		pluginName,
+	] );
+
+	if ( 0 !== proc.status ) {
+		throw new Error(
+			proc.error || proc.stderr.toString() || proc.stdout.toString()
+		);
+	}
 };
 
 module.exports = {
