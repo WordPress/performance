@@ -1,5 +1,6 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
+const { execSync } = require( 'child_process' );
 
 /**
  * Return plugin root path.
@@ -97,10 +98,24 @@ const assetDataTransformer = ( content, absoluteFrom ) => {
 	return `<?php return array('dependencies' => array(), 'version' => '${ version }');`;
 };
 
+/**
+ * Create plugins zip file using `zip` command.
+ *
+ * @param {string} pluginPath The path where the plugin build is located.
+ * @param {string} pluginName The name of the plugin.
+ *
+ * @return {void}
+ */
+const createPluginZip = ( pluginPath, pluginName ) => {
+	const command = `cd ${ pluginPath } && zip -r ${ pluginName }.zip ${ pluginName }`;
+	execSync( command );
+};
+
 module.exports = {
 	getPluginRootPath,
 	deleteFileOrDirectory,
 	getPluginVersion,
 	generateBuildManifest,
 	assetDataTransformer,
+	createPluginZip,
 };

@@ -10,6 +10,7 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
  */
 const { plugins: standalonePlugins } = require( './plugins.json' );
 const {
+	createPluginZip,
 	assetDataTransformer,
 	deleteFileOrDirectory,
 	generateBuildManifest,
@@ -102,7 +103,8 @@ const buildPlugin = ( env ) => {
 		};
 	}
 
-	const to = path.resolve( __dirname, 'build', env.plugin );
+	const buildDir = path.resolve( __dirname, 'build' );
+	const to = path.resolve( buildDir, env.plugin );
 	const from = path.resolve( __dirname, 'plugins', env.plugin );
 	const dependencies = pluginsWithBuild.includes( env.plugin )
 		? [ `${ env.plugin }` ]
@@ -138,6 +140,11 @@ const buildPlugin = ( env ) => {
 					// After emit, generate build manifest.
 					compiler.hooks.afterEmit.tap( 'AfterEmitPlugin', () => {
 						generateBuildManifest( env.plugin, from );
+
+						// If zip flag is passed, create a zip file.
+						if ( env.zip ) {
+							createPluginZip( buildDir, env.plugin );
+						}
 					} );
 				},
 			},
