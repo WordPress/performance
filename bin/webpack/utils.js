@@ -1,5 +1,6 @@
 const fs = require( 'fs' );
 const path = require( 'path' );
+const { chdir } = require( 'process' );
 const { execSync } = require( 'child_process' );
 
 /**
@@ -107,8 +108,8 @@ const assetDataTransformer = ( content, absoluteFrom ) => {
  * @return {void}
  */
 const createPluginZip = ( pluginPath, pluginName ) => {
-	const command = `cd ${ pluginPath } && zip -r ${ pluginName }.zip ${ pluginName }`;
-	execSync( command );
+	chdir( pluginPath );
+	execSync( 'zip', [ '-r', `${ pluginName }.zip`, pluginName ] );
 };
 
 module.exports = {
