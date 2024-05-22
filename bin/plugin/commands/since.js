@@ -32,22 +32,15 @@ exports.options = [
 exports.handler = async ( opt ) => {
 	const isAllPlugins = ! opt.plugin;
 
-	if (
-		! isAllPlugins &&
-		opt.plugin !== 'performance-lab' && // TODO: Remove this as of <https://github.com/WordPress/performance/pull/1182>.
-		! plugins.includes( opt.plugin )
-	) {
+	if ( ! isAllPlugins && ! plugins.includes( opt.plugin ) ) {
 		throw new Error(
 			`The plugin "${ opt.plugin }" is not a valid plugin managed as part of this project.`
 		);
 	}
 
+	const pluginDirectories = [];
 	const pluginRoot = path.resolve( __dirname, '../../../' );
 
-	const pluginDirectories = [];
-	if ( isAllPlugins || opt.plugin === 'performance-lab' ) {
-		pluginDirectories.push( pluginRoot ); // TODO: Remove this as of <https://github.com/WordPress/performance/pull/1182>.
-	}
 	if ( isAllPlugins ) {
 		for ( const pluginSlug of plugins ) {
 			pluginDirectories.push(
@@ -76,10 +69,6 @@ exports.handler = async ( opt ) => {
 			);
 		}
 		const version = readmeContentMatches[ 1 ];
-
-		if ( pluginDirectory === pluginRoot ) {
-			ignore.push( '**/plugins' ); // TODO: Remove this as of <https://github.com/WordPress/performance/pull/1182>.
-		}
 
 		patterns.push( `${ pluginDirectory }/**/*.php` );
 		patterns.push( `${ pluginDirectory }/**/*.js` );
