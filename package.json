@@ -31,6 +31,7 @@
     "versions": "./bin/plugin/cli.js versions",
     "build": "wp-scripts build",
     "build-plugins": "npm-run-all 'build:plugin:*'",
+    "build-plugins:zip": "npm-run-all 'build:plugin:* --env zip=true'",
     "build:plugin:performance-lab": "webpack --mode production --env plugin=performance-lab",
     "build:plugin:auto-sizes": "webpack --mode production --env plugin=auto-sizes",
     "build:plugin:dominant-color-images": "webpack --mode production --env plugin=dominant-color-images",
