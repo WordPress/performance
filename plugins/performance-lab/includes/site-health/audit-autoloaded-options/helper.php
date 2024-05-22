@@ -107,8 +107,11 @@ function perflab_aao_autoloaded_options_size(): int {
 
 	$total_length = 0;
 
-	foreach ( $all_options as $option_name => $option_value ) {
-		$total_length += strlen( $option_value );
+	foreach ( $all_options as $option_value ) {
+		if ( is_array( $option_value ) || is_object( $option_value ) ) {
+			$option_value = serialize( $option_value ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		}
+		$total_length += strlen( (string) $option_value );
 	}
 
 	return $total_length;
