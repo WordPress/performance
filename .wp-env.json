@@ -1,7 +1,6 @@
 {
   "core": null,
   "plugins": [
-    ".",
     "./plugins/auto-sizes",
     "./plugins/dominant-color-images",
     "./plugins/embed-optimizer",
@@ -14,6 +13,9 @@
     "tests": {
       "config": {
         "FS_METHOD": "direct"
+      },
+      "mappings": {
+        "/wp-content/plugins/performance": "."
       }
     }
   }
