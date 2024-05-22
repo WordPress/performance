@@ -1,16 +1,12 @@
 <?xml version="1.0"?>
-<ruleset name="WPP-PerfLab">
-	<description>WordPress Coding Standards for the Performance Lab Plugin</description>
+<ruleset name="WPP">
+	<description>WordPress Coding Standards for the Performance Features.</description>
 	<rule ref="bin/phpcs/phpcs.ruleset.xml"/>
 
 	<config name="text_domain" value="performance-lab,default"/>
 
-	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
-		<exclude-pattern>includes/server-timing/object-cache.copy.php</exclude-pattern>
-	</rule>
-
 	<file>.</file>
-	<exclude-pattern>./node_modules/*</exclude-pattern>
+
+	<!--Ignore plugins directory-->
 	<exclude-pattern>./plugins/*</exclude-pattern>
-	<exclude-pattern>./vendor/*</exclude-pattern>
 </ruleset>

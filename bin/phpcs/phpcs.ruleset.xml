@@ -131,4 +131,8 @@
 
 	<!-- Exclude built plugins and built assets in plugins. -->
 	<exclude-pattern>./build/*</exclude-pattern>
+
+	<!-- Exclude node_modules and vendor directories. -->
+	<exclude-pattern>./node_modules/*</exclude-pattern>
+	<exclude-pattern>./vendor/*</exclude-pattern>
 </ruleset>

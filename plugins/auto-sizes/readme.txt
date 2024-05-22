@@ -51,6 +51,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 = 1.0.2 =
 
 * Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
+* Bump minimum PHP requirement to 7.2. ([1130](https://github.com/WordPress/performance/pull/1130))
 
 = 1.0.1 =
 
