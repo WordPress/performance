@@ -98,6 +98,11 @@ function perflab_aao_autoloaded_options_test(): array {
  * @return int autoloaded data in bytes.
  */
 function perflab_aao_autoloaded_options_size(): int {
+	/**
+	 * External object cache plugins may return mixed values including arrays and objects instead of them being serialized.
+	 *
+	 * @var array<string, string|array<int|string, mixed>|object> $all_options
+	 */
 	$all_options = wp_load_alloptions();
 
 	$total_length = 0;
