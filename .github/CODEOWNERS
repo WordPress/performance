@@ -1,8 +1,14 @@
 # Documentation/Infrastructure
-/admin                                      @mukeshpanchal27 @felixarntz
-/tests/admin                                @mukeshpanchal27 @felixarntz
-/bin                                        @mukeshpanchal27 @felixarntz
 /.github                                    @mukeshpanchal27 @felixarntz @thelovekesh
+/bin                                        @mukeshpanchal27 @felixarntz @thelovekesh
+
+# Performance Lab Plugin Admin
+/includes/admin                             @mukeshpanchal27 @felixarntz
+/tests/includes/admin                       @mukeshpanchal27 @felixarntz
+
+# Server Timing API
+/includes/server-timing                    @felixarntz
+/tests/includes/server-timing              @felixarntz
 
 # Site Health: AVIF Support Health Check
 /includes/site-health/avif-support                                          @adamsilverstein
@@ -23,22 +29,22 @@
 /plugins/auto-sizes                         @joemcgill
 /tests/plugins/auto-sizes                   @joemcgill
 
-# Plugin: Speculative Loading
-/plugins/speculation-rules                  @felixarntz
-/tests/plugins/speculation-rules            @felixarntz
-
-# Plugin: Modern Image Formats
-/plugins/webp-uploads                       @adamsilverstein @felixarntz
-/tests/plugins/webp-uploads                 @adamsilverstein @felixarntz
+# Plugin: Embed Optimizer
+/plugins/embed-optimizer                    @adamsilverstein @westonruter
+/tests/plugins/embed-optimizer              @adamsilverstein @westonruter
 
 # Plugin: Image Placeholders
 /plugins/dominant-color-images              @pbearne @spacedmonkey
 /tests/plugins/dominant-color-images        @pbearne @spacedmonkey
 
-# Plugin: Embed Optimizer
-/plugins/embed-optimizer                    @adamsilverstein @westonruter
-/tests/plugins/embed-optimizer              @adamsilverstein @westonruter
+# Plugin: Modern Image Formats
+/plugins/webp-uploads                       @adamsilverstein @felixarntz
+/tests/plugins/webp-uploads                 @adamsilverstein @felixarntz
 
 # Plugin: Optimization Detective
 /plugins/optimization-detective             @westonruter @felixarntz
 /tests/plugins/optimization-detective       @westonruter @felixarntz
+
+# Plugin: Speculative Loading
+/plugins/speculation-rules                  @felixarntz
+/tests/plugins/speculation-rules            @felixarntz
