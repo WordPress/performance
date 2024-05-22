@@ -1,1 +1,4 @@
+# See <https://github.com/github-linguist/linguist/blob/master/docs/overrides.md>.
+
+# Improve highlighting for PHPStan stub files.
 *.stub linguist-language=PHP
