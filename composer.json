@@ -67,9 +67,6 @@
     "lint": "phpcs",
     "lint:all": [
       "@lint",
-      "@lint:plugins"
-    ],
-    "lint:plugins": [
       "@lint:auto-sizes",
       "@lint:dominant-color-images",
       "@lint:embed-optimizer",
