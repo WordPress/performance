@@ -70,10 +70,6 @@ exports.handler = async ( opt ) => {
 		}
 		const version = readmeContentMatches[ 1 ];
 
-		if ( pluginDirectory === pluginRoot ) {
-			ignore.push( '**/plugins' ); // TODO: Remove this as of <https://github.com/WordPress/performance/pull/1182>.
-		}
-
 		patterns.push( `${ pluginDirectory }/**/*.php` );
 		patterns.push( `${ pluginDirectory }/**/*.js` );
 
