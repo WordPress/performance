@@ -398,7 +398,7 @@ function perflab_plugin_admin_notices(): void {
 /**
  * Callback function that print plugin progress indicator script.
  *
- * @since n.e.x.t
+ * @since 3.1.0
  */
 function perflab_print_plugin_progress_indicator_script(): void {
 	$js_function = <<<JS
@@ -434,7 +434,7 @@ JS;
 /**
  * Gets the URL to the plugin settings screen if one exists.
  *
- * @since n.e.x.t
+ * @since 3.1.0
  *
  * @param string $plugin_slug Plugin slug passed to generate the settings link.
  * @return string|null Either the plugin settings URL or null if not available.

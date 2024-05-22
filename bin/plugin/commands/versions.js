@@ -34,16 +34,14 @@ exports.options = [
  * @return {Promise<string>} Consistent version.
  */
 async function checkPluginDirectory( pluginDirectory ) {
-	const readmeContents = fs.readFileSync(
-		path.resolve( pluginDirectory, 'readme.txt' ),
-		'utf-8'
-	);
+	const readmeFilePath = path.resolve( pluginDirectory, 'readme.txt' );
+	const readmeContents = fs.readFileSync( readmeFilePath, 'utf-8' );
 
 	const stableTagVersionMatches = readmeContents.match(
 		/^Stable tag:\s*(\d+\.\d+\.\d+)$/m
 	);
 	if ( ! stableTagVersionMatches ) {
-		throw new Error( 'Unable to locate stable tag in readme.txt' );
+		throw new Error( `Unable to locate stable tag in ${ readmeFilePath }` );
 	}
 	const stableTagVersion = stableTagVersionMatches[ 1 ];
 
@@ -121,13 +119,8 @@ async function checkPluginDirectory( pluginDirectory ) {
  * @param {WPVersionsCommandOptions} opt Command options.
  */
 exports.handler = async ( opt ) => {
-	const pluginRoot = path.resolve( __dirname, '../../../' );
-
 	const pluginDirectories = [];
-
-	if ( ! opt.plugin || 'performance-lab' === opt.plugin ) {
-		pluginDirectories.push( pluginRoot ); // TODO: Remove this after <https://github.com/WordPress/performance/pull/1182>.
-	}
+	const pluginRoot = path.resolve( __dirname, '../../../' );
 
 	for ( const pluginSlug of plugins ) {
 		if ( ! opt.plugin || pluginSlug === opt.plugin ) {

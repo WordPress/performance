@@ -69,14 +69,13 @@ exports.handler = async ( opt ) => {
 };
 
 /**
- * Returns a promise resolving to an array of pull requests associated with the
+ * Returns a promise resolving to an array of merged pull requests associated with the
  * changelog settings object.
  *
  * @param {GitHub}              octokit  GitHub REST client.
  * @param {WPChangelogSettings} settings Changelog settings.
  *
- * @return {Promise<IssuesListForRepoResponseItem[]>} Promise resolving to array of
- *                                            pull requests.
+ * @return {Promise<IssuesListForRepoResponseItem[]>} Promise resolving to array of pull requests.
  */
 async function fetchAllPullRequests( octokit, settings ) {
 	const { owner, repo, milestone: milestoneTitle } = settings;
@@ -101,11 +100,9 @@ async function fetchAllPullRequests( octokit, settings ) {
 		'closed'
 	);
 
-	// Return all pull requests except those with the SKIP_CHANGELOG_LABEL.
+	// Return all merged pull requests.
 	return issues.filter(
-		( issue ) =>
-			issue.pull_request &&
-			! issue.labels.find( ( { name } ) => name === SKIP_CHANGELOG_LABEL )
+		( issue ) => issue.pull_request && issue.pull_request.merged_at
 	);
 }
 
@@ -139,17 +136,10 @@ function getIssueType( issue ) {
  * @param {string}                          milestone    Milestone title.
  * @param {IssuesListForRepoResponseItem[]} pullRequests List of pull requests.
  *
- * @return {string} The formatted changelog string.
+ * @return {string} The formatted changelog string (without the heading).
  */
 function formatChangelog( milestone, pullRequests ) {
-	const version = milestone.match( /\d+\.\d+(\.\d+)?(-[A-Za-z0-9.]+)?$/ );
-	if ( ! version ) {
-		throw new Error(
-			`The ${ milestone } milestone does not end with a version number.`
-		);
-	}
-
-	let changelog = '= ' + version[ 0 ] + ' =\n\n';
+	let changelog = '';
 
 	// Group PRs by type.
 	const typeGroups = groupBy( pullRequests, getIssueType );
@@ -223,11 +213,23 @@ async function getChangelog( settings ) {
 	const pullRequests = await fetchAllPullRequests( octokit, settings );
 	if ( ! pullRequests.length ) {
 		throw new Error(
-			'There are no (closed) pull requests associated with the milestone.'
+			`There are no merged pull requests associated with the milestone ${ settings.milestone }`
 		);
 	}
 
-	return formatChangelog( settings.milestone, pullRequests );
+	const nonSkippedPullRequests = pullRequests.filter(
+		( pullRequest ) =>
+			! pullRequest.labels.find(
+				( { name } ) => name === SKIP_CHANGELOG_LABEL
+			)
+	);
+	if ( ! nonSkippedPullRequests.length ) {
+		throw new Error(
+			`All of the merged pull requests in the ${ settings.milestone } milestone have the "${ SKIP_CHANGELOG_LABEL }" label.`
+		);
+	}
+
+	return formatChangelog( settings.milestone, nonSkippedPullRequests );
 }
 
 /**

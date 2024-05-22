@@ -51,7 +51,15 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.1.1 =
 
+**Enhancements**
+
+* Avoid needless array allocation in rgb to hex conversion. ([1104](https://github.com/WordPress/performance/pull/1104))
 * Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
+* Bump minimum PHP requirement to 7.2. ([1130](https://github.com/WordPress/performance/pull/1130))
+
+**Bug Fixes**
+
+* Fix Imagick detecting partial transparency. ([1215](https://github.com/WordPress/performance/pull/1215))
 
 = 1.1.0 =
 

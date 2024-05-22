@@ -55,12 +55,16 @@ withOptions( program.command( 'release-plugin-changelog' ), changelogOptions )
 
 withOptions( program.command( 'release-plugin-since' ), sinceOptions )
 	.alias( 'since' )
-	.description( 'Updates "n.e.x.t" tags with the current release version' )
+	.description(
+		'Updates "n.e.x.t" tags with the current release version in the "Stable tag" of readme.txt'
+	)
 	.action( catchException( sinceHandler ) );
 
 withOptions( program.command( 'plugin-readme' ), readmeOptions )
 	.alias( 'readme' )
-	.description( 'Updates the readme.txt file' )
+	.description(
+		'Updates the changelog in the readme.txt file for the stable tag (requires milestones to be named "$plugin_slug $stable_tag")'
+	)
 	.action( catchException( readmeHandler ) );
 
 withOptions( program.command( 'verify-version-consistency' ), versionsOptions )

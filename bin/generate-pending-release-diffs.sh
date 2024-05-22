@@ -20,12 +20,11 @@ done
 
 cd "$(git rev-parse --show-toplevel)"
 
-npm run build:plugin:performance-lab >&2 # TODO: Remove this as of <https://github.com/WordPress/performance/pull/1182>.
 npm run build-plugins >&2
 
 stable_dir=/tmp/stable-svn
 mkdir -p "$stable_dir"
-for plugin_slug in $(jq '.plugins[]' -r plugins.json) 'performance-lab'; do
+for plugin_slug in $(jq '.plugins[]' -r plugins.json); do
 	echo "# $plugin_slug ###############################" >&2
 	if [ ! -d "$stable_dir/$plugin_slug" ]; then
 		svn co "https://plugins.svn.wordpress.org/$plugin_slug/trunk/" "$stable_dir/$plugin_slug" >&2
