@@ -119,13 +119,8 @@ async function checkPluginDirectory( pluginDirectory ) {
  * @param {WPVersionsCommandOptions} opt Command options.
  */
 exports.handler = async ( opt ) => {
-	const pluginRoot = path.resolve( __dirname, '../../../' );
-
 	const pluginDirectories = [];
-
-	if ( ! opt.plugin || 'performance-lab' === opt.plugin ) {
-		pluginDirectories.push( pluginRoot ); // TODO: Remove this after <https://github.com/WordPress/performance/pull/1182>.
-	}
+	const pluginRoot = path.resolve( __dirname, '../../../' );
 
 	for ( const pluginSlug of plugins ) {
 		if ( ! opt.plugin || pluginSlug === opt.plugin ) {
