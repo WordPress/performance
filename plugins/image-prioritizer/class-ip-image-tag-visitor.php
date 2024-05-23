@@ -96,7 +96,7 @@ final class IP_Image_Tag_Visitor {
 		$is_img_tag = (
 			'IMG' === $walker->get_tag()
 			&&
-			$src
+			'' !== $src
 			&&
 			! $this->is_data_url( $src )
 		);
@@ -112,16 +112,18 @@ final class IP_Image_Tag_Visitor {
 		$background_image_url = null;
 		$style                = $walker->get_attribute( 'style' );
 		if (
-			$style
+			is_string( $style )
 			&&
-			preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', (string) $style, $matches )
+			false !== preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', $style, $matches )
+			&&
+			'' !== $matches['background_image'] // PHPStan should ideally know that this is a non-empty string based on the `.+?` regular expression.
 			&&
 			! $this->is_data_url( $matches['background_image'] )
 		) {
 			$background_image_url = $matches['background_image'];
 		}
 
-		if ( ! ( $is_img_tag || $background_image_url ) ) {
+		if ( ! $is_img_tag && is_null( $background_image_url ) ) {
 			return false;
 		}
 
@@ -129,7 +131,7 @@ final class IP_Image_Tag_Visitor {
 
 		// Ensure the fetchpriority attribute is set on the element properly.
 		if ( $is_img_tag ) {
-			if ( $this->common_lcp_xpath && $xpath === $this->common_lcp_xpath ) {
+			if ( ! is_null( $this->common_lcp_xpath ) && $xpath === $this->common_lcp_xpath ) {
 				if ( 'high' === $walker->get_attribute( 'fetchpriority' ) ) {
 					$walker->set_attribute( 'data-od-fetchpriority-already-added', true );
 				} else {
@@ -142,7 +144,7 @@ final class IP_Image_Tag_Visitor {
 					$walker->set_attribute( 'data-od-removed-loading', $walker->get_attribute( 'loading' ) );
 					$walker->remove_attribute( 'loading' );
 				}
-			} elseif ( $walker->get_attribute( 'fetchpriority' ) && $this->url_metrics_group_collection->is_every_group_populated() ) {
+			} elseif ( is_string( $walker->get_attribute( 'fetchpriority' ) ) && $this->url_metrics_group_collection->is_every_group_populated() ) {
 				// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
 				// continue to apply while waiting for all breakpoints to have metrics collected for them.
 				$walker->set_attribute( 'data-od-removed-fetchpriority', $walker->get_attribute( 'fetchpriority' ) );
@@ -168,15 +170,18 @@ final class IP_Image_Tag_Visitor {
 								'href'        => (string) $walker->get_attribute( 'src' ),
 								'imagesrcset' => (string) $walker->get_attribute( 'srcset' ),
 								'imagesizes'  => (string) $walker->get_attribute( 'sizes' ),
-							)
+							),
+							static function ( string $value ): bool {
+								return '' !== $value;
+							}
 						)
 					);
 
 					$crossorigin = $walker->get_attribute( 'crossorigin' );
-					if ( $crossorigin ) {
+					if ( is_string( $crossorigin ) ) {
 						$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
 					}
-				} elseif ( $background_image_url ) {
+				} else {
 					$link_attributes['href'] = $background_image_url;
 				}
 
