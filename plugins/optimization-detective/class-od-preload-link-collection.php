@@ -117,9 +117,11 @@ final class OD_Preload_Link_Collection implements Countable {
 				 */
 				$last_link = end( $carry );
 				if (
-					$last_link
+					is_array( $last_link )
 					&&
 					$last_link['attributes'] === $link['attributes']
+					&&
+					is_int( $last_link['minimum_viewport_width'] )
 					&&
 					is_int( $last_link['maximum_viewport_width'] )
 					&&
