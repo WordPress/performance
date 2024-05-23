@@ -189,7 +189,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$preload_links = new OD_Preload_Link_Collection();
 
 	$is_data_url = static function ( string $url ): bool {
-		return strtolower( substr( $url, 0, 5 ) ) === 'data:';
+		return str_starts_with( strtolower( $url ), 'data:' );
 	};
 
 	// Walk over all tags in the document and ensure fetchpriority is set/removed, and construct preload links for image LCP elements.
