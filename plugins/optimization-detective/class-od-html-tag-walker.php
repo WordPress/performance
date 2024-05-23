@@ -27,7 +27,7 @@ final class OD_HTML_Tag_Walker {
 	 *
 	 * @link https://html.spec.whatwg.org/multipage/syntax.html#void-elements
 	 * @see WP_HTML_Processor::is_void()
-	 * @todo Reuse `WP_HTML_Processor::is_void()` once WordPress 6.4 is the minimum-supported version.
+	 * @todo Reuse `WP_HTML_Processor::is_void()` once WordPress 6.5 is the minimum-supported version. See <https://github.com/WordPress/performance/pull/1115>.
 	 *
 	 * @var string[]
 	 */
