@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                   as: 'audio'|'document'|'embed'|'fetch'|'font'|'image'|'object'|'script'|'style'|'track'|'video'|'worker'
  *               }
  *
- * @since 0.1.0
+ * @since n.e.x.t
  * @access private
  */
 final class OD_Preload_Link_Collection implements Countable {
