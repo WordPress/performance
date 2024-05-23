@@ -23,6 +23,11 @@ class WebP_Uploads_Picture_Element_Tests extends ImagesTestCase {
 	 * @param bool $expect_picture_element Whether to expect the image to be wrapped in a picture element.
 	 */
 	public function it_should_maybe_wrap_images_in_picture_element( bool $jpeg_and_webp, bool $picture_element, bool $expect_picture_element ): void {
+		$mime_type = 'image/webp';
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
 		if ( $jpeg_and_webp ) {
 			$this->opt_in_to_jpeg_and_webp();
 		}
