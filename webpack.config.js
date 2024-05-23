@@ -10,6 +10,7 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
  */
 const { plugins: standalonePlugins } = require( './plugins.json' );
 const {
+	createPluginZip,
 	assetDataTransformer,
 	deleteFileOrDirectory,
 	generateBuildManifest,
@@ -20,10 +21,16 @@ const {
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
+const defaultBuildConfig = {
+	entry: {},
+	output: {
+		path: path.resolve( __dirname, 'build' ),
+	},
+};
+
 const sharedConfig = {
 	...defaultConfig,
-	entry: {},
-	output: {},
+	...defaultBuildConfig,
 };
 
 // Store plugins that require build process.
@@ -37,10 +44,7 @@ const pluginsWithBuild = [ 'optimization-detective' ];
  */
 const optimizationDetective = ( env ) => {
 	if ( env.plugin && env.plugin !== 'optimization-detective' ) {
-		return {
-			entry: {},
-			output: {},
-		};
+		return defaultBuildConfig;
 	}
 
 	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
@@ -86,23 +90,18 @@ const optimizationDetective = ( env ) => {
  */
 const buildPlugin = ( env ) => {
 	if ( ! env.plugin ) {
-		return {
-			entry: {},
-			output: {},
-		};
+		return defaultBuildConfig;
 	}
 
 	if ( ! standalonePlugins.includes( env.plugin ) ) {
 		// eslint-disable-next-line no-console
 		console.error( `Plugin "${ env.plugin }" not found. Aborting.` );
 
-		return {
-			entry: {},
-			output: {},
-		};
+		return defaultBuildConfig;
 	}
 
-	const to = path.resolve( __dirname, 'build', env.plugin );
+	const buildDir = path.resolve( __dirname, 'build' );
+	const to = path.resolve( buildDir, env.plugin );
 	const from = path.resolve( __dirname, 'plugins', env.plugin );
 	const dependencies = pluginsWithBuild.includes( env.plugin )
 		? [ `${ env.plugin }` ]
@@ -138,6 +137,11 @@ const buildPlugin = ( env ) => {
 					// After emit, generate build manifest.
 					compiler.hooks.afterEmit.tap( 'AfterEmitPlugin', () => {
 						generateBuildManifest( env.plugin, from );
+
+						// If zip flag is passed, create a zip file.
+						if ( env.zip ) {
+							createPluginZip( buildDir, env.plugin );
+						}
 					} );
 				},
 			},
