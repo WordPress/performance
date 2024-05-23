@@ -118,7 +118,7 @@ class OD_URL_Metrics_Post_Type {
 	 */
 	public static function get_url_metrics_from_post( WP_Post $post ): array {
 		$this_function   = __FUNCTION__;
-		$trigger_warning = static function ( $message ) use ( $this_function ): void {
+		$trigger_warning = static function ( string $message ) use ( $this_function ): void {
 			wp_trigger_error( $this_function, esc_html( $message ), E_USER_WARNING );
 		};
 

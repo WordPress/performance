@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * URL metrics grouped by viewport according to breakpoints.
  *
  * @implements IteratorAggregate<int, OD_URL_Metric>
+ * @phpstan-import-type ElementData from OD_URL_Metric
  *
  * @since 0.1.0
  * @access private
@@ -59,6 +60,13 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	 * @phpstan-var 0|positive-int
 	 */
 	private $freshness_ttl;
+
+	/**
+	 * Cached LCP element data.
+	 *
+	 * @var ElementData|null|false
+	 */
+	private $cached_lcp_element = false;
 
 	/**
 	 * Constructor.
@@ -122,7 +130,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	/**
 	 * Gets the minimum possible viewport width (inclusive).
 	 *
-	 * @return int Minimum viewport width.
+	 * @return int<0, max> Minimum viewport width.
 	 */
 	public function get_minimum_viewport_width(): int {
 		return $this->minimum_viewport_width;
@@ -131,7 +139,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	/**
 	 * Gets the maximum possible viewport width (inclusive).
 	 *
-	 * @return int Minimum viewport width.
+	 * @return int<1, max> Minimum viewport width.
 	 */
 	public function get_maximum_viewport_width(): int {
 		return $this->maximum_viewport_width;
@@ -164,6 +172,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 			);
 		}
 
+		$this->clear_caches();
 		$this->url_metrics[] = $url_metric;
 
 		// If we have too many URL metrics now, remove the oldest ones up to the sample size.
@@ -201,6 +210,70 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Clear caches.
+	 */
+	private function clear_caches(): void {
+		$this->cached_lcp_element = false;
+	}
+
+	/**
+	 * Gets the LCP element in the viewport group.
+	 *
+	 * @return ElementData|null LCP element data or null if not available, either because there are no URL metrics or
+	 *                          the LCP element type is not supported.
+	 */
+	public function get_lcp_element(): ?array {
+
+		// Return pre-computed value if available.
+		if ( false !== $this->cached_lcp_element ) {
+			return $this->cached_lcp_element;
+		}
+
+		// No metrics have been gathered for this group so there is no LCP element.
+		if ( count( $this->url_metrics ) === 0 ) {
+			return null;
+		}
+
+		// The following arrays all share array indices.
+		$seen_breadcrumbs   = array();
+		$breadcrumb_counts  = array();
+		$breadcrumb_element = array();
+
+		foreach ( $this->url_metrics as $url_metric ) {
+			foreach ( $url_metric->get_elements() as $element ) {
+				if ( ! $element['isLCP'] ) {
+					continue;
+				}
+
+				$i = array_search( $element['xpath'], $seen_breadcrumbs, true );
+				if ( false === $i ) {
+					$i                       = count( $seen_breadcrumbs );
+					$seen_breadcrumbs[ $i ]  = $element['xpath'];
+					$breadcrumb_counts[ $i ] = 0;
+				}
+
+				$breadcrumb_counts[ $i ] += 1;
+				$breadcrumb_element[ $i ] = $element;
+				break; // We found the LCP element for the URL metric, go to the next URL metric.
+			}
+		}
+
+		// Now sort by the breadcrumb counts in descending order, so the remaining first key is the most common breadcrumb.
+		if ( $seen_breadcrumbs ) {
+			arsort( $breadcrumb_counts );
+			$most_common_breadcrumb_index = key( $breadcrumb_counts );
+
+			$lcp_element = $breadcrumb_element[ $most_common_breadcrumb_index ];
+		} else {
+			$lcp_element = null;
+		}
+
+		$this->cached_lcp_element = $lcp_element;
+
+		return $lcp_element;
 	}
 
 	/**
