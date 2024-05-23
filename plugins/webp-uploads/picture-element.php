@@ -55,7 +55,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	 * @param int           $attachment_id The id of the image being evaluated.
 	 */
 	$enabled_mime_types = apply_filters(
-		'wp_picture_element_mime_types',
+		'webp_uploads_picture_element_mime_types',
 		array(
 			'image/webp',
 			'image/jpeg',
