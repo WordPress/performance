@@ -123,4 +123,11 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 			}
 		);
 	}
+
+	/**
+	 * Opt into picture element output.
+	 */
+	public function opt_in_to_picture_element(): void {
+		update_option( 'webp_uploads_use_picture_element', true );
+	}
 }
