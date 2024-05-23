@@ -98,7 +98,7 @@ final class IP_Image_Tag_Visitor {
 			&&
 			$src
 			&&
-			! ip_is_data_url( $src )
+			! $this->is_data_url( $src )
 		);
 
 		/*
@@ -116,7 +116,7 @@ final class IP_Image_Tag_Visitor {
 			&&
 			preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', (string) $style, $matches )
 			&&
-			! ip_is_data_url( $matches['background_image'] )
+			! $this->is_data_url( $matches['background_image'] )
 		) {
 			$background_image_url = $matches['background_image'];
 		}
@@ -189,5 +189,15 @@ final class IP_Image_Tag_Visitor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Determines if the provided URL is a data: URL.
+	 *
+	 * @param string $url URL.
+	 * @return bool Whether data URL.
+	 */
+	private function is_data_url( string $url ): bool {
+		return str_starts_with( strtolower( $url ), 'data:' );
 	}
 }

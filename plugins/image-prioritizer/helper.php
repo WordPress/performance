@@ -23,16 +23,6 @@ function ip_render_generator_meta_tag(): void {
 }
 
 /**
- * Determines if the provided URL is a data: URL.
- *
- * @param string $url URL.
- * @return bool Whether data URL.
- */
-function ip_is_data_url( string $url ): bool {
-	return str_starts_with( strtolower( $url ), 'data:' );
-}
-
-/**
  * Filters the tag walker visitors which apply image prioritizer optimizations.
  *
  * @since 0.1.0
