@@ -57,3 +57,12 @@ parameters:
 		-
 			identifier: cast.string
 			path: */tests/*
+		-
+			identifier: staticMethod.dynamicCall
+			path: */tests/*
+		-
+			identifier: booleanNot.exprNotBoolean
+			path: */tests/*
+		-
+			identifier: if.condNotBoolean
+			path: */tests/*
