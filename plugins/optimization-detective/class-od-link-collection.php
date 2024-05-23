@@ -130,6 +130,8 @@ final class OD_Link_Collection implements Countable {
 					&&
 					$last_link['attributes'] === $link['attributes']
 					&&
+					is_int( $last_link['maximum_viewport_width'] )
+					&&
 					$last_link['maximum_viewport_width'] + 1 === $link['minimum_viewport_width']
 				) {
 					$last_link['maximum_viewport_width'] = max( $last_link['maximum_viewport_width'], $link['maximum_viewport_width'] );
