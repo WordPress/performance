@@ -98,12 +98,20 @@ function perflab_aao_autoloaded_options_test(): array {
  * @return int autoloaded data in bytes.
  */
 function perflab_aao_autoloaded_options_size(): int {
+	/**
+	 * External object cache plugins may return mixed values including arrays and objects instead of them being serialized.
+	 *
+	 * @var array<string, string|array<int|string, mixed>|object> $all_options
+	 */
 	$all_options = wp_load_alloptions();
 
 	$total_length = 0;
 
-	foreach ( $all_options as $option_name => $option_value ) {
-		$total_length += strlen( $option_value );
+	foreach ( $all_options as $option_value ) {
+		if ( is_array( $option_value ) || is_object( $option_value ) ) {
+			$option_value = serialize( $option_value ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		}
+		$total_length += strlen( (string) $option_value );
 	}
 
 	return $total_length;

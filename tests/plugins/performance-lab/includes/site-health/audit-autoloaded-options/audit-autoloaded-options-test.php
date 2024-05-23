@@ -61,6 +61,8 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Tests perflab_aao_autoloaded_options_size()
+	 *
+	 * @covers ::perflab_aao_autoloaded_options_size
 	 */
 	public function test_perflab_aao_autoloaded_options_size(): void {
 		global $wpdb;
@@ -78,11 +80,39 @@ class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
 		);
 		$this->assertEquals( $autoloaded_options_size, perflab_aao_autoloaded_options_size() );
 
-		// Add autoload option.
-		$test_option_string       = 'test';
-		$test_option_string_bytes = mb_strlen( $test_option_string, '8bit' );
-		self::set_autoloaded_option( $test_option_string_bytes );
-		$this->assertSame( $autoloaded_options_size + $test_option_string_bytes, perflab_aao_autoloaded_options_size() );
+		// Add autoload options.
+		$new_autoload_options = array(
+			'string' => 'test',
+			'array'  => array( 1, 2, 3 ),
+			'object' => (object) array( 'foo' => 'bar' ),
+		);
+
+		$expected_size_increase = 0;
+		foreach ( $new_autoload_options as $key => $value ) {
+			add_option( "new_autoload_{$key}", $value, '', true );
+			$expected_size_increase += mb_strlen( maybe_serialize( $value ), '8bit' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		}
+
+		$this->assertSame( $autoloaded_options_size + $expected_size_increase, perflab_aao_autoloaded_options_size() );
+
+		// Now try faking a misconfigured object cache which returns unserialized values from wp_load_alloptions().
+		add_filter(
+			'alloptions',
+			static function ( array $alloptions ): array {
+				return array_map(
+					static function ( $option ) {
+						if ( is_serialized( $option ) ) {
+							return unserialize( $option ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+						} else {
+							return $option;
+						}
+					},
+					$alloptions
+				);
+			}
+		);
+
+		$this->assertSame( $autoloaded_options_size + $expected_size_increase, perflab_aao_autoloaded_options_size() );
 	}
 
 	public function test_perflab_aao_autoloaded_options_disable_revert_functionality(): void {
