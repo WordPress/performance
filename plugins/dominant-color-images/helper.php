@@ -91,6 +91,8 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 	if ( is_wp_error( $has_transparency ) ) {
 		return $has_transparency;
 	}
+	$dominant_color_data = array();
+
 	$dominant_color_data['has_transparency'] = $has_transparency;
 
 	$dominant_color = $editor->get_dominant_color();
