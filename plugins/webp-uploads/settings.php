@@ -98,7 +98,7 @@ function webp_uploads_use_picture_element_callback(): void {
 			<input name="webp_uploads_use_picture_element" type="checkbox" id="webp_uploads_use_picture_element" aria-describedby="webp_uploads_use_picture_element_description" value="1"<?php checked( '1', get_option( 'webp_uploads_use_picture_element' ) ); ?> />
 			<?php esc_html_e( 'Use Picture Element', 'webp-uploads' ); ?>
 		</label>
-		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'Picture element serves AVIF or WebP with a fallback to JPEG handled by the browser automatically.', 'webp-uploads' ); ?></p>
+		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'Picture element serves a modern image format with a fallback to JPEG.', 'webp-uploads' ); ?></p>
 		</td></tr>
 	<?php
 }

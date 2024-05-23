@@ -322,3 +322,14 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 	}
 	return false;
 }
+
+/**
+ * Helper function to check if the `webp_uploads_picture_element_enabled` option is enabled.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if the option is enabled, false otherwise.
+ */
+function webp_uploads_picture_element_enabled(): bool {
+	return empty( get_option( 'webp_uploads_use_picture_element', false ) );
+}
