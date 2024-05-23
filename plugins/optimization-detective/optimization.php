@@ -172,10 +172,10 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 *
 	 * @since 0.2.0
 	 *
-	 * @param callable[]                      $visitors         Visitors which are invoked for each tag in the document.
-	 * @param OD_HTML_Tag_Walker              $walker           HTML tag walker.
-	 * @param OD_URL_Metrics_Group_Collection $group_collection URL metrics group collection.
-	 * @param OD_Preload_Link_Collection      $preload_links    Preload link collection.
+	 * @param array<string|int, callable( OD_HTML_Tag_Walker, OD_URL_Metrics_Group_Collection, OD_Preload_Link_Collection ): bool> $visitors         Visitors which are invoked for each tag in the document.
+	 * @param OD_HTML_Tag_Walker                                                                                                   $walker           HTML tag walker.
+	 * @param OD_URL_Metrics_Group_Collection                                                                                      $group_collection URL metrics group collection.
+	 * @param OD_Preload_Link_Collection                                                                                           $preload_links    Preload link collection.
 	 */
 	$visitors = (array) apply_filters( 'od_html_tag_walker_visitors', array(), $walker, $group_collection, $preload_links );
 	$visitors = array_filter(
