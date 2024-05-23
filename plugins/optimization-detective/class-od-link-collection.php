@@ -178,7 +178,7 @@ final class OD_Link_Collection implements Countable {
 	/**
 	 * Counts the links.
 	 *
-	 * @return int Link count.
+	 * @return int<0, max> Link count.
 	 */
 	public function count(): int {
 		return count( $this->links );
