@@ -34,7 +34,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	foreach ( $image_meta['sizes'] as $size ) {
 		if ( isset( $size['sources'] ) && isset( $size['width'] ) && isset( $size['height'] ) ) {
 			foreach ( $size['sources'] as $mime_type => $data ) {
-				$mime_type_data[ $mime_type ]                         = isset( $mime_type_data[ $mime_type ] ) ? $mime_type_data[ $mime_type ] : array();
+				$mime_type_data[ $mime_type ]                         = $mime_type_data[ $mime_type ] ?? array();
 				$mime_type_data[ $mime_type ]['w'][ $size['width'] ]  = $data;
 				$mime_type_data[ $mime_type ]['h'][ $size['height'] ] = $data;
 			}
