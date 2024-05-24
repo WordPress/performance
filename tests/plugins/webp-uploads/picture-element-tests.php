@@ -46,7 +46,7 @@ class WebP_Uploads_Picture_Element_Tests extends ImagesTestCase {
 		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
 
 		// Check that the image is wrapped in a picture element with the correct class.
-		$picture_element = sprintf( '<picture class=wp-picture-%s>', $attachment_id );
+		$picture_element = sprintf( '<picture class="wp-picture-%s">', $attachment_id );
 		if ( $expect_picture_element ) {
 			$this->assertStringContainsString( $picture_element, $the_image );
 		} else {
