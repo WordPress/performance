@@ -22,7 +22,7 @@ function wwo_configuration(): array {
 	$content_dir_basename = basename( WP_CONTENT_DIR );
 
 	$config = array(
-		'lib'     => substr( $plugin_dir, strpos( $plugin_dir, $content_dir_basename ) - 1 ) . 'assets/js/partytown/',
+		'lib'     => substr( $plugin_dir, strpos( $plugin_dir, $content_dir_basename ) - 1 ) . 'build/',
 		'forward' => array(),
 	);
 
