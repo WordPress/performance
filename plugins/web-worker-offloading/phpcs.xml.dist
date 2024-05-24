@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="WPP-Web-Worker-Offloading">
+	<description>WordPress Coding Standards for Web Worker Offloading</description>
+
+	<rule ref="../../tools/phpcs/phpcs.ruleset.xml"/>
+
+	<config name="text_domain" value="web-worker-offloading"/>
+
+	<file>.</file>
+</ruleset>
