@@ -15,10 +15,8 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Checks whether the sources information is added to image sizes details of the REST response object.
-	 *
-	 * @test
 	 */
-	public function it_should_add_sources_to_rest_response(): void {
+	public function test_it_should_add_sources_to_rest_response(): void {
 		remove_all_filters( 'webp_uploads_upload_image_mime_transforms' );
 
 		add_filter(
@@ -72,10 +70,8 @@ class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
 
 	/**
 	 * Checks whether the media details information is added to the REST response object.
-	 *
-	 * @test
 	 */
-	public function it_should_check_media_details_in_rest_response(): void {
+	public function test_it_should_check_media_details_in_rest_response(): void {
 		$file_location = TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg';
 		$attachment_id = self::factory()->attachment->create_upload_object( $file_location );
 
