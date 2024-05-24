@@ -6,6 +6,7 @@
     "optimization-detective",
     "performance-lab",
     "speculation-rules",
+    "web-worker-offloading",
     "webp-uploads"
   ]
 }
