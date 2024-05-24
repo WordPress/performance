@@ -374,13 +374,13 @@ function webp_uploads_get_image_output_format(): string {
 }
 
 /**
- * Check if an image format type is supported by the plugin.
+ * Sanitizes the image format.
  *
  * @since n.e.x.t
  *
  * @param string $image_format The image format to check.
- * @return bool Whether the image format is supported.
+ * @return string Supported image format.
  */
-function webp_uploads_image_format_is_supported( string $image_format ): bool {
-	return in_array( $image_format, array( 'webp', 'avif' ), true );
+function webp_uploads_sanitize_image_format( string $image_format ): string {
+	return in_array( $image_format, array( 'webp', 'avif' ), true ) ? $image_format : 'webp';
 }
