@@ -14,7 +14,7 @@ const {
 	assetDataTransformer,
 	deleteFileOrDirectory,
 	generateBuildManifest,
-} = require( './bin/webpack/utils' );
+} = require( './tools/webpack/utils' );
 
 /**
  * WordPress dependencies
