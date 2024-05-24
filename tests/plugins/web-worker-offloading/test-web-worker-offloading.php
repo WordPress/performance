@@ -10,7 +10,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	/**
 	 * @covers ::wwo_configuration
 	 */
-	public function test_wwo_configuration() {
+	public function test_wwo_configuration(): void {
 		$wp_content_dir        = WP_CONTENT_DIR;
 		$partytown_assets_path = 'web-worker-offloading/build/';
 		$config                = wwo_configuration();
@@ -47,7 +47,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	/**
 	 * @covers ::wwo_init
 	 */
-	public function test_wwo_init() {
+	public function test_wwo_init(): void {
 		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', 'wwo_init' ) );
 
 		// Register scripts.
@@ -83,18 +83,16 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	/**
 	 * @covers ::wwo_get_partytown_handles
 	 */
-	public function test_wwo_get_partytown_handles() {
+	public function test_wwo_get_partytown_handles(): void {
 		$handles = wwo_get_partytown_handles();
 
 		$this->assertEmpty( $handles );
-		$this->assertIsArray( $handles );
 
 		// Enqueue a script that depends on Partytown.
 		wp_enqueue_script( 'partytown-test', 'https://example.com/test.js', array( 'partytown' ) );
 
 		$handles = wwo_get_partytown_handles();
 
-		$this->assertIsArray( $handles );
 		$this->assertNotEmpty( $handles );
 		$this->assertContains( 'partytown-test', $handles );
 		$this->assertTrue( wp_script_is( 'partytown', 'enqueued' ) );
