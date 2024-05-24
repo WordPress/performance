@@ -51,8 +51,8 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	 * The original image will be used as the fallback image for browsers that don't support the picture element.
 	 *
 	 * @since n.e.x.t
-	 * @param array<string> $mime_types    Mime types than can be used.
-	 * @param int           $attachment_id The id of the image being evaluated.
+	 * @param string[] $mime_types    Mime types than can be used.
+	 * @param int      $attachment_id The id of the image being evaluated.
 	 */
 	$enabled_mime_types = apply_filters(
 		'webp_uploads_picture_element_mime_types',
