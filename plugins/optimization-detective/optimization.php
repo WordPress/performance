@@ -105,83 +105,9 @@ function od_can_optimize_response(): bool {
 }
 
 /**
- * Constructs preload links.
- *
- * @since 0.1.0
- * @access private
- *
- * @param array<int, array{background_image?: string, img_attributes?: array{src?: string, srcset?: string, sizes?: string, crossorigin?: string}}|false> $lcp_elements_by_minimum_viewport_widths LCP elements keyed by minimum viewport width, amended with element details.
- * @return string Markup for zero or more preload link tags.
- */
-function od_construct_preload_links( array $lcp_elements_by_minimum_viewport_widths ): string {
-	$preload_links = array();
-
-	// This uses a for loop to be able to access the following element within the iteration, using a numeric index.
-	$minimum_viewport_widths = array_keys( $lcp_elements_by_minimum_viewport_widths );
-	for ( $i = 0, $len = count( $minimum_viewport_widths ); $i < $len; $i++ ) {
-		$lcp_element = $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_widths[ $i ] ];
-		if ( false === $lcp_element ) {
-			// No supported LCP element at this breakpoint, so nothing to preload.
-			continue;
-		}
-
-		$link_attributes = array();
-
-		if ( ! empty( $lcp_element['background_image'] ) ) {
-			$link_attributes['href'] = $lcp_element['background_image'];
-		} elseif ( ! empty( $lcp_element['img_attributes'] ) ) {
-			foreach ( $lcp_element['img_attributes'] as $name => $value ) {
-				// Map img attribute name to link attribute name.
-				if ( 'srcset' === $name || 'sizes' === $name ) {
-					$name = 'image' . $name;
-				} elseif ( 'src' === $name ) {
-					$name = 'href';
-				}
-				$link_attributes[ $name ] = $value;
-			}
-		}
-
-		// Skip constructing a link if it is missing required attributes.
-		if ( empty( $link_attributes['href'] ) && empty( $link_attributes['imagesrcset'] ) ) {
-			_doing_it_wrong(
-				__FUNCTION__,
-				esc_html(
-					__( 'Attempted to construct preload link without an available href or imagesrcset. Supplied LCP element: ', 'optimization-detective' ) . wp_json_encode( $lcp_element )
-				),
-				''
-			);
-			continue;
-		}
-
-		// Add media query if it's going to be something other than just `min-width: 0px`.
-		$minimum_viewport_width = $minimum_viewport_widths[ $i ];
-		$maximum_viewport_width = isset( $minimum_viewport_widths[ $i + 1 ] ) ? $minimum_viewport_widths[ $i + 1 ] - 1 : null;
-		$media_features         = array( 'screen' );
-		if ( $minimum_viewport_width > 0 ) {
-			$media_features[] = sprintf( '(min-width: %dpx)', $minimum_viewport_width );
-		}
-		if ( null !== $maximum_viewport_width ) {
-			$media_features[] = sprintf( '(max-width: %dpx)', $maximum_viewport_width );
-		}
-		$link_attributes['media'] = implode( ' and ', $media_features );
-
-		// Construct preload link.
-		$link_tag = '<link data-od-added-tag rel="preload" fetchpriority="high" as="image"';
-		foreach ( $link_attributes as $name => $value ) {
-			$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
-		}
-		$link_tag .= ">\n";
-
-		$preload_links[] = $link_tag;
-	}
-
-	return implode( '', $preload_links );
-}
-
-/**
  * Determines whether the response has an HTML Content-Type.
  *
- * @since n.e.x.t
+ * @since 0.2.0
  * @private
  *
  * @return bool Whether Content-Type is HTML.
@@ -211,6 +137,8 @@ function od_is_response_html_content_type(): bool {
  *
  * @param string $buffer Template output buffer.
  * @return string Filtered template output buffer.
+ *
+ * @throws Exception Except it won't really.
  */
 function od_optimize_template_output_buffer( string $buffer ): string {
 	if ( ! od_is_response_html_content_type() ) {
@@ -230,56 +158,51 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
-	$lcp_elements_by_minimum_viewport_widths = od_get_lcp_elements_by_minimum_viewport_widths( $group_collection );
-	$all_breakpoints_have_url_metrics        = $group_collection->is_every_group_populated();
-
-	/**
-	 * Optimized lookup of the LCP element viewport widths by XPath.
-	 *
-	 * @var array<string, int[]> $lcp_element_minimum_viewport_widths_by_xpath
-	 */
-	$lcp_element_minimum_viewport_widths_by_xpath = array();
-	foreach ( $lcp_elements_by_minimum_viewport_widths as $minimum_viewport_width => $lcp_element ) {
-		if ( false !== $lcp_element ) {
-			$lcp_element_minimum_viewport_widths_by_xpath[ $lcp_element['xpath'] ][] = $minimum_viewport_width;
+	// Capture all the XPaths for known LCP elements.
+	$groups_by_lcp_element_xpath   = array();
+	$group_has_unknown_lcp_element = false;
+	foreach ( $group_collection as $group ) {
+		$lcp_element = $group->get_lcp_element();
+		if ( null !== $lcp_element ) {
+			$groups_by_lcp_element_xpath[ $lcp_element['xpath'] ][] = $group;
+		} else {
+			$group_has_unknown_lcp_element = true;
 		}
 	}
 
 	// Prepare to set fetchpriority attribute on the image when all breakpoints have the same LCP element.
 	if (
 		// All breakpoints share the same LCP element (or all have none at all).
-		1 === count( $lcp_elements_by_minimum_viewport_widths )
+		1 === count( $groups_by_lcp_element_xpath )
 		&&
-		// The breakpoints don't share a common lack of an LCP image.
-		! in_array( false, $lcp_elements_by_minimum_viewport_widths, true )
+		// The breakpoints don't share a common lack of a detected LCP element.
+		! $group_has_unknown_lcp_element
 		&&
 		// All breakpoints have URL metrics being reported.
-		$all_breakpoints_have_url_metrics
+		$group_collection->is_every_group_populated()
 	) {
-		$common_lcp_element = current( $lcp_elements_by_minimum_viewport_widths );
+		$common_lcp_xpath = key( $groups_by_lcp_element_xpath );
 	} else {
-		$common_lcp_element = null;
+		$common_lcp_xpath = null;
 	}
 
-	/**
-	 * Mapping of XPath to true to indicate whether the element was found in the document.
-	 *
-	 * After processing through the entire document, only the elements which were actually found in the document can get
-	 * preload links.
-	 *
-	 * @var array<string, true> $detected_lcp_element_xpaths
-	 */
-	$detected_lcp_element_xpaths = array();
+	$preload_links = new OD_Preload_Link_Collection();
 
-	// Walk over all tags in the document and ensure fetchpriority is set/removed, and gather IMG attributes or background-image for preloading.
+	$is_data_url = static function ( string $url ): bool {
+		return str_starts_with( strtolower( $url ), 'data:' );
+	};
+
+	// Walk over all tags in the document and ensure fetchpriority is set/removed, and construct preload links for image LCP elements.
 	$walker = new OD_HTML_Tag_Walker( $buffer );
 	foreach ( $walker->open_tags() as $tag_name ) {
+		$src = trim( (string) $walker->get_attribute( 'src' ) );
+
 		$is_img_tag = (
 			'IMG' === $tag_name
 			&&
-			$walker->get_attribute( 'src' )
+			$src
 			&&
-			! str_starts_with( (string) $walker->get_attribute( 'src' ), 'data:' )
+			! $is_data_url( $src )
 		);
 
 		/*
@@ -295,9 +218,9 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		if (
 			$style
 			&&
-			preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?(?<background_image>.+?)[\'"]?\s*\)/', (string) $style, $matches )
+			preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', (string) $style, $matches )
 			&&
-			! str_starts_with( $matches['background_image'], 'data:' )
+			! $is_data_url( $matches['background_image'] )
 		) {
 			$background_image_url = $matches['background_image'];
 		}
@@ -310,7 +233,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 		// Ensure the fetchpriority attribute is set on the element properly.
 		if ( $is_img_tag ) {
-			if ( $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
+			if ( $common_lcp_xpath && $xpath === $common_lcp_xpath ) {
 				if ( 'high' === $walker->get_attribute( 'fetchpriority' ) ) {
 					$walker->set_attribute( 'data-od-fetchpriority-already-added', true );
 				} else {
@@ -323,7 +246,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 					$walker->set_attribute( 'data-od-removed-loading', $walker->get_attribute( 'loading' ) );
 					$walker->remove_attribute( 'loading' );
 				}
-			} elseif ( $all_breakpoints_have_url_metrics && $walker->get_attribute( 'fetchpriority' ) ) {
+			} elseif ( $walker->get_attribute( 'fetchpriority' ) && $group_collection->is_every_group_populated() ) {
 				// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
 				// continue to apply while waiting for all breakpoints to have metrics collected for them.
 				$walker->set_attribute( 'data-od-removed-fetchpriority', $walker->get_attribute( 'fetchpriority' ) );
@@ -334,29 +257,38 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		// TODO: If the image is visible (intersectionRatio!=0) in any of the URL metrics, remove loading=lazy.
 		// TODO: Conversely, if an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
 
-		// Capture the attributes from the LCP elements to use in preload links.
-		if ( isset( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] ) ) {
-			$detected_lcp_element_xpaths[ $xpath ] = true;
+		// If this element is the LCP (for a breakpoint group), add a preload link for it.
+		if ( array_key_exists( $xpath, $groups_by_lcp_element_xpath ) ) {
+			foreach ( $groups_by_lcp_element_xpath[ $xpath ] as $group ) {
+				$link_attributes = array(
+					'fetchpriority' => 'high',
+					'as'            => 'image',
+				);
+				if ( $is_img_tag ) {
+					$link_attributes = array_merge(
+						$link_attributes,
+						array_filter(
+							array(
+								'href'        => (string) $walker->get_attribute( 'src' ),
+								'imagesrcset' => (string) $walker->get_attribute( 'srcset' ),
+								'imagesizes'  => (string) $walker->get_attribute( 'sizes' ),
+							)
+						)
+					);
 
-			if ( $is_img_tag ) {
-				$img_attributes = array();
-				foreach ( array( 'src', 'srcset', 'sizes', 'crossorigin' ) as $attr_name ) {
-					$value = $walker->get_attribute( $attr_name );
-					if ( is_string( $value ) ) {
-						$img_attributes[ $attr_name ] = $value;
+					$crossorigin = $walker->get_attribute( 'crossorigin' );
+					if ( $crossorigin ) {
+						$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
 					}
+				} elseif ( $background_image_url ) {
+					$link_attributes['href'] = $background_image_url;
 				}
-				foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
-					if ( is_array( $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ] ) ) {
-						$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['img_attributes'] = $img_attributes;
-					}
-				}
-			} elseif ( $background_image_url ) {
-				foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
-					if ( is_array( $lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ] ) ) {
-						$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ]['background_image'] = $background_image_url;
-					}
-				}
+
+				$preload_links->add_link(
+					$link_attributes,
+					$group->get_minimum_viewport_width(),
+					$group->get_maximum_viewport_width()
+				);
 			}
 		}
 
@@ -365,20 +297,9 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 	}
 
-	// If there were any LCP elements captured in URL Metrics that no longer exist in the document, we need to behave as
-	// if they didn't exist in the first place as there is nothing that can be preloaded.
-	foreach ( array_keys( $lcp_element_minimum_viewport_widths_by_xpath ) as $xpath ) {
-		if ( empty( $detected_lcp_element_xpaths[ $xpath ] ) ) {
-			foreach ( $lcp_element_minimum_viewport_widths_by_xpath[ $xpath ] as $minimum_viewport_width ) {
-				$lcp_elements_by_minimum_viewport_widths[ $minimum_viewport_width ] = false;
-			}
-		}
-	}
-
 	// Inject any preload links at the end of the HEAD.
-	$head_injection = od_construct_preload_links( $lcp_elements_by_minimum_viewport_widths );
-	if ( $head_injection ) {
-		$walker->append_head_html( $head_injection );
+	if ( count( $preload_links ) > 0 ) {
+		$walker->append_head_html( $preload_links->get_html() );
 	}
 
 	// Inject detection script.

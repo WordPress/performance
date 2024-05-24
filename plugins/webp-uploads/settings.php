@@ -152,7 +152,7 @@ function webp_uploads_media_setting_style(): void {
  * Adds a settings link to the plugin's action links.
  *
  * @since 1.1.0
- * @since n.e.x.t Renamed from webp_uploads_settings_link() to webp_uploads_add_settings_action_link()
+ * @since 1.1.1 Renamed from webp_uploads_settings_link() to webp_uploads_add_settings_action_link()
  *
  * @param string[]|mixed $links An array of plugin action links.
  * @return string[]|mixed The modified list of actions.

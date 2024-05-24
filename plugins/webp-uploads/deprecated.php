@@ -4,7 +4,7 @@
  *
  * @package webp-uploads
  *
- * @since n.e.x.t
+ * @since 1.1.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

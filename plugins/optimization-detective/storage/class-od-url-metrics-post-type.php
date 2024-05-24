@@ -118,7 +118,7 @@ class OD_URL_Metrics_Post_Type {
 	 */
 	public static function get_url_metrics_from_post( WP_Post $post ): array {
 		$this_function   = __FUNCTION__;
-		$trigger_warning = static function ( $message ) use ( $this_function ): void {
+		$trigger_warning = static function ( string $message ) use ( $this_function ): void {
 			wp_trigger_error( $this_function, esc_html( $message ), E_USER_WARNING );
 		};
 
@@ -154,7 +154,6 @@ class OD_URL_Metrics_Post_Type {
 						}
 
 						try {
-							// @phpstan-ignore-next-line -- Invalid data will be validated in the constructor.
 							return new OD_URL_Metric( $url_metric_data );
 						} catch ( OD_Data_Validation_Exception $e ) {
 							$trigger_warning(

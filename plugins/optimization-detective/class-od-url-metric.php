@@ -45,18 +45,30 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Constructor.
 	 *
-	 * @phpstan-param Data $data URL metric data.
+	 * @phpstan-param Data|array<string, mixed> $data Valid data or invalid data (in which case an exception is thrown).
 	 *
-	 * @param array $data URL metric data.
+	 * @param array<string, mixed> $data URL metric data.
 	 *
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 */
 	public function __construct( array $data ) {
+		$this->validate_data( $data );
+		$this->data = $data;
+	}
+
+	/**
+	 * Validate data.
+	 *
+	 * @phpstan-assert Data $data
+	 *
+	 * @param array<string, mixed> $data Data to validate.
+	 * @throws OD_Data_Validation_Exception When the input is invalid.
+	 */
+	private function validate_data( array $data ): void {
 		$valid = rest_validate_object_value_from_schema( $data, self::get_json_schema(), self::class );
 		if ( is_wp_error( $valid ) ) {
 			throw new OD_Data_Validation_Exception( esc_html( $valid->get_error_message() ) );
 		}
-		$this->data = $data;
 	}
 
 	/**

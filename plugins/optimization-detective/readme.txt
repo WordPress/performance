@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.2
-Stable tag:        0.1.1
+Stable tag:        0.2.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images
@@ -68,7 +68,7 @@ Filters the sample size for a breakpoint's URL metrics on a given URL. The sampl
 
 `
 <?php
-add_filter( 'od_url_metrics_breakpoint_sample_size', function () { return 1; } );
+add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int { return 1; } );
 `
 
 **Filter:** `od_url_metric_storage_lock_ttl` (default: 1 minute)
@@ -77,7 +77,7 @@ Filters how long a given IP is locked from submitting another metric-storage RES
 
 `
 <?php
-add_filter( 'od_metrics_storage_lock_ttl', function ( $ttl ) {
+add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
     return is_user_logged_in() ? 0 : $ttl;
 } );
 `
@@ -136,6 +136,22 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.2.0 =
+
+**Enhancements**
+
+* Add optimization_detective_disabled query var to disable behavior. ([1193](https://github.com/WordPress/performance/pull/1193))
+* Facilitate embedding Optimization Detective in other plugins/themes. ([1185](https://github.com/WordPress/performance/pull/1185))
+* Use PHP 7.2 features in Optimization Detective. ([1162](https://github.com/WordPress/performance/pull/1162))
+* Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
+* Bump minimum PHP requirement to 7.2. ([1130](https://github.com/WordPress/performance/pull/1130))
+
+**Bug Fixes**
+
+* Avoid _doing_it_wrong() for Server-Timing in Optimization Detective when output buffering is not enabled. ([1194](https://github.com/WordPress/performance/pull/1194))
+* Ensure only HTML responses are optimized. ([1189](https://github.com/WordPress/performance/pull/1189))
+* Fix XPath indices to be 1-based instead of 0-based. ([1191](https://github.com/WordPress/performance/pull/1191))
 
 = 0.1.1 =
 

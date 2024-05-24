@@ -219,4 +219,168 @@ class OD_URL_Metrics_Group_Tests extends WP_UnitTestCase {
 		$this->assertSame( $viewport_width, iterator_to_array( $group )[0]->get_viewport()['width'] );
 		$this->assertTrue( $group->is_complete() );
 	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @throws OD_Data_Validation_Exception When failing to instantiate a URL metric.
+	 * @return array<string, mixed> Data.
+	 */
+	public function data_provider_test_get_lcp_element(): array {
+		return array(
+			'common_lcp_element_across_breakpoints'    => array(
+				'breakpoints'                 => array( 600, 800 ),
+				'url_metrics'                 => array(
+					// 0.
+					$this->get_validated_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
+					$this->get_validated_url_metric( 599, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					// 600.
+					$this->get_validated_url_metric( 600, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$this->get_validated_url_metric( 700, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					// 800.
+					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+				),
+				'expected_lcp_element_xpaths' => array_fill_keys(
+					array(
+						'0:600',
+						'601:800',
+						'801:',
+					),
+					$this->get_xpath( 'HTML', 'BODY', 'FIGURE', 'IMG' )
+				),
+			),
+			'different_lcp_elements_across_breakpoint' => array(
+				'breakpoints'                 => array( 600 ),
+				'url_metrics'                 => array(
+					// 0.
+					$this->get_validated_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
+					$this->get_validated_url_metric( 600, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					// 600.
+					$this->get_validated_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+				),
+				'expected_lcp_element_xpaths' => array(
+					'0:600' => $this->get_xpath( 'HTML', 'BODY', 'FIGURE', 'IMG' ),
+					'601:'  => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
+				),
+			),
+			'same_lcp_element_across_non_consecutive_breakpoints' => array(
+				'breakpoints'                 => array( 400, 600 ),
+				'url_metrics'                 => array(
+					// 0.
+					$this->get_validated_url_metric( 300, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+					// 400.
+					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'HEADER', 'IMG' ), false ),
+					// 600.
+					$this->get_validated_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+				),
+				'expected_lcp_element_xpaths' => array(
+					'0:400'   => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
+					'401:600' => null, // The (image) element is either not visible at this breakpoint or it is not LCP element.
+					'601:'    => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
+				),
+			),
+			'no_lcp_image_elements'                    => array(
+				'breakpoints'                 => array( 600 ),
+				'url_metrics'                 => array(
+					// 0.
+					$this->get_validated_url_metric( 300, array( 'HTML', 'BODY', 'IMG' ), false ),
+					// 600.
+					$this->get_validated_url_metric( 700, array( 'HTML', 'BODY', 'IMG' ), false ),
+				),
+				'expected_lcp_element_xpaths' => array_fill_keys(
+					array(
+						'0:600',
+						'601:',
+					),
+					null
+				),
+			),
+		);
+	}
+
+	/**
+	 * Test get_lcp_element().
+	 *
+	 * @covers ::get_lcp_element
+	 * @dataProvider data_provider_test_get_lcp_element
+	 *
+	 * @param int[]              $breakpoints Breakpoints.
+	 * @param OD_URL_Metric[]    $url_metrics URL Metrics.
+	 * @param array<int, string> $expected_lcp_element_xpaths Expected XPaths.
+	 */
+	public function test_get_lcp_element( array $breakpoints, array $url_metrics, array $expected_lcp_element_xpaths ): void {
+		$group_collection = new OD_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, 10, HOUR_IN_SECONDS );
+
+		$lcp_element_xpaths_by_minimum_viewport_widths = array();
+		foreach ( $group_collection as $group ) {
+			$lcp_element = $group->get_lcp_element();
+			$width_range = sprintf( '%d:', $group->get_minimum_viewport_width() );
+			if ( $group->get_maximum_viewport_width() !== PHP_INT_MAX ) {
+				$width_range .= $group->get_maximum_viewport_width();
+			}
+			$lcp_element_xpaths_by_minimum_viewport_widths[ $width_range ] = $lcp_element['xpath'] ?? null;
+		}
+
+		$this->assertSame( $expected_lcp_element_xpaths, $lcp_element_xpaths_by_minimum_viewport_widths );
+	}
+
+	/**
+	 * Gets a validated URL metric for testing.
+	 *
+	 * @param int      $viewport_width Viewport width.
+	 * @param string[] $breadcrumbs    Breadcrumb tags.
+	 * @param bool     $is_lcp         Whether LCP.
+	 *
+	 * @return OD_URL_Metric Validated URL metric.
+	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
+	 */
+	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): OD_URL_Metric {
+		$data = array(
+			'url'       => home_url( '/' ),
+			'viewport'  => array(
+				'width'  => $viewport_width,
+				'height' => 640,
+			),
+			'timestamp' => microtime( true ),
+			'elements'  => array(
+				array(
+					'isLCP'              => $is_lcp,
+					'isLCPCandidate'     => $is_lcp,
+					'xpath'              => $this->get_xpath( ...$breadcrumbs ),
+					'intersectionRatio'  => 1,
+					'intersectionRect'   => array(
+						'width'  => 100,
+						'height' => 100,
+					),
+					'boundingClientRect' => array(
+						'width'  => 100,
+						'height' => 100,
+					),
+				),
+			),
+		);
+		return new OD_URL_Metric( $data );
+	}
+
+	/**
+	 * Gets sample XPath.
+	 *
+	 * @param string ...$breadcrumbs List of tags.
+	 * @return string XPath.
+	 */
+	private function get_xpath( string ...$breadcrumbs ): string {
+		return implode(
+			'',
+			array_map(
+				static function ( $tag ): string {
+					return sprintf( '/*[0][self::%s]', strtoupper( $tag ) );
+				},
+				$breadcrumbs
+			)
+		);
+	}
 }
