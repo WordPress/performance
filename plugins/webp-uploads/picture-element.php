@@ -84,12 +84,14 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	$picture_sources = '';
 
 	// Extract sizes using regex to parse image tag, then use to retrieve tag.
-	$image_sizes = array();
-	preg_match( '/width="([^"]+)"/', $image, $image_sizes );
-	$width = isset( $image_sizes[1] ) ? (int) $image_sizes[1] : false;
-	preg_match( '/height="([^"]+)"/', $image, $image_sizes );
-	$height      = isset( $image_sizes[1] ) ? (int) $image_sizes[1] : false;
-	$size_to_use = ( $width && $height ) ? array( $width, $height ) : 'full';
+	$width     = 0;
+	$height    = 0;
+	$processor = new WP_HTML_Tag_Processor( $image );
+	if ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+		$width  = (int) $processor->get_attribute( 'width' );
+		$height = (int) $processor->get_attribute( 'height' );
+	}
+	$size_to_use = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
 
 	$image_src = wp_get_attachment_image_src( $attachment_id, $size_to_use, false );
 	if ( ! $image_src ) {
