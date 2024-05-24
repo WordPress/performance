@@ -71,7 +71,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	);
 
 	// No eligible mime types.
-	if ( ! $mime_types ) {
+	if ( count( $mime_types ) === 0 ) {
 		return $image;
 	}
 
