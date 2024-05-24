@@ -370,7 +370,7 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
  */
 function webp_uploads_get_image_output_format(): string {
 	$image_format = get_option( 'perflab_modern_image_format' );
-	return webp_uploads_image_format_is_supported( $image_format ) ? $image_format : 'avif';
+	return webp_uploads_sanitize_image_format( $image_format );
 }
 
 /**
