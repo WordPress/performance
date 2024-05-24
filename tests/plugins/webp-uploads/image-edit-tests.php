@@ -2,8 +2,6 @@
 /**
  * Tests for webp-uploads plugin image-edit.php.
  *
- * @group images
- *
  * @package webp-uploads
  * @subpackage image-edit
  */

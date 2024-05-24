@@ -2,8 +2,6 @@
 /**
  * Tests for webp-uploads plugin rest-api.php.
  *
- * @group images
- *
  * @package webp-uploads
  */
 

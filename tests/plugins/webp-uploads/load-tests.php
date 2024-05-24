@@ -2,8 +2,6 @@
 /**
  * Tests for webp-uploads plugin load.php.
  *
- * @group images
- *
  * @package webp-uploads
  */
 
