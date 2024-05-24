@@ -104,29 +104,27 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		$sizes = wp_calculate_image_sizes( $size_array, $src, $image_meta, $attachment_id );
 		// Filter core's wp_get_attachment_image_srcset to return the sources for the current mime type.
 
-		add_filter(
-			'wp_calculate_image_srcset',
-			static function ( $sources ) use ( $mime_type_data, $image_mime_type ) {
-				$filtered_sources = array();
-				foreach ( $sources as $source ) {
-					// Swap the URL for the current mime type.
-					if ( isset( $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ] ) ) {
-						$filename  = $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ]['file'];
-						$url_array = explode( '/', $source['url'] );
-						array_pop( $url_array );
+		$filter = static function ( $sources ) use ( $mime_type_data, $image_mime_type ): array {
+			$filtered_sources = array();
+			foreach ( $sources as $source ) {
+				// Swap the URL for the current mime type.
+				if ( isset( $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ] ) ) {
+					$filename  = $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ]['file'];
+					$url_array = explode( '/', $source['url'] );
+					array_pop( $url_array );
 
-						$filtered_sources[] = array(
-							'url'        => implode( '/', $url_array ) . '/' . $filename,
-							'descriptor' => $source['descriptor'],
-							'value'      => $source['value'],
-						);
-					}
+					$filtered_sources[] = array(
+						'url'        => implode( '/', $url_array ) . '/' . $filename,
+						'descriptor' => $source['descriptor'],
+						'value'      => $source['value'],
+					);
 				}
-				return $filtered_sources;
 			}
-		);
+			return $filtered_sources;
+		};
+		add_filter( 'wp_calculate_image_srcset', $filter );
 		$image_srcset = wp_get_attachment_image_srcset( $attachment_id, $size_array, $image_meta );
-		remove_all_filters( 'wp_calculate_image_srcset' );
+		remove_filter( 'wp_calculate_image_srcset', $filter );
 
 		$picture_sources .= sprintf(
 			'<source type="%s" srcset="%s" sizes="%s">',
