@@ -9,7 +9,7 @@ parameters:
 		- performance.php
 		- plugins/performance-lab/load.php
 	bootstrapFiles:
-		- bin/phpstan/constants.php
+		- tools/phpstan/constants.php
 		- plugins/performance-lab/load.php
 		- plugins/webp-uploads/load.php
 	scanDirectories:
@@ -20,7 +20,7 @@ parameters:
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
 	stubFiles:
-		- bin/phpstan/filtered-functions.stub
+		- tools/phpstan/filtered-functions.stub
 	dynamicConstantNames:
 		- PERFLAB_OBJECT_CACHE_DROPIN_VERSION
 	ignoreErrors:
