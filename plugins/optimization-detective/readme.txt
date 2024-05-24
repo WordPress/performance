@@ -68,7 +68,7 @@ Filters the sample size for a breakpoint's URL metrics on a given URL. The sampl
 
 `
 <?php
-add_filter( 'od_url_metrics_breakpoint_sample_size', function () { return 1; } );
+add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int { return 1; } );
 `
 
 **Filter:** `od_url_metric_storage_lock_ttl` (default: 1 minute)
@@ -77,7 +77,7 @@ Filters how long a given IP is locked from submitting another metric-storage RES
 
 `
 <?php
-add_filter( 'od_metrics_storage_lock_ttl', function ( $ttl ) {
+add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
     return is_user_logged_in() ? 0 : $ttl;
 } );
 `

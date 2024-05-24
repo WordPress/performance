@@ -51,7 +51,7 @@ function od_register_endpoint(): void {
 			'description'       => __( 'Nonce originally computed by server required to authorize the request.', 'optimization-detective' ),
 			'required'          => true,
 			'pattern'           => '^[0-9a-f]+$',
-			'validate_callback' => static function ( $nonce, WP_REST_Request $request ) {
+			'validate_callback' => static function ( string $nonce, WP_REST_Request $request ) {
 				if ( ! od_verify_url_metrics_storage_nonce( $nonce, $request->get_param( 'slug' ), $request->get_param( 'url' ) ) ) {
 					return new WP_Error( 'invalid_nonce', __( 'URL metrics nonce verification failure.', 'optimization-detective' ) );
 				}

@@ -27,7 +27,7 @@ final class OD_HTML_Tag_Walker {
 	 *
 	 * @link https://html.spec.whatwg.org/multipage/syntax.html#void-elements
 	 * @see WP_HTML_Processor::is_void()
-	 * @todo Reuse `WP_HTML_Processor::is_void()` once WordPress 6.4 is the minimum-supported version.
+	 * @todo Reuse `WP_HTML_Processor::is_void()` once WordPress 6.5 is the minimum-supported version. See <https://github.com/WordPress/performance/pull/1115>.
 	 *
 	 * @var string[]
 	 */
@@ -170,6 +170,23 @@ final class OD_HTML_Tag_Walker {
 	private $processor;
 
 	/**
+	 * XPath for the current tag.
+	 *
+	 * This is used so that repeated calls to {@see self::get_xpath()} won't needlessly reconstruct the string. This
+	 * gets cleared whenever {@see self::open_tags()} iterates to the next tag.
+	 *
+	 * @var string|null
+	 */
+	private $current_xpath = null;
+
+	/**
+	 * Whether walking has started.
+	 *
+	 * @var bool
+	 */
+	private $did_start_walking = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $html HTML to process.
@@ -187,8 +204,15 @@ final class OD_HTML_Tag_Walker {
 	 * @since 0.1.0
 	 *
 	 * @return Generator<string> Tag name of current open tag.
+	 *
+	 * @throws Exception When walking has already started.
 	 */
 	public function open_tags(): Generator {
+		if ( $this->did_start_walking ) {
+			throw new Exception( esc_html__( 'Open tags may only be iterated over once per instance.', 'optimization-detective' ) );
+		}
+		$this->did_start_walking = true;
+
 		$p = $this->processor;
 
 		/*
@@ -236,6 +260,8 @@ final class OD_HTML_Tag_Walker {
 				} else {
 					++$this->open_stack_indices[ $level ];
 				}
+
+				$this->current_xpath = null; // Clear cache.
 
 				// Now that the breadcrumbs are constructed, yield the tag name so that they can be queried if desired.
 				// Other mutations may be performed to the open tag's attributes by the callee at this point as well.
@@ -339,11 +365,13 @@ final class OD_HTML_Tag_Walker {
 	 * @return string XPath.
 	 */
 	public function get_xpath(): string {
-		$xpath = '';
-		foreach ( $this->get_breadcrumbs() as list( $tag_name, $index ) ) {
-			$xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
+		if ( null === $this->current_xpath ) {
+			$this->current_xpath = '';
+			foreach ( $this->get_breadcrumbs() as list( $tag_name, $index ) ) {
+				$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
+			}
 		}
-		return $xpath;
+		return $this->current_xpath;
 	}
 
 	/**
@@ -378,6 +406,21 @@ final class OD_HTML_Tag_Walker {
 			$this->warn( __( 'Unable to append markup to the BODY.', 'optimization-detective' ) );
 		}
 		return $success;
+	}
+
+	/**
+	 * Returns the uppercase name of the matched tag.
+	 *
+	 * This is a wrapper around the underlying WP_HTML_Tag_Processor method of the same name since only a limited number of
+	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
+	 *
+	 * @since n.e.x.t
+	 * @see WP_HTML_Tag_Processor::get_tag()
+	 *
+	 * @return string|null Name of currently matched tag in input HTML, or `null` if none found.
+	 */
+	public function get_tag(): ?string {
+		return $this->processor->get_tag();
 	}
 
 	/**
