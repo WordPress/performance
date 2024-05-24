@@ -82,8 +82,6 @@ add_action( 'wp_enqueue_scripts', 'wwo_init' );
  * @return string[] Array of script handles.
  */
 function wwo_get_partytown_handles(): array {
-	global $wp_scripts;
-
 	/**
 	 * Array of script handles which has `partytown` dependency.
 	 *
@@ -95,7 +93,7 @@ function wwo_get_partytown_handles(): array {
 		return $partytown_handles;
 	}
 
-	foreach ( $wp_scripts->registered as $handle => $script ) {
+	foreach ( wp_scripts()->registered as $handle => $script ) {
 		if ( ! empty( $script->deps ) && in_array( 'partytown', $script->deps, true ) ) {
 			$partytown_handles[] = $handle;
 		}
@@ -116,13 +114,11 @@ function wwo_get_partytown_handles(): array {
  * @return string $tag Script tag with type="text/partytown".
  */
 function wwo_update_script_type( string $tag, string $handle, string $src ): string {
-	global $wp_scripts;
-
 	$partytown_handles = wwo_get_partytown_handles();
 
 	if ( in_array( $handle, $partytown_handles, true ) ) {
-		$before_script = $wp_scripts->get_inline_script_data( $handle, 'before' );
-		$after_script  = $wp_scripts->get_inline_script_data( $handle, 'after' );
+		$before_script = wp_scripts()->get_inline_script_data( $handle, 'before' );
+		$after_script  = wp_scripts()->get_inline_script_data( $handle, 'after' );
 
 		if ( ! empty( $before_script ) || ! empty( $after_script ) ) {
 			_doing_it_wrong(
