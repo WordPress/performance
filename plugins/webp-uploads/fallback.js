@@ -112,12 +112,8 @@ window.wpPerfLab = window.wpPerfLab || {};
 
 			if (
 				node.nodeName !== 'IMG' ||
-				( 'webp' === webpUploadsOutputFormat &&
-					! node.src.match( /\.webp$/i ) &&
-					! srcset.match( /\.webp\s+/ ) ) ||
-				( 'avif' === webpUploadsOutputFormat &&
-					! node.src.match( /\.avif$/i ) &&
-					! srcset.match( /\.avif\s+/ ) )
+				( ! node.src.match( /\.(webp|avif)$/i ) &&
+					! srcset.match( /\.(webp|avif)\s+/ ) )
 			) {
 				continue;
 			}
