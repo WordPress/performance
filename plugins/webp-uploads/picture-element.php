@@ -149,8 +149,8 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	remove_filter( 'wp_calculate_image_srcset_meta', $filter );
 
 	return sprintf(
-		'<picture class=%s>%s %s</picture>',
-		'wp-picture-' . $attachment_id,
+		'<picture class="%s">%s%s</picture>',
+		esc_attr( 'wp-picture-' . $attachment_id ),
 		$picture_sources,
 		$original_image_without_srcset
 	);
