@@ -140,7 +140,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	if ( false === $original_image ) {
 		return $image;
 	}
-	$filter = function (): bool {
+	$filter = static function (): bool {
 		return false;
 	};
 	add_filter( 'wp_calculate_image_srcset_meta', $filter );
