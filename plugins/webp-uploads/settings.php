@@ -116,7 +116,6 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
  * @since 1.0.0
  */
 function webp_uploads_generate_webp_jpeg_setting_callback(): void {
-
 	?>
 
 		<label for="perflab_generate_webp_and_jpeg">
