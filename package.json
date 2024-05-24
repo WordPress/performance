@@ -39,6 +39,7 @@
     "build:plugin:embed-optimizer": "webpack --mode production --env plugin=embed-optimizer",
     "build:plugin:optimization-detective": "webpack --mode production --env plugin=optimization-detective",
     "build:plugin:speculation-rules": "webpack --mode production --env plugin=speculation-rules",
+    "build:plugin:web-worker-offloading": "webpack --mode production --env plugin=web-worker-offloading",
     "build:plugin:webp-uploads": "webpack --mode production --env plugin=webp-uploads",
     "generate-pending-release-diffs": "bin/generate-pending-release-diffs.sh",
     "format-js": "wp-scripts format",
