@@ -362,7 +362,7 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 }
 
 /**
- * Get the image output format from the option, falling back to webp.
+ * Get the image output format from the option, falling back to webp if unset.
  *
  * @since n.e.x.t
  *
@@ -370,5 +370,17 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
  */
 function webp_uploads_get_image_output_format(): string {
 	$image_format = get_option( 'perflab_modern_image_format' );
-	return in_array( $image_format, array( 'webp', 'avif' ), true ) ? $image_format : 'webp';
+	return webp_uploads_image_format_is_supported( $image_format ) ? $image_format : 'webp';
+}
+
+/**
+ * Check if an image format type is supported by the plugin.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $image_format The image format to check.
+ * @return bool Whether the image format is supported.
+ */
+function webp_uploads_image_format_is_supported( string $image_format ): bool {
+	return in_array( $image_format, array( 'webp', 'avif' ), true );
 }
