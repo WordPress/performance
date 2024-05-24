@@ -7,8 +7,8 @@
     "npm": ">=10.2.3"
   },
   "dependencies": {
-    "web-vitals": "3.5.0",
-    "@builder.io/partytown": "^0.8.2"
+    "@builder.io/partytown": "^0.10.2",
+    "web-vitals": "3.5.0"
   },
   "devDependencies": {
     "@octokit/rest": "^19.0.5",
