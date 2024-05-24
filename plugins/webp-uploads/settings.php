@@ -33,7 +33,7 @@ function webp_uploads_register_media_settings_field(): void {
 		array(
 			'type'         => 'boolean',
 			// Use picture element by default if the theme declares support for it.
-			'default'      => current_theme_supports( 'html5', 'picture' ) ? true : false,
+			'default'      => current_theme_supports( 'html5', 'picture' ),
 			'show_in_rest' => false,
 		)
 	);
