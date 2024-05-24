@@ -2,7 +2,7 @@
 <ruleset name="WPP-WebPUploads">
 	<description>WordPress Coding Standards for Modern Image Formats Plugin</description>
 
-	<rule ref="../../bin/phpcs/phpcs.ruleset.xml"/>
+	<rule ref="../../tools/phpcs/phpcs.ruleset.xml"/>
 
 	<config name="text_domain" value="webp-uploads"/>
 
