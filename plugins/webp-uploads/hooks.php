@@ -103,16 +103,14 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 			continue;
 		}
 
-		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
-		$destination = trailingslashit( $original_directory ) . "{$filename}-{$ext}.{$extension[0]}";
-		$image       = webp_uploads_generate_additional_image_source( $attachment_id, 'full', $original_size_data, $targeted_mime, $destination );
+		$image = webp_uploads_generate_additional_image_source( $attachment_id, 'full', $original_size_data, $targeted_mime );
 
 		if ( is_wp_error( $image ) ) {
 			continue;
 		}
 
 		if ( webp_uploads_should_discard_additional_image_file( $metadata, $image ) ) {
-			wp_delete_file_from_directory( $destination, $original_directory );
+			wp_delete_file_from_directory( $image['file'], $original_directory );
 			continue;
 		}
 

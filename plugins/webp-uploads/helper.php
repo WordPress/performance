@@ -159,11 +159,8 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	$editor->resize( $width, $height, $crop );
 
 	if ( null === $destination_file_name ) {
-		$ext                   = pathinfo( $image_path, PATHINFO_EXTENSION );
-		$suffix                = $editor->get_suffix();
-		$suffix               .= "-{$ext}";
 		$extension             = explode( '|', $allowed_mimes[ $mime ] );
-		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
+		$destination_file_name = webp_uploads_generate_filename( $editor, $image_path, $image_size, $extension[0] );
 	}
 
 	remove_filter( 'image_editor_output_format', 'webp_uploads_filter_image_editor_output_format', 10 );
@@ -182,6 +179,36 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 		'file'     => $image['file'],
 		'filesize' => isset( $image['path'] ) ? wp_filesize( $image['path'] ) : 0,
 	);
+}
+
+/**
+ * Generates a file name for an image with a different extension.
+ *
+ * @since n.e.x.t
+ *
+ * @param WP_Image_Editor $editor    The image editor that handle the image manipulation.
+ * @param string          $file      Full path to the image file.
+ * @param string          $size      The image size.
+ * @param string          $extension The image extension.
+ * @return string File name with a different extension.
+ */
+function webp_uploads_generate_filename( WP_Image_Editor $editor, string $file, string $size, string $extension ): string {
+	$ext = pathinfo( $file, PATHINFO_EXTENSION );
+	if ( $extension === $ext ) {
+		return $file;
+	}
+
+	$dir    = trailingslashit( pathinfo( $file, PATHINFO_DIRNAME ) );
+	$name   = wp_basename( $file, ".$ext" );
+	$suffix = 'full' === $size ? '' : '-' . $editor->get_suffix();
+
+	// Add "-{$ext}" to the filename if an image with the same name already exists.
+	$file = "{$dir}{$name}{$suffix}.{$extension}";
+	if ( file_exists( $file ) ) {
+		$file = "{$dir}{$name}{$suffix}-{$ext}.{$extension}";
+	}
+
+	return $file;
 }
 
 /**
