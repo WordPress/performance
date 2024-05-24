@@ -51,6 +51,7 @@
       "@format:embed-optimizer",
       "@format:optimization-detective",
       "@format:speculation-rules",
+      "@format:web-worker-offloading",
       "@format:webp-uploads"
     ],
     "format:auto-sizes":             "@format -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
@@ -68,6 +69,7 @@
       "@lint:optimization-detective",
       "@lint:performance-lab",
       "@lint:speculation-rules",
+      "@lint:web-worker-offloading",
       "@lint:webp-uploads"
     ],
     "lint:auto-sizes":             "@lint -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
@@ -87,6 +89,7 @@
       "@test-multisite:optimization-detective",
       "@test-multisite:performance-lab",
       "@test-multisite:speculation-rules",
+      "@test-multisite:web-worker-offloading",
       "@test-multisite:webp-uploads"
     ],
     "test-multisite:auto-sizes":             "@test-multisite --verbose --testsuite auto-sizes",
@@ -103,6 +106,7 @@
       "@test:optimization-detective",
       "@test:performance-lab",
       "@test:speculation-rules",
+      "@test:web-worker-offloading",
       "@test:webp-uploads"
     ],
     "test:auto-sizes":             "@test --verbose --testsuite auto-sizes",
