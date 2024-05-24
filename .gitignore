@@ -32,9 +32,7 @@ build
 
 node_modules/
 vendor/
-plugins/optimization-detective/detection/web-vitals*
 
-modules/js-and-css/partytown-web-worker/assets/js/partytown
 ############
 ## OSes
 ############
