@@ -25,9 +25,7 @@ function webp_uploads_register_media_settings_field(): void {
 		'media',
 		'perflab_modern_image_format',
 		array(
-			'sanitize_callback' => static function ( $image_format ): string {
-				return webp_uploads_image_format_is_supported( $image_format ) ? $image_format : 'avif'; // Default to AVIF.
-			},
+			'sanitize_callback' => 'webp_uploads_sanitize_image_format',
 			'type'              => 'string',
 			'default'           => 'avif',                                                                                                                                    // AVIF is the default if the editor supports it.
 			'show_in_rest'      => false,
