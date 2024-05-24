@@ -20,7 +20,7 @@
  * @return string The new image tag.
  */
 function webp_uploads_wrap_image_in_picture( string $image, string $context, int $attachment_id ): string {
-	if ( 'the_content' !== $context || ! webp_uploads_picture_element_enabled() ) {
+	if ( 'the_content' !== $context ) {
 		return $image;
 	}
 	$image_meta              = wp_get_attachment_metadata( $attachment_id );
