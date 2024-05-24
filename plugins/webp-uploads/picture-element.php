@@ -1,10 +1,9 @@
 <?php
 /**
- * Add Picture Element support
- * Description: Use <picture> element when image has more than one mime type.
- * Experimental: No
+ * Add `picture` element support
  *
- * @package performance-lab
+ * @package webp-uploads
+ *
  * @since n.e.x.t
  */
 
