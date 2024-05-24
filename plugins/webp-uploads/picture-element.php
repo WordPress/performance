@@ -137,7 +137,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	$original_sizes = array( $image_src[1], $image_src[2] );
 	$original_image = wp_get_original_image_url( $attachment_id );
 	// Fail gracefully if the original image is not found.
-	if ( ! $original_image ) {
+	if ( false === $original_image ) {
 		return $image;
 	}
 	$filter = function (): bool {
