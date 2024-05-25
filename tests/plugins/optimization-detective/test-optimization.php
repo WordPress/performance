@@ -340,19 +340,20 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 			return (string) preg_replace( '/^\t+/m', '', $input );
 		};
 
-		add_filter(
-			'od_html_tag_walker_visitors',
-			function ( array $visitors, OD_HTML_Tag_Walker $walker_outer, OD_URL_Metrics_Group_Collection $url_metrics_outer, OD_Preload_Link_Collection $preload_links_outer ): array {
-				$visitors[] = function ( OD_HTML_Tag_Walker $walker, OD_URL_Metrics_Group_Collection $url_metrics, OD_Preload_Link_Collection $preload_links ) use ( $walker_outer, $url_metrics_outer, $preload_links_outer ): bool {
-					$this->assertSame( $walker, $walker_outer );
-					$this->assertSame( $url_metrics, $url_metrics_outer );
-					$this->assertSame( $preload_links, $preload_links_outer );
-					return $walker->get_tag() === 'IMG';
-				};
-				return $visitors;
+		add_action(
+			'od_register_tag_visitors',
+			function ( OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metrics_Group_Collection $url_metrics_outer, OD_Preload_Link_Collection $preload_links_outer ): void {
+				$tag_visitor_registry->register(
+					'img',
+					function ( OD_HTML_Tag_Walker $walker, OD_URL_Metrics_Group_Collection $url_metrics, OD_Preload_Link_Collection $preload_links ) use ( $url_metrics_outer, $preload_links_outer ): bool {
+						$this->assertSame( $url_metrics, $url_metrics_outer );
+						$this->assertSame( $preload_links, $preload_links_outer );
+						return $walker->get_tag() === 'IMG';
+					}
+				);
 			},
 			10,
-			4
+			3
 		);
 
 		$expected = $remove_initial_tabs( $expected );

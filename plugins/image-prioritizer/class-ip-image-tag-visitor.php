@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Visitor for the tag walker that optimizes image tags (both `img` tags and elements with background-image styles).
  *
+ * @todo Let this be an abstract class that a background-image visitor and an IMG tag visitor both inherit from.
+ *
  * @since n.e.x.t
  * @access private
  */
@@ -25,7 +27,6 @@ final class IP_Image_Tag_Visitor {
 	 * @var OD_URL_Metrics_Group_Collection
 	 */
 	private $url_metrics_group_collection;
-
 
 	/**
 	 * Preload Link Collection.
@@ -156,41 +157,39 @@ final class IP_Image_Tag_Visitor {
 		// TODO: Conversely, if an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
 
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
-		if ( array_key_exists( $xpath, $this->groups_by_lcp_element_xpath ) ) {
-			foreach ( $this->groups_by_lcp_element_xpath[ $xpath ] as $group ) {
-				$link_attributes = array(
-					'fetchpriority' => 'high',
-					'as'            => 'image',
-				);
-				if ( $is_img_tag ) {
-					$link_attributes = array_merge(
-						$link_attributes,
-						array_filter(
-							array(
-								'href'        => (string) $walker->get_attribute( 'src' ),
-								'imagesrcset' => (string) $walker->get_attribute( 'srcset' ),
-								'imagesizes'  => (string) $walker->get_attribute( 'sizes' ),
-							),
-							static function ( string $value ): bool {
-								return '' !== $value;
-							}
-						)
-					);
-
-					$crossorigin = $walker->get_attribute( 'crossorigin' );
-					if ( is_string( $crossorigin ) ) {
-						$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
-					}
-				} else {
-					$link_attributes['href'] = $background_image_url;
-				}
-
-				$this->preload_links_collection->add_link(
+		foreach ( $this->url_metrics_group_collection->get_groups_with_lcp_element( $xpath ) as $group ) {
+			$link_attributes = array(
+				'fetchpriority' => 'high',
+				'as'            => 'image',
+			);
+			if ( $is_img_tag ) {
+				$link_attributes = array_merge(
 					$link_attributes,
-					$group->get_minimum_viewport_width(),
-					$group->get_maximum_viewport_width()
+					array_filter(
+						array(
+							'href'        => (string) $walker->get_attribute( 'src' ),
+							'imagesrcset' => (string) $walker->get_attribute( 'srcset' ),
+							'imagesizes'  => (string) $walker->get_attribute( 'sizes' ),
+						),
+						static function ( string $value ): bool {
+							return '' !== $value;
+						}
+					)
 				);
+
+				$crossorigin = $walker->get_attribute( 'crossorigin' );
+				if ( is_string( $crossorigin ) ) {
+					$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
+				}
+			} else {
+				$link_attributes['href'] = $background_image_url;
 			}
+
+			$this->preload_links_collection->add_link(
+				$link_attributes,
+				$group->get_minimum_viewport_width(),
+				$group->get_maximum_viewport_width()
+			);
 		}
 
 		return true;

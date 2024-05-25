@@ -213,6 +213,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * method below.
 	 *
 	 * @see OD_URL_Metrics_Group_Collection::is_every_group_complete()
+	 * @todo Cache the result.
 	 *
 	 * @return bool Whether all groups have some URL metrics.
 	 */
@@ -229,6 +230,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * Checks whether every group is complete.
 	 *
 	 * @see OD_URL_Metrics_Group::is_complete()
+	 * @todo Cache the result.
 	 *
 	 * @return bool Whether all groups are complete.
 	 */
@@ -239,6 +241,25 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Gets the groups with the provided LCP element.
+	 *
+	 * @todo Cache the result.
+	 *
+	 * @param string $xpath XPath for LCP element.
+	 * @return OD_URL_Metrics_Group[] Groups which have the LCP element.
+	 */
+	public function get_groups_with_lcp_element( string $xpath ): array {
+		$groups = array();
+		foreach ( $this->groups as $group ) {
+			$lcp_element = $group->get_lcp_element();
+			if ( ! is_null( $lcp_element ) && $xpath === $lcp_element['xpath'] ) {
+				$groups[] = $group;
+			}
+		}
+		return $groups;
 	}
 
 	/**

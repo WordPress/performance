@@ -114,6 +114,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		// Optimization logic.
 		require_once __DIR__ . '/class-od-html-tag-walker.php';
 		require_once __DIR__ . '/class-od-preload-link-collection.php';
+		require_once __DIR__ . '/class-od-tag-visitor-registry.php';
 		require_once __DIR__ . '/optimization.php';
 
 		// Add hooks for the above requires.

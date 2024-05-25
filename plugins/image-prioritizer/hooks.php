@@ -12,9 +12,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 add_action( 'wp_head', 'ip_render_generator_meta_tag' );
 
-add_filter(
-	'od_html_tag_walker_visitors',
-	'ip_filter_tag_walker_visitors',
-	10,
-	4
-);
+add_action( 'od_register_tag_visitors', 'ip_register_tag_visitor', 10, 3 );

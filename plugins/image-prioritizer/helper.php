@@ -23,29 +23,16 @@ function ip_render_generator_meta_tag(): void {
 }
 
 /**
- * Filters the tag walker visitors which apply image prioritizer optimizations.
+ * Register tag visitor for images.
  *
- * @since 0.1.0
+ * @since n.e.x.t
  *
- * @param array<string|int, callable( OD_HTML_Tag_Walker, OD_URL_Metrics_Group_Collection, OD_Preload_Link_Collection ): bool>|mixed $visitors         Visitors which are invoked for each tag in the document.
- * @param OD_HTML_Tag_Walker                                                                                                         $walker           HTML tag walker.
- * @param OD_URL_Metrics_Group_Collection                                                                                            $group_collection URL metrics group collection.
- * @param OD_Preload_Link_Collection                                                                                                 $preload_links    Preload link collection.
- * @return array<string|int, callable( OD_HTML_Tag_Walker, OD_URL_Metrics_Group_Collection, OD_Preload_Link_Collection ): bool> Visitors.
+ * @param OD_Tag_Visitor_Registry         $registry                     Tag visitor registry.
+ * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
+ * @param OD_Preload_Link_Collection      $preload_links_collection     Preload Links Collection.
  */
-function ip_filter_tag_walker_visitors( $visitors, OD_HTML_Tag_Walker $walker, OD_URL_Metrics_Group_Collection $group_collection, OD_Preload_Link_Collection $preload_links ): array {
-	if ( ! is_array( $visitors ) ) {
-		$visitors = array();
-	}
-
-	/**
-	 * Visitors.
-	 *
-	 * @var array<string|int, callable( OD_HTML_Tag_Walker, OD_URL_Metrics_Group_Collection, OD_Preload_Link_Collection ): bool> $visitors
-	 */
-
+function ip_register_tag_visitor( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Preload_Link_Collection $preload_links_collection ): void {
 	// Note: The IP_Image_Tag_Visitor class is invocable (it as an __invoke() method).
-	$visitors[] = new IP_Image_Tag_Visitor( $group_collection, $preload_links );
-
-	return $visitors;
+	$visitor = new IP_Image_Tag_Visitor( $url_metrics_group_collection, $preload_links_collection );
+	$registry->register( 'images', $visitor );
 }

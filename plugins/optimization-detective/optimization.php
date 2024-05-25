@@ -162,30 +162,20 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$preload_links = new OD_Preload_Link_Collection();
 	$walker        = new OD_HTML_Tag_Walker( $buffer );
 
-	/**
-	 * Filters whether the current tag is optimized (or could be) while the HTML document is being walked over.
-	 *
-	 * This is the key filter allowing Optimization Detective to be extended. All optimizations should be performed
-	 * via this filter. Document mutations can be performed via the supplied `$walker` argument. Information about
-	 * what optimizations should be performed can be determined by inspecting the `$group_collection` argument.
-	 * Preload links can be added via the `$preload_links` argument.
-	 *
-	 * @since 0.2.0
-	 *
-	 * @param array<string|int, callable( OD_HTML_Tag_Walker, OD_URL_Metrics_Group_Collection, OD_Preload_Link_Collection ): bool> $visitors         Visitors which are invoked for each tag in the document.
-	 * @param OD_HTML_Tag_Walker                                                                                                   $walker           HTML tag walker.
-	 * @param OD_URL_Metrics_Group_Collection                                                                                      $group_collection URL metrics group collection.
-	 * @param OD_Preload_Link_Collection                                                                                           $preload_links    Preload link collection.
-	 */
-	$visitors = (array) apply_filters( 'od_html_tag_walker_visitors', array(), $walker, $group_collection, $preload_links );
-	$visitors = array_filter(
-		$visitors,
-		static function ( $visitor ) {
-			// @phpstan-ignore-next-line function.alreadyNarrowedType (Defensive WP coding.)
-			return is_callable( $visitor );
-		}
-	);
+	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
 
+	/**
+	 * Fires to register tag visitors before walking over the document to perform optimizations.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Tag_Visitor_Registry         $tag_visitor_registry Tag visitor registry.
+	 * @param OD_URL_Metrics_Group_Collection $group_collection     URL Metrics Group collection.
+	 * @param OD_Preload_Link_Collection      $preload_links        Preload links collection.
+	 */
+	do_action( 'od_register_tag_visitors', $tag_visitor_registry, $group_collection, $preload_links );
+
+	$visitors  = iterator_to_array( $tag_visitor_registry );
 	$generator = $walker->open_tags();
 	while ( $generator->valid() ) {
 		$did_visit = false;
