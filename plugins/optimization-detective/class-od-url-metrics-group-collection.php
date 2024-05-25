@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Collection of URL groups according to the breakpoints.
  *
+ * @phpstan-import-type ElementData from OD_URL_Metric
+ *
  * @implements IteratorAggregate<int, OD_URL_Metrics_Group>
  *
  * @since 0.1.0
@@ -261,6 +263,48 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 			}
 		}
 		return $groups;
+	}
+
+	/**
+	 * Gets common LCP element.
+	 *
+	 * @todo Add caching.
+	 *
+	 * @return ElementData|null
+	 */
+	public function get_common_lcp_element(): ?array {
+
+		// If every group isn't populated, then we can't say whether there is a common LCP element across every viewport group.
+		if ( ! $this->is_every_group_populated() ) {
+			return null;
+		}
+
+		// Look at the LCP elements across all the viewport groups.
+		$groups_by_lcp_element_xpath   = array();
+		$lcp_elements_by_xpath         = array();
+		$group_has_unknown_lcp_element = false;
+		foreach ( $this->groups as $group ) {
+			$lcp_element = $group->get_lcp_element();
+			if ( ! is_null( $lcp_element ) ) {
+				$groups_by_lcp_element_xpath[ $lcp_element['xpath'] ][] = $group;
+				$lcp_elements_by_xpath[ $lcp_element['xpath'] ][]       = $lcp_element;
+			} else {
+				$group_has_unknown_lcp_element = true;
+			}
+		}
+
+		if (
+			// All breakpoints share the same LCP element.
+			1 === count( $groups_by_lcp_element_xpath )
+			&&
+			// The breakpoints don't share a common lack of a detected LCP element.
+			! $group_has_unknown_lcp_element
+		) {
+			$xpath = key( $lcp_elements_by_xpath );
+			return $lcp_elements_by_xpath[ $xpath ][0];
+		}
+
+		return null;
 	}
 
 	/**

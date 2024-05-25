@@ -546,6 +546,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	 * Test get_groups_by_lcp_element().
 	 *
 	 * @covers ::get_groups_by_lcp_element
+	 * @covers ::get_common_lcp_element
 	 */
 	public function test_get_groups_by_lcp_element(): void {
 
@@ -584,6 +585,37 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 		$this->assertSameSets( array( $group1, $group3 ), $group_collection->get_groups_by_lcp_element( $first_child_image_xpath ) );
 		$this->assertSameSets( array( $group2 ), $group_collection->get_groups_by_lcp_element( $first_child_h1_xpath ) );
 		$this->assertCount( 0, $group_collection->get_groups_by_lcp_element( $second_child_image_xpath ) );
+
+		$this->assertNull( $group_collection->get_common_lcp_element() );
+	}
+
+	/**
+	 * Test get_common_lcp_element().
+	 *
+	 * @covers ::get_common_lcp_element
+	 */
+	public function test_get_common_lcp_element(): void {
+		$breakpoints      = array( 480, 800 );
+		$sample_size      = 3;
+		$group_collection = new OD_URL_Metrics_Group_Collection(
+			array(),
+			$breakpoints,
+			$sample_size,
+			HOUR_IN_SECONDS
+		);
+
+		$lcp_element_xpath = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]';
+
+		foreach ( array_merge( $breakpoints, array( 1000 ) ) as $viewport_width ) {
+			for ( $i = 0; $i < $sample_size; $i++ ) {
+				$group_collection->add_url_metric( $this->get_validated_url_metric( $viewport_width, $lcp_element_xpath ) );
+			}
+		}
+
+		$this->assertCount( 3, $group_collection );
+		$common_lcp_element = $group_collection->get_common_lcp_element();
+		$this->assertIsArray( $common_lcp_element );
+		$this->assertSame( $lcp_element_xpath, $common_lcp_element['xpath'] );
 	}
 
 	/**

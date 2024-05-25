@@ -226,10 +226,11 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	 *                          the LCP element type is not supported.
 	 */
 	public function get_lcp_element(): ?array {
+		$lcp_element = $this->cached_lcp_element;
 
 		// Return pre-computed value if available.
-		if ( false !== $this->cached_lcp_element ) {
-			return $this->cached_lcp_element;
+		if ( false !== $lcp_element ) {
+			return $lcp_element;
 		}
 
 		// No metrics have been gathered for this group so there is no LCP element.
@@ -238,8 +239,26 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 		}
 
 		// The following arrays all share array indices.
-		$seen_breadcrumbs   = array();
-		$breadcrumb_counts  = array();
+
+		/**
+		 * Seen breadcrumbs counts.
+		 *
+		 * @var array<int, string> $seen_breadcrumbs
+		 */
+		$seen_breadcrumbs = array();
+
+		/**
+		 * Breadcrumb counts.
+		 *
+		 * @var array<int, int> $breadcrumb_counts
+		 */
+		$breadcrumb_counts = array();
+
+		/**
+		 * Breadcrumb element.
+		 *
+		 * @var array<int, ElementData> $breadcrumb_element
+		 */
 		$breadcrumb_element = array();
 
 		foreach ( $this->url_metrics as $url_metric ) {
