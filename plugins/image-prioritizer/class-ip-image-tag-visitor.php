@@ -43,13 +43,6 @@ final class IP_Image_Tag_Visitor {
 	private $common_lcp_xpath = null;
 
 	/**
-	 * Groups by LCP element XPath.
-	 *
-	 * @var array<string, OD_URL_Metrics_Group[]>
-	 */
-	private $groups_by_lcp_element_xpath = array();
-
-	/**
 	 * Constructor.
 	 *
 	 * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
@@ -60,11 +53,12 @@ final class IP_Image_Tag_Visitor {
 		$this->preload_links_collection     = $preload_links_collection;
 
 		// Capture all the XPaths for known LCP elements.
+		$groups_by_lcp_element_xpath   = array();
 		$group_has_unknown_lcp_element = false;
 		foreach ( $url_metrics_group_collection as $group ) {
 			$lcp_element = $group->get_lcp_element();
 			if ( null !== $lcp_element ) {
-				$this->groups_by_lcp_element_xpath[ $lcp_element['xpath'] ][] = $group;
+				$groups_by_lcp_element_xpath[ $lcp_element['xpath'] ][] = $group;
 			} else {
 				$group_has_unknown_lcp_element = true;
 			}
@@ -73,7 +67,7 @@ final class IP_Image_Tag_Visitor {
 		// Prepare to set fetchpriority attribute on the image when all breakpoints have the same LCP element.
 		if (
 			// All breakpoints share the same LCP element (or all have none at all).
-			1 === count( $this->groups_by_lcp_element_xpath )
+			1 === count( $groups_by_lcp_element_xpath )
 			&&
 			// The breakpoints don't share a common lack of a detected LCP element.
 			! $group_has_unknown_lcp_element
@@ -81,7 +75,7 @@ final class IP_Image_Tag_Visitor {
 			// All breakpoints have URL metrics being reported.
 			$url_metrics_group_collection->is_every_group_populated()
 		) {
-			$this->common_lcp_xpath = key( $this->groups_by_lcp_element_xpath );
+			$this->common_lcp_xpath = key( $groups_by_lcp_element_xpath );
 		}
 	}
 
@@ -157,7 +151,7 @@ final class IP_Image_Tag_Visitor {
 		// TODO: Conversely, if an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
 
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
-		foreach ( $this->url_metrics_group_collection->get_groups_with_lcp_element( $xpath ) as $group ) {
+		foreach ( $this->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
 			$link_attributes = array(
 				'fetchpriority' => 'high',
 				'as'            => 'image',

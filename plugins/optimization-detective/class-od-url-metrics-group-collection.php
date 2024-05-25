@@ -244,14 +244,15 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	}
 
 	/**
-	 * Gets the groups with the provided LCP element.
+	 * Gets the groups with the provided LCP element XPath.
 	 *
+	 * @see OD_URL_Metrics_Group::get_lcp_element()
 	 * @todo Cache the result.
 	 *
 	 * @param string $xpath XPath for LCP element.
 	 * @return OD_URL_Metrics_Group[] Groups which have the LCP element.
 	 */
-	public function get_groups_with_lcp_element( string $xpath ): array {
+	public function get_groups_by_lcp_element( string $xpath ): array {
 		$groups = array();
 		foreach ( $this->groups as $group ) {
 			$lcp_element = $group->get_lcp_element();

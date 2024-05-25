@@ -543,6 +543,50 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_groups_by_lcp_element().
+	 *
+	 * @covers ::get_groups_by_lcp_element
+	 */
+	public function test_get_groups_by_lcp_element(): void {
+
+		$first_child_image_xpath  = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]';
+		$second_child_image_xpath = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[2]';
+		$first_child_h1_xpath     = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::H1]/*[1]';
+
+		$breakpoints      = array( 480, 800 );
+		$sample_size      = 3;
+		$group_collection = new OD_URL_Metrics_Group_Collection(
+			array(
+				// Group 1: 0-480 viewport widths.
+				$this->get_validated_url_metric( 400, $first_child_image_xpath ),
+				$this->get_validated_url_metric( 420, $first_child_image_xpath ),
+				$this->get_validated_url_metric( 440, $second_child_image_xpath ),
+				// Group 2: 481-800 viewport widths.
+				$this->get_validated_url_metric( 500, $first_child_h1_xpath ),
+				// Group 3: 801-Infinity viewport widths.
+				$this->get_validated_url_metric( 820, $first_child_image_xpath ),
+				$this->get_validated_url_metric( 900, $first_child_image_xpath ),
+			),
+			$breakpoints,
+			$sample_size,
+			HOUR_IN_SECONDS
+		);
+
+		$this->assertCount( 3, $group_collection );
+		$groups = iterator_to_array( $group_collection );
+		$group1 = $groups[0];
+		$this->assertSame( $group1, $group_collection->get_group_for_viewport_width( 480 ) );
+		$group2 = $groups[1];
+		$this->assertSame( $group2, $group_collection->get_group_for_viewport_width( 800 ) );
+		$group3 = $groups[2];
+		$this->assertSame( $group3, $group_collection->get_group_for_viewport_width( 801 ) );
+
+		$this->assertSameSets( array( $group1, $group3 ), $group_collection->get_groups_by_lcp_element( $first_child_image_xpath ) );
+		$this->assertSameSets( array( $group2 ), $group_collection->get_groups_by_lcp_element( $first_child_h1_xpath ) );
+		$this->assertCount( 0, $group_collection->get_groups_by_lcp_element( $second_child_image_xpath ) );
+	}
+
+	/**
 	 * Test get_flattened_url_metrics().
 	 *
 	 * @covers ::get_flattened_url_metrics
@@ -572,12 +616,12 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	/**
 	 * Gets a validated URL metric for testing.
 	 *
-	 * @param int $viewport_width Viewport width.
-	 *
+	 * @param int    $viewport_width    Viewport width.
+	 * @param string $lcp_element_xpath LCP element XPath.
 	 * @return OD_URL_Metric Validated URL metric.
 	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
-	private function get_validated_url_metric( int $viewport_width = 480 ): OD_URL_Metric {
+	private function get_validated_url_metric( int $viewport_width = 480, string $lcp_element_xpath = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]' ): OD_URL_Metric {
 		$data = array(
 			'url'       => home_url( '/' ),
 			'viewport'  => array(
@@ -589,7 +633,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 				array(
 					'isLCP'              => true,
 					'isLCPCandidate'     => true,
-					'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]',
+					'xpath'              => $lcp_element_xpath,
 					'intersectionRatio'  => 1,
 					'intersectionRect'   => array(
 						'width'  => 100,
