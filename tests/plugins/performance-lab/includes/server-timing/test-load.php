@@ -8,7 +8,7 @@
 /**
  * @group server-timing
  */
-class Server_Timing_Load_Tests extends WP_UnitTestCase {
+class Test_Server_Timing_Load extends WP_UnitTestCase {
 
 	public function test_perflab_server_timing(): void {
 		$this->assertSame( 10, has_action( 'wp_loaded', 'perflab_server_timing_init' ) );

@@ -8,7 +8,7 @@
 /**
  * @group server-timing
  */
-class Perflab_Server_Timing_Metric_Tests extends WP_UnitTestCase {
+class Test_Perflab_Server_Timing_Metric extends WP_UnitTestCase {
 
 	/** @var Perflab_Server_Timing_Metric */
 	private $metric;

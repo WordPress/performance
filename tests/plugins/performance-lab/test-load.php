@@ -5,7 +5,7 @@
  * @package performance-lab
  */
 
-class Load_Tests extends WP_UnitTestCase {
+class Test_Load extends WP_UnitTestCase {
 
 	public function test_perflab_get_generator_content(): void {
 		$expected = 'performance-lab ' . PERFLAB_VERSION . '; plugins: ';

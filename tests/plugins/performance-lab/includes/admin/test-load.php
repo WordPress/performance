@@ -8,7 +8,7 @@
 /**
  * @group admin
  */
-class Admin_Load_Tests extends WP_UnitTestCase {
+class Test_Admin_Load extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::perflab_add_features_page

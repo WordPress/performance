@@ -6,7 +6,7 @@
  * @group audit-enqueued-assets
  */
 
-class Audit_Enqueued_Assets_Tests extends WP_UnitTestCase {
+class Test_Audit_Enqueued_Assets extends WP_UnitTestCase {
 
 	const WARNING_SCRIPTS_THRESHOLD = 31;
 	const WARNING_STYLES_THRESHOLD  = 11;

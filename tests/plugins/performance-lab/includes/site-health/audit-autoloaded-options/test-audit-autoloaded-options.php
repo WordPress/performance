@@ -4,7 +4,7 @@
  *
  * @package performance-lab
  */
-class Audit_Autoloaded_Options_Tests extends WP_UnitTestCase {
+class Test_Audit_Autoloaded_Options extends WP_UnitTestCase {
 
 	const WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES = 800000;
 	const AUTOLOADED_OPTION_KEY                  = 'test_set_autoloaded_option';

@@ -9,7 +9,7 @@
  * @group admin
  * @group server-timing
  */
-class Admin_Server_Timing_Tests extends WP_UnitTestCase {
+class Test_Admin_Server_Timing extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::perflab_add_server_timing_page

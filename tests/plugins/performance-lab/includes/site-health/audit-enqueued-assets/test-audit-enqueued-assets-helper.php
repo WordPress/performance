@@ -6,7 +6,7 @@
  * @group audit-enqueued-assets
  */
 
-class Audit_Enqueued_Assets_Helper_Tests extends WP_UnitTestCase {
+class Test_Audit_Enqueued_Assets_Helper extends WP_UnitTestCase {
 
 	/**
 	 * Tests perflab_aea_get_total_enqueued_scripts() no transient saved.

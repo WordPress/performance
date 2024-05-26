@@ -8,7 +8,7 @@
 /**
  * @group server-timing
  */
-class Perflab_Server_Timing_Tests extends WP_UnitTestCase {
+class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 
 	/**
 	 * @var Perflab_Server_Timing
