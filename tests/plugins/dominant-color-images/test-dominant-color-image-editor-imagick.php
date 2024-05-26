@@ -9,7 +9,7 @@
 
 use PerformanceLab\Tests\TestCase\DominantColorTestCase;
 
-class Dominant_Color_Image_Editor_Imagick_Test extends DominantColorTestCase {
+class Test_Dominant_Color_Image_Editor_Imagick extends DominantColorTestCase {
 
 	/**
 	 * Makes sure that only the Imagick editor is used.

@@ -6,7 +6,7 @@ use PerformanceLab\Tests\TestCase\DominantColorTestCase;
  *
  * @package dominant-color-images
  */
-class Dominant_Color_Test extends DominantColorTestCase {
+class Test_Dominant_Color extends DominantColorTestCase {
 
 	/**
 	 * Tests dominant_color_metadata().

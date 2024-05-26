@@ -6,7 +6,7 @@
  * @group   auto-sizes
  */
 
-class AutoSizesTests extends WP_UnitTestCase {
+class Test_AutoSizes extends WP_UnitTestCase {
 
 	/**
 	 * Attachment ID.

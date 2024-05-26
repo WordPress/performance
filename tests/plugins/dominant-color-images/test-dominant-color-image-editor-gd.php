@@ -7,7 +7,7 @@
 
 use PerformanceLab\Tests\TestCase\DominantColorTestCase;
 
-class Dominant_Color_Image_Editor_GD_Test extends DominantColorTestCase {
+class Test_Dominant_Color_Image_Editor_GD extends DominantColorTestCase {
 
 	/**
 	 * Makes sure that only the GD editor is used.
