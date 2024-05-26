@@ -8,7 +8,7 @@
  * @noinspection PhpUnhandledExceptionInspection
  */
 
-class OD_Storage_Post_Type_Tests extends WP_UnitTestCase {
+class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 
 	/**
 	 * Test add_hooks().

@@ -5,7 +5,7 @@
  * @package optimization-detective
  */
 
-class OD_Helper_Tests extends WP_UnitTestCase {
+class Test_OD_Helper extends WP_UnitTestCase {
 
 	/**
 	 * Test printing the meta generator tag.

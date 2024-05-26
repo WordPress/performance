@@ -7,7 +7,7 @@
  * @coversDefaultClass OD_Storage_Lock
  */
 
-class OD_Storage_Lock_Tests extends WP_UnitTestCase {
+class Test_OD_Storage_Lock extends WP_UnitTestCase {
 
 	/**
 	 * Tear down.

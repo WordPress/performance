@@ -6,7 +6,7 @@
  *
  * @coversDefaultClass OD_URL_Metric
  */
-class OD_URL_Metric_Tests extends WP_UnitTestCase {
+class Test_OD_URL_Metric extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.

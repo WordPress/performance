@@ -14,7 +14,7 @@
  * @noinspection HtmlExtraClosingTag
  * @todo What are the other inspection IDs which can turn off inspections for the other irrelevant warnings? Remaining is "The tag is marked as deprecated."
  */
-class OD_HTML_Tag_Walker_Tests extends WP_UnitTestCase {
+class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.

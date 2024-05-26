@@ -5,7 +5,7 @@
  * @package optimization-detective
  */
 
-class OD_Detection_Tests extends WP_UnitTestCase {
+class Test_OD_Detection extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.

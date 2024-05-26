@@ -5,7 +5,7 @@
  * @package optimization-detective
  */
 
-class OD_Hooks_Tests extends WP_UnitTestCase {
+class Test_OD_Hooks extends WP_UnitTestCase {
 
 	/**
 	 * Make sure the hooks are added in hooks.php.

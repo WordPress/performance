@@ -7,7 +7,7 @@
  * @todo There are "Cannot resolve ..." errors and "Element img doesn't have a required attribute src" warnings that should be excluded from inspection.
  */
 
-class OD_Optimization_Tests extends WP_UnitTestCase {
+class Test_OD_Optimization extends WP_UnitTestCase {
 
 	/**
 	 * @var string

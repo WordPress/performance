@@ -5,7 +5,7 @@
  * @package optimization-detective
  */
 
-class OD_Storage_REST_API_Tests extends WP_UnitTestCase {
+class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 
 	/**
 	 * @var string

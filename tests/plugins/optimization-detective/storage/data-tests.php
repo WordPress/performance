@@ -7,7 +7,7 @@
  * @noinspection PhpUnhandledExceptionInspection
  */
 
-class OD_Storage_Data_Tests extends WP_UnitTestCase {
+class Test_OD_Storage_Data extends WP_UnitTestCase {
 
 	/**
 	 * @var string
