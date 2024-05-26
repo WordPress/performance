@@ -5,7 +5,7 @@
  * @package speculation-rules
  */
 
-class Speculation_Rules_Settings_Tests extends WP_UnitTestCase {
+class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::plsr_register_setting

@@ -5,7 +5,7 @@
  * @package speculation-rules
  */
 
-class Speculation_Rules_Tests extends WP_UnitTestCase {
+class Test_Speculation_Rules extends WP_UnitTestCase {
 
 	/** @var array<string, mixed> */
 	private $original_wp_theme_features = array();

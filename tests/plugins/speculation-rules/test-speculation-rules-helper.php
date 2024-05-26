@@ -5,7 +5,7 @@
  * @package speculation-rules
  */
 
-class Speculation_Rules_Helper_Tests extends WP_UnitTestCase {
+class Test_Speculation_Rules_Helper extends WP_UnitTestCase {
 	/**
 	 * Runs the routine before each test is executed.
 	 */

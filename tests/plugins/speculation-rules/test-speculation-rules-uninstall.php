@@ -6,7 +6,7 @@
  * @package speculation-rules
  */
 
-class Speculation_Rules_Uninstall_Tests extends WP_UnitTestCase {
+class Test_Speculation_Rules_Uninstall extends WP_UnitTestCase {
 
 	/**
 	 * Runs the routine before setting up all tests.

@@ -5,7 +5,7 @@
  * @package speculation-rules
  */
 
-class PLSR_URL_Pattern_Prefixer_Tests extends WP_UnitTestCase {
+class Test_PLSR_URL_Pattern_Prefixer extends WP_UnitTestCase {
 
 	/**
 	 * @dataProvider data_prefix_path_pattern
