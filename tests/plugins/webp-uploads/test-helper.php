@@ -7,7 +7,7 @@
 
 use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
-class WebP_Uploads_Helper_Tests extends ImagesTestCase {
+class Test_WebP_Uploads_Helper extends ImagesTestCase {
 
 	/**
 	 * Return an error when creating an additional image source with invalid parameters

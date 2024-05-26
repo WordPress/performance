@@ -7,7 +7,7 @@
 
 use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
-class WebP_Uploads_Load_Tests extends ImagesTestCase {
+class Test_WebP_Uploads_Load extends ImagesTestCase {
 
 	/**
 	 * To unlink files.

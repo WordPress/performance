@@ -8,7 +8,7 @@
 
 use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
-class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
+class Test_WebP_Uploads_Image_Edit extends ImagesTestCase {
 
 	public function set_up(): void {
 		parent::set_up();

@@ -5,7 +5,7 @@
  * @package webp-uploads
  */
 
-class WebP_Uploads_Settings_Tests extends WP_UnitTestCase {
+class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::webp_uploads_add_settings_action_link

@@ -5,7 +5,7 @@
  * @package webp-uploads
  */
 
-class WebP_Uploads_REST_API_Tests extends WP_UnitTestCase {
+class Test_WebP_Uploads_REST_API extends WP_UnitTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
