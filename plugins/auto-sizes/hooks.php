@@ -91,8 +91,6 @@ function auto_sizes_render_generator(): void {
 }
 add_action( 'wp_head', 'auto_sizes_render_generator' );
 
-
-
 /**
  * Filter the sizes attribute for images to improve the default calculation.
  *
