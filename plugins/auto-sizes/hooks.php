@@ -90,3 +90,52 @@ function auto_sizes_render_generator(): void {
 	echo '<meta name="generator" content="auto-sizes ' . esc_attr( IMAGE_AUTO_SIZES_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'auto_sizes_render_generator' );
+
+
+
+/**
+ * Filter the sizes attribute for images to improve the default calculation.
+ *
+ * @since n.e.x.t
+ *
+ * @param string               $content      The block content about to be rendered.
+ * @param array<string, mixed> $parsed_block The parsed block.
+ * @return string The updated block content.
+ */
+function auto_sizes_improve_image_sizes_attribute( string $content, array $parsed_block ): string {
+
+	$tags   = new WP_HTML_Tag_Processor( $content );
+	$image  = $tags->next_tag( array( 'tag_name' => 'img' ) );
+	$layout = wp_get_global_settings( array( 'layout' ) );
+
+	// Only update the markup if an image is found and we have layout settings.
+	if ( $image && isset( $layout['wideSize'] ) && $layout['contentSize'] ) {
+
+		$align = $parsed_block['attrs']['align'] ?? null;
+
+		// Handle different alignment use cases.
+		switch ( $align ) {
+			case 'full':
+				$sizes = '100vw';
+				break;
+
+			case 'wide':
+				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['wideSize'] );
+				break;
+
+			// @todo: handle left/right alignments.
+			default:
+				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['contentSize'] );
+				break;
+		}
+
+		if ( $sizes ) {
+			$tags->set_attribute( 'sizes', $sizes );
+		}
+
+		$content = $tags->get_updated_html();
+	}
+	return $content;
+}
+add_filter( 'render_block_core/image', 'auto_sizes_improve_image_sizes_attribute', 10, 2 );
+add_filter( 'render_block_core/cover', 'auto_sizes_improve_image_sizes_attribute', 10, 2 );
