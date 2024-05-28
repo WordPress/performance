@@ -1,7 +1,7 @@
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
-	level: 8
+	level: 9
 	treatPhpDocTypesAsCertain: false
 	paths:
 		- plugins
@@ -56,4 +56,13 @@ parameters:
 			path: tests/*
 		-
 			identifier: cast.string
+			path: tests/*
+		-
+			message: '/Cannot access offset .+ on mixed\./'
+			path: tests/*
+		-
+			message: '/Argument of an invalid type mixed supplied for foreach, only iterables are supported./'
+			path: tests/*
+		-
+			message: '/Property .+ does not accept mixed\./'
 			path: tests/*

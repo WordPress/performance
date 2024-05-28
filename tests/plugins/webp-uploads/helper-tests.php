@@ -472,7 +472,8 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 
 	public function test_webp_uploads_in_frontend_body_with_feed(): void {
 		$this->mock_empty_action( 'template_redirect' );
-		$GLOBALS['wp_query']->is_feed = true;
+		global $wp_query;
+		$wp_query->is_feed = true;
 
 		$this->assertFalse( webp_uploads_in_frontend_body() );
 	}
