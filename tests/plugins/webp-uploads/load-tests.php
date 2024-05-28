@@ -731,12 +731,12 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	/**
 	 * Data provider for tests returns the supported image types to run the tests against.
 	 *
-	 * @return array<array<string>> An array of valid image types.
+	 * @return array<string, array<string>> An array of valid image types.
 	 */
 	public function data_provider_supported_image_types(): array {
 		return array(
-			array( 'webp' ),
-			array( 'avif' ),
+			'webp' => array( 'webp' ),
+			'avif' => array( 'avif' ),
 		);
 	}
 
