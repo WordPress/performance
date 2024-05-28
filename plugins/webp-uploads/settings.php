@@ -101,7 +101,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 			<p><b><?php esc_html_e( 'AVIF support is not available.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
 		</div>
-	<?php endif;
+	<?php endif; ?>
 	<?php
 }
 

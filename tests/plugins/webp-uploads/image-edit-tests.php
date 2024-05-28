@@ -19,10 +19,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Backup the sources structure alongside the full size
-	 *
-	 * @test
 	 */
-	public function it_should_backup_the_sources_structure_alongside_the_full_size(): void {
+	public function test_it_should_backup_the_sources_structure_alongside_the_full_size(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
@@ -65,10 +63,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Restore the sources array from the backup when an image is edited
-	 *
-	 * @test
 	 */
-	public function it_should_restore_the_sources_array_from_the_backup_when_an_image_is_edited(): void {
+	public function test_it_should_restore_the_sources_array_from_the_backup_when_an_image_is_edited(): void {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
@@ -120,10 +116,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Prevent to back up the sources when the sources attributes does not exists
-	 *
-	 * @test
 	 */
-	public function it_should_prevent_to_back_up_the_sources_when_the_sources_attributes_does_not_exists(): void {
+	public function test_it_should_prevent_to_back_up_the_sources_when_the_sources_attributes_does_not_exists(): void {
 		// Disable the generation of the sources attributes.
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
 
@@ -149,10 +143,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Prevent to backup the full size image if only the thumbnail is edited
-	 *
-	 * @test
 	 */
-	public function it_should_prevent_to_backup_the_full_size_image_if_only_the_thumbnail_is_edited(): void {
+	public function test_it_should_prevent_to_backup_the_full_size_image_if_only_the_thumbnail_is_edited(): void {
 		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
 			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
 		}
@@ -204,10 +196,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Backup the image when all images except the thumbnail are updated
-	 *
-	 * @test
 	 */
-	public function it_should_backup_the_image_when_all_images_except_the_thumbnail_are_updated(): void {
+	public function test_it_should_backup_the_image_when_all_images_except_the_thumbnail_are_updated(): void {
 		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
 			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
 		}
@@ -249,10 +239,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Use the attached image when updating subsequent images not the original version
-	 *
-	 * @test
 	 */
-	public function it_should_use_the_attached_image_when_updating_subsequent_images_not_the_original_version(): void {
+	public function test_it_should_use_the_attached_image_when_updating_subsequent_images_not_the_original_version(): void {
 		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
 			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
 		}
@@ -307,10 +295,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Update source attributes when webp is edited.
-	 *
-	 * @test
 	 */
-	public function it_should_validate_source_attribute_update_when_webp_edited(): void {
+	public function test_it_should_validate_source_attribute_update_when_webp_edited(): void {
 		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
 			$this->markTestSkipped( 'Editing image thumbnails separately is disabled' );
 		}
@@ -340,20 +326,16 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Not return a target if no backup image exists
-	 *
-	 * @test
 	 */
-	public function it_should_not_return_a_target_if_no_backup_image_exists(): void {
+	public function test_it_should_not_return_a_target_if_no_backup_image_exists(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 		$this->assertNull( webp_uploads_get_next_full_size_key_from_backup( $attachment_id ) );
 	}
 
 	/**
 	 * Return the full-orig target key when only one edit image exists
-	 *
-	 * @test
 	 */
-	public function it_should_return_the_full_orig_target_key_when_only_one_edit_image_exists(): void {
+	public function test_it_should_return_the_full_orig_target_key_when_only_one_edit_image_exists(): void {
 		// Remove the filter to prevent the usage of the next target.
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
@@ -367,10 +349,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Return null when looking for a target that is already used
-	 *
-	 * @test
 	 */
-	public function it_should_return_null_when_looking_for_a_target_that_is_already_used(): void {
+	public function test_it_should_return_null_when_looking_for_a_target_that_is_already_used(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 		$editor        = new WP_Image_Edit( $attachment_id );
 		$editor->rotate_right()->save();
@@ -381,10 +361,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Use the next available hash for the full size image on multiple image edits
-	 *
-	 * @test
 	 */
-	public function it_should_use_the_next_available_hash_for_the_full_size_image_on_multiple_image_edits(): void {
+	public function test_it_should_use_the_next_available_hash_for_the_full_size_image_on_multiple_image_edits(): void {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
@@ -407,10 +385,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Save populate the backup sources with the next target
-	 *
-	 * @test
 	 */
-	public function it_should_save_populate_the_backup_sources_with_the_next_target(): void {
+	public function test_it_should_save_populate_the_backup_sources_with_the_next_target(): void {
 		// Remove the filter to prevent the usage of the next target.
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
@@ -432,10 +408,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Store the metadata on the next available hash
-	 *
-	 * @test
 	 */
-	public function it_should_store_the_metadata_on_the_next_available_hash(): void {
+	public function test_it_should_store_the_metadata_on_the_next_available_hash(): void {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
@@ -469,10 +443,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Prevent to store an empty set of sources
-	 *
-	 * @test
 	 */
-	public function it_should_prevent_to_store_an_empty_set_of_sources(): void {
+	public function test_it_should_prevent_to_store_an_empty_set_of_sources(): void {
 		// Remove the filter to prevent the usage of the next target.
 		remove_filter( 'wp_update_attachment_metadata', 'webp_uploads_update_attachment_metadata' );
 
@@ -488,10 +460,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Store the next image hash on the backup sources
-	 *
-	 * @test
 	 */
-	public function it_should_store_the_next_image_hash_on_the_backup_sources(): void {
+	public function test_it_should_store_the_next_image_hash_on_the_backup_sources(): void {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
@@ -516,10 +486,8 @@ class WebP_Uploads_Image_Edit_Tests extends ImagesTestCase {
 
 	/**
 	 * Create backup of full size images with the same hash keys as the edited images
-	 *
-	 * @test
 	 */
-	public function it_should_create_backup_of_full_size_images_with_the_same_hash_keys_as_the_edited_images(): void {
+	public function test_it_should_create_backup_of_full_size_images_with_the_same_hash_keys_as_the_edited_images(): void {
 		// Create JPEG and WebP.
 		$this->opt_in_to_jpeg_and_webp();
 
