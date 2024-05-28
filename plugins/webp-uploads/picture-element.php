@@ -93,7 +93,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	$size_to_use = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
 
 	$image_src = wp_get_attachment_image_src( $attachment_id, $size_to_use, false );
-	if ( ! $image_src ) {
+	if ( false === $image_src ) {
 		return $image;
 	}
 	list( $src, $width, $height ) = $image_src;
