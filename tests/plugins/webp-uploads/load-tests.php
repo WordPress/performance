@@ -44,8 +44,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * Don't create the original mime type for JPEG images.
 	 *
 	 * @dataProvider data_provider_supported_image_types
-	 *
-	 * @test
 	 */
 	public function test_it_should_not_create_the_original_mime_type_for_jpeg_images( string $image_type ): void {
 		$mime_type = 'image/' . $image_type;
