@@ -41,7 +41,6 @@ function webp_uploads_get_attachment_sources( int $attachment_id, string $size =
 	return array();
 }
 
-
 /**
  * Adds custom styles to hide specific elements in media settings.
  *
