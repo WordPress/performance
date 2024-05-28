@@ -76,7 +76,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		define( 'IMAGE_PRIORITIZER_VERSION', $version );
 
-		require_once __DIR__ . '/class-ip-image-tag-visitor.php';
+		require_once __DIR__ . '/class-ip-tag-visitor.php';
+		require_once __DIR__ . '/class-ip-img-tag-visitor.php';
+		require_once __DIR__ . '/class-ip-background-image-styled-tag-visitor.php';
 		require_once __DIR__ . '/helper.php';
 		require_once __DIR__ . '/hooks.php';
 	}

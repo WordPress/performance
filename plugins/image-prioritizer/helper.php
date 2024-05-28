@@ -23,7 +23,7 @@ function ip_render_generator_meta_tag(): void {
 }
 
 /**
- * Register tag visitor for images.
+ * Registers tag visitors for images.
  *
  * @since n.e.x.t
  *
@@ -31,8 +31,11 @@ function ip_render_generator_meta_tag(): void {
  * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
  * @param OD_Preload_Link_Collection      $preload_links_collection     Preload Links Collection.
  */
-function ip_register_tag_visitor( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Preload_Link_Collection $preload_links_collection ): void {
-	// Note: The IP_Image_Tag_Visitor class is invocable (it as an __invoke() method).
-	$visitor = new IP_Image_Tag_Visitor( $url_metrics_group_collection, $preload_links_collection );
-	$registry->register( 'images', $visitor );
+function ip_register_tag_visitors( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Preload_Link_Collection $preload_links_collection ): void {
+	// Note: The class is invocable (it as an __invoke() method).
+	$img_visitor = new IP_Img_Tag_Visitor( $url_metrics_group_collection, $preload_links_collection );
+	$registry->register( 'img-tags', $img_visitor );
+
+	$bg_image_visitor = new IP_Background_Image_Styled_Tag_Visitor( $url_metrics_group_collection, $preload_links_collection );
+	$registry->register( 'bg-image-tags', $bg_image_visitor );
 }

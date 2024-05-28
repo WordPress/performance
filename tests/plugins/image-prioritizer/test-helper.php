@@ -774,9 +774,12 @@ class Test_IP_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ip_register_tag_visitor().
+	 * Test ip_register_tag_visitors().
 	 *
-	 * @covers ::ip_register_tag_visitor
+	 * @covers ::ip_register_tag_visitors
+	 * @covers IP_Tag_Visitor
+	 * @covers IP_Img_Tag_Visitor
+	 * @covers IP_Background_Image_Styled_Tag_Visitor
 	 *
 	 * @dataProvider data_provider_test_ip_filter_tag_walker_visitors
 	 * @throws Exception But it won't.
