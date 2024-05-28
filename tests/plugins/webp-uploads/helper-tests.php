@@ -185,6 +185,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 		if ( ! wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) ) ) {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
+
 		$attachment_id = self::factory()->attachment->create_upload_object(
 			TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg'
 		);
@@ -417,6 +418,7 @@ class WebP_Uploads_Helper_Tests extends ImagesTestCase {
 	 */
 	public function test_it_should_return_jpeg_and_webp_transforms_when_option_generate_webp_and_jpeg_set(): void {
 		remove_all_filters( 'webp_uploads_get_upload_image_mime_transforms' );
+
 		if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
 			$this->set_image_output_type( 'avif' );
 		}
