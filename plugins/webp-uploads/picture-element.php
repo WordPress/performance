@@ -124,9 +124,9 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 
 		$picture_sources .= sprintf(
 			'<source type="%s" srcset="%s" sizes="%s">',
-			$image_mime_type,
-			$image_srcset,
-			$sizes
+			esc_attr( $image_mime_type ),
+			esc_attr( $image_srcset ),
+			esc_attr( $sizes )
 		);
 	}
 
