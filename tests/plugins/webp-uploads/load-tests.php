@@ -110,8 +110,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * Create JPEG and output type for JPEG images, if opted in.
 	 *
 	 * @dataProvider data_provider_supported_image_types
-	 *
-	 * @test
 	 */
 	public function test_it_should_create_jpeg_and_webp_for_jpeg_images_if_opted_in( string $image_type ): void {
 		$mime_type = 'image/' . $image_type;
