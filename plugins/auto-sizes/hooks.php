@@ -92,6 +92,23 @@ function auto_sizes_render_generator(): void {
 add_action( 'wp_head', 'auto_sizes_render_generator' );
 
 /**
+ * Gets the proper image size.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $layout_width The layout width.
+ * @param int    $image_width  The image width.
+ * @return string The proper width after some calculations.
+ */
+function auto_sizes_get_width( string $layout_width, int $image_width ): string {
+	// Account for px value.
+	if ( 'px' === substr( $layout_width, -2 ) ) {
+		return $image_width > (int) $layout_width ? $layout_width : $image_width . 'px';
+	}
+	return $layout_width;
+}
+
+/**
  * Filter the sizes attribute for images to improve the default calculation.
  *
  * @since n.e.x.t
@@ -109,7 +126,16 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 	// Only update the markup if an image is found and we have layout settings.
 	if ( $image && isset( $layout['wideSize'] ) && $layout['contentSize'] ) {
 
-		$align = $parsed_block['attrs']['align'] ?? null;
+		$align      = $parsed_block['attrs']['align'] ?? null;
+		$image_id   = $parsed_block['attrs']['id'] ?? '';
+		$image_size = $parsed_block['attrs']['sizeSlug'] ?? '';
+
+		$image_attributes = wp_get_attachment_image_src( $image_id, $image_size );
+		if ( ! $image_attributes ) {
+			return $content;
+		}
+
+		$image_width = $image_attributes[1] ?? '';
 
 		// Handle different alignment use cases.
 		switch ( $align ) {
@@ -118,12 +144,14 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 				break;
 
 			case 'wide':
-				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['wideSize'] );
+				$width = auto_sizes_get_width( $layout['wideSize'], $image_width );
+				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
 				break;
 
-			// @todo: handle left/right alignments.
+				// @todo: handle left/right alignments.
 			default:
-				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['contentSize'] );
+				$width = auto_sizes_get_width( $layout['contentSize'], $image_width );
+				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
 				break;
 		}
 
