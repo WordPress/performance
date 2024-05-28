@@ -42,7 +42,7 @@ class WebP_Uploads_Picture_Element_Tests extends ImagesTestCase {
 		// Create some content with the image.
 		$the_image = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 
-		// Apply the content filters
+		// Apply the wp_content_img_tag filter.
 		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
 
 		// Check that the image is wrapped in a picture element with the correct class.

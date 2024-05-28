@@ -128,6 +128,6 @@ abstract class ImagesTestCase extends WP_UnitTestCase {
 	 * Opt into picture element output.
 	 */
 	public function opt_in_to_picture_element(): void {
-		update_option( 'webp_uploads_use_picture_element', true );
+		add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10, 3 );
 	}
 }
