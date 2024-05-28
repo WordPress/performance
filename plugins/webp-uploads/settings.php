@@ -103,7 +103,6 @@ function webp_uploads_use_picture_element_callback(): void {
 	<?php
 }
 
-
 /**
  * Adds a settings link to the plugin's action links.
  *
