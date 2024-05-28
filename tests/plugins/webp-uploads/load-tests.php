@@ -668,8 +668,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 * @dataProvider data_provider_supported_image_types
 	 *
 	 * @group current1
-	 *
-	 * @test
 	 */
 	public function test_it_should_allow_the_upload_of_a_webp_image_if_at_least_one_editor_supports_the_format( string $image_type ): void {
 		$mime_type = 'image/' . $image_type;
