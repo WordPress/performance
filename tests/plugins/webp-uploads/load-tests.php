@@ -743,7 +743,7 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	public function data_provider_supported_image_types(): array {
 		return array(
 			array( 'webp' ),
-			array ( 'avif' ),
+			array( 'avif' ),
 		);
 	}
 
