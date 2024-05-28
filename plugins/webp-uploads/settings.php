@@ -122,25 +122,6 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 }
 
 /**
- * Adds custom styles to hide specific elements in media settings.
- *
- * @since 1.0.0
- */
-function webp_uploads_media_setting_style(): void {
-	if ( is_multisite() ) {
-		return;
-	}
-	?>
-	<style>
-		.form-table .perflab-generate-webp-and-jpeg th,
-		.form-table .perflab-generate-webp-and-jpeg td:not(.td-full) {
-			display: none;
-		}
-	</style>
-	<?php
-}
-
-/**
  * Adds a settings link to the plugin's action links.
  *
  * @since 1.1.0
