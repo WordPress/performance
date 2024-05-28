@@ -108,8 +108,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 			foreach ( $sources as $source ) {
 				// Swap the URL for the current mime type.
 				if ( isset( $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ] ) ) {
-					$filename  = $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ]['file'];
-
+					$filename           = $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ]['file'];
 					$filtered_sources[] = array(
 						'url'        => dirname( $source['url'] ) . '/' . $filename,
 						'descriptor' => $source['descriptor'],
