@@ -123,28 +123,25 @@ function getStableTag( readmeFilePath ) {
 async function updateReadme( settings ) {
 	const pluginRoot = path.resolve( __dirname, '../../../' );
 
-	const allPluginSlugs = [
-		'performance-lab', // TODO: Remove as of <https://github.com/WordPress/performance/pull/1182>.
-		...plugins,
-	];
-	if ( settings.plugin && ! allPluginSlugs.includes( settings.plugin ) ) {
+	if ( settings.plugin && ! plugins.includes( settings.plugin ) ) {
 		throw new Error( `Unrecognized plugin: ${ settings.plugin }` );
 	}
 
 	const pluginSlugs = [];
+
 	if ( settings.plugin ) {
 		pluginSlugs.push( settings.plugin );
 	} else {
-		pluginSlugs.push( ...allPluginSlugs );
+		pluginSlugs.push( ...plugins );
 	}
 
 	for ( const pluginSlug of pluginSlugs ) {
 		try {
-			const pluginDirectory =
-				'performance-lab' === pluginSlug // TODO: Remove this condition as of <https://github.com/WordPress/performance/pull/1182>.
-					? pluginRoot
-					: path.resolve( pluginRoot, 'plugins', pluginSlug );
-
+			const pluginDirectory = path.resolve(
+				pluginRoot,
+				'plugins',
+				pluginSlug
+			);
 			const readmeFilePath = path.resolve(
 				pluginDirectory,
 				'readme.txt'
@@ -157,6 +154,7 @@ async function updateReadme( settings ) {
 				token: settings.token,
 			} );
 			const status = updateReadmeChangelog( readmeFilePath, changelog );
+
 			log(
 				formats.success(
 					`💃 ${ pluginSlug } successfully updated for version ${ stableTag }: ${ status }`
