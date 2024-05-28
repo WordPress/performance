@@ -46,7 +46,7 @@ function webp_uploads_get_attachment_sources( int $attachment_id, string $size =
  * Adds custom styles to hide specific elements in media settings.
  *
  * @since 1.0.0
- * @deprecated This funciton is not used as of Modern Image Formats versions 2.0.0.
+ * @deprecated This function is not used as of Modern Image Formats versions 2.0.0.
  */
 function webp_uploads_media_setting_style(): void {
 	_deprecated_function( __FUNCTION__, 'Modern Image Formats 2.0.0' );
