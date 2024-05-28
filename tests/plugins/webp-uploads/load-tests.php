@@ -707,7 +707,6 @@ class WebP_Uploads_Load_Tests extends ImagesTestCase {
 	 *
 	 * @dataProvider data_provider_supported_image_types
 	 *
-	 * @test
 	 * @param string $image_type
 	 */
 	public function test_it_should_replace_the_featured_image_to_webp_when_requesting_the_featured_image( string $image_type ): void {
