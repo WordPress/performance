@@ -44,7 +44,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	/**
 	 * Filter the image mime types that can be used for the <picture> element.
 	 *
-	 * Default is: ['image/webp', 'image/avif', 'image/jpeg']. Returning an empty array will skip using the picture element.
+	 * Default is: ['image/avif', 'image/webp', 'image/jpeg']. Returning an empty array will skip using the `picture` element.
 	 *
 	 * The mime types will output in the picture element in the order they are provided.
 	 * The original image will be used as the fallback image for browsers that don't support the picture element.
@@ -56,6 +56,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	$enabled_mime_types = (array) apply_filters(
 		'webp_uploads_picture_element_mime_types',
 		array(
+			'image/avif',
 			'image/webp',
 			'image/jpeg',
 		),
