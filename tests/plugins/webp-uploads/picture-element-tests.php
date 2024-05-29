@@ -61,7 +61,6 @@ class Test_WebP_Uploads_Picture_Element extends ImagesTestCase {
 	 * Data provider for it_should_maybe_wrap_images_in_picture_element.
 	 *
 	 * @return array<string, array<string, bool>>
-	 *
 	 */
 	public function data_provider_it_should_maybe_wrap_images_in_picture_element(): array {
 		return array(
