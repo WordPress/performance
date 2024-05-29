@@ -38,8 +38,8 @@
 /tests/plugins/dominant-color-images        @pbearne @spacedmonkey
 
 # Plugin: Modern Image Formats
-/plugins/webp-uploads                       @adamsilverstein @felixarntz
-/tests/plugins/webp-uploads                 @adamsilverstein @felixarntz
+/plugins/webp-uploads                       @adamsilverstein @felixarntz @westonruter
+/tests/plugins/webp-uploads                 @adamsilverstein @felixarntz @westonruter
 
 # Plugin: Optimization Detective
 /plugins/optimization-detective             @westonruter @felixarntz
