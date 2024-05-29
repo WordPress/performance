@@ -2,7 +2,6 @@
 /**
  * Tests for webp-uploads plugin picture-element.php.
  *
- *
  * @group picture-element
  *
  * @package webp-uploads
@@ -15,7 +14,6 @@ class Test_WebP_Uploads_Picture_Element extends ImagesTestCase {
 	 * Test that images are wrapped in picture element when enabled.
 	 *
 	 * @dataProvider data_provider_it_should_maybe_wrap_images_in_picture_element
-	 *
 	 *
 	 * @param bool $jpeg_and_webp          Whether to enable JPEG and WebP output.
 	 * @param bool $picture_element        Whether to enable picture element output.
@@ -86,4 +84,3 @@ class Test_WebP_Uploads_Picture_Element extends ImagesTestCase {
 		);
 	}
 }
-

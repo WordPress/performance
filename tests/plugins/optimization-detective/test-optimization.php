@@ -302,7 +302,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 			),
 
 			'no-lcp-image-with-populated-url-metrics'     => array(
-				'set_up'   => function () {
+				'set_up'   => function (): void {
 					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 					$sample_size = od_get_url_metrics_breakpoint_sample_size();
 					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
