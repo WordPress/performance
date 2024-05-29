@@ -13,9 +13,11 @@ Optimizes the loading of the LCP image by leveraging client-side detection with 
 
 == Description ==
 
-Optimizes the loading of the LCP image by leveraging client-side detection with real user metrics.
+Optimizes the loading of the LCP image by leveraging client-side detection with real user metrics. Currently, this involves adding `fetchpriority=high` to the LCP image and adding preload links for the LCP `img` as well as any LCP `background-image`.
 
 This plugin requires the [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) plugin as a dependency.
+
+TODO: Flesh out description.
 
 == Installation ==
 
