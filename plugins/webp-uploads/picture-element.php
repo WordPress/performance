@@ -28,7 +28,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		return $image;
 	}
 
-	// Collect all of the sub size image mime types.
+	// Collect all the sub size image mime types.
 	$mime_type_data = array();
 	foreach ( $image_meta['sizes'] as $size ) {
 		if ( isset( $size['sources'] ) && isset( $size['width'] ) && isset( $size['height'] ) ) {
