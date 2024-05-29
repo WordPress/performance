@@ -16,13 +16,12 @@ class Test_WebP_Uploads_Picture_Element extends ImagesTestCase {
 	 *
 	 * @dataProvider data_provider_it_should_maybe_wrap_images_in_picture_element
 	 *
-	 * @test
 	 *
 	 * @param bool $jpeg_and_webp          Whether to enable JPEG and WebP output.
 	 * @param bool $picture_element        Whether to enable picture element output.
 	 * @param bool $expect_picture_element Whether to expect the image to be wrapped in a picture element.
 	 */
-	public function it_should_maybe_wrap_images_in_picture_element( bool $jpeg_and_webp, bool $picture_element, bool $expect_picture_element ): void {
+	public function test_maybe_wrap_images_in_picture_element( bool $jpeg_and_webp, bool $picture_element, bool $expect_picture_element ): void {
 		$mime_type = 'image/webp';
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
