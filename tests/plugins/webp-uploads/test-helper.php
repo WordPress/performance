@@ -9,6 +9,11 @@ use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
 class Test_WebP_Uploads_Helper extends ImagesTestCase {
 
+	public function set_up() {
+		parent::set_up();
+		$this->set_image_output_type( 'webp' );
+	}
+
 	/**
 	 * Return an error when creating an additional image source with invalid parameters
 	 *
@@ -207,6 +212,7 @@ class Test_WebP_Uploads_Helper extends ImagesTestCase {
 			TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg'
 		);
 
+		update_option( 'perflab_modern_image_format', 'webp' );
 		// Make sure no editor is available.
 		add_filter( 'wp_image_editors', '__return_empty_array' );
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
@@ -238,7 +244,7 @@ class Test_WebP_Uploads_Helper extends ImagesTestCase {
 		add_filter(
 			'wp_image_editors',
 			static function () {
-				return array( 'WP_Image_Doesnt_Support_WebP' );
+				return array( 'WP_Image_Doesnt_Support_Modern_Images' );
 			}
 		);
 
@@ -355,10 +361,20 @@ class Test_WebP_Uploads_Helper extends ImagesTestCase {
 	public function test_it_should_return_default_transforms_when_filter_returns_non_array_type(): void {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_zero' );
 
-		$default_transforms = array(
-			'image/jpeg' => array( 'image/webp' ),
-			'image/webp' => array( 'image/webp' ),
-		);
+		if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$this->set_image_output_type( 'avif' );
+			$default_transforms = array(
+				'image/jpeg' => array( 'image/avif' ),
+				'image/webp' => array( 'image/webp' ),
+				'image/avif' => array( 'image/avif' ),
+			);
+		} else {
+			$default_transforms = array(
+				'image/jpeg' => array( 'image/webp' ),
+				'image/webp' => array( 'image/webp' ),
+				'image/avif' => array( 'image/avif' ),
+			);
+		}
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
@@ -403,17 +419,31 @@ class Test_WebP_Uploads_Helper extends ImagesTestCase {
 	public function test_it_should_return_jpeg_and_webp_transforms_when_option_generate_webp_and_jpeg_set(): void {
 		remove_all_filters( 'webp_uploads_get_upload_image_mime_transforms' );
 
+		if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$this->set_image_output_type( 'avif' );
+		}
 		update_option( 'perflab_generate_webp_and_jpeg', true );
 
 		$transforms = webp_uploads_get_upload_image_mime_transforms();
 
-		$this->assertSame(
-			array(
-				'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
-				'image/webp' => array( 'image/webp', 'image/jpeg' ),
-			),
-			$transforms
-		);
+		// The returned value depends on whether the server supports AVIF.
+		if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$this->assertSame(
+				array(
+					'image/jpeg' => array( 'image/jpeg', 'image/avif' ),
+					'image/avif' => array( 'image/avif', 'image/jpeg' ),
+				),
+				$transforms
+			);
+		} else {
+			$this->assertSame(
+				array(
+					'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
+					'image/webp' => array( 'image/webp', 'image/jpeg' ),
+				),
+				$transforms
+			);
+		}
 	}
 
 	/**

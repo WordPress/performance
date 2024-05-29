@@ -679,7 +679,7 @@ function webp_uploads_img_tag_update_mime_type( string $original_image, string $
 			$image !== $original_image &&
 			'the_content' === $context &&
 			'image/jpeg' === $original_mime &&
-			'image/webp' === $target_mime
+			'image/' . webp_uploads_get_image_output_format() === $target_mime
 		) {
 			add_action( 'wp_footer', 'webp_uploads_wepb_fallback' );
 		}
@@ -711,41 +711,58 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
  */
 function webp_uploads_wepb_fallback(): void {
 	// Get mime type transforms for the site.
-	$transforms = webp_uploads_get_upload_image_mime_transforms();
+	$transforms   = webp_uploads_get_upload_image_mime_transforms();
+	$image_format = webp_uploads_get_image_output_format();
 
-	// We need to add fallback only if jpeg alternatives for the webp images are enabled for the server.
-	$preserve_jpegs_for_jpeg_transforms = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/webp', $transforms['image/jpeg'], true );
-	$preserve_jpegs_for_webp_transforms = isset( $transforms['image/webp'] ) && in_array( 'image/jpeg', $transforms['image/webp'], true ) && in_array( 'image/webp', $transforms['image/webp'], true );
-	if ( ! $preserve_jpegs_for_jpeg_transforms && ! $preserve_jpegs_for_webp_transforms ) {
+	// We need to add fallback only if jpeg alternatives for the image_format images are enabled for the server.
+	$preserve_jpegs_for_jpeg_transforms       = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/' . $image_format, $transforms['image/jpeg'], true );
+	$preserve_jpegs_for_image_type_transforms = isset( $transforms[ 'image/' . $image_format ] ) && in_array( 'image/jpeg', $transforms[ 'image/' . $image_format ], true ) && in_array( 'image/' . $image_format, $transforms[ 'image/' . $image_format ], true );
+	if ( ! $preserve_jpegs_for_jpeg_transforms && ! $preserve_jpegs_for_image_type_transforms ) {
 		return;
 	}
 
-	ob_start();
+	$detection_string = '';
+	// The fallback script can only handle a single image format at a time.
+	if ( 'webp' === $image_format ) {
+		$detection_string = 'data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
+	} elseif ( 'avif' === $image_format ) {
+		$detection_string = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgANogQEAwgMg8f8D///8WfhwB8+ErK42A=';
+	}
+	if ( '' === $detection_string ) {
+		return;
+	}
 
-	?>
-	( function( d, i, s, p ) {
+	$js_function = <<<JS
+	/**
+	 * Detect if the browser supports the current output format and if not loads the fallback.js script.
+	 */
+	function webpUploadsDetectFallback( d, i, s, p, fallbackSrc ) {
 		s = d.createElement( s );
-		s.src = '<?php echo esc_url_raw( plugins_url( '/fallback.js', __FILE__ ) ); ?>';
+		s.src = fallbackSrc;
 
 		i = d.createElement( i );
-		i.src = p + 'jIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
+		i.src = p;
 		i.onload = function() {
 			i.onload = undefined;
-			i.src = p + 'h4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
 		};
 
 		i.onerror = function() {
 			d.body.appendChild( s );
 		};
-	} )( document, 'img', 'script', 'data:image/webp;base64,UklGR' );
-	<?php
-	$javascript = ob_get_clean();
+	}
+JS;
 
 	wp_print_inline_script_tag(
-		(string) preg_replace( '/\s+/', '', (string) $javascript ),
+		sprintf(
+			'( %s )( document, "img", "script", %s, %s )',
+			(string) preg_replace( '/\s+/', '', (string) $js_function ),
+			wp_json_encode( $detection_string ),
+			wp_json_encode( plugins_url( '/fallback.js', __FILE__ ) )
+		),
 		array(
-			'id'            => 'webpUploadsFallbackWebpImages',
-			'data-rest-api' => esc_url_raw( trailingslashit( get_rest_url() ) ),
+			'id'                 => 'webpUploadsFallbackWebpImages',
+			'data-rest-api'      => esc_url_raw( trailingslashit( get_rest_url() ) ),
+			'data-output-format' => webp_uploads_get_image_output_format(),
 		)
 	);
 }

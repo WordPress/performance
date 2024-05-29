@@ -16,20 +16,26 @@ if ( ! defined( 'ABSPATH' ) ) {
  * for example an image/jpeg can be converted into an image/webp.
  *
  * @since 1.0.0
+ * @since n.e.x.t Added support for AVIF.
  *
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
 function webp_uploads_get_upload_image_mime_transforms(): array {
+
+	// Check the selected output format.
+	$output_format = webp_uploads_mime_type_supported( 'image/avif' ) ? webp_uploads_get_image_output_format() : 'webp';
+
 	$default_transforms = array(
-		'image/jpeg' => array( 'image/webp' ),
+		'image/jpeg' => array( 'image/' . $output_format ),
 		'image/webp' => array( 'image/webp' ),
+		'image/avif' => array( 'image/avif' ),
 	);
 
-	// Check setting for whether to generate both JPEG and WebP.
+	// Check setting for whether to generate both JPEG and the modern output format.
 	if ( true === (bool) get_option( 'perflab_generate_webp_and_jpeg' ) ) {
 		$default_transforms = array(
-			'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
-			'image/webp' => array( 'image/webp', 'image/jpeg' ),
+			'image/jpeg'              => array( 'image/jpeg', 'image/' . $output_format ),
+			'image/' . $output_format => array( 'image/' . $output_format, 'image/jpeg' ),
 		);
 	}
 
@@ -246,7 +252,7 @@ function webp_uploads_generate_image_size( int $attachment_id, string $size, str
  * @return string[] Mime types to use for the image.
  */
 function webp_uploads_get_content_image_mimes( int $attachment_id, string $context ): array {
-	$target_mimes = array( 'image/webp', 'image/jpeg' );
+	$target_mimes = array( 'image/' . webp_uploads_get_image_output_format(), 'image/jpeg' );
 
 	/**
 	 * Filters mime types that should be used to update all images in the content. The order of
@@ -321,4 +327,60 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 		}
 	}
 	return false;
+}
+
+/**
+ * Checks if a mime type is supported by the server.
+ *
+ * Includes special handling for false positives on AVIF support.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $mime_type The mime type to check.
+ * @return bool Whether the server supports a given mime type.
+ */
+function webp_uploads_mime_type_supported( string $mime_type ): bool {
+	if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+		return false;
+	}
+
+	// In certain server environments Image editors can report a false positive for AVIF support.
+	if ( 'image/avif' === $mime_type ) {
+		$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
+		if ( false === $editor ) {
+			return false;
+		}
+		if ( is_a( $editor, WP_Image_Editor_GD::class, true ) ) {
+			return function_exists( 'imageavif' );
+		}
+		if ( is_a( $editor, WP_Image_Editor_Imagick::class, true ) && class_exists( 'Imagick' ) ) {
+			return 0 !== count( Imagick::queryFormats( 'AVIF' ) );
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Get the image output format setting from the option. Default is avif.
+ *
+ * @since n.e.x.t
+ *
+ * @return string The image output format. One of 'webp' or 'avif'.
+ */
+function webp_uploads_get_image_output_format(): string {
+	$image_format = get_option( 'perflab_modern_image_format' );
+	return webp_uploads_sanitize_image_format( $image_format );
+}
+
+/**
+ * Sanitizes the image format.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $image_format The image format to check.
+ * @return string Supported image format.
+ */
+function webp_uploads_sanitize_image_format( string $image_format ): string {
+	return in_array( $image_format, array( 'webp', 'avif' ), true ) ? $image_format : 'webp';
 }

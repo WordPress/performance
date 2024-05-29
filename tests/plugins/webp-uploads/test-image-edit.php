@@ -12,6 +12,7 @@ class Test_WebP_Uploads_Image_Edit extends ImagesTestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+		$this->set_image_output_type( 'webp' );
 
 		add_filter( 'webp_uploads_discard_larger_generated_images', '__return_false' );
 	}
