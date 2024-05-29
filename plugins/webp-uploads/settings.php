@@ -95,7 +95,7 @@ function webp_uploads_add_media_settings_fields(): void {
 	// Add picture element support settings field.
 	add_settings_field(
 		'webp_uploads_use_picture_element',
-		__( 'Enable `picture` element', 'webp-uploads' ),
+		__( 'Picture element', 'webp-uploads' ),
 		'webp_uploads_use_picture_element_callback',
 		'media',
 		'perflab_modern_image_format_settings',
