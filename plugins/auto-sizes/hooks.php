@@ -102,15 +102,15 @@ add_action( 'wp_head', 'auto_sizes_render_generator' );
  */
 function auto_sizes_improve_image_sizes_attribute( string $content, array $parsed_block ): string {
 
-	$tags   = new WP_HTML_Tag_Processor( $content );
-	$image  = $tags->next_tag( array( 'tag_name' => 'img' ) );
-	$layout = wp_get_global_settings( array( 'layout' ) );
+	$processor = new WP_HTML_Tag_Processor( $content );
+	$has_image = $processor->next_tag( array( 'tag_name' => 'img' ) );
+	$layout    = wp_get_global_settings( array( 'layout' ) );
 
-	// Only update the markup if an image is found and we have layout settings.
-	if ( $image && isset( $layout['wideSize'] ) && $layout['contentSize'] ) {
+	// Only update the markup if an image is found.
+	if ( $has_image ) {
 
 		$align = $parsed_block['attrs']['align'] ?? null;
-
+		$sizes = null;
 		// Handle different alignment use cases.
 		switch ( $align ) {
 			case 'full':
@@ -118,20 +118,24 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 				break;
 
 			case 'wide':
-				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['wideSize'] );
+				if ( isset( $layout['wideSize'] ) ) {
+					$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['wideSize'] );
+				}
 				break;
 
 			// @todo: handle left/right alignments.
 			default:
-				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['contentSize'] );
+				if ( isset( $layout['contentSize'] ) ) {
+					$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['contentSize'] );
+				}
 				break;
 		}
 
 		if ( $sizes ) {
-			$tags->set_attribute( 'sizes', $sizes );
+			$processor->set_attribute( 'sizes', $sizes );
 		}
 
-		$content = $tags->get_updated_html();
+		$content = $processor->get_updated_html();
 	}
 	return $content;
 }
