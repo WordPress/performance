@@ -54,7 +54,7 @@ class Test_WebP_Uploads_Picture_Element extends ImagesTestCase {
 		}
 
 		// When both features are enabled, the picture element will contain two srcset elements.
- 		$this->assertEquals( ( $jpeg_and_webp && $expect_picture_element ) ? 2 : 1, substr_count( $the_image, 'srcset=' ) );
+		$this->assertEquals( ( $jpeg_and_webp && $expect_picture_element ) ? 2 : 1, substr_count( $the_image, 'srcset=' ) );
 	}
 
 	/**
