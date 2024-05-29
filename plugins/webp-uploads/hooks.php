@@ -569,7 +569,7 @@ function webp_uploads_update_image_references( string $content ): string {
 
 	return $content;
 }
-add_filter( 'the_content', 'webp_uploads_update_image_references', 13 );
+add_filter( 'the_content', 'webp_uploads_update_image_references', 13 ); // Run after wp_filter_content_tags.
 
 /**
  * Finds all the urls with *.jpg and *.jpeg extension and updates with *.webp version for the provided image
