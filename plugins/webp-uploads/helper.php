@@ -386,7 +386,7 @@ function webp_uploads_sanitize_image_format( string $image_format ): string {
 }
 
 /**
- * Checks if the `webp_uploads_is_picture_element_enabled` option is enabled.
+ * Checks if the `webp_uploads_use_picture_element` option is enabled.
  *
  * @since n.e.x.t
  *
