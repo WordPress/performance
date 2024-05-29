@@ -159,7 +159,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
  */
 function webp_uploads_use_picture_element_callback(): void {
 	?>
-			<label for="webp_uploads_use_picture_element">
+		<label for="webp_uploads_use_picture_element">
 			<input name="webp_uploads_use_picture_element" type="checkbox" id="webp_uploads_use_picture_element" aria-describedby="webp_uploads_use_picture_element_description" value="1"<?php checked( webp_uploads_is_picture_element_enabled() ); ?> />
 			<?php esc_html_e( 'Use <picture> Element', 'webp-uploads' ); ?>
 			<em><?php esc_html_e( '(experimental)', 'webp-uploads' ); ?></em>
