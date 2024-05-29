@@ -59,7 +59,7 @@ function webp_uploads_add_media_settings_fields(): void {
 	// Add settings field.
 	add_settings_field(
 		'webp_uploads_use_picture_element',
-		__( 'Picture Element', 'webp-uploads' ),
+		__( 'Picture Element (Experimental)', 'webp-uploads' ),
 		'webp_uploads_use_picture_element_callback',
 		'media',
 		is_multisite() ? 'default' : 'uploads',
