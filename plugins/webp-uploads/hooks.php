@@ -680,7 +680,7 @@ function webp_uploads_img_tag_update_mime_type( string $original_image, string $
 			'the_content' === $context &&
 			'image/jpeg' === $original_mime &&
 			'image/' . webp_uploads_get_image_output_format() === $target_mime &&
-			! webp_uploads_picture_element_enabled() // Don't enqueue fallback JS if picture enabled.
+			! webp_uploads_is_picture_element_enabled() // Don't enqueue fallback JS if picture enabled.
 		) {
 			add_action( 'wp_footer', 'webp_uploads_webp_fallback' );
 		}
@@ -838,6 +838,6 @@ function webp_uploads_render_generator(): void {
 }
 add_action( 'wp_head', 'webp_uploads_render_generator' );
 
-if ( webp_uploads_picture_element_enabled() ) {
+if ( webp_uploads_is_picture_element_enabled() ) {
 	add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10, 3 );
 }
