@@ -675,14 +675,14 @@ function webp_uploads_img_tag_update_mime_type( string $original_image, string $
 		}
 
 		if (
-			! has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) &&
+			! has_action( 'wp_footer', 'webp_uploads_webp_fallback' ) &&
 			$image !== $original_image &&
 			'the_content' === $context &&
 			'image/jpeg' === $original_mime &&
 			'image/webp' === $target_mime &&
 			! webp_uploads_picture_element_enabled() // Don't enqueue fallback JS if picture enabled.
 		) {
-			add_action( 'wp_footer', 'webp_uploads_wepb_fallback' );
+			add_action( 'wp_footer', 'webp_uploads_webp_fallback' );
 		}
 	}
 
@@ -710,7 +710,7 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
  *
  * @since 1.0.0
  */
-function webp_uploads_wepb_fallback(): void {
+function webp_uploads_webp_fallback(): void {
 	// Get mime type transforms for the site.
 	$transforms = webp_uploads_get_upload_image_mime_transforms();
 

@@ -809,7 +809,7 @@ class Test_WebP_Uploads_Load extends ImagesTestCase {
 			)
 		);
 
-		$this->assertTrue( has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) === 10 );
+		$this->assertTrue( has_action( 'wp_footer', 'webp_uploads_webp_fallback' ) === 10 );
 
 		$footer = get_echo( 'wp_footer' );
 		$this->assertStringContainsString( 'data:image/webp;base64,UklGR', $footer );
@@ -823,7 +823,7 @@ class Test_WebP_Uploads_Load extends ImagesTestCase {
 
 		apply_filters( 'the_content', '<p>no image</p>' );
 
-		$this->assertFalse( has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) );
+		$this->assertFalse( has_action( 'wp_footer', 'webp_uploads_webp_fallback' ) );
 
 		$footer = get_echo( 'wp_footer' );
 		$this->assertStringNotContainsString( 'data:image/webp;base64,UklGR', $footer );
