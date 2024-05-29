@@ -69,17 +69,17 @@ class Test_WebP_Uploads_Picture_Element extends ImagesTestCase {
 				'picture_element'        => true,
 				'expect_picture_element' => true,
 			),
-			'only picture enabled' => array(
+			'only picture enabled'     => array(
 				'jpeg_and_webp'          => false,
 				'picture_element'        => true,
 				'expect_picture_element' => true,
 			),
-			'only jpeg enabled' => array(
+			'only jpeg enabled'        => array(
 				'jpeg_and_webp'          => true,
 				'picture_element'        => false,
 				'expect_picture_element' => false,
 			),
-			'neither enabled' => array(
+			'neither enabled'          => array(
 				'jpeg_and_webp'          => false,
 				'picture_element'        => false,
 				'expect_picture_element' => false,
