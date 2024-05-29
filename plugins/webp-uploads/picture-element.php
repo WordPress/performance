@@ -63,12 +63,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		$attachment_id
 	);
 
-	$mime_types = array_filter(
-		$enabled_mime_types,
-		static function ( $mime_type ) use ( $sub_size_mime_types ) {
-			return in_array( $mime_type, $sub_size_mime_types, true );
-		}
-	);
+	$mime_types = array_intersect( $enabled_mime_types, $sub_size_mime_types );
 
 	// No eligible mime types.
 	if ( count( $mime_types ) === 0 ) {
@@ -76,7 +71,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	}
 
 	// If the original mime types is the only one available, no picture element is needed.
-	if ( 1 === count( $mime_types ) && $mime_types[0] === $original_file_mime_type ) {
+	if ( 1 === count( $mime_types ) && current( $mime_types ) === $original_file_mime_type ) {
 		return $image;
 	}
 
