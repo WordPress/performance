@@ -142,7 +142,7 @@ function webp_uploads_use_picture_element_callback(): void {
 	?>
 		<tr><td colspan="2" class="td-full">
 			<label for="webp_uploads_use_picture_element">
-			<input name="webp_uploads_use_picture_element" type="checkbox" id="webp_uploads_use_picture_element" aria-describedby="webp_uploads_use_picture_element_description" value="1"<?php checked( '1', get_option( 'webp_uploads_use_picture_element' ) ); ?> />
+			<input name="webp_uploads_use_picture_element" type="checkbox" id="webp_uploads_use_picture_element" aria-describedby="webp_uploads_use_picture_element_description" value="1"<?php checked( webp_uploads_picture_element_enabled() ); ?> />
 			<?php esc_html_e( 'Use `<picture>` Element', 'webp-uploads' ); ?>
 		</label>
 		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'The picture element serves a modern image format with a fallback to JPEG. Warning: Make sure you test your theme and plugins for compatibility. In particular, CSS selectors will not match images when using the child combinator (e.g. figure > img).', 'webp-uploads' ); ?></p>
