@@ -155,7 +155,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 /**
  * Renders the settings field for the 'webp_uploads_use_picture_element' setting.
  *
- * @since 1.0.0
+ * @since n.e.x.t
  */
 function webp_uploads_use_picture_element_callback(): void {
 	?>
