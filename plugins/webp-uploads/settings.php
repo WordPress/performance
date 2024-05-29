@@ -65,7 +65,11 @@ function webp_uploads_add_media_settings_fields(): void {
 		'perflab_modern_image_format_settings',
 		__( 'Modern Image Formats', 'webp-uploads' ),
 		'__return_empty_string',
-		'media'
+		'media',
+		array(
+			'before_section' => '<div id="modern-image-formats">',
+			'after_section'  => '</div>',
+		)
 	);
 
 	// Add a dropdown to select the output format between AVIF and WebP output.
@@ -179,7 +183,7 @@ function webp_uploads_add_settings_action_link( $links ) {
 
 	$settings_link = sprintf(
 		'<a href="%1$s">%2$s</a>',
-		esc_url( admin_url( 'options-media.php#perflab_generate_webp_and_jpeg' ) ),
+		esc_url( admin_url( 'options-media.php#modern-image-formats' ) ),
 		esc_html__( 'Settings', 'webp-uploads' )
 	);
 
