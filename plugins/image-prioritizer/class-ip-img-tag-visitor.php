@@ -38,7 +38,11 @@ final class IP_Img_Tag_Visitor extends IP_Tag_Visitor {
 
 		$xpath = $walker->get_xpath();
 
-		// Ensure the fetchpriority attribute is set on the element properly.
+		/*
+		 * When the same LCP element is common/shared among all viewport groups, make sure that the element has
+		 * fetchpriority=high, even though it won't really be needed because a preload link with fetchpriority=high
+		 * will also be added. Additionally, ensure that this common LCP element is never lazy-loaded.
+		 */
 		$common_lcp_element = $this->url_metrics_group_collection->get_common_lcp_element();
 		if ( ! is_null( $common_lcp_element ) && $xpath === $common_lcp_element['xpath'] ) {
 			if ( 'high' === $walker->get_attribute( 'fetchpriority' ) ) {
@@ -54,8 +58,16 @@ final class IP_Img_Tag_Visitor extends IP_Tag_Visitor {
 				$walker->remove_attribute( 'loading' );
 			}
 		} elseif ( is_string( $walker->get_attribute( 'fetchpriority' ) ) && $this->url_metrics_group_collection->is_every_group_populated() ) {
-			// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
-			// continue to apply while waiting for all breakpoints to have metrics collected for them.
+			/*
+			 * At this point, the element is not the shared LCP across all viewport groups. It may not be an LCP element
+			 * in _any_ of the viewport groups. Nevertheless, server-side heuristics may have added the fetchpriority=high
+			 * attribute to the element for some reason. Because of server-side heuristics, we'll only go ahead and remove
+			 * the fetchpriority attribute if every viewport group (is_every_group_populated) has been populated with URL
+			 * metrics because only then do we know that in fact it is _not_ the LCP element in any of the viewport groups.
+			 * This allows for server-side heuristics to continue to apply while waiting for more URL metrics to be gathered.
+			 * Note also that if this is the LCP element for _some_ of the viewport groups, it will still get
+			 * fetchpriority=high by means of the preload link (with a media query) that is added further below.
+			 */
 			$walker->set_attribute( 'data-od-removed-fetchpriority', $walker->get_attribute( 'fetchpriority' ) );
 			$walker->remove_attribute( 'fetchpriority' );
 		}

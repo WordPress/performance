@@ -241,6 +241,59 @@ class Test_IP_Helper extends WP_UnitTestCase {
 				',
 			),
 
+			'common-lcp-image-with-fully-incomplete-sample-data' => array(
+				'set_up'   => function (): void {
+					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+					$sample_size = od_get_url_metrics_breakpoint_sample_size();
+
+					// Only populate the largest viewport group.
+					for ( $i = 0; $i < $sample_size; $i++ ) {
+						OD_URL_Metrics_Post_Type::store_url_metric(
+							$slug,
+							$this->get_validated_url_metric(
+								1000,
+								array(
+									array(
+										'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+										'isLCP' => true,
+									),
+									array(
+										'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+										'isLCP' => false,
+									),
+								)
+							)
+						);
+					}
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+							<img src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" fetchpriority="high">
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen and (min-width: 783px)">
+						</head>
+						<body>
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" fetchpriority="high">
+							<script type="module">/* import detect ... */</script>
+						</body>
+					</html>
+				',
+			),
+
 			'common-lcp-image-with-stale-sample-data'     => array(
 				'set_up'   => function (): void {
 					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
