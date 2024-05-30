@@ -46,13 +46,17 @@ function perflab_server_timing(): Perflab_Server_Timing {
 		}
 
 		/*
-		 * Send the Server-Timing header right before the template is included (and rendered on the page) or else start
-		 * output buffering at this point to then send the Server-Timing header in the output buffer callback. Note that
-		 * a priority of PHP_INT_MAX-1 is used so that other plugins that also do output buffering can start their
-		 * buffering at PHP_INT_MAX and ensure that they can register their own Server-Timing metrics successfully when
-		 * the outer output buffer callback here for Server-Timing is called. Otherwise, a _doing_it_wrong() may ensue.
+		 * When output buffering is enabled, buffer as early as possible so that any other plugins that also do output
+		 * buffering will be able to register Server-Timing metrics. The first output buffer callback to be registered
+		 * is the last one to be called, so by starting the Server-Timing output buffer as soon as possible we can be
+		 * assured that other plugins' output buffer callbacks will run before the Server-Timing one that sends the
+		 * Server-Timing header.
 		 */
-		add_filter( 'template_include', array( $server_timing, 'on_template_include' ), PHP_INT_MAX - 1 );
+		if ( $server_timing->use_output_buffer() ) {
+			add_action( 'template_redirect', array( $server_timing, 'start_output_buffer' ), PHP_INT_MIN );
+		} else {
+			add_filter( 'template_include', array( $server_timing, 'on_template_include' ), PHP_INT_MAX );
+		}
 	}
 
 	return $server_timing;

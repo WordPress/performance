@@ -238,19 +238,22 @@ class Perflab_Server_Timing {
 	 * @return mixed Unmodified value of $passthrough.
 	 */
 	public function on_template_include( $passthrough = null ) {
-		if ( ! $this->use_output_buffer() ) {
-			$this->send_header();
-			return $passthrough;
-		}
+		$this->send_header();
+		return $passthrough;
+	}
 
+	/**
+	 * Starts output buffering to send the Server-Timing header right before returning the buffer.
+	 *
+	 * @since n.e.x.t
+	 */
+	public function start_output_buffer(): void {
 		ob_start(
 			function ( $output ) {
-				#$output .= 'SENT HEADER';
 				$this->send_header();
 				return $output;
 			}
 		);
-		return $passthrough;
 	}
 
 	/**
