@@ -245,6 +245,7 @@ class Perflab_Server_Timing {
 
 		ob_start(
 			function ( $output ) {
+				#$output .= 'SENT HEADER';
 				$this->send_header();
 				return $output;
 			}
