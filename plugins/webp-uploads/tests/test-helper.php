@@ -5,9 +5,9 @@
  * @package webp-uploads
  */
 
-use PerformanceLab\Tests\TestCase\ImagesTestCase;
+use WebP_Uploads\Tests\TestCase;
 
-class Test_WebP_Uploads_Helper extends ImagesTestCase {
+class Test_WebP_Uploads_Helper extends TestCase {
 
 	public function set_up(): void {
 		parent::set_up();

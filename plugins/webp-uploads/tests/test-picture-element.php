@@ -7,9 +7,9 @@
  * @package webp-uploads
  */
 
-use PerformanceLab\Tests\TestCase\ImagesTestCase;
+use WebP_Uploads\Tests\TestCase;
 
-class Test_WebP_Uploads_Picture_Element extends ImagesTestCase {
+class Test_WebP_Uploads_Picture_Element extends TestCase {
 	/**
 	 * Test that images are wrapped in picture element when enabled.
 	 *
