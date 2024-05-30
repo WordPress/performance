@@ -9,7 +9,7 @@ use PerformanceLab\Tests\TestCase\ImagesTestCase;
 
 class Test_WebP_Uploads_Helper extends ImagesTestCase {
 
-	public function set_up() {
+	public function set_up(): void {
 		parent::set_up();
 		$this->set_image_output_type( 'webp' );
 	}

@@ -704,8 +704,6 @@ class Test_WebP_Uploads_Load extends ImagesTestCase {
 	 * Replace the featured image to the proper type when requesting the featured image.
 	 *
 	 * @dataProvider data_provider_supported_image_types
-	 *
-	 * @param string $image_type
 	 */
 	public function test_it_should_replace_the_featured_image_to_webp_when_requesting_the_featured_image( string $image_type ): void {
 		$mime_type = 'image/' . $image_type;
@@ -876,7 +874,7 @@ class Test_WebP_Uploads_Load extends ImagesTestCase {
 			)
 		);
 
-		$this->assertTrue( has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) === 10 );
+		$this->assertTrue( has_action( 'wp_footer', 'webp_uploads_webp_fallback' ) === 10 );
 
 		$footer = get_echo( 'wp_footer' );
 		$this->assertStringContainsString( 'webp;base64,UklGR', wp_unslash( $footer ) );
@@ -890,7 +888,7 @@ class Test_WebP_Uploads_Load extends ImagesTestCase {
 
 		apply_filters( 'the_content', '<p>no image</p>' );
 
-		$this->assertFalse( has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) );
+		$this->assertFalse( has_action( 'wp_footer', 'webp_uploads_webp_fallback' ) );
 
 		$footer = get_echo( 'wp_footer' );
 		$this->assertStringNotContainsString( 'webp;base64,UklGR', $footer );
