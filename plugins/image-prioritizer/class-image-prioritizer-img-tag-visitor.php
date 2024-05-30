@@ -72,8 +72,41 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$walker->remove_attribute( 'fetchpriority' );
 		}
 
-		// TODO: If the image is visible (intersectionRatio!=0) in any of the URL metrics, remove loading=lazy.
-		// TODO: Conversely, if an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
+		// TODO: Also if the element isLCPCandidate it should never by lazy-loaded.
+		$is_visible = false;
+		$is_found   = false;
+		foreach ( $this->url_metrics_group_collection as $group ) {
+			foreach ( $group as $url_metric ) {
+				foreach ( $url_metric->get_elements() as $element ) {
+					if ( $xpath === $element['xpath'] ) {
+						$is_found = true;
+						if ( $element['intersectionRatio'] > 0 ) {
+							$is_visible = true;
+							break 3; // TODO: O(n^3) my!
+						}
+					}
+				}
+			}
+		}
+
+		// If the element was not found, we don't know if it was visible for not, so don't do anything.
+		if ( ! $is_found ) {
+			$walker->set_attribute( 'data-ip-unknown-tag', true ); // Mostly useful for debugging why an IMG isn't optimized.
+		} else {
+			// Otherwise, make sure visible elements omit the loading attribute, and hidden elements include loading=lazy.
+			$loading = (string) $walker->get_attribute( 'loading' );
+			if ( $is_visible && 'lazy' === $loading ) {
+				$walker->set_attribute( 'data-od-removed-loading', $loading );
+				$walker->remove_attribute( 'loading' );
+			} elseif ( ! $is_visible && 'lazy' !== $loading ) {
+				$walker->set_attribute( 'loading', 'lazy' );
+				$walker->set_attribute( 'data-od-added-loading', true );
+				if ( '' !== $loading ) {
+					$walker->set_attribute( 'data-od-removed-loading', $loading );
+				}
+			}
+		}
+		// TODO: If an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
 
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
 		foreach ( $this->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
