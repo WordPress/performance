@@ -171,7 +171,7 @@ class Test_Load extends WP_UnitTestCase {
 		add_filter(
 			'filesystem_method_file',
 			static function () {
-				return __DIR__ . '/../../utils/Filesystem/WP_Filesystem_MockFilesystem.php';
+				return __DIR__ . '/data/class-wp-filesystem-mockfilesystem.php';
 			}
 		);
 		add_filter(
