@@ -384,3 +384,14 @@ function webp_uploads_get_image_output_format(): string {
 function webp_uploads_sanitize_image_format( string $image_format ): string {
 	return in_array( $image_format, array( 'webp', 'avif' ), true ) ? $image_format : 'webp';
 }
+
+/**
+ * Checks if the `webp_uploads_use_picture_element` option is enabled.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if the option is enabled, false otherwise.
+ */
+function webp_uploads_is_picture_element_enabled(): bool {
+	return (bool) get_option( 'webp_uploads_use_picture_element', false );
+}

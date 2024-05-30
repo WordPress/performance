@@ -569,7 +569,7 @@ function webp_uploads_update_image_references( string $content ): string {
 
 	return $content;
 }
-add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
+add_filter( 'the_content', 'webp_uploads_update_image_references', 13 ); // Run after wp_filter_content_tags.
 
 /**
  * Finds all the urls with *.jpg and *.jpeg extension and updates with *.webp version for the provided image
@@ -675,13 +675,14 @@ function webp_uploads_img_tag_update_mime_type( string $original_image, string $
 		}
 
 		if (
-			! has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) &&
+			! has_action( 'wp_footer', 'webp_uploads_webp_fallback' ) &&
 			$image !== $original_image &&
 			'the_content' === $context &&
 			'image/jpeg' === $original_mime &&
-			'image/' . webp_uploads_get_image_output_format() === $target_mime
+			'image/' . webp_uploads_get_image_output_format() === $target_mime &&
+			! webp_uploads_is_picture_element_enabled() // Don't enqueue fallback JS if picture enabled.
 		) {
-			add_action( 'wp_footer', 'webp_uploads_wepb_fallback' );
+			add_action( 'wp_footer', 'webp_uploads_webp_fallback' );
 		}
 	}
 
@@ -709,7 +710,7 @@ add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 )
  *
  * @since 1.0.0
  */
-function webp_uploads_wepb_fallback(): void {
+function webp_uploads_webp_fallback(): void {
 	// Get mime type transforms for the site.
 	$transforms   = webp_uploads_get_upload_image_mime_transforms();
 	$image_format = webp_uploads_get_image_output_format();
@@ -836,3 +837,7 @@ function webp_uploads_render_generator(): void {
 	echo '<meta name="generator" content="webp-uploads ' . esc_attr( WEBP_UPLOADS_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'webp_uploads_render_generator' );
+
+if ( webp_uploads_is_picture_element_enabled() ) {
+	add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10, 3 );
+}

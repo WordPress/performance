@@ -21,7 +21,7 @@ class Test_WebP_Uploads_Settings extends WP_UnitTestCase {
 		$this->assertSame(
 			array_merge(
 				array(
-					'settings' => '<a href="' . esc_url( admin_url( 'options-media.php#perflab_generate_webp_and_jpeg' ) ) . '">Settings</a>',
+					'settings' => '<a href="' . esc_url( admin_url( 'options-media.php#modern-image-formats' ) ) . '">Settings</a>',
 				),
 				$default_action_links
 			),
