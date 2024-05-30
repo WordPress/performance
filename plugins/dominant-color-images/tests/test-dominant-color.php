@@ -1,12 +1,12 @@
 <?php
 
-use PerformanceLab\Tests\TestCase\DominantColorTestCase;
+use Dominant_Color_Images\Tests\TestCase;
 /**
  * Tests for Image Placeholders plugin.
  *
  * @package dominant-color-images
  */
-class Test_Dominant_Color extends DominantColorTestCase {
+class Test_Dominant_Color extends TestCase {
 
 	/**
 	 * Tests dominant_color_metadata().

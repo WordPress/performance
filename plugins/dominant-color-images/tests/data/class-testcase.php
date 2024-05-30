@@ -1,10 +1,10 @@
 <?php
 
-namespace PerformanceLab\Tests\TestCase;
+namespace Dominant_Color_Images\Tests;
 
 use WP_UnitTestCase;
 
-abstract class DominantColorTestCase extends WP_UnitTestCase {
+abstract class TestCase extends WP_UnitTestCase {
 	/**
 	 * Data provider for test_get_dominant_color_GD.
 	 *

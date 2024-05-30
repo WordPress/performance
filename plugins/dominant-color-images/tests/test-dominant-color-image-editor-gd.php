@@ -5,9 +5,9 @@
  * @package dominant-color-images
  */
 
-use PerformanceLab\Tests\TestCase\DominantColorTestCase;
+use Dominant_Color_Images\Tests\TestCase;
 
-class Test_Dominant_Color_Image_Editor_GD extends DominantColorTestCase {
+class Test_Dominant_Color_Image_Editor_GD extends TestCase {
 
 	/**
 	 * Makes sure that only the GD editor is used.
