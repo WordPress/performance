@@ -21,7 +21,7 @@ const joinFiles = ( files ) => {
 };
 
 // Get plugin base name to match regex more accurately.
-// Else it can cause issues when this plugin is places in `wp-content/plugins` directory.
+// Else it can cause issues when this plugin is placed in `wp-content/plugins` directory.
 const PLUGIN_BASE_NAME = path.basename( __dirname );
 
 module.exports = {
