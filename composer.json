@@ -33,11 +33,6 @@
     "yoast/phpunit-polyfills": "^1.0",
     "phpstan/php-8-stubs": "^0.3.84"
   },
-  "autoload-dev": {
-    "psr-4": {
-      "PerformanceLab\\Tests\\": "tests/utils"
-    }
-  },
   "config": {
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
