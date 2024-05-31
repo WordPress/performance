@@ -27,7 +27,7 @@
 			<directory suffix=".php">plugins/speculation-rules/tests</directory>
 		</testsuite>
 		<testsuite name="web-worker-offloading">
-			<directory suffix=".php">./tests/plugins/web-worker-offloading</directory>
+			<directory suffix=".php">plugins/web-worker-offloading/tests</directory>
 		</testsuite>
 		<testsuite name="webp-uploads">
 			<directory suffix=".php">plugins/webp-uploads/tests</directory>
