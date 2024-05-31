@@ -3,6 +3,7 @@
  */
 const path = require( 'path' );
 const micromatch = require( 'micromatch' );
+const { execSync } = require( 'child_process' );
 
 /**
  * Internal dependencies
@@ -27,7 +28,14 @@ const PLUGIN_BASE_NAME = path.basename( __dirname );
 module.exports = {
 	'**/*.js': ( files ) => `npm run lint-js -- ${ joinFiles( files ) }`,
 	'**/*.php': ( files ) => {
-		const commands = [ 'composer phpstan' ];
+		const getAllTrackedFiles = ( pattern ) => {
+			return execSync( `git ls-files ${ pattern }` )
+				.toString()
+				.trim()
+				.split( '\n' );
+		};
+
+		const commands = [];
 
 		plugins.forEach( ( plugin ) => {
 			const pluginFiles = micromatch(
@@ -37,6 +45,15 @@ module.exports = {
 			);
 
 			if ( pluginFiles.length ) {
+				const allPhpFiles = getAllTrackedFiles(
+					`plugins/${ plugin }`
+				).filter( ( file ) => /\.php$/.test( file ) );
+				if ( allPhpFiles.length ) {
+					commands.push(
+						`composer phpstan -- ${ joinFiles( allPhpFiles ) }`
+					);
+				}
+
 				// Note: The lint command has to be used directly because the plugin-specific lint command includes the entire plugin directory as an argument.
 				commands.push(
 					`composer lint -- --standard=./plugins/${ plugin }/phpcs.xml.dist ${ joinFiles(
@@ -53,6 +70,15 @@ module.exports = {
 		);
 
 		if ( otherFiles.length ) {
+			const allPhpFiles = getAllTrackedFiles( `!(plugins)` ).filter(
+				( file ) => /\.php$/.test( file )
+			);
+			if ( allPhpFiles.length ) {
+				commands.push(
+					`composer phpstan -- ${ joinFiles( allPhpFiles ) }`
+				);
+			}
+
 			commands.push( `composer lint -- ${ joinFiles( otherFiles ) }` );
 		}
 
