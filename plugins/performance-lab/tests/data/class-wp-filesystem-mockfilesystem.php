@@ -9,10 +9,7 @@
 // phpcs:disable SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingAnyTypeHint
 // phpcs:disable SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingNativeTypeHint
 
-// For the sake of auto-loading by PHPUnit, we may need to include this file here.
-if ( ! class_exists( 'WP_Filesystem_Base' ) ) {
-	require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
-}
+require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
 
 /**
  * Simple mock filesystem, limited to working with concrete file paths.

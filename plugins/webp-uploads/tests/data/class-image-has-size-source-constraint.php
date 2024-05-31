@@ -2,10 +2,7 @@
 
 namespace WebP_Uploads\Tests\Constraint;
 
-// Load `Image_Has_Source_Constraint` class if it's not loaded yet.
-if ( ! class_exists( Image_Has_Source_Constraint::class ) ) {
-	require_once __DIR__ . '/class-image-has-source-constraint.php';
-}
+require_once __DIR__ . '/class-image-has-source-constraint.php';
 
 /**
  * A constraint that checks a certain subsize source with provided mime type.
