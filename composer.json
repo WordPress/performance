@@ -59,6 +59,7 @@
     "format:embed-optimizer":        "@format -- ./plugins/embed-optimizer --standard=./plugins/embed-optimizer/phpcs.xml.dist",
     "format:optimization-detective": "@format -- ./plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
     "format:speculation-rules":      "@format -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
+    "format:web-worker-offloading":  "@format -- ./plugins/web-worker-offloading --standard=./plugins/web-worker-offloading/phpcs.xml.dist",
     "format:webp-uploads":           "@format -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
     "lint": "phpcs",
     "lint:all": [
@@ -78,6 +79,7 @@
     "lint:optimization-detective": "@lint -- ./plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
     "lint:performance-lab":        "@lint -- ./plugins/performance-lab --standard=./plugins/performance-lab/phpcs.xml.dist",
     "lint:speculation-rules":      "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
+    "lint:web-worker-offloading":  "@lint -- ./plugins/web-worker-offloading --standard=./plugins/web-worker-offloading/phpcs.xml.dist",
     "lint:webp-uploads":           "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
     "phpstan": "phpstan analyse --memory-limit=2048M",
     "test": "phpunit",
@@ -98,6 +100,7 @@
     "test-multisite:optimization-detective": "@test-multisite --verbose --testsuite optimization-detective",
     "test-multisite:performance-lab":        "@test-multisite --verbose --testsuite performance-lab",
     "test-multisite:speculation-rules":      "@test-multisite --verbose --testsuite speculation-rules",
+    "test-multisite:web-worker-offloading":  "@test-multisite --verbose --testsuite web-worker-offloading",
     "test-multisite:webp-uploads":           "@test-multisite --verbose --testsuite webp-uploads",
     "test:plugins": [
       "@test:auto-sizes",
@@ -115,6 +118,7 @@
     "test:optimization-detective": "@test --verbose --testsuite optimization-detective",
     "test:performance-lab":        "@test --verbose --testsuite performance-lab",
     "test:speculation-rules":      "@test --verbose --testsuite speculation-rules",
+    "test:web-worker-offloading":  "@test --verbose --testsuite web-worker-offloading",
     "test:webp-uploads":           "@test --verbose --testsuite webp-uploads"
   }
 }
