@@ -73,28 +73,15 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		}
 
 		// TODO: Also if the element isLCPCandidate it should never by lazy-loaded.
-		$is_visible = false;
-		$is_found   = false;
-		foreach ( $this->url_metrics_group_collection as $group ) {
-			foreach ( $group as $url_metric ) {
-				foreach ( $url_metric->get_elements() as $element ) {
-					if ( $xpath === $element['xpath'] ) {
-						$is_found = true;
-						if ( $element['intersectionRatio'] > 0 ) {
-							$is_visible = true;
-							break 3; // TODO: O(n^3) my!
-						}
-					}
-				}
-			}
-		}
+		$element_max_intersection_ratio = $this->url_metrics_group_collection->get_element_max_intersection_ratio( $xpath );
 
 		// If the element was not found, we don't know if it was visible for not, so don't do anything.
-		if ( ! $is_found ) {
+		if ( is_null( $element_max_intersection_ratio ) ) {
 			$walker->set_attribute( 'data-ip-unknown-tag', true ); // Mostly useful for debugging why an IMG isn't optimized.
 		} else {
 			// Otherwise, make sure visible elements omit the loading attribute, and hidden elements include loading=lazy.
-			$loading = (string) $walker->get_attribute( 'loading' );
+			$is_visible = $element_max_intersection_ratio > 0.0;
+			$loading    = (string) $walker->get_attribute( 'loading' );
 			if ( $is_visible && 'lazy' === $loading ) {
 				$walker->set_attribute( 'data-od-removed-loading', $loading );
 				$walker->remove_attribute( 'loading' );

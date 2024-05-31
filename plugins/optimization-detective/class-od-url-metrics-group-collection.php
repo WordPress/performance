@@ -78,7 +78,8 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 *          is_every_group_populated?: bool,
 	 *          is_every_group_complete?: bool,
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metrics_Group[]>,
-	 *          get_common_lcp_element?: ElementData|null
+	 *          get_common_lcp_element?: ElementData|null,
+	 *          get_all_element_max_intersection_ratios?: array<string, float>
 	 *      }
 	 */
 	private $result_cache = array();
@@ -368,6 +369,51 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 
 		$this->result_cache[ __FUNCTION__ ] = $result;
 		return $result;
+	}
+
+	/**
+	 * Gets the max intersection ratios of all elements across all groups and their captured URL metrics.
+	 *
+	 * @return array<string, float> Keys are XPaths and values are the intersection ratios.
+	 */
+	public function get_all_element_max_intersection_ratios(): array {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
+		}
+
+		$result = ( function () {
+			$element_max_intersection_ratios = array();
+
+			/*
+			 * O(n^3) my! Yes. This is why the result is cached. This being said, the number of groups should be 4 (one
+			 * more than the default number of breakpoints) and the number of URL metrics for each group should be 3
+			 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
+			 * end up running n*4*3 times.
+			 */
+			foreach ( $this->groups as $group ) {
+				foreach ( $group as $url_metric ) {
+					foreach ( $url_metric->get_elements() as $element ) {
+						$element_max_intersection_ratios[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_max_intersection_ratios )
+							? max( $element_max_intersection_ratios[ $element['xpath'] ], $element['intersectionRatio'] )
+							: $element['intersectionRatio'];
+					}
+				}
+			}
+			return $element_max_intersection_ratios;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
+	}
+
+	/**
+	 * Gets the max intersection ratio of an element across all groups and their captured URL metrics.
+	 *
+	 * @param string $xpath XPath for the element.
+	 * @return float|null Max intersection ratio of null if tag is unknown (not captured).
+	 */
+	public function get_element_max_intersection_ratio( string $xpath ): ?float {
+		return $this->get_all_element_max_intersection_ratios()[ $xpath ] ?? null;
 	}
 
 	/**
