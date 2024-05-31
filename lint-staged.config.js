@@ -37,8 +37,11 @@ module.exports = {
 			);
 
 			if ( pluginFiles.length ) {
+				// Note: The lint command has to be used directly because the plugin-specific lint command includes the entire plugin directory as an argument.
 				commands.push(
-					`composer lint:${ plugin } ${ joinFiles( pluginFiles ) }`
+					`composer lint -- --standard=./plugins/${ plugin }/phpcs.xml.dist ${ joinFiles(
+						pluginFiles
+					) }`
 				);
 			}
 		} );
