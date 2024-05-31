@@ -25,7 +25,7 @@ const joinFiles = ( files ) => {
 const PLUGIN_BASE_NAME = path.basename( __dirname );
 
 module.exports = {
-	'**/*.js': ( files ) => `npm run lint-js ${ joinFiles( files ) }`,
+	'**/*.js': ( files ) => `npm run lint-js -- ${ joinFiles( files ) }`,
 	'**/*.php': ( files ) => {
 		const commands = [ 'composer phpstan' ];
 
@@ -37,8 +37,11 @@ module.exports = {
 			);
 
 			if ( pluginFiles.length ) {
+				// Note: The lint command has to be used directly because the plugin-specific lint command includes the entire plugin directory as an argument.
 				commands.push(
-					`composer lint:${ plugin } ${ joinFiles( pluginFiles ) }`
+					`composer lint -- --standard=./plugins/${ plugin }/phpcs.xml.dist ${ joinFiles(
+						pluginFiles
+					) }`
 				);
 			}
 		} );
@@ -50,7 +53,7 @@ module.exports = {
 		);
 
 		if ( otherFiles.length ) {
-			commands.push( `composer lint ${ joinFiles( otherFiles ) }` );
+			commands.push( `composer lint -- ${ joinFiles( otherFiles ) }` );
 		}
 
 		return commands;
