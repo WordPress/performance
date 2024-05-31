@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * PartyTown Configuration
+ * Configuration for Web Worker Offloading.
  *
  * @since n.e.x.t
  * @see https://partytown.builder.io/configuration
@@ -27,7 +27,7 @@ function wwo_configuration(): array {
 	);
 
 	/**
-	 * Add configuration for PartyTown.
+	 * Add configuration for Web Worker Offloading.
 	 *
 	 * @since n.e.x.t
 	 * @see <https://partytown.builder.io/configuration>.
@@ -50,7 +50,7 @@ function wwo_init(): void {
 	}
 
 	wp_register_script(
-		'partytown',
+		'web-worker-offloader',
 		'',
 		array(),
 		WEB_WORKER_OFFLOADING_VERSION,
@@ -58,7 +58,7 @@ function wwo_init(): void {
 	);
 
 	wp_add_inline_script(
-		'partytown',
+		'web-worker-offloader',
 		sprintf(
 			'window.partytown = %s;',
 			wp_json_encode( wwo_configuration() )
@@ -67,7 +67,7 @@ function wwo_init(): void {
 	);
 
 	wp_add_inline_script(
-		'partytown',
+		'web-worker-offloader',
 		$partytown_js,
 		'after'
 	);
@@ -75,35 +75,35 @@ function wwo_init(): void {
 add_action( 'wp_enqueue_scripts', 'wwo_init' );
 
 /**
- * Helper function to get all scripts tags which has `partytown` dependency.
+ * Helper function to get all scripts tags which has `web-worker-offloader` dependency.
  *
  * @since n.e.x.t
  *
  * @return string[] Array of script handles.
  */
-function wwo_get_partytown_handles(): array {
+function wwo_get_web_worker_offloader_handles(): array {
 	/**
-	 * Array of script handles which has `partytown` dependency.
+	 * Array of script handles which has `web-worker-offloader` dependency.
 	 *
 	 * @var string[]
 	 */
-	static $partytown_handles = array();
+	static $web_worker_offloader_handles = array();
 
-	if ( ! empty( $partytown_handles ) ) {
-		return $partytown_handles;
+	if ( ! empty( $web_worker_offloader_handles ) ) {
+		return $web_worker_offloader_handles;
 	}
 
 	foreach ( wp_scripts()->registered as $handle => $script ) {
-		if ( ! empty( $script->deps ) && in_array( 'partytown', $script->deps, true ) ) {
-			$partytown_handles[] = $handle;
+		if ( ! empty( $script->deps ) && in_array( 'web-worker-offloader', $script->deps, true ) ) {
+			$web_worker_offloader_handles[] = $handle;
 		}
 	}
 
-	return $partytown_handles;
+	return $web_worker_offloader_handles;
 }
 
 /**
- * Mark scripts with `partytown` dependency as async.
+ * Mark scripts with `web-worker-offloader` dependency as async.
  *
  * Why this is needed?
  *
@@ -118,9 +118,9 @@ function wwo_get_partytown_handles(): array {
  * @return string[] Array of script handles.
  */
 function wwo_update_script_strategy( array $script_handles ): array {
-	$partytown_handles = wwo_get_partytown_handles();
+	$web_worker_offloader_handles = wwo_get_web_worker_offloader_handles();
 
-	foreach ( array_intersect( $script_handles, $partytown_handles ) as $handle ) {
+	foreach ( array_intersect( $script_handles, $web_worker_offloader_handles ) as $handle ) {
 		wp_script_add_data( $handle, 'strategy', 'async' );
 	}
 
@@ -129,19 +129,19 @@ function wwo_update_script_strategy( array $script_handles ): array {
 add_filter( 'print_scripts_array', 'wwo_update_script_strategy', 10, 1 );
 
 /**
- * Update script type for handles having `partytown` as dependency.
+ * Update script type for handles having `web-worker-offloader` as dependency.
  *
  * @since n.e.x.t
  *
  * @param string $tag Script tag.
  * @param string $handle Script handle.
  *
- * @return string $tag Script tag with type="text/partytown".
+ * @return string $tag Script tag with type="text/partytown" for eligible scripts.
  */
 function wwo_update_script_type( string $tag, string $handle ): string {
-	$partytown_handles = wwo_get_partytown_handles();
+	$web_worker_offloader_handles = wwo_get_web_worker_offloader_handles();
 
-	if ( in_array( $handle, $partytown_handles, true ) ) {
+	if ( in_array( $handle, $web_worker_offloader_handles, true ) ) {
 		$html_processor = new WP_HTML_Tag_Processor( $tag );
 
 		while ( $html_processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
