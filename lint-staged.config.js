@@ -38,9 +38,7 @@ module.exports = {
 
 			if ( pluginFiles.length ) {
 				commands.push(
-					`npm run lint:php:plugins --plugin=${ plugin } ${ joinFiles(
-						pluginFiles
-					) }`
+					`composer lint:${ plugin } ${ joinFiles( pluginFiles ) }`
 				);
 			}
 		} );
