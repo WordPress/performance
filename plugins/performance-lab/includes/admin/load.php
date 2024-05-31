@@ -471,3 +471,28 @@ function perflab_get_plugin_settings_url( string $plugin_slug ): ?string {
 
 	return null;
 }
+
+/**
+ * Prints the Performance Lab install notice after each feature plugin's row meta.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $plugin_file Plugin file.
+ */
+function perflab_print_row_meta_install_notice( string $plugin_file ): void {
+	if ( ! in_array( strtok( $plugin_file, '/' ), perflab_get_standalone_plugins(), true ) ) {
+		return;
+	}
+
+	$message = sprintf(
+		/* translators: placeholder is URL to Performance Lab screen */
+		__( 'This plugin is installed by <a href="%s">Performance Lab</a>.', 'performance-lab' ),
+		esc_url( add_query_arg( 'page', PERFLAB_SCREEN, admin_url( 'options-general.php' ) ) )
+	);
+
+	printf(
+		'<div class="requires"><p>%1$s</p></div>',
+		wp_kses( $message, array( 'a' => array( 'href' => array() ) ) )
+	);
+}
+add_action( 'after_plugin_row_meta', 'perflab_print_row_meta_install_notice' );
