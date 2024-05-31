@@ -103,44 +103,70 @@ function wwo_get_partytown_handles(): array {
 }
 
 /**
+ * Mark scripts with `partytown` dependency as async.
+ *
+ * Why this is needed?
+ *
+ * Scripts offloaded to a worker thread can be considered async. However, they may include `before` and `after` inline
+ * scripts that need sequential execution. Once marked as async, `filter_eligible_strategies()` determines if the
+ * script is eligible for async execution. If so, it will be offloaded to the worker thread.
+ *
+ * @since n.e.x.t
+ *
+ * @param string[] $script_handles Array of script handles.
+ *
+ * @return string[] Array of script handles.
+ */
+function wwo_update_script_strategy( array $script_handles ): array {
+	$partytown_handles = wwo_get_partytown_handles();
+
+	foreach ( array_intersect( $script_handles, $partytown_handles ) as $handle ) {
+		wp_script_add_data( $handle, 'strategy', 'async' );
+	}
+
+	return $script_handles;
+}
+add_filter( 'print_scripts_array', 'wwo_update_script_strategy', 10, 1 );
+
+/**
  * Update script type for handles having `partytown` as dependency.
  *
  * @since n.e.x.t
  *
  * @param string $tag Script tag.
  * @param string $handle Script handle.
- * @param string $src Script source.
  *
  * @return string $tag Script tag with type="text/partytown".
  */
-function wwo_update_script_type( string $tag, string $handle, string $src ): string {
+function wwo_update_script_type( string $tag, string $handle ): string {
 	$partytown_handles = wwo_get_partytown_handles();
 
 	if ( in_array( $handle, $partytown_handles, true ) ) {
-		$before_script = wp_scripts()->get_inline_script_data( $handle, 'before' );
-		$after_script  = wp_scripts()->get_inline_script_data( $handle, 'after' );
+		$html_processor = new WP_HTML_Tag_Processor( $tag );
 
-		if ( ! empty( $before_script ) || ! empty( $after_script ) ) {
-			_doing_it_wrong(
-				'wp_add_inline_script',
-				sprintf(
-					/* translators: %s: script handle */
-					esc_html__( 'Cannot add inline script "%s" to scripts with a "partytown" dependency. Script will continue to load in the main thread.', 'web-worker-offloading' ),
-					'<a href="https://developer.wordpress.org/reference/functions/wp_add_inline_script/">wp_add_inline_script()</a>'
-				),
-				esc_html( WEB_WORKER_OFFLOADING_VERSION )
-			);
-		} else {
-			$tag = wp_get_script_tag(
-				array(
-					'type'   => 'text/partytown',
-					'src'    => $src,
-					'handle' => $handle . '-js',
-				)
-			);
+		while ( $html_processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
+			if ( $html_processor->get_attribute( 'id' ) === "{$handle}-js" ) {
+				if ( ! $html_processor->get_attribute( 'async' ) ) {
+					_doing_it_wrong(
+						'wwo_update_script_type',
+						esc_html(
+							sprintf(
+								/* translators: %s: script handle */
+								__( 'Unable to offload "%s" script to a worker. Script will continue to load in the main thread.', 'web-worker-offloading' ),
+								$handle
+							)
+						),
+						esc_html( WEB_WORKER_OFFLOADING_VERSION )
+					);
+				} else {
+					$html_processor->set_attribute( 'type', 'text/partytown' );
+					$html_processor->remove_attribute( 'async' );
+					$tag = $html_processor->get_updated_html();
+				}
+			}
 		}
 	}
 
 	return $tag;
 }
-add_filter( 'script_loader_tag', 'wwo_update_script_type', 10, 3 );
+add_filter( 'script_loader_tag', 'wwo_update_script_type', 10, 2 );
