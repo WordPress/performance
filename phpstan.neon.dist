@@ -32,28 +32,28 @@ parameters:
 		# The following ignored errors are all for tests. They are likely excessively strict and do not warrant being fixed.
 		-
 			identifier: argument.type
-			path: tests/*
+			path: */tests/*
 		-
 			identifier: offsetAccess.nonArray
-			path: tests/*
+			path: */tests/*
 		-
 			identifier: method.notFound
-			path: tests/*
+			path: */tests/*
 		-
 			identifier: offsetAccess.notFound
-			path: tests/*
+			path: */tests/*
 		-
 			identifier: encapsedStringPart.nonString
-			path: tests/*
+			path: */tests/*
 		-
 			identifier: offsetAccess.invalidOffset
-			path: tests/*
+			path: */tests/*
 		-
 			identifier: assign.propertyType
-			path: tests/*
+			path: */tests/*
 		-
 			identifier: method.nonObject
-			path: tests/*
+			path: */tests/*
 		-
 			identifier: cast.string
-			path: tests/*
+			path: */tests/*

@@ -1,13 +1,13 @@
 <?php
 
-namespace PerformanceLab\Tests\Constraint;
+namespace WebP_Uploads\Tests\Constraint;
 
 use PHPUnit\Framework\Constraint\Constraint;
 
 /**
  * A constraint that checks a certain source with provided mime type.
  */
-class ImageHasSource extends Constraint {
+class Image_Has_Source_Constraint extends Constraint {
 
 	/**
 	 * The requested mime type.
