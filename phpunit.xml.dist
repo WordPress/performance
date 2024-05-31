@@ -9,28 +9,28 @@
 	>
 	<testsuites>
 		<testsuite name="performance-lab">
-			<directory suffix=".php">./tests/plugins/performance-lab</directory>
+			<directory suffix=".php">plugins/performance-lab/tests</directory>
 		</testsuite>
 		<testsuite name="auto-sizes">
-			<directory suffix=".php">./tests/plugins/auto-sizes</directory>
+			<directory suffix=".php">plugins/auto-sizes/tests</directory>
 		</testsuite>
 		<testsuite name="dominant-color-images">
-			<directory suffix=".php">./tests/plugins/dominant-color-images</directory>
+			<directory suffix=".php">plugins/dominant-color-images/tests</directory>
 		</testsuite>
 		<testsuite name="embed-optimizer">
-			<directory suffix=".php">./tests/plugins/embed-optimizer</directory>
+			<directory suffix=".php">plugins/embed-optimizer/tests</directory>
 		</testsuite>
 		<testsuite name="image-prioritizer">
-			<directory suffix=".php">./tests/plugins/image-prioritizer</directory>
+			<directory suffix=".php">plugins/image-prioritizer/tests</directory>
 		</testsuite>
 		<testsuite name="optimization-detective">
-			<directory suffix=".php">./tests/plugins/optimization-detective</directory>
+			<directory suffix=".php">plugins/optimization-detective/tests</directory>
 		</testsuite>
 		<testsuite name="speculation-rules">
-			<directory suffix=".php">./tests/plugins/speculation-rules</directory>
+			<directory suffix=".php">plugins/speculation-rules/tests</directory>
 		</testsuite>
 		<testsuite name="webp-uploads">
-			<directory suffix=".php">./tests/plugins/webp-uploads</directory>
+			<directory suffix=".php">plugins/webp-uploads/tests</directory>
 		</testsuite>
 	</testsuites>
 	<groups>

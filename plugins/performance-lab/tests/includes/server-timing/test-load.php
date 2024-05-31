@@ -16,10 +16,27 @@ class Test_Server_Timing_Load extends WP_UnitTestCase {
 		$this->assertTrue( has_filter( 'template_include' ) );
 
 		$server_timing = perflab_server_timing();
+		$this->assertFalse( $server_timing->use_output_buffer() );
 		$this->assertSame( PHP_INT_MAX, has_filter( 'template_include', array( $server_timing, 'on_template_include' ) ), 'template_include filter not added' );
+		$this->assertFalse( has_action( 'template_redirect', array( $server_timing, 'start_output_buffer' ) ), 'template_redirect action added' );
 
 		$server_timing2 = perflab_server_timing();
 		$this->assertSame( $server_timing, $server_timing2, 'Different instance returned' );
+	}
+
+	/**
+	 * @covers Perflab_Server_Timing::add_hooks
+	 */
+	public function test_perflab_server_timing_with_output_buffering(): void {
+		remove_all_actions( 'template_redirect' );
+		remove_all_filters( 'template_include' );
+
+		$server_timing = perflab_server_timing();
+		add_filter( 'perflab_server_timing_use_output_buffer', '__return_true' );
+		$this->assertTrue( $server_timing->use_output_buffer() );
+		$server_timing->add_hooks();
+		$this->assertFalse( has_filter( 'template_include', array( $server_timing, 'on_template_include' ) ), 'template_include filter added' );
+		$this->assertSame( PHP_INT_MIN, has_action( 'template_redirect', array( $server_timing, 'start_output_buffer' ) ), 'template_redirect action not added' );
 	}
 
 	public function test_perflab_server_timing_register_metric(): void {

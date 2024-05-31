@@ -1,11 +1,13 @@
 <?php
 
-namespace PerformanceLab\Tests\Constraint;
+namespace WebP_Uploads\Tests\Constraint;
+
+require_once __DIR__ . '/class-image-has-source-constraint.php';
 
 /**
  * A constraint that checks a certain subsize source with provided mime type.
  */
-class ImageHasSizeSource extends ImageHasSource {
+class Image_Has_Size_Source_Constraint extends Image_Has_Source_Constraint {
 
 	/**
 	 * The requested size.

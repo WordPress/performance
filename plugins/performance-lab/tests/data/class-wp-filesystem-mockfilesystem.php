@@ -9,6 +9,8 @@
 // phpcs:disable SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingAnyTypeHint
 // phpcs:disable SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingNativeTypeHint
 
+require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+
 /**
  * Simple mock filesystem, limited to working with concrete file paths.
  * No support for hierarchy or parent directories etc.

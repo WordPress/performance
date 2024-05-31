@@ -33,11 +33,6 @@
     "yoast/phpunit-polyfills": "^1.0",
     "phpstan/php-8-stubs": "^0.3.84"
   },
-  "autoload-dev": {
-    "psr-4": {
-      "PerformanceLab\\Tests\\": "tests/utils"
-    }
-  },
   "config": {
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
@@ -76,14 +71,14 @@
       "@lint:speculation-rules",
       "@lint:webp-uploads"
     ],
-    "lint:auto-sizes":             "@lint -- ./plugins/auto-sizes             ./tests/plugins/auto-sizes             --standard=./plugins/auto-sizes/phpcs.xml.dist",
-    "lint:dominant-color-images":  "@lint -- ./plugins/dominant-color-images  ./tests/plugins/dominant-color-images  --standard=./plugins/dominant-color-images/phpcs.xml.dist",
-    "lint:embed-optimizer":        "@lint -- ./plugins/embed-optimizer        ./tests/plugins/embed-optimizer        --standard=./plugins/embed-optimizer/phpcs.xml.dist",
-    "lint:image-prioritizer":      "@lint -- ./plugins/image-prioritizer      ./tests/plugins/image-prioritizer      --standard=./plugins/image-prioritizer/phpcs.xml.dist",
-    "lint:optimization-detective": "@lint -- ./plugins/optimization-detective ./tests/plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
-    "lint:performance-lab":        "@lint -- ./plugins/performance-lab        ./tests/plugins/performance-lab        --standard=./plugins/performance-lab/phpcs.xml.dist",
-    "lint:speculation-rules":      "@lint -- ./plugins/speculation-rules      ./tests/plugins/speculation-rules      --standard=./plugins/speculation-rules/phpcs.xml.dist",
-    "lint:webp-uploads":           "@lint -- ./plugins/webp-uploads           ./tests/plugins/webp-uploads           --standard=./plugins/webp-uploads/phpcs.xml.dist",
+    "lint:auto-sizes":             "@lint -- ./plugins/auto-sizes --standard=./plugins/auto-sizes/phpcs.xml.dist",
+    "lint:dominant-color-images":  "@lint -- ./plugins/dominant-color-images --standard=./plugins/dominant-color-images/phpcs.xml.dist",
+    "lint:embed-optimizer":        "@lint -- ./plugins/embed-optimizer --standard=./plugins/embed-optimizer/phpcs.xml.dist",
+    "lint:image-prioritizer":      "@lint -- ./plugins/image-prioritizer --standard=./plugins/image-prioritizer/phpcs.xml.dist",
+    "lint:optimization-detective": "@lint -- ./plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
+    "lint:performance-lab":        "@lint -- ./plugins/performance-lab --standard=./plugins/performance-lab/phpcs.xml.dist",
+    "lint:speculation-rules":      "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
+    "lint:webp-uploads":           "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
     "phpstan": "phpstan analyse --memory-limit=2048M",
     "test": "phpunit",
     "test-multisite": "@test -c tests/multisite.xml",
