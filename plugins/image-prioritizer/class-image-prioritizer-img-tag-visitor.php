@@ -46,15 +46,13 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		$common_lcp_element = $this->url_metrics_group_collection->get_common_lcp_element();
 		if ( ! is_null( $common_lcp_element ) && $xpath === $common_lcp_element['xpath'] ) {
 			if ( 'high' === $walker->get_attribute( 'fetchpriority' ) ) {
-				$walker->set_attribute( 'data-od-fetchpriority-already-added', true );
+				$walker->set_meta_attribute( 'fetchpriority-already-added', true );
 			} else {
 				$walker->set_attribute( 'fetchpriority', 'high' );
-				$walker->set_attribute( 'data-od-added-fetchpriority', true );
 			}
 
 			// Never include loading=lazy on the LCP image common across all breakpoints.
 			if ( 'lazy' === $walker->get_attribute( 'loading' ) ) {
-				$walker->set_attribute( 'data-od-removed-loading', $walker->get_attribute( 'loading' ) );
 				$walker->remove_attribute( 'loading' );
 			}
 		} elseif ( is_string( $walker->get_attribute( 'fetchpriority' ) ) && $this->url_metrics_group_collection->is_every_group_populated() ) {
@@ -68,7 +66,6 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			 * Note also that if this is the LCP element for _some_ of the viewport groups, it will still get
 			 * fetchpriority=high by means of the preload link (with a media query) that is added further below.
 			 */
-			$walker->set_attribute( 'data-od-removed-fetchpriority', $walker->get_attribute( 'fetchpriority' ) );
 			$walker->remove_attribute( 'fetchpriority' );
 		}
 
@@ -77,21 +74,15 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 
 		// If the element was not found, we don't know if it was visible for not, so don't do anything.
 		if ( is_null( $element_max_intersection_ratio ) ) {
-			$walker->set_attribute( 'data-ip-unknown-tag', true ); // Mostly useful for debugging why an IMG isn't optimized.
+			$walker->set_meta_attribute( 'unknown-tag', true ); // Mostly useful for debugging why an IMG isn't optimized.
 		} else {
 			// Otherwise, make sure visible elements omit the loading attribute, and hidden elements include loading=lazy.
 			$is_visible = $element_max_intersection_ratio > 0.0;
 			$loading    = (string) $walker->get_attribute( 'loading' );
 			if ( $is_visible && 'lazy' === $loading ) {
-				$walker->set_attribute( 'data-od-removed-loading', $loading ); // TODO: This should be automatically added when calling remove_attribute().
 				$walker->remove_attribute( 'loading' );
 			} elseif ( ! $is_visible && 'lazy' !== $loading ) {
 				$walker->set_attribute( 'loading', 'lazy' );
-				if ( '' !== $loading ) {
-					$walker->set_attribute( 'data-od-replaced-loading', $loading ); // TODO: This should be added automatically when forcing loading=lazy above.
-				} else {
-					$walker->set_attribute( 'data-od-added-loading', true ); // TODO: This should be automatically added when calling set_attribute().
-				}
 			}
 		}
 		// TODO: If an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.

@@ -48,7 +48,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<img data-ip-unknown-tag data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+							<img data-od-unknown-tag data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -362,7 +362,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						</head>
 						<body>
 							<script>/* Something injected with wp_body_open */</script>
-							<img data-ip-unknown-tag src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+							<img data-od-unknown-tag src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
 						</body>
 					</html>
 				',
@@ -829,7 +829,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						<body>
 							<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
 							<p>New paragraph since URL Metrics were captured!</p>
-							<img data-ip-unknown-tag src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+							<img data-od-unknown-tag src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
 						</body>
 					</html>
 				',
@@ -843,7 +843,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						<body>
 							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
 							<p>New paragraph since URL Metrics were captured!</p>
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]" data-ip-unknown-tag src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]" data-od-unknown-tag src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>

@@ -184,7 +184,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		}
 
 		if ( $did_visit && $needs_detection ) {
-			$walker->set_attribute( 'data-od-xpath', $walker->get_xpath() );
+			$walker->set_meta_attribute( 'xpath', $walker->get_xpath() );
 		}
 		$generator->next();
 	}
