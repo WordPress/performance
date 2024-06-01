@@ -485,7 +485,7 @@ function perflab_print_row_meta_install_notice( string $plugin_file ): void {
 	}
 
 	$message = sprintf(
-		/* translators: placeholder is link to Performance Lab screen */
+		/* translators: %s: link to Performance Lab settings screen */
 		__( 'This plugin is installed by %s.', 'performance-lab' ),
 		sprintf(
 			'<a href="%s">%s</a>',
