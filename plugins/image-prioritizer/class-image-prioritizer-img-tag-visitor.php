@@ -83,13 +83,14 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$is_visible = $element_max_intersection_ratio > 0.0;
 			$loading    = (string) $walker->get_attribute( 'loading' );
 			if ( $is_visible && 'lazy' === $loading ) {
-				$walker->set_attribute( 'data-od-removed-loading', $loading );
+				$walker->set_attribute( 'data-od-removed-loading', $loading ); // TODO: This should be automatically added when calling remove_attribute().
 				$walker->remove_attribute( 'loading' );
 			} elseif ( ! $is_visible && 'lazy' !== $loading ) {
 				$walker->set_attribute( 'loading', 'lazy' );
-				$walker->set_attribute( 'data-od-added-loading', true );
 				if ( '' !== $loading ) {
-					$walker->set_attribute( 'data-od-removed-loading', $loading );
+					$walker->set_attribute( 'data-od-replaced-loading', $loading ); // TODO: This should be added automatically when forcing loading=lazy above.
+				} else {
+					$walker->set_attribute( 'data-od-added-loading', true ); // TODO: This should be automatically added when calling set_attribute().
 				}
 			}
 		}
