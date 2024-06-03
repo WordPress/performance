@@ -163,4 +163,4 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 == Upgrade Notice ==
 
 = 0.3.0 =
-Image loading optimizations have been moved to a new dependent plugin called Image Prioritizer. The Optimization Detective plugin is now serves as a dependency.
+Image loading optimizations have been moved to a new dependent plugin called Image Prioritizer. The Optimization Detective plugin now serves as a dependency.
