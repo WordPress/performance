@@ -487,7 +487,7 @@ function perflab_print_row_meta_install_notice( string $plugin_file ): void {
 	$message = sprintf(
 		/* translators: %s: link to Performance Lab settings screen */
 		__( 'This plugin is installed by <a href="%s">Performance Lab</a>', 'performance-lab' ),
-		esc_url( add_query_arg( 'page', PERFLAB_SCREEN, admin_url( 'options-general.php' )
+		esc_url( add_query_arg( 'page', PERFLAB_SCREEN, admin_url( 'options-general.php' ) ) )
 	);
 
 	printf(
