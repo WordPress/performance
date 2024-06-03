@@ -50,11 +50,6 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			} else {
 				$walker->set_attribute( 'fetchpriority', 'high' );
 			}
-
-			// Never include loading=lazy on the LCP image common across all breakpoints.
-			if ( 'lazy' === $walker->get_attribute( 'loading' ) ) {
-				$walker->remove_attribute( 'loading' );
-			}
 		} elseif ( is_string( $walker->get_attribute( 'fetchpriority' ) ) && $this->url_metrics_group_collection->is_every_group_populated() ) {
 			/*
 			 * At this point, the element is not the shared LCP across all viewport groups. It may not be an LCP element
@@ -69,7 +64,6 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$walker->remove_attribute( 'fetchpriority' );
 		}
 
-		// TODO: Also if the element isLCPCandidate it should never by lazy-loaded.
 		$element_max_intersection_ratio = $this->url_metrics_group_collection->get_element_max_intersection_ratio( $xpath );
 
 		// If the element was not found, we don't know if it was visible for not, so don't do anything.
@@ -85,7 +79,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 				$walker->set_attribute( 'loading', 'lazy' );
 			}
 		}
-		// TODO: If an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
+		// TODO: If an image is visible in one breakpoint but not another, add loading=lazy AND add a regular-priority preload link with media queries (unless LCP in which case it should already have a fetchpriority=high link) so that the image won't be eagerly-loaded for viewports on which it is not shown.
 
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
 		foreach ( $this->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {

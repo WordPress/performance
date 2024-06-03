@@ -579,6 +579,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				',
 			),
 
+			// TODO: Eventually the images in this test should all be lazy-loaded, leaving the prioritization to the preload links.
 			'different-lcp-elements-for-non-consecutive-viewport-groups-with-missing-data-for-middle-group' => array(
 				'set_up'   => function (): void {
 					OD_URL_Metrics_Post_Type::store_url_metric(
@@ -587,12 +588,14 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 							400,
 							array(
 								array(
-									'isLCP' => true,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+									'isLCP'             => true,
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+									'intersectionRatio' => 1.0,
 								),
 								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+									'isLCP'             => false,
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+									'intersectionRatio' => 0.0,
 								),
 							)
 						)
@@ -603,12 +606,14 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 							800,
 							array(
 								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+									'isLCP'             => false,
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+									'intersectionRatio' => 0.0,
 								),
 								array(
-									'isLCP' => true,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+									'isLCP'             => true,
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+									'intersectionRatio' => 1.0,
 								),
 							)
 						)
@@ -619,6 +624,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
+							<style>/* Never show mobile and desktop logos at the same time. */</style>
 						</head>
 						<body>
 							<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
@@ -631,6 +637,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
+							<style>/* Never show mobile and desktop logos at the same time. */</style>
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" media="screen and (max-width: 480px)">
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-logo.png" media="screen and (min-width: 783px)">
 						</head>
