@@ -1,4 +1,4 @@
-=== Optimization Detective (Developer Preview) ===
+=== Optimization Detective ===
 
 Contributors:      wordpressdotorg
 Requires at least: 6.4
@@ -114,10 +114,6 @@ Filters the template output buffer prior to sending to the client. This filter i
 3. Activate the **Optimization Detective** plugin.
 
 == Frequently Asked Questions ==
-
-= What is the status of this plugin and what does “developer preview” mean? =
-
-This initial release of the Optimization Detective plugin is a preview for the kinds of optimizations that can be applied with this foundation. The intention is that this plugin will serve as an API, planned eventually to be proposed for WordPress core, in which other plugins can extend the functionality to apply additional optimizations. Additional documentation will be made available as development progresses. Follow [progress on GitHub](https://github.com/WordPress/performance/labels/%5BPlugin%5D%20Optimization%20Detective).
 
 = Where can I submit my plugin feedback? =
 
