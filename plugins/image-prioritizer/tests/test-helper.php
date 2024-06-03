@@ -1,8 +1,8 @@
 <?php
 /**
- * Tests for optimization-detective plugin helper.php.
+ * Tests for image-prioritizer plugin helper.php.
  *
- * @package optimization-detective
+ * @package image-prioritizer
  */
 
 class Test_IP_Helper extends WP_UnitTestCase {
