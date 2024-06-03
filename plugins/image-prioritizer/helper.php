@@ -32,7 +32,7 @@ function ip_render_generator_meta_tag(): void {
  * @param OD_Preload_Link_Collection      $preload_links_collection     Preload Links Collection.
  */
 function ip_register_tag_visitors( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Preload_Link_Collection $preload_links_collection ): void {
-	// Note: The class is invocable (it as an __invoke() method).
+	// Note: The class is invocable (it has an __invoke() method).
 	$img_visitor = new IP_Img_Tag_Visitor( $url_metrics_group_collection, $preload_links_collection );
 	$registry->register( 'img-tags', $img_visitor );
 
