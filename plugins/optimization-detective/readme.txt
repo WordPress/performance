@@ -4,16 +4,16 @@ Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.2
-Stable tag:        0.2.0
+Stable tag:        0.3.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, images
+Tags:              performance
 
-Uses real user metrics to improve heuristics WordPress applies on the frontend to improve image loading priority.
+Provides an API for leveraging real user metrics to improve the heuristics WordPress applies on the frontend to optimize page performance.
 
 == Description ==
 
-This plugin captures real user metrics about what elements are displayed on the page across a variety of device form factors (e.g. desktop, tablet, and phone) in order to apply loading optimizations which are not possible with WordPress’s current server-side heuristics.
+This plugin captures real user metrics about what elements are displayed on the page across a variety of device form factors (e.g. desktop, tablet, and phone) in order to apply loading optimizations which are not possible with WordPress’s current server-side heuristics. This plugin is a dependency which does not provide end-user functionality on its own. For that, please install the dependent plugin [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) (among others to come from the WordPress Core Performance team).
 
 = Background =
 
@@ -133,6 +133,8 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 == Changelog ==
 
+= 0.3.0 =
+
 = 0.2.0 =
 
 **Enhancements**
@@ -157,3 +159,8 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 = 0.1.0 =
 
 * Initial release.
+
+== Upgrade Notice ==
+
+= 0.3.0 =
+Image loading optimizations have been moved to a new dependent plugin called Image Prioritizer. The Optimization Detective plugin is now serves as a dependency.
