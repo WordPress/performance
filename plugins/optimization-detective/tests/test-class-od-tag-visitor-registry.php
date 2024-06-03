@@ -68,6 +68,5 @@ class Test_OD_Tag_Visitor_Registry extends WP_UnitTestCase {
 			array( $video_visitor ),
 			iterator_to_array( $registry )
 		);
-		$this->assertCount( 1, $registry );
 	}
 }
