@@ -48,7 +48,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+							<img data-od-unknown-tag data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -189,7 +189,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				',
 			),
 
-			'common-lcp-image-with-fully-populated-sample-data' => array(
+			'common-lcp-image-and-lazy-loaded-image-outside-viewport-with-fully-populated-sample-data' => array(
 				'set_up'   => function (): void {
 					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 					$sample_size = od_get_url_metrics_breakpoint_sample_size();
@@ -205,8 +205,24 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 											'isLCP' => true,
 										),
 										array(
-											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]',
 											'isLCP' => false,
+											'intersectionRatio' => 0 === $i ? 0.5 : 0.0, // Make sure that the _max_ intersection ratio is considered.
+										),
+										array(
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[5][self::IMG]',
+											'isLCP' => false,
+											'intersectionRatio' => 0.0,
+										),
+										array(
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[6][self::IMG]',
+											'isLCP' => false,
+											'intersectionRatio' => 0.0,
+										),
+										array(
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[7][self::IMG]',
+											'isLCP' => false,
+											'intersectionRatio' => 0.0,
 										),
 									)
 								)
@@ -222,7 +238,12 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						</head>
 						<body>
 							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
-							<img src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" fetchpriority="high">
+							<p>Pretend this is a super long paragraph that pushes the next image mostly out of the initial viewport.</p>
+							<img src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" fetchpriority="high" loading="lazy">
+							<p>Now the following image is definitely outside the initial viewport.</p>
+							<img src="https://example.com/baz.jpg" alt="Baz" width="10" height="10" fetchpriority="high">
+							<img src="https://example.com/qux.jpg" alt="Qux" width="10" height="10" fetchpriority="high" loading="eager">
+							<img src="https://example.com/quux.jpg" alt="Quux" width="10" height="10" loading="lazy"><!-- This one is all good. -->
 						</body>
 					</html>
 				',
@@ -235,7 +256,12 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						</head>
 						<body>
 							<img data-od-added-fetchpriority data-od-removed-loading="lazy" fetchpriority="high" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
-							<img data-od-removed-fetchpriority="high" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" >
+							<p>Pretend this is a super long paragraph that pushes the next image mostly out of the initial viewport.</p>
+							<img data-od-removed-fetchpriority="high" data-od-removed-loading="lazy" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10"  >
+							<p>Now the following image is definitely outside the initial viewport.</p>
+							<img data-od-added-loading data-od-removed-fetchpriority="high" loading="lazy" src="https://example.com/baz.jpg" alt="Baz" width="10" height="10" >
+							<img data-od-removed-fetchpriority="high" data-od-replaced-loading="eager" src="https://example.com/qux.jpg" alt="Qux" width="10" height="10"  loading="lazy">
+							<img src="https://example.com/quux.jpg" alt="Quux" width="10" height="10" loading="lazy"><!-- This one is all good. -->
 						</body>
 					</html>
 				',
@@ -286,8 +312,8 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen and (min-width: 783px)">
 						</head>
 						<body>
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" fetchpriority="high">
+							<img data-od-removed-loading="lazy" data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" >
+							<img data-od-removed-loading="lazy" data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10"  fetchpriority="high">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -306,7 +332,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 									$viewport_width,
 									array(
 										array(
-											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]', // Note: This is intentionally not reflecting the IMG in the HTML below.
 											'isLCP' => true,
 										),
 									)
@@ -336,7 +362,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						</head>
 						<body>
 							<script>/* Something injected with wp_body_open */</script>
-							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
+							<img data-od-unknown-tag src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
 						</body>
 					</html>
 				',
@@ -553,6 +579,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				',
 			),
 
+			// TODO: Eventually the images in this test should all be lazy-loaded, leaving the prioritization to the preload links.
 			'different-lcp-elements-for-non-consecutive-viewport-groups-with-missing-data-for-middle-group' => array(
 				'set_up'   => function (): void {
 					OD_URL_Metrics_Post_Type::store_url_metric(
@@ -561,12 +588,14 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 							400,
 							array(
 								array(
-									'isLCP' => true,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+									'isLCP'             => true,
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+									'intersectionRatio' => 1.0,
 								),
 								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+									'isLCP'             => false,
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+									'intersectionRatio' => 0.0,
 								),
 							)
 						)
@@ -577,12 +606,14 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 							800,
 							array(
 								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+									'isLCP'             => false,
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+									'intersectionRatio' => 0.0,
 								),
 								array(
-									'isLCP' => true,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+									'isLCP'             => true,
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+									'intersectionRatio' => 1.0,
 								),
 							)
 						)
@@ -593,6 +624,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
+							<style>/* Never show mobile and desktop logos at the same time. */</style>
 						</head>
 						<body>
 							<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
@@ -605,6 +637,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
+							<style>/* Never show mobile and desktop logos at the same time. */</style>
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" media="screen and (max-width: 480px)">
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-logo.png" media="screen and (min-width: 783px)">
 						</head>
@@ -803,7 +836,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						<body>
 							<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
 							<p>New paragraph since URL Metrics were captured!</p>
-							<img src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+							<img data-od-unknown-tag src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
 						</body>
 					</html>
 				',
@@ -817,7 +850,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 						<body>
 							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
 							<p>New paragraph since URL Metrics were captured!</p>
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]" data-od-unknown-tag src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>

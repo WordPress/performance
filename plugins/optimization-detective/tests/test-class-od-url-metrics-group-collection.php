@@ -619,6 +619,76 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 * @throws OD_Data_Validation_Exception But it won't really.
+	 */
+	public function data_provider_element_max_intersection_ratios(): array {
+		$xpath1 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]';
+		$xpath2 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[2]';
+		$xpath3 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[3]';
+		return array(
+			'one-element-sample-size-one'    => array(
+				'url_metrics' => array(
+					$this->get_validated_url_metric( 400, $xpath1, 0.0 ),
+					$this->get_validated_url_metric( 600, $xpath1, 0.5 ),
+					$this->get_validated_url_metric( 800, $xpath1, 1.0 ),
+				),
+				'expected'    => array(
+					$xpath1 => 1.0,
+				),
+			),
+			'three-elements-sample-size-two' => array(
+				'url_metrics' => array(
+					// Group 1.
+					$this->get_validated_url_metric( 400, $xpath1, 0.0 ),
+					$this->get_validated_url_metric( 400, $xpath1, 1.0 ),
+					// Group 2.
+					$this->get_validated_url_metric( 600, $xpath2, 0.9 ),
+					$this->get_validated_url_metric( 600, $xpath2, 0.1 ),
+					// Group 3.
+					$this->get_validated_url_metric( 800, $xpath3, 0.5 ),
+					$this->get_validated_url_metric( 800, $xpath3, 0.6 ),
+				),
+				'expected'    => array(
+					$xpath1 => 1.0,
+					$xpath2 => 0.9,
+					$xpath3 => 0.6,
+				),
+			),
+			'no-url-metrics'                 => array(
+				'url_metrics' => array(),
+				'expected'    => array(),
+			),
+
+		);
+	}
+
+	/**
+	 * Test get_all_element_max_intersection_ratios() and get_element_max_intersection_ratio().
+	 *
+	 * @covers ::get_all_element_max_intersection_ratios
+	 * @covers ::get_element_max_intersection_ratio
+	 *
+	 * @dataProvider data_provider_element_max_intersection_ratios
+	 *
+	 * @param array<string, mixed> $url_metrics URL metrics.
+	 * @param array<string, float> $expected    Expected.
+	 */
+	public function test_get_all_element_max_intersection_ratios( array $url_metrics, array $expected ): void {
+		$breakpoints      = array( 480, 600, 782 );
+		$sample_size      = 3;
+		$group_collection = new OD_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, $sample_size, 0 );
+		$actual           = $group_collection->get_all_element_max_intersection_ratios();
+		$this->assertSame( $actual, $group_collection->get_all_element_max_intersection_ratios(), 'Cached result is identical.' );
+		$this->assertSame( $expected, $actual );
+		foreach ( $expected as $expected_xpath => $expected_max_ratio ) {
+			$this->assertSame( $expected_max_ratio, $group_collection->get_element_max_intersection_ratio( $expected_xpath ) );
+		}
+	}
+
+	/**
 	 * Test get_flattened_url_metrics().
 	 *
 	 * @covers ::get_flattened_url_metrics
@@ -648,12 +718,13 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	/**
 	 * Gets a validated URL metric for testing.
 	 *
-	 * @param int    $viewport_width    Viewport width.
-	 * @param string $lcp_element_xpath LCP element XPath.
+	 * @param int    $viewport_width     Viewport width.
+	 * @param string $lcp_element_xpath  LCP element XPath.
+	 * @param float  $intersection_ratio Intersection ratio.
 	 * @return OD_URL_Metric Validated URL metric.
 	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
-	private function get_validated_url_metric( int $viewport_width = 480, string $lcp_element_xpath = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]' ): OD_URL_Metric {
+	private function get_validated_url_metric( int $viewport_width = 480, string $lcp_element_xpath = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]', float $intersection_ratio = 1.0 ): OD_URL_Metric {
 		$data = array(
 			'url'       => home_url( '/' ),
 			'viewport'  => array(
@@ -666,7 +737,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 					'isLCP'              => true,
 					'isLCPCandidate'     => true,
 					'xpath'              => $lcp_element_xpath,
-					'intersectionRatio'  => 1,
+					'intersectionRatio'  => $intersection_ratio,
 					'intersectionRect'   => array(
 						'width'  => 100,
 						'height' => 100,
