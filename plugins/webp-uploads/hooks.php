@@ -669,23 +669,6 @@ function webp_uploads_img_tag_update_mime_type( string $original_image, string $
 		}
 	}
 
-	foreach ( $target_mimes as $target_mime ) {
-		if ( $target_mime === $original_mime ) {
-			continue;
-		}
-
-		if (
-			! has_action( 'wp_footer', 'webp_uploads_webp_fallback' ) &&
-			$image !== $original_image &&
-			'the_content' === $context &&
-			'image/jpeg' === $original_mime &&
-			'image/' . webp_uploads_get_image_output_format() === $target_mime &&
-			! webp_uploads_is_picture_element_enabled() // Don't enqueue fallback JS if picture enabled.
-		) {
-			add_action( 'wp_footer', 'webp_uploads_webp_fallback' );
-		}
-	}
-
 	return $image;
 }
 
@@ -704,69 +687,6 @@ function webp_uploads_update_featured_image( string $html, int $post_id, int $at
 	return webp_uploads_img_tag_update_mime_type( $html, 'post_thumbnail_html', $attachment_id );
 }
 add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );
-
-/**
- * Adds a fallback mechanism to replace webp images with jpeg alternatives on older browsers.
- *
- * @since 1.0.0
- */
-function webp_uploads_webp_fallback(): void {
-	// Get mime type transforms for the site.
-	$transforms   = webp_uploads_get_upload_image_mime_transforms();
-	$image_format = webp_uploads_get_image_output_format();
-
-	// We need to add fallback only if jpeg alternatives for the image_format images are enabled for the server.
-	$preserve_jpegs_for_jpeg_transforms       = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/' . $image_format, $transforms['image/jpeg'], true );
-	$preserve_jpegs_for_image_type_transforms = isset( $transforms[ 'image/' . $image_format ] ) && in_array( 'image/jpeg', $transforms[ 'image/' . $image_format ], true ) && in_array( 'image/' . $image_format, $transforms[ 'image/' . $image_format ], true );
-	if ( ! $preserve_jpegs_for_jpeg_transforms && ! $preserve_jpegs_for_image_type_transforms ) {
-		return;
-	}
-
-	$detection_string = '';
-	// The fallback script can only handle a single image format at a time.
-	if ( 'webp' === $image_format ) {
-		$detection_string = 'data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
-	} elseif ( 'avif' === $image_format ) {
-		$detection_string = 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgANogQEAwgMg8f8D///8WfhwB8+ErK42A=';
-	}
-	if ( '' === $detection_string ) {
-		return;
-	}
-
-	$js_function = <<<JS
-	/**
-	 * Detect if the browser supports the current output format and if not loads the fallback.js script.
-	 */
-	function webpUploadsDetectFallback( d, i, s, p, fallbackSrc ) {
-		s = d.createElement( s );
-		s.src = fallbackSrc;
-
-		i = d.createElement( i );
-		i.src = p;
-		i.onload = function() {
-			i.onload = undefined;
-		};
-
-		i.onerror = function() {
-			d.body.appendChild( s );
-		};
-	}
-JS;
-
-	wp_print_inline_script_tag(
-		sprintf(
-			'( %s )( document, "img", "script", %s, %s )',
-			(string) preg_replace( '/\s+/', '', (string) $js_function ),
-			wp_json_encode( $detection_string ),
-			wp_json_encode( plugins_url( '/fallback.js', __FILE__ ) )
-		),
-		array(
-			'id'                 => 'webpUploadsFallbackWebpImages',
-			'data-rest-api'      => esc_url_raw( trailingslashit( get_rest_url() ) ),
-			'data-output-format' => webp_uploads_get_image_output_format(),
-		)
-	);
-}
 
 /**
  * Returns an array of image size names that have secondary mime type output enabled. Core sizes and
