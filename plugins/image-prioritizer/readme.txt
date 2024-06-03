@@ -9,15 +9,24 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images
 
-Optimizes the loading of the LCP image by leveraging client-side detection with real user metrics.
+Optimizes LCP image loading with fetchpriority=high and applies image lazy-loading by leveraging client-side detection with real user metrics.
 
 == Description ==
 
-Optimizes the loading of the LCP image by leveraging client-side detection with real user metrics. Currently, this involves adding `fetchpriority=high` to the LCP image and adding preload links for the LCP `img` as well as any LCP `background-image`.
+This plugin optimizes the loading of images which are the LCP (Largest Contentful Paint) element, including both `img` elements and elements with CSS background images (where there is a `style` attribute with an `background-image` property). Different breakpoints in a theme's responsive design may result in differing elements being the LCP element. Therefore, the LCP element for each breakpoint is captured so that high-fetchpriority preload links with media queries are added which prioritize loading the LCP image specific to the viewport of the visitor.
 
-This plugin requires the [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) plugin as a dependency.
+In addition to prioritizing the loading of the LCP image, this plugin also optimizes image loading by ensuring that `loading=lazy` is omitted from any image that appears in the initial viewport for any of the breakpoints, which by default include:
 
-TODO: Flesh out description.
+1. 0-320 (small smartphone)
+2. 321-480 (normal smartphone)
+3. 481-576 (phablets)
+4. >576 (desktop)
+
+If an image does not appear in the initial viewport for any of these viewport groups, then `loading=lazy` is added to the `img` element. 
+
+Note that by default, URL Metrics are not gathered for administrator users, since they are not normal site visitors, and it is likely that additional elements will be present on the page which are not also shown to non-administrators.
+
+This plugin requires the [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) plugin as a dependency. Please refer to that plugin for additional background on how this plugin works as well as additional developer options. 
 
 == Installation ==
 
