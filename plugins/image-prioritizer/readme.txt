@@ -9,7 +9,7 @@ License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, images
 
-Optimizes LCP image loading with fetchpriority=high and applies image lazy-loading by leveraging client-side detection with real user metrics.
+Optimizes LCP image loading with `fetchpriority=high` and applies image lazy-loading by leveraging client-side detection with real user metrics.
 
 == Description ==
 
