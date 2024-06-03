@@ -45,7 +45,7 @@ function perflab_server_timing(): Perflab_Server_Timing {
 			return $server_timing;
 		}
 
-		add_filter( 'template_include', array( $server_timing, 'on_template_include' ), PHP_INT_MAX );
+		$server_timing->add_hooks();
 	}
 
 	return $server_timing;

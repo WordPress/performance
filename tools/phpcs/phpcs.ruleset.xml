@@ -44,22 +44,6 @@
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 
-	<!-- Do not apply filename rules for unit tests and object cache -->
-	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
-		<exclude-pattern>tests/*</exclude-pattern>
-	</rule>
-
-	<!-- Do not apply compatibility rules to allow using the modern PHPUnit functionality -->
-	<rule ref="PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.stringFound">
-		<exclude-pattern>tests/utils/*</exclude-pattern>
-	</rule>
-	<rule ref="PHPCompatibility.FunctionDeclarations.NewReturnTypeDeclarations.boolFound">
-		<exclude-pattern>tests/utils/*</exclude-pattern>
-	</rule>
-
 	<!-- Ignore inapplicable WordPress-Extra sniffs in tests. -->
 	<rule ref="WordPress.WP.EnqueuedResourceParameters">
 		<exclude-pattern>tests/*</exclude-pattern>

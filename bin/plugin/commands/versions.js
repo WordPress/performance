@@ -38,7 +38,7 @@ async function checkPluginDirectory( pluginDirectory ) {
 	const readmeContents = fs.readFileSync( readmeFilePath, 'utf-8' );
 
 	const stableTagVersionMatches = readmeContents.match(
-		/^Stable tag:\s*(\d+\.\d+\.\d+)$/m
+		/^Stable tag:\s*(\d+\.\d+\.\d+(?:-\w+)?)$/m
 	);
 	if ( ! stableTagVersionMatches ) {
 		throw new Error( `Unable to locate stable tag in ${ readmeFilePath }` );
@@ -46,7 +46,7 @@ async function checkPluginDirectory( pluginDirectory ) {
 	const stableTagVersion = stableTagVersionMatches[ 1 ];
 
 	const latestChangelogMatches = readmeContents.match(
-		/^== Changelog ==\n+= (\d+\.\d+\.\d+) =$/m
+		/^== Changelog ==\n+= (\d+\.\d+\.\d+(?:-\w+)?) =$/m
 	);
 	if ( ! latestChangelogMatches ) {
 		throw new Error(
@@ -71,7 +71,7 @@ async function checkPluginDirectory( pluginDirectory ) {
 	}
 
 	const headerVersionMatches = phpBootstrapFileContents.match(
-		/^ \* Version:\s+(\d+\.\d+\.\d+)$/m
+		/^ \* Version:\s+(\d+\.\d+\.\d+(?:-\w+)?)$/m
 	);
 	if ( ! headerVersionMatches ) {
 		throw new Error(
@@ -80,8 +80,9 @@ async function checkPluginDirectory( pluginDirectory ) {
 	}
 	const headerVersion = headerVersionMatches[ 1 ];
 
-	const phpLiteralVersionMatches =
-		phpBootstrapFileContents.match( /'(\d+\.\d+\.\d+?)'/ );
+	const phpLiteralVersionMatches = phpBootstrapFileContents.match(
+		/'(\d+\.\d+\.\d+(?:-\w+)?)'/
+	);
 	if ( ! phpLiteralVersionMatches ) {
 		throw new Error( 'Unable to locate the PHP literal version.' );
 	}
@@ -96,12 +97,16 @@ async function checkPluginDirectory( pluginDirectory ) {
 
 	if ( ! allVersions.every( ( version ) => version === stableTagVersion ) ) {
 		throw new Error(
-			`Version mismatch: ${ JSON.stringify( {
-				latestChangelogVersion,
-				headerVersion,
-				stableTagVersion,
-				phpLiteralVersion,
-			} ) }`
+			`Version mismatch: ${ JSON.stringify(
+				{
+					latestChangelogVersion,
+					headerVersion,
+					stableTagVersion,
+					phpLiteralVersion,
+				},
+				null,
+				4
+			) }`
 		);
 	}
 
@@ -135,7 +140,15 @@ exports.handler = async ( opt ) => {
 		const slug = path.basename( pluginDirectory );
 		try {
 			const version = await checkPluginDirectory( pluginDirectory );
-			log( formats.success( `✅ ${ slug }: ${ version } ` ) );
+			if ( version.includes( '-' ) ) {
+				log(
+					formats.warning(
+						`⚠ ${ slug }: ${ version } (pre-release identifier is present)`
+					)
+				);
+			} else {
+				log( formats.success( `✅ ${ slug }: ${ version } ` ) );
+			}
 		} catch ( error ) {
 			errorCount++;
 			log( formats.error( `❌ ${ slug }: ${ error.message }` ) );
