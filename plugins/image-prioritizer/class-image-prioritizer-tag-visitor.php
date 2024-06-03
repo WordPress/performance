@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  */
-abstract class IP_Tag_Visitor {
+abstract class Image_Prioritizer_Tag_Visitor {
 
 	/**
 	 * URL Metrics Group Collection.

@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  */
-final class IP_Background_Image_Styled_Tag_Visitor extends IP_Tag_Visitor {
+final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_Prioritizer_Tag_Visitor {
 
 	/**
 	 * Visits a tag.

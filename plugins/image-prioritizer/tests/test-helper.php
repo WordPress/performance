@@ -5,15 +5,15 @@
  * @package image-prioritizer
  */
 
-class Test_IP_Helper extends WP_UnitTestCase {
+class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 
 	/**
 	 * Test printing the meta generator tag.
 	 *
-	 * @covers ::ip_render_generator_meta_tag
+	 * @covers ::image_prioritizer_render_generator_meta_tag
 	 */
-	public function test_ip_render_generator_meta_tag(): void {
-		$function_name = 'ip_render_generator_meta_tag';
+	public function test_image_prioritizer_render_generator_meta_tag(): void {
+		$function_name = 'image_prioritizer_render_generator_meta_tag';
 		$this->assertSame( 10, has_action( 'wp_head', $function_name ) );
 		$tag = get_echo( $function_name );
 		$this->assertStringStartsWith( '<meta', $tag );
@@ -26,7 +26,7 @@ class Test_IP_Helper extends WP_UnitTestCase {
 	 *
 	 * @return array<string, mixed> Data.
 	 */
-	public function data_provider_test_ip_filter_tag_walker_visitors(): array {
+	public function data_provider_test_filter_tag_walker_visitors(): array {
 		return array(
 			'no-url-metrics'                              => array(
 				'set_up'   => static function (): void {},
@@ -827,17 +827,17 @@ class Test_IP_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ip_register_tag_visitors().
+	 * Test image_prioritizer_register_tag_visitors().
 	 *
-	 * @covers ::ip_register_tag_visitors
-	 * @covers IP_Tag_Visitor
-	 * @covers IP_Img_Tag_Visitor
-	 * @covers IP_Background_Image_Styled_Tag_Visitor
+	 * @covers ::image_prioritizer_register_tag_visitors
+	 * @covers Image_Prioritizer_Tag_Visitor
+	 * @covers Image_Prioritizer_Img_Tag_Visitor
+	 * @covers Image_Prioritizer_Background_Image_Styled_Tag_Visitor
 	 *
-	 * @dataProvider data_provider_test_ip_filter_tag_walker_visitors
+	 * @dataProvider data_provider_test_filter_tag_walker_visitors
 	 * @throws Exception But it won't.
 	 */
-	public function test_ip_filter_tag_walker_visitors( Closure $set_up, string $buffer, string $expected ): void {
+	public function test_image_prioritizer_register_tag_visitors( Closure $set_up, string $buffer, string $expected ): void {
 		$set_up();
 
 		$remove_initial_tabs = static function ( string $input ): string {
