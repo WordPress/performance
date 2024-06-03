@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Collection of URL groups according to the breakpoints.
  *
+ * @phpstan-import-type ElementData from OD_URL_Metric
+ *
  * @implements IteratorAggregate<int, OD_URL_Metrics_Group>
  *
  * @since 0.1.0
@@ -67,6 +69,19 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * @phpstan-var 0|positive-int
 	 */
 	private $freshness_ttl;
+
+	/**
+	 * Result cache.
+	 *
+	 * @var array{
+	 *          get_group_for_viewport_width?: array<int, OD_URL_Metrics_Group>,
+	 *          is_every_group_populated?: bool,
+	 *          is_every_group_complete?: bool,
+	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metrics_Group[]>,
+	 *          get_common_lcp_element?: ElementData|null
+	 *      }
+	 */
+	private $result_cache = array();
 
 	/**
 	 * Constructor.
@@ -141,6 +156,13 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	}
 
 	/**
+	 * Clear result cache.
+	 */
+	public function clear_cache(): void {
+		$this->result_cache = array();
+	}
+
+	/**
 	 * Create groups.
 	 *
 	 * @phpstan-return non-empty-array<OD_URL_Metrics_Group>
@@ -151,10 +173,10 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 		$groups    = array();
 		$min_width = 0;
 		foreach ( $this->breakpoints as $max_width ) {
-			$groups[]  = new OD_URL_Metrics_Group( array(), $min_width, $max_width, $this->sample_size, $this->freshness_ttl );
+			$groups[]  = new OD_URL_Metrics_Group( array(), $min_width, $max_width, $this->sample_size, $this->freshness_ttl, $this );
 			$min_width = $max_width + 1;
 		}
-		$groups[] = new OD_URL_Metrics_Group( array(), $min_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl );
+		$groups[] = new OD_URL_Metrics_Group( array(), $min_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl, $this );
 		return $groups;
 	}
 
@@ -188,20 +210,29 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * @return OD_URL_Metrics_Group URL metrics group for the viewport width.
 	 */
 	public function get_group_for_viewport_width( int $viewport_width ): OD_URL_Metrics_Group {
-		foreach ( $this->groups as $group ) {
-			if ( $group->is_viewport_width_in_range( $viewport_width ) ) {
-				return $group;
-			}
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) && array_key_exists( $viewport_width, $this->result_cache[ __FUNCTION__ ] ) ) {
+			return $this->result_cache[ __FUNCTION__ ][ $viewport_width ];
 		}
-		throw new InvalidArgumentException(
-			esc_html(
-				sprintf(
+
+		$result = ( function () use ( $viewport_width ) {
+			foreach ( $this->groups as $group ) {
+				if ( $group->is_viewport_width_in_range( $viewport_width ) ) {
+					return $group;
+				}
+			}
+			throw new InvalidArgumentException(
+				esc_html(
+					sprintf(
 					/* translators: %d is viewport width */
-					__( 'No URL metrics group found for viewport width: %d', 'optimization-detective' ),
-					$viewport_width
+						__( 'No URL metrics group found for viewport width: %d', 'optimization-detective' ),
+						$viewport_width
+					)
 				)
-			)
-		);
+			);
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ][ $viewport_width ] = $result;
+		return $result;
 	}
 
 	/**
@@ -217,12 +248,21 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * @return bool Whether all groups have some URL metrics.
 	 */
 	public function is_every_group_populated(): bool {
-		foreach ( $this->groups as $group ) {
-			if ( count( $group ) === 0 ) {
-				return false;
-			}
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
 		}
-		return true;
+
+		$result = ( function () {
+			foreach ( $this->groups as $group ) {
+				if ( count( $group ) === 0 ) {
+					return false;
+				}
+			}
+			return true;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
 	}
 
 	/**
@@ -233,12 +273,101 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * @return bool Whether all groups are complete.
 	 */
 	public function is_every_group_complete(): bool {
-		foreach ( $this->groups as $group ) {
-			if ( ! $group->is_complete() ) {
-				return false;
-			}
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
 		}
-		return true;
+
+		$result = ( function () {
+			foreach ( $this->groups as $group ) {
+				if ( ! $group->is_complete() ) {
+					return false;
+				}
+			}
+
+			return true;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
+	}
+
+	/**
+	 * Gets the groups with the provided LCP element XPath.
+	 *
+	 * @see OD_URL_Metrics_Group::get_lcp_element()
+	 *
+	 * @param string $xpath XPath for LCP element.
+	 * @return OD_URL_Metrics_Group[] Groups which have the LCP element.
+	 */
+	public function get_groups_by_lcp_element( string $xpath ): array {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) && array_key_exists( $xpath, $this->result_cache[ __FUNCTION__ ] ) ) {
+			return $this->result_cache[ __FUNCTION__ ][ $xpath ];
+		}
+
+		$result = ( function () use ( $xpath ) {
+			$groups = array();
+			foreach ( $this->groups as $group ) {
+				$lcp_element = $group->get_lcp_element();
+				if ( ! is_null( $lcp_element ) && $xpath === $lcp_element['xpath'] ) {
+					$groups[] = $group;
+				}
+			}
+
+			return $groups;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ][ $xpath ] = $result;
+		return $result;
+	}
+
+	/**
+	 * Gets common LCP element.
+	 *
+	 * @return ElementData|null
+	 */
+	public function get_common_lcp_element(): ?array {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
+		}
+
+		$result = ( function () {
+
+			// If every group isn't populated, then we can't say whether there is a common LCP element across every viewport group.
+			if ( ! $this->is_every_group_populated() ) {
+				return null;
+			}
+
+			// Look at the LCP elements across all the viewport groups.
+			$groups_by_lcp_element_xpath   = array();
+			$lcp_elements_by_xpath         = array();
+			$group_has_unknown_lcp_element = false;
+			foreach ( $this->groups as $group ) {
+				$lcp_element = $group->get_lcp_element();
+				if ( ! is_null( $lcp_element ) ) {
+					$groups_by_lcp_element_xpath[ $lcp_element['xpath'] ][] = $group;
+					$lcp_elements_by_xpath[ $lcp_element['xpath'] ][]       = $lcp_element;
+				} else {
+					$group_has_unknown_lcp_element = true;
+				}
+			}
+
+			if (
+				// All breakpoints share the same LCP element.
+				1 === count( $groups_by_lcp_element_xpath )
+				&&
+				// The breakpoints don't share a common lack of a detected LCP element.
+				! $group_has_unknown_lcp_element
+			) {
+				$xpath = key( $lcp_elements_by_xpath );
+
+				return $lcp_elements_by_xpath[ $xpath ][0];
+			}
+
+			return null;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
 	}
 
 	/**

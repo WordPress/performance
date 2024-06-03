@@ -104,6 +104,10 @@ function perflab_get_standalone_plugin_data(): array {
 			'constant'     => 'EMBED_OPTIMIZER_VERSION',
 			'experimental' => true,
 		),
+		'image-prioritizer'       => array(
+			'constant'     => 'IMAGE_PRIORITIZER_VERSION',
+			'experimental' => true,
+		),
 		// TODO: Add image loading optimization plugin, dependent of Optimization Detective, once ready for end users.
 		'performant-translations' => array(
 			'constant' => 'PERFORMANT_TRANSLATIONS_VERSION',

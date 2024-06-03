@@ -1,19 +1,19 @@
-=== Optimization Detective (Developer Preview) ===
+=== Optimization Detective ===
 
 Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.2
-Stable tag:        0.2.0
+Stable tag:        0.3.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, images
+Tags:              performance
 
-Uses real user metrics to improve heuristics WordPress applies on the frontend to improve image loading priority.
+Provides an API for leveraging real user metrics to improve the heuristics WordPress applies on the frontend to optimize page performance.
 
 == Description ==
 
-This plugin captures real user metrics about what elements are displayed on the page across a variety of device form factors (e.g. desktop, tablet, and phone) in order to apply loading optimizations which are not possible with WordPress’s current server-side heuristics.
+This plugin captures real user metrics about what elements are displayed on the page across a variety of device form factors (e.g. desktop, tablet, and phone) in order to apply loading optimizations which are not possible with WordPress’s current server-side heuristics. This plugin is a dependency which does not provide end-user functionality on its own. For that, please install the dependent plugin [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) (among others to come from the WordPress Core Performance team).
 
 = Background =
 
@@ -115,10 +115,6 @@ Filters the template output buffer prior to sending to the client. This filter i
 
 == Frequently Asked Questions ==
 
-= What is the status of this plugin and what does “developer preview” mean? =
-
-This initial release of the Optimization Detective plugin is a preview for the kinds of optimizations that can be applied with this foundation. The intention is that this plugin will serve as an API, planned eventually to be proposed for WordPress core, in which other plugins can extend the functionality to apply additional optimizations. Additional documentation will be made available as development progresses. Follow [progress on GitHub](https://github.com/WordPress/performance/labels/%5BPlugin%5D%20Optimization%20Detective).
-
 = Where can I submit my plugin feedback? =
 
 Feedback is encouraged and much appreciated, especially since this plugin may contain future WordPress core features. If you have suggestions or requests for new features, you can [submit them as an issue in the WordPress Performance Team's GitHub repository](https://github.com/WordPress/performance/issues/new/choose). If you need help with troubleshooting or have a question about the plugin, please [create a new topic on our support forum](https://wordpress.org/support/plugin/optimization-detective/#new-topic-0).
@@ -136,6 +132,8 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.3.0 =
 
 = 0.2.0 =
 
@@ -161,3 +159,8 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 = 0.1.0 =
 
 * Initial release.
+
+== Upgrade Notice ==
+
+= 0.3.0 =
+Image loading optimizations have been moved to a new dependent plugin called Image Prioritizer. The Optimization Detective plugin now serves as a dependency.

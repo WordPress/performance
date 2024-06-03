@@ -21,9 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *               }
  *
  * @phpstan-type LinkAttributes array{
- *                   href?: non-falsy-string,
- *                   imagesrcset?: non-falsy-string,
- *                   imagesizes?: non-falsy-string,
+ *                   href?: non-empty-string,
+ *                   imagesrcset?: non-empty-string,
+ *                   imagesizes?: non-empty-string,
  *                   crossorigin?: ''|'anonymous'|'use-credentials',
  *                   fetchpriority?: 'high'|'low'|'auto',
  *                   as: 'audio'|'document'|'embed'|'fetch'|'font'|'image'|'object'|'script'|'style'|'track'|'video'|'worker'
