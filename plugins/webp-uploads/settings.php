@@ -133,9 +133,8 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	}
 
 	// If only one of the two formats is supported, the dropdown defaults to that type and the other type is disabled.
-	if ( $avif_supported ) {
-		$selected = 'avif';
-	} else {
+	if ( ! $avif_supported && 'avif' === $selected ) {
+		$selected = 'webp';
 		$selected = 'webp';
 	}
 	?>
