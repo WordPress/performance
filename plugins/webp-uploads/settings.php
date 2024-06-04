@@ -187,15 +187,9 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 				const pictureCheckboxDescription = document.getElementById( 'webp_uploads_use_picture_element_description' );
 
 				function togglePictureCheckbox() {
-					if ( jpegCheckbox.checked ) {
-						pictureCheckbox.removeAttribute( 'disabled' );
-						pictureCheckboxLabel.classList.remove( 'webp-uploads-disabled' );
-						pictureCheckboxDescription.classList.remove( 'webp-uploads-disabled' );
-					} else {
-						pictureCheckbox.setAttribute( 'disabled', 'disabled' );
-						pictureCheckboxLabel.classList.add( 'webp-uploads-disabled' );
-						pictureCheckboxDescription.classList.add( 'webp-uploads-disabled' );
-					}
+					pictureCheckbox.disabled = ! jpegCheckbox.checked;
+					pictureCheckboxLabel.classList.toggle( 'webp-uploads-disabled', ! jpegCheckbox.checked );
+					pictureCheckboxDescription.classList.toggle( 'webp-uploads-disabled', ! jpegCheckbox.checked );
 				}
 
 				jpegCheckbox.addEventListener( 'change', togglePictureCheckbox );
