@@ -135,7 +135,6 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	// If only one of the two formats is supported, the dropdown defaults to that type and the other type is disabled.
 	if ( ! $avif_supported && 'avif' === $selected ) {
 		$selected = 'webp';
-		$selected = 'webp';
 	}
 	?>
 	<select name="perflab_modern_image_format" id="perflab_modern_image_format" aria-describedby="perflab_modern_image_format_description">
@@ -148,7 +147,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	<p class="description" id="perflab_modern_image_format_description"><?php esc_html_e( 'Select the format to use when generating new images from uploaded JPEGs.', 'webp-uploads' ); ?></p>
 	<?php if ( ! $avif_supported ) : ?>
 		<br />
-		<div class="notice notice-warning is-dismissible inline">
+		<div class="notice notice-warning inline">
 			<p><b><?php esc_html_e( 'AVIF support is not available.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
 		</div>
@@ -179,20 +178,12 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 		<script>
 			// Listen for clicks on the JPEG output checkbox, enabling/disabling the
 			// picture element checkbox accordingly.
-			document.addEventListener( 'DOMContentLoaded', function() {
-				const jpegCheckbox               = document.getElementById( 'perflab_generate_webp_and_jpeg' );
-				const pictureCheckbox            = document.getElementById( 'webp_uploads_use_picture_element' );
-				const pictureCheckboxLabel       = document.getElementById( 'webp_uploads_use_picture_element_label' );
-				const pictureCheckboxDescription = document.getElementById( 'webp_uploads_use_picture_element_description' );
-
-				function togglePictureCheckbox() {
-					pictureCheckbox.disabled = ! jpegCheckbox.checked;
-					pictureCheckboxLabel.classList.toggle( 'webp-uploads-disabled', ! jpegCheckbox.checked );
-					pictureCheckboxDescription.classList.toggle( 'webp-uploads-disabled', ! jpegCheckbox.checked );
-				}
-
-				jpegCheckbox.addEventListener( 'change', togglePictureCheckbox );
-			});
+			document.getElementById( 'perflab_generate_webp_and_jpeg' ).addEventListener( 'change', function () {
+				document.querySelector( '.webp-uploads-use-picture-element' ).classList.toggle( 'webp-uploads-disabled', ! this.checked );
+				document.getElementById( 'webp_uploads_picture_element_notice' ).hidden = this.checked;
+				document.getElementById( 'webp_uploads_use_picture_element' ).classList.toggle( 'disabled', ! this.checked );
+				document.getElementById( 'webp_uploads_picture_element_fieldset' ).classList.toggle( 'disabled', ! this.checked );
+			} );
 		</script>
 	<?php
 }
@@ -204,20 +195,25 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
  */
 function webp_uploads_use_picture_element_callback(): void {
 	// Picture element support requires the JPEG output to be enabled.
-	$jpeg_disabled = ! webp_uploads_is_jpeg_fallback_enabled();
+	$jpeg_fallback_enabled = ! webp_uploads_is_jpeg_fallback_enabled();
 	?>
-		<style>
-			.webp-uploads-disabled {
-				color #a7aaad;
-				opacity: 0.5;
-			}
-		</style>
-		<label for="webp_uploads_use_picture_element" class="<?php echo $jpeg_disabled ? 'webp-uploads-disabled' : ''; ?>" id="webp_uploads_use_picture_element_label">
-			<input name="webp_uploads_use_picture_element" type="checkbox" id="webp_uploads_use_picture_element" aria-describedby="webp_uploads_use_picture_element_description" value="1"<?php checked( webp_uploads_is_picture_element_enabled() ); ?> <?php disabled( $jpeg_disabled ); ?>/>
+	<style>
+		#webp_uploads_picture_element_fieldset.disabled label,
+		#webp_uploads_picture_element_fieldset.disabled p {
+			opacity: 0.7;
+		}
+	</style>
+	<div id="webp_uploads_picture_element_notice" class="notice notice-info inline" <?php echo ! $jpeg_fallback_enabled ? 'hidden' : ''; ?>>
+		<p><?php esc_html_e( 'This setting requires JPEG also be output as a fallback option.', 'webp-uploads' ); ?></p>
+	</div>
+	<div id="webp_uploads_picture_element_fieldset" class="<?php echo ! $jpeg_fallback_enabled ? 'disabled' : ''; ?>">
+		<label for="webp_uploads_use_picture_element" id="webp_uploads_use_picture_element_label">
+			<input name="webp_uploads_use_picture_element" type="checkbox" id="webp_uploads_use_picture_element" aria-describedby="webp_uploads_use_picture_element_description" value="1"<?php checked( webp_uploads_is_picture_element_enabled() ); ?> class="<?php echo ! $jpeg_fallback_enabled ? 'disabled' : ''; ?>" >
 			<?php esc_html_e( 'Use <picture> Element', 'webp-uploads' ); ?>
 			<em><?php esc_html_e( '(experimental)', 'webp-uploads' ); ?></em>
 		</label>
-		<p class="description<?php echo $jpeg_disabled ? ' webp-uploads-disabled' : ''; ?>" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'The picture element serves a modern image format with a fallback to JPEG. Warning: Make sure you test your theme and plugins for compatibility. In particular, CSS selectors will not match images when using the child combinator (e.g. figure > img).', 'webp-uploads' ); ?></p>
+		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'The picture element serves a modern image format with a fallback to JPEG. Warning: Make sure you test your theme and plugins for compatibility. In particular, CSS selectors will not match images when using the child combinator (e.g. figure > img).', 'webp-uploads' ); ?></p>
+	</div>
 	<?php
 }
 
