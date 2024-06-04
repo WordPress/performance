@@ -133,9 +133,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	}
 
 	// If only one of the two formats is supported, the dropdown defaults to that type and the other type is disabled.
-	if ( $avif_supported ) {
-		$selected = 'avif';
-	} else {
+	if ( ! $avif_supported && 'avif' === $selected ) {
 		$selected = 'webp';
 	}
 	?>
@@ -196,7 +194,8 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
  * @since n.e.x.t
  */
 function webp_uploads_use_picture_element_callback(): void {
-	$jpeg_fallback_enabled = webp_uploads_is_jpeg_fallback_enabled();
+	// Picture element support requires the JPEG output to be enabled.
+	$jpeg_fallback_enabled = ! webp_uploads_is_jpeg_fallback_enabled();
 	?>
 	<style>
 		#webp_uploads_picture_element_fieldset.disabled label,
