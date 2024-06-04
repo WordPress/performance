@@ -11,8 +11,8 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	/**
 	 * Set up the environment for the tests.
 	 */
-	public function setUp(): void {
-		parent::setUp();
+	public static function set_up_before_class(): void {
+		parent::set_up_before_class();
 
 		switch_theme( 'twentytwentyfour' );
 	}

@@ -118,14 +118,14 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 				break;
 
 			case 'wide':
-				if ( isset( $layout['wideSize'] ) ) {
+				if ( array_key_exists( 'wideSize', $layout ) ) {
 					$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['wideSize'] );
 				}
 				break;
 
 			// @todo: handle left/right alignments.
 			default:
-				if ( isset( $layout['contentSize'] ) ) {
+				if ( array_key_exists( 'contentSize', $layout ) ) {
 					$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['contentSize'] );
 				}
 				break;
