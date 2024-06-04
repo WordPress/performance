@@ -204,12 +204,12 @@ function webp_uploads_use_picture_element_callback(): void {
 			opacity: 0.7;
 		}
 	</style>
-	<div id="webp_uploads_picture_element_notice" class="notice notice-info inline" <?php if ( $jpeg_fallback_enabled ) { echo 'hidden'; } ?>>
+	<div id="webp_uploads_picture_element_notice" class="notice notice-info inline" <?php echo $jpeg_fallback_enabled ? 'hidden' : ''; ?>>
 		<p><?php esc_html_e( 'This setting requires JPEG also be output as a fallback option.', 'webp-uploads' ); ?></p>
 	</div>
-	<div id="webp_uploads_picture_element_fieldset" class="<?php if ( ! $jpeg_fallback_enabled ) { echo 'disabled'; } ?>">
+	<div id="webp_uploads_picture_element_fieldset" class="<?php echo ! $jpeg_fallback_enabled ? 'disabled' : ''; ?>">
 		<label for="webp_uploads_use_picture_element" id="webp_uploads_use_picture_element_label">
-			<input name="webp_uploads_use_picture_element" type="checkbox" id="webp_uploads_use_picture_element" aria-describedby="webp_uploads_use_picture_element_description" value="1"<?php checked( webp_uploads_is_picture_element_enabled() ); ?> class="<?php if ( ! $jpeg_fallback_enabled ) { echo 'disabled'; } ?>" >
+			<input name="webp_uploads_use_picture_element" type="checkbox" id="webp_uploads_use_picture_element" aria-describedby="webp_uploads_use_picture_element_description" value="1"<?php checked( webp_uploads_is_picture_element_enabled() ); ?> class="<?php echo ! $jpeg_fallback_enabled ? 'disabled' : ''; ?>" >
 			<?php esc_html_e( 'Use <picture> Element', 'webp-uploads' ); ?>
 			<em><?php esc_html_e( '(experimental)', 'webp-uploads' ); ?></em>
 		</label>
