@@ -98,7 +98,7 @@ function webp_uploads_add_media_settings_fields(): void {
 	);
 
 	$class = 'webp-uploads-use-picture-element';
-	if ( ! webp_uploads_is_generate_webp_and_jpeg_enabled() ) {
+	if ( ! webp_uploads_is_jpeg_fallback_enabled() ) {
 		$class .= ' hidden';
 	}
 
@@ -129,18 +129,18 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	if ( ! $avif_supported && ! $webp_supported ) {
 		?>
 		<br />
-		<div class="notice notice-warning is-dismissible inline">
+		<div class="notice notice-warning inline">
 			<p><b><?php esc_html_e( 'Modern Image support is not available.', 'webp-uploads' ); ?></b></p>
-			<p><?php esc_html_e( 'WebP of AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
+			<p><?php esc_html_e( 'WebP or AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
 		</div>
 		<?php
 		return;
 	}
 
 	// If only one of the two formats is supported, the dropdown defaults to that type and the other type is disabled.
-	if ( $avif_supported && ! $webp_supported ) {
+	if ( $avif_supported ) {
 		$selected = 'avif';
-	} elseif ( ! $avif_supported && $webp_supported ) {
+	} else {
 		$selected = 'webp';
 	}
 	?>
@@ -161,7 +161,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	<?php endif; ?>
 	<?php if ( ! $webp_supported ) : ?>
 		<br />
-		<div class="notice notice-warning is-dismissible inline">
+		<div class="notice notice-warning inline">
 			<p><b><?php esc_html_e( 'WebP support is not available.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'WebP support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
 		</div>
