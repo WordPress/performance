@@ -104,13 +104,12 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 
 	$processor = new WP_HTML_Tag_Processor( $content );
 	$has_image = $processor->next_tag( array( 'tag_name' => 'img' ) );
-	$layout    = wp_get_global_settings( array( 'layout' ) );
 
 	// Only update the markup if an image is found.
 	if ( $has_image ) {
-
-		$align = $parsed_block['attrs']['align'] ?? null;
-		$sizes = null;
+		$layout = wp_get_global_settings( array( 'layout' ) );
+		$align  = $parsed_block['attrs']['align'] ?? null;
+		$sizes  = null;
 		// Handle different alignment use cases.
 		switch ( $align ) {
 			case 'full':
