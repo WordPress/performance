@@ -32,7 +32,7 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
 	);
 
 	// Check setting for whether to generate both JPEG and the modern output format.
-	if ( webp_uploads_is_generate_webp_and_jpeg_enabled() ) {
+	if ( webp_uploads_is_jpeg_fallback_enabled() ) {
 		$default_transforms = array(
 			'image/jpeg'              => array( 'image/jpeg', 'image/' . $output_format ),
 			'image/' . $output_format => array( 'image/' . $output_format, 'image/jpeg' ),
