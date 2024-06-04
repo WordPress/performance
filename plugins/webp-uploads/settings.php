@@ -195,7 +195,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
  */
 function webp_uploads_use_picture_element_callback(): void {
 	// Picture element support requires the JPEG output to be enabled.
-	$jpeg_fallback_enabled = ! webp_uploads_is_jpeg_fallback_enabled();
+	$jpeg_fallback_enabled = webp_uploads_is_jpeg_fallback_enabled();
 	?>
 	<style>
 		#webp_uploads_picture_element_fieldset.disabled label,
@@ -203,7 +203,7 @@ function webp_uploads_use_picture_element_callback(): void {
 			opacity: 0.7;
 		}
 	</style>
-	<div id="webp_uploads_picture_element_notice" class="notice notice-info inline" <?php echo ! $jpeg_fallback_enabled ? 'hidden' : ''; ?>>
+	<div id="webp_uploads_picture_element_notice" class="notice notice-info inline" <?php echo $jpeg_fallback_enabled ? 'hidden' : ''; ?>>
 		<p><?php esc_html_e( 'This setting requires JPEG also be output as a fallback option.', 'webp-uploads' ); ?></p>
 	</div>
 	<div id="webp_uploads_picture_element_fieldset" class="<?php echo ! $jpeg_fallback_enabled ? 'disabled' : ''; ?>">
