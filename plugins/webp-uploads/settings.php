@@ -186,13 +186,21 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
  * @since n.e.x.t
  */
 function webp_uploads_use_picture_element_callback(): void {
+	// Picture element support requires the JPEG output to be enabled.
+	$jpeg_disabled = ! webp_uploads_is_generate_webp_and_jpeg_enabled();
 	?>
-		<label for="webp_uploads_use_picture_element">
-			<input name="webp_uploads_use_picture_element" type="checkbox" id="webp_uploads_use_picture_element" aria-describedby="webp_uploads_use_picture_element_description" value="1"<?php checked( webp_uploads_is_picture_element_enabled() ); ?> />
+		<style>
+			.webp-uploads-disabled {
+				color #a7aaad;
+				opacity: 0.5;
+			}
+		</style>
+		<label for="webp_uploads_use_picture_element" class="<?php echo $jpeg_disabled ? 'webp-uploads-disabled' : ''; ?>" id="webp_uploads_use_picture_element_label">
+			<input name="webp_uploads_use_picture_element" type="checkbox" id="webp_uploads_use_picture_element" aria-describedby="webp_uploads_use_picture_element_description" value="1"<?php checked( webp_uploads_is_picture_element_enabled() ); ?> <?php disabled( $jpeg_disabled ); ?>/>
 			<?php esc_html_e( 'Use <picture> Element', 'webp-uploads' ); ?>
 			<em><?php esc_html_e( '(experimental)', 'webp-uploads' ); ?></em>
 		</label>
-		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'The picture element serves a modern image format with a fallback to JPEG. Warning: Make sure you test your theme and plugins for compatibility. In particular, CSS selectors will not match images when using the child combinator (e.g. figure > img).', 'webp-uploads' ); ?></p>
+		<p class="description<?php echo $jpeg_disabled ? ' webp-uploads-disabled' : ''; ?>" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'The picture element serves a modern image format with a fallback to JPEG. Warning: Make sure you test your theme and plugins for compatibility. In particular, CSS selectors will not match images when using the child combinator (e.g. figure > img).', 'webp-uploads' ); ?></p>
 	<?php
 }
 
