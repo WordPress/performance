@@ -177,6 +177,30 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 			<?php esc_html_e( 'Output JPEG images in addition to the modern format', 'webp-uploads' ); ?>
 		</label>
 		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
+		<script>
+			// Listen for clicks on the JPEG output checkbox, enabling/disabling the
+			// picture element checkbox accordingly.
+			document.addEventListener( 'DOMContentLoaded', function() {
+				var jpegCheckbox               = document.getElementById( 'perflab_generate_webp_and_jpeg' );
+				var pictureCheckbox            = document.getElementById( 'webp_uploads_use_picture_element' );
+				var pictureCheckboxLabel       = document.getElementById( 'webp_uploads_use_picture_element_label' );
+				var pictureCheckboxDescription = document.getElementById( 'webp_uploads_use_picture_element_description' );
+
+				function togglePictureCheckbox() {
+					if ( jpegCheckbox.checked ) {
+						pictureCheckbox.removeAttribute( 'disabled' );
+						pictureCheckboxLabel.classList.remove( 'webp-uploads-disabled' );
+						pictureCheckboxDescription.classList.remove( 'webp-uploads-disabled' );
+					} else {
+						pictureCheckbox.setAttribute( 'disabled', 'disabled' );
+						pictureCheckboxLabel.classList.add( 'webp-uploads-disabled' );
+						pictureCheckboxDescription.classList.add( 'webp-uploads-disabled' );
+					}
+				}
+
+				jpegCheckbox.addEventListener( 'change', togglePictureCheckbox );
+			});
+		</script>
 	<?php
 }
 
