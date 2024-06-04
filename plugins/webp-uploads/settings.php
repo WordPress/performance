@@ -82,6 +82,11 @@ function webp_uploads_add_media_settings_fields(): void {
 		array( 'class' => 'perflab-generate-avif-and-webp' )
 	);
 
+	// Only add the remaining settings fields if at least one modern image format is supported.
+	if ( ! webp_uploads_mime_type_supported( 'image/avif' ) && ! webp_uploads_mime_type_supported( 'image/webp' ) ) {
+		return;
+	}
+
 	// Add JPEG Output settings field.
 	add_settings_field(
 		'perflab_generate_webp_and_jpeg',
@@ -113,13 +118,29 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 
 	$selected       = webp_uploads_get_image_output_format();
 	$avif_supported = webp_uploads_mime_type_supported( 'image/avif' );
-	// Ensure WebP selected if AVIF is not supported.
-	if ( ! $avif_supported ) {
+	$webp_supported = webp_uploads_mime_type_supported( 'image/webp' );
+
+	// If neither format is support, the entire field is not shown.
+	if ( ! $avif_supported && ! $webp_supported ) {
+		?>
+		<br />
+		<div class="notice notice-warning is-dismissible inline">
+			<p><b><?php esc_html_e( 'Modern Image support is not available.', 'webp-uploads' ); ?></b></p>
+			<p><?php esc_html_e( 'WebP of AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
+		</div>
+		<?php
+		return;
+	}
+
+	// If only one of the two formats is supported, the dropdown defaults to that type and the other type is disabled.
+	if ( $avif_supported && ! $webp_supported ) {
+		$selected = 'avif';
+	} elseif ( ! $avif_supported && $webp_supported ) {
 		$selected = 'webp';
 	}
 	?>
 	<select name="perflab_modern_image_format" id="perflab_modern_image_format" aria-describedby="perflab_modern_image_format_description">
-		<option value="webp"<?php selected( 'webp', $selected ); ?>><?php esc_html_e( 'WebP', 'webp-uploads' ); ?></option>
+		<option value="webp"<?php selected( 'webp', $selected ); ?><?php disabled( ! $webp_supported ); ?>><?php esc_html_e( 'WebP', 'webp-uploads' ); ?></option>
 		<option value="avif"<?php selected( 'avif', $selected ); ?><?php disabled( ! $avif_supported ); ?>><?php esc_html_e( 'AVIF', 'webp-uploads' ); ?></option>
 	</select>
 	<label for="perflab_modern_image_format">
@@ -131,6 +152,13 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 		<div class="notice notice-warning is-dismissible inline">
 			<p><b><?php esc_html_e( 'AVIF support is not available.', 'webp-uploads' ); ?></b></p>
 			<p><?php esc_html_e( 'AVIF support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
+		</div>
+	<?php endif; ?>
+	<?php if ( ! $webp_supported ) : ?>
+		<br />
+		<div class="notice notice-warning is-dismissible inline">
+			<p><b><?php esc_html_e( 'WebP support is not available.', 'webp-uploads' ); ?></b></p>
+			<p><?php esc_html_e( 'WebP support can only be enabled by your hosting provider, so contact them for more information.', 'webp-uploads' ); ?></p>
 		</div>
 	<?php endif; ?>
 	<?php
