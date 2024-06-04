@@ -181,10 +181,10 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 			// Listen for clicks on the JPEG output checkbox, enabling/disabling the
 			// picture element checkbox accordingly.
 			document.addEventListener( 'DOMContentLoaded', function() {
-				var jpegCheckbox               = document.getElementById( 'perflab_generate_webp_and_jpeg' );
-				var pictureCheckbox            = document.getElementById( 'webp_uploads_use_picture_element' );
-				var pictureCheckboxLabel       = document.getElementById( 'webp_uploads_use_picture_element_label' );
-				var pictureCheckboxDescription = document.getElementById( 'webp_uploads_use_picture_element_description' );
+				const jpegCheckbox               = document.getElementById( 'perflab_generate_webp_and_jpeg' );
+				const pictureCheckbox            = document.getElementById( 'webp_uploads_use_picture_element' );
+				const pictureCheckboxLabel       = document.getElementById( 'webp_uploads_use_picture_element_label' );
+				const pictureCheckboxDescription = document.getElementById( 'webp_uploads_use_picture_element_description' );
 
 				function togglePictureCheckbox() {
 					if ( jpegCheckbox.checked ) {
