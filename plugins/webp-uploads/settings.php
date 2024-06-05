@@ -37,7 +37,7 @@ function webp_uploads_register_media_settings_field(): void {
 		'perflab_generate_webp_and_jpeg',
 		array(
 			'type'         => 'boolean',
-			'default'      => current_theme_supports( 'html5', 'picture' ), // Use picture element by default if the theme declares support for it.
+			'default'      => current_theme_supports( 'html5', 'picture' ), // If picture element is supported by the theme, default to enabling the JPEG fallback.
 			'show_in_rest' => false,
 		)
 	);
