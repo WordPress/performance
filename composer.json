@@ -44,6 +44,9 @@
       "php": "7.2"
     }
   },
+  "extra": {
+    "wordpress-install-dir": "vendor/roots/wordpress"
+  },
   "scripts": {
     "format": "phpcbf --report-summary --report-source",
     "format:all": [
