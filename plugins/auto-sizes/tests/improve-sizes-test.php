@@ -22,13 +22,8 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		parent::set_up_before_class();
 
 		switch_theme( 'twentytwentyfour' );
-	}
 
-	/**
-	 * Setup shared fixtures.
-	 */
-	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
-		self::$image_id = $factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+		self::$image_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 	}
 
 	/**
