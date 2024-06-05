@@ -404,5 +404,5 @@ function webp_uploads_is_picture_element_enabled(): bool {
  * @return bool True if the option is enabled, false otherwise.
  */
 function webp_uploads_is_jpeg_fallback_enabled(): bool {
-	return true === (bool) get_option( 'perflab_generate_webp_and_jpeg' );
+	return (bool) get_option( 'perflab_generate_webp_and_jpeg' );
 }
