@@ -3,7 +3,7 @@
  * Optimization Detective: OD_Preload_Link_Collection class
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.3.0
  */
 
 // Exit if accessed directly.
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                   as: 'audio'|'document'|'embed'|'fetch'|'font'|'image'|'object'|'script'|'style'|'track'|'video'|'worker'
  *               }
  *
- * @since n.e.x.t
+ * @since 0.3.0
  * @access private
  */
 final class OD_Preload_Link_Collection implements Countable {

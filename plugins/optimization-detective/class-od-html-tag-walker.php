@@ -414,7 +414,7 @@ final class OD_HTML_Tag_Walker {
 	 * This is a wrapper around the underlying WP_HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 * @see WP_HTML_Tag_Processor::get_tag()
 	 *
 	 * @return string|null Name of currently matched tag in input HTML, or `null` if none found.

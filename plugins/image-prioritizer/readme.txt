@@ -7,7 +7,7 @@ Requires PHP:      7.2
 Stable tag:        0.1.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, images
+Tags:              performance, optimization, image, lcp, lazy-load
 
 Optimizes LCP image loading with `fetchpriority=high` and applies image lazy-loading by leveraging client-side detection with real user metrics.
 
@@ -24,7 +24,9 @@ In addition to prioritizing the loading of the LCP image, this plugin also optim
 
 If an image does not appear in the initial viewport for any of these viewport groups, then `loading=lazy` is added to the `img` element. 
 
-Note that by default, URL Metrics are not gathered for administrator users, since they are not normal site visitors, and it is likely that additional elements will be present on the page which are not also shown to non-administrators.
+👉 **Note:** This plugin optimizes pages for actual visitors, and it depends on visitors to optimize pages (since URL metrics need to be collected). As such, you won't see optimizations applied immediately after activating the plugin. And since administrator users are not normal visitors typically, optimizations are not applied for admins by default.
+
+There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
 This plugin requires the [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) plugin as a dependency. Please refer to that plugin for additional background on how this plugin works as well as additional developer options. 
 

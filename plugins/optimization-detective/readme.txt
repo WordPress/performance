@@ -7,7 +7,7 @@ Requires PHP:      7.2
 Stable tag:        0.3.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance
+Tags:              performance, optimization, rum
 
 Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
 
@@ -27,13 +27,13 @@ At the core of Optimization Detective is the “URL Metric”, information about
 
 URL Metrics have a “freshness TTL” after which they will be stale and the JavaScript will be served again to start gathering metrics again to ensure that the right elements continue to get their loading prioritized. When a URL Metrics custom post type hasn't been touched in a while, it is automatically garbage-collected.
 
-Prioritizing the loading of images which are the LCP element is only the first optimization implemented as a proof of concept for how other optimizations might also be applied. See a [list of issues](https://github.com/WordPress/performance/labels/%5BPlugin%5D%20Optimization%20Detective) for planned additional optimizations which are only feasible with the URL Metrics RUM data.
+👉 **Note:** This plugin optimizes pages for actual visitors, and it depends on visitors to optimize pages (since URL metrics need to be collected). As such, you won't see optimizations applied immediately after activating the plugin (and dependent plugin(s)). And since administrator users are not normal visitors typically, optimizations are not applied for admins by default (but this can be overridden with the `od_can_optimize_response` filter below). URL metrics are not collected for administrators because it is likely that additional elements will be present on the page which are not also shown to non-administrators, meaning the URL metrics could not reliably be reused between them. 
 
-Note that by default, URL Metrics are not gathered for administrator users, since they are not normal site visitors, and it is likely that additional elements will be present on the page which are not also shown to non-administrators.
+There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
 When the `WP_DEBUG` constant is enabled, additional logging for Optimization Detective is added to the browser console.
 
-= Filters =
+= Hooks =
 
 **Filter:** `od_breakpoint_max_widths` (default: [480, 600, 782])
 
@@ -68,7 +68,9 @@ Filters the sample size for a breakpoint's URL metrics on a given URL. The sampl
 
 `
 <?php
-add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int { return 1; } );
+add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int {
+	return 1;
+} );
 `
 
 **Filter:** `od_url_metric_storage_lock_ttl` (default: 1 minute)
@@ -97,7 +99,7 @@ Filters the time window between serve time and run time in which loading detecti
 
 **Filter:** `od_template_output_buffer` (default: the HTML response)
 
-Filters the template output buffer prior to sending to the client. This filter is added to implement #43258.
+Filters the template output buffer prior to sending to the client. This filter is added to implement [#43258](https://core.trac.wordpress.org/ticket/43258) in WordPress core.
 
 == Installation ==
 
@@ -135,6 +137,8 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 0.3.0 =
 
+* The image optimization features have been split out into a new dependent plugin called [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/), which also now optimizes image lazy-loading. ([1088](https://github.com/WordPress/performance/issues/1088))
+
 = 0.2.0 =
 
 **Enhancements**
@@ -163,4 +167,5 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 == Upgrade Notice ==
 
 = 0.3.0 =
+
 Image loading optimizations have been moved to a new dependent plugin called Image Prioritizer. The Optimization Detective plugin now serves as a dependency.

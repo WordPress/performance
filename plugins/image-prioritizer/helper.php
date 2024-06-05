@@ -3,7 +3,7 @@
  * Helper functions for Image Prioritizer.
  *
  * @package image-prioritizer
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * See {@see 'wp_head'}.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  */
 function image_prioritizer_render_generator_meta_tag(): void {
 	// Use the plugin slug as it is immutable.
@@ -25,7 +25,7 @@ function image_prioritizer_render_generator_meta_tag(): void {
 /**
  * Registers tag visitors for images.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  *
  * @param OD_Tag_Visitor_Registry         $registry                     Tag visitor registry.
  * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.

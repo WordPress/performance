@@ -3,7 +3,7 @@
  * Image Prioritizer: IP_Img_Tag_Visitor class
  *
  * @package image-prioritizer
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 // Exit if accessed directly.
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Visitor for the tag walker that optimizes IMG tags.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @access private
  */
 final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visitor {

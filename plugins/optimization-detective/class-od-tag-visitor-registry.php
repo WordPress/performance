@@ -3,7 +3,7 @@
  * Optimization Detective: OD_Tag_Visitor_Registry class
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.3.0
  */
 
 // Exit if accessed directly.
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @implements IteratorAggregate<string, TagVisitorCallback>
  *
- * @since n.e.x.t
+ * @since 0.3.0
  * @access private
  */
 final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {

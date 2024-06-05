@@ -3,7 +3,7 @@
  * Hook callbacks used for Image Prioritizer.
  *
  * @package image-prioritizer
- * @since n.e.x.t
+ * @since 0.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
