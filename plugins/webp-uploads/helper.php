@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * for example an image/jpeg can be converted into an image/webp.
  *
  * @since 1.0.0
- * @since n.e.x.t Added support for AVIF.
+ * @since 2.0.0 Added support for AVIF.
  *
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
@@ -334,7 +334,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
  *
  * Includes special handling for false positives on AVIF support.
  *
- * @since n.e.x.t
+ * @since 2.0.0
  *
  * @param string $mime_type The mime type to check.
  * @return bool Whether the server supports a given mime type.
@@ -364,7 +364,7 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 /**
  * Get the image output format setting from the option. Default is avif.
  *
- * @since n.e.x.t
+ * @since 2.0.0
  *
  * @return string The image output format. One of 'webp' or 'avif'.
  */
@@ -376,7 +376,7 @@ function webp_uploads_get_image_output_format(): string {
 /**
  * Sanitizes the image format.
  *
- * @since n.e.x.t
+ * @since 2.0.0
  *
  * @param string $image_format The image format to check.
  * @return string Supported image format.
@@ -388,7 +388,7 @@ function webp_uploads_sanitize_image_format( string $image_format ): string {
 /**
  * Checks if the `webp_uploads_use_picture_element` option is enabled.
  *
- * @since n.e.x.t
+ * @since 2.0.0
  *
  * @return bool True if the option is enabled, false otherwise.
  */
@@ -399,7 +399,7 @@ function webp_uploads_is_picture_element_enabled(): bool {
 /**
  * Checks if the `perflab_generate_webp_and_jpeg` option is enabled.
  *
- * @since n.e.x.t
+ * @since 2.0.0
  *
  * @return bool True if the option is enabled, false otherwise.
  */
