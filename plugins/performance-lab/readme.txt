@@ -70,7 +70,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 **Bug Fixes**
 
 * Fix Server-Timing compatibility with other plugins that do output buffering. ([1260](https://github.com/WordPress/performance/pull/1260))
-* Harden autoloaded-options site health test for mis-implemented external object cache plugins. ([1238](https://github.com/WordPress/performance/pull/1238))
+* Harden autoloaded-options site health test for incorrectly implemented external object cache plugins. ([1238](https://github.com/WordPress/performance/pull/1238))
 
 = 3.1.0 =
 
