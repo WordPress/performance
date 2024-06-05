@@ -31,12 +31,14 @@
     "wp-coding-standards/wpcs": "^3.1",
     "wp-phpunit/wp-phpunit": "^6.5",
     "yoast/phpunit-polyfills": "^1.0",
-    "phpstan/php-8-stubs": "^0.3.84"
+    "phpstan/php-8-stubs": "^0.3.84",
+    "roots/wordpress": "^6"
   },
   "config": {
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
-      "phpstan/extension-installer": true
+      "phpstan/extension-installer": true,
+      "roots/wordpress-core-installer": true
     },
     "platform": {
       "php": "7.2"
