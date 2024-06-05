@@ -15,24 +15,24 @@
     "php": "^7.2 || ^8.0",
     "ext-json": "*"
   },
-  "suggest": {
-    "ext-imagick": "Required to use Modern Image Format's Dominant_Color_Image_Editor_Imagick class",
-    "ext-gd": "Required to use Modern Image Format's Dominant_Color_Image_Editor_GD class"
-  },
   "require-dev": {
     "phpcompatibility/php-compatibility": "^9.3",
     "phpstan/extension-installer": "^1.3",
+    "phpstan/php-8-stubs": "^0.3.84",
     "phpstan/phpstan": "^1.11",
     "phpstan/phpstan-deprecation-rules": "^1.1",
     "phpstan/phpstan-phpunit": "^1.3",
+    "roots/wordpress": "^6",
     "slevomat/coding-standard": "^8.0",
     "squizlabs/php_codesniffer": "^3.9",
     "szepeviktor/phpstan-wordpress": "^1.3",
     "wp-coding-standards/wpcs": "^3.1",
     "wp-phpunit/wp-phpunit": "^6.5",
-    "yoast/phpunit-polyfills": "^1.0",
-    "phpstan/php-8-stubs": "^0.3.84",
-    "roots/wordpress": "^6"
+    "yoast/phpunit-polyfills": "^1.0"
+  },
+  "suggest": {
+    "ext-gd": "Required to use Modern Image Format's Dominant_Color_Image_Editor_GD class",
+    "ext-imagick": "Required to use Modern Image Format's Dominant_Color_Image_Editor_Imagick class"
   },
   "config": {
     "allow-plugins": {
