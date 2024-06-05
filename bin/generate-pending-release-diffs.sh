@@ -25,7 +25,7 @@ cd "$(git rev-parse --show-toplevel)"
 
 stable_dir=/tmp/stable-svn
 mkdir -p "$stable_dir"
-for plugin_slug in $( if [ $# -gt 0 ]; then echo $@; else jq '.plugins[]' -r plugins.json; fi ); do
+for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r plugins.json; fi ); do
 	echo "# $plugin_slug ###############################" >&2
 	if ! npm run "build:plugin:$plugin_slug" >&2; then
 		echo "Failed to build plugin: $plugin_slug" >&2
