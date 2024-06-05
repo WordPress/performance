@@ -51,6 +51,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.1.2 =
 
+**Bug Fixes**
+
+* Re-remove unneeded phpcs:ignore. ([1231](https://github.com/WordPress/performance/pull/1231))
+
 = 1.1.1 =
 
 **Enhancements**

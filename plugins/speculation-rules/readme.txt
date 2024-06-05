@@ -116,6 +116,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.3.1 =
 
+**Bug Fixes**
+
+* Check if rel contains nofollow instead of being just nofollow when excluding speculative loading. ([1232](https://github.com/WordPress/performance/pull/1232))
+
 = 1.3.0 =
 
 **Enhancements**
