@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
  * Requires at least: 6.4
  * Requires PHP: 7.2
- * Version: 3.1.0
+ * Version: 3.2.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'PERFLAB_VERSION', '3.1.0' );
+define( 'PERFLAB_VERSION', '3.2.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_SCREEN', 'performance-lab' );
@@ -108,7 +108,6 @@ function perflab_get_standalone_plugin_data(): array {
 			'constant'     => 'IMAGE_PRIORITIZER_VERSION',
 			'experimental' => true,
 		),
-		// TODO: Add image loading optimization plugin, dependent of Optimization Detective, once ready for end users.
 		'performant-translations' => array(
 			'constant' => 'PERFORMANT_TRANSLATIONS_VERSION',
 		),
