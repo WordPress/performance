@@ -119,13 +119,12 @@ function auto_sizes_get_width( string $layout_width, int $image_width ): string 
  */
 function auto_sizes_improve_image_sizes_attribute( string $content, array $parsed_block ): string {
 
-	$tags   = new WP_HTML_Tag_Processor( $content );
-	$image  = $tags->next_tag( array( 'tag_name' => 'img' ) );
-	$layout = wp_get_global_settings( array( 'layout' ) );
+	$processor = new WP_HTML_Tag_Processor( $content );
+	$has_image = $processor->next_tag( array( 'tag_name' => 'img' ) );
 
-	// Only update the markup if an image is found and we have layout settings.
-	if ( $image && isset( $layout['wideSize'] ) && $layout['contentSize'] ) {
-
+	// Only update the markup if an image is found.
+	if ( $has_image ) {
+		$layout     = wp_get_global_settings( array( 'layout' ) );
 		$align      = $parsed_block['attrs']['align'] ?? null;
 		$image_id   = $parsed_block['attrs']['id'] ?? '';
 		$image_size = $parsed_block['attrs']['sizeSlug'] ?? '';
@@ -136,7 +135,7 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 		}
 
 		$image_width = $image_attributes[1] ?? '';
-
+		$sizes       = null;
 		// Handle different alignment use cases.
 		switch ( $align ) {
 			case 'full':
@@ -144,22 +143,26 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 				break;
 
 			case 'wide':
-				$width = auto_sizes_get_width( $layout['wideSize'], $image_width );
-				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
+				if ( array_key_exists( 'wideSize', $layout ) ) {
+					$width = auto_sizes_get_width( $layout['wideSize'], $image_width );
+					$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
+				}
 				break;
 
 				// @todo: handle left/right alignments.
 			default:
-				$width = auto_sizes_get_width( $layout['contentSize'], $image_width );
-				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
+				if ( array_key_exists( 'contentSize', $layout ) ) {
+					$width = auto_sizes_get_width( $layout['contentSize'], $image_width );
+					$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
+				}
 				break;
 		}
 
 		if ( $sizes ) {
-			$tags->set_attribute( 'sizes', $sizes );
+			$processor->set_attribute( 'sizes', $sizes );
 		}
 
-		$content = $tags->get_updated_html();
+		$content = $processor->get_updated_html();
 	}
 	return $content;
 }
