@@ -42,7 +42,7 @@ for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r p
 
 	cd "$stable_dir/$plugin_slug/"
 
-	echo "# \`$plugin_slug\`"
+	echo "## \`$plugin_slug\`"
 	echo
 	echo "\`svn status\`:"
 	echo '```'
