@@ -167,7 +167,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	/**
 	 * Fires to register tag visitors before walking over the document to perform optimizations.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param OD_Tag_Visitor_Registry         $tag_visitor_registry Tag visitor registry.
 	 * @param OD_URL_Metrics_Group_Collection $group_collection     URL Metrics Group collection.
