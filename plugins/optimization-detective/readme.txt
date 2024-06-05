@@ -97,7 +97,7 @@ Filters the time window between serve time and run time in which loading detecti
 
 **Filter:** `od_template_output_buffer` (default: the HTML response)
 
-Filters the template output buffer prior to sending to the client. This filter is added to implement #43258.
+Filters the template output buffer prior to sending to the client. This filter is added to implement [#43258](https://core.trac.wordpress.org/ticket/43258) in WordPress core.
 
 == Installation ==
 
