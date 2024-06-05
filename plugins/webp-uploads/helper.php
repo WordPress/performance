@@ -32,7 +32,7 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
 	);
 
 	// Check setting for whether to generate both JPEG and the modern output format.
-	if ( true === (bool) get_option( 'perflab_generate_webp_and_jpeg' ) ) {
+	if ( webp_uploads_is_jpeg_fallback_enabled() ) {
 		$default_transforms = array(
 			'image/jpeg'              => array( 'image/jpeg', 'image/' . $output_format ),
 			'image/' . $output_format => array( 'image/' . $output_format, 'image/jpeg' ),
@@ -394,4 +394,15 @@ function webp_uploads_sanitize_image_format( string $image_format ): string {
  */
 function webp_uploads_is_picture_element_enabled(): bool {
 	return (bool) get_option( 'webp_uploads_use_picture_element', false );
+}
+
+/**
+ * Checks if the `perflab_generate_webp_and_jpeg` option is enabled.
+ *
+ * @since n.e.x.t
+ *
+ * @return bool True if the option is enabled, false otherwise.
+ */
+function webp_uploads_is_jpeg_fallback_enabled(): bool {
+	return (bool) get_option( 'perflab_generate_webp_and_jpeg' );
 }
