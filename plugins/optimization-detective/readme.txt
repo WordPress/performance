@@ -33,7 +33,7 @@ There are currently **no settings** and no user interface for this plugin since 
 
 When the `WP_DEBUG` constant is enabled, additional logging for Optimization Detective is added to the browser console.
 
-= Filters =
+= Hooks =
 
 **Filter:** `od_breakpoint_max_widths` (default: [480, 600, 782])
 
@@ -68,7 +68,9 @@ Filters the sample size for a breakpoint's URL metrics on a given URL. The sampl
 
 `
 <?php
-add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int { return 1; } );
+add_filter( 'od_url_metrics_breakpoint_sample_size', function (): int {
+	return 1;
+} );
 `
 
 **Filter:** `od_url_metric_storage_lock_ttl` (default: 1 minute)
@@ -165,4 +167,5 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 == Upgrade Notice ==
 
 = 0.3.0 =
+
 Image loading optimizations have been moved to a new dependent plugin called Image Prioritizer. The Optimization Detective plugin now serves as a dependency.
