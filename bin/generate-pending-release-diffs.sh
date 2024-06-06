@@ -36,7 +36,7 @@ for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r p
 		svn co "https://plugins.svn.wordpress.org/$plugin_slug/trunk/" "$stable_dir/$plugin_slug" >&2
 	else
 		svn revert "$stable_dir/$plugin_slug" >&2
-		svn up "$stable_dir/$plugin_slug" >&2
+		svn up --force "$stable_dir/$plugin_slug" >&2
 	fi
 
 	rsync -avz --delete --exclude=".svn" "build/$plugin_slug/" "$stable_dir/$plugin_slug/" >&2
