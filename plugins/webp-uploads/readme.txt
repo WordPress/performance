@@ -66,11 +66,11 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 **Features**
 
+* Add `picture` element support. ([73](https://github.com/WordPress/performance/pull/73))
 * Add AVIF image format support. Add setting for output image format to choose between WebP and AVIF. ([1176](https://github.com/WordPress/performance/pull/1176))
 
 **Enhancements**
 
-* Add `picture` element support. ([73](https://github.com/WordPress/performance/pull/73))
 * Improve Settings->Media controls for Modern Image Formats. ([1273](https://github.com/WordPress/performance/pull/1273))
 * Remove obsolete fallback script now that picture element is supported. ([1269](https://github.com/WordPress/performance/pull/1269))
 
