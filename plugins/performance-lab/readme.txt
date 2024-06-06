@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.2
-Stable tag:        3.1.0
+Stable tag:        3.2.0
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, site health, measurement, optimization, diagnostics
@@ -61,6 +61,16 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 == Changelog ==
 
 = 3.2.0 =
+
+**Enhancements**
+
+* Add install note after each PerfLab feature plugin in the plugin list table. ([1265](https://github.com/WordPress/performance/pull/1265))
+* Update plugins with new banners and icons. ([1272](https://github.com/WordPress/performance/pull/1272))
+
+**Bug Fixes**
+
+* Fix Server-Timing compatibility with other plugins that do output buffering. ([1260](https://github.com/WordPress/performance/pull/1260))
+* Harden autoloaded-options site health test for incorrectly implemented external object cache plugins. ([1238](https://github.com/WordPress/performance/pull/1238))
 
 = 3.1.0 =
 

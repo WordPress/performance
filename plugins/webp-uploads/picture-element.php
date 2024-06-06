@@ -4,13 +4,13 @@
  *
  * @package webp-uploads
  *
- * @since n.e.x.t
+ * @since 2.0.0
  */
 
 /**
  * Potentially wrap an image tag in a picture element.
  *
- * @since n.e.x.t
+ * @since 2.0.0
  *
  * @param string $image         The image tag.
  * @param string $context       The context for the image tag.
@@ -49,7 +49,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	 * The mime types will output in the picture element in the order they are provided.
 	 * The original image will be used as the fallback image for browsers that don't support the picture element.
 	 *
-	 * @since n.e.x.t
+	 * @since 2.0.0
 	 * @param string[] $mime_types    Mime types than can be used.
 	 * @param int      $attachment_id The id of the image being evaluated.
 	 */
