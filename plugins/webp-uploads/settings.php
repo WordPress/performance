@@ -16,9 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  * @since 2.0.0 The setting was made more general to cover outputting JPEG as a secondary type. The "webp" option naming
- *                was left unchanged for backward compatibility.
- * @since 2.0.0 The `perflab_modern_image_format` was added to enable selecting an output format.
- *                Currently includes AVIF and WebP.
+ *              was left unchanged for backward compatibility. Also, the `perflab_modern_image_format` was added to
+ *              enable selecting an output format. Currently includes AVIF and WebP.
  */
 function webp_uploads_register_media_settings_field(): void {
 	register_setting(
