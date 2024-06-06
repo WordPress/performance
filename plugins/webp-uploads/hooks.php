@@ -519,10 +519,14 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
  *
  * @see wp_filter_content_tags()
  *
- * @param string $content The content of the current post.
+ * @param string|mixed $content The content of the current post.
  * @return string The content with the updated references to the images.
  */
-function webp_uploads_update_image_references( string $content ): string {
+function webp_uploads_update_image_references( $content ): string {
+	if ( ! is_string( $content ) ) {
+		$content = '';
+	}
+
 	// Bail early if request is not for the frontend.
 	if ( ! webp_uploads_in_frontend_body() ) {
 		return $content;
