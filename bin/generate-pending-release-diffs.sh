@@ -4,10 +4,13 @@
 # pasting into a GitHub release preparation PR. Program status updates are sent to STDERR, so STDOUT can be piped
 # either to the clipboard or to a file for posting to GitHub.
 #
-# USAGE:
-# ./generate-pending-release-diffs.sh > overview.md
+# EXAMPLES:
+# ./generate-pending-release-diffs.sh > all-plugins.md
 # ./generate-pending-release-diffs.sh | pbcopy
+# ./generate-pending-release-diffs.sh optimization-detective image-prioritizer > two-plugins.md
 # npm run generate-pending-release-diffs --silent
+# npm run generate-pending-release-diffs --silent auto-sizes
+# npm run generate-pending-release-diffs --silent auto-sizes webp-uploads
 
 set -e
 
@@ -20,12 +23,15 @@ done
 
 cd "$(git rev-parse --show-toplevel)"
 
-npm run build-plugins >&2
-
 stable_dir=/tmp/stable-svn
 mkdir -p "$stable_dir"
-for plugin_slug in $(jq '.plugins[]' -r plugins.json); do
+for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r plugins.json; fi ); do
 	echo "# $plugin_slug ###############################" >&2
+	if ! npm run "build:plugin:$plugin_slug" >&2; then
+		echo "Failed to build plugin: $plugin_slug" >&2
+		exit 1
+	fi
+
 	if [ ! -d "$stable_dir/$plugin_slug" ]; then
 		svn co "https://plugins.svn.wordpress.org/$plugin_slug/trunk/" "$stable_dir/$plugin_slug" >&2
 	else
@@ -37,19 +43,24 @@ for plugin_slug in $(jq '.plugins[]' -r plugins.json); do
 
 	cd "$stable_dir/$plugin_slug/"
 
-	echo "# \`$plugin_slug\`"
+	echo "## \`$plugin_slug\`"
 	echo
-	echo "\`svn status\`:"
-	echo '```'
-	svn status
-	echo '```'
-	echo
-	echo '<details><summary><code>svn diff</code></summary>'
-	echo
-	echo '```diff'
-	svn diff
-	echo '```'
-	echo '</details>'
+
+	if [ -z "$( svn status -q )" ]; then
+		echo "No changes."
+	else
+		echo "\`svn status\`:"
+		echo '```'
+		svn status
+		echo '```'
+		echo
+		echo '<details><summary><code>svn diff</code></summary>'
+		echo
+		echo '```diff'
+		svn diff
+		echo '```'
+		echo '</details>'
+	fi
 	echo
 
 	cd - > /dev/null

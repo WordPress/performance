@@ -20,6 +20,7 @@
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
     "lodash": "4.17.21",
+    "micromatch": "^4.0.7",
     "npm-run-all": "^4.1.5",
     "webpackbar": "^6.0.1"
   },
@@ -35,6 +36,7 @@
     "build:plugin:auto-sizes": "webpack --mode production --env plugin=auto-sizes",
     "build:plugin:dominant-color-images": "webpack --mode production --env plugin=dominant-color-images",
     "build:plugin:embed-optimizer": "webpack --mode production --env plugin=embed-optimizer",
+    "build:plugin:image-prioritizer": "webpack --mode production --env plugin=image-prioritizer",
     "build:plugin:optimization-detective": "webpack --mode production --env plugin=optimization-detective",
     "build:plugin:speculation-rules": "webpack --mode production --env plugin=speculation-rules",
     "build:plugin:webp-uploads": "webpack --mode production --env plugin=webp-uploads",
@@ -48,14 +50,5 @@
     "test-php-multisite": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:plugins",
     "wp-env": "wp-env",
     "prepare": "husky install"
-  },
-  "lint-staged": {
-    "*.php": [
-      "composer run-script lint",
-      "composer run-script phpstan"
-    ],
-    "*.js": [
-      "npm run lint-js"
-    ]
   }
 }

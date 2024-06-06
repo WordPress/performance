@@ -569,7 +569,7 @@ function webp_uploads_update_image_references( string $content ): string {
 
 	return $content;
 }
-add_filter( 'the_content', 'webp_uploads_update_image_references', 10 );
+add_filter( 'the_content', 'webp_uploads_update_image_references', 13 ); // Run after wp_filter_content_tags.
 
 /**
  * Finds all the urls with *.jpg and *.jpeg extension and updates with *.webp version for the provided image
@@ -669,22 +669,6 @@ function webp_uploads_img_tag_update_mime_type( string $original_image, string $
 		}
 	}
 
-	foreach ( $target_mimes as $target_mime ) {
-		if ( $target_mime === $original_mime ) {
-			continue;
-		}
-
-		if (
-			! has_action( 'wp_footer', 'webp_uploads_wepb_fallback' ) &&
-			$image !== $original_image &&
-			'the_content' === $context &&
-			'image/jpeg' === $original_mime &&
-			'image/webp' === $target_mime
-		) {
-			add_action( 'wp_footer', 'webp_uploads_wepb_fallback' );
-		}
-	}
-
 	return $image;
 }
 
@@ -703,52 +687,6 @@ function webp_uploads_update_featured_image( string $html, int $post_id, int $at
 	return webp_uploads_img_tag_update_mime_type( $html, 'post_thumbnail_html', $attachment_id );
 }
 add_filter( 'post_thumbnail_html', 'webp_uploads_update_featured_image', 10, 3 );
-
-/**
- * Adds a fallback mechanism to replace webp images with jpeg alternatives on older browsers.
- *
- * @since 1.0.0
- */
-function webp_uploads_wepb_fallback(): void {
-	// Get mime type transforms for the site.
-	$transforms = webp_uploads_get_upload_image_mime_transforms();
-
-	// We need to add fallback only if jpeg alternatives for the webp images are enabled for the server.
-	$preserve_jpegs_for_jpeg_transforms = isset( $transforms['image/jpeg'] ) && in_array( 'image/jpeg', $transforms['image/jpeg'], true ) && in_array( 'image/webp', $transforms['image/jpeg'], true );
-	$preserve_jpegs_for_webp_transforms = isset( $transforms['image/webp'] ) && in_array( 'image/jpeg', $transforms['image/webp'], true ) && in_array( 'image/webp', $transforms['image/webp'], true );
-	if ( ! $preserve_jpegs_for_jpeg_transforms && ! $preserve_jpegs_for_webp_transforms ) {
-		return;
-	}
-
-	ob_start();
-
-	?>
-	( function( d, i, s, p ) {
-		s = d.createElement( s );
-		s.src = '<?php echo esc_url_raw( plugins_url( '/fallback.js', __FILE__ ) ); ?>';
-
-		i = d.createElement( i );
-		i.src = p + 'jIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
-		i.onload = function() {
-			i.onload = undefined;
-			i.src = p + 'h4AAABXRUJQVlA4TBEAAAAvAQAAAAfQ//73v/+BiOh/AAA=';
-		};
-
-		i.onerror = function() {
-			d.body.appendChild( s );
-		};
-	} )( document, 'img', 'script', 'data:image/webp;base64,UklGR' );
-	<?php
-	$javascript = ob_get_clean();
-
-	wp_print_inline_script_tag(
-		(string) preg_replace( '/\s+/', '', (string) $javascript ),
-		array(
-			'id'            => 'webpUploadsFallbackWebpImages',
-			'data-rest-api' => esc_url_raw( trailingslashit( get_rest_url() ) ),
-		)
-	);
-}
 
 /**
  * Returns an array of image size names that have secondary mime type output enabled. Core sizes and
@@ -819,3 +757,7 @@ function webp_uploads_render_generator(): void {
 	echo '<meta name="generator" content="webp-uploads ' . esc_attr( WEBP_UPLOADS_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'webp_uploads_render_generator' );
+
+if ( webp_uploads_is_picture_element_enabled() ) {
+	add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10, 3 );
+}

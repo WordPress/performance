@@ -62,24 +62,35 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	private $freshness_ttl;
 
 	/**
-	 * Cached LCP element data.
+	 * Collection that this instance belongs to.
 	 *
-	 * @var ElementData|null|false
+	 * @var OD_URL_Metrics_Group_Collection|null
 	 */
-	private $cached_lcp_element = false;
+	private $collection;
+
+	/**
+	 * Result cache.
+	 *
+	 * @var array{
+	 *          get_lcp_element?: ElementData|null,
+	 *          is_complete?: bool
+	 *      }
+	 */
+	private $result_cache = array();
 
 	/**
 	 * Constructor.
 	 *
 	 * @throws InvalidArgumentException If arguments are valid.
 	 *
-	 * @param OD_URL_Metric[] $url_metrics            URL metrics to add to the group.
-	 * @param int             $minimum_viewport_width Minimum possible viewport width for the group. Must be zero or greater.
-	 * @param int             $maximum_viewport_width Maximum possible viewport width for the group. Must be greater than zero and the minimum viewport width.
-	 * @param int             $sample_size            Sample size for the maximum number of viewports in a group between breakpoints.
-	 * @param int             $freshness_ttl          Freshness age (TTL) for a given URL metric.
+	 * @param OD_URL_Metric[]                      $url_metrics            URL metrics to add to the group.
+	 * @param int                                  $minimum_viewport_width Minimum possible viewport width for the group. Must be zero or greater.
+	 * @param int                                  $maximum_viewport_width Maximum possible viewport width for the group. Must be greater than zero and the minimum viewport width.
+	 * @param int                                  $sample_size            Sample size for the maximum number of viewports in a group between breakpoints.
+	 * @param int                                  $freshness_ttl          Freshness age (TTL) for a given URL metric.
+	 * @param OD_URL_Metrics_Group_Collection|null $collection             Collection that this instance belongs to. Optional.
 	 */
-	public function __construct( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl ) {
+	public function __construct( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl, ?OD_URL_Metrics_Group_Collection $collection = null ) {
 		if ( $minimum_viewport_width < 0 ) {
 			throw new InvalidArgumentException(
 				esc_html__( 'The minimum viewport width must be at least zero.', 'optimization-detective' )
@@ -123,6 +134,10 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 			);
 		}
 		$this->freshness_ttl = $freshness_ttl;
+
+		if ( ! is_null( $collection ) ) {
+			$this->collection = $collection;
+		}
 
 		$this->url_metrics = $url_metrics;
 	}
@@ -172,7 +187,11 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 			);
 		}
 
-		$this->clear_caches();
+		$this->result_cache = array();
+		if ( ! is_null( $this->collection ) ) {
+			$this->collection->clear_cache();
+		}
+
 		$this->url_metrics[] = $url_metric;
 
 		// If we have too many URL metrics now, remove the oldest ones up to the sample size.
@@ -200,23 +219,26 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	 * @return bool Whether complete.
 	 */
 	public function is_complete(): bool {
-		if ( count( $this->url_metrics ) < $this->sample_size ) {
-			return false;
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
 		}
-		$current_time = microtime( true );
-		foreach ( $this->url_metrics as $url_metric ) {
-			if ( $current_time > $url_metric->get_timestamp() + $this->freshness_ttl ) {
+
+		$result = ( function () {
+			if ( count( $this->url_metrics ) < $this->sample_size ) {
 				return false;
 			}
-		}
-		return true;
-	}
+			$current_time = microtime( true );
+			foreach ( $this->url_metrics as $url_metric ) {
+				if ( $current_time > $url_metric->get_timestamp() + $this->freshness_ttl ) {
+					return false;
+				}
+			}
 
-	/**
-	 * Clear caches.
-	 */
-	private function clear_caches(): void {
-		$this->cached_lcp_element = false;
+			return true;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
 	}
 
 	/**
@@ -226,54 +248,74 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	 *                          the LCP element type is not supported.
 	 */
 	public function get_lcp_element(): ?array {
-
-		// Return pre-computed value if available.
-		if ( false !== $this->cached_lcp_element ) {
-			return $this->cached_lcp_element;
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
 		}
 
-		// No metrics have been gathered for this group so there is no LCP element.
-		if ( count( $this->url_metrics ) === 0 ) {
-			return null;
-		}
+		$result = ( function () {
 
-		// The following arrays all share array indices.
-		$seen_breadcrumbs   = array();
-		$breadcrumb_counts  = array();
-		$breadcrumb_element = array();
-
-		foreach ( $this->url_metrics as $url_metric ) {
-			foreach ( $url_metric->get_elements() as $element ) {
-				if ( ! $element['isLCP'] ) {
-					continue;
-				}
-
-				$i = array_search( $element['xpath'], $seen_breadcrumbs, true );
-				if ( false === $i ) {
-					$i                       = count( $seen_breadcrumbs );
-					$seen_breadcrumbs[ $i ]  = $element['xpath'];
-					$breadcrumb_counts[ $i ] = 0;
-				}
-
-				$breadcrumb_counts[ $i ] += 1;
-				$breadcrumb_element[ $i ] = $element;
-				break; // We found the LCP element for the URL metric, go to the next URL metric.
+			// No metrics have been gathered for this group so there is no LCP element.
+			if ( count( $this->url_metrics ) === 0 ) {
+				return null;
 			}
-		}
 
-		// Now sort by the breadcrumb counts in descending order, so the remaining first key is the most common breadcrumb.
-		if ( $seen_breadcrumbs ) {
-			arsort( $breadcrumb_counts );
-			$most_common_breadcrumb_index = key( $breadcrumb_counts );
+			// The following arrays all share array indices.
 
-			$lcp_element = $breadcrumb_element[ $most_common_breadcrumb_index ];
-		} else {
-			$lcp_element = null;
-		}
+			/**
+			 * Seen breadcrumbs counts.
+			 *
+			 * @var array<int, string> $seen_breadcrumbs
+			 */
+			$seen_breadcrumbs = array();
 
-		$this->cached_lcp_element = $lcp_element;
+			/**
+			 * Breadcrumb counts.
+			 *
+			 * @var array<int, int> $breadcrumb_counts
+			 */
+			$breadcrumb_counts = array();
 
-		return $lcp_element;
+			/**
+			 * Breadcrumb element.
+			 *
+			 * @var array<int, ElementData> $breadcrumb_element
+			 */
+			$breadcrumb_element = array();
+
+			foreach ( $this->url_metrics as $url_metric ) {
+				foreach ( $url_metric->get_elements() as $element ) {
+					if ( ! $element['isLCP'] ) {
+						continue;
+					}
+
+					$i = array_search( $element['xpath'], $seen_breadcrumbs, true );
+					if ( false === $i ) {
+						$i                       = count( $seen_breadcrumbs );
+						$seen_breadcrumbs[ $i ]  = $element['xpath'];
+						$breadcrumb_counts[ $i ] = 0;
+					}
+
+					$breadcrumb_counts[ $i ] += 1;
+					$breadcrumb_element[ $i ] = $element;
+					break; // We found the LCP element for the URL metric, go to the next URL metric.
+				}
+			}
+
+			// Now sort by the breadcrumb counts in descending order, so the remaining first key is the most common breadcrumb.
+			if ( $seen_breadcrumbs ) {
+				arsort( $breadcrumb_counts );
+				$most_common_breadcrumb_index = key( $breadcrumb_counts );
+
+				$lcp_element = $breadcrumb_element[ $most_common_breadcrumb_index ];
+			} else {
+				$lcp_element = null;
+			}
+
+			return $lcp_element;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
 	}
 
 	/**

@@ -37,9 +37,13 @@
 /plugins/dominant-color-images              @pbearne @spacedmonkey
 /tests/plugins/dominant-color-images        @pbearne @spacedmonkey
 
+# Plugin: Image Prioritizer
+/plugins/image-prioritizer                  @westonruter @felixarntz
+/tests/plugins/image-prioritizer            @westonruter @felixarntz
+
 # Plugin: Modern Image Formats
-/plugins/webp-uploads                       @adamsilverstein @felixarntz
-/tests/plugins/webp-uploads                 @adamsilverstein @felixarntz
+/plugins/webp-uploads                       @adamsilverstein @felixarntz @westonruter
+/tests/plugins/webp-uploads                 @adamsilverstein @felixarntz @westonruter
 
 # Plugin: Optimization Detective
 /plugins/optimization-detective             @westonruter @felixarntz

@@ -60,6 +60,8 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 == Changelog ==
 
+= 3.2.0 =
+
 = 3.1.0 =
 
 **Enhancements**
@@ -483,6 +485,10 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 * Infrastructure: Define module specification in documentation. ([26](https://github.com/WordPress/performance/pull/26))
 
 == Upgrade Notice ==
+
+= 3.2.0 =
+
+This release introduces a new feature plugin called Image Prioritizer which optimizes the loading of images to improve LCP.
 
 = 3.0.0 =
 
