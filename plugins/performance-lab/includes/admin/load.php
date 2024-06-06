@@ -475,7 +475,7 @@ function perflab_get_plugin_settings_url( string $plugin_slug ): ?string {
 /**
  * Prints the Performance Lab install notice after each feature plugin's row meta.
  *
- * @since n.e.x.t
+ * @since 3.2.0
  *
  * @param string $plugin_file Plugin file.
  */

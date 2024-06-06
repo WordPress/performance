@@ -15,10 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Registers setting for generating JPEG in addition to the selected modern format for image uploads.
  *
  * @since 1.0.0
- * @since n.e.x.t The setting was made more general to cover outputting JPEG as a secondary type. The "webp" option naming
- *                was left unchanged for backward compatibility.
- * @since n.e.x.t The `perflab_modern_image_format` was added to enable selecting an output format.
- *                Currently includes AVIF and WebP.
+ * @since 2.0.0 The setting was made more general to cover outputting JPEG as a secondary type. The "webp" option naming
+ *              was left unchanged for backward compatibility. Also, the `perflab_modern_image_format` was added to
+ *              enable selecting an output format. Currently includes AVIF and WebP.
  */
 function webp_uploads_register_media_settings_field(): void {
 	register_setting(
@@ -112,7 +111,7 @@ add_action( 'admin_init', 'webp_uploads_add_media_settings_fields' );
 /**
  * Renders the settings field for the 'perflab_modern_image_format' setting.
  *
- * @since n.e.x.t
+ * @since 2.0.0
  */
 function webp_uploads_generate_avif_webp_setting_callback(): void {
 
@@ -193,7 +192,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 /**
  * Renders the settings field for the 'webp_uploads_use_picture_element' setting.
  *
- * @since n.e.x.t
+ * @since 2.0.0
  */
 function webp_uploads_use_picture_element_callback(): void {
 	// Picture element support requires the JPEG output to be enabled.
