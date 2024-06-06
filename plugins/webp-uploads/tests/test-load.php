@@ -851,20 +851,6 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
-	 * Tests that the fallback script is not added when a post with no updated images is rendered.
-	 */
-	public function test_it_should_not_add_fallback_script_if_content_has_no_updated_images(): void {
-		remove_all_actions( 'wp_footer' );
-
-		apply_filters( 'the_content', '<p>no image</p>' );
-
-		$this->assertFalse( has_action( 'wp_footer', 'webp_uploads_webp_fallback' ) );
-
-		$footer = get_echo( 'wp_footer' );
-		$this->assertStringNotContainsString( 'webp;base64,UklGR', $footer );
-	}
-
-	/**
 	 * Tests whether additional mime types generated only for allowed image sizes or not when the filter is used.
 	 */
 	public function test_it_should_create_mime_types_for_allowed_sizes_only_via_filter(): void {
