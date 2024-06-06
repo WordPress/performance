@@ -41,7 +41,7 @@ function webp_uploads_check_webp_supported_test(): array {
 		$result['actions'] = sprintf(
 			'<p>%s</p>',
 			/* translators: Accessibility text. */
-			__( 'WebP images are not currently supported by your web server\'s image processing libraries (Imagick or LibGD). This functionality is required to serve WebP images and improve website speed. Fortunately, these libraries have supported WebP for quite a while, so support is widely available. If your server does not support WebP, you will see an error message when you try to upload a WebP image. To check your supported file formats, go to Tools > Site Health > Info > Media Handling > Supported File Formats. For more information, visit <a href="https://learn.wordpress.org/lesson-plan/webp-images-in-wordpress/" target="_blank">WebP images in WordPress</a>.', 'performance-lab' )
+			__( 'WebP support can only be enabled by your hosting provider. Please contact them to inquire about switching to a plan that supports WebP, or consider switching to a host that offers this feature. <a href="https://make.wordpress.org/hosting/2022/03/30/wordpress-hosting-and-webp-support/" target="_blank">Learn more</a> about WebP image support for WordPress sites.', 'performance-lab' )
 		);
 	}
 
