@@ -31,6 +31,7 @@ for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r p
 		echo "Failed to build plugin: $plugin_slug" >&2
 		exit 1
 	fi
+
 	if [ ! -d "$stable_dir/$plugin_slug" ]; then
 		svn co "https://plugins.svn.wordpress.org/$plugin_slug/trunk/" "$stable_dir/$plugin_slug" >&2
 	else
@@ -44,17 +45,22 @@ for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r p
 
 	echo "## \`$plugin_slug\`"
 	echo
-	echo "\`svn status\`:"
-	echo '```'
-	svn status
-	echo '```'
-	echo
-	echo '<details><summary><code>svn diff</code></summary>'
-	echo
-	echo '```diff'
-	svn diff
-	echo '```'
-	echo '</details>'
+
+	if [ -z "$( svn status -q )" ]; then
+		echo "No changes."
+	else
+		echo "\`svn status\`:"
+		echo '```'
+		svn status
+		echo '```'
+		echo
+		echo '<details><summary><code>svn diff</code></summary>'
+		echo
+		echo '```diff'
+		svn diff
+		echo '```'
+		echo '</details>'
+	fi
 	echo
 
 	cd - > /dev/null
