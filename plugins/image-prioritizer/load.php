@@ -6,7 +6,7 @@
  * Requires at least: 6.4
  * Requires PHP: 7.2
  * Requires Plugins: optimization-detective
- * Version: 0.1.0
+ * Version: 0.1.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -66,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'image_prioritizer_pending_plugin',
-	'0.1.0',
+	'0.1.1',
 	static function ( string $version ): void {
 
 		// Define the constant.
