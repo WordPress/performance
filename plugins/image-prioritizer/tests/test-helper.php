@@ -86,6 +86,34 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				',
 			),
 
+			'no-url-metrics-with-non-background-image-style' => array(
+				'set_up'   => static function (): void {},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<div style="background-color: black; color: white; width:100%; height: 200px;">This is so background!</div>
+						</body>
+					</html>
+				',
+				// There should be no data-od-xpath added to the DIV because it is using a data: URL for the background-image.
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<div style="background-color: black; color: white; width:100%; height: 200px;">This is so background!</div>
+							<script type="module">/* import detect ... */</script>
+						</body>
+					</html>
+				',
+			),
+
 			'no-url-metrics-with-data-url-image'          => array(
 				'set_up'   => static function (): void {},
 				// Smallest PNG courtesy of <https://evanhahn.com/worlds-smallest-png/>.
