@@ -454,7 +454,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	/**
 	 * Specifies data which should be serialized to JSON.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.1
 	 *
 	 * @return array{
 	 *             breakpoints: positive-int[],

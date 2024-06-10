@@ -4,7 +4,7 @@ Contributors:      wordpressdotorg
 Requires at least: 6.4
 Tested up to:      6.5
 Requires PHP:      7.2
-Stable tag:        0.3.0
+Stable tag:        0.3.1
 License:           GPLv2 or later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Tags:              performance, optimization, rum
@@ -134,6 +134,16 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.3.1 =
+
+**Enhancements**
+
+* Log URL metrics group collection to console when debugging is enabled (`WP_DEBUG` is true). ([1295](https://github.com/WordPress/performance/pull/1295))
+
+**Bug Fixes**
+
+* Include non-intersecting elements in URL metrics to fix lazy-load optimization. ([1293](https://github.com/WordPress/performance/pull/1293))
 
 = 0.3.0 =
 
