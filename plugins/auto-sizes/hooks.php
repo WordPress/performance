@@ -92,10 +92,10 @@ function auto_sizes_render_generator(): void {
 add_action( 'wp_head', 'auto_sizes_render_generator' );
 
 /**
- * Gets the smaller image size if the layout width id bigger.
+ * Gets the smaller image size if the layout width is bigger.
  *
  * It will return the smaller image size and return "px" if the layout width
- * id something else. ex. min(640px, 90vw) or 90vw.
+ * is something else, e.g. min(640px, 90vw) or 90vw.
  *
  * @since n.e.x.t
  *
@@ -104,7 +104,7 @@ add_action( 'wp_head', 'auto_sizes_render_generator' );
  * @return string The proper width after some calculations.
  */
 function auto_sizes_get_width( string $layout_width, int $image_width ): string {
-	if ( 'px' === substr( $layout_width, -2 ) ) {
+	if ( str_ends_with( $layout_width, 'px' ) ) {
 		return $image_width > (int) $layout_width ? $layout_width : $image_width . 'px';
 	}
 	return $image_width . 'px';
