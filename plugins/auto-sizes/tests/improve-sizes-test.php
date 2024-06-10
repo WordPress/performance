@@ -216,6 +216,159 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test the image block with different image sizes and left and right alignment.
+	 *
+	 * @dataProvider data_image_sizes_for_left_right_alignment
+	 *
+	 * @param string $image_size Image size.
+	 * @param string $expected   Expected output.
+	 * @param string $alignment  Alignment of the image.
+	 * @param string $is_resize  Whether resize or not.
+	 */
+	public function test_image_block_with_alignment( string $image_size, string $expected, string $alignment, string $is_resize = '' ): void {
+		if ( $is_resize ) {
+			$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"width":"100px","sizeSlug":"' . $image_size . '","linkDestination":"none","align":"' . $alignment . '"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" style="width:100px" /></figure><!-- /wp:image -->';
+		} else {
+			$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"' . $alignment . '"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" style="width:100px" /></figure><!-- /wp:image -->';
+		}
+		$parsed_blocks = parse_blocks( $block_content );
+		$block         = new WP_Block( $parsed_blocks[0] );
+		$result        = $block->render();
+
+		$this->assertStringContainsString( $expected, $result );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<array<string>> The image sizes and alignments.
+	 */
+	public function data_image_sizes_for_left_right_alignment(): array {
+		return array(
+			'Return thumbnail image size 150px with left alignment'                               => array(
+				'thumbnail',
+				'sizes="(max-width: 150px) 100vw, 150px" ',
+				'left',
+			),
+			'Return medium image size 300px with left alignment'                                  => array(
+				'medium',
+				'sizes="(max-width: 300px) 100vw, 300px" ',
+				'left',
+			),
+			'Return large image size 1024px with left alignment'                                  => array(
+				'large',
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+				'left',
+			),
+			'Return full image size 1080px with left alignment'                                   => array(
+				'full',
+				'sizes="(max-width: 1080px) 100vw, 1080px" ',
+				'left',
+			),
+			'Return thumbnail image size 150px with right alignment'                              => array(
+				'thumbnail',
+				'sizes="(max-width: 150px) 100vw, 150px" ',
+				'right',
+			),
+			'Return medium image size 300px with right alignment'                                 => array(
+				'medium',
+				'sizes="(max-width: 300px) 100vw, 300px" ',
+				'right',
+			),
+			'Return large image size 1024px with right alignment'                                 => array(
+				'large',
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+				'right',
+			),
+			'Return full image size 1080px with right alignment'                                  => array(
+				'full',
+				'sizes="(max-width: 1080px) 100vw, 1080px" ',
+				'right',
+			),
+			'Return resized size 100px instead of thumbnail image size 150px with left alignment' => array(
+				'thumbnail',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'left',
+				'yes',
+			),
+			'Return resized size 100px instead of medium image size 300px with left alignment'  => array(
+				'medium',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'left',
+				'yes',
+			),
+			'Return resized size 100px instead of large image size 1024px with left alignment'  => array(
+				'large',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'left',
+				'yes',
+			),
+			'Return resized size 100px instead of full image size 1080px with left alignment'   => array(
+				'full',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'left',
+				'yes',
+			),
+			'Return resized size 100px instead of thumbnail image size 150px with right alignment' => array(
+				'thumbnail',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'right',
+				'yes',
+			),
+			'Return resized size 100px instead of medium image size 300px with right alignment'    => array(
+				'medium',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'right',
+				'yes',
+			),
+			'Return resized size 100px instead of large image size 1024px with right alignment'    => array(
+				'large',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'right',
+				'yes',
+			),
+			'Return resized size 100px instead of full image size 1080px with right alignment'     => array(
+				'full',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'right',
+				'yes',
+			),
+		);
+	}
+
+	/**
+	 * Test the cover block with left and right alignment.
+	 *
+	 * @dataProvider data_image_left_right_alignment
+	 *
+	 * @param string $alignment Alignment of the image.
+	 */
+	public function test_cover_block_with_left_right_alignment( string $alignment ): void {
+		$image_url     = wp_get_attachment_image_url( self::$image_id, 'full' );
+		$block_content = '<!-- wp:cover {"url":"' . $image_url . '","id":' . self::$image_id . ',"dimRatio":50,"align":"' . $alignment . '","style":{"color":{}}} -->
+		<div class="wp-block-cover align' . $alignment . '"><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><img class="wp-block-cover__image-background wp-image-' . self::$image_id . '" alt="" src="' . $image_url . '" data-object-fit="cover"/><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
+		<p class="has-text-align-center has-large-font-size"></p>
+		<!-- /wp:paragraph --></div></div>
+		<!-- /wp:cover -->';
+		$parsed_blocks = parse_blocks( $block_content );
+		$block         = new WP_Block( $parsed_blocks[0] );
+		$result        = $block->render();
+		$this->assertStringContainsString( 'sizes="(max-width: 1080px) 100vw, 1080px" ', $result );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<array<string>> The image sizes.
+	 */
+	public function data_image_left_right_alignment(): array {
+		return array(
+			array( 'left' ),
+			array( 'right' ),
+		);
+	}
+
+	/**
 	 * Test the function when no image is present.
 	 */
 	public function test_no_image(): void {

@@ -158,7 +158,11 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 				}
 				break;
 
-				// @todo: handle left/right alignments.
+			case 'left':
+			case 'right':
+				$width = auto_sizes_get_width( '', $image_width );
+				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
+				break;
 			default:
 				if ( array_key_exists( 'contentSize', $layout ) ) {
 					$width = auto_sizes_get_width( $layout['contentSize'], $image_width );
