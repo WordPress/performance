@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  */
-final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggregate {
+final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggregate, JSONSerializable {
 
 	/**
 	 * URL metrics groups.
@@ -449,5 +449,51 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 */
 	public function count(): int {
 		return count( $this->groups );
+	}
+
+	/**
+	 * Specifies data which should be serialized to JSON.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array{
+	 *             breakpoints: positive-int[],
+	 *             freshness_ttl: 0|positive-int,
+	 *             sample_size: positive-int,
+	 *             all_element_max_intersection_ratios: array<string, float>,
+	 *             common_lcp_element: ?ElementData,
+	 *             every_group_complete: bool,
+	 *             every_group_populated: bool,
+	 *             groups: array<int, array{
+	 *                 lcp_element: ?ElementData,
+	 *                 minimum_viewport_width: 0|positive-int,
+	 *                 maximum_viewport_width: positive-int,
+	 *                 complete: bool,
+	 *                 url_metrics: OD_URL_Metric[]
+	 *             }>
+	 *         } Data which can be serialized by json_encode.
+	 */
+	public function jsonSerialize(): array {
+		return array(
+			'breakpoints'                         => $this->breakpoints,
+			'freshness_ttl'                       => $this->freshness_ttl,
+			'sample_size'                         => $this->sample_size,
+			'all_element_max_intersection_ratios' => $this->get_all_element_max_intersection_ratios(),
+			'common_lcp_element'                  => $this->get_common_lcp_element(),
+			'every_group_complete'                => $this->is_every_group_complete(),
+			'every_group_populated'               => $this->is_every_group_populated(),
+			'groups'                              => array_map(
+				static function ( OD_URL_Metrics_Group $group ): array {
+					$group_data = $group->jsonSerialize();
+					// Remove redundant data.
+					unset(
+						$group_data['freshness_ttl'],
+						$group_data['sample_size']
+					);
+					return $group_data;
+				},
+				$this->groups
+			),
+		);
 	}
 }

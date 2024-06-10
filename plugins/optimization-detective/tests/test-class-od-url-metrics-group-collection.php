@@ -716,6 +716,44 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test jsonSerialize().
+	 *
+	 * @covers ::jsonSerialize
+	 */
+	public function test_json_serialize(): void {
+		$url_metrics = array(
+			$this->get_validated_url_metric( 400 ),
+			$this->get_validated_url_metric( 600 ),
+			$this->get_validated_url_metric( 800 ),
+		);
+
+		$group_collection = new OD_URL_Metrics_Group_Collection(
+			$url_metrics,
+			array( 500, 700 ),
+			3,
+			HOUR_IN_SECONDS
+		);
+
+		$json          = wp_json_encode( $group_collection );
+		$parsed_json   = json_decode( $json, true );
+		$expected_keys = array(
+			'breakpoints',
+			'freshness_ttl',
+			'sample_size',
+			'all_element_max_intersection_ratios',
+			'common_lcp_element',
+			'every_group_complete',
+			'every_group_populated',
+			'groups',
+		);
+		$this->assertIsArray( $parsed_json );
+		$this->assertSameSets(
+			$expected_keys,
+			array_keys( $parsed_json )
+		);
+	}
+
+	/**
 	 * Gets a validated URL metric for testing.
 	 *
 	 * @param int    $viewport_width     Viewport width.
