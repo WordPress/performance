@@ -34,7 +34,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 * @param string $image_size Image size.
 	 */
 	public function test_image_block_with_full_alignment( string $image_size ): void {
-		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"full"} --><figure class="wp-block-image size-large"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" /></figure><!-- /wp:image -->';
+		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"full"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" /></figure><!-- /wp:image -->';
 		$parsed_blocks = parse_blocks( $block_content );
 		$block         = new WP_Block( $parsed_blocks[0] );
 		$result        = $block->render();
@@ -81,7 +81,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 * @param string $expected   Expected output.
 	 */
 	public function test_image_block_with_wide_alignment( string $image_size, string $expected ): void {
-		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"wide"} --><figure class="wp-block-image size-large"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" /></figure><!-- /wp:image -->';
+		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"wide"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" /></figure><!-- /wp:image -->';
 		$parsed_blocks = parse_blocks( $block_content );
 		$block         = new WP_Block( $parsed_blocks[0] );
 		$result        = $block->render();
