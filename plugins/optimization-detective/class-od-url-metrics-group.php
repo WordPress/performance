@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  */
-final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
+final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSerializable {
 
 	/**
 	 * URL metrics.
@@ -334,5 +334,32 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable {
 	 */
 	public function count(): int {
 		return count( $this->url_metrics );
+	}
+
+	/**
+	 * Specifies data which should be serialized to JSON.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array{
+	 *             freshness_ttl: 0|positive-int,
+	 *             sample_size: positive-int,
+	 *             minimum_viewport_width: 0|positive-int,
+	 *             maximum_viewport_width: positive-int,
+	 *             lcp_element: ?ElementData,
+	 *             complete: bool,
+	 *             url_metrics: OD_URL_Metric[]
+	 *         } Data which can be serialized by json_encode().
+	 */
+	public function jsonSerialize(): array {
+		return array(
+			'freshness_ttl'          => $this->freshness_ttl,
+			'sample_size'            => $this->sample_size,
+			'minimum_viewport_width' => $this->minimum_viewport_width,
+			'maximum_viewport_width' => $this->maximum_viewport_width,
+			'lcp_element'            => $this->get_lcp_element(),
+			'complete'               => $this->is_complete(),
+			'url_metrics'            => $this->url_metrics,
+		);
 	}
 }

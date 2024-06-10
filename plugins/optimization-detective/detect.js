@@ -135,18 +135,19 @@ function getCurrentTime() {
 /**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
- * @param {Object}                  args                         Args.
- * @param {number}                  args.serveTime               The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
- * @param {number}                  args.detectionTimeWindow     The number of milliseconds between now and when the page was first generated in which detection should proceed.
- * @param {boolean}                 args.isDebug                 Whether to show debug messages.
- * @param {string}                  args.restApiEndpoint         URL for where to send the detection data.
- * @param {string}                  args.restApiNonce            Nonce for writing to the REST API.
- * @param {string}                  args.currentUrl              Current URL.
- * @param {string}                  args.urlMetricsSlug          Slug for URL metrics.
- * @param {string}                  args.urlMetricsNonce         Nonce for URL metrics storage.
- * @param {URLMetricsGroupStatus[]} args.urlMetricsGroupStatuses URL metrics group statuses.
- * @param {number}                  args.storageLockTTL          The TTL (in seconds) for the URL metric storage lock.
- * @param {string}                  args.webVitalsLibrarySrc     The URL for the web-vitals library.
+ * @param {Object}                  args                             Args.
+ * @param {number}                  args.serveTime                   The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
+ * @param {number}                  args.detectionTimeWindow         The number of milliseconds between now and when the page was first generated in which detection should proceed.
+ * @param {boolean}                 args.isDebug                     Whether to show debug messages.
+ * @param {string}                  args.restApiEndpoint             URL for where to send the detection data.
+ * @param {string}                  args.restApiNonce                Nonce for writing to the REST API.
+ * @param {string}                  args.currentUrl                  Current URL.
+ * @param {string}                  args.urlMetricsSlug              Slug for URL metrics.
+ * @param {string}                  args.urlMetricsNonce             Nonce for URL metrics storage.
+ * @param {URLMetricsGroupStatus[]} args.urlMetricsGroupStatuses     URL metrics group statuses.
+ * @param {number}                  args.storageLockTTL              The TTL (in seconds) for the URL metric storage lock.
+ * @param {string}                  args.webVitalsLibrarySrc         The URL for the web-vitals library.
+ * @param {Object}                  [args.urlMetricsGroupCollection] URL metrics group collection, when in debug mode.
  */
 export default async function detect( {
 	serveTime,
@@ -160,8 +161,16 @@ export default async function detect( {
 	urlMetricsGroupStatuses,
 	storageLockTTL,
 	webVitalsLibrarySrc,
+	urlMetricsGroupCollection,
 } ) {
 	const currentTime = getCurrentTime();
+
+	if ( isDebug ) {
+		log(
+			'Stored URL metrics group collection:',
+			urlMetricsGroupCollection
+		);
+	}
 
 	// Abort running detection logic if it was served in a cached page.
 	if ( currentTime - serveTime > detectionTimeWindow ) {
@@ -356,7 +365,7 @@ export default async function detect( {
 	}
 
 	if ( isDebug ) {
-		log( 'URL metrics:', urlMetrics );
+		log( 'Current URL metrics:', urlMetrics );
 	}
 
 	// Yield to main before sending data to server to further break up task.
