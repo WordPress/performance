@@ -132,18 +132,20 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test the function with default alignment (contentSize).
-	 */
-	/**
 	 * Test the image block with different image sizes and default alignment (contentSize).
 	 *
 	 * @dataProvider data_image_sizes_for_default_alignment
 	 *
 	 * @param string $image_size Image size.
 	 * @param string $expected   Expected output.
+	 * @param string $is_resize  Whether resize or not.
 	 */
-	public function test_image_block_with_default_alignment( string $image_size, string $expected ): void {
-		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none"} --><figure class="wp-block-image size-large"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" /></figure><!-- /wp:image -->';
+	public function test_image_block_with_default_alignment( string $image_size, string $expected, string $is_resize = '' ): void {
+		if ( $is_resize ) {
+			$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"width":"100px","sizeSlug":"' . $image_size . '","linkDestination":"none"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '"  style="width:100px" /></figure><!-- /wp:image -->';
+		} else {
+			$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" /></figure><!-- /wp:image -->';
+		}
 		$parsed_blocks = parse_blocks( $block_content );
 		$block         = new WP_Block( $parsed_blocks[0] );
 		$result        = $block->render();
@@ -158,21 +160,41 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 */
 	public function data_image_sizes_for_default_alignment(): array {
 		return array(
-			'Return thumb size 150px instead of contentSize 620px'  => array(
+			'Return thumbnail image size 150px instead of contentSize 620px'                       => array(
 				'thumbnail',
 				'sizes="(max-width: 150px) 100vw, 150px" ',
 			),
-			'Return medium size 300px instead of contentSize 620px' => array(
+			'Return medium image size 300px instead of contentSize 620px'                          => array(
 				'medium',
 				'sizes="(max-width: 300px) 100vw, 300px" ',
 			),
-			'Return contentSize 620px instead of large size 1024px' => array(
+			'Return contentSize 620px instead of large image size 1024px'                          => array(
 				'large',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
 			),
-			'Return contentSize 620px instead of full size 1080px' => array(
+			'Return contentSize 620px instead of full image size 1080px'                           => array(
 				'full',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return resized size 100px instead of contentSize 620px or thumbnail image size 150px' => array(
+				'thumbnail',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'yes',
+			),
+			'Return resized size 100px instead of contentSize 620px or medium image size 300px'    => array(
+				'medium',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'yes',
+			),
+			'Return resized size 100px instead of contentSize 620px or large image size 1024px'    => array(
+				'large',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'yes',
+			),
+			'Return resized size 100px instead of contentSize 620px or full image size 1080px'     => array(
+				'full',
+				'sizes="(max-width: 100px) 100vw, 100px" ',
+				'yes',
 			),
 		);
 	}
@@ -195,8 +217,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 
 	/**
 	 * Test the function when no image is present.
-	 *
-	 * @covers ::auto_sizes_improve_image_sizes_attribute
 	 */
 	public function test_no_image(): void {
 		$block_content = '<!-- wp:paragraph -->

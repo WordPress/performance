@@ -131,13 +131,20 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 		$image_id   = $parsed_block['attrs']['id'] ?? '';
 		$image_size = $parsed_block['attrs']['sizeSlug'] ?? '';
 
-		$image_attributes = wp_get_attachment_image_src( $image_id, $image_size );
-		if ( ! $image_attributes ) {
-			return $content;
-		}
+		// Resize image width.
+		$resize_image_width = $parsed_block['attrs']['width'] ?? '';
 
-		$image_width = $image_attributes[1] ?? '';
-		$sizes       = null;
+		if ( $resize_image_width ) {
+			$image_width = (int) $resize_image_width;
+		} else {
+			$image_attributes = wp_get_attachment_image_src( $image_id, $image_size );
+			if ( ! $image_attributes ) {
+				return $content;
+			}
+
+			$image_width = $image_attributes[1] ?? '';
+		}
+		$sizes = null;
 		// Handle different alignment use cases.
 		switch ( $align ) {
 			case 'full':
