@@ -263,9 +263,7 @@ export default async function detect( {
 			intersectionObserver = new IntersectionObserver(
 				( entries ) => {
 					for ( const entry of entries ) {
-						if ( entry.isIntersecting ) {
-							elementIntersections.push( entry );
-						}
+						elementIntersections.push( entry );
 					}
 					resolve();
 				},
