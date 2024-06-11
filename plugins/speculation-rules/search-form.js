@@ -51,7 +51,7 @@ const { actions } = store( 'speculationRules', {
 			if ( ! formData.get( 's' ) ) {
 				context.speculativeLoadUrl = null;
 			} else {
-				const url = new URL( form.action || location.href );
+				const url = new URL( form.action );
 				url.search = new URLSearchParams( formData ).toString();
 				context.speculativeLoadUrl = url.href;
 			}
@@ -63,11 +63,12 @@ const { actions } = store( 'speculationRules', {
 			}
 		},
 		handleFormSubmit: ( event ) => {
-			const context = getContext();
-			if ( context.speculativeLoadUrl ) {
-				event.preventDefault();
-				location.href = context.speculativeLoadUrl;
-			}
+			event.preventDefault();
+			const form = event.target;
+			const formData = new FormData( form );
+			const url = new URL( form.action );
+			url.search = new URLSearchParams( formData ).toString();
+			location.href = url.href;
 		},
 	},
 } );
