@@ -5,7 +5,7 @@ import {
 	getElement,
 } from '@wordpress/interactivity';
 
-store( 'speculationRules', {
+const { actions } = store( 'speculationRules', {
 	callbacks: {
 		doSpeculativeLoad: () => {
 			/**
@@ -42,6 +42,7 @@ store( 'speculationRules', {
 		},
 	},
 	actions: {
+		// TODO: Is this really actually callback?
 		updateSpeculativeLoadUrl: () => {
 			const context = getContext();
 			const { ref } = getElement();
@@ -53,6 +54,12 @@ store( 'speculationRules', {
 				const url = new URL( form.action || location.href );
 				url.search = new URLSearchParams( formData ).toString();
 				context.speculativeLoadUrl = url.href;
+			}
+		},
+		handleInputKeydown: ( event ) => {
+			// Eke out a few milliseconds when hitting enter on the input to submit.
+			if ( event.key === 'Enter' ) {
+				actions.updateSpeculativeLoadUrl();
 			}
 		},
 		handleFormSubmit: ( event ) => {

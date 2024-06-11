@@ -101,6 +101,12 @@ function plsr_filter_searchform( $form ): string {
 		) {
 			$p->set_attribute( "{$directive_prefix}--focus--{$namespace}", "{$namespace}::actions.updateSpeculativeLoadUrl" );
 			$p->set_attribute( "{$directive_prefix}--pointerover--{$namespace}", "{$namespace}::actions.updateSpeculativeLoadUrl" );
+		} elseif (
+			'INPUT' === $p->get_tag()
+			&&
+			's' === $p->get_attribute( 'name' )
+		) {
+			$p->set_attribute( "{$directive_prefix}--keydown--{$namespace}", "{$namespace}::actions.handleInputKeydown" );
 		}
 	}
 
