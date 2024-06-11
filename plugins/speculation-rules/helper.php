@@ -112,3 +112,13 @@ function plsr_get_speculation_rules(): array {
 
 	return array( $mode => $rules );
 }
+
+/**
+ * Adds config for the speculative-loading search form.
+ *
+ * @since n.e.x.t
+ */
+function plsr_add_search_form_config(): void {
+	$setting = plsr_get_setting();
+	wp_interactivity_config( 'speculationRules', array( 'mode' => $setting['mode'] ) );
+}
