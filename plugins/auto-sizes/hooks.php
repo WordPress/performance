@@ -130,8 +130,8 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 		$align  = $parsed_block['attrs']['align'] ?? null;
 
 		// Get image width for default. left. right and center algnments.
-		$exlude_align = array( 'full', 'wide' );
-		if ( ! in_array( $align, $exlude_align, true ) ) {
+		$exclude_align = array( 'full', 'wide' );
+		if ( ! in_array( $align, $exclude_align, true ) ) {
 			$image_id   = $parsed_block['attrs']['id'] ?? '';
 			$image_size = $parsed_block['attrs']['sizeSlug'] ?? '';
 
