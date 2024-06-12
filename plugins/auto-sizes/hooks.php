@@ -160,6 +160,7 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 
 			case 'left':
 			case 'right':
+			case 'center':
 				$width = auto_sizes_get_width( '', $image_width );
 				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
 				break;
