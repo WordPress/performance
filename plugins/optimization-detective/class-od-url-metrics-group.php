@@ -339,7 +339,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 	/**
 	 * Specifies data which should be serialized to JSON.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.1
 	 *
 	 * @return array{
 	 *             freshness_ttl: 0|positive-int,
