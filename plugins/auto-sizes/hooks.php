@@ -121,29 +121,35 @@ function auto_sizes_get_width( string $layout_width, int $image_width ): string 
  */
 function auto_sizes_improve_image_sizes_attribute( string $content, array $parsed_block ): string {
 
-	$processor = new WP_HTML_Tag_Processor( $content );
-	$has_image = $processor->next_tag( array( 'tag_name' => 'img' ) );
-
+	$processor   = new WP_HTML_Tag_Processor( $content );
+	$has_image   = $processor->next_tag( array( 'tag_name' => 'img' ) );
+	$image_width = 0;
 	// Only update the markup if an image is found.
 	if ( $has_image ) {
-		$layout     = wp_get_global_settings( array( 'layout' ) );
-		$align      = $parsed_block['attrs']['align'] ?? null;
-		$image_id   = $parsed_block['attrs']['id'] ?? '';
-		$image_size = $parsed_block['attrs']['sizeSlug'] ?? '';
+		$layout = wp_get_global_settings( array( 'layout' ) );
+		$align  = $parsed_block['attrs']['align'] ?? null;
 
-		// Resize image width.
-		$resize_image_width = $parsed_block['attrs']['width'] ?? '';
+		// Get image width for default. left. right and center algnments.
+		$exlude_align = array( 'full', 'wide' );
+		if ( ! in_array( $align, $exlude_align, true ) ) {
+			$image_id   = $parsed_block['attrs']['id'] ?? '';
+			$image_size = $parsed_block['attrs']['sizeSlug'] ?? '';
 
-		if ( $resize_image_width ) {
-			$image_width = (int) $resize_image_width;
-		} else {
-			$image_attributes = wp_get_attachment_image_src( $image_id, $image_size );
-			if ( ! $image_attributes ) {
-				return $content;
+			// Resize image width.
+			$resize_image_width = $parsed_block['attrs']['width'] ?? '';
+
+			if ( $resize_image_width ) {
+				$image_width = (int) $resize_image_width;
+			} else {
+				$image_attributes = wp_get_attachment_image_src( $image_id, $image_size );
+				if ( ! $image_attributes ) {
+					return $content;
+				}
+
+				$image_width = $image_attributes[1] ?? '';
 			}
-
-			$image_width = $image_attributes[1] ?? '';
 		}
+
 		$sizes = null;
 		// Handle different alignment use cases.
 		switch ( $align ) {
@@ -153,8 +159,7 @@ function auto_sizes_improve_image_sizes_attribute( string $content, array $parse
 
 			case 'wide':
 				if ( array_key_exists( 'wideSize', $layout ) ) {
-					$width = auto_sizes_get_width( $layout['wideSize'], $image_width );
-					$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
+					$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['wideSize'] );
 				}
 				break;
 

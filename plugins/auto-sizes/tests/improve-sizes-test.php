@@ -78,15 +78,14 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 * @dataProvider data_image_sizes_for_wide_alignment
 	 *
 	 * @param string $image_size Image size.
-	 * @param string $expected   Expected output.
 	 */
-	public function test_image_block_with_wide_alignment( string $image_size, string $expected ): void {
+	public function test_image_block_with_wide_alignment( string $image_size ): void {
 		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"wide"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" /></figure><!-- /wp:image -->';
 		$parsed_blocks = parse_blocks( $block_content );
 		$block         = new WP_Block( $parsed_blocks[0] );
 		$result        = $block->render();
 
-		$this->assertStringContainsString( $expected, $result );
+		$this->assertStringContainsString( 'sizes="(max-width: 1280px) 100vw, 1280px" ', $result );
 	}
 
 	/**
@@ -96,21 +95,17 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 */
 	public function data_image_sizes_for_wide_alignment(): array {
 		return array(
-			'Return thumb size 150px instead of wideSize 1280px'  => array(
+			'Return wideSize 1280px instead of thumb size 150px'  => array(
 				'thumbnail',
-				'sizes="(max-width: 150px) 100vw, 150px" ',
 			),
-			'Return medium size 300px instead of wideSize 1280px' => array(
+			'Return wideSize 1280px instead of medium size 300px'  => array(
 				'medium',
-				'sizes="(max-width: 300px) 100vw, 300px" ',
 			),
-			'Return large size 1024px instead of wideSize 1280px' => array(
+			'Return wideSize 1280px instead of large size 1024px'  => array(
 				'large',
-				'sizes="(max-width: 1024px) 100vw, 1024px" ',
 			),
-			'Return full size 1080px instead of wideSize 1280px' => array(
+			'Return wideSize 1280px instead of full size 1080px'  => array(
 				'full',
-				'sizes="(max-width: 1080px) 100vw, 1080px" ',
 			),
 		);
 	}
@@ -128,7 +123,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		$parsed_blocks = parse_blocks( $block_content );
 		$block         = new WP_Block( $parsed_blocks[0] );
 		$result        = $block->render();
-		$this->assertStringContainsString( 'sizes="(max-width: 1080px) 100vw, 1080px" ', $result );
+		$this->assertStringContainsString( 'sizes="(max-width: 1280px) 100vw, 1280px" ', $result );
 	}
 
 	/**
@@ -204,7 +199,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 */
 	public function test_cover_block_with_default_alignment(): void {
 		$image_url     = wp_get_attachment_image_url( self::$image_id, 'full' );
-		$block_content = '<!-- wp:cover {"url":"' . $image_url . '","id":' . self::$image_id . ',"dimRatio":50,"align":"wide","style":{"color":{}}} -->
+		$block_content = '<!-- wp:cover {"url":"' . $image_url . '","id":' . self::$image_id . ',"dimRatio":50,"style":{"color":{}}} -->
 		<div class="wp-block-cover alignwide"><span aria-hidden="true" class="wp-block-cover__background has-background-dim"></span><img class="wp-block-cover__image-background wp-image-' . self::$image_id . '" alt="" src="' . $image_url . '" data-object-fit="cover"/><div class="wp-block-cover__inner-container"><!-- wp:paragraph {"align":"center","fontSize":"large"} -->
 		<p class="has-text-align-center has-large-font-size"></p>
 		<!-- /wp:paragraph --></div></div>
@@ -212,7 +207,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		$parsed_blocks = parse_blocks( $block_content );
 		$block         = new WP_Block( $parsed_blocks[0] );
 		$result        = $block->render();
-		$this->assertStringContainsString( 'sizes="(max-width: 1080px) 100vw, 1080px" ', $result );
+		$this->assertStringContainsString( 'sizes="(max-width: 620px) 100vw, 620px" ', $result );
 	}
 
 	/**
