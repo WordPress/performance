@@ -27,7 +27,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 */
 	public function get_dominant_color() {
 
-		if ( ! $this->image ) {
+		if ( ! (bool) $this->image ) {
 			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'dominant-color-images' ) );
 		}
 		// The logic here is resize the image to 1x1 pixel, then get the color of that pixel.
@@ -47,7 +47,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		$g   = ( $rgb >> 8 ) & 0xFF;
 		$b   = $rgb & 0xFF;
 		$hex = dominant_color_rgb_to_hex( $r, $g, $b );
-		if ( ! $hex ) {
+		if ( null === $hex ) {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 		}
 
@@ -64,7 +64,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 */
 	public function has_transparency() {
 
-		if ( ! $this->image ) {
+		if ( ! (bool) $this->image ) {
 			return new WP_Error( 'image_editor_has_transparency_error_no_image', __( 'Transparency detection no image found.', 'dominant-color-images' ) );
 		}
 

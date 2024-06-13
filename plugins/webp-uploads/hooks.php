@@ -63,7 +63,7 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 
 	$file = get_attached_file( $attachment_id, true );
 	// File does not exist.
-	if ( ! $file || ! file_exists( $file ) ) {
+	if ( false === $file || ! file_exists( $file ) ) {
 		return $metadata;
 	}
 
@@ -397,7 +397,7 @@ function webp_uploads_remove_sources_files( int $attachment_id ): void {
 			}
 
 			$intermediate_file = str_replace( $basename, $properties['file'], $file );
-			if ( ! $intermediate_file ) {
+			if ( '' === $intermediate_file ) {
 				continue;
 			}
 
@@ -429,7 +429,7 @@ function webp_uploads_remove_sources_files( int $attachment_id ): void {
 		}
 
 		$full_size = str_replace( $basename, $properties['file'], $file );
-		if ( ! $full_size ) {
+		if ( '' === $full_size ) {
 			continue;
 		}
 
@@ -533,14 +533,14 @@ function webp_uploads_update_image_references( $content ): string {
 	}
 
 	// This content does not have any tag on it, move forward.
-	if ( ! preg_match_all( '/<(img)\s[^>]+>/', $content, $img_tags, PREG_SET_ORDER ) ) {
+	if ( 0 === (int) preg_match_all( '/<(img)\s[^>]+>/', $content, $img_tags, PREG_SET_ORDER ) ) {
 		return $content;
 	}
 
 	$images = array();
 	foreach ( $img_tags as list( $img ) ) {
 		// Find the ID of each image by the class.
-		if ( ! preg_match( '/wp-image-([\d]+)/i', $img, $class_name ) ) {
+		if ( 0 === (int) preg_match( '/wp-image-([\d]+)/i', $img, $class_name ) ) {
 			continue;
 		}
 
@@ -551,7 +551,7 @@ function webp_uploads_update_image_references( $content ): string {
 		// Make sure we use the last item on the list of matches.
 		$attachment_id = (int) $class_name[1];
 
-		if ( ! $attachment_id ) {
+		if ( 0 === $attachment_id ) {
 			continue;
 		}
 

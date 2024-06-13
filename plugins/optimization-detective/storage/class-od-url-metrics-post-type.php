@@ -263,12 +263,12 @@ class OD_URL_Metrics_Post_Type {
 
 		// Unschedule any existing event which had a differing recurrence.
 		$scheduled_event = wp_get_scheduled_event( self::GC_CRON_EVENT_NAME );
-		if ( $scheduled_event && self::GC_CRON_RECURRENCE !== $scheduled_event->schedule ) {
+		if ( is_object( $scheduled_event ) && self::GC_CRON_RECURRENCE !== $scheduled_event->schedule ) {
 			wp_unschedule_event( $scheduled_event->timestamp, self::GC_CRON_EVENT_NAME );
-			$scheduled_event = null;
+			$scheduled_event = false;
 		}
 
-		if ( ! $scheduled_event ) {
+		if ( false === $scheduled_event ) {
 			wp_schedule_event( time(), self::GC_CRON_RECURRENCE, self::GC_CRON_EVENT_NAME );
 		}
 	}

@@ -28,11 +28,10 @@ function plsr_get_speculation_rules(): array {
 	 * This logic is only relevant for edge-cases where the setting may not be registered,
 	 * a.k.a. defensive coding.
 	 */
-	if ( ! $option || ! is_array( $option ) ) {
-		$option = plsr_get_setting_default();
-	} else {
-		$option = array_merge( plsr_get_setting_default(), $option );
+	if ( ! is_array( $option ) ) {
+		$option = array();
 	}
+	$option = array_merge( plsr_get_setting_default(), $option );
 
 	$mode      = (string) $option['mode'];
 	$eagerness = $option['eagerness'];

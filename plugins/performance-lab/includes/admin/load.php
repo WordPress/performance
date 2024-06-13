@@ -265,7 +265,7 @@ function perflab_install_activate_plugin_callback(): void {
 	}
 
 	$plugin_slug = perflab_sanitize_plugin_slug( wp_unslash( $_GET['slug'] ) );
-	if ( ! $plugin_slug ) {
+	if ( null === $plugin_slug ) {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 

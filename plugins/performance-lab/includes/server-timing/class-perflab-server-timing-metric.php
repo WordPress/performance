@@ -130,7 +130,7 @@ class Perflab_Server_Timing_Metric {
 	 * @since 1.8.0
 	 */
 	public function measure_after(): void {
-		if ( ! $this->before_value ) {
+		if ( null === $this->before_value ) {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: PHP method name */

@@ -47,7 +47,7 @@ foreach ( $_SERVER['argv'] as $index => $arg ) {
 }
 
 // Set default plugin to load if not specified.
-if ( ! $plugin_name ) {
+if ( '' === $plugin_name ) {
 	$plugin_name = 'performance-lab';
 }
 

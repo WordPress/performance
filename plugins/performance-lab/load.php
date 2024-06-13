@@ -214,7 +214,7 @@ function perflab_maybe_set_object_cache_dropin(): void {
 		 */
 		if ( $wp_filesystem->exists( $dropin_path ) ) {
 			// If this constant evaluates to `false`, the existing file is for sure from a third party.
-			if ( ! $current_dropin_version ) {
+			if ( false === $current_dropin_version ) {
 				// Set timeout of 1 day before retrying again (only in case the file already exists).
 				set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
 				return;

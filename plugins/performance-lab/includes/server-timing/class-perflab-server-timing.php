@@ -160,7 +160,7 @@ class Perflab_Server_Timing {
 		do_action( 'perflab_server_timing_send_header' );
 
 		$header_value = $this->get_header();
-		if ( ! $header_value ) {
+		if ( '' === $header_value ) {
 			return;
 		}
 

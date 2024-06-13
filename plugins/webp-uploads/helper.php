@@ -140,7 +140,7 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	}
 
 	$image_path = wp_get_original_image_path( $attachment_id );
-	if ( ! $image_path || ! file_exists( $image_path ) ) {
+	if ( false === $image_path || ! file_exists( $image_path ) ) {
 		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'webp-uploads' ) );
 	}
 
@@ -290,7 +290,7 @@ function webp_uploads_in_frontend_body(): bool {
 	}
 
 	// Check if we're anywhere before 'template_redirect' or within the 'wp_head' action.
-	if ( ! did_action( 'template_redirect' ) || doing_action( 'wp_head' ) ) {
+	if ( 0 === did_action( 'template_redirect' ) || doing_action( 'wp_head' ) ) {
 		return false;
 	}
 

@@ -54,10 +54,10 @@ function dominant_color_get_dominant_color_data( int $attachment_id ) {
 		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'dominant-color-images' ) );
 	}
 	$file = dominant_color_get_attachment_file_path( $attachment_id );
-	if ( ! $file ) {
+	if ( false === $file ) {
 		$file = get_attached_file( $attachment_id );
 	}
-	if ( ! $file ) {
+	if ( false === $file ) {
 		return new WP_Error( 'no_image_found', __( 'Unable to load image.', 'dominant-color-images' ) );
 	}
 	add_filter( 'wp_image_editors', 'dominant_color_set_image_editors' );
@@ -124,7 +124,7 @@ function dominant_color_get_attachment_file_path( int $attachment_id, string $si
 	}
 
 	$file = get_attached_file( $attachment_id );
-	if ( ! $file ) {
+	if ( false === $file ) {
 		return false;
 	}
 

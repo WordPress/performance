@@ -128,7 +128,7 @@ function perflab_render_plugins_ui(): void {
 		}
 	}
 
-	if ( ! $plugins && ! $experimental_plugins ) {
+	if ( count( $plugins ) === 0 && count( $experimental_plugins ) === 0 ) {
 		return;
 	}
 	?>
@@ -174,11 +174,11 @@ function perflab_get_plugin_availability( array $plugin_data, array &$processed_
 
 	$availability = array(
 		'compatible_php' => (
-			! $plugin_data['requires_php'] ||
+			false === $plugin_data['requires_php'] ||
 			is_php_version_compatible( $plugin_data['requires_php'] )
 		),
 		'compatible_wp'  => (
-			! $plugin_data['requires'] ||
+			false === $plugin_data['requires'] ||
 			is_wp_version_compatible( $plugin_data['requires'] )
 		),
 	);
