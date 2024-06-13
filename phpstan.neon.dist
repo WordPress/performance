@@ -62,3 +62,6 @@ parameters:
 		-
 			identifier: staticMethod.dynamicCall
 			path: */tests/*
+		-
+			# TODO: Remove this to fix https://github.com/WordPress/performance/issues/1219
+			identifier: empty.notAllowed
