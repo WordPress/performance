@@ -85,6 +85,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		foreach ( $this->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
 			$link_attributes = array_merge(
 				array(
+					'rel'           => 'preload',
 					'fetchpriority' => 'high',
 					'as'            => 'image',
 				),
