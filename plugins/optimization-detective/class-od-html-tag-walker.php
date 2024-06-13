@@ -500,6 +500,22 @@ final class OD_HTML_Tag_Walker {
 	}
 
 	/**
+	 * Returns if a matched tag contains the given ASCII case-insensitive class name.
+	 *
+	 * This is a wrapper around the underlying WP_HTML_Tag_Processor method of the same name since only a limited number of
+	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
+	 *
+	 * @since n.e.x.t
+	 * @see   WP_HTML_Tag_Processor::has_class()
+	 *
+	 * @param string $wanted_class Look for this CSS class name, ASCII case-insensitive.
+	 * @return bool|null Whether the matched tag contains the given class name, or null if not matched.
+	 */
+	public function has_class( string $wanted_class ): ?bool {
+		return $this->processor->has_class( $wanted_class );
+	}
+
+	/**
 	 * Returns the string representation of the HTML Tag Processor.
 	 *
 	 * This is a wrapper around the underlying HTML_Tag_Processor method of the same name since only a limited number of

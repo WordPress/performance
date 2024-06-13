@@ -464,11 +464,12 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	 * @covers ::remove_attribute
 	 * @covers ::get_updated_html
 	 * @covers ::set_meta_attribute
+	 * @covers ::has_class
 	 *
 	 * @throws Exception But not really.
 	 */
 	public function test_html_tag_processor_wrapper_methods(): void {
-		$processor = new OD_HTML_Tag_Walker( '<html lang="en" dir="ltr"></html>' );
+		$processor = new OD_HTML_Tag_Walker( '<html lang="en" class="foo" dir="ltr"></html>' );
 		foreach ( $processor->open_tags() as $open_tag ) {
 			if ( 'HTML' === $open_tag ) {
 				$this->assertSame( $open_tag, $processor->get_tag() );
@@ -478,9 +479,11 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 				$processor->set_attribute( 'id', 'root' );
 				$processor->set_meta_attribute( 'foo', 'bar' );
 				$processor->set_meta_attribute( 'baz', true );
+				$this->assertTrue( $processor->has_class( 'foo' ) );
+				$this->assertFalse( $processor->has_class( 'bar' ) );
 			}
 		}
-		$this->assertSame( '<html data-od-added-id data-od-baz data-od-foo="bar" data-od-removed-dir="ltr" data-od-replaced-lang="en" id="root" lang="es" ></html>', $processor->get_updated_html() );
+		$this->assertSame( '<html data-od-added-id data-od-baz data-od-foo="bar" data-od-removed-dir="ltr" data-od-replaced-lang="en" id="root" lang="es" class="foo" ></html>', $processor->get_updated_html() );
 	}
 
 	/**
