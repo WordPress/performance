@@ -197,7 +197,7 @@ function perflab_get_plugin_availability( array $plugin_data, array &$processed_
 	// The plugin is activated or the user can activate plugins.
 	$availability['can_activate'] = (
 		$availability['activated'] ||
-		$plugin_status['file'] // When not false, the plugin is installed.
+		false !== $plugin_status['file'] // When not false, the plugin is installed.
 			? current_user_can( 'activate_plugin', $plugin_status['file'] )
 			: current_user_can( 'activate_plugins' )
 	);

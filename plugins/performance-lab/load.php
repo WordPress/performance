@@ -197,7 +197,7 @@ function perflab_maybe_set_object_cache_dropin(): void {
 		return;
 	}
 
-	if ( $wp_filesystem || WP_Filesystem() ) {
+	if ( $wp_filesystem instanceof WP_Filesystem_Base || true === WP_Filesystem() ) {
 		$dropin_path = WP_CONTENT_DIR . '/object-cache.php';
 
 		/*
@@ -271,7 +271,7 @@ function perflab_maybe_remove_object_cache_dropin(): void {
 		return;
 	}
 
-	if ( $wp_filesystem || WP_Filesystem() ) {
+	if ( $wp_filesystem instanceof WP_Filesystem_Base || true === WP_Filesystem() ) {
 		$dropin_path        = WP_CONTENT_DIR . '/object-cache.php';
 		$dropin_backup_path = WP_CONTENT_DIR . '/object-cache-plst-orig.php';
 
