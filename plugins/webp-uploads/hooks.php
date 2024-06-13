@@ -148,13 +148,13 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 			if ( ! empty( $metadata['original_image'] ) ) {
 				$uploadpath    = wp_get_upload_dir();
 				$attached_file = get_attached_file( $attachment_id );
-				if ( $attached_file ) {
+				if ( false !== $attached_file ) {
 					wp_delete_file_from_directory( $attached_file, $uploadpath['basedir'] );
 				}
 			}
 
 			// Replace the attached file with the custom MIME type version.
-			if ( $original_image ) {
+			if ( false !== $original_image ) {
 				$metadata = _wp_image_meta_replace_original( $saved_data, $original_image, $metadata, $attachment_id );
 			}
 

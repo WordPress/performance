@@ -63,7 +63,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 	if ( 1 === $script_count && ! $has_inline_script && $html_processor->has_bookmark( 'script' ) ) {
 		add_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' );
 		if ( $html_processor->seek( 'script' ) ) {
-			if ( $html_processor->get_attribute( 'type' ) ) {
+			if ( is_string( $html_processor->get_attribute( 'type' ) ) ) {
 				$html_processor->set_attribute( 'data-original-type', $html_processor->get_attribute( 'type' ) );
 			}
 			$html_processor->set_attribute( 'type', 'application/vnd.embed-optimizer.javascript' );
@@ -79,7 +79,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			// For post embeds, use visibility:hidden instead of clip since browsers will consistently load the
 			// lazy-loaded iframe (where Chromium is unreliably with clip) while at the same time improve accessibility
 			// by preventing links in the hidden iframe from receiving focus.
-			if ( $html_processor->has_class( 'wp-embedded-content' ) ) {
+			if ( true === $html_processor->has_class( 'wp-embedded-content' ) ) {
 				$style = $html_processor->get_attribute( 'style' );
 				if ( is_string( $style ) ) {
 					// WordPress core injects this clip CSS property:

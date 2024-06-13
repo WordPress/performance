@@ -123,7 +123,7 @@ class OD_URL_Metrics_Post_Type {
 		};
 
 		$url_metrics_data = json_decode( $post->post_content, true );
-		if ( json_last_error() ) {
+		if ( json_last_error() !== 0 ) {
 			$trigger_warning(
 				sprintf(
 					/* translators: 1: Post type slug, 2: Post ID, 3: JSON error message */
