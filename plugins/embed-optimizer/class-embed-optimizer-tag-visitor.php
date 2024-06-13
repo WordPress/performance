@@ -34,7 +34,13 @@ final class Embed_Optimizer_Tag_Visitor extends Image_Prioritizer_Tag_Visitor {
 			return false;
 		}
 
-		// TODO: Everything.
+		$max_intersection_ratio = $this->url_metrics_group_collection->get_element_max_intersection_ratio( $walker->get_xpath() );
+
+		if ( $max_intersection_ratio > 0 ) {
+			// TODO: Add preconnect link.
+		} else {
+			// TODO: Now apply embed.
+		}
 
 		return true;
 	}
