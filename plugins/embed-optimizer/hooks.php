@@ -187,6 +187,84 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
 add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors', 10, 3 );
 
 /**
+ * Prints the Optimization Detective installation notices.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $plugin_file Plugin file.
+ */
+function embed_optimizer_print_row_meta_install_notice( string $plugin_file ): void {
+	$od_plugin_slug = 'optimization-detective';
+	$od_plugin_file = "{$od_plugin_slug}/load.php";
+	$od_plugin_name = 'Optimization Detective';
+	if ( 'embed-optimizer/load.php' === $plugin_file && ! is_plugin_active( $od_plugin_file ) ) {
+		if ( current_user_can( 'install_plugins' ) ) {
+			$details_url = esc_url_raw(
+				add_query_arg(
+					array(
+						'tab'       => 'plugin-information',
+						'plugin'    => $od_plugin_slug,
+						'TB_iframe' => 'true',
+						'width'     => 600,
+						'height'    => 550,
+					),
+					admin_url( 'plugin-install.php' )
+				)
+			);
+
+			$link_start_tag = sprintf(
+				'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s">',
+				esc_url( $details_url ),
+				/* translators: %s: Plugin name and version. */
+				esc_attr( sprintf( __( 'More information about %s', 'default' ), $od_plugin_name ) )
+			);
+		} else {
+			/* translators: %s: Plugin name. */
+			$aria_label  = sprintf( __( 'Visit plugin site for %s', 'default' ), $od_plugin_name );
+			$details_url = __( 'https://wordpress.org/plugins/', 'default' ) . $od_plugin_slug . '/';
+
+			$link_start_tag = sprintf(
+				'<a href="%s" aria-label="%s" target="_blank">',
+				esc_url( $details_url ),
+				esc_attr( $aria_label )
+			);
+		}
+
+		$message = str_replace(
+			'<a>',
+			$link_start_tag,
+			__( 'This plugin performs best when <a>Optimization Detective</a> is also installed and active.', 'embed-optimizer' )
+		);
+
+		wp_admin_notice(
+			'<p>' . $message . '</p>',
+			array(
+				'type'               => 'warning',
+				'additional_classes' => array( 'inline', 'notice' ),
+			)
+		);
+	} elseif ( $od_plugin_file === $plugin_file ) {
+		if ( is_plugin_active( $od_plugin_file ) ) {
+			printf(
+				'<p><strong>%s</strong> %s</p>',
+				esc_html__( 'Recommended by:', 'embed-optimizer' ),
+				'Embed Optimizer'
+			);
+		} else {
+			$message = __( 'This plugin is strongly recommended to be active by <strong>Embed Optimizer</strong>.', 'embed-optimizer' );
+			wp_admin_notice(
+				'<p>' . wp_kses( $message, array( 'strong' => array() ) ) . '</p>',
+				array(
+					'type'               => 'warning',
+					'additional_classes' => array( 'inline', 'notice-alt' ),
+				)
+			);
+		}
+	}
+}
+add_action( 'after_plugin_row_meta', 'embed_optimizer_print_row_meta_install_notice', 20 );
+
+/**
  * Displays the HTML generator tag for the Embed Optimizer plugin.
  *
  * See {@see 'wp_head'}.
