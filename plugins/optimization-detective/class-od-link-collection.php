@@ -85,18 +85,50 @@ final class OD_Link_Collection implements Countable {
 	}
 
 	/**
+	 * Groups links by link relation type.
+	 *
+	 * @return array<string, Link[]> Grouped links.
+	 */
+	private function group_links_by_rel_type(): array {
+		$links_by_type = array(
+			'preload'    => array(),
+			'preconnect' => array(),
+		);
+		foreach ( $this->links as $link ) {
+			$links_by_type[ $link['attributes']['rel'] ][] = $link;
+		}
+
+		$links_by_type['preload'] = array_map(
+			static function ( array $link ): array {
+				// TODO: What if screen is not the media type? What if there are other media queries?
+				$media_features = array( 'screen' );
+				if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
+					$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
+				}
+				if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
+					$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
+				}
+				$link['attributes']['media'] = implode( ' and ', $media_features );
+				return $link;
+			},
+			$this->get_adjacent_deduplicated_links( $links_by_type['preload'] )
+		);
+
+		return $links_by_type;
+	}
+
+	/**
 	 * Get adjacent-deduplicated links.
 	 *
 	 * When two links are identical except for their minimum/maximum widths which are also consecutive, then merge them
 	 * together.
 	 *
+	 * @param Link[] $preload_links Preload links.
 	 * @return array<int, Link> Links with adjacent-duplicates merged together.
 	 */
-	private function get_adjacent_deduplicated_links(): array {
-		$links = $this->links;
-
+	private function get_adjacent_deduplicated_links( array $preload_links ): array {
 		usort(
-			$links,
+			$preload_links,
 			/**
 			 * Comparator.
 			 *
@@ -105,12 +137,13 @@ final class OD_Link_Collection implements Countable {
 			 * @return int Comparison result.
 			 */
 			static function ( array $a, array $b ): int {
+				// TODO: Either of these may be null.
 				return $a['minimum_viewport_width'] <=> $b['minimum_viewport_width'];
 			}
 		);
 
 		return array_reduce(
-			$links,
+			$preload_links,
 			/**
 			 * Reducer.
 			 *
@@ -157,16 +190,7 @@ final class OD_Link_Collection implements Countable {
 	public function get_html(): string {
 		$link_tags = array();
 
-		foreach ( $this->get_adjacent_deduplicated_links() as $link ) {
-			$media_features = array( 'screen' );
-			if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
-				$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
-			}
-			if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
-				$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
-			}
-			$link['attributes']['media'] = implode( ' and ', $media_features );
-
+		foreach ( array_merge( ...array_values( $this->group_links_by_rel_type() ) ) as $link ) {
 			$link_tag = '<link data-od-added-tag';
 			foreach ( $link['attributes'] as $name => $value ) {
 				$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
