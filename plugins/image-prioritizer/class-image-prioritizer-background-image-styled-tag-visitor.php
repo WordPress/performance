@@ -62,7 +62,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 				'href'          => $background_image_url,
 			);
 
-			$this->preload_links_collection->add_link(
+			$this->link_collection->add_link(
 				$link_attributes,
 				$group->get_minimum_viewport_width(),
 				$group->get_maximum_viewport_width()

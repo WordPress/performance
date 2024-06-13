@@ -158,11 +158,9 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
-	// Walk over all tags in the document and ensure fetchpriority is set/removed, and construct preload links for image LCP elements.
-	$preload_links = new OD_Preload_Link_Collection();
-	$walker        = new OD_HTML_Tag_Walker( $buffer );
-
 	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
+	$link_collection      = new OD_Link_Collection();
+	$walker               = new OD_HTML_Tag_Walker( $buffer );
 
 	/**
 	 * Fires to register tag visitors before walking over the document to perform optimizations.
@@ -171,16 +169,16 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 *
 	 * @param OD_Tag_Visitor_Registry         $tag_visitor_registry Tag visitor registry.
 	 * @param OD_URL_Metrics_Group_Collection $group_collection     URL Metrics Group collection.
-	 * @param OD_Preload_Link_Collection      $preload_links        Preload links collection.
+	 * @param OD_Link_Collection              $link_collection      Link collection.
 	 */
-	do_action( 'od_register_tag_visitors', $tag_visitor_registry, $group_collection, $preload_links );
+	do_action( 'od_register_tag_visitors', $tag_visitor_registry, $group_collection, $link_collection );
 
 	$visitors  = iterator_to_array( $tag_visitor_registry );
 	$generator = $walker->open_tags();
 	while ( $generator->valid() ) {
 		$did_visit = false;
 		foreach ( $visitors as $visitor ) {
-			$did_visit = $visitor( $walker, $group_collection, $preload_links ) || $did_visit;
+			$did_visit = $visitor( $walker, $group_collection, $link_collection ) || $did_visit;
 		}
 
 		if ( $did_visit && $needs_detection ) {
@@ -189,9 +187,9 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$generator->next();
 	}
 
-	// Inject any preload links at the end of the HEAD.
-	if ( count( $preload_links ) > 0 ) {
-		$walker->append_head_html( $preload_links->get_html() );
+	// Inject any links at the end of the HEAD.
+	if ( count( $link_collection ) > 0 ) {
+		$walker->append_head_html( $link_collection->get_html() );
 	}
 
 	// Inject detection script.

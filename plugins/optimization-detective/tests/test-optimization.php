@@ -342,12 +342,12 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 
 		add_action(
 			'od_register_tag_visitors',
-			function ( OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metrics_Group_Collection $url_metrics_outer, OD_Preload_Link_Collection $preload_links_outer ): void {
+			function ( OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metrics_Group_Collection $url_metrics_outer, OD_Link_Collection $link_collection_outer ): void {
 				$tag_visitor_registry->register(
 					'img',
-					function ( OD_HTML_Tag_Walker $walker, OD_URL_Metrics_Group_Collection $url_metrics, OD_Preload_Link_Collection $preload_links ) use ( $url_metrics_outer, $preload_links_outer ): bool {
+					function ( OD_HTML_Tag_Walker $walker, OD_URL_Metrics_Group_Collection $url_metrics, OD_Link_Collection $link_collection ) use ( $url_metrics_outer, $link_collection_outer ): bool {
 						$this->assertSame( $url_metrics, $url_metrics_outer );
-						$this->assertSame( $preload_links, $preload_links_outer );
+						$this->assertSame( $link_collection, $link_collection_outer );
 						return $walker->get_tag() === 'IMG';
 					}
 				);

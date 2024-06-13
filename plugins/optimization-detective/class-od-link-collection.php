@@ -1,6 +1,6 @@
 <?php
 /**
- * Optimization Detective: OD_Preload_Link_Collection class
+ * Optimization Detective: OD_Link_Collection class
  *
  * @package optimization-detective
  * @since 0.3.0
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Collection for preload links added to the document.
+ * Collection for links added to the document.
  *
  * @phpstan-type Link array{
  *                   attributes: LinkAttributes,
@@ -30,9 +30,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *               }
  *
  * @since 0.3.0
+ * @since n.e.x.t Renamed from OD_Preload_Link_Collection.
  * @access private
  */
-final class OD_Preload_Link_Collection implements Countable {
+final class OD_Link_Collection implements Countable {
 
 	/**
 	 * Links.

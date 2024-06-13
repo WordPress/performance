@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Registry for tag visitors invoked for each tag while walking over a document.
  *
- * @phpstan-type TagVisitorCallback callable( OD_HTML_Tag_Walker, OD_URL_Metrics_Group_Collection, OD_Preload_Link_Collection ): bool
+ * @phpstan-type TagVisitorCallback callable( OD_HTML_Tag_Walker, OD_URL_Metrics_Group_Collection, OD_Link_Collection ): bool
  *
  * @implements IteratorAggregate<string, TagVisitorCallback>
  *

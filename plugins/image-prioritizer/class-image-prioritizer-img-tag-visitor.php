@@ -105,7 +105,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 				$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
 			}
 
-			$this->preload_links_collection->add_link(
+			$this->link_collection->add_link(
 				$link_attributes,
 				$group->get_minimum_viewport_width(),
 				$group->get_maximum_viewport_width()
