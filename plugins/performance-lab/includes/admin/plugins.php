@@ -186,7 +186,7 @@ function perflab_get_plugin_availability( array $plugin_data, array &$processed_
 	$plugin_status = install_plugin_install_status( $plugin_data );
 
 	$availability['installed'] = ( 'install' !== $plugin_status['status'] );
-	$availability['activated'] = $plugin_status['file'] && is_plugin_active( $plugin_status['file'] );
+	$availability['activated'] = false !== $plugin_status['file'] && is_plugin_active( $plugin_status['file'] );
 
 	// The plugin is already installed or the user can install plugins.
 	$availability['can_install'] = (

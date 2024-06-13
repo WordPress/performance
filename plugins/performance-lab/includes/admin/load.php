@@ -465,7 +465,7 @@ function perflab_get_plugin_settings_url( string $plugin_slug ): ?string {
 		return null;
 	}
 	$href = $p->get_attribute( 'href' );
-	if ( $href && is_string( $href ) ) {
+	if ( is_string( $href ) && '' !== $href ) {
 		return $href;
 	}
 

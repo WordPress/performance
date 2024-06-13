@@ -185,7 +185,7 @@ function perflab_maybe_set_object_cache_dropin(): void {
 	$current_dropin_version = apply_filters( 'perflab_object_cache_dropin_version', PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
 
 	// Bail if already placed in the latest version or newer.
-	if ( $current_dropin_version && $current_dropin_version >= PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION ) {
+	if ( null !== $current_dropin_version && $current_dropin_version >= PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION ) {
 		return;
 	}
 
