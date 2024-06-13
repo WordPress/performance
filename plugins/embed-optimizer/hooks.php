@@ -171,6 +171,22 @@ function embed_optimizer_trigger_error( string $function_name, string $message, 
 }
 
 /**
+ * Registers the tag visitor for embeds.
+ *
+ * @since n.e.x.t
+ *
+ * @param OD_Tag_Visitor_Registry         $registry                     Tag visitor registry.
+ * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
+ * @param OD_Preload_Link_Collection      $preload_links_collection     Preload Links Collection.
+ */
+function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Preload_Link_Collection $preload_links_collection ): void {
+	require_once __DIR__ . '/class-embed-optimizer-tag-visitor.php';
+	$visitor = new Embed_Optimizer_Tag_Visitor( $url_metrics_group_collection, $preload_links_collection );
+	$registry->register( 'embeds', $visitor );
+}
+add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors', 10, 3 );
+
+/**
  * Displays the HTML generator tag for the Embed Optimizer plugin.
  *
  * See {@see 'wp_head'}.
