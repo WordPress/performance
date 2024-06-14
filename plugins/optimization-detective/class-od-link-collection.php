@@ -15,28 +15,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Collection for links added to the document.
  *
  * @phpstan-type Link array{
- *                   attributes: PreloadLinkAttributes|PreconnectLinkAttributes,
+ *                   attributes: LinkAttributes,
  *                   minimum_viewport_width: int<0, max>|null,
  *                   maximum_viewport_width: positive-int|null
  *               }
  *
  * @TODO: There are other link attributes possible: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link
- * @phpstan-type CommonLinkAttributes array{
- *                   href?: non-empty-string,
- *                   crossorigin?: ''|'anonymous'|'use-credentials',
- *                   media?: non-empty-string
- *               }
- * @phpstan-type PreloadLinkAttributes CommonLinkAttributes&array{
- *                   rel: 'preload',
+ * @phpstan-type LinkAttributes array{
+ *                   rel: 'preload'|'modulepreload'|'preconnect',
  *                   href?: non-empty-string,
  *                   imagesrcset?: non-empty-string,
  *                   imagesizes?: non-empty-string,
+ *                   crossorigin?: ''|'anonymous'|'use-credentials',
  *                   fetchpriority?: 'high'|'low'|'auto',
- *                   as: 'audio'|'document'|'embed'|'fetch'|'font'|'image'|'object'|'script'|'style'|'track'|'video'|'worker'
- *               }
- * @phpstan-type PreconnectLinkAttributes CommonLinkAttributes&array{
- *                   rel: 'preconnect',
- *                   href: non-empty-string
+ *                   as?: 'audio'|'document'|'embed'|'fetch'|'font'|'image'|'object'|'script'|'style'|'track'|'video'|'worker',
+ *                   media?: non-empty-string
  *               }
  *
  * @since 0.3.0
@@ -55,7 +48,7 @@ final class OD_Link_Collection implements Countable {
 	/**
 	 * Adds link.
 	 *
-	 * @phpstan-param PreconnectLinkAttributes|PreloadLinkAttributes $attributes
+	 * @phpstan-param LinkAttributes $attributes
 	 *
 	 * @param array             $attributes             Attributes.
 	 * @param int<0, max>|null  $minimum_viewport_width Minimum width or null if not bounded or relevant.
