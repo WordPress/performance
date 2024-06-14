@@ -61,6 +61,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 				'fetchpriority' => 'high',
 				'as'            => 'image',
 				'href'          => $background_image_url,
+				'media'         => 'screen',
 			);
 
 			$this->link_collection->add_link(

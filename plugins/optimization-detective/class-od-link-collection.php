@@ -28,7 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                   imagesizes?: non-empty-string,
  *                   crossorigin?: ''|'anonymous'|'use-credentials',
  *                   fetchpriority?: 'high'|'low'|'auto',
- *                   as?: 'audio'|'document'|'embed'|'fetch'|'font'|'image'|'object'|'script'|'style'|'track'|'video'|'worker'
+ *                   as?: 'audio'|'document'|'embed'|'fetch'|'font'|'image'|'object'|'script'|'style'|'track'|'video'|'worker',
+ *                   media?: non-empty-string
  *               }
  *
  * @since 0.3.0
@@ -163,7 +164,10 @@ final class OD_Link_Collection implements Countable {
 
 				$link_tag = '<link data-od-added-tag';
 				// TODO: What if screen is not the media type? What if there are other media queries?
-				$media_features = array( 'screen' );
+				$media_features = array();
+				if ( array_key_exists( 'media', $link['attributes'] ) ) {
+					$media_features[] = $link['attributes']['media'];
+				}
 				if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
 					$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
 				}
