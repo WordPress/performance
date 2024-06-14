@@ -38,11 +38,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class OD_Link_Collection implements Countable {
 
 	/**
-	 * Links.
+	 * Links grouped by rel type.
 	 *
-	 * @var array<int, Link>
+	 * @var array<string, Link[]>
 	 */
-	private $links = array();
+	private $links_by_rel = array();
 
 	/**
 	 * Adds link.
@@ -77,7 +77,7 @@ final class OD_Link_Collection implements Countable {
 			}
 		}
 
-		$this->links[] = array(
+		$this->links_by_rel[ $attributes['rel'] ][] = array(
 			'attributes'             => $attributes,
 			'minimum_viewport_width' => $minimum_viewport_width,
 			'maximum_viewport_width' => $maximum_viewport_width,
@@ -85,50 +85,17 @@ final class OD_Link_Collection implements Countable {
 	}
 
 	/**
-	 * Groups links by link relation type.
-	 *
-	 * @return array<string, Link[]> Grouped links.
-	 */
-	private function group_links_by_rel_type(): array {
-		$links_by_type = array(
-			'preload'    => array(),
-			'preconnect' => array(),
-		);
-		foreach ( $this->links as $link ) {
-			$links_by_type[ $link['attributes']['rel'] ][] = $link;
-		}
-
-		$links_by_type['preload'] = array_map(
-			static function ( array $link ): array {
-				// TODO: What if screen is not the media type? What if there are other media queries?
-				$media_features = array( 'screen' );
-				if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
-					$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
-				}
-				if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
-					$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
-				}
-				$link['attributes']['media'] = implode( ' and ', $media_features );
-				return $link;
-			},
-			$this->get_adjacent_deduplicated_links( $links_by_type['preload'] )
-		);
-
-		return $links_by_type;
-	}
-
-	/**
-	 * Get adjacent-deduplicated links.
+	 * Merges adjacent consecutive links.
 	 *
 	 * When two links are identical except for their minimum/maximum widths which are also consecutive, then merge them
 	 * together.
 	 *
-	 * @param Link[] $preload_links Preload links.
-	 * @return array<int, Link> Links with adjacent-duplicates merged together.
+	 * @param Link[] $links Links.
+	 * @return Link[] Links with adjacent-duplicates merged together.
 	 */
-	private function get_adjacent_deduplicated_links( array $preload_links ): array {
+	private function merge_adjacent_consecutive_links( array $links ): array {
 		usort(
-			$preload_links,
+			$links,
 			/**
 			 * Comparator.
 			 *
@@ -143,7 +110,7 @@ final class OD_Link_Collection implements Countable {
 		);
 
 		return array_reduce(
-			$preload_links,
+			$links,
 			/**
 			 * Reducer.
 			 *
@@ -190,14 +157,27 @@ final class OD_Link_Collection implements Countable {
 	public function get_html(): string {
 		$link_tags = array();
 
-		foreach ( array_merge( ...array_values( $this->group_links_by_rel_type() ) ) as $link ) {
-			$link_tag = '<link data-od-added-tag';
-			foreach ( $link['attributes'] as $name => $value ) {
-				$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
-			}
-			$link_tag .= ">\n";
+		foreach ( $this->links_by_rel as $links ) {
+			$links = $this->merge_adjacent_consecutive_links( $links );
+			foreach ( $links as $link ) {
 
-			$link_tags[] = $link_tag;
+				$link_tag = '<link data-od-added-tag';
+				// TODO: What if screen is not the media type? What if there are other media queries?
+				$media_features = array( 'screen' );
+				if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
+					$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
+				}
+				if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
+					$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
+				}
+				$link['attributes']['media'] = implode( ' and ', $media_features );
+				foreach ( $link['attributes'] as $name => $value ) {
+					$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
+				}
+				$link_tag .= ">\n";
+
+				$link_tags[] = $link_tag;
+			}
 		}
 
 		return implode( '', $link_tags );
@@ -209,6 +189,6 @@ final class OD_Link_Collection implements Countable {
 	 * @return int<0, max> Link count.
 	 */
 	public function count(): int {
-		return count( $this->links );
+		return count( $this->links_by_rel );
 	}
 }
