@@ -20,7 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                   maximum_viewport_width: positive-int|null
  *               }
  *
- * @TODO: There are other link attributes possible: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link
  * @phpstan-type LinkAttributes array{
  *                   rel: 'preload'|'modulepreload'|'preconnect',
  *                   href?: non-empty-string,
@@ -29,7 +28,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                   crossorigin?: ''|'anonymous'|'use-credentials',
  *                   fetchpriority?: 'high'|'low'|'auto',
  *                   as?: 'audio'|'document'|'embed'|'fetch'|'font'|'image'|'object'|'script'|'style'|'track'|'video'|'worker',
- *                   media?: non-empty-string
+ *                   media?: non-empty-string,
+ *                   integrity?: non-empty-string,
+ *                   referrerpolicy?: 'no-referrer'|'no-referrer-when-downgrade'|'origin'|'origin-when-cross-origin'|'unsafe-url'
  *               }
  *
  * @since 0.3.0
@@ -56,14 +57,14 @@ final class OD_Link_Collection implements Countable {
 	 *
 	 * @throws InvalidArgumentException When invalid arguments are provided.
 	 */
-	public function add_link( array $attributes, ?int $minimum_viewport_width, ?int $maximum_viewport_width ): void {
+	public function add_link( array $attributes, ?int $minimum_viewport_width = null, ?int $maximum_viewport_width = null ): void {
 		if ( ! array_key_exists( 'rel', $attributes ) ) {
 			throw new InvalidArgumentException( esc_html__( 'The rel attribute must be provided.', 'optimization-detective' ) );
 		}
 		if ( 'preload' === $attributes['rel'] && ! array_key_exists( 'as', $attributes ) ) {
-			throw new InvalidArgumentException( esc_html__( 'A preload link must include an "as" attribute.', 'optimization-detective' ) );
+			throw new InvalidArgumentException( esc_html__( 'A preload link must include an as attribute.', 'optimization-detective' ) );
 		} elseif ( 'preconnect' === $attributes['rel'] && ! array_key_exists( 'href', $attributes ) ) {
-			throw new InvalidArgumentException( esc_html__( 'A preconnect link must include an "href" attribute.', 'optimization-detective' ) );
+			throw new InvalidArgumentException( esc_html__( 'A preconnect link must include an href attribute.', 'optimization-detective' ) );
 		}
 		if ( ! array_key_exists( 'href', $attributes ) && ! array_key_exists( 'imagesrcset', $attributes ) ) {
 			throw new InvalidArgumentException( esc_html__( 'Either the href or imagesrcset attributes must be supplied.', 'optimization-detective' ) );
@@ -74,7 +75,7 @@ final class OD_Link_Collection implements Countable {
 		if ( null !== $maximum_viewport_width && ( $maximum_viewport_width < $minimum_viewport_width || $maximum_viewport_width < 0 ) ) {
 			throw new InvalidArgumentException( esc_html__( 'Maximum width must be greater than zero and greater than the minimum width.', 'optimization-detective' ) );
 		}
-		foreach ( array( 'rel', 'href', 'imagesrcset', 'imagesizes', 'crossorigin', 'fetchpriority', 'as' ) as $attribute_name ) {
+		foreach ( array( 'rel', 'href', 'imagesrcset', 'imagesizes', 'crossorigin', 'fetchpriority', 'as', 'integrity', 'referrerpolicy' ) as $attribute_name ) {
 			if ( array_key_exists( $attribute_name, $attributes ) && ! is_string( $attributes[ $attribute_name ] ) ) {
 				throw new InvalidArgumentException( esc_html__( 'Link attributes must be strings.', 'optimization-detective' ) );
 			}
@@ -176,7 +177,9 @@ final class OD_Link_Collection implements Countable {
 				if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
 					$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
 				}
-				$link['attributes']['media'] = implode( ' and ', $media_features );
+				if ( count( $media_features ) > 0 ) {
+					$link['attributes']['media'] = implode( ' and ', $media_features );
+				}
 				foreach ( $link['attributes'] as $name => $value ) {
 					$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
 				}
