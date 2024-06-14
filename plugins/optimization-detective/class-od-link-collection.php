@@ -62,6 +62,8 @@ final class OD_Link_Collection implements Countable {
 		}
 		if ( 'preload' === $attributes['rel'] && ! array_key_exists( 'as', $attributes ) ) {
 			throw new InvalidArgumentException( esc_html__( 'A preload link must include an "as" attribute.', 'optimization-detective' ) );
+		} elseif ( 'preconnect' === $attributes['rel'] && ! array_key_exists( 'href', $attributes ) ) {
+			throw new InvalidArgumentException( esc_html__( 'A preconnect link must include an "href" attribute.', 'optimization-detective' ) );
 		}
 		if ( ! array_key_exists( 'href', $attributes ) && ! array_key_exists( 'imagesrcset', $attributes ) ) {
 			throw new InvalidArgumentException( esc_html__( 'Either the href or imagesrcset attributes must be supplied.', 'optimization-detective' ) );
