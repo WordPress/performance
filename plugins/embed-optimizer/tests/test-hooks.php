@@ -7,8 +7,16 @@
 
 class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 
+	/**
+	 * @covers ::embed_optimizer_add_hooks
+	 */
 	public function test_hooks(): void {
-		$this->assertSame( 10, has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' ) );
+		embed_optimizer_add_hooks();
+		if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
+			$this->assertFalse( has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' ) );
+		} else {
+			$this->assertSame( 10, has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' ) );
+		}
 		$this->assertSame( 10, has_action( 'wp_head', 'embed_optimizer_render_generator' ) );
 	}
 

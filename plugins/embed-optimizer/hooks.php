@@ -11,6 +11,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Add hooks.
+ *
+ * @since n.e.x.t
+ */
+function embed_optimizer_add_hooks(): void {
+	add_action( 'wp_head', 'embed_optimizer_render_generator' );
+
+	// TODO: If Optimization Detective is enabled, do the markup injection entirely in the Walker.
+	if ( ! defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
+		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
+	}
+}
+add_action( 'init', 'embed_optimizer_add_hooks' );
+
+/**
  * Filter the oEmbed HTML.
  *
  * Add loading="lazy" to any iframe tags.
@@ -97,7 +112,6 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 	}
 	return $html_processor->get_updated_html();
 }
-add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
 
 /**
  * Add a script to the footer if there are lazy loaded embeds.
@@ -259,4 +273,3 @@ function embed_optimizer_render_generator(): void {
 	// Use the plugin slug as it is immutable.
 	echo '<meta name="generator" content="embed-optimizer ' . esc_attr( EMBED_OPTIMIZER_VERSION ) . '">' . "\n";
 }
-add_action( 'wp_head', 'embed_optimizer_render_generator' );
