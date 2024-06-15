@@ -24,3 +24,5 @@ define( 'EMBED_OPTIMIZER_VERSION', '0.1.2' );
 
 // Load in the Embed Optimizer plugin hooks.
 require_once __DIR__ . '/hooks.php';
+
+require_once __DIR__ . '/optimization-detective.php';

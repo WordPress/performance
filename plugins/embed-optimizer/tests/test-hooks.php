@@ -163,18 +163,6 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests embed_optimizer_register_tag_visitors().
-	 *
-	 * @covers ::embed_optimizer_register_tag_visitors
-	 */
-	public function test_embed_optimizer_register_tag_visitors(): void {
-		$registry = new OD_Tag_Visitor_Registry();
-		embed_optimizer_register_tag_visitors( $registry );
-		$this->assertTrue( $registry->is_registered( 'embeds' ) );
-		$this->assertSame( 'embed_optimizer_visit_tag', $registry->get_registered( 'embeds' ) );
-	}
-
-	/**
 	 * Test printing the meta generator tag.
 	 *
 	 * @covers ::embed_optimizer_render_generator

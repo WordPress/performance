@@ -171,45 +171,6 @@ function embed_optimizer_trigger_error( string $function_name, string $message, 
 }
 
 /**
- * Visits a tag.
- *
- * @param OD_HTML_Tag_Walker              $walker                       Walker.
- * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL metrics group collection.
- * @return bool Whether the visitor visited the tag.
- */
-function embed_optimizer_visit_tag( OD_HTML_Tag_Walker $walker, OD_URL_Metrics_Group_Collection $url_metrics_group_collection ): bool {
-	if ( ! (
-		'FIGURE' === $walker->get_tag()
-		&&
-		$walker->has_class( 'wp-block-embed' )
-	) ) {
-		return false;
-	}
-
-	$max_intersection_ratio = $url_metrics_group_collection->get_element_max_intersection_ratio( $walker->get_xpath() );
-
-	if ( $max_intersection_ratio > 0 ) {
-		// TODO: Add preconnect link.
-	} else {
-		// TODO: Now apply embed.
-	}
-
-	return true;
-}
-
-/**
- * Registers the tag visitor for embeds.
- *
- * @since n.e.x.t
- *
- * @param OD_Tag_Visitor_Registry $registry Tag visitor registry.
- */
-function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry ): void {
-	$registry->register( 'embeds', 'embed_optimizer_visit_tag' );
-}
-add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' );
-
-/**
  * Prints the Optimization Detective installation notices.
  *
  * @since n.e.x.t
