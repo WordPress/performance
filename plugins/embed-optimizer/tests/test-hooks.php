@@ -1,11 +1,11 @@
 <?php
 /**
- * Tests for Embed Optimizer.
+ * Tests for embed-optimizer plugin hooks.php.
  *
  * @package embed-optimizer
  */
 
-class Test_Embed_Optimizer_Helper extends WP_UnitTestCase {
+class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 
 	public function test_hooks(): void {
 		$this->assertSame( 10, has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' ) );
