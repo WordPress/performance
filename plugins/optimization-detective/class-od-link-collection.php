@@ -108,7 +108,6 @@ final class OD_Link_Collection implements Countable {
 			 * @return int Comparison result.
 			 */
 			static function ( array $a, array $b ): int {
-				// TODO: Either of these may be null.
 				return $a['minimum_viewport_width'] <=> $b['minimum_viewport_width'];
 			}
 		);
@@ -164,9 +163,8 @@ final class OD_Link_Collection implements Countable {
 		foreach ( $this->links_by_rel as $links ) {
 			$links = $this->merge_adjacent_consecutive_links( $links );
 			foreach ( $links as $link ) {
-
 				$link_tag = '<link data-od-added-tag';
-				// TODO: What if screen is not the media type? What if there are other media queries?
+
 				$media_features = array();
 				if ( array_key_exists( 'media', $link['attributes'] ) ) {
 					$media_features[] = $link['attributes']['media'];
