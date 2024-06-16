@@ -23,161 +23,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class OD_HTML_Tag_Walker {
 
 	/**
-	 * HTML void tags (i.e. those which are self-closing).
-	 *
-	 * @link https://html.spec.whatwg.org/multipage/syntax.html#void-elements
-	 * @see WP_HTML_Processor::is_void()
-	 * @todo Reuse `WP_HTML_Processor::is_void()` once WordPress 6.5 is the minimum-supported version. See <https://github.com/WordPress/performance/pull/1115>.
-	 *
-	 * @var string[]
-	 */
-	const VOID_TAGS = array(
-		'AREA',
-		'BASE',
-		'BASEFONT', // Obsolete.
-		'BGSOUND', // Obsolete.
-		'BR',
-		'COL',
-		'EMBED',
-		'FRAME', // Deprecated.
-		'HR',
-		'IMG',
-		'INPUT',
-		'KEYGEN', // Obsolete.
-		'LINK',
-		'META',
-		'PARAM', // Deprecated.
-		'SOURCE',
-		'TRACK',
-		'WBR',
-	);
-
-	/**
-	 * Raw text tags.
-	 *
-	 * These are treated like void tags for the purposes of walking over the document since we do not process any text
-	 * nodes. To cite the docblock for WP_HTML_Tag_Processor:
-	 *
-	 * > Some HTML elements are handled in a special way; their start and end tags
-	 * > act like a void tag. These are special because their contents can't contain
-	 * > HTML markup. Everything inside these elements is handled in a special way
-	 * > and content that _appears_ like HTML tags inside of them isn't. There can
-	 * > be no nesting in these elements.
-	 * >
-	 * > In the following list, "raw text" means that all of the content in the HTML
-	 * > until the matching closing tag is treated verbatim without any replacements
-	 * > and without any parsing.
-	 *
-	 * @link https://github.com/WordPress/wordpress-develop/blob/6dd00b1ffac54c20c1c1c7721aeebbcd82d0e378/src/wp-includes/html-api/class-wp-html-tag-processor.php#L136-L155
-	 * @link https://core.trac.wordpress.org/ticket/60392#comment:2
-	 *
-	 * @var string[]
-	 */
-	const RAW_TEXT_TAGS = array(
-		'SCRIPT',
-		'IFRAME',
-		'NOEMBED', // Deprecated.
-		'NOFRAMES', // Deprecated.
-		'STYLE',
-		'TEXTAREA',
-		'TITLE',
-		'XMP', // Deprecated.
-	);
-
-	/**
-	 * The set of HTML tags whose presence will implicitly close a <p> element.
-	 * For example '<p>foo<h1>bar</h1>' should parse the same as '<p>foo</p><h1>bar</h1>'.
-	 *
-	 * @link https://html.spec.whatwg.org/multipage/grouping-content.html#the-p-element
-	 *
-	 * @var string[]
-	 */
-	const P_CLOSING_TAGS = array(
-		'ADDRESS',
-		'ARTICLE',
-		'ASIDE',
-		'BLOCKQUOTE',
-		'DETAILS',
-		'DIV',
-		'DL',
-		'FIELDSET',
-		'FIGCAPTION',
-		'FIGURE',
-		'FOOTER',
-		'FORM',
-		'H1',
-		'H2',
-		'H3',
-		'H4',
-		'H5',
-		'H6',
-		'HEADER',
-		'HGROUP',
-		'HR',
-		'MAIN',
-		'MENU',
-		'NAV',
-		'OL',
-		'P',
-		'PRE',
-		'SEARCH',
-		'SECTION',
-		'TABLE',
-		'UL',
-	);
-
-	/**
-	 * Pattern for valid XPath subset for breadcrumb.
-	 *
-	 * @see self::get_xpath()
-	 * @var string
-	 */
-	const XPATH_PATTERN = '^(/\*\[\d+\]\[self::.+?\])+$';
-
-	/**
-	 * Bookmark for the end of the HEAD.
-	 *
-	 * @var string
-	 */
-	const END_OF_HEAD_BOOKMARK = 'end_of_head';
-
-	/**
-	 * Bookmark for the end of the BODY.
-	 *
-	 * @var string
-	 */
-	const END_OF_BODY_BOOKMARK = 'end_of_body';
-
-	/**
-	 * Open stack tags.
-	 *
-	 * @var string[]
-	 */
-	private $open_stack_tags = array();
-
-	/**
-	 * Open stag indices.
-	 *
-	 * @var int[]
-	 */
-	private $open_stack_indices = array();
-
-	/**
 	 * Processor.
 	 *
 	 * @var OD_HTML_Tag_Processor
 	 */
 	private $processor;
-
-	/**
-	 * XPath for the current tag.
-	 *
-	 * This is used so that repeated calls to {@see self::get_xpath()} won't needlessly reconstruct the string. This
-	 * gets cleared whenever {@see self::open_tags()} iterates to the next tag.
-	 *
-	 * @var string|null
-	 */
-	private $current_xpath = null;
 
 	/**
 	 * Whether walking has started.
@@ -213,145 +63,15 @@ final class OD_HTML_Tag_Walker {
 		}
 		$this->did_start_walking = true;
 
-		$p = $this->processor;
-
-		/*
-		 * The keys for the following two arrays correspond to each other. Given the following document:
-		 *
-		 * <html>
-		 *   <head>
-		 *   </head>
-		 *   <body>
-		 *     <p>Hello!</p>
-		 *     <img src="lcp.png">
-		 *   </body>
-		 * </html>
-		 *
-		 * Upon processing the IMG element, the two arrays should be equal to the following:
-		 *
-		 * $open_stack_tags    = array( 'HTML', 'BODY', 'IMG' );
-		 * $open_stack_indices = array( 0, 1, 1 );
-		 */
-		$this->open_stack_tags    = array();
-		$this->open_stack_indices = array();
-		while ( $p->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
-			$tag_name = $p->get_tag();
+		while ( $this->processor->next_tag() ) {
+			$tag_name = $this->processor->get_tag();
 			if ( ! is_string( $tag_name ) ) {
 				continue;
 			}
-			if ( ! $p->is_tag_closer() ) {
-
-				// Close an open P tag when a P-closing tag is encountered.
-				// TODO: There are quite a few more cases of optional closing tags: https://html.spec.whatwg.org/multipage/syntax.html#optional-tags
-				// Nevertheless, given WordPress's legacy of XHTML compatibility, the lack of closing tags may not be common enough to warrant worrying about any of them.
-				if ( in_array( $tag_name, self::P_CLOSING_TAGS, true ) ) {
-					$i = array_search( 'P', $this->open_stack_tags, true );
-					if ( false !== $i ) {
-						array_splice( $this->open_stack_tags, (int) $i );
-						array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) );
-					}
-				}
-
-				$level                   = count( $this->open_stack_tags );
-				$this->open_stack_tags[] = $tag_name;
-
-				if ( ! isset( $this->open_stack_indices[ $level ] ) ) {
-					$this->open_stack_indices[ $level ] = 0;
-				} else {
-					++$this->open_stack_indices[ $level ];
-				}
-
-				$this->current_xpath = null; // Clear cache.
-
-				// Now that the breadcrumbs are constructed, yield the tag name so that they can be queried if desired.
-				// Other mutations may be performed to the open tag's attributes by the callee at this point as well.
+			if ( ! $this->processor->is_tag_closer() ) {
 				yield $tag_name;
-
-				// Immediately pop off self-closing and raw text tags.
-				if (
-					in_array( $tag_name, self::VOID_TAGS, true )
-					||
-					in_array( $tag_name, self::RAW_TEXT_TAGS, true )
-					||
-					( $p->has_self_closing_flag() && $this->is_foreign_element() )
-				) {
-					array_pop( $this->open_stack_tags );
-				}
-			} else {
-				// If the closing tag is for self-closing or raw text tag, we ignore it since it was already handled above.
-				if (
-					in_array( $tag_name, self::VOID_TAGS, true )
-					||
-					in_array( $tag_name, self::RAW_TEXT_TAGS, true )
-				) {
-					continue;
-				}
-
-				$popped_tag_name = array_pop( $this->open_stack_tags );
-				if ( $popped_tag_name !== $tag_name ) {
-					$this->warn(
-						sprintf(
-							/* translators: 1: Popped tag name, 2: Closing tag name */
-							__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'optimization-detective' ),
-							$popped_tag_name,
-							$tag_name
-						)
-					);
-				}
-
-				// Set bookmarks for insertion of preload links and the detection script module.
-				if ( 'HEAD' === $popped_tag_name ) {
-					$p->set_bookmark( self::END_OF_HEAD_BOOKMARK );
-				} elseif ( 'BODY' === $popped_tag_name ) {
-					$p->set_bookmark( self::END_OF_BODY_BOOKMARK );
-				}
-
-				array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) + 1 );
 			}
 		}
-	}
-
-	/**
-	 * Warns of bad markup.
-	 *
-	 * @param string $message Warning message.
-	 */
-	private function warn( string $message ): void {
-		wp_trigger_error(
-			__CLASS__ . '::open_tags',
-			esc_html( $message )
-		);
-	}
-
-	/**
-	 * Gets breadcrumbs for the current open tag.
-	 *
-	 * A breadcrumb consists of a tag name and its sibling index.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return Generator<array{string, int}> Breadcrumb.
-	 */
-	private function get_breadcrumbs(): Generator {
-		foreach ( $this->open_stack_tags as $i => $breadcrumb_tag_name ) {
-			yield array( $breadcrumb_tag_name, $this->open_stack_indices[ $i ] );
-		}
-	}
-
-	/**
-	 * Determines whether currently inside a foreign element (MATH or SVG).
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return bool In foreign element.
-	 */
-	private function is_foreign_element(): bool {
-		foreach ( $this->open_stack_tags as $open_stack_tag ) {
-			if ( 'MATH' === $open_stack_tag || 'SVG' === $open_stack_tag ) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -365,13 +85,7 @@ final class OD_HTML_Tag_Walker {
 	 * @return string XPath.
 	 */
 	public function get_xpath(): string {
-		if ( null === $this->current_xpath ) {
-			$this->current_xpath = '';
-			foreach ( $this->get_breadcrumbs() as list( $tag_name, $index ) ) {
-				$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
-			}
-		}
-		return $this->current_xpath;
+		return $this->processor->get_xpath();
 	}
 
 	/**
@@ -384,11 +98,7 @@ final class OD_HTML_Tag_Walker {
 	 * @return bool Whether successful.
 	 */
 	public function append_head_html( string $html ): bool {
-		$success = $this->processor->append_html( self::END_OF_HEAD_BOOKMARK, $html );
-		if ( ! $success ) {
-			$this->warn( __( 'Unable to append markup to the HEAD.', 'optimization-detective' ) );
-		}
-		return $success;
+		return $this->processor->append_head_html( $html );
 	}
 
 	/**
@@ -401,11 +111,7 @@ final class OD_HTML_Tag_Walker {
 	 * @return bool Whether successful.
 	 */
 	public function append_body_html( string $html ): bool {
-		$success = $this->processor->append_html( self::END_OF_BODY_BOOKMARK, $html );
-		if ( ! $success ) {
-			$this->warn( __( 'Unable to append markup to the BODY.', 'optimization-detective' ) );
-		}
-		return $success;
+		return $this->processor->append_body_html( $html );
 	}
 
 	/**
