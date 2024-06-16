@@ -26,7 +26,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 *
 	 * @return array<string, mixed> Data.
 	 */
-	public function data_provider_test_filter_tag_walker_visitors(): array {
+	public function data_provider_test_filter_tag_visitors(): array {
 		return array(
 			'no-url-metrics'                              => array(
 				'set_up'   => static function (): void {},
@@ -895,7 +895,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * @covers Image_Prioritizer_Img_Tag_Visitor
 	 * @covers Image_Prioritizer_Background_Image_Styled_Tag_Visitor
 	 *
-	 * @dataProvider data_provider_test_filter_tag_walker_visitors
+	 * @dataProvider data_provider_test_filter_tag_visitors
 	 * @throws Exception But it won't.
 	 */
 	public function test_image_prioritizer_register_tag_visitors( Closure $set_up, string $buffer, string $expected ): void {

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Visitor for the tag walker that optimizes embeds.
+ * Tag visitor that optimizes embeds.
  *
  * @since 0.1.0
  * @access private
@@ -47,24 +47,24 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Visits a tag.
 	 *
-	 * @param OD_HTML_Tag_Walker $walker Walker.
+	 * @param OD_HTML_Tag_Processor $processor Processor.
 	 * @return bool Whether the visit or visited the tag.
 	 */
-	public function __invoke( OD_HTML_Tag_Walker $walker ): bool {
+	public function __invoke( OD_HTML_Tag_Processor $processor ): bool {
 		if ( ! (
-			'FIGURE' === $walker->get_tag()
+			'FIGURE' === $processor->get_tag()
 			&&
-			$walker->has_class( 'wp-block-embed' )
+			$processor->has_class( 'wp-block-embed' )
 		) ) {
 			return false;
 		}
 
-		$max_intersection_ratio = $this->url_metrics_group_collection->get_element_max_intersection_ratio( $walker->get_xpath() );
+		$max_intersection_ratio = $this->url_metrics_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() );
 
 		if ( $max_intersection_ratio > 0 ) {
 
 			// TODO: Add more cases.
-			if ( $walker->has_class( 'wp-block-embed-youtube' ) ) {
+			if ( $processor->has_class( 'wp-block-embed-youtube' ) ) {
 				$this->link_collection->add_link(
 					array(
 						'rel'  => 'preconnect',
@@ -74,7 +74,7 @@ final class Embed_Optimizer_Tag_Visitor {
 				// TODO: Undo lazy-loading?
 			}
 		} else {
-			$walker->set_meta_attribute( 'needs-lazy-loading', 'true' );
+			$processor->set_meta_attribute( 'needs-lazy-loading', 'true' );
 			// TODO: Add lazy-loading?
 		}
 

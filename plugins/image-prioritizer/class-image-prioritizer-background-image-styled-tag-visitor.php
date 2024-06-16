@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Visitor for the tag walker that optimizes elements with background-image styles.
+ * Tag visitor that optimizes elements with background-image styles.
  *
  * @since 0.1.0
  * @access private
@@ -22,10 +22,10 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 	/**
 	 * Visits a tag.
 	 *
-	 * @param OD_HTML_Tag_Walker $walker Walker.
+	 * @param OD_HTML_Tag_Processor $processor Processor.
 	 * @return bool Whether the visitor visited the tag.
 	 */
-	public function __invoke( OD_HTML_Tag_Walker $walker ): bool {
+	public function __invoke( OD_HTML_Tag_Processor $processor ): bool {
 		/*
 		 * Note that CSS allows for a `background`/`background-image` to have multiple `url()` CSS functions, resulting
 		 * in multiple background images being layered on top of each other. This ability is not employed in core. Here
@@ -35,7 +35,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 		 * parser of the `url()` functions from the property value.
 		 */
 		$background_image_url = null;
-		$style                = $walker->get_attribute( 'style' );
+		$style                = $processor->get_attribute( 'style' );
 		if (
 			is_string( $style )
 			&&
@@ -52,7 +52,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 			return false;
 		}
 
-		$xpath = $walker->get_xpath();
+		$xpath = $processor->get_xpath();
 
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
 		foreach ( $this->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {

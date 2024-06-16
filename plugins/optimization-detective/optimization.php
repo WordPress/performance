@@ -160,7 +160,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
 	$link_collection      = new OD_Link_Collection();
-	$walker               = new OD_HTML_Tag_Walker( $buffer );
+	$processor            = new OD_HTML_Tag_Processor( $buffer );
 
 	/**
 	 * Fires to register tag visitors before walking over the document to perform optimizations.
@@ -173,30 +173,28 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 */
 	do_action( 'od_register_tag_visitors', $tag_visitor_registry, $group_collection, $link_collection );
 
-	$visitors  = iterator_to_array( $tag_visitor_registry );
-	$generator = $walker->open_tags();
-	while ( $generator->valid() ) {
+	$visitors = iterator_to_array( $tag_visitor_registry );
+	while ( $processor->next_tag() ) {
 		$did_visit = false;
 		foreach ( $visitors as $visitor ) {
-			$did_visit = $visitor( $walker, $group_collection, $link_collection ) || $did_visit;
+			$did_visit = $visitor( $processor, $group_collection, $link_collection ) || $did_visit;
 		}
 
 		if ( $did_visit && $needs_detection ) {
-			$walker->set_meta_attribute( 'xpath', $walker->get_xpath() );
+			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );
 		}
-		$generator->next();
 	}
 
 	// Inject any links at the end of the HEAD.
 	if ( count( $link_collection ) > 0 ) {
-		$walker->append_head_html( $link_collection->get_html() );
+		$processor->append_head_html( $link_collection->get_html() );
 	}
 
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
 	if ( $needs_detection ) {
-		$walker->append_body_html( od_get_detection_script( $slug, $group_collection ) );
+		$processor->append_body_html( od_get_detection_script( $slug, $group_collection ) );
 	}
 
-	return $walker->get_updated_html();
+	return $processor->get_updated_html();
 }

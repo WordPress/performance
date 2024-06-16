@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Extension to WP_HTML_Tag_Processor that supports injecting HTML.
+ * Extension to WP_HTML_Tag_Processor that supports injecting HTML and obtaining XPath for the current tag.
  *
  * @since 0.1.1
  * @access private
@@ -202,6 +202,14 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $current_xpath = null;
 
 	/**
+	 * Whether the previous tag was void.
+	 *
+	 * @since n.e.x.t
+	 * @var bool
+	 */
+	private $last_tag_visits_closer = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $html HTML to process.
@@ -219,6 +227,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @inheritDoc
 	 * @since n.e.x.t
+	 * @todo Add a next_open_tag() convenience method.
 	 *
 	 * @param null $query Query.
 	 * @return bool Whether a tag was matched.
@@ -233,12 +242,20 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Whether the previous tag was void.
+	 * Finds the next open tag.
 	 *
 	 * @since n.e.x.t
-	 * @var bool
+	 *
+	 * @return bool Whether a tag was matched.
 	 */
-	private $last_tag_visits_closer = false;
+	public function next_open_tag(): bool {
+		while ( $this->next_tag() ) {
+			if ( ! $this->is_tag_closer() ) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Finds the next token in the HTML document.
@@ -333,6 +350,59 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Updates or creates a new attribute on the currently matched tag with the passed value.
+	 *
+	 * @inheritDoc
+	 * @since n.e.x.t
+	 *
+	 * @param string      $name  The attribute name to target.
+	 * @param string|bool $value The new attribute value.
+	 * @return bool Whether an attribute value was set.
+	 */
+	public function set_attribute( $name, $value ): bool { // phpcs:ignore SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+		$existing_value = $this->get_attribute( $name );
+		$result         = parent::set_attribute( $name, $value );
+		if ( $result ) {
+			if ( is_string( $existing_value ) ) {
+				$this->set_meta_attribute( "replaced-{$name}", $existing_value );
+			} else {
+				$this->set_meta_attribute( "added-{$name}", true );
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Sets a meta attribute.
+	 *
+	 * All meta attributes are prefixed with 'data-od-'.
+	 *
+	 * @param string      $name  Meta attribute name.
+	 * @param string|true $value Value.
+	 * @return bool Whether an attribute was set.
+	 */
+	public function set_meta_attribute( string $name, $value ): bool {
+		return parent::set_attribute( "data-od-{$name}", $value );
+	}
+
+	/**
+	 * Removes an attribute from the currently-matched tag.
+	 *
+	 * @inheritDoc
+	 * @since n.e.x.t
+	 *
+	 * @param string $name The attribute name to remove.
+	 */
+	public function remove_attribute( $name ): bool { // phpcs:ignore SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+		$old_value = $this->get_attribute( $name );
+		$result    = parent::remove_attribute( $name );
+		if ( $result ) {
+			$this->set_meta_attribute( "removed-{$name}", is_string( $old_value ) ? $old_value : true );
+		}
+		return $result;
 	}
 
 	/**

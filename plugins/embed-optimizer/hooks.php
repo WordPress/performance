@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function embed_optimizer_add_hooks(): void {
 	add_action( 'wp_head', 'embed_optimizer_render_generator' );
 
-	// TODO: If Optimization Detective is enabled, do the markup injection entirely in the Walker.
+	// TODO: If Optimization Detective is enabled, do the markup injection entirely in the Processor.
 	if ( ! defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
 	}

@@ -1,10 +1,10 @@
 <?php
 /**
- * Tests for optimization-detective class OD_HTML_Tag_Walker.
+ * Tests for optimization-detective class OD_HTML_Tag_Processor.
  *
  * @package optimization-detective
  *
- * @coversDefaultClass OD_HTML_Tag_Walker
+ * @coversDefaultClass OD_HTML_Tag_Processor
  *
  * @noinspection HtmlRequiredTitleElement
  * @noinspection HtmlRequiredAltAttribute
@@ -14,7 +14,7 @@
  * @noinspection HtmlExtraClosingTag
  * @todo What are the other inspection IDs which can turn off inspections for the other irrelevant warnings? Remaining is "The tag is marked as deprecated."
  */
-class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
+class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.
@@ -300,9 +300,10 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test open_tags() and get_xpath().
+	 * Test next_tag(), next_token(), and get_xpath().
 	 *
-	 * @covers ::open_tags
+	 * @covers ::next_tag
+	 * @covers ::next_token
 	 * @covers ::get_xpath
 	 *
 	 * @dataProvider data_provider_sample_documents
@@ -313,14 +314,16 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	 *
 	 * @throws Exception But not really.
 	 */
-	public function test_open_tags_and_get_xpath( string $document, array $open_tags, array $xpaths ): void {
-		$p = new OD_HTML_Tag_Walker( $document );
+	public function test_next_tag_and_get_xpath( string $document, array $open_tags, array $xpaths ): void {
+		$p = new OD_HTML_Tag_Processor( $document );
 		$this->assertSame( '', $p->get_xpath(), 'Expected empty XPath since iteration has not started.' );
 		$actual_open_tags = array();
 		$actual_xpaths    = array();
-		foreach ( $p->open_tags() as $open_tag ) {
-			$actual_open_tags[] = $open_tag;
-			$actual_xpaths[]    = $p->get_xpath();
+		while ( $p->next_tag() ) {
+			if ( ! $p->is_tag_closer() ) {
+				$actual_open_tags[] = $p->get_tag();
+				$actual_xpaths[]    = $p->get_xpath();
+			}
 		}
 
 		$this->assertSame( $open_tags, $actual_open_tags, "Expected list of open tags to match.\nSnapshot: " . $this->export_array_snapshot( $actual_open_tags, true ) );
@@ -328,21 +331,14 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test open_tags() throwing exception when called more than once.
+	 * Test next_tag() passing query which is invalid.
 	 *
-	 * @covers ::open_tags
+	 * @covers ::next_tag
 	 */
-	public function test_open_tags_throwing_exception(): void {
-		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Open tags may only be iterated over once per instance.' );
-		$p = new OD_HTML_Tag_Walker( '<html><body><p>Hello world</p></body></html>' );
-
-		$this->assertSame(
-			array( 'HTML', 'BODY', 'P' ),
-			iterator_to_array( $p->open_tags() )
-		);
-
-		iterator_to_array( $p->open_tags() );
+	public function test_next_tag_with_query(): void {
+		$this->expectException( InvalidArgumentException::class );
+		$p = new OD_HTML_Tag_Processor( '<html></html>' );
+		$p->next_tag( array( 'tag_name' => 'HTML' ) );
 	}
 
 	/**
@@ -354,7 +350,7 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	 * @throws Exception But not really.
 	 */
 	public function test_append_head_html(): void {
-		$html     = '
+		$html      = '
 			<html>
 				<head>
 					<meta charset=utf-8>
@@ -366,19 +362,20 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 				</body>
 			</html>
 		';
-		$injected = '<meta name="generator" content="optimization-detective">';
-		$walker   = new OD_HTML_Tag_Walker( $html );
-		$this->assertFalse( $walker->append_head_html( $injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
+		$injected  = '<meta name="generator" content="optimization-detective">';
+		$processor = new OD_HTML_Tag_Processor( $html );
+		$this->assertFalse( $processor->append_head_html( $injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
 
 		$saw_head = false;
-		foreach ( $walker->open_tags() as $tag ) {
+		while ( $processor->next_tag() ) {
+			$tag = $processor->get_tag();
 			if ( 'HEAD' === $tag ) {
 				$saw_head = true;
 			}
 		}
 		$this->assertTrue( $saw_head );
 
-		$this->assertTrue( $walker->append_head_html( $injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
+		$this->assertTrue( $processor->append_head_html( $injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
 		$expected = "
 			<html>
 				<head>
@@ -391,7 +388,7 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 				</body>
 			</html>
 		";
-		$this->assertSame( $expected, $walker->get_updated_html() );
+		$this->assertSame( $expected, $processor->get_updated_html() );
 	}
 
 	/**
@@ -420,13 +417,14 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 		';
 		$head_injected = '<link rel="home" href="/">';
 		$body_injected = '<script>document.write("Goodbye!")</script>';
-		$walker        = new OD_HTML_Tag_Walker( $html );
-		$this->assertFalse( $walker->append_head_html( $head_injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
-		$this->assertFalse( $walker->append_body_html( $body_injected ), 'Expected injection to fail because the BODY closing tag has not been encountered yet.' );
+		$processor     = new OD_HTML_Tag_Processor( $html );
+		$this->assertFalse( $processor->append_head_html( $head_injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
+		$this->assertFalse( $processor->append_body_html( $body_injected ), 'Expected injection to fail because the BODY closing tag has not been encountered yet.' );
 
 		$saw_head = false;
 		$saw_body = false;
-		foreach ( $walker->open_tags() as $tag ) {
+		while ( $processor->next_tag() ) {
+			$tag = $processor->get_tag();
 			if ( 'HEAD' === $tag ) {
 				$saw_head = true;
 			} elseif ( 'BODY' === $tag ) {
@@ -436,8 +434,8 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 		$this->assertTrue( $saw_head );
 		$this->assertTrue( $saw_body );
 
-		$this->assertTrue( $walker->append_head_html( $head_injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
-		$this->assertTrue( $walker->append_body_html( $body_injected ), 'Expected injection to succeed because the BODY closing tag has been encountered.' );
+		$this->assertTrue( $processor->append_head_html( $head_injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
+		$this->assertTrue( $processor->append_body_html( $body_injected ), 'Expected injection to succeed because the BODY closing tag has been encountered.' );
 		$expected = "
 			<html>
 				<head>
@@ -452,35 +450,28 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 				<!--</BODY>-->
 			</html>
 		";
-		$this->assertSame( $expected, $walker->get_updated_html() );
+		$this->assertSame( $expected, $processor->get_updated_html() );
 	}
 
 	/**
 	 * Test get_tag(), get_attribute(), set_attribute(), remove_attribute(), and get_updated_html().
 	 *
-	 * @covers ::get_tag
-	 * @covers ::get_attribute
 	 * @covers ::set_attribute
 	 * @covers ::remove_attribute
-	 * @covers ::get_updated_html
 	 * @covers ::set_meta_attribute
-	 * @covers ::has_class
 	 *
 	 * @throws Exception But not really.
 	 */
 	public function test_html_tag_processor_wrapper_methods(): void {
-		$processor = new OD_HTML_Tag_Walker( '<html lang="en" class="foo" dir="ltr"></html>' );
-		foreach ( $processor->open_tags() as $open_tag ) {
-			if ( 'HTML' === $open_tag ) {
-				$this->assertSame( $open_tag, $processor->get_tag() );
-				$this->assertSame( 'en', $processor->get_attribute( 'lang' ) );
+		$processor = new OD_HTML_Tag_Processor( '<html lang="en" class="foo" dir="ltr"></html>' );
+		while ( $processor->next_tag() ) {
+			$open_tag = $processor->get_tag();
+			if ( 'HTML' === $open_tag && ! $processor->is_tag_closer() ) {
 				$processor->set_attribute( 'lang', 'es' );
 				$processor->remove_attribute( 'dir' );
 				$processor->set_attribute( 'id', 'root' );
 				$processor->set_meta_attribute( 'foo', 'bar' );
 				$processor->set_meta_attribute( 'baz', true );
-				$this->assertTrue( $processor->has_class( 'foo' ) );
-				$this->assertFalse( $processor->has_class( 'bar' ) );
 			}
 		}
 		$this->assertSame( '<html data-od-added-id data-od-baz data-od-foo="bar" data-od-removed-dir="ltr" data-od-replaced-lang="en" id="root" lang="es" class="foo" ></html>', $processor->get_updated_html() );

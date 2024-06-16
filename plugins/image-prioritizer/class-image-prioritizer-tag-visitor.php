@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Visitor for the tag walker that optimizes image tags.
+ * Tag visitor that optimizes image tags.
  *
  * @since 0.1.0
  * @access private
@@ -47,10 +47,10 @@ abstract class Image_Prioritizer_Tag_Visitor {
 	/**
 	 * Visits a tag.
 	 *
-	 * @param OD_HTML_Tag_Walker $walker Walker.
+	 * @param OD_HTML_Tag_Processor $processor Processor.
 	 * @return bool Whether the visitor visited the tag.
 	 */
-	abstract public function __invoke( OD_HTML_Tag_Walker $walker ): bool;
+	abstract public function __invoke( OD_HTML_Tag_Processor $processor ): bool;
 
 	/**
 	 * Determines if the provided URL is a data: URL.
