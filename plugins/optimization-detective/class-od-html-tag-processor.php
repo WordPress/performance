@@ -227,7 +227,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @inheritDoc
 	 * @since n.e.x.t
-	 * @todo Add a next_open_tag() convenience method.
 	 *
 	 * @param null $query Query.
 	 * @return bool Whether a tag was matched.

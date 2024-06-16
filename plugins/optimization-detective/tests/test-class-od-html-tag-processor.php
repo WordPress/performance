@@ -302,6 +302,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	/**
 	 * Test next_tag(), next_token(), and get_xpath().
 	 *
+	 * @covers ::next_open_tag
 	 * @covers ::next_tag
 	 * @covers ::next_token
 	 * @covers ::get_xpath
@@ -319,11 +320,9 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$this->assertSame( '', $p->get_xpath(), 'Expected empty XPath since iteration has not started.' );
 		$actual_open_tags = array();
 		$actual_xpaths    = array();
-		while ( $p->next_tag() ) {
-			if ( ! $p->is_tag_closer() ) {
-				$actual_open_tags[] = $p->get_tag();
-				$actual_xpaths[]    = $p->get_xpath();
-			}
+		while ( $p->next_open_tag() ) {
+			$actual_open_tags[] = $p->get_tag();
+			$actual_xpaths[]    = $p->get_xpath();
 		}
 
 		$this->assertSame( $open_tags, $actual_open_tags, "Expected list of open tags to match.\nSnapshot: " . $this->export_array_snapshot( $actual_open_tags, true ) );
@@ -367,7 +366,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$this->assertFalse( $processor->append_head_html( $injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
 
 		$saw_head = false;
-		while ( $processor->next_tag() ) {
+		while ( $processor->next_open_tag() ) {
 			$tag = $processor->get_tag();
 			if ( 'HEAD' === $tag ) {
 				$saw_head = true;
@@ -423,7 +422,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 
 		$saw_head = false;
 		$saw_body = false;
-		while ( $processor->next_tag() ) {
+		while ( $processor->next_open_tag() ) {
 			$tag = $processor->get_tag();
 			if ( 'HEAD' === $tag ) {
 				$saw_head = true;
@@ -464,9 +463,9 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 */
 	public function test_html_tag_processor_wrapper_methods(): void {
 		$processor = new OD_HTML_Tag_Processor( '<html lang="en" class="foo" dir="ltr"></html>' );
-		while ( $processor->next_tag() ) {
+		while ( $processor->next_open_tag() ) {
 			$open_tag = $processor->get_tag();
-			if ( 'HTML' === $open_tag && ! $processor->is_tag_closer() ) {
+			if ( 'HTML' === $open_tag ) {
 				$processor->set_attribute( 'lang', 'es' );
 				$processor->remove_attribute( 'dir' );
 				$processor->set_attribute( 'id', 'root' );
