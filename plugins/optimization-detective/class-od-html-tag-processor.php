@@ -286,6 +286,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @return bool Whether a token was parsed.
 	 */
 	public function next_token(): bool {
+		$this->current_xpath = null; // Clear cache.
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags    = array();
 			$this->open_stack_indices = array();
@@ -323,8 +324,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 				++$this->open_stack_indices[ $level ];
 			}
 
-			$this->current_xpath = null; // Clear cache.
-
 			// Keep track of whether the next call to next_token() should start by
 			// immediately popping off the stack due to this tag being either self-closing
 			// or a raw text tag.
@@ -360,7 +359,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 				$this->set_bookmark( self::END_OF_BODY_BOOKMARK );
 			}
 
-			array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) + 1 );
+			array_splice( $this->open_stack_indices, $this->get_current_depth() + 1 );
 		}
 
 		return true;
@@ -417,6 +416,18 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			$this->set_meta_attribute( "removed-{$name}", is_string( $old_value ) ? $old_value : true );
 		}
 		return $result;
+	}
+
+	/**
+	 * Returns the nesting depth of the current location in the document.
+	 *
+	 * @since n.e.x.t
+	 * @see WP_HTML_Processor::get_current_depth()
+	 *
+	 * @return int Nesting-depth of current location in the document.
+	 */
+	public function get_current_depth(): int {
+		return count( $this->open_stack_tags );
 	}
 
 	/**

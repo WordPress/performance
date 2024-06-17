@@ -477,6 +477,117 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test bookmarking and seeking.
+	 *
+	 * @covers ::set_bookmark
+	 * @covers ::seek
+	 * @covers ::release_bookmark
+	 */
+	public function test_bookmarking_and_seeking(): void {
+		$processor = new OD_HTML_Tag_Processor(
+			'
+				<html>
+					<head></head>
+					<body>
+						<iframe src="https://example.net/"></iframe>
+						<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
+							<div class="wp-block-embed__wrapper">
+								<iframe title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+							</div>
+							<figcaption>This is the State of the Word!</figcaption>
+						</figure>
+						<iframe src="https://example.com/"></iframe>
+						<img src="https://example.com/foo.jpg">
+					</body>
+				</html>
+			'
+		);
+
+		$actual_figure_contents = array();
+
+		$bookmarks = array();
+		while ( $processor->next_open_tag() ) {
+			if (
+				'FIGURE' === $processor->get_tag()
+				&&
+				$processor->has_class( 'wp-block-embed' )
+			) {
+				$embed_block_depth = $processor->get_current_depth();
+				do {
+					if ( ! $processor->is_tag_closer() ) {
+						$bookmark = $processor->get_tag();
+						$processor->set_bookmark( $bookmark );
+						$bookmarks[]              = $bookmark;
+						$actual_figure_contents[] = array(
+							'tag'   => $processor->get_tag(),
+							'xpath' => $processor->get_xpath(),
+							'depth' => $processor->get_current_depth(),
+						);
+					}
+					if ( $processor->get_current_depth() < $embed_block_depth ) {
+						break;
+					}
+				} while ( $processor->next_tag() );
+			}
+		}
+
+		$expected_figure_contents = array(
+			array(
+				'tag'   => 'FIGURE',
+				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]',
+				'depth' => 3,
+			),
+			array(
+				'tag'   => 'DIV',
+				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]',
+				'depth' => 4,
+			),
+			array(
+				'tag'   => 'IFRAME',
+				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::IFRAME]',
+				'depth' => 5,
+			),
+			array(
+				'tag'   => 'FIGCAPTION',
+				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[2][self::FIGCAPTION]',
+				'depth' => 4,
+			),
+		);
+
+		$this->assertSame( $expected_figure_contents, $actual_figure_contents );
+
+		$sought_actual_contents = array();
+		foreach ( $bookmarks as $bookmark ) {
+			$processor->seek( $bookmark );
+			$sought_actual_contents[] = array(
+				'tag'   => $processor->get_tag(),
+				'xpath' => $processor->get_xpath(),
+				'depth' => $processor->get_current_depth(),
+			);
+		}
+
+		$this->assertSame( $expected_figure_contents, $sought_actual_contents );
+
+		$this->assertTrue( $processor->has_bookmark( 'FIGURE' ) );
+		$this->assertTrue( $processor->has_bookmark( 'DIV' ) );
+		$this->assertTrue( $processor->has_bookmark( 'IFRAME' ) );
+		$this->assertTrue( $processor->has_bookmark( 'FIGCAPTION' ) );
+		$this->assertFalse( $processor->has_bookmark( 'IMG' ) );
+		$processor->seek( 'IFRAME' );
+		$processor->set_attribute( 'loading', 'lazy' );
+
+		$this->assertStringContainsString(
+			'<iframe data-od-added-loading loading="lazy" title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+			$processor->get_updated_html()
+		);
+
+		$processor->release_bookmark( 'FIGURE' );
+		$this->assertFalse( $processor->has_bookmark( 'FIGURE' ) );
+
+		// TODO: Try adding too many bookmarks.
+	}
+
+	/**
 	 * Export an array as a PHP literal to use as a snapshot.
 	 *
 	 * @param array<int|string, mixed> $data Data.
