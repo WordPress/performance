@@ -24,6 +24,9 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		switch_theme( 'twentytwentyfour' );
 
 		self::$image_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		// Disable lazy loading attribute.
+		add_filter( 'wp_img_tag_add_loading_attr', '__return_false' );
 	}
 
 	/**
@@ -34,10 +37,9 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 * @param string $image_size Image size.
 	 */
 	public function test_image_block_with_full_alignment( string $image_size ): void {
-		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"full"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" /></figure><!-- /wp:image -->';
-		$parsed_blocks = parse_blocks( $block_content );
-		$block         = new WP_Block( $parsed_blocks[0] );
-		$result        = $block->render();
+		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"full"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" alt="" class="wp-image-' . self::$image_id . '"/></figure><!-- /wp:image -->';
+
+		$result = apply_filters( 'the_content', $block_content );
 
 		$this->assertStringContainsString( 'sizes="100vw" ', $result );
 	}
@@ -66,9 +68,8 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		<p class="has-text-align-center has-large-font-size"></p>
 		<!-- /wp:paragraph --></div></div>
 		<!-- /wp:cover -->';
-		$parsed_blocks = parse_blocks( $block_content );
-		$block         = new WP_Block( $parsed_blocks[0] );
-		$result        = $block->render();
+
+		$result = apply_filters( 'the_content', $block_content );
 		$this->assertStringContainsString( 'sizes="100vw" ', $result );
 	}
 
@@ -80,10 +81,9 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 * @param string $image_size Image size.
 	 */
 	public function test_image_block_with_wide_alignment( string $image_size ): void {
-		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"wide"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" /></figure><!-- /wp:image -->';
-		$parsed_blocks = parse_blocks( $block_content );
-		$block         = new WP_Block( $parsed_blocks[0] );
-		$result        = $block->render();
+		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"wide"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" alt="" class="wp-image-' . self::$image_id . '"/></figure><!-- /wp:image -->';
+
+		$result = apply_filters( 'the_content', $block_content );
 
 		$this->assertStringContainsString( 'sizes="(max-width: 1280px) 100vw, 1280px" ', $result );
 	}
@@ -120,9 +120,8 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		<p class="has-text-align-center has-large-font-size"></p>
 		<!-- /wp:paragraph --></div></div>
 		<!-- /wp:cover -->';
-		$parsed_blocks = parse_blocks( $block_content );
-		$block         = new WP_Block( $parsed_blocks[0] );
-		$result        = $block->render();
+
+		$result = apply_filters( 'the_content', $block_content );
 		$this->assertStringContainsString( 'sizes="(max-width: 1280px) 100vw, 1280px" ', $result );
 	}
 
@@ -137,13 +136,11 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 */
 	public function test_image_block_with_default_alignment( string $image_size, string $expected, string $is_resize = '' ): void {
 		if ( $is_resize ) {
-			$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"width":"100px","sizeSlug":"' . $image_size . '","linkDestination":"none"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '"  style="width:100px" /></figure><!-- /wp:image -->';
+			$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"width":"100px","sizeSlug":"' . $image_size . '","linkDestination":"none"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '"  style="width:100px" alt="" class="wp-image-' . self::$image_id . '"/></figure><!-- /wp:image -->';
 		} else {
-			$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" /></figure><!-- /wp:image -->';
+			$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" alt="" class="wp-image-' . self::$image_id . '"/></figure><!-- /wp:image -->';
 		}
-		$parsed_blocks = parse_blocks( $block_content );
-		$block         = new WP_Block( $parsed_blocks[0] );
-		$result        = $block->render();
+		$result = apply_filters( 'the_content', $block_content );
 
 		$this->assertStringContainsString( $expected, $result );
 	}
@@ -204,9 +201,8 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		<p class="has-text-align-center has-large-font-size"></p>
 		<!-- /wp:paragraph --></div></div>
 		<!-- /wp:cover -->';
-		$parsed_blocks = parse_blocks( $block_content );
-		$block         = new WP_Block( $parsed_blocks[0] );
-		$result        = $block->render();
+
+		$result = apply_filters( 'the_content', $block_content );
 		$this->assertStringContainsString( 'sizes="(max-width: 620px) 100vw, 620px" ', $result );
 	}
 
@@ -217,9 +213,8 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		$block_content = '<!-- wp:paragraph -->
 		<p>No image here</p>
 		<!-- /wp:paragraph -->';
-		$parsed_blocks = parse_blocks( $block_content );
-		$block         = new WP_Block( $parsed_blocks[0] );
-		$result        = $block->render();
+
+		$result = apply_filters( 'the_content', $block_content );
 
 		$this->assertStringContainsString( '<p>No image here</p>', $result );
 	}
