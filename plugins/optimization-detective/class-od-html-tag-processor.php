@@ -202,12 +202,12 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $current_xpath = null;
 
 	/**
-	 * Whether the previous tag was void.
+	 * Whether the previous tag does not expect a closer.
 	 *
 	 * @since n.e.x.t
 	 * @var bool
 	 */
-	private $last_tag_visits_closer = false;
+	private $previous_tag_without_closer = false;
 
 	/**
 	 * Constructor.
@@ -257,6 +257,27 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
+	 * Whether the tag expects a closing tag.
+	 *
+	 * @see WP_HTML_Processor::expects_closer()
+	 * @since n.e.x.t
+	 *
+	 * @param string|null $tag_name Tag name, if not provided then the current tag is used. Optional.
+	 * @return bool Whether to expect a closer for the tag.
+	 */
+	public function expects_closer( ?string $tag_name = null ): bool {
+		if ( is_null( $tag_name ) ) {
+			$tag_name = $this->get_tag();
+		}
+
+		return ! (
+			in_array( $tag_name, self::VOID_TAGS, true )
+			||
+			in_array( $tag_name, self::RAW_TEXT_TAGS, true )
+		);
+	}
+
+	/**
 	 * Finds the next token in the HTML document.
 	 *
 	 * @inheritDoc
@@ -276,7 +297,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			return true;
 		}
 
-		if ( $this->last_tag_visits_closer ) {
+		if ( $this->previous_tag_without_closer ) {
 			array_pop( $this->open_stack_tags );
 		}
 
@@ -307,22 +328,16 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			// Keep track of whether the next call to next_token() should start by
 			// immediately popping off the stack due to this tag being either self-closing
 			// or a raw text tag.
-			$this->last_tag_visits_closer = (
-				in_array( $tag_name, self::VOID_TAGS, true )
-				||
-				in_array( $tag_name, self::RAW_TEXT_TAGS, true )
+			$this->previous_tag_without_closer = (
+				! $this->expects_closer()
 				||
 				( $this->has_self_closing_flag() && $this->is_foreign_element() )
 			);
 		} else {
-			$this->last_tag_visits_closer = false; // Right?
+			$this->previous_tag_without_closer = false;
 
 			// If the closing tag is for self-closing or raw text tag, we ignore it since it was already handled above.
-			if (
-				in_array( $tag_name, self::VOID_TAGS, true )
-				||
-				in_array( $tag_name, self::RAW_TEXT_TAGS, true )
-			) {
+			if ( ! $this->expects_closer() ) {
 				return true;
 			}
 
