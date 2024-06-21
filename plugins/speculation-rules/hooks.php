@@ -86,7 +86,7 @@ function plsr_filter_searchform( $form ): string {
 			if ( ! $p->get_attribute( 'data-wp-context' ) ) {
 				$p->set_attribute( 'data-wp-context', '{}' );
 			}
-			// TODO: Shouldn't we just watch changes to the one context key?
+			// Note: This directive only subscribes to the properties that are accessed during its execution.
 			$p->set_attribute( "data-wp-watch--{$namespace}", "{$namespace}::callbacks.doSpeculativeLoad" );
 			$p->set_attribute( "data-wp-on--submit--{$namespace}", "{$namespace}::actions.handleFormSubmit" );
 
