@@ -32,11 +32,11 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		}
 		// The logic here is resize the image to 1x1 pixel, then get the color of that pixel.
 		$shorted_image = imagecreatetruecolor( 1, 1 );
-		$image_width   = imagesx( $this->image );
-		$image_height  = imagesy( $this->image );
-		if ( false === $shorted_image || false === $image_width || false === $image_height ) {
+		if ( false === $shorted_image ) {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 		}
+		$image_width  = imagesx( $this->image );
+		$image_height = imagesy( $this->image );
 		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, $image_width, $image_height );
 
 		$rgb = imagecolorat( $shorted_image, 0, 0 );
@@ -78,9 +78,6 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 					return new WP_Error( 'unable_to_obtain_rgb_via_imagecolorat' );
 				}
 				$rgba = imagecolorsforindex( $this->image, $rgb );
-				if ( ! is_array( $rgba ) ) {
-					return new WP_Error( 'unable_to_obtain_rgba_via_imagecolorsforindex' );
-				}
 				if ( $rgba['alpha'] > 0 ) {
 					return true;
 				}
