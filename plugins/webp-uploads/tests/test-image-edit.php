@@ -109,7 +109,7 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 	}
 
 	/**
-	 * Prevent to back up the sources when the sources attributes does not exists
+	 * Prevent to back up the sources when the sources attribute does not exist.
 	 */
 	public function test_it_should_prevent_to_back_up_the_sources_when_the_sources_attributes_does_not_exists(): void {
 		// Disable the generation of the sources attributes.
@@ -136,7 +136,7 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 	}
 
 	/**
-	 * Prevent to backup the full size image if only the thumbnail is edited
+	 * Prevent backing up the full size image if only the thumbnail is edited.
 	 */
 	public function test_it_should_prevent_to_backup_the_full_size_image_if_only_the_thumbnail_is_edited(): void {
 		if ( ! webp_uploads_image_edit_thumbnails_separately() ) {
