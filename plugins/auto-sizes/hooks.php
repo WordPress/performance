@@ -167,6 +167,12 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 			continue; // Skip if width attribute is not found.
 		}
 
+		// Skips second time parsing if custom IMG attribute removed.
+		$image_alignment = $processor->get_attribute( 'data-align' );
+		if ( ! $image_alignment ) {
+			continue;
+		}
+
 		$layout = wp_get_global_settings( array( 'layout' ) );
 		$align  = $processor->get_attribute( 'data-align' );
 
@@ -199,8 +205,8 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 			$processor->set_attribute( 'sizes', $sizes );
 		}
 
-		// TODO: The filter runs two time so if we remove the attribute first time second time it shows
-		// that there is not alignment selected. Once it resolved we should remove data-align and data-resize-width.
+		$processor->remove_attribute( 'data-align' );
+		$processor->remove_attribute( 'data-resize-width' );
 	}
 
 	return $processor->get_updated_html();
