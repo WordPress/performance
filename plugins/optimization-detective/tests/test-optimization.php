@@ -54,10 +54,12 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		// buffer callback. See <https://stackoverflow.com/a/61439514/93579>.
 		ob_start();
 
+		$filter_invoked = false;
 		add_filter(
 			'od_template_output_buffer',
-			function ( $buffer ) use ( $original, $expected ) {
+			function ( $buffer ) use ( $original, $expected, &$filter_invoked ) {
 				$this->assertSame( $original, $buffer );
+				$filter_invoked = true;
 				return $expected;
 			}
 		);
@@ -71,6 +73,44 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 
 		$buffer = ob_get_clean(); // Get the buffer from our wrapper output buffer.
 		$this->assertSame( $expected, $buffer );
+		$this->assertTrue( $filter_invoked );
+	}
+
+	/**
+	 * Make output is buffered and that it is also filtered.
+	 *
+	 * @covers ::od_buffer_output
+	 */
+	public function test_od_buffer_output_not_finalized(): void {
+		$original = 'Hello My World!';
+		$override = 'Ciao mondo!';
+
+		// In order to test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
+		// buffer callback. See <https://stackoverflow.com/a/61439514/93579>.
+		ob_start();
+
+		$filter_invoked = false;
+		add_filter(
+			'od_template_output_buffer',
+			function ( $buffer ) use ( $original, &$filter_invoked ) {
+				$this->assertSame( $original, $buffer );
+				$filter_invoked = true;
+				return '¡Hola Mi Mundo!';
+			}
+		);
+
+		$original_ob_level = ob_get_level();
+		od_buffer_output( '' );
+		$this->assertSame( $original_ob_level + 1, ob_get_level(), 'Expected call to ob_start().' );
+		echo $original;
+
+		ob_clean(); // Note the lack of flush here.
+		echo $override;
+
+		$buffer = ob_get_clean(); // Get the buffer from our wrapper output buffer.
+
+		$this->assertFalse( $filter_invoked );
+		$this->assertSame( $override, $buffer );
 	}
 
 	/**

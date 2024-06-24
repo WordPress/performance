@@ -32,16 +32,19 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function od_buffer_output( string $passthrough ): string {
 	ob_start(
-		static function ( string $output ): string {
-			/**
-			 * Filters the template output buffer prior to sending to the client.
-			 *
-			 * @since 0.1.0
-			 *
-			 * @param string $output Output buffer.
-			 * @return string Filtered output buffer.
-			 */
-			return (string) apply_filters( 'od_template_output_buffer', $output );
+		static function ( string $output, ?int $phase ): string {
+			if ( $phase & PHP_OUTPUT_HANDLER_FINAL ) {
+				/**
+				 * Filters the template output buffer prior to sending to the client.
+				 *
+				 * @since 0.1.0
+				 *
+				 * @param string $output Output buffer.
+				 * @return string Filtered output buffer.
+				 */
+				$output = (string) apply_filters( 'od_template_output_buffer', $output );
+			}
+			return $output;
 		}
 	);
 	return $passthrough;
