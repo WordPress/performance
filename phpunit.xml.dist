@@ -20,6 +20,9 @@
 		<testsuite name="embed-optimizer">
 			<directory suffix=".php">plugins/embed-optimizer/tests</directory>
 		</testsuite>
+		<testsuite name="image-prioritizer">
+			<directory suffix=".php">plugins/image-prioritizer/tests</directory>
+		</testsuite>
 		<testsuite name="optimization-detective">
 			<directory suffix=".php">plugins/optimization-detective/tests</directory>
 		</testsuite>

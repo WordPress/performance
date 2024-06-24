@@ -158,143 +158,35 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
-	// Capture all the XPaths for known LCP elements.
-	$groups_by_lcp_element_xpath   = array();
-	$group_has_unknown_lcp_element = false;
-	foreach ( $group_collection as $group ) {
-		$lcp_element = $group->get_lcp_element();
-		if ( null !== $lcp_element ) {
-			$groups_by_lcp_element_xpath[ $lcp_element['xpath'] ][] = $group;
-		} else {
-			$group_has_unknown_lcp_element = true;
-		}
-	}
-
-	// Prepare to set fetchpriority attribute on the image when all breakpoints have the same LCP element.
-	if (
-		// All breakpoints share the same LCP element (or all have none at all).
-		1 === count( $groups_by_lcp_element_xpath )
-		&&
-		// The breakpoints don't share a common lack of a detected LCP element.
-		! $group_has_unknown_lcp_element
-		&&
-		// All breakpoints have URL metrics being reported.
-		$group_collection->is_every_group_populated()
-	) {
-		$common_lcp_xpath = key( $groups_by_lcp_element_xpath );
-	} else {
-		$common_lcp_xpath = null;
-	}
-
-	$preload_links = new OD_Preload_Link_Collection();
-
-	$is_data_url = static function ( string $url ): bool {
-		return str_starts_with( strtolower( $url ), 'data:' );
-	};
-
 	// Walk over all tags in the document and ensure fetchpriority is set/removed, and construct preload links for image LCP elements.
-	$walker = new OD_HTML_Tag_Walker( $buffer );
-	foreach ( $walker->open_tags() as $tag_name ) {
-		$src = trim( (string) $walker->get_attribute( 'src' ) );
+	$preload_links = new OD_Preload_Link_Collection();
+	$walker        = new OD_HTML_Tag_Walker( $buffer );
 
-		$is_img_tag = (
-			'IMG' === $tag_name
-			&&
-			$src
-			&&
-			! $is_data_url( $src )
-		);
+	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
 
-		/*
-		 * Note that CSS allows for a `background`/`background-image` to have multiple `url()` CSS functions, resulting
-		 * in multiple background images being layered on top of each other. This ability is not employed in core. Here
-		 * is a regex to search WPDirectory for instances of this: /background(-image)?:[^;}]+?url\([^;}]+?[^_]url\(/.
-		 * It is used in Jetpack with the second background image being a gradient. To support multiple background
-		 * images, this logic would need to be modified to make $background_image an array and to have a more robust
-		 * parser of the `url()` functions from the property value.
-		 */
-		$background_image_url = null;
-		$style                = $walker->get_attribute( 'style' );
-		if (
-			$style
-			&&
-			preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', (string) $style, $matches )
-			&&
-			! $is_data_url( $matches['background_image'] )
-		) {
-			$background_image_url = $matches['background_image'];
+	/**
+	 * Fires to register tag visitors before walking over the document to perform optimizations.
+	 *
+	 * @since 0.3.0
+	 *
+	 * @param OD_Tag_Visitor_Registry         $tag_visitor_registry Tag visitor registry.
+	 * @param OD_URL_Metrics_Group_Collection $group_collection     URL Metrics Group collection.
+	 * @param OD_Preload_Link_Collection      $preload_links        Preload links collection.
+	 */
+	do_action( 'od_register_tag_visitors', $tag_visitor_registry, $group_collection, $preload_links );
+
+	$visitors  = iterator_to_array( $tag_visitor_registry );
+	$generator = $walker->open_tags();
+	while ( $generator->valid() ) {
+		$did_visit = false;
+		foreach ( $visitors as $visitor ) {
+			$did_visit = $visitor( $walker, $group_collection, $preload_links ) || $did_visit;
 		}
 
-		if ( ! ( $is_img_tag || $background_image_url ) ) {
-			continue;
+		if ( $did_visit && $needs_detection ) {
+			$walker->set_meta_attribute( 'xpath', $walker->get_xpath() );
 		}
-
-		$xpath = $walker->get_xpath();
-
-		// Ensure the fetchpriority attribute is set on the element properly.
-		if ( $is_img_tag ) {
-			if ( $common_lcp_xpath && $xpath === $common_lcp_xpath ) {
-				if ( 'high' === $walker->get_attribute( 'fetchpriority' ) ) {
-					$walker->set_attribute( 'data-od-fetchpriority-already-added', true );
-				} else {
-					$walker->set_attribute( 'fetchpriority', 'high' );
-					$walker->set_attribute( 'data-od-added-fetchpriority', true );
-				}
-
-				// Never include loading=lazy on the LCP image common across all breakpoints.
-				if ( 'lazy' === $walker->get_attribute( 'loading' ) ) {
-					$walker->set_attribute( 'data-od-removed-loading', $walker->get_attribute( 'loading' ) );
-					$walker->remove_attribute( 'loading' );
-				}
-			} elseif ( $walker->get_attribute( 'fetchpriority' ) && $group_collection->is_every_group_populated() ) {
-				// Note: The $all_breakpoints_have_url_metrics condition here allows for server-side heuristics to
-				// continue to apply while waiting for all breakpoints to have metrics collected for them.
-				$walker->set_attribute( 'data-od-removed-fetchpriority', $walker->get_attribute( 'fetchpriority' ) );
-				$walker->remove_attribute( 'fetchpriority' );
-			}
-		}
-
-		// TODO: If the image is visible (intersectionRatio!=0) in any of the URL metrics, remove loading=lazy.
-		// TODO: Conversely, if an image is the LCP element for one breakpoint but not another, add loading=lazy. This won't hurt performance since the image is being preloaded.
-
-		// If this element is the LCP (for a breakpoint group), add a preload link for it.
-		if ( array_key_exists( $xpath, $groups_by_lcp_element_xpath ) ) {
-			foreach ( $groups_by_lcp_element_xpath[ $xpath ] as $group ) {
-				$link_attributes = array(
-					'fetchpriority' => 'high',
-					'as'            => 'image',
-				);
-				if ( $is_img_tag ) {
-					$link_attributes = array_merge(
-						$link_attributes,
-						array_filter(
-							array(
-								'href'        => (string) $walker->get_attribute( 'src' ),
-								'imagesrcset' => (string) $walker->get_attribute( 'srcset' ),
-								'imagesizes'  => (string) $walker->get_attribute( 'sizes' ),
-							)
-						)
-					);
-
-					$crossorigin = $walker->get_attribute( 'crossorigin' );
-					if ( $crossorigin ) {
-						$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
-					}
-				} elseif ( $background_image_url ) {
-					$link_attributes['href'] = $background_image_url;
-				}
-
-				$preload_links->add_link(
-					$link_attributes,
-					$group->get_minimum_viewport_width(),
-					$group->get_maximum_viewport_width()
-				);
-			}
-		}
-
-		if ( $needs_detection ) {
-			$walker->set_attribute( 'data-od-xpath', $xpath );
-		}
+		$generator->next();
 	}
 
 	// Inject any preload links at the end of the HEAD.

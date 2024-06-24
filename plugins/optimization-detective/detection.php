@@ -60,6 +60,9 @@ function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection 
 		'storageLockTTL'          => OD_Storage_Lock::get_ttl(),
 		'webVitalsLibrarySrc'     => $web_vitals_lib_src,
 	);
+	if ( WP_DEBUG ) {
+		$detect_args['urlMetricsGroupCollection'] = $group_collection;
+	}
 
 	return wp_get_inline_script_tag(
 		sprintf(

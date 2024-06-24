@@ -414,7 +414,7 @@ final class OD_HTML_Tag_Walker {
 	 * This is a wrapper around the underlying WP_HTML_Tag_Processor method of the same name since only a limited number of
 	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 * @see WP_HTML_Tag_Processor::get_tag()
 	 *
 	 * @return string|null Name of currently matched tag in input HTML, or `null` if none found.
@@ -453,7 +453,29 @@ final class OD_HTML_Tag_Walker {
 	 * @return bool Whether an attribute value was set.
 	 */
 	public function set_attribute( string $name, $value ): bool {
-		return $this->processor->set_attribute( $name, $value );
+		$existing_value = $this->processor->get_attribute( $name );
+		$result         = $this->processor->set_attribute( $name, $value );
+		if ( $result ) {
+			if ( is_string( $existing_value ) ) {
+				$this->set_meta_attribute( "replaced-{$name}", $existing_value );
+			} else {
+				$this->set_meta_attribute( "added-{$name}", true );
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Sets a meta attribute.
+	 *
+	 * All meta attributes are prefixed with 'data-od-'.
+	 *
+	 * @param string      $name  Meta attribute name.
+	 * @param string|true $value Value.
+	 * @return bool Whether an attribute was set.
+	 */
+	public function set_meta_attribute( string $name, $value ): bool {
+		return $this->processor->set_attribute( "data-od-{$name}", $value );
 	}
 
 	/**
@@ -469,7 +491,12 @@ final class OD_HTML_Tag_Walker {
 	 * @return bool Whether an attribute was removed.
 	 */
 	public function remove_attribute( string $name ): bool {
-		return $this->processor->remove_attribute( $name );
+		$old_value = $this->processor->get_attribute( $name );
+		$result    = $this->processor->remove_attribute( $name );
+		if ( $result ) {
+			$this->set_meta_attribute( "removed-{$name}", is_string( $old_value ) ? $old_value : true );
+		}
+		return $result;
 	}
 
 	/**

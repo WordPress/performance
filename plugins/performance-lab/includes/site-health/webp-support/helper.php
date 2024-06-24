@@ -41,7 +41,7 @@ function webp_uploads_check_webp_supported_test(): array {
 		$result['actions'] = sprintf(
 			'<p>%s</p>',
 			/* translators: Accessibility text. */
-			__( 'WebP support can only be enabled by your hosting provider, so contact them for more information.', 'performance-lab' )
+			__( 'WebP support can only be enabled by your hosting provider. Please contact them to inquire about switching to a plan that supports WebP, or consider switching to a host that offers this capability. <a href="https://make.wordpress.org/hosting/2022/03/30/wordpress-hosting-and-webp-support/" target="_blank">Learn more</a> about WebP image support for WordPress sites.', 'performance-lab' )
 		);
 	}
 

@@ -234,7 +234,7 @@ class Perflab_Server_Timing {
 	 * assured that other plugins' output buffer callbacks will run before the Server-Timing one that sends the
 	 * Server-Timing header.
 	 *
-	 * @since n.e.x.t
+	 * @since 3.2.0
 	 */
 	public function add_hooks(): void {
 		if ( $this->use_output_buffer() ) {
@@ -264,7 +264,7 @@ class Perflab_Server_Timing {
 	/**
 	 * Starts output buffering to send the Server-Timing header right before returning the buffer.
 	 *
-	 * @since n.e.x.t
+	 * @since 3.2.0
 	 */
 	public function start_output_buffer(): void {
 		ob_start(

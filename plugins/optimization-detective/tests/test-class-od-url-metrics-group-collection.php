@@ -543,6 +543,152 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_groups_by_lcp_element().
+	 *
+	 * @covers ::get_groups_by_lcp_element
+	 * @covers ::get_common_lcp_element
+	 */
+	public function test_get_groups_by_lcp_element(): void {
+
+		$first_child_image_xpath  = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]';
+		$second_child_image_xpath = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[2]';
+		$first_child_h1_xpath     = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::H1]/*[1]';
+
+		$breakpoints      = array( 480, 800 );
+		$sample_size      = 3;
+		$group_collection = new OD_URL_Metrics_Group_Collection(
+			array(
+				// Group 1: 0-480 viewport widths.
+				$this->get_validated_url_metric( 400, $first_child_image_xpath ),
+				$this->get_validated_url_metric( 420, $first_child_image_xpath ),
+				$this->get_validated_url_metric( 440, $second_child_image_xpath ),
+				// Group 2: 481-800 viewport widths.
+				$this->get_validated_url_metric( 500, $first_child_h1_xpath ),
+				// Group 3: 801-Infinity viewport widths.
+				$this->get_validated_url_metric( 820, $first_child_image_xpath ),
+				$this->get_validated_url_metric( 900, $first_child_image_xpath ),
+			),
+			$breakpoints,
+			$sample_size,
+			HOUR_IN_SECONDS
+		);
+
+		$this->assertCount( 3, $group_collection );
+		$groups = iterator_to_array( $group_collection );
+		$group1 = $groups[0];
+		$this->assertSame( $group1, $group_collection->get_group_for_viewport_width( 480 ) );
+		$group2 = $groups[1];
+		$this->assertSame( $group2, $group_collection->get_group_for_viewport_width( 800 ) );
+		$group3 = $groups[2];
+		$this->assertSame( $group3, $group_collection->get_group_for_viewport_width( 801 ) );
+
+		$this->assertSameSets( array( $group1, $group3 ), $group_collection->get_groups_by_lcp_element( $first_child_image_xpath ) );
+		$this->assertSameSets( array( $group2 ), $group_collection->get_groups_by_lcp_element( $first_child_h1_xpath ) );
+		$this->assertCount( 0, $group_collection->get_groups_by_lcp_element( $second_child_image_xpath ) );
+
+		$this->assertNull( $group_collection->get_common_lcp_element() );
+	}
+
+	/**
+	 * Test get_common_lcp_element().
+	 *
+	 * @covers ::get_common_lcp_element
+	 */
+	public function test_get_common_lcp_element(): void {
+		$breakpoints      = array( 480, 800 );
+		$sample_size      = 3;
+		$group_collection = new OD_URL_Metrics_Group_Collection(
+			array(),
+			$breakpoints,
+			$sample_size,
+			HOUR_IN_SECONDS
+		);
+
+		$lcp_element_xpath = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]';
+
+		foreach ( array_merge( $breakpoints, array( 1000 ) ) as $viewport_width ) {
+			for ( $i = 0; $i < $sample_size; $i++ ) {
+				$group_collection->add_url_metric( $this->get_validated_url_metric( $viewport_width, $lcp_element_xpath ) );
+			}
+		}
+
+		$this->assertCount( 3, $group_collection );
+		$common_lcp_element = $group_collection->get_common_lcp_element();
+		$this->assertIsArray( $common_lcp_element );
+		$this->assertSame( $lcp_element_xpath, $common_lcp_element['xpath'] );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 * @throws OD_Data_Validation_Exception But it won't really.
+	 */
+	public function data_provider_element_max_intersection_ratios(): array {
+		$xpath1 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]';
+		$xpath2 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[2]';
+		$xpath3 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[3]';
+		return array(
+			'one-element-sample-size-one'    => array(
+				'url_metrics' => array(
+					$this->get_validated_url_metric( 400, $xpath1, 0.0 ),
+					$this->get_validated_url_metric( 600, $xpath1, 0.5 ),
+					$this->get_validated_url_metric( 800, $xpath1, 1.0 ),
+				),
+				'expected'    => array(
+					$xpath1 => 1.0,
+				),
+			),
+			'three-elements-sample-size-two' => array(
+				'url_metrics' => array(
+					// Group 1.
+					$this->get_validated_url_metric( 400, $xpath1, 0.0 ),
+					$this->get_validated_url_metric( 400, $xpath1, 1.0 ),
+					// Group 2.
+					$this->get_validated_url_metric( 600, $xpath2, 0.9 ),
+					$this->get_validated_url_metric( 600, $xpath2, 0.1 ),
+					// Group 3.
+					$this->get_validated_url_metric( 800, $xpath3, 0.5 ),
+					$this->get_validated_url_metric( 800, $xpath3, 0.6 ),
+				),
+				'expected'    => array(
+					$xpath1 => 1.0,
+					$xpath2 => 0.9,
+					$xpath3 => 0.6,
+				),
+			),
+			'no-url-metrics'                 => array(
+				'url_metrics' => array(),
+				'expected'    => array(),
+			),
+
+		);
+	}
+
+	/**
+	 * Test get_all_element_max_intersection_ratios() and get_element_max_intersection_ratio().
+	 *
+	 * @covers ::get_all_element_max_intersection_ratios
+	 * @covers ::get_element_max_intersection_ratio
+	 *
+	 * @dataProvider data_provider_element_max_intersection_ratios
+	 *
+	 * @param array<string, mixed> $url_metrics URL metrics.
+	 * @param array<string, float> $expected    Expected.
+	 */
+	public function test_get_all_element_max_intersection_ratios( array $url_metrics, array $expected ): void {
+		$breakpoints      = array( 480, 600, 782 );
+		$sample_size      = 3;
+		$group_collection = new OD_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, $sample_size, 0 );
+		$actual           = $group_collection->get_all_element_max_intersection_ratios();
+		$this->assertSame( $actual, $group_collection->get_all_element_max_intersection_ratios(), 'Cached result is identical.' );
+		$this->assertSame( $expected, $actual );
+		foreach ( $expected as $expected_xpath => $expected_max_ratio ) {
+			$this->assertSame( $expected_max_ratio, $group_collection->get_element_max_intersection_ratio( $expected_xpath ) );
+		}
+	}
+
+	/**
 	 * Test get_flattened_url_metrics().
 	 *
 	 * @covers ::get_flattened_url_metrics
@@ -570,14 +716,53 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test jsonSerialize().
+	 *
+	 * @covers ::jsonSerialize
+	 */
+	public function test_json_serialize(): void {
+		$url_metrics = array(
+			$this->get_validated_url_metric( 400 ),
+			$this->get_validated_url_metric( 600 ),
+			$this->get_validated_url_metric( 800 ),
+		);
+
+		$group_collection = new OD_URL_Metrics_Group_Collection(
+			$url_metrics,
+			array( 500, 700 ),
+			3,
+			HOUR_IN_SECONDS
+		);
+
+		$json          = wp_json_encode( $group_collection );
+		$parsed_json   = json_decode( $json, true );
+		$expected_keys = array(
+			'breakpoints',
+			'freshness_ttl',
+			'sample_size',
+			'all_element_max_intersection_ratios',
+			'common_lcp_element',
+			'every_group_complete',
+			'every_group_populated',
+			'groups',
+		);
+		$this->assertIsArray( $parsed_json );
+		$this->assertSameSets(
+			$expected_keys,
+			array_keys( $parsed_json )
+		);
+	}
+
+	/**
 	 * Gets a validated URL metric for testing.
 	 *
-	 * @param int $viewport_width Viewport width.
-	 *
+	 * @param int    $viewport_width     Viewport width.
+	 * @param string $lcp_element_xpath  LCP element XPath.
+	 * @param float  $intersection_ratio Intersection ratio.
 	 * @return OD_URL_Metric Validated URL metric.
 	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
-	private function get_validated_url_metric( int $viewport_width = 480 ): OD_URL_Metric {
+	private function get_validated_url_metric( int $viewport_width = 480, string $lcp_element_xpath = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]', float $intersection_ratio = 1.0 ): OD_URL_Metric {
 		$data = array(
 			'url'       => home_url( '/' ),
 			'viewport'  => array(
@@ -589,8 +774,8 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 				array(
 					'isLCP'              => true,
 					'isLCPCandidate'     => true,
-					'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]',
-					'intersectionRatio'  => 1,
+					'xpath'              => $lcp_element_xpath,
+					'intersectionRatio'  => $intersection_ratio,
 					'intersectionRect'   => array(
 						'width'  => 100,
 						'height' => 100,
