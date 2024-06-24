@@ -123,6 +123,7 @@ add_action( 'admin_notices', 'perflab_aao_admin_notices' );
  * @since n.e.x.t
  *
  * @param string $description Description message when autoloaded options bigger than threshold.
+ * return string Extended health check description.
  */
 function perflab_aao_extend_core_check( string $description ): string {
 	return $description . perflab_aao_get_autoloaded_options_table() . perflab_aao_get_disabled_autoloaded_options_table();
