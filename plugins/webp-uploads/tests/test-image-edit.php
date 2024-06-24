@@ -47,18 +47,12 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 		$this->assertArrayHasKey( 'full-orig', $backup_sources );
 		$this->assertSame( $metadata['sources'], $backup_sources['full-orig'] );
 
+		unset( $backup_sizes['full-orig'] );
 		foreach ( $backup_sizes as $size => $properties ) {
 			$size_name = str_replace( '-orig', '', $size );
-
-			if ( 'full-orig' === $size ) {
-				continue;
-			}
-
 			$this->assertArrayHasKey( 'sources', $properties );
 			$this->assertSame( $metadata['sizes'][ $size_name ]['sources'], $properties['sources'] );
 		}
-
-		$metadata = wp_get_attachment_metadata( $attachment_id );
 	}
 
 	/**
@@ -136,7 +130,7 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 		$backup_sizes = get_post_meta( $attachment_id, '_wp_attachment_backup_sizes', true );
 		$this->assertIsArray( $backup_sizes );
 
-		foreach ( $backup_sizes as $size_name => $properties ) {
+		foreach ( $backup_sizes as $properties ) {
 			$this->assertArrayNotHasKey( 'sources', $properties );
 		}
 	}
@@ -281,7 +275,7 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 		foreach ( $metadata['sizes'] as $size_name => $properties ) {
 			$this->assertImageNotHasSizeSource( $attachment_id, $size_name, 'image/jpeg' );
 			$this->assertImageHasSizeSource( $attachment_id, $size_name, 'image/webp' );
-			foreach ( $properties['sources'] as $mime_type => $values ) {
+			foreach ( $properties['sources'] as $values ) {
 				if ( 'thumbnail' === $size_name ) {
 					$this->assertFileNameIsNotEdited( $values['file'], "'{$size_name}' is not valid." );
 					$this->assertStringNotContainsString( '-scaled-', $values['file'] );
