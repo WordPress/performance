@@ -154,55 +154,58 @@ add_filter( 'render_block_core/cover', 'auto_sizes_filter_image_tag', 10, 2 );
  */
 function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 	$processor = new WP_HTML_Tag_Processor( $content );
-	while ( $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
-		// Retrieve width from the image tag itself.
-		$image_width = $processor->get_attribute( 'width' );
-		if ( ! $image_width ) {
-			continue; // Skip if width attribute is not found.
-		}
-
-		// Skips second time parsing if already processed.
-		if ( false === $processor->get_attribute( 'data-needs-sizes-update' ) ) {
-			continue;
-		}
-
-		$layout = wp_get_global_settings( array( 'layout' ) );
-		$align  = $processor->get_attribute( 'data-align' );
-
-		$sizes = null;
-		// Handle different alignment use cases.
-		switch ( $align ) {
-			case 'full':
-				$sizes = '100vw';
-				break;
-
-			case 'wide':
-				if ( array_key_exists( 'wideSize', $layout ) ) {
-					$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['wideSize'] );
-				}
-				break;
-
-			// @todo: handle left/right alignments.
-			default:
-				if ( array_key_exists( 'contentSize', $layout ) ) {
-					// Resize image width.
-					$image_width = $processor->get_attribute( 'data-resize-width' ) ?? $image_width;
-					$width       = auto_sizes_get_width( $layout['contentSize'], (int) $image_width );
-					$sizes       = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
-				}
-				break;
-		}
-
-		if ( $sizes ) {
-			$processor->set_attribute( 'sizes', $sizes );
-		}
-
-		$processor->remove_attribute( 'data-needs-sizes-update' );
-		$processor->remove_attribute( 'data-align' );
-		$processor->remove_attribute( 'data-resize-width' );
+	if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
+		return $content;
 	}
+
+	// Skips second time parsing if already processed.
+	if ( false === $processor->get_attribute( 'data-needs-sizes-update' ) ) {
+		return $content;
+	}
+
+	$align = $processor->get_attribute( 'data-align' );
+
+	// Retrieve width from the image tag itself.
+	$image_width = $processor->get_attribute( 'width' );
+	if ( ! $image_width && ! in_array( $align, array( 'full', 'wide' ), true ) ) {
+		return $content;
+	}
+
+	$layout = wp_get_global_settings( array( 'layout' ) );
+
+	$sizes = null;
+	// Handle different alignment use cases.
+	switch ( $align ) {
+		case 'full':
+			$sizes = '100vw';
+			break;
+
+		case 'wide':
+			if ( array_key_exists( 'wideSize', $layout ) ) {
+				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['wideSize'] );
+			}
+			break;
+
+		// @todo: handle left/right alignments.
+		default:
+			if ( array_key_exists( 'contentSize', $layout ) ) {
+				// Resize image width.
+				$image_width = $processor->get_attribute( 'data-resize-width' ) ?? $image_width;
+				$width       = auto_sizes_get_width( $layout['contentSize'], (int) $image_width );
+				$sizes       = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
+			}
+			break;
+	}
+
+	if ( $sizes ) {
+		$processor->set_attribute( 'sizes', $sizes );
+	}
+
+	$processor->remove_attribute( 'data-needs-sizes-update' );
+	$processor->remove_attribute( 'data-align' );
+	$processor->remove_attribute( 'data-resize-width' );
 
 	return $processor->get_updated_html();
 }
-// Run filter prior to auto sizes filter.
+// Run filter prior to auto sizes "auto_sizes_update_content_img_tag" filter.
 add_filter( 'wp_content_img_tag', 'auto_sizes_improve_image_sizes_attributes', 9 );
