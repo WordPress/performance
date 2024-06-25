@@ -91,16 +91,16 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 */
 	public function data_image_sizes(): array {
 		return array(
-			'Return wideSize 1280px instead of thumb size 150px'  => array(
+			'Return full or wideSize 1280px instead of thumb size 150px'  => array(
 				'thumbnail',
 			),
-			'Return wideSize 1280px instead of medium size 300px'  => array(
+			'Return full or wideSize 1280px instead of medium size 300px'  => array(
 				'medium',
 			),
-			'Return wideSize 1280px instead of large size 1024px'  => array(
+			'Return full or wideSize 1280px instead of large size 1024px'  => array(
 				'large',
 			),
-			'Return wideSize 1280px instead of full size 1080px'  => array(
+			'Return full or wideSize 1280px instead of full size 1080px'  => array(
 				'full',
 			),
 		);

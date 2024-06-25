@@ -73,12 +73,10 @@ class Test_AutoSizes extends WP_UnitTestCase {
 
 		$image_tag = $this->get_image_tag( self::$image_id );
 
-		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 		$this->assertStringContainsString(
 			'sizes="auto, (max-width: 1024px) 100vw, 1024px"',
 			wp_filter_content_tags( $this->get_image_tag( self::$image_id ) )
 		);
-		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 	}
 
 	/**
