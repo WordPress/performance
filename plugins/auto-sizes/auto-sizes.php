@@ -28,3 +28,5 @@ if ( defined( 'IMAGE_AUTO_SIZES_VERSION' ) ) {
 define( 'IMAGE_AUTO_SIZES_VERSION', '1.0.2' );
 
 require_once __DIR__ . '/hooks.php';
+
+require_once __DIR__ . '/optimization-detective.php';
