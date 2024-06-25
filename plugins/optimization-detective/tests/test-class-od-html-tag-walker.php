@@ -310,6 +310,8 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	 * @param string   $document Document.
 	 * @param string[] $open_tags Open tags.
 	 * @param string[] $xpaths XPaths.
+	 *
+	 * @throws Exception But not really.
 	 */
 	public function test_open_tags_and_get_xpath( string $document, array $open_tags, array $xpaths ): void {
 		$p = new OD_HTML_Tag_Walker( $document );
@@ -348,6 +350,8 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	 *
 	 * @covers ::append_head_html
 	 * @covers OD_HTML_Tag_Processor::append_html
+	 *
+	 * @throws Exception But not really.
 	 */
 	public function test_append_head_html(): void {
 		$html     = '
@@ -396,6 +400,8 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	 * @covers ::append_head_html
 	 * @covers ::append_body_html
 	 * @covers OD_HTML_Tag_Processor::append_html
+	 *
+	 * @throws Exception But not really.
 	 */
 	public function test_append_head_and_body_html(): void {
 		$html          = '
@@ -457,18 +463,24 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	 * @covers ::set_attribute
 	 * @covers ::remove_attribute
 	 * @covers ::get_updated_html
+	 * @covers ::set_meta_attribute
+	 *
+	 * @throws Exception But not really.
 	 */
 	public function test_html_tag_processor_wrapper_methods(): void {
-		$processor = new OD_HTML_Tag_Walker( '<html lang="en" xml:lang="en"></html>' );
+		$processor = new OD_HTML_Tag_Walker( '<html lang="en" dir="ltr"></html>' );
 		foreach ( $processor->open_tags() as $open_tag ) {
 			if ( 'HTML' === $open_tag ) {
 				$this->assertSame( $open_tag, $processor->get_tag() );
 				$this->assertSame( 'en', $processor->get_attribute( 'lang' ) );
 				$processor->set_attribute( 'lang', 'es' );
-				$processor->remove_attribute( 'xml:lang' );
+				$processor->remove_attribute( 'dir' );
+				$processor->set_attribute( 'id', 'root' );
+				$processor->set_meta_attribute( 'foo', 'bar' );
+				$processor->set_meta_attribute( 'baz', true );
 			}
 		}
-		$this->assertSame( '<html lang="es" ></html>', $processor->get_updated_html() );
+		$this->assertSame( '<html data-od-added-id data-od-baz data-od-foo="bar" data-od-removed-dir="ltr" data-od-replaced-lang="en" id="root" lang="es" ></html>', $processor->get_updated_html() );
 	}
 
 	/**

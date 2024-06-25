@@ -51,21 +51,34 @@ if ( ! $plugin_name ) {
 	$plugin_name = 'performance-lab';
 }
 
-$plugin_test_path = TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name;
+/**
+ * Load plugin bootstrap and any dependencies.
+ *
+ * @param string $plugin_name Plugin slug to load.
+ */
+$load_plugin = static function ( string $plugin_name ) use ( &$load_plugin ): void {
+	$plugin_test_path = TESTS_PLUGIN_DIR . '/plugins/' . $plugin_name;
+	if ( file_exists( $plugin_test_path . '/' . $plugin_name . '.php' ) ) {
+		$plugin_file = $plugin_test_path . '/' . $plugin_name . '.php';
+	} elseif ( file_exists( $plugin_test_path . '/load.php' ) ) {
+		$plugin_file = $plugin_test_path . '/load.php';
+	} else {
+		echo "Unable to locate standalone plugin bootstrap file in $plugin_test_path.";
+		exit( 1 );
+	}
+
+	if ( preg_match( '/^ \* Requires Plugins:\s*(.+)$/m', (string) file_get_contents( $plugin_file ), $matches ) ) {
+		foreach ( (array) preg_split( '/\s*,\s*/', $matches[1] ) as $requires_plugin ) {
+			$load_plugin( (string) $requires_plugin );
+		}
+	}
+	require_once $plugin_file;
+};
 
 tests_add_filter(
 	'plugins_loaded',
-	static function () use ( $plugin_test_path, $plugin_name ): void {
-		// Check if plugin has a "plugin/plugin.php" file.
-		if ( file_exists( $plugin_test_path . '/' . $plugin_name . '.php' ) ) {
-			require_once $plugin_test_path . '/' . $plugin_name . '.php';
-		} elseif ( file_exists( $plugin_test_path . '/load.php' ) ) {
-			// Check if plugin has a "plugin/load.php" file.
-			require_once $plugin_test_path . '/load.php';
-		} else {
-			echo "Unable to locate standalone plugin bootstrap file in $plugin_test_path.";
-			exit( 1 );
-		}
+	static function () use ( $load_plugin, $plugin_name ): void {
+		$load_plugin( $plugin_name );
 	},
 	1
 );
@@ -82,7 +95,6 @@ if ( 'performance-lab' === $plugin_name ) {
 		1
 	);
 }
-
 
 // Start up the WP testing environment.
 require $_test_root . '/includes/bootstrap.php';

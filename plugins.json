@@ -3,6 +3,7 @@
     "auto-sizes",
     "dominant-color-images",
     "embed-optimizer",
+    "image-prioritizer",
     "optimization-detective",
     "performance-lab",
     "speculation-rules",
