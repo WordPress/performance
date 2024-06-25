@@ -74,7 +74,7 @@ class Test_AutoSizes extends WP_UnitTestCase {
 		$image_tag = $this->get_image_tag( self::$image_id );
 
 		$this->assertStringContainsString(
-			'sizes="auto, (max-width: 1024px) 100vw, 1024px"',
+			'sizes="auto, (max-width: 620px) 100vw, 620px"',
 			wp_filter_content_tags( $this->get_image_tag( self::$image_id ) )
 		);
 	}
@@ -89,7 +89,7 @@ class Test_AutoSizes extends WP_UnitTestCase {
 		add_filter( 'wp_img_tag_add_loading_attr', '__return_false' );
 
 		$this->assertStringContainsString(
-			'sizes="(max-width: 1024px) 100vw, 1024px"',
+			'sizes="(max-width: 620px) 100vw, 620px"',
 			wp_filter_content_tags( $this->get_image_tag( self::$image_id ) )
 		);
 	}
