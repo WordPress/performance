@@ -78,6 +78,10 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			} elseif ( ! $is_visible && 'lazy' !== $loading ) {
 				$walker->set_attribute( 'loading', 'lazy' );
 			}
+			// If the element is not visible in the initial viewport, set fetchpriority to low.
+			if ( ! $is_visible ) {
+				$walker->set_attribute( 'fetchpriority', 'low' );
+			}
 		}
 		// TODO: If an image is visible in one breakpoint but not another, add loading=lazy AND add a regular-priority preload link with media queries (unless LCP in which case it should already have a fetchpriority=high link) so that the image won't be eagerly-loaded for viewports on which it is not shown.
 
