@@ -25,8 +25,17 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 
 		self::$image_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 
-		// Disable lazy loading attribute.
-		add_filter( 'wp_img_tag_add_loading_attr', '__return_false' );
+		// Disable auto sizes in these tests.
+		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+	}
+
+	/**
+	 * Enable auto sizes.
+	 */
+	public static function tear_down_after_class(): void {
+		parent::tear_down_after_class();
+
+		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 	}
 
 	/**
@@ -42,20 +51,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		$result = apply_filters( 'the_content', $block_content );
 
 		$this->assertStringContainsString( 'sizes="100vw" ', $result );
-	}
-
-	/**
-	 * Data provider.
-	 *
-	 * @return array<array<string>> The image sizes.
-	 */
-	public function data_image_sizes(): array {
-		return array(
-			array( 'thumbnail' ),
-			array( 'medium' ),
-			array( 'large' ),
-			array( 'full' ),
-		);
 	}
 
 	/**
@@ -76,7 +71,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	/**
 	 * Test the image block with different image sizes and wide alignment.
 	 *
-	 * @dataProvider data_image_sizes_for_wide_alignment
+	 * @dataProvider data_image_sizes
 	 *
 	 * @param string $image_size Image size.
 	 */
@@ -93,7 +88,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 *
 	 * @return array<array<string>> The image sizes.
 	 */
-	public function data_image_sizes_for_wide_alignment(): array {
+	public function data_image_sizes(): array {
 		return array(
 			'Return wideSize 1280px instead of thumb size 150px'  => array(
 				'thumbnail',
@@ -132,9 +127,9 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 *
 	 * @param string $image_size Image size.
 	 * @param string $expected   Expected output.
-	 * @param string $is_resize  Whether resize or not.
+	 * @param bool   $is_resize  Whether resize or not.
 	 */
-	public function test_image_block_with_default_alignment( string $image_size, string $expected, string $is_resize = '' ): void {
+	public function test_image_block_with_default_alignment( string $image_size, string $expected, bool $is_resize = false ): void {
 		if ( $is_resize ) {
 			$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"width":"100px","sizeSlug":"' . $image_size . '","linkDestination":"none"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '"  style="width:100px" alt="" class="wp-image-' . self::$image_id . '"/></figure><!-- /wp:image -->';
 		} else {
@@ -148,7 +143,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array<array<string>> The image sizes.
+	 * @return array<string, array<int, bool|string>> The image sizes.
 	 */
 	public function data_image_sizes_for_default_alignment(): array {
 		return array(
@@ -171,22 +166,22 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 			'Return resized size 100px instead of contentSize 620px or thumbnail image size 150px' => array(
 				'thumbnail',
 				'sizes="(max-width: 100px) 100vw, 100px" ',
-				'yes',
+				true,
 			),
 			'Return resized size 100px instead of contentSize 620px or medium image size 300px'    => array(
 				'medium',
 				'sizes="(max-width: 100px) 100vw, 100px" ',
-				'yes',
+				true,
 			),
 			'Return resized size 100px instead of contentSize 620px or large image size 1024px'    => array(
 				'large',
 				'sizes="(max-width: 100px) 100vw, 100px" ',
-				'yes',
+				true,
 			),
 			'Return resized size 100px instead of contentSize 620px or full image size 1080px'     => array(
 				'full',
 				'sizes="(max-width: 100px) 100vw, 100px" ',
-				'yes',
+				true,
 			),
 		);
 	}
