@@ -35,10 +35,10 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		if ( false === $shorted_image ) {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 		}
-		// Note: These two functions only return integers, but PHPStan thinks they return int|false. PhpStorm's stubs also think this. However, from looking at
-		// <https://github.com/php/php-src/blob/5db847e/ext/gd/gd.stub.php#L716-L718> these functions only ever returned integers. Nevertheless, the PHP docs
-		// did used to have int|false as the return type but this was removed for PHP 8: <https://github.com/php/doc-en/commit/0462f49>.
-		// So this is why there is type casting to integer, just for the sake of PHPStan, and possibly for PHP<8.
+		// Note: These two functions only return integers, but they used to return int|false in PHP<8. This was changed in the PHP documentation in
+		// <https://github.com/php/doc-en/commit/0462f49> and <https://github.com/php/doc-en/commit/37f858a>. However, PhpStorm's stubs still think
+		// they return int|false. However, from looking at <https://github.com/php/php-src/blob/5db847e/ext/gd/gd.stub.php#L716-L718> these functions
+		// apparently only ever returned integers. So the type casting is here for the possible sake PHP<8.
 		$image_width  = (int) imagesx( $this->image );
 		$image_height = (int) imagesy( $this->image );
 		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, $image_width, $image_height );
