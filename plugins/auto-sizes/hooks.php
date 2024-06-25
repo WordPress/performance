@@ -155,12 +155,6 @@ add_filter( 'render_block_core/cover', 'auto_sizes_filter_image_tag', 10, 2 );
 function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 	$processor = new WP_HTML_Tag_Processor( $content );
 	while ( $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
-
-		$has_auto_sizes = false;
-		if ( str_contains( $content, 'auto,' ) ) {
-			$has_auto_sizes = true;
-		}
-
 		// Retrieve width from the image tag itself.
 		$image_width = $processor->get_attribute( 'width' );
 		if ( ! $image_width ) {
@@ -200,7 +194,6 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 		}
 
 		if ( $sizes ) {
-			$sizes = $has_auto_sizes ? 'auto, ' . $sizes : $sizes;
 			$processor->set_attribute( 'sizes', $sizes );
 		}
 
@@ -211,4 +204,5 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 
 	return $processor->get_updated_html();
 }
-add_filter( 'wp_content_img_tag', 'auto_sizes_improve_image_sizes_attributes' );
+// Run filter prior to auto sizes filter.
+add_filter( 'wp_content_img_tag', 'auto_sizes_improve_image_sizes_attributes', 9 );
