@@ -35,8 +35,9 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		if ( false === $shorted_image ) {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 		}
-		$image_width  = imagesx( $this->image );
-		$image_height = imagesy( $this->image );
+		// Note: These two functions only return integers, but PHPStan thinks they return int|false. PhpStorm's stubs also think this.
+		$image_width  = (int) imagesx( $this->image );
+		$image_height = (int) imagesy( $this->image );
 		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, $image_width, $image_height );
 
 		$rgb = imagecolorat( $shorted_image, 0, 0 );
@@ -77,7 +78,15 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 				if ( false === $rgb ) {
 					return new WP_Error( 'unable_to_obtain_rgb_via_imagecolorat' );
 				}
-				$rgba = imagecolorsforindex( $this->image, $rgb );
+				try {
+					// Note: In PHP<8, this returns false if the color is out of range. In PHP8, this throws a ValueError instead.
+					$rgba = imagecolorsforindex( $this->image, $rgb );
+				} catch ( ValueError $error ) {
+					$rgba = false;
+				}
+				if ( ! is_array( $rgba ) ) {
+					return new WP_Error( 'unable_to_obtain_rgba_via_imagecolorsforindex' );
+				}
 				if ( $rgba['alpha'] > 0 ) {
 					return true;
 				}
