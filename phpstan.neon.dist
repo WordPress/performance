@@ -19,6 +19,7 @@ parameters:
 		# See <https://github.com/php-stubs/wordpress-stubs/issues/100>.
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
+		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_ends_with.php
 	stubFiles:
 		- tools/phpstan/filtered-functions.stub
 	dynamicConstantNames:
