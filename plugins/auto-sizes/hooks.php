@@ -125,8 +125,8 @@ function auto_sizes_filter_image_tag( string $content, array $parsed_block ): st
 
 	// Only update the markup if an image is found.
 	if ( $has_image ) {
-		$align = $parsed_block['attrs']['align'] ?? 'default';
-
+		$processor->set_attribute( 'data-needs-sizes-update', true );
+		$align = $parsed_block['attrs']['align'] ?? '';
 		if ( $align ) {
 			$processor->set_attribute( 'data-align', $align );
 		}
@@ -167,9 +167,8 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 			continue; // Skip if width attribute is not found.
 		}
 
-		// Skips second time parsing if custom IMG attribute removed.
-		$image_alignment = $processor->get_attribute( 'data-align' );
-		if ( ! $image_alignment ) {
+		// Skips second time parsing if already processed.
+		if ( false === $processor->get_attribute( 'data-needs-sizes-update' ) ) {
 			continue;
 		}
 
@@ -205,6 +204,7 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 			$processor->set_attribute( 'sizes', $sizes );
 		}
 
+		$processor->remove_attribute( 'data-needs-sizes-update' );
 		$processor->remove_attribute( 'data-align' );
 		$processor->remove_attribute( 'data-resize-width' );
 	}
