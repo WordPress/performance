@@ -32,37 +32,13 @@ if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
 	$_test_root = '/tmp/wordpress-tests-lib';
 }
 
-$required_constants = array(
-	'WORDPRESS_DB_PASSWORD',
-	'WORDPRESS_DB_HOST',
-	'WORDPRESS_DB_USER',
-	'WORDPRESS_DB_NAME',
-	'PHP_VERSION',
-	'COMPOSER_BINARY',
-	'WP_TESTS_DIR',
-	'WP_PHPUNIT__DIR',
-);
-
-$missing_constants = array();
-
-foreach ( $required_constants as $constant ) {
-	if ( getenv( $constant ) === false ) {
-		$missing_constants[] = $constant;
+// Check if tests are run locally without configuring test environment.
+if ( false !== strpos( $_test_root, 'wp-phpunit/wp-phpunit' ) ) {
+	if ( ! getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) || ! getenv( 'WP_TESTS_CONFIG_FILE_PATH' ) ) {
+		echo 'Error: wp-tests-config.php is missing! Please use wp-tests-config-sample.php to create a config file.' . PHP_EOL;
+		echo 'Info: Alternatively, you can run `npm run wp-env start && npm run test-php` to execute tests in the wp-env environment.' . PHP_EOL;
+		exit( 1 );
 	}
-}
-
-if ( $missing_constants ) {
-	printf(
-		"Please use 'npm run test-php' instead of running the composer test command directly." . PHP_EOL .
-		'If you are intending to run PHPUnit directly, the following environment variables are missing: %s' . PHP_EOL,
-		implode( ', ', $missing_constants )
-	);
-	exit( 1 );
-}
-
-if ( ! file_exists( $_test_root . '/includes/functions.php' ) ) {
-	echo "It seems your environment is not set up for running tests. (Unable to determine the test root.) Please use 'npm run test-php' instead.\n";
-	exit( 1 );
 }
 
 require_once $_test_root . '/includes/functions.php';
