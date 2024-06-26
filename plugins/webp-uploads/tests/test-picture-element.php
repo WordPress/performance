@@ -50,8 +50,22 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			$this->assertStringNotContainsString( $picture_element, $the_image );
 		}
 
-		// When both features are enabled, the picture element will contain two srcset elements.
-		$this->assertEquals( ( $jpeg_and_webp && $expect_picture_element ) ? 2 : 1, substr_count( $the_image, 'srcset=' ) );
+		// When both features are enabled, the picture element will contain 3 srcset elements.
+		if ( $jpeg_and_webp && $expect_picture_element ) {
+			$this->assertEquals( 3, substr_count( $the_image, 'srcset=' ) );
+		}
+		// When neither features are enabled, the picture element will contain 1 srcset elements.
+		if ( ! $jpeg_and_webp && ! $expect_picture_element ) {
+			$this->assertEquals( 1, substr_count( $the_image, 'srcset=' ) );
+		}
+		// When only jpeg_and_webp is enabled, the picture element will contain 1 srcset elements.
+		if ( $jpeg_and_webp && ! $expect_picture_element ) {
+			$this->assertEquals( 1, substr_count( $the_image, 'srcset=' ) );
+		}
+		// When only picture_element is enabled, the picture element will contain 2 srcset elements.
+		if ( ! $jpeg_and_webp && $expect_picture_element ) {
+			$this->assertEquals( 2, substr_count( $the_image, 'srcset=' ) );
+		}
 	}
 
 	/**
