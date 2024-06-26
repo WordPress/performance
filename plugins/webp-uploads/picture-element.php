@@ -81,12 +81,10 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	// Extract sizes using regex to parse image tag, then use to retrieve tag.
 	$width     = 0;
 	$height    = 0;
-	$alt       = '';
 	$processor = new WP_HTML_Tag_Processor( $image );
 	if ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
 		$width  = (int) $processor->get_attribute( 'width' );
 		$height = (int) $processor->get_attribute( 'height' );
-		$alt    = (string) $processor->get_attribute( 'alt' );
 	}
 	$size_to_use = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
 
@@ -126,11 +124,10 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 			continue;
 		}
 		$picture_sources .= sprintf(
-			'<source type="%s" srcset="%s" sizes="%s" alt="%s">',
+			'<source type="%s" srcset="%s" sizes="%s">',
 			esc_attr( $image_mime_type ),
 			esc_attr( $image_srcset ),
-			esc_attr( $sizes ),
-			esc_attr( $alt )
+			esc_attr( $sizes )
 		);
 	}
 
@@ -145,15 +142,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		return false;
 	};
 	add_filter( 'wp_calculate_image_srcset_meta', $filter );
-	$original_image_without_srcset = wp_get_attachment_image(
-		$attachment_id,
-		$original_sizes,
-		false,
-		array(
-			'src' => $original_image,
-			'alt' => $alt,
-		)
-	);
+	$original_image_without_srcset = wp_get_attachment_image( $attachment_id, $original_sizes, false, array( 'src' => $original_image ) );
 	remove_filter( 'wp_calculate_image_srcset_meta', $filter );
 
 	return sprintf(
