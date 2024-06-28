@@ -167,6 +167,37 @@ final class OD_Preload_Link_Collection implements Countable {
 	}
 
 	/**
+	 * Gets the HTTP Link header string.
+	 *
+	 * @return string HTTP Link header.
+	 */
+	public function get_headers(): string {
+		$link_headers = array();
+
+		foreach ( $this->get_adjacent_deduplicated_links() as $link ) {
+			$media_features = array( 'screen' );
+			if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
+				$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
+			}
+			if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
+				$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
+			}
+			$link['attributes']['media'] = implode( ' and ', $media_features );
+
+			$link_header = '<' . esc_url( $link['attributes']['href'] ?? '' ) . '>; rel="preload"';
+			foreach ( $link['attributes'] as $name => $value ) {
+				if ( 'href' !== $name ) {
+					$link_header .= sprintf( '; %s="%s"', $name, esc_attr( $value ) );
+				}
+			}
+
+			$link_headers[] = $link_header;
+		}
+
+		return 'Link: ' . implode( ', ', $link_headers );
+	}
+
+	/**
 	 * Counts the links.
 	 *
 	 * @return int Link count.

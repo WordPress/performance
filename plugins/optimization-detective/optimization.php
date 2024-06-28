@@ -164,6 +164,11 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
 
+	// Send any preload links as Link headers.
+	if ( count( $preload_links ) > 0 && ! headers_sent() ) {
+		header( $preload_links->get_headers() );
+	}
+
 	/**
 	 * Fires to register tag visitors before walking over the document to perform optimizations.
 	 *
