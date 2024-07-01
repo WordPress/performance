@@ -39,7 +39,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 		if (
 			is_string( $style )
 			&&
-			0 < (int) preg_match( '/background(-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', $style, $matches )
+			0 < (int) preg_match( '/background(?:-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', $style, $matches )
 			&&
 			isset( $matches['background_image'] ) // PHPStan should ideally know that this is set since the above preg_match() returned successfully.
 			&&
