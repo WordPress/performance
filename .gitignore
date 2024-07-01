@@ -47,6 +47,7 @@ plugins/optimization-detective/detection/web-vitals*
 ############
 phpcs.xml
 phpunit.xml
+phpunit-multisite.xml
 phpstan.neon
 
 ############
