@@ -26,6 +26,21 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		self::$image_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 	}
 
+	public function set_up(): void {
+		parent::set_up();
+
+		// Disable auto sizes.
+		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+	}
+
+	public function tear_down(): void {
+		// Clean up specific to the tests within this class.
+		parent::tear_down();
+
+		// Enable auto sizes.
+		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+	}
+
 	/**
 	 * Test the image block with different image sizes and full alignment.
 	 *
@@ -36,11 +51,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	public function test_image_block_with_full_alignment( string $image_size ): void {
 		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"full"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" alt="" class="wp-image-' . self::$image_id . '"/></figure><!-- /wp:image -->';
 
-		// Disable auto sizes.
-		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 		$result = apply_filters( 'the_content', $block_content );
-		// Enable auto sizes.
-		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 
 		$this->assertStringContainsString( 'sizes="100vw" ', $result );
 	}
@@ -56,11 +67,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		<!-- /wp:paragraph --></div></div>
 		<!-- /wp:cover -->';
 
-		// Disable auto sizes.
-		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 		$result = apply_filters( 'the_content', $block_content );
-		// Enable auto sizes.
-		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 
 		$this->assertStringContainsString( 'sizes="100vw" ', $result );
 	}
@@ -75,11 +82,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	public function test_image_block_with_wide_alignment( string $image_size ): void {
 		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"wide"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" alt="" class="wp-image-' . self::$image_id . '"/></figure><!-- /wp:image -->';
 
-		// Disable auto sizes.
-		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 		$result = apply_filters( 'the_content', $block_content );
-		// Enable auto sizes.
-		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 
 		$this->assertStringContainsString( 'sizes="(max-width: 1280px) 100vw, 1280px" ', $result );
 	}
@@ -117,11 +120,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		<!-- /wp:paragraph --></div></div>
 		<!-- /wp:cover -->';
 
-		// Disable auto sizes.
-		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 		$result = apply_filters( 'the_content', $block_content );
-		// Enable auto sizes.
-		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 
 		$this->assertStringContainsString( 'sizes="(max-width: 1280px) 100vw, 1280px" ', $result );
 	}
@@ -142,11 +141,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 			$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" alt="" class="wp-image-' . self::$image_id . '"/></figure><!-- /wp:image -->';
 		}
 
-		// Disable auto sizes.
-		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 		$result = apply_filters( 'the_content', $block_content );
-		// Enable auto sizes.
-		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 
 		$this->assertStringContainsString( $expected, $result );
 	}
@@ -208,11 +203,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		<!-- /wp:paragraph --></div></div>
 		<!-- /wp:cover -->';
 
-		// Disable auto sizes.
-		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 		$result = apply_filters( 'the_content', $block_content );
-		// Enable auto sizes.
-		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 
 		$this->assertStringContainsString( 'sizes="(max-width: 620px) 100vw, 620px" ', $result );
 	}
@@ -234,11 +225,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 			$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none","align":"' . $alignment . '"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" alt="" class="wp-image-' . self::$image_id . '"/></figure><!-- /wp:image -->';
 		}
 
-		// Disable auto sizes.
-		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 		$result = apply_filters( 'the_content', $block_content );
-		// Enable auto sizes.
-		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 
 		$this->assertStringContainsString( $expected, $result );
 	}
@@ -400,11 +387,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		<!-- /wp:paragraph --></div></div>
 		<!-- /wp:cover -->';
 
-		// Disable auto sizes.
-		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 		$result = apply_filters( 'the_content', $block_content );
-		// Enable auto sizes.
-		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 
 		$this->assertStringContainsString( 'sizes="(max-width: 1080px) 100vw, 1080px" ', $result );
 	}
