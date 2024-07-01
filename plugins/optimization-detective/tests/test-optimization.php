@@ -185,7 +185,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 */
 	public function data_provider_test_od_optimize_template_output_buffer(): array {
 		return array(
-			'no-url-metrics'                              => array(
+			'no-url-metrics'       => array(
 				'set_up'   => static function (): void {},
 				'buffer'   => '
 					<html lang="en">
@@ -212,97 +212,10 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				',
 			),
 
-			'no-url-metrics-with-data-url-background-image' => array(
-				'set_up'   => static function (): void {
-					ini_set( 'default_mimetype', 'text/html; charset=utf-8' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
-				},
-				// Smallest PNG courtesy of <https://evanhahn.com/worlds-smallest-png/>.
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<div style="background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==); width:100%; height: 200px;">This is so background!</div>
-						</body>
-					</html>
-				',
-				// There should be no data-od-xpath added to the DIV because it is using a data: URL for the background-image.
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<div style="background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==); width:100%; height: 200px;">This is so background!</div>
-							<script type="module">/* import detect ... */</script>
-						</body>
-					</html>
-				',
-			),
-
-			'no-url-metrics-with-data-url-image'          => array(
-				'set_up'   => static function (): void {},
-				// Smallest PNG courtesy of <https://evanhahn.com/worlds-smallest-png/>.
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==" alt="">
-						</body>
-					</html>
-				',
-				// There should be no data-od-xpath added to the IMG because it is using a data: URL.
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQAAAAA3bvkkAAAACklEQVR4AWNgAAAAAgABc3UBGAAAAABJRU5ErkJggg==" alt="">
-							<script type="module">/* import detect ... */</script>
-						</body>
-					</html>
-				',
-			),
-
-			'no-url-metrics-for-image-without-src'        => array(
-				'set_up'   => static function (): void {},
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<img id="no-src" alt="">
-							<img id="empty-src" src="" alt="">
-						</body>
-					</html>
-				',
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<img id="no-src" alt="">
-							<img id="empty-src" src="" alt="">
-							<script type="module">/* import detect ... */</script>
-						</body>
-					</html>
-				',
-			),
-
-			'no-lcp-image-with-populated-url-metrics'     => array(
+			'complete-url-metrics' => array(
 				'set_up'   => function (): void {
+					ini_set( 'default_mimetype', 'text/html; charset=utf-8' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+
 					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 					$sample_size = od_get_url_metrics_breakpoint_sample_size();
 					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
@@ -329,7 +242,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<h1>Hello World</h1>
+							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
 						</body>
 					</html>
 				',
@@ -340,595 +253,13 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<h1>Hello World</h1>
+							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
 						</body>
 					</html>
 				',
 			),
 
-			'common-lcp-image-with-fully-populated-sample-data' => array(
-				'set_up'   => function (): void {
-					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-					$sample_size = od_get_url_metrics_breakpoint_sample_size();
-					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
-						for ( $i = 0; $i < $sample_size; $i++ ) {
-							OD_URL_Metrics_Post_Type::store_url_metric(
-								$slug,
-								$this->get_validated_url_metric(
-									$viewport_width,
-									array(
-										array(
-											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-											'isLCP' => true,
-										),
-										array(
-											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-											'isLCP' => false,
-										),
-									)
-								)
-							);
-						}
-					}
-				},
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
-							<img src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" fetchpriority="high">
-						</body>
-					</html>
-				',
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" imagesrcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous" media="screen">
-						</head>
-						<body>
-							<img data-od-added-fetchpriority data-od-removed-loading="lazy" fetchpriority="high" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
-							<img data-od-removed-fetchpriority="high" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" >
-						</body>
-					</html>
-				',
-			),
-
-			'common-lcp-image-with-stale-sample-data'     => array(
-				'set_up'   => function (): void {
-					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-					$sample_size = od_get_url_metrics_breakpoint_sample_size();
-					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
-						for ( $i = 0; $i < $sample_size; $i++ ) {
-							OD_URL_Metrics_Post_Type::store_url_metric(
-								$slug,
-								$this->get_validated_url_metric(
-									$viewport_width,
-									array(
-										array(
-											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-											'isLCP' => true,
-										),
-									)
-								)
-							);
-						}
-					}
-				},
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<script>/* Something injected with wp_body_open */</script>
-							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
-						</body>
-					</html>
-				',
-				// The preload link should be absent because the URL Metrics were collected before the script was printed at wp_body_open, causing the XPath to no longer be valid.
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<script>/* Something injected with wp_body_open */</script>
-							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
-						</body>
-					</html>
-				',
-			),
-
-			'common-lcp-background-image-with-fully-populated-sample-data' => array(
-				'set_up'   => function (): void {
-					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-					$sample_size = od_get_url_metrics_breakpoint_sample_size();
-					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
-						for ( $i = 0; $i < $sample_size; $i++ ) {
-							OD_URL_Metrics_Post_Type::store_url_metric(
-								$slug,
-								$this->get_validated_url_metric(
-									$viewport_width,
-									array(
-										array(
-											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::DIV]',
-											'isLCP' => true,
-										),
-									)
-								)
-							);
-						}
-					}
-				},
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<div style="background-image:url(https://example.com/foo-bg.jpg); width:100%; height: 200px;">This is so background!</div>
-						</body>
-					</html>
-				',
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo-bg.jpg" media="screen">
-						</head>
-						<body>
-							<div style="background-image:url(https://example.com/foo-bg.jpg); width:100%; height: 200px;">This is so background!</div>
-						</body>
-					</html>
-				',
-			),
-
-			'responsive-background-images'                => array(
-				'set_up'   => function (): void {
-					$mobile_breakpoint  = 480;
-					$tablet_breakpoint  = 600;
-					$desktop_breakpoint = 782;
-					add_filter(
-						'od_breakpoint_max_widths',
-						static function () use ( $mobile_breakpoint, $tablet_breakpoint ): array {
-							return array( $mobile_breakpoint, $tablet_breakpoint );
-						}
-					);
-					$sample_size = od_get_url_metrics_breakpoint_sample_size();
-
-					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-					$div_index_to_viewport_width_mapping = array(
-						0 => $desktop_breakpoint,
-						1 => $tablet_breakpoint,
-						2 => $mobile_breakpoint,
-					);
-
-					foreach ( $div_index_to_viewport_width_mapping as $div_index => $viewport_width ) {
-						for ( $i = 0; $i < $sample_size; $i++ ) {
-							OD_URL_Metrics_Post_Type::store_url_metric(
-								$slug,
-								$this->get_validated_url_metric(
-									$viewport_width,
-									array(
-										array(
-											'xpath' => sprintf( '/*[1][self::HTML]/*[2][self::BODY]/*[%d][self::DIV]', $div_index + 1 ),
-											'isLCP' => true,
-										),
-									)
-								)
-							);
-						}
-					}
-				},
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-							<style>/* responsive styles to show only one div.header at a time... */</style>
-						</head>
-						<body>
-							<div class="header desktop" style="background: red no-repeat center/80% url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>
-							<div class="header tablet" style=\'background-image:url( "https://example.com/tablet-bg.jpg" ); width:100%; height: 200px;\'>This is the tablet background!</div>
-							<div class="header mobile" style="background-image:url(https://example.com/mobile-bg.jpg); width:100%; height: 200px;">This is the mobile background!</div>
-						</body>
-					</html>
-				',
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-							<style>/* responsive styles to show only one div.header at a time... */</style>
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-bg.jpg" media="screen and (max-width: 480px)">
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/tablet-bg.jpg" media="screen and (min-width: 481px) and (max-width: 600px)">
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-bg.jpg" media="screen and (min-width: 601px)">
-						</head>
-						<body>
-							<div class="header desktop" style="background: red no-repeat center/80% url(\'https://example.com/desktop-bg.jpg\'); width:100%; height: 200px;">This is the desktop background!</div>
-							<div class="header tablet" style=\'background-image:url( "https://example.com/tablet-bg.jpg" ); width:100%; height: 200px;\'>This is the tablet background!</div>
-							<div class="header mobile" style="background-image:url(https://example.com/mobile-bg.jpg); width:100%; height: 200px;">This is the mobile background!</div>
-						</body>
-					</html>
-				',
-			),
-
-			'fetch-priority-high-already-on-common-lcp-image-with-fully-populated-sample-data' => array(
-				'set_up'   => function (): void {
-					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-					$sample_size = od_get_url_metrics_breakpoint_sample_size();
-					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
-						for ( $i = 0; $i < $sample_size; $i++ ) {
-							OD_URL_Metrics_Post_Type::store_url_metric(
-								$slug,
-								$this->get_validated_url_metric(
-									$viewport_width,
-									array(
-										array(
-											'isLCP' => true,
-											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-										),
-									)
-								)
-							);
-						}
-					}
-				},
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" fetchpriority="high">
-						</body>
-					</html>
-				',
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen">
-						</head>
-						<body>
-							<img data-od-fetchpriority-already-added src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" fetchpriority="high">
-						</body>
-					</html>
-				',
-			),
-
-			'url-metric-only-captured-for-one-breakpoint' => array(
-				'set_up'   => function (): void {
-					OD_URL_Metrics_Post_Type::store_url_metric(
-						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-						$this->get_validated_url_metric(
-							400,
-							array(
-								array(
-									'isLCP' => true,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								),
-							)
-						)
-					);
-				},
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-							<!--</head>-->
-						</head>
-						<!--</head>-->
-						<body>
-							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
-							<!--</body>-->
-						</body>
-						<!--</body>-->
-					</html>
-				',
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-							<!--</head>-->
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen and (max-width: 480px)">
-						</head>
-						<!--</head>-->
-						<body>
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800">
-							<!--</body>-->
-							<script type="module">/* import detect ... */</script>
-						</body>
-						<!--</body>-->
-					</html>
-				',
-			),
-
-			'different-lcp-elements-for-non-consecutive-viewport-groups-with-missing-data-for-middle-group' => array(
-				'set_up'   => function (): void {
-					OD_URL_Metrics_Post_Type::store_url_metric(
-						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-						$this->get_validated_url_metric(
-							400,
-							array(
-								array(
-									'isLCP' => true,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								),
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-								),
-							)
-						)
-					);
-					OD_URL_Metrics_Post_Type::store_url_metric(
-						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-						$this->get_validated_url_metric(
-							800,
-							array(
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								),
-								array(
-									'isLCP' => true,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-								),
-							)
-						)
-					);
-				},
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-							<img src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
-						</body>
-					</html>
-				',
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" media="screen and (max-width: 480px)">
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-logo.png" media="screen and (min-width: 783px)">
-						</head>
-						<body>
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
-							<script type="module">/* import detect ... */</script>
-						</body>
-					</html>
-				',
-			),
-
-			'different-lcp-elements-for-two-non-consecutive-breakpoints' => array(
-				'set_up'   => function (): void {
-					add_filter(
-						'od_breakpoint_max_widths',
-						static function () {
-							return array( 480, 600, 782 );
-						}
-					);
-
-					OD_URL_Metrics_Post_Type::store_url_metric(
-						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-						$this->get_validated_url_metric(
-							400,
-							array(
-								array(
-									'isLCP' => true,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								),
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-								),
-							)
-						)
-					);
-					OD_URL_Metrics_Post_Type::store_url_metric(
-						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-						$this->get_validated_url_metric(
-							500,
-							array(
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								),
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-								),
-							)
-						)
-					);
-					OD_URL_Metrics_Post_Type::store_url_metric(
-						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-						$this->get_validated_url_metric(
-							700,
-							array(
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								),
-								array(
-									'isLCP' => true,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-								),
-							)
-						)
-					);
-					OD_URL_Metrics_Post_Type::store_url_metric(
-						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-						$this->get_validated_url_metric(
-							800,
-							array(
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								),
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-								),
-							)
-						)
-					);
-				},
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-							<img src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
-						</body>
-					</html>
-				',
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" media="screen and (max-width: 480px)">
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-logo.png" media="screen and (min-width: 601px) and (max-width: 782px)">
-						</head>
-						<body>
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
-							<script type="module">/* import detect ... */</script>
-						</body>
-					</html>
-				',
-			),
-
-			'different-lcp-elements-for-two-non-consecutive-breakpoints-and-one-is-stale' => array(
-				'set_up'   => function (): void {
-					add_filter(
-						'od_breakpoint_max_widths',
-						static function () {
-							return array( 480, 600, 782 );
-						}
-					);
-
-					OD_URL_Metrics_Post_Type::store_url_metric(
-						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-						$this->get_validated_url_metric(
-							500,
-							array(
-								array(
-									'isLCP' => true,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								),
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-								),
-							)
-						)
-					);
-					OD_URL_Metrics_Post_Type::store_url_metric(
-						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-						$this->get_validated_url_metric(
-							650,
-							array(
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								),
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-								),
-							)
-						)
-					);
-					OD_URL_Metrics_Post_Type::store_url_metric(
-						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-						$this->get_validated_url_metric(
-							800,
-							array(
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								),
-								array(
-									'isLCP' => true,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-								),
-							)
-						)
-					);
-					OD_URL_Metrics_Post_Type::store_url_metric(
-						od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-						$this->get_validated_url_metric(
-							800,
-							array(
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								),
-								array(
-									'isLCP' => false,
-									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-								),
-							)
-						)
-					);
-				},
-				'buffer'   => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-						</head>
-						<body>
-							<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-							<p>New paragraph since URL Metrics were captured!</p>
-							<img src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
-						</body>
-					</html>
-				',
-				'expected' => '
-					<html lang="en">
-						<head>
-							<meta charset="utf-8">
-							<title>...</title>
-							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" media="screen and (min-width: 481px) and (max-width: 600px)">
-						</head>
-						<body>
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-							<p>New paragraph since URL Metrics were captured!</p>
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
-							<script type="module">/* import detect ... */</script>
-						</body>
-					</html>
-				',
-			),
-
-			'rss-response'                                => array(
+			'rss-response'         => array(
 				'set_up'   => static function (): void {
 					ini_set( 'default_mimetype', 'application/rss+xml' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 				},
@@ -960,7 +291,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				',
 			),
 
-			'xhtml-response'                              => array(
+			'xhtml-response'       => array(
 				'set_up'   => static function (): void {
 					ini_set( 'default_mimetype', 'application/xhtml+xml; charset=utf-8' ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 				},
@@ -1000,6 +331,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * @covers ::od_is_response_html_content_type
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
+	 * @throws Exception But it won't.
 	 */
 	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ): void {
 		$set_up();
@@ -1007,6 +339,22 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		$remove_initial_tabs = static function ( string $input ): string {
 			return (string) preg_replace( '/^\t+/m', '', $input );
 		};
+
+		add_action(
+			'od_register_tag_visitors',
+			function ( OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metrics_Group_Collection $url_metrics_outer, OD_Preload_Link_Collection $preload_links_outer ): void {
+				$tag_visitor_registry->register(
+					'img',
+					function ( OD_HTML_Tag_Walker $walker, OD_URL_Metrics_Group_Collection $url_metrics, OD_Preload_Link_Collection $preload_links ) use ( $url_metrics_outer, $preload_links_outer ): bool {
+						$this->assertSame( $url_metrics, $url_metrics_outer );
+						$this->assertSame( $preload_links, $preload_links_outer );
+						return $walker->get_tag() === 'IMG';
+					}
+				);
+			},
+			10,
+			3
+		);
 
 		$expected = $remove_initial_tabs( $expected );
 		$buffer   = $remove_initial_tabs( $buffer );
