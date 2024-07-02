@@ -98,7 +98,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	foreach ( $mime_types as $image_mime_type ) {
 		$sizes = wp_calculate_image_sizes( $size_array, $src, $image_meta, $attachment_id );
 		if ( false === $sizes ) {
-			continue;
+			$image_srcset = $src;
 		}
 
 		// Filter core's wp_get_attachment_image_srcset to return the sources for the current mime type.
@@ -121,7 +121,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		$image_srcset = wp_get_attachment_image_srcset( $attachment_id, $size_array, $image_meta );
 		remove_filter( 'wp_calculate_image_srcset', $filter );
 		if ( false === $image_srcset ) {
-			continue;
+			$image_srcset = $src;
 		}
 		$picture_sources .= sprintf(
 			'<source type="%s" srcset="%s" sizes="%s">',
