@@ -344,12 +344,11 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 * Test append_head_html().
 	 *
 	 * @covers ::append_head_html
-	 * @covers OD_HTML_Tag_Processor::append_html
 	 *
 	 * @throws Exception But not really.
 	 */
 	public function test_append_head_html(): void {
-		$html      = '
+		$html           = '
 			<html>
 				<head>
 					<meta charset=utf-8>
@@ -361,9 +360,10 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 				</body>
 			</html>
 		';
-		$injected  = '<meta name="generator" content="optimization-detective">';
-		$processor = new OD_HTML_Tag_Processor( $html );
-		$this->assertFalse( $processor->append_head_html( $injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
+		$processor      = new OD_HTML_Tag_Processor( $html );
+		$early_injected = '<!-- Early injection -->';
+		$late_injected  = '<!-- Late injection -->';
+		$processor->append_head_html( $early_injected );
 
 		$saw_head = false;
 		while ( $processor->next_open_tag() ) {
@@ -374,13 +374,31 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		}
 		$this->assertTrue( $saw_head );
 
-		$this->assertTrue( $processor->append_head_html( $injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
+		$processor->append_head_html( $late_injected );
 		$expected = "
 			<html>
 				<head>
 					<meta charset=utf-8>
 					<!-- </head> -->
-				{$injected}</head>
+				{$early_injected}{$late_injected}</head>
+				<!--</HEAD>-->
+				<body>
+					<h1>Hello World</h1>
+				</body>
+			</html>
+		";
+
+		$this->assertSame( $expected, $processor->get_updated_html() );
+
+		$later_injected = '<!-- Later injection -->';
+		$processor->append_head_html( $later_injected );
+
+		$expected = "
+			<html>
+				<head>
+					<meta charset=utf-8>
+					<!-- </head> -->
+				{$early_injected}{$late_injected}{$later_injected}</head>
 				<!--</HEAD>-->
 				<body>
 					<h1>Hello World</h1>
@@ -395,7 +413,6 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 *
 	 * @covers ::append_head_html
 	 * @covers ::append_body_html
-	 * @covers OD_HTML_Tag_Processor::append_html
 	 *
 	 * @throws Exception But not really.
 	 */
@@ -417,8 +434,6 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$head_injected = '<link rel="home" href="/">';
 		$body_injected = '<script>document.write("Goodbye!")</script>';
 		$processor     = new OD_HTML_Tag_Processor( $html );
-		$this->assertFalse( $processor->append_head_html( $head_injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
-		$this->assertFalse( $processor->append_body_html( $body_injected ), 'Expected injection to fail because the BODY closing tag has not been encountered yet.' );
 
 		$saw_head = false;
 		$saw_body = false;
@@ -433,8 +448,8 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$this->assertTrue( $saw_head );
 		$this->assertTrue( $saw_body );
 
-		$this->assertTrue( $processor->append_head_html( $head_injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
-		$this->assertTrue( $processor->append_body_html( $body_injected ), 'Expected injection to succeed because the BODY closing tag has been encountered.' );
+		$processor->append_head_html( $head_injected );
+		$processor->append_body_html( $body_injected );
 		$expected = "
 			<html>
 				<head>

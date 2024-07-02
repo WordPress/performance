@@ -210,6 +210,14 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $previous_tag_without_closer = false;
 
 	/**
+	 * Mapping of bookmark name to a list of HTML strings which will be inserted at the time get_updated_html() is called.
+	 *
+	 * @since n.e.x.t
+	 * @var array<string, string[]>
+	 */
+	private $buffered_text_replacements = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $html HTML to process.
@@ -487,6 +495,13 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @return bool Whether the bookmark already existed before removal.
 	 */
 	public function release_bookmark( $name ): bool {
+		if ( in_array( $name, array( self::END_OF_HEAD_BOOKMARK, self::END_OF_BODY_BOOKMARK ), true ) ) {
+			$this->warn(
+				/* translators: %s is the bookmark name */
+				sprintf( 'The %s bookmark is not allowed to be released.', 'optimization-detective' )
+			);
+			return false;
+		}
 		unset( $this->bookmarked_open_stacks[ $name ] );
 		return parent::release_bookmark( $name );
 	}
@@ -545,64 +560,59 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Append HTML to the HEAD.
 	 *
-	 * Before this can be called, the document must first have been iterated over with so that the bookmark for the HEAD
-	 * end tag is set.
+	 * The provided HTML must be valid! No validation is performed.
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @param string $html HTML to inject.
-	 * @return bool Whether successful.
 	 */
-	public function append_head_html( string $html ): bool {
-		$success = $this->append_html( self::END_OF_HEAD_BOOKMARK, $html );
-		if ( ! $success ) {
-			$this->warn( __( 'Unable to append markup to the HEAD.', 'optimization-detective' ) );
-		}
-		return $success;
+	public function append_head_html( string $html ): void {
+		$this->buffered_text_replacements[ self::END_OF_HEAD_BOOKMARK ][] = $html;
 	}
 
 	/**
 	 * Append HTML to the BODY.
 	 *
-	 * Before this can be called, the document must first have been iterated over so that the bookmark for the BODY end
-	 * tag is set.
+	 * The provided HTML must be valid! No validation is performed.
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @param string $html HTML to inject.
-	 * @return bool Whether successful.
 	 */
-	public function append_body_html( string $html ): bool {
-		$success = $this->append_html( self::END_OF_BODY_BOOKMARK, $html );
-		if ( ! $success ) {
-			$this->warn( __( 'Unable to append markup to the BODY.', 'optimization-detective' ) );
-		}
-		return $success;
+	public function append_body_html( string $html ): void {
+		$this->buffered_text_replacements[ self::END_OF_BODY_BOOKMARK ][] = $html;
 	}
 
 	/**
-	 * Appends HTML to the provided bookmark.
+	 * Returns the string representation of the HTML Tag Processor.
 	 *
-	 * @since n.e.x.t
-	 *
-	 * @param string $bookmark Bookmark.
-	 * @param string $html     HTML to inject.
-	 *
-	 * @return bool Whether the HTML was appended.
+	 * @return string The processed HTML.
 	 */
-	private function append_html( string $bookmark, string $html ): bool {
-		if ( ! $this->has_bookmark( $bookmark ) ) {
-			return false;
+	public function get_updated_html(): string {
+		foreach ( array_keys( $this->buffered_text_replacements ) as $bookmark ) {
+			$html_strings = $this->buffered_text_replacements[ $bookmark ];
+			if ( count( $html_strings ) === 0 ) {
+				continue;
+			}
+			if ( ! $this->has_bookmark( $bookmark ) ) {
+				$this->warn(
+					/* translators: %s is the bookmark name */
+					__( 'Unable to append markup to %s since the bookmark no longer exists.', 'optimization-detective' )
+				);
+			} else {
+				$start = $this->bookmarks[ $bookmark ]->start;
+
+				$this->lexical_updates[] = new WP_HTML_Text_Replacement(
+					$start,
+					$this->old_text_replacement_signature_needed ? $start : 0,
+					implode( '', $html_strings )
+				);
+
+				unset( $this->buffered_text_replacements[ $bookmark ] );
+			}
 		}
 
-		$start = $this->bookmarks[ $bookmark ]->start;
-
-		$this->lexical_updates[] = new WP_HTML_Text_Replacement(
-			$start,
-			$this->old_text_replacement_signature_needed ? $start : 0,
-			$html
-		);
-		return true;
+		return parent::get_updated_html();
 	}
 
 	/**
