@@ -18,12 +18,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 function embed_optimizer_add_hooks(): void {
 	add_action( 'wp_head', 'embed_optimizer_render_generator' );
 
-	// TODO: If Optimization Detective is enabled, do the markup injection entirely in the Processor.
-	if ( ! defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
+	if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
+		add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors', 10, 3 );
+	} else {
 		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
 	}
 }
 add_action( 'init', 'embed_optimizer_add_hooks' );
+
+/**
+ * Registers the tag visitor for embeds.
+ *
+ * @since n.e.x.t
+ *
+ * @param OD_Tag_Visitor_Registry         $registry                     Tag visitor registry.
+ * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
+ * @param OD_Link_Collection              $link_collection              Link Collection.
+ */
+function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Link_Collection $link_collection ): void {
+	require_once __DIR__ . '/class-embed-optimizer-tag-visitor.php';
+	$registry->register( 'embeds', new Embed_Optimizer_Tag_Visitor( $url_metrics_group_collection, $link_collection ) );
+}
 
 /**
  * Filter the oEmbed HTML.
