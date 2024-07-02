@@ -73,7 +73,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			if ( empty( $loading_value ) ) {
 				++$iframe_count;
 				if ( ! $html_processor->set_bookmark( 'iframe' ) ) {
-					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set iframe bookmark.', 'embed-optimizer' ) );
+					wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set iframe bookmark.', 'embed-optimizer' ) );
 					return $html;
 				}
 			}
@@ -83,7 +83,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			} else {
 				++$script_count;
 				if ( ! $html_processor->set_bookmark( 'script' ) ) {
-					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set script bookmark.', 'embed-optimizer' ) );
+					wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set script bookmark.', 'embed-optimizer' ) );
 					return $html;
 				}
 			}
@@ -98,7 +98,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			}
 			$html_processor->set_attribute( 'type', 'application/vnd.embed-optimizer.javascript' );
 		} else {
-			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to script bookmark.', 'embed-optimizer' ) );
+			wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to script bookmark.', 'embed-optimizer' ) );
 		}
 	}
 	// If there was only one iframe, make it lazy.
@@ -122,7 +122,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 				}
 			}
 		} else {
-			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to iframe bookmark.', 'embed-optimizer' ) );
+			wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to iframe bookmark.', 'embed-optimizer' ) );
 		}
 	}
 	return $html_processor->get_updated_html();
@@ -174,29 +174,6 @@ function embed_optimizer_lazy_load_scripts(): void {
 		}
 JS;
 	wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
-}
-
-/**
- * Generates a user-level error/warning/notice/deprecation message.
- *
- * Generates the message when `WP_DEBUG` is true.
- *
- * @since 0.1.0
- *
- * @param string $function_name The function that triggered the error.
- * @param string $message       The message explaining the error.
- *                              The message can contain allowed HTML 'a' (with href), 'code',
- *                              'br', 'em', and 'strong' tags and http or https protocols.
- *                              If it contains other HTML tags or protocols, the message should be escaped
- *                              before passing to this function to avoid being stripped {@see wp_kses()}.
- * @param int    $error_level   Optional. The designated error type for this error.
- *                              Only works with E_USER family of constants. Default E_USER_NOTICE.
- */
-function embed_optimizer_trigger_error( string $function_name, string $message, int $error_level = E_USER_NOTICE ): void {
-	if ( ! function_exists( 'wp_trigger_error' ) ) {
-		return;
-	}
-	wp_trigger_error( $function_name, $message, $error_level );
 }
 
 /**
