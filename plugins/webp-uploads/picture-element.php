@@ -131,16 +131,6 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		);
 	}
 
-	// Fall back to the original image without a srcset.
-	$original_image = wp_get_original_image_url( $attachment_id );
-	// Fail gracefully if the original image is not found.
-	if ( false === $original_image ) {
-		return $image;
-	}
-	$filter = static function (): bool {
-		return false;
-	};
-
 	return sprintf(
 		'<picture class="%s" style="display: contents;">%s%s</picture>',
 		esc_attr( 'wp-picture-' . $attachment_id ),
