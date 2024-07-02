@@ -191,8 +191,7 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 		case 'center':
 			// Resize image width.
 			$image_width = $processor->get_attribute( 'data-resize-width' ) ?? $image_width;
-			$width       = auto_sizes_get_width( '', (int) $image_width );
-			$sizes       = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
+			$sizes       = sprintf( '(max-width: %1$dpx) 100vw, %1$dpx', $image_width );
 			break;
 
 		default:
