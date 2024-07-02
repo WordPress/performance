@@ -5,6 +5,9 @@
  * @package embed-optimizer
  */
 
+/**
+ * @phpstan-type ElementDataSubset array{xpath: string, isLCP: bool, intersectionRatio: float}
+ */
 class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	/**
 	 * Runs the routine before each test is executed.
@@ -37,26 +40,15 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	 */
 	public function data_provider_test_od_optimize_template_output_buffer(): array {
 		return array(
-			'complete_url_metrics' => array(
+			'single_youtube_embed_inside_viewport'  => array(
 				'set_up'   => function (): void {
-					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-					$sample_size = od_get_url_metrics_breakpoint_sample_size();
-					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
-						for ( $i = 0; $i < $sample_size; $i++ ) {
-							OD_URL_Metrics_Post_Type::store_url_metric(
-								$slug,
-								$this->get_validated_url_metric(
-									$viewport_width,
-									array(
-										array(
-											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
-											'isLCP' => true,
-										),
-									)
-								)
-							);
-						}
-					}
+					$this->populate_complete_url_metrics(
+						array(
+							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+							'isLCP'             => true,
+							'intersectionRatio' => 1,
+						)
+					);
 				},
 				'buffer'   => '
 					<html lang="en">
@@ -84,6 +76,92 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
 								<div class="wp-block-embed__wrapper">
 									<iframe title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+								</div>
+							</figure>
+						</body>
+					</html>
+				',
+			),
+
+			'single_youtube_embed_outside_viewport' => array(
+				'set_up'   => function (): void {
+					$this->populate_complete_url_metrics(
+						array(
+							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+							'isLCP'             => false,
+							'intersectionRatio' => 0,
+						)
+					);
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div class="wp-block-embed__wrapper">
+									<iframe title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+								</div>
+							</figure>
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div class="wp-block-embed__wrapper">
+									<iframe data-od-added-loading loading="lazy" title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+								</div>
+							</figure>
+						</body>
+					</html>
+				',
+			),
+
+			'single_twitter_embed_outside_viewport' => array(
+				'set_up'   => function (): void {
+					$this->populate_complete_url_metrics(
+						array(
+							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+							'isLCP'             => false,
+							'intersectionRatio' => 0,
+						)
+					);
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<figure class="wp-block-embed is-type-rich is-provider-twitter wp-block-embed-twitter">
+								<div class="wp-block-embed__wrapper">
+									<blockquote class="twitter-tweet" data-width="550" data-dnt="true"><p lang="en" dir="ltr">We want your feedback for the Privacy Sandbox 📨<br><br>Learn why your feedback is critical through real examples and learn how to provide it ↓ <a href="https://t.co/anGk6gWkbc">https://t.co/anGk6gWkbc</a></p>&mdash; Chrome for Developers (@ChromiumDev) <a href="https://twitter.com/ChromiumDev/status/1636796541368139777?ref_src=twsrc%5Etfw">March 17, 2023</a></blockquote>
+									<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+								</div>
+							</figure>
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<figure class="wp-block-embed is-type-rich is-provider-twitter wp-block-embed-twitter">
+								<div class="wp-block-embed__wrapper">
+									<blockquote class="twitter-tweet" data-width="550" data-dnt="true"><p lang="en" dir="ltr">We want your feedback for the Privacy Sandbox 📨<br><br>Learn why your feedback is critical through real examples and learn how to provide it ↓ <a href="https://t.co/anGk6gWkbc">https://t.co/anGk6gWkbc</a></p>&mdash; Chrome for Developers (@ChromiumDev) <a href="https://twitter.com/ChromiumDev/status/1636796541368139777?ref_src=twsrc%5Etfw">March 17, 2023</a></blockquote>
+									<script data-od-added-type type="application/vnd.embed-optimizer.javascript" async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 								</div>
 							</figure>
 						</body>
@@ -121,10 +199,35 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Populates complete URL metrics for the provided element data.
+	 *
+	 * @phpstan-param ElementDataSubset $element
+	 * @param array $element Element data.
+	 * @throws Exception But it won't.
+	 */
+	protected function populate_complete_url_metrics( array $element ): void {
+		$slug        = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+		$sample_size = od_get_url_metrics_breakpoint_sample_size();
+		foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+			for ( $i = 0; $i < $sample_size; $i++ ) {
+				OD_URL_Metrics_Post_Type::store_url_metric(
+					$slug,
+					$this->get_validated_url_metric(
+						$viewport_width,
+						array(
+							$element,
+						)
+					)
+				);
+			}
+		}
+	}
+
+	/**
 	 * Gets a validated URL metric.
 	 *
-	 * @param int                                      $viewport_width Viewport width for the URL metric.
-	 * @param array<array{xpath: string, isLCP: bool}> $elements       Elements.
+	 * @param int                      $viewport_width Viewport width for the URL metric.
+	 * @param array<ElementDataSubset> $elements       Elements.
 	 * @return OD_URL_Metric URL metric.
 	 * @throws Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */

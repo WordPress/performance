@@ -34,6 +34,13 @@ final class Embed_Optimizer_Tag_Visitor {
 	protected $link_collection;
 
 	/**
+	 * Whether the lazy-loading script was added to the body.
+	 *
+	 * @var bool
+	 */
+	protected $added_lazy_script = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
@@ -59,6 +66,8 @@ final class Embed_Optimizer_Tag_Visitor {
 			return false;
 		}
 
+		$original_bookmarks = $processor->get_bookmark_names();
+
 		$max_intersection_ratio = $this->url_metrics_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() );
 
 		if ( $max_intersection_ratio > 0 ) {
@@ -71,11 +80,17 @@ final class Embed_Optimizer_Tag_Visitor {
 						'href' => 'https://i.ytimg.com',
 					)
 				);
-				// TODO: Undo lazy-loading?
 			}
-		} else {
-			$processor->set_meta_attribute( 'needs-lazy-loading', 'true' );
-			// TODO: Add lazy-loading?
+		} elseif ( embed_optimizer_update_markup( $processor ) && ! $this->added_lazy_script ) {
+			$processor->append_body_html( '<!-- TODO: Add lazy-loading script. -->' ); // TODO: This does not work because the end of the BODY hasn't been encountered yet. We need to rather hold onto a buffer of the content to append.
+			$this->added_lazy_script = true;
+		}
+
+		// Since there is a limit to the number of bookmarks we can add, make sure any new ones we add get removed.
+		// TODO: Instead of this consider throwing an exception inside embed_optimizer_update_markup() and clear out the bookmarks in the catch() block or else when the function returns.
+		$new_bookmarks = array_diff( $original_bookmarks, $processor->get_bookmark_names() );
+		foreach ( $new_bookmarks as $new_bookmark ) {
+			$processor->release_bookmark( $new_bookmark );
 		}
 
 		return true;

@@ -176,9 +176,11 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$visitors = iterator_to_array( $tag_visitor_registry );
 	while ( $processor->next_tag() ) {
 		$did_visit = false;
+		// TODO: Set bookmark.
 		foreach ( $visitors as $visitor ) {
 			$did_visit = $visitor( $processor, $group_collection, $link_collection ) || $did_visit;
 		}
+		// TODO: Seek to bookmark and release.
 
 		if ( $did_visit && $needs_detection ) {
 			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );

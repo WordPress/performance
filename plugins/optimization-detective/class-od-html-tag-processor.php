@@ -431,6 +431,15 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
+	 * Gets the bookmark names.
+	 *
+	 * @return string[] Bookmark names.
+	 */
+	public function get_bookmark_names(): array {
+		return array_keys( $this->bookmarks );
+	}
+
+	/**
 	 * Move the internal cursor in the Tag Processor to a given bookmark's location.
 	 *
 	 * @inheritDoc

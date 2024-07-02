@@ -52,7 +52,30 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
  * @return string Filtered oEmbed HTML.
  */
 function embed_optimizer_filter_oembed_html( string $html ): string {
-	$html_processor = new WP_HTML_Tag_Processor( $html );
+	$figure_start_tag = '<figure>'; // TODO: Instead of wrapping the $html in a FIGURE, we could instead just let the initial tag be null and then in that case we loop to the very end of the HTML.
+	$figure_end_tag   = '</figure>';
+	$html_processor   = new WP_HTML_Tag_Processor( $figure_start_tag . $html . $figure_end_tag );
+
+	if ( embed_optimizer_update_markup( $html_processor ) ) {
+		add_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' );
+	}
+
+	return str_replace(
+		array( $figure_start_tag, $figure_end_tag ),
+		'',
+		$html_processor->get_updated_html()
+	);
+}
+
+/**
+ * Applies changes to HTML in the supplied tag processor to lazy-load the embed.
+ *
+ * @since n.e.x.t
+ *
+ * @param WP_HTML_Tag_Processor $html_processor HTML Processor.
+ * @return bool Whether the lazy-loading script is required.
+ */
+function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ): bool {
 
 	/**
 	 * Determine how to lazy load the embed.
@@ -65,16 +88,35 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 	 */
 	$iframe_count      = 0;
 	$script_count      = 0;
+	$needs_lazy_script = false;
 	$has_inline_script = false;
+	$inside_figure     = 'FIGURE' === $html_processor->get_tag(); // TODO: For the non-OD case, this could be instead 'FIGURE' ==== $html_processor->get_tag() or null === $html_processor->get_tag().
 	// Locate the iframes and scripts.
 	while ( $html_processor->next_tag() ) {
+		if ( 'FIGURE' === $html_processor->get_tag() ) {
+			if ( $html_processor->is_tag_closer() ) {
+				// We reached the end of the embed.
+				break;
+			} elseif ( ! $inside_figure ) {
+				// We're now inside the embed, so skip to the next tag to start processing.
+				$inside_figure = true;
+				continue;
+			} else {
+				// We encountered an embed which contains a FIGURE, which we cannot support without using the WP_HTML_Processor (although OD_HTML_Tag_Processor could).
+				wp_trigger_error( __FUNCTION__, esc_html__( 'Unable to handle embeds containing FIGURE elements.', 'embed-optimizer' ) );
+				break;
+			}
+		}
+		if ( ! $inside_figure ) {
+			continue;
+		}
 		if ( 'IFRAME' === $html_processor->get_tag() ) {
 			$loading_value = $html_processor->get_attribute( 'loading' );
 			if ( empty( $loading_value ) ) {
 				++$iframe_count;
 				if ( ! $html_processor->set_bookmark( 'iframe' ) ) {
 					wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set iframe bookmark.', 'embed-optimizer' ) );
-					return $html;
+					return false;
 				}
 			}
 		} elseif ( 'SCRIPT' === $html_processor->get_tag() ) {
@@ -84,14 +126,14 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 				++$script_count;
 				if ( ! $html_processor->set_bookmark( 'script' ) ) {
 					wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set script bookmark.', 'embed-optimizer' ) );
-					return $html;
+					return false;
 				}
 			}
 		}
 	}
 	// If there was only one non-inline script, make it lazy.
 	if ( 1 === $script_count && ! $has_inline_script && $html_processor->has_bookmark( 'script' ) ) {
-		add_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' );
+		$needs_lazy_script = true;
 		if ( $html_processor->seek( 'script' ) ) {
 			if ( $html_processor->get_attribute( 'type' ) ) {
 				$html_processor->set_attribute( 'data-original-type', $html_processor->get_attribute( 'type' ) );
@@ -125,7 +167,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to iframe bookmark.', 'embed-optimizer' ) );
 		}
 	}
-	return $html_processor->get_updated_html();
+	return $needs_lazy_script;
 }
 
 /**
