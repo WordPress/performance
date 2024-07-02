@@ -20,37 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 
 	/**
-	 * HTML void tags (i.e. those which are self-closing).
-	 *
-	 * @link https://html.spec.whatwg.org/multipage/syntax.html#void-elements
-	 * @see WP_HTML_Processor::is_void()
-	 * @todo Reuse `WP_HTML_Processor::is_void()` once WordPress 6.5 is the minimum-supported version. See <https://github.com/WordPress/performance/pull/1115>.
-	 *
-	 * @since n.e.x.t
-	 * @var string[]
-	 */
-	const VOID_TAGS = array(
-		'AREA',
-		'BASE',
-		'BASEFONT', // Obsolete.
-		'BGSOUND', // Obsolete.
-		'BR',
-		'COL',
-		'EMBED',
-		'FRAME', // Deprecated.
-		'HR',
-		'IMG',
-		'INPUT',
-		'KEYGEN', // Obsolete.
-		'LINK',
-		'META',
-		'PARAM', // Deprecated.
-		'SOURCE',
-		'TRACK',
-		'WBR',
-	);
-
-	/**
 	 * Raw text tags.
 	 *
 	 * These are treated like void tags for the purposes of walking over the document since we do not process any text
@@ -152,16 +121,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	const END_OF_BODY_BOOKMARK = 'end_of_body';
 
 	/**
-	 * Whether the old (pre-WP 6.5) signature for WP_HTML_Text_Replacement is needed.
-	 *
-	 * WordPress 6.5 changed the $end arg in the WP_HTML_Text_Replacement constructor to $length.
-	 *
-	 * @since n.e.x.t
-	 * @var bool
-	 */
-	private $old_text_replacement_signature_needed;
-
-	/**
 	 * Open stack tags.
 	 *
 	 * @since n.e.x.t
@@ -218,16 +177,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $buffered_text_replacements = array();
 
 	/**
-	 * Constructor.
-	 *
-	 * @param string $html HTML to process.
-	 */
-	public function __construct( string $html ) {
-		$this->old_text_replacement_signature_needed = version_compare( get_bloginfo( 'version' ), '6.5', '<' );
-		parent::__construct( $html );
-	}
-
-	/**
 	 * Finds the next tag.
 	 *
 	 * Unlike the base class, this subclass disallows querying. This is to ensure the breadcrumbs can be tracked.
@@ -277,9 +226,12 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		if ( is_null( $tag_name ) ) {
 			$tag_name = $this->get_tag();
 		}
+		if ( is_null( $tag_name ) ) {
+			return false;
+		}
 
 		return ! (
-			in_array( $tag_name, self::VOID_TAGS, true )
+			WP_HTML_Processor::is_void( $tag_name )
 			||
 			in_array( $tag_name, self::RAW_TEXT_TAGS, true )
 		);
@@ -604,7 +556,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 
 				$this->lexical_updates[] = new WP_HTML_Text_Replacement(
 					$start,
-					$this->old_text_replacement_signature_needed ? $start : 0,
+					0,
 					implode( '', $html_strings )
 				);
 
