@@ -137,6 +137,27 @@ final class OD_Preload_Link_Collection implements Countable {
 	}
 
 	/**
+	 * Adds media features to the links.
+	 *
+	 * @phpstan-param Link $link
+	 * @param array $link Link array.
+	 * @phpstan-return Link
+	 * @return array Link array with media features added.
+	 */
+	private function add_media_features( array $link ): array {
+		$media_features = array( 'screen' );
+		if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
+			$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
+		}
+		if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
+			$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
+		}
+		$link['attributes']['media'] = implode( ' and ', $media_features );
+
+		return (array) $link;
+	}
+
+	/**
 	 * Gets the HTML for the link tags.
 	 *
 	 * @return string Link tags HTML.
@@ -145,14 +166,7 @@ final class OD_Preload_Link_Collection implements Countable {
 		$link_tags = array();
 
 		foreach ( $this->get_adjacent_deduplicated_links() as $link ) {
-			$media_features = array( 'screen' );
-			if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
-				$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
-			}
-			if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
-				$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
-			}
-			$link['attributes']['media'] = implode( ' and ', $media_features );
+			$link = $this->add_media_features( (array) $link );
 
 			$link_tag = '<link data-od-added-tag rel="preload"';
 			foreach ( $link['attributes'] as $name => $value ) {
@@ -167,31 +181,27 @@ final class OD_Preload_Link_Collection implements Countable {
 	}
 
 	/**
-	 * Gets the HTTP Link header string.
+	 * Constructs the Link HTTP response header.
 	 *
-	 * @return string HTTP Link header.
+	 * @return string|null Link HTTP response header, or null if there are none.
 	 */
-	public function get_headers(): string {
+	public function get_response_header(): ?string {
 		$link_headers = array();
 
 		foreach ( $this->get_adjacent_deduplicated_links() as $link ) {
-			$media_features = array( 'screen' );
-			if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
-				$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
-			}
-			if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
-				$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
-			}
-			$link['attributes']['media'] = implode( ' and ', $media_features );
+			$link = $this->add_media_features( (array) $link );
 
-			$link_header = '<' . esc_url( $link['attributes']['href'] ?? '' ) . '>; rel="preload"';
+			$link_header = '<' . esc_url_raw( $link['attributes']['href'] ?? '' ) . '>; rel="preload"';
 			foreach ( $link['attributes'] as $name => $value ) {
 				if ( 'href' !== $name ) {
-					$link_header .= sprintf( '; %s="%s"', $name, esc_attr( $value ) );
+					$link_header .= sprintf( '; %s="%s"', $name, rawurlencode( $value ) );
 				}
 			}
 
 			$link_headers[] = $link_header;
+		}
+		if ( count( $link_headers ) === 0 ) {
+			return null;
 		}
 
 		return 'Link: ' . implode( ', ', $link_headers );

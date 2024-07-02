@@ -164,11 +164,6 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
 
-	// Send any preload links as Link headers.
-	if ( count( $preload_links ) > 0 && ! headers_sent() ) {
-		header( $preload_links->get_headers() );
-	}
-
 	/**
 	 * Fires to register tag visitors before walking over the document to perform optimizations.
 	 *
@@ -194,8 +189,12 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$generator->next();
 	}
 
-	// Inject any preload links at the end of the HEAD.
+	// Send any preload links in a Link response header and in a LINK tag injected at the end of the HEAD.
 	if ( count( $preload_links ) > 0 ) {
+		$response_header_links = $preload_links->get_response_header();
+		if ( ! is_null( $response_header_links ) && ! headers_sent() ) {
+			header( $response_header_links, false );
+		}
 		$walker->append_head_html( $preload_links->get_html() );
 	}
 
