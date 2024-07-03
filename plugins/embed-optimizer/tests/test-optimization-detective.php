@@ -125,6 +125,50 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				',
 			),
 
+			'single_twitter_embed_inside_viewport'  => array(
+				'set_up'   => function (): void {
+					$this->populate_complete_url_metrics(
+						array(
+							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+							'isLCP'             => true,
+							'intersectionRatio' => 1,
+						)
+					);
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<figure class="wp-block-embed is-type-rich is-provider-twitter wp-block-embed-twitter">
+								<div class="wp-block-embed__wrapper">
+									<blockquote class="twitter-tweet" data-width="550" data-dnt="true"><p lang="en" dir="ltr">We want your feedback for the Privacy Sandbox 📨<br><br>Learn why your feedback is critical through real examples and learn how to provide it ↓ <a href="https://t.co/anGk6gWkbc">https://t.co/anGk6gWkbc</a></p>&mdash; Chrome for Developers (@ChromiumDev) <a href="https://twitter.com/ChromiumDev/status/1636796541368139777?ref_src=twsrc%5Etfw">March 17, 2023</a></blockquote>
+									<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+								</div>
+							</figure>
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<figure class="wp-block-embed is-type-rich is-provider-twitter wp-block-embed-twitter">
+								<div class="wp-block-embed__wrapper">
+									<blockquote class="twitter-tweet" data-width="550" data-dnt="true"><p lang="en" dir="ltr">We want your feedback for the Privacy Sandbox 📨<br><br>Learn why your feedback is critical through real examples and learn how to provide it ↓ <a href="https://t.co/anGk6gWkbc">https://t.co/anGk6gWkbc</a></p>&mdash; Chrome for Developers (@ChromiumDev) <a href="https://twitter.com/ChromiumDev/status/1636796541368139777?ref_src=twsrc%5Etfw">March 17, 2023</a></blockquote>
+									<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+								</div>
+							</figure>
+						</body>
+					</html>
+				',
+			),
+
 			'single_twitter_embed_outside_viewport' => array(
 				'set_up'   => function (): void {
 					$this->populate_complete_url_metrics(
@@ -164,6 +208,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 									<script data-od-added-type type="application/vnd.embed-optimizer.javascript" async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 								</div>
 							</figure>
+							<script type="module">/* ... */</script>
 						</body>
 					</html>
 				',
@@ -191,7 +236,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 
 		$buffer = preg_replace(
 			':<script type="module">.+?</script>:s',
-			'<script type="module">/* import detect ... */</script>',
+			'<script type="module">/* ... */</script>',
 			od_optimize_template_output_buffer( $buffer )
 		);
 

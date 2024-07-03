@@ -171,13 +171,25 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ):
 }
 
 /**
- * Add a script to the footer if there are lazy loaded embeds.
- * Load the embed's scripts when they approach the viewport using an IntersectionObserver.
+ * Prints the script to lazy-load embeds.
+ *
+ * Load an embed's scripts when it approaches the viewport using an IntersectionObserver.
  *
  * @since 0.1.0
  */
 function embed_optimizer_lazy_load_scripts(): void {
-	$js = <<<JS
+	wp_print_inline_script_tag( embed_optimizer_get_lazy_load_script(), array( 'type' => 'module' ) );
+}
+
+/**
+ * Gets the script to lazy-load embeds.
+ *
+ * Load an embed's scripts when it approaches the viewport using an IntersectionObserver.
+ *
+ * @since n.e.x.t
+ */
+function embed_optimizer_get_lazy_load_script(): string {
+	return <<<JS
 		const lazyEmbedsScripts = document.querySelectorAll( 'script[type="application/vnd.embed-optimizer.javascript"]' );
 		const lazyEmbedScriptsByParents = new Map();
 
@@ -215,7 +227,6 @@ function embed_optimizer_lazy_load_scripts(): void {
 			lazyEmbedObserver.observe( lazyEmbedParent );
 		}
 JS;
-	wp_print_inline_script_tag( $js, array( 'type' => 'module' ) );
 }
 
 /**

@@ -82,7 +82,7 @@ final class Embed_Optimizer_Tag_Visitor {
 				);
 			}
 		} elseif ( embed_optimizer_update_markup( $processor ) && ! $this->added_lazy_script ) {
-			$processor->append_body_html( '<!-- TODO: Add lazy-loading script. -->' ); // TODO: This does not work because the end of the BODY hasn't been encountered yet. We need to rather hold onto a buffer of the content to append.
+			$processor->append_body_html( wp_get_inline_script_tag( embed_optimizer_get_lazy_load_script(), array( 'type' => 'module' ) ) );
 			$this->added_lazy_script = true;
 		}
 
