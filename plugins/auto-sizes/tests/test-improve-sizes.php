@@ -33,14 +33,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 	}
 
-	public function tear_down(): void {
-		// Clean up specific to the tests within this class.
-		parent::tear_down();
-
-		// Enable auto sizes.
-		add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
-	}
-
 	/**
 	 * Test the image block with different image sizes and full alignment.
 	 *
