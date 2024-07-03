@@ -75,10 +75,15 @@ final class Embed_Optimizer_Tag_Visitor {
 			$preconnect_hrefs = array();
 			// TODO: Add more cases.
 			if ( $processor->has_class( 'wp-block-embed-youtube' ) ) {
+				$preconnect_hrefs[] = 'https://www.youtube.com';
 				$preconnect_hrefs[] = 'https://i.ytimg.com';
 			} elseif ( $processor->has_class( 'wp-block-embed-twitter' ) ) {
 				$preconnect_hrefs[] = 'https://syndication.twitter.com';
 				$preconnect_hrefs[] = 'https://pbs.twimg.com';
+			} elseif ( $processor->has_class( 'wp-block-embed-wordpress-tv' ) ) {
+				$preconnect_hrefs[] = 'https://video.wordpress.com';
+				$preconnect_hrefs[] = 'https://public-api.wordpress.com';
+				$preconnect_hrefs[] = 'https://videos.files.wordpress.com';
 			}
 
 			foreach ( $preconnect_hrefs as $preconnect_href ) {

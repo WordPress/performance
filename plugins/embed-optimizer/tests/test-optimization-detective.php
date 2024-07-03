@@ -40,7 +40,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	 */
 	public function data_provider_test_od_optimize_template_output_buffer(): array {
 		return array(
-			'single_youtube_embed_inside_viewport'  => array(
+			'single_youtube_embed_inside_viewport'      => array(
 				'set_up'   => function (): void {
 					$this->populate_complete_url_metrics(
 						array(
@@ -70,6 +70,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
+							<link data-od-added-tag rel="preconnect" href="https://www.youtube.com">
 							<link data-od-added-tag rel="preconnect" href="https://i.ytimg.com">
 						</head>
 						<body>
@@ -83,7 +84,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				',
 			),
 
-			'single_youtube_embed_outside_viewport' => array(
+			'single_youtube_embed_outside_viewport'     => array(
 				'set_up'   => function (): void {
 					$this->populate_complete_url_metrics(
 						array(
@@ -125,7 +126,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				',
 			),
 
-			'single_twitter_embed_inside_viewport'  => array(
+			'single_twitter_embed_inside_viewport'      => array(
 				'set_up'   => function (): void {
 					$this->populate_complete_url_metrics(
 						array(
@@ -171,7 +172,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				',
 			),
 
-			'single_twitter_embed_outside_viewport' => array(
+			'single_twitter_embed_outside_viewport'     => array(
 				'set_up'   => function (): void {
 					$this->populate_complete_url_metrics(
 						array(
@@ -208,6 +209,98 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 								<div class="wp-block-embed__wrapper">
 									<blockquote class="twitter-tweet" data-width="550" data-dnt="true"><p lang="en" dir="ltr">We want your feedback for the Privacy Sandbox 📨<br><br>Learn why your feedback is critical through real examples and learn how to provide it ↓ <a href="https://t.co/anGk6gWkbc">https://t.co/anGk6gWkbc</a></p>&mdash; Chrome for Developers (@ChromiumDev) <a href="https://twitter.com/ChromiumDev/status/1636796541368139777?ref_src=twsrc%5Etfw">March 17, 2023</a></blockquote>
 									<script data-od-added-type type="application/vnd.embed-optimizer.javascript" async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+								</div>
+							</figure>
+							<script type="module">/* ... */</script>
+						</body>
+					</html>
+				',
+			),
+
+			'single_wordpresstv_embed_inside_viewport'  => array(
+				'set_up'   => function (): void {
+					$this->populate_complete_url_metrics(
+						array(
+							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+							'isLCP'             => true,
+							'intersectionRatio' => 1,
+						)
+					);
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<figure class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div class="wp-block-embed__wrapper">
+									<iframe title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
+									<script src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
+								</div>
+							</figure>
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+							<link data-od-added-tag rel="preconnect" href="https://video.wordpress.com">
+							<link data-od-added-tag rel="preconnect" href="https://public-api.wordpress.com">
+							<link data-od-added-tag rel="preconnect" href="https://videos.files.wordpress.com">
+						</head>
+						<body>
+							<figure class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div class="wp-block-embed__wrapper">
+									<iframe title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
+									<script src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
+								</div>
+							</figure>
+						</body>
+					</html>
+				',
+			),
+
+			'single_wordpresstv_embed_outside_viewport' => array(
+				'set_up'   => function (): void {
+					$this->populate_complete_url_metrics(
+						array(
+							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+							'isLCP'             => false,
+							'intersectionRatio' => 0,
+						)
+					);
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<figure class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div class="wp-block-embed__wrapper">
+									<iframe title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
+									<script src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
+								</div>
+							</figure>
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<figure class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div class="wp-block-embed__wrapper">
+									<iframe data-od-added-loading loading="lazy" title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
+									<script data-od-added-type type="application/vnd.embed-optimizer.javascript" src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
 								</div>
 							</figure>
 							<script type="module">/* ... */</script>
