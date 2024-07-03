@@ -72,12 +72,20 @@ final class Embed_Optimizer_Tag_Visitor {
 
 		if ( $max_intersection_ratio > 0 ) {
 
+			$preconnect_hrefs = array();
 			// TODO: Add more cases.
 			if ( $processor->has_class( 'wp-block-embed-youtube' ) ) {
+				$preconnect_hrefs[] = 'https://i.ytimg.com';
+			} elseif ( $processor->has_class( 'wp-block-embed-twitter' ) ) {
+				$preconnect_hrefs[] = 'https://syndication.twitter.com';
+				$preconnect_hrefs[] = 'https://pbs.twimg.com';
+			}
+
+			foreach ( $preconnect_hrefs as $preconnect_href ) {
 				$this->link_collection->add_link(
 					array(
 						'rel'  => 'preconnect',
-						'href' => 'https://i.ytimg.com',
+						'href' => $preconnect_href,
 					)
 				);
 			}
