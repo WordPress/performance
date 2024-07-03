@@ -42,7 +42,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 		return array(
 			'single_youtube_embed_inside_viewport'      => array(
 				'set_up'   => function (): void {
-					$this->populate_complete_url_metrics(
+					$this->populate_url_metrics(
 						array(
 							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
 							'isLCP'             => true,
@@ -86,7 +86,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 
 			'single_youtube_embed_outside_viewport'     => array(
 				'set_up'   => function (): void {
-					$this->populate_complete_url_metrics(
+					$this->populate_url_metrics(
 						array(
 							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
 							'isLCP'             => false,
@@ -128,7 +128,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 
 			'single_twitter_embed_inside_viewport'      => array(
 				'set_up'   => function (): void {
-					$this->populate_complete_url_metrics(
+					$this->populate_url_metrics(
 						array(
 							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
 							'isLCP'             => true,
@@ -174,7 +174,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 
 			'single_twitter_embed_outside_viewport'     => array(
 				'set_up'   => function (): void {
-					$this->populate_complete_url_metrics(
+					$this->populate_url_metrics(
 						array(
 							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
 							'isLCP'             => false,
@@ -211,7 +211,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 									<script data-od-added-type type="application/vnd.embed-optimizer.javascript" async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 								</div>
 							</figure>
-							<script type="module">/* ... */</script>
+							<script type="module">/* const lazyEmbedsScripts ... */</script>
 						</body>
 					</html>
 				',
@@ -219,12 +219,13 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 
 			'single_wordpresstv_embed_inside_viewport'  => array(
 				'set_up'   => function (): void {
-					$this->populate_complete_url_metrics(
+					$this->populate_url_metrics(
 						array(
 							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
 							'isLCP'             => true,
 							'intersectionRatio' => 1,
-						)
+						),
+						false
 					);
 				},
 				'buffer'   => '
@@ -253,12 +254,13 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preconnect" href="https://videos.files.wordpress.com">
 						</head>
 						<body>
-							<figure class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
 								<div class="wp-block-embed__wrapper">
 									<iframe title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
 									<script src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
 								</div>
 							</figure>
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -266,12 +268,13 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 
 			'single_wordpresstv_embed_outside_viewport' => array(
 				'set_up'   => function (): void {
-					$this->populate_complete_url_metrics(
+					$this->populate_url_metrics(
 						array(
 							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
 							'isLCP'             => false,
 							'intersectionRatio' => 0,
-						)
+						),
+						false
 					);
 				},
 				'buffer'   => '
@@ -297,13 +300,14 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<figure class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
 								<div class="wp-block-embed__wrapper">
 									<iframe data-od-added-loading loading="lazy" title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
 									<script data-od-added-type type="application/vnd.embed-optimizer.javascript" src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
 								</div>
 							</figure>
-							<script type="module">/* ... */</script>
+							<script type="module">/* const lazyEmbedsScripts ... */</script>
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -329,12 +333,20 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 		$expected = $remove_initial_tabs( $expected );
 		$buffer   = $remove_initial_tabs( $buffer );
 
-		$buffer = preg_replace(
-			':<script type="module">.+?</script>:s',
-			'<script type="module">/* ... */</script>',
-			od_optimize_template_output_buffer( $buffer )
+		$buffer = od_optimize_template_output_buffer( $buffer );
+		$buffer = preg_replace_callback(
+			':(<script type="module">)(.+?)(</script>):s',
+			static function ( $matches ) {
+				array_shift( $matches );
+				if ( false !== strpos( $matches[1], 'import detect' ) ) {
+					$matches[1] = '/* import detect ... */';
+				} elseif ( false !== strpos( $matches[1], 'const lazyEmbedsScripts' ) ) {
+					$matches[1] = '/* const lazyEmbedsScripts ... */';
+				}
+				return implode( '', $matches );
+			},
+			$buffer
 		);
-
 		$this->assertEquals( $expected, $buffer );
 	}
 
@@ -342,12 +354,13 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	 * Populates complete URL metrics for the provided element data.
 	 *
 	 * @phpstan-param ElementDataSubset $element
-	 * @param array $element Element data.
+	 * @param array $element  Element data.
+	 * @param bool  $complete Whether to fully populate the grous.
 	 * @throws Exception But it won't.
 	 */
-	protected function populate_complete_url_metrics( array $element ): void {
+	protected function populate_url_metrics( array $element, bool $complete = true ): void {
 		$slug        = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-		$sample_size = od_get_url_metrics_breakpoint_sample_size();
+		$sample_size = $complete ? od_get_url_metrics_breakpoint_sample_size() : 1;
 		foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
 				OD_URL_Metrics_Post_Type::store_url_metric(

@@ -173,14 +173,21 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 */
 	do_action( 'od_register_tag_visitors', $tag_visitor_registry, $group_collection, $link_collection );
 
+	$current_tag_bookmark = 'optimization_detective_current_tag';
+
 	$visitors = iterator_to_array( $tag_visitor_registry );
 	while ( $processor->next_tag() ) {
 		$did_visit = false;
-		// TODO: Set bookmark.
+		$processor->set_bookmark( $current_tag_bookmark );
 		foreach ( $visitors as $visitor ) {
 			$did_visit = $visitor( $processor, $group_collection, $link_collection ) || $did_visit;
+
+			// Since the visitor may have traversed HTML tags, we need to make sure we go back to this tag so that
+			// in the next iteration any relevant tag visitors may apply, in addition to properly setting the data-od-xpath
+			// on this tag below.
+			$processor->seek( $current_tag_bookmark );
 		}
-		// TODO: Seek to bookmark and release.
+		$processor->release_bookmark( $current_tag_bookmark );
 
 		if ( $did_visit && $needs_detection ) {
 			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );
