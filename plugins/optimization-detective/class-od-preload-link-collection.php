@@ -76,14 +76,14 @@ final class OD_Preload_Link_Collection implements Countable {
 	}
 
 	/**
-	 * Get adjacent-deduplicated links.
+	 * Prepare links by deduplicating adjacent links and adding media attributes.
 	 *
 	 * When two links are identical except for their minimum/maximum widths which are also consecutive, then merge them
-	 * together.
+	 * together. Also, add media attributes to the links.
 	 *
-	 * @return array<int, Link> Links with adjacent-duplicates merged together.
+	 * @return array<int, Link> Prepared links with adjacent-duplicates merged together and media attributes added.
 	 */
-	private function get_adjacent_deduplicated_links(): array {
+	private function prepare_links(): array {
 		$links = $this->links;
 
 		usort(
@@ -100,7 +100,8 @@ final class OD_Preload_Link_Collection implements Countable {
 			}
 		);
 
-		return array_reduce(
+		// Deduplicating adjacent links.
+		$prepared_links = array_reduce(
 			$links,
 			/**
 			 * Reducer.
@@ -125,7 +126,7 @@ final class OD_Preload_Link_Collection implements Countable {
 				) {
 					$last_link['maximum_viewport_width'] = max( $last_link['maximum_viewport_width'], $link['maximum_viewport_width'] );
 
-					// Update the last link with the new maximum viewport with.
+					// Update the last link with the new maximum viewport width.
 					$carry[ count( $carry ) - 1 ] = $last_link;
 				} else {
 					$carry[] = $link;
@@ -134,27 +135,20 @@ final class OD_Preload_Link_Collection implements Countable {
 			},
 			array()
 		);
-	}
 
-	/**
-	 * Adds media features to the links.
-	 *
-	 * @phpstan-param Link $link
-	 * @param array $link Link array.
-	 * @phpstan-return Link
-	 * @return array Link array with media features added.
-	 */
-	private function add_media_features( array $link ): array {
-		$media_features = array( 'screen' );
-		if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
-			$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
+		// Add media attributes to the deduplicated links.
+		foreach ( $prepared_links as &$link ) {
+			$media_attributes = array( 'screen' );
+			if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
+				$media_attributes[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
+			}
+			if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
+				$media_attributes[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
+			}
+			$link['attributes']['media'] = implode( ' and ', $media_attributes );
 		}
-		if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
-			$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
-		}
-		$link['attributes']['media'] = implode( ' and ', $media_features );
 
-		return (array) $link;
+		return $prepared_links;
 	}
 
 	/**
@@ -165,9 +159,7 @@ final class OD_Preload_Link_Collection implements Countable {
 	public function get_html(): string {
 		$link_tags = array();
 
-		foreach ( $this->get_adjacent_deduplicated_links() as $link ) {
-			$link = $this->add_media_features( (array) $link );
-
+		foreach ( $this->prepare_links() as $link ) {
 			$link_tag = '<link data-od-added-tag rel="preload"';
 			foreach ( $link['attributes'] as $name => $value ) {
 				$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
@@ -188,9 +180,7 @@ final class OD_Preload_Link_Collection implements Countable {
 	public function get_response_header(): ?string {
 		$link_headers = array();
 
-		foreach ( $this->get_adjacent_deduplicated_links() as $link ) {
-			$link = $this->add_media_features( (array) $link );
-
+		foreach ( $this->prepare_links() as $link ) {
 			$link_header = '<' . esc_url_raw( $link['attributes']['href'] ?? '' ) . '>; rel="preload"';
 			foreach ( $link['attributes'] as $name => $value ) {
 				if ( 'href' !== $name ) {
