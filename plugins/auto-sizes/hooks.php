@@ -159,7 +159,7 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 	}
 
 	// Skips second time parsing if already processed.
-	if ( false === $processor->get_attribute( 'data-needs-sizes-update' ) ) {
+	if ( null === $processor->get_attribute( 'data-needs-sizes-update' ) ) {
 		return $content;
 	}
 
@@ -186,7 +186,14 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 			}
 			break;
 
-		// @todo: handle left/right alignments.
+		case 'left':
+		case 'right':
+		case 'center':
+			// Resize image width.
+			$image_width = $processor->get_attribute( 'data-resize-width' ) ?? $image_width;
+			$sizes       = sprintf( '(max-width: %1$dpx) 100vw, %1$dpx', $image_width );
+			break;
+
 		default:
 			if ( array_key_exists( 'contentSize', $layout ) ) {
 				// Resize image width.
