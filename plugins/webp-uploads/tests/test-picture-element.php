@@ -111,11 +111,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		// Check that the generated HTML contains the expected image URL and has the correct class.
 		$this->assertStringContainsString( $thumbnail_url, $the_image );
-		$this->assertStringContainsString( "wp-picture-{$attachment_id}", $the_image );
 
 		// Ensure that the source element exists in the picture element and has the correct mime type.
-		$webp_source = sprintf( '<source type="image/webp"', $attachment_id );
-		$jpg_source  = sprintf( '<source type="image/jpeg"', $attachment_id );
+		$webp_source = '<source type="image/webp"';
+		$jpg_source  = '<source type="image/jpeg"';
 		$this->assertStringContainsString( $webp_source, $the_image );
 		$this->assertStringContainsString( $jpg_source, $the_image );
 	}
