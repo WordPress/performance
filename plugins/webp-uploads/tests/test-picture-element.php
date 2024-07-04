@@ -88,39 +88,8 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		// Apply the wp_content_img_tag filter.
 		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
 
-		// Check that the image is wrapped in a picture element with the correct class.
-		$picture_element = sprintf( '<picture class="wp-picture-%s" style="display: contents;">', $attachment_id );
-		if ( $expect_picture_element ) {
-			$this->assertStringContainsString( $picture_element, $the_image );
-		} else {
-			$this->assertStringNotContainsString( $picture_element, $the_image );
-		}
-
+		// Check that the image has the expected HTML.
 		$this->assertEquals( $expected_html, $the_image );
-		$this->assertStringContainsString( '<img', $the_image );
-
-		// Check that the image has the correct alt text.
-		$this->assertStringContainsString( 'alt="Green Leaves"', $the_image );
-
-		// When both features are enabled, the picture element will contain 3 srcset elements.
-		if ( $jpeg_and_webp && $expect_picture_element ) {
-			$this->assertEquals( 3, substr_count( $the_image, 'srcset=' ) );
-			$this->assertStringContainsString( '<source type="image/webp"', $the_image );
-			$this->assertStringContainsString( '<source type="image/jpeg"', $the_image );
-		}
-		// When neither features are enabled, the picture element will contain 1 srcset elements.
-		if ( ! $jpeg_and_webp && ! $expect_picture_element ) {
-			$this->assertEquals( 1, substr_count( $the_image, 'srcset=' ) );
-		}
-		// When only jpeg_and_webp is enabled, the picture element will contain 1 srcset elements.
-		if ( $jpeg_and_webp && ! $expect_picture_element ) {
-			$this->assertEquals( 1, substr_count( $the_image, 'srcset=' ) );
-		}
-		// When only picture_element is enabled, the picture element will contain 2 srcset elements.
-		if ( ! $jpeg_and_webp && $expect_picture_element ) {
-			$this->assertEquals( 2, substr_count( $the_image, 'srcset=' ) );
-			$this->assertStringContainsString( '<source type="image/webp"', $the_image );
-		}
 	}
 
 	/**
