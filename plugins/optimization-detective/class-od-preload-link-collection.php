@@ -76,14 +76,14 @@ final class OD_Preload_Link_Collection implements Countable {
 	}
 
 	/**
-	 * Prepare links by deduplicating adjacent links and adding media attributes.
+	 * Prepares links by deduplicating adjacent links and adding media attributes.
 	 *
 	 * When two links are identical except for their minimum/maximum widths which are also consecutive, then merge them
 	 * together. Also, add media attributes to the links.
 	 *
 	 * @return array<int, Link> Prepared links with adjacent-duplicates merged together and media attributes added.
 	 */
-	private function prepare_links(): array {
+	private function get_prepared_links(): array {
 		$links = $this->links;
 
 		usort(
@@ -100,7 +100,7 @@ final class OD_Preload_Link_Collection implements Countable {
 			}
 		);
 
-		// Deduplicating adjacent links.
+		// Deduplicate adjacent links.
 		$prepared_links = array_reduce(
 			$links,
 			/**
@@ -159,7 +159,7 @@ final class OD_Preload_Link_Collection implements Countable {
 	public function get_html(): string {
 		$link_tags = array();
 
-		foreach ( $this->prepare_links() as $link ) {
+		foreach ( $this->get_prepared_links() as $link ) {
 			$link_tag = '<link data-od-added-tag rel="preload"';
 			foreach ( $link['attributes'] as $name => $value ) {
 				$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
@@ -180,12 +180,13 @@ final class OD_Preload_Link_Collection implements Countable {
 	public function get_response_header(): ?string {
 		$link_headers = array();
 
-		foreach ( $this->prepare_links() as $link ) {
-			$link_header = '<' . esc_url_raw( $link['attributes']['href'] ?? '' ) . '>; rel="preload"';
+		foreach ( $this->get_prepared_links() as $link ) {
+			// The about:blank is present since a Link without a reference-uri is invalid so any imagesrcset would otherwise not get downloaded.
+			$link['attributes']['href'] = isset( $link['attributes']['href'] ) ? esc_url_raw( $link['attributes']['href'] ) : 'about:blank';
+			$link_header                = '<' . $link['attributes']['href'] . '>; rel="preload"';
+			unset( $link['attributes']['href'] );
 			foreach ( $link['attributes'] as $name => $value ) {
-				if ( 'href' !== $name ) {
-					$link_header .= sprintf( '; %s="%s"', $name, rawurlencode( $value ) );
-				}
+				$link_header .= sprintf( '; %s="%s"', $name, rawurlencode( $value ) );
 			}
 
 			$link_headers[] = $link_header;
