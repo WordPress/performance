@@ -37,7 +37,15 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 
 		// Create some content with the image.
-		$the_image = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
+		$the_image = wp_get_attachment_image(
+			$attachment_id,
+			'medium',
+			false,
+			array(
+				'class' => "wp-image-{$attachment_id}",
+				'alt'   => 'Green Leaves',
+			)
+		);
 
 		// Apply the wp_content_img_tag filter.
 		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
@@ -50,9 +58,16 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			$this->assertStringNotContainsString( $picture_element, $the_image );
 		}
 
+		$this->assertStringContainsString( '<img', $the_image );
+
+		// Check that the image has the correct alt text.
+		$this->assertStringContainsString( 'alt="Green Leaves"', $the_image );
+
 		// When both features are enabled, the picture element will contain 3 srcset elements.
 		if ( $jpeg_and_webp && $expect_picture_element ) {
 			$this->assertEquals( 3, substr_count( $the_image, 'srcset=' ) );
+			$this->assertStringContainsString( '<source type="image/webp"', $the_image );
+			$this->assertStringContainsString( '<source type="image/jpeg"', $the_image );
 		}
 		// When neither features are enabled, the picture element will contain 1 srcset elements.
 		if ( ! $jpeg_and_webp && ! $expect_picture_element ) {
@@ -65,6 +80,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		// When only picture_element is enabled, the picture element will contain 2 srcset elements.
 		if ( ! $jpeg_and_webp && $expect_picture_element ) {
 			$this->assertEquals( 2, substr_count( $the_image, 'srcset=' ) );
+			$this->assertStringContainsString( '<source type="image/webp"', $the_image );
 		}
 	}
 
