@@ -479,6 +479,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertNotEmpty( $expected_tag );
 		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->mock_frontend_body_hooks();
+		$this->assertSame( $expected_tag, webp_uploads_update_image_references( $tag ) );
 	}
 
 	/**
@@ -521,6 +523,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertNotEmpty( $expected_tag );
 		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->mock_frontend_body_hooks();
+		$this->assertSame( $expected_tag, webp_uploads_update_image_references( $tag ) );
 	}
 
 	/**
@@ -544,6 +548,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$tag           = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->mock_frontend_body_hooks();
+		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
 	}
 
 	public function provider_replace_images_with_different_extensions(): Generator {
@@ -570,8 +576,11 @@ class Test_WebP_Uploads_Load extends TestCase {
 		);
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 		$this->assertSame( $expected, wp_check_filetype( get_attached_file( $attachment_id ) ) );
+		$this->mock_frontend_body_hooks();
 		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_update_image_references( $tag ) );
 		$this->assertStringContainsString( $metadata['sources']['image/webp']['file'], webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_update_image_references( $tag ) );
 	}
 
 	/**
@@ -586,6 +595,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->mock_frontend_body_hooks();
+		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
 	}
 
 	/**
@@ -601,6 +612,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->mock_frontend_body_hooks();
+		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
 	}
 
 	public function data_provider_not_supported_webp_images(): Generator {
@@ -755,6 +768,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->mock_frontend_body_hooks();
+		$this->assertNotSame( $tag, webp_uploads_update_image_references( $tag ) );
 	}
 
 	/**
@@ -776,6 +791,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$result        = webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id );
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
+		$this->mock_frontend_body_hooks();
+		$this->assertSame( $result, webp_uploads_update_image_references( $tag ) );
 
 		$this->assertNotSame( $tag, $result );
 
@@ -817,6 +834,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 			$this->assertImageNotHasSizeSource( $attachment_id, $size, 'image/webp' );
 		}
 		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
+		$this->mock_frontend_body_hooks();
+		$this->assertNotSame( $tag, webp_uploads_update_image_references( $tag ) );
 	}
 
 	/**
@@ -848,6 +867,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$this->assertNotSame( $tag, $updated_tag );
 		$this->assertSame( $expected_tag, $updated_tag );
+		$this->mock_frontend_body_hooks();
+		$this->assertSame( $expected_tag, webp_uploads_update_image_references( $tag ) );
 	}
 
 	/**
