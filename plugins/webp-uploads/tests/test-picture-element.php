@@ -83,4 +83,40 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			),
 		);
 	}
+
+	/**
+	 * Test the correct image size rendered in the picture element.
+	 */
+	public function test_thumbnail_image_size_in_picture_element(): void {
+		// Enable necessary plugin settings.
+		$this->opt_in_to_jpeg_and_webp();
+		$this->opt_in_to_picture_element();
+
+		// Create an image attachment with jpeg image.
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+
+		$image_size = 'thumbnail';
+
+		// Get the thumbnail size URL directly (simulate Gutenberg usage).
+		$thumbnail_url = wp_get_attachment_image_url( $attachment_id, $image_size );
+
+		// Check if the URL is not empty and contains the expected thumbnail size dimension.
+		$this->assertNotEmpty( $thumbnail_url );
+
+		// Fetch the HTML output of the image in Gutenberg.
+		$the_image = wp_get_attachment_image( $attachment_id, $image_size, false, array( 'class' => "wp-image-{$attachment_id}" ) );
+
+		// Apply the wp_content_img_tag filter.
+		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
+
+		// Check that the generated HTML contains the expected image URL and has the correct class.
+		$this->assertStringContainsString( $thumbnail_url, $the_image );
+		$this->assertStringContainsString( "wp-picture-{$attachment_id}", $the_image );
+
+		// Ensure that the source element exists in the picture element and has the correct mime type.
+		$webp_source = sprintf( '<source type="image/webp"', $attachment_id );
+		$jpg_source  = sprintf( '<source type="image/jpeg"', $attachment_id );
+		$this->assertStringContainsString( $webp_source, $the_image );
+		$this->assertStringContainsString( $jpg_source, $the_image );
+	}
 }
