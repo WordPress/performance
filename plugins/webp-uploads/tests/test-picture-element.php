@@ -75,15 +75,19 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$webp_srcset = str_replace( '.jpg', '-jpg.webp', $jpeg_srcset );
 
 		// Prepare the expected HTML by replacing placeholders with expected values.
-		$expected_html = str_replace( '{{img-width}}', $width, $expected_html );
-		$expected_html = str_replace( '{{img-height}}', $height, $expected_html );
-		$expected_html = str_replace( '{{img-src}}', $img_src, $expected_html );
-		$expected_html = str_replace( '{{img-attachment-id}}', $attachment_id, $expected_html );
-		$expected_html = str_replace( '{{img-alt}}', $alt, $expected_html );
-		$expected_html = str_replace( '{{img-srcset}}', $image_srcset, $expected_html );
-		$expected_html = str_replace( '{{img-sizes}}', $sizes, $expected_html );
-		$expected_html = str_replace( '{{jpeg-srcset}}', $jpeg_srcset, $expected_html );
-		$expected_html = str_replace( '{{webp-srcset}}', $webp_srcset, $expected_html );
+		$replacements = array(
+			'{{img-width}}'         => $width,
+			'{{img-height}}'        => $height,
+			'{{img-src}}'           => $img_src,
+			'{{img-attachment-id}}' => $attachment_id,
+			'{{img-alt}}'           => $alt,
+			'{{img-srcset}}'        => $image_srcset,
+			'{{img-sizes}}'         => $sizes,
+			'{{jpeg-srcset}}'       => $jpeg_srcset,
+			'{{webp-srcset}}'       => $webp_srcset,
+		);
+
+		$expected_html = str_replace( array_keys( $replacements ), array_values( $replacements ), $expected_html );
 
 		// Apply the wp_content_img_tag filter.
 		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
