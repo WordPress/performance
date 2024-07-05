@@ -82,8 +82,7 @@
     "phpstan": "phpstan analyse --memory-limit=2048M",
     "test": "phpunit",
     "test-multisite": [
-      "php bin/generate-multisite-phpunit.php",
-      "@test -c phpunit-multisite.xml"
+      "WP_MULTISITE=1 phpunit --exclude-group=ms-excluded"
     ],
     "test-multisite:plugins": [
       "@test-multisite:auto-sizes",
