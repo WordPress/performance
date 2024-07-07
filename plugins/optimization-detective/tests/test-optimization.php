@@ -369,6 +369,44 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_response_header().
+	 *
+	 * @covers \OD_Preload_Link_Collection::get_response_header
+	 */
+	public function test_get_response_header(): void {
+		$collection = new OD_Preload_Link_Collection();
+
+		$collection->add_link(
+			array(
+				'href'          => 'https://example.com/foo.jpg',
+				'as'            => 'image',
+				'fetchpriority' => 'high',
+				'imagesrcset'   => 'https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w',
+				'imagesizes'    => '(max-width: 600px) 480px, 800px',
+				'crossorigin'   => 'anonymous',
+			),
+			null,
+			null
+		);
+
+		$collection->add_link(
+			array(
+				'href'          => 'https://example.com/bar.jpg',
+				'as'            => 'image',
+				'fetchpriority' => 'high',
+				'imagesrcset'   => 'https://example.com/bar-480w.jpg 480w, https://example.com/bar-800w.jpg 800w',
+				'imagesizes'    => '(max-width: 600px) 480px, 800px',
+				'crossorigin'   => 'anonymous',
+			),
+			600,
+			1200
+		);
+
+		$expected_header = 'Link: <https://example.com/foo.jpg>; rel="preload"; as="image"; fetchpriority="high"; imagesrcset="https%3A%2F%2Fexample.com%2Ffoo-480w.jpg%20480w%2C%20https%3A%2F%2Fexample.com%2Ffoo-800w.jpg%20800w"; imagesizes="%28max-width%3A%20600px%29%20480px%2C%20800px"; crossorigin="anonymous"; media="screen", <https://example.com/bar.jpg>; rel="preload"; as="image"; fetchpriority="high"; imagesrcset="https%3A%2F%2Fexample.com%2Fbar-480w.jpg%20480w%2C%20https%3A%2F%2Fexample.com%2Fbar-800w.jpg%20800w"; imagesizes="%28max-width%3A%20600px%29%20480px%2C%20800px"; crossorigin="anonymous"; media="screen%20and%20%28min-width%3A%20600px%29%20and%20%28max-width%3A%201200px%29"';
+		$this->assertSame( $expected_header, $collection->get_response_header() );
+	}
+
+	/**
 	 * Gets a validated URL metric.
 	 *
 	 * @param int                                      $viewport_width Viewport width for the URL metric.
