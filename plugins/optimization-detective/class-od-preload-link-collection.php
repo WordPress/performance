@@ -76,14 +76,14 @@ final class OD_Preload_Link_Collection implements Countable {
 	}
 
 	/**
-	 * Get adjacent-deduplicated links.
+	 * Prepares links by deduplicating adjacent links and adding media attributes.
 	 *
 	 * When two links are identical except for their minimum/maximum widths which are also consecutive, then merge them
-	 * together.
+	 * together. Also, add media attributes to the links.
 	 *
-	 * @return array<int, Link> Links with adjacent-duplicates merged together.
+	 * @return array<int, Link> Prepared links with adjacent-duplicates merged together and media attributes added.
 	 */
-	private function get_adjacent_deduplicated_links(): array {
+	private function get_prepared_links(): array {
 		$links = $this->links;
 
 		usort(
@@ -100,7 +100,8 @@ final class OD_Preload_Link_Collection implements Countable {
 			}
 		);
 
-		return array_reduce(
+		// Deduplicate adjacent links.
+		$prepared_links = array_reduce(
 			$links,
 			/**
 			 * Reducer.
@@ -125,7 +126,7 @@ final class OD_Preload_Link_Collection implements Countable {
 				) {
 					$last_link['maximum_viewport_width'] = max( $last_link['maximum_viewport_width'], $link['maximum_viewport_width'] );
 
-					// Update the last link with the new maximum viewport with.
+					// Update the last link with the new maximum viewport width.
 					$carry[ count( $carry ) - 1 ] = $last_link;
 				} else {
 					$carry[] = $link;
@@ -133,6 +134,22 @@ final class OD_Preload_Link_Collection implements Countable {
 				return $carry;
 			},
 			array()
+		);
+
+		// Add media attributes to the deduplicated links.
+		return array_map(
+			static function ( array $link ): array {
+				$media_attributes = array( 'screen' );
+				if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
+					$media_attributes[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
+				}
+				if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
+					$media_attributes[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
+				}
+				$link['attributes']['media'] = implode( ' and ', $media_attributes );
+				return $link;
+			},
+			$prepared_links
 		);
 	}
 
@@ -144,16 +161,7 @@ final class OD_Preload_Link_Collection implements Countable {
 	public function get_html(): string {
 		$link_tags = array();
 
-		foreach ( $this->get_adjacent_deduplicated_links() as $link ) {
-			$media_features = array( 'screen' );
-			if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
-				$media_features[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
-			}
-			if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
-				$media_features[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
-			}
-			$link['attributes']['media'] = implode( ' and ', $media_features );
-
+		foreach ( $this->get_prepared_links() as $link ) {
 			$link_tag = '<link data-od-added-tag rel="preload"';
 			foreach ( $link['attributes'] as $name => $value ) {
 				$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
@@ -164,6 +172,44 @@ final class OD_Preload_Link_Collection implements Countable {
 		}
 
 		return implode( '', $link_tags );
+	}
+
+	/**
+	 * Constructs the Link HTTP response header.
+	 *
+	 * @return string|null Link HTTP response header, or null if there are none.
+	 */
+	public function get_response_header(): ?string {
+		$link_headers = array();
+
+		foreach ( $this->get_prepared_links() as $link ) {
+			// The about:blank is present since a Link without a reference-uri is invalid so any imagesrcset would otherwise not get downloaded.
+			$link['attributes']['href'] = isset( $link['attributes']['href'] ) ? esc_url_raw( $link['attributes']['href'] ) : 'about:blank';
+			$link_header                = '<' . $link['attributes']['href'] . '>; rel="preload"';
+			unset( $link['attributes']['href'] );
+			foreach ( $link['attributes'] as $name => $value ) {
+				/*
+				 * Escape the value being put into an HTTP quoted string. The grammar is:
+				 *
+				 *     quoted-string  = DQUOTE *( qdtext / quoted-pair ) DQUOTE
+				 *     qdtext         = HTAB / SP / %x21 / %x23-5B / %x5D-7E / obs-text
+				 *     quoted-pair    = "\" ( HTAB / SP / VCHAR / obs-text )
+				 *     obs-text       = %x80-FF
+				 *
+				 * See <https://www.rfc-editor.org/rfc/rfc9110.html#section-5.6.4>. So to escape a value we need to add
+				 * a backslash in front of anything character which is not qdtext.
+				 */
+				$escaped_value = preg_replace( '/(?=[^\t \x21\x23-\x5B\x5D-\x7E\x80-\xFF])/', '\\\\', $value );
+				$link_header  .= sprintf( '; %s="%s"', $name, $escaped_value );
+			}
+
+			$link_headers[] = $link_header;
+		}
+		if ( count( $link_headers ) === 0 ) {
+			return null;
+		}
+
+		return 'Link: ' . implode( ', ', $link_headers );
 	}
 
 	/**
