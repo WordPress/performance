@@ -1,13 +1,11 @@
 === Speculative Loading ===
 
-Contributors:      wordpressdotorg
-Requires at least: 6.5
-Tested up to:      6.6
-Requires PHP:      7.2
-Stable tag:        1.3.1
-License:           GPLv2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, javascript, speculation rules, prerender, prefetch
+Contributors: wordpressdotorg
+Tested up to: 6.6
+Stable tag:   1.3.1
+License:      GPLv2 or later
+License URI:  https://www.gnu.org/licenses/gpl-2.0.html
+Tags:         performance, javascript, speculation rules, prerender, prefetch
 
 Enables browsers to speculatively prerender or prefetch pages when hovering over links.
 
