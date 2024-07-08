@@ -85,7 +85,9 @@
     "lint:webp-uploads":           "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
     "phpstan": "phpstan analyse --memory-limit=2048M",
     "test": "phpunit",
-    "test-multisite": "@test -c tests/multisite.xml",
+    "test-multisite": [
+      "WP_MULTISITE=1 phpunit --exclude-group=ms-excluded"
+    ],
     "test-multisite:plugins": [
       "@test-multisite:auto-sizes",
       "@test-multisite:dominant-color-images",
