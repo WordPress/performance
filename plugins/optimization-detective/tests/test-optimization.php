@@ -371,7 +371,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	/**
 	 * Test get_response_header().
 	 *
-	 * @covers \OD_Preload_Link_Collection::get_response_header
+	 * @covers OD_Preload_Link_Collection::get_response_header
 	 */
 	public function test_get_response_header(): void {
 		$collection = new OD_Preload_Link_Collection();
