@@ -1,13 +1,11 @@
 === Image Prioritizer ===
 
-Contributors:      wordpressdotorg
-Requires at least: 6.5
-Tested up to:      6.6
-Requires PHP:      7.2
-Stable tag:        0.1.1
-License:           GPLv2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, optimization, image, lcp, lazy-load
+Contributors: wordpressdotorg
+Tested up to: 6.6
+Stable tag:   0.1.1
+License:      GPLv2 or later
+License URI:  https://www.gnu.org/licenses/gpl-2.0.html
+Tags:         performance, optimization, image, lcp, lazy-load
 
 Optimizes LCP image loading with `fetchpriority=high` and applies image lazy-loading by leveraging client-side detection with real user metrics.
 
