@@ -24,6 +24,32 @@ function plsr_print_speculation_rules(): void {
 		return;
 	}
 
+	/**
+	 * Filters whether speculation rules are printed to the page.
+	 *
+	 * Speculative loading can add excessive server load on sites where many users are logged-in since page caching
+	 * is typically bypassed. So only enable if the user is not logged-in, except if the user is an administrator so
+	 * the can actually see the plugin working. Similarly, when PHP sessions are used, concurrent requests are not
+	 * possible. So if a page takes 2 seconds to generate, and two pages are requested at about the same time, the
+	 * first page's generation will block the generation of the second page, causing the second page to take 4 seconds
+	 * to generate. Therefore, speculation rules are disabled by default when a session is active.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $can_print Whether to print speculation rules.
+	 */
+	$can_print = (bool) apply_filters(
+		'plsr_can_print_speculation_rules',
+		(
+			( ! is_user_logged_in() || current_user_can( 'activate_plugins' ) )
+			&&
+			session_status() !== PHP_SESSION_ACTIVE
+		)
+	);
+	if ( ! $can_print ) {
+		return;
+	}
+
 	// This workaround is needed for WP 6.4. See <https://core.trac.wordpress.org/ticket/60320>.
 	$needs_html5_workaround = (
 		! current_theme_supports( 'html5', 'script' ) &&
