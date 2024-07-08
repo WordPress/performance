@@ -186,7 +186,19 @@ final class OD_Preload_Link_Collection implements Countable {
 			$link_header                = '<' . $link['attributes']['href'] . '>; rel="preload"';
 			unset( $link['attributes']['href'] );
 			foreach ( $link['attributes'] as $name => $value ) {
-				$link_header .= sprintf( '; %s="%s"', $name, rawurlencode( $value ) );
+				/*
+				 * Escape the value being put into an HTTP quoted string. The grammar is:
+				 *
+				 *     quoted-string  = DQUOTE *( qdtext / quoted-pair ) DQUOTE
+				 *     qdtext         = HTAB / SP / %x21 / %x23-5B / %x5D-7E / obs-text
+				 *     quoted-pair    = "\" ( HTAB / SP / VCHAR / obs-text )
+				 *     obs-text       = %x80-FF
+				 *
+				 * See <https://www.rfc-editor.org/rfc/rfc9110.html#section-5.6.4>. So to escape a value we need to add
+				 * a backslash in front of anything character which is not qdtext.
+				 */
+				$escaped_value = preg_replace( '/(?=[^\t \x21\x23-\x5B\x5D-\x7E\x80-\xFF])/', '\\\\', $value );
+				$link_header  .= sprintf( '; %s="%s"', $name, $escaped_value );
 			}
 
 			$link_headers[] = $link_header;
