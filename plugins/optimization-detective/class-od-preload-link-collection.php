@@ -137,18 +137,20 @@ final class OD_Preload_Link_Collection implements Countable {
 		);
 
 		// Add media attributes to the deduplicated links.
-		foreach ( $prepared_links as &$link ) {
-			$media_attributes = array( 'screen' );
-			if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
-				$media_attributes[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
-			}
-			if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
-				$media_attributes[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
-			}
-			$link['attributes']['media'] = implode( ' and ', $media_attributes );
-		}
-
-		return $prepared_links;
+		return array_map(
+			static function ( array $link ): array {
+				$media_attributes = array( 'screen' );
+				if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
+					$media_attributes[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
+				}
+				if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
+					$media_attributes[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
+				}
+				$link['attributes']['media'] = implode( ' and ', $media_attributes );
+				return $link;
+			},
+			$prepared_links
+		);
 	}
 
 	/**
