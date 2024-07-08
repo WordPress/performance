@@ -3,7 +3,7 @@
  * Plugin Name: Embed Optimizer
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer
  * Description: Optimizes the performance of embeds by lazy-loading iframes and scripts.
- * Requires at least: 6.4
+ * Requires at least: 6.5
  * Requires PHP: 7.2
  * Version: 0.1.2
  * Author: WordPress Performance Team
