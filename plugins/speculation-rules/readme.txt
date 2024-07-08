@@ -1,8 +1,8 @@
 === Speculative Loading ===
 
 Contributors:      wordpressdotorg
-Requires at least: 6.4
-Tested up to:      6.5
+Requires at least: 6.5
+Tested up to:      6.6
 Requires PHP:      7.2
 Stable tag:        1.3.1
 License:           GPLv2 or later
