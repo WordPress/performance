@@ -66,8 +66,6 @@ final class Embed_Optimizer_Tag_Visitor {
 			return false;
 		}
 
-		$original_bookmarks = $processor->get_bookmark_names();
-
 		$max_intersection_ratio = $this->url_metrics_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() );
 
 		if ( $max_intersection_ratio > 0 ) {
@@ -97,13 +95,6 @@ final class Embed_Optimizer_Tag_Visitor {
 		} elseif ( embed_optimizer_update_markup( $processor ) && ! $this->added_lazy_script ) {
 			$processor->append_body_html( wp_get_inline_script_tag( embed_optimizer_get_lazy_load_script(), array( 'type' => 'module' ) ) );
 			$this->added_lazy_script = true;
-		}
-
-		// Since there is a limit to the number of bookmarks we can add, make sure any new ones we add get removed.
-		// TODO: Instead of this consider throwing an exception inside embed_optimizer_update_markup() and clear out the bookmarks in the catch() block or else when the function returns.
-		$new_bookmarks = array_diff( $original_bookmarks, $processor->get_bookmark_names() );
-		foreach ( $new_bookmarks as $new_bookmark ) {
-			$processor->release_bookmark( $new_bookmark );
 		}
 
 		return true;

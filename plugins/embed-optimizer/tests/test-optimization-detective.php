@@ -44,9 +44,11 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
-							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
-							'isLCP'             => true,
-							'intersectionRatio' => 1,
+							array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'isLCP'             => true,
+								'intersectionRatio' => 1,
+							),
 						)
 					);
 				},
@@ -88,9 +90,11 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
-							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
-							'isLCP'             => false,
-							'intersectionRatio' => 0,
+							array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'isLCP'             => false,
+								'intersectionRatio' => 0,
+							),
 						)
 					);
 				},
@@ -130,9 +134,11 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
-							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
-							'isLCP'             => true,
-							'intersectionRatio' => 1,
+							array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'isLCP'             => true,
+								'intersectionRatio' => 1,
+							),
 						)
 					);
 				},
@@ -176,9 +182,11 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
-							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
-							'isLCP'             => false,
-							'intersectionRatio' => 0,
+							array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'isLCP'             => false,
+								'intersectionRatio' => 0,
+							),
 						)
 					);
 				},
@@ -221,9 +229,11 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
-							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
-							'isLCP'             => true,
-							'intersectionRatio' => 1,
+							array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'isLCP'             => true,
+								'intersectionRatio' => 1,
+							),
 						),
 						false
 					);
@@ -270,9 +280,11 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
-							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
-							'isLCP'             => false,
-							'intersectionRatio' => 0,
+							array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'isLCP'             => false,
+								'intersectionRatio' => 0,
+							),
 						),
 						false
 					);
@@ -317,9 +329,11 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
-							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
-							'isLCP'             => false,
-							'intersectionRatio' => 0,
+							array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'isLCP'             => false,
+								'intersectionRatio' => 0,
+							),
 						),
 						false
 					);
@@ -363,11 +377,69 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
-							'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
-							'isLCP'             => false,
-							'intersectionRatio' => 0,
+							array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'isLCP'             => false,
+								'intersectionRatio' => 1,
+							),
+							array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]',
+								'isLCP'             => false,
+								'intersectionRatio' => 1,
+							),
+							array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]',
+								'isLCP'             => false,
+								'intersectionRatio' => 0,
+							),
+							array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::FIGURE]/*[2][self::VIDEO]',
+								'isLCP'             => false,
+								'intersectionRatio' => 0,
+							),
 						),
 						false
+					);
+
+					// This tests how the Embed Optimizer plugin plays along with other tag visitors.
+					add_action(
+						'od_register_tag_visitors',
+						function ( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $group_collection, OD_Link_Collection $link_collection ): void {
+							$registry->register(
+								'video_with_poster',
+								function ( OD_HTML_Tag_Processor $processor ) use ( $group_collection, $link_collection ): bool {
+									static $seen_video_count = 0;
+									if ( $processor->get_tag() !== 'VIDEO' ) {
+										return false;
+									}
+									$poster = $processor->get_attribute( 'poster' );
+									if ( ! is_string( $poster ) ) {
+										return false;
+									}
+									$seen_video_count++;
+									if ( 1 === $seen_video_count ) {
+										$processor->set_bookmark( 'the_first_video' );
+									} else {
+										$this->assertTrue( $processor->has_bookmark( 'the_first_video' ) );
+									}
+									if ( $group_collection->get_element_max_intersection_ratio( $processor->get_xpath() ) > 0 ) {
+										$link_collection->add_link(
+											array(
+												'rel'  => 'preload',
+												'as'   => 'image',
+												'href' => $poster,
+											)
+										);
+										$processor->set_attribute( 'preload', 'auto' );
+									} else {
+										$processor->set_attribute( 'preload', 'none' );
+									}
+									return true;
+								}
+							);
+						},
+						10,
+						3
 					);
 				},
 				'buffer'   => '
@@ -377,10 +449,16 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
+							<figure class="wp-block-embed is-type-video">
+								<div class="wp-block-embed__wrapper">
+									<video src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
+								</div>
+							</figure>
 							<figure class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
 								<div class="wp-block-embed__wrapper">
 									<figure>
 										<p>So I heard you like <code>FIGURE</code>?</p>
+										<video src="https://example.com/video2.mp4" poster="https://example.com/poster2.jpg" width="640" height="480"></video>
 										<figcaption>Tagline from Figurine embed.</figcaption>
 									</figure>
 									<iframe src="https://example.com/" width="640" height="480"></iframe>
@@ -395,12 +473,19 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 						<head>
 							<meta charset="utf-8">
 							<title>...</title>
+							<link data-od-added-tag rel="preload" as="image" href="https://example.com/poster1.jpg">
 						</head>
 						<body>
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
+							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-video">
+								<div class="wp-block-embed__wrapper">
+									<video data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]" data-od-added-preload preload="auto" src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
+								</div>
+							</figure>
+							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
 								<div class="wp-block-embed__wrapper">
 									<figure>
 										<p>So I heard you like <code>FIGURE</code>?</p>
+										<video data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::FIGURE]/*[2][self::VIDEO]" data-od-added-preload preload="none" src="https://example.com/video2.mp4" poster="https://example.com/poster2.jpg" width="640" height="480"></video>
 										<figcaption>Tagline from Figurine embed.</figcaption>
 									</figure>
 									<iframe data-od-added-loading loading="lazy" src="https://example.com/" width="640" height="480"></iframe>
@@ -453,12 +538,12 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	/**
 	 * Populates complete URL metrics for the provided element data.
 	 *
-	 * @phpstan-param ElementDataSubset $element
-	 * @param array $element  Element data.
-	 * @param bool  $complete Whether to fully populate the grous.
+	 * @phpstan-param ElementDataSubset[] $elements
+	 * @param array[] $elements Element data.
+	 * @param bool    $complete Whether to fully populate the groups.
 	 * @throws Exception But it won't.
 	 */
-	protected function populate_url_metrics( array $element, bool $complete = true ): void {
+	protected function populate_url_metrics( array $elements, bool $complete = true ): void {
 		$slug        = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 		$sample_size = $complete ? od_get_url_metrics_breakpoint_sample_size() : 1;
 		foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
@@ -467,9 +552,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 					$slug,
 					$this->get_validated_url_metric(
 						$viewport_width,
-						array(
-							$element,
-						)
+						$elements
 					)
 				);
 			}
