@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the Auto-sizes for Lazy-loaded Images.
+ * Tests for the Enhanced Responsive Images plugin.
  *
  * @package auto-sizes
  * @group   auto-sizes
