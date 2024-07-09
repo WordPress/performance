@@ -131,6 +131,7 @@ function DashboardWidget() {
 	const clsData = data.map( ( entry ) => entry.webVitals.CLS );
 	const clsMetric = percentile( clsData, THRESHOLDS.CLS.percentile );
 
+	// eslint-disable-next-line no-console
 	console.log( lcpData, lcpMetric );
 
 	return (

@@ -30,13 +30,13 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	if ( file_exists( WP_PLUGIN_DIR . '/' . $plugin_slug . '/load.php' ) ) {
 		$local_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_slug . '/load.php' );
 
-		$plugin['name'] = $local_data['Name'];
-		$plugin['slug'] = $plugin_slug;
+		$plugin['name']              = $local_data['Name'];
+		$plugin['slug']              = $plugin_slug;
 		$plugin['short_description'] = $local_data['Description'];
-		$plugin['requires'] = $local_data['RequiresWP'];
-		$plugin['requires_php'] = $local_data['RequiresPHP'];
-		$plugin['requires_plugins'] = explode( ',', $local_data['RequiresPlugins'] );
-		$plugin['version'] = $local_data['Version'];
+		$plugin['requires']          = $local_data['RequiresWP'];
+		$plugin['requires_php']      = $local_data['RequiresPHP'];
+		$plugin['requires_plugins']  = explode( ',', $local_data['RequiresPlugins'] );
+		$plugin['version']           = $local_data['Version'];
 
 		return $plugin;
 	}
@@ -110,7 +110,7 @@ function perflab_render_plugins_ui(): void {
 	$experimental_plugins = array();
 
 	foreach ( perflab_get_standalone_plugin_data() as $plugin_slug => $plugin_data ) {
-		$api_data = perflab_query_plugin_info($plugin_slug); // Data from WordPress.org.
+		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from WordPress.org.
 
 		// Skip if the plugin is not on WordPress.org or there was a network error.
 		if ( ! $api_data instanceof WP_Error ) {
@@ -244,7 +244,7 @@ function perflab_install_and_activate_plugin( string $plugin_slug, array &$proce
 	$processed_plugins[] = $plugin_slug;
 
 	$plugin_data = perflab_query_plugin_info( $plugin_slug );
-	var_dump($plugin_data);
+
 	if ( $plugin_data instanceof WP_Error ) {
 		return $plugin_data;
 	}
