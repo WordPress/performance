@@ -25,29 +25,10 @@ class Test_Speculation_Rules extends WP_UnitTestCase {
 		$this->assertSame( 10, has_action( 'wp_head', 'plsr_render_generator_meta_tag' ) );
 	}
 
-	/** @return array<string, array{ html5_support: bool }> */
-	public function data_provider_to_test_print_speculation_rules(): array {
-		return array(
-			'xhtml' => array(
-				'html5_support' => false,
-			),
-			'html5' => array(
-				'html5_support' => true,
-			),
-		);
-	}
-
 	/**
-	 * @dataProvider data_provider_to_test_print_speculation_rules
 	 * @covers ::plsr_print_speculation_rules
 	 */
-	public function test_plsr_print_speculation_rules_without_html5_support( bool $html5_support ): void {
-		if ( $html5_support ) {
-			add_theme_support( 'html5', array( 'script' ) );
-		} else {
-			remove_theme_support( 'html5' );
-		}
-
+	public function test_plsr_print_speculation_rules_without_html5_support(): void {
 		$output = get_echo( 'plsr_print_speculation_rules' );
 		$this->assertStringContainsString( '<script type="speculationrules">', $output );
 
@@ -55,13 +36,6 @@ class Test_Speculation_Rules extends WP_UnitTestCase {
 		$rules = json_decode( $json, true );
 		$this->assertIsArray( $rules );
 		$this->assertArrayHasKey( 'prerender', $rules );
-
-		// Make sure that theme support was restored. This is only relevant to WordPress 6.4 per https://core.trac.wordpress.org/ticket/60320.
-		if ( $html5_support ) {
-			$this->assertStringNotContainsString( '/* <![CDATA[ */', wp_get_inline_script_tag( '/*...*/' ) );
-		} else {
-			$this->assertStringContainsString( '/* <![CDATA[ */', wp_get_inline_script_tag( '/*...*/' ) );
-		}
 	}
 
 	/**

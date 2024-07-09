@@ -1,13 +1,11 @@
 === Image Placeholders ===
 
-Contributors:      wordpressdotorg
-Requires at least: 6.4
-Tested up to:      6.5
-Requires PHP:      7.2
-Stable tag:        1.1.1
-License:           GPLv2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, images, dominant color
+Contributors: wordpressdotorg
+Tested up to: 6.6
+Stable tag:   1.1.1
+License:      GPLv2 or later
+License URI:  https://www.gnu.org/licenses/gpl-2.0.html
+Tags:         performance, images, dominant color
 
 Displays placeholders based on an image's dominant color while the image is loading.
 
