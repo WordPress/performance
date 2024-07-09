@@ -162,16 +162,17 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$link_collection      = new OD_Link_Collection();
 	$processor            = new OD_HTML_Tag_Processor( $buffer );
 
+	$tag_visitor_context = new OD_Tag_Visitor_Context( $processor, $group_collection, $link_collection );
+
 	/**
 	 * Fires to register tag visitors before walking over the document to perform optimizations.
 	 *
 	 * @since 0.3.0
 	 *
-	 * @param OD_Tag_Visitor_Registry         $tag_visitor_registry Tag visitor registry.
-	 * @param OD_URL_Metrics_Group_Collection $group_collection     URL Metrics Group collection.
-	 * @param OD_Link_Collection              $link_collection      Link collection.
+	 * @param OD_Tag_Visitor_Registry $tag_visitor_registry Tag visitor registry.
+	 * @param OD_Tag_Visitor_Context  $tag_visitor_context  Tag visitor context.
 	 */
-	do_action( 'od_register_tag_visitors', $tag_visitor_registry, $group_collection, $link_collection );
+	do_action( 'od_register_tag_visitors', $tag_visitor_registry, $tag_visitor_context );
 
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 
@@ -180,7 +181,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$did_visit = false;
 		$processor->set_bookmark( $current_tag_bookmark );
 		foreach ( $visitors as $visitor ) {
-			$did_visit = $visitor( $processor, $group_collection, $link_collection ) || $did_visit;
+			$did_visit = $visitor( $tag_visitor_context ) || $did_visit;
 
 			// Since the visitor may have traversed HTML tags, we need to make sure we go back to this tag so that
 			// in the next iteration any relevant tag visitors may apply, in addition to properly setting the data-od-xpath

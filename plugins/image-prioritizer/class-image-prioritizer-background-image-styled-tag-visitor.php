@@ -22,10 +22,12 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 	/**
 	 * Visits a tag.
 	 *
-	 * @param OD_HTML_Tag_Processor $processor Processor.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the visitor visited the tag.
 	 */
-	public function __invoke( OD_HTML_Tag_Processor $processor ): bool {
+	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
+		$processor = $context->processor;
+
 		/*
 		 * Note that CSS allows for a `background`/`background-image` to have multiple `url()` CSS functions, resulting
 		 * in multiple background images being layered on top of each other. This ability is not employed in core. Here
@@ -55,7 +57,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 		$xpath = $processor->get_xpath();
 
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
-		foreach ( $this->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
+		foreach ( $context->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
 			$link_attributes = array(
 				'rel'           => 'preload',
 				'fetchpriority' => 'high',
@@ -64,7 +66,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 				'media'         => 'screen',
 			);
 
-			$this->link_collection->add_link(
+			$context->link_collection->add_link(
 				$link_attributes,
 				$group->get_minimum_viewport_width(),
 				$group->get_maximum_viewport_width()

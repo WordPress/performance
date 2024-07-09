@@ -19,7 +19,7 @@ function embed_optimizer_add_hooks(): void {
 	add_action( 'wp_head', 'embed_optimizer_render_generator' );
 
 	if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
-		add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors', 10, 3 );
+		add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' );
 	} else {
 		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
 	}
@@ -31,13 +31,11 @@ add_action( 'init', 'embed_optimizer_add_hooks' );
  *
  * @since n.e.x.t
  *
- * @param OD_Tag_Visitor_Registry         $registry                     Tag visitor registry.
- * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
- * @param OD_Link_Collection              $link_collection              Link Collection.
+ * @param OD_Tag_Visitor_Registry $registry Tag visitor registry.
  */
-function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Link_Collection $link_collection ): void {
+function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry ): void {
 	require_once __DIR__ . '/class-embed-optimizer-tag-visitor.php';
-	$registry->register( 'embeds', new Embed_Optimizer_Tag_Visitor( $url_metrics_group_collection, $link_collection ) );
+	$registry->register( 'embeds', new Embed_Optimizer_Tag_Visitor() );
 }
 
 /**
@@ -64,7 +62,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
  *
  * @since n.e.x.t
  *
- * @throws Exception But it won't because it is caught.
+ * phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing -- The exception is caught.
  *
  * @param WP_HTML_Tag_Processor|OD_HTML_Tag_Processor $html_processor HTML Processor.
  * @return bool Whether the lazy-loading script is required.

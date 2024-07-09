@@ -392,19 +392,19 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 
 		add_action(
 			'od_register_tag_visitors',
-			function ( OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metrics_Group_Collection $url_metrics_outer, OD_Link_Collection $link_collection_outer ): void {
+			function ( OD_Tag_Visitor_Registry $tag_visitor_registry, OD_Tag_Visitor_Context $outer_context ): void {
 				$tag_visitor_registry->register(
 					'img',
-					function ( OD_HTML_Tag_Processor $processor, OD_URL_Metrics_Group_Collection $url_metrics, OD_Link_Collection $link_collection ) use ( $url_metrics_outer, $link_collection_outer ): bool {
-						$this->assertFalse( $processor->is_tag_closer() );
-						$this->assertSame( $url_metrics, $url_metrics_outer );
-						$this->assertSame( $link_collection, $link_collection_outer );
-						return $processor->get_tag() === 'IMG';
+					function ( OD_Tag_Visitor_Context $inner_context ) use ( $outer_context ): bool {
+						$this->assertFalse( $inner_context->processor->is_tag_closer() );
+						$this->assertSame( $inner_context->url_metrics_group_collection, $outer_context->url_metrics_group_collection );
+						$this->assertSame( $inner_context->link_collection, $outer_context->link_collection );
+						return $inner_context->processor->get_tag() === 'IMG';
 					}
 				);
 			},
 			10,
-			3
+			2
 		);
 
 		add_action(
@@ -412,9 +412,9 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 			function ( OD_Tag_Visitor_Registry $tag_visitor_registry ): void {
 				$tag_visitor_registry->register(
 					'video',
-					function ( OD_HTML_Tag_Processor $processor ): bool {
-						$this->assertFalse( $processor->is_tag_closer() );
-						return $processor->get_tag() === 'VIDEO';
+					function ( OD_Tag_Visitor_Context $context ): bool {
+						$this->assertFalse( $context->processor->is_tag_closer() );
+						return $context->processor->get_tag() === 'VIDEO';
 					}
 				);
 			}

@@ -20,20 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Embed_Optimizer_Tag_Visitor {
 
 	/**
-	 * URL Metrics Group Collection.
-	 *
-	 * @var OD_URL_Metrics_Group_Collection
-	 */
-	protected $url_metrics_group_collection;
-
-	/**
-	 * Link Collection.
-	 *
-	 * @var OD_Link_Collection
-	 */
-	protected $link_collection;
-
-	/**
 	 * Whether the lazy-loading script was added to the body.
 	 *
 	 * @var bool
@@ -41,25 +27,15 @@ final class Embed_Optimizer_Tag_Visitor {
 	protected $added_lazy_script = false;
 
 	/**
-	 * Constructor.
-	 *
-	 * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
-	 * @param OD_Link_Collection              $link_collection              Link Collection.
-	 */
-	public function __construct( OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Link_Collection $link_collection ) {
-		$this->url_metrics_group_collection = $url_metrics_group_collection;
-		$this->link_collection              = $link_collection;
-	}
-
-	/**
 	 * Visits a tag.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_HTML_Tag_Processor $processor Processor.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the visit or visited the tag.
 	 */
-	public function __invoke( OD_HTML_Tag_Processor $processor ): bool {
+	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
+		$processor = $context->processor;
 		if ( ! (
 			'FIGURE' === $processor->get_tag()
 			&&
@@ -68,7 +44,7 @@ final class Embed_Optimizer_Tag_Visitor {
 			return false;
 		}
 
-		$max_intersection_ratio = $this->url_metrics_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() );
+		$max_intersection_ratio = $context->url_metrics_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() );
 
 		if ( $max_intersection_ratio > 0 ) {
 
@@ -87,7 +63,7 @@ final class Embed_Optimizer_Tag_Visitor {
 			}
 
 			foreach ( $preconnect_hrefs as $preconnect_href ) {
-				$this->link_collection->add_link(
+				$context->link_collection->add_link(
 					array(
 						'rel'  => 'preconnect',
 						'href' => $preconnect_href,

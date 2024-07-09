@@ -25,10 +25,8 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	 * @covers ::embed_optimizer_register_tag_visitors
 	 */
 	public function test_embed_optimizer_register_tag_visitors(): void {
-		$link_collection  = new OD_Link_Collection();
-		$group_collection = new OD_URL_Metrics_Group_Collection( array(), array( 1024 ), 3, DAY_IN_SECONDS );
-		$registry         = new OD_Tag_Visitor_Registry();
-		embed_optimizer_register_tag_visitors( $registry, $group_collection, $link_collection );
+		$registry = new OD_Tag_Visitor_Registry();
+		embed_optimizer_register_tag_visitors( $registry );
 		$this->assertTrue( $registry->is_registered( 'embeds' ) );
 		$this->assertInstanceOf( Embed_Optimizer_Tag_Visitor::class, $registry->get_registered( 'embeds' ) );
 	}
@@ -404,16 +402,17 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 					// This tests how the Embed Optimizer plugin plays along with other tag visitors.
 					add_action(
 						'od_register_tag_visitors',
-						function ( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $group_collection, OD_Link_Collection $link_collection ): void {
+						function ( OD_Tag_Visitor_Registry $registry ): void {
 							$registry->register(
 								'video_with_poster',
-								function ( OD_HTML_Tag_Processor $processor ) use ( $group_collection, $link_collection ): bool {
+								function ( OD_Tag_Visitor_Context $context ): bool {
 									static $seen_video_count = 0;
+									$processor = $context->processor;
 									if ( $processor->get_tag() !== 'VIDEO' ) {
 										return false;
 									}
 									$poster = $processor->get_attribute( 'poster' );
-									if ( ! is_string( $poster ) ) {
+									if ( ! is_string( $poster ) || '' === $poster ) {
 										return false;
 									}
 									$seen_video_count++;
@@ -422,8 +421,8 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 									} else {
 										$this->assertTrue( $processor->has_bookmark( 'the_first_video' ) );
 									}
-									if ( $group_collection->get_element_max_intersection_ratio( $processor->get_xpath() ) > 0 ) {
-										$link_collection->add_link(
+									if ( $context->url_metrics_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() ) > 0 ) {
+										$context->link_collection->add_link(
 											array(
 												'rel'  => 'preload',
 												'as'   => 'image',
@@ -437,9 +436,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 									return true;
 								}
 							);
-						},
-						10,
-						3
+						}
 					);
 				},
 				'buffer'   => '
@@ -508,7 +505,8 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 						function ( OD_Tag_Visitor_Registry $registry ): void {
 							$registry->register(
 								'body',
-								function ( OD_HTML_Tag_Processor $processor ): bool {
+								function ( OD_Tag_Visitor_Context $context ): bool {
+									$processor = $context->processor;
 									if ( $processor->get_tag() === 'BODY' ) {
 										$this->assertFalse( $processor->is_tag_closer() );
 
