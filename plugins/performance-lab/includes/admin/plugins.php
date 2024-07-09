@@ -107,7 +107,7 @@ function perflab_render_plugins_ui(): void {
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	$plugins              = array();
+	$plugins = array();
 
 	foreach ( perflab_get_standalone_plugin_data() as $plugin_slug => $plugin_data ) {
 		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from WordPress.org.
@@ -130,7 +130,7 @@ function perflab_render_plugins_ui(): void {
 		$plugins,
 		array(
 			'experimental' => 'ASC',
-			'name' => 'ASC'
+			'name'         => 'ASC'
 		)
 	);
 
