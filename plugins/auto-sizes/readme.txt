@@ -7,12 +7,11 @@ License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, auto-sizes
 
-Instructs browsers to automatically choose the right size for images.
+Improvements for WordPress' responsive image functionality.
 
 == Description ==
 
-This plugin implements the HTML spec for adding `sizes="auto"` to lazy-loaded images.
-For background, see: https://github.com/whatwg/html/issues/4654.
+This plugin implements experimental enhancements for the responsive images functionality in WordPress. Currently, this includes improvements to the accuracy of the `sizes` attribute by using available layout information in the theme and by implementing the new HTML spec for adding `sizes="auto"` to lazy-loaded images (See: https://github.com/whatwg/html/issues/4654).
 
 == Installation ==
 
@@ -24,7 +23,7 @@ For background, see: https://github.com/whatwg/html/issues/4654.
 
 = Manual installation =
 
-1. Upload the entire `auto-sizes` folder to the `/wp-content/plugins/` directory.
+1. Upload the entire plugin folder to the `/wp-content/plugins/` directory.
 2. Visit **Plugins**.
 3. Activate the **Enhanced Responsive Images** plugin.
 
