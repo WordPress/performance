@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook callbacks used for Auto-sizes for Lazy-loaded Images.
+ * Hook callbacks used for Enhanced Responsive Images.
  *
  * @package auto-sizes
  * @since 1.0.0

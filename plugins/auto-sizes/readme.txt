@@ -1,4 +1,4 @@
-=== Auto-sizes for Lazy-loaded Images ===
+=== Enhanced Responsive Images ===
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
@@ -7,7 +7,7 @@ License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, auto-sizes
 
-Instructs browsers to automatically choose the right image size for lazy-loaded images.
+Instructs browsers to automatically choose the right size for images.
 
 == Description ==
 
@@ -19,14 +19,14 @@ For background, see: https://github.com/whatwg/html/issues/4654.
 = Installation from within WordPress =
 
 1. Visit **Plugins > Add New**.
-2. Search for **Auto-sizes for Lazy-loaded Images**.
-3. Install and activate the **Auto-sizes for Lazy-loaded Images** plugin.
+2. Search for **Enhanced Responsive Images**.
+3. Install and activate the **Enhanced Responsive Images** plugin.
 
 = Manual installation =
 
 1. Upload the entire `auto-sizes` folder to the `/wp-content/plugins/` directory.
 2. Visit **Plugins**.
-3. Activate the **Auto-sizes for Lazy-loaded Images** plugin.
+3. Activate the **Enhanced Responsive Images** plugin.
 
 == Frequently Asked Questions ==
 
