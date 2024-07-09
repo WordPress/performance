@@ -27,7 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                                url: string,
  *                                timestamp: float,
  *                                viewport: RectData,
- *                                elements: ElementData[]
+ *                                elements: ElementData[],
+ *                                webVitals: WebVitalData
  *                            }
  * @phpstan-type WebVitalData array{
  *                                LCP: float,

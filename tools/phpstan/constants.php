@@ -15,3 +15,5 @@ define( 'OPTIMIZATION_DETECTIVE_VERSION', '0.0.0' );
 define( 'OPTIMIZATION_DETECTIVE_MAIN_FILE', 'plugins/optimization-detective/load.php' );
 
 define( 'IMAGE_PRIORITIZER_VERSION', '0.0.0' );
+
+define( 'PERFORMANCE_DASHBOARD_VERSION', '0.0.0' );

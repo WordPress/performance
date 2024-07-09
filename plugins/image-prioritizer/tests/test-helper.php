@@ -955,6 +955,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				},
 				$elements
 			),
+			'webVitals' => array(),
 		);
 		return new OD_URL_Metric( $data );
 	}

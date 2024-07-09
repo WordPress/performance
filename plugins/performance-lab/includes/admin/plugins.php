@@ -37,6 +37,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		$plugin['requires_php']      = $local_data['RequiresPHP'];
 		$plugin['requires_plugins']  = explode( ',', $local_data['RequiresPlugins'] );
 		$plugin['version']           = $local_data['Version'];
+		$plugin['download_link']     = '';
 
 		return $plugin;
 	}
@@ -124,7 +125,7 @@ function perflab_render_plugins_ui(): void {
 		}
 
 		// Separate experimental plugins so that they're displayed after non-experimental plugins.
-		if ( $plugin_data['experimental'] ) {
+		if ( ! empty( $plugin_data['experimental'] ) ) {
 			$experimental_plugins[ $plugin_slug ] = $plugin_data;
 		} else {
 			$plugins[ $plugin_slug ] = $plugin_data;

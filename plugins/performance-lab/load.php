@@ -111,7 +111,6 @@ function perflab_get_standalone_plugin_data(): array {
 		'performance-dashboard'   => array(
 			'constant'     => 'PERFORMANCE_DASHBOARD_VERSION',
 			'experimental' => true,
-			'unreleased'   => true,
 		),
 		'performant-translations' => array(
 			'constant' => 'PERFORMANT_TRANSLATIONS_VERSION',
