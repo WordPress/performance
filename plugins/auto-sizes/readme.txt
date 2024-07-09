@@ -1,13 +1,11 @@
 === Auto-sizes for Lazy-loaded Images ===
 
-Contributors:      wordpressdotorg
-Requires at least: 6.4
-Tested up to:      6.5
-Requires PHP:      7.2
-Stable tag:        1.0.2
-License:           GPLv2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, images, auto-sizes
+Contributors: wordpressdotorg
+Tested up to: 6.6
+Stable tag:   1.0.2
+License:      GPLv2 or later
+License URI:  https://www.gnu.org/licenses/gpl-2.0.html
+Tags:         performance, images, auto-sizes
 
 Instructs browsers to automatically choose the right image size for lazy-loaded images.
 

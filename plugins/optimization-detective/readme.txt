@@ -1,13 +1,11 @@
 === Optimization Detective ===
 
-Contributors:      wordpressdotorg
-Requires at least: 6.4
-Tested up to:      6.5
-Requires PHP:      7.2
-Stable tag:        0.3.1
-License:           GPLv2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, optimization, rum
+Contributors: wordpressdotorg
+Tested up to: 6.6
+Stable tag:   0.3.1
+License:      GPLv2 or later
+License URI:  https://www.gnu.org/licenses/gpl-2.0.html
+Tags:         performance, optimization, rum
 
 Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
 

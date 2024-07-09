@@ -128,7 +128,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					),
 				),
 				'expected_html' => '
-					<link data-od-added-tag rel="preconnect" href="https://youtube.com/">
+					<link data-od-added-tag rel="preconnect" href="https://youtube.com/" media="screen">
 				',
 				'error'         => '',
 			),
