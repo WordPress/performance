@@ -94,6 +94,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 				),
 				'timestamp' => (int) microtime( true ), // Integer to facilitate equality tests.
 				'elements'  => array(),
+				'webVitals' => array(),
 			),
 		);
 
@@ -356,6 +357,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 						),
 					),
 				),
+				'webVitals' => array(),
 			)
 		);
 	}

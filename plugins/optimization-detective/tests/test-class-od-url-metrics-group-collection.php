@@ -786,6 +786,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 					),
 				),
 			),
+			'webVitals' => array(),
 		);
 		return new OD_URL_Metric( $data );
 	}

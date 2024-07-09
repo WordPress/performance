@@ -414,6 +414,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 					'intersectionRatio' => 1,
 				),
 			),
+			'webVitals' => array(),
 		);
 	}
 }

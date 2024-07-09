@@ -442,6 +442,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				},
 				$elements
 			),
+			'webVitals' => array(),
 		);
 		return new OD_URL_Metric( $data );
 	}

@@ -126,7 +126,13 @@ function perflab_render_plugins_ui(): void {
 		}
 	}
 
-	$plugins = wp_list_sort( $plugins, array( 'experimental' => 'ASC', 'name' => 'ASC' ) );
+	$plugins = wp_list_sort(
+		$plugins,
+		array(
+			'experimental' => 'ASC',
+			'name' => 'ASC'
+		)
+	);
 
 	if ( ! $plugins ) {
 		return;
