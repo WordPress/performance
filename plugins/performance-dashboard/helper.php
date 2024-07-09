@@ -22,6 +22,11 @@ function performance_dashboard_render_generator_meta_tag(): void {
 	echo '<meta name="generator" content="performance-dashboard ' . esc_attr( PERFORMANCE_DASHBOARD_VERSION ) . '">' . "\n";
 }
 
+/**
+ * Adds a performance dashboard widget.
+ *
+ * @since 0.1.0
+ */
 function performance_dashboard_add_dashboard_widget(): void {
 	wp_add_dashboard_widget(
 		'performance-dashboard-widget',
@@ -30,6 +35,11 @@ function performance_dashboard_add_dashboard_widget(): void {
 	);
 }
 
+/**
+ * Renders the performance dashboard widget.
+ *
+ * @since 0.1.0
+ */
 function performance_dashboard_render_dashboard_widget(): void {
 	$asset_file = plugin_dir_path( __FILE__ ) . 'build/performance-dashboard-widget.asset.php';
 
@@ -91,6 +101,11 @@ function performance_dashboard_render_dashboard_widget(): void {
 	<?php
 }
 
+/**
+ * Adds a performance dashboard admin menu item.
+ *
+ * @since 0.1.0
+ */
 function performance_dashboard_add_submenu_page(): void {
 	add_submenu_page(
 		'index.php',
@@ -102,6 +117,11 @@ function performance_dashboard_add_submenu_page(): void {
 	);
 }
 
+/**
+ * Renders the performance dashboard page.
+ *
+ * @since 0.1.0
+ */
 function performance_dashboard_render_dashboard_page(): void {
 	$asset_file = plugin_dir_path( __FILE__ ) . 'build/performance-dashboard.asset.php';
 
