@@ -95,8 +95,7 @@ function perflab_render_plugins_ui(): void {
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	$plugins              = array();
-	$experimental_plugins = array();
+	$plugins = array();
 
 	foreach ( perflab_get_standalone_plugin_data() as $plugin_slug => $plugin_data ) {
 		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from wordpress.org.
@@ -114,26 +113,25 @@ function perflab_render_plugins_ui(): void {
 				),
 				array( 'type' => 'error' )
 			);
-			continue;
-		}
-
-		$plugin_data = array_merge(
-			array(
-				'experimental' => false,
-			),
-			$plugin_data, // Data defined within Performance Lab.
-			$api_data
-		);
-
-		// Separate experimental plugins so that they're displayed after non-experimental plugins.
-		if ( $plugin_data['experimental'] ) {
-			$experimental_plugins[ $plugin_slug ] = $plugin_data;
 		} else {
-			$plugins[ $plugin_slug ] = $plugin_data;
+			$plugins[ $plugin_slug ] = array_merge(
+				array(
+					'experimental' => false,
+				),
+				$plugin_data, // Data defined within Performance Lab.
+				$api_data
+			);
 		}
 	}
 
-	if ( count( $plugins ) === 0 && count( $experimental_plugins ) === 0 ) {
+	$plugins = wp_list_sort(
+		$plugins,
+		array(
+			'experimental' => 'ASC',
+			'name'         => 'ASC',
+		)
+	);
+	if ( count( $plugins ) === 0 ) {
 		return;
 	}
 	?>
@@ -146,9 +144,6 @@ function perflab_render_plugins_ui(): void {
 					<div id="the-list">
 						<?php
 						foreach ( $plugins as $plugin_data ) {
-							perflab_render_plugin_card( $plugin_data );
-						}
-						foreach ( $experimental_plugins as $plugin_data ) {
 							perflab_render_plugin_card( $plugin_data );
 						}
 						?>
