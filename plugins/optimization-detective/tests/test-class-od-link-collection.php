@@ -37,6 +37,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w" imagesizes="100vw" crossorigin="anonymous" fetchpriority="high" as="image" media="screen" integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC" referrerpolicy="origin">
 				',
 				'expected_header' => 'Link: <https://example.com/foo.jpg>; rel="preload"; imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w"; imagesizes="100vw"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen"; integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"; referrerpolicy="origin"',
+				'expected_count'  => 1,
 				'error'           => '',
 			),
 			'preload_with_min0_max_viewport_widths'      => array(
@@ -58,6 +59,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" crossorigin="anonymous" fetchpriority="high" as="image" media="screen and (max-width: 100px)">
 				',
 				'expected_header' => 'Link: <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen and (max-width: 100px)"',
+				'expected_count'  => 1,
 				'error'           => '',
 			),
 			'preload_with_min_max_viewport_widths'       => array(
@@ -79,6 +81,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" crossorigin="anonymous" fetchpriority="high" as="image" media="screen and (min-width: 100px) and (max-width: 200px)">
 				',
 				'expected_header' => 'Link: <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen and (min-width: 100px) and (max-width: 200px)"',
+				'expected_count'  => 1,
 				'error'           => '',
 			),
 			'multiple_preloads_merged'                   => array(
@@ -121,6 +124,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" crossorigin="anonymous" fetchpriority="high" as="image" media="screen and (min-width: 100px) and (max-width: 300px)">
 				',
 				'expected_header' => 'Link: <https://example.com/bar.jpg>; rel="preload"; as="image"; media="screen", <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen and (min-width: 100px) and (max-width: 300px)"',
+				'expected_count'  => 3,
 				'error'           => '',
 			),
 			'preconnect_with_min_max_viewport_widths'    => array(
@@ -138,6 +142,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					<link data-od-added-tag rel="preconnect" href="https://youtube.com/" media="(min-width: 201px) and (max-width: 300px)">
 				',
 				'expected_header' => 'Link: <https://youtube.com/>; rel="preconnect"; media="(min-width: 201px) and (max-width: 300px)"',
+				'expected_count'  => 1,
 				'error'           => '',
 			),
 			'preconnect_with_min_max_viewport_widths_and_media' => array(
@@ -156,6 +161,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					<link data-od-added-tag rel="preconnect" href="https://youtube.com/" media="tty and (min-width: 201px) and (max-width: 300px)">
 				',
 				'expected_header' => 'Link: <https://youtube.com/>; rel="preconnect"; media="tty and (min-width: 201px) and (max-width: 300px)"',
+				'expected_count'  => 1,
 				'error'           => '',
 			),
 			'preconnect_without_min_max_viewport_widths' => array(
@@ -171,6 +177,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					<link data-od-added-tag rel="preconnect" href="https://youtube.com/">
 				',
 				'expected_header' => 'Link: <https://youtube.com/>; rel="preconnect"',
+				'expected_count'  => 1,
 				'error'           => '',
 			),
 			'print_stylesheet'                           => array(
@@ -187,6 +194,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					<link data-od-added-tag rel="stylesheet" href="https://example.com/print.css" media="print">
 				',
 				'expected_header' => 'Link: <https://example.com/print.css>; rel="stylesheet"; media="print"',
+				'expected_count'  => 1,
 				'error'           => '',
 			),
 			'escaped_links'                              => array(
@@ -207,6 +215,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					<link data-od-added-tag rel="preload" href="https://example.com/bar.jpg" as="image" fetchpriority="high" imagesrcset="https://example.com/&quot;bar&quot;-480w.jpg 480w, https://example.com/&quot;bar&quot;-800w.jpg 800w" imagesizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
 				',
 				'expected_header' => 'Link: <https://example.com/bar.jpg>; rel="preload"; as="image"; fetchpriority="high"; imagesrcset="https://example.com/\"bar\"-480w.jpg 480w, https://example.com/\"bar\"-800w.jpg 800w"; imagesizes="(max-width: 600px) 480px, 800px"; crossorigin="anonymous"',
+				'expected_count'  => 1,
 				'error'           => '',
 			),
 			'bad_preconnect'                             => array(
@@ -220,6 +229,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				),
 				'expected_html'   => '',
 				'expected_header' => '',
+				'expected_count'  => 0,
 				'error'           => 'A preconnect link must include an href attribute.',
 			),
 			'bad_preload'                                => array(
@@ -233,6 +243,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				),
 				'expected_html'   => '',
 				'expected_header' => '',
+				'expected_count'  => 0,
 				'error'           => 'A preload link must include an as attribute.',
 			),
 			'missing_rel'                                => array(
@@ -245,6 +256,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				),
 				'expected_html'   => '',
 				'expected_header' => '',
+				'expected_count'  => 0,
 				'error'           => 'The rel attribute must be provided.',
 			),
 			'missing_href_or_imagesrcset'                => array(
@@ -258,6 +270,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				),
 				'expected_html'   => '',
 				'expected_header' => '',
+				'expected_count'  => 0,
 				'error'           => 'Either the href or imagesrcset attributes must be supplied.',
 			),
 			'bad_minimum_viewport_width'                 => array(
@@ -272,6 +285,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				),
 				'expected_html'   => '',
 				'expected_header' => '',
+				'expected_count'  => 0,
 				'error'           => 'Minimum width must be at least zero.',
 			),
 			'bad_maximum_viewport_width'                 => array(
@@ -287,6 +301,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				),
 				'expected_html'   => '',
 				'expected_header' => '',
+				'expected_count'  => 0,
 				'error'           => 'Maximum width must be greater than zero and greater than the minimum width.',
 			),
 			'bad_maximum_viewport_width2'                => array(
@@ -302,6 +317,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				),
 				'expected_html'   => '',
 				'expected_header' => '',
+				'expected_count'  => 0,
 				'error'           => 'Maximum width must be greater than zero and greater than the minimum width.',
 			),
 		);
@@ -319,9 +335,10 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 	 * @param array<string, mixed> $links_args      Links args.
 	 * @param string               $expected_html   Expected HTML.
 	 * @param string               $expected_header Expected Link header.
+	 * @param int                  $expected_count  Expected count of links.
 	 * @param string               $error           Error.
 	 */
-	public function test_add_link( array $links_args, string $expected_html, string $expected_header, string $error = '' ): void {
+	public function test_add_link( array $links_args, string $expected_html, string $expected_header, int $expected_count, string $error = '' ): void {
 		if ( $error ) {
 			$this->expectException( InvalidArgumentException::class );
 			$this->expectExceptionMessage( $error );
@@ -340,5 +357,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 			$expected_header,
 			$collection->get_response_header()
 		);
+
+		$this->assertCount( $expected_count, $collection );
 	}
 }

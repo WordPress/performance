@@ -263,6 +263,13 @@ final class OD_Link_Collection implements Countable {
 	 * @return int<0, max> Link count.
 	 */
 	public function count(): int {
-		return count( $this->links_by_rel );
+		return array_sum(
+			array_map(
+				static function ( array $links ): int {
+					return count( $links );
+				},
+				array_values( $this->links_by_rel )
+			)
+		);
 	}
 }
