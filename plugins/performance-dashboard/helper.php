@@ -1,8 +1,8 @@
 <?php
 /**
- * Optimizing for Optimization Detective.
+ * Helper functions for Performance Dashboard
  *
- * @package optimization-detective
+ * @package performance-dashboard
  * @since 0.1.0
  */
 
@@ -10,17 +10,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-function od_add_dashboard_widget() {
+/**
+ * Displays the HTML generator meta tag for the Performance Dashboard plugin.
+ *
+ * See {@see 'wp_head'}.
+ *
+ * @since 0.1.0
+ */
+function performance_dashboard_render_generator_meta_tag(): void {
+	// Use the plugin slug as it is immutable.
+	echo '<meta name="generator" content="performance-dashboard ' . esc_attr( PERFORMANCE_DASHBOARD_VERSION ) . '">' . "\n";
+}
+
+function performance_dashboard_add_dashboard_widget(): void {
 	wp_add_dashboard_widget(
-		'od-performance-widget',
-		__( 'Performance Overview', 'optimization-detective' ),
-		'od_render_dashboard_widget'
+		'performance-dashboard-widget',
+		__( 'Performance Overview', 'performance-dashboard' ),
+		'performance_dashboard_render_dashboard_widget'
 	);
 }
 
-add_action( 'wp_dashboard_setup', 'od_add_dashboard_widget' );
-
-function od_render_dashboard_widget() {
+function performance_dashboard_render_dashboard_widget(): void {
 	$asset_file = plugin_dir_path( __FILE__ ) . 'build/performance-dashboard-widget.asset.php';
 
 	$asset = file_exists( $asset_file ) ? require $asset_file : array(
@@ -31,7 +41,7 @@ function od_render_dashboard_widget() {
 	wp_enqueue_style( 'wp-components' );
 
 	wp_enqueue_script(
-		'od-performance-dashboard-widget',
+		'performance-dashboard-widget',
 		plugin_dir_url( __FILE__ ) . 'build/performance-dashboard-widget.js',
 		$asset['dependencies'],
 		$asset['version'],
@@ -57,16 +67,16 @@ function od_render_dashboard_widget() {
 
 	$options = array_map(
 		static function ( $entry ) {
-				return array(
-					'value' => $entry->ID,
-					'label' => $entry->post_title,
-				);
+			return array(
+				'value' => $entry->ID,
+				'label' => $entry->post_title,
+			);
 		},
 		$recent_entries
 	);
 
 	wp_localize_script(
-		'od-performance-dashboard-widget',
+		'performance-dashboard-widget',
 		'performanceDashboardWidget',
 		array(
 			'options'  => $options,
@@ -75,26 +85,24 @@ function od_render_dashboard_widget() {
 		)
 	);
 	?>
-	<div id="od-performance-dashboard-widget">
-		<?php esc_html_e( 'Loading…', 'optimization-detective' ); ?>
+	<div id="performance-dashboard-widget">
+		<?php esc_html_e( 'Loading…', 'performance-dashboard' ); ?>
 	</div>
 	<?php
 }
 
-function od_add_submenu_page() {
+function performance_dashboard_add_submenu_page(): void {
 	add_submenu_page(
 		'index.php',
-		__( 'Performance', 'optimization-detective' ),
-		__( 'Performance', 'optimization-detective' ),
+		__( 'Performance', 'performance-dashboard' ),
+		__( 'Performance', 'performance-dashboard' ),
 		'manage_options',
-		'od-performance-dashboard',
-		'od_render_dashboard_page'
+		'performance-dashboard',
+		'performance_dashboard_render_dashboard_page'
 	);
 }
 
-add_action( 'admin_menu', 'od_add_submenu_page' );
-
-function od_render_dashboard_page() {
+function performance_dashboard_render_dashboard_page(): void {
 	$asset_file = plugin_dir_path( __FILE__ ) . 'build/performance-dashboard.asset.php';
 
 	$asset = file_exists( $asset_file ) ? require $asset_file : array(
@@ -105,7 +113,7 @@ function od_render_dashboard_page() {
 	wp_enqueue_style( 'wp-components' );
 
 	wp_enqueue_script(
-		'od-performance-dashboard',
+		'performance-dashboard',
 		plugin_dir_url( __FILE__ ) . 'build/performance-dashboard.js',
 		$asset['dependencies'],
 		$asset['version'],
@@ -131,16 +139,16 @@ function od_render_dashboard_page() {
 
 	$options = array_map(
 		static function ( $entry ) {
-				return array(
-					'value' => $entry->ID,
-					'label' => $entry->post_title,
-				);
+			return array(
+				'value' => $entry->ID,
+				'label' => $entry->post_title,
+			);
 		},
 		$recent_entries
 	);
 
 	wp_localize_script(
-		'od-performance-dashboard',
+		'performance-dashboard',
 		'performanceDashboard',
 		array(
 			'options'  => $options,
@@ -150,9 +158,9 @@ function od_render_dashboard_page() {
 	);
 	?>
 	<div class="wrap">
-		<h2><?php esc_html_e( 'Performance Dashboard', 'optimization-detective' ); ?></h2>
-		<div id="od-performance-dashboard">
-			<?php esc_html_e( 'Loading…', 'optimization-detective' ); ?>
+		<h2><?php esc_html_e( 'Performance Dashboard', 'performance-dashboard' ); ?></h2>
+		<div id="performance-dashboard">
+			<?php esc_html_e( 'Loading…', 'performance-dashboard' ); ?>
 		</div>
 	</div>
 	<?php

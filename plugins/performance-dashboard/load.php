@@ -1,18 +1,19 @@
 <?php
 /**
- * Plugin Name: Optimization Detective
- * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective
- * Description: Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
+ * Plugin Name: Performance Dashboard
+ * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/performance-dashboard
+ * Description: See what real users are experiencing on your site.
  * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 0.3.1
+ * Requires Plugins: optimization-detective
+ * Version: 0.1.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * Text Domain: optimization-detective
+ * Text Domain: performance-dashboard
  *
- * @package optimization-detective
+ * @package performance-dashboard
  */
 
 // Exit if accessed directly.
@@ -64,60 +65,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 	}
 )(
-	'optimization_detective_pending_plugin',
-	'0.3.1',
+	'performance_dashboard_pending_plugin',
+	'0.1.0',
 	static function ( string $version ): void {
 
 		// Define the constant.
-		if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
+		if ( defined( 'PERFORMANCE_DASHBOARD_VERSION' ) ) {
 			return;
 		}
 
-		if (
-			( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) &&
-			! file_exists( __DIR__ . '/build/web-vitals.asset.php' )
-		) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			trigger_error(
-				esc_html(
-					sprintf(
-						/* translators: 1: File path. 2: CLI command. */
-						'[Optimization Detective] ' . __( 'Unable to load %1$s. Please make sure you have run %2$s.', 'optimization-detective' ),
-						'build/web-vitals.asset.php',
-						'`npm install && npm run build:optimization-detective`'
-					)
-				),
-				E_USER_ERROR
-			);
-		}
-
-		define( 'OPTIMIZATION_DETECTIVE_VERSION', $version );
+		define( 'PERFORMANCE_DASHBOARD_VERSION', $version );
 
 		require_once __DIR__ . '/helper.php';
-
-		// Core infrastructure classes.
-		require_once __DIR__ . '/class-od-data-validation-exception.php';
-		require_once __DIR__ . '/class-od-html-tag-processor.php';
-		require_once __DIR__ . '/class-od-url-metric.php';
-		require_once __DIR__ . '/class-od-url-metrics-group.php';
-		require_once __DIR__ . '/class-od-url-metrics-group-collection.php';
-
-		// Storage logic.
-		require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
-		require_once __DIR__ . '/storage/class-od-storage-lock.php';
-		require_once __DIR__ . '/storage/data.php';
-		require_once __DIR__ . '/storage/rest-api.php';
-
-		// Detection logic.
-		require_once __DIR__ . '/detection.php';
-
-		// Optimization logic.
-		require_once __DIR__ . '/class-od-html-tag-walker.php';
-		require_once __DIR__ . '/class-od-preload-link-collection.php';
-		require_once __DIR__ . '/class-od-tag-visitor-registry.php';
-		require_once __DIR__ . '/optimization.php';
-
-		// Add hooks for the above requires.
 		require_once __DIR__ . '/hooks.php';
 	}
 );

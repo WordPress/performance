@@ -180,7 +180,7 @@ function Dashboard() {
 
 domReady( () => {
 	const root = createRoot(
-		document.getElementById( 'od-performance-dashboard' )
+		document.getElementById( 'performance-dashboard' )
 	);
 
 	root.render( <Dashboard /> );

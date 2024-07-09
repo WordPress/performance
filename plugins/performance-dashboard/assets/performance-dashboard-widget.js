@@ -108,7 +108,7 @@ function DashboardWidget() {
 
 	useEffect( () => {
 		if ( ! postId ) {
-			setData( null );
+			setData( [] );
 			return;
 		}
 
@@ -215,7 +215,7 @@ function DashboardWidget() {
 
 domReady( () => {
 	const root = createRoot(
-		document.getElementById( 'od-performance-dashboard-widget' )
+		document.getElementById( 'performance-dashboard-widget' )
 	);
 
 	root.render( <DashboardWidget /> );
