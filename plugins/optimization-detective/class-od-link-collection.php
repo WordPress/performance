@@ -94,86 +94,107 @@ final class OD_Link_Collection implements Countable {
 	 * When two links are identical except for their minimum/maximum widths which are also consecutive, then merge them
 	 * together. Also, add media attributes to the links.
 	 *
-	 * @return array<int, Link> Prepared links with adjacent-duplicates merged together and media attributes added.
+	 * @return LinkAttributes[] Prepared links with adjacent-duplicates merged together and media attributes added.
 	 */
 	private function get_prepared_links(): array {
 		return array_merge(
 			...array_map(
-				static function ( $links ): array {
-
-					// Ensure links are sorted by the minimum_viewport_width.
-					usort(
-						$links,
-						/**
-						 * Comparator.
-						 *
-						 * @param Link $a First link.
-						 * @param Link $b Second link.
-						 * @return int Comparison result.
-						 */
-						static function ( array $a, array $b ): int {
-							return $a['minimum_viewport_width'] <=> $b['minimum_viewport_width'];
-						}
-					);
-
-					// Deduplicate adjacent links.
-					$prepared_links = array_reduce(
-						$links,
-						/**
-						 * Reducer.
-						 *
-						 * @param array<int, Link> $carry Carry.
-						 * @param Link $link Link.
-						 * @return non-empty-array<int, Link> Potentially-reduced links.
-						 */
-						static function ( array $carry, array $link ): array {
-							/**
-							 * Last link.
-							 *
-							 * @var Link $last_link
-							 */
-							$last_link = end( $carry );
-							if (
-								is_array( $last_link )
-								&&
-								$last_link['attributes'] === $link['attributes']
-								&&
-								is_int( $last_link['minimum_viewport_width'] )
-								&&
-								is_int( $last_link['maximum_viewport_width'] )
-								&&
-								$last_link['maximum_viewport_width'] + 1 === $link['minimum_viewport_width']
-							) {
-								$last_link['maximum_viewport_width'] = max( $last_link['maximum_viewport_width'], $link['maximum_viewport_width'] );
-
-								// Update the last link with the new maximum viewport width.
-								$carry[ count( $carry ) - 1 ] = $last_link;
-							} else {
-								$carry[] = $link;
-							}
-							return $carry;
-						},
-						array()
-					);
-
-					// Add media attributes to the deduplicated links.
-					return array_map(
-						static function ( array $link ): array {
-							$media_attributes = array( 'screen' );
-							if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
-								$media_attributes[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
-							}
-							if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
-								$media_attributes[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
-							}
-							$link['attributes']['media'] = implode( ' and ', $media_attributes );
-							return $link;
-						},
-						$prepared_links
-					);
+				function ( array $links ): array {
+					return $this->merge_consecutive_links( $links );
 				},
 				array_values( $this->links_by_rel )
 			)
+		);
+	}
+
+	/**
+	 * Merges consecutive links.
+	 *
+	 * @param Link[] $links Links.
+	 * @return LinkAttributes[] Merged consecutive links.
+	 */
+	private function merge_consecutive_links( array $links ): array {
+
+		// Ensure links are sorted by the minimum_viewport_width.
+		usort(
+			$links,
+			/**
+			 * Comparator.
+			 *
+			 * @param Link $a First link.
+			 * @param Link $b Second link.
+			 * @return int Comparison result.
+			 */
+			static function ( array $a, array $b ): int {
+				return $a['minimum_viewport_width'] <=> $b['minimum_viewport_width'];
+			}
+		);
+
+		/**
+		 * Deduplicated adjacent links.
+		 *
+		 * @var Link[] $prepared_links
+		 */
+		$prepared_links = array_reduce(
+			$links,
+			/**
+			 * Reducer.
+			 *
+			 * @param array<int, Link> $carry Carry.
+			 * @param Link $link Link.
+			 * @return non-empty-array<int, Link> Potentially-reduced links.
+			 */
+			static function ( array $carry, array $link ): array {
+				/**
+				 * Last link.
+				 *
+				 * @var Link $last_link
+				 */
+				$last_link = end( $carry );
+				if (
+					is_array( $last_link )
+					&&
+					$last_link['attributes'] === $link['attributes']
+					&&
+					is_int( $last_link['minimum_viewport_width'] )
+					&&
+					is_int( $last_link['maximum_viewport_width'] )
+					&&
+					$last_link['maximum_viewport_width'] + 1 === $link['minimum_viewport_width']
+				) {
+					$last_link['maximum_viewport_width'] = max( $last_link['maximum_viewport_width'], $link['maximum_viewport_width'] );
+
+					// Update the last link with the new maximum viewport width.
+					$carry[ count( $carry ) - 1 ] = $last_link;
+				} else {
+					$carry[] = $link;
+				}
+				return $carry;
+			},
+			array()
+		);
+
+		// Add media attributes to the deduplicated links.
+		return array_map(
+			static function ( array $link ): array {
+				$media_attributes = array();
+				if ( null !== $link['minimum_viewport_width'] && $link['minimum_viewport_width'] > 0 ) {
+					$media_attributes[] = sprintf( '(min-width: %dpx)', $link['minimum_viewport_width'] );
+				}
+				if ( null !== $link['maximum_viewport_width'] && PHP_INT_MAX !== $link['maximum_viewport_width'] ) {
+					$media_attributes[] = sprintf( '(max-width: %dpx)', $link['maximum_viewport_width'] );
+				}
+				if ( count( $media_attributes ) > 0 ) {
+					if ( ! isset( $link['attributes']['media'] ) ) {
+						$link['attributes']['media'] = '';
+					} else {
+						$link['attributes']['media'] .= ' and ';
+					}
+					$link['attributes']['media'] .= implode( ' and ', $media_attributes );
+				}
+				return $link['attributes'];
+			},
+			$prepared_links
 		);
 	}
 
@@ -187,7 +208,7 @@ final class OD_Link_Collection implements Countable {
 
 		foreach ( $this->get_prepared_links() as $link ) {
 			$link_tag = '<link data-od-added-tag';
-			foreach ( $link['attributes'] as $name => $value ) {
+			foreach ( $link as $name => $value ) {
 				$link_tag .= sprintf( ' %s="%s"', $name, esc_attr( $value ) );
 			}
 			$link_tag .= ">\n";
@@ -208,10 +229,10 @@ final class OD_Link_Collection implements Countable {
 
 		foreach ( $this->get_prepared_links() as $link ) {
 			// The about:blank is present since a Link without a reference-uri is invalid so any imagesrcset would otherwise not get downloaded.
-			$link['attributes']['href'] = isset( $link['attributes']['href'] ) ? esc_url_raw( $link['attributes']['href'] ) : 'about:blank';
-			$link_header                = '<' . $link['attributes']['href'] . '>';
-			unset( $link['attributes']['href'] );
-			foreach ( $link['attributes'] as $name => $value ) {
+			$link['href'] = isset( $link['href'] ) ? esc_url_raw( $link['href'] ) : 'about:blank';
+			$link_header  = '<' . $link['href'] . '>';
+			unset( $link['href'] );
+			foreach ( $link as $name => $value ) {
 				/*
 				 * Escape the value being put into an HTTP quoted string. The grammar is:
 				 *
