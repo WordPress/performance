@@ -35,7 +35,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		$plugin['short_description'] = $local_data['Description'];
 		$plugin['requires']          = $local_data['RequiresWP'];
 		$plugin['requires_php']      = $local_data['RequiresPHP'];
-		$plugin['requires_plugins']  = explode( ',', $local_data['RequiresPlugins'] );
+		$plugin['requires_plugins']  = array_filter( explode( ',', $local_data['RequiresPlugins'] ) );
 		$plugin['version']           = $local_data['Version'];
 		$plugin['download_link']     = '';
 
