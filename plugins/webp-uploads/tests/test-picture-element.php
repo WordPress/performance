@@ -49,14 +49,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		);
 
 		$processor = new WP_HTML_Tag_Processor( $the_image );
-		$width     = 0;
-		$height    = 0;
-		$alt       = '';
-		if ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
-			$width  = (int) $processor->get_attribute( 'width' );
-			$height = (int) $processor->get_attribute( 'height' );
-			$alt    = (string) $processor->get_attribute( 'alt' );
-		}
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
+		$width  = (int) $processor->get_attribute( 'width' );
+		$height = (int) $processor->get_attribute( 'height' );
+		$alt    = (string) $processor->get_attribute( 'alt' );
 
 		$size_to_use                  = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
 		$image_src                    = wp_get_attachment_image_src( $attachment_id, $size_to_use );
