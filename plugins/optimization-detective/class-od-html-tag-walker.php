@@ -23,36 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class OD_HTML_Tag_Walker {
 
 	/**
-	 * HTML void tags (i.e. those which are self-closing).
-	 *
-	 * @link https://html.spec.whatwg.org/multipage/syntax.html#void-elements
-	 * @see WP_HTML_Processor::is_void()
-	 * @todo Reuse `WP_HTML_Processor::is_void()` once WordPress 6.4 is the minimum-supported version.
-	 *
-	 * @var string[]
-	 */
-	const VOID_TAGS = array(
-		'AREA',
-		'BASE',
-		'BASEFONT', // Obsolete.
-		'BGSOUND', // Obsolete.
-		'BR',
-		'COL',
-		'EMBED',
-		'FRAME', // Deprecated.
-		'HR',
-		'IMG',
-		'INPUT',
-		'KEYGEN', // Obsolete.
-		'LINK',
-		'META',
-		'PARAM', // Deprecated.
-		'SOURCE',
-		'TRACK',
-		'WBR',
-	);
-
-	/**
 	 * Raw text tags.
 	 *
 	 * These are treated like void tags for the purposes of walking over the document since we do not process any text
@@ -170,6 +140,23 @@ final class OD_HTML_Tag_Walker {
 	private $processor;
 
 	/**
+	 * XPath for the current tag.
+	 *
+	 * This is used so that repeated calls to {@see self::get_xpath()} won't needlessly reconstruct the string. This
+	 * gets cleared whenever {@see self::open_tags()} iterates to the next tag.
+	 *
+	 * @var string|null
+	 */
+	private $current_xpath = null;
+
+	/**
+	 * Whether walking has started.
+	 *
+	 * @var bool
+	 */
+	private $did_start_walking = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $html HTML to process.
@@ -187,8 +174,15 @@ final class OD_HTML_Tag_Walker {
 	 * @since 0.1.0
 	 *
 	 * @return Generator<string> Tag name of current open tag.
+	 *
+	 * @throws Exception When walking has already started.
 	 */
 	public function open_tags(): Generator {
+		if ( $this->did_start_walking ) {
+			throw new Exception( esc_html__( 'Open tags may only be iterated over once per instance.', 'optimization-detective' ) );
+		}
+		$this->did_start_walking = true;
+
 		$p = $this->processor;
 
 		/*
@@ -212,6 +206,9 @@ final class OD_HTML_Tag_Walker {
 		$this->open_stack_indices = array();
 		while ( $p->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			$tag_name = $p->get_tag();
+			if ( ! is_string( $tag_name ) ) {
+				continue;
+			}
 			if ( ! $p->is_tag_closer() ) {
 
 				// Close an open P tag when a P-closing tag is encountered.
@@ -220,7 +217,7 @@ final class OD_HTML_Tag_Walker {
 				if ( in_array( $tag_name, self::P_CLOSING_TAGS, true ) ) {
 					$i = array_search( 'P', $this->open_stack_tags, true );
 					if ( false !== $i ) {
-						array_splice( $this->open_stack_tags, $i );
+						array_splice( $this->open_stack_tags, (int) $i );
 						array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) );
 					}
 				}
@@ -234,13 +231,15 @@ final class OD_HTML_Tag_Walker {
 					++$this->open_stack_indices[ $level ];
 				}
 
+				$this->current_xpath = null; // Clear cache.
+
 				// Now that the breadcrumbs are constructed, yield the tag name so that they can be queried if desired.
 				// Other mutations may be performed to the open tag's attributes by the callee at this point as well.
 				yield $tag_name;
 
 				// Immediately pop off self-closing and raw text tags.
 				if (
-					in_array( $tag_name, self::VOID_TAGS, true )
+					WP_HTML_Processor::is_void( $tag_name )
 					||
 					in_array( $tag_name, self::RAW_TEXT_TAGS, true )
 					||
@@ -251,7 +250,7 @@ final class OD_HTML_Tag_Walker {
 			} else {
 				// If the closing tag is for self-closing or raw text tag, we ignore it since it was already handled above.
 				if (
-					in_array( $tag_name, self::VOID_TAGS, true )
+					WP_HTML_Processor::is_void( $tag_name )
 					||
 					in_array( $tag_name, self::RAW_TEXT_TAGS, true )
 				) {
@@ -336,11 +335,13 @@ final class OD_HTML_Tag_Walker {
 	 * @return string XPath.
 	 */
 	public function get_xpath(): string {
-		$xpath = '';
-		foreach ( $this->get_breadcrumbs() as list( $tag_name, $index ) ) {
-			$xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
+		if ( null === $this->current_xpath ) {
+			$this->current_xpath = '';
+			foreach ( $this->get_breadcrumbs() as list( $tag_name, $index ) ) {
+				$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
+			}
 		}
-		return $xpath;
+		return $this->current_xpath;
 	}
 
 	/**
@@ -378,6 +379,21 @@ final class OD_HTML_Tag_Walker {
 	}
 
 	/**
+	 * Returns the uppercase name of the matched tag.
+	 *
+	 * This is a wrapper around the underlying WP_HTML_Tag_Processor method of the same name since only a limited number of
+	 * methods can be exposed to prevent moving the pointer in such a way as the breadcrumb calculation is invalidated.
+	 *
+	 * @since 0.3.0
+	 * @see WP_HTML_Tag_Processor::get_tag()
+	 *
+	 * @return string|null Name of currently matched tag in input HTML, or `null` if none found.
+	 */
+	public function get_tag(): ?string {
+		return $this->processor->get_tag();
+	}
+
+	/**
 	 * Returns the value of a requested attribute from a matched tag opener if that attribute exists.
 	 *
 	 * This is a wrapper around the underlying WP_HTML_Tag_Processor method of the same name since only a limited number of
@@ -407,7 +423,29 @@ final class OD_HTML_Tag_Walker {
 	 * @return bool Whether an attribute value was set.
 	 */
 	public function set_attribute( string $name, $value ): bool {
-		return $this->processor->set_attribute( $name, $value );
+		$existing_value = $this->processor->get_attribute( $name );
+		$result         = $this->processor->set_attribute( $name, $value );
+		if ( $result ) {
+			if ( is_string( $existing_value ) ) {
+				$this->set_meta_attribute( "replaced-{$name}", $existing_value );
+			} else {
+				$this->set_meta_attribute( "added-{$name}", true );
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Sets a meta attribute.
+	 *
+	 * All meta attributes are prefixed with 'data-od-'.
+	 *
+	 * @param string      $name  Meta attribute name.
+	 * @param string|true $value Value.
+	 * @return bool Whether an attribute was set.
+	 */
+	public function set_meta_attribute( string $name, $value ): bool {
+		return $this->processor->set_attribute( "data-od-{$name}", $value );
 	}
 
 	/**
@@ -423,7 +461,12 @@ final class OD_HTML_Tag_Walker {
 	 * @return bool Whether an attribute was removed.
 	 */
 	public function remove_attribute( string $name ): bool {
-		return $this->processor->remove_attribute( $name );
+		$old_value = $this->processor->get_attribute( $name );
+		$result    = $this->processor->remove_attribute( $name );
+		if ( $result ) {
+			$this->set_meta_attribute( "removed-{$name}", is_string( $old_value ) ? $old_value : true );
+		}
+		return $result;
 	}
 
 	/**

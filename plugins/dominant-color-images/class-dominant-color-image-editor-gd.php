@@ -32,7 +32,16 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		}
 		// The logic here is resize the image to 1x1 pixel, then get the color of that pixel.
 		$shorted_image = imagecreatetruecolor( 1, 1 );
-		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, imagesx( $this->image ), imagesy( $this->image ) );
+		if ( false === $shorted_image ) {
+			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
+		}
+		// Note: These two functions only return integers, but they used to return int|false in PHP<8. This was changed in the PHP documentation in
+		// <https://github.com/php/doc-en/commit/0462f49> and <https://github.com/php/doc-en/commit/37f858a>. However, PhpStorm's stubs still think
+		// they return int|false. However, from looking at <https://github.com/php/php-src/blob/5db847e/ext/gd/gd.stub.php#L716-L718> these functions
+		// apparently only ever returned integers. So the type casting is here for the possible sake PHP<8.
+		$image_width  = (int) imagesx( $this->image );
+		$image_height = (int) imagesy( $this->image );
+		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, $image_width, $image_height );
 
 		$rgb = imagecolorat( $shorted_image, 0, 0 );
 		if ( false === $rgb ) {
@@ -48,7 +57,6 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 
 		return $hex;
 	}
-
 
 	/**
 	 * Looks for transparent pixels in the image.
@@ -69,8 +77,19 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		$h = imagesy( $this->image );
 		for ( $x = 0; $x < $w; $x++ ) {
 			for ( $y = 0; $y < $h; $y++ ) {
-				$rgb  = imagecolorat( $this->image, $x, $y );
-				$rgba = imagecolorsforindex( $this->image, $rgb );
+				$rgb = imagecolorat( $this->image, $x, $y );
+				if ( false === $rgb ) {
+					return new WP_Error( 'unable_to_obtain_rgb_via_imagecolorat' );
+				}
+				try {
+					// Note: In PHP<8, this returns false if the color is out of range. In PHP8, this throws a ValueError instead.
+					$rgba = imagecolorsforindex( $this->image, $rgb );
+				} catch ( ValueError $error ) {
+					$rgba = false;
+				}
+				if ( ! is_array( $rgba ) ) {
+					return new WP_Error( 'unable_to_obtain_rgba_via_imagecolorsforindex' );
+				}
 				if ( $rgba['alpha'] > 0 ) {
 					return true;
 				}

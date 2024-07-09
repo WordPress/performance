@@ -35,7 +35,7 @@ final class OD_Storage_Lock {
 		 * Filtering the TTL to zero will disable any metric storage locking. This is useful, for example, to disable
 		 * locking when a user is logged-in with code like the following:
 		 *
-		 *     add_filter( 'od_metrics_storage_lock_ttl', static function ( $ttl ) {
+		 *     add_filter( 'od_metrics_storage_lock_ttl', static function ( int $ttl ): int {
 		 *         return is_user_logged_in() ? 0 : $ttl;
 		 *     } );
 		 *

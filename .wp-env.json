@@ -1,11 +1,12 @@
 {
   "core": null,
   "plugins": [
-    ".",
+    "./plugins/optimization-detective",
     "./plugins/auto-sizes",
     "./plugins/dominant-color-images",
     "./plugins/embed-optimizer",
-    "./plugins/optimization-detective",
+    "./plugins/image-prioritizer",
+    "./plugins/performance-lab",
     "./plugins/speculation-rules",
     "./plugins/webp-uploads"
   ],
@@ -13,6 +14,9 @@
     "tests": {
       "config": {
         "FS_METHOD": "direct"
+      },
+      "mappings": {
+        "/wp-content/plugins/performance": "."
       }
     }
   }

@@ -3,9 +3,9 @@
  * Plugin Name: Image Placeholders
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/dominant-color-images
  * Description: Displays placeholders based on an image's dominant color while the image is loading.
- * Requires at least: 6.4
+ * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -25,7 +25,7 @@ if ( defined( 'DOMINANT_COLOR_IMAGES_VERSION' ) ) {
 	return;
 }
 
-define( 'DOMINANT_COLOR_IMAGES_VERSION', '1.1.0' );
+define( 'DOMINANT_COLOR_IMAGES_VERSION', '1.1.1' );
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';

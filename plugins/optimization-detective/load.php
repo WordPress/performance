@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Optimization Detective
- * Plugin URI: https://github.com/WordPress/performance/issues/869
- * Description: Uses real user metrics to improve heuristics WordPress applies on the frontend to improve image loading priority.
- * Requires at least: 6.4
+ * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective
+ * Description: Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
+ * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 0.1.1
+ * Version: 0.3.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -28,9 +28,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param string  $version         Version.
 	 * @param Closure $load            Callback that loads the plugin.
 	 */
-	static function ( string $global_var_name, string $version, Closure $load ) {
+	static function ( string $global_var_name, string $version, Closure $load ): void {
 		if ( ! isset( $GLOBALS[ $global_var_name ] ) ) {
-			$bootstrap = static function () use ( $global_var_name ) {
+			$bootstrap = static function () use ( $global_var_name ): void {
 				if (
 					isset( $GLOBALS[ $global_var_name ]['load'], $GLOBALS[ $global_var_name ]['version'] )
 					&&
@@ -65,8 +65,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'optimization_detective_pending_plugin',
-	'0.1.1',
-	static function ( string $version ) {
+	'0.3.1',
+	static function ( string $version ): void {
 
 		// Define the constant.
 		if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
@@ -113,6 +113,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		// Optimization logic.
 		require_once __DIR__ . '/class-od-html-tag-walker.php';
+		require_once __DIR__ . '/class-od-preload-link-collection.php';
+		require_once __DIR__ . '/class-od-tag-visitor-registry.php';
 		require_once __DIR__ . '/optimization.php';
 
 		// Add hooks for the above requires.

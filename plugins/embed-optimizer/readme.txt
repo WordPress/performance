@@ -1,13 +1,11 @@
 === Embed Optimizer ===
 
-Contributors:      wordpressdotorg
-Requires at least: 6.4
-Tested up to:      6.5
-Requires PHP:      7.2
-Stable tag:        0.1.1
-License:           GPLv2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, embeds
+Contributors: wordpressdotorg
+Tested up to: 6.6
+Stable tag:   0.1.2
+License:      GPLv2 or later
+License URI:  https://www.gnu.org/licenses/gpl-2.0.html
+Tags:         performance, embeds
 
 Optimizes the performance of embeds by lazy-loading iframes and scripts.
 
@@ -48,6 +46,17 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.1.2 =
+
+**Enhancements**
+
+* Improve overall code quality with stricter static analysis checks. ([775](https://github.com/WordPress/performance/issues/775))
+* Bump minimum PHP requirement to 7.2. ([1130](https://github.com/WordPress/performance/pull/1130))
+
+**Bug Fixes**
+
+* Hide post embed iframes with visibility:hidden instead of clipping. ([1192](https://github.com/WordPress/performance/pull/1192))
 
 = 0.1.1 =
 

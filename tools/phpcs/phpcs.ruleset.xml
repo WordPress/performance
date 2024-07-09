@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<ruleset name="WPP-Base">
+	<description>Sniffs for WordPress plugins</description>
+
+	<rule ref="PHPCompatibility"/>
+	<config name="testVersion" value="7.2-"/>
+
+	<rule ref="WordPress-Docs"/>
+	<rule ref="WordPress-Extra" />
+	<rule ref="WordPress.WP.I18n"/>
+
+	<arg value="ps"/>
+	<arg name="extensions" value="php"/>
+
+	<!-- Check up to 20 files simultaneously. -->
+	<arg name="parallel" value="20"/>
+
+	<!-- Do not require docblocks for unit tests -->
+	<rule ref="Squiz.Commenting.FunctionComment.Missing">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FileComment.Missing">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.ClassComment.Missing">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.ClassComment.SpacingAfter">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.Empty">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.MissingShort">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.VariableComment.Missing">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!-- Ignore inapplicable WordPress-Extra sniffs in tests. -->
+	<rule ref="WordPress.WP.EnqueuedResourceParameters">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.EscapeOutput.OutputNotEscaped">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.AlternativeFunctions.unlink_unlink">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.GlobalVariablesOverride.Prohibited">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.PHP.DevelopmentFunctions.error_log_var_export">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!-- Exceptions for variable name casing. -->
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<properties>
+			<property name="allowed_custom_properties" type="array">
+				<element value="nodeValue"/>
+				<element value="parentNode"/>
+				<element value="createTextNode"/>
+				<element value="textContent"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Do not apply script rules for unit tests -->
+	<rule ref="WordPress.WP.EnqueuedResources.NonEnqueuedScript">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.Functions.StaticClosure" />
+	<rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint">
+		<properties>
+			<property name="enableStaticTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
+			<property name="enableNeverTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
+			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in PHP 8.2+ -->
+		</properties>
+		<exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHint.MissingTraversableTypeHintSpecification" /><!-- TODO: Investigate this -->
+	</rule>
+	<rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint">
+		<properties>
+			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
+			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in PHP 8.2+ -->
+		</properties>
+		<exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingTraversableTypeHintSpecification" /><!-- TODO: Investigate this -->
+	</rule>
+	<rule ref="SlevomatCodingStandard.TypeHints.PropertyTypeHint">
+		<properties>
+			<property name="enableNativeTypeHint" value="false" /><!-- Only available in PHP 7.4+ -->
+			<property name="enableMixedTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableUnionTypeHint" value="false" /><!-- Only available in PHP 8.0+ -->
+			<property name="enableIntersectionTypeHint" value="false" /><!-- Only available in PHP 8.1+ -->
+			<property name="enableStandaloneNullTrueFalseTypeHints" value="false" /><!-- Only available in PHP 8.2+ -->
+		</properties>
+		<exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingTraversableTypeHintSpecification" /><!-- TODO: Investigate this -->
+	</rule>
+
+	<!-- Exclude built plugins and built assets in plugins. -->
+	<exclude-pattern>./build/*</exclude-pattern>
+
+	<!-- Exclude node_modules and vendor directories. -->
+	<exclude-pattern>./node_modules/*</exclude-pattern>
+	<exclude-pattern>./vendor/*</exclude-pattern>
+</ruleset>

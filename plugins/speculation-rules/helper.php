@@ -19,9 +19,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @return array Associative array of speculation rules by type.
+ * @return array<string, array<int, array<string, mixed>>> Associative array of speculation rules by type.
  */
-function plsr_get_speculation_rules() {
+function plsr_get_speculation_rules(): array {
 	$option = get_option( 'plsr_speculation_rules' );
 
 	/*
@@ -34,7 +34,7 @@ function plsr_get_speculation_rules() {
 		$option = array_merge( plsr_get_setting_default(), $option );
 	}
 
-	$mode      = $option['mode'];
+	$mode      = (string) $option['mode'];
 	$eagerness = $option['eagerness'];
 
 	$prefixer = new PLSR_URL_Pattern_Prefixer();
@@ -103,7 +103,7 @@ function plsr_get_speculation_rules() {
 					// Also exclude rel=nofollow links, as plugins like WooCommerce use that on their add-to-cart links.
 					array(
 						'not' => array(
-							'selector_matches' => 'a[rel=nofollow]',
+							'selector_matches' => 'a[rel~="nofollow"]',
 						),
 					),
 				),

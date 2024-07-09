@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  *
  * @param string $html The oEmbed HTML.
- * @return string
+ * @return string Filtered oEmbed HTML.
  */
 function embed_optimizer_filter_oembed_html( string $html ): string {
 	$html_processor = new WP_HTML_Tag_Processor( $html );
@@ -43,7 +43,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			if ( empty( $loading_value ) ) {
 				++$iframe_count;
 				if ( ! $html_processor->set_bookmark( 'iframe' ) ) {
-					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set iframe bookmark.', 'embed-optimizer' ) );
+					wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set iframe bookmark.', 'embed-optimizer' ) );
 					return $html;
 				}
 			}
@@ -53,7 +53,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			} else {
 				++$script_count;
 				if ( ! $html_processor->set_bookmark( 'script' ) ) {
-					embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set script bookmark.', 'embed-optimizer' ) );
+					wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to set script bookmark.', 'embed-optimizer' ) );
 					return $html;
 				}
 			}
@@ -68,7 +68,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			}
 			$html_processor->set_attribute( 'type', 'application/vnd.embed-optimizer.javascript' );
 		} else {
-			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to script bookmark.', 'embed-optimizer' ) );
+			wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to script bookmark.', 'embed-optimizer' ) );
 		}
 	}
 	// If there was only one iframe, make it lazy.
@@ -81,7 +81,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 			// by preventing links in the hidden iframe from receiving focus.
 			if ( $html_processor->has_class( 'wp-embedded-content' ) ) {
 				$style = $html_processor->get_attribute( 'style' );
-				if ( $style ) {
+				if ( is_string( $style ) ) {
 					// WordPress core injects this clip CSS property:
 					// <https://github.com/WordPress/wordpress-develop/blob/6974b994de5/src/wp-includes/embed.php#L968>.
 					$style = str_replace( 'clip: rect(1px, 1px, 1px, 1px);', 'visibility: hidden;', $style );
@@ -92,7 +92,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 				}
 			}
 		} else {
-			embed_optimizer_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to iframe bookmark.', 'embed-optimizer' ) );
+			wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to iframe bookmark.', 'embed-optimizer' ) );
 		}
 	}
 	return $html_processor->get_updated_html();
@@ -105,7 +105,7 @@ add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
  *
  * @since 0.1.0
  */
-function embed_optimizer_lazy_load_scripts() {
+function embed_optimizer_lazy_load_scripts(): void {
 	$js = <<<JS
 		const lazyEmbedsScripts = document.querySelectorAll( 'script[type="application/vnd.embed-optimizer.javascript"]' );
 		const lazyEmbedScriptsByParents = new Map();
@@ -148,36 +148,13 @@ JS;
 }
 
 /**
- * Generates a user-level error/warning/notice/deprecation message.
- *
- * Generates the message when `WP_DEBUG` is true.
- *
- * @since 0.1.0
- *
- * @param string $function_name The function that triggered the error.
- * @param string $message       The message explaining the error.
- *                              The message can contain allowed HTML 'a' (with href), 'code',
- *                              'br', 'em', and 'strong' tags and http or https protocols.
- *                              If it contains other HTML tags or protocols, the message should be escaped
- *                              before passing to this function to avoid being stripped {@see wp_kses()}.
- * @param int    $error_level   Optional. The designated error type for this error.
- *                              Only works with E_USER family of constants. Default E_USER_NOTICE.
- */
-function embed_optimizer_trigger_error( string $function_name, string $message, int $error_level = E_USER_NOTICE ) {
-	if ( ! function_exists( 'wp_trigger_error' ) ) {
-		return;
-	}
-	wp_trigger_error( $function_name, $message, $error_level );
-}
-
-/**
  * Displays the HTML generator tag for the Embed Optimizer plugin.
  *
  * See {@see 'wp_head'}.
  *
  * @since 0.1.0
  */
-function embed_optimizer_render_generator() {
+function embed_optimizer_render_generator(): void {
 	// Use the plugin slug as it is immutable.
 	echo '<meta name="generator" content="embed-optimizer ' . esc_attr( EMBED_OPTIMIZER_VERSION ) . '">' . "\n";
 }

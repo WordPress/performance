@@ -3,9 +3,9 @@
  * Plugin Name: Modern Image Formats
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/webp-uploads
  * Description: Converts images to more modern formats such as WebP or AVIF during upload.
- * Requires at least: 6.4
+ * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 1.1.0
+ * Version: 2.0.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -25,11 +25,13 @@ if ( defined( 'WEBP_UPLOADS_VERSION' ) ) {
 	return;
 }
 
-define( 'WEBP_UPLOADS_VERSION', '1.1.0' );
+define( 'WEBP_UPLOADS_VERSION', '2.0.1' );
 define( 'WEBP_UPLOADS_MAIN_FILE', plugin_basename( __FILE__ ) );
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/rest-api.php';
 require_once __DIR__ . '/image-edit.php';
 require_once __DIR__ . '/settings.php';
+require_once __DIR__ . '/picture-element.php';
 require_once __DIR__ . '/hooks.php';
+require_once __DIR__ . '/deprecated.php';

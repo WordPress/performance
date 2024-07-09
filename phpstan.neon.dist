@@ -1,17 +1,16 @@
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon
 parameters:
-	level: 5
+	level: 8
 	treatPhpDocTypesAsCertain: false
-	rememberPossiblyImpureFunctionValues: false
 	paths:
-		- load.php
-		- includes/
-		- plugins/
-		- tests/
+		- plugins
+		- tests
+		- performance.php
+		- plugins/performance-lab/load.php
 	bootstrapFiles:
-		- load.php
-		- bin/phpstan/constants.php
+		- tools/phpstan/constants.php
+		- plugins/performance-lab/load.php
 		- plugins/webp-uploads/load.php
 	scanDirectories:
 		- vendor/wp-phpunit/wp-phpunit/
@@ -21,6 +20,40 @@ parameters:
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_contains.php
 		- vendor/phpstan/php-8-stubs/stubs/ext/standard/str_starts_with.php
 	stubFiles:
-		- bin/phpstan/filtered-functions.stub
+		- tools/phpstan/filtered-functions.stub
 	dynamicConstantNames:
 		- PERFLAB_OBJECT_CACHE_DROPIN_VERSION
+	ignoreErrors:
+		-
+			# Ignore error related to PHP 8 using a GdImage but PHP 7 using a resource.
+			message: '/^Parameter .+? of function .+? expects resource, GdImage\|resource given\.$/'
+			path: plugins/dominant-color-images/*.php
+
+		# The following ignored errors are all for tests. They are likely excessively strict and do not warrant being fixed.
+		-
+			identifier: argument.type
+			path: */tests/*
+		-
+			identifier: offsetAccess.nonArray
+			path: */tests/*
+		-
+			identifier: method.notFound
+			path: */tests/*
+		-
+			identifier: offsetAccess.notFound
+			path: */tests/*
+		-
+			identifier: encapsedStringPart.nonString
+			path: */tests/*
+		-
+			identifier: offsetAccess.invalidOffset
+			path: */tests/*
+		-
+			identifier: assign.propertyType
+			path: */tests/*
+		-
+			identifier: method.nonObject
+			path: */tests/*
+		-
+			identifier: cast.string
+			path: */tests/*

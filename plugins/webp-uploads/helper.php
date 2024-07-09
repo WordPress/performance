@@ -16,20 +16,26 @@ if ( ! defined( 'ABSPATH' ) ) {
  * for example an image/jpeg can be converted into an image/webp.
  *
  * @since 1.0.0
+ * @since 2.0.0 Added support for AVIF.
  *
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
-function webp_uploads_get_upload_image_mime_transforms() {
+function webp_uploads_get_upload_image_mime_transforms(): array {
+
+	// Check the selected output format.
+	$output_format = webp_uploads_mime_type_supported( 'image/avif' ) ? webp_uploads_get_image_output_format() : 'webp';
+
 	$default_transforms = array(
-		'image/jpeg' => array( 'image/webp' ),
+		'image/jpeg' => array( 'image/' . $output_format ),
 		'image/webp' => array( 'image/webp' ),
+		'image/avif' => array( 'image/avif' ),
 	);
 
-	// Check setting for whether to generate both JPEG and WebP.
-	if ( true === (bool) get_option( 'perflab_generate_webp_and_jpeg' ) ) {
+	// Check setting for whether to generate both JPEG and the modern output format.
+	if ( webp_uploads_is_jpeg_fallback_enabled() ) {
 		$default_transforms = array(
-			'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
-			'image/webp' => array( 'image/webp', 'image/jpeg' ),
+			'image/jpeg'              => array( 'image/jpeg', 'image/' . $output_format ),
+			'image/' . $output_format => array( 'image/' . $output_format, 'image/jpeg' ),
 		);
 	}
 
@@ -79,7 +85,7 @@ function webp_uploads_get_upload_image_mime_transforms() {
  *
  * @return array{ file: string, filesize: int }|WP_Error An array with the file and filesize if the image was created correctly, otherwise a WP_Error.
  */
-function webp_uploads_generate_additional_image_source( $attachment_id, $image_size, array $size_data, $mime, $destination_file_name = null ) {
+function webp_uploads_generate_additional_image_source( int $attachment_id, string $image_size, array $size_data, string $mime, ?string $destination_file_name = null ) {
 	/**
 	 * Filter to allow the generation of additional image sources, in which a defined mime type
 	 * can be transformed and create additional mime types for the file.
@@ -106,21 +112,22 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	if ( is_wp_error( $image ) ) {
 		return $image;
 	}
+	if ( is_array( $image ) && array_key_exists( 'file', $image ) && is_string( $image['file'] ) ) {
+		// The filtered image provided all we need to short-circuit here.
+		if ( array_key_exists( 'filesize', $image ) && is_int( $image['filesize'] ) && $image['filesize'] > 0 ) {
+			return $image;
+		}
 
-	if (
-		is_array( $image ) &&
-		! empty( $image['file'] ) &&
-		(
-			! empty( $image['path'] ) ||
-			array_key_exists( 'filesize', $image )
-		)
-	) {
-		return array(
-			'file'     => $image['file'],
-			'filesize' => array_key_exists( 'filesize', $image )
-				? $image['filesize']
-				: wp_filesize( $image['path'] ),
-		);
+		// Supply the filesize based on the filter-provided path.
+		if ( array_key_exists( 'path', $image ) && is_int( $image['path'] ) ) {
+			$filesize = wp_filesize( $image['path'] );
+			if ( $filesize > 0 ) {
+				return array(
+					'file'     => $image['file'],
+					'filesize' => $filesize,
+				);
+			}
+		}
 	}
 
 	$allowed_mimes = array_flip( wp_get_mime_types() );
@@ -133,7 +140,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
 	}
 
 	$image_path = wp_get_original_image_path( $attachment_id );
-	if ( ! file_exists( $image_path ) ) {
+	if ( ! $image_path || ! file_exists( $image_path ) ) {
 		return new WP_Error( 'original_image_file_not_found', __( 'The original image file does not exists, subsizes are created out of the original image.', 'webp-uploads' ) );
 	}
 
@@ -198,7 +205,7 @@ function webp_uploads_generate_additional_image_source( $attachment_id, $image_s
  *
  * @return array{ file: string, filesize: int }|WP_Error
  */
-function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
+function webp_uploads_generate_image_size( int $attachment_id, string $size, string $mime ) {
 	$sizes    = wp_get_registered_image_subsizes();
 	$metadata = wp_get_attachment_metadata( $attachment_id );
 
@@ -236,43 +243,16 @@ function webp_uploads_generate_image_size( $attachment_id, $size, $mime ) {
 }
 
 /**
- * Returns the attachment sources array ordered by filesize.
- *
- * @since 1.0.0
- *
- * @param int    $attachment_id The attachment ID.
- * @param string $size          The attachment size.
- * @return array The attachment sources array.
- */
-function webp_uploads_get_attachment_sources( $attachment_id, $size = 'thumbnail' ) {
-	// Check for the sources attribute in attachment metadata.
-	$metadata = wp_get_attachment_metadata( $attachment_id );
-
-	// Return full image size sources.
-	if ( 'full' === $size && ! empty( $metadata['sources'] ) ) {
-		return $metadata['sources'];
-	}
-
-	// Return the resized image sources.
-	if ( ! empty( $metadata['sizes'][ $size ]['sources'] ) ) {
-		return $metadata['sizes'][ $size ]['sources'];
-	}
-
-	// Return an empty array if no sources found.
-	return array();
-}
-
-/**
  * Returns mime types that should be used for an image in the specific context.
  *
  * @since 1.0.0
  *
  * @param int    $attachment_id The attachment ID.
  * @param string $context       The current context.
- * @return array Mime types to use for the image.
+ * @return string[] Mime types to use for the image.
  */
-function webp_uploads_get_content_image_mimes( $attachment_id, $context ) {
-	$target_mimes = array( 'image/webp', 'image/jpeg' );
+function webp_uploads_get_content_image_mimes( int $attachment_id, string $context ): array {
+	$target_mimes = array( 'image/' . webp_uploads_get_image_output_format(), 'image/jpeg' );
 
 	/**
 	 * Filters mime types that should be used to update all images in the content. The order of
@@ -301,7 +281,7 @@ function webp_uploads_get_content_image_mimes( $attachment_id, $context ) {
  *
  * @return bool True if in the <body> within a frontend request, false otherwise.
  */
-function webp_uploads_in_frontend_body() {
+function webp_uploads_in_frontend_body(): bool {
 	global $wp_query;
 
 	// Check if this request is generally outside (or before) any frontend context.
@@ -322,11 +302,11 @@ function webp_uploads_in_frontend_body() {
  *
  * @since 1.0.0
  *
- * @param array $original   An array with the metadata of the attachment.
- * @param array $additional An array containing the filename and file size for additional mime.
+ * @param array{ filesize?: int } $original   An array with the metadata of the attachment.
+ * @param array{ filesize?: int } $additional An array containing the filename and file size for additional mime.
  * @return bool True if the additional image is larger than the original image, otherwise false.
  */
-function webp_uploads_should_discard_additional_image_file( array $original, array $additional ) {
+function webp_uploads_should_discard_additional_image_file( array $original, array $additional ): bool {
 	$original_image_filesize   = isset( $original['filesize'] ) ? (int) $original['filesize'] : 0;
 	$additional_image_filesize = isset( $additional['filesize'] ) ? (int) $additional['filesize'] : 0;
 	if ( $original_image_filesize > 0 && $additional_image_filesize > 0 ) {
@@ -347,4 +327,82 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 		}
 	}
 	return false;
+}
+
+/**
+ * Checks if a mime type is supported by the server.
+ *
+ * Includes special handling for false positives on AVIF support.
+ *
+ * @since 2.0.0
+ *
+ * @param string $mime_type The mime type to check.
+ * @return bool Whether the server supports a given mime type.
+ */
+function webp_uploads_mime_type_supported( string $mime_type ): bool {
+	if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+		return false;
+	}
+
+	// In certain server environments Image editors can report a false positive for AVIF support.
+	if ( 'image/avif' === $mime_type ) {
+		$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
+		if ( false === $editor ) {
+			return false;
+		}
+		if ( is_a( $editor, WP_Image_Editor_GD::class, true ) ) {
+			return function_exists( 'imageavif' );
+		}
+		if ( is_a( $editor, WP_Image_Editor_Imagick::class, true ) && class_exists( 'Imagick' ) ) {
+			return 0 !== count( Imagick::queryFormats( 'AVIF' ) );
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Get the image output format setting from the option. Default is avif.
+ *
+ * @since 2.0.0
+ *
+ * @return string The image output format. One of 'webp' or 'avif'.
+ */
+function webp_uploads_get_image_output_format(): string {
+	$image_format = get_option( 'perflab_modern_image_format' );
+	return webp_uploads_sanitize_image_format( $image_format );
+}
+
+/**
+ * Sanitizes the image format.
+ *
+ * @since 2.0.0
+ *
+ * @param string $image_format The image format to check.
+ * @return string Supported image format.
+ */
+function webp_uploads_sanitize_image_format( string $image_format ): string {
+	return in_array( $image_format, array( 'webp', 'avif' ), true ) ? $image_format : 'webp';
+}
+
+/**
+ * Checks if the `webp_uploads_use_picture_element` option is enabled.
+ *
+ * @since 2.0.0
+ *
+ * @return bool True if the option is enabled, false otherwise.
+ */
+function webp_uploads_is_picture_element_enabled(): bool {
+	return (bool) get_option( 'webp_uploads_use_picture_element', false );
+}
+
+/**
+ * Checks if the `perflab_generate_webp_and_jpeg` option is enabled.
+ *
+ * @since 2.0.0
+ *
+ * @return bool True if the option is enabled, false otherwise.
+ */
+function webp_uploads_is_jpeg_fallback_enabled(): bool {
+	return (bool) get_option( 'perflab_generate_webp_and_jpeg' );
 }

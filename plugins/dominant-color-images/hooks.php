@@ -16,11 +16,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @param array $metadata      The attachment metadata.
- * @param int   $attachment_id The attachment ID.
- * @return array $metadata The attachment metadata.
+ * @param array|mixed $metadata      The attachment metadata.
+ * @param int         $attachment_id The attachment ID.
+ * @return array{ has_transparency?: bool, dominant_color?: string } $metadata The attachment metadata.
  */
-function dominant_color_metadata( $metadata, $attachment_id ) {
+function dominant_color_metadata( $metadata, int $attachment_id ): array {
+	if ( ! is_array( $metadata ) ) {
+		$metadata = array();
+	}
+
 	$dominant_color_data = dominant_color_get_dominant_color_data( $attachment_id );
 	if ( ! is_wp_error( $dominant_color_data ) ) {
 		if ( isset( $dominant_color_data['dominant_color'] ) ) {
@@ -41,11 +45,15 @@ add_filter( 'wp_generate_attachment_metadata', 'dominant_color_metadata', 10, 2 
  *
  * @since 1.0.0
  *
- * @param array  $attr       Attributes for the image markup.
- * @param object $attachment Image attachment post.
- * @return mixed $attr Attributes for the image markup.
+ * @param array|mixed $attr       Attributes for the image markup.
+ * @param WP_Post     $attachment Image attachment post.
+ * @return array{ 'data-has-transparency'?: string, class?: string, 'data-dominant-color'?: string, style?: string } Attributes for the image markup.
  */
-function dominant_color_update_attachment_image_attributes( $attr, $attachment ) {
+function dominant_color_update_attachment_image_attributes( $attr, WP_Post $attachment ): array {
+	if ( ! is_array( $attr ) ) {
+		$attr = array();
+	}
+
 	$image_meta = wp_get_attachment_metadata( $attachment->ID );
 	if ( ! is_array( $image_meta ) ) {
 		return $attr;
@@ -77,12 +85,15 @@ add_filter( 'wp_get_attachment_image_attributes', 'dominant_color_update_attachm
  *
  * @since 1.0.0
  *
- * @param string $filtered_image The filtered image.
- * @param string $context        The context of the image.
- * @param int    $attachment_id  The attachment ID.
+ * @param string|mixed $filtered_image The filtered image.
+ * @param string       $context        The context of the image.
+ * @param int          $attachment_id  The attachment ID.
  * @return string image tag
  */
-function dominant_color_img_tag_add_dominant_color( $filtered_image, $context, $attachment_id ) {
+function dominant_color_img_tag_add_dominant_color( $filtered_image, string $context, int $attachment_id ): string {
+	if ( ! is_string( $filtered_image ) ) {
+		$filtered_image = '';
+	}
 
 	// Only apply this in `the_content` for now, since otherwise it can result in duplicate runs due to a problem with full site editing logic.
 	if ( 'the_content' !== $context ) {
@@ -159,7 +170,7 @@ add_filter( 'wp_content_img_tag', 'dominant_color_img_tag_add_dominant_color', 2
  *
  * @since 1.0.0
  */
-function dominant_color_add_inline_style() {
+function dominant_color_add_inline_style(): void {
 	$handle = 'dominant-color-styles';
 	// PHPCS ignore reason: Version not used since this handle is only registered for adding an inline style.
 	// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
@@ -168,7 +179,7 @@ function dominant_color_add_inline_style() {
 	$custom_css = 'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }';
 	wp_add_inline_style( $handle, $custom_css );
 }
-add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
+add_action( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
 
 /**
  * Displays the HTML generator tag for the Image Placeholders plugin.
@@ -177,7 +188,7 @@ add_filter( 'wp_enqueue_scripts', 'dominant_color_add_inline_style' );
  *
  * @since 1.0.0
  */
-function dominant_color_render_generator() {
+function dominant_color_render_generator(): void {
 	// Use the plugin slug as it is immutable.
 	echo '<meta name="generator" content="dominant-color-images ' . esc_attr( DOMINANT_COLOR_IMAGES_VERSION ) . '">' . "\n";
 }

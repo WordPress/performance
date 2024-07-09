@@ -3,9 +3,9 @@
  * Plugin Name: Speculative Loading
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/speculation-rules
  * Description: Enables browsers to speculatively prerender or prefetch pages when hovering over links.
- * Requires at least: 6.4
+ * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 1.2.2
+ * Version: 1.3.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -28,9 +28,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param string  $version         Version.
 	 * @param Closure $load            Callback that loads the plugin.
 	 */
-	static function ( string $global_var_name, string $version, Closure $load ) {
+	static function ( string $global_var_name, string $version, Closure $load ): void {
 		if ( ! isset( $GLOBALS[ $global_var_name ] ) ) {
-			$bootstrap = static function () use ( $global_var_name ) {
+			$bootstrap = static function () use ( $global_var_name ): void {
 				if (
 					isset( $GLOBALS[ $global_var_name ]['load'], $GLOBALS[ $global_var_name ]['version'] )
 					&&
@@ -65,8 +65,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'plsr_pending_plugin_info',
-	'1.2.2',
-	static function ( string $version ) {
+	'1.3.1',
+	static function ( string $version ): void {
 
 		// Define the constant.
 		if ( defined( 'SPECULATION_RULES_VERSION' ) ) {

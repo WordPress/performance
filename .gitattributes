@@ -1,41 +1,4 @@
-/.git export-ignore
-/.github export-ignore
-/.wordpress-org export-ignore
-/.husky export-ignore
-/node_modules export-ignore
-/vendor export-ignore
+# See <https://github.com/github-linguist/linguist/blob/master/docs/overrides.md>.
 
-/bin export-ignore
-/docs export-ignore
-/tests export-ignore
-/plugin-tests export-ignore
-/plugins export-ignore
-/plugins.json export-ignore
-
-/*.DS_store export-ignore
-/.DS_store? export-ignore
-
-/.editorconfig export-ignore
-/.eslintrc.js export-ignore
-/.nvmrc export-ignore
-/.wp-env.json export-ignore
-/composer.json export-ignore
-/composer.lock export-ignore
-/package.json export-ignore
-/package-lock.json export-ignore
-phpcs.xml.dist export-ignore
-/phpstan.neon.dist export-ignore
-/phpunit.xml.dist export-ignore
-/webpack.config.js export-ignore
-
-/CONTRIBUTING.md export-ignore
-/SECURITY.md export-ignore
-/README.md export-ignore
-
-/.gitattributes export-ignore
-/.gitignore export-ignore
-
-/modules/**/readme.txt export-ignore
-/modules/**/.wordpress-org export-ignore
-
-/plugins/**/.wordpress-org export-ignore
+# Improve highlighting for PHPStan stub files.
+*.stub linguist-language=PHP
