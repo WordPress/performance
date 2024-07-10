@@ -7,11 +7,15 @@ License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, auto-sizes
 
-Improvements for WordPress' responsive image functionality.
+Improvements for responsive images in WordPress.
 
 == Description ==
 
-This plugin implements experimental enhancements for the responsive images functionality in WordPress. Currently, this includes improvements to the accuracy of the `sizes` attribute by using available layout information in the theme and by implementing the new HTML spec for adding `sizes="auto"` to lazy-loaded images (See: https://github.com/whatwg/html/issues/4654).
+This plugin implements experimental enhancements for the responsive images functionality in WordPress. Currently, this includes:
+
+1. Improvements to the accuracy of the `sizes` attribute by using available layout information in the theme
+2. Implementation of the new HTML spec for adding `sizes="auto"` to lazy-loaded images. See the HTML spec issue [Add "auto sizes" for lazy-loaded images](https://github.com/whatwg/html/issues/4654).
+There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
 == Installation ==
 
