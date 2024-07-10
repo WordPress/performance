@@ -262,6 +262,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preconnect" href="https://video.wordpress.com">
 							<link data-od-added-tag rel="preconnect" href="https://public-api.wordpress.com">
 							<link data-od-added-tag rel="preconnect" href="https://videos.files.wordpress.com">
+							<link data-od-added-tag rel="preconnect" href="https://v0.wordpress.com">
 						</head>
 						<body>
 							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
