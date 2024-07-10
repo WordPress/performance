@@ -58,26 +58,41 @@ final class OD_Link_Collection implements Countable {
 	 * @throws InvalidArgumentException When invalid arguments are provided.
 	 */
 	public function add_link( array $attributes, ?int $minimum_viewport_width = null, ?int $maximum_viewport_width = null ): void {
+		$throw_invalid_argument_exception = static function ( string $message ): void {
+			throw new InvalidArgumentException( esc_html( $message ) );
+		};
 		if ( ! array_key_exists( 'rel', $attributes ) ) {
-			throw new InvalidArgumentException( esc_html__( 'The rel attribute must be provided.', 'optimization-detective' ) );
+			$throw_invalid_argument_exception(
+				/* translators: %s: rel */
+				sprintf( __( 'The "%s" attribute must be provided.', 'optimization-detective' ), 'rel' )
+			);
 		}
 		if ( 'preload' === $attributes['rel'] && ! array_key_exists( 'as', $attributes ) ) {
-			throw new InvalidArgumentException( esc_html__( 'A preload link must include an as attribute.', 'optimization-detective' ) );
+			$throw_invalid_argument_exception(
+				/* translators: 1: link, 2: rel=preload, 3: 'as' attribute name */
+				sprintf( __( 'A %1$s with %2$s must include an "%3$s" attribute.', 'optimization-detective' ), 'link', 'rel=preload', 'as' )
+			);
 		} elseif ( 'preconnect' === $attributes['rel'] && ! array_key_exists( 'href', $attributes ) ) {
-			throw new InvalidArgumentException( esc_html__( 'A preconnect link must include an href attribute.', 'optimization-detective' ) );
+			$throw_invalid_argument_exception(
+				/* translators: 1: link, 2: rel=preconnect, 3: 'href' attribute name */
+				sprintf( __( 'A %1$s with %2$s must include an "%3$s" attribute.', 'optimization-detective' ), 'link', 'rel=preconnect', 'href' )
+			);
 		}
 		if ( ! array_key_exists( 'href', $attributes ) && ! array_key_exists( 'imagesrcset', $attributes ) ) {
-			throw new InvalidArgumentException( esc_html__( 'Either the href or imagesrcset attributes must be supplied.', 'optimization-detective' ) );
+			$throw_invalid_argument_exception(
+				/* translators: 1: 'href' attribute name, 2: 'imagesrcset' attribute name */
+				sprintf( __( 'Either the "%1$s" or "%2$s" attribute must be supplied.', 'optimization-detective' ), 'href', 'imagesrcset' )
+			);
 		}
 		if ( null !== $minimum_viewport_width && $minimum_viewport_width < 0 ) {
-			throw new InvalidArgumentException( esc_html__( 'Minimum width must be at least zero.', 'optimization-detective' ) );
+			$throw_invalid_argument_exception( __( 'Minimum width must be at least zero.', 'optimization-detective' ) );
 		}
 		if ( null !== $maximum_viewport_width && ( $maximum_viewport_width < $minimum_viewport_width || $maximum_viewport_width < 0 ) ) {
-			throw new InvalidArgumentException( esc_html__( 'Maximum width must be greater than zero and greater than the minimum width.', 'optimization-detective' ) );
+			$throw_invalid_argument_exception( __( 'Maximum width must be greater than zero and greater than the minimum width.', 'optimization-detective' ) );
 		}
 		foreach ( array( 'rel', 'href', 'imagesrcset', 'imagesizes', 'crossorigin', 'fetchpriority', 'as', 'integrity', 'referrerpolicy' ) as $attribute_name ) {
 			if ( array_key_exists( $attribute_name, $attributes ) && ! is_string( $attributes[ $attribute_name ] ) ) {
-				throw new InvalidArgumentException( esc_html__( 'Link attributes must be strings.', 'optimization-detective' ) );
+				$throw_invalid_argument_exception( __( 'Link attributes must be strings.', 'optimization-detective' ) );
 			}
 		}
 

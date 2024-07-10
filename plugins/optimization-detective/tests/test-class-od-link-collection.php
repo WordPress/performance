@@ -230,7 +230,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '',
 				'expected_header' => '',
 				'expected_count'  => 0,
-				'error'           => 'A preconnect link must include an href attribute.',
+				'error'           => 'A link with rel=preconnect must include an &quot;href&quot; attribute.',
 			),
 			'bad_preload'                                => array(
 				'links_args'      => array(
@@ -244,7 +244,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '',
 				'expected_header' => '',
 				'expected_count'  => 0,
-				'error'           => 'A preload link must include an as attribute.',
+				'error'           => 'A link with rel=preload must include an &quot;as&quot; attribute.',
 			),
 			'missing_rel'                                => array(
 				'links_args'      => array(
@@ -257,7 +257,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '',
 				'expected_header' => '',
 				'expected_count'  => 0,
-				'error'           => 'The rel attribute must be provided.',
+				'error'           => 'The &quot;rel&quot; attribute must be provided.',
 			),
 			'missing_href_or_imagesrcset'                => array(
 				'links_args'      => array(
@@ -271,7 +271,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '',
 				'expected_header' => '',
 				'expected_count'  => 0,
-				'error'           => 'Either the href or imagesrcset attributes must be supplied.',
+				'error'           => 'Either the &quot;href&quot; or &quot;imagesrcset&quot; attribute must be supplied.',
 			),
 			'bad_minimum_viewport_width'                 => array(
 				'links_args'      => array(
