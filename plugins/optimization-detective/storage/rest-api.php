@@ -175,14 +175,25 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
-	$result = OD_URL_Metrics_Post_Type::store_url_metric(
+	$post_id = OD_URL_Metrics_Post_Type::store_url_metric(
 		$request->get_param( 'slug' ),
 		$url_metric
 	);
 
-	if ( $result instanceof WP_Error ) {
-		return $result;
+	if ( $post_id instanceof WP_Error ) {
+		return $post_id;
 	}
+
+	/**
+	 * Fires when a new URL metric has been stored.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_URL_Metric   $url_metric Stored URL metric.
+	 * @param int             $post_id    Post ID where metrics were stored.
+	 * @param WP_REST_Request $request    REST request to store the URL metric.
+	 */
+	do_action( 'od_url_metric_stored', $url_metric, $post_id, $request );
 
 	return new WP_REST_Response(
 		array(

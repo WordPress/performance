@@ -77,6 +77,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		define( 'PERFORMANCE_DASHBOARD_VERSION', $version );
 
 		require_once __DIR__ . '/helper.php';
+		require_once __DIR__ . '/class-performance-dashboard-rest-controller.php';
 		require_once __DIR__ . '/hooks.php';
 	}
 );

@@ -185,3 +185,56 @@ function performance_dashboard_render_dashboard_page(): void {
 	</div>
 	<?php
 }
+
+/**
+ * Registers post type for URL metrics storage.
+ *
+ * This the configuration for this post type is similar to the oembed_cache in core.
+ *
+ * @since 0.1.0
+ */
+function performance_dashboard_register_post_type(): void {
+	register_post_type(
+		'perf-dash-data',
+		array(
+			'labels'           => array(
+				'name'          => __( 'Performance Metrics', 'performance-dashboard' ),
+				'singular_name' => __( 'Performance Metrics', 'performance-dashboard' ),
+			),
+			'public'           => false,
+			'hierarchical'     => false,
+			'rewrite'          => false,
+			'query_var'        => false,
+			'delete_with_user' => false,
+			'can_export'       => false,
+			'supports'         => array( 'title' ),
+			// The original URL is stored in the post_title, and the post_name is a hash of the query vars.
+		)
+	);
+}
+
+/**
+ * Stores incoming URL metrics in a way that's suitable for Performance Dashboard.
+ *
+ * @since 0.1.0
+ *
+ * @param OD_URL_Metric $url_metric URL metric from Optimization Detective.
+ */
+function performance_dashboard_store_data( OD_URL_Metric $url_metric ): void {
+	// TODO: Store form factor and effective connection type à la CRuX.
+
+	$viewport_width = $url_metric->get_viewport_width();
+	$web_vitals     = $url_metric->get_web_vitals();
+	$timestamp      = $url_metric->get_timestamp();
+	$url            = $url_metric->get_url();
+}
+
+/**
+ * Registers custom REST routes.
+ *
+ * @since 0.1.0
+ */
+function performance_dashboard_register_rest_routes(): void {
+	$controller = new Performance_Dashboard_REST_Controller();
+	$controller->register_routes();
+}

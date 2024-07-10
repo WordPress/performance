@@ -23,7 +23,7 @@ function Dashboard() {
 
 	useEffect( () => {
 		if ( ! postId ) {
-			setData( null );
+			setData( [] );
 			return;
 		}
 

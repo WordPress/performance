@@ -106,8 +106,8 @@ const performanceDashboard = ( env ) => {
 		...sharedConfig,
 		name: 'performance-dashboard',
 		entry: {
-			'performance-dashboard': `${ pluginRoot }/assets/performance-dashboard.js`,
-			'performance-dashboard-widget': `${ pluginRoot }/assets/performance-dashboard-widget.js`,
+			'performance-dashboard': `${ pluginRoot }/assets/performance-dashboard.jsx`,
+			'performance-dashboard-widget': `${ pluginRoot }/assets/performance-dashboard-widget.jsx`,
 		},
 		output: {
 			filename: '[name].js',
