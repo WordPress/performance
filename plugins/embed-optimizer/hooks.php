@@ -54,7 +54,7 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
  */
 function embed_optimizer_filter_oembed_html( string $html ): string {
 	$html_processor = new WP_HTML_Tag_Processor( $html );
-	if ( embed_optimizer_update_markup( $html_processor ) ) {
+	if ( embed_optimizer_update_markup( $html_processor, true ) ) {
 		add_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' );
 	}
 	return $html_processor->get_updated_html();
@@ -68,9 +68,10 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
  * @throws Exception But it won't because it is caught.
  *
  * @param WP_HTML_Tag_Processor|OD_HTML_Tag_Processor $html_processor HTML Processor.
+ * @param bool                                        $is_isolated    Whether processing an isolated embed fragment or the entire document.
  * @return bool Whether the lazy-loading script is required.
  */
-function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ): bool {
+function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, bool $is_isolated ): bool {
 	$bookmark_names = array(
 		'script' => 'embed_optimizer_script',
 		'iframe' => 'embed_optimizer_iframe',
@@ -100,7 +101,7 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ):
 			// over all tags in the document, and this embed_optimizer_update_markup() is used as part of the tag visitor
 			// from Embed Optimizer. On the other hand, if $html_processor is not an OD_HTML_Tag_Processor then this is
 			// iterating over the tags of the embed markup alone as is passed into the embed_oembed_html filter.
-			if ( $html_processor instanceof OD_HTML_Tag_Processor ) {
+			if ( ! $is_isolated ) {
 				if ( 'FIGURE' === $html_processor->get_tag() ) {
 					if ( $html_processor->is_tag_closer() ) {
 						--$figure_depth;
