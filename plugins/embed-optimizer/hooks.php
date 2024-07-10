@@ -34,6 +34,7 @@ add_action( 'init', 'embed_optimizer_add_hooks' );
  * @param OD_Tag_Visitor_Registry $registry Tag visitor registry.
  */
 function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry ): void {
+	// Note: This class is loaded on the fly since it is only needed here when Optimization Detective is active.
 	require_once __DIR__ . '/class-embed-optimizer-tag-visitor.php';
 	$registry->register( 'embeds', new Embed_Optimizer_Tag_Visitor() );
 }
@@ -51,7 +52,7 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
  */
 function embed_optimizer_filter_oembed_html( string $html ): string {
 	$html_processor = new WP_HTML_Tag_Processor( $html );
-	if ( embed_optimizer_update_markup( $html_processor ) ) {
+	if ( embed_optimizer_update_markup( $html_processor, true ) ) {
 		add_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' );
 	}
 	return $html_processor->get_updated_html();
@@ -65,9 +66,10 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
  * phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing -- The exception is caught.
  *
  * @param WP_HTML_Tag_Processor|OD_HTML_Tag_Processor $html_processor HTML Processor.
+ * @param bool                                        $is_isolated    Whether processing an isolated embed fragment or the entire document.
  * @return bool Whether the lazy-loading script is required.
  */
-function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ): bool {
+function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, bool $is_isolated ): bool {
 	$bookmark_names = array(
 		'script' => 'embed_optimizer_script',
 		'iframe' => 'embed_optimizer_iframe',
@@ -94,10 +96,10 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ):
 		do {
 			// This condition ensures that when iterating over an embed inside a larger document that we stop once we reach
 			// closing </figure> tag. The $processor is an OD_HTML_Tag_Processor when Optimization Detective is iterating
-			// over all tags in the document, and this embed_optimizer_update_markup() is usd as part of the tag visitor
+			// over all tags in the document, and this embed_optimizer_update_markup() is used as part of the tag visitor
 			// from Embed Optimizer. On the other hand, if $html_processor is not an OD_HTML_Tag_Processor then this is
 			// iterating over the tags of the embed markup alone as is passed into the embed_oembed_html filter.
-			if ( $html_processor instanceof OD_HTML_Tag_Processor ) {
+			if ( ! $is_isolated ) {
 				if ( 'FIGURE' === $html_processor->get_tag() ) {
 					if ( $html_processor->is_tag_closer() ) {
 						--$figure_depth;

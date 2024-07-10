@@ -24,6 +24,7 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 	 * Test that the oEmbed HTML is filtered.
 	 *
 	 * @covers ::embed_optimizer_filter_oembed_html
+	 * @covers ::embed_optimizer_update_markup
 	 * @dataProvider get_data_to_test_filter_oembed_html_data
 	 */
 	public function test_embed_optimizer_filter_oembed_html( string $html, string $expected_html = null, bool $expected_lazy_script = false ): void {
