@@ -97,7 +97,7 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ):
 		do {
 			// This condition ensures that when iterating over an embed inside a larger document that we stop once we reach
 			// closing </figure> tag. The $processor is an OD_HTML_Tag_Processor when Optimization Detective is iterating
-			// over all tags in the document, and this embed_optimizer_update_markup() is usd as part of the tag visitor
+			// over all tags in the document, and this embed_optimizer_update_markup() is used as part of the tag visitor
 			// from Embed Optimizer. On the other hand, if $html_processor is not an OD_HTML_Tag_Processor then this is
 			// iterating over the tags of the embed markup alone as is passed into the embed_oembed_html filter.
 			if ( $html_processor instanceof OD_HTML_Tag_Processor ) {
