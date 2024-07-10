@@ -74,6 +74,9 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ):
 		'script' => 'embed_optimizer_script',
 		'iframe' => 'embed_optimizer_iframe',
 	);
+	$trigger_error  = static function ( string $message ): void {
+		wp_trigger_error( __FUNCTION__, esc_html( $message ) );
+	};
 	try {
 		/*
 		 * Determine how to lazy load the embed.
@@ -120,7 +123,10 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ):
 				if ( empty( $loading_value ) ) {
 					++$iframe_count;
 					if ( ! $html_processor->set_bookmark( $bookmark_names['iframe'] ) ) {
-						throw new Exception( __( 'Embed Optimizer unable to set iframe bookmark.', 'embed-optimizer' ) );
+						throw new Exception(
+							/* translators: %s is bookmark name */
+							sprintf( __( 'Embed Optimizer unable to set %s bookmark.', 'embed-optimizer' ), $bookmark_names['iframe'] )
+						);
 					}
 				}
 			} elseif ( 'SCRIPT' === $html_processor->get_tag() ) {
@@ -129,7 +135,10 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ):
 				} else {
 					++$script_count;
 					if ( ! $html_processor->set_bookmark( $bookmark_names['script'] ) ) {
-						throw new Exception( __( 'Embed Optimizer unable to set script bookmark.', 'embed-optimizer' ) );
+						throw new Exception(
+							/* translators: %s is bookmark name */
+							sprintf( __( 'Embed Optimizer unable to set %s bookmark.', 'embed-optimizer' ), $bookmark_names['script'] )
+						);
 					}
 				}
 			}
@@ -143,7 +152,10 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ):
 				}
 				$html_processor->set_attribute( 'type', 'application/vnd.embed-optimizer.javascript' );
 			} else {
-				wp_trigger_error( __FUNCTION__, esc_html__( 'Embed Optimizer unable to seek to script bookmark.', 'embed-optimizer' ) );
+				$trigger_error(
+					/* translators: %s is bookmark name */
+					sprintf( __( 'Embed Optimizer unable to seek to %s bookmark.', 'embed-optimizer' ), $bookmark_names['script'] )
+				);
 			}
 		}
 		// If there was only one iframe, make it lazy.
@@ -167,11 +179,14 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor ):
 					}
 				}
 			} else {
-				throw new Exception( __( 'Embed Optimizer unable to seek to iframe bookmark.', 'embed-optimizer' ) );
+				$trigger_error(
+					/* translators: %s is bookmark name */
+					sprintf( __( 'Embed Optimizer unable to seek to %s bookmark.', 'embed-optimizer' ), $bookmark_names['iframe'] )
+				);
 			}
 		}
 	} catch ( Exception $exception ) {
-		wp_trigger_error( __FUNCTION__, esc_html( $exception->getMessage() ) );
+		$trigger_error( $exception->getMessage() );
 		$needs_lazy_script = false;
 	}
 
