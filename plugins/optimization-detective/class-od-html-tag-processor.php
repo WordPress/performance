@@ -110,7 +110,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	const END_OF_HEAD_BOOKMARK = 'end_of_head';
+	const END_OF_HEAD_BOOKMARK = 'optimization_detective_end_of_head';
 
 	/**
 	 * Bookmark for the end of the BODY.
@@ -118,7 +118,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since n.e.x.t
 	 * @var string
 	 */
-	const END_OF_BODY_BOOKMARK = 'end_of_body';
+	const END_OF_BODY_BOOKMARK = 'optimization_detective_end_of_body';
 
 	/**
 	 * Open stack tags.

@@ -40,7 +40,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	 */
 	public function data_provider_test_od_optimize_template_output_buffer(): array {
 		return array(
-			'single_youtube_embed_inside_viewport'      => array(
+			'single_youtube_embed_inside_viewport'       => array(
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
@@ -86,7 +86,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				',
 			),
 
-			'single_youtube_embed_outside_viewport'     => array(
+			'single_youtube_embed_outside_viewport'      => array(
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
@@ -130,7 +130,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				',
 			),
 
-			'single_twitter_embed_inside_viewport'      => array(
+			'single_twitter_embed_inside_viewport'       => array(
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
@@ -178,7 +178,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				',
 			),
 
-			'single_twitter_embed_outside_viewport'     => array(
+			'single_twitter_embed_outside_viewport'      => array(
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
@@ -225,7 +225,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				',
 			),
 
-			'single_wordpresstv_embed_inside_viewport'  => array(
+			'single_wordpress_tv_embed_inside_viewport'  => array(
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
@@ -276,7 +276,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				',
 			),
 
-			'single_wordpresstv_embed_outside_viewport' => array(
+			'single_wordpress_tv_embed_outside_viewport' => array(
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
@@ -373,7 +373,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 				',
 			),
 
-			'nested_figure_embed'                       => array(
+			'nested_figure_embed'                        => array(
 				'set_up'   => function (): void {
 					$this->populate_url_metrics(
 						array(
@@ -497,6 +497,77 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 					</html>
 				',
 			),
+
+			'too_many_bookmarks'                         => array(
+				'set_up'   => function (): void {
+					$this->setExpectedIncorrectUsage( 'WP_HTML_Tag_Processor::set_bookmark' );
+
+					// Check what happens when there are too many bookmarks.
+					add_action(
+						'od_register_tag_visitors',
+						function ( OD_Tag_Visitor_Registry $registry ): void {
+							$registry->register(
+								'body',
+								function ( OD_HTML_Tag_Processor $processor ): bool {
+									if ( $processor->get_tag() === 'BODY' ) {
+										$this->assertFalse( $processor->is_tag_closer() );
+
+										$reflection = new ReflectionObject( $processor );
+										$bookmarks_property = $reflection->getProperty( 'bookmarks' );
+										$bookmarks_property->setAccessible( true );
+										$bookmarks = $bookmarks_property->getValue( $processor );
+										$this->assertCount( 2, $bookmarks );
+										$this->assertArrayHasKey( OD_HTML_Tag_Processor::END_OF_HEAD_BOOKMARK, $bookmarks );
+										$this->assertArrayHasKey( 'optimization_detective_current_tag', $bookmarks );
+
+										// Set a bunch of bookmarks to fill up the total allowed.
+										$remaining_bookmark_count = WP_HTML_Tag_Processor::MAX_BOOKMARKS - count( $bookmarks );
+										for ( $i = 0; $i < $remaining_bookmark_count; $i++ ) {
+											$processor->set_bookmark( "body_bookmark_{$i}" );
+										}
+										return true;
+									}
+									return false;
+								}
+							);
+						}
+					);
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<figure class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div class="wp-block-embed__wrapper">
+									<iframe title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
+									<script src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
+								</div>
+							</figure>
+						</body>
+					</html>
+				',
+				// Note that no optimizations are applied because we ran out of bookmarks.
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]">
+							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div class="wp-block-embed__wrapper">
+									<iframe title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
+									<script src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
+								</div>
+							</figure>
+							<script type="module">/* import detect ... */</script>
+						</body>
+					</html>
+				',
+			),
 		);
 	}
 
@@ -509,6 +580,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	 * @throws Exception But it won't.
 	 */
 	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ): void {
+		$set_up = Closure::bind( $set_up, $this ); // TODO: It's not clear to me why this is required. Without it, the setExpectedIncorrectUsage calls don't result in the expected_doing_it_wrong property being populated.
 		$set_up();
 
 		$remove_initial_tabs = static function ( string $input ): string {
