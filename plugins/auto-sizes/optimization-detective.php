@@ -13,6 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Visits responsive lazy-loaded IMG tags to ensure they include sizes=auto.
  *
+ * @since n.e.x.t
+ *
  * @param OD_Tag_Visitor_Context $context Tag visitor context.
  * @return bool Whether visited.
  */
