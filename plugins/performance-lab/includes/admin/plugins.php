@@ -130,7 +130,7 @@ function perflab_render_plugins_ui(): void {
 		$plugins,
 		array(
 			'experimental' => 'ASC',
-			'name'         => 'ASC'
+			'name'         => 'ASC',
 		)
 	);
 
