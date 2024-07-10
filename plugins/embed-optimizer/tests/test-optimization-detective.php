@@ -576,6 +576,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	 * Test embed_optimizer_visit_tag().
 	 *
 	 * @covers Embed_Optimizer_Tag_Visitor
+	 * @covers ::embed_optimizer_update_markup
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
 	 * @throws Exception But it won't.
