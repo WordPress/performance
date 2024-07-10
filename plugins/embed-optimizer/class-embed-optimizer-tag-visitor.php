@@ -54,6 +54,8 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Visits a tag.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor.
 	 * @return bool Whether the visit or visited the tag.
 	 */
