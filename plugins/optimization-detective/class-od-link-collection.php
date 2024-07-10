@@ -260,7 +260,7 @@ final class OD_Link_Collection implements Countable {
 	/**
 	 * Counts the links.
 	 *
-	 * @return int<0, max> Link count.
+	 * @return non-negative-int Link count.
 	 */
 	public function count(): int {
 		return array_sum(
