@@ -36,6 +36,7 @@ add_action( 'init', 'embed_optimizer_add_hooks' );
  * @param OD_Link_Collection              $link_collection              Link Collection.
  */
 function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Link_Collection $link_collection ): void {
+	// Note: This class is loaded on the fly since it is only needed here when Optimization Detective is active.
 	require_once __DIR__ . '/class-embed-optimizer-tag-visitor.php';
 	$registry->register( 'embeds', new Embed_Optimizer_Tag_Visitor( $url_metrics_group_collection, $link_collection ) );
 }
