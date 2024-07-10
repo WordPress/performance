@@ -176,10 +176,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 
 	$visitors = iterator_to_array( $tag_visitor_registry );
-	while ( $processor->next_tag() ) {
-		if ( $processor->is_tag_closer() ) {
-			continue;
-		}
+	while ( $processor->next_open_tag() ) {
 		$did_visit = false;
 		$processor->set_bookmark( $current_tag_bookmark );
 		foreach ( $visitors as $visitor ) {
