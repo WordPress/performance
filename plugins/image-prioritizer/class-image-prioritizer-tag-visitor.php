@@ -20,37 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class Image_Prioritizer_Tag_Visitor {
 
 	/**
-	 * URL Metrics Group Collection.
-	 *
-	 * @var OD_URL_Metrics_Group_Collection
-	 */
-	protected $url_metrics_group_collection;
-
-	/**
-	 * Link Collection.
-	 *
-	 * @var OD_Link_Collection
-	 */
-	protected $link_collection;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
-	 * @param OD_Link_Collection              $link_collection              Link Collection.
-	 */
-	public function __construct( OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Link_Collection $link_collection ) {
-		$this->url_metrics_group_collection = $url_metrics_group_collection;
-		$this->link_collection              = $link_collection;
-	}
-
-	/**
 	 * Visits a tag.
 	 *
-	 * @param OD_HTML_Tag_Processor $processor Processor.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the visitor visited the tag.
 	 */
-	abstract public function __invoke( OD_HTML_Tag_Processor $processor ): bool;
+	abstract public function __invoke( OD_Tag_Visitor_Context $context ): bool;
 
 	/**
 	 * Determines if the provided URL is a data: URL.

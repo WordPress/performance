@@ -22,11 +22,12 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	/**
 	 * Visits a tag.
 	 *
-	 * @param OD_HTML_Tag_Processor $processor Processor.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 *
 	 * @return bool Whether the visitor visited the tag.
 	 */
-	public function __invoke( OD_HTML_Tag_Processor $processor ): bool {
+	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
+		$processor = $context->processor;
 		if ( 'IMG' !== $processor->get_tag() ) {
 			return false;
 		}
@@ -44,14 +45,14 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		 * fetchpriority=high, even though it won't really be needed because a preload link with fetchpriority=high
 		 * will also be added. Additionally, ensure that this common LCP element is never lazy-loaded.
 		 */
-		$common_lcp_element = $this->url_metrics_group_collection->get_common_lcp_element();
+		$common_lcp_element = $context->url_metrics_group_collection->get_common_lcp_element();
 		if ( ! is_null( $common_lcp_element ) && $xpath === $common_lcp_element['xpath'] ) {
 			if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
 				$processor->set_meta_attribute( 'fetchpriority-already-added', true );
 			} else {
 				$processor->set_attribute( 'fetchpriority', 'high' );
 			}
-		} elseif ( is_string( $processor->get_attribute( 'fetchpriority' ) ) && $this->url_metrics_group_collection->is_every_group_populated() ) {
+		} elseif ( is_string( $processor->get_attribute( 'fetchpriority' ) ) && $context->url_metrics_group_collection->is_every_group_populated() ) {
 			/*
 			 * At this point, the element is not the shared LCP across all viewport groups. It may not be an LCP element
 			 * in _any_ of the viewport groups. Nevertheless, server-side heuristics may have added the fetchpriority=high
@@ -65,7 +66,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$processor->remove_attribute( 'fetchpriority' );
 		}
 
-		$element_max_intersection_ratio = $this->url_metrics_group_collection->get_element_max_intersection_ratio( $xpath );
+		$element_max_intersection_ratio = $context->url_metrics_group_collection->get_element_max_intersection_ratio( $xpath );
 
 		// If the element was not found, we don't know if it was visible for not, so don't do anything.
 		if ( is_null( $element_max_intersection_ratio ) ) {
@@ -83,7 +84,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		// TODO: If an image is visible in one breakpoint but not another, add loading=lazy AND add a regular-priority preload link with media queries (unless LCP in which case it should already have a fetchpriority=high link) so that the image won't be eagerly-loaded for viewports on which it is not shown.
 
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
-		foreach ( $this->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
+		foreach ( $context->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
 			$link_attributes = array_merge(
 				array(
 					'rel'           => 'preload',
@@ -109,7 +110,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 
 			$link_attributes['media'] = 'screen';
 
-			$this->link_collection->add_link(
+			$context->link_collection->add_link(
 				$link_attributes,
 				$group->get_minimum_viewport_width(),
 				$group->get_maximum_viewport_width()
