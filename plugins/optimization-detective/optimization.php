@@ -159,10 +159,6 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
 	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
-	$link_collection      = new OD_Link_Collection();
-	$processor            = new OD_HTML_Tag_Processor( $buffer );
-
-	$tag_visitor_context = new OD_Tag_Visitor_Context( $processor, $group_collection, $link_collection );
 
 	/**
 	 * Fires to register tag visitors before walking over the document to perform optimizations.
@@ -170,13 +166,14 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 * @since 0.3.0
 	 *
 	 * @param OD_Tag_Visitor_Registry $tag_visitor_registry Tag visitor registry.
-	 * @param OD_Tag_Visitor_Context  $tag_visitor_context  Tag visitor context.
 	 */
-	do_action( 'od_register_tag_visitors', $tag_visitor_registry, $tag_visitor_context );
+	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
 
+	$link_collection      = new OD_Link_Collection();
+	$processor            = new OD_HTML_Tag_Processor( $buffer );
+	$tag_visitor_context  = new OD_Tag_Visitor_Context( $processor, $group_collection, $link_collection );
 	$current_tag_bookmark = 'optimization_detective_current_tag';
-
-	$visitors = iterator_to_array( $tag_visitor_registry );
+	$visitors             = iterator_to_array( $tag_visitor_registry );
 	while ( $processor->next_open_tag() ) {
 		$did_visit = false;
 		$processor->set_bookmark( $current_tag_bookmark );
