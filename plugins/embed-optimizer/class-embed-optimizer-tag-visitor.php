@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Tag visitor that optimizes embeds.
  *
- * @since 0.1.0
+ * @since n.e.x.t
  * @access private
  */
 final class Embed_Optimizer_Tag_Visitor {
