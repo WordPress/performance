@@ -226,7 +226,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 									$viewport_width,
 									array(
 										array(
-											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::H1]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 											'isLCP' => true,
 										),
 									)
@@ -254,6 +254,56 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 						</head>
 						<body>
 							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+						</body>
+					</html>
+				',
+			),
+
+			'video'                => array(
+				'set_up'   => function (): void {
+					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+					$sample_size = od_get_url_metrics_breakpoint_sample_size();
+					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+						OD_URL_Metrics_Post_Type::store_url_metric(
+							$slug,
+							$this->get_validated_url_metric(
+								$viewport_width,
+								array(
+									array(
+										'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::VIDEO]',
+										'isLCP' => true,
+									),
+								)
+							)
+						);
+					}
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<video width="620" controls poster="https://upload.wikimedia.org/wikipedia/commons/e/e8/Elephants_Dream_s5_both.jpg">
+								<source src="https://archive.org/download/ElephantsDream/ed_hd.avi" type="video/avi" />
+								<source src="https://archive.org/download/ElephantsDream/ed_1024_512kb.mp4" type="video/mp4" />
+							</video>
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<video data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::VIDEO]" width="620" controls poster="https://upload.wikimedia.org/wikipedia/commons/e/e8/Elephants_Dream_s5_both.jpg">
+								<source src="https://archive.org/download/ElephantsDream/ed_hd.avi" type="video/avi" />
+								<source src="https://archive.org/download/ElephantsDream/ed_1024_512kb.mp4" type="video/mp4" />
+							</video>
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -342,18 +392,32 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 
 		add_action(
 			'od_register_tag_visitors',
-			function ( OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metrics_Group_Collection $url_metrics_outer, OD_Preload_Link_Collection $preload_links_outer ): void {
+			function ( OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metrics_Group_Collection $url_metrics_outer, OD_Link_Collection $link_collection_outer ): void {
 				$tag_visitor_registry->register(
 					'img',
-					function ( OD_HTML_Tag_Walker $walker, OD_URL_Metrics_Group_Collection $url_metrics, OD_Preload_Link_Collection $preload_links ) use ( $url_metrics_outer, $preload_links_outer ): bool {
+					function ( OD_HTML_Tag_Processor $processor, OD_URL_Metrics_Group_Collection $url_metrics, OD_Link_Collection $link_collection ) use ( $url_metrics_outer, $link_collection_outer ): bool {
+						$this->assertFalse( $processor->is_tag_closer() );
 						$this->assertSame( $url_metrics, $url_metrics_outer );
-						$this->assertSame( $preload_links, $preload_links_outer );
-						return $walker->get_tag() === 'IMG';
+						$this->assertSame( $link_collection, $link_collection_outer );
+						return $processor->get_tag() === 'IMG';
 					}
 				);
 			},
 			10,
 			3
+		);
+
+		add_action(
+			'od_register_tag_visitors',
+			function ( OD_Tag_Visitor_Registry $tag_visitor_registry ): void {
+				$tag_visitor_registry->register(
+					'video',
+					function ( OD_HTML_Tag_Processor $processor ): bool {
+						$this->assertFalse( $processor->is_tag_closer() );
+						return $processor->get_tag() === 'VIDEO';
+					}
+				);
+			}
 		);
 
 		$expected = $remove_initial_tabs( $expected );
@@ -366,44 +430,6 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals( $expected, $buffer );
-	}
-
-	/**
-	 * Test get_response_header().
-	 *
-	 * @covers OD_Preload_Link_Collection::get_response_header
-	 */
-	public function test_get_response_header(): void {
-		$collection = new OD_Preload_Link_Collection();
-
-		$collection->add_link(
-			array(
-				'href'          => 'https://example.com/foo.jpg',
-				'as'            => 'image',
-				'fetchpriority' => 'high',
-				'imagesrcset'   => 'https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w',
-				'imagesizes'    => '(max-width: 600px) 480px, 800px',
-				'crossorigin'   => 'anonymous',
-			),
-			null,
-			null
-		);
-
-		$collection->add_link(
-			array(
-				'href'          => 'https://example.com/bar.jpg',
-				'as'            => 'image',
-				'fetchpriority' => 'high',
-				'imagesrcset'   => 'https://example.com/"bar"-480w.jpg 480w, https://example.com/"bar"-800w.jpg 800w',
-				'imagesizes'    => '(max-width: 600px) 480px, 800px',
-				'crossorigin'   => 'anonymous',
-			),
-			600,
-			1200
-		);
-
-		$expected_header = 'Link: <https://example.com/foo.jpg>; rel="preload"; as="image"; fetchpriority="high"; imagesrcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w"; imagesizes="(max-width: 600px) 480px, 800px"; crossorigin="anonymous"; media="screen", <https://example.com/bar.jpg>; rel="preload"; as="image"; fetchpriority="high"; imagesrcset="https://example.com/\"bar\"-480w.jpg 480w, https://example.com/\"bar\"-800w.jpg 800w"; imagesizes="(max-width: 600px) 480px, 800px"; crossorigin="anonymous"; media="screen and (min-width: 600px) and (max-width: 1200px)"';
-		$this->assertSame( $expected_header, $collection->get_response_header() );
 	}
 
 	/**

@@ -330,7 +330,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 	/**
 	 * Counts the URL metrics in the group.
 	 *
-	 * @return int URL metric count.
+	 * @return int<0, max> URL metric count.
 	 */
 	public function count(): int {
 		return count( $this->url_metrics );

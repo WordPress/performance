@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Visitor for the tag walker that optimizes image tags.
+ * Tag visitor that optimizes image tags.
  *
  * @since 0.1.0
  * @access private
@@ -27,30 +27,30 @@ abstract class Image_Prioritizer_Tag_Visitor {
 	protected $url_metrics_group_collection;
 
 	/**
-	 * Preload Link Collection.
+	 * Link Collection.
 	 *
-	 * @var OD_Preload_Link_Collection
+	 * @var OD_Link_Collection
 	 */
-	protected $preload_links_collection;
+	protected $link_collection;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
-	 * @param OD_Preload_Link_Collection      $preload_links_collection     Preload Link Collection.
+	 * @param OD_Link_Collection              $link_collection              Link Collection.
 	 */
-	public function __construct( OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Preload_Link_Collection $preload_links_collection ) {
+	public function __construct( OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Link_Collection $link_collection ) {
 		$this->url_metrics_group_collection = $url_metrics_group_collection;
-		$this->preload_links_collection     = $preload_links_collection;
+		$this->link_collection              = $link_collection;
 	}
 
 	/**
 	 * Visits a tag.
 	 *
-	 * @param OD_HTML_Tag_Walker $walker Walker.
+	 * @param OD_HTML_Tag_Processor $processor Processor.
 	 * @return bool Whether the visitor visited the tag.
 	 */
-	abstract public function __invoke( OD_HTML_Tag_Walker $walker ): bool;
+	abstract public function __invoke( OD_HTML_Tag_Processor $processor ): bool;
 
 	/**
 	 * Determines if the provided URL is a data: URL.

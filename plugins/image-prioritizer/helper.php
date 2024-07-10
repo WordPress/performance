@@ -29,13 +29,13 @@ function image_prioritizer_render_generator_meta_tag(): void {
  *
  * @param OD_Tag_Visitor_Registry         $registry                     Tag visitor registry.
  * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
- * @param OD_Preload_Link_Collection      $preload_links_collection     Preload Links Collection.
+ * @param OD_Link_Collection              $link_collection              Link Collection.
  */
-function image_prioritizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Preload_Link_Collection $preload_links_collection ): void {
+function image_prioritizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry, OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Link_Collection $link_collection ): void {
 	// Note: The class is invocable (it has an __invoke() method).
-	$img_visitor = new Image_Prioritizer_Img_Tag_Visitor( $url_metrics_group_collection, $preload_links_collection );
+	$img_visitor = new Image_Prioritizer_Img_Tag_Visitor( $url_metrics_group_collection, $link_collection );
 	$registry->register( 'img-tags', $img_visitor );
 
-	$bg_image_visitor = new Image_Prioritizer_Background_Image_Styled_Tag_Visitor( $url_metrics_group_collection, $preload_links_collection );
+	$bg_image_visitor = new Image_Prioritizer_Background_Image_Styled_Tag_Visitor( $url_metrics_group_collection, $link_collection );
 	$registry->register( 'bg-image-tags', $bg_image_visitor );
 }

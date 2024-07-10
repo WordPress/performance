@@ -158,11 +158,9 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
-	// Walk over all tags in the document and ensure fetchpriority is set/removed, and construct preload links for image LCP elements.
-	$preload_links = new OD_Preload_Link_Collection();
-	$walker        = new OD_HTML_Tag_Walker( $buffer );
-
 	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
+	$link_collection      = new OD_Link_Collection();
+	$processor            = new OD_HTML_Tag_Processor( $buffer );
 
 	/**
 	 * Fires to register tag visitors before walking over the document to perform optimizations.
@@ -171,38 +169,45 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 *
 	 * @param OD_Tag_Visitor_Registry         $tag_visitor_registry Tag visitor registry.
 	 * @param OD_URL_Metrics_Group_Collection $group_collection     URL Metrics Group collection.
-	 * @param OD_Preload_Link_Collection      $preload_links        Preload links collection.
+	 * @param OD_Link_Collection              $link_collection      Link collection.
 	 */
-	do_action( 'od_register_tag_visitors', $tag_visitor_registry, $group_collection, $preload_links );
+	do_action( 'od_register_tag_visitors', $tag_visitor_registry, $group_collection, $link_collection );
 
-	$visitors  = iterator_to_array( $tag_visitor_registry );
-	$generator = $walker->open_tags();
-	while ( $generator->valid() ) {
+	$current_tag_bookmark = 'optimization_detective_current_tag';
+
+	$visitors = iterator_to_array( $tag_visitor_registry );
+	while ( $processor->next_open_tag() ) {
 		$did_visit = false;
+		$processor->set_bookmark( $current_tag_bookmark );
 		foreach ( $visitors as $visitor ) {
-			$did_visit = $visitor( $walker, $group_collection, $preload_links ) || $did_visit;
+			$did_visit = $visitor( $processor, $group_collection, $link_collection ) || $did_visit;
+
+			// Since the visitor may have traversed HTML tags, we need to make sure we go back to this tag so that
+			// in the next iteration any relevant tag visitors may apply, in addition to properly setting the data-od-xpath
+			// on this tag below.
+			$processor->seek( $current_tag_bookmark );
 		}
+		$processor->release_bookmark( $current_tag_bookmark );
 
 		if ( $did_visit && $needs_detection ) {
-			$walker->set_meta_attribute( 'xpath', $walker->get_xpath() );
+			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );
 		}
-		$generator->next();
 	}
 
 	// Send any preload links in a Link response header and in a LINK tag injected at the end of the HEAD.
-	if ( count( $preload_links ) > 0 ) {
-		$response_header_links = $preload_links->get_response_header();
+	if ( count( $link_collection ) > 0 ) {
+		$response_header_links = $link_collection->get_response_header();
 		if ( ! is_null( $response_header_links ) && ! headers_sent() ) {
 			header( $response_header_links, false );
 		}
-		$walker->append_head_html( $preload_links->get_html() );
+		$processor->append_head_html( $link_collection->get_html() );
 	}
 
 	// Inject detection script.
 	// TODO: When optimizing above, if we find that there is a stored LCP element but it fails to match, it should perhaps set $needs_detection to true and send the request with an override nonce. However, this would require backtracking and adding the data-od-xpath attributes.
 	if ( $needs_detection ) {
-		$walker->append_body_html( od_get_detection_script( $slug, $group_collection ) );
+		$processor->append_body_html( od_get_detection_script( $slug, $group_collection ) );
 	}
 
-	return $walker->get_updated_html();
+	return $processor->get_updated_html();
 }

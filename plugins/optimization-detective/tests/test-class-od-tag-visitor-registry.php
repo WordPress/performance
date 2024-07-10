@@ -24,16 +24,16 @@ class Test_OD_Tag_Visitor_Registry extends WP_UnitTestCase {
 
 		// Add img visitor.
 		$this->assertFalse( $registry->is_registered( 'img' ) );
-		$img_visitor = static function ( OD_HTML_Tag_Walker $walker ) {
-			return $walker->get_tag() === 'IMG';
+		$img_visitor = static function ( OD_HTML_Tag_Processor $processor ) {
+			return $processor->get_tag() === 'IMG';
 		};
 		$registry->register( 'img', $img_visitor );
 		$this->assertCount( 1, $registry );
 		$this->assertTrue( $registry->is_registered( 'img' ) );
 
 		// Add video visitor.
-		$video_visitor = static function ( OD_HTML_Tag_Walker $walker ) {
-			return $walker->get_tag() === 'VIDEO';
+		$video_visitor = static function ( OD_HTML_Tag_Processor $processor ) {
+			return $processor->get_tag() === 'VIDEO';
 		};
 		$registry->register( 'video', $video_visitor );
 		$this->assertTrue( $registry->is_registered( 'video' ) );
@@ -50,8 +50,8 @@ class Test_OD_Tag_Visitor_Registry extends WP_UnitTestCase {
 			array( $img_visitor, $video_visitor ),
 			iterator_to_array( $registry )
 		);
-		$img2_visitor = static function ( OD_HTML_Tag_Walker $walker ) {
-			return $walker->get_tag() === 'IMG' || $walker->get_tag() === 'PICTURE';
+		$img2_visitor = static function ( OD_HTML_Tag_Processor $processor ) {
+			return $processor->get_tag() === 'IMG' || $processor->get_tag() === 'PICTURE';
 		};
 		$this->assertSame( $img_visitor, $registry->get_registered( 'img' ) );
 		$registry->register( 'img', $img2_visitor );
