@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Enhanced Responsive Images
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/auto-sizes
- * Description: Improves responsive images with better sizes calculation and auto-sizes for lazy loaded images.
+ * Description: Improves responsive images with better sizes calculations and auto-sizes for lazy-loaded images.
  * Requires at least: 6.5
  * Requires PHP: 7.2
  * Version: 1.0.2
