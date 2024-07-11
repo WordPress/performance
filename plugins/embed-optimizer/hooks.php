@@ -48,7 +48,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 				}
 			}
 		} elseif ( 'SCRIPT' === $html_processor->get_tag() ) {
-			if ( ! is_string( $html_processor->get_attribute( 'src' ) ) ) {
+			if ( null !== $html_processor->get_attribute( 'src' ) ) {
 				$has_inline_script = true;
 			} else {
 				++$script_count;
