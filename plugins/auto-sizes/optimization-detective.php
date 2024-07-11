@@ -34,7 +34,7 @@ function auto_sizes_visit_tag( OD_Tag_Visitor_Context $context ): bool {
 		$context->processor->set_attribute( 'sizes', join( ', ', $sizes ) );
 	}
 
-	return true;
+	return false; // Since this tag visitor does not require this tag to be included in the URL Metrics.
 }
 
 /**
