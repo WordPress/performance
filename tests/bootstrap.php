@@ -79,6 +79,13 @@ $load_plugin = static function ( string $plugin_name ) use ( &$load_plugin ): vo
 			$load_plugin( (string) $requires_plugin );
 		}
 	}
+
+	// Add plugin-specific bootstrap if it exists.
+	$plugin_bootstrap_file = WP_PLUGIN_DIR . "/$plugin_name/tests/bootstrap.php";
+	if ( file_exists( $plugin_bootstrap_file ) ) {
+		require_once $plugin_bootstrap_file;
+	}
+
 	require_once $plugin_file;
 };
 

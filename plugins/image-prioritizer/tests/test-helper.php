@@ -26,7 +26,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 *
 	 * @return array<string, mixed> Data.
 	 */
-	public function data_provider_test_filter_tag_walker_visitors(): array {
+	public function data_provider_test_filter_tag_visitors(): array {
 		return array(
 			'no-url-metrics'                              => array(
 				'set_up'   => static function (): void {},
@@ -48,7 +48,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<img data-od-unknown-tag data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" data-od-unknown-tag src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -340,8 +340,8 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen and (min-width: 783px)">
 						</head>
 						<body>
-							<img data-od-removed-loading="lazy" data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" >
-							<img data-od-removed-loading="lazy" data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10"  fetchpriority="high">
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" data-od-removed-loading="lazy" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" >
+							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" data-od-removed-loading="lazy" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10"  fetchpriority="high">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -895,7 +895,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * @covers Image_Prioritizer_Img_Tag_Visitor
 	 * @covers Image_Prioritizer_Background_Image_Styled_Tag_Visitor
 	 *
-	 * @dataProvider data_provider_test_filter_tag_walker_visitors
+	 * @dataProvider data_provider_test_filter_tag_visitors
 	 * @throws Exception But it won't.
 	 */
 	public function test_image_prioritizer_register_tag_visitors( Closure $set_up, string $buffer, string $expected ): void {

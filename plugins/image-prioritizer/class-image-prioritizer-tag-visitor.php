@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Visitor for the tag walker that optimizes image tags.
+ * Tag visitor that optimizes image tags.
  *
  * @since 0.1.0
  * @access private
@@ -20,37 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class Image_Prioritizer_Tag_Visitor {
 
 	/**
-	 * URL Metrics Group Collection.
-	 *
-	 * @var OD_URL_Metrics_Group_Collection
-	 */
-	protected $url_metrics_group_collection;
-
-	/**
-	 * Preload Link Collection.
-	 *
-	 * @var OD_Preload_Link_Collection
-	 */
-	protected $preload_links_collection;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param OD_URL_Metrics_Group_Collection $url_metrics_group_collection URL Metrics Group Collection.
-	 * @param OD_Preload_Link_Collection      $preload_links_collection     Preload Link Collection.
-	 */
-	public function __construct( OD_URL_Metrics_Group_Collection $url_metrics_group_collection, OD_Preload_Link_Collection $preload_links_collection ) {
-		$this->url_metrics_group_collection = $url_metrics_group_collection;
-		$this->preload_links_collection     = $preload_links_collection;
-	}
-
-	/**
 	 * Visits a tag.
 	 *
-	 * @param OD_HTML_Tag_Walker $walker Walker.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the visitor visited the tag.
 	 */
-	abstract public function __invoke( OD_HTML_Tag_Walker $walker ): bool;
+	abstract public function __invoke( OD_Tag_Visitor_Context $context ): bool;
 
 	/**
 	 * Determines if the provided URL is a data: URL.
