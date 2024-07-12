@@ -1,4 +1,4 @@
-=== Auto-sizes for Lazy-loaded Images ===
+=== Enhanced Responsive Images ===
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
@@ -7,12 +7,14 @@ License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, auto-sizes
 
-Instructs browsers to automatically choose the right image size for lazy-loaded images.
+Improvements for responsive images in WordPress.
 
 == Description ==
 
-This plugin implements the HTML spec for adding `sizes="auto"` to lazy-loaded images.
-For background, see the HTML spec issue [Add "auto sizes" for lazy-loaded images](https://github.com/whatwg/html/issues/4654).
+This plugin implements experimental enhancements for the responsive images functionality in WordPress. Currently, this includes:
+
+1. Improvements to the accuracy of the `sizes` attribute by using available layout information in the theme.
+2. Implementation of the new HTML spec for adding `sizes="auto"` to lazy-loaded images. See the HTML spec issue [Add "auto sizes" for lazy-loaded images](https://github.com/whatwg/html/issues/4654).
 
 This plugin integrates with the [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) plugin. When that plugin is active, it starts learning about which images are not in the initial viewport based on actual visitors to your site. When it knows which images are below the fold, it then adds `loading=lazy` to these images. This plugin then extends Image Prioritizer to also add `sizes=auto` to these lazy-loaded images.
 
@@ -23,14 +25,14 @@ There are currently **no settings** and no user interface for this plugin since 
 = Installation from within WordPress =
 
 1. Visit **Plugins > Add New**.
-2. Search for **Auto-sizes for Lazy-loaded Images**.
-3. Install and activate the **Auto-sizes for Lazy-loaded Images** plugin.
+2. Search for **Enhanced Responsive Images**.
+3. Install and activate the **Enhanced Responsive Images** plugin.
 
 = Manual installation =
 
-1. Upload the entire `auto-sizes` folder to the `/wp-content/plugins/` directory.
+1. Upload the entire plugin folder to the `/wp-content/plugins/` directory.
 2. Visit **Plugins**.
-3. Activate the **Auto-sizes for Lazy-loaded Images** plugin.
+3. Activate the **Enhanced Responsive Images** plugin.
 
 == Frequently Asked Questions ==
 
