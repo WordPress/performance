@@ -70,9 +70,6 @@ By default, the Modern Image Formats plugin will only generate WebP versions of 
 
 * Improve compatibility of styling picture elements. ([1307](https://github.com/WordPress/performance/pull/1307))
 
-**Other**
-
-
 = 2.0.1 =
 
 **Bug Fixes**
