@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *               }
  *
  * @since 0.3.0
- * @since n.e.x.t Renamed from OD_Preload_Link_Collection.
+ * @since 0.4.0 Renamed from OD_Preload_Link_Collection.
  * @access private
  */
 final class OD_Link_Collection implements Countable {

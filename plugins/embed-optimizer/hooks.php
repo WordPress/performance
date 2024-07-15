@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Add hooks.
  *
- * @since n.e.x.t
+ * @since 0.2.0
  */
 function embed_optimizer_add_hooks(): void {
 	add_action( 'wp_head', 'embed_optimizer_render_generator' );
@@ -29,7 +29,7 @@ add_action( 'init', 'embed_optimizer_add_hooks' );
 /**
  * Registers the tag visitor for embeds.
  *
- * @since n.e.x.t
+ * @since 0.2.0
  *
  * @param OD_Tag_Visitor_Registry $registry Tag visitor registry.
  */
@@ -61,7 +61,7 @@ function embed_optimizer_filter_oembed_html( string $html ): string {
 /**
  * Applies changes to HTML in the supplied tag processor to lazy-load the embed.
  *
- * @since n.e.x.t
+ * @since 0.2.0
  *
  * phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.Missing -- The exception is caught.
  *
@@ -214,7 +214,7 @@ function embed_optimizer_lazy_load_scripts(): void {
  *
  * Load an embed's scripts when it approaches the viewport using an IntersectionObserver.
  *
- * @since n.e.x.t
+ * @since 0.2.0
  */
 function embed_optimizer_get_lazy_load_script(): string {
 	return <<<JS
@@ -260,7 +260,7 @@ JS;
 /**
  * Prints the Optimization Detective installation notices.
  *
- * @since n.e.x.t
+ * @since 0.2.0
  *
  * @param string $plugin_file Plugin file.
  */

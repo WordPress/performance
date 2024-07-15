@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   0.3.1
+Stable tag:   0.4.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
@@ -132,6 +132,13 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.4.0 =
+
+**Enhancements**
+
+* Avoid passing positional parameters in Optimization Detective. ([1338](https://github.com/WordPress/performance/pull/1338))
+* Send preload links via HTTP Link headers in addition to LINK tags. ([1323](https://github.com/WordPress/performance/pull/1323))
 
 = 0.3.1 =
 

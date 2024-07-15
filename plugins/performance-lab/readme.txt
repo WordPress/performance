@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   3.2.0
+Stable tag:   3.3.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -57,6 +57,20 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 3.3.0 =
+
+**Enhancements**
+
+* Bump minimum WP versions and WP version tested up to. ([1333](https://github.com/WordPress/performance/pull/1333))
+* Improve message for WebP site health test. ([1249](https://github.com/WordPress/performance/pull/1249))
+* Remove 'Requires at least' and 'Requires PHP' from plugin readmes. ([1334](https://github.com/WordPress/performance/pull/1334))
+* Upgrade PHPStan to 1.11.6. ([1325](https://github.com/WordPress/performance/pull/1325))
+
+**Bug Fixes**
+
+* Extend core's Autoloaded Options Site Health test if present (in WP 6.6). ([1298](https://github.com/WordPress/performance/pull/1298))
+* Generate phpunit-multisite.xml on the fly. ([1327](https://github.com/WordPress/performance/pull/1327))
 
 = 3.2.0 =
 

@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   0.1.2
+Stable tag:   0.2.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, embeds
@@ -50,6 +50,13 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.2.0 =
+
+**Enhancements**
+
+* Facilitate embedding of Embed Optimizer. ([1337](https://github.com/WordPress/performance/pull/1337))
+* Leverage Optimization Detective to optimize embeds in Embed Optimizer. ([1302](https://github.com/WordPress/performance/pull/1302))
 
 = 0.1.2 =
 

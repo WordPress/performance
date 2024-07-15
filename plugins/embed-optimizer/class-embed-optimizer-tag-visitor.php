@@ -3,7 +3,7 @@
  * Tag visitor for Embed Optimizer.
  *
  * @package embed-optimizer
- * @since n.e.x.t
+ * @since 0.2.0
  */
 
 // Exit if accessed directly.
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Tag visitor that optimizes embeds.
  *
- * @since n.e.x.t
+ * @since 0.2.0
  * @access private
  */
 final class Embed_Optimizer_Tag_Visitor {
@@ -29,7 +29,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Visits a tag.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.2.0
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the visit or visited the tag.
