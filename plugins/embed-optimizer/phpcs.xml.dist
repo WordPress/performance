@@ -4,7 +4,7 @@
 
 	<rule ref="../../tools/phpcs/phpcs.ruleset.xml"/>
 
-	<config name="text_domain" value="embed-optimizer"/>
+	<config name="text_domain" value="embed-optimizer,default"/>
 
 	<file>.</file>
 </ruleset>

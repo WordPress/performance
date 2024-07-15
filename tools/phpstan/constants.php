@@ -16,4 +16,6 @@ define( 'OPTIMIZATION_DETECTIVE_MAIN_FILE', 'plugins/optimization-detective/load
 
 define( 'IMAGE_PRIORITIZER_VERSION', '0.0.0' );
 
+define( 'EMBED_OPTIMIZER_VERSION', '0.0.0' );
+
 define( 'PERFORMANCE_DASHBOARD_VERSION', '0.0.0' );
