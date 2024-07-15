@@ -39,7 +39,7 @@ class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 	public function data_provider_test_od_optimize_template_output_buffer(): array {
 		return array(
 			// Note: The Image Prioritizer plugin removes the loading attribute, and so then Auto Sizes does not then add sizes=auto.
-			'wrongly_lazy_responsive_img' => array(
+			'wrongly_lazy_responsive_img'       => array(
 				'element_metrics' => array(
 					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 					'isLCP'             => false,
@@ -49,7 +49,7 @@ class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 				'expected'        => '<img data-od-removed-loading="lazy" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
 			),
 
-			'non_responsive_image'        => array(
+			'non_responsive_image'              => array(
 				'element_metrics' => array(
 					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 					'isLCP'             => false,
@@ -59,7 +59,7 @@ class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 				'expected'        => '<img src="https://example.com/foo.jpg" alt="Quux" width="1200" height="800" loading="lazy">',
 			),
 
-			'auto_sizes_added'            => array(
+			'auto_sizes_added'                  => array(
 				'element_metrics' => array(
 					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 					'isLCP'             => false,
@@ -69,7 +69,7 @@ class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 				'expected'        => '<img data-od-replaced-sizes="(max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
 			),
 
-			'auto_sizes_already_added'    => array(
+			'auto_sizes_already_added'          => array(
 				'element_metrics' => array(
 					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 					'isLCP'             => false,
@@ -77,6 +77,17 @@ class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
 				'expected'        => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
+			),
+
+			// If Auto Sizes added the sizes=auto attribute but Image Prioritizer ended up removing it due to the image not being lazy-loaded, remove sizes=auto again.
+			'wrongly_auto_sized_responsive_img' => array(
+				'element_metrics' => array(
+					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+					'isLCP'             => false,
+					'intersectionRatio' => 1,
+				),
+				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
+				'expected'        => '<img data-od-replaced-sizes="auto, (max-width: 600px) 480px, 800px" data-od-removed-loading="lazy" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800"  srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
 			),
 		);
 	}
