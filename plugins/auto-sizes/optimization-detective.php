@@ -2,7 +2,7 @@
 /**
  * Optimization Detective extensions by Auto Sizes.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  * @package auto-sizes
  */
 
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Visits responsive lazy-loaded IMG tags to ensure they include sizes=auto.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  *
  * @param OD_Tag_Visitor_Context $context Tag visitor context.
  * @return false Whether the tag should be recorded in URL metrics.
@@ -54,7 +54,7 @@ function auto_sizes_visit_tag( OD_Tag_Visitor_Context $context ): bool {
 /**
  * Registers the tag visitor for image tags.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  *
  * @param OD_Tag_Visitor_Registry $registry Tag visitor registry.
  */

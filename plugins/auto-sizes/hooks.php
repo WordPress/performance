@@ -97,7 +97,7 @@ add_action( 'wp_head', 'auto_sizes_render_generator' );
  * It will return the smaller image size and return "px" if the layout width
  * is something else, e.g. min(640px, 90vw) or 90vw.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  *
  * @param string $layout_width The layout width.
  * @param int    $image_width  The image width.
@@ -113,7 +113,7 @@ function auto_sizes_get_width( string $layout_width, int $image_width ): string 
 /**
  * Filter the sizes attribute for images to improve the default calculation.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  *
  * @param string               $content      The block content about to be rendered.
  * @param array<string, mixed> $parsed_block The parsed block.
@@ -147,7 +147,7 @@ add_filter( 'render_block_core/cover', 'auto_sizes_filter_image_tag', 10, 2 );
 /**
  * Filter the sizes attribute for images to improve the default calculation.
  *
- * @since n.e.x.t
+ * @since 1.1.0
  *
  * @param string $content The block content about to be rendered.
  * @return string The updated block content.
