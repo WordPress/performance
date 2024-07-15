@@ -38,7 +38,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @link https://github.com/WordPress/wordpress-develop/blob/6dd00b1ffac54c20c1c1c7721aeebbcd82d0e378/src/wp-includes/html-api/class-wp-html-tag-processor.php#L136-L155
 	 * @link https://core.trac.wordpress.org/ticket/60392#comment:2
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @var string[]
 	 */
 	const RAW_TEXT_TAGS = array(
@@ -58,7 +58,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @link https://html.spec.whatwg.org/multipage/grouping-content.html#the-p-element
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @var string[]
 	 */
 	const P_CLOSING_TAGS = array(
@@ -98,7 +98,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Pattern for valid XPath subset for breadcrumb.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @see self::get_xpath()
 	 * @var string
 	 */
@@ -107,7 +107,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Bookmark for the end of the HEAD.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @var string
 	 */
 	const END_OF_HEAD_BOOKMARK = 'optimization_detective_end_of_head';
@@ -115,7 +115,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Bookmark for the end of the BODY.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @var string
 	 */
 	const END_OF_BODY_BOOKMARK = 'optimization_detective_end_of_body';
@@ -123,7 +123,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Open stack tags.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @var string[]
 	 */
 	private $open_stack_tags = array();
@@ -131,7 +131,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Open stack indices.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @var int[]
 	 */
 	private $open_stack_indices = array();
@@ -144,7 +144,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Then whenever `self::seek()` is called, the bookmarked open stacks are
 	 * populated back into `$this->open_stack_tags` and `$this->open_stack_indices`.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @var array<string, array{tags: string[], indices: int[]}>
 	 */
 	private $bookmarked_open_stacks = array();
@@ -155,7 +155,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * This is used so that repeated calls to {@see self::get_xpath()} won't needlessly reconstruct the string. This
 	 * gets cleared whenever {@see self::open_tags()} iterates to the next tag.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @var string|null
 	 */
 	private $current_xpath = null;
@@ -163,7 +163,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Whether the previous tag does not expect a closer.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @var bool
 	 */
 	private $previous_tag_without_closer = false;
@@ -171,7 +171,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Mapping of bookmark name to a list of HTML strings which will be inserted at the time get_updated_html() is called.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @var array<string, string[]>
 	 */
 	private $buffered_text_replacements = array();
@@ -183,7 +183,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * It will _always_ visit tag closers.
 	 *
 	 * @inheritDoc
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @param null $query Query.
 	 * @return bool Whether a tag was matched.
@@ -200,7 +200,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Finds the next open tag.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @return bool Whether a tag was matched.
 	 */
@@ -217,7 +217,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Whether the tag expects a closing tag.
 	 *
 	 * @see WP_HTML_Processor::expects_closer()
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @param string|null $tag_name Tag name, if not provided then the current tag is used. Optional.
 	 * @return bool Whether to expect a closer for the tag.
@@ -241,7 +241,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Finds the next token in the HTML document.
 	 *
 	 * @inheritDoc
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @return bool Whether a token was parsed.
 	 */
@@ -329,7 +329,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Updates or creates a new attribute on the currently matched tag with the passed value.
 	 *
 	 * @inheritDoc
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @param string      $name  The attribute name to target.
 	 * @param string|bool $value The new attribute value.
@@ -365,7 +365,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Removes an attribute from the currently-matched tag.
 	 *
 	 * @inheritDoc
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @param string $name The attribute name to remove.
 	 */
@@ -381,7 +381,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Returns the nesting depth of the current location in the document.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 * @see WP_HTML_Processor::get_current_depth()
 	 *
 	 * @return int Nesting-depth of current location in the document.
@@ -394,7 +394,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Move the internal cursor in the Tag Processor to a given bookmark's location.
 	 *
 	 * @inheritDoc
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @param string $bookmark_name Jump to the place in the document identified by this bookmark name.
 	 * @return bool Whether the internal cursor was successfully moved to the bookmark's location.
@@ -412,7 +412,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Sets a bookmark in the HTML document.
 	 *
 	 * @inheritDoc
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @param string $name Identifies this particular bookmark.
 	 * @return bool Whether the bookmark was successfully created.
@@ -432,7 +432,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Removes a bookmark that is no longer needed.
 	 *
 	 * @inheritDoc
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @param string $name Name of the bookmark to remove.
 	 * @return bool Whether the bookmark already existed before removal.
@@ -454,7 +454,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * A breadcrumb consists of a tag name and its sibling index.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @return Generator<array{string, int}> Breadcrumb.
 	 */
@@ -467,7 +467,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Determines whether currently inside a foreign element (MATH or SVG).
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @return bool In foreign element.
 	 */
@@ -486,7 +486,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * It would be nicer if this were like `/html[1]/body[2]` but in XPath the position() here refers to the
 	 * index of the preceding node set. So it has to rather be written `/*[1][self::html]/*[2][self::body]`.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @return string XPath.
 	 */
@@ -505,7 +505,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * The provided HTML must be valid! No validation is performed.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @param string $html HTML to inject.
 	 */
@@ -518,7 +518,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * The provided HTML must be valid! No validation is performed.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @param string $html HTML to inject.
 	 */
@@ -561,7 +561,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Warns of bad markup.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
 	 *
 	 * @param string $message Warning message.
 	 */

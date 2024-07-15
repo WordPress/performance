@@ -3,7 +3,7 @@
  * Optimization Detective: OD_Tag_Visitor_Context class
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.4.0
  */
 
 // Exit if accessed directly.
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Context for tag visitors invoked for each tag while walking over a document.
  *
- * @since n.e.x.t
+ * @since 0.4.0
  * @access private
  */
 final class OD_Tag_Visitor_Context {

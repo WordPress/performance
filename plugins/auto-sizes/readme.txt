@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   1.0.2
+Stable tag:   1.1.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, auto-sizes
@@ -51,6 +51,24 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.1.0 =
+
+**Features**
+
+* Initial implementation of improved image `sizes` algorithm. ([1250](https://github.com/WordPress/performance/pull/1250))
+
+**Enhancements**
+
+* Improved image `sizes` for left/right/center alignment. ([1290](https://github.com/WordPress/performance/pull/1290))
+* Integrate Auto Sizes with Image Prioritizer to ensure correct sizes=auto. ([1322](https://github.com/WordPress/performance/pull/1322))
+* Update `Auto-sizes for Lazy-loaded Images` plugin name to `Enhanced Responsive Images`. ([1335](https://github.com/WordPress/performance/pull/1335))
+* Use correct sizes for small images. ([1252](https://github.com/WordPress/performance/pull/1252))
+
+**Documentation**
+
+* Update the plugin description for Enhanced Responsive Images. ([1339](https://github.com/WordPress/performance/pull/1339))
+* Update the plugin header description. ([1344](https://github.com/WordPress/performance/pull/1344))
 
 = 1.0.2 =
 
