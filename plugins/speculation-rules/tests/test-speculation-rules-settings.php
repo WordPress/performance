@@ -102,6 +102,26 @@ class Test_Speculation_Rules_Settings extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers ::plsr_get_setting
+	 */
+	public function test_plsr_get_setting_not_set(): void {
+		delete_option( 'plsr_speculation_rules' );
+		$this->assertSame( plsr_get_setting_default(), plsr_get_setting() );
+	}
+
+	/**
+	 * @covers ::plsr_get_setting
+	 * @dataProvider data_plsr_sanitize_setting
+	 *
+	 * @param mixed                $input    Input.
+	 * @param array<string, mixed> $expected Expected.
+	 */
+	public function test_plsr_get_setting( $input, array $expected ): void {
+		update_option( 'plsr_speculation_rules', $input );
+		$this->assertSame( $expected, plsr_get_setting() );
+	}
+
+	/**
 	 * @covers ::plsr_add_settings_action_link
 	 */
 	public function test_plsr_add_settings_action_link(): void {

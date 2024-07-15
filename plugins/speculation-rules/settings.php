@@ -45,6 +45,7 @@ function plsr_get_eagerness_labels(): array {
  *
  * @since 1.0.0
  *
+ * @phpstan-return array{ mode: 'prerender', eagerness: 'moderate' }
  * @return array<string, string> {
  *     Default setting value.
  *
@@ -60,11 +61,58 @@ function plsr_get_setting_default(): array {
 }
 
 /**
+ * Gets setting.
+ *
+ * @since n.e.x.t
+ *
+ * @phpstan-return array{
+ *                     mode: 'prerender'|'prefetch',
+ *                     eagerness: 'conservative'|'moderate'|'eager'
+ *                 }
+ * @return array<string, string> {
+ *     Setting value.
+ *
+ *     @type string $mode      Mode.
+ *     @type string $eagerness Eagerness.
+ * }
+ */
+function plsr_get_setting(): array {
+	$setting = get_option( 'plsr_speculation_rules' );
+
+	/*
+	 * This logic is only relevant for edge-cases where the setting may not be registered,
+	 * a.k.a. defensive coding.
+	 */
+	if ( ! $setting || ! is_array( $setting ) ) {
+		$setting = plsr_get_setting_default();
+	} else {
+		$setting = array_merge( plsr_get_setting_default(), $setting );
+	}
+
+	/**
+	 * Validated setting.
+	 *
+	 * The value is validated by {@see plsr_sanitize_setting()}.
+	 *
+	 * @var array{
+	 *          mode: 'prerender'|'prefetch',
+	 *          eagerness: 'conservative'|'moderate'|'eager'
+	 *      } $setting
+	 */
+	return $setting;
+}
+
+/**
  * Sanitizes the setting for Speculative Loading configuration.
  *
  * @since 1.0.0
  *
  * @param mixed $input Setting to sanitize.
+
+ * @phpstan-return array{
+ *                     mode: 'prerender'|'prefetch',
+ *                     eagerness: 'conservative'|'moderate'|'eager'
+ *                 }
  * @return array<string, string> {
  *     Sanitized setting.
  *

@@ -43,3 +43,75 @@ function plsr_render_generator_meta_tag(): void {
 	echo '<meta name="generator" content="speculation-rules ' . esc_attr( SPECULATION_RULES_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'plsr_render_generator_meta_tag' );
+
+/**
+ * Filters the HTML output of the search form to inject speculative loading interactivity.
+ *
+ * @since n.e.x.t
+ *
+ * @param string|mixed $form The search form HTML output.
+ * @return string Filtered HTML.
+ */
+function plsr_filter_searchform( $form ): string {
+	if ( ! is_string( $form ) ) {
+		return '';
+	}
+
+	$namespace        = 'speculationRules';
+	$directive_prefix = 'data-wp-on'; // TODO: Use data-wp-on-async when available.
+
+	$p = new WP_HTML_Tag_Processor( $form );
+	while ( $p->next_tag() ) {
+		if ( 'FORM' === $p->get_tag() ) {
+			if ( ! $p->get_attribute( 'data-wp-interactive' ) ) {
+				$p->set_attribute( 'data-wp-interactive', $namespace );
+			}
+			// Create context if not already present.
+			// TODO: Should there be namespaced context?
+			if ( ! $p->get_attribute( 'data-wp-context' ) ) {
+				$p->set_attribute( 'data-wp-context', '{}' );
+			}
+			// Note: This directive only subscribes to the properties that are accessed during its execution.
+			$p->set_attribute( "data-wp-watch--{$namespace}", "{$namespace}::callbacks.doSpeculativeLoad" );
+			$p->set_attribute( "data-wp-on--submit--{$namespace}", "{$namespace}::actions.handleFormSubmit" );
+
+			$p->set_attribute( "{$directive_prefix}--change--{$namespace}", "{$namespace}::actions.updateSpeculativeLoadUrl" );
+
+			wp_enqueue_script_module( 'speculation-rules-search-form' );
+			plsr_add_search_form_config();
+		} elseif (
+			( 'INPUT' === $p->get_tag() || 'BUTTON' === $p->get_tag() )
+			&&
+			'submit' === $p->get_attribute( 'type' )
+		) {
+			$p->set_attribute( "{$directive_prefix}--focus--{$namespace}", "{$namespace}::actions.updateSpeculativeLoadUrl" );
+			$p->set_attribute( "{$directive_prefix}--pointerover--{$namespace}", "{$namespace}::actions.updateSpeculativeLoadUrl" );
+		} elseif (
+			'INPUT' === $p->get_tag()
+			&&
+			's' === $p->get_attribute( 'name' )
+		) {
+			$p->set_attribute( "{$directive_prefix}--keydown--{$namespace}", "{$namespace}::actions.handleInputKeydown" );
+		}
+	}
+
+	return $p->get_updated_html();
+}
+add_filter( 'get_search_form', 'plsr_filter_searchform' );
+add_filter( 'render_block_core/search', 'plsr_filter_searchform' );
+
+/**
+ * Registers script module for the speculatively loading search form.
+ *
+ * @since n.e.x.t
+ */
+function plsr_register_script_module(): void {
+	wp_register_script_module(
+		'speculation-rules-search-form',
+		plugin_dir_url( __FILE__ ) . 'search-form.js',
+		array(
+			array( 'id' => '@wordpress/interactivity' ),
+		)
+	);
+}
+add_action( 'wp_enqueue_scripts', 'plsr_register_script_module' );
