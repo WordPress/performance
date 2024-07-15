@@ -53,6 +53,11 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 0.2.0 =
 
+**Enhancements**
+
+* Facilitate embedding of Embed Optimizer. ([1337](https://github.com/WordPress/performance/pull/1337))
+* Leverage Optimization Detective to optimize embeds in Embed Optimizer. ([1302](https://github.com/WordPress/performance/pull/1302))
+
 = 0.1.2 =
 
 **Enhancements**

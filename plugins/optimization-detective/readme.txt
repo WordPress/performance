@@ -135,6 +135,11 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 0.4.0 =
 
+**Enhancements**
+
+* Avoid passing positional parameters in Optimization Detective. ([1338](https://github.com/WordPress/performance/pull/1338))
+* Send preload links via HTTP Link headers in addition to LINK tags. ([1323](https://github.com/WordPress/performance/pull/1323))
+
 = 0.3.1 =
 
 **Enhancements**

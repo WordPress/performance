@@ -60,6 +60,18 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 3.3.0 =
 
+**Enhancements**
+
+* Bump minimum WP versions and WP version tested up to. ([1333](https://github.com/WordPress/performance/pull/1333))
+* Improve message for WebP site health test. ([1249](https://github.com/WordPress/performance/pull/1249))
+* Remove 'Requires at least' and 'Requires PHP' from plugin readmes. ([1334](https://github.com/WordPress/performance/pull/1334))
+* Upgrade PHPStan to 1.11.6. ([1325](https://github.com/WordPress/performance/pull/1325))
+
+**Bug Fixes**
+
+* Extend core's Autoloaded Options Site Health test if present (in WP 6.6). ([1298](https://github.com/WordPress/performance/pull/1298))
+* Generate phpunit-multisite.xml on the fly. ([1327](https://github.com/WordPress/performance/pull/1327))
+
 = 3.2.0 =
 
 **Enhancements**
