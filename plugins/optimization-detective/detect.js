@@ -414,7 +414,7 @@ export default async function detect( {
 
 		// TODO: Collect Server-Timing information.
 
-		// TODO: Detect form factor and effective connection type à la CRuX.
+		// TODO: Detect form factor à la CRuX.
 		// See https://developer.chrome.com/docs/crux/methodology/dimensions
 
 		if ( isDebug ) {

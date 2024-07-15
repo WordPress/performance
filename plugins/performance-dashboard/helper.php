@@ -221,7 +221,7 @@ function performance_dashboard_register_post_type(): void {
  * @param OD_URL_Metric $url_metric URL metric from Optimization Detective.
  */
 function performance_dashboard_store_data( OD_URL_Metric $url_metric ): void {
-	// TODO: Store form factor and effective connection type à la CRuX.
+	// TODO: Store form factor à la CRuX.
 
 	$viewport_width = $url_metric->get_viewport_width();
 	$web_vitals     = $url_metric->get_web_vitals();
