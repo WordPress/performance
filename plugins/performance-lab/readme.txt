@@ -70,7 +70,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 **Bug Fixes**
 
 * Extend core's Autoloaded Options Site Health test if present (in WP 6.6). ([1298](https://github.com/WordPress/performance/pull/1298))
-* Generate phpunit-multisite.xml on the fly. ([1327](https://github.com/WordPress/performance/pull/1327))
+* Fix unit tests for multisite. ([1327](https://github.com/WordPress/performance/pull/1327))
 
 = 3.2.0 =
 
