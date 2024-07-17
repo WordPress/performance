@@ -10,7 +10,7 @@
     "web-vitals": "3.5.0"
   },
   "devDependencies": {
-    "@octokit/rest": "^19.0.5",
+    "@octokit/rest": "^21.0.1",
     "@wordpress/env": "^9.6.0",
     "@wordpress/scripts": "^26.19.0",
     "commander": "^9.4.1",
