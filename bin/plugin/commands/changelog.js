@@ -2,7 +2,6 @@
  * External dependencies
  */
 const { groupBy } = require( 'lodash' );
-const { Octokit } = require( '@octokit/rest' );
 
 /**
  * Internal dependencies
@@ -206,6 +205,7 @@ function formatChangelog( milestone, pullRequests ) {
  * @return {Promise<string>} Promise resolving to changelog.
  */
 async function getChangelog( settings ) {
+	const { Octokit } = await import( '@octokit/rest' );
 	const octokit = new Octokit( {
 		auth: settings.token,
 	} );
