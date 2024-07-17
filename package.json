@@ -49,6 +49,6 @@
     "test-php": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:plugins",
     "test-php-multisite": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:plugins",
     "wp-env": "wp-env",
-    "prepare": "husky install"
+    "prepare": "husky"
   }
 }
