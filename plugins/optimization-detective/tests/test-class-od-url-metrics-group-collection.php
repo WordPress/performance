@@ -721,6 +721,93 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function data_provider_element_minimum_heights(): array {
+		$xpath1 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]';
+		$xpath2 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[2]';
+		$xpath3 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[3]';
+
+		$get_sample_url_metric = function ( int $viewport_width, string $lcp_element_xpath, float $element_height ): OD_URL_Metric {
+			return $this->get_sample_url_metric(
+				array(
+					'viewport_width' => $viewport_width,
+					'element'        => array(
+						'isLCP'            => true,
+						'xpath'            => $lcp_element_xpath,
+						'intersectionRect' => array_merge(
+							$this->get_sample_dom_rect(),
+							array( 'height' => $element_height )
+						),
+					),
+				)
+			);
+		};
+
+		return array(
+			'one-element-sample-size-one'    => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 400, $xpath1, 480 ),
+					$get_sample_url_metric( 600, $xpath1, 240 ),
+					$get_sample_url_metric( 800, $xpath1, 768 ),
+				),
+				'expected'    => array(
+					$xpath1 => 240.0,
+				),
+			),
+			'three-elements-sample-size-two' => array(
+				'url_metrics' => array(
+					// Group 1.
+					$get_sample_url_metric( 400, $xpath1, 400 ),
+					$get_sample_url_metric( 400, $xpath1, 600 ),
+					// Group 2.
+					$get_sample_url_metric( 600, $xpath2, 100.1 ),
+					$get_sample_url_metric( 600, $xpath2, 100.2 ),
+					$get_sample_url_metric( 600, $xpath2, 100.05 ),
+					// Group 3.
+					$get_sample_url_metric( 800, $xpath3, 500 ),
+					$get_sample_url_metric( 800, $xpath3, 500 ),
+				),
+				'expected'    => array(
+					$xpath1 => 400.0,
+					$xpath2 => 100.05,
+					$xpath3 => 500.0,
+				),
+			),
+			'no-url-metrics'                 => array(
+				'url_metrics' => array(),
+				'expected'    => array(),
+			),
+
+		);
+	}
+
+	/**
+	 * Test get_all_element_max_intersection_ratios() and get_element_max_intersection_ratio().
+	 *
+	 * @covers ::get_all_element_minimum_heights
+	 * @covers ::get_element_minimum_height
+	 *
+	 * @dataProvider data_provider_element_minimum_heights
+	 *
+	 * @param array<string, mixed> $url_metrics URL metrics.
+	 * @param array<string, float> $expected    Expected.
+	 */
+	public function test_get_all_element_minimum_heights( array $url_metrics, array $expected ): void {
+		$breakpoints      = array( 480, 600, 782 );
+		$sample_size      = 3;
+		$group_collection = new OD_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, $sample_size, 0 );
+		$actual           = $group_collection->get_all_element_minimum_heights();
+		$this->assertSame( $actual, $group_collection->get_all_element_minimum_heights(), 'Cached result is identical.' );
+		$this->assertSame( $expected, $actual );
+		foreach ( $expected as $expected_xpath => $expected_max_ratio ) {
+			$this->assertSame( $expected_max_ratio, $group_collection->get_element_minimum_height( $expected_xpath ) );
+		}
+	}
+
+	/**
 	 * Test get_flattened_url_metrics().
 	 *
 	 * @covers ::get_flattened_url_metrics
