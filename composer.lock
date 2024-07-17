@@ -653,16 +653,16 @@
         },
         {
             "name": "phpstan/php-8-stubs",
-            "version": "0.3.84",
+            "version": "0.3.88",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/php-8-stubs.git",
-                "reference": "d713e9c3f6f8223d323efe9558b477ae92e989df"
+                "reference": "5fe7bb854860ecdee9b8a31addc1d98499d11ab3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/d713e9c3f6f8223d323efe9558b477ae92e989df",
-                "reference": "d713e9c3f6f8223d323efe9558b477ae92e989df",
+                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/5fe7bb854860ecdee9b8a31addc1d98499d11ab3",
+                "reference": "5fe7bb854860ecdee9b8a31addc1d98499d11ab3",
                 "shasum": ""
             },
             "type": "library",
@@ -679,9 +679,9 @@
             "description": "PHP stubs extracted from php-src",
             "support": {
                 "issues": "https://github.com/phpstan/php-8-stubs/issues",
-                "source": "https://github.com/phpstan/php-8-stubs/tree/0.3.84"
+                "source": "https://github.com/phpstan/php-8-stubs/tree/0.3.88"
             },
-            "time": "2023-12-30T11:29:15+00:00"
+            "time": "2024-07-16T00:16:52+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
