@@ -17,7 +17,7 @@
     "copy-webpack-plugin": "^12.0.2",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
-    "husky": "^8.0.2",
+    "husky": "^9.1.0",
     "lint-staged": "^15.2.7",
     "lodash": "4.17.21",
     "micromatch": "^4.0.7",
@@ -49,6 +49,6 @@
     "test-php": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:plugins",
     "test-php-multisite": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test-multisite:plugins",
     "wp-env": "wp-env",
-    "prepare": "husky install"
+    "prepare": "husky"
   }
 }
