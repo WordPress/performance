@@ -44,6 +44,18 @@ final class Embed_Optimizer_Tag_Visitor {
 			return false;
 		}
 
+		$minimum_height = $context->url_metrics_group_collection->get_element_minimum_height( $processor->get_xpath() );
+		if ( is_int( $minimum_height ) ) {
+			$style = $processor->get_attribute( 'style' );
+			if ( is_string( $style ) ) {
+				$style = rtrim( trim( $style ), ';' ) . '; ';
+			} else {
+				$style = '';
+			}
+			$style .= sprintf( 'min-height: %dpx;', $minimum_height );
+			$processor->set_attribute( 'style', $style );
+		}
+
 		$max_intersection_ratio = $context->url_metrics_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() );
 
 		if ( $max_intersection_ratio > 0 ) {

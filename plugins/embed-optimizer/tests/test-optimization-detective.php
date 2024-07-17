@@ -74,7 +74,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preconnect" href="https://i.ytimg.com">
 						</head>
 						<body>
-							<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
+							<figure data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
 								<div class="wp-block-embed__wrapper">
 									<iframe title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 								</div>
@@ -118,7 +118,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
+							<figure data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
 								<div class="wp-block-embed__wrapper">
 									<iframe data-od-added-loading loading="lazy" title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 								</div>
@@ -165,7 +165,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preconnect" href="https://pbs.twimg.com">
 						</head>
 						<body>
-							<figure class="wp-block-embed is-type-rich is-provider-twitter wp-block-embed-twitter">
+							<figure data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-rich is-provider-twitter wp-block-embed-twitter">
 								<div class="wp-block-embed__wrapper">
 									<blockquote class="twitter-tweet" data-width="550" data-dnt="true"><p lang="en" dir="ltr">We want your feedback for the Privacy Sandbox 📨<br><br>Learn why your feedback is critical through real examples and learn how to provide it ↓ <a href="https://t.co/anGk6gWkbc">https://t.co/anGk6gWkbc</a></p>&mdash; Chrome for Developers (@ChromiumDev) <a href="https://twitter.com/ChromiumDev/status/1636796541368139777?ref_src=twsrc%5Etfw">March 17, 2023</a></blockquote>
 									<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -211,7 +211,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<figure class="wp-block-embed is-type-rich is-provider-twitter wp-block-embed-twitter">
+							<figure data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-rich is-provider-twitter wp-block-embed-twitter">
 								<div class="wp-block-embed__wrapper">
 									<blockquote class="twitter-tweet" data-width="550" data-dnt="true"><p lang="en" dir="ltr">We want your feedback for the Privacy Sandbox 📨<br><br>Learn why your feedback is critical through real examples and learn how to provide it ↓ <a href="https://t.co/anGk6gWkbc">https://t.co/anGk6gWkbc</a></p>&mdash; Chrome for Developers (@ChromiumDev) <a href="https://twitter.com/ChromiumDev/status/1636796541368139777?ref_src=twsrc%5Etfw">March 17, 2023</a></blockquote>
 									<script data-od-added-type type="application/vnd.embed-optimizer.javascript" async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
@@ -263,7 +263,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preconnect" href="https://v0.wordpress.com">
 						</head>
 						<body>
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
 								<div class="wp-block-embed__wrapper">
 									<iframe title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
 									<script src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
@@ -311,7 +311,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
 								<div class="wp-block-embed__wrapper">
 									<iframe data-od-added-loading loading="lazy" title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
 									<script data-od-added-type type="application/vnd.embed-optimizer.javascript" src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
@@ -360,7 +360,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-rich is-provider-spotify wp-block-embed-spotify wp-embed-aspect-21-9 wp-has-aspect-ratio">
+							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-rich is-provider-spotify wp-block-embed-spotify wp-embed-aspect-21-9 wp-has-aspect-ratio">
 								<div class="wp-block-embed__wrapper">
 									<iframe data-od-added-loading loading="lazy" title="Spotify Embed: Deep Focus" style="border-radius: 12px" width="100%" height="352" frameborder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" src="https://open.spotify.com/embed/playlist/37i9dQZF1DWZeKCadgRdKQ?utm_source=oembed"></iframe>
 								</div>
@@ -447,12 +447,12 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<figure class="wp-block-embed is-type-video">
+							<figure style="background: black; color:gray" class="wp-block-embed is-type-video">
 								<div class="wp-block-embed__wrapper">
 									<video src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
 								</div>
 							</figure>
-							<figure class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
+							<figure style="background: black; color: white;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
 								<div class="wp-block-embed__wrapper">
 									<figure>
 										<p>So I heard you like <code>FIGURE</code>?</p>
@@ -474,12 +474,12 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preload" as="image" href="https://example.com/poster1.jpg">
 						</head>
 						<body>
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-video">
+							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" data-od-replaced-style="background: black; color:gray" style="background: black; color:gray; min-height: 500px;" class="wp-block-embed is-type-video">
 								<div class="wp-block-embed__wrapper">
 									<video data-od-added-preload data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]" preload="auto" src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
 								</div>
 							</figure>
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
+							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]" data-od-replaced-style="background: black; color: white;" style="background: black; color: white; min-height: 500px;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
 								<div class="wp-block-embed__wrapper">
 									<figure>
 										<p>So I heard you like <code>FIGURE</code>?</p>
@@ -654,12 +654,12 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							'isLCPCandidate'     => true,
 							'intersectionRatio'  => 1,
 							'intersectionRect'   => array(
-								'width'  => 100,
-								'height' => 100,
+								'width'  => 500,
+								'height' => 500,
 							),
 							'boundingClientRect' => array(
-								'width'  => 100,
-								'height' => 100,
+								'width'  => 500,
+								'height' => 500,
 							),
 						),
 						$element
