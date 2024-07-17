@@ -13,7 +13,7 @@
     "@octokit/rest": "^21.0.1",
     "@wordpress/env": "^10.3.0",
     "@wordpress/scripts": "^28.3.0",
-    "commander": "^9.4.1",
+    "commander": "12.1.0",
     "copy-webpack-plugin": "^12.0.2",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
