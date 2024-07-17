@@ -47,16 +47,19 @@ const optimizationDetective = ( env ) => {
 		return defaultBuildConfig;
 	}
 
-	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
-	const destination = path.resolve(
+	const pluginRoot = path.resolve(
 		__dirname,
-		'plugins/optimization-detective/build'
+		'plugins/optimization-detective'
 	);
+
+	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
+	const destination = path.resolve( pluginRoot, 'build' );
 
 	return {
 		...sharedConfig,
 		name: 'optimization-detective',
 		plugins: [
+			...sharedConfig.plugins,
 			new CopyWebpackPlugin( {
 				patterns: [
 					{
@@ -76,6 +79,45 @@ const optimizationDetective = ( env ) => {
 			new WebpackBar( {
 				name: 'Building Optimization Detective Assets',
 				color: '#2196f3',
+			} ),
+		],
+	};
+};
+
+/**
+ * Webpack Config: Performance Dashboard
+ *
+ * @param {*} env Webpack environment
+ * @return {Object} Webpack configuration
+ */
+const performanceDashboard = ( env ) => {
+	if ( env.plugin && env.plugin !== 'performance-dashboard' ) {
+		return defaultBuildConfig;
+	}
+
+	const pluginRoot = path.resolve(
+		__dirname,
+		'plugins/performance-dashboard'
+	);
+
+	const destination = path.resolve( pluginRoot, 'build' );
+
+	return {
+		...sharedConfig,
+		name: 'performance-dashboard',
+		entry: {
+			'performance-dashboard': `${ pluginRoot }/assets/performance-dashboard.jsx`,
+			'performance-dashboard-widget': `${ pluginRoot }/assets/performance-dashboard-widget.jsx`,
+		},
+		output: {
+			filename: '[name].js',
+			path: destination,
+		},
+		plugins: [
+			...sharedConfig.plugins,
+			new WebpackBar( {
+				name: 'Building Performance Dashboard Assets',
+				color: '#fdea62',
 			} ),
 		],
 	};
@@ -155,4 +197,4 @@ const buildPlugin = ( env ) => {
 	};
 };
 
-module.exports = [ optimizationDetective, buildPlugin ];
+module.exports = [ optimizationDetective, performanceDashboard, buildPlugin ];

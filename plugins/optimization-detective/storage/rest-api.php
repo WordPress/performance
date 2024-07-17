@@ -29,6 +29,8 @@ const OD_REST_API_NAMESPACE = 'optimization-detective/v1';
  */
 const OD_URL_METRICS_ROUTE = '/url-metrics:store';
 
+const OD_CHART_ROUTE = '/url-metrics:chart';
+
 /**
  * Registers endpoint for storage of URL metric.
  *
@@ -64,7 +66,7 @@ function od_register_endpoint(): void {
 		OD_REST_API_NAMESPACE,
 		OD_URL_METRICS_ROUTE,
 		array(
-			'methods'             => 'POST',
+			'methods'             => WP_REST_Server::CREATABLE,
 			'args'                => array_merge(
 				$args,
 				rest_get_endpoint_args_for_schema( OD_URL_Metric::get_json_schema() )
@@ -81,6 +83,26 @@ function od_register_endpoint(): void {
 						array( 'status' => 403 )
 					);
 				}
+				return true;
+			},
+		)
+	);
+
+	register_rest_route(
+		OD_REST_API_NAMESPACE,
+		OD_CHART_ROUTE . '/(?P<id>[\d]+)',
+		array(
+			'methods'             => WP_REST_Server::READABLE,
+			'args'                => array(
+				'id' => array(
+					'description' => __( 'Unique identifier for the object.', 'optimization-detective' ),
+					'type'        => 'integer',
+				),
+			),
+			'callback'            => static function ( WP_REST_Request $request ) {
+				return od_handle_chart_rest_request( $request );
+			},
+			'permission_callback' => static function () {
 				return true;
 			},
 		)
@@ -153,18 +175,58 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
-	$result = OD_URL_Metrics_Post_Type::store_url_metric(
+	$post_id = OD_URL_Metrics_Post_Type::store_url_metric(
 		$request->get_param( 'slug' ),
 		$url_metric
 	);
 
-	if ( $result instanceof WP_Error ) {
-		return $result;
+	if ( $post_id instanceof WP_Error ) {
+		return $post_id;
 	}
+
+	/**
+	 * Fires when a new URL metric has been stored.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_URL_Metric   $url_metric Stored URL metric.
+	 * @param int             $post_id    Post ID where metrics were stored.
+	 * @param WP_REST_Request $request    REST request to store the URL metric.
+	 */
+	do_action( 'od_url_metric_stored', $url_metric, $post_id, $request );
 
 	return new WP_REST_Response(
 		array(
 			'success' => true,
 		)
+	);
+}
+
+/**
+ * Handles REST API request to get chart data.
+ *
+ * @since 0.1.0
+ * @access private
+ *
+ * @param WP_REST_Request $request Request.
+ * @return WP_REST_Response|WP_Error Response.
+ */
+function od_handle_chart_rest_request( WP_REST_Request $request ) {
+	$post = get_post( $request->get_param( 'id' ) );
+
+	$metrics = $post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array();
+	$metrics = array_reverse( $metrics );
+
+	$data = array();
+
+	foreach ( $metrics as $metric ) {
+		$data[] = array(
+			'date'      => wp_date( 'Y-m-d H:i', $metric->get_timestamp() ),
+			'webVitals' => $metric->get_web_vitals(),
+		);
+	}
+
+	return new WP_REST_Response(
+		$data
 	);
 }

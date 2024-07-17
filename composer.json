@@ -50,6 +50,7 @@
       "@format:dominant-color-images",
       "@format:embed-optimizer",
       "@format:optimization-detective",
+      "@format:performance-dashboard",
       "@format:speculation-rules",
       "@format:webp-uploads"
     ],
@@ -57,6 +58,7 @@
     "format:dominant-color-images":  "@format -- ./plugins/dominant-color-images --standard=./plugins/dominant-color-images/phpcs.xml.dist",
     "format:embed-optimizer":        "@format -- ./plugins/embed-optimizer --standard=./plugins/embed-optimizer/phpcs.xml.dist",
     "format:optimization-detective": "@format -- ./plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
+    "format:performance-dashboard": "@format -- ./plugins/performance-dashboard --standard=./plugins/performance-dashboard/phpcs.xml.dist",
     "format:speculation-rules":      "@format -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
     "format:webp-uploads":           "@format -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
     "lint": "phpcs",
@@ -67,6 +69,7 @@
       "@lint:embed-optimizer",
       "@lint:image-prioritizer",
       "@lint:optimization-detective",
+      "@lint:performance-dashboard",
       "@lint:performance-lab",
       "@lint:speculation-rules",
       "@lint:webp-uploads"
@@ -76,6 +79,7 @@
     "lint:embed-optimizer":        "@lint -- ./plugins/embed-optimizer --standard=./plugins/embed-optimizer/phpcs.xml.dist",
     "lint:image-prioritizer":      "@lint -- ./plugins/image-prioritizer --standard=./plugins/image-prioritizer/phpcs.xml.dist",
     "lint:optimization-detective": "@lint -- ./plugins/optimization-detective --standard=./plugins/optimization-detective/phpcs.xml.dist",
+    "lint:performance-dashboard": "@lint -- ./plugins/performance-dashboard --standard=./plugins/performance-dashboard/phpcs.xml.dist",
     "lint:performance-lab":        "@lint -- ./plugins/performance-lab --standard=./plugins/performance-lab/phpcs.xml.dist",
     "lint:speculation-rules":      "@lint -- ./plugins/speculation-rules --standard=./plugins/speculation-rules/phpcs.xml.dist",
     "lint:webp-uploads":           "@lint -- ./plugins/webp-uploads --standard=./plugins/webp-uploads/phpcs.xml.dist",
@@ -90,6 +94,7 @@
       "@test-multisite:embed-optimizer",
       "@test-multisite:image-prioritizer",
       "@test-multisite:optimization-detective",
+      "@test-multisite:performance-dashboard",
       "@test-multisite:performance-lab",
       "@test-multisite:speculation-rules",
       "@test-multisite:webp-uploads"
@@ -99,6 +104,7 @@
     "test-multisite:embed-optimizer":        "@test-multisite --verbose --testsuite embed-optimizer",
     "test-multisite:image-prioritizer":      "@test-multisite --verbose --testsuite image-prioritizer",
     "test-multisite:optimization-detective": "@test-multisite --verbose --testsuite optimization-detective",
+    "test-multisite:performance-dashboard":        "@test-multisite --verbose --testsuite performance-dashboard",
     "test-multisite:performance-lab":        "@test-multisite --verbose --testsuite performance-lab",
     "test-multisite:speculation-rules":      "@test-multisite --verbose --testsuite speculation-rules",
     "test-multisite:webp-uploads":           "@test-multisite --verbose --testsuite webp-uploads",
@@ -108,6 +114,7 @@
       "@test:embed-optimizer",
       "@test:image-prioritizer",
       "@test:optimization-detective",
+      "@test:performance-dashboard",
       "@test:performance-lab",
       "@test:speculation-rules",
       "@test:webp-uploads"
@@ -117,6 +124,7 @@
     "test:embed-optimizer":        "@test --verbose --testsuite embed-optimizer",
     "test:image-prioritizer":      "@test --verbose --testsuite image-prioritizer",
     "test:optimization-detective": "@test --verbose --testsuite optimization-detective",
+    "test:performance-dashboard":        "@test --verbose --testsuite performance-dashboard",
     "test:performance-lab":        "@test --verbose --testsuite performance-lab",
     "test:speculation-rules":      "@test --verbose --testsuite speculation-rules",
     "test:webp-uploads":           "@test --verbose --testsuite webp-uploads"

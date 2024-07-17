@@ -78,6 +78,7 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 							),
 							'timestamp' => microtime( true ),
 							'elements'  => array(),
+							'webVitals' => array(),
 						)
 					),
 				),
@@ -211,6 +212,7 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 					),
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
+					'webVitals' => array(),
 				)
 			)
 		);
@@ -398,6 +400,7 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 					),
 				),
 			),
+			'webVitals' => array(),
 		);
 		return new OD_URL_Metric( $data );
 	}

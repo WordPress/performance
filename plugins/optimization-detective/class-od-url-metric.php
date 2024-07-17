@@ -14,21 +14,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Representation of the measurements taken from a single client's visit to a specific URL.
  *
- * @phpstan-type RectData    array{ width: int, height: int }
- * @phpstan-type ElementData array{
- *                               isLCP: bool,
- *                               isLCPCandidate: bool,
- *                               xpath: string,
- *                               intersectionRatio: float,
- *                               intersectionRect: RectData,
- *                               boundingClientRect: RectData,
- *                           }
- * @phpstan-type Data        array{
- *                               url: string,
- *                               timestamp: float,
- *                               viewport: RectData,
- *                               elements: ElementData[]
- *                           }
+ * @phpstan-type RectData     array{ width: int, height: int }
+ * @phpstan-type ElementData  array{
+ *                                isLCP: bool,
+ *                                isLCPCandidate: bool,
+ *                                xpath: string,
+ *                                intersectionRatio: float,
+ *                                intersectionRect: RectData,
+ *                                boundingClientRect: RectData,
+ *                            }
+ * @phpstan-type Data         array{
+ *                                url: string,
+ *                                timestamp: float,
+ *                                viewport: RectData,
+ *                                elements: ElementData[],
+ *                                webVitals: WebVitalData
+ *                            }
+ * @phpstan-type WebVitalData array{
+ *                                LCP: float,
+ *                                CLS: float,
+ *                                INP: float|null,
+ *                                TTFB: float,
+ *                            }
  *
  * @since 0.1.0
  * @access private
@@ -38,7 +45,8 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Data.
 	 *
-	 * @var Data
+	 * @var array
+	 * @phpstan-var Data
 	 */
 	private $data;
 
@@ -162,6 +170,38 @@ final class OD_URL_Metric implements JsonSerializable {
 						'additionalProperties' => false,
 					),
 				),
+				'webVitals' => array(
+					'description' => __( 'Web vitals metrics', 'optimization-detective' ),
+					'type'        => 'object',
+					'required'    => true,
+					'properties'  => array(
+						// See the URLMetrics in detect.js.
+						'type'                 => 'object',
+						'properties'           => array(
+							'LCP'  => array(
+								'type'     => 'number',
+								'required' => false,
+								'minimum'  => 0,
+							),
+							'CLS'  => array(
+								'type'     => 'number',
+								'required' => false,
+								'minimum'  => 0,
+							),
+							'TTFB' => array(
+								'type'     => 'number',
+								'required' => false,
+								'minimum'  => 0,
+							),
+							'INP'  => array(
+								'type'     => 'number',
+								'required' => false,
+								'minimum'  => 0,
+							),
+						),
+						'additionalProperties' => false,
+					),
+				),
 			),
 			'additionalProperties' => false,
 		);
@@ -179,7 +219,8 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets viewport data.
 	 *
-	 * @return RectData Viewport data.
+	 * @return array Viewport data.
+	 * @phpstan-return RectData
 	 */
 	public function get_viewport(): array {
 		return $this->data['viewport'];
@@ -206,16 +247,28 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets elements.
 	 *
-	 * @return ElementData[] Elements.
+	 * @return array Elements.
+	 * @phpstan-return ElementData[]
 	 */
 	public function get_elements(): array {
 		return $this->data['elements'];
 	}
 
 	/**
+	 * Gets web vitals.
+	 *
+	 * @return array Web Vitals.
+	 * @phpstan-return WebVitalData
+	 */
+	public function get_web_vitals(): array {
+		return $this->data['webVitals'];
+	}
+
+	/**
 	 * Specifies data which should be serialized to JSON.
 	 *
-	 * @return Data Exports to be serialized by json_encode().
+	 * @return array Exports to be serialized by json_encode().
+	 * @phpstan-return Data
 	 */
 	public function jsonSerialize(): array {
 		return $this->data;

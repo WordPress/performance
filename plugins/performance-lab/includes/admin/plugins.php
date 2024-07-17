@@ -25,6 +25,23 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return $plugin;
 	}
 
+	$plugin = array();
+
+	if ( file_exists( WP_PLUGIN_DIR . '/' . $plugin_slug . '/load.php' ) ) {
+		$local_data = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin_slug . '/load.php' );
+
+		$plugin['name']              = $local_data['Name'];
+		$plugin['slug']              = $plugin_slug;
+		$plugin['short_description'] = $local_data['Description'];
+		$plugin['requires']          = $local_data['RequiresWP'];
+		$plugin['requires_php']      = $local_data['RequiresPHP'];
+		$plugin['requires_plugins']  = array_filter( explode( ',', $local_data['RequiresPlugins'] ) );
+		$plugin['version']           = $local_data['Version'];
+		$plugin['download_link']     = '';
+
+		return $plugin;
+	}
+
 	$fields = array(
 		'name',
 		'slug',
@@ -90,45 +107,34 @@ function perflab_render_plugins_ui(): void {
 	require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
-	$plugins              = array();
-	$experimental_plugins = array();
+	$plugins = array();
 
 	foreach ( perflab_get_standalone_plugin_data() as $plugin_slug => $plugin_data ) {
-		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from wordpress.org.
+		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from WordPress.org.
 
 		// Skip if the plugin is not on WordPress.org or there was a network error.
-		if ( $api_data instanceof WP_Error ) {
-			wp_admin_notice(
-				esc_html(
-					sprintf(
-						/* translators: 1: plugin slug. 2: error message. */
-						__( 'Failed to query WordPress.org Plugin Directory for plugin "%1$s". %2$s', 'performance-lab' ),
-						$plugin_slug,
-						$api_data->get_error_message()
-					)
+		if ( ! $api_data instanceof WP_Error ) {
+			$plugin_data = array_merge(
+				array(
+					'experimental' => false,
 				),
-				array( 'type' => 'error' )
+				$plugin_data, // Data defined within Performance Lab.
+				$api_data
 			);
-			continue;
-		}
 
-		$plugin_data = array_merge(
-			array(
-				'experimental' => false,
-			),
-			$plugin_data, // Data defined within Performance Lab.
-			$api_data
-		);
-
-		// Separate experimental plugins so that they're displayed after non-experimental plugins.
-		if ( $plugin_data['experimental'] ) {
-			$experimental_plugins[ $plugin_slug ] = $plugin_data;
-		} else {
 			$plugins[ $plugin_slug ] = $plugin_data;
 		}
 	}
 
-	if ( ! $plugins && ! $experimental_plugins ) {
+	$plugins = wp_list_sort(
+		$plugins,
+		array(
+			'experimental' => 'ASC',
+			'name'         => 'ASC',
+		)
+	);
+
+	if ( ! $plugins ) {
 		return;
 	}
 	?>
@@ -141,9 +147,6 @@ function perflab_render_plugins_ui(): void {
 					<div id="the-list">
 						<?php
 						foreach ( $plugins as $plugin_data ) {
-							perflab_render_plugin_card( $plugin_data );
-						}
-						foreach ( $experimental_plugins as $plugin_data ) {
 							perflab_render_plugin_card( $plugin_data );
 						}
 						?>
@@ -241,6 +244,7 @@ function perflab_install_and_activate_plugin( string $plugin_slug, array &$proce
 	$processed_plugins[] = $plugin_slug;
 
 	$plugin_data = perflab_query_plugin_info( $plugin_slug );
+
 	if ( $plugin_data instanceof WP_Error ) {
 		return $plugin_data;
 	}

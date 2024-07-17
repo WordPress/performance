@@ -108,6 +108,10 @@ function perflab_get_standalone_plugin_data(): array {
 			'constant'     => 'IMAGE_PRIORITIZER_VERSION',
 			'experimental' => true,
 		),
+		'performance-dashboard'   => array(
+			'constant'     => 'PERFORMANCE_DASHBOARD_VERSION',
+			'experimental' => true,
+		),
 		'performant-translations' => array(
 			'constant' => 'PERFORMANT_TRANSLATIONS_VERSION',
 		),

@@ -7,12 +7,18 @@
     "npm": ">=10.2.3"
   },
   "dependencies": {
+    "react-google-charts": "^4.0.1",
     "web-vitals": "3.5.0"
   },
   "devDependencies": {
     "@octokit/rest": "^19.0.5",
-    "@wordpress/env": "^9.6.0",
-    "@wordpress/scripts": "^26.19.0",
+    "@wordpress/api-fetch": "^6.52.0",
+    "@wordpress/components": "^27.3.0",
+    "@wordpress/dom-ready": "^3.55.0",
+    "@wordpress/element": "^5.32.0",
+    "@wordpress/env": "^9.7.0",
+    "@wordpress/i18n": "^4.55.0",
+    "@wordpress/scripts": "^27.6.0",
     "commander": "^9.4.1",
     "copy-webpack-plugin": "^12.0.2",
     "fast-glob": "^3.3.2",
@@ -38,8 +44,10 @@
     "build:plugin:embed-optimizer": "webpack --mode production --env plugin=embed-optimizer",
     "build:plugin:image-prioritizer": "webpack --mode production --env plugin=image-prioritizer",
     "build:plugin:optimization-detective": "webpack --mode production --env plugin=optimization-detective",
+    "build:plugin:performance-dashboard": "webpack --mode production --env plugin=performance-dashboard",
     "build:plugin:speculation-rules": "webpack --mode production --env plugin=speculation-rules",
     "build:plugin:webp-uploads": "webpack --mode production --env plugin=webp-uploads",
+    "start:plugin:performance-dashboard": "webpack --mode development --watch --env plugin=performance-dashboard",
     "generate-pending-release-diffs": "bin/generate-pending-release-diffs.sh",
     "format-js": "wp-scripts format",
     "lint-js": "wp-scripts lint-js",
