@@ -181,7 +181,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Count for the number of times next_token() was called
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.1
 	 * @var int
 	 * @see self::next_token()
 	 */
@@ -340,7 +340,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Gets the number of times next_token() was called.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.1
 	 * @see self::next_token()
 	 *
 	 * @return int Count of next_token() calls.
@@ -435,7 +435,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Gets the number of times seek() was called.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.1
 	 * @see self::seek()
 	 *
 	 * @return int Count of seek() calls.
