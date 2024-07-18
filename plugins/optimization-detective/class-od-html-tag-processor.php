@@ -550,8 +550,11 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			}
 			if ( ! $this->has_bookmark( $bookmark ) ) {
 				$this->warn(
-					/* translators: %s is the bookmark name */
-					__( 'Unable to append markup to %s since the bookmark no longer exists.', 'optimization-detective' )
+					sprintf(
+						/* translators: %s is the bookmark name */
+						__( 'Unable to append markup to %s since the bookmark no longer exists.', 'optimization-detective' ),
+						$bookmark
+					)
 				);
 			} else {
 				$start = $this->bookmarks[ $bookmark ]->start;
