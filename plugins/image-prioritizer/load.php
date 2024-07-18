@@ -78,6 +78,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		require_once __DIR__ . '/class-image-prioritizer-tag-visitor.php';
 		require_once __DIR__ . '/class-image-prioritizer-img-tag-visitor.php';
+		require_once __DIR__ . '/class-image-prioritizer-video-tag-visitor.php';
 		require_once __DIR__ . '/class-image-prioritizer-background-image-styled-tag-visitor.php';
 		require_once __DIR__ . '/helper.php';
 		require_once __DIR__ . '/hooks.php';
