@@ -238,7 +238,7 @@ function auto_sizes_improve_image_sizes_attributes_for_picture_element( string $
 		$sizes = $processor->get_attribute( 'sizes' );
 	}
 
-	if ( ! $sizes ) {
+	if ( ! is_string( $sizes ) ) {
 		return $content;
 	}
 
