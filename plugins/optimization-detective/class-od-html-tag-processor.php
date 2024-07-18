@@ -409,6 +409,17 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
+	 * Gets the seek count.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return int Seek count.
+	 */
+	public function get_seek_count(): int {
+		return $this->seek_count;
+	}
+
+	/**
 	 * Sets a bookmark in the HTML document.
 	 *
 	 * @inheritDoc

@@ -177,13 +177,16 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	while ( $processor->next_open_tag() ) {
 		$did_visit = false;
 		$processor->set_bookmark( $current_tag_bookmark );
-		foreach ( $visitors as $visitor ) {
-			$did_visit = $visitor( $tag_visitor_context ) || $did_visit;
 
-			// Since the visitor may have traversed HTML tags, we need to make sure we go back to this tag so that
-			// in the next iteration any relevant tag visitors may apply, in addition to properly setting the data-od-xpath
-			// on this tag below.
-			$processor->seek( $current_tag_bookmark );
+		foreach ( $visitors as $visitor ) {
+			$seek_count = $processor->get_seek_count();
+			$did_visit  = $visitor( $tag_visitor_context ) || $did_visit;
+
+			// If the visitor traversed HTML tags, we need to go back to this tag so that in the next iteration any
+			// relevant tag visitors may apply, in addition to properly setting the data-od-xpath on this tag below.
+			if ( $seek_count !== $processor->get_seek_count() ) {
+				$processor->seek( $current_tag_bookmark );
+			}
 		}
 		$processor->release_bookmark( $current_tag_bookmark );
 

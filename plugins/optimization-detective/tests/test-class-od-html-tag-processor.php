@@ -494,6 +494,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	/**
 	 * Test bookmarking and seeking.
 	 *
+	 * @covers ::get_seek_count
 	 * @covers ::set_bookmark
 	 * @covers ::seek
 	 * @covers ::release_bookmark
@@ -519,6 +520,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		);
 
 		$actual_figure_contents = array();
+		$this->assertSame( 0, $processor->get_seek_count() );
 
 		$bookmarks = array();
 		while ( $processor->next_open_tag() ) {
@@ -580,6 +582,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 				'depth' => $processor->get_current_depth(),
 			);
 		}
+		$this->assertSame( count( $bookmarks ), $processor->get_seek_count() );
 
 		$this->assertSame( $expected_figure_contents, $sought_actual_contents );
 
