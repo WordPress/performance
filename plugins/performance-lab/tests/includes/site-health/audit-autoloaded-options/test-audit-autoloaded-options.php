@@ -187,6 +187,56 @@ class Test_Audit_Autoloaded_Options extends WP_UnitTestCase {
 		);
 	}
 
+	public function test_perflab_aao_autoloaded_options_auto_enable_functionality(): void {
+
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		// Mock wp_redirect to avoid actual redirection.
+		add_filter(
+			'wp_redirect',
+			static function () {
+				return false;
+			}
+		);
+
+		// Add an autoload option with bigger size length value for testing.
+		self::set_autoloaded_option( self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES );
+
+		$table_html = perflab_aao_get_autoloaded_options_table();
+		$this->assertStringContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
+
+		// Check disable autoloaded option functionality.
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'perflab_aao_update_autoload' );
+		$_GET['action']       = 'perflab_aao_update_autoload';
+		$_GET['option_name']  = self::AUTOLOADED_OPTION_KEY;
+		$_GET['autoload']     = 'false';
+
+		perflab_aao_handle_update_autoload();
+
+		// Test that the autoloaded option is not displayed in the perflab_aao_get_autoloaded_options_table() after disabling.
+		$table_html = perflab_aao_get_autoloaded_options_table();
+		$this->assertStringNotContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
+
+		// The option already exists, so update it.
+		update_option( self::AUTOLOADED_OPTION_KEY, wp_generate_password( self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES ), 'yes' );
+
+		$table_html = perflab_aao_get_autoloaded_options_table();
+		$this->assertStringContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
+
+		// Test that the disabled autoloaded option is displayed in the disabled options perflab_aao_get_disabled_autoloaded_options_table().
+		$table_html = perflab_aao_get_disabled_autoloaded_options_table();
+		$this->assertStringNotContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
+
+		// Remove the mock filter.
+		remove_filter(
+			'wp_redirect',
+			static function () {
+				return false;
+			}
+		);
+	}
+
 	/**
 	 * Sets a test autoloaded option.
 	 *

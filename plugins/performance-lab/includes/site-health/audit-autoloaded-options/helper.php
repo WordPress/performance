@@ -211,7 +211,24 @@ function perflab_aao_get_autoloaded_options_table(): string {
 function perflab_aao_get_disabled_autoloaded_options_table(): string {
 	$disabled_options = get_option( 'perflab_aao_disabled_options', array() );
 
-	if ( ! is_array( $disabled_options ) ) {
+	$autoload_option_names = array_map(
+		static function ( $option ) {
+			return $option->option_name;
+		},
+		perflab_aao_query_autoloaded_options()
+	);
+
+	// Filter out the $disabled_options that are present in $autoload_option_names.
+	$disabled_options = array_filter(
+		$disabled_options,
+		static function ( $option ) use ( $autoload_option_names ) {
+			return ! in_array( $option, $autoload_option_names, true );
+		}
+	);
+
+	update_option( 'perflab_aao_disabled_options', $disabled_options );
+
+	if ( ! $disabled_options ) {
 		return '';
 	}
 
