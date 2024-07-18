@@ -36,4 +36,7 @@ function image_prioritizer_register_tag_visitors( OD_Tag_Visitor_Registry $regis
 
 	$bg_image_visitor = new Image_Prioritizer_Background_Image_Styled_Tag_Visitor();
 	$registry->register( 'bg-image-tags', $bg_image_visitor );
+
+	$video_visitor = new Image_Prioritizer_Video_Tag_Visitor();
+	$registry->register( 'video-tags', $video_visitor );
 }
