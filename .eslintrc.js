@@ -8,6 +8,12 @@ const config = {
 	rules: {
 		...( wpConfig?.rules || {} ),
 		'jsdoc/valid-types': 'off',
+		'import/no-unresolved': [
+			'error',
+			{
+				ignore: [ '@octokit/rest' ],
+			},
+		],
 	},
 	env: {
 		browser: true,
