@@ -231,12 +231,11 @@ function auto_sizes_improve_image_sizes_attributes_for_picture_element( string $
 		return $content;
 	}
 
-	$has_image = $processor->next_tag( array( 'tag_name' => 'img' ) );
-	$sizes     = null;
 	// Only update the markup if an image is found.
-	if ( $has_image ) {
-		$sizes = $processor->get_attribute( 'sizes' );
+	if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
+		return $content;
 	}
+	$sizes = $processor->get_attribute( 'sizes' );
 
 	if ( ! is_string( $sizes ) ) {
 		return $content;
