@@ -476,14 +476,14 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 						<body>
 							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-video">
 								<div class="wp-block-embed__wrapper">
-									<video data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]" data-od-added-preload preload="auto" src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
+									<video data-od-added-preload data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]" preload="auto" src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
 								</div>
 							</figure>
 							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
 								<div class="wp-block-embed__wrapper">
 									<figure>
 										<p>So I heard you like <code>FIGURE</code>?</p>
-										<video data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::FIGURE]/*[2][self::VIDEO]" data-od-added-preload preload="none" src="https://example.com/video2.mp4" poster="https://example.com/poster2.jpg" width="640" height="480"></video>
+										<video data-od-added-preload data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::FIGURE]/*[2][self::VIDEO]" preload="none" src="https://example.com/video2.mp4" poster="https://example.com/poster2.jpg" width="640" height="480"></video>
 										<figcaption>Tagline from Figurine embed.</figcaption>
 									</figure>
 									<iframe data-od-added-loading loading="lazy" src="https://example.com/" width="640" height="480"></iframe>
