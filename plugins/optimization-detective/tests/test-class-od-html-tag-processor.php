@@ -494,7 +494,6 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	/**
 	 * Test bookmarking and seeking.
 	 *
-	 * @covers ::get_seek_count
 	 * @covers ::set_bookmark
 	 * @covers ::seek
 	 * @covers ::release_bookmark
@@ -603,6 +602,38 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$this->assertFalse( $processor->has_bookmark( 'FIGURE' ) );
 
 		// TODO: Try adding too many bookmarks.
+	}
+
+	/**
+	 * Test get_seek_count.
+	 *
+	 * @covers ::get_seek_count
+	 */
+	public function test_get_next_token_count(): void {
+		$processor = new OD_HTML_Tag_Processor(
+			trim(
+				'
+				<html>
+					<head></head>
+					<body></body>
+				</html>
+				'
+			)
+		);
+		$this->assertSame( 0, $processor->get_next_token_count() );
+		$this->assertTrue( $processor->next_tag() );
+		$this->assertSame( 'HTML', $processor->get_tag() );
+		$this->assertSame( 1, $processor->get_next_token_count() );
+		$this->assertTrue( $processor->next_tag() );
+		$this->assertSame( 'HEAD', $processor->get_tag() );
+		$this->assertSame( 3, $processor->get_next_token_count() ); // Note that next_token() call #2 was for the whitespace between <html> and <head>.
+		$this->assertTrue( $processor->next_tag() );
+		$this->assertSame( 'HEAD', $processor->get_tag() );
+		$this->assertTrue( $processor->is_tag_closer() );
+		$this->assertSame( 4, $processor->get_next_token_count() );
+		$this->assertTrue( $processor->next_tag() );
+		$this->assertSame( 'BODY', $processor->get_tag() );
+		$this->assertSame( 6, $processor->get_next_token_count() ); // Note that next_token() call #5 was for the whitespace between </head> and <body>.
 	}
 
 	/**

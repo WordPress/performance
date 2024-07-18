@@ -522,7 +522,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 										// Set a bunch of bookmarks to fill up the total allowed.
 										$remaining_bookmark_count = WP_HTML_Tag_Processor::MAX_BOOKMARKS - count( $bookmarks );
 										for ( $i = 0; $i < $remaining_bookmark_count; $i++ ) {
-											$processor->set_bookmark( "body_bookmark_{$i}" );
+											$this->assertTrue( $processor->set_bookmark( "body_bookmark_{$i}" ) );
 										}
 										return true;
 									}

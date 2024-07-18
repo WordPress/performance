@@ -107,6 +107,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Bookmark for the end of the HEAD.
 	 *
+	 * @todo Consider reserving this.
 	 * @since 0.4.0
 	 * @var string
 	 */
@@ -115,6 +116,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Bookmark for the end of the BODY.
 	 *
+	 * @todo Consider reserving this.
 	 * @since 0.4.0
 	 * @var string
 	 */
@@ -175,6 +177,15 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @var array<string, string[]>
 	 */
 	private $buffered_text_replacements = array();
+
+	/**
+	 * Count for the number of times next_token() was called
+	 *
+	 * @since n.e.x.t
+	 * @var int
+	 * @see self::next_token()
+	 */
+	private $next_token_count = 0;
 
 	/**
 	 * Finds the next tag.
@@ -247,6 +258,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 */
 	public function next_token(): bool {
 		$this->current_xpath = null; // Clear cache.
+		++$this->next_token_count;
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags    = array();
 			$this->open_stack_indices = array();
@@ -323,6 +335,18 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Gets the number of times next_token() was called.
+	 *
+	 * @since n.e.x.t
+	 * @see self::next_token()
+	 *
+	 * @return int Count of next_token() calls.
+	 */
+	public function get_next_token_count(): int {
+		return $this->next_token_count;
 	}
 
 	/**
@@ -409,11 +433,12 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Gets the seek count.
+	 * Gets the number of times seek() was called.
 	 *
 	 * @since n.e.x.t
+	 * @see self::seek()
 	 *
-	 * @return int Seek count.
+	 * @return int Count of seek() calls.
 	 */
 	public function get_seek_count(): int {
 		return $this->seek_count;
