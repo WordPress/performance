@@ -209,7 +209,7 @@ function perflab_aao_get_autoloaded_options_table(): string {
  * @return string HTML formatted table.
  */
 function perflab_aao_get_disabled_autoloaded_options_table(): string {
-	$disabled_options = get_option( 'perflab_aao_disabled_options', array() );
+	$disabled_options = (array) get_option( 'perflab_aao_disabled_options', array() );
 
 	$autoload_option_names = array_map(
 		static function ( $option ) {
