@@ -121,12 +121,7 @@ class Test_Audit_Autoloaded_Options extends WP_UnitTestCase {
 		wp_set_current_user( $user_id );
 
 		// Mock wp_redirect to avoid actual redirection.
-		add_filter(
-			'wp_redirect',
-			static function () {
-				return false;
-			}
-		);
+		add_filter( 'wp_redirect', '__return_false' );
 
 		// Add an autoload option with small size length value for testing.
 		$test_option_string       = 'test';
@@ -177,14 +172,6 @@ class Test_Audit_Autoloaded_Options extends WP_UnitTestCase {
 		// Test that the reverted autoloaded option is displayed in the autoloaded options perflab_aao_get_autoloaded_options_table().
 		$table_html = perflab_aao_get_autoloaded_options_table();
 		$this->assertStringContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
-
-		// Remove the mock filter.
-		remove_filter(
-			'wp_redirect',
-			static function () {
-				return false;
-			}
-		);
 	}
 
 	public function test_perflab_aao_autoloaded_options_auto_enable_functionality(): void {
@@ -193,12 +180,7 @@ class Test_Audit_Autoloaded_Options extends WP_UnitTestCase {
 		wp_set_current_user( $user_id );
 
 		// Mock wp_redirect to avoid actual redirection.
-		add_filter(
-			'wp_redirect',
-			static function () {
-				return false;
-			}
-		);
+		add_filter( 'wp_redirect', '__return_false' );
 
 		// Add an autoload option with bigger size length value for testing.
 		self::set_autoloaded_option( self::WARNING_AUTOLOADED_SIZE_LIMIT_IN_BYTES );
@@ -227,14 +209,6 @@ class Test_Audit_Autoloaded_Options extends WP_UnitTestCase {
 		// Test that the disabled autoloaded option is displayed in the disabled options perflab_aao_get_disabled_autoloaded_options_table().
 		$table_html = perflab_aao_get_disabled_autoloaded_options_table();
 		$this->assertStringNotContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
-
-		// Remove the mock filter.
-		remove_filter(
-			'wp_redirect',
-			static function () {
-				return false;
-			}
-		);
 	}
 
 	/**
