@@ -763,5 +763,5 @@ add_action( 'wp_head', 'webp_uploads_render_generator' );
 
 if ( webp_uploads_is_picture_element_enabled() ) {
 	// Run filter prior to auto sizes filters https://github.com/WordPress/performance/issues/1349.
-	add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 8, 3 );
+	add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10, 3 );
 }

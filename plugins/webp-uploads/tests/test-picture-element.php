@@ -125,4 +125,75 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			),
 		);
 	}
+
+	public function test_maybe_wrap_images_in_picture_elementsss(): void {
+		$mime_type = 'image/webp';
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
+		$this->opt_in_to_jpeg_and_webp();
+
+		$this->opt_in_to_picture_element();
+
+		// Create an image.
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		// Create some content with the image.
+		$the_image = wp_get_attachment_image(
+			$attachment_id,
+			'large',
+			false,
+			array(
+				'class' => "wp-image-{$attachment_id}",
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		// Filter updates IMG tag sizes.
+		add_filter(
+			'wp_content_img_tag',
+			static function (
+				string $content
+			): string {
+				$processor = new WP_HTML_Tag_Processor( $content );
+				if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
+					return $content;
+				}
+				$processor->set_attribute( 'sizes', '(max-width: 333px) 100vw, 333px' );
+				return $processor->get_updated_html();
+			}
+		);
+
+		// Picture filter "webp_uploads_wrap_image_in_picture" is run prior to "wp_content_img_tag".
+		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
+
+		// 1024px sizes comes from "source" tags.
+		$this->assertStringContainsString( 'sizes="(max-width: 1024px) 100vw, 1024px"', $the_image );
+		// 333px sizes comes from "IMG" tag.
+		$this->assertStringContainsString( 'sizes="(max-width: 333px) 100vw, 333px"', $the_image );
+
+		// Run filter prior to Picture filter "webp_uploads_wrap_image_in_picture".
+		add_filter(
+			'wp_content_img_tag',
+			static function (
+				string $content
+			): string {
+				$processor = new WP_HTML_Tag_Processor( $content );
+				if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
+					return $content;
+				}
+				$processor->set_attribute( 'sizes', '(max-width: 333px) 100vw, 333px' );
+				return $processor->get_updated_html();
+			},
+			9
+		);
+
+		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
+
+		// 1024px sizes not set in "source" tags.
+		$this->assertStringContainsString( 'sizes="(max-width: 1024px) 100vw, 1024px"', $the_image );
+		// 333px sizes set in "IMG" and "source" tag.
+		$this->assertStringContainsString( 'sizes="(max-width: 333px) 100vw, 333px"', $the_image );
+	}
 }

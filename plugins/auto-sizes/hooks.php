@@ -216,36 +216,3 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 }
 // Run filter prior to auto sizes "auto_sizes_update_content_img_tag" filter.
 add_filter( 'wp_content_img_tag', 'auto_sizes_improve_image_sizes_attributes', 9 );
-
-/**
- * Filter the sizes attribute for picture element.
- *
- * @since n.e.x.t
- *
- * @param string $content The block content about to be rendered.
- * @return string The updated block content.
- */
-function auto_sizes_improve_image_sizes_attributes_for_picture_element( string $content ): string {
-	$processor = new WP_HTML_Tag_Processor( $content );
-	if ( ! $processor->next_tag( array( 'tag_name' => 'picture' ) ) ) {
-		return $content;
-	}
-
-	// Only update the markup if an image is found.
-	if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
-		return $content;
-	}
-	$sizes = $processor->get_attribute( 'sizes' );
-
-	if ( ! is_string( $sizes ) ) {
-		return $content;
-	}
-
-	$processor = new WP_HTML_Tag_Processor( $content );
-	while ( $processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
-		$processor->set_attribute( 'sizes', $sizes );
-	}
-
-	return $processor->get_updated_html();
-}
-add_filter( 'wp_content_img_tag', 'auto_sizes_improve_image_sizes_attributes_for_picture_element', 9 );

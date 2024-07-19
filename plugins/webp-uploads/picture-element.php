@@ -95,12 +95,10 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	list( $src, $width, $height ) = $image_src;
 	$size_array                   = array( absint( $width ), absint( $height ) );
 
-	foreach ( $mime_types as $image_mime_type ) {
-		$sizes = wp_calculate_image_sizes( $size_array, $src, $image_meta, $attachment_id );
-		if ( false === $sizes ) {
-			continue;
-		}
+	// If the 'sizes' attribute is not a string, get the sizes from the core function.
+	$sizes = (string) $processor->get_attribute( 'sizes' );
 
+	foreach ( $mime_types as $image_mime_type ) {
 		// Filter core's wp_get_attachment_image_srcset to return the sources for the current mime type.
 		$filter = static function ( $sources ) use ( $mime_type_data, $image_mime_type ): array {
 			$filtered_sources = array();
