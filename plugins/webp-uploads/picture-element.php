@@ -95,7 +95,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	list( $src, $width, $height ) = $image_src;
 	$size_array                   = array( absint( $width ), absint( $height ) );
 
-	// If the 'sizes' attribute is not a string, get the sizes from the core function.
+	// Get the sizes from the IMG tag.
 	$sizes = (string) $processor->get_attribute( 'sizes' );
 
 	foreach ( $mime_types as $image_mime_type ) {
