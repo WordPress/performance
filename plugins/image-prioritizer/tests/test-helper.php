@@ -48,7 +48,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" data-od-unknown-tag src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+							<img data-od-unknown-tag data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
@@ -340,8 +340,8 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen and (min-width: 783px)">
 						</head>
 						<body>
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" data-od-removed-loading="lazy" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" >
-							<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" data-od-removed-loading="lazy" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10"  fetchpriority="high">
+							<img data-od-removed-loading="lazy" data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" >
+							<img data-od-removed-loading="lazy" data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10"  fetchpriority="high">
 							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
