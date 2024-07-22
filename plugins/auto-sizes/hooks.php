@@ -206,6 +206,14 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 
 	if ( $sizes ) {
 		$processor->set_attribute( 'sizes', $sizes );
+
+		// The sizes filter to reflate improve sizes calculations.
+		add_filter(
+			'wp_calculate_image_sizes',
+			static function () use ( $sizes ): string {
+				return $sizes;
+			}
+		);
 	}
 
 	$processor->remove_attribute( 'data-needs-sizes-update' );
