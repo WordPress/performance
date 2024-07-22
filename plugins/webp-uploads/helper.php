@@ -393,7 +393,7 @@ function webp_uploads_sanitize_image_format( string $image_format ): string {
  * @return bool True if the option is enabled, false otherwise.
  */
 function webp_uploads_is_picture_element_enabled(): bool {
-	return (bool) get_option( 'webp_uploads_use_picture_element', false );
+	return webp_uploads_is_jpeg_fallback_enabled() && (bool) get_option( 'webp_uploads_use_picture_element', false );
 }
 
 /**

@@ -148,7 +148,7 @@ final class OD_URL_Metric implements JsonSerializable {
 							'xpath'              => array(
 								'type'     => 'string',
 								'required' => true,
-								'pattern'  => OD_HTML_Tag_Walker::XPATH_PATTERN,
+								'pattern'  => OD_HTML_Tag_Processor::XPATH_PATTERN,
 							),
 							'intersectionRatio'  => array(
 								'type'     => 'number',

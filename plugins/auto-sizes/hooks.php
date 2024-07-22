@@ -1,6 +1,6 @@
 <?php
 /**
- * Hook callbacks used for Auto-sizes for Lazy-loaded Images.
+ * Hook callbacks used for Enhanced Responsive Images.
  *
  * @package auto-sizes
  * @since 1.0.0
@@ -90,3 +90,129 @@ function auto_sizes_render_generator(): void {
 	echo '<meta name="generator" content="auto-sizes ' . esc_attr( IMAGE_AUTO_SIZES_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'auto_sizes_render_generator' );
+
+/**
+ * Gets the smaller image size if the layout width is bigger.
+ *
+ * It will return the smaller image size and return "px" if the layout width
+ * is something else, e.g. min(640px, 90vw) or 90vw.
+ *
+ * @since 1.1.0
+ *
+ * @param string $layout_width The layout width.
+ * @param int    $image_width  The image width.
+ * @return string The proper width after some calculations.
+ */
+function auto_sizes_get_width( string $layout_width, int $image_width ): string {
+	if ( str_ends_with( $layout_width, 'px' ) ) {
+		return $image_width > (int) $layout_width ? $layout_width : $image_width . 'px';
+	}
+	return $image_width . 'px';
+}
+
+/**
+ * Filter the sizes attribute for images to improve the default calculation.
+ *
+ * @since 1.1.0
+ *
+ * @param string               $content      The block content about to be rendered.
+ * @param array<string, mixed> $parsed_block The parsed block.
+ * @return string The updated block content.
+ */
+function auto_sizes_filter_image_tag( string $content, array $parsed_block ): string {
+	$processor = new WP_HTML_Tag_Processor( $content );
+	$has_image = $processor->next_tag( array( 'tag_name' => 'img' ) );
+
+	// Only update the markup if an image is found.
+	if ( $has_image ) {
+		$processor->set_attribute( 'data-needs-sizes-update', true );
+		$align = $parsed_block['attrs']['align'] ?? '';
+		if ( $align ) {
+			$processor->set_attribute( 'data-align', $align );
+		}
+
+		// Resize image width.
+		$resize_image_width = $parsed_block['attrs']['width'] ?? '';
+		if ( $resize_image_width ) {
+			$processor->set_attribute( 'data-resize-width', $resize_image_width );
+		}
+
+		$content = $processor->get_updated_html();
+	}
+	return $content;
+}
+add_filter( 'render_block_core/image', 'auto_sizes_filter_image_tag', 10, 2 );
+add_filter( 'render_block_core/cover', 'auto_sizes_filter_image_tag', 10, 2 );
+
+/**
+ * Filter the sizes attribute for images to improve the default calculation.
+ *
+ * @since 1.1.0
+ *
+ * @param string $content The block content about to be rendered.
+ * @return string The updated block content.
+ */
+function auto_sizes_improve_image_sizes_attributes( string $content ): string {
+	$processor = new WP_HTML_Tag_Processor( $content );
+	if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
+		return $content;
+	}
+
+	// Skips second time parsing if already processed.
+	if ( null === $processor->get_attribute( 'data-needs-sizes-update' ) ) {
+		return $content;
+	}
+
+	$align = $processor->get_attribute( 'data-align' );
+
+	// Retrieve width from the image tag itself.
+	$image_width = $processor->get_attribute( 'width' );
+	if ( ! $image_width && ! in_array( $align, array( 'full', 'wide' ), true ) ) {
+		return $content;
+	}
+
+	$layout = wp_get_global_settings( array( 'layout' ) );
+
+	$sizes = null;
+	// Handle different alignment use cases.
+	switch ( $align ) {
+		case 'full':
+			$sizes = '100vw';
+			break;
+
+		case 'wide':
+			if ( array_key_exists( 'wideSize', $layout ) ) {
+				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['wideSize'] );
+			}
+			break;
+
+		case 'left':
+		case 'right':
+		case 'center':
+			// Resize image width.
+			$image_width = $processor->get_attribute( 'data-resize-width' ) ?? $image_width;
+			$sizes       = sprintf( '(max-width: %1$dpx) 100vw, %1$dpx', $image_width );
+			break;
+
+		default:
+			if ( array_key_exists( 'contentSize', $layout ) ) {
+				// Resize image width.
+				$image_width = $processor->get_attribute( 'data-resize-width' ) ?? $image_width;
+				$width       = auto_sizes_get_width( $layout['contentSize'], (int) $image_width );
+				$sizes       = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
+			}
+			break;
+	}
+
+	if ( $sizes ) {
+		$processor->set_attribute( 'sizes', $sizes );
+	}
+
+	$processor->remove_attribute( 'data-needs-sizes-update' );
+	$processor->remove_attribute( 'data-align' );
+	$processor->remove_attribute( 'data-resize-width' );
+
+	return $processor->get_updated_html();
+}
+// Run filter prior to auto sizes "auto_sizes_update_content_img_tag" filter.
+add_filter( 'wp_content_img_tag', 'auto_sizes_improve_image_sizes_attributes', 9 );

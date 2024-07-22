@@ -20,6 +20,7 @@ async function getMilestoneByTitle( octokit, owner, repo, title ) {
 	const options = octokit.issues.listMilestones.endpoint.merge( {
 		owner,
 		repo,
+		state: 'all',
 	} );
 
 	/**

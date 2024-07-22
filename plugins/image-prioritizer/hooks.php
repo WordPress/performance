@@ -12,4 +12,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 add_action( 'wp_head', 'image_prioritizer_render_generator_meta_tag' );
 
-add_action( 'od_register_tag_visitors', 'image_prioritizer_register_tag_visitors', 10, 3 );
+add_action( 'od_register_tag_visitors', 'image_prioritizer_register_tag_visitors' );

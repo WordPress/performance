@@ -3,9 +3,9 @@
  * Plugin Name: Optimization Detective
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective
  * Description: Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
- * Requires at least: 6.4
+ * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 0.3.1
+ * Version: 0.4.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -65,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'optimization_detective_pending_plugin',
-	'0.3.1',
+	'0.4.1',
 	static function ( string $version ): void {
 
 		// Define the constant.
@@ -112,9 +112,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/detection.php';
 
 		// Optimization logic.
-		require_once __DIR__ . '/class-od-html-tag-walker.php';
-		require_once __DIR__ . '/class-od-preload-link-collection.php';
+		require_once __DIR__ . '/class-od-link-collection.php';
 		require_once __DIR__ . '/class-od-tag-visitor-registry.php';
+		require_once __DIR__ . '/class-od-tag-visitor-context.php';
 		require_once __DIR__ . '/optimization.php';
 
 		// Add hooks for the above requires.

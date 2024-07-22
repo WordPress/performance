@@ -32,6 +32,13 @@ if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
 	$_test_root = '/tmp/wordpress-tests-lib';
 }
 
+// Check if tests are run locally without configuring test environment.
+if ( false !== strpos( $_test_root, 'wp-phpunit/wp-phpunit' ) && ! ( getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) || defined( 'WP_TESTS_CONFIG_FILE_PATH' ) ) ) {
+	echo 'Error: wp-tests-config.php is missing! Please use wp-tests-config-sample.php to create a config file.' . PHP_EOL;
+	echo 'Info: Alternatively, you can run `npm run wp-env start && npm run test-php` to execute tests in the wp-env environment.' . PHP_EOL;
+	exit( 2 );
+}
+
 require_once $_test_root . '/includes/functions.php';
 
 // Check if we use the plugin's test suite. If so, disable the PL plugin and only load the requested plugin.
@@ -72,6 +79,13 @@ $load_plugin = static function ( string $plugin_name ) use ( &$load_plugin ): vo
 			$load_plugin( (string) $requires_plugin );
 		}
 	}
+
+	// Add plugin-specific bootstrap if it exists.
+	$plugin_bootstrap_file = WP_PLUGIN_DIR . "/$plugin_name/tests/bootstrap.php";
+	if ( file_exists( $plugin_bootstrap_file ) ) {
+		require_once $plugin_bootstrap_file;
+	}
+
 	require_once $plugin_file;
 };
 

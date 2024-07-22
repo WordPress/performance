@@ -533,29 +533,28 @@ function webp_uploads_update_image_references( $content ): string {
 	}
 
 	// This content does not have any tag on it, move forward.
+	// TODO: Eventually this should use the HTML API to parse out the image tags and then update them.
 	if ( 0 === (int) preg_match_all( '/<(img)\s[^>]+>/', $content, $img_tags, PREG_SET_ORDER ) ) {
 		return $content;
 	}
 
 	$images = array();
 	foreach ( $img_tags as list( $img ) ) {
-		// Find the ID of each image by the class.
-		if ( 0 === (int) preg_match( '/wp-image-([\d]+)/i', $img, $class_name ) ) {
+		$processor = new WP_HTML_Tag_Processor( $img );
+		if ( 0 === (int) $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+			// This condition won't ever be met since we're iterating over the IMG tags extracted with preg_match_all() above.
 			continue;
 		}
 
-		if ( empty( $class_name ) ) {
+		// Find the ID of each image by the class.
+		// TODO: It would be preferable to use the $processor->class_list() method but there seems to be some typing issues with PHPStan.
+		$class_name = $processor->get_attribute( 'class' );
+		if ( ! is_string( $class_name ) || ! preg_match( '/(?:^|\s)wp-image-([1-9]\d*)(?:\s|$)/i', $class_name, $matches ) ) {
 			continue;
 		}
 
 		// Make sure we use the last item on the list of matches.
-		$attachment_id = (int) $class_name[1];
-
-		if ( 0 === $attachment_id ) {
-			continue;
-		}
-
-		$images[ $img ] = $attachment_id;
+		$images[ $img ] = (int) $matches[1];
 	}
 
 	$attachment_ids = array_unique( array_filter( array_values( $images ) ) );
