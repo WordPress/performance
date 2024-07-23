@@ -74,7 +74,7 @@ $load_plugin = static function ( string $plugin_name ) use ( &$load_plugin ): vo
 		exit( 1 );
 	}
 
-	if ( 1 !== preg_match( '/^ \* Requires Plugins:\s*(.+)$/m', (string) file_get_contents( $plugin_file ), $matches ) ) {
+	if ( 1 === preg_match( '/^ \* Requires Plugins:\s*(.+)$/m', (string) file_get_contents( $plugin_file ), $matches ) ) {
 		foreach ( (array) preg_split( '/\s*,\s*/', $matches[1] ) as $requires_plugin ) {
 			$load_plugin( (string) $requires_plugin );
 		}
