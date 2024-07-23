@@ -79,6 +79,7 @@ function plsr_get_stored_setting_value(): array {
  * Sanitizes the setting for Speculative Loading configuration.
  *
  * @since 1.0.0
+ * @todo  Consider whether the JSON schema for the setting could be reused here.
  *
  * @param mixed $input Setting to sanitize.
  * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager' } {
@@ -122,24 +123,24 @@ function plsr_register_setting(): void {
 		array(
 			'type'              => 'object',
 			'description'       => __( 'Configuration for the Speculation Rules API.', 'speculation-rules' ),
-			'sanitize_callback' => 'plsr_sanitize_setting', // TODO: Is this even needed here due to the schema?
+			'sanitize_callback' => 'plsr_sanitize_setting',
 			'default'           => plsr_get_setting_default(),
 			'show_in_rest'      => array(
 				'schema' => array(
-					'properties' => array(
+					'type'                 => 'object',
+					'properties'           => array(
 						'mode'      => array(
 							'description' => __( 'Whether to prefetch or prerender URLs.', 'speculation-rules' ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_mode_labels() ),
-							'default'     => plsr_get_setting_default()['mode'],
 						),
 						'eagerness' => array(
 							'description' => __( 'The eagerness setting defines the heuristics based on which the loading is triggered. "Eager" will have the minimum delay to start speculative loads, "Conservative" increases the chance that only URLs the user actually navigates to are loaded.', 'speculation-rules' ),
 							'type'        => 'string',
 							'enum'        => array_keys( plsr_get_eagerness_labels() ),
-							'default'     => plsr_get_setting_default()['eagerness'],
 						),
 					),
+					'additionalProperties' => false,
 				),
 			),
 		)
