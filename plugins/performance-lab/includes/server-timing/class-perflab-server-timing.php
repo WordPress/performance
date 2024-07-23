@@ -67,7 +67,7 @@ class Perflab_Server_Timing {
 			return;
 		}
 
-		if ( did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
+		if ( 0 !== did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: WordPress action name */
@@ -113,7 +113,7 @@ class Perflab_Server_Timing {
 
 		// If the current user has already been determined, and they lack the necessary access,
 		// do not even attempt to calculate the metric.
-		if ( did_action( 'set_current_user' ) && ! current_user_can( $args['access_cap'] ) ) {
+		if ( 0 !== did_action( 'set_current_user' ) && ! current_user_can( $args['access_cap'] ) ) {
 			return;
 		}
 
@@ -160,7 +160,7 @@ class Perflab_Server_Timing {
 		do_action( 'perflab_server_timing_send_header' );
 
 		$header_value = $this->get_header();
-		if ( ! $header_value ) {
+		if ( '' === $header_value ) {
 			return;
 		}
 

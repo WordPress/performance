@@ -265,7 +265,7 @@ function perflab_install_activate_plugin_callback(): void {
 	}
 
 	$plugin_slug = perflab_sanitize_plugin_slug( wp_unslash( $_GET['slug'] ) );
-	if ( ! $plugin_slug ) {
+	if ( null === $plugin_slug ) {
 		wp_die( esc_html__( 'Invalid plugin.', 'performance-lab' ) );
 	}
 
@@ -369,11 +369,11 @@ function perflab_plugin_admin_notices(): void {
 		$activated_plugin_slug = perflab_sanitize_plugin_slug( wp_unslash( $_GET['activate'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
-	if ( $activated_plugin_slug ) {
+	if ( null !== $activated_plugin_slug ) {
 		$message = __( 'Feature activated.', 'performance-lab' );
 
 		$plugin_settings_url = perflab_get_plugin_settings_url( $activated_plugin_slug );
-		if ( $plugin_settings_url ) {
+		if ( null !== $plugin_settings_url ) {
 			/* translators: %s is the settings URL */
 			$message .= ' ' . sprintf( __( 'Review <a href="%s">settings</a>.', 'performance-lab' ), esc_url( $plugin_settings_url ) );
 		}
@@ -465,7 +465,7 @@ function perflab_get_plugin_settings_url( string $plugin_slug ): ?string {
 		return null;
 	}
 	$href = $p->get_attribute( 'href' );
-	if ( $href && is_string( $href ) ) {
+	if ( is_string( $href ) && '' !== $href ) {
 		return $href;
 	}
 
