@@ -541,7 +541,7 @@ function webp_uploads_update_image_references( $content ): string {
 	$images = array();
 	foreach ( $img_tags as list( $img ) ) {
 		$processor = new WP_HTML_Tag_Processor( $img );
-		if ( 0 === (int) $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+		if ( ! $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
 			// This condition won't ever be met since we're iterating over the IMG tags extracted with preg_match_all() above.
 			continue;
 		}
