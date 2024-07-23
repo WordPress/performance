@@ -107,7 +107,7 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 	 * @param string          $exception Expected exception.
 	 */
 	public function test_construction( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl, string $exception ): void {
-		if ( $exception ) {
+		if ( '' !== $exception ) {
 			$this->expectException( $exception );
 		}
 		$group = new OD_URL_Metrics_Group( $url_metrics, $minimum_viewport_width, $maximum_viewport_width, $sample_size, $freshness_ttl );
@@ -195,7 +195,7 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 	 * @dataProvider data_provider_test_add_url_metric
 	 */
 	public function test_add_url_metric( int $viewport_width, string $exception ): void {
-		if ( $exception ) {
+		if ( '' !== $exception ) {
 			$this->expectException( $exception );
 		}
 		$group = new OD_URL_Metrics_Group( array(), 100, 200, 1, HOUR_IN_SECONDS );

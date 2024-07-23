@@ -40,7 +40,7 @@ function perflab_aea_audit_enqueued_scripts(): void {
 			}
 
 			$path = perflab_aea_get_path_from_resource_url( $script->src );
-			if ( ! $path ) {
+			if ( '' === $path ) {
 				continue;
 			}
 
@@ -80,7 +80,7 @@ function perflab_aea_audit_enqueued_styles(): void {
 				$path = $style->extra['path'];
 			} else { // Fallback to getting the path from the style's src.
 				$path = perflab_aea_get_path_from_resource_url( $style->src );
-				if ( ! $path ) {
+				if ( '' === $path ) {
 					continue;
 				}
 			}

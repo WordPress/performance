@@ -130,7 +130,7 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, b
 					}
 				}
 			} elseif ( 'SCRIPT' === $html_processor->get_tag() ) {
-				if ( ! $html_processor->get_attribute( 'src' ) ) {
+				if ( null === $html_processor->get_attribute( 'src' ) ) {
 					$has_inline_script = true;
 				} else {
 					++$script_count;
@@ -147,7 +147,7 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, b
 		if ( 1 === $script_count && ! $has_inline_script && $html_processor->has_bookmark( $bookmark_names['script'] ) ) {
 			$needs_lazy_script = true;
 			if ( $html_processor->seek( $bookmark_names['script'] ) ) {
-				if ( $html_processor->get_attribute( 'type' ) ) {
+				if ( is_string( $html_processor->get_attribute( 'type' ) ) ) {
 					$html_processor->set_attribute( 'data-original-type', $html_processor->get_attribute( 'type' ) );
 				}
 				$html_processor->set_attribute( 'type', 'application/vnd.embed-optimizer.javascript' );
@@ -166,7 +166,7 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, b
 				// For post embeds, use visibility:hidden instead of clip since browsers will consistently load the
 				// lazy-loaded iframe (where Chromium is unreliably with clip) while at the same time improve accessibility
 				// by preventing links in the hidden iframe from receiving focus.
-				if ( $html_processor->has_class( 'wp-embedded-content' ) ) {
+				if ( true === $html_processor->has_class( 'wp-embedded-content' ) ) {
 					$style = $html_processor->get_attribute( 'style' );
 					if ( is_string( $style ) ) {
 						// WordPress core injects this clip CSS property:

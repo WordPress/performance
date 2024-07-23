@@ -63,7 +63,7 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 
 	$file = get_attached_file( $attachment_id, true );
 	// File does not exist.
-	if ( ! $file || ! file_exists( $file ) ) {
+	if ( false === $file || ! file_exists( $file ) ) {
 		return $metadata;
 	}
 
@@ -148,13 +148,13 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 			if ( ! empty( $metadata['original_image'] ) ) {
 				$uploadpath    = wp_get_upload_dir();
 				$attached_file = get_attached_file( $attachment_id );
-				if ( $attached_file ) {
+				if ( false !== $attached_file ) {
 					wp_delete_file_from_directory( $attached_file, $uploadpath['basedir'] );
 				}
 			}
 
 			// Replace the attached file with the custom MIME type version.
-			if ( $original_image ) {
+			if ( false !== $original_image ) {
 				$metadata = _wp_image_meta_replace_original( $saved_data, $original_image, $metadata, $attachment_id );
 			}
 
@@ -397,7 +397,7 @@ function webp_uploads_remove_sources_files( int $attachment_id ): void {
 			}
 
 			$intermediate_file = str_replace( $basename, $properties['file'], $file );
-			if ( ! $intermediate_file ) {
+			if ( '' === $intermediate_file ) {
 				continue;
 			}
 
@@ -429,7 +429,7 @@ function webp_uploads_remove_sources_files( int $attachment_id ): void {
 		}
 
 		$full_size = str_replace( $basename, $properties['file'], $file );
-		if ( ! $full_size ) {
+		if ( '' === $full_size ) {
 			continue;
 		}
 
@@ -534,7 +534,7 @@ function webp_uploads_update_image_references( $content ): string {
 
 	// This content does not have any tag on it, move forward.
 	// TODO: Eventually this should use the HTML API to parse out the image tags and then update them.
-	if ( ! preg_match_all( '/<(img)\s[^>]+>/', $content, $img_tags, PREG_SET_ORDER ) ) {
+	if ( 0 === (int) preg_match_all( '/<(img)\s[^>]+>/', $content, $img_tags, PREG_SET_ORDER ) ) {
 		return $content;
 	}
 
@@ -549,7 +549,11 @@ function webp_uploads_update_image_references( $content ): string {
 		// Find the ID of each image by the class.
 		// TODO: It would be preferable to use the $processor->class_list() method but there seems to be some typing issues with PHPStan.
 		$class_name = $processor->get_attribute( 'class' );
-		if ( ! is_string( $class_name ) || ! preg_match( '/(?:^|\s)wp-image-([1-9]\d*)(?:\s|$)/i', $class_name, $matches ) ) {
+		if (
+			! is_string( $class_name )
+			||
+			1 !== preg_match( '/(?:^|\s)wp-image-([1-9]\d*)(?:\s|$)/i', $class_name, $matches )
+		) {
 			continue;
 		}
 

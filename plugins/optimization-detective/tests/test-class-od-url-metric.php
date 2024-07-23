@@ -127,7 +127,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 * @param string               $error Error.
 	 */
 	public function test_constructor( array $data, string $error = '' ): void {
-		if ( $error ) {
+		if ( '' !== $error ) {
 			$this->expectException( OD_Data_Validation_Exception::class );
 			$this->expectExceptionMessage( $error );
 		}
