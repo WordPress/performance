@@ -414,7 +414,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 * Test wp_calculate_image_sizes() without improve sizes filter.
 	 */
 	public function test_wp_calculate_image_sizes_without_improve_sizes_filter(): void {
-		// Remove the improve sizes filter.
+		// Remove the improve sizes filter to check wp_calculate_image_sizes() behaviour.
 		remove_filter( 'wp_content_img_tag', 'auto_sizes_improve_image_sizes_attributes', 9 );
 
 		$image_size = 'large';
@@ -425,11 +425,12 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 
 		$result = apply_filters( 'the_content', $block_content );
 
+		$this->assertStringContainsString( $sizes, $result, 'Make sure the sizes is present in resul.' );
+
 		$new_sizes = wp_calculate_image_sizes( $image_size, $image_url, '', self::$image_id );
 
-		$this->assertStringContainsString( $sizes, $result );
-		$this->assertStringContainsString( $new_sizes, $result );
-		$this->assertSame( $new_sizes, $sizes );
+		$this->assertStringContainsString( $new_sizes, $result, 'Make sure the sizes is present in result.' );
+		$this->assertSame( $new_sizes, $sizes, 'Make sure the sizes value are the same' );
 	}
 
 	/**
@@ -438,21 +439,19 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	public function test_wp_calculate_image_sizes_with_improve_sizes_filter(): void {
 		$image_size = 'large';
 		$image_url  = wp_get_attachment_image_url( self::$image_id, $image_size );
-		$sizes      = wp_calculate_image_sizes( $image_size, $image_url, '', self::$image_id );
+
+		// Retrieves the sizes from the core function. It should return different sizes from the accurate ones.
+		$sizes = wp_calculate_image_sizes( $image_size, $image_url, '', self::$image_id );
 
 		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" alt="" class="wp-image-' . self::$image_id . '"/></figure><!-- /wp:image -->';
 
 		$result = apply_filters( 'the_content', $block_content );
 
+		// Retrieves the sizes from the core function. It should return same sizes as accurate ones.
 		$improve_sizes = wp_calculate_image_sizes( $image_size, $image_url, '', self::$image_id );
 
-		$this->assertStringContainsString( $improve_sizes, $result );
-		$this->assertStringNotContainsString( $sizes, $result );
-		$this->assertNotSame( $improve_sizes, $sizes );
-
-		remove_filter( 'wp_content_img_tag', 'auto_sizes_improve_image_sizes_attributes', 9 );
-
-		$new_sizes = wp_calculate_image_sizes( $image_size, $image_url, '', self::$image_id );
-		$this->assertSame( $improve_sizes, $new_sizes );
+		$this->assertStringContainsString( $improve_sizes, $result, 'Make sure the improve sizes is present in result.' );
+		$this->assertStringNotContainsString( $sizes, $result, 'Make sure the old sizes is present in result.' );
+		$this->assertNotSame( $improve_sizes, $sizes, 'Make sure the sizes are not same.' );
 	}
 }
