@@ -120,7 +120,8 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, b
 
 			if ( 'IFRAME' === $html_processor->get_tag() ) {
 				$loading_value = $html_processor->get_attribute( 'loading' );
-				if ( empty( $loading_value ) ) {
+				// Per the HTML spec: "The attribute's missing value default and invalid value default are both the Eager state".
+				if ( 'lazy' !== $loading_value ) {
 					++$iframe_count;
 					if ( ! $html_processor->set_bookmark( $bookmark_names['iframe'] ) ) {
 						throw new Exception(
