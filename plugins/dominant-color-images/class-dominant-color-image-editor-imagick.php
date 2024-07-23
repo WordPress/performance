@@ -27,7 +27,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 */
 	public function get_dominant_color() {
 
-		if ( ! $this->image ) {
+		if ( ! (bool) $this->image ) {
 			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'dominant-color-images' ) );
 		}
 
@@ -37,7 +37,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 			$pixel = $this->image->getImagePixelColor( 0, 0 );
 			$color = $pixel->getColor();
 			$hex   = dominant_color_rgb_to_hex( $color['r'], $color['g'], $color['b'] );
-			if ( ! $hex ) {
+			if ( null === $hex ) {
 				return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 			}
 
@@ -58,7 +58,7 @@ class Dominant_Color_Image_Editor_Imagick extends WP_Image_Editor_Imagick {
 	 */
 	public function has_transparency() {
 
-		if ( ! $this->image ) {
+		if ( ! (bool) $this->image ) {
 			return new WP_Error( 'image_editor_has_transparency_error_no_image', __( 'Transparency detection no image found.', 'dominant-color-images' ) );
 		}
 

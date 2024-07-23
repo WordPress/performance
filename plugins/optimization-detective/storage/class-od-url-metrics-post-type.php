@@ -123,7 +123,7 @@ class OD_URL_Metrics_Post_Type {
 		};
 
 		$url_metrics_data = json_decode( $post->post_content, true );
-		if ( json_last_error() ) {
+		if ( json_last_error() !== 0 ) {
 			$trigger_warning(
 				sprintf(
 					/* translators: 1: Post type slug, 2: Post ID, 3: JSON error message */
@@ -263,12 +263,12 @@ class OD_URL_Metrics_Post_Type {
 
 		// Unschedule any existing event which had a differing recurrence.
 		$scheduled_event = wp_get_scheduled_event( self::GC_CRON_EVENT_NAME );
-		if ( $scheduled_event && self::GC_CRON_RECURRENCE !== $scheduled_event->schedule ) {
+		if ( is_object( $scheduled_event ) && self::GC_CRON_RECURRENCE !== $scheduled_event->schedule ) {
 			wp_unschedule_event( $scheduled_event->timestamp, self::GC_CRON_EVENT_NAME );
-			$scheduled_event = null;
+			$scheduled_event = false;
 		}
 
-		if ( ! $scheduled_event ) {
+		if ( false === $scheduled_event ) {
 			wp_schedule_event( time(), self::GC_CRON_RECURRENCE, self::GC_CRON_EVENT_NAME );
 		}
 	}

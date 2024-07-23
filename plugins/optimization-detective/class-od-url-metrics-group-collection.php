@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  */
-final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggregate, JSONSerializable {
+final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggregate, JsonSerializable {
 
 	/**
 	 * URL metrics groups.

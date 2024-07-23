@@ -249,7 +249,7 @@ function perflab_aea_get_total_size_bytes_enqueued_scripts() {
 function perflab_aea_get_total_enqueued_styles() {
 	$enqueued_styles      = false;
 	$list_enqueued_styles = get_transient( 'aea_enqueued_front_page_styles' );
-	if ( $list_enqueued_styles ) {
+	if ( is_array( $list_enqueued_styles ) ) {
 		$enqueued_styles = count( $list_enqueued_styles );
 	}
 	return $enqueued_styles;
@@ -287,7 +287,7 @@ function perflab_aea_get_total_size_bytes_enqueued_styles() {
  * @return string Returns absolute path to the resource.
  */
 function perflab_aea_get_path_from_resource_url( string $resource_url ): string {
-	if ( ! $resource_url ) {
+	if ( '' === $resource_url ) {
 		return '';
 	}
 

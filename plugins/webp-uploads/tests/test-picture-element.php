@@ -63,7 +63,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$image_srcset                 = wp_get_attachment_image_srcset( $attachment_id, $size_to_use );
 
 		$img_src = '';
-		if ( $image_src ) {
+		if ( is_array( $image_src ) ) {
 			$img_src = $image_src[0];
 		}
 		// Remove the last size in the srcset, as it is not needed.

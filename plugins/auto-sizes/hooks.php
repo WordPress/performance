@@ -115,8 +115,8 @@ function auto_sizes_get_width( string $layout_width, int $image_width ): string 
  *
  * @since 1.1.0
  *
- * @param string               $content      The block content about to be rendered.
- * @param array<string, mixed> $parsed_block The parsed block.
+ * @param string                                                   $content      The block content about to be rendered.
+ * @param array{ attrs?: array{ align?: string, width?: string } } $parsed_block The parsed block.
  * @return string The updated block content.
  */
 function auto_sizes_filter_image_tag( string $content, array $parsed_block ): string {
@@ -126,15 +126,13 @@ function auto_sizes_filter_image_tag( string $content, array $parsed_block ): st
 	// Only update the markup if an image is found.
 	if ( $has_image ) {
 		$processor->set_attribute( 'data-needs-sizes-update', true );
-		$align = $parsed_block['attrs']['align'] ?? '';
-		if ( $align ) {
-			$processor->set_attribute( 'data-align', $align );
+		if ( isset( $parsed_block['attrs']['align'] ) ) {
+			$processor->set_attribute( 'data-align', $parsed_block['attrs']['align'] );
 		}
 
 		// Resize image width.
-		$resize_image_width = $parsed_block['attrs']['width'] ?? '';
-		if ( $resize_image_width ) {
-			$processor->set_attribute( 'data-resize-width', $resize_image_width );
+		if ( isset( $parsed_block['attrs']['width'] ) ) {
+			$processor->set_attribute( 'data-resize-width', $parsed_block['attrs']['width'] );
 		}
 
 		$content = $processor->get_updated_html();
@@ -167,7 +165,7 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 
 	// Retrieve width from the image tag itself.
 	$image_width = $processor->get_attribute( 'width' );
-	if ( ! $image_width && ! in_array( $align, array( 'full', 'wide' ), true ) ) {
+	if ( ! is_string( $image_width ) && ! in_array( $align, array( 'full', 'wide' ), true ) ) {
 		return $content;
 	}
 
@@ -204,7 +202,7 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 			break;
 	}
 
-	if ( $sizes ) {
+	if ( is_string( $sizes ) ) {
 		$processor->set_attribute( 'sizes', $sizes );
 
 		// The sizes filter to reflate improve sizes calculations.

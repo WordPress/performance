@@ -302,7 +302,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 			}
 
 			// Now sort by the breadcrumb counts in descending order, so the remaining first key is the most common breadcrumb.
-			if ( $seen_breadcrumbs ) {
+			if ( count( $seen_breadcrumbs ) > 0 ) {
 				arsort( $breadcrumb_counts );
 				$most_common_breadcrumb_index = key( $breadcrumb_counts );
 
