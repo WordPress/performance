@@ -96,7 +96,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	$size_array                   = array( absint( $width ), absint( $height ) );
 
 	// Get the sizes from the IMG tag.
-	$sizes = (string) $processor->get_attribute( 'sizes' );
+	$sizes = $processor->get_attribute( 'sizes' );
 
 	foreach ( $mime_types as $image_mime_type ) {
 		// Filter core's wp_get_attachment_image_srcset to return the sources for the current mime type.
