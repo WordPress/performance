@@ -291,4 +291,63 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		$this->assertSame( $expected_html, $the_image );
 	}
+
+	public function test_that_img_sizes_is_equal_to_source_for_picture_elementsss(): void {
+		$mime_type = 'image/webp';
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
+		$this->opt_in_to_jpeg_and_webp();
+
+		$this->opt_in_to_picture_element();
+
+		// Create an image.
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		// Remove sizes and srcset.
+		add_filter( 'wp_calculate_image_srcset_meta', '__return_null' );
+
+		// Create some content with the image.
+		$the_image = wp_get_attachment_image(
+			$attachment_id,
+			'large',
+			false,
+			array(
+				'class' => "wp-image-{$attachment_id}",
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		$processor = new WP_HTML_Tag_Processor( $the_image );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
+		$width  = (int) $processor->get_attribute( 'width' );
+		$height = (int) $processor->get_attribute( 'height' );
+		$alt    = (string) $processor->get_attribute( 'alt' );
+
+		$size_to_use                  = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
+		$image_src                    = wp_get_attachment_image_src( $attachment_id, $size_to_use );
+		list( $src, $width, $height ) = $image_src;
+
+		$img_src = '';
+		if ( is_array( $image_src ) ) {
+			$img_src = $image_src[0];
+		}
+
+		// Prepare the expected HTML by replacing placeholders with expected values.
+		$replacements = array(
+			'{{img-width}}'         => $width,
+			'{{img-height}}'        => $height,
+			'{{img-src}}'           => $img_src,
+			'{{img-attachment-id}}' => $attachment_id,
+			'{{img-alt}}'           => $alt,
+		);
+
+		$expected_html = '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" /></picture>';
+		$expected_html = str_replace( array_keys( $replacements ), array_values( $replacements ), $expected_html );
+
+		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
+
+		$this->assertSame( $expected_html, $the_image );
+	}
 }

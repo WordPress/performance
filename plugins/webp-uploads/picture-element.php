@@ -122,10 +122,10 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 			continue;
 		}
 		$picture_sources .= sprintf(
-			'<source type="%s" srcset="%s" sizes="%s">',
+			'<source type="%s"%s%s>',
 			esc_attr( $image_mime_type ),
-			esc_attr( $image_srcset ),
-			is_string( $sizes ) ? esc_attr( $sizes ) : ''
+			! empty( $image_srcset ) ? sprintf( ' srcset="%s"', esc_attr( $image_srcset ) ) : '',
+			is_string( $sizes ) ? sprintf( ' sizes="%s"', esc_attr( $sizes ) ) : ''
 		);
 	}
 
