@@ -526,7 +526,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 			if (
 				'FIGURE' === $processor->get_tag()
 				&&
-				$processor->has_class( 'wp-block-embed' )
+				true === $processor->has_class( 'wp-block-embed' )
 			) {
 				$embed_block_depth = $processor->get_current_depth();
 				do {

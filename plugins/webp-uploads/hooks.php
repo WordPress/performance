@@ -549,7 +549,11 @@ function webp_uploads_update_image_references( $content ): string {
 		// Find the ID of each image by the class.
 		// TODO: It would be preferable to use the $processor->class_list() method but there seems to be some typing issues with PHPStan.
 		$class_name = $processor->get_attribute( 'class' );
-		if ( ! is_string( $class_name ) || ! preg_match( '/(?:^|\s)wp-image-([1-9]\d*)(?:\s|$)/i', $class_name, $matches ) ) {
+		if (
+			! is_string( $class_name )
+			||
+			1 !== preg_match( '/(?:^|\s)wp-image-([1-9]\d*)(?:\s|$)/i', $class_name, $matches )
+		) {
 			continue;
 		}
 

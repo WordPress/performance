@@ -39,8 +39,8 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		// <https://github.com/php/doc-en/commit/0462f49> and <https://github.com/php/doc-en/commit/37f858a>. However, PhpStorm's stubs still think
 		// they return int|false. However, from looking at <https://github.com/php/php-src/blob/5db847e/ext/gd/gd.stub.php#L716-L718> these functions
 		// apparently only ever returned integers. So the type casting is here for the possible sake PHP<8.
-		$image_width  = (int) imagesx( $this->image );
-		$image_height = (int) imagesy( $this->image );
+		$image_width  = (int) imagesx( $this->image ); // @phpstan-ignore cast.useless
+		$image_height = (int) imagesy( $this->image ); // @phpstan-ignore cast.useless
 		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, $image_width, $image_height );
 
 		$rgb = imagecolorat( $shorted_image, 0, 0 );

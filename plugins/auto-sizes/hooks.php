@@ -127,13 +127,13 @@ function auto_sizes_filter_image_tag( string $content, array $parsed_block ): st
 	if ( $has_image ) {
 		$processor->set_attribute( 'data-needs-sizes-update', true );
 		$align = $parsed_block['attrs']['align'] ?? '';
-		if ( $align ) {
+		if ( is_string( $align ) ) {
 			$processor->set_attribute( 'data-align', $align );
 		}
 
 		// Resize image width.
 		$resize_image_width = $parsed_block['attrs']['width'] ?? '';
-		if ( $resize_image_width ) {
+		if ( is_string( $resize_image_width ) ) {
 			$processor->set_attribute( 'data-resize-width', $resize_image_width );
 		}
 
@@ -167,7 +167,7 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 
 	// Retrieve width from the image tag itself.
 	$image_width = $processor->get_attribute( 'width' );
-	if ( ! $image_width && ! in_array( $align, array( 'full', 'wide' ), true ) ) {
+	if ( ! is_string( $image_width ) && ! in_array( $align, array( 'full', 'wide' ), true ) ) {
 		return $content;
 	}
 
@@ -204,7 +204,7 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 			break;
 	}
 
-	if ( $sizes ) {
+	if ( is_string( $sizes ) ) {
 		$processor->set_attribute( 'sizes', $sizes );
 	}
 

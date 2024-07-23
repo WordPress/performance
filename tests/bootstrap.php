@@ -33,7 +33,7 @@ if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
 }
 
 // Check if tests are run locally without configuring test environment.
-if ( false !== strpos( $_test_root, 'wp-phpunit/wp-phpunit' ) && ! ( getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) || defined( 'WP_TESTS_CONFIG_FILE_PATH' ) ) ) {
+if ( false !== strpos( $_test_root, 'wp-phpunit/wp-phpunit' ) && ! ( false !== getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) || defined( 'WP_TESTS_CONFIG_FILE_PATH' ) ) ) {
 	echo 'Error: wp-tests-config.php is missing! Please use wp-tests-config-sample.php to create a config file.' . PHP_EOL;
 	echo 'Info: Alternatively, you can run `npm run wp-env start && npm run test-php` to execute tests in the wp-env environment.' . PHP_EOL;
 	exit( 2 );

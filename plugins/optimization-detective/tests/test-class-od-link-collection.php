@@ -339,7 +339,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 	 * @param string               $error           Error.
 	 */
 	public function test_add_link( array $links_args, string $expected_html, string $expected_header, int $expected_count, string $error = '' ): void {
-		if ( $error ) {
+		if ( '' !== $error ) {
 			$this->expectException( InvalidArgumentException::class );
 			$this->expectExceptionMessage( $error );
 		}
