@@ -425,7 +425,7 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 
 		$result = apply_filters( 'the_content', $block_content );
 
-		$this->assertStringContainsString( $sizes, $result, 'Make sure the sizes is present in resul.' );
+		$this->assertStringContainsString( $sizes, $result, 'Make sure the sizes is present in result.' );
 
 		$new_sizes = wp_calculate_image_sizes( $image_size, $image_url, '', self::$image_id );
 
