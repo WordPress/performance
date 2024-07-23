@@ -102,7 +102,7 @@ function od_get_current_url(): string {
 		$parsed_url = array();
 	}
 
-	if ( empty( $parsed_url['scheme'] ) ) {
+	if ( ! isset( $parsed_url['scheme'] ) ) {
 		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 	}
 	if ( ! isset( $parsed_url['host'] ) ) {
