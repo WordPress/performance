@@ -14,8 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Configuration for Web Worker Offloading.
  *
  * @since n.e.x.t
- * @see https://partytown.builder.io/configuration
- * @return array<string, mixed> Configuration for Partytown.
+ * @link https://partytown.builder.io/configuration
+ * @return array{ debug?: bool, forward?: non-empty-string[], lib: non-empty-string, loadScriptsOnMainThread?: non-empty-string[], nonce?: non-empty-string } Configuration for Partytown.
  */
 function wwo_configuration(): array {
 	$plugin_dir           = plugin_dir_path( __FILE__ );
@@ -30,9 +30,8 @@ function wwo_configuration(): array {
 	 * Add configuration for Web Worker Offloading.
 	 *
 	 * @since n.e.x.t
-	 * @see <https://partytown.builder.io/configuration>.
-	 * @param array $config Configuration for Partytown.
-	 * @return array
+	 * @link https://partytown.builder.io/configuration
+	 * @param array{ debug?: bool, forward?: non-empty-string[], lib: non-empty-string, loadScriptsOnMainThread?: non-empty-string[], nonce?: non-empty-string } $config Configuration for Partytown.
 	 */
 	return apply_filters( 'wwo_configuration', $config );
 }
