@@ -61,11 +61,7 @@ function wwo_init(): void {
 		'before'
 	);
 
-	wp_add_inline_script(
-		'web-worker-offloading',
-		$partytown_js,
-		'after'
-	);
+	wp_add_inline_script( 'web-worker-offloading', $partytown_js );
 }
 add_action( 'wp_enqueue_scripts', 'wwo_init' );
 
@@ -121,7 +117,7 @@ function wwo_update_script_strategy( array $script_handles ): array {
 
 	return $script_handles;
 }
-add_filter( 'print_scripts_array', 'wwo_update_script_strategy', 10, 1 );
+add_filter( 'print_scripts_array', 'wwo_update_script_strategy' );
 
 /**
  * Update script type for handles having `web-worker-offloading` as dependency.
