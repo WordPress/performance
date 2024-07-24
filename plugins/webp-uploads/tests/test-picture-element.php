@@ -10,6 +10,21 @@
 use WebP_Uploads\Tests\TestCase;
 
 class Test_WebP_Uploads_Picture_Element extends TestCase {
+
+	/**
+	 * Attachment ID.
+	 *
+	 * @var int
+	 */
+	public static $image_id;
+
+	/**
+	 * Setup shared fixtures.
+	 */
+	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
+		self::$image_id = $factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+	}
+
 	/**
 	 * Test that images are wrapped in picture element when enabled.
 	 *
@@ -132,16 +147,12 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 
-		// Create an image.
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
-
-		// Create some content with the image.
 		$image = wp_get_attachment_image(
-			$attachment_id,
+			self::$image_id,
 			'large',
 			false,
 			array(
-				'class' => "wp-image-{$attachment_id}",
+				'class' => 'wp-image-' . self::$image_id,
 				'alt'   => 'Green Leaves',
 			)
 		);
@@ -170,16 +181,12 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 
-		// Create an image.
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
-
-		// Create some content with the image.
 		$image = wp_get_attachment_image(
-			$attachment_id,
+			self::$image_id,
 			'large',
 			false,
 			array(
-				'class' => "wp-image-{$attachment_id}",
+				'class' => 'wp-image-' . self::$image_id,
 				'alt'   => 'Green Leaves',
 			)
 		);
@@ -226,16 +233,12 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		// Disable responsive images.
 		add_filter( 'wp_calculate_image_sizes', '__return_false' );
 
-		// Create an image.
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
-
-		// Create some content with the image.
 		$image = wp_get_attachment_image(
-			$attachment_id,
+			self::$image_id,
 			'large',
 			false,
 			array(
-				'class' => "wp-image-{$attachment_id}",
+				'class' => 'wp-image-' . self::$image_id,
 				'alt'   => 'Green Leaves',
 			)
 		);
