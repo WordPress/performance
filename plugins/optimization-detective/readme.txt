@@ -1,13 +1,11 @@
 === Optimization Detective ===
 
-Contributors:      wordpressdotorg
-Requires at least: 6.4
-Tested up to:      6.5
-Requires PHP:      7.2
-Stable tag:        0.3.1
-License:           GPLv2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, optimization, rum
+Contributors: wordpressdotorg
+Tested up to: 6.6
+Stable tag:   0.4.1
+License:      GPLv2 or later
+License URI:  https://www.gnu.org/licenses/gpl-2.0.html
+Tags:         performance, optimization, rum
 
 Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
 
@@ -134,6 +132,23 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.4.1 =
+
+**Enhancements**
+
+* Upgrade web-vitals.js from [v3.5.0](https://github.com/GoogleChrome/web-vitals/blob/main/CHANGELOG.md#v350-2023-09-28) to [v4.2.1](https://github.com/GoogleChrome/web-vitals/blob/main/CHANGELOG.md#v422-2024-07-17).
+
+**Bug Fixes**
+
+* Fix logic for seeking during optimization loop to prevent emitting seek() notices. ([1376](https://github.com/WordPress/performance/pull/1376))
+
+= 0.4.0 =
+
+**Enhancements**
+
+* Avoid passing positional parameters in Optimization Detective. ([1338](https://github.com/WordPress/performance/pull/1338))
+* Send preload links via HTTP Link headers in addition to LINK tags. ([1323](https://github.com/WordPress/performance/pull/1323))
 
 = 0.3.1 =
 

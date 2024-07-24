@@ -35,9 +35,12 @@ for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r p
 	if [ ! -d "$stable_dir/$plugin_slug" ]; then
 		svn co "https://plugins.svn.wordpress.org/$plugin_slug/trunk/" "$stable_dir/$plugin_slug" >&2
 	else
-		svn revert "$stable_dir/$plugin_slug" >&2
+		svn revert -R "$stable_dir/$plugin_slug" >&2
 		svn up --force "$stable_dir/$plugin_slug" >&2
 	fi
+
+	remote_stable_tag=$( grep "Stable tag:" "$stable_dir/$plugin_slug/readme.txt" | awk '{print $3}' )
+	local_stable_tag=$( grep "Stable tag:" "build/$plugin_slug/readme.txt" | awk '{print $3}' )
 
 	rsync -avz --delete --exclude=".svn" "build/$plugin_slug/" "$stable_dir/$plugin_slug/" >&2
 
@@ -47,8 +50,18 @@ for plugin_slug in $( if [ $# -gt 0 ]; then echo "$@"; else jq '.plugins[]' -r p
 	echo
 
 	if [ -z "$( svn status -q )" ]; then
-		echo "No changes."
+		echo "> [!NOTE]"
+		echo "> No changes."
 	else
+		if [[ "$remote_stable_tag" == "$local_stable_tag" ]]; then
+			echo "> [!WARNING]"
+			echo "> Stable tag is unchanged at $remote_stable_tag, so no plugin release will occur."
+		else
+			echo "> [!IMPORTANT]"
+			echo "> Stable tag change: $remote_stable_tag → **$local_stable_tag**"
+		fi
+		echo
+
 		echo "\`svn status\`:"
 		echo '```'
 		svn status

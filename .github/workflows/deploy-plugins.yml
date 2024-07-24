@@ -197,7 +197,7 @@ jobs:
 
       - name: Upload release assets
         if: steps.artifact-existence.outputs.exists == 'true'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             ./build/dist/${{ matrix.plugin }}.zip

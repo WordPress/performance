@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  */
-final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggregate, JSONSerializable {
+final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggregate, JsonSerializable {
 
 	/**
 	 * URL metrics groups.
@@ -445,7 +445,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	/**
 	 * Counts the URL metrics groups in the collection.
 	 *
-	 * @return int Group count.
+	 * @return int<0, max> Group count.
 	 */
 	public function count(): int {
 		return count( $this->groups );

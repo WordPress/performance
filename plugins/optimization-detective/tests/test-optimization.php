@@ -226,7 +226,7 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 									$viewport_width,
 									array(
 										array(
-											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::H1]',
+											'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 											'isLCP' => true,
 										),
 									)
@@ -254,6 +254,128 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 						</head>
 						<body>
 							<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+						</body>
+					</html>
+				',
+			),
+
+			'video'                => array(
+				'set_up'   => function (): void {
+					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+						OD_URL_Metrics_Post_Type::store_url_metric(
+							$slug,
+							$this->get_validated_url_metric(
+								$viewport_width,
+								array(
+									array(
+										'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::VIDEO]',
+										'isLCP' => true,
+									),
+								)
+							)
+						);
+					}
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<video width="620" controls poster="https://upload.wikimedia.org/wikipedia/commons/e/e8/Elephants_Dream_s5_both.jpg">
+								<source src="https://archive.org/download/ElephantsDream/ed_hd.avi" type="video/avi" />
+								<source src="https://archive.org/download/ElephantsDream/ed_1024_512kb.mp4" type="video/mp4" />
+							</video>
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							<video data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::VIDEO]" width="620" controls poster="https://upload.wikimedia.org/wikipedia/commons/e/e8/Elephants_Dream_s5_both.jpg">
+								<source src="https://archive.org/download/ElephantsDream/ed_hd.avi" type="video/avi" />
+								<source src="https://archive.org/download/ElephantsDream/ed_1024_512kb.mp4" type="video/mp4" />
+							</video>
+							<script type="module">/* import detect ... */</script>
+						</body>
+					</html>
+				',
+			),
+
+			'many_images'          => array(
+				'set_up'   => function (): void {
+					$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+					foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
+
+						$elements = array();
+						for ( $i = 1; $i < WP_HTML_Tag_Processor::MAX_SEEK_OPS; $i++ ) {
+							$elements[] = array(
+								'xpath' => sprintf( '/*[1][self::HTML]/*[2][self::BODY]/*[%d][self::IMG]', $i ),
+								'isLCP' => false,
+							);
+						}
+
+						OD_URL_Metrics_Post_Type::store_url_metric(
+							$slug,
+							$this->get_validated_url_metric(
+								$viewport_width,
+								$elements
+							)
+						);
+					}
+				},
+				'buffer'   => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							' .
+							join(
+								"\n",
+								call_user_func(
+									static function () {
+										$tags = array();
+										for ( $i = 1; $i < WP_HTML_Tag_Processor::MAX_SEEK_OPS + 1; $i++ ) {
+											$tags[] = sprintf( '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">' );
+										}
+										return $tags;
+									}
+								)
+							) .
+							'
+						</body>
+					</html>
+				',
+				'expected' => '
+					<html lang="en">
+						<head>
+							<meta charset="utf-8">
+							<title>...</title>
+						</head>
+						<body>
+							' .
+							join(
+								"\n",
+								call_user_func(
+									static function () {
+										$tags = array();
+										for ( $i = 1; $i < WP_HTML_Tag_Processor::MAX_SEEK_OPS + 1; $i++ ) {
+											$tags[] = sprintf( '<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[%d][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">', $i );
+										}
+										return $tags;
+									}
+								)
+							) .
+							'
+							<script type="module">/* import detect ... */</script>
 						</body>
 					</html>
 				',
@@ -342,18 +464,28 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 
 		add_action(
 			'od_register_tag_visitors',
-			function ( OD_Tag_Visitor_Registry $tag_visitor_registry, OD_URL_Metrics_Group_Collection $url_metrics_outer, OD_Preload_Link_Collection $preload_links_outer ): void {
+			function ( OD_Tag_Visitor_Registry $tag_visitor_registry ): void {
 				$tag_visitor_registry->register(
 					'img',
-					function ( OD_HTML_Tag_Walker $walker, OD_URL_Metrics_Group_Collection $url_metrics, OD_Preload_Link_Collection $preload_links ) use ( $url_metrics_outer, $preload_links_outer ): bool {
-						$this->assertSame( $url_metrics, $url_metrics_outer );
-						$this->assertSame( $preload_links, $preload_links_outer );
-						return $walker->get_tag() === 'IMG';
+					function ( OD_Tag_Visitor_Context $context ): bool {
+						$this->assertFalse( $context->processor->is_tag_closer() );
+						return $context->processor->get_tag() === 'IMG';
 					}
 				);
-			},
-			10,
-			3
+			}
+		);
+
+		add_action(
+			'od_register_tag_visitors',
+			function ( OD_Tag_Visitor_Registry $tag_visitor_registry ): void {
+				$tag_visitor_registry->register(
+					'video',
+					function ( OD_Tag_Visitor_Context $context ): bool {
+						$this->assertFalse( $context->processor->is_tag_closer() );
+						return $context->processor->get_tag() === 'VIDEO';
+					}
+				);
+			}
 		);
 
 		$expected = $remove_initial_tabs( $expected );

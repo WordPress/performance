@@ -1,19 +1,17 @@
 === Modern Image Formats ===
 
-Contributors:      wordpressdotorg
-Requires at least: 6.4
-Tested up to:      6.5
-Requires PHP:      7.2
-Stable tag:        2.0.1
-License:           GPLv2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, images, webp, avif, modern image formats
+Contributors: wordpressdotorg
+Tested up to: 6.6
+Stable tag:   2.0.2
+License:      GPLv2 or later
+License URI:  https://www.gnu.org/licenses/gpl-2.0.html
+Tags:         performance, images, webp, avif, modern image formats
 
 Converts images to more modern formats such as WebP or AVIF during upload.
 
 == Description ==
 
-This plugin adds WebP and AVIF support for media uploads within the WordPress application. By default, AVIF images will be generated if supported on the hosting server, otherwise WebP will be used as the output format. When both formats are available, the output format can be selected under `Settings > Media`. Modern images will be generated only for new uploads, pre-existing images will only converted to a modern format if images are "Regenerated".
+This plugin adds WebP and AVIF support for media uploads within the WordPress application. By default, AVIF images will be generated if supported on the hosting server, otherwise WebP will be used as the output format. When both formats are available, the output format can be selected under `Settings > Media`. Modern images will be generated only for new uploads, pre-existing images will only converted to a modern format if images are regenerated. Images can be regenerated with a plugin like [Regenerate Thumbnails](https://wordpress.org/plugins/regenerate-thumbnails/) or via WP-CLI with the `wp media regenerate` [command](https://developer.wordpress.org/cli/commands/media/regenerate/).
 
 By default, only modern image format sub-sizes will be generated for JPEG uploads - only the original uploaded file will still exist as a JPEG image, generated image sizes use be WebP or AVIF files. To change this behavior, there is a checkbox in `Settings > Media` "Also output JPEG" that - when checked - will result in the plugin generating both JPEG and WebP or AVIF images for every sub-size (noting again that this will only affect newly uploaded images, i.e. after making said change).
 
@@ -61,6 +59,16 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the Modern Image Formats plugin will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.0.2 =
+
+**Enhancements**
+
+* I18N: Add context to Modern Image Formats section title. ([1287](https://github.com/WordPress/performance/pull/1287))
+
+**Bug Fixes**
+
+* Improve compatibility of styling picture elements. ([1307](https://github.com/WordPress/performance/pull/1307))
 
 = 2.0.1 =
 

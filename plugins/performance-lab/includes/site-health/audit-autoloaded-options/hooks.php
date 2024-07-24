@@ -120,7 +120,7 @@ add_action( 'admin_notices', 'perflab_aao_admin_notices' );
 /**
  * Extends the health check description that merged in WordPress 6.6.
  *
- * @since n.e.x.t
+ * @since 3.3.0
  *
  * @param string $description Description message when autoloaded options bigger than threshold.
  * @return string Extended health check description.

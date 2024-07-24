@@ -3,10 +3,10 @@
  * Plugin Name: Image Prioritizer
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer
  * Description: Optimizes LCP image loading with <code>fetchpriority=high</code> and applies image lazy-loading by leveraging client-side detection with real user metrics.
- * Requires at least: 6.4
+ * Requires at least: 6.5
  * Requires PHP: 7.2
  * Requires Plugins: optimization-detective
- * Version: 0.1.1
+ * Version: 0.1.2
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -66,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'image_prioritizer_pending_plugin',
-	'0.1.1',
+	'0.1.2',
 	static function ( string $version ): void {
 
 		// Define the constant.

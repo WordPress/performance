@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Auto-sizes for Lazy-loaded Images
+ * Plugin Name: Enhanced Responsive Images
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/auto-sizes
- * Description: Instructs browsers to automatically choose the right image size for lazy-loaded images.
- * Requires at least: 6.4
+ * Description: Improves responsive images with better sizes calculations and auto-sizes for lazy-loaded images.
+ * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 1.0.2
+ * Version: 1.1.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -25,6 +25,8 @@ if ( defined( 'IMAGE_AUTO_SIZES_VERSION' ) ) {
 	return;
 }
 
-define( 'IMAGE_AUTO_SIZES_VERSION', '1.0.2' );
+define( 'IMAGE_AUTO_SIZES_VERSION', '1.1.0' );
 
 require_once __DIR__ . '/hooks.php';
+
+require_once __DIR__ . '/optimization-detective.php';
