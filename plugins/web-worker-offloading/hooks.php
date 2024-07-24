@@ -46,7 +46,7 @@ function wwo_init(): void {
 	}
 
 	wp_register_script(
-		'web-worker-offloader',
+		'web-worker-offloading',
 		'',
 		array(),
 		WEB_WORKER_OFFLOADING_VERSION,
@@ -54,7 +54,7 @@ function wwo_init(): void {
 	);
 
 	wp_add_inline_script(
-		'web-worker-offloader',
+		'web-worker-offloading',
 		sprintf(
 			'window.partytown = %s;',
 			wp_json_encode( wwo_get_configuration() )
@@ -63,7 +63,7 @@ function wwo_init(): void {
 	);
 
 	wp_add_inline_script(
-		'web-worker-offloader',
+		'web-worker-offloading',
 		$partytown_js,
 		'after'
 	);
@@ -71,35 +71,35 @@ function wwo_init(): void {
 add_action( 'wp_enqueue_scripts', 'wwo_init' );
 
 /**
- * Helper function to get all scripts tags which has `web-worker-offloader` dependency.
+ * Helper function to get all scripts tags which has `web-worker-offloading` dependency.
  *
  * @since n.e.x.t
  *
  * @return string[] Array of script handles.
  */
-function wwo_get_web_worker_offloader_handles(): array {
+function wwo_get_web_worker_offloading_handles(): array {
 	/**
-	 * Array of script handles which has `web-worker-offloader` dependency.
+	 * Array of script handles which has `web-worker-offloading` dependency.
 	 *
 	 * @var string[]
 	 */
-	static $web_worker_offloader_handles = array();
+	static $web_worker_offloading_handles = array();
 
-	if ( ! empty( $web_worker_offloader_handles ) ) {
-		return $web_worker_offloader_handles;
+	if ( ! empty( $web_worker_offloading_handles ) ) {
+		return $web_worker_offloading_handles;
 	}
 
 	foreach ( wp_scripts()->registered as $handle => $script ) {
-		if ( ! empty( $script->deps ) && in_array( 'web-worker-offloader', $script->deps, true ) ) {
-			$web_worker_offloader_handles[] = $handle;
+		if ( ! empty( $script->deps ) && in_array( 'web-worker-offloading', $script->deps, true ) ) {
+			$web_worker_offloading_handles[] = $handle;
 		}
 	}
 
-	return $web_worker_offloader_handles;
+	return $web_worker_offloading_handles;
 }
 
 /**
- * Mark scripts with `web-worker-offloader` dependency as async.
+ * Mark scripts with `web-worker-offloading` dependency as async.
  *
  * Why this is needed?
  *
@@ -114,9 +114,9 @@ function wwo_get_web_worker_offloader_handles(): array {
  * @return string[] Array of script handles.
  */
 function wwo_update_script_strategy( array $script_handles ): array {
-	$web_worker_offloader_handles = wwo_get_web_worker_offloader_handles();
+	$web_worker_offloading_handles = wwo_get_web_worker_offloading_handles();
 
-	foreach ( array_intersect( $script_handles, $web_worker_offloader_handles ) as $handle ) {
+	foreach ( array_intersect( $script_handles, $web_worker_offloading_handles ) as $handle ) {
 		wp_script_add_data( $handle, 'strategy', 'async' );
 	}
 
@@ -125,7 +125,7 @@ function wwo_update_script_strategy( array $script_handles ): array {
 add_filter( 'print_scripts_array', 'wwo_update_script_strategy', 10, 1 );
 
 /**
- * Update script type for handles having `web-worker-offloader` as dependency.
+ * Update script type for handles having `web-worker-offloading` as dependency.
  *
  * @since n.e.x.t
  *
@@ -135,9 +135,9 @@ add_filter( 'print_scripts_array', 'wwo_update_script_strategy', 10, 1 );
  * @return string $tag Script tag with type="text/partytown" for eligible scripts.
  */
 function wwo_update_script_type( string $tag, string $handle ): string {
-	$web_worker_offloader_handles = wwo_get_web_worker_offloader_handles();
+	$web_worker_offloading_handles = wwo_get_web_worker_offloading_handles();
 
-	if ( in_array( $handle, $web_worker_offloader_handles, true ) ) {
+	if ( in_array( $handle, $web_worker_offloading_handles, true ) ) {
 		$html_processor = new WP_HTML_Tag_Processor( $tag );
 
 		while ( $html_processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {

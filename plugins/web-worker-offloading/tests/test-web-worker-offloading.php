@@ -56,10 +56,10 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$wp_content_dir   = WP_CONTENT_DIR;
 		$partytown_config = wwo_get_configuration();
 		$partytown_lib    = dirname( $wp_content_dir ) . $partytown_config['lib'];
-		$before_data      = wp_scripts()->get_inline_script_data( 'web-worker-offloader', 'before' );
-		$after_data       = wp_scripts()->get_inline_script_data( 'web-worker-offloader', 'after' );
+		$before_data      = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'before' );
+		$after_data       = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'after' );
 
-		$this->assertTrue( wp_script_is( 'web-worker-offloader', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'registered' ) );
 		$this->assertNotEmpty( $before_data );
 		$this->assertNotEmpty( $after_data );
 		$this->assertEquals(
@@ -67,39 +67,39 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 			$before_data
 		);
 		$this->assertEquals( file_get_contents( $partytown_lib . 'partytown.js' ), $after_data );
-		$this->assertTrue( wp_script_is( 'web-worker-offloader', 'registered' ) );
+		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'registered' ) );
 
 		// Ensure that Partytown is enqueued when a script depends on it.
-		wp_enqueue_script( 'partytown-test', 'https://example.com/test.js', array( 'web-worker-offloader' ) );
+		wp_enqueue_script( 'partytown-test', 'https://example.com/test.js', array( 'web-worker-offloading' ) );
 
-		$this->assertTrue( wp_script_is( 'web-worker-offloader', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'partytown-test', 'enqueued' ) );
 
 		// Reset the state.
-		wp_scripts()->remove( 'web-worker-offloader' );
+		wp_scripts()->remove( 'web-worker-offloading' );
 		wp_scripts()->remove( 'partytown-test' );
 	}
 
 	/**
-	 * @covers ::wwo_get_web_worker_offloader_handles
+	 * @covers ::wwo_get_web_worker_offloading_handles
 	 */
-	public function test_wwo_get_web_worker_offloader_handles(): void {
-		$handles = wwo_get_web_worker_offloader_handles();
+	public function test_wwo_get_web_worker_offloading_handles(): void {
+		$handles = wwo_get_web_worker_offloading_handles();
 
 		$this->assertEmpty( $handles );
 
 		// Enqueue a script that depends on Partytown.
-		wp_enqueue_script( 'partytown-test', 'https://example.com/test.js', array( 'web-worker-offloader' ) );
+		wp_enqueue_script( 'partytown-test', 'https://example.com/test.js', array( 'web-worker-offloading' ) );
 
-		$handles = wwo_get_web_worker_offloader_handles();
+		$handles = wwo_get_web_worker_offloading_handles();
 
 		$this->assertNotEmpty( $handles );
 		$this->assertContains( 'partytown-test', $handles );
-		$this->assertTrue( wp_script_is( 'web-worker-offloader', 'enqueued' ) );
+		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'partytown-test', 'enqueued' ) );
 
 		// Reset the state.
-		wp_scripts()->remove( 'web-worker-offloader' );
+		wp_scripts()->remove( 'web-worker-offloading' );
 		wp_scripts()->remove( 'partytown-test' );
 	}
 }
