@@ -91,35 +91,35 @@ class Test_Admin_Load extends WP_UnitTestCase {
 	 */
 	public function data_provider_test_perflab_admin_pointer(): array {
 		return array(
-			'null'                    => array(
+			'null'                       => array(
 				'set_up'                => null,
 				'hook_suffix'           => null,
 				'expected'              => false,
 				'assert'                => null,
 				'dismissed_wp_pointers' => '',
 			),
-			'edit.php'                => array(
+			'edit.php'                   => array(
 				'set_up'                => null,
 				'hook_suffix'           => 'edit.php',
 				'expected'              => false,
 				'assert'                => null,
 				'dismissed_wp_pointers' => '',
 			),
-			'dashboard_not_dismissed' => array(
+			'dashboard_not_dismissed'    => array(
 				'set_up'                => null,
 				'hook_suffix'           => 'index.php',
 				'expected'              => true,
 				'assert'                => null,
 				'dismissed_wp_pointers' => '',
 			),
-			'plugins_not_dismissed'   => array(
+			'plugins_not_dismissed'      => array(
 				'set_up'                => null,
 				'hook_suffix'           => 'plugins.php',
 				'expected'              => true,
 				'assert'                => null,
 				'dismissed_wp_pointers' => '',
 			),
-			'dashboard_yes_dismissed' => array(
+			'dashboard_yes_dismissed'    => array(
 				'set_up'                => static function (): void {
 					update_user_meta( wp_get_current_user()->ID, 'dismissed_wp_pointers', 'perflab-admin-pointer' );
 				},
@@ -128,7 +128,7 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				'assert'                => null,
 				'dismissed_wp_pointers' => 'perflab-admin-pointer',
 			),
-			'perflab_screen_1st_time' => array(
+			'perflab_screen_first_time'  => array(
 				'set_up'                => static function (): void {
 					$_GET['page'] = PERFLAB_SCREEN;
 				},
@@ -137,7 +137,7 @@ class Test_Admin_Load extends WP_UnitTestCase {
 				'assert'                => null,
 				'dismissed_wp_pointers' => 'perflab-admin-pointer',
 			),
-			'perflab_screen_2nd_time' => array(
+			'perflab_screen_second_time' => array(
 				'set_up'                => static function (): void {
 					$_GET['page'] = PERFLAB_SCREEN;
 					update_user_meta( wp_get_current_user()->ID, 'dismissed_wp_pointers', 'perflab-admin-pointer' );
