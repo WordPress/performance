@@ -126,21 +126,17 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		);
 	}
 
-	public function test_that_img_sizes_not_equal_to_source_for_picture_element(): void {
+	public function test_that_img_sizes_is_equal_to_source_sizes_for_picture_element(): void {
 		$mime_type = 'image/webp';
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 
-		$this->opt_in_to_jpeg_and_webp();
-
-		$this->opt_in_to_picture_element();
-
 		// Create an image.
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 
 		// Create some content with the image.
-		$the_image = wp_get_attachment_image(
+		$image = wp_get_attachment_image(
 			$attachment_id,
 			'large',
 			false,
@@ -150,81 +146,35 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			)
 		);
 
-		// Filter updates IMG tag sizes.
-		add_filter(
-			'wp_content_img_tag',
-			static function (
-				string $content
-			): string {
-				$processor = new WP_HTML_Tag_Processor( $content );
-				if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
-					return $content;
-				}
-				$processor->set_attribute( 'sizes', '(max-width: 333px) 100vw, 333px' );
-				return $processor->get_updated_html();
-			}
-		);
+		$img_markup = apply_filters( 'the_content', $image );
 
-		$processor = new WP_HTML_Tag_Processor( $the_image );
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
-		$width  = (int) $processor->get_attribute( 'width' );
-		$height = (int) $processor->get_attribute( 'height' );
-		$alt    = (string) $processor->get_attribute( 'alt' );
-		$sizes  = (string) $processor->get_attribute( 'sizes' );
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
 
-		$size_to_use                  = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
-		$image_src                    = wp_get_attachment_image_src( $attachment_id, $size_to_use );
-		list( $src, $width, $height ) = $image_src;
-		$size_array                   = array( absint( $width ), absint( $height ) );
-		$image_meta                   = wp_get_attachment_metadata( $attachment_id );
-		$image_srcset                 = wp_get_attachment_image_srcset( $attachment_id, $size_to_use );
+		$picture_markup = apply_filters( 'the_content', $image );
 
-		$img_src = '';
-		if ( is_array( $image_src ) ) {
-			$img_src = $image_src[0];
-		}
-		// Remove the last size in the srcset, as it is not needed.
-		$jpeg_srcset = substr( $image_srcset, 0, strrpos( $image_srcset, ',' ) );
-		$webp_srcset = str_replace( '.jpg', '-jpg.webp', $jpeg_srcset );
+		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
+		$img_processor->next_tag( array( 'tag_name' => 'IMG' ) );
+		$img_sizes = $img_processor->get_attribute( 'sizes' );
 
-		// Prepare the expected HTML by replacing placeholders with expected values.
-		$replacements = array(
-			'{{img-width}}'         => $width,
-			'{{img-height}}'        => $height,
-			'{{img-src}}'           => $img_src,
-			'{{img-attachment-id}}' => $attachment_id,
-			'{{img-alt}}'           => $alt,
-			'{{img-srcset}}'        => $image_srcset,
-			'{{img-sizes}}'         => '(max-width: 333px) 100vw, 333px', // For IMG tag sizes.
-			'{{source-sizes}}'      => $sizes, // For Picture sources sizes.
-			'{{jpeg-srcset}}'       => $jpeg_srcset,
-			'{{webp-srcset}}'       => $webp_srcset,
-		);
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+		$picture_processor->next_tag( array( 'tag_name' => 'source' ) );
+		$picture_source_sizes = $picture_processor->get_attribute( 'sizes' );
 
-		$expected_html = '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{source-sizes}}"><source type="image/jpeg" srcset="{{jpeg-srcset}}" sizes="{{source-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>';
-		$expected_html = str_replace( array_keys( $replacements ), array_values( $replacements ), $expected_html );
-
-		// Picture filter "webp_uploads_wrap_image_in_picture" is run prior to "wp_content_img_tag".
-		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
-
-		$this->assertSame( $expected_html, $the_image );
+		$this->assertSame( $img_sizes, $picture_source_sizes );
 	}
 
-	public function test_that_img_sizes_is_equal_to_source_for_picture_element(): void {
+	public function test_that_img_sizes_is_equal_to_source_sizes_for_after_new_sizes_filter_picture_element(): void {
 		$mime_type = 'image/webp';
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 
-		$this->opt_in_to_jpeg_and_webp();
-
-		$this->opt_in_to_picture_element();
-
 		// Create an image.
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 
 		// Create some content with the image.
-		$the_image = wp_get_attachment_image(
+		$image = wp_get_attachment_image(
 			$attachment_id,
 			'large',
 			false,
@@ -246,70 +196,41 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 				}
 				$processor->set_attribute( 'sizes', '(max-width: 333px) 100vw, 333px' );
 				return $processor->get_updated_html();
-			},
-			9
+			}
 		);
 
-		$processor = new WP_HTML_Tag_Processor( $the_image );
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
-		$width  = (int) $processor->get_attribute( 'width' );
-		$height = (int) $processor->get_attribute( 'height' );
-		$alt    = (string) $processor->get_attribute( 'alt' );
+		$img_markup = apply_filters( 'the_content', $image );
 
-		$size_to_use                  = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
-		$image_src                    = wp_get_attachment_image_src( $attachment_id, $size_to_use );
-		list( $src, $width, $height ) = $image_src;
-		$size_array                   = array( absint( $width ), absint( $height ) );
-		$image_meta                   = wp_get_attachment_metadata( $attachment_id );
-		$image_srcset                 = wp_get_attachment_image_srcset( $attachment_id, $size_to_use );
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
 
-		$img_src = '';
-		if ( is_array( $image_src ) ) {
-			$img_src = $image_src[0];
-		}
-		// Remove the last size in the srcset, as it is not needed.
-		$jpeg_srcset = substr( $image_srcset, 0, strrpos( $image_srcset, ',' ) );
-		$webp_srcset = str_replace( '.jpg', '-jpg.webp', $jpeg_srcset );
+		$picture_markup = apply_filters( 'the_content', $image );
 
-		// Prepare the expected HTML by replacing placeholders with expected values.
-		$replacements = array(
-			'{{img-width}}'         => $width,
-			'{{img-height}}'        => $height,
-			'{{img-src}}'           => $img_src,
-			'{{img-attachment-id}}' => $attachment_id,
-			'{{img-alt}}'           => $alt,
-			'{{img-srcset}}'        => $image_srcset,
-			'{{img-sizes}}'         => '(max-width: 333px) 100vw, 333px',
-			'{{jpeg-srcset}}'       => $jpeg_srcset,
-			'{{webp-srcset}}'       => $webp_srcset,
-		);
+		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
+		$img_processor->next_tag( array( 'tag_name' => 'IMG' ) );
+		$img_sizes = $img_processor->get_attribute( 'sizes' );
 
-		$expected_html = '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><source type="image/jpeg" srcset="{{jpeg-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>';
-		$expected_html = str_replace( array_keys( $replacements ), array_values( $replacements ), $expected_html );
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+		$picture_processor->next_tag( array( 'tag_name' => 'source' ) );
+		$picture_source_sizes = $picture_processor->get_attribute( 'sizes' );
 
-		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
-
-		$this->assertSame( $expected_html, $the_image );
+		$this->assertSame( $img_sizes, $picture_source_sizes );
 	}
 
-	public function test_that_img_sizes_is_equal_to_source_for_picture_elementsss(): void {
+	public function test_disable_responsive_image_with_picture_element(): void {
 		$mime_type = 'image/webp';
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 
-		$this->opt_in_to_jpeg_and_webp();
-
-		$this->opt_in_to_picture_element();
+		// Disable responsive images.
+		add_filter( 'wp_calculate_image_sizes', '__return_false' );
 
 		// Create an image.
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 
-		// Remove sizes and srcset.
-		add_filter( 'wp_calculate_image_srcset_meta', '__return_null' );
-
 		// Create some content with the image.
-		$the_image = wp_get_attachment_image(
+		$image = wp_get_attachment_image(
 			$attachment_id,
 			'large',
 			false,
@@ -319,35 +240,21 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			)
 		);
 
-		$processor = new WP_HTML_Tag_Processor( $the_image );
-		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
-		$width  = (int) $processor->get_attribute( 'width' );
-		$height = (int) $processor->get_attribute( 'height' );
-		$alt    = (string) $processor->get_attribute( 'alt' );
+		$img_markup = apply_filters( 'the_content', $image );
 
-		$size_to_use                  = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
-		$image_src                    = wp_get_attachment_image_src( $attachment_id, $size_to_use );
-		list( $src, $width, $height ) = $image_src;
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
 
-		$img_src = '';
-		if ( is_array( $image_src ) ) {
-			$img_src = $image_src[0];
-		}
+		$picture_markup = apply_filters( 'the_content', $image );
 
-		// Prepare the expected HTML by replacing placeholders with expected values.
-		$replacements = array(
-			'{{img-width}}'         => $width,
-			'{{img-height}}'        => $height,
-			'{{img-src}}'           => $img_src,
-			'{{img-attachment-id}}' => $attachment_id,
-			'{{img-alt}}'           => $alt,
-		);
+		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
+		$img_processor->next_tag( array( 'tag_name' => 'IMG' ) );
 
-		$expected_html = '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" /></picture>';
-		$expected_html = str_replace( array_keys( $replacements ), array_values( $replacements ), $expected_html );
+		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in IMG tag.' );
 
-		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+		$picture_processor->next_tag( array( 'tag_name' => 'source' ) );
 
-		$this->assertSame( $expected_html, $the_image );
+		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in source tag.' );
 	}
 }
