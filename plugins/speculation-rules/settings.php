@@ -43,7 +43,7 @@ function plsr_get_eagerness_labels(): array {
 /**
  * Returns the default setting value for Speculative Loading configuration.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  *
  * @return array{ mode: 'prerender', eagerness: 'moderate' } {
  *     Default setting value.
@@ -62,7 +62,7 @@ function plsr_get_setting_default(): array {
 /**
  * Returns the stored setting value for Speculative Loading configuration.
  *
- * @since 1.0.0
+ * @since n.e.x.t
  *
  * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager' } {
  *     Stored setting value.
