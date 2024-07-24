@@ -430,7 +430,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 		$new_sizes = wp_calculate_image_sizes( $image_size, $image_url, '', self::$image_id );
 
 		$this->assertStringContainsString( $new_sizes, $result, 'Make sure the sizes is present in result.' );
-		$this->assertSame( $new_sizes, $sizes, 'Make sure the sizes value are the same' );
 	}
 
 	/**
@@ -447,11 +446,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 
 		$result = apply_filters( 'the_content', $block_content );
 
-		// Retrieves the sizes from the core function. It should return same sizes as accurate ones.
-		$improve_sizes = wp_calculate_image_sizes( $image_size, $image_url, '', self::$image_id );
-
-		$this->assertStringContainsString( $improve_sizes, $result, 'Make sure the improve sizes is present in result.' );
 		$this->assertStringNotContainsString( $sizes, $result, 'Make sure the old sizes is present in result.' );
-		$this->assertNotSame( $improve_sizes, $sizes, 'Make sure the sizes are not same.' );
 	}
 }

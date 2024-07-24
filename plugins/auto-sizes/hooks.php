@@ -204,22 +204,15 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 
 	if ( is_string( $sizes ) ) {
 		// Add the filter to update the sizes calculations to "wp_calculate_image_sizes".
-		add_filter(
-			'wp_calculate_image_sizes',
-			static function () use ( $sizes ): string {
-				return $sizes;
-			}
-		);
+		$filter = static function () use ( $sizes ): string {
+			return $sizes;
+		};
+		add_filter( 'wp_calculate_image_sizes', $filter );
 
 		$processor->set_attribute( 'sizes', $sizes );
 
 		// Remove the filter to update the sizes calculations to "wp_calculate_image_sizes".
-		remove_filter(
-			'wp_calculate_image_sizes',
-			static function () use ( $sizes ): string {
-				return $sizes;
-			}
-		);
+		remove_filter( 'wp_calculate_image_sizes', $filter );
 	}
 
 	$processor->remove_attribute( 'data-needs-sizes-update' );
