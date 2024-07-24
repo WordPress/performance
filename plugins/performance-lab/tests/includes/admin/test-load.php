@@ -11,6 +11,30 @@
 class Test_Admin_Load extends WP_UnitTestCase {
 
 	/**
+	 * Runs the routine before each test is executed.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+		$this->reset_wp_dependencies();
+	}
+
+	/**
+	 * After a test method runs, resets any state in WordPress the test method might have changed.
+	 */
+	public function tear_down(): void {
+		parent::tear_down();
+		$this->reset_wp_dependencies();
+	}
+
+	/**
+	 * Reset WP_Scripts and WP_Styles.
+	 */
+	private function reset_wp_dependencies(): void {
+		$GLOBALS['wp_scripts'] = null;
+		$GLOBALS['wp_styles']  = null;
+	}
+
+	/**
 	 * @covers ::perflab_add_features_page
 	 */
 	public function test_perflab_add_features_page(): void {
@@ -60,6 +84,94 @@ class Test_Admin_Load extends WP_UnitTestCase {
 		$output = ob_get_clean();
 		$this->assertStringContainsString( '<div class="wrap">', $output );
 		$this->assertStringNotContainsString( "<input type='hidden' name='option_page' value='" . PERFLAB_SCREEN . "' />", $output );
+	}
+
+	/**
+	 * @return array<string, array{ hook_suffix: string|null, expected: bool }>
+	 */
+	public function data_provider_test_perflab_admin_pointer(): array {
+		return array(
+			'null'                    => array(
+				'set_up'                => null,
+				'hook_suffix'           => null,
+				'expected'              => false,
+				'assert'                => null,
+				'dismissed_wp_pointers' => '',
+			),
+			'edit.php'                => array(
+				'set_up'                => null,
+				'hook_suffix'           => 'edit.php',
+				'expected'              => false,
+				'assert'                => null,
+				'dismissed_wp_pointers' => '',
+			),
+			'dashboard_not_dismissed' => array(
+				'set_up'                => null,
+				'hook_suffix'           => 'index.php',
+				'expected'              => true,
+				'assert'                => null,
+				'dismissed_wp_pointers' => '',
+			),
+			'plugins_not_dismissed'   => array(
+				'set_up'                => null,
+				'hook_suffix'           => 'plugins.php',
+				'expected'              => true,
+				'assert'                => null,
+				'dismissed_wp_pointers' => '',
+			),
+			'dashboard_yes_dismissed' => array(
+				'set_up'                => static function (): void {
+					update_user_meta( wp_get_current_user()->ID, 'dismissed_wp_pointers', 'perflab-admin-pointer' );
+				},
+				'hook_suffix'           => 'index.php',
+				'expected'              => false,
+				'assert'                => null,
+				'dismissed_wp_pointers' => 'perflab-admin-pointer',
+			),
+			'perflab_screen_1st_time' => array(
+				'set_up'                => static function (): void {
+					$_GET['page'] = PERFLAB_SCREEN;
+				},
+				'hook_suffix'           => 'options-general.php',
+				'expected'              => false,
+				'assert'                => null,
+				'dismissed_wp_pointers' => 'perflab-admin-pointer',
+			),
+			'perflab_screen_2nd_time' => array(
+				'set_up'                => static function (): void {
+					$_GET['page'] = PERFLAB_SCREEN;
+					update_user_meta( wp_get_current_user()->ID, 'dismissed_wp_pointers', 'perflab-admin-pointer' );
+				},
+				'hook_suffix'           => 'options-general.php',
+				'expected'              => false,
+				'assert'                => null,
+				'dismissed_wp_pointers' => 'perflab-admin-pointer',
+			),
+		);
+	}
+
+	/**
+	 * @covers ::perflab_admin_pointer
+	 * @dataProvider data_provider_test_perflab_admin_pointer
+	 *
+	 * @param Closure|null $set_up      Set up.
+	 * @param string|null  $hook_suffix Hook suffix.
+	 * @param bool         $expected    Expected.
+	 * @param Closure|null $assert      Assert.
+	 * @param string       $dismissed_wp_pointers Dismissed admin pointers.
+	 */
+	public function test_perflab_admin_pointer( ?Closure $set_up, ?string $hook_suffix, bool $expected, ?Closure $assert, string $dismissed_wp_pointers ): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		if ( $set_up instanceof Closure ) {
+			$set_up();
+		}
+		$this->assertFalse( is_network_admin() || is_user_admin() );
+		perflab_admin_pointer( $hook_suffix );
+		$this->assertSame( $expected ? 10 : false, has_action( 'admin_print_footer_scripts', 'perflab_render_pointer' ) );
+		$this->assertSame( $expected, wp_script_is( 'wp-pointer', 'enqueued' ) );
+		$this->assertSame( $expected, wp_style_is( 'wp-pointer', 'enqueued' ) );
+		$this->assertSame( $dismissed_wp_pointers, get_user_meta( $user_id, 'dismissed_wp_pointers', true ) );
 	}
 
 	/**
