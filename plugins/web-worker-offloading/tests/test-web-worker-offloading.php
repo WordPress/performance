@@ -8,12 +8,12 @@
 class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 
 	/**
-	 * @covers ::wwo_configuration
+	 * @covers ::wwo_get_configuration
 	 */
-	public function test_wwo_configuration(): void {
+	public function test_wwo_get_configuration(): void {
 		$wp_content_dir        = WP_CONTENT_DIR;
 		$partytown_assets_path = 'web-worker-offloading/build/';
-		$config                = wwo_configuration();
+		$config                = wwo_get_configuration();
 
 		$this->assertArrayHasKey( 'lib', $config );
 		$this->assertArrayHasKey( 'forward', $config );
@@ -32,7 +32,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 			}
 		);
 
-		$config = wwo_configuration();
+		$config = wwo_get_configuration();
 
 		$this->assertArrayHasKey( 'forward', $config );
 		$this->assertArrayHasKey( 'debug', $config );
@@ -54,7 +54,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		wwo_init();
 
 		$wp_content_dir   = WP_CONTENT_DIR;
-		$partytown_config = wwo_configuration();
+		$partytown_config = wwo_get_configuration();
 		$partytown_lib    = dirname( $wp_content_dir ) . $partytown_config['lib'];
 		$before_data      = wp_scripts()->get_inline_script_data( 'web-worker-offloader', 'before' );
 		$after_data       = wp_scripts()->get_inline_script_data( 'web-worker-offloader', 'after' );

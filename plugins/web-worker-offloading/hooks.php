@@ -11,18 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Configuration for Web Worker Offloading.
+ * Gets configuration for Web Worker Offloading.
  *
  * @since n.e.x.t
  * @link https://partytown.builder.io/configuration
  * @return array{ debug?: bool, forward?: non-empty-string[], lib: non-empty-string, loadScriptsOnMainThread?: non-empty-string[], nonce?: non-empty-string } Configuration for Partytown.
  */
-function wwo_configuration(): array {
-	$plugin_dir           = plugin_dir_path( __FILE__ );
-	$content_dir_basename = basename( WP_CONTENT_DIR );
-
+function wwo_get_configuration(): array {
 	$config = array(
-		'lib'     => substr( $plugin_dir, strpos( $plugin_dir, $content_dir_basename ) - 1 ) . 'build/',
+		'lib'     => wp_parse_url( plugin_dir_url( __FILE__ ), PHP_URL_PATH ) . 'build/',
 		'forward' => array(),
 	);
 
@@ -60,7 +57,7 @@ function wwo_init(): void {
 		'web-worker-offloader',
 		sprintf(
 			'window.partytown = %s;',
-			wp_json_encode( wwo_configuration() )
+			wp_json_encode( wwo_get_configuration() )
 		),
 		'before'
 	);
