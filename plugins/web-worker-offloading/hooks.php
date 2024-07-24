@@ -40,8 +40,7 @@ function wwo_get_configuration(): array {
  */
 function wwo_init(): void {
 	$partytown_js = file_get_contents( __DIR__ . '/build/partytown.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
-
-	if ( ! $partytown_js ) {
+	if ( false === $partytown_js ) {
 		return;
 	}
 
@@ -81,16 +80,16 @@ function wwo_get_web_worker_offloading_handles(): array {
 	/**
 	 * Array of script handles which has `web-worker-offloading` dependency.
 	 *
-	 * @var string[]
+	 * @var string[] $web_worker_offloading_handles
 	 */
 	static $web_worker_offloading_handles = array();
 
-	if ( ! empty( $web_worker_offloading_handles ) ) {
+	if ( count( $web_worker_offloading_handles ) > 0 ) {
 		return $web_worker_offloading_handles;
 	}
 
 	foreach ( wp_scripts()->registered as $handle => $script ) {
-		if ( ! empty( $script->deps ) && in_array( 'web-worker-offloading', $script->deps, true ) ) {
+		if ( in_array( 'web-worker-offloading', $script->deps, true ) ) {
 			$web_worker_offloading_handles[] = $handle;
 		}
 	}
@@ -142,7 +141,7 @@ function wwo_update_script_type( string $tag, string $handle ): string {
 
 		while ( $html_processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
 			if ( $html_processor->get_attribute( 'id' ) === "{$handle}-js" ) {
-				if ( ! $html_processor->get_attribute( 'async' ) ) {
+				if ( null === $html_processor->get_attribute( 'async' ) ) {
 					_doing_it_wrong(
 						'wwo_update_script_type',
 						esc_html(
