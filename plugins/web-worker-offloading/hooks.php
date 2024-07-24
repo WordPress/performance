@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since n.e.x.t
  * @link https://partytown.builder.io/configuration
+ *
  * @return array{ debug?: bool, forward?: non-empty-string[], lib: non-empty-string, loadScriptsOnMainThread?: non-empty-string[], nonce?: non-empty-string } Configuration for Partytown.
  */
 function wwo_get_configuration(): array {
@@ -28,6 +29,7 @@ function wwo_get_configuration(): array {
 	 *
 	 * @since n.e.x.t
 	 * @link https://partytown.builder.io/configuration
+	 *
 	 * @param array{ debug?: bool, forward?: non-empty-string[], lib: non-empty-string, loadScriptsOnMainThread?: non-empty-string[], nonce?: non-empty-string } $config Configuration for Partytown.
 	 */
 	return apply_filters( 'wwo_configuration', $config );
@@ -105,7 +107,6 @@ function wwo_get_web_worker_offloading_handles(): array {
  * @since n.e.x.t
  *
  * @param string[] $script_handles Array of script handles.
- *
  * @return string[] Array of script handles.
  */
 function wwo_update_script_strategy( array $script_handles ): array {
@@ -124,10 +125,9 @@ add_filter( 'print_scripts_array', 'wwo_update_script_strategy' );
  *
  * @since n.e.x.t
  *
- * @param string $tag Script tag.
+ * @param string $tag    Script tag.
  * @param string $handle Script handle.
- *
- * @return string $tag Script tag with type="text/partytown" for eligible scripts.
+ * @return string Script tag with type="text/partytown" for eligible scripts.
  */
 function wwo_update_script_type( string $tag, string $handle ): string {
 	$web_worker_offloading_handles = wwo_get_web_worker_offloading_handles();
