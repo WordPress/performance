@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since n.e.x.t
  * @see https://partytown.builder.io/configuration
- * @return array<string, mixed> Configuration for PartyTown.
+ * @return array<string, mixed> Configuration for Partytown.
  */
 function wwo_configuration(): array {
 	$plugin_dir           = plugin_dir_path( __FILE__ );
@@ -31,7 +31,7 @@ function wwo_configuration(): array {
 	 *
 	 * @since n.e.x.t
 	 * @see <https://partytown.builder.io/configuration>.
-	 * @param array $config Configuration for PartyTown.
+	 * @param array $config Configuration for Partytown.
 	 * @return array
 	 */
 	return apply_filters( 'wwo_configuration', $config );
