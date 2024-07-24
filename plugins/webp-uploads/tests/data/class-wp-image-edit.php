@@ -107,10 +107,10 @@ class WP_Image_Edit {
 	public function crop( int $width, int $height, int $x, int $y ) {
 		$this->changes[] = array(
 			'c' => array(
-				'x' => (int) $x,
-				'y' => (int) $y,
-				'w' => (int) $width,
-				'h' => (int) $height,
+				'x' => $x,
+				'y' => $y,
+				'w' => $width,
+				'h' => $height,
 			),
 		);
 

@@ -21,7 +21,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 function perflab_query_plugin_info( string $plugin_slug ) {
 	$plugin = get_transient( 'perflab_plugin_info_' . $plugin_slug );
 
-	if ( $plugin ) {
+	if ( is_array( $plugin ) ) {
+		/**
+		 * Validated (mostly) plugin data.
+		 *
+		 * @var array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string} $plugin
+		 */
 		return $plugin;
 	}
 
@@ -128,7 +133,7 @@ function perflab_render_plugins_ui(): void {
 		}
 	}
 
-	if ( ! $plugins && ! $experimental_plugins ) {
+	if ( count( $plugins ) === 0 && count( $experimental_plugins ) === 0 ) {
 		return;
 	}
 	?>
@@ -174,11 +179,11 @@ function perflab_get_plugin_availability( array $plugin_data, array &$processed_
 
 	$availability = array(
 		'compatible_php' => (
-			! $plugin_data['requires_php'] ||
+			false === $plugin_data['requires_php'] ||
 			is_php_version_compatible( $plugin_data['requires_php'] )
 		),
 		'compatible_wp'  => (
-			! $plugin_data['requires'] ||
+			false === $plugin_data['requires'] ||
 			is_wp_version_compatible( $plugin_data['requires'] )
 		),
 	);
@@ -186,7 +191,7 @@ function perflab_get_plugin_availability( array $plugin_data, array &$processed_
 	$plugin_status = install_plugin_install_status( $plugin_data );
 
 	$availability['installed'] = ( 'install' !== $plugin_status['status'] );
-	$availability['activated'] = $plugin_status['file'] && is_plugin_active( $plugin_status['file'] );
+	$availability['activated'] = false !== $plugin_status['file'] && is_plugin_active( $plugin_status['file'] );
 
 	// The plugin is already installed or the user can install plugins.
 	$availability['can_install'] = (
@@ -197,7 +202,7 @@ function perflab_get_plugin_availability( array $plugin_data, array &$processed_
 	// The plugin is activated or the user can activate plugins.
 	$availability['can_activate'] = (
 		$availability['activated'] ||
-		$plugin_status['file'] // When not false, the plugin is installed.
+		false !== $plugin_status['file'] // When not false, the plugin is installed.
 			? current_user_can( 'activate_plugin', $plugin_status['file'] )
 			: current_user_can( 'activate_plugins' )
 	);
@@ -400,7 +405,7 @@ function perflab_render_plugin_card( array $plugin_data ): void {
 
 	if ( $availability['activated'] ) {
 		$settings_url = perflab_get_plugin_settings_url( $plugin_data['slug'] );
-		if ( $settings_url ) {
+		if ( null !== $settings_url ) {
 			/* translators: %s is the settings URL */
 			$action_links[] = sprintf( '<a href="%s">%s</a>', esc_url( $settings_url ), esc_html__( 'Settings', 'performance-lab' ) );
 		}

@@ -98,7 +98,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	 * @param int             $sample_size Sample size.
 	 */
 	public function test_construction( array $url_metrics, array $breakpoints, int $sample_size, int $freshness_ttl, string $exception ): void {
-		if ( $exception ) {
+		if ( '' !== $exception ) {
 			$this->expectException( $exception );
 		}
 		$group_collection = new OD_URL_Metrics_Group_Collection( $url_metrics, $breakpoints, $sample_size, $freshness_ttl );

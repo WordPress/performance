@@ -102,7 +102,7 @@ function od_get_current_url(): string {
 		$parsed_url = array();
 	}
 
-	if ( empty( $parsed_url['scheme'] ) ) {
+	if ( ! isset( $parsed_url['scheme'] ) ) {
 		$parsed_url['scheme'] = is_ssl() ? 'https' : 'http';
 	}
 	if ( ! isset( $parsed_url['host'] ) ) {
@@ -210,7 +210,7 @@ function od_get_breakpoint_max_widths(): array {
 
 	$breakpoint_max_widths = array_map(
 		static function ( $original_breakpoint ) use ( $function_name ): int {
-			$breakpoint = (int) $original_breakpoint;
+			$breakpoint = $original_breakpoint;
 			if ( PHP_INT_MAX === $breakpoint ) {
 				$breakpoint = PHP_INT_MAX - 1;
 				_doing_it_wrong(
@@ -249,7 +249,7 @@ function od_get_breakpoint_max_widths(): array {
 		 *
 		 * @param int[] $breakpoint_max_widths Max widths for viewport breakpoints. Defaults to [480, 600, 782].
 		 */
-		(array) apply_filters( 'od_breakpoint_max_widths', array( 480, 600, 782 ) )
+		array_map( 'intval', (array) apply_filters( 'od_breakpoint_max_widths', array( 480, 600, 782 ) ) )
 	);
 
 	$breakpoint_max_widths = array_unique( $breakpoint_max_widths, SORT_NUMERIC );

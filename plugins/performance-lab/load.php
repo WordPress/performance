@@ -185,7 +185,7 @@ function perflab_maybe_set_object_cache_dropin(): void {
 	$current_dropin_version = apply_filters( 'perflab_object_cache_dropin_version', PERFLAB_OBJECT_CACHE_DROPIN_VERSION );
 
 	// Bail if already placed in the latest version or newer.
-	if ( $current_dropin_version && $current_dropin_version >= PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION ) {
+	if ( null !== $current_dropin_version && $current_dropin_version >= PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION ) {
 		return;
 	}
 
@@ -197,7 +197,7 @@ function perflab_maybe_set_object_cache_dropin(): void {
 		return;
 	}
 
-	if ( $wp_filesystem || WP_Filesystem() ) {
+	if ( $wp_filesystem instanceof WP_Filesystem_Base || true === WP_Filesystem() ) {
 		$dropin_path = WP_CONTENT_DIR . '/object-cache.php';
 
 		/*
@@ -214,7 +214,7 @@ function perflab_maybe_set_object_cache_dropin(): void {
 		 */
 		if ( $wp_filesystem->exists( $dropin_path ) ) {
 			// If this constant evaluates to `false`, the existing file is for sure from a third party.
-			if ( ! $current_dropin_version ) {
+			if ( false === $current_dropin_version ) {
 				// Set timeout of 1 day before retrying again (only in case the file already exists).
 				set_transient( 'perflab_set_object_cache_dropin', true, DAY_IN_SECONDS );
 				return;
@@ -271,7 +271,7 @@ function perflab_maybe_remove_object_cache_dropin(): void {
 		return;
 	}
 
-	if ( $wp_filesystem || WP_Filesystem() ) {
+	if ( $wp_filesystem instanceof WP_Filesystem_Base || true === WP_Filesystem() ) {
 		$dropin_path        = WP_CONTENT_DIR . '/object-cache.php';
 		$dropin_backup_path = WP_CONTENT_DIR . '/object-cache-plst-orig.php';
 

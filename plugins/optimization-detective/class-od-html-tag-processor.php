@@ -196,7 +196,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @inheritDoc
 	 * @since 0.4.0
 	 *
-	 * @param null $query Query.
+	 * @param array{tag_name?: string|null, match_offset?: int|null, class_name?: string|null, tag_closers?: string|null}|null $query Query, but only null is accepted for this subclass.
 	 * @return bool Whether a tag was matched.
 	 *
 	 * @throws InvalidArgumentException If attempting to pass a query.

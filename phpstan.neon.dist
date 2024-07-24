@@ -24,6 +24,8 @@ parameters:
 		- tools/phpstan/filtered-functions.stub
 	dynamicConstantNames:
 		- PERFLAB_OBJECT_CACHE_DROPIN_VERSION
+	strictRules:
+		strictArrayFilter: false
 	ignoreErrors:
 		-
 			# Ignore error related to PHP 8 using a GdImage but PHP 7 using a resource.
@@ -58,3 +60,15 @@ parameters:
 		-
 			identifier: cast.string
 			path: */tests/*
+		-
+			identifier: staticMethod.dynamicCall
+			path: */tests/*
+		-
+			# TODO: Remove this to fix https://github.com/WordPress/performance/issues/1219
+			identifier: empty.notAllowed
+			paths:
+				- */tests/*
+				- plugins/dominant-color-images
+				- plugins/performance-lab
+				- plugins/speculation-rules
+				- plugins/webp-uploads

@@ -80,7 +80,7 @@ class Perflab_Server_Timing_Metric {
 			return;
 		}
 
-		if ( did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
+		if ( 0 !== did_action( 'perflab_server_timing_send_header' ) && ! doing_action( 'perflab_server_timing_send_header' ) ) {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: WordPress action name */
@@ -130,7 +130,7 @@ class Perflab_Server_Timing_Metric {
 	 * @since 1.8.0
 	 */
 	public function measure_after(): void {
-		if ( ! $this->before_value ) {
+		if ( null === $this->before_value ) {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: PHP method name */

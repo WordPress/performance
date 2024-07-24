@@ -107,18 +107,18 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 						<head></head>
 						<body>
 							<span>1</span>
-							<br></br>
+							<meta></meta>
 							<span>2</span>
 						</body>
 					</html>
 				',
-				'open_tags' => array( 'HTML', 'HEAD', 'BODY', 'SPAN', 'BR', 'SPAN' ),
+				'open_tags' => array( 'HTML', 'HEAD', 'BODY', 'SPAN', 'META', 'SPAN' ),
 				'xpaths'    => array(
 					'/*[1][self::HTML]',
 					'/*[1][self::HTML]/*[1][self::HEAD]',
 					'/*[1][self::HTML]/*[2][self::BODY]',
 					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SPAN]',
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::BR]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::META]',
 					'/*[1][self::HTML]/*[2][self::BODY]/*[3][self::SPAN]',
 				),
 			),
@@ -526,7 +526,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 			if (
 				'FIGURE' === $processor->get_tag()
 				&&
-				$processor->has_class( 'wp-block-embed' )
+				true === $processor->has_class( 'wp-block-embed' )
 			) {
 				$embed_block_depth = $processor->get_current_depth();
 				do {
