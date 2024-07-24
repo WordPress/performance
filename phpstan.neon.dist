@@ -70,5 +70,4 @@ parameters:
 				- */tests/*
 				- plugins/dominant-color-images
 				- plugins/performance-lab
-				- plugins/speculation-rules
 				- plugins/webp-uploads
