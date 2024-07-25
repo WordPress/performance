@@ -19,13 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.0.0
  */
 function plsr_print_speculation_rules(): void {
-	$rules = plsr_get_speculation_rules();
-	if ( empty( $rules ) ) {
-		return;
-	}
-
 	wp_print_inline_script_tag(
-		(string) wp_json_encode( $rules ),
+		(string) wp_json_encode( plsr_get_speculation_rules() ),
 		array( 'type' => 'speculationrules' )
 	);
 }
