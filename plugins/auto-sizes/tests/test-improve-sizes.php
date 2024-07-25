@@ -34,6 +34,24 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that if disable responsive image then it will not add sizes attribute.
+	 */
+	public function test_that_if_disable_responsive_image_then_it_will_not_add_sizes_attribute(): void {
+		// Disable responsive images.
+		add_filter( 'wp_calculate_image_sizes', '__return_false' );
+
+		$image_size = 'large';
+
+		$block_content = '<!-- wp:image {"id":' . self::$image_id . ',"sizeSlug":"' . $image_size . '","linkDestination":"none"} --><figure class="wp-block-image size-' . $image_size . '"><img src="' . wp_get_attachment_image_url( self::$image_id, $image_size ) . '" alt="" class="wp-image-' . self::$image_id . '"/></figure><!-- /wp:image -->';
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$img_processor = new WP_HTML_Tag_Processor( $result );
+		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
+		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'The sizes attribute should not added in IMG tag.' );
+	}
+
+	/**
 	 * Test the image block with different image sizes and full alignment.
 	 *
 	 * @dataProvider data_image_sizes
