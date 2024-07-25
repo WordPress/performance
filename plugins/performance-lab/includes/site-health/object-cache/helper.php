@@ -16,11 +16,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array<string, array{label: string, value: string}> Fields.
  * @since n.e.x.t
  */
-function performance_lab_object_cache_supported_fields(): array {
+function perflab_object_cache_supported_fields(): array {
 	return array(
 		'extension'        => array(
 			'label' => __( 'Extension', 'performance-lab' ),
-			'value' => performance_lab_get_cache_type(),
+			'value' => perflab_get_cache_type(),
 		),
 		'multiple_gets'    => array(
 			'label' => __( 'Multiple gets', 'performance-lab' ),
@@ -55,7 +55,7 @@ function performance_lab_object_cache_supported_fields(): array {
  * @return string Object cache type.
  * @since n.e.x.t
  */
-function performance_lab_get_cache_type(): string {
+function perflab_get_cache_type(): string {
 	global $_wp_using_ext_object_cache, $wp_object_cache;
 
 	$message = '';
