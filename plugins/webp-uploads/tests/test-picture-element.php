@@ -174,16 +174,16 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$picture_markup = apply_filters( 'the_content', $image );
 
 		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
-		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
+		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
 		$img_sizes = $img_processor->get_attribute( 'sizes' );
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 
 		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
-		$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ) );
+		$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ), 'The IMG and Picture IMG have same sizes attributes.' );
 
 		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
-			$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ) );
+			$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ), 'The IMG and Picture source have same sizes attributes.' );
 		}
 	}
 
@@ -249,8 +249,12 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in IMG tag.' );
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
+
+		$this->assertNull( $picture_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in Picture IMG tag.' );
+
 		$picture_processor->next_tag( array( 'tag_name' => 'source' ) );
 
-		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in source tag.' );
+		$this->assertNull( $picture_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in Picture source tag.' );
 	}
 }
