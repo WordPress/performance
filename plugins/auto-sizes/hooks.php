@@ -156,6 +156,15 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 		return $content;
 	}
 
+	// Bail early if the responsive images are disabled.
+	if ( null === $processor->get_attribute( 'sizes' ) ) {
+		$processor->remove_attribute( 'data-needs-sizes-update' );
+		$processor->remove_attribute( 'data-align' );
+		$processor->remove_attribute( 'data-resize-width' );
+
+		return $processor->get_updated_html();
+	}
+
 	// Skips second time parsing if already processed.
 	if ( null === $processor->get_attribute( 'data-needs-sizes-update' ) ) {
 		return $content;
