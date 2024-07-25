@@ -141,7 +141,12 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		);
 	}
 
-	public function test_that_img_sizes_is_equal_to_source_sizes_for_picture_element(): void {
+	/**
+	 * @dataProvider data_provider_test_image_sizes_equality
+	 *
+	 * @param Closure|null $add_filter The filter.
+	 */
+	public function test_img_sizes_is_equal_to_picture_source_sizes_for_picture_element( ?Closure $add_filter ): void {
 		$mime_type = 'image/webp';
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
@@ -157,54 +162,9 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			)
 		);
 
-		$img_markup = apply_filters( 'the_content', $image );
-
-		// Apply picture element support.
-		$this->opt_in_to_picture_element();
-
-		$picture_markup = apply_filters( 'the_content', $image );
-
-		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
-		$img_processor->next_tag( array( 'tag_name' => 'IMG' ) );
-		$img_sizes = $img_processor->get_attribute( 'sizes' );
-
-		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
-		$picture_processor->next_tag( array( 'tag_name' => 'source' ) );
-		$picture_source_sizes = $picture_processor->get_attribute( 'sizes' );
-
-		$this->assertSame( $img_sizes, $picture_source_sizes );
-	}
-
-	public function test_that_img_sizes_is_equal_to_source_sizes_for_after_new_sizes_filter_picture_element(): void {
-		$mime_type = 'image/webp';
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		if ( $add_filter instanceof Closure ) {
+			$add_filter();
 		}
-
-		$image = wp_get_attachment_image(
-			self::$image_id,
-			'large',
-			false,
-			array(
-				'class' => 'wp-image-' . self::$image_id,
-				'alt'   => 'Green Leaves',
-			)
-		);
-
-		// Run filter prior to Picture filter "webp_uploads_wrap_image_in_picture".
-		add_filter(
-			'wp_content_img_tag',
-			static function (
-				string $content
-			): string {
-				$processor = new WP_HTML_Tag_Processor( $content );
-				if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
-					return $content;
-				}
-				$processor->set_attribute( 'sizes', '(max-width: 333px) 100vw, 333px' );
-				return $processor->get_updated_html();
-			}
-		);
 
 		$img_markup = apply_filters( 'the_content', $image );
 
@@ -218,10 +178,43 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$img_sizes = $img_processor->get_attribute( 'sizes' );
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
-		$picture_processor->next_tag( array( 'tag_name' => 'source' ) );
-		$picture_source_sizes = $picture_processor->get_attribute( 'sizes' );
 
-		$this->assertSame( $img_sizes, $picture_source_sizes );
+		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
+		$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ) );
+
+		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
+			$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ) );
+		}
+	}
+
+	/**
+	 * Data provider for it_should_maybe_wrap_images_in_picture_element.
+	 *
+	 * @return array<string, array<string, (Closure)|null>>
+	 */
+	public function data_provider_test_image_sizes_equality(): array {
+		return array(
+			'no_filter'   => array(
+				'add_filter' => null,
+			),
+			'with_filter' => array(
+				'add_filter' => static function (): void {
+					add_filter(
+						'wp_content_img_tag',
+						static function (
+							string $content
+						): string {
+							$processor = new WP_HTML_Tag_Processor( $content );
+							if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
+								return $content;
+							}
+							$processor->set_attribute( 'sizes', '(max-width: 333px) 100vw, 333px' );
+							return $processor->get_updated_html();
+						}
+					);
+				},
+			),
+		);
 	}
 
 	public function test_disable_responsive_image_with_picture_element(): void {
