@@ -76,9 +76,10 @@ function perflab_render_settings_page(): void {
  *
  * @since 1.0.0
  *
- * @param string $hook_suffix The current admin page.
+ * @param string|null $hook_suffix The current admin page. Note this can be null because `iframe_header()` does not
+ *                                 ensure that `$hook_suffix` is a string when it calls `do_action( 'admin_enqueue_scripts', $hook_suffix )`.
  */
-function perflab_admin_pointer( string $hook_suffix ): void {
+function perflab_admin_pointer( ?string $hook_suffix = '' ): void {
 	// Do not show admin pointer in multisite Network admin or User admin UI.
 	if ( is_network_admin() || is_user_admin() ) {
 		return;
