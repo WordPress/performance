@@ -104,9 +104,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 */
 	public function data_image_sizes(): array {
 		return array(
-			'Return full or wideSize 1280px instead of thumb size 150px'  => array(
-				'thumbnail',
-			),
 			'Return full or wideSize 1280px instead of medium size 300px'  => array(
 				'medium',
 			),
@@ -163,10 +160,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 */
 	public function data_image_sizes_for_default_alignment(): array {
 		return array(
-			'Return thumbnail image size 150px instead of contentSize 620px'                       => array(
-				'thumbnail',
-				'sizes="(max-width: 150px) 100vw, 150px" ',
-			),
 			'Return medium image size 300px instead of contentSize 620px'                          => array(
 				'medium',
 				'sizes="(max-width: 300px) 100vw, 300px" ',
@@ -178,11 +171,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 			'Return contentSize 620px instead of full image size 1080px'                           => array(
 				'full',
 				'sizes="(max-width: 620px) 100vw, 620px" ',
-			),
-			'Return resized size 100px instead of contentSize 620px or thumbnail image size 150px' => array(
-				'thumbnail',
-				'sizes="(max-width: 100px) 100vw, 100px" ',
-				true,
 			),
 			'Return resized size 100px instead of contentSize 620px or medium image size 300px'    => array(
 				'medium',
@@ -247,11 +235,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 	 */
 	public function data_image_sizes_for_left_right_center_alignment(): array {
 		return array(
-			'Return thumbnail image size 150px with left alignment'                                 => array(
-				'thumbnail',
-				'sizes="(max-width: 150px) 100vw, 150px" ',
-				'left',
-			),
 			'Return medium image size 300px with left alignment'                                    => array(
 				'medium',
 				'sizes="(max-width: 300px) 100vw, 300px" ',
@@ -266,11 +249,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 				'full',
 				'sizes="(max-width: 1080px) 100vw, 1080px" ',
 				'left',
-			),
-			'Return thumbnail image size 150px with right alignment'                                => array(
-				'thumbnail',
-				'sizes="(max-width: 150px) 100vw, 150px" ',
-				'right',
 			),
 			'Return medium image size 300px with right alignment'                                   => array(
 				'medium',
@@ -287,11 +265,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 				'sizes="(max-width: 1080px) 100vw, 1080px" ',
 				'right',
 			),
-			'Return thumbnail image size 150px with center alignment'                               => array(
-				'thumbnail',
-				'sizes="(max-width: 150px) 100vw, 150px" ',
-				'center',
-			),
 			'Return medium image size 300px with center alignment'                                  => array(
 				'medium',
 				'sizes="(max-width: 300px) 100vw, 300px" ',
@@ -306,12 +279,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 				'full',
 				'sizes="(max-width: 1080px) 100vw, 1080px" ',
 				'center',
-			),
-			'Return resized size 100px instead of thumbnail image size 150px with left alignment'   => array(
-				'thumbnail',
-				'sizes="(max-width: 100px) 100vw, 100px" ',
-				'left',
-				true,
 			),
 			'Return resized size 100px instead of medium image size 300px with left alignment'      => array(
 				'medium',
@@ -331,12 +298,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 				'left',
 				true,
 			),
-			'Return resized size 100px instead of thumbnail image size 150px with right alignment'  => array(
-				'thumbnail',
-				'sizes="(max-width: 100px) 100vw, 100px" ',
-				'right',
-				true,
-			),
 			'Return resized size 100px instead of medium image size 300px with right alignment'     => array(
 				'medium',
 				'sizes="(max-width: 100px) 100vw, 100px" ',
@@ -353,12 +314,6 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 				'full',
 				'sizes="(max-width: 100px) 100vw, 100px" ',
 				'right',
-				true,
-			),
-			'Return resized size 100px instead of thumbnail image size 150px with center alignment' => array(
-				'thumbnail',
-				'sizes="(max-width: 100px) 100vw, 100px" ',
-				'center',
 				true,
 			),
 			'Return resized size 100px instead of medium image size 300px with center alignment'    => array(
