@@ -3,7 +3,7 @@
  * Helper functions used for Object Cache Support Info.
  *
  * @package performance-lab
- * @since 2.1.0
+ * @since n.e.x.t
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -14,29 +14,29 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Callback for Object Cache Info fields.
  *
  * @return array<string, array{label: string, value: string}> Fields.
- * @since 3.3.0
+ * @since n.e.x.t
  */
-function object_cache_supported_fields(): array {
+function performance_lab_object_cache_supported_fields(): array {
 	return array(
 		'extension'        => array(
 			'label' => __( 'Extension', 'performance-lab' ),
-			'value' => wp_get_cache_type(),
+			'value' => performance_lab_get_cache_type(),
 		),
 		'multiple_gets'    => array(
 			'label' => __( 'Multiple gets', 'performance-lab' ),
-			'value' => wp_cache_supports( 'get_multiple' ) ? 'Enabled' : 'Disabled',
+			'value' => wp_cache_supports( 'get_multiple' ) ? __( 'Enabled', 'performance-lab' ) : __( 'Disabled', 'performance-lab' ),
 		),
 		'multiple_sets'    => array(
 			'label' => __( 'Multiple sets', 'performance-lab' ),
-			'value' => wp_cache_supports( 'set_multiple' ) ? 'Enabled' : 'Disabled',
+			'value' => wp_cache_supports( 'set_multiple' ) ? __( 'Enabled', 'performance-lab' ) : __( 'Disabled', 'performance-lab' ),
 		),
 		'multiple_deletes' => array(
 			'label' => __( 'Multiple deletes', 'performance-lab' ),
-			'value' => wp_cache_supports( 'delete_multiple' ) ? 'Enabled' : 'Disabled',
+			'value' => wp_cache_supports( 'delete_multiple' ) ? __( 'Enabled', 'performance-lab' ) : __( 'Disabled', 'performance-lab' ),
 		),
 		'flush_group'      => array(
 			'label' => __( 'Flush group', 'performance-lab' ),
-			'value' => wp_cache_supports( 'flush_group' ) ? 'Enabled' : 'Disabled',
+			'value' => wp_cache_supports( 'flush_group' ) ? __( 'Enabled', 'performance-lab' ) : __( 'Disabled', 'performance-lab' ),
 		),
 	);
 }
@@ -48,10 +48,14 @@ function object_cache_supported_fields(): array {
  * that define the 3rd party object cache extension. Changes to those classes could render
  * problems with this function's ability to determine which object cache is being used.
  *
+ * This function was copied from WP-CLI.
+ *
+ * @link https://github.com/wp-cli/wp-cli/blob/0ca6d920123ac904c918d69181edc5071dc92c9d/php/utils-wp.php#L259-L331
+ *
  * @return string Object cache type.
- * @since 3.3.0
+ * @since n.e.x.t
  */
-function wp_get_cache_type(): string {
+function performance_lab_get_cache_type(): string {
 	global $_wp_using_ext_object_cache, $wp_object_cache;
 
 	$message = '';
