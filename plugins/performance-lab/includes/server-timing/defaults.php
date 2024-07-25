@@ -243,7 +243,7 @@ function perflab_register_additional_server_timing_metrics_from_setting(): void 
 	}
 
 	// Bail early if there are no hooks to measure.
-	if ( ! $hooks_to_measure ) {
+	if ( count( $hooks_to_measure ) === 0 ) {
 		return;
 	}
 
@@ -313,7 +313,7 @@ function perflab_register_additional_server_timing_metrics_from_setting(): void 
  * drop-in, it must not call this function right away since otherwise the cache
  * will not be loaded yet.
  */
-if ( ! did_action( 'muplugins_loaded' ) ) {
+if ( 0 === did_action( 'muplugins_loaded' ) ) {
 	add_action( 'muplugins_loaded', 'perflab_register_additional_server_timing_metrics_from_setting' );
 } else {
 	perflab_register_additional_server_timing_metrics_from_setting();

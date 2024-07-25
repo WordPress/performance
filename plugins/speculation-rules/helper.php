@@ -19,22 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @return array<string, array<int, array<string, mixed>>> Associative array of speculation rules by type.
+ * @return non-empty-array<string, array<int, array<string, mixed>>> Associative array of speculation rules by type.
  */
 function plsr_get_speculation_rules(): array {
-	$option = get_option( 'plsr_speculation_rules' );
-
-	/*
-	 * This logic is only relevant for edge-cases where the setting may not be registered,
-	 * a.k.a. defensive coding.
-	 */
-	if ( ! $option || ! is_array( $option ) ) {
-		$option = plsr_get_setting_default();
-	} else {
-		$option = array_merge( plsr_get_setting_default(), $option );
-	}
-
-	$mode      = (string) $option['mode'];
+	$option    = plsr_get_stored_setting_value();
+	$mode      = $option['mode'];
 	$eagerness = $option['eagerness'];
 
 	$prefixer = new PLSR_URL_Pattern_Prefixer();

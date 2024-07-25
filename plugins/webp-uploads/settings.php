@@ -62,7 +62,7 @@ add_action( 'init', 'webp_uploads_register_media_settings_field' );
 function webp_uploads_add_media_settings_fields(): void {
 	add_settings_section(
 		'perflab_modern_image_format_settings',
-		__( 'Modern Image Formats', 'webp-uploads' ),
+		_x( 'Modern Image Formats', 'settings page section name', 'webp-uploads' ),
 		'__return_empty_string',
 		'media',
 		array(

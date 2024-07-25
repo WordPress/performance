@@ -175,6 +175,14 @@ abstract class TestCase extends WP_UnitTestCase {
 	 * @dataProvider provider_get_dominant_color_invalid_images
 	 */
 	public function test_get_dominant_color_invalid( string $image_path ): void {
+		$mime_type = wp_check_filetype( $image_path )['type'];
+		// Old WP does not support ".tiff" and ".bmp" so return false.
+		if ( false === $mime_type ) {
+			$this->markTestSkipped( 'Mime type is not supported.' );
+		}
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
 		wp_maybe_generate_attachment_metadata( get_post( $attachment_id ) );
 

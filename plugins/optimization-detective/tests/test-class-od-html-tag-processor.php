@@ -1,10 +1,10 @@
 <?php
 /**
- * Tests for optimization-detective class OD_HTML_Tag_Walker.
+ * Tests for optimization-detective class OD_HTML_Tag_Processor.
  *
  * @package optimization-detective
  *
- * @coversDefaultClass OD_HTML_Tag_Walker
+ * @coversDefaultClass OD_HTML_Tag_Processor
  *
  * @noinspection HtmlRequiredTitleElement
  * @noinspection HtmlRequiredAltAttribute
@@ -14,7 +14,7 @@
  * @noinspection HtmlExtraClosingTag
  * @todo What are the other inspection IDs which can turn off inspections for the other irrelevant warnings? Remaining is "The tag is marked as deprecated."
  */
-class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
+class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 
 	/**
 	 * Data provider.
@@ -107,18 +107,18 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 						<head></head>
 						<body>
 							<span>1</span>
-							<br></br>
+							<meta></meta>
 							<span>2</span>
 						</body>
 					</html>
 				',
-				'open_tags' => array( 'HTML', 'HEAD', 'BODY', 'SPAN', 'BR', 'SPAN' ),
+				'open_tags' => array( 'HTML', 'HEAD', 'BODY', 'SPAN', 'META', 'SPAN' ),
 				'xpaths'    => array(
 					'/*[1][self::HTML]',
 					'/*[1][self::HTML]/*[1][self::HEAD]',
 					'/*[1][self::HTML]/*[2][self::BODY]',
 					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SPAN]',
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::BR]',
+					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::META]',
 					'/*[1][self::HTML]/*[2][self::BODY]/*[3][self::SPAN]',
 				),
 			),
@@ -300,9 +300,11 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test open_tags() and get_xpath().
+	 * Test next_tag(), next_token(), and get_xpath().
 	 *
-	 * @covers ::open_tags
+	 * @covers ::next_open_tag
+	 * @covers ::next_tag
+	 * @covers ::next_token
 	 * @covers ::get_xpath
 	 *
 	 * @dataProvider data_provider_sample_documents
@@ -313,48 +315,40 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	 *
 	 * @throws Exception But not really.
 	 */
-	public function test_open_tags_and_get_xpath( string $document, array $open_tags, array $xpaths ): void {
-		$p = new OD_HTML_Tag_Walker( $document );
+	public function test_next_tag_and_get_xpath( string $document, array $open_tags, array $xpaths ): void {
+		$p = new OD_HTML_Tag_Processor( $document );
 		$this->assertSame( '', $p->get_xpath(), 'Expected empty XPath since iteration has not started.' );
 		$actual_open_tags = array();
 		$actual_xpaths    = array();
-		foreach ( $p->open_tags() as $open_tag ) {
-			$actual_open_tags[] = $open_tag;
+		while ( $p->next_open_tag() ) {
+			$actual_open_tags[] = $p->get_tag();
 			$actual_xpaths[]    = $p->get_xpath();
 		}
 
-		$this->assertSame( $actual_open_tags, $open_tags, "Expected list of open tags to match.\nSnapshot: " . $this->export_array_snapshot( $actual_open_tags, true ) );
-		$this->assertSame( $actual_xpaths, $xpaths, "Expected list of XPaths to match.\nSnapshot: " . $this->export_array_snapshot( $actual_xpaths ) );
+		$this->assertSame( $open_tags, $actual_open_tags, "Expected list of open tags to match.\nSnapshot: " . $this->export_array_snapshot( $actual_open_tags, true ) );
+		$this->assertSame( $xpaths, $actual_xpaths, "Expected list of XPaths to match.\nSnapshot: " . $this->export_array_snapshot( $actual_xpaths ) );
 	}
 
 	/**
-	 * Test open_tags() throwing exception when called more than once.
+	 * Test next_tag() passing query which is invalid.
 	 *
-	 * @covers ::open_tags
+	 * @covers ::next_tag
 	 */
-	public function test_open_tags_throwing_exception(): void {
-		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Open tags may only be iterated over once per instance.' );
-		$p = new OD_HTML_Tag_Walker( '<html><body><p>Hello world</p></body></html>' );
-
-		$this->assertSame(
-			array( 'HTML', 'BODY', 'P' ),
-			iterator_to_array( $p->open_tags() )
-		);
-
-		iterator_to_array( $p->open_tags() );
+	public function test_next_tag_with_query(): void {
+		$this->expectException( InvalidArgumentException::class );
+		$p = new OD_HTML_Tag_Processor( '<html></html>' );
+		$p->next_tag( array( 'tag_name' => 'HTML' ) );
 	}
 
 	/**
 	 * Test append_head_html().
 	 *
 	 * @covers ::append_head_html
-	 * @covers OD_HTML_Tag_Processor::append_html
 	 *
 	 * @throws Exception But not really.
 	 */
 	public function test_append_head_html(): void {
-		$html     = '
+		$html           = '
 			<html>
 				<head>
 					<meta charset=utf-8>
@@ -366,32 +360,52 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 				</body>
 			</html>
 		';
-		$injected = '<meta name="generator" content="optimization-detective">';
-		$walker   = new OD_HTML_Tag_Walker( $html );
-		$this->assertFalse( $walker->append_head_html( $injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
+		$processor      = new OD_HTML_Tag_Processor( $html );
+		$early_injected = '<!-- Early injection -->';
+		$late_injected  = '<!-- Late injection -->';
+		$processor->append_head_html( $early_injected );
 
 		$saw_head = false;
-		foreach ( $walker->open_tags() as $tag ) {
+		while ( $processor->next_open_tag() ) {
+			$tag = $processor->get_tag();
 			if ( 'HEAD' === $tag ) {
 				$saw_head = true;
 			}
 		}
 		$this->assertTrue( $saw_head );
 
-		$this->assertTrue( $walker->append_head_html( $injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
+		$processor->append_head_html( $late_injected );
 		$expected = "
 			<html>
 				<head>
 					<meta charset=utf-8>
 					<!-- </head> -->
-				{$injected}</head>
+				{$early_injected}{$late_injected}</head>
 				<!--</HEAD>-->
 				<body>
 					<h1>Hello World</h1>
 				</body>
 			</html>
 		";
-		$this->assertSame( $expected, $walker->get_updated_html() );
+
+		$this->assertSame( $expected, $processor->get_updated_html() );
+
+		$later_injected = '<!-- Later injection -->';
+		$processor->append_head_html( $later_injected );
+
+		$expected = "
+			<html>
+				<head>
+					<meta charset=utf-8>
+					<!-- </head> -->
+				{$early_injected}{$late_injected}{$later_injected}</head>
+				<!--</HEAD>-->
+				<body>
+					<h1>Hello World</h1>
+				</body>
+			</html>
+		";
+		$this->assertSame( $expected, $processor->get_updated_html() );
 	}
 
 	/**
@@ -399,7 +413,6 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 	 *
 	 * @covers ::append_head_html
 	 * @covers ::append_body_html
-	 * @covers OD_HTML_Tag_Processor::append_html
 	 *
 	 * @throws Exception But not really.
 	 */
@@ -420,13 +433,12 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 		';
 		$head_injected = '<link rel="home" href="/">';
 		$body_injected = '<script>document.write("Goodbye!")</script>';
-		$walker        = new OD_HTML_Tag_Walker( $html );
-		$this->assertFalse( $walker->append_head_html( $head_injected ), 'Expected injection to fail because the HEAD closing tag has not been encountered yet.' );
-		$this->assertFalse( $walker->append_body_html( $body_injected ), 'Expected injection to fail because the BODY closing tag has not been encountered yet.' );
+		$processor     = new OD_HTML_Tag_Processor( $html );
 
 		$saw_head = false;
 		$saw_body = false;
-		foreach ( $walker->open_tags() as $tag ) {
+		while ( $processor->next_open_tag() ) {
+			$tag = $processor->get_tag();
 			if ( 'HEAD' === $tag ) {
 				$saw_head = true;
 			} elseif ( 'BODY' === $tag ) {
@@ -436,8 +448,8 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 		$this->assertTrue( $saw_head );
 		$this->assertTrue( $saw_body );
 
-		$this->assertTrue( $walker->append_head_html( $head_injected ), 'Expected injection to succeed because the HEAD closing tag has been encountered.' );
-		$this->assertTrue( $walker->append_body_html( $body_injected ), 'Expected injection to succeed because the BODY closing tag has been encountered.' );
+		$processor->append_head_html( $head_injected );
+		$processor->append_body_html( $body_injected );
 		$expected = "
 			<html>
 				<head>
@@ -452,27 +464,23 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 				<!--</BODY>-->
 			</html>
 		";
-		$this->assertSame( $expected, $walker->get_updated_html() );
+		$this->assertSame( $expected, $processor->get_updated_html() );
 	}
 
 	/**
 	 * Test get_tag(), get_attribute(), set_attribute(), remove_attribute(), and get_updated_html().
 	 *
-	 * @covers ::get_tag
-	 * @covers ::get_attribute
 	 * @covers ::set_attribute
 	 * @covers ::remove_attribute
-	 * @covers ::get_updated_html
 	 * @covers ::set_meta_attribute
 	 *
 	 * @throws Exception But not really.
 	 */
 	public function test_html_tag_processor_wrapper_methods(): void {
-		$processor = new OD_HTML_Tag_Walker( '<html lang="en" dir="ltr"></html>' );
-		foreach ( $processor->open_tags() as $open_tag ) {
+		$processor = new OD_HTML_Tag_Processor( '<html lang="en" class="foo" dir="ltr"></html>' );
+		while ( $processor->next_open_tag() ) {
+			$open_tag = $processor->get_tag();
 			if ( 'HTML' === $open_tag ) {
-				$this->assertSame( $open_tag, $processor->get_tag() );
-				$this->assertSame( 'en', $processor->get_attribute( 'lang' ) );
 				$processor->set_attribute( 'lang', 'es' );
 				$processor->remove_attribute( 'dir' );
 				$processor->set_attribute( 'id', 'root' );
@@ -480,7 +488,152 @@ class Test_OD_HTML_Tag_Walker extends WP_UnitTestCase {
 				$processor->set_meta_attribute( 'baz', true );
 			}
 		}
-		$this->assertSame( '<html data-od-added-id data-od-baz data-od-foo="bar" data-od-removed-dir="ltr" data-od-replaced-lang="en" id="root" lang="es" ></html>', $processor->get_updated_html() );
+		$this->assertSame( '<html data-od-added-id data-od-baz data-od-foo="bar" data-od-removed-dir="ltr" data-od-replaced-lang="en" id="root" lang="es" class="foo" ></html>', $processor->get_updated_html() );
+	}
+
+	/**
+	 * Test bookmarking and seeking.
+	 *
+	 * @covers ::set_bookmark
+	 * @covers ::seek
+	 * @covers ::release_bookmark
+	 */
+	public function test_bookmarking_and_seeking(): void {
+		$processor = new OD_HTML_Tag_Processor(
+			'
+				<html>
+					<head></head>
+					<body>
+						<iframe src="https://example.net/"></iframe>
+						<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
+							<div class="wp-block-embed__wrapper">
+								<iframe title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+							</div>
+							<figcaption>This is the State of the Word!</figcaption>
+						</figure>
+						<iframe src="https://example.com/"></iframe>
+						<img src="https://example.com/foo.jpg">
+					</body>
+				</html>
+			'
+		);
+
+		$actual_figure_contents = array();
+		$this->assertSame( 0, $processor->get_seek_count() );
+
+		$bookmarks = array();
+		while ( $processor->next_open_tag() ) {
+			if (
+				'FIGURE' === $processor->get_tag()
+				&&
+				true === $processor->has_class( 'wp-block-embed' )
+			) {
+				$embed_block_depth = $processor->get_current_depth();
+				do {
+					if ( ! $processor->is_tag_closer() ) {
+						$bookmark = $processor->get_tag();
+						$processor->set_bookmark( $bookmark );
+						$bookmarks[]              = $bookmark;
+						$actual_figure_contents[] = array(
+							'tag'   => $processor->get_tag(),
+							'xpath' => $processor->get_xpath(),
+							'depth' => $processor->get_current_depth(),
+						);
+					}
+					if ( $processor->get_current_depth() < $embed_block_depth ) {
+						break;
+					}
+				} while ( $processor->next_tag() );
+			}
+		}
+
+		$expected_figure_contents = array(
+			array(
+				'tag'   => 'FIGURE',
+				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]',
+				'depth' => 3,
+			),
+			array(
+				'tag'   => 'DIV',
+				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]',
+				'depth' => 4,
+			),
+			array(
+				'tag'   => 'IFRAME',
+				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::IFRAME]',
+				'depth' => 5,
+			),
+			array(
+				'tag'   => 'FIGCAPTION',
+				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[2][self::FIGCAPTION]',
+				'depth' => 4,
+			),
+		);
+
+		$this->assertSame( $expected_figure_contents, $actual_figure_contents );
+
+		$sought_actual_contents = array();
+		foreach ( $bookmarks as $bookmark ) {
+			$processor->seek( $bookmark );
+			$sought_actual_contents[] = array(
+				'tag'   => $processor->get_tag(),
+				'xpath' => $processor->get_xpath(),
+				'depth' => $processor->get_current_depth(),
+			);
+		}
+		$this->assertSame( count( $bookmarks ), $processor->get_seek_count() );
+
+		$this->assertSame( $expected_figure_contents, $sought_actual_contents );
+
+		$this->assertTrue( $processor->has_bookmark( 'FIGURE' ) );
+		$this->assertTrue( $processor->has_bookmark( 'DIV' ) );
+		$this->assertTrue( $processor->has_bookmark( 'IFRAME' ) );
+		$this->assertTrue( $processor->has_bookmark( 'FIGCAPTION' ) );
+		$this->assertFalse( $processor->has_bookmark( 'IMG' ) );
+		$processor->seek( 'IFRAME' );
+		$processor->set_attribute( 'loading', 'lazy' );
+
+		$this->assertStringContainsString(
+			'<iframe data-od-added-loading loading="lazy" title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+			$processor->get_updated_html()
+		);
+
+		$processor->release_bookmark( 'FIGURE' );
+		$this->assertFalse( $processor->has_bookmark( 'FIGURE' ) );
+
+		// TODO: Try adding too many bookmarks.
+	}
+
+	/**
+	 * Test get_seek_count.
+	 *
+	 * @covers ::get_seek_count
+	 */
+	public function test_get_next_token_count(): void {
+		$processor = new OD_HTML_Tag_Processor(
+			trim(
+				'
+				<html>
+					<head></head>
+					<body></body>
+				</html>
+				'
+			)
+		);
+		$this->assertSame( 0, $processor->get_next_token_count() );
+		$this->assertTrue( $processor->next_tag() );
+		$this->assertSame( 'HTML', $processor->get_tag() );
+		$this->assertSame( 1, $processor->get_next_token_count() );
+		$this->assertTrue( $processor->next_tag() );
+		$this->assertSame( 'HEAD', $processor->get_tag() );
+		$this->assertSame( 3, $processor->get_next_token_count() ); // Note that next_token() call #2 was for the whitespace between <html> and <head>.
+		$this->assertTrue( $processor->next_tag() );
+		$this->assertSame( 'HEAD', $processor->get_tag() );
+		$this->assertTrue( $processor->is_tag_closer() );
+		$this->assertSame( 4, $processor->get_next_token_count() );
+		$this->assertTrue( $processor->next_tag() );
+		$this->assertSame( 'BODY', $processor->get_tag() );
+		$this->assertSame( 6, $processor->get_next_token_count() ); // Note that next_token() call #5 was for the whitespace between </head> and <body>.
 	}
 
 	/**

@@ -27,16 +27,20 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 */
 	public function get_dominant_color() {
 
-		if ( ! $this->image ) {
+		if ( ! (bool) $this->image ) {
 			return new WP_Error( 'image_editor_dominant_color_error_no_image', __( 'Dominant color detection no image found.', 'dominant-color-images' ) );
 		}
 		// The logic here is resize the image to 1x1 pixel, then get the color of that pixel.
 		$shorted_image = imagecreatetruecolor( 1, 1 );
-		$image_width   = imagesx( $this->image );
-		$image_height  = imagesy( $this->image );
-		if ( false === $shorted_image || false === $image_width || false === $image_height ) { // @phpstan-ignore-line
+		if ( false === $shorted_image ) {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 		}
+		// Note: These two functions only return integers, but they used to return int|false in PHP<8. This was changed in the PHP documentation in
+		// <https://github.com/php/doc-en/commit/0462f49> and <https://github.com/php/doc-en/commit/37f858a>. However, PhpStorm's stubs still think
+		// they return int|false. However, from looking at <https://github.com/php/php-src/blob/5db847e/ext/gd/gd.stub.php#L716-L718> these functions
+		// apparently only ever returned integers. So the type casting is here for the possible sake PHP<8.
+		$image_width  = (int) imagesx( $this->image ); // @phpstan-ignore cast.useless
+		$image_height = (int) imagesy( $this->image ); // @phpstan-ignore cast.useless
 		imagecopyresampled( $shorted_image, $this->image, 0, 0, 0, 0, 1, 1, $image_width, $image_height );
 
 		$rgb = imagecolorat( $shorted_image, 0, 0 );
@@ -47,7 +51,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 		$g   = ( $rgb >> 8 ) & 0xFF;
 		$b   = $rgb & 0xFF;
 		$hex = dominant_color_rgb_to_hex( $r, $g, $b );
-		if ( ! $hex ) {
+		if ( null === $hex ) {
 			return new WP_Error( 'image_editor_dominant_color_error', __( 'Dominant color detection failed.', 'dominant-color-images' ) );
 		}
 
@@ -64,7 +68,7 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 	 */
 	public function has_transparency() {
 
-		if ( ! $this->image ) {
+		if ( ! (bool) $this->image ) {
 			return new WP_Error( 'image_editor_has_transparency_error_no_image', __( 'Transparency detection no image found.', 'dominant-color-images' ) );
 		}
 
@@ -77,8 +81,13 @@ class Dominant_Color_Image_Editor_GD extends WP_Image_Editor_GD {
 				if ( false === $rgb ) {
 					return new WP_Error( 'unable_to_obtain_rgb_via_imagecolorat' );
 				}
-				$rgba = imagecolorsforindex( $this->image, $rgb );
-				if ( ! is_array( $rgba ) ) { // @phpstan-ignore-line
+				try {
+					// Note: In PHP<8, this returns false if the color is out of range. In PHP8, this throws a ValueError instead.
+					$rgba = imagecolorsforindex( $this->image, $rgb );
+				} catch ( ValueError $error ) {
+					$rgba = false;
+				}
+				if ( ! is_array( $rgba ) ) {
 					return new WP_Error( 'unable_to_obtain_rgba_via_imagecolorsforindex' );
 				}
 				if ( $rgba['alpha'] > 0 ) {

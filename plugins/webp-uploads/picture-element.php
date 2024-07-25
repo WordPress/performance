@@ -131,24 +131,10 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		);
 	}
 
-	// Fall back to the original image without a srcset.
-	$original_sizes = array( $image_src[1], $image_src[2] );
-	$original_image = wp_get_original_image_url( $attachment_id );
-	// Fail gracefully if the original image is not found.
-	if ( false === $original_image ) {
-		return $image;
-	}
-	$filter = static function (): bool {
-		return false;
-	};
-	add_filter( 'wp_calculate_image_srcset_meta', $filter );
-	$original_image_without_srcset = wp_get_attachment_image( $attachment_id, $original_sizes, false, array( 'src' => $original_image ) );
-	remove_filter( 'wp_calculate_image_srcset_meta', $filter );
-
 	return sprintf(
-		'<picture class="%s">%s%s</picture>',
+		'<picture class="%s" style="display: contents;">%s%s</picture>',
 		esc_attr( 'wp-picture-' . $attachment_id ),
 		$picture_sources,
-		$original_image_without_srcset
+		$image
 	);
 }

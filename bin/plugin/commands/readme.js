@@ -74,9 +74,14 @@ function updateReadmeChangelog( readmeFile, changelog ) {
 	let newContent = fileContent.replace(
 		regex,
 		( match, changelogHeading, _versionHeading, existingChangelog ) => {
-			status =
-				'Merged existing changelog with the new changelog in an Other section.';
-			return `${ changelogHeading }${ _versionHeading }${ normalizedChangelog }\n**Other**\n\n${ existingChangelog }`;
+			const newChangelog = `${ changelogHeading }${ _versionHeading.trimEnd() }\n\n${ normalizedChangelog }`;
+			if ( existingChangelog.trim() !== '' ) {
+				status =
+					'Merged existing changelog with the new changelog in an Other section.';
+				return `${ newChangelog }\n**Other**\n\n${ existingChangelog }`;
+			}
+			status = 'Populated empty changelog section.';
+			return `${ newChangelog }${ existingChangelog }`;
 		}
 	);
 

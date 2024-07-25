@@ -363,7 +363,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			$data
 		);
 		unset( $data['timestamp'] ); // Since provided by default args.
-		if ( $extras ) {
+		if ( count( $extras ) > 0 ) {
 			$data = $this->recursive_merge( $data, $extras );
 		}
 		return $data;

@@ -32,6 +32,13 @@ if ( false !== getenv( 'WP_TESTS_DIR' ) ) {
 	$_test_root = '/tmp/wordpress-tests-lib';
 }
 
+// Check if tests are run locally without configuring test environment.
+if ( false !== strpos( $_test_root, 'wp-phpunit/wp-phpunit' ) && ! ( false !== getenv( 'WP_PHPUNIT__TESTS_CONFIG' ) || defined( 'WP_TESTS_CONFIG_FILE_PATH' ) ) ) {
+	echo 'Error: wp-tests-config.php is missing! Please use wp-tests-config-sample.php to create a config file.' . PHP_EOL;
+	echo 'Info: Alternatively, you can run `npm run wp-env start && npm run test-php` to execute tests in the wp-env environment.' . PHP_EOL;
+	exit( 2 );
+}
+
 require_once $_test_root . '/includes/functions.php';
 
 // Check if we use the plugin's test suite. If so, disable the PL plugin and only load the requested plugin.
@@ -47,7 +54,7 @@ foreach ( $_SERVER['argv'] as $index => $arg ) {
 }
 
 // Set default plugin to load if not specified.
-if ( ! $plugin_name ) {
+if ( '' === $plugin_name ) {
 	$plugin_name = 'performance-lab';
 }
 
@@ -67,11 +74,18 @@ $load_plugin = static function ( string $plugin_name ) use ( &$load_plugin ): vo
 		exit( 1 );
 	}
 
-	if ( preg_match( '/^ \* Requires Plugins:\s*(.+)$/m', (string) file_get_contents( $plugin_file ), $matches ) ) {
+	if ( 1 === preg_match( '/^ \* Requires Plugins:\s*(.+)$/m', (string) file_get_contents( $plugin_file ), $matches ) ) {
 		foreach ( (array) preg_split( '/\s*,\s*/', $matches[1] ) as $requires_plugin ) {
 			$load_plugin( (string) $requires_plugin );
 		}
 	}
+
+	// Add plugin-specific bootstrap if it exists.
+	$plugin_bootstrap_file = WP_PLUGIN_DIR . "/$plugin_name/tests/bootstrap.php";
+	if ( file_exists( $plugin_bootstrap_file ) ) {
+		require_once $plugin_bootstrap_file;
+	}
+
 	require_once $plugin_file;
 };
 

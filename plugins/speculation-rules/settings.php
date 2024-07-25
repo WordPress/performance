@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  *
- * @return array<string, string> Associative array of `$mode => $label` pairs.
+ * @return array{ prefetch: string, prerender: string } Associative array of `$mode => $label` pairs.
  */
 function plsr_get_mode_labels(): array {
 	return array(
@@ -30,7 +30,7 @@ function plsr_get_mode_labels(): array {
  *
  * @since 1.0.0
  *
- * @return array<string, string> Associative array of `$eagerness => $label` pairs.
+ * @return array{ conservative: string, moderate: string, eager: string } Associative array of `$eagerness => $label` pairs.
  */
 function plsr_get_eagerness_labels(): array {
 	return array(
@@ -45,7 +45,7 @@ function plsr_get_eagerness_labels(): array {
  *
  * @since 1.0.0
  *
- * @return array<string, string> {
+ * @return array{ mode: 'prerender', eagerness: 'moderate' } {
  *     Default setting value.
  *
  *     @type string $mode      Mode.
@@ -60,12 +60,29 @@ function plsr_get_setting_default(): array {
 }
 
 /**
+ * Returns the stored setting value for Speculative Loading configuration.
+ *
+ * @since n.e.x.t
+ *
+ * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager' } {
+ *     Stored setting value.
+ *
+ *     @type string $mode      Mode.
+ *     @type string $eagerness Eagerness.
+ * }
+ */
+function plsr_get_stored_setting_value(): array {
+	return plsr_sanitize_setting( get_option( 'plsr_speculation_rules' ) );
+}
+
+/**
  * Sanitizes the setting for Speculative Loading configuration.
  *
  * @since 1.0.0
+ * @todo  Consider whether the JSON schema for the setting could be reused here.
  *
  * @param mixed $input Setting to sanitize.
- * @return array<string, string> {
+ * @return array{ mode: 'prefetch'|'prerender', eagerness: 'conservative'|'moderate'|'eager' } {
  *     Sanitized setting.
  *
  *     @type string $mode      Mode.
@@ -79,17 +96,14 @@ function plsr_sanitize_setting( $input ): array {
 		return $default_value;
 	}
 
-	$mode_labels      = plsr_get_mode_labels();
-	$eagerness_labels = plsr_get_eagerness_labels();
-
 	// Ensure only valid keys are present.
-	$value = array_intersect_key( $input, $default_value );
+	$value = array_intersect_key( array_merge( $default_value, $input ), $default_value );
 
-	// Set any missing or invalid values to their defaults.
-	if ( ! isset( $value['mode'] ) || ! isset( $mode_labels[ $value['mode'] ] ) ) {
+	// Constrain values to what is allowed.
+	if ( ! in_array( $value['mode'], array_keys( plsr_get_mode_labels() ), true ) ) {
 		$value['mode'] = $default_value['mode'];
 	}
-	if ( ! isset( $value['eagerness'] ) || ! isset( $eagerness_labels[ $value['eagerness'] ] ) ) {
+	if ( ! in_array( $value['eagerness'], array_keys( plsr_get_eagerness_labels() ), true ) ) {
 		$value['eagerness'] = $default_value['eagerness'];
 	}
 
@@ -113,7 +127,8 @@ function plsr_register_setting(): void {
 			'default'           => plsr_get_setting_default(),
 			'show_in_rest'      => array(
 				'schema' => array(
-					'properties' => array(
+					'type'                 => 'object',
+					'properties'           => array(
 						'mode'      => array(
 							'description' => __( 'Whether to prefetch or prerender URLs.', 'speculation-rules' ),
 							'type'        => 'string',
@@ -125,6 +140,7 @@ function plsr_register_setting(): void {
 							'enum'        => array_keys( plsr_get_eagerness_labels() ),
 						),
 					),
+					'additionalProperties' => false,
 				),
 			),
 		)
@@ -188,7 +204,7 @@ add_action( 'load-options-reading.php', 'plsr_add_setting_ui' );
  * @since 1.0.0
  * @access private
  *
- * @param array<string, string> $args {
+ * @param array{ field: 'mode'|'eagerness', title: non-empty-string, description: non-empty-string } $args {
  *     Associative array of arguments.
  *
  *     @type string $field       The slug of the sub setting controlled by the field.
@@ -197,28 +213,24 @@ add_action( 'load-options-reading.php', 'plsr_add_setting_ui' );
  * }
  */
 function plsr_render_settings_field( array $args ): void {
-	if ( empty( $args['field'] ) || empty( $args['title'] ) ) { // Invalid.
-		return;
+	$option = plsr_get_stored_setting_value();
+
+	switch ( $args['field'] ) {
+		case 'mode':
+			$choices = plsr_get_mode_labels();
+			break;
+		case 'eagerness':
+			$choices = plsr_get_eagerness_labels();
+			break;
+		default:
+			return; // Invalid (and this case should never occur).
 	}
 
-	$option = get_option( 'plsr_speculation_rules' );
-	if ( ! isset( $option[ $args['field'] ] ) ) { // Invalid.
-		return;
-	}
-
-	$value    = $option[ $args['field'] ];
-	$callback = "plsr_get_{$args['field']}_labels";
-	if ( ! is_callable( $callback ) ) {
-		return;
-	}
-	$choices = call_user_func( $callback );
-
+	$value = $option[ $args['field'] ];
 	?>
 	<fieldset>
 		<legend class="screen-reader-text"><?php echo esc_html( $args['title'] ); ?></legend>
-		<?php
-		foreach ( $choices as $slug => $label ) {
-			?>
+		<?php foreach ( $choices as $slug => $label ) : ?>
 			<p>
 				<label>
 					<input
@@ -230,17 +242,11 @@ function plsr_render_settings_field( array $args ): void {
 					<?php echo esc_html( $label ); ?>
 				</label>
 			</p>
-			<?php
-		}
+		<?php endforeach; ?>
 
-		if ( ! empty( $args['description'] ) ) {
-			?>
-			<p class="description" style="max-width: 800px;">
-				<?php echo esc_html( $args['description'] ); ?>
-			</p>
-			<?php
-		}
-		?>
+		<p class="description" style="max-width: 800px;">
+			<?php echo esc_html( $args['description'] ); ?>
+		</p>
 	</fieldset>
 	<?php
 }
