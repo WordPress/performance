@@ -43,8 +43,6 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 			&&
 			1 === preg_match( '/background(?:-image)?\s*:[^;]*?url\(\s*[\'"]?\s*(?<background_image>.+?)\s*[\'"]?\s*\)/', $style, $matches )
 			&&
-			'' !== $matches['background_image'] // PHPStan should ideally know that this is a non-empty string based on the `.+?` regular expression. See <https://github.com/phpstan/phpstan/issues/11222>.
-			&&
 			! $this->is_data_url( $matches['background_image'] )
 		) {
 			$background_image_url = $matches['background_image'];
