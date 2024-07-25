@@ -50,7 +50,7 @@ class Test_WebP_Uploads_Image_Edit extends TestCase {
 		foreach ( $backup_sizes as $size => $properties ) {
 			$size_name = str_replace( '-orig', '', $size );
 
-			if ( 'full-orig' === $size ) {
+			if ( 'full-orig' === $size ) { // @phpstan-ignore-line
 				continue;
 			}
 

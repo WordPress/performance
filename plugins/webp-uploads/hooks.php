@@ -544,7 +544,7 @@ function webp_uploads_update_image_references( $content ): string {
 			continue;
 		}
 
-		if ( empty( $class_name ) ) {
+		if ( empty( $class_name ) ) { // @phpstan-ignore-line
 			continue;
 		}
 
