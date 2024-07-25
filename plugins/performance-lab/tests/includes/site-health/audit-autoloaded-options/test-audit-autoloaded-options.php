@@ -174,6 +174,11 @@ class Test_Audit_Autoloaded_Options extends WP_UnitTestCase {
 		$this->assertStringContainsString( self::AUTOLOADED_OPTION_KEY, $table_html );
 	}
 
+	/**
+	 * Test that the list of disabled options excludes options that are autoloaded.
+	 *
+	 * @covers ::perflab_filter_option_perflab_aao_disabled_options
+	 */
 	public function test_perflab_aao_autoloaded_options_auto_enable_functionality(): void {
 
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
