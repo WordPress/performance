@@ -214,7 +214,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$picture_markup = apply_filters( 'the_content', $image );
 
 		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
-		$img_processor->next_tag( array( 'tag_name' => 'IMG' ) );
+		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
 		$img_sizes = $img_processor->get_attribute( 'sizes' );
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
