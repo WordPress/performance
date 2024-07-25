@@ -50,7 +50,7 @@ function perflab_object_cache_supported_fields(): array {
  *
  * This function was copied from WP-CLI.
  *
- * @link https://github.com/wp-cli/wp-cli/blob/0ca6d920123ac904c918d69181edc5071dc92c9d/php/utils-wp.php#L259-L331
+ * @link https://github.com/wp-cli/wp-cli/blob/0ca6d920123ac904c918d69181edc5071dc92c9d/php/utils-wp.php#L259-L331.
  *
  * @return string Object cache type.
  * @since n.e.x.t
