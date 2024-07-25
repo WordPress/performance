@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   3.3.0
+Stable tag:   3.3.1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -57,6 +57,16 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 3.3.1 =
+
+**Enhancements**
+
+* Add PHPStan strict rules (except for empty.notAllowed). ([1241](https://github.com/WordPress/performance/pull/1241))
+
+**Bug Fixes**
+
+* Allow null to be passed into perflab_admin_pointer(). ([1393](https://github.com/WordPress/performance/pull/1393))
 
 = 3.3.0 =
 
