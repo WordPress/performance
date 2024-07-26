@@ -1,25 +1,14 @@
 <?php
 return array(
 	'set_up'   => static function ( Test_OD_Optimization $test_case ): void {
-		$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-		foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
-
-			$elements = array();
-			for ( $i = 1; $i < WP_HTML_Tag_Processor::MAX_SEEK_OPS; $i++ ) {
-				$elements[] = array(
-					'xpath' => sprintf( '/*[1][self::HTML]/*[2][self::BODY]/*[%d][self::IMG]', $i ),
-					'isLCP' => false,
-				);
-			}
-
-			OD_URL_Metrics_Post_Type::store_url_metric(
-				$slug,
-				$test_case->get_validated_url_metric(
-					$viewport_width,
-					$elements
-				)
+		$elements = array();
+		for ( $i = 1; $i < WP_HTML_Tag_Processor::MAX_SEEK_OPS; $i++ ) {
+			$elements[] = array(
+				'xpath' => sprintf( '/*[1][self::HTML]/*[2][self::BODY]/*[%d][self::IMG]', $i ),
+				'isLCP' => false,
 			);
 		}
+		$test_case->populate_url_metrics( $elements, false );
 	},
 	'buffer'   => '
 		<html lang="en">
