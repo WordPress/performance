@@ -78,7 +78,7 @@ final class Embed_Optimizer_Tag_Visitor {
 			return false;
 		}
 
-		$embed_wrapper_xpath = $processor->get_xpath() . '/*[1][self::DIV]';
+		$embed_wrapper_xpath = $processor->get_xpath() . od_construct_xpath( array( array( 'DIV', 0 ) ) );
 		$minimum_height      = $context->url_metrics_group_collection->get_element_minimum_height( $embed_wrapper_xpath );
 		if ( is_int( $minimum_height ) ) {
 			$style = $processor->get_attribute( 'style' );

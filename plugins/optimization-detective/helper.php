@@ -11,6 +11,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Constructs XPath from indexed breadcrumbs.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<int, array{ string, non-negative-int }> $breadcrumbs Indexed breadcrumbs.
+ * @return string XPath.
+ */
+function od_construct_xpath( array $breadcrumbs ): string {
+	$xpath = '';
+	foreach ( $breadcrumbs as $breadcrumb ) {
+		$xpath .= sprintf( '/*[%d][self::%s]', $breadcrumb[1] + 1, $breadcrumb[0] );
+	}
+	return $xpath;
+}
+
+/**
  * Displays the HTML generator meta tag for the Optimization Detective plugin.
  *
  * See {@see 'wp_head'}.

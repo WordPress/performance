@@ -134,7 +134,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Open stack indices.
 	 *
 	 * @since 0.4.0
-	 * @var int[]
+	 * @var non-negative-int[]
 	 */
 	private $open_stack_indices = array();
 
@@ -147,7 +147,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * populated back into `$this->open_stack_tags` and `$this->open_stack_indices`.
 	 *
 	 * @since 0.4.0
-	 * @var array<string, array{tags: string[], indices: int[]}>
+	 * @var array<string, array{tags: string[], indices: non-negative-int[]}>
 	 */
 	private $bookmarked_open_stacks = array();
 
@@ -494,7 +494,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @since 0.4.0
 	 *
-	 * @return Generator<array{string, int}> Breadcrumb.
+	 * @return Generator<array{string, non-negative-int}> Breadcrumb.
 	 */
 	private function get_breadcrumbs(): Generator {
 		foreach ( $this->open_stack_tags as $i => $breadcrumb_tag_name ) {
@@ -530,10 +530,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 */
 	public function get_xpath(): string {
 		if ( null === $this->current_xpath ) {
-			$this->current_xpath = '';
-			foreach ( $this->get_breadcrumbs() as list( $tag_name, $index ) ) {
-				$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
-			}
+			$this->current_xpath = od_construct_xpath( iterator_to_array( $this->get_breadcrumbs() ) );
 		}
 		return $this->current_xpath;
 	}
