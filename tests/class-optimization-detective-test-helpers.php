@@ -59,12 +59,12 @@ trait Optimization_Detective_Test_Helpers {
 								'isLCPCandidate'     => $element['isLCP'],
 								'intersectionRatio'  => 1,
 								'intersectionRect'   => array(
-									'width'  => 100,
-									'height' => 100,
+									'width'  => 500,
+									'height' => 500,
 								),
 								'boundingClientRect' => array(
-									'width'  => 100,
-									'height' => 100,
+									'width'  => 500,
+									'height' => 500,
 								),
 							),
 							$element
