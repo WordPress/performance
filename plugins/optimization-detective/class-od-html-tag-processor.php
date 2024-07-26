@@ -315,6 +315,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			$popped_tag_name = array_pop( $this->open_stack_tags );
 			if ( $popped_tag_name !== $tag_name ) {
 				$this->warn(
+					__METHOD__,
 					sprintf(
 						/* translators: 1: Popped tag name, 2: Closing tag name */
 						__( 'Expected popped tag stack element %1$s to match the currently visited closing tag %2$s.', 'optimization-detective' ),
@@ -476,6 +477,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	public function release_bookmark( $name ): bool {
 		if ( in_array( $name, array( self::END_OF_HEAD_BOOKMARK, self::END_OF_BODY_BOOKMARK ), true ) ) {
 			$this->warn(
+				__METHOD__,
 				/* translators: %s is the bookmark name */
 				sprintf( 'The %s bookmark is not allowed to be released.', 'optimization-detective' )
 			);
@@ -575,6 +577,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			}
 			if ( ! $this->has_bookmark( $bookmark ) ) {
 				$this->warn(
+					__METHOD__,
 					sprintf(
 						/* translators: %s is the bookmark name */
 						__( 'Unable to append markup to %s since the bookmark no longer exists.', 'optimization-detective' ),
@@ -602,11 +605,12 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @since 0.4.0
 	 *
-	 * @param string $message Warning message.
+	 * @param string $function_name Function name.
+	 * @param string $message       Warning message.
 	 */
-	private function warn( string $message ): void {
+	private function warn( string $function_name, string $message ): void {
 		wp_trigger_error(
-			__CLASS__ . '::open_tags',
+			$function_name,
 			esc_html( $message )
 		);
 	}
