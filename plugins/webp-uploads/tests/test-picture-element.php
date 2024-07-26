@@ -201,13 +201,9 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 				'add_filter' => static function (): void {
 					add_filter(
 						'wp_content_img_tag',
-						static function (
-							string $content
-						): string {
+						function ( string $content ): string {
 							$processor = new WP_HTML_Tag_Processor( $content );
-							if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
-								return $content;
-							}
+							$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'img' ) ) );
 							$processor->set_attribute( 'sizes', '(max-width: 333px) 100vw, 333px' );
 							return $processor->get_updated_html();
 						}
