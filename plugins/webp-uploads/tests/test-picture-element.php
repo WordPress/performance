@@ -190,7 +190,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	/**
 	 * Data provider for it_should_maybe_wrap_images_in_picture_element.
 	 *
-	 * @return array<string, array<string, (Closure)|null>>
+	 * @return array<string, array{ add_filter: Closure|null }>
 	 */
 	public function data_provider_test_image_sizes_equality(): array {
 		return array(
