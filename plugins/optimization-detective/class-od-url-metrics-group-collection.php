@@ -81,7 +81,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metrics_Group[]>,
 	 *          get_common_lcp_element?: ElementData|null,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
-	 *          get_all_element_minimum_heights?: array<string, int>
+	 *          get_all_element_minimum_heights?: array<string, float>
 	 *      }
 	 */
 	private $result_cache = array();
@@ -434,7 +434,9 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	/**
 	 * Gets the minimum heights of all elements across all groups and their captured URL metrics.
 	 *
-	 * @return array<string, int> Keys are XPaths and values are the minimum heights.
+	 * @since n.e.x.t
+	 *
+	 * @return array<string, float> Keys are XPaths and values are the minimum heights.
 	 */
 	public function get_all_element_minimum_heights(): array {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
@@ -479,10 +481,12 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	/**
 	 * Gets the minimum height of an element across all groups and their captured URL metrics.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @param string $xpath XPath for the element.
-	 * @return int Minimum height in pixels.
+	 * @return float Minimum height in pixels.
 	 */
-	public function get_element_minimum_height( string $xpath ): ?int {
+	public function get_element_minimum_height( string $xpath ): ?float {
 		return $this->get_all_element_minimum_heights()[ $xpath ] ?? null;
 	}
 

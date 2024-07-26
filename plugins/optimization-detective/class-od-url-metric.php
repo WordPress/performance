@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Representation of the measurements taken from a single client's visit to a specific URL.
  *
- * @phpstan-type RectData    array{ width: int, height: int }
+ * @phpstan-type RectData    array{ width: float, height: float }
  * @phpstan-type ElementData array{
  *                               isLCP: bool,
  *                               isLCPCandidate: bool,
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @phpstan-type Data        array{
  *                               url: string,
  *                               timestamp: float,
- *                               viewport: RectData,
+ *                               viewport: array{ width: int, height: int },
  *                               elements: ElementData[]
  *                           }
  *
@@ -82,11 +82,11 @@ final class OD_URL_Metric implements JsonSerializable {
 			'properties'           => array(
 				'width'  => array(
 					'type'    => 'number',
-					'minimum' => 0,
+					'minimum' => 0.0,
 				),
 				'height' => array(
 					'type'    => 'number',
-					'minimum' => 0,
+					'minimum' => 0.0,
 				),
 			),
 			// TODO: There are other properties to define if we need them: x, y, top, right, bottom, left.
@@ -179,7 +179,7 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets viewport data.
 	 *
-	 * @return RectData Viewport data.
+	 * @return array{ width: int, height: int } Viewport data.
 	 */
 	public function get_viewport(): array {
 		return $this->data['viewport'];

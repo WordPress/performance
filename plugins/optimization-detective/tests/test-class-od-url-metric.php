@@ -4,6 +4,8 @@
  *
  * @package optimization-detective
  *
+ * @phpstan-import-type Data from OD_URL_Metric
+ *
  * @coversDefaultClass OD_URL_Metric
  */
 class Test_OD_URL_Metric extends WP_UnitTestCase {
