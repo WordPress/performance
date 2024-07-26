@@ -27,24 +27,59 @@ final class Embed_Optimizer_Tag_Visitor {
 	protected $added_lazy_script = false;
 
 	/**
+	 * Determines whether the processor is currently at a figure.wp-block-embed tag.
+	 *
+	 * @param OD_HTML_Tag_Processor $processor Processor.
+	 * @return bool Whether at the tag.
+	 */
+	private function is_embed_figure( OD_HTML_Tag_Processor $processor ): bool {
+		return (
+			'FIGURE' === $processor->get_tag()
+			&&
+			true === $processor->has_class( 'wp-block-embed' )
+		);
+	}
+
+	/**
+	 * Determines whether the processor is currently at a div.wp-block-embed__wrapper tag.
+	 *
+	 * @param OD_HTML_Tag_Processor $processor Processor.
+	 * @return bool Whether at the tag.
+	 */
+	private function is_embed_wrapper( OD_HTML_Tag_Processor $processor ): bool {
+		return (
+			'DIV' === $processor->get_tag()
+			&&
+			true === $processor->has_class( 'wp-block-embed__wrapper' )
+		);
+	}
+
+	/**
 	 * Visits a tag.
 	 *
 	 * @since 0.2.0
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
-	 * @return bool Whether the visit or visited the tag.
+	 * @return bool Whether the tag should be measured and stored in URL metrics.
 	 */
 	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
-		if ( ! (
-			'FIGURE' === $processor->get_tag()
-			&&
-			true === $processor->has_class( 'wp-block-embed' )
-		) ) {
+
+		/*
+		 * The only thing we need to do if it is a div.wp-block-embed__wrapper tag is return true so that the tag
+		 * will get measured and stored in the URL Metrics.
+		 */
+		if ( $this->is_embed_wrapper( $processor ) ) {
+			return true;
+		}
+
+		// Short-circuit if not a figure.wp-block-embed tag.
+		if ( ! $this->is_embed_figure( $processor ) ) {
 			return false;
 		}
 
-		$minimum_height = $context->url_metrics_group_collection->get_element_minimum_height( $processor->get_xpath() );
+		$embed_wrapper_xpath = $processor->get_xpath() . '/*[1][self::DIV]';
+		$minimum_height      = $context->url_metrics_group_collection->get_element_minimum_height( $embed_wrapper_xpath );
 		if ( is_int( $minimum_height ) ) {
 			$style = $processor->get_attribute( 'style' );
 			if ( is_string( $style ) ) {
@@ -56,8 +91,7 @@ final class Embed_Optimizer_Tag_Visitor {
 			$processor->set_attribute( 'style', $style );
 		}
 
-		$max_intersection_ratio = $context->url_metrics_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() );
-
+		$max_intersection_ratio = $context->url_metrics_group_collection->get_element_max_intersection_ratio( $embed_wrapper_xpath );
 		if ( $max_intersection_ratio > 0 ) {
 			/*
 			 * The following embeds have been chosen for optimization due to their relative popularity among all embed types.
@@ -131,6 +165,12 @@ final class Embed_Optimizer_Tag_Visitor {
 			$this->added_lazy_script = true;
 		}
 
-		return true;
+		/*
+		 * At this point the tag is a figure.wp-block-embed, and we can return false because this does not need to be
+		 * measured and stored in URL Metrics. Only the child div.wp-block-embed__wrapper tag is measured and stored
+		 * so that this visitor can look up the height to set as a min-height on the figure.wp-block-embed. For more
+		 * information on what the return values mean for tag visitors, see <https://github.com/WordPress/performance/issues/1342>.
+		 */
+		return false;
 	}
 }

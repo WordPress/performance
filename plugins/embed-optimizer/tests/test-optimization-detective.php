@@ -43,7 +43,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 					$this->populate_url_metrics(
 						array(
 							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
 								'isLCP'             => true,
 								'intersectionRatio' => 1,
 							),
@@ -89,7 +89,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 					$this->populate_url_metrics(
 						array(
 							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
 								'isLCP'             => false,
 								'intersectionRatio' => 0,
 							),
@@ -133,7 +133,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 					$this->populate_url_metrics(
 						array(
 							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
 								'isLCP'             => true,
 								'intersectionRatio' => 1,
 							),
@@ -181,7 +181,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 					$this->populate_url_metrics(
 						array(
 							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
 								'isLCP'             => false,
 								'intersectionRatio' => 0,
 							),
@@ -228,7 +228,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 					$this->populate_url_metrics(
 						array(
 							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
 								'isLCP'             => true,
 								'intersectionRatio' => 1,
 							),
@@ -263,8 +263,8 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preconnect" href="https://v0.wordpress.com">
 						</head>
 						<body>
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
-								<div class="wp-block-embed__wrapper">
+							<figure data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 									<iframe title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
 									<script src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
 								</div>
@@ -280,7 +280,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 					$this->populate_url_metrics(
 						array(
 							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
 								'isLCP'             => false,
 								'intersectionRatio' => 0,
 							),
@@ -311,8 +311,8 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
-								<div class="wp-block-embed__wrapper">
+							<figure data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 									<iframe data-od-added-loading loading="lazy" title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
 									<script data-od-added-type type="application/vnd.embed-optimizer.javascript" src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
 								</div>
@@ -329,7 +329,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 					$this->populate_url_metrics(
 						array(
 							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
 								'isLCP'             => false,
 								'intersectionRatio' => 0,
 							),
@@ -360,8 +360,8 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body>
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-rich is-provider-spotify wp-block-embed-spotify wp-embed-aspect-21-9 wp-has-aspect-ratio">
-								<div class="wp-block-embed__wrapper">
+							<figure data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-rich is-provider-spotify wp-block-embed-spotify wp-embed-aspect-21-9 wp-has-aspect-ratio">
+								<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 									<iframe data-od-added-loading loading="lazy" title="Spotify Embed: Deep Focus" style="border-radius: 12px" width="100%" height="352" frameborder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" src="https://open.spotify.com/embed/playlist/37i9dQZF1DWZeKCadgRdKQ?utm_source=oembed"></iframe>
 								</div>
 							</figure>
@@ -377,7 +377,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 					$this->populate_url_metrics(
 						array(
 							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
 								'isLCP'             => false,
 								'intersectionRatio' => 1,
 							),
@@ -387,7 +387,7 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 								'intersectionRatio' => 1,
 							),
 							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]',
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]',
 								'isLCP'             => false,
 								'intersectionRatio' => 0,
 							),
@@ -474,13 +474,13 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<link data-od-added-tag rel="preload" as="image" href="https://example.com/poster1.jpg">
 						</head>
 						<body>
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" data-od-replaced-style="background: black; color:gray" style="background: black; color:gray; min-height: 500px;" class="wp-block-embed is-type-video">
-								<div class="wp-block-embed__wrapper">
+							<figure data-od-replaced-style="background: black; color:gray" style="background: black; color:gray; min-height: 500px;" class="wp-block-embed is-type-video">
+								<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 									<video data-od-added-preload data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]" preload="auto" src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
 								</div>
 							</figure>
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]" data-od-replaced-style="background: black; color: white;" style="background: black; color: white; min-height: 500px;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
-								<div class="wp-block-embed__wrapper">
+							<figure data-od-replaced-style="background: black; color: white;" style="background: black; color: white; min-height: 500px;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
+								<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 									<figure>
 										<p>So I heard you like <code>FIGURE</code>?</p>
 										<video data-od-added-preload data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::FIGURE]/*[2][self::VIDEO]" preload="none" src="https://example.com/video2.mp4" poster="https://example.com/poster2.jpg" width="640" height="480"></video>
@@ -556,8 +556,8 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 							<title>...</title>
 						</head>
 						<body data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]">
-							<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
-								<div class="wp-block-embed__wrapper">
+							<figure class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 									<iframe title="VideoPress Video Player" aria-label=\'VideoPress Video Player\' width=\'750\' height=\'422\' src=\'https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1\' frameborder=\'0\' allowfullscreen allow=\'clipboard-write\'></iframe>
 									<script src=\'https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142\'></script>
 								</div>
