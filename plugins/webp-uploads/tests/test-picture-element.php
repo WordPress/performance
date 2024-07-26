@@ -198,7 +198,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 				'add_filter' => null,
 			),
 			'with_filter' => array(
-				'add_filter' => static function (): void {
+				'add_filter' => function (): void {
 					add_filter(
 						'wp_content_img_tag',
 						function ( string $content ): string {
