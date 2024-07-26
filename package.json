@@ -43,7 +43,7 @@
     "generate-pending-release-diffs": "bin/generate-pending-release-diffs.sh",
     "format-js": "wp-scripts format",
     "lint-js": "wp-scripts lint-js",
-    "format-php": "composer format",
+    "format-php": "composer format:all",
     "phpstan": "composer phpstan",
     "lint-php": "composer lint:all",
     "test-php": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:plugins",
