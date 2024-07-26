@@ -129,3 +129,25 @@ function perflab_aao_extend_core_check( string $description ): string {
 	return $description . perflab_aao_get_autoloaded_options_table() . perflab_aao_get_disabled_autoloaded_options_table();
 }
 add_filter( 'site_status_autoloaded_options_limit_description', 'perflab_aao_extend_core_check' );
+
+/**
+ * Filters the list of disabled options to exclude options that are autoloaded.
+ *
+ * This filter modifies the 'option_perflab_aao_disabled_options' to ensure
+ * that autoloaded options are not included in the disabled options list.
+ *
+ * @since n.e.x.t
+ *
+ * @param string[]|mixed $disabled_options Array of disabled options.
+ * @return string[] Filtered array of disabled options excluding autoloaded options.
+ */
+function perflab_filter_option_perflab_aao_disabled_options( $disabled_options ): array {
+	$autoload_option_names = wp_list_pluck( perflab_aao_query_autoloaded_options(), 'option_name' );
+	return array_filter(
+		(array) $disabled_options,
+		static function ( $option ) use ( $autoload_option_names ): bool {
+			return ! in_array( $option, $autoload_option_names, true );
+		}
+	);
+}
+add_filter( 'option_perflab_aao_disabled_options', 'perflab_filter_option_perflab_aao_disabled_options' );
