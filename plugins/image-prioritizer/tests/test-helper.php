@@ -62,7 +62,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 		$this->assertEquals(
 			$remove_initial_tabs( $expected ),
 			$remove_initial_tabs( $buffer ),
-			"Snapshot:\n$buffer"
+			"Buffer snapshot:\n$buffer"
 		);
 	}
 

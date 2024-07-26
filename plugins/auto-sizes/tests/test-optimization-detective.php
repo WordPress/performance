@@ -125,14 +125,15 @@ class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 		$html_start_doc = '<html lang="en"><head><meta charset="utf-8"><title>...</title></head><body>';
 		$html_end_doc   = '</body></html>';
 
-		$expected = $remove_initial_tabs( $expected );
-		$buffer   = $remove_initial_tabs( $buffer );
-
 		$buffer = od_optimize_template_output_buffer( $html_start_doc . $buffer . $html_end_doc );
 		$buffer = preg_replace( '#.+?<body[^>]*>#s', '', $buffer );
 		$buffer = preg_replace( '#</body>.*$#s', '', $buffer );
 
-		$this->assertEquals( $expected, $buffer );
+		$this->assertEquals(
+			$remove_initial_tabs( $expected ),
+			$remove_initial_tabs( $buffer ),
+			"Buffer snapshot:\n$buffer"
+		);
 	}
 
 	/**

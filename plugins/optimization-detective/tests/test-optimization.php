@@ -234,16 +234,17 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 			}
 		);
 
-		$expected = $remove_initial_tabs( $expected );
-		$buffer   = $remove_initial_tabs( $buffer );
-
 		$buffer = preg_replace(
 			':<script type="module">.+?</script>:s',
 			'<script type="module">/* import detect ... */</script>',
 			od_optimize_template_output_buffer( $buffer )
 		);
 
-		$this->assertEquals( $expected, $buffer );
+		$this->assertEquals(
+			$remove_initial_tabs( $expected ),
+			$remove_initial_tabs( $buffer ),
+			"Buffer snapshot:\n$buffer"
+		);
 	}
 
 	/**
