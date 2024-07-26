@@ -5,8 +5,6 @@
  * @package image-prioritizer
  */
 
-require_once __DIR__ . '/../../../tests/class-optimization-detective-test-helpers.php';
-
 class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	use Optimization_Detective_Test_Helpers;
 

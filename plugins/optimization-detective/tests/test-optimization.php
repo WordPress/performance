@@ -7,8 +7,6 @@
  * @todo There are "Cannot resolve ..." errors and "Element img doesn't have a required attribute src" warnings that should be excluded from inspection.
  */
 
-require_once __DIR__ . '/../../../tests/class-optimization-detective-test-helpers.php';
-
 class Test_OD_Optimization extends WP_UnitTestCase {
 	use Optimization_Detective_Test_Helpers;
 

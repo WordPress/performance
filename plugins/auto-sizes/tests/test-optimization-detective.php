@@ -5,8 +5,6 @@
  * @package auto-sizes
  */
 
-require_once __DIR__ . '/../../../tests/class-optimization-detective-test-helpers.php';
-
 class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 	use Optimization_Detective_Test_Helpers;
 

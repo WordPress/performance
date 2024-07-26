@@ -5,8 +5,6 @@
  * @package embed-optimizer
  */
 
-require_once __DIR__ . '/../../../tests/class-optimization-detective-test-helpers.php';
-
 class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	use Optimization_Detective_Test_Helpers;
 
