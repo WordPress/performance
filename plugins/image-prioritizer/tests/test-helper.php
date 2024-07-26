@@ -962,7 +962,9 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 									<h2 class="entry-title">Last Post</h2>
 									<div class="entry-content">
 										<p>This post has no featured image!</p>
-										<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut orci id orci facilisis fringilla. Quisque arcu dui, posuere eu ullamcorper at, vulputate ut dolor. Mauris id faucibus ipsum. Integer a bibendum neque. Vivamus auctor condimentum lacinia. Fusce eget faucibus justo, mattis luctus turpis. Proin auctor est non volutpat commodo. Pellentesque feugiat lectus at ex tempus varius. In mollis tempor urna, eu venenatis ligula efficitur vitae. In vestibulum purus ac tempus rutrum. Pellentesque ultricies eleifend hendrerit.</p>
+										<p>This paragraph adds vertical height.</p>
+										<p>So does this one.</p>
+										<p>And this one too.</p>
 									</div>
 								</article>
 								<article id="post-1">
@@ -992,7 +994,9 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 									<h2 class="entry-title">Last Post</h2>
 									<div class="entry-content">
 										<p>This post has no featured image!</p>
-										<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ut orci id orci facilisis fringilla. Quisque arcu dui, posuere eu ullamcorper at, vulputate ut dolor. Mauris id faucibus ipsum. Integer a bibendum neque. Vivamus auctor condimentum lacinia. Fusce eget faucibus justo, mattis luctus turpis. Proin auctor est non volutpat commodo. Pellentesque feugiat lectus at ex tempus varius. In mollis tempor urna, eu venenatis ligula efficitur vitae. In vestibulum purus ac tempus rutrum. Pellentesque ultricies eleifend hendrerit.</p>
+										<p>This paragraph adds vertical height.</p>
+										<p>So does this one.</p>
+										<p>And this one too.</p>
 									</div>
 								</article>
 								<article id="post-1">
