@@ -68,25 +68,6 @@ function wwo_init(): void {
 add_action( 'wp_enqueue_scripts', 'wwo_init' );
 
 /**
- * Helper function to get all scripts tags which has `web-worker-offloading` dependency.
- *
- * @since n.e.x.t
- *
- * @return string[] Array of script handles.
- */
-function wwo_get_web_worker_offloading_handles(): array {
-	$web_worker_offloading_handles = array();
-
-	foreach ( wp_scripts()->registered as $handle => $script ) {
-		if ( in_array( 'web-worker-offloading', $script->deps, true ) ) {
-			$web_worker_offloading_handles[] = $handle;
-		}
-	}
-
-	return $web_worker_offloading_handles;
-}
-
-/**
  * Mark scripts with `web-worker-offloading` dependency as async.
  *
  * Why this is needed?

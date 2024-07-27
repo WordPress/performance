@@ -79,27 +79,4 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		wp_scripts()->remove( 'web-worker-offloading' );
 		wp_scripts()->remove( 'partytown-test' );
 	}
-
-	/**
-	 * @covers ::wwo_get_web_worker_offloading_handles
-	 */
-	public function test_wwo_get_web_worker_offloading_handles(): void {
-		$handles = wwo_get_web_worker_offloading_handles();
-
-		$this->assertEmpty( $handles );
-
-		// Enqueue a script that depends on Partytown.
-		wp_enqueue_script( 'partytown-test', 'https://example.com/test.js', array( 'web-worker-offloading' ) );
-
-		$handles = wwo_get_web_worker_offloading_handles();
-
-		$this->assertNotEmpty( $handles );
-		$this->assertContains( 'partytown-test', $handles );
-		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'enqueued' ) );
-		$this->assertTrue( wp_script_is( 'partytown-test', 'enqueued' ) );
-
-		// Reset the state.
-		wp_scripts()->remove( 'web-worker-offloading' );
-		wp_scripts()->remove( 'partytown-test' );
-	}
 }
