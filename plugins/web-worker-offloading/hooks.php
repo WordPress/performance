@@ -101,10 +101,10 @@ function wwo_get_web_worker_offloading_handles(): array {
  * @return string[] Array of script handles.
  */
 function wwo_update_script_strategy( array $script_handles ): array {
-	$web_worker_offloading_handles = wwo_get_web_worker_offloading_handles();
-
-	foreach ( array_intersect( $script_handles, $web_worker_offloading_handles ) as $handle ) {
-		wp_script_add_data( $handle, 'strategy', 'async' );
+	foreach ( $script_handles as $handle ) {
+		if ( in_array( 'web-worker-offloading', wp_scripts()->registered[ $handle ]->deps, true ) ) {
+			wp_script_add_data( $handle, 'strategy', 'async' );
+		}
 	}
 
 	return $script_handles;
