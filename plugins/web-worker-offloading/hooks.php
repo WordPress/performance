@@ -121,9 +121,7 @@ add_filter( 'print_scripts_array', 'wwo_update_script_strategy' );
  * @return string Script tag with type="text/partytown" for eligible scripts.
  */
 function wwo_update_script_type( string $tag, string $handle ): string {
-	$web_worker_offloading_handles = wwo_get_web_worker_offloading_handles();
-
-	if ( in_array( $handle, $web_worker_offloading_handles, true ) ) {
+	if ( in_array( 'web-worker-offloading', wp_scripts()->registered[ $handle ]->deps, true ) ) {
 		$html_processor = new WP_HTML_Tag_Processor( $tag );
 
 		while ( $html_processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
