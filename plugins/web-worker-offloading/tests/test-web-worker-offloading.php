@@ -40,8 +40,6 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$this->assertIsArray( $config['forward'] );
 		$this->assertTrue( $config['debug'] );
 		$this->assertContains( 'datalayer.push', $config['forward'] );
-
-		remove_all_filters( 'wwo_configuration' );
 	}
 
 	/**
@@ -74,9 +72,5 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 
 		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'partytown-test', 'enqueued' ) );
-
-		// Reset the state.
-		wp_scripts()->remove( 'web-worker-offloading' );
-		wp_scripts()->remove( 'partytown-test' );
 	}
 }
