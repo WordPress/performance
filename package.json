@@ -58,6 +58,7 @@
     "test-php:image-prioritizer": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:image-prioritizer",
     "test-php:optimization-detective": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:optimization-detective",
     "test-php:speculation-rules": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:speculation-rules",
+    "test-php:web-worker-offloading": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:web-worker-offloading",
     "test-php:webp-uploads": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:webp-uploads",
     "wp-env": "wp-env",
     "prepare": "husky"
