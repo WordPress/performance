@@ -75,16 +75,7 @@ add_action( 'wp_enqueue_scripts', 'wwo_init' );
  * @return string[] Array of script handles.
  */
 function wwo_get_web_worker_offloading_handles(): array {
-	/**
-	 * Array of script handles which has `web-worker-offloading` dependency.
-	 *
-	 * @var string[] $web_worker_offloading_handles
-	 */
-	static $web_worker_offloading_handles = array();
-
-	if ( count( $web_worker_offloading_handles ) > 0 ) {
-		return $web_worker_offloading_handles;
-	}
+	$web_worker_offloading_handles = array();
 
 	foreach ( wp_scripts()->registered as $handle => $script ) {
 		if ( in_array( 'web-worker-offloading', $script->deps, true ) ) {
