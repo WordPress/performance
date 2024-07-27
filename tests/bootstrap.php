@@ -110,5 +110,25 @@ if ( 'performance-lab' === $plugin_name ) {
 	);
 }
 
+// Clean up object-cache drop-ins after possible previous failed tests.
+tests_add_filter(
+	'enable_loading_object_cache_dropin',
+	static function ( bool $passthrough ): bool {
+		$cleanup_files = array(
+			WP_CONTENT_DIR . '/object-cache.php',
+			WP_CONTENT_DIR . '/object-cache-plst-orig.php',
+		);
+		foreach ( $cleanup_files as $cleanup_file ) {
+			if ( file_exists( $cleanup_file ) ) {
+				unlink( $cleanup_file );
+			}
+		}
+		return $passthrough;
+	}
+);
+
+// Require helper classes.
+require_once __DIR__ . '/class-optimization-detective-test-helpers.php';
+
 // Start up the WP testing environment.
 require $_test_root . '/includes/bootstrap.php';
