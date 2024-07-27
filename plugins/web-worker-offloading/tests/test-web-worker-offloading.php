@@ -8,6 +8,22 @@
 class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 
 	/**
+	 * Set up the test case.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+		$this->reset_wp_dependencies();
+	}
+
+	/**
+	 * Tear down the test case.
+	 */
+	public function tear_down(): void {
+		parent::tear_down();
+		$this->reset_wp_dependencies();
+	}
+
+	/**
 	 * @covers ::wwo_get_configuration
 	 */
 	public function test_wwo_get_configuration(): void {
@@ -72,5 +88,12 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 
 		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'enqueued' ) );
 		$this->assertTrue( wp_script_is( 'partytown-test', 'enqueued' ) );
+	}
+
+	/**
+	 * Reset WP_Scripts and WP_Styles.
+	 */
+	private function reset_wp_dependencies(): void {
+		$GLOBALS['wp_scripts'] = null;
 	}
 }
