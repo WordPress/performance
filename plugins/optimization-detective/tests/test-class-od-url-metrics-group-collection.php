@@ -555,11 +555,9 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 			return $this->get_validated_url_metric(
 				array(
 					'viewport_width' => $viewport_width,
-					'elements'       => array(
-						array(
-							'isLCP' => true,
-							'xpath' => $lcp_element_xpath,
-						),
+					'element'        => array(
+						'isLCP' => true,
+						'xpath' => $lcp_element_xpath,
 					),
 				)
 			);
@@ -623,11 +621,9 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 					$this->get_validated_url_metric(
 						array(
 							'viewport_width' => $viewport_width,
-							'elements'       => array(
-								array(
-									'isLCP' => true,
-									'xpath' => $lcp_element_xpath,
-								),
+							'element'        => array(
+								'isLCP' => true,
+								'xpath' => $lcp_element_xpath,
 							),
 						)
 					)
@@ -655,12 +651,10 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 			return $this->get_validated_url_metric(
 				array(
 					'viewport_width' => $viewport_width,
-					'elements'       => array(
-						array(
-							'isLCP'             => true,
-							'xpath'             => $lcp_element_xpath,
-							'intersectionRatio' => $intersection_ratio,
-						),
+					'element'        => array(
+						'isLCP'             => true,
+						'xpath'             => $lcp_element_xpath,
+						'intersectionRatio' => $intersection_ratio,
 					),
 				)
 			);

@@ -385,10 +385,8 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$data = $this->get_validated_url_metric(
 			array(
 				'viewport_width' => 480,
-				'elements'       => array(
-					array(
-						'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
-					),
+				'element'        => array(
+					'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
 				),
 			)
 		)->jsonSerialize();

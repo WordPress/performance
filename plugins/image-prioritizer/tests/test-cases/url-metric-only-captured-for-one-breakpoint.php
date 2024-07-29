@@ -6,11 +6,9 @@ return array(
 			$test_case->get_validated_url_metric(
 				array(
 					'viewport_width' => 400,
-					'elements'       => array(
-						array(
-							'isLCP' => true,
-							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-						),
+					'element'        => array(
+						'isLCP' => true,
+						'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 					),
 				)
 			)

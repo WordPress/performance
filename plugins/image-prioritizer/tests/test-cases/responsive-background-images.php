@@ -26,11 +26,9 @@ return array(
 					$test_case->get_validated_url_metric(
 						array(
 							'viewport_width' => $viewport_width,
-							'elements'       => array(
-								array(
-									'xpath' => sprintf( '/*[1][self::HTML]/*[2][self::BODY]/*[%d][self::DIV]', $div_index + 1 ),
-									'isLCP' => true,
-								),
+							'element'        => array(
+								'xpath' => sprintf( '/*[1][self::HTML]/*[2][self::BODY]/*[%d][self::DIV]', $div_index + 1 ),
+								'isLCP' => true,
 							),
 						)
 					)

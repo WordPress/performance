@@ -19,12 +19,10 @@ return array(
 					$test_case->get_validated_url_metric(
 						array(
 							'viewport_width' => $viewport_width,
-							'elements'       => array(
-								array(
-									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::MAIN]/*[2][self::ARTICLE]/*[2][self::FIGURE]/*[1][self::IMG]',
-									'isLCP'             => $viewport_width > 600,
-									'intersectionRatio' => $viewport_width > 600 ? 1.0 : 0.1,
-								),
+							'element'        => array(
+								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::MAIN]/*[2][self::ARTICLE]/*[2][self::FIGURE]/*[1][self::IMG]',
+								'isLCP'             => $viewport_width > 600,
+								'intersectionRatio' => $viewport_width > 600 ? 1.0 : 0.1,
 							),
 						)
 					)
