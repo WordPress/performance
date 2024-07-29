@@ -11,15 +11,17 @@ return array(
 		OD_URL_Metrics_Post_Type::store_url_metric(
 			od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 			$test_case->get_validated_url_metric(
-				500,
 				array(
-					array(
-						'isLCP' => true,
-						'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-					),
-					array(
-						'isLCP' => false,
-						'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+					'viewport_width' => 500,
+					'elements'       => array(
+						array(
+							'isLCP' => true,
+							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+						),
+						array(
+							'isLCP' => false,
+							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+						),
 					),
 				)
 			)
@@ -27,15 +29,17 @@ return array(
 		OD_URL_Metrics_Post_Type::store_url_metric(
 			od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 			$test_case->get_validated_url_metric(
-				650,
 				array(
-					array(
-						'isLCP' => false,
-						'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-					),
-					array(
-						'isLCP' => false,
-						'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+					'viewport_width' => 650,
+					'elements'       => array(
+						array(
+							'isLCP' => false,
+							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+						),
+						array(
+							'isLCP' => false,
+							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+						),
 					),
 				)
 			)
@@ -43,15 +47,17 @@ return array(
 		OD_URL_Metrics_Post_Type::store_url_metric(
 			od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 			$test_case->get_validated_url_metric(
-				800,
 				array(
-					array(
-						'isLCP' => false,
-						'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-					),
-					array(
-						'isLCP' => true,
-						'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+					'viewport_width' => 800,
+					'elements'       => array(
+						array(
+							'isLCP' => false,
+							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+						),
+						array(
+							'isLCP' => true,
+							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+						),
 					),
 				)
 			)
@@ -59,15 +65,17 @@ return array(
 		OD_URL_Metrics_Post_Type::store_url_metric(
 			od_get_url_metrics_slug( od_get_normalized_query_vars() ),
 			$test_case->get_validated_url_metric(
-				800,
 				array(
-					array(
-						'isLCP' => false,
-						'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-					),
-					array(
-						'isLCP' => false,
-						'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+					'viewport_width' => 800,
+					'elements'       => array(
+						array(
+							'isLCP' => false,
+							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+						),
+						array(
+							'isLCP' => false,
+							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+						),
 					),
 				)
 			)

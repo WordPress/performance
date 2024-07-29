@@ -29,8 +29,10 @@ trait Optimization_Detective_Test_Helpers {
 				OD_URL_Metrics_Post_Type::store_url_metric(
 					$slug,
 					$this->get_validated_url_metric(
-						$viewport_width,
-						$elements
+						array(
+							'viewport_width' => $viewport_width,
+							'elements'       => $elements,
+						)
 					)
 				);
 			}
@@ -58,17 +60,29 @@ trait Optimization_Detective_Test_Helpers {
 	/**
 	 * Gets a validated URL metric.
 	 *
-	 * @param int                      $viewport_width Viewport width for the URL metric.
-	 * @param array<ElementDataSubset> $elements       Elements.
+	 * @phpstan-param array{
+	 *                    url?:            string,
+	 *                    viewport_width?: int,
+	 *                    elements?:       array<ElementDataSubset>
+	 *                } $params Params.
 	 *
 	 * @return OD_URL_Metric URL metric.
 	 */
-	public function get_validated_url_metric( int $viewport_width, array $elements = array() ): OD_URL_Metric {
+	public function get_validated_url_metric( array $params ): OD_URL_Metric {
+		$params = array_merge(
+			array(
+				'url'            => home_url( '/' ),
+				'viewport_width' => 480,
+				'elements'       => array(),
+			),
+			$params
+		);
+
 		return new OD_URL_Metric(
 			array(
 				'url'       => home_url( '/' ),
 				'viewport'  => array(
-					'width'  => $viewport_width,
+					'width'  => $params['viewport_width'],
 					'height' => 800,
 				),
 				'timestamp' => microtime( true ),
@@ -85,7 +99,7 @@ trait Optimization_Detective_Test_Helpers {
 							$element
 						);
 					},
-					$elements
+					$params['elements']
 				),
 			)
 		);
