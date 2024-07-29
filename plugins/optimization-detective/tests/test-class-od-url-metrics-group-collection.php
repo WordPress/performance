@@ -5,6 +5,7 @@
  * @package optimization-detective
  *
  * @noinspection PhpUnhandledExceptionInspection
+ * @noinspection PhpDocMissingThrowsInspection
  *
  * @coversDefaultClass OD_URL_Metrics_Group_Collection
  */
@@ -15,7 +16,6 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_construction(): array {
@@ -180,7 +180,6 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	 * @param array<int, int> $expected_counts Minimum viewport widths mapped to the expected counts in each group.
 	 *
 	 * @dataProvider data_provider_sample_size_and_breakpoints
-	 * @throws OD_Data_Validation_Exception When failing to instantiate a URL metric.
 	 */
 	public function test_add_url_metric( int $sample_size, array $breakpoints, array $viewport_widths, array $expected_counts ): void {
 		$group_collection = new OD_URL_Metrics_Group_Collection( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
@@ -209,8 +208,6 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	 * Test that add_url_metric() pushes out old metrics.
 	 *
 	 * @covers ::add_url_metric
-	 *
-	 * @throws OD_Data_Validation_Exception When failing to instantiate a URL metric.
 	 */
 	public function test_adding_pushes_out_old_metrics(): void {
 		$sample_size      = 3;
@@ -310,7 +307,6 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	 * @covers ::getIterator
 	 *
 	 * @dataProvider data_provider_test_get_iterator
-	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 *
 	 * @param int[]             $breakpoints Breakpoints.
 	 * @param int[]             $viewport_widths Viewport widths.
@@ -623,7 +619,6 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	 * Data provider.
 	 *
 	 * @return array<string, mixed>
-	 * @throws OD_Data_Validation_Exception But it won't really.
 	 */
 	public function data_provider_element_max_intersection_ratios(): array {
 		$xpath1 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]';
@@ -764,7 +759,6 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	 * @param float  $intersection_ratio Intersection ratio.
 	 *
 	 * @return OD_URL_Metric Validated URL metric.
-	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
 	private function get_validated_url_metric( int $viewport_width = 480, string $lcp_element_xpath = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]', float $intersection_ratio = 1.0 ): OD_URL_Metric {
 		return new OD_URL_Metric(

@@ -379,7 +379,6 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 *
 	 * @param array<string, mixed> $extras Extra params which are recursively merged on top of the valid params.
 	 * @return array<string, mixed> Params.
-	 * @throws OD_Data_Validation_Exception Except it won't.
 	 */
 	private function get_valid_params( array $extras = array() ): array {
 		$slug = od_get_url_metrics_slug( array() );

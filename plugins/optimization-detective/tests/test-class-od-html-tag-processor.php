@@ -312,8 +312,6 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 * @param string   $document Document.
 	 * @param string[] $open_tags Open tags.
 	 * @param string[] $xpaths XPaths.
-	 *
-	 * @throws Exception But not really.
 	 */
 	public function test_next_tag_and_get_xpath( string $document, array $open_tags, array $xpaths ): void {
 		$p = new OD_HTML_Tag_Processor( $document );
@@ -344,8 +342,6 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 * Test append_head_html().
 	 *
 	 * @covers ::append_head_html
-	 *
-	 * @throws Exception But not really.
 	 */
 	public function test_append_head_html(): void {
 		$html           = '
@@ -413,8 +409,6 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 *
 	 * @covers ::append_head_html
 	 * @covers ::append_body_html
-	 *
-	 * @throws Exception But not really.
 	 */
 	public function test_append_head_and_body_html(): void {
 		$html          = '
@@ -473,8 +467,6 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 * @covers ::set_attribute
 	 * @covers ::remove_attribute
 	 * @covers ::set_meta_attribute
-	 *
-	 * @throws Exception But not really.
 	 */
 	public function test_html_tag_processor_wrapper_methods(): void {
 		$processor = new OD_HTML_Tag_Processor( '<html lang="en" class="foo" dir="ltr"></html>' );

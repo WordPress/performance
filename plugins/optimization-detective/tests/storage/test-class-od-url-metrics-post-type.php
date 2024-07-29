@@ -6,6 +6,7 @@
  *
  * @coversDefaultClass OD_URL_Metrics_Post_Type
  * @noinspection PhpUnhandledExceptionInspection
+ * @noinspection PhpDocMissingThrowsInspection
  */
 
 class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
@@ -331,8 +332,6 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 	 * @todo Replace with {@see Optimization_Detective_Test_Helpers::get_validated_url_metric()}
 	 *
 	 * @param string $url URL.
-	 *
-	 * @throws OD_Data_Validation_Exception When invalid data (but there won't be).
 	 */
 	private function get_sample_url_metric( string $url ): OD_URL_Metric {
 		return new OD_URL_Metric(

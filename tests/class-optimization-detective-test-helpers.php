@@ -3,6 +3,9 @@
  * Helper trait for Optimization Detective tests.
  *
  * @package performance-lab
+ *
+ * @noinspection PhpDocMissingThrowsInspection
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 /**
@@ -57,8 +60,8 @@ trait Optimization_Detective_Test_Helpers {
 	 *
 	 * @param int                      $viewport_width Viewport width for the URL metric.
 	 * @param array<ElementDataSubset> $elements       Elements.
+	 *
 	 * @return OD_URL_Metric URL metric.
-	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
 	public function get_validated_url_metric( int $viewport_width, array $elements = array() ): OD_URL_Metric {
 		return new OD_URL_Metric(

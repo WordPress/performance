@@ -5,6 +5,7 @@
  * @package optimization-detective
  *
  * @noinspection PhpUnhandledExceptionInspection
+ * @noinspection PhpDocMissingThrowsInspection
  *
  * @coversDefaultClass OD_URL_Metrics_Group
  */
@@ -15,7 +16,6 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @throws OD_Data_Validation_Exception If bad arguments are provided to OD_URL_Metric.
 	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_construction(): array {
@@ -224,7 +224,6 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @throws OD_Data_Validation_Exception When failing to instantiate a URL metric.
 	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_get_lcp_element(): array {
@@ -375,7 +374,6 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 	 * @param bool     $is_lcp         Whether LCP.
 	 *
 	 * @return OD_URL_Metric Validated URL metric.
-	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
 	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): OD_URL_Metric {
 		return new OD_URL_Metric(
