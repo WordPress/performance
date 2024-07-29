@@ -327,11 +327,23 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 	/**
 	 * Gets a sample URL Metric.
 	 *
+	 * @todo Replace with {@see Optimization_Detective_Test_Helpers::get_validated_url_metric()}
+	 *
 	 * @param string $url URL.
 	 *
 	 * @throws OD_Data_Validation_Exception When invalid data (but there won't be).
 	 */
 	private function get_sample_url_metric( string $url ): OD_URL_Metric {
+		$dom_rect = array(
+			'width'  => 100,
+			'height' => 100,
+			'x'      => 100,
+			'y'      => 100,
+			'top'    => 0,
+			'right'  => 0,
+			'bottom' => 0,
+			'left'   => 0,
+		);
 		return new OD_URL_Metric(
 			array(
 				'url'       => $url,
@@ -346,14 +358,8 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 						'isLCPCandidate'     => true,
 						'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
 						'intersectionRatio'  => 1,
-						'intersectionRect'   => array(
-							'width'  => 100,
-							'height' => 100,
-						),
-						'boundingClientRect' => array(
-							'width'  => 100,
-							'height' => 100,
-						),
+						'intersectionRect'   => $dom_rect,
+						'boundingClientRect' => $dom_rect,
 					),
 				),
 			)

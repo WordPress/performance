@@ -117,6 +117,33 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 						),
 					),
 				),
+				'invalid_elements_additional_intersect_rect_property' => array(
+					'elements' => array(
+						array_merge(
+							$valid_element,
+							array(
+								'intersectionRect' => array(
+									'width'  => 640,
+									'height' => 480,
+									'wooHoo' => 'bad',
+								),
+							)
+						),
+					),
+				),
+				'invalid_elements_negative_width_intersect_rect_property' => array(
+					'elements' => array(
+						array_merge(
+							$valid_element,
+							array(
+								'intersectionRect' => array(
+									'width'  => -640,
+									'height' => 480,
+								),
+							)
+						),
+					),
+				),
 			)
 		);
 	}
@@ -396,9 +423,20 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	/**
 	 * Gets sample validated URL metric data.
 	 *
+	 * @todo Replace with {@see Optimization_Detective_Test_Helpers::get_validated_url_metric()}
 	 * @return array<string, mixed>
 	 */
 	private function get_sample_validated_url_metric(): array {
+		$dom_rect = array(
+			'width'  => 100,
+			'height' => 100,
+			'x'      => 100,
+			'y'      => 100,
+			'top'    => 0,
+			'right'  => 0,
+			'bottom' => 0,
+			'left'   => 0,
+		);
 		return array(
 			'url'       => home_url( '/' ),
 			'viewport'  => array(
@@ -408,10 +446,12 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			'timestamp' => microtime( true ),
 			'elements'  => array(
 				array(
-					'isLCP'             => true,
-					'isLCPCandidate'    => true,
-					'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
-					'intersectionRatio' => 1,
+					'isLCP'              => true,
+					'isLCPCandidate'     => true,
+					'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
+					'intersectionRatio'  => 1,
+					'intersectionRect'   => $dom_rect,
+					'boundingClientRect' => $dom_rect,
 				),
 			),
 		);

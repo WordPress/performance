@@ -367,6 +367,8 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 	/**
 	 * Gets a validated URL metric for testing.
 	 *
+	 * @todo Replace with {@see Optimization_Detective_Test_Helpers::get_validated_url_metric()}
+	 *
 	 * @param int      $viewport_width Viewport width.
 	 * @param string[] $breadcrumbs    Breadcrumb tags.
 	 * @param bool     $is_lcp         Whether LCP.
@@ -375,31 +377,36 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
 	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): OD_URL_Metric {
-		$data = array(
-			'url'       => home_url( '/' ),
-			'viewport'  => array(
-				'width'  => $viewport_width,
-				'height' => 640,
-			),
-			'timestamp' => microtime( true ),
-			'elements'  => array(
-				array(
-					'isLCP'              => $is_lcp,
-					'isLCPCandidate'     => $is_lcp,
-					'xpath'              => $this->get_xpath( ...$breadcrumbs ),
-					'intersectionRatio'  => 1,
-					'intersectionRect'   => array(
-						'width'  => 100,
-						'height' => 100,
-					),
-					'boundingClientRect' => array(
-						'width'  => 100,
-						'height' => 100,
+		$dom_rect = array(
+			'width'  => 100,
+			'height' => 100,
+			'x'      => 100,
+			'y'      => 100,
+			'top'    => 0,
+			'right'  => 0,
+			'bottom' => 0,
+			'left'   => 0,
+		);
+		return new OD_URL_Metric(
+			array(
+				'url'       => home_url( '/' ),
+				'viewport'  => array(
+					'width'  => $viewport_width,
+					'height' => 640,
+				),
+				'timestamp' => microtime( true ),
+				'elements'  => array(
+					array(
+						'isLCP'              => $is_lcp,
+						'isLCPCandidate'     => $is_lcp,
+						'xpath'              => $this->get_xpath( ...$breadcrumbs ),
+						'intersectionRatio'  => 1,
+						'intersectionRect'   => $dom_rect,
+						'boundingClientRect' => $dom_rect,
 					),
 				),
-			),
+			)
 		);
-		return new OD_URL_Metric( $data );
 	}
 
 	/**

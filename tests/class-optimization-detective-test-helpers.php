@@ -43,6 +43,16 @@ trait Optimization_Detective_Test_Helpers {
 	 * @throws Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
 	public function get_validated_url_metric( int $viewport_width, array $elements = array() ): OD_URL_Metric {
+		$dom_rect = array(
+			'width'  => 100,
+			'height' => 100,
+			'x'      => 100,
+			'y'      => 100,
+			'top'    => 0,
+			'right'  => 0,
+			'bottom' => 0,
+			'left'   => 0,
+		);
 		return new OD_URL_Metric(
 			array(
 				'url'       => home_url( '/' ),
@@ -52,20 +62,14 @@ trait Optimization_Detective_Test_Helpers {
 				),
 				'timestamp' => microtime( true ),
 				'elements'  => array_map(
-					static function ( array $element ): array {
+					static function ( array $element ) use ( $dom_rect ): array {
 						return array_merge(
 							array(
 								'isLCP'              => false,
 								'isLCPCandidate'     => $element['isLCP'],
 								'intersectionRatio'  => 1,
-								'intersectionRect'   => array(
-									'width'  => 100,
-									'height' => 100,
-								),
-								'boundingClientRect' => array(
-									'width'  => 100,
-									'height' => 100,
-								),
+								'intersectionRect'   => $dom_rect,
+								'boundingClientRect' => $dom_rect,
 							),
 							$element
 						);
