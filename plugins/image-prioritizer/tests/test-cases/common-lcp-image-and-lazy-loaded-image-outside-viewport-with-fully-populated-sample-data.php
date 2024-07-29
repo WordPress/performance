@@ -7,7 +7,7 @@ return array(
 			for ( $i = 0; $i < $sample_size; $i++ ) {
 				OD_URL_Metrics_Post_Type::store_url_metric(
 					$slug,
-					$test_case->get_validated_url_metric(
+					$test_case->get_sample_url_metric(
 						array(
 							'viewport_width' => $viewport_width,
 							'elements'       => array(

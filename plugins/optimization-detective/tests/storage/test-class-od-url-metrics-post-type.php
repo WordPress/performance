@@ -155,7 +155,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 	public function test_store_url_metric(): void {
 		$slug = od_get_url_metrics_slug( array( 'p' => 1 ) );
 
-		$validated_url_metric = $this->get_validated_url_metric( array( 'url' => home_url( '/' ) ) );
+		$validated_url_metric = $this->get_sample_url_metric( array( 'url' => home_url( '/' ) ) );
 
 		$post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $validated_url_metric );
 		$this->assertIsInt( $post_id );
@@ -234,9 +234,9 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		clean_post_cache( $old_generic_post );
 
 		$new_url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $new_generic_post ) );
-		$new_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $new_url_metrics_slug, $this->get_validated_url_metric( array( 'url' => get_permalink( $new_generic_post ) ) ) );
+		$new_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $new_url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $new_generic_post ) ) ) );
 		$old_url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $old_generic_post ) );
-		$old_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $old_url_metrics_slug, $this->get_validated_url_metric( array( 'url' => get_permalink( $old_generic_post ) ) ) );
+		$old_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $old_url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $old_generic_post ) ) ) );
 		$wpdb->update(
 			$wpdb->posts,
 			array(
@@ -283,7 +283,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		// Now create sample URL Metrics posts.
 		for ( $i = 1; $i <= 101; $i++ ) {
 			$slug    = od_get_url_metrics_slug( array( 'p' => $i ) );
-			$post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $this->get_validated_url_metric( array( 'url' => home_url( "/?p=$i" ) ) ) );
+			$post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $this->get_sample_url_metric( array( 'url' => home_url( "/?p=$i" ) ) ) );
 			update_post_meta( $post_id, $url_metrics_post_meta_key, '' );
 		}
 

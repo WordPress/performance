@@ -78,8 +78,8 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 			),
 			'all_arguments_good'         => array(
 				'url_metrics'   => array(
-					$this->get_validated_url_metric( array( 'viewport_width' => 200 ) ),
-					$this->get_validated_url_metric( array( 'viewport_width' => 400 ) ),
+					$this->get_sample_url_metric( array( 'viewport_width' => 200 ) ),
+					$this->get_sample_url_metric( array( 'viewport_width' => 400 ) ),
 				),
 				'breakpoints'   => array( 400 ),
 				'sample_size'   => 3,
@@ -187,7 +187,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 		// Over-populate the sample size for the breakpoints by a dozen.
 		foreach ( $viewport_widths as $viewport_width => $count ) {
 			for ( $i = 0; $i < $count; $i++ ) {
-				$group_collection->add_url_metric( $this->get_validated_url_metric( array( 'viewport_width' => $viewport_width ) ) );
+				$group_collection->add_url_metric( $this->get_sample_url_metric( array( 'viewport_width' => $viewport_width ) ) );
 			}
 		}
 
@@ -223,7 +223,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 				$group_collection->add_url_metric(
 					new OD_URL_Metric(
 						array_merge(
-							$this->get_validated_url_metric( array( 'viewport_width' => $viewport_width ) )->jsonSerialize(),
+							$this->get_sample_url_metric( array( 'viewport_width' => $viewport_width ) )->jsonSerialize(),
 							array(
 								'timestamp' => $old_timestamp,
 							)
@@ -235,7 +235,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 
 		// Try adding one URL metric for each breakpoint group.
 		foreach ( $viewport_widths as $viewport_width ) {
-			$group_collection->add_url_metric( $this->get_validated_url_metric( array( 'viewport_width' => $viewport_width ) ) );
+			$group_collection->add_url_metric( $this->get_sample_url_metric( array( 'viewport_width' => $viewport_width ) ) );
 		}
 
 		$max_possible_url_metrics_count = $sample_size * ( count( $breakpoints ) + 1 );
@@ -315,7 +315,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	public function test_get_iterator( array $breakpoints, array $viewport_widths, array $expected_groups ): void {
 		$url_metrics = array_map(
 			function ( $viewport_width ) {
-				return $this->get_validated_url_metric( array( 'viewport_width' => $viewport_width ) );
+				return $this->get_sample_url_metric( array( 'viewport_width' => $viewport_width ) );
 			},
 			$viewport_widths
 		);
@@ -361,7 +361,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 						3,
 						new OD_URL_Metric(
 							array_merge(
-								$this->get_validated_url_metric( array( 'viewport_width' => 400 ) )->jsonSerialize(),
+								$this->get_sample_url_metric( array( 'viewport_width' => 400 ) )->jsonSerialize(),
 								array( 'timestamp' => $current_time )
 							)
 						)
@@ -371,7 +371,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 						3,
 						new OD_URL_Metric(
 							array_merge(
-								$this->get_validated_url_metric( array( 'viewport_width' => 600 ) )->jsonSerialize(),
+								$this->get_sample_url_metric( array( 'viewport_width' => 600 ) )->jsonSerialize(),
 								array( 'timestamp' => $current_time )
 							)
 						)
@@ -520,20 +520,20 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 		);
 		$this->assertFalse( $group_collection->is_every_group_populated() );
 		$this->assertFalse( $group_collection->is_every_group_complete() );
-		$group_collection->add_url_metric( $this->get_validated_url_metric( array( 'viewport_width' => 200 ) ) );
+		$group_collection->add_url_metric( $this->get_sample_url_metric( array( 'viewport_width' => 200 ) ) );
 		$this->assertFalse( $group_collection->is_every_group_populated() );
 		$this->assertFalse( $group_collection->is_every_group_complete() );
-		$group_collection->add_url_metric( $this->get_validated_url_metric( array( 'viewport_width' => 500 ) ) );
+		$group_collection->add_url_metric( $this->get_sample_url_metric( array( 'viewport_width' => 500 ) ) );
 		$this->assertFalse( $group_collection->is_every_group_populated() );
 		$this->assertFalse( $group_collection->is_every_group_complete() );
-		$group_collection->add_url_metric( $this->get_validated_url_metric( array( 'viewport_width' => 900 ) ) );
+		$group_collection->add_url_metric( $this->get_sample_url_metric( array( 'viewport_width' => 900 ) ) );
 		$this->assertTrue( $group_collection->is_every_group_populated() );
 		$this->assertFalse( $group_collection->is_every_group_complete() );
 
 		// Now finish completing all the groups.
 		foreach ( array_merge( $breakpoints, array( 1000 ) ) as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
-				$group_collection->add_url_metric( $this->get_validated_url_metric( array( 'viewport_width' => $viewport_width ) ) );
+				$group_collection->add_url_metric( $this->get_sample_url_metric( array( 'viewport_width' => $viewport_width ) ) );
 			}
 		}
 		$this->assertTrue( $group_collection->is_every_group_complete() );
@@ -552,7 +552,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 		$first_child_h1_xpath     = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::H1]/*[1]';
 
 		$get_url_metric_with_one_lcp_element = function ( int $viewport_width, string $lcp_element_xpath ): OD_URL_Metric {
-			return $this->get_validated_url_metric(
+			return $this->get_sample_url_metric(
 				array(
 					'viewport_width' => $viewport_width,
 					'element'        => array(
@@ -618,7 +618,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 		foreach ( array_merge( $breakpoints, array( 1000 ) ) as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
 				$group_collection->add_url_metric(
-					$this->get_validated_url_metric(
+					$this->get_sample_url_metric(
 						array(
 							'viewport_width' => $viewport_width,
 							'element'        => array(
@@ -648,7 +648,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 		$xpath3 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[3]';
 
 		$get_sample_url_metric = function ( int $viewport_width, string $lcp_element_xpath, float $intersection_ratio ): OD_URL_Metric {
-			return $this->get_validated_url_metric(
+			return $this->get_sample_url_metric(
 				array(
 					'viewport_width' => $viewport_width,
 					'element'        => array(
@@ -727,9 +727,9 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	 */
 	public function test_get_flattened_url_metrics(): void {
 		$url_metrics = array(
-			$this->get_validated_url_metric( array( 'viewport_width' => 400 ) ),
-			$this->get_validated_url_metric( array( 'viewport_width' => 600 ) ),
-			$this->get_validated_url_metric( array( 'viewport_width' => 800 ) ),
+			$this->get_sample_url_metric( array( 'viewport_width' => 400 ) ),
+			$this->get_sample_url_metric( array( 'viewport_width' => 600 ) ),
+			$this->get_sample_url_metric( array( 'viewport_width' => 800 ) ),
 		);
 
 		$group_collection = new OD_URL_Metrics_Group_Collection(
@@ -754,9 +754,9 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 	 */
 	public function test_json_serialize(): void {
 		$url_metrics = array(
-			$this->get_validated_url_metric( array( 'viewport_width' => 400 ) ),
-			$this->get_validated_url_metric( array( 'viewport_width' => 600 ) ),
-			$this->get_validated_url_metric( array( 'viewport_width' => 800 ) ),
+			$this->get_sample_url_metric( array( 'viewport_width' => 400 ) ),
+			$this->get_sample_url_metric( array( 'viewport_width' => 600 ) ),
+			$this->get_sample_url_metric( array( 'viewport_width' => 800 ) ),
 		);
 
 		$group_collection = new OD_URL_Metrics_Group_Collection(

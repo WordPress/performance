@@ -228,7 +228,7 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 	 */
 	public function data_provider_test_get_lcp_element(): array {
 		$get_sample_url_metric = function ( int $viewport_width, array $breadcrumbs, $is_lcp = true ) {
-			return $this->get_validated_url_metric(
+			return $this->get_sample_url_metric(
 				array(
 					'viewport_width' => $viewport_width,
 					'element'        => array(
@@ -349,7 +349,7 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 		$group = new OD_URL_Metrics_Group(
 			array_map(
 				function ( $viewport_width ) {
-					return $this->get_validated_url_metric( array( 'viewport_width' => $viewport_width ) );
+					return $this->get_sample_url_metric( array( 'viewport_width' => $viewport_width ) );
 				},
 				array( 400, 600, 800 )
 			),

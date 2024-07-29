@@ -382,7 +382,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 */
 	private function get_valid_params( array $extras = array() ): array {
 		$slug = od_get_url_metrics_slug( array() );
-		$data = $this->get_validated_url_metric(
+		$data = $this->get_sample_url_metric(
 			array(
 				'viewport_width' => 480,
 				'element'        => array(

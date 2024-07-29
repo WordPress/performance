@@ -28,7 +28,7 @@ trait Optimization_Detective_Test_Helpers {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
 				OD_URL_Metrics_Post_Type::store_url_metric(
 					$slug,
-					$this->get_validated_url_metric(
+					$this->get_sample_url_metric(
 						array(
 							'viewport_width' => $viewport_width,
 							'elements'       => $elements,
@@ -58,7 +58,7 @@ trait Optimization_Detective_Test_Helpers {
 	}
 
 	/**
-	 * Gets a validated URL metric.
+	 * Gets a sample URL metric.
 	 *
 	 * @phpstan-param array{
 	 *                    url?:            string,
@@ -69,7 +69,7 @@ trait Optimization_Detective_Test_Helpers {
 	 *
 	 * @return OD_URL_Metric URL metric.
 	 */
-	public function get_validated_url_metric( array $params ): OD_URL_Metric {
+	public function get_sample_url_metric( array $params ): OD_URL_Metric {
 		$params = array_merge(
 			array(
 				'url'            => home_url( '/' ),
