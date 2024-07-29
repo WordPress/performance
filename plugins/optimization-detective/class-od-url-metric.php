@@ -90,46 +90,37 @@ final class OD_URL_Metric implements JsonSerializable {
 	 * @return array<string, mixed> Schema.
 	 */
 	public static function get_json_schema(): array {
-		// See <https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly>.
+		/*
+		 * The intersectionRect and clientBoundingRect are both instances of the DOMRectReadOnly, which
+		 * the following schema describes. See <https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly>.
+		 * Note that 'number' is used specifically instead of 'integer' because the values are all specified as
+		 * floats/doubles.
+		 */
+		$properties = array_fill_keys(
+			array(
+				'width',
+				'height',
+				'x',
+				'y',
+				'top',
+				'right',
+				'bottom',
+				'left',
+			),
+			array(
+				'type'     => 'number',
+				'required' => true,
+			)
+		);
+
+		// The spec allows these to be negative but this doesn't make sense in the context of intersectionRect and boundingClientRect.
+		$properties['width']['minimum']  = 0.0;
+		$properties['height']['minimum'] = 0.0;
+
 		$dom_rect_schema = array(
 			'type'                 => 'object',
 			'required'             => true,
-			'properties'           => array(
-				'width'  => array(
-					'type'     => 'number', // An 'unrestricted double'.
-					'required' => true,
-					'minimum'  => 0.0,      // The spec allows this to be negative in DOMRectReadOnly, but this doesn't make sense in the context of intersectionRect and boundingClientRect.
-				),
-				'height' => array(
-					'type'     => 'number', // An 'unrestricted double'.
-					'required' => true,
-					'minimum'  => 0.0,      // The spec allows this to be negative in DOMRectReadOnly, but this doesn't make sense in the context of intersectionRect and boundingClientRect.
-				),
-				'x'      => array(
-					'type'     => 'number', // A 'double'.
-					'required' => true,
-				),
-				'y'      => array(
-					'type'     => 'number', // A 'double'.
-					'required' => true,
-				),
-				'top'    => array(
-					'type'     => 'number', // A 'double'.
-					'required' => true,
-				),
-				'right'  => array(
-					'type'     => 'number', // A 'double'.
-					'required' => true,
-				),
-				'bottom' => array(
-					'type'     => 'number', // A 'double'.
-					'required' => true,
-				),
-				'left'   => array(
-					'type'     => 'number', // A 'double'.
-					'required' => true,
-				),
-			),
+			'properties'           => $properties,
 			'additionalProperties' => false,
 		);
 
