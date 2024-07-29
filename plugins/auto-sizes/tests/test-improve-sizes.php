@@ -426,5 +426,13 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( $improve_sizes, $result, 'Make sure the improve sizes is present in result.' );
 		$this->assertStringNotContainsString( $sizes, $result, 'Make sure the old sizes is not present in result.' );
+
+		// Check new image sizes.
+		$attachment_id  = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/car.jpeg' );
+		$attachment_url = wp_get_attachment_image_url( $attachment_id, $image_size );
+
+		$attachment_sizes = wp_calculate_image_sizes( $image_size, $attachment_url, '', $attachment_id );
+
+		$this->assertNotSame( $improve_sizes, $attachment_sizes, 'Make sure that the previous filter sizes do not affect the new image sizes.' );
 	}
 }

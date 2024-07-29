@@ -126,6 +126,10 @@ function auto_sizes_filter_image_tag( string $content, array $parsed_block ): st
 	// Only update the markup if an image is found.
 	if ( $has_image ) {
 		$processor->set_attribute( 'data-needs-sizes-update', true );
+		if ( isset( $parsed_block['attrs']['id'] ) ) {
+			$processor->set_attribute( 'data-id', $parsed_block['attrs']['id'] );
+		}
+
 		if ( isset( $parsed_block['attrs']['align'] ) ) {
 			$processor->set_attribute( 'data-align', $parsed_block['attrs']['align'] );
 		}
@@ -160,6 +164,7 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 		$processor->remove_attribute( 'data-needs-sizes-update' );
 		$processor->remove_attribute( 'data-align' );
 		$processor->remove_attribute( 'data-resize-width' );
+		$processor->remove_attribute( 'data-id' );
 	};
 
 	// Bail early if the responsive images are disabled.
@@ -215,16 +220,21 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 	}
 
 	if ( is_string( $sizes ) ) {
+		$image_id = $processor->get_attribute( 'data-id' );
 		// Add the filter to update the sizes calculations to "wp_calculate_image_sizes".
-		$filter = static function () use ( $sizes ): string {
-			return $sizes;
-		};
-		add_filter( 'wp_calculate_image_sizes', $filter );
+		add_filter(
+			'wp_calculate_image_sizes',
+			static function ( $attachment_sizes, $attachment_size, $attachment_src, $attachment_meta, $attachment_id ) use ( $image_id, $sizes ): string {
+				if ( (int) $attachment_id === (int) $image_id ) {
+					return $sizes;
+				}
+				return $attachment_sizes;
+			},
+			10,
+			5
+		);
 
 		$processor->set_attribute( 'sizes', $sizes );
-
-		// Remove the filter to update the sizes calculations to "wp_calculate_image_sizes".
-		remove_filter( 'wp_calculate_image_sizes', $filter );
 	}
 
 	$remove_data_attributes();
