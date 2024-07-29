@@ -63,6 +63,7 @@ trait Optimization_Detective_Test_Helpers {
 	 * @phpstan-param array{
 	 *                    url?:            string,
 	 *                    viewport_width?: int,
+	 *                    element?:        ElementDataSubset,
 	 *                    elements?:       array<ElementDataSubset>
 	 *                } $params Params.
 	 *
@@ -77,6 +78,10 @@ trait Optimization_Detective_Test_Helpers {
 			),
 			$params
 		);
+
+		if ( array_key_exists( 'element', $params ) ) {
+			$params['elements'][] = $params['element'];
+		}
 
 		return new OD_URL_Metric(
 			array(
