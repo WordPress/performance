@@ -52,6 +52,9 @@ function perflab_object_cache_supported_fields(): array {
  *
  * @link https://github.com/wp-cli/wp-cli/blob/0ca6d920123ac904c918d69181edc5071dc92c9d/php/utils-wp.php#L259-L331.
  *
+ * @global bool $_wp_using_ext_object_cache Whether external object cache is being used.
+ * @global WP_Object_Cache $wp_object_cache Object cache global instance.
+ *
  * @return string Object cache type.
  * @since n.e.x.t
  */
