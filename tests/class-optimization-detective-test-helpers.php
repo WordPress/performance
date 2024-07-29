@@ -9,7 +9,11 @@
  */
 
 /**
- * @phpstan-type ElementDataSubset array{xpath: string, isLCP?: bool, intersectionRatio: float}
+ * @phpstan-type ElementDataSubset array{
+ *     xpath: string,
+ *     isLCP?: bool,
+ *     intersectionRatio?: float
+ * }
  */
 trait Optimization_Detective_Test_Helpers {
 
@@ -42,18 +46,18 @@ trait Optimization_Detective_Test_Helpers {
 	/**
 	 * Gets a sample DOM rect for testing.
 	 *
-	 * @return int[]
+	 * @return array<string, float>
 	 */
 	public function get_sample_dom_rect(): array {
 		return array(
-			'width'  => 100,
-			'height' => 100,
-			'x'      => 100,
-			'y'      => 100,
-			'top'    => 0,
-			'right'  => 0,
-			'bottom' => 0,
-			'left'   => 0,
+			'width'  => 100.1,
+			'height' => 100.2,
+			'x'      => 100.3,
+			'y'      => 100.4,
+			'top'    => 0.1,
+			'right'  => 0.2,
+			'bottom' => 0.3,
+			'left'   => 0.4,
 		);
 	}
 

@@ -168,7 +168,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Check schema subset.
+	 * Checks schema subset.
 	 *
 	 * @param array<string, mixed> $schema Schema subset.
 	 */

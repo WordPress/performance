@@ -102,7 +102,7 @@ class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 	 * @covers ::auto_sizes_visit_tag
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
-	 * @phpstan-param array<string, mixed> $element_metrics
+	 * @phpstan-param array{ xpath: string, isLCP: bool, intersectionRatio: int } $element_metrics
 	 */
 	public function test_od_optimize_template_output_buffer( array $element_metrics, string $buffer, string $expected ): void {
 		$this->populate_url_metrics( array( $element_metrics ) );
