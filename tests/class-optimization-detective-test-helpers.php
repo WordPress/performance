@@ -35,15 +35,12 @@ trait Optimization_Detective_Test_Helpers {
 	}
 
 	/**
-	 * Gets a validated URL metric.
+	 * Gets a sample DOM rect for testing.
 	 *
-	 * @param int                      $viewport_width Viewport width for the URL metric.
-	 * @param array<ElementDataSubset> $elements       Elements.
-	 * @return OD_URL_Metric URL metric.
-	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
+	 * @return int[]
 	 */
-	public function get_validated_url_metric( int $viewport_width, array $elements = array() ): OD_URL_Metric {
-		$dom_rect = array(
+	public function get_sample_dom_rect(): array {
+		return array(
 			'width'  => 100,
 			'height' => 100,
 			'x'      => 100,
@@ -53,6 +50,17 @@ trait Optimization_Detective_Test_Helpers {
 			'bottom' => 0,
 			'left'   => 0,
 		);
+	}
+
+	/**
+	 * Gets a validated URL metric.
+	 *
+	 * @param int                      $viewport_width Viewport width for the URL metric.
+	 * @param array<ElementDataSubset> $elements       Elements.
+	 * @return OD_URL_Metric URL metric.
+	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
+	 */
+	public function get_validated_url_metric( int $viewport_width, array $elements = array() ): OD_URL_Metric {
 		return new OD_URL_Metric(
 			array(
 				'url'       => home_url( '/' ),
@@ -62,14 +70,14 @@ trait Optimization_Detective_Test_Helpers {
 				),
 				'timestamp' => microtime( true ),
 				'elements'  => array_map(
-					static function ( array $element ) use ( $dom_rect ): array {
+					function ( array $element ): array {
 						return array_merge(
 							array(
 								'isLCP'              => false,
 								'isLCPCandidate'     => $element['isLCP'] ?? false,
 								'intersectionRatio'  => 1,
-								'intersectionRect'   => $dom_rect,
-								'boundingClientRect' => $dom_rect,
+								'intersectionRect'   => $this->get_sample_dom_rect(),
+								'boundingClientRect' => $this->get_sample_dom_rect(),
 							),
 							$element
 						);

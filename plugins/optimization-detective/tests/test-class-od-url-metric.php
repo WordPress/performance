@@ -7,6 +7,7 @@
  * @coversDefaultClass OD_URL_Metric
  */
 class Test_OD_URL_Metric extends WP_UnitTestCase {
+	use Optimization_Detective_Test_Helpers;
 
 	/**
 	 * Data provider.
@@ -18,23 +19,13 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			'width'  => 640,
 			'height' => 480,
 		);
-		$dom_rect      = array(
-			'width'  => 100,
-			'height' => 100,
-			'x'      => 100,
-			'y'      => 100,
-			'top'    => 0,
-			'right'  => 0,
-			'bottom' => 0,
-			'left'   => 0,
-		);
 		$valid_element = array(
 			'isLCP'              => true,
 			'isLCPCandidate'     => true,
 			'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
 			'intersectionRatio'  => 1.0,
-			'intersectionRect'   => $dom_rect,
-			'boundingClientRect' => $dom_rect,
+			'intersectionRect'   => $this->get_sample_dom_rect(),
+			'boundingClientRect' => $this->get_sample_dom_rect(),
 		);
 
 		return array(
