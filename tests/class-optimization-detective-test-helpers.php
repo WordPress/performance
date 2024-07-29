@@ -6,7 +6,7 @@
  */
 
 /**
- * @phpstan-type ElementDataSubset array{xpath: string, isLCP: bool, intersectionRatio: float}
+ * @phpstan-type ElementDataSubset array{xpath: string, isLCP?: bool, intersectionRatio: float}
  */
 trait Optimization_Detective_Test_Helpers {
 
@@ -40,7 +40,7 @@ trait Optimization_Detective_Test_Helpers {
 	 * @param int                      $viewport_width Viewport width for the URL metric.
 	 * @param array<ElementDataSubset> $elements       Elements.
 	 * @return OD_URL_Metric URL metric.
-	 * @throws Exception From OD_URL_Metric if there is a parse error, but there won't be.
+	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
 	 */
 	public function get_validated_url_metric( int $viewport_width, array $elements = array() ): OD_URL_Metric {
 		$dom_rect = array(
@@ -66,7 +66,7 @@ trait Optimization_Detective_Test_Helpers {
 						return array_merge(
 							array(
 								'isLCP'              => false,
-								'isLCPCandidate'     => $element['isLCP'],
+								'isLCPCandidate'     => $element['isLCP'] ?? false,
 								'intersectionRatio'  => 1,
 								'intersectionRect'   => $dom_rect,
 								'boundingClientRect' => $dom_rect,

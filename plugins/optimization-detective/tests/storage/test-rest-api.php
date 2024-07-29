@@ -6,6 +6,7 @@
  */
 
 class Test_OD_Storage_REST_API extends WP_UnitTestCase {
+	use Optimization_Detective_Test_Helpers;
 
 	/**
 	 * @var string
@@ -378,10 +379,18 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 *
 	 * @param array<string, mixed> $extras Extra params which are recursively merged on top of the valid params.
 	 * @return array<string, mixed> Params.
+	 * @throws OD_Data_Validation_Exception Except it won't.
 	 */
 	private function get_valid_params( array $extras = array() ): array {
 		$slug = od_get_url_metrics_slug( array() );
-		$data = $this->get_sample_validated_url_metric();
+		$data = $this->get_validated_url_metric(
+			480,
+			array(
+				array(
+					'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
+				),
+			)
+		)->jsonSerialize();
 		$data = array_merge(
 			array(
 				'slug'  => $slug,
@@ -418,42 +427,5 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			}
 		}
 		return $base_array;
-	}
-
-	/**
-	 * Gets sample validated URL metric data.
-	 *
-	 * @todo Replace with {@see Optimization_Detective_Test_Helpers::get_validated_url_metric()}
-	 * @return array<string, mixed>
-	 */
-	private function get_sample_validated_url_metric(): array {
-		$dom_rect = array(
-			'width'  => 100,
-			'height' => 100,
-			'x'      => 100,
-			'y'      => 100,
-			'top'    => 0,
-			'right'  => 0,
-			'bottom' => 0,
-			'left'   => 0,
-		);
-		return array(
-			'url'       => home_url( '/' ),
-			'viewport'  => array(
-				'width'  => 480,
-				'height' => 640,
-			),
-			'timestamp' => microtime( true ),
-			'elements'  => array(
-				array(
-					'isLCP'              => true,
-					'isLCPCandidate'     => true,
-					'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
-					'intersectionRatio'  => 1,
-					'intersectionRect'   => $dom_rect,
-					'boundingClientRect' => $dom_rect,
-				),
-			),
-		);
 	}
 }
