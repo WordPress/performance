@@ -52,16 +52,23 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			} else {
 				$processor->set_attribute( 'fetchpriority', 'high' );
 			}
-		} elseif ( is_string( $processor->get_attribute( 'fetchpriority' ) ) && $context->url_metrics_group_collection->is_every_group_populated() ) {
+		} elseif (
+			is_string( $processor->get_attribute( 'fetchpriority' ) )
+			&&
+			// Temporary condition in case someone updates Image Prioritizer without also updating Optimization Detective.
+			method_exists( $context->url_metrics_group_collection, 'is_any_group_populated' )
+			&&
+			$context->url_metrics_group_collection->is_any_group_populated()
+		) {
 			/*
-			 * At this point, the element is not the shared LCP across all viewport groups. It may not be an LCP element
-			 * in _any_ of the viewport groups. Nevertheless, server-side heuristics may have added the fetchpriority=high
-			 * attribute to the element for some reason. Because of server-side heuristics, we'll only go ahead and remove
-			 * the fetchpriority attribute if every viewport group (is_every_group_populated) has been populated with URL
-			 * metrics because only then do we know that in fact it is _not_ the LCP element in any of the viewport groups.
-			 * This allows for server-side heuristics to continue to apply while waiting for more URL metrics to be gathered.
-			 * Note also that if this is the LCP element for _some_ of the viewport groups, it will still get
-			 * fetchpriority=high by means of the preload link (with a media query) that is added further below.
+			 * At this point, the element is not the shared LCP across all viewport groups. Nevertheless, server-side
+			 * heuristics have added fetchpriority=high to the element, but this is not warranted either due to a lack
+			 * of data or because the LCP element is not common across all viewport groups. Since we have collected at
+			 * least some URL metrics (per is_any_group_populated), further below a fetchpriority=high preload link will
+			 * be added for the viewport(s) for which this is actually the LCP element. Some viewport groups may never
+			 * get populated due to a lack of traffic (e.g. from tablets or phablets), so it is important to remove
+			 * fetchpriority=high in such case to prevent server-side heuristics from prioritizing loading the image
+			 * which isn't actually the LCP element for actual visitors.
 			 */
 			$processor->remove_attribute( 'fetchpriority' );
 		}

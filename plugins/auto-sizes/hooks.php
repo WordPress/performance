@@ -156,6 +156,18 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 		return $content;
 	}
 
+	$remove_data_attributes = static function () use ( $processor ): void {
+		$processor->remove_attribute( 'data-needs-sizes-update' );
+		$processor->remove_attribute( 'data-align' );
+		$processor->remove_attribute( 'data-resize-width' );
+	};
+
+	// Bail early if the responsive images are disabled.
+	if ( null === $processor->get_attribute( 'sizes' ) ) {
+		$remove_data_attributes();
+		return $processor->get_updated_html();
+	}
+
 	// Skips second time parsing if already processed.
 	if ( null === $processor->get_attribute( 'data-needs-sizes-update' ) ) {
 		return $content;
@@ -215,9 +227,7 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 		remove_filter( 'wp_calculate_image_sizes', $filter );
 	}
 
-	$processor->remove_attribute( 'data-needs-sizes-update' );
-	$processor->remove_attribute( 'data-align' );
-	$processor->remove_attribute( 'data-resize-width' );
+	$remove_data_attributes();
 
 	return $processor->get_updated_html();
 }

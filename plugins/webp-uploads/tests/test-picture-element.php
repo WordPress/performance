@@ -10,6 +10,21 @@
 use WebP_Uploads\Tests\TestCase;
 
 class Test_WebP_Uploads_Picture_Element extends TestCase {
+
+	/**
+	 * Attachment ID.
+	 *
+	 * @var int
+	 */
+	public static $image_id;
+
+	/**
+	 * Setup shared fixtures.
+	 */
+	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
+		self::$image_id = $factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+	}
+
 	/**
 	 * Test that images are wrapped in picture element when enabled.
 	 *
@@ -124,5 +139,118 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 				'expected_html'          => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
 			),
 		);
+	}
+
+	/**
+	 * @dataProvider data_provider_test_image_sizes_equality
+	 *
+	 * @param Closure|null $add_filter The filter.
+	 */
+	public function test_img_sizes_is_equal_to_picture_source_sizes_for_picture_element( ?Closure $add_filter ): void {
+		$mime_type = 'image/webp';
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		if ( $add_filter instanceof Closure ) {
+			$add_filter();
+		}
+
+		$img_markup = apply_filters( 'the_content', $image );
+
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
+
+		$picture_markup = apply_filters( 'the_content', $image );
+
+		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
+		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
+		$img_sizes = $img_processor->get_attribute( 'sizes' );
+
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+
+		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
+		$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ), 'The IMG and Picture IMG have same sizes attributes.' );
+
+		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
+			$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ), 'The IMG and Picture source have same sizes attributes.' );
+		}
+	}
+
+	/**
+	 * Data provider for it_should_maybe_wrap_images_in_picture_element.
+	 *
+	 * @return array<string, array{ add_filter: Closure|null }>
+	 */
+	public function data_provider_test_image_sizes_equality(): array {
+		return array(
+			'no_filter'   => array(
+				'add_filter' => null,
+			),
+			'with_filter' => array(
+				'add_filter' => function (): void {
+					add_filter(
+						'wp_content_img_tag',
+						function ( string $content ): string {
+							$processor = new WP_HTML_Tag_Processor( $content );
+							$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'img' ) ) );
+							$processor->set_attribute( 'sizes', '(max-width: 333px) 100vw, 333px' );
+							return $processor->get_updated_html();
+						}
+					);
+				},
+			),
+		);
+	}
+
+	public function test_disable_responsive_image_with_picture_element(): void {
+		$mime_type = 'image/webp';
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
+		// Disable responsive images.
+		add_filter( 'wp_calculate_image_sizes', '__return_false' );
+
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		$img_markup = apply_filters( 'the_content', $image );
+
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
+
+		$picture_markup = apply_filters( 'the_content', $image );
+
+		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
+		$img_processor->next_tag( array( 'tag_name' => 'IMG' ) );
+
+		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in IMG tag.' );
+
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
+
+		$this->assertNull( $picture_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in Picture IMG tag.' );
+
+		$picture_processor->next_tag( array( 'tag_name' => 'source' ) );
+
+		$this->assertNull( $picture_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in Picture source tag.' );
 	}
 }

@@ -76,6 +76,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * @var array{
 	 *          get_group_for_viewport_width?: array<int, OD_URL_Metrics_Group>,
 	 *          is_every_group_populated?: bool,
+	 *          is_any_group_populated?: bool,
 	 *          is_every_group_complete?: bool,
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metrics_Group[]>,
 	 *          get_common_lcp_element?: ElementData|null,
@@ -233,6 +234,29 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ][ $viewport_width ] = $result;
+		return $result;
+	}
+
+	/**
+	 * Checks whether any group is populated with at least one URL metric.
+	 *
+	 * @return bool Whether at least one group has some URL metrics.
+	 */
+	public function is_any_group_populated(): bool {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
+		}
+
+		$result = ( function () {
+			foreach ( $this->groups as $group ) {
+				if ( count( $group ) !== 0 ) {
+					return true;
+				}
+			}
+			return false;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
 		return $result;
 	}
 
