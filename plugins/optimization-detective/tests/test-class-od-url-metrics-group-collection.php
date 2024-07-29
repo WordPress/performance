@@ -647,7 +647,7 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 		$xpath2 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[2]';
 		$xpath3 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[3]';
 
-		$get_url_metric_with_one_lcp_element_having_intersection_ratio = function ( int $viewport_width, string $lcp_element_xpath, float $intersection_ratio ): OD_URL_Metric {
+		$get_sample_url_metric = function ( int $viewport_width, string $lcp_element_xpath, float $intersection_ratio ): OD_URL_Metric {
 			return $this->get_validated_url_metric(
 				array(
 					'viewport_width' => $viewport_width,
@@ -663,9 +663,9 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 		return array(
 			'one-element-sample-size-one'    => array(
 				'url_metrics' => array(
-					$get_url_metric_with_one_lcp_element_having_intersection_ratio( 400, $xpath1, 0.0 ),
-					$get_url_metric_with_one_lcp_element_having_intersection_ratio( 600, $xpath1, 0.5 ),
-					$get_url_metric_with_one_lcp_element_having_intersection_ratio( 800, $xpath1, 1.0 ),
+					$get_sample_url_metric( 400, $xpath1, 0.0 ),
+					$get_sample_url_metric( 600, $xpath1, 0.5 ),
+					$get_sample_url_metric( 800, $xpath1, 1.0 ),
 				),
 				'expected'    => array(
 					$xpath1 => 1.0,
@@ -674,14 +674,14 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 			'three-elements-sample-size-two' => array(
 				'url_metrics' => array(
 					// Group 1.
-					$get_url_metric_with_one_lcp_element_having_intersection_ratio( 400, $xpath1, 0.0 ),
-					$get_url_metric_with_one_lcp_element_having_intersection_ratio( 400, $xpath1, 1.0 ),
+					$get_sample_url_metric( 400, $xpath1, 0.0 ),
+					$get_sample_url_metric( 400, $xpath1, 1.0 ),
 					// Group 2.
-					$get_url_metric_with_one_lcp_element_having_intersection_ratio( 600, $xpath2, 0.9 ),
-					$get_url_metric_with_one_lcp_element_having_intersection_ratio( 600, $xpath2, 0.1 ),
+					$get_sample_url_metric( 600, $xpath2, 0.9 ),
+					$get_sample_url_metric( 600, $xpath2, 0.1 ),
 					// Group 3.
-					$get_url_metric_with_one_lcp_element_having_intersection_ratio( 800, $xpath3, 0.5 ),
-					$get_url_metric_with_one_lcp_element_having_intersection_ratio( 800, $xpath3, 0.6 ),
+					$get_sample_url_metric( 800, $xpath3, 0.5 ),
+					$get_sample_url_metric( 800, $xpath3, 0.6 ),
 				),
 				'expected'    => array(
 					$xpath1 => 1.0,
