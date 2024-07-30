@@ -35,7 +35,7 @@ return array(
 				<link data-od-added-tag rel="preconnect" href="https://i.ytimg.com">
 			</head>
 			<body>
-				<figure data-od-added-style style="min-height: 100px;" class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
+				<figure data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
 					<div class="wp-block-embed__wrapper">
 						<iframe title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 					</div>
