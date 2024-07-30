@@ -4,7 +4,7 @@ return array(
 		$test_case->populate_url_metrics(
 			array(
 				array(
-					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]',
+					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
 					'isLCP'             => false,
 					'intersectionRatio' => 1,
 				),
@@ -14,7 +14,7 @@ return array(
 					'intersectionRatio' => 1,
 				),
 				array(
-					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]',
+					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]',
 					'isLCP'             => false,
 					'intersectionRatio' => 0,
 				),
@@ -101,13 +101,13 @@ return array(
 				<link data-od-added-tag rel="preload" as="image" href="https://example.com/poster1.jpg">
 			</head>
 			<body>
-				<figure data-od-added-style data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]" style="min-height: 100px;" class="wp-block-embed is-type-video">
-					<div class="wp-block-embed__wrapper">
+				<figure data-od-added-style style="min-height: 100px;" class="wp-block-embed is-type-video">
+					<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 						<video data-od-added-preload data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]" preload="auto" src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
 					</div>
 				</figure>
-				<figure data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]" data-od-added-style style="min-height: 100px;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
-					<div class="wp-block-embed__wrapper">
+				<figure data-od-added-style style="min-height: 100px;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
+					<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 						<figure>
 							<p>So I heard you like <code>FIGURE</code>?</p>
 							<video data-od-added-preload data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::FIGURE]/*[2][self::VIDEO]" preload="none" src="https://example.com/video2.mp4" poster="https://example.com/poster2.jpg" width="640" height="480"></video>
