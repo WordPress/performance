@@ -12,41 +12,26 @@ use WebP_Uploads\Tests\TestCase;
 class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 	/**
-	 * Attachment ID.
-	 *
-	 * @var int
-	 */
-	public static $image_id;
-
-	/**
-	 * Setup shared fixtures.
-	 */
-	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
-		self::$image_id = $factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
-	}
-
-	/**
 	 * Test that images are wrapped in picture element when enabled.
 	 *
 	 * @dataProvider data_provider_it_should_maybe_wrap_images_in_picture_element
 	 *
-	 * @param bool   $jpeg_and_webp          Whether to enable JPEG and WebP output.
-	 * @param bool   $picture_element        Whether to enable picture element output.
-	 * @param bool   $expect_picture_element Whether to expect the image to be wrapped in a picture element.
-	 * @param string $expected_html          The expected HTML output.
+	 * @param bool   $fallback_jpeg   Whether to fallback JPEG output.
+	 * @param bool   $picture_element Whether to enable picture element output.
+	 * @param string $expected_html   The expected HTML output.
 	 */
-	public function test_maybe_wrap_images_in_picture_element( bool $jpeg_and_webp, bool $picture_element, bool $expect_picture_element, string $expected_html ): void {
+	public function test_maybe_wrap_images_in_picture_element( bool $fallback_jpeg, bool $picture_element, string $expected_html ): void {
 		$mime_type = 'image/webp';
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 
-		if ( $jpeg_and_webp ) {
-			$this->opt_in_to_jpeg_and_webp();
+		if ( $fallback_jpeg ) {
+			update_option( 'perflab_generate_webp_and_jpeg', '1' );
 		}
 
 		if ( $picture_element ) {
-			$this->opt_in_to_picture_element();
+			update_option( 'webp_uploads_use_picture_element', '1' );
 		}
 
 		// Create an image.
@@ -55,7 +40,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		// Create some content with the image.
 		$the_image = wp_get_attachment_image(
 			$attachment_id,
-			'medium',
+			'large',
 			false,
 			array(
 				'class' => "wp-image-{$attachment_id}",
@@ -115,28 +100,24 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	public function data_provider_it_should_maybe_wrap_images_in_picture_element(): array {
 		return array(
 			'jpeg and picture enabled' => array(
-				'jpeg_and_webp'          => true,
-				'picture_element'        => true,
-				'expect_picture_element' => true,
-				'expected_html'          => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><source type="image/jpeg" srcset="{{jpeg-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
+				'fallback_jpeg'   => true,
+				'picture_element' => true,
+				'expected_html'   => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><source type="image/jpeg" srcset="{{jpeg-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
 			),
 			'only picture enabled'     => array(
-				'jpeg_and_webp'          => false,
-				'picture_element'        => true,
-				'expect_picture_element' => true,
-				'expected_html'          => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
+				'fallback_jpeg'   => false,
+				'picture_element' => true,
+				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
 			),
 			'only jpeg enabled'        => array(
-				'jpeg_and_webp'          => true,
-				'picture_element'        => false,
-				'expect_picture_element' => false,
-				'expected_html'          => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
+				'fallback_jpeg'   => true,
+				'picture_element' => false,
+				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
 			),
 			'neither enabled'          => array(
-				'jpeg_and_webp'          => false,
-				'picture_element'        => false,
-				'expect_picture_element' => false,
-				'expected_html'          => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
+				'fallback_jpeg'   => false,
+				'picture_element' => false,
+				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
 			),
 		);
 	}
@@ -152,12 +133,19 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 
+		// Fallback to JPEG IMG.
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		// Create an image.
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		// Create some content with the image.
 		$image = wp_get_attachment_image(
-			self::$image_id,
+			$attachment_id,
 			'large',
 			false,
 			array(
-				'class' => 'wp-image-' . self::$image_id,
+				'class' => "wp-image-{$attachment_id}",
 				'alt'   => 'Green Leaves',
 			)
 		);
@@ -168,20 +156,23 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		$img_markup = apply_filters( 'the_content', $image );
 
-		// Apply picture element support.
-		$this->opt_in_to_picture_element();
-
-		$picture_markup = apply_filters( 'the_content', $image );
-
 		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
 		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
 		$img_sizes = $img_processor->get_attribute( 'sizes' );
 		$img_src   = $img_processor->get_attribute( 'src' );
 
+		$this->assertStringEndsWith( '.jpg', $img_src, 'Should return .jpg img src.' );
+
+		// Apply picture element support.
+		update_option( 'webp_uploads_use_picture_element', '1' );
+
+		$picture_markup    = apply_filters( 'the_content', $image );
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 
 		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
-		$this->assertSame( $img_src, $picture_processor->get_attribute( 'src' ), 'Make sure IMG src is same.' );
+		$picture_img_src = $picture_processor->get_attribute( 'src' );
+		$this->assertStringEndsWith( '.jpg', $picture_img_src, 'Should return .jpg img src.' );
+		$this->assertSame( $img_src, $picture_img_src, 'Make sure IMG src is same.' );
 		$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ), 'The IMG and Picture IMG have same sizes attributes.' );
 
 		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
@@ -224,27 +215,35 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		// Disable responsive images.
 		add_filter( 'wp_calculate_image_sizes', '__return_false' );
 
+		// Fallback to JPEG IMG.
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		// Create an image.
+		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+
+		// Create some content with the image.
 		$image = wp_get_attachment_image(
-			self::$image_id,
+			$attachment_id,
 			'large',
 			false,
 			array(
-				'class' => 'wp-image-' . self::$image_id,
+				'class' => "wp-image-{$attachment_id}",
 				'alt'   => 'Green Leaves',
 			)
 		);
 
 		$img_markup = apply_filters( 'the_content', $image );
 
-		// Apply picture element support.
-		$this->opt_in_to_picture_element();
-
-		$picture_markup = apply_filters( 'the_content', $image );
-
 		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
 		$img_processor->next_tag( array( 'tag_name' => 'IMG' ) );
 
 		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in IMG tag.' );
+
+		// Apply picture element support.
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+		update_option( 'webp_uploads_use_picture_element', '1' );
+
+		$picture_markup = apply_filters( 'the_content', $image );
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );

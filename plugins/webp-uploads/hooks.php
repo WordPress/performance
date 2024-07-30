@@ -765,6 +765,5 @@ function webp_uploads_render_generator(): void {
 }
 add_action( 'wp_head', 'webp_uploads_render_generator' );
 
-if ( webp_uploads_is_picture_element_enabled() ) {
-	add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10, 3 );
-}
+// Add Picture element.
+add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10, 3 );
