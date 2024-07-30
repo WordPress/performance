@@ -378,10 +378,10 @@ function webp_uploads_get_image_output_format(): string {
  *
  * @since 2.0.0
  *
- * @param string $image_format The image format to check.
+ * @param string|mixed $image_format The image format to check.
  * @return string Supported image format.
  */
-function webp_uploads_sanitize_image_format( string $image_format ): string {
+function webp_uploads_sanitize_image_format( $image_format ): string {
 	return in_array( $image_format, array( 'webp', 'avif' ), true ) ? $image_format : 'webp';
 }
 
