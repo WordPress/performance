@@ -2462,7 +2462,7 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "6.6.0",
+            "version": "6.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
