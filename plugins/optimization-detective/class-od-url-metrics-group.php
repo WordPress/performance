@@ -81,7 +81,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 	/**
 	 * Constructor.
 	 *
-	 * @throws InvalidArgumentException If arguments are valid.
+	 * @throws InvalidArgumentException If arguments are invalid.
 	 *
 	 * @param OD_URL_Metric[]                      $url_metrics            URL metrics to add to the group.
 	 * @param int                                  $minimum_viewport_width Minimum possible viewport width for the group. Must be zero or greater.

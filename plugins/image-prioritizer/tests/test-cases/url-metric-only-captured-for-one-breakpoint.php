@@ -3,10 +3,10 @@ return array(
 	'set_up'   => static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 		OD_URL_Metrics_Post_Type::store_url_metric(
 			od_get_url_metrics_slug( od_get_normalized_query_vars() ),
-			$test_case->get_validated_url_metric(
-				400,
+			$test_case->get_sample_url_metric(
 				array(
-					array(
+					'viewport_width' => 400,
+					'element'        => array(
 						'isLCP' => true,
 						'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
 					),

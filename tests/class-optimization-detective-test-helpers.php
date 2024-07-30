@@ -3,10 +3,17 @@
  * Helper trait for Optimization Detective tests.
  *
  * @package performance-lab
+ *
+ * @noinspection PhpDocMissingThrowsInspection
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 /**
- * @phpstan-type ElementDataSubset array{xpath: string, isLCP: bool, intersectionRatio: float}
+ * @phpstan-type ElementDataSubset array{
+ *     xpath: string,
+ *     isLCP?: bool,
+ *     intersectionRatio?: float
+ * }
  */
 trait Optimization_Detective_Test_Helpers {
 
@@ -25,9 +32,11 @@ trait Optimization_Detective_Test_Helpers {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
 				OD_URL_Metrics_Post_Type::store_url_metric(
 					$slug,
-					$this->get_validated_url_metric(
-						$viewport_width,
-						$elements
+					$this->get_sample_url_metric(
+						array(
+							'viewport_width' => $viewport_width,
+							'elements'       => $elements,
+						)
 					)
 				);
 			}
@@ -35,42 +44,71 @@ trait Optimization_Detective_Test_Helpers {
 	}
 
 	/**
-	 * Gets a validated URL metric.
+	 * Gets a sample DOM rect for testing.
 	 *
-	 * @param int                      $viewport_width Viewport width for the URL metric.
-	 * @param array<ElementDataSubset> $elements       Elements.
-	 * @return OD_URL_Metric URL metric.
-	 * @throws Exception From OD_URL_Metric if there is a parse error, but there won't be.
+	 * @return array<string, float>
 	 */
-	public function get_validated_url_metric( int $viewport_width, array $elements = array() ): OD_URL_Metric {
+	public function get_sample_dom_rect(): array {
+		return array(
+			'width'  => 100.1,
+			'height' => 100.2,
+			'x'      => 100.3,
+			'y'      => 100.4,
+			'top'    => 0.1,
+			'right'  => 0.2,
+			'bottom' => 0.3,
+			'left'   => 0.4,
+		);
+	}
+
+	/**
+	 * Gets a sample URL metric.
+	 *
+	 * @phpstan-param array{
+	 *                    url?:            string,
+	 *                    viewport_width?: int,
+	 *                    element?:        ElementDataSubset,
+	 *                    elements?:       array<ElementDataSubset>
+	 *                } $params Params.
+	 *
+	 * @return OD_URL_Metric URL metric.
+	 */
+	public function get_sample_url_metric( array $params ): OD_URL_Metric {
+		$params = array_merge(
+			array(
+				'url'            => home_url( '/' ),
+				'viewport_width' => 480,
+				'elements'       => array(),
+			),
+			$params
+		);
+
+		if ( array_key_exists( 'element', $params ) ) {
+			$params['elements'][] = $params['element'];
+		}
+
 		return new OD_URL_Metric(
 			array(
 				'url'       => home_url( '/' ),
 				'viewport'  => array(
-					'width'  => $viewport_width,
+					'width'  => $params['viewport_width'],
 					'height' => 800,
 				),
 				'timestamp' => microtime( true ),
 				'elements'  => array_map(
-					static function ( array $element ): array {
+					function ( array $element ): array {
 						return array_merge(
 							array(
 								'isLCP'              => false,
-								'isLCPCandidate'     => $element['isLCP'],
+								'isLCPCandidate'     => $element['isLCP'] ?? false,
 								'intersectionRatio'  => 1,
-								'intersectionRect'   => array(
-									'width'  => 100,
-									'height' => 100,
-								),
-								'boundingClientRect' => array(
-									'width'  => 100,
-									'height' => 100,
-								),
+								'intersectionRect'   => $this->get_sample_dom_rect(),
+								'boundingClientRect' => $this->get_sample_dom_rect(),
 							),
 							$element
 						);
 					},
-					$elements
+					$params['elements']
 				),
 			)
 		);
