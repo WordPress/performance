@@ -80,7 +80,8 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 *          is_every_group_complete?: bool,
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metrics_Group[]>,
 	 *          get_common_lcp_element?: ElementData|null,
-	 *          get_all_element_max_intersection_ratios?: array<string, float>
+	 *          get_all_element_max_intersection_ratios?: array<string, float>,
+	 *          get_all_element_aspect_ratios?: array<string, float|null>
 	 *      }
 	 */
 	private $result_cache = array();
@@ -431,13 +432,79 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	}
 
 	/**
+	 * Gets the aspect ratios of all elements across all groups and their captured URL metrics.
+	 *
+	 * If an element does not have the same aspect ratio across all viewport groups, then null is returned as the aspect ratio.
+	 *
+	 * @return array<string, float|null> Keys are XPaths and values are the intersection ratios.
+	 */
+	public function get_all_element_aspect_ratios(): array {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
+		}
+
+		$result = ( function () {
+			$element_aspect_ratios = array();
+
+			/*
+			 * O(n^3) my! Yes. This is why the result is cached. This being said, the number of groups should be 4 (one
+			 * more than the default number of breakpoints) and the number of URL metrics for each group should be 3
+			 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
+			 * end up running n*4*3 times.
+			 */
+			foreach ( $this->groups as $group ) {
+				foreach ( $group as $url_metric ) {
+					foreach ( $url_metric->get_elements() as $element ) {
+						if ( $element['boundingClientRect']['width'] > 0 && $element['boundingClientRect']['height'] > 0 ) {
+							$element_aspect_ratios[ $element['xpath'] ][] = $element['boundingClientRect']['width'] / $element['boundingClientRect']['height'];
+						}
+					}
+				}
+			}
+
+			return array_map(
+				/**
+				 * Restricts aspect ratios for an element to just the common ones.
+				 *
+				 * @param float[] $aspect_ratios Aspect ratios of element across all URL metrics.
+				 * @return float|null Common aspect ratio.
+				 */
+				static function ( array $aspect_ratios ): ?float {
+					$count = count( $aspect_ratios );
+					if ( 1 === $count ) {
+						return $aspect_ratios[0];
+					} elseif ( abs( ( (float) array_sum( $aspect_ratios ) / (float) $count ) - $aspect_ratios[0] ) < 0.0001 ) {
+						// If the average of all aspect ratios is the same as one of the aspect ratios, then the aspect ratio is consistent.
+						return $aspect_ratios[0];
+					}
+					return null;
+				},
+				$element_aspect_ratios
+			);
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
+	}
+
+	/**
 	 * Gets the max intersection ratio of an element across all groups and their captured URL metrics.
 	 *
 	 * @param string $xpath XPath for the element.
-	 * @return float|null Max intersection ratio of null if tag is unknown (not captured).
+	 * @return float|null Max intersection ratio or null if tag is unknown (not captured).
 	 */
 	public function get_element_max_intersection_ratio( string $xpath ): ?float {
 		return $this->get_all_element_max_intersection_ratios()[ $xpath ] ?? null;
+	}
+
+	/**
+	 * Gets the aspect ratio of an element across all groups and their captured URL metrics.
+	 *
+	 * @param string $xpath XPath for the element.
+	 * @return float|null Aspect ratio or null if tag is unknown (not captured) or it is not common across all URL metrics.
+	 */
+	public function get_element_aspect_ratio( string $xpath ): ?float {
+		return $this->get_all_element_aspect_ratios()[ $xpath ] ?? null;
 	}
 
 	/**
@@ -485,6 +552,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 *             freshness_ttl: 0|positive-int,
 	 *             sample_size: positive-int,
 	 *             all_element_max_intersection_ratios: array<string, float>,
+	 *             all_element_aspect_ratios: array<string, float|null>,
 	 *             common_lcp_element: ?ElementData,
 	 *             every_group_complete: bool,
 	 *             every_group_populated: bool,
@@ -503,6 +571,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 			'freshness_ttl'                       => $this->freshness_ttl,
 			'sample_size'                         => $this->sample_size,
 			'all_element_max_intersection_ratios' => $this->get_all_element_max_intersection_ratios(),
+			'all_element_aspect_ratios'           => $this->get_all_element_aspect_ratios(),
 			'common_lcp_element'                  => $this->get_common_lcp_element(),
 			'every_group_complete'                => $this->is_every_group_complete(),
 			'every_group_populated'               => $this->is_every_group_populated(),

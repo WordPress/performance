@@ -73,6 +73,19 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$processor->remove_attribute( 'fetchpriority' );
 		}
 
+		// Set the aspect-ratio of the image when it lacks a width and height.
+		// TODO: Big problem: once the aspect-ratio is set, then future measurements in URL metrics will never result in anything different! Should detect.js also capture intrinsic width/height when available (e.g. for image, video, svg, canvas, iframe(?), and input[type=image])?
+		if (
+			null === $processor->get_attribute( 'width' ) &&
+			null === $processor->get_attribute( 'height' ) &&
+			method_exists( $context->url_metrics_group_collection, 'get_element_aspect_ratio' )
+		) {
+			$aspect_ratio = $context->url_metrics_group_collection->get_element_aspect_ratio( $xpath );
+			if ( null !== $aspect_ratio ) {
+				$processor->set_attribute( 'style', sprintf( 'aspect-ratio: %f; width: 100%%;', $aspect_ratio ) );
+			}
+		}
+
 		$element_max_intersection_ratio = $context->url_metrics_group_collection->get_element_max_intersection_ratio( $xpath );
 
 		// If the element was not found, we don't know if it was visible for not, so don't do anything.
