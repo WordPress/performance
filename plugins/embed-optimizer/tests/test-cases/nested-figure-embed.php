@@ -74,12 +74,12 @@ return array(
 				<title>...</title>
 			</head>
 			<body>
-				<figure class="wp-block-embed is-type-video">
+				<figure style="background: black; color:gray" class="wp-block-embed is-type-video">
 					<div class="wp-block-embed__wrapper">
 						<video src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
 					</div>
 				</figure>
-				<figure class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
+				<figure style="background: black; color: white;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
 					<div class="wp-block-embed__wrapper">
 						<figure>
 							<p>So I heard you like <code>FIGURE</code>?</p>
@@ -101,12 +101,12 @@ return array(
 				<link data-od-added-tag rel="preload" as="image" href="https://example.com/poster1.jpg">
 			</head>
 			<body>
-				<figure data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-video">
+				<figure data-od-replaced-style="background: black; color:gray" style="background: black; color:gray; min-height: 500px;" class="wp-block-embed is-type-video">
 					<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 						<video data-od-added-preload data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]" preload="auto" src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
 					</div>
 				</figure>
-				<figure data-od-added-style style="min-height: 500px;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
+				<figure data-od-replaced-style="background: black; color: white;" style="background: black; color: white; min-height: 500px;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
 					<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 						<figure>
 							<p>So I heard you like <code>FIGURE</code>?</p>
