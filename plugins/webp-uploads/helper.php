@@ -29,6 +29,7 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
 		'image/jpeg' => array( 'image/' . $output_format ),
 		'image/webp' => array( 'image/webp' ),
 		'image/avif' => array( 'image/avif' ),
+		'image/png'  => array( 'image/' . $output_format ),
 	);
 
 	// Check setting for whether to generate both JPEG and the modern output format.
