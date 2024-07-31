@@ -4,6 +4,7 @@
  *
  * @package optimization-detective
  *
+ * @noinspection PhpUnhandledExceptionInspection
  * @todo There are "Cannot resolve ..." errors and "Element img doesn't have a required attribute src" warnings that should be excluded from inspection.
  */
 
@@ -200,7 +201,6 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * @covers ::od_is_response_html_content_type
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
-	 * @throws Exception But it won't.
 	 */
 	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ): void {
 		$set_up( $this );

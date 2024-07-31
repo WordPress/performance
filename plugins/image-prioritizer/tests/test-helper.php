@@ -3,6 +3,8 @@
  * Tests for image-prioritizer plugin helper.php.
  *
  * @package image-prioritizer
+ *
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
@@ -45,7 +47,6 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * @covers Image_Prioritizer_Background_Image_Styled_Tag_Visitor
 	 *
 	 * @dataProvider data_provider_test_filter_tag_visitors
-	 * @throws Exception But it won't.
 	 */
 	public function test_image_prioritizer_register_tag_visitors( Closure $set_up, string $buffer, string $expected ): void {
 		$set_up( $this );

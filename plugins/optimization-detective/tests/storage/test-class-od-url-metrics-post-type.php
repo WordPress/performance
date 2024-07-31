@@ -6,9 +6,11 @@
  *
  * @coversDefaultClass OD_URL_Metrics_Post_Type
  * @noinspection PhpUnhandledExceptionInspection
+ * @noinspection PhpDocMissingThrowsInspection
  */
 
 class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
+	use Optimization_Detective_Test_Helpers;
 
 	/**
 	 * Test add_hooks().
@@ -153,7 +155,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 	public function test_store_url_metric(): void {
 		$slug = od_get_url_metrics_slug( array( 'p' => 1 ) );
 
-		$validated_url_metric = $this->get_sample_url_metric( home_url( '/' ) );
+		$validated_url_metric = $this->get_sample_url_metric( array( 'url' => home_url( '/' ) ) );
 
 		$post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $validated_url_metric );
 		$this->assertIsInt( $post_id );
@@ -232,9 +234,9 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		clean_post_cache( $old_generic_post );
 
 		$new_url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $new_generic_post ) );
-		$new_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $new_url_metrics_slug, $this->get_sample_url_metric( get_permalink( $new_generic_post ) ) );
+		$new_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $new_url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $new_generic_post ) ) ) );
 		$old_url_metrics_slug = od_get_url_metrics_slug( array( 'p' => $old_generic_post ) );
-		$old_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $old_url_metrics_slug, $this->get_sample_url_metric( get_permalink( $old_generic_post ) ) );
+		$old_url_metrics_post = OD_URL_Metrics_Post_Type::store_url_metric( $old_url_metrics_slug, $this->get_sample_url_metric( array( 'url' => get_permalink( $old_generic_post ) ) ) );
 		$wpdb->update(
 			$wpdb->posts,
 			array(
@@ -281,7 +283,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		// Now create sample URL Metrics posts.
 		for ( $i = 1; $i <= 101; $i++ ) {
 			$slug    = od_get_url_metrics_slug( array( 'p' => $i ) );
-			$post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $this->get_sample_url_metric( home_url( "/?p=$i" ) ) );
+			$post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $this->get_sample_url_metric( array( 'url' => home_url( "/?p=$i" ) ) ) );
 			update_post_meta( $post_id, $url_metrics_post_meta_key, '' );
 		}
 
@@ -322,41 +324,5 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		}
 		$this->assertEquals( 0, $wpdb->get_var( $wpdb->prepare( "SELECT count(*) FROM $wpdb->postmeta WHERE meta_key = %s", $url_metrics_post_meta_key ) ) );
 		$this->assertEquals( $other_post_meta_count, $wpdb->get_var( $wpdb->prepare( "SELECT count(*) FROM $wpdb->postmeta WHERE meta_key = %s and meta_value = %s", $other_post_meta_key, $other_post_meta_value ) ) );
-	}
-
-	/**
-	 * Gets a sample URL Metric.
-	 *
-	 * @param string $url URL.
-	 *
-	 * @throws OD_Data_Validation_Exception When invalid data (but there won't be).
-	 */
-	private function get_sample_url_metric( string $url ): OD_URL_Metric {
-		return new OD_URL_Metric(
-			array(
-				'url'       => $url,
-				'viewport'  => array(
-					'width'  => 480,
-					'height' => 640,
-				),
-				'timestamp' => microtime( true ),
-				'elements'  => array(
-					array(
-						'isLCP'              => true,
-						'isLCPCandidate'     => true,
-						'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
-						'intersectionRatio'  => 1,
-						'intersectionRect'   => array(
-							'width'  => 100,
-							'height' => 100,
-						),
-						'boundingClientRect' => array(
-							'width'  => 100,
-							'height' => 100,
-						),
-					),
-				),
-			)
-		);
 	}
 }
