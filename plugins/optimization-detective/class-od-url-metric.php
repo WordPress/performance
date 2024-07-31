@@ -14,21 +14,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Representation of the measurements taken from a single client's visit to a specific URL.
  *
- * @phpstan-type RectData    array{ width: int, height: int }
- * @phpstan-type ElementData array{
- *                               isLCP: bool,
- *                               isLCPCandidate: bool,
- *                               xpath: string,
- *                               intersectionRatio: float,
- *                               intersectionRect: RectData,
- *                               boundingClientRect: RectData,
- *                           }
- * @phpstan-type Data        array{
- *                               url: string,
- *                               timestamp: float,
- *                               viewport: RectData,
- *                               elements: ElementData[]
- *                           }
+ * @phpstan-type ViewportRect array{
+ *                                width: int,
+ *                                height: int
+ *                            }
+ * @phpstan-type DOMRect      array{
+ *                                width: float,
+ *                                height: float,
+ *                                x: float,
+ *                                y: float,
+ *                                top: float,
+ *                                right: float,
+ *                                bottom: float,
+ *                                left: float
+ *                            }
+ * @phpstan-type ElementData  array{
+ *                                isLCP: bool,
+ *                                isLCPCandidate: bool,
+ *                                xpath: string,
+ *                                intersectionRatio: float,
+ *                                intersectionRect: DOMRect,
+ *                                boundingClientRect: DOMRect,
+ *                            }
+ * @phpstan-type Data         array{
+ *                                url: string,
+ *                                timestamp: float,
+ *                                viewport: ViewportRect,
+ *                                elements: ElementData[]
+ *                            }
  *
  * @since 0.1.0
  * @access private
@@ -77,39 +90,58 @@ final class OD_URL_Metric implements JsonSerializable {
 	 * @return array<string, mixed> Schema.
 	 */
 	public static function get_json_schema(): array {
+		/*
+		 * The intersectionRect and clientBoundingRect are both instances of the DOMRectReadOnly, which
+		 * the following schema describes. See <https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly>.
+		 * Note that 'number' is used specifically instead of 'integer' because the values are all specified as
+		 * floats/doubles.
+		 */
+		$properties = array_fill_keys(
+			array(
+				'width',
+				'height',
+				'x',
+				'y',
+				'top',
+				'right',
+				'bottom',
+				'left',
+			),
+			array(
+				'type'     => 'number',
+				'required' => true,
+			)
+		);
+
+		// The spec allows these to be negative but this doesn't make sense in the context of intersectionRect and boundingClientRect.
+		$properties['width']['minimum']  = 0.0;
+		$properties['height']['minimum'] = 0.0;
+
 		$dom_rect_schema = array(
 			'type'                 => 'object',
-			'properties'           => array(
-				'width'  => array(
-					'type'    => 'number',
-					'minimum' => 0,
-				),
-				'height' => array(
-					'type'    => 'number',
-					'minimum' => 0,
-				),
-			),
-			// TODO: There are other properties to define if we need them: x, y, top, right, bottom, left.
-			'additionalProperties' => true,
+			'required'             => true,
+			'properties'           => $properties,
+			'additionalProperties' => false,
 		);
 
 		return array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
 			'title'                => 'od-url-metric',
 			'type'                 => 'object',
+			'required'             => true,
 			'properties'           => array(
 				'url'       => array(
-					'type'        => 'string',
 					'description' => __( 'The URL for which the metric was obtained.', 'optimization-detective' ),
+					'type'        => 'string',
 					'required'    => true,
 					'format'      => 'uri',
 					'pattern'     => '^https?://',
 				),
 				'viewport'  => array(
-					'description' => __( 'Viewport dimensions', 'optimization-detective' ),
-					'type'        => 'object',
-					'required'    => true,
-					'properties'  => array(
+					'description'          => __( 'Viewport dimensions', 'optimization-detective' ),
+					'type'                 => 'object',
+					'required'             => true,
+					'properties'           => array(
 						'width'  => array(
 							'type'     => 'integer',
 							'required' => true,
@@ -121,6 +153,7 @@ final class OD_URL_Metric implements JsonSerializable {
 							'minimum'  => 0,
 						),
 					),
+					'additionalProperties' => false,
 				),
 				'timestamp' => array(
 					'description' => __( 'Timestamp at which the URL metric was captured.', 'optimization-detective' ),
@@ -137,13 +170,15 @@ final class OD_URL_Metric implements JsonSerializable {
 					'items'       => array(
 						// See the ElementMetrics in detect.js.
 						'type'                 => 'object',
+						'required'             => true,
 						'properties'           => array(
 							'isLCP'              => array(
 								'type'     => 'boolean',
 								'required' => true,
 							),
 							'isLCPCandidate'     => array(
-								'type' => 'boolean',
+								'type'     => 'boolean',
+								'required' => true,
 							),
 							'xpath'              => array(
 								'type'     => 'string',
@@ -179,7 +214,7 @@ final class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets viewport data.
 	 *
-	 * @return RectData Viewport data.
+	 * @return ViewportRect Viewport data.
 	 */
 	public function get_viewport(): array {
 		return $this->data['viewport'];

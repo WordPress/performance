@@ -8,16 +8,18 @@ return array(
 		for ( $i = 0; $i < $sample_size; $i++ ) {
 			OD_URL_Metrics_Post_Type::store_url_metric(
 				$slug,
-				$test_case->get_validated_url_metric(
-					1000,
+				$test_case->get_sample_url_metric(
 					array(
-						array(
-							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-							'isLCP' => true,
-						),
-						array(
-							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
-							'isLCP' => false,
+						'viewport_width' => 1000,
+						'elements'       => array(
+							array(
+								'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+								'isLCP' => true,
+							),
+							array(
+								'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]',
+								'isLCP' => false,
+							),
 						),
 					)
 				)
