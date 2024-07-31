@@ -397,6 +397,28 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	}
 
 	/**
+	 * Gets all elements from all URL metrics from all groups.
+	 *
+	 * This is an O(n^3) function so its results must be cached. This being said, the number of groups should be 4 (one
+	 * more than the default number of breakpoints) and the number of URL metrics for each group should be 3
+	 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
+	 * end up running n*4*3 times.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return Generator<ElementData>
+	 */
+	protected function get_all_url_metrics_groups_elements(): Generator {
+		foreach ( $this->groups as $group ) {
+			foreach ( $group as $url_metric ) {
+				foreach ( $url_metric->get_elements() as $element ) {
+					yield $element;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Gets the max intersection ratios of all elements across all groups and their captured URL metrics.
 	 *
 	 * @return array<string, float> Keys are XPaths and values are the intersection ratios.
@@ -408,21 +430,10 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 
 		$result = ( function () {
 			$element_max_intersection_ratios = array();
-
-			/*
-			 * O(n^3) my! Yes. This is why the result is cached. This being said, the number of groups should be 4 (one
-			 * more than the default number of breakpoints) and the number of URL metrics for each group should be 3
-			 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
-			 * end up running n*4*3 times.
-			 */
-			foreach ( $this->groups as $group ) {
-				foreach ( $group as $url_metric ) {
-					foreach ( $url_metric->get_elements() as $element ) {
-						$element_max_intersection_ratios[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_max_intersection_ratios )
-							? max( $element_max_intersection_ratios[ $element['xpath'] ], $element['intersectionRatio'] )
-							: $element['intersectionRatio'];
-					}
-				}
+			foreach ( $this->get_all_url_metrics_groups_elements() as $element ) {
+				$element_max_intersection_ratios[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_max_intersection_ratios )
+					? max( $element_max_intersection_ratios[ $element['xpath'] ], $element['intersectionRatio'] )
+					: $element['intersectionRatio'];
 			}
 			return $element_max_intersection_ratios;
 		} )();
@@ -446,20 +457,10 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 		$result = ( function () {
 			$element_min_heights = array();
 
-			/*
-			 * O(n^3) my! Yes. This is why the result is cached. This being said, the number of groups should be 4 (one
-			 * more than the default number of breakpoints) and the number of URL metrics for each group should be 3
-			 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
-			 * end up running n*4*3 times.
-			 */
-			foreach ( $this->groups as $group ) {
-				foreach ( $group as $url_metric ) {
-					foreach ( $url_metric->get_elements() as $element ) {
-						$element_min_heights[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_min_heights )
-							? min( $element_min_heights[ $element['xpath'] ], $element['intersectionRect']['height'] )
-							: $element['intersectionRect']['height'];
-					}
-				}
+			foreach ( $this->get_all_url_metrics_groups_elements() as $element ) {
+				$element_min_heights[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_min_heights )
+					? min( $element_min_heights[ $element['xpath'] ], $element['intersectionRect']['height'] )
+					: $element['intersectionRect']['height'];
 			}
 			return $element_min_heights;
 		} )();
