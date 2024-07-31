@@ -527,6 +527,11 @@ function webp_uploads_update_image_references( $content ): string {
 		$content = '';
 	}
 
+	// Bail early if picture element requirement is not met.
+	if ( webp_uploads_is_picture_element_enabled() ) {
+		return $content;
+	}
+
 	// Bail early if request is not for the frontend.
 	if ( ! webp_uploads_in_frontend_body() ) {
 		return $content;

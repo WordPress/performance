@@ -28,9 +28,6 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		return $image;
 	}
 
-	// Remove IMG replacement for picture element.
-	remove_filter( 'the_content', 'webp_uploads_update_image_references', 13 );
-
 	$image_meta              = wp_get_attachment_metadata( $attachment_id );
 	$original_file_mime_type = get_post_mime_type( $attachment_id );
 	if ( false === $original_file_mime_type || ! isset( $image_meta['sizes'] ) ) {
