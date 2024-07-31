@@ -34,8 +34,8 @@
 /tests/plugins/embed-optimizer              @adamsilverstein @westonruter
 
 # Plugin: Image Placeholders
-/plugins/dominant-color-images              @pbearne @spacedmonkey
-/tests/plugins/dominant-color-images        @pbearne @spacedmonkey
+/plugins/dominant-color-images              @pbearne
+/tests/plugins/dominant-color-images        @pbearne
 
 # Plugin: Image Prioritizer
 /plugins/image-prioritizer                  @westonruter @felixarntz
