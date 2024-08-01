@@ -76,10 +76,11 @@ add_action( 'wp_enqueue_scripts', 'wwo_init' );
  *
  * @since n.e.x.t
  *
- * @param string[] $script_handles Array of script handles.
+ * @param string[]|mixed $script_handles Array of script handles.
  * @return string[] Array of script handles.
  */
-function wwo_update_script_strategy( array $script_handles ): array {
+function wwo_update_script_strategy( $script_handles ): array {
+	$script_handles = array_intersect( (array) $script_handles, array_keys( wp_scripts()->registered ) );
 	foreach ( $script_handles as $handle ) {
 		if ( in_array( 'web-worker-offloading', wp_scripts()->registered[ $handle ]->deps, true ) ) {
 			wp_script_add_data( $handle, 'strategy', 'async' );
@@ -95,12 +96,16 @@ add_filter( 'print_scripts_array', 'wwo_update_script_strategy' );
  *
  * @since n.e.x.t
  *
- * @param string $tag    Script tag.
- * @param string $handle Script handle.
+ * @param string|mixed $tag Script tag.
+ * @param string $handle    Script handle.
  * @return string Script tag with type="text/partytown" for eligible scripts.
  */
-function wwo_update_script_type( string $tag, string $handle ): string {
-	if ( in_array( 'web-worker-offloading', wp_scripts()->registered[ $handle ]->deps, true ) ) {
+function wwo_update_script_type( $tag, string $handle ): string {
+	if (
+		is_string( $tag ) && 
+		array_key_exists( $handle, wp_scripts()->registered ) && 
+		in_array( 'web-worker-offloading', wp_scripts()->registered[ $handle ]->deps, true ) 
+	) {
 		$html_processor = new WP_HTML_Tag_Processor( $tag );
 
 		while ( $html_processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
