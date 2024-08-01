@@ -99,21 +99,21 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	public static function data_update_script_types(): array {
 		return array(
 			'add-script'                           => array(
-				'setup'          => static function (): void {
+				'set_up'         => static function (): void {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', true );
 				},
 				'expected'       => '<script src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script>',
 				'doing_it_wrong' => false,
 			),
 			'add-script-for-web-worker-offloading' => array(
-				'setup'          => static function (): void {
+				'set_up'         => static function (): void {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array( 'web-worker-offloading' ), '1.0.0', true );
 				},
 				'expected'       => '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"  data-wp-strategy="async"></script>',
 				'doing_it_wrong' => false,
 			),
 			'add-script-for-web-worker-offloading-with-before-data' => array(
-				'setup'          => static function (): void {
+				'set_up'         => static function (): void {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array( 'web-worker-offloading' ), '1.0.0', true );
 					wp_add_inline_script( 'foo', 'console.log("Hello, World!");', 'before' );
 				},
@@ -121,7 +121,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 				'doing_it_wrong' => false,
 			),
 			'add-script-for-web-worker-offloading-with-after-data' => array(
-				'setup'          => static function (): void {
+				'set_up'         => static function (): void {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array( 'web-worker-offloading' ), '1.0.0', true );
 					wp_add_inline_script( 'foo', 'console.log("Hello, World!");', 'after' );
 				},
@@ -129,7 +129,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 				'doing_it_wrong' => true,
 			),
 			'add-script-for-web-worker-offloading-with-before-and-after-data' => array(
-				'setup'          => static function (): void {
+				'set_up'         => static function (): void {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array( 'web-worker-offloading' ), '1.0.0', true );
 					wp_add_inline_script( 'foo', 'console.log("Hello, World!");', 'before' );
 					wp_add_inline_script( 'foo', 'console.log("Hello, World!");', 'after' );
@@ -148,11 +148,11 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_update_script_types
 	 *
-	 * @param Closure $setup          Setup function.
+	 * @param Closure $set_up         Closure to set up the test.
 	 * @param string  $expected       Expected output.
 	 * @param bool    $doing_it_wrong Whether to expect a `_doing_it_wrong` notice.
 	 */
-	public function test_update_script_types( Closure $setup, string $expected, bool $doing_it_wrong ): void {
+	public function test_update_script_types( Closure $set_up, string $expected, bool $doing_it_wrong ): void {
 		// Setup.
 		wwo_init();
 
@@ -174,7 +174,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 			$this->setExpectedIncorrectUsage( 'wwo_update_script_type' );
 		}
 
-		$setup();
+		$set_up();
 
 		// Normalize the output.
 		$actual   = preg_replace( '/\r|\n/', '', get_echo( 'wp_print_scripts' ) );
