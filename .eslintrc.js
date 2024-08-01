@@ -18,7 +18,13 @@ const config = {
 	env: {
 		browser: true,
 	},
-	ignorePatterns: [ '/vendor', '/node_modules' ],
+	ignorePatterns: [
+		'/vendor',
+		'/node_modules',
+		'/build',
+		'/dist',
+		'/*.min.js',
+	],
 };
 
 module.exports = config;
