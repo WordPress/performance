@@ -14,3 +14,5 @@ Offload JavaScript execution to a Web Worker.
 == Description ==
 
 This plugin offloads JavaScript execution to a Web Worker, improving performance by freeing up the main thread.
+
+In order to opt-in a script to be loaded in a worker, simply add the `web-worker-offloading` script as a dependency.

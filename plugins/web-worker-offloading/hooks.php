@@ -36,7 +36,7 @@ function wwo_get_configuration(): array {
 }
 
 /**
- * Initialize Web Worker Offloading.
+ * Initializes Web Worker Offloading.
  *
  * @since n.e.x.t
  */
@@ -68,11 +68,9 @@ function wwo_init(): void {
 add_action( 'wp_enqueue_scripts', 'wwo_init' );
 
 /**
- * Mark scripts with `web-worker-offloading` dependency as async.
+ * Marks scripts with `web-worker-offloading` dependency as async.
  *
- * Why this is needed?
- *
- * Scripts offloaded to a worker thread can be considered async. However, they may include `before` and `after` inline
+ * This is needed because scripts offloaded to a worker thread can be considered async. However, they may include `before` and `after` inline
  * scripts that need sequential execution. Once marked as async, `filter_eligible_strategies()` determines if the
  * script is eligible for async execution. If so, it will be offloaded to the worker thread.
  *
@@ -93,7 +91,7 @@ function wwo_update_script_strategy( array $script_handles ): array {
 add_filter( 'print_scripts_array', 'wwo_update_script_strategy' );
 
 /**
- * Update script type for handles having `web-worker-offloading` as dependency.
+ * Updates script type for handles having `web-worker-offloading` as dependency.
  *
  * @since n.e.x.t
  *
@@ -117,7 +115,7 @@ function wwo_update_script_type( string $tag, string $handle ): string {
 								$handle
 							)
 						),
-						esc_html( WEB_WORKER_OFFLOADING_VERSION )
+						'Web Worker Offloading n.e.x.t'
 					);
 				} else {
 					$html_processor->set_attribute( 'type', 'text/partytown' );
