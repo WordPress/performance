@@ -581,7 +581,6 @@ function webp_uploads_update_image_references( $content ): string {
 
 	return $content;
 }
-add_filter( 'the_content', 'webp_uploads_update_image_references', 13 ); // Run after wp_filter_content_tags.
 
 /**
  * Finds all the urls with *.jpg and *.jpeg extension and updates with *.webp version for the provided image
@@ -770,5 +769,16 @@ function webp_uploads_render_generator(): void {
 }
 add_action( 'wp_head', 'webp_uploads_render_generator' );
 
-// Add Picture element.
-add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10, 3 );
+/**
+ * Initializes custom functionality for handling image uploads and content filters.
+ *
+ * @since n.e.x.t
+ */
+function webp_uploads_init(): void {
+	if ( webp_uploads_is_picture_element_enabled() ) {
+		add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10, 3 );
+	} else {
+		add_filter( 'the_content', 'webp_uploads_update_image_references', 13 ); // Run after wp_filter_content_tags.
+	}
+}
+add_action( 'init', 'webp_uploads_init' );

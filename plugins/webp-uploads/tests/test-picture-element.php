@@ -34,6 +34,9 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			update_option( 'webp_uploads_use_picture_element', '1' );
 		}
 
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
+
 		// Create an image.
 		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 
@@ -166,6 +169,9 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		// Apply picture element support.
 		update_option( 'webp_uploads_use_picture_element', '1' );
 
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
+
 		$picture_markup    = apply_filters( 'the_content', $image );
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 
@@ -240,8 +246,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in IMG tag.' );
 
 		// Apply picture element support.
-		update_option( 'perflab_generate_webp_and_jpeg', '1' );
 		update_option( 'webp_uploads_use_picture_element', '1' );
+
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
 
 		$picture_markup = apply_filters( 'the_content', $image );
 

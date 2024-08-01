@@ -132,4 +132,11 @@ abstract class TestCase extends WP_UnitTestCase {
 	public function set_image_output_type( string $format ): void {
 		update_option( 'perflab_modern_image_format', $format );
 	}
+
+	/**
+	 * Opt into picture element output.
+	 */
+	public function opt_in_to_picture_element(): void {
+		webp_uploads_init();
+	}
 }
