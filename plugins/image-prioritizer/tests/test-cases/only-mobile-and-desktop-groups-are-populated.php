@@ -16,10 +16,10 @@ return array(
 			for ( $i = 0; $i < $sample_size; $i++ ) {
 				OD_URL_Metrics_Post_Type::store_url_metric(
 					$slug,
-					$test_case->get_validated_url_metric(
-						$viewport_width,
+					$test_case->get_sample_url_metric(
 						array(
-							array(
+							'viewport_width' => $viewport_width,
+							'element'        => array(
 								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::MAIN]/*[2][self::ARTICLE]/*[2][self::FIGURE]/*[1][self::IMG]',
 								'isLCP'             => $viewport_width > 600,
 								'intersectionRatio' => $viewport_width > 600 ? 1.0 : 0.1,

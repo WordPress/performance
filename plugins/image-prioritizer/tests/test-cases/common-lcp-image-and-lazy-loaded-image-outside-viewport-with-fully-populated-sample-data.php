@@ -7,32 +7,34 @@ return array(
 			for ( $i = 0; $i < $sample_size; $i++ ) {
 				OD_URL_Metrics_Post_Type::store_url_metric(
 					$slug,
-					$test_case->get_validated_url_metric(
-						$viewport_width,
+					$test_case->get_sample_url_metric(
 						array(
-							array(
-								'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-								'isLCP' => true,
-							),
-							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]',
-								'isLCP'             => false,
-								'intersectionRatio' => 0 === $i ? 0.5 : 0.0, // Make sure that the _max_ intersection ratio is considered.
-							),
-							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[5][self::IMG]',
-								'isLCP'             => false,
-								'intersectionRatio' => 0.0,
-							),
-							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[6][self::IMG]',
-								'isLCP'             => false,
-								'intersectionRatio' => 0.0,
-							),
-							array(
-								'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[7][self::IMG]',
-								'isLCP'             => false,
-								'intersectionRatio' => 0.0,
+							'viewport_width' => $viewport_width,
+							'elements'       => array(
+								array(
+									'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+									'isLCP' => true,
+								),
+								array(
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]',
+									'isLCP'             => false,
+									'intersectionRatio' => 0 === $i ? 0.5 : 0.0, // Make sure that the _max_ intersection ratio is considered.
+								),
+								array(
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[5][self::IMG]',
+									'isLCP'             => false,
+									'intersectionRatio' => 0.0,
+								),
+								array(
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[6][self::IMG]',
+									'isLCP'             => false,
+									'intersectionRatio' => 0.0,
+								),
+								array(
+									'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[7][self::IMG]',
+									'isLCP'             => false,
+									'intersectionRatio' => 0.0,
+								),
 							),
 						)
 					)

@@ -5,16 +5,17 @@
  * @package optimization-detective
  *
  * @noinspection PhpUnhandledExceptionInspection
+ * @noinspection PhpDocMissingThrowsInspection
  *
  * @coversDefaultClass OD_URL_Metrics_Group
  */
 
 class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
+	use Optimization_Detective_Test_Helpers;
 
 	/**
 	 * Data provider.
 	 *
-	 * @throws OD_Data_Validation_Exception If bad arguments are provided to OD_URL_Metric.
 	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_construction(): array {
@@ -223,23 +224,34 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @throws OD_Data_Validation_Exception When failing to instantiate a URL metric.
 	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_get_lcp_element(): array {
+		$get_sample_url_metric = function ( int $viewport_width, array $breadcrumbs, $is_lcp = true ) {
+			return $this->get_sample_url_metric(
+				array(
+					'viewport_width' => $viewport_width,
+					'element'        => array(
+						'xpath' => $this->get_xpath( ...$breadcrumbs ),
+						'isLCP' => $is_lcp,
+					),
+				)
+			);
+		};
+
 		return array(
 			'common_lcp_element_across_breakpoints'    => array(
 				'breakpoints'                 => array( 600, 800 ),
 				'url_metrics'                 => array(
 					// 0.
-					$this->get_validated_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
-					$this->get_validated_url_metric( 599, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$get_sample_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$get_sample_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
+					$get_sample_url_metric( 599, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
 					// 600.
-					$this->get_validated_url_metric( 600, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					$this->get_validated_url_metric( 700, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$get_sample_url_metric( 600, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$get_sample_url_metric( 700, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
 					// 800.
-					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$get_sample_url_metric( 900, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
 				),
 				'expected_lcp_element_xpaths' => array_fill_keys(
 					array(
@@ -254,12 +266,12 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 				'breakpoints'                 => array( 600 ),
 				'url_metrics'                 => array(
 					// 0.
-					$this->get_validated_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
-					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
-					$this->get_validated_url_metric( 600, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$get_sample_url_metric( 400, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
+					$get_sample_url_metric( 500, array( 'HTML', 'BODY', 'DIV', 'IMG' ) ), // Ignored since less common than the other two.
+					$get_sample_url_metric( 600, array( 'HTML', 'BODY', 'FIGURE', 'IMG' ) ),
 					// 600.
-					$this->get_validated_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+					$get_sample_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+					$get_sample_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
 				),
 				'expected_lcp_element_xpaths' => array(
 					'0:600' => $this->get_xpath( 'HTML', 'BODY', 'FIGURE', 'IMG' ),
@@ -270,12 +282,12 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 				'breakpoints'                 => array( 400, 600 ),
 				'url_metrics'                 => array(
 					// 0.
-					$this->get_validated_url_metric( 300, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+					$get_sample_url_metric( 300, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
 					// 400.
-					$this->get_validated_url_metric( 500, array( 'HTML', 'BODY', 'HEADER', 'IMG' ), false ),
+					$get_sample_url_metric( 500, array( 'HTML', 'BODY', 'HEADER', 'IMG' ), false ),
 					// 600.
-					$this->get_validated_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
-					$this->get_validated_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+					$get_sample_url_metric( 800, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
+					$get_sample_url_metric( 900, array( 'HTML', 'BODY', 'MAIN', 'IMG' ) ),
 				),
 				'expected_lcp_element_xpaths' => array(
 					'0:400'   => $this->get_xpath( 'HTML', 'BODY', 'MAIN', 'IMG' ),
@@ -287,9 +299,9 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 				'breakpoints'                 => array( 600 ),
 				'url_metrics'                 => array(
 					// 0.
-					$this->get_validated_url_metric( 300, array( 'HTML', 'BODY', 'IMG' ), false ),
+					$get_sample_url_metric( 300, array( 'HTML', 'BODY', 'IMG' ), false ),
 					// 600.
-					$this->get_validated_url_metric( 700, array( 'HTML', 'BODY', 'IMG' ), false ),
+					$get_sample_url_metric( 700, array( 'HTML', 'BODY', 'IMG' ), false ),
 				),
 				'expected_lcp_element_xpaths' => array_fill_keys(
 					array(
@@ -335,10 +347,11 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 	 */
 	public function test_json_serialize(): void {
 		$group = new OD_URL_Metrics_Group(
-			array(
-				$this->get_validated_url_metric( 400 ),
-				$this->get_validated_url_metric( 600 ),
-				$this->get_validated_url_metric( 800 ),
+			array_map(
+				function ( $viewport_width ) {
+					return $this->get_sample_url_metric( array( 'viewport_width' => $viewport_width ) );
+				},
+				array( 400, 600, 800 )
 			),
 			0,
 			1000,
@@ -362,44 +375,6 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 			$expected_keys,
 			array_keys( $parsed_json )
 		);
-	}
-
-	/**
-	 * Gets a validated URL metric for testing.
-	 *
-	 * @param int      $viewport_width Viewport width.
-	 * @param string[] $breadcrumbs    Breadcrumb tags.
-	 * @param bool     $is_lcp         Whether LCP.
-	 *
-	 * @return OD_URL_Metric Validated URL metric.
-	 * @throws OD_Data_Validation_Exception From OD_URL_Metric if there is a parse error, but there won't be.
-	 */
-	private function get_validated_url_metric( int $viewport_width = 480, array $breadcrumbs = array( 'HTML', 'BODY', 'IMG' ), bool $is_lcp = true ): OD_URL_Metric {
-		$data = array(
-			'url'       => home_url( '/' ),
-			'viewport'  => array(
-				'width'  => $viewport_width,
-				'height' => 640,
-			),
-			'timestamp' => microtime( true ),
-			'elements'  => array(
-				array(
-					'isLCP'              => $is_lcp,
-					'isLCPCandidate'     => $is_lcp,
-					'xpath'              => $this->get_xpath( ...$breadcrumbs ),
-					'intersectionRatio'  => 1,
-					'intersectionRect'   => array(
-						'width'  => 100,
-						'height' => 100,
-					),
-					'boundingClientRect' => array(
-						'width'  => 100,
-						'height' => 100,
-					),
-				),
-			),
-		);
-		return new OD_URL_Metric( $data );
 	}
 
 	/**

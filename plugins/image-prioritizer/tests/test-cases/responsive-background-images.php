@@ -23,10 +23,10 @@ return array(
 			for ( $i = 0; $i < $sample_size; $i++ ) {
 				OD_URL_Metrics_Post_Type::store_url_metric(
 					$slug,
-					$test_case->get_validated_url_metric(
-						$viewport_width,
+					$test_case->get_sample_url_metric(
 						array(
-							array(
+							'viewport_width' => $viewport_width,
+							'element'        => array(
 								'xpath' => sprintf( '/*[1][self::HTML]/*[2][self::BODY]/*[%d][self::DIV]', $div_index + 1 ),
 								'isLCP' => true,
 							),

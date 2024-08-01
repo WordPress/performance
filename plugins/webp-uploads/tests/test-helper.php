@@ -585,4 +585,43 @@ class Test_WebP_Uploads_Helper extends TestCase {
 			),
 		);
 	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	public function data_provider_to_test_webp_uploads_sanitize_image_format(): array {
+		return array(
+			'null'  => array(
+				'input'    => null,
+				'expected' => 'webp',
+			),
+			'array' => array(
+				'input'    => array( 'tiff' ),
+				'expected' => 'webp',
+			),
+			'webp'  => array(
+				'input'    => 'webp',
+				'expected' => 'webp',
+			),
+			'avif'  => array(
+				'input'    => 'avif',
+				'expected' => 'avif',
+			),
+			'bmp'   => array(
+				'input'    => 'bmp',
+				'expected' => 'webp',
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider data_provider_to_test_webp_uploads_sanitize_image_format
+	 * @covers ::webp_uploads_sanitize_image_format
+	 *
+	 * @param mixed  $input    Input.
+	 * @param string $expected Expected.
+	 */
+	public function test_webp_uploads_sanitize_image_format( $input, string $expected ): void {
+		$this->assertSame( $expected, webp_uploads_sanitize_image_format( $input ) );
+	}
 }

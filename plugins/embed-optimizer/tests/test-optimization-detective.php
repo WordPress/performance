@@ -3,6 +3,8 @@
  * Tests for embed-optimizer plugin hooks.php.
  *
  * @package embed-optimizer
+ *
+ * @noinspection PhpUnhandledExceptionInspection
  */
 
 class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
@@ -51,7 +53,6 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 	 * @covers ::embed_optimizer_update_markup
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
-	 * @throws Exception But it won't.
 	 */
 	public function test_od_optimize_template_output_buffer( Closure $set_up, string $buffer, string $expected ): void {
 		$set_up( $this );

@@ -7,6 +7,7 @@
  * @coversDefaultClass OD_URL_Metric
  */
 class Test_OD_URL_Metric extends WP_UnitTestCase {
+	use Optimization_Detective_Test_Helpers;
 
 	/**
 	 * Data provider.
@@ -14,9 +15,17 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider(): array {
-		$viewport = array(
+		$viewport      = array(
 			'width'  => 640,
 			'height' => 480,
+		);
+		$valid_element = array(
+			'isLCP'              => true,
+			'isLCPCandidate'     => true,
+			'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+			'intersectionRatio'  => 1.0,
+			'intersectionRect'   => $this->get_sample_dom_rect(),
+			'boundingClientRect' => $this->get_sample_dom_rect(),
 		);
 
 		return array(
@@ -34,12 +43,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(
-						array(
-							'isLCP'             => true,
-							'isLCPCandidate'    => true,
-							'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
-							'intersectionRatio' => 1.0,
-						),
+						$valid_element,
 					),
 				),
 			),
@@ -109,6 +113,20 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				),
 				'error' => 'isLCP is a required property of OD_URL_Metric[elements][0].',
 			),
+			'bad_intersection_width' => array(
+				'data'  => array(
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(
+						( static function ( $element ) {
+							$element['intersectionRect']['width'] = -10;
+							return $element;
+						} )( $valid_element ),
+					),
+				),
+				'error' => 'OD_URL_Metric[elements][0][intersectionRect][width] must be greater than or equal to 0',
+			),
 		);
 	}
 
@@ -146,6 +164,28 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 */
 	public function test_get_json_schema(): void {
 		$schema = OD_URL_Metric::get_json_schema();
-		$this->assertArrayHasKey( 'properties', $schema );
+		$this->check_schema_subset( $schema, 'root' );
+	}
+
+	/**
+	 * Checks schema subset.
+	 *
+	 * @param array<string, mixed> $schema Schema subset.
+	 */
+	protected function check_schema_subset( array $schema, string $path ): void {
+		$this->assertArrayHasKey( 'required', $schema, $path );
+		$this->assertTrue( $schema['required'], $path );
+		$this->assertArrayHasKey( 'type', $schema, $path );
+		if ( 'object' === $schema['type'] ) {
+			$this->assertArrayHasKey( 'properties', $schema, $path );
+			$this->assertArrayHasKey( 'additionalProperties', $schema, $path );
+			$this->assertFalse( $schema['additionalProperties'] );
+			foreach ( $schema['properties'] as $key => $property_schema ) {
+				$this->check_schema_subset( $property_schema, "$path/$key" );
+			}
+		} elseif ( 'array' === $schema['type'] ) {
+			$this->assertArrayHasKey( 'items', $schema, $path );
+			$this->check_schema_subset( $schema['items'], "$path/items" );
+		}
 	}
 }

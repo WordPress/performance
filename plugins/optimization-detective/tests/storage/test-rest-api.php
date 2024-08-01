@@ -6,6 +6,7 @@
  */
 
 class Test_OD_Storage_REST_API extends WP_UnitTestCase {
+	use Optimization_Detective_Test_Helpers;
 
 	/**
 	 * @var string
@@ -113,6 +114,33 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 							$valid_element,
 							array(
 								'intersectionRatio' => - 1,
+							)
+						),
+					),
+				),
+				'invalid_elements_additional_intersect_rect_property' => array(
+					'elements' => array(
+						array_merge(
+							$valid_element,
+							array(
+								'intersectionRect' => array(
+									'width'  => 640,
+									'height' => 480,
+									'wooHoo' => 'bad',
+								),
+							)
+						),
+					),
+				),
+				'invalid_elements_negative_width_intersect_rect_property' => array(
+					'elements' => array(
+						array_merge(
+							$valid_element,
+							array(
+								'intersectionRect' => array(
+									'width'  => -640,
+									'height' => 480,
+								),
 							)
 						),
 					),
@@ -354,7 +382,14 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 */
 	private function get_valid_params( array $extras = array() ): array {
 		$slug = od_get_url_metrics_slug( array() );
-		$data = $this->get_sample_validated_url_metric();
+		$data = $this->get_sample_url_metric(
+			array(
+				'viewport_width' => 480,
+				'element'        => array(
+					'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
+				),
+			)
+		)->jsonSerialize();
 		$data = array_merge(
 			array(
 				'slug'  => $slug,
@@ -391,29 +426,5 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			}
 		}
 		return $base_array;
-	}
-
-	/**
-	 * Gets sample validated URL metric data.
-	 *
-	 * @return array<string, mixed>
-	 */
-	private function get_sample_validated_url_metric(): array {
-		return array(
-			'url'       => home_url( '/' ),
-			'viewport'  => array(
-				'width'  => 480,
-				'height' => 640,
-			),
-			'timestamp' => microtime( true ),
-			'elements'  => array(
-				array(
-					'isLCP'             => true,
-					'isLCPCandidate'    => true,
-					'xpath'             => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
-					'intersectionRatio' => 1,
-				),
-			),
-		);
 	}
 }
