@@ -109,24 +109,25 @@ function wwo_update_script_type( $tag, string $handle ) {
 		$html_processor = new WP_HTML_Tag_Processor( $tag );
 
 		while ( $html_processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
-			if ( $html_processor->get_attribute( 'id' ) === "{$handle}-js" ) {
-				if ( null === $html_processor->get_attribute( 'async' ) ) {
-					_doing_it_wrong(
-						'wwo_update_script_type',
-						esc_html(
-							sprintf(
-								/* translators: %s: script handle */
-								__( 'Unable to offload "%s" script to a worker. Script will continue to load in the main thread.', 'web-worker-offloading' ),
-								$handle
-							)
-						),
-						'Web Worker Offloading n.e.x.t'
-					);
-				} else {
-					$html_processor->set_attribute( 'type', 'text/partytown' );
-					$html_processor->remove_attribute( 'async' );
-					$tag = $html_processor->get_updated_html();
-				}
+			if ( $html_processor->get_attribute( 'id' ) !== "{$handle}-js" ) {
+				continue;
+			}
+			if ( null === $html_processor->get_attribute( 'async' ) ) {
+				_doing_it_wrong(
+					'wwo_update_script_type',
+					esc_html(
+						sprintf(
+							/* translators: %s: script handle */
+							__( 'Unable to offload "%s" script to a worker. Script will continue to load in the main thread.', 'web-worker-offloading' ),
+							$handle
+						)
+					),
+					'Web Worker Offloading n.e.x.t'
+				);
+			} else {
+				$html_processor->set_attribute( 'type', 'text/partytown' );
+				$html_processor->remove_attribute( 'async' );
+				$tag = $html_processor->get_updated_html();
 			}
 		}
 	}
