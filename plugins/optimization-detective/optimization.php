@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function od_buffer_output( string $passthrough ): string {
 	ob_start(
 		static function ( string $output, ?int $phase ): string {
-			if ( $phase & PHP_OUTPUT_HANDLER_FINAL ) {
+			if ( ( $phase & PHP_OUTPUT_HANDLER_FINAL ) > 0 ) {
 				/**
 				 * Filters the template output buffer prior to sending to the client.
 				 *
