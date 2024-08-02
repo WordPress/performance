@@ -77,7 +77,6 @@ add_action( 'wp_enqueue_scripts', 'wwo_init' );
  * @since n.e.x.t
  *
  * @param string[]|mixed $script_handles Array of script handles.
- *
  * @return string[] Array of script handles.
  */
 function wwo_update_script_strategy( $script_handles ): array {
@@ -99,10 +98,9 @@ add_filter( 'print_scripts_array', 'wwo_update_script_strategy' );
  *
  * @param string|mixed $tag    Script tag.
  * @param string       $handle Script handle.
- *
- * @return string Script tag with type="text/partytown" for eligible scripts.
+ * @return string|mixed Script tag with type="text/partytown" for eligible scripts.
  */
-function wwo_update_script_type( $tag, string $handle ): string {
+function wwo_update_script_type( $tag, string $handle ) {
 	if (
 		is_string( $tag ) &&
 		array_key_exists( $handle, wp_scripts()->registered ) &&
