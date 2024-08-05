@@ -83,7 +83,10 @@ function wwo_update_script_strategy( $script_handles ): array {
 	$script_handles = array_intersect( (array) $script_handles, array_keys( wp_scripts()->registered ) );
 	foreach ( $script_handles as $handle ) {
 		if ( in_array( 'web-worker-offloading', wp_scripts()->registered[ $handle ]->deps, true ) ) {
-			wp_script_add_data( $handle, 'strategy', 'async' );
+			if ( false === wp_scripts()->get_data( $handle, 'strategy' ) ) {
+				wp_script_add_data( $handle, 'strategy', 'async' ); // The 'defer' strategy would work as well.
+				wp_script_add_data( $handle, 'wwo_strategy_added', true );
+			}
 		}
 	}
 
@@ -112,7 +115,7 @@ function wwo_update_script_type( $tag, string $handle ) {
 			if ( $html_processor->get_attribute( 'id' ) !== "{$handle}-js" ) {
 				continue;
 			}
-			if ( null === $html_processor->get_attribute( 'async' ) ) {
+			if ( null === $html_processor->get_attribute( 'async' ) && null === $html_processor->get_attribute( 'defer' ) ) {
 				_doing_it_wrong(
 					'wwo_update_script_type',
 					esc_html(
@@ -126,10 +129,12 @@ function wwo_update_script_type( $tag, string $handle ) {
 				);
 			} else {
 				$html_processor->set_attribute( 'type', 'text/partytown' );
+			}
+			if ( true === wp_scripts()->get_data( $handle, 'wwo_strategy_added' ) ) {
 				$html_processor->remove_attribute( 'async' );
 				$html_processor->remove_attribute( 'data-wp-strategy' );
-				$tag = $html_processor->get_updated_html();
 			}
+			$tag = $html_processor->get_updated_html();
 		}
 	}
 

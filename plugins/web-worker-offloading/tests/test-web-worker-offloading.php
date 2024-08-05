@@ -98,18 +98,32 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	 */
 	public static function data_update_script_types(): array {
 		return array(
-			'add-script'                           => array(
+			'add-script'                                 => array(
 				'set_up'         => static function (): void {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', true );
 				},
 				'expected'       => '<script src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script>',
 				'doing_it_wrong' => false,
 			),
-			'add-script-for-web-worker-offloading' => array(
+			'add-script-for-web-worker-offloading'       => array(
 				'set_up'         => static function (): void {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array( 'web-worker-offloading' ), '1.0.0', true );
 				},
 				'expected'       => '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"  ></script>',
+				'doing_it_wrong' => false,
+			),
+			'add-defer-script-for-web-worker-offloading' => array(
+				'set_up'         => static function (): void {
+					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array( 'web-worker-offloading' ), '1.0.0', array( 'strategy' => 'defer' ) );
+				},
+				'expected'       => '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js" defer data-wp-strategy="defer"></script>',
+				'doing_it_wrong' => false,
+			),
+			'add-async-script-for-web-worker-offloading' => array(
+				'set_up'         => static function (): void {
+					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array( 'web-worker-offloading' ), '1.0.0', array( 'strategy' => 'async' ) );
+				},
+				'expected'       => '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js" async data-wp-strategy="async"></script>',
 				'doing_it_wrong' => false,
 			),
 			'add-script-for-web-worker-offloading-with-before-data' => array(
@@ -125,7 +139,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array( 'web-worker-offloading' ), '1.0.0', true );
 					wp_add_inline_script( 'foo', 'console.log("Hello, World!");', 'after' );
 				},
-				'expected'       => '{{ wwo_config }}{{ wwo_inline_script }}<script src="https://example.com/foo.js?ver=1.0.0" id="foo-js" data-wp-strategy="async"></script><script id="foo-js-after">console.log("Hello, World!");</script>',
+				'expected'       => '{{ wwo_config }}{{ wwo_inline_script }}<script src="https://example.com/foo.js?ver=1.0.0" id="foo-js" ></script><script id="foo-js-after">console.log("Hello, World!");</script>',
 				'doing_it_wrong' => true,
 			),
 			'add-script-for-web-worker-offloading-with-before-and-after-data' => array(
@@ -134,7 +148,25 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, World!");', 'before' );
 					wp_add_inline_script( 'foo', 'console.log("Hello, World!");', 'after' );
 				},
+				'expected'       => '{{ wwo_config }}{{ wwo_inline_script }}<script id="foo-js-before">console.log("Hello, World!");</script><script src="https://example.com/foo.js?ver=1.0.0" id="foo-js" ></script><script id="foo-js-after">console.log("Hello, World!");</script>',
+				'doing_it_wrong' => true,
+			),
+			'add-async-script-for-web-worker-offloading-with-before-and-after-data' => array(
+				'set_up'         => static function (): void {
+					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array( 'web-worker-offloading' ), '1.0.0', array( 'strategy' => 'async' ) );
+					wp_add_inline_script( 'foo', 'console.log("Hello, World!");', 'before' );
+					wp_add_inline_script( 'foo', 'console.log("Hello, World!");', 'after' );
+				},
 				'expected'       => '{{ wwo_config }}{{ wwo_inline_script }}<script id="foo-js-before">console.log("Hello, World!");</script><script src="https://example.com/foo.js?ver=1.0.0" id="foo-js" data-wp-strategy="async"></script><script id="foo-js-after">console.log("Hello, World!");</script>',
+				'doing_it_wrong' => true,
+			),
+			'add-defer-script-for-web-worker-offloading-with-before-and-after-data' => array(
+				'set_up'         => static function (): void {
+					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array( 'web-worker-offloading' ), '1.0.0', array( 'strategy' => 'defer' ) );
+					wp_add_inline_script( 'foo', 'console.log("Hello, World!");', 'before' );
+					wp_add_inline_script( 'foo', 'console.log("Hello, World!");', 'after' );
+				},
+				'expected'       => '{{ wwo_config }}{{ wwo_inline_script }}<script id="foo-js-before">console.log("Hello, World!");</script><script src="https://example.com/foo.js?ver=1.0.0" id="foo-js" data-wp-strategy="defer"></script><script id="foo-js-after">console.log("Hello, World!");</script>',
 				'doing_it_wrong' => true,
 			),
 		);
