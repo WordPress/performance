@@ -129,10 +129,10 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		);
 	}
 
-	return sprintf(
+	return ( '' === $picture_sources ? $image : sprintf(
 		'<picture class="%s" style="display: contents;">%s%s</picture>',
 		esc_attr( 'wp-picture-' . $attachment_id ),
 		$picture_sources,
 		$image
-	);
+	) );
 }
