@@ -127,6 +127,7 @@ function wwo_update_script_type( $tag, string $handle ) {
 			} else {
 				$html_processor->set_attribute( 'type', 'text/partytown' );
 				$html_processor->remove_attribute( 'async' );
+				$html_processor->remove_attribute( 'data-wp-strategy' );
 				$tag = $html_processor->get_updated_html();
 			}
 		}
