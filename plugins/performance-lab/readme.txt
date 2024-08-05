@@ -11,7 +11,19 @@ Performance plugin from the WordPress Performance Team, which is a collection of
 
 == Description ==
 
-The Performance Lab plugin is a collection of features focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin allows to individually enable and test the features to get their benefits before they become available in WordPress core, and to provide feedback to further improve the solutions.
+The Performance Lab plugin is a collection of features focused on enhancing performance of your site, most of which should eventually be merged into WordPress core. The plugin facilitates the discovery and activation of the individual performance feature plugins which the performance team is developing. In this way you can test the features to get their benefits before they become available in WordPress core. You can also play an important role by providing feedback to further improve the solutions. 
+
+The feature plugins which are currently featured by this plugin are:
+
+* [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/)
+* [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/)
+* [Image Placeholders](https://wordpress.org/plugins/dominant-color-images/)
+* [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/)
+* [Modern Image Formats](https://wordpress.org/plugins/webp-uploads/)
+* [Performant Translations](https://wordpress.org/plugins/performant-translations/)
+* [Speculative Loading](https://wordpress.org/plugins/speculation-rules/)
+
+These plugins can also be installed separately from installing Performance Lab, but having the Performance Lab plugin also active will ensure you find out about new performance features as they are developed.
 
 == Installation ==
 
