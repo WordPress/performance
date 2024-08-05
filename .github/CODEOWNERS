@@ -2,53 +2,32 @@
 /.github                                    @mukeshpanchal27 @felixarntz @thelovekesh
 /bin                                        @mukeshpanchal27 @felixarntz @thelovekesh
 
-# Performance Lab Plugin Admin
-/includes/admin                             @mukeshpanchal27 @felixarntz
-/tests/includes/admin                       @mukeshpanchal27 @felixarntz
+# Performance Lab Plugin
+/plugins/performance-lab                    @mukeshpanchal27 @felixarntz
 
-# Server Timing API
-/includes/server-timing                    @felixarntz
-/tests/includes/server-timing              @felixarntz
-
-# Site Health: AVIF Support Health Check
-/includes/site-health/avif-support                                          @adamsilverstein
-
-# Site Health: WebP Support Health Check
-/includes/site-health/webp-support                                          @adamsilverstein
-
-# Site Health: Autoloaded Options Health Check
-/includes/site-health/audit-autoloaded-options                              @manuelRod @felixarntz @mukeshpanchal27
-/tests/includes/site-health/audit-autoloaded-options                        @manuelRod @felixarntz @mukeshpanchal27
-
-# Site Health: Enqueued Assets Health Check
-/includes/site-health/audit-enqueued-assets                                 @manuelRod
-/tests/includes/site-health/audit-enqueued-assets                           @manuelRod
-/tests/testdata/modules/site-health/audit-enqueued-assets                   @manuelRod
+# Performance Lab Plugin: Individual Site Health checks
+/plugins/performance-lab/includes/site-health/avif-support              @adamsilverstein
+/plugins/performance-lab/includes/site-health/webp-support              @adamsilverstein
+/plugins/performance-lab/includes/site-health/audit-autoloaded-options  @manuelRod @felixarntz @mukeshpanchal27
+/plugins/performance-lab/includes/site-health/audit-enqueued-assets     @manuelRod
 
 # Plugin: Enhanced Responsive Images
 /plugins/auto-sizes                         @joemcgill @mukeshpanchal27
-/tests/plugins/auto-sizes                   @joemcgill @mukeshpanchal27
 
 # Plugin: Embed Optimizer
 /plugins/embed-optimizer                    @adamsilverstein @westonruter
-/tests/plugins/embed-optimizer              @adamsilverstein @westonruter
 
 # Plugin: Image Placeholders
 /plugins/dominant-color-images              @pbearne
-/tests/plugins/dominant-color-images        @pbearne
 
 # Plugin: Image Prioritizer
 /plugins/image-prioritizer                  @westonruter @felixarntz
-/tests/plugins/image-prioritizer            @westonruter @felixarntz
 
 # Plugin: Modern Image Formats
 /plugins/webp-uploads                       @adamsilverstein @felixarntz @westonruter
-/tests/plugins/webp-uploads                 @adamsilverstein @felixarntz @westonruter
 
 # Plugin: Optimization Detective
 /plugins/optimization-detective             @westonruter @felixarntz
-/tests/plugins/optimization-detective       @westonruter @felixarntz
 
 # Plugin: Speculative Loading
 /plugins/speculation-rules                  @felixarntz
-/tests/plugins/speculation-rules            @felixarntz
