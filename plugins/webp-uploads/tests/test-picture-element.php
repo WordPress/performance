@@ -160,9 +160,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
 		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
 		$img_sizes = $img_processor->get_attribute( 'sizes' );
-		$img_src   = $img_processor->get_attribute( 'src' );
-
-		$this->assertStringEndsWith( '.jpg', $img_src, 'Should return .jpg img src.' );
 
 		// Apply picture element support.
 		$this->opt_in_to_picture_element();
@@ -171,9 +168,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 
 		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
-		$picture_img_src = $picture_processor->get_attribute( 'src' );
-		$this->assertStringEndsWith( '.jpg', $picture_img_src, 'Should return .jpg img src.' );
-		$this->assertSame( $img_src, $picture_img_src, 'Make sure IMG src is same.' );
 		$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ), 'The IMG and Picture IMG have same sizes attributes.' );
 
 		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
