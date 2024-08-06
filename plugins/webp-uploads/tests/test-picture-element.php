@@ -133,7 +133,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		);
 	}
 
-	public function test_picture_source_only_have_additional_mime_not_jpeg_and_retrun_jpeg_fallback(): void {
+	public function test_picture_source_only_have_additional_mime_not_jpeg_and_return_jpeg_fallback(): void {
 		$mime_type = 'image/webp';
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
