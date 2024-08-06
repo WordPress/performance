@@ -88,7 +88,9 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 
 		// In order to test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
 		// buffer callback. See <https://stackoverflow.com/a/61439514/93579>.
+		$initial_level = ob_get_level();
 		ob_start();
+		$this->assertSame( $initial_level + 1, ob_get_level() );
 
 		$filter_count = 0;
 		add_filter(
@@ -100,23 +102,23 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 			}
 		);
 
-		$original_ob_level = ob_get_level();
 		od_buffer_output( '' );
-		$this->assertSame( $original_ob_level + 1, ob_get_level(), 'Expected call to ob_start().' );
+		$this->assertSame( $initial_level + 2, ob_get_level() );
 		echo $original; // This should never be passed into the od_template_output_buffer filter.
 
 		// Abort the original content printed above.
-		ob_clean(); // Note the lack of flush here.
+		ob_clean(); // Note the lack of flush here and the lack of ending the buffer.
+		$this->assertSame( $initial_level + 2, ob_get_level() );
 		echo $template_override; // This should get passed into the od_template_output_buffer filter.
 
-		ob_end_flush();
+		ob_end_flush(); // Close the output buffer opened by od_buffer_output().
+		$this->assertSame( $initial_level + 1, ob_get_level() );
 
-		$buffer = ob_get_clean(); // Get the buffer from our wrapper output buffer.
+		$buffer = ob_get_clean(); // Get the buffer from our wrapper output buffer and close it.
+		$this->assertSame( $initial_level, ob_get_level() );
 
 		$this->assertSame( 1, $filter_count, 'Expected filter to be called once.' );
-		$this->assertSame( $filter_override, $buffer, 'Excepted return value of filter to be the resulting value for the buffer.' ); // TODO: The output buffer callback returns $filter_override, but the $buffer for some reason is actually equal to $template_override. Why?
-
-		ob_end_clean(); // Close the wrapper buffer.
+		$this->assertSame( $filter_override, $buffer, 'Excepted return value of filter to be the resulting value for the buffer.' );
 	}
 
 	/**
