@@ -7,6 +7,7 @@
     "npm": ">=10.2.3"
   },
   "dependencies": {
+    "@builder.io/partytown": "^0.10.2",
     "web-vitals": "4.2.2"
   },
   "devDependencies": {
@@ -40,6 +41,7 @@
     "build:plugin:image-prioritizer": "webpack --mode production --env plugin=image-prioritizer",
     "build:plugin:optimization-detective": "webpack --mode production --env plugin=optimization-detective",
     "build:plugin:speculation-rules": "webpack --mode production --env plugin=speculation-rules",
+    "build:plugin:web-worker-offloading": "webpack --mode production --env plugin=web-worker-offloading",
     "build:plugin:webp-uploads": "webpack --mode production --env plugin=webp-uploads",
     "generate-pending-release-diffs": "bin/generate-pending-release-diffs.sh",
     "format-js": "wp-scripts format",
@@ -57,6 +59,7 @@
     "test-php:image-prioritizer": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:image-prioritizer",
     "test-php:optimization-detective": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:optimization-detective",
     "test-php:speculation-rules": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:speculation-rules",
+    "test-php:web-worker-offloading": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:web-worker-offloading",
     "test-php:webp-uploads": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:webp-uploads",
     "wp-env": "wp-env",
     "prepare": "husky"
