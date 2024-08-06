@@ -109,6 +109,8 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		ob_clean(); // Note the lack of flush here.
 		echo $template_override; // This should get passed into the od_template_output_buffer filter.
 
+		ob_end_flush();
+
 		$buffer = ob_get_clean(); // Get the buffer from our wrapper output buffer.
 
 		$this->assertSame( 1, $filter_count, 'Expected filter to be called once.' );
