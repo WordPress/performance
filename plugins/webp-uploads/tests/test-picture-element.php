@@ -133,6 +133,45 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		);
 	}
 
+	public function test_picture_source_only_have_additional_mime_not_jpeg_and_retrun_jpeg_fallback(): void {
+		$mime_type = 'image/webp';
+		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			$this->markTestSkipped( "Mime type $mime_type is not supported." );
+		}
+
+		// Create some content with the image.
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		$img_markup = apply_filters( 'the_content', $image );
+
+		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
+		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
+		$img_src    = $img_processor->get_attribute( 'src' );
+		$img_srcset = $img_processor->get_attribute( 'srcset' );
+
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
+
+		$picture_markup    = apply_filters( 'the_content', $image );
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+
+		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
+		$this->assertSame( $img_src, $picture_processor->get_attribute( 'src' ), 'Make sure the IMG and Picture IMG have same image src.' );
+
+		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
+			$this->assertNotSame( 'image/jpeg', $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return jpeg as source.' );
+			$this->assertNotSame( $img_srcset, $picture_processor->get_attribute( 'srcset' ), 'Make sure the IMG and Picture source should not same srcset attributes.' );
+		}
+	}
+
 	/**
 	 * @dataProvider data_provider_test_image_sizes_equality
 	 *
