@@ -8,6 +8,7 @@
     "./plugins/image-prioritizer",
     "./plugins/performance-lab",
     "./plugins/speculation-rules",
+    "./plugins/web-worker-offloading",
     "./plugins/webp-uploads"
   ],
   "env": {

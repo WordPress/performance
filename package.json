@@ -7,18 +7,20 @@
     "npm": ">=10.2.3"
   },
   "dependencies": {
+    "@builder.io/partytown": "^0.10.2",
     "web-vitals": "4.2.2"
   },
   "devDependencies": {
     "@octokit/rest": "^21.0.1",
     "@wordpress/env": "^10.4.0",
+    "@wordpress/prettier-config": "^4.4.0",
     "@wordpress/scripts": "^28.4.0",
     "commander": "12.1.0",
     "copy-webpack-plugin": "^12.0.2",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
     "husky": "^9.1.4",
-    "lint-staged": "^15.2.7",
+    "lint-staged": "^15.2.8",
     "lodash": "4.17.21",
     "micromatch": "^4.0.7",
     "npm-run-all": "^4.1.5",
@@ -39,6 +41,7 @@
     "build:plugin:image-prioritizer": "webpack --mode production --env plugin=image-prioritizer",
     "build:plugin:optimization-detective": "webpack --mode production --env plugin=optimization-detective",
     "build:plugin:speculation-rules": "webpack --mode production --env plugin=speculation-rules",
+    "build:plugin:web-worker-offloading": "webpack --mode production --env plugin=web-worker-offloading",
     "build:plugin:webp-uploads": "webpack --mode production --env plugin=webp-uploads",
     "generate-pending-release-diffs": "bin/generate-pending-release-diffs.sh",
     "format-js": "wp-scripts format",
@@ -56,6 +59,7 @@
     "test-php:image-prioritizer": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:image-prioritizer",
     "test-php:optimization-detective": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:optimization-detective",
     "test-php:speculation-rules": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:speculation-rules",
+    "test-php:web-worker-offloading": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:web-worker-offloading",
     "test-php:webp-uploads": "wp-env run tests-cli --env-cwd=/var/www/html/wp-content/plugins/performance composer test:webp-uploads",
     "wp-env": "wp-env",
     "prepare": "husky"

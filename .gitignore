@@ -16,6 +16,7 @@ local.properties
 .cproject
 .buildpath
 nbproject/
+.vscode
 
 ############
 ## Build
@@ -31,7 +32,6 @@ build
 
 node_modules/
 vendor/
-plugins/optimization-detective/detection/web-vitals*
 
 ############
 ## OSes
