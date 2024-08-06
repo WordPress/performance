@@ -22,7 +22,6 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	if ( 'the_content' !== $context ) {
 		return $image;
 	}
-
 	$image_meta              = wp_get_attachment_metadata( $attachment_id );
 	$original_file_mime_type = get_post_mime_type( $attachment_id );
 	if ( false === $original_file_mime_type || ! isset( $image_meta['sizes'] ) ) {
