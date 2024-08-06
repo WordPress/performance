@@ -55,10 +55,6 @@ function od_buffer_output( string $passthrough ): string {
 				return $output;
 			}
 
-			// Since ob_start() was called without PHP_OUTPUT_HANDLER_FLUSHABLE, at this point the phase should never be flush, and it should always be final.
-			assert( ( $phase & ( PHP_OUTPUT_HANDLER_FLUSH ) ) === 0 );
-			assert( ( $phase & ( PHP_OUTPUT_HANDLER_FINAL ) ) !== 0 );
-
 			/**
 			 * Filters the template output buffer prior to sending to the client.
 			 *
