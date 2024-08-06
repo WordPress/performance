@@ -31,21 +31,47 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string Unmodified value of $passthrough.
  */
 function od_buffer_output( string $passthrough ): string {
+	/*
+	 * Instead of the default PHP_OUTPUT_HANDLER_STDFLAGS (cleanable, flushable, and removable) being used for flags,
+	 * we need to omit PHP_OUTPUT_HANDLER_FLUSHABLE. If the buffer were flushable, then each time that ob_flush() is
+	 * called, it would send a fragment of the output into the output buffer callback. When buffering the entire
+	 * response as an HTML document, this would result in broken HTML processing.
+	 *
+	 * If this ends up being problematic, then PHP_OUTPUT_HANDLER_FLUSHABLE could be added to the $flags and the
+	 * output buffer callback could check if the phase is PHP_OUTPUT_HANDLER_FLUSH and abort any subsequent
+	 * processing while also emitting a _doing_it_wrong().
+	 */
+	$flags = PHP_OUTPUT_HANDLER_CLEANABLE;
+
+	// When running unit tests the output buffer must also be removable in order to obtain the buffered output.
+	if ( php_sapi_name() === 'cli' ) {
+		// TODO: Do any caching plugins need the output buffer to be removable? This is unlikely, as they would pass an output buffer callback to ob_start() instead of calling ob_get_clean() at shutdown.
+		$flags |= PHP_OUTPUT_HANDLER_REMOVABLE;
+	}
+
 	ob_start(
 		static function ( string $output, ?int $phase ): string {
-			if ( ( $phase & PHP_OUTPUT_HANDLER_FINAL ) > 0 ) {
-				/**
-				 * Filters the template output buffer prior to sending to the client.
-				 *
-				 * @since 0.1.0
-				 *
-				 * @param string $output Output buffer.
-				 * @return string Filtered output buffer.
-				 */
-				$output = (string) apply_filters( 'od_template_output_buffer', $output );
+			// When the output is being cleaned (e.g. pending template is replaced with error page), do not send it through the filter.
+			if ( ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) !== 0 ) {
+				return $output;
 			}
-			return $output;
-		}
+
+			// Since ob_start() was called without PHP_OUTPUT_HANDLER_FLUSHABLE, at this point the phase should never be flush, and it should always be final.
+			assert( ( $phase & ( PHP_OUTPUT_HANDLER_FLUSH ) ) === 0 );
+			assert( ( $phase & ( PHP_OUTPUT_HANDLER_FINAL ) ) !== 0 );
+
+			/**
+			 * Filters the template output buffer prior to sending to the client.
+			 *
+			 * @since 0.1.0
+			 *
+			 * @param string $output Output buffer.
+			 * @return string Filtered output buffer.
+			 */
+			return (string) apply_filters( 'od_template_output_buffer', $output );
+		},
+		0, // Unlimited buffer size.
+		$flags
 	);
 	return $passthrough;
 }
@@ -142,7 +168,7 @@ function od_is_response_html_content_type(): bool {
  * @return string Filtered template output buffer.
  */
 function od_optimize_template_output_buffer( string $buffer ): string {
-	if ( ! od_is_response_html_content_type() ) {
+	if ( ! od_is_response_html_content_type() ) { // TODO: This should check to see if there is an HTML tag.
 		return $buffer;
 	}
 

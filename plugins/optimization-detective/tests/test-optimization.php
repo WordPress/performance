@@ -65,7 +65,8 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 		);
 
 		$original_ob_level = ob_get_level();
-		od_buffer_output( '' );
+		$template          = sprintf( 'page-%s.php', wp_generate_uuid4() );
+		$this->assertSame( $template, od_buffer_output( $template ), 'Expected value to be passed through.' );
 		$this->assertSame( $original_ob_level + 1, ob_get_level(), 'Expected call to ob_start().' );
 		echo $original;
 
@@ -77,48 +78,70 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that calling ob_clean() will discard previous buffer and never send it into the od_template_output_buffer filter.
+	 * Test that calling ob_flush() will not result in the buffer being processed and that ob_clean() will successfully prevent content from being processed.
 	 *
 	 * @covers ::od_buffer_output
 	 */
-	public function test_od_buffer_output_not_finalized(): void {
-		$original          = 'Hello My World!';
-		$template_override = 'Ciao mondo!';
-		$filter_override   = '¡Hola Mi Mundo!';
+	public function test_od_buffer_with_cleaning_and_attempted_flushing(): void {
+		$template_aborted = 'Before time began!';
+		$template_start   = 'The beginning';
+		$template_middle  = ', the middle';
+		$template_end     = ', and the end!';
 
 		// In order to test, a wrapping output buffer is required because ob_get_clean() does not invoke the output
 		// buffer callback. See <https://stackoverflow.com/a/61439514/93579>.
 		$initial_level = ob_get_level();
-		ob_start();
+		$this->assertTrue( ob_start() );
 		$this->assertSame( $initial_level + 1, ob_get_level() );
 
 		$filter_count = 0;
 		add_filter(
 			'od_template_output_buffer',
-			function ( $buffer ) use ( $template_override, $filter_override, &$filter_count ) {
-				$this->assertSame( $template_override, $buffer, 'Expected the original template output to never get passed into the buffer callback since ob_clean() was called after the original was printed.' );
+			function ( $buffer ) use ( $template_start, $template_middle, $template_end, &$filter_count ) {
 				$filter_count++;
-				return $filter_override;
+				$this->assertSame( $template_start . $template_middle . $template_end, $buffer );
+				return '<filtered>' . $buffer . '</filtered>';
 			}
 		);
 
 		od_buffer_output( '' );
 		$this->assertSame( $initial_level + 2, ob_get_level() );
-		echo $original; // This should never be passed into the od_template_output_buffer filter.
 
-		// Abort the original content printed above.
-		ob_clean(); // Note the lack of flush here and the lack of ending the buffer.
+		echo $template_aborted;
+		$this->assertTrue( ob_clean() ); // By cleaning, the above should never be seen by the filter.
+
+		// This is the start of what will end up getting filtered.
+		echo $template_start;
+
+		// Attempt to flush the output, which will fail because the output buffer was opened without the flushable flag.
+		$this->assertFalse( ob_flush() );
+
+		// This will also be sent into the filter.
+		echo $template_middle;
+		$this->assertFalse( ob_flush() );
 		$this->assertSame( $initial_level + 2, ob_get_level() );
-		echo $template_override; // This should get passed into the od_template_output_buffer filter.
 
-		ob_end_flush(); // Close the output buffer opened by od_buffer_output().
+		// Start a nested output buffer which will also end up getting sent into the filter.
+		$this->assertTrue( ob_start() );
+		echo $template_end;
+		$this->assertSame( $initial_level + 3, ob_get_level() );
+		$this->assertTrue( ob_flush() );
+		$this->assertTrue( ob_end_flush() );
+		$this->assertSame( $initial_level + 2, ob_get_level() );
+
+		// Close the output buffer opened by od_buffer_output(). This only works in the unit test because the removable flag was passed.
+		$this->assertTrue( ob_end_flush() );
 		$this->assertSame( $initial_level + 1, ob_get_level() );
 
 		$buffer = ob_get_clean(); // Get the buffer from our wrapper output buffer and close it.
 		$this->assertSame( $initial_level, ob_get_level() );
 
 		$this->assertSame( 1, $filter_count, 'Expected filter to be called once.' );
-		$this->assertSame( $filter_override, $buffer, 'Excepted return value of filter to be the resulting value for the buffer.' );
+		$this->assertSame(
+			'<filtered>' . $template_start . $template_middle . $template_end . '</filtered>',
+			$buffer,
+			'Excepted return value of filter to be the resulting value for the buffer.'
+		);
 	}
 
 	/**
