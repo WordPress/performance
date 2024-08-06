@@ -50,7 +50,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		}
 
 		// Create some content with the image.
-		$the_image = wp_get_attachment_image(
+		$image = wp_get_attachment_image(
 			self::$image_id,
 			'large',
 			false,
@@ -60,7 +60,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			)
 		);
 
-		$processor = new WP_HTML_Tag_Processor( $the_image );
+		$processor = new WP_HTML_Tag_Processor( $image );
 		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) );
 		$width  = (int) $processor->get_attribute( 'width' );
 		$height = (int) $processor->get_attribute( 'height' );
@@ -98,10 +98,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$expected_html = str_replace( array_keys( $replacements ), array_values( $replacements ), $expected_html );
 
 		// Apply the wp_content_img_tag filter.
-		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', self::$image_id );
+		$image = apply_filters( 'wp_content_img_tag', $image, 'the_content', self::$image_id );
 
 		// Check that the image has the expected HTML.
-		$this->assertEquals( $expected_html, $the_image );
+		$this->assertEquals( $expected_html, $image );
 	}
 
 	/**
