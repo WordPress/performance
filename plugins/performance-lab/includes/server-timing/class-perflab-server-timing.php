@@ -268,8 +268,11 @@ class Perflab_Server_Timing {
 	 */
 	public function start_output_buffer(): void {
 		ob_start(
-			function ( $output ) {
-				$this->send_header();
+			function ( string $output, ?int $phase ): string {
+				// Only send the header when the buffer is not being cleaned.
+				if ( ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) === 0 ) {
+					$this->send_header();
+				}
 				return $output;
 			}
 		);
