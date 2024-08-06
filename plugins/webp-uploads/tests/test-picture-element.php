@@ -12,6 +12,22 @@ use WebP_Uploads\Tests\TestCase;
 class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 	/**
+	 * Attachment ID.
+	 *
+	 * @var int
+	 */
+	public static $image_id;
+
+	/**
+	 * Setup shared fixtures.
+	 */
+	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
+		// Fallback to JPEG IMG.
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
+
+		self::$image_id = $factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
+	}
+	/**
 	 * Test that images are wrapped in picture element when enabled.
 	 *
 	 * @dataProvider data_provider_it_should_maybe_wrap_images_in_picture_element
@@ -26,25 +42,20 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 
-		if ( $fallback_jpeg ) {
-			update_option( 'perflab_generate_webp_and_jpeg', '1' );
-		}
+		update_option( 'perflab_generate_webp_and_jpeg', $fallback_jpeg );
 
 		// Apply picture element support.
 		if ( $picture_element ) {
 			$this->opt_in_to_picture_element();
 		}
 
-		// Create an image.
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
-
 		// Create some content with the image.
 		$the_image = wp_get_attachment_image(
-			$attachment_id,
+			self::$image_id,
 			'large',
 			false,
 			array(
-				'class' => "wp-image-{$attachment_id}",
+				'class' => 'wp-image-' . self::$image_id,
 				'alt'   => 'Green Leaves',
 			)
 		);
@@ -56,12 +67,12 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$alt    = (string) $processor->get_attribute( 'alt' );
 
 		$size_to_use                  = ( $width > 0 && $height > 0 ) ? array( $width, $height ) : 'full';
-		$image_src                    = wp_get_attachment_image_src( $attachment_id, $size_to_use );
+		$image_src                    = wp_get_attachment_image_src( self::$image_id, $size_to_use );
 		list( $src, $width, $height ) = $image_src;
 		$size_array                   = array( absint( $width ), absint( $height ) );
-		$image_meta                   = wp_get_attachment_metadata( $attachment_id );
-		$sizes                        = wp_calculate_image_sizes( $size_array, $src, $image_meta, $attachment_id );
-		$image_srcset                 = wp_get_attachment_image_srcset( $attachment_id, $size_to_use );
+		$image_meta                   = wp_get_attachment_metadata( self::$image_id );
+		$sizes                        = wp_calculate_image_sizes( $size_array, $src, $image_meta, self::$image_id );
+		$image_srcset                 = wp_get_attachment_image_srcset( self::$image_id, $size_to_use );
 
 		$img_src = '';
 		if ( is_array( $image_src ) ) {
@@ -76,7 +87,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			'{{img-width}}'         => $width,
 			'{{img-height}}'        => $height,
 			'{{img-src}}'           => $img_src,
-			'{{img-attachment-id}}' => $attachment_id,
+			'{{img-attachment-id}}' => self::$image_id,
 			'{{img-alt}}'           => $alt,
 			'{{img-srcset}}'        => $image_srcset,
 			'{{img-sizes}}'         => $sizes,
@@ -87,7 +98,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$expected_html = str_replace( array_keys( $replacements ), array_values( $replacements ), $expected_html );
 
 		// Apply the wp_content_img_tag filter.
-		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', $attachment_id );
+		$the_image = apply_filters( 'wp_content_img_tag', $the_image, 'the_content', self::$image_id );
 
 		// Check that the image has the expected HTML.
 		$this->assertEquals( $expected_html, $the_image );
@@ -134,19 +145,13 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 
-		// Fallback to JPEG IMG.
-		update_option( 'perflab_generate_webp_and_jpeg', '1' );
-
-		// Create an image.
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
-
 		// Create some content with the image.
 		$image = wp_get_attachment_image(
-			$attachment_id,
+			self::$image_id,
 			'large',
 			false,
 			array(
-				'class' => "wp-image-{$attachment_id}",
+				'class' => 'wp-image-' . self::$image_id,
 				'alt'   => 'Green Leaves',
 			)
 		);
@@ -210,19 +215,13 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		// Disable responsive images.
 		add_filter( 'wp_calculate_image_sizes', '__return_false' );
 
-		// Fallback to JPEG IMG.
-		update_option( 'perflab_generate_webp_and_jpeg', '1' );
-
-		// Create an image.
-		$attachment_id = self::factory()->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
-
 		// Create some content with the image.
 		$image = wp_get_attachment_image(
-			$attachment_id,
+			self::$image_id,
 			'large',
 			false,
 			array(
-				'class' => "wp-image-{$attachment_id}",
+				'class' => 'wp-image-' . self::$image_id,
 				'alt'   => 'Green Leaves',
 			)
 		);
