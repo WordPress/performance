@@ -167,7 +167,21 @@ function od_is_response_html_content_type(): bool {
  * @return string Filtered template output buffer.
  */
 function od_optimize_template_output_buffer( string $buffer ): string {
-	if ( ! od_is_response_html_content_type() ) { // TODO: This should check to see if there is an HTML tag.
+	// If the content-type is not HTML or the output does not start with '<', then abort since the buffer is definitely not HTML.
+	if (
+		! od_is_response_html_content_type() ||
+		! str_starts_with( ltrim( $buffer ), '<' )
+	) {
+		return $buffer;
+	}
+
+	// If the initial tag is not an open HTML tag, then abort since the buffer is not a complete HTML document.
+	$processor = new OD_HTML_Tag_Processor( $buffer );
+	if ( ! (
+		$processor->next_tag() &&
+		! $processor->is_tag_closer() &&
+		'HTML' === $processor->get_tag()
+	) ) {
 		return $buffer;
 	}
 
@@ -196,11 +210,10 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
 
 	$link_collection      = new OD_Link_Collection();
-	$processor            = new OD_HTML_Tag_Processor( $buffer );
 	$tag_visitor_context  = new OD_Tag_Visitor_Context( $processor, $group_collection, $link_collection );
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 	$visitors             = iterator_to_array( $tag_visitor_registry );
-	while ( $processor->next_open_tag() ) {
+	do {
 		$did_visit = false;
 		$processor->set_bookmark( $current_tag_bookmark ); // TODO: Should we break if this returns false?
 
@@ -220,7 +233,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		if ( $did_visit && $needs_detection ) {
 			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );
 		}
-	}
+	} while ( $processor->next_open_tag() );
 
 	// Send any preload links in a Link response header and in a LINK tag injected at the end of the HEAD.
 	if ( count( $link_collection ) > 0 ) {
