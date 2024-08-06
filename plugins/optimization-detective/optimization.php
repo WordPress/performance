@@ -40,14 +40,13 @@ function od_buffer_output( string $passthrough ): string {
 	 * If this ends up being problematic, then PHP_OUTPUT_HANDLER_FLUSHABLE could be added to the $flags and the
 	 * output buffer callback could check if the phase is PHP_OUTPUT_HANDLER_FLUSH and abort any subsequent
 	 * processing while also emitting a _doing_it_wrong().
+	 *
+	 * The output buffer needs to be removable because WordPress calls wp_ob_end_flush_all() and then calls
+	 * wp_cache_close(). If the buffers are not all flushed before wp_cache_close() is closed, then some output buffer
+	 * handlers (e.g. for caching plugins) may fail to be able to store the page output in the object cache.
+	 * See <https://github.com/WordPress/performance/pull/1317#issuecomment-2271955356>.
 	 */
-	$flags = PHP_OUTPUT_HANDLER_CLEANABLE;
-
-	// When running unit tests the output buffer must also be removable in order to obtain the buffered output.
-	if ( php_sapi_name() === 'cli' ) {
-		// TODO: Do any caching plugins need the output buffer to be removable? This is unlikely, as they would pass an output buffer callback to ob_start() instead of calling ob_get_clean() at shutdown.
-		$flags |= PHP_OUTPUT_HANDLER_REMOVABLE;
-	}
+	$flags = PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE;
 
 	ob_start(
 		static function ( string $output, ?int $phase ): string {
