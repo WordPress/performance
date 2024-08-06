@@ -88,7 +88,7 @@ class Perflab_Server_Timing {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: PHP parameter name */
-				sprintf( esc_html__( 'The %s argument is required and must be a callable.', 'performance-lab' ), esc_attr( $args['measure_callback'] ) ),
+				sprintf( esc_html__( 'The %s argument is required and must be a callable.', 'performance-lab' ), 'measure_callback' ),
 				''
 			);
 			return;
@@ -97,7 +97,7 @@ class Perflab_Server_Timing {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: PHP parameter name */
-				sprintf( esc_html__( 'The %s argument is required and must be a string.', 'performance-lab' ), esc_attr( $args['access_cap'] ) ),
+				sprintf( esc_html__( 'The %s argument is required and must be a string.', 'performance-lab' ), 'access_cap' ),
 				''
 			);
 			return;
