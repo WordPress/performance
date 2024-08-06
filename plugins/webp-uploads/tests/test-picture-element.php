@@ -166,6 +166,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
 		$this->assertSame( $img_src, $picture_processor->get_attribute( 'src' ), 'Make sure the IMG and Picture IMG have same image src.' );
 
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
 			$this->assertNotSame( 'image/jpeg', $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return jpeg as source.' );
 			$this->assertNotSame( $img_srcset, $picture_processor->get_attribute( 'srcset' ), 'Make sure the IMG and Picture source should not same srcset attributes.' );
@@ -213,6 +214,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
 		$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ), 'The IMG and Picture IMG have same sizes attributes.' );
 
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
 			$this->assertSame( $img_sizes, $picture_processor->get_attribute( 'sizes' ), 'The IMG and Picture source have same sizes attributes.' );
 		}
