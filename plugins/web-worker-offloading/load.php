@@ -36,7 +36,7 @@ if (
 				/* translators: 1: File path. 2: CLI command. */
 				'[Web Worker Offloading] ' . __( 'Unable to load %1$s. Please make sure you have run %2$s.', 'web-worker-offloading' ),
 				'build/partytown.asset.php',
-				'`npm install && npm run build:web-worker-offloading`'
+				'`npm install && npm run build:plugin:web-worker-offloading`'
 			)
 		),
 		E_USER_ERROR
