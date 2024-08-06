@@ -81,9 +81,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		if ( is_array( $image_src ) ) {
 			$img_src = $image_src[0];
 		}
-		// Remove the last size in the srcset, as it is not needed.
-		$jpeg_srcset = substr( $image_srcset, 0, strrpos( $image_srcset, ',' ) );
-		$webp_srcset = str_replace( '.jpg', '-jpg.webp', $jpeg_srcset );
+		$webp_srcset = str_replace( '.jpg', '-jpg.webp', $image_srcset );
 
 		// Prepare the expected HTML by replacing placeholders with expected values.
 		$replacements = array(
@@ -94,7 +92,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			'{{img-alt}}'           => $alt,
 			'{{img-srcset}}'        => $image_srcset,
 			'{{img-sizes}}'         => $sizes,
-			'{{jpeg-srcset}}'       => $jpeg_srcset,
 			'{{webp-srcset}}'       => $webp_srcset,
 		);
 
@@ -118,7 +115,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 				'jpeg_and_webp'          => true,
 				'picture_element'        => true,
 				'expect_picture_element' => true,
-				'expected_html'          => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><source type="image/jpeg" srcset="{{jpeg-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
+				'expected_html'          => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><source type="image/jpeg" srcset="{{img-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
 			),
 			'only picture enabled'     => array(
 				'jpeg_and_webp'          => false,
