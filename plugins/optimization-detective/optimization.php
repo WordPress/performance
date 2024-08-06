@@ -46,7 +46,7 @@ function od_buffer_output( string $passthrough ): string {
 	 * handlers (e.g. for caching plugins) may fail to be able to store the page output in the object cache.
 	 * See <https://github.com/WordPress/performance/pull/1317#issuecomment-2271955356>.
 	 */
-	$flags = PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE;
+	$flags = PHP_OUTPUT_HANDLER_STDFLAGS ^ PHP_OUTPUT_HANDLER_FLUSHABLE;
 
 	ob_start(
 		static function ( string $output, ?int $phase ): string {
