@@ -34,7 +34,7 @@ function auto_sizes_update_image_attributes( $attr ): array {
 	}
 
 	// Don't add 'auto' to the sizes attribute if it already exists.
-	if ( str_contains( $attr['sizes'], 'auto,' ) ) {
+	if ( auto_sizes_attribute_includes_auto( $attr['sizes'] ) ) {
 		return $attr;
 	}
 
@@ -63,12 +63,12 @@ function auto_sizes_update_content_img_tag( $html ): string {
 	}
 
 	// Bail early if the image is not responsive.
-	if ( false === strpos( $html, 'sizes="' ) ) {
+	if ( preg_match( '/sizes="([^"]+)"/', $html, $match ) === 0 || ! isset( $match[1] ) ) {
 		return $html;
 	}
 
-	// Don't double process content images.
-	if ( false !== strpos( $html, 'sizes="auto,' ) ) {
+	// Don't add 'auto' to the sizes attribute if it already exists.
+	if ( auto_sizes_attribute_includes_auto( $match[1] ) ) {
 		return $html;
 	}
 
@@ -77,6 +77,26 @@ function auto_sizes_update_content_img_tag( $html ): string {
 	return $html;
 }
 add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+
+/**
+ * Checks whether the given 'sizes' attribute includes the 'auto' keyword.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $sizes_attr The 'sizes' attribute value.
+ * @return bool True if the 'auto' keyword is present, false otherwise.
+ */
+function auto_sizes_attribute_includes_auto( string $sizes_attr ): bool {
+	if ( str_contains( $sizes_attr, 'auto,' ) ) {
+		return true;
+	}
+
+	if ( 'auto' === $sizes_attr ) {
+		return true;
+	}
+
+	return str_ends_with( $sizes_attr, ' auto' ) || str_ends_with( $sizes_attr, ',auto' );
+}
 
 /**
  * Displays the HTML generator tag for the plugin.

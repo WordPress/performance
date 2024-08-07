@@ -95,6 +95,95 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test generated markup for an image with 'auto' keyword already present in sizes does not receive it again.
+	 *
+	 * @covers ::auto_sizes_update_image_attributes
+	 * @covers ::auto_sizes_attribute_includes_auto
+	 * @dataProvider data_image_with_existing_auto_sizes
+	 */
+	public function test_image_with_existing_auto_sizes_is_not_processed_again( string $initial_sizes, bool $expected_processed ): void {
+		$image_tag = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				// Force pre-existing 'sizes' attribute and lazy-loading.
+				'sizes'   => $initial_sizes,
+				'loading' => 'lazy',
+			)
+		);
+		if ( $expected_processed ) {
+			$this->assertStringContainsString( 'sizes="auto, ' . $initial_sizes . '"', $image_tag );
+		} else {
+			$this->assertStringContainsString( 'sizes="' . $initial_sizes . '"', $image_tag );
+		}
+	}
+
+	/**
+	 * Test content filtered markup with 'auto' keyword already present in sizes does not receive it again.
+	 *
+	 * @covers ::auto_sizes_update_content_img_tag
+	 * @covers ::auto_sizes_attribute_includes_auto
+	 * @dataProvider data_image_with_existing_auto_sizes
+	 */
+	public function test_content_image_with_existing_auto_sizes_is_not_processed_again( string $initial_sizes, bool $expected_processed ): void {
+		// Force lazy loading attribute.
+		add_filter( 'wp_img_tag_add_loading_attr', '__return_true' );
+
+		add_filter(
+			'get_image_tag',
+			static function ( $html ) use ( $initial_sizes ) {
+				return str_replace(
+					'" />',
+					'" sizes="' . $initial_sizes . '" />',
+					$html
+				);
+			}
+		);
+
+		$image_content = wp_filter_content_tags( $this->get_image_tag( self::$image_id ) );
+		if ( $expected_processed ) {
+			$this->assertStringContainsString( 'sizes="auto, ' . $initial_sizes . '"', $image_content );
+		} else {
+			$this->assertStringContainsString( 'sizes="' . $initial_sizes . '"', $image_content );
+		}
+	}
+
+	/**
+	 * Returns data for the above test methods to assert correct behavior with a pre-existing sizes attribute.
+	 *
+	 * @return array<string, mixed[]> Arguments for the test scenarios.
+	 */
+	public function data_image_with_existing_auto_sizes(): array {
+		return array(
+			'not present'                 => array(
+				'(max-width: 1024px) 100vw, 1024px',
+				true,
+			),
+			'in beginning, without space' => array(
+				'auto,(max-width: 1024px) 100vw, 1024px',
+				false,
+			),
+			'in beginning, with space'    => array(
+				'auto, (max-width: 1024px) 100vw, 1024px',
+				false,
+			),
+			'at the end, without space'   => array(
+				'(max-width: 1024px) 100vw,auto',
+				false,
+			),
+			'at the end, with space'      => array(
+				'(max-width: 1024px) 100vw, auto',
+				false,
+			),
+			'sole keyword'                => array(
+				'auto',
+				false,
+			),
+		);
+	}
+
+	/**
 	 * Test printing the meta generator tag.
 	 *
 	 * @covers ::auto_sizes_render_generator
