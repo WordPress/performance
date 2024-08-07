@@ -154,8 +154,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
 		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
-		$img_src    = $img_processor->get_attribute( 'src' );
+		$img_src = $img_processor->get_attribute( 'src' );
+		$this->assertStringEndsWith( '.jpg', $img_src );
 		$img_srcset = $img_processor->get_attribute( 'srcset' );
+		$this->assertStringContainsString( '.jpg', $img_srcset );
 
 		// Apply picture element support.
 		$this->opt_in_to_picture_element();
@@ -165,10 +167,13 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
 		$this->assertSame( $img_src, $picture_processor->get_attribute( 'src' ), 'Make sure the IMG and Picture IMG have same image src.' );
+		$this->assertStringEndsWith( '.jpg', $picture_processor->get_attribute( 'src' ) );
+		$this->assertStringContainsString( '.jpg', $picture_processor->get_attribute( 'srcset' ) );
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
-			$this->assertNotSame( 'image/jpeg', $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return jpeg as source.' );
+			$this->assertSame( $mime_type, $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return JPEG as source.' );
+			$this->assertStringContainsString( '.webp', $picture_processor->get_attribute( 'srcset' ) );
 			$this->assertNotSame( $img_srcset, $picture_processor->get_attribute( 'srcset' ), 'Make sure the IMG and Picture source should not same srcset attributes.' );
 		}
 	}
