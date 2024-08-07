@@ -168,6 +168,14 @@ class Test_AutoSizes extends WP_UnitTestCase {
 				'auto, (max-width: 1024px) 100vw, 1024px',
 				false,
 			),
+			'within, without space'       => array(
+				'(max-width: 1024px) auto,1024px',
+				false,
+			),
+			'within, with space'          => array(
+				'(max-width: 1024px) auto, 1024px',
+				false,
+			),
 			'at the end, without space'   => array(
 				'(max-width: 1024px) 100vw,auto',
 				false,
