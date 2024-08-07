@@ -124,6 +124,11 @@ function perflab_render_plugins_ui(): void {
 		}
 	}
 
+	/*
+	 * Sort plugins alphabetically, with experimental ones coming last.
+	 * Even though `experimental` is a boolean flag, the underlying
+	 * algorithm (`usort` with `strcmp`) makes it possible to sort by it.
+	 */
 	$plugins = wp_list_sort(
 		$plugins,
 		array(
