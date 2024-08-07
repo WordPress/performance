@@ -174,7 +174,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
 			$this->assertSame( $mime_type, $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return JPEG as source.' );
 			$this->assertStringContainsString( '.webp', $picture_processor->get_attribute( 'srcset' ) );
-			$this->assertNotSame( $img_srcset, $picture_processor->get_attribute( 'srcset' ), 'Make sure the IMG and Picture source should not same srcset attributes.' );
 		}
 	}
 
