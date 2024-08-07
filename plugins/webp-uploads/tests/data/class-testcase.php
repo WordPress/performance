@@ -145,4 +145,12 @@ abstract class TestCase extends WP_UnitTestCase {
 
 		webp_uploads_init();
 	}
+
+	/**
+	 * Runs (empty) hooks to satisfy webp_uploads_in_frontend_body() conditions.
+	 */
+	public function mock_frontend_body_hooks(): void {
+		remove_all_actions( 'template_redirect' );
+		do_action( 'template_redirect' );
+	}
 }

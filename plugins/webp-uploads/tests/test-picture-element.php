@@ -18,6 +18,13 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	 */
 	public static $image_id;
 
+	public function set_up(): void {
+		parent::set_up();
+
+		// Default to webp output for tests.
+		$this->set_image_output_type( 'webp' );
+	}
+
 	/**
 	 * Setup shared fixtures.
 	 */
@@ -27,6 +34,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		self::$image_id = $factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 	}
+
 	/**
 	 * Test that images are wrapped in picture element when enabled.
 	 *
@@ -150,14 +158,17 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			)
 		);
 
+		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
+		$this->mock_frontend_body_hooks();
+
 		$img_markup = apply_filters( 'the_content', $image );
 
 		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
 		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
 		$img_src = $img_processor->get_attribute( 'src' );
-		$this->assertStringEndsWith( '.jpg', $img_src );
+		$this->assertStringEndsWith( '.webp', $img_src, 'Make sure the IMG should return WEBP src.' );
 		$img_srcset = $img_processor->get_attribute( 'srcset' );
-		$this->assertStringContainsString( '.jpg', $img_srcset );
+		$this->assertStringContainsString( '.webp', $img_srcset, 'Make sure the IMG srcset should return WEBP images.' );
 
 		// Apply picture element support.
 		$this->opt_in_to_picture_element();
@@ -166,14 +177,14 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 
 		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
-		$this->assertSame( $img_src, $picture_processor->get_attribute( 'src' ), 'Make sure the IMG and Picture IMG have same image src.' );
-		$this->assertStringEndsWith( '.jpg', $picture_processor->get_attribute( 'src' ) );
-		$this->assertStringContainsString( '.jpg', $picture_processor->get_attribute( 'srcset' ) );
+		// The fallback image should be JPEG.
+		$this->assertStringEndsWith( '.jpg', $picture_processor->get_attribute( 'src' ), 'Make sure the fallback IMG should return JPEG src.' );
+		$this->assertStringContainsString( '.jpg', $picture_processor->get_attribute( 'srcset' ), 'Make sure the IMG srcset should return JPEG images.' );
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
 			$this->assertSame( $mime_type, $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return JPEG as source.' );
-			$this->assertStringContainsString( '.webp', $picture_processor->get_attribute( 'srcset' ) );
+			$this->assertStringContainsString( '.webp', $picture_processor->get_attribute( 'srcset' ), 'Make sure the Picture source srcset should return WEBP images.' );
 		}
 	}
 
