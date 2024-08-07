@@ -188,6 +188,14 @@ class Test_AutoSizes extends WP_UnitTestCase {
 				'auto',
 				false,
 			),
+			'with space at beginning'                => array(
+				' auto, (max-width: 1024px) 100vw, 1024px',
+				false,
+			),
+			'with uppercase'                => array(
+				'AUTO, (max-width: 1024px) 100vw, 1024px',
+				false,
+			),
 		);
 	}
 
