@@ -12,6 +12,13 @@ use WebP_Uploads\Tests\TestCase;
 class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 	/**
+	 * Mime type.
+	 *
+	 * @var string
+	 */
+	public static $mime_type = 'image/webp';
+
+	/**
 	 * Attachment ID.
 	 *
 	 * @var int
@@ -20,6 +27,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 	public function set_up(): void {
 		parent::set_up();
+
+		if ( ! wp_image_editor_supports( array( 'mime_type' => self::$mime_type ) ) ) {
+			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
+		}
 
 		// Default to webp output for tests.
 		$this->set_image_output_type( 'webp' );
@@ -45,11 +56,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	 * @param string $expected_html   The expected HTML output.
 	 */
 	public function test_maybe_wrap_images_in_picture_element( bool $fallback_jpeg, bool $picture_element, string $expected_html ): void {
-		$mime_type = 'image/webp';
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
-
 		update_option( 'perflab_generate_webp_and_jpeg', $fallback_jpeg );
 
 		// Apply picture element support.
@@ -142,11 +148,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	}
 
 	public function test_picture_source_only_have_additional_mime_not_jpeg_and_return_jpeg_fallback(): void {
-		$mime_type = 'image/webp';
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
-
 		// Create some content with the image.
 		$image = wp_get_attachment_image(
 			self::$image_id,
@@ -183,7 +184,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
-			$this->assertSame( $mime_type, $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return JPEG as source.' );
+			$this->assertSame( self::$mime_type, $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return JPEG as source.' );
 			$this->assertStringContainsString( '.webp', $picture_processor->get_attribute( 'srcset' ), 'Make sure the Picture source srcset should return WEBP images.' );
 		}
 	}
@@ -194,11 +195,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	 * @param Closure|null $add_filter The filter.
 	 */
 	public function test_img_sizes_is_equal_to_picture_source_sizes_for_picture_element( ?Closure $add_filter ): void {
-		$mime_type = 'image/webp';
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
-
 		// Create some content with the image.
 		$image = wp_get_attachment_image(
 			self::$image_id,
@@ -262,11 +258,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	}
 
 	public function test_disable_responsive_image_with_picture_element(): void {
-		$mime_type = 'image/webp';
-		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
-			$this->markTestSkipped( "Mime type $mime_type is not supported." );
-		}
-
 		// Disable responsive images.
 		add_filter( 'wp_calculate_image_sizes', '__return_false' );
 
