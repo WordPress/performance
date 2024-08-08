@@ -98,6 +98,11 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	// Get the sizes from the IMG tag.
 	$sizes = $processor->get_attribute( 'sizes' );
 
+	// Bail early when the responsive images are disabled.
+	if ( null === $sizes ) {
+		return $image;
+	}
+
 	foreach ( $mime_types as $image_mime_type ) {
 		// Filter core's wp_get_attachment_image_srcset to return the sources for the current mime type.
 		$filter = static function ( $sources ) use ( $mime_type_data, $image_mime_type ): array {
