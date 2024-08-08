@@ -145,7 +145,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	<label for="perflab_modern_image_format">
 		<?php esc_html_e( 'Generate images in this format', 'webp-uploads' ); ?>
 	</label>
-	<p class="description" id="perflab_modern_image_format_description"><?php esc_html_e( 'Select the format to use when generating new images from uploaded JPEGs.', 'webp-uploads' ); ?></p>
+	<p class="description" id="perflab_modern_image_format_description"><?php esc_html_e( 'Select the format to use when generating new images from uploaded images.', 'webp-uploads' ); ?></p>
 	<?php if ( ! $avif_supported ) : ?>
 		<br />
 		<div class="notice notice-warning inline">
