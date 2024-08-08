@@ -34,7 +34,7 @@ const sharedConfig = {
 };
 
 // Store plugins that require build process.
-const pluginsWithBuild = [ 'optimization-detective' ];
+const pluginsWithBuild = [ 'optimization-detective', 'web-worker-offloading' ];
 
 /**
  * Webpack Config: Optimization Detective
@@ -76,6 +76,54 @@ const optimizationDetective = ( env ) => {
 			new WebpackBar( {
 				name: 'Building Optimization Detective Assets',
 				color: '#2196f3',
+			} ),
+		],
+	};
+};
+
+/**
+ * Webpack Config: Web Worker Offloading
+ *
+ * @param {*} env Webpack environment
+ * @return {Object} Webpack configuration
+ */
+const webWorkerOffloading = ( env ) => {
+	if ( env.plugin && env.plugin !== 'web-worker-offloading' ) {
+		return defaultBuildConfig;
+	}
+
+	const source = path.resolve(
+		__dirname,
+		'node_modules/@builder.io/partytown'
+	);
+	const destination = path.resolve(
+		__dirname,
+		'plugins/web-worker-offloading/build'
+	);
+
+	return {
+		...sharedConfig,
+		name: 'web-worker-offloading',
+		plugins: [
+			new CopyWebpackPlugin( {
+				patterns: [
+					{
+						from: `${ source }/lib/`,
+						to: `${ destination }`,
+					},
+					{
+						from: `${ source }/package.json`,
+						to: `${ destination }/partytown.asset.php`,
+						transform: {
+							transformer: assetDataTransformer,
+							cache: false,
+						},
+					},
+				],
+			} ),
+			new WebpackBar( {
+				name: 'Building Web Worker Offloading Assets',
+				color: '#FFC107',
 			} ),
 		],
 	};
@@ -155,4 +203,4 @@ const buildPlugin = ( env ) => {
 	};
 };
 
-module.exports = [ optimizationDetective, buildPlugin ];
+module.exports = [ optimizationDetective, webWorkerOffloading, buildPlugin ];
