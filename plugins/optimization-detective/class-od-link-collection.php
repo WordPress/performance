@@ -96,6 +96,16 @@ final class OD_Link_Collection implements Countable {
 			}
 		}
 
+		// Allow for custom attributes to be added as well, namely data attributes.
+		foreach ( $attributes as $key => $value ) {
+			if ( ! is_string( $key ) ) {
+				$throw_invalid_argument_exception( __( 'All attribute keys must be strings.', 'optimization-detective' ) );
+			}
+			if ( ! is_string( $value ) ) {
+				$throw_invalid_argument_exception( __( 'All attribute values must be strings.', 'optimization-detective' ) );
+			}
+		}
+
 		$this->links_by_rel[ $attributes['rel'] ][] = array(
 			'attributes'             => $attributes,
 			'minimum_viewport_width' => $minimum_viewport_width,
