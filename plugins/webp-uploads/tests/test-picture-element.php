@@ -49,6 +49,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		self::$image_id = $factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
 	}
 
+	public static function wpTearDownAfterClass(): void {
+		wp_delete_attachment( self::$image_id, true );
+	}
+
 	/**
 	 * Test that images are wrapped in picture element when enabled.
 	 *
