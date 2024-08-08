@@ -34,6 +34,9 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		// Default to webp output for tests.
 		$this->set_image_output_type( 'webp' );
+
+		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
+		$this->mock_frontend_body_hooks();
 	}
 
 	/**
@@ -159,9 +162,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			)
 		);
 
-		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
-		$this->mock_frontend_body_hooks();
-
 		$img_markup = apply_filters( 'the_content', $image );
 
 		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
@@ -275,9 +275,11 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$img_markup = apply_filters( 'the_content', $image );
 
 		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
-		$img_processor->next_tag( array( 'tag_name' => 'IMG' ) );
-
-		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in IMG tag.' );
+		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
+		$img_src = $img_processor->get_attribute( 'src' );
+		$this->assertStringEndsWith( '.webp', $img_src, 'Make sure the IMG should return WEBP src.' );
+		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'Make sure the sizes attribute is missing in IMG tag.' );
+		$this->assertNull( $img_processor->get_attribute( 'srcset' ), 'Make sure the srcset attribute is missing in IMG tag.' );
 
 		// Apply picture element support.
 		$this->opt_in_to_picture_element();
@@ -287,11 +289,13 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
 
-		$this->assertSame( $img_processor->get_attribute( 'src' ), $picture_processor->get_attribute( 'src' ), 'Make sure IMG src is same.' );
-		$this->assertNull( $picture_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in Picture IMG tag.' );
+		// The fallback image should be JPEG.
+		$this->assertStringEndsWith( '.jpg', $picture_processor->get_attribute( 'src' ), 'Make sure the fallback IMG should return JPEG src.' );
 
-		$picture_processor->next_tag( array( 'tag_name' => 'source' ) );
-
-		$this->assertNull( $picture_processor->get_attribute( 'sizes' ), 'Sizes attribute missing in Picture source tag.' );
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
+			$this->assertSame( self::$mime_type, $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return JPEG as source.' );
+			$this->assertStringContainsString( '.webp', $picture_processor->get_attribute( 'srcset' ), 'Make sure the Picture source srcset should return WEBP images.' );
+		}
 	}
 }
