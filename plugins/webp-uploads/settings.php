@@ -86,10 +86,10 @@ function webp_uploads_add_media_settings_fields(): void {
 		return;
 	}
 
-	// Add JPEG Output settings field.
+	// Add fallback image output settings field.
 	add_settings_field(
 		'perflab_generate_webp_and_jpeg',
-		__( 'Also output JPEG', 'webp-uploads' ),
+		__( 'Output fallback images', 'webp-uploads' ),
 		'webp_uploads_generate_webp_jpeg_setting_callback',
 		'media',
 		'perflab_modern_image_format_settings',
