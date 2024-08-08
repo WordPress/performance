@@ -173,11 +173,11 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 	?>
 		<label for="perflab_generate_webp_and_jpeg">
 			<input name="perflab_generate_webp_and_jpeg" type="checkbox" id="perflab_generate_webp_and_jpeg" aria-describedby="perflab_generate_webp_and_jpeg_description" value="1"<?php checked( '1', get_option( 'perflab_generate_webp_and_jpeg' ) ); ?> />
-			<?php esc_html_e( 'Output JPEG images in addition to the modern format', 'webp-uploads' ); ?>
+			<?php esc_html_e( 'Also generate fallback images in the original upload format', 'webp-uploads' ); ?>
 		</label>
-		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
+		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling fallback image output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
 		<script>
-			// Listen for clicks on the JPEG output checkbox, enabling/disabling the
+			// Listen for clicks on the fallback output checkbox, enabling/disabling the
 			// picture element checkbox accordingly.
 			document.getElementById( 'perflab_generate_webp_and_jpeg' ).addEventListener( 'change', function () {
 				document.querySelector( '.webp-uploads-use-picture-element' ).classList.toggle( 'webp-uploads-disabled', ! this.checked );
@@ -205,7 +205,7 @@ function webp_uploads_use_picture_element_callback(): void {
 		}
 	</style>
 	<div id="webp_uploads_picture_element_notice" class="notice notice-info inline" <?php echo $jpeg_fallback_enabled ? 'hidden' : ''; ?>>
-		<p><?php esc_html_e( 'This setting requires JPEG also be output as a fallback option.', 'webp-uploads' ); ?></p>
+		<p><?php esc_html_e( 'This setting requires fallback image output to be enabled.', 'webp-uploads' ); ?></p>
 	</div>
 	<div id="webp_uploads_picture_element_fieldset" class="<?php echo ! $jpeg_fallback_enabled ? 'disabled' : ''; ?>">
 		<label for="webp_uploads_use_picture_element" id="webp_uploads_use_picture_element_label">
