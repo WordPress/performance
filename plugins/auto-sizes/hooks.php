@@ -63,7 +63,7 @@ function auto_sizes_update_content_img_tag( $html ): string {
 	}
 
 	// Bail early if the image is not responsive.
-	if ( preg_match( '/sizes="([^"]+)"/', $html, $match ) === 0 || ! isset( $match[1] ) ) {
+	if ( 1 !== preg_match( '/sizes="([^"]+)"/', $html, $match ) ) {
 		return $html;
 	}
 
