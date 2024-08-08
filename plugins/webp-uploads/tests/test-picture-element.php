@@ -237,8 +237,8 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
 		$img_processor->next_tag( array( 'tag_name' => 'IMG' ) );
 
-		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'Make sure that there no sizes attribute in IMG tag.' );
-		$this->assertNull( $img_processor->get_attribute( 'srcset' ), 'Make sure that there no srcset attribute in IMG tag.' );
+		$this->assertNull( $img_processor->get_attribute( 'sizes' ), 'Make sure that there is no sizes attribute in IMG tag.' );
+		$this->assertNull( $img_processor->get_attribute( 'srcset' ), 'Make sure that there is no srcset attribute in IMG tag.' );
 
 		// Apply picture element support.
 		$this->opt_in_to_picture_element();
@@ -246,12 +246,12 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$picture_markup = apply_filters( 'the_content', $image );
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
-		$this->assertFalse( $img_processor->next_tag( array( 'tag_name' => 'picture' ) ), 'Make sure that there no Picture tag.' );
-		$this->assertFalse( $img_processor->next_tag( array( 'tag_name' => 'source' ) ), 'Make sure that there no source tag.' );
-		$this->assertTrue( $picture_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Make sure that there IMG tag.' );
-		$this->assertNull( $picture_processor->get_attribute( 'sizes' ), 'Make sure that there no sizes attribute in IMG tag.' );
-		$this->assertNull( $picture_processor->get_attribute( 'srcset' ), 'Make sure that there no srcset attribute in IMG tag.' );
+		$this->assertFalse( $img_processor->next_tag( array( 'tag_name' => 'picture' ) ), 'Make sure that there is no Picture tag.' );
+		$this->assertFalse( $img_processor->next_tag( array( 'tag_name' => 'source' ) ), 'Make sure that there is no source tag.' );
+		$this->assertTrue( $picture_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Make sure that there is a IMG tag.' );
+		$this->assertNull( $picture_processor->get_attribute( 'sizes' ), 'Make sure that there is no sizes attribute in IMG tag.' );
+		$this->assertNull( $picture_processor->get_attribute( 'srcset' ), 'Make sure that there is no srcset attribute in IMG tag.' );
 
-		$this->assertSame( $img_markup, $picture_markup, 'Make sure both images have the same' );
+		$this->assertSame( $img_markup, $picture_markup, 'Make sure both markup are the same' );
 	}
 }
