@@ -98,7 +98,7 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	 * Test generated markup for an image with 'auto' keyword already present in sizes does not receive it again.
 	 *
 	 * @covers ::auto_sizes_update_image_attributes
-	 * @covers ::auto_sizes_attribute_includes_auto
+	 * @covers ::auto_sizes_attribute_includes_valid_auto
 	 * @dataProvider data_image_with_existing_auto_sizes
 	 */
 	public function test_image_with_existing_auto_sizes_is_not_processed_again( string $initial_sizes, bool $expected_processed ): void {
@@ -123,7 +123,7 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	 * Test content filtered markup with 'auto' keyword already present in sizes does not receive it again.
 	 *
 	 * @covers ::auto_sizes_update_content_img_tag
-	 * @covers ::auto_sizes_attribute_includes_auto
+	 * @covers ::auto_sizes_attribute_includes_valid_auto
 	 * @dataProvider data_image_with_existing_auto_sizes
 	 */
 	public function test_content_image_with_existing_auto_sizes_is_not_processed_again( string $initial_sizes, bool $expected_processed ): void {
@@ -168,33 +168,41 @@ class Test_AutoSizes extends WP_UnitTestCase {
 				'auto, (max-width: 1024px) 100vw, 1024px',
 				false,
 			),
-			'within, without space'       => array(
-				'(max-width: 1024px) 100vw, auto,1024px',
-				false,
-			),
-			'within, with space'          => array(
-				'(max-width: 1024px) 100vw, auto, 1024px',
-				false,
-			),
-			'at the end, without space'   => array(
-				'(max-width: 1024px) 100vw,auto',
-				false,
-			),
-			'at the end, with space'      => array(
-				'(max-width: 1024px) 100vw, auto',
-				false,
-			),
 			'sole keyword'                => array(
 				'auto',
 				false,
 			),
-			'with space at beginning'     => array(
+			'with space before'           => array(
 				' auto, (max-width: 1024px) 100vw, 1024px',
 				false,
 			),
 			'with uppercase'              => array(
 				'AUTO, (max-width: 1024px) 100vw, 1024px',
 				false,
+			),
+
+			/*
+			 * The following scenarios technically include the 'auto' keyword,
+			 * but it is in the wrong place, as per the HTML spec it must be
+			 * the first entry in the list.
+			 * Therefore in these invalid cases the 'auto' keyword should still
+			 * be added to the beginning of the list.
+			 */
+			'within, without space'       => array(
+				'(max-width: 1024px) 100vw, auto,1024px',
+				true,
+			),
+			'within, with space'          => array(
+				'(max-width: 1024px) 100vw, auto, 1024px',
+				true,
+			),
+			'at the end, without space'   => array(
+				'(max-width: 1024px) 100vw,auto',
+				true,
+			),
+			'at the end, with space'      => array(
+				'(max-width: 1024px) 100vw, auto',
+				true,
 			),
 		);
 	}

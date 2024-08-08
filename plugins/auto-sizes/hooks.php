@@ -34,7 +34,7 @@ function auto_sizes_update_image_attributes( $attr ): array {
 	}
 
 	// Don't add 'auto' to the sizes attribute if it already exists.
-	if ( auto_sizes_attribute_includes_auto( $attr['sizes'] ) ) {
+	if ( auto_sizes_attribute_includes_valid_auto( $attr['sizes'] ) ) {
 		return $attr;
 	}
 
@@ -68,7 +68,7 @@ function auto_sizes_update_content_img_tag( $html ): string {
 	}
 
 	// Don't add 'auto' to the sizes attribute if it already exists.
-	if ( auto_sizes_attribute_includes_auto( $match[1] ) ) {
+	if ( auto_sizes_attribute_includes_valid_auto( $match[1] ) ) {
 		return $html;
 	}
 
@@ -79,20 +79,22 @@ function auto_sizes_update_content_img_tag( $html ): string {
 add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 
 /**
- * Checks whether the given 'sizes' attribute includes the 'auto' keyword.
+ * Checks whether the given 'sizes' attribute includes the 'auto' keyword as the first item in the list.
+ *
+ * Per the HTML spec, if present it must be the first entry.
  *
  * @since n.e.x.t
  *
  * @param string $sizes_attr The 'sizes' attribute value.
  * @return bool True if the 'auto' keyword is present, false otherwise.
  */
-function auto_sizes_attribute_includes_auto( string $sizes_attr ): bool {
+function auto_sizes_attribute_includes_valid_auto( string $sizes_attr ): bool {
 	$parts = preg_split( '/\s*,\s*/', strtolower( trim( $sizes_attr ) ) );
-	if ( ! is_array( $parts ) ) {
+	if ( ! is_array( $parts ) || ! isset( $parts[0] ) ) {
 		return false;
 	}
 
-	return in_array( 'auto', $parts, true );
+	return 'auto' === $parts[0];
 }
 
 /**
