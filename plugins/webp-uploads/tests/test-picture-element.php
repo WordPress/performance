@@ -51,6 +51,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 	public static function wpTearDownAfterClass(): void {
 		wp_delete_attachment( self::$image_id, true );
+		delete_option( 'perflab_generate_webp_and_jpeg' );
 	}
 
 	/**
