@@ -59,6 +59,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 			'image/avif',
 			'image/webp',
 			'image/jpeg',
+			'image/png',
 		),
 		$attachment_id
 	);
