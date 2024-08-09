@@ -3,7 +3,7 @@
  * Plugin Name: Web Worker Offloading
  * Plugin URI: https://github.com/WordPress/performance/issues/176
  * Description: Offload JavaScript execution to a Web Worker.
- * Requires at least: 6.4
+ * Requires at least: 6.5
  * Requires PHP: 7.2
  * Version: 0.1.0
  * Author: WordPress Performance Team
