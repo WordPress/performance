@@ -1,7 +1,6 @@
 === Web Worker Offloading ===
 
 Contributors:      wordpressdotorg
-Requires at least: 6.4
 Tested up to:      6.6
 Stable tag:        0.1.0
 License:           GPLv2 or later
