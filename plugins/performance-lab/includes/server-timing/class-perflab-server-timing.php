@@ -61,7 +61,7 @@ class Perflab_Server_Timing {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: metric slug */
-				sprintf( esc_html__( 'A metric with the slug %s is already registered.', 'performance-lab' ), esc_attr( $metric_slug ) ),
+				esc_html( sprintf( __( 'A metric with the slug %s is already registered.', 'performance-lab' ), $metric_slug ) ),
 				''
 			);
 			return;
@@ -71,7 +71,7 @@ class Perflab_Server_Timing {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: WordPress action name */
-				sprintf( esc_html__( 'The method must be called before or during the %s action.', 'performance-lab' ), 'perflab_server_timing_send_header' ),
+				esc_html( sprintf( __( 'The method must be called before or during the %s action.', 'performance-lab' ), 'perflab_server_timing_send_header' ) ),
 				''
 			);
 			return;
@@ -88,7 +88,7 @@ class Perflab_Server_Timing {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: PHP parameter name */
-				sprintf( esc_html__( 'The %s argument is required and must be a callable.', 'performance-lab' ), esc_attr( $args['measure_callback'] ) ),
+				esc_html( sprintf( __( 'The %s argument is required and must be a callable.', 'performance-lab' ), 'measure_callback' ) ),
 				''
 			);
 			return;
@@ -97,7 +97,7 @@ class Perflab_Server_Timing {
 			_doing_it_wrong(
 				__METHOD__,
 				/* translators: %s: PHP parameter name */
-				sprintf( esc_html__( 'The %s argument is required and must be a string.', 'performance-lab' ), esc_attr( $args['access_cap'] ) ),
+				esc_html( sprintf( __( 'The %s argument is required and must be a string.', 'performance-lab' ), 'access_cap' ) ),
 				''
 			);
 			return;
@@ -268,8 +268,11 @@ class Perflab_Server_Timing {
 	 */
 	public function start_output_buffer(): void {
 		ob_start(
-			function ( $output ) {
-				$this->send_header();
+			function ( string $output, ?int $phase ): string {
+				// Only send the header when the buffer is not being cleaned.
+				if ( ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) === 0 ) {
+					$this->send_header();
+				}
 				return $output;
 			}
 		);
