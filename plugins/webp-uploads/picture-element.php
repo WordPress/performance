@@ -75,8 +75,8 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		return $image;
 	}
 
-	// If jpeg fallback is not available, don't wrap in picture element.
-	if ( ! in_array( 'image/jpeg', $mime_types, true ) ) {
+	// If original image type fallback is not available, don't wrap in picture element.
+	if ( ! in_array( $original_file_mime_type, $mime_types, true ) ) {
 		return $image;
 	}
 
