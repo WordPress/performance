@@ -31,8 +31,30 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string Unmodified value of $passthrough.
  */
 function od_buffer_output( string $passthrough ): string {
+	/*
+	 * Instead of the default PHP_OUTPUT_HANDLER_STDFLAGS (cleanable, flushable, and removable) being used for flags,
+	 * we need to omit PHP_OUTPUT_HANDLER_FLUSHABLE. If the buffer were flushable, then each time that ob_flush() is
+	 * called, it would send a fragment of the output into the output buffer callback. When buffering the entire
+	 * response as an HTML document, this would result in broken HTML processing.
+	 *
+	 * If this ends up being problematic, then PHP_OUTPUT_HANDLER_FLUSHABLE could be added to the $flags and the
+	 * output buffer callback could check if the phase is PHP_OUTPUT_HANDLER_FLUSH and abort any subsequent
+	 * processing while also emitting a _doing_it_wrong().
+	 *
+	 * The output buffer needs to be removable because WordPress calls wp_ob_end_flush_all() and then calls
+	 * wp_cache_close(). If the buffers are not all flushed before wp_cache_close() is closed, then some output buffer
+	 * handlers (e.g. for caching plugins) may fail to be able to store the page output in the object cache.
+	 * See <https://github.com/WordPress/performance/pull/1317#issuecomment-2271955356>.
+	 */
+	$flags = PHP_OUTPUT_HANDLER_STDFLAGS ^ PHP_OUTPUT_HANDLER_FLUSHABLE;
+
 	ob_start(
-		static function ( string $output ): string {
+		static function ( string $output, ?int $phase ): string {
+			// When the output is being cleaned (e.g. pending template is replaced with error page), do not send it through the filter.
+			if ( ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) !== 0 ) {
+				return $output;
+			}
+
 			/**
 			 * Filters the template output buffer prior to sending to the client.
 			 *
@@ -42,7 +64,9 @@ function od_buffer_output( string $passthrough ): string {
 			 * @return string Filtered output buffer.
 			 */
 			return (string) apply_filters( 'od_template_output_buffer', $output );
-		}
+		},
+		0, // Unlimited buffer size.
+		$flags
 	);
 	return $passthrough;
 }
@@ -139,7 +163,21 @@ function od_is_response_html_content_type(): bool {
  * @return string Filtered template output buffer.
  */
 function od_optimize_template_output_buffer( string $buffer ): string {
-	if ( ! od_is_response_html_content_type() ) {
+	// If the content-type is not HTML or the output does not start with '<', then abort since the buffer is definitely not HTML.
+	if (
+		! od_is_response_html_content_type() ||
+		! str_starts_with( ltrim( $buffer ), '<' )
+	) {
+		return $buffer;
+	}
+
+	// If the initial tag is not an open HTML tag, then abort since the buffer is not a complete HTML document.
+	$processor = new OD_HTML_Tag_Processor( $buffer );
+	if ( ! (
+		$processor->next_tag() &&
+		! $processor->is_tag_closer() &&
+		'HTML' === $processor->get_tag()
+	) ) {
 		return $buffer;
 	}
 
@@ -168,11 +206,10 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
 
 	$link_collection      = new OD_Link_Collection();
-	$processor            = new OD_HTML_Tag_Processor( $buffer );
 	$tag_visitor_context  = new OD_Tag_Visitor_Context( $processor, $group_collection, $link_collection );
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 	$visitors             = iterator_to_array( $tag_visitor_registry );
-	while ( $processor->next_open_tag() ) {
+	do {
 		$did_visit = false;
 		$processor->set_bookmark( $current_tag_bookmark ); // TODO: Should we break if this returns false?
 
@@ -192,7 +229,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		if ( $did_visit && $needs_detection ) {
 			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );
 		}
-	}
+	} while ( $processor->next_open_tag() );
 
 	// Send any preload links in a Link response header and in a LINK tag injected at the end of the HEAD.
 	if ( count( $link_collection ) > 0 ) {
