@@ -89,12 +89,8 @@ add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
  * @return bool True if the 'auto' keyword is present, false otherwise.
  */
 function auto_sizes_attribute_includes_valid_auto( string $sizes_attr ): bool {
-	$parts = preg_split( '/\s*,\s*/', strtolower( trim( $sizes_attr ) ) );
-	if ( ! is_array( $parts ) || ! isset( $parts[0] ) ) {
-		return false;
-	}
-
-	return 'auto' === $parts[0];
+	$token = strtok( strtolower( $sizes_attr ), ',' );
+	return false !== $token && 'auto' === trim( $token, " \t\f\r\n" );
 }
 
 /**
