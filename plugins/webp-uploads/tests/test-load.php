@@ -965,14 +965,6 @@ class Test_WebP_Uploads_Load extends TestCase {
 	}
 
 	/**
-	 * Runs (empty) hooks to satisfy webp_uploads_in_frontend_body() conditions.
-	 */
-	private function mock_frontend_body_hooks(): void {
-		remove_all_actions( 'template_redirect' );
-		do_action( 'template_redirect' );
-	}
-
-	/**
 	 * Force return WebP image quality 86 for testing.
 	 */
 	public function force_webp_image_quality_86( int $quality, string $mime_type ): int {
