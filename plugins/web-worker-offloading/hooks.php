@@ -2,7 +2,7 @@
 /**
  * Hook callback for Web Worker Offloading.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @package web-worker-offloading
  */
 
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Gets configuration for Web Worker Offloading.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  * @link https://partytown.builder.io/configuration
  *
  * @return array{ debug?: bool, forward?: non-empty-string[], lib: non-empty-string, loadScriptsOnMainThread?: non-empty-string[], nonce?: non-empty-string } Configuration for Partytown.
@@ -27,7 +27,7 @@ function wwo_get_configuration(): array {
 	/**
 	 * Add configuration for Web Worker Offloading.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.0
 	 * @link https://partytown.builder.io/configuration
 	 *
 	 * @param array{ debug?: bool, forward?: non-empty-string[], lib: non-empty-string, loadScriptsOnMainThread?: non-empty-string[], nonce?: non-empty-string } $config Configuration for Partytown.
@@ -38,7 +38,7 @@ function wwo_get_configuration(): array {
 /**
  * Initializes Web Worker Offloading.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  */
 function wwo_init(): void {
 	$partytown_js = file_get_contents( __DIR__ . '/build/partytown.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
@@ -74,7 +74,7 @@ add_action( 'wp_enqueue_scripts', 'wwo_init' );
  * scripts that need sequential execution. Once marked as async, `filter_eligible_strategies()` determines if the
  * script is eligible for async execution. If so, it will be offloaded to the worker thread.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  *
  * @param string[]|mixed $script_handles Array of script handles.
  * @return string[] Array of script handles.
@@ -97,7 +97,7 @@ add_filter( 'print_scripts_array', 'wwo_update_script_strategy' );
 /**
  * Updates script type for handles having `web-worker-offloading` as dependency.
  *
- * @since n.e.x.t
+ * @since 0.1.0
  *
  * @param string|mixed $tag    Script tag.
  * @param string       $handle Script handle.
@@ -125,7 +125,7 @@ function wwo_update_script_type( $tag, string $handle ) {
 							$handle
 						)
 					),
-					'Web Worker Offloading n.e.x.t'
+					'Web Worker Offloading 0.1.0'
 				);
 			} else {
 				$html_processor->set_attribute( 'type', 'text/partytown' );
