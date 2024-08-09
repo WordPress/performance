@@ -196,7 +196,8 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
  */
 function webp_uploads_use_picture_element_callback(): void {
 	// Picture element support requires the JPEG output to be enabled.
-	$jpeg_fallback_enabled = webp_uploads_is_jpeg_fallback_enabled();
+	$picture_element_enabled = webp_uploads_is_picture_element_enabled();
+	$jpeg_fallback_enabled   = webp_uploads_is_jpeg_fallback_enabled();
 	?>
 	<style>
 		#webp_uploads_picture_element_fieldset.disabled label,
@@ -214,7 +215,15 @@ function webp_uploads_use_picture_element_callback(): void {
 			<em><?php esc_html_e( '(experimental)', 'webp-uploads' ); ?></em>
 		</label>
 		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'The picture element serves a modern image format with a fallback to JPEG. Warning: Make sure you test your theme and plugins for compatibility. In particular, CSS selectors will not match images when using the child combinator (e.g. figure > img).', 'webp-uploads' ); ?></p>
+		<div id="webp_uploads_jpeg_fallback_notice" class="notice notice-info inline" <?php echo $picture_element_enabled ? '' : 'hidden'; ?>>
+			<p><?php esc_html_e( 'Picture elements will only be used when JPEG fallback images are available. So any images you have uploaded while the "Also generate JPEG" setting was disabled won\'t get served in any picture elements.', 'webp-uploads' ); ?></p>
+		</div>
 	</div>
+	<script>
+		document.getElementById( 'webp_uploads_use_picture_element' ).addEventListener( 'change', function () {
+			document.getElementById( 'webp_uploads_jpeg_fallback_notice' ).hidden = !this.checked;
+		} );
+	</script>
 	<?php
 }
 
