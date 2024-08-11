@@ -72,15 +72,15 @@ class Test_WebP_Uploads_Picture_Element_Original_Image_Fallback extends TestCase
 			)
 		);
 
-		// Apply picture element support.
-		$this->opt_in_to_picture_element();
-
 		$img_processor = new WP_HTML_Tag_Processor( $image );
 		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
 		$img_src = $img_processor->get_attribute( 'src' );
 		$this->assertStringEndsWith( '.webp', $img_src, 'Make sure the IMG should return WEBP src.' );
 		$img_srcset = $img_processor->get_attribute( 'srcset' );
 		$this->assertStringContainsString( '.webp', $img_srcset, 'Make sure the IMG srcset should return WEBP images.' );
+
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
 
 		$image_markup      = apply_filters( 'the_content', $image );
 		$picture_processor = new WP_HTML_Tag_Processor( $image_markup );
