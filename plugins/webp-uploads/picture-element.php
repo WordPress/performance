@@ -41,6 +41,11 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	}
 	$sub_size_mime_types = array_keys( $mime_type_data );
 
+	// If original image type fallback is not available, don't wrap in picture element.
+	if ( ! in_array( $original_file_mime_type, $sub_size_mime_types, true ) ) {
+		return $image;
+	}
+
 	/**
 	 * Filter the image mime types that can be used for the <picture> element.
 	 *
@@ -73,11 +78,6 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 
 	// If the original mime types is the only one available, no picture element is needed.
 	if ( 1 === count( $mime_types ) && current( $mime_types ) === $original_file_mime_type ) {
-		return $image;
-	}
-
-	// If original image type fallback is not available, don't wrap in picture element.
-	if ( ! in_array( $original_file_mime_type, $mime_types, true ) ) {
 		return $image;
 	}
 
