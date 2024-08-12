@@ -137,6 +137,20 @@ abstract class TestCase extends WP_UnitTestCase {
 	 * Opt into picture element output.
 	 */
 	public function opt_in_to_picture_element(): void {
-		add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10, 3 );
+		remove_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10 );
+		remove_filter( 'the_content', 'webp_uploads_update_image_references', 13 ); // Run after wp_filter_content_tags.
+
+		// Apply picture element support.
+		update_option( 'webp_uploads_use_picture_element', '1' );
+
+		webp_uploads_init();
+	}
+
+	/**
+	 * Runs (empty) hooks to satisfy webp_uploads_in_frontend_body() conditions.
+	 */
+	public function mock_frontend_body_hooks(): void {
+		remove_all_actions( 'template_redirect' );
+		do_action( 'template_redirect' );
 	}
 }
