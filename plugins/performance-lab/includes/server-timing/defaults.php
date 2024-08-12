@@ -87,42 +87,6 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 		},
 		PHP_INT_MAX
 	);
-
-	// Measure duration of autoloaded options query.
-	// Requires the Performance Lab object-cache.php drop-in to be present in order to work,
-	// which is why the constant is checked below.
-	if ( PERFLAB_OBJECT_CACHE_DROPIN_VERSION ) {
-		add_filter(
-			'query',
-			static function ( $query ) {
-				global $wpdb;
-				if ( "SELECT option_name, option_value FROM $wpdb->options WHERE autoload = 'yes'" !== $query ) {
-					return $query;
-				}
-				// In case the autoloaded options query is run again, prevent re-registering it and do not measure again.
-				if ( perflab_server_timing()->has_registered_metric( 'load-alloptions-query' ) ) {
-					return $query;
-				}
-				perflab_server_timing_register_metric(
-					'load-alloptions-query',
-					array(
-						'measure_callback' => static function ( $metric ): void {
-							$metric->measure_before();
-							add_filter(
-								'pre_cache_alloptions',
-								static function ( $passthrough ) use ( $metric ) {
-									$metric->measure_after();
-									return $passthrough;
-								}
-							);
-						},
-						'access_cap'       => 'exist',
-					)
-				);
-				return $query;
-			}
-		);
-	}
 }
 perflab_register_default_server_timing_before_template_metrics();
 
