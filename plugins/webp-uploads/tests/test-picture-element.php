@@ -262,9 +262,16 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		);
 	}
 
-	public function test_disable_responsive_image_with_picture_element(): void {
+	/**
+	 * @dataProvider data_provider_test_disable_responsive_image_with_picture_element
+	 *
+	 * @param Closure|null $add_filter The filter.
+	 */
+	public function test_disable_responsive_image_with_picture_element( ?Closure $add_filter ): void {
 		// Disable responsive images.
-		add_filter( 'wp_calculate_image_sizes', '__return_false' );
+		if ( $add_filter instanceof Closure ) {
+			$add_filter();
+		}
 
 		// Create some content with the image.
 		$image = wp_get_attachment_image(
@@ -280,7 +287,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$img_markup = apply_filters( 'the_content', $image );
 
 		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
-
 		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
 		$img_src = $img_processor->get_attribute( 'src' );
 		$this->assertStringEndsWith( '.webp', $img_src, 'Make sure the IMG should return WEBP src.' );
@@ -293,8 +299,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$picture_markup = apply_filters( 'the_content', $image );
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
-		$this->assertFalse( $img_processor->next_tag( array( 'tag_name' => 'picture' ) ), 'Make sure that there is no Picture tag.' );
-		$this->assertFalse( $img_processor->next_tag( array( 'tag_name' => 'source' ) ), 'Make sure that there is no source tag.' );
+		$this->assertTrue( $picture_processor->next_tag( array( 'tag_name' => 'picture' ) ), 'Make sure that there is a Picture tag.' );
 		$this->assertTrue( $picture_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Make sure that there is a IMG tag.' );
 		$this->assertNull( $picture_processor->get_attribute( 'sizes' ), 'Make sure that there is no sizes attribute in IMG tag.' );
 		$this->assertNull( $picture_processor->get_attribute( 'srcset' ), 'Make sure that there is no srcset attribute in IMG tag.' );
@@ -307,5 +312,25 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			$this->assertSame( self::$mime_type, $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return JPEG as source.' );
 			$this->assertStringContainsString( '.webp', $picture_processor->get_attribute( 'srcset' ), 'Make sure the Picture source srcset should return WEBP images.' );
 		}
+	}
+
+	/**
+	 * Data provider for it_should_maybe_wrap_images_in_picture_element.
+	 *
+	 * @return array<string, array{ add_filter: Closure|null }>
+	 */
+	public function data_provider_test_disable_responsive_image_with_picture_element(): array {
+		return array(
+			'no_sizes'  => array(
+				'add_filter' => static function (): void {
+					add_filter( 'wp_calculate_image_sizes', '__return_false' );
+				},
+			),
+			'no_srcset' => array(
+				'add_filter' => static function (): void {
+					add_filter( 'wp_calculate_image_srcset', '__return_false' );
+				},
+			),
+		);
 	}
 }

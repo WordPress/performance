@@ -97,42 +97,55 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	$size_array                   = array( absint( $width ), absint( $height ) );
 
 	// Get the sizes from the IMG tag.
-	$sizes = $processor->get_attribute( 'sizes' );
+	$sizes  = $processor->get_attribute( 'sizes' );
+	$srcset = $processor->get_attribute( 'srcset' );
 
-	// Bail early when the responsive images are disabled.
-	if ( null === $sizes ) {
-		return $image;
-	}
-
-	foreach ( $mime_types as $image_mime_type ) {
-		// Filter core's wp_get_attachment_image_srcset to return the sources for the current mime type.
-		$filter = static function ( $sources ) use ( $mime_type_data, $image_mime_type ): array {
-			$filtered_sources = array();
-			foreach ( $sources as $source ) {
-				// Swap the URL for the current mime type.
-				if ( isset( $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ] ) ) {
-					$filename           = $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ]['file'];
-					$filtered_sources[] = array(
-						'url'        => dirname( $source['url'] ) . '/' . $filename,
-						'descriptor' => $source['descriptor'],
-						'value'      => $source['value'],
-					);
+	if ( null !== $srcset && null !== $sizes ) {
+		foreach ( $mime_types as $image_mime_type ) {
+			// Filter core's wp_get_attachment_image_srcset to return the sources for the current mime type.
+			$filter = static function ( $sources ) use ( $mime_type_data, $image_mime_type ): array {
+				$filtered_sources = array();
+				foreach ( $sources as $source ) {
+					// Swap the URL for the current mime type.
+					if ( isset( $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ] ) ) {
+						$filename           = $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ]['file'];
+						$filtered_sources[] = array(
+							'url'        => dirname( $source['url'] ) . '/' . $filename,
+							'descriptor' => $source['descriptor'],
+							'value'      => $source['value'],
+						);
+					}
 				}
+				return $filtered_sources;
+			};
+			add_filter( 'wp_calculate_image_srcset', $filter );
+			$image_srcset = wp_get_attachment_image_srcset( $attachment_id, $size_array, $image_meta );
+			remove_filter( 'wp_calculate_image_srcset', $filter );
+			if ( false === $image_srcset ) {
+				continue;
 			}
-			return $filtered_sources;
-		};
-		add_filter( 'wp_calculate_image_srcset', $filter );
-		$image_srcset = wp_get_attachment_image_srcset( $attachment_id, $size_array, $image_meta );
-		remove_filter( 'wp_calculate_image_srcset', $filter );
-		if ( false === $image_srcset ) {
-			continue;
+			$picture_sources .= sprintf(
+				'<source type="%s"%s%s>',
+				esc_attr( $image_mime_type ),
+				is_string( $image_srcset ) ? sprintf( ' srcset="%s"', esc_attr( $image_srcset ) ) : '',
+				is_string( $sizes ) ? sprintf( ' sizes="%s"', esc_attr( $sizes ) ) : ''
+			);
 		}
-		$picture_sources .= sprintf(
-			'<source type="%s"%s%s>',
-			esc_attr( $image_mime_type ),
-			is_string( $image_srcset ) ? sprintf( ' srcset="%s"', esc_attr( $image_srcset ) ) : '',
-			is_string( $sizes ) ? sprintf( ' sizes="%s"', esc_attr( $sizes ) ) : ''
-		);
+	} else {
+		foreach ( $mime_types as $image_mime_type ) {
+			// Updates the reference of the image to the a new image format if available.
+			$img       = webp_uploads_img_tag_update_mime_type( $image, 'the_content', $attachment_id );
+			$processor = new WP_HTML_Tag_Processor( $img );
+			if ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+				$src = $processor->get_attribute( 'src' );
+
+				$picture_sources .= sprintf(
+					'<source type="%s"%s>',
+					esc_attr( $image_mime_type ),
+					is_string( $src ) ? sprintf( ' srcset="%s"', esc_attr( $src ) ) : ''
+				);
+			}
+		}
 	}
 
 	return sprintf(
