@@ -84,7 +84,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						/* translators: 1: File path. 2: CLI command. */
 						'[Optimization Detective] ' . __( 'Unable to load %1$s. Please make sure you have run %2$s.', 'optimization-detective' ),
 						'build/web-vitals.asset.php',
-						'`npm install && npm run build:optimization-detective`'
+						'`npm install && npm run build:plugin:optimization-detective`'
 					)
 				),
 				E_USER_ERROR
