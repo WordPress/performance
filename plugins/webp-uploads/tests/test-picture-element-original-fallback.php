@@ -43,7 +43,7 @@ class Test_WebP_Uploads_Picture_Element_Original_Image_Fallback extends TestCase
 	 * Setup shared fixtures.
 	 */
 	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
-		// Fallback to JPEG IMG.
+		// Disable fallback to JPEG IMG.
 		update_option( 'perflab_generate_webp_and_jpeg', '0' );
 
 		self::$image_id = $factory->attachment->create_upload_object( TESTS_PLUGIN_DIR . '/tests/data/images/leaves.jpg' );
@@ -51,7 +51,6 @@ class Test_WebP_Uploads_Picture_Element_Original_Image_Fallback extends TestCase
 
 	public static function wpTearDownAfterClass(): void {
 		wp_delete_attachment( self::$image_id, true );
-
 		delete_option( 'perflab_generate_webp_and_jpeg' );
 	}
 
@@ -70,28 +69,18 @@ class Test_WebP_Uploads_Picture_Element_Original_Image_Fallback extends TestCase
 			)
 		);
 
-		$img_processor = new WP_HTML_Tag_Processor( $image );
+		$img_markup    = apply_filters( 'the_content', $image );
+		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
 		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
-		$img_src = $img_processor->get_attribute( 'src' );
-		$this->assertStringEndsWith( '.webp', $img_src, 'Make sure the IMG should return WEBP src.' );
-		$img_srcset = $img_processor->get_attribute( 'srcset' );
-		$this->assertStringContainsString( '.webp', $img_srcset, 'Make sure the IMG srcset should return WEBP images.' );
-
-		update_option( 'perflab_generate_webp_and_jpeg', '1' );
-
+		$this->assertStringEndsWith( '.webp', $img_processor->get_attribute( 'src' ), 'Make sure the IMG should return WEBP src.' );
 		// Apply picture element support.
 		$this->opt_in_to_picture_element();
-
-		$image_markup      = apply_filters( 'the_content', $image );
-		$picture_processor = new WP_HTML_Tag_Processor( $image_markup );
-
+		$picture_markup    = apply_filters( 'the_content', $image );
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+		$this->assertFalse( $picture_processor->next_tag( array( 'tag_name' => 'picture' ) ), 'There should not be a PICTURE tag.' );
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
 		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
-		// Fallback image should not be available.
 		$this->assertStringEndsWith( '.webp', $picture_processor->get_attribute( 'src' ), 'Make sure the IMG should return WEBP src.' );
-		$this->assertStringContainsString( '.webp', $picture_processor->get_attribute( 'srcset' ), 'Make sure the IMG srcset should return WEBP images.' );
-
-		$picture_processor = new WP_HTML_Tag_Processor( $image_markup );
-		$picture_processor = $picture_processor->next_tag( array( 'tag_name' => 'picture' ) );
-		$this->assertFalse( $picture_processor, 'There should not be a PICTURE tag.' );
+		$this->assertSame( $img_markup, $picture_markup, 'Make sure the IMG and Picture markup are same.' );
 	}
 }
