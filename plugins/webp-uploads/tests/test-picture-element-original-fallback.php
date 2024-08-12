@@ -59,8 +59,6 @@ class Test_WebP_Uploads_Picture_Element_Original_Image_Fallback extends TestCase
 	 * Test that the picture element is not applied when the original fallback image is not available.
 	 */
 	public function test_no_picture_tag_wrap_and_original_image_fallback(): void {
-		update_option( 'perflab_generate_webp_and_jpeg', '1' );
-
 		// Create some content with the image.
 		$image = wp_get_attachment_image(
 			self::$image_id,
@@ -78,6 +76,8 @@ class Test_WebP_Uploads_Picture_Element_Original_Image_Fallback extends TestCase
 		$this->assertStringEndsWith( '.webp', $img_src, 'Make sure the IMG should return WEBP src.' );
 		$img_srcset = $img_processor->get_attribute( 'srcset' );
 		$this->assertStringContainsString( '.webp', $img_srcset, 'Make sure the IMG srcset should return WEBP images.' );
+
+		update_option( 'perflab_generate_webp_and_jpeg', '1' );
 
 		// Apply picture element support.
 		$this->opt_in_to_picture_element();
