@@ -265,7 +265,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	/**
 	 * @dataProvider data_provider_test_disable_responsive_image_with_picture_element
 	 *
-	 * @param Closure|null $add_filter The filter.
+	 * @param Closure $add_filter The filter.
 	 */
 	public function test_disable_responsive_image_with_picture_element( ?Closure $add_filter ): void {
 		// Disable responsive images.
@@ -317,7 +317,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	/**
 	 * Data provider for it_should_maybe_wrap_images_in_picture_element.
 	 *
-	 * @return array<string, array{ add_filter: Closure|null }>
+	 * @return array<string, array{ add_filter: Closure }>
 	 */
 	public function data_provider_test_disable_responsive_image_with_picture_element(): array {
 		return array(
