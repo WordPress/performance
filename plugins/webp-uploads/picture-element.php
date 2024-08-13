@@ -103,7 +103,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	list( $src, $width, $height ) = $image_src;
 	$size_array                   = array( absint( $width ), absint( $height ) );
 
-	// Get the sizes from the IMG tag.
+	// Gets the srcset and sizes from the IMG tag.
 	$sizes  = $processor->get_attribute( 'sizes' );
 	$srcset = $processor->get_attribute( 'srcset' );
 
@@ -139,18 +139,13 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		}
 	} else {
 		foreach ( $mime_types as $image_mime_type ) {
-			// Updates the reference of the image to the a new image format if available.
-			$img       = webp_uploads_img_tag_update_mime_type( $image, 'the_content', $attachment_id );
-			$processor = new WP_HTML_Tag_Processor( $img );
-			if ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
-				$src = $processor->get_attribute( 'src' );
-				if ( is_string( $src ) ) {
-					$picture_sources .= sprintf(
-						'<source type="%s" srcset="%s">',
-						esc_attr( $image_mime_type ),
-						esc_attr( $src )
-					);
-				}
+			$image_srcset = webp_uploads_get_mime_type_image( $attachment_id, $src, $image_mime_type );
+			if ( is_string( $image_srcset ) ) {
+				$picture_sources .= sprintf(
+					'<source type="%s" srcset="%s">',
+					esc_attr( $image_mime_type ),
+					esc_attr( $image_srcset )
+				);
 			}
 		}
 	}
