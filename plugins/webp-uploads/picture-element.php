@@ -28,9 +28,16 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		return $image;
 	}
 
+	$image_sizes = $image_meta['sizes'];
+
+	// Append missing full size image in $image_sizes array for srcset.
+	if ( isset( $image_meta['sources'], $image_meta['width'], $image_meta['height'] ) ) {
+		array_unshift( $image_sizes, $image_meta );
+	}
+
 	// Collect all the sub size image mime types.
 	$mime_type_data = array();
-	foreach ( $image_meta['sizes'] as $size ) {
+	foreach ( $image_sizes as $size ) {
 		if ( isset( $size['sources'] ) && isset( $size['width'] ) && isset( $size['height'] ) ) {
 			foreach ( $size['sources'] as $mime_type => $data ) {
 				$mime_type_data[ $mime_type ]                         = $mime_type_data[ $mime_type ] ?? array();
@@ -50,7 +57,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	 * The original image will be used as the fallback image for browsers that don't support the picture element.
 	 *
 	 * @since 2.0.0
-	 * @since n.e.x.t. The 'image/png' mime type was added to the default array.
+	 * @since n.e.x.t The default value was updated, removing 'image/jpeg'.
 	 *
 	 * @param string[] $mime_types    Mime types than can be used.
 	 * @param int      $attachment_id The id of the image being evaluated.
@@ -60,8 +67,6 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		array(
 			'image/avif',
 			'image/webp',
-			'image/jpeg',
-			'image/png',
 		),
 		$attachment_id
 	);
