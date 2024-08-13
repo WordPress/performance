@@ -145,12 +145,13 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 			$processor = new WP_HTML_Tag_Processor( $img );
 			if ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
 				$src = $processor->get_attribute( 'src' );
-
-				$picture_sources .= sprintf(
-					'<source type="%s"%s>',
-					esc_attr( $image_mime_type ),
-					is_string( $src ) ? sprintf( ' srcset="%s"', esc_attr( $src ) ) : ''
-				);
+				if ( null !== $src ) {
+					$picture_sources .= sprintf(
+						'<source type="%s"%s>',
+						esc_attr( $image_mime_type ),
+						is_string( $src ) ? sprintf( ' srcset="%s"', esc_attr( $src ) ) : ''
+					);
+				}
 			}
 		}
 	}
