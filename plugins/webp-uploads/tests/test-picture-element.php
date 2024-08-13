@@ -263,13 +263,11 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	/**
 	 * @dataProvider data_provider_test_disable_responsive_image_with_picture_element
 	 *
-	 * @param Closure $add_filter The filter.
+	 * @param Closure $set_up Set up the filter.
 	 */
-	public function test_disable_responsive_image_with_picture_element( ?Closure $add_filter ): void {
+	public function test_disable_responsive_image_with_picture_element( Closure $set_up ): void {
 		// Disable responsive images.
-		if ( $add_filter instanceof Closure ) {
-			$add_filter();
-		}
+		$set_up();
 
 		// Create some content with the image.
 		$image = wp_get_attachment_image(
@@ -297,7 +295,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		$picture_markup = apply_filters( 'the_content', $image );
 
 		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
-		$this->assertTrue( $picture_processor->next_tag( array( 'tag_name' => 'picture' ) ), 'Make sure that there is a Picture tag.' );
+		$this->assertTrue( $picture_processor->next_tag( array( 'tag_name' => 'PICTURE' ) ), 'Make sure that there is a PICTURE tag.' );
 		$this->assertTrue( $picture_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Make sure that there is a IMG tag.' );
 		$this->assertNull( $picture_processor->get_attribute( 'sizes' ), 'Make sure that there is no sizes attribute in IMG tag.' );
 		$this->assertNull( $picture_processor->get_attribute( 'srcset' ), 'Make sure that there is no srcset attribute in IMG tag.' );
