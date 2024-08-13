@@ -128,15 +128,14 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 			add_filter( 'wp_calculate_image_srcset', $filter );
 			$image_srcset = wp_get_attachment_image_srcset( $attachment_id, $size_array, $image_meta );
 			remove_filter( 'wp_calculate_image_srcset', $filter );
-			if ( false === $image_srcset ) {
-				continue;
+			if ( is_string( $image_srcset ) ) {
+				$picture_sources .= sprintf(
+					'<source type="%s"%s%s>',
+					esc_attr( $image_mime_type ),
+					sprintf( ' srcset="%s"', esc_attr( $image_srcset ) ),
+					is_string( $sizes ) ? sprintf( ' sizes="%s"', esc_attr( $sizes ) ) : ''
+				);
 			}
-			$picture_sources .= sprintf(
-				'<source type="%s"%s%s>',
-				esc_attr( $image_mime_type ),
-				is_string( $image_srcset ) ? sprintf( ' srcset="%s"', esc_attr( $image_srcset ) ) : '',
-				is_string( $sizes ) ? sprintf( ' sizes="%s"', esc_attr( $sizes ) ) : ''
-			);
 		}
 	} else {
 		foreach ( $mime_types as $image_mime_type ) {
@@ -145,11 +144,11 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 			$processor = new WP_HTML_Tag_Processor( $img );
 			if ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
 				$src = $processor->get_attribute( 'src' );
-				if ( null !== $src ) {
+				if ( is_string( $src ) ) {
 					$picture_sources .= sprintf(
 						'<source type="%s"%s>',
 						esc_attr( $image_mime_type ),
-						is_string( $src ) ? sprintf( ' srcset="%s"', esc_attr( $src ) ) : ''
+						sprintf( ' srcset="%s"', esc_attr( $src ) )
 					);
 				}
 			}
