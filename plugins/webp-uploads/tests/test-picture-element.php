@@ -100,9 +100,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		if ( is_array( $image_src ) ) {
 			$img_src = $image_src[0];
 		}
-		// Remove the last size in the srcset, as it is not needed.
-		$jpeg_srcset = substr( $image_srcset, 0, strrpos( $image_srcset, ',' ) );
-		$webp_srcset = str_replace( '.jpg', '-jpg.webp', $jpeg_srcset );
+		$webp_srcset = str_replace( '.jpg', '-jpg.webp', $image_srcset );
 
 		// Prepare the expected HTML by replacing placeholders with expected values.
 		$replacements = array(
@@ -301,6 +299,46 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
 			$this->assertSame( self::$mime_type, $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return JPEG as source.' );
 			$this->assertStringContainsString( '.webp', $picture_processor->get_attribute( 'srcset' ), 'Make sure the Picture source srcset should return WEBP images.' );
+		}
+	}
+
+	public function test_picture_source_should_have_full_size_image_in_its_srcset(): void {
+		// Create some content with the image.
+		$image = wp_get_attachment_image(
+			self::$image_id,
+			'large',
+			false,
+			array(
+				'class' => 'wp-image-' . self::$image_id,
+				'alt'   => 'Green Leaves',
+			)
+		);
+
+		$image_meta = wp_get_attachment_metadata( self::$image_id );
+
+		$img_markup = apply_filters( 'the_content', $image );
+
+		$img_processor = new WP_HTML_Tag_Processor( $img_markup );
+		$this->assertTrue( $img_processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'There should be an IMG tag.' );
+		$this->assertStringEndsWith( '.webp', $img_processor->get_attribute( 'src' ), 'Make sure the IMG should return WEBP src.' );
+		$this->assertStringContainsString( $image_meta['sources'][ self::$mime_type ]['file'], $img_processor->get_attribute( 'srcset' ), 'Make sure the IMG srcset should have full size image.' );
+
+		// Apply picture element support.
+		$this->opt_in_to_picture_element();
+
+		$picture_markup = apply_filters( 'the_content', $image );
+
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+		$picture_processor->next_tag( array( 'tag_name' => 'IMG' ) );
+
+		// The fallback image should be JPEG.
+		$this->assertStringEndsWith( '.jpg', $picture_processor->get_attribute( 'src' ), 'Make sure the fallback IMG should return JPEG src.' );
+		$this->assertStringContainsString( $image_meta['sources']['image/jpeg']['file'], $picture_processor->get_attribute( 'srcset' ), 'Make sure the IMG srcset should have full size image.' );
+
+		$picture_processor = new WP_HTML_Tag_Processor( $picture_markup );
+		while ( $picture_processor->next_tag( array( 'tag_name' => 'source' ) ) ) {
+			$this->assertSame( self::$mime_type, $picture_processor->get_attribute( 'type' ), 'Make sure the Picture source should not return JPEG as source.' );
+			$this->assertStringContainsString( $image_meta['sources'][ self::$mime_type ]['file'], $picture_processor->get_attribute( 'srcset' ), 'Make sure the IMG srcset should have full size image.' );
 		}
 	}
 }

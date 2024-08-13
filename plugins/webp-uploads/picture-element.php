@@ -28,9 +28,16 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 		return $image;
 	}
 
+	$image_sizes = $image_meta['sizes'];
+
+	// Append missing full size image in $image_sizes array for srcset.
+	if ( isset( $image_meta['sources'], $image_meta['width'], $image_meta['height'] ) ) {
+		array_unshift( $image_sizes, $image_meta );
+	}
+
 	// Collect all the sub size image mime types.
 	$mime_type_data = array();
-	foreach ( $image_meta['sizes'] as $size ) {
+	foreach ( $image_sizes as $size ) {
 		if ( isset( $size['sources'] ) && isset( $size['width'] ) && isset( $size['height'] ) ) {
 			foreach ( $size['sources'] as $mime_type => $data ) {
 				$mime_type_data[ $mime_type ]                         = $mime_type_data[ $mime_type ] ?? array();
