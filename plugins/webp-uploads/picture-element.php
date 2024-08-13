@@ -130,9 +130,9 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 			remove_filter( 'wp_calculate_image_srcset', $filter );
 			if ( is_string( $image_srcset ) ) {
 				$picture_sources .= sprintf(
-					'<source type="%s"%s%s>',
+					'<source type="%s" srcset="%s"%s>',
 					esc_attr( $image_mime_type ),
-					sprintf( ' srcset="%s"', esc_attr( $image_srcset ) ),
+					esc_attr( $image_srcset ),
 					is_string( $sizes ) ? sprintf( ' sizes="%s"', esc_attr( $sizes ) ) : ''
 				);
 			}
@@ -146,9 +146,9 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 				$src = $processor->get_attribute( 'src' );
 				if ( is_string( $src ) ) {
 					$picture_sources .= sprintf(
-						'<source type="%s"%s>',
+						'<source type="%s" srcset="%s">',
 						esc_attr( $image_mime_type ),
-						sprintf( ' srcset="%s"', esc_attr( $src ) )
+						esc_attr( $src )
 					);
 				}
 			}
