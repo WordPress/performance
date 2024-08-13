@@ -37,9 +37,20 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	 *
 	 * @param string   $id                   Identifier for the tag visitor.
 	 * @param callable $tag_visitor_callback Tag visitor callback.
+	 * @param array<mixed> $dependencies array with ID as key and Callable as value
 	 */
-	public function register( string $id, callable $tag_visitor_callback ): void {
-		$this->visitors[ $id ] = $tag_visitor_callback;
+	public function register( string $id, callable $tag_visitor_callback, array $dependencies = array() ): void
+	{
+		if (!empty($dependencies)) {
+			foreach ($dependencies as $dependency_id => $dependency_callback) {
+				if (!self::is_registered($dependency_id)) {
+					$this->visitors[$dependency_id] = $dependency_callback;
+				}
+			}
+		}
+		if (!self::is_registered($id)) {
+			$this->visitors[$id] = $tag_visitor_callback;
+		}
 	}
 
 	/**

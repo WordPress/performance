@@ -20,6 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_Prioritizer_Tag_Visitor {
 
 	/**
+	 * The ID used the register the class
+	 */
+
+	public const ID = 'image-prioritizer-bg-img';
+	/**
 	 * Visits a tag.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.

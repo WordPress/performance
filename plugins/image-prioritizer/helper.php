@@ -32,8 +32,8 @@ function image_prioritizer_render_generator_meta_tag(): void {
 function image_prioritizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry ): void {
 	// Note: The class is invocable (it has an __invoke() method).
 	$img_visitor = new Image_Prioritizer_Img_Tag_Visitor();
-	$registry->register( 'img-tags', $img_visitor );
+	$registry->register( $img_visitor::ID, $img_visitor );
 
 	$bg_image_visitor = new Image_Prioritizer_Background_Image_Styled_Tag_Visitor();
-	$registry->register( 'bg-image-tags', $bg_image_visitor );
+	$registry->register( $bg_image_visitor::ID, $bg_image_visitor );
 }
