@@ -48,6 +48,11 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	}
 	$sub_size_mime_types = array_keys( $mime_type_data );
 
+	// If original image type fallback is not available, don't wrap in picture element.
+	if ( ! in_array( $original_file_mime_type, $sub_size_mime_types, true ) ) {
+		return $image;
+	}
+
 	/**
 	 * Filter the image mime types that can be used for the <picture> element.
 	 *
