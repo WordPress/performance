@@ -438,7 +438,7 @@ function webp_uploads_get_mime_type_image( int $attachment_id, string $src, stri
 	if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
 		foreach ( $metadata['sizes'] as $size => $size_data ) {
 
-			if ( empty( $size_data['file'] ) ) {
+			if ( ! isset( $size_data['file'] ) ) {
 				continue;
 			}
 
