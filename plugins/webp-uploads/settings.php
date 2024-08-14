@@ -204,6 +204,9 @@ function webp_uploads_use_picture_element_callback(): void {
 		#webp_uploads_picture_element_fieldset.disabled p {
 			opacity: 0.7;
 		}
+		#webp_uploads_picture_element_fieldset.disabled #webp_uploads_use_picture_element_label {
+			pointer-events: none;
+		}
 	</style>
 	<div id="webp_uploads_picture_element_notice" class="notice notice-info inline" <?php echo $jpeg_fallback_enabled ? 'hidden' : ''; ?>>
 		<p><?php esc_html_e( 'This setting requires JPEG also be output as a fallback option.', 'webp-uploads' ); ?></p>
