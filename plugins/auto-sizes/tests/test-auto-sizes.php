@@ -218,4 +218,97 @@ class Test_AutoSizes extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'generator', $tag );
 		$this->assertStringContainsString( 'auto-sizes ' . IMAGE_AUTO_SIZES_VERSION, $tag );
 	}
+
+	public function test_content_image_with_single_quote_replacement_does_not_have_auto_sizes(): void {
+		add_filter(
+			'get_image_tag',
+			static function ( $html ) {
+				return str_replace(
+					'" />',
+					'" loading="lazy" sizes="(max-width: 1024px) 100vw, 1024px" />',
+					$html
+				);
+			}
+		);
+
+		$image_tag     = str_replace( '"', "'", $this->get_image_tag( self::$image_id ) );
+		$image_content = wp_filter_content_tags( $image_tag );
+
+		$processor = new WP_HTML_Tag_Processor( $image_content );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Failed to find the IMG tag.' );
+		$sizes = $processor->get_attribute( 'sizes' );
+		$this->assertTrue( auto_sizes_attribute_includes_valid_auto( $sizes ), 'The sizes attribute does not include "auto" as the first item in the list.' );
+		$this->assertStringContainsString( 'auto', $sizes, 'The sizes attribute does not contain "auto".' );
+	}
+
+	public function test_content_image_with_custom_attribute_name_with_sizes_at_the_end_does_not_have_auto_sizes(): void {
+		add_filter(
+			'get_image_tag',
+			static function ( $html ) {
+				return str_replace(
+					'" />',
+					'" loading="lazy" sizes="(max-width: 1024px) 100vw, 1024px" data-tshirt-sizes="S M L" />',
+					$html
+				);
+			}
+		);
+
+		$image_tag     = $this->get_image_tag( self::$image_id );
+		$image_content = wp_filter_content_tags( $image_tag );
+
+		$processor = new WP_HTML_Tag_Processor( $image_content );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Failed to find the IMG tag.' );
+		$data_tshirt_sizes = $processor->get_attribute( 'data-tshirt-sizes' );
+		$this->assertStringNotContainsString( 'auto', $data_tshirt_sizes, 'The data-tshirt-sizes attribute should not contain "auto".' );
+		$this->assertSame( 'S M L', $data_tshirt_sizes, 'The data-tshirt-sizes attribute does not match the expected value.' );
+	}
+
+	public function test_content_image_with_lazy_load_text_in_alt_does_not_have_auto_sizes(): void {
+		add_filter(
+			'get_image_tag',
+			static function ( $html ) {
+				return str_replace(
+					'alt="',
+					'alt="This is the LCP image and it should not get loading="lazy"!',
+					$html
+				);
+			}
+		);
+
+		$image_tag     = $this->get_image_tag( self::$image_id );
+		$image_content = wp_filter_content_tags( $image_tag );
+
+		$processor = new WP_HTML_Tag_Processor( $image_content );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Failed to find the IMG tag.' );
+		$this->assertNull( $processor->get_attribute( 'loading' ), 'The loading attribute should be null when lazy-load text is in the alt attribute.' );
+		$sizes = $processor->get_attribute( 'sizes' );
+		$this->assertFalse( auto_sizes_attribute_includes_valid_auto( $sizes ), 'The sizes attribute does not include "auto" as the first item in the list.' );
+		$this->assertStringNotContainsString( 'auto', $sizes, 'The sizes attribute should not contain "auto".' );
+	}
+
+	public function test_content_image_with_custom_attribute_name_with_loading_lazy_at_the_end_does_not_have_auto_sizes(): void {
+		// Force lazy loading attribute.
+		add_filter( 'wp_img_tag_add_loading_attr', '__return_false' );
+
+		add_filter(
+			'get_image_tag',
+			static function ( $html ) {
+				return str_replace(
+					'" />',
+					'" data-removed-loading="lazy" />',
+					$html
+				);
+			}
+		);
+
+		$image_tag     = $this->get_image_tag( self::$image_id );
+		$image_content = wp_filter_content_tags( $image_tag );
+
+		$processor = new WP_HTML_Tag_Processor( $image_content );
+		$this->assertTrue( $processor->next_tag( array( 'tag_name' => 'IMG' ) ), 'Failed to find the IMG tag.' );
+		$this->assertNull( $processor->get_attribute( 'loading' ), 'The loading attribute should be null when a custom attribute name is used.' );
+		$sizes = $processor->get_attribute( 'sizes' );
+		$this->assertFalse( auto_sizes_attribute_includes_valid_auto( $sizes ), 'The sizes attribute does not include "auto" as the first item in the list.' );
+		$this->assertStringNotContainsString( 'auto', $sizes, 'The sizes attribute should not contain "auto".' );
+	}
 }
