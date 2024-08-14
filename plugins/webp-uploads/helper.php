@@ -418,9 +418,9 @@ function webp_uploads_is_jpeg_fallback_enabled(): bool {
  * @param int    $attachment_id The ID of the attachment.
  * @param string $src           The original image src url.
  * @param string $mime          A mime type we are looking to get image url.
- * @return string|false Returns mime type image if available, false otherwise.
+ * @return string|null Returns mime type image if available.
  */
-function webp_uploads_get_mime_type_image( int $attachment_id, string $src, string $mime ) {
+function webp_uploads_get_mime_type_image( int $attachment_id, string $src, string $mime ): ?string {
 	$metadata     = wp_get_attachment_metadata( $attachment_id );
 	$src_basename = wp_basename( $src );
 	if ( isset( $metadata['sources'][ $mime ]['file'] ) ) {
@@ -462,5 +462,5 @@ function webp_uploads_get_mime_type_image( int $attachment_id, string $src, stri
 		}
 	}
 
-	return false;
+	return null;
 }
