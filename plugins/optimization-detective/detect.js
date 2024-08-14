@@ -216,11 +216,11 @@ export default async function detect( {
 		);
 
 	/**
-	 * Monitors embed for mutations.
+	 * Monitors embed wrapper for resizes.
 	 *
 	 * @param {HTMLDivElement} embedWrapper Embed wrapper DIV.
 	 */
-	function monitorEmbedForMutations( embedWrapper ) {
+	function monitorEmbedWrapperForResizes( embedWrapper ) {
 		// If the embed lacks any scripting, then short-circuit since it can't possibly be doing any mutations.
 		if ( ! embedWrapper.querySelector( 'script, [onload]' ) ) {
 			return;
@@ -230,22 +230,27 @@ export default async function detect( {
 		}
 		const xpath = embedWrapper.dataset.odXpath;
 		let timeoutId = 0;
-		const observer = new MutationObserver( () => {
+		const observer = new ResizeObserver( ( entries ) => {
+			const [ entry ] = entries;
 			if ( timeoutId > 0 ) {
 				clearTimeout( timeoutId );
 			}
+			log(
+				`[Embed Optimizer] Pending embed height of ${ entry.contentRect.height }px for ${ xpath }`
+			);
+			// TODO: Is the timeout really needed? We can just keep updating the height of the element until the URL metrics are sent when the page closes.
 			timeoutId = setTimeout( () => {
-				const rect = embedWrapper.getBoundingClientRect();
 				log(
-					`[Embed Optimizer] Embed height of ${ rect.height }px for ${ xpath }`
+					`[Embed Optimizer] Final embed height of ${ entry.contentRect.height }px for ${ xpath }`
 				);
+				observer.disconnect();
 				// TODO: Now amend URL metrics with this rect.height.
 			}, EMBED_LOAD_WAIT_MS );
 		} );
-		observer.observe( embedWrapper, { childList: true, subtree: true } );
+		observer.observe( embedWrapper, { box: 'content-box' } );
 	}
 	for ( const embedWrapper of embedWrappers ) {
-		monitorEmbedForMutations( embedWrapper );
+		monitorEmbedWrapperForResizes( embedWrapper );
 	}
 
 	// Wait until the resources on the page have fully loaded.
