@@ -182,8 +182,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 			document.getElementById( 'perflab_generate_webp_and_jpeg' ).addEventListener( 'change', function () {
 				document.querySelector( '.webp-uploads-use-picture-element' ).classList.toggle( 'webp-uploads-disabled', ! this.checked );
 				document.getElementById( 'webp_uploads_picture_element_notice' ).hidden = this.checked;
-				document.getElementById( 'webp_uploads_use_picture_element' ).classList.toggle( 'disabled', ! this.checked );
-				document.getElementById( 'webp_uploads_use_picture_element' ).setAttribute( 'aria-disabled', ! this.checked ? 'true' : 'false' );
+				document.getElementById( 'webp_uploads_use_picture_element' ).disabled = ! this.checked;
 				document.getElementById( 'webp_uploads_picture_element_fieldset' ).classList.toggle( 'disabled', ! this.checked );
 			} );
 		</script>
@@ -197,16 +196,13 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
  */
 function webp_uploads_use_picture_element_callback(): void {
 	// Picture element support requires the JPEG output to be enabled.
-	$picture_element_enabled = webp_uploads_is_picture_element_enabled();
+	$picture_element_enabled = 1 === (int) get_option( 'webp_uploads_use_picture_element', 0 );
 	$jpeg_fallback_enabled   = webp_uploads_is_jpeg_fallback_enabled();
 	?>
 	<style>
 		#webp_uploads_picture_element_fieldset.disabled label,
 		#webp_uploads_picture_element_fieldset.disabled p {
 			opacity: 0.7;
-		}
-		#webp_uploads_picture_element_fieldset.disabled #webp_uploads_use_picture_element_label {
-			pointer-events: none;
 		}
 	</style>
 	<div id="webp_uploads_picture_element_notice" class="notice notice-info inline" <?php echo $jpeg_fallback_enabled ? 'hidden' : ''; ?>>
@@ -215,14 +211,17 @@ function webp_uploads_use_picture_element_callback(): void {
 	<div id="webp_uploads_picture_element_fieldset" class="<?php echo ! $jpeg_fallback_enabled ? 'disabled' : ''; ?>">
 		<label for="webp_uploads_use_picture_element" id="webp_uploads_use_picture_element_label">
 			<input
-				name="webp_uploads_use_picture_element"
 				type="checkbox"
 				id="webp_uploads_use_picture_element"
 				aria-describedby="webp_uploads_use_picture_element_description"
-				value="1"
 				<?php checked( get_option( 'webp_uploads_use_picture_element', false ) ); // Option intentionally used instead of webp_uploads_is_picture_element_enabled() to persist when perflab_generate_webp_and_jpeg is updated. ?>
-				class="<?php echo ! $jpeg_fallback_enabled ? 'disabled' : ''; ?>"
-				aria-disabled="<?php echo ! $jpeg_fallback_enabled ? 'true' : 'false'; ?>"
+				<?php disabled( ! $jpeg_fallback_enabled ); ?>
+				onchange="document.getElementById('webp_uploads_use_picture_element_value').value = this.checked ? 1 : 0"
+			>
+			<input
+				type="hidden" name="webp_uploads_use_picture_element"
+				id="webp_uploads_use_picture_element_value"
+				value="<?php echo $picture_element_enabled ? 1 : 0; ?>"
 			>
 			<?php esc_html_e( 'Use <picture> Element', 'webp-uploads' ); ?>
 			<em><?php esc_html_e( '(experimental)', 'webp-uploads' ); ?></em>
