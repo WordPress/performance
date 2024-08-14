@@ -107,6 +107,11 @@ function od_can_optimize_response(): bool {
 		// Since there is no predictability in whether posts in the loop will have featured images assigned or not. If a
 		// theme template for search results doesn't even show featured images, then this wouldn't be an issue.
 		is_search() ||
+		// Avoid optimizing embed responses because the Post Embed iframes include a sandbox attribute with the value of
+		// "allow-scripts" but without "allow-same-origin". This can result in an error in the console:
+		// > Access to script at '.../detect.js?ver=0.4.1' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+		// So it's better to just avoid attempting to optimize Post Embed responses (which don't need optimization anyway).
+		is_embed() ||
 		// Since injection of inline-editing controls interfere with breadcrumbs, while also just not necessary in this context.
 		is_customize_preview() ||
 		// Since the images detected in the response body of a POST request cannot, by definition, be cached.

@@ -48,10 +48,11 @@ The default breakpoints are reused from Gutenberg which appear to be used the mo
 
 Filters whether the current response can be optimized. By default, detection and optimization are only performed when:
 
-1. It’s not a search template (i.e. `is_search()`).
-2. It’s not the Customizer preview.
-3. It’s not the response to a `POST` request.
-4. The user is not an administrator (i.e. the `customize` capability).
+1. It’s not a search template (`is_search()`).
+2. It’s not a post embed template (`is_embed()`).
+3. It’s not the Customizer preview (`is_customize_preview()`)
+4. It’s not the response to a `POST` request.
+5. The user is not an administrator (`current_user_can( 'customize' )`).
 
 During development, you may want to force this to always be enabled:
 
