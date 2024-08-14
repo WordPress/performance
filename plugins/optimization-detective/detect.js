@@ -199,6 +199,55 @@ export default async function detect( {
 		}
 	} );
 
+	// TODO: Conditionally add this JS only when we know there are embeds on the page.
+	// TODO: This JS should be provided by Embed Optimizer and not bundled in Optimization Detective. It should update the pending url metrics before they are sent to the server when the page is hidden.
+	// TODO: This is only necessary for embeds that contain scripting.
+	/*
+	 * Observe the loading of embeds on the page. We need to run this now before the resources on the page have fully
+	 * loaded because we need to start observing the embed wrappers before the embeds have loaded. When we detect
+	 * subtree modifications in an embed wrapper, we then need to measure the new height of the wrapper element.
+	 * However, since there may be multiple subtree modifications performed as an embed is loaded, we need to wait until
+	 * what is likely the last mutation.
+	 */
+	const EMBED_LOAD_WAIT_MS = 1000;
+	const embedWrappers =
+		/** @type NodeListOf<HTMLDivElement> */ document.querySelectorAll(
+			'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
+		);
+
+	/**
+	 * Monitors embed for mutations.
+	 *
+	 * @param {HTMLDivElement} embedWrapper Embed wrapper DIV.
+	 */
+	function monitorEmbedForMutations( embedWrapper ) {
+		// If the embed lacks any scripting, then short-circuit since it can't possibly be doing any mutations.
+		if ( ! embedWrapper.querySelector( 'script, [onload]' ) ) {
+			return;
+		}
+		if ( ! ( 'odXpath' in embedWrapper.dataset ) ) {
+			throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
+		}
+		const xpath = embedWrapper.dataset.odXpath;
+		let timeoutId = 0;
+		const observer = new MutationObserver( () => {
+			if ( timeoutId > 0 ) {
+				clearTimeout( timeoutId );
+			}
+			timeoutId = setTimeout( () => {
+				const rect = embedWrapper.getBoundingClientRect();
+				log(
+					`[Embed Optimizer] Embed height of ${ rect.height }px for ${ xpath }`
+				);
+				// TODO: Now amend URL metrics with this rect.height.
+			}, EMBED_LOAD_WAIT_MS );
+		} );
+		observer.observe( embedWrapper, { childList: true, subtree: true } );
+	}
+	for ( const embedWrapper of embedWrappers ) {
+		monitorEmbedForMutations( embedWrapper );
+	}
+
 	// Wait until the resources on the page have fully loaded.
 	await new Promise( ( resolve ) => {
 		if ( doc.readyState === 'complete' ) {
