@@ -221,10 +221,6 @@ export default async function detect( {
 	 * @param {HTMLDivElement} embedWrapper Embed wrapper DIV.
 	 */
 	function monitorEmbedWrapperForResizes( embedWrapper ) {
-		// If the embed lacks any scripting, then short-circuit since it can't possibly be doing any mutations.
-		if ( ! embedWrapper.querySelector( 'script, [onload]' ) ) {
-			return;
-		}
 		if ( ! ( 'odXpath' in embedWrapper.dataset ) ) {
 			throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
 		}
