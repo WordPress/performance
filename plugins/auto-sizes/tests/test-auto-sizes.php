@@ -71,8 +71,6 @@ class Test_AutoSizes extends WP_UnitTestCase {
 		// Force lazy loading attribute.
 		add_filter( 'wp_img_tag_add_loading_attr', '__return_true' );
 
-		$image_tag = $this->get_image_tag( self::$image_id );
-
 		$this->assertStringContainsString(
 			'sizes="auto, (max-width: 1024px) 100vw, 1024px"',
 			wp_filter_content_tags( $this->get_image_tag( self::$image_id ) )
