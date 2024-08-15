@@ -65,7 +65,8 @@ function auto_sizes_update_content_img_tag( $html ): string {
 	}
 
 	// Bail early if the image is not lazy-loaded.
-	if ( 'lazy' !== $processor->get_attribute( 'loading' ) ) {
+	$value = $processor->get_attribute( 'loading' );
+	if ( ! is_string( $value ) || 'lazy' !== strtolower( trim( $value, " \t\f\r\n" ) ) ) {
 		return $html;
 	}
 
