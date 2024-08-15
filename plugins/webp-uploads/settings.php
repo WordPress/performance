@@ -244,18 +244,18 @@ function webp_uploads_use_picture_element_callback(): void {
 			document.getElementById( 'webp_uploads_picture_element_notice' ).hidden = this.checked;
 			document.getElementById( 'webp_uploads_picture_element_fieldset' ).classList.toggle( 'disabled', ! this.checked );
 
-			var checkbox = document.getElementById( 'webp_uploads_use_picture_element' );
+			const checkbox = document.getElementById( 'webp_uploads_use_picture_element' );
 			checkbox.disabled = ! this.checked;
 
 			// Remove or inject hidden input to preserve original setting value as needed.
 			if ( this.checked ) {
-				var hiddenInput = document.getElementById( 'webp_uploads_use_picture_element_hidden' );
+				const hiddenInput = document.getElementById( 'webp_uploads_use_picture_element_hidden' );
 				if ( hiddenInput ) {
 					hiddenInput.parentElement.removeChild( hiddenInput );
 				}
 			} else if ( checkbox.checked && ! document.getElementById( 'webp_uploads_use_picture_element_hidden' ) ) {
 				// The hidden input is only needed if the value was originally set (i.e. the checkbox enabled).
-				var hiddenInput = document.createElement( 'input' );
+				const hiddenInput = document.createElement( 'input' );
 				hiddenInput.setAttribute( 'type', 'hidden' );
 				hiddenInput.setAttribute( 'id', 'webp_uploads_use_picture_element_hidden' );
 				hiddenInput.setAttribute( 'name', checkbox.getAttribute( 'name' ) );
