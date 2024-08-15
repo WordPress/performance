@@ -214,7 +214,7 @@ function webp_uploads_use_picture_element_callback(): void {
 				type="checkbox"
 				id="webp_uploads_use_picture_element"
 				aria-describedby="webp_uploads_use_picture_element_description"
-				<?php checked( get_option( 'webp_uploads_use_picture_element', false ) ); // Option intentionally used instead of webp_uploads_is_picture_element_enabled() to persist when perflab_generate_webp_and_jpeg is updated. ?>
+				<?php checked( $picture_element_option ); // Option intentionally used instead of webp_uploads_is_picture_element_enabled() to persist when perflab_generate_webp_and_jpeg is updated. ?>
 				<?php disabled( ! $jpeg_fallback_enabled ); ?>
 				onchange="document.getElementById('webp_uploads_use_picture_element_value').value = this.checked ? 1 : 0"
 			>
