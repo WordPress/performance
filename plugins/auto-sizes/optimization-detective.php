@@ -59,8 +59,12 @@ function auto_sizes_visit_tag( OD_Tag_Visitor_Context $context ): bool {
  * @param OD_Tag_Visitor_Registry $registry Tag visitor registry.
  */
 function auto_sizes_register_tag_visitors( OD_Tag_Visitor_Registry $registry ): void {
-	$registry->register( 'auto-sizes', 'auto_sizes_visit_tag' );
+	$registry->register(
+		'auto-sizes',
+		'auto_sizes_visit_tag',
+		defined( 'Image_Prioritizer_Img_Tag_Visitor::ID' ) ? array( Image_Prioritizer_Img_Tag_Visitor::ID => new Image_Prioritizer_Img_Tag_Visitor() ) : array()
+	);
 }
 
 // Important: The Image Prioritizer's IMG tag visitor is registered at priority 10, so priority 100 ensures that the loading attribute has been correctly set by the time the Auto Sizes visitor runs.
-add_action( 'od_register_tag_visitors', 'auto_sizes_register_tag_visitors', 100 );
+add_action( 'od_register_tag_visitors', 'auto_sizes_register_tag_visitors' );
