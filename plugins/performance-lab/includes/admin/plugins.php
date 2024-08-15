@@ -153,7 +153,7 @@ function perflab_render_plugins_ui(): void {
 			$plugin_list .
 			'<p>' . esc_html( _n( 'The following error occurred:', 'The following errors occurred:', count( $error_messages ), 'performance-lab' ) ) . '</p>' .
 			'<ul><li>' . join( '</li><li>', $error_messages ) . '</li></ul>' .
-			esc_html__( 'Please consider manual plugin installation and activation.', 'performance-lab' ),
+			esc_html__( 'Please consider manual plugin installation and activation. You can then access each plugin\'s settings via its respective "Settings" link on the Plugins screen.', 'performance-lab' ),
 			array( 'type' => 'error' )
 		);
 	}
