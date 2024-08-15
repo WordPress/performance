@@ -103,12 +103,15 @@ function perflab_render_plugins_ui(): void {
 		// Skip if the plugin is not on WordPress.org or there was a network error.
 		if ( $api_data instanceof WP_Error ) {
 			wp_admin_notice(
-				esc_html(
+				wp_kses(
 					sprintf(
 						/* translators: 1: plugin slug. 2: error message. */
-						__( 'Failed to query WordPress.org Plugin Directory for plugin "%1$s". %2$s', 'performance-lab' ),
+						esc_html__( 'Failed to query WordPress.org Plugin Directory for plugin "%1$s". %2$s', 'performance-lab' ),
 						$plugin_slug,
 						$api_data->get_error_message()
+					),
+					array(
+						'a' => array( 'href' => true ),
 					)
 				),
 				array( 'type' => 'error' )
