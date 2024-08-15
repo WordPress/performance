@@ -20,6 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class Image_Prioritizer_Tag_Visitor {
 
 	/**
+	 * The ID used the register the class
+	 */
+	public const ID = 'image-prioritizer-tag';
+
+	/**
 	 * Visits a tag.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
