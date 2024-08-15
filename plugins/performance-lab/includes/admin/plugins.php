@@ -96,26 +96,14 @@ function perflab_render_plugins_ui(): void {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 	$plugins = array();
+	$errors  = array();
 
 	foreach ( perflab_get_standalone_plugin_data() as $plugin_slug => $plugin_data ) {
 		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from wordpress.org.
 
 		// Skip if the plugin is not on WordPress.org or there was a network error.
 		if ( $api_data instanceof WP_Error ) {
-			wp_admin_notice(
-				wp_kses(
-					sprintf(
-						/* translators: 1: plugin slug. 2: error message. */
-						esc_html__( 'Failed to query WordPress.org Plugin Directory for plugin "%1$s". %2$s', 'performance-lab' ),
-						$plugin_slug,
-						$api_data->get_error_message()
-					),
-					array(
-						'a' => array( 'href' => true ),
-					)
-				),
-				array( 'type' => 'error' )
-			);
+			$errors[ $plugin_slug ] = $api_data;
 		} else {
 			$plugins[ $plugin_slug ] = array_merge(
 				array(
@@ -125,6 +113,27 @@ function perflab_render_plugins_ui(): void {
 				$api_data
 			);
 		}
+	}
+
+	if ( count( $errors ) > 0 ) {
+		$list = '<ul>';
+		foreach ( $errors as $plugin_slug => $error ) {
+			$list .= sprintf(
+				'<li><a target="_blank" href="%s">%s</a>: %s</li>',
+				esc_url( trailingslashit( __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_slug ) ),
+				esc_html( $plugin_slug ),
+				wp_kses( $error->get_error_message(), array( 'a' => array( 'href' => true ) ) )
+			);
+		}
+		$list .= '</ul>';
+		wp_admin_notice(
+			esc_html(
+				_n( 'Failed to query WordPress.org Plugin Directory for the following plugin:', 'Failed to query WordPress.org Plugin Directory for the following plugins:', count( $errors ), 'performance-lab' )
+			) .
+			$list .
+			esc_html__( 'Please consider manual installation.', 'performance-lab' ),
+			array( 'type' => 'error' )
+		);
 	}
 
 	/*
