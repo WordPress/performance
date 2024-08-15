@@ -219,7 +219,8 @@ function webp_uploads_use_picture_element_callback(): void {
 				onchange="document.getElementById('webp_uploads_use_picture_element_value').value = this.checked ? 1 : 0"
 			>
 			<input
-				type="hidden" name="webp_uploads_use_picture_element"
+				type="hidden"
+				name="webp_uploads_use_picture_element"
 				id="webp_uploads_use_picture_element_value"
 				value="<?php echo $picture_element_enabled ? 1 : 0; ?>"
 			>
