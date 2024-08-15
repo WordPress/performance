@@ -169,41 +169,12 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
  * @since 1.0.0
  */
 function webp_uploads_generate_webp_jpeg_setting_callback(): void {
-
 	?>
 		<label for="perflab_generate_webp_and_jpeg">
 			<input name="perflab_generate_webp_and_jpeg" type="checkbox" id="perflab_generate_webp_and_jpeg" aria-describedby="perflab_generate_webp_and_jpeg_description" value="1"<?php checked( '1', get_option( 'perflab_generate_webp_and_jpeg' ) ); ?> />
 			<?php esc_html_e( 'Output JPEG images in addition to the modern format', 'webp-uploads' ); ?>
 		</label>
 		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
-		<script>
-			// Listen for clicks on the JPEG output checkbox, enabling/disabling the
-			// picture element checkbox accordingly.
-			document.getElementById( 'perflab_generate_webp_and_jpeg' ).addEventListener( 'change', function () {
-				document.querySelector( '.webp-uploads-use-picture-element' ).classList.toggle( 'webp-uploads-disabled', ! this.checked );
-				document.getElementById( 'webp_uploads_picture_element_notice' ).hidden = this.checked;
-				document.getElementById( 'webp_uploads_picture_element_fieldset' ).classList.toggle( 'disabled', ! this.checked );
-
-				var checkbox = document.getElementById( 'webp_uploads_use_picture_element' );
-				checkbox.disabled = ! this.checked;
-
-				// Remove or inject hidden input to preserve original setting value as needed.
-				if ( this.checked ) {
-					var hiddenInput = document.getElementById( 'webp_uploads_use_picture_element_hidden' );
-					if ( hiddenInput ) {
-						hiddenInput.parentElement.removeChild( hiddenInput );
-					}
-				} else if ( checkbox.checked && ! document.getElementById( 'webp_uploads_use_picture_element_hidden' ) ) {
-					// The hidden input is only needed if the value was originally set (i.e. the checkbox enabled).
-					var hiddenInput = document.createElement( 'input' );
-					hiddenInput.setAttribute( 'type', 'hidden' );
-					hiddenInput.setAttribute( 'id', 'webp_uploads_use_picture_element_hidden' );
-					hiddenInput.setAttribute( 'name', checkbox.getAttribute( 'name' ) );
-					hiddenInput.setAttribute( 'value', checkbox.getAttribute( 'value' ) );
-					checkbox.parentElement.insertBefore( hiddenInput, checkbox.nextSibling );
-				}
-			} );
-		</script>
 	<?php
 }
 
@@ -264,6 +235,33 @@ function webp_uploads_use_picture_element_callback(): void {
 	<script>
 		document.getElementById( 'webp_uploads_use_picture_element' ).addEventListener( 'change', function () {
 			document.getElementById( 'webp_uploads_jpeg_fallback_notice' ).hidden = ! this.checked;
+		} );
+
+		// Listen for clicks on the JPEG output checkbox, enabling/disabling the
+		// picture element checkbox accordingly.
+		document.getElementById( 'perflab_generate_webp_and_jpeg' ).addEventListener( 'change', function () {
+			document.querySelector( '.webp-uploads-use-picture-element' ).classList.toggle( 'webp-uploads-disabled', ! this.checked );
+			document.getElementById( 'webp_uploads_picture_element_notice' ).hidden = this.checked;
+			document.getElementById( 'webp_uploads_picture_element_fieldset' ).classList.toggle( 'disabled', ! this.checked );
+
+			var checkbox = document.getElementById( 'webp_uploads_use_picture_element' );
+			checkbox.disabled = ! this.checked;
+
+			// Remove or inject hidden input to preserve original setting value as needed.
+			if ( this.checked ) {
+				var hiddenInput = document.getElementById( 'webp_uploads_use_picture_element_hidden' );
+				if ( hiddenInput ) {
+					hiddenInput.parentElement.removeChild( hiddenInput );
+				}
+			} else if ( checkbox.checked && ! document.getElementById( 'webp_uploads_use_picture_element_hidden' ) ) {
+				// The hidden input is only needed if the value was originally set (i.e. the checkbox enabled).
+				var hiddenInput = document.createElement( 'input' );
+				hiddenInput.setAttribute( 'type', 'hidden' );
+				hiddenInput.setAttribute( 'id', 'webp_uploads_use_picture_element_hidden' );
+				hiddenInput.setAttribute( 'name', checkbox.getAttribute( 'name' ) );
+				hiddenInput.setAttribute( 'value', checkbox.getAttribute( 'value' ) );
+				checkbox.parentElement.insertBefore( hiddenInput, checkbox.nextSibling );
+			}
 		} );
 	</script>
 	<?php
