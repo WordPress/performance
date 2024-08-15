@@ -98,7 +98,8 @@ function perflab_render_plugins_ui(): void {
 	$plugins = array();
 	$errors  = array();
 
-	foreach ( perflab_get_standalone_plugin_data() as $plugin_slug => $plugin_data ) {
+	$standalone_plugin_data = perflab_get_standalone_plugin_data();
+	foreach ( $standalone_plugin_data as $plugin_slug => $plugin_data ) {
 		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from wordpress.org.
 
 		// Skip if the plugin is not on WordPress.org or there was a network error.
@@ -125,11 +126,19 @@ function perflab_render_plugins_ui(): void {
 		$plugin_list    = '<ul>';
 		$error_messages = array();
 		foreach ( $errors as $plugin_slug => $error ) {
+			if ( defined( $standalone_plugin_data[ $plugin_slug ]['constant'] ) ) {
+				$status = __( '(active)', 'performance-lab' );
+			} elseif ( in_array( $plugin_slug, $active_plugins, true ) ) {
+				$status = __( '(installed)', 'performance-lab' );
+			} else {
+				$status = '';
+			}
+
 			$plugin_list     .= sprintf(
-				'<li><a target="_blank" href="%s"><code>%s</code></a>%s</li>',
+				'<li><a target="_blank" href="%s"><code>%s</code></a> %s</li>',
 				esc_url( trailingslashit( __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_slug ) ),
 				esc_html( $plugin_slug ),
-				in_array( $plugin_slug, $active_plugins, true ) ? ' ' . esc_html__( '(already installed)', 'performance-lab' ) : ''
+				esc_html( $status )
 			);
 			$error_messages[] = $error->get_error_message();
 		}
@@ -144,7 +153,7 @@ function perflab_render_plugins_ui(): void {
 			$plugin_list .
 			'<p>' . esc_html( _n( 'The following error occurred:', 'The following errors occurred:', count( $error_messages ), 'performance-lab' ) ) . '</p>' .
 			'<ul><li>' . join( '</li><li>', $error_messages ) . '</li></ul>' .
-			esc_html__( 'Please consider manual installation.', 'performance-lab' ),
+			esc_html__( 'Please consider manual plugin installation and activation.', 'performance-lab' ),
 			array( 'type' => 'error' )
 		);
 	}
