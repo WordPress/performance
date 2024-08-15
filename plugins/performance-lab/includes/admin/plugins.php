@@ -116,21 +116,34 @@ function perflab_render_plugins_ui(): void {
 	}
 
 	if ( count( $errors ) > 0 ) {
-		$list = '<ul>';
+		$active_plugins = array_map(
+			static function ( string $file ) {
+				return strtok( $file, '/' );
+			},
+			array_keys( get_plugins() )
+		);
+		$plugin_list    = '<ul>';
+		$error_messages = array();
 		foreach ( $errors as $plugin_slug => $error ) {
-			$list .= sprintf(
-				'<li><a target="_blank" href="%s">%s</a>: %s</li>',
+			$plugin_list     .= sprintf(
+				'<li><a target="_blank" href="%s"><code>%s</code></a>%s</li>',
 				esc_url( trailingslashit( __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_slug ) ),
 				esc_html( $plugin_slug ),
-				wp_kses( $error->get_error_message(), array( 'a' => array( 'href' => true ) ) )
+				in_array( $plugin_slug, $active_plugins, true ) ? ' ' . esc_html__( '(already installed)', 'performance-lab' ) : ''
 			);
+			$error_messages[] = $error->get_error_message();
 		}
-		$list .= '</ul>';
+		$plugin_list .= '</ul>';
+
+		$error_messages = array_unique( $error_messages );
+
 		wp_admin_notice(
 			esc_html(
 				_n( 'Failed to query WordPress.org Plugin Directory for the following plugin:', 'Failed to query WordPress.org Plugin Directory for the following plugins:', count( $errors ), 'performance-lab' )
 			) .
-			$list .
+			$plugin_list .
+			'<p>' . esc_html( _n( 'The following error occurred:', 'The following errors occurred:', count( $error_messages ), 'performance-lab' ) ) . '</p>' .
+			'<ul><li>' . join( '</li><li>', $error_messages ) . '</li></ul>' .
 			esc_html__( 'Please consider manual installation.', 'performance-lab' ),
 			array( 'type' => 'error' )
 		);
