@@ -258,10 +258,10 @@ function webp_uploads_use_picture_element_callback(): void {
 			} else if ( checkbox.checked && ! document.getElementById( pictureElementHiddenId ) ) {
 				// The hidden input is only needed if the value was originally set (i.e. the checkbox enabled).
 				const hiddenInput = document.createElement( 'input' );
-				hiddenInput.setAttribute( 'type', 'hidden' );
-				hiddenInput.setAttribute( 'id', pictureElementHiddenId );
-				hiddenInput.setAttribute( 'name', checkbox.getAttribute( 'name' ) );
-				hiddenInput.setAttribute( 'value', checkbox.getAttribute( 'value' ) );
+				hiddenInput.type = 'hidden';
+				hiddenInput.id = pictureElementHiddenId;
+				hiddenInput.name = checkbox.name;
+				hiddenInput.value = checkbox.value;
 				checkbox.parentElement.insertBefore( hiddenInput, checkbox.nextSibling );
 			}
 		} );
