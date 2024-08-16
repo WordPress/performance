@@ -163,8 +163,11 @@ function perflab_render_plugins_ui(): void {
 				)
 			)
 			. '</li></ul>' .
-			esc_html__( 'Please consider manual plugin installation and activation. You can then access each plugin\'s settings via its respective "Settings" link on the Plugins screen.', 'performance-lab' ),
-			array( 'type' => 'error' )
+			'<p>' . esc_html__( 'Please consider manual plugin installation and activation. You can then access each plugin\'s settings via its respective "Settings" link on the Plugins screen.', 'performance-lab' ) . '</p>',
+			array(
+				'type'           => 'error',
+				'paragraph_wrap' => false,
+			)
 		);
 	}
 
