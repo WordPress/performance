@@ -179,11 +179,24 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $buffered_text_replacements = array();
 
 	/**
-	 * Count for the number of times next_token() was called
+	 * Count for the number of times that the cursor was successfully moved.
+	 *
+	 * @since n.e.x.t
+	 * @var int
+	 * @see self::next_token()
+	 * @see self::seek()
+	 */
+	private $cursor_move_count = 0;
+
+	/**
+	 * Count for the number of times next_token() was called.
+	 *
+	 * The method that uses this is deprecated and it will be removed in a future release.
 	 *
 	 * @since 0.4.1
 	 * @var int
 	 * @see self::next_token()
+	 * @see self::get_next_token_count()
 	 */
 	private $next_token_count = 0;
 
@@ -258,7 +271,8 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 */
 	public function next_token(): bool {
 		$this->current_xpath = null; // Clear cache.
-		++$this->next_token_count;
+		++$this->next_token_count; // TODO: Remove when the deprecated get_next_token_count() method is removed.
+		++$this->cursor_move_count;
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags    = array();
 			$this->open_stack_indices = array();
@@ -339,14 +353,29 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
+	 * Gets the number of times the cursor has moved.
+	 *
+	 * @since n.e.x.t
+	 * @see self::next_token()
+	 * @see self::seek()
+	 *
+	 * @return int Count of times the cursor has moved.
+	 */
+	public function get_cursor_move_count(): int {
+		return $this->cursor_move_count;
+	}
+
+	/**
 	 * Gets the number of times next_token() was called.
 	 *
 	 * @since 0.4.1
 	 * @see self::next_token()
+	 * @deprecated Use {@see self::get_cursor_move_count()} instead.
 	 *
 	 * @return int Count of next_token() calls.
 	 */
 	public function get_next_token_count(): int {
+		_deprecated_function( __METHOD__, 'Optimization Detective n.e.x.t', __CLASS__ . '::get_cursor_move_count()' );
 		return $this->next_token_count;
 	}
 
@@ -429,6 +458,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		if ( $result ) {
 			$this->open_stack_tags    = $this->bookmarked_open_stacks[ $bookmark_name ]['tags'];
 			$this->open_stack_indices = $this->bookmarked_open_stacks[ $bookmark_name ]['indices'];
+			++$this->cursor_move_count;
 		}
 		return $result;
 	}
@@ -438,10 +468,12 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @since 0.4.1
 	 * @see self::seek()
+	 * @deprecated Use {@see self::get_cursor_move_count()} instead.
 	 *
 	 * @return int Count of seek() calls.
 	 */
 	public function get_seek_count(): int {
+		_deprecated_function( __METHOD__, 'Optimization Detective n.e.x.t', __CLASS__ . '::get_cursor_move_count()' );
 		return $this->seek_count;
 	}
 
