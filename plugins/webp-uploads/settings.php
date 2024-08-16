@@ -185,8 +185,9 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
  */
 function webp_uploads_use_picture_element_callback(): void {
 	// Picture element support requires the JPEG output to be enabled.
-	$picture_element_option = 1 === (int) get_option( 'webp_uploads_use_picture_element', 0 );
-	$jpeg_fallback_enabled  = webp_uploads_is_jpeg_fallback_enabled();
+	$picture_element_option    = 1 === (int) get_option( 'webp_uploads_use_picture_element', 0 );
+	$jpeg_fallback_enabled     = webp_uploads_is_jpeg_fallback_enabled();
+	$picture_element_hidden_id = 'webp_uploads_use_picture_element_hidden';
 	?>
 	<style>
 		#webp_uploads_picture_element_fieldset.disabled label,
@@ -217,7 +218,7 @@ function webp_uploads_use_picture_element_callback(): void {
 				?>
 				<input
 					type="hidden"
-					id="webp_uploads_use_picture_element_hidden"
+					id="<?php echo esc_attr( $picture_element_hidden_id ); ?>"
 					name="webp_uploads_use_picture_element"
 					value="1"
 				>
@@ -233,6 +234,7 @@ function webp_uploads_use_picture_element_callback(): void {
 		</div>
 	</div>
 	<script>
+	( function ( pictureElementHiddenId ) {
 		document.getElementById( 'webp_uploads_use_picture_element' ).addEventListener( 'change', function () {
 			document.getElementById( 'webp_uploads_jpeg_fallback_notice' ).hidden = ! this.checked;
 		} );
@@ -249,20 +251,21 @@ function webp_uploads_use_picture_element_callback(): void {
 
 			// Remove or inject hidden input to preserve original setting value as needed.
 			if ( this.checked ) {
-				const hiddenInput = document.getElementById( 'webp_uploads_use_picture_element_hidden' );
+				const hiddenInput = document.getElementById( pictureElementHiddenId );
 				if ( hiddenInput ) {
 					hiddenInput.parentElement.removeChild( hiddenInput );
 				}
-			} else if ( checkbox.checked && ! document.getElementById( 'webp_uploads_use_picture_element_hidden' ) ) {
+			} else if ( checkbox.checked && ! document.getElementById( pictureElementHiddenId ) ) {
 				// The hidden input is only needed if the value was originally set (i.e. the checkbox enabled).
 				const hiddenInput = document.createElement( 'input' );
 				hiddenInput.setAttribute( 'type', 'hidden' );
-				hiddenInput.setAttribute( 'id', 'webp_uploads_use_picture_element_hidden' );
+				hiddenInput.setAttribute( 'id', pictureElementHiddenId );
 				hiddenInput.setAttribute( 'name', checkbox.getAttribute( 'name' ) );
 				hiddenInput.setAttribute( 'value', checkbox.getAttribute( 'value' ) );
 				checkbox.parentElement.insertBefore( hiddenInput, checkbox.nextSibling );
 			}
 		} );
+	} )( <?php echo wp_json_encode( $picture_element_hidden_id ); ?> );
 	</script>
 	<?php
 }
