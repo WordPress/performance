@@ -116,8 +116,8 @@ function auto_sizes_apply_tag_parser_updates( WP_HTML_Tag_Processor $processor )
  * @return bool True if the 'auto' keyword is present, false otherwise.
  */
 function auto_sizes_attribute_includes_valid_auto( string $sizes_attr ): bool {
-	$token = strtok( strtolower( $sizes_attr ), ',' );
-	return false !== $token && 'auto' === trim( $token, " \t\f\r\n" );
+	list( $first_size ) = explode( ',', $sizes_attr, 2 );
+	return 'auto' === strtolower( trim( $first_size, " \t\f\r\n" ) );
 }
 
 /**
