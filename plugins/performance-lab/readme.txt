@@ -72,6 +72,16 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 3.4.0 =
 
+**Enhancements**
+
+* Remove Server-Timing metric for the autoloaded options query time. ([1456](https://github.com/WordPress/performance/pull/1456))
+
+**Bug Fixes**
+
+* Avoid sending Server-Timing header when buffer is being cleaned. ([1443](https://github.com/WordPress/performance/pull/1443))
+* Fix disabled options from reappearing in Site Health after external update. ([1374](https://github.com/WordPress/performance/pull/1374))
+* Improve Performance screen when external requests to WordPress.org fail. ([1474](https://github.com/WordPress/performance/pull/1474))
+
 = 3.3.1 =
 
 **Enhancements**

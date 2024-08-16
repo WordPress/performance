@@ -54,6 +54,15 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 1.2.0 =
 
+**Enhancements**
+
+* Harden logic to add `auto` keyword to `sizes` attribute to prevent duplicate keyword. ([1445](https://github.com/WordPress/performance/pull/1445))
+* Use more robust HTML Tag Processor for auto sizes injection. ([1471](https://github.com/WordPress/performance/pull/1471))
+
+**Bug Fixes**
+
+* Remove sizes attribute when the responsive image disabled. ([1399](https://github.com/WordPress/performance/pull/1399))
+
 = 1.1.0 =
 
 **Features**

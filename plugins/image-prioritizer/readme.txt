@@ -64,6 +64,10 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 0.2.0 =
 
+**Bug Fixes**
+
+* Fix handling of image prioritization when only some viewport groups are populated. ([1404](https://github.com/WordPress/performance/pull/1404))
+
 = 0.1.2 =
 
 * Update PHP logic to account for changes in Optimization Detective API. ([1302](https://github.com/WordPress/performance/pull/1302))
