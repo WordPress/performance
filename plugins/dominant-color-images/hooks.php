@@ -95,20 +95,18 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, string $con
 		$filtered_image = '';
 	}
 
-	$processor = new WP_HTML_Tag_Processor( $filtered_image );
-
-	if ( ! $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
-		return $filtered_image;
-	}
-
 	// Only apply this in `the_content` for now, since otherwise it can result in duplicate runs due to a problem with full site editing logic.
 	if ( 'the_content' !== $context ) {
 		return $filtered_image;
 	}
 
-	// Only apply the dominant color to images that have a src attribute that
-	// starts with a double quote, ensuring escaped JSON is also excluded.
-	if ( ! str_contains( $filtered_image, ' src="' ) ) {
+	$processor = new WP_HTML_Tag_Processor( $filtered_image );
+	if ( ! $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+		return $filtered_image;
+	}
+
+	// Only apply the dominant color to images that have a src attribute.
+	if ( null === $processor->get_attribute( 'src' ) || ! is_string( $processor->get_attribute( 'src' ) ) ) {
 		return $filtered_image;
 	}
 
@@ -141,9 +139,9 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, string $con
 	}
 
 	if ( ! empty( $image_meta['dominant_color'] ) ) {
-		$processor->set_attribute( 'data-dominant-color', esc_attr( $image_meta['dominant_color'] ) );
+		$processor->set_attribute( 'data-dominant-color', $image_meta['dominant_color'] );
 
-		$style_attribute = '--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . '; ';
+		$style_attribute = '--dominant-color: #' . $image_meta['dominant_color'] . '; ';
 		if ( null !== $processor->get_attribute( 'style' ) ) {
 			$style_attribute .= $processor->get_attribute( 'style' );
 		}
@@ -152,7 +150,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, string $con
 
 	if ( isset( $image_meta['has_transparency'] ) ) {
 		$transparency = $image_meta['has_transparency'] ? 'true' : 'false';
-		$processor->set_attribute( 'data-has-transparency', esc_attr( $transparency ) );
+		$processor->set_attribute( 'data-has-transparency', $transparency );
 		$processor->add_class( $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent' );
 	}
 
