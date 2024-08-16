@@ -189,11 +189,11 @@ class Test_Dominant_Color extends TestCase {
 			),
 			'single quotes'         => array(
 				'image'    => "<img src='%s'>",
-				'expected' => false,
+				'expected' => true,
 			),
 			'escaped double quotes' => array(
 				'image'    => '<img src=\"%s\">',
-				'expected' => false,
+				'expected' => true,
 			),
 		);
 	}
