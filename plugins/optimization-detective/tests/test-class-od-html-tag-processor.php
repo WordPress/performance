@@ -645,10 +645,10 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$this->assertFalse( $processor->next_tag() );
 		$this->assertSame( 11, $processor->get_cursor_move_count() );
 		$this->assertTrue( $processor->seek( 'document_root' ) );
-		$this->assertSame( 13, $processor->get_cursor_move_count() ); // Incremented by two because seek() was called in addition to next_token().
+		$this->assertSame( 12, $processor->get_cursor_move_count() );
 		$this->setExpectedIncorrectUsage( 'WP_HTML_Tag_Processor::seek' );
 		$this->assertFalse( $processor->seek( 'does_not_exist' ) );
-		$this->assertSame( 13, $processor->get_cursor_move_count() ); // The bookmark does not exist so no change.
+		$this->assertSame( 12, $processor->get_cursor_move_count() ); // The bookmark does not exist so no change.
 	}
 
 	/**

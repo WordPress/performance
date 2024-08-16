@@ -458,7 +458,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		if ( $result ) {
 			$this->open_stack_tags    = $this->bookmarked_open_stacks[ $bookmark_name ]['tags'];
 			$this->open_stack_indices = $this->bookmarked_open_stacks[ $bookmark_name ]['indices'];
-			++$this->cursor_move_count;
 		}
 		return $result;
 	}
