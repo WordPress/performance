@@ -147,9 +147,9 @@ function perflab_render_plugins_ui(): void {
 		$error_messages = array_unique( $error_messages );
 
 		wp_admin_notice(
-			esc_html(
+			'<p>' . esc_html(
 				_n( 'Failed to query WordPress.org Plugin Directory for the following plugin:', 'Failed to query WordPress.org Plugin Directory for the following plugins:', count( $errors ), 'performance-lab' )
-			) .
+			) . '</p>' .
 			$plugin_list .
 			'<p>' . esc_html( _n( 'The following error occurred:', 'The following errors occurred:', count( $error_messages ), 'performance-lab' ) ) . '</p>' .
 			'<ul><li>' .
