@@ -92,7 +92,7 @@ add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
  *
  * Per the HTML spec, if present it must be the first entry.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @param string $sizes_attr The 'sizes' attribute value.
  * @return bool True if the 'auto' keyword is present, false otherwise.
