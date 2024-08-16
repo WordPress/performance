@@ -64,28 +64,46 @@ function auto_sizes_update_content_img_tag( $html ): string {
 		return $html;
 	}
 
-	// Bail early if the image is not lazy-loaded.
-	$value = $processor->get_attribute( 'loading' );
-	if ( ! is_string( $value ) || 'lazy' !== strtolower( trim( $value, " \t\f\r\n" ) ) ) {
-		return $html;
-	}
-
-	$sizes = $processor->get_attribute( 'sizes' );
-
-	// Bail early if the image is not responsive.
-	if ( ! is_string( $sizes ) ) {
-		return $html;
-	}
-
-	// Don't add 'auto' to the sizes attribute if it already exists.
-	if ( auto_sizes_attribute_includes_valid_auto( $sizes ) ) {
-		return $html;
-	}
-
-	$processor->set_attribute( 'sizes', "auto, $sizes" );
+	auto_sizes_apply_tag_parser_updates( $processor );
 	return $processor->get_updated_html();
 }
 add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+
+/**
+ * Applies changes to current IMG tag to add or remove 'auto' from the sizes attribute when needed.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @param WP_HTML_Tag_Processor $processor HTML processor currently at an IMG tag.
+ * @return bool Whether changes were made.
+ */
+function auto_sizes_apply_tag_parser_updates( WP_HTML_Tag_Processor $processor ): bool {
+	if ( $processor->get_tag() !== 'IMG' ) {
+		return false;
+	}
+
+	$sizes = $processor->get_attribute( 'sizes' );
+	if ( ! is_string( $sizes ) ) {
+		return false;
+	}
+
+	$value   = $processor->get_attribute( 'loading' );
+	$is_lazy = ( is_string( $value ) && 'lazy' === strtolower( trim( $value, " \t\f\r\n" ) ) );
+
+	$has_auto = auto_sizes_attribute_includes_valid_auto( $sizes );
+
+	if ( $is_lazy && ! $has_auto ) {
+		$processor->set_attribute( 'sizes', "auto, $sizes" );
+	} elseif ( ! $is_lazy && $has_auto ) {
+		// Remove auto from the beginning of the list.
+		$processor->set_attribute(
+			'sizes',
+			(string) preg_replace( '/^[ \t\f\r\n]*auto[ \t\f\r\n]*(,[ \t\f\r\n]*)?/i', '', $sizes )
+		);
+	}
+	return true;
+}
 
 /**
  * Checks whether the given 'sizes' attribute includes the 'auto' keyword as the first item in the list.
