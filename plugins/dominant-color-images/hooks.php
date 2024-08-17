@@ -106,7 +106,7 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, string $con
 	}
 
 	// Only apply the dominant color to images that have a src attribute.
-	if ( null === $processor->get_attribute( 'src' ) || ! is_string( $processor->get_attribute( 'src' ) ) ) {
+	if ( ! is_string( $processor->get_attribute( 'src' ) ) ) {
 		return $filtered_image;
 	}
 
