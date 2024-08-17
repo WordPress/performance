@@ -87,7 +87,7 @@ function error( ...message ) {
  */
 
 /**
- * @typedef {Object} URLMetrics
+ * @typedef {Object} URLMetric
  * @property {string}           url             - URL of the page.
  * @property {Object}           viewport        - Viewport.
  * @property {number}           viewport.width  - Viewport width.
@@ -99,6 +99,12 @@ function error( ...message ) {
  * @typedef {Object} URLMetricsGroupStatus
  * @property {number}  minimumViewportWidth - Minimum viewport width.
  * @property {boolean} complete             - Whether viewport group is complete.
+ */
+
+/**
+ * @typedef {Object} Extension
+ * @property {Function} [initialize] - Initialize the extension as soon as the DOM has loaded.
+ * @property {Function} [finalize]   - Finalize the URL metric prior to it being sent to the server.
  */
 
 /**
@@ -138,6 +144,7 @@ function getCurrentTime() {
  * @param {Object}                  args                             Args.
  * @param {number}                  args.serveTime                   The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
  * @param {number}                  args.detectionTimeWindow         The number of milliseconds between now and when the page was first generated in which detection should proceed.
+ * @param {string[]}                args.extensionModuleUrls         URLs for extension script modules to import.
  * @param {boolean}                 args.isDebug                     Whether to show debug messages.
  * @param {string}                  args.restApiEndpoint             URL for where to send the detection data.
  * @param {string}                  args.restApiNonce                Nonce for writing to the REST API.
@@ -153,6 +160,7 @@ export default async function detect( {
 	serveTime,
 	detectionTimeWindow,
 	isDebug,
+	extensionModuleUrls,
 	restApiEndpoint,
 	restApiNonce,
 	currentUrl,
@@ -172,6 +180,8 @@ export default async function detect( {
 		);
 	}
 
+	// TODO: Start of code which should be inlined in the module.
+
 	// Abort running detection logic if it was served in a cached page.
 	if ( currentTime - serveTime > detectionTimeWindow ) {
 		if ( isDebug ) {
@@ -190,6 +200,8 @@ export default async function detect( {
 		return;
 	}
 
+	// TODO: End of code which should be inlined in the module.
+
 	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
 	await new Promise( ( resolve ) => {
 		if ( doc.readyState !== 'loading' ) {
@@ -199,54 +211,15 @@ export default async function detect( {
 		}
 	} );
 
-	// TODO: Conditionally add this JS only when we know there are embeds on the page.
-	// TODO: This JS should be provided by Embed Optimizer and not bundled in Optimization Detective. It should update the pending url metrics before they are sent to the server when the page is hidden.
-	// TODO: This is only necessary for embeds that contain scripting.
-	/*
-	 * Observe the loading of embeds on the page. We need to run this now before the resources on the page have fully
-	 * loaded because we need to start observing the embed wrappers before the embeds have loaded. When we detect
-	 * subtree modifications in an embed wrapper, we then need to measure the new height of the wrapper element.
-	 * However, since there may be multiple subtree modifications performed as an embed is loaded, we need to wait until
-	 * what is likely the last mutation.
-	 */
-	const EMBED_LOAD_WAIT_MS = 1000;
-	const embedWrappers =
-		/** @type NodeListOf<HTMLDivElement> */ document.querySelectorAll(
-			'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
-		);
-
-	/**
-	 * Monitors embed wrapper for resizes.
-	 *
-	 * @param {HTMLDivElement} embedWrapper Embed wrapper DIV.
-	 */
-	function monitorEmbedWrapperForResizes( embedWrapper ) {
-		if ( ! ( 'odXpath' in embedWrapper.dataset ) ) {
-			throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
+	/** @type {Extension[]} */
+	const extensions = [];
+	for ( const extensionModuleUrl of extensionModuleUrls ) {
+		const extension = await import( extensionModuleUrl );
+		extensions.push( extension );
+		// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
+		if ( extension.initialize instanceof Function ) {
+			extension.initialize( { isDebug } );
 		}
-		const xpath = embedWrapper.dataset.odXpath;
-		let timeoutId = 0;
-		const observer = new ResizeObserver( ( entries ) => {
-			const [ entry ] = entries;
-			if ( timeoutId > 0 ) {
-				clearTimeout( timeoutId );
-			}
-			log(
-				`[Embed Optimizer] Pending embed height of ${ entry.contentRect.height }px for ${ xpath }`
-			);
-			// TODO: Is the timeout really needed? We can just keep updating the height of the element until the URL metrics are sent when the page closes.
-			timeoutId = setTimeout( () => {
-				log(
-					`[Embed Optimizer] Final embed height of ${ entry.contentRect.height }px for ${ xpath }`
-				);
-				observer.disconnect();
-				// TODO: Now amend URL metrics with this rect.height.
-			}, EMBED_LOAD_WAIT_MS );
-		} );
-		observer.observe( embedWrapper, { box: 'content-box' } );
-	}
-	for ( const embedWrapper of embedWrappers ) {
-		monitorEmbedWrapperForResizes( embedWrapper );
 	}
 
 	// Wait until the resources on the page have fully loaded.
@@ -265,6 +238,7 @@ export default async function detect( {
 		} );
 	}
 
+	// TODO: Does this make sense here? Should it be moved up above the isViewportNeeded condition?
 	// As an alternative to this, the od_print_detection_script() function can short-circuit if the
 	// od_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
 	// result in metrics missed from being gathered when a user navigates around a site and primes the page cache.
@@ -275,6 +249,7 @@ export default async function detect( {
 		return;
 	}
 
+	// TODO: Does this make sense here?
 	// Prevent detection when page is not scrolled to the initial viewport.
 	if ( doc.documentElement.scrollTop > 0 ) {
 		if ( isDebug ) {
@@ -371,8 +346,8 @@ export default async function detect( {
 		log( 'Detection is stopping.' );
 	}
 
-	/** @type {URLMetrics} */
-	const urlMetrics = {
+	/** @type {URLMetric} */
+	const urlMetric = {
 		url: currentUrl,
 		slug: urlMetricsSlug,
 		nonce: urlMetricsNonce,
@@ -411,11 +386,22 @@ export default async function detect( {
 			boundingClientRect: elementIntersection.boundingClientRect,
 		};
 
-		urlMetrics.elements.push( elementMetrics );
+		urlMetric.elements.push( elementMetrics );
+	}
+
+	// TODO: Wait until the page is unloading.
+
+	for ( const extension of extensions ) {
+		if ( extension.finalize instanceof Function ) {
+			extension.finalize( {
+				isDebug,
+				urlMetric,
+			} );
+		}
 	}
 
 	if ( isDebug ) {
-		log( 'Current URL metrics:', urlMetrics );
+		log( 'Current URL metrics:', urlMetric );
 	}
 
 	// Yield to main before sending data to server to further break up task.
@@ -430,7 +416,7 @@ export default async function detect( {
 				'Content-Type': 'application/json',
 				'X-WP-Nonce': restApiNonce,
 			},
-			body: JSON.stringify( urlMetrics ),
+			body: JSON.stringify( urlMetric ),
 		} );
 
 		if ( response.status === 200 ) {

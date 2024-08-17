@@ -13,9 +13,9 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 	public function test_hooks(): void {
 		embed_optimizer_add_hooks();
 		if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
-			$this->assertFalse( has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' ) );
+			$this->assertFalse( has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_lazy_load' ) );
 		} else {
-			$this->assertSame( 10, has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' ) );
+			$this->assertSame( 10, has_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_lazy_load' ) );
 		}
 		$this->assertSame( 10, has_action( 'wp_head', 'embed_optimizer_render_generator' ) );
 	}
@@ -23,15 +23,15 @@ class Test_Embed_Optimizer_Hooks extends WP_UnitTestCase {
 	/**
 	 * Test that the oEmbed HTML is filtered.
 	 *
-	 * @covers ::embed_optimizer_filter_oembed_html
+	 * @covers ::embed_optimizer_filter_oembed_html_to_lazy_load
 	 * @covers ::embed_optimizer_update_markup
 	 * @dataProvider get_data_to_test_filter_oembed_html_data
 	 */
-	public function test_embed_optimizer_filter_oembed_html( string $html, string $expected_html = null, bool $expected_lazy_script = false ): void {
+	public function test_embed_optimizer_filter_oembed_html_to_lazy_load( string $html, string $expected_html = null, bool $expected_lazy_script = false ): void {
 		if ( null === $expected_html ) {
 			$expected_html = $html; // No change.
 		}
-		$this->assertEquals( $expected_html, embed_optimizer_filter_oembed_html( $html ) );
+		$this->assertEquals( $expected_html, embed_optimizer_filter_oembed_html_to_lazy_load( $html ) );
 		$this->assertSame( $expected_lazy_script ? 10 : false, has_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' ) );
 	}
 

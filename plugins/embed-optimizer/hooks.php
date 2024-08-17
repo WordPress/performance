@@ -20,8 +20,9 @@ function embed_optimizer_add_hooks(): void {
 
 	if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 		add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' );
+		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_detect_embed_presence' );
 	} else {
-		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
+		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_lazy_load' );
 	}
 }
 add_action( 'init', 'embed_optimizer_add_hooks' );
@@ -40,17 +41,54 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
 }
 
 /**
- * Filter the oEmbed HTML.
+ * Filters the list of Optimization Detective extension module URLs to include the extension for Embed Optimizer.
+ *
+ * @since n.e.x.t
+ *
+ * @param string[]|mixed $extension_module_urls Extension module URLs.
+ * @return string[] Extension module URLs.
+ */
+function embed_optimizer_filter_extension_module_urls( $extension_module_urls ): array {
+	if ( ! is_array( $extension_module_urls ) ) {
+		$extension_module_urls = array();
+	}
+	$extension_module_urls[] = add_query_arg( 'ver', EMBED_OPTIMIZER_VERSION, plugin_dir_url( __FILE__ ) . 'detect.js' );
+	return $extension_module_urls;
+}
+
+/**
+ * Filter the oEmbed HTML to detect when an embed is present so that the Optimization Detective extension module can be enqueued.
+ *
+ * This ensures that the module for handling embeds is only loaded when there is an embed on the page.
+ *
+ * @since n.e.x.t
+ *
+ * @param string|mixed $html The oEmbed HTML.
+ * @return string Unchanged oEmbed HTML.
+ */
+function embed_optimizer_filter_oembed_html_to_detect_embed_presence( $html ): string {
+	if ( ! is_string( $html ) ) {
+		$html = '';
+	}
+	add_filter( 'od_extension_module_urls', 'embed_optimizer_filter_extension_module_urls' );
+	return $html;
+}
+
+/**
+ * Filter the oEmbed HTML to lazy load the embed.
  *
  * Add loading="lazy" to any iframe tags.
  * Lazy load any script tags.
  *
  * @since 0.1.0
  *
- * @param string $html The oEmbed HTML.
+ * @param string|mixed $html The oEmbed HTML.
  * @return string Filtered oEmbed HTML.
  */
-function embed_optimizer_filter_oembed_html( string $html ): string {
+function embed_optimizer_filter_oembed_html_to_lazy_load( $html ): string {
+	if ( ! is_string( $html ) ) {
+		$html = '';
+	}
 	$html_processor = new WP_HTML_Tag_Processor( $html );
 	if ( embed_optimizer_update_markup( $html_processor, true ) ) {
 		add_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' );
