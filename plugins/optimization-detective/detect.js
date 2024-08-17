@@ -389,7 +389,10 @@ export default async function detect( {
 		urlMetric.elements.push( elementMetrics );
 	}
 
-	// TODO: Wait until the page is unloading.
+	// TODO: Wait until the page is actually unloading.
+	await new Promise( ( resolve ) => {
+		setTimeout( resolve, 2000 );
+	} );
 
 	for ( const extension of extensions ) {
 		if ( extension.finalize instanceof Function ) {

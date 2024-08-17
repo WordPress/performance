@@ -1,6 +1,29 @@
 const consoleLogPrefix = '[Embed Optimizer]';
 
 /**
+ * @todo This should be reused and not copied from ../optimization-detective/detect.js
+ *
+ * @typedef {Object} ElementMetrics
+ * @property {boolean}         isLCP              - Whether it is the LCP candidate.
+ * @property {boolean}         isLCPCandidate     - Whether it is among the LCP candidates.
+ * @property {string}          xpath              - XPath.
+ * @property {number}          intersectionRatio  - Intersection ratio.
+ * @property {DOMRectReadOnly} intersectionRect   - Intersection rectangle.
+ * @property {DOMRectReadOnly} boundingClientRect - Bounding client rectangle.
+ */
+
+/**
+ * @todo This should be reused and not copied from ../optimization-detective/detect.js
+ *
+ * @typedef {Object} URLMetric
+ * @property {string}           url             - URL of the page.
+ * @property {Object}           viewport        - Viewport.
+ * @property {number}           viewport.width  - Viewport width.
+ * @property {number}           viewport.height - Viewport height.
+ * @property {ElementMetrics[]} elements        - Metrics for the elements observed on the page.
+ */
+
+/**
  * Log a message.
  *
  * @param {...*} message
@@ -20,6 +43,13 @@ function log( ...message ) {
 const EMBED_LOAD_WAIT_MS = 1000;
 
 /**
+ * Embed element heights.
+ *
+ * @type {Map<string, DOMRectReadOnly>}
+ */
+const loadedElementContentRects = new Map();
+
+/**
  * Initialize.
  *
  * @param {Object}  args         Args.
@@ -36,10 +66,8 @@ export async function initialize( { isDebug } ) {
 	}
 
 	if ( isDebug ) {
-		log( embedWrappers );
+		log( 'Loaded embed content rects:', loadedElementContentRects );
 	}
-
-	// TODO: It should update the pending url metrics before they are sent to the server when the page is hidden.
 }
 
 /**
@@ -47,16 +75,30 @@ export async function initialize( { isDebug } ) {
  *
  * @todo Add typing for args.urlMetric
  *
- * @param {Object}  args           Args.
- * @param {boolean} args.isDebug   Whether to show debug messages.
- * @param {Object}  args.urlMetric Pending URL metric.
+ * @param {Object}    args           Args.
+ * @param {boolean}   args.isDebug   Whether to show debug messages.
+ * @param {URLMetric} args.urlMetric Pending URL metric.
  */
 export async function finalize( { urlMetric, isDebug } ) {
 	if ( isDebug ) {
 		log( 'URL metric to be sent:', urlMetric );
 	}
 
-	// TODO: Finalize.
+	for ( const element of urlMetric.elements ) {
+		if ( loadedElementContentRects.has( element.xpath ) ) {
+			if ( isDebug ) {
+				log(
+					'Overriding:',
+					element.boundingClientRect,
+					'=>',
+					loadedElementContentRects.get( element.xpath )
+				);
+			}
+			element.boundingClientRect = loadedElementContentRects.get(
+				element.xpath
+			);
+		}
+	}
 }
 
 /**
@@ -80,11 +122,8 @@ function monitorEmbedWrapperForResizes( embedWrapper ) {
 		);
 		// TODO: Is the timeout really needed? We can just keep updating the height of the element until the URL metrics are sent when the page closes.
 		timeoutId = setTimeout( () => {
-			log(
-				`Final embed height of ${ entry.contentRect.height }px for ${ xpath }`
-			);
+			loadedElementContentRects.set( xpath, entry.contentRect );
 			observer.disconnect();
-			// TODO: Now amend URL metrics with this rect.height.
 		}, EMBED_LOAD_WAIT_MS );
 	} );
 	observer.observe( embedWrapper, { box: 'content-box' } );
