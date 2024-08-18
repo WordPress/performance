@@ -155,8 +155,6 @@ export default async function detect( {
 		);
 	}
 
-	// TODO: Start of code which should be inlined in the module.
-
 	// Abort running detection logic if it was served in a cached page.
 	if ( currentTime - serveTime > detectionTimeWindow ) {
 		if ( isDebug ) {
@@ -175,8 +173,6 @@ export default async function detect( {
 		return;
 	}
 
-	// TODO: End of code which should be inlined in the module.
-
 	// Ensure the DOM is loaded (although it surely already is since we're executing in a module).
 	await new Promise( ( resolve ) => {
 		if ( doc.readyState !== 'loading' ) {
@@ -185,18 +181,6 @@ export default async function detect( {
 			doc.addEventListener( 'DOMContentLoaded', resolve, { once: true } );
 		}
 	} );
-
-	/** @type {Extension[]} */
-	const extensions = [];
-	for ( const extensionModuleUrl of extensionModuleUrls ) {
-		const extension = await import( extensionModuleUrl );
-		extensions.push( extension );
-		// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args. It's important to pass webVitalsLibrarySrc to the extension so that onLCP, onCLS, or onINP can be obtained.
-		// TODO: Pass additional functions from this module into the extensions.
-		if ( extension.initialize instanceof Function ) {
-			extension.initialize( { isDebug } );
-		}
-	}
 
 	// Wait until the resources on the page have fully loaded.
 	await new Promise( ( resolve ) => {
@@ -238,6 +222,18 @@ export default async function detect( {
 
 	if ( isDebug ) {
 		log( 'Proceeding with detection' );
+	}
+
+	/** @type {Extension[]} */
+	const extensions = [];
+	for ( const extensionModuleUrl of extensionModuleUrls ) {
+		const extension = await import( extensionModuleUrl );
+		extensions.push( extension );
+		// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args. It's important to pass webVitalsLibrarySrc to the extension so that onLCP, onCLS, or onINP can be obtained.
+		// TODO: Pass additional functions from this module into the extensions.
+		if ( extension.initialize instanceof Function ) {
+			extension.initialize( { isDebug } );
+		}
 	}
 
 	const breadcrumbedElements = doc.body.querySelectorAll( '[data-od-xpath]' );
