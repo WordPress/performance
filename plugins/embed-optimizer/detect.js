@@ -15,16 +15,6 @@ function log( ...message ) {
 	console.log( consoleLogPrefix, ...message );
 }
 
-/*
- * Observe the loading of embeds on the page. We need to run this now before the resources on the page have fully
- * loaded because we need to start observing the embed wrappers before the embeds have loaded. When we detect
- * subtree modifications in an embed wrapper, we then need to measure the new height of the wrapper element.
- * However, since there may be multiple subtree modifications performed as an embed is loaded, we need to wait until
- * what is likely the last mutation.
- * TODO: This is a magic number. Ideally we wouldn't need this.
- */
-const EMBED_LOAD_WAIT_MS = 5000;
-
 /**
  * Embed element heights.
  *
@@ -69,7 +59,7 @@ export async function finalize( { urlMetric, isDebug } ) {
 		if ( loadedElementContentRects.has( element.xpath ) ) {
 			if ( isDebug ) {
 				log(
-					'Overriding:',
+					`Overriding boundingClientRect for ${ element.xpath }:`,
 					element.boundingClientRect,
 					'=>',
 					loadedElementContentRects.get( element.xpath )
@@ -93,20 +83,9 @@ function monitorEmbedWrapperForResizes( embedWrapper ) {
 		throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
 	}
 	const xpath = embedWrapper.dataset.odXpath;
-	let timeoutId = 0;
 	const observer = new ResizeObserver( ( entries ) => {
 		const [ entry ] = entries;
-		if ( timeoutId > 0 ) {
-			clearTimeout( timeoutId );
-		}
-		log(
-			`Pending embed height of ${ entry.contentRect.height }px for ${ xpath }`
-		);
 		loadedElementContentRects.set( xpath, entry.contentRect );
-		// TODO: Is the timeout really needed? We can just keep updating the height of the element until the URL metrics are sent when the page closes.
-		timeoutId = setTimeout( () => {
-			observer.disconnect();
-		}, EMBED_LOAD_WAIT_MS );
 	} );
 	observer.observe( embedWrapper, { box: 'content-box' } );
 }
