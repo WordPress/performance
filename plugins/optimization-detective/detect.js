@@ -325,8 +325,6 @@ export default async function detect( {
 	/** @type {URLMetric} */
 	const urlMetric = {
 		url: currentUrl,
-		slug: urlMetricsSlug,
-		nonce: urlMetricsNonce,
 		viewport: {
 			width: win.innerWidth,
 			height: win.innerHeight,
@@ -365,9 +363,24 @@ export default async function detect( {
 		urlMetric.elements.push( elementMetrics );
 	}
 
-	// TODO: Wait until the page is actually unloading.
+	if ( isDebug ) {
+		log( 'Current URL metrics:', urlMetric );
+	}
+
+	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
-		setTimeout( resolve, 2000 );
+		win.addEventListener( 'pagehide', resolve, { once: true } );
+		win.addEventListener( 'pageswap', resolve, { once: true } );
+		doc.addEventListener(
+			'visibilitychange',
+			() => {
+				if ( document.visibilityState === 'hidden' ) {
+					// TODO: This will fire even when switching tabs.
+					resolve();
+				}
+			},
+			{ once: true }
+		);
 	} );
 
 	for ( const extension of extensions ) {
@@ -379,42 +392,22 @@ export default async function detect( {
 		}
 	}
 
-	if ( isDebug ) {
-		log( 'Current URL metrics:', urlMetric );
-	}
+	// Even though the server may reject the REST API request, we still have to set the storage lock
+	// because we can't look at the response when sending a beacon.
+	setStorageLock( getCurrentTime() );
 
-	// Yield to main before sending data to server to further break up task.
-	await new Promise( ( resolve ) => {
-		setTimeout( resolve, 0 );
+	const body = Object.assign( {}, urlMetric, {
+		slug: urlMetricsSlug,
+		nonce: urlMetricsNonce,
 	} );
-
-	try {
-		const response = await fetch( restApiEndpoint, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': restApiNonce,
-			},
-			body: JSON.stringify( urlMetric ),
-		} );
-
-		if ( response.status === 200 ) {
-			setStorageLock( getCurrentTime() );
-		}
-
-		if ( isDebug ) {
-			const body = await response.json();
-			if ( response.status === 200 ) {
-				log( 'Response:', body );
-			} else {
-				error( 'Failure:', body );
-			}
-		}
-	} catch ( err ) {
-		if ( isDebug ) {
-			error( err );
-		}
-	}
+	const url = new URL( restApiEndpoint );
+	url.searchParams.set( '_wpnonce', restApiNonce );
+	navigator.sendBeacon(
+		url,
+		new Blob( [ JSON.stringify( body ) ], {
+			type: 'application/json',
+		} )
+	);
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();
