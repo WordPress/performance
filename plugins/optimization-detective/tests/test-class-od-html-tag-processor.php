@@ -339,79 +339,14 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test append_head_html().
-	 *
-	 * @covers ::append_head_html
-	 */
-	public function test_append_head_html(): void {
-		$html           = '
-			<html>
-				<head>
-					<meta charset=utf-8>
-					<!-- </head> -->
-				</head>
-				<!--</HEAD>-->
-				<body>
-					<h1>Hello World</h1>
-				</body>
-			</html>
-		';
-		$processor      = new OD_HTML_Tag_Processor( $html );
-		$early_injected = '<!-- Early injection -->';
-		$late_injected  = '<!-- Late injection -->';
-		$processor->append_head_html( $early_injected );
-
-		$saw_head = false;
-		while ( $processor->next_open_tag() ) {
-			$tag = $processor->get_tag();
-			if ( 'HEAD' === $tag ) {
-				$saw_head = true;
-			}
-		}
-		$this->assertTrue( $saw_head );
-
-		$processor->append_head_html( $late_injected );
-		$expected = "
-			<html>
-				<head>
-					<meta charset=utf-8>
-					<!-- </head> -->
-				{$early_injected}{$late_injected}</head>
-				<!--</HEAD>-->
-				<body>
-					<h1>Hello World</h1>
-				</body>
-			</html>
-		";
-
-		$this->assertSame( $expected, $processor->get_updated_html() );
-
-		$later_injected = '<!-- Later injection -->';
-		$processor->append_head_html( $later_injected );
-
-		$expected = "
-			<html>
-				<head>
-					<meta charset=utf-8>
-					<!-- </head> -->
-				{$early_injected}{$late_injected}{$later_injected}</head>
-				<!--</HEAD>-->
-				<body>
-					<h1>Hello World</h1>
-				</body>
-			</html>
-		";
-		$this->assertSame( $expected, $processor->get_updated_html() );
-	}
-
-	/**
 	 * Test both append_head_html() and append_body_html().
 	 *
 	 * @covers ::append_head_html
 	 * @covers ::append_body_html
+	 * @covers ::get_final_updated_html
 	 */
 	public function test_append_head_and_body_html(): void {
-		$html          = '
+		$html                = '
 			<html>
 				<head>
 					<meta charset=utf-8>
@@ -425,9 +360,13 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 				<!--</BODY>-->
 			</html>
 		';
-		$head_injected = '<link rel="home" href="/">';
-		$body_injected = '<script>document.write("Goodbye!")</script>';
-		$processor     = new OD_HTML_Tag_Processor( $html );
+		$head_injected       = '<link rel="home" href="/">';
+		$body_injected       = '<script>document.write("Goodbye!")</script>';
+		$later_head_injected = '<!-- Later injection -->';
+		$processor           = new OD_HTML_Tag_Processor( $html );
+
+		$processor->append_head_html( $head_injected );
+		$processor->append_body_html( $body_injected );
 
 		$saw_head = false;
 		$saw_body = false;
@@ -442,14 +381,14 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$this->assertTrue( $saw_head );
 		$this->assertTrue( $saw_body );
 
-		$processor->append_head_html( $head_injected );
-		$processor->append_body_html( $body_injected );
+		$processor->append_head_html( $later_head_injected );
+
 		$expected = "
 			<html>
 				<head>
 					<meta charset=utf-8>
 					<!-- </head> -->
-				{$head_injected}</head>
+				{$head_injected}{$later_head_injected}</head>
 				<!--</HEAD>-->
 				<body>
 					<h1>Hello World</h1>
@@ -458,7 +397,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 				<!--</BODY>-->
 			</html>
 		";
-		$this->assertSame( $expected, $processor->get_updated_html() );
+		$this->assertSame( $expected, $processor->get_final_updated_html() );
 	}
 
 	/**

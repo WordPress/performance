@@ -565,11 +565,16 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Returns the string representation of the HTML Tag Processor.
+	 * Gets the final updated HTML.
 	 *
-	 * @return string The processed HTML.
+	 * This should only be called after the closing HTML tag has been reached and just before
+	 * calling {@see WP_HTML_Tag_Processor::get_updated_html()} to send the document back in the response.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return string Final updated HTML.
 	 */
-	public function get_updated_html(): string {
+	public function get_final_updated_html(): string {
 		foreach ( array_keys( $this->buffered_text_replacements ) as $bookmark ) {
 			$html_strings = $this->buffered_text_replacements[ $bookmark ];
 			if ( count( $html_strings ) === 0 ) {
