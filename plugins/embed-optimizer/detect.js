@@ -1,26 +1,8 @@
 const consoleLogPrefix = '[Embed Optimizer]';
 
 /**
- * @todo This should be reused and not copied from ../optimization-detective/detect.js
- *
- * @typedef {Object} ElementMetrics
- * @property {boolean}         isLCP              - Whether it is the LCP candidate.
- * @property {boolean}         isLCPCandidate     - Whether it is among the LCP candidates.
- * @property {string}          xpath              - XPath.
- * @property {number}          intersectionRatio  - Intersection ratio.
- * @property {DOMRectReadOnly} intersectionRect   - Intersection rectangle.
- * @property {DOMRectReadOnly} boundingClientRect - Bounding client rectangle.
- */
-
-/**
- * @todo This should be reused and not copied from ../optimization-detective/detect.js
- *
- * @typedef {Object} URLMetric
- * @property {string}           url             - URL of the page.
- * @property {Object}           viewport        - Viewport.
- * @property {number}           viewport.width  - Viewport width.
- * @property {number}           viewport.height - Viewport height.
- * @property {ElementMetrics[]} elements        - Metrics for the elements observed on the page.
+ * @typedef {import("../optimization-detective/types.d.ts").ElementMetrics} ElementMetrics
+ * @typedef {import("../optimization-detective/types.d.ts").URLMetric} URLMetric
  */
 
 /**
@@ -73,8 +55,6 @@ export async function initialize( { isDebug } ) {
 /**
  * Initialize.
  *
- * @todo Add typing for args.urlMetric
- *
  * @param {Object}    args           Args.
  * @param {boolean}   args.isDebug   Whether to show debug messages.
  * @param {URLMetric} args.urlMetric Pending URL metric.
@@ -94,6 +74,7 @@ export async function finalize( { urlMetric, isDebug } ) {
 					loadedElementContentRects.get( element.xpath )
 				);
 			}
+			// TODO: Maybe element.boundingClientRect should rather be element.initialBoundingClientRect and the schema is extended by Embed Optimizer to add an element.finalBoundingClientRect (same goes for intersectionRect and intersectionRatio).
 			element.boundingClientRect = loadedElementContentRects.get(
 				element.xpath
 			);

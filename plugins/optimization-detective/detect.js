@@ -1,4 +1,10 @@
-/** @typedef {import("web-vitals").LCPMetric} LCPMetric */
+/**
+ * @typedef {import("web-vitals").LCPMetric} LCPMetric
+ * @typedef {import("types.d.ts").ElementMetrics} ElementMetrics
+ * @typedef {import("types.d.ts").URLMetric} URLMetric
+ * @typedef {import("types.d.ts").URLMetricsGroupStatus} URLMetricsGroupStatus
+ * @typedef {import("types.d.ts").Extension} Extension
+ */
 
 const win = window;
 const doc = win.document;
@@ -75,37 +81,6 @@ function error( ...message ) {
 	// eslint-disable-next-line no-console
 	console.error( consoleLogPrefix, ...message );
 }
-
-/**
- * @typedef {Object} ElementMetrics
- * @property {boolean}         isLCP              - Whether it is the LCP candidate.
- * @property {boolean}         isLCPCandidate     - Whether it is among the LCP candidates.
- * @property {string}          xpath              - XPath.
- * @property {number}          intersectionRatio  - Intersection ratio.
- * @property {DOMRectReadOnly} intersectionRect   - Intersection rectangle.
- * @property {DOMRectReadOnly} boundingClientRect - Bounding client rectangle.
- */
-
-/**
- * @typedef {Object} URLMetric
- * @property {string}           url             - URL of the page.
- * @property {Object}           viewport        - Viewport.
- * @property {number}           viewport.width  - Viewport width.
- * @property {number}           viewport.height - Viewport height.
- * @property {ElementMetrics[]} elements        - Metrics for the elements observed on the page.
- */
-
-/**
- * @typedef {Object} URLMetricsGroupStatus
- * @property {number}  minimumViewportWidth - Minimum viewport width.
- * @property {boolean} complete             - Whether viewport group is complete.
- */
-
-/**
- * @typedef {Object} Extension
- * @property {Function} [initialize] - Initialize the extension as soon as the DOM has loaded.
- * @property {Function} [finalize]   - Finalize the URL metric prior to it being sent to the server.
- */
 
 /**
  * Checks whether the URL metric(s) for the provided viewport width is needed.
@@ -216,7 +191,8 @@ export default async function detect( {
 	for ( const extensionModuleUrl of extensionModuleUrls ) {
 		const extension = await import( extensionModuleUrl );
 		extensions.push( extension );
-		// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
+		// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args. It's important to pass webVitalsLibrarySrc to the extension so that onLCP, onCLS, or onINP can be obtained.
+		// TODO: Pass additional functions from this module into the extensions.
 		if ( extension.initialize instanceof Function ) {
 			extension.initialize( { isDebug } );
 		}
