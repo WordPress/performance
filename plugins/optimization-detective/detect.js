@@ -396,6 +396,10 @@ export default async function detect( {
 	// because we can't look at the response when sending a beacon.
 	setStorageLock( getCurrentTime() );
 
+	if ( isDebug ) {
+		log( 'Sending URL metric:', urlMetric );
+	}
+
 	const body = Object.assign( {}, urlMetric, {
 		slug: urlMetricsSlug,
 		nonce: urlMetricsNonce,

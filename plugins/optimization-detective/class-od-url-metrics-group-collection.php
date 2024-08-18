@@ -459,8 +459,8 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 
 			foreach ( $this->get_all_url_metrics_groups_elements() as $element ) {
 				$element_min_heights[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_min_heights )
-					? min( $element_min_heights[ $element['xpath'] ], $element['intersectionRect']['height'] )
-					: $element['intersectionRect']['height'];
+					? min( $element_min_heights[ $element['xpath'] ], $element['boundingClientRect']['height'] )
+					: $element['boundingClientRect']['height'];
 			}
 			return $element_min_heights;
 		} )();

@@ -735,9 +735,13 @@ class Test_OD_URL_Metrics_Group_Collection extends WP_UnitTestCase {
 				array(
 					'viewport_width' => $viewport_width,
 					'element'        => array(
-						'isLCP'            => true,
-						'xpath'            => $lcp_element_xpath,
-						'intersectionRect' => array_merge(
+						'isLCP'              => true,
+						'xpath'              => $lcp_element_xpath,
+						'intersectionRect'   => array_merge(
+							$this->get_sample_dom_rect(),
+							array( 'height' => $element_height )
+						),
+						'boundingClientRect' => array_merge(
 							$this->get_sample_dom_rect(),
 							array( 'height' => $element_height )
 						),

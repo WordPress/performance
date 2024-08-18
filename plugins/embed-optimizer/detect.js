@@ -21,8 +21,9 @@ function log( ...message ) {
  * subtree modifications in an embed wrapper, we then need to measure the new height of the wrapper element.
  * However, since there may be multiple subtree modifications performed as an embed is loaded, we need to wait until
  * what is likely the last mutation.
+ * TODO: This is a magic number. Ideally we wouldn't need this.
  */
-const EMBED_LOAD_WAIT_MS = 1000;
+const EMBED_LOAD_WAIT_MS = 5000;
 
 /**
  * Embed element heights.
@@ -101,9 +102,9 @@ function monitorEmbedWrapperForResizes( embedWrapper ) {
 		log(
 			`Pending embed height of ${ entry.contentRect.height }px for ${ xpath }`
 		);
+		loadedElementContentRects.set( xpath, entry.contentRect );
 		// TODO: Is the timeout really needed? We can just keep updating the height of the element until the URL metrics are sent when the page closes.
 		timeoutId = setTimeout( () => {
-			loadedElementContentRects.set( xpath, entry.contentRect );
 			observer.disconnect();
 		}, EMBED_LOAD_WAIT_MS );
 	} );
