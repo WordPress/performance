@@ -61,7 +61,7 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 **Bug Fixes**
 
-* Remove sizes attribute when the responsive image disabled. ([1399](https://github.com/WordPress/performance/pull/1399))
+* Remove sizes attribute when responsive images are disabled. ([1399](https://github.com/WordPress/performance/pull/1399))
 
 = 1.1.0 =
 
