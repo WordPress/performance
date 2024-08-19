@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   0.2.0
+Stable tag:   0.1.3
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, image, lcp, lazy-load
@@ -62,7 +62,7 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 == Changelog ==
 
-= 0.2.0 =
+= 0.1.3 =
 
 **Bug Fixes**
 
