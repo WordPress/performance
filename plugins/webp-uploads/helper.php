@@ -406,3 +406,61 @@ function webp_uploads_is_picture_element_enabled(): bool {
 function webp_uploads_is_jpeg_fallback_enabled(): bool {
 	return (bool) get_option( 'perflab_generate_webp_and_jpeg' );
 }
+
+/**
+ * Retrieves the image URL for a specified MIME type from the attachment metadata.
+ *
+ * This function attempts to locate an alternate image source URL in the
+ * attachment's metadata that matches the provided MIME type.
+ *
+ * @since n.e.x.t
+ *
+ * @param int    $attachment_id The ID of the attachment.
+ * @param string $src           The original image src url.
+ * @param string $mime          A mime type we are looking to get image url.
+ * @return string|null Returns mime type image if available.
+ */
+function webp_uploads_get_mime_type_image( int $attachment_id, string $src, string $mime ): ?string {
+	$metadata     = wp_get_attachment_metadata( $attachment_id );
+	$src_basename = wp_basename( $src );
+	if ( isset( $metadata['sources'][ $mime ]['file'] ) ) {
+		$basename = wp_basename( $metadata['file'] );
+
+		if ( $src_basename === $basename ) {
+			return str_replace(
+				$basename,
+				$metadata['sources'][ $mime ]['file'],
+				$src
+			);
+		}
+	}
+
+	if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
+		foreach ( $metadata['sizes'] as $size => $size_data ) {
+
+			if ( ! isset( $size_data['file'] ) ) {
+				continue;
+			}
+
+			if ( ! isset( $size_data['sources'][ $mime ]['file'] ) ) {
+				continue;
+			}
+
+			if ( $size_data['file'] === $size_data['sources'][ $mime ]['file'] ) {
+				continue;
+			}
+
+			if ( $src_basename !== $size_data['file'] ) {
+				continue;
+			}
+
+			return str_replace(
+				$size_data['file'],
+				$size_data['sources'][ $mime ]['file'],
+				$src
+			);
+		}
+	}
+
+	return null;
+}
