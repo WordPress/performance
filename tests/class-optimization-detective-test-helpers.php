@@ -65,10 +65,11 @@ trait Optimization_Detective_Test_Helpers {
 	 * Gets a sample URL metric.
 	 *
 	 * @phpstan-param array{
-	 *                    url?:            string,
-	 *                    viewport_width?: int,
-	 *                    element?:        ElementDataSubset,
-	 *                    elements?:       array<ElementDataSubset>
+	 *                    url?:             string,
+	 *                    viewport_width?:  int,
+	 *                    viewport_height?: int,
+	 *                    element?:         ElementDataSubset,
+	 *                    elements?:        array<ElementDataSubset>
 	 *                } $params Params.
 	 *
 	 * @return OD_URL_Metric URL metric.
@@ -76,9 +77,10 @@ trait Optimization_Detective_Test_Helpers {
 	public function get_sample_url_metric( array $params ): OD_URL_Metric {
 		$params = array_merge(
 			array(
-				'url'            => home_url( '/' ),
-				'viewport_width' => 480,
-				'elements'       => array(),
+				'url'             => home_url( '/' ),
+				'viewport_width'  => 480,
+				'viewport_height' => 800,
+				'elements'        => array(),
 			),
 			$params
 		);
@@ -92,7 +94,7 @@ trait Optimization_Detective_Test_Helpers {
 				'url'       => home_url( '/' ),
 				'viewport'  => array(
 					'width'  => $params['viewport_width'],
-					'height' => 800,
+					'height' => $params['viewport_height'],
 				),
 				'timestamp' => microtime( true ),
 				'elements'  => array_map(
