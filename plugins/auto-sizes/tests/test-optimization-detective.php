@@ -41,6 +41,13 @@ class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_od_optimize_template_output_buffer(): array {
+		$outside_viewport_rect = array_merge(
+			$this->get_sample_dom_rect(),
+			array(
+				'top' => 1000,
+			)
+		);
+
 		return array(
 			// Note: The Image Prioritizer plugin removes the loading attribute, and so then Auto Sizes does not then add sizes=auto.
 			'wrongly_lazy_responsive_img'       => array(
@@ -55,9 +62,11 @@ class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 
 			'non_responsive_image'              => array(
 				'element_metrics' => array(
-					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-					'isLCP'             => false,
-					'intersectionRatio' => 0,
+					'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+					'isLCP'              => false,
+					'intersectionRatio'  => 0,
+					'intersectionRect'   => $outside_viewport_rect,
+					'boundingClientRect' => $outside_viewport_rect,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Quux" width="1200" height="800" loading="lazy">',
 				'expected'        => '<img src="https://example.com/foo.jpg" alt="Quux" width="1200" height="800" loading="lazy">',
@@ -65,9 +74,11 @@ class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 
 			'auto_sizes_added'                  => array(
 				'element_metrics' => array(
-					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-					'isLCP'             => false,
-					'intersectionRatio' => 0,
+					'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+					'isLCP'              => false,
+					'intersectionRatio'  => 0,
+					'intersectionRect'   => $outside_viewport_rect,
+					'boundingClientRect' => $outside_viewport_rect,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
 				'expected'        => '<img data-od-replaced-sizes="(max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
@@ -75,9 +86,11 @@ class Test_Auto_Sizes_Optimization_Detective extends WP_UnitTestCase {
 
 			'auto_sizes_already_added'          => array(
 				'element_metrics' => array(
-					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-					'isLCP'             => false,
-					'intersectionRatio' => 0,
+					'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+					'isLCP'              => false,
+					'intersectionRatio'  => 0,
+					'intersectionRect'   => $outside_viewport_rect,
+					'boundingClientRect' => $outside_viewport_rect,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
 				'expected'        => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
