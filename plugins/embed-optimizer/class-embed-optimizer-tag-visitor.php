@@ -85,13 +85,13 @@ final class Embed_Optimizer_Tag_Visitor {
 		$embed_wrapper_xpath = $processor->get_xpath() . '/*[1][self::DIV]';
 		$minimum_height      = $context->url_metrics_group_collection->get_element_minimum_height( $embed_wrapper_xpath );
 		if ( is_float( $minimum_height ) ) {
-			$style = $processor->get_attribute( 'style' );
+			$min_height_style = sprintf( 'min-height: %dpx;', $minimum_height );
+			$style            = $processor->get_attribute( 'style' );
 			if ( is_string( $style ) ) {
-				$style = rtrim( trim( $style ), ';' ) . '; ';
+				$style = $min_height_style . ' ' . $style;
 			} else {
-				$style = '';
+				$style = $min_height_style;
 			}
-			$style .= sprintf( 'min-height: %dpx;', $minimum_height );
 			$processor->set_attribute( 'style', $style );
 		}
 
