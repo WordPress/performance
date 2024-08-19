@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   3.3.1
+Stable tag:   3.4.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -69,6 +69,18 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 3.4.0 =
+
+**Enhancements**
+
+* Remove Server-Timing metric for the autoloaded options query time. ([1456](https://github.com/WordPress/performance/pull/1456))
+
+**Bug Fixes**
+
+* Avoid sending Server-Timing header when buffer is being cleaned. ([1443](https://github.com/WordPress/performance/pull/1443))
+* Fix disabled options from reappearing in Site Health after external update. ([1374](https://github.com/WordPress/performance/pull/1374))
+* Improve Performance screen when external requests to WordPress.org fail. ([1474](https://github.com/WordPress/performance/pull/1474))
 
 = 3.3.1 =
 
