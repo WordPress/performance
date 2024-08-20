@@ -378,7 +378,9 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Sets a meta attribute.
 	 *
-	 * All meta attributes are prefixed with 'data-od-'.
+	 * All meta attributes are prefixed with data-od-.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @param string      $name  Meta attribute name.
 	 * @param string|true $value Value.
@@ -556,6 +558,8 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 
 	/**
 	 * Returns the string representation of the HTML Tag Processor.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @return string The processed HTML.
 	 */
