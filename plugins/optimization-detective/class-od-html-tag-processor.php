@@ -189,18 +189,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $cursor_move_count = 0;
 
 	/**
-	 * Count for the number of times next_token() was called.
-	 *
-	 * The method that uses this is deprecated and it will be removed in a future release.
-	 *
-	 * @since 0.4.1
-	 * @var int
-	 * @see self::next_token()
-	 * @see self::get_next_token_count()
-	 */
-	private $next_token_count = 0;
-
-	/**
 	 * Finds the next tag.
 	 *
 	 * Unlike the base class, this subclass disallows querying. This is to ensure the breadcrumbs can be tracked.
@@ -271,7 +259,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 */
 	public function next_token(): bool {
 		$this->current_xpath = null; // Clear cache.
-		++$this->next_token_count; // TODO: Remove when the deprecated get_next_token_count() method is removed.
 		++$this->cursor_move_count;
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags    = array();
@@ -366,20 +353,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Gets the number of times next_token() was called.
-	 *
-	 * @since 0.4.1
-	 * @see self::next_token()
-	 * @deprecated Use {@see self::get_cursor_move_count()} instead.
-	 *
-	 * @return int Count of next_token() calls.
-	 */
-	public function get_next_token_count(): int {
-		_deprecated_function( __METHOD__, 'Optimization Detective n.e.x.t', __CLASS__ . '::get_cursor_move_count()' );
-		return $this->next_token_count;
-	}
-
-	/**
 	 * Updates or creates a new attribute on the currently matched tag with the passed value.
 	 *
 	 * @inheritDoc
@@ -460,20 +433,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			$this->open_stack_indices = $this->bookmarked_open_stacks[ $bookmark_name ]['indices'];
 		}
 		return $result;
-	}
-
-	/**
-	 * Gets the number of times seek() was called.
-	 *
-	 * @since 0.4.1
-	 * @see self::seek()
-	 * @deprecated Use {@see self::get_cursor_move_count()} instead.
-	 *
-	 * @return int Count of seek() calls.
-	 */
-	public function get_seek_count(): int {
-		_deprecated_function( __METHOD__, 'Optimization Detective n.e.x.t', __CLASS__ . '::get_cursor_move_count()' );
-		return $this->seek_count;
 	}
 
 	/**
