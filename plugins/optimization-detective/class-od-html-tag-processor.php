@@ -179,7 +179,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $buffered_text_replacements = array();
 
 	/**
-	 * Count for the number of times that the cursor was successfully moved.
+	 * Count for the number of times that the cursor was moved.
 	 *
 	 * @since n.e.x.t
 	 * @var int
