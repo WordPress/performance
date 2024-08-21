@@ -128,19 +128,30 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	OD_Storage_Lock::set_lock();
 
 	try {
-		$url_metric = new OD_URL_Metric(
-			array_merge(
-				wp_array_slice_assoc(
-					$request->get_params(),
-					array_keys( OD_URL_Metric::get_json_schema()['properties'] )
-				),
-				array(
-					// Now supply the readonly args which were omitted from the REST API params due to being `readonly`.
-					'timestamp' => microtime( true ),
-					'uuid'      => wp_generate_uuid4(),
-				)
+		$data = array_merge(
+			wp_array_slice_assoc(
+				$request->get_params(),
+				array_keys( OD_URL_Metric::get_json_schema()['properties'] )
+			),
+			array(
+				// Now supply the readonly args which were omitted from the REST API params due to being `readonly`.
+				'timestamp' => microtime( true ), // Also `required`, so it must be set to instantiate an OD_URL_Metric.
+				'uuid'      => wp_generate_uuid4(),
 			)
 		);
+
+		/**
+		 * Filters whether the user agent is logged with a captured URL metric.
+		 *
+		 * This is only relevant for debugging so it is not enabled by default.
+		 *
+		 * @since n.e.x.t
+		 * @param bool $logging_enabled Whether to log the user agent.
+		 */
+		if ( array_key_exists( 'HTTP_USER_AGENT', $_SERVER ) && apply_filters( 'od_url_metrics_user_agent_logging', WP_DEBUG ) ) {
+			$data['userAgent'] = wp_unslash( $_SERVER['HTTP_USER_AGENT'] );
+		}
+		$url_metric = new OD_URL_Metric( $data );
 	} catch ( OD_Data_Validation_Exception $e ) {
 		return new WP_Error(
 			'url_metric_exception',

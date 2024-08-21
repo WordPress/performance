@@ -199,7 +199,9 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 */
 	protected function check_schema_subset( array $schema, string $path ): void {
 		$this->assertArrayHasKey( 'required', $schema, $path );
-		$this->assertTrue( $schema['required'], $path );
+		if ( 'root/userAgent' !== $path ) {
+			$this->assertTrue( $schema['required'], $path );
+		}
 		$this->assertArrayHasKey( 'type', $schema, $path );
 		if ( 'object' === $schema['type'] ) {
 			$this->assertArrayHasKey( 'properties', $schema, $path );

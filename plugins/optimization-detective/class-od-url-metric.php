@@ -41,7 +41,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                                url: string,
  *                                timestamp: float,
  *                                viewport: ViewportRect,
- *                                elements: ElementData[]
+ *                                elements: ElementData[],
+ *                                userAgent: string|null,
  *                            }
  *
  * @since 0.1.0
@@ -144,6 +145,7 @@ final class OD_URL_Metric implements JsonSerializable {
 					'readonly'    => true, // Omit from REST API.
 				),
 				'url'       => array(
+					// TODO: Should this not also be readonly?
 					'description' => __( 'The URL for which the metric was obtained.', 'optimization-detective' ),
 					'type'        => 'string',
 					'required'    => true,
@@ -167,6 +169,12 @@ final class OD_URL_Metric implements JsonSerializable {
 						),
 					),
 					'additionalProperties' => false,
+				),
+				'userAgent' => array(
+					'description' => __( 'The user agent responsible for the URL metric.', 'optimization-detective' ),
+					'type'        => 'string',
+					'required'    => false,
+					'readonly'    => true, // Omit from REST API.
 				),
 				'timestamp' => array(
 					'description' => __( 'Timestamp at which the URL metric was captured.', 'optimization-detective' ),
