@@ -40,16 +40,10 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	 * @param string[] $dependencies Tag visitors that must run before this tag visitor.
 	 */
 	public function register( string $id, callable $tag_visitor_callback, array $dependencies = array() ): void {
-		if ( ! empty( $dependencies ) ) {
-			foreach ( $dependencies as $dependency_id => $dependency_callback ) {
-				if ( ! self::is_registered( $dependency_id ) ) {
-					$this->register( $dependency_id, $dependency_callback );
-				}
-			}
-		}
-		if ( ! self::is_registered( $id ) ) {
-			$this->visitors[ $id ] = $tag_visitor_callback;
-		}
+		$this->visitors[ $id ] = array(
+			'callback'     => $tag_visitor_callback,
+			'dependencies' => $dependencies,
+		);
 	}
 
 	/**
