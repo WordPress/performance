@@ -62,7 +62,7 @@ function auto_sizes_register_tag_visitors( OD_Tag_Visitor_Registry $registry ): 
 	$registry->register(
 		'auto-sizes',
 		'auto_sizes_visit_tag',
-		defined( 'Image_Prioritizer_Img_Tag_Visitor::ID' ) ? array( Image_Prioritizer_Img_Tag_Visitor::ID => new Image_Prioritizer_Img_Tag_Visitor() ) : array()
+		defined( 'Image_Prioritizer_Img_Tag_Visitor::ID' ) ? array( Image_Prioritizer_Img_Tag_Visitor::ID ) : array()
 	);
 }
 
