@@ -181,8 +181,9 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
 		$params  = $this->get_valid_params(
 			array(
-				// Timestamp should cause to be ignored.
+				// Both should be ignored since they are read-only.
 				'timestamp' => microtime( true ) - HOUR_IN_SECONDS,
+				'uuid'      => wp_generate_uuid4(),
 			)
 		);
 		$request->set_body_params( $params );
@@ -197,6 +198,8 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertCount( 1, $url_metrics );
 		$url_metric = $url_metrics[0];
 		$this->assertNotEquals( $params['timestamp'], $url_metric->get_timestamp() );
+		$this->assertTrue( wp_is_uuid( $url_metric->get_uuid() ), $url_metric->get_uuid() );
+		$this->assertNotEquals( $params['uuid'], $url_metric->get_uuid() );
 		$this->assertGreaterThanOrEqual( $initial_microtime, $url_metric->get_timestamp() );
 	}
 
