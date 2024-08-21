@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.1.0
  *
  * @param OD_Tag_Visitor_Context $context Tag visitor context.
- * @return false Whether the tag should be recorded in URL metrics.
+ * @return false Whether the tag should be tracked in URL metrics.
  */
 function auto_sizes_visit_tag( OD_Tag_Visitor_Context $context ): bool {
 	if ( 'IMG' !== $context->processor->get_tag() ) {

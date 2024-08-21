@@ -23,7 +23,7 @@ abstract class Image_Prioritizer_Tag_Visitor {
 	 * Visits a tag.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
-	 * @return bool Whether the visitor visited the tag.
+	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
 	abstract public function __invoke( OD_Tag_Visitor_Context $context ): bool;
 

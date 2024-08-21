@@ -32,7 +32,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * @since 0.2.0
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
-	 * @return bool Whether the visit or visited the tag.
+	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
 	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
