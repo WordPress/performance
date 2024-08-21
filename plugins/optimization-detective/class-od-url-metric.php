@@ -44,6 +44,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                                elements: ElementData[]
  *                            }
  *
+ * @property-read string        $uuid
+ * @property-read string        $url
+ * @property-read float         $timestamp
+ * @property-read ViewportRect  $viewport
+ * @property-read ElementData[] $elements
+ *
  * @since 0.1.0
  * @access private
  */
@@ -323,6 +329,36 @@ final class OD_URL_Metric implements JsonSerializable {
 			$properties_schema[ $property_key ] = $property_schema;
 		}
 		return $properties_schema;
+	}
+
+	/**
+	 * Gets property value for an arbitrary key.
+	 *
+	 * This is particularly useful in conjunction with the `od_url_metric_schema_root_additional_properties` filter.
+	 *
+	 * @since n.e.x.t
+	 * @todo Instead of returning null when the key doesn't exist, should the `default` value be returned as defined in the schema?
+	 *
+	 * @param string $key Property.
+	 * @return mixed|null
+	 */
+	public function get( string $key ) {
+		return $this->data[ $key ] ?? null;
+	}
+
+	/**
+	 * Gets property value for an arbitrary key.
+	 *
+	 * This is useful with the `@property-read` annotations for the class. For accessing other data,
+	 * it's likely the `get()` method will be more useful for static analysis reasons.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $key Property.
+	 * @return mixed|null
+	 */
+	public function __get( string $key ) {
+		return $this->get( $key );
 	}
 
 	/**

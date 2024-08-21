@@ -178,6 +178,8 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	/**
 	 * Tests construction.
 	 *
+	 * @todo PHPStan complains when adding @covers tags for `::get()` and `::__get()` saying they are invalid method references.
+	 *
 	 * @covers ::get_viewport
 	 * @covers ::get_viewport_width
 	 * @covers ::get_timestamp
@@ -195,11 +197,29 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			$this->expectExceptionMessage( $error );
 		}
 		$url_metric = new OD_URL_Metric( $data );
+
 		$this->assertSame( $data['viewport'], $url_metric->get_viewport() );
+		$this->assertSame( $data['viewport'], $url_metric->get( 'viewport' ) );
+		$this->assertSame( $data['viewport'], $url_metric->viewport );
 		$this->assertSame( $data['viewport']['width'], $url_metric->get_viewport_width() );
+		$this->assertSame( $data['viewport']['width'], $url_metric->viewport['width'] );
+
 		$this->assertSame( $data['timestamp'], $url_metric->get_timestamp() );
+		$this->assertSame( $data['timestamp'], $url_metric->get( 'timestamp' ) );
+		$this->assertSame( $data['timestamp'], $url_metric->timestamp );
+
 		$this->assertSame( $data['elements'], $url_metric->get_elements() );
+		$this->assertSame( $data['elements'], $url_metric->get( 'elements' ) );
+		$this->assertSame( $data['elements'], $url_metric->elements );
+
+		$this->assertSame( $data['url'], $url_metric->get_url() );
+		$this->assertSame( $data['url'], $url_metric->get( 'url' ) );
+		$this->assertSame( $data['url'], $url_metric->url );
+
 		$this->assertTrue( wp_is_uuid( $url_metric->get_uuid() ) );
+		$this->assertSame( $url_metric->get_uuid(), $url_metric->uuid );
+		$this->assertSame( $url_metric->get_uuid(), $url_metric->get( 'uuid' ) );
+
 		$serialized = $url_metric->jsonSerialize();
 		if ( ! array_key_exists( 'uuid', $data ) ) {
 			$this->assertTrue( wp_is_uuid( $serialized['uuid'] ) );
