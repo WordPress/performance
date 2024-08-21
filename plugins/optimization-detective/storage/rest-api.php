@@ -128,17 +128,16 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	OD_Storage_Lock::set_lock();
 
 	try {
-		$properties = OD_URL_Metric::get_json_schema()['properties'];
 		$url_metric = new OD_URL_Metric(
 			array_merge(
 				wp_array_slice_assoc(
 					$request->get_params(),
-					array_keys( $properties )
+					array_keys( OD_URL_Metric::get_json_schema()['properties'] )
 				),
 				array(
-					// Now supply the timestamp since it was omitted from the REST API params since it is `readonly`.
-					// Nevertheless, it is also `required`, so it must be set to instantiate an OD_URL_Metric.
-					'timestamp' => $properties['timestamp']['default'],
+					// Now supply the readonly args which were omitted from the REST API params due to being `readonly`.
+					'timestamp' => microtime( true ),
+					'uuid'      => wp_generate_uuid4(),
 				)
 			)
 		);
