@@ -215,7 +215,189 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 */
 	public function test_get_json_schema(): void {
 		$schema = OD_URL_Metric::get_json_schema();
-		$this->check_schema_subset( $schema, 'root' );
+		$this->check_schema_subset( $schema, 'root', false );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function data_provider_to_test_get_json_schema_extensibility(): array {
+		return array(
+			'missing_type'                   => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_url_metric_schema_root_additional_properties',
+						static function ( $additional_properties ) {
+							$additional_properties['foo'] = array(
+								'missing',
+							);
+							return $additional_properties;
+						}
+					);
+				},
+				'assert'                   => function ( array $original_schema, $extended_schema ): void {
+					$this->assertSame( $original_schema, $extended_schema );
+				},
+				'expected_incorrect_usage' => 'add_filter(od_url_metric_schema_root_additional_properties,...)',
+			),
+
+			'bad_type'                       => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_url_metric_schema_root_additional_properties',
+						static function ( $additional_properties ) {
+							$additional_properties['foo'] = array(
+								'type' => 123,
+							);
+							return $additional_properties;
+						}
+					);
+				},
+				'assert'                   => function ( array $original_schema, $extended_schema ): void {
+					$this->assertSame( $original_schema, $extended_schema );
+				},
+				'expected_incorrect_usage' => 'add_filter(od_url_metric_schema_root_additional_properties,...)',
+			),
+
+			'bad_required'                   => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_url_metric_schema_root_additional_properties',
+						static function ( $additional_properties ) {
+							$additional_properties['foo'] = array(
+								'type'     => 'string',
+								'required' => true,
+							);
+							return $additional_properties;
+						}
+					);
+				},
+				'assert'                   => function ( array $original_schema, $extended_schema ): void {
+					$expected_schema = $original_schema;
+					$expected_schema['properties']['foo'] = array(
+						'type'     => 'string',
+						'required' => false,
+					);
+					$this->assertSame( $expected_schema, $extended_schema );
+				},
+				'expected_incorrect_usage' => 'add_filter(od_url_metric_schema_root_additional_properties,...)',
+			),
+
+			'bad_existing_root_property'     => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_url_metric_schema_root_additional_properties',
+						static function ( $additional_properties ) {
+							$additional_properties['uuid'] = array(
+								'type' => 'number',
+							);
+							return $additional_properties;
+						}
+					);
+				},
+				'assert'                   => function ( array $original_schema, $extended_schema ): void {
+					$this->assertSame( $original_schema, $extended_schema );
+				},
+				'expected_incorrect_usage' => 'add_filter(od_url_metric_schema_root_additional_properties,...)',
+			),
+
+			'bad_existing_element_property'  => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_url_metric_schema_element_item_additional_properties',
+						static function ( $additional_properties ) {
+							$additional_properties['intersectionRatio'] = array(
+								'type' => 'string',
+							);
+							return $additional_properties;
+						}
+					);
+				},
+				'assert'                   => function ( array $original_schema, $extended_schema ): void {
+					$this->assertSame( $original_schema, $extended_schema );
+				},
+				'expected_incorrect_usage' => 'add_filter(od_url_metric_schema_root_additional_properties,...)',
+			),
+
+			'adding_root_string'             => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_url_metric_schema_root_additional_properties',
+						static function ( $additional_properties ) {
+							$additional_properties['foo'] = array(
+								'type' => 'string',
+							);
+							return $additional_properties;
+						}
+					);
+				},
+				'assert'                   => function ( array $original_schema, $extended_schema ): void {
+					$expected_schema = $original_schema;
+					$expected_schema['properties']['foo'] = array(
+						'type'     => 'string',
+						'required' => false,
+					);
+					$this->assertSame( $expected_schema, $extended_schema );
+				},
+				'expected_incorrect_usage' => null,
+			),
+
+			'adding_root_and_element_string' => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_url_metric_schema_root_additional_properties',
+						static function ( $additional_properties ) {
+							$additional_properties['foo'] = array(
+								'type' => 'string',
+							);
+							return $additional_properties;
+						}
+					);
+					add_filter(
+						'od_url_metric_schema_element_item_additional_properties',
+						static function ( $additional_properties ) {
+							$additional_properties['bar'] = array(
+								'type' => 'number',
+							);
+							return $additional_properties;
+						}
+					);
+				},
+				'assert'                   => function ( array $original_schema, $extended_schema ): void {
+					$expected_schema = $original_schema;
+					$expected_schema['properties']['foo'] = array(
+						'type'     => 'string',
+						'required' => false,
+					);
+					$expected_schema['properties']['elements']['items']['properties']['bar'] = array(
+						'type'     => 'number',
+						'required' => false,
+					);
+					$this->assertSame( $expected_schema, $extended_schema );
+				},
+				'expected_incorrect_usage' => null,
+			),
+		);
+	}
+
+	/**
+	 * Tests get_json_schema() extensibility.
+	 *
+	 * @dataProvider data_provider_to_test_get_json_schema_extensibility
+	 *
+	 * @covers ::get_json_schema
+	 */
+	public function test_get_json_schema_extensibility( Closure $set_up, Closure $assert, ?string $expected_incorrect_usage ): void {
+		if ( null !== $expected_incorrect_usage ) {
+			$this->setExpectedIncorrectUsage( $expected_incorrect_usage );
+		}
+		$original_schema = OD_URL_Metric::get_json_schema();
+		$set_up();
+		$extended_schema = OD_URL_Metric::get_json_schema();
+		$this->check_schema_subset( $extended_schema, 'root', true );
+		$assert( $original_schema, $extended_schema );
 	}
 
 	/**
@@ -223,20 +405,22 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 *
 	 * @param array<string, mixed> $schema Schema subset.
 	 */
-	protected function check_schema_subset( array $schema, string $path ): void {
+	protected function check_schema_subset( array $schema, string $path, bool $extended = false ): void {
 		$this->assertArrayHasKey( 'required', $schema, $path );
-		$this->assertTrue( $schema['required'], $path );
+		if ( ! $extended ) {
+			$this->assertTrue( $schema['required'], $path );
+		}
 		$this->assertArrayHasKey( 'type', $schema, $path );
 		if ( 'object' === $schema['type'] ) {
 			$this->assertArrayHasKey( 'properties', $schema, $path );
 			$this->assertArrayHasKey( 'additionalProperties', $schema, $path );
 			$this->assertFalse( $schema['additionalProperties'] );
 			foreach ( $schema['properties'] as $key => $property_schema ) {
-				$this->check_schema_subset( $property_schema, "$path/$key" );
+				$this->check_schema_subset( $property_schema, "$path/$key", $extended );
 			}
 		} elseif ( 'array' === $schema['type'] ) {
 			$this->assertArrayHasKey( 'items', $schema, $path );
-			$this->check_schema_subset( $schema['items'], "$path/items" );
+			$this->check_schema_subset( $schema['items'], "$path/items", $extended );
 		}
 	}
 }

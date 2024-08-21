@@ -121,7 +121,7 @@ final class OD_URL_Metric implements JsonSerializable {
 		 * Note that 'number' is used specifically instead of 'integer' because the values are all specified as
 		 * floats/doubles.
 		 */
-		$properties = array_fill_keys(
+		$dom_rect_properties = array_fill_keys(
 			array(
 				'width',
 				'height',
@@ -139,17 +139,17 @@ final class OD_URL_Metric implements JsonSerializable {
 		);
 
 		// The spec allows these to be negative but this doesn't make sense in the context of intersectionRect and boundingClientRect.
-		$properties['width']['minimum']  = 0.0;
-		$properties['height']['minimum'] = 0.0;
+		$dom_rect_properties['width']['minimum']  = 0.0;
+		$dom_rect_properties['height']['minimum'] = 0.0;
 
 		$dom_rect_schema = array(
 			'type'                 => 'object',
 			'required'             => true,
-			'properties'           => $properties,
+			'properties'           => $dom_rect_properties,
 			'additionalProperties' => false,
 		);
 
-		return array(
+		$schema = array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
 			'title'                => 'od-url-metric',
 			'type'                 => 'object',
@@ -231,6 +231,98 @@ final class OD_URL_Metric implements JsonSerializable {
 			),
 			'additionalProperties' => false,
 		);
+
+		/**
+		 * Filters additional schema properties which should be allowed at the root of a URL metric.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param array<string, array{type: string}> $additional_properties Additional properties.
+		 */
+		$additional_properties = (array) apply_filters( 'od_url_metric_schema_root_additional_properties', array() );
+		if ( count( $additional_properties ) > 0 ) {
+			$schema['properties'] = self::extend_schema_with_optional_properties( $schema['properties'], $additional_properties, 'od_url_metric_schema_root_additional_properties' );
+		}
+
+		/**
+		 * Filters additional schema properties which should be allowed for an elements item in a URL metric.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param array<string, array{type: string}> $additional_properties Additional properties.
+		 */
+		$additional_properties = (array) apply_filters( 'od_url_metric_schema_element_item_additional_properties', array() );
+		if ( count( $additional_properties ) > 0 ) {
+			$schema['properties']['elements']['items']['properties'] = self::extend_schema_with_optional_properties(
+				$schema['properties']['elements']['items']['properties'],
+				$additional_properties,
+				'od_url_metric_schema_root_additional_properties'
+			);
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Extends a schema with additional optional properties.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param array<string, mixed> $properties_schema     Properties schema to extend.
+	 * @param array<string, mixed> $additional_properties Additional properties.
+	 * @param string               $filter_name           Filter name used to extend.
+	 *
+	 * @return array<string, mixed> Extended schema.
+	 */
+	protected static function extend_schema_with_optional_properties( array $properties_schema, array $additional_properties, string $filter_name ): array {
+		$doing_it_wrong = static function ( string $message ) use ( $filter_name ): void {
+			_doing_it_wrong(
+				esc_html( "add_filter({$filter_name},...)" ),
+				esc_html( $message ),
+				'Optimization Detective n.e.x.t'
+			);
+		};
+		foreach ( $additional_properties as $property_key => $property_schema ) {
+			if ( ! is_array( $property_schema ) ) {
+				continue;
+			}
+			if ( isset( $properties_schema[ $property_key ] ) ) {
+				$doing_it_wrong(
+					sprintf(
+						/* translators: property name */
+						__( 'Disallowed override of existing schema property "%s".', 'optimization-detective' ),
+						$property_key
+					)
+				);
+				continue;
+			}
+			if ( ! isset( $property_schema['type'] ) || ! is_string( $property_schema['type'] ) ) {
+				$doing_it_wrong(
+					sprintf(
+						/* translators: 1: property name, 2: 'type' */
+						__( 'Supplied schema property "%1$s" with missing "%2$s" key.', 'optimization-detective' ),
+						'type',
+						$property_key
+					)
+				);
+				continue;
+			}
+			// TODO: Should 'default' be required?
+			if ( isset( $property_schema['required'] ) && false !== $property_schema['required'] ) {
+				$doing_it_wrong(
+					sprintf(
+						/* translators: 1: property name, 2: 'required' */
+						__( 'Supplied schema property "%1$s" with truthy for "%2$s". All properties must be optional.', 'optimization-detective' ),
+						'type',
+						$property_key
+					)
+				);
+			}
+			$property_schema['required'] = false;
+
+			$properties_schema[ $property_key ] = $property_schema;
+		}
+		return $properties_schema;
 	}
 
 	/**
