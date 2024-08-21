@@ -35,5 +35,5 @@ function image_prioritizer_register_tag_visitors( OD_Tag_Visitor_Registry $regis
 	$registry->register( Image_Prioritizer_Img_Tag_Visitor::ID, $img_visitor );
 
 	$bg_image_visitor = new Image_Prioritizer_Background_Image_Styled_Tag_Visitor();
-	$registry->register( $bg_image_visitor::ID, $bg_image_visitor );
+	$registry->register( Image_Prioritizer_Background_Image_Styled_Tag_Visitor::ID, $bg_image_visitor );
 }
