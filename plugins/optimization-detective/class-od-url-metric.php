@@ -66,7 +66,7 @@ final class OD_URL_Metric implements JsonSerializable {
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 */
 	public function __construct( array $data ) {
-		if ( ! array_key_exists( 'uuid', $data ) ) {
+		if ( ! isset( $data['uuid'] ) ) {
 			$data['uuid'] = wp_generate_uuid4();
 		}
 		$this->validate_data( $data );
