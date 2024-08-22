@@ -42,6 +42,8 @@ function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection 
 	$detect_args = array(
 		'serveTime'               => microtime( true ) * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
 		'detectionTimeWindow'     => $detection_time_window,
+		'minViewportAspectRatio'  => od_get_minimum_viewport_aspect_ratio(),
+		'maxViewportAspectRatio'  => od_get_maximum_viewport_aspect_ratio(),
 		'isDebug'                 => WP_DEBUG,
 		'restApiEndpoint'         => rest_url( OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE ),
 		'restApiNonce'            => wp_create_nonce( 'wp_rest' ),

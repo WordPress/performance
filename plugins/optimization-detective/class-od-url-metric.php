@@ -86,6 +86,25 @@ final class OD_URL_Metric implements JsonSerializable {
 		if ( is_wp_error( $valid ) ) {
 			throw new OD_Data_Validation_Exception( esc_html( $valid->get_error_message() ) );
 		}
+		$aspect_ratio     = $data['viewport']['width'] / $data['viewport']['height'];
+		$min_aspect_ratio = od_get_minimum_viewport_aspect_ratio();
+		$max_aspect_ratio = od_get_maximum_viewport_aspect_ratio();
+		if (
+			$aspect_ratio < $min_aspect_ratio ||
+			$aspect_ratio > $max_aspect_ratio
+		) {
+			throw new OD_Data_Validation_Exception(
+				esc_html(
+					sprintf(
+						/* translators: 1: current aspect ratio, 2: minimum aspect ratio, 3: maximum aspect ratio */
+						__( 'Viewport aspect ratio (%1$s) is in the accepted range of %2$s to %3$s.', 'optimization-detective' ),
+						$aspect_ratio,
+						$min_aspect_ratio,
+						$max_aspect_ratio
+					)
+				)
+			);
+		}
 	}
 
 	/**

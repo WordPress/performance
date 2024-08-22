@@ -179,11 +179,11 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 	public function data_provider_test_add_url_metric(): array {
 		return array(
 			'out_of_range' => array(
-				'viewport_width' => 1,
+				'viewport_width' => 400,
 				'exception'      => InvalidArgumentException::class,
 			),
 			'within_range' => array(
-				'viewport_width' => 100,
+				'viewport_width' => 600,
 				'exception'      => '',
 			),
 		);
@@ -199,7 +199,7 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 		if ( '' !== $exception ) {
 			$this->expectException( $exception );
 		}
-		$group = new OD_URL_Metrics_Group( array(), 100, 200, 1, HOUR_IN_SECONDS );
+		$group = new OD_URL_Metrics_Group( array(), 480, 799, 1, HOUR_IN_SECONDS );
 
 		$this->assertFalse( $group->is_complete() );
 		$group->add_url_metric(
@@ -208,7 +208,7 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 					'url'       => home_url( '/' ),
 					'viewport'  => array(
 						'width'  => $viewport_width,
-						'height' => 1000,
+						'height' => $viewport_width / 2,
 					),
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
