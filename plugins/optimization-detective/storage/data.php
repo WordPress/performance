@@ -191,7 +191,7 @@ function od_get_minimum_viewport_aspect_ratio(): float {
 	/**
 	 * Filters the minimum allowed viewport aspect ratio for URL metrics.
 	 *
-	 * The 0.4 value is intended to accommodate the phone with the greatest known aspect
+	 * The 0.4 default value is intended to accommodate the phone with the greatest known aspect
 	 * ratio at 21:9 when rotated 90 degrees to 9:21 (0.429).
 	 *
 	 * @since n.e.x.t
@@ -213,7 +213,7 @@ function od_get_maximum_viewport_aspect_ratio(): float {
 	/**
 	 * Filters the maximum allowed viewport aspect ratio for URL metrics.
 	 *
-	 * The 2.5 value is intended to accommodate the phone with the greatest known aspect
+	 * The 2.5 default value is intended to accommodate the phone with the greatest known aspect
 	 * ratio at 21:9 (2.333).
 	 *
 	 * @since n.e.x.t

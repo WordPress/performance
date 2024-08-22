@@ -103,7 +103,7 @@ Filters the minimum allowed viewport aspect ratio for URL metrics.
 The 0.4 value is intended to accommodate the phone with the greatest known aspect
 ratio at 21:9 when rotated 90 degrees to 9:21 (0.429).
 
-**Filter:** `od_maximum_viewport_aspect_ratio` (default: 2.0)
+**Filter:** `od_maximum_viewport_aspect_ratio` (default: 2.5)
 
 Filters the maximum allowed viewport aspect ratio for URL metrics.
 
