@@ -161,6 +161,33 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	if ( $result instanceof WP_Error ) {
 		return $result;
 	}
+	$post_id = $result;
+
+	/**
+	 * Fires whenever a URL Metric was successfully collected.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param array $context {
+	 *     Context about the successful URL Metric collection.
+	 *
+	 *     @var int                                   $post_id
+	 *     @var WP_REST_Request<array<string, mixed>> $request
+	 *     @var OD_URL_Metric                         $url_metric
+	 *     @var OD_URL_Metrics_Group                  $group
+	 *     @var OD_URL_Metrics_Group_Collection       $group_collection
+	 * }
+	 */
+	do_action(
+		'od_url_metric_collected',
+		array(
+			'post_id'                      => $post_id,
+			'request'                      => $request,
+			'url_metric'                   => $url_metric,
+			'url_metrics_group'            => $group,
+			'url_metrics_group_collection' => $group_collection,
+		)
+	);
 
 	return new WP_REST_Response(
 		array(
