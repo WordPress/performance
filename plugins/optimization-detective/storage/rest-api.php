@@ -143,12 +143,13 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	} catch ( OD_Data_Validation_Exception $e ) {
 		return new WP_Error(
-			'url_metric_exception',
+			'rest_invalid_param',
 			sprintf(
 				/* translators: %s is exception name */
 				__( 'Failed to validate URL metric: %s', 'optimization-detective' ),
 				$e->getMessage()
-			)
+			),
+			array( 'status' => 400 )
 		);
 	}
 

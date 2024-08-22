@@ -85,6 +85,12 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 						'depth'   => 200,
 					),
 				),
+				'invalid_viewport_aspect_ratio'            => array(
+					'viewport' => array(
+						'width'  => 1024,
+						'height' => 12000,
+					),
+				),
 				'invalid_elements_type'                    => array(
 					'elements' => 'bad',
 				),
@@ -235,7 +241,14 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		foreach ( $viewport_widths as $viewport_width ) {
 			$this->populate_url_metrics(
 				$sample_size,
-				$this->get_valid_params( array( 'viewport' => array( 'width' => $viewport_width ) ) )
+				$this->get_valid_params(
+					array(
+						'viewport' => array(
+							'width'  => $viewport_width,
+							'height' => ceil( $viewport_width / 2 ),
+						),
+					)
+				)
 			);
 		}
 
