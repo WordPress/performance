@@ -396,10 +396,11 @@ export default async function detect( {
 		log( 'Sending URL metric:', urlMetric );
 	}
 
-	const body = Object.assign( {}, urlMetric, {
+	const body = {
+		...urlMetric,
 		slug: urlMetricsSlug,
 		nonce: urlMetricsNonce,
-	} );
+	};
 	const url = new URL( restApiEndpoint );
 	url.searchParams.set( '_wpnonce', restApiNonce );
 	navigator.sendBeacon(
