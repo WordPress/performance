@@ -77,21 +77,29 @@ exports.handler = async ( opt ) => {
 			ignore,
 		} );
 
-		const regexp = /(@since\s+)n\.e\.x\.t/g;
+		const regexps = [
+			/(@since\s+)n\.e\.x\.t/g,
+			/('[^']*?)n\.e\.x\.t(?=')/g,
+		];
 
 		let replacementCount = 0;
-		files.forEach( ( file ) => {
-			const content = fs.readFileSync( file, 'utf-8' );
-			if ( regexp.test( content ) ) {
-				fs.writeFileSync(
-					file,
-					content.replace( regexp, function ( matches, sinceTag ) {
-						replacementCount++;
-						return sinceTag + version;
-					} )
-				);
+		for ( const file of files ) {
+			for ( const regexp of regexps ) {
+				const content = fs.readFileSync( file, 'utf-8' );
+				if ( regexp.test( content ) ) {
+					fs.writeFileSync(
+						file,
+						content.replace(
+							regexp,
+							function ( matches, sinceTag ) {
+								replacementCount++;
+								return sinceTag + version;
+							}
+						)
+					);
+				}
 			}
-		} );
+		}
 
 		const commonMessage = `Using version ${ version } for ${ pluginSlug }: `;
 		if ( replacementCount > 0 ) {
