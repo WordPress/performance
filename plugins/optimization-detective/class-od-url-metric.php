@@ -302,7 +302,7 @@ final class OD_URL_Metric implements JsonSerializable {
 				);
 				continue;
 			}
-			if ( ! isset( $property_schema['type'] ) || ! is_string( $property_schema['type'] ) ) {
+			if ( ! isset( $property_schema['type'] ) || ! ( is_string( $property_schema['type'] ) || is_array( $property_schema['type'] ) ) ) {
 				$doing_it_wrong(
 					sprintf(
 						/* translators: 1: property name, 2: 'type' */
