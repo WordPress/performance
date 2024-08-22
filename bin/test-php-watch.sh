@@ -6,7 +6,7 @@ fi
 
 while true; do
 	echo "Waiting for a change in the plugins directory..."
-	output=$(inotifywait -e modify,create,delete -r ./plugins 2> /dev/null)
+	output=$(inotifywait -e modify,create,delete -r ./plugins  --include '.*(\.php$|/tests/.*)' 2> /dev/null)
 	plugin_slug=$(echo "$output" | awk -F/ '{print $3}')
 	sleep 1 # Give the user a chance to copy text from terminal before IDE auto-saves.
 	clear

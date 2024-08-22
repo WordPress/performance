@@ -215,23 +215,22 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 	$visitors             = iterator_to_array( $tag_visitor_registry );
 	do {
-		$did_visit = false;
+		$tracked_in_url_metrics = false;
 		$processor->set_bookmark( $current_tag_bookmark ); // TODO: Should we break if this returns false?
 
 		foreach ( $visitors as $visitor ) {
-			$seek_count       = $processor->get_seek_count();
-			$next_token_count = $processor->get_next_token_count();
-			$did_visit        = $visitor( $tag_visitor_context ) || $did_visit;
+			$cursor_move_count      = $processor->get_cursor_move_count();
+			$tracked_in_url_metrics = $visitor( $tag_visitor_context ) || $tracked_in_url_metrics;
 
 			// If the visitor traversed HTML tags, we need to go back to this tag so that in the next iteration any
 			// relevant tag visitors may apply, in addition to properly setting the data-od-xpath on this tag below.
-			if ( $seek_count !== $processor->get_seek_count() || $next_token_count !== $processor->get_next_token_count() ) {
+			if ( $cursor_move_count !== $processor->get_cursor_move_count() ) {
 				$processor->seek( $current_tag_bookmark ); // TODO: Should this break out of the optimization loop if it returns false?
 			}
 		}
 		$processor->release_bookmark( $current_tag_bookmark );
 
-		if ( $did_visit && $needs_detection ) {
+		if ( $tracked_in_url_metrics && $needs_detection ) {
 			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );
 		}
 	} while ( $processor->next_open_tag() );

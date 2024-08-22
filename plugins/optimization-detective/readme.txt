@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   0.4.1
+Stable tag:   0.5.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
@@ -133,6 +133,19 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.5.0 =
+
+**Enhancements**
+
+* Bump web-vitals from 4.2.1 to 4.2.2. ([1386](https://github.com/WordPress/performance/pull/1386))
+
+**Bug Fixes**
+
+* Disable Optimization Detective by default on the embed template. ([1472](https://github.com/WordPress/performance/pull/1472))
+* Ensure only HTML documents are processed by Optimization Detective. ([1442](https://github.com/WordPress/performance/pull/1442))
+* Ensure the entire template is passed to the output buffer callback for Optimization Detective to process. ([1317](https://github.com/WordPress/performance/pull/1317))
+* Implement full support for intersectionRect/boundingClientRect, fix viewportRect typing, and harden JSON schema. ([1411](https://github.com/WordPress/performance/pull/1411))
 
 = 0.4.1 =
 
