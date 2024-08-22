@@ -117,7 +117,7 @@ class OD_URL_Metrics_Post_Type {
 	 * @return OD_URL_Metric[] URL metrics.
 	 */
 	public static function get_url_metrics_from_post( WP_Post $post ): array {
-		$this_function   = __FUNCTION__;
+		$this_function   = __METHOD__;
 		$trigger_warning = static function ( string $message ) use ( $this_function ): void {
 			wp_trigger_error( $this_function, esc_html( $message ), E_USER_WARNING );
 		};
@@ -156,12 +156,17 @@ class OD_URL_Metrics_Post_Type {
 						try {
 							return new OD_URL_Metric( $url_metric_data );
 						} catch ( OD_Data_Validation_Exception $e ) {
+							$suffix = '';
+							if ( isset( $url_metric_data['uuid'] ) && is_string( $url_metric_data['uuid'] ) ) {
+								$suffix .= sprintf( ' (URL Metric UUID: %s)', $url_metric_data['uuid'] );
+							}
+
 							$trigger_warning(
 								sprintf(
 									/* translators: 1: Post type slug. 2: Exception message. */
 									__( 'Unexpected shape to JSON array in post_content of %1$s post type: %2$s', 'optimization-detective' ),
 									OD_URL_Metrics_Post_Type::SLUG,
-									$e->getMessage()
+									$e->getMessage() . $suffix
 								)
 							);
 
