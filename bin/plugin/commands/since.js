@@ -79,7 +79,7 @@ exports.handler = async ( opt ) => {
 
 		const regexps = [
 			/(@since\s+)n\.e\.x\.t/g,
-			/('[^']+?)n\.e\.x\.t(?=')/g,
+			/('[^']*?)n\.e\.x\.t(?=')/g,
 		];
 
 		let replacementCount = 0;
