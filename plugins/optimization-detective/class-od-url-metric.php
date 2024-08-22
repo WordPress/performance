@@ -97,7 +97,7 @@ final class OD_URL_Metric implements JsonSerializable {
 				esc_html(
 					sprintf(
 						/* translators: 1: current aspect ratio, 2: minimum aspect ratio, 3: maximum aspect ratio */
-						__( 'Viewport aspect ratio (%1$s) is in the accepted range of %2$s to %3$s.', 'optimization-detective' ),
+						__( 'Viewport aspect ratio (%1$s) is not in the accepted range of %2$s to %3$s.', 'optimization-detective' ),
 						$aspect_ratio,
 						$min_aspect_ratio,
 						$max_aspect_ratio

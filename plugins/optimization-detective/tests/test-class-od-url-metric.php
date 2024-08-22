@@ -101,7 +101,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
 				),
-				'error' => 'Viewport aspect ratio (0.1) is in the accepted range of 0.4 to 2.5.',
+				'error' => 'Viewport aspect ratio (0.1) is not in the accepted range of 0.4 to 2.5.',
 			),
 			'viewport_aspect_ratio_too_large' => array(
 				'data'  => array(
@@ -114,7 +114,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
 				),
-				'error' => 'Viewport aspect ratio (10) is in the accepted range of 0.4 to 2.5.',
+				'error' => 'Viewport aspect ratio (10) is not in the accepted range of 0.4 to 2.5.',
 			),
 			'missing_timestamp'               => array(
 				'data'  => array(

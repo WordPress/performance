@@ -202,7 +202,7 @@ export default async function detect( {
 	) {
 		if ( isDebug ) {
 			warn(
-				`Viewport aspect ratio (${ aspectRatio }) is in the accepted range of ${ minViewportAspectRatio } to ${ maxViewportAspectRatio }.`
+				`Viewport aspect ratio (${ aspectRatio }) is not in the accepted range of ${ minViewportAspectRatio } to ${ maxViewportAspectRatio }.`
 			);
 		}
 		return;
