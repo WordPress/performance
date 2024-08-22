@@ -153,6 +153,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
+	// TODO: This should be changed from store_url_metric($slug, $url_metric) instead be update_post( $slug, $group_collection ). As it stands, store_url_metric() is duplicating logic here.
 	$result = OD_URL_Metrics_Post_Type::store_url_metric(
 		$request->get_param( 'slug' ),
 		$url_metric
