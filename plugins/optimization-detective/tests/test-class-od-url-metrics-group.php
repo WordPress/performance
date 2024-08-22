@@ -208,7 +208,7 @@ class Test_OD_URL_Metrics_Group extends WP_UnitTestCase {
 					'url'       => home_url( '/' ),
 					'viewport'  => array(
 						'width'  => $viewport_width,
-						'height' => $viewport_width / 2,
+						'height' => ceil( $viewport_width / 2 ),
 					),
 					'timestamp' => microtime( true ),
 					'elements'  => array(),

@@ -245,7 +245,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 					array(
 						'viewport' => array(
 							'width'  => $viewport_width,
-							'height' => $viewport_width / 2,
+							'height' => ceil( $viewport_width / 2 ),
 						),
 					)
 				)
