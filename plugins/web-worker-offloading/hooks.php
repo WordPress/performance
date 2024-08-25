@@ -68,28 +68,30 @@ function wwo_init(): void {
 add_action( 'wp_enqueue_scripts', 'wwo_init' );
 
 /**
- * Marks scripts with `web-worker-offloading` dependency as async.
+ * Adds `web-worker-offloading` as dependency to scripts with `worker` data. Also, marks their strategy as `async`.
  *
  * This is needed because scripts offloaded to a worker thread can be considered async. However, they may include `before` and `after` inline
  * scripts that need sequential execution. Once marked as async, `filter_eligible_strategies()` determines if the
  * script is eligible for async execution. If so, it will be offloaded to the worker thread.
  *
- * @since 0.1.0
- *
- * @param string[]|mixed $script_handles Array of script handles.
- * @return string[] Array of script handles.
+ * @since n.e.x.t
  */
-function wwo_update_script_strategy( $script_handles ): array {
-	foreach ( $script_handles as $handle ) {
-		if ( (bool) wp_scripts()->get_data( $handle, 'worker' ) && false === wp_scripts()->get_data( $handle, 'strategy' ) ) {
-			wp_script_add_data( $handle, 'strategy', 'async' ); // The 'defer' strategy would work as well.
-			wp_script_add_data( $handle, 'wwo_strategy_added', true );
+function wwo_add_dependency_to_worker_scripts(): void {
+	foreach ( wp_scripts()->registered as $dep ) {
+		if (
+			(bool) wp_scripts()->get_data( $dep->handle, 'worker') &&
+			! in_array( 'web-worker-offloading', wp_scripts()->registered[ $dep->handle ]->deps, true )
+		) {
+			wp_scripts()->registered[ $dep->handle ]->deps[] = 'web-worker-offloading';
+
+			if ( false === wp_scripts()->get_data( $dep->handle, 'strategy' ) ) {
+				wp_script_add_data( $dep->handle, 'strategy', 'async' ); // The 'defer' strategy would work as well.
+				wp_script_add_data( $dep->handle, 'wwo_strategy_added', true );
+			}
 		}
 	}
-
-	return $script_handles;
 }
-add_filter( 'print_scripts_array', 'wwo_update_script_strategy' );
+add_action( 'wp_print_scripts', 'wwo_add_dependency_to_worker_scripts' );
 
 /**
  * Updates script type for handles having `web-worker-offloading` as dependency.
