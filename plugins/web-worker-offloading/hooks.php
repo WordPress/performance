@@ -76,7 +76,7 @@ add_action( 'wp_enqueue_scripts', 'wwo_init' );
  *
  * @since n.e.x.t
  */
-function wwo_add_dependency_to_worker_scripts(): void {
+function wwo_update_worker_scripts_deps_and_strategy(): void {
 	foreach ( wp_scripts()->registered as $dep ) {
 		if (
 			(bool) wp_scripts()->get_data( $dep->handle, 'worker') &&
@@ -91,7 +91,7 @@ function wwo_add_dependency_to_worker_scripts(): void {
 		}
 	}
 }
-add_action( 'wp_print_scripts', 'wwo_add_dependency_to_worker_scripts' );
+add_action( 'wp_print_scripts', 'wwo_update_worker_scripts_deps_and_strategy' );
 
 /**
  * Updates script type for handles having `web-worker-offloading` as dependency.
