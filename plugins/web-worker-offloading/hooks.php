@@ -80,13 +80,10 @@ add_action( 'wp_enqueue_scripts', 'wwo_init' );
  * @return string[] Array of script handles.
  */
 function wwo_update_script_strategy( $script_handles ): array {
-	$script_handles = array_intersect( (array) $script_handles, array_keys( wp_scripts()->registered ) );
 	foreach ( $script_handles as $handle ) {
-		if ( in_array( 'web-worker-offloading', wp_scripts()->registered[ $handle ]->deps, true ) ) {
-			if ( false === wp_scripts()->get_data( $handle, 'strategy' ) ) {
-				wp_script_add_data( $handle, 'strategy', 'async' ); // The 'defer' strategy would work as well.
-				wp_script_add_data( $handle, 'wwo_strategy_added', true );
-			}
+		if ( (bool) wp_scripts()->get_data( $handle, 'worker' ) && false === wp_scripts()->get_data( $handle, 'strategy' ) ) {
+			wp_script_add_data( $handle, 'strategy', 'async' ); // The 'defer' strategy would work as well.
+			wp_script_add_data( $handle, 'wwo_strategy_added', true );
 		}
 	}
 
@@ -106,8 +103,7 @@ add_filter( 'print_scripts_array', 'wwo_update_script_strategy' );
 function wwo_update_script_type( $tag, string $handle ) {
 	if (
 		is_string( $tag ) &&
-		array_key_exists( $handle, wp_scripts()->registered ) &&
-		in_array( 'web-worker-offloading', wp_scripts()->registered[ $handle ]->deps, true )
+		(bool) wp_scripts()->get_data( $handle, 'worker' )
 	) {
 		$html_processor = new WP_HTML_Tag_Processor( $tag );
 
