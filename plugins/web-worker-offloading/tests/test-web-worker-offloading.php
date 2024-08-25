@@ -184,7 +184,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	 * Test `wwo_update_script_type`.
 	 *
 	 * @covers ::wwo_update_script_type
-	 * @covers ::wwo_update_script_strategy
+	 * @covers ::wwo_update_worker_scripts_deps_and_strategy
 	 *
 	 * @dataProvider data_update_script_types
 	 *
