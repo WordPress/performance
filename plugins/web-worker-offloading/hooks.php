@@ -79,7 +79,7 @@ add_action( 'wp_enqueue_scripts', 'wwo_init' );
 function wwo_update_worker_scripts_deps_and_strategy(): void {
 	foreach ( wp_scripts()->registered as $dep ) {
 		if (
-			(bool) wp_scripts()->get_data( $dep->handle, 'worker') &&
+			(bool) wp_scripts()->get_data( $dep->handle, 'worker' ) &&
 			! in_array( 'web-worker-offloading', wp_scripts()->registered[ $dep->handle ]->deps, true )
 		) {
 			wp_scripts()->registered[ $dep->handle ]->deps[] = 'web-worker-offloading';
