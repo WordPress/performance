@@ -230,7 +230,7 @@ function webp_uploads_use_picture_element_callback(): void {
 		</label>
 		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'The picture element serves a modern image format with a fallback to the original upload format. Warning: Make sure you test your theme and plugins for compatibility. In particular, CSS selectors will not match images when using the child combinator (e.g. figure > img).', 'webp-uploads' ); ?></p>
 		<div id="webp_uploads_jpeg_fallback_notice" class="notice notice-info inline" <?php echo $picture_element_option ? '' : 'hidden'; ?>>
-			<p><?php esc_html_e( 'Picture elements will only be used when JPEG fallback images are available. So this will not apply to any images you may have uploaded while the "Also generate JPEG" setting was disabled.', 'webp-uploads' ); ?></p>
+			<p><?php esc_html_e( 'Picture elements will only be used when fallback images are available. So this will only apply to  images you have uploaded while the "Also generate fallback images" setting was enabled.', 'webp-uploads' ); ?></p>
 		</div>
 	</div>
 	<script>
@@ -239,7 +239,7 @@ function webp_uploads_use_picture_element_callback(): void {
 			document.getElementById( 'webp_uploads_jpeg_fallback_notice' ).hidden = ! this.checked;
 		} );
 
-		// Listen for clicks on the JPEG output checkbox, enabling/disabling the
+		// Listen for clicks on the fallback output checkbox, enabling/disabling the
 		// picture element checkbox accordingly.
 		document.getElementById( 'perflab_generate_webp_and_jpeg' ).addEventListener( 'change', function () {
 			document.querySelector( '.webp-uploads-use-picture-element' ).classList.toggle( 'webp-uploads-disabled', ! this.checked );
