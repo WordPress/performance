@@ -138,6 +138,8 @@ function getCurrentTime() {
  * @param {Object}                  args                             Args.
  * @param {number}                  args.serveTime                   The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
  * @param {number}                  args.detectionTimeWindow         The number of milliseconds between now and when the page was first generated in which detection should proceed.
+ * @param {number}                  args.minViewportAspectRatio      Minimum aspect ratio allowed for the viewport.
+ * @param {number}                  args.maxViewportAspectRatio      Maximum aspect ratio allowed for the viewport.
  * @param {boolean}                 args.isDebug                     Whether to show debug messages.
  * @param {string}                  args.restApiEndpoint             URL for where to send the detection data.
  * @param {string}                  args.restApiNonce                Nonce for writing to the REST API.
@@ -152,6 +154,8 @@ function getCurrentTime() {
 export default async function detect( {
 	serveTime,
 	detectionTimeWindow,
+	minViewportAspectRatio,
+	maxViewportAspectRatio,
 	isDebug,
 	restApiEndpoint,
 	restApiNonce,
@@ -186,6 +190,20 @@ export default async function detect( {
 	if ( ! isViewportNeeded( win.innerWidth, urlMetricsGroupStatuses ) ) {
 		if ( isDebug ) {
 			log( 'No need for URL metrics from the current viewport.' );
+		}
+		return;
+	}
+
+	// Abort if the viewport aspect ratio is not in a common range.
+	const aspectRatio = win.innerWidth / win.innerHeight;
+	if (
+		aspectRatio < minViewportAspectRatio ||
+		aspectRatio > maxViewportAspectRatio
+	) {
+		if ( isDebug ) {
+			warn(
+				`Viewport aspect ratio (${ aspectRatio }) is not in the accepted range of ${ minViewportAspectRatio } to ${ maxViewportAspectRatio }.`
+			);
 		}
 		return;
 	}

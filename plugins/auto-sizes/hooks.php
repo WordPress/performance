@@ -57,24 +57,33 @@ function auto_sizes_update_content_img_tag( $html ): string {
 		$html = '';
 	}
 
-	// Bail early if the image is not lazy-loaded.
-	if ( false === strpos( $html, 'loading="lazy"' ) ) {
+	$processor = new WP_HTML_Tag_Processor( $html );
+
+	// Bail if there is no IMG tag.
+	if ( ! $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
 		return $html;
 	}
 
+	// Bail early if the image is not lazy-loaded.
+	$value = $processor->get_attribute( 'loading' );
+	if ( ! is_string( $value ) || 'lazy' !== strtolower( trim( $value, " \t\f\r\n" ) ) ) {
+		return $html;
+	}
+
+	$sizes = $processor->get_attribute( 'sizes' );
+
 	// Bail early if the image is not responsive.
-	if ( 1 !== preg_match( '/sizes="([^"]+)"/', $html, $match ) ) {
+	if ( ! is_string( $sizes ) ) {
 		return $html;
 	}
 
 	// Don't add 'auto' to the sizes attribute if it already exists.
-	if ( auto_sizes_attribute_includes_valid_auto( $match[1] ) ) {
+	if ( auto_sizes_attribute_includes_valid_auto( $sizes ) ) {
 		return $html;
 	}
 
-	$html = str_replace( 'sizes="', 'sizes="auto, ', $html );
-
-	return $html;
+	$processor->set_attribute( 'sizes', "auto, $sizes" );
+	return $processor->get_updated_html();
 }
 add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 
@@ -83,7 +92,7 @@ add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
  *
  * Per the HTML spec, if present it must be the first entry.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @param string $sizes_attr The 'sizes' attribute value.
  * @return bool True if the 'auto' keyword is present, false otherwise.

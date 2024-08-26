@@ -23,7 +23,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 	 * Visits a tag.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
-	 * @return bool Whether the visitor visited the tag.
+	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
 	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;

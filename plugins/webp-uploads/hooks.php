@@ -767,7 +767,7 @@ add_action( 'wp_head', 'webp_uploads_render_generator' );
 /**
  * Initializes custom functionality for handling image uploads and content filters.
  *
- * @since n.e.x.t
+ * @since 2.1.0
  */
 function webp_uploads_init(): void {
 	if ( webp_uploads_is_picture_element_enabled() ) {

@@ -48,6 +48,11 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	}
 	$sub_size_mime_types = array_keys( $mime_type_data );
 
+	// If original image type fallback is not available, don't wrap in picture element.
+	if ( ! in_array( $original_file_mime_type, $sub_size_mime_types, true ) ) {
+		return $image;
+	}
+
 	/**
 	 * Filter the image mime types that can be used for the <picture> element.
 	 *
@@ -57,7 +62,7 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	 * The original image will be used as the fallback image for browsers that don't support the picture element.
 	 *
 	 * @since 2.0.0
-	 * @since n.e.x.t The default value was updated, removing 'image/jpeg'.
+	 * @since 2.1.0 The default value was updated, removing 'image/jpeg'.
 	 *
 	 * @param string[] $mime_types    Mime types than can be used.
 	 * @param int      $attachment_id The id of the image being evaluated.
@@ -103,38 +108,51 @@ function webp_uploads_wrap_image_in_picture( string $image, string $context, int
 	list( $src, $width, $height ) = $image_src;
 	$size_array                   = array( absint( $width ), absint( $height ) );
 
-	// Get the sizes from the IMG tag.
-	$sizes = $processor->get_attribute( 'sizes' );
+	// Gets the srcset and sizes from the IMG tag.
+	$sizes  = $processor->get_attribute( 'sizes' );
+	$srcset = $processor->get_attribute( 'srcset' );
 
-	foreach ( $mime_types as $image_mime_type ) {
-		// Filter core's wp_get_attachment_image_srcset to return the sources for the current mime type.
-		$filter = static function ( $sources ) use ( $mime_type_data, $image_mime_type ): array {
-			$filtered_sources = array();
-			foreach ( $sources as $source ) {
-				// Swap the URL for the current mime type.
-				if ( isset( $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ] ) ) {
-					$filename           = $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ]['file'];
-					$filtered_sources[] = array(
-						'url'        => dirname( $source['url'] ) . '/' . $filename,
-						'descriptor' => $source['descriptor'],
-						'value'      => $source['value'],
-					);
+	if ( null !== $srcset && null !== $sizes ) {
+		foreach ( $mime_types as $image_mime_type ) {
+			// Filter core's wp_get_attachment_image_srcset to return the sources for the current mime type.
+			$filter = static function ( $sources ) use ( $mime_type_data, $image_mime_type ): array {
+				$filtered_sources = array();
+				foreach ( $sources as $source ) {
+					// Swap the URL for the current mime type.
+					if ( isset( $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ] ) ) {
+						$filename           = $mime_type_data[ $image_mime_type ][ $source['descriptor'] ][ $source['value'] ]['file'];
+						$filtered_sources[] = array(
+							'url'        => dirname( $source['url'] ) . '/' . $filename,
+							'descriptor' => $source['descriptor'],
+							'value'      => $source['value'],
+						);
+					}
 				}
+				return $filtered_sources;
+			};
+			add_filter( 'wp_calculate_image_srcset', $filter );
+			$image_srcset = wp_get_attachment_image_srcset( $attachment_id, $size_array, $image_meta );
+			remove_filter( 'wp_calculate_image_srcset', $filter );
+			if ( is_string( $image_srcset ) ) {
+				$picture_sources .= sprintf(
+					'<source type="%s" srcset="%s"%s>',
+					esc_attr( $image_mime_type ),
+					esc_attr( $image_srcset ),
+					is_string( $sizes ) ? sprintf( ' sizes="%s"', esc_attr( $sizes ) ) : ''
+				);
 			}
-			return $filtered_sources;
-		};
-		add_filter( 'wp_calculate_image_srcset', $filter );
-		$image_srcset = wp_get_attachment_image_srcset( $attachment_id, $size_array, $image_meta );
-		remove_filter( 'wp_calculate_image_srcset', $filter );
-		if ( false === $image_srcset ) {
-			continue;
 		}
-		$picture_sources .= sprintf(
-			'<source type="%s"%s%s>',
-			esc_attr( $image_mime_type ),
-			is_string( $image_srcset ) ? sprintf( ' srcset="%s"', esc_attr( $image_srcset ) ) : '',
-			is_string( $sizes ) ? sprintf( ' sizes="%s"', esc_attr( $sizes ) ) : ''
-		);
+	} else {
+		foreach ( $mime_types as $image_mime_type ) {
+			$image_srcset = webp_uploads_get_mime_type_image( $attachment_id, $src, $image_mime_type );
+			if ( is_string( $image_srcset ) ) {
+				$picture_sources .= sprintf(
+					'<source type="%s" srcset="%s">',
+					esc_attr( $image_mime_type ),
+					esc_attr( $image_srcset )
+				);
+			}
+		}
 	}
 
 	return sprintf(
