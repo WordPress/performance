@@ -37,6 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                                boundingClientRect: DOMRect,
  *                            }
  * @phpstan-type Data         array{
+ *                                uuid: string,
  *                                url: string,
  *                                timestamp: float,
  *                                viewport: ViewportRect,
@@ -65,6 +66,9 @@ final class OD_URL_Metric implements JsonSerializable {
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 */
 	public function __construct( array $data ) {
+		if ( ! isset( $data['uuid'] ) ) {
+			$data['uuid'] = wp_generate_uuid4();
+		}
 		$this->validate_data( $data );
 		$this->data = $data;
 	}
@@ -82,10 +86,31 @@ final class OD_URL_Metric implements JsonSerializable {
 		if ( is_wp_error( $valid ) ) {
 			throw new OD_Data_Validation_Exception( esc_html( $valid->get_error_message() ) );
 		}
+		$aspect_ratio     = $data['viewport']['width'] / $data['viewport']['height'];
+		$min_aspect_ratio = od_get_minimum_viewport_aspect_ratio();
+		$max_aspect_ratio = od_get_maximum_viewport_aspect_ratio();
+		if (
+			$aspect_ratio < $min_aspect_ratio ||
+			$aspect_ratio > $max_aspect_ratio
+		) {
+			throw new OD_Data_Validation_Exception(
+				esc_html(
+					sprintf(
+						/* translators: 1: current aspect ratio, 2: minimum aspect ratio, 3: maximum aspect ratio */
+						__( 'Viewport aspect ratio (%1$s) is not in the accepted range of %2$s to %3$s.', 'optimization-detective' ),
+						$aspect_ratio,
+						$min_aspect_ratio,
+						$max_aspect_ratio
+					)
+				)
+			);
+		}
 	}
 
 	/**
 	 * Gets JSON schema for URL Metric.
+	 *
+	 * @todo Cache the return value?
 	 *
 	 * @return array<string, mixed> Schema.
 	 */
@@ -130,6 +155,13 @@ final class OD_URL_Metric implements JsonSerializable {
 			'type'                 => 'object',
 			'required'             => true,
 			'properties'           => array(
+				'uuid'      => array(
+					'description' => __( 'The UUID for the URL metric.', 'optimization-detective' ),
+					'type'        => 'string',
+					'format'      => 'uuid',
+					'required'    => true,
+					'readonly'    => true, // Omit from REST API.
+				),
 				'url'       => array(
 					'description' => __( 'The URL for which the metric was obtained.', 'optimization-detective' ),
 					'type'        => 'string',
@@ -160,7 +192,6 @@ final class OD_URL_Metric implements JsonSerializable {
 					'type'        => 'number',
 					'required'    => true,
 					'readonly'    => true, // Omit from REST API.
-					'default'     => microtime( true ), // Value provided when instantiating OD_URL_Metric in REST API.
 					'minimum'     => 0,
 				),
 				'elements'  => array(
@@ -200,6 +231,15 @@ final class OD_URL_Metric implements JsonSerializable {
 			),
 			'additionalProperties' => false,
 		);
+	}
+
+	/**
+	 * Gets UUID.
+	 *
+	 * @return string UUID.
+	 */
+	public function get_uuid(): string {
+		return $this->data['uuid'];
 	}
 
 	/**

@@ -29,7 +29,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		);
 
 		return array(
-			'valid_minimal'          => array(
+			'valid_minimal'                   => array(
 				'data' => array(
 					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
@@ -37,8 +37,9 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 					'elements'  => array(),
 				),
 			),
-			'valid_with_element'     => array(
+			'valid_with_element'              => array(
 				'data' => array(
+					'uuid'      => wp_generate_uuid4(),
 					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
@@ -47,16 +48,28 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 					),
 				),
 			),
-			'missing_viewport'       => array(
+			'bad_uuid'                        => array(
 				'data'  => array(
+					'uuid'      => 'foo',
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+				),
+				'error' => 'OD_URL_Metric[uuid] is not a valid UUID.',
+			),
+			'missing_viewport'                => array(
+				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
 					'url'       => home_url( '/' ),
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
 				),
 				'error' => 'viewport is a required property of OD_URL_Metric.',
 			),
-			'missing_viewport_width' => array(
+			'missing_viewport_width'          => array(
 				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
 					'url'       => home_url( '/' ),
 					'viewport'  => array( 'height' => 640 ),
 					'timestamp' => microtime( true ),
@@ -64,8 +77,9 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				),
 				'error' => 'width is a required property of OD_URL_Metric[viewport].',
 			),
-			'bad_viewport'           => array(
+			'bad_viewport'                    => array(
 				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
 					'url'       => home_url( '/' ),
 					'viewport'  => array(
 						'height' => 'tall',
@@ -76,32 +90,62 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				),
 				'error' => 'OD_URL_Metric[viewport][height] is not of type integer.',
 			),
-			'missing_timestamp'      => array(
+			'viewport_aspect_ratio_too_small' => array(
 				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
+					'url'       => home_url( '/' ),
+					'viewport'  => array(
+						'width'  => 1000,
+						'height' => 10000,
+					),
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+				),
+				'error' => 'Viewport aspect ratio (0.1) is not in the accepted range of 0.4 to 2.5.',
+			),
+			'viewport_aspect_ratio_too_large' => array(
+				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
+					'url'       => home_url( '/' ),
+					'viewport'  => array(
+						'width'  => 10000,
+						'height' => 1000,
+					),
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+				),
+				'error' => 'Viewport aspect ratio (10) is not in the accepted range of 0.4 to 2.5.',
+			),
+			'missing_timestamp'               => array(
+				'data'  => array(
+					'uuid'     => wp_generate_uuid4(),
 					'url'      => home_url( '/' ),
 					'viewport' => $viewport,
 					'elements' => array(),
 				),
 				'error' => 'timestamp is a required property of OD_URL_Metric.',
 			),
-			'missing_elements'       => array(
+			'missing_elements'                => array(
 				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
 					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 				),
 				'error' => 'elements is a required property of OD_URL_Metric.',
 			),
-			'missing_url'            => array(
+			'missing_url'                     => array(
 				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
 					'elements'  => array(),
 				),
 				'error' => 'url is a required property of OD_URL_Metric.',
 			),
-			'bad_elements'           => array(
+			'bad_elements'                    => array(
 				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
 					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
@@ -113,8 +157,9 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				),
 				'error' => 'isLCP is a required property of OD_URL_Metric[elements][0].',
 			),
-			'bad_intersection_width' => array(
+			'bad_intersection_width'          => array(
 				'data'  => array(
+					'uuid'      => wp_generate_uuid4(),
 					'url'       => home_url( '/' ),
 					'viewport'  => $viewport,
 					'timestamp' => microtime( true ),
@@ -141,7 +186,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider
 	 *
-	 * @param array<string, mixed> $data Data.
+	 * @param array<string, mixed> $data  Data.
 	 * @param string               $error Error.
 	 */
 	public function test_constructor( array $data, string $error = '' ): void {
@@ -154,7 +199,13 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		$this->assertSame( $data['viewport']['width'], $url_metric->get_viewport_width() );
 		$this->assertSame( $data['timestamp'], $url_metric->get_timestamp() );
 		$this->assertSame( $data['elements'], $url_metric->get_elements() );
-		$this->assertEquals( $data, $url_metric->jsonSerialize() );
+		$this->assertTrue( wp_is_uuid( $url_metric->get_uuid() ) );
+		$serialized = $url_metric->jsonSerialize();
+		if ( ! array_key_exists( 'uuid', $data ) ) {
+			$this->assertTrue( wp_is_uuid( $serialized['uuid'] ) );
+			unset( $serialized['uuid'] );
+		}
+		$this->assertEquals( $data, $serialized );
 	}
 
 	/**

@@ -146,12 +146,18 @@ function perflab_render_plugins_ui(): void {
 
 		$error_messages = array_unique( $error_messages );
 
+		if ( count( $error_messages ) === 1 ) {
+			$error_text          = __( 'Failed to query WordPress.org Plugin Directory for the following plugin:', 'performance-lab' );
+			$error_occurred_text = __( 'The following error occurred:', 'performance-lab' );
+		} else {
+			$error_text          = __( 'Failed to query WordPress.org Plugin Directory for the following plugins:', 'performance-lab' );
+			$error_occurred_text = __( 'The following errors occurred:', 'performance-lab' );
+		}
+
 		wp_admin_notice(
-			'<p>' . esc_html(
-				_n( 'Failed to query WordPress.org Plugin Directory for the following plugin:', 'Failed to query WordPress.org Plugin Directory for the following plugins:', count( $errors ), 'performance-lab' )
-			) . '</p>' .
+			'<p>' . esc_html( $error_text ) . '</p>' .
 			$plugin_list .
-			'<p>' . esc_html( _n( 'The following error occurred:', 'The following errors occurred:', count( $error_messages ), 'performance-lab' ) ) . '</p>' .
+			'<p>' . esc_html( $error_occurred_text ) . '</p>' .
 			'<ul><li>' .
 			join(
 				'</li><li>',

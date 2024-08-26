@@ -179,13 +179,14 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $buffered_text_replacements = array();
 
 	/**
-	 * Count for the number of times next_token() was called
+	 * Count for the number of times that the cursor was moved.
 	 *
-	 * @since 0.4.1
+	 * @since n.e.x.t
 	 * @var int
 	 * @see self::next_token()
+	 * @see self::seek()
 	 */
-	private $next_token_count = 0;
+	private $cursor_move_count = 0;
 
 	/**
 	 * Finds the next tag.
@@ -258,7 +259,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 */
 	public function next_token(): bool {
 		$this->current_xpath = null; // Clear cache.
-		++$this->next_token_count;
+		++$this->cursor_move_count;
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags    = array();
 			$this->open_stack_indices = array();
@@ -339,15 +340,16 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Gets the number of times next_token() was called.
+	 * Gets the number of times the cursor has moved.
 	 *
-	 * @since 0.4.1
+	 * @since n.e.x.t
 	 * @see self::next_token()
+	 * @see self::seek()
 	 *
-	 * @return int Count of next_token() calls.
+	 * @return int Count of times the cursor has moved.
 	 */
-	public function get_next_token_count(): int {
-		return $this->next_token_count;
+	public function get_cursor_move_count(): int {
+		return $this->cursor_move_count;
 	}
 
 	/**
@@ -376,7 +378,9 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Sets a meta attribute.
 	 *
-	 * All meta attributes are prefixed with 'data-od-'.
+	 * All meta attributes are prefixed with data-od-.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @param string      $name  Meta attribute name.
 	 * @param string|true $value Value.
@@ -431,18 +435,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			$this->open_stack_indices = $this->bookmarked_open_stacks[ $bookmark_name ]['indices'];
 		}
 		return $result;
-	}
-
-	/**
-	 * Gets the number of times seek() was called.
-	 *
-	 * @since 0.4.1
-	 * @see self::seek()
-	 *
-	 * @return int Count of seek() calls.
-	 */
-	public function get_seek_count(): int {
-		return $this->seek_count;
 	}
 
 	/**
@@ -566,6 +558,8 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 
 	/**
 	 * Returns the string representation of the HTML Tag Processor.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @return string The processed HTML.
 	 */

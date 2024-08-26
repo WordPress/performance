@@ -99,22 +99,29 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 			),
 		);
 
+		$valid_content_with_uuid            = $valid_content;
+		$valid_content_with_uuid[0]['uuid'] = wp_generate_uuid4();
+
 		return array(
-			'malformed_json' => array(
+			'malformed_json'  => array(
 				'post_content'   => '{"bad":',
 				'expected_value' => array(),
 			),
-			'not_array_json' => array(
+			'not_array_json'  => array(
 				'post_content'   => '{"cool":"beans"}',
 				'expected_value' => array(),
 			),
-			'missing_keys'   => array(
+			'missing_keys'    => array(
 				'post_content'   => '[{},{},{}]',
 				'expected_value' => array(),
 			),
-			'valid'          => array(
+			'valid_sans_uuid' => array(
 				'post_content'   => wp_json_encode( $valid_content ),
 				'expected_value' => $valid_content,
+			),
+			'valid_with_uuid' => array(
+				'post_content'   => wp_json_encode( $valid_content_with_uuid ),
+				'expected_value' => $valid_content_with_uuid,
 			),
 		);
 	}
@@ -144,7 +151,18 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 			OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post )
 		);
 
-		$this->assertSame( $expected_value, $url_metrics );
+		$this->assertCount( count( $expected_value ), $url_metrics );
+		while ( count( $url_metrics ) > 0 ) { // phpcs:ignore Squiz.PHP.DisallowSizeFunctionsInLoops.Found
+			$url_metric = array_shift( $url_metrics );
+			$expected   = array_shift( $expected_value );
+
+			if ( ! array_key_exists( 'uuid', $expected ) ) {
+				$this->assertTrue( wp_is_uuid( $url_metric['uuid'] ) );
+				unset( $url_metric['uuid'] );
+			}
+
+			$this->assertSame( $url_metric, $expected );
+		}
 	}
 
 	/**
