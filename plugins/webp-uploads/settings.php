@@ -175,16 +175,6 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 			<?php esc_html_e( 'Also generate fallback images in the original upload format', 'webp-uploads' ); ?>
 		</label>
 		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling fallback image output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
-		<script>
-			// Listen for clicks on the fallback output checkbox, enabling/disabling the
-			// picture element checkbox accordingly.
-			document.getElementById( 'perflab_generate_webp_and_jpeg' ).addEventListener( 'change', function () {
-				document.querySelector( '.webp-uploads-use-picture-element' ).classList.toggle( 'webp-uploads-disabled', ! this.checked );
-				document.getElementById( 'webp_uploads_picture_element_notice' ).hidden = this.checked;
-				document.getElementById( 'webp_uploads_use_picture_element' ).classList.toggle( 'disabled', ! this.checked );
-				document.getElementById( 'webp_uploads_picture_element_fieldset' ).classList.toggle( 'disabled', ! this.checked );
-			} );
-		</script>
 	<?php
 }
 
