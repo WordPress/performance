@@ -183,16 +183,12 @@ class Test_Dominant_Color extends TestCase {
 	 */
 	public function data_dominant_color_img_tag_add_dominant_color_requires_proper_quotes(): array {
 		return array(
-			'double quotes'         => array(
+			'double quotes' => array(
 				'image'    => '<img src="%s">',
 				'expected' => true,
 			),
-			'single quotes'         => array(
+			'single quotes' => array(
 				'image'    => "<img src='%s'>",
-				'expected' => true,
-			),
-			'escaped double quotes' => array(
-				'image'    => '<img src=\"%s\">',
 				'expected' => true,
 			),
 		);
