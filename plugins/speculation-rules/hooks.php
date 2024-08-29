@@ -48,7 +48,7 @@ function plsr_load_predict_script(): void {
 	wp_enqueue_script(
 		'plsr-predict',
 		plugin_dir_url( __FILE__ ) . 'predict.js', // @todo switch to build version.
-		array( 'genai_bundle' ),
+		array(),
 		SPECULATION_RULES_VERSION,
 		array(
 			'strategy' => 'defer',
