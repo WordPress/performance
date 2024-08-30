@@ -33,7 +33,7 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
 	);
 
 	// Check setting for whether to generate both JPEG and the modern output format.
-	if ( webp_uploads_is_jpeg_fallback_enabled() ) {
+	if ( webp_uploads_is_fallback_enabled() ) {
 		$default_transforms = array(
 			'image/jpeg'              => array( 'image/jpeg', 'image/' . $output_format ),
 			'image/png'               => array( 'image/png', 'image/' . $output_format ),
@@ -395,7 +395,7 @@ function webp_uploads_sanitize_image_format( $image_format ): string {
  * @return bool True if the option is enabled, false otherwise.
  */
 function webp_uploads_is_picture_element_enabled(): bool {
-	return webp_uploads_is_jpeg_fallback_enabled() && (bool) get_option( 'webp_uploads_use_picture_element', false );
+	return webp_uploads_is_fallback_enabled() && (bool) get_option( 'webp_uploads_use_picture_element', false );
 }
 
 /**
@@ -405,7 +405,7 @@ function webp_uploads_is_picture_element_enabled(): bool {
  *
  * @return bool True if the option is enabled, false otherwise.
  */
-function webp_uploads_is_jpeg_fallback_enabled(): bool {
+function webp_uploads_is_fallback_enabled(): bool {
 	return (bool) get_option( 'perflab_generate_webp_and_jpeg' );
 }
 

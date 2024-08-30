@@ -186,7 +186,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 function webp_uploads_use_picture_element_callback(): void {
 	// Picture element support requires the JPEG output to be enabled.
 	$picture_element_option    = 1 === (int) get_option( 'webp_uploads_use_picture_element', 0 );
-	$jpeg_fallback_enabled     = webp_uploads_is_jpeg_fallback_enabled();
+	$jpeg_fallback_enabled     = webp_uploads_is_fallback_enabled();
 	$picture_element_hidden_id = 'webp_uploads_use_picture_element_hidden';
 	?>
 	<style>
