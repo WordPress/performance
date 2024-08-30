@@ -31,15 +31,26 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	private $visitors = array();
 
 	/**
+	 * sorted_Visitors.
+	 *
+	 * @var array<string, TagVisitorCallback>
+	 */
+	private $sorted_visitors = array();
+
+	/**
 	 * Registers a tag visitor.
 	 *
 	 * @phpstan-param TagVisitorCallback $tag_visitor_callback
 	 *
-	 * @param string   $id                   Identifier for the tag visitor.
+	 * @param string   $id Identifier for the tag visitor.
 	 * @param callable $tag_visitor_callback Tag visitor callback.
+	 * @param string[] $dependencies Tag visitors that must run before this tag visitor.
 	 */
-	public function register( string $id, callable $tag_visitor_callback ): void {
-		$this->visitors[ $id ] = $tag_visitor_callback;
+	public function register( string $id, callable $tag_visitor_callback, array $dependencies = array() ): void {
+		$this->visitors[ $id ] = array(
+			'callback'     => $tag_visitor_callback,
+			'dependencies' => $dependencies,
+		);
 	}
 
 	/**
@@ -60,7 +71,7 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	 */
 	public function get_registered( string $id ): ?callable {
 		if ( $this->is_registered( $id ) ) {
-			return $this->visitors[ $id ];
+			return $this->visitors[ $id ]['callback'];
 		}
 		return null;
 	}
@@ -85,7 +96,31 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	 * @return ArrayIterator<string, TagVisitorCallback> ArrayIterator for tag visitors.
 	 */
 	public function getIterator(): ArrayIterator {
+		// sort the visitors so dependents load first
 		return new ArrayIterator( $this->visitors );
+		if( array() !== $this->sorted_visitors ){
+			return new ArrayIterator( $this->sorted_visitors );
+		}
+
+		foreach( $this->visitors as $key => $visitor ){
+			if( $visitor['dependencies'] && array() !== $visitor['dependencies'] ) {
+				foreach( $visitor['dependencies'] as $dependent ) {
+					if ( array_key_exists( $dependent, $this->sorted_visitors  ) ) {
+						$this->sorted_visitors[ $key ] = $visitor;
+					} else {
+						// remove current location in array
+						unset( $this->visitors[ $key ] );
+						// add to the end
+						$this->visitors[ $key ] = $visitor;
+					}
+				}
+			} else {
+				$this->sorted_visitors[ $key ] = $visitor;
+			}
+
+		}
+
+		return new ArrayIterator( $this->sorted_visitors );
 	}
 
 	/**
