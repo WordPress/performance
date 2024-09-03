@@ -711,6 +711,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$this->assertImageNotHasSizeSource( $attachment_id, 'thumbnail', 'image/jpeg' );
 		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/' . $image_type );
+		remove_all_filters( 'wp_image_editors' );
 	}
 
 	/**

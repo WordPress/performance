@@ -218,6 +218,8 @@ class Test_WebP_Uploads_Helper extends TestCase {
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
 		$this->assertWPError( $result );
 		$this->assertSame( 'image_mime_type_not_supported', $result->get_error_code() );
+		remove_filter( 'wp_image_editors', '__return_empty_array' );
+
 	}
 
 	/**
@@ -251,6 +253,7 @@ class Test_WebP_Uploads_Helper extends TestCase {
 		$result = webp_uploads_generate_image_size( $attachment_id, 'medium', 'image/webp' );
 		$this->assertWPError( $result );
 		$this->assertSame( 'image_mime_type_not_supported', $result->get_error_code() );
+		remove_all_filters( 'wp_image_editors' );
 	}
 
 	/**

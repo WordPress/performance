@@ -33,4 +33,14 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 			}
 		);
 	}
+
+	/**
+	 * Remove the image editor filter
+	 */
+	public function tear_down(): void {
+		parent::tear_down();
+
+		remove_all_filters( 'wp_image_editors' );
+	}
+
 }
