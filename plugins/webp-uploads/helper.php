@@ -342,7 +342,7 @@ function webp_uploads_should_discard_additional_image_file( array $original, arr
 function webp_uploads_mime_type_supported( string $mime_type ): bool {
 
 	error_log( "Checking support for mime type: $mime_type" );
-	error_log( "check1 wp_image_editor_supports( array( 'mime_type' => $mime_type ) )" . wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) );
+	error_log( "check1 wp_image_editor_supports( array( 'mime_type' => $mime_type ) )" . ( wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ?'yes' : 'no' ) );
 	error_log( "check 2 method_exists( 'Imagick', 'setIteratorIndex' )" . method_exists( 'Imagick', 'setIteratorIndex' ) );
 	$imagick_image_editor = new WP_Image_Editor_Imagick( null );
 	error_log( "check 3 $imagick_image_editor->$imagick_image_editor->supports_mime_type( 'image/avif') " . $imagick_image_editor->$imagick_image_editor->supports_mime_type( 'image/avif') );
