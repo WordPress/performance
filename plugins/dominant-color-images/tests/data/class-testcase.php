@@ -153,6 +153,9 @@ abstract class TestCase extends WP_UnitTestCase {
 	public function test_get_dominant_color_valid( string $image_path, array $expected_color, bool $expected_transparency ): void {
 		$mime_type = wp_check_filetype( $image_path )['type'];
 		if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
+			error_log( wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) );
+			error_log( wp_image_editor_supports( $mime_type ) );
+
 			$this->markTestSkipped( "Mime type $mime_type is not supported." );
 		}
 
