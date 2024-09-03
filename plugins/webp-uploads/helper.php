@@ -343,9 +343,9 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 
 	error_log( "Checking support for mime type: $mime_type" );
 	error_log( "check1 wp_image_editor_supports( array( 'mime_type' => $mime_type ) )" . ( wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ?'yes' : 'no' ) );
-	error_log( "check 2 method_exists( 'Imagick', 'setIteratorIndex' )" . method_exists( 'Imagick', 'setIteratorIndex' ) );
 	$imagick_image_editor = new WP_Image_Editor_Imagick( null );
-	error_log( "check 3 $imagick_image_editor->$imagick_image_editor->supports_mime_type( 'image/avif') " . $imagick_image_editor->$imagick_image_editor->supports_mime_type( 'image/avif') );
+	error_log( "check 3 for 'imagick_image_editor->supports_mime_type( 'image/avif' )' " . $imagick_image_editor->supports_mime_type( 'image/avif') );
+	error_log("Counta " . count( Imagick::queryFormats( 'AVIF' ) ));
 
 	if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
 		return false;
@@ -353,14 +353,19 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 
 	// In certain server environments Image editors can report a false positive for AVIF support.
 	if ( 'image/avif' === $mime_type ) {
+		error_log( "Additional AVIF check...");
 		$editor = _wp_image_editor_choose( array( 'mime_type' => 'image/avif' ) );
 		if ( false === $editor ) {
 			return false;
 		}
+		error_log( "editor $editor" );
 		if ( is_a( $editor, WP_Image_Editor_GD::class, true ) ) {
+			error_log(function_exists( 'imageavif' ));
 			return function_exists( 'imageavif' );
 		}
 		if ( is_a( $editor, WP_Image_Editor_Imagick::class, true ) && class_exists( 'Imagick' ) ) {
+
+			error_log("Count " . count( Imagick::queryFormats( 'AVIF' ) ));
 			return 0 !== count( Imagick::queryFormats( 'AVIF' ) );
 		}
 	}
