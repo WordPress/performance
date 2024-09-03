@@ -722,7 +722,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$mime_type = 'image/' . $image_type;
 
 		// Skip this test if the image editor doesn't support the image type.
-		if ( ! webp_uploads_mime_type_supported( $mime_type ) ) {
+		if ( false === webp_uploads_mime_type_supported( $mime_type ) ) {
 				$this->markTestSkipped( 'The image editor does not support the image type: ' . $image_type );
 		}
 
