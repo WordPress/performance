@@ -11,6 +11,9 @@
     "./plugins/web-worker-offloading",
     "./plugins/webp-uploads"
   ],
+  "lifecycleScripts": {
+    "afterStart": "bin/update-wp-cli-local-ssh.sh"
+  },
   "env": {
     "tests": {
       "config": {
