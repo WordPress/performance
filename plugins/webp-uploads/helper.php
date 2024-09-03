@@ -343,7 +343,7 @@ function webp_uploads_mime_type_supported( string $mime_type ): bool {
 
 	error_log( "Checking support for mime type: $mime_type" );
 	error_log( wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) );
-	error_log( wp_image_editor_supports( $mime_type ) );
+	error_log( $image_types & IMG_AVIF  );
 
 
 	if ( ! wp_image_editor_supports( array( 'mime_type' => $mime_type ) ) ) {
