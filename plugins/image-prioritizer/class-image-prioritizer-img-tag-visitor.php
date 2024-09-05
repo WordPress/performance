@@ -111,7 +111,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			);
 
 			$crossorigin = $processor->get_attribute( 'crossorigin' );
-			if ( is_string( $crossorigin ) ) {
+			if ( null !== $crossorigin ) {
 				$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
 			}
 
