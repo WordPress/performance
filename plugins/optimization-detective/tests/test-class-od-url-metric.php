@@ -260,7 +260,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				'assert'                   => function ( array $original_schema, $extended_schema ): void {
 					$this->assertSame( $original_schema, $extended_schema );
 				},
-				'expected_incorrect_usage' => 'add_filter(od_url_metric_schema_root_additional_properties,...)',
+				'expected_incorrect_usage' => 'Filter: &#039;od_url_metric_schema_root_additional_properties&#039;',
 			),
 
 			'bad_type'                       => array(
@@ -278,7 +278,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				'assert'                   => function ( array $original_schema, $extended_schema ): void {
 					$this->assertSame( $original_schema, $extended_schema );
 				},
-				'expected_incorrect_usage' => 'add_filter(od_url_metric_schema_root_additional_properties,...)',
+				'expected_incorrect_usage' => 'Filter: &#039;od_url_metric_schema_root_additional_properties&#039;',
 			),
 
 			'bad_required'                   => array(
@@ -302,7 +302,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 					);
 					$this->assertSame( $expected_schema, $extended_schema );
 				},
-				'expected_incorrect_usage' => 'add_filter(od_url_metric_schema_root_additional_properties,...)',
+				'expected_incorrect_usage' => 'Filter: &#039;od_url_metric_schema_root_additional_properties&#039;',
 			),
 
 			'bad_existing_root_property'     => array(
@@ -320,7 +320,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				'assert'                   => function ( array $original_schema, $extended_schema ): void {
 					$this->assertSame( $original_schema, $extended_schema );
 				},
-				'expected_incorrect_usage' => 'add_filter(od_url_metric_schema_root_additional_properties,...)',
+				'expected_incorrect_usage' => 'Filter: &#039;od_url_metric_schema_root_additional_properties&#039;',
 			),
 
 			'bad_existing_element_property'  => array(
@@ -338,7 +338,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				'assert'                   => function ( array $original_schema, $extended_schema ): void {
 					$this->assertSame( $original_schema, $extended_schema );
 				},
-				'expected_incorrect_usage' => 'add_filter(od_url_metric_schema_root_additional_properties,...)',
+				'expected_incorrect_usage' => 'Filter: &#039;od_url_metric_schema_root_additional_properties&#039;',
 			),
 
 			'adding_root_string'             => array(

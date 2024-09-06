@@ -283,7 +283,7 @@ final class OD_URL_Metric implements JsonSerializable {
 	protected static function extend_schema_with_optional_properties( array $properties_schema, array $additional_properties, string $filter_name ): array {
 		$doing_it_wrong = static function ( string $message ) use ( $filter_name ): void {
 			_doing_it_wrong(
-				esc_html( "add_filter({$filter_name},...)" ),
+				esc_html( "Filter: '{$filter_name}'" ),
 				esc_html( $message ),
 				'Optimization Detective n.e.x.t'
 			);
