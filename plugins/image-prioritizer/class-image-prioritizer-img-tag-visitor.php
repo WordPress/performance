@@ -40,6 +40,20 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 
 		$xpath = $processor->get_xpath();
 
+		/**
+		 * Gets attribute value.
+		 *
+		 * @param string $attribute_name Attribute name.
+		 * @return string|true|null Normalized attribute value.
+		 */
+		$get_attribute_value = static function ( string $attribute_name ) use ( $processor ) {
+			$value = $processor->get_attribute( $attribute_name );
+			if ( is_string( $value ) ) {
+				$value = strtolower( trim( $value, " \t\f\r\n" ) );
+			}
+			return $value;
+		};
+
 		/*
 		 * When the same LCP element is common/shared among all viewport groups, make sure that the element has
 		 * fetchpriority=high, even though it won't really be needed because a preload link with fetchpriority=high
@@ -47,13 +61,13 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		 */
 		$common_lcp_element = $context->url_metrics_group_collection->get_common_lcp_element();
 		if ( ! is_null( $common_lcp_element ) && $xpath === $common_lcp_element['xpath'] ) {
-			if ( 'high' === $processor->get_attribute( 'fetchpriority' ) ) {
+			if ( 'high' === $get_attribute_value( 'fetchpriority' ) ) {
 				$processor->set_meta_attribute( 'fetchpriority-already-added', true );
 			} else {
 				$processor->set_attribute( 'fetchpriority', 'high' );
 			}
 		} elseif (
-			is_string( $processor->get_attribute( 'fetchpriority' ) )
+			is_string( $get_attribute_value( 'fetchpriority' ) )
 			&&
 			// Temporary condition in case someone updates Image Prioritizer without also updating Optimization Detective.
 			method_exists( $context->url_metrics_group_collection, 'is_any_group_populated' )
@@ -81,7 +95,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		} else {
 			// Otherwise, make sure visible elements omit the loading attribute, and hidden elements include loading=lazy.
 			$is_visible = $element_max_intersection_ratio > 0.0;
-			$loading    = (string) $processor->get_attribute( 'loading' );
+			$loading    = $get_attribute_value( 'loading' );
 			if ( $is_visible && 'lazy' === $loading ) {
 				$processor->remove_attribute( 'loading' );
 			} elseif ( ! $is_visible && 'lazy' !== $loading ) {
@@ -110,7 +124,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 				)
 			);
 
-			$crossorigin = $processor->get_attribute( 'crossorigin' );
+			$crossorigin = $get_attribute_value( 'crossorigin' );
 			if ( null !== $crossorigin ) {
 				$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
 			}

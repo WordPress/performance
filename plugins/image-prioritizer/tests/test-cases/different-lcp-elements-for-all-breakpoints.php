@@ -48,8 +48,8 @@ return array(
 				<title>...</title>
 			</head>
 			<body>
-				<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-				<img src="https://example.com/phablet-logo.png" alt="Phablet Logo" width="600" height="600" crossorigin>
+				<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600" crossorigin>
+				<img src="https://example.com/phablet-logo.png" alt="Phablet Logo" width="600" height="600" crossorigin="">
 				<img src="https://example.com/tablet-logo.png" alt="Tablet Logo" width="600" height="600" crossorigin="anonymous">
 				<img src="https://example.net/desktop-logo.png" alt="Desktop Logo" width="600" height="600" crossorigin="use-credentials">
 			</body>
@@ -60,14 +60,14 @@ return array(
 			<head>
 				<meta charset="utf-8">
 				<title>...</title>
-				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" media="screen and (max-width: 480px)">
+				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" crossorigin="anonymous" media="screen and (max-width: 480px)">
 				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/phablet-logo.png" crossorigin="anonymous" media="screen and (min-width: 481px) and (max-width: 600px)">
 				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/tablet-logo.png" crossorigin="anonymous" media="screen and (min-width: 601px) and (max-width: 782px)">
 				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.net/desktop-logo.png" crossorigin="use-credentials" media="screen and (min-width: 783px)">
 			</head>
 			<body>
-				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
-				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/phablet-logo.png" alt="Phablet Logo" width="600" height="600" crossorigin>
+				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600" crossorigin>
+				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/phablet-logo.png" alt="Phablet Logo" width="600" height="600" crossorigin="">
 				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]" src="https://example.com/tablet-logo.png" alt="Tablet Logo" width="600" height="600" crossorigin="anonymous">
 				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[4][self::IMG]" src="https://example.net/desktop-logo.png" alt="Desktop Logo" width="600" height="600" crossorigin="use-credentials">
 				<script type="module">/* import detect ... */</script>
