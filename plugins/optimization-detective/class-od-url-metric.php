@@ -318,9 +318,9 @@ final class OD_URL_Metric implements JsonSerializable {
 				$doing_it_wrong(
 					sprintf(
 						/* translators: 1: property name, 2: 'required' */
-						__( 'Supplied schema property "%1$s" with truthy for "%2$s". All properties must be optional.', 'optimization-detective' ),
-						'type',
-						$property_key
+						__( 'Supplied schema property "%1$s" has a truthy value for "%2$s". All extended properties must be optional so that URL Metrics are not all immediately invalidated once an extension is deactivated..', 'optimization-detective' ),
+						$property_key,
+						'required'
 					)
 				);
 			}
