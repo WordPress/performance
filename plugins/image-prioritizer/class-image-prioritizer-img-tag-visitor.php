@@ -104,6 +104,23 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		}
 		// TODO: If an image is visible in one breakpoint but not another, add loading=lazy AND add a regular-priority preload link with media queries (unless LCP in which case it should already have a fetchpriority=high link) so that the image won't be eagerly-loaded for viewports on which it is not shown.
 
+		// Ensure that sizes=auto is set properly.
+		$sizes = $processor->get_attribute( 'sizes' );
+		if ( is_string( $sizes ) ) {
+			$is_lazy  = 'lazy' === $get_attribute_value( 'loading' );
+			$has_auto = $this->sizes_attribute_includes_valid_auto( $sizes );
+
+			if ( $is_lazy && ! $has_auto ) {
+				$processor->set_attribute( 'sizes', "auto, $sizes" );
+			} elseif ( ! $is_lazy && $has_auto ) {
+				// Remove auto from the beginning of the list.
+				$processor->set_attribute(
+					'sizes',
+					(string) preg_replace( '/^[ \t\f\r\n]*auto[ \t\f\r\n]*(,[ \t\f\r\n]*)?/i', '', $sizes )
+				);
+			}
+		}
+
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
 		foreach ( $context->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
 			$link_attributes = array_merge(
@@ -139,5 +156,21 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks whether the given 'sizes' attribute includes the 'auto' keyword as the first item in the list.
+	 *
+	 * Per the HTML spec, if present it must be the first entry.
+	 *
+	 * @since n.e.x.t
+	 * @see auto_sizes_attribute_includes_valid_auto()
+	 *
+	 * @param string $sizes_attr The 'sizes' attribute value.
+	 * @return bool True if the 'auto' keyword is present, false otherwise.
+	 */
+	private function sizes_attribute_includes_valid_auto( string $sizes_attr ): bool {
+		list( $first_size ) = explode( ',', $sizes_attr, 2 );
+		return 'auto' === strtolower( trim( $first_size, " \t\f\r\n" ) );
 	}
 }
