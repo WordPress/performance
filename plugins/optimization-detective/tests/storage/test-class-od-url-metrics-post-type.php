@@ -94,7 +94,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 					'width'  => 640,
 					'height' => 480,
 				),
-				'timestamp' => (int) microtime( true ), // Integer to facilitate equality tests.
+				'timestamp' => microtime( true ),
 				'elements'  => array(),
 			),
 		);

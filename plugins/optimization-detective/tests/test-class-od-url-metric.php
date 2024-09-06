@@ -48,6 +48,26 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 					),
 				),
 			),
+			// This tests that sanitization converts values into their expected PHP types.
+			'valid_but_props_are_strings'     => array(
+				'data' => array(
+					'url'       => home_url( '/' ),
+					'viewport'  => array_map( 'strval', $viewport ),
+					'timestamp' => (string) microtime( true ),
+					'elements'  => array(
+						array_map(
+							static function ( $value ) {
+								if ( is_array( $value ) ) {
+									return array_map( 'strval', $value );
+								} else {
+									return (string) $value;
+								}
+							},
+							$valid_element
+						),
+					),
+				),
+			),
 			'bad_uuid'                        => array(
 				'data'  => array(
 					'uuid'      => 'foo',
@@ -198,19 +218,26 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		}
 		$url_metric = new OD_URL_Metric( $data );
 
-		$this->assertSame( $data['viewport'], $url_metric->get_viewport() );
-		$this->assertSame( $data['viewport'], $url_metric->get( 'viewport' ) );
-		$this->assertSame( $data['viewport'], $url_metric->viewport );
-		$this->assertSame( $data['viewport']['width'], $url_metric->get_viewport_width() );
-		$this->assertSame( $data['viewport']['width'], $url_metric->viewport['width'] );
+		$this->assertSame( array_map( 'intval', $data['viewport'] ), $url_metric->get_viewport() );
+		$this->assertSame( array_map( 'intval', $data['viewport'] ), $url_metric->get( 'viewport' ) );
+		$this->assertSame( array_map( 'intval', $data['viewport'] ), $url_metric->viewport );
+		$this->assertSame( (int) $data['viewport']['width'], $url_metric->get_viewport_width() );
+		$this->assertSame( (int) $data['viewport']['width'], $url_metric->viewport['width'] );
 
-		$this->assertSame( $data['timestamp'], $url_metric->get_timestamp() );
-		$this->assertSame( $data['timestamp'], $url_metric->get( 'timestamp' ) );
-		$this->assertSame( $data['timestamp'], $url_metric->timestamp );
+		$this->assertSame( (float) $data['timestamp'], $url_metric->get_timestamp() );
+		$this->assertSame( (float) $data['timestamp'], $url_metric->get( 'timestamp' ) );
+		$this->assertSame( (float) $data['timestamp'], $url_metric->timestamp );
 
-		$this->assertSame( $data['elements'], $url_metric->get_elements() );
-		$this->assertSame( $data['elements'], $url_metric->get( 'elements' ) );
-		$this->assertSame( $data['elements'], $url_metric->elements );
+		$this->assertCount( count( $data['elements'] ), $url_metric->elements );
+		for ( $i = 0, $length = count( $data['elements'] ); $i < $length; $i++ ) {
+			$this->assertSame( (bool) $data['elements'][ $i ]['isLCP'], $url_metric->elements[ $i ]['isLCP'] );
+			$this->assertSame( (bool) $data['elements'][ $i ]['isLCPCandidate'], $url_metric->elements[ $i ]['isLCPCandidate'] );
+			$this->assertSame( (float) $data['elements'][ $i ]['intersectionRatio'], $url_metric->elements[ $i ]['intersectionRatio'] );
+			$this->assertSame( array_map( 'floatval', $data['elements'][ $i ]['boundingClientRect'] ), $url_metric->elements[ $i ]['boundingClientRect'] );
+			$this->assertSame( array_map( 'floatval', $data['elements'][ $i ]['intersectionRect'] ), $url_metric->elements[ $i ]['intersectionRect'] );
+		}
+		$this->assertSame( $url_metric->elements, $url_metric->get_elements() );
+		$this->assertSame( $url_metric->elements, $url_metric->get( 'elements' ) );
 
 		$this->assertSame( $data['url'], $url_metric->get_url() );
 		$this->assertSame( $data['url'], $url_metric->get( 'url' ) );
@@ -225,6 +252,8 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			$this->assertTrue( wp_is_uuid( $serialized['uuid'] ) );
 			unset( $serialized['uuid'] );
 		}
+
+		// The use of assertEquals instead of assertSame ensures that lossy type comparisons are employed.
 		$this->assertEquals( $data, $serialized );
 	}
 

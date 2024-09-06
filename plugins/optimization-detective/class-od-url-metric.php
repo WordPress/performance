@@ -67,28 +67,28 @@ final class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @phpstan-param Data|array<string, mixed> $data Valid data or invalid data (in which case an exception is thrown).
 	 *
-	 * @param array<string, mixed> $data URL metric data.
-	 *
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
+	 *
+	 * @param array<string, mixed> $data URL metric data.
 	 */
 	public function __construct( array $data ) {
 		if ( ! isset( $data['uuid'] ) ) {
 			$data['uuid'] = wp_generate_uuid4();
 		}
-		$this->validate_data( $data );
-		$this->data = $data;
+		$this->data = $this->prepare_data( $data );
 	}
 
 	/**
-	 * Validate data.
+	 * Prepares data with validation and sanitization.
 	 *
-	 * @phpstan-assert Data $data
+	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 *
 	 * @param array<string, mixed> $data Data to validate.
-	 * @throws OD_Data_Validation_Exception When the input is invalid.
+	 * @return Data Validated and sanitized data.
 	 */
-	private function validate_data( array $data ): void {
-		$valid = rest_validate_object_value_from_schema( $data, self::get_json_schema(), self::class );
+	private function prepare_data( array $data ): array {
+		$schema = static::get_json_schema();
+		$valid  = rest_validate_object_value_from_schema( $data, $schema, self::class );
 		if ( is_wp_error( $valid ) ) {
 			throw new OD_Data_Validation_Exception( esc_html( $valid->get_error_message() ) );
 		}
@@ -111,6 +111,7 @@ final class OD_URL_Metric implements JsonSerializable {
 				)
 			);
 		}
+		return rest_sanitize_value_from_schema( $data, $schema, self::class );
 	}
 
 	/**
