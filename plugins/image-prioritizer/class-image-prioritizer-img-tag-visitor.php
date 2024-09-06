@@ -170,7 +170,12 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	 * @return bool True if the 'auto' keyword is present, false otherwise.
 	 */
 	private function sizes_attribute_includes_valid_auto( string $sizes_attr ): bool {
-		list( $first_size ) = explode( ',', $sizes_attr, 2 );
-		return 'auto' === strtolower( trim( $first_size, " \t\f\r\n" ) );
+		if ( function_exists( 'wp_sizes_attribute_includes_valid_auto' ) ) {
+			return wp_sizes_attribute_includes_valid_auto( $sizes_attr );
+		} elseif ( function_exists( 'auto_sizes_attribute_includes_valid_auto' ) ) {
+			return auto_sizes_attribute_includes_valid_auto( $sizes_attr );
+		} else {
+			return 'auto' === $sizes_attr || str_starts_with( $sizes_attr, 'auto,' );
+		}
 	}
 }
