@@ -14,7 +14,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 *
 	 * @return array<string, mixed> Data.
 	 */
-	public function data_provider(): array {
+	public function data_provider_to_test_constructor(): array {
 		$viewport      = array(
 			'width'  => 640,
 			'height' => 480,
@@ -198,15 +198,15 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	/**
 	 * Tests construction.
 	 *
-	 * @todo PHPStan complains when adding @covers tags for `::get()` and `::__get()` saying they are invalid method references.
-	 *
 	 * @covers ::get_viewport
 	 * @covers ::get_viewport_width
 	 * @covers ::get_timestamp
 	 * @covers ::get_elements
 	 * @covers ::jsonSerialize
+	 * @covers ::get
+	 * @covers ::__get
 	 *
-	 * @dataProvider data_provider
+	 * @dataProvider data_provider_to_test_constructor
 	 *
 	 * @param array<string, mixed> $data  Data.
 	 * @param string               $error Error.
@@ -255,6 +255,175 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 
 		// The use of assertEquals instead of assertSame ensures that lossy type comparisons are employed.
 		$this->assertEquals( $data, $serialized );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed> Data.
+	 */
+	public function data_provider_to_test_constructor_with_extended_schema(): array {
+		$viewport      = array(
+			'width'  => 640,
+			'height' => 480,
+		);
+		$valid_element = array(
+			'isLCP'              => true,
+			'isLCPCandidate'     => true,
+			'xpath'              => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]',
+			'intersectionRatio'  => 1.0,
+			'intersectionRect'   => $this->get_sample_dom_rect(),
+			'boundingClientRect' => $this->get_sample_dom_rect(),
+		);
+
+		return array(
+			'added_valid_root_property'      => array(
+				'set_up' => static function (): void {
+					add_filter(
+						'od_url_metric_schema_root_additional_properties',
+						static function ( array $properties ): array {
+							$properties['isTouch'] = array(
+								'type' => 'boolean',
+							);
+							return $properties;
+						}
+					);
+				},
+				'data'   => array(
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+					'isTouch'   => 1, // This should get cast to `true` after the extended schema has applied.
+				),
+				'assert' => function ( OD_URL_Metric $extended_url_metric, OD_URL_Metric $original_url_metric ): void {
+					$this->assertSame( $original_url_metric->get_viewport(), $extended_url_metric->get_viewport() );
+
+					$original_data = $original_url_metric->jsonSerialize();
+					$this->assertArrayHasKey( 'isTouch', $original_data );
+					$this->assertSame( 1, $original_data['isTouch'] );
+					$this->assertSame( 1, $original_url_metric->get( 'isTouch' ) );
+
+					$extended_data = $extended_url_metric->jsonSerialize();
+					$this->assertArrayHasKey( 'isTouch', $extended_data );
+					$this->assertTrue( $extended_data['isTouch'] );
+					$this->assertTrue( $extended_url_metric->get( 'isTouch' ) );
+				},
+			),
+
+			'added_invalid_root_property'    => array(
+				'set_up' => static function (): void {
+					add_filter(
+						'od_url_metric_schema_root_additional_properties',
+						static function ( array $properties ): array {
+							$properties['isTouch'] = array(
+								'type' => 'boolean',
+							);
+							return $properties;
+						}
+					);
+				},
+				'data'   => array(
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+					'isTouch'   => array( 'cannot be cast to boolean' ),
+				),
+				'assert' => static function (): void {},
+				'error'  => 'OD_URL_Metric[isTouch] is not of type boolean.',
+			),
+
+			'added_valid_element_property'   => array(
+				'set_up' => static function (): void {
+					add_filter(
+						'od_url_metric_schema_element_item_additional_properties',
+						static function ( array $properties ): array {
+							$properties['isColorful'] = array(
+								'type' => 'boolean',
+							);
+							return $properties;
+						}
+					);
+				},
+				'data'   => array(
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(
+						array_merge(
+							$valid_element,
+							array( 'isColorful' => 'false' )
+						),
+					),
+				),
+				'assert' => function ( OD_URL_Metric $extended_url_metric, OD_URL_Metric $original_url_metric ): void {
+					$this->assertSame( $original_url_metric->get_viewport(), $extended_url_metric->get_viewport() );
+
+					$original_data = $original_url_metric->jsonSerialize();
+					$this->assertArrayHasKey( 'isColorful', $original_data['elements'][0] );
+					$this->assertSame( 'false', $original_data['elements'][0]['isColorful'] );
+					$this->assertSame( 'false', $original_url_metric->get_elements()[0]['isColorful'] );
+
+					$extended_data = $extended_url_metric->jsonSerialize();
+					$this->assertArrayHasKey( 'isColorful', $extended_data['elements'][0] );
+					$this->assertFalse( $extended_data['elements'][0]['isColorful'] );
+					$this->assertFalse( $extended_url_metric->get_elements()[0]['isColorful'] );
+				},
+			),
+
+			'added_invalid_element_property' => array(
+				'set_up' => static function (): void {
+					add_filter(
+						'od_url_metric_schema_element_item_additional_properties',
+						static function ( array $properties ): array {
+							$properties['isColorful'] = array(
+								'type' => 'boolean',
+							);
+							return $properties;
+						}
+					);
+				},
+				'data'   => array(
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(
+						array_merge(
+							$valid_element,
+							array( 'isColorful' => array( 'cannot be cast to boolean' ) )
+						),
+					),
+				),
+				'assert' => static function (): void {},
+				'error'  => 'OD_URL_Metric[elements][0][isColorful] is not of type boolean.',
+			),
+		);
+	}
+
+	/**
+	 * Tests construction with extended schema.
+	 *
+	 * @covers ::jsonSerialize
+	 * @covers ::get
+	 * @covers ::__get
+	 *
+	 * @dataProvider data_provider_to_test_constructor_with_extended_schema
+	 *
+	 * @param Closure              $set_up Set up to extend schema.
+	 * @param array<string, mixed> $data   Data.
+	 * @param Closure              $assert Assert.
+	 * @param string               $error  Error.
+	 */
+	public function test_constructor_with_extended_schema( Closure $set_up, array $data, Closure $assert, string $error = '' ): void {
+		if ( '' !== $error ) {
+			$this->expectException( OD_Data_Validation_Exception::class );
+			$this->expectExceptionMessage( $error );
+		}
+		$url_metric_sans_extended_schema = new OD_URL_Metric( $data );
+		$set_up();
+		$url_metric_with_extended_schema = new OD_URL_Metric( $data );
+		$assert( $url_metric_with_extended_schema, $url_metric_sans_extended_schema );
 	}
 
 	/**
@@ -463,7 +632,11 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		if ( 'object' === $schema['type'] ) {
 			$this->assertArrayHasKey( 'properties', $schema, $path );
 			$this->assertArrayHasKey( 'additionalProperties', $schema, $path );
-			$this->assertFalse( $schema['additionalProperties'] );
+			if ( 'root/viewport' === $path || 'root/elements/items/intersectionRect' === $path || 'root/elements/items/boundingClientRect' === $path ) {
+				$this->assertFalse( $schema['additionalProperties'], "Path: $path" );
+			} else {
+				$this->assertTrue( $schema['additionalProperties'], "Path: $path" );
+			}
 			foreach ( $schema['properties'] as $key => $property_schema ) {
 				$this->check_schema_subset( $property_schema, "$path/$key", $extended );
 			}

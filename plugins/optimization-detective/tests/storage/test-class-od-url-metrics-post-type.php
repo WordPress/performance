@@ -102,26 +102,33 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		$valid_content_with_uuid            = $valid_content;
 		$valid_content_with_uuid[0]['uuid'] = wp_generate_uuid4();
 
+		$valid_content_with_extra_property             = $valid_content_with_uuid;
+		$valid_content_with_extra_property[0]['extra'] = 'foo';
+
 		return array(
-			'malformed_json'  => array(
+			'malformed_json'        => array(
 				'post_content'   => '{"bad":',
 				'expected_value' => array(),
 			),
-			'not_array_json'  => array(
+			'not_array_json'        => array(
 				'post_content'   => '{"cool":"beans"}',
 				'expected_value' => array(),
 			),
-			'missing_keys'    => array(
+			'missing_keys'          => array(
 				'post_content'   => '[{},{},{}]',
 				'expected_value' => array(),
 			),
-			'valid_sans_uuid' => array(
+			'valid_sans_uuid'       => array(
 				'post_content'   => wp_json_encode( $valid_content ),
 				'expected_value' => $valid_content,
 			),
-			'valid_with_uuid' => array(
+			'valid_with_uuid'       => array(
 				'post_content'   => wp_json_encode( $valid_content_with_uuid ),
 				'expected_value' => $valid_content_with_uuid,
+			),
+			'valid_with_extra_prop' => array(
+				'post_content'   => wp_json_encode( $valid_content_with_extra_property ),
+				'expected_value' => $valid_content_with_extra_property,
 			),
 		);
 	}

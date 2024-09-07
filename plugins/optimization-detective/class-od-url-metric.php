@@ -53,14 +53,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  */
-final class OD_URL_Metric implements JsonSerializable {
+class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Data.
 	 *
 	 * @var Data
 	 */
-	private $data;
+	protected $data;
 
 	/**
 	 * Constructor.
@@ -123,7 +123,7 @@ final class OD_URL_Metric implements JsonSerializable {
 	 */
 	public static function get_json_schema(): array {
 		/*
-		 * The intersectionRect and clientBoundingRect are both instances of the DOMRectReadOnly, which
+		 * The intersectionRect and boundingClientRect are both instances of the DOMRectReadOnly, which
 		 * the following schema describes. See <https://developer.mozilla.org/en-US/docs/Web/API/DOMRectReadOnly>.
 		 * Note that 'number' is used specifically instead of 'integer' because the values are all specified as
 		 * floats/doubles.
@@ -232,11 +232,18 @@ final class OD_URL_Metric implements JsonSerializable {
 							'intersectionRect'   => $dom_rect_schema,
 							'boundingClientRect' => $dom_rect_schema,
 						),
-						'additionalProperties' => false,
+
+						// Additional properties may be added to the schema for items of elements via the od_url_metric_schema_element_item_additional_properties filter.
+						// See further explanation below.
+						'additionalProperties' => true,
 					),
 				),
 			),
-			'additionalProperties' => false,
+			// Additional root properties may be added to the schema via the od_url_metric_schema_root_additional_properties filter.
+			// Therefore, additionalProperties is set to true so that additional properties defined in the extended schema may persist
+			// in a stored URL Metric even when the extension is deactivated. For REST API requests, the OD_Strict_URL_Metric
+			// which sets this to false so that newly-submitted URL Metrics only ever include the known properties.
+			'additionalProperties' => true,
 		);
 
 		/**
