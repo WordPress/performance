@@ -321,18 +321,29 @@ class OD_URL_Metric implements JsonSerializable {
 				);
 				continue;
 			}
-			// TODO: Should 'default' be required?
 			if ( isset( $property_schema['required'] ) && false !== $property_schema['required'] ) {
 				$doing_it_wrong(
 					sprintf(
 						/* translators: 1: property name, 2: 'required' */
-						__( 'Supplied schema property "%1$s" has a truthy value for "%2$s". All extended properties must be optional so that URL Metrics are not all immediately invalidated once an extension is deactivated..', 'optimization-detective' ),
+						__( 'Supplied schema property "%1$s" has a truthy value for "%2$s". All extended properties must be optional so that URL Metrics are not all immediately invalidated once an extension is deactivated.', 'optimization-detective' ),
 						$property_key,
 						'required'
 					)
 				);
 			}
 			$property_schema['required'] = false;
+
+			if ( isset( $property_schema['default'] ) ) {
+				$doing_it_wrong(
+					sprintf(
+						/* translators: 1: property name, 2: 'default' */
+						__( 'Supplied schema property "%1$s" has disallowed "%2$s" specified.', 'optimization-detective' ),
+						$property_key,
+						'default'
+					)
+				);
+				unset( $property_schema['default'] );
+			}
 
 			$properties_schema[ $property_key ] = $property_schema;
 		}
@@ -345,7 +356,6 @@ class OD_URL_Metric implements JsonSerializable {
 	 * This is particularly useful in conjunction with the `od_url_metric_schema_root_additional_properties` filter.
 	 *
 	 * @since n.e.x.t
-	 * @todo Instead of returning null when the key doesn't exist, should the `default` value be returned as defined in the schema?
 	 *
 	 * @param string $key Property.
 	 * @return mixed|null The property value, or null if not set.

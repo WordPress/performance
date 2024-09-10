@@ -277,7 +277,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		);
 
 		return array(
-			'added_valid_root_property'      => array(
+			'added_valid_root_property_populated'        => array(
 				'set_up' => static function (): void {
 					add_filter(
 						'od_url_metric_schema_root_additional_properties',
@@ -311,7 +311,38 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 			),
 
-			'added_invalid_root_property'    => array(
+			'added_valid_root_property_not_populated'    => array(
+				'set_up' => static function (): void {
+					add_filter(
+						'od_url_metric_schema_root_additional_properties',
+						static function ( array $properties ): array {
+							$properties['isTouch'] = array(
+								'type' => 'boolean',
+							);
+							return $properties;
+						}
+					);
+				},
+				'data'   => array(
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array(),
+				),
+				'assert' => function ( OD_URL_Metric $extended_url_metric, OD_URL_Metric $original_url_metric ): void {
+					$this->assertSame( $original_url_metric->get_viewport(), $extended_url_metric->get_viewport() );
+
+					$original_data = $original_url_metric->jsonSerialize();
+					$this->assertArrayNotHasKey( 'isTouch', $original_data );
+					$this->assertNull( $original_url_metric->get( 'isTouch' ) );
+
+					$extended_data = $extended_url_metric->jsonSerialize();
+					$this->assertArrayNotHasKey( 'isTouch', $extended_data ); // If rest_sanitize_value_from_schema() took default into account (and we allowed defaults), this could be different.
+					$this->assertNull( $extended_url_metric->get( 'isTouch' ) );
+				},
+			),
+
+			'added_invalid_root_property'                => array(
 				'set_up' => static function (): void {
 					add_filter(
 						'od_url_metric_schema_root_additional_properties',
@@ -334,7 +365,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				'error'  => 'OD_URL_Metric[isTouch] is not of type boolean.',
 			),
 
-			'added_valid_element_property'   => array(
+			'added_valid_element_property_populated'     => array(
 				'set_up' => static function (): void {
 					add_filter(
 						'od_url_metric_schema_element_item_additional_properties',
@@ -363,16 +394,45 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 					$original_data = $original_url_metric->jsonSerialize();
 					$this->assertArrayHasKey( 'isColorful', $original_data['elements'][0] );
 					$this->assertSame( 'false', $original_data['elements'][0]['isColorful'] );
-					$this->assertSame( 'false', $original_url_metric->get_elements()[0]['isColorful'] );
+					$this->assertSame( 'false', $original_url_metric->elements[0]['isColorful'] );
 
 					$extended_data = $extended_url_metric->jsonSerialize();
 					$this->assertArrayHasKey( 'isColorful', $extended_data['elements'][0] );
 					$this->assertFalse( $extended_data['elements'][0]['isColorful'] );
-					$this->assertFalse( $extended_url_metric->get_elements()[0]['isColorful'] );
+					$this->assertFalse( $extended_url_metric->elements[0]['isColorful'] );
 				},
 			),
 
-			'added_invalid_element_property' => array(
+			'added_valid_element_property_not_populated' => array(
+				'set_up' => static function (): void {
+					add_filter(
+						'od_url_metric_schema_element_item_additional_properties',
+						static function ( array $properties ): array {
+							$properties['isColorful'] = array(
+								'type' => 'boolean',
+							);
+							return $properties;
+						}
+					);
+				},
+				'data'   => array(
+					'url'       => home_url( '/' ),
+					'viewport'  => $viewport,
+					'timestamp' => microtime( true ),
+					'elements'  => array( $valid_element ),
+				),
+				'assert' => function ( OD_URL_Metric $extended_url_metric, OD_URL_Metric $original_url_metric ): void {
+					$this->assertSame( $original_url_metric->get_viewport(), $extended_url_metric->get_viewport() );
+
+					$original_data = $original_url_metric->jsonSerialize();
+					$this->assertArrayNotHasKey( 'isColorful', $original_data['elements'][0] );
+
+					$extended_data = $extended_url_metric->jsonSerialize();
+					$this->assertArrayNotHasKey( 'isColorful', $extended_data['elements'][0] );  // If rest_sanitize_value_from_schema() took default into account (and we allowed defaults), this could be different.
+				},
+			),
+
+			'added_invalid_element_property'             => array(
 				'set_up' => static function (): void {
 					add_filter(
 						'od_url_metric_schema_element_item_additional_properties',
@@ -487,6 +547,30 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 							$additional_properties['foo'] = array(
 								'type'     => 'string',
 								'required' => true,
+							);
+							return $additional_properties;
+						}
+					);
+				},
+				'assert'                   => function ( array $original_schema, $extended_schema ): void {
+					$expected_schema = $original_schema;
+					$expected_schema['properties']['foo'] = array(
+						'type'     => 'string',
+						'required' => false,
+					);
+					$this->assertSame( $expected_schema, $extended_schema );
+				},
+				'expected_incorrect_usage' => 'Filter: &#039;od_url_metric_schema_root_additional_properties&#039;',
+			),
+
+			'bad_default'                    => array(
+				'set_up'                   => static function (): void {
+					add_filter(
+						'od_url_metric_schema_root_additional_properties',
+						static function ( $additional_properties ) {
+							$additional_properties['foo'] = array(
+								'type'    => 'string',
+								'default' => 'bar',
 							);
 							return $additional_properties;
 						}
