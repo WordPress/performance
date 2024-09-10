@@ -373,7 +373,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @since n.e.x.t
 	 *
 	 * @param string $key Property.
-	 * @return mixed|null
+	 * @return mixed|null The property value, or null if not set.
 	 */
 	public function __get( string $key ) {
 		return $this->get( $key );
