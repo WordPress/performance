@@ -229,7 +229,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 			}
 			$current_time = microtime( true );
 			foreach ( $this->url_metrics as $url_metric ) {
-				if ( $current_time > $url_metric->get_timestamp() + $this->freshness_ttl ) {
+				if ( $current_time > $url_metric->timestamp + $this->freshness_ttl ) {
 					return false;
 				}
 			}
