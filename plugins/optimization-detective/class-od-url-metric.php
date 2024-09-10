@@ -348,7 +348,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @todo Instead of returning null when the key doesn't exist, should the `default` value be returned as defined in the schema?
 	 *
 	 * @param string $key Property.
-	 * @return mixed|null
+	 * @return mixed|null The property value, or null if not set.
 	 */
 	public function get( string $key ) {
 		return $this->data[ $key ] ?? null;
