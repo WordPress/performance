@@ -181,7 +181,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 	 * @param OD_URL_Metric $url_metric URL metric.
 	 */
 	public function add_url_metric( OD_URL_Metric $url_metric ): void {
-		if ( ! $this->is_viewport_width_in_range( $url_metric->get_viewport_width() ) ) {
+		if ( ! $this->is_viewport_width_in_range( $url_metric->viewport['width'] ) ) {
 			throw new InvalidArgumentException(
 				esc_html__( 'URL metric is not in the viewport range for group.', 'optimization-detective' )
 			);
@@ -201,7 +201,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 			usort(
 				$this->url_metrics,
 				static function ( OD_URL_Metric $a, OD_URL_Metric $b ): int {
-					return $b->get_timestamp() <=> $a->get_timestamp();
+					return $b->timestamp <=> $a->timestamp;
 				}
 			);
 
@@ -283,7 +283,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 			$breadcrumb_element = array();
 
 			foreach ( $this->url_metrics as $url_metric ) {
-				foreach ( $url_metric->get_elements() as $element ) {
+				foreach ( $url_metric->elements as $element ) {
 					if ( ! $element['isLCP'] ) {
 						continue;
 					}
