@@ -193,7 +193,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 */
 	public function add_url_metric( OD_URL_Metric $new_url_metric ): void {
 		foreach ( $this->groups as $group ) {
-			if ( $group->is_viewport_width_in_range( $new_url_metric->viewport['width'] ) ) {
+			if ( $group->is_viewport_width_in_range( $new_url_metric->get_viewport_width() ) ) {
 				$group->add_url_metric( $new_url_metric );
 				return;
 			}
@@ -416,7 +416,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 			 */
 			foreach ( $this->groups as $group ) {
 				foreach ( $group as $url_metric ) {
-					foreach ( $url_metric->elements as $element ) {
+					foreach ( $url_metric->get_elements() as $element ) {
 						$element_max_intersection_ratios[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_max_intersection_ratios )
 							? max( $element_max_intersection_ratios[ $element['xpath'] ], $element['intersectionRatio'] )
 							: $element['intersectionRatio'];

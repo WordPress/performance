@@ -200,7 +200,7 @@ class OD_URL_Metrics_Post_Type {
 			// multiple URL Metric instances, each of which also contains the URL for which the metric was captured. The URL
 			// appearing in the post title is therefore the most recent URL seen for the URL Metrics which have the same
 			// normalized query vars among them.
-			'post_title' => $new_url_metric->url,
+			'post_title' => $new_url_metric->get_url(),
 		);
 
 		$post = self::get_post( $slug );
@@ -221,7 +221,7 @@ class OD_URL_Metrics_Post_Type {
 		);
 
 		try {
-			$group = $group_collection->get_group_for_viewport_width( $new_url_metric->viewport['width'] );
+			$group = $group_collection->get_group_for_viewport_width( $new_url_metric->get_viewport_width() );
 			$group->add_url_metric( $new_url_metric );
 		} catch ( InvalidArgumentException $e ) {
 			return new WP_Error( 'invalid_url_metric', $e->getMessage() );

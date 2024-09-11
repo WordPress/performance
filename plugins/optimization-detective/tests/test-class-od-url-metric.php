@@ -204,7 +204,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 * @covers ::get_elements
 	 * @covers ::jsonSerialize
 	 * @covers ::get
-	 * @covers ::__get
+	 * @covers ::get_json_schema
 	 *
 	 * @dataProvider data_provider_to_test_constructor
 	 *
@@ -220,31 +220,25 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 
 		$this->assertSame( array_map( 'intval', $data['viewport'] ), $url_metric->get_viewport() );
 		$this->assertSame( array_map( 'intval', $data['viewport'] ), $url_metric->get( 'viewport' ) );
-		$this->assertSame( array_map( 'intval', $data['viewport'] ), $url_metric->viewport );
 		$this->assertSame( (int) $data['viewport']['width'], $url_metric->get_viewport_width() );
-		$this->assertSame( (int) $data['viewport']['width'], $url_metric->viewport['width'] );
 
 		$this->assertSame( (float) $data['timestamp'], $url_metric->get_timestamp() );
 		$this->assertSame( (float) $data['timestamp'], $url_metric->get( 'timestamp' ) );
-		$this->assertSame( (float) $data['timestamp'], $url_metric->timestamp );
 
-		$this->assertCount( count( $data['elements'] ), $url_metric->elements );
+		$this->assertCount( count( $data['elements'] ), $url_metric->get_elements() );
 		for ( $i = 0, $length = count( $data['elements'] ); $i < $length; $i++ ) {
-			$this->assertSame( (bool) $data['elements'][ $i ]['isLCP'], $url_metric->elements[ $i ]['isLCP'] );
-			$this->assertSame( (bool) $data['elements'][ $i ]['isLCPCandidate'], $url_metric->elements[ $i ]['isLCPCandidate'] );
-			$this->assertSame( (float) $data['elements'][ $i ]['intersectionRatio'], $url_metric->elements[ $i ]['intersectionRatio'] );
-			$this->assertSame( array_map( 'floatval', $data['elements'][ $i ]['boundingClientRect'] ), $url_metric->elements[ $i ]['boundingClientRect'] );
-			$this->assertSame( array_map( 'floatval', $data['elements'][ $i ]['intersectionRect'] ), $url_metric->elements[ $i ]['intersectionRect'] );
+			$this->assertSame( (bool) $data['elements'][ $i ]['isLCP'], $url_metric->get_elements()[ $i ]['isLCP'] );
+			$this->assertSame( (bool) $data['elements'][ $i ]['isLCPCandidate'], $url_metric->get_elements()[ $i ]['isLCPCandidate'] );
+			$this->assertSame( (float) $data['elements'][ $i ]['intersectionRatio'], $url_metric->get_elements()[ $i ]['intersectionRatio'] );
+			$this->assertSame( array_map( 'floatval', $data['elements'][ $i ]['boundingClientRect'] ), $url_metric->get_elements()[ $i ]['boundingClientRect'] );
+			$this->assertSame( array_map( 'floatval', $data['elements'][ $i ]['intersectionRect'] ), $url_metric->get_elements()[ $i ]['intersectionRect'] );
 		}
-		$this->assertSame( $url_metric->elements, $url_metric->get_elements() );
-		$this->assertSame( $url_metric->elements, $url_metric->get( 'elements' ) );
+		$this->assertSame( $url_metric->get_elements(), $url_metric->get( 'elements' ) );
 
 		$this->assertSame( $data['url'], $url_metric->get_url() );
 		$this->assertSame( $data['url'], $url_metric->get( 'url' ) );
-		$this->assertSame( $data['url'], $url_metric->url );
 
 		$this->assertTrue( wp_is_uuid( $url_metric->get_uuid() ) );
-		$this->assertSame( $url_metric->get_uuid(), $url_metric->uuid );
 		$this->assertSame( $url_metric->get_uuid(), $url_metric->get( 'uuid' ) );
 
 		$serialized = $url_metric->jsonSerialize();
@@ -394,12 +388,12 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 					$original_data = $original_url_metric->jsonSerialize();
 					$this->assertArrayHasKey( 'isColorful', $original_data['elements'][0] );
 					$this->assertSame( 'false', $original_data['elements'][0]['isColorful'] );
-					$this->assertSame( 'false', $original_url_metric->elements[0]['isColorful'] );
+					$this->assertSame( 'false', $original_url_metric->get_elements()[0]['isColorful'] );
 
 					$extended_data = $extended_url_metric->jsonSerialize();
 					$this->assertArrayHasKey( 'isColorful', $extended_data['elements'][0] );
 					$this->assertFalse( $extended_data['elements'][0]['isColorful'] );
-					$this->assertFalse( $extended_url_metric->elements[0]['isColorful'] );
+					$this->assertFalse( $extended_url_metric->get_elements()[0]['isColorful'] );
 				},
 			),
 
@@ -464,9 +458,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	/**
 	 * Tests construction with extended schema.
 	 *
-	 * @covers ::jsonSerialize
-	 * @covers ::get
-	 * @covers ::__get
+	 * @covers ::get_json_schema
 	 *
 	 * @dataProvider data_provider_to_test_constructor_with_extended_schema
 	 *

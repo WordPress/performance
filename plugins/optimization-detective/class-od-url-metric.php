@@ -44,12 +44,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                                elements: ElementData[]
  *                            }
  *
- * @property-read string        $uuid
- * @property-read string        $url
- * @property-read float         $timestamp
- * @property-read ViewportRect  $viewport
- * @property-read ElementData[] $elements
- *
  * @since 0.1.0
  * @access private
  */
@@ -362,21 +356,6 @@ class OD_URL_Metric implements JsonSerializable {
 	 */
 	public function get( string $key ) {
 		return $this->data[ $key ] ?? null;
-	}
-
-	/**
-	 * Gets property value for an arbitrary key.
-	 *
-	 * This is useful with the `@property-read` annotations for the class. For accessing other data,
-	 * it's likely the `get()` method will be more useful for static analysis reasons.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param string $key Property.
-	 * @return mixed|null The property value, or null if not set.
-	 */
-	public function __get( string $key ) {
-		return $this->get( $key );
 	}
 
 	/**
