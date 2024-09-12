@@ -77,8 +77,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			'large',
 			false,
 			array(
-				'class' => 'wp-image-' . self::$image_id,
-				'alt'   => 'Green Leaves',
+				'class'         => 'wp-image-' . self::$image_id,
+				'alt'           => 'Green Leaves',
+				'loading'       => false,
+				'fetchpriority' => false,
 			)
 		);
 
@@ -133,22 +135,22 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			'jpeg and picture enabled' => array(
 				'fallback_jpeg'   => true,
 				'picture_element' => true,
-				'expected_html'   => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
+				'expected_html'   => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
 			),
 			'only picture enabled'     => array(
 				'fallback_jpeg'   => false,
 				'picture_element' => true,
-				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
+				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
 			),
 			'only jpeg enabled'        => array(
 				'fallback_jpeg'   => true,
 				'picture_element' => false,
-				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
+				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
 			),
 			'neither enabled'          => array(
 				'fallback_jpeg'   => false,
 				'picture_element' => false,
-				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
+				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
 			),
 		);
 	}
