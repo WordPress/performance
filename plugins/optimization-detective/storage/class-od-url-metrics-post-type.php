@@ -316,6 +316,8 @@ class OD_URL_Metrics_Post_Type {
 	 * This is used during uninstallation.
 	 *
 	 * @since 0.1.0
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
 	public static function delete_all_posts(): void {
 		global $wpdb;
