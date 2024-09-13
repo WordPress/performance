@@ -23,14 +23,48 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function data_provider_to_test_rest_request_good_params(): array {
+		return array(
+			'not_extended' => array(
+				'set_up' => function () {
+					return $this->get_valid_params();
+				},
+			),
+			'extended'     => array(
+				'set_up' => function () {
+					add_filter(
+						'od_url_metric_schema_root_additional_properties',
+						static function ( array $properties ): array {
+							$properties['extra'] = array(
+								'type' => 'string',
+							);
+							return $properties;
+						}
+					);
+
+					$params = $this->get_valid_params();
+					$params['extra'] = 'foo';
+					return $params;
+				},
+			),
+		);
+	}
+
+	/**
 	 * Test good params.
+	 *
+	 * @dataProvider data_provider_to_test_rest_request_good_params
 	 *
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 */
-	public function test_rest_request_good_params(): void {
+	public function test_rest_request_good_params( Closure $set_up ): void {
+		$valid_params = $set_up();
 		$request      = new WP_REST_Request( 'POST', self::ROUTE );
-		$valid_params = $this->get_valid_params();
 		$this->assertCount( 0, get_posts( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) ) );
 		$request->set_body_params( $valid_params );
 		$response = rest_get_server()->dispatch( $request );
@@ -47,6 +81,13 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertCount( 1, $url_metrics, 'Expected number of URL metrics stored.' );
 		$this->assertSame( $valid_params['elements'], $url_metrics[0]->get_elements() );
 		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
+
+		$expected_data = $valid_params;
+		unset( $expected_data['nonce'], $expected_data['slug'] );
+		$this->assertSame(
+			$expected_data,
+			wp_array_slice_assoc( $url_metrics[0]->jsonSerialize(), array_keys( $expected_data ) )
+		);
 	}
 
 	/**
@@ -147,6 +188,19 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 									'width'  => -640,
 									'height' => 480,
 								),
+							)
+						),
+					),
+				),
+				'invalid_root_property'                    => array(
+					'is_touch' => false,
+				),
+				'invalid_element_property'                 => array(
+					'elements' => array(
+						array_merge(
+							$valid_element,
+							array(
+								'is_big' => true,
 							)
 						),
 					),
@@ -406,6 +460,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 				),
 			)
 		)->jsonSerialize();
+		unset( $data['timestamp'], $data['uuid'] ); // Since these are readonly.
 		$data = array_merge(
 			array(
 				'slug'  => $slug,
@@ -413,7 +468,6 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			),
 			$data
 		);
-		unset( $data['timestamp'] ); // Since provided by default args.
 		if ( count( $extras ) > 0 ) {
 			$data = $this->recursive_merge( $data, $extras );
 		}
