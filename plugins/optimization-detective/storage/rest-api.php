@@ -67,7 +67,7 @@ function od_register_endpoint(): void {
 			'methods'             => 'POST',
 			'args'                => array_merge(
 				$args,
-				rest_get_endpoint_args_for_schema( OD_URL_Metric::get_json_schema() )
+				rest_get_endpoint_args_for_schema( OD_Strict_URL_Metric::get_json_schema() )
 			),
 			'callback'            => static function ( WP_REST_Request $request ) {
 				return od_handle_rest_request( $request );
@@ -128,30 +128,36 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	OD_Storage_Lock::set_lock();
 
 	try {
-		$url_metric = new OD_URL_Metric(
-			array_merge(
-				wp_array_slice_assoc(
-					$request->get_params(),
-					array_keys( OD_URL_Metric::get_json_schema()['properties'] )
-				),
-				array(
-					// Now supply the readonly args which were omitted from the REST API params due to being `readonly`.
-					'timestamp' => microtime( true ),
-					'uuid'      => wp_generate_uuid4(),
-				)
+		$data = $request->get_params();
+		// Remove params which are only used for the REST API request and which are not part of a URL Metric.
+		unset(
+			$data['slug'],
+			$data['nonce']
+		);
+		$data = array_merge(
+			$data,
+			array(
+				// Now supply the readonly args which were omitted from the REST API params due to being `readonly`.
+				'timestamp' => microtime( true ),
+				'uuid'      => wp_generate_uuid4(),
 			)
 		);
+
+		// The "strict" URL Metric class is being used here to ensure additionalProperties of all objects are disallowed.
+		$url_metric = new OD_Strict_URL_Metric( $data );
 	} catch ( OD_Data_Validation_Exception $e ) {
 		return new WP_Error(
-			'url_metric_exception',
+			'rest_invalid_param',
 			sprintf(
 				/* translators: %s is exception name */
 				__( 'Failed to validate URL metric: %s', 'optimization-detective' ),
 				$e->getMessage()
-			)
+			),
+			array( 'status' => 400 )
 		);
 	}
 
+	// TODO: This should be changed from store_url_metric($slug, $url_metric) instead be update_post( $slug, $group_collection ). As it stands, store_url_metric() is duplicating logic here.
 	$result = OD_URL_Metrics_Post_Type::store_url_metric(
 		$request->get_param( 'slug' ),
 		$url_metric
@@ -160,6 +166,33 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	if ( $result instanceof WP_Error ) {
 		return $result;
 	}
+	$post_id = $result;
+
+	/**
+	 * Fires whenever a URL Metric was successfully collected.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param array $context {
+	 *     Context about the successful URL Metric collection.
+	 *
+	 *     @var int                                   $post_id
+	 *     @var WP_REST_Request<array<string, mixed>> $request
+	 *     @var OD_Strict_URL_Metric                  $url_metric
+	 *     @var OD_URL_Metrics_Group                  $group
+	 *     @var OD_URL_Metrics_Group_Collection       $group_collection
+	 * }
+	 */
+	do_action(
+		'od_url_metric_collected',
+		array(
+			'post_id'                      => $post_id,
+			'request'                      => $request,
+			'url_metric'                   => $url_metric,
+			'url_metrics_group'            => $group,
+			'url_metrics_group_collection' => $group_collection,
+		)
+	);
 
 	return new WP_REST_Response(
 		array(

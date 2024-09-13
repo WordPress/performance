@@ -367,12 +367,14 @@ class Test_WebP_Uploads_Helper extends TestCase {
 				'image/jpeg' => array( 'image/avif' ),
 				'image/webp' => array( 'image/webp' ),
 				'image/avif' => array( 'image/avif' ),
+				'image/png'  => array( 'image/avif' ),
 			);
 		} else {
 			$default_transforms = array(
 				'image/jpeg' => array( 'image/webp' ),
 				'image/webp' => array( 'image/webp' ),
 				'image/avif' => array( 'image/avif' ),
+				'image/png'  => array( 'image/webp' ),
 			);
 		}
 
@@ -431,6 +433,7 @@ class Test_WebP_Uploads_Helper extends TestCase {
 			$this->assertSame(
 				array(
 					'image/jpeg' => array( 'image/jpeg', 'image/avif' ),
+					'image/png'  => array( 'image/png', 'image/avif' ),
 					'image/avif' => array( 'image/avif', 'image/jpeg' ),
 				),
 				$transforms
@@ -439,6 +442,7 @@ class Test_WebP_Uploads_Helper extends TestCase {
 			$this->assertSame(
 				array(
 					'image/jpeg' => array( 'image/jpeg', 'image/webp' ),
+					'image/png'  => array( 'image/png', 'image/webp' ),
 					'image/webp' => array( 'image/webp', 'image/jpeg' ),
 				),
 				$transforms

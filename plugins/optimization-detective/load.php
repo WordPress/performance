@@ -99,6 +99,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/class-od-data-validation-exception.php';
 		require_once __DIR__ . '/class-od-html-tag-processor.php';
 		require_once __DIR__ . '/class-od-url-metric.php';
+		require_once __DIR__ . '/class-od-strict-url-metric.php';
 		require_once __DIR__ . '/class-od-url-metrics-group.php';
 		require_once __DIR__ . '/class-od-url-metrics-group-collection.php';
 

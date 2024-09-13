@@ -96,6 +96,29 @@ add_filter( 'od_url_metric_freshness_ttl', '__return_zero' );
 
 Filters the time window between serve time and run time in which loading detection is allowed to run. This amount is the allowance between when the page was first generated (and perhaps cached) and when the detect function on the page is allowed to perform its detection logic and submit the request to store the results. This avoids situations in which there are missing URL Metrics in which case a site with page caching which also has a lot of traffic could result in a cache stampede.
 
+**Filter:** `od_minimum_viewport_aspect_ratio` (default: 0.4)
+
+Filters the minimum allowed viewport aspect ratio for URL metrics.
+
+The 0.4 value is intended to accommodate the phone with the greatest known aspect
+ratio at 21:9 when rotated 90 degrees to 9:21 (0.429).
+
+**Filter:** `od_maximum_viewport_aspect_ratio` (default: 2.5)
+
+Filters the maximum allowed viewport aspect ratio for URL metrics.
+
+The 2.5 value is intended to accommodate the phone with the greatest known aspect
+ratio at 21:9 (2.333).
+
+During development when you have the DevTools console open, for example, the viewport aspect ratio will be wider than normal. In this case, you may want to increase the maximum aspect ratio:
+
+`
+<?php
+add_filter( 'od_maximum_viewport_aspect_ratio', function () {
+	return 5;
+} );
+`
+
 **Filter:** `od_template_output_buffer` (default: the HTML response)
 
 Filters the template output buffer prior to sending to the client. This filter is added to implement [#43258](https://core.trac.wordpress.org/ticket/43258) in WordPress core.

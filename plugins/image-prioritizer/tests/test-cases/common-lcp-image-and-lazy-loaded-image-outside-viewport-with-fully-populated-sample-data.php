@@ -55,7 +55,7 @@ return array(
 				<p>Now the following image is definitely outside the initial viewport.</p>
 				<img src="https://example.com/baz.jpg" alt="Baz" width="10" height="10" fetchpriority="high">
 				<img src="https://example.com/qux.jpg" alt="Qux" width="10" height="10" fetchpriority="high" loading="eager">
-				<img src="https://example.com/quux.jpg" alt="Quux" width="10" height="10" loading="lazy"><!-- This one is all good. -->
+				<img src="https://example.com/quux.jpg" alt="Quux" width="10" height="10" loading="LAZY"><!-- This one is all good. -->
 			</body>
 		</html>
 	',
@@ -73,7 +73,7 @@ return array(
 				<p>Now the following image is definitely outside the initial viewport.</p>
 				<img data-od-added-loading data-od-removed-fetchpriority="high" loading="lazy" src="https://example.com/baz.jpg" alt="Baz" width="10" height="10" >
 				<img data-od-removed-fetchpriority="high" data-od-replaced-loading="eager" src="https://example.com/qux.jpg" alt="Qux" width="10" height="10"  loading="lazy">
-				<img src="https://example.com/quux.jpg" alt="Quux" width="10" height="10" loading="lazy"><!-- This one is all good. -->
+				<img src="https://example.com/quux.jpg" alt="Quux" width="10" height="10" loading="LAZY"><!-- This one is all good. -->
 			</body>
 		</html>
 	',

@@ -86,10 +86,10 @@ function webp_uploads_add_media_settings_fields(): void {
 		return;
 	}
 
-	// Add JPEG Output settings field.
+	// Add fallback image output settings field.
 	add_settings_field(
 		'perflab_generate_webp_and_jpeg',
-		__( 'Also output JPEG', 'webp-uploads' ),
+		__( 'Output fallback images', 'webp-uploads' ),
 		'webp_uploads_generate_webp_jpeg_setting_callback',
 		'media',
 		'perflab_modern_image_format_settings',
@@ -145,7 +145,7 @@ function webp_uploads_generate_avif_webp_setting_callback(): void {
 	<label for="perflab_modern_image_format">
 		<?php esc_html_e( 'Generate images in this format', 'webp-uploads' ); ?>
 	</label>
-	<p class="description" id="perflab_modern_image_format_description"><?php esc_html_e( 'Select the format to use when generating new images from uploaded JPEGs.', 'webp-uploads' ); ?></p>
+	<p class="description" id="perflab_modern_image_format_description"><?php esc_html_e( 'Select the format to use when generating new images from uploaded images.', 'webp-uploads' ); ?></p>
 	<?php if ( ! $avif_supported ) : ?>
 		<br />
 		<div class="notice notice-warning inline">
@@ -172,9 +172,9 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 	?>
 		<label for="perflab_generate_webp_and_jpeg">
 			<input name="perflab_generate_webp_and_jpeg" type="checkbox" id="perflab_generate_webp_and_jpeg" aria-describedby="perflab_generate_webp_and_jpeg_description" value="1"<?php checked( '1', get_option( 'perflab_generate_webp_and_jpeg' ) ); ?> />
-			<?php esc_html_e( 'Output JPEG images in addition to the modern format', 'webp-uploads' ); ?>
+			<?php esc_html_e( 'Also generate fallback images in the original upload format', 'webp-uploads' ); ?>
 		</label>
-		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling JPEG output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
+		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling fallback image output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
 	<?php
 }
 
@@ -186,7 +186,7 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 function webp_uploads_use_picture_element_callback(): void {
 	// Picture element support requires the JPEG output to be enabled.
 	$picture_element_option    = 1 === (int) get_option( 'webp_uploads_use_picture_element', 0 );
-	$jpeg_fallback_enabled     = webp_uploads_is_jpeg_fallback_enabled();
+	$jpeg_fallback_enabled     = webp_uploads_is_fallback_enabled();
 	$picture_element_hidden_id = 'webp_uploads_use_picture_element_hidden';
 	?>
 	<style>
@@ -196,7 +196,7 @@ function webp_uploads_use_picture_element_callback(): void {
 		}
 	</style>
 	<div id="webp_uploads_picture_element_notice" class="notice notice-info inline" <?php echo $jpeg_fallback_enabled ? 'hidden' : ''; ?>>
-		<p><?php esc_html_e( 'This setting requires JPEG also be output as a fallback option.', 'webp-uploads' ); ?></p>
+		<p><?php esc_html_e( 'This setting requires fallback image output to be enabled.', 'webp-uploads' ); ?></p>
 	</div>
 	<div id="webp_uploads_picture_element_fieldset" class="<?php echo ! $jpeg_fallback_enabled ? 'disabled' : ''; ?>">
 		<label for="webp_uploads_use_picture_element" id="webp_uploads_use_picture_element_label">
@@ -228,9 +228,9 @@ function webp_uploads_use_picture_element_callback(): void {
 			?>
 			<em><?php esc_html_e( '(experimental)', 'webp-uploads' ); ?></em>
 		</label>
-		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'The picture element serves a modern image format with a fallback to JPEG. Warning: Make sure you test your theme and plugins for compatibility. In particular, CSS selectors will not match images when using the child combinator (e.g. figure > img).', 'webp-uploads' ); ?></p>
+		<p class="description" id="webp_uploads_use_picture_element_description"><?php esc_html_e( 'The picture element serves a modern image format with a fallback to the original upload format. Warning: Make sure you test your theme and plugins for compatibility. In particular, CSS selectors will not match images when using the child combinator (e.g. figure > img).', 'webp-uploads' ); ?></p>
 		<div id="webp_uploads_jpeg_fallback_notice" class="notice notice-info inline" <?php echo $picture_element_option ? '' : 'hidden'; ?>>
-			<p><?php esc_html_e( 'Picture elements will only be used when JPEG fallback images are available. So this will not apply to any images you may have uploaded while the "Also generate JPEG" setting was disabled.', 'webp-uploads' ); ?></p>
+			<p><?php esc_html_e( 'Picture elements will only be used when fallback images are available. So this will only apply to  images you have uploaded while the "Also generate fallback images" setting was enabled.', 'webp-uploads' ); ?></p>
 		</div>
 	</div>
 	<script>
@@ -239,7 +239,7 @@ function webp_uploads_use_picture_element_callback(): void {
 			document.getElementById( 'webp_uploads_jpeg_fallback_notice' ).hidden = ! this.checked;
 		} );
 
-		// Listen for clicks on the JPEG output checkbox, enabling/disabling the
+		// Listen for clicks on the fallback output checkbox, enabling/disabling the
 		// picture element checkbox accordingly.
 		document.getElementById( 'perflab_generate_webp_and_jpeg' ).addEventListener( 'change', function () {
 			document.querySelector( '.webp-uploads-use-picture-element' ).classList.toggle( 'webp-uploads-disabled', ! this.checked );
