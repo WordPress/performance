@@ -83,7 +83,19 @@ final class Embed_Optimizer_Tag_Visitor {
 		}
 
 		$embed_wrapper_xpath = $processor->get_xpath() . '/*[1][self::DIV]';
-		$minimum_height      = $context->url_metrics_group_collection->get_element_minimum_height( $embed_wrapper_xpath );
+
+		// TODO: This should be cached.
+		$minimum_height = null;
+		foreach ( $context->url_metrics_group_collection->get_all_url_metrics_groups_elements() as $element ) {
+			if ( $embed_wrapper_xpath === $element['xpath'] && isset( $element['resizedBoundingClientRect'] ) ) {
+				if ( null === $minimum_height ) {
+					$minimum_height = $element['resizedBoundingClientRect']['height'];
+				} else {
+					$minimum_height = min( $minimum_height, $element['resizedBoundingClientRect']['height'] );
+				}
+			}
+		}
+
 		if ( is_float( $minimum_height ) ) {
 			$min_height_style = sprintf( 'min-height: %dpx;', $minimum_height );
 			$style            = $processor->get_attribute( 'style' );

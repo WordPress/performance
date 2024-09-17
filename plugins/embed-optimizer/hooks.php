@@ -21,6 +21,7 @@ function embed_optimizer_add_hooks(): void {
 	if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 		add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' );
 		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_detect_embed_presence' );
+		add_filter( 'od_url_metric_schema_element_item_additional_properties', 'embed_optimizer_add_element_item_schema_properties' );
 	} else {
 		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_lazy_load' );
 	}
@@ -38,6 +39,37 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
 	// Note: This class is loaded on the fly since it is only needed here when Optimization Detective is active.
 	require_once __DIR__ . '/class-embed-optimizer-tag-visitor.php';
 	$registry->register( 'embeds', new Embed_Optimizer_Tag_Visitor() );
+}
+
+/**
+ * Filters additional properties for the element item schema for Optimization Detective.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, array{type: string}> $additional_properties Additional properties.
+ * @return array<string, array{type: string}> Additional properties.
+ */
+function embed_optimizer_add_element_item_schema_properties( array $additional_properties ): array {
+	$additional_properties['resizedBoundingClientRect'] = array(
+		'type'       => 'object',
+		'properties' => array_fill_keys(
+			array(
+				'width',
+				'height',
+				'x',
+				'y',
+				'top',
+				'right',
+				'bottom',
+				'left',
+			),
+			array(
+				'type'     => 'number',
+				'required' => true,
+			)
+		),
+	);
+	return $additional_properties;
 }
 
 /**

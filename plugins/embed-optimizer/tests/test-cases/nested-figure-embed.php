@@ -1,12 +1,24 @@
 <?php
 return array(
 	'set_up'   => static function ( Test_Embed_Optimizer_Optimization_Detective $test_case ): void {
+		$rect = array(
+			'width'  => 500.1,
+			'height' => 500.2,
+			'x'      => 100.3,
+			'y'      => 100.4,
+			'top'    => 0.1,
+			'right'  => 0.2,
+			'bottom' => 0.3,
+			'left'   => 0.4,
+		);
+
 		$test_case->populate_url_metrics(
 			array(
 				array(
-					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
-					'isLCP'             => false,
-					'intersectionRatio' => 1,
+					'xpath'                     => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
+					'isLCP'                     => false,
+					'intersectionRatio'         => 1,
+					'resizedBoundingClientRect' => array_merge( $rect, array( 'height' => 500 ) ),
 				),
 				array(
 					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]',
@@ -14,9 +26,10 @@ return array(
 					'intersectionRatio' => 1,
 				),
 				array(
-					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]',
-					'isLCP'             => false,
-					'intersectionRatio' => 0,
+					'xpath'                     => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]',
+					'isLCP'                     => false,
+					'intersectionRatio'         => 0,
+					'resizedBoundingClientRect' => array_merge( $rect, array( 'height' => 654 ) ),
 				),
 				array(
 					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::FIGURE]/*[2][self::VIDEO]',
@@ -106,7 +119,7 @@ return array(
 						<video data-od-added-preload data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]" preload="auto" src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
 					</div>
 				</figure>
-				<figure data-od-replaced-style="background: black; color: white;" style="min-height: 500px; background: black; color: white;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
+				<figure data-od-replaced-style="background: black; color: white;" style="min-height: 654px; background: black; color: white;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
 					<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 						<figure>
 							<p>So I heard you like <code>FIGURE</code>?</p>

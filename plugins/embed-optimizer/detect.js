@@ -59,14 +59,13 @@ export async function finalize( { urlMetric, isDebug } ) {
 		if ( loadedElementContentRects.has( element.xpath ) ) {
 			if ( isDebug ) {
 				log(
-					`Overriding boundingClientRect for ${ element.xpath }:`,
+					`boundingClientRect for ${ element.xpath } resized:`,
 					element.boundingClientRect,
 					'=>',
 					loadedElementContentRects.get( element.xpath )
 				);
 			}
-			// TODO: Maybe element.boundingClientRect should rather be element.initialBoundingClientRect and the schema is extended by Embed Optimizer to add an element.finalBoundingClientRect (same goes for intersectionRect and intersectionRatio).
-			element.boundingClientRect = loadedElementContentRects.get(
+			element.resizedBoundingClientRect = loadedElementContentRects.get(
 				element.xpath
 			);
 		}

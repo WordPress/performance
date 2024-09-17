@@ -408,7 +408,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 *
 	 * @return Generator<ElementData>
 	 */
-	protected function get_all_url_metrics_groups_elements(): Generator {
+	public function get_all_url_metrics_groups_elements(): Generator {
 		foreach ( $this->groups as $group ) {
 			foreach ( $group as $url_metric ) {
 				foreach ( $url_metric->get_elements() as $element ) {
