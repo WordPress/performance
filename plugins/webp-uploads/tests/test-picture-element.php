@@ -32,9 +32,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
 
-		// Default to webp output for tests.
-		$this->set_image_output_type( 'webp' );
-
 		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
 		$this->mock_frontend_body_hooks();
 	}
@@ -43,6 +40,9 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	 * Setup shared fixtures.
 	 */
 	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
+		// Default to webp output for tests.
+		update_option( 'perflab_modern_image_format', 'webp' );
+
 		// Fallback to JPEG IMG.
 		update_option( 'perflab_generate_webp_and_jpeg', '1' );
 
@@ -52,6 +52,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	public static function wpTearDownAfterClass(): void {
 		wp_delete_attachment( self::$image_id, true );
 		delete_option( 'perflab_generate_webp_and_jpeg' );
+		delete_option( 'perflab_modern_image_format' );
 	}
 
 	/**
