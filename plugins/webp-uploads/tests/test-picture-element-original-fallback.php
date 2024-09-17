@@ -52,6 +52,7 @@ class Test_WebP_Uploads_Picture_Element_Original_Image_Fallback extends TestCase
 	public static function wpTearDownAfterClass(): void {
 		wp_delete_attachment( self::$image_id, true );
 		delete_option( 'perflab_generate_webp_and_jpeg' );
+		delete_option( 'perflab_modern_image_format' );
 	}
 
 	/**
