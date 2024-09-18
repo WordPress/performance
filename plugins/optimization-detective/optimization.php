@@ -219,6 +219,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$processor->set_bookmark( $current_tag_bookmark ); // TODO: Should we break if this returns false?
 
 		foreach ( $visitors as $visitor ) {
+			// TODO: Remove get_cursor_move_count() logic once core automatically short-circuits seek().
 			$cursor_move_count      = $processor->get_cursor_move_count();
 			$tracked_in_url_metrics = $visitor( $tag_visitor_context ) || $tracked_in_url_metrics;
 

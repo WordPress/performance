@@ -342,6 +342,8 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Gets the number of times the cursor has moved.
 	 *
+	 * @todo Not needed once core short-circuits seek() when current cursor is the same as the sought-bookmark.
+	 *
 	 * @since n.e.x.t
 	 * @see self::next_token()
 	 * @see self::seek()
