@@ -178,6 +178,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 
 	// If the initial tag is not an open HTML tag, then abort since the buffer is not a complete HTML document.
 	$processor = new OD_HTML_Tag_Processor( $buffer );
+	//$processor = new OD_HTML_Processor::create_full_parser( $buffer );
 	if ( ! (
 		$processor->next_tag() &&
 		! $processor->is_tag_closer() &&
