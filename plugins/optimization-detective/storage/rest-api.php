@@ -128,9 +128,10 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	OD_Storage_Lock::set_lock();
 
 	try {
-		$data = $request->get_json_params();
+		$data = $request->get_params();
 		// Remove params which are only used for the REST API request and which are not part of a URL Metric.
 		unset(
+			$data['_wpnonce'],
 			$data['slug'],
 			$data['nonce']
 		);
