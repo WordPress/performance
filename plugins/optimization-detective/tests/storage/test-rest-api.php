@@ -66,7 +66,8 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$valid_params = $set_up();
 		$request      = new WP_REST_Request( 'POST', self::ROUTE );
 		$this->assertCount( 0, get_posts( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) ) );
-		$request->set_body_params( $valid_params );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( $valid_params ) );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 200, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 
@@ -221,7 +222,8 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 */
 	public function test_rest_request_bad_params( array $params ): void {
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
-		$request->set_body_params( $params );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( $params ) );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
@@ -246,7 +248,8 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 				'uuid'      => wp_generate_uuid4(),
 			)
 		);
-		$request->set_body_params( $params );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( $params ) );
 		$response = rest_get_server()->dispatch( $request );
 
 		$this->assertSame( 200, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
@@ -308,7 +311,8 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 
 		// The next request will be rejected because all groups are fully populated with samples.
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
-		$request->set_body_params( $this->get_valid_params() );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( $this->get_valid_params() ) );
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 403, $response->get_status() );
 	}
@@ -438,7 +442,8 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	private function populate_url_metrics( int $count, array $params ): void {
 		for ( $i = 0; $i < $count; $i++ ) {
 			$request = new WP_REST_Request( 'POST', self::ROUTE );
-			$request->set_body_params( $params );
+			$request->set_header( 'Content-Type', 'application/json' );
+			$request->set_body( wp_json_encode( $params ) );
 			$response = rest_get_server()->dispatch( $request );
 			$this->assertSame( 200, $response->get_status() );
 		}
