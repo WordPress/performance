@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d718357823681410d46135323910524f",
+    "content-hash": "b607a922148ff7d8c9e5e163e59ccc9d",
     "packages": [],
     "packages-dev": [
         {
@@ -154,6 +154,82 @@
                 }
             ],
             "time": "2022-12-30T00:15:36+00:00"
+        },
+        {
+            "name": "johnbillion/wp-compat",
+            "version": "0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/johnbillion/wp-compat.git",
+                "reference": "580cc09bdadd0922bd9de5d4e02fcc39c2ad342c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/johnbillion/wp-compat/zipball/580cc09bdadd0922bd9de5d4e02fcc39c2ad342c",
+                "reference": "580cc09bdadd0922bd9de5d4e02fcc39c2ad342c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">= 7.4",
+                "phpstan/phpstan": "^1.12"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+                "johnbillion/plugin-infrastructure": "dev-trunk",
+                "nikic/php-parser": "^5.1",
+                "php-stubs/wordpress-stubs": "^6.6",
+                "phpstan/phpstan-deprecation-rules": "1.2.0",
+                "phpstan/phpstan-phpunit": "1.3.15",
+                "phpstan/phpstan-strict-rules": "1.6.0",
+                "phpunit/phpunit": "^9.0",
+                "roots/wordpress-core-installer": "1.100.0",
+                "roots/wordpress-full": "dev-main",
+                "wp-coding-standards/wpcs": "3.1.0"
+            },
+            "suggest": {
+                "phpstan/phpstan-deprecation-rules": "PHPStan rules for detecting usage of deprecated symbols",
+                "szepeviktor/phpstan-wordpress": "WordPress extensions for PHPStan"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "wordpress-install-dir": "vendor/wordpress/wordpress",
+                "phpstan": {
+                    "includes": [
+                        "extension.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "WPCompat\\PHPStan\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "John Blackbourn",
+                    "homepage": "https://johnblackbourn.com/"
+                }
+            ],
+            "description": "PHPStan extension to help verify that your PHP code is compatible with a given version of WordPress",
+            "keywords": [
+                "PHPStan",
+                "wordpress"
+            ],
+            "support": {
+                "issues": "https://github.com/johnbillion/wp-compat/issues",
+                "source": "https://github.com/johnbillion/wp-compat"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/johnbillion",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-09-09T23:34:34+00:00"
         },
         {
             "name": "myclabs/deep-copy",
