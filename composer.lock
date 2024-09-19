@@ -658,16 +658,16 @@
         },
         {
             "name": "phpstan/php-8-stubs",
-            "version": "0.3.102",
+            "version": "0.3.106",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/php-8-stubs.git",
-                "reference": "607eedcd3bf7bc7baa2bc187741d772c776cc7ee"
+                "reference": "32a289268a0bbd2ee64f060ecd74bb6eb345738d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/607eedcd3bf7bc7baa2bc187741d772c776cc7ee",
-                "reference": "607eedcd3bf7bc7baa2bc187741d772c776cc7ee",
+                "url": "https://api.github.com/repos/phpstan/php-8-stubs/zipball/32a289268a0bbd2ee64f060ecd74bb6eb345738d",
+                "reference": "32a289268a0bbd2ee64f060ecd74bb6eb345738d",
                 "shasum": ""
             },
             "type": "library",
@@ -684,9 +684,9 @@
             "description": "PHP stubs extracted from php-src",
             "support": {
                 "issues": "https://github.com/phpstan/php-8-stubs/issues",
-                "source": "https://github.com/phpstan/php-8-stubs/tree/0.3.102"
+                "source": "https://github.com/phpstan/php-8-stubs/tree/0.3.106"
             },
-            "time": "2024-09-05T00:17:54+00:00"
+            "time": "2024-09-17T00:15:59+00:00"
         },
         {
             "name": "phpstan/phpdoc-parser",
@@ -795,21 +795,21 @@
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
-            "version": "1.2.0",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-deprecation-rules.git",
-                "reference": "fa8cce7720fa782899a0aa97b6a41225d1bb7b26"
+                "reference": "f94d246cc143ec5a23da868f8f7e1393b50eaa82"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-deprecation-rules/zipball/fa8cce7720fa782899a0aa97b6a41225d1bb7b26",
-                "reference": "fa8cce7720fa782899a0aa97b6a41225d1bb7b26",
+                "url": "https://api.github.com/repos/phpstan/phpstan-deprecation-rules/zipball/f94d246cc143ec5a23da868f8f7e1393b50eaa82",
+                "reference": "f94d246cc143ec5a23da868f8f7e1393b50eaa82",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.2 || ^8.0",
-                "phpstan/phpstan": "^1.11"
+                "phpstan/phpstan": "^1.12"
             },
             "require-dev": {
                 "php-parallel-lint/php-parallel-lint": "^1.2",
@@ -836,9 +836,9 @@
             "description": "PHPStan rules for detecting usage of deprecated classes, methods, properties, constants and traits.",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan-deprecation-rules/issues",
-                "source": "https://github.com/phpstan/phpstan-deprecation-rules/tree/1.2.0"
+                "source": "https://github.com/phpstan/phpstan-deprecation-rules/tree/1.2.1"
             },
-            "time": "2024-04-20T06:39:48+00:00"
+            "time": "2024-09-11T15:52:35+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
@@ -2466,7 +2466,7 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "6.6.1",
+            "version": "6.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
