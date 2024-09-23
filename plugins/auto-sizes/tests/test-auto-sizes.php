@@ -206,11 +206,13 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test auto-sizes meta tag present in wp_head hook.
+	 * Test printing the meta generator tag.
+	 *
+	 * @covers ::auto_sizes_render_generator
 	 */
-	public function test_auto_sizes_meta_tag_present_in_wp_head_hook(): void {
-		$tag = get_echo( 'wp_head' );
-		$this->assertStringContainsString( '<meta', $tag );
+	public function test_auto_sizes_render_generator(): void {
+		$tag = get_echo( 'auto_sizes_render_generator' );
+		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
 		$this->assertStringContainsString( 'auto-sizes ' . IMAGE_AUTO_SIZES_VERSION, $tag );
 	}
