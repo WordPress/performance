@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   1.1.1
+Stable tag:   1.1.2
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, dominant color
@@ -46,6 +46,17 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.1.2 =
+
+**Enhancements**
+
+* Use more robust HTML Tag Processor for Image Placeholders. ([1477](https://github.com/WordPress/performance/pull/1477))
+
+**Bug Fixes**
+
+* Re-remove unneeded phpcs:ignore. ([1231](https://github.com/WordPress/performance/pull/1231))
+* Update PHPStan to 1.11.5. ([1318](https://github.com/WordPress/performance/pull/1318))
 
 = 1.1.1 =
 

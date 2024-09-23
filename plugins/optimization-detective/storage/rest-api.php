@@ -171,7 +171,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	/**
 	 * Fires whenever a URL Metric was successfully collected.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 *
 	 * @param array $context {
 	 *     Context about the successful URL Metric collection.

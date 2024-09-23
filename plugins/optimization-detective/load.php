@@ -5,7 +5,7 @@
  * Description: Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
  * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 0.5.0
+ * Version: 0.6.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -65,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'optimization_detective_pending_plugin',
-	'0.5.0',
+	'0.6.0',
 	static function ( string $version ): void {
 
 		// Define the constant.

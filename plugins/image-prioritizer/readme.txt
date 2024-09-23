@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   0.1.3
+Stable tag:   0.1.4
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, image, lcp, lazy-load
@@ -61,6 +61,12 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.1.4 =
+
+**Enhancements**
+
+* Move Auto Sizes logic from Enhanced Responsive Images to Image Prioritizer. ([1476](https://github.com/WordPress/performance/pull/1476))
 
 = 0.1.3 =
 
