@@ -46,35 +46,24 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	 */
 	const END_OF_BODY_BOOKMARK = 'optimization_detective_end_of_body';
 
-
-	/**
-	 * Open stack tags.
-	 *
-	 * @since 0.4.0
-	 * @var string[]
-	 */
-	private $open_stack_tags = array();
-
 	/**
 	 * Open stack indices.
 	 *
-	 * @since 0.4.0
+	 * @since n.e.x.t
 	 * @var int[]
 	 */
 	private $open_stack_indices = array();
 
 	/**
-	 * Bookmarked open stacks.
+	 * Bookmarked open stack indices.
 	 *
-	 * This is populated with the contents of `$this->open_stack_tags` and
-	 * `$this->open_stack_indices` whenever calling `self::set_bookmark()`.
-	 * Then whenever `self::seek()` is called, the bookmarked open stacks are
-	 * populated back into `$this->open_stack_tags` and `$this->open_stack_indices`.
+	 * This is populated with the contents of `$this->open_stack_indices` whenever calling `self::set_bookmark()`. Then
+	 * whenever `self::seek()` is called, the bookmarked open stacks are populated back into `$this->open_stack_indices`.
 	 *
-	 * @since 0.4.0
-	 * @var array<string, array{tags: string[], indices: int[]}>
+	 * @since n.e.x.t
+	 * @var array<string, int[]>
 	 */
-	private $bookmarked_open_stacks = array();
+	private $bookmarked_open_stack_indices = array();
 
 	/**
 	 * XPath for the current tag.
@@ -106,24 +95,12 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	private $cursor_move_count = 0;
 
 	/**
-	 * Creates an HTML processor in the full parsing mode.
+	 * Previous depth.
 	 *
-	 * It's likely that a fragment parser is more appropriate, unless sending an
-	 * entire HTML document from start to finish. Consider a fragment parser with
-	 * a context node of `<body>`.
-	 *
-	 * Since UTF-8 is the only currently-accepted charset, if working with a
-	 * document that isn't UTF-8, it's important to convert the document before
-	 * creating the processor: pass in the converted HTML.
-	 *
-	 * @param string      $html                    Input HTML document to process.
-	 * @param string|null $known_definite_encoding Optional. If provided, specifies the charset used
-	 *                                             in the input byte stream. Currently must be UTF-8.
-	 * @return static|null The created processor if successful, otherwise null.
+	 * @since n.e.x.t
+	 * @var int
 	 */
-	public static function create_full_parser( $html, $known_definite_encoding = 'UTF-8' ) {
-		return parent::create_full_parser( $html, $known_definite_encoding );
-	}
+	private $previous_depth = -1;
 
 	/**
 	 * Finds the next open tag.
@@ -150,20 +127,47 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	 * @return bool Whether a token was parsed.
 	 */
 	public function next_token(): bool {
+		$previous_depth       = $this->previous_depth;
+		$current_depth        = $this->get_current_depth();
+		$this->previous_depth = $current_depth;
+
 		$this->current_xpath = null; // Clear cache.
 		++$this->cursor_move_count;
 		if ( ! parent::next_token() ) {
+			$this->open_stack_indices = array();
 			return false;
 		}
 
-		if ( $this->get_token_type() === '#tag' && $this->is_tag_closer() ) {
-			$tag_name = $this->get_tag();
+		if ( $this->get_token_type() === '#tag' ) {
+			if ( $current_depth < $previous_depth ) {
+				array_splice( $this->open_stack_indices, $current_depth );
+			} elseif ( ! isset( $this->open_stack_indices[ $current_depth ] ) ) {
+				$this->open_stack_indices[ $current_depth ] = 0;
+			} else {
+				++$this->open_stack_indices[ $current_depth ];
+			}
 
-			// Set bookmarks for insertion of preload links and the detection script module.
-			if ( 'HEAD' === $tag_name ) {
-				$this->set_bookmark( self::END_OF_HEAD_BOOKMARK );
-			} elseif ( 'BODY' === $tag_name ) {
-				$this->set_bookmark( self::END_OF_BODY_BOOKMARK );
+//			if ( $current_depth === 0 ) {
+//				echo  '=========>' . $this->get_tag() . PHP_EOL;
+//			}
+
+//			if ( $current_depth > $previous_depth ) {
+//				$this->open_stack_tags[] = $this->get_tag();
+//			} elseif ( $current_depth < $previous_depth ) {
+//				array_splice( $this->open_stack_indices, $current_depth );
+//			} else {
+//
+//			}
+
+			if ( $current_depth < $previous_depth ) {
+				$tag_name = $this->get_tag();
+
+				// Set bookmarks for insertion of preload links and the detection script module.
+				if ( 'HEAD' === $tag_name ) {
+					$this->set_bookmark( self::END_OF_HEAD_BOOKMARK );
+				} elseif ( 'BODY' === $tag_name ) {
+					$this->set_bookmark( self::END_OF_BODY_BOOKMARK );
+				}
 			}
 		}
 		return true;
@@ -251,8 +255,7 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	public function seek( $bookmark_name ): bool {
 		$result = parent::seek( $bookmark_name );
 		if ( $result ) {
-			$this->open_stack_tags    = $this->bookmarked_open_stacks[ $bookmark_name ]['tags'];
-			$this->open_stack_indices = $this->bookmarked_open_stacks[ $bookmark_name ]['indices'];
+			$this->open_stack_indices = $this->bookmarked_open_stack_indices[ $bookmark_name ];
 		}
 		return $result;
 	}
@@ -269,10 +272,7 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	public function set_bookmark( $bookmark_name ): bool {
 		$result = parent::set_bookmark( $bookmark_name );
 		if ( $result ) {
-			$this->bookmarked_open_stacks[ $bookmark_name ] = array(
-				'tags'    => $this->open_stack_tags,
-				'indices' => $this->open_stack_indices,
-			);
+			$this->bookmarked_open_stack_indices[ $bookmark_name ] = $this->open_stack_indices;
 		}
 		return $result;
 	}
@@ -295,23 +295,8 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 			);
 			return false;
 		}
-		unset( $this->bookmarked_open_stacks[ $bookmark_name ] );
+		unset( $this->bookmarked_open_stack_indices[ $bookmark_name ] );
 		return parent::release_bookmark( $bookmark_name );
-	}
-
-	/**
-	 * Gets indexed breadcrumbs for the current open tag.
-	 *
-	 * A breadcrumb consists of a tag name and its sibling index.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return Generator<array{string, int}> Breadcrumb.
-	 */
-	private function get_indexed_breadcrumbs(): Generator {
-		foreach ( $this->open_stack_tags as $i => $breadcrumb_tag_name ) {
-			yield array( $breadcrumb_tag_name, $this->open_stack_indices[ $i ] );
-		}
 	}
 
 	/**
@@ -327,7 +312,8 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	public function get_xpath(): string {
 		if ( null === $this->current_xpath ) {
 			$this->current_xpath = '';
-			foreach ( $this->get_indexed_breadcrumbs() as list( $tag_name, $index ) ) {
+			foreach ( $this->get_breadcrumbs() ?? array() as $i => $tag_name ) {
+				$index                = $this->open_stack_indices[ $i ] ?? 0;
 				$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
 			}
 		}
@@ -376,7 +362,10 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 			if ( count( $html_strings ) === 0 ) {
 				continue;
 			}
-			if ( ! $this->has_bookmark( $bookmark ) ) {
+
+			$actual_bookmark_name = "_{$bookmark}";
+
+			if ( ! isset( $this->bookmarks[ $actual_bookmark_name ] ) ) {
 				$this->warn(
 					__METHOD__,
 					sprintf(
@@ -386,7 +375,7 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 					)
 				);
 			} else {
-				$start = $this->bookmarks[ $bookmark ]->start;
+				$start = $this->bookmarks[ $actual_bookmark_name ]->start;
 
 				$this->lexical_updates[] = new WP_HTML_Text_Replacement(
 					$start,
