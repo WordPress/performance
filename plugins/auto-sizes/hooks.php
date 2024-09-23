@@ -85,7 +85,7 @@ function auto_sizes_update_content_img_tag( $html ): string {
 	return $processor->get_updated_html();
 }
 
-// Skip loading plugin filters if the WordPress core is already loaded auto sizes.
+// Skip loading plugin filters if WordPress Core already loaded the functionality.
 if ( ! function_exists( 'wp_sizes_attribute_includes_valid_auto' ) ) {
 	add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' );
 	add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
