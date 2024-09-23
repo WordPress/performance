@@ -3,7 +3,7 @@
  * Optimization Detective: OD_Strict_URL_Metric class
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.6.0
  */
 
 // Exit if accessed directly.
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * This is used exclusively in the REST API endpoint for capturing new URL metrics to prevent invalid additional data from being
  * submitted in the request. For URL metrics which have been stored the looser OD_URL_Metric class is used instead.
  *
- * @since n.e.x.t
+ * @since 0.6.0
  * @access private
  */
 final class OD_Strict_URL_Metric extends OD_URL_Metric {
@@ -25,7 +25,7 @@ final class OD_Strict_URL_Metric extends OD_URL_Metric {
 	/**
 	 * Gets JSON schema for URL Metric without additionalProperties.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 *
 	 * @return array<string, mixed> Schema.
 	 */
@@ -39,7 +39,7 @@ final class OD_Strict_URL_Metric extends OD_URL_Metric {
 	 * This is a forked version of `rest_default_additional_properties_to_false()` which isn't being used itself because
 	 * it does not override `additionalProperties` to be false, but rather only sets it when it is empty.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 * @see rest_default_additional_properties_to_false()
 	 *
 	 * @param mixed $schema Schema.

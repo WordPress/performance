@@ -163,7 +163,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	 *
 	 * Per the HTML spec, if present it must be the first entry.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.1.4
 	 *
 	 * @param string $sizes_attr The 'sizes' attribute value.
 	 * @return bool True if the 'auto' keyword is present, false otherwise.
