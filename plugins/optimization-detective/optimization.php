@@ -177,7 +177,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	}
 
 	// If the initial tag is not an open HTML tag, then abort since the buffer is not a complete HTML document.
-	if ( version_compare( get_bloginfo( 'version' ), strtok( '6.7', '-' ), '>=' ) ) {
+	if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '6.7', '>=' ) ) {
 		$processor = OD_HTML_Processor::create_full_parser( $buffer );
 		if ( null === $processor ) {
 			return $buffer;
