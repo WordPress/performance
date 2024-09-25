@@ -29,7 +29,14 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[author]=wordpressdotorg&request[tag]=performance&request[per_page]=100' );
 
 	if ( is_wp_error( $response ) ) {
-		return new WP_Error( 'api_error', __( 'Failed to retrieve plugins data from WordPress.org API: ' . $request->get_error_message(), 'performance-lab' ) );
+		return new WP_Error(
+			'api_error',
+			sprintf(
+				/* translators: %s: API error message */
+				__( 'Failed to retrieve plugins data from WordPress.org API: %s', 'performance-lab' ),
+				$request->get_error_message()
+			)
+		);
 	}
 
 	$body = wp_remote_retrieve_body( $response );
