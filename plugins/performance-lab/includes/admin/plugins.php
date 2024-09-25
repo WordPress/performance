@@ -19,58 +19,55 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string}|WP_Error Array of plugin data or WP_Error if failed.
  */
 function perflab_query_plugin_info( string $plugin_slug ) {
-	$plugin = get_transient( 'perflab_plugin_info_' . $plugin_slug );
+	$transient_key = 'perflab_plugins_info';
+	$plugins       = get_transient( $transient_key );
 
-	if ( is_array( $plugin ) ) {
-		/**
-		 * Validated (mostly) plugin data.
-		 *
-		 * @var array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string} $plugin
-		 */
-		return $plugin;
+	if ( is_array( $plugins ) && isset( $plugins[ $plugin_slug ] ) ) {
+		return $plugins[ $plugin_slug ];
 	}
 
-	$fields = array(
-		'name',
-		'slug',
-		'short_description',
-		'requires',
-		'requires_php',
-		'requires_plugins',
-		'download_link',
-		'version', // Needed by install_plugin_install_status().
-	);
+	$request = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[author]=wordpressdotorg&request[tag]=performance&request[per_page]=100' );
 
-	$plugin = plugins_api(
-		'plugin_information',
-		array(
-			'slug'   => $plugin_slug,
-			'fields' => array_fill_keys( $fields, true ),
-		)
-	);
-
-	if ( is_wp_error( $plugin ) ) {
-		return $plugin;
+	if ( is_wp_error( $request ) ) {
+		return new WP_Error( 'api_error', __( 'Failed to retrieve plugins data from WordPress.org API.', 'default' ) );
 	}
 
-	if ( is_object( $plugin ) ) {
-		$plugin = (array) $plugin;
+	$body = wp_remote_retrieve_body( $request );
+	$data = json_decode( $body, true );
+
+	if ( ! isset( $data['plugins'] ) || ! is_array( $data['plugins'] ) ) {
+		return new WP_Error( 'no_plugins', __( 'No plugins found in the API response.', 'default' ) );
 	}
 
-	// Only store what we need.
-	$plugin = wp_array_slice_assoc( $plugin, $fields );
+	$plugins = array();
+	foreach ( $data['plugins'] as $plugin_data ) {
+		$plugins[ $plugin_data['slug'] ] = wp_array_slice_assoc( 
+			$plugin_data, 
+			array(
+				'name',
+				'slug',
+				'short_description',
+				'requires',
+				'requires_php',
+				'requires_plugins',
+				'download_link',
+				'version',
+			)
+		);
+	}
 
-	// Make sure all fields default to false in case another plugin is modifying the response from WordPress.org via the plugins_api filter.
-	$plugin = array_merge( array_fill_keys( $fields, false ), $plugin );
+	set_transient( $transient_key, $plugins, HOUR_IN_SECONDS );
 
-	set_transient( 'perflab_plugin_info_' . $plugin_slug, $plugin, HOUR_IN_SECONDS );
+	if ( ! isset( $plugins[ $plugin_slug ] ) ) {
+		return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'default' ) );
+	}
 
 	/**
 	 * Validated (mostly) plugin data.
 	 *
 	 * @var array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string} $plugin
 	 */
-	return $plugin;
+	return $plugins[ $plugin_slug ];
 }
 
 /**
