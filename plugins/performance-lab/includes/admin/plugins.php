@@ -30,7 +30,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return $plugins[ $plugin_slug ]; // Return cached plugin info if found.
 	}
 
-	// Proceed with API request since no cache hit.
+	/* Proceed with API request since no cache hit. */
 	$response = plugins_api(
 		'query_plugins',
 		array(
@@ -51,10 +51,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		);
 	}
 
-	$body = wp_remote_retrieve_body( $response );
-	$data = json_decode( $body, true );
-
-	// Check if the response contains plugins.
+	/* Check if the response contains plugins. */
 	if ( ! isset( $response->plugins ) || ! is_array( $response->plugins ) ) {
 		return new WP_Error( 'no_plugins', __( 'No plugins found in the API response.', 'performance-lab' ) );
 	}
