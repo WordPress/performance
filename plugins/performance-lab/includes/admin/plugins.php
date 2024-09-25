@@ -22,8 +22,12 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	$transient_key = 'perflab_plugins_info';
 	$plugins       = get_transient( $transient_key );
 
-	if ( is_array( $plugins ) && isset( $plugins[ $plugin_slug ] ) ) {
-		return $plugins[ $plugin_slug ];
+	if ( is_array( $plugins ) ) {
+		/* If the specific plugin_slug is not in the cache, return an error. */
+		if ( ! isset( $plugins[ $plugin_slug ] ) ) {
+			return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'performance-lab' ) );
+		}
+		return $plugins[ $plugin_slug ]; // Return cached plugin info if found
 	}
 
 	$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[author]=wordpressdotorg&request[tag]=performance&request[per_page]=100' );
