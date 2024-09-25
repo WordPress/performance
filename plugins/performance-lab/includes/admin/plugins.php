@@ -41,8 +41,8 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 
 	$plugins = array();
 	foreach ( $data['plugins'] as $plugin_data ) {
-		$plugins[ $plugin_data['slug'] ] = wp_array_slice_assoc( 
-			$plugin_data, 
+		$plugins[ $plugin_data['slug'] ] = wp_array_slice_assoc(
+			$plugin_data,
 			array(
 				'name',
 				'slug',
