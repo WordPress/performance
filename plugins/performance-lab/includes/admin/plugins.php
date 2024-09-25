@@ -62,11 +62,6 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'default' ) );
 	}
 
-	/**
-	 * Validated (mostly) plugin data.
-	 *
-	 * @var array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string} $plugin
-	 */
 	return $plugins[ $plugin_slug ];
 }
 
