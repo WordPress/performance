@@ -34,7 +34,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 			sprintf(
 				/* translators: %s: API error message */
 				__( 'Failed to retrieve plugins data from WordPress.org API: %s', 'performance-lab' ),
-				$request->get_error_message()
+				$response->get_error_message()
 			)
 		);
 	}
