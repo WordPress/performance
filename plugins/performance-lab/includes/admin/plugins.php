@@ -41,7 +41,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 
 	$plugins = array();
 	foreach ( $data['plugins'] as $plugin_data ) {
-		$plugins[ $plugin_data['slug'] ] = wp_array_slice_assoc(
+		$plugin_info = wp_array_slice_assoc(
 			$plugin_data,
 			array(
 				'name',
@@ -54,6 +54,17 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 				'version',
 			)
 		);
+
+		// Ensure the 'requires_plugins' is always an array.
+		if ( ! isset( $plugin_info['requires_plugins'] ) || ! is_array( $plugin_info['requires_plugins'] ) ) {
+			$plugin_info['requires_plugins'] = array();
+		}
+
+		// Ensure 'requires' and 'requires_php' are either strings or false.
+		$plugin_info['requires']     = isset( $plugin_info['requires'] ) ? $plugin_info['requires'] : false;
+		$plugin_info['requires_php'] = isset( $plugin_info['requires_php'] ) ? $plugin_info['requires_php'] : false;
+
+		$plugins[ $plugin_data['slug'] ] = $plugin_info;
 	}
 
 	set_transient( $transient_key, $plugins, HOUR_IN_SECONDS );
@@ -62,6 +73,11 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'default' ) );
 	}
 
+	/**
+	 * Validated (mostly) plugin data.
+	 *
+	 * @var array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: array<string>, download_link: string, version: string} $plugin
+	 */
 	return $plugins[ $plugin_slug ];
 }
 
