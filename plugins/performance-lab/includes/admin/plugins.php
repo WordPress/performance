@@ -52,7 +52,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	}
 
 	/* Check if the response contains plugins. */
-	if ( ! is_object( $response ) ) {
+	if ( ! ( is_object( $response ) && property_exists( $response, 'plugins' ) ) ) {
 		return new WP_Error( 'no_plugins', __( 'No plugins found in the API response.', 'performance-lab' ) );
 	}
 
