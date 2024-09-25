@@ -76,7 +76,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	/**
 	 * Validated (mostly) plugin data.
 	 *
-	 * @var array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: array<string>, download_link: string, version: string} $plugin
+	 * @var array<string, array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string}> $plugins
 	 */
 	return $plugins[ $plugin_slug ];
 }
