@@ -26,17 +26,17 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return $plugins[ $plugin_slug ];
 	}
 
-	$request = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[author]=wordpressdotorg&request[tag]=performance&request[per_page]=100' );
+	$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[author]=wordpressdotorg&request[tag]=performance&request[per_page]=100' );
 
-	if ( is_wp_error( $request ) ) {
-		return new WP_Error( 'api_error', __( 'Failed to retrieve plugins data from WordPress.org API.', 'default' ) );
+	if ( is_wp_error( $response ) ) {
+		return new WP_Error( 'api_error', __( 'Failed to retrieve plugins data from WordPress.org API: ' . $request->get_error_message(), 'performance-lab' ) );
 	}
 
-	$body = wp_remote_retrieve_body( $request );
+	$body = wp_remote_retrieve_body( $response );
 	$data = json_decode( $body, true );
 
 	if ( ! isset( $data['plugins'] ) || ! is_array( $data['plugins'] ) ) {
-		return new WP_Error( 'no_plugins', __( 'No plugins found in the API response.', 'default' ) );
+		return new WP_Error( 'no_plugins', __( 'No plugins found in the API response.', 'performance-lab' ) );
 	}
 
 	$plugins = array();
@@ -70,7 +70,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	set_transient( $transient_key, $plugins, HOUR_IN_SECONDS );
 
 	if ( ! isset( $plugins[ $plugin_slug ] ) ) {
-		return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'default' ) );
+		return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'performance-lab' ) );
 	}
 
 	/**
