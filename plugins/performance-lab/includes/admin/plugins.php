@@ -30,7 +30,15 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return $plugins[ $plugin_slug ]; // Return cached plugin info if found.
 	}
 
-	$response = wp_remote_get( 'https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[author]=wordpressdotorg&request[tag]=performance&request[per_page]=100' );
+	// Proceed with API request since no cache hit.
+	$response = plugins_api(
+		'query_plugins',
+		array(
+			'author'   => 'wordpressdotorg',
+			'tag'      => 'performance',
+			'per_page' => 100,
+		)
+	);
 
 	if ( is_wp_error( $response ) ) {
 		return new WP_Error(
@@ -46,12 +54,13 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	$body = wp_remote_retrieve_body( $response );
 	$data = json_decode( $body, true );
 
-	if ( ! isset( $data['plugins'] ) || ! is_array( $data['plugins'] ) ) {
+	// Check if the response contains plugins.
+	if ( ! isset( $response->plugins ) || ! is_array( $response->plugins ) ) {
 		return new WP_Error( 'no_plugins', __( 'No plugins found in the API response.', 'performance-lab' ) );
 	}
 
 	$plugins = array();
-	foreach ( $data['plugins'] as $plugin_data ) {
+	foreach ( $response->plugins as $plugin_data ) {
 		$plugin_info = wp_array_slice_assoc(
 			$plugin_data,
 			array(
