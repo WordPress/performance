@@ -110,7 +110,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 			'add-defer-script-for-web-worker-offloading' => array(
 				'set_up'         => static function (): void {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', array( 'strategy' => 'defer' ) );
-					wp_script_add_data( 'foo', 'worker', true );
+					wp_script_add_data( 'foo', 'worker', 1 );
 				},
 				'expected'       => '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js" defer data-wp-strategy="defer"></script>',
 				'doing_it_wrong' => false,

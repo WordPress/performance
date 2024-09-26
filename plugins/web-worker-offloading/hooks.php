@@ -85,7 +85,7 @@ add_action( 'wp_default_scripts', 'wwo_register_default_scripts' );
 function wwo_filter_print_scripts_array( $to_do ): array {
 	$scripts = wp_scripts();
 	foreach ( (array) $to_do as $handle ) {
-		if ( true === $scripts->get_data( $handle, 'worker' ) ) {
+		if ( true === (bool) $scripts->get_data( $handle, 'worker' ) ) {
 			$scripts->set_group( 'web-worker-offloading', false, 0 ); // Try to print in the head.
 			array_unshift( $to_do, 'web-worker-offloading' );
 
