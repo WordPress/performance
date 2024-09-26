@@ -202,7 +202,6 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $actual );
 	}
 
-
 	/**
 	 * Test head and footer scripts.
 	 *
@@ -223,6 +222,52 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			$this->replace_placeholders( '<script type="text/partytown" src="https://example.com/bar.js?ver=1.0.0" id="bar-js"  ></script>' ),
+			trim( get_echo( 'wp_print_footer_scripts' ) )
+		);
+	}
+
+	/**
+	 * Test only head script.
+	 *
+	 * @covers ::wwo_update_script_type
+	 * @covers ::wwo_filter_print_scripts_array
+	 */
+	public function test_only_head_script(): void {
+		wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', false );
+		wp_script_add_data( 'foo', 'worker', true );
+
+		$this->assertEquals(
+			$this->replace_placeholders( '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"  ></script>' ),
+			trim( get_echo( 'wp_print_head_scripts' ) )
+		);
+
+		wp_enqueue_script( 'bar', 'https://example.com/bar.js', array(), '1.0.0', true );
+
+		$this->assertEquals(
+			$this->replace_placeholders( '<script src="https://example.com/bar.js?ver=1.0.0" id="bar-js"></script>' ),
+			trim( get_echo( 'wp_print_footer_scripts' ) )
+		);
+	}
+
+	/**
+	 * Test only footer script.
+	 *
+	 * @covers ::wwo_update_script_type
+	 * @covers ::wwo_filter_print_scripts_array
+	 */
+	public function test_only_footer_script(): void {
+		wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', false );
+
+		$this->assertEquals(
+			$this->replace_placeholders( '<script src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script>' ),
+			trim( get_echo( 'wp_print_head_scripts' ) )
+		);
+
+		wp_enqueue_script( 'bar', 'https://example.com/bar.js', array(), '1.0.0', true );
+		wp_script_add_data( 'bar', 'worker', true );
+
+		$this->assertEquals(
+			$this->replace_placeholders( '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/bar.js?ver=1.0.0" id="bar-js"  ></script>' ),
 			trim( get_echo( 'wp_print_footer_scripts' ) )
 		);
 	}
