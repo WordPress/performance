@@ -30,7 +30,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return $plugins[ $plugin_slug ]; // Return cached plugin info if found.
 	}
 
-	/* Proceed with API request since no cache hit. */
+	// Proceed with API request since no cache hit.
 	$response = plugins_api(
 		'query_plugins',
 		array(
