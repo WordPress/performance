@@ -21,6 +21,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 function perflab_query_plugin_info( string $plugin_slug ) {
 	$transient_key = 'perflab_plugins_info';
 	$plugins       = get_transient( $transient_key );
+	$fields        = array(
+		'name',
+		'slug',
+		'short_description',
+		'requires',
+		'requires_php',
+		'requires_plugins',
+		'download_link',
+		'version', // Needed by install_plugin_install_status().
+	);
 
 	if ( is_array( $plugins ) ) {
 		/* If the specific plugin_slug is not in the cache, return an error. */
@@ -37,6 +47,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 			'author'   => 'wordpressdotorg',
 			'tag'      => 'performance',
 			'per_page' => 100,
+			'fields'   => array_fill_keys( $fields, true ),
 		)
 	);
 
@@ -58,19 +69,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 
 	$plugins = array();
 	foreach ( $response->plugins as $plugin_data ) {
-		$plugin_info = wp_array_slice_assoc(
-			$plugin_data,
-			array(
-				'name',
-				'slug',
-				'short_description',
-				'requires',
-				'requires_php',
-				'requires_plugins',
-				'download_link',
-				'version',
-			)
-		);
+		$plugin_info = wp_array_slice_assoc( $plugin_data, $fields );
 
 		// Ensure the 'requires_plugins' is always an array.
 		if ( ! isset( $plugin_info['requires_plugins'] ) || ! is_array( $plugin_info['requires_plugins'] ) ) {
