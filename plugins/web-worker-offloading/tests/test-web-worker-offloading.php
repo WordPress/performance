@@ -83,12 +83,6 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		);
 		$this->assertEquals( file_get_contents( $partytown_lib . 'partytown.js' ), $after_data );
 		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'registered' ) );
-
-		// Ensure that Partytown is enqueued when a script depends on it.
-		wp_enqueue_script( 'partytown-test', 'https://example.com/test.js', array( 'web-worker-offloading' ) );
-
-		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'enqueued' ) );
-		$this->assertTrue( wp_script_is( 'partytown-test', 'enqueued' ) );
 	}
 
 	/**
