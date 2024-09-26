@@ -188,6 +188,7 @@ class OD_URL_Metrics_Post_Type {
 	 * Stores URL metric by merging it with the other URL metrics which share the same normalized query vars.
 	 *
 	 * @since 0.1.0
+	 * @todo There is duplicate logic here with od_handle_rest_request().
 	 *
 	 * @param string        $slug           Slug (hash of normalized query vars).
 	 * @param OD_URL_Metric $new_url_metric New URL metric.
@@ -315,6 +316,8 @@ class OD_URL_Metrics_Post_Type {
 	 * This is used during uninstallation.
 	 *
 	 * @since 0.1.0
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
 	public static function delete_all_posts(): void {
 		global $wpdb;

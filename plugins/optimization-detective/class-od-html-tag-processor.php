@@ -181,7 +181,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Count for the number of times that the cursor was moved.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 * @var int
 	 * @see self::next_token()
 	 * @see self::seek()
@@ -342,7 +342,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Gets the number of times the cursor has moved.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 * @see self::next_token()
 	 * @see self::seek()
 	 *
