@@ -178,7 +178,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	 * Test `wwo_update_script_type`.
 	 *
 	 * @covers ::wwo_update_script_type
-	 * @covers ::wwo_update_worker_scripts_deps_and_strategy
+	 * @covers ::wwo_filter_print_scripts_array
 	 *
 	 * @dataProvider data_update_script_types
 	 *
@@ -187,19 +187,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	 * @param bool    $doing_it_wrong Whether to expect a `_doing_it_wrong` notice.
 	 */
 	public function test_update_script_types( Closure $set_up, string $expected, bool $doing_it_wrong ): void {
-		$wwo_config_data        = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'before' );
-		$wwo_inline_script_data = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'after' );
-
-		$expected = str_replace(
-			'{{ wwo_config }}',
-			wp_get_inline_script_tag( $wwo_config_data, array( 'id' => 'web-worker-offloading-js-before' ) ),
-			$expected
-		);
-		$expected = str_replace(
-			'{{ wwo_inline_script }}',
-			wp_get_inline_script_tag( $wwo_inline_script_data, array( 'id' => 'web-worker-offloading-js-after' ) ),
-			$expected
-		);
+		$expected = $this->replace_placeholders( $expected );
 
 		if ( $doing_it_wrong ) {
 			$this->setExpectedIncorrectUsage( 'wwo_update_script_type' );
@@ -212,6 +200,53 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$expected = preg_replace( '/\r|\n/', '', $expected );
 
 		$this->assertEquals( $expected, $actual );
+	}
+
+
+	/**
+	 * Test head and footer scripts.
+	 *
+	 * @covers ::wwo_update_script_type
+	 * @covers ::wwo_filter_print_scripts_array
+	 */
+	public function test_head_and_footer_scripts(): void {
+		wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', false );
+		wp_script_add_data( 'foo', 'worker', true );
+
+		$this->assertEquals(
+			$this->replace_placeholders( '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"  ></script>' ),
+			trim( get_echo( 'wp_print_head_scripts' ) )
+		);
+
+		wp_enqueue_script( 'bar', 'https://example.com/bar.js', array(), '1.0.0', true );
+		wp_script_add_data( 'bar', 'worker', true );
+
+		$this->assertEquals(
+			$this->replace_placeholders( '<script type="text/partytown" src="https://example.com/bar.js?ver=1.0.0" id="bar-js"  ></script>' ),
+			trim( get_echo( 'wp_print_footer_scripts' ) )
+		);
+	}
+
+	/**
+	 * Replace placeholders.
+	 *
+	 * @param string $template Template.
+	 * @return string Template with placeholders replaced.
+	 */
+	private function replace_placeholders( string $template ): string {
+		$wwo_config_data        = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'before' );
+		$wwo_inline_script_data = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'after' );
+
+		$template = str_replace(
+			'{{ wwo_config }}',
+			wp_get_inline_script_tag( $wwo_config_data, array( 'id' => 'web-worker-offloading-js-before' ) ),
+			$template
+		);
+		return str_replace(
+			'{{ wwo_inline_script }}',
+			wp_get_inline_script_tag( $wwo_inline_script_data, array( 'id' => 'web-worker-offloading-js-after' ) ),
+			$template
+		);
 	}
 
 	/**

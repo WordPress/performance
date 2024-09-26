@@ -70,30 +70,35 @@ function wwo_register_default_scripts( WP_Scripts $scripts ): void {
 add_action( 'wp_default_scripts', 'wwo_register_default_scripts' );
 
 /**
- * Adds `web-worker-offloading` as dependency to scripts with `worker` data. Also, marks their strategy as `async`.
+ * Prepends web-worker-offloading to the list of scripts to print if one of the queued scripts is offloaded to a worker.
  *
- * This is needed because scripts offloaded to a worker thread can be considered async. However, they may include `before` and `after` inline
- * scripts that need sequential execution. Once marked as async, `filter_eligible_strategies()` determines if the
- * script is eligible for async execution. If so, it will be offloaded to the worker thread.
+ * This also marks their strategy as `async`. This is needed because scripts offloaded to a worker thread can be
+ * considered async. However, they may include `before` and `after` inline scripts that need sequential execution. Once
+ * marked as async, `filter_eligible_strategies()` determines if the script is eligible for async execution. If so, it
+ * will be offloaded to the worker thread.
  *
- * @since n.e.x.t
+ * @since 0.1.0
+ *
+ * @param string[]|mixed $to_do An array of enqueued script dependency handles.
+ * @return string[] Script handles.
  */
-function wwo_update_worker_scripts_deps_and_strategy(): void {
-	foreach ( wp_scripts()->registered as $dep ) {
-		if (
-			(bool) wp_scripts()->get_data( $dep->handle, 'worker' ) &&
-			! in_array( 'web-worker-offloading', wp_scripts()->registered[ $dep->handle ]->deps, true )
-		) {
-			wp_scripts()->registered[ $dep->handle ]->deps[] = 'web-worker-offloading';
+function wwo_filter_print_scripts_array( $to_do ): array {
+	$scripts = wp_scripts();
+	foreach ( (array) $to_do as $handle ) {
+		if ( true === $scripts->get_data( $handle, 'worker' ) ) {
+			$scripts->set_group( 'web-worker-offloading', false, 0 ); // Try to print in the head.
+			array_unshift( $to_do, 'web-worker-offloading' );
 
-			if ( false === wp_scripts()->get_data( $dep->handle, 'strategy' ) ) {
-				wp_script_add_data( $dep->handle, 'strategy', 'async' ); // The 'defer' strategy would work as well.
-				wp_script_add_data( $dep->handle, 'wwo_strategy_added', true );
+			// TODO: This should be reconsidered because scripts needing to be offloaded will often have after scripts. See <https://github.com/WordPress/performance/pull/1497/files#r1733538721>.
+			if ( false === wp_scripts()->get_data( $handle, 'strategy' ) ) {
+				wp_script_add_data( $handle, 'strategy', 'async' ); // The 'defer' strategy would work as well.
+				wp_script_add_data( $handle, 'wwo_strategy_added', true );
 			}
 		}
 	}
+	return $to_do;
 }
-add_action( 'wp_print_scripts', 'wwo_update_worker_scripts_deps_and_strategy' );
+add_filter( 'print_scripts_array', 'wwo_filter_print_scripts_array' );
 
 /**
  * Updates script type for handles having `web-worker-offloading` as dependency.
