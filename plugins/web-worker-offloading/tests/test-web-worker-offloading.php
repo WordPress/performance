@@ -60,13 +60,13 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers ::wwo_init
+	 * @covers ::wwo_register_default_scripts
 	 */
-	public function test_wwo_init(): void {
-		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', 'wwo_init' ) );
+	public function test_wwo_register_default_scripts(): void {
+		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'wwo_register_default_scripts' ) );
 
 		// Register scripts.
-		wwo_init();
+		wp_scripts();
 
 		$wp_content_dir   = WP_CONTENT_DIR;
 		$partytown_config = wwo_get_configuration();
@@ -193,9 +193,6 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	 * @param bool    $doing_it_wrong Whether to expect a `_doing_it_wrong` notice.
 	 */
 	public function test_update_script_types( Closure $set_up, string $expected, bool $doing_it_wrong ): void {
-		// Setup.
-		wwo_init();
-
 		$wwo_config_data        = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'before' );
 		$wwo_inline_script_data = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'after' );
 

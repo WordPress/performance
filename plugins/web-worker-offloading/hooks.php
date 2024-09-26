@@ -36,17 +36,19 @@ function wwo_get_configuration(): array {
 }
 
 /**
- * Initializes Web Worker Offloading.
+ * Registers defaults scripts for Web Worker Offloading.
  *
  * @since 0.1.0
+ *
+ * @param WP_Scripts $scripts WP_Scripts instance.
  */
-function wwo_init(): void {
+function wwo_register_default_scripts( WP_Scripts $scripts ): void {
 	$partytown_js = file_get_contents( __DIR__ . '/build/partytown.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 	if ( false === $partytown_js ) {
 		return;
 	}
 
-	wp_register_script(
+	$scripts->add(
 		'web-worker-offloading',
 		'',
 		array(),
@@ -54,7 +56,7 @@ function wwo_init(): void {
 		array( 'in_footer' => false )
 	);
 
-	wp_add_inline_script(
+	$scripts->add_inline_script(
 		'web-worker-offloading',
 		sprintf(
 			'window.partytown = %s;',
@@ -63,9 +65,9 @@ function wwo_init(): void {
 		'before'
 	);
 
-	wp_add_inline_script( 'web-worker-offloading', $partytown_js );
+	$scripts->add_inline_script( 'web-worker-offloading', $partytown_js );
 }
-add_action( 'wp_enqueue_scripts', 'wwo_init' );
+add_action( 'wp_default_scripts', 'wwo_register_default_scripts' );
 
 /**
  * Adds `web-worker-offloading` as dependency to scripts with `worker` data. Also, marks their strategy as `async`.
