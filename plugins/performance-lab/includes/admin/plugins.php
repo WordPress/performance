@@ -77,8 +77,8 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		}
 
 		// Ensure 'requires' and 'requires_php' are either strings or false.
-		$plugin_info['requires']     = isset( $plugin_info['requires'] ) ? $plugin_info['requires'] : false;
-		$plugin_info['requires_php'] = isset( $plugin_info['requires_php'] ) ? $plugin_info['requires_php'] : false;
+		$plugin_info['requires']     = $plugin_info['requires'] ?? false;
+		$plugin_info['requires_php'] = $plugin_info['requires_php'] ?? false;
 
 		$plugins[ $plugin_data['slug'] ] = $plugin_info;
 	}
