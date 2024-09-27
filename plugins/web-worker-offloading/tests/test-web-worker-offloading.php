@@ -195,9 +195,14 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 
 		$set_up();
 
+		$normalize = static function ( $html ) {
+			$html = preg_replace( '/\r|\n/', '', $html );
+			return trim( preg_replace( '#(?=<[^/])#', "\n", $html ) );
+		};
+
 		// Normalize the output.
-		$actual   = preg_replace( '/\r|\n/', '', get_echo( 'wp_print_scripts' ) );
-		$expected = preg_replace( '/\r|\n/', '', $expected );
+		$actual   = $normalize( get_echo( 'wp_print_scripts' ) );
+		$expected = $normalize( $expected );
 
 		$this->assertEquals( $expected, $actual );
 	}
