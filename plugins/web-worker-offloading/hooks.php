@@ -63,12 +63,6 @@ function wwo_filter_print_scripts_array( $script_handles ): array {
 		if ( true === (bool) $scripts->get_data( $handle, 'worker' ) ) {
 			$scripts->set_group( 'web-worker-offloading', false, 0 ); // Try to print in the head.
 			array_unshift( $script_handles, 'web-worker-offloading' );
-
-			// TODO: This should be reconsidered because scripts needing to be offloaded will often have after scripts. See <https://github.com/WordPress/performance/pull/1497/files#r1733538721>.
-			if ( false === wp_scripts()->get_data( $handle, 'strategy' ) ) {
-				wp_script_add_data( $handle, 'strategy', 'async' ); // The 'defer' strategy would work as well.
-				wp_script_add_data( $handle, 'wwo_strategy_added', true );
-			}
 		}
 	}
 	return $script_handles;
@@ -95,25 +89,7 @@ function wwo_update_script_type( $tag, string $handle ) {
 			if ( $html_processor->get_attribute( 'id' ) !== "{$handle}-js" ) {
 				continue;
 			}
-			if ( null === $html_processor->get_attribute( 'async' ) && null === $html_processor->get_attribute( 'defer' ) ) {
-				_doing_it_wrong(
-					'wwo_update_script_type',
-					esc_html(
-						sprintf(
-							/* translators: %s: script handle */
-							__( 'Unable to offload "%s" script to a worker. Script will continue to load in the main thread.', 'web-worker-offloading' ),
-							$handle
-						)
-					),
-					'Web Worker Offloading 0.1.0'
-				);
-			} else {
-				$html_processor->set_attribute( 'type', 'text/partytown' );
-			}
-			if ( true === wp_scripts()->get_data( $handle, 'wwo_strategy_added' ) ) {
-				$html_processor->remove_attribute( 'async' );
-				$html_processor->remove_attribute( 'data-wp-strategy' );
-			}
+			$html_processor->set_attribute( 'type', 'text/partytown' );
 			$tag = $html_processor->get_updated_html();
 		}
 	}
@@ -121,3 +97,24 @@ function wwo_update_script_type( $tag, string $handle ) {
 	return $tag;
 }
 add_filter( 'script_loader_tag', 'wwo_update_script_type', 10, 2 );
+
+/**
+ * Filters inline script attributes to offload to a worker if the script has been opted-in.
+ *
+ * @param array<string, mixed>|mixed $attributes Attributes.
+ * @return array<string, mixed> Attributes.
+ */
+function wwo_filter_inline_script_attributes( $attributes ): array {
+	$attributes = (array) $attributes;
+	if (
+		isset( $attributes['id'] )
+		&&
+		1 === preg_match( '/^(?P<handle>.+)-js-(?:before|after)$/', $attributes['id'], $matches )
+		&&
+		(bool) wp_scripts()->get_data( $matches['handle'], 'worker' )
+	) {
+		$attributes['type'] = 'text/partytown';
+	}
+	return $attributes;
+}
+add_filter( 'wp_inline_script_attributes', 'wwo_filter_inline_script_attributes' );
