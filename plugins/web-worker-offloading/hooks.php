@@ -79,15 +79,15 @@ add_action( 'wp_default_scripts', 'wwo_register_default_scripts' );
  *
  * @since 0.1.0
  *
- * @param string[]|mixed $to_do An array of enqueued script dependency handles.
+ * @param string[]|mixed $script_handles An array of enqueued script dependency handles.
  * @return string[] Script handles.
  */
-function wwo_filter_print_scripts_array( $to_do ): array {
+function wwo_filter_print_scripts_array( $script_handles ): array {
 	$scripts = wp_scripts();
-	foreach ( (array) $to_do as $handle ) {
+	foreach ( (array) $script_handles as $handle ) {
 		if ( true === (bool) $scripts->get_data( $handle, 'worker' ) ) {
 			$scripts->set_group( 'web-worker-offloading', false, 0 ); // Try to print in the head.
-			array_unshift( $to_do, 'web-worker-offloading' );
+			array_unshift( $script_handles, 'web-worker-offloading' );
 
 			// TODO: This should be reconsidered because scripts needing to be offloaded will often have after scripts. See <https://github.com/WordPress/performance/pull/1497/files#r1733538721>.
 			if ( false === wp_scripts()->get_data( $handle, 'strategy' ) ) {
@@ -96,7 +96,7 @@ function wwo_filter_print_scripts_array( $to_do ): array {
 			}
 		}
 	}
-	return $to_do;
+	return $script_handles;
 }
 add_filter( 'print_scripts_array', 'wwo_filter_print_scripts_array' );
 
