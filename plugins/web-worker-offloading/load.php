@@ -47,3 +47,4 @@ define( 'WEB_WORKER_OFFLOADING_VERSION', '0.1.0' );
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';
+require_once __DIR__ . '/third-party.php';

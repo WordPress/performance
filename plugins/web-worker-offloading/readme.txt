@@ -11,14 +11,22 @@ Offload JavaScript execution to a Web Worker.
 
 == Description ==
 
-This plugin offloads JavaScript execution to a Web Worker, improving performance by freeing up the main thread.
+This plugin offloads JavaScript execution to a Web Worker, improving performance by freeing up the main thread. This should translate into improved [Interaction to Next Paint](https://web.dev/articles/inp) (INP) scores. _This functionality is considered experimental._
 
-In order to opt-in a script to be loaded in a worker, simply add `worker` script data to a registered script. For example,
+In order to opt in a script to be loaded in a worker, simply add `worker` script data to a registered script. For example,
 if you have a script registered with the handle of `foo`, opt-in to offload it to a web worker by doing:
 
 `
 wp_script_add_data( 'foo', 'worker', true );
 `
+
+Otherwise, the plugin currently ships with built-in integrations to offload Google Analytics to a web worker for the following plugins:
+
+* [Rank Math SEO](https://wordpress.org/plugins/seo-by-rank-math/)
+* [Site Kit by Google](https://wordpress.org/plugins/google-site-kit/)
+* [WooCommerce](https://wordpress.org/plugins/woocommerce/)
+
+Please monitor your analytics once activating to ensure all the expected events are being logged. At the same time, monitor your INP scores to check for improvement.
 
 == Frequently Asked Questions ==
 
