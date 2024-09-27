@@ -33,7 +33,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 	);
 
 	if ( is_array( $plugins ) ) {
-		/* If the specific plugin_slug is not in the cache, return an error. */
+		// If the specific plugin_slug is not in the cache, return an error.
 		if ( ! isset( $plugins[ $plugin_slug ] ) ) {
 			return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'performance-lab' ) );
 		}
