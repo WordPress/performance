@@ -47,11 +47,6 @@ add_action( 'wp_default_scripts', 'wwo_register_default_scripts' );
 /**
  * Prepends web-worker-offloading to the list of scripts to print if one of the queued scripts is offloaded to a worker.
  *
- * This also marks their strategy as `async`. This is needed because scripts offloaded to a worker thread can be
- * considered async. However, they may include `before` and `after` inline scripts that need sequential execution. Once
- * marked as async, `filter_eligible_strategies()` determines if the script is eligible for async execution. If so, it
- * will be offloaded to the worker thread.
- *
  * @since 0.1.0
  *
  * @param string[]|mixed $script_handles An array of enqueued script dependency handles.
@@ -80,20 +75,19 @@ add_filter( 'print_scripts_array', 'wwo_filter_print_scripts_array' );
  */
 function wwo_update_script_type( $tag, string $handle ) {
 	if (
-		is_string( $tag ) &&
+		is_string( $tag )
+		&&
 		(bool) wp_scripts()->get_data( $handle, 'worker' )
 	) {
 		$html_processor = new WP_HTML_Tag_Processor( $tag );
-
 		while ( $html_processor->next_tag( array( 'tag_name' => 'SCRIPT' ) ) ) {
-			if ( $html_processor->get_attribute( 'id' ) !== "{$handle}-js" ) {
-				continue;
+			if ( $html_processor->get_attribute( 'id' ) === "{$handle}-js" ) {
+				$html_processor->set_attribute( 'type', 'text/partytown' );
+				$tag = $html_processor->get_updated_html();
+				break;
 			}
-			$html_processor->set_attribute( 'type', 'text/partytown' );
-			$tag = $html_processor->get_updated_html();
 		}
 	}
-
 	return $tag;
 }
 add_filter( 'script_loader_tag', 'wwo_update_script_type', 10, 2 );
