@@ -58,11 +58,12 @@ function wwo_filter_print_scripts_array( $script_handles ): array {
 		if ( true === (bool) $scripts->get_data( $handle, 'worker' ) ) {
 			$scripts->set_group( 'web-worker-offloading', false, 0 ); // Try to print in the head.
 			array_unshift( $script_handles, 'web-worker-offloading' );
+			break;
 		}
 	}
 	return $script_handles;
 }
-add_filter( 'print_scripts_array', 'wwo_filter_print_scripts_array' );
+add_filter( 'print_scripts_array', 'wwo_filter_print_scripts_array', PHP_INT_MAX );
 
 /**
  * Updates script type for handles having `web-worker-offloading` as dependency.
