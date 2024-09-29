@@ -20,11 +20,11 @@ if you have a script registered with the handle of `foo`, opt-in to offload it t
 wp_script_add_data( 'foo', 'worker', true );
 `
 
-Otherwise, the plugin currently ships with built-in integrations to offload Google Analytics to a web worker for the following plugins:
+Otherwise, the plugin currently ships with built-in integrations to offload Google Analytics to a web worker for the following plugin:
 
-* [Rank Math SEO](https://wordpress.org/plugins/seo-by-rank-math/)
-* [Site Kit by Google](https://wordpress.org/plugins/google-site-kit/)
 * [WooCommerce](https://wordpress.org/plugins/woocommerce/)
+
+Support for [Site Kit by Google](https://wordpress.org/plugins/google-site-kit/) and [Rank Math SEO](https://wordpress.org/plugins/seo-by-rank-math/) are [planned](https://github.com/WordPress/performance/issues/1455).
 
 Please monitor your analytics once activating to ensure all the expected events are being logged. At the same time, monitor your INP scores to check for improvement.
 
