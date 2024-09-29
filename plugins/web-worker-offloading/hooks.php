@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Registers defaults scripts for Web Worker Offloading.
  *
  * @since 0.1.0
+ * @access private
  *
  * @param WP_Scripts $scripts WP_Scripts instance.
  */
@@ -48,6 +49,7 @@ add_action( 'wp_default_scripts', 'wwo_register_default_scripts' );
  * Prepends web-worker-offloading to the list of scripts to print if one of the queued scripts is offloaded to a worker.
  *
  * @since 0.1.0
+ * @access private
  *
  * @param string[]|mixed $script_handles An array of enqueued script dependency handles.
  * @return string[] Script handles.
@@ -69,6 +71,7 @@ add_filter( 'print_scripts_array', 'wwo_filter_print_scripts_array', PHP_INT_MAX
  * Updates script type for handles having `web-worker-offloading` as dependency.
  *
  * @since 0.1.0
+ * @access private
  *
  * @param string|mixed $tag    Script tag.
  * @param string       $handle Script handle.
@@ -97,6 +100,7 @@ add_filter( 'script_loader_tag', 'wwo_update_script_type', 10, 2 );
  * Filters inline script attributes to offload to a worker if the script has been opted-in.
  *
  * @since 0.1.0
+ * @access private
  *
  * @param array<string, mixed>|mixed $attributes Attributes.
  * @return array<string, mixed> Attributes.

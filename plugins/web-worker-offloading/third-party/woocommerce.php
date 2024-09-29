@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Configures WWO for WooCommerce and Google Analytics.
  *
  * @since 0.1.0
+ * @access private
  * @link https://partytown.builder.io/google-tag-manager#forward-events
  *
  * @param array<string, mixed>|mixed $configuration Configuration.

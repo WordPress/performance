@@ -13,6 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Adds scripts to be offloaded to a worker.
  *
+ * @since 0.1.0
+ * @access private
+ *
  * @param string[] $script_handles Script handles.
  */
 function wwo_mark_scripts_for_offloading( array $script_handles ): void {
@@ -32,6 +35,7 @@ function wwo_mark_scripts_for_offloading( array $script_handles ): void {
  * Loads third party plugin integrations for active plugins.
  *
  * @since 0.1.0
+ * @access private
  */
 function wwo_load_third_party_integrations(): void {
 	$plugins_with_integrations = array(
