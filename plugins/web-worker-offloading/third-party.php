@@ -27,18 +27,19 @@ function wwo_add_google_analytics_forwarded_events( $configuration ): array {
 }
 
 /**
- * Adds a script to be offloaded to a worker.
+ * Adds scripts to be offloaded to a worker.
  *
- * @param string $script_handle Script handle.
+ * @param string[] $script_handles Script handles.
  */
-function wwo_mark_script_for_offloading( string $script_handle ): void {
+function wwo_mark_scripts_for_offloading( array $script_handles ): void {
 	add_filter(
 		'print_scripts_array',
-		static function ( $script_handles ) use ( $script_handle ) {
-			if ( in_array( $script_handle, (array) $script_handles, true ) ) {
-				wp_script_add_data( $script_handle, 'worker', true );
+		static function ( $to_do ) use ( $script_handles ) {
+			$worker_script_handles = array_intersect( (array) $to_do, $script_handles );
+			foreach ( $worker_script_handles as $worker_script_handle ) {
+				wp_script_add_data( $worker_script_handle, 'worker', true );
 			}
-			return $script_handles;
+			return $to_do;
 		}
 	);
 }
