@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  *
- * @param string[] $script_handles Script handles.
+ * @param non-empty-string[] $script_handles Script handles.
  */
 function wwo_mark_scripts_for_offloading( array $script_handles ): void {
 	add_filter(

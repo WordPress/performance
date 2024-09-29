@@ -35,7 +35,7 @@ function wwo_register_default_scripts( WP_Scripts $scripts ): void {
 	$scripts->add_inline_script(
 		'web-worker-offloading',
 		sprintf(
-			'window.partytown = %s;',
+			'window.partytown = {...(window.partytown || {}), ...%s};',
 			wp_json_encode( wwo_get_configuration() )
 		),
 		'before'

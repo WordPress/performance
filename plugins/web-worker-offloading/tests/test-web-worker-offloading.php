@@ -77,8 +77,12 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$this->assertTrue( wp_script_is( 'web-worker-offloading', 'registered' ) );
 		$this->assertNotEmpty( $before_data );
 		$this->assertNotEmpty( $after_data );
-		$this->assertEquals(
-			sprintf( 'window.partytown = %s;', wp_json_encode( $partytown_config ) ),
+		$this->assertStringContainsString(
+			'window.partytown',
+			$before_data
+		);
+		$this->assertStringContainsString(
+			wp_json_encode( $partytown_config ),
 			$before_data
 		);
 		$this->assertEquals( file_get_contents( $partytown_lib . 'partytown.js' ), $after_data );
