@@ -28,8 +28,36 @@ Otherwise, the plugin currently ships with built-in integrations to offload Goog
 
 Please monitor your analytics once activating to ensure all the expected events are being logged. At the same time, monitor your INP scores to check for improvement.
 
+This plugin relies on the [Partytown 🎉](https://partytown.builder.io/) library by Builder.io, released under the MIT license. This library is in beta and there are quite a few [open bugs](https://github.com/BuilderIO/partytown/issues?q=is%3Aopen+is%3Aissue+label%3Abug). The [Partytown configuration](https://partytown.builder.io/configuration) can be modified via the `wwo_configuration` filter. For example:
+
+`
+<?php
+add_filter( 'wwo_configuration', function ( $config ) {
+	$config['mainWindowAccessors'][] = 'wp'; // Make the wp global available in the worker (e.g. wp.i18n and wp.hooks).
+	return $config;
+} );
+`
+
 == Frequently Asked Questions ==
 
 = Why are my offloaded scripts not working and I see a 404 error in the console for `partytown-sandbox-sw.html`? =
 
 If you find that your offloaded scripts aren't working while also seeing a 404 error in the console for a file at `/wp-content/plugins/web-worker-offloading/build/partytown-sandbox-sw.html?1727389399791` then it's likely you have Chrome DevTools open with the "Bypass for Network" toggle enabled in the Application panel.
+
+= Where can I report security bugs? =
+
+The Performance team and WordPress community take security bugs seriously. We appreciate your efforts to responsibly disclose your findings, and will make every effort to acknowledge your contributions.
+
+To report a security issue, please visit the [WordPress HackerOne](https://hackerone.com/wordpress) program.
+
+= How can I contribute to the plugin? =
+
+Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
+
+The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/web-worker-offloading) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
+
+== Changelog ==
+
+= 0.1.0 =
+
+* Initial release.
