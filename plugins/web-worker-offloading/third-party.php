@@ -11,22 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Adds forwarded events for Google Analytics.
- *
- * @since 0.1.0
- * @link https://partytown.builder.io/google-tag-manager#forward-events
- *
- * @param array<string, mixed>|mixed $configuration Configuration.
- * @return array<string, mixed> Configuration.
- */
-function wwo_add_google_analytics_forwarded_events( $configuration ): array {
-	$configuration = (array) $configuration;
-
-	$configuration['forward'][] = 'dataLayer.push';
-	return $configuration;
-}
-
-/**
  * Adds scripts to be offloaded to a worker.
  *
  * @param string[] $script_handles Script handles.
