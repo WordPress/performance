@@ -96,6 +96,8 @@ add_filter( 'script_loader_tag', 'wwo_update_script_type', 10, 2 );
 /**
  * Filters inline script attributes to offload to a worker if the script has been opted-in.
  *
+ * @since 0.1.0
+ *
  * @param array<string, mixed>|mixed $attributes Attributes.
  * @return array<string, mixed> Attributes.
  */
