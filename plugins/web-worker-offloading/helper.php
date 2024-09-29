@@ -36,5 +36,5 @@ function wwo_get_configuration(): array {
 	 *
 	 * @param array{ debug?: bool, forward?: non-empty-string[], lib: non-empty-string, loadScriptsOnMainThread?: non-empty-string[], nonce?: non-empty-string } $config Configuration for Partytown.
 	 */
-	return apply_filters( 'wwo_configuration', $config );
+	return (array) apply_filters( 'wwo_configuration', $config );
 }
