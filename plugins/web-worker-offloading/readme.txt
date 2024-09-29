@@ -20,6 +20,8 @@ if you have a script registered with the handle of `foo`, opt-in to offload it t
 wp_script_add_data( 'foo', 'worker', true );
 `
 
+Unlike with the script loading strategies (async/defer), any inline before/after scripts associated with the worker-offloaded registered script will also be offloaded to the worker, whereas with the script strategies an inline after script would block the script from being delayed.
+
 Otherwise, the plugin currently ships with built-in integrations to offload Google Analytics to a web worker for the following plugin:
 
 * [WooCommerce](https://wordpress.org/plugins/woocommerce/)
