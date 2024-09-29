@@ -11,7 +11,9 @@ Offload JavaScript execution to a Web Worker.
 
 == Description ==
 
-This plugin offloads JavaScript execution to a Web Worker, improving performance by freeing up the main thread. This should translate into improved [Interaction to Next Paint](https://web.dev/articles/inp) (INP) scores. _This functionality is considered experimental._
+This plugin offloads JavaScript execution to a Web Worker, improving performance by freeing up the main thread. This should translate into improved [Interaction to Next Paint](https://web.dev/articles/inp) (INP) scores.
+
+⚠ _This functionality is experimental._ ⚠
 
 In order to opt in a script to be loaded in a worker, simply add `worker` script data to a registered script. For example,
 if you have a script registered with the handle of `foo`, opt-in to offload it to a web worker by doing:
@@ -30,7 +32,9 @@ Support for [Site Kit by Google](https://wordpress.org/plugins/google-site-kit/)
 
 Please monitor your analytics once activating to ensure all the expected events are being logged. At the same time, monitor your INP scores to check for improvement.
 
-This plugin relies on the [Partytown 🎉](https://partytown.builder.io/) library by Builder.io, released under the MIT license. This library is in beta and there are quite a few [open bugs](https://github.com/BuilderIO/partytown/issues?q=is%3Aopen+is%3Aissue+label%3Abug). The [Partytown configuration](https://partytown.builder.io/configuration) can be modified via the `wwo_configuration` filter. For example:
+This plugin relies on the [Partytown 🎉](https://partytown.builder.io/) library by Builder.io, released under the MIT license. This library is in beta and there are quite a few [open bugs](https://github.com/BuilderIO/partytown/issues?q=is%3Aopen+is%3Aissue+label%3Abug).
+
+The [Partytown configuration](https://partytown.builder.io/configuration) can be modified via the `wwo_configuration` filter. For example:
 
 `
 <?php
@@ -39,6 +43,36 @@ add_filter( 'wwo_configuration', function ( $config ) {
 	return $config;
 } );
 `
+
+However, not all of the configuration options can be serialized to JSON in this way, for example the `resolveUrl` configuration is a function. To specify this, you can add an inline script as follows.
+
+`
+<?php
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		wp_add_inline_script(
+			'web-worker-offloading',
+			<<<JS
+			window.partytown = {
+				...(window.partytown || {}),
+				resolveUrl: (url, location, type) => {
+					if (type === 'script') {
+						const proxyUrl = new URL('https://my-reverse-proxy.com/');
+						proxyUrl.searchParams.append('url', url.href);
+						return proxyUrl;
+					}
+					return url;
+				},
+			};
+			JS,
+			'before'
+		);
+	}
+);
+`
+
+There are also many configuration options which are not documented, so refer to the [TypeScript definitions](https://github.com/BuilderIO/partytown/blob/b292a14047a0c12ca05ba97df1833935d42fdb66/src/lib/types.ts#L393-L548).
 
 == Frequently Asked Questions ==
 

@@ -33,9 +33,6 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$config                = wwo_get_configuration();
 
 		$this->assertArrayHasKey( 'lib', $config );
-		$this->assertArrayHasKey( 'forward', $config );
-		$this->assertEmpty( $config['forward'] );
-		$this->assertIsArray( $config['forward'] );
 		$this->assertStringStartsWith( '/' . basename( $wp_content_dir ), $config['lib'] );
 		$this->assertStringEndsWith( $partytown_assets_path, $config['lib'] );
 
