@@ -29,24 +29,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	 * @param Closure $load            Callback that loads the plugin.
 	 */
 	static function ( string $global_var_name, string $version, Closure $load ): void {
-		if ( ! isset( $GLOBALS[ $global_var_name ] ) ) {
-			$bootstrap = static function () use ( $global_var_name ): void {
-				if (
-					isset( $GLOBALS[ $global_var_name ]['load'], $GLOBALS[ $global_var_name ]['version'] )
-					&&
-					$GLOBALS[ $global_var_name ]['load'] instanceof Closure
-					&&
-					is_string( $GLOBALS[ $global_var_name ]['version'] )
-				) {
-					call_user_func( $GLOBALS[ $global_var_name ]['load'], $GLOBALS[ $global_var_name ]['version'] );
-					unset( $GLOBALS[ $global_var_name ] );
-				}
-			};
-
-			// Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action is used
-			// because it is the first action that fires once the theme is loaded.
-			add_action( 'after_setup_theme', $bootstrap, PHP_INT_MIN );
-		}
+		$bootstrap = static function () use ( $global_var_name ): void {
+			if (
+				isset( $GLOBALS[ $global_var_name ]['load'], $GLOBALS[ $global_var_name ]['version'] )
+				&&
+				$GLOBALS[ $global_var_name ]['load'] instanceof Closure
+				&&
+				is_string( $GLOBALS[ $global_var_name ]['version'] )
+			) {
+				call_user_func( $GLOBALS[ $global_var_name ]['load'], $GLOBALS[ $global_var_name ]['version'] );
+				unset( $GLOBALS[ $global_var_name ] );
+			}
+		};
 
 		// Register this copy of the plugin.
 		if (
@@ -61,6 +55,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 		) {
 			$GLOBALS[ $global_var_name ]['version'] = $version;
 			$GLOBALS[ $global_var_name ]['load']    = $load;
+		}
+
+		// Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action is used
+		// because it is the first action that fires once the theme is loaded. Otherwise, if the after_setup_theme
+		// action has already fired, then bootstrap right away.
+		if ( 0 === did_action( 'after_setup_theme' ) ) {
+			add_action( 'after_setup_theme', $bootstrap, PHP_INT_MIN );
+		} else {
+			$bootstrap();
 		}
 	}
 )(
