@@ -22,7 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 function wwo_woocommerce_configure( $configuration ): array {
 	$configuration = (array) $configuration;
 
-	$configuration['mainWindowAccessors'][] = 'wp'; // Because woocommerce-google-analytics-integration needs to access wp.i18n.
+	$configuration['mainWindowAccessors'][] = 'wp';   // Because woocommerce-google-analytics-integration needs to access wp.i18n.
+	$configuration['mainWindowAccessors'][] = 'ga4w'; // Because woocommerce-google-analytics-integration needs to access window.ga4w.
 	$configuration['globalFns'][]           = 'gtag'; // Because gtag() is defined in one script and called in another.
 	$configuration['forward'][]             = 'dataLayer.push'; // Because the Partytown integration has this in its example config.
 	return $configuration;
@@ -33,7 +34,6 @@ wwo_mark_scripts_for_offloading(
 	array(
 		'google-tag-manager',
 		'woocommerce-google-analytics-integration',
-		'woocommerce-google-analytics-integration-data',
 		'woocommerce-google-analytics-integration-gtag',
 	)
 );
