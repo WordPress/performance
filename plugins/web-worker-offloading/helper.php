@@ -24,6 +24,10 @@ function wwo_get_configuration(): array {
 		'forward' => array(),
 	);
 
+	if ( WP_DEBUG && SCRIPT_DEBUG ) {
+		$config['debug'] = true;
+	}
+
 	/**
 	 * Add configuration for Web Worker Offloading.
 	 *
