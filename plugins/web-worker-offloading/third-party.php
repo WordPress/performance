@@ -41,25 +41,16 @@ function wwo_load_third_party_integrations(): void {
 	$plugins_with_integrations = array(
 		// TODO: google-site-kit.
 		// TODO: seo-by-rank-math.
-		'woocommerce',
+		'woocommerce' => static function (): bool {
+			// See <https://woocommerce.com/document/query-whether-woocommerce-is-activated/>.
+			return class_exists( 'WooCommerce' );
+		},
 	);
 
-	// Load corresponding file for each string in $plugins if the WordPress plugin is installed and active.
-	$active_plugin_slugs = array_filter(
-		array_map(
-			static function ( $plugin_file ) {
-				if ( is_string( $plugin_file ) && str_contains( $plugin_file, '/' ) ) {
-					return strtok( $plugin_file, '/' );
-				} else {
-					return false;
-				}
-			},
-			(array) get_option( 'active_plugins' )
-		)
-	);
-
-	foreach ( array_intersect( $active_plugin_slugs, $plugins_with_integrations ) as $plugin_slug ) {
-		require_once __DIR__ . '/third-party/' . $plugin_slug . '.php';
+	foreach ( $plugins_with_integrations as $plugin_slug => $active_callback ) {
+		if ( $active_callback() ) {
+			require_once __DIR__ . '/third-party/' . $plugin_slug . '.php';
+		}
 	}
 }
 add_action( 'plugins_loaded', 'wwo_load_third_party_integrations' );
