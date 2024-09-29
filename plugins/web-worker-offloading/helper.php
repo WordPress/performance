@@ -45,7 +45,7 @@ function wwo_get_configuration(): array {
 	 *                     ...(window.partytown || {}),
 	 *                     resolveUrl: (url, location, type) => {
 	 *                         if (type === 'script') {
-	 *                             const proxyUrl = new URL('https://my-reverse-proxy.com/');
+	 *                             const proxyUrl = new URL('https://my-reverse-proxy.example.com/');
 	 *                             proxyUrl.searchParams.append('url', url.href);
 	 *                             return proxyUrl;
 	 *                         }
