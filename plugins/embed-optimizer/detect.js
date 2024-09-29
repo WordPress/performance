@@ -44,7 +44,7 @@ export async function initialize( { isDebug } ) {
 }
 
 /**
- * Initialize.
+ * Finalize.
  *
  * @param {Object}    args           Args.
  * @param {boolean}   args.isDebug   Whether to show debug messages.
