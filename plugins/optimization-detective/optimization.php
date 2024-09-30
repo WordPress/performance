@@ -27,10 +27,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @access private
  * @link https://core.trac.wordpress.org/ticket/43258
  *
- * @param string $passthrough Value for the template_include filter which is passed through.
- * @return string Unmodified value of $passthrough.
+ * @param string|mixed $passthrough Value for the template_include filter which is passed through.
+ * @return string|mixed Unmodified value of $passthrough.
  */
-function od_buffer_output( string $passthrough ): string {
+function od_buffer_output( $passthrough ) {
 	/*
 	 * Instead of the default PHP_OUTPUT_HANDLER_STDFLAGS (cleanable, flushable, and removable) being used for flags,
 	 * we need to omit PHP_OUTPUT_HANDLER_FLUSHABLE. If the buffer were flushable, then each time that ob_flush() is
