@@ -7,7 +7,7 @@
     "npm": ">=10.2.3"
   },
   "dependencies": {
-    "@builder.io/partytown": "^0.10.2",
+    "@builder.io/partytown": "github:westonruter/partytown#add/wp-i18n-workaround",
     "web-vitals": "4.2.3"
   },
   "devDependencies": {
