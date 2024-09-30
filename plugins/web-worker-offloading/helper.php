@@ -21,6 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function plwwo_get_configuration(): array {
 	$config = array(
+		// The source code in the build directory is compiled from <https://github.com/BuilderIO/partytown/tree/main/src/lib>.
+		// See webpack config in the WordPress/performance repo: <https://github.com/WordPress/performance/blob/282a068f3eb2575d37aeb9034e894e7140fcddca/webpack.config.js#L84-L130>.
 		'lib' => wp_parse_url( plugin_dir_url( __FILE__ ), PHP_URL_PATH ) . 'build/',
 	);
 

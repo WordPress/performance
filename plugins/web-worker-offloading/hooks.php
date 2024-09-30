@@ -19,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param WP_Scripts $scripts WP_Scripts instance.
  */
 function plwwo_register_default_scripts( WP_Scripts $scripts ): void {
+	// The source code for partytown.js is built from <https://github.com/BuilderIO/partytown/blob/b292a14047a0c12ca05ba97df1833935d42fdb66/src/lib/main/snippet.ts>.
+	// See webpack config in the WordPress/performance repo: <https://github.com/WordPress/performance/blob/282a068f3eb2575d37aeb9034e894e7140fcddca/webpack.config.js#L84-L130>.
 	$partytown_js = file_get_contents( __DIR__ . '/build/partytown.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 	if ( false === $partytown_js ) {
 		return;
