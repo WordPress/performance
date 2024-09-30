@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @param WP_Scripts $scripts WP_Scripts instance.
  */
-function wwo_register_default_scripts( WP_Scripts $scripts ): void {
+function plwwo_register_default_scripts( WP_Scripts $scripts ): void {
 	$partytown_js = file_get_contents( __DIR__ . '/build/partytown.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 	if ( false === $partytown_js ) {
 		return;
@@ -36,14 +36,14 @@ function wwo_register_default_scripts( WP_Scripts $scripts ): void {
 		'web-worker-offloading',
 		sprintf(
 			'window.partytown = {...(window.partytown || {}), ...%s};',
-			wp_json_encode( wwo_get_configuration() )
+			wp_json_encode( plwwo_get_configuration() )
 		),
 		'before'
 	);
 
 	$scripts->add_inline_script( 'web-worker-offloading', $partytown_js );
 }
-add_action( 'wp_default_scripts', 'wwo_register_default_scripts' );
+add_action( 'wp_default_scripts', 'plwwo_register_default_scripts' );
 
 /**
  * Prepends web-worker-offloading to the list of scripts to print if one of the queued scripts is offloaded to a worker.
@@ -54,7 +54,7 @@ add_action( 'wp_default_scripts', 'wwo_register_default_scripts' );
  * @param string[]|mixed $script_handles An array of enqueued script dependency handles.
  * @return string[] Script handles.
  */
-function wwo_filter_print_scripts_array( $script_handles ): array {
+function plwwo_filter_print_scripts_array( $script_handles ): array {
 	$scripts = wp_scripts();
 	foreach ( (array) $script_handles as $handle ) {
 		if ( true === (bool) $scripts->get_data( $handle, 'worker' ) ) {
@@ -65,7 +65,7 @@ function wwo_filter_print_scripts_array( $script_handles ): array {
 	}
 	return $script_handles;
 }
-add_filter( 'print_scripts_array', 'wwo_filter_print_scripts_array', PHP_INT_MAX );
+add_filter( 'print_scripts_array', 'plwwo_filter_print_scripts_array', PHP_INT_MAX );
 
 /**
  * Updates script type for handles having `web-worker-offloading` as dependency.
@@ -77,7 +77,7 @@ add_filter( 'print_scripts_array', 'wwo_filter_print_scripts_array', PHP_INT_MAX
  * @param string       $handle Script handle.
  * @return string|mixed Script tag with type="text/partytown" for eligible scripts.
  */
-function wwo_update_script_type( $tag, string $handle ) {
+function plwwo_update_script_type( $tag, string $handle ) {
 	if (
 		is_string( $tag )
 		&&
@@ -94,7 +94,7 @@ function wwo_update_script_type( $tag, string $handle ) {
 	}
 	return $tag;
 }
-add_filter( 'script_loader_tag', 'wwo_update_script_type', 10, 2 );
+add_filter( 'script_loader_tag', 'plwwo_update_script_type', 10, 2 );
 
 /**
  * Filters inline script attributes to offload to a worker if the script has been opted-in.
@@ -105,7 +105,7 @@ add_filter( 'script_loader_tag', 'wwo_update_script_type', 10, 2 );
  * @param array<string, mixed>|mixed $attributes Attributes.
  * @return array<string, mixed> Attributes.
  */
-function wwo_filter_inline_script_attributes( $attributes ): array {
+function plwwo_filter_inline_script_attributes( $attributes ): array {
 	$attributes = (array) $attributes;
 	if (
 		isset( $attributes['id'] )
@@ -118,4 +118,4 @@ function wwo_filter_inline_script_attributes( $attributes ): array {
 	}
 	return $attributes;
 }
-add_filter( 'wp_inline_script_attributes', 'wwo_filter_inline_script_attributes' );
+add_filter( 'wp_inline_script_attributes', 'plwwo_filter_inline_script_attributes' );

@@ -25,20 +25,20 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers ::wwo_get_configuration
+	 * @covers ::plwwo_get_configuration
 	 */
-	public function test_wwo_get_configuration(): void {
+	public function test_plwwo_get_configuration(): void {
 		$wp_content_dir        = WP_CONTENT_DIR;
 		$partytown_assets_path = 'web-worker-offloading/build/';
-		$config                = wwo_get_configuration();
+		$config                = plwwo_get_configuration();
 
 		$this->assertArrayHasKey( 'lib', $config );
 		$this->assertStringStartsWith( '/' . basename( $wp_content_dir ), $config['lib'] );
 		$this->assertStringEndsWith( $partytown_assets_path, $config['lib'] );
 
-		// Test `wwo_configuration` filter.
+		// Test `plwwo_configuration` filter.
 		add_filter(
-			'wwo_configuration',
+			'plwwo_configuration',
 			static function ( $config ) {
 				$config['forward'] = array( 'datalayer.push' );
 				$config['debug']   = true;
@@ -46,7 +46,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 			}
 		);
 
-		$config = wwo_get_configuration();
+		$config = plwwo_get_configuration();
 
 		$this->assertArrayHasKey( 'forward', $config );
 		$this->assertArrayHasKey( 'debug', $config );
@@ -57,16 +57,16 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @covers ::wwo_register_default_scripts
+	 * @covers ::plwwo_register_default_scripts
 	 */
-	public function test_wwo_register_default_scripts(): void {
-		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'wwo_register_default_scripts' ) );
+	public function test_plwwo_register_default_scripts(): void {
+		$this->assertEquals( 10, has_action( 'wp_default_scripts', 'plwwo_register_default_scripts' ) );
 
 		// Register scripts.
 		wp_scripts();
 
 		$wp_content_dir   = WP_CONTENT_DIR;
-		$partytown_config = wwo_get_configuration();
+		$partytown_config = plwwo_get_configuration();
 		$partytown_lib    = dirname( $wp_content_dir ) . $partytown_config['lib'];
 		$before_data      = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'before' );
 		$after_data       = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'after' );
@@ -113,21 +113,21 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', true );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script>',
 			),
 			'add-defer-script-for-web-worker-offloading' => array(
 				'set_up'   => static function (): void {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', array( 'strategy' => 'defer' ) );
 					wp_script_add_data( 'foo', 'worker', 1 );
 				},
-				'expected' => '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js" defer data-wp-strategy="defer"></script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js" defer data-wp-strategy="defer"></script>',
 			),
 			'add-async-script-for-web-worker-offloading' => array(
 				'set_up'   => static function (): void {
 					wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', array( 'strategy' => 'async' ) );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js" async data-wp-strategy="async"></script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js" async data-wp-strategy="async"></script>',
 			),
 			'add-script-for-web-worker-offloading-with-before-data' => array(
 				'set_up'   => static function (): void {
@@ -135,7 +135,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, Before World!");', 'before' );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ wwo_config }}{{ wwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script>',
 			),
 			'add-script-for-web-worker-offloading-with-after-data' => array(
 				'set_up'   => static function (): void {
@@ -143,7 +143,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, After World!");', 'after' );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
 			),
 			'add-script-for-web-worker-offloading-with-before-and-after-data' => array(
 				'set_up'   => static function (): void {
@@ -152,7 +152,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, After World!");', 'after' );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ wwo_config }}{{ wwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
 			),
 			'add-async-script-for-web-worker-offloading-with-before-and-after-data' => array(
 				'set_up'   => static function (): void {
@@ -161,7 +161,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, After World!");', 'after' );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ wwo_config }}{{ wwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js" data-wp-strategy="async"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js" data-wp-strategy="async"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
 			),
 			'add-defer-script-for-web-worker-offloading-with-before-and-after-data' => array(
 				'set_up'   => static function (): void {
@@ -170,7 +170,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_add_inline_script( 'foo', 'console.log("Hello, After World!");', 'after' );
 					wp_script_add_data( 'foo', 'worker', true );
 				},
-				'expected' => '{{ wwo_config }}{{ wwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js" data-wp-strategy="defer"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js" data-wp-strategy="defer"></script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
 			),
 			'add-inline-script-offloaded-to-web-worker'  => array(
 				'set_up'   => static function (): void {
@@ -180,7 +180,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 					wp_script_add_data( 'foo', 'worker', true );
 					wp_enqueue_script( 'foo' );
 				},
-				'expected' => '{{ wwo_config }}{{ wwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
+				'expected' => '{{ plwwo_config }}{{ plwwo_inline_script }}<script id="foo-js-before" type="text/partytown">console.log("Hello, Before World!");</script><script id="foo-js-after" type="text/partytown">console.log("Hello, After World!");</script>',
 			),
 		);
 	}
@@ -188,9 +188,9 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	/**
 	 * Test `wwo_update_script_type`.
 	 *
-	 * @covers ::wwo_update_script_type
-	 * @covers ::wwo_filter_print_scripts_array
-	 * @cogers ::wwo_filter_inline_script_attributes
+	 * @covers ::plwwo_update_script_type
+	 * @covers ::plwwo_filter_print_scripts_array
+	 * @cogers ::plwwo_filter_inline_script_attributes
 	 *
 	 * @dataProvider data_update_script_types
 	 *
@@ -217,15 +217,15 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	/**
 	 * Test head and footer scripts.
 	 *
-	 * @covers ::wwo_update_script_type
-	 * @covers ::wwo_filter_print_scripts_array
+	 * @covers ::plwwo_update_script_type
+	 * @covers ::plwwo_filter_print_scripts_array
 	 */
 	public function test_head_and_footer_scripts(): void {
 		wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', false );
 		wp_script_add_data( 'foo', 'worker', true );
 
 		$this->assertEquals(
-			$this->replace_placeholders( '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script>' ),
+			$this->replace_placeholders( '{{ plwwo_config }}{{ plwwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script>' ),
 			trim( get_echo( 'wp_print_head_scripts' ) )
 		);
 
@@ -241,15 +241,15 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	/**
 	 * Test only head script.
 	 *
-	 * @covers ::wwo_update_script_type
-	 * @covers ::wwo_filter_print_scripts_array
+	 * @covers ::plwwo_update_script_type
+	 * @covers ::plwwo_filter_print_scripts_array
 	 */
 	public function test_only_head_script(): void {
 		wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', false );
 		wp_script_add_data( 'foo', 'worker', true );
 
 		$this->assertEquals(
-			$this->replace_placeholders( '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script>' ),
+			$this->replace_placeholders( '{{ plwwo_config }}{{ plwwo_inline_script }}<script type="text/partytown" src="https://example.com/foo.js?ver=1.0.0" id="foo-js"></script>' ),
 			trim( get_echo( 'wp_print_head_scripts' ) )
 		);
 
@@ -264,8 +264,8 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	/**
 	 * Test only footer script.
 	 *
-	 * @covers ::wwo_update_script_type
-	 * @covers ::wwo_filter_print_scripts_array
+	 * @covers ::plwwo_update_script_type
+	 * @covers ::plwwo_filter_print_scripts_array
 	 */
 	public function test_only_footer_script(): void {
 		wp_enqueue_script( 'foo', 'https://example.com/foo.js', array(), '1.0.0', false );
@@ -279,7 +279,7 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		wp_script_add_data( 'bar', 'worker', true );
 
 		$this->assertEquals(
-			$this->replace_placeholders( '{{ wwo_config }}{{ wwo_inline_script }}<script type="text/partytown" src="https://example.com/bar.js?ver=1.0.0" id="bar-js"></script>' ),
+			$this->replace_placeholders( '{{ plwwo_config }}{{ plwwo_inline_script }}<script type="text/partytown" src="https://example.com/bar.js?ver=1.0.0" id="bar-js"></script>' ),
 			trim( get_echo( 'wp_print_footer_scripts' ) )
 		);
 	}
@@ -295,12 +295,12 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 		$wwo_inline_script_data = wp_scripts()->get_inline_script_data( 'web-worker-offloading', 'after' );
 
 		$template = str_replace(
-			'{{ wwo_config }}',
+			'{{ plwwo_config }}',
 			wp_get_inline_script_tag( $wwo_config_data, array( 'id' => 'web-worker-offloading-js-before' ) ),
 			$template
 		);
 		return str_replace(
-			'{{ wwo_inline_script }}',
+			'{{ plwwo_inline_script }}',
 			wp_get_inline_script_tag( $wwo_inline_script_data, array( 'id' => 'web-worker-offloading-js-after' ) ),
 			$template
 		);

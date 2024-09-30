@@ -34,11 +34,11 @@ Please monitor your analytics once activating to ensure all the expected events 
 
 This plugin relies on the [Partytown 🎉](https://partytown.builder.io/) library by Builder.io, released under the MIT license. This library is in beta and there are quite a few [open bugs](https://github.com/BuilderIO/partytown/issues?q=is%3Aopen+is%3Aissue+label%3Abug).
 
-The [Partytown configuration](https://partytown.builder.io/configuration) can be modified via the `wwo_configuration` filter. For example:
+The [Partytown configuration](https://partytown.builder.io/configuration) can be modified via the `plwwo_configuration` filter. For example:
 
 `
 <?php
-add_filter( 'wwo_configuration', function ( $config ) {
+add_filter( 'plwwo_configuration', function ( $config ) {
 	$config['mainWindowAccessors'][] = 'wp'; // Make the wp global available in the worker (e.g. wp.i18n and wp.hooks).
 	return $config;
 } );

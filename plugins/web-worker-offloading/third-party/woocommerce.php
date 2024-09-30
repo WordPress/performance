@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param array<string, mixed>|mixed $configuration Configuration.
  * @return array<string, mixed> Configuration.
  */
-function wwo_woocommerce_configure( $configuration ): array {
+function plwwo_woocommerce_configure( $configuration ): array {
 	$configuration = (array) $configuration;
 
 	$configuration['mainWindowAccessors'][] = 'wp';   // Because woocommerce-google-analytics-integration needs to access wp.i18n.
@@ -29,9 +29,9 @@ function wwo_woocommerce_configure( $configuration ): array {
 	$configuration['forward'][]             = 'dataLayer.push'; // Because the Partytown integration has this in its example config.
 	return $configuration;
 }
-add_filter( 'wwo_configuration', 'wwo_woocommerce_configure' );
+add_filter( 'plwwo_configuration', 'plwwo_woocommerce_configure' );
 
-wwo_mark_scripts_for_offloading(
+plwwo_mark_scripts_for_offloading(
 	array(
 		'google-tag-manager',
 		'woocommerce-google-analytics-integration',
