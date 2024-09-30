@@ -1,7 +1,10 @@
 includes:
 	- phar://phpstan.phar/conf/bleedingEdge.neon
+	- vendor/johnbillion/wp-compat/extension.neon
 parameters:
 	level: 8
+	WPCompat:
+		requiresAtLeast: '6.5'
 	treatPhpDocTypesAsCertain: false
 	paths:
 		- plugins
