@@ -31,7 +31,7 @@
     "wp-coding-standards/wpcs": "^3.1",
     "wp-phpunit/wp-phpunit": "^6.5",
     "yoast/phpunit-polyfills": "^2.0",
-    "phpstan/php-8-stubs": "^0.3.84",
+    "phpstan/php-8-stubs": "^0.4.0",
     "phpstan/phpstan-strict-rules": "^1.6"
   },
   "config": {
