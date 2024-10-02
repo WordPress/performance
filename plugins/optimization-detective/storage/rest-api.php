@@ -125,15 +125,25 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	}
 
+	$data = $request->get_json_params();
+	if ( ! is_array( $data ) ) {
+		return new WP_Error(
+			'missing_array_json_body',
+			__( 'The request body is not JSON array.', 'optimization-detective' ),
+			array( 'status' => 400 )
+		);
+	}
+
 	OD_Storage_Lock::set_lock();
 
 	try {
-		$data = $request->get_params();
-		// Remove params which are only used for the REST API request and which are not part of a URL Metric.
+		// Remove params which are only used for the REST API request and which are not part of a URL Metric, and would
+		// cause an exception to be thrown when passed into the OD_Strict_URL_Metric constructor.
 		unset(
 			$data['slug'],
 			$data['nonce']
 		);
+
 		$data = array_merge(
 			$data,
 			array(
