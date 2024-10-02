@@ -189,7 +189,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 	$post = OD_URL_Metrics_Post_Type::get_post( $slug );
 
-	$group_collection = new OD_URL_Metrics_Group_Collection(
+	$group_collection = new OD_URL_Metric_Group_Collection(
 		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 		od_get_breakpoint_max_widths(),
 		od_get_url_metrics_breakpoint_sample_size(),

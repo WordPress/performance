@@ -205,7 +205,7 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 **Enhancements**
 
-* Log URL metrics group collection to console when debugging is enabled (`WP_DEBUG` is true). ([1295](https://github.com/WordPress/performance/pull/1295))
+* Log URL metric group collection to console when debugging is enabled (`WP_DEBUG` is true). ([1295](https://github.com/WordPress/performance/pull/1295))
 
 **Bug Fixes**
 

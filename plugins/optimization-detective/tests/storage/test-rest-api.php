@@ -420,7 +420,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		);
 
 		// Sanity check that the groups were constructed as expected.
-		$group_collection  = new OD_URL_Metrics_Group_Collection(
+		$group_collection  = new OD_URL_Metric_Group_Collection(
 			OD_URL_Metrics_Post_Type::get_url_metrics_from_post( OD_URL_Metrics_Post_Type::get_post( od_get_url_metrics_slug( array() ) ) ),
 			od_get_breakpoint_max_widths(),
 			od_get_url_metrics_breakpoint_sample_size(),
@@ -430,7 +430,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertSame(
 			array( 0, $breakpoint_width + 1 ),
 			array_map(
-				static function ( OD_URL_Metrics_Group $group ) {
+				static function ( OD_URL_Metric_Group $group ) {
 					return $group->get_minimum_viewport_width();
 				},
 				$url_metric_groups

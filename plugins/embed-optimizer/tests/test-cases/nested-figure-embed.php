@@ -49,7 +49,7 @@ return array(
 						} else {
 							$test_case->assertTrue( $processor->has_bookmark( 'the_first_video' ) );
 						}
-						if ( $context->url_metrics_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() ) > 0 ) {
+						if ( $context->url_metric_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() ) > 0 ) {
 							$context->link_collection->add_link(
 								array(
 									'rel'  => 'preload',

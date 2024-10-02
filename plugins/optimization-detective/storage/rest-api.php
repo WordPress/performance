@@ -102,7 +102,7 @@ add_action( 'rest_api_init', 'od_register_endpoint' );
 function od_handle_rest_request( WP_REST_Request $request ) {
 	$post = OD_URL_Metrics_Post_Type::get_post( $request->get_param( 'slug' ) );
 
-	$group_collection = new OD_URL_Metrics_Group_Collection(
+	$group_collection = new OD_URL_Metric_Group_Collection(
 		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 		od_get_breakpoint_max_widths(),
 		od_get_url_metrics_breakpoint_sample_size(),
@@ -119,8 +119,8 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	}
 	if ( $group->is_complete() ) {
 		return new WP_Error(
-			'url_metrics_group_complete',
-			__( 'The URL metrics group for the provided viewport is already complete.', 'optimization-detective' ),
+			'url_metric_group_complete',
+			__( 'The URL metric group for the provided viewport is already complete.', 'optimization-detective' ),
 			array( 'status' => 403 )
 		);
 	}
@@ -176,24 +176,24 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	 *
 	 * @since 0.6.0
 	 *
-	 * @param array $context {
+	 * @param array                                   $context {
 	 *     Context about the successful URL Metric collection.
 	 *
 	 *     @var int                                   $post_id
 	 *     @var WP_REST_Request<array<string, mixed>> $request
 	 *     @var OD_Strict_URL_Metric                  $url_metric
-	 *     @var OD_URL_Metrics_Group                  $group
-	 *     @var OD_URL_Metrics_Group_Collection       $group_collection
+	 *     @var OD_URL_Metric_Group                   $group
+	 *     @var OD_URL_Metric_Group_Collection        $group_collection
 	 * }
 	 */
 	do_action(
 		'od_url_metric_collected',
 		array(
-			'post_id'                      => $post_id,
-			'request'                      => $request,
-			'url_metric'                   => $url_metric,
-			'url_metrics_group'            => $group,
-			'url_metrics_group_collection' => $group_collection,
+			'post_id'                     => $post_id,
+			'request'                     => $request,
+			'url_metric'                  => $url_metric,
+			'url_metric_group'            => $group,
+			'url_metric_group_collection' => $group_collection,
 		)
 	);
 

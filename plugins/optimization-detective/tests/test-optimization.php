@@ -282,6 +282,12 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				$tag_visitor_registry->register(
 					'img',
 					function ( OD_Tag_Visitor_Context $context ): bool {
+						$this->assertInstanceOf( OD_URL_Metric_Group_Collection::class, $context->url_metric_group_collection );
+						$this->setExpectedIncorrectUsage( 'OD_Tag_Visitor_Context::$url_metrics_group_collection' );
+						$this->assertInstanceOf( OD_URL_Metric_Group_Collection::class, $context->url_metrics_group_collection );
+						$this->assertInstanceOf( OD_HTML_Tag_Processor::class, $context->processor );
+						$this->assertInstanceOf( OD_Link_Collection::class, $context->link_collection );
+
 						$this->assertFalse( $context->processor->is_tag_closer() );
 						return $context->processor->get_tag() === 'IMG';
 					}
