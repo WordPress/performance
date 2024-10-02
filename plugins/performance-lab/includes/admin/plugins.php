@@ -21,7 +21,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 function perflab_query_plugin_info( string $plugin_slug ) {
 	$transient_key = 'perflab_plugins_info';
 	$plugins       = get_transient( $transient_key );
-	$fields        = array(
+
+	if ( is_array( $plugins ) ) {
+		// If the specific plugin_slug is not in the cache, return an error.
+		if ( ! isset( $plugins[ $plugin_slug ] ) ) {
+			return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'performance-lab' ) );
+		}
+		return $plugins[ $plugin_slug ]; // Return cached plugin info if found.
+	}
+
+	$fields = array(
 		'name',
 		'slug',
 		'short_description',
@@ -31,14 +40,6 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		'download_link',
 		'version', // Needed by install_plugin_install_status().
 	);
-
-	if ( is_array( $plugins ) ) {
-		// If the specific plugin_slug is not in the cache, return an error.
-		if ( ! isset( $plugins[ $plugin_slug ] ) ) {
-			return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'performance-lab' ) );
-		}
-		return $plugins[ $plugin_slug ]; // Return cached plugin info if found.
-	}
 
 	// Proceed with API request since no cache hit.
 	$response = plugins_api(
@@ -67,8 +68,12 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return new WP_Error( 'no_plugins', __( 'No plugins found in the API response.', 'performance-lab' ) );
 	}
 
-	$plugins = array();
+	$plugins            = array();
+	$standalone_plugins = array_flip( perflab_get_standalone_plugins() );
 	foreach ( $response->plugins as $plugin_data ) {
+		if ( ! isset( $standalone_plugins[ $plugin_data['slug'] ] ) ) {
+			continue;
+		}
 		$plugins[ $plugin_data['slug'] ] = wp_array_slice_assoc( $plugin_data, $fields );
 	}
 
