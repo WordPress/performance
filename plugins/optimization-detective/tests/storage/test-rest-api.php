@@ -562,6 +562,8 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		 */
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_query_params( wp_array_slice_assoc( $params, array( 'nonce', 'slug' ) ) );
+		unset( $params['nonce'], $params['slug'] );
 		$request->set_body( wp_json_encode( $params ) );
 		return $request;
 	}

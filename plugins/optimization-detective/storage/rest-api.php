@@ -137,24 +137,17 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	OD_Storage_Lock::set_lock();
 
 	try {
-		// Remove params which are only used for the REST API request and which are not part of a URL Metric, and would
-		// cause an exception to be thrown when passed into the OD_Strict_URL_Metric constructor.
-		unset(
-			$data['slug'],
-			$data['nonce']
-		);
-
-		$data = array_merge(
-			$data,
-			array(
-				// Now supply the readonly args which were omitted from the REST API params due to being `readonly`.
-				'timestamp' => microtime( true ),
-				'uuid'      => wp_generate_uuid4(),
+		// The "strict" URL Metric class is being used here to ensure additionalProperties of all objects are disallowed.
+		$url_metric = new OD_Strict_URL_Metric(
+			array_merge(
+				$data,
+				array(
+					// Now supply the readonly args which were omitted from the REST API params due to being `readonly`.
+					'timestamp' => microtime( true ),
+					'uuid'      => wp_generate_uuid4(),
+				)
 			)
 		);
-
-		// The "strict" URL Metric class is being used here to ensure additionalProperties of all objects are disallowed.
-		$url_metric = new OD_Strict_URL_Metric( $data );
 	} catch ( OD_Data_Validation_Exception $e ) {
 		return new WP_Error(
 			'rest_invalid_param',

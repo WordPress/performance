@@ -48,8 +48,8 @@ function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection 
 		'restApiEndpoint'         => rest_url( OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE ),
 		'restApiNonce'            => wp_create_nonce( 'wp_rest' ),
 		'currentUrl'              => $current_url,
-		'urlMetricsSlug'          => $slug,
-		'urlMetricsNonce'         => od_get_url_metrics_storage_nonce( $slug, $current_url ),
+		'urlMetricSlug'           => $slug,
+		'urlMetricNonce'          => od_get_url_metrics_storage_nonce( $slug, $current_url ),
 		'urlMetricsGroupStatuses' => array_map(
 			static function ( OD_URL_Metrics_Group $group ): array {
 				return array(

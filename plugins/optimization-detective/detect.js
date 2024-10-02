@@ -87,7 +87,7 @@ function error( ...message ) {
  */
 
 /**
- * @typedef {Object} URLMetrics
+ * @typedef {Object} URLMetric
  * @property {string}           url             - URL of the page.
  * @property {Object}           viewport        - Viewport.
  * @property {number}           viewport.width  - Viewport width.
@@ -144,8 +144,8 @@ function getCurrentTime() {
  * @param {string}                  args.restApiEndpoint             URL for where to send the detection data.
  * @param {string}                  args.restApiNonce                Nonce for writing to the REST API.
  * @param {string}                  args.currentUrl                  Current URL.
- * @param {string}                  args.urlMetricsSlug              Slug for URL metrics.
- * @param {string}                  args.urlMetricsNonce             Nonce for URL metrics storage.
+ * @param {string}                  args.urlMetricSlug               Slug for URL metric.
+ * @param {string}                  args.urlMetricNonce              Nonce for URL metric storage.
  * @param {URLMetricsGroupStatus[]} args.urlMetricsGroupStatuses     URL metrics group statuses.
  * @param {number}                  args.storageLockTTL              The TTL (in seconds) for the URL metric storage lock.
  * @param {string}                  args.webVitalsLibrarySrc         The URL for the web-vitals library.
@@ -160,8 +160,8 @@ export default async function detect( {
 	restApiEndpoint,
 	restApiNonce,
 	currentUrl,
-	urlMetricsSlug,
-	urlMetricsNonce,
+	urlMetricSlug,
+	urlMetricNonce,
 	urlMetricsGroupStatuses,
 	storageLockTTL,
 	webVitalsLibrarySrc,
@@ -339,11 +339,9 @@ export default async function detect( {
 		log( 'Detection is stopping.' );
 	}
 
-	/** @type {URLMetrics} */
-	const urlMetrics = {
+	/** @type {URLMetric} */
+	const urlMetric = {
 		url: currentUrl,
-		slug: urlMetricsSlug,
-		nonce: urlMetricsNonce,
 		viewport: {
 			width: win.innerWidth,
 			height: win.innerHeight,
@@ -379,11 +377,11 @@ export default async function detect( {
 			boundingClientRect: elementIntersection.boundingClientRect,
 		};
 
-		urlMetrics.elements.push( elementMetrics );
+		urlMetric.elements.push( elementMetrics );
 	}
 
 	if ( isDebug ) {
-		log( 'Current URL metrics:', urlMetrics );
+		log( 'Current URL metric:', urlMetric );
 	}
 
 	// Yield to main before sending data to server to further break up task.
@@ -392,13 +390,16 @@ export default async function detect( {
 	} );
 
 	try {
-		const response = await fetch( restApiEndpoint, {
+		const restUrl = new URL( restApiEndpoint );
+		restUrl.searchParams.append( 'slug', urlMetricSlug );
+		restUrl.searchParams.append( 'nonce', urlMetricNonce );
+		const response = await fetch( restUrl, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 				'X-WP-Nonce': restApiNonce,
 			},
-			body: JSON.stringify( urlMetrics ),
+			body: JSON.stringify( urlMetric ),
 		} );
 
 		if ( response.status === 200 ) {
