@@ -1,6 +1,6 @@
 <?php
 /**
- * Optimization Detective: OD_URL_Metric_Stored_Context class
+ * Optimization Detective: OD_URL_Metric_Store_Request_Context class
  *
  * @package optimization-detective
  * @since n.e.x.t
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since n.e.x.t
  * @access private
  */
-final class OD_URL_Metric_Stored_Context {
+final class OD_URL_Metric_Store_Request_Context {
 
 	/**
 	 * Request.

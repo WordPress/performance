@@ -176,11 +176,11 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_URL_Metric_Stored_Context $context Context about the successful URL Metric collection.
+	 * @param OD_URL_Metric_Store_Request_Context $context Context about the successful URL Metric collection.
 	 */
 	do_action(
 		'od_url_metric_stored',
-		new OD_URL_Metric_Stored_Context(
+		new OD_URL_Metric_Store_Request_Context(
 			$request,
 			$post_id,
 			$url_metric_group_collection,

@@ -110,7 +110,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/storage/class-od-storage-lock.php';
 		require_once __DIR__ . '/storage/data.php';
 		require_once __DIR__ . '/storage/rest-api.php';
-		require_once __DIR__ . '/storage/class-od-url-metric-stored-context.php';
+		require_once __DIR__ . '/storage/class-od-url-metric-store-request-context.php';
 
 		// Detection logic.
 		require_once __DIR__ . '/detection.php';

@@ -65,7 +65,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	public function test_rest_request_good_params( Closure $set_up ): void {
 		add_action(
 			'od_url_metric_stored',
-			function ( OD_URL_Metric_Stored_Context $context ): void {
+			function ( OD_URL_Metric_Store_Request_Context $context ): void {
 				$this->assertInstanceOf( OD_URL_Metric_Group_Collection::class, $context->url_metric_group_collection );
 				$this->assertInstanceOf( OD_URL_Metric_Group::class, $context->url_metric_group );
 				$this->assertInstanceOf( OD_URL_Metric::class, $context->url_metric );
