@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @param non-empty-string[] $script_handles Script handles.
  */
-function wwo_mark_scripts_for_offloading( array $script_handles ): void {
+function plwwo_mark_scripts_for_offloading( array $script_handles ): void {
 	add_filter(
 		'print_scripts_array',
 		static function ( $to_do ) use ( $script_handles ) {
@@ -37,7 +37,7 @@ function wwo_mark_scripts_for_offloading( array $script_handles ): void {
  * @since 0.1.0
  * @access private
  */
-function wwo_load_third_party_integrations(): void {
+function plwwo_load_third_party_integrations(): void {
 	$plugins_with_integrations = array(
 		// TODO: google-site-kit.
 		// TODO: seo-by-rank-math.
@@ -53,4 +53,4 @@ function wwo_load_third_party_integrations(): void {
 		}
 	}
 }
-add_action( 'plugins_loaded', 'wwo_load_third_party_integrations' );
+add_action( 'plugins_loaded', 'plwwo_load_third_party_integrations' );

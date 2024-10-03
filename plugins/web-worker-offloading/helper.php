@@ -19,8 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return array<string, mixed> Configuration for Partytown.
  */
-function wwo_get_configuration(): array {
+function plwwo_get_configuration(): array {
 	$config = array(
+		// The source code in the build directory is compiled from <https://github.com/BuilderIO/partytown/tree/main/src/lib>.
+		// See webpack config in the WordPress/performance repo: <https://github.com/WordPress/performance/blob/282a068f3eb2575d37aeb9034e894e7140fcddca/webpack.config.js#L84-L130>.
 		'lib' => wp_parse_url( plugin_dir_url( __FILE__ ), PHP_URL_PATH ) . 'build/',
 	);
 
@@ -33,7 +35,7 @@ function wwo_get_configuration(): array {
 	 *
 	 * Many of the configuration options are not documented publicly, so refer to the TypeScript definitions.
 	 * Additionally, not all of the configuration options (e.g. functions) can be serialized as JSON and must instead be
-	 * defined in JavaScript instead. To do so, use the following PHP code instead of filtering `wwo_configuration`:
+	 * defined in JavaScript instead. To do so, use the following PHP code instead of filtering `plwwo_configuration`:
 	 *
 	 *     add_action(
 	 *         'wp_enqueue_scripts',
@@ -66,5 +68,5 @@ function wwo_get_configuration(): array {
 	 *
 	 * @param array<string, mixed> $config Configuration for Partytown.
 	 */
-	return (array) apply_filters( 'wwo_configuration', $config );
+	return (array) apply_filters( 'plwwo_configuration', $config );
 }
