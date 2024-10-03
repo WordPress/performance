@@ -172,28 +172,20 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	$post_id = $result;
 
 	/**
-	 * Fires whenever a URL Metric was successfully collected.
+	 * Fires whenever a URL Metric was successfully stored.
 	 *
-	 * @since 0.6.0
+	 * @since n.e.x.t
 	 *
-	 * @param array                                   $context {
-	 *     Context about the successful URL Metric collection.
-	 *
-	 *     @type int                                   $post_id                     ID for URL metrics post.
-	 *     @type WP_REST_Request<array<string, mixed>> $request                     Storage request.
-	 *     @type OD_Strict_URL_Metric                  $url_metric                  URL metric.
-	 *     @type OD_URL_Metric_Group                   $url_metric_group            URL metric group.
-	 *     @type OD_URL_Metric_Group_Collection        $url_metric_group_collection URL metric group collection.
-	 * }
+	 * @param OD_URL_Metric_Stored_Context $context Context.
 	 */
 	do_action(
-		'od_url_metric_collected',
-		array(
-			'post_id'                     => $post_id,
-			'request'                     => $request,
-			'url_metric'                  => $url_metric,
-			'url_metric_group'            => $url_metric_group,
-			'url_metric_group_collection' => $url_metric_group_collection,
+		'od_url_metric_stored',
+		new OD_URL_Metric_Stored_Context(
+			$request,
+			$post_id,
+			$url_metric_group_collection,
+			$url_metric_group,
+			$url_metric
 		)
 	);
 

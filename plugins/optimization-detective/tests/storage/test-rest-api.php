@@ -63,6 +63,17 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 * @covers ::od_handle_rest_request
 	 */
 	public function test_rest_request_good_params( Closure $set_up ): void {
+		add_action(
+			'od_url_metric_stored',
+			function ( OD_URL_Metric_Stored_Context $context ): void {
+				$this->assertInstanceOf( OD_URL_Metric_Group_Collection::class, $context->url_metric_group_collection );
+				$this->assertInstanceOf( OD_URL_Metric_Group::class, $context->url_metric_group );
+				$this->assertInstanceOf( OD_URL_Metric::class, $context->url_metric );
+				$this->assertInstanceOf( WP_REST_Request::class, $context->request );
+				$this->assertIsInt( $context->post_id );
+			}
+		);
+
 		$valid_params = $set_up();
 		$this->assertCount( 0, get_posts( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) ) );
 		$request  = $this->create_request( $valid_params );
@@ -87,6 +98,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			$expected_data,
 			wp_array_slice_assoc( $url_metrics[0]->jsonSerialize(), array_keys( $expected_data ) )
 		);
+		$this->assertSame( 1, did_action( 'od_url_metric_stored' ) );
 	}
 
 	/**
@@ -225,6 +237,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
 
 		$this->assertNull( OD_URL_Metrics_Post_Type::get_post( $params['slug'] ) );
+		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
 	}
 
 	/**
@@ -239,6 +252,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 		$this->assertSame( 'missing_array_json_body', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
 	}
 
 	/**
@@ -254,6 +268,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 		$this->assertSame( 'rest_missing_callback_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
 	}
 
 	/**
@@ -269,6 +284,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 		$this->assertSame( 'rest_missing_callback_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
 	}
 
 	/**
@@ -284,6 +300,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 		$this->assertSame( 'rest_missing_callback_param', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
 	}
 
 	/**
