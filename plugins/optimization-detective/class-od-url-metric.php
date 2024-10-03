@@ -243,7 +243,7 @@ class OD_URL_Metric implements JsonSerializable {
 		/**
 		 * Filters additional schema properties which should be allowed at the root of a URL metric.
 		 *
-		 * @since n.e.x.t
+		 * @since 0.6.0
 		 *
 		 * @param array<string, array{type: string}> $additional_properties Additional properties.
 		 */
@@ -255,7 +255,7 @@ class OD_URL_Metric implements JsonSerializable {
 		/**
 		 * Filters additional schema properties which should be allowed for an elements item in a URL metric.
 		 *
-		 * @since n.e.x.t
+		 * @since 0.6.0
 		 *
 		 * @param array<string, array{type: string}> $additional_properties Additional properties.
 		 */
@@ -274,7 +274,7 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Extends a schema with additional optional properties.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 *
 	 * @param array<string, mixed> $properties_schema     Properties schema to extend.
 	 * @param array<string, mixed> $additional_properties Additional properties.
@@ -287,7 +287,7 @@ class OD_URL_Metric implements JsonSerializable {
 			_doing_it_wrong(
 				esc_html( "Filter: '{$filter_name}'" ),
 				esc_html( $message ),
-				'Optimization Detective n.e.x.t'
+				'Optimization Detective 0.6.0'
 			);
 		};
 		foreach ( $additional_properties as $property_key => $property_schema ) {
@@ -349,7 +349,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * This is particularly useful in conjunction with the `od_url_metric_schema_root_additional_properties` filter.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 *
 	 * @param string $key Property.
 	 * @return mixed|null The property value, or null if not set.

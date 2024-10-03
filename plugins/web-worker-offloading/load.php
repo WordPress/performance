@@ -45,5 +45,6 @@ if (
 
 define( 'WEB_WORKER_OFFLOADING_VERSION', '0.1.0' );
 
-// Load the hooks.
+require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';
+require_once __DIR__ . '/third-party.php';

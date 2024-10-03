@@ -7,14 +7,14 @@
     "npm": ">=10.2.3"
   },
   "dependencies": {
-    "@builder.io/partytown": "^0.10.2",
+    "@builder.io/partytown": "github:westonruter/partytown#add/wp-i18n-workaround",
     "web-vitals": "4.2.3"
   },
   "devDependencies": {
     "@octokit/rest": "^21.0.2",
-    "@wordpress/env": "^10.7.0",
-    "@wordpress/prettier-config": "^4.7.0",
-    "@wordpress/scripts": "^29.0.0",
+    "@wordpress/env": "^10.8.0",
+    "@wordpress/prettier-config": "^4.8.0",
+    "@wordpress/scripts": "^30.0.2",
     "commander": "12.1.0",
     "copy-webpack-plugin": "^12.0.2",
     "fast-glob": "^3.3.2",

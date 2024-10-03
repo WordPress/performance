@@ -107,7 +107,7 @@ final class Embed_Optimizer_Tag_Visitor {
 			$processor->set_attribute( 'style', $style );
 		}
 
-		$max_intersection_ratio = $context->url_metrics_group_collection->get_element_max_intersection_ratio( $embed_wrapper_xpath );
+		$max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $embed_wrapper_xpath );
 		if ( $max_intersection_ratio > 0 ) {
 			/*
 			 * The following embeds have been chosen for optimization due to their relative popularity among all embed types.

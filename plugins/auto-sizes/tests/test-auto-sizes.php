@@ -33,8 +33,8 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	}
 
 	public function test_hooks(): void {
-		$this->assertSame( 10, has_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' ) );
-		$this->assertSame( 10, has_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' ) );
+		$this->assertSame( function_exists( 'wp_sizes_attribute_includes_valid_auto' ) ? false : 10, has_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' ) );
+		$this->assertSame( function_exists( 'wp_sizes_attribute_includes_valid_auto' ) ? false : 10, has_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' ) );
 		$this->assertSame( 10, has_action( 'wp_head', 'auto_sizes_render_generator' ) );
 	}
 

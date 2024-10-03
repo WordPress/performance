@@ -16,7 +16,7 @@ interface URLMetric {
 	elements: ElementMetrics[];
 }
 
-interface URLMetricsGroupStatus {
+interface URLMetricGroupStatus {
 	minimumViewportWidth: number;
 	complete: boolean;
 }

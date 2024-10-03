@@ -42,7 +42,6 @@ function auto_sizes_update_image_attributes( $attr ): array {
 
 	return $attr;
 }
-add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' );
 
 /**
  * Adds auto to the sizes attribute to the image, if applicable.
@@ -85,7 +84,12 @@ function auto_sizes_update_content_img_tag( $html ): string {
 	$processor->set_attribute( 'sizes', "auto, $sizes" );
 	return $processor->get_updated_html();
 }
-add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+
+// Skip loading plugin filters if WordPress Core already loaded the functionality.
+if ( ! function_exists( 'wp_sizes_attribute_includes_valid_auto' ) ) {
+	add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' );
+	add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+}
 
 /**
  * Checks whether the given 'sizes' attribute includes the 'auto' keyword as the first item in the list.

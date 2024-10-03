@@ -2,7 +2,7 @@
  * @typedef {import("web-vitals").LCPMetric} LCPMetric
  * @typedef {import("types.d.ts").ElementMetrics} ElementMetrics
  * @typedef {import("types.d.ts").URLMetric} URLMetric
- * @typedef {import("types.d.ts").URLMetricsGroupStatus} URLMetricsGroupStatus
+ * @typedef {import("types.d.ts").URLMetricGroupStatus} URLMetricGroupStatus
  * @typedef {import("types.d.ts").Extension} Extension
  */
 
@@ -85,16 +85,13 @@ function error( ...message ) {
 /**
  * Checks whether the URL metric(s) for the provided viewport width is needed.
  *
- * @param {number}                  viewportWidth           - Current viewport width.
- * @param {URLMetricsGroupStatus[]} urlMetricsGroupStatuses - Viewport group statuses.
+ * @param {number}                 viewportWidth          - Current viewport width.
+ * @param {URLMetricGroupStatus[]} urlMetricGroupStatuses - Viewport group statuses.
  * @return {boolean} Whether URL metrics are needed.
  */
-function isViewportNeeded( viewportWidth, urlMetricsGroupStatuses ) {
+function isViewportNeeded( viewportWidth, urlMetricGroupStatuses ) {
 	let lastWasLacking = false;
-	for ( const {
-		minimumViewportWidth,
-		complete,
-	} of urlMetricsGroupStatuses ) {
+	for ( const { minimumViewportWidth, complete } of urlMetricGroupStatuses ) {
 		if ( viewportWidth >= minimumViewportWidth ) {
 			lastWasLacking = ! complete;
 		} else {
@@ -116,22 +113,22 @@ function getCurrentTime() {
 /**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
- * @param {Object}                  args                             Args.
- * @param {number}                  args.serveTime                   The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
- * @param {number}                  args.detectionTimeWindow         The number of milliseconds between now and when the page was first generated in which detection should proceed.
- * @param {string[]}                args.extensionModuleUrls         URLs for extension script modules to import.
- * @param {number}                  args.minViewportAspectRatio      Minimum aspect ratio allowed for the viewport.
- * @param {number}                  args.maxViewportAspectRatio      Maximum aspect ratio allowed for the viewport.
- * @param {boolean}                 args.isDebug                     Whether to show debug messages.
- * @param {string}                  args.restApiEndpoint             URL for where to send the detection data.
- * @param {string}                  args.restApiNonce                Nonce for writing to the REST API.
- * @param {string}                  args.currentUrl                  Current URL.
- * @param {string}                  args.urlMetricsSlug              Slug for URL metrics.
- * @param {string}                  args.urlMetricsNonce             Nonce for URL metrics storage.
- * @param {URLMetricsGroupStatus[]} args.urlMetricsGroupStatuses     URL metrics group statuses.
- * @param {number}                  args.storageLockTTL              The TTL (in seconds) for the URL metric storage lock.
- * @param {string}                  args.webVitalsLibrarySrc         The URL for the web-vitals library.
- * @param {Object}                  [args.urlMetricsGroupCollection] URL metrics group collection, when in debug mode.
+ * @param {Object}                 args                            Args.
+ * @param {number}                 args.serveTime                  The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
+ * @param {number}                 args.detectionTimeWindow        The number of milliseconds between now and when the page was first generated in which detection should proceed.
+ * @param {string[]}               args.extensionModuleUrls        URLs for extension script modules to import.
+ * @param {number}                 args.minViewportAspectRatio     Minimum aspect ratio allowed for the viewport.
+ * @param {number}                 args.maxViewportAspectRatio     Maximum aspect ratio allowed for the viewport.
+ * @param {boolean}                args.isDebug                    Whether to show debug messages.
+ * @param {string}                 args.restApiEndpoint            URL for where to send the detection data.
+ * @param {string}                 args.restApiNonce               Nonce for writing to the REST API.
+ * @param {string}                 args.currentUrl                 Current URL.
+ * @param {string}                 args.urlMetricSlug              Slug for URL metric.
+ * @param {string}                 args.urlMetricNonce             Nonce for URL metric storage.
+ * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     URL metric group statuses.
+ * @param {number}                 args.storageLockTTL             The TTL (in seconds) for the URL metric storage lock.
+ * @param {string}                 args.webVitalsLibrarySrc        The URL for the web-vitals library.
+ * @param {Object}                 [args.urlMetricGroupCollection] URL metric group collection, when in debug mode.
  */
 export default async function detect( {
 	serveTime,
@@ -143,20 +140,17 @@ export default async function detect( {
 	restApiEndpoint,
 	restApiNonce,
 	currentUrl,
-	urlMetricsSlug,
-	urlMetricsNonce,
-	urlMetricsGroupStatuses,
+	urlMetricSlug,
+	urlMetricNonce,
+	urlMetricGroupStatuses,
 	storageLockTTL,
 	webVitalsLibrarySrc,
-	urlMetricsGroupCollection,
+	urlMetricGroupCollection,
 } ) {
 	const currentTime = getCurrentTime();
 
 	if ( isDebug ) {
-		log(
-			'Stored URL metrics group collection:',
-			urlMetricsGroupCollection
-		);
+		log( 'Stored URL metric group collection:', urlMetricGroupCollection );
 	}
 
 	// Abort running detection logic if it was served in a cached page.
@@ -170,7 +164,7 @@ export default async function detect( {
 	}
 
 	// Abort if the current viewport is not among those which need URL metrics.
-	if ( ! isViewportNeeded( win.innerWidth, urlMetricsGroupStatuses ) ) {
+	if ( ! isViewportNeeded( win.innerWidth, urlMetricGroupStatuses ) ) {
 		if ( isDebug ) {
 			log( 'No need for URL metrics from the current viewport.' );
 		}
@@ -378,7 +372,7 @@ export default async function detect( {
 	}
 
 	if ( isDebug ) {
-		log( 'Current URL metrics:', urlMetric );
+		log( 'Current URL metric:', urlMetric );
 	}
 
 	// Wait for the page to be hidden.
@@ -414,16 +408,13 @@ export default async function detect( {
 		log( 'Sending URL metric:', urlMetric );
 	}
 
-	const body = {
-		...urlMetric,
-		slug: urlMetricsSlug,
-		nonce: urlMetricsNonce,
-	};
 	const url = new URL( restApiEndpoint );
 	url.searchParams.set( '_wpnonce', restApiNonce );
+	url.searchParams.set( 'slug', urlMetricSlug );
+	url.searchParams.set( 'nonce', urlMetricNonce );
 	navigator.sendBeacon(
 		url,
-		new Blob( [ JSON.stringify( body ) ], {
+		new Blob( [ JSON.stringify( urlMetric ) ], {
 			type: 'application/json',
 		} )
 	);

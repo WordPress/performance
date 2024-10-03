@@ -1,6 +1,6 @@
 <?php
 /**
- * Optimization Detective: OD_URL_Metrics_Group_Collection class
+ * Optimization Detective: OD_URL_Metric_Group_Collection class
  *
  * @package optimization-detective
  * @since 0.1.0
@@ -16,15 +16,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @phpstan-import-type ElementData from OD_URL_Metric
  *
- * @implements IteratorAggregate<int, OD_URL_Metrics_Group>
+ * @implements IteratorAggregate<int, OD_URL_Metric_Group>
  *
  * @since 0.1.0
  * @access private
  */
-final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggregate, JsonSerializable {
+final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggregate, JsonSerializable {
 
 	/**
-	 * URL metrics groups.
+	 * URL metric groups.
 	 *
 	 * The number of groups corresponds to one greater than the number of
 	 * breakpoints. This is because breakpoints are the dividing line between
@@ -32,8 +32,8 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * even to when there are zero breakpoints: there will still be one group
 	 * in this case, in which every single URL metric is added.
 	 *
-	 * @var OD_URL_Metrics_Group[]
-	 * @phpstan-var non-empty-array<OD_URL_Metrics_Group>
+	 * @var OD_URL_Metric_Group[]
+	 * @phpstan-var non-empty-array<OD_URL_Metric_Group>
 	 */
 	private $groups;
 
@@ -74,11 +74,11 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * Result cache.
 	 *
 	 * @var array{
-	 *          get_group_for_viewport_width?: array<int, OD_URL_Metrics_Group>,
+	 *          get_group_for_viewport_width?: array<int, OD_URL_Metric_Group>,
 	 *          is_every_group_populated?: bool,
 	 *          is_any_group_populated?: bool,
 	 *          is_every_group_complete?: bool,
-	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metrics_Group[]>,
+	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metric_Group[]>,
 	 *          get_common_lcp_element?: ElementData|null,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
 	 *          get_all_element_minimum_heights?: array<string, float>
@@ -168,18 +168,18 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	/**
 	 * Create groups.
 	 *
-	 * @phpstan-return non-empty-array<OD_URL_Metrics_Group>
+	 * @phpstan-return non-empty-array<OD_URL_Metric_Group>
 	 *
-	 * @return OD_URL_Metrics_Group[] Groups.
+	 * @return OD_URL_Metric_Group[] Groups.
 	 */
 	private function create_groups(): array {
 		$groups    = array();
 		$min_width = 0;
 		foreach ( $this->breakpoints as $max_width ) {
-			$groups[]  = new OD_URL_Metrics_Group( array(), $min_width, $max_width, $this->sample_size, $this->freshness_ttl, $this );
+			$groups[]  = new OD_URL_Metric_Group( array(), $min_width, $max_width, $this->sample_size, $this->freshness_ttl, $this );
 			$min_width = $max_width + 1;
 		}
-		$groups[] = new OD_URL_Metrics_Group( array(), $min_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl, $this );
+		$groups[] = new OD_URL_Metric_Group( array(), $min_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl, $this );
 		return $groups;
 	}
 
@@ -210,9 +210,9 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
 	 *
 	 * @param int $viewport_width Viewport width.
-	 * @return OD_URL_Metrics_Group URL metrics group for the viewport width.
+	 * @return OD_URL_Metric_Group URL metric group for the viewport width.
 	 */
-	public function get_group_for_viewport_width( int $viewport_width ): OD_URL_Metrics_Group {
+	public function get_group_for_viewport_width( int $viewport_width ): OD_URL_Metric_Group {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) && array_key_exists( $viewport_width, $this->result_cache[ __FUNCTION__ ] ) ) {
 			return $this->result_cache[ __FUNCTION__ ][ $viewport_width ];
 		}
@@ -226,8 +226,8 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 			throw new InvalidArgumentException(
 				esc_html(
 					sprintf(
-					/* translators: %d is viewport width */
-						__( 'No URL metrics group found for viewport width: %d', 'optimization-detective' ),
+						/* translators: %d is viewport width */
+						__( 'No URL metric group found for viewport width: %d', 'optimization-detective' ),
 						$viewport_width
 					)
 				)
@@ -269,7 +269,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	 * should be contrasted with the `is_every_group_complete()`
 	 * method below.
 	 *
-	 * @see OD_URL_Metrics_Group_Collection::is_every_group_complete()
+	 * @see OD_URL_Metric_Group_Collection::is_every_group_complete()
 	 *
 	 * @return bool Whether all groups have some URL metrics.
 	 */
@@ -294,7 +294,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	/**
 	 * Checks whether every group is complete.
 	 *
-	 * @see OD_URL_Metrics_Group::is_complete()
+	 * @see OD_URL_Metric_Group::is_complete()
 	 *
 	 * @return bool Whether all groups are complete.
 	 */
@@ -320,10 +320,10 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	/**
 	 * Gets the groups with the provided LCP element XPath.
 	 *
-	 * @see OD_URL_Metrics_Group::get_lcp_element()
+	 * @see OD_URL_Metric_Group::get_lcp_element()
 	 *
 	 * @param string $xpath XPath for LCP element.
-	 * @return OD_URL_Metrics_Group[] Groups which have the LCP element.
+	 * @return OD_URL_Metric_Group[] Groups which have the LCP element.
 	 */
 	public function get_groups_by_lcp_element( string $xpath ): array {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) && array_key_exists( $xpath, $this->result_cache[ __FUNCTION__ ] ) ) {
@@ -511,14 +511,14 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 	/**
 	 * Returns an iterator for the groups of URL metrics.
 	 *
-	 * @return ArrayIterator<int, OD_URL_Metrics_Group> Array iterator for OD_URL_Metric_Group instances.
+	 * @return ArrayIterator<int, OD_URL_Metric_Group> Array iterator for OD_URL_Metric_Group instances.
 	 */
 	public function getIterator(): ArrayIterator {
 		return new ArrayIterator( $this->groups );
 	}
 
 	/**
-	 * Counts the URL metrics groups in the collection.
+	 * Counts the URL metric groups in the collection.
 	 *
 	 * @return int<0, max> Group count.
 	 */
@@ -558,7 +558,7 @@ final class OD_URL_Metrics_Group_Collection implements Countable, IteratorAggreg
 			'every_group_complete'                => $this->is_every_group_complete(),
 			'every_group_populated'               => $this->is_every_group_populated(),
 			'groups'                              => array_map(
-				static function ( OD_URL_Metrics_Group $group ): array {
+				static function ( OD_URL_Metric_Group $group ): array {
 					$group_data = $group->jsonSerialize();
 					// Remove redundant data.
 					unset(

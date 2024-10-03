@@ -102,7 +102,7 @@ add_action( 'rest_api_init', 'od_register_endpoint' );
 function od_handle_rest_request( WP_REST_Request $request ) {
 	$post = OD_URL_Metrics_Post_Type::get_post( $request->get_param( 'slug' ) );
 
-	$group_collection = new OD_URL_Metrics_Group_Collection(
+	$url_metric_group_collection = new OD_URL_Metric_Group_Collection(
 		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 		od_get_breakpoint_max_widths(),
 		od_get_url_metrics_breakpoint_sample_size(),
@@ -111,41 +111,43 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 
 	// Block the request if URL metrics aren't needed for the provided viewport width.
 	try {
-		$group = $group_collection->get_group_for_viewport_width(
+		$url_metric_group = $url_metric_group_collection->get_group_for_viewport_width(
 			$request->get_param( 'viewport' )['width']
 		);
 	} catch ( InvalidArgumentException $exception ) {
 		return new WP_Error( 'invalid_viewport_width', $exception->getMessage() );
 	}
-	if ( $group->is_complete() ) {
+	if ( $url_metric_group->is_complete() ) {
 		return new WP_Error(
-			'url_metrics_group_complete',
-			__( 'The URL metrics group for the provided viewport is already complete.', 'optimization-detective' ),
+			'url_metric_group_complete',
+			__( 'The URL metric group for the provided viewport is already complete.', 'optimization-detective' ),
 			array( 'status' => 403 )
+		);
+	}
+
+	$data = $request->get_json_params();
+	if ( ! is_array( $data ) ) {
+		return new WP_Error(
+			'missing_array_json_body',
+			__( 'The request body is not JSON array.', 'optimization-detective' ),
+			array( 'status' => 400 )
 		);
 	}
 
 	OD_Storage_Lock::set_lock();
 
 	try {
-		$data = $request->get_params();
-		// Remove params which are only used for the REST API request and which are not part of a URL Metric.
-		unset(
-			$data['_wpnonce'],
-			$data['slug'],
-			$data['nonce']
-		);
-		$data = array_merge(
-			$data,
-			array(
-				// Now supply the readonly args which were omitted from the REST API params due to being `readonly`.
-				'timestamp' => microtime( true ),
-				'uuid'      => wp_generate_uuid4(),
+		// The "strict" URL Metric class is being used here to ensure additionalProperties of all objects are disallowed.
+		$url_metric = new OD_Strict_URL_Metric(
+			array_merge(
+				$data,
+				array(
+					// Now supply the readonly args which were omitted from the REST API params due to being `readonly`.
+					'timestamp' => microtime( true ),
+					'uuid'      => wp_generate_uuid4(),
+				)
 			)
 		);
-
-		// The "strict" URL Metric class is being used here to ensure additionalProperties of all objects are disallowed.
-		$url_metric = new OD_Strict_URL_Metric( $data );
 	} catch ( OD_Data_Validation_Exception $e ) {
 		return new WP_Error(
 			'rest_invalid_param',
@@ -170,28 +172,20 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	$post_id = $result;
 
 	/**
-	 * Fires whenever a URL Metric was successfully collected.
+	 * Fires whenever a URL Metric was successfully stored.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param array $context {
-	 *     Context about the successful URL Metric collection.
-	 *
-	 *     @var int                                   $post_id
-	 *     @var WP_REST_Request<array<string, mixed>> $request
-	 *     @var OD_Strict_URL_Metric                  $url_metric
-	 *     @var OD_URL_Metrics_Group                  $group
-	 *     @var OD_URL_Metrics_Group_Collection       $group_collection
-	 * }
+	 * @param OD_URL_Metric_Store_Request_Context $context Context about the successful URL Metric collection.
 	 */
 	do_action(
-		'od_url_metric_collected',
-		array(
-			'post_id'                      => $post_id,
-			'request'                      => $request,
-			'url_metric'                   => $url_metric,
-			'url_metrics_group'            => $group,
-			'url_metrics_group_collection' => $group_collection,
+		'od_url_metric_stored',
+		new OD_URL_Metric_Store_Request_Context(
+			$request,
+			$post_id,
+			$url_metric_group_collection,
+			$url_metric_group,
+			$url_metric
 		)
 	);
 
