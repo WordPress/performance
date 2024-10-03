@@ -47,7 +47,7 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		array(
 			'author'   => 'wordpressdotorg',
 			'tag'      => 'performance',
-			'per_page' => 100,
+			'per_page' => 99, // Decremented from 100 to bust WordPress.org response cache.
 			'fields'   => array_fill_keys( $fields, true ),
 		)
 	);
