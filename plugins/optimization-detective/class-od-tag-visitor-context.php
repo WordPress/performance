@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.4.0
  * @access private
  *
- * @property-read OD_URL_Metric_Group_Collection $url_metrics_group_collection
+ * @property-read OD_URL_Metric_Group_Collection $url_metrics_group_collection Deprecated property accessed via magic getter. Use the url_metric_group_collection property instead.
  */
 final class OD_Tag_Visitor_Context {
 
@@ -59,7 +59,10 @@ final class OD_Tag_Visitor_Context {
 	}
 
 	/**
-	 * Gets magic properties.
+	 * Gets deprecated property.
+	 *
+	 * @since n.e.x.t
+	 * @todo Remove this when no plugins are possibly referring to the url_metrics_group_collection property anymore.
 	 *
 	 * @param string $name Property name.
 	 * @return OD_URL_Metric_Group_Collection URL metric group collection.
