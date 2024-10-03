@@ -87,7 +87,7 @@ function error( ...message ) {
  */
 
 /**
- * @typedef {Object} URLMetrics
+ * @typedef {Object} URLMetric
  * @property {string}           url             - URL of the page.
  * @property {Object}           viewport        - Viewport.
  * @property {number}           viewport.width  - Viewport width.
@@ -96,7 +96,7 @@ function error( ...message ) {
  */
 
 /**
- * @typedef {Object} URLMetricsGroupStatus
+ * @typedef {Object} URLMetricGroupStatus
  * @property {number}  minimumViewportWidth - Minimum viewport width.
  * @property {boolean} complete             - Whether viewport group is complete.
  */
@@ -104,16 +104,13 @@ function error( ...message ) {
 /**
  * Checks whether the URL metric(s) for the provided viewport width is needed.
  *
- * @param {number}                  viewportWidth           - Current viewport width.
- * @param {URLMetricsGroupStatus[]} urlMetricsGroupStatuses - Viewport group statuses.
+ * @param {number}                 viewportWidth          - Current viewport width.
+ * @param {URLMetricGroupStatus[]} urlMetricGroupStatuses - Viewport group statuses.
  * @return {boolean} Whether URL metrics are needed.
  */
-function isViewportNeeded( viewportWidth, urlMetricsGroupStatuses ) {
+function isViewportNeeded( viewportWidth, urlMetricGroupStatuses ) {
 	let lastWasLacking = false;
-	for ( const {
-		minimumViewportWidth,
-		complete,
-	} of urlMetricsGroupStatuses ) {
+	for ( const { minimumViewportWidth, complete } of urlMetricGroupStatuses ) {
 		if ( viewportWidth >= minimumViewportWidth ) {
 			lastWasLacking = ! complete;
 		} else {
@@ -135,21 +132,21 @@ function getCurrentTime() {
 /**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
- * @param {Object}                  args                             Args.
- * @param {number}                  args.serveTime                   The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
- * @param {number}                  args.detectionTimeWindow         The number of milliseconds between now and when the page was first generated in which detection should proceed.
- * @param {number}                  args.minViewportAspectRatio      Minimum aspect ratio allowed for the viewport.
- * @param {number}                  args.maxViewportAspectRatio      Maximum aspect ratio allowed for the viewport.
- * @param {boolean}                 args.isDebug                     Whether to show debug messages.
- * @param {string}                  args.restApiEndpoint             URL for where to send the detection data.
- * @param {string}                  args.restApiNonce                Nonce for writing to the REST API.
- * @param {string}                  args.currentUrl                  Current URL.
- * @param {string}                  args.urlMetricsSlug              Slug for URL metrics.
- * @param {string}                  args.urlMetricsNonce             Nonce for URL metrics storage.
- * @param {URLMetricsGroupStatus[]} args.urlMetricsGroupStatuses     URL metrics group statuses.
- * @param {number}                  args.storageLockTTL              The TTL (in seconds) for the URL metric storage lock.
- * @param {string}                  args.webVitalsLibrarySrc         The URL for the web-vitals library.
- * @param {Object}                  [args.urlMetricsGroupCollection] URL metrics group collection, when in debug mode.
+ * @param {Object}                 args                            Args.
+ * @param {number}                 args.serveTime                  The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
+ * @param {number}                 args.detectionTimeWindow        The number of milliseconds between now and when the page was first generated in which detection should proceed.
+ * @param {number}                 args.minViewportAspectRatio     Minimum aspect ratio allowed for the viewport.
+ * @param {number}                 args.maxViewportAspectRatio     Maximum aspect ratio allowed for the viewport.
+ * @param {boolean}                args.isDebug                    Whether to show debug messages.
+ * @param {string}                 args.restApiEndpoint            URL for where to send the detection data.
+ * @param {string}                 args.restApiNonce               Nonce for writing to the REST API.
+ * @param {string}                 args.currentUrl                 Current URL.
+ * @param {string}                 args.urlMetricSlug              Slug for URL metric.
+ * @param {string}                 args.urlMetricNonce             Nonce for URL metric storage.
+ * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     URL metric group statuses.
+ * @param {number}                 args.storageLockTTL             The TTL (in seconds) for the URL metric storage lock.
+ * @param {string}                 args.webVitalsLibrarySrc        The URL for the web-vitals library.
+ * @param {Object}                 [args.urlMetricGroupCollection] URL metric group collection, when in debug mode.
  */
 export default async function detect( {
 	serveTime,
@@ -160,20 +157,17 @@ export default async function detect( {
 	restApiEndpoint,
 	restApiNonce,
 	currentUrl,
-	urlMetricsSlug,
-	urlMetricsNonce,
-	urlMetricsGroupStatuses,
+	urlMetricSlug,
+	urlMetricNonce,
+	urlMetricGroupStatuses,
 	storageLockTTL,
 	webVitalsLibrarySrc,
-	urlMetricsGroupCollection,
+	urlMetricGroupCollection,
 } ) {
 	const currentTime = getCurrentTime();
 
 	if ( isDebug ) {
-		log(
-			'Stored URL metrics group collection:',
-			urlMetricsGroupCollection
-		);
+		log( 'Stored URL metric group collection:', urlMetricGroupCollection );
 	}
 
 	// Abort running detection logic if it was served in a cached page.
@@ -187,7 +181,7 @@ export default async function detect( {
 	}
 
 	// Abort if the current viewport is not among those which need URL metrics.
-	if ( ! isViewportNeeded( win.innerWidth, urlMetricsGroupStatuses ) ) {
+	if ( ! isViewportNeeded( win.innerWidth, urlMetricGroupStatuses ) ) {
 		if ( isDebug ) {
 			log( 'No need for URL metrics from the current viewport.' );
 		}
@@ -339,11 +333,9 @@ export default async function detect( {
 		log( 'Detection is stopping.' );
 	}
 
-	/** @type {URLMetrics} */
-	const urlMetrics = {
+	/** @type {URLMetric} */
+	const urlMetric = {
 		url: currentUrl,
-		slug: urlMetricsSlug,
-		nonce: urlMetricsNonce,
 		viewport: {
 			width: win.innerWidth,
 			height: win.innerHeight,
@@ -379,11 +371,11 @@ export default async function detect( {
 			boundingClientRect: elementIntersection.boundingClientRect,
 		};
 
-		urlMetrics.elements.push( elementMetrics );
+		urlMetric.elements.push( elementMetrics );
 	}
 
 	if ( isDebug ) {
-		log( 'Current URL metrics:', urlMetrics );
+		log( 'Current URL metric:', urlMetric );
 	}
 
 	// Yield to main before sending data to server to further break up task.
@@ -392,13 +384,16 @@ export default async function detect( {
 	} );
 
 	try {
-		const response = await fetch( restApiEndpoint, {
+		const restUrl = new URL( restApiEndpoint );
+		restUrl.searchParams.append( 'slug', urlMetricSlug );
+		restUrl.searchParams.append( 'nonce', urlMetricNonce );
+		const response = await fetch( restUrl, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 				'X-WP-Nonce': restApiNonce,
 			},
-			body: JSON.stringify( urlMetrics ),
+			body: JSON.stringify( urlMetric ),
 		} );
 
 		if ( response.status === 200 ) {

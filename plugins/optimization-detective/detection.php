@@ -16,10 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  *
- * @param string                          $slug             URL metrics slug.
- * @param OD_URL_Metrics_Group_Collection $group_collection URL metrics group collection.
+ * @param string                         $slug             URL metrics slug.
+ * @param OD_URL_Metric_Group_Collection $group_collection URL metric group collection.
  */
-function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection $group_collection ): string {
+function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $group_collection ): string {
 	/**
 	 * Filters the time window between serve time and run time in which loading detection is allowed to run.
 	 *
@@ -40,18 +40,18 @@ function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection 
 
 	$current_url = od_get_current_url();
 	$detect_args = array(
-		'serveTime'               => microtime( true ) * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
-		'detectionTimeWindow'     => $detection_time_window,
-		'minViewportAspectRatio'  => od_get_minimum_viewport_aspect_ratio(),
-		'maxViewportAspectRatio'  => od_get_maximum_viewport_aspect_ratio(),
-		'isDebug'                 => WP_DEBUG,
-		'restApiEndpoint'         => rest_url( OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE ),
-		'restApiNonce'            => wp_create_nonce( 'wp_rest' ),
-		'currentUrl'              => $current_url,
-		'urlMetricsSlug'          => $slug,
-		'urlMetricsNonce'         => od_get_url_metrics_storage_nonce( $slug, $current_url ),
-		'urlMetricsGroupStatuses' => array_map(
-			static function ( OD_URL_Metrics_Group $group ): array {
+		'serveTime'              => microtime( true ) * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
+		'detectionTimeWindow'    => $detection_time_window,
+		'minViewportAspectRatio' => od_get_minimum_viewport_aspect_ratio(),
+		'maxViewportAspectRatio' => od_get_maximum_viewport_aspect_ratio(),
+		'isDebug'                => WP_DEBUG,
+		'restApiEndpoint'        => rest_url( OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE ),
+		'restApiNonce'           => wp_create_nonce( 'wp_rest' ),
+		'currentUrl'             => $current_url,
+		'urlMetricSlug'          => $slug,
+		'urlMetricNonce'         => od_get_url_metrics_storage_nonce( $slug, $current_url ),
+		'urlMetricGroupStatuses' => array_map(
+			static function ( OD_URL_Metric_Group $group ): array {
 				return array(
 					'minimumViewportWidth' => $group->get_minimum_viewport_width(),
 					'complete'             => $group->is_complete(),
@@ -59,11 +59,11 @@ function od_get_detection_script( string $slug, OD_URL_Metrics_Group_Collection 
 			},
 			iterator_to_array( $group_collection )
 		),
-		'storageLockTTL'          => OD_Storage_Lock::get_ttl(),
-		'webVitalsLibrarySrc'     => $web_vitals_lib_src,
+		'storageLockTTL'         => OD_Storage_Lock::get_ttl(),
+		'webVitalsLibrarySrc'    => $web_vitals_lib_src,
 	);
 	if ( WP_DEBUG ) {
-		$detect_args['urlMetricsGroupCollection'] = $group_collection;
+		$detect_args['urlMetricGroupCollection'] = $group_collection;
 	}
 
 	return wp_get_inline_script_tag(

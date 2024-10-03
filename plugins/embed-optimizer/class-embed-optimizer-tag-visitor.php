@@ -44,7 +44,7 @@ final class Embed_Optimizer_Tag_Visitor {
 			return false;
 		}
 
-		$max_intersection_ratio = $context->url_metrics_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() );
+		$max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $processor->get_xpath() );
 
 		if ( $max_intersection_ratio > 0 ) {
 			/*

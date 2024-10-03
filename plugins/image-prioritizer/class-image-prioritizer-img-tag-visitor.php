@@ -59,7 +59,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		 * fetchpriority=high, even though it won't really be needed because a preload link with fetchpriority=high
 		 * will also be added. Additionally, ensure that this common LCP element is never lazy-loaded.
 		 */
-		$common_lcp_element = $context->url_metrics_group_collection->get_common_lcp_element();
+		$common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
 		if ( ! is_null( $common_lcp_element ) && $xpath === $common_lcp_element['xpath'] ) {
 			if ( 'high' === $get_attribute_value( 'fetchpriority' ) ) {
 				$processor->set_meta_attribute( 'fetchpriority-already-added', true );
@@ -70,9 +70,9 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			is_string( $processor->get_attribute( 'fetchpriority' ) )
 			&&
 			// Temporary condition in case someone updates Image Prioritizer without also updating Optimization Detective.
-			method_exists( $context->url_metrics_group_collection, 'is_any_group_populated' )
+			method_exists( $context->url_metric_group_collection, 'is_any_group_populated' )
 			&&
-			$context->url_metrics_group_collection->is_any_group_populated()
+			$context->url_metric_group_collection->is_any_group_populated()
 		) {
 			/*
 			 * At this point, the element is not the shared LCP across all viewport groups. Nevertheless, server-side
@@ -87,7 +87,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$processor->remove_attribute( 'fetchpriority' );
 		}
 
-		$element_max_intersection_ratio = $context->url_metrics_group_collection->get_element_max_intersection_ratio( $xpath );
+		$element_max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath );
 
 		// If the element was not found, we don't know if it was visible for not, so don't do anything.
 		if ( is_null( $element_max_intersection_ratio ) ) {
@@ -122,7 +122,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		}
 
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
-		foreach ( $context->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
+		foreach ( $context->url_metric_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
 			$link_attributes = array_merge(
 				array(
 					'rel'           => 'preload',
