@@ -164,6 +164,15 @@ class Perflab_Server_Timing {
 			return;
 		}
 
+		// Include non-standard metrics to provide timing context to the browser.
+		if ( $this->use_output_buffer() ) {
+			$start_time = round( $GLOBALS['timestart'] * 1000.0, 2 );
+			$end_time   = round( microtime( true ) * 1000.0, 2 );
+
+			$header_value .= sprintf( ', response-start;start=%s', $start_time );
+			$header_value .= sprintf( ', response-end;start=%s', $end_time );
+		}
+
 		header( sprintf( 'Server-Timing: %s', $header_value ), false );
 	}
 
@@ -282,6 +291,7 @@ class Perflab_Server_Timing {
 	 * Formats the header segment for a single metric.
 	 *
 	 * @since 1.8.0
+	 * @since n.e.x.t Now includes optional `start` parameter if specified for the given metric.
 	 *
 	 * @param Perflab_Server_Timing_Metric $metric The metric to format.
 	 * @return string|null Segment for the Server-Timing header, or null if no value set.
@@ -301,6 +311,16 @@ class Perflab_Server_Timing {
 		// See https://github.com/WordPress/performance/issues/955.
 		$name = preg_replace( '/[^!#$%&\'*+\-.^_`|~0-9a-zA-Z]/', '-', $metric->get_slug() );
 
-		return sprintf( 'wp-%1$s;dur=%2$s', $name, $value );
+		$header = sprintf( 'wp-%1$s;dur=%2$s', $name, $value );
+
+		$start_value = $metric->get_start_value();
+		if ( null !== $start_value ) {
+			if ( is_float( $start_value ) ) {
+				$start_value = round( $start_value, 2 );
+			}
+			$header .= sprintf( ';start=%s', $start_value );
+		}
+
+		return $header;
 	}
 }
