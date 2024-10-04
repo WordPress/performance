@@ -82,51 +82,9 @@ final class Embed_Optimizer_Tag_Visitor {
 			return false;
 		}
 
-		$embed_wrapper_xpath = $processor->get_xpath() . '/*[1][self::DIV]';
+		$this->reduce_layout_shifts( $context );
 
-		/**
-		 * Array of tuples of groups and their minimum heights keyed by the minimum viewport width.
-		 *
-		 * @var array<int, array{OD_URL_Metric_Group, int}> $group_minimum_heights
-		 */
-		$group_minimum_heights = array();
-		// TODO: This can be made more efficient if the get_all_url_metrics_groups_elements return value included an elements_by_xpath key.
-		foreach ( $context->url_metric_group_collection->get_all_url_metrics_groups_elements() as list( $group, $element ) ) {
-			if ( isset( $element['resizedBoundingClientRect'] ) && $embed_wrapper_xpath === $element['xpath'] ) {
-				$group_min_width = $group->get_minimum_viewport_width();
-				if ( ! isset( $group_minimum_heights[ $group_min_width ] ) ) {
-					$group_minimum_heights[ $group_min_width ] = array( $group, $element['resizedBoundingClientRect']['height'] );
-				} else {
-					$group_minimum_heights[ $group_min_width ][1] = min(
-						$group_minimum_heights[ $group_min_width ][1],
-						$element['resizedBoundingClientRect']['height']
-					);
-				}
-			}
-		}
-
-		// Add style rules to set the min-height for each viewport group.
-		if ( count( $group_minimum_heights ) > 0 && function_exists( 'od_generate_media_query' ) ) { // TODO: Remove the function_exists() check after a few releases.
-			$element_id = $processor->get_attribute( 'id' );
-			if ( ! is_string( $element_id ) ) {
-				$element_id = 'embed-optimizer-' . md5( $processor->get_xpath() );
-				$processor->set_attribute( 'id', $element_id );
-			}
-
-			$style_rules = array();
-			foreach ( $group_minimum_heights as list( $group, $minimum_height ) ) {
-				$style_rules[] = sprintf(
-					'@media %s { #%s { min-height: %dpx; } }',
-					od_generate_media_query( $group->get_minimum_viewport_width(), $group->get_maximum_viewport_width() ),
-					$element_id,
-					$minimum_height
-				);
-			}
-
-			$processor->append_head_html( sprintf( "<style>\n%s\n</style>\n", join( "\n", $style_rules ) ) );
-		}
-
-		$max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $embed_wrapper_xpath );
+		$max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $this->get_embed_wrapper_xpath( $context ) );
 		if ( $max_intersection_ratio > 0 ) {
 			/*
 			 * The following embeds have been chosen for optimization due to their relative popularity among all embed types.
@@ -207,5 +165,76 @@ final class Embed_Optimizer_Tag_Visitor {
 		 * information on what the return values mean for tag visitors, see <https://github.com/WordPress/performance/issues/1342>.
 		 */
 		return false;
+	}
+
+	/**
+	 * Gets the XPath for the embed wrapper.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
+	 * @return string XPath.
+	 */
+	private function get_embed_wrapper_xpath( OD_Tag_Visitor_Context $context ): string {
+		return $context->processor->get_xpath() . '/*[1][self::DIV]';
+	}
+
+	/**
+	 * Reduces layout shifts.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
+	 */
+	private function reduce_layout_shifts( OD_Tag_Visitor_Context $context ): void {
+		// TODO: Remove this condition once no longer likely that Optimization Detective v0.6.0 is no longer in the wild. Or should the plugin short-circuit if OPTIMIZATION_DETECTIVE_VERSION is not 0.7.0 (for example) or higher?
+		if ( ! function_exists( 'od_generate_media_query' ) || ! method_exists( $context->url_metric_group_collection, 'get_all_url_metrics_groups_elements' ) ) {
+			return;
+		}
+
+		$processor           = $context->processor;
+		$embed_wrapper_xpath = $this->get_embed_wrapper_xpath( $context );
+
+		/**
+		 * Array of tuples of groups and their minimum heights keyed by the minimum viewport width.
+		 *
+		 * @var array<int, array{OD_URL_Metric_Group, int}> $group_minimum_heights
+		 */
+		$group_minimum_heights = array();
+		// TODO: This can be made more efficient if the get_all_url_metrics_groups_elements return value included an elements_by_xpath key.
+		foreach ( $context->url_metric_group_collection->get_all_url_metrics_groups_elements() as list( $group, $element ) ) {
+			if ( isset( $element['resizedBoundingClientRect'] ) && $embed_wrapper_xpath === $element['xpath'] ) {
+				$group_min_width = $group->get_minimum_viewport_width();
+				if ( ! isset( $group_minimum_heights[ $group_min_width ] ) ) {
+					$group_minimum_heights[ $group_min_width ] = array( $group, $element['resizedBoundingClientRect']['height'] );
+				} else {
+					$group_minimum_heights[ $group_min_width ][1] = min(
+						$group_minimum_heights[ $group_min_width ][1],
+						$element['resizedBoundingClientRect']['height']
+					);
+				}
+			}
+		}
+
+		// Add style rules to set the min-height for each viewport group.
+		if ( count( $group_minimum_heights ) > 0 ) {
+			$element_id = $processor->get_attribute( 'id' );
+			if ( ! is_string( $element_id ) ) {
+				$element_id = 'embed-optimizer-' . md5( $processor->get_xpath() );
+				$processor->set_attribute( 'id', $element_id );
+			}
+
+			$style_rules = array();
+			foreach ( $group_minimum_heights as list( $group, $minimum_height ) ) {
+				$style_rules[] = sprintf(
+					'@media %s { #%s { min-height: %dpx; } }',
+					od_generate_media_query( $group->get_minimum_viewport_width(), $group->get_maximum_viewport_width() ),
+					$element_id,
+					$minimum_height
+				);
+			}
+
+			$processor->append_head_html( sprintf( "<style>\n%s\n</style>\n", join( "\n", $style_rules ) ) );
+		}
 	}
 }
