@@ -30,7 +30,8 @@ function perflab_register_default_server_timing_before_template_metrics(): void 
 			array(
 				'measure_callback' => static function ( $metric ): void {
 					// The 'timestart' global is set right at the beginning of WordPress execution.
-					$metric->set_value( ( microtime( true ) - $GLOBALS['timestart'] ) * 1000.0 );
+					$metric->set_start_value( $GLOBALS['timestart'] * 1000.0 );
+					$metric->measure_end();
 				},
 				'access_cap'       => 'exist',
 			)
@@ -113,8 +114,8 @@ function perflab_register_default_server_timing_template_metrics(): void {
 				'template',
 				array(
 					'measure_callback' => static function ( Perflab_Server_Timing_Metric $metric ): void {
-						$metric->measure_before();
-						add_action( 'perflab_server_timing_send_header', array( $metric, 'measure_after' ), PHP_INT_MAX );
+						$metric->measure_start();
+						add_action( 'perflab_server_timing_send_header', array( $metric, 'measure_end' ), PHP_INT_MAX );
 					},
 					'access_cap'       => 'exist',
 				)
@@ -134,7 +135,8 @@ function perflab_register_default_server_timing_template_metrics(): void {
 				array(
 					'measure_callback' => static function ( $metric ): void {
 						// The 'timestart' global is set right at the beginning of WordPress execution.
-						$metric->set_value( ( microtime( true ) - $GLOBALS['timestart'] ) * 1000.0 );
+						$metric->set_start_value( $GLOBALS['timestart'] * 1000.0 );
+						$metric->measure_end();
 					},
 					'access_cap'       => 'exist',
 				)
@@ -242,17 +244,17 @@ function perflab_register_additional_server_timing_metrics_from_setting(): void 
 			}
 
 			$measure_callback = static function ( $metric ) use ( $hook_name, $hook_type ): void {
-				$metric->measure_before();
+				$metric->measure_start();
 
 				if ( 'action' === $hook_type ) {
 					$cb = static function () use ( $metric, $hook_name, &$cb ): void {
-						$metric->measure_after();
+						$metric->measure_end();
 						remove_action( $hook_name, $cb, PHP_INT_MAX );
 					};
 					add_action( $hook_name, $cb, PHP_INT_MAX );
 				} else {
 					$cb = static function ( $passthrough ) use ( $metric, $hook_name, &$cb ) {
-						$metric->measure_after();
+						$metric->measure_end();
 						remove_filter( $hook_name, $cb, PHP_INT_MAX );
 						return $passthrough;
 					};
