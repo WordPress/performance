@@ -106,7 +106,7 @@ final class Embed_Optimizer_Tag_Visitor {
 		}
 
 		// Add style rules to set the min-height for each viewport group.
-		if ( count( $group_minimum_heights ) > 0 ) {
+		if ( count( $group_minimum_heights ) > 0 && function_exists( 'od_generate_media_query' ) ) { // TODO: Remove the function_exists() check after a few releases.
 			$element_id = $processor->get_attribute( 'id' );
 			if ( ! is_string( $element_id ) ) {
 				$element_id = 'embed-optimizer-' . md5( $processor->get_xpath() );
@@ -115,14 +115,9 @@ final class Embed_Optimizer_Tag_Visitor {
 
 			$style_rules = array();
 			foreach ( $group_minimum_heights as list( $group, $minimum_height ) ) {
-				// TODO: The following media query logic can be added to a method on the group class.
-				$media_query = sprintf( 'screen and (min-width: %dpx)', $group->get_minimum_viewport_width() );
-				if ( $group->get_maximum_viewport_width() !== PHP_INT_MAX ) {
-					$media_query .= sprintf( ' and (max-width: %dpx)', $group->get_maximum_viewport_width() );
-				}
 				$style_rules[] = sprintf(
 					'@media %s { #%s { min-height: %dpx; } }',
-					$media_query,
+					od_generate_media_query( $group->get_minimum_viewport_width(), $group->get_maximum_viewport_width() ),
 					$element_id,
 					$minimum_height
 				);
