@@ -404,18 +404,21 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
 	 * end up running n*4*3 times.
 	 *
+	 * @todo This should be cached.
 	 * @since n.e.x.t
 	 *
-	 * @return Generator<ElementData>
+	 * @return array<int, array{OD_URL_Metric_Group, ElementData}>
 	 */
-	public function get_all_url_metrics_groups_elements(): Generator {
+	public function get_all_url_metrics_groups_elements(): array {
+		$elements_and_groups = array();
 		foreach ( $this->groups as $group ) {
 			foreach ( $group as $url_metric ) {
 				foreach ( $url_metric->get_elements() as $element ) {
-					yield $element;
+					$elements_and_groups[] = array( $group, $element );
 				}
 			}
 		}
+		return $elements_and_groups;
 	}
 
 	/**
@@ -430,7 +433,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 		$result = ( function () {
 			$element_max_intersection_ratios = array();
-			foreach ( $this->get_all_url_metrics_groups_elements() as $element ) {
+			foreach ( $this->get_all_url_metrics_groups_elements() as list( $group, $element ) ) {
 				$element_max_intersection_ratios[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_max_intersection_ratios )
 					? max( $element_max_intersection_ratios[ $element['xpath'] ], $element['intersectionRatio'] )
 					: $element['intersectionRatio'];
@@ -457,7 +460,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 		$result = ( function () {
 			$element_min_heights = array();
 
-			foreach ( $this->get_all_url_metrics_groups_elements() as $element ) {
+			foreach ( $this->get_all_url_metrics_groups_elements() as list( $group, $element ) ) {
 				$element_min_heights[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_min_heights )
 					? min( $element_min_heights[ $element['xpath'] ], $element['boundingClientRect']['height'] )
 					: $element['boundingClientRect']['height'];

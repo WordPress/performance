@@ -145,6 +145,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	/**
 	 * Gets the minimum possible viewport width (inclusive).
 	 *
+	 * @todo Eliminate in favor of readonly public property.
 	 * @return int<0, max> Minimum viewport width.
 	 */
 	public function get_minimum_viewport_width(): int {
@@ -154,6 +155,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	/**
 	 * Gets the maximum possible viewport width (inclusive).
 	 *
+	 * @todo Eliminate in favor of readonly public property.
 	 * @return int<1, max> Minimum viewport width.
 	 */
 	public function get_maximum_viewport_width(): int {

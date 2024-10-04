@@ -92,7 +92,7 @@ return array(
 						<video src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
 					</div>
 				</figure>
-				<figure style="background: black; color: white;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
+				<figure id="existing-figurine-id" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
 					<div class="wp-block-embed__wrapper">
 						<figure>
 							<p>So I heard you like <code>FIGURE</code>?</p>
@@ -111,15 +111,27 @@ return array(
 			<head>
 				<meta charset="utf-8">
 				<title>...</title>
+				<style>
+				@media screen and (min-width: 0px) and (max-width: 480px) { #embed-optimizer-a7659db28ecaa36ddee6ae66857dabd8 { min-height: 500px; } }
+				@media screen and (min-width: 481px) and (max-width: 600px) { #embed-optimizer-a7659db28ecaa36ddee6ae66857dabd8 { min-height: 500px; } }
+				@media screen and (min-width: 601px) and (max-width: 782px) { #embed-optimizer-a7659db28ecaa36ddee6ae66857dabd8 { min-height: 500px; } }
+				@media screen and (min-width: 783px) { #embed-optimizer-a7659db28ecaa36ddee6ae66857dabd8 { min-height: 500px; } }
+				</style>
+				<style>
+				@media screen and (min-width: 0px) and (max-width: 480px) { #existing-figurine-id { min-height: 654px; } }
+				@media screen and (min-width: 481px) and (max-width: 600px) { #existing-figurine-id { min-height: 654px; } }
+				@media screen and (min-width: 601px) and (max-width: 782px) { #existing-figurine-id { min-height: 654px; } }
+				@media screen and (min-width: 783px) { #existing-figurine-id { min-height: 654px; } }
+				</style>
 				<link data-od-added-tag rel="preload" as="image" href="https://example.com/poster1.jpg">
 			</head>
 			<body>
-				<figure data-od-replaced-style="background: black; color:gray" style="min-height: 500px; background: black; color:gray" class="wp-block-embed is-type-video">
+				<figure data-od-added-id id="embed-optimizer-a7659db28ecaa36ddee6ae66857dabd8" style="background: black; color:gray" class="wp-block-embed is-type-video">
 					<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 						<video data-od-added-preload data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]" preload="auto" src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
 					</div>
 				</figure>
-				<figure data-od-replaced-style="background: black; color: white;" style="min-height: 654px; background: black; color: white;" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
+				<figure id="existing-figurine-id" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
 					<div data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
 						<figure>
 							<p>So I heard you like <code>FIGURE</code>?</p>

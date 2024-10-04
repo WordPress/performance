@@ -84,27 +84,51 @@ final class Embed_Optimizer_Tag_Visitor {
 
 		$embed_wrapper_xpath = $processor->get_xpath() . '/*[1][self::DIV]';
 
-		// TODO: This should be cached.
-		$minimum_height = null;
-		foreach ( $context->url_metric_group_collection->get_all_url_metrics_groups_elements() as $element ) {
-			if ( $embed_wrapper_xpath === $element['xpath'] && isset( $element['resizedBoundingClientRect'] ) ) {
-				if ( null === $minimum_height ) {
-					$minimum_height = $element['resizedBoundingClientRect']['height'];
+		/**
+		 * Array of tuples of groups and their minimum heights keyed by the minimum viewport width.
+		 *
+		 * @var array<int, array{OD_URL_Metric_Group, int}> $group_minimum_heights
+		 */
+		$group_minimum_heights = array();
+		// TODO: This can be made more efficient if the get_all_url_metrics_groups_elements return value included an elements_by_xpath key.
+		foreach ( $context->url_metric_group_collection->get_all_url_metrics_groups_elements() as list( $group, $element ) ) {
+			if ( isset( $element['resizedBoundingClientRect'] ) && $embed_wrapper_xpath === $element['xpath'] ) {
+				$group_min_width = $group->get_minimum_viewport_width();
+				if ( ! isset( $group_minimum_heights[ $group_min_width ] ) ) {
+					$group_minimum_heights[ $group_min_width ] = array( $group, $element['resizedBoundingClientRect']['height'] );
 				} else {
-					$minimum_height = min( $minimum_height, $element['resizedBoundingClientRect']['height'] );
+					$group_minimum_heights[ $group_min_width ][1] = min(
+						$group_minimum_heights[ $group_min_width ][1],
+						$element['resizedBoundingClientRect']['height']
+					);
 				}
 			}
 		}
 
-		if ( is_float( $minimum_height ) ) {
-			$min_height_style = sprintf( 'min-height: %dpx;', $minimum_height );
-			$style            = $processor->get_attribute( 'style' );
-			if ( is_string( $style ) ) {
-				$style = $min_height_style . ' ' . $style;
-			} else {
-				$style = $min_height_style;
+		// Add style rules to set the min-height for each viewport group.
+		if ( count( $group_minimum_heights ) > 0 ) {
+			$element_id = $processor->get_attribute( 'id' );
+			if ( ! is_string( $element_id ) ) {
+				$element_id = 'embed-optimizer-' . md5( $processor->get_xpath() );
+				$processor->set_attribute( 'id', $element_id );
 			}
-			$processor->set_attribute( 'style', $style );
+
+			$style_rules = array();
+			foreach ( $group_minimum_heights as list( $group, $minimum_height ) ) {
+				// TODO: The following media query logic can be added to a method on the group class.
+				$media_query = sprintf( 'screen and (min-width: %dpx)', $group->get_minimum_viewport_width() );
+				if ( $group->get_maximum_viewport_width() !== PHP_INT_MAX ) {
+					$media_query .= sprintf( ' and (max-width: %dpx)', $group->get_maximum_viewport_width() );
+				}
+				$style_rules[] = sprintf(
+					'@media %s { #%s { min-height: %dpx; } }',
+					$media_query,
+					$element_id,
+					$minimum_height
+				);
+			}
+
+			$processor->append_head_html( sprintf( "<style>\n%s\n</style>\n", join( "\n", $style_rules ) ) );
 		}
 
 		$max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $embed_wrapper_xpath );
