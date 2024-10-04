@@ -48,6 +48,7 @@ class Test_Perflab_Server_Timing_Metric extends WP_UnitTestCase {
 		$this->setExpectedIncorrectUsage( Perflab_Server_Timing_Metric::class . '::set_value' );
 
 		$this->metric->set_value( 2 );
+		remove_all_actions( 'perflab_server_timing_send_header' );
 		do_action( 'perflab_server_timing_send_header' );
 		$this->metric->set_value( 3 );
 
@@ -80,6 +81,7 @@ class Test_Perflab_Server_Timing_Metric extends WP_UnitTestCase {
 		$this->setExpectedIncorrectUsage( Perflab_Server_Timing_Metric::class . '::set_start_value' );
 
 		$this->metric->set_start_value( 2 );
+		remove_all_actions( 'perflab_server_timing_send_header' );
 		do_action( 'perflab_server_timing_send_header' );
 		$this->metric->set_start_value( 3 );
 
