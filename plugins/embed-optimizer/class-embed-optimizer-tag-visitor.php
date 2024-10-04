@@ -86,7 +86,7 @@ final class Embed_Optimizer_Tag_Visitor {
 
 		// TODO: This should be cached.
 		$minimum_height = null;
-		foreach ( $context->url_metrics_group_collection->get_all_url_metrics_groups_elements() as $element ) {
+		foreach ( $context->url_metric_group_collection->get_all_url_metrics_groups_elements() as $element ) {
 			if ( $embed_wrapper_xpath === $element['xpath'] && isset( $element['resizedBoundingClientRect'] ) ) {
 				if ( null === $minimum_height ) {
 					$minimum_height = $element['resizedBoundingClientRect']['height'];
