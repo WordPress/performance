@@ -67,6 +67,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	'embed_optimizer_pending_plugin',
 	'0.3.0-alpha',
 	static function ( string $version ): void {
+		if ( defined( 'EMBED_OPTIMIZER_VERSION' ) ) {
+			return;
+		}
 
 		define( 'EMBED_OPTIMIZER_VERSION', $version );
 
