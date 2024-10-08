@@ -187,11 +187,6 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 */
 	private function reduce_layout_shifts( OD_Tag_Visitor_Context $context ): void {
-		// TODO: Remove this condition once no longer likely that Optimization Detective v0.6.0 is no longer in the wild. Or should the plugin short-circuit if OPTIMIZATION_DETECTIVE_VERSION is not 0.7.0 (for example) or higher?
-		if ( ! function_exists( 'od_generate_media_query' ) || ! method_exists( $context->url_metric_group_collection, 'get_all_url_metrics_groups_elements' ) ) {
-			return;
-		}
-
 		$processor           = $context->processor;
 		$embed_wrapper_xpath = $this->get_embed_wrapper_xpath( $context );
 
