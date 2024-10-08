@@ -43,7 +43,7 @@ function embed_optimizer_add_non_optimization_detective_hooks(): void {
  */
 function embed_optimizer_init_optimization_detective( string $optimization_detective_version ): void {
 	$required_od_version = '0.7.0';
-	if ( ! version_compare( (string) strtok( $optimization_detective_version, '-' ), $required_od_version, '>=' ) ) {
+	if ( version_compare( (string) strtok( $optimization_detective_version, '-' ), $required_od_version, '<' ) ) {
 		add_action(
 			'admin_notices',
 			static function (): void {
