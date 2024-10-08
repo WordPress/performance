@@ -789,29 +789,6 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_all_element_max_intersection_ratios() and get_element_max_intersection_ratio().
-	 *
-	 * @covers ::get_all_element_minimum_heights
-	 * @covers ::get_element_minimum_height
-	 *
-	 * @dataProvider data_provider_element_minimum_heights
-	 *
-	 * @param array<string, mixed> $url_metrics URL metrics.
-	 * @param array<string, float> $expected    Expected.
-	 */
-	public function test_get_all_element_minimum_heights( array $url_metrics, array $expected ): void {
-		$breakpoints      = array( 480, 600, 782 );
-		$sample_size      = 3;
-		$group_collection = new OD_URL_Metric_Group_Collection( $url_metrics, $breakpoints, $sample_size, 0 );
-		$actual           = $group_collection->get_all_element_minimum_heights();
-		$this->assertSame( $actual, $group_collection->get_all_element_minimum_heights(), 'Cached result is identical.' );
-		$this->assertSame( $expected, $actual );
-		foreach ( $expected as $expected_xpath => $expected_max_ratio ) {
-			$this->assertSame( $expected_max_ratio, $group_collection->get_element_minimum_height( $expected_xpath ) );
-		}
-	}
-
-	/**
 	 * Test get_flattened_url_metrics().
 	 *
 	 * @covers ::get_flattened_url_metrics

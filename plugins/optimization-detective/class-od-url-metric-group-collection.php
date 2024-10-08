@@ -81,7 +81,6 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metric_Group[]>,
 	 *          get_common_lcp_element?: ElementData|null,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
-	 *          get_all_element_minimum_heights?: array<string, float>,
 	 *          get_all_denormalized_elements?: array<string, non-empty-array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>>,
 	 *      }
 	 */
@@ -460,36 +459,6 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets the minimum heights of all elements across all groups and their captured URL metrics.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @return array<string, float> Keys are XPaths and values are the minimum heights.
-	 */
-	public function get_all_element_minimum_heights(): array {
-		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
-			return $this->result_cache[ __FUNCTION__ ];
-		}
-
-		$result = ( function () {
-			$elements_min_heights = array();
-			foreach ( $this->get_all_denormalized_elements() as $xpath => $denormalized_elements ) {
-				$element_min_heights = array();
-				foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
-					$element_min_heights[] = $element['boundingClientRect']['height'];
-				}
-				$elements_min_heights[ $xpath ] = count( $element_min_heights ) > 1
-					? (float) min( ...$element_min_heights )
-					: $element_min_heights[0];
-			}
-			return $elements_min_heights;
-		} )();
-
-		$this->result_cache[ __FUNCTION__ ] = $result;
-		return $result;
-	}
-
-	/**
 	 * Gets the max intersection ratio of an element across all groups and their captured URL metrics.
 	 *
 	 * @param string $xpath XPath for the element.
@@ -497,18 +466,6 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 */
 	public function get_element_max_intersection_ratio( string $xpath ): ?float {
 		return $this->get_all_element_max_intersection_ratios()[ $xpath ] ?? null;
-	}
-
-	/**
-	 * Gets the minimum height of an element across all groups and their captured URL metrics.
-	 *
-	 * @since n.e.x.t
-	 *
-	 * @param string $xpath XPath for the element.
-	 * @return float Minimum height in pixels.
-	 */
-	public function get_element_minimum_height( string $xpath ): ?float {
-		return $this->get_all_element_minimum_heights()[ $xpath ] ?? null;
 	}
 
 	/**
