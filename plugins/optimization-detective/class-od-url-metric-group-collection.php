@@ -81,7 +81,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metric_Group[]>,
 	 *          get_common_lcp_element?: ElementData|null,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
-	 *          get_all_element_minimum_heights?: array<string, float>
+	 *          get_all_element_minimum_heights?: array<string, float>,
+	 *          get_all_denormalized_elements?: array<string, array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>>,
 	 *      }
 	 */
 	private $result_cache = array();
@@ -397,28 +398,37 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets all elements from all URL metrics from all groups.
+	 * Gets all elements from all URL metrics from all groups keyed by the elements' XPaths.
 	 *
 	 * This is an O(n^3) function so its results must be cached. This being said, the number of groups should be 4 (one
 	 * more than the default number of breakpoints) and the number of URL metrics for each group should be 3
 	 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
 	 * end up running n*4*3 times.
 	 *
-	 * @todo This should be cached.
+	 * @todo Should there be an OD_Element class which has a $url_metric property which then in turn has a $group property. Then this would only need to return array<string, OD_Element[]>.
 	 * @since n.e.x.t
 	 *
-	 * @return array<int, array{OD_URL_Metric_Group, ElementData}>
+	 * @return array<string, array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>> Keys are XPaths and values are arrays of tuples consisting of the group, URL metric, and element data.
 	 */
-	public function get_all_url_metrics_groups_elements(): array {
-		$elements_and_groups = array();
-		foreach ( $this->groups as $group ) {
-			foreach ( $group as $url_metric ) {
-				foreach ( $url_metric->get_elements() as $element ) {
-					$elements_and_groups[] = array( $group, $element );
+	public function get_all_denormalized_elements(): array {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
+		}
+
+		$result = ( function () {
+			$all_denormalized_elements = array();
+			foreach ( $this->groups as $group ) {
+				foreach ( $group as $url_metric ) {
+					foreach ( $url_metric->get_elements() as $element ) {
+						$all_denormalized_elements[ $element['xpath'] ][] = array( $group, $url_metric, $element );
+					}
 				}
 			}
-		}
-		return $elements_and_groups;
+			return $all_denormalized_elements;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
 	}
 
 	/**
@@ -432,13 +442,15 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 		}
 
 		$result = ( function () {
-			$element_max_intersection_ratios = array();
-			foreach ( $this->get_all_url_metrics_groups_elements() as list( $group, $element ) ) {
-				$element_max_intersection_ratios[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_max_intersection_ratios )
-					? max( $element_max_intersection_ratios[ $element['xpath'] ], $element['intersectionRatio'] )
-					: $element['intersectionRatio'];
+			$elements_max_intersection_ratios = array();
+			foreach ( $this->get_all_denormalized_elements() as $xpath => $denormalized_elements ) {
+				$element_min_heights = array();
+				foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
+					$element_min_heights[] = $element['intersectionRatio'];
+				}
+				$elements_max_intersection_ratios[ $xpath ] = (float) max( ...$element_min_heights );
 			}
-			return $element_max_intersection_ratios;
+			return $elements_max_intersection_ratios;
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ] = $result;
@@ -458,14 +470,15 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 		}
 
 		$result = ( function () {
-			$element_min_heights = array();
-
-			foreach ( $this->get_all_url_metrics_groups_elements() as list( $group, $element ) ) {
-				$element_min_heights[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_min_heights )
-					? min( $element_min_heights[ $element['xpath'] ], $element['boundingClientRect']['height'] )
-					: $element['boundingClientRect']['height'];
+			$elements_min_heights = array();
+			foreach ( $this->get_all_denormalized_elements() as $xpath => $denormalized_elements ) {
+				$element_min_heights = array();
+				foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
+					$element_min_heights[] = $element['boundingClientRect']['height'];
+				}
+				$elements_min_heights[ $xpath ] = (float) min( ...$element_min_heights );
 			}
-			return $element_min_heights;
+			return $elements_min_heights;
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ] = $result;

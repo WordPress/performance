@@ -196,18 +196,20 @@ final class Embed_Optimizer_Tag_Visitor {
 		 * @var array<int, array{OD_URL_Metric_Group, int}> $group_minimum_heights
 		 */
 		$group_minimum_heights = array();
-		// TODO: This can be made more efficient if the get_all_url_metrics_groups_elements return value included an elements_by_xpath key.
-		foreach ( $context->url_metric_group_collection->get_all_url_metrics_groups_elements() as list( $group, $element ) ) {
-			if ( isset( $element['resizedBoundingClientRect'] ) && $embed_wrapper_xpath === $element['xpath'] ) {
-				$group_min_width = $group->get_minimum_viewport_width();
-				if ( ! isset( $group_minimum_heights[ $group_min_width ] ) ) {
-					$group_minimum_heights[ $group_min_width ] = array( $group, $element['resizedBoundingClientRect']['height'] );
-				} else {
-					$group_minimum_heights[ $group_min_width ][1] = min(
-						$group_minimum_heights[ $group_min_width ][1],
-						$element['resizedBoundingClientRect']['height']
-					);
-				}
+
+		$denormalized_elements = $context->url_metric_group_collection->get_all_denormalized_elements()[ $embed_wrapper_xpath ] ?? array();
+		foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
+			if ( ! isset( $element['resizedBoundingClientRect'] ) ) {
+				continue;
+			}
+			$group_min_width = $group->get_minimum_viewport_width();
+			if ( ! isset( $group_minimum_heights[ $group_min_width ] ) ) {
+				$group_minimum_heights[ $group_min_width ] = array( $group, $element['resizedBoundingClientRect']['height'] );
+			} else {
+				$group_minimum_heights[ $group_min_width ][1] = min(
+					$group_minimum_heights[ $group_min_width ][1],
+					$element['resizedBoundingClientRect']['height']
+				);
 			}
 		}
 
