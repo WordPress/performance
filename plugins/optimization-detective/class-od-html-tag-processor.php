@@ -179,6 +179,15 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $buffered_text_replacements = array();
 
 	/**
+	 * Whether the end of the document was reached.
+	 *
+	 * @since n.e.x.t
+	 * @see self::next_token()
+	 * @var bool
+	 */
+	private $reached_end_of_document = false;
+
+	/**
 	 * Count for the number of times that the cursor was moved.
 	 *
 	 * @since 0.6.0
@@ -263,6 +272,9 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags    = array();
 			$this->open_stack_indices = array();
+
+			// Mark that the end of the document was reached, meaning that get_modified_html() can should now be able to append markup to the HEAD and the BODY.
+			$this->reached_end_of_document = true;
 			return false;
 		}
 
@@ -557,16 +569,27 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Gets the final updated HTML.
+	 * Returns the string representation of the HTML Tag Processor.
 	 *
-	 * This should only be called after the closing HTML tag has been reached and just before
-	 * calling {@see WP_HTML_Tag_Processor::get_updated_html()} to send the document back in the response.
+	 * This can only be called once the end of the document has been reached. It is responsible for adding the pending
+	 * markup to append to the HEAD and the BODY. Originally this was done in an overridden get_updated_html() method
+	 * before calling the parent method. However, every time that seek() is called it the HTML Processor will flush any
+	 * pending updates to the document. This means that if there is any pending markup to append to the end of the BODY
+	 * then the insertion will fail because the closing tag for the BODY has not been encountered yet. Additionally, by
+	 * not processing the buffered text replacements in get_updated_html() then we avoid trying to insert them every
+	 * time that seek() is called which is wasteful as they are only needed once finishing iterating over the document.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
+	 * @see WP_HTML_Tag_Processor::get_updated_html()
+	 * @see WP_HTML_Tag_Processor::seek()
 	 *
-	 * @return string Final updated HTML.
+	 * @return string The processed HTML.
 	 */
-	public function get_final_updated_html(): string {
+	public function get_updated_html(): string {
+		if ( ! $this->reached_end_of_document ) {
+			return parent::get_updated_html();
+		}
+
 		foreach ( array_keys( $this->buffered_text_replacements ) as $bookmark ) {
 			$html_strings = $this->buffered_text_replacements[ $bookmark ];
 			if ( count( $html_strings ) === 0 ) {

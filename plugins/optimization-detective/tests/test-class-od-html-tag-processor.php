@@ -343,7 +343,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 *
 	 * @covers ::append_head_html
 	 * @covers ::append_body_html
-	 * @covers ::get_final_updated_html
+	 * @covers ::get_updated_html
 	 */
 	public function test_append_head_and_body_html(): void {
 		$html                = '
@@ -370,16 +370,29 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 
 		$saw_head = false;
 		$saw_body = false;
+		$did_seek = false;
 		while ( $processor->next_open_tag() ) {
+			$this->assertStringNotContainsString( $head_injected, $processor->get_updated_html(), 'Only expecting end-of-head injection once document was finalized.' );
+			$this->assertStringNotContainsString( $body_injected, $processor->get_updated_html(), 'Only expecting end-of-body injection once document was finalized.' );
 			$tag = $processor->get_tag();
 			if ( 'HEAD' === $tag ) {
 				$saw_head = true;
 			} elseif ( 'BODY' === $tag ) {
 				$saw_body = true;
+				$this->assertTrue( $processor->set_bookmark( 'cuerpo' ) );
+			}
+			if ( ! $did_seek && 'H1' === $tag ) {
+				$processor->append_head_html( '<!--H1 appends to HEAD-->' );
+				$processor->append_body_html( '<!--H1 appends to BODY-->' );
+				$this->assertTrue( $processor->seek( 'cuerpo' ) );
+				$did_seek = true;
 			}
 		}
+		$this->assertTrue( $did_seek );
 		$this->assertTrue( $saw_head );
 		$this->assertTrue( $saw_body );
+		$this->assertStringContainsString( $head_injected, $processor->get_updated_html(), 'Only expecting end-of-head injection once document was finalized.' );
+		$this->assertStringContainsString( $body_injected, $processor->get_updated_html(), 'Only expecting end-of-body injection once document was finalized.' );
 
 		$processor->append_head_html( $later_head_injected );
 
@@ -388,16 +401,16 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 				<head>
 					<meta charset=utf-8>
 					<!-- </head> -->
-				{$head_injected}{$later_head_injected}</head>
+				{$head_injected}<!--H1 appends to HEAD-->{$later_head_injected}</head>
 				<!--</HEAD>-->
 				<body>
 					<h1>Hello World</h1>
 					<!-- </body> -->
-				{$body_injected}</body>
+				{$body_injected}<!--H1 appends to BODY--></body>
 				<!--</BODY>-->
 			</html>
 		";
-		$this->assertSame( $expected, $processor->get_final_updated_html() );
+		$this->assertSame( $expected, $processor->get_updated_html() );
 	}
 
 	/**

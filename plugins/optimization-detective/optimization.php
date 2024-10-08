@@ -250,5 +250,5 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$processor->append_body_html( od_get_detection_script( $slug, $group_collection ) );
 	}
 
-	return $processor->get_final_updated_html();
+	return $processor->get_updated_html();
 }
