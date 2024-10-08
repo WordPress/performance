@@ -11,6 +11,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Initializes extensions for Optimization Detective.
+ *
+ * @since n.e.x.t
+ */
+function od_initialize_extensions(): void {
+	/**
+	 * Fires when extensions to Optimization Detective can be loaded and initialized.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $version Optimization Detective version.
+	 */
+	do_action( 'od_init', OPTIMIZATION_DETECTIVE_VERSION );
+}
+
+/**
  * Generates a media query for the provided minimum and maximum viewport widths.
  *
  * @since n.e.x.t

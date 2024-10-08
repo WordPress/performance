@@ -43,9 +43,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 			};
 
-			// Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action is used
-			// because it is the first action that fires once the theme is loaded.
-			add_action( 'after_setup_theme', $bootstrap, PHP_INT_MIN );
+			/*
+			 * Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action could be
+			 * used since it is the first action that fires once the theme is loaded. However, plugins may embed this
+			 * logic inside a module which initializes even later at the init action. The earliest action that this
+			 * plugin has hooks for is the init action at the default priority of 10 (which includes the rest_api_init
+			 * action), so this is why it gets initialized at priority 9.
+			 */
+			add_action( 'init', $bootstrap, 9 );
 		}
 
 		// Register this copy of the plugin.
