@@ -11,6 +11,38 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	use Optimization_Detective_Test_Helpers;
 
 	/**
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function data_provider_to_test_image_prioritizer_init(): array {
+		return array(
+			'with_old_version' => array(
+				'version'  => '0.5.0',
+				'expected' => false,
+			),
+			'with_new_version' => array(
+				'version'  => '0.7.0',
+				'expected' => true,
+			),
+		);
+	}
+
+	/**
+	 * @covers ::image_prioritizer_init
+	 * @dataProvider data_provider_to_test_image_prioritizer_init
+	 */
+	public function test_image_prioritizer_init( string $version, bool $expected ): void {
+		remove_all_actions( 'admin_notices' );
+		remove_all_actions( 'wp_head' );
+		remove_all_actions( 'od_register_tag_visitors' );
+
+		image_prioritizer_init( $version );
+
+		$this->assertSame( ! $expected, has_action( 'admin_notices' ) );
+		$this->assertSame( $expected ? 10 : false, has_action( 'wp_head', 'image_prioritizer_render_generator_meta_tag' ) );
+		$this->assertSame( $expected ? 10 : false, has_action( 'od_register_tag_visitors', 'image_prioritizer_register_tag_visitors' ) );
+	}
+
+	/**
 	 * Test printing the meta generator tag.
 	 *
 	 * @covers ::image_prioritizer_render_generator_meta_tag
