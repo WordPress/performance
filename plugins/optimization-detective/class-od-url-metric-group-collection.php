@@ -82,7 +82,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          get_common_lcp_element?: ElementData|null,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
 	 *          get_all_element_minimum_heights?: array<string, float>,
-	 *          get_all_denormalized_elements?: array<string, array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>>,
+	 *          get_all_denormalized_elements?: array<string, non-empty-array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>>,
 	 *      }
 	 */
 	private $result_cache = array();
@@ -408,7 +408,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @todo Should there be an OD_Element class which has a $url_metric property which then in turn has a $group property. Then this would only need to return array<string, OD_Element[]>.
 	 * @since n.e.x.t
 	 *
-	 * @return array<string, array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>> Keys are XPaths and values are arrays of tuples consisting of the group, URL metric, and element data.
+	 * @return array<string, non-empty-array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>> Keys are XPaths and values are arrays of tuples consisting of the group, URL metric, and element data.
 	 */
 	public function get_all_denormalized_elements(): array {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
@@ -444,11 +444,13 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 		$result = ( function () {
 			$elements_max_intersection_ratios = array();
 			foreach ( $this->get_all_denormalized_elements() as $xpath => $denormalized_elements ) {
-				$element_min_heights = array();
+				$element_intersection_ratios = array();
 				foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
-					$element_min_heights[] = $element['intersectionRatio'];
+					$element_intersection_ratios[] = $element['intersectionRatio'];
 				}
-				$elements_max_intersection_ratios[ $xpath ] = (float) max( ...$element_min_heights );
+				$elements_max_intersection_ratios[ $xpath ] = count( $element_intersection_ratios ) > 1
+					? (float) max( ...$element_intersection_ratios )
+					: $element_intersection_ratios[0];
 			}
 			return $elements_max_intersection_ratios;
 		} )();
@@ -476,7 +478,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 				foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
 					$element_min_heights[] = $element['boundingClientRect']['height'];
 				}
-				$elements_min_heights[ $xpath ] = (float) min( ...$element_min_heights );
+				$elements_min_heights[ $xpath ] = count( $element_min_heights ) > 1
+					? (float) min( ...$element_min_heights )
+					: $element_min_heights[0];
 			}
 			return $elements_min_heights;
 		} )();
