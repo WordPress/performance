@@ -8,6 +8,23 @@
 class Test_OD_Helper extends WP_UnitTestCase {
 
 	/**
+	 * @covers ::od_initialize_extensions
+	 */
+	public function test_od_initialize_extensions(): void {
+		unset( $GLOBALS['wp_actions']['od_init'] );
+		$passed_version = null;
+		add_action(
+			'od_init',
+			static function ( string $version ) use ( &$passed_version ): void {
+				$passed_version = $version;
+			}
+		);
+		od_initialize_extensions();
+		$this->assertSame( 1, did_action( 'od_init' ) );
+		$this->assertSame( OPTIMIZATION_DETECTIVE_VERSION, $passed_version );
+	}
+
+	/**
 	 * @return array<string, array<string, mixed>>
 	 */
 	public function data_to_test_od_generate_media_query(): array {
