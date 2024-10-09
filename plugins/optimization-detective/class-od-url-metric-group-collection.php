@@ -160,6 +160,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Clear result cache.
+	 *
+	 * @since 0.3.0
 	 */
 	public function clear_cache(): void {
 		$this->result_cache = array();
@@ -167,6 +169,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Create groups.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @phpstan-return non-empty-array<OD_URL_Metric_Group>
 	 *
@@ -188,6 +192,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * Once a group reaches the sample size, the oldest URL metric is pushed out.
 	 *
+	 * @since 0.1.0
 	 * @throws InvalidArgumentException If there is no group available to add a URL metric to.
 	 *
 	 * @param OD_URL_Metric $new_url_metric New URL metric.
@@ -207,6 +212,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets group for viewport width.
 	 *
+	 * @since 0.1.0
 	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
 	 *
 	 * @param int $viewport_width Viewport width.
@@ -241,6 +247,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Checks whether any group is populated with at least one URL metric.
 	 *
+	 * @since 0.5.0
+	 *
 	 * @return bool Whether at least one group has some URL metrics.
 	 */
 	public function is_any_group_populated(): bool {
@@ -269,6 +277,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * should be contrasted with the `is_every_group_complete()`
 	 * method below.
 	 *
+	 * @since 0.1.0
 	 * @see OD_URL_Metric_Group_Collection::is_every_group_complete()
 	 *
 	 * @return bool Whether all groups have some URL metrics.
@@ -294,6 +303,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Checks whether every group is complete.
 	 *
+	 * @since 0.1.0
 	 * @see OD_URL_Metric_Group::is_complete()
 	 *
 	 * @return bool Whether all groups are complete.
@@ -320,6 +330,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets the groups with the provided LCP element XPath.
 	 *
+	 * @since 0.3.0
 	 * @see OD_URL_Metric_Group::get_lcp_element()
 	 *
 	 * @param string $xpath XPath for LCP element.
@@ -348,6 +359,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Gets common LCP element.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @return ElementData|null
 	 */
@@ -433,6 +446,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets the max intersection ratios of all elements across all groups and their captured URL metrics.
 	 *
+	 * @since 0.3.0
+	 *
 	 * @return array<string, float> Keys are XPaths and values are the intersection ratios.
 	 */
 	public function get_all_element_max_intersection_ratios(): array {
@@ -461,6 +476,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets the max intersection ratio of an element across all groups and their captured URL metrics.
 	 *
+	 * @since 0.3.0
+	 *
 	 * @param string $xpath XPath for the element.
 	 * @return float|null Max intersection ratio of null if tag is unknown (not captured).
 	 */
@@ -470,6 +487,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Gets URL metrics from all groups flattened into one list.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return OD_URL_Metric[] All URL metrics.
 	 */
@@ -488,6 +507,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Returns an iterator for the groups of URL metrics.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return ArrayIterator<int, OD_URL_Metric_Group> Array iterator for OD_URL_Metric_Group instances.
 	 */
 	public function getIterator(): ArrayIterator {
@@ -496,6 +517,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Counts the URL metric groups in the collection.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return int<0, max> Group count.
 	 */
