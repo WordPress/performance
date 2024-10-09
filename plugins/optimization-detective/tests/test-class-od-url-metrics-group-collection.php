@@ -698,10 +698,11 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_all_element_max_intersection_ratios() and get_element_max_intersection_ratio().
+	 * Test get_all_element_max_intersection_ratios(), get_element_max_intersection_ratio(), and get_all_denormalized_elements().
 	 *
 	 * @covers ::get_all_element_max_intersection_ratios
 	 * @covers ::get_element_max_intersection_ratio
+	 * @covers ::get_all_denormalized_elements
 	 *
 	 * @dataProvider data_provider_element_max_intersection_ratios
 	 *
@@ -717,6 +718,29 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		$this->assertSame( $expected, $actual );
 		foreach ( $expected as $expected_xpath => $expected_max_ratio ) {
 			$this->assertSame( $expected_max_ratio, $group_collection->get_element_max_intersection_ratio( $expected_xpath ) );
+		}
+
+		// Check get_all_denormalized_elements.
+		$all_denormalized_elements = $group_collection->get_all_denormalized_elements();
+		$xpath_counts              = array();
+		foreach ( $url_metrics as $url_metric ) {
+			foreach ( $url_metric->get_elements() as $element ) {
+				if ( ! isset( $xpath_counts[ $element['xpath'] ] ) ) {
+					$xpath_counts[ $element['xpath'] ] = 0;
+				}
+				$xpath_counts[ $element['xpath'] ] += 1;
+			}
+		}
+		$this->assertCount( count( $xpath_counts ), $all_denormalized_elements );
+		foreach ( $all_denormalized_elements as $xpath => $denormalized_elements ) {
+			foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
+				$this->assertContains( $url_metric, iterator_to_array( $group ) );
+				$this->assertContains( $element, $url_metric->get_elements() );
+				$this->assertInstanceOf( OD_URL_Metric_Group::class, $group );
+				$this->assertInstanceOf( OD_URL_Metric::class, $url_metric );
+				$this->assertIsArray( $element );
+				$this->assertSame( $xpath, $element['xpath'] );
+			}
 		}
 	}
 
