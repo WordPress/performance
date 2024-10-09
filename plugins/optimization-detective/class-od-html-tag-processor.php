@@ -571,13 +571,13 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Returns the string representation of the HTML Tag Processor.
 	 *
-	 * This can only be called once the end of the document has been reached. It is responsible for adding the pending
-	 * markup to append to the HEAD and the BODY. Originally this was done in an overridden get_updated_html() method
-	 * before calling the parent method. However, every time that seek() is called it the HTML Processor will flush any
-	 * pending updates to the document. This means that if there is any pending markup to append to the end of the BODY
-	 * then the insertion will fail because the closing tag for the BODY has not been encountered yet. Additionally, by
-	 * not processing the buffered text replacements in get_updated_html() then we avoid trying to insert them every
-	 * time that seek() is called which is wasteful as they are only needed once finishing iterating over the document.
+	 * Once the end of the document has been reached this is responsible for adding the pending markup to append to the
+	 * HEAD and the BODY. It waits to do this injection until the end of the document has been reached because every
+	 * time that seek() is called it the HTML Processor will flush any pending updates to the document. This means that
+	 * if there is any pending markup to append to the end of the BODY then the insertion will fail because the closing
+	 * tag for the BODY has not been encountered yet. Additionally, by not prematurely processing the buffered text
+	 * replacements in get_updated_html() then we avoid trying to insert them every time that seek() is called which is
+	 * wasteful as they are only needed once finishing iterating over the document.
 	 *
 	 * @since 0.4.0
 	 * @see WP_HTML_Tag_Processor::get_updated_html()
