@@ -43,7 +43,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	}
 
 	/**
-	 * Determines whether the processor is currently at a div.wp-block-embed__wrapper tag.
+	 * Determines whether the processor is currently at a div.wp-block-embed__wrapper tag (which is a child of figure.wp-block-embed).
 	 *
 	 * @since n.e.x.t
 	 *
@@ -60,6 +60,23 @@ final class Embed_Optimizer_Tag_Visitor {
 
 	/**
 	 * Visits a tag.
+	 *
+	 * This visitor has two entry points, the `figure.wp-block-embed` tag and its child the `div.wp-block-embed__wrapper`
+	 * tag. For example:
+	 *
+	 *     <figure class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+	 *         <div class="wp-block-embed__wrapper">
+	 *             <iframe title="VideoPress Video Player" aria-label='VideoPress Video Player' width='750' height='422' src='https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1' frameborder='0' allowfullscreen allow='clipboard-write'></iframe>
+	 *             <script src='https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142'></script>
+	 *         </div>
+	 *     </figure>
+	 *
+	 * For the `div.wp-block-embed__wrapper` tag, the only thing this tag visitor does is flag it for tracking in URL
+	 * Metrics (by returning true). When visiting the parent `figure.wp-block-embed` tag, it does all the actual
+	 * processing. In particular, it will use the element metrics gathered for the child `div.wp-block-embed__wrapper`
+	 * element to set the min-height style on the `figure.wp-block-embed` to avoid layout shifts. Additionally, when
+	 * the embed is in the initial viewport for any breakpoint, it will add preconnect links for key resources.
+	 * Otherwise, if the embed is not in any initial viewport, it will add lazy-loading logic.
 	 *
 	 * @since 0.2.0
 	 *
@@ -84,7 +101,7 @@ final class Embed_Optimizer_Tag_Visitor {
 
 		$this->reduce_layout_shifts( $context );
 
-		$max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $this->get_embed_wrapper_xpath( $context ) );
+		$max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( self::get_embed_wrapper_xpath( $processor->get_xpath() ) );
 		if ( $max_intersection_ratio > 0 ) {
 			/*
 			 * The following embeds have been chosen for optimization due to their relative popularity among all embed types.
@@ -168,15 +185,15 @@ final class Embed_Optimizer_Tag_Visitor {
 	}
 
 	/**
-	 * Gets the XPath for the embed wrapper.
+	 * Gets the XPath for the embed wrapper DIV which is the sole child of the embed block FIGURE.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
-	 * @return string XPath.
+	 * @param string $embed_block_xpath XPath for the embed block FIGURE tag. For example: `/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]`.
+	 * @return string XPath for the child DIV. For example: `/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]`
 	 */
-	private function get_embed_wrapper_xpath( OD_Tag_Visitor_Context $context ): string {
-		return $context->processor->get_xpath() . '/*[1][self::DIV]';
+	private static function get_embed_wrapper_xpath( string $embed_block_xpath ): string {
+		return $embed_block_xpath . '/*[1][self::DIV]';
 	}
 
 	/**
@@ -184,11 +201,11 @@ final class Embed_Optimizer_Tag_Visitor {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 */
 	private function reduce_layout_shifts( OD_Tag_Visitor_Context $context ): void {
 		$processor           = $context->processor;
-		$embed_wrapper_xpath = $this->get_embed_wrapper_xpath( $context );
+		$embed_wrapper_xpath = self::get_embed_wrapper_xpath( $processor->get_xpath() );
 
 		/**
 		 * Array of tuples of groups and their minimum heights keyed by the minimum viewport width.
