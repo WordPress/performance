@@ -208,11 +208,11 @@ final class Embed_Optimizer_Tag_Visitor {
 		$embed_wrapper_xpath = self::get_embed_wrapper_xpath( $processor->get_xpath() );
 
 		/**
-		 * Array of tuples of groups and their minimum heights keyed by the minimum viewport width.
+		 * Collection of the minimum heights for the element with each group keyed by the minimum viewport with.
 		 *
-		 * @var array<int, array{OD_URL_Metric_Group, int}> $group_minimum_heights
+		 * @var array<int, array{group: OD_URL_Metric_Group, height: int}> $minimums
 		 */
-		$group_minimum_heights = array();
+		$minimums = array();
 
 		$denormalized_elements = $context->url_metric_group_collection->get_all_denormalized_elements()[ $embed_wrapper_xpath ] ?? array();
 		foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
@@ -220,18 +220,21 @@ final class Embed_Optimizer_Tag_Visitor {
 				continue;
 			}
 			$group_min_width = $group->get_minimum_viewport_width();
-			if ( ! isset( $group_minimum_heights[ $group_min_width ] ) ) {
-				$group_minimum_heights[ $group_min_width ] = array( $group, $element['resizedBoundingClientRect']['height'] );
+			if ( ! isset( $minimums[ $group_min_width ] ) ) {
+				$minimums[ $group_min_width ] = array(
+					'group'  => $group,
+					'height' => $element['resizedBoundingClientRect']['height'],
+				);
 			} else {
-				$group_minimum_heights[ $group_min_width ][1] = min(
-					$group_minimum_heights[ $group_min_width ][1],
+				$minimums[ $group_min_width ]['height'] = min(
+					$minimums[ $group_min_width ]['height'],
 					$element['resizedBoundingClientRect']['height']
 				);
 			}
 		}
 
 		// Add style rules to set the min-height for each viewport group.
-		if ( count( $group_minimum_heights ) > 0 ) {
+		if ( count( $minimums ) > 0 ) {
 			$element_id = $processor->get_attribute( 'id' );
 			if ( ! is_string( $element_id ) ) {
 				$element_id = 'embed-optimizer-' . md5( $processor->get_xpath() );
@@ -239,12 +242,12 @@ final class Embed_Optimizer_Tag_Visitor {
 			}
 
 			$style_rules = array();
-			foreach ( $group_minimum_heights as list( $group, $minimum_height ) ) {
+			foreach ( $minimums as $minimum ) {
 				$style_rules[] = sprintf(
 					'@media %s { #%s { min-height: %dpx; } }',
-					od_generate_media_query( $group->get_minimum_viewport_width(), $group->get_maximum_viewport_width() ),
+					od_generate_media_query( $minimum['group']->get_minimum_viewport_width(), $minimum['group']->get_maximum_viewport_width() ),
 					$element_id,
-					$minimum_height
+					$minimum['height']
 				);
 			}
 
