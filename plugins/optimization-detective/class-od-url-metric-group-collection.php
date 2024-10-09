@@ -81,7 +81,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metric_Group[]>,
 	 *          get_common_lcp_element?: OD_Element|null,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
-	 *          get_all_denormalized_elements?: array<string, non-empty-array<int, array{OD_URL_Metric_Group, OD_URL_Metric, OD_Element}>>,
+	 *          get_all_elements?: array<string, non-empty-array<int, OD_Element>>,
 	 *      }
 	 */
 	private $result_cache = array();
@@ -417,26 +417,25 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
 	 * end up running n*4*3 times.
 	 *
-	 * @todo Should there be an OD_Element class which has a $url_metric property which then in turn has a $group property. Then this would only need to return array<string, OD_Element[]>.
 	 * @since n.e.x.t
 	 *
-	 * @return array<string, non-empty-array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>> Keys are XPaths and values are arrays of tuples consisting of the group, URL metric, and element data.
+	 * @return array<string, non-empty-array<int, OD_Element>> Keys are XPaths and values are the element instances.
 	 */
-	public function get_all_denormalized_elements(): array {
+	public function get_all_elements(): array {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
 			return $this->result_cache[ __FUNCTION__ ];
 		}
 
 		$result = ( function () {
-			$all_denormalized_elements = array();
+			$all_elements = array();
 			foreach ( $this->groups as $group ) {
 				foreach ( $group as $url_metric ) {
 					foreach ( $url_metric->get_elements() as $element ) {
-						$all_denormalized_elements[ $element['xpath'] ][] = array( $group, $url_metric, $element );
+						$all_elements[ (string) $element['xpath'] ][] = $element;
 					}
 				}
 			}
-			return $all_denormalized_elements;
+			return $all_elements;
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ] = $result;
@@ -457,9 +456,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 		$result = ( function () {
 			$elements_max_intersection_ratios = array();
-			foreach ( $this->get_all_denormalized_elements() as $xpath => $denormalized_elements ) {
+			foreach ( $this->get_all_elements() as $xpath => $elements ) {
 				$element_intersection_ratios = array();
-				foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
+				foreach ( $elements as $element ) {
 					$element_intersection_ratios[] = $element['intersectionRatio'];
 				}
 				$elements_max_intersection_ratios[ $xpath ] = (float) max( $element_intersection_ratios );

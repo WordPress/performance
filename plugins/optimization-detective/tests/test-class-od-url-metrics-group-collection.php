@@ -710,7 +710,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 *
 	 * @covers ::get_all_element_max_intersection_ratios
 	 * @covers ::get_element_max_intersection_ratio
-	 * @covers ::get_all_denormalized_elements
+	 * @covers ::get_all_elements
 	 *
 	 * @dataProvider data_provider_element_max_intersection_ratios
 	 *
@@ -729,8 +729,8 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		}
 
 		// Check get_all_denormalized_elements.
-		$all_denormalized_elements = $group_collection->get_all_denormalized_elements();
-		$xpath_counts              = array();
+		$all_elements = $group_collection->get_all_elements();
+		$xpath_counts = array();
 		foreach ( $url_metrics as $url_metric ) {
 			foreach ( $url_metric->get_elements() as $element ) {
 				if ( ! isset( $xpath_counts[ $element['xpath'] ] ) ) {
@@ -739,13 +739,11 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				$xpath_counts[ $element['xpath'] ] += 1;
 			}
 		}
-		$this->assertCount( count( $xpath_counts ), $all_denormalized_elements );
-		foreach ( $all_denormalized_elements as $xpath => $denormalized_elements ) {
-			foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
-				$this->assertContains( $url_metric, iterator_to_array( $group ) );
-				$this->assertContains( $element->jsonSerialize(), $url_metric->get( 'elements' ) );
-				$this->assertInstanceOf( OD_URL_Metric_Group::class, $group );
-				$this->assertInstanceOf( OD_URL_Metric::class, $url_metric );
+		$this->assertCount( count( $xpath_counts ), $all_elements );
+		foreach ( $all_elements as $xpath => $elements ) {
+			foreach ( $elements as $element ) {
+				$this->assertInstanceOf( OD_URL_Metric::class, $element->url_metric );
+				$this->assertInstanceOf( OD_URL_Metric_Group::class, $element->url_metric->group );
 				$this->assertInstanceOf( OD_Element::class, $element );
 				$this->assertSame( $xpath, $element['xpath'] );
 			}

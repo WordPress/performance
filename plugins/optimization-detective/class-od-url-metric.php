@@ -57,6 +57,14 @@ class OD_URL_Metric implements JsonSerializable {
 	protected $data;
 
 	/**
+	 * Group.
+	 *
+	 * @since n.e.x.t
+	 * @var OD_URL_Metric_Group
+	 */
+	public $group;
+
+	/**
 	 * Constructor.
 	 *
 	 * @phpstan-param Data|array<string, mixed> $data Valid data or invalid data (in which case an exception is thrown).

@@ -214,11 +214,12 @@ final class Embed_Optimizer_Tag_Visitor {
 		 */
 		$minimums = array();
 
-		$denormalized_elements = $context->url_metric_group_collection->get_all_denormalized_elements()[ $embed_wrapper_xpath ] ?? array();
-		foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
+		$elements = $context->url_metric_group_collection->get_all_elements()[ $embed_wrapper_xpath ] ?? array();
+		foreach ( $elements as $element ) {
 			if ( ! isset( $element['resizedBoundingClientRect'] ) ) {
 				continue;
 			}
+			$group           = $element->url_metric->group;
 			$group_min_width = $group->get_minimum_viewport_width();
 			if ( ! isset( $minimums[ $group_min_width ] ) ) {
 				$minimums[ $group_min_width ] = array(

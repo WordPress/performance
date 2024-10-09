@@ -194,6 +194,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			$this->collection->clear_cache();
 		}
 
+		$url_metric->group   = $this;
 		$this->url_metrics[] = $url_metric;
 
 		// If we have too many URL metrics now, remove the oldest ones up to the sample size.
