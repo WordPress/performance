@@ -406,10 +406,15 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets elements.
 	 *
-	 * @return ElementData[] Elements.
+	 * @return OD_Element[] Elements.
 	 */
 	public function get_elements(): array {
-		return $this->data['elements'];
+		return array_map(
+			function ( array $element ): OD_Element {
+				return new OD_Element( $element, $this );
+			},
+			$this->data['elements']
+		);
 	}
 
 	/**

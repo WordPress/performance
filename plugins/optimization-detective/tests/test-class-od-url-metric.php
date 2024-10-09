@@ -233,7 +233,15 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			$this->assertSame( array_map( 'floatval', $data['elements'][ $i ]['boundingClientRect'] ), $url_metric->get_elements()[ $i ]['boundingClientRect'] );
 			$this->assertSame( array_map( 'floatval', $data['elements'][ $i ]['intersectionRect'] ), $url_metric->get_elements()[ $i ]['intersectionRect'] );
 		}
-		$this->assertSame( $url_metric->get_elements(), $url_metric->get( 'elements' ) );
+		$this->assertSame(
+			array_map(
+				static function ( OD_Element $element ) {
+					return $element->jsonSerialize();
+				},
+				$url_metric->get_elements()
+			),
+			$url_metric->get( 'elements' )
+		);
 
 		$this->assertSame( $data['url'], $url_metric->get_url() );
 		$this->assertSame( $data['url'], $url_metric->get( 'url' ) );

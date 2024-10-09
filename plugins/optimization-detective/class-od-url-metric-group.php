@@ -72,7 +72,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * Result cache.
 	 *
 	 * @var array{
-	 *          get_lcp_element?: ElementData|null,
+	 *          get_lcp_element?: OD_Element|null,
 	 *          is_complete?: bool
 	 *      }
 	 */
@@ -246,10 +246,10 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	/**
 	 * Gets the LCP element in the viewport group.
 	 *
-	 * @return ElementData|null LCP element data or null if not available, either because there are no URL metrics or
+	 * @return OD_Element|null LCP element data or null if not available, either because there are no URL metrics or
 	 *                          the LCP element type is not supported.
 	 */
-	public function get_lcp_element(): ?array {
+	public function get_lcp_element(): ?OD_Element {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
 			return $this->result_cache[ __FUNCTION__ ];
 		}

@@ -633,7 +633,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 
 		$this->assertCount( 3, $group_collection );
 		$common_lcp_element = $group_collection->get_common_lcp_element();
-		$this->assertIsArray( $common_lcp_element );
+		$this->assertInstanceOf( OD_Element::class, $common_lcp_element );
 		$this->assertSame( $lcp_element_xpath, $common_lcp_element['xpath'] );
 	}
 
@@ -743,10 +743,10 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		foreach ( $all_denormalized_elements as $xpath => $denormalized_elements ) {
 			foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
 				$this->assertContains( $url_metric, iterator_to_array( $group ) );
-				$this->assertContains( $element, $url_metric->get_elements() );
+				$this->assertContains( $element->jsonSerialize(), $url_metric->get( 'elements' ) );
 				$this->assertInstanceOf( OD_URL_Metric_Group::class, $group );
 				$this->assertInstanceOf( OD_URL_Metric::class, $url_metric );
-				$this->assertIsArray( $element );
+				$this->assertInstanceOf( OD_Element::class, $element );
 				$this->assertSame( $xpath, $element['xpath'] );
 			}
 		}

@@ -79,9 +79,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          is_any_group_populated?: bool,
 	 *          is_every_group_complete?: bool,
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metric_Group[]>,
-	 *          get_common_lcp_element?: ElementData|null,
+	 *          get_common_lcp_element?: OD_Element|null,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
-	 *          get_all_denormalized_elements?: array<string, non-empty-array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>>,
+	 *          get_all_denormalized_elements?: array<string, non-empty-array<int, array{OD_URL_Metric_Group, OD_URL_Metric, OD_Element}>>,
 	 *      }
 	 */
 	private $result_cache = array();
@@ -362,9 +362,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * @since 0.3.0
 	 *
-	 * @return ElementData|null
+	 * @return OD_Element|null Common LCP element if it exists.
 	 */
-	public function get_common_lcp_element(): ?array {
+	public function get_common_lcp_element(): ?OD_Element {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
 			return $this->result_cache[ __FUNCTION__ ];
 		}
