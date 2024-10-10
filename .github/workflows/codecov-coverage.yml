@@ -1,0 +1,39 @@
+name: PHP Test and Coverage
+
+on: [push, pull_request]
+
+jobs:
+  php-test:
+    runs-on: ubuntu-latest
+    name: WordPress Test Coverage
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.1', '8.0', '7.4', '7.3', '7.2']
+        wp: [ 'latest' ]
+        include:
+          - php: '7.4'
+            wp: '6.5'
+          - php: '8.3'
+            wp: 'trunk'
+    env:
+      WP_ENV_PHP_VERSION: ${{ matrix.php }}
+      WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php }}
+        extensions: mbstring, intl, curl, dom, json, xml, zip
+    - name: Install Composer dependencies
+      run: composer install --no-interaction --no-progress
+    - name: Run PHPUnit tests
+      run: vendor/bin/phpunit --coverage-clover=coverage.xml
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: coverage.xml
+        flags: unittests
+        name: ${{ matrix.php }}-coverage
