@@ -92,7 +92,7 @@ trait Optimization_Detective_Test_Helpers {
 				'url'       => home_url( '/' ),
 				'viewport'  => array(
 					'width'  => $params['viewport_width'],
-					'height' => 800,
+					'height' => $params['viewport_height'] ?? ceil( $params['viewport_width'] / 2 ),
 				),
 				'timestamp' => microtime( true ),
 				'elements'  => array_map(

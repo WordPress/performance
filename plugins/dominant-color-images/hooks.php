@@ -100,14 +100,18 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, string $con
 		return $filtered_image;
 	}
 
-	// Only apply the dominant color to images that have a src attribute that
-	// starts with a double quote, ensuring escaped JSON is also excluded.
-	if ( ! str_contains( $filtered_image, ' src="' ) ) {
+	$processor = new WP_HTML_Tag_Processor( $filtered_image );
+	if ( ! $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+		return $filtered_image;
+	}
+
+	// Only apply the dominant color to images that have a src attribute.
+	if ( ! is_string( $processor->get_attribute( 'src' ) ) ) {
 		return $filtered_image;
 	}
 
 	// Ensure to not run the logic below in case relevant attributes are already present.
-	if ( str_contains( $filtered_image, ' data-dominant-color="' ) || str_contains( $filtered_image, ' data-has-transparency="' ) ) {
+	if ( null !== $processor->get_attribute( 'data-dominant-color' ) || null !== $processor->get_attribute( 'data-has-transparency' ) ) {
 		return $filtered_image;
 	}
 
@@ -134,34 +138,23 @@ function dominant_color_img_tag_add_dominant_color( $filtered_image, string $con
 		return $filtered_image;
 	}
 
-	$data        = '';
-	$extra_class = '';
-
 	if ( ! empty( $image_meta['dominant_color'] ) ) {
-		$data .= sprintf( 'data-dominant-color="%s" ', esc_attr( $image_meta['dominant_color'] ) );
+		$processor->set_attribute( 'data-dominant-color', $image_meta['dominant_color'] );
 
-		if ( str_contains( $filtered_image, ' style="' ) ) {
-			$filtered_image = str_replace( ' style="', ' style="--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . '; ', $filtered_image );
-		} else {
-			$filtered_image = str_replace( '<img ', '<img style="--dominant-color: #' . esc_attr( $image_meta['dominant_color'] ) . ';" ', $filtered_image );
+		$style_attribute = '--dominant-color: #' . $image_meta['dominant_color'] . '; ';
+		if ( null !== $processor->get_attribute( 'style' ) ) {
+			$style_attribute .= $processor->get_attribute( 'style' );
 		}
+		$processor->set_attribute( 'style', trim( $style_attribute ) );
 	}
 
 	if ( isset( $image_meta['has_transparency'] ) ) {
 		$transparency = $image_meta['has_transparency'] ? 'true' : 'false';
-		$data        .= sprintf( 'data-has-transparency="%s" ', $transparency );
-		$extra_class  = $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent';
+		$processor->set_attribute( 'data-has-transparency', $transparency );
+		$processor->add_class( $image_meta['has_transparency'] ? 'has-transparency' : 'not-transparent' );
 	}
 
-	if ( '' !== $data ) {
-		$filtered_image = str_replace( '<img ', '<img ' . $data, $filtered_image );
-	}
-
-	if ( '' !== $extra_class ) {
-		$filtered_image = str_replace( ' class="', ' class="' . $extra_class . ' ', $filtered_image );
-	}
-
-	return $filtered_image;
+	return $processor->get_updated_html();
 }
 add_filter( 'wp_content_img_tag', 'dominant_color_img_tag_add_dominant_color', 20, 3 );
 

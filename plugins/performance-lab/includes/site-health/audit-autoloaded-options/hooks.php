@@ -136,7 +136,7 @@ add_filter( 'site_status_autoloaded_options_limit_description', 'perflab_aao_ext
  * This filter modifies the 'option_perflab_aao_disabled_options' to ensure
  * that autoloaded options are not included in the disabled options list.
  *
- * @since n.e.x.t
+ * @since 3.4.0
  *
  * @param string[]|mixed $disabled_options Array of disabled options.
  * @return string[] Filtered array of disabled options excluding autoloaded options.

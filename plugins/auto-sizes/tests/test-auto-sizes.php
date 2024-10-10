@@ -33,8 +33,8 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	}
 
 	public function test_hooks(): void {
-		$this->assertSame( 10, has_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' ) );
-		$this->assertSame( 10, has_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' ) );
+		$this->assertSame( function_exists( 'wp_sizes_attribute_includes_valid_auto' ) ? false : 10, has_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' ) );
+		$this->assertSame( function_exists( 'wp_sizes_attribute_includes_valid_auto' ) ? false : 10, has_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' ) );
 		$this->assertSame( 10, has_action( 'wp_head', 'auto_sizes_render_generator' ) );
 	}
 
@@ -70,8 +70,6 @@ class Test_AutoSizes extends WP_UnitTestCase {
 	public function test_content_image_with_lazy_loading_has_auto_sizes(): void {
 		// Force lazy loading attribute.
 		add_filter( 'wp_img_tag_add_loading_attr', '__return_true' );
-
-		$image_tag = $this->get_image_tag( self::$image_id );
 
 		$this->assertStringContainsString(
 			'sizes="auto, (max-width: 1024px) 100vw, 1024px"',
@@ -217,5 +215,68 @@ class Test_AutoSizes extends WP_UnitTestCase {
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
 		$this->assertStringContainsString( 'auto-sizes ' . IMAGE_AUTO_SIZES_VERSION, $tag );
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	public function data_provider_to_test_auto_sizes_update_content_img_tag(): array {
+		return array(
+			'expected_with_single_quoted_attributes'       => array(
+				'input'    => "<img src='https://example.com/foo-300x225.jpg' srcset='https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w' sizes='(max-width: 650px) 100vw, 650px' loading='lazy'>",
+				'expected' => "<img src='https://example.com/foo-300x225.jpg' srcset='https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w' sizes=\"auto, (max-width: 650px) 100vw, 650px\" loading='lazy'>",
+			),
+			'expected_with_data_sizes_attribute'           => array(
+				'input'    => '<img data-tshirt-sizes="S M L" src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="(max-width: 650px) 100vw, 650px" loading="lazy">',
+				'expected' => '<img data-tshirt-sizes="S M L" src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="auto, (max-width: 650px) 100vw, 650px" loading="lazy">',
+			),
+			'expected_with_data_sizes_attribute_already_present' => array(
+				'input'    => '<img data-tshirt-sizes="S M L" src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="AUTO, (max-width: 650px) 100vw, 650px" loading="lazy">',
+				'expected' => '<img data-tshirt-sizes="S M L" src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="AUTO, (max-width: 650px) 100vw, 650px" loading="lazy">',
+			),
+			'not_expected_with_loading_lazy_in_attr_value' => array(
+				'input'    => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="(max-width: 650px) 100vw, 650px" alt=\'This is the LCP image and it should not get loading="lazy"!\'>',
+				'expected' => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="(max-width: 650px) 100vw, 650px" alt=\'This is the LCP image and it should not get loading="lazy"!\'>',
+			),
+			'not_expected_with_data_loading_attribute_present' => array(
+				'input'    => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="(max-width: 650px) 100vw, 650px" data-removed-loading="lazy">',
+				'expected' => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="(max-width: 650px) 100vw, 650px" data-removed-loading="lazy">',
+			),
+			'expected_when_attributes_have_spaces_after_them' => array(
+				'input'    => '<img src = "https://example.com/foo-300x225.jpg" srcset = "https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes = "(max-width: 650px) 100vw, 650px" loading = "lazy">',
+				'expected' => '<img src = "https://example.com/foo-300x225.jpg" srcset = "https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="auto, (max-width: 650px) 100vw, 650px" loading = "lazy">',
+			),
+			'expected_when_attributes_are_upper_case'      => array(
+				'input'    => '<IMG SRC="https://example.com/foo-300x225.jpg" SRCSET="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" SIZES="(max-width: 650px) 100vw, 650px" LOADING="LAZY">',
+				'expected' => '<IMG SRC="https://example.com/foo-300x225.jpg" SRCSET="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="auto, (max-width: 650px) 100vw, 650px" LOADING="LAZY">',
+			),
+			'expected_when_loading_lazy_lacks_quotes'      => array(
+				'input'    => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="(max-width: 650px) 100vw, 650px" loading=lazy>',
+				'expected' => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="auto, (max-width: 650px) 100vw, 650px" loading=lazy>',
+			),
+			'expected_when_loading_lazy_has_whitespace'    => array(
+				'input'    => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="(max-width: 650px) 100vw, 650px" loading=" lazy ">',
+				'expected' => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="auto, (max-width: 650px) 100vw, 650px" loading=" lazy ">',
+			),
+			'not_expected_when_sizes_auto_lacks_quotes'    => array(
+				'input'    => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes=auto loading="lazy">',
+				'expected' => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes=auto loading="lazy">',
+			),
+			'expected_when_auto_size_preceded_by_extra_commas' => array(
+				'input'    => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes=",,,,,,,,,auto, (max-width: 650px) 100vw, 650px" loading="lazy">',
+				'expected' => '<img src="https://example.com/foo-300x225.jpg" srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="auto, ,,,,,,,,,auto, (max-width: 650px) 100vw, 650px" loading="lazy">',
+			),
+		);
+	}
+
+	/**
+	 * @covers ::auto_sizes_update_content_img_tag
+	 * @dataProvider data_provider_to_test_auto_sizes_update_content_img_tag
+	 */
+	public function test_auto_sizes_update_content_img_tag( string $input, string $expected ): void {
+		$this->assertSame(
+			$expected,
+			auto_sizes_update_content_img_tag( $input )
+		);
 	}
 }

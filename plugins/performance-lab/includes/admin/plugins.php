@@ -19,15 +19,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string}|WP_Error Array of plugin data or WP_Error if failed.
  */
 function perflab_query_plugin_info( string $plugin_slug ) {
-	$plugin = get_transient( 'perflab_plugin_info_' . $plugin_slug );
+	$transient_key = 'perflab_plugins_info';
+	$plugins       = get_transient( $transient_key );
 
-	if ( is_array( $plugin ) ) {
-		/**
-		 * Validated (mostly) plugin data.
-		 *
-		 * @var array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string} $plugin
-		 */
-		return $plugin;
+	if ( is_array( $plugins ) ) {
+		// If the specific plugin_slug is not in the cache, return an error.
+		if ( ! isset( $plugins[ $plugin_slug ] ) ) {
+			return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'performance-lab' ) );
+		}
+		return $plugins[ $plugin_slug ]; // Return cached plugin info if found.
 	}
 
 	$fields = array(
@@ -41,36 +41,54 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		'version', // Needed by install_plugin_install_status().
 	);
 
-	$plugin = plugins_api(
-		'plugin_information',
+	// Proceed with API request since no cache hit.
+	$response = plugins_api(
+		'query_plugins',
 		array(
-			'slug'   => $plugin_slug,
-			'fields' => array_fill_keys( $fields, true ),
+			'author'   => 'wordpressdotorg',
+			'tag'      => 'performance',
+			'per_page' => 100,
+			'fields'   => array_fill_keys( $fields, true ),
 		)
 	);
 
-	if ( is_wp_error( $plugin ) ) {
-		return $plugin;
+	if ( is_wp_error( $response ) ) {
+		return new WP_Error(
+			'api_error',
+			sprintf(
+				/* translators: %s: API error message */
+				__( 'Failed to retrieve plugins data from WordPress.org API: %s', 'performance-lab' ),
+				$response->get_error_message()
+			)
+		);
 	}
 
-	if ( is_object( $plugin ) ) {
-		$plugin = (array) $plugin;
+	// Check if the response contains plugins.
+	if ( ! ( is_object( $response ) && property_exists( $response, 'plugins' ) ) ) {
+		return new WP_Error( 'no_plugins', __( 'No plugins found in the API response.', 'performance-lab' ) );
 	}
 
-	// Only store what we need.
-	$plugin = wp_array_slice_assoc( $plugin, $fields );
+	$plugins            = array();
+	$standalone_plugins = array_flip( perflab_get_standalone_plugins() );
+	foreach ( $response->plugins as $plugin_data ) {
+		if ( ! isset( $standalone_plugins[ $plugin_data['slug'] ] ) ) {
+			continue;
+		}
+		$plugins[ $plugin_data['slug'] ] = wp_array_slice_assoc( $plugin_data, $fields );
+	}
 
-	// Make sure all fields default to false in case another plugin is modifying the response from WordPress.org via the plugins_api filter.
-	$plugin = array_merge( array_fill_keys( $fields, false ), $plugin );
+	set_transient( $transient_key, $plugins, HOUR_IN_SECONDS );
 
-	set_transient( 'perflab_plugin_info_' . $plugin_slug, $plugin, HOUR_IN_SECONDS );
+	if ( ! isset( $plugins[ $plugin_slug ] ) ) {
+		return new WP_Error( 'plugin_not_found', __( 'Plugin not found.', 'performance-lab' ) );
+	}
 
 	/**
 	 * Validated (mostly) plugin data.
 	 *
-	 * @var array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string} $plugin
+	 * @var array<string, array{name: string, slug: string, short_description: string, requires: string|false, requires_php: string|false, requires_plugins: string[], download_link: string, version: string}> $plugins
 	 */
-	return $plugin;
+	return $plugins[ $plugin_slug ];
 }
 
 /**
@@ -96,23 +114,15 @@ function perflab_render_plugins_ui(): void {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 	$plugins = array();
+	$errors  = array();
 
-	foreach ( perflab_get_standalone_plugin_data() as $plugin_slug => $plugin_data ) {
+	$standalone_plugin_data = perflab_get_standalone_plugin_data();
+	foreach ( $standalone_plugin_data as $plugin_slug => $plugin_data ) {
 		$api_data = perflab_query_plugin_info( $plugin_slug ); // Data from wordpress.org.
 
 		// Skip if the plugin is not on WordPress.org or there was a network error.
 		if ( $api_data instanceof WP_Error ) {
-			wp_admin_notice(
-				esc_html(
-					sprintf(
-						/* translators: 1: plugin slug. 2: error message. */
-						__( 'Failed to query WordPress.org Plugin Directory for plugin "%1$s". %2$s', 'performance-lab' ),
-						$plugin_slug,
-						$api_data->get_error_message()
-					)
-				),
-				array( 'type' => 'error' )
-			);
+			$errors[ $plugin_slug ] = $api_data;
 		} else {
 			$plugins[ $plugin_slug ] = array_merge(
 				array(
@@ -122,6 +132,67 @@ function perflab_render_plugins_ui(): void {
 				$api_data
 			);
 		}
+	}
+
+	if ( count( $errors ) > 0 ) {
+		$active_plugins = array_map(
+			static function ( string $file ) {
+				return strtok( $file, '/' );
+			},
+			array_keys( get_plugins() )
+		);
+		$plugin_list    = '<ul>';
+		$error_messages = array();
+		foreach ( $errors as $plugin_slug => $error ) {
+			if ( defined( $standalone_plugin_data[ $plugin_slug ]['constant'] ) ) {
+				$status = __( '(active)', 'performance-lab' );
+			} elseif ( in_array( $plugin_slug, $active_plugins, true ) ) {
+				$status = __( '(installed)', 'performance-lab' );
+			} else {
+				$status = '';
+			}
+
+			$plugin_list     .= sprintf(
+				'<li><a target="_blank" href="%s"><code>%s</code></a> %s</li>',
+				esc_url( trailingslashit( __( 'https://wordpress.org/plugins/', 'default' ) . $plugin_slug ) ),
+				esc_html( $plugin_slug ),
+				esc_html( $status )
+			);
+			$error_messages[] = $error->get_error_message();
+		}
+		$plugin_list .= '</ul>';
+
+		$error_messages = array_unique( $error_messages );
+
+		if ( count( $error_messages ) === 1 ) {
+			$error_text          = __( 'Failed to query WordPress.org Plugin Directory for the following plugin:', 'performance-lab' );
+			$error_occurred_text = __( 'The following error occurred:', 'performance-lab' );
+		} else {
+			$error_text          = __( 'Failed to query WordPress.org Plugin Directory for the following plugins:', 'performance-lab' );
+			$error_occurred_text = __( 'The following errors occurred:', 'performance-lab' );
+		}
+
+		wp_admin_notice(
+			'<p>' . esc_html( $error_text ) . '</p>' .
+			$plugin_list .
+			'<p>' . esc_html( $error_occurred_text ) . '</p>' .
+			'<ul><li>' .
+			join(
+				'</li><li>',
+				array_map(
+					static function ( string $error_message ): string {
+						return wp_kses( $error_message, array( 'a' => array( 'href' => true ) ) );
+					},
+					$error_messages
+				)
+			)
+			. '</li></ul>' .
+			'<p>' . esc_html__( 'Please consider manual plugin installation and activation. You can then access each plugin\'s settings via its respective "Settings" link on the Plugins screen.', 'performance-lab' ) . '</p>',
+			array(
+				'type'           => 'error',
+				'paragraph_wrap' => false,
+			)
+		);
 	}
 
 	/*

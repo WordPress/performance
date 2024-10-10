@@ -42,7 +42,6 @@ function auto_sizes_update_image_attributes( $attr ): array {
 
 	return $attr;
 }
-add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' );
 
 /**
  * Adds auto to the sizes attribute to the image, if applicable.
@@ -57,40 +56,54 @@ function auto_sizes_update_content_img_tag( $html ): string {
 		$html = '';
 	}
 
-	// Bail early if the image is not lazy-loaded.
-	if ( false === strpos( $html, 'loading="lazy"' ) ) {
+	$processor = new WP_HTML_Tag_Processor( $html );
+
+	// Bail if there is no IMG tag.
+	if ( ! $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
 		return $html;
 	}
 
+	// Bail early if the image is not lazy-loaded.
+	$value = $processor->get_attribute( 'loading' );
+	if ( ! is_string( $value ) || 'lazy' !== strtolower( trim( $value, " \t\f\r\n" ) ) ) {
+		return $html;
+	}
+
+	$sizes = $processor->get_attribute( 'sizes' );
+
 	// Bail early if the image is not responsive.
-	if ( 1 !== preg_match( '/sizes="([^"]+)"/', $html, $match ) ) {
+	if ( ! is_string( $sizes ) ) {
 		return $html;
 	}
 
 	// Don't add 'auto' to the sizes attribute if it already exists.
-	if ( auto_sizes_attribute_includes_valid_auto( $match[1] ) ) {
+	if ( auto_sizes_attribute_includes_valid_auto( $sizes ) ) {
 		return $html;
 	}
 
-	$html = str_replace( 'sizes="', 'sizes="auto, ', $html );
-
-	return $html;
+	$processor->set_attribute( 'sizes', "auto, $sizes" );
+	return $processor->get_updated_html();
 }
-add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+
+// Skip loading plugin filters if WordPress Core already loaded the functionality.
+if ( ! function_exists( 'wp_sizes_attribute_includes_valid_auto' ) ) {
+	add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' );
+	add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+}
 
 /**
  * Checks whether the given 'sizes' attribute includes the 'auto' keyword as the first item in the list.
  *
  * Per the HTML spec, if present it must be the first entry.
  *
- * @since n.e.x.t
+ * @since 1.2.0
  *
  * @param string $sizes_attr The 'sizes' attribute value.
  * @return bool True if the 'auto' keyword is present, false otherwise.
  */
 function auto_sizes_attribute_includes_valid_auto( string $sizes_attr ): bool {
-	$token = strtok( strtolower( $sizes_attr ), ',' );
-	return false !== $token && 'auto' === trim( $token, " \t\f\r\n" );
+	list( $first_size ) = explode( ',', $sizes_attr, 2 );
+	return 'auto' === strtolower( trim( $first_size, " \t\f\r\n" ) );
 }
 
 /**

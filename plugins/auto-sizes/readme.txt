@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   1.1.0
+Stable tag:   1.3.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, auto-sizes
@@ -51,6 +51,24 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 1.3.0 =
+
+**Enhancements**
+
+* Move Auto Sizes logic from Enhanced Responsive Images to Image Prioritizer. ([1476](https://github.com/WordPress/performance/pull/1476))
+* Update auto sizes logic in Enhanced Responsive Images plugin to no longer load if already in Core. ([1547](https://github.com/WordPress/performance/pull/1547))
+
+= 1.2.0 =
+
+**Enhancements**
+
+* Harden logic to add `auto` keyword to `sizes` attribute to prevent duplicate keyword. ([1445](https://github.com/WordPress/performance/pull/1445))
+* Use more robust HTML Tag Processor for auto sizes injection. ([1471](https://github.com/WordPress/performance/pull/1471))
+
+**Bug Fixes**
+
+* Remove sizes attribute when responsive images are disabled. ([1399](https://github.com/WordPress/performance/pull/1399))
 
 = 1.1.0 =
 
