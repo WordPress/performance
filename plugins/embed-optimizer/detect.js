@@ -16,6 +16,7 @@ const consoleLogPrefix = '[Embed Optimizer]';
  * @typedef {import("../optimization-detective/types.d.ts").InitializeArgs} InitializeArgs
  * @typedef {import("../optimization-detective/types.d.ts").FinalizeArgs} FinalizeArgs
  * @typedef {import("../optimization-detective/types.d.ts").FinalizeCallback} FinalizeCallback
+ * @typedef {import("../optimization-detective/types.d.ts").AmendedElementData} AmendedElementData
  */
 
 /**
@@ -51,14 +52,17 @@ const loadedElementContentRects = new Map();
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
  */
-export async function initialize( { isDebug } ) {
+export function initialize( { isDebug } ) {
 	const embedWrappers =
 		/** @type NodeListOf<HTMLDivElement> */ document.querySelectorAll(
 			'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
 		);
 
 	for ( const embedWrapper of embedWrappers ) {
-		monitorEmbedWrapperForResizes( embedWrapper, isDebug );
+		monitorEmbedWrapperForResizes(
+			embedWrapper, // TODO: Why TypeScript error: TS2345: Argument of type Element is not assignable to parameter of type HTMLDivElement.
+			isDebug
+		);
 	}
 
 	if ( isDebug ) {
@@ -79,7 +83,9 @@ export async function finalize( {
 } ) {
 	for ( const [ xpath, domRect ] of loadedElementContentRects.entries() ) {
 		try {
-			amendElementData( xpath, { resizedBoundingClientRect: domRect } );
+			amendElementData( xpath, {
+				resizedBoundingClientRect: domRect,
+			} );
 			if ( isDebug ) {
 				const elementData = getElementData( xpath );
 				log(

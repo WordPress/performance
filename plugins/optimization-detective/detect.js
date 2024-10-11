@@ -1,9 +1,11 @@
 /**
  * @typedef {import("web-vitals").LCPMetric} LCPMetric
- * @typedef {import("types.d.ts").ElementData} ElementData
- * @typedef {import("types.d.ts").URLMetric} URLMetric
- * @typedef {import("types.d.ts").URLMetricGroupStatus} URLMetricGroupStatus
- * @typedef {import("types.d.ts").Extension} Extension
+ * @typedef {import("./types.d.ts").ElementData} ElementData
+ * @typedef {import("./types.d.ts").URLMetric} URLMetric
+ * @typedef {import("./types.d.ts").URLMetricGroupStatus} URLMetricGroupStatus
+ * @typedef {import("./types.d.ts").Extension} Extension
+ * @typedef {import("./types.d.ts").AmendedRootData} AmendedRootData
+ * @typedef {import("./types.d.ts").AmendedElementData} AmendedElementData
  */
 
 const win = window;
@@ -151,12 +153,28 @@ function getElementData( xpath ) {
 /**
  * Amends element data.
  *
- * @param {string} xpath      XPath.
- * @param {Object} properties Properties.
+ * @param {string}             xpath      XPath.
+ * @param {AmendedElementData} properties Properties.
  */
 function amendElementData( xpath, properties ) {
 	if ( ! elementsByXPath.has( xpath ) ) {
 		throw new Error( `Unknown element with XPath: ${ xpath }` );
+	}
+	for ( const key of Object.getOwnPropertyNames( properties ) ) {
+		if (
+			[
+				'isLCP',
+				'isLCPCandidate',
+				'xpath',
+				'intersectionRatio',
+				'intersectionRect',
+				'boundingClientRect',
+			].includes( key )
+		) {
+			throw new Error(
+				`Disallowed setting of key '${ key }' on element.`
+			);
+		}
 	}
 	const elementData = elementsByXPath.get( xpath );
 	Object.assign( elementData, properties ); // TODO: Check if any core properties are being used.
@@ -310,7 +328,7 @@ export default async function detect( {
 
 	const breadcrumbedElements = doc.body.querySelectorAll( '[data-od-xpath]' );
 
-	/** @type {Map<HTMLElement, string>} */
+	/** @type {Map<Element, string>} */
 	const breadcrumbedElementsMap = new Map(
 		[ ...breadcrumbedElements ].map(
 			/**
@@ -371,7 +389,7 @@ export default async function detect( {
 	// Obtain at least one LCP candidate. More may be reported before the page finishes loading.
 	await new Promise( ( resolve ) => {
 		onLCP(
-			( metric ) => {
+			( /** @type LCPMetric */ metric ) => {
 				lcpMetricCandidates.push( metric );
 				resolve();
 			},
@@ -467,10 +485,19 @@ export default async function detect( {
 		/**
 		 * Amends root URL metric data.
 		 *
-		 * @param {Object} properties
+		 * @todo Would "extend" be better than "amend"? Or something else?
+		 *
+		 * @param {AmendedRootData} properties
 		 */
 		const amendRootData = ( properties ) => {
-			Object.assign( urlMetric, properties ); // TODO: Prevent overriding core properties.
+			for ( const key of Object.getOwnPropertyNames( properties ) ) {
+				if ( [ 'url', 'viewport', 'elements' ].includes( key ) ) {
+					throw new Error(
+						`Disallowed setting of key '${ key }' on root.`
+					);
+				}
+			}
+			Object.assign( urlMetric, properties );
 		};
 
 		for ( const [
@@ -479,7 +506,7 @@ export default async function detect( {
 		] of extensions.entries() ) {
 			if ( extension.finalize instanceof Function ) {
 				try {
-					extension.finalize( {
+					await extension.finalize( {
 						isDebug,
 						getRootData,
 						getElementData,
