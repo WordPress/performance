@@ -135,6 +135,31 @@ function recursiveFreeze( obj ) {
 const elementsByXPath = new Map();
 
 /**
+ * Reserved root property keys.
+ *
+ * @see {URLMetric}
+ * @see {AmendedElementData}
+ * @type {Set<string>}
+ */
+const reservedRootPropertyKeys = new Set( [ 'url', 'viewport', 'elements' ] );
+
+/**
+ * Reserved element property keys.
+ *
+ * @see {ElementData}
+ * @see {AmendedRootData}
+ * @type {Set<string>}
+ */
+const reservedElementPropertyKeys = new Set( [
+	'isLCP',
+	'isLCPCandidate',
+	'xpath',
+	'intersectionRatio',
+	'intersectionRect',
+	'boundingClientRect',
+] );
+
+/**
  * Gets element data.
  *
  * @param {string} xpath XPath.
@@ -161,23 +186,14 @@ function amendElementData( xpath, properties ) {
 		throw new Error( `Unknown element with XPath: ${ xpath }` );
 	}
 	for ( const key of Object.getOwnPropertyNames( properties ) ) {
-		if (
-			[
-				'isLCP',
-				'isLCPCandidate',
-				'xpath',
-				'intersectionRatio',
-				'intersectionRect',
-				'boundingClientRect',
-			].includes( key )
-		) {
+		if ( reservedElementPropertyKeys.has( key ) ) {
 			throw new Error(
 				`Disallowed setting of key '${ key }' on element.`
 			);
 		}
 	}
 	const elementData = elementsByXPath.get( xpath );
-	Object.assign( elementData, properties ); // TODO: Check if any core properties are being used.
+	Object.assign( elementData, properties );
 }
 
 /**
@@ -491,7 +507,7 @@ export default async function detect( {
 		 */
 		const amendRootData = ( properties ) => {
 			for ( const key of Object.getOwnPropertyNames( properties ) ) {
-				if ( [ 'url', 'viewport', 'elements' ].includes( key ) ) {
+				if ( reservedRootPropertyKeys.has( key ) ) {
 					throw new Error(
 						`Disallowed setting of key '${ key }' on root.`
 					);
