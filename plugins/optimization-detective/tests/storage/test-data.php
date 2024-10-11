@@ -333,6 +333,42 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test od_get_minimum_viewport_aspect_ratio().
+	 *
+	 * @covers ::od_get_minimum_viewport_aspect_ratio
+	 */
+	public function test_od_get_minimum_viewport_aspect_ratio(): void {
+		$this->assertSame( 0.4, od_get_minimum_viewport_aspect_ratio() );
+
+		add_filter(
+			'od_minimum_viewport_aspect_ratio',
+			static function () {
+				return '0.6';
+			}
+		);
+
+		$this->assertSame( 0.6, od_get_minimum_viewport_aspect_ratio() );
+	}
+
+	/**
+	 * Test od_get_maximum_viewport_aspect_ratio().
+	 *
+	 * @covers ::od_get_maximum_viewport_aspect_ratio
+	 */
+	public function test_od_get_maximum_viewport_aspect_ratio(): void {
+		$this->assertSame( 2.5, od_get_maximum_viewport_aspect_ratio() );
+
+		add_filter(
+			'od_maximum_viewport_aspect_ratio',
+			static function () {
+				return 3;
+			}
+		);
+
+		$this->assertSame( 3.0, od_get_maximum_viewport_aspect_ratio() );
+	}
+
+	/**
 	 * Test od_get_breakpoint_max_widths().
 	 *
 	 * @covers ::od_get_breakpoint_max_widths
