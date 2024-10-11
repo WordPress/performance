@@ -20,7 +20,7 @@ const consoleLogPrefix = '[Embed Optimizer]';
  */
 
 /**
- * Log a message.
+ * Logs a message.
  *
  * @param {...*} message
  */
@@ -30,7 +30,7 @@ function log( ...message ) {
 }
 
 /**
- * Log an error.
+ * Logs an error.
  *
  * @param {...*} message
  */
@@ -47,7 +47,7 @@ function error( ...message ) {
 const loadedElementContentRects = new Map();
 
 /**
- * Initialize.
+ * Initializes extension.
  *
  * @type {InitializeCallback}
  * @param {InitializeArgs} args Args.
@@ -71,7 +71,7 @@ export function initialize( { isDebug } ) {
 }
 
 /**
- * Finalize.
+ * Finalizes extension.
  *
  * @type {FinalizeCallback}
  * @param {FinalizeArgs} args Args.

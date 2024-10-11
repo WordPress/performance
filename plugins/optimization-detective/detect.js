@@ -41,7 +41,7 @@ function isStorageLocked( currentTime, storageLockTTL ) {
 }
 
 /**
- * Set the storage lock.
+ * Sets the storage lock.
  *
  * @param {number} currentTime - Current time in milliseconds.
  */
@@ -55,7 +55,7 @@ function setStorageLock( currentTime ) {
 }
 
 /**
- * Log a message.
+ * Logs a message.
  *
  * @param {...*} message
  */
@@ -65,7 +65,7 @@ function log( ...message ) {
 }
 
 /**
- * Log a warning.
+ * Logs a warning.
  *
  * @param {...*} message
  */
@@ -75,7 +75,7 @@ function warn( ...message ) {
 }
 
 /**
- * Log an error.
+ * Logs an error.
  *
  * @param {...*} message
  */
@@ -128,11 +128,11 @@ function recursiveFreeze( obj ) {
 }
 
 /**
- * Mapping of XPath to element data.
+ * URL metric being assembled for submission.
  *
- * @type {Map<string, ElementData>}
+ * @type {URLMetric}
  */
-const elementsByXPath = new Map();
+let urlMetric;
 
 /**
  * Reserved root property keys.
@@ -142,6 +142,40 @@ const elementsByXPath = new Map();
  * @type {Set<string>}
  */
 const reservedRootPropertyKeys = new Set( [ 'url', 'viewport', 'elements' ] );
+
+/**
+ * Gets root URL Metric data.
+ *
+ * @return {URLMetric} URL Metric.
+ */
+function getRootData() {
+	const immutableUrlMetric = structuredClone( urlMetric );
+	recursiveFreeze( immutableUrlMetric );
+	return immutableUrlMetric;
+}
+
+/**
+ * Amends root URL metric data.
+ *
+ * @todo Would "extend" be better than "amend"? Or something else?
+ *
+ * @param {AmendedRootData} properties
+ */
+function amendRootData( properties ) {
+	for ( const key of Object.getOwnPropertyNames( properties ) ) {
+		if ( reservedRootPropertyKeys.has( key ) ) {
+			throw new Error( `Disallowed setting of key '${ key }' on root.` );
+		}
+	}
+	Object.assign( urlMetric, properties );
+}
+
+/**
+ * Mapping of XPath to element data.
+ *
+ * @type {Map<string, ElementData>}
+ */
+const elementsByXPath = new Map();
 
 /**
  * Reserved element property keys.
@@ -330,7 +364,6 @@ export default async function detect( {
 			const extension = await import( extensionModuleUrl );
 			extensions.set( extensionModuleUrl, extension );
 			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args. It's important to pass webVitalsLibrarySrc to the extension so that onLCP, onCLS, or onINP can be obtained.
-			// TODO: Pass additional functions from this module into the extensions.
 			if ( extension.initialize instanceof Function ) {
 				extension.initialize( { isDebug } );
 			}
@@ -424,8 +457,7 @@ export default async function detect( {
 		log( 'Detection is stopping.' );
 	}
 
-	/** @type {URLMetric} */
-	const urlMetric = {
+	urlMetric = {
 		url: currentUrl,
 		viewport: {
 			width: win.innerWidth,
@@ -487,35 +519,6 @@ export default async function detect( {
 	} );
 
 	if ( extensions.size > 0 ) {
-		/**
-		 * Gets root URL Metric data.
-		 *
-		 * @return {URLMetric} URL Metric.
-		 */
-		const getRootData = () => {
-			const immutableUrlMetric = structuredClone( urlMetric );
-			recursiveFreeze( immutableUrlMetric );
-			return immutableUrlMetric;
-		};
-
-		/**
-		 * Amends root URL metric data.
-		 *
-		 * @todo Would "extend" be better than "amend"? Or something else?
-		 *
-		 * @param {AmendedRootData} properties
-		 */
-		const amendRootData = ( properties ) => {
-			for ( const key of Object.getOwnPropertyNames( properties ) ) {
-				if ( reservedRootPropertyKeys.has( key ) ) {
-					throw new Error(
-						`Disallowed setting of key '${ key }' on root.`
-					);
-				}
-			}
-			Object.assign( urlMetric, properties );
-		};
-
 		for ( const [
 			extensionModuleUrl,
 			extension,
