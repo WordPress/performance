@@ -9,8 +9,13 @@
 const consoleLogPrefix = '[Embed Optimizer]';
 
 /**
- * @typedef {import("../optimization-detective/types.d.ts").ElementMetrics} ElementMetrics
+ * @typedef {import("../optimization-detective/types.d.ts").ElementData} ElementMetrics
  * @typedef {import("../optimization-detective/types.d.ts").URLMetric} URLMetric
+ * @typedef {import("../optimization-detective/types.d.ts").Extension} Extension
+ * @typedef {import("../optimization-detective/types.d.ts").InitializeCallback} InitializeCallback
+ * @typedef {import("../optimization-detective/types.d.ts").InitializeArgs} InitializeArgs
+ * @typedef {import("../optimization-detective/types.d.ts").FinalizeArgs} FinalizeArgs
+ * @typedef {import("../optimization-detective/types.d.ts").FinalizeCallback} FinalizeCallback
  */
 
 /**
@@ -33,8 +38,8 @@ const loadedElementContentRects = new Map();
 /**
  * Initialize.
  *
- * @param {Object}  args         Args.
- * @param {boolean} args.isDebug Whether to show debug messages.
+ * @type {InitializeCallback}
+ * @param {InitializeArgs} args Args.
  */
 export async function initialize( { isDebug } ) {
 	const embedWrappers =
@@ -43,7 +48,7 @@ export async function initialize( { isDebug } ) {
 		);
 
 	for ( const embedWrapper of embedWrappers ) {
-		monitorEmbedWrapperForResizes( embedWrapper );
+		monitorEmbedWrapperForResizes( embedWrapper, isDebug );
 	}
 
 	if ( isDebug ) {
@@ -54,28 +59,34 @@ export async function initialize( { isDebug } ) {
 /**
  * Finalize.
  *
- * @param {Object}    args           Args.
- * @param {boolean}   args.isDebug   Whether to show debug messages.
- * @param {URLMetric} args.urlMetric Pending URL metric.
+ * @type {FinalizeCallback}
+ * @param {FinalizeArgs} args Args.
  */
-export async function finalize( { urlMetric, isDebug } ) {
+export async function finalize( {
+	urlMetric,
+	isDebug,
+	getElementData,
+	amendElementData,
+} ) {
 	if ( isDebug ) {
 		log( 'URL metric to be sent:', urlMetric );
 	}
 
-	for ( const element of urlMetric.elements ) {
-		if ( loadedElementContentRects.has( element.xpath ) ) {
+	for ( const [ xpath, domRect ] of loadedElementContentRects.entries() ) {
+		if (
+			amendElementData( xpath, { resizedBoundingClientRect: domRect } )
+		) {
+			const elementData = getElementData( xpath );
 			if ( isDebug ) {
 				log(
-					`boundingClientRect for ${ element.xpath } resized:`,
-					element.boundingClientRect,
+					`boundingClientRect for ${ xpath } resized:`,
+					elementData.boundingClientRect,
 					'=>',
-					loadedElementContentRects.get( element.xpath )
+					elementData.resizedBoundingClientRect
 				);
 			}
-			element.resizedBoundingClientRect = loadedElementContentRects.get(
-				element.xpath
-			);
+		} else if ( isDebug ) {
+			log( `Unable to amend element data for ${ xpath }` );
 		}
 	}
 }
@@ -84,8 +95,9 @@ export async function finalize( { urlMetric, isDebug } ) {
  * Monitors embed wrapper for resizes.
  *
  * @param {HTMLDivElement} embedWrapper Embed wrapper DIV.
+ * @param {boolean}        isDebug      Whether debug.
  */
-function monitorEmbedWrapperForResizes( embedWrapper ) {
+function monitorEmbedWrapperForResizes( embedWrapper, isDebug ) {
 	if ( ! ( 'odXpath' in embedWrapper.dataset ) ) {
 		throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
 	}
@@ -93,6 +105,9 @@ function monitorEmbedWrapperForResizes( embedWrapper ) {
 	const observer = new ResizeObserver( ( entries ) => {
 		const [ entry ] = entries;
 		loadedElementContentRects.set( xpath, entry.contentRect );
+		if ( isDebug ) {
+			log( `Resized element ${ xpath }:`, entry.contentRect );
+		}
 	} );
 	observer.observe( embedWrapper, { box: 'content-box' } );
 }

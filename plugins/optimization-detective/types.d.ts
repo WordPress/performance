@@ -1,4 +1,4 @@
-interface ElementMetrics {
+interface ElementData {
 	isLCP: boolean;
 	isLCPCandidate: boolean;
 	xpath: string;
@@ -13,7 +13,7 @@ interface URLMetric {
 		width: number;
 		height: number;
 	};
-	elements: ElementMetrics[];
+	elements: ElementData[];
 }
 
 interface URLMetricGroupStatus {
@@ -21,7 +21,23 @@ interface URLMetricGroupStatus {
 	complete: boolean;
 }
 
+type InitializeArgs = {
+	readonly isDebug: boolean,
+};
+
+type InitializeCallback = ( args: InitializeArgs ) => void;
+
+type FinalizeArgs = {
+	readonly getRootData: () => URLMetric,
+	readonly amendRootData: ( properties: object ) => void,
+	readonly getElementData: ( xpath: string ) => ElementData|null,
+	readonly amendElementData: ( xpath: string, properties: object ) => boolean,
+	readonly isDebug: boolean,
+};
+
+type FinalizeCallback = ( args: FinalizeArgs ) => void;
+
 interface Extension {
-	initialize?: Function;
-	finalize?: Function;
+	initialize?: InitializeCallback;
+	finalize?: FinalizeCallback;
 }

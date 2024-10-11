@@ -1,6 +1,6 @@
 /**
  * @typedef {import("web-vitals").LCPMetric} LCPMetric
- * @typedef {import("types.d.ts").ElementMetrics} ElementMetrics
+ * @typedef {import("types.d.ts").ElementData} ElementData
  * @typedef {import("types.d.ts").URLMetric} URLMetric
  * @typedef {import("types.d.ts").URLMetricGroupStatus} URLMetricGroupStatus
  * @typedef {import("types.d.ts").Extension} Extension
@@ -108,6 +108,60 @@ function isViewportNeeded( viewportWidth, urlMetricGroupStatuses ) {
  */
 function getCurrentTime() {
 	return Date.now();
+}
+
+/**
+ * Recursively freezes an object to prevent mutation.
+ *
+ * @param {Object} obj Object to recursively freeze.
+ */
+function recursiveFreeze( obj ) {
+	for ( const prop of Object.getOwnPropertyNames( obj ) ) {
+		const value = obj[ prop ];
+		if ( null !== value && typeof value === 'object' ) {
+			recursiveFreeze( value );
+		}
+	}
+	Object.freeze( obj );
+}
+
+/**
+ * Mapping of XPath to element data.
+ *
+ * @type {Map<string, ElementData>}
+ */
+const elementsByXPath = new Map();
+
+/**
+ * Gets element data.
+ *
+ * @param {string} xpath XPath.
+ * @return {ElementData|null} Element data, or null if no element for the XPath exists.
+ */
+function getElementData( xpath ) {
+	const elementData = elementsByXPath.get( xpath );
+	if ( elementData ) {
+		const cloned = structuredClone( elementData );
+		recursiveFreeze( cloned );
+		return cloned;
+	}
+	return null;
+}
+
+/**
+ * Amends element data.
+ *
+ * @param {string} xpath      XPath.
+ * @param {Object} properties Properties.
+ * @return {boolean} Whether appending element data was successful.
+ */
+function amendElementData( xpath, properties ) {
+	if ( ! elementsByXPath.has( xpath ) ) {
+		return false;
+	}
+	const elementData = elementsByXPath.get( xpath );
+	Object.assign( elementData, properties ); // TODO: Check if any core properties are being used.
+	return true;
 }
 
 /**
@@ -354,8 +408,8 @@ export default async function detect( {
 		const isLCP =
 			elementIntersection.target === lcpMetric?.entries[ 0 ]?.element;
 
-		/** @type {ElementMetrics} */
-		const elementMetrics = {
+		/** @type {ElementData} */
+		const elementData = {
 			isLCP,
 			isLCPCandidate: !! lcpMetricCandidates.find(
 				( lcpMetricCandidate ) =>
@@ -368,7 +422,8 @@ export default async function detect( {
 			boundingClientRect: elementIntersection.boundingClientRect,
 		};
 
-		urlMetric.elements.push( elementMetrics );
+		urlMetric.elements.push( elementData );
+		elementsByXPath.set( elementData.xpath, elementData );
 	}
 
 	if ( isDebug ) {
@@ -391,12 +446,37 @@ export default async function detect( {
 		);
 	} );
 
-	for ( const extension of extensions ) {
-		if ( extension.finalize instanceof Function ) {
-			extension.finalize( {
-				isDebug,
-				urlMetric,
-			} );
+	if ( extensions.length > 0 ) {
+		/**
+		 * Gets root URL Metric data.
+		 *
+		 * @return {URLMetric} URL Metric.
+		 */
+		const getRootData = () => {
+			const immutableUrlMetric = structuredClone( urlMetric );
+			recursiveFreeze( immutableUrlMetric );
+			return immutableUrlMetric;
+		};
+
+		/**
+		 * Amends root URL metric data.
+		 *
+		 * @param {Object} properties
+		 */
+		const amendRootData = ( properties ) => {
+			Object.assign( urlMetric, properties ); // TODO: Prevent overriding core properties.
+		};
+
+		for ( const extension of extensions ) {
+			if ( extension.finalize instanceof Function ) {
+				extension.finalize( {
+					isDebug,
+					getRootData,
+					getElementData,
+					amendElementData,
+					amendRootData,
+				} );
+			}
 		}
 	}
 
