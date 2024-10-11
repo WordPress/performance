@@ -29,6 +29,16 @@ function log( ...message ) {
 }
 
 /**
+ * Log an error.
+ *
+ * @param {...*} message
+ */
+function error( ...message ) {
+	// eslint-disable-next-line no-console
+	console.error( consoleLogPrefix, ...message );
+}
+
+/**
  * Embed element heights.
  *
  * @type {Map<string, DOMRectReadOnly>}
@@ -63,30 +73,28 @@ export async function initialize( { isDebug } ) {
  * @param {FinalizeArgs} args Args.
  */
 export async function finalize( {
-	urlMetric,
 	isDebug,
 	getElementData,
 	amendElementData,
 } ) {
-	if ( isDebug ) {
-		log( 'URL metric to be sent:', urlMetric );
-	}
-
 	for ( const [ xpath, domRect ] of loadedElementContentRects.entries() ) {
-		if (
-			amendElementData( xpath, { resizedBoundingClientRect: domRect } )
-		) {
-			const elementData = getElementData( xpath );
+		try {
+			amendElementData( xpath, { resizedBoundingClientRect: domRect } );
 			if ( isDebug ) {
+				const elementData = getElementData( xpath );
 				log(
 					`boundingClientRect for ${ xpath } resized:`,
 					elementData.boundingClientRect,
 					'=>',
-					elementData.resizedBoundingClientRect
+					domRect
 				);
 			}
-		} else if ( isDebug ) {
-			log( `Unable to amend element data for ${ xpath }` );
+		} catch ( err ) {
+			error(
+				`Failed to amend ${ xpath } with resizedBoundingClientRect data:`,
+				domRect,
+				err
+			);
 		}
 	}
 }

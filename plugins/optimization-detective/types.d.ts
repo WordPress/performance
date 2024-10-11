@@ -31,7 +31,7 @@ type FinalizeArgs = {
 	readonly getRootData: () => URLMetric,
 	readonly amendRootData: ( properties: object ) => void,
 	readonly getElementData: ( xpath: string ) => ElementData|null,
-	readonly amendElementData: ( xpath: string, properties: object ) => boolean,
+	readonly amendElementData: ( xpath: string, properties: object ) => void,
 	readonly isDebug: boolean,
 };
 

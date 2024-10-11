@@ -153,15 +153,13 @@ function getElementData( xpath ) {
  *
  * @param {string} xpath      XPath.
  * @param {Object} properties Properties.
- * @return {boolean} Whether appending element data was successful.
  */
 function amendElementData( xpath, properties ) {
 	if ( ! elementsByXPath.has( xpath ) ) {
-		return false;
+		throw new Error( `Unknown element with XPath: ${ xpath }` );
 	}
 	const elementData = elementsByXPath.get( xpath );
 	Object.assign( elementData, properties ); // TODO: Check if any core properties are being used.
-	return true;
 }
 
 /**
@@ -290,15 +288,23 @@ export default async function detect( {
 		log( 'Proceeding with detection' );
 	}
 
-	/** @type {Extension[]} */
-	const extensions = [];
+	/** @type {Map<string, Extension>} */
+	const extensions = new Map();
 	for ( const extensionModuleUrl of extensionModuleUrls ) {
-		const extension = await import( extensionModuleUrl );
-		extensions.push( extension );
-		// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args. It's important to pass webVitalsLibrarySrc to the extension so that onLCP, onCLS, or onINP can be obtained.
-		// TODO: Pass additional functions from this module into the extensions.
-		if ( extension.initialize instanceof Function ) {
-			extension.initialize( { isDebug } );
+		try {
+			/** @type {Extension} */
+			const extension = await import( extensionModuleUrl );
+			extensions.set( extensionModuleUrl, extension );
+			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args. It's important to pass webVitalsLibrarySrc to the extension so that onLCP, onCLS, or onINP can be obtained.
+			// TODO: Pass additional functions from this module into the extensions.
+			if ( extension.initialize instanceof Function ) {
+				extension.initialize( { isDebug } );
+			}
+		} catch ( err ) {
+			error(
+				`Failed to initialize extension '${ extensionModuleUrl }':`,
+				err
+			);
 		}
 	}
 
@@ -446,7 +452,7 @@ export default async function detect( {
 		);
 	} );
 
-	if ( extensions.length > 0 ) {
+	if ( extensions.size > 0 ) {
 		/**
 		 * Gets root URL Metric data.
 		 *
@@ -467,15 +473,25 @@ export default async function detect( {
 			Object.assign( urlMetric, properties ); // TODO: Prevent overriding core properties.
 		};
 
-		for ( const extension of extensions ) {
+		for ( const [
+			extensionModuleUrl,
+			extension,
+		] of extensions.entries() ) {
 			if ( extension.finalize instanceof Function ) {
-				extension.finalize( {
-					isDebug,
-					getRootData,
-					getElementData,
-					amendElementData,
-					amendRootData,
-				} );
+				try {
+					extension.finalize( {
+						isDebug,
+						getRootData,
+						getElementData,
+						amendElementData,
+						amendRootData,
+					} );
+				} catch ( err ) {
+					error(
+						`Unable to finalize module '${ extensionModuleUrl }':`,
+						err
+					);
+				}
 			}
 		}
 	}
