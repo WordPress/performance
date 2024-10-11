@@ -53,16 +53,13 @@ const loadedElementContentRects = new Map();
  * @param {InitializeArgs} args Args.
  */
 export function initialize( { isDebug } ) {
-	const embedWrappers =
-		/** @type NodeListOf<HTMLDivElement> */ document.querySelectorAll(
-			'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
-		);
+	/** @type NodeListOf<HTMLDivElement> */
+	const embedWrappers = document.querySelectorAll(
+		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
+	);
 
 	for ( const embedWrapper of embedWrappers ) {
-		monitorEmbedWrapperForResizes(
-			embedWrapper, // TODO: Why TypeScript error: TS2345: Argument of type Element is not assignable to parameter of type HTMLDivElement.
-			isDebug
-		);
+		monitorEmbedWrapperForResizes( embedWrapper, isDebug );
 	}
 
 	if ( isDebug ) {
