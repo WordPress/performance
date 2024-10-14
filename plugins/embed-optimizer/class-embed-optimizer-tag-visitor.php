@@ -48,7 +48,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 * @since n.e.x.t
 	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor.
-	 * @return bool Whether the tag should be measured and stored in URL metrics
+	 * @return bool Whether the tag should be measured and stored in URL metrics.
 	 */
 	private function is_embed_wrapper( OD_HTML_Tag_Processor $processor ): bool {
 		return (
