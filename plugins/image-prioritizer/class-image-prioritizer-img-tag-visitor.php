@@ -84,16 +84,15 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$updated_fetchpriority = false; // That is, remove it.
 		}
 
-		$element_max_intersection_ratio        = $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath );
-		$is_positioned_in_any_initial_viewport = $context->url_metric_group_collection->is_element_positioned_in_any_initial_viewport( $xpath );
+		$element_max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath );
 
 		// If the element was not found, we don't know if it was visible for not, so don't do anything.
-		if ( is_null( $element_max_intersection_ratio ) || is_null( $is_positioned_in_any_initial_viewport ) ) {
+		if ( is_null( $element_max_intersection_ratio ) ) {
 			$processor->set_meta_attribute( 'unknown-tag', true ); // Mostly useful for debugging why an IMG isn't optimized.
 		} else {
 			// TODO: Take into account whether the element has the computed style of visibility:hidden, in such case it should also get fetchpriority=low.
 			$is_visible = $element_max_intersection_ratio > 0.0;
-			if ( $is_positioned_in_any_initial_viewport ) {
+			if ( true === $context->url_metric_group_collection->is_element_positioned_in_any_initial_viewport( $xpath ) ) {
 				if ( ! $is_visible ) {
 					// If an element is positioned in the initial viewport and yet it is it not visible, it may be
 					// located in a subsequent carousel slide or inside a hidden navigation menu which could be

@@ -527,7 +527,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @since n.e.x.t
 	 *
 	 * @param string $xpath XPath for the element.
-	 * @return bool Whether element is positioned in any initial viewport of null if unknown.
+	 * @return bool|null Whether element is positioned in any initial viewport of null if unknown.
 	 */
 	public function is_element_positioned_in_any_initial_viewport( string $xpath ): ?bool {
 		return $this->get_all_elements_positioned_in_any_initial_viewport()[ $xpath ] ?? null;
