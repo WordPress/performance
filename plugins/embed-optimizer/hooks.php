@@ -18,14 +18,52 @@ if ( ! defined( 'ABSPATH' ) ) {
 function embed_optimizer_add_hooks(): void {
 	add_action( 'wp_head', 'embed_optimizer_render_generator' );
 
-	if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
-		add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' );
-		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_detect_embed_presence' );
-	} else {
+	add_action( 'od_init', 'embed_optimizer_init_optimization_detective' );
+	add_action( 'wp_loaded', 'embed_optimizer_add_non_optimization_detective_hooks' );
+}
+add_action( 'init', 'embed_optimizer_add_hooks' );
+
+/**
+ * Adds hooks for when the Optimization Detective logic is not running.
+ *
+ * @since n.e.x.t
+ */
+function embed_optimizer_add_non_optimization_detective_hooks(): void {
+	if ( false === has_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' ) ) {
 		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_lazy_load' );
 	}
 }
-add_action( 'init', 'embed_optimizer_add_hooks' );
+
+/**
+ * Initializes Embed Optimizer when Optimization Detective has loaded.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $optimization_detective_version Current version of the optimization detective plugin.
+ */
+function embed_optimizer_init_optimization_detective( string $optimization_detective_version ): void {
+	$required_od_version = '0.7.0';
+	if ( version_compare( (string) strtok( $optimization_detective_version, '-' ), $required_od_version, '<' ) ) {
+		add_action(
+			'admin_notices',
+			static function (): void {
+				global $pagenow;
+				if ( ! in_array( $pagenow, array( 'index.php', 'plugins.php' ), true ) ) {
+					return;
+				}
+				wp_admin_notice(
+					esc_html__( 'The Embed Optimizer plugin requires a newer version of the Optimization Detective plugin. Please update your plugins.', 'embed-optimizer' ),
+					array( 'type' => 'warning' )
+				);
+			}
+		);
+		return;
+	}
+
+	add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' );
+	add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_detect_embed_presence' );
+	add_filter( 'od_url_metric_schema_element_item_additional_properties', 'embed_optimizer_add_element_item_schema_properties' );
+}
 
 /**
  * Registers the tag visitor for embeds.
@@ -38,6 +76,37 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
 	// Note: This class is loaded on the fly since it is only needed here when Optimization Detective is active.
 	require_once __DIR__ . '/class-embed-optimizer-tag-visitor.php';
 	$registry->register( 'embeds', new Embed_Optimizer_Tag_Visitor() );
+}
+
+/**
+ * Filters additional properties for the element item schema for Optimization Detective.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, array{type: string}> $additional_properties Additional properties.
+ * @return array<string, array{type: string}> Additional properties.
+ */
+function embed_optimizer_add_element_item_schema_properties( array $additional_properties ): array {
+	$additional_properties['resizedBoundingClientRect'] = array(
+		'type'       => 'object',
+		'properties' => array_fill_keys(
+			array(
+				'width',
+				'height',
+				'x',
+				'y',
+				'top',
+				'right',
+				'bottom',
+				'left',
+			),
+			array(
+				'type'     => 'number',
+				'required' => true,
+			)
+		),
+	);
+	return $additional_properties;
 }
 
 /**

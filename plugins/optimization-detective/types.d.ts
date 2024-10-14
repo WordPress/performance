@@ -1,4 +1,8 @@
-interface ElementMetrics {
+
+// h/t https://stackoverflow.com/a/59801602/93579
+type ExcludeProps<T> = { [k: string]: any } & { [K in keyof T]?: never }
+
+export interface ElementData {
 	isLCP: boolean;
 	isLCPCandidate: boolean;
 	xpath: string;
@@ -7,21 +11,41 @@ interface ElementMetrics {
 	boundingClientRect: DOMRectReadOnly;
 }
 
-interface URLMetric {
+export type ExtendedElementData = ExcludeProps<ElementData>
+
+export interface URLMetric {
 	url: string;
 	viewport: {
 		width: number;
 		height: number;
 	};
-	elements: ElementMetrics[];
+	elements: ElementData[];
 }
 
-interface URLMetricsGroupStatus {
+export type ExtendedRootData = ExcludeProps<URLMetric>
+
+export interface URLMetricGroupStatus {
 	minimumViewportWidth: number;
 	complete: boolean;
 }
 
-interface Extension {
-	initialize?: Function;
-	finalize?: Function;
+export type InitializeArgs = {
+	readonly isDebug: boolean,
+};
+
+export type InitializeCallback = ( args: InitializeArgs ) => void;
+
+export type FinalizeArgs = {
+	readonly getRootData: () => URLMetric,
+	readonly extendRootData: ( properties: ExtendedRootData ) => void,
+	readonly getElementData: ( xpath: string ) => ElementData|null,
+	readonly extendElementData: (xpath: string, properties: ExtendedElementData ) => void,
+	readonly isDebug: boolean,
+};
+
+export type FinalizeCallback = ( args: FinalizeArgs ) => Promise<void>;
+
+export interface Extension {
+	initialize?: InitializeCallback;
+	finalize?: FinalizeCallback;
 }

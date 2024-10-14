@@ -179,13 +179,23 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $buffered_text_replacements = array();
 
 	/**
-	 * Count for the number of times next_token() was called
+	 * Whether the end of the document was reached.
 	 *
-	 * @since 0.4.1
+	 * @since n.e.x.t
+	 * @see self::next_token()
+	 * @var bool
+	 */
+	private $reached_end_of_document = false;
+
+	/**
+	 * Count for the number of times that the cursor was moved.
+	 *
+	 * @since 0.6.0
 	 * @var int
 	 * @see self::next_token()
+	 * @see self::seek()
 	 */
-	private $next_token_count = 0;
+	private $cursor_move_count = 0;
 
 	/**
 	 * Finds the next tag.
@@ -258,10 +268,13 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 */
 	public function next_token(): bool {
 		$this->current_xpath = null; // Clear cache.
-		++$this->next_token_count;
+		++$this->cursor_move_count;
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags    = array();
 			$this->open_stack_indices = array();
+
+			// Mark that the end of the document was reached, meaning that get_modified_html() can should now be able to append markup to the HEAD and the BODY.
+			$this->reached_end_of_document = true;
 			return false;
 		}
 
@@ -339,15 +352,16 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Gets the number of times next_token() was called.
+	 * Gets the number of times the cursor has moved.
 	 *
-	 * @since 0.4.1
+	 * @since 0.6.0
 	 * @see self::next_token()
+	 * @see self::seek()
 	 *
-	 * @return int Count of next_token() calls.
+	 * @return int Count of times the cursor has moved.
 	 */
-	public function get_next_token_count(): int {
-		return $this->next_token_count;
+	public function get_cursor_move_count(): int {
+		return $this->cursor_move_count;
 	}
 
 	/**
@@ -376,7 +390,9 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Sets a meta attribute.
 	 *
-	 * All meta attributes are prefixed with 'data-od-'.
+	 * All meta attributes are prefixed with data-od-.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @param string      $name  Meta attribute name.
 	 * @param string|true $value Value.
@@ -431,18 +447,6 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			$this->open_stack_indices = $this->bookmarked_open_stacks[ $bookmark_name ]['indices'];
 		}
 		return $result;
-	}
-
-	/**
-	 * Gets the number of times seek() was called.
-	 *
-	 * @since 0.4.1
-	 * @see self::seek()
-	 *
-	 * @return int Count of seek() calls.
-	 */
-	public function get_seek_count(): int {
-		return $this->seek_count;
 	}
 
 	/**
@@ -565,16 +569,27 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	}
 
 	/**
-	 * Gets the final updated HTML.
+	 * Returns the string representation of the HTML Tag Processor.
 	 *
-	 * This should only be called after the closing HTML tag has been reached and just before
-	 * calling {@see WP_HTML_Tag_Processor::get_updated_html()} to send the document back in the response.
+	 * Once the end of the document has been reached this is responsible for adding the pending markup to append to the
+	 * HEAD and the BODY. It waits to do this injection until the end of the document has been reached because every
+	 * time that seek() is called it the HTML Processor will flush any pending updates to the document. This means that
+	 * if there is any pending markup to append to the end of the BODY then the insertion will fail because the closing
+	 * tag for the BODY has not been encountered yet. Additionally, by not prematurely processing the buffered text
+	 * replacements in get_updated_html() then we avoid trying to insert them every time that seek() is called which is
+	 * wasteful as they are only needed once finishing iterating over the document.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.4.0
+	 * @see WP_HTML_Tag_Processor::get_updated_html()
+	 * @see WP_HTML_Tag_Processor::seek()
 	 *
-	 * @return string Final updated HTML.
+	 * @return string The processed HTML.
 	 */
-	public function get_final_updated_html(): string {
+	public function get_updated_html(): string {
+		if ( ! $this->reached_end_of_document ) {
+			return parent::get_updated_html();
+		}
+
 		foreach ( array_keys( $this->buffered_text_replacements ) as $bookmark ) {
 			$html_strings = $this->buffered_text_replacements[ $bookmark ];
 			if ( count( $html_strings ) === 0 ) {

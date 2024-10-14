@@ -24,7 +24,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 *
-	 * @return bool Whether the visitor visited the tag.
+	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
 	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
@@ -40,8 +40,22 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 
 		$xpath = $processor->get_xpath();
 
-		$current_fetchpriority = strtolower( trim( (string) $processor->get_attribute( 'fetchpriority' ), " \t\f\r\n" ) );
-		$is_lazy_loaded        = 'lazy' === strtolower( trim( (string) $processor->get_attribute( 'loading' ), " \t\f\r\n" ) );
+		/**
+		 * Gets attribute value.
+		 *
+		 * @param string $attribute_name Attribute name.
+		 * @return string|true|null Normalized attribute value.
+		 */
+		$get_attribute_value = static function ( string $attribute_name ) use ( $processor ) {
+			$value = $processor->get_attribute( $attribute_name );
+			if ( is_string( $value ) ) {
+				$value = strtolower( trim( $value, " \t\f\r\n" ) );
+			}
+			return $value;
+		};
+
+		$current_fetchpriority = $get_attribute_value( 'fetchpriority' );
+		$is_lazy_loaded        = 'lazy' === $get_attribute_value( 'loading' );
 		$updated_fetchpriority = null;
 
 		/*
@@ -49,16 +63,13 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		 * fetchpriority=high, even though it won't really be needed because a preload link with fetchpriority=high
 		 * will also be added. Additionally, ensure that this common LCP element is never lazy-loaded.
 		 */
-		$common_lcp_element = $context->url_metrics_group_collection->get_common_lcp_element();
+		$common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
 		if ( ! is_null( $common_lcp_element ) && $xpath === $common_lcp_element['xpath'] ) {
 			$updated_fetchpriority = 'high';
 		} elseif (
 			'high' === $current_fetchpriority
 			&&
-			// Temporary condition in case someone updates Image Prioritizer without also updating Optimization Detective.
-			method_exists( $context->url_metrics_group_collection, 'is_any_group_populated' )
-			&&
-			$context->url_metrics_group_collection->is_any_group_populated()
+			$context->url_metric_group_collection->is_any_group_populated()
 		) {
 			/*
 			 * At this point, the element is not the shared LCP across all viewport groups. Nevertheless, server-side
@@ -73,12 +84,8 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$updated_fetchpriority = false; // That is, remove it.
 		}
 
-		$element_max_intersection_ratio        = $context->url_metrics_group_collection->get_element_max_intersection_ratio( $xpath );
-		$is_positioned_in_any_initial_viewport = null;
-		// Temporary condition in case Optimization Detective is not updated to the latest version yet.
-		if ( method_exists( $context->url_metrics_group_collection, 'is_element_positioned_in_any_initial_viewport' ) ) {
-			$is_positioned_in_any_initial_viewport = $context->url_metrics_group_collection->is_element_positioned_in_any_initial_viewport( $xpath );
-		}
+		$element_max_intersection_ratio        = $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath );
+		$is_positioned_in_any_initial_viewport = $context->url_metric_group_collection->is_element_positioned_in_any_initial_viewport( $xpath );
 
 		// If the element was not found, we don't know if it was visible for not, so don't do anything.
 		if ( is_null( $element_max_intersection_ratio ) || is_null( $is_positioned_in_any_initial_viewport ) ) {
@@ -111,16 +118,35 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		// TODO: If an image is visible in one breakpoint but not another, add loading=lazy AND add a regular-priority preload link with media queries (unless LCP in which case it should already have a fetchpriority=high link) so that the image won't be eagerly-loaded for viewports on which it is not shown.
 
 		// Set the fetchpriority attribute if needed.
-		if ( is_string( $updated_fetchpriority ) && $updated_fetchpriority !== $current_fetchpriority ) {
-			$processor->set_attribute( 'fetchpriority', $updated_fetchpriority );
-		} elseif ( $updated_fetchpriority === $current_fetchpriority ) {
-			$processor->set_meta_attribute( 'fetchpriority-already-added', true );
+		if ( is_string( $updated_fetchpriority ) ) {
+			if ( $updated_fetchpriority !== $current_fetchpriority ) {
+				$processor->set_attribute( 'fetchpriority', $updated_fetchpriority );
+			} else {
+				$processor->set_meta_attribute( 'fetchpriority-already-added', true );
+			}
 		} elseif ( false === $updated_fetchpriority ) {
 			$processor->remove_attribute( 'fetchpriority' );
 		}
 
+		// Ensure that sizes=auto is set properly.
+		$sizes = $processor->get_attribute( 'sizes' );
+		if ( is_string( $sizes ) ) {
+			$is_lazy  = 'lazy' === $get_attribute_value( 'loading' );
+			$has_auto = $this->sizes_attribute_includes_valid_auto( $sizes );
+
+			if ( $is_lazy && ! $has_auto ) {
+				$processor->set_attribute( 'sizes', "auto, $sizes" );
+			} elseif ( ! $is_lazy && $has_auto ) {
+				// Remove auto from the beginning of the list.
+				$processor->set_attribute(
+					'sizes',
+					(string) preg_replace( '/^[ \t\f\r\n]*auto[ \t\f\r\n]*(,[ \t\f\r\n]*)?/i', '', $sizes )
+				);
+			}
+		}
+
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
-		foreach ( $context->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
+		foreach ( $context->url_metric_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
 			$link_attributes = array_merge(
 				array(
 					'rel'           => 'preload',
@@ -139,8 +165,8 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 				)
 			);
 
-			$crossorigin = $processor->get_attribute( 'crossorigin' );
-			if ( is_string( $crossorigin ) ) {
+			$crossorigin = $get_attribute_value( 'crossorigin' );
+			if ( null !== $crossorigin ) {
 				$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
 			}
 
@@ -154,5 +180,25 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks whether the given 'sizes' attribute includes the 'auto' keyword as the first item in the list.
+	 *
+	 * Per the HTML spec, if present it must be the first entry.
+	 *
+	 * @since 0.1.4
+	 *
+	 * @param string $sizes_attr The 'sizes' attribute value.
+	 * @return bool True if the 'auto' keyword is present, false otherwise.
+	 */
+	private function sizes_attribute_includes_valid_auto( string $sizes_attr ): bool {
+		if ( function_exists( 'wp_sizes_attribute_includes_valid_auto' ) ) {
+			return wp_sizes_attribute_includes_valid_auto( $sizes_attr );
+		} elseif ( function_exists( 'auto_sizes_attribute_includes_valid_auto' ) ) {
+			return auto_sizes_attribute_includes_valid_auto( $sizes_attr );
+		} else {
+			return 'auto' === $sizes_attr || str_starts_with( $sizes_attr, 'auto,' );
+		}
 	}
 }

@@ -1,9 +1,11 @@
 /**
  * @typedef {import("web-vitals").LCPMetric} LCPMetric
- * @typedef {import("types.d.ts").ElementMetrics} ElementMetrics
- * @typedef {import("types.d.ts").URLMetric} URLMetric
- * @typedef {import("types.d.ts").URLMetricsGroupStatus} URLMetricsGroupStatus
- * @typedef {import("types.d.ts").Extension} Extension
+ * @typedef {import("./types.d.ts").ElementData} ElementData
+ * @typedef {import("./types.d.ts").URLMetric} URLMetric
+ * @typedef {import("./types.d.ts").URLMetricGroupStatus} URLMetricGroupStatus
+ * @typedef {import("./types.d.ts").Extension} Extension
+ * @typedef {import("./types.d.ts").ExtendedRootData} ExtendedRootData
+ * @typedef {import("./types.d.ts").ExtendedElementData} ExtendedElementData
  */
 
 const win = window;
@@ -39,7 +41,7 @@ function isStorageLocked( currentTime, storageLockTTL ) {
 }
 
 /**
- * Set the storage lock.
+ * Sets the storage lock.
  *
  * @param {number} currentTime - Current time in milliseconds.
  */
@@ -53,7 +55,7 @@ function setStorageLock( currentTime ) {
 }
 
 /**
- * Log a message.
+ * Logs a message.
  *
  * @param {...*} message
  */
@@ -63,7 +65,7 @@ function log( ...message ) {
 }
 
 /**
- * Log a warning.
+ * Logs a warning.
  *
  * @param {...*} message
  */
@@ -73,7 +75,7 @@ function warn( ...message ) {
 }
 
 /**
- * Log an error.
+ * Logs an error.
  *
  * @param {...*} message
  */
@@ -85,16 +87,13 @@ function error( ...message ) {
 /**
  * Checks whether the URL metric(s) for the provided viewport width is needed.
  *
- * @param {number}                  viewportWidth           - Current viewport width.
- * @param {URLMetricsGroupStatus[]} urlMetricsGroupStatuses - Viewport group statuses.
+ * @param {number}                 viewportWidth          - Current viewport width.
+ * @param {URLMetricGroupStatus[]} urlMetricGroupStatuses - Viewport group statuses.
  * @return {boolean} Whether URL metrics are needed.
  */
-function isViewportNeeded( viewportWidth, urlMetricsGroupStatuses ) {
+function isViewportNeeded( viewportWidth, urlMetricGroupStatuses ) {
 	let lastWasLacking = false;
-	for ( const {
-		minimumViewportWidth,
-		complete,
-	} of urlMetricsGroupStatuses ) {
+	for ( const { minimumViewportWidth, complete } of urlMetricGroupStatuses ) {
 		if ( viewportWidth >= minimumViewportWidth ) {
 			lastWasLacking = ! complete;
 		} else {
@@ -114,45 +113,162 @@ function getCurrentTime() {
 }
 
 /**
+ * Recursively freezes an object to prevent mutation.
+ *
+ * @param {Object} obj Object to recursively freeze.
+ */
+function recursiveFreeze( obj ) {
+	for ( const prop of Object.getOwnPropertyNames( obj ) ) {
+		const value = obj[ prop ];
+		if ( null !== value && typeof value === 'object' ) {
+			recursiveFreeze( value );
+		}
+	}
+	Object.freeze( obj );
+}
+
+/**
+ * URL metric being assembled for submission.
+ *
+ * @type {URLMetric}
+ */
+let urlMetric;
+
+/**
+ * Reserved root property keys.
+ *
+ * @see {URLMetric}
+ * @see {ExtendedElementData}
+ * @type {Set<string>}
+ */
+const reservedRootPropertyKeys = new Set( [ 'url', 'viewport', 'elements' ] );
+
+/**
+ * Gets root URL Metric data.
+ *
+ * @return {URLMetric} URL Metric.
+ */
+function getRootData() {
+	const immutableUrlMetric = structuredClone( urlMetric );
+	recursiveFreeze( immutableUrlMetric );
+	return immutableUrlMetric;
+}
+
+/**
+ * Extends root URL metric data.
+ *
+ * @param {ExtendedRootData} properties
+ */
+function extendRootData( properties ) {
+	for ( const key of Object.getOwnPropertyNames( properties ) ) {
+		if ( reservedRootPropertyKeys.has( key ) ) {
+			throw new Error( `Disallowed setting of key '${ key }' on root.` );
+		}
+	}
+	Object.assign( urlMetric, properties );
+}
+
+/**
+ * Mapping of XPath to element data.
+ *
+ * @type {Map<string, ElementData>}
+ */
+const elementsByXPath = new Map();
+
+/**
+ * Reserved element property keys.
+ *
+ * @see {ElementData}
+ * @see {ExtendedRootData}
+ * @type {Set<string>}
+ */
+const reservedElementPropertyKeys = new Set( [
+	'isLCP',
+	'isLCPCandidate',
+	'xpath',
+	'intersectionRatio',
+	'intersectionRect',
+	'boundingClientRect',
+] );
+
+/**
+ * Gets element data.
+ *
+ * @param {string} xpath XPath.
+ * @return {ElementData|null} Element data, or null if no element for the XPath exists.
+ */
+function getElementData( xpath ) {
+	const elementData = elementsByXPath.get( xpath );
+	if ( elementData ) {
+		const cloned = structuredClone( elementData );
+		recursiveFreeze( cloned );
+		return cloned;
+	}
+	return null;
+}
+
+/**
+ * Extends element data.
+ *
+ * @param {string}              xpath      XPath.
+ * @param {ExtendedElementData} properties Properties.
+ */
+function extendElementData( xpath, properties ) {
+	if ( ! elementsByXPath.has( xpath ) ) {
+		throw new Error( `Unknown element with XPath: ${ xpath }` );
+	}
+	for ( const key of Object.getOwnPropertyNames( properties ) ) {
+		if ( reservedElementPropertyKeys.has( key ) ) {
+			throw new Error(
+				`Disallowed setting of key '${ key }' on element.`
+			);
+		}
+	}
+	const elementData = elementsByXPath.get( xpath );
+	Object.assign( elementData, properties );
+}
+
+/**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
- * @param {Object}                  args                             Args.
- * @param {number}                  args.serveTime                   The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
- * @param {number}                  args.detectionTimeWindow         The number of milliseconds between now and when the page was first generated in which detection should proceed.
- * @param {string[]}                args.extensionModuleUrls         URLs for extension script modules to import.
- * @param {boolean}                 args.isDebug                     Whether to show debug messages.
- * @param {string}                  args.restApiEndpoint             URL for where to send the detection data.
- * @param {string}                  args.restApiNonce                Nonce for writing to the REST API.
- * @param {string}                  args.currentUrl                  Current URL.
- * @param {string}                  args.urlMetricsSlug              Slug for URL metrics.
- * @param {string}                  args.urlMetricsNonce             Nonce for URL metrics storage.
- * @param {URLMetricsGroupStatus[]} args.urlMetricsGroupStatuses     URL metrics group statuses.
- * @param {number}                  args.storageLockTTL              The TTL (in seconds) for the URL metric storage lock.
- * @param {string}                  args.webVitalsLibrarySrc         The URL for the web-vitals library.
- * @param {Object}                  [args.urlMetricsGroupCollection] URL metrics group collection, when in debug mode.
+ * @param {Object}                 args                            Args.
+ * @param {number}                 args.serveTime                  The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
+ * @param {number}                 args.detectionTimeWindow        The number of milliseconds between now and when the page was first generated in which detection should proceed.
+ * @param {string[]}               args.extensionModuleUrls        URLs for extension script modules to import.
+ * @param {number}                 args.minViewportAspectRatio     Minimum aspect ratio allowed for the viewport.
+ * @param {number}                 args.maxViewportAspectRatio     Maximum aspect ratio allowed for the viewport.
+ * @param {boolean}                args.isDebug                    Whether to show debug messages.
+ * @param {string}                 args.restApiEndpoint            URL for where to send the detection data.
+ * @param {string}                 args.restApiNonce               Nonce for writing to the REST API.
+ * @param {string}                 args.currentUrl                 Current URL.
+ * @param {string}                 args.urlMetricSlug              Slug for URL metric.
+ * @param {string}                 args.urlMetricNonce             Nonce for URL metric storage.
+ * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     URL metric group statuses.
+ * @param {number}                 args.storageLockTTL             The TTL (in seconds) for the URL metric storage lock.
+ * @param {string}                 args.webVitalsLibrarySrc        The URL for the web-vitals library.
+ * @param {Object}                 [args.urlMetricGroupCollection] URL metric group collection, when in debug mode.
  */
 export default async function detect( {
 	serveTime,
 	detectionTimeWindow,
+	minViewportAspectRatio,
+	maxViewportAspectRatio,
 	isDebug,
 	extensionModuleUrls,
 	restApiEndpoint,
 	restApiNonce,
 	currentUrl,
-	urlMetricsSlug,
-	urlMetricsNonce,
-	urlMetricsGroupStatuses,
+	urlMetricSlug,
+	urlMetricNonce,
+	urlMetricGroupStatuses,
 	storageLockTTL,
 	webVitalsLibrarySrc,
-	urlMetricsGroupCollection,
+	urlMetricGroupCollection,
 } ) {
 	const currentTime = getCurrentTime();
 
 	if ( isDebug ) {
-		log(
-			'Stored URL metrics group collection:',
-			urlMetricsGroupCollection
-		);
+		log( 'Stored URL metric group collection:', urlMetricGroupCollection );
 	}
 
 	// Abort running detection logic if it was served in a cached page.
@@ -166,9 +282,23 @@ export default async function detect( {
 	}
 
 	// Abort if the current viewport is not among those which need URL metrics.
-	if ( ! isViewportNeeded( win.innerWidth, urlMetricsGroupStatuses ) ) {
+	if ( ! isViewportNeeded( win.innerWidth, urlMetricGroupStatuses ) ) {
 		if ( isDebug ) {
 			log( 'No need for URL metrics from the current viewport.' );
+		}
+		return;
+	}
+
+	// Abort if the viewport aspect ratio is not in a common range.
+	const aspectRatio = win.innerWidth / win.innerHeight;
+	if (
+		aspectRatio < minViewportAspectRatio ||
+		aspectRatio > maxViewportAspectRatio
+	) {
+		if ( isDebug ) {
+			warn(
+				`Viewport aspect ratio (${ aspectRatio }) is not in the accepted range of ${ minViewportAspectRatio } to ${ maxViewportAspectRatio }.`
+			);
 		}
 		return;
 	}
@@ -224,21 +354,28 @@ export default async function detect( {
 		log( 'Proceeding with detection' );
 	}
 
-	/** @type {Extension[]} */
-	const extensions = [];
+	/** @type {Map<string, Extension>} */
+	const extensions = new Map();
 	for ( const extensionModuleUrl of extensionModuleUrls ) {
-		const extension = await import( extensionModuleUrl );
-		extensions.push( extension );
-		// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args. It's important to pass webVitalsLibrarySrc to the extension so that onLCP, onCLS, or onINP can be obtained.
-		// TODO: Pass additional functions from this module into the extensions.
-		if ( extension.initialize instanceof Function ) {
-			extension.initialize( { isDebug } );
+		try {
+			/** @type {Extension} */
+			const extension = await import( extensionModuleUrl );
+			extensions.set( extensionModuleUrl, extension );
+			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args. It's important to pass webVitalsLibrarySrc to the extension so that onLCP, onCLS, or onINP can be obtained.
+			if ( extension.initialize instanceof Function ) {
+				extension.initialize( { isDebug } );
+			}
+		} catch ( err ) {
+			error(
+				`Failed to initialize extension '${ extensionModuleUrl }':`,
+				err
+			);
 		}
 	}
 
 	const breadcrumbedElements = doc.body.querySelectorAll( '[data-od-xpath]' );
 
-	/** @type {Map<HTMLElement, string>} */
+	/** @type {Map<Element, string>} */
 	const breadcrumbedElementsMap = new Map(
 		[ ...breadcrumbedElements ].map(
 			/**
@@ -299,7 +436,7 @@ export default async function detect( {
 	// Obtain at least one LCP candidate. More may be reported before the page finishes loading.
 	await new Promise( ( resolve ) => {
 		onLCP(
-			( metric ) => {
+			( /** @type LCPMetric */ metric ) => {
 				lcpMetricCandidates.push( metric );
 				resolve();
 			},
@@ -318,8 +455,7 @@ export default async function detect( {
 		log( 'Detection is stopping.' );
 	}
 
-	/** @type {URLMetric} */
-	const urlMetric = {
+	urlMetric = {
 		url: currentUrl,
 		viewport: {
 			width: win.innerWidth,
@@ -342,8 +478,8 @@ export default async function detect( {
 		const isLCP =
 			elementIntersection.target === lcpMetric?.entries[ 0 ]?.element;
 
-		/** @type {ElementMetrics} */
-		const elementMetrics = {
+		/** @type {ElementData} */
+		const elementData = {
 			isLCP,
 			isLCPCandidate: !! lcpMetricCandidates.find(
 				( lcpMetricCandidate ) =>
@@ -356,11 +492,12 @@ export default async function detect( {
 			boundingClientRect: elementIntersection.boundingClientRect,
 		};
 
-		urlMetric.elements.push( elementMetrics );
+		urlMetric.elements.push( elementData );
+		elementsByXPath.set( elementData.xpath, elementData );
 	}
 
 	if ( isDebug ) {
-		log( 'Current URL metrics:', urlMetric );
+		log( 'Current URL metric:', urlMetric );
 	}
 
 	// Wait for the page to be hidden.
@@ -379,12 +516,27 @@ export default async function detect( {
 		);
 	} );
 
-	for ( const extension of extensions ) {
-		if ( extension.finalize instanceof Function ) {
-			extension.finalize( {
-				isDebug,
-				urlMetric,
-			} );
+	if ( extensions.size > 0 ) {
+		for ( const [
+			extensionModuleUrl,
+			extension,
+		] of extensions.entries() ) {
+			if ( extension.finalize instanceof Function ) {
+				try {
+					await extension.finalize( {
+						isDebug,
+						getRootData,
+						getElementData,
+						extendElementData,
+						extendRootData,
+					} );
+				} catch ( err ) {
+					error(
+						`Unable to finalize module '${ extensionModuleUrl }':`,
+						err
+					);
+				}
+			}
 		}
 	}
 
@@ -396,15 +548,13 @@ export default async function detect( {
 		log( 'Sending URL metric:', urlMetric );
 	}
 
-	const body = Object.assign( {}, urlMetric, {
-		slug: urlMetricsSlug,
-		nonce: urlMetricsNonce,
-	} );
 	const url = new URL( restApiEndpoint );
 	url.searchParams.set( '_wpnonce', restApiNonce );
+	url.searchParams.set( 'slug', urlMetricSlug );
+	url.searchParams.set( 'nonce', urlMetricNonce );
 	navigator.sendBeacon(
 		url,
-		new Blob( [ JSON.stringify( body ) ], {
+		new Blob( [ JSON.stringify( urlMetric ) ], {
 			type: 'application/json',
 		} )
 	);

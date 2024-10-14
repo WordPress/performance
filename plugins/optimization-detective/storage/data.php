@@ -180,6 +180,50 @@ function od_verify_url_metrics_storage_nonce( string $nonce, string $slug, strin
 }
 
 /**
+ * Gets the minimum allowed viewport aspect ratio for URL metrics.
+ *
+ * @since 0.6.0
+ * @access private
+ *
+ * @return float Minimum viewport aspect ratio for URL metrics.
+ */
+function od_get_minimum_viewport_aspect_ratio(): float {
+	/**
+	 * Filters the minimum allowed viewport aspect ratio for URL metrics.
+	 *
+	 * The 0.4 default value is intended to accommodate the phone with the greatest known aspect
+	 * ratio at 21:9 when rotated 90 degrees to 9:21 (0.429).
+	 *
+	 * @since 0.6.0
+	 *
+	 * @param float $minimum_viewport_aspect_ratio Minimum viewport aspect ratio.
+	 */
+	return (float) apply_filters( 'od_minimum_viewport_aspect_ratio', 0.4 );
+}
+
+/**
+ * Gets the maximum allowed viewport aspect ratio for URL metrics.
+ *
+ * @since 0.6.0
+ * @access private
+ *
+ * @return float Maximum viewport aspect ratio for URL metrics.
+ */
+function od_get_maximum_viewport_aspect_ratio(): float {
+	/**
+	 * Filters the maximum allowed viewport aspect ratio for URL metrics.
+	 *
+	 * The 2.5 default value is intended to accommodate the phone with the greatest known aspect
+	 * ratio at 21:9 (2.333).
+	 *
+	 * @since 0.6.0
+	 *
+	 * @param float $maximum_viewport_aspect_ratio Maximum viewport aspect ratio.
+	 */
+	return (float) apply_filters( 'od_maximum_viewport_aspect_ratio', 2.5 );
+}
+
+/**
  * Gets the breakpoint max widths to group URL metrics for various viewports.
  *
  * Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then

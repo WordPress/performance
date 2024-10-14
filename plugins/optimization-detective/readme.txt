@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   0.4.1
+Stable tag:   0.6.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
@@ -96,6 +96,29 @@ add_filter( 'od_url_metric_freshness_ttl', '__return_zero' );
 
 Filters the time window between serve time and run time in which loading detection is allowed to run. This amount is the allowance between when the page was first generated (and perhaps cached) and when the detect function on the page is allowed to perform its detection logic and submit the request to store the results. This avoids situations in which there are missing URL Metrics in which case a site with page caching which also has a lot of traffic could result in a cache stampede.
 
+**Filter:** `od_minimum_viewport_aspect_ratio` (default: 0.4)
+
+Filters the minimum allowed viewport aspect ratio for URL metrics.
+
+The 0.4 value is intended to accommodate the phone with the greatest known aspect
+ratio at 21:9 when rotated 90 degrees to 9:21 (0.429).
+
+**Filter:** `od_maximum_viewport_aspect_ratio` (default: 2.5)
+
+Filters the maximum allowed viewport aspect ratio for URL metrics.
+
+The 2.5 value is intended to accommodate the phone with the greatest known aspect
+ratio at 21:9 (2.333).
+
+During development when you have the DevTools console open, for example, the viewport aspect ratio will be wider than normal. In this case, you may want to increase the maximum aspect ratio:
+
+`
+<?php
+add_filter( 'od_maximum_viewport_aspect_ratio', function () {
+	return 5;
+} );
+`
+
 **Filter:** `od_template_output_buffer` (default: the HTML response)
 
 Filters the template output buffer prior to sending to the client. This filter is added to implement [#43258](https://core.trac.wordpress.org/ticket/43258) in WordPress core.
@@ -133,6 +156,33 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.6.0 =
+
+**Enhancements**
+
+* Allow URL metric schema to be extended. ([1492](https://github.com/WordPress/performance/pull/1492))
+* Clarify docs around a tag visitor's boolean return value. ([1479](https://github.com/WordPress/performance/pull/1479))
+* Include UUID with each URL metric. ([1489](https://github.com/WordPress/performance/pull/1489))
+* Introduce get_cursor_move_count() to use instead of get_seek_count() and get_next_token_count(). ([1478](https://github.com/WordPress/performance/pull/1478))
+
+**Bug Fixes**
+
+* Add missing global documentation for `delete_all_posts()`. ([1522](https://github.com/WordPress/performance/pull/1522))
+* Introduce viewport aspect ratio validation for URL Metrics. ([1494](https://github.com/WordPress/performance/pull/1494))
+
+= 0.5.0 =
+
+**Enhancements**
+
+* Bump web-vitals from 4.2.1 to 4.2.2. ([1386](https://github.com/WordPress/performance/pull/1386))
+
+**Bug Fixes**
+
+* Disable Optimization Detective by default on the embed template. ([1472](https://github.com/WordPress/performance/pull/1472))
+* Ensure only HTML documents are processed by Optimization Detective. ([1442](https://github.com/WordPress/performance/pull/1442))
+* Ensure the entire template is passed to the output buffer callback for Optimization Detective to process. ([1317](https://github.com/WordPress/performance/pull/1317))
+* Implement full support for intersectionRect/boundingClientRect, fix viewportRect typing, and harden JSON schema. ([1411](https://github.com/WordPress/performance/pull/1411))
 
 = 0.4.1 =
 

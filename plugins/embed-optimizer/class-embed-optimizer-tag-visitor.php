@@ -43,12 +43,12 @@ final class Embed_Optimizer_Tag_Visitor {
 	}
 
 	/**
-	 * Determines whether the processor is currently at a div.wp-block-embed__wrapper tag.
+	 * Determines whether the processor is currently at a div.wp-block-embed__wrapper tag (which is a child of figure.wp-block-embed).
 	 *
 	 * @since n.e.x.t
 	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor.
-	 * @return bool Whether the tag should be measured and stored in URL metrics
+	 * @return bool Whether the tag should be measured and stored in URL metrics.
 	 */
 	private function is_embed_wrapper( OD_HTML_Tag_Processor $processor ): bool {
 		return (
@@ -61,10 +61,27 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Visits a tag.
 	 *
+	 * This visitor has two entry points, the `figure.wp-block-embed` tag and its child the `div.wp-block-embed__wrapper`
+	 * tag. For example:
+	 *
+	 *     <figure class="wp-block-embed is-type-video is-provider-wordpress-tv wp-block-embed-wordpress-tv wp-embed-aspect-16-9 wp-has-aspect-ratio">
+	 *         <div class="wp-block-embed__wrapper">
+	 *             <iframe title="VideoPress Video Player" aria-label='VideoPress Video Player' width='750' height='422' src='https://video.wordpress.com/embed/vaWm9zO6?hd=1&amp;cover=1' frameborder='0' allowfullscreen allow='clipboard-write'></iframe>
+	 *             <script src='https://v0.wordpress.com/js/next/videopress-iframe.js?m=1674852142'></script>
+	 *         </div>
+	 *     </figure>
+	 *
+	 * For the `div.wp-block-embed__wrapper` tag, the only thing this tag visitor does is flag it for tracking in URL
+	 * Metrics (by returning true). When visiting the parent `figure.wp-block-embed` tag, it does all the actual
+	 * processing. In particular, it will use the element metrics gathered for the child `div.wp-block-embed__wrapper`
+	 * element to set the min-height style on the `figure.wp-block-embed` to avoid layout shifts. Additionally, when
+	 * the embed is in the initial viewport for any breakpoint, it will add preconnect links for key resources.
+	 * Otherwise, if the embed is not in any initial viewport, it will add lazy-loading logic.
+	 *
 	 * @since 0.2.0
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
-	 * @return bool Whether the tag should be measured and stored in URL metrics.
+	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
 	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
@@ -82,20 +99,9 @@ final class Embed_Optimizer_Tag_Visitor {
 			return false;
 		}
 
-		$embed_wrapper_xpath = $processor->get_xpath() . '/*[1][self::DIV]';
-		$minimum_height      = $context->url_metrics_group_collection->get_element_minimum_height( $embed_wrapper_xpath );
-		if ( is_float( $minimum_height ) ) {
-			$min_height_style = sprintf( 'min-height: %dpx;', $minimum_height );
-			$style            = $processor->get_attribute( 'style' );
-			if ( is_string( $style ) ) {
-				$style = $min_height_style . ' ' . $style;
-			} else {
-				$style = $min_height_style;
-			}
-			$processor->set_attribute( 'style', $style );
-		}
+		$this->reduce_layout_shifts( $context );
 
-		$max_intersection_ratio = $context->url_metrics_group_collection->get_element_max_intersection_ratio( $embed_wrapper_xpath );
+		$max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( self::get_embed_wrapper_xpath( $processor->get_xpath() ) );
 		if ( $max_intersection_ratio > 0 ) {
 			/*
 			 * The following embeds have been chosen for optimization due to their relative popularity among all embed types.
@@ -176,5 +182,76 @@ final class Embed_Optimizer_Tag_Visitor {
 		 * information on what the return values mean for tag visitors, see <https://github.com/WordPress/performance/issues/1342>.
 		 */
 		return false;
+	}
+
+	/**
+	 * Gets the XPath for the embed wrapper DIV which is the sole child of the embed block FIGURE.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $embed_block_xpath XPath for the embed block FIGURE tag. For example: `/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]`.
+	 * @return string XPath for the child DIV. For example: `/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]`
+	 */
+	private static function get_embed_wrapper_xpath( string $embed_block_xpath ): string {
+		return $embed_block_xpath . '/*[1][self::DIV]';
+	}
+
+	/**
+	 * Reduces layout shifts.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
+	 */
+	private function reduce_layout_shifts( OD_Tag_Visitor_Context $context ): void {
+		$processor           = $context->processor;
+		$embed_wrapper_xpath = self::get_embed_wrapper_xpath( $processor->get_xpath() );
+
+		/**
+		 * Collection of the minimum heights for the element with each group keyed by the minimum viewport with.
+		 *
+		 * @var array<int, array{group: OD_URL_Metric_Group, height: int}> $minimums
+		 */
+		$minimums = array();
+
+		$denormalized_elements = $context->url_metric_group_collection->get_all_denormalized_elements()[ $embed_wrapper_xpath ] ?? array();
+		foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
+			if ( ! isset( $element['resizedBoundingClientRect'] ) ) {
+				continue;
+			}
+			$group_min_width = $group->get_minimum_viewport_width();
+			if ( ! isset( $minimums[ $group_min_width ] ) ) {
+				$minimums[ $group_min_width ] = array(
+					'group'  => $group,
+					'height' => $element['resizedBoundingClientRect']['height'],
+				);
+			} else {
+				$minimums[ $group_min_width ]['height'] = min(
+					$minimums[ $group_min_width ]['height'],
+					$element['resizedBoundingClientRect']['height']
+				);
+			}
+		}
+
+		// Add style rules to set the min-height for each viewport group.
+		if ( count( $minimums ) > 0 ) {
+			$element_id = $processor->get_attribute( 'id' );
+			if ( ! is_string( $element_id ) ) {
+				$element_id = 'embed-optimizer-' . md5( $processor->get_xpath() );
+				$processor->set_attribute( 'id', $element_id );
+			}
+
+			$style_rules = array();
+			foreach ( $minimums as $minimum ) {
+				$style_rules[] = sprintf(
+					'@media %s { #%s { min-height: %dpx; } }',
+					od_generate_media_query( $minimum['group']->get_minimum_viewport_width(), $minimum['group']->get_maximum_viewport_width() ),
+					$element_id,
+					$minimum['height']
+				);
+			}
+
+			$processor->append_head_html( sprintf( "<style>\n%s\n</style>\n", join( "\n", $style_rules ) ) );
+		}
 	}
 }

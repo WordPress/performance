@@ -10,6 +10,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-add_action( 'wp_head', 'image_prioritizer_render_generator_meta_tag' );
-
-add_action( 'od_register_tag_visitors', 'image_prioritizer_register_tag_visitors' );
+add_action( 'od_init', 'image_prioritizer_init' );

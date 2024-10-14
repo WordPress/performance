@@ -11,6 +11,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Initializes Image Prioritizer when Optimization Detective has loaded.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $optimization_detective_version Current version of the optimization detective plugin.
+ */
+function image_prioritizer_init( string $optimization_detective_version ): void {
+	$required_od_version = '0.7.0';
+	if ( ! version_compare( (string) strtok( $optimization_detective_version, '-' ), $required_od_version, '>=' ) ) {
+		add_action(
+			'admin_notices',
+			static function (): void {
+				global $pagenow;
+				if ( ! in_array( $pagenow, array( 'index.php', 'plugins.php' ), true ) ) {
+					return;
+				}
+				wp_admin_notice(
+					esc_html__( 'The Image Prioritizer plugin requires a newer version of the Optimization Detective plugin. Please update your plugins.', 'image-prioritizer' ),
+					array( 'type' => 'warning' )
+				);
+			}
+		);
+		return;
+	}
+
+	// Classes are required here because only here do we know the expected version of Optimization Detective is active.
+	require_once __DIR__ . '/class-image-prioritizer-tag-visitor.php';
+	require_once __DIR__ . '/class-image-prioritizer-img-tag-visitor.php';
+	require_once __DIR__ . '/class-image-prioritizer-background-image-styled-tag-visitor.php';
+
+	add_action( 'wp_head', 'image_prioritizer_render_generator_meta_tag' );
+	add_action( 'od_register_tag_visitors', 'image_prioritizer_register_tag_visitors' );
+}
+
+/**
  * Displays the HTML generator meta tag for the Image Prioritizer plugin.
  *
  * See {@see 'wp_head'}.
