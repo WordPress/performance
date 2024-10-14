@@ -493,14 +493,12 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 		$result = ( function () {
 			$elements_positioned = array();
-			foreach ( $this->groups as $group ) {
-				foreach ( $group as $url_metric ) {
-					foreach ( $url_metric->get_elements() as $element ) {
-						$elements_positioned[ $element['xpath'] ] = (
-							( $elements_positioned[ $element['xpath'] ] ?? false )
-							||
-							$element['boundingClientRect']['top'] < $url_metric->get_viewport()['height']
-						);
+			foreach ( $this->get_all_denormalized_elements() as $xpath => $denormalized_elements ) {
+				$elements_positioned[ $xpath ] = false;
+				foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
+					if ( $element['boundingClientRect']['top'] < $url_metric->get_viewport()['height'] ) {
+						$elements_positioned[ $xpath ] = true;
+						break;
 					}
 				}
 			}
