@@ -11,7 +11,7 @@ export interface ElementData {
 	boundingClientRect: DOMRectReadOnly;
 }
 
-export type AmendedElementData = ExcludeProps<ElementData>
+export type ExtendedElementData = ExcludeProps<ElementData>
 
 export interface URLMetric {
 	url: string;
@@ -22,7 +22,7 @@ export interface URLMetric {
 	elements: ElementData[];
 }
 
-export type AmendedRootData = ExcludeProps<URLMetric>
+export type ExtendedRootData = ExcludeProps<URLMetric>
 
 export interface URLMetricGroupStatus {
 	minimumViewportWidth: number;
@@ -37,9 +37,9 @@ export type InitializeCallback = ( args: InitializeArgs ) => void;
 
 export type FinalizeArgs = {
 	readonly getRootData: () => URLMetric,
-	readonly amendRootData: ( properties: AmendedRootData ) => void,
+	readonly extendRootData: ( properties: ExtendedRootData ) => void,
 	readonly getElementData: ( xpath: string ) => ElementData|null,
-	readonly amendElementData: ( xpath: string, properties: AmendedElementData ) => void,
+	readonly extendElementData: (xpath: string, properties: ExtendedElementData ) => void,
 	readonly isDebug: boolean,
 };
 

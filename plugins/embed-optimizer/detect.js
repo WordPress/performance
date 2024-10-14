@@ -2,8 +2,8 @@
  * Embed Optimizer module for Optimization Detective
  *
  * When a URL metric is being collected by Optimization Detective, this module adds a ResizeObserver to keep track of
- * the changed heights for embed blocks. This data is amended onto the element data of the pending URL metric when it
- * is submitted for storage.
+ * the changed heights for embed blocks. This data is extended/amended onto the element data of the pending URL metric
+ * when it is submitted for storage.
  */
 
 const consoleLogPrefix = '[Embed Optimizer]';
@@ -16,7 +16,7 @@ const consoleLogPrefix = '[Embed Optimizer]';
  * @typedef {import("../optimization-detective/types.d.ts").InitializeArgs} InitializeArgs
  * @typedef {import("../optimization-detective/types.d.ts").FinalizeArgs} FinalizeArgs
  * @typedef {import("../optimization-detective/types.d.ts").FinalizeCallback} FinalizeCallback
- * @typedef {import("../optimization-detective/types.d.ts").AmendedElementData} AmendedElementData
+ * @typedef {import("../optimization-detective/types.d.ts").ExtendedElementData} ExtendedElementData
  */
 
 /**
@@ -76,11 +76,11 @@ export function initialize( { isDebug } ) {
 export async function finalize( {
 	isDebug,
 	getElementData,
-	amendElementData,
+	extendElementData,
 } ) {
 	for ( const [ xpath, domRect ] of loadedElementContentRects.entries() ) {
 		try {
-			amendElementData( xpath, {
+			extendElementData( xpath, {
 				resizedBoundingClientRect: domRect,
 			} );
 			if ( isDebug ) {
@@ -94,7 +94,7 @@ export async function finalize( {
 			}
 		} catch ( err ) {
 			error(
-				`Failed to amend ${ xpath } with resizedBoundingClientRect data:`,
+				`Failed to extend element data for ${ xpath } with resizedBoundingClientRect:`,
 				domRect,
 				err
 			);

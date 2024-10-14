@@ -4,8 +4,8 @@
  * @typedef {import("./types.d.ts").URLMetric} URLMetric
  * @typedef {import("./types.d.ts").URLMetricGroupStatus} URLMetricGroupStatus
  * @typedef {import("./types.d.ts").Extension} Extension
- * @typedef {import("./types.d.ts").AmendedRootData} AmendedRootData
- * @typedef {import("./types.d.ts").AmendedElementData} AmendedElementData
+ * @typedef {import("./types.d.ts").ExtendedRootData} ExtendedRootData
+ * @typedef {import("./types.d.ts").ExtendedElementData} ExtendedElementData
  */
 
 const win = window;
@@ -138,7 +138,7 @@ let urlMetric;
  * Reserved root property keys.
  *
  * @see {URLMetric}
- * @see {AmendedElementData}
+ * @see {ExtendedElementData}
  * @type {Set<string>}
  */
 const reservedRootPropertyKeys = new Set( [ 'url', 'viewport', 'elements' ] );
@@ -155,13 +155,11 @@ function getRootData() {
 }
 
 /**
- * Amends root URL metric data.
+ * Extends root URL metric data.
  *
- * @todo Would "extend" be better than "amend"? Or something else?
- *
- * @param {AmendedRootData} properties
+ * @param {ExtendedRootData} properties
  */
-function amendRootData( properties ) {
+function extendRootData( properties ) {
 	for ( const key of Object.getOwnPropertyNames( properties ) ) {
 		if ( reservedRootPropertyKeys.has( key ) ) {
 			throw new Error( `Disallowed setting of key '${ key }' on root.` );
@@ -181,7 +179,7 @@ const elementsByXPath = new Map();
  * Reserved element property keys.
  *
  * @see {ElementData}
- * @see {AmendedRootData}
+ * @see {ExtendedRootData}
  * @type {Set<string>}
  */
 const reservedElementPropertyKeys = new Set( [
@@ -210,12 +208,12 @@ function getElementData( xpath ) {
 }
 
 /**
- * Amends element data.
+ * Extends element data.
  *
- * @param {string}             xpath      XPath.
- * @param {AmendedElementData} properties Properties.
+ * @param {string}              xpath      XPath.
+ * @param {ExtendedElementData} properties Properties.
  */
-function amendElementData( xpath, properties ) {
+function extendElementData( xpath, properties ) {
 	if ( ! elementsByXPath.has( xpath ) ) {
 		throw new Error( `Unknown element with XPath: ${ xpath }` );
 	}
@@ -529,8 +527,8 @@ export default async function detect( {
 						isDebug,
 						getRootData,
 						getElementData,
-						amendElementData,
-						amendRootData,
+						extendElementData,
+						extendRootData,
 					} );
 				} catch ( err ) {
 					error(
