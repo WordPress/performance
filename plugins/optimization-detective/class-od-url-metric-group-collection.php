@@ -462,9 +462,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 				foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
 					$element_intersection_ratios[] = $element['intersectionRatio'];
 				}
-				$elements_max_intersection_ratios[ $xpath ] = count( $element_intersection_ratios ) > 1
-					? (float) max( ...$element_intersection_ratios )
-					: $element_intersection_ratios[0];
+				$elements_max_intersection_ratios[ $xpath ] = (float) max( $element_intersection_ratios );
 			}
 			return $elements_max_intersection_ratios;
 		} )();

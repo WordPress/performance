@@ -661,7 +661,15 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		};
 
 		return array(
-			'one-element-sample-size-one'    => array(
+			'one-element-one-group'           => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 600, $xpath1, 0.5 ),
+				),
+				'expected'    => array(
+					$xpath1 => 0.5,
+				),
+			),
+			'one-element-three-groups-of-one' => array(
 				'url_metrics' => array(
 					$get_sample_url_metric( 400, $xpath1, 0.0 ),
 					$get_sample_url_metric( 600, $xpath1, 0.5 ),
@@ -671,7 +679,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 					$xpath1 => 1.0,
 				),
 			),
-			'three-elements-sample-size-two' => array(
+			'three-elements-sample-size-two'  => array(
 				'url_metrics' => array(
 					// Group 1.
 					$get_sample_url_metric( 400, $xpath1, 0.0 ),
@@ -689,7 +697,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 					$xpath3 => 0.6,
 				),
 			),
-			'no-url-metrics'                 => array(
+			'no-url-metrics'                  => array(
 				'url_metrics' => array(),
 				'expected'    => array(),
 			),
