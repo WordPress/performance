@@ -481,6 +481,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * case it will have intersectionRatio of 0. Or the element may not be visible due to it or an ancestor having the
 	 * `visibility:hidden` style, such as in the case of a dropdown navigation menu. When, for example, an IMG element
 	 * is positioned in any initial viewport, it should not get `loading=lazy` but rather `fetchpriority=low`.
+	 * Furthermore, the element may be positioned _above_ the initial viewport or to the left or right of the viewport,
+	 * in which case the element may be dynamically displayed at any time in response to a user interaction.
 	 *
 	 * @since n.e.x.t
 	 *
