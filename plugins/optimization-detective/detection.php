@@ -38,6 +38,15 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 	$web_vitals_lib_data = require __DIR__ . '/build/web-vitals.asset.php';
 	$web_vitals_lib_src  = add_query_arg( 'ver', $web_vitals_lib_data['version'], plugin_dir_url( __FILE__ ) . 'build/web-vitals.js' );
 
+	/**
+	 * Filters the list of extension script module URLs to import when performing detection.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string[] $extension_module_urls Extension module URLs.
+	 */
+	$extension_module_urls = (array) apply_filters( 'od_extension_module_urls', array() );
+
 	$current_url = od_get_current_url();
 	$detect_args = array(
 		'serveTime'              => microtime( true ) * 1000, // In milliseconds for comparison with `Date.now()` in JavaScript.
@@ -45,6 +54,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'minViewportAspectRatio' => od_get_minimum_viewport_aspect_ratio(),
 		'maxViewportAspectRatio' => od_get_maximum_viewport_aspect_ratio(),
 		'isDebug'                => WP_DEBUG,
+		'extensionModuleUrls'    => $extension_module_urls,
 		'restApiEndpoint'        => rest_url( OD_REST_API_NAMESPACE . OD_URL_METRICS_ROUTE ),
 		'restApiNonce'           => wp_create_nonce( 'wp_rest' ),
 		'currentUrl'             => $current_url,

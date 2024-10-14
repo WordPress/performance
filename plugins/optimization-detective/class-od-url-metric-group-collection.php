@@ -80,7 +80,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          is_every_group_complete?: bool,
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metric_Group[]>,
 	 *          get_common_lcp_element?: ElementData|null,
-	 *          get_all_element_max_intersection_ratios?: array<string, float>
+	 *          get_all_element_max_intersection_ratios?: array<string, float>,
+	 *          get_all_denormalized_elements?: array<string, non-empty-array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>>,
 	 *      }
 	 */
 	private $result_cache = array();
@@ -159,6 +160,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Clear result cache.
+	 *
+	 * @since 0.3.0
 	 */
 	public function clear_cache(): void {
 		$this->result_cache = array();
@@ -166,6 +169,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Create groups.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @phpstan-return non-empty-array<OD_URL_Metric_Group>
 	 *
@@ -187,6 +192,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * Once a group reaches the sample size, the oldest URL metric is pushed out.
 	 *
+	 * @since 0.1.0
 	 * @throws InvalidArgumentException If there is no group available to add a URL metric to.
 	 *
 	 * @param OD_URL_Metric $new_url_metric New URL metric.
@@ -206,6 +212,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets group for viewport width.
 	 *
+	 * @since 0.1.0
 	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
 	 *
 	 * @param int $viewport_width Viewport width.
@@ -240,6 +247,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Checks whether any group is populated with at least one URL metric.
 	 *
+	 * @since 0.5.0
+	 *
 	 * @return bool Whether at least one group has some URL metrics.
 	 */
 	public function is_any_group_populated(): bool {
@@ -268,6 +277,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * should be contrasted with the `is_every_group_complete()`
 	 * method below.
 	 *
+	 * @since 0.1.0
 	 * @see OD_URL_Metric_Group_Collection::is_every_group_complete()
 	 *
 	 * @return bool Whether all groups have some URL metrics.
@@ -293,6 +303,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Checks whether every group is complete.
 	 *
+	 * @since 0.1.0
 	 * @see OD_URL_Metric_Group::is_complete()
 	 *
 	 * @return bool Whether all groups are complete.
@@ -319,6 +330,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets the groups with the provided LCP element XPath.
 	 *
+	 * @since 0.3.0
 	 * @see OD_URL_Metric_Group::get_lcp_element()
 	 *
 	 * @param string $xpath XPath for LCP element.
@@ -347,6 +359,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Gets common LCP element.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @return ElementData|null
 	 */
@@ -396,7 +410,43 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
+	 * Gets all elements from all URL metrics from all groups keyed by the elements' XPaths.
+	 *
+	 * This is an O(n^3) function so its results must be cached. This being said, the number of groups should be 4 (one
+	 * more than the default number of breakpoints) and the number of URL metrics for each group should be 3
+	 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
+	 * end up running n*4*3 times.
+	 *
+	 * @todo Should there be an OD_Element class which has a $url_metric property which then in turn has a $group property. Then this would only need to return array<string, OD_Element[]>.
+	 * @since n.e.x.t
+	 *
+	 * @return array<string, non-empty-array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>> Keys are XPaths and values are arrays of tuples consisting of the group, URL metric, and element data.
+	 */
+	public function get_all_denormalized_elements(): array {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
+		}
+
+		$result = ( function () {
+			$all_denormalized_elements = array();
+			foreach ( $this->groups as $group ) {
+				foreach ( $group as $url_metric ) {
+					foreach ( $url_metric->get_elements() as $element ) {
+						$all_denormalized_elements[ $element['xpath'] ][] = array( $group, $url_metric, $element );
+					}
+				}
+			}
+			return $all_denormalized_elements;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
+	}
+
+	/**
 	 * Gets the max intersection ratios of all elements across all groups and their captured URL metrics.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @return array<string, float> Keys are XPaths and values are the intersection ratios.
 	 */
@@ -406,24 +456,15 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 		}
 
 		$result = ( function () {
-			$element_max_intersection_ratios = array();
-
-			/*
-			 * O(n^3) my! Yes. This is why the result is cached. This being said, the number of groups should be 4 (one
-			 * more than the default number of breakpoints) and the number of URL metrics for each group should be 3
-			 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
-			 * end up running n*4*3 times.
-			 */
-			foreach ( $this->groups as $group ) {
-				foreach ( $group as $url_metric ) {
-					foreach ( $url_metric->get_elements() as $element ) {
-						$element_max_intersection_ratios[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_max_intersection_ratios )
-							? max( $element_max_intersection_ratios[ $element['xpath'] ], $element['intersectionRatio'] )
-							: $element['intersectionRatio'];
-					}
+			$elements_max_intersection_ratios = array();
+			foreach ( $this->get_all_denormalized_elements() as $xpath => $denormalized_elements ) {
+				$element_intersection_ratios = array();
+				foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
+					$element_intersection_ratios[] = $element['intersectionRatio'];
 				}
+				$elements_max_intersection_ratios[ $xpath ] = (float) max( $element_intersection_ratios );
 			}
-			return $element_max_intersection_ratios;
+			return $elements_max_intersection_ratios;
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ] = $result;
@@ -432,6 +473,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Gets the max intersection ratio of an element across all groups and their captured URL metrics.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @param string $xpath XPath for the element.
 	 * @return float|null Max intersection ratio of null if tag is unknown (not captured).
@@ -442,6 +485,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Gets URL metrics from all groups flattened into one list.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return OD_URL_Metric[] All URL metrics.
 	 */
@@ -460,6 +505,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Returns an iterator for the groups of URL metrics.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return ArrayIterator<int, OD_URL_Metric_Group> Array iterator for OD_URL_Metric_Group instances.
 	 */
 	public function getIterator(): ArrayIterator {
@@ -468,6 +515,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Counts the URL metric groups in the collection.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return int<0, max> Group count.
 	 */

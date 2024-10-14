@@ -50,8 +50,8 @@ trait Optimization_Detective_Test_Helpers {
 	 */
 	public function get_sample_dom_rect(): array {
 		return array(
-			'width'  => 100.1,
-			'height' => 100.2,
+			'width'  => 500.1,
+			'height' => 500.2,
 			'x'      => 100.3,
 			'y'      => 100.4,
 			'top'    => 0.1,

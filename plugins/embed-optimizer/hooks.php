@@ -18,13 +18,52 @@ if ( ! defined( 'ABSPATH' ) ) {
 function embed_optimizer_add_hooks(): void {
 	add_action( 'wp_head', 'embed_optimizer_render_generator' );
 
-	if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
-		add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' );
-	} else {
-		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html' );
-	}
+	add_action( 'od_init', 'embed_optimizer_init_optimization_detective' );
+	add_action( 'wp_loaded', 'embed_optimizer_add_non_optimization_detective_hooks' );
 }
 add_action( 'init', 'embed_optimizer_add_hooks' );
+
+/**
+ * Adds hooks for when the Optimization Detective logic is not running.
+ *
+ * @since n.e.x.t
+ */
+function embed_optimizer_add_non_optimization_detective_hooks(): void {
+	if ( false === has_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' ) ) {
+		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_lazy_load' );
+	}
+}
+
+/**
+ * Initializes Embed Optimizer when Optimization Detective has loaded.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $optimization_detective_version Current version of the optimization detective plugin.
+ */
+function embed_optimizer_init_optimization_detective( string $optimization_detective_version ): void {
+	$required_od_version = '0.7.0';
+	if ( version_compare( (string) strtok( $optimization_detective_version, '-' ), $required_od_version, '<' ) ) {
+		add_action(
+			'admin_notices',
+			static function (): void {
+				global $pagenow;
+				if ( ! in_array( $pagenow, array( 'index.php', 'plugins.php' ), true ) ) {
+					return;
+				}
+				wp_admin_notice(
+					esc_html__( 'The Embed Optimizer plugin requires a newer version of the Optimization Detective plugin. Please update your plugins.', 'embed-optimizer' ),
+					array( 'type' => 'warning' )
+				);
+			}
+		);
+		return;
+	}
+
+	add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' );
+	add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_detect_embed_presence' );
+	add_filter( 'od_url_metric_schema_element_item_additional_properties', 'embed_optimizer_add_element_item_schema_properties' );
+}
 
 /**
  * Registers the tag visitor for embeds.
@@ -40,17 +79,85 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
 }
 
 /**
- * Filter the oEmbed HTML.
+ * Filters additional properties for the element item schema for Optimization Detective.
+ *
+ * @since n.e.x.t
+ *
+ * @param array<string, array{type: string}> $additional_properties Additional properties.
+ * @return array<string, array{type: string}> Additional properties.
+ */
+function embed_optimizer_add_element_item_schema_properties( array $additional_properties ): array {
+	$additional_properties['resizedBoundingClientRect'] = array(
+		'type'       => 'object',
+		'properties' => array_fill_keys(
+			array(
+				'width',
+				'height',
+				'x',
+				'y',
+				'top',
+				'right',
+				'bottom',
+				'left',
+			),
+			array(
+				'type'     => 'number',
+				'required' => true,
+			)
+		),
+	);
+	return $additional_properties;
+}
+
+/**
+ * Filters the list of Optimization Detective extension module URLs to include the extension for Embed Optimizer.
+ *
+ * @since n.e.x.t
+ *
+ * @param string[]|mixed $extension_module_urls Extension module URLs.
+ * @return string[] Extension module URLs.
+ */
+function embed_optimizer_filter_extension_module_urls( $extension_module_urls ): array {
+	if ( ! is_array( $extension_module_urls ) ) {
+		$extension_module_urls = array();
+	}
+	$extension_module_urls[] = add_query_arg( 'ver', EMBED_OPTIMIZER_VERSION, plugin_dir_url( __FILE__ ) . 'detect.js' );
+	return $extension_module_urls;
+}
+
+/**
+ * Filter the oEmbed HTML to detect when an embed is present so that the Optimization Detective extension module can be enqueued.
+ *
+ * This ensures that the module for handling embeds is only loaded when there is an embed on the page.
+ *
+ * @since n.e.x.t
+ *
+ * @param string|mixed $html The oEmbed HTML.
+ * @return string Unchanged oEmbed HTML.
+ */
+function embed_optimizer_filter_oembed_html_to_detect_embed_presence( $html ): string {
+	if ( ! is_string( $html ) ) {
+		$html = '';
+	}
+	add_filter( 'od_extension_module_urls', 'embed_optimizer_filter_extension_module_urls' );
+	return $html;
+}
+
+/**
+ * Filter the oEmbed HTML to lazy load the embed.
  *
  * Add loading="lazy" to any iframe tags.
  * Lazy load any script tags.
  *
  * @since 0.1.0
  *
- * @param string $html The oEmbed HTML.
+ * @param string|mixed $html The oEmbed HTML.
  * @return string Filtered oEmbed HTML.
  */
-function embed_optimizer_filter_oembed_html( string $html ): string {
+function embed_optimizer_filter_oembed_html_to_lazy_load( $html ): string {
+	if ( ! is_string( $html ) ) {
+		$html = '';
+	}
 	$html_processor = new WP_HTML_Tag_Processor( $html );
 	if ( embed_optimizer_update_markup( $html_processor, true ) ) {
 		add_action( 'wp_footer', 'embed_optimizer_lazy_load_scripts' );

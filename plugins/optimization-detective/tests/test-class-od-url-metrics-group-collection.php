@@ -661,7 +661,15 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		};
 
 		return array(
-			'one-element-sample-size-one'    => array(
+			'one-element-one-group'           => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 600, $xpath1, 0.5 ),
+				),
+				'expected'    => array(
+					$xpath1 => 0.5,
+				),
+			),
+			'one-element-three-groups-of-one' => array(
 				'url_metrics' => array(
 					$get_sample_url_metric( 400, $xpath1, 0.0 ),
 					$get_sample_url_metric( 600, $xpath1, 0.5 ),
@@ -671,7 +679,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 					$xpath1 => 1.0,
 				),
 			),
-			'three-elements-sample-size-two' => array(
+			'three-elements-sample-size-two'  => array(
 				'url_metrics' => array(
 					// Group 1.
 					$get_sample_url_metric( 400, $xpath1, 0.0 ),
@@ -689,7 +697,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 					$xpath3 => 0.6,
 				),
 			),
-			'no-url-metrics'                 => array(
+			'no-url-metrics'                  => array(
 				'url_metrics' => array(),
 				'expected'    => array(),
 			),
@@ -698,10 +706,11 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_all_element_max_intersection_ratios() and get_element_max_intersection_ratio().
+	 * Test get_all_element_max_intersection_ratios(), get_element_max_intersection_ratio(), and get_all_denormalized_elements().
 	 *
 	 * @covers ::get_all_element_max_intersection_ratios
 	 * @covers ::get_element_max_intersection_ratio
+	 * @covers ::get_all_denormalized_elements
 	 *
 	 * @dataProvider data_provider_element_max_intersection_ratios
 	 *
@@ -718,6 +727,97 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		foreach ( $expected as $expected_xpath => $expected_max_ratio ) {
 			$this->assertSame( $expected_max_ratio, $group_collection->get_element_max_intersection_ratio( $expected_xpath ) );
 		}
+
+		// Check get_all_denormalized_elements.
+		$all_denormalized_elements = $group_collection->get_all_denormalized_elements();
+		$xpath_counts              = array();
+		foreach ( $url_metrics as $url_metric ) {
+			foreach ( $url_metric->get_elements() as $element ) {
+				if ( ! isset( $xpath_counts[ $element['xpath'] ] ) ) {
+					$xpath_counts[ $element['xpath'] ] = 0;
+				}
+				$xpath_counts[ $element['xpath'] ] += 1;
+			}
+		}
+		$this->assertCount( count( $xpath_counts ), $all_denormalized_elements );
+		foreach ( $all_denormalized_elements as $xpath => $denormalized_elements ) {
+			foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
+				$this->assertContains( $url_metric, iterator_to_array( $group ) );
+				$this->assertContains( $element, $url_metric->get_elements() );
+				$this->assertInstanceOf( OD_URL_Metric_Group::class, $group );
+				$this->assertInstanceOf( OD_URL_Metric::class, $url_metric );
+				$this->assertIsArray( $element );
+				$this->assertSame( $xpath, $element['xpath'] );
+			}
+		}
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function data_provider_element_minimum_heights(): array {
+		$xpath1 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]';
+		$xpath2 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[2]';
+		$xpath3 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[3]';
+
+		$get_sample_url_metric = function ( int $viewport_width, string $lcp_element_xpath, float $element_height ): OD_URL_Metric {
+			return $this->get_sample_url_metric(
+				array(
+					'viewport_width' => $viewport_width,
+					'element'        => array(
+						'isLCP'              => true,
+						'xpath'              => $lcp_element_xpath,
+						'intersectionRect'   => array_merge(
+							$this->get_sample_dom_rect(),
+							array( 'height' => $element_height )
+						),
+						'boundingClientRect' => array_merge(
+							$this->get_sample_dom_rect(),
+							array( 'height' => $element_height )
+						),
+					),
+				)
+			);
+		};
+
+		return array(
+			'one-element-sample-size-one'    => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 400, $xpath1, 480 ),
+					$get_sample_url_metric( 600, $xpath1, 240 ),
+					$get_sample_url_metric( 800, $xpath1, 768 ),
+				),
+				'expected'    => array(
+					$xpath1 => 240.0,
+				),
+			),
+			'three-elements-sample-size-two' => array(
+				'url_metrics' => array(
+					// Group 1.
+					$get_sample_url_metric( 400, $xpath1, 400 ),
+					$get_sample_url_metric( 400, $xpath1, 600 ),
+					// Group 2.
+					$get_sample_url_metric( 600, $xpath2, 100.1 ),
+					$get_sample_url_metric( 600, $xpath2, 100.2 ),
+					$get_sample_url_metric( 600, $xpath2, 100.05 ),
+					// Group 3.
+					$get_sample_url_metric( 800, $xpath3, 500 ),
+					$get_sample_url_metric( 800, $xpath3, 500 ),
+				),
+				'expected'    => array(
+					$xpath1 => 400.0,
+					$xpath2 => 100.05,
+					$xpath3 => 500.0,
+				),
+			),
+			'no-url-metrics'                 => array(
+				'url_metrics' => array(),
+				'expected'    => array(),
+			),
+
+		);
 	}
 
 	/**

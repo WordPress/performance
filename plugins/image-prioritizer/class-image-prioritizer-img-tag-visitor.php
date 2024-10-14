@@ -69,9 +69,6 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		} elseif (
 			is_string( $processor->get_attribute( 'fetchpriority' ) )
 			&&
-			// Temporary condition in case someone updates Image Prioritizer without also updating Optimization Detective.
-			method_exists( $context->url_metric_group_collection, 'is_any_group_populated' )
-			&&
 			$context->url_metric_group_collection->is_any_group_populated()
 		) {
 			/*
