@@ -96,13 +96,12 @@ class OD_URL_Metric implements JsonSerializable {
 			throw new OD_Data_Validation_Exception(
 				esc_html(
 					sprintf(
-						/* translators: 1: current aspect ratio, 2: minimum aspect ratio, 3: maximum aspect ratio, 4: viewport width, 5: viewport height */
-						__( 'Viewport aspect ratio (%1$s) is not in the accepted range of %2$s to %3$s. Viewport dimensions: %4$sx%5$s', 'optimization-detective' ),
+						/* translators: 1: current aspect ratio, 2: minimum aspect ratio, 3: maximum aspect ratio, 4: viewport dimensions */
+						__( 'Viewport aspect ratio (%1$s) is not in the accepted range of %2$s to %3$s. Viewport dimensions: %4$s', 'optimization-detective' ),
 						$aspect_ratio,
 						$min_aspect_ratio,
 						$max_aspect_ratio,
-						$data['viewport']['width'],
-						$data['viewport']['height']
+						$data['viewport']['width'] . 'x' . $data['viewport']['height']
 					)
 				)
 			);
