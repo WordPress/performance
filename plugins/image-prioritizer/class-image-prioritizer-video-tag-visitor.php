@@ -58,29 +58,19 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		$xpath = $processor->get_xpath();
 
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
-		foreach ( $context->url_metrics_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
-			$link_attributes = array_merge(
-				array(
-					'rel'           => 'preload',
-					'fetchpriority' => 'high',
-					'as'            => 'image',
-				),
-				array_filter(
-					array(
-						'href' => (string) $processor->get_attribute( self::POSTER ),
-					),
-					static function ( string $value ): bool {
-						return '' !== $value;
-					}
-				)
+		foreach ( $context->url_metric_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
+			$link_attributes = array(
+				'rel'           => 'preload',
+				'fetchpriority' => 'high',
+				'as'            => 'image',
+				'href'          => $poster,
+				'media'         => 'screen',
 			);
 
 			$crossorigin = $this->get_attribute_value( $processor, 'crossorigin' );
 			if ( null !== $crossorigin ) {
 				$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
 			}
-
-			$link_attributes['media'] = 'screen';
 
 			$context->link_collection->add_link(
 				$link_attributes,
