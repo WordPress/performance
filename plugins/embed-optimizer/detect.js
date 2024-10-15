@@ -9,14 +9,14 @@
 const consoleLogPrefix = '[Embed Optimizer]';
 
 /**
- * @typedef {import("../optimization-detective/types.d.ts").ElementData} ElementMetrics
- * @typedef {import("../optimization-detective/types.d.ts").URLMetric} URLMetric
- * @typedef {import("../optimization-detective/types.d.ts").Extension} Extension
- * @typedef {import("../optimization-detective/types.d.ts").InitializeCallback} InitializeCallback
- * @typedef {import("../optimization-detective/types.d.ts").InitializeArgs} InitializeArgs
- * @typedef {import("../optimization-detective/types.d.ts").FinalizeArgs} FinalizeArgs
- * @typedef {import("../optimization-detective/types.d.ts").FinalizeCallback} FinalizeCallback
- * @typedef {import("../optimization-detective/types.d.ts").ExtendedElementData} ExtendedElementData
+ * @typedef {import("../optimization-detective/types.ts").ElementData} ElementMetrics
+ * @typedef {import("../optimization-detective/types.ts").URLMetric} URLMetric
+ * @typedef {import("../optimization-detective/types.ts").Extension} Extension
+ * @typedef {import("../optimization-detective/types.ts").InitializeCallback} InitializeCallback
+ * @typedef {import("../optimization-detective/types.ts").InitializeArgs} InitializeArgs
+ * @typedef {import("../optimization-detective/types.ts").FinalizeArgs} FinalizeArgs
+ * @typedef {import("../optimization-detective/types.ts").FinalizeCallback} FinalizeCallback
+ * @typedef {import("../optimization-detective/types.ts").ExtendedElementData} ExtendedElementData
  */
 
 /**

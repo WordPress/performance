@@ -11,7 +11,6 @@
   "include": [
     "plugins/**/*.js",
     "plugins/**/*.ts",
-    "plugins/**/*.d.ts"
   ],
   "exclude": [
     "node_modules/**/*",
