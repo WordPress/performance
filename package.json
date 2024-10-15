@@ -47,6 +47,7 @@
     "generate-pending-release-diffs": "bin/generate-pending-release-diffs.sh",
     "format-js": "wp-scripts format",
     "lint-js": "wp-scripts lint-js",
+    "tsc": "tsc",
     "format-php": "composer format:all",
     "phpstan": "composer phpstan",
     "lint-php": "composer lint:all",
