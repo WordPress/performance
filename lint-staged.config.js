@@ -28,7 +28,7 @@ module.exports = {
 	'**/*.{js,ts}': ( files ) => {
 		return [
 			`npm run lint-js -- ${ joinFiles( files ) }`,
-			`npm run tsc`, // TODO: How to pass joinFiles( files ) here?
+			`npm run tsc`,
 		];
 	},
 	'**/*.php': ( files ) => {
