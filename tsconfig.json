@@ -5,7 +5,8 @@
     "allowJs": true,
     "target": "es2020",
     "moduleResolution": "node",
-    "module": "esnext"
+    "module": "esnext",
+    "skipLibCheck": true
   },
   "include": [
     "plugins/**/*.js",
