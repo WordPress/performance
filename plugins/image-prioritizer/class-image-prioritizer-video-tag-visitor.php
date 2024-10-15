@@ -23,20 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Visitor {
 
 	/**
-	 * Video tag.
-	 *
-	 * @var string
-	 */
-	const VIDEO = 'VIDEO';
-
-	/**
-	 * Poster attribute.
-	 *
-	 * @var string
-	 */
-	const POSTER = 'poster';
-
-	/**
 	 * Visits a tag.
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
@@ -45,12 +31,12 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 */
 	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
-		if ( self::VIDEO !== $processor->get_tag() ) {
+		if ( 'VIDEO' !== $processor->get_tag() ) {
 			return false;
 		}
 
 		// Skip empty poster attributes and data: URLs.
-		$poster = trim( (string) $processor->get_attribute( self::POSTER ) );
+		$poster = trim( (string) $processor->get_attribute( 'poster' ) );
 		if ( '' === $poster || $this->is_data_url( $poster ) ) {
 			return false;
 		}
