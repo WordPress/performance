@@ -57,6 +57,8 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		$xpath = $processor->get_xpath();
 
+		// TODO: If $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath ) is 0.0, then the video is not in any initial viewport and the VIDEO tag could get the preload=none attribute added.
+
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
 		foreach ( $context->url_metric_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
 			$link_attributes = array(
