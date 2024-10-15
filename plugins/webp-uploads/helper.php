@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  * @since 2.0.0 Added support for AVIF.
+ * @since 2.2.0 Added support for PNG.
  *
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
@@ -29,12 +30,14 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
 		'image/jpeg' => array( 'image/' . $output_format ),
 		'image/webp' => array( 'image/webp' ),
 		'image/avif' => array( 'image/avif' ),
+		'image/png'  => array( 'image/' . $output_format ),
 	);
 
 	// Check setting for whether to generate both JPEG and the modern output format.
-	if ( webp_uploads_is_jpeg_fallback_enabled() ) {
+	if ( webp_uploads_is_fallback_enabled() ) {
 		$default_transforms = array(
 			'image/jpeg'              => array( 'image/jpeg', 'image/' . $output_format ),
+			'image/png'               => array( 'image/png', 'image/' . $output_format ),
 			'image/' . $output_format => array( 'image/' . $output_format, 'image/jpeg' ),
 		);
 	}
@@ -393,17 +396,18 @@ function webp_uploads_sanitize_image_format( $image_format ): string {
  * @return bool True if the option is enabled, false otherwise.
  */
 function webp_uploads_is_picture_element_enabled(): bool {
-	return webp_uploads_is_jpeg_fallback_enabled() && (bool) get_option( 'webp_uploads_use_picture_element', false );
+	return webp_uploads_is_fallback_enabled() && (bool) get_option( 'webp_uploads_use_picture_element', false );
 }
 
 /**
  * Checks if the `perflab_generate_webp_and_jpeg` option is enabled.
  *
  * @since 2.0.0
+ * @since 2.2.0 Renamed to webp_uploads_is_fallback_enabled().
  *
  * @return bool True if the option is enabled, false otherwise.
  */
-function webp_uploads_is_jpeg_fallback_enabled(): bool {
+function webp_uploads_is_fallback_enabled(): bool {
 	return (bool) get_option( 'perflab_generate_webp_and_jpeg' );
 }
 
@@ -413,7 +417,7 @@ function webp_uploads_is_jpeg_fallback_enabled(): bool {
  * This function attempts to locate an alternate image source URL in the
  * attachment's metadata that matches the provided MIME type.
  *
- * @since n.e.x.t
+ * @since 2.2.0
  *
  * @param int    $attachment_id The ID of the attachment.
  * @param string $src           The original image src url.

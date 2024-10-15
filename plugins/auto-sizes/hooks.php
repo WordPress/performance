@@ -42,7 +42,6 @@ function auto_sizes_update_image_attributes( $attr ): array {
 
 	return $attr;
 }
-add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' );
 
 /**
  * Adds auto to the sizes attribute to the image, if applicable.
@@ -85,7 +84,12 @@ function auto_sizes_update_content_img_tag( $html ): string {
 	$processor->set_attribute( 'sizes', "auto, $sizes" );
 	return $processor->get_updated_html();
 }
-add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+
+// Skip loading plugin filters if WordPress Core already loaded the functionality.
+if ( ! function_exists( 'wp_sizes_attribute_includes_valid_auto' ) ) {
+	add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' );
+	add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+}
 
 /**
  * Checks whether the given 'sizes' attribute includes the 'auto' keyword as the first item in the list.
@@ -98,8 +102,8 @@ add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
  * @return bool True if the 'auto' keyword is present, false otherwise.
  */
 function auto_sizes_attribute_includes_valid_auto( string $sizes_attr ): bool {
-	$token = strtok( strtolower( $sizes_attr ), ',' );
-	return false !== $token && 'auto' === trim( $token, " \t\f\r\n" );
+	list( $first_size ) = explode( ',', $sizes_attr, 2 );
+	return 'auto' === strtolower( trim( $first_size, " \t\f\r\n" ) );
 }
 
 /**

@@ -19,6 +19,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 				'expected_exports' => array(
 					'detectionTimeWindow' => 5000,
 					'storageLockTTL'      => MINUTE_IN_SECONDS,
+					'extensionModuleUrls' => array(),
 				),
 			),
 			'filtered'   => array(
@@ -35,10 +36,18 @@ class Test_OD_Detection extends WP_UnitTestCase {
 							return HOUR_IN_SECONDS;
 						}
 					);
+					add_filter(
+						'od_extension_module_urls',
+						static function ( array $urls ): array {
+							$urls[] = home_url( '/my-extension.js', 'https' );
+							return $urls;
+						}
+					);
 				},
 				'expected_exports' => array(
 					'detectionTimeWindow' => 2500,
 					'storageLockTTL'      => HOUR_IN_SECONDS,
+					'extensionModuleUrls' => array( home_url( '/my-extension.js', 'https' ) ),
 				),
 			),
 		);
@@ -59,7 +68,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		$slug = od_get_url_metrics_slug( array( 'p' => '1' ) );
 
 		$breakpoints      = array( 480, 600, 782 );
-		$group_collection = new OD_URL_Metrics_Group_Collection( array(), $breakpoints, 3, HOUR_IN_SECONDS );
+		$group_collection = new OD_URL_Metric_Group_Collection( array(), $breakpoints, 3, HOUR_IN_SECONDS );
 
 		$script = od_get_detection_script( $slug, $group_collection );
 

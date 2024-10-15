@@ -1,6 +1,6 @@
 <?php
 /**
- * Optimization Detective: OD_URL_Metrics_Group class
+ * Optimization Detective: OD_URL_Metric_Group class
  *
  * @package optimization-detective
  * @since 0.1.0
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 0.1.0
  * @access private
  */
-final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSerializable {
+final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSerializable {
 
 	/**
 	 * URL metrics.
@@ -64,7 +64,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 	/**
 	 * Collection that this instance belongs to.
 	 *
-	 * @var OD_URL_Metrics_Group_Collection|null
+	 * @var OD_URL_Metric_Group_Collection|null
 	 */
 	private $collection;
 
@@ -83,14 +83,14 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 	 *
 	 * @throws InvalidArgumentException If arguments are invalid.
 	 *
-	 * @param OD_URL_Metric[]                      $url_metrics            URL metrics to add to the group.
-	 * @param int                                  $minimum_viewport_width Minimum possible viewport width for the group. Must be zero or greater.
-	 * @param int                                  $maximum_viewport_width Maximum possible viewport width for the group. Must be greater than zero and the minimum viewport width.
-	 * @param int                                  $sample_size            Sample size for the maximum number of viewports in a group between breakpoints.
-	 * @param int                                  $freshness_ttl          Freshness age (TTL) for a given URL metric.
-	 * @param OD_URL_Metrics_Group_Collection|null $collection             Collection that this instance belongs to. Optional.
+	 * @param OD_URL_Metric[]                     $url_metrics            URL metrics to add to the group.
+	 * @param int                                 $minimum_viewport_width Minimum possible viewport width for the group. Must be zero or greater.
+	 * @param int                                 $maximum_viewport_width Maximum possible viewport width for the group. Must be greater than zero and the minimum viewport width.
+	 * @param int                                 $sample_size            Sample size for the maximum number of viewports in a group between breakpoints.
+	 * @param int                                 $freshness_ttl          Freshness age (TTL) for a given URL metric.
+	 * @param OD_URL_Metric_Group_Collection|null $collection             Collection that this instance belongs to. Optional.
 	 */
-	public function __construct( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl, ?OD_URL_Metrics_Group_Collection $collection = null ) {
+	public function __construct( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl, ?OD_URL_Metric_Group_Collection $collection = null ) {
 		if ( $minimum_viewport_width < 0 ) {
 			throw new InvalidArgumentException(
 				esc_html__( 'The minimum viewport width must be at least zero.', 'optimization-detective' )
@@ -145,6 +145,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 	/**
 	 * Gets the minimum possible viewport width (inclusive).
 	 *
+	 * @todo Eliminate in favor of readonly public property.
 	 * @return int<0, max> Minimum viewport width.
 	 */
 	public function get_minimum_viewport_width(): int {
@@ -154,6 +155,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 	/**
 	 * Gets the maximum possible viewport width (inclusive).
 	 *
+	 * @todo Eliminate in favor of readonly public property.
 	 * @return int<1, max> Minimum viewport width.
 	 */
 	public function get_maximum_viewport_width(): int {
@@ -211,7 +213,7 @@ final class OD_URL_Metrics_Group implements IteratorAggregate, Countable, JsonSe
 	}
 
 	/**
-	 * Determines whether the URL metrics group is complete.
+	 * Determines whether the URL metric group is complete.
 	 *
 	 * A group is complete if it has the full sample size of URL metrics
 	 * and all of these URL metrics are fresh.

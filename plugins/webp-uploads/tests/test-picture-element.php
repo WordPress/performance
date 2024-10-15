@@ -32,9 +32,6 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			$this->markTestSkipped( 'Mime type image/webp is not supported.' );
 		}
 
-		// Default to webp output for tests.
-		$this->set_image_output_type( 'webp' );
-
 		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
 		$this->mock_frontend_body_hooks();
 	}
@@ -43,6 +40,9 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	 * Setup shared fixtures.
 	 */
 	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
+		// Default to webp output for tests.
+		update_option( 'perflab_modern_image_format', 'webp' );
+
 		// Fallback to JPEG IMG.
 		update_option( 'perflab_generate_webp_and_jpeg', '1' );
 
@@ -52,6 +52,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 	public static function wpTearDownAfterClass(): void {
 		wp_delete_attachment( self::$image_id, true );
 		delete_option( 'perflab_generate_webp_and_jpeg' );
+		delete_option( 'perflab_modern_image_format' );
 	}
 
 	/**
@@ -77,8 +78,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			'large',
 			false,
 			array(
-				'class' => 'wp-image-' . self::$image_id,
-				'alt'   => 'Green Leaves',
+				'class'         => 'wp-image-' . self::$image_id,
+				'alt'           => 'Green Leaves',
+				'loading'       => false,
+				'fetchpriority' => false,
 			)
 		);
 
@@ -133,22 +136,22 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 			'jpeg and picture enabled' => array(
 				'fallback_jpeg'   => true,
 				'picture_element' => true,
-				'expected_html'   => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
+				'expected_html'   => '<picture class="wp-picture-{{img-attachment-id}}" style="display: contents;"><source type="image/webp" srcset="{{webp-srcset}}" sizes="{{img-sizes}}"><img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" /></picture>',
 			),
 			'only picture enabled'     => array(
 				'fallback_jpeg'   => false,
 				'picture_element' => true,
-				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
+				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
 			),
 			'only jpeg enabled'        => array(
 				'fallback_jpeg'   => true,
 				'picture_element' => false,
-				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
+				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
 			),
 			'neither enabled'          => array(
 				'fallback_jpeg'   => false,
 				'picture_element' => false,
-				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" loading="lazy" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
+				'expected_html'   => '<img width="{{img-width}}" height="{{img-height}}" src="{{img-src}}" class="wp-image-{{img-attachment-id}}" alt="{{img-alt}}" decoding="async" srcset="{{img-srcset}}" sizes="{{img-sizes}}" />',
 			),
 		);
 	}

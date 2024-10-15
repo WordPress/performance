@@ -27,10 +27,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @access private
  * @link https://core.trac.wordpress.org/ticket/43258
  *
- * @param string $passthrough Value for the template_include filter which is passed through.
- * @return string Unmodified value of $passthrough.
+ * @param string|mixed $passthrough Value for the template_include filter which is passed through.
+ * @return string|mixed Unmodified value of $passthrough.
  */
-function od_buffer_output( string $passthrough ): string {
+function od_buffer_output( $passthrough ) {
 	/*
 	 * Instead of the default PHP_OUTPUT_HANDLER_STDFLAGS (cleanable, flushable, and removable) being used for flags,
 	 * we need to omit PHP_OUTPUT_HANDLER_FLUSHABLE. If the buffer were flushable, then each time that ob_flush() is
@@ -189,7 +189,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 	$post = OD_URL_Metrics_Post_Type::get_post( $slug );
 
-	$group_collection = new OD_URL_Metrics_Group_Collection(
+	$group_collection = new OD_URL_Metric_Group_Collection(
 		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 		od_get_breakpoint_max_widths(),
 		od_get_url_metrics_breakpoint_sample_size(),

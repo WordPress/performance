@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.6
-Stable tag:   0.5.0
+Stable tag:   0.6.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
@@ -156,6 +156,20 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.6.0 =
+
+**Enhancements**
+
+* Allow URL metric schema to be extended. ([1492](https://github.com/WordPress/performance/pull/1492))
+* Clarify docs around a tag visitor's boolean return value. ([1479](https://github.com/WordPress/performance/pull/1479))
+* Include UUID with each URL metric. ([1489](https://github.com/WordPress/performance/pull/1489))
+* Introduce get_cursor_move_count() to use instead of get_seek_count() and get_next_token_count(). ([1478](https://github.com/WordPress/performance/pull/1478))
+
+**Bug Fixes**
+
+* Add missing global documentation for `delete_all_posts()`. ([1522](https://github.com/WordPress/performance/pull/1522))
+* Introduce viewport aspect ratio validation for URL Metrics. ([1494](https://github.com/WordPress/performance/pull/1494))
 
 = 0.5.0 =
 

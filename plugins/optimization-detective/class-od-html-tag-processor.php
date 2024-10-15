@@ -179,9 +179,18 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $buffered_text_replacements = array();
 
 	/**
-	 * Count for the number of times that the cursor was moved.
+	 * Whether the end of the document was reached.
 	 *
 	 * @since n.e.x.t
+	 * @see self::next_token()
+	 * @var bool
+	 */
+	private $reached_end_of_document = false;
+
+	/**
+	 * Count for the number of times that the cursor was moved.
+	 *
+	 * @since 0.6.0
 	 * @var int
 	 * @see self::next_token()
 	 * @see self::seek()
@@ -263,6 +272,9 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags    = array();
 			$this->open_stack_indices = array();
+
+			// Mark that the end of the document was reached, meaning that get_modified_html() can should now be able to append markup to the HEAD and the BODY.
+			$this->reached_end_of_document = true;
 			return false;
 		}
 
@@ -342,7 +354,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Gets the number of times the cursor has moved.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 * @see self::next_token()
 	 * @see self::seek()
 	 *
@@ -559,11 +571,25 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Returns the string representation of the HTML Tag Processor.
 	 *
+	 * Once the end of the document has been reached this is responsible for adding the pending markup to append to the
+	 * HEAD and the BODY. It waits to do this injection until the end of the document has been reached because every
+	 * time that seek() is called it the HTML Processor will flush any pending updates to the document. This means that
+	 * if there is any pending markup to append to the end of the BODY then the insertion will fail because the closing
+	 * tag for the BODY has not been encountered yet. Additionally, by not prematurely processing the buffered text
+	 * replacements in get_updated_html() then we avoid trying to insert them every time that seek() is called which is
+	 * wasteful as they are only needed once finishing iterating over the document.
+	 *
 	 * @since 0.4.0
+	 * @see WP_HTML_Tag_Processor::get_updated_html()
+	 * @see WP_HTML_Tag_Processor::seek()
 	 *
 	 * @return string The processed HTML.
 	 */
 	public function get_updated_html(): string {
+		if ( ! $this->reached_end_of_document ) {
+			return parent::get_updated_html();
+		}
+
 		foreach ( array_keys( $this->buffered_text_replacements ) as $bookmark ) {
 			$html_strings = $this->buffered_text_replacements[ $bookmark ];
 			if ( count( $html_strings ) === 0 ) {
