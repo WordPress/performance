@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "noEmit": true,
+    "allowJs": true,
+    "target": "es2020",
+    "moduleResolution": "node",
+    "module": "esnext"
+  },
+  "include": [
+    "plugins/**/*.js",
+    "plugins/**/*.ts",
+    "plugins/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules/**/*",
+    "plugins/*/build/*"
+  ]
+}
