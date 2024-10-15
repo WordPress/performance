@@ -41,7 +41,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 *
-	 * @return bool Whether the visitor visited the tag.
+	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
 	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
@@ -75,7 +75,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 				)
 			);
 
-			$crossorigin = $processor->get_attribute( 'crossorigin' );
+			$crossorigin = $this->get_attribute_value( $processor, 'crossorigin' );
 			if ( null !== $crossorigin ) {
 				$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
 			}
