@@ -40,22 +40,8 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 
 		$xpath = $processor->get_xpath();
 
-		/**
-		 * Gets attribute value.
-		 *
-		 * @param string $attribute_name Attribute name.
-		 * @return string|true|null Normalized attribute value.
-		 */
-		$get_attribute_value = static function ( string $attribute_name ) use ( $processor ) {
-			$value = $processor->get_attribute( $attribute_name );
-			if ( is_string( $value ) ) {
-				$value = strtolower( trim( $value, " \t\f\r\n" ) );
-			}
-			return $value;
-		};
-
-		$current_fetchpriority = $get_attribute_value( 'fetchpriority' );
-		$is_lazy_loaded        = 'lazy' === $get_attribute_value( 'loading' );
+		$current_fetchpriority = $this->get_attribute_value( $processor, 'fetchpriority' );
+		$is_lazy_loaded        = 'lazy' === $this->get_attribute_value( $processor, 'loading' );
 		$updated_fetchpriority = null;
 
 		/*
@@ -130,7 +116,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		// Ensure that sizes=auto is set properly.
 		$sizes = $processor->get_attribute( 'sizes' );
 		if ( is_string( $sizes ) ) {
-			$is_lazy  = 'lazy' === $get_attribute_value( 'loading' );
+			$is_lazy  = 'lazy' === $this->get_attribute_value( $processor, 'loading' );
 			$has_auto = $this->sizes_attribute_includes_valid_auto( $sizes );
 
 			if ( $is_lazy && ! $has_auto ) {
@@ -164,7 +150,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 				)
 			);
 
-			$crossorigin = $get_attribute_value( 'crossorigin' );
+			$crossorigin = $this->get_attribute_value( $processor, 'crossorigin' );
 			if ( null !== $crossorigin ) {
 				$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
 			}
