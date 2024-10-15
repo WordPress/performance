@@ -9,7 +9,6 @@
 const consoleLogPrefix = '[Embed Optimizer]';
 
 /**
- * @typedef {import("../optimization-detective/types.ts").ElementData} ElementMetrics
  * @typedef {import("../optimization-detective/types.ts").URLMetric} URLMetric
  * @typedef {import("../optimization-detective/types.ts").Extension} Extension
  * @typedef {import("../optimization-detective/types.ts").InitializeCallback} InitializeCallback
