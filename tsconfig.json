@@ -13,7 +13,6 @@
     "plugins/**/*.ts",
   ],
   "exclude": [
-    "node_modules/**/*",
     "plugins/*/build/*"
   ]
 }
