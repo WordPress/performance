@@ -40,20 +40,6 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 
 		$xpath = $processor->get_xpath();
 
-		/**
-		 * Gets attribute value.
-		 *
-		 * @param string $attribute_name Attribute name.
-		 * @return string|true|null Normalized attribute value.
-		 */
-		$get_attribute_value = static function ( string $attribute_name ) use ( $processor ) {
-			$value = $processor->get_attribute( $attribute_name );
-			if ( is_string( $value ) ) {
-				$value = strtolower( trim( $value, " \t\f\r\n" ) );
-			}
-			return $value;
-		};
-
 		/*
 		 * When the same LCP element is common/shared among all viewport groups, make sure that the element has
 		 * fetchpriority=high, even though it won't really be needed because a preload link with fetchpriority=high
@@ -61,7 +47,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		 */
 		$common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
 		if ( ! is_null( $common_lcp_element ) && $xpath === $common_lcp_element['xpath'] ) {
-			if ( 'high' === $get_attribute_value( 'fetchpriority' ) ) {
+			if ( 'high' === $this->get_attribute_value( $processor, 'fetchpriority' ) ) {
 				$processor->set_meta_attribute( 'fetchpriority-already-added', true );
 			} else {
 				$processor->set_attribute( 'fetchpriority', 'high' );
@@ -92,7 +78,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		} else {
 			// Otherwise, make sure visible elements omit the loading attribute, and hidden elements include loading=lazy.
 			$is_visible = $element_max_intersection_ratio > 0.0;
-			$loading    = $get_attribute_value( 'loading' );
+			$loading    = $this->get_attribute_value( $processor, 'loading' );
 			if ( $is_visible && 'lazy' === $loading ) {
 				$processor->remove_attribute( 'loading' );
 			} elseif ( ! $is_visible && 'lazy' !== $loading ) {
@@ -104,7 +90,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		// Ensure that sizes=auto is set properly.
 		$sizes = $processor->get_attribute( 'sizes' );
 		if ( is_string( $sizes ) ) {
-			$is_lazy  = 'lazy' === $get_attribute_value( 'loading' );
+			$is_lazy  = 'lazy' === $this->get_attribute_value( $processor, 'loading' );
 			$has_auto = $this->sizes_attribute_includes_valid_auto( $sizes );
 
 			if ( $is_lazy && ! $has_auto ) {
@@ -138,7 +124,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 				)
 			);
 
-			$crossorigin = $get_attribute_value( 'crossorigin' );
+			$crossorigin = $this->get_attribute_value( $processor, 'crossorigin' );
 			if ( null !== $crossorigin ) {
 				$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
 			}

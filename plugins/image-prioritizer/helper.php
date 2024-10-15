@@ -40,6 +40,7 @@ function image_prioritizer_init( string $optimization_detective_version ): void 
 	require_once __DIR__ . '/class-image-prioritizer-tag-visitor.php';
 	require_once __DIR__ . '/class-image-prioritizer-img-tag-visitor.php';
 	require_once __DIR__ . '/class-image-prioritizer-background-image-styled-tag-visitor.php';
+	require_once __DIR__ . '/class-image-prioritizer-video-tag-visitor.php';
 
 	add_action( 'wp_head', 'image_prioritizer_render_generator_meta_tag' );
 	add_action( 'od_register_tag_visitors', 'image_prioritizer_register_tag_visitors' );
@@ -58,7 +59,7 @@ function image_prioritizer_render_generator_meta_tag(): void {
 }
 
 /**
- * Registers tag visitors for images.
+ * Registers tag visitors.
  *
  * @since 0.1.0
  *
@@ -67,8 +68,11 @@ function image_prioritizer_render_generator_meta_tag(): void {
 function image_prioritizer_register_tag_visitors( OD_Tag_Visitor_Registry $registry ): void {
 	// Note: The class is invocable (it has an __invoke() method).
 	$img_visitor = new Image_Prioritizer_Img_Tag_Visitor();
-	$registry->register( 'img-tags', $img_visitor );
+	$registry->register( 'image-prioritizer/img', $img_visitor );
 
 	$bg_image_visitor = new Image_Prioritizer_Background_Image_Styled_Tag_Visitor();
-	$registry->register( 'bg-image-tags', $bg_image_visitor );
+	$registry->register( 'image-prioritizer/background-image', $bg_image_visitor );
+
+	$video_visitor = new Image_Prioritizer_Video_Tag_Visitor();
+	$registry->register( 'image-prioritizer/video', $video_visitor );
 }
