@@ -14,8 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Collection of URL groups according to the breakpoints.
  *
- * @phpstan-import-type ElementData from OD_URL_Metric
- *
  * @implements IteratorAggregate<int, OD_URL_Metric_Group>
  *
  * @since 0.1.0
@@ -533,11 +531,11 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *             freshness_ttl: 0|positive-int,
 	 *             sample_size: positive-int,
 	 *             all_element_max_intersection_ratios: array<string, float>,
-	 *             common_lcp_element: ?ElementData,
+	 *             common_lcp_element: ?OD_Element,
 	 *             every_group_complete: bool,
 	 *             every_group_populated: bool,
 	 *             groups: array<int, array{
-	 *                 lcp_element: ?ElementData,
+	 *                 lcp_element: ?OD_Element,
 	 *                 minimum_viewport_width: 0|positive-int,
 	 *                 maximum_viewport_width: positive-int,
 	 *                 complete: bool,

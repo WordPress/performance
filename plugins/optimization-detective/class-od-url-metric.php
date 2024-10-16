@@ -31,14 +31,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @phpstan-type ElementData  array{
  *                                isLCP: bool,
  *                                isLCPCandidate: bool,
- *                                xpath: string,
+ *                                xpath: non-empty-string,
  *                                intersectionRatio: float,
  *                                intersectionRect: DOMRect,
  *                                boundingClientRect: DOMRect,
  *                            }
  * @phpstan-type Data         array{
- *                                uuid: string,
- *                                url: string,
+ *                                uuid: non-empty-string,
+ *                                url: non-empty-string,
  *                                timestamp: float,
  *                                viewport: ViewportRect,
  *                                elements: ElementData[]

@@ -216,7 +216,8 @@ final class Embed_Optimizer_Tag_Visitor {
 
 		$elements = $context->url_metric_group_collection->get_all_elements()[ $embed_wrapper_xpath ] ?? array();
 		foreach ( $elements as $element ) {
-			if ( ! isset( $element['resizedBoundingClientRect'] ) ) {
+			$resized_bounding_client_rect = $element->get( 'resizedBoundingClientRect' );
+			if ( ! is_array( $resized_bounding_client_rect ) ) {
 				continue;
 			}
 			$group           = $element->url_metric->group;
@@ -224,12 +225,12 @@ final class Embed_Optimizer_Tag_Visitor {
 			if ( ! isset( $minimums[ $group_min_width ] ) ) {
 				$minimums[ $group_min_width ] = array(
 					'group'  => $group,
-					'height' => $element['resizedBoundingClientRect']['height'],
+					'height' => $resized_bounding_client_rect['height'],
 				);
 			} else {
 				$minimums[ $group_min_width ]['height'] = min(
 					$minimums[ $group_min_width ]['height'],
-					$element['resizedBoundingClientRect']['height']
+					$resized_bounding_client_rect['height']
 				);
 			}
 		}

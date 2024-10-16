@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Data for a single element in a URL metric.
  *
  * @phpstan-import-type ElementData from OD_URL_Metric
+ * @phpstan-import-type DOMRect from OD_URL_Metric
+ * @implements ArrayAccess<key-of<ElementData>, ElementData[key-of<ElementData>]>
  *
  * @since n.e.x.t
  * @access private
@@ -52,6 +54,90 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	}
 
 	/**
+	 * Gets property value for an arbitrary key.
+	 *
+	 * This is particularly useful in conjunction with the `od_url_metric_schema_element_item_additional_properties` filter.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $key Property.
+	 * @return mixed|null The property value, or null if not set.
+	 */
+	public function get( string $key ) {
+		return $this->data[ $key ] ?? null;
+	}
+
+	/**
+	 * Determines whether element was detected as LCP.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return bool Whether LCP.
+	 */
+	public function is_lcp(): bool {
+		return $this->data['isLCP'];
+	}
+
+	/**
+	 * Determines whether element was detected as an LCP candidate.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return bool Whether LCP candidate.
+	 */
+	public function is_lcp_candidate(): bool {
+		return $this->data['isLCPCandidate'];
+	}
+
+	/**
+	 * Gets XPath for element.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return non-empty-string XPath.
+	 */
+	public function get_xpath(): string {
+		return $this->data['xpath'];
+	}
+
+	/**
+	 * Gets intersectionRatio for element.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return float Intersection ratio.
+	 */
+	public function get_intersection_ratio(): float {
+		return $this->data['intersectionRatio'];
+	}
+
+	/**
+	 * Gets intersectionRect for element.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @phpstan-return DOMRect
+	 *
+	 * @return array Intersection rect.
+	 */
+	public function get_intersection_rect(): array {
+		return $this->data['intersectionRect'];
+	}
+
+	/**
+	 * Gets boundingClientRect for element.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @phpstan-return DOMRect
+	 *
+	 * @return array Bounding client rect.
+	 */
+	public function get_bounding_client_rect(): array {
+		return $this->data['boundingClientRect'];
+	}
+
+	/**
 	 * Checks whether an offset exists.
 	 *
 	 * @since n.e.x.t
@@ -68,40 +154,46 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 *
 	 * @since n.e.x.t
 	 *
+	 * @template T of key-of<ElementData>
+	 * @phpstan-param T $offset
+	 * @phpstan-return ElementData[T]|null
+	 *
 	 * @param mixed $offset Key.
-	 * @return mixed Can return all value types.
+	 * @return mixed May return any value from ElementData including possible extensions.
 	 */
-	public function offsetGet( $offset ) { // phpcs:ignore SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-		if ( ! is_scalar( $offset ) ) {
-			return null;
-		}
+	public function offsetGet( $offset ) {
 		return $this->data[ $offset ] ?? null;
 	}
 
 	/**
 	 * Sets an offset.
 	 *
-	 * @param TKey   $offset Key.
-	 * @param TValue $value  Value.
+	 * This is disallowed. Attempting to set a property will throw an error.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param mixed $offset Key.
+	 * @param mixed $value  Value.
+	 *
+	 * @throws Exception When attempting to set a property.
 	 */
 	public function offsetSet( $offset, $value ): void {
-		// @todo Throw an error.
-		$this->data[ $offset ] = $value;
+		throw new Exception( 'Offsets may not be set.' );
 	}
 
 	/**
-	 * Offset to unset
-	 * @link https://php.net/manual/en/arrayaccess.offsetunset.php
+	 * Offset to unset.
 	 *
-	 * @param TKey $offset <p>
-	 *                     The offset to unset.
-	 *                     </p>
+	 * This is disallowed. Attempting to unset a property will throw an error.
 	 *
-	 * @return void
+	 * @since n.e.x.t
+	 *
+	 * @param mixed $offset Offset.
+	 *
+	 * @throws Exception When attempting to unset a property.
 	 */
-	public function offsetUnset( $offset ){
-		// @todo Throw an error since read only.
-		unset( $this->data[ $offset ] );
+	public function offsetUnset( $offset ): void {
+		throw new Exception( 'Offsets may not be unset.' );
 	}
 
 	/**
