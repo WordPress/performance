@@ -50,7 +50,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			return true;
 		}
 
-		$this->lazy_load_videos( $context );
+		$this->lazy_load_videos( $poster, $context );
 
 		return false;
 	}
@@ -142,10 +142,10 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 *
 	 * @since n.e.x.t
 	 *
+	 * @param non-empty-string|null  $poster  Poster image URL.
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
-	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
-	private function lazy_load_videos( OD_Tag_Visitor_Context $context ): bool {
+	private function lazy_load_videos( ?string $poster, OD_Tag_Visitor_Context $context ): void {
 		$processor = $context->processor;
 
 		$xpath = $processor->get_xpath();
@@ -153,7 +153,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		$intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath );
 
 		if ( $intersection_ratio > 0 ) {
-			return false;
+			return;
 		}
 
 		$preload = $processor->get_attribute( 'preload' );
@@ -169,8 +169,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			$processor->add_class( 'wp-lazy-video' );
 		}
 
-		$poster = trim( (string) $processor->get_attribute( 'poster' ) );
-		if ( '' !== $poster && ! $this->is_data_url( $poster ) ) {
+		if ( null !== $poster ) {
 			$processor->set_attribute( 'data-original-poster', $poster );
 			$processor->remove_attribute( 'poster' );
 			$processor->add_class( 'wp-lazy-video' );
@@ -180,7 +179,5 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			$processor->append_body_html( wp_get_inline_script_tag( image_prioritizer_get_lazy_load_script(), array( 'type' => 'module' ) ) );
 			$this->added_lazy_script = true;
 		}
-
-		return true;
 	}
 }
