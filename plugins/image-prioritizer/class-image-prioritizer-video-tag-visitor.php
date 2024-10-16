@@ -41,29 +41,47 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			return false;
 		}
 
-		$reduced_poster_size = $this->reduce_poster_image_size( $context );
-		$preload_poster      = $this->preload_poster_image( $context );
-		$lazy_load           = $this->lazy_load_videos( $context );
+		$poster = $this->get_poster( $context );
 
-		return $reduced_poster_size || $preload_poster || $lazy_load;
+		if ( null !== $poster ) {
+			$this->reduce_poster_image_size( $poster, $context );
+			$this->preload_poster_image( $poster, $context );
+
+			return true;
+		}
+
+		$this->lazy_load_videos( $context );
+
+		return false;
 	}
-
 	/**
-	 * Reduce poster image size by choosing one that fits the maximum video size more closely.
+	 * Gets the poster from the current VIDEO element.
+	 *
+	 * Skips empty poster attributes and data: URLs.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
-	 * @return bool Whether the tag should be tracked in URL metrics.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
+	 * @return non-empty-string|null Poster or null if not defined or is a data: URL.
 	 */
-	private function reduce_poster_image_size( OD_Tag_Visitor_Context $context ): bool {
-		$processor = $context->processor;
-
-		// Skip empty poster attributes and data: URLs.
-		$poster = trim( (string) $processor->get_attribute( 'poster' ) );
+	private function get_poster( OD_Tag_Visitor_Context $context ): ?string {
+		$poster = trim( (string) $context->processor->get_attribute( 'poster' ) );
 		if ( '' === $poster || $this->is_data_url( $poster ) ) {
-			return false;
+			return null;
 		}
+		return $poster;
+	}
+
+	/**
+	 * Reduces poster image size by choosing one that fits the maximum video size more closely.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param non-empty-string       $poster  Poster image URL.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at a VIDEO tag.
+	 */
+	private function reduce_poster_image_size( string $poster, OD_Tag_Visitor_Context $context ): void {
+		$processor = $context->processor;
 
 		$xpath = $processor->get_xpath();
 
@@ -81,26 +99,18 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			$smaller_image_url = wp_get_attachment_image_url( $poster_id, array( (int) $max_element_width, 0 ) );
 			$processor->set_attribute( 'poster', $smaller_image_url );
 		}
-
-		return true;
 	}
 
 	/**
-	 * Preload poster image for the LCP <video> element.
+	 * Preloads poster image for the LCP <video> element.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
-	 * @return bool Whether the tag should be tracked in URL metrics.
+	 * @param non-empty-string       $poster  Poster image URL.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at a VIDEO tag.
 	 */
-	private function preload_poster_image( OD_Tag_Visitor_Context $context ): bool {
+	private function preload_poster_image( string $poster, OD_Tag_Visitor_Context $context ): void {
 		$processor = $context->processor;
-
-		// Skip empty poster attributes and data: URLs.
-		$poster = trim( (string) $processor->get_attribute( 'poster' ) );
-		if ( '' === $poster || $this->is_data_url( $poster ) ) {
-			return false;
-		}
 
 		$xpath = $processor->get_xpath();
 
@@ -125,8 +135,6 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 				$group->get_maximum_viewport_width()
 			);
 		}
-
-		return true;
 	}
 
 	/**
