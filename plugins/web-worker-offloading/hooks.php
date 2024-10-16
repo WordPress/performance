@@ -121,3 +121,16 @@ function plwwo_filter_inline_script_attributes( $attributes ): array {
 	return $attributes;
 }
 add_filter( 'wp_inline_script_attributes', 'plwwo_filter_inline_script_attributes' );
+
+/**
+ * Displays the HTML generator meta tag for the Web Worker Offloading plugin.
+ *
+ * See {@see 'wp_head'}.
+ *
+ * @since n.e.x.t
+ */
+function plwwo_render_generator_meta_tag(): void {
+	// Use the plugin slug as it is immutable.
+	echo '<meta name="generator" content="web-worker-offloading ' . esc_attr( WEB_WORKER_OFFLOADING_VERSION ) . '">' . "\n";
+}
+add_action( 'wp_head', 'plwwo_render_generator_meta_tag' );
