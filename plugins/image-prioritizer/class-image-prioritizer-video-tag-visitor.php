@@ -37,10 +37,16 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		// TODO: If $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath ) is 0.0, then the video is not in any initial viewport and the VIDEO tag could get the preload=none attribute added.
 
-		$reduced_poster_size = $this->reduce_poster_image_size( $context );
-		$preload_poster      = $this->preload_poster_image( $context );
+		$poster = $this->get_poster( $context );
 
-		return $reduced_poster_size || $preload_poster;
+		if ( null !== $poster ) {
+			$reduced_poster_size = $this->reduce_poster_image_size( $poster, $context );
+			$preload_poster      = $this->preload_poster_image( $poster, $context );
+
+			return true;
+		}
+
+		return false;
 	}
 	/**
 	 * Gets the poster from the current VIDEO element.
@@ -65,10 +71,11 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 *
 	 * @since n.e.x.t
 	 *
+	 * @param non-empty-string       $poster  Poster image URL.
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at a VIDEO tag.
 	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
-	private function reduce_poster_image_size( OD_Tag_Visitor_Context $context ): bool {
+	private function reduce_poster_image_size( string $poster, OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
 
 		$xpath = $processor->get_xpath();
@@ -79,12 +86,6 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		foreach ( $denormalized_elements as list( , , $element ) ) {
 			$max_element_width = max( $max_element_width, $element['boundingClientRect']['width'] ?? 0 );
-		}
-
-		$poster = $this->get_poster( $context );
-
-		if ( null === $poster ) {
-			return false;
 		}
 
 		$poster_id = attachment_url_to_postid( $poster );
@@ -102,17 +103,12 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 *
 	 * @since n.e.x.t
 	 *
+	 * @param non-empty-string       $poster  Poster image URL.
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at a VIDEO tag.
 	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
-	private function preload_poster_image( OD_Tag_Visitor_Context $context ): bool {
+	private function preload_poster_image( string $poster, OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
-
-		$poster = $this->get_poster( $context );
-
-		if ( null === $poster ) {
-			return false;
-		}
 
 		$xpath = $processor->get_xpath();
 
