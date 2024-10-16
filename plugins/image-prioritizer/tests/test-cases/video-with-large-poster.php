@@ -1,10 +1,10 @@
 <?php
 
-$full_url = '';
+$full_url     = '';
 $expected_url = '';
 
 return array(
-	'set_up'   => static function ( Test_Image_Prioritizer_Helper $test_case, WP_UnitTest_Factory $factory ) use( &$full_url, &$expected_url ): void {
+	'set_up'   => static function ( Test_Image_Prioritizer_Helper $test_case, WP_UnitTest_Factory $factory ) use ( &$full_url, &$expected_url ): void {
 		$breakpoint_max_widths = array( 480, 600, 782 );
 
 		add_filter(
@@ -65,7 +65,7 @@ return array(
 		$full_url = wp_get_attachment_url( $attachment_id );
 		$expected_url = wp_get_attachment_image_url( $attachment_id, array( (int) $dom_rect['width'], 0 ) );
 	},
-	'buffer' => static function () use ( &$full_url ) {
+	'buffer'   => static function () use ( &$full_url ) {
 		return "
 		<html lang=\"en\">
 			<head>

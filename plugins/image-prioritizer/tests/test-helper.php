@@ -84,7 +84,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * @param callable|string $buffer   Content before.
 	 * @param callable|string $expected Expected content after.
 	 */
-	public function test_image_prioritizer_register_tag_visitors( Closure $set_up, $buffer, $expected ): void {
+	public function test_image_prioritizer_register_tag_visitors( callable $set_up, $buffer, $expected ): void {
 		$set_up( $this, $this::factory() );
 
 		$buffer = is_string( $buffer ) ? $buffer : $buffer();
