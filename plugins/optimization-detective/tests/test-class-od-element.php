@@ -112,13 +112,13 @@ class Test_OD_Element extends WP_UnitTestCase {
 
 		$this->assertNull( $element['notFound'] );
 		$this->assertNull( $element->get( 'notFound' ) );
-		$this->assertNull( $element->offsetGet( 'notFound' ) ); // @phpstan-ignore argument.templateType
+		$this->assertNull( $element->offsetGet( 'notFound' ) ); // @phpstan-ignore argument.templateType (Likely resolved by <https://github.com/phpstan/phpstan/issues/8438>)
 		$this->assertFalse( isset( $element['notFound'] ) );
 		$this->assertFalse( $element->offsetExists( 'notFound' ) );
 
-		$this->assertSame( $element_data['customProp'], $element['customProp'] );
+		$this->assertSame( $element_data['customProp'], $element['customProp'] ); // TODO: Why is PHPStan not complaining about the argument.templateType here?
 		$this->assertSame( $element_data['customProp'], $element->get( 'customProp' ) );
-		$this->assertSame( $element_data['customProp'], $element->offsetGet( 'customProp' ) ); // @phpstan-ignore argument.templateType
+		$this->assertSame( $element_data['customProp'], $element->offsetGet( 'customProp' ) ); // @phpstan-ignore argument.templateType (Likely resolved by <https://github.com/phpstan/phpstan/issues/8438>)
 		$this->assertTrue( isset( $element['customProp'] ) );
 		$this->assertTrue( $element->offsetExists( 'customProp' ) );
 

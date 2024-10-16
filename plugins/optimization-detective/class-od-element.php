@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @phpstan-import-type ElementData from OD_URL_Metric
  * @phpstan-import-type DOMRect from OD_URL_Metric
  * @implements ArrayAccess<key-of<ElementData>, ElementData[key-of<ElementData>]>
- * @todo The above implements tag should account for additional undefined keys which can be supplied by extending the element schema.
+ * @todo The above implements tag should account for additional undefined keys which can be supplied by extending the element schema. May depend on <https://github.com/phpstan/phpstan/issues/8438>.
  *
  * @since n.e.x.t
  * @access private
@@ -158,7 +158,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @template T of key-of<ElementData>
 	 * @phpstan-param T $offset
 	 * @phpstan-return ElementData[T]|null
-	 * @todo This should account for additional undefined keys which can be supplied by extending the element schema.
+	 * @todo This should account for additional undefined keys which can be supplied by extending the element schema. May depend on <https://github.com/phpstan/phpstan/issues/8438>.
 	 *
 	 * @param mixed $offset Key.
 	 * @return mixed May return any value from ElementData including possible extensions.
