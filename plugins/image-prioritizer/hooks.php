@@ -57,7 +57,7 @@ function image_prioritizer_get_lazy_load_script(): string {
 			}
 		);
 
-		const videos = document.querySelectorAll( 'video' );
+		const videos = document.querySelectorAll( 'video.wp-lazy-video' );
 		for ( const video of videos ) {
 			lazyVideoObserver.observe( video );
 		}

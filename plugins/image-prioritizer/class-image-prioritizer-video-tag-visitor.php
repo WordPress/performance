@@ -130,7 +130,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	}
 
 	/**
-	 * Adjust `autoplay` and `preload` values for videos outside initial viewport.
+	 * Adjusts `autoplay` and `preload` values for videos outside initial viewport.
 	 *
 	 * @since n.e.x.t
 	 *
@@ -152,17 +152,20 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		if ( 'none' !== $preload ) {
 			$processor->set_attribute( 'data-original-preload', null !== $preload ? $preload : 'default' );
 			$processor->set_attribute( 'preload', 'none' );
+			$processor->add_class( 'wp-lazy-video' );
 		}
 
-		if ( true === $processor->get_attribute( 'autoplay' ) ) {
+		if ( null !== $processor->get_attribute( 'autoplay' ) ) {
 			$processor->set_attribute( 'data-original-autoplay', true );
 			$processor->remove_attribute( 'autoplay' );
+			$processor->add_class( 'wp-lazy-video' );
 		}
 
 		$poster = trim( (string) $processor->get_attribute( 'poster' ) );
 		if ( '' !== $poster && ! $this->is_data_url( $poster ) ) {
 			$processor->set_attribute( 'data-original-poster', $poster );
 			$processor->remove_attribute( 'poster' );
+			$processor->add_class( 'wp-lazy-video' );
 		}
 
 		if ( ! $this->added_lazy_script ) {
