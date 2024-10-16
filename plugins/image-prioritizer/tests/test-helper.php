@@ -79,15 +79,22 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * @covers Image_Prioritizer_Background_Image_Styled_Tag_Visitor
 	 *
 	 * @dataProvider data_provider_test_filter_tag_visitors
+	 *
+	 * @param callable        $set_up   Setup function.
+	 * @param callable|string $buffer   Content before.
+	 * @param callable|string $expected Expected content after.
 	 */
-	public function test_image_prioritizer_register_tag_visitors( Closure $set_up, string $buffer, string $expected ): void {
-		$set_up( $this );
+	public function test_image_prioritizer_register_tag_visitors( Closure $set_up, $buffer, $expected ): void {
+		$set_up( $this, $this::factory() );
 
+		$buffer = is_string( $buffer ) ? $buffer : $buffer();
 		$buffer = preg_replace(
 			':<script type="module">.+?</script>:s',
 			'<script type="module">/* import detect ... */</script>',
 			od_optimize_template_output_buffer( $buffer )
 		);
+
+		$expected = is_string( $expected ) ? $expected : $expected();
 
 		$this->assertEquals(
 			$this->remove_initial_tabs( $expected ),
