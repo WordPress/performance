@@ -523,7 +523,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			array(
 				'viewport_width' => 480,
 				'element'        => array(
-					'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
+					'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::DIV]/*[2][self::MAIN]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::IMG]',
 				),
 			)
 		)->jsonSerialize();
