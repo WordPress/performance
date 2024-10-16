@@ -45,6 +45,8 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	/**
 	 * Gets the poster from the current VIDEO element.
 	 *
+	 * Skips empty poster attributes and data: URLs.
+	 *
 	 * @since n.e.x.t
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
@@ -69,12 +71,6 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	private function reduce_poster_image_size( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
 
-		// Skip empty poster attributes and data: URLs.
-		$poster = trim( (string) $processor->get_attribute( 'poster' ) );
-		if ( '' === $poster || $this->is_data_url( $poster ) ) {
-			return false;
-		}
-
 		$xpath = $processor->get_xpath();
 
 		$max_element_width = 0;
@@ -83,6 +79,12 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		foreach ( $denormalized_elements as list( , , $element ) ) {
 			$max_element_width = max( $max_element_width, $element['boundingClientRect']['width'] ?? 0 );
+		}
+
+		$poster = $this->get_poster( $context );
+
+		if ( null === $poster ) {
+			return false;
 		}
 
 		$poster_id = attachment_url_to_postid( $poster );
@@ -106,9 +108,9 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	private function preload_poster_image( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
 
-		// Skip empty poster attributes and data: URLs.
-		$poster = trim( (string) $processor->get_attribute( 'poster' ) );
-		if ( '' === $poster || $this->is_data_url( $poster ) ) {
+		$poster = $this->get_poster( $context );
+
+		if ( null === $poster ) {
 			return false;
 		}
 
