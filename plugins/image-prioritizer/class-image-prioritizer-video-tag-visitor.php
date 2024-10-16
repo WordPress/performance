@@ -42,13 +42,28 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		return $reduced_poster_size || $preload_poster;
 	}
-
 	/**
-	 * Reduce poster image size by choosing one that fits the maximum video size more closely.
+	 * Gets the poster from the current VIDEO element.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
+	 * @return non-empty-string|null Poster or null if not defined or is a data: URL.
+	 */
+	private function get_poster( OD_Tag_Visitor_Context $context ): ?string {
+		$poster = trim( (string) $context->processor->get_attribute( 'poster' ) );
+		if ( '' === $poster || $this->is_data_url( $poster ) ) {
+			return null;
+		}
+		return $poster;
+	}
+
+	/**
+	 * Reduces poster image size by choosing one that fits the maximum video size more closely.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at a VIDEO tag.
 	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
 	private function reduce_poster_image_size( OD_Tag_Visitor_Context $context ): bool {
@@ -81,11 +96,11 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	}
 
 	/**
-	 * Preload poster image for the LCP <video> element.
+	 * Preloads poster image for the LCP <video> element.
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at a VIDEO tag.
 	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
 	private function preload_poster_image( OD_Tag_Visitor_Context $context ): bool {
