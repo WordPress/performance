@@ -21,6 +21,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @access private
  */
 final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Visitor {
+	/**
+	 * Whether the lazy-loading script was added to the body.
+	 *
+	 * @var bool
+	 */
+	protected $added_lazy_script = false;
 
 	/**
 	 * Visits a tag.
@@ -35,12 +41,11 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			return false;
 		}
 
-		// TODO: If $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath ) is 0.0, then the video is not in any initial viewport and the VIDEO tag could get the preload=none attribute added.
-
 		$reduced_poster_size = $this->reduce_poster_image_size( $context );
 		$preload_poster      = $this->preload_poster_image( $context );
+		$lazy_load           = $this->lazy_load_videos( $context );
 
-		return $reduced_poster_size || $preload_poster;
+		return $reduced_poster_size || $preload_poster || $lazy_load;
 	}
 
 	/**
@@ -119,6 +124,50 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 				$group->get_minimum_viewport_width(),
 				$group->get_maximum_viewport_width()
 			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Adjust `autoplay` and `preload` values for videos outside initial viewport.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
+	 * @return bool Whether the tag should be tracked in URL metrics.
+	 */
+	private function lazy_load_videos( OD_Tag_Visitor_Context $context ): bool {
+		$processor = $context->processor;
+
+		$xpath = $processor->get_xpath();
+
+		$intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath );
+
+		if ( $intersection_ratio > 0 ) {
+			return false;
+		}
+
+		$preload = $processor->get_attribute( 'preload' );
+		if ( 'none' !== $preload ) {
+			$processor->set_attribute( 'data-original-preload', null !== $preload ? $preload : 'default' );
+			$processor->set_attribute( 'preload', 'none' );
+		}
+
+		if ( true === $processor->get_attribute( 'autoplay' ) ) {
+			$processor->set_attribute( 'data-original-autoplay', true );
+			$processor->remove_attribute( 'autoplay' );
+		}
+
+		$poster = trim( (string) $processor->get_attribute( 'poster' ) );
+		if ( '' !== $poster && ! $this->is_data_url( $poster ) ) {
+			$processor->set_attribute( 'data-original-poster', $poster );
+			$processor->remove_attribute( 'poster' );
+		}
+
+		if ( ! $this->added_lazy_script ) {
+			$processor->append_body_html( wp_get_inline_script_tag( image_prioritizer_get_lazy_load_script(), array( 'type' => 'module' ) ) );
+			$this->added_lazy_script = true;
 		}
 
 		return true;
