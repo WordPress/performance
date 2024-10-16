@@ -40,8 +40,8 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		$poster = $this->get_poster( $context );
 
 		if ( null !== $poster ) {
-			$reduced_poster_size = $this->reduce_poster_image_size( $poster, $context );
-			$preload_poster      = $this->preload_poster_image( $poster, $context );
+			$this->reduce_poster_image_size( $poster, $context );
+			$this->preload_poster_image( $poster, $context );
 
 			return true;
 		}
@@ -73,9 +73,8 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 *
 	 * @param non-empty-string       $poster  Poster image URL.
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at a VIDEO tag.
-	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
-	private function reduce_poster_image_size( string $poster, OD_Tag_Visitor_Context $context ): bool {
+	private function reduce_poster_image_size( string $poster, OD_Tag_Visitor_Context $context ): void {
 		$processor = $context->processor;
 
 		$xpath = $processor->get_xpath();
@@ -94,8 +93,6 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			$smaller_image_url = wp_get_attachment_image_url( $poster_id, array( (int) $max_element_width, 0 ) );
 			$processor->set_attribute( 'poster', $smaller_image_url );
 		}
-
-		return true;
 	}
 
 	/**
@@ -105,9 +102,8 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 *
 	 * @param non-empty-string       $poster  Poster image URL.
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at a VIDEO tag.
-	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
-	private function preload_poster_image( string $poster, OD_Tag_Visitor_Context $context ): bool {
+	private function preload_poster_image( string $poster, OD_Tag_Visitor_Context $context ): void {
 		$processor = $context->processor;
 
 		$xpath = $processor->get_xpath();
@@ -133,7 +129,5 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 				$group->get_maximum_viewport_width()
 			);
 		}
-
-		return true;
 	}
 }
