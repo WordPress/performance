@@ -1,11 +1,11 @@
 /**
  * @typedef {import("web-vitals").LCPMetric} LCPMetric
- * @typedef {import("./types.d.ts").ElementData} ElementData
- * @typedef {import("./types.d.ts").URLMetric} URLMetric
- * @typedef {import("./types.d.ts").URLMetricGroupStatus} URLMetricGroupStatus
- * @typedef {import("./types.d.ts").Extension} Extension
- * @typedef {import("./types.d.ts").ExtendedRootData} ExtendedRootData
- * @typedef {import("./types.d.ts").ExtendedElementData} ExtendedElementData
+ * @typedef {import("./types.ts").ElementData} ElementData
+ * @typedef {import("./types.ts").URLMetric} URLMetric
+ * @typedef {import("./types.ts").URLMetricGroupStatus} URLMetricGroupStatus
+ * @typedef {import("./types.ts").Extension} Extension
+ * @typedef {import("./types.ts").ExtendedRootData} ExtendedRootData
+ * @typedef {import("./types.ts").ExtendedElementData} ExtendedElementData
  */
 
 const win = window;
