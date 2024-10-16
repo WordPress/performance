@@ -343,7 +343,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 			$groups = array();
 			foreach ( $this->groups as $group ) {
 				$lcp_element = $group->get_lcp_element();
-				if ( ! is_null( $lcp_element ) && $xpath === $lcp_element['xpath'] ) {
+				if ( $lcp_element instanceof OD_Element && $xpath === $lcp_element->get_xpath() ) {
 					$groups[] = $group;
 				}
 			}
@@ -380,9 +380,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 			$group_has_unknown_lcp_element = false;
 			foreach ( $this->groups as $group ) {
 				$lcp_element = $group->get_lcp_element();
-				if ( ! is_null( $lcp_element ) ) {
-					$groups_by_lcp_element_xpath[ $lcp_element['xpath'] ][] = $group;
-					$lcp_elements_by_xpath[ $lcp_element['xpath'] ][]       = $lcp_element;
+				if ( $lcp_element instanceof OD_Element ) {
+					$groups_by_lcp_element_xpath[ $lcp_element->get_xpath() ][] = $group;
+					$lcp_elements_by_xpath[ $lcp_element->get_xpath() ][]       = $lcp_element;
 				} else {
 					$group_has_unknown_lcp_element = true;
 				}
@@ -429,7 +429,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 			foreach ( $this->groups as $group ) {
 				foreach ( $group as $url_metric ) {
 					foreach ( $url_metric->get_elements() as $element ) {
-						$all_elements[ (string) $element['xpath'] ][] = $element;
+						$all_elements[ $element->get_xpath() ][] = $element;
 					}
 				}
 			}
@@ -457,7 +457,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 			foreach ( $this->get_all_elements() as $xpath => $elements ) {
 				$element_intersection_ratios = array();
 				foreach ( $elements as $element ) {
-					$element_intersection_ratios[] = $element['intersectionRatio'];
+					$element_intersection_ratios[] = $element->get_intersection_ratio();
 				}
 				$elements_max_intersection_ratios[ $xpath ] = (float) max( $element_intersection_ratios );
 			}
