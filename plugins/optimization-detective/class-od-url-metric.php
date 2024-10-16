@@ -57,6 +57,13 @@ class OD_URL_Metric implements JsonSerializable {
 	protected $data;
 
 	/**
+	 * Elements.
+	 *
+	 * @var OD_Element[]
+	 */
+	protected $elements;
+
+	/**
 	 * Group.
 	 *
 	 * @since n.e.x.t
@@ -363,6 +370,9 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @return mixed|null The property value, or null if not set.
 	 */
 	public function get( string $key ) {
+		if ( 'elements' === $key ) {
+			return $this->get_elements();
+		}
 		return $this->data[ $key ] ?? null;
 	}
 
@@ -417,12 +427,15 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @return OD_Element[] Elements.
 	 */
 	public function get_elements(): array {
-		return array_map(
-			function ( array $element ): OD_Element {
-				return new OD_Element( $element, $this );
-			},
-			$this->data['elements']
-		);
+		if ( ! is_array( $this->elements ) ) {
+			$this->elements = array_map(
+				function ( array $element ): OD_Element {
+					return new OD_Element( $element, $this );
+				},
+				$this->data['elements']
+			);
+		}
+		return $this->elements;
 	}
 
 	/**

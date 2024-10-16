@@ -240,7 +240,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 				},
 				$url_metric->get_elements()
 			),
-			$url_metric->get( 'elements' )
+			$this->get_array_json_data( $url_metric->get( 'elements' ) )
 		);
 
 		$this->assertSame( $data['url'], $url_metric->get_url() );
