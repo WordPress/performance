@@ -51,7 +51,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
-	private function reduce_poster_image_size( OD_Tag_Visitor_Context $context ) {
+	private function reduce_poster_image_size( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
 
 		// Skip empty poster attributes and data: URLs.
@@ -88,7 +88,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
-	private function preload_poster_image( OD_Tag_Visitor_Context $context ) {
+	private function preload_poster_image( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
 
 		// Skip empty poster attributes and data: URLs.
