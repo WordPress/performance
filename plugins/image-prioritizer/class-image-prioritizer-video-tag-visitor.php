@@ -46,13 +46,11 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		if ( null !== $poster ) {
 			$this->reduce_poster_image_size( $poster, $context );
 			$this->preload_poster_image( $poster, $context );
-
-			return true;
 		}
 
 		$this->lazy_load_videos( $poster, $context );
 
-		return false;
+		return true;
 	}
 
 	/**
