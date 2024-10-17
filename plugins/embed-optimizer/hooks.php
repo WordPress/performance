@@ -325,7 +325,7 @@ function embed_optimizer_lazy_load_scripts(): void {
  * @since 0.2.0
  */
 function embed_optimizer_get_lazy_load_script(): string {
-	$script = file_get_contents( __DIR__ . '/embed-optimizer-lazy-load.js.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$script = file_get_contents( __DIR__ . '/lazy-load.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 
 	if ( false === $script ) {
 		return '';
