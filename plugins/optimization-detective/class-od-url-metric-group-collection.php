@@ -47,6 +47,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *    until PHP_INT_MAX. So a breakpoint cannot be PHP_INT_MAX because then the minimum viewport width for the final group
 	 *    would end up being larger than PHP_INT_MAX.
 	 *
+	 * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
+	 * single group.
+	 *
 	 * @var int[]
 	 * @phpstan-var positive-int[]
 	 */

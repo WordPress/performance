@@ -298,6 +298,17 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 					),
 				),
 			),
+			'0-breakpoints-and-4-viewport-widths' => array(
+				'breakpoints'     => array(),
+				'viewport_widths' => array( 250, 500, 1000 ),
+				'expected_groups' => array(
+					array(
+						'minimum_viewport_width'     => 0,
+						'maximum_viewport_width'     => PHP_INT_MAX,
+						'url_metric_viewport_widths' => array( 250, 500, 1000 ),
+					),
+				),
+			),
 		);
 	}
 
