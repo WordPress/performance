@@ -159,6 +159,36 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
+	 * Gets the first URL Metric group.
+	 *
+	 * This group normally represents viewports for mobile devices. This group always has a minimum viewport width of 0
+	 * and the maximum viewport width corresponds to the smallest defined breakpoint returned by
+	 * {@see od_get_breakpoint_max_widths()}.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return OD_URL_Metric_Group First URL Metric group.
+	 */
+	public function get_first_group(): OD_URL_Metric_Group {
+		return $this->groups[0];
+	}
+
+	/**
+	 * Gets the last URL Metric group.
+	 *
+	 * This group normally represents viewports for desktop devices.  This group always has a minimum viewport width
+	 * defined as one greater than the largest breakpoint returned by {@see od_get_breakpoint_max_widths()}.
+	 * The maximum viewport is always `PHP_INT_MAX`, or in other words it is unbounded.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return OD_URL_Metric_Group Last URL Metric group.
+	 */
+	public function get_last_group(): OD_URL_Metric_Group {
+		return $this->groups[ count( $this->groups ) - 1 ];
+	}
+
+	/**
 	 * Clear result cache.
 	 *
 	 * @since 0.3.0

@@ -302,9 +302,11 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test getIterator().
+	 * Test getIterator(), get_first_group(), and get_last_group().
 	 *
 	 * @covers ::getIterator
+	 * @covers ::get_first_group
+	 * @covers ::get_last_group
 	 *
 	 * @dataProvider data_provider_test_get_iterator
 	 *
@@ -343,6 +345,10 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		}
 
 		$this->assertEquals( $expected_groups, $actual_groups );
+
+		$groups_array = iterator_to_array( $group_collection );
+		$this->assertSame( $groups_array[0], $group_collection->get_first_group() );
+		$this->assertSame( $groups_array[ count( $groups_array ) - 1 ], $group_collection->get_last_group() );
 	}
 
 	/**
