@@ -133,7 +133,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		$xpath = $processor->get_xpath();
 
-		// If this element is the LCP (for a breakpoint group), add a preload link for it.
+		// If this element is the LCP (for a breakpoint group), add a preload link for the poster image.
 		foreach ( $context->url_metric_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
 			$link_attributes = array(
 				'rel'           => 'preload',
@@ -171,6 +171,14 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		$intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath );
 
+		// Set preload="auto" if the video is the LCP element among all viewports.
+		$common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
+		if ( null !== $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
+			$processor->set_attribute( 'preload', 'auto' );
+			return;
+		}
+
+		// TODO: What if URL metrics aren't available for all viewports yet?
 		if ( $intersection_ratio > 0 ) {
 			return;
 		}
