@@ -48,6 +48,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		return false;
 	}
+
 	/**
 	 * Gets the poster from the current VIDEO element.
 	 *
@@ -107,9 +108,11 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		$poster_id = attachment_url_to_postid( $poster );
 
-		if ( $poster_id > 0 && $max_element_width > 0 ) {
+		if ( $poster_id > 0 ) {
 			$smaller_image_url = wp_get_attachment_image_url( $poster_id, array( (int) $max_element_width, 0 ) );
-			$processor->set_attribute( 'poster', $smaller_image_url );
+			if ( is_string( $smaller_image_url ) ) {
+				$processor->set_attribute( 'poster', $smaller_image_url );
+			}
 		}
 	}
 
