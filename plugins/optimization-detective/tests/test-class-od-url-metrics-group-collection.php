@@ -742,8 +742,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		$this->assertCount( count( $xpath_counts ), $all_elements );
 		foreach ( $all_elements as $xpath => $elements ) {
 			foreach ( $elements as $element ) {
-				$this->assertInstanceOf( OD_URL_Metric::class, $element->url_metric );
-				$this->assertInstanceOf( OD_URL_Metric_Group::class, $element->url_metric->group );
+				$this->assertSame( $element->get_url_metric()->get_group(), $element->get_url_metric_group() );
 				$this->assertInstanceOf( OD_Element::class, $element );
 				$this->assertSame( $xpath, $element['xpath'] );
 			}

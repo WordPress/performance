@@ -227,7 +227,10 @@ final class Embed_Optimizer_Tag_Visitor {
 			if ( ! is_array( $resized_bounding_client_rect ) ) {
 				continue;
 			}
-			$group           = $element->url_metric->group;
+			$group = $element->get_url_metric_group();
+			if ( null === $group ) {
+				continue; // Technically could be null but in practice it never will be.
+			}
 			$group_min_width = $group->get_minimum_viewport_width();
 			if ( ! isset( $minimums[ $group_min_width ] ) ) {
 				$minimums[ $group_min_width ] = array(

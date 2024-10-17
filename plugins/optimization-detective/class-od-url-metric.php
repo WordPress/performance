@@ -67,9 +67,9 @@ class OD_URL_Metric implements JsonSerializable {
 	 * Group.
 	 *
 	 * @since n.e.x.t
-	 * @var OD_URL_Metric_Group
+	 * @var OD_URL_Metric_Group|null
 	 */
-	public $group;
+	protected $group = null;
 
 	/**
 	 * Constructor.
@@ -121,6 +121,33 @@ class OD_URL_Metric implements JsonSerializable {
 			);
 		}
 		return rest_sanitize_value_from_schema( $data, $schema, self::class );
+	}
+
+	/**
+	 * Gets the group that this URL metric is a part of (which may not be any).
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return OD_URL_Metric_Group|null Group.
+	 */
+	public function get_group(): ?OD_URL_Metric_Group {
+		return $this->group;
+	}
+
+	/**
+	 * Sets the group that this URL metric is a part of.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_URL_Metric_Group $group Group.
+	 *
+	 * @throws InvalidArgumentException When the supplied group has minimum/maximum viewport widths which are out of bounds with the viewport width for this URL Metric.
+	 */
+	public function set_group( OD_URL_Metric_Group $group ): void {
+		if ( $this->get_viewport_width() < $group->get_minimum_viewport_width() || $this->get_viewport_width() > $group->get_maximum_viewport_width() ) {
+			throw new InvalidArgumentException( 'Group does not have the correct minimum or maximum viewport widths for this URL Metric.' );
+		}
+		$this->group = $group;
 	}
 
 	/**

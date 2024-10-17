@@ -39,7 +39,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @var OD_URL_Metric
 	 * @readonly
 	 */
-	public $url_metric;
+	protected $url_metric;
 
 	/**
 	 * Constructor.
@@ -54,6 +54,28 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	public function __construct( array $data, OD_URL_Metric $url_metric ) {
 		$this->data       = $data;
 		$this->url_metric = $url_metric;
+	}
+
+	/**
+	 * Gets the URL metric that this element belongs to.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return OD_URL_Metric URL Metric.
+	 */
+	public function get_url_metric(): OD_URL_Metric {
+		return $this->url_metric;
+	}
+
+	/**
+	 * Gets the group that this element's URL metric is a part of (which may not be any).
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return OD_URL_Metric_Group|null Group.
+	 */
+	public function get_url_metric_group(): ?OD_URL_Metric_Group {
+		return $this->url_metric->get_group();
 	}
 
 	/**

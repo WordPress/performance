@@ -205,6 +205,8 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 	 * @covers ::jsonSerialize
 	 * @covers ::get
 	 * @covers ::get_json_schema
+	 * @covers ::set_group
+	 * @covers ::get_group
 	 *
 	 * @dataProvider data_provider_to_test_constructor
 	 *
@@ -217,6 +219,10 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 			$this->expectExceptionMessage( $error );
 		}
 		$url_metric = new OD_URL_Metric( $data );
+		$this->assertNull( $url_metric->get_group() );
+		$group = new OD_URL_Metric_Group( array( $url_metric ), 0, PHP_INT_MAX, 1, DAY_IN_SECONDS );
+		$url_metric->set_group( $group );
+		$this->assertSame( $group, $url_metric->get_group() );
 
 		$this->assertSame( array_map( 'intval', $data['viewport'] ), $url_metric->get_viewport() );
 		$this->assertSame( array_map( 'intval', $data['viewport'] ), $url_metric->get( 'viewport' ) );
