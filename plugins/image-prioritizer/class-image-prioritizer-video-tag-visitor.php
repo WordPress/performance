@@ -86,13 +86,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		 * mobile viewports that an excessively-small poster would end up getting served to the first desktop visitor.
 		 */
 		$max_element_width = 0;
-		$widest_group      = array_reduce(
-			iterator_to_array( $context->url_metric_group_collection ),
-			static function ( $carry, OD_URL_Metric_Group $group ) {
-				return ( null === $carry || $group->get_minimum_viewport_width() > $carry->get_minimum_viewport_width() ) ? $group : $carry;
-			}
-		);
-		foreach ( $widest_group as $url_metric ) {
+		foreach ( $context->url_metric_group_collection->get_last_group() as $url_metric ) {
 			foreach ( $url_metric->get_elements() as $element ) {
 				if ( $element['xpath'] === $xpath ) {
 					$max_element_width = max( $max_element_width, $element['boundingClientRect']['width'] );
