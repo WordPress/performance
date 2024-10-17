@@ -57,11 +57,12 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
 		foreach ( $context->url_metric_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
 			$link_attributes = array(
-				'rel'           => 'preload',
-				'fetchpriority' => 'high',
-				'as'            => 'image',
-				'href'          => $background_image_url,
-				'media'         => 'screen',
+				'rel'                 => 'preload',
+				'fetchpriority'       => 'high',
+				'as'                  => 'image',
+				'href'                => $background_image_url,
+				'media'               => 'screen',
+				'data-od-related-tag' => $xpath,
 			);
 
 			$context->link_collection->add_link(

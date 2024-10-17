@@ -131,6 +131,8 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 
 			$link_attributes['media'] = 'screen';
 
+			$link_attributes['data-od-related-tag'] = $context->processor->get_xpath();
+
 			$context->link_collection->add_link(
 				$link_attributes,
 				$group->get_minimum_viewport_width(),
