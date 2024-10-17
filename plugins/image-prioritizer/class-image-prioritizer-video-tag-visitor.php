@@ -21,6 +21,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @access private
  */
 final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Visitor {
+
+	/**
+	 * Class name used to indicate a video which is lazy-loaded.
+	 *
+	 * @since n.e.x.t
+	 * @var string
+	 */
+	const LAZY_VIDEO_CLASS_NAME = 'od-lazy-video';
+
 	/**
 	 * Whether the lazy-loading script was added to the body.
 	 *
@@ -217,19 +226,19 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		if ( 'none' !== $initial_preload ) {
 			$processor->set_attribute( 'data-original-preload', null !== $initial_preload ? $initial_preload : 'default' );
 			$processor->set_attribute( 'preload', 'none' );
-			$processor->add_class( 'wp-lazy-video' );
+			$processor->add_class( self::LAZY_VIDEO_CLASS_NAME );
 		}
 
 		if ( null !== $processor->get_attribute( 'autoplay' ) ) {
 			$processor->set_attribute( 'data-original-autoplay', true );
 			$processor->remove_attribute( 'autoplay' );
-			$processor->add_class( 'wp-lazy-video' );
+			$processor->add_class( self::LAZY_VIDEO_CLASS_NAME );
 		}
 
 		if ( null !== $poster ) {
 			$processor->set_attribute( 'data-original-poster', $poster );
 			$processor->remove_attribute( 'poster' );
-			$processor->add_class( 'wp-lazy-video' );
+			$processor->add_class( self::LAZY_VIDEO_CLASS_NAME );
 		}
 
 		if ( ! $this->added_lazy_script ) {

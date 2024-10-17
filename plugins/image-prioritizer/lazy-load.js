@@ -36,7 +36,7 @@ const lazyVideoObserver = new IntersectionObserver(
 	}
 );
 
-const videos = document.querySelectorAll( 'video.wp-lazy-video' );
+const videos = document.querySelectorAll( 'video.od-lazy-video' );
 for ( const video of videos ) {
 	lazyVideoObserver.observe( video );
 }
