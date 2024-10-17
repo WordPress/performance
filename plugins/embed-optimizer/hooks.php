@@ -325,44 +325,13 @@ function embed_optimizer_lazy_load_scripts(): void {
  * @since 0.2.0
  */
 function embed_optimizer_get_lazy_load_script(): string {
-	return <<<JS
-		const lazyEmbedsScripts = document.querySelectorAll( 'script[type="application/vnd.embed-optimizer.javascript"]' );
-		const lazyEmbedScriptsByParents = new Map();
+	$script = file_get_contents( __DIR__ . '/lazy-load.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 
-		const lazyEmbedObserver = new IntersectionObserver(
-			( entries ) => {
-				for ( const entry of entries ) {
-					if ( entry.isIntersecting ) {
-						const lazyEmbedParent = entry.target;
-						const lazyEmbedScript = /** @type {HTMLScriptElement} */ lazyEmbedScriptsByParents.get( lazyEmbedParent );
-						const embedScript = document.createElement( 'script' );
-						for ( const attr of lazyEmbedScript.attributes ) {
-							if ( attr.nodeName === 'type' ) {
-								// Omit type=application/vnd.embed-optimizer.javascript type.
-								continue;
-							}
-							embedScript.setAttribute(
-								attr.nodeName === 'data-original-type' ? 'type' : attr.nodeName,
-								attr.nodeValue
-							);
-						}
-						lazyEmbedScript.replaceWith( embedScript );
-						lazyEmbedObserver.unobserve( lazyEmbedParent );
-					}
-				}
-			},
-			{
-				rootMargin: '100% 0% 100% 0%',
-				threshold: 0
-			}
-		);
+	if ( false === $script ) {
+		return '';
+	}
 
-		for ( const lazyEmbedScript of lazyEmbedsScripts ) {
-			const lazyEmbedParent = /** @type {HTMLElement} */ lazyEmbedScript.parentNode;
-			lazyEmbedScriptsByParents.set( lazyEmbedParent, lazyEmbedScript );
-			lazyEmbedObserver.observe( lazyEmbedParent );
-		}
-JS;
+	return $script;
 }
 
 /**
