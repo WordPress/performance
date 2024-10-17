@@ -46,7 +46,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		 * will also be added. Additionally, ensure that this common LCP element is never lazy-loaded.
 		 */
 		$common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
-		if ( ! is_null( $common_lcp_element ) && $xpath === $common_lcp_element->get_xpath() ) {
+		if ( $common_lcp_element instanceof OD_Element && $xpath === $common_lcp_element->get_xpath() ) {
 			if ( 'high' === $this->get_attribute_value( $processor, 'fetchpriority' ) ) {
 				$processor->set_meta_attribute( 'fetchpriority-already-added', true );
 			} else {
