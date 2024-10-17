@@ -180,7 +180,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @throws Exception When attempting to set a property.
 	 */
 	public function offsetSet( $offset, $value ): void {
-		throw new Exception( 'Offsets may not be set.' );
+		throw new Exception( 'Element data may not be set.' );
 	}
 
 	/**
@@ -195,7 +195,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @throws Exception When attempting to unset a property.
 	 */
 	public function offsetUnset( $offset ): void {
-		throw new Exception( 'Offsets may not be unset.' );
+		throw new Exception( 'Element data may not be unset.' );
 	}
 
 	/**
