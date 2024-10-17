@@ -2,8 +2,7 @@ const lazyVideoObserver = new IntersectionObserver(
 	( entries ) => {
 		for ( const entry of entries ) {
 			if ( entry.isIntersecting ) {
-				/** @type {HTMLVideoElement} */
-				const video = entry.target;
+				const video = /** @type {HTMLVideoElement} */ entry.target;
 
 				if ( video.hasAttribute( 'data-original-poster' ) ) {
 					video.setAttribute(
