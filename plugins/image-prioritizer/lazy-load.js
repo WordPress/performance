@@ -18,7 +18,7 @@ const lazyVideoObserver = new IntersectionObserver(
 
 				if ( video.hasAttribute( 'data-original-preload' ) ) {
 					const preload = video.getAttribute(
-						'data-original-poster'
+						'data-original-preload'
 					);
 					if ( 'default' === preload ) {
 						video.removeAttribute( 'preload' );
