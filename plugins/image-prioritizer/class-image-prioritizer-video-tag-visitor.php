@@ -161,25 +161,59 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	private function lazy_load_videos( ?string $poster, OD_Tag_Visitor_Context $context ): void {
 		$processor = $context->processor;
 
+		/*
+		 * Do not do any lazy-loading if the mobile and desktop viewport groups lack URL metrics. This is important
+		 * because if there is a VIDEO in the initial viewport on desktop but not mobile, if then there are only URL
+		 * metrics collected for mobile then the VIDEO will get lazy-loaded which is good for mobile but for desktop
+		 * it will hurt performance. So this is why it is important to have URL metrics collected for both desktop and
+		 * mobile to verify whether maximum intersectionRatio is accounting for both screen sizes.
+		 * TODO: Add this same condition to IMG lazy-loading and Embed lazy-loading.
+		 */
+		if (
+			$context->url_metric_group_collection->get_first_group()->count() === 0
+			||
+			$context->url_metric_group_collection->get_last_group()->count() === 0
+		) {
+			return;
+		}
+
 		$xpath = $processor->get_xpath();
 
-		$intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath );
+		$initial_preload        = $this->get_attribute_value( $processor, 'preload' );
+		$max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath );
 
-		// Set preload="auto" if the video is the LCP element among all viewports.
+		/*
+		 * Optimize the video preload value based on how visible the video is in the viewport. If it is the common LCP
+		 * element, then make sure that preload is set to auto so that the browser is encouraged to download more of the
+		 * video. Nevertheless, it is likely that get_common_lcp_element() may return null since URL Metrics for
+		 * phablets and tablets may not get frequently gathered.
+		 *
+		 * So, for figure consideration this should perhaps check if the element in all gathered URL Metrics for all
+		 * viewport groups has an intersectionRatio greater than zero. If so, then it can also set it to preload=auto.
+		 * Otherwise, if the maximum intersectionRatio is greater than zero and yet there are also instances of the
+		 * element in one or more URL Metrics for which the intersectionRatio is zero, then in this case it may make
+		 * sense to set preload to metadata. This would avoid potentially aggressive downloading of a video when it is
+		 * not visible on mobile and yet it is visible on desktop. For prioritizing the loading of image which is the
+		 * LCP element for one viewport but not another the solution is to use a preload link with a media query.
+		 * However, videos are not supported in preload links, so we have to resort to trying pick the best preload
+		 * value  attribute to be shared across all viewports.
+		 * TODO: The above paragraph.
+		 */
 		$common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
 		if ( null !== $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
-			$processor->set_attribute( 'preload', 'auto' );
+			if ( 'auto' !== $initial_preload ) {
+				$processor->set_attribute( 'preload', 'auto' );
+			}
 			return;
 		}
 
-		// TODO: What if URL metrics aren't available for all viewports yet?
-		if ( $intersection_ratio > 0 ) {
+		// If the element is visible in any viewport, do not lazy-load it.
+		if ( $max_intersection_ratio > 0 ) {
 			return;
 		}
 
-		$preload = $processor->get_attribute( 'preload' );
-		if ( 'none' !== $preload ) {
-			$processor->set_attribute( 'data-original-preload', null !== $preload ? $preload : 'default' );
+		if ( 'none' !== $initial_preload ) {
+			$processor->set_attribute( 'data-original-preload', null !== $initial_preload ? $initial_preload : 'default' );
 			$processor->set_attribute( 'preload', 'none' );
 			$processor->add_class( 'wp-lazy-video' );
 		}
