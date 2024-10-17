@@ -24,6 +24,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	/**
 	 * Whether the lazy-loading script was added to the body.
 	 *
+	 * @since n.e.x.t
 	 * @var bool
 	 */
 	protected $added_lazy_script = false;
@@ -31,8 +32,9 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	/**
 	 * Visits a tag.
 	 *
-	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
+	 * @since n.e.x.t
 	 *
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the tag should be tracked in URL metrics.
 	 */
 	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
@@ -151,7 +153,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	}
 
 	/**
-	 * Adjusts `autoplay` and `preload` values for videos outside initial viewport.
+	 * Optimizes the VIDEO tag based on whether it is the LCP element or else whether it is displayed in any initial viewport.
 	 *
 	 * @since n.e.x.t
 	 *
