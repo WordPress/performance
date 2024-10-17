@@ -37,7 +37,6 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 *
 	 * @since n.e.x.t
 	 * @var OD_URL_Metric
-	 * @readonly
 	 */
 	protected $url_metric;
 
