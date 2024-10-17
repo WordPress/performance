@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Tag visitor that optimizes image tags.
  *
- * @phpstan-type NormalizedAttributeNames 'fetchpriority'|'loading'|'crossorigin'
+ * @phpstan-type NormalizedAttributeNames 'fetchpriority'|'loading'|'crossorigin'|'preload'
  *
  * @since 0.1.0
  * @access private

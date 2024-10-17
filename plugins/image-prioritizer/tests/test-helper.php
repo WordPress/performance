@@ -88,10 +88,19 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 		$set_up( $this, $this::factory() );
 
 		$buffer = is_string( $buffer ) ? $buffer : $buffer();
-		$buffer = preg_replace(
-			':<script type="module">.+?</script>:s',
-			'<script type="module">/* import detect ... */</script>',
-			od_optimize_template_output_buffer( $buffer )
+		$buffer = od_optimize_template_output_buffer( $buffer );
+		$buffer = preg_replace_callback(
+			':(<script type="module">)(.+?)(</script>):s',
+			static function ( $matches ) {
+				array_shift( $matches );
+				if ( false !== strpos( $matches[1], 'import detect' ) ) {
+					$matches[1] = '/* import detect ... */';
+				} elseif ( false !== strpos( $matches[1], 'const lazyVideoObserver' ) ) {
+					$matches[1] = '/* const lazyVideoObserver ... */';
+				}
+				return implode( '', $matches );
+			},
+			$buffer
 		);
 
 		$expected = is_string( $expected ) ? $expected : $expected();

@@ -71,7 +71,7 @@ return array(
 			</head>
 			<body>
 				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" class="mobile" src="https://example.com/mobile-header.jpg" alt="Mobile Logo" width="800" height="600">
-				<video class="desktop" width="1200" height="500">
+				<video data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::VIDEO]" class="desktop" width="1200" height="500">
 					<source src="https://example.com/header.webm" type="video/webm">
 					<source src="https://example.com/header.mp4" type="video/mp4">
 				</video>
