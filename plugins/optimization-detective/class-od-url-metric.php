@@ -144,7 +144,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @throws InvalidArgumentException When the supplied group has minimum/maximum viewport widths which are out of bounds with the viewport width for this URL Metric.
 	 */
 	public function set_group( OD_URL_Metric_Group $group ): void {
-		if ( $this->get_viewport_width() < $group->get_minimum_viewport_width() || $this->get_viewport_width() > $group->get_maximum_viewport_width() ) {
+		if ( ! $group->is_viewport_width_in_range( $this->get_viewport_width() ) ) {
 			throw new InvalidArgumentException( 'Group does not have the correct minimum or maximum viewport widths for this URL Metric.' );
 		}
 		$this->group = $group;
