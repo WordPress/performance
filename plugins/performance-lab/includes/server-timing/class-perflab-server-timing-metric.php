@@ -30,12 +30,20 @@ class Perflab_Server_Timing_Metric {
 	private $value;
 
 	/**
-	 * The value measured before relevant execution logic in seconds, if used.
+	 * The value measured before relevant execution logic in microseconds, if used.
 	 *
 	 * @since 1.8.0
 	 * @var float|null
 	 */
 	private $before_value;
+
+	/**
+	 * The metric description, if used.
+	 *
+	 * @since n.e.x.t
+	 * @var string|null
+	 */
+	private $description;
 
 	/**
 	 * Constructor.
@@ -110,6 +118,50 @@ class Perflab_Server_Timing_Metric {
 	}
 
 	/**
+	 * Sets the start time.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param float $value Start time in microseconds.
+	 */
+	public function set_start_time( float $value ): void {
+		$this->before_value = $value;
+	}
+
+	/**
+	 * Returns the start time if set.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return float|null Start time if set.
+	 */
+	public function get_start_time(): ?float {
+		return $this->before_value;
+	}
+
+	/**
+	 * Sets the metric description.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $description Description.
+	 */
+	public function set_description( string $description ): void {
+		$this->description = $description;
+	}
+
+	/**
+	 * Returns the metric description.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return string|null Description if set.
+	 */
+	public function get_description(): ?string {
+		return $this->description;
+	}
+
+	/**
 	 * Captures the current time, as a reference point to calculate the duration of a task afterward.
 	 *
 	 * This should be used in combination with {@see Perflab_Server_Timing_Metric::measure_after()}. Alternatively,
@@ -118,7 +170,7 @@ class Perflab_Server_Timing_Metric {
 	 * @since 1.8.0
 	 */
 	public function measure_before(): void {
-		$this->before_value = microtime( true );
+		$this->set_start_time( microtime( true ) );
 	}
 
 	/**
