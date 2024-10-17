@@ -710,7 +710,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 *
 	 * @covers ::get_all_element_max_intersection_ratios
 	 * @covers ::get_element_max_intersection_ratio
-	 * @covers ::get_all_elements
+	 * @covers ::get_xpath_elements_map
 	 *
 	 * @dataProvider data_provider_element_max_intersection_ratios
 	 *
@@ -729,7 +729,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		}
 
 		// Check get_all_denormalized_elements.
-		$all_elements = $group_collection->get_all_elements();
+		$all_elements = $group_collection->get_xpath_elements_map();
 		$xpath_counts = array();
 		foreach ( $url_metrics as $url_metric ) {
 			foreach ( $url_metric->get_elements() as $element ) {

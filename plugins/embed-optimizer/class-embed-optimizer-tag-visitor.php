@@ -216,7 +216,7 @@ final class Embed_Optimizer_Tag_Visitor {
 		 */
 		$minimums = array();
 
-		$elements = $context->url_metric_group_collection->get_all_elements()[ $embed_wrapper_xpath ] ?? array();
+		$elements = $context->url_metric_group_collection->get_xpath_elements_map()[ $embed_wrapper_xpath ] ?? array();
 		foreach ( $elements as $element ) {
 			/**
 			 * Resized bounding client rect.
