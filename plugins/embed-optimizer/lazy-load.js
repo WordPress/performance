@@ -18,7 +18,10 @@ const lazyEmbedObserver = new IntersectionObserver(
 					/** @type {HTMLScriptElement} */ lazyEmbedScriptsByParents.get(
 						lazyEmbedParent
 					);
-				const embedScript = document.createElement( 'script' );
+				const embedScript =
+					/** @type {HTMLScriptElement} */ document.createElement(
+						'script'
+					);
 				for ( const attr of lazyEmbedScript.attributes ) {
 					if ( attr.nodeName === 'type' ) {
 						// Omit type=application/vnd.embed-optimizer.javascript type.
