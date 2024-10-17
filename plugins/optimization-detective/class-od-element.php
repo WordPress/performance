@@ -44,6 +44,8 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Constructor.
 	 *
+	 * @since n.e.x.t
+	 *
 	 * @phpstan-param ElementData $data
 	 *
 	 * @param array<string, mixed> $data       Element data.
@@ -201,6 +203,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Specifies data which should be serialized to JSON.
 	 *
+	 * @since n.e.x.t
 	 * @return ElementData Exports to be serialized by json_encode().
 	 */
 	public function jsonSerialize(): array {
