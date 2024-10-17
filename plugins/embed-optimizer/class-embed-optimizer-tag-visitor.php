@@ -208,7 +208,7 @@ final class Embed_Optimizer_Tag_Visitor {
 		$embed_wrapper_xpath = self::get_embed_wrapper_xpath( $processor->get_xpath() );
 
 		/**
-		 * Collection of the minimum heights for the element with each group keyed by the minimum viewport with.
+		 * Collection of the minimum heights for the element with each group keyed by the minimum viewport width.
 		 *
 		 * @var array<int, array{group: OD_URL_Metric_Group, height: int}> $minimums
 		 */
