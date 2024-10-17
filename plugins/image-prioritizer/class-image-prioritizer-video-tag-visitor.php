@@ -54,6 +54,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		return false;
 	}
+
 	/**
 	 * Gets the poster from the current VIDEO element.
 	 *
@@ -85,19 +86,39 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		$xpath = $processor->get_xpath();
 
+		/*
+		 * Obtain maximum width of the element exclusively from the URL metrics group with the widest viewport width,
+		 * which would be desktop. This prevents the situation where if URL metrics have only so far been gathered for
+		 * mobile viewports that an excessively-small poster would end up getting served to the first desktop visitor.
+		 */
 		$max_element_width = 0;
+		$widest_group      = array_reduce(
+			iterator_to_array( $context->url_metric_group_collection ),
+			static function ( $carry, OD_URL_Metric_Group $group ) {
+				return ( null === $carry || $group->get_minimum_viewport_width() > $carry->get_minimum_viewport_width() ) ? $group : $carry;
+			}
+		);
+		foreach ( $widest_group as $url_metric ) {
+			foreach ( $url_metric->get_elements() as $element ) {
+				if ( $element['xpath'] === $xpath ) {
+					$max_element_width = max( $max_element_width, $element['boundingClientRect']['width'] );
+					break; // Move on to the next URL Metric.
+				}
+			}
+		}
 
-		$denormalized_elements = $context->url_metric_group_collection->get_all_denormalized_elements()[ $xpath ] ?? array();
-
-		foreach ( $denormalized_elements as list( , , $element ) ) {
-			$max_element_width = max( $max_element_width, $element['boundingClientRect']['width'] ?? 0 );
+		// If the element wasn't present in any URL Metrics gathered for desktop, then abort downsizing the poster.
+		if ( 0 === $max_element_width ) {
+			return;
 		}
 
 		$poster_id = attachment_url_to_postid( $poster );
 
-		if ( $poster_id > 0 && $max_element_width > 0 ) {
+		if ( $poster_id > 0 ) {
 			$smaller_image_url = wp_get_attachment_image_url( $poster_id, array( (int) $max_element_width, 0 ) );
-			$processor->set_attribute( 'poster', $smaller_image_url );
+			if ( is_string( $smaller_image_url ) ) {
+				$processor->set_attribute( 'poster', $smaller_image_url );
+			}
 		}
 	}
 
