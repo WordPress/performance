@@ -43,11 +43,12 @@ vendor/
 .DS_store?
 
 ############
-## Config overrides for CS tools
+## Config overrides for tools
 ############
 phpcs.xml
 phpunit.xml
 phpstan.neon
+wp-cli.local.yml
 
 ############
 ## Misc
