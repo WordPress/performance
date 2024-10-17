@@ -14,6 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Tag visitor that optimizes embeds.
  *
+ * @phpstan-import-type DOMRect from OD_URL_Metric
+ *
  * @since 0.2.0
  * @access private
  */
@@ -216,6 +218,11 @@ final class Embed_Optimizer_Tag_Visitor {
 
 		$elements = $context->url_metric_group_collection->get_all_elements()[ $embed_wrapper_xpath ] ?? array();
 		foreach ( $elements as $element ) {
+			/**
+			 * Resized bounding client rect.
+			 *
+			 * @var DOMRect|null $resized_bounding_client_rect
+			 */
 			$resized_bounding_client_rect = $element->get( 'resizedBoundingClientRect' );
 			if ( ! is_array( $resized_bounding_client_rect ) ) {
 				continue;
