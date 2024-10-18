@@ -411,6 +411,17 @@ function webp_uploads_is_fallback_enabled(): bool {
 }
 
 /**
+ * Checks if the `webp_uploads_delete_original` option is enabled.
+ *
+ * @since 2.2.0
+ *
+ * @return bool True if the option is enabled, false otherwise.
+ */
+function webp_uploads_is_delete_original_enabled(): bool {
+	return (bool) get_option( 'webp_uploads_delete_original' );
+}
+
+/**
  * Retrieves the image URL for a specified MIME type from the attachment metadata.
  *
  * This function attempts to locate an alternate image source URL in the
