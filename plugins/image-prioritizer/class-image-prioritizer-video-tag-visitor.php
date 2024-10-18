@@ -210,7 +210,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		 * TODO: The above paragraph.
 		 */
 		$common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
-		if ( null !== $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
+		if ( $common_lcp_element instanceof OD_Element && $xpath === $common_lcp_element->get_xpath() ) {
 			if ( 'auto' !== $initial_preload ) {
 				$processor->set_attribute( 'preload', 'auto' );
 			}
