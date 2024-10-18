@@ -1,13 +1,13 @@
 {
-	"plugins": [
-		"auto-sizes",
-		"dominant-color-images",
-		"embed-optimizer",
-		"image-prioritizer",
-		"optimization-detective",
-		"performance-lab",
-		"speculation-rules",
-		"web-worker-offloading",
-		"webp-uploads"
-	]
+  "plugins": [
+    "auto-sizes",
+    "dominant-color-images",
+    "embed-optimizer",
+    "image-prioritizer",
+    "optimization-detective",
+    "performance-lab",
+    "speculation-rules",
+    "web-worker-offloading",
+    "webp-uploads"
+  ]
 }
