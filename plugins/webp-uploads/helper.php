@@ -168,9 +168,8 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	$editor->resize( $width, $height, $crop );
 
 	if ( null === $destination_file_name ) {
-		$ext                   = pathinfo( $image_path, PATHINFO_EXTENSION );
 		$suffix                = $editor->get_suffix();
-		$suffix               .= "-{$ext}";
+		$suffix                = false !== $suffix ? $suffix : '';
 		$extension             = explode( '|', $allowed_mimes[ $mime ] );
 		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
 	}

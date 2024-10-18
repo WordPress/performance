@@ -88,7 +88,6 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 
 	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
 	$filename           = pathinfo( $file, PATHINFO_FILENAME );
-	$ext                = pathinfo( $file, PATHINFO_EXTENSION );
 	$allowed_mimes      = array_flip( wp_get_mime_types() );
 
 	// Create the sources for the full sized image.
@@ -104,7 +103,7 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 		}
 
 		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
-		$destination = trailingslashit( $original_directory ) . "{$filename}-{$ext}.{$extension[0]}";
+		$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
 		$image       = webp_uploads_generate_additional_image_source( $attachment_id, 'full', $original_size_data, $targeted_mime, $destination );
 
 		if ( is_wp_error( $image ) ) {
