@@ -128,7 +128,7 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	 */
 	public function next_token(): bool {
 		$previous_depth       = $this->previous_depth;
-		$current_depth        = $this->get_current_depth();
+		$current_depth        = $this->get_current_depth(); // @phpstan-ignore method.notFound (Not yet part of szepeviktor/phpstan-wordpress.)
 		$this->previous_depth = $current_depth;
 
 		$this->current_xpath = null; // Clear cache.
