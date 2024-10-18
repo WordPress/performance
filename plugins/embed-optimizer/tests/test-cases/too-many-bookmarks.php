@@ -3,6 +3,17 @@ return array(
 	'set_up'   => static function ( Test_Embed_Optimizer_Optimization_Detective $test_case ): void {
 		$test_case->setExpectedIncorrectUsage( 'WP_HTML_Tag_Processor::set_bookmark' );
 
+		$test_case->populate_url_metrics(
+			array(
+				array(
+					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::BOGUS]',
+					'isLCP'             => false,
+					'intersectionRatio' => 0.0,
+				),
+			),
+			false
+		);
+
 		// Check what happens when there are too many bookmarks.
 		add_action(
 			'od_register_tag_visitors',

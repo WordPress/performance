@@ -1,16 +1,6 @@
 <?php
 return array(
 	'set_up'   => static function ( Test_Embed_Optimizer_Optimization_Detective $test_case ): void {
-		$rect = array(
-			'width'  => 500.1,
-			'height' => 500.2,
-			'x'      => 100.3,
-			'y'      => 100.4,
-			'top'    => 0.1,
-			'right'  => 0.2,
-			'bottom' => 0.3,
-			'left'   => 0.4,
-		);
 		$test_case->populate_url_metrics(
 			array(
 				array(

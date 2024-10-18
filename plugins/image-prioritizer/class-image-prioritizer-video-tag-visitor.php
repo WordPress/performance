@@ -178,7 +178,6 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		 * metrics collected for mobile then the VIDEO will get lazy-loaded which is good for mobile but for desktop
 		 * it will hurt performance. So this is why it is important to have URL metrics collected for both desktop and
 		 * mobile to verify whether maximum intersectionRatio is accounting for both screen sizes.
-		 * TODO: Add this same condition to IMG lazy-loading and Embed lazy-loading.
 		 */
 		if (
 			$context->url_metric_group_collection->get_first_group()->count() === 0
