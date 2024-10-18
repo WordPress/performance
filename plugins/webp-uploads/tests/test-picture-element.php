@@ -103,7 +103,7 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 		if ( is_array( $image_src ) ) {
 			$img_src = $image_src[0];
 		}
-		$webp_srcset = str_replace( '.jpg', '-jpg.webp', $image_srcset );
+		$webp_srcset = str_replace( '.jpg', '.webp', $image_srcset );
 
 		// Prepare the expected HTML by replacing placeholders with expected values.
 		$replacements = array(

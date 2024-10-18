@@ -51,6 +51,17 @@ function webp_uploads_register_media_settings_field(): void {
 			'show_in_rest' => false,
 		)
 	);
+
+	// Add a setting to delete the original image file after conversion.
+	register_setting(
+		'media',
+		'webp_uploads_delete_original',
+		array(
+			'type'         => 'boolean',
+			'default'      => false,
+			'show_in_rest' => false,
+		)
+	);
 }
 add_action( 'init', 'webp_uploads_register_media_settings_field' );
 
@@ -104,6 +115,16 @@ function webp_uploads_add_media_settings_fields(): void {
 		'media',
 		'perflab_modern_image_format_settings',
 		array( 'class' => 'webp-uploads-use-picture-element' )
+	);
+
+	// Add delete original image setting field.
+	add_settings_field(
+		'webp_uploads_delete_original',
+		__( 'Delete Original Image', 'webp-uploads' ),
+		'webp_uploads_delete_original_setting_callback',
+		'media',
+		'perflab_modern_image_format_settings',
+		array( 'class' => 'webp-uploads-delete-original' )
 	);
 }
 add_action( 'admin_init', 'webp_uploads_add_media_settings_fields' );
@@ -267,6 +288,23 @@ function webp_uploads_use_picture_element_callback(): void {
 		} );
 	} )( <?php echo wp_json_encode( $picture_element_hidden_id ); ?> );
 	</script>
+	<?php
+}
+
+/**
+ * Renders the settings field for the 'webp_uploads_delete_original' setting.
+ *
+ * @since 2.2.0
+ */
+function webp_uploads_delete_original_setting_callback(): void {
+	?>
+	<label for="webp_uploads_delete_original">
+		<input name="webp_uploads_delete_original" type="checkbox" id="webp_uploads_delete_original" value="1" <?php checked( '1', get_option( 'webp_uploads_delete_original' ) ); ?> />
+		<?php esc_html_e( 'Delete the original JPEG/PNG file after conversion', 'webp-uploads' ); ?>
+	</label>
+	<p class="description" id="webp_uploads_delete_original_description">
+		<?php esc_html_e( 'If enabled, the original image file will be deleted after conversion to modern formats. This will reduce filesystem storage but may cause incompatibility in certain cases.', 'webp-uploads' ); ?>
+	</p>
 	<?php
 }
 

@@ -168,9 +168,8 @@ function webp_uploads_generate_additional_image_source( int $attachment_id, stri
 	$editor->resize( $width, $height, $crop );
 
 	if ( null === $destination_file_name ) {
-		$ext                   = pathinfo( $image_path, PATHINFO_EXTENSION );
 		$suffix                = $editor->get_suffix();
-		$suffix               .= "-{$ext}";
+		$suffix                = false !== $suffix ? $suffix : '';
 		$extension             = explode( '|', $allowed_mimes[ $mime ] );
 		$destination_file_name = $editor->generate_filename( $suffix, null, $extension[0] );
 	}
@@ -409,6 +408,17 @@ function webp_uploads_is_picture_element_enabled(): bool {
  */
 function webp_uploads_is_fallback_enabled(): bool {
 	return (bool) get_option( 'perflab_generate_webp_and_jpeg' );
+}
+
+/**
+ * Checks if the `webp_uploads_delete_original` option is enabled.
+ *
+ * @since 2.2.0
+ *
+ * @return bool True if the option is enabled, false otherwise.
+ */
+function webp_uploads_is_delete_original_enabled(): bool {
+	return (bool) get_option( 'webp_uploads_delete_original' );
 }
 
 /**
