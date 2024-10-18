@@ -31,14 +31,14 @@ final class Embed_Optimizer_Tag_Visitor {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_HTML_Tag_Processor $processor Processor.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether at the tag.
 	 */
-	private function is_embed_figure( OD_HTML_Tag_Processor $processor ): bool {
+	private function is_embed_figure( OD_Tag_Visitor_Context $context ): bool {
 		return (
-			'FIGURE' === $processor->get_tag()
+			'FIGURE' === $context->processor->get_tag()
 			&&
-			true === $processor->has_class( 'wp-block-embed' )
+			true === $context->processor->has_class( 'wp-block-embed' )
 		);
 	}
 
@@ -47,14 +47,14 @@ final class Embed_Optimizer_Tag_Visitor {
 	 *
 	 * @since n.e.x.t
 	 *
-	 * @param OD_HTML_Tag_Processor $processor Processor.
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the tag should be measured and stored in URL metrics
 	 */
-	private function is_embed_wrapper( OD_HTML_Tag_Processor $processor ): bool {
+	private function is_embed_wrapper( OD_Tag_Visitor_Context $context ): bool {
 		return (
-			'DIV' === $processor->get_tag()
+			'DIV' === $context->processor->get_tag()
 			&&
-			true === $processor->has_class( 'wp-block-embed__wrapper' )
+			true === $context->processor->has_class( 'wp-block-embed__wrapper' )
 		);
 	}
 
@@ -73,12 +73,12 @@ final class Embed_Optimizer_Tag_Visitor {
 		 * The only thing we need to do if it is a div.wp-block-embed__wrapper tag is return true so that the tag
 		 * will get measured and stored in the URL Metrics.
 		 */
-		if ( $this->is_embed_wrapper( $processor ) ) {
+		if ( $this->is_embed_wrapper( $context ) ) {
 			return true;
 		}
 
 		// Short-circuit if not a figure.wp-block-embed tag.
-		if ( ! $this->is_embed_figure( $processor ) ) {
+		if ( ! $this->is_embed_figure( $context ) ) {
 			return false;
 		}
 
