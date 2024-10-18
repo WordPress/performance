@@ -165,8 +165,9 @@ final class Embed_Optimizer_Tag_Visitor {
 			foreach ( $preconnect_hrefs as $preconnect_href ) {
 				$context->link_collection->add_link(
 					array(
-						'rel'  => 'preconnect',
-						'href' => $preconnect_href,
+						'rel'                 => 'preconnect',
+						'href'                => $preconnect_href,
+						'data-od-related-tag' => $context->processor->get_xpath(),
 					)
 				);
 			}
