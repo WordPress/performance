@@ -8,11 +8,6 @@
     "module": "esnext",
     "skipLibCheck": true
   },
-  "include": [
-    "plugins/**/*.js",
-    "plugins/**/*.ts",
-  ],
-  "exclude": [
-    "plugins/*/build/*"
-  ]
+  "include": [ "plugins/**/*.js", "plugins/**/*.ts" ],
+  "exclude": [ "plugins/*/build/*" ]
 }

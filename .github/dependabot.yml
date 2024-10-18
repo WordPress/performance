@@ -6,9 +6,9 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     labels:
-      - "no milestone"
-      - "[Type] Enhancement"
-      - "github_actions"
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'github_actions'
 
   - package-ecosystem: npm
     directory: '/'
@@ -16,9 +16,9 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     labels:
-      - "no milestone"
-      - "[Type] Enhancement"
-      - "javascript"
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'javascript'
 
   - package-ecosystem: composer
     directory: '/'
@@ -26,6 +26,6 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
     labels:
-      - "no milestone"
-      - "[Type] Enhancement"
-      - "php"
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'php'

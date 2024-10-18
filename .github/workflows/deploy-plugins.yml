@@ -47,7 +47,7 @@ jobs:
           echo "plugins=$(echo $PLUGINS | jq -c .)" >> $GITHUB_OUTPUT
 
   deploy:
-    name: "Deploy Plugin: ${{ matrix.plugin }}"
+    name: 'Deploy Plugin: ${{ matrix.plugin }}'
     needs: pre-run
     runs-on: ubuntu-latest
     permissions:
@@ -131,7 +131,7 @@ jobs:
         with:
           step: start
           token: ${{ secrets.GITHUB_TOKEN }}
-          env: "wp.org plugin: ${{ matrix.plugin }}"
+          env: 'wp.org plugin: ${{ matrix.plugin }}'
 
       - name: Deploy Plugin - ${{ matrix.plugin }}
         if: steps.check-deployment.outputs.deploy == 'true'
@@ -154,12 +154,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           status: ${{ job.status }}
           deployment_id: ${{ steps.wporg-deployment.outputs.deployment_id }}
-          env: "wp.org plugin: ${{ matrix.plugin }}"
-          env_url: "https://wordpress.org/plugins/${{ matrix.plugin }}/"
+          env: 'wp.org plugin: ${{ matrix.plugin }}'
+          env_url: 'https://wordpress.org/plugins/${{ matrix.plugin }}/'
 
   release-assets:
     name: Add release assets
-    needs: [ pre-run, deploy ]
+    needs: [pre-run, deploy]
     runs-on: ubuntu-latest
     permissions:
       actions: read
