@@ -13,6 +13,7 @@ module.exports = {
 		{
 			files: '*.yml',
 			options: {
+				singleQuote: true,
 				useTabs: false,
 				tabWidth: 2,
 			},
