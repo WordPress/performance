@@ -103,8 +103,8 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		$max_element_width = 0;
 		foreach ( $context->url_metric_group_collection->get_last_group() as $url_metric ) {
 			foreach ( $url_metric->get_elements() as $element ) {
-				if ( $element['xpath'] === $xpath ) {
-					$max_element_width = max( $max_element_width, $element['boundingClientRect']['width'] );
+				if ( $element->get_xpath() === $xpath ) {
+					$max_element_width = max( $max_element_width, $element->get_bounding_client_rect()['width'] );
 					break; // Move on to the next URL Metric.
 				}
 			}
@@ -210,7 +210,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		 * TODO: The above paragraph.
 		 */
 		$common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
-		if ( null !== $common_lcp_element && $xpath === $common_lcp_element['xpath'] ) {
+		if ( $common_lcp_element instanceof OD_Element && $xpath === $common_lcp_element->get_xpath() ) {
 			if ( 'auto' !== $initial_preload ) {
 				$processor->set_attribute( 'preload', 'auto' );
 			}
