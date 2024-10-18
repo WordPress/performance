@@ -70,13 +70,25 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$updated_fetchpriority = false; // That is, remove it.
 		}
 
+		/*
+		 * Do not do any lazy-loading if the mobile and desktop viewport groups lack URL metrics. This is important
+		 * because if there is an IMG in the initial viewport on desktop but not mobile, if then there are only URL
+		 * metrics collected for mobile then the IMG will get lazy-loaded which is good for mobile but for desktop
+		 * it will hurt performance. So this is why it is important to have URL metrics collected for both desktop and
+		 * mobile to verify whether maximum intersectionRatio is accounting for both screen sizes.
+		 */
 		$element_max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath );
 
 		// If the element was not found, we don't know if it was visible for not, so don't do anything.
 		if ( is_null( $element_max_intersection_ratio ) ) {
 			$processor->set_meta_attribute( 'unknown-tag', true ); // Mostly useful for debugging why an IMG isn't optimized.
-		} else {
+		} elseif (
+			$context->url_metric_group_collection->get_first_group()->count() > 0
+			&&
+			$context->url_metric_group_collection->get_last_group()->count() > 0
+		) {
 			// TODO: Take into account whether the element has the computed style of visibility:hidden, in such case it should also get fetchpriority=low.
+			// Otherwise, make sure visible elements omit the loading attribute, and hidden elements include loading=lazy.
 			$is_visible = $element_max_intersection_ratio > 0.0;
 			if ( true === $context->url_metric_group_collection->is_element_positioned_in_any_initial_viewport( $xpath ) ) {
 				if ( ! $is_visible ) {

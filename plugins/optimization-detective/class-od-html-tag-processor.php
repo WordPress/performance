@@ -378,7 +378,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		$existing_value = $this->get_attribute( $name );
 		$result         = parent::set_attribute( $name, $value );
 		if ( $result && $existing_value !== $value ) {
-			if ( is_string( $existing_value ) ) {
+			if ( null !== $existing_value ) {
 				$this->set_meta_attribute( "replaced-{$name}", $existing_value );
 			} else {
 				$this->set_meta_attribute( "added-{$name}", true );

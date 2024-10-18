@@ -421,7 +421,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 * @covers ::set_meta_attribute
 	 */
 	public function test_html_tag_processor_wrapper_methods(): void {
-		$processor = new OD_HTML_Tag_Processor( '<html lang="en" class="foo" dir="ltr"></html>' );
+		$processor = new OD_HTML_Tag_Processor( '<html lang="en" class="foo" dir="ltr" data-novalue></html>' );
 		while ( $processor->next_open_tag() ) {
 			$open_tag = $processor->get_tag();
 			if ( 'HTML' === $open_tag ) {
@@ -431,9 +431,13 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 				$processor->set_attribute( 'id', 'root' );
 				$processor->set_meta_attribute( 'foo', 'bar' );
 				$processor->set_meta_attribute( 'baz', true );
+				$processor->set_attribute( 'data-novalue', 'Nevermind!' );
 			}
 		}
-		$this->assertSame( '<html data-od-added-id data-od-baz data-od-foo="bar" data-od-removed-dir="ltr" data-od-replaced-lang="en" id="root" lang="es" class="foo" ></html>', $processor->get_updated_html() );
+		$this->assertSame(
+			'<html data-od-added-id data-od-baz data-od-foo="bar" data-od-removed-dir="ltr" data-od-replaced-data-novalue data-od-replaced-lang="en" id="root" lang="es" class="foo"  data-novalue="Nevermind!"></html>',
+			$processor->get_updated_html()
+		);
 	}
 
 	/**
