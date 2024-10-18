@@ -236,24 +236,24 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 
 	// Delete the original file if the option is enabled and new formats exist.
 	if ( webp_uploads_is_delete_original_enabled() && ! empty( $metadata['sources'] ) ) {
-		$new_formats_exist = false;
+		$supported_modern_image_formats = array();
 
-		// Check if the 'sources' property has a file with the expected extensions.
-		foreach ( $metadata['sources'] as $current_mime_type => $source ) {
-			if ( isset( $source['file'] ) ) {
-				$file_extension = pathinfo( $source['file'], PATHINFO_EXTENSION );
-				if ( in_array( $file_extension, array( 'avif', 'webp' ), true ) ) {
-					$new_formats_exist = true;
-					break;
-				}
-			}
+		if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$supported_modern_image_formats[] = 'avif';
+		}
+		if ( webp_uploads_mime_type_supported( 'image/webp' ) ) {
+			$supported_modern_image_formats[] = 'webp';
 		}
 
-		if ( $new_formats_exist ) {
-			// Update the original_image metadata to point to the new primary image
+		$original_file_extension  = pathinfo( $file, PATHINFO_EXTENSION );
+		$generated_file_extension = ! empty( $metadata['file'] ) ? pathinfo( $metadata['file'], PATHINFO_EXTENSION ) : '';
+		$delete_original_file     = ! in_array( $original_file_extension, $supported_modern_image_formats, true ) && in_array( $generated_file_extension, $supported_modern_image_formats, true );
+
+		if ( $delete_original_file ) {
+			// Update the original_image metadata value to point to the new primary image
 			// file since original image will be deleted.
 			$first_source = reset( $metadata['sources'] );
-			if ( ! empty( $first_source['file'] ) ) {
+			if ( isset( $metadata['original_image'] ) && ! empty( $first_source['file'] ) ) {
 				$metadata['original_image'] = $first_source['file'];
 				wp_update_attachment_metadata( $attachment_id, $metadata );
 			}
