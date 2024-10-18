@@ -176,6 +176,10 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 		$measure_12point345 = static function ( Perflab_Server_Timing_Metric $metric ): void {
 			$metric->set_value( 12.345 );
 		};
+		$measure_with_start = static function ( Perflab_Server_Timing_Metric $metric ): void {
+			$metric->set_start_value( 100000000.36 );
+			$metric->set_value( 100.72 );
+		};
 
 		return array(
 			'single metric'                      => array(
@@ -217,6 +221,15 @@ class Test_Perflab_Server_Timing extends WP_UnitTestCase {
 					),
 					'with-cap'    => array(
 						'measure_callback' => $measure_42,
+						'access_cap'       => 'exist',
+					),
+				),
+			),
+			'metric with start'                  => array(
+				'wp-with-start;dur=100.72;start=100000000.36',
+				array(
+					'with-start' => array(
+						'measure_callback' => $measure_with_start,
 						'access_cap'       => 'exist',
 					),
 				),
