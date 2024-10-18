@@ -426,7 +426,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 			$open_tag = $processor->get_tag();
 			if ( 'HTML' === $open_tag ) {
 				$processor->set_attribute( 'lang', 'es' );
-				$processor->set_attribute( 'class', 'foo' ); // Unchanged.
+				$processor->set_attribute( 'class', 'foo' ); // Unchanged from source to test that data-od-replaced-class metadata attribute won't be added.
 				$processor->remove_attribute( 'dir' );
 				$processor->set_attribute( 'id', 'root' );
 				$processor->set_meta_attribute( 'foo', 'bar' );
