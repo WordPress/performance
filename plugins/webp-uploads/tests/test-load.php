@@ -43,6 +43,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Don't create the original mime type for JPEG images.
 	 *
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::wp_get_original_image_path
+	 * @covers ::get_post_mime_type
 	 * @dataProvider data_provider_supported_image_types
 	 */
 	public function test_it_should_not_create_the_original_mime_type_for_jpeg_images( string $image_type ): void {
@@ -79,6 +82,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Create the original mime type for WebP images.
+	 *
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::get_post_mime_type
 	 */
 	public function test_it_should_create_the_original_mime_type_as_well_with_all_the_available_sources_for_the_specified_mime(): void {
 		update_option( 'perflab_generate_webp_and_jpeg', false );
@@ -109,6 +115,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Create JPEG and output type for JPEG images, if opted in.
 	 *
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::get_post_mime_type
 	 * @dataProvider data_provider_supported_image_types
 	 */
 	public function test_it_should_create_jpeg_and_webp_for_jpeg_images_if_opted_in( string $image_type ): void {
@@ -145,6 +153,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Create JPEG and output format for JPEG images, if perflab_generate_webp_and_jpeg option set.
 	 *
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::get_post_mime_type
 	 * @dataProvider data_provider_supported_image_types
 	 */
 	public function test_it_should_create_jpeg_and_webp_for_jpeg_images_if_generate_webp_and_jpeg_set( string $image_type ): void {
@@ -181,6 +191,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Don't create the sources property if no transform is provided.
+	 *
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::assertArrayNotHasKey
 	 */
 	public function test_it_should_not_create_the_sources_property_if_no_transform_is_provided(): void {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
@@ -200,6 +213,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Create the sources property when no transform is available
+	 *
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_create_the_sources_property_when_no_transform_is_available(): void {
 		add_filter(
@@ -225,6 +240,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Not create the sources property if the mime is not specified on the transforms images
+	 *
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::assertArrayNotHasKey
 	 */
 	public function test_it_should_not_create_the_sources_property_if_the_mime_is_not_specified_on_the_transforms_images(): void {
 		add_filter(
@@ -249,6 +267,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Create a WebP version with all the required properties
+	 *
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::assertFileExists
 	 */
 	public function test_it_should_create_a_webp_version_with_all_the_required_properties(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -275,6 +296,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Create the full size images when no size is available
+	 *
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_create_the_full_size_images_when_no_size_is_available(): void {
 		add_filter( 'intermediate_image_sizes', '__return_empty_array' );
@@ -291,6 +314,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Remove `scaled` suffix from the generated filename
+	 *
+	 * @covers ::get_attached_file
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_remove_scaled_suffix_from_the_generated_filename(): void {
 		// Create JPEG and WebP to check for scaled suffix.
@@ -316,6 +342,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Remove the generated webp images when the attachment is deleted
+	 *
+	 * @covers ::get_attached_file
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_remove_the_generated_webp_images_when_the_attachment_is_deleted(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -349,6 +378,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Remove the attached WebP version if the attachment is force deleted
+	 *
+	 * @covers ::wp_delete_attachment
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_remove_the_attached_webp_version_if_the_attachment_is_force_deleted(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -374,6 +406,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Remove full size images when no size image exists
+	 *
+	 * @covers ::wp_delete_attachment
+	 * @covers ::wp_get_attachment_metadata
 	 */
 	public function test_it_should_remove_full_size_images_when_no_size_image_exists(): void {
 		add_filter( 'intermediate_image_sizes', '__return_empty_array' );
@@ -397,6 +432,10 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Remove the attached WebP version if the attachment is force deleted after edit.
+	 *
+	 * @covers ::wp_delete_attachment
+	 * @covers ::wp_get_attachment_metadata
+	 * @covers ::get_post_meta
 	 */
 	public function test_it_should_remove_the_backup_sizes_and_sources_if_the_attachment_is_deleted_after_edit(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -429,6 +468,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Avoid the change of URLs of images that are not part of the media library
 	 *
+	 * @covers ::webp_uploads_update_image_references
 	 * @group webp_uploads_update_image_references
 	 */
 	public function test_it_should_avoid_the_change_of_urls_of_images_that_are_not_part_of_the_media_library(): void {
@@ -443,6 +483,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Avoid replacing not existing attachment IDs
 	 *
+	 * @covers ::webp_uploads_update_image_references
 	 * @group webp_uploads_update_image_references
 	 */
 	public function test_it_should_avoid_replacing_not_existing_attachment_i_ds(): void {
@@ -457,6 +498,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Prevent replacing a WebP image
 	 *
+	 * @covers ::webp_uploads_update_image_references
 	 * @group webp_uploads_update_image_references
 	 */
 	public function test_it_should_prevent_replacing_a_webp_image(): void {
@@ -485,6 +527,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Prevent replacing a jpg image if the image does not have the target class name
+	 *
+	 * @covers ::webp_uploads_update_image_references
 	 */
 	public function test_it_should_prevent_replacing_a_jpg_image_if_the_image_does_not_have_the_target_class_name(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -502,6 +546,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Replace references to a JPG image to a WebP version
 	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_update_image_references
 	 * @dataProvider provider_replace_images_with_different_extensions
 	 * @group webp_uploads_update_image_references
 	 */
@@ -530,6 +576,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Should not replace jpeg images in the content if other mime types are disabled via filter.
 	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_update_image_references
 	 * @dataProvider provider_replace_images_with_different_extensions
 	 * @group webp_uploads_update_image_references
 	 */
@@ -559,6 +607,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Replace all the images including the full size image
+	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_update_image_references
 	 */
 	public function test_it_should_replace_all_the_images_including_the_full_size_image(): void {
 		// Create JPEG and WebP to check replacement of JPEG => WebP.
@@ -586,6 +637,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Prevent replacing an image with no available sources
 	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_update_image_references
 	 * @group webp_uploads_update_image_references
 	 */
 	public function test_it_should_prevent_replacing_an_image_with_no_available_sources(): void {
@@ -602,6 +655,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Prevent update not supported images with no available sources
 	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_update_image_references
 	 * @dataProvider data_provider_not_supported_webp_images
 	 * @group webp_uploads_update_image_references
 	 */
@@ -654,6 +709,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * Tests that we can force generating jpeg subsizes using the webp_uploads_upload_image_mime_transforms filter.
+	 *
+	 * @covers \Test_WebP_Uploads_Load::opt_in_to_jpeg_and_webp
 	 */
 	public function test_it_should_preserve_jpeg_subsizes_using_transform_filter(): void {
 		// Create JPEG and WebP.
@@ -674,6 +731,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Allow the upload of an image if at least one editor supports the image type
 	 *
+	 * @covers ::wp_image_editor_supports
+	 * @covers ::set_post_thumbnail
 	 * @dataProvider data_provider_supported_image_types
 	 *
 	 * @group current1
@@ -716,6 +775,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Replace the featured image to the proper type when requesting the featured image.
 	 *
+	 * @covers ::get_the_post_thumbnail
+	 * @covers ::set_post_thumbnail
 	 * @dataProvider data_provider_supported_image_types
 	 */
 	public function test_it_should_replace_the_featured_image_to_webp_when_requesting_the_featured_image( string $image_type ): void {
@@ -752,6 +813,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Prevent replacing an image if image was uploaded via external source or plugin.
 	 *
+	 * @covers ::webp_uploads_update_image_references
 	 * @group webp_uploads_update_image_references
 	 */
 	public function test_it_should_prevent_replacing_an_image_uploaded_via_external_source(): void {
@@ -774,6 +836,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
+	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_update_image_references
 	 */
 	public function test_it_should_create_webp_when_webp_is_smaller_than_jpegs(): void {
 		// Create JPEG and WebP.
@@ -813,6 +878,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
+	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_update_image_references
 	 */
 	public function test_it_should_create_webp_for_full_size_which_is_smaller_in_webp_format(): void {
 		// Create JPEG and WebP.
@@ -840,6 +908,9 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 	/**
 	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
+	 *
+	 * @covers ::webp_uploads_img_tag_update_mime_type
+	 * @covers ::webp_uploads_update_image_references
 	 */
 	public function test_it_should_create_webp_for_some_sizes_which_are_smaller_in_webp_format(): void {
 		// Create JPEG and WebP.
