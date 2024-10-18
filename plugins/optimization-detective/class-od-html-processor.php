@@ -50,7 +50,7 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	 * Open stack indices.
 	 *
 	 * @since n.e.x.t
-	 * @var int[]
+	 * @var array<int, array{tag_name: string, index: int}>
 	 */
 	private $open_stack_indices = array();
 
@@ -61,7 +61,7 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	 * whenever `self::seek()` is called, the bookmarked open stacks are populated back into `$this->open_stack_indices`.
 	 *
 	 * @since n.e.x.t
-	 * @var array<string, int[]>
+	 * @var array<string, array<int, array{tag_name: string, index: int}>>
 	 */
 	private $bookmarked_open_stack_indices = array();
 
@@ -95,12 +95,97 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	private $cursor_move_count = 0;
 
 	/**
-	 * Previous depth.
+	 * Constructor.
 	 *
-	 * @since n.e.x.t
-	 * @var int
+	 * Do not use this method. Use the static creator methods instead.
+	 *
+	 * @access private
+	 *
+	 * @since  n.e.x.t
+	 *
+	 * @see    WP_HTML_Processor::create_fragment()
+	 *
+	 * @param string      $html                                  HTML to process.
+	 * @param string|null $use_the_static_create_methods_instead This constructor should not be called manually.
+	 *
+	 * @throws ReflectionException When unable to access private properties.
 	 */
-	private $previous_depth = -1;
+	public function __construct( string $html, ?string $use_the_static_create_methods_instead = null ) {
+		parent::__construct( $html, $use_the_static_create_methods_instead );
+
+		$html_processor_reflection = new ReflectionClass( WP_HTML_Processor::class );
+		$state_property_reflection = $html_processor_reflection->getProperty( 'state' );
+		$state_property_reflection->setAccessible( true );
+
+		/**
+		 * State.
+		 *
+		 * @var WP_HTML_Processor_State $state
+		 */
+		$state = $state_property_reflection->getValue( $this );
+
+		$stack_of_open_elements_reflection = new ReflectionObject( $state->stack_of_open_elements );
+
+		$push_handler_reflection = $stack_of_open_elements_reflection->getProperty( 'push_handler' );
+		$push_handler_reflection->setAccessible( true );
+		$existing_push_handler = $push_handler_reflection->getValue( $state->stack_of_open_elements );
+
+		$pop_handler_reflection = $stack_of_open_elements_reflection->getProperty( 'pop_handler' );
+		$pop_handler_reflection->setAccessible( true );
+		$existing_pop_handler = $pop_handler_reflection->getValue( $state->stack_of_open_elements );
+
+		$state->stack_of_open_elements->set_push_handler( // @phpstan-ignore method.notFound (Not yet part of szepeviktor/phpstan-wordpress.)
+			function ( WP_HTML_Token $token ) use ( $existing_push_handler, $state ): void {
+				if ( $existing_push_handler instanceof Closure ) {
+					$existing_push_handler( $token );
+				}
+
+				if ( '#' !== $token->node_name[0] && 'html' !== $token->node_name ) {
+					$this->current_xpath = null; // Clear cache.
+
+					$depth = $state->stack_of_open_elements->count();
+					if ( ! isset( $this->open_stack_indices[ $depth ] ) ) {
+						$this->open_stack_indices[ $depth ] = array(
+							'tag_name' => $token->node_name,
+							'index'    => 0,
+						);
+					} else {
+						$this->open_stack_indices[ $depth ]['tag_name'] = $token->node_name;
+						++$this->open_stack_indices[ $depth ]['index'];
+					}
+				}
+			}
+		);
+		$state->stack_of_open_elements->set_pop_handler( // @phpstan-ignore method.notFound (Not yet part of szepeviktor/phpstan-wordpress.)
+			function ( WP_HTML_Token $token ) use ( $existing_pop_handler, $state ): void {
+				if ( $existing_pop_handler instanceof Closure ) {
+					$existing_pop_handler( $token );
+				}
+
+				if ( '#' !== $token->node_name[0] && 'html' !== $token->node_name ) {
+					$this->current_xpath = null;
+
+					if ( count( $this->open_stack_indices ) > $state->stack_of_open_elements->count() + 1 ) {
+						array_pop( $this->open_stack_indices );
+					}
+				}
+
+				if ( 'HEAD' === $token->node_name ) {
+					$this->set_bookmark( self::END_OF_HEAD_BOOKMARK );
+				} elseif ( 'BODY' === $token->node_name ) {
+					// TODO: This currently always fails because self::STATE_COMPLETE === $this->parser_state, so the below hack is required.
+					$this->set_bookmark( self::END_OF_BODY_BOOKMARK );
+				}
+			}
+		);
+
+		// TODO: This is a hack! It's only needed because of a failure to set a bookmark when the BODY tag is popped above.
+		$body_end_position = strripos( $html, '</body>' );
+		if ( false === $body_end_position ) {
+			$body_end_position = strlen( $html );
+		}
+		$this->bookmarks[ '_' . self::END_OF_BODY_BOOKMARK ] = new WP_HTML_Span( $body_end_position, 0 );
+	}
 
 	/**
 	 * Finds the next open tag.
@@ -116,61 +201,6 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Finds the next token in the HTML document.
-	 *
-	 * @inheritDoc
-	 * @since n.e.x.t
-	 *
-	 * @return bool Whether a token was parsed.
-	 */
-	public function next_token(): bool {
-		$previous_depth       = $this->previous_depth;
-		$current_depth        = $this->get_current_depth(); // @phpstan-ignore method.notFound (Not yet part of szepeviktor/phpstan-wordpress.)
-		$this->previous_depth = $current_depth;
-
-		$this->current_xpath = null; // Clear cache.
-		++$this->cursor_move_count;
-		if ( ! parent::next_token() ) {
-			$this->open_stack_indices = array();
-			return false;
-		}
-
-		if ( $this->get_token_type() === '#tag' ) {
-			if ( $current_depth < $previous_depth ) {
-				array_splice( $this->open_stack_indices, $current_depth );
-			} elseif ( ! isset( $this->open_stack_indices[ $current_depth ] ) ) {
-				$this->open_stack_indices[ $current_depth ] = 0;
-			} else {
-				++$this->open_stack_indices[ $current_depth ];
-			}
-
-//			if ( $current_depth === 0 ) {
-//				echo  '=========>' . $this->get_tag() . PHP_EOL;
-//			}
-
-//			if ( $current_depth > $previous_depth ) {
-//				$this->open_stack_tags[] = $this->get_tag();
-//			} elseif ( $current_depth < $previous_depth ) {
-//				array_splice( $this->open_stack_indices, $current_depth );
-//			} else {
-//
-//			}
-
-			if ( $current_depth < $previous_depth ) {
-				$tag_name = $this->get_tag();
-
-				// Set bookmarks for insertion of preload links and the detection script module.
-				if ( 'HEAD' === $tag_name ) {
-					$this->set_bookmark( self::END_OF_HEAD_BOOKMARK );
-				} elseif ( 'BODY' === $tag_name ) {
-					$this->set_bookmark( self::END_OF_BODY_BOOKMARK );
-				}
-			}
-		}
-		return true;
 	}
 
 	/**
@@ -247,7 +277,7 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	 * Move the internal cursor in the Tag Processor to a given bookmark's location.
 	 *
 	 * @inheritDoc
-	 * @since 0.4.0
+	 * @since n.e.x.t
 	 *
 	 * @param string $bookmark_name Jump to the place in the document identified by this bookmark name.
 	 * @return bool Whether the internal cursor was successfully moved to the bookmark's location.
@@ -264,7 +294,7 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	 * Sets a bookmark in the HTML document.
 	 *
 	 * @inheritDoc
-	 * @since 0.4.0
+	 * @since n.e.x.t
 	 *
 	 * @param string $bookmark_name Identifies this particular bookmark.
 	 * @return bool Whether the bookmark was successfully created.
@@ -312,9 +342,8 @@ final class OD_HTML_Processor extends WP_HTML_Processor {
 	public function get_xpath(): string {
 		if ( null === $this->current_xpath ) {
 			$this->current_xpath = '';
-			foreach ( $this->get_breadcrumbs() ?? array() as $i => $tag_name ) {
-				$index                = $this->open_stack_indices[ $i ] ?? 0;
-				$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
+			foreach ( $this->open_stack_indices as $level ) {
+				$this->current_xpath .= sprintf( '/*[%d][self::%s]', $level['index'] + 1, $level['tag_name'] );
 			}
 		}
 		return $this->current_xpath;
