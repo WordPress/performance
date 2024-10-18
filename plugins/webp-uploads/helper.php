@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 1.0.0
  * @since 2.0.0 Added support for AVIF.
- * @since n.e.x.t Added support for PNG.
+ * @since 2.2.0 Added support for PNG.
  *
  * @return array<string, array<string>> An array of valid mime types, where the key is the mime type and the value is the extension type.
  */
@@ -403,7 +403,7 @@ function webp_uploads_is_picture_element_enabled(): bool {
  * Checks if the `perflab_generate_webp_and_jpeg` option is enabled.
  *
  * @since 2.0.0
- * @since n.e.x.t Renamed to webp_uploads_is_fallback_enabled().
+ * @since 2.2.0 Renamed to webp_uploads_is_fallback_enabled().
  *
  * @return bool True if the option is enabled, false otherwise.
  */
@@ -417,7 +417,7 @@ function webp_uploads_is_fallback_enabled(): bool {
  * This function attempts to locate an alternate image source URL in the
  * attachment's metadata that matches the provided MIME type.
  *
- * @since n.e.x.t
+ * @since 2.2.0
  *
  * @param int    $attachment_id The ID of the attachment.
  * @param string $src           The original image src url.

@@ -65,10 +65,11 @@ trait Optimization_Detective_Test_Helpers {
 	 * Gets a sample URL metric.
 	 *
 	 * @phpstan-param array{
-	 *                    url?:            string,
-	 *                    viewport_width?: int,
-	 *                    element?:        ElementDataSubset,
-	 *                    elements?:       array<ElementDataSubset>
+	 *                    url?:             string,
+	 *                    viewport_width?:  int,
+	 *                    viewport_height?: int,
+	 *                    element?:         ElementDataSubset,
+	 *                    elements?:        array<ElementDataSubset>
 	 *                } $params Params.
 	 *
 	 * @return OD_URL_Metric URL metric.
@@ -122,5 +123,20 @@ trait Optimization_Detective_Test_Helpers {
 	 */
 	public function remove_initial_tabs( string $input ): string {
 		return (string) preg_replace( '/^\t+/m', '', $input );
+	}
+
+	/**
+	 * Gets JSON-serializable data from an array of JsonSerializable objects.
+	 *
+	 * @param JsonSerializable[] $items Items.
+	 * @return array<string|int, mixed> Data from items.
+	 */
+	public function get_array_json_data( array $items ): array {
+		return array_map(
+			static function ( JsonSerializable $item ) {
+				return $item->jsonSerialize();
+			},
+			$items
+		);
 	}
 }

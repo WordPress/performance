@@ -31,14 +31,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @phpstan-type ElementData  array{
  *                                isLCP: bool,
  *                                isLCPCandidate: bool,
- *                                xpath: string,
+ *                                xpath: non-empty-string,
  *                                intersectionRatio: float,
  *                                intersectionRect: DOMRect,
  *                                boundingClientRect: DOMRect,
  *                            }
  * @phpstan-type Data         array{
- *                                uuid: string,
- *                                url: string,
+ *                                uuid: non-empty-string,
+ *                                url: non-empty-string,
  *                                timestamp: float,
  *                                viewport: ViewportRect,
  *                                elements: ElementData[]
@@ -55,6 +55,21 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @var Data
 	 */
 	protected $data;
+
+	/**
+	 * Elements.
+	 *
+	 * @var OD_Element[]
+	 */
+	protected $elements;
+
+	/**
+	 * Group.
+	 *
+	 * @since n.e.x.t
+	 * @var OD_URL_Metric_Group|null
+	 */
+	protected $group = null;
 
 	/**
 	 * Constructor.
@@ -96,16 +111,44 @@ class OD_URL_Metric implements JsonSerializable {
 			throw new OD_Data_Validation_Exception(
 				esc_html(
 					sprintf(
-						/* translators: 1: current aspect ratio, 2: minimum aspect ratio, 3: maximum aspect ratio */
-						__( 'Viewport aspect ratio (%1$s) is not in the accepted range of %2$s to %3$s.', 'optimization-detective' ),
+						/* translators: 1: current aspect ratio, 2: minimum aspect ratio, 3: maximum aspect ratio, 4: viewport dimensions */
+						__( 'Viewport aspect ratio (%1$s) is not in the accepted range of %2$s to %3$s. Viewport dimensions: %4$s', 'optimization-detective' ),
 						$aspect_ratio,
 						$min_aspect_ratio,
-						$max_aspect_ratio
+						$max_aspect_ratio,
+						$data['viewport']['width'] . 'x' . $data['viewport']['height']
 					)
 				)
 			);
 		}
 		return rest_sanitize_value_from_schema( $data, $schema, self::class );
+	}
+
+	/**
+	 * Gets the group that this URL metric is a part of (which may not be any).
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return OD_URL_Metric_Group|null Group.
+	 */
+	public function get_group(): ?OD_URL_Metric_Group {
+		return $this->group;
+	}
+
+	/**
+	 * Sets the group that this URL metric is a part of.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_URL_Metric_Group $group Group.
+	 *
+	 * @throws InvalidArgumentException When the supplied group has minimum/maximum viewport widths which are out of bounds with the viewport width for this URL Metric.
+	 */
+	public function set_group( OD_URL_Metric_Group $group ): void {
+		if ( ! $group->is_viewport_width_in_range( $this->get_viewport_width() ) ) {
+			throw new InvalidArgumentException( 'Group does not have the correct minimum or maximum viewport widths for this URL Metric.' );
+		}
+		$this->group = $group;
 	}
 
 	/**
@@ -243,7 +286,7 @@ class OD_URL_Metric implements JsonSerializable {
 		/**
 		 * Filters additional schema properties which should be allowed at the root of a URL metric.
 		 *
-		 * @since n.e.x.t
+		 * @since 0.6.0
 		 *
 		 * @param array<string, array{type: string}> $additional_properties Additional properties.
 		 */
@@ -255,7 +298,7 @@ class OD_URL_Metric implements JsonSerializable {
 		/**
 		 * Filters additional schema properties which should be allowed for an elements item in a URL metric.
 		 *
-		 * @since n.e.x.t
+		 * @since 0.6.0
 		 *
 		 * @param array<string, array{type: string}> $additional_properties Additional properties.
 		 */
@@ -274,7 +317,7 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Extends a schema with additional optional properties.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 *
 	 * @param array<string, mixed> $properties_schema     Properties schema to extend.
 	 * @param array<string, mixed> $additional_properties Additional properties.
@@ -287,7 +330,7 @@ class OD_URL_Metric implements JsonSerializable {
 			_doing_it_wrong(
 				esc_html( "Filter: '{$filter_name}'" ),
 				esc_html( $message ),
-				'Optimization Detective n.e.x.t'
+				'Optimization Detective 0.6.0'
 			);
 		};
 		foreach ( $additional_properties as $property_key => $property_schema ) {
@@ -349,12 +392,15 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * This is particularly useful in conjunction with the `od_url_metric_schema_root_additional_properties` filter.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 *
 	 * @param string $key Property.
 	 * @return mixed|null The property value, or null if not set.
 	 */
 	public function get( string $key ) {
+		if ( 'elements' === $key ) {
+			return $this->get_elements();
+		}
 		return $this->data[ $key ] ?? null;
 	}
 
@@ -406,10 +452,18 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets elements.
 	 *
-	 * @return ElementData[] Elements.
+	 * @return OD_Element[] Elements.
 	 */
 	public function get_elements(): array {
-		return $this->data['elements'];
+		if ( ! is_array( $this->elements ) ) {
+			$this->elements = array_map(
+				function ( array $element ): OD_Element {
+					return new OD_Element( $element, $this );
+				},
+				$this->data['elements']
+			);
+		}
+		return $this->elements;
 	}
 
 	/**

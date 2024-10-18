@@ -343,7 +343,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 *
 	 * @covers ::append_head_html
 	 * @covers ::append_body_html
-	 * @covers ::get_final_updated_html
+	 * @covers ::get_updated_html
 	 */
 	public function test_append_head_and_body_html(): void {
 		$html                = '
@@ -370,16 +370,29 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 
 		$saw_head = false;
 		$saw_body = false;
+		$did_seek = false;
 		while ( $processor->next_open_tag() ) {
+			$this->assertStringNotContainsString( $head_injected, $processor->get_updated_html(), 'Only expecting end-of-head injection once document was finalized.' );
+			$this->assertStringNotContainsString( $body_injected, $processor->get_updated_html(), 'Only expecting end-of-body injection once document was finalized.' );
 			$tag = $processor->get_tag();
 			if ( 'HEAD' === $tag ) {
 				$saw_head = true;
 			} elseif ( 'BODY' === $tag ) {
 				$saw_body = true;
+				$this->assertTrue( $processor->set_bookmark( 'cuerpo' ) );
+			}
+			if ( ! $did_seek && 'H1' === $tag ) {
+				$processor->append_head_html( '<!--H1 appends to HEAD-->' );
+				$processor->append_body_html( '<!--H1 appends to BODY-->' );
+				$this->assertTrue( $processor->seek( 'cuerpo' ) );
+				$did_seek = true;
 			}
 		}
+		$this->assertTrue( $did_seek );
 		$this->assertTrue( $saw_head );
 		$this->assertTrue( $saw_body );
+		$this->assertStringContainsString( $head_injected, $processor->get_updated_html(), 'Only expecting end-of-head injection once document was finalized.' );
+		$this->assertStringContainsString( $body_injected, $processor->get_updated_html(), 'Only expecting end-of-body injection once document was finalized.' );
 
 		$processor->append_head_html( $later_head_injected );
 
@@ -388,16 +401,16 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 				<head>
 					<meta charset=utf-8>
 					<!-- </head> -->
-				{$head_injected}{$later_head_injected}</head>
+				{$head_injected}<!--H1 appends to HEAD-->{$later_head_injected}</head>
 				<!--</HEAD>-->
 				<body>
 					<h1>Hello World</h1>
 					<!-- </body> -->
-				{$body_injected}</body>
+				{$body_injected}<!--H1 appends to BODY--></body>
 				<!--</BODY>-->
 			</html>
 		";
-		$this->assertSame( $expected, $processor->get_final_updated_html() );
+		$this->assertSame( $expected, $processor->get_updated_html() );
 	}
 
 	/**
@@ -408,18 +421,23 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 	 * @covers ::set_meta_attribute
 	 */
 	public function test_html_tag_processor_wrapper_methods(): void {
-		$processor = new OD_HTML_Tag_Processor( '<html lang="en" class="foo" dir="ltr"></html>' );
+		$processor = new OD_HTML_Tag_Processor( '<html lang="en" class="foo" dir="ltr" data-novalue></html>' );
 		while ( $processor->next_open_tag() ) {
 			$open_tag = $processor->get_tag();
 			if ( 'HTML' === $open_tag ) {
 				$processor->set_attribute( 'lang', 'es' );
+				$processor->set_attribute( 'class', 'foo' ); // Unchanged from source to test that data-od-replaced-class metadata attribute won't be added.
 				$processor->remove_attribute( 'dir' );
 				$processor->set_attribute( 'id', 'root' );
 				$processor->set_meta_attribute( 'foo', 'bar' );
 				$processor->set_meta_attribute( 'baz', true );
+				$processor->set_attribute( 'data-novalue', 'Nevermind!' );
 			}
 		}
-		$this->assertSame( '<html data-od-added-id data-od-baz data-od-foo="bar" data-od-removed-dir="ltr" data-od-replaced-lang="en" id="root" lang="es" class="foo" ></html>', $processor->get_updated_html() );
+		$this->assertSame(
+			'<html data-od-added-id data-od-baz data-od-foo="bar" data-od-removed-dir="ltr" data-od-replaced-data-novalue data-od-replaced-lang="en" id="root" lang="es" class="foo"  data-novalue="Nevermind!"></html>',
+			$processor->get_updated_html()
+		);
 	}
 
 	/**

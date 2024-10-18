@@ -5,7 +5,7 @@
  * Description: Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
  * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 0.5.0
+ * Version: 0.7.0-alpha
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -43,9 +43,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 			};
 
-			// Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action is used
-			// because it is the first action that fires once the theme is loaded.
-			add_action( 'after_setup_theme', $bootstrap, PHP_INT_MIN );
+			/*
+			 * Wait until after the plugins have loaded and the theme has loaded. The after_setup_theme action could be
+			 * used since it is the first action that fires once the theme is loaded. However, plugins may embed this
+			 * logic inside a module which initializes even later at the init action. The earliest action that this
+			 * plugin has hooks for is the init action at the default priority of 10 (which includes the rest_api_init
+			 * action), so this is why it gets initialized at priority 9.
+			 */
+			add_action( 'init', $bootstrap, 9 );
 		}
 
 		// Register this copy of the plugin.
@@ -65,10 +70,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'optimization_detective_pending_plugin',
-	'0.5.0',
+	'0.7.0-alpha',
 	static function ( string $version ): void {
-
-		// Define the constant.
 		if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 			return;
 		}
@@ -100,15 +103,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/class-od-html-tag-processor.php';
 		require_once __DIR__ . '/class-od-html-processor.php';
 		require_once __DIR__ . '/class-od-url-metric.php';
+		require_once __DIR__ . '/class-od-element.php';
 		require_once __DIR__ . '/class-od-strict-url-metric.php';
-		require_once __DIR__ . '/class-od-url-metrics-group.php';
-		require_once __DIR__ . '/class-od-url-metrics-group-collection.php';
+		require_once __DIR__ . '/class-od-url-metric-group.php';
+		require_once __DIR__ . '/class-od-url-metric-group-collection.php';
+		class_alias( OD_URL_Metric_Group::class, 'OD_URL_Metrics_Group' ); // Temporary class alias for back-compat after rename.
+		class_alias( OD_URL_Metric_Group_Collection::class, 'OD_URL_Metrics_Group_Collection' ); // Temporary class alias for back-compat after rename.
 
 		// Storage logic.
 		require_once __DIR__ . '/storage/class-od-url-metrics-post-type.php';
 		require_once __DIR__ . '/storage/class-od-storage-lock.php';
 		require_once __DIR__ . '/storage/data.php';
 		require_once __DIR__ . '/storage/rest-api.php';
+		require_once __DIR__ . '/storage/class-od-url-metric-store-request-context.php';
 
 		// Detection logic.
 		require_once __DIR__ . '/detection.php';

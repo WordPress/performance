@@ -182,7 +182,7 @@ function od_verify_url_metrics_storage_nonce( string $nonce, string $slug, strin
 /**
  * Gets the minimum allowed viewport aspect ratio for URL metrics.
  *
- * @since n.e.x.t
+ * @since 0.6.0
  * @access private
  *
  * @return float Minimum viewport aspect ratio for URL metrics.
@@ -194,7 +194,7 @@ function od_get_minimum_viewport_aspect_ratio(): float {
 	 * The 0.4 default value is intended to accommodate the phone with the greatest known aspect
 	 * ratio at 21:9 when rotated 90 degrees to 9:21 (0.429).
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 *
 	 * @param float $minimum_viewport_aspect_ratio Minimum viewport aspect ratio.
 	 */
@@ -204,7 +204,7 @@ function od_get_minimum_viewport_aspect_ratio(): float {
 /**
  * Gets the maximum allowed viewport aspect ratio for URL metrics.
  *
- * @since n.e.x.t
+ * @since 0.6.0
  * @access private
  *
  * @return float Maximum viewport aspect ratio for URL metrics.
@@ -216,7 +216,7 @@ function od_get_maximum_viewport_aspect_ratio(): float {
 	 * The 2.5 default value is intended to accommodate the phone with the greatest known aspect
 	 * ratio at 21:9 (2.333).
 	 *
-	 * @since n.e.x.t
+	 * @since 0.6.0
 	 *
 	 * @param float $maximum_viewport_aspect_ratio Maximum viewport aspect ratio.
 	 */
@@ -242,6 +242,9 @@ function od_get_maximum_viewport_aspect_ratio(): float {
  *     $break-mobile: 480px;
  *
  * These breakpoints appear to be used the most in media queries that affect frontend styles.
+ *
+ * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
+ * single group.
  *
  * @since 0.1.0
  * @access private
@@ -287,7 +290,8 @@ function od_get_breakpoint_max_widths(): array {
 		/**
 		 * Filters the breakpoint max widths to group URL metrics for various viewports.
 		 *
-		 * A breakpoint must be greater than zero and less than PHP_INT_MAX.
+		 * A breakpoint must be greater than zero and less than PHP_INT_MAX. This array may be empty in which case there
+		 * are no responsive breakpoints and all URL Metrics are collected in a single group.
 		 *
 		 * @since 0.1.0
 		 *

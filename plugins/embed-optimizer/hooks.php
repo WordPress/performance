@@ -18,15 +18,52 @@ if ( ! defined( 'ABSPATH' ) ) {
 function embed_optimizer_add_hooks(): void {
 	add_action( 'wp_head', 'embed_optimizer_render_generator' );
 
-	if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
-		add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' );
-		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_detect_embed_presence' );
-		add_filter( 'od_url_metric_schema_element_item_additional_properties', 'embed_optimizer_add_element_item_schema_properties' );
-	} else {
+	add_action( 'od_init', 'embed_optimizer_init_optimization_detective' );
+	add_action( 'wp_loaded', 'embed_optimizer_add_non_optimization_detective_hooks' );
+}
+add_action( 'init', 'embed_optimizer_add_hooks' );
+
+/**
+ * Adds hooks for when the Optimization Detective logic is not running.
+ *
+ * @since n.e.x.t
+ */
+function embed_optimizer_add_non_optimization_detective_hooks(): void {
+	if ( false === has_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' ) ) {
 		add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_lazy_load' );
 	}
 }
-add_action( 'init', 'embed_optimizer_add_hooks' );
+
+/**
+ * Initializes Embed Optimizer when Optimization Detective has loaded.
+ *
+ * @since n.e.x.t
+ *
+ * @param string $optimization_detective_version Current version of the optimization detective plugin.
+ */
+function embed_optimizer_init_optimization_detective( string $optimization_detective_version ): void {
+	$required_od_version = '0.7.0';
+	if ( version_compare( (string) strtok( $optimization_detective_version, '-' ), $required_od_version, '<' ) ) {
+		add_action(
+			'admin_notices',
+			static function (): void {
+				global $pagenow;
+				if ( ! in_array( $pagenow, array( 'index.php', 'plugins.php' ), true ) ) {
+					return;
+				}
+				wp_admin_notice(
+					esc_html__( 'The Embed Optimizer plugin requires a newer version of the Optimization Detective plugin. Please update your plugins.', 'embed-optimizer' ),
+					array( 'type' => 'warning' )
+				);
+			}
+		);
+		return;
+	}
+
+	add_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' );
+	add_filter( 'embed_oembed_html', 'embed_optimizer_filter_oembed_html_to_detect_embed_presence' );
+	add_filter( 'od_url_metric_schema_element_item_additional_properties', 'embed_optimizer_add_element_item_schema_properties' );
+}
 
 /**
  * Registers the tag visitor for embeds.
@@ -288,44 +325,13 @@ function embed_optimizer_lazy_load_scripts(): void {
  * @since 0.2.0
  */
 function embed_optimizer_get_lazy_load_script(): string {
-	return <<<JS
-		const lazyEmbedsScripts = document.querySelectorAll( 'script[type="application/vnd.embed-optimizer.javascript"]' );
-		const lazyEmbedScriptsByParents = new Map();
+	$script = file_get_contents( __DIR__ . '/lazy-load.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 
-		const lazyEmbedObserver = new IntersectionObserver(
-			( entries ) => {
-				for ( const entry of entries ) {
-					if ( entry.isIntersecting ) {
-						const lazyEmbedParent = entry.target;
-						const lazyEmbedScript = /** @type {HTMLScriptElement} */ lazyEmbedScriptsByParents.get( lazyEmbedParent );
-						const embedScript = document.createElement( 'script' );
-						for ( const attr of lazyEmbedScript.attributes ) {
-							if ( attr.nodeName === 'type' ) {
-								// Omit type=application/vnd.embed-optimizer.javascript type.
-								continue;
-							}
-							embedScript.setAttribute(
-								attr.nodeName === 'data-original-type' ? 'type' : attr.nodeName,
-								attr.nodeValue
-							);
-						}
-						lazyEmbedScript.replaceWith( embedScript );
-						lazyEmbedObserver.unobserve( lazyEmbedParent );
-					}
-				}
-			},
-			{
-				rootMargin: '100% 0% 100% 0%',
-				threshold: 0
-			}
-		);
+	if ( false === $script ) {
+		return '';
+	}
 
-		for ( const lazyEmbedScript of lazyEmbedsScripts ) {
-			const lazyEmbedParent = /** @type {HTMLElement} */ lazyEmbedScript.parentNode;
-			lazyEmbedScriptsByParents.set( lazyEmbedParent, lazyEmbedScript );
-			lazyEmbedObserver.observe( lazyEmbedParent );
-		}
-JS;
+	return $script;
 }
 
 /**

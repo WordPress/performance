@@ -1,18 +1,41 @@
+/**
+ * Embed Optimizer module for Optimization Detective
+ *
+ * When a URL metric is being collected by Optimization Detective, this module adds a ResizeObserver to keep track of
+ * the changed heights for embed blocks. This data is extended/amended onto the element data of the pending URL metric
+ * when it is submitted for storage.
+ */
+
 const consoleLogPrefix = '[Embed Optimizer]';
 
 /**
- * @typedef {import("../optimization-detective/types.d.ts").ElementMetrics} ElementMetrics
- * @typedef {import("../optimization-detective/types.d.ts").URLMetric} URLMetric
+ * @typedef {import("../optimization-detective/types.ts").URLMetric} URLMetric
+ * @typedef {import("../optimization-detective/types.ts").Extension} Extension
+ * @typedef {import("../optimization-detective/types.ts").InitializeCallback} InitializeCallback
+ * @typedef {import("../optimization-detective/types.ts").InitializeArgs} InitializeArgs
+ * @typedef {import("../optimization-detective/types.ts").FinalizeArgs} FinalizeArgs
+ * @typedef {import("../optimization-detective/types.ts").FinalizeCallback} FinalizeCallback
+ * @typedef {import("../optimization-detective/types.ts").ExtendedElementData} ExtendedElementData
  */
 
 /**
- * Log a message.
+ * Logs a message.
  *
  * @param {...*} message
  */
 function log( ...message ) {
 	// eslint-disable-next-line no-console
 	console.log( consoleLogPrefix, ...message );
+}
+
+/**
+ * Logs an error.
+ *
+ * @param {...*} message
+ */
+function error( ...message ) {
+	// eslint-disable-next-line no-console
+	console.error( consoleLogPrefix, ...message );
 }
 
 /**
@@ -23,19 +46,19 @@ function log( ...message ) {
 const loadedElementContentRects = new Map();
 
 /**
- * Initialize.
+ * Initializes extension.
  *
- * @param {Object}  args         Args.
- * @param {boolean} args.isDebug Whether to show debug messages.
+ * @type {InitializeCallback}
+ * @param {InitializeArgs} args Args.
  */
-export async function initialize( { isDebug } ) {
-	const embedWrappers =
-		/** @type NodeListOf<HTMLDivElement> */ document.querySelectorAll(
-			'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
-		);
+export function initialize( { isDebug } ) {
+	/** @type NodeListOf<HTMLDivElement> */
+	const embedWrappers = document.querySelectorAll(
+		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
+	);
 
 	for ( const embedWrapper of embedWrappers ) {
-		monitorEmbedWrapperForResizes( embedWrapper );
+		monitorEmbedWrapperForResizes( embedWrapper, isDebug );
 	}
 
 	if ( isDebug ) {
@@ -44,29 +67,35 @@ export async function initialize( { isDebug } ) {
 }
 
 /**
- * Initialize.
+ * Finalizes extension.
  *
- * @param {Object}    args           Args.
- * @param {boolean}   args.isDebug   Whether to show debug messages.
- * @param {URLMetric} args.urlMetric Pending URL metric.
+ * @type {FinalizeCallback}
+ * @param {FinalizeArgs} args Args.
  */
-export async function finalize( { urlMetric, isDebug } ) {
-	if ( isDebug ) {
-		log( 'URL metric to be sent:', urlMetric );
-	}
-
-	for ( const element of urlMetric.elements ) {
-		if ( loadedElementContentRects.has( element.xpath ) ) {
+export async function finalize( {
+	isDebug,
+	getElementData,
+	extendElementData,
+} ) {
+	for ( const [ xpath, domRect ] of loadedElementContentRects.entries() ) {
+		try {
+			extendElementData( xpath, {
+				resizedBoundingClientRect: domRect,
+			} );
 			if ( isDebug ) {
+				const elementData = getElementData( xpath );
 				log(
-					`boundingClientRect for ${ element.xpath } resized:`,
-					element.boundingClientRect,
+					`boundingClientRect for ${ xpath } resized:`,
+					elementData.boundingClientRect,
 					'=>',
-					loadedElementContentRects.get( element.xpath )
+					domRect
 				);
 			}
-			element.resizedBoundingClientRect = loadedElementContentRects.get(
-				element.xpath
+		} catch ( err ) {
+			error(
+				`Failed to extend element data for ${ xpath } with resizedBoundingClientRect:`,
+				domRect,
+				err
 			);
 		}
 	}
@@ -76,8 +105,9 @@ export async function finalize( { urlMetric, isDebug } ) {
  * Monitors embed wrapper for resizes.
  *
  * @param {HTMLDivElement} embedWrapper Embed wrapper DIV.
+ * @param {boolean}        isDebug      Whether debug.
  */
-function monitorEmbedWrapperForResizes( embedWrapper ) {
+function monitorEmbedWrapperForResizes( embedWrapper, isDebug ) {
 	if ( ! ( 'odXpath' in embedWrapper.dataset ) ) {
 		throw new Error( 'Embed wrapper missing data-od-xpath attribute.' );
 	}
@@ -85,6 +115,9 @@ function monitorEmbedWrapperForResizes( embedWrapper ) {
 	const observer = new ResizeObserver( ( entries ) => {
 		const [ entry ] = entries;
 		loadedElementContentRects.set( xpath, entry.contentRect );
+		if ( isDebug ) {
+			log( `Resized element ${ xpath }:`, entry.contentRect );
+		}
 	} );
 	observer.observe( embedWrapper, { box: 'content-box' } );
 }

@@ -7,23 +7,24 @@
     "npm": ">=10.2.3"
   },
   "dependencies": {
-    "@builder.io/partytown": "^0.10.2",
+    "@builder.io/partytown": "github:westonruter/partytown#add/wp-i18n-workaround",
     "web-vitals": "4.2.3"
   },
   "devDependencies": {
     "@octokit/rest": "^21.0.2",
-    "@wordpress/env": "^10.7.0",
-    "@wordpress/prettier-config": "^4.7.0",
-    "@wordpress/scripts": "^29.0.0",
+    "@wordpress/env": "^10.9.0",
+    "@wordpress/prettier-config": "^4.9.0",
+    "@wordpress/scripts": "^30.1.0",
     "commander": "12.1.0",
     "copy-webpack-plugin": "^12.0.2",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
-    "husky": "^9.1.5",
+    "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
     "lodash": "4.17.21",
     "micromatch": "^4.0.8",
     "npm-run-all": "^4.1.5",
+    "typescript": "^5.6.3",
     "webpackbar": "^6.0.1"
   },
   "scripts": {
@@ -46,6 +47,7 @@
     "generate-pending-release-diffs": "bin/generate-pending-release-diffs.sh",
     "format-js": "wp-scripts format",
     "lint-js": "wp-scripts lint-js",
+    "tsc": "tsc",
     "format-php": "composer format:all",
     "phpstan": "composer phpstan",
     "lint-php": "composer lint:all",
