@@ -40,6 +40,10 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 
 		$xpath = $processor->get_xpath();
 
+		$current_fetchpriority = $this->get_attribute_value( $processor, 'fetchpriority' );
+		$is_lazy_loaded        = 'lazy' === $this->get_attribute_value( $processor, 'loading' );
+		$updated_fetchpriority = null;
+
 		/*
 		 * When the same LCP element is common/shared among all viewport groups, make sure that the element has
 		 * fetchpriority=high, even though it won't really be needed because a preload link with fetchpriority=high
@@ -47,13 +51,9 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		 */
 		$common_lcp_element = $context->url_metric_group_collection->get_common_lcp_element();
 		if ( ! is_null( $common_lcp_element ) && $xpath === $common_lcp_element['xpath'] ) {
-			if ( 'high' === $this->get_attribute_value( $processor, 'fetchpriority' ) ) {
-				$processor->set_meta_attribute( 'fetchpriority-already-added', true );
-			} else {
-				$processor->set_attribute( 'fetchpriority', 'high' );
-			}
+			$updated_fetchpriority = 'high';
 		} elseif (
-			is_string( $processor->get_attribute( 'fetchpriority' ) )
+			'high' === $current_fetchpriority
 			&&
 			$context->url_metric_group_collection->is_any_group_populated()
 		) {
@@ -67,7 +67,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			 * fetchpriority=high in such case to prevent server-side heuristics from prioritizing loading the image
 			 * which isn't actually the LCP element for actual visitors.
 			 */
-			$processor->remove_attribute( 'fetchpriority' );
+			$updated_fetchpriority = false; // That is, remove it.
 		}
 
 		/*
@@ -87,16 +87,43 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			&&
 			$context->url_metric_group_collection->get_last_group()->count() > 0
 		) {
+			// TODO: Take into account whether the element has the computed style of visibility:hidden, in such case it should also get fetchpriority=low.
 			// Otherwise, make sure visible elements omit the loading attribute, and hidden elements include loading=lazy.
 			$is_visible = $element_max_intersection_ratio > 0.0;
-			$loading    = $this->get_attribute_value( $processor, 'loading' );
-			if ( $is_visible && 'lazy' === $loading ) {
-				$processor->remove_attribute( 'loading' );
-			} elseif ( ! $is_visible && 'lazy' !== $loading ) {
+			if ( true === $context->url_metric_group_collection->is_element_positioned_in_any_initial_viewport( $xpath ) ) {
+				if ( ! $is_visible ) {
+					// If an element is positioned in the initial viewport and yet it is it not visible, it may be
+					// located in a subsequent carousel slide or inside a hidden navigation menu which could be
+					// displayed at any time. Therefore, it should get fetchpriority=low so that any images which are
+					// visible can be loaded with a higher priority.
+					$updated_fetchpriority = 'low';
+
+					// Also prevent the image from being lazy-loaded (or eager-loaded) since it may be revealed at any
+					// time without the browser having any signal (e.g. user scrolling toward it) to start downloading.
+					$processor->remove_attribute( 'loading' );
+				} elseif ( $is_lazy_loaded ) {
+					// Otherwise, if the image is positioned inside any initial viewport then it should never get lazy-loaded.
+					$processor->remove_attribute( 'loading' );
+				}
+			} elseif ( ! $is_lazy_loaded && ! $is_visible ) {
+				// Otherwise, the element is not positioned in any initial viewport, so it should always get lazy-loaded.
+				// The `! $is_visible` condition should always evaluate to true since the intersectionRatio of an
+				// element positioned below the initial viewport should by definition never be visible.
 				$processor->set_attribute( 'loading', 'lazy' );
 			}
 		}
 		// TODO: If an image is visible in one breakpoint but not another, add loading=lazy AND add a regular-priority preload link with media queries (unless LCP in which case it should already have a fetchpriority=high link) so that the image won't be eagerly-loaded for viewports on which it is not shown.
+
+		// Set the fetchpriority attribute if needed.
+		if ( is_string( $updated_fetchpriority ) ) {
+			if ( $updated_fetchpriority !== $current_fetchpriority ) {
+				$processor->set_attribute( 'fetchpriority', $updated_fetchpriority );
+			} else {
+				$processor->set_meta_attribute( 'fetchpriority-already-added', true );
+			}
+		} elseif ( false === $updated_fetchpriority ) {
+			$processor->remove_attribute( 'fetchpriority' );
+		}
 
 		// Ensure that sizes=auto is set properly.
 		$sizes = $processor->get_attribute( 'sizes' );
