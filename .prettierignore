@@ -1,0 +1,5 @@
+# Ignore Composer lock file
+composer.lock
+
+# Ignore npm package lock file
+package-lock.json
