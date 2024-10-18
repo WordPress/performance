@@ -83,6 +83,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          get_common_lcp_element?: OD_Element|null,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
 	 *          get_xpath_elements_map?: array<string, non-empty-array<int, OD_Element>>,
+	 *          get_all_elements_positioned_in_any_initial_viewport?: array<string, bool>,
 	 *      }
 	 */
 	private $result_cache = array();
@@ -502,6 +503,45 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
+	 * Gets all elements' status for whether they are positioned in any initial viewport.
+	 *
+	 * An element is positioned in the initial viewport if its `boundingClientRect.top` is less than the
+	 * `viewport.height` for any of its recorded URL metrics. Note that even though the element may be positioned in the
+	 * initial viewport, it may not actually be visible. It could be occluded as a latter slide in a carousel in which
+	 * case it will have intersectionRatio of 0. Or the element may not be visible due to it or an ancestor having the
+	 * `visibility:hidden` style, such as in the case of a dropdown navigation menu. When, for example, an IMG element
+	 * is positioned in any initial viewport, it should not get `loading=lazy` but rather `fetchpriority=low`.
+	 * Furthermore, the element may be positioned _above_ the initial viewport or to the left or right of the viewport,
+	 * in which case the element may be dynamically displayed at any time in response to a user interaction.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string, bool> Keys are XPaths and values whether the element is positioned in any initial viewport.
+	 */
+	public function get_all_elements_positioned_in_any_initial_viewport(): array {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
+		}
+
+		$result = ( function () {
+			$elements_positioned = array();
+			foreach ( $this->get_xpath_elements_map() as $xpath => $elements ) {
+				$elements_positioned[ $xpath ] = false;
+				foreach ( $elements as $element ) {
+					if ( $element->get_bounding_client_rect()['top'] < $element->get_url_metric()->get_viewport()['height'] ) {
+						$elements_positioned[ $xpath ] = true;
+						break;
+					}
+				}
+			}
+			return $elements_positioned;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
+	}
+
+	/**
 	 * Gets the max intersection ratio of an element across all groups and their captured URL metrics.
 	 *
 	 * @since 0.3.0
@@ -511,6 +551,18 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 */
 	public function get_element_max_intersection_ratio( string $xpath ): ?float {
 		return $this->get_all_element_max_intersection_ratios()[ $xpath ] ?? null;
+	}
+
+	/**
+	 * Determines whether an element is positioned in any initial viewport.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $xpath XPath for the element.
+	 * @return bool|null Whether element is positioned in any initial viewport of null if unknown.
+	 */
+	public function is_element_positioned_in_any_initial_viewport( string $xpath ): ?bool {
+		return $this->get_all_elements_positioned_in_any_initial_viewport()[ $xpath ] ?? null;
 	}
 
 	/**

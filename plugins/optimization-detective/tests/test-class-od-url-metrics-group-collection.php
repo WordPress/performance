@@ -745,6 +745,8 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 			$this->assertSame( $expected_max_ratio, $group_collection->get_element_max_intersection_ratio( $expected_xpath ) );
 		}
 
+		$this->assertNull( $group_collection->get_element_max_intersection_ratio( '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::BLINK]/*[1]' ) );
+
 		// Check get_all_denormalized_elements.
 		$all_elements = $group_collection->get_xpath_elements_map();
 		$xpath_counts = array();
@@ -832,6 +834,94 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 			),
 
 		);
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function data_provider_get_all_elements_positioned_in_any_initial_viewport(): array {
+		$xpath1 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]';
+		$xpath2 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[2]';
+
+		$get_sample_url_metric = function ( int $viewport_width, int $viewport_height, string $xpath, float $intersection_ratio, float $top ): OD_URL_Metric {
+			return $this->get_sample_url_metric(
+				array(
+					'viewport_width'  => $viewport_width,
+					'viewport_height' => $viewport_height,
+					'element'         => array(
+						'isLCP'              => false,
+						'xpath'              => $xpath,
+						'intersectionRatio'  => $intersection_ratio,
+						'intersectionRect'   => array_merge(
+							$this->get_sample_dom_rect(),
+							array( 'top' => $top )
+						),
+						'boundingClientRect' => array_merge(
+							$this->get_sample_dom_rect(),
+							array( 'top' => $top )
+						),
+					),
+				)
+			);
+		};
+
+		return array(
+			'element-inside-viewport'                  => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 360, 640, $xpath1, 1.0, 0 ),
+					$get_sample_url_metric( 360, 640, $xpath1, 1.0, 100 ),
+					$get_sample_url_metric( 360, 640, $xpath1, 1.0, 639 ),
+				),
+				'expected'    => array(
+					$xpath1 => true,
+				),
+			),
+			'element-outside-viewport'                 => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 360, 640, $xpath1, 0.0, 640 ),
+					$get_sample_url_metric( 360, 640, $xpath1, 0.0, 641 ),
+				),
+				'expected'    => array(
+					$xpath1 => false,
+				),
+			),
+			'two-elements-inside-and-outside-viewport' => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 360, 640, $xpath1, 1.0, 100 ),
+					$get_sample_url_metric( 360, 640, $xpath2, 0.0, 1000 ),
+				),
+				'expected'    => array(
+					$xpath1 => true,
+					$xpath2 => false,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Test get_all_elements_positioned_in_any_initial_viewport() and is_element_positioned_in_any_initial_viewport().
+	 *
+	 * @covers ::get_all_elements_positioned_in_any_initial_viewport
+	 * @covers ::is_element_positioned_in_any_initial_viewport
+	 *
+	 * @dataProvider data_provider_get_all_elements_positioned_in_any_initial_viewport
+	 *
+	 * @param array<string, mixed> $url_metrics URL metrics.
+	 * @param array<string, bool>  $expected    Expected.
+	 */
+	public function test_get_all_elements_positioned_in_any_initial_viewport( array $url_metrics, array $expected ): void {
+		$breakpoints      = array( 480, 600, 782 );
+		$sample_size      = 3;
+		$group_collection = new OD_URL_Metric_Group_Collection( $url_metrics, $breakpoints, $sample_size, 0 );
+		$actual           = $group_collection->get_all_elements_positioned_in_any_initial_viewport();
+		$this->assertSame( $actual, $group_collection->get_all_elements_positioned_in_any_initial_viewport(), 'Cached result is identical.' );
+		$this->assertSame( $expected, $actual );
+		foreach ( $expected as $expected_xpath => $expected_is_positioned ) {
+			$this->assertSame( $expected_is_positioned, $group_collection->is_element_positioned_in_any_initial_viewport( $expected_xpath ) );
+		}
+		$this->assertNull( $group_collection->is_element_positioned_in_any_initial_viewport( '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::BLINK]/*[1]' ) );
 	}
 
 	/**
