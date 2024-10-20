@@ -186,6 +186,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @param mixed $offset Key.
 	 * @return mixed May return any value from ElementData including possible extensions.
 	 */
+	#[ReturnTypeWillChange]
 	public function offsetGet( $offset ) {
 		return $this->data[ $offset ] ?? null;
 	}
