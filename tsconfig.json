@@ -1,13 +1,13 @@
 {
-  "compilerOptions": {
-    "checkJs": true,
-    "noEmit": true,
-    "allowJs": true,
-    "target": "es2020",
-    "moduleResolution": "node",
-    "module": "esnext",
-    "skipLibCheck": true
-  },
-  "include": [ "plugins/**/*.js", "plugins/**/*.ts" ],
-  "exclude": [ "plugins/*/build/*" ]
+	"compilerOptions": {
+		"checkJs": true,
+		"noEmit": true,
+		"allowJs": true,
+		"target": "es2020",
+		"moduleResolution": "node",
+		"module": "esnext",
+		"skipLibCheck": true
+	},
+	"include": [ "plugins/**/*.js", "plugins/**/*.ts" ],
+	"exclude": [ "plugins/*/build/*" ]
 }
