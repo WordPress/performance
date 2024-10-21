@@ -167,7 +167,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * and the maximum viewport width corresponds to the smallest defined breakpoint returned by
 	 * {@see od_get_breakpoint_max_widths()}.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @return OD_URL_Metric_Group First URL Metric group.
 	 */
@@ -182,7 +182,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * defined as one greater than the largest breakpoint returned by {@see od_get_breakpoint_max_widths()}.
 	 * The maximum viewport is always `PHP_INT_MAX`, or in other words it is unbounded.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @return OD_URL_Metric_Group Last URL Metric group.
 	 */
@@ -449,7 +449,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
 	 * end up running n*4*3 times.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @return array<string, non-empty-array<int, OD_Element>> Keys are XPaths and values are the element instances.
 	 */
@@ -514,7 +514,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * Furthermore, the element may be positioned _above_ the initial viewport or to the left or right of the viewport,
 	 * in which case the element may be dynamically displayed at any time in response to a user interaction.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @return array<string, bool> Keys are XPaths and values whether the element is positioned in any initial viewport.
 	 */
@@ -556,7 +556,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Determines whether an element is positioned in any initial viewport.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @param string $xpath XPath for the element.
 	 * @return bool|null Whether element is positioned in any initial viewport of null if unknown.

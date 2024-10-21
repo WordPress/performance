@@ -66,7 +66,7 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Group.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 * @var OD_URL_Metric_Group|null
 	 */
 	protected $group = null;
@@ -127,7 +127,7 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets the group that this URL metric is a part of (which may not be any).
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @return OD_URL_Metric_Group|null Group.
 	 */
@@ -138,7 +138,7 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Sets the group that this URL metric is a part of.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @param OD_URL_Metric_Group $group Group.
 	 *

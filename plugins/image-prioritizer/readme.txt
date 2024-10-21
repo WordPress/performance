@@ -1,8 +1,8 @@
 === Image Prioritizer ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.6
-Stable tag:   0.1.4
+Tested up to: 6.7
+Stable tag:   0.2.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, image, lcp, lazy-load
@@ -61,6 +61,16 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.2.0 =
+
+**Enhancements**
+
+* Lazy load videos and video posters. ([1596](https://github.com/WordPress/performance/pull/1596))
+* Prioritize loading poster image of video LCP elements. ([1498](https://github.com/WordPress/performance/pull/1498))
+* Choose smaller video poster image size based on actual dimensions. ([1595](https://github.com/WordPress/performance/pull/1595))
+* Add fetchpriority=low to occluded initial-viewport images (e.g. images in hidden carousel slides). ([1482](https://github.com/WordPress/performance/pull/1482))
+* Avoid lazy-loading images and embeds unless there are URL Metrics for both mobile and desktop. ([1604](https://github.com/WordPress/performance/pull/1604))
 
 = 0.1.4 =
 

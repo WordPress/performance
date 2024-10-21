@@ -181,7 +181,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Whether the end of the document was reached.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 * @see self::next_token()
 	 * @var bool
 	 */

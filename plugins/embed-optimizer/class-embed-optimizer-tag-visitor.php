@@ -31,7 +31,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Determines whether the processor is currently at a figure.wp-block-embed tag.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor.
 	 * @return bool Whether at the tag.
@@ -47,7 +47,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Determines whether the processor is currently at a div.wp-block-embed__wrapper tag (which is a child of figure.wp-block-embed).
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param OD_HTML_Tag_Processor $processor Processor.
 	 * @return bool Whether the tag should be measured and stored in URL metrics.
@@ -196,7 +196,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Gets the XPath for the embed wrapper DIV which is the sole child of the embed block FIGURE.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param string $embed_block_xpath XPath for the embed block FIGURE tag. For example: `/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]`.
 	 * @return string XPath for the child DIV. For example: `/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]`
@@ -208,7 +208,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	/**
 	 * Reduces layout shifts.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.3.0
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
 	 */
