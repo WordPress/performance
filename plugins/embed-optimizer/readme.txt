@@ -1,8 +1,8 @@
 === Embed Optimizer ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.6
-Stable tag:   0.2.0
+Tested up to: 6.7
+Stable tag:   0.3.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, embeds
@@ -50,6 +50,13 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/embed-optimizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.3.0 =
+
+**Enhancements**
+
+* Leverage URL metrics to reserve space for embeds to reduce CLS. ([1373](https://github.com/WordPress/performance/pull/1373))
+* Avoid lazy-loading images and embeds unless there are URL Metrics for both mobile and desktop. ([1604](https://github.com/WordPress/performance/pull/1604))
 
 = 0.2.0 =
 

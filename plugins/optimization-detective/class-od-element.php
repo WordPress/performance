@@ -3,7 +3,7 @@
  * Optimization Detective: OD_Element class
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.7.0
  */
 
 // Exit if accessed directly.
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @implements ArrayAccess<key-of<ElementData>, ElementData[key-of<ElementData>]>
  * @todo The above implements tag should account for additional undefined keys which can be supplied by extending the element schema. May depend on <https://github.com/phpstan/phpstan/issues/8438>.
  *
- * @since n.e.x.t
+ * @since 0.7.0
  * @access private
  */
 class OD_Element implements ArrayAccess, JsonSerializable {
@@ -27,7 +27,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Data.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 * @var ElementData
 	 */
 	protected $data;
@@ -35,7 +35,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * URL metric that this element belongs to.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 * @var OD_URL_Metric
 	 */
 	protected $url_metric;
@@ -43,7 +43,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Constructor.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @phpstan-param ElementData $data
 	 *
@@ -58,7 +58,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Gets the URL metric that this element belongs to.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @return OD_URL_Metric URL Metric.
 	 */
@@ -69,7 +69,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Gets the group that this element's URL metric is a part of (which may not be any).
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @return OD_URL_Metric_Group|null Group.
 	 */
@@ -82,7 +82,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 *
 	 * This is particularly useful in conjunction with the `od_url_metric_schema_element_item_additional_properties` filter.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @param string $key Property.
 	 * @return mixed|null The property value, or null if not set.
@@ -94,7 +94,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Determines whether element was detected as LCP.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @return bool Whether LCP.
 	 */
@@ -105,7 +105,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Determines whether element was detected as an LCP candidate.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @return bool Whether LCP candidate.
 	 */
@@ -116,7 +116,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Gets XPath for element.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @return non-empty-string XPath.
 	 */
@@ -127,7 +127,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Gets intersectionRatio for element.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @return float Intersection ratio.
 	 */
@@ -138,7 +138,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Gets intersectionRect for element.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @phpstan-return DOMRect
 	 *
@@ -151,7 +151,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Gets boundingClientRect for element.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @phpstan-return DOMRect
 	 *
@@ -164,7 +164,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Checks whether an offset exists.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @param mixed $offset Key.
 	 * @return bool Whether the offset exists.
@@ -176,7 +176,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Retrieves an offset.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @template T of key-of<ElementData>
 	 * @phpstan-param T $offset
@@ -196,7 +196,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 *
 	 * This is disallowed. Attempting to set a property will throw an error.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @param mixed $offset Key.
 	 * @param mixed $value  Value.
@@ -212,7 +212,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 *
 	 * This is disallowed. Attempting to unset a property will throw an error.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @param mixed $offset Offset.
 	 *
@@ -225,7 +225,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	/**
 	 * Specifies data which should be serialized to JSON.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 * @return ElementData Exports to be serialized by json_encode().
 	 */
 	public function jsonSerialize(): array {

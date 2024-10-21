@@ -61,7 +61,7 @@ final class OD_Tag_Visitor_Context {
 	/**
 	 * Gets deprecated property.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 * @todo Remove this when no plugins are possibly referring to the url_metrics_group_collection property anymore.
 	 *
 	 * @param string $name Property name.
@@ -80,7 +80,7 @@ final class OD_Tag_Visitor_Context {
 						__CLASS__ . '::$url_metric_group_collection'
 					)
 				),
-				'optimization-detective n.e.x.t'
+				'optimization-detective 0.7.0'
 			);
 			return $this->url_metric_group_collection;
 		}
