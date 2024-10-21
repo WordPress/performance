@@ -41,8 +41,6 @@ function avif_headers_check_avif_headers_test(): array {
 		$result['actions'] = sprintf(
 			'<p>%s</p>',
 			/* translators: Accessibility text. */
-			// @todo consider including instructions on how to enable AVIF, see https://shortpixel.com/blog/avif-mime-type-delivery-apache-nginx/.
-			// Possibly update this article and link there instead: https://make.wordpress.org/hosting/2024/06/19/the-image-revolution-avif-and-webp/
 			__( 'AVIF headers can be enabled with a small configuration change by your hosting provider.', 'performance-lab' )
 		);
 	}
