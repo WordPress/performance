@@ -288,19 +288,43 @@ class Perflab_Server_Timing {
 	 */
 	private function format_metric_header_value( Perflab_Server_Timing_Metric $metric ): ?string {
 		$value = $metric->get_value();
-
-		// If no value is set, make sure it's just passed through.
-		if ( null === $value ) {
-			return null;
-		}
+		$start = $metric->get_start_time();
+		$desc  = $metric->get_description();
 
 		if ( is_float( $value ) ) {
 			$value = round( $value, 2 );
 		}
 
+		if ( is_float( $start ) ) {
+			$start = round( $start, 2 ) * 1000.00;
+		}
+
+		// If no value is set, make sure it's just passed through.
+		if ( null === $start && null === $value ) {
+			return null;
+		}
+
 		// See https://github.com/WordPress/performance/issues/955.
 		$name = preg_replace( '/[^!#$%&\'*+\-.^_`|~0-9a-zA-Z]/', '-', $metric->get_slug() );
 
-		return sprintf( 'wp-%1$s;dur=%2$s', $name, $value );
+		if ( 'response-start' !== $name && 'response-end' !== $name ) {
+			$name = 'wp-' . $name;
+		}
+
+		$header_value = sprintf( '%s', $name );
+
+		if ( null !== $value ) {
+			$header_value .= sprintf( ';dur=%s', $value );
+		}
+
+		if ( null !== $start ) {
+			$header_value .= sprintf( ';start=%s', $start );
+		}
+
+		if ( null !== $desc ) {
+			$header_value .= sprintf( ';desc=%s', $desc );
+		}
+
+		return $header_value;
 	}
 }
