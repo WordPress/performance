@@ -25,3 +25,7 @@ require_once __DIR__ . '/webp-support/hooks.php';
 // AVIF Support site health check.
 require_once __DIR__ . '/avif-support/helper.php';
 require_once __DIR__ . '/avif-support/hooks.php';
+
+// Object Cache Support site health info.
+require_once __DIR__ . '/object-cache/helper.php';
+require_once __DIR__ . '/object-cache/hooks.php';
