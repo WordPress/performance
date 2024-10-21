@@ -1,3 +1,12 @@
+# Files and folders related to build
+/build
+/node_modules
+/vendor
+/dist
+
+# Minified files
+/*.min.js
+
 # Ignore Composer lock file
 composer.lock
 
