@@ -296,11 +296,11 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 				$i = array_search( 'P', $this->open_stack_tags, true );
 				if ( false !== $i ) {
 					array_splice( $this->open_stack_tags, (int) $i );
-					array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) );
+					array_splice( $this->open_stack_indices, $this->get_current_depth() );
 				}
 			}
 
-			$level                   = count( $this->open_stack_tags );
+			$level                   = $this->get_current_depth();
 			$this->open_stack_tags[] = $tag_name;
 
 			if ( ! isset( $this->open_stack_indices[ $level ] ) ) {
@@ -353,6 +353,8 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 
 	/**
 	 * Gets the number of times the cursor has moved.
+	 *
+	 * @todo Not needed once core short-circuits seek() when current cursor is the same as the sought-bookmark.
 	 *
 	 * @since 0.6.0
 	 * @see self::next_token()
