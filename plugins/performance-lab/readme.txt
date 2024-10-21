@@ -22,6 +22,7 @@ The feature plugins which are currently featured by this plugin are:
 * [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) _(experimental)_
 * [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/) _(experimental)_
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) _(experimental)_
+* [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
 
 These plugins can also be installed separately from installing Performance Lab, but having the Performance Lab plugin also active will ensure you find out about new performance features as they are developed.
 
