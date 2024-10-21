@@ -3,7 +3,7 @@
  * Optimization Detective: OD_URL_Metric_Store_Request_Context class
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 0.7.0
  */
 
 // Exit if accessed directly.
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Context for when a URL metric is successfully stored via the REST API.
  *
- * @since n.e.x.t
+ * @since 0.7.0
  * @access private
  */
 final class OD_URL_Metric_Store_Request_Context {

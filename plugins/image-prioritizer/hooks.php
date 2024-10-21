@@ -19,7 +19,7 @@ add_action( 'od_init', 'image_prioritizer_init' );
  *
  * Handles 'autoplay' and 'preload' attributes accordingly.
  *
- * @since n.e.x.t
+ * @since 0.2.0
  */
 function image_prioritizer_get_lazy_load_script(): string {
 	$script = file_get_contents( __DIR__ . '/lazy-load.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.

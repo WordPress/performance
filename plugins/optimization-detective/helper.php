@@ -13,13 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Initializes extensions for Optimization Detective.
  *
- * @since n.e.x.t
+ * @since 0.7.0
  */
 function od_initialize_extensions(): void {
 	/**
 	 * Fires when extensions to Optimization Detective can be loaded and initialized.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @param string $version Optimization Detective version.
 	 */
@@ -29,7 +29,7 @@ function od_initialize_extensions(): void {
 /**
  * Generates a media query for the provided minimum and maximum viewport widths.
  *
- * @since n.e.x.t
+ * @since 0.7.0
  *
  * @param int|null $minimum_viewport_width Minimum viewport width.
  * @param int|null $maximum_viewport_width Maximum viewport width.
@@ -37,7 +37,7 @@ function od_initialize_extensions(): void {
  */
 function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_viewport_width ): ?string {
 	if ( is_int( $minimum_viewport_width ) && is_int( $maximum_viewport_width ) && $minimum_viewport_width > $maximum_viewport_width ) {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'The minimum width must be greater than the maximum width.', 'optimization-detective' ), 'Optimization Detective n.e.x.t' );
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'The minimum width must be greater than the maximum width.', 'optimization-detective' ), 'Optimization Detective 0.7.0' );
 		return null;
 	}
 	$media_attributes = array();

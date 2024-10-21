@@ -5,7 +5,7 @@
  *
  * @package image-prioritizer
  *
- * @since n.e.x.t
+ * @since 0.2.0
  */
 
 // Exit if accessed directly.
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Image Prioritizer: Image_Prioritizer_Video_Tag_Visitor class
  *
- * @since n.e.x.t
+ * @since 0.2.0
  *
  * @access private
  */
@@ -25,7 +25,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	/**
 	 * Class name used to indicate a video which is lazy-loaded.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.2.0
 	 * @var string
 	 */
 	const LAZY_VIDEO_CLASS_NAME = 'od-lazy-video';
@@ -33,7 +33,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	/**
 	 * Whether the lazy-loading script was added to the body.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.2.0
 	 * @var bool
 	 */
 	protected $added_lazy_script = false;
@@ -41,7 +41,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	/**
 	 * Visits a tag.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.2.0
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return bool Whether the tag should be tracked in URL metrics.
@@ -69,7 +69,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 *
 	 * Skips empty poster attributes and data: URLs.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.2.0
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 * @return non-empty-string|null Poster or null if not defined or is a data: URL.
@@ -85,7 +85,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	/**
 	 * Reduces poster image size by choosing one that fits the maximum video size more closely.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.2.0
 	 *
 	 * @param non-empty-string       $poster  Poster image URL.
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at a VIDEO tag.
@@ -128,7 +128,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	/**
 	 * Preloads poster image for the LCP <video> element.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.2.0
 	 *
 	 * @param non-empty-string       $poster  Poster image URL.
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at a VIDEO tag.
@@ -164,7 +164,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	/**
 	 * Optimizes the VIDEO tag based on whether it is the LCP element or else whether it is displayed in any initial viewport.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.2.0
 	 *
 	 * @param non-empty-string|null  $poster  Poster image URL.
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.

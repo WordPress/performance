@@ -42,7 +42,7 @@ abstract class Image_Prioritizer_Tag_Visitor {
 	/**
 	 * Gets attribute value for select attributes.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.2.0
 	 * @todo Move this into the OD_HTML_Tag_Processor/OD_HTML_Processor class eventually.
 	 *
 	 * @phpstan-param NormalizedAttributeNames $attribute_name
