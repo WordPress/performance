@@ -68,6 +68,20 @@ jobs:
       - name: Composer Install
         run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
       - name: Running single site unit tests
-        run: npm run test-php
+        run: npm run test-php -- --coverage-clover=coverage.xml
       - name: Running multisite unit tests
-        run: npm run test-php-multisite
+        run: npm run test-php-multisite -- --coverage-clover=coverage-multisite.xml
+      - name: Upload single site coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+          flags: unittests
+          name: ${{ matrix.php }}-single-site-coverage
+      - name: Upload multisite coverage reports to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage-multisite.xml
+          flags: multisite
+          name: ${{ matrix.php }}-multisite-coverage
