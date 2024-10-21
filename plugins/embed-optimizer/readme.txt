@@ -53,6 +53,11 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 0.3.0 =
 
+**Enhancements**
+
+* Leverage URL metrics to reserve space for embeds to reduce CLS. ([1373](https://github.com/WordPress/performance/pull/1373))
+* Moves embed-optimizer-lazy-load script to js file. ([1601](https://github.com/WordPress/performance/pull/1601))
+
 = 0.2.0 =
 
 **Enhancements**

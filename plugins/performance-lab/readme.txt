@@ -72,6 +72,12 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 
 = 3.5.0 =
 
+**Enhancements**
+
+* Add Web Worker Offloading to list of Performance features. ([1577](https://github.com/WordPress/performance/pull/1577))
+* Only store info for relevant standalone plugins in the transient cache. ([1573](https://github.com/WordPress/performance/pull/1573))
+* Use a single WordPress.org API request to get information for all plugins. ([1562](https://github.com/WordPress/performance/pull/1562))
+
 = 3.4.1 =
 
 **Bug Fixes**

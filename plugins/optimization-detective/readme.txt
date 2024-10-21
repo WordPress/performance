@@ -159,6 +159,16 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 0.7.0 =
 
+**Enhancements**
+
+* Add group collection helper methods to get the first/last groups. ([1602](https://github.com/WordPress/performance/pull/1602))
+* Introduce OD_Element class. ([1585](https://github.com/WordPress/performance/pull/1585))
+
+**Bug Fixes**
+
+* Fix Optimization Detective compatibility with WooCommerce when Coming Soon page is served. ([1565](https://github.com/WordPress/performance/pull/1565))
+* Fix storage of URL Metric when plain non-pretty permalinks are enabled. ([1574](https://github.com/WordPress/performance/pull/1574))
+
 = 0.6.0 =
 
 **Enhancements**

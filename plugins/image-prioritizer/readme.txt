@@ -64,6 +64,14 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 0.2.0 =
 
+**Enhancements**
+
+* Add fetchpriority=low to occluded initial-viewport images. ([1482](https://github.com/WordPress/performance/pull/1482))
+* Avoid lazy-loading images and embeds unless there are URL Metrics for both mobile and desktop. ([1604](https://github.com/WordPress/performance/pull/1604))
+* Choose smaller poster image size based on actual dimensions. ([1595](https://github.com/WordPress/performance/pull/1595))
+* Lazy load videos and video posters. ([1596](https://github.com/WordPress/performance/pull/1596))
+* Prioritize loading poster image of video LCP elements. ([1498](https://github.com/WordPress/performance/pull/1498))
+
 = 0.1.4 =
 
 **Enhancements**

@@ -96,6 +96,10 @@ The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plu
 
 = 0.1.1 =
 
+**Enhancements**
+
+* Add Web Worker Offloading meta generator. ([1598](https://github.com/WordPress/performance/pull/1598))
+
 = 0.1.0 =
 
 * Initial release.
