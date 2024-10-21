@@ -1,11 +1,11 @@
 === Web Worker Offloading ===
 
-Contributors:      wordpressdotorg
-Tested up to:      6.6
-Stable tag:        0.1.1
-License:           GPLv2 or later
-License URI:       https://www.gnu.org/licenses/gpl-2.0.html
-Tags:              performance, JavaScript, web worker, partytown, analytics
+Contributors: wordpressdotorg
+Tested up to: 6.7
+Stable tag:   0.1.1
+License:      GPLv2 or later
+License URI:  https://www.gnu.org/licenses/gpl-2.0.html
+Tags:         performance, JavaScript, web worker, partytown, analytics
 
 Offloads select JavaScript execution to a Web Worker to reduce work on the main thread and improve the Interaction to Next Paint (INP) metric.
 
