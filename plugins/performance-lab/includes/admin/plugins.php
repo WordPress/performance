@@ -68,9 +68,11 @@ function perflab_query_plugin_info( string $plugin_slug ) {
 		return new WP_Error( 'no_plugins', __( 'No plugins found in the API response.', 'performance-lab' ) );
 	}
 
-	$plugins              = array();
-	$standalone_plugins   = array_flip( perflab_get_standalone_plugins() );
-	$standalone_plugins[] = 'optimization-detective'; // TODO: Programmatically discover the plugin dependencies and add them here.
+	$plugins            = array();
+	$standalone_plugins = array_merge(
+		array_flip( perflab_get_standalone_plugins() ),
+		array( 'optimization-detective' => array() ) // TODO: Programmatically discover the plugin dependencies and add them here.
+	);
 	foreach ( $response->plugins as $plugin_data ) {
 		if ( ! isset( $standalone_plugins[ $plugin_data['slug'] ] ) ) {
 			continue;
