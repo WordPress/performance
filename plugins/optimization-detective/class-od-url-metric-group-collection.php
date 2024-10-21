@@ -14,8 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Collection of URL groups according to the breakpoints.
  *
- * @phpstan-import-type ElementData from OD_URL_Metric
- *
  * @implements IteratorAggregate<int, OD_URL_Metric_Group>
  *
  * @since 0.1.0
@@ -82,9 +80,10 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          is_any_group_populated?: bool,
 	 *          is_every_group_complete?: bool,
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metric_Group[]>,
-	 *          get_common_lcp_element?: ElementData|null,
+	 *          get_common_lcp_element?: OD_Element|null,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
-	 *          get_all_denormalized_elements?: array<string, non-empty-array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>>,
+	 *          get_xpath_elements_map?: array<string, non-empty-array<int, OD_Element>>,
+	 *          get_all_elements_positioned_in_any_initial_viewport?: array<string, bool>,
 	 *      }
 	 */
 	private $result_cache = array();
@@ -378,7 +377,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 			$groups = array();
 			foreach ( $this->groups as $group ) {
 				$lcp_element = $group->get_lcp_element();
-				if ( ! is_null( $lcp_element ) && $xpath === $lcp_element['xpath'] ) {
+				if ( $lcp_element instanceof OD_Element && $xpath === $lcp_element->get_xpath() ) {
 					$groups[] = $group;
 				}
 			}
@@ -395,9 +394,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * @since 0.3.0
 	 *
-	 * @return ElementData|null
+	 * @return OD_Element|null Common LCP element if it exists.
 	 */
-	public function get_common_lcp_element(): ?array {
+	public function get_common_lcp_element(): ?OD_Element {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
 			return $this->result_cache[ __FUNCTION__ ];
 		}
@@ -415,9 +414,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 			$group_has_unknown_lcp_element = false;
 			foreach ( $this->groups as $group ) {
 				$lcp_element = $group->get_lcp_element();
-				if ( ! is_null( $lcp_element ) ) {
-					$groups_by_lcp_element_xpath[ $lcp_element['xpath'] ][] = $group;
-					$lcp_elements_by_xpath[ $lcp_element['xpath'] ][]       = $lcp_element;
+				if ( $lcp_element instanceof OD_Element ) {
+					$groups_by_lcp_element_xpath[ $lcp_element->get_xpath() ][] = $group;
+					$lcp_elements_by_xpath[ $lcp_element->get_xpath() ][]       = $lcp_element;
 				} else {
 					$group_has_unknown_lcp_element = true;
 				}
@@ -450,26 +449,25 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
 	 * end up running n*4*3 times.
 	 *
-	 * @todo Should there be an OD_Element class which has a $url_metric property which then in turn has a $group property. Then this would only need to return array<string, OD_Element[]>.
 	 * @since n.e.x.t
 	 *
-	 * @return array<string, non-empty-array<int, array{OD_URL_Metric_Group, OD_URL_Metric, ElementData}>> Keys are XPaths and values are arrays of tuples consisting of the group, URL metric, and element data.
+	 * @return array<string, non-empty-array<int, OD_Element>> Keys are XPaths and values are the element instances.
 	 */
-	public function get_all_denormalized_elements(): array {
+	public function get_xpath_elements_map(): array {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
 			return $this->result_cache[ __FUNCTION__ ];
 		}
 
 		$result = ( function () {
-			$all_denormalized_elements = array();
+			$all_elements = array();
 			foreach ( $this->groups as $group ) {
 				foreach ( $group as $url_metric ) {
 					foreach ( $url_metric->get_elements() as $element ) {
-						$all_denormalized_elements[ $element['xpath'] ][] = array( $group, $url_metric, $element );
+						$all_elements[ $element->get_xpath() ][] = $element;
 					}
 				}
 			}
-			return $all_denormalized_elements;
+			return $all_elements;
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ] = $result;
@@ -490,14 +488,53 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 		$result = ( function () {
 			$elements_max_intersection_ratios = array();
-			foreach ( $this->get_all_denormalized_elements() as $xpath => $denormalized_elements ) {
+			foreach ( $this->get_xpath_elements_map() as $xpath => $elements ) {
 				$element_intersection_ratios = array();
-				foreach ( $denormalized_elements as list( $group, $url_metric, $element ) ) {
-					$element_intersection_ratios[] = $element['intersectionRatio'];
+				foreach ( $elements as $element ) {
+					$element_intersection_ratios[] = $element->get_intersection_ratio();
 				}
 				$elements_max_intersection_ratios[ $xpath ] = (float) max( $element_intersection_ratios );
 			}
 			return $elements_max_intersection_ratios;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
+	}
+
+	/**
+	 * Gets all elements' status for whether they are positioned in any initial viewport.
+	 *
+	 * An element is positioned in the initial viewport if its `boundingClientRect.top` is less than the
+	 * `viewport.height` for any of its recorded URL metrics. Note that even though the element may be positioned in the
+	 * initial viewport, it may not actually be visible. It could be occluded as a latter slide in a carousel in which
+	 * case it will have intersectionRatio of 0. Or the element may not be visible due to it or an ancestor having the
+	 * `visibility:hidden` style, such as in the case of a dropdown navigation menu. When, for example, an IMG element
+	 * is positioned in any initial viewport, it should not get `loading=lazy` but rather `fetchpriority=low`.
+	 * Furthermore, the element may be positioned _above_ the initial viewport or to the left or right of the viewport,
+	 * in which case the element may be dynamically displayed at any time in response to a user interaction.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<string, bool> Keys are XPaths and values whether the element is positioned in any initial viewport.
+	 */
+	public function get_all_elements_positioned_in_any_initial_viewport(): array {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
+		}
+
+		$result = ( function () {
+			$elements_positioned = array();
+			foreach ( $this->get_xpath_elements_map() as $xpath => $elements ) {
+				$elements_positioned[ $xpath ] = false;
+				foreach ( $elements as $element ) {
+					if ( $element->get_bounding_client_rect()['top'] < $element->get_url_metric()->get_viewport()['height'] ) {
+						$elements_positioned[ $xpath ] = true;
+						break;
+					}
+				}
+			}
+			return $elements_positioned;
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ] = $result;
@@ -514,6 +551,18 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 */
 	public function get_element_max_intersection_ratio( string $xpath ): ?float {
 		return $this->get_all_element_max_intersection_ratios()[ $xpath ] ?? null;
+	}
+
+	/**
+	 * Determines whether an element is positioned in any initial viewport.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $xpath XPath for the element.
+	 * @return bool|null Whether element is positioned in any initial viewport of null if unknown.
+	 */
+	public function is_element_positioned_in_any_initial_viewport( string $xpath ): ?bool {
+		return $this->get_all_elements_positioned_in_any_initial_viewport()[ $xpath ] ?? null;
 	}
 
 	/**
@@ -567,11 +616,11 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *             freshness_ttl: 0|positive-int,
 	 *             sample_size: positive-int,
 	 *             all_element_max_intersection_ratios: array<string, float>,
-	 *             common_lcp_element: ?ElementData,
+	 *             common_lcp_element: ?OD_Element,
 	 *             every_group_complete: bool,
 	 *             every_group_populated: bool,
 	 *             groups: array<int, array{
-	 *                 lcp_element: ?ElementData,
+	 *                 lcp_element: ?OD_Element,
 	 *                 minimum_viewport_width: 0|positive-int,
 	 *                 maximum_viewport_width: positive-int,
 	 *                 complete: bool,
