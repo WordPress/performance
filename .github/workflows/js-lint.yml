@@ -1,52 +1,52 @@
 name: JS Code Linting
 
 on:
-    push:
-        branches:
-            - trunk
-            - 'release/**'
-        # Only run if JS/JSON/Lint/NVM files changed.
-        paths:
-            - '.github/workflows/js-lint.yml'
-            - '**.js'
-            - '**.json'
-            - '.eslint*'
-            - '.nvmrc'
-            - '.wp-env.json'
-            - '**/package.json'
-            - 'package-lock.json'
-    pull_request:
-        # Only run if JS/JSON/Lint/NVM files changed.
-        paths:
-            - '.github/workflows/js-lint.yml'
-            - '**.js'
-            - '**.json'
-            - '.eslint*'
-            - '.nvmrc'
-            - '.wp-env.json'
-            - '**/package.json'
-            - 'package-lock.json'
-        types:
-            - opened
-            - reopened
-            - synchronize
+  push:
+    branches:
+      - trunk
+      - 'release/**'
+    # Only run if JS/JSON/Lint/NVM files changed.
+    paths:
+      - '.github/workflows/js-lint.yml'
+      - '**.js'
+      - '**.json'
+      - '.eslint*'
+      - '.nvmrc'
+      - '.wp-env.json'
+      - '**/package.json'
+      - 'package-lock.json'
+  pull_request:
+    # Only run if JS/JSON/Lint/NVM files changed.
+    paths:
+      - '.github/workflows/js-lint.yml'
+      - '**.js'
+      - '**.json'
+      - '.eslint*'
+      - '.nvmrc'
+      - '.wp-env.json'
+      - '**/package.json'
+      - 'package-lock.json'
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 jobs:
-    js-lint:
-        name: JS Lint
-        runs-on: ubuntu-latest
-        timeout-minutes: 20
-        steps:
-            - uses: styfle/cancel-workflow-action@0.12.1
-            - uses: actions/checkout@v4
-            - name: Setup Node.js (via .nvmrc)
-              uses: actions/setup-node@v4
-              with:
-                  node-version-file: '.nvmrc'
-                  cache: npm
-            - name: npm install
-              run: npm ci
-            - name: JS Lint
-              run: npm run lint-js
-            - name: TypeScript compile
-              run: npm run tsc
+  js-lint:
+    name: JS Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: styfle/cancel-workflow-action@0.12.1
+      - uses: actions/checkout@v4
+      - name: Setup Node.js (via .nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - name: npm install
+        run: npm ci
+      - name: JS Lint
+        run: npm run lint-js
+      - name: TypeScript compile
+        run: npm run tsc

@@ -1,31 +1,31 @@
 version: 2
 updates:
-    - package-ecosystem: github-actions
-      directory: '/'
-      schedule:
-          interval: weekly
-      open-pull-requests-limit: 10
-      labels:
-          - 'no milestone'
-          - '[Type] Enhancement'
-          - 'github_actions'
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'github_actions'
 
-    - package-ecosystem: npm
-      directory: '/'
-      schedule:
-          interval: weekly
-      open-pull-requests-limit: 10
-      labels:
-          - 'no milestone'
-          - '[Type] Enhancement'
-          - 'javascript'
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'javascript'
 
-    - package-ecosystem: composer
-      directory: '/'
-      schedule:
-          interval: weekly
-      open-pull-requests-limit: 10
-      labels:
-          - 'no milestone'
-          - '[Type] Enhancement'
-          - 'php'
+  - package-ecosystem: composer
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - 'no milestone'
+      - '[Type] Enhancement'
+      - 'php'
