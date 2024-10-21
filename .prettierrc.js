@@ -1,22 +1,3 @@
-const wpPrettierConfig = require( '@wordpress/prettier-config' );
-
-module.exports = {
-	...wpPrettierConfig,
-	overrides: [
-		{
-			files: '*.json',
-			options: {
-				useTabs: false,
-				tabWidth: 2,
-			},
-		},
-		{
-			files: '*.yml',
-			options: {
-				singleQuote: true,
-				useTabs: false,
-				tabWidth: 2,
-			},
-		},
-	],
-};
+// Import the default config file and expose it in the project root.
+// Useful for editor integrations.
+module.exports = require( '@wordpress/prettier-config' );
