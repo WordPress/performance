@@ -132,13 +132,13 @@ function perflab_wrap_server_timing( callable $callback, string $metric_slug, st
 		}
 
 		// Measure time before the callback.
-		$server_timing_metric->measure_before();
+		$server_timing_metric->measure_start();
 
 		// Execute the callback.
 		$result = call_user_func_array( $callback, $callback_args );
 
 		// Measure time after the callback and calculate total.
-		$server_timing_metric->measure_after();
+		$server_timing_metric->measure_end();
 
 		// Return result (e.g. in case this is a filter callback).
 		return $result;
