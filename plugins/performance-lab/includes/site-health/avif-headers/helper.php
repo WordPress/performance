@@ -6,7 +6,7 @@
  * @since n.e.x.t
  */
 
- if ( ! defined( 'ABSPATH' ) ) {
+if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
@@ -57,7 +57,7 @@ function avif_headers_check_avif_headers_test(): array {
  */
 function avif_headers_is_enabled(): bool {
 	// Request an AVIF image at a known URL bundled with the plugin.
-	$url = plugins_url( 'avif-headers/images/lossy.avif', dirname( __FILE__ ) );
+	$url = plugins_url( 'avif-headers/images/lossy.avif', __DIR__ );
 
 	$response = wp_remote_request( $url, array( 'sslverify' => false ) );
 
