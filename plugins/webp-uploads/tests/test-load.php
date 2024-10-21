@@ -311,7 +311,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertStringEndsWith( '-scaled.jpg', get_attached_file( $attachment_id ) );
 		$this->assertImageHasSizeSource( $attachment_id, 'medium', 'image/webp' );
 		$this->assertStringEndsNotWith( '-scaled.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
-		$this->assertStringEndsWith( '-300x200-jpg.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
+		$this->assertStringEndsWith( '-300x200.webp', $metadata['sizes']['medium']['sources']['image/webp']['file'] );
 	}
 
 	/**
