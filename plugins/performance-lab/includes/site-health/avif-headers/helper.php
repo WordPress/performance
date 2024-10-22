@@ -27,7 +27,7 @@ function avif_headers_check_avif_headers_test(): array {
 		),
 		'description' => sprintf(
 			'<p>%s</p>',
-			__( 'AVIF images served without the `image/avif` `content-type` header may not render properly in the browser.', 'performance-lab' )
+			esc_html__( 'AVIF images served without the `image/avif` `content-type` header may not render properly in the browser.', 'performance-lab' )
 		),
 		'actions'     => '',
 		'test'        => 'is_avif_headers_enabled',
