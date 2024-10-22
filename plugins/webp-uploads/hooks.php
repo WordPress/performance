@@ -13,13 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Hook called by `wp_generate_attachment_metadata` to create the `sources` property for every image
- * size, the sources' property would create a new image size with all the mime types specified in
- * `webp_uploads_get_upload_image_mime_transforms`. If the original image is one of the mimes from
- * `webp_uploads_get_upload_image_mime_transforms` the image is just added to the `sources` property and not
- * created again. If the uploaded attachment is not a supported mime by this function, the hook does not alter the
- * metadata of the attachment. In addition to every single size the `sources` property is added at the
- * top level of the image metadata to store the references for all the mime types for the `full` size image of the
- * attachment.
+ * size, and delete the original JPEG/PNG file if the option is enabled. The sources' property would
+ * create a new image size with all the mime types specified in `webp_uploads_get_upload_image_mime_transforms`.
+ * If the original image is one of the mimes from `webp_uploads_get_upload_image_mime_transforms` the image is just
+ * added to the `sources` property and not created again. If the uploaded attachment is not a supported mime by this
+ * function, the hook does not alter the metadata of the attachment. In addition to every single size the `sources`
+ * property is added at the top level of the image metadata to store the references for all the mime types for the
+ * `full` size image of the attachment.
  *
  * @since 1.0.0
  *
@@ -88,7 +88,6 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 
 	$original_directory = pathinfo( $file, PATHINFO_DIRNAME );
 	$filename           = pathinfo( $file, PATHINFO_FILENAME );
-	$ext                = pathinfo( $file, PATHINFO_EXTENSION );
 	$allowed_mimes      = array_flip( wp_get_mime_types() );
 
 	// Create the sources for the full sized image.
@@ -104,7 +103,7 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 		}
 
 		$extension   = explode( '|', $allowed_mimes[ $targeted_mime ] );
-		$destination = trailingslashit( $original_directory ) . "{$filename}-{$ext}.{$extension[0]}";
+		$destination = trailingslashit( $original_directory ) . "{$filename}.{$extension[0]}";
 		$image       = webp_uploads_generate_additional_image_source( $attachment_id, 'full', $original_size_data, $targeted_mime, $destination );
 
 		if ( is_wp_error( $image ) ) {
@@ -233,6 +232,35 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 		}
 
 		$metadata['sizes'][ $size_name ] = $properties;
+	}
+
+	// Delete the original file if the option is enabled and new formats exist.
+	if ( webp_uploads_is_delete_original_enabled() && ! empty( $metadata['sources'] ) ) {
+		$supported_modern_image_formats = array();
+
+		if ( webp_uploads_mime_type_supported( 'image/avif' ) ) {
+			$supported_modern_image_formats[] = 'avif';
+		}
+		if ( webp_uploads_mime_type_supported( 'image/webp' ) ) {
+			$supported_modern_image_formats[] = 'webp';
+		}
+
+		$original_file_extension  = pathinfo( $file, PATHINFO_EXTENSION );
+		$generated_file_extension = ! empty( $metadata['file'] ) ? pathinfo( $metadata['file'], PATHINFO_EXTENSION ) : '';
+		$delete_original_file     = ! in_array( $original_file_extension, $supported_modern_image_formats, true ) && in_array( $generated_file_extension, $supported_modern_image_formats, true );
+
+		if ( $delete_original_file ) {
+			// Update the original_image metadata value to point to the new primary image
+			// file since original image will be deleted.
+			$first_source = reset( $metadata['sources'] );
+			if ( isset( $metadata['original_image'] ) && ! empty( $first_source['file'] ) ) {
+				$metadata['original_image'] = $first_source['file'];
+				wp_update_attachment_metadata( $attachment_id, $metadata );
+			}
+
+			// Delete the original file.
+			wp_delete_file( $file );
+		}
 	}
 
 	return $metadata;
