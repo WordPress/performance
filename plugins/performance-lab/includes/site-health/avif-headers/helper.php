@@ -41,7 +41,7 @@ function avif_headers_check_avif_headers_test(): array {
 		$result['actions'] = sprintf(
 			'<p>%s</p>',
 			/* translators: Accessibility text. */
-			__( 'AVIF headers can be enabled with a small configuration change by your hosting provider.', 'performance-lab' )
+			esc_html__( 'AVIF headers can be enabled with a small configuration change by your hosting provider.', 'performance-lab' )
 		);
 	}
 
