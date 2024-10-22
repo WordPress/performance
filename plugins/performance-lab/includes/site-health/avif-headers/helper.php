@@ -74,9 +74,5 @@ function avif_headers_is_enabled(): bool {
 
 	$content_type = $headers['content-type'];
 
-	if ( 'image/avif' === $content_type ) {
-		return true;
-	}
-
-	return false;
+	return ( 'image/avif' === $content_type );
 }
