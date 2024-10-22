@@ -38,3 +38,21 @@ function plsr_render_generator_meta_tag(): void {
 	echo '<meta name="generator" content="speculation-rules ' . esc_attr( SPECULATION_RULES_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'plsr_render_generator_meta_tag' );
+
+/**
+ * Load the predict.js script which will uses on-device AI to predict links users are most likely to visit for prerendering.
+ *
+ * @since n.e.x.t
+ */
+function plsr_load_predict_script(): void {
+	wp_enqueue_script(
+		'plsr-predict',
+		plugin_dir_url( __FILE__ ) . 'predict.js', // @todo switch to build version.
+		array(),
+		SPECULATION_RULES_VERSION,
+		array(
+			'strategy' => 'defer',
+		)
+	);
+}
+add_action( 'wp_enqueue_scripts', 'plsr_load_predict_script' );
