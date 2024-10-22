@@ -177,7 +177,28 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	}
 
 	// If the initial tag is not an open HTML tag, then abort since the buffer is not a complete HTML document.
-	$processor = new OD_HTML_Tag_Processor( $buffer );
+	if ( version_compare( (string) strtok( get_bloginfo( 'version' ), '-' ), '6.7', '>=' ) ) {
+		/*
+		 * When using the full HTML processor, we have to resort to using the tag processor first to determine if it is
+		 * HTML since the HTML processor will wrap the non-HTML in HTML and BODY tags according to the HTML spec.
+		 * TODO: De-duplicate this logic with the below 'HTML' root tag check.
+		 */
+		$tag_processor = new WP_HTML_Tag_Processor( $buffer );
+		if ( ! (
+			$tag_processor->next_tag() &&
+			! $tag_processor->is_tag_closer() &&
+			'HTML' === $tag_processor->get_tag()
+		) ) {
+			return $buffer;
+		}
+
+		$processor = OD_HTML_Processor::create_full_parser( $buffer ); // @phpstan-ignore staticMethod.notFound (Not yet part of szepeviktor/phpstan-wordpress.)
+		if ( ! ( $processor instanceof OD_HTML_Processor ) ) {
+			return $buffer;
+		}
+	} else {
+		$processor = new OD_HTML_Tag_Processor( $buffer );
+	}
 	if ( ! (
 		$processor->next_tag() &&
 		! $processor->is_tag_closer() &&
@@ -219,6 +240,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$processor->set_bookmark( $current_tag_bookmark ); // TODO: Should we break if this returns false?
 
 		foreach ( $visitors as $visitor ) {
+			// TODO: Remove get_cursor_move_count() logic once core automatically short-circuits seek().
 			$cursor_move_count      = $processor->get_cursor_move_count();
 			$tracked_in_url_metrics = $visitor( $tag_visitor_context ) || $tracked_in_url_metrics;
 

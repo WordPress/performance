@@ -47,11 +47,11 @@ abstract class Image_Prioritizer_Tag_Visitor {
 	 *
 	 * @phpstan-param NormalizedAttributeNames $attribute_name
 	 *
-	 * @param OD_HTML_Tag_Processor $processor      Processor.
-	 * @param string                $attribute_name Attribute name.
+	 * @param OD_HTML_Tag_Processor|OD_HTML_Processor $processor      Processor.
+	 * @param string                                  $attribute_name Attribute name.
 	 * @return string|true|null Normalized attribute value.
 	 */
-	protected function get_attribute_value( OD_HTML_Tag_Processor $processor, string $attribute_name ) {
+	protected function get_attribute_value( $processor, string $attribute_name ) {
 		$value = $processor->get_attribute( $attribute_name );
 		if ( is_string( $value ) ) {
 			$value = strtolower( trim( $value, " \t\f\r\n" ) );
