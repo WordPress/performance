@@ -27,7 +27,15 @@ function avif_headers_check_avif_headers_test(): array {
 		),
 		'description' => sprintf(
 			'<p>%s</p>',
-			esc_html__( 'AVIF images served without the `image/avif` `content-type` header may not render properly in the browser.', 'performance-lab' )
+			esc_html__( 
+				/* translators: 1: image/avif, 2: content-type */
+				sprintf( 
+					'Images with the mime type %1$s served without the correct %2$s header may not render properly.',
+					'image/avif',
+					'content-type'
+				),
+				'performance-lab' 
+			)
 		),
 		'actions'     => '',
 		'test'        => 'is_avif_headers_enabled',
