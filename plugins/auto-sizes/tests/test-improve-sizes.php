@@ -31,6 +31,9 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 
 		// Disable auto sizes.
 		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+
+		// Disable lazy loading attribute.
+		add_filter( 'wp_img_tag_add_loading_attr', '__return_false' );
 	}
 
 	/**
