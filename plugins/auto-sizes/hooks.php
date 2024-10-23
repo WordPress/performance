@@ -224,13 +224,13 @@ function auto_sizes_filter_image_tag( string $content, array $parsed_block, WP_B
 			$alignment = $block->attributes['align'] ?? '';
 			$width     = $block->attributes['width'] ?? '';
 
-			// Hypotehtical function to calculate better sizes.
+			// Hypothetical function to calculate better sizes.
 			$sizes = auto_sizes_calculate_better_sizes( $id, $size, $alignment, $width );
 
 			return $sizes;
 		};
 
-		// Hook this filter early, before default fitlers are run.
+		// Hook this filter early, before default filters are run.
 		add_filter( 'wp_calculate_image_sizes', $filter, 9, 2 );
 
 		$sizes = wp_calculate_image_sizes(
