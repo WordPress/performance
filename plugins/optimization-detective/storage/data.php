@@ -243,6 +243,9 @@ function od_get_maximum_viewport_aspect_ratio(): float {
  *
  * These breakpoints appear to be used the most in media queries that affect frontend styles.
  *
+ * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
+ * single group.
+ *
  * @since 0.1.0
  * @access private
  * @link https://github.com/WordPress/gutenberg/blob/093d52cbfd3e2c140843d3fb91ad3d03330320a5/packages/base-styles/_breakpoints.scss#L11-L13
@@ -287,7 +290,8 @@ function od_get_breakpoint_max_widths(): array {
 		/**
 		 * Filters the breakpoint max widths to group URL metrics for various viewports.
 		 *
-		 * A breakpoint must be greater than zero and less than PHP_INT_MAX.
+		 * A breakpoint must be greater than zero and less than PHP_INT_MAX. This array may be empty in which case there
+		 * are no responsive breakpoints and all URL Metrics are collected in a single group.
 		 *
 		 * @since 0.1.0
 		 *

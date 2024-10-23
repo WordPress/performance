@@ -14,8 +14,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Collection of URL groups according to the breakpoints.
  *
- * @phpstan-import-type ElementData from OD_URL_Metric
- *
  * @implements IteratorAggregate<int, OD_URL_Metric_Group>
  *
  * @since 0.1.0
@@ -46,6 +44,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * 2. After the last breakpoint, the final breakpoint group is set to be spanning one plus the last breakpoint max width up
 	 *    until PHP_INT_MAX. So a breakpoint cannot be PHP_INT_MAX because then the minimum viewport width for the final group
 	 *    would end up being larger than PHP_INT_MAX.
+	 *
+	 * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
+	 * single group.
 	 *
 	 * @var int[]
 	 * @phpstan-var positive-int[]
@@ -79,8 +80,10 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          is_any_group_populated?: bool,
 	 *          is_every_group_complete?: bool,
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metric_Group[]>,
-	 *          get_common_lcp_element?: ElementData|null,
-	 *          get_all_element_max_intersection_ratios?: array<string, float>
+	 *          get_common_lcp_element?: OD_Element|null,
+	 *          get_all_element_max_intersection_ratios?: array<string, float>,
+	 *          get_xpath_elements_map?: array<string, non-empty-array<int, OD_Element>>,
+	 *          get_all_elements_positioned_in_any_initial_viewport?: array<string, bool>,
 	 *      }
 	 */
 	private $result_cache = array();
@@ -158,7 +161,39 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
+	 * Gets the first URL Metric group.
+	 *
+	 * This group normally represents viewports for mobile devices. This group always has a minimum viewport width of 0
+	 * and the maximum viewport width corresponds to the smallest defined breakpoint returned by
+	 * {@see od_get_breakpoint_max_widths()}.
+	 *
+	 * @since 0.7.0
+	 *
+	 * @return OD_URL_Metric_Group First URL Metric group.
+	 */
+	public function get_first_group(): OD_URL_Metric_Group {
+		return $this->groups[0];
+	}
+
+	/**
+	 * Gets the last URL Metric group.
+	 *
+	 * This group normally represents viewports for desktop devices.  This group always has a minimum viewport width
+	 * defined as one greater than the largest breakpoint returned by {@see od_get_breakpoint_max_widths()}.
+	 * The maximum viewport is always `PHP_INT_MAX`, or in other words it is unbounded.
+	 *
+	 * @since 0.7.0
+	 *
+	 * @return OD_URL_Metric_Group Last URL Metric group.
+	 */
+	public function get_last_group(): OD_URL_Metric_Group {
+		return $this->groups[ count( $this->groups ) - 1 ];
+	}
+
+	/**
 	 * Clear result cache.
+	 *
+	 * @since 0.3.0
 	 */
 	public function clear_cache(): void {
 		$this->result_cache = array();
@@ -166,6 +201,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Create groups.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @phpstan-return non-empty-array<OD_URL_Metric_Group>
 	 *
@@ -187,6 +224,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * Once a group reaches the sample size, the oldest URL metric is pushed out.
 	 *
+	 * @since 0.1.0
 	 * @throws InvalidArgumentException If there is no group available to add a URL metric to.
 	 *
 	 * @param OD_URL_Metric $new_url_metric New URL metric.
@@ -206,6 +244,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets group for viewport width.
 	 *
+	 * @since 0.1.0
 	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
 	 *
 	 * @param int $viewport_width Viewport width.
@@ -240,6 +279,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Checks whether any group is populated with at least one URL metric.
 	 *
+	 * @since 0.5.0
+	 *
 	 * @return bool Whether at least one group has some URL metrics.
 	 */
 	public function is_any_group_populated(): bool {
@@ -268,6 +309,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * should be contrasted with the `is_every_group_complete()`
 	 * method below.
 	 *
+	 * @since 0.1.0
 	 * @see OD_URL_Metric_Group_Collection::is_every_group_complete()
 	 *
 	 * @return bool Whether all groups have some URL metrics.
@@ -293,6 +335,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Checks whether every group is complete.
 	 *
+	 * @since 0.1.0
 	 * @see OD_URL_Metric_Group::is_complete()
 	 *
 	 * @return bool Whether all groups are complete.
@@ -319,6 +362,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets the groups with the provided LCP element XPath.
 	 *
+	 * @since 0.3.0
 	 * @see OD_URL_Metric_Group::get_lcp_element()
 	 *
 	 * @param string $xpath XPath for LCP element.
@@ -333,7 +377,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 			$groups = array();
 			foreach ( $this->groups as $group ) {
 				$lcp_element = $group->get_lcp_element();
-				if ( ! is_null( $lcp_element ) && $xpath === $lcp_element['xpath'] ) {
+				if ( $lcp_element instanceof OD_Element && $xpath === $lcp_element->get_xpath() ) {
 					$groups[] = $group;
 				}
 			}
@@ -348,9 +392,11 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets common LCP element.
 	 *
-	 * @return ElementData|null
+	 * @since 0.3.0
+	 *
+	 * @return OD_Element|null Common LCP element if it exists.
 	 */
-	public function get_common_lcp_element(): ?array {
+	public function get_common_lcp_element(): ?OD_Element {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
 			return $this->result_cache[ __FUNCTION__ ];
 		}
@@ -368,9 +414,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 			$group_has_unknown_lcp_element = false;
 			foreach ( $this->groups as $group ) {
 				$lcp_element = $group->get_lcp_element();
-				if ( ! is_null( $lcp_element ) ) {
-					$groups_by_lcp_element_xpath[ $lcp_element['xpath'] ][] = $group;
-					$lcp_elements_by_xpath[ $lcp_element['xpath'] ][]       = $lcp_element;
+				if ( $lcp_element instanceof OD_Element ) {
+					$groups_by_lcp_element_xpath[ $lcp_element->get_xpath() ][] = $group;
+					$lcp_elements_by_xpath[ $lcp_element->get_xpath() ][]       = $lcp_element;
 				} else {
 					$group_has_unknown_lcp_element = true;
 				}
@@ -396,7 +442,42 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
+	 * Gets all elements from all URL metrics from all groups keyed by the elements' XPaths.
+	 *
+	 * This is an O(n^3) function so its results must be cached. This being said, the number of groups should be 4 (one
+	 * more than the default number of breakpoints) and the number of URL metrics for each group should be 3
+	 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
+	 * end up running n*4*3 times.
+	 *
+	 * @since 0.7.0
+	 *
+	 * @return array<string, non-empty-array<int, OD_Element>> Keys are XPaths and values are the element instances.
+	 */
+	public function get_xpath_elements_map(): array {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
+		}
+
+		$result = ( function () {
+			$all_elements = array();
+			foreach ( $this->groups as $group ) {
+				foreach ( $group as $url_metric ) {
+					foreach ( $url_metric->get_elements() as $element ) {
+						$all_elements[ $element->get_xpath() ][] = $element;
+					}
+				}
+			}
+			return $all_elements;
+		} )();
+
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
+	}
+
+	/**
 	 * Gets the max intersection ratios of all elements across all groups and their captured URL metrics.
+	 *
+	 * @since 0.3.0
 	 *
 	 * @return array<string, float> Keys are XPaths and values are the intersection ratios.
 	 */
@@ -406,24 +487,54 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 		}
 
 		$result = ( function () {
-			$element_max_intersection_ratios = array();
+			$elements_max_intersection_ratios = array();
+			foreach ( $this->get_xpath_elements_map() as $xpath => $elements ) {
+				$element_intersection_ratios = array();
+				foreach ( $elements as $element ) {
+					$element_intersection_ratios[] = $element->get_intersection_ratio();
+				}
+				$elements_max_intersection_ratios[ $xpath ] = (float) max( $element_intersection_ratios );
+			}
+			return $elements_max_intersection_ratios;
+		} )();
 
-			/*
-			 * O(n^3) my! Yes. This is why the result is cached. This being said, the number of groups should be 4 (one
-			 * more than the default number of breakpoints) and the number of URL metrics for each group should be 3
-			 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
-			 * end up running n*4*3 times.
-			 */
-			foreach ( $this->groups as $group ) {
-				foreach ( $group as $url_metric ) {
-					foreach ( $url_metric->get_elements() as $element ) {
-						$element_max_intersection_ratios[ $element['xpath'] ] = array_key_exists( $element['xpath'], $element_max_intersection_ratios )
-							? max( $element_max_intersection_ratios[ $element['xpath'] ], $element['intersectionRatio'] )
-							: $element['intersectionRatio'];
+		$this->result_cache[ __FUNCTION__ ] = $result;
+		return $result;
+	}
+
+	/**
+	 * Gets all elements' status for whether they are positioned in any initial viewport.
+	 *
+	 * An element is positioned in the initial viewport if its `boundingClientRect.top` is less than the
+	 * `viewport.height` for any of its recorded URL metrics. Note that even though the element may be positioned in the
+	 * initial viewport, it may not actually be visible. It could be occluded as a latter slide in a carousel in which
+	 * case it will have intersectionRatio of 0. Or the element may not be visible due to it or an ancestor having the
+	 * `visibility:hidden` style, such as in the case of a dropdown navigation menu. When, for example, an IMG element
+	 * is positioned in any initial viewport, it should not get `loading=lazy` but rather `fetchpriority=low`.
+	 * Furthermore, the element may be positioned _above_ the initial viewport or to the left or right of the viewport,
+	 * in which case the element may be dynamically displayed at any time in response to a user interaction.
+	 *
+	 * @since 0.7.0
+	 *
+	 * @return array<string, bool> Keys are XPaths and values whether the element is positioned in any initial viewport.
+	 */
+	public function get_all_elements_positioned_in_any_initial_viewport(): array {
+		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
+			return $this->result_cache[ __FUNCTION__ ];
+		}
+
+		$result = ( function () {
+			$elements_positioned = array();
+			foreach ( $this->get_xpath_elements_map() as $xpath => $elements ) {
+				$elements_positioned[ $xpath ] = false;
+				foreach ( $elements as $element ) {
+					if ( $element->get_bounding_client_rect()['top'] < $element->get_url_metric()->get_viewport()['height'] ) {
+						$elements_positioned[ $xpath ] = true;
+						break;
 					}
 				}
 			}
-			return $element_max_intersection_ratios;
+			return $elements_positioned;
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ] = $result;
@@ -433,6 +544,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets the max intersection ratio of an element across all groups and their captured URL metrics.
 	 *
+	 * @since 0.3.0
+	 *
 	 * @param string $xpath XPath for the element.
 	 * @return float|null Max intersection ratio of null if tag is unknown (not captured).
 	 */
@@ -441,7 +554,21 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
+	 * Determines whether an element is positioned in any initial viewport.
+	 *
+	 * @since 0.7.0
+	 *
+	 * @param string $xpath XPath for the element.
+	 * @return bool|null Whether element is positioned in any initial viewport of null if unknown.
+	 */
+	public function is_element_positioned_in_any_initial_viewport( string $xpath ): ?bool {
+		return $this->get_all_elements_positioned_in_any_initial_viewport()[ $xpath ] ?? null;
+	}
+
+	/**
 	 * Gets URL metrics from all groups flattened into one list.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return OD_URL_Metric[] All URL metrics.
 	 */
@@ -460,6 +587,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Returns an iterator for the groups of URL metrics.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return ArrayIterator<int, OD_URL_Metric_Group> Array iterator for OD_URL_Metric_Group instances.
 	 */
 	public function getIterator(): ArrayIterator {
@@ -468,6 +597,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 	/**
 	 * Counts the URL metric groups in the collection.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return int<0, max> Group count.
 	 */
@@ -485,11 +616,11 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *             freshness_ttl: 0|positive-int,
 	 *             sample_size: positive-int,
 	 *             all_element_max_intersection_ratios: array<string, float>,
-	 *             common_lcp_element: ?ElementData,
+	 *             common_lcp_element: ?OD_Element,
 	 *             every_group_complete: bool,
 	 *             every_group_populated: bool,
 	 *             groups: array<int, array{
-	 *                 lcp_element: ?ElementData,
+	 *                 lcp_element: ?OD_Element,
 	 *                 minimum_viewport_width: 0|positive-int,
 	 *                 maximum_viewport_width: positive-int,
 	 *                 complete: bool,

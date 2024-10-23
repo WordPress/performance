@@ -10,6 +10,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-add_action( 'wp_head', 'image_prioritizer_render_generator_meta_tag' );
+add_action( 'od_init', 'image_prioritizer_init' );
 
-add_action( 'od_register_tag_visitors', 'image_prioritizer_register_tag_visitors' );
+/**
+ * Gets the script to lazy-load videos.
+ *
+ * Load a video and its poster image when it approaches the viewport using an IntersectionObserver.
+ *
+ * Handles 'autoplay' and 'preload' attributes accordingly.
+ *
+ * @since 0.2.0
+ */
+function image_prioritizer_get_lazy_load_script(): string {
+	$script = file_get_contents( __DIR__ . '/lazy-load.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+
+	if ( false === $script ) {
+		return '';
+	}
+
+	return $script;
+}
