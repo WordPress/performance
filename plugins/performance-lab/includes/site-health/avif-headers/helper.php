@@ -39,7 +39,6 @@ function avif_headers_check_avif_headers_test(): array {
 		$result['status']  = 'recommended';
 		$result['label']   = __( 'Your site does not send AVIF image headers correctly', 'performance-lab' );
 		$result['actions'] = sprintf(
-			/* translators: Accessibility text. */
 			'<p>%s</p>',
 			esc_html__( 'AVIF headers can be enabled with a small configuration change by your hosting provider.', 'performance-lab' )
 		);
