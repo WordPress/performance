@@ -168,9 +168,9 @@ function auto_sizes_prime_attachment_caches( string $content, string $context = 
 
 			if ( $attachment_id > 0 ) {
 				/*
-					* If exactly the same image tag is used more than once, overwrite it.
-					* All identical tags will be replaced later with 'str_replace()'.
-					*/
+				 * If exactly the same image tag is used more than once, overwrite it.
+				 * All identical tags will be replaced later with 'str_replace()'.
+				 */
 				$images[ $tag_name ] = $attachment_id;
 			}
 		}
