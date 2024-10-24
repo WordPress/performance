@@ -139,79 +139,142 @@ function auto_sizes_get_width( string $layout_width, int $image_width ): string 
 }
 
 /**
- * Filter the sizes attribute for images to improve the default calculation.
+ * Primes attachment into the cache with a single database query.
  *
- * @since 1.1.0
+ * @since n.e.x.t
  *
- * @param string                                                   $content      The block content about to be rendered.
- * @param array{ attrs?: array{ align?: string, width?: string } } $parsed_block The parsed block.
- * @return string The updated block content.
+ * @param string $content The HTML content.
+ * @param string $context Optional. Additional context to pass to the filters.
+ *                        Defaults to `current_filter()` when not set.
+ * @return string The HTML content.
  */
-function auto_sizes_filter_image_tag( string $content, array $parsed_block ): string {
-	$processor = new WP_HTML_Tag_Processor( $content );
-	$has_image = $processor->next_tag( array( 'tag_name' => 'img' ) );
-
-	// Only update the markup if an image is found.
-	if ( $has_image ) {
-		$processor->set_attribute( 'data-needs-sizes-update', true );
-		if ( isset( $parsed_block['attrs']['align'] ) ) {
-			$processor->set_attribute( 'data-align', $parsed_block['attrs']['align'] );
-		}
-
-		// Resize image width.
-		if ( isset( $parsed_block['attrs']['width'] ) ) {
-			$processor->set_attribute( 'data-resize-width', $parsed_block['attrs']['width'] );
-		}
-
-		$content = $processor->get_updated_html();
+function auto_sizes_prime_attachment_caches( string $content, string $context = null ): string {
+	if ( null === $context ) {
+		$context = current_filter();
 	}
+
+	$processor = new WP_HTML_Tag_Processor( $content );
+
+	$images = array();
+	while ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+		$class = $processor->get_attribute( 'class' );
+
+		// Only apply the dominant color to images that have a src attribute.
+		if ( ! is_string( $class ) ) {
+			continue;
+		}
+
+		if ( preg_match( '/wp-image-([0-9]+)/i', $class, $class_id ) === 1 ) {
+			$attachment_id = absint( $class_id[1] );
+			if ( $attachment_id > 0 ) {
+				$images[] = $attachment_id;
+			}
+		}
+	}
+
+	// Reduce the array to unique attachment IDs.
+	$attachment_ids = array_unique( array_filter( $images ) );
+
+	if ( count( $attachment_ids ) > 1 ) {
+		/*
+		 * Warm the object cache with post and meta information for all found
+		 * images to avoid making individual database calls.
+		 */
+		_prime_post_caches( $attachment_ids, false, true );
+	}
+
 	return $content;
 }
-add_filter( 'render_block_core/image', 'auto_sizes_filter_image_tag', 10, 2 );
-add_filter( 'render_block_core/cover', 'auto_sizes_filter_image_tag', 10, 2 );
+add_filter( 'the_content', 'auto_sizes_prime_attachment_caches', 6 );
 
 /**
  * Filter the sizes attribute for images to improve the default calculation.
  *
  * @since 1.1.0
  *
- * @param string $content The block content about to be rendered.
+ * @param string                                                   $content      The block content about to be rendered.
+ * @param array{ attrs?: array{ align?: string, width?: string } } $parsed_block The parsed block.
+ * @param WP_Block                                                 $block        Block instance.
  * @return string The updated block content.
  */
-function auto_sizes_improve_image_sizes_attributes( string $content ): string {
+function auto_sizes_filter_image_tag( string $content, array $parsed_block, WP_Block $block ): string {
 	$processor = new WP_HTML_Tag_Processor( $content );
-	if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
-		return $content;
-	}
+	$has_image = $processor->next_tag( array( 'tag_name' => 'img' ) );
 
-	$remove_data_attributes = static function () use ( $processor ): void {
-		$processor->remove_attribute( 'data-needs-sizes-update' );
-		$processor->remove_attribute( 'data-align' );
-		$processor->remove_attribute( 'data-resize-width' );
-	};
+	// Only update the markup if an image is found.
+	if ( $has_image ) {
 
-	// Bail early if the responsive images are disabled.
-	if ( null === $processor->get_attribute( 'sizes' ) ) {
-		$remove_data_attributes();
+		/**
+		 * Callback for calculating image sizes attribute value for an image block.
+		 *
+		 * This is a workaround to use block context data when calculating the img sizes attribute.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param string $sizes The image sizes attribute value.
+		 * @param string $size  The image size data.
+		 */
+		$filter = static function ( $sizes, $size ) use ( $block ) {
+			$id        = $block->attributes['id'] ?? 0;
+			$alignment = $block->attributes['align'] ?? '';
+			$width     = $block->attributes['width'] ?? '';
+
+			// Hypothetical function to calculate better sizes.
+			$sizes = auto_sizes_calculate_better_sizes( $id, $size, $alignment, $width );
+
+			return $sizes;
+		};
+
+		// Hook this filter early, before default filters are run.
+		add_filter( 'wp_calculate_image_sizes', $filter, 9, 2 );
+
+		$sizes = wp_calculate_image_sizes(
+			// If we don't have a size slug, assume the full size was used.
+			$parsed_block['attrs']['sizeSlug'] ?? 'full',
+			null,
+			null,
+			$parsed_block['attrs']['id'] ?? 0
+		);
+
+		remove_filter( 'wp_calculate_image_sizes', $filter, 9 );
+
+		// Bail early if sizes are not calculated.
+		if ( false === $sizes ) {
+			return $content;
+		}
+
+		$processor->set_attribute( 'sizes', $sizes );
+
 		return $processor->get_updated_html();
 	}
 
-	// Skips second time parsing if already processed.
-	if ( null === $processor->get_attribute( 'data-needs-sizes-update' ) ) {
-		return $content;
-	}
+	return $content;
+}
+add_filter( 'render_block_core/image', 'auto_sizes_filter_image_tag', 10, 3 );
+add_filter( 'render_block_core/cover', 'auto_sizes_filter_image_tag', 10, 3 );
 
-	$align = $processor->get_attribute( 'data-align' );
+/**
+ * Hypothetical function to calculate better sizes.
+ *
+ * @param int    $id           The image id.
+ * @param string $size         The image size data.
+ * @param string $align        The image alignment.
+ * @param string $resize_width Resize image width.
+ * @return string The sizes attribute value.
+ */
+function auto_sizes_calculate_better_sizes( int $id, string $size, string $align, string $resize_width ): string {
+	$sizes = '';
+	$image = wp_get_attachment_image_src( $id, $size );
+
+	if ( false === $image ) {
+		return $sizes;
+	}
 
 	// Retrieve width from the image tag itself.
-	$image_width = $processor->get_attribute( 'width' );
-	if ( ! is_string( $image_width ) && ! in_array( $align, array( 'full', 'wide' ), true ) ) {
-		return $content;
-	}
+	$image_width = '' !== $resize_width ? (int) $resize_width : $image[1];
 
 	$layout = wp_get_global_settings( array( 'layout' ) );
 
-	$sizes = null;
 	// Handle different alignment use cases.
 	switch ( $align ) {
 		case 'full':
@@ -227,28 +290,16 @@ function auto_sizes_improve_image_sizes_attributes( string $content ): string {
 		case 'left':
 		case 'right':
 		case 'center':
-			// Resize image width.
-			$image_width = $processor->get_attribute( 'data-resize-width' ) ?? $image_width;
-			$sizes       = sprintf( '(max-width: %1$dpx) 100vw, %1$dpx', $image_width );
+			$sizes = sprintf( '(max-width: %1$dpx) 100vw, %1$dpx', $image_width );
 			break;
 
 		default:
 			if ( array_key_exists( 'contentSize', $layout ) ) {
-				// Resize image width.
-				$image_width = $processor->get_attribute( 'data-resize-width' ) ?? $image_width;
-				$width       = auto_sizes_get_width( $layout['contentSize'], (int) $image_width );
-				$sizes       = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
+				$width = auto_sizes_get_width( $layout['contentSize'], $image_width );
+				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
 			}
 			break;
 	}
 
-	if ( is_string( $sizes ) ) {
-		$processor->set_attribute( 'sizes', $sizes );
-	}
-
-	$remove_data_attributes();
-
-	return $processor->get_updated_html();
+	return $sizes;
 }
-// Run filter prior to auto sizes "auto_sizes_update_content_img_tag" filter.
-add_filter( 'wp_content_img_tag', 'auto_sizes_improve_image_sizes_attributes', 9 );

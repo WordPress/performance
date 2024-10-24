@@ -31,12 +31,13 @@ class Tests_Improve_Sizes extends WP_UnitTestCase {
 
 		// Disable auto sizes.
 		remove_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
+
+		// Disable lazy loading attribute.
+		add_filter( 'wp_img_tag_add_loading_attr', '__return_false' );
 	}
 
 	/**
 	 * Test that if disable responsive image then it will not add sizes attribute.
-	 *
-	 * @covers ::auto_sizes_improve_image_sizes_attributes
 	 */
 	public function test_that_if_disable_responsive_image_then_it_will_not_add_sizes_attribute(): void {
 		// Disable responsive images.
