@@ -153,32 +153,27 @@ function auto_sizes_prime_attachment_caches( string $content, string $context = 
 		$context = current_filter();
 	}
 
-	if ( false === preg_match_all( '/<img\s[^>]+>/', $content, $matches, PREG_SET_ORDER ) ) {
-		return $content;
-	}
+	$processor = new WP_HTML_Tag_Processor( $content );
 
-	// List of the unique `img` tags found in $content.
 	$images = array();
+	while ( $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
+		$class = $processor->get_attribute( 'class' );
 
-	foreach ( $matches as $match ) {
-		list( $tag_name ) = $match;
+		// Only apply the dominant color to images that have a src attribute.
+		if ( ! is_string( $class ) ) {
+			continue;
+		}
 
-		if ( preg_match( '/wp-image-([0-9]+)/i', $tag_name, $class_id ) === 1 ) {
+		if ( preg_match( '/wp-image-([0-9]+)/i', $class, $class_id ) === 1 ) {
 			$attachment_id = absint( $class_id[1] );
-
 			if ( $attachment_id > 0 ) {
-				/*
-				 * If exactly the same image tag is used more than once, overwrite it.
-				 * All identical tags will be replaced later with 'str_replace()'.
-				 */
-				$images[ $tag_name ] = $attachment_id;
+				$images[] = $attachment_id;
 			}
 		}
-		$images[ $tag_name ] = 0;
 	}
 
 	// Reduce the array to unique attachment IDs.
-	$attachment_ids = array_unique( array_filter( array_values( $images ) ) );
+	$attachment_ids = array_unique( array_filter( $images ) );
 
 	if ( count( $attachment_ids ) > 1 ) {
 		/*
