@@ -25,6 +25,29 @@ class Perflab_Performance_Marks {
 	private $marks = array();
 
 	/**
+	 * Array of all plugins and their data.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @var array<string, array<string, mixed>>
+	 */
+	private $plugins_data = array();
+
+	/**
+	 * Initialize the class including plugin data.
+	 *
+	 * @since n.e.x.t
+	 */
+	public function __construct() {
+		global $wp_scripts;
+
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$this->plugins_data = get_plugins();
+	}
+
+	/**
 	 * Add a mark to the list of marks.
 	 *
 	 * @since n.e.x.t
@@ -71,50 +94,78 @@ class Perflab_Performance_Marks {
 	public function send_marks(): void {
 		global $wp_scripts;
 
-		if ( ! function_exists( 'get_plugins' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		$all_plugins = get_plugins();
-
-		// Map TextDomain to Name. This only works when the handle matches the text domain.
-		$plugin_name_map = array();
-		foreach ( $all_plugins as $plugin_slug => $plugin_data ) {
-			$plugin_name_map[ $plugin_data['TextDomain'] ] = $plugin_data['Name'];
-		}
-
-		// Save the data to the error log so you can see what the array format is like.
-		error_log( print_r( $plugin_name_map, true ) );
-
 		foreach ( $wp_scripts->done as $handle ) {
-			$name = isset( $plugin_name_map[ $handle ] ) ? $plugin_name_map[ $handle ] : $handle;
 			$src = $wp_scripts->registered[ $handle ]->src;
+			if ( false === $src ) {
+				continue;
+			}
+			// Gather the plugin slug, name at relative path.
+			$plugin_data = $this->get_plugin_data_from_src( $src );
 			perflab_performance_marks()->add_mark(
 				'script_enqueue::' . $handle,
 				array(
-					'slug' => $handle,
-					'src'  => $src,
-					'name' => $name,
+					'path' => $plugin_data['path'],
+					'slug' => $plugin_data['slug'],
+					'name' => $plugin_data['name'],
 				)
 			);
 		}
-		error_log( "send marks!" );
- 		if ( empty( $this->marks ) ) {
-			error_log( "no marks!" );
+		if ( empty( $this->marks ) ) {
 			return;
 		}
 		echo ( '<script>' );
-		echo ( 'console.log( "sending marks" );' );
+		echo 'console.log( "sending marks" );';
 		$x = 100;
 		foreach ( $this->marks as $mark_slug => $mark_args ) {
-			echo sprintf(
+			printf(
 				'performance.mark( "%s", { detail: %s, startTime: %s } );',
-				$mark_slug,
+				esc_attr( $mark_slug ),
 				wp_json_encode( $mark_args ),
-				$x
+				esc_attr( (string) $x )
 			);
 			$x = $x + 10;
 		}
 		echo( '</script>' );
+	}
+
+	/**
+	 * Helper function to get the plugin slug and name when passed a script path.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $src The script path.
+	 * @return array<string, string> The plugin slug, name and path.
+	 */
+	private function get_plugin_data_from_src( string $src ): array {
+
+		// Get just the local path for the src (removing the local domain).
+		$src = str_replace( get_site_url(), '', $src );
+
+		if ( str_starts_with( $src, '/wp-includes/' ) ) {
+			return array(
+				'slug' => 'core',
+				'name' => 'Core',
+				'path' => $src,
+			);
+		}
+
+		// Extract the slug from $src, eg. "/wp-content/plugins/{slug}/path/to/script.js".
+		$slugs = explode( '/', $src );
+		$slug  = $slugs[3];
+
+		foreach ( $this->plugins_data as $plugin_slug => $plugin_data ) {
+			if ( $slug === $plugin_data['TextDomain'] ) {
+				return array(
+					'slug' => $plugin_data['TextDomain'],
+					'name' => $plugin_data['Name'],
+					'path' => $src,
+				);
+			}
+		}
+		return array(
+			'slug' => '',
+			'name' => '',
+			'path' => $src,
+		);
 	}
 }
