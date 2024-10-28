@@ -15,7 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * URL metrics grouped by viewport according to breakpoints.
  *
  * @implements IteratorAggregate<int, OD_URL_Metric>
- * @phpstan-import-type ElementData from OD_URL_Metric
  *
  * @since 0.1.0
  * @access private
@@ -72,7 +71,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * Result cache.
 	 *
 	 * @var array{
-	 *          get_lcp_element?: ElementData|null,
+	 *          get_lcp_element?: OD_Element|null,
 	 *          is_complete?: bool
 	 *      }
 	 */
@@ -194,6 +193,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			$this->collection->clear_cache();
 		}
 
+		$url_metric->set_group( $this );
 		$this->url_metrics[] = $url_metric;
 
 		// If we have too many URL metrics now, remove the oldest ones up to the sample size.
@@ -246,10 +246,10 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	/**
 	 * Gets the LCP element in the viewport group.
 	 *
-	 * @return ElementData|null LCP element data or null if not available, either because there are no URL metrics or
+	 * @return OD_Element|null LCP element data or null if not available, either because there are no URL metrics or
 	 *                          the LCP element type is not supported.
 	 */
-	public function get_lcp_element(): ?array {
+	public function get_lcp_element(): ?OD_Element {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
 			return $this->result_cache[ __FUNCTION__ ];
 		}
@@ -280,20 +280,20 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			/**
 			 * Breadcrumb element.
 			 *
-			 * @var array<int, ElementData> $breadcrumb_element
+			 * @var array<int, OD_Element> $breadcrumb_element
 			 */
 			$breadcrumb_element = array();
 
 			foreach ( $this->url_metrics as $url_metric ) {
 				foreach ( $url_metric->get_elements() as $element ) {
-					if ( ! $element['isLCP'] ) {
+					if ( ! $element->is_lcp() ) {
 						continue;
 					}
 
-					$i = array_search( $element['xpath'], $seen_breadcrumbs, true );
+					$i = array_search( $element->get_xpath(), $seen_breadcrumbs, true );
 					if ( false === $i ) {
 						$i                       = count( $seen_breadcrumbs );
-						$seen_breadcrumbs[ $i ]  = $element['xpath'];
+						$seen_breadcrumbs[ $i ]  = $element->get_xpath();
 						$breadcrumb_counts[ $i ] = 0;
 					}
 
@@ -348,7 +348,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *             sample_size: positive-int,
 	 *             minimum_viewport_width: 0|positive-int,
 	 *             maximum_viewport_width: positive-int,
-	 *             lcp_element: ?ElementData,
+	 *             lcp_element: ?OD_Element,
 	 *             complete: bool,
 	 *             url_metrics: OD_URL_Metric[]
 	 *         } Data which can be serialized by json_encode().

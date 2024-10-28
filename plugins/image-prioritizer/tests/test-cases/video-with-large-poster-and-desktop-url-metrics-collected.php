@@ -17,6 +17,7 @@ return array(
 			'isLCP'              => false,
 			'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::VIDEO]',
 			'boundingClientRect' => $test_case->get_sample_dom_rect(),
+			'intersectionRatio'  => 1.0,
 		);
 
 		foreach ( array_merge( $breakpoint_max_widths, array( 1000 ) ) as $viewport_width ) {
@@ -46,36 +47,36 @@ return array(
 		$expected_url = wp_get_attachment_image_url( $attachment_id, array( (int) $element['boundingClientRect']['width'], 0 ) );
 	},
 	'buffer'   => static function () use ( &$full_url ) {
-		return "
-		<html lang=\"en\">
+		return <<<HTML
+		<html lang="en">
 			<head>
-				<meta charset=\"utf-8\">
+				<meta charset="utf-8">
 				<title>...</title>
 			</head>
 			<body>
-				<video class=\"desktop\" poster=\"$full_url\" width=\"1200\" height=\"500\" crossorigin>
-					<source src=\"https://example.com/header.webm\" type=\"video/webm\">
-					<source src=\"https://example.com/header.mp4\" type=\"video/mp4\">
+				<video class="desktop" poster="$full_url" width="1200" height="500" crossorigin>
+					<source src="https://example.com/header.webm" type="video/webm">
+					<source src="https://example.com/header.mp4" type="video/mp4">
 				</video>
 			</body>
 		</html>
-	";
+HTML;
 	},
 	'expected' => static function () use ( &$full_url, &$expected_url ) {
-		return "
-		<html lang=\"en\">
+		return <<<HTML
+		<html lang="en">
 			<head>
-				<meta charset=\"utf-8\">
+				<meta charset="utf-8">
 				<title>...</title>
 			</head>
 			<body>
-				<video data-od-replaced-poster=\"$full_url\" data-od-xpath=\"/*[1][self::HTML]/*[2][self::BODY]/*[1][self::VIDEO]\" class=\"desktop\" poster=\"$expected_url\" width=\"1200\" height=\"500\" crossorigin>
-					<source src=\"https://example.com/header.webm\" type=\"video/webm\">
-					<source src=\"https://example.com/header.mp4\" type=\"video/mp4\">
+				<video data-od-replaced-poster="$full_url" data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::VIDEO]" class="desktop" poster="$expected_url" width="1200" height="500" crossorigin>
+					<source src="https://example.com/header.webm" type="video/webm">
+					<source src="https://example.com/header.mp4" type="video/mp4">
 				</video>
-				<script type=\"module\">/* import detect ... */</script>
+				<script type="module">/* import detect ... */</script>
 			</body>
 		</html>
-	";
+HTML;
 	},
 );

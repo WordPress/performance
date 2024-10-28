@@ -88,10 +88,19 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 		$set_up( $this, $this::factory() );
 
 		$buffer = is_string( $buffer ) ? $buffer : $buffer();
-		$buffer = preg_replace(
-			':<script type="module">.+?</script>:s',
-			'<script type="module">/* import detect ... */</script>',
-			od_optimize_template_output_buffer( $buffer )
+		$buffer = od_optimize_template_output_buffer( $buffer );
+		$buffer = preg_replace_callback(
+			':(<script type="module">)(.+?)(</script>):s',
+			static function ( $matches ) {
+				array_shift( $matches );
+				if ( false !== strpos( $matches[1], 'import detect' ) ) {
+					$matches[1] = '/* import detect ... */';
+				} elseif ( false !== strpos( $matches[1], 'const lazyVideoObserver' ) ) {
+					$matches[1] = '/* const lazyVideoObserver ... */';
+				}
+				return implode( '', $matches );
+			},
+			$buffer
 		);
 
 		$expected = is_string( $expected ) ? $expected : $expected();
@@ -109,6 +118,13 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	 * @return array<string, mixed> Data.
 	 */
 	public function data_provider_test_auto_sizes(): array {
+		$outside_viewport_rect = array_merge(
+			$this->get_sample_dom_rect(),
+			array(
+				'top' => 1000,
+			)
+		);
+
 		return array(
 			// Note: The Image Prioritizer plugin removes the loading attribute, and so then Auto Sizes does not then add sizes=auto.
 			'wrongly_lazy_responsive_img'       => array(
@@ -123,9 +139,11 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 
 			'non_responsive_image'              => array(
 				'element_metrics' => array(
-					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-					'isLCP'             => false,
-					'intersectionRatio' => 0,
+					'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+					'isLCP'              => false,
+					'intersectionRatio'  => 0,
+					'intersectionRect'   => $outside_viewport_rect,
+					'boundingClientRect' => $outside_viewport_rect,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Quux" width="1200" height="800" loading="lazy">',
 				'expected'        => '<img src="https://example.com/foo.jpg" alt="Quux" width="1200" height="800" loading="lazy">',
@@ -133,9 +151,11 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 
 			'auto_sizes_added'                  => array(
 				'element_metrics' => array(
-					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-					'isLCP'             => false,
-					'intersectionRatio' => 0,
+					'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+					'isLCP'              => false,
+					'intersectionRatio'  => 0,
+					'intersectionRect'   => $outside_viewport_rect,
+					'boundingClientRect' => $outside_viewport_rect,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">',
 				'expected'        => '<img data-od-replaced-sizes="(max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
@@ -143,9 +163,11 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 
 			'auto_sizes_already_added'          => array(
 				'element_metrics' => array(
-					'xpath'             => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-					'isLCP'             => false,
-					'intersectionRatio' => 0,
+					'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+					'isLCP'              => false,
+					'intersectionRatio'  => 0,
+					'intersectionRect'   => $outside_viewport_rect,
+					'boundingClientRect' => $outside_viewport_rect,
 				),
 				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
 				'expected'        => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',

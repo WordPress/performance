@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Initializes Image Prioritizer when Optimization Detective has loaded.
  *
- * @since n.e.x.t
+ * @since 0.2.0
  *
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */

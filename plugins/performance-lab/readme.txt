@@ -1,8 +1,8 @@
 === Performance Lab ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.6
-Stable tag:   3.4.1
+Tested up to: 6.7
+Stable tag:   3.5.1
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -22,6 +22,7 @@ The feature plugins which are currently featured by this plugin are:
 * [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) _(experimental)_
 * [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/) _(experimental)_
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) _(experimental)_
+* [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
 
 These plugins can also be installed separately from installing Performance Lab, but having the Performance Lab plugin also active will ensure you find out about new performance features as they are developed.
 
@@ -69,6 +70,20 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 3.5.1 =
+
+**Bug Fixes**
+
+* Account for plugin dependencies when storing relevant plugin info. ([1613](https://github.com/WordPress/performance/pull/1613))
+
+= 3.5.0 =
+
+**Enhancements**
+
+* Add Web Worker Offloading to list of Performance features. ([1577](https://github.com/WordPress/performance/pull/1577))
+* Only store info for relevant standalone plugins in the transient cache. ([1573](https://github.com/WordPress/performance/pull/1573))
+* Use a single WordPress.org API request to get information for all plugins. ([1562](https://github.com/WordPress/performance/pull/1562))
 
 = 3.4.1 =
 

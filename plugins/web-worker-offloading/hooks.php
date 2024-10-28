@@ -127,7 +127,7 @@ add_filter( 'wp_inline_script_attributes', 'plwwo_filter_inline_script_attribute
  *
  * See {@see 'wp_head'}.
  *
- * @since n.e.x.t
+ * @since 0.1.1
  */
 function plwwo_render_generator_meta_tag(): void {
 	// Use the plugin slug as it is immutable.

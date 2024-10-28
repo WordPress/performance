@@ -1,23 +1,13 @@
 <?php
 return array(
 	'set_up'   => static function ( Test_Embed_Optimizer_Optimization_Detective $test_case ): void {
-		$rect = array(
-			'width'  => 500.1,
-			'height' => 500.2,
-			'x'      => 100.3,
-			'y'      => 100.4,
-			'top'    => 0.1,
-			'right'  => 0.2,
-			'bottom' => 0.3,
-			'left'   => 0.4,
-		);
 		$test_case->populate_url_metrics(
 			array(
 				array(
 					'xpath'                     => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]',
 					'isLCP'                     => false,
 					'intersectionRatio'         => 0,
-					'resizedBoundingClientRect' => array_merge( $rect, array( 'height' => 500 ) ),
+					'resizedBoundingClientRect' => array_merge( $test_case->get_sample_dom_rect(), array( 'height' => 500 ) ),
 				),
 			)
 		);

@@ -41,7 +41,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 	/**
 	 * Filters the list of extension script module URLs to import when performing detection.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 *
 	 * @param string[] $extension_module_urls Extension module URLs.
 	 */

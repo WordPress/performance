@@ -26,7 +26,7 @@ add_action( 'init', 'embed_optimizer_add_hooks' );
 /**
  * Adds hooks for when the Optimization Detective logic is not running.
  *
- * @since n.e.x.t
+ * @since 0.3.0
  */
 function embed_optimizer_add_non_optimization_detective_hooks(): void {
 	if ( false === has_action( 'od_register_tag_visitors', 'embed_optimizer_register_tag_visitors' ) ) {
@@ -37,7 +37,7 @@ function embed_optimizer_add_non_optimization_detective_hooks(): void {
 /**
  * Initializes Embed Optimizer when Optimization Detective has loaded.
  *
- * @since n.e.x.t
+ * @since 0.3.0
  *
  * @param string $optimization_detective_version Current version of the optimization detective plugin.
  */
@@ -81,7 +81,7 @@ function embed_optimizer_register_tag_visitors( OD_Tag_Visitor_Registry $registr
 /**
  * Filters additional properties for the element item schema for Optimization Detective.
  *
- * @since n.e.x.t
+ * @since 0.3.0
  *
  * @param array<string, array{type: string}> $additional_properties Additional properties.
  * @return array<string, array{type: string}> Additional properties.
@@ -112,7 +112,7 @@ function embed_optimizer_add_element_item_schema_properties( array $additional_p
 /**
  * Filters the list of Optimization Detective extension module URLs to include the extension for Embed Optimizer.
  *
- * @since n.e.x.t
+ * @since 0.3.0
  *
  * @param string[]|mixed $extension_module_urls Extension module URLs.
  * @return string[] Extension module URLs.
@@ -130,7 +130,7 @@ function embed_optimizer_filter_extension_module_urls( $extension_module_urls ):
  *
  * This ensures that the module for handling embeds is only loaded when there is an embed on the page.
  *
- * @since n.e.x.t
+ * @since 0.3.0
  *
  * @param string|mixed $html The oEmbed HTML.
  * @return string Unchanged oEmbed HTML.

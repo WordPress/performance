@@ -1,8 +1,8 @@
 === Optimization Detective ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.6
-Stable tag:   0.6.0
+Tested up to: 6.7
+Stable tag:   0.7.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, rum
@@ -32,6 +32,10 @@ There are currently **no settings** and no user interface for this plugin since 
 When the `WP_DEBUG` constant is enabled, additional logging for Optimization Detective is added to the browser console.
 
 = Hooks =
+
+**Action:** `od_init` (argument: plugin version)
+
+Fires when the Optimization Detective is initializing. This action is useful for loading extension code that depends on Optimization Detective to be running. The version of the plugin is passed as the sole argument so that if the required version is not present, the callback can short circuit.
 
 **Filter:** `od_breakpoint_max_widths` (default: [480, 600, 782])
 
@@ -156,6 +160,21 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/optimization-detective) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.7.0 =
+
+**Enhancements**
+
+* Send gathered URL metric data when the page is hidden/unloaded as opposed to once the page has loaded; this enables the ability to track layout shifts and INP scores over the life of the page. ([1373](https://github.com/WordPress/performance/pull/1373))
+* Introduce client-side extensions in the form of script modules which are loaded when the detection logic runs. ([1373](https://github.com/WordPress/performance/pull/1373))
+* Add an `od_init` action for extensions to load their code. ([1373](https://github.com/WordPress/performance/pull/1373))
+* Introduce `OD_Element` class and improve PHP API. ([1585](https://github.com/WordPress/performance/pull/1585))
+* Add group collection helper methods to get the first/last groups. ([1602](https://github.com/WordPress/performance/pull/1602))
+
+**Bug Fixes**
+
+* Fix Optimization Detective compatibility with WooCommerce when Coming Soon page is served. ([1565](https://github.com/WordPress/performance/pull/1565))
+* Fix storage of URL Metric when plain non-pretty permalinks are enabled. ([1574](https://github.com/WordPress/performance/pull/1574))
 
 = 0.6.0 =
 

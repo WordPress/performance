@@ -5,7 +5,7 @@
  * Description: Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
  * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 0.7.0-alpha
+ * Version: 0.7.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -70,7 +70,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'optimization_detective_pending_plugin',
-	'0.7.0-alpha',
+	'0.7.0',
 	static function ( string $version ): void {
 		if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 			return;
@@ -102,6 +102,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		require_once __DIR__ . '/class-od-data-validation-exception.php';
 		require_once __DIR__ . '/class-od-html-tag-processor.php';
 		require_once __DIR__ . '/class-od-url-metric.php';
+		require_once __DIR__ . '/class-od-element.php';
 		require_once __DIR__ . '/class-od-strict-url-metric.php';
 		require_once __DIR__ . '/class-od-url-metric-group.php';
 		require_once __DIR__ . '/class-od-url-metric-group-collection.php';

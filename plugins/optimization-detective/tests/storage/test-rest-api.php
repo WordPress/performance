@@ -89,7 +89,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 
 		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
 		$this->assertCount( 1, $url_metrics, 'Expected number of URL metrics stored.' );
-		$this->assertSame( $valid_params['elements'], $url_metrics[0]->get_elements() );
+		$this->assertSame( $valid_params['elements'], $this->get_array_json_data( $url_metrics[0]->get( 'elements' ) ) );
 		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
 
 		$expected_data = $valid_params;
@@ -523,7 +523,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			array(
 				'viewport_width' => 480,
 				'element'        => array(
-					'xpath' => '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::DIV]/*[1][self::MAIN]/*[0][self::DIV]/*[0][self::FIGURE]/*[0][self::IMG]',
+					'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::DIV]/*[2][self::MAIN]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::IMG]',
 				),
 			)
 		)->jsonSerialize();

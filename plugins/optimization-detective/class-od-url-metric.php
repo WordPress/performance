@@ -31,14 +31,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @phpstan-type ElementData  array{
  *                                isLCP: bool,
  *                                isLCPCandidate: bool,
- *                                xpath: string,
+ *                                xpath: non-empty-string,
  *                                intersectionRatio: float,
  *                                intersectionRect: DOMRect,
  *                                boundingClientRect: DOMRect,
  *                            }
  * @phpstan-type Data         array{
- *                                uuid: string,
- *                                url: string,
+ *                                uuid: non-empty-string,
+ *                                url: non-empty-string,
  *                                timestamp: float,
  *                                viewport: ViewportRect,
  *                                elements: ElementData[]
@@ -55,6 +55,21 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @var Data
 	 */
 	protected $data;
+
+	/**
+	 * Elements.
+	 *
+	 * @var OD_Element[]
+	 */
+	protected $elements;
+
+	/**
+	 * Group.
+	 *
+	 * @since 0.7.0
+	 * @var OD_URL_Metric_Group|null
+	 */
+	protected $group = null;
 
 	/**
 	 * Constructor.
@@ -96,16 +111,44 @@ class OD_URL_Metric implements JsonSerializable {
 			throw new OD_Data_Validation_Exception(
 				esc_html(
 					sprintf(
-						/* translators: 1: current aspect ratio, 2: minimum aspect ratio, 3: maximum aspect ratio */
-						__( 'Viewport aspect ratio (%1$s) is not in the accepted range of %2$s to %3$s.', 'optimization-detective' ),
+						/* translators: 1: current aspect ratio, 2: minimum aspect ratio, 3: maximum aspect ratio, 4: viewport dimensions */
+						__( 'Viewport aspect ratio (%1$s) is not in the accepted range of %2$s to %3$s. Viewport dimensions: %4$s', 'optimization-detective' ),
 						$aspect_ratio,
 						$min_aspect_ratio,
-						$max_aspect_ratio
+						$max_aspect_ratio,
+						$data['viewport']['width'] . 'x' . $data['viewport']['height']
 					)
 				)
 			);
 		}
 		return rest_sanitize_value_from_schema( $data, $schema, self::class );
+	}
+
+	/**
+	 * Gets the group that this URL metric is a part of (which may not be any).
+	 *
+	 * @since 0.7.0
+	 *
+	 * @return OD_URL_Metric_Group|null Group.
+	 */
+	public function get_group(): ?OD_URL_Metric_Group {
+		return $this->group;
+	}
+
+	/**
+	 * Sets the group that this URL metric is a part of.
+	 *
+	 * @since 0.7.0
+	 *
+	 * @param OD_URL_Metric_Group $group Group.
+	 *
+	 * @throws InvalidArgumentException When the supplied group has minimum/maximum viewport widths which are out of bounds with the viewport width for this URL Metric.
+	 */
+	public function set_group( OD_URL_Metric_Group $group ): void {
+		if ( ! $group->is_viewport_width_in_range( $this->get_viewport_width() ) ) {
+			throw new InvalidArgumentException( 'Group does not have the correct minimum or maximum viewport widths for this URL Metric.' );
+		}
+		$this->group = $group;
 	}
 
 	/**
@@ -355,6 +398,9 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @return mixed|null The property value, or null if not set.
 	 */
 	public function get( string $key ) {
+		if ( 'elements' === $key ) {
+			return $this->get_elements();
+		}
 		return $this->data[ $key ] ?? null;
 	}
 
@@ -406,10 +452,18 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets elements.
 	 *
-	 * @return ElementData[] Elements.
+	 * @return OD_Element[] Elements.
 	 */
 	public function get_elements(): array {
-		return $this->data['elements'];
+		if ( ! is_array( $this->elements ) ) {
+			$this->elements = array_map(
+				function ( array $element ): OD_Element {
+					return new OD_Element( $element, $this );
+				},
+				$this->data['elements']
+			);
+		}
+		return $this->elements;
 	}
 
 	/**
