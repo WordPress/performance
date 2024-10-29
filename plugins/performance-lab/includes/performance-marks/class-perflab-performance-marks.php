@@ -94,6 +94,23 @@ class Perflab_Performance_Marks {
 	public function send_marks(): void {
 		global $wp_scripts;
 
+		// Collect any scripts output directly.
+		remove_action( 'wp_footer', array( perflab_performance_marks(), 'send_marks' ), 999 );
+		$manually_output_scripts = $this->get_manually_output_scripts();
+
+		// Add the manually output scripts to the marks.
+		foreach ( $manually_output_scripts as $script ) {
+
+			$this->add_mark(
+				'script_output::' . $script['slug'],
+				array(
+					'path' => $script['path'],
+					'slug' => $script['slug'],
+					'name' => $script['name'],
+				)
+			);
+		}
+
 		foreach ( $wp_scripts->done as $handle ) {
 			$src = $wp_scripts->registered[ $handle ]->src;
 			if ( false === $src ) {
@@ -123,7 +140,7 @@ class Perflab_Performance_Marks {
 				wp_json_encode( $mark_args ),
 				esc_attr( (string) $x )
 			);
-			$x = $x + 10;
+			++$x;
 		}
 		echo( '</script>' );
 	}
@@ -153,19 +170,133 @@ class Perflab_Performance_Marks {
 		$slugs = explode( '/', $src );
 		$slug  = $slugs[3];
 
+		$plugin_data = $this->get_plugin_data_by_slug( $slug );
+
+		return array(
+			'slug' => $plugin_data['slug'],
+			'name' => $plugin_data['name'],
+			'path' => $src,
+		);
+	}
+
+	/**
+	 * Get data for plugin by slug.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string $slug The plugin slug.
+	 * @return array<string, string> The plugin slug and name.
+	 */
+	private function get_plugin_data_by_slug( string $slug ): array {
+		if ( '' === $slug ) {
+			return array(
+				'slug' => '',
+				'name' => '',
+			);
+		}
 		foreach ( $this->plugins_data as $plugin_slug => $plugin_data ) {
 			if ( $slug === $plugin_data['TextDomain'] ) {
 				return array(
 					'slug' => $plugin_data['TextDomain'],
 					'name' => $plugin_data['Name'],
-					'path' => $src,
 				);
 			}
 		}
 		return array(
 			'slug' => '',
 			'name' => '',
-			'path' => $src,
 		);
+	}
+
+	/**
+	 * Get all of the manually output scripts.
+	 *
+	 * Check all plugins hooked to wp_head or wp_footer to see if they are enqueuing scripts.
+	 * Run all hooks using output buffering, then review content for any script handles that are enqueued.
+	 * Use the HTML API to parse for script handle, then add that to the performance marks.
+	 *
+	 * For each script, return the plugin slug and name and the script path.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @return array<int, array<string, bool|string>> Array of script handles with plugin slug and name.
+	 */
+	private function get_manually_output_scripts(): array {
+		$scripts = array();
+		$hooks   = array(
+			'wp_head',
+			'wp_footer',
+		);
+		foreach ( $hooks as $hook ) {
+			// Get all callbacks hooked on this hook and invoke them one at a time.
+			$callbacks = $GLOBALS['wp_filter'][ $hook ];
+			foreach ( $callbacks as $priority => $sub_callbacks ) {
+				foreach ( $sub_callbacks as $callback ) {
+					// Capture the output HTML.
+					ob_start();
+					call_user_func( $callback['function'], array() );
+					$html = ob_get_clean();
+					// Parse the HTML for any script handles.
+					if ( empty( $html ) ) {
+						continue;
+					}
+					$processor = new WP_HTML_Tag_Processor( $html );
+					while ( $processor->next_tag() ) {
+						if ( 'SCRIPT' === $processor->get_tag() ) {
+							$src         = $processor->get_attribute( 'src' );
+							$plugin_slug = '';
+							if ( ! empty( $src ) ) {
+								if ( is_array( $callback['function'] ) ) {
+									$class_name  = $callback['function'][0]; // Class.
+									$method_name = $callback['function'][1]; // Method.
+									try {
+										$reflection_method = new ReflectionMethod( $class_name, $method_name );
+										$file_path         = $reflection_method->getFileName();
+										$plugin_slug       = $this->get_slug_from_path( $file_path );
+									} catch ( ReflectionException $e ) {
+										continue;
+									}
+								} else {
+									$function_name = $callback['function'];
+									try {
+										$reflection_function = new ReflectionFunction( $function_name );
+										$file_path           = $reflection_function->getFileName();
+										$plugin_slug         = $this->get_slug_from_path( $file_path );
+									} catch ( ReflectionException $e ) {
+										continue;
+									}
+									$plugin_data = $this->get_plugin_data_by_slug( $plugin_slug );
+									$scripts[]   = array(
+										'path' => $src,
+										'slug' => empty( $plugin_data['slug'] ) ? 'core' : $plugin_data['slug'],
+										'name' => empty( $plugin_data['name'] ) ? 'Core' : $plugin_data['name'],
+									);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return $scripts;
+	}
+
+	/**
+	 * Helper to get the plugin slug from a file path.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param string|false $file_path The file path.
+	 * @return string The plugin slug.
+	 */
+	private function get_slug_from_path( $file_path ): string {
+		if ( false === $file_path ) {
+			return '';
+		}
+		$pattern = '#/(?:plugins|themes)/([^/]+)/#'; // Match anything after '/plugins/' or '/themes/' up to the next '/'.
+		if ( false !== preg_match( $pattern, $file_path, $matches ) ) {
+			return $matches[1];
+		}
+		return '';
 	}
 }

@@ -15,4 +15,4 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since n.e.x.t
  */
-add_action( 'wp_footer', array( perflab_performance_marks(), 'send_marks'), 999 );
+add_action( 'wp_footer', array( perflab_performance_marks(), 'send_marks' ), 999 );
