@@ -625,10 +625,10 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @since 0.4.0
 	 *
-	 * @param string $function_name Function name.
-	 * @param string $message       Warning message.
+	 * @param callable-string $function_name Function name.
+	 * @param string          $message       Warning message.
 	 */
-	private function warn( string $function_name, string $message ): void {
+	private function warn( callable $function_name, string $message ): void {
 		wp_trigger_error(
 			$function_name,
 			esc_html( $message )

@@ -119,6 +119,10 @@ class OD_URL_Metrics_Post_Type {
 	public static function get_url_metrics_from_post( WP_Post $post ): array {
 		$this_function = __METHOD__;
 		$trigger_error = static function ( string $message, int $error_level = E_USER_NOTICE ) use ( $this_function ): void {
+			// Default to E_USER_NOTICE.
+			if ( ! in_array( $error_level, array( E_USER_NOTICE, E_USER_WARNING, E_USER_ERROR, E_USER_DEPRECATED ), true ) ) {
+				$error_level = E_USER_NOTICE;
+			}
 			wp_trigger_error( $this_function, esc_html( $message ), $error_level );
 		};
 
