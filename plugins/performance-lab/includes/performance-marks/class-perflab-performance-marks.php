@@ -102,7 +102,7 @@ class Perflab_Performance_Marks {
 		foreach ( $manually_output_scripts as $script ) {
 
 			$this->add_mark(
-				'script_output::' . $script['slug'],
+				'attribution::plugin_output::' . $script['slug'],
 				array(
 					'path' => $script['path'],
 					'slug' => $script['slug'],
@@ -119,7 +119,7 @@ class Perflab_Performance_Marks {
 			// Gather the plugin slug, name at relative path.
 			$plugin_data = $this->get_plugin_data_from_src( $src );
 			perflab_performance_marks()->add_mark(
-				'script_enqueue::' . $handle,
+				'attribution::plugin_enqueue::' . $handle,
 				array(
 					'path' => $plugin_data['path'],
 					'slug' => $plugin_data['slug'],
@@ -161,7 +161,7 @@ class Perflab_Performance_Marks {
 		if ( str_starts_with( $src, '/wp-includes/' ) ) {
 			return array(
 				'slug' => 'core',
-				'name' => 'Core',
+				'name' => 'WordPress Core',
 				'path' => $src,
 			);
 		}
@@ -269,7 +269,7 @@ class Perflab_Performance_Marks {
 									$scripts[]   = array(
 										'path' => $src,
 										'slug' => empty( $plugin_data['slug'] ) ? 'core' : $plugin_data['slug'],
-										'name' => empty( $plugin_data['name'] ) ? 'Core' : $plugin_data['name'],
+										'name' => empty( $plugin_data['name'] ) ? 'WordPressCore' : $plugin_data['name'],
 									);
 								}
 							}
