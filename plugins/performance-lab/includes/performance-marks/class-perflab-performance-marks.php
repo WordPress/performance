@@ -116,14 +116,17 @@ class Perflab_Performance_Marks {
 			if ( false === $src ) {
 				continue;
 			}
-			// Gather the plugin slug, name at relative path.
-			$plugin_data = $this->get_plugin_data_from_src( $src );
+			// Gather the slug, name at relative path.
+			$attribution_data = $this->get_script_data_from_src( $src );
+
+			// If the slug is core, the is a core:enqueue, otherwise if the src contains 'themes' this is a theme:enqueue, otherwise it is a plugin:enqueue.
+			$mark_slug = 'attribution::' . ( 'core' === $attribution_data['slug'] ? 'core' : ( str_contains( $src, 'themes' ) ? 'theme' : 'plugin' ) ) . '_enqueue::' . $handle;
 			perflab_performance_marks()->add_mark(
-				'attribution::plugin_enqueue::' . $handle,
+				$mark_slug,
 				array(
-					'path' => $plugin_data['path'],
-					'slug' => $plugin_data['slug'],
-					'name' => $plugin_data['name'],
+					'path' => $attribution_data['path'],
+					'slug' => $attribution_data['slug'],
+					'name' => $attribution_data['name'],
 				)
 			);
 		}
@@ -153,7 +156,7 @@ class Perflab_Performance_Marks {
 	 * @param string $src The script path.
 	 * @return array<string, string> The plugin slug, name and path.
 	 */
-	private function get_plugin_data_from_src( string $src ): array {
+	private function get_script_data_from_src( string $src ): array {
 
 		// Get just the local path for the src (removing the local domain).
 		$src = str_replace( get_site_url(), '', $src );
@@ -170,11 +173,19 @@ class Perflab_Performance_Marks {
 		$slugs = explode( '/', $src );
 		$slug  = $slugs[3];
 
-		$plugin_data = $this->get_plugin_data_by_slug( $slug );
+		// If the src contains 'plugins', extract the plugin data.
+		if ( str_contains( $src, 'themes' ) ) {
+			return array(
+				'slug' => $slug,
+				'name' => wp_get_theme()->get( 'Name' ),
+				'path' => $src,
+			);
+		}
+		$script_data = $this->get_plugin_data_by_slug( $slug );
 
 		return array(
-			'slug' => $plugin_data['slug'],
-			'name' => $plugin_data['name'],
+			'slug' => $script_data['slug'],
+			'name' => $script_data['name'],
 			'path' => $src,
 		);
 	}
