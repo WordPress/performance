@@ -24,7 +24,7 @@ return array(
 						static function () {
 							$tags = array();
 							for ( $i = 1; $i < WP_HTML_Tag_Processor::MAX_SEEK_OPS + 1; $i++ ) {
-								$tags[] = sprintf( '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">' );
+								$tags[] = '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">';
 							}
 							return $tags;
 						}
