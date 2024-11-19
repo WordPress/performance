@@ -78,7 +78,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 *
-	 * @param array<string, mixed> $data URL metric data.
+	 * @param array<string, mixed> $data URL Metric data.
 	 */
 	public function __construct( array $data ) {
 		if ( ! isset( $data['uuid'] ) ) {
@@ -125,7 +125,7 @@ class OD_URL_Metric implements JsonSerializable {
 	}
 
 	/**
-	 * Gets the group that this URL metric is a part of (which may not be any).
+	 * Gets the group that this URL Metric is a part of (which may not be any).
 	 *
 	 * @since 0.7.0
 	 *
@@ -136,7 +136,7 @@ class OD_URL_Metric implements JsonSerializable {
 	}
 
 	/**
-	 * Sets the group that this URL metric is a part of.
+	 * Sets the group that this URL Metric is a part of.
 	 *
 	 * @since 0.7.0
 	 *
@@ -153,6 +153,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Gets JSON schema for URL Metric.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @todo Cache the return value?
 	 *
@@ -200,7 +202,7 @@ class OD_URL_Metric implements JsonSerializable {
 			'required'             => true,
 			'properties'           => array(
 				'uuid'      => array(
-					'description' => __( 'The UUID for the URL metric.', 'optimization-detective' ),
+					'description' => __( 'The UUID for the URL Metric.', 'optimization-detective' ),
 					'type'        => 'string',
 					'format'      => 'uuid',
 					'required'    => true,
@@ -232,7 +234,7 @@ class OD_URL_Metric implements JsonSerializable {
 					'additionalProperties' => false,
 				),
 				'timestamp' => array(
-					'description' => __( 'Timestamp at which the URL metric was captured.', 'optimization-detective' ),
+					'description' => __( 'Timestamp at which the URL Metric was captured.', 'optimization-detective' ),
 					'type'        => 'number',
 					'required'    => true,
 					'readonly'    => true, // Omit from REST API.
@@ -284,7 +286,7 @@ class OD_URL_Metric implements JsonSerializable {
 		);
 
 		/**
-		 * Filters additional schema properties which should be allowed at the root of a URL metric.
+		 * Filters additional schema properties which should be allowed at the root of a URL Metric.
 		 *
 		 * @since 0.6.0
 		 *
@@ -296,7 +298,7 @@ class OD_URL_Metric implements JsonSerializable {
 		}
 
 		/**
-		 * Filters additional schema properties which should be allowed for an elements item in a URL metric.
+		 * Filters additional schema properties which should be allowed for an element's item in a URL Metric.
 		 *
 		 * @since 0.6.0
 		 *
@@ -407,6 +409,8 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets UUID.
 	 *
+	 * @since 0.6.0
+	 *
 	 * @return string UUID.
 	 */
 	public function get_uuid(): string {
@@ -415,6 +419,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Gets URL.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return string URL.
 	 */
@@ -425,6 +431,8 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets viewport data.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return ViewportRect Viewport data.
 	 */
 	public function get_viewport(): array {
@@ -433,6 +441,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Gets viewport width.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return int Viewport width.
 	 */
@@ -443,6 +453,8 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets timestamp.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return float Timestamp.
 	 */
 	public function get_timestamp(): float {
@@ -451,6 +463,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Gets elements.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return OD_Element[] Elements.
 	 */
@@ -468,6 +482,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Specifies data which should be serialized to JSON.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return Data Exports to be serialized by json_encode().
 	 */

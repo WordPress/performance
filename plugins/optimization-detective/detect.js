@@ -85,11 +85,11 @@ function error( ...message ) {
 }
 
 /**
- * Checks whether the URL metric(s) for the provided viewport width is needed.
+ * Checks whether the URL Metric(s) for the provided viewport width is needed.
  *
  * @param {number}                 viewportWidth          - Current viewport width.
  * @param {URLMetricGroupStatus[]} urlMetricGroupStatuses - Viewport group statuses.
- * @return {boolean} Whether URL metrics are needed.
+ * @return {boolean} Whether URL Metrics are needed.
  */
 function isViewportNeeded( viewportWidth, urlMetricGroupStatuses ) {
 	let lastWasLacking = false;
@@ -128,7 +128,7 @@ function recursiveFreeze( obj ) {
 }
 
 /**
- * URL metric being assembled for submission.
+ * URL Metric being assembled for submission.
  *
  * @type {URLMetric}
  */
@@ -155,7 +155,7 @@ function getRootData() {
 }
 
 /**
- * Extends root URL metric data.
+ * Extends root URL Metric data.
  *
  * @param {ExtendedRootData} properties
  */
@@ -232,59 +232,43 @@ function extendElementData( xpath, properties ) {
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
  * @param {Object}                 args                            Args.
- * @param {number}                 args.serveTime                  The serve time of the page in milliseconds from PHP via `microtime( true ) * 1000`.
- * @param {number}                 args.detectionTimeWindow        The number of milliseconds between now and when the page was first generated in which detection should proceed.
  * @param {string[]}               args.extensionModuleUrls        URLs for extension script modules to import.
  * @param {number}                 args.minViewportAspectRatio     Minimum aspect ratio allowed for the viewport.
  * @param {number}                 args.maxViewportAspectRatio     Maximum aspect ratio allowed for the viewport.
  * @param {boolean}                args.isDebug                    Whether to show debug messages.
  * @param {string}                 args.restApiEndpoint            URL for where to send the detection data.
- * @param {string}                 args.restApiNonce               Nonce for writing to the REST API.
  * @param {string}                 args.currentUrl                 Current URL.
- * @param {string}                 args.urlMetricSlug              Slug for URL metric.
- * @param {string}                 args.urlMetricNonce             Nonce for URL metric storage.
- * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     URL metric group statuses.
- * @param {number}                 args.storageLockTTL             The TTL (in seconds) for the URL metric storage lock.
+ * @param {string}                 args.urlMetricSlug              Slug for URL Metric.
+ * @param {number|null}            args.cachePurgePostId           Cache purge post ID.
+ * @param {string}                 args.urlMetricHMAC              HMAC for URL Metric storage.
+ * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     URL Metric group statuses.
+ * @param {number}                 args.storageLockTTL             The TTL (in seconds) for the URL Metric storage lock.
  * @param {string}                 args.webVitalsLibrarySrc        The URL for the web-vitals library.
- * @param {Object}                 [args.urlMetricGroupCollection] URL metric group collection, when in debug mode.
+ * @param {Object}                 [args.urlMetricGroupCollection] URL Metric group collection, when in debug mode.
  */
 export default async function detect( {
-	serveTime,
-	detectionTimeWindow,
 	minViewportAspectRatio,
 	maxViewportAspectRatio,
 	isDebug,
 	extensionModuleUrls,
 	restApiEndpoint,
-	restApiNonce,
 	currentUrl,
 	urlMetricSlug,
-	urlMetricNonce,
+	cachePurgePostId,
+	urlMetricHMAC,
 	urlMetricGroupStatuses,
 	storageLockTTL,
 	webVitalsLibrarySrc,
 	urlMetricGroupCollection,
 } ) {
-	const currentTime = getCurrentTime();
-
 	if ( isDebug ) {
-		log( 'Stored URL metric group collection:', urlMetricGroupCollection );
+		log( 'Stored URL Metric group collection:', urlMetricGroupCollection );
 	}
 
-	// Abort running detection logic if it was served in a cached page.
-	if ( currentTime - serveTime > detectionTimeWindow ) {
-		if ( isDebug ) {
-			warn(
-				'Aborted detection due to being outside detection time window.'
-			);
-		}
-		return;
-	}
-
-	// Abort if the current viewport is not among those which need URL metrics.
+	// Abort if the current viewport is not among those which need URL Metrics.
 	if ( ! isViewportNeeded( win.innerWidth, urlMetricGroupStatuses ) ) {
 		if ( isDebug ) {
-			log( 'No need for URL metrics from the current viewport.' );
+			log( 'No need for URL Metrics from the current viewport.' );
 		}
 		return;
 	}
@@ -332,7 +316,7 @@ export default async function detect( {
 	// As an alternative to this, the od_print_detection_script() function can short-circuit if the
 	// od_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
 	// result in metrics missed from being gathered when a user navigates around a site and primes the page cache.
-	if ( isStorageLocked( currentTime, storageLockTTL ) ) {
+	if ( isStorageLocked( getCurrentTime(), storageLockTTL ) ) {
 		if ( isDebug ) {
 			warn( 'Aborted detection due to storage being locked.' );
 		}
@@ -475,16 +459,21 @@ export default async function detect( {
 			continue;
 		}
 
-		const isLCP =
-			elementIntersection.target === lcpMetric?.entries[ 0 ]?.element;
+		const element = /** @type {Element|null} */ (
+			lcpMetric?.entries[ 0 ]?.element
+		);
+		const isLCP = elementIntersection.target === element;
 
 		/** @type {ElementData} */
 		const elementData = {
 			isLCP,
 			isLCPCandidate: !! lcpMetricCandidates.find(
-				( lcpMetricCandidate ) =>
-					lcpMetricCandidate.entries[ 0 ]?.element ===
-					elementIntersection.target
+				( lcpMetricCandidate ) => {
+					const candidateElement = /** @type {Element|null} */ (
+						lcpMetricCandidate.entries[ 0 ]?.element
+					);
+					return candidateElement === elementIntersection.target;
+				}
 			),
 			xpath,
 			intersectionRatio: elementIntersection.intersectionRatio,
@@ -497,7 +486,7 @@ export default async function detect( {
 	}
 
 	if ( isDebug ) {
-		log( 'Current URL metric:', urlMetric );
+		log( 'Current URL Metric:', urlMetric );
 	}
 
 	// Wait for the page to be hidden.
@@ -545,13 +534,18 @@ export default async function detect( {
 	setStorageLock( getCurrentTime() );
 
 	if ( isDebug ) {
-		log( 'Sending URL metric:', urlMetric );
+		log( 'Sending URL Metric:', urlMetric );
 	}
 
 	const url = new URL( restApiEndpoint );
-	url.searchParams.set( '_wpnonce', restApiNonce );
 	url.searchParams.set( 'slug', urlMetricSlug );
-	url.searchParams.set( 'nonce', urlMetricNonce );
+	if ( typeof cachePurgePostId === 'number' ) {
+		url.searchParams.set(
+			'cache_purge_post_id',
+			cachePurgePostId.toString()
+		);
+	}
+	url.searchParams.set( 'hmac', urlMetricHMAC );
 	navigator.sendBeacon(
 		url,
 		new Blob( [ JSON.stringify( urlMetric ) ], {

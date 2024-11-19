@@ -52,18 +52,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  * } An array with the updated structure for the metadata before is stored in the database.
  */
 function webp_uploads_create_sources_property( array $metadata, int $attachment_id ): array {
-	// This should take place only on the JPEG image.
-	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
-
-	// Not a supported mime type to create the sources property.
-	$mime_type = get_post_mime_type( $attachment_id );
-	if ( ! is_string( $mime_type ) || ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
-		return $metadata;
-	}
-
 	$file = get_attached_file( $attachment_id, true );
 	// File does not exist.
 	if ( false === $file || ! file_exists( $file ) ) {
+		return $metadata;
+	}
+
+	$mime_type = webp_uploads_get_attachment_file_mime_type( $attachment_id, $file );
+	if ( '' === $mime_type ) {
+		return $metadata;
+	}
+
+	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
+
+	// Not a supported mime type to create the sources property.
+	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
 		return $metadata;
 	}
 

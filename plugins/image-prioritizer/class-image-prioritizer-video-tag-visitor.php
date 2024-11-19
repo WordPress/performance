@@ -44,7 +44,7 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 	 * @since 0.2.0
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
-	 * @return bool Whether the tag should be tracked in URL metrics.
+	 * @return bool Whether the tag should be tracked in URL Metrics.
 	 */
 	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
@@ -96,8 +96,8 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		$xpath = $processor->get_xpath();
 
 		/*
-		 * Obtain maximum width of the element exclusively from the URL metrics group with the widest viewport width,
-		 * which would be desktop. This prevents the situation where if URL metrics have only so far been gathered for
+		 * Obtain maximum width of the element exclusively from the URL Metrics group with the widest viewport width,
+		 * which would be desktop. This prevents the situation where if URL Metrics have only so far been gathered for
 		 * mobile viewports that an excessively-small poster would end up getting served to the first desktop visitor.
 		 */
 		$max_element_width = 0;
@@ -173,10 +173,10 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 		$processor = $context->processor;
 
 		/*
-		 * Do not do any lazy-loading if the mobile and desktop viewport groups lack URL metrics. This is important
+		 * Do not do any lazy-loading if the mobile and desktop viewport groups lack URL Metrics. This is important
 		 * because if there is a VIDEO in the initial viewport on desktop but not mobile, if then there are only URL
 		 * metrics collected for mobile then the VIDEO will get lazy-loaded which is good for mobile but for desktop
-		 * it will hurt performance. So this is why it is important to have URL metrics collected for both desktop and
+		 * it will hurt performance. So this is why it is important to have URL Metrics collected for both desktop and
 		 * mobile to verify whether maximum intersectionRatio is accounting for both screen sizes.
 		 */
 		if (

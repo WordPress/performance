@@ -287,49 +287,49 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test od_get_url_metrics_storage_nonce().
+	 * Data provider.
 	 *
-	 * @covers ::od_get_url_metrics_storage_nonce
-	 * @covers ::od_verify_url_metrics_storage_nonce
+	 * @return array<string, mixed> Data.
 	 */
-	public function test_od_get_url_metrics_storage_nonce_and_od_verify_url_metrics_storage_nonce(): void {
-		$user_id = self::factory()->user->create();
-
-		$nonce_life_actions = array();
-		add_filter(
-			'nonce_life',
-			static function ( int $life, string $action ) use ( &$nonce_life_actions ): int {
-				$nonce_life_actions[] = $action;
-				return $life;
-			},
-			10,
-			2
+	public function data_provider_to_test_hmac(): array {
+		return array(
+			'is_home'   => array(
+				'set_up' => static function (): array {
+					$post_id = self::factory()->post->create();
+					return array(
+						home_url(),
+						od_get_url_metrics_slug( array() ),
+						$post_id,
+					);
+				},
+			),
+			'is_single' => array(
+				'set_up' => static function (): array {
+					$post_id = self::factory()->post->create();
+					return array(
+						get_permalink( $post_id ),
+						od_get_url_metrics_slug( array( 'p' => $post_id ) ),
+						$post_id,
+					);
+				},
+			),
 		);
+	}
 
-		// Create first nonce for unauthenticated user.
-		$url    = home_url( '/' );
-		$slug   = od_get_url_metrics_slug( array() );
-		$nonce1 = od_get_url_metrics_storage_nonce( $slug, $url );
-		$this->assertMatchesRegularExpression( '/^[0-9a-f]{10}$/', $nonce1 );
-		$this->assertTrue( od_verify_url_metrics_storage_nonce( $nonce1, $slug, $url ) );
-		$this->assertCount( 2, $nonce_life_actions );
-
-		// Create second nonce for unauthenticated user.
-		$nonce2 = od_get_url_metrics_storage_nonce( $slug, $url );
-		$this->assertSame( $nonce1, $nonce2 );
-		$this->assertCount( 3, $nonce_life_actions );
-
-		// Create third nonce, this time for authenticated user.
-		wp_set_current_user( $user_id );
-		$nonce3 = od_get_url_metrics_storage_nonce( $slug, $url );
-		$this->assertNotEquals( $nonce3, $nonce2 );
-		$this->assertFalse( od_verify_url_metrics_storage_nonce( $nonce1, $slug, $url ) );
-		$this->assertTrue( od_verify_url_metrics_storage_nonce( $nonce3, $slug, $url ) );
-		$this->assertCount( 6, $nonce_life_actions );
-
-		foreach ( $nonce_life_actions as $nonce_life_action ) {
-			$this->assertSame( "store_url_metrics:{$slug}:{$url}", $nonce_life_action );
-		}
+	/**
+	 * Test od_get_url_metrics_storage_hmac() and od_verify_url_metrics_storage_hmac().
+	 *
+	 * @dataProvider data_provider_to_test_hmac
+	 *
+	 * @covers ::od_get_url_metrics_storage_hmac
+	 * @covers ::od_verify_url_metrics_storage_hmac
+	 */
+	public function test_od_get_url_metrics_storage_hmac_and_od_verify_url_metrics_storage_hmac( Closure $set_up ): void {
+		list( $url, $slug, $cache_purge_post_id ) = $set_up();
+		$this->go_to( $url );
+		$hmac = od_get_url_metrics_storage_hmac( $slug, $url, $cache_purge_post_id );
+		$this->assertMatchesRegularExpression( '/^[0-9a-f]+$/', $hmac );
+		$this->assertTrue( od_verify_url_metrics_storage_hmac( $hmac, $slug, $url, $cache_purge_post_id ) );
 	}
 
 	/**

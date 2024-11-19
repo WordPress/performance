@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * URL metrics grouped by viewport according to breakpoints.
+ * URL Metrics grouped by viewport according to breakpoints.
  *
  * @implements IteratorAggregate<int, OD_URL_Metric>
  *
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSerializable {
 
 	/**
-	 * URL metrics.
+	 * URL Metrics.
 	 *
 	 * @var OD_URL_Metric[]
 	 */
@@ -45,7 +45,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	private $maximum_viewport_width;
 
 	/**
-	 * Sample size for URL metrics for a given breakpoint.
+	 * Sample size for URL Metrics for a given breakpoint.
 	 *
 	 * @var int
 	 * @phpstan-var positive-int
@@ -53,7 +53,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	private $sample_size;
 
 	/**
-	 * Freshness age (TTL) for a given URL metric.
+	 * Freshness age (TTL) for a given URL Metric.
 	 *
 	 * @var int
 	 * @phpstan-var 0|positive-int
@@ -82,11 +82,11 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @throws InvalidArgumentException If arguments are invalid.
 	 *
-	 * @param OD_URL_Metric[]                     $url_metrics            URL metrics to add to the group.
+	 * @param OD_URL_Metric[]                     $url_metrics            URL Metrics to add to the group.
 	 * @param int                                 $minimum_viewport_width Minimum possible viewport width for the group. Must be zero or greater.
 	 * @param int                                 $maximum_viewport_width Maximum possible viewport width for the group. Must be greater than zero and the minimum viewport width.
 	 * @param int                                 $sample_size            Sample size for the maximum number of viewports in a group between breakpoints.
-	 * @param int                                 $freshness_ttl          Freshness age (TTL) for a given URL metric.
+	 * @param int                                 $freshness_ttl          Freshness age (TTL) for a given URL Metric.
 	 * @param OD_URL_Metric_Group_Collection|null $collection             Collection that this instance belongs to. Optional.
 	 */
 	public function __construct( array $url_metrics, int $minimum_viewport_width, int $maximum_viewport_width, int $sample_size, int $freshness_ttl, ?OD_URL_Metric_Group_Collection $collection = null ) {
@@ -175,16 +175,16 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	}
 
 	/**
-	 * Adds a URL metric to the group.
+	 * Adds a URL Metric to the group.
 	 *
-	 * @throws InvalidArgumentException If the viewport width of the URL metric is not within the min/max bounds of the group.
+	 * @throws InvalidArgumentException If the viewport width of the URL Metric is not within the min/max bounds of the group.
 	 *
-	 * @param OD_URL_Metric $url_metric URL metric.
+	 * @param OD_URL_Metric $url_metric URL Metric.
 	 */
 	public function add_url_metric( OD_URL_Metric $url_metric ): void {
 		if ( ! $this->is_viewport_width_in_range( $url_metric->get_viewport_width() ) ) {
 			throw new InvalidArgumentException(
-				esc_html__( 'URL metric is not in the viewport range for group.', 'optimization-detective' )
+				esc_html__( 'URL Metric is not in the viewport range for group.', 'optimization-detective' )
 			);
 		}
 
@@ -196,10 +196,10 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 		$url_metric->set_group( $this );
 		$this->url_metrics[] = $url_metric;
 
-		// If we have too many URL metrics now, remove the oldest ones up to the sample size.
+		// If we have too many URL Metrics now, remove the oldest ones up to the sample size.
 		if ( count( $this->url_metrics ) > $this->sample_size ) {
 
-			// Sort URL metrics in descending order by timestamp.
+			// Sort URL Metrics in descending order by timestamp.
 			usort(
 				$this->url_metrics,
 				static function ( OD_URL_Metric $a, OD_URL_Metric $b ): int {
@@ -207,16 +207,16 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 				}
 			);
 
-			// Only keep the sample size of the newest URL metrics.
+			// Only keep the sample size of the newest URL Metrics.
 			$this->url_metrics = array_slice( $this->url_metrics, 0, $this->sample_size );
 		}
 	}
 
 	/**
-	 * Determines whether the URL metric group is complete.
+	 * Determines whether the URL Metric group is complete.
 	 *
-	 * A group is complete if it has the full sample size of URL metrics
-	 * and all of these URL metrics are fresh.
+	 * A group is complete if it has the full sample size of URL Metrics
+	 * and all of these URL Metrics are fresh.
 	 *
 	 * @return bool Whether complete.
 	 */
@@ -246,7 +246,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	/**
 	 * Gets the LCP element in the viewport group.
 	 *
-	 * @return OD_Element|null LCP element data or null if not available, either because there are no URL metrics or
+	 * @return OD_Element|null LCP element data or null if not available, either because there are no URL Metrics or
 	 *                          the LCP element type is not supported.
 	 */
 	public function get_lcp_element(): ?OD_Element {
@@ -299,7 +299,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 
 					$breadcrumb_counts[ $i ] += 1;
 					$breadcrumb_element[ $i ] = $element;
-					break; // We found the LCP element for the URL metric, go to the next URL metric.
+					break; // We found the LCP element for the URL Metric, go to the next URL Metric.
 				}
 			}
 
@@ -321,7 +321,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	}
 
 	/**
-	 * Returns an iterator for the URL metrics in the group.
+	 * Returns an iterator for the URL Metrics in the group.
 	 *
 	 * @return ArrayIterator<int, OD_URL_Metric> ArrayIterator for OD_URL_Metric instances.
 	 */
@@ -330,9 +330,9 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	}
 
 	/**
-	 * Counts the URL metrics in the group.
+	 * Counts the URL Metrics in the group.
 	 *
-	 * @return int<0, max> URL metric count.
+	 * @return int<0, max> URL Metric count.
 	 */
 	public function count(): int {
 		return count( $this->url_metrics );

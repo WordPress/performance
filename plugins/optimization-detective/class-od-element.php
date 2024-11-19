@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Data for a single element in a URL metric.
+ * Data for a single element in a URL Metric.
  *
  * @phpstan-import-type ElementData from OD_URL_Metric
  * @phpstan-import-type DOMRect from OD_URL_Metric
@@ -33,7 +33,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	protected $data;
 
 	/**
-	 * URL metric that this element belongs to.
+	 * URL Metric that this element belongs to.
 	 *
 	 * @since 0.7.0
 	 * @var OD_URL_Metric
@@ -48,7 +48,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @phpstan-param ElementData $data
 	 *
 	 * @param array<string, mixed> $data       Element data.
-	 * @param OD_URL_Metric        $url_metric URL metric.
+	 * @param OD_URL_Metric        $url_metric URL Metric.
 	 */
 	public function __construct( array $data, OD_URL_Metric $url_metric ) {
 		$this->data       = $data;
@@ -56,7 +56,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	}
 
 	/**
-	 * Gets the URL metric that this element belongs to.
+	 * Gets the URL Metric that this element belongs to.
 	 *
 	 * @since 0.7.0
 	 *
@@ -67,7 +67,7 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	}
 
 	/**
-	 * Gets the group that this element's URL metric is a part of (which may not be any).
+	 * Gets the group that this element's URL Metric is a part of (which may not be any).
 	 *
 	 * @since 0.7.0
 	 *

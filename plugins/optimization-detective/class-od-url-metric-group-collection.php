@@ -22,13 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggregate, JsonSerializable {
 
 	/**
-	 * URL metric groups.
+	 * URL Metric groups.
 	 *
 	 * The number of groups corresponds to one greater than the number of
 	 * breakpoints. This is because breakpoints are the dividing line between
-	 * the groups of URL metrics with specific viewport widths. This extends
+	 * the groups of URL Metrics with specific viewport widths. This extends
 	 * even to when there are zero breakpoints: there will still be one group
-	 * in this case, in which every single URL metric is added.
+	 * in this case, in which every single URL Metric is added.
 	 *
 	 * @var OD_URL_Metric_Group[]
 	 * @phpstan-var non-empty-array<OD_URL_Metric_Group>
@@ -54,7 +54,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	private $breakpoints;
 
 	/**
-	 * Sample size for URL metrics for a given breakpoint.
+	 * Sample size for URL Metrics for a given breakpoint.
 	 *
 	 * @var int
 	 * @phpstan-var positive-int
@@ -62,9 +62,9 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	private $sample_size;
 
 	/**
-	 * Freshness age (TTL) for a given URL metric.
+	 * Freshness age (TTL) for a given URL Metric.
 	 *
-	 * A freshness age of zero means a URL metric will always be considered stale.
+	 * A freshness age of zero means a URL Metric will always be considered stale.
 	 *
 	 * @var int
 	 * @phpstan-var 0|positive-int
@@ -93,10 +93,10 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * @throws InvalidArgumentException When an invalid argument is supplied.
 	 *
-	 * @param OD_URL_Metric[] $url_metrics   URL metrics.
+	 * @param OD_URL_Metric[] $url_metrics   URL Metrics.
 	 * @param int[]           $breakpoints   Breakpoints in max widths.
 	 * @param int             $sample_size   Sample size for the maximum number of viewports in a group between breakpoints.
-	 * @param int             $freshness_ttl Freshness age (TTL) for a given URL metric.
+	 * @param int             $freshness_ttl Freshness age (TTL) for a given URL Metric.
 	 */
 	public function __construct( array $url_metrics, array $breakpoints, int $sample_size, int $freshness_ttl ) {
 		// Set breakpoints.
@@ -153,7 +153,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 		}
 		$this->freshness_ttl = $freshness_ttl;
 
-		// Create groups and the URL metrics to them.
+		// Create groups and the URL Metrics to them.
 		$this->groups = $this->create_groups();
 		foreach ( $url_metrics as $url_metric ) {
 			$this->add_url_metric( $url_metric );
@@ -220,14 +220,14 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Adds a new URL metric to a group.
+	 * Adds a new URL Metric to a group.
 	 *
-	 * Once a group reaches the sample size, the oldest URL metric is pushed out.
+	 * Once a group reaches the sample size, the oldest URL Metric is pushed out.
 	 *
 	 * @since 0.1.0
-	 * @throws InvalidArgumentException If there is no group available to add a URL metric to.
+	 * @throws InvalidArgumentException If there is no group available to add a URL Metric to.
 	 *
-	 * @param OD_URL_Metric $new_url_metric New URL metric.
+	 * @param OD_URL_Metric $new_url_metric New URL Metric.
 	 */
 	public function add_url_metric( OD_URL_Metric $new_url_metric ): void {
 		foreach ( $this->groups as $group ) {
@@ -237,7 +237,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 			}
 		}
 		throw new InvalidArgumentException(
-			esc_html__( 'No group available to add URL metric to.', 'optimization-detective' )
+			esc_html__( 'No group available to add URL Metric to.', 'optimization-detective' )
 		);
 	}
 
@@ -248,7 +248,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
 	 *
 	 * @param int $viewport_width Viewport width.
-	 * @return OD_URL_Metric_Group URL metric group for the viewport width.
+	 * @return OD_URL_Metric_Group URL Metric group for the viewport width.
 	 */
 	public function get_group_for_viewport_width( int $viewport_width ): OD_URL_Metric_Group {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) && array_key_exists( $viewport_width, $this->result_cache[ __FUNCTION__ ] ) ) {
@@ -265,7 +265,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 				esc_html(
 					sprintf(
 						/* translators: %d is viewport width */
-						__( 'No URL metric group found for viewport width: %d', 'optimization-detective' ),
+						__( 'No URL Metric group found for viewport width: %d', 'optimization-detective' ),
 						$viewport_width
 					)
 				)
@@ -277,11 +277,11 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Checks whether any group is populated with at least one URL metric.
+	 * Checks whether any group is populated with at least one URL Metric.
 	 *
 	 * @since 0.5.0
 	 *
-	 * @return bool Whether at least one group has some URL metrics.
+	 * @return bool Whether at least one group has some URL Metrics.
 	 */
 	public function is_any_group_populated(): bool {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
@@ -302,17 +302,17 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Checks whether every group is populated with at least one URL metric each.
+	 * Checks whether every group is populated with at least one URL Metric each.
 	 *
 	 * They aren't necessarily filled to the sample size, however.
-	 * The URL metrics may also be stale (non-fresh). This method
+	 * The URL Metrics may also be stale (non-fresh). This method
 	 * should be contrasted with the `is_every_group_complete()`
 	 * method below.
 	 *
 	 * @since 0.1.0
 	 * @see OD_URL_Metric_Group_Collection::is_every_group_complete()
 	 *
-	 * @return bool Whether all groups have some URL metrics.
+	 * @return bool Whether all groups have some URL Metrics.
 	 */
 	public function is_every_group_populated(): bool {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
@@ -442,10 +442,10 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets all elements from all URL metrics from all groups keyed by the elements' XPaths.
+	 * Gets all elements from all URL Metrics from all groups keyed by the elements' XPaths.
 	 *
 	 * This is an O(n^3) function so its results must be cached. This being said, the number of groups should be 4 (one
-	 * more than the default number of breakpoints) and the number of URL metrics for each group should be 3
+	 * more than the default number of breakpoints) and the number of URL Metrics for each group should be 3
 	 * (the default sample size). Therefore, given the number (n) of visited elements on the page this will only
 	 * end up running n*4*3 times.
 	 *
@@ -475,7 +475,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets the max intersection ratios of all elements across all groups and their captured URL metrics.
+	 * Gets the max intersection ratios of all elements across all groups and their captured URL Metrics.
 	 *
 	 * @since 0.3.0
 	 *
@@ -506,7 +506,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * Gets all elements' status for whether they are positioned in any initial viewport.
 	 *
 	 * An element is positioned in the initial viewport if its `boundingClientRect.top` is less than the
-	 * `viewport.height` for any of its recorded URL metrics. Note that even though the element may be positioned in the
+	 * `viewport.height` for any of its recorded URL Metrics. Note that even though the element may be positioned in the
 	 * initial viewport, it may not actually be visible. It could be occluded as a latter slide in a carousel in which
 	 * case it will have intersectionRatio of 0. Or the element may not be visible due to it or an ancestor having the
 	 * `visibility:hidden` style, such as in the case of a dropdown navigation menu. When, for example, an IMG element
@@ -542,7 +542,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets the max intersection ratio of an element across all groups and their captured URL metrics.
+	 * Gets the max intersection ratio of an element across all groups and their captured URL Metrics.
 	 *
 	 * @since 0.3.0
 	 *
@@ -566,11 +566,11 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Gets URL metrics from all groups flattened into one list.
+	 * Gets URL Metrics from all groups flattened into one list.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return OD_URL_Metric[] All URL metrics.
+	 * @return OD_URL_Metric[] All URL Metrics.
 	 */
 	public function get_flattened_url_metrics(): array {
 		// The duplication of iterator_to_array is not a mistake. This collection is an
@@ -585,7 +585,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Returns an iterator for the groups of URL metrics.
+	 * Returns an iterator for the groups of URL Metrics.
 	 *
 	 * @since 0.1.0
 	 *
@@ -596,7 +596,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Counts the URL metric groups in the collection.
+	 * Counts the URL Metric groups in the collection.
 	 *
 	 * @since 0.1.0
 	 *

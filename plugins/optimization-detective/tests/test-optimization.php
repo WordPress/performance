@@ -185,27 +185,35 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 */
 	public function data_provider_test_od_can_optimize_response(): array {
 		return array(
-			'homepage'           => array(
+			'home_as_anonymous'                    => array(
 				'set_up'   => function (): void {
 					$this->go_to( home_url( '/' ) );
 				},
 				'expected' => true,
 			),
-			'homepage_filtered'  => array(
+			'home_filtered_as_anonymous'           => array(
 				'set_up'   => function (): void {
 					$this->go_to( home_url( '/' ) );
 					add_filter( 'od_can_optimize_response', '__return_false' );
 				},
 				'expected' => false,
 			),
-			'search'             => array(
+			'singular_as_anonymous'                => array(
+				'set_up'   => function (): void {
+					$posts = get_posts();
+					$this->assertInstanceOf( WP_Post::class, $posts[0] );
+					$this->go_to( get_permalink( $posts[0] ) );
+				},
+				'expected' => true,
+			),
+			'search_as_anonymous'                  => array(
 				'set_up'   => function (): void {
 					self::factory()->post->create( array( 'post_title' => 'Hello' ) );
 					$this->go_to( home_url( '?s=Hello' ) );
 				},
 				'expected' => false,
 			),
-			'customizer_preview' => array(
+			'home_customizer_preview_as_anonymous' => array(
 				'set_up'   => function (): void {
 					$this->go_to( home_url( '/' ) );
 					global $wp_customize;
@@ -215,21 +223,28 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 				},
 				'expected' => false,
 			),
-			'post_request'       => array(
+			'home_post_request_as_anonymous'       => array(
 				'set_up'   => function (): void {
 					$this->go_to( home_url( '/' ) );
 					$_SERVER['REQUEST_METHOD'] = 'POST';
 				},
 				'expected' => false,
 			),
-			'subscriber_user'    => array(
+			'home_as_subscriber'                   => array(
 				'set_up'   => function (): void {
 					wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
 					$this->go_to( home_url( '/' ) );
 				},
 				'expected' => true,
 			),
-			'admin_user'         => array(
+			'empty_author_page_as_anonymous'       => array(
+				'set_up'   => function (): void {
+					$user_id = self::factory()->user->create( array( 'role' => 'author' ) );
+					$this->go_to( get_author_posts_url( $user_id ) );
+				},
+				'expected' => false,
+			),
+			'home_as_admin'                        => array(
 				'set_up'   => function (): void {
 					wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 					$this->go_to( home_url( '/' ) );
@@ -243,10 +258,12 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * Test od_can_optimize_response().
 	 *
 	 * @covers ::od_can_optimize_response
+	 * @covers ::od_get_cache_purge_post_id
 	 *
 	 * @dataProvider data_provider_test_od_can_optimize_response
 	 */
 	public function test_od_can_optimize_response( Closure $set_up, bool $expected ): void {
+		self::factory()->post->create(); // Make sure there is at least one post in the DB.
 		$set_up();
 		$this->assertSame( $expected, od_can_optimize_response() );
 	}

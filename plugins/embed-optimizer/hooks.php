@@ -121,7 +121,7 @@ function embed_optimizer_filter_extension_module_urls( $extension_module_urls ):
 	if ( ! is_array( $extension_module_urls ) ) {
 		$extension_module_urls = array();
 	}
-	$extension_module_urls[] = add_query_arg( 'ver', EMBED_OPTIMIZER_VERSION, plugin_dir_url( __FILE__ ) . 'detect.js' );
+	$extension_module_urls[] = add_query_arg( 'ver', EMBED_OPTIMIZER_VERSION, plugin_dir_url( __FILE__ ) . sprintf( 'detect%s.js', wp_scripts_get_suffix() ) );
 	return $extension_module_urls;
 }
 
@@ -181,8 +181,9 @@ function embed_optimizer_update_markup( WP_HTML_Tag_Processor $html_processor, b
 		'script' => 'embed_optimizer_script',
 		'iframe' => 'embed_optimizer_iframe',
 	);
-	$trigger_error  = static function ( string $message ): void {
-		wp_trigger_error( __FUNCTION__, esc_html( $message ) );
+	$function_name  = __FUNCTION__;
+	$trigger_error  = static function ( string $message ) use ( $function_name ): void {
+		wp_trigger_error( $function_name, esc_html( $message ) );
 	};
 	try {
 		/*
@@ -325,7 +326,7 @@ function embed_optimizer_lazy_load_scripts(): void {
  * @since 0.2.0
  */
 function embed_optimizer_get_lazy_load_script(): string {
-	$script = file_get_contents( __DIR__ . '/lazy-load.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	$script = file_get_contents( __DIR__ . sprintf( '/lazy-load%s.js', wp_scripts_get_suffix() ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 
 	if ( false === $script ) {
 		return '';

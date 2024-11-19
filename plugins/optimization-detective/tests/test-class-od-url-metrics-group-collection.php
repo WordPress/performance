@@ -176,7 +176,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 *
 	 * @param int             $sample_size     Sample size.
 	 * @param int[]           $breakpoints     Breakpoints.
-	 * @param array<int, int> $viewport_widths Viewport widths mapped to the number of URL metrics to instantiate.
+	 * @param array<int, int> $viewport_widths Viewport widths mapped to the number of URL Metrics to instantiate.
 	 * @param array<int, int> $expected_counts Minimum viewport widths mapped to the expected counts in each group.
 	 *
 	 * @dataProvider data_provider_sample_size_and_breakpoints
@@ -214,7 +214,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		$breakpoints      = array( 400, 600 );
 		$group_collection = new OD_URL_Metric_Group_Collection( array(), $breakpoints, $sample_size, HOUR_IN_SECONDS );
 
-		// Populate the groups with stale URL metrics.
+		// Populate the groups with stale URL Metrics.
 		$viewport_widths = array( 300, 500, 700 );
 		$old_timestamp   = microtime( true ) - ( HOUR_IN_SECONDS + 1 );
 
@@ -233,7 +233,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 			}
 		}
 
-		// Try adding one URL metric for each breakpoint group.
+		// Try adding one URL Metric for each breakpoint group.
 		foreach ( $viewport_widths as $viewport_width ) {
 			$group_collection->add_url_metric( $this->get_sample_url_metric( array( 'viewport_width' => $viewport_width ) ) );
 		}
@@ -242,7 +242,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		$this->assertCount(
 			$max_possible_url_metrics_count,
 			$group_collection->get_flattened_url_metrics(),
-			'Expected the total count of URL metrics to not exceed the multiple of the sample size.'
+			'Expected the total count of URL Metrics to not exceed the multiple of the sample size.'
 		);
 		$new_count = 0;
 		foreach ( $group_collection->get_flattened_url_metrics() as $url_metric ) {
@@ -250,8 +250,8 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				++$new_count;
 			}
 		}
-		$this->assertGreaterThan( 0, $new_count, 'Expected there to be at least one new URL metric.' );
-		$this->assertSame( count( $viewport_widths ), $new_count, 'Expected the new URL metrics to all have been added.' );
+		$this->assertGreaterThan( 0, $new_count, 'Expected there to be at least one new URL Metric.' );
+		$this->assertSame( count( $viewport_widths ), $new_count, 'Expected the new URL Metrics to all have been added.' );
 	}
 
 	/**
@@ -731,7 +731,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_element_max_intersection_ratios
 	 *
-	 * @param array<string, mixed> $url_metrics URL metrics.
+	 * @param array<string, mixed> $url_metrics URL Metrics.
 	 * @param array<string, float> $expected    Expected.
 	 */
 	public function test_get_all_element_max_intersection_ratios( array $url_metrics, array $expected ): void {
@@ -908,7 +908,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_get_all_elements_positioned_in_any_initial_viewport
 	 *
-	 * @param array<string, mixed> $url_metrics URL metrics.
+	 * @param array<string, mixed> $url_metrics URL Metrics.
 	 * @param array<string, bool>  $expected    Expected.
 	 */
 	public function test_get_all_elements_positioned_in_any_initial_viewport( array $url_metrics, array $expected ): void {

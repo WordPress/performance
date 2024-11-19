@@ -10,6 +10,76 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
+	 * @return array<string, array{set_up: Closure, expected_is_query_object: bool, expected_query_object_class: string|null}>
+	 */
+	public function data_provider_od_get_cache_purge_post_id(): array {
+		return array(
+			'singular'  => array(
+				'set_up'                      => function () {
+					$post_id = self::factory()->post->create();
+					$this->go_to( get_permalink( $post_id ) );
+					return $post_id;
+				},
+				'expected_is_query_object'    => true,
+				'expected_query_object_class' => WP_Post::class,
+			),
+			'home'      => array(
+				'set_up'                      => function () {
+					$post_id = self::factory()->post->create();
+					$this->go_to( home_url() );
+					return $post_id;
+				},
+				'expected_is_query_object'    => false,
+				'expected_query_object_class' => null,
+			),
+			'category'  => array(
+				'set_up'                      => function () {
+					$cat_id = self::factory()->category->create();
+					$post_id = self::factory()->post->create();
+					wp_set_post_categories( $post_id, array( $cat_id ) );
+					$this->go_to( get_category_link( $cat_id ) );
+					return $post_id;
+				},
+				'expected_is_query_object'    => false,
+				'expected_query_object_class' => WP_Term::class,
+			),
+			'not_found' => array(
+				'set_up'                      => function () {
+					$this->go_to( '/this-page-does-not-exist' );
+					return null;
+				},
+				'expected_is_query_object'    => false,
+				'expected_query_object_class' => null,
+			),
+		);
+	}
+
+	/**
+	 * Tests od_get_cache_purge_post_id().
+	 *
+	 * @covers ::od_get_cache_purge_post_id
+	 *
+	 * @dataProvider data_provider_od_get_cache_purge_post_id
+	 */
+	public function test_od_get_cache_purge_post_id( Closure $set_up, bool $expected_is_query_object, ?string $expected_query_object_class ): void {
+		$expected = $set_up();
+		$this->assertSame( $expected, od_get_cache_purge_post_id() );
+		if ( $expected_is_query_object ) {
+			$this->assertSame( $expected, get_queried_object_id() );
+		} else {
+			$this->assertNotSame( $expected, get_queried_object_id() );
+		}
+
+		if ( null === $expected_query_object_class ) {
+			$this->assertNull( get_queried_object() );
+		} else {
+			$this->assertSame( $expected_query_object_class, get_class( get_queried_object() ) );
+		}
+	}
+
+	/**
+	 * Data provider.
+	 *
 	 * @return array<string, array{set_up: Closure, expected_exports: array<string, mixed>}>
 	 */
 	public function data_provider_od_get_detection_script(): array {
@@ -17,19 +87,12 @@ class Test_OD_Detection extends WP_UnitTestCase {
 			'unfiltered' => array(
 				'set_up'           => static function (): void {},
 				'expected_exports' => array(
-					'detectionTimeWindow' => 5000,
 					'storageLockTTL'      => MINUTE_IN_SECONDS,
 					'extensionModuleUrls' => array(),
 				),
 			),
 			'filtered'   => array(
 				'set_up'           => static function (): void {
-					add_filter(
-						'od_detection_time_window',
-						static function (): int {
-							return 2500;
-						}
-					);
 					add_filter(
 						'od_url_metric_storage_lock_ttl',
 						static function (): int {
@@ -45,7 +108,6 @@ class Test_OD_Detection extends WP_UnitTestCase {
 					);
 				},
 				'expected_exports' => array(
-					'detectionTimeWindow' => 2500,
 					'storageLockTTL'      => HOUR_IN_SECONDS,
 					'extensionModuleUrls' => array( home_url( '/my-extension.js', 'https' ) ),
 				),

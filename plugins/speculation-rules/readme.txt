@@ -7,26 +7,24 @@ License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, javascript, speculation rules, prerender, prefetch
 
-Enables browsers to speculatively prerender or prefetch pages when hovering over links.
+Enables browsers to speculatively prerender or prefetch pages to achieve near-instant loads based on user interaction.
 
 == Description ==
 
-This plugin adds support for the [Speculation Rules API](https://developer.mozilla.org/en-US/docs/Web/API/Speculation_Rules_API), which allows defining rules by which certain URLs are dynamically prefetched or prerendered based on user interaction.
+This plugin adds support for the [Speculation Rules API](https://developer.mozilla.org/en-US/docs/Web/API/Speculation_Rules_API), which allows defining rules by which certain URLs are dynamically prefetched or prerendered.
 
 See the [Speculation Rules WICG specification draft](https://wicg.github.io/nav-speculation/speculation-rules.html).
 
-By default, the plugin is configured to prerender WordPress frontend URLs when the user hovers over a relevant link. This can be customized via the "Speculative Loading" section under _Settings > Reading_.
+By default, the plugin is configured to prerender WordPress frontend URLs when the user interacts with a relevant link. This can be customized via the "Speculative Loading" section in the _Settings > Reading_ admin screen.
 
-A filter can be used to exclude certain URL paths from being eligible for prefetching and prerendering (see FAQ section). Alternatively, you can add the 'no-prerender' CSS class to any link (`<a>` tag) that should not be prerendered. See FAQ for more information.
+A filter can be used to exclude certain URL paths from being eligible for prefetching and prerendering (see FAQ section). Alternatively, you can add the `no-prerender` CSS class to any link (`<a>` tag) that should not be prerendered. See FAQ for more information.
 
 = Browser support =
 
-The Speculation Rules API is a new web API, and the functionality used by the plugin is supported in Chromium-based browsers such as Chrome, Edge, or Opera using version 121 or above. Other browsers such as Safari and Firefox will ignore the functionality with no ill effects but will not benefit from the speculative loading. Note that extensions may disable preloading by default (for example, uBlock Origin does this).
-
-Other browsers will not see any adverse effects, however the feature will not work for those clients.
+The Speculation Rules API is a new web API, and the functionality used by the plugin is supported in Chromium-based browsers such as Chrome, Edge, or Opera using version 121 or above. Other browsers such as Safari and Firefox will ignore the functionality with no ill effects; they will simply not benefit from the speculative loading. Note that certain browser extensions may disable preloading by default.
 
 * [Browser support for the Speculation Rules API in general](https://caniuse.com/mdn-html_elements_script_type_speculationrules)
-* [Information on document rules syntax support used by the plugin](https://developer.chrome.com/blog/chrome-121-beta#speculation_rules_api)
+* [Information on document rules syntax support used by the plugin](https://developer.chrome.com/docs/web-platform/prerender-pages)
 
 _This plugin was formerly known as Speculation Rules._
 
@@ -48,12 +46,11 @@ _This plugin was formerly known as Speculation Rules._
 
 = How can I prevent certain URLs from being prefetched and prerendered? =
 
-Not every URL can be reasonably prerendered. Prerendering static content is typically reliable, however prerendering interactive content, such as a logout URL, can lead to issues. For this reason, certain WordPress core URLs such as `/wp-login.php` and `/wp-admin/*` are excluded from prefetching and prerendering. Additionally, any URL generated with `wp_nonce_url()` (or which contain the `_wpnonce` query var) is also ignored. You can exclude additional URL patterns by using the `plsr_speculation_rules_href_exclude_paths` filter.
+Not every URL can be reasonably prerendered. Prerendering static content is typically reliable, however prerendering interactive content, such as a logout URL, can lead to issues. For this reason, certain WordPress core URLs such as `/wp-login.php` and `/wp-admin/*` are excluded from prefetching and prerendering. Additionally, any URLs generated with `wp_nonce_url()` (or which contains the `_wpnonce` query var) and `nofollow` links are also ignored. You can exclude additional URL patterns by using the `plsr_speculation_rules_href_exclude_paths` filter.
 
-This example would ensure that URLs like `https://example.com/cart/` or `https://example.com/cart/foo` would be excluded from prefetching and prerendering.
+The following example ensures that URLs like `https://example.com/cart/` or `https://example.com/cart/foo` are excluded from prefetching and prerendering:
 `
 <?php
-
 add_filter(
 	'plsr_speculation_rules_href_exclude_paths',
 	function ( array $exclude_paths ): array {
@@ -67,10 +64,9 @@ Keep in mind that sometimes it may be useful to exclude a URL from prerendering 
 
 For this purpose, the `plsr_speculation_rules_href_exclude_paths` filter receives the current mode (either "prefetch" or "prerender") to provide conditional exclusions.
 
-The following example would ensure that URLs like `https://example.com/products/...` cannot be prerendered, while still allowing them to be prefetched.
+The following example ensures that URLs like `https://example.com/products/...` cannot be prerendered, while still allowing them to be prefetched:
 `
 <?php
-
 add_filter(
 	'plsr_speculation_rules_href_exclude_paths',
 	function ( array $exclude_paths, string $mode ): array {
@@ -90,11 +86,11 @@ As mentioned above, adding the `no-prerender` CSS class to a link will prevent i
 
 Prerendering can affect analytics and personalization.
 
-For client-side JavaScript, is recommended to delay these until the page clicks and some solutions (like Google Analytics) already do this automatically for prerender. See [Impact on Analytics](https://developer.chrome.com/docs/web-platform/prerender-pages#impact-on-analytics). Additionally, cross-origin iframes are not loaded until activation which can further avoid issues here.
+For client-side JavaScript, is recommended to delay these until the prerender is activated (for example by clicking on the link). Some solutions (like Google Analytics) already do this automatically, see [Impact on Analytics](https://developer.chrome.com/docs/web-platform/prerender-pages#impact-on-analytics). Additionally, cross-origin iframes are not loaded until activation which can further avoid issues here.
 
-Speculating on hover (moderate) increases the chance the page will be loaded, over preloading without this signal, and thus reduces the risk here. Alternatively, the plugin offers to only speculate on mouse/pointer down (conservative) which further reduces the risk here and is an option for sites which are concerned about this, at the cost of having less of a lead time and so less of a performance gain.
+Speculating with the default `moderate` eagerness decreases the risk that the prerendered page will not be visited by the user and therefore will avoid any side effects of loading such a link in advance. In contrast, `eager` speculation increases the risk that prerendered pages may not be loaded. Alternatively, the plugin offers to only speculate on mouse/pointer down (conservative) which reduces the risk even further and is an option for sites which are concerned about this, at the cost of having less of a lead time and so less of a performance gain.
 
-A prerendered page is linked to the page that prerenders it, so personalisation may already be known by this point and changes (e.g. browsing other products, or logging in/out) may require a new page load, and hence a new prerender anyway, which will take these into account. But it definitely is something to be aware of and test!
+A prerendered page is linked to the page that prerenders it, so personalisation may already be known by this point and changes (e.g. browsing other products, or logging in/out) often require a new page load, and hence a new prerender, which will then take these into account. But it definitely is something to be aware of and test! Prerendered pages can be canceled by removing the speculation rules `<script>` element from the page using standard JavaScript DOM APIs should this be needed when state changes without a new page load.
 
 = Where can I submit my plugin feedback? =
 

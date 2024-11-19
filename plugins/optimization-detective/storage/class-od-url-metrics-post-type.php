@@ -51,7 +51,7 @@ class OD_URL_Metrics_Post_Type {
 	}
 
 	/**
-	 * Registers post type for URL metrics storage.
+	 * Registers post type for URL Metrics storage.
 	 *
 	 * This the configuration for this post type is similar to the oembed_cache in core.
 	 *
@@ -78,11 +78,11 @@ class OD_URL_Metrics_Post_Type {
 	}
 
 	/**
-	 * Gets URL metrics post.
+	 * Gets URL Metrics post.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param string $slug URL metrics slug.
+	 * @param string $slug URL Metrics slug.
 	 * @return WP_Post|null Post object if exists.
 	 */
 	public static function get_post( string $slug ): ?WP_Post {
@@ -109,16 +109,20 @@ class OD_URL_Metrics_Post_Type {
 	}
 
 	/**
-	 * Parses post content in URL metrics post.
+	 * Parses post content in URL Metrics post.
 	 *
 	 * @since 0.1.0
 	 *
-	 * @param WP_Post $post URL metrics post.
-	 * @return OD_URL_Metric[] URL metrics.
+	 * @param WP_Post $post URL Metrics post.
+	 * @return OD_URL_Metric[] URL Metrics.
 	 */
 	public static function get_url_metrics_from_post( WP_Post $post ): array {
 		$this_function = __METHOD__;
 		$trigger_error = static function ( string $message, int $error_level = E_USER_NOTICE ) use ( $this_function ): void {
+			// Default to E_USER_NOTICE.
+			if ( ! in_array( $error_level, array( E_USER_NOTICE, E_USER_WARNING, E_USER_ERROR, E_USER_DEPRECATED ), true ) ) {
+				$error_level = E_USER_NOTICE;
+			}
 			wp_trigger_error( $this_function, esc_html( $message ), $error_level );
 		};
 
@@ -171,7 +175,7 @@ class OD_URL_Metrics_Post_Type {
 									$e->getMessage() . $suffix
 								),
 								// This is not a warning because schema changes will happen, and so it is expected
-								// that this will result in existing URL metrics being invalidated.
+								// that this will result in existing URL Metrics being invalidated.
 								E_USER_NOTICE
 							);
 
@@ -185,13 +189,13 @@ class OD_URL_Metrics_Post_Type {
 	}
 
 	/**
-	 * Stores URL metric by merging it with the other URL metrics which share the same normalized query vars.
+	 * Stores URL Metric by merging it with the other URL Metrics which share the same normalized query vars.
 	 *
 	 * @since 0.1.0
 	 * @todo There is duplicate logic here with od_handle_rest_request().
 	 *
 	 * @param string        $slug           Slug (hash of normalized query vars).
-	 * @param OD_URL_Metric $new_url_metric New URL metric.
+	 * @param OD_URL_Metric $new_url_metric New URL Metric.
 	 * @return int|WP_Error Post ID or WP_Error otherwise.
 	 */
 	public static function store_url_metric( string $slug, OD_URL_Metric $new_url_metric ) {

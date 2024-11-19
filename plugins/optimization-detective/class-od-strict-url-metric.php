@@ -14,8 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Representation of the measurements taken from a single client's visit to a specific URL without additionalProperties allowed.
  *
- * This is used exclusively in the REST API endpoint for capturing new URL metrics to prevent invalid additional data from being
- * submitted in the request. For URL metrics which have been stored the looser OD_URL_Metric class is used instead.
+ * This is used exclusively in the REST API endpoint for capturing new URL Metrics to prevent invalid additional data from being
+ * submitted in the request. For URL Metrics which have been stored the looser OD_URL_Metric class is used instead.
  *
  * @since 0.6.0
  * @access private

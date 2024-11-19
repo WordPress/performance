@@ -625,6 +625,8 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @since 0.4.0
 	 *
+	 * @phpstan-param callable-string $function_name
+	 *
 	 * @param string $function_name Function name.
 	 * @param string $message       Warning message.
 	 */

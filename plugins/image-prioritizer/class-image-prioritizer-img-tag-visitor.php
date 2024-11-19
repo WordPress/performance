@@ -24,7 +24,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	 *
 	 * @param OD_Tag_Visitor_Context $context Tag visitor context.
 	 *
-	 * @return bool Whether the tag should be tracked in URL metrics.
+	 * @return bool Whether the tag should be tracked in URL Metrics.
 	 */
 	public function __invoke( OD_Tag_Visitor_Context $context ): bool {
 		$processor = $context->processor;
@@ -61,7 +61,7 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			 * At this point, the element is not the shared LCP across all viewport groups. Nevertheless, server-side
 			 * heuristics have added fetchpriority=high to the element, but this is not warranted either due to a lack
 			 * of data or because the LCP element is not common across all viewport groups. Since we have collected at
-			 * least some URL metrics (per is_any_group_populated), further below a fetchpriority=high preload link will
+			 * least some URL Metrics (per is_any_group_populated), further below a fetchpriority=high preload link will
 			 * be added for the viewport(s) for which this is actually the LCP element. Some viewport groups may never
 			 * get populated due to a lack of traffic (e.g. from tablets or phablets), so it is important to remove
 			 * fetchpriority=high in such case to prevent server-side heuristics from prioritizing loading the image
@@ -71,10 +71,10 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 		}
 
 		/*
-		 * Do not do any lazy-loading if the mobile and desktop viewport groups lack URL metrics. This is important
+		 * Do not do any lazy-loading if the mobile and desktop viewport groups lack URL Metrics. This is important
 		 * because if there is an IMG in the initial viewport on desktop but not mobile, if then there are only URL
 		 * metrics collected for mobile then the IMG will get lazy-loaded which is good for mobile but for desktop
-		 * it will hurt performance. So this is why it is important to have URL metrics collected for both desktop and
+		 * it will hurt performance. So this is why it is important to have URL Metrics collected for both desktop and
 		 * mobile to verify whether maximum intersectionRatio is accounting for both screen sizes.
 		 */
 		$element_max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $xpath );

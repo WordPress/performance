@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   3.5.1
+Stable tag:   3.6.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -70,6 +70,18 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 3.6.0 =
+
+**Enhancements**
+
+* Use AJAX for activating features / plugins in Performance Lab. ([1646](https://github.com/WordPress/performance/pull/1646))
+* Introduce AVIF header health check. ([1612](https://github.com/WordPress/performance/pull/1612))
+* Install and activate Optimization Detective when the Embed Optimizer feature is activated from the Performance screen. ([1644](https://github.com/WordPress/performance/pull/1644))
+
+**Bug Fixes**
+
+* Fix uses of 'Plugin not found' string. ([1651](https://github.com/WordPress/performance/pull/1651))
 
 = 3.5.1 =
 

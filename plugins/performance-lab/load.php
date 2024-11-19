@@ -5,7 +5,7 @@
  * Description: Performance plugin from the WordPress Performance Team, which is a collection of standalone performance features.
  * Requires at least: 6.5
  * Requires PHP: 7.2
- * Version: 3.5.1
+ * Version: 3.6.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-define( 'PERFLAB_VERSION', '3.5.1' );
+define( 'PERFLAB_VERSION', '3.6.0' );
 define( 'PERFLAB_MAIN_FILE', __FILE__ );
 define( 'PERFLAB_PLUGIN_DIR_PATH', plugin_dir_path( PERFLAB_MAIN_FILE ) );
 define( 'PERFLAB_SCREEN', 'performance-lab' );
@@ -339,3 +339,6 @@ if ( is_admin() ) {
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/server-timing.php';
 	require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/plugins.php';
 }
+
+// Load REST API.
+require_once PERFLAB_PLUGIN_DIR_PATH . 'includes/admin/rest-api.php';

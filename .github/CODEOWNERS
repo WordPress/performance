@@ -7,6 +7,7 @@
 
 # Performance Lab Plugin: Individual Site Health checks
 /plugins/performance-lab/includes/site-health/avif-support              @adamsilverstein
+/plugins/performance-lab/includes/site-health/avif-headers              @adamsilverstein
 /plugins/performance-lab/includes/site-health/webp-support              @adamsilverstein
 /plugins/performance-lab/includes/site-health/audit-autoloaded-options  @manuelRod @felixarntz @mukeshpanchal27
 /plugins/performance-lab/includes/site-health/audit-enqueued-assets     @manuelRod

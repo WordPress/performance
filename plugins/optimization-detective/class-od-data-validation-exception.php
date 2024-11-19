@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Exception thrown when failing to validate URL metrics data.
+ * Exception thrown when failing to validate URL Metrics data.
  *
  * @since 0.1.0
  * @access private

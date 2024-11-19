@@ -29,13 +29,13 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 */
 	public function data_provider_to_test_rest_request_good_params(): array {
 		return array(
-			'not_extended' => array(
-				'set_up' => function () {
+			'not_extended'             => array(
+				'set_up' => function (): array {
 					return $this->get_valid_params();
 				},
 			),
-			'extended'     => array(
-				'set_up' => function () {
+			'extended'                 => array(
+				'set_up' => function (): array {
 					add_filter(
 						'od_url_metric_schema_root_additional_properties',
 						static function ( array $properties ): array {
@@ -51,6 +51,16 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 					return $params;
 				},
 			),
+			'with_cache_purge_post_id' => array(
+				'set_up' => function (): array {
+					$params = $this->get_valid_params();
+					$params['cache_purge_post_id'] = self::factory()->post->create();
+					$params['url'] = get_permalink( $params['cache_purge_post_id'] );
+					$params['slug'] = od_get_url_metrics_slug( array( 'p' => $params['cache_purge_post_id'] ) );
+					$params['hmac'] = od_get_url_metrics_storage_hmac( $params['slug'], $params['url'], $params['cache_purge_post_id'] );
+					return $params;
+				},
+			),
 		);
 	}
 
@@ -61,20 +71,28 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
+	 * @covers ::od_trigger_page_cache_invalidation
 	 */
 	public function test_rest_request_good_params( Closure $set_up ): void {
+		$stored_context = null;
 		add_action(
 			'od_url_metric_stored',
-			function ( OD_URL_Metric_Store_Request_Context $context ): void {
+			function ( OD_URL_Metric_Store_Request_Context $context ) use ( &$stored_context ): void {
 				$this->assertInstanceOf( OD_URL_Metric_Group_Collection::class, $context->url_metric_group_collection );
 				$this->assertInstanceOf( OD_URL_Metric_Group::class, $context->url_metric_group );
 				$this->assertInstanceOf( OD_URL_Metric::class, $context->url_metric );
 				$this->assertInstanceOf( WP_REST_Request::class, $context->request );
 				$this->assertIsInt( $context->post_id );
+				$stored_context = $context;
 			}
 		);
 
 		$valid_params = $set_up();
+
+		if ( isset( $valid_params['cache_purge_post_id'] ) ) {
+			$this->assertFalse( wp_next_scheduled( 'od_trigger_page_cache_invalidation', array( $valid_params['cache_purge_post_id'] ) ) );
+		}
+
 		$this->assertCount( 0, get_posts( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) ) );
 		$request  = $this->create_request( $valid_params );
 		$response = rest_get_server()->dispatch( $request );
@@ -88,17 +106,29 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertInstanceOf( WP_Post::class, $post );
 
 		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
-		$this->assertCount( 1, $url_metrics, 'Expected number of URL metrics stored.' );
+		$this->assertCount( 1, $url_metrics, 'Expected number of URL Metrics stored.' );
 		$this->assertSame( $valid_params['elements'], $this->get_array_json_data( $url_metrics[0]->get( 'elements' ) ) );
 		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
 
 		$expected_data = $valid_params;
-		unset( $expected_data['nonce'], $expected_data['slug'] );
+		unset( $expected_data['hmac'], $expected_data['slug'], $expected_data['cache_purge_post_id'] );
 		$this->assertSame(
 			$expected_data,
 			wp_array_slice_assoc( $url_metrics[0]->jsonSerialize(), array_keys( $expected_data ) )
 		);
 		$this->assertSame( 1, did_action( 'od_url_metric_stored' ) );
+
+		$this->assertInstanceOf( OD_URL_Metric_Store_Request_Context::class, $stored_context );
+
+		// Now check that od_trigger_page_cache_invalidation() cleaned caches as expected.
+		$this->assertSame( $url_metrics[0]->jsonSerialize(), $stored_context->url_metric->jsonSerialize() );
+		$cache_purge_post_id = $stored_context->request->get_param( 'cache_purge_post_id' );
+
+		if ( isset( $valid_params['cache_purge_post_id'] ) ) {
+			$scheduled = wp_next_scheduled( 'od_trigger_page_cache_invalidation', array( $valid_params['cache_purge_post_id'] ) );
+			$this->assertIsInt( $scheduled );
+			$this->assertGreaterThan( time(), $scheduled );
+		}
 	}
 
 	/**
@@ -122,11 +152,14 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 				'bad_slug'                                 => array(
 					'slug' => '<script>document.write("evil")</script>',
 				),
-				'bad_nonce'                                => array(
-					'nonce' => 'not even a hash',
+				'bad_hmac'                                 => array(
+					'hmac' => 'not even a hash',
 				),
-				'invalid_nonce'                            => array(
-					'nonce' => od_get_url_metrics_storage_nonce( od_get_url_metrics_slug( array( 'different' => 'query vars' ) ), home_url( '/' ) ),
+				'invalid_hmac'                             => array(
+					'hmac' => od_get_url_metrics_storage_hmac( od_get_url_metrics_slug( array( 'different' => 'query vars' ) ), home_url( '/' ) ),
+				),
+				'invalid_hmac_with_queried_object'         => array(
+					'hmac' => od_get_url_metrics_storage_hmac( od_get_url_metrics_slug( array() ), home_url( '/' ), 1 ),
 				),
 				'invalid_viewport_type'                    => array(
 					'viewport' => '640x480',
@@ -241,6 +274,58 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test sending data when no Origin request header is sent.
+	 *
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
+	 * @covers ::od_is_allowed_http_origin
+	 */
+	public function test_rest_request_without_origin(): void {
+		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params( $this->get_valid_params() ); // Valid and yet set as POST params and not as JSON body, so this is why it fails.
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 403, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 'rest_cross_origin_forbidden', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
+	}
+
+	/**
+	 * Test sending data when a cross-domain Origin request header is sent.
+	 *
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
+	 * @covers ::od_is_allowed_http_origin
+	 */
+	public function test_rest_request_cross_origin(): void {
+		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_header( 'Origin', 'https://cross-origin.example.com' );
+		$request->set_body_params( $this->get_valid_params() ); // Valid and yet set as POST params and not as JSON body, so this is why it fails.
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 403, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 'rest_cross_origin_forbidden', $response->get_data()['code'], 'Response: ' . wp_json_encode( $response ) );
+		$this->assertSame( 0, did_action( 'od_url_metric_stored' ) );
+	}
+
+	/**
+	 * Test REST API request when 'home_url' is filtered.
+	 *
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
+	 * @covers ::od_is_allowed_http_origin
+	 */
+	public function test_rest_request_origin_when_home_url_filtered(): void {
+		$request = $this->create_request( $this->get_valid_params() );
+		add_filter(
+			'home_url',
+			static function ( string $url ): string {
+				return trailingslashit( $url ) . 'home/en/?foo=bar#baz';
+			}
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+	}
+
+	/**
 	 * Test not sending JSON data.
 	 *
 	 * @covers ::od_register_endpoint
@@ -248,6 +333,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 */
 	public function test_rest_request_not_json_data(): void {
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_header( 'Origin', home_url() );
 		$request->set_body_params( $this->get_valid_params() ); // Valid and yet set as POST params and not as JSON body, so this is why it fails.
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertSame( 400, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
@@ -417,7 +503,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	public function test_rest_request_over_populate_wider_viewport_group(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
 
-		// First establish a single breakpoint, so there are two groups of URL metrics
+		// First establish a single breakpoint, so there are two groups of URL Metrics
 		// with viewport widths 0-480 and >481.
 		$breakpoint_width = 480;
 		add_filter(
@@ -456,7 +542,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertCount( 0, $url_metric_groups[0], 'Expected first group to be empty.' );
 		$this->assertCount( $sample_size, end( $url_metric_groups ), 'Expected last group to be fully populated.' );
 
-		// Now attempt to store one more URL metric for the wider viewport group.
+		// Now attempt to store one more URL Metric for the wider viewport group.
 		// This should fail because the group is already fully populated to the sample size.
 		$request  = $this->create_request( $wider_viewport_params );
 		$response = rest_get_server()->dispatch( $request );
@@ -472,7 +558,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	public function test_rest_request_over_populate_narrower_viewport_group(): void {
 		add_filter( 'od_url_metric_storage_lock_ttl', '__return_zero' );
 
-		// First establish a single breakpoint, so there are two groups of URL metrics
+		// First establish a single breakpoint, so there are two groups of URL Metrics
 		// with viewport widths 0-480 and >481.
 		$breakpoint_width = 480;
 		add_filter(
@@ -490,7 +576,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			$narrower_viewport_params
 		);
 
-		// Now attempt to store one more URL metric for the narrower viewport group.
+		// Now attempt to store one more URL Metric for the narrower viewport group.
 		// This should fail because the group is already fully populated to the sample size.
 		$request  = $this->create_request( $narrower_viewport_params );
 		$response = rest_get_server()->dispatch( $request );
@@ -498,10 +584,65 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Populate URL metrics.
+	 * Test od_trigger_page_cache_invalidation().
 	 *
-	 * @param int                  $count  Count of URL metrics to populate.
-	 * @param array<string, mixed> $params Params for URL metric.
+	 * @covers ::od_trigger_page_cache_invalidation
+	 */
+	public function test_od_trigger_page_cache_invalidation(): void {
+		$cache_purge_post_id = self::factory()->post->create();
+
+		$all_hook_callback_args = array();
+		add_action(
+			'all',
+			static function ( string $hook, ...$args ) use ( &$all_hook_callback_args ): void {
+				$all_hook_callback_args[ $hook ][] = $args;
+			},
+			10,
+			PHP_INT_MAX
+		);
+
+		od_trigger_page_cache_invalidation( $cache_purge_post_id );
+
+		$this->assertArrayHasKey( 'clean_post_cache', $all_hook_callback_args );
+		$found = false;
+		foreach ( $all_hook_callback_args['clean_post_cache'] as $args ) {
+			if ( $args[0] === $cache_purge_post_id ) {
+				$this->assertInstanceOf( WP_Post::class, $args[1] );
+				$this->assertSame( $cache_purge_post_id, $args[1]->ID );
+				$found = true;
+			}
+		}
+		$this->assertTrue( $found, 'Expected clean_post_cache to have been fired for the post queried object.' );
+
+		$this->assertArrayHasKey( 'transition_post_status', $all_hook_callback_args );
+		$found = false;
+		foreach ( $all_hook_callback_args['transition_post_status'] as $args ) {
+			$this->assertInstanceOf( WP_Post::class, $args[2] );
+			if ( $args[2]->ID === $cache_purge_post_id ) {
+				$this->assertSame( $args[2]->post_status, $args[0] );
+				$this->assertSame( $args[2]->post_status, $args[1] );
+				$found = true;
+			}
+		}
+		$this->assertTrue( $found, 'Expected transition_post_status to have been fired for the post queried object.' );
+
+		$this->assertArrayHasKey( 'save_post', $all_hook_callback_args );
+		$found = false;
+		foreach ( $all_hook_callback_args['save_post'] as $args ) {
+			if ( $args[0] === $cache_purge_post_id ) {
+				$this->assertInstanceOf( WP_Post::class, $args[1] );
+				$this->assertSame( $cache_purge_post_id, $args[1]->ID );
+				$found = true;
+			}
+		}
+		$this->assertTrue( $found, 'Expected save_post to have been fired for the post queried object.' );
+	}
+
+	/**
+	 * Populate URL Metrics.
+	 *
+	 * @param int                  $count  Count of URL Metrics to populate.
+	 * @param array<string, mixed> $params Params for URL Metric.
 	 */
 	private function populate_url_metrics( int $count, array $params ): void {
 		for ( $i = 0; $i < $count; $i++ ) {
@@ -530,8 +671,8 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		unset( $data['timestamp'], $data['uuid'] ); // Since these are readonly.
 		$data = array_merge(
 			array(
-				'slug'  => $slug,
-				'nonce' => od_get_url_metrics_storage_nonce( $slug, $data['url'] ),
+				'slug' => $slug,
+				'hmac' => od_get_url_metrics_storage_hmac( $slug, $data['url'] ),
 			),
 			$data
 		);
@@ -566,7 +707,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Creates a request to store a URL metric.
+	 * Creates a request to store a URL Metric.
 	 *
 	 * @param array<string, mixed> $params Params.
 	 * @return WP_REST_Request<array<string, mixed>> Request.
@@ -579,8 +720,9 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		 */
 		$request = new WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_query_params( wp_array_slice_assoc( $params, array( 'nonce', 'slug' ) ) );
-		unset( $params['nonce'], $params['slug'] );
+		$request->set_query_params( wp_array_slice_assoc( $params, array( 'hmac', 'slug', 'cache_purge_post_id' ) ) );
+		$request->set_header( 'Origin', home_url() );
+		unset( $params['hmac'], $params['slug'], $params['cache_purge_post_id'] );
 		$request->set_body( wp_json_encode( $params ) );
 		return $request;
 	}
