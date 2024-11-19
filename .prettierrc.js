@@ -4,13 +4,4 @@ const wpPrettierConfig = require( '@wordpress/prettier-config' );
 
 module.exports = {
 	...wpPrettierConfig,
-	overrides: [
-		{
-			files: '*.yml',
-			options: {
-				useTabs: false,
-				tabWidth: 2,
-			},
-		},
-	],
 };
