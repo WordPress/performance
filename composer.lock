@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "99a4ff17fc479a208dfeba7f135911b8",
+    "content-hash": "6743d9445c398a38701df2d3af11dfa0",
     "packages": [],
     "packages-dev": [
         {
@@ -2210,6 +2210,57 @@
             "time": "2024-11-16T12:02:36+00:00"
         },
         {
+            "name": "swissspidy/phpstan-no-private",
+            "version": "v0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/swissspidy/phpstan-no-private.git",
+                "reference": "f7a1890e350c8d8bf26370426a971d7490ae4245"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/swissspidy/phpstan-no-private/zipball/f7a1890e350c8d8bf26370426a971d7490ae4245",
+                "reference": "f7a1890e350c8d8bf26370426a971d7490ae4245",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2 || ^8.0",
+                "phpstan/phpstan": "^1.10.3"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^1.0.0",
+                "php-parallel-lint/php-parallel-lint": "^1.2",
+                "phpstan/phpstan-php-parser": "^1.1",
+                "phpstan/phpstan-phpunit": "^1.0",
+                "phpunit/phpunit": "^9.5",
+                "slevomat/coding-standard": "^8.8.0",
+                "squizlabs/php_codesniffer": "^3.5.3"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "rules.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Swissspidy\\PHPStan\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PHPStan rules for detecting usage of pseudo-private functions, classes, and methods.",
+            "support": {
+                "issues": "https://github.com/swissspidy/phpstan-no-private/issues",
+                "source": "https://github.com/swissspidy/phpstan-no-private/tree/v0.2.1"
+            },
+            "time": "2024-06-05T10:03:17+00:00"
+        },
+        {
             "name": "symfony/polyfill-php73",
             "version": "v1.30.0",
             "source": {
@@ -2578,14 +2629,14 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "^7.2 || ^8.0",
         "ext-json": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "platform-overrides": {
         "php": "7.2"
     },
