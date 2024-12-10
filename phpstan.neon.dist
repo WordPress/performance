@@ -67,6 +67,15 @@ parameters:
 			identifier: staticMethod.dynamicCall
 			path: */tests/*
 		-
+			identifier: no.private.class
+			path: */tests/*
+		-
+			identifier: no.private.method
+			path: */tests/*
+		-
+			identifier: no.private.function
+			path: */tests/*
+		-
 			# TODO: Remove this to fix https://github.com/WordPress/performance/issues/1219
 			identifier: empty.notAllowed
 			paths:
