@@ -158,6 +158,7 @@ function webp_uploads_create_sources_property( array $metadata, int $attachment_
 
 			// Replace the attached file with the custom MIME type version.
 			if ( false !== $original_image ) {
+				// @phpstan-ignore no.private.function
 				$metadata = _wp_image_meta_replace_original( $saved_data, $original_image, $metadata, $attachment_id );
 			}
 

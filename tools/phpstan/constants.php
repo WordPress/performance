@@ -17,3 +17,14 @@ define( 'OPTIMIZATION_DETECTIVE_MAIN_FILE', 'plugins/optimization-detective/load
 define( 'IMAGE_PRIORITIZER_VERSION', '0.0.0' );
 
 define( 'EMBED_OPTIMIZER_VERSION', '0.0.0' );
+
+define( 'WEBP_UPLOADS_VERSION', '0.0.0' );
+define( 'WEBP_UPLOADS_MAIN_FILE', '' );
+
+define( 'PERFLAB_VERSION', '0.0.0' );
+define( 'PERFLAB_MAIN_FILE', '' );
+define( 'PERFLAB_PLUGIN_DIR_PATH', '' );
+define( 'PERFLAB_SCREEN', '' );
+
+define( 'PERFLAB_OBJECT_CACHE_DROPIN_VERSION', false );
+define( 'PERFLAB_OBJECT_CACHE_DROPIN_LATEST_VERSION', 99999 );

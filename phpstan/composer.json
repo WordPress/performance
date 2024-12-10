@@ -1,0 +1,20 @@
+{
+  "require-dev": {
+    "phpstan/extension-installer": "^1.4.3",
+    "phpstan/phpstan": "^2.0.3",
+    "phpstan/phpstan-deprecation-rules": "^2.0.1",
+    "phpstan/phpstan-phpunit": "^2.0.1",
+    "szepeviktor/phpstan-wordpress": "^2.0.1",
+    "phpstan/php-8-stubs": "^0.4.9",
+    "phpstan/phpstan-strict-rules": "^2.0.0",
+    "swissspidy/phpstan-no-private": "^1.0.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "phpstan/extension-installer": true
+    },
+    "platform": {
+      "php": "8.2"
+    }
+  }
+}
