@@ -36,7 +36,7 @@ on:
 jobs:
   php-test-plugins:
     name: "PHP ${{ matrix.php }} / WP ${{ matrix.wp }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
