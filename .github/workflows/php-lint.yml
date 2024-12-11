@@ -30,7 +30,7 @@ on:
 jobs:
   php-lint:
     name: PHP
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: styfle/cancel-workflow-action@0.12.1
