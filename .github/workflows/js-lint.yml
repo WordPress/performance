@@ -34,7 +34,7 @@ on:
 jobs:
   js-lint:
     name: JS Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 20
     steps:
       - uses: styfle/cancel-workflow-action@0.12.1
