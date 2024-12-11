@@ -21,7 +21,7 @@ permissions: {}
 jobs:
   pre-run:
     name: Pre-run
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.plugins }}
     steps:
@@ -49,7 +49,7 @@ jobs:
   deploy:
     name: "Deploy Plugin: ${{ matrix.plugin }}"
     needs: pre-run
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       actions: write
       deployments: write
@@ -160,7 +160,7 @@ jobs:
   release-assets:
     name: Add release assets
     needs: [ pre-run, deploy ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       actions: read
       contents: write
