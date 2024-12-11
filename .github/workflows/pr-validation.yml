@@ -20,13 +20,13 @@ env:
 jobs:
   check-type-label:
     name: Check [Type] Label
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - if: contains( env.LABELS, '[Type]' ) == false
         run: exit 1
   check-milestone:
     name: Check Milestone
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - if: github.event.pull_request.milestone == null && contains( env.LABELS, 'no milestone' ) == false
         run: exit 1
