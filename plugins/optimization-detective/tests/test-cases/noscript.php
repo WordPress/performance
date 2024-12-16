@@ -22,7 +22,7 @@ return array(
 			</head>
 			<body>
 				<noscript>
-					<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::NOSCRIPT]/*[1][self::IMG]" src="https://example.com/pixel.gif" alt="" width="1" height="1">
+					<img src="https://example.com/pixel.gif" alt="" width="1" height="1">
 				</noscript>
 				<script type="module">/* import detect ... */</script>
 			</body>

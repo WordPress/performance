@@ -77,7 +77,7 @@ return array(
 				<!-- Example with an adjoining NOSCRIPT > IMG tag which should be excluded from URL Metrics. -->
 				<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="https://example.com/bar.jpg" data-srcset="https://example.com/bar-large.jpg 1000w, https://example.com/bar-large.jpg 1000w" sizes="(max-width: 556px) 100vw, 556px" alt="Bar" class="attachment-large size-large wp-image-2 has-transparency lazyload" width="500" height="300">
 				<noscript>
-					<img data-od-unknown-tag data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[3][self::NOSCRIPT]/*[1][self::IMG]" src="https://example.com/bar.jpg" srcset="https://example.com/bar-large.jpg 1000w, https://example.com/bar-large.jpg 1000w" sizes="(max-width: 556px) 100vw, 556px" alt="Bar" class="attachment-large size-large wp-image-2 has-transparency lazyload" width="500" height="300">
+					<img src="https://example.com/bar.jpg" srcset="https://example.com/bar-large.jpg 1000w, https://example.com/bar-large.jpg 1000w" sizes="(max-width: 556px) 100vw, 556px" alt="Bar" class="attachment-large size-large wp-image-2 has-transparency lazyload" width="500" height="300">
 				</noscript>
 				<script type="module">/* import detect ... */</script>
 			</body>

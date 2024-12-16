@@ -227,6 +227,11 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
 	do {
+		// Never process anything inside NOSCRIPT since it will never show up in the DOM when scripting is enabled, and thus it can never be detected nor measured.
+		if ( in_array( 'NOSCRIPT', $processor->get_breadcrumbs(), true ) ) {
+			continue;
+		}
+
 		$tracked_in_url_metrics = false;
 		$processor->set_bookmark( $current_tag_bookmark ); // TODO: Should we break if this returns false?
 
