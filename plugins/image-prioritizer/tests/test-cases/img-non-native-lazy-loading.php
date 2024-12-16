@@ -1,28 +1,14 @@
 <?php
 return array(
-	'set_up'   => static function ( Test_Image_Prioritizer_Helper $test_case ): void {
-		$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
+	'set_up'   => static function (): void {},
 
-		// Populate one URL Metric so that none of the IMG elements are unknown.
-		OD_URL_Metrics_Post_Type::store_url_metric(
-			$slug,
-			$test_case->get_sample_url_metric(
-				array(
-					'viewport_width' => 1000,
-					'elements'       => array(
-						array(
-							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-							'isLCP' => true,
-						),
-						array(
-							'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
-							'isLCP' => false,
-						),
-					),
-				)
-			)
-		);
-	},
+	/*
+	 * Example 1 comes from Avada's Fusion_Images lazy images which replaces the srcset attribute with data-srcset but
+	 * which leaves the src attribute as-is.
+	 *
+	 * Example 2 comes from Speed Optimizer v7.7.2 by Site Ground which uses lazysizes v5.3.1.
+	 * See <https://plugins.trac.wordpress.org/browser/sg-cachepress/tags/7.7.2/core/Lazy_Load/Lazy_Load_Images.php>.
+	 */
 	'buffer'   => '
 		<html lang="en">
 			<head>
@@ -31,7 +17,7 @@ return array(
 				<script>/* custom lazy-loading */</script>
 			</head>
 			<body>
-				<!-- Example seen in the wild which caused a preload link to be added with a data: URL in the imagesrcset attribute. -->
+				<!-- Example 1 -->
 				<img
 					src="https://example.com/foo.webp"
 					data-orig-src="https://example.com/foo.webp"
@@ -44,7 +30,21 @@ return array(
 					data-orig-sizes="(max-width: 767px) 100vw, 1920px"
 				>
 
-				<!-- Example with an adjoining NOSCRIPT > IMG tag which should be excluded from URL Metrics. -->
+				<!-- Example 1 extended to PICTURE, where none of these should be tracked in URL Metrics -->
+				<picture>
+					<source type="image/avif" srcset="https://example.com/foo-300x225.avif 300w, https://example.com/foo-1024x768.avif 1024w, https://example.com/foo-768x576.avif 768w, https://example.com/foo-1536x1152.avif 1536w, https://example.com/foo-2048x1536.avif 2048w" sizes="(max-width: 600px) 480px, 800px">
+					<img class="lazyload" width="1200" height="800" src="https://example.com/foo.avif" alt="Foo" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="(max-width: 600px) 480px, 800px">
+				</picture>
+				<picture>
+					<source type="image/avif" srcset="https://example.com/foo-300x225.avif 300w, https://example.com/foo-1024x768.avif 1024w, https://example.com/foo-768x576.avif 768w, https://example.com/foo-1536x1152.avif 1536w, https://example.com/foo-2048x1536.avif 2048w" sizes="(max-width: 600px) 480px, 800px">
+					<img class="lazyload" width="1200" height="800" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Foo">
+				</picture>
+				<picture>
+					<source type="image/avif" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="(max-width: 600px) 480px, 800px">
+					<img class="lazyload" width="1200" height="800" src="https://example.com/foo.avif" alt="Foo">
+				</picture>
+
+				<!-- Example 2 -->
 				<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="https://example.com/bar.jpg" data-srcset="https://example.com/bar-large.jpg 1000w, https://example.com/bar-large.jpg 1000w" sizes="(max-width: 556px) 100vw, 556px" alt="Bar" class="attachment-large size-large wp-image-2 has-transparency lazyload" width="500" height="300">
 				<noscript>
 					<img src="https://example.com/bar.jpg" srcset="https://example.com/bar-large.jpg 1000w, https://example.com/bar-large.jpg 1000w" sizes="(max-width: 556px) 100vw, 556px" alt="Bar" class="attachment-large size-large wp-image-2 has-transparency lazyload" width="500" height="300">
@@ -60,8 +60,8 @@ return array(
 				<script>/* custom lazy-loading */</script>
 			</head>
 			<body>
-				<!-- Example seen in the wild which caused a preload link to be added with a data: URL in the imagesrcset attribute. -->
-				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]"
+				<!-- Example 1 -->
+				<img
 					src="https://example.com/foo.webp"
 					data-orig-src="https://example.com/foo.webp"
 					width="1000"
@@ -73,7 +73,21 @@ return array(
 					data-orig-sizes="(max-width: 767px) 100vw, 1920px"
 				>
 
-				<!-- Example with an adjoining NOSCRIPT > IMG tag which should be excluded from URL Metrics. -->
+				<!-- Example 1 extended to PICTURE, where none of these should be tracked in URL Metrics -->
+				<picture>
+					<source type="image/avif" srcset="https://example.com/foo-300x225.avif 300w, https://example.com/foo-1024x768.avif 1024w, https://example.com/foo-768x576.avif 768w, https://example.com/foo-1536x1152.avif 1536w, https://example.com/foo-2048x1536.avif 2048w" sizes="(max-width: 600px) 480px, 800px">
+					<img class="lazyload" width="1200" height="800" src="https://example.com/foo.avif" alt="Foo" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="(max-width: 600px) 480px, 800px">
+				</picture>
+				<picture>
+					<source type="image/avif" srcset="https://example.com/foo-300x225.avif 300w, https://example.com/foo-1024x768.avif 1024w, https://example.com/foo-768x576.avif 768w, https://example.com/foo-1536x1152.avif 1536w, https://example.com/foo-2048x1536.avif 2048w" sizes="(max-width: 600px) 480px, 800px">
+					<img class="lazyload" width="1200" height="800" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Foo">
+				</picture>
+				<picture>
+					<source type="image/avif" srcset="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-srcset="https://example.com/foo-300x225.jpg 300w, https://example.com/foo-1024x768.jpg 1024w, https://example.com/foo-768x576.jpg 768w, https://example.com/foo-1536x1152.jpg 1536w, https://example.com/foo-2048x1536.jpg 2048w" sizes="(max-width: 600px) 480px, 800px">
+					<img class="lazyload" width="1200" height="800" src="https://example.com/foo.avif" alt="Foo">
+				</picture>
+
+				<!-- Example 2 -->
 				<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="https://example.com/bar.jpg" data-srcset="https://example.com/bar-large.jpg 1000w, https://example.com/bar-large.jpg 1000w" sizes="(max-width: 556px) 100vw, 556px" alt="Bar" class="attachment-large size-large wp-image-2 has-transparency lazyload" width="500" height="300">
 				<noscript>
 					<img src="https://example.com/bar.jpg" srcset="https://example.com/bar-large.jpg 1000w, https://example.com/bar-large.jpg 1000w" sizes="(max-width: 556px) 100vw, 556px" alt="Bar" class="attachment-large size-large wp-image-2 has-transparency lazyload" width="500" height="300">
