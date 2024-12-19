@@ -12,6 +12,11 @@
     "./plugins/webp-uploads"
   ],
   "env": {
+    "development": {
+      "config": {
+        "WP_DEVELOPMENT_MODE": "plugin"
+      }
+    },
     "tests": {
       "config": {
         "FS_METHOD": "direct"

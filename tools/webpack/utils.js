@@ -2,6 +2,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const { chdir } = require( 'process' );
 const { spawnSync } = require( 'child_process' );
+const CssMinimizerPlugin = require( 'css-minimizer-webpack-plugin' );
 
 /**
  * Return plugin root path.
@@ -100,6 +101,37 @@ const assetDataTransformer = ( content, absoluteFrom ) => {
 };
 
 /**
+ * Transformer to minify CSS content.
+ *
+ * @param {Buffer} content      The content as a Buffer of the file being transformed.
+ * @param {string} absoluteFrom The absolute path to the file being transformed.
+ *
+ * @return {Promise<string>} A promise that resolves to the transformed (minified) content.
+ */
+const cssMinifyTransformer = ( content, absoluteFrom ) => {
+	const cssContent = content.toString();
+
+	return Promise.resolve(
+		CssMinimizerPlugin.cssnanoMinify(
+			{ [ absoluteFrom ]: cssContent },
+			undefined,
+			{
+				preset: [
+					'default',
+					{
+						discardComments: {
+							removeAll: true,
+						},
+					},
+				],
+			}
+		)
+	).then( ( result ) => {
+		return result.code;
+	} );
+};
+
+/**
  * Create plugins zip file using `zip` command.
  *
  * @param {string} pluginPath The path where the plugin build is located.
@@ -129,5 +161,6 @@ module.exports = {
 	getPluginVersion,
 	generateBuildManifest,
 	assetDataTransformer,
+	cssMinifyTransformer,
 	createPluginZip,
 };

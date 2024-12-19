@@ -31,14 +31,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @phpstan-type ElementData  array{
  *                                isLCP: bool,
  *                                isLCPCandidate: bool,
- *                                xpath: string,
+ *                                xpath: non-empty-string,
  *                                intersectionRatio: float,
  *                                intersectionRect: DOMRect,
  *                                boundingClientRect: DOMRect,
  *                            }
  * @phpstan-type Data         array{
- *                                uuid: string,
- *                                url: string,
+ *                                uuid: non-empty-string,
+ *                                etag?: non-empty-string,
+ *                                url: non-empty-string,
  *                                timestamp: float,
  *                                viewport: ViewportRect,
  *                                elements: ElementData[]
@@ -57,13 +58,28 @@ class OD_URL_Metric implements JsonSerializable {
 	protected $data;
 
 	/**
+	 * Elements.
+	 *
+	 * @var OD_Element[]
+	 */
+	protected $elements;
+
+	/**
+	 * Group.
+	 *
+	 * @since 0.7.0
+	 * @var OD_URL_Metric_Group|null
+	 */
+	protected $group = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @phpstan-param Data|array<string, mixed> $data Valid data or invalid data (in which case an exception is thrown).
 	 *
 	 * @throws OD_Data_Validation_Exception When the input is invalid.
 	 *
-	 * @param array<string, mixed> $data URL metric data.
+	 * @param array<string, mixed> $data URL Metric data.
 	 */
 	public function __construct( array $data ) {
 		if ( ! isset( $data['uuid'] ) ) {
@@ -96,11 +112,12 @@ class OD_URL_Metric implements JsonSerializable {
 			throw new OD_Data_Validation_Exception(
 				esc_html(
 					sprintf(
-						/* translators: 1: current aspect ratio, 2: minimum aspect ratio, 3: maximum aspect ratio */
-						__( 'Viewport aspect ratio (%1$s) is not in the accepted range of %2$s to %3$s.', 'optimization-detective' ),
+						/* translators: 1: current aspect ratio, 2: minimum aspect ratio, 3: maximum aspect ratio, 4: viewport dimensions */
+						__( 'Viewport aspect ratio (%1$s) is not in the accepted range of %2$s to %3$s. Viewport dimensions: %4$s', 'optimization-detective' ),
 						$aspect_ratio,
 						$min_aspect_ratio,
-						$max_aspect_ratio
+						$max_aspect_ratio,
+						$data['viewport']['width'] . 'x' . $data['viewport']['height']
 					)
 				)
 			);
@@ -109,7 +126,37 @@ class OD_URL_Metric implements JsonSerializable {
 	}
 
 	/**
+	 * Gets the group that this URL Metric is a part of (which may not be any).
+	 *
+	 * @since 0.7.0
+	 *
+	 * @return OD_URL_Metric_Group|null Group.
+	 */
+	public function get_group(): ?OD_URL_Metric_Group {
+		return $this->group;
+	}
+
+	/**
+	 * Sets the group that this URL Metric is a part of.
+	 *
+	 * @since 0.7.0
+	 *
+	 * @param OD_URL_Metric_Group $group Group.
+	 *
+	 * @throws InvalidArgumentException When the supplied group has minimum/maximum viewport widths which are out of bounds with the viewport width for this URL Metric.
+	 */
+	public function set_group( OD_URL_Metric_Group $group ): void {
+		if ( ! $group->is_viewport_width_in_range( $this->get_viewport_width() ) ) {
+			throw new InvalidArgumentException( 'Group does not have the correct minimum or maximum viewport widths for this URL Metric.' );
+		}
+		$this->group = $group;
+	}
+
+	/**
 	 * Gets JSON schema for URL Metric.
+	 *
+	 * @since 0.1.0
+	 * @since 0.9.0 Added the 'etag' property to the schema.
 	 *
 	 * @todo Cache the return value?
 	 *
@@ -157,10 +204,19 @@ class OD_URL_Metric implements JsonSerializable {
 			'required'             => true,
 			'properties'           => array(
 				'uuid'      => array(
-					'description' => __( 'The UUID for the URL metric.', 'optimization-detective' ),
+					'description' => __( 'The UUID for the URL Metric.', 'optimization-detective' ),
 					'type'        => 'string',
 					'format'      => 'uuid',
 					'required'    => true,
+					'readonly'    => true, // Omit from REST API.
+				),
+				'etag'      => array(
+					'description' => __( 'The ETag for the URL Metric.', 'optimization-detective' ),
+					'type'        => 'string',
+					'pattern'     => '^[0-9a-f]{32}\z',
+					'minLength'   => 32,
+					'maxLength'   => 32,
+					'required'    => false, // To be made required in a future release.
 					'readonly'    => true, // Omit from REST API.
 				),
 				'url'       => array(
@@ -189,7 +245,7 @@ class OD_URL_Metric implements JsonSerializable {
 					'additionalProperties' => false,
 				),
 				'timestamp' => array(
-					'description' => __( 'Timestamp at which the URL metric was captured.', 'optimization-detective' ),
+					'description' => __( 'Timestamp at which the URL Metric was captured.', 'optimization-detective' ),
 					'type'        => 'number',
 					'required'    => true,
 					'readonly'    => true, // Omit from REST API.
@@ -241,7 +297,7 @@ class OD_URL_Metric implements JsonSerializable {
 		);
 
 		/**
-		 * Filters additional schema properties which should be allowed at the root of a URL metric.
+		 * Filters additional schema properties which should be allowed at the root of a URL Metric.
 		 *
 		 * @since 0.6.0
 		 *
@@ -253,7 +309,7 @@ class OD_URL_Metric implements JsonSerializable {
 		}
 
 		/**
-		 * Filters additional schema properties which should be allowed for an elements item in a URL metric.
+		 * Filters additional schema properties which should be allowed for an element's item in a URL Metric.
 		 *
 		 * @since 0.6.0
 		 *
@@ -264,7 +320,7 @@ class OD_URL_Metric implements JsonSerializable {
 			$schema['properties']['elements']['items']['properties'] = self::extend_schema_with_optional_properties(
 				$schema['properties']['elements']['items']['properties'],
 				$additional_properties,
-				'od_url_metric_schema_root_additional_properties'
+				'od_url_metric_schema_element_item_additional_properties'
 			);
 		}
 
@@ -355,11 +411,16 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @return mixed|null The property value, or null if not set.
 	 */
 	public function get( string $key ) {
+		if ( 'elements' === $key ) {
+			return $this->get_elements();
+		}
 		return $this->data[ $key ] ?? null;
 	}
 
 	/**
 	 * Gets UUID.
+	 *
+	 * @since 0.6.0
 	 *
 	 * @return string UUID.
 	 */
@@ -368,7 +429,21 @@ class OD_URL_Metric implements JsonSerializable {
 	}
 
 	/**
+	 * Gets ETag.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @return non-empty-string|null ETag.
+	 */
+	public function get_etag(): ?string {
+		// Since the ETag is optional for now, return null for old URL Metrics that do not have one.
+		return $this->data['etag'] ?? null;
+	}
+
+	/**
 	 * Gets URL.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return string URL.
 	 */
@@ -379,6 +454,8 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets viewport data.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return ViewportRect Viewport data.
 	 */
 	public function get_viewport(): array {
@@ -387,6 +464,8 @@ class OD_URL_Metric implements JsonSerializable {
 
 	/**
 	 * Gets viewport width.
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return int Viewport width.
 	 */
@@ -397,6 +476,8 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets timestamp.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return float Timestamp.
 	 */
 	public function get_timestamp(): float {
@@ -406,18 +487,39 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets elements.
 	 *
-	 * @return ElementData[] Elements.
+	 * @since 0.1.0
+	 *
+	 * @return OD_Element[] Elements.
 	 */
 	public function get_elements(): array {
-		return $this->data['elements'];
+		if ( ! is_array( $this->elements ) ) {
+			$this->elements = array_map(
+				function ( array $element ): OD_Element {
+					return new OD_Element( $element, $this );
+				},
+				$this->data['elements']
+			);
+		}
+		return $this->elements;
 	}
 
 	/**
 	 * Specifies data which should be serialized to JSON.
 	 *
+	 * @since 0.1.0
+	 *
 	 * @return Data Exports to be serialized by json_encode().
 	 */
 	public function jsonSerialize(): array {
-		return $this->data;
+		$data = $this->data;
+
+		$data['elements'] = array_map(
+			static function ( OD_Element $element ): array {
+				return $element->jsonSerialize();
+			},
+			$this->get_elements()
+		);
+
+		return $data;
 	}
 }

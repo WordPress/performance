@@ -30,7 +30,7 @@ final class OD_Tag_Visitor_Context {
 	public $processor;
 
 	/**
-	 * URL metric group collection.
+	 * URL Metric group collection.
 	 *
 	 * @var OD_URL_Metric_Group_Collection
 	 * @readonly
@@ -49,7 +49,7 @@ final class OD_Tag_Visitor_Context {
 	 * Constructor.
 	 *
 	 * @param OD_HTML_Tag_Processor          $processor                   HTML tag processor.
-	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL metric group collection.
+	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection.
 	 * @param OD_Link_Collection             $link_collection             Link collection.
 	 */
 	public function __construct( OD_HTML_Tag_Processor $processor, OD_URL_Metric_Group_Collection $url_metric_group_collection, OD_Link_Collection $link_collection ) {
@@ -61,11 +61,11 @@ final class OD_Tag_Visitor_Context {
 	/**
 	 * Gets deprecated property.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.7.0
 	 * @todo Remove this when no plugins are possibly referring to the url_metrics_group_collection property anymore.
 	 *
 	 * @param string $name Property name.
-	 * @return OD_URL_Metric_Group_Collection URL metric group collection.
+	 * @return OD_URL_Metric_Group_Collection URL Metric group collection.
 	 *
 	 * @throws Error When property is unknown.
 	 */
@@ -80,7 +80,7 @@ final class OD_Tag_Visitor_Context {
 						__CLASS__ . '::$url_metric_group_collection'
 					)
 				),
-				'optimization-detective n.e.x.t'
+				'optimization-detective 0.7.0'
 			);
 			return $this->url_metric_group_collection;
 		}

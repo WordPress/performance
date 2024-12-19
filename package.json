@@ -8,23 +8,25 @@
   },
   "dependencies": {
     "@builder.io/partytown": "github:westonruter/partytown#add/wp-i18n-workaround",
-    "web-vitals": "4.2.3"
+    "web-vitals": "4.2.4"
   },
   "devDependencies": {
     "@octokit/rest": "^21.0.2",
-    "@wordpress/env": "^10.9.0",
-    "@wordpress/prettier-config": "^4.9.0",
-    "@wordpress/scripts": "^30.1.0",
+    "@wordpress/env": "^10.14.0",
+    "@wordpress/prettier-config": "^4.14.0",
+    "@wordpress/scripts": "^30.7.0",
     "commander": "12.1.0",
     "copy-webpack-plugin": "^12.0.2",
+    "css-minimizer-webpack-plugin": "^7.0.0",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
-    "husky": "^9.1.6",
-    "lint-staged": "^15.2.10",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
     "lodash": "4.17.21",
     "micromatch": "^4.0.8",
     "npm-run-all": "^4.1.5",
-    "webpackbar": "^6.0.1"
+    "typescript": "^5.7.2",
+    "webpackbar": "^7.0.0"
   },
   "scripts": {
     "changelog": "./bin/plugin/cli.js changelog",
@@ -46,6 +48,7 @@
     "generate-pending-release-diffs": "bin/generate-pending-release-diffs.sh",
     "format-js": "wp-scripts format",
     "lint-js": "wp-scripts lint-js",
+    "tsc": "tsc",
     "format-php": "composer format:all",
     "phpstan": "composer phpstan",
     "lint-php": "composer lint:all",

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Speculative Loading
  * Plugin URI: https://github.com/WordPress/performance/tree/trunk/plugins/speculation-rules
- * Description: Enables browsers to speculatively prerender or prefetch pages when hovering over links.
- * Requires at least: 6.5
+ * Description: Enables browsers to speculatively prerender or prefetch pages to achieve near-instant loads based on user interaction.
+ * Requires at least: 6.6
  * Requires PHP: 7.2
  * Version: 1.3.1
  * Author: WordPress Performance Team

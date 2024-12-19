@@ -11,102 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Adds auto to the sizes attribute to the image, if applicable.
- *
- * @since 1.0.0
- *
- * @param array<string, string>|mixed $attr Attributes for the image markup.
- * @return array<string, string> The filtered attributes for the image markup.
- */
-function auto_sizes_update_image_attributes( $attr ): array {
-	if ( ! is_array( $attr ) ) {
-		$attr = array();
-	}
-
-	// Bail early if the image is not lazy-loaded.
-	if ( ! isset( $attr['loading'] ) || 'lazy' !== $attr['loading'] ) {
-		return $attr;
-	}
-
-	// Bail early if the image is not responsive.
-	if ( ! isset( $attr['sizes'] ) ) {
-		return $attr;
-	}
-
-	// Don't add 'auto' to the sizes attribute if it already exists.
-	if ( auto_sizes_attribute_includes_valid_auto( $attr['sizes'] ) ) {
-		return $attr;
-	}
-
-	$attr['sizes'] = 'auto, ' . $attr['sizes'];
-
-	return $attr;
-}
-
-/**
- * Adds auto to the sizes attribute to the image, if applicable.
- *
- * @since 1.0.0
- *
- * @param string|mixed $html The HTML image tag markup being filtered.
- * @return string The filtered HTML image tag markup.
- */
-function auto_sizes_update_content_img_tag( $html ): string {
-	if ( ! is_string( $html ) ) {
-		$html = '';
-	}
-
-	$processor = new WP_HTML_Tag_Processor( $html );
-
-	// Bail if there is no IMG tag.
-	if ( ! $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
-		return $html;
-	}
-
-	// Bail early if the image is not lazy-loaded.
-	$value = $processor->get_attribute( 'loading' );
-	if ( ! is_string( $value ) || 'lazy' !== strtolower( trim( $value, " \t\f\r\n" ) ) ) {
-		return $html;
-	}
-
-	$sizes = $processor->get_attribute( 'sizes' );
-
-	// Bail early if the image is not responsive.
-	if ( ! is_string( $sizes ) ) {
-		return $html;
-	}
-
-	// Don't add 'auto' to the sizes attribute if it already exists.
-	if ( auto_sizes_attribute_includes_valid_auto( $sizes ) ) {
-		return $html;
-	}
-
-	$processor->set_attribute( 'sizes', "auto, $sizes" );
-	return $processor->get_updated_html();
-}
-
-// Skip loading plugin filters if WordPress Core already loaded the functionality.
-if ( ! function_exists( 'wp_sizes_attribute_includes_valid_auto' ) ) {
-	add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' );
-	add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
-}
-
-/**
- * Checks whether the given 'sizes' attribute includes the 'auto' keyword as the first item in the list.
- *
- * Per the HTML spec, if present it must be the first entry.
- *
- * @since 1.2.0
- *
- * @param string $sizes_attr The 'sizes' attribute value.
- * @return bool True if the 'auto' keyword is present, false otherwise.
- */
-function auto_sizes_attribute_includes_valid_auto( string $sizes_attr ): bool {
-	list( $first_size ) = explode( ',', $sizes_attr, 2 );
-	return 'auto' === strtolower( trim( $first_size, " \t\f\r\n" ) );
-}
-
-/**
  * Displays the HTML generator tag for the plugin.
  *
  * See {@see 'wp_head'}.
@@ -120,135 +24,19 @@ function auto_sizes_render_generator(): void {
 add_action( 'wp_head', 'auto_sizes_render_generator' );
 
 /**
- * Gets the smaller image size if the layout width is bigger.
- *
- * It will return the smaller image size and return "px" if the layout width
- * is something else, e.g. min(640px, 90vw) or 90vw.
- *
- * @since 1.1.0
- *
- * @param string $layout_width The layout width.
- * @param int    $image_width  The image width.
- * @return string The proper width after some calculations.
+ * Filters related to the auto-sizes functionality.
  */
-function auto_sizes_get_width( string $layout_width, int $image_width ): string {
-	if ( str_ends_with( $layout_width, 'px' ) ) {
-		return $image_width > (int) $layout_width ? $layout_width : $image_width . 'px';
-	}
-	return $image_width . 'px';
+// Skip loading plugin filters if WordPress Core already loaded the functionality.
+if ( ! function_exists( 'wp_img_tag_add_auto_sizes' ) ) {
+	add_filter( 'wp_get_attachment_image_attributes', 'auto_sizes_update_image_attributes' );
+	add_filter( 'wp_content_img_tag', 'auto_sizes_update_content_img_tag' );
 }
 
 /**
- * Filter the sizes attribute for images to improve the default calculation.
- *
- * @since 1.1.0
- *
- * @param string                                                   $content      The block content about to be rendered.
- * @param array{ attrs?: array{ align?: string, width?: string } } $parsed_block The parsed block.
- * @return string The updated block content.
+ * Filters related to the improved image sizes functionality.
  */
-function auto_sizes_filter_image_tag( string $content, array $parsed_block ): string {
-	$processor = new WP_HTML_Tag_Processor( $content );
-	$has_image = $processor->next_tag( array( 'tag_name' => 'img' ) );
-
-	// Only update the markup if an image is found.
-	if ( $has_image ) {
-		$processor->set_attribute( 'data-needs-sizes-update', true );
-		if ( isset( $parsed_block['attrs']['align'] ) ) {
-			$processor->set_attribute( 'data-align', $parsed_block['attrs']['align'] );
-		}
-
-		// Resize image width.
-		if ( isset( $parsed_block['attrs']['width'] ) ) {
-			$processor->set_attribute( 'data-resize-width', $parsed_block['attrs']['width'] );
-		}
-
-		$content = $processor->get_updated_html();
-	}
-	return $content;
-}
-add_filter( 'render_block_core/image', 'auto_sizes_filter_image_tag', 10, 2 );
-add_filter( 'render_block_core/cover', 'auto_sizes_filter_image_tag', 10, 2 );
-
-/**
- * Filter the sizes attribute for images to improve the default calculation.
- *
- * @since 1.1.0
- *
- * @param string $content The block content about to be rendered.
- * @return string The updated block content.
- */
-function auto_sizes_improve_image_sizes_attributes( string $content ): string {
-	$processor = new WP_HTML_Tag_Processor( $content );
-	if ( ! $processor->next_tag( array( 'tag_name' => 'img' ) ) ) {
-		return $content;
-	}
-
-	$remove_data_attributes = static function () use ( $processor ): void {
-		$processor->remove_attribute( 'data-needs-sizes-update' );
-		$processor->remove_attribute( 'data-align' );
-		$processor->remove_attribute( 'data-resize-width' );
-	};
-
-	// Bail early if the responsive images are disabled.
-	if ( null === $processor->get_attribute( 'sizes' ) ) {
-		$remove_data_attributes();
-		return $processor->get_updated_html();
-	}
-
-	// Skips second time parsing if already processed.
-	if ( null === $processor->get_attribute( 'data-needs-sizes-update' ) ) {
-		return $content;
-	}
-
-	$align = $processor->get_attribute( 'data-align' );
-
-	// Retrieve width from the image tag itself.
-	$image_width = $processor->get_attribute( 'width' );
-	if ( ! is_string( $image_width ) && ! in_array( $align, array( 'full', 'wide' ), true ) ) {
-		return $content;
-	}
-
-	$layout = wp_get_global_settings( array( 'layout' ) );
-
-	$sizes = null;
-	// Handle different alignment use cases.
-	switch ( $align ) {
-		case 'full':
-			$sizes = '100vw';
-			break;
-
-		case 'wide':
-			if ( array_key_exists( 'wideSize', $layout ) ) {
-				$sizes = sprintf( '(max-width: %1$s) 100vw, %1$s', $layout['wideSize'] );
-			}
-			break;
-
-		case 'left':
-		case 'right':
-		case 'center':
-			// Resize image width.
-			$image_width = $processor->get_attribute( 'data-resize-width' ) ?? $image_width;
-			$sizes       = sprintf( '(max-width: %1$dpx) 100vw, %1$dpx', $image_width );
-			break;
-
-		default:
-			if ( array_key_exists( 'contentSize', $layout ) ) {
-				// Resize image width.
-				$image_width = $processor->get_attribute( 'data-resize-width' ) ?? $image_width;
-				$width       = auto_sizes_get_width( $layout['contentSize'], (int) $image_width );
-				$sizes       = sprintf( '(max-width: %1$s) 100vw, %1$s', $width );
-			}
-			break;
-	}
-
-	if ( is_string( $sizes ) ) {
-		$processor->set_attribute( 'sizes', $sizes );
-	}
-
-	$remove_data_attributes();
-
-	return $processor->get_updated_html();
-}
-// Run filter prior to auto sizes "auto_sizes_update_content_img_tag" filter.
-add_filter( 'wp_content_img_tag', 'auto_sizes_improve_image_sizes_attributes', 9 );
+add_filter( 'the_content', 'auto_sizes_prime_attachment_caches', 9 ); // This must run before 'do_blocks', which runs at priority 9.
+add_filter( 'render_block_core/image', 'auto_sizes_filter_image_tag', 10, 3 );
+add_filter( 'render_block_core/cover', 'auto_sizes_filter_image_tag', 10, 3 );
+add_filter( 'get_block_type_uses_context', 'auto_sizes_filter_uses_context', 10, 2 );
+add_filter( 'render_block_context', 'auto_sizes_filter_render_block_context', 10, 2 );

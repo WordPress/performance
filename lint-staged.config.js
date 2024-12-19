@@ -25,7 +25,9 @@ const joinFiles = ( files ) => {
 const PLUGIN_BASE_NAME = path.basename( __dirname );
 
 module.exports = {
-	'**/*.js': ( files ) => `npm run lint-js -- ${ joinFiles( files ) }`,
+	'**/*.{js,ts}': ( files ) => {
+		return [ `npm run lint-js -- ${ joinFiles( files ) }`, `npm run tsc` ];
+	},
 	'**/*.php': ( files ) => {
 		const commands = [ 'composer phpstan' ];
 

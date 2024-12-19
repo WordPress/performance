@@ -17,3 +17,5 @@ define( 'OPTIMIZATION_DETECTIVE_MAIN_FILE', 'plugins/optimization-detective/load
 define( 'IMAGE_PRIORITIZER_VERSION', '0.0.0' );
 
 define( 'EMBED_OPTIMIZER_VERSION', '0.0.0' );
+
+define( 'PERFLAB_PLUGIN_DIR_PATH', __DIR__ . '/../../plugins/performance-lab/' );

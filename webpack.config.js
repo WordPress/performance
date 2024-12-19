@@ -12,6 +12,7 @@ const { plugins: standalonePlugins } = require( './plugins.json' );
 const {
 	createPluginZip,
 	assetDataTransformer,
+	cssMinifyTransformer,
 	deleteFileOrDirectory,
 	generateBuildManifest,
 } = require( './tools/webpack/utils' );
@@ -34,7 +35,132 @@ const sharedConfig = {
 };
 
 // Store plugins that require build process.
-const pluginsWithBuild = [ 'optimization-detective', 'web-worker-offloading' ];
+const pluginsWithBuild = [
+	'performance-lab',
+	'embed-optimizer',
+	'image-prioritizer',
+	'optimization-detective',
+	'web-worker-offloading',
+];
+
+/**
+ * Webpack Config: Performance Lab
+ *
+ * @param {*} env Webpack environment
+ * @return {Object} Webpack configuration
+ */
+const performanceLab = ( env ) => {
+	if ( env.plugin && env.plugin !== 'performance-lab' ) {
+		return defaultBuildConfig;
+	}
+
+	const pluginDir = path.resolve( __dirname, 'plugins/performance-lab' );
+
+	return {
+		...sharedConfig,
+		name: 'performance-lab',
+		plugins: [
+			new CopyWebpackPlugin( {
+				patterns: [
+					{
+						from: `${ pluginDir }/includes/admin/plugin-activate-ajax.js`,
+						to: `${ pluginDir }/includes/admin/plugin-activate-ajax.min.js`,
+					},
+				],
+			} ),
+			new WebpackBar( {
+				name: 'Building Performance Lab Assets',
+				color: '#2196f3',
+			} ),
+		],
+	};
+};
+
+/**
+ * Webpack Config: Embed Optimizer
+ *
+ * @param {*} env Webpack environment
+ * @return {Object} Webpack configuration
+ */
+const embedOptimizer = ( env ) => {
+	if ( env.plugin && env.plugin !== 'embed-optimizer' ) {
+		return defaultBuildConfig;
+	}
+
+	const pluginDir = path.resolve( __dirname, 'plugins/embed-optimizer' );
+
+	return {
+		...sharedConfig,
+		name: 'embed-optimizer',
+		plugins: [
+			new CopyWebpackPlugin( {
+				patterns: [
+					{
+						from: `${ pluginDir }/detect.js`,
+						to: `${ pluginDir }/detect.min.js`,
+					},
+					{
+						from: `${ pluginDir }/lazy-load.js`,
+						to: `${ pluginDir }/lazy-load.min.js`,
+					},
+				],
+			} ),
+			new WebpackBar( {
+				name: 'Building Embed Optimizer Assets',
+				color: '#2196f3',
+			} ),
+		],
+	};
+};
+
+/**
+ * Webpack Config: Image Prioritizer
+ *
+ * @param {*} env Webpack environment
+ * @return {Object} Webpack configuration
+ */
+const imagePrioritizer = ( env ) => {
+	if ( env.plugin && env.plugin !== 'image-prioritizer' ) {
+		return defaultBuildConfig;
+	}
+
+	const pluginDir = path.resolve( __dirname, 'plugins/image-prioritizer' );
+
+	return {
+		...sharedConfig,
+		name: 'image-prioritizer',
+		plugins: [
+			new CopyWebpackPlugin( {
+				patterns: [
+					{
+						from: `${ pluginDir }/detect.js`,
+						to: `${ pluginDir }/detect.min.js`,
+					},
+					{
+						from: `${ pluginDir }/lazy-load-video.js`,
+						to: `${ pluginDir }/lazy-load-video.min.js`,
+					},
+					{
+						from: `${ pluginDir }/lazy-load-bg-image.js`,
+						to: `${ pluginDir }/lazy-load-bg-image.min.js`,
+					},
+					{
+						from: `${ pluginDir }/lazy-load-bg-image.css`,
+						to: `${ pluginDir }/lazy-load-bg-image.min.css`,
+						transform: {
+							transformer: cssMinifyTransformer,
+							cache: false,
+						},
+					},
+				],
+			} ),
+			new WebpackBar( {
+				name: 'Building Image Prioritizer Assets',
+				color: '#2196f3',
+			} ),
+		],
+	};
+};
 
 /**
  * Webpack Config: Optimization Detective
@@ -50,7 +176,7 @@ const optimizationDetective = ( env ) => {
 	const source = path.resolve( __dirname, 'node_modules/web-vitals' );
 	const destination = path.resolve(
 		__dirname,
-		'plugins/optimization-detective/build'
+		'plugins/optimization-detective'
 	);
 
 	return {
@@ -61,15 +187,20 @@ const optimizationDetective = ( env ) => {
 				patterns: [
 					{
 						from: `${ source }/dist/web-vitals.js`,
-						to: `${ destination }/web-vitals.js`,
+						to: `${ destination }/build/web-vitals.js`,
+						info: { minimized: true },
 					},
 					{
 						from: `${ source }/package.json`,
-						to: `${ destination }/web-vitals.asset.php`,
+						to: `${ destination }/build/web-vitals.asset.php`,
 						transform: {
 							transformer: assetDataTransformer,
 							cache: false,
 						},
+					},
+					{
+						from: `${ destination }/detect.js`,
+						to: `${ destination }/detect.min.js`,
 					},
 				],
 			} ),
@@ -110,6 +241,7 @@ const webWorkerOffloading = ( env ) => {
 					{
 						from: `${ source }/lib/`,
 						to: `${ destination }`,
+						info: { minimized: true },
 					},
 					{
 						from: `${ source }/package.json`,
@@ -164,6 +296,7 @@ const buildPlugin = ( env ) => {
 					{
 						from,
 						to,
+						info: { minimized: true },
 						globOptions: {
 							dot: true,
 							ignore: [
@@ -203,4 +336,11 @@ const buildPlugin = ( env ) => {
 	};
 };
 
-module.exports = [ optimizationDetective, webWorkerOffloading, buildPlugin ];
+module.exports = [
+	performanceLab,
+	embedOptimizer,
+	imagePrioritizer,
+	optimizationDetective,
+	webWorkerOffloading,
+	buildPlugin,
+];

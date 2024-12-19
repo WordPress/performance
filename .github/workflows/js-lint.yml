@@ -48,3 +48,5 @@ jobs:
         run: npm ci
       - name: JS Lint
         run: npm run lint-js
+      - name: TypeScript compile
+        run: npm run tsc

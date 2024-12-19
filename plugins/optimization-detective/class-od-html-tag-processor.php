@@ -179,6 +179,15 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $buffered_text_replacements = array();
 
 	/**
+	 * Whether the end of the document was reached.
+	 *
+	 * @since 0.7.0
+	 * @see self::next_token()
+	 * @var bool
+	 */
+	private $reached_end_of_document = false;
+
+	/**
 	 * Count for the number of times that the cursor was moved.
 	 *
 	 * @since 0.6.0
@@ -263,6 +272,9 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		if ( ! parent::next_token() ) {
 			$this->open_stack_tags    = array();
 			$this->open_stack_indices = array();
+
+			// Mark that the end of the document was reached, meaning that get_modified_html() should now be able to append markup to the HEAD and the BODY.
+			$this->reached_end_of_document = true;
 			return false;
 		}
 
@@ -284,7 +296,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 				$i = array_search( 'P', $this->open_stack_tags, true );
 				if ( false !== $i ) {
 					array_splice( $this->open_stack_tags, (int) $i );
-					array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) );
+					array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) + 1 );
 				}
 			}
 
@@ -365,8 +377,8 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	public function set_attribute( $name, $value ): bool { // phpcs:ignore SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
 		$existing_value = $this->get_attribute( $name );
 		$result         = parent::set_attribute( $name, $value );
-		if ( $result ) {
-			if ( is_string( $existing_value ) ) {
+		if ( $result && $existing_value !== $value ) {
+			if ( null !== $existing_value ) {
 				$this->set_meta_attribute( "replaced-{$name}", $existing_value );
 			} else {
 				$this->set_meta_attribute( "added-{$name}", true );
@@ -485,13 +497,29 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * A breadcrumb consists of a tag name and its sibling index.
 	 *
 	 * @since 0.4.0
+	 * @since 0.9.0 Renamed from get_breadcrumbs() to get_indexed_breadcrumbs().
 	 *
 	 * @return Generator<array{string, int}> Breadcrumb.
 	 */
-	private function get_breadcrumbs(): Generator {
+	private function get_indexed_breadcrumbs(): Generator {
 		foreach ( $this->open_stack_tags as $i => $breadcrumb_tag_name ) {
 			yield array( $breadcrumb_tag_name, $this->open_stack_indices[ $i ] );
 		}
+	}
+
+	/**
+	 * Computes the HTML breadcrumbs for the currently-matched node, if matched.
+	 *
+	 * Breadcrumbs start at the outermost parent and descend toward the matched element.
+	 * They always include the entire path from the root HTML node to the matched element.
+	 *
+	 * @since 0.9.0
+	 * @see WP_HTML_Processor::get_breadcrumbs()
+	 *
+	 * @return string[] Array of tag names representing path to matched node.
+	 */
+	public function get_breadcrumbs(): array {
+		return $this->open_stack_tags;
 	}
 
 	/**
@@ -523,7 +551,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	public function get_xpath(): string {
 		if ( null === $this->current_xpath ) {
 			$this->current_xpath = '';
-			foreach ( $this->get_breadcrumbs() as list( $tag_name, $index ) ) {
+			foreach ( $this->get_indexed_breadcrumbs() as list( $tag_name, $index ) ) {
 				$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
 			}
 		}
@@ -559,11 +587,25 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Returns the string representation of the HTML Tag Processor.
 	 *
+	 * Once the end of the document has been reached this is responsible for adding the pending markup to append to the
+	 * HEAD and the BODY. It waits to do this injection until the end of the document has been reached because every
+	 * time that seek() is called it the HTML Processor will flush any pending updates to the document. This means that
+	 * if there is any pending markup to append to the end of the BODY then the insertion will fail because the closing
+	 * tag for the BODY has not been encountered yet. Additionally, by not prematurely processing the buffered text
+	 * replacements in get_updated_html() then we avoid trying to insert them every time that seek() is called which is
+	 * wasteful as they are only needed once finishing iterating over the document.
+	 *
 	 * @since 0.4.0
+	 * @see WP_HTML_Tag_Processor::get_updated_html()
+	 * @see WP_HTML_Tag_Processor::seek()
 	 *
 	 * @return string The processed HTML.
 	 */
 	public function get_updated_html(): string {
+		if ( ! $this->reached_end_of_document ) {
+			return parent::get_updated_html();
+		}
+
 		foreach ( array_keys( $this->buffered_text_replacements ) as $bookmark ) {
 			$html_strings = $this->buffered_text_replacements[ $bookmark ];
 			if ( count( $html_strings ) === 0 ) {
@@ -599,10 +641,19 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * @since 0.4.0
 	 *
+	 * @phpstan-param callable-string $function_name
+	 *
 	 * @param string $function_name Function name.
 	 * @param string $message       Warning message.
+	 *
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	private function warn( string $function_name, string $message ): void {
+		/**
+		 * No WP_Exception is thrown by wp_trigger_error() since E_USER_ERROR is not passed as the error level.
+		 *
+		 * @noinspection PhpUnhandledExceptionInspection
+		 */
 		wp_trigger_error(
 			$function_name,
 			esc_html( $message )

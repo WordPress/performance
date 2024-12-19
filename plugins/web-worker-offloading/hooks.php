@@ -21,7 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 function plwwo_register_default_scripts( WP_Scripts $scripts ): void {
 	// The source code for partytown.js is built from <https://github.com/BuilderIO/partytown/blob/b292a14047a0c12ca05ba97df1833935d42fdb66/src/lib/main/snippet.ts>.
 	// See webpack config in the WordPress/performance repo: <https://github.com/WordPress/performance/blob/282a068f3eb2575d37aeb9034e894e7140fcddca/webpack.config.js#L84-L130>.
-	$partytown_js = file_get_contents( __DIR__ . '/build/partytown.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
+	if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+		$partytown_js_path = '/build/debug/partytown.js';
+	} else {
+		$partytown_js_path = '/build/partytown.js';
+	}
+
+	$partytown_js = file_get_contents( __DIR__ . $partytown_js_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 	if ( false === $partytown_js ) {
 		return;
 	}
@@ -121,3 +127,16 @@ function plwwo_filter_inline_script_attributes( $attributes ): array {
 	return $attributes;
 }
 add_filter( 'wp_inline_script_attributes', 'plwwo_filter_inline_script_attributes' );
+
+/**
+ * Displays the HTML generator meta tag for the Web Worker Offloading plugin.
+ *
+ * See {@see 'wp_head'}.
+ *
+ * @since 0.1.1
+ */
+function plwwo_render_generator_meta_tag(): void {
+	// Use the plugin slug as it is immutable.
+	echo '<meta name="generator" content="web-worker-offloading ' . esc_attr( WEB_WORKER_OFFLOADING_VERSION ) . '">' . "\n";
+}
+add_action( 'wp_head', 'plwwo_render_generator_meta_tag' );

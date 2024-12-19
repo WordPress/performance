@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class containing logic for locking storage for new URL metrics.
+ * Class containing logic for locking storage for new URL Metrics.
  *
  * @since 0.1.0
  * @access private
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class OD_Storage_Lock {
 
 	/**
-	 * Gets the TTL (in seconds) for the URL metric storage lock.
+	 * Gets the TTL (in seconds) for the URL Metric storage lock.
 	 *
 	 * @since 0.1.0
 	 * @access private
@@ -48,7 +48,7 @@ final class OD_Storage_Lock {
 	}
 
 	/**
-	 * Gets transient key for locking URL metric storage (for the current IP).
+	 * Gets transient key for locking URL Metric storage (for the current IP).
 	 *
 	 * @todo Should the URL be included in the key? Or should a user only be allowed to store one metric?
 	 * @return string Transient key.
@@ -59,7 +59,7 @@ final class OD_Storage_Lock {
 	}
 
 	/**
-	 * Sets URL metric storage lock (for the current IP).
+	 * Sets URL Metric storage lock (for the current IP).
 	 *
 	 * If the storage lock TTL is greater than zero, then a transient is set with the current timestamp and expiring at TTL
 	 * seconds. Otherwise, if the current TTL is zero, then any transient is deleted.
@@ -78,7 +78,7 @@ final class OD_Storage_Lock {
 	}
 
 	/**
-	 * Checks whether URL metric storage is locked (for the current IP).
+	 * Checks whether URL Metric storage is locked (for the current IP).
 	 *
 	 * @since 0.1.0
 	 * @access private

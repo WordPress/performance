@@ -49,9 +49,6 @@ function perflab_load_features_page(): void {
 
 	// Handle style for settings page.
 	add_action( 'admin_head', 'perflab_print_features_page_style' );
-
-	// Handle script for settings page.
-	add_action( 'admin_footer', 'perflab_print_plugin_progress_indicator_script' );
 }
 
 /**
@@ -217,6 +214,42 @@ function perflab_dismiss_wp_pointer_wrapper(): void {
 add_action( 'wp_ajax_dismiss-wp-pointer', 'perflab_dismiss_wp_pointer_wrapper', 0 );
 
 /**
+ * Gets the path to a script or stylesheet.
+ *
+ * @since 3.7.0
+ *
+ * @param string      $src_path Source path.
+ * @param string|null $min_path Minified path. If not supplied, then '.min' is injected before the file extension in the source path.
+ * @return string URL to script or stylesheet.
+ */
+function perflab_get_asset_path( string $src_path, ?string $min_path = null ): string {
+	if ( null === $min_path ) {
+		// Note: wp_scripts_get_suffix() is not used here because we need access to both the source and minified paths.
+		$min_path = (string) preg_replace( '/(?=\.\w+$)/', '.min', $src_path );
+	}
+
+	$force_src = false;
+	if ( WP_DEBUG && ! file_exists( trailingslashit( PERFLAB_PLUGIN_DIR_PATH ) . $min_path ) ) {
+		$force_src = true;
+		wp_trigger_error(
+			__FUNCTION__,
+			sprintf(
+				/* translators: %s is the minified asset path */
+				__( 'Minified asset has not been built: %s', 'performance-lab' ),
+				$min_path
+			),
+			E_USER_WARNING
+		);
+	}
+
+	if ( SCRIPT_DEBUG || $force_src ) {
+		return $src_path;
+	}
+
+	return $min_path;
+}
+
+/**
  * Callback function to handle admin scripts.
  *
  * @since 2.8.0
@@ -228,8 +261,14 @@ function perflab_enqueue_features_page_scripts(): void {
 	wp_enqueue_style( 'thickbox' );
 	wp_enqueue_script( 'plugin-install' );
 
-	// Enqueue the a11y script.
-	wp_enqueue_script( 'wp-a11y' );
+	// Enqueue plugin activate AJAX script and localize script data.
+	wp_enqueue_script(
+		'perflab-plugin-activate-ajax',
+		plugin_dir_url( PERFLAB_MAIN_FILE ) . perflab_get_asset_path( 'includes/admin/plugin-activate-ajax.js' ),
+		array( 'wp-i18n', 'wp-a11y', 'wp-api-fetch' ),
+		PERFLAB_VERSION,
+		true
+	);
 }
 
 /**
@@ -394,42 +433,6 @@ function perflab_plugin_admin_notices(): void {
 			)
 		);
 	}
-}
-
-/**
- * Callback function that print plugin progress indicator script.
- *
- * @since 3.1.0
- */
-function perflab_print_plugin_progress_indicator_script(): void {
-	$js_function = <<<JS
-		function addPluginProgressIndicator( message ) {
-			document.addEventListener( 'DOMContentLoaded', function () {
-				document.addEventListener( 'click', function ( event ) {
-					if (
-						event.target.classList.contains(
-							'perflab-install-active-plugin'
-						)
-					) {
-						const target = event.target;
-						target.classList.add( 'updating-message' );
-						target.textContent = message;
-
-						wp.a11y.speak( message );
-					}
-				} );
-			} );
-		}
-JS;
-
-	wp_print_inline_script_tag(
-		sprintf(
-			'( %s )( %s );',
-			$js_function,
-			wp_json_encode( __( 'Activating...', 'default' ) )
-		),
-		array( 'type' => 'module' )
-	);
 }
 
 /**

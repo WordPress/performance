@@ -12,7 +12,7 @@ return array(
 			</body>
 		</html>
 	',
-	// There should be no data-od-xpath added to the DIV because it is using a data: URL for the background-image.
+	// There should be no data-od-xpath added to the DIV because it is using a background-color style.
 	'expected' => '
 		<html lang="en">
 			<head>

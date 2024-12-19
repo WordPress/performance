@@ -11,9 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Gets the freshness age (TTL) for a given URL metric.
+ * Gets the freshness age (TTL) for a given URL Metric.
  *
- * When a URL metric expires it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
+ * When a URL Metric expires it is eligible to be replaced by a newer one if its viewport lies within the same breakpoint.
  *
  * @since 0.1.0
  * @access private
@@ -22,9 +22,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function od_get_url_metric_freshness_ttl(): int {
 	/**
-	 * Filters the freshness age (TTL) for a given URL metric.
+	 * Filters the freshness age (TTL) for a given URL Metric.
 	 *
-	 * The freshness TTL must be at least zero, in which it considers URL metrics to always be stale.
+	 * The freshness TTL must be at least zero, in which it considers URL Metrics to always be stale.
 	 * In practice, the value should be at least an hour.
 	 *
 	 * @since 0.1.0
@@ -54,7 +54,7 @@ function od_get_url_metric_freshness_ttl(): int {
 /**
  * Gets the normalized query vars for the current request.
  *
- * This is used as a cache key for stored URL metrics.
+ * This is used as a cache key for stored URL Metrics.
  *
  * TODO: For non-singular requests, consider adding the post IDs from The Loop to ensure publishing a new post will invalidate the cache.
  *
@@ -77,7 +77,7 @@ function od_get_normalized_query_vars(): array {
 		);
 	}
 
-	// Vary URL metrics by whether the user is logged in since additional elements may be present.
+	// Vary URL Metrics by whether the user is logged in since additional elements may be present.
 	if ( is_user_logged_in() ) {
 		$normalized_query_vars['user_logged_in'] = true;
 	}
@@ -124,7 +124,7 @@ function od_get_current_url(): string {
 }
 
 /**
- * Gets slug for URL metrics.
+ * Gets slug for URL Metrics.
  *
  * A slug is the hash of the normalized query vars.
  *
@@ -141,55 +141,167 @@ function od_get_url_metrics_slug( array $query_vars ): string {
 }
 
 /**
- * Computes nonce for storing URL metrics for a specific slug.
+ * Gets the current template for a block theme or a classic theme.
  *
- * This is used in the REST API to authenticate the storage of new URL metrics from a given URL.
- *
- * @since 0.1.0
+ * @since 0.9.0
  * @access private
  *
- * @see wp_create_nonce()
- * @see od_verify_url_metrics_storage_nonce()
- * @see od_get_url_metrics_slug()
+ * @global string|null $_wp_current_template_id Current template ID.
+ * @global string|null $template                Template file path.
  *
- * @param string $slug Slug (hash of normalized query vars).
- * @param string $url  URL.
- * @return string Nonce.
+ * @return string|WP_Block_Template|null Template.
  */
-function od_get_url_metrics_storage_nonce( string $slug, string $url ): string {
-	return wp_create_nonce( "store_url_metrics:$slug:$url" );
+function od_get_current_theme_template() {
+	global $template, $_wp_current_template_id;
+
+	if ( wp_is_block_theme() && isset( $_wp_current_template_id ) ) {
+		$block_template = get_block_template( $_wp_current_template_id, 'wp_template' );
+		if ( $block_template instanceof WP_Block_Template ) {
+			return $block_template;
+		}
+	}
+	if ( isset( $template ) && is_string( $template ) ) {
+		return basename( $template );
+	}
+	return null;
 }
 
 /**
- * Verifies nonce for storing URL metrics for a specific slug.
+ * Gets the current ETag for URL Metrics.
  *
- * @since 0.1.0
+ * Generates a hash based on the IDs of registered tag visitors, the queried object,
+ * posts in The Loop, and theme information in the current environment. This ETag
+ * is used to assess if the URL Metrics are stale when its value changes.
+ *
+ * @since 0.9.0
  * @access private
  *
- * @see wp_verify_nonce()
- * @see od_get_url_metrics_storage_nonce()
- * @see od_get_url_metrics_slug()
- *
- * @param string $nonce Nonce.
- * @param string $slug  Slug (hash of normalized query vars).
- * @param String $url   URL.
- * @return bool Whether the nonce is valid.
+ * @param OD_Tag_Visitor_Registry       $tag_visitor_registry Tag visitor registry.
+ * @param WP_Query|null                 $wp_query             The WP_Query instance.
+ * @param string|WP_Block_Template|null $current_template     The current template being used.
+ * @return non-empty-string Current ETag.
  */
-function od_verify_url_metrics_storage_nonce( string $nonce, string $slug, string $url ): bool {
-	return (bool) wp_verify_nonce( $nonce, "store_url_metrics:$slug:$url" );
+function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_registry, ?WP_Query $wp_query, $current_template ): string {
+	$queried_object      = $wp_query instanceof WP_Query ? $wp_query->get_queried_object() : null;
+	$queried_object_data = array(
+		'id'   => null,
+		'type' => null,
+	);
+
+	if ( $queried_object instanceof WP_Post ) {
+		$queried_object_data['id']                = $queried_object->ID;
+		$queried_object_data['type']              = 'post';
+		$queried_object_data['post_modified_gmt'] = $queried_object->post_modified_gmt;
+	} elseif ( $queried_object instanceof WP_Term ) {
+		$queried_object_data['id']   = $queried_object->term_id;
+		$queried_object_data['type'] = 'term';
+	} elseif ( $queried_object instanceof WP_User ) {
+		$queried_object_data['id']   = $queried_object->ID;
+		$queried_object_data['type'] = 'user';
+	} elseif ( $queried_object instanceof WP_Post_Type ) {
+		$queried_object_data['type'] = $queried_object->name;
+	}
+
+	$data = array(
+		'tag_visitors'     => array_keys( iterator_to_array( $tag_visitor_registry ) ),
+		'queried_object'   => $queried_object_data,
+		'queried_posts'    => array_filter(
+			array_map(
+				static function ( $post ): ?array {
+					if ( is_int( $post ) ) {
+						$post = get_post( $post );
+					}
+					if ( ! ( $post instanceof WP_Post ) ) {
+						return null;
+					}
+					return array(
+						'id'                => $post->ID,
+						'post_modified_gmt' => $post->post_modified_gmt,
+					);
+				},
+				( $wp_query instanceof WP_Query && $wp_query->post_count > 0 ) ? $wp_query->posts : array()
+			)
+		),
+		'active_theme'     => array(
+			'template'   => array(
+				'name'    => get_template(),
+				'version' => wp_get_theme( get_template() )->get( 'Version' ),
+			),
+			'stylesheet' => array(
+				'name'    => get_stylesheet(),
+				'version' => wp_get_theme()->get( 'Version' ),
+			),
+		),
+		'current_template' => $current_template instanceof WP_Block_Template ? get_object_vars( $current_template ) : $current_template,
+	);
+
+	/**
+	 * Filters the data that goes into computing the current ETag for URL Metrics.
+	 *
+	 * @since 0.9.0
+	 *
+	 * @param array<string, mixed> $data Data.
+	 */
+	$data = (array) apply_filters( 'od_current_url_metrics_etag_data', $data );
+
+	return md5( (string) wp_json_encode( $data ) );
 }
 
 /**
- * Gets the minimum allowed viewport aspect ratio for URL metrics.
+ * Computes HMAC for storing URL Metrics for a specific slug.
+ *
+ * This is used in the REST API to authenticate the storage of new URL Metrics from a given URL.
+ *
+ * @since 0.8.0
+ * @since 0.9.0 Introduced the `$current_etag` parameter.
+ * @access private
+ *
+ * @see od_verify_url_metrics_storage_hmac()
+ * @see od_get_url_metrics_slug()
+ *
+ * @param string           $slug                Slug (hash of normalized query vars).
+ * @param non-empty-string $current_etag        Current ETag.
+ * @param string           $url                 URL.
+ * @param int|null         $cache_purge_post_id Cache purge post ID.
+ * @return string HMAC.
+ */
+function od_get_url_metrics_storage_hmac( string $slug, string $current_etag, string $url, ?int $cache_purge_post_id = null ): string {
+	$action = "store_url_metric:$slug:$current_etag:$url:$cache_purge_post_id";
+	return wp_hash( $action, 'nonce' );
+}
+
+/**
+ * Verifies HMAC for storing URL Metrics for a specific slug.
+ *
+ * @since 0.8.0
+ * @since 0.9.0 Introduced the `$current_etag` parameter.
+ * @access private
+ *
+ * @see od_get_url_metrics_storage_hmac()
+ * @see od_get_url_metrics_slug()
+ *
+ * @param string           $hmac                HMAC.
+ * @param string           $slug                Slug (hash of normalized query vars).
+ * @param non-empty-string $current_etag        Current ETag.
+ * @param string           $url                 URL.
+ * @param int|null         $cache_purge_post_id Cache purge post ID.
+ * @return bool Whether the HMAC is valid.
+ */
+function od_verify_url_metrics_storage_hmac( string $hmac, string $slug, string $current_etag, string $url, ?int $cache_purge_post_id = null ): bool {
+	return hash_equals( od_get_url_metrics_storage_hmac( $slug, $current_etag, $url, $cache_purge_post_id ), $hmac );
+}
+
+/**
+ * Gets the minimum allowed viewport aspect ratio for URL Metrics.
  *
  * @since 0.6.0
  * @access private
  *
- * @return float Minimum viewport aspect ratio for URL metrics.
+ * @return float Minimum viewport aspect ratio for URL Metrics.
  */
 function od_get_minimum_viewport_aspect_ratio(): float {
 	/**
-	 * Filters the minimum allowed viewport aspect ratio for URL metrics.
+	 * Filters the minimum allowed viewport aspect ratio for URL Metrics.
 	 *
 	 * The 0.4 default value is intended to accommodate the phone with the greatest known aspect
 	 * ratio at 21:9 when rotated 90 degrees to 9:21 (0.429).
@@ -202,16 +314,16 @@ function od_get_minimum_viewport_aspect_ratio(): float {
 }
 
 /**
- * Gets the maximum allowed viewport aspect ratio for URL metrics.
+ * Gets the maximum allowed viewport aspect ratio for URL Metrics.
  *
  * @since 0.6.0
  * @access private
  *
- * @return float Maximum viewport aspect ratio for URL metrics.
+ * @return float Maximum viewport aspect ratio for URL Metrics.
  */
 function od_get_maximum_viewport_aspect_ratio(): float {
 	/**
-	 * Filters the maximum allowed viewport aspect ratio for URL metrics.
+	 * Filters the maximum allowed viewport aspect ratio for URL Metrics.
 	 *
 	 * The 2.5 default value is intended to accommodate the phone with the greatest known aspect
 	 * ratio at 21:9 (2.333).
@@ -224,7 +336,7 @@ function od_get_maximum_viewport_aspect_ratio(): float {
 }
 
 /**
- * Gets the breakpoint max widths to group URL metrics for various viewports.
+ * Gets the breakpoint max widths to group URL Metrics for various viewports.
  *
  * Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then
  * this means there will be two viewport groupings, one for 0<=480, and another >480. If instead there were three
@@ -242,6 +354,9 @@ function od_get_maximum_viewport_aspect_ratio(): float {
  *     $break-mobile: 480px;
  *
  * These breakpoints appear to be used the most in media queries that affect frontend styles.
+ *
+ * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
+ * single group.
  *
  * @since 0.1.0
  * @access private
@@ -285,9 +400,10 @@ function od_get_breakpoint_max_widths(): array {
 			return $breakpoint;
 		},
 		/**
-		 * Filters the breakpoint max widths to group URL metrics for various viewports.
+		 * Filters the breakpoint max widths to group URL Metrics for various viewports.
 		 *
-		 * A breakpoint must be greater than zero and less than PHP_INT_MAX.
+		 * A breakpoint must be greater than zero and less than PHP_INT_MAX. This array may be empty in which case there
+		 * are no responsive breakpoints and all URL Metrics are collected in a single group.
 		 *
 		 * @since 0.1.0
 		 *
@@ -302,11 +418,11 @@ function od_get_breakpoint_max_widths(): array {
 }
 
 /**
- * Gets the sample size for a breakpoint's URL metrics on a given URL.
+ * Gets the sample size for a breakpoint's URL Metrics on a given URL.
  *
- * A breakpoint divides URL metrics for viewports which are smaller and those which are larger. Given the default
+ * A breakpoint divides URL Metrics for viewports which are smaller and those which are larger. Given the default
  * sample size of 3 and there being just a single breakpoint (480) by default, for a given URL, there would be a maximum
- * total of 6 URL metrics stored for a given URL: 3 for mobile and 3 for desktop.
+ * total of 6 URL Metrics stored for a given URL: 3 for mobile and 3 for desktop.
  *
  * @since 0.1.0
  * @access private
@@ -315,7 +431,7 @@ function od_get_breakpoint_max_widths(): array {
  */
 function od_get_url_metrics_breakpoint_sample_size(): int {
 	/**
-	 * Filters the sample size for a breakpoint's URL metrics on a given URL.
+	 * Filters the sample size for a breakpoint's URL Metrics on a given URL.
 	 *
 	 * The sample size must be greater than zero.
 	 *

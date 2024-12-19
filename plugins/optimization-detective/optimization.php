@@ -98,6 +98,8 @@ function od_maybe_add_template_output_buffer_filter(): void {
  * Determines whether the current response can be optimized.
  *
  * @since 0.1.0
+ * @since 0.9.0 Response is optimized for admin users as well when in 'plugin' development mode.
+ *
  * @access private
  *
  * @return bool Whether response can be optimized.
@@ -116,11 +118,15 @@ function od_can_optimize_response(): bool {
 		is_customize_preview() ||
 		// Since the images detected in the response body of a POST request cannot, by definition, be cached.
 		( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) ||
-		// The aim is to optimize pages for the majority of site visitors, not those who administer the site. For admin
-		// users, additional elements will be present like the script from wp_customize_support_script() which will
-		// interfere with the XPath indices. Note that od_get_normalized_query_vars() is varied by is_user_logged_in()
-		// so membership sites and e-commerce sites will still be able to be optimized for their normal visitors.
-		current_user_can( 'customize' )
+		// The aim is to optimize pages for the majority of site visitors, not for those who administer the site, unless
+		// in 'plugin' development mode. For admin users, additional elements will be present, like the script from
+		// wp_customize_support_script(), which will interfere with the XPath indices. Note that
+		// od_get_normalized_query_vars() is varied by is_user_logged_in(), so membership sites and e-commerce sites
+		// will still be able to be optimized for their normal visitors.
+		( current_user_can( 'customize' ) && ! wp_is_development_mode( 'plugin' ) ) ||
+		// Page caching plugins can only reliably be told to invalidate a cached page when a post is available to trigger
+		// the relevant actions on.
+		null === od_get_cache_purge_post_id()
 	);
 
 	/**
@@ -164,10 +170,14 @@ function od_is_response_html_content_type(): bool {
  * @since 0.1.0
  * @access private
  *
+ * @global WP_Query $wp_the_query WP_Query object.
+ *
  * @param string $buffer Template output buffer.
  * @return string Filtered template output buffer.
  */
 function od_optimize_template_output_buffer( string $buffer ): string {
+	global $wp_the_query;
+
 	// If the content-type is not HTML or the output does not start with '<', then abort since the buffer is definitely not HTML.
 	if (
 		! od_is_response_html_content_type() ||
@@ -189,16 +199,6 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$slug = od_get_url_metrics_slug( od_get_normalized_query_vars() );
 	$post = OD_URL_Metrics_Post_Type::get_post( $slug );
 
-	$group_collection = new OD_URL_Metric_Group_Collection(
-		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
-		od_get_breakpoint_max_widths(),
-		od_get_url_metrics_breakpoint_sample_size(),
-		od_get_url_metric_freshness_ttl()
-	);
-
-	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
-	$needs_detection = ! $group_collection->is_every_group_complete();
-
 	$tag_visitor_registry = new OD_Tag_Visitor_Registry();
 
 	/**
@@ -210,10 +210,22 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 */
 	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
 
+	$current_etag         = od_get_current_url_metrics_etag( $tag_visitor_registry, $wp_the_query, od_get_current_theme_template() );
+	$group_collection     = new OD_URL_Metric_Group_Collection(
+		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
+		$current_etag,
+		od_get_breakpoint_max_widths(),
+		od_get_url_metrics_breakpoint_sample_size(),
+		od_get_url_metric_freshness_ttl()
+	);
 	$link_collection      = new OD_Link_Collection();
 	$tag_visitor_context  = new OD_Tag_Visitor_Context( $processor, $group_collection, $link_collection );
 	$current_tag_bookmark = 'optimization_detective_current_tag';
 	$visitors             = iterator_to_array( $tag_visitor_registry );
+
+	// Whether we need to add the data-od-xpath attribute to elements and whether the detection script should be injected.
+	$needs_detection = ! $group_collection->is_every_group_complete();
+
 	do {
 		$tracked_in_url_metrics = false;
 		$processor->set_bookmark( $current_tag_bookmark ); // TODO: Should we break if this returns false?

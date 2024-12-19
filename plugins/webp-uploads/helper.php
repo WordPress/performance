@@ -28,7 +28,7 @@ function webp_uploads_get_upload_image_mime_transforms(): array {
 
 	$default_transforms = array(
 		'image/jpeg' => array( 'image/' . $output_format ),
-		'image/webp' => array( 'image/webp' ),
+		'image/webp' => array( 'image/' . $output_format ),
 		'image/avif' => array( 'image/avif' ),
 		'image/png'  => array( 'image/' . $output_format ),
 	);
@@ -412,6 +412,17 @@ function webp_uploads_is_fallback_enabled(): bool {
 }
 
 /**
+ * Checks if the `perflab_generate_all_fallback_sizes` option is enabled.
+ *
+ * @since 2.4.0
+ *
+ * @return bool Whether the option is enabled. Default is false.
+ */
+function webp_uploads_should_generate_all_fallback_sizes(): bool {
+	return (bool) get_option( 'perflab_generate_all_fallback_sizes', 0 );
+}
+
+/**
  * Retrieves the image URL for a specified MIME type from the attachment metadata.
  *
  * This function attempts to locate an alternate image source URL in the
@@ -467,4 +478,33 @@ function webp_uploads_get_mime_type_image( int $attachment_id, string $src, stri
 	}
 
 	return null;
+}
+
+/**
+ * Retrieves the MIME type of an attachment file, checking the file directly if possible.
+ *
+ * If checking the file directly fails, the function falls back to the attachment's MIME type.
+ *
+ * @since 2.3.0
+ *
+ * @param int    $attachment_id The attachment ID.
+ * @param string $file          Optional. The path to the file.
+ * @return string The MIME type of the file, or an empty string if not found.
+ */
+function webp_uploads_get_attachment_file_mime_type( int $attachment_id, string $file = '' ): string {
+	if ( '' === $file ) {
+		$file = get_attached_file( $attachment_id, true );
+		// File does not exist.
+		if ( false === $file ) {
+			return '';
+		}
+	}
+
+	/*
+	 * We need to get the MIME type ideally from the file, as WordPress Core may have already altered it.
+	 * The post MIME type is typically not updated during that process.
+	 */
+	$filetype  = wp_check_filetype( $file );
+	$mime_type = $filetype['type'] ?? get_post_mime_type( $attachment_id );
+	return is_string( $mime_type ) ? $mime_type : '';
 }

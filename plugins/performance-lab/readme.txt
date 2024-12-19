@@ -1,8 +1,8 @@
 === Performance Lab ===
 
 Contributors: wordpressdotorg
-Tested up to: 6.6
-Stable tag:   3.4.1
+Tested up to: 6.7
+Stable tag:   3.7.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -22,6 +22,7 @@ The feature plugins which are currently featured by this plugin are:
 * [Embed Optimizer](https://wordpress.org/plugins/embed-optimizer/) _(experimental)_
 * [Enhanced Responsive Images](https://wordpress.org/plugins/auto-sizes/) _(experimental)_
 * [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) _(experimental)_
+* [Web Worker Offloading](https://wordpress.org/plugins/web-worker-offloading/) _(experimental)_
 
 These plugins can also be installed separately from installing Performance Lab, but having the Performance Lab plugin also active will ensure you find out about new performance features as they are developed.
 
@@ -69,6 +70,51 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 3.7.0 =
+
+**Enhancements**
+
+* Add guidance for managing Performance feature plugins. ([1734](https://github.com/WordPress/performance/pull/1734))
+* Automatically discover plugin dependencies when obtaining Performance feature plugins from WordPress.org. ([1680](https://github.com/WordPress/performance/pull/1680))
+* Disregard transient cache in `perflab_query_plugin_info()` when a plugin is absent. ([1694](https://github.com/WordPress/performance/pull/1694))
+* Minify script used for ajax activation of features; warn if absent and serve original file when SCRIPT_DEBUG is enabled. ([1658](https://github.com/WordPress/performance/pull/1658))
+
+**Bug Fixes**
+
+* Fix latest plugin version not being downloaded consistently. ([1693](https://github.com/WordPress/performance/pull/1693))
+
+= 3.6.1 =
+
+**Bug Fixes**
+
+* Fix race condition bug where activating multiple features sequentially could fail to activate some features. ([#1675](https://github.com/WordPress/performance/pull/1675))
+
+= 3.6.0 =
+
+**Enhancements**
+
+* Use AJAX for activating features / plugins in Performance Lab. ([1646](https://github.com/WordPress/performance/pull/1646))
+* Introduce AVIF header health check. ([1612](https://github.com/WordPress/performance/pull/1612))
+* Install and activate Optimization Detective when the Embed Optimizer feature is activated from the Performance screen. ([1644](https://github.com/WordPress/performance/pull/1644))
+
+**Bug Fixes**
+
+* Fix uses of 'Plugin not found' string. ([1651](https://github.com/WordPress/performance/pull/1651))
+
+= 3.5.1 =
+
+**Bug Fixes**
+
+* Account for plugin dependencies when storing relevant plugin info. ([1613](https://github.com/WordPress/performance/pull/1613))
+
+= 3.5.0 =
+
+**Enhancements**
+
+* Add Web Worker Offloading to list of Performance features. ([1577](https://github.com/WordPress/performance/pull/1577))
+* Only store info for relevant standalone plugins in the transient cache. ([1573](https://github.com/WordPress/performance/pull/1573))
+* Use a single WordPress.org API request to get information for all plugins. ([1562](https://github.com/WordPress/performance/pull/1562))
 
 = 3.4.1 =
 

@@ -21,6 +21,7 @@ return array(
 			</body>
 		</html>
 	',
+	// Note: There should be no lazy-loading script or styles added here as the only background image is in the initial viewport.
 	'expected' => '
 		<html lang="en">
 			<head>

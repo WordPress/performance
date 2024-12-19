@@ -307,6 +307,18 @@ class Test_Web_Worker_Offloading extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test printing the meta generator tag.
+	 *
+	 * @covers ::plwwo_render_generator_meta_tag
+	 */
+	public function test_plwwo_render_generator_meta_tag(): void {
+		$tag = get_echo( 'plwwo_render_generator_meta_tag' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'generator', $tag );
+		$this->assertStringContainsString( 'web-worker-offloading ' . WEB_WORKER_OFFLOADING_VERSION, $tag );
+	}
+
+	/**
 	 * Reset WP_Scripts and WP_Styles.
 	 */
 	private function reset_wp_dependencies(): void {

@@ -52,18 +52,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  * } An array with the updated structure for the metadata before is stored in the database.
  */
 function webp_uploads_create_sources_property( array $metadata, int $attachment_id ): array {
-	// This should take place only on the JPEG image.
-	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
-
-	// Not a supported mime type to create the sources property.
-	$mime_type = get_post_mime_type( $attachment_id );
-	if ( ! is_string( $mime_type ) || ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
-		return $metadata;
-	}
-
 	$file = get_attached_file( $attachment_id, true );
 	// File does not exist.
 	if ( false === $file || ! file_exists( $file ) ) {
+		return $metadata;
+	}
+
+	$mime_type = webp_uploads_get_attachment_file_mime_type( $attachment_id, $file );
+	if ( '' === $mime_type ) {
+		return $metadata;
+	}
+
+	$valid_mime_transforms = webp_uploads_get_upload_image_mime_transforms();
+
+	// Not a supported mime type to create the sources property.
+	if ( ! isset( $valid_mime_transforms[ $mime_type ] ) ) {
 		return $metadata;
 	}
 
@@ -777,3 +780,50 @@ function webp_uploads_init(): void {
 	}
 }
 add_action( 'init', 'webp_uploads_init' );
+
+/**
+ * Automatically opt into extra image sizes when generating fallback images.
+ *
+ * @since 2.4.0
+ *
+ * @global array $_wp_additional_image_sizes Associative array of additional image sizes.
+ */
+function webp_uploads_opt_in_extra_image_sizes(): void {
+	if ( ! webp_uploads_is_fallback_enabled() ) {
+		return;
+	}
+
+	global $_wp_additional_image_sizes;
+
+	// Modify global to mimic the "hypothetical" WP core API behavior via an additional `add_image_size()` parameter.
+
+	if ( isset( $_wp_additional_image_sizes['1536x1536'] ) && ! isset( $_wp_additional_image_sizes['1536x1536']['provide_additional_mime_types'] ) ) {
+		$_wp_additional_image_sizes['1536x1536']['provide_additional_mime_types'] = true; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	if ( isset( $_wp_additional_image_sizes['2048x2048'] ) && ! isset( $_wp_additional_image_sizes['2048x2048']['provide_additional_mime_types'] ) ) {
+		$_wp_additional_image_sizes['2048x2048']['provide_additional_mime_types'] = true; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+}
+add_action( 'plugins_loaded', 'webp_uploads_opt_in_extra_image_sizes' );
+
+/**
+ * Enables additional MIME type support for all image sizes based on the generate all fallback sizes settings.
+ *
+ * @since 2.4.0
+ *
+ * @param array<string, bool> $allowed_sizes A map of image size names and whether they are allowed to have additional MIME types.
+ * @return array<string, bool> Modified map of image sizes with additional MIME type support.
+ */
+function webp_uploads_enable_additional_mime_type_support_for_all_sizes( array $allowed_sizes ): array {
+	if ( ! webp_uploads_should_generate_all_fallback_sizes() ) {
+		return $allowed_sizes;
+	}
+
+	foreach ( array_keys( $allowed_sizes ) as $size ) {
+		$allowed_sizes[ $size ] = true;
+	}
+
+	return $allowed_sizes;
+}
+add_filter( 'webp_uploads_image_sizes_with_additional_mime_type_support', 'webp_uploads_enable_additional_mime_type_support_for_all_sizes' );

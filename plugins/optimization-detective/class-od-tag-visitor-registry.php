@@ -80,7 +80,7 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	}
 
 	/**
-	 * Returns an iterator for the URL metrics in the group.
+	 * Returns an iterator for the URL Metrics in the group.
 	 *
 	 * @return ArrayIterator<string, TagVisitorCallback> ArrayIterator for tag visitors.
 	 */
@@ -89,9 +89,9 @@ final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 	}
 
 	/**
-	 * Counts the URL metrics in the group.
+	 * Counts the URL Metrics in the group.
 	 *
-	 * @return int<0, max> URL metric count.
+	 * @return int<0, max> URL Metric count.
 	 */
 	public function count(): int {
 		return count( $this->visitors );

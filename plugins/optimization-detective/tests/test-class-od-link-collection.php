@@ -30,13 +30,14 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 							'media'          => 'screen',
 							'integrity'      => 'sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC',
 							'referrerpolicy' => 'origin',
+							'type'           => 'image/jpeg',
 						),
 					),
 				),
 				'expected_html'   => '
-					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w" imagesizes="100vw" crossorigin="anonymous" fetchpriority="high" as="image" media="screen" integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC" referrerpolicy="origin">
+					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w" imagesizes="100vw" crossorigin="anonymous" fetchpriority="high" as="image" media="screen" integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC" referrerpolicy="origin" type="image/jpeg">
 				',
-				'expected_header' => 'Link: <https://example.com/foo.jpg>; rel="preload"; imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w"; imagesizes="100vw"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen"; integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"; referrerpolicy="origin"',
+				'expected_header' => 'Link: <https://example.com/foo.jpg>; rel="preload"; imagesrcset="https://example.com/foo-400.jpg 400w, https://example.com/foo-800.jpg 800w"; imagesizes="100vw"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen"; integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"; referrerpolicy="origin"; type="image/jpeg"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
