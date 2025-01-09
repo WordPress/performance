@@ -23,7 +23,6 @@ final class OD_Storage_Lock {
 	 * Gets the TTL (in seconds) for the URL Metric storage lock.
 	 *
 	 * @since 0.1.0
-	 * @access private
 	 *
 	 * @return int TTL in seconds, greater than or equal to zero. A value of zero means that the storage lock should be disabled and thus that transients must not be used.
 	 */
@@ -65,7 +64,6 @@ final class OD_Storage_Lock {
 	 * seconds. Otherwise, if the current TTL is zero, then any transient is deleted.
 	 *
 	 * @since 0.1.0
-	 * @access private
 	 */
 	public static function set_lock(): void {
 		$ttl = self::get_ttl();
@@ -81,7 +79,6 @@ final class OD_Storage_Lock {
 	 * Checks whether URL Metric storage is locked (for the current IP).
 	 *
 	 * @since 0.1.0
-	 * @access private
 	 *
 	 * @return bool Whether locked.
 	 */
