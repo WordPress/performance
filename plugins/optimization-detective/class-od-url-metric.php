@@ -46,7 +46,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                            }
  *
  * @since 0.1.0
- * @access private
  */
 class OD_URL_Metric implements JsonSerializable {
 

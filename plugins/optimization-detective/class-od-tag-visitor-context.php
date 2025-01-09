@@ -15,7 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Context for tag visitors invoked for each tag while walking over a document.
  *
  * @since 0.4.0
- * @access private
  *
  * @property-read OD_URL_Metric_Group_Collection $url_metrics_group_collection Deprecated property accessed via magic getter. Use the url_metric_group_collection property instead.
  */

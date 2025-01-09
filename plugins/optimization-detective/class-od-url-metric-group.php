@@ -17,7 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @implements IteratorAggregate<int, OD_URL_Metric>
  *
  * @since 0.1.0
- * @access private
  */
 final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSerializable {
 

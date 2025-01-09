@@ -15,7 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Context for when a URL Metric is successfully stored via the REST API.
  *
  * @since 0.7.0
- * @access private
  */
 final class OD_URL_Metric_Store_Request_Context {
 

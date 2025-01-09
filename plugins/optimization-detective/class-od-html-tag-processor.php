@@ -15,7 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Extension to WP_HTML_Tag_Processor that supports injecting HTML and obtaining XPath for the current tag.
  *
  * @since 0.1.1
- * @access private
  */
 final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 

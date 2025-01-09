@@ -19,7 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @implements IteratorAggregate<string, TagVisitorCallback>
  *
  * @since 0.3.0
- * @access private
  */
 final class OD_Tag_Visitor_Registry implements Countable, IteratorAggregate {
 
