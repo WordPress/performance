@@ -263,7 +263,7 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
 
 	if ( in_array( $block_type->name, $consumer_blocks, true ) ) {
 		// Use array_values to reset the array keys after merging.
-		return array_values( array_unique( array_merge( $uses_context, array( 'max_alignment' ) ) ) );
+		return array_values( array_unique( array_merge( $uses_context, array( 'max_alignment', 'block_width_data' ) ) ) );
 	}
 	return $uses_context;
 }
