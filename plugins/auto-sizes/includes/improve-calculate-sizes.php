@@ -273,11 +273,12 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
  *
  * @since 1.4.0
  *
- * @param array<string, mixed> $context Current block context.
- * @param array<string, mixed> $block   The block being rendered.
+ * @param array<string, mixed> $context      Current block context.
+ * @param array<string, mixed> $block        The block being rendered.
+ * @param WP_Block|null        $parent_block If this is a nested block, a reference to the parent block.
  * @return array<string, mixed> Modified block context.
  */
-function auto_sizes_filter_render_block_context( array $context, array $block ): array {
+function auto_sizes_filter_render_block_context( array $context, array $block, WP_Block $parent_block = null ): array {
 	// When no max alignment is set, the maximum is assumed to be 'full'.
 	$context['max_alignment'] = $context['max_alignment'] ?? 'full';
 
@@ -296,6 +297,54 @@ function auto_sizes_filter_render_block_context( array $context, array $block ):
 		} elseif ( 'wide' === $alignment ) {
 			$context['max_alignment'] = 'wide';
 		}
+	}
+
+	static $block_width_data = array();
+
+	if ( null !== $parent_block ) {
+		$block_width_data = array();
+	}
+
+	$block_width_data = $parent_block->context['block_width_data'] ?? $block_width_data;
+	if ( 'core/group' === $block['blockName'] || 'core/columns' === $block['blockName'] ) {
+		if ( isset( $block['attrs']['align'] ) ) {
+			switch ( $block['attrs']['align'] ) {
+				case 'full':
+					$block_width_data[][ $block['blockName'] ] = 'full';
+					break;
+				case 'wide':
+					$block_width_data[][ $block['blockName'] ] = 'wide'; // Use actual `wideWidth` here.
+					break;
+				default:
+					$block_width_data[][ $block['blockName'] ] = 'default'; // Use actual `contentWidth` here.
+					break;
+			}
+		} else {
+			$block_width_data[][ $block['blockName'] ] = 'default'; // Use actual `contentWidth` here.
+		}
+	}
+
+	if ( 'core/columns' === $block['blockName'] ) {
+		// This is a special context key just to pass to the child 'core/column' block.
+		$context['column_count'] = count( $block['innerBlocks'] );
+	}
+
+	if ( 'core/column' === $block['blockName'] ) {
+		$found_image_block = wp_get_first_block( $block['innerBlocks'], 'core/image' );
+		$found_cover_block = wp_get_first_block( $block['innerBlocks'], 'core/cover' );
+		if ( count( $found_image_block ) > 0 || count( $found_cover_block ) > 0 ) {
+			if ( isset( $block['attrs']['width'] ) && '' !== $block['attrs']['width'] ) {
+				// Use specific column width.
+				$block_width_data[][ $block['blockName'] ] = $block['attrs']['width'];
+			} elseif ( isset( $parent_block->context['column_count'] ) && $parent_block->context['column_count'] ) {
+				// Determine the width based on equally sized columns.
+				$block_width_data[][ $block['blockName'] ] = '' . ( 100 / $parent_block->context['column_count'] ) . '%';
+			}
+		}
+	}
+
+	if ( $block_width_data ) {
+		$context['block_width_data'] = $block_width_data;
 	}
 
 	return $context;
