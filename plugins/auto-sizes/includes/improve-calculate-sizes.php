@@ -278,7 +278,7 @@ function auto_sizes_filter_uses_context( array $uses_context, WP_Block_Type $blo
  * @param WP_Block|null        $parent_block If this is a nested block, a reference to the parent block.
  * @return array<string, mixed> Modified block context.
  */
-function auto_sizes_filter_render_block_context( array $context, array $block, WP_Block $parent_block = null ): array {
+function auto_sizes_filter_render_block_context( array $context, array $block, ?WP_Block $parent_block ): array {
 	// When no max alignment is set, the maximum is assumed to be 'full'.
 	$context['max_alignment'] = $context['max_alignment'] ?? 'full';
 
@@ -301,7 +301,7 @@ function auto_sizes_filter_render_block_context( array $context, array $block, W
 
 	static $block_width_data = array();
 
-	if ( null !== $parent_block ) {
+	if ( null === $parent_block ) {
 		$block_width_data = array();
 	}
 
