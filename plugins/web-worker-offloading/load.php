@@ -5,7 +5,7 @@
  * Description: Offloads select JavaScript execution to a Web Worker to reduce work on the main thread and improve the Interaction to Next Paint (INP) metric.
  * Requires at least: 6.6
  * Requires PHP: 7.2
- * Version: 0.1.1
+ * Version: 0.2.0
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -43,7 +43,7 @@ if (
 	);
 }
 
-define( 'WEB_WORKER_OFFLOADING_VERSION', '0.1.1' );
+define( 'WEB_WORKER_OFFLOADING_VERSION', '0.2.0' );
 
 require_once __DIR__ . '/helper.php';
 require_once __DIR__ . '/hooks.php';

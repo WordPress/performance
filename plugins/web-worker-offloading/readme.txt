@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   0.1.1
+Stable tag:   0.2.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, JavaScript, web worker, partytown, analytics
@@ -26,9 +26,9 @@ Unlike with the script loading strategies (async/defer), any inline before/after
 
 Otherwise, the plugin currently ships with built-in integrations to offload Google Analytics to a web worker for the following plugin:
 
+* [Rank Math SEO](https://wordpress.org/plugins/seo-by-rank-math/)
+* [Site Kit by Google](https://wordpress.org/plugins/google-site-kit/)
 * [WooCommerce](https://wordpress.org/plugins/woocommerce/)
-
-Support for [Site Kit by Google](https://wordpress.org/plugins/google-site-kit/) and [Rank Math SEO](https://wordpress.org/plugins/seo-by-rank-math/) are [planned](https://github.com/WordPress/performance/issues/1455).
 
 Please monitor your analytics once activating to ensure all the expected events are being logged. At the same time, monitor your INP scores to check for improvement.
 
@@ -93,6 +93,18 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/web-worker-offloading) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.2.0 =
+
+**Enhancements**
+
+* Integrate Web Worker Offloading with Google Site Kit. ([1686](https://github.com/WordPress/performance/pull/1686))
+* Integrate Web Worker Offloading with Rank Math SEO. ([1685](https://github.com/WordPress/performance/pull/1685))
+* Serve unminified scripts when `SCRIPT_DEBUG` is enabled. ([1643](https://github.com/WordPress/performance/pull/1643))
+
+**Bug Fixes**
+
+* Fix tracking events like add_to_cart in WooCommerce integration. ([1740](https://github.com/WordPress/performance/pull/1740))
 
 = 0.1.1 =
 

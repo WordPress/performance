@@ -29,9 +29,8 @@ function plsr_get_speculation_rules(): array {
 	$prefixer = new PLSR_URL_Pattern_Prefixer();
 
 	$base_href_exclude_paths = array(
-		$prefixer->prefix_path_pattern( '/wp-login.php', 'site' ),
+		$prefixer->prefix_path_pattern( '/wp-*.php', 'site' ),
 		$prefixer->prefix_path_pattern( '/wp-admin/*', 'site' ),
-		$prefixer->prefix_path_pattern( '/*\\?*(^|&)_wpnonce=*', 'home' ),
 		$prefixer->prefix_path_pattern( '/*', 'uploads' ),
 		$prefixer->prefix_path_pattern( '/*', 'content' ),
 		$prefixer->prefix_path_pattern( '/*', 'plugins' ),
@@ -39,11 +38,20 @@ function plsr_get_speculation_rules(): array {
 		$prefixer->prefix_path_pattern( '/*', 'stylesheet' ),
 	);
 
+	/*
+	 * If pretty permalinks are enabled, exclude any URLs with query parameters.
+	 * Otherwise, exclude specifically the URLs with a `_wpnonce` query parameter.
+	 */
+	if ( (bool) get_option( 'permalink_structure' ) ) {
+		$base_href_exclude_paths[] = $prefixer->prefix_path_pattern( '/*\\?(.+)', 'home' );
+	} else {
+		$base_href_exclude_paths[] = $prefixer->prefix_path_pattern( '/*\\?*(^|&)_wpnonce=*', 'home' );
+	}
+
 	/**
 	 * Filters the paths for which speculative prerendering should be disabled.
 	 *
 	 * All paths should start in a forward slash, relative to the root document. The `*` can be used as a wildcard.
-	 * By default, the array includes `/wp-login.php` and `/wp-admin/*`.
 	 *
 	 * If the WordPress site is in a subdirectory, the exclude paths will automatically be prefixed as necessary.
 	 *

@@ -2,32 +2,39 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   0.2.0
+Stable tag:   0.3.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, optimization, image, lcp, lazy-load
 
-Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds fetchpriority and applies lazy-loading.
+Prioritizes the loading of images and videos based on how visible they are to actual visitors; adds fetchpriority and applies lazy loading.
 
 == Description ==
 
-This plugin optimizes the loading of images (and videos) with prioritization, lazy loading, and more accurate image size selection.
+This plugin optimizes the loading of images (and videos) with prioritization to improve [Largest Contentful Paint](https://web.dev/articles/lcp) (LCP), lazy loading, and more accurate image size selection.
 
 The current optimizations include:
 
-1. Ensure `fetchpriority=high` is only added to an `IMG` when it is the Largest Contentful Paint (LCP) element across all responsive breakpoints.
-2. Add breakpoint-specific `fetchpriority=high` preload links for the LCP elements which are `IMG` elements or elements with a CSS `background-image` inline style.
-3. Apply lazy-loading to `IMG` tags based on whether they appear in any breakpoint’s initial viewport. (Additionally, [`sizes=auto`](https://make.wordpress.org/core/2024/10/18/auto-sizes-for-lazy-loaded-images-in-wordpress-6-7/) is then also correctly applied.)
-4. Implement lazy-loading of CSS background images added via inline `style` attributes.
-5. Add `fetchpriority=low` to `IMG` tags which appear in the initial viewport but are not visible, such as when they are subsequent carousel slides.
+1. Add breakpoint-specific `fetchpriority=high` preload links (`LINK[rel=preload]`) for image URLs of LCP elements:
+   1. An `IMG` element, including the `srcset`/`sizes` attributes supplied as `imagesrcset`/`imagesizes` on the `LINK`.
+   2. The first `SOURCE` element with a `type` attribute in a `PICTURE` element. (Art-directed `PICTURE` elements using media queries are not supported.)
+   3. An element with a CSS `background-image` inline `style` attribute.
+   4. An element with a CSS `background-image` applied with a stylesheet (when the image is from an allowed origin).
+   5. A `VIDEO` element's `poster` image.
+2. Ensure `fetchpriority=high` is only added to an `IMG` when it is the LCP element across all responsive breakpoints.
+3. Add `fetchpriority=low` to `IMG` tags which appear in the initial viewport but are not visible, such as when they are subsequent carousel slides.
+4. Lazy loading:
+   1. Apply lazy loading to `IMG` tags based on whether they appear in any breakpoint’s initial viewport.
+   2. Implement lazy loading of CSS background images added via inline `style` attributes.
+   3. Lazy-load `VIDEO` tags by setting the appropriate attributes based on whether they appear in the initial viewport. If a `VIDEO` is the LCP element, it gets `preload=auto`; if it is in an initial viewport, the `preload=metadata` default is left; if it is not in an initial viewport, it gets `preload=none`. Lazy-loaded videos also get initial `preload`, `autoplay`, and `poster` attributes restored when the `VIDEO` is going to enter the viewport.
+5. Ensure that [`sizes=auto`](https://make.wordpress.org/core/2024/10/18/auto-sizes-for-lazy-loaded-images-in-wordpress-6-7/) is added to all lazy-loaded `IMG` elements.
 6. Reduce the size of the `poster` image of a `VIDEO` from full size to the size appropriate for the maximum width of the video (on desktop).
-7. Lazy-load `VIDEO` tags by setting the appropriate attributes based on whether they appear in the initial viewport. If a `VIDEO` is the LCP element, it gets `preload=auto`; if it is in an initial viewport, the `preload=metadata` default is left; if it is not in an initial viewport, it gets `preload=none`. Lazy-loaded videos also get initial `preload`, `autoplay`, and `poster` attributes restored when the `VIDEO` is going to enter the viewport.
 
 **This plugin requires the [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) plugin as a dependency.** Please refer to that plugin for additional background on how this plugin works as well as additional developer options.
 
 👉 **Note:** This plugin optimizes pages for actual visitors, and it depends on visitors to optimize pages. As such, you won't see optimizations applied immediately after activating the plugin. Please wait for URL Metrics to be gathered for both mobile and desktop visits. And since administrator users are not normal visitors typically, optimizations are not applied for admins by default.
 
-There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
+Your site must have the **REST API accessible** to unauthenticated frontend visitors since this is how metrics are collected about how a page should be optimized. There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
 == Installation ==
 
@@ -62,6 +69,16 @@ Contributions are always welcome! Learn more about how to get involved in the [C
 The [plugin source code](https://github.com/WordPress/performance/tree/trunk/plugins/image-prioritizer) is located in the [WordPress/performance](https://github.com/WordPress/performance) repo on GitHub.
 
 == Changelog ==
+
+= 0.3.0 =
+
+**Enhancements**
+
+* Add preload links LCP picture elements. ([1707](https://github.com/WordPress/performance/pull/1707))
+* Harden validation of user-submitted LCP background image URL. ([1713](https://github.com/WordPress/performance/pull/1713))
+* Lazy load background images added via inline style attributes. ([1708](https://github.com/WordPress/performance/pull/1708))
+* Preload image URLs for LCP elements with external background images. ([1697](https://github.com/WordPress/performance/pull/1697))
+* Serve unminified scripts when `SCRIPT_DEBUG` is enabled. ([1643](https://github.com/WordPress/performance/pull/1643))
 
 = 0.2.0 =
 

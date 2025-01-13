@@ -17,7 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Image Prioritizer: Image_Prioritizer_Video_Tag_Visitor class
  *
  * @since 0.2.0
- *
  * @access private
  */
 final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Visitor {

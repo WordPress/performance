@@ -28,6 +28,18 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 * @return array<string, mixed>
 	 */
 	public function data_provider_to_test_rest_request_good_params(): array {
+		$add_root_extra_property = static function ( string $property_name ): void {
+			add_filter(
+				'od_url_metric_schema_root_additional_properties',
+				static function ( array $properties ) use ( $property_name ): array {
+					$properties[ $property_name ] = array(
+						'type' => 'string',
+					);
+					return $properties;
+				}
+			);
+		};
+
 		return array(
 			'not_extended'             => array(
 				'set_up' => function (): array {
@@ -35,17 +47,8 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 				},
 			),
 			'extended'                 => array(
-				'set_up' => function (): array {
-					add_filter(
-						'od_url_metric_schema_root_additional_properties',
-						static function ( array $properties ): array {
-							$properties['extra'] = array(
-								'type' => 'string',
-							);
-							return $properties;
-						}
-					);
-
+				'set_up' => function () use ( $add_root_extra_property ): array {
+					$add_root_extra_property( 'extra' );
 					$params = $this->get_valid_params();
 					$params['extra'] = 'foo';
 					return $params;
@@ -96,12 +99,15 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertCount( 0, get_posts( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) ) );
 		$request  = $this->create_request( $valid_params );
 		$response = rest_get_server()->dispatch( $request );
-		$this->assertSame( 200, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 
+		$this->assertSame( 1, did_action( 'od_url_metric_stored' ) );
+
+		$this->assertSame( 200, $response->get_status(), 'Response: ' . wp_json_encode( $response ) );
 		$data = $response->get_data();
+		$this->assertCount( 1, get_posts( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) ) );
+
 		$this->assertTrue( $data['success'] );
 
-		$this->assertCount( 1, get_posts( array( 'post_type' => OD_URL_Metrics_Post_Type::SLUG ) ) );
 		$post = OD_URL_Metrics_Post_Type::get_post( $valid_params['slug'] );
 		$this->assertInstanceOf( WP_Post::class, $post );
 
@@ -112,20 +118,20 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 
 		$expected_data = $valid_params;
 		unset( $expected_data['hmac'], $expected_data['slug'], $expected_data['current_etag'], $expected_data['cache_purge_post_id'] );
+		unset( $expected_data['unset_prop'] );
 		$this->assertSame(
 			$expected_data,
 			wp_array_slice_assoc( $url_metrics[0]->jsonSerialize(), array_keys( $expected_data ) )
 		);
-		$this->assertSame( 1, did_action( 'od_url_metric_stored' ) );
 
 		$this->assertInstanceOf( OD_URL_Metric_Store_Request_Context::class, $stored_context );
 
 		// Now check that od_trigger_page_cache_invalidation() cleaned caches as expected.
 		$this->assertSame( $url_metrics[0]->jsonSerialize(), $stored_context->url_metric->jsonSerialize() );
-		$cache_purge_post_id = $stored_context->request->get_param( 'cache_purge_post_id' );
-
 		if ( isset( $valid_params['cache_purge_post_id'] ) ) {
-			$scheduled = wp_next_scheduled( 'od_trigger_page_cache_invalidation', array( $valid_params['cache_purge_post_id'] ) );
+			$cache_purge_post_id = $stored_context->request->get_param( 'cache_purge_post_id' );
+			$this->assertSame( $valid_params['cache_purge_post_id'], $cache_purge_post_id );
+			$scheduled = wp_next_scheduled( 'od_trigger_page_cache_invalidation', array( $cache_purge_post_id ) );
 			$this->assertIsInt( $scheduled );
 			$this->assertGreaterThan( time(), $scheduled );
 		}

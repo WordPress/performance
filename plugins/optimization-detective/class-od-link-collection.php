@@ -29,6 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                   fetchpriority?: 'high'|'low'|'auto',
  *                   as?: 'audio'|'document'|'embed'|'fetch'|'font'|'image'|'object'|'script'|'style'|'track'|'video'|'worker',
  *                   media?: non-empty-string,
+ *                   type?: non-empty-string,
  *                   integrity?: non-empty-string,
  *                   referrerpolicy?: 'no-referrer'|'no-referrer-when-downgrade'|'origin'|'origin-when-cross-origin'|'unsafe-url'
  *               }

@@ -186,3 +186,97 @@ function dominant_color_render_generator(): void {
 	echo '<meta name="generator" content="dominant-color-images ' . esc_attr( DOMINANT_COLOR_IMAGES_VERSION ) . '">' . "\n";
 }
 add_action( 'wp_head', 'dominant_color_render_generator' );
+
+/**
+ * Adds inline CSS for dominant color styling in the WordPress admin area.
+ *
+ * This function registers and enqueues a custom style handle, then adds inline CSS
+ * to apply background color based on the dominant color for attachment previews
+ * in the WordPress admin interface.
+ *
+ * @since 1.2.0
+ */
+function dominant_color_admin_inline_style(): void {
+	$handle = 'dominant-color-admin-styles';
+	// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- Version not used since this handle is only registered for adding an inline style.
+	wp_register_style( $handle, false );
+	wp_enqueue_style( $handle );
+	$custom_css = '.wp-core-ui .attachment-preview[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }';
+	wp_add_inline_style( $handle, $custom_css );
+}
+add_action( 'admin_enqueue_scripts', 'dominant_color_admin_inline_style' );
+
+/**
+ * Adds a script to the admin footer to modify the attachment template.
+ *
+ * This function injects a JavaScript snippet into the admin footer that modifies
+ * the attachment template. It adds attributes for dominant color and transparency
+ * to the template, allowing these properties to be displayed in the media library.
+ *
+ * @since 1.2.0
+ * @see wp_print_media_templates()
+ */
+function dominant_color_admin_script(): void {
+	?>
+	<script type="module">
+		const tmpl = document.getElementById( 'tmpl-attachment' );
+		if ( tmpl ) {
+			tmpl.textContent = tmpl.textContent.replace( /^\s*<div[^>]*?(?=>)/, ( match ) => {
+				let replaced = match.replace( /\sclass="/, " class=\"{{ data.hasTransparency ? 'has-transparency' : 'not-transparent' }} " );
+				replaced += ' data-dominant-color="{{ data.dominantColor }}"';
+				replaced += ' data-has-transparency="{{ data.hasTransparency }}"';
+				let hasStyleAttr = false;
+				const colorStyle = "{{ data.dominantColor ? '--dominant-color: #' + data.dominantColor + ';' : '' }}";
+				replaced = replaced.replace( /\sstyle="/, ( styleMatch ) => {
+					hasStyleAttr = true;
+					return styleMatch + colorStyle;
+				} );
+				if ( ! hasStyleAttr ) {
+					replaced += ` style="${colorStyle}"`;
+				}
+				return replaced;
+			} );
+		}
+	</script>
+	<?php
+}
+add_action( 'admin_print_footer_scripts', 'dominant_color_admin_script' );
+
+/**
+ * Prepares attachment data for JavaScript, adding dominant color and transparency information.
+ *
+ * This function enhances the attachment data for JavaScript by including information about
+ * the dominant color and transparency of the image. It modifies the response array to include
+ * these additional properties, which can be used in the media library interface.
+ *
+ * @since 1.2.0
+ *
+ * @param array<string, mixed>|mixed $response   The current response array for the attachment.
+ * @param WP_Post                    $attachment The attachment post object.
+ * @param array<string, mixed>|false $meta       The attachment metadata.
+ * @return array<string, mixed> The modified response array with added dominant color and transparency information.
+ */
+function dominant_color_prepare_attachment_for_js( $response, WP_Post $attachment, $meta ): array {
+	if ( ! is_array( $response ) ) {
+		$response = array();
+	}
+	if ( ! is_array( $meta ) ) {
+		return $response;
+	}
+
+	$response['dominantColor'] = '';
+	if (
+		isset( $meta['dominant_color'] )
+		&&
+		1 === preg_match( '/^[0-9a-f]+$/', $meta['dominant_color'] ) // See format returned by dominant_color_rgb_to_hex().
+	) {
+		$response['dominantColor'] = $meta['dominant_color'];
+	}
+	$response['hasTransparency'] = '';
+	if ( isset( $meta['has_transparency'] ) ) {
+		$response['hasTransparency'] = (bool) $meta['has_transparency'];
+	}
+
+	return $response;
+}
+add_filter( 'wp_prepare_attachment_for_js', 'dominant_color_prepare_attachment_for_js', 10, 3 );

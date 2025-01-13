@@ -82,6 +82,17 @@ add_filter(
 
 As mentioned above, adding the `no-prerender` CSS class to a link will prevent it from being prerendered (but not prefetched). Additionally, links with `rel=nofollow` will neither be prefetched nor prerendered because some plugins add this to non-idempotent links (e.g. add to cart); such links ideally should rather be buttons which trigger a POST request or at least they should use `wp_nonce_url()`.
 
+= Are there any special considerations for speculative loading behavior? =
+
+For safety reasons, the entire speculative loading feature is disabled by default for logged-in users and for sites that do not use pretty permalinks. The latter is the case because plugins often use URLs with custom query parameters to let users perform actions, and such URLs should not be speculatively loaded. For sites without pretty permalinks, it is impossible or at least extremely complex to differentiate between which query parameters are Core defaults and which query parameters are custom.
+
+If you are running this plugin on a site without pretty permalinks and are confident that there are no custom query parameters in use that can cause state changes, you can opt in to enabling speculative loading via the `plsr_enabled_without_pretty_permalinks` filter:
+
+`
+<?php
+add_filter( 'plsr_enabled_without_pretty_permalinks', '__return_true' );
+`
+
 = How will this impact analytics and personalization? =
 
 Prerendering can affect analytics and personalization.

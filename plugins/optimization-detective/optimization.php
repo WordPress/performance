@@ -98,7 +98,7 @@ function od_maybe_add_template_output_buffer_filter(): void {
  * Determines whether the current response can be optimized.
  *
  * @since 0.1.0
- * @since n.e.x.t Response is optimized for admin users as well when in 'plugin' development mode.
+ * @since 0.9.0 Response is optimized for admin users as well when in 'plugin' development mode.
  *
  * @access private
  *
@@ -170,10 +170,14 @@ function od_is_response_html_content_type(): bool {
  * @since 0.1.0
  * @access private
  *
+ * @global WP_Query $wp_the_query WP_Query object.
+ *
  * @param string $buffer Template output buffer.
  * @return string Filtered template output buffer.
  */
 function od_optimize_template_output_buffer( string $buffer ): string {
+	global $wp_the_query;
+
 	// If the content-type is not HTML or the output does not start with '<', then abort since the buffer is definitely not HTML.
 	if (
 		! od_is_response_html_content_type() ||
@@ -206,7 +210,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	 */
 	do_action( 'od_register_tag_visitors', $tag_visitor_registry );
 
-	$current_etag         = od_get_current_url_metrics_etag( $tag_visitor_registry );
+	$current_etag         = od_get_current_url_metrics_etag( $tag_visitor_registry, $wp_the_query, od_get_current_theme_template() );
 	$group_collection     = new OD_URL_Metric_Group_Collection(
 		$post instanceof WP_Post ? OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ) : array(),
 		$current_etag,
@@ -223,6 +227,11 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
 	do {
+		// Never process anything inside NOSCRIPT since it will never show up in the DOM when scripting is enabled, and thus it can never be detected nor measured.
+		if ( in_array( 'NOSCRIPT', $processor->get_breadcrumbs(), true ) ) {
+			continue;
+		}
+
 		$tracked_in_url_metrics = false;
 		$processor->set_bookmark( $current_tag_bookmark ); // TODO: Should we break if this returns false?
 

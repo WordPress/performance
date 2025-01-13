@@ -38,7 +38,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * The current ETag.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.9.0
 	 * @var non-empty-string
 	 */
 	private $current_etag;
@@ -186,7 +186,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	/**
 	 * Gets the current ETag.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.9.0
 	 *
 	 * @return non-empty-string Current ETag.
 	 */
@@ -225,7 +225,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Clear result cache.
+	 * Clears result cache.
 	 *
 	 * @since 0.3.0
 	 */
@@ -234,7 +234,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	}
 
 	/**
-	 * Create groups.
+	 * Creates groups.
 	 *
 	 * @since 0.1.0
 	 *
@@ -427,6 +427,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * Gets common LCP element.
 	 *
 	 * @since 0.3.0
+	 * @since 0.9.0 An LCP element is also considered common if it is the same in the narrowest and widest viewport groups, and all intermediate groups are empty.
 	 *
 	 * @return OD_Element|null Common LCP element if it exists.
 	 */
@@ -437,38 +438,40 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 
 		$result = ( function () {
 
-			// If every group isn't populated, then we can't say whether there is a common LCP element across every viewport group.
-			if ( ! $this->is_every_group_populated() ) {
+			// Ensure both the narrowest (first) and widest (last) viewport groups are populated.
+			$first_group = $this->get_first_group();
+			$last_group  = $this->get_last_group();
+			if ( $first_group->count() === 0 || $last_group->count() === 0 ) {
 				return null;
 			}
 
-			// Look at the LCP elements across all the viewport groups.
-			$groups_by_lcp_element_xpath   = array();
-			$lcp_elements_by_xpath         = array();
-			$group_has_unknown_lcp_element = false;
-			foreach ( $this->groups as $group ) {
-				$lcp_element = $group->get_lcp_element();
-				if ( $lcp_element instanceof OD_Element ) {
-					$groups_by_lcp_element_xpath[ $lcp_element->get_xpath() ][] = $group;
-					$lcp_elements_by_xpath[ $lcp_element->get_xpath() ][]       = $lcp_element;
-				} else {
-					$group_has_unknown_lcp_element = true;
+			$first_group_lcp_element = $first_group->get_lcp_element();
+			$last_group_lcp_element  = $last_group->get_lcp_element();
+
+			// Validate LCP elements exist and have matching XPaths in the extreme viewport groups.
+			if (
+				! $first_group_lcp_element instanceof OD_Element
+				||
+				! $last_group_lcp_element instanceof OD_Element
+				||
+				$first_group_lcp_element->get_xpath() !== $last_group_lcp_element->get_xpath()
+			) {
+				return null; // No common LCP element across the narrowest and widest viewports.
+			}
+
+			// Check intermediate viewport groups for conflicting LCP elements.
+			foreach ( array_slice( $this->groups, 1, -1 ) as $group ) {
+				$group_lcp_element = $group->get_lcp_element();
+				if (
+					$group_lcp_element instanceof OD_Element
+					&&
+					$group_lcp_element->get_xpath() !== $first_group_lcp_element->get_xpath()
+				) {
+					return null; // Conflicting LCP element found in an intermediate group.
 				}
 			}
 
-			if (
-				// All breakpoints share the same LCP element.
-				1 === count( $groups_by_lcp_element_xpath )
-				&&
-				// The breakpoints don't share a common lack of a detected LCP element.
-				! $group_has_unknown_lcp_element
-			) {
-				$xpath = key( $lcp_elements_by_xpath );
-
-				return $lcp_elements_by_xpath[ $xpath ][0];
-			}
-
-			return null;
+			return $first_group_lcp_element;
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ] = $result;

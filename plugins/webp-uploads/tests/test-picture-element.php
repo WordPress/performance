@@ -119,9 +119,10 @@ class Test_WebP_Uploads_Picture_Element extends TestCase {
 
 		$expected_html = str_replace( array_keys( $replacements ), array_values( $replacements ), $expected_html );
 
-		// Apply the wp_content_img_tag filter.
-		$image = apply_filters( 'wp_content_img_tag', $image, 'the_content', self::$image_id );
-
+		if ( webp_uploads_is_picture_element_enabled() ) {
+			// Apply the wp_content_img_tag filter.
+			$image = apply_filters( 'wp_content_img_tag', $image, 'the_content', self::$image_id );
+		}
 		// Check that the image has the expected HTML.
 		$this->assertEquals( $expected_html, $image );
 	}

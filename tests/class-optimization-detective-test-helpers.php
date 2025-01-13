@@ -27,7 +27,7 @@ trait Optimization_Detective_Test_Helpers {
 	 */
 	public function populate_url_metrics( array $elements, bool $complete = true ): void {
 		$slug        = od_get_url_metrics_slug( od_get_normalized_query_vars() );
-		$etag        = od_get_current_url_metrics_etag( new OD_Tag_Visitor_Registry() ); // Note: Tests rely on the od_current_url_metrics_etag_data filter to set the desired value.
+		$etag        = od_get_current_url_metrics_etag( new OD_Tag_Visitor_Registry(), null, null ); // Note: Tests rely on the od_current_url_metrics_etag_data filter to set the desired value.
 		$sample_size = $complete ? od_get_url_metrics_breakpoint_sample_size() : 1;
 		foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $viewport_width ) {
 			for ( $i = 0; $i < $sample_size; $i++ ) {
@@ -81,11 +81,12 @@ trait Optimization_Detective_Test_Helpers {
 	public function get_sample_url_metric( array $params ): OD_URL_Metric {
 		$params = array_merge(
 			array(
-				'etag'           => od_get_current_url_metrics_etag( new OD_Tag_Visitor_Registry() ), // Note: Tests rely on the od_current_url_metrics_etag_data filter to set the desired value.
+				'etag'           => od_get_current_url_metrics_etag( new OD_Tag_Visitor_Registry(), null, null ), // Note: Tests rely on the od_current_url_metrics_etag_data filter to set the desired value.
 				'url'            => home_url( '/' ),
 				'viewport_width' => 480,
 				'elements'       => array(),
 				'timestamp'      => microtime( true ),
+				'extended_root'  => array(),
 			),
 			$params
 		);
@@ -94,7 +95,7 @@ trait Optimization_Detective_Test_Helpers {
 			$params['elements'][] = $params['element'];
 		}
 
-		return new OD_URL_Metric(
+		$data = array_merge(
 			array(
 				'etag'      => $params['etag'],
 				'url'       => $params['url'],
@@ -118,8 +119,10 @@ trait Optimization_Detective_Test_Helpers {
 					},
 					$params['elements']
 				),
-			)
+			),
+			$params['extended_root']
 		);
+		return new OD_URL_Metric( $data );
 	}
 
 	/**

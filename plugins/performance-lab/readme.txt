@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   3.6.1
+Stable tag:   3.7.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -70,6 +70,19 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 3.7.0 =
+
+**Enhancements**
+
+* Add guidance for managing Performance feature plugins. ([1734](https://github.com/WordPress/performance/pull/1734))
+* Automatically discover plugin dependencies when obtaining Performance feature plugins from WordPress.org. ([1680](https://github.com/WordPress/performance/pull/1680))
+* Disregard transient cache in `perflab_query_plugin_info()` when a plugin is absent. ([1694](https://github.com/WordPress/performance/pull/1694))
+* Minify script used for ajax activation of features; warn if absent and serve original file when SCRIPT_DEBUG is enabled. ([1658](https://github.com/WordPress/performance/pull/1658))
+
+**Bug Fixes**
+
+* Fix latest plugin version not being downloaded consistently. ([1693](https://github.com/WordPress/performance/pull/1693))
 
 = 3.6.1 =
 

@@ -27,10 +27,10 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	private $default_mimetype;
 
 	public function set_up(): void {
+		parent::set_up();
 		$this->original_request_uri    = $_SERVER['REQUEST_URI'];
 		$this->original_request_method = $_SERVER['REQUEST_METHOD'];
 		$this->default_mimetype        = (string) ini_get( 'default_mimetype' );
-		parent::set_up();
 	}
 
 	public function tear_down(): void {

@@ -19,6 +19,34 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 1.0.0
  */
 function plsr_print_speculation_rules(): void {
+	// Skip speculative loading for logged-in users.
+	if ( is_user_logged_in() ) {
+		return;
+	}
+
+	// Skip speculative loading for sites without pretty permalinks, unless explicitly enabled.
+	if ( ! (bool) get_option( 'permalink_structure' ) ) {
+		/**
+		 * Filters whether speculative loading should be enabled even though the site does not use pretty permalinks.
+		 *
+		 * Since query parameters are commonly used by plugins for dynamic behavior that can change state, ideally any
+		 * such URLs are excluded from speculative loading. If the site does not use pretty permalinks though, they are
+		 * impossible to recognize. Therefore speculative loading is disabled by default for those sites.
+		 *
+		 * For site owners of sites without pretty permalinks that are certain their site is not using such a pattern,
+		 * this filter can be used to still enable speculative loading at their own risk.
+		 *
+		 * @since n.e.x.t
+		 *
+		 * @param bool $enabled Whether speculative loading is enabled even without pretty permalinks.
+		 */
+		$enabled = (bool) apply_filters( 'plsr_enabled_without_pretty_permalinks', false );
+
+		if ( ! $enabled ) {
+			return;
+		}
+	}
+
 	wp_print_inline_script_tag(
 		(string) wp_json_encode( plsr_get_speculation_rules() ),
 		array( 'type' => 'speculationrules' )

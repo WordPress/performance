@@ -68,11 +68,13 @@ function od_render_generator_meta_tag(): void {
 /**
  * Gets the path to a script or stylesheet.
  *
- * @since n.e.x.t
+ * @since 0.9.0
  *
  * @param string      $src_path Source path, relative to plugin root.
  * @param string|null $min_path Minified path. If not supplied, then '.min' is injected before the file extension in the source path.
  * @return string URL to script or stylesheet.
+ *
+ * @noinspection PhpDocMissingThrowsInspection
  */
 function od_get_asset_path( string $src_path, ?string $min_path = null ): string {
 	if ( null === $min_path ) {
@@ -83,6 +85,11 @@ function od_get_asset_path( string $src_path, ?string $min_path = null ): string
 	$force_src = false;
 	if ( WP_DEBUG && ! file_exists( trailingslashit( __DIR__ ) . $min_path ) ) {
 		$force_src = true;
+		/**
+		 * No WP_Exception is thrown by wp_trigger_error() since E_USER_ERROR is not passed as the error level.
+		 *
+		 * @noinspection PhpUnhandledExceptionInspection
+		 */
 		wp_trigger_error(
 			__FUNCTION__,
 			sprintf(

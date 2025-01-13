@@ -200,6 +200,40 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test clear_cache().
+	 *
+	 * @covers ::clear_cache
+	 * @covers OD_URL_Metric_Group::clear_cache
+	 */
+	public function test_clear_cache(): void {
+		$collection      = new OD_URL_Metric_Group_Collection( array(), md5( '' ), array(), 1, DAY_IN_SECONDS );
+		$populated_value = array( 'foo' => true );
+		$group           = $collection->get_first_group();
+
+		// Get private members.
+		$collection_result_cache_reflection_property = new ReflectionProperty( OD_URL_Metric_Group_Collection::class, 'result_cache' );
+		$collection_result_cache_reflection_property->setAccessible( true );
+		$this->assertSame( array(), $collection_result_cache_reflection_property->getValue( $collection ) );
+		$group_result_cache_reflection_property = new ReflectionProperty( OD_URL_Metric_Group::class, 'result_cache' );
+		$group_result_cache_reflection_property->setAccessible( true );
+		$this->assertSame( array(), $group_result_cache_reflection_property->getValue( $group ) );
+
+		// Test clear_cache() on collection.
+		$collection_result_cache_reflection_property->setValue( $collection, $populated_value );
+		$collection->clear_cache();
+		$this->assertSame( array(), $collection_result_cache_reflection_property->getValue( $collection ) );
+
+		// Test that adding a URL metric to a collection clears the caches.
+		$collection_result_cache_reflection_property->setValue( $collection, $populated_value );
+		$group_result_cache_reflection_property->setValue( $group, $populated_value );
+		$collection->add_url_metric( $this->get_sample_url_metric( array() ) );
+		$url_metric = $group->getIterator()->current();
+		$this->assertInstanceOf( OD_URL_Metric::class, $url_metric );
+		$this->assertSame( array(), $collection_result_cache_reflection_property->getValue( $collection ) );
+		$this->assertSame( array(), $group_result_cache_reflection_property->getValue( $group ) );
+	}
+
+	/**
 	 * Test add_url_metric().
 	 *
 	 * @covers ::add_url_metric
@@ -722,44 +756,118 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function data_provider_test_get_common_lcp_element(): array {
+		$xpath1 = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]/*[1]';
+		$xpath2 = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]/*[2]';
+
+		$get_sample_url_metric = function ( int $viewport_width, string $lcp_element_xpath, bool $is_lcp = true ): OD_URL_Metric {
+			return $this->get_sample_url_metric(
+				array(
+					'viewport_width' => $viewport_width,
+					'element'        => array(
+						'isLCP' => $is_lcp,
+						'xpath' => $lcp_element_xpath,
+					),
+				)
+			);
+		};
+
+		return array(
+			'all_groups_have_common_lcp'             => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 400, $xpath1 ),
+					$get_sample_url_metric( 600, $xpath1 ),
+					$get_sample_url_metric( 1000, $xpath1 ),
+				),
+				'expected'    => $xpath1,
+			),
+			'no_url_metrics'                         => array(
+				'url_metrics' => array(),
+				'expected'    => null,
+			),
+			'empty_first_group'                      => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 600, $xpath1 ),
+					$get_sample_url_metric( 1000, $xpath1 ),
+				),
+				'expected'    => null,
+			),
+			'empty_last_group'                       => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 400, $xpath1 ),
+					$get_sample_url_metric( 600, $xpath1 ),
+				),
+				'expected'    => null,
+			),
+			'first_and_last_common_lcp_others_empty' => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 400, $xpath1 ),
+					$get_sample_url_metric( 1000, $xpath1 ),
+				),
+				'expected'    => $xpath1,
+			),
+			'intermediate_groups_conflict'           => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 400, $xpath1 ),
+					$get_sample_url_metric( 600, $xpath2 ),
+					$get_sample_url_metric( 1000, $xpath1 ),
+				),
+				'expected'    => null,
+			),
+			'first_and_last_lcp_mismatch'            => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 400, $xpath1 ),
+					$get_sample_url_metric( 600, $xpath1 ),
+					$get_sample_url_metric( 1000, $xpath2 ),
+				),
+				'expected'    => null,
+			),
+			'no_lcp_metrics'                         => array(
+				'url_metrics' => array(
+					$get_sample_url_metric( 400, $xpath1, false ),
+					$get_sample_url_metric( 600, $xpath1, false ),
+					$get_sample_url_metric( 1000, $xpath1, false ),
+				),
+				'expected'    => null,
+			),
+		);
+	}
+
+	/**
 	 * Test get_common_lcp_element().
 	 *
 	 * @covers ::get_common_lcp_element
+	 *
+	 * @dataProvider data_provider_test_get_common_lcp_element
+	 *
+	 * @param OD_URL_Metric[] $url_metrics URL Metrics.
+	 * @param string|null     $expected    Expected.
 	 */
-	public function test_get_common_lcp_element(): void {
+	public function test_get_common_lcp_element( array $url_metrics, ?string $expected ): void {
 		$breakpoints      = array( 480, 800 );
 		$sample_size      = 3;
 		$current_etag     = md5( '' );
 		$group_collection = new OD_URL_Metric_Group_Collection(
-			array(),
+			$url_metrics,
 			$current_etag,
 			$breakpoints,
 			$sample_size,
 			HOUR_IN_SECONDS
 		);
 
-		$lcp_element_xpath = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]/*[1]';
-
-		foreach ( array_merge( $breakpoints, array( 1000 ) ) as $viewport_width ) {
-			for ( $i = 0; $i < $sample_size; $i++ ) {
-				$group_collection->add_url_metric(
-					$this->get_sample_url_metric(
-						array(
-							'viewport_width' => $viewport_width,
-							'element'        => array(
-								'isLCP' => true,
-								'xpath' => $lcp_element_xpath,
-							),
-						)
-					)
-				);
-			}
-		}
-
 		$this->assertCount( 3, $group_collection );
+
 		$common_lcp_element = $group_collection->get_common_lcp_element();
-		$this->assertInstanceOf( OD_Element::class, $common_lcp_element );
-		$this->assertSame( $lcp_element_xpath, $common_lcp_element['xpath'] );
+		if ( is_string( $expected ) ) {
+			$this->assertInstanceOf( OD_Element::class, $common_lcp_element );
+			$this->assertSame( $expected, $common_lcp_element->get_xpath() );
+		} else {
+			$this->assertNull( $common_lcp_element );
+		}
 	}
 
 	/**

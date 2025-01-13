@@ -10,7 +10,6 @@ parameters:
 		- plugins/performance-lab/load.php
 	bootstrapFiles:
 		- tools/phpstan/constants.php
-		- plugins/performance-lab/load.php
 		- plugins/webp-uploads/load.php
 	scanDirectories:
 		- vendor/wp-phpunit/wp-phpunit/

@@ -115,6 +115,7 @@ class OD_URL_Metrics_Post_Type {
 	 *
 	 * @param WP_Post $post URL Metrics post.
 	 * @return OD_URL_Metric[] URL Metrics.
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	public static function get_url_metrics_from_post( WP_Post $post ): array {
 		$this_function = __METHOD__;
@@ -123,6 +124,11 @@ class OD_URL_Metrics_Post_Type {
 			if ( ! in_array( $error_level, array( E_USER_NOTICE, E_USER_WARNING, E_USER_ERROR, E_USER_DEPRECATED ), true ) ) {
 				$error_level = E_USER_NOTICE;
 			}
+			/**
+			 * No WP_Exception is thrown by wp_trigger_error() since E_USER_ERROR is not passed as the error level.
+			 *
+			 * @noinspection PhpUnhandledExceptionInspection
+			 */
 			wp_trigger_error( $this_function, esc_html( $message ), $error_level );
 		};
 

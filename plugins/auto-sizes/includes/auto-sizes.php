@@ -3,7 +3,7 @@
  * Functionality to implement auto-sizes for lazy loaded images.
  *
  * @package auto-sizes
- * @since n.e.x.t
+ * @since 1.4.0
  */
 
 /**

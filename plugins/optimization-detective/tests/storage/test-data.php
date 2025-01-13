@@ -22,6 +22,8 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	public function tear_down(): void {
 		$_SERVER['REQUEST_URI'] = $this->original_request_uri;
 		unset( $GLOBALS['wp_customize'] );
+		unset( $GLOBALS['template'] );
+		unset( $GLOBALS['_wp_current_template_id'] );
 		parent::tear_down();
 	}
 
@@ -287,55 +289,267 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function data_provider_test_od_get_current_url_metrics_etag(): array {
+		return array(
+			'homepage_one_post'           => array(
+				'set_up' => function (): Closure {
+					$post = self::factory()->post->create_and_get();
+					$this->assertInstanceOf( WP_Post::class, $post );
+					$this->go_to( '/' );
+					$GLOBALS['template'] = trailingslashit( get_template_directory() ) . 'home.php';
+
+					return function ( array $etag_data, Closure $get_etag ) use ( $post ): void {
+						$this->assertTrue( is_home() );
+						$this->assertTrue( is_front_page() );
+						$this->assertNull( $etag_data['queried_object']['id'] );
+						$this->assertNull( $etag_data['queried_object']['type'] );
+						$this->assertCount( 1, $etag_data['queried_posts'] );
+						$this->assertSame( $post->ID, $etag_data['queried_posts'][0]['id'] );
+						$this->assertSame( $post->post_modified_gmt, $etag_data['queried_posts'][0]['post_modified_gmt'] );
+						$this->assertSame( 'home.php', $etag_data['current_template'] );
+
+						// Modify data using filters.
+						$etag = $get_etag();
+						add_filter(
+							'od_current_url_metrics_etag_data',
+							static function ( $data ) {
+								$data['custom'] = true;
+								return $data;
+							}
+						);
+						$etag_after_filtering = $get_etag();
+						$this->assertNotEquals( $etag, $etag_after_filtering );
+					};
+				},
+			),
+
+			'singular_post_then_modified' => array(
+				'set_up' => function (): Closure {
+					$force_old_post_modified_data = static function ( $data ) {
+						$data['post_modified']     = '1970-01-01 00:00:00';
+						$data['post_modified_gmt'] = '1970-01-01 00:00:00';
+						return $data;
+					};
+					add_filter( 'wp_insert_post_data', $force_old_post_modified_data );
+					$post = self::factory()->post->create_and_get();
+					$this->assertInstanceOf( WP_Post::class, $post );
+					remove_filter( 'wp_insert_post_data', $force_old_post_modified_data );
+					$this->go_to( get_permalink( $post ) );
+					$GLOBALS['template'] = trailingslashit( get_template_directory() ) . 'single.php';
+
+					return function ( array $etag_data, Closure $get_etag ) use ( $post ): void {
+						$this->assertTrue( is_single( $post ) );
+						$this->assertSame( $post->ID, $etag_data['queried_object']['id'] );
+						$this->assertSame( 'post', $etag_data['queried_object']['type'] );
+						$this->assertArrayHasKey( 'post_modified_gmt', $etag_data['queried_object'] );
+						$this->assertSame( $post->post_modified_gmt, $etag_data['queried_object']['post_modified_gmt'] );
+						$this->assertCount( 1, $etag_data['queried_posts'] );
+						$this->assertSame( $post->ID, $etag_data['queried_posts'][0]['id'] );
+						$this->assertSame( $post->post_modified_gmt, $etag_data['queried_posts'][0]['post_modified_gmt'] );
+						$this->assertSame( 'single.php', $etag_data['current_template'] );
+
+						// Now try updating the post and re-navigating to it to verify that the modified date changes the ETag.
+						$previous_etag = $get_etag();
+						$r = wp_update_post(
+							array(
+								'ID'         => $post->ID,
+								'post_title' => 'Modified Title!',
+							),
+							true
+						);
+						$this->assertIsInt( $r );
+						$this->go_to( get_permalink( $post ) );
+						$next_etag = $get_etag();
+						$this->assertNotSame( $previous_etag, $next_etag );
+					};
+				},
+			),
+
+			'category_archive'            => array(
+				'set_up' => function (): Closure {
+					$term = self::factory()->category->create_and_get();
+					$this->assertInstanceOf( WP_Term::class, $term );
+					$post_ids = self::factory()->post->create_many( 2 );
+					foreach ( $post_ids as $post_id ) {
+						wp_set_post_terms( $post_id, array( $term->term_id ), 'category' );
+					}
+					$this->go_to( get_category_link( $term ) );
+					$GLOBALS['template'] = trailingslashit( get_template_directory() ) . 'category.php';
+
+					return function ( array $etag_data ) use ( $term, $post_ids ): void {
+						$this->assertTrue( is_category( $term ) );
+						$this->assertSame( $term->term_id, $etag_data['queried_object']['id'] );
+						$this->assertSame( 'term', $etag_data['queried_object']['type'] );
+						$this->assertCount( 2, $etag_data['queried_posts'] );
+						$this->assertEqualSets( $post_ids, wp_list_pluck( $etag_data['queried_posts'], 'id' ) );
+						$this->assertSame( 'category.php', $etag_data['current_template'] );
+					};
+				},
+			),
+
+			'user_archive'                => array(
+				'set_up' => function (): Closure {
+					$user_id = self::factory()->user->create();
+					$this->assertIsInt( $user_id );
+					$post_ids = self::factory()->post->create_many( 3, array( 'post_author' => $user_id ) );
+
+					// This is a workaround because the author URL pretty permalink is failing for some reason only on GHA.
+					add_filter(
+						'author_link',
+						static function ( $link, $author_id ) {
+							return add_query_arg( 'author', $author_id, home_url( '/' ) );
+						},
+						10,
+						2
+					);
+					$this->go_to( get_author_posts_url( $user_id ) );
+					$GLOBALS['template'] = trailingslashit( get_template_directory() ) . 'author.php';
+
+					return function ( array $etag_data ) use ( $user_id, $post_ids ): void {
+						$this->assertTrue( is_author( $user_id ), 'Expected is_author() after having gone to ' . get_author_posts_url( $user_id ) );
+						$this->assertSame( $user_id, $etag_data['queried_object']['id'] );
+						$this->assertSame( 'user', $etag_data['queried_object']['type'] );
+						$this->assertCount( 3, $etag_data['queried_posts'] );
+						$this->assertEqualSets( $post_ids, wp_list_pluck( $etag_data['queried_posts'], 'id' ) );
+						$this->assertSame( 'author.php', $etag_data['current_template'] );
+					};
+				},
+			),
+
+			'post_type_archive'           => array(
+				'set_up' => function (): Closure {
+					register_post_type(
+						'book',
+						array(
+							'public'      => true,
+							'has_archive' => true,
+						)
+					);
+					$post_ids = self::factory()->post->create_many( 4, array( 'post_type' => 'book' ) );
+					$this->go_to( get_post_type_archive_link( 'book' ) );
+					$GLOBALS['template'] = trailingslashit( get_template_directory() ) . 'archive-book.php';
+
+					return function ( array $etag_data ) use ( $post_ids ): void {
+						$this->assertTrue( is_post_type_archive( 'book' ) );
+						$this->assertNull( $etag_data['queried_object']['id'] );
+						$this->assertSame( 'book', $etag_data['queried_object']['type'] );
+						$this->assertCount( 4, $etag_data['queried_posts'] );
+						$this->assertEqualSets( $post_ids, wp_list_pluck( $etag_data['queried_posts'], 'id' ) );
+						$this->assertSame( 'archive-book.php', $etag_data['current_template'] );
+					};
+				},
+			),
+
+			'page_for_posts'              => array(
+				'set_up' => function (): Closure {
+					$page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+					update_option( 'show_on_front', 'page' );
+					update_option( 'page_for_posts', $page_id );
+
+					$post_ids = self::factory()->post->create_many( 5 );
+					$this->go_to( get_page_link( $page_id ) );
+					$GLOBALS['template'] = trailingslashit( get_template_directory() ) . 'home.php';
+
+					return function ( array $etag_data ) use ( $page_id, $post_ids ): void {
+						$this->assertTrue( is_home() );
+						$this->assertFalse( is_front_page() );
+						$this->assertSame( $page_id, $etag_data['queried_object']['id'] );
+						$this->assertSame( 'post', $etag_data['queried_object']['type'] );
+						$this->assertCount( 5, $etag_data['queried_posts'] );
+						$this->assertEqualSets( $post_ids, wp_list_pluck( $etag_data['queried_posts'], 'id' ) );
+						$this->assertSame( 'home.php', $etag_data['current_template'] );
+					};
+				},
+			),
+
+			'block_theme'                 => array(
+				'set_up' => function (): Closure {
+					self::factory()->post->create();
+					register_theme_directory( __DIR__ . '/../data/themes' );
+					update_option( 'template', 'block-theme' );
+					update_option( 'stylesheet', 'block-theme' );
+					$this->go_to( '/' );
+					$this->assertTrue( is_home() );
+					$this->assertTrue( is_front_page() );
+					$GLOBALS['_wp_current_template_id'] = 'block-theme//index';
+
+					return function ( array $etag_data ): void {
+						$this->assertTrue( wp_is_block_theme() );
+						$this->assertIsArray( $etag_data['current_template'] );
+						$this->assertEquals( 'wp_template', $etag_data['current_template']['type'] );
+						$this->assertEquals( 'block-theme//index', $etag_data['current_template']['id'] );
+						$this->assertArrayHasKey( 'modified', $etag_data['current_template'] );
+					};
+				},
+			),
+		);
+	}
+
+	/**
 	 * Test od_get_current_url_metrics_etag().
 	 *
+	 * @dataProvider data_provider_test_od_get_current_url_metrics_etag
+	 *
 	 * @covers ::od_get_current_url_metrics_etag
+	 * @covers ::od_get_current_theme_template
 	 */
-	public function test_od_get_current_url_metrics_etag(): void {
-		remove_all_filters( 'od_current_url_metrics_etag_data' );
-		$registry = new OD_Tag_Visitor_Registry();
-
-		$captured_etag_data = array();
+	public function test_od_get_current_url_metrics_etag( Closure $set_up ): void {
+		$captured_etag_data = null;
 		add_filter(
 			'od_current_url_metrics_etag_data',
 			static function ( array $data ) use ( &$captured_etag_data ) {
-				$captured_etag_data[] = $data;
+				$captured_etag_data = $data;
 				return $data;
 			},
 			PHP_INT_MAX
 		);
-		$etag1 = od_get_current_url_metrics_etag( $registry );
-		$this->assertMatchesRegularExpression( '/^[a-z0-9]{32}\z/', $etag1 );
-		$etag2 = od_get_current_url_metrics_etag( $registry );
-		$this->assertSame( $etag1, $etag2 );
-		$this->assertCount( 2, $captured_etag_data );
-		$this->assertSame( array( 'tag_visitors' => array() ), $captured_etag_data[0] );
-		$this->assertSame( $captured_etag_data[ count( $captured_etag_data ) - 2 ], $captured_etag_data[ count( $captured_etag_data ) - 1 ] );
 
+		$registry = new OD_Tag_Visitor_Registry();
 		$registry->register( 'foo', static function (): void {} );
 		$registry->register( 'bar', static function (): void {} );
 		$registry->register( 'baz', static function (): void {} );
-		$etag3 = od_get_current_url_metrics_etag( $registry );
-		$this->assertNotEquals( $etag2, $etag3 );
-		$this->assertNotEquals( $captured_etag_data[ count( $captured_etag_data ) - 2 ], $captured_etag_data[ count( $captured_etag_data ) - 1 ] );
-		$this->assertSame( array( 'tag_visitors' => array( 'foo', 'bar', 'baz' ) ), $captured_etag_data[ count( $captured_etag_data ) - 1 ] );
-		add_filter(
-			'od_current_url_metrics_etag_data',
-			static function ( $data ): array {
-				$data['last_modified'] = '2024-03-02T01:00:00';
-				return $data;
-			}
-		);
-		$etag4 = od_get_current_url_metrics_etag( $registry );
-		$this->assertNotEquals( $etag3, $etag4 );
-		$this->assertNotEquals( $captured_etag_data[ count( $captured_etag_data ) - 2 ], $captured_etag_data[ count( $captured_etag_data ) - 1 ] );
-		$this->assertSame(
-			array(
-				'tag_visitors'  => array( 'foo', 'bar', 'baz' ),
-				'last_modified' => '2024-03-02T01:00:00',
+		$get_etag = static function () use ( $registry ) {
+			global $wp_the_query;
+			return od_get_current_url_metrics_etag( $registry, $wp_the_query, od_get_current_theme_template() );
+		};
+
+		$extra_assert = $set_up();
+
+		$initial_active_theme = array(
+			'template'   => array(
+				'name'    => get_template(),
+				'version' => wp_get_theme( get_template() )->get( 'Version' ),
 			),
-			$captured_etag_data[ count( $captured_etag_data ) - 1 ]
+			'stylesheet' => array(
+				'name'    => get_stylesheet(),
+				'version' => wp_get_theme( get_stylesheet() )->get( 'Version' ),
+			),
 		);
+
+		$etag = $get_etag();
+		$this->assertMatchesRegularExpression( '/^[a-z0-9]{32}\z/', $etag );
+		$this->assertIsArray( $captured_etag_data );
+		$expected_keys = array( 'tag_visitors', 'queried_object', 'queried_posts', 'active_theme', 'current_template' );
+		foreach ( $expected_keys as $expected_key ) {
+			$this->assertArrayHasKey( $expected_key, $captured_etag_data );
+		}
+		$this->assertSame( $initial_active_theme, $captured_etag_data['active_theme'] );
+		$this->assertContains( 'foo', $captured_etag_data['tag_visitors'] );
+		$this->assertContains( 'bar', $captured_etag_data['tag_visitors'] );
+		$this->assertContains( 'baz', $captured_etag_data['tag_visitors'] );
+		$this->assertArrayHasKey( 'id', $captured_etag_data['queried_object'] );
+		$this->assertArrayHasKey( 'type', $captured_etag_data['queried_object'] );
+		$previous_captured_etag_data = $captured_etag_data;
+		$this->assertSame( $etag, $get_etag() );
+		$this->assertSame( $captured_etag_data, $previous_captured_etag_data );
+
+		if ( $extra_assert instanceof Closure ) {
+			$extra_assert( $captured_etag_data, $get_etag );
+		}
 	}
 
 	/**

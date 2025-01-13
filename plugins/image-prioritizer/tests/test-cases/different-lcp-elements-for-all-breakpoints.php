@@ -1,7 +1,7 @@
 <?php
 return array(
 	'set_up'   => static function ( Test_Image_Prioritizer_Helper $test_case ): void {
-		$breakpoint_max_widths = array( 480, 600, 782 );
+		$breakpoint_max_widths = array( 480, 600, 782, 1000 );
 
 		add_filter(
 			'od_breakpoint_max_widths',
@@ -28,6 +28,10 @@ return array(
 					'isLCP' => false,
 					'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[4][self::IMG]',
 				),
+				array(
+					'isLCP' => false,
+					'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[5][self::IMG]',
+				),
 			);
 			$elements[ $i ]['isLCP'] = true;
 			OD_URL_Metrics_Post_Type::store_url_metric(
@@ -49,9 +53,10 @@ return array(
 			</head>
 			<body>
 				<img src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600" crossorigin>
-				<img src="https://example.com/phablet-logo.png" alt="Phablet Logo" width="600" height="600" crossorigin="">
-				<img src="https://example.com/tablet-logo.png" alt="Tablet Logo" width="600" height="600" crossorigin="anonymous">
-				<img src="https://example.net/desktop-logo.png" alt="Desktop Logo" width="600" height="600" crossorigin="use-credentials">
+				<img src="https://example.com/phablet-logo.png" alt="Phablet Logo" width="600" height="600" crossorigin="" referrerpolicy="no-referrer">
+				<img src="https://example.com/tablet-logo.png" alt="Tablet Logo" width="600" height="600" crossorigin="anonymous" referrerpolicy="no-referrer-when-downgrade">
+				<img src="https://example.net/desktop-logo.png" alt="Desktop Logo" width="600" height="600" crossorigin="use-credentials" referrerpolicy="origin-when-cross-origin">
+				<img src="https://example.net/ultra-desktop-logo.png" alt="Desktop Logo" width="600" height="600" crossorigin=" something-custom " referrerpolicy="same-origin">
 			</body>
 		</html>
 	',
@@ -61,15 +66,17 @@ return array(
 				<meta charset="utf-8">
 				<title>...</title>
 				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" crossorigin="anonymous" media="screen and (max-width: 480px)">
-				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/phablet-logo.png" crossorigin="anonymous" media="screen and (min-width: 481px) and (max-width: 600px)">
-				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/tablet-logo.png" crossorigin="anonymous" media="screen and (min-width: 601px) and (max-width: 782px)">
-				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.net/desktop-logo.png" crossorigin="use-credentials" media="screen and (min-width: 783px)">
+				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/phablet-logo.png" crossorigin="anonymous" referrerpolicy="no-referrer" media="screen and (min-width: 481px) and (max-width: 600px)">
+				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/tablet-logo.png" crossorigin="anonymous" referrerpolicy="no-referrer-when-downgrade" media="screen and (min-width: 601px) and (max-width: 782px)">
+				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.net/desktop-logo.png" crossorigin="use-credentials" referrerpolicy="origin-when-cross-origin" media="screen and (min-width: 783px) and (max-width: 1000px)">
+				<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.net/ultra-desktop-logo.png" crossorigin="anonymous" referrerpolicy="same-origin" media="screen and (min-width: 1001px)">
 			</head>
 			<body>
 				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600" crossorigin>
-				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/phablet-logo.png" alt="Phablet Logo" width="600" height="600" crossorigin="">
-				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]" src="https://example.com/tablet-logo.png" alt="Tablet Logo" width="600" height="600" crossorigin="anonymous">
-				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[4][self::IMG]" src="https://example.net/desktop-logo.png" alt="Desktop Logo" width="600" height="600" crossorigin="use-credentials">
+				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]" src="https://example.com/phablet-logo.png" alt="Phablet Logo" width="600" height="600" crossorigin="" referrerpolicy="no-referrer">
+				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[3][self::IMG]" src="https://example.com/tablet-logo.png" alt="Tablet Logo" width="600" height="600" crossorigin="anonymous" referrerpolicy="no-referrer-when-downgrade">
+				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[4][self::IMG]" src="https://example.net/desktop-logo.png" alt="Desktop Logo" width="600" height="600" crossorigin="use-credentials" referrerpolicy="origin-when-cross-origin">
+				<img data-od-xpath="/*[1][self::HTML]/*[2][self::BODY]/*[5][self::IMG]" src="https://example.net/ultra-desktop-logo.png" alt="Desktop Logo" width="600" height="600" crossorigin=" something-custom " referrerpolicy="same-origin">
 				<script type="module">/* import detect ... */</script>
 			</body>
 		</html>

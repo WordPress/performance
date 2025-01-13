@@ -25,6 +25,8 @@ class Test_OD_Helper extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data provider.
+	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	public function data_to_test_od_generate_media_query(): array {

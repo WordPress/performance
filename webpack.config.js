@@ -133,6 +133,10 @@ const imagePrioritizer = ( env ) => {
 			new CopyWebpackPlugin( {
 				patterns: [
 					{
+						from: `${ pluginDir }/detect.js`,
+						to: `${ pluginDir }/detect.min.js`,
+					},
+					{
 						from: `${ pluginDir }/lazy-load-video.js`,
 						to: `${ pluginDir }/lazy-load-video.min.js`,
 					},

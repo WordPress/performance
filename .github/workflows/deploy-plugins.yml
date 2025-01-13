@@ -69,9 +69,6 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Check plugin versions
-        run: npm run versions -- --plugin=${{ matrix.plugin }}
-
       - name: Build plugin
         run: npm run build:plugin:${{ matrix.plugin }}
 
@@ -100,6 +97,10 @@ jobs:
           fi
 
           echo "deploy=true" >> $GITHUB_OUTPUT
+
+      - name: Check plugin version integrity
+        if: steps.check-deployment.outputs.deploy == 'true'
+        run: npm run versions -- --plugin=${{ matrix.plugin }}
 
       - name: Create zip file
         if: steps.check-deployment.outputs.deploy == 'true'

@@ -71,7 +71,7 @@ function od_get_cache_purge_post_id(): ?int {
  */
 function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $group_collection ): string {
 	$web_vitals_lib_data = require __DIR__ . '/build/web-vitals.asset.php';
-	$web_vitals_lib_src  = add_query_arg( 'ver', $web_vitals_lib_data['version'], plugin_dir_url( __FILE__ ) . 'build/web-vitals.js' );
+	$web_vitals_lib_src  = plugins_url( add_query_arg( 'ver', $web_vitals_lib_data['version'], 'build/web-vitals.js' ), __FILE__ );
 
 	/**
 	 * Filters the list of extension script module URLs to import when performing detection.
@@ -118,7 +118,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 	return wp_get_inline_script_tag(
 		sprintf(
 			'import detect from %s; detect( %s );',
-			wp_json_encode( add_query_arg( 'ver', OPTIMIZATION_DETECTIVE_VERSION, plugin_dir_url( __FILE__ ) . od_get_asset_path( 'detect.js' ) ) ),
+			wp_json_encode( plugins_url( add_query_arg( 'ver', OPTIMIZATION_DETECTIVE_VERSION, od_get_asset_path( 'detect.js' ) ), __FILE__ ) ),
 			wp_json_encode( $detect_args )
 		),
 		array( 'type' => 'module' )

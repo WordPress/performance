@@ -615,6 +615,38 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test the image block with different alignment in classic theme.
+	 *
+	 * @dataProvider data_image_blocks_with_relative_alignment_for_classic_theme
+	 *
+	 * @param string $image_alignment Image alignment.
+	 */
+	public function test_image_block_with_different_alignment_in_classic_theme( string $image_alignment ): void {
+		switch_theme( 'twentytwentyone' );
+
+		$block_content = $this->get_image_block_markup( self::$image_id, 'large', $image_alignment );
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( 'sizes="(max-width: 1024px) 100vw, 1024px" ', $result );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<array<string>> The ancestor and image alignments.
+	 */
+	public function data_image_blocks_with_relative_alignment_for_classic_theme(): array {
+		return array(
+			array( '' ),
+			array( 'wide' ),
+			array( 'left' ),
+			array( 'center' ),
+			array( 'right' ),
+		);
+	}
+
+	/**
 	 * Filter the theme.json data to include relative layout sizes.
 	 *
 	 * @param WP_Theme_JSON_Data $theme_json Theme JSON object.

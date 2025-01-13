@@ -95,6 +95,8 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	 * @covers ::__construct
 	 * @covers ::get_minimum_viewport_width
 	 * @covers ::get_maximum_viewport_width
+	 * @covers ::get_sample_size
+	 * @covers ::get_freshness_ttl
 	 * @covers ::getIterator
 	 * @covers ::count
 	 *
@@ -121,6 +123,8 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 		$this->assertCount( count( $url_metrics ), $group );
 		$this->assertSame( $minimum_viewport_width, $group->get_minimum_viewport_width() );
 		$this->assertSame( $maximum_viewport_width, $group->get_maximum_viewport_width() );
+		$this->assertSame( $sample_size, $group->get_sample_size() );
+		$this->assertSame( $freshness_ttl, $group->get_freshness_ttl() );
 		$this->assertCount( count( $url_metrics ), $group );
 		$this->assertSame( $url_metrics, iterator_to_array( $group ) );
 	}

@@ -121,7 +121,7 @@ function embed_optimizer_filter_extension_module_urls( $extension_module_urls ):
 	if ( ! is_array( $extension_module_urls ) ) {
 		$extension_module_urls = array();
 	}
-	$extension_module_urls[] = add_query_arg( 'ver', EMBED_OPTIMIZER_VERSION, plugin_dir_url( __FILE__ ) . embed_optimizer_get_asset_path( 'detect.js' ) );
+	$extension_module_urls[] = plugins_url( add_query_arg( 'ver', EMBED_OPTIMIZER_VERSION, embed_optimizer_get_asset_path( 'detect.js' ) ), __FILE__ );
 	return $extension_module_urls;
 }
 
@@ -428,7 +428,7 @@ function embed_optimizer_render_generator(): void {
 /**
  * Gets the path to a script or stylesheet.
  *
- * @since n.e.x.t
+ * @since 0.4.0
  *
  * @param string      $src_path Source path, relative to plugin root.
  * @param string|null $min_path Minified path. If not supplied, then '.min' is injected before the file extension in the source path.

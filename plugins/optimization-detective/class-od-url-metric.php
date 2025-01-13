@@ -156,7 +156,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 * Gets JSON schema for URL Metric.
 	 *
 	 * @since 0.1.0
-	 * @since n.e.x.t Added the 'etag' property to the schema.
+	 * @since 0.9.0 Added the 'etag' property to the schema.
 	 *
 	 * @todo Cache the return value?
 	 *
@@ -431,7 +431,7 @@ class OD_URL_Metric implements JsonSerializable {
 	/**
 	 * Gets ETag.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.9.0
 	 *
 	 * @return non-empty-string|null ETag.
 	 */
@@ -511,6 +511,15 @@ class OD_URL_Metric implements JsonSerializable {
 	 * @return Data Exports to be serialized by json_encode().
 	 */
 	public function jsonSerialize(): array {
-		return $this->data;
+		$data = $this->data;
+
+		$data['elements'] = array_map(
+			static function ( OD_Element $element ): array {
+				return $element->jsonSerialize();
+			},
+			$this->get_elements()
+		);
+
+		return $data;
 	}
 }

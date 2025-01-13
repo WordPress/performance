@@ -1,6 +1,11 @@
 /**
  * @typedef {import("web-vitals").LCPMetric} LCPMetric
  * @typedef {import("./types.ts").ElementData} ElementData
+ * @typedef {import("./types.ts").OnTTFBFunction} OnTTFBFunction
+ * @typedef {import("./types.ts").OnFCPFunction} OnFCPFunction
+ * @typedef {import("./types.ts").OnLCPFunction} OnLCPFunction
+ * @typedef {import("./types.ts").OnINPFunction} OnINPFunction
+ * @typedef {import("./types.ts").OnCLSFunction} OnCLSFunction
  * @typedef {import("./types.ts").URLMetric} URLMetric
  * @typedef {import("./types.ts").URLMetricGroupStatus} URLMetricGroupStatus
  * @typedef {import("./types.ts").Extension} Extension
@@ -229,6 +234,11 @@ function extendElementData( xpath, properties ) {
 }
 
 /**
+ * @typedef {{timestamp: number, creationDate: Date}} UrlMetricDebugData
+ * @typedef {{groups: Array<{url_metrics: Array<UrlMetricDebugData>}>}} CollectionDebugData
+ */
+
+/**
  * Detects the LCP element, loaded images, client viewport and store for future optimizations.
  *
  * @param {Object}                 args                            Args.
@@ -245,7 +255,7 @@ function extendElementData( xpath, properties ) {
  * @param {URLMetricGroupStatus[]} args.urlMetricGroupStatuses     URL Metric group statuses.
  * @param {number}                 args.storageLockTTL             The TTL (in seconds) for the URL Metric storage lock.
  * @param {string}                 args.webVitalsLibrarySrc        The URL for the web-vitals library.
- * @param {Object}                 [args.urlMetricGroupCollection] URL Metric group collection, when in debug mode.
+ * @param {CollectionDebugData}    [args.urlMetricGroupCollection] URL Metric group collection, when in debug mode.
  */
 export default async function detect( {
 	minViewportAspectRatio,
@@ -264,7 +274,21 @@ export default async function detect( {
 	urlMetricGroupCollection,
 } ) {
 	if ( isDebug ) {
-		log( 'Stored URL Metric group collection:', urlMetricGroupCollection );
+		const allUrlMetrics = /** @type Array<UrlMetricDebugData> */ [];
+		for ( const group of urlMetricGroupCollection.groups ) {
+			for ( const otherUrlMetric of group.url_metrics ) {
+				otherUrlMetric.creationDate = new Date(
+					otherUrlMetric.timestamp * 1000
+				);
+				allUrlMetrics.push( otherUrlMetric );
+			}
+		}
+		log( 'Stored URL Metric Group Collection:', urlMetricGroupCollection );
+		allUrlMetrics.sort( ( a, b ) => b.timestamp - a.timestamp );
+		log(
+			'Stored URL Metrics in reverse chronological order:',
+			allUrlMetrics
+		);
 	}
 
 	// Abort if the current viewport is not among those which need URL Metrics.
@@ -325,6 +349,24 @@ export default async function detect( {
 		return;
 	}
 
+	// Keep track of whether the window resized. If it resized, we abort sending the URLMetric.
+	let didWindowResize = false;
+	window.addEventListener(
+		'resize',
+		() => {
+			didWindowResize = true;
+		},
+		{ once: true }
+	);
+
+	const {
+		/** @type OnTTFBFunction */ onTTFB,
+		/** @type OnFCPFunction */ onFCP,
+		/** @type OnLCPFunction */ onLCP,
+		/** @type OnINPFunction */ onINP,
+		/** @type OnCLSFunction */ onCLS,
+	} = await import( webVitalsLibrarySrc );
+
 	// TODO: Does this make sense here?
 	// Prevent detection when page is not scrolled to the initial viewport.
 	if ( doc.documentElement.scrollTop > 0 ) {
@@ -342,19 +384,53 @@ export default async function detect( {
 
 	/** @type {Map<string, Extension>} */
 	const extensions = new Map();
+
+	/** @type {Promise[]} */
+	const extensionInitializePromises = [];
+
+	/** @type {string[]} */
+	const initializingExtensionModuleUrls = [];
+
 	for ( const extensionModuleUrl of extensionModuleUrls ) {
 		try {
 			/** @type {Extension} */
 			const extension = await import( extensionModuleUrl );
 			extensions.set( extensionModuleUrl, extension );
-			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args. It's important to pass webVitalsLibrarySrc to the extension so that onLCP, onCLS, or onINP can be obtained.
+			// TODO: There should to be a way to pass additional args into the module. Perhaps extensionModuleUrls should be a mapping of URLs to args.
 			if ( extension.initialize instanceof Function ) {
-				extension.initialize( { isDebug } );
+				const initializePromise = extension.initialize( {
+					isDebug,
+					onTTFB,
+					onFCP,
+					onLCP,
+					onINP,
+					onCLS,
+				} );
+				if ( initializePromise instanceof Promise ) {
+					extensionInitializePromises.push( initializePromise );
+					initializingExtensionModuleUrls.push( extensionModuleUrl );
+				}
 			}
 		} catch ( err ) {
 			error(
-				`Failed to initialize extension '${ extensionModuleUrl }':`,
+				`Failed to start initializing extension '${ extensionModuleUrl }':`,
 				err
+			);
+		}
+	}
+
+	// Wait for all extensions to finish initializing.
+	const settledInitializePromises = await Promise.allSettled(
+		extensionInitializePromises
+	);
+	for ( const [
+		i,
+		settledInitializePromise,
+	] of settledInitializePromises.entries() ) {
+		if ( settledInitializePromise.status === 'rejected' ) {
+			error(
+				`Failed to initialize extension '${ initializingExtensionModuleUrls[ i ] }':`,
+				settledInitializePromise.reason
 			);
 		}
 	}
@@ -413,8 +489,6 @@ export default async function detect( {
 			passive: true,
 		} );
 	}
-
-	const { onLCP } = await import( webVitalsLibrarySrc );
 
 	/** @type {LCPMetric[]} */
 	const lcpMetricCandidates = [];
@@ -507,26 +581,65 @@ export default async function detect( {
 		);
 	} );
 
+	// Only proceed with submitting the URL Metric if viewport stayed the same size. Changing the viewport size (e.g. due
+	// to resizing a window or changing the orientation of a device) will result in unexpected metrics being collected.
+	if ( didWindowResize ) {
+		if ( isDebug ) {
+			log(
+				'Aborting URL Metric collection due to viewport size change.'
+			);
+		}
+		return;
+	}
+
 	if ( extensions.size > 0 ) {
+		/** @type {Promise[]} */
+		const extensionFinalizePromises = [];
+
+		/** @type {string[]} */
+		const finalizingExtensionModuleUrls = [];
+
 		for ( const [
 			extensionModuleUrl,
 			extension,
 		] of extensions.entries() ) {
 			if ( extension.finalize instanceof Function ) {
 				try {
-					await extension.finalize( {
+					const finalizePromise = extension.finalize( {
 						isDebug,
 						getRootData,
 						getElementData,
 						extendElementData,
 						extendRootData,
 					} );
+					if ( finalizePromise instanceof Promise ) {
+						extensionFinalizePromises.push( finalizePromise );
+						finalizingExtensionModuleUrls.push(
+							extensionModuleUrl
+						);
+					}
 				} catch ( err ) {
 					error(
-						`Unable to finalize module '${ extensionModuleUrl }':`,
+						`Unable to start finalizing extension '${ extensionModuleUrl }':`,
 						err
 					);
 				}
+			}
+		}
+
+		// Wait for all extensions to finish finalizing.
+		const settledFinalizePromises = await Promise.allSettled(
+			extensionFinalizePromises
+		);
+		for ( const [
+			i,
+			settledFinalizePromise,
+		] of settledFinalizePromises.entries() ) {
+			if ( settledFinalizePromise.status === 'rejected' ) {
+				error(
+					`Failed to finalize extension '${ finalizingExtensionModuleUrls[ i ] }':`,
+					settledFinalizePromise.reason
+				);
 			}
 		}
 	}

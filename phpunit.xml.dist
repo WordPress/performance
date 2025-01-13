@@ -41,4 +41,12 @@
 			<group>ms-required</group>
 		</exclude>
 	</groups>
+	<coverage>
+		<include>
+			<directory suffix=".php">plugins</directory>
+		</include>
+		<exclude>
+			<directory suffix=".php">plugins/*/tests</directory>
+		</exclude>
+	</coverage>
 </phpunit>

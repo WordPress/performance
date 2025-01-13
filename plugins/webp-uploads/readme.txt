@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   2.3.0
+Stable tag:   2.4.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, webp, avif, modern image formats
@@ -59,6 +59,14 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the Modern Image Formats plugin will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.4.0 =
+
+**Enhancements**
+
+* Automatically opt into 1536x1536 and 2048x2048 sizes when generating fallback images. ([1679](https://github.com/WordPress/performance/pull/1679))
+* Convert WebP to AVIF on upload. ([1724](https://github.com/WordPress/performance/pull/1724))
+* Enable end user opt-in to generate all sizes in fallback format. ([1689](https://github.com/WordPress/performance/pull/1689))
 
 = 2.3.0 =
 

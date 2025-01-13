@@ -40,6 +40,18 @@ function webp_uploads_register_media_settings_field(): void {
 			'show_in_rest' => false,
 		)
 	);
+
+	// Add a setting to generate fallback images in all sizes including custom sizes.
+	register_setting(
+		'media',
+		'perflab_generate_all_fallback_sizes',
+		array(
+			'type'         => 'boolean',
+			'default'      => false,
+			'show_in_rest' => false,
+		)
+	);
+
 	// Add a setting to use the picture element.
 	register_setting(
 		'media',
@@ -94,6 +106,16 @@ function webp_uploads_add_media_settings_fields(): void {
 		'media',
 		'perflab_modern_image_format_settings',
 		array( 'class' => 'perflab-generate-webp-and-jpeg' )
+	);
+
+	// Add setting field for generating fallback images in all sizes including custom sizes.
+	add_settings_field(
+		'perflab_generate_all_fallback_sizes',
+		__( 'Generate all fallback image sizes', 'webp-uploads' ),
+		'webp_uploads_generate_all_fallback_sizes_callback',
+		'media',
+		'perflab_modern_image_format_settings',
+		array( 'class' => 'perflab-generate-fallback-all-sizes' )
 	);
 
 	// Add picture element support settings field.
@@ -175,6 +197,94 @@ function webp_uploads_generate_webp_jpeg_setting_callback(): void {
 			<?php esc_html_e( 'Also generate fallback images in the original upload format', 'webp-uploads' ); ?>
 		</label>
 		<p class="description" id="perflab_generate_webp_and_jpeg_description"><?php esc_html_e( 'Enabling fallback image output can improve compatibility, but will increase the filesystem storage use of your images.', 'webp-uploads' ); ?></p>
+	<?php
+}
+
+
+/**
+ * Renders the settings field for generating all fallback image sizes.
+ *
+ * @since 2.4.0
+ */
+function webp_uploads_generate_all_fallback_sizes_callback(): void {
+	$all_fallback_sizes_enabled   = webp_uploads_should_generate_all_fallback_sizes();
+	$fallback_enabled             = webp_uploads_is_fallback_enabled();
+	$all_fallback_sizes_hidden_id = 'perflab_generate_all_fallback_sizes_hidden';
+
+	?>
+	<style>
+		#perflab_generate_all_fallback_sizes_fieldset.disabled label,
+		#perflab_generate_all_fallback_sizes_fieldset.disabled p {
+			opacity: 0.7;
+		}
+	</style>
+	<div id="perflab_generate_all_fallback_sizes_notice" class="notice notice-info inline" <?php echo $fallback_enabled ? 'hidden' : ''; ?>>
+		<p><?php esc_html_e( 'This setting requires fallback image output to be enabled.', 'webp-uploads' ); ?></p>
+	</div>
+	<div id="perflab_generate_all_fallback_sizes_fieldset" class="<?php echo ! $fallback_enabled ? 'disabled' : ''; ?>">
+		<label for="perflab_generate_all_fallback_sizes" id="perflab_generate_all_fallback_sizes_label">
+			<input
+				type="checkbox"
+				id="perflab_generate_all_fallback_sizes"
+				name="perflab_generate_all_fallback_sizes"
+				aria-describedby="perflab_generate_all_fallback_sizes_description"
+				value="1"
+				<?php checked( $all_fallback_sizes_enabled ); ?>
+				<?php disabled( ! $fallback_enabled ); ?>
+			>
+			<?php
+			/*
+			 * If the checkbox is disabled, but the option is enabled, include a hidden input to continue sending the
+			 * same value upon form submission.
+			 */
+			if ( ! $fallback_enabled && $all_fallback_sizes_enabled ) {
+				?>
+				<input
+					type="hidden"
+					id="<?php echo esc_attr( $all_fallback_sizes_hidden_id ); ?>"
+					name="perflab_generate_all_fallback_sizes"
+					value="1"
+				>
+				<?php
+			}
+			esc_html_e( 'Generate all fallback image sizes including custom sizes', 'webp-uploads' );
+			?>
+		</label>
+		<p class="description" id="perflab_generate_all_fallback_sizes_description"><?php esc_html_e( 'Enabling this option will generate all fallback image sizes including custom sizes. Note: uses even more storage space.', 'webp-uploads' ); ?></p>
+	</div>
+	<script>
+	( function ( allFallbackSizesHiddenId ) {
+		const fallbackCheckbox = document.getElementById( 'perflab_generate_webp_and_jpeg' );
+		const allFallbackSizesCheckbox = document.getElementById( 'perflab_generate_all_fallback_sizes' );
+		const allFallbackSizesFieldset = document.getElementById( 'perflab_generate_all_fallback_sizes_fieldset' );
+		const allFallbackSizesNotice = document.getElementById( 'perflab_generate_all_fallback_sizes_notice' );
+
+		function toggleAllFallbackSizes() {
+			const fallbackEnabled = fallbackCheckbox.checked;
+			allFallbackSizesFieldset.classList.toggle( 'disabled', ! fallbackEnabled );
+			allFallbackSizesCheckbox.disabled = ! fallbackEnabled;
+			allFallbackSizesNotice.hidden = fallbackEnabled;
+
+			// Remove or inject hidden input to preserve original setting value as needed.
+			if ( fallbackEnabled ) {
+				const hiddenInput = document.getElementById( allFallbackSizesHiddenId );
+				if ( hiddenInput ) {
+					hiddenInput.parentElement.removeChild( hiddenInput );
+				}
+			} else if ( allFallbackSizesCheckbox.checked && ! document.getElementById( allFallbackSizesHiddenId ) ) {
+				// The hidden input is only needed if the value was originally set (i.e., the checkbox enabled).
+				const hiddenInput = document.createElement( 'input' );
+				hiddenInput.type = 'hidden';
+				hiddenInput.id = allFallbackSizesHiddenId;
+				hiddenInput.name = allFallbackSizesCheckbox.name;
+				hiddenInput.value = allFallbackSizesCheckbox.value;
+				allFallbackSizesCheckbox.parentElement.insertBefore( hiddenInput, allFallbackSizesCheckbox.nextSibling );
+			}
+		}
+
+		fallbackCheckbox.addEventListener( 'change', toggleAllFallbackSizes );
+	} )( <?php echo wp_json_encode( $all_fallback_sizes_hidden_id ); ?> );
+	</script>
 	<?php
 }
 

@@ -141,27 +141,104 @@ function od_get_url_metrics_slug( array $query_vars ): string {
 }
 
 /**
- * Gets the current ETag for URL Metrics.
+ * Gets the current template for a block theme or a classic theme.
  *
- * The ETag is a hash based on the IDs of the registered tag visitors
- * in the current environment. It is used for marking the URL Metrics as stale
- * when its value changes.
- *
- * @since n.e.x.t
+ * @since 0.9.0
  * @access private
  *
- * @param OD_Tag_Visitor_Registry $tag_visitor_registry Tag visitor registry.
+ * @global string|null $_wp_current_template_id Current template ID.
+ * @global string|null $template                Template file path.
+ *
+ * @return string|WP_Block_Template|null Template.
+ */
+function od_get_current_theme_template() {
+	global $template, $_wp_current_template_id;
+
+	if ( wp_is_block_theme() && isset( $_wp_current_template_id ) ) {
+		$block_template = get_block_template( $_wp_current_template_id, 'wp_template' );
+		if ( $block_template instanceof WP_Block_Template ) {
+			return $block_template;
+		}
+	}
+	if ( isset( $template ) && is_string( $template ) ) {
+		return basename( $template );
+	}
+	return null;
+}
+
+/**
+ * Gets the current ETag for URL Metrics.
+ *
+ * Generates a hash based on the IDs of registered tag visitors, the queried object,
+ * posts in The Loop, and theme information in the current environment. This ETag
+ * is used to assess if the URL Metrics are stale when its value changes.
+ *
+ * @since 0.9.0
+ * @access private
+ *
+ * @param OD_Tag_Visitor_Registry       $tag_visitor_registry Tag visitor registry.
+ * @param WP_Query|null                 $wp_query             The WP_Query instance.
+ * @param string|WP_Block_Template|null $current_template     The current template being used.
  * @return non-empty-string Current ETag.
  */
-function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_registry ): string {
+function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_registry, ?WP_Query $wp_query, $current_template ): string {
+	$queried_object      = $wp_query instanceof WP_Query ? $wp_query->get_queried_object() : null;
+	$queried_object_data = array(
+		'id'   => null,
+		'type' => null,
+	);
+
+	if ( $queried_object instanceof WP_Post ) {
+		$queried_object_data['id']                = $queried_object->ID;
+		$queried_object_data['type']              = 'post';
+		$queried_object_data['post_modified_gmt'] = $queried_object->post_modified_gmt;
+	} elseif ( $queried_object instanceof WP_Term ) {
+		$queried_object_data['id']   = $queried_object->term_id;
+		$queried_object_data['type'] = 'term';
+	} elseif ( $queried_object instanceof WP_User ) {
+		$queried_object_data['id']   = $queried_object->ID;
+		$queried_object_data['type'] = 'user';
+	} elseif ( $queried_object instanceof WP_Post_Type ) {
+		$queried_object_data['type'] = $queried_object->name;
+	}
+
 	$data = array(
-		'tag_visitors' => array_keys( iterator_to_array( $tag_visitor_registry ) ),
+		'tag_visitors'     => array_keys( iterator_to_array( $tag_visitor_registry ) ),
+		'queried_object'   => $queried_object_data,
+		'queried_posts'    => array_filter(
+			array_map(
+				static function ( $post ): ?array {
+					if ( is_int( $post ) ) {
+						$post = get_post( $post );
+					}
+					if ( ! ( $post instanceof WP_Post ) ) {
+						return null;
+					}
+					return array(
+						'id'                => $post->ID,
+						'post_modified_gmt' => $post->post_modified_gmt,
+					);
+				},
+				( $wp_query instanceof WP_Query && $wp_query->post_count > 0 ) ? $wp_query->posts : array()
+			)
+		),
+		'active_theme'     => array(
+			'template'   => array(
+				'name'    => get_template(),
+				'version' => wp_get_theme( get_template() )->get( 'Version' ),
+			),
+			'stylesheet' => array(
+				'name'    => get_stylesheet(),
+				'version' => wp_get_theme()->get( 'Version' ),
+			),
+		),
+		'current_template' => $current_template instanceof WP_Block_Template ? get_object_vars( $current_template ) : $current_template,
 	);
 
 	/**
 	 * Filters the data that goes into computing the current ETag for URL Metrics.
 	 *
-	 * @since n.e.x.t
+	 * @since 0.9.0
 	 *
 	 * @param array<string, mixed> $data Data.
 	 */
@@ -176,7 +253,7 @@ function od_get_current_url_metrics_etag( OD_Tag_Visitor_Registry $tag_visitor_r
  * This is used in the REST API to authenticate the storage of new URL Metrics from a given URL.
  *
  * @since 0.8.0
- * @since n.e.x.t Introduced the `$current_etag` parameter.
+ * @since 0.9.0 Introduced the `$current_etag` parameter.
  * @access private
  *
  * @see od_verify_url_metrics_storage_hmac()
@@ -197,7 +274,7 @@ function od_get_url_metrics_storage_hmac( string $slug, string $current_etag, st
  * Verifies HMAC for storing URL Metrics for a specific slug.
  *
  * @since 0.8.0
- * @since n.e.x.t Introduced the `$current_etag` parameter.
+ * @since 0.9.0 Introduced the `$current_etag` parameter.
  * @access private
  *
  * @see od_get_url_metrics_storage_hmac()

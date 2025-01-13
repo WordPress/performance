@@ -1,6 +1,8 @@
 // h/t https://stackoverflow.com/a/59801602/93579
 type ExcludeProps< T > = { [ k: string ]: any } & { [ K in keyof T ]?: never };
 
+import { onTTFB, onFCP, onLCP, onINP, onCLS } from 'web-vitals';
+
 export interface ElementData {
 	isLCP: boolean;
 	isLCPCandidate: boolean;
@@ -28,11 +30,22 @@ export interface URLMetricGroupStatus {
 	complete: boolean;
 }
 
+export type OnTTFBFunction = typeof onTTFB;
+export type OnFCPFunction = typeof onFCP;
+export type OnLCPFunction = typeof onLCP;
+export type OnINPFunction = typeof onINP;
+export type OnCLSFunction = typeof onCLS;
+
 export type InitializeArgs = {
 	readonly isDebug: boolean;
+	readonly onTTFB: OnTTFBFunction;
+	readonly onFCP: OnFCPFunction;
+	readonly onLCP: OnLCPFunction;
+	readonly onINP: OnINPFunction;
+	readonly onCLS: OnCLSFunction;
 };
 
-export type InitializeCallback = ( args: InitializeArgs ) => void;
+export type InitializeCallback = ( args: InitializeArgs ) => Promise< void >;
 
 export type FinalizeArgs = {
 	readonly getRootData: () => URLMetric;
