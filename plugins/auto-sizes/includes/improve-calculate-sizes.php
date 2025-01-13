@@ -313,14 +313,14 @@ function auto_sizes_filter_render_block_context( array $context, array $block, ?
 					$block_width_data[][ $block['blockName'] ] = 'full';
 					break;
 				case 'wide':
-					$block_width_data[][ $block['blockName'] ] = 'wide'; // Use actual `wideWidth` here.
+					$block_width_data[][ $block['blockName'] ] = 'wide';
 					break;
 				default:
-					$block_width_data[][ $block['blockName'] ] = 'default'; // Use actual `contentWidth` here.
+					$block_width_data[][ $block['blockName'] ] = 'default';
 					break;
 			}
 		} else {
-			$block_width_data[][ $block['blockName'] ] = 'default'; // Use actual `contentWidth` here.
+			$block_width_data[][ $block['blockName'] ] = 'default';
 		}
 	}
 
