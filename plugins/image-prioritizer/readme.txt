@@ -34,7 +34,7 @@ The current optimizations include:
 
 👉 **Note:** This plugin optimizes pages for actual visitors, and it depends on visitors to optimize pages. As such, you won't see optimizations applied immediately after activating the plugin. Please wait for URL Metrics to be gathered for both mobile and desktop visits. And since administrator users are not normal visitors typically, optimizations are not applied for admins by default.
 
-There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
+Your site must have the **REST API accessible** to unauthenticated frontend visitors since this is how metrics are collected about how a page should be optimized. There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
 == Installation ==
 

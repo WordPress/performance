@@ -265,17 +265,17 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test image_prioritizer_add_element_item_schema_properties.
+	 * Test image_prioritizer_add_root_schema_properties.
 	 *
-	 * @covers ::image_prioritizer_add_element_item_schema_properties
+	 * @covers ::image_prioritizer_add_root_schema_properties
 	 */
-	public function test_image_prioritizer_add_element_item_schema_properties(): void {
+	public function test_image_prioritizer_add_root_schema_properties(): void {
 		$initial_schema  = array(
 			'foo' => array(
 				'type' => 'string',
 			),
 		);
-		$filtered_schema = image_prioritizer_add_element_item_schema_properties( $initial_schema );
+		$filtered_schema = image_prioritizer_add_root_schema_properties( $initial_schema );
 		$this->assertCount( 2, $filtered_schema );
 		$this->assertArrayHasKey( 'foo', $filtered_schema );
 		$this->assertArrayHasKey( 'lcpElementExternalBackgroundImage', $filtered_schema );
@@ -286,7 +286,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	/**
 	 * @return array<string, mixed>
 	 */
-	public function data_provider_for_test_image_prioritizer_add_element_item_schema_properties_inputs(): array {
+	public function data_provider_for_test_image_prioritizer_add_root_schema_properties_inputs(): array {
 		return array(
 			'bad_type'         => array(
 				'input_value'        => 'not_an_object',
@@ -437,17 +437,17 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test image_prioritizer_add_element_item_schema_properties for various inputs.
+	 * Test image_prioritizer_add_root_schema_properties for various inputs.
 	 *
-	 * @covers ::image_prioritizer_add_element_item_schema_properties
+	 * @covers ::image_prioritizer_add_root_schema_properties
 	 *
-	 * @dataProvider data_provider_for_test_image_prioritizer_add_element_item_schema_properties_inputs
+	 * @dataProvider data_provider_for_test_image_prioritizer_add_root_schema_properties_inputs
 	 *
 	 * @param mixed                     $input_value        Input value.
 	 * @param string|null               $expected_exception Expected exception message.
 	 * @param array<string, mixed>|null $output_value       Output value.
 	 */
-	public function test_image_prioritizer_add_element_item_schema_properties_inputs( $input_value, ?string $expected_exception, ?array $output_value ): void {
+	public function test_image_prioritizer_add_root_schema_properties_inputs( $input_value, ?string $expected_exception, ?array $output_value ): void {
 		$data                                      = $this->get_sample_url_metric( array() )->jsonSerialize();
 		$data['lcpElementExternalBackgroundImage'] = $input_value;
 		$exception_message                         = null;

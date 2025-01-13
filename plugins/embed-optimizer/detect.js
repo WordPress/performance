@@ -57,7 +57,7 @@ export async function initialize( { isDebug } ) {
 		'.wp-block-embed > .wp-block-embed__wrapper[data-od-xpath]'
 	);
 
-	for ( const embedWrapper of embedWrappers ) {
+	for ( /** @type {HTMLElement} */ const embedWrapper of embedWrappers ) {
 		monitorEmbedWrapperForResizes( embedWrapper, isDebug );
 	}
 

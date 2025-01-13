@@ -50,8 +50,9 @@ jobs:
           - php: '8.3'
             wp: 'trunk'
           - php: '8.2'
+            phpunit: '9.6'
             wp: 'latest'
-            # coverage: true # TODO: Uncomment once coverage reports are fixed. See <https://github.com/WordPress/performance/pull/1586#issuecomment-2474498387>.
+            coverage: true
     env:
       WP_ENV_PHP_VERSION: ${{ matrix.php }}
       WP_ENV_CORE: ${{ matrix.wp == 'trunk' && 'WordPress/WordPress' || format( 'https://wordpress.org/wordpress-{0}.zip', matrix.wp ) }}
@@ -68,20 +69,51 @@ jobs:
       - name: Build assets
         run: npm run build
       - name: Install WordPress
-        run: npm run wp-env start
+        run: |
+          if [ "${{ matrix.coverage }}" == "true" ]; then
+            npm run wp-env start -- --xdebug=coverage
+          else
+            npm run wp-env start
+          fi
       - name: Composer Install
         run: npm run wp-env run tests-cli -- --env-cwd="wp-content/plugins/$(basename $(pwd))" composer install --no-interaction --no-progress
+      - name: Update Composer Dependencies
+        run: composer update --with-all-dependencies --no-interaction --no-progress
+      - name: Install PHPUnit
+        run: |
+          if [ "${{ matrix.php }}" == "8.2" ]; then
+            composer require phpunit/phpunit:${{ matrix.phpunit }} --with-all-dependencies --ignore-platform-reqs
+          else
+            composer require --dev phpunit/phpunit:${{ matrix.phpunit }}
+          fi
+        if: matrix.phpunit != ''
       - name: Running single site unit tests
         run: |
           if [ "${{ matrix.coverage }}" == "true" ]; then
-            npm run test-php -- --coverage-clover=coverage-${{ github.sha }}.xml
+            npm run test-php:performance-lab -- -- -- --coverage-clover=./single-site-reports/coverage-performance-lab.xml
+            npm run test-php:auto-sizes -- -- -- --coverage-clover=./single-site-reports/coverage-auto-sizes.xml
+            npm run test-php:dominant-color-images -- -- -- --coverage-clover=./single-site-reports/coverage-dominant-color-images.xml
+            npm run test-php:embed-optimizer -- -- -- --coverage-clover=./single-site-reports/coverage-embed-optimizer.xml
+            npm run test-php:image-prioritizer -- -- -- --coverage-clover=./single-site-reports/coverage-image-prioritizer.xml
+            npm run test-php:optimization-detective -- -- -- --coverage-clover=./single-site-reports/coverage-optimization-detective.xml
+            npm run test-php:speculation-rules -- -- -- --coverage-clover=./single-site-reports/coverage-speculation-rules.xml
+            npm run test-php:web-worker-offloading -- -- -- --coverage-clover=./single-site-reports/coverage-web-worker-offloading.xml
+            npm run test-php:webp-uploads -- -- -- --coverage-clover=./single-site-reports/coverage-webp-uploads.xml
           else
             npm run test-php
           fi
       - name: Running multisite unit tests
         run: |
           if [ "${{ matrix.coverage }}" == "true" ]; then
-            npm run test-php-multisite -- --coverage-clover=coverage-multisite-${{ github.sha }}.xml
+            npm run test-php-multisite:performance-lab -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-performance-lab.xml
+            npm run test-php-multisite:auto-sizes -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-auto-sizes.xml
+            npm run test-php-multisite:dominant-color-images -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-dominant-color-images.xml
+            npm run test-php-multisite:embed-optimizer -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-embed-optimizer.xml
+            npm run test-php-multisite:image-prioritizer -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-image-prioritizer.xml
+            npm run test-php-multisite:optimization-detective -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-optimization-detective.xml
+            npm run test-php-multisite:speculation-rules -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-speculation-rules.xml
+            npm run test-php-multisite:web-worker-offloading -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-web-worker-offloading.xml
+            npm run test-php-multisite:webp-uploads -- -- -- --coverage-clover=./multisite-reports/coverage-multisite-webp-uploads.xml
           else
             npm run test-php-multisite
           fi
@@ -90,7 +122,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage-${{ github.sha }}.xml
+          directory: ./single-site-reports
           flags: single
           name: ${{ matrix.php }}-single-site-coverage
           fail_ci_if_error: true
@@ -99,7 +131,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage-multisite-${{ github.sha }}.xml
+          directory: ./multisite-reports
           flags: multisite
           name: ${{ matrix.php }}-multisite-coverage
           fail_ci_if_error: true

@@ -19,7 +19,7 @@ The current optimizations include:
 2. Adding preconnect links for embeds in the initial viewport.
 3. Reserving space for embeds that resize to reduce layout shifting.
 
-**Lazy loading embeds** improves performance because embeds are generally very resource-intensive, so lazy loading them ensures that they don't compete with resources when the page is loading. Lazy loading of `IFRAME`\-based embeds is handled simply by adding the `loading=lazy` attribute. Lazy loading embeds that include `SCRIPT` tags is handled by using an Intersection Observer to watch for when the embed’s `FIGURE` container is going to enter the viewport and then it dynamically inserts the `SCRIPT` tag.
+**Lazy loading embeds** improves performance because embeds are generally very resource-intensive, so lazy loading them ensures that they don't compete with resources when the page is loading. Lazy loading of `IFRAME`\-based embeds is handled simply by adding the `loading=lazy` attribute. Lazy loading embeds that include `SCRIPT` tags is handled by using an Intersection Observer to watch for when the embed’s `FIGURE` container is going to enter the viewport, and then it dynamically inserts the `SCRIPT` tag.
 
 **This plugin also recommends that you install and activate the [Optimization Detective](https://wordpress.org/plugins/optimization-detective/) plugin**, which unlocks several optimizations beyond just lazy loading. Without Optimization Detective, lazy loading can actually degrade performance *when an embed is positioned in the initial viewport*. This is because lazy loading such viewport-initial elements can degrade LCP since rendering is delayed by the logic to determine whether the element is visible. This is why WordPress Core tries its best to [avoid](https://make.wordpress.org/core/2021/07/15/refining-wordpress-cores-lazy-loading-implementation/) [lazy loading](https://make.wordpress.org/core/2021/07/15/refining-wordpress-cores-lazy-loading-implementation/) `IMG` tags which appear in the initial viewport, although the server-side heuristics aren’t perfect. This is where Optimization Detective comes in since it detects whether an embed appears in any breakpoint-specific viewports, like mobile, tablet, and desktop. (See also the [Image Prioritizer](https://wordpress.org/plugins/image-prioritizer/) plugin which extends Optimization Detective to ensure lazy loading is correctly applied based on whether an IMG is in the initial viewport.)
 
@@ -29,9 +29,9 @@ The other major feature in Embed Optimizer enabled by Optimization Detective is 
 
 Since Optimization Detective relies on page visits to learn how the page is laid out, you’ll need to wait until you have visits from a mobile and desktop device to start seeing optimizations applied. Also, note that Optimization Detective does not apply optimizations by default for logged-in admin users.
 
-Please note that the optimizations are intended to apply to Embed blocks. So if you do not see optimizations applied, make sure that your embeds are not inside of a Classic Block.
+Please note that the optimizations are intended to apply to Embed blocks. So if you do not see optimizations applied, make sure that your embeds are not inside a Classic Block.
 
-There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
+Your site must have the **REST API accessible** to unauthenticated frontend visitors since this is how metrics are collected about how a page should be optimized. There are currently **no settings** and no user interface for this plugin since it is designed to work without any configuration.
 
 == Installation ==
 

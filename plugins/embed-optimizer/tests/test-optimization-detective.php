@@ -118,8 +118,8 @@ class Test_Embed_Optimizer_Optimization_Detective extends WP_UnitTestCase {
 			$buffer
 		);
 		$this->assertEquals(
-			$this->remove_initial_tabs( $expected ),
-			$this->remove_initial_tabs( $buffer ),
+			trim( $this->remove_initial_tabs( $expected ) ),
+			trim( $this->remove_initial_tabs( $buffer ) ),
 			"Buffer snapshot:\n$buffer"
 		);
 	}

@@ -26,7 +26,7 @@ final class Embed_Optimizer_Tag_Visitor {
 	 *
 	 * @var bool
 	 */
-	protected $added_lazy_script = false;
+	private $added_lazy_script = false;
 
 	/**
 	 * Determines whether the processor is currently at a figure.wp-block-embed tag.
@@ -103,96 +103,8 @@ final class Embed_Optimizer_Tag_Visitor {
 		}
 
 		$this->reduce_layout_shifts( $context );
-
-		// Preconnect links and lazy-loading can only be done once there are URL Metrics collected for both mobile and desktop.
-		if (
-			$context->url_metric_group_collection->get_first_group()->count() > 0
-			&&
-			$context->url_metric_group_collection->get_last_group()->count() > 0
-		) {
-			$embed_wrapper_xpath    = self::get_embed_wrapper_xpath( $processor->get_xpath() );
-			$max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $embed_wrapper_xpath );
-			if ( $max_intersection_ratio > 0 ) {
-				/*
-				 * The following embeds have been chosen for optimization due to their relative popularity among all embed types.
-				 * See <https://colab.sandbox.google.com/drive/1nSpg3qoCLY-cBTV2zOUkgUCU7R7X2f_R?resourcekey=0-MgT7Ur0pT__vw-5_AHjgWQ#scrollTo=utZv59sXzXvS>.
-				 * The list of hosts being preconnected to was obtained by inserting an embed into a post and then looking
-				 * at the network log on the frontend as the embed renders. Each should include the host of the iframe src
-				 * as well as URLs for assets used by the embed, _if_ the URL looks like it is not geotargeted (e.g. '-us')
-				 * or load-balanced (e.g. 's0.example.com'). For the load balancing case, attempt to load the asset by
-				 * incrementing the number appearing in the subdomain (e.g. s1.example.com). If the asset still loads, then
-				 * it is a likely case of a load balancing domain name which cannot be safely preconnected since it could
-				 * not end up being the load balanced domain used for the embed. Lastly, these domains are only for the URLs
-				 * for GET requests, as POST requests are not likely to be part of the critical rendering path.
-				 */
-				$preconnect_hrefs = array();
-				$has_class        = static function ( string $wanted_class ) use ( $processor ): bool {
-					return true === $processor->has_class( $wanted_class );
-				};
-				if ( $has_class( 'wp-block-embed-youtube' ) ) {
-					$preconnect_hrefs[] = 'https://www.youtube.com';
-					$preconnect_hrefs[] = 'https://i.ytimg.com';
-				} elseif ( $has_class( 'wp-block-embed-twitter' ) ) {
-					$preconnect_hrefs[] = 'https://syndication.twitter.com';
-					$preconnect_hrefs[] = 'https://pbs.twimg.com';
-				} elseif ( $has_class( 'wp-block-embed-vimeo' ) ) {
-					$preconnect_hrefs[] = 'https://player.vimeo.com';
-					$preconnect_hrefs[] = 'https://f.vimeocdn.com';
-					$preconnect_hrefs[] = 'https://i.vimeocdn.com';
-				} elseif ( $has_class( 'wp-block-embed-spotify' ) ) {
-					$preconnect_hrefs[] = 'https://apresolve.spotify.com';
-					$preconnect_hrefs[] = 'https://embed-cdn.spotifycdn.com';
-					$preconnect_hrefs[] = 'https://encore.scdn.co';
-					$preconnect_hrefs[] = 'https://i.scdn.co';
-				} elseif ( $has_class( 'wp-block-embed-videopress' ) || $has_class( 'wp-block-embed-wordpress-tv' ) ) {
-					$preconnect_hrefs[] = 'https://video.wordpress.com';
-					$preconnect_hrefs[] = 'https://public-api.wordpress.com';
-					$preconnect_hrefs[] = 'https://videos.files.wordpress.com';
-					$preconnect_hrefs[] = 'https://v0.wordpress.com'; // This does not appear to be a load-balanced domain since v1.wordpress.com is not valid.
-				} elseif ( $has_class( 'wp-block-embed-instagram' ) ) {
-					$preconnect_hrefs[] = 'https://www.instagram.com';
-					$preconnect_hrefs[] = 'https://static.cdninstagram.com';
-					$preconnect_hrefs[] = 'https://scontent.cdninstagram.com';
-				} elseif ( $has_class( 'wp-block-embed-tiktok' ) ) {
-					$preconnect_hrefs[] = 'https://www.tiktok.com';
-					// Note: The other domains used for TikTok embeds include https://lf16-tiktok-web.tiktokcdn-us.com,
-					// https://lf16-cdn-tos.tiktokcdn-us.com, and https://lf16-tiktok-common.tiktokcdn-us.com among others
-					// which either appear to be geo-targeted ('-us') _or_ load-balanced ('lf16'). So these are not added
-					// to the preconnected hosts.
-				} elseif ( $has_class( 'wp-block-embed-amazon' ) ) {
-					$preconnect_hrefs[] = 'https://read.amazon.com';
-					$preconnect_hrefs[] = 'https://m.media-amazon.com';
-				} elseif ( $has_class( 'wp-block-embed-soundcloud' ) ) {
-					$preconnect_hrefs[] = 'https://w.soundcloud.com';
-					$preconnect_hrefs[] = 'https://widget.sndcdn.com';
-					// Note: There is also https://i1.sndcdn.com which is for the album art, but the '1' indicates it may be geotargeted/load-balanced.
-				} elseif ( $has_class( 'wp-block-embed-pinterest' ) ) {
-					$preconnect_hrefs[] = 'https://assets.pinterest.com';
-					$preconnect_hrefs[] = 'https://widgets.pinterest.com';
-					$preconnect_hrefs[] = 'https://i.pinimg.com';
-				}
-
-				foreach ( $preconnect_hrefs as $preconnect_href ) {
-					foreach ( $context->url_metric_group_collection as $group ) {
-						if ( ! ( $group->get_element_max_intersection_ratio( $embed_wrapper_xpath ) > 0.0 ) ) {
-							continue;
-						}
-
-						$context->link_collection->add_link(
-							array(
-								'rel'  => 'preconnect',
-								'href' => $preconnect_href,
-							),
-							$group->get_minimum_viewport_width(),
-							$group->get_maximum_viewport_width()
-						);
-					}
-				}
-			} elseif ( embed_optimizer_update_markup( $processor, false ) && ! $this->added_lazy_script ) {
-				$processor->append_body_html( wp_get_inline_script_tag( embed_optimizer_get_lazy_load_script(), array( 'type' => 'module' ) ) );
-				$this->added_lazy_script = true;
-			}
-		}
+		$this->add_preconnect_links( $context );
+		$this->lazy_load_embeds( $context );
 
 		/*
 		 * At this point the tag is a figure.wp-block-embed, and we can return false because this does not need to be
@@ -281,6 +193,133 @@ final class Embed_Optimizer_Tag_Visitor {
 			}
 
 			$processor->append_head_html( sprintf( "<style>\n%s\n</style>\n", join( "\n", $style_rules ) ) );
+		}
+	}
+
+	/**
+	 * Gets preconnect URLs based on embed type.
+	 *
+	 * The following embeds have been chosen for optimization due to their relative popularity among all embed types.
+	 * The list of hosts being preconnected to was obtained by inserting an embed into a post and then looking
+	 * at the network log on the frontend as the embed renders. Each should include the host of the iframe src
+	 * as well as URLs for assets used by the embed, _if_ the URL looks like it is not geotargeted (e.g. '-us')
+	 * or load-balanced (e.g. 's0.example.com'). For the load balancing case, attempt to load the asset by
+	 * incrementing the number appearing in the subdomain (e.g. s1.example.com). If the asset still loads, then
+	 * it is a likely case of a load balancing domain name which cannot be safely preconnected since it could
+	 * not end up being the load balanced domain used for the embed. Lastly, these domains are only for the URLs
+	 * for GET requests, as POST requests are not likely to be part of the critical rendering path.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_HTML_Tag_Processor $processor Processor, with the cursor currently at an embed block.
+	 * @return array<non-empty-string> Array of URLs to preconnect to.
+	 */
+	private function get_preconnect_urls( OD_HTML_Tag_Processor $processor ): array {
+		$urls      = array();
+		$has_class = static function ( string $wanted_class ) use ( $processor ): bool {
+			return true === $processor->has_class( $wanted_class );
+		};
+
+		if ( $has_class( 'wp-block-embed-youtube' ) ) {
+			$urls[] = 'https://www.youtube.com';
+			$urls[] = 'https://i.ytimg.com';
+		} elseif ( $has_class( 'wp-block-embed-twitter' ) ) {
+			$urls[] = 'https://syndication.twitter.com';
+			$urls[] = 'https://pbs.twimg.com';
+		} elseif ( $has_class( 'wp-block-embed-vimeo' ) ) {
+			$urls[] = 'https://player.vimeo.com';
+			$urls[] = 'https://f.vimeocdn.com';
+			$urls[] = 'https://i.vimeocdn.com';
+		} elseif ( $has_class( 'wp-block-embed-spotify' ) ) {
+			$urls[] = 'https://apresolve.spotify.com';
+			$urls[] = 'https://embed-cdn.spotifycdn.com';
+			$urls[] = 'https://encore.scdn.co';
+			$urls[] = 'https://i.scdn.co';
+		} elseif ( $has_class( 'wp-block-embed-videopress' ) || $has_class( 'wp-block-embed-wordpress-tv' ) ) {
+			$urls[] = 'https://video.wordpress.com';
+			$urls[] = 'https://public-api.wordpress.com';
+			$urls[] = 'https://videos.files.wordpress.com';
+			$urls[] = 'https://v0.wordpress.com'; // This does not appear to be a load-balanced domain since v1.wordpress.com is not valid.
+		} elseif ( $has_class( 'wp-block-embed-instagram' ) ) {
+			$urls[] = 'https://www.instagram.com';
+			$urls[] = 'https://static.cdninstagram.com';
+			$urls[] = 'https://scontent.cdninstagram.com';
+		} elseif ( $has_class( 'wp-block-embed-tiktok' ) ) {
+			$urls[] = 'https://www.tiktok.com';
+			// Note: The other domains used for TikTok embeds include https://lf16-tiktok-web.tiktokcdn-us.com,
+			// https://lf16-cdn-tos.tiktokcdn-us.com, and https://lf16-tiktok-common.tiktokcdn-us.com among others
+			// which either appear to be geo-targeted ('-us') _or_ load-balanced ('lf16'). So these are not added
+			// to the preconnected hosts.
+		} elseif ( $has_class( 'wp-block-embed-amazon' ) ) {
+			$urls[] = 'https://read.amazon.com';
+			$urls[] = 'https://m.media-amazon.com';
+		} elseif ( $has_class( 'wp-block-embed-soundcloud' ) ) {
+			$urls[] = 'https://w.soundcloud.com';
+			$urls[] = 'https://widget.sndcdn.com';
+			// Note: There is also https://i1.sndcdn.com which is for the album art, but the '1' indicates it may be geotargeted/load-balanced.
+		} elseif ( $has_class( 'wp-block-embed-pinterest' ) ) {
+			$urls[] = 'https://assets.pinterest.com';
+			$urls[] = 'https://widgets.pinterest.com';
+			$urls[] = 'https://i.pinimg.com';
+		}
+
+		return $urls;
+	}
+
+	/**
+	 * Adds preconnect links for embed resources.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
+	 */
+	private function add_preconnect_links( OD_Tag_Visitor_Context $context ): void {
+		$processor           = $context->processor;
+		$embed_wrapper_xpath = self::get_embed_wrapper_xpath( $processor->get_xpath() );
+
+		foreach ( $this->get_preconnect_urls( $processor ) as $preconnect_url ) {
+			foreach ( $context->url_metric_group_collection as $group ) {
+				if ( $group->get_element_max_intersection_ratio( $embed_wrapper_xpath ) < PHP_FLOAT_EPSILON ) {
+					continue;
+				}
+
+				$context->link_collection->add_link(
+					array(
+						'rel'  => 'preconnect',
+						'href' => $preconnect_url,
+					),
+					$group->get_minimum_viewport_width(),
+					$group->get_maximum_viewport_width()
+				);
+			}
+		}
+	}
+
+	/**
+	 * Optimizes an embed based on whether it is displayed in any initial viewport.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Tag_Visitor_Context $context Tag visitor context, with the cursor currently at an embed block.
+	 */
+	private function lazy_load_embeds( OD_Tag_Visitor_Context $context ): void {
+		$processor = $context->processor;
+
+		// Lazy-loading can only be done once there are URL Metrics collected for both mobile and desktop.
+		if (
+			$context->url_metric_group_collection->get_first_group()->count() === 0
+			||
+			$context->url_metric_group_collection->get_last_group()->count() === 0
+		) {
+			return;
+		}
+
+		$embed_wrapper_xpath = self::get_embed_wrapper_xpath( $processor->get_xpath() );
+
+		$max_intersection_ratio = $context->url_metric_group_collection->get_element_max_intersection_ratio( $embed_wrapper_xpath );
+		if ( $max_intersection_ratio < PHP_FLOAT_EPSILON && embed_optimizer_update_markup( $processor, false ) && ! $this->added_lazy_script ) {
+			$processor->append_body_html( wp_get_inline_script_tag( embed_optimizer_get_lazy_load_script(), array( 'type' => 'module' ) ) );
+			$this->added_lazy_script = true;
 		}
 	}
 }

@@ -166,7 +166,6 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * Don't create the sources property if no transform is provided.
 	 *
 	 * @covers ::wp_get_attachment_metadata
-	 * @covers ::assertArrayNotHasKey
 	 */
 	public function test_it_should_not_create_the_sources_property_if_no_transform_is_provided(): void {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
@@ -215,7 +214,6 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * Not create the sources property if the mime is not specified on the transforms images
 	 *
 	 * @covers ::wp_get_attachment_metadata
-	 * @covers ::assertArrayNotHasKey
 	 */
 	public function test_it_should_not_create_the_sources_property_if_the_mime_is_not_specified_on_the_transforms_images(): void {
 		add_filter(
@@ -242,7 +240,6 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * Create a WebP version with all the required properties
 	 *
 	 * @covers ::wp_get_attachment_metadata
-	 * @covers ::assertFileExists
 	 */
 	public function test_it_should_create_a_webp_version_with_all_the_required_properties(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -441,38 +438,38 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Avoid the change of URLs of images that are not part of the media library
 	 *
-	 * @covers ::webp_uploads_update_image_references
-	 * @group webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_avoid_the_change_of_urls_of_images_that_are_not_part_of_the_media_library(): void {
 		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
 		$this->mock_frontend_body_hooks();
 
-		$paragraph = '<p>Donec accumsan, sapien et <img src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">, id commodo nisi sapien et est. Mauris nisl odio, iaculis vitae pellentesque nec.</p>';
+		$paragraph = '<img src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">';
 
-		$this->assertSame( $paragraph, webp_uploads_update_image_references( $paragraph ) );
+		$this->assertSame( $paragraph, webp_uploads_filter_image_tag( $paragraph, 'the_content', 0 ) );
 	}
 
 	/**
 	 * Avoid replacing not existing attachment IDs
 	 *
-	 * @covers ::webp_uploads_update_image_references
-	 * @group webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_avoid_replacing_not_existing_attachment_i_ds(): void {
 		// Run critical hooks to satisfy webp_uploads_in_frontend_body() conditions.
 		$this->mock_frontend_body_hooks();
 
-		$paragraph = '<p>Donec accumsan, sapien et <img class="wp-image-0" src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">, id commodo nisi sapien et est. Mauris nisl odio, iaculis vitae pellentesque nec.</p>';
+		$paragraph = '<img class="wp-image-0" src="https://ia600200.us.archive.org/16/items/SPD-SLRSY-1867/hubblesite_2001_06.jpg">';
 
-		$this->assertSame( $paragraph, webp_uploads_update_image_references( $paragraph ) );
+		$this->assertSame( $paragraph, webp_uploads_filter_image_tag( $paragraph, 'the_content', 0 ) );
 	}
 
 	/**
 	 * Prevent replacing a WebP image
 	 *
-	 * @covers ::webp_uploads_update_image_references
-	 * @group webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_prevent_replacing_a_webp_image(): void {
 		// Create JPEG and WebP to check that WebP does not get replaced with JPEG.
@@ -495,13 +492,13 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $expected_tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $expected_tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * Prevent replacing a jpg image if the image does not have the target class name
 	 *
-	 * @covers ::webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_prevent_replacing_a_jpg_image_if_the_image_does_not_have_the_target_class_name(): void {
 		$attachment_id = self::factory()->attachment->create_upload_object(
@@ -513,16 +510,16 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$tag = wp_get_attachment_image( $attachment_id, 'medium' );
 
-		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * Replace references to a JPG image to a WebP version
 	 *
 	 * @covers ::webp_uploads_img_tag_update_mime_type
-	 * @covers ::webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
 	 * @dataProvider provider_replace_images_with_different_extensions
-	 * @group webp_uploads_update_image_references
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_replace_references_to_a_jpg_image_to_a_webp_version( string $image_path ): void {
 		// Create JPEG and WebP to check replacement of JPEG => WebP.
@@ -543,16 +540,16 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertNotSame( $tag, $expected_tag );
 		$this->assertSame( $expected_tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $expected_tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $expected_tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * Should not replace jpeg images in the content if other mime types are disabled via filter.
 	 *
 	 * @covers ::webp_uploads_img_tag_update_mime_type
-	 * @covers ::webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
 	 * @dataProvider provider_replace_images_with_different_extensions
-	 * @group webp_uploads_update_image_references
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_not_replace_the_references_to_a_jpg_image_when_disabled_via_filter( string $image_path ): void {
 		remove_all_filters( 'webp_uploads_content_image_mimes' );
@@ -570,7 +567,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	public function provider_replace_images_with_different_extensions(): Generator {
@@ -582,7 +579,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * Replace all the images including the full size image
 	 *
 	 * @covers ::webp_uploads_img_tag_update_mime_type
-	 * @covers ::webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_replace_all_the_images_including_the_full_size_image(): void {
 		// Create JPEG and WebP to check replacement of JPEG => WebP.
@@ -602,17 +599,17 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertSame( $expected, wp_check_filetype( get_attached_file( $attachment_id ) ) );
 		$this->mock_frontend_body_hooks();
 		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
-		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_update_image_references( $tag ) );
+		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 		$this->assertStringContainsString( $metadata['sources']['image/webp']['file'], webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
-		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_update_image_references( $tag ) );
+		$this->assertStringNotContainsString( wp_basename( get_attached_file( $attachment_id ) ), webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * Prevent replacing an image with no available sources
 	 *
 	 * @covers ::webp_uploads_img_tag_update_mime_type
-	 * @covers ::webp_uploads_update_image_references
-	 * @group webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_prevent_replacing_an_image_with_no_available_sources(): void {
 		add_filter( 'webp_uploads_upload_image_mime_transforms', '__return_empty_array' );
@@ -622,16 +619,16 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$tag = wp_get_attachment_image( $attachment_id, 'full', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * Prevent update not supported images with no available sources
 	 *
 	 * @covers ::webp_uploads_img_tag_update_mime_type
-	 * @covers ::webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
 	 * @dataProvider data_provider_not_supported_webp_images
-	 * @group webp_uploads_update_image_references
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_prevent_update_not_supported_images_with_no_available_sources( string $image_path ): void {
 		$attachment_id = self::factory()->attachment->create_upload_object( $image_path );
@@ -641,7 +638,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 
 		$this->assertSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	public function data_provider_not_supported_webp_images(): Generator {
@@ -800,8 +797,8 @@ class Test_WebP_Uploads_Load extends TestCase {
 	/**
 	 * Prevent replacing an image if image was uploaded via external source or plugin.
 	 *
-	 * @covers ::webp_uploads_update_image_references
-	 * @group webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
+	 * @group webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_prevent_replacing_an_image_uploaded_via_external_source(): void {
 		remove_all_filters( 'webp_uploads_pre_replace_additional_image_source' );
@@ -818,14 +815,14 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$tag = wp_get_attachment_image( $attachment_id, 'medium', false, array( 'class' => "wp-image-{$attachment_id}" ) );
 		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertNotSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertNotSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
 	 *
 	 * @covers ::webp_uploads_img_tag_update_mime_type
-	 * @covers ::webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_create_webp_when_webp_is_smaller_than_jpegs(): void {
 		// Create JPEG and WebP.
@@ -844,7 +841,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertImageHasSource( $attachment_id, 'image/webp' );
 		$this->assertImageHasSizeSource( $attachment_id, 'thumbnail', 'image/webp' );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $result, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $result, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 
 		$this->assertNotSame( $tag, $result );
 
@@ -867,7 +864,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
 	 *
 	 * @covers ::webp_uploads_img_tag_update_mime_type
-	 * @covers ::webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_create_webp_for_full_size_which_is_smaller_in_webp_format(): void {
 		// Create JPEG and WebP.
@@ -890,14 +887,14 @@ class Test_WebP_Uploads_Load extends TestCase {
 		}
 		$this->assertNotSame( $tag, webp_uploads_img_tag_update_mime_type( $tag, 'the_content', $attachment_id ) );
 		$this->mock_frontend_body_hooks();
-		$this->assertNotSame( $tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertNotSame( $tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**
 	 * The image with the smaller filesize should be used when webp_uploads_discard_larger_generated_images is set to true.
 	 *
 	 * @covers ::webp_uploads_img_tag_update_mime_type
-	 * @covers ::webp_uploads_update_image_references
+	 * @covers ::webp_uploads_filter_image_tag
 	 */
 	public function test_it_should_create_webp_for_some_sizes_which_are_smaller_in_webp_format(): void {
 		// Create JPEG and WebP.
@@ -926,7 +923,7 @@ class Test_WebP_Uploads_Load extends TestCase {
 		$this->assertNotSame( $tag, $updated_tag );
 		$this->assertSame( $expected_tag, $updated_tag );
 		$this->mock_frontend_body_hooks();
-		$this->assertSame( $expected_tag, webp_uploads_update_image_references( $tag ) );
+		$this->assertSame( $expected_tag, webp_uploads_filter_image_tag( $tag, 'the_content', $attachment_id ) );
 	}
 
 	/**

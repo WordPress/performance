@@ -510,74 +510,24 @@ function webp_uploads_remove_sources_files( int $attachment_id ): void {
 add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
 
 /**
- * Filters `the_content` to update images so that they use the preferred MIME type where possible.
+ * Filters `wp_content_img_tag` to update images so that they use the preferred MIME type where possible.
  *
- * By default, this is `image/webp`, if the current attachment contains the targeted MIME
- * type. In the near future this will be filterable.
+ * @since n.e.x.t
  *
- * Note that most of this function will not be needed for an eventual core implementation as it
- * would rely on `wp_filter_content_tags()`.
- *
- * @since 1.0.0
- *
- * @see wp_filter_content_tags()
- *
- * @param string|mixed $content The content of the current post.
- * @return string The content with the updated references to the images.
+ * @param string $filtered_image Full img tag with attributes that will replace the source img tag.
+ * @param string $context        Additional context, like the current filter name or the function name from where this was called.
+ * @param int    $attachment_id  The image attachment ID. May be 0 in case the image is not an attachment.
+ * @return string The updated IMG tag with references to the new MIME type if available.
  */
-function webp_uploads_update_image_references( $content ): string {
-	if ( ! is_string( $content ) ) {
-		$content = '';
-	}
-
+function webp_uploads_filter_image_tag( string $filtered_image, string $context, int $attachment_id ): string {
 	// Bail early if request is not for the frontend.
 	if ( ! webp_uploads_in_frontend_body() ) {
-		return $content;
+		return $filtered_image;
 	}
 
-	// This content does not have any tag on it, move forward.
-	// TODO: Eventually this should use the HTML API to parse out the image tags and then update them.
-	if ( 0 === (int) preg_match_all( '/<(img)\s[^>]+>/', $content, $img_tags, PREG_SET_ORDER ) ) {
-		return $content;
-	}
+	$filtered_image = str_replace( $filtered_image, webp_uploads_img_tag_update_mime_type( $filtered_image, 'the_content', $attachment_id ), $filtered_image );
 
-	$images = array();
-	foreach ( $img_tags as list( $img ) ) {
-		$processor = new WP_HTML_Tag_Processor( $img );
-		if ( ! $processor->next_tag( array( 'tag_name' => 'IMG' ) ) ) {
-			// This condition won't ever be met since we're iterating over the IMG tags extracted with preg_match_all() above.
-			continue;
-		}
-
-		// Find the ID of each image by the class.
-		// TODO: It would be preferable to use the $processor->class_list() method but there seems to be some typing issues with PHPStan.
-		$class_name = $processor->get_attribute( 'class' );
-		if (
-			! is_string( $class_name )
-			||
-			1 !== preg_match( '/(?:^|\s)wp-image-([1-9]\d*)(?:\s|$)/i', $class_name, $matches )
-		) {
-			continue;
-		}
-
-		// Make sure we use the last item on the list of matches.
-		$images[ $img ] = (int) $matches[1];
-	}
-
-	$attachment_ids = array_unique( array_filter( array_values( $images ) ) );
-	if ( count( $attachment_ids ) > 1 ) {
-		/**
-		 * Warm the object cache with post and meta information for all found
-		 * images to avoid making individual database calls.
-		 */
-		_prime_post_caches( $attachment_ids, false, true );
-	}
-
-	foreach ( $images as $img => $attachment_id ) {
-		$content = str_replace( $img, webp_uploads_img_tag_update_mime_type( $img, 'the_content', $attachment_id ), $content );
-	}
-
-	return $content;
+	return $filtered_image;
 }
 
 /**
@@ -773,11 +723,7 @@ add_action( 'wp_head', 'webp_uploads_render_generator' );
  * @since 2.1.0
  */
 function webp_uploads_init(): void {
-	if ( webp_uploads_is_picture_element_enabled() ) {
-		add_filter( 'wp_content_img_tag', 'webp_uploads_wrap_image_in_picture', 10, 3 );
-	} else {
-		add_filter( 'the_content', 'webp_uploads_update_image_references', 13 ); // Run after wp_filter_content_tags.
-	}
+	add_filter( 'wp_content_img_tag', webp_uploads_is_picture_element_enabled() ? 'webp_uploads_wrap_image_in_picture' : 'webp_uploads_filter_image_tag', 10, 3 );
 }
 add_action( 'init', 'webp_uploads_init' );
 
