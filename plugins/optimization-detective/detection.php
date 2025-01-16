@@ -70,8 +70,32 @@ function od_get_cache_purge_post_id(): ?int {
  * @param OD_URL_Metric_Group_Collection $group_collection URL Metric group collection.
  */
 function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $group_collection ): string {
+
+	/**
+	 * Filters whether to use the web-vitals.js build with attribution.
+	 *
+	 * When using the attribution build of web-vitals, the metric object passed to report callbacks registered via
+	 * `onTTFB`, `onFCP`, `onLCP`, `onCLS`, and `onINP` will include an additional {@link https://github.com/GoogleChrome/web-vitals#attribution attribution property}.
+	 * For details, please refer to the {@link https://github.com/GoogleChrome/web-vitals web-vitals documentation}.
+	 *
+	 * For example, to opt in to using the attribution build:
+	 *
+	 *     add_filter( 'od_use_web_vitals_attribution_build', '__return_true' );
+	 *
+	 * Note that the attribution build is slightly larger than the standard build, so this is why it is not used by default.
+	 * The additional attribution data is made available to client-side extension script modules registered via the `od_extension_module_urls` filter.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param bool $use_attribution_build Whether to use the attribution build.
+	 */
+	$use_attribution_build = (bool) apply_filters( 'od_use_web_vitals_attribution_build', false );
+
 	$web_vitals_lib_data = require __DIR__ . '/build/web-vitals.asset.php';
-	$web_vitals_lib_src  = plugins_url( add_query_arg( 'ver', $web_vitals_lib_data['version'], 'build/web-vitals.js' ), __FILE__ );
+	$web_vitals_lib_src  = $use_attribution_build ?
+		plugins_url( 'build/web-vitals-attribution.js', __FILE__ ) :
+		plugins_url( 'build/web-vitals.js', __FILE__ );
+	$web_vitals_lib_src  = add_query_arg( 'ver', $web_vitals_lib_data['version'], $web_vitals_lib_src );
 
 	/**
 	 * Filters the list of extension script module URLs to import when performing detection.

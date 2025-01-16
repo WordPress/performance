@@ -43,6 +43,9 @@
 	<rule ref="Squiz.Commenting.FunctionCommentThrowTag.Missing">
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
+	<rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
 
 	<!-- Ignore inapplicable WordPress-Extra sniffs in tests. -->
 	<rule ref="WordPress.WP.EnqueuedResourceParameters">

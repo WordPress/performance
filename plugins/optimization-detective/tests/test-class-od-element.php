@@ -39,7 +39,7 @@ class Test_OD_Element extends WP_UnitTestCase {
 		);
 
 		$element_data = array(
-			'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+			'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
 			'isLCP'              => false,
 			'isLCPCandidate'     => true,
 			'intersectionRatio'  => 0.123,

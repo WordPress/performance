@@ -118,12 +118,6 @@ function od_can_optimize_response(): bool {
 		is_customize_preview() ||
 		// Since the images detected in the response body of a POST request cannot, by definition, be cached.
 		( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== $_SERVER['REQUEST_METHOD'] ) ||
-		// The aim is to optimize pages for the majority of site visitors, not for those who administer the site, unless
-		// in 'plugin' development mode. For admin users, additional elements will be present, like the script from
-		// wp_customize_support_script(), which will interfere with the XPath indices. Note that
-		// od_get_normalized_query_vars() is varied by is_user_logged_in(), so membership sites and e-commerce sites
-		// will still be able to be optimized for their normal visitors.
-		( current_user_can( 'customize' ) && ! wp_is_development_mode( 'plugin' ) ) ||
 		// Page caching plugins can only reliably be told to invalidate a cached page when a post is available to trigger
 		// the relevant actions on.
 		null === od_get_cache_purge_post_id()
@@ -298,6 +292,11 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 	$needs_detection = ! $group_collection->is_every_group_complete();
 
 	do {
+		// Never process anything inside NOSCRIPT since it will never show up in the DOM when scripting is enabled, and thus it can never be detected nor measured.
+		if ( in_array( 'NOSCRIPT', $processor->get_breadcrumbs(), true ) ) {
+			continue;
+		}
+
 		$tracked_in_url_metrics = false;
 		$processor->set_bookmark( $current_tag_bookmark ); // TODO: Should we break if this returns false?
 

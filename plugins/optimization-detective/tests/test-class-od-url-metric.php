@@ -22,7 +22,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		$valid_element = array(
 			'isLCP'              => true,
 			'isLCPCandidate'     => true,
-			'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+			'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
 			'intersectionRatio'  => 1.0,
 			'intersectionRect'   => $this->get_sample_dom_rect(),
 			'boundingClientRect' => $this->get_sample_dom_rect(),
@@ -359,7 +359,7 @@ class Test_OD_URL_Metric extends WP_UnitTestCase {
 		$valid_element = array(
 			'isLCP'              => true,
 			'isLCPCandidate'     => true,
-			'xpath'              => '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]',
+			'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
 			'intersectionRatio'  => 1.0,
 			'intersectionRect'   => $this->get_sample_dom_rect(),
 			'boundingClientRect' => $this->get_sample_dom_rect(),

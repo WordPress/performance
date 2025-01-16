@@ -702,9 +702,9 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 */
 	public function test_get_groups_by_lcp_element(): void {
 
-		$first_child_image_xpath  = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]';
-		$second_child_image_xpath = '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::IMG]';
-		$first_child_h1_xpath     = '/*[1][self::HTML]/*21][self::BODY]/*[1][self::H1]';
+		$first_child_image_xpath  = '/HTML/BODY/DIV/*[1][self::IMG]';
+		$second_child_image_xpath = '/HTML/BODY/DIV/*[2][self::IMG]';
+		$first_child_h1_xpath     = '/HTML/BODY/DIV/*[1][self::H1]';
 
 		$get_url_metric_with_one_lcp_element = function ( int $viewport_width, string $lcp_element_xpath ): OD_URL_Metric {
 			return $this->get_sample_url_metric(
@@ -761,8 +761,8 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 * @return array<string, mixed>
 	 */
 	public function data_provider_test_get_common_lcp_element(): array {
-		$xpath1 = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]/*[1]';
-		$xpath2 = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]/*[2]';
+		$xpath1 = '/HTML/BODY/DIV/*[1][self::IMG]';
+		$xpath2 = '/HTML/BODY/DIV/*[2][self::IMG]';
 
 		$get_sample_url_metric = function ( int $viewport_width, string $lcp_element_xpath, bool $is_lcp = true ): OD_URL_Metric {
 			return $this->get_sample_url_metric(
@@ -876,9 +876,9 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 * @return array<string, mixed>
 	 */
 	public function data_provider_element_max_intersection_ratios(): array {
-		$xpath1 = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]/*[1]';
-		$xpath2 = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]/*[2]';
-		$xpath3 = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]/*[3]';
+		$xpath1 = '/HTML/BODY/DIV/*[1][self::IMG]';
+		$xpath2 = '/HTML/BODY/DIV/*[2][self::IMG]';
+		$xpath3 = '/HTML/BODY/DIV/*[3][self::IMG]';
 
 		$get_sample_url_metric = function ( int $viewport_width, string $lcp_element_xpath, float $intersection_ratio ): OD_URL_Metric {
 			return $this->get_sample_url_metric(
@@ -962,7 +962,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 			$this->assertSame( $expected_max_ratio, $group_collection->get_element_max_intersection_ratio( $expected_xpath ) );
 		}
 
-		$this->assertNull( $group_collection->get_element_max_intersection_ratio( '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::BLINK]/*[1]' ) );
+		$this->assertNull( $group_collection->get_element_max_intersection_ratio( '/HTML/BODY/DIV/*[1][self::BLINK]' ) );
 
 		// Check get_all_denormalized_elements.
 		$all_elements = $group_collection->get_xpath_elements_map();
@@ -991,9 +991,9 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 * @return array<string, mixed>
 	 */
 	public function data_provider_element_minimum_heights(): array {
-		$xpath1 = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]/*[1]';
-		$xpath2 = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]/*[2]';
-		$xpath3 = '/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IMG]/*[3]';
+		$xpath1 = '/HTML/BODY/DIV/*[1][self::IMG]';
+		$xpath2 = '/HTML/BODY/DIV/*[2][self::IMG]';
+		$xpath3 = '/HTML/BODY/DIV/*[3][self::IMG]';
 
 		$get_sample_url_metric = function ( int $viewport_width, string $lcp_element_xpath, float $element_height ): OD_URL_Metric {
 			return $this->get_sample_url_metric(
@@ -1059,8 +1059,8 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 * @return array<string, mixed>
 	 */
 	public function data_provider_get_all_elements_positioned_in_any_initial_viewport(): array {
-		$xpath1 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[1]';
-		$xpath2 = '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::IMG]/*[2]';
+		$xpath1 = '/HTML/BODY/DIV/*[1][self::IMG]';
+		$xpath2 = '/HTML/BODY/DIV/*[2][self::IMG]';
 
 		$get_sample_url_metric = function ( int $viewport_width, int $viewport_height, string $xpath, float $intersection_ratio, float $top ): OD_URL_Metric {
 			return $this->get_sample_url_metric(
@@ -1139,7 +1139,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		foreach ( $expected as $expected_xpath => $expected_is_positioned ) {
 			$this->assertSame( $expected_is_positioned, $group_collection->is_element_positioned_in_any_initial_viewport( $expected_xpath ) );
 		}
-		$this->assertNull( $group_collection->is_element_positioned_in_any_initial_viewport( '/*[0][self::HTML]/*[1][self::BODY]/*[0][self::BLINK]/*[1]' ) );
+		$this->assertNull( $group_collection->is_element_positioned_in_any_initial_viewport( '/HTML/BODY/DIV/*[1][self::BLINK]' ) );
 	}
 
 	/**

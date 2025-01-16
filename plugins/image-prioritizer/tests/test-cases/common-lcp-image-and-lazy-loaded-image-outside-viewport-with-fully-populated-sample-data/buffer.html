@@ -1,0 +1,21 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>...</title>
+	</head>
+	<body>
+		<div id="page">
+			<div class="carousel">
+				<img src="https://example.com/foo1.jpg" alt="Foo" width="1200" height="800" fetchpriority="low" loading="lazy" srcset="https://example.com/foo1-480w.jpg 480w, https://example.com/foo1-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px" crossorigin="anonymous">
+				<img src="https://example.com/foo2.jpg" alt="Foo" width="1200" height="800" loading="eager" srcset="https://example.com/foo2-480w.jpg 480w, https://example.com/foo2-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">
+				<img src="https://example.com/foo3.jpg" alt="Foo" width="1200" height="800" fetchpriority="high" srcset="https://example.com/foo3-480w.jpg 480w, https://example.com/foo3-800w.jpg 800w" sizes="(max-width: 600px) 480px, 800px">
+			</div>
+			<p>Pretend this is a super long paragraph that pushes the next image mostly out of the initial viewport.</p>
+			<img src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" fetchpriority="high" loading="lazy">
+			<p>Now the following image is definitely outside the initial viewport.</p>
+			<img src="https://example.com/baz.jpg" alt="Baz" width="10" height="10" fetchpriority="high">
+			<img src="https://example.com/qux.jpg" alt="Qux" width="10" height="10" fetchpriority="high" loading="eager">
+			<img src="https://example.com/quux.jpg" alt="Quux" width="10" height="10" loading="LAZY"><!-- This one is all good. -->
+		</div>
+	</body>
+</html>

@@ -120,8 +120,8 @@ final class Embed_Optimizer_Tag_Visitor {
 	 *
 	 * @since 0.3.0
 	 *
-	 * @param string $embed_block_xpath XPath for the embed block FIGURE tag. For example: `/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]`.
-	 * @return string XPath for the child DIV. For example: `/*[1][self::HTML]/*[2][self::BODY]/*[1][self::FIGURE]/*[1][self::DIV]`
+	 * @param string $embed_block_xpath XPath for the embed block FIGURE tag. For example: `/HTML/BODY/DIV/*[1][self::FIGURE]`.
+	 * @return string XPath for the child DIV. For example: `/HTML/BODY/DIV/*[1][self::FIGURE]/*[1][self::DIV]`
 	 */
 	private static function get_embed_wrapper_xpath( string $embed_block_xpath ): string {
 		return $embed_block_xpath . '/*[1][self::DIV]';

@@ -1,11 +1,17 @@
 /**
  * @typedef {import("web-vitals").LCPMetric} LCPMetric
+ * @typedef {import("web-vitals").LCPMetricWithAttribution} LCPMetricWithAttribution
  * @typedef {import("./types.ts").ElementData} ElementData
  * @typedef {import("./types.ts").OnTTFBFunction} OnTTFBFunction
  * @typedef {import("./types.ts").OnFCPFunction} OnFCPFunction
  * @typedef {import("./types.ts").OnLCPFunction} OnLCPFunction
  * @typedef {import("./types.ts").OnINPFunction} OnINPFunction
  * @typedef {import("./types.ts").OnCLSFunction} OnCLSFunction
+ * @typedef {import("./types.ts").OnTTFBWithAttributionFunction} OnTTFBWithAttributionFunction
+ * @typedef {import("./types.ts").OnFCPWithAttributionFunction} OnFCPWithAttributionFunction
+ * @typedef {import("./types.ts").OnLCPWithAttributionFunction} OnLCPWithAttributionFunction
+ * @typedef {import("./types.ts").OnINPWithAttributionFunction} OnINPWithAttributionFunction
+ * @typedef {import("./types.ts").OnCLSWithAttributionFunction} OnCLSWithAttributionFunction
  * @typedef {import("./types.ts").URLMetric} URLMetric
  * @typedef {import("./types.ts").URLMetricGroupStatus} URLMetricGroupStatus
  * @typedef {import("./types.ts").Extension} Extension
@@ -360,11 +366,11 @@ export default async function detect( {
 	);
 
 	const {
-		/** @type OnTTFBFunction */ onTTFB,
-		/** @type OnFCPFunction */ onFCP,
-		/** @type OnLCPFunction */ onLCP,
-		/** @type OnINPFunction */ onINP,
-		/** @type OnCLSFunction */ onCLS,
+		/** @type {OnTTFBFunction|OnTTFBWithAttributionFunction} */ onTTFB,
+		/** @type {OnFCPFunction|OnFCPWithAttributionFunction} */ onFCP,
+		/** @type {OnLCPFunction|OnLCPWithAttributionFunction} */ onLCP,
+		/** @type {OnINPFunction|OnINPWithAttributionFunction} */ onINP,
+		/** @type {OnCLSFunction|OnCLSWithAttributionFunction} */ onCLS,
 	} = await import( webVitalsLibrarySrc );
 
 	// TODO: Does this make sense here?
@@ -490,13 +496,18 @@ export default async function detect( {
 		} );
 	}
 
-	/** @type {LCPMetric[]} */
+	/** @type {(LCPMetric|LCPMetricWithAttribution)[]} */
 	const lcpMetricCandidates = [];
 
 	// Obtain at least one LCP candidate. More may be reported before the page finishes loading.
 	await new Promise( ( resolve ) => {
 		onLCP(
-			( /** @type LCPMetric */ metric ) => {
+			/**
+			 * Handles an LCP metric being reported.
+			 *
+			 * @param {LCPMetric|LCPMetricWithAttribution} metric
+			 */
+			( metric ) => {
 				lcpMetricCandidates.push( metric );
 				resolve();
 			},

@@ -115,7 +115,7 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 				'set_up' => function (): array {
 					wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
 					$this->go_to( home_url( '/' ) );
-					return array( 'user_logged_in' => true );
+					return array();
 				},
 			),
 		);

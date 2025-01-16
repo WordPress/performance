@@ -2,6 +2,13 @@
 type ExcludeProps< T > = { [ k: string ]: any } & { [ K in keyof T ]?: never };
 
 import { onTTFB, onFCP, onLCP, onINP, onCLS } from 'web-vitals';
+import {
+	onTTFB as onTTFBWithAttribution,
+	onFCP as onFCPWithAttribution,
+	onLCP as onLCPWithAttribution,
+	onINP as onINPWithAttribution,
+	onCLS as onCLSWithAttribution,
+} from 'web-vitals/attribution';
 
 export interface ElementData {
 	isLCP: boolean;
@@ -35,14 +42,19 @@ export type OnFCPFunction = typeof onFCP;
 export type OnLCPFunction = typeof onLCP;
 export type OnINPFunction = typeof onINP;
 export type OnCLSFunction = typeof onCLS;
+export type OnTTFBWithAttributionFunction = typeof onTTFBWithAttribution;
+export type OnFCPWithAttributionFunction = typeof onFCPWithAttribution;
+export type OnLCPWithAttributionFunction = typeof onLCPWithAttribution;
+export type OnINPWithAttributionFunction = typeof onINPWithAttribution;
+export type OnCLSWithAttributionFunction = typeof onCLSWithAttribution;
 
 export type InitializeArgs = {
 	readonly isDebug: boolean;
-	readonly onTTFB: OnTTFBFunction;
-	readonly onFCP: OnFCPFunction;
-	readonly onLCP: OnLCPFunction;
-	readonly onINP: OnINPFunction;
-	readonly onCLS: OnCLSFunction;
+	readonly onTTFB: OnTTFBFunction | OnTTFBWithAttributionFunction;
+	readonly onFCP: OnFCPFunction | OnFCPWithAttributionFunction;
+	readonly onLCP: OnLCPFunction | OnLCPWithAttributionFunction;
+	readonly onINP: OnINPFunction | OnINPWithAttributionFunction;
+	readonly onCLS: OnCLSFunction | OnCLSWithAttributionFunction;
 };
 
 export type InitializeCallback = ( args: InitializeArgs ) => Promise< void >;

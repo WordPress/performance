@@ -97,11 +97,32 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Pattern for valid XPath subset for breadcrumb.
 	 *
+	 * The pattern for matching a tag /[a-zA-Z0-9:_-]+/ used here is informed by the characters found in tag names in
+	 * HTTP Archive as {@link https://docs.google.com/spreadsheets/d/1grkd2_1xSV3jvNK6ucRQ0OL1HmGTsScHuwA8GZuRLHU/edit?gid=2057119066#gid=2057119066 seen}
+	 * in Web Almanac 2022, with the only exception being the very malformed tag name `script="async"`. Note that XPaths
+	 * begin with `/HTML/BODY` followed by an index-free reference to an element which is a direct child of the BODY,
+	 * for example `/HTML/BODY/DIV`. Below this point, all tags must then have indices to disambiguate the XPaths among
+	 * siblings. For example: `/HTML/BODY/DIV/*[2][self::MAIN]/*[1][self::FIGURE]/*[2][self::IMG]`. There is little need
+	 * for there to be an index added to the `DIV` directly under the `BODY` because WordPress themes almost always use
+	 * a wrapper element: Block Themes always wrap the page in a `DIV.wp-site-blocks` element, and classic themes either
+	 * wrap the content in a `DIV#page` or else use `HEADER`, `MAIN`, and `FOOTER`.
+	 *
+	 * The benefit of omitting the node index from direct children of the BODY allows for variations in content output
+	 * at `wp_body_open()` without impacting the computed XPaths for subsequent tags. Omitting the node index at this
+	 * level, however, does incur a slight risk of duplicate XPaths being computed. For example, if a theme has a
+	 * `<div id="header" role="banner">` and a `<div id="footer" role="contentinfo">` which are both direct descendants
+	 * of `BODY`, then it is possible for an XPath like `/HTML/BODY/DIV/*[1][self::IMG]` to be duplicated if both of
+	 * these `DIV` elements has an `IMG` as the first child. The conflict could arise for any tags of the same name in
+	 * the same relative position, which does not seem likely. Additionally, as noted above, themes almost always wrap
+	 * the page content in an overall `DIV` or else they use semantic HTML tags like `HEADER` and `FOOTER`, so the risk
+	 * is low.
+	 *
 	 * @since 0.4.0
 	 * @see self::get_xpath()
 	 * @var string
+	 * @link https://github.com/WordPress/performance/issues/1787
 	 */
-	const XPATH_PATTERN = '^(/\*\[\d+\]\[self::.+?\])+$';
+	const XPATH_PATTERN = '^(/([a-zA-Z0-9:_-]+|\*\[\d+\]\[self::[a-zA-Z0-9:_-]+\]))+$';
 
 	/**
 	 * Bookmark for the end of the HEAD.
@@ -540,8 +561,10 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Gets XPath for the current open tag.
 	 *
-	 * It would be nicer if this were like `/html[1]/body[2]` but in XPath the position() here refers to the
-	 * index of the preceding node set. So it has to rather be written `/*[1][self::html]/*[2][self::body]`.
+	 * It would be nicer if this were like `.../DIV[1]/DIV[2]` but in XPath the position() here refers to the
+	 * index of the preceding node set. So it has to rather be written `.../*[1][self::DIV]/*[2][self::DIV]`.
+	 * Note that the first three levels lack any node index, for example `/HTML/BODY/DIV` for the reasons
+	 * explained in {@see self::XPATH_PATTERN}.
 	 *
 	 * @since 0.4.0
 	 *
@@ -550,8 +573,12 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	public function get_xpath(): string {
 		if ( null === $this->current_xpath ) {
 			$this->current_xpath = '';
-			foreach ( $this->get_indexed_breadcrumbs() as list( $tag_name, $index ) ) {
-				$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
+			foreach ( $this->get_indexed_breadcrumbs() as $i => list( $tag_name, $index ) ) {
+				if ( $i < 2 || ( 2 === $i && '/HTML/BODY' === $this->current_xpath ) ) {
+					$this->current_xpath .= "/$tag_name";
+				} else {
+					$this->current_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
+				}
 			}
 		}
 		return $this->current_xpath;

@@ -80,19 +80,20 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	/**
 	 * Data provider.
 	 *
-	 * @return array<string, array{set_up: Closure, expected_exports: array<string, mixed>}>
+	 * @return array<string, array{set_up: Closure, expected_exports: array<string, mixed>, expected_standard_build: bool}>
 	 */
 	public function data_provider_od_get_detection_script(): array {
 		return array(
 			'unfiltered' => array(
-				'set_up'           => static function (): void {},
-				'expected_exports' => array(
+				'set_up'                  => static function (): void {},
+				'expected_exports'        => array(
 					'storageLockTTL'      => MINUTE_IN_SECONDS,
 					'extensionModuleUrls' => array(),
 				),
+				'expected_standard_build' => true,
 			),
 			'filtered'   => array(
-				'set_up'           => static function (): void {
+				'set_up'                  => static function (): void {
 					add_filter(
 						'od_url_metric_storage_lock_ttl',
 						static function (): int {
@@ -106,11 +107,13 @@ class Test_OD_Detection extends WP_UnitTestCase {
 							return $urls;
 						}
 					);
+					add_filter( 'od_use_web_vitals_attribution_build', '__return_true' );
 				},
-				'expected_exports' => array(
+				'expected_exports'        => array(
 					'storageLockTTL'      => HOUR_IN_SECONDS,
 					'extensionModuleUrls' => array( home_url( '/my-extension.js', 'https' ) ),
 				),
+				'expected_standard_build' => false,
 			),
 		);
 	}
@@ -122,10 +125,11 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	 *
 	 * @dataProvider data_provider_od_get_detection_script
 	 *
-	 * @param Closure                                                                       $set_up           Set up callback.
-	 * @param array<string, array{set_up: Closure, expected_exports: array<string, mixed>}> $expected_exports Expected exports.
+	 * @param Closure               $set_up                  Set up callback.
+	 * @param array<string, string> $expected_exports        Expected exports.
+	 * @param bool                  $expected_standard_build Expected standard build.
 	 */
-	public function test_od_get_detection_script_returns_script( Closure $set_up, array $expected_exports ): void {
+	public function test_od_get_detection_script_returns_script( Closure $set_up, array $expected_exports, bool $expected_standard_build ): void {
 		$set_up();
 		$slug         = od_get_url_metrics_slug( array( 'p' => '1' ) );
 		$current_etag = md5( '' );
@@ -140,6 +144,12 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		foreach ( $expected_exports as $key => $value ) {
 			$this->assertStringContainsString( sprintf( '%s:%s', wp_json_encode( $key ), wp_json_encode( $value ) ), $script );
 		}
+		$this->assertSame( 1, preg_match( '/"webVitalsLibrarySrc":("[^"]+?")/', $script, $matches ) );
+		$web_vitals_library_src = json_decode( $matches[1] );
+		$this->assertStringContainsString(
+			$expected_standard_build ? '/web-vitals.' : '/web-vitals-attribution.',
+			$web_vitals_library_src
+		);
 		$this->assertStringContainsString( '"minimumViewportWidth":0', $script );
 		$this->assertStringContainsString( '"minimumViewportWidth":481', $script );
 		$this->assertStringContainsString( '"minimumViewportWidth":601', $script );

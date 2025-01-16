@@ -1,0 +1,16 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>...</title>
+		<style>/* Never show mobile and desktop logos at the same time. */</style>
+	<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/desktop-logo.png" media="screen and (min-width: 783px)">
+<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/mobile-logo.png" media="screen and (max-width: 480px)">
+</head>
+	<body>
+		<div id="page">
+			<img data-od-xpath="/HTML/BODY/DIV/*[1][self::IMG]" src="https://example.com/mobile-logo.png" alt="Mobile Logo" width="600" height="600">
+			<img data-od-xpath="/HTML/BODY/DIV/*[2][self::IMG]" src="https://example.com/desktop-logo.png" alt="Desktop Logo" width="600" height="600">
+		</div>
+	<script type="module">/* import detect ... */</script>
+</body>
+</html>

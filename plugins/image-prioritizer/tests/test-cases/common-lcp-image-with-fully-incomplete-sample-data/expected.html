@@ -1,0 +1,14 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>...</title>
+	<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/foo.jpg" media="screen and (min-width: 783px)">
+</head>
+	<body>
+		<div id="page">
+			<img data-od-xpath="/HTML/BODY/DIV/*[1][self::IMG]" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy">
+			<img data-od-removed-fetchpriority="high" data-od-xpath="/HTML/BODY/DIV/*[2][self::IMG]" src="https://example.com/bar.jpg" alt="Bar" width="10" height="10" loading="lazy" >
+		</div>
+	<script type="module">/* import detect ... */</script>
+</body>
+</html>

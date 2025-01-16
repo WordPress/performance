@@ -1,0 +1,40 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>...</title>
+	<style>
+@media (max-width: 480px) { #embed-optimizer-b4fa815eb0a365ecd43611413ae0a83b { min-height: 500px; } }
+@media (min-width: 481px) and (max-width: 600px) { #embed-optimizer-b4fa815eb0a365ecd43611413ae0a83b { min-height: 500px; } }
+@media (min-width: 601px) and (max-width: 782px) { #embed-optimizer-b4fa815eb0a365ecd43611413ae0a83b { min-height: 500px; } }
+@media (min-width: 783px) { #embed-optimizer-b4fa815eb0a365ecd43611413ae0a83b { min-height: 500px; } }
+</style>
+<style>
+@media (max-width: 480px) { #existing-figurine-id { min-height: 654px; } }
+@media (min-width: 481px) and (max-width: 600px) { #existing-figurine-id { min-height: 654px; } }
+@media (min-width: 601px) and (max-width: 782px) { #existing-figurine-id { min-height: 654px; } }
+@media (min-width: 783px) { #existing-figurine-id { min-height: 654px; } }
+</style>
+<link data-od-added-tag rel="preload" as="image" href="https://example.com/poster1.jpg">
+</head>
+	<body>
+		<div class="wp-site-blocks">
+			<figure data-od-added-id id="embed-optimizer-b4fa815eb0a365ecd43611413ae0a83b" style="background: black; color:gray" class="wp-block-embed is-type-video">
+				<div data-od-xpath="/HTML/BODY/DIV/*[1][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
+					<video data-od-added-preload data-od-xpath="/HTML/BODY/DIV/*[1][self::FIGURE]/*[1][self::DIV]/*[1][self::VIDEO]" preload="auto" src="https://example.com/video1.mp4" poster="https://example.com/poster1.jpg" width="640" height="480"></video>
+				</div>
+			</figure>
+			<figure id="existing-figurine-id" class="wp-block-embed is-type-rich is-provider-figurine wp-block-embed-figurine">
+				<div data-od-xpath="/HTML/BODY/DIV/*[2][self::FIGURE]/*[1][self::DIV]" class="wp-block-embed__wrapper">
+					<figure>
+						<p>So I heard you like <code>FIGURE</code>?</p>
+						<video data-od-added-preload data-od-xpath="/HTML/BODY/DIV/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::FIGURE]/*[2][self::VIDEO]" preload="none" src="https://example.com/video2.mp4" poster="https://example.com/poster2.jpg" width="640" height="480"></video>
+						<figcaption>Tagline from Figurine embed.</figcaption>
+					</figure>
+					<iframe data-od-added-loading loading="lazy" src="https://example.com/" width="640" height="480"></iframe>
+				</div>
+			</figure>
+			<script src="https://example.com/script-not-part-of-embed.js"></script>
+		</div>
+	<script type="module">/* import detect ... */</script>
+</body>
+</html>

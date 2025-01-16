@@ -149,4 +149,115 @@ trait Optimization_Detective_Test_Helpers {
 			$items
 		);
 	}
+
+	/**
+	 * Loads snapshot test cases.
+	 *
+	 * @param non-empty-string $directory Directory for test cases.
+	 * @return array<string, array{ directory: non-empty-string }> Test cases.
+	 */
+	public function load_snapshot_test_cases( string $directory ): array {
+		$test_cases = array();
+		foreach ( (array) glob( $directory . '/*' ) as $test_case ) {
+			/**
+			 * Test case directory.
+			 *
+			 * @var non-empty-string $test_case
+			 */
+			$test_cases[ basename( $test_case ) ] = array(
+				'directory' => $test_case,
+			);
+		}
+		return $test_cases;
+	}
+
+	/**
+	 * Asserts equality against snapshot.
+	 *
+	 * @param non-empty-string $directory Directory for test cases.
+	 */
+	public function assert_snapshot_equals( string $directory ): void {
+		$set_up_file = "$directory/set-up.php";
+		if ( ! file_exists( $set_up_file ) ) {
+			throw new Exception( "Missing required file: $directory/set-up.php" );
+		}
+
+		$set_up      = require $set_up_file;
+		$buffer_file = "$directory/buffer.html";
+
+		$buffer = file_get_contents( $buffer_file );
+		if ( ! is_string( $buffer ) ) {
+			throw new Exception( "Missing test case file: $buffer_file" );
+		}
+
+		$expected_file = "$directory/expected.html";
+		$actual_file   = "$directory/actual.html";
+		if ( file_exists( $expected_file ) ) {
+			$expected = file_get_contents( $expected_file );
+			if ( ! is_string( $expected ) ) {
+				throw new Exception( "Missing test case file: $expected_file" );
+			}
+		} else {
+			$expected = null;
+		}
+
+		$replacements = $set_up( $this, $this::factory() );
+
+		// Replace placeholders with values computed in set_up.
+		if ( is_array( $replacements ) && count( $replacements ) > 0 ) {
+			$buffer = str_replace( array_keys( $replacements ), array_values( $replacements ), $buffer );
+			if ( is_string( $expected ) ) {
+				$expected = str_replace( array_keys( $replacements ), array_values( $replacements ), $expected );
+			}
+		}
+
+		$buffer = od_optimize_template_output_buffer( $buffer );
+
+		// Normalize script module content so changes do not impact snapshots.
+		$buffer = preg_replace_callback(
+			'#(<script type="module">)(.+?)(</script>)#s',
+			static function ( $matches ) {
+				array_shift( $matches );
+				list( $start_tag, $text, $end_tag ) = $matches;
+
+				$text = str_replace( "/* <![CDATA[ */\n", '', $text );
+				$text = str_replace( "/* ]]> */\n", '', $text );
+				$text = trim( $text );
+				if ( 1 === preg_match( '/^(import|const) \w+/', $text, $matches ) ) {
+					$text = '/* ' . $matches[0] . ' ... */';
+				}
+				return $start_tag . $text . $end_tag;
+			},
+			$buffer
+		);
+
+		// Undo replacements so that the placeholders are restored to the buffer for persisting in the snapshot.
+		$snapshot = $buffer;
+		if ( is_array( $replacements ) && count( $replacements ) > 0 ) {
+			$snapshot = str_replace( array_values( $replacements ), array_keys( $replacements ), $snapshot );
+		}
+
+		$buffer = $this->remove_initial_tabs( $buffer );
+		if ( is_string( $expected ) ) {
+			$expected = $this->remove_initial_tabs( $expected );
+		}
+
+		if ( $buffer !== $expected ) {
+			file_put_contents( $actual_file, $snapshot ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		}
+
+		$rel_actual_file   = str_replace( trailingslashit( getcwd() ), '', $actual_file );
+		$rel_expected_file = str_replace( trailingslashit( getcwd() ), '', $expected_file );
+		$rel_buffer_file   = str_replace( trailingslashit( getcwd() ), '', $buffer_file );
+
+		if ( null === $expected ) {
+			$this->markTestIncomplete( "Examine $actual_file to see if it is expected and if so rename to $expected_file." );
+		} else {
+			$this->assertEquals(
+				$expected,
+				$buffer,
+				"Examine $rel_actual_file for differences with $rel_buffer_file and if acceptable move to $rel_expected_file"
+			);
+		}
+	}
 }

@@ -467,14 +467,14 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 	 * @return string XPath.
 	 */
 	private function get_xpath( string ...$breadcrumbs ): string {
-		return implode(
-			'',
-			array_map(
-				static function ( $tag ): string {
-					return sprintf( '/*[0][self::%s]', strtoupper( $tag ) );
-				},
-				$breadcrumbs
-			)
-		);
+		$xpath = '';
+		foreach ( $breadcrumbs as $i => $tag_name ) {
+			if ( $i < 2 || ( 2 === $i && '/HTML/BODY' === $xpath ) ) {
+				$xpath .= "/$tag_name";
+			} else {
+				$xpath .= sprintf( '/*[%d][self::%s]', $i + 1, $tag_name );
+			}
+		}
+		return $xpath;
 	}
 }

@@ -1,4 +1,10 @@
 ############
+## Generated files during testing
+############
+
+plugins/*/tests/**/actual.html
+
+############
 ## IDEs
 ############
 

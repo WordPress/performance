@@ -1,0 +1,16 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>...</title>
+	<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/poster.jpg" media="screen and (max-width: 480px)">
+<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/poster.jpg" media="screen and (min-width: 783px)">
+<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/tablet-header.jpg" media="screen and (min-width: 481px) and (max-width: 782px)">
+</head>
+	<body>
+		<div id="page">
+			<img data-od-xpath="/HTML/BODY/DIV/*[1][self::IMG]" class="tablet" src="https://example.com/tablet-header.jpg" alt="Tablet header" width="800" height="600">
+			<video data-od-xpath="/HTML/BODY/DIV/*[2][self::VIDEO]" class="not-tablet" poster="https://example.com/poster.jpg" width="1200" height="500" src="https://example.com/header.mp4"></video>
+		</div>
+	<script type="module">/* import detect ... */</script>
+</body>
+</html>

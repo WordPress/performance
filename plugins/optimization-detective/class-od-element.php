@@ -50,7 +50,18 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * @param OD_URL_Metric        $url_metric URL Metric.
 	 */
 	public function __construct( array $data, OD_URL_Metric $url_metric ) {
-		$this->data       = $data;
+		$this->data = $data;
+
+		// Convert old XPath scheme.
+		$xpath = preg_replace(
+			'#^/\*\[1\]\[self::HTML\]/\*\[2\]\[self::BODY\]/\*\[\d+\]\[self::([a-zA-Z0-9:_-]+)\]#',
+			'/HTML/BODY/$1',
+			$this->data['xpath']
+		);
+		if ( is_string( $xpath ) && '' !== $xpath ) {
+			$this->data['xpath'] = $xpath;
+		}
+
 		$this->url_metric = $url_metric;
 	}
 

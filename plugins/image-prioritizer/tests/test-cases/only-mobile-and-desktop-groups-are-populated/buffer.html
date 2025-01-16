@@ -1,0 +1,33 @@
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>...</title>
+	</head>
+	<body>
+		<div id="page">
+			<h1>Example</h1>
+			<main>
+				<article id="post-2">
+					<h2 class="entry-title">Last Post</h2>
+					<div class="entry-content">
+						<p>This post has no featured image!</p>
+						<p>This paragraph adds vertical height.</p>
+						<p>So does this one.</p>
+						<p>And this one too.</p>
+					</div>
+				</article>
+				<article id="post-1">
+					<h2 class="entry-title">First Post</h2>
+					<figure class="featured-media">
+						<img src="https://example.com/featured-image.jpg" fetchpriority="high" width="1200" height="600" alt="Featured Image" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" srcset="https://example.com/featured-image-1200.jpg 1200w, https://example.com/featured-image-600.jpg 600w, https://example.com/featured-image-300.jpg 300w" sizes="(max-width: 1200px) 100vw, 1200px">
+					</figure>
+					<div class="entry-content">
+						<p>This post does have a featured image, and the server-side heuristics in WordPress cause it to get fetchpriority=high, but it should not have this since it is out of the viewport on mobile.</p>
+					</div>
+				</article>
+				<p>Pretend this is a super long paragraph that pushes the next div out of the initial viewport.</p>
+				<div style="background-image:url(https://example.com/foo-bg.jpg); width:100%; height: 200px;">This is so background!</div>
+			</main>
+		</div>
+	</body>
+</html>

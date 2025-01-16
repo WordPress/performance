@@ -11,7 +11,7 @@
     "web-vitals": "4.2.4"
   },
   "devDependencies": {
-    "@octokit/rest": "^21.0.2",
+    "@octokit/rest": "^21.1.0",
     "@wordpress/env": "^10.15.0",
     "@wordpress/prettier-config": "^4.14.0",
     "@wordpress/scripts": "^30.8.1",
@@ -25,7 +25,7 @@
     "lodash": "4.17.21",
     "micromatch": "^4.0.8",
     "npm-run-all": "^4.1.5",
-    "typescript": "^5.7.2",
+    "typescript": "^5.7.3",
     "webpackbar": "^7.0.0"
   },
   "scripts": {

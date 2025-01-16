@@ -34,33 +34,36 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 							<style>/*...*/</style>
 						</head>
 						<body>
-							<iframe src="https://example.com/"></iframe>
-							<p>
-								Foo!
-								<br>
-								<img src="https://example.com/foo.jpg" width="1000" height="600" alt="Foo">
-							</p>
-							<form><textarea>Write here!</textarea></form>
-							<footer>The end!</footer>
+							<div id="page">
+								<iframe src="https://example.com/"></iframe>
+								<p>
+									Foo!
+									<br>
+									<img src="https://example.com/foo.jpg" width="1000" height="600" alt="Foo">
+								</p>
+								<form><textarea>Write here!</textarea></form>
+								<footer>The end!</footer>
+							</div>
 						</body>
 					</html>
 				',
-				'open_tags'         => array( 'HTML', 'HEAD', 'META', 'TITLE', 'SCRIPT', 'STYLE', 'BODY', 'IFRAME', 'P', 'BR', 'IMG', 'FORM', 'TEXTAREA', 'FOOTER' ),
+				'open_tags'         => array( 'HTML', 'HEAD', 'META', 'TITLE', 'SCRIPT', 'STYLE', 'BODY', 'DIV', 'IFRAME', 'P', 'BR', 'IMG', 'FORM', 'TEXTAREA', 'FOOTER' ),
 				'xpath_breadcrumbs' => array(
-					'/*[1][self::HTML]'                  => array( 'HTML' ),
-					'/*[1][self::HTML]/*[1][self::HEAD]' => array( 'HTML', 'HEAD' ),
-					'/*[1][self::HTML]/*[1][self::HEAD]/*[1][self::META]' => array( 'HTML', 'HEAD', 'META' ),
-					'/*[1][self::HTML]/*[1][self::HEAD]/*[2][self::TITLE]' => array( 'HTML', 'HEAD', 'TITLE' ),
-					'/*[1][self::HTML]/*[1][self::HEAD]/*[3][self::SCRIPT]' => array( 'HTML', 'HEAD', 'SCRIPT' ),
-					'/*[1][self::HTML]/*[1][self::HEAD]/*[4][self::STYLE]' => array( 'HTML', 'HEAD', 'STYLE' ),
-					'/*[1][self::HTML]/*[2][self::BODY]' => array( 'HTML', 'BODY' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::IFRAME]' => array( 'HTML', 'BODY', 'IFRAME' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]/*[1][self::BR]' => array( 'HTML', 'BODY', 'P', 'BR' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]/*[2][self::IMG]' => array( 'HTML', 'BODY', 'P', 'IMG' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[3][self::FORM]' => array( 'HTML', 'BODY', 'FORM' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[3][self::FORM]/*[1][self::TEXTAREA]' => array( 'HTML', 'BODY', 'FORM', 'TEXTAREA' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[4][self::FOOTER]' => array( 'HTML', 'BODY', 'FOOTER' ),
+					'/HTML'                             => array( 'HTML' ),
+					'/HTML/HEAD'                        => array( 'HTML', 'HEAD' ),
+					'/HTML/HEAD/*[1][self::META]'       => array( 'HTML', 'HEAD', 'META' ),
+					'/HTML/HEAD/*[2][self::TITLE]'      => array( 'HTML', 'HEAD', 'TITLE' ),
+					'/HTML/HEAD/*[3][self::SCRIPT]'     => array( 'HTML', 'HEAD', 'SCRIPT' ),
+					'/HTML/HEAD/*[4][self::STYLE]'      => array( 'HTML', 'HEAD', 'STYLE' ),
+					'/HTML/BODY'                        => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV'                    => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV/*[1][self::IFRAME]' => array( 'HTML', 'BODY', 'DIV', 'IFRAME' ),
+					'/HTML/BODY/DIV/*[2][self::P]'      => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[2][self::P]/*[1][self::BR]' => array( 'HTML', 'BODY', 'DIV', 'P', 'BR' ),
+					'/HTML/BODY/DIV/*[2][self::P]/*[2][self::IMG]' => array( 'HTML', 'BODY', 'DIV', 'P', 'IMG' ),
+					'/HTML/BODY/DIV/*[3][self::FORM]'   => array( 'HTML', 'BODY', 'DIV', 'FORM' ),
+					'/HTML/BODY/DIV/*[3][self::FORM]/*[1][self::TEXTAREA]' => array( 'HTML', 'BODY', 'DIV', 'FORM', 'TEXTAREA' ),
+					'/HTML/BODY/DIV/*[4][self::FOOTER]' => array( 'HTML', 'BODY', 'DIV', 'FOOTER' ),
 				),
 			),
 			'foreign-elements'   => array(
@@ -68,37 +71,40 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 					<html>
 						<head></head>
 						<body>
-							<svg>
-								<g>
-									<path d="M10 10"/>
-									<circle cx="10" cy="10" r="2" fill="red"/>
-									<g />
-									<rect width="100%" height="100%" fill="red" />
-								</g>
-							</svg>
-							<math display="block">
-								<mn>1</mn>
-								<mspace depth="40px" height="20px" width="100px" style="background: lightblue;"/>
-								<mn>2</mn>
-							</math>
+							<div id="page">
+								<svg>
+									<g>
+										<path d="M10 10"/>
+										<circle cx="10" cy="10" r="2" fill="red"/>
+										<g />
+										<rect width="100%" height="100%" fill="red" />
+									</g>
+								</svg>
+								<math display="block">
+									<mn>1</mn>
+									<mspace depth="40px" height="20px" width="100px" style="background: lightblue;"/>
+									<mn>2</mn>
+								</math>
+							</div>
 						</body>
 					</html>
 				',
-				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'SVG', 'G', 'PATH', 'CIRCLE', 'G', 'RECT', 'MATH', 'MN', 'MSPACE', 'MN' ),
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'SVG', 'G', 'PATH', 'CIRCLE', 'G', 'RECT', 'MATH', 'MN', 'MSPACE', 'MN' ),
 				'xpath_breadcrumbs' => array(
-					'/*[1][self::HTML]'                  => array( 'HTML' ),
-					'/*[1][self::HTML]/*[1][self::HEAD]' => array( 'HTML', 'HEAD' ),
-					'/*[1][self::HTML]/*[2][self::BODY]' => array( 'HTML', 'BODY' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]' => array( 'HTML', 'BODY', 'SVG' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]/*[1][self::G]' => array( 'HTML', 'BODY', 'SVG', 'G' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]/*[1][self::G]/*[1][self::PATH]' => array( 'HTML', 'BODY', 'SVG', 'G', 'PATH' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]/*[1][self::G]/*[2][self::CIRCLE]' => array( 'HTML', 'BODY', 'SVG', 'G', 'CIRCLE' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]/*[1][self::G]/*[3][self::G]' => array( 'HTML', 'BODY', 'SVG', 'G', 'G' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SVG]/*[1][self::G]/*[4][self::RECT]' => array( 'HTML', 'BODY', 'SVG', 'G', 'RECT' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::MATH]' => array( 'HTML', 'BODY', 'MATH' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::MATH]/*[1][self::MN]' => array( 'HTML', 'BODY', 'MATH', 'MN' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::MATH]/*[2][self::MSPACE]' => array( 'HTML', 'BODY', 'MATH', 'MSPACE' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::MATH]/*[3][self::MN]' => array( 'HTML', 'BODY', 'MATH', 'MN' ),
+					'/HTML'                           => array( 'HTML' ),
+					'/HTML/HEAD'                      => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                      => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV'                  => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV/*[1][self::SVG]'  => array( 'HTML', 'BODY', 'DIV', 'SVG' ),
+					'/HTML/BODY/DIV/*[1][self::SVG]/*[1][self::G]' => array( 'HTML', 'BODY', 'DIV', 'SVG', 'G' ),
+					'/HTML/BODY/DIV/*[1][self::SVG]/*[1][self::G]/*[1][self::PATH]' => array( 'HTML', 'BODY', 'DIV', 'SVG', 'G', 'PATH' ),
+					'/HTML/BODY/DIV/*[1][self::SVG]/*[1][self::G]/*[2][self::CIRCLE]' => array( 'HTML', 'BODY', 'DIV', 'SVG', 'G', 'CIRCLE' ),
+					'/HTML/BODY/DIV/*[1][self::SVG]/*[1][self::G]/*[3][self::G]' => array( 'HTML', 'BODY', 'DIV', 'SVG', 'G', 'G' ),
+					'/HTML/BODY/DIV/*[1][self::SVG]/*[1][self::G]/*[4][self::RECT]' => array( 'HTML', 'BODY', 'DIV', 'SVG', 'G', 'RECT' ),
+					'/HTML/BODY/DIV/*[2][self::MATH]' => array( 'HTML', 'BODY', 'DIV', 'MATH' ),
+					'/HTML/BODY/DIV/*[2][self::MATH]/*[1][self::MN]' => array( 'HTML', 'BODY', 'DIV', 'MATH', 'MN' ),
+					'/HTML/BODY/DIV/*[2][self::MATH]/*[2][self::MSPACE]' => array( 'HTML', 'BODY', 'DIV', 'MATH', 'MSPACE' ),
+					'/HTML/BODY/DIV/*[2][self::MATH]/*[3][self::MN]' => array( 'HTML', 'BODY', 'DIV', 'MATH', 'MN' ),
 				),
 			),
 			'closing-void-tag'   => array(
@@ -106,20 +112,23 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 					<html>
 						<head></head>
 						<body>
-							<span>1</span>
-							<meta></meta>
-							<span>2</span>
+							<div id="page">
+								<span>1</span>
+								<meta></meta>
+								<span>2</span>
+							</div>
 						</body>
 					</html>
 				',
-				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'SPAN', 'META', 'SPAN' ),
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'SPAN', 'META', 'SPAN' ),
 				'xpath_breadcrumbs' => array(
-					'/*[1][self::HTML]'                  => array( 'HTML' ),
-					'/*[1][self::HTML]/*[1][self::HEAD]' => array( 'HTML', 'HEAD' ),
-					'/*[1][self::HTML]/*[2][self::BODY]' => array( 'HTML', 'BODY' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::SPAN]' => array( 'HTML', 'BODY', 'SPAN' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::META]' => array( 'HTML', 'BODY', 'META' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[3][self::SPAN]' => array( 'HTML', 'BODY', 'SPAN' ),
+					'/HTML'                           => array( 'HTML' ),
+					'/HTML/HEAD'                      => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                      => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV'                  => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV/*[1][self::SPAN]' => array( 'HTML', 'BODY', 'DIV', 'SPAN' ),
+					'/HTML/BODY/DIV/*[2][self::META]' => array( 'HTML', 'BODY', 'DIV', 'META' ),
+					'/HTML/BODY/DIV/*[3][self::SPAN]' => array( 'HTML', 'BODY', 'DIV', 'SPAN' ),
 				),
 			),
 			'void-tags'          => array(
@@ -127,58 +136,61 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 					<html>
 						<head></head>
 						<body>
-							<area>
-							<base>
-							<basefont>
-							<bgsound>
-							<br>
-							<col>
-							<embed>
-							<frame>
-							<hr>
-							<img src="">
-							<input>
-							<keygen>
-							<link>
-							<meta>
-							<param name="foo" value="bar">
-							<source>
-							<track src="https://example.com/track">
-							<wbr>
+							<div id="page">
+								<area>
+								<base>
+								<basefont>
+								<bgsound>
+								<br>
+								<col>
+								<embed>
+								<frame>
+								<hr>
+								<img src="">
+								<input>
+								<keygen>
+								<link>
+								<meta>
+								<param name="foo" value="bar">
+								<source>
+								<track src="https://example.com/track">
+								<wbr>
 
-							<!-- The following are not void -->
-							<div>
-							<span>
-							<em>
+								<!-- The following are not void -->
+								<div>
+								<span>
+								<em>
+							</div>
 						</body>
 					</html>
 				',
-				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'AREA', 'BASE', 'BASEFONT', 'BGSOUND', 'BR', 'COL', 'EMBED', 'FRAME', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR', 'DIV', 'SPAN', 'EM' ),
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'AREA', 'BASE', 'BASEFONT', 'BGSOUND', 'BR', 'COL', 'EMBED', 'FRAME', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR', 'DIV', 'SPAN', 'EM' ),
 				'xpath_breadcrumbs' => array(
-					'/*[1][self::HTML]'                  => array( 'HTML' ),
-					'/*[1][self::HTML]/*[1][self::HEAD]' => array( 'HTML', 'HEAD' ),
-					'/*[1][self::HTML]/*[2][self::BODY]' => array( 'HTML', 'BODY' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::AREA]' => array( 'HTML', 'BODY', 'AREA' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::BASE]' => array( 'HTML', 'BODY', 'BASE' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[3][self::BASEFONT]' => array( 'HTML', 'BODY', 'BASEFONT' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[4][self::BGSOUND]' => array( 'HTML', 'BODY', 'BGSOUND' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[5][self::BR]' => array( 'HTML', 'BODY', 'BR' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[6][self::COL]' => array( 'HTML', 'BODY', 'COL' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[7][self::EMBED]' => array( 'HTML', 'BODY', 'EMBED' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[8][self::FRAME]' => array( 'HTML', 'BODY', 'FRAME' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[9][self::HR]' => array( 'HTML', 'BODY', 'HR' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[10][self::IMG]' => array( 'HTML', 'BODY', 'IMG' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[11][self::INPUT]' => array( 'HTML', 'BODY', 'INPUT' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[12][self::KEYGEN]' => array( 'HTML', 'BODY', 'KEYGEN' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[13][self::LINK]' => array( 'HTML', 'BODY', 'LINK' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[14][self::META]' => array( 'HTML', 'BODY', 'META' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[15][self::PARAM]' => array( 'HTML', 'BODY', 'PARAM' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[16][self::SOURCE]' => array( 'HTML', 'BODY', 'SOURCE' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[17][self::TRACK]' => array( 'HTML', 'BODY', 'TRACK' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[18][self::WBR]' => array( 'HTML', 'BODY', 'WBR' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[19][self::DIV]' => array( 'HTML', 'BODY', 'DIV' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[19][self::DIV]/*[1][self::SPAN]' => array( 'HTML', 'BODY', 'DIV', 'SPAN' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[19][self::DIV]/*[1][self::SPAN]/*[1][self::EM]' => array( 'HTML', 'BODY', 'DIV', 'SPAN', 'EM' ),
+					'/HTML'                               => array( 'HTML' ),
+					'/HTML/HEAD'                          => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                          => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV'                      => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV/*[1][self::AREA]'     => array( 'HTML', 'BODY', 'DIV', 'AREA' ),
+					'/HTML/BODY/DIV/*[2][self::BASE]'     => array( 'HTML', 'BODY', 'DIV', 'BASE' ),
+					'/HTML/BODY/DIV/*[3][self::BASEFONT]' => array( 'HTML', 'BODY', 'DIV', 'BASEFONT' ),
+					'/HTML/BODY/DIV/*[4][self::BGSOUND]'  => array( 'HTML', 'BODY', 'DIV', 'BGSOUND' ),
+					'/HTML/BODY/DIV/*[5][self::BR]'       => array( 'HTML', 'BODY', 'DIV', 'BR' ),
+					'/HTML/BODY/DIV/*[6][self::COL]'      => array( 'HTML', 'BODY', 'DIV', 'COL' ),
+					'/HTML/BODY/DIV/*[7][self::EMBED]'    => array( 'HTML', 'BODY', 'DIV', 'EMBED' ),
+					'/HTML/BODY/DIV/*[8][self::FRAME]'    => array( 'HTML', 'BODY', 'DIV', 'FRAME' ),
+					'/HTML/BODY/DIV/*[9][self::HR]'       => array( 'HTML', 'BODY', 'DIV', 'HR' ),
+					'/HTML/BODY/DIV/*[10][self::IMG]'     => array( 'HTML', 'BODY', 'DIV', 'IMG' ),
+					'/HTML/BODY/DIV/*[11][self::INPUT]'   => array( 'HTML', 'BODY', 'DIV', 'INPUT' ),
+					'/HTML/BODY/DIV/*[12][self::KEYGEN]'  => array( 'HTML', 'BODY', 'DIV', 'KEYGEN' ),
+					'/HTML/BODY/DIV/*[13][self::LINK]'    => array( 'HTML', 'BODY', 'DIV', 'LINK' ),
+					'/HTML/BODY/DIV/*[14][self::META]'    => array( 'HTML', 'BODY', 'DIV', 'META' ),
+					'/HTML/BODY/DIV/*[15][self::PARAM]'   => array( 'HTML', 'BODY', 'DIV', 'PARAM' ),
+					'/HTML/BODY/DIV/*[16][self::SOURCE]'  => array( 'HTML', 'BODY', 'DIV', 'SOURCE' ),
+					'/HTML/BODY/DIV/*[17][self::TRACK]'   => array( 'HTML', 'BODY', 'DIV', 'TRACK' ),
+					'/HTML/BODY/DIV/*[18][self::WBR]'     => array( 'HTML', 'BODY', 'DIV', 'WBR' ),
+					'/HTML/BODY/DIV/*[19][self::DIV]'     => array( 'HTML', 'BODY', 'DIV', 'DIV' ),
+					'/HTML/BODY/DIV/*[19][self::DIV]/*[1][self::SPAN]' => array( 'HTML', 'BODY', 'DIV', 'DIV', 'SPAN' ),
+					'/HTML/BODY/DIV/*[19][self::DIV]/*[1][self::SPAN]/*[1][self::EM]' => array( 'HTML', 'BODY', 'DIV', 'DIV', 'SPAN', 'EM' ),
 				),
 			),
 			'optional-closing-p' => array(
@@ -186,114 +198,117 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 					<html>
 						<head></head>
 						<body>
-							<!-- In HTML, the closing paragraph tag is optional. -->
-							<p>First
-							<p><em>Second</em>
-							<p>Third
+							<div id="page">
+								<!-- In HTML, the closing paragraph tag is optional. -->
+								<p>First
+								<p><em>Second</em>
+								<p>Third
 
-							<!-- Try triggering all closing -->
-							<p><address></address>
-							<p><article></article>
-							<p><aside></aside>
-							<p><blockquote></blockquote>
-							<p><details></details>
-							<p><div></div>
-							<p><dl></dl>
-							<p><fieldset></fieldset>
-							<p><figcaption></figcaption>
-							<p><figure></figure>
-							<p><footer></footer>
-							<p><form></form>
-							<p><h1></h1>
-							<p><h2></h2>
-							<p><h3></h3>
-							<p><h4></h4>
-							<p><h5></h5>
-							<p><h6></h6>
-							<p><header></header>
-							<p><hgroup></hgroup>
-							<p><hr>
-							<p><main></main>
-							<p><menu></menu>
-							<p><nav></nav>
-							<p><ol></ol>
-							<p><pre></pre>
-							<p><search></search>
-							<p><section></section>
-							<p><table></table>
-							<p><ul></ul>
+								<!-- Try triggering all closing -->
+								<p><address></address>
+								<p><article></article>
+								<p><aside></aside>
+								<p><blockquote></blockquote>
+								<p><details></details>
+								<p><div></div>
+								<p><dl></dl>
+								<p><fieldset></fieldset>
+								<p><figcaption></figcaption>
+								<p><figure></figure>
+								<p><footer></footer>
+								<p><form></form>
+								<p><h1></h1>
+								<p><h2></h2>
+								<p><h3></h3>
+								<p><h4></h4>
+								<p><h5></h5>
+								<p><h6></h6>
+								<p><header></header>
+								<p><hgroup></hgroup>
+								<p><hr>
+								<p><main></main>
+								<p><menu></menu>
+								<p><nav></nav>
+								<p><ol></ol>
+								<p><pre></pre>
+								<p><search></search>
+								<p><section></section>
+								<p><table></table>
+								<p><ul></ul>
+							</div>
 						</body>
 					</html>
 				',
-				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'P', 'P', 'EM', 'P', 'P', 'ADDRESS', 'P', 'ARTICLE', 'P', 'ASIDE', 'P', 'BLOCKQUOTE', 'P', 'DETAILS', 'P', 'DIV', 'P', 'DL', 'P', 'FIELDSET', 'P', 'FIGCAPTION', 'P', 'FIGURE', 'P', 'FOOTER', 'P', 'FORM', 'P', 'H1', 'P', 'H2', 'P', 'H3', 'P', 'H4', 'P', 'H5', 'P', 'H6', 'P', 'HEADER', 'P', 'HGROUP', 'P', 'HR', 'P', 'MAIN', 'P', 'MENU', 'P', 'NAV', 'P', 'OL', 'P', 'PRE', 'P', 'SEARCH', 'P', 'SECTION', 'P', 'TABLE', 'P', 'UL' ),
+				'open_tags'         => array( 'HTML', 'HEAD', 'BODY', 'DIV', 'P', 'P', 'EM', 'P', 'P', 'ADDRESS', 'P', 'ARTICLE', 'P', 'ASIDE', 'P', 'BLOCKQUOTE', 'P', 'DETAILS', 'P', 'DIV', 'P', 'DL', 'P', 'FIELDSET', 'P', 'FIGCAPTION', 'P', 'FIGURE', 'P', 'FOOTER', 'P', 'FORM', 'P', 'H1', 'P', 'H2', 'P', 'H3', 'P', 'H4', 'P', 'H5', 'P', 'H6', 'P', 'HEADER', 'P', 'HGROUP', 'P', 'HR', 'P', 'MAIN', 'P', 'MENU', 'P', 'NAV', 'P', 'OL', 'P', 'PRE', 'P', 'SEARCH', 'P', 'SECTION', 'P', 'TABLE', 'P', 'UL' ),
 				'xpath_breadcrumbs' => array(
-					'/*[1][self::HTML]'                  => array( 'HTML' ),
-					'/*[1][self::HTML]/*[1][self::HEAD]' => array( 'HTML', 'HEAD' ),
-					'/*[1][self::HTML]/*[2][self::BODY]' => array( 'HTML', 'BODY' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[1][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[2][self::P]/*[1][self::EM]' => array( 'HTML', 'BODY', 'P', 'EM' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[3][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[4][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[5][self::ADDRESS]' => array( 'HTML', 'BODY', 'ADDRESS' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[6][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[7][self::ARTICLE]' => array( 'HTML', 'BODY', 'ARTICLE' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[8][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[9][self::ASIDE]' => array( 'HTML', 'BODY', 'ASIDE' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[10][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[11][self::BLOCKQUOTE]' => array( 'HTML', 'BODY', 'BLOCKQUOTE' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[12][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[13][self::DETAILS]' => array( 'HTML', 'BODY', 'DETAILS' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[14][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[15][self::DIV]' => array( 'HTML', 'BODY', 'DIV' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[16][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[17][self::DL]' => array( 'HTML', 'BODY', 'DL' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[18][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[19][self::FIELDSET]' => array( 'HTML', 'BODY', 'FIELDSET' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[20][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[21][self::FIGCAPTION]' => array( 'HTML', 'BODY', 'FIGCAPTION' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[22][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[23][self::FIGURE]' => array( 'HTML', 'BODY', 'FIGURE' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[24][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[25][self::FOOTER]' => array( 'HTML', 'BODY', 'FOOTER' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[26][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[27][self::FORM]' => array( 'HTML', 'BODY', 'FORM' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[28][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[29][self::H1]' => array( 'HTML', 'BODY', 'H1' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[30][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[31][self::H2]' => array( 'HTML', 'BODY', 'H2' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[32][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[33][self::H3]' => array( 'HTML', 'BODY', 'H3' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[34][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[35][self::H4]' => array( 'HTML', 'BODY', 'H4' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[36][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[37][self::H5]' => array( 'HTML', 'BODY', 'H5' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[38][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[39][self::H6]' => array( 'HTML', 'BODY', 'H6' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[40][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[41][self::HEADER]' => array( 'HTML', 'BODY', 'HEADER' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[42][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[43][self::HGROUP]' => array( 'HTML', 'BODY', 'HGROUP' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[44][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[45][self::HR]' => array( 'HTML', 'BODY', 'HR' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[46][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[47][self::MAIN]' => array( 'HTML', 'BODY', 'MAIN' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[48][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[49][self::MENU]' => array( 'HTML', 'BODY', 'MENU' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[50][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[51][self::NAV]' => array( 'HTML', 'BODY', 'NAV' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[52][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[53][self::OL]' => array( 'HTML', 'BODY', 'OL' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[54][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[55][self::PRE]' => array( 'HTML', 'BODY', 'PRE' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[56][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[57][self::SEARCH]' => array( 'HTML', 'BODY', 'SEARCH' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[58][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[59][self::SECTION]' => array( 'HTML', 'BODY', 'SECTION' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[60][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[61][self::TABLE]' => array( 'HTML', 'BODY', 'TABLE' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[62][self::P]' => array( 'HTML', 'BODY', 'P' ),
-					'/*[1][self::HTML]/*[2][self::BODY]/*[63][self::UL]' => array( 'HTML', 'BODY', 'UL' ),
+					'/HTML'                                => array( 'HTML' ),
+					'/HTML/HEAD'                           => array( 'HTML', 'HEAD' ),
+					'/HTML/BODY'                           => array( 'HTML', 'BODY' ),
+					'/HTML/BODY/DIV'                       => array( 'HTML', 'BODY', 'DIV' ),
+					'/HTML/BODY/DIV/*[1][self::P]'         => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[2][self::P]'         => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[2][self::P]/*[1][self::EM]' => array( 'HTML', 'BODY', 'DIV', 'P', 'EM' ),
+					'/HTML/BODY/DIV/*[3][self::P]'         => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[4][self::P]'         => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[5][self::ADDRESS]'   => array( 'HTML', 'BODY', 'DIV', 'ADDRESS' ),
+					'/HTML/BODY/DIV/*[6][self::P]'         => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[7][self::ARTICLE]'   => array( 'HTML', 'BODY', 'DIV', 'ARTICLE' ),
+					'/HTML/BODY/DIV/*[8][self::P]'         => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[9][self::ASIDE]'     => array( 'HTML', 'BODY', 'DIV', 'ASIDE' ),
+					'/HTML/BODY/DIV/*[10][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[11][self::BLOCKQUOTE]' => array( 'HTML', 'BODY', 'DIV', 'BLOCKQUOTE' ),
+					'/HTML/BODY/DIV/*[12][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[13][self::DETAILS]'  => array( 'HTML', 'BODY', 'DIV', 'DETAILS' ),
+					'/HTML/BODY/DIV/*[14][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[15][self::DIV]'      => array( 'HTML', 'BODY', 'DIV', 'DIV' ),
+					'/HTML/BODY/DIV/*[16][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[17][self::DL]'       => array( 'HTML', 'BODY', 'DIV', 'DL' ),
+					'/HTML/BODY/DIV/*[18][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[19][self::FIELDSET]' => array( 'HTML', 'BODY', 'DIV', 'FIELDSET' ),
+					'/HTML/BODY/DIV/*[20][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[21][self::FIGCAPTION]' => array( 'HTML', 'BODY', 'DIV', 'FIGCAPTION' ),
+					'/HTML/BODY/DIV/*[22][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[23][self::FIGURE]'   => array( 'HTML', 'BODY', 'DIV', 'FIGURE' ),
+					'/HTML/BODY/DIV/*[24][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[25][self::FOOTER]'   => array( 'HTML', 'BODY', 'DIV', 'FOOTER' ),
+					'/HTML/BODY/DIV/*[26][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[27][self::FORM]'     => array( 'HTML', 'BODY', 'DIV', 'FORM' ),
+					'/HTML/BODY/DIV/*[28][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[29][self::H1]'       => array( 'HTML', 'BODY', 'DIV', 'H1' ),
+					'/HTML/BODY/DIV/*[30][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[31][self::H2]'       => array( 'HTML', 'BODY', 'DIV', 'H2' ),
+					'/HTML/BODY/DIV/*[32][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[33][self::H3]'       => array( 'HTML', 'BODY', 'DIV', 'H3' ),
+					'/HTML/BODY/DIV/*[34][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[35][self::H4]'       => array( 'HTML', 'BODY', 'DIV', 'H4' ),
+					'/HTML/BODY/DIV/*[36][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[37][self::H5]'       => array( 'HTML', 'BODY', 'DIV', 'H5' ),
+					'/HTML/BODY/DIV/*[38][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[39][self::H6]'       => array( 'HTML', 'BODY', 'DIV', 'H6' ),
+					'/HTML/BODY/DIV/*[40][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[41][self::HEADER]'   => array( 'HTML', 'BODY', 'DIV', 'HEADER' ),
+					'/HTML/BODY/DIV/*[42][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[43][self::HGROUP]'   => array( 'HTML', 'BODY', 'DIV', 'HGROUP' ),
+					'/HTML/BODY/DIV/*[44][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[45][self::HR]'       => array( 'HTML', 'BODY', 'DIV', 'HR' ),
+					'/HTML/BODY/DIV/*[46][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[47][self::MAIN]'     => array( 'HTML', 'BODY', 'DIV', 'MAIN' ),
+					'/HTML/BODY/DIV/*[48][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[49][self::MENU]'     => array( 'HTML', 'BODY', 'DIV', 'MENU' ),
+					'/HTML/BODY/DIV/*[50][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[51][self::NAV]'      => array( 'HTML', 'BODY', 'DIV', 'NAV' ),
+					'/HTML/BODY/DIV/*[52][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[53][self::OL]'       => array( 'HTML', 'BODY', 'DIV', 'OL' ),
+					'/HTML/BODY/DIV/*[54][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[55][self::PRE]'      => array( 'HTML', 'BODY', 'DIV', 'PRE' ),
+					'/HTML/BODY/DIV/*[56][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[57][self::SEARCH]'   => array( 'HTML', 'BODY', 'DIV', 'SEARCH' ),
+					'/HTML/BODY/DIV/*[58][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[59][self::SECTION]'  => array( 'HTML', 'BODY', 'DIV', 'SECTION' ),
+					'/HTML/BODY/DIV/*[60][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[61][self::TABLE]'    => array( 'HTML', 'BODY', 'DIV', 'TABLE' ),
+					'/HTML/BODY/DIV/*[62][self::P]'        => array( 'HTML', 'BODY', 'DIV', 'P' ),
+					'/HTML/BODY/DIV/*[63][self::UL]'       => array( 'HTML', 'BODY', 'DIV', 'UL' ),
 				),
 			),
 		);
@@ -459,15 +474,17 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 				<html>
 					<head></head>
 					<body>
-						<iframe src="https://example.net/"></iframe>
-						<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
-							<div class="wp-block-embed__wrapper">
-								<iframe title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-							</div>
-							<figcaption>This is the State of the Word!</figcaption>
-						</figure>
-						<iframe src="https://example.com/"></iframe>
-						<img src="https://example.com/foo.jpg">
+						<div id="page">
+							<iframe src="https://example.net/"></iframe>
+							<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube wp-embed-aspect-16-9 wp-has-aspect-ratio">
+								<div class="wp-block-embed__wrapper">
+									<iframe title="Matt Mullenweg: State of the Word 2023" width="750" height="422" src="https://www.youtube.com/embed/c7M4mBVgP3Y?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+								</div>
+								<figcaption>This is the State of the Word!</figcaption>
+							</figure>
+							<iframe src="https://example.com/"></iframe>
+							<img src="https://example.com/foo.jpg">
+						</div>
 					</body>
 				</html>
 				'
@@ -510,23 +527,23 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 		$expected_figure_contents = array(
 			array(
 				'tag'   => 'FIGURE',
-				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]',
-				'depth' => 3,
+				'xpath' => '/HTML/BODY/DIV/*[2][self::FIGURE]',
+				'depth' => 4,
 			),
 			array(
 				'tag'   => 'DIV',
-				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]',
-				'depth' => 4,
-			),
-			array(
-				'tag'   => 'IFRAME',
-				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::IFRAME]',
+				'xpath' => '/HTML/BODY/DIV/*[2][self::FIGURE]/*[1][self::DIV]',
 				'depth' => 5,
 			),
 			array(
+				'tag'   => 'IFRAME',
+				'xpath' => '/HTML/BODY/DIV/*[2][self::FIGURE]/*[1][self::DIV]/*[1][self::IFRAME]',
+				'depth' => 6,
+			),
+			array(
 				'tag'   => 'FIGCAPTION',
-				'xpath' => '/*[1][self::HTML]/*[2][self::BODY]/*[2][self::FIGURE]/*[2][self::FIGCAPTION]',
-				'depth' => 4,
+				'xpath' => '/HTML/BODY/DIV/*[2][self::FIGURE]/*[2][self::FIGCAPTION]',
+				'depth' => 5,
 			),
 		);
 
