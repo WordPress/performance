@@ -647,6 +647,395 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that the layout property of a column block is passed by context to the image block.
+	 *
+	 * @dataProvider data_image_block_with_column_block
+	 *
+	 * @param string $ancestor_block_alignment Ancestor block alignment.
+	 * @param string $image_block_alignment    Image block alignment.
+	 * @param string $expected                 Expected output.
+	 */
+	public function test_image_block_with_single_column_block( string $ancestor_block_alignment, string $image_block_alignment, string $expected ): void {
+		$block_content = $this->get_columns_block_markup(
+			$this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment ),
+			array(
+				'align' => $ancestor_block_alignment,
+			)
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( $expected, $result );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
+	 */
+	public function data_image_block_with_column_block(): array {
+		return array(
+			// Parent default alignment.
+			'Return contentSize 620px, parent block default alignment, image block default alignment' => array(
+				'',
+				'',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return contentSize 620px, parent block default alignment, image block wide alignment'    => array(
+				'',
+				'wide',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return contentSize 620px, parent block default alignment, image block full alignment'    => array(
+				'',
+				'full',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return contentSize 620px, parent block default alignment, image block left alignment'    => array(
+				'',
+				'left',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return contentSize 620px, parent block default alignment, image block center alignment'  => array(
+				'',
+				'center',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return contentSize 620px, parent block default alignment, image block right alignment'   => array(
+				'',
+				'right',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+
+			// Parent wide alignment.
+			'Return contentSize 620px, parent block wide alignment, image block default alignment'    => array(
+				'wide',
+				'',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return wideSize 1280px, parent block wide alignment, image block wide alignment'         => array(
+				'wide',
+				'wide',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Return wideSize 1280px, parent block wide alignment, image block full alignment'         => array(
+				'wide',
+				'full',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Return image size 1024px, parent block wide alignment, image block left alignment'       => array(
+				'wide',
+				'left',
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Return image size 620px, parent block wide alignment, image block center alignment'     => array(
+				'wide',
+				'center',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return image size 1024px, parent block wide alignment, image block right alignment'      => array(
+				'wide',
+				'right',
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+
+			// Parent full alignment.
+			'Return contentSize 620px, parent block full alignment, image block default alignment'    => array(
+				'full',
+				'',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return wideSize 1280px, parent block full alignment, image block wide alignment'         => array(
+				'full',
+				'wide',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Return full size, parent block full alignment, image block full alignment'               => array(
+				'full',
+				'full',
+				'sizes="100vw" ',
+			),
+			'Return image size 1024px, parent block full alignment, image block left alignment'       => array(
+				'full',
+				'left',
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Return image size 620px, parent block full alignment, image block center alignment'     => array(
+				'full',
+				'center',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return image size 1024px, parent block full alignment, image block right alignment'      => array(
+				'full',
+				'right',
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+		);
+	}
+
+	/**
+	 * Test that the layout property of a column block is passed by context to the image block.
+	 *
+	 * @dataProvider data_image_block_with_two_equal_column_block
+	 *
+	 * @param string $ancestor_block_alignment Ancestor block alignment.
+	 * @param string $image_block_alignment    Image block alignment.
+	 * @param string $expected                 Expected output.
+	 */
+	public function test_image_block_with_two_equal_column_block( string $ancestor_block_alignment, string $image_block_alignment, string $expected ): void {
+		$block_content = $this->get_columns_block_markup(
+			$this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment ),
+			array(
+				'align' => $ancestor_block_alignment,
+			),
+			array(
+				'50%'    => true,
+				'49.99%' => false,
+			)
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( $expected, $result );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
+	 */
+	public function data_image_block_with_two_equal_column_block(): array {
+		return array(
+			// Parent default alignment.
+			'Return half size of contentSize 310px, parent block default alignment, image block default alignment' => array(
+				'',
+				'',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Return half size of contentSize 310px, parent block default alignment, image block wide alignment'    => array(
+				'',
+				'wide',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Return half size of contentSize 310px, parent block default alignment, image block full alignment'    => array(
+				'',
+				'full',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Return half size of contentSize 310px, parent block default alignment, image block left alignment'    => array(
+				'',
+				'left',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Return half size of contentSize 310px, parent block default alignment, image block center alignment'  => array(
+				'',
+				'center',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+			'Return half size of contentSize 310px, parent block default alignment, image block right alignment'   => array(
+				'',
+				'right',
+				'sizes="(max-width: 310px) 100vw, 310px" ',
+			),
+
+			// Parent wide alignment.
+			'Return contentSize 620px, parent block wide alignment, image block default alignment'    => array(
+				'wide',
+				'',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return half size of wideSize 640px, parent block wide alignment, image block wide alignment'         => array(
+				'wide',
+				'wide',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Return half size of wideSize 640px, parent block wide alignment, image block full alignment'         => array(
+				'wide',
+				'full',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Return half size of wideSize 640px, parent block wide alignment, image block left alignment'       => array(
+				'wide',
+				'left',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+			'Return image size 620px, parent block wide alignment, image block center alignment'     => array(
+				'wide',
+				'center',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return half size of wideSize 640px, parent block wide alignment, image block right alignment'      => array(
+				'wide',
+				'right',
+				'sizes="(max-width: 640px) 100vw, 640px" ',
+			),
+
+			// Parent full alignment.
+			'Return contentSize 620px, parent block full alignment, image block default alignment'    => array(
+				'full',
+				'',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return wideSize 1280px, parent block full alignment, image block wide alignment'         => array(
+				'full',
+				'wide',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Return full size, parent block full alignment, image block full alignment'               => array(
+				'full',
+				'full',
+				'sizes="100vw" ',
+			),
+			'Return image size 1024px, parent block full alignment, image block left alignment'       => array(
+				'full',
+				'left',
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Return image size 620px, parent block full alignment, image block center alignment'     => array(
+				'full',
+				'center',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return image size 1024px, parent block full alignment, image block right alignment'      => array(
+				'full',
+				'right',
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+		);
+	}
+
+	/**
+	 * Test that the layout property of a column block is passed by context to the image block.
+	 *
+	 * @dataProvider data_image_block_with_two_different_width_column_block
+	 *
+	 * @param string $ancestor_block_alignment Ancestor block alignment.
+	 * @param string $image_block_alignment    Image block alignment.
+	 * @param string $expected                 Expected output.
+	 */
+	public function test_image_block_with_two_different_width_column_block( string $ancestor_block_alignment, string $image_block_alignment, string $expected ): void {
+		$block_content = $this->get_columns_block_markup(
+			$this->get_image_block_markup( self::$image_id, 'large', $image_block_alignment ),
+			array(
+				'align' => $ancestor_block_alignment,
+			),
+			array(
+				'66.66%' => true,
+				'33.33%' => false,
+			)
+		);
+
+		$result = apply_filters( 'the_content', $block_content );
+
+		$this->assertStringContainsString( $expected, $result );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array<string, array<int, bool|string>> The ancestor and image alignments.
+	 */
+	public function data_image_block_with_two_different_width_column_block(): array {
+		return array(
+			// Parent default alignment.
+			'Return contentSize 310px, parent block default alignment, image block default alignment' => array(
+				'',
+				'',
+				'sizes="(max-width: 409px) 100vw, 409px" ',
+			),
+			'Return contentSize 310px, parent block default alignment, image block wide alignment'    => array(
+				'',
+				'wide',
+				'sizes="(max-width: 409px) 100vw, 409px" ',
+			),
+			'Return contentSize 310px, parent block default alignment, image block full alignment'    => array(
+				'',
+				'full',
+				'sizes="(max-width: 409px) 100vw, 409px" ',
+			),
+			'Return contentSize 310px, parent block default alignment, image block left alignment'    => array(
+				'',
+				'left',
+				'sizes="(max-width: 409px) 100vw, 409px" ',
+			),
+			'Return contentSize 310px, parent block default alignment, image block center alignment'  => array(
+				'',
+				'center',
+				'sizes="(max-width: 409px) 100vw, 409px" ',
+			),
+			'Return contentSize 310px, parent block default alignment, image block right alignment'   => array(
+				'',
+				'right',
+				'sizes="(max-width: 409px) 100vw, 409px" ',
+			),
+
+			// Parent wide alignment.
+			'Return contentSize 620px, parent block wide alignment, image block default alignment'    => array(
+				'wide',
+				'',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return half size of wideSize 640px, parent block wide alignment, image block wide alignment'         => array(
+				'wide',
+				'wide',
+				'sizes="(max-width: 844px) 100vw, 844px" ',
+			),
+			'Return half size of wideSize 640px, parent block wide alignment, image block full alignment'         => array(
+				'wide',
+				'full',
+				'sizes="(max-width: 844px) 100vw, 844px" ',
+			),
+			'Return half size of wideSize 640px, parent block wide alignment, image block left alignment'       => array(
+				'wide',
+				'left',
+				'sizes="(max-width: 844px) 100vw, 844px" ',
+			),
+			'Return image size 620px, parent block wide alignment, image block center alignment'     => array(
+				'wide',
+				'center',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return half size of wideSize 640px, parent block wide alignment, image block right alignment'      => array(
+				'wide',
+				'right',
+				'sizes="(max-width: 844px) 100vw, 844px" ',
+			),
+
+			// Parent full alignment.
+			'Return contentSize 620px, parent block full alignment, image block default alignment'    => array(
+				'full',
+				'',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return wideSize 1280px, parent block full alignment, image block wide alignment'         => array(
+				'full',
+				'wide',
+				'sizes="(max-width: 1280px) 100vw, 1280px" ',
+			),
+			'Return full size, parent block full alignment, image block full alignment'               => array(
+				'full',
+				'full',
+				'sizes="100vw" ',
+			),
+			'Return image size 1024px, parent block full alignment, image block left alignment'       => array(
+				'full',
+				'left',
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+			'Return image size 620px, parent block full alignment, image block center alignment'     => array(
+				'full',
+				'center',
+				'sizes="(max-width: 620px) 100vw, 620px" ',
+			),
+			'Return image size 1024px, parent block full alignment, image block right alignment'      => array(
+				'full',
+				'right',
+				'sizes="(max-width: 1024px) 100vw, 1024px" ',
+			),
+		);
+	}
+
+	/**
 	 * Filter the theme.json data to include relative layout sizes.
 	 *
 	 * @param WP_Theme_JSON_Data $theme_json Theme JSON object.
@@ -713,5 +1102,60 @@ class Tests_Improve_Calculate_Sizes extends WP_UnitTestCase {
 		return '<!-- wp:group ' . wp_json_encode( $atts ) . ' -->
 		<div class="wp-block-group' . $align_class . '">' . $content . '</div>
 		<!-- /wp:group -->';
+	}
+
+	/**
+	 * Helper to generate columns block markup.
+	 *
+	 * This function generates a WordPress columns block with optional alignment,
+	 * column widths, and conditional content for columns.
+	 *
+	 * @param string       $content      Content to be included in the columns.
+	 * @param array<mixed> $atts         Optional. Block attributes. Default empty array.
+	 * @param array<mixed> $column_width Optional. An array of column widths and content flags.
+	 *                                   Each key represents a column width (string),
+	 *                                   and the value is a boolean indicating whether the column
+	 *                                   should contain the image block content. Default empty array.
+	 * @return string The generated columns block markup.
+	 */
+	public function get_columns_block_markup( string $content, array $atts = array(), array $column_width = array() ): string {
+		// Generate alignment class if align attribute is provided.
+		$align_class  = ! empty( $atts['align'] ) ? ' align' . $atts['align'] : '';
+		$column_block = '';
+
+		// Generate individual column markup based on provided widths and content flags.
+		if ( count( $column_width ) > 0 ) {
+			foreach ( $column_width as $width => $is_image ) {
+				$width_data     = array( 'width' => $width );
+				$width_style    = '' !== $width ? ' style="flex-basis: ' . esc_attr( $width ) . ';"' : '';
+				$column_content = (bool) $is_image ? $content : '';
+
+				$column_block .= sprintf(
+					'<!-- wp:column %1$s -->
+					<div class="wp-block-column"%2$s>%3$s</div>
+					<!-- /wp:column -->',
+					wp_json_encode( $width_data ),
+					$width_style,
+					$column_content
+				);
+			}
+		} else {
+			$column_block .= sprintf(
+				'<!-- wp:column -->
+				<div class="wp-block-column">%1$s</div>
+				<!-- /wp:column -->',
+				$content
+			);
+		}
+
+		// Generate and return the final columns block markup.
+		return sprintf(
+			'<!-- wp:columns %1$s -->
+			<div class="wp-block-columns%2$s">%3$s</div>
+			<!-- /wp:columns -->',
+			wp_json_encode( $atts ),
+			esc_attr( $align_class ),
+			$column_block
+		);
 	}
 }
