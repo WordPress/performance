@@ -119,7 +119,6 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
 		$element = $url_metrics[0]->get( 'elements' )[0];
 		$this->assertStringStartsWith( '/HTML/BODY/DIV[@id=\'page\']/', $element->jsonSerialize()['xpath'] );
-		$this->assertStringStartsWith( '/HTML/BODY/DIV/', $element->get_xpath() ); // TODO: Remove once the XPath transitional period is over.
 
 		$expected_data = $valid_params;
 		unset( $expected_data['hmac'], $expected_data['slug'], $expected_data['current_etag'], $expected_data['cache_purge_post_id'] );

@@ -249,9 +249,7 @@ function od_optimize_template_output_buffer( string $buffer ): string {
 		$processor->release_bookmark( $current_tag_bookmark );
 
 		if ( $tracked_in_url_metrics && $needs_detection ) {
-			// TODO: Replace get_stored_xpath with get_xpath once the transitional period is over.
-			$xpath = $processor->get_stored_xpath();
-			$processor->set_meta_attribute( 'xpath', $xpath );
+			$processor->set_meta_attribute( 'xpath', $processor->get_xpath() );
 		}
 	} while ( $processor->next_open_tag() );
 
