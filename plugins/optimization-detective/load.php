@@ -131,5 +131,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		// Load site health checks.
 		require_once __DIR__ . '/site-health.php';
+
+		// Load the settings page.
+		require_once __DIR__ . '/settings.php';
 	}
 );

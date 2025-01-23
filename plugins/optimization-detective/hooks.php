@@ -23,4 +23,5 @@ add_action( 'wp_head', 'od_render_generator_meta_tag' );
 add_filter( 'site_status_tests', 'od_add_rest_api_availability_test' );
 add_action( 'admin_init', 'od_maybe_run_rest_api_health_check' );
 add_action( 'after_plugin_row_meta', 'od_render_rest_api_health_check_admin_notice_in_plugin_row', 30 );
+add_action( 'admin_menu', 'od_add_optimization_detective_menu' );
 // @codeCoverageIgnoreEnd
