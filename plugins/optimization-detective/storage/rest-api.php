@@ -32,6 +32,13 @@ const OD_REST_API_NAMESPACE = 'optimization-detective/v1';
 const OD_URL_METRICS_ROUTE = '/url-metrics:store';
 
 /**
+ * Route for getting URLs that need to be primed.
+ *
+ * @var string
+ */
+const OD_PRIME_URLS_ROUTE = '/prime-urls';
+
+/**
  * Registers endpoint for storage of URL Metric.
  *
  * @since 0.1.0
@@ -102,6 +109,20 @@ function od_register_endpoint(): void {
 					);
 				}
 				return true;
+			},
+		)
+	);
+
+	register_rest_route(
+		OD_REST_API_NAMESPACE,
+		OD_PRIME_URLS_ROUTE,
+		array(
+			'methods'             => 'POST',
+			'callback'            => static function ( WP_REST_Request $request ) {
+				return od_handle_generate_batch_urls_request( $request );
+			},
+			'permission_callback' => static function () {
+				return current_user_can( 'manage_options' );
 			},
 		)
 	);
@@ -266,6 +287,148 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 	return new WP_REST_Response(
 		array(
 			'success' => true,
+		)
+	);
+}
+
+/**
+ * Handles REST API request to generate batch URLs.
+ *
+ * @since n.e.x.t
+ * @access private
+ *
+ * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+ *
+ * @param WP_REST_Request $request Request.
+ * @return WP_REST_Response Response.
+ */
+function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_REST_Response {
+	$cursor = $request->get_param( 'cursor' );
+
+	// Initialize cursor with default values.
+	$cursor = wp_parse_args(
+		$cursor,
+		array(
+			'provider_index'     => 0,
+			'subtype_index'      => 0,
+			'page_number'        => 1,
+			'offset_within_page' => 0,
+			'batch_size'         => 1,
+		)
+	);
+
+	// Get the server & its registry of sitemap providers.
+	$server   = wp_sitemaps_get_server();
+	$registry = $server->registry;
+
+	// All registered providers.
+	$providers = array_values( $registry->get_providers() ); // Ensure zero-based index.
+
+	$all_urls        = array();
+	$collected_count = 0;
+
+	// Flag to indicate if we should stop collecting further URLs (i.e., we reached $cursor['batch_size']).
+	$done = false;
+
+	// Start iterating from the current provider_index forward.
+	$providers_count = count( $providers );
+	for ( $p = $cursor['provider_index']; $p < $providers_count && ! $done; ) {
+		$provider = $providers[ $p ];
+
+		// WordPress providers return an array of strings from get_object_subtypes().
+		$subtypes = array_values( $provider->get_object_subtypes() ); // zero-based index.
+
+		// Start from the current subtype_index if resuming.
+		$subtypes_count = count( $subtypes );
+		for ( $s = ( $p === $cursor['provider_index'] ) ? $cursor['subtype_index'] : 0; $s < $subtypes_count && ! $done; ) {
+			// This is a string, e.g. 'post', 'page', etc.
+			$subtype = $subtypes[ $s ];
+
+			// Retrieve the max number of pages for this subtype.
+			$max_num_pages = $provider->get_max_num_pages( $subtype->name );
+
+			// Start from the current page_number if resuming.
+			for ( $page = ( ( $p === $cursor['provider_index'] ) && ( $s === $cursor['subtype_index'] ) ) ? $cursor['page_number'] : 1; $page <= $max_num_pages && ! $done; ++$page ) {
+				$url_list = $provider->get_url_list( $page, $subtype->name );
+				if ( ! is_array( $url_list ) ) {
+					continue;
+				}
+
+				// Filter out empty URLs.
+				$url_chunk = array_filter( array_column( $url_list, 'loc' ) );
+
+				// We might have partially consumed this page, so skip $cursor['offset_within_page'] items first.
+				$current_page_urls = array_slice( $url_chunk, $cursor['offset_within_page'] );
+
+				// Count how many URLs we consumed in this page.
+				$consumed_in_this_page = 0;
+
+				// Now collect from current_page_urls until we reach $cursor['batch_size'].
+				foreach ( $current_page_urls as $url ) {
+					$all_urls[] = $url;
+					++$collected_count;
+					++$consumed_in_this_page;
+
+					if ( $collected_count >= $cursor['batch_size'] ) {
+						// We have our full batch; stop collecting further.
+						$done = true;
+						break;
+					}
+				}
+
+				if ( ! $done ) {
+					// We consumed this entire page, so if we continue, next time we start at offset 0 of the next page.
+					$cursor['page_number']        = $page + 1;
+					$cursor['offset_within_page'] = 0;
+				} else {
+					// We reached the limit in the middle of this page.
+					// Figure out how many we used from this page to update the offset properly.
+					$extra_consumed = $collected_count - $cursor['batch_size']; // If exactly $cursor['batch_size'], this might be 0 or negative.
+					if ( $extra_consumed < 0 ) {
+						$extra_consumed = 0;
+					}
+
+					$cursor['offset_within_page'] = $cursor['offset_within_page'] + ( $consumed_in_this_page - $extra_consumed );
+
+					// We haven't fully finished this page, so keep the same $cursor['page_number'].
+					$cursor['page_number'] = $page;
+				}
+			} // end for pages
+
+			if ( ! $done ) {
+				// If we've finished all pages in this subtype, move to next subtype from the start (page 1, offset 0).
+				$cursor['page_number']        = 1;
+				$cursor['offset_within_page'] = 0;
+			}
+
+			$cursor['subtype_index'] = $s;
+			++$s;
+		} // end for subtypes
+
+		if ( ! $done ) {
+			// If we finished all subtypes in this provider, move to next provider and start at subtype=0, page=1.
+			$cursor['subtype_index']      = 0;
+			$cursor['page_number']        = 1;
+			$cursor['offset_within_page'] = 0;
+		}
+
+		$cursor['provider_index'] = $p;
+		++$p;
+	} // end for providers
+
+	// Prepare next cursor.
+	$new_cursor = array(
+		'provider_index'     => $cursor['provider_index'],
+		'subtype_index'      => $cursor['subtype_index'],
+		'page_number'        => $cursor['page_number'],
+		'offset_within_page' => $cursor['offset_within_page'],
+		'batch_size'         => $cursor['batch_size'],
+	);
+
+	return new WP_REST_Response(
+		array(
+			'urls'   => $all_urls,
+			'cursor' => $new_cursor,
 		)
 	);
 }
