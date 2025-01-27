@@ -122,3 +122,20 @@ function od_get_asset_path( string $src_path, ?string $min_path = null ): string
 
 	return $min_path;
 }
+
+/**
+ * Enqueues admin scripts.
+ *
+ * @param string $hook_suffix Current admin page.
+ */
+function od_enqueue_prime_url_metrics_scripts( string $hook_suffix ): void {
+	if ( 'tools_page_od-optimization-detective' === $hook_suffix ) {
+		wp_enqueue_script(
+			'od-prime-url-metrics',
+			plugins_url( od_get_asset_path( 'prime-url-metrics.js' ), __FILE__ ),
+			array( 'wp-i18n', 'wp-api-fetch' ),
+			OPTIMIZATION_DETECTIVE_VERSION,
+			true
+		);
+	}
+}
