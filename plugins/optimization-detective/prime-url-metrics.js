@@ -46,18 +46,6 @@
 			isInitialized = true;
 			iframe.style.display = 'block';
 			while ( isProcessing && isNextBatchAvailable ) {
-				/**
-				 * @type {{
-				 *   urls: Array<string>,
-				 *   cursor: {
-				 *     provider_index: number,
-				 *     subtype_index: number,
-				 *     page_number: number,
-				 *     offset_within_page: number,
-				 *     batch_size: number
-				 *   }
-				 * }}
-				 */
 				const batch = await getBatch( cursor );
 				cursor = batch.cursor;
 				progressBar.max += batch.urls.length;
@@ -73,7 +61,22 @@
 	/**
 	 * Fetches the next batch of URLs.
 	 * @param {Object} lastCursor - The cursor to fetch the next batch.
-	 * @return {Promise<{urls: string[], cursor: {provider_index: number, subtype_index: number, page_number: number, offset_within_page: number, batch_size: number}}>} The promise that resolves to the next batch of URLs.
+	 * @return {Promise<{
+	 *   urls: Array<Array<{
+	 *     url: string,
+	 *     breakpoints: Array<{
+	 *       width: number,
+	 *       height: number
+	 *     }>
+	 *   }>>,
+	 *   cursor: {
+	 *     provider_index: number,
+	 *     subtype_index: number,
+	 *     page_number: number,
+	 *     offset_within_page: number,
+	 *     batch_size: number
+	 *   }
+	 * }>} - The promise that resolves to the batch of URLs.
 	 */
 	async function getBatch( lastCursor ) {
 		const response = await apiFetch( {
@@ -91,9 +94,18 @@
 	 */
 	async function processBatch( urls ) {
 		for ( const url of urls ) {
-			iframe.src = url;
-			await new Promise( ( resolve ) => {
-				iframe.onload = resolve;
+			await new Promise( async ( urlResolve ) => {
+				for ( const breakpoint of url.breakpoints ) {
+					await new Promise( ( breakpointResolve ) => {
+						iframe.src = url.url;
+						iframe.width = breakpoint.width;
+						iframe.height = breakpoint.height;
+						iframe.onload = () => {
+							breakpointResolve();
+						};
+					} );
+				}
+				urlResolve();
 			} );
 			progressBar.value += 1;
 		}

@@ -330,6 +330,21 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 	// Flag to indicate if we should stop collecting further URLs (i.e., we reached $cursor['batch_size']).
 	$done = false;
 
+	// Calculate breakpoints.
+	$widths   = od_get_breakpoint_max_widths();
+	$widths[] = (int) end( $widths ) + 300; // Add a large width.
+
+	$calculated_breakpoints = array_map(
+		static function ( int $width ): array {
+			$aspect = max( 1, min( 2, $width / 1000 ) );
+			return array(
+				'width'  => $width,
+				'height' => round( $width / $aspect ),
+			);
+		},
+		$widths
+	);
+
 	// Start iterating from the current provider_index forward.
 	$providers_count = count( $providers );
 	for ( $p = $cursor['provider_index']; $p < $providers_count && ! $done; ) {
@@ -365,7 +380,10 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 
 				// Now collect from current_page_urls until we reach $cursor['batch_size'].
 				foreach ( $current_page_urls as $url ) {
-					$all_urls[] = $url;
+					$all_urls[] = array(
+						'url'         => $url,
+						'breakpoints' => $calculated_breakpoints,
+					);
 					++$collected_count;
 					++$consumed_in_this_page;
 
