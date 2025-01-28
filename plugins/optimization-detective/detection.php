@@ -87,7 +87,7 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 	 * Note that the attribution build is slightly larger than the standard build, so this is why it is not used by default.
 	 * The additional attribution data is made available to client-side extension script modules registered via the `od_extension_module_urls` filter.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @param bool $use_attribution_build Whether to use the attribution build.
 	 */

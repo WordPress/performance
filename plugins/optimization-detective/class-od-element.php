@@ -119,7 +119,6 @@ class OD_Element implements ArrayAccess, JsonSerializable {
 	 * Gets XPath for element.
 	 *
 	 * @since 0.7.0
-	 * @since n.e.x.t Returns the transitional XPath format. To access the underlying raw XPath, access the 'xpath' key of the jsonSerialize response.
 	 *
 	 * @return non-empty-string XPath.
 	 */

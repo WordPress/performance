@@ -159,7 +159,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Note that currently only the third item will currently be populated (index 2), as this corresponds to tags which
 	 * are children of the `BODY` tag. This is used in {@see self::get_xpath()}.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var array<array<string, string>>
 	 */
 	private $open_stack_attributes = array();
@@ -191,7 +191,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * This is used to store the old XPath format in a transitional period until which new URL Metrics are expected to
 	 * have been collected to purge out references to the old format.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @var string|null
 	 */
 	private $current_xpath = null;
@@ -568,7 +568,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * Themes utilize the 'wp-site-blocks' class name in the root `DIV`. Only one attribute is currently returned,
 	 * although potentially more could be returned if additional disambiguation is needed in the future.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @return array<string, string> Disambiguating attributes.
 	 */
@@ -667,7 +667,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * This method was temporary for a transition period while new URL Metrics are collected for active installs
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 * @access private
 	 * @deprecated
 	 * @codeCoverageIgnore
@@ -681,7 +681,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	/**
 	 * Returns whether the processor is currently at or inside the admin bar.
 	 *
-	 * @since n.e.x.t
+	 * @since 1.0.0
 	 *
 	 * @return bool Whether at or inside the admin bar.
 	 */

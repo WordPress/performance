@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   3.7.0
+Stable tag:   3.8.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, site health, measurement, optimization, diagnostics
@@ -70,6 +70,14 @@ To report a security issue, please visit the [WordPress HackerOne](https://hacke
 Contributions are always welcome! Learn more about how to get involved in the [Core Performance Team Handbook](https://make.wordpress.org/performance/handbook/get-involved/).
 
 == Changelog ==
+
+= 3.8.0 =
+
+**Enhancements**
+
+* Add Site Health test for `Cache-Control: no-store` page response header which disables bfcache. ([1807](https://github.com/WordPress/performance/pull/1807))
+* Add Site Health test to verify that static assets are served with far-future expires. ([1727](https://github.com/WordPress/performance/pull/1727))
+* Enqueue scripts using `plugins_url()` instead of `plugin_dir_url()`. ([1761](https://github.com/WordPress/performance/pull/1761))
 
 = 3.7.0 =
 

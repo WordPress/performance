@@ -514,7 +514,7 @@ add_action( 'delete_attachment', 'webp_uploads_remove_sources_files', 10, 1 );
 /**
  * Filters `wp_content_img_tag` to update images so that they use the preferred MIME type where possible.
  *
- * @since n.e.x.t
+ * @since 2.5.0
  *
  * @param string $filtered_image Full img tag with attributes that will replace the source img tag.
  * @param string $context        Additional context, like the current filter name or the function name from where this was called.

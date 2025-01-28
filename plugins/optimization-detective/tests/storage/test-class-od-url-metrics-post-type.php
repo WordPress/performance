@@ -90,6 +90,7 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		$valid_content = array(
 			array(
 				'url'       => home_url( '/' ),
+				'etag'      => md5( '' ),
 				'viewport'  => array(
 					'width'  => 640,
 					'height' => 480,

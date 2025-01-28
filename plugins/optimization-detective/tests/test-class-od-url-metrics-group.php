@@ -73,6 +73,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 					new OD_URL_Metric(
 						array(
 							'url'       => home_url( '/' ),
+							'etag'      => md5( '' ),
 							'viewport'  => array(
 								'width'  => 1,
 								'height' => 2,
@@ -259,21 +260,6 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 					array(
 						'timestamp' => microtime( true ) - ( HOUR_IN_SECONDS + 1 ),
 						'etag'      => md5( '' ),
-					)
-				),
-				'expected_is_group_complete' => false,
-			),
-			// Note: The following test case will not be required once the ETag is mandatory in a future release.
-			'etag_missing'   => array(
-				'url_metric'                 => new OD_URL_Metric(
-					array(
-						'url'       => home_url( '/' ),
-						'viewport'  => array(
-							'width'  => 400,
-							'height' => 700,
-						),
-						'timestamp' => microtime( true ),
-						'elements'  => array(),
 					)
 				),
 				'expected_is_group_complete' => false,

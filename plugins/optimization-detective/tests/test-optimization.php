@@ -216,6 +216,25 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test od_print_disabled_reasons().
+	 *
+	 * @covers ::od_print_disabled_reasons
+	 */
+	public function test_od_print_disabled_reasons(): void {
+		$this->assertSame( '', get_echo( 'od_print_disabled_reasons', array( array() ) ) );
+		$foo_message = get_echo( 'od_print_disabled_reasons', array( array( 'Foo' ) ) );
+		$this->assertStringContainsString( '<script', $foo_message );
+		$this->assertStringContainsString( 'console.info(', $foo_message );
+		$this->assertStringContainsString( '[Optimization Detective] Foo', $foo_message );
+
+		$foo_and_bar_messages = get_echo( 'od_print_disabled_reasons', array( array( 'Foo', 'Bar' ) ) );
+		$this->assertStringContainsString( '<script', $foo_and_bar_messages );
+		$this->assertStringContainsString( 'console.info(', $foo_and_bar_messages );
+		$this->assertStringContainsString( '[Optimization Detective] Foo', $foo_and_bar_messages );
+		$this->assertStringContainsString( '[Optimization Detective] Bar', $foo_and_bar_messages );
+	}
+
+	/**
 	 * Data provider.
 	 *
 	 * @return array<string, mixed> Data.
@@ -337,6 +356,11 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * @covers ::od_is_response_html_content_type
 	 * @covers OD_Tag_Visitor_Context::__construct
 	 * @covers OD_Tag_Visitor_Context::__get
+	 * @covers OD_Tag_Visitor_Context::track_tag
+	 * @covers OD_Visited_Tag_State::__construct
+	 * @covers OD_Visited_Tag_State::track_tag
+	 * @covers OD_Visited_Tag_State::is_tag_tracked
+	 * @covers OD_Visited_Tag_State::reset
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
 	 *
@@ -379,9 +403,11 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 			function ( OD_Tag_Visitor_Registry $tag_visitor_registry ): void {
 				$tag_visitor_registry->register(
 					'video',
-					function ( OD_Tag_Visitor_Context $context ): bool {
+					function ( OD_Tag_Visitor_Context $context ): void {
 						$this->assertFalse( $context->processor->is_tag_closer() );
-						return $context->processor->get_tag() === 'VIDEO';
+						if ( $context->processor->get_tag() === 'VIDEO' ) {
+							$context->track_tag();
+						}
 					}
 				);
 			}

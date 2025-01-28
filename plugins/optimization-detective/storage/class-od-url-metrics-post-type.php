@@ -226,13 +226,6 @@ class OD_URL_Metrics_Post_Type {
 		}
 
 		$etag = $new_url_metric->get_etag();
-		if ( null === $etag ) {
-			// This case actually will never occur in practice because the store_url_metric function is only called
-			// in the REST API endpoint where the ETag parameter is required. It is here exclusively for the sake of
-			// PHPStan's static analysis. This entire condition can be removed in a future release when the 'etag'
-			// property becomes required.
-			return new WP_Error( 'missing_etag' );
-		}
 
 		$group_collection = new OD_URL_Metric_Group_Collection(
 			$url_metrics,

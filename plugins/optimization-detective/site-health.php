@@ -3,7 +3,7 @@
  * Site Health checks.
  *
  * @package optimization-detective
- * @since n.e.x.t
+ * @since 1.0.0
  */
 
 // @codeCoverageIgnoreStart
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Adds the Optimization Detective REST API check to site health tests.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @param array{direct: array<string, array{label: string, test: string}>}|mixed $tests Site Health Tests.
@@ -39,7 +39,7 @@ function od_add_rest_api_availability_test( $tests ): array {
 /**
  * Tests availability of the Optimization Detective REST API endpoint.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @return array{label: string, status: string, badge: array{label: string, color: string}, description: string, actions: string, test: string} Result.
@@ -68,7 +68,7 @@ function od_test_rest_api_availability(): array {
  * the admin. The reason for storing the negative unavailable state as opposed to the positive available state is that
  * when an option does not exist then `get_option()` returns `false` which is the same falsy value as the stored `'0'`.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @return bool Whether unavailable.
@@ -80,7 +80,7 @@ function od_is_rest_api_unavailable(): bool {
 /**
  * Tests availability of the Optimization Detective REST API endpoint.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @param array<string, mixed>|WP_Error $response REST API response.
@@ -165,7 +165,7 @@ function od_compose_site_health_result( $response ): array {
 /**
  * Gets the response to an Optimization Detective REST API store request to confirm it is available to unauthenticated requests.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @param bool $use_cached Whether to use a previous response cached in a transient.
@@ -195,7 +195,7 @@ function od_get_rest_api_health_check_response( bool $use_cached ) {
 /**
  * Renders an admin notice if the REST API health check fails.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @param bool $in_plugin_row Whether the notice is to be printed in the plugin row.
@@ -251,7 +251,7 @@ function od_maybe_render_rest_api_health_check_admin_notice( bool $in_plugin_row
 /**
  * Displays an admin notice on the plugin row if the REST API health check fails.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  *
  * @param string $plugin_file Plugin file.
@@ -273,7 +273,7 @@ function od_render_rest_api_health_check_admin_notice_in_plugin_row( string $plu
  * shown at the `admin_notices` action once, the notice will only be displayed inline with the plugin row thereafter
  * via {@see od_render_rest_api_health_check_admin_notice_in_plugin_row()}.
  *
- * @since n.e.x.t
+ * @since 1.0.0
  * @access private
  */
 function od_maybe_run_rest_api_health_check(): void {
