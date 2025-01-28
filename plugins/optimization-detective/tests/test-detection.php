@@ -122,6 +122,7 @@ class Test_OD_Detection extends WP_UnitTestCase {
 	 * Make sure the expected script is printed.
 	 *
 	 * @covers ::od_get_detection_script
+	 * @covers ::od_get_asset_path
 	 *
 	 * @dataProvider data_provider_od_get_detection_script
 	 *

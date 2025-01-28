@@ -7,7 +7,7 @@ return static function ( Test_Embed_Optimizer_Optimization_Detective $test_case 
 				'viewport_width' => 100,
 				'elements'       => array(
 					array(
-						'xpath'                     => '/HTML/BODY/DIV/*[1][self::FIGURE]/*[1][self::DIV]',
+						'xpath'                     => '/HTML/BODY/DIV[@class=\'wp-site-blocks\']/*[1][self::FIGURE]/*[1][self::DIV]',
 						'isLCP'                     => false,
 						'intersectionRatio'         => 1,
 						'resizedBoundingClientRect' => array_merge( $test_case->get_sample_dom_rect(), array( 'height' => 500 ) ),

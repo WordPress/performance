@@ -6,16 +6,16 @@
  * @since 0.4.0
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Context for tag visitors invoked for each tag while walking over a document.
  *
  * @since 0.4.0
- * @access private
  *
  * @property-read OD_URL_Metric_Group_Collection $url_metrics_group_collection Deprecated property accessed via magic getter. Use the url_metric_group_collection property instead.
  */
@@ -24,6 +24,7 @@ final class OD_Tag_Visitor_Context {
 	/**
 	 * HTML tag processor.
 	 *
+	 * @since 0.4.0
 	 * @var OD_HTML_Tag_Processor
 	 * @readonly
 	 */
@@ -32,6 +33,7 @@ final class OD_Tag_Visitor_Context {
 	/**
 	 * URL Metric group collection.
 	 *
+	 * @since 0.4.0
 	 * @var OD_URL_Metric_Group_Collection
 	 * @readonly
 	 */
@@ -40,22 +42,46 @@ final class OD_Tag_Visitor_Context {
 	/**
 	 * Link collection.
 	 *
+	 * @since 0.4.0
 	 * @var OD_Link_Collection
 	 * @readonly
 	 */
 	public $link_collection;
 
 	/**
+	 * Visited tag state.
+	 *
+	 * @since 1.0.0
+	 * @var OD_Visited_Tag_State
+	 */
+	private $visited_tag_state;
+
+	/**
 	 * Constructor.
+	 *
+	 * @since 0.4.0
 	 *
 	 * @param OD_HTML_Tag_Processor          $processor                   HTML tag processor.
 	 * @param OD_URL_Metric_Group_Collection $url_metric_group_collection URL Metric group collection.
 	 * @param OD_Link_Collection             $link_collection             Link collection.
+	 * @param OD_Visited_Tag_State           $visited_tag_state           Visited tag state.
 	 */
-	public function __construct( OD_HTML_Tag_Processor $processor, OD_URL_Metric_Group_Collection $url_metric_group_collection, OD_Link_Collection $link_collection ) {
+	public function __construct( OD_HTML_Tag_Processor $processor, OD_URL_Metric_Group_Collection $url_metric_group_collection, OD_Link_Collection $link_collection, OD_Visited_Tag_State $visited_tag_state ) {
 		$this->processor                   = $processor;
 		$this->url_metric_group_collection = $url_metric_group_collection;
 		$this->link_collection             = $link_collection;
+		$this->visited_tag_state           = $visited_tag_state;
+	}
+
+	/**
+	 * Marks the tag for being tracked in URL Metrics.
+	 *
+	 * Calling this method from a tag visitor has the same effect as a tag visitor returning `true`.
+	 *
+	 * @since 1.0.0
+	 */
+	public function track_tag(): void {
+		$this->visited_tag_state->track_tag();
 	}
 
 	/**

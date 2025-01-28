@@ -6,10 +6,11 @@
  * @since 0.1.0
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * URL Metrics grouped by viewport according to breakpoints.
@@ -282,11 +283,6 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			foreach ( $this->url_metrics as $url_metric ) {
 				// The URL Metric is too old to be fresh.
 				if ( $current_time > $url_metric->get_timestamp() + $this->freshness_ttl ) {
-					return false;
-				}
-
-				// The ETag is not populated yet, so this is stale. Eventually this will be required.
-				if ( $url_metric->get_etag() === null ) {
 					return false;
 				}
 

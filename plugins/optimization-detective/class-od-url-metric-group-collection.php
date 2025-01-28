@@ -6,10 +6,11 @@
  * @since 0.1.0
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Collection of URL groups according to the breakpoints.
@@ -270,9 +271,12 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 				return;
 			}
 		}
+		// @codeCoverageIgnoreStart
+		// In practice this exception should never get thrown because create_groups() creates groups from a minimum of 0 to a maximum of PHP_INT_MAX.
 		throw new InvalidArgumentException(
 			esc_html__( 'No group available to add URL Metric to.', 'optimization-detective' )
 		);
+		// @codeCoverageIgnoreEnd
 	}
 
 	/**
@@ -295,6 +299,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 					return $group;
 				}
 			}
+			// @codeCoverageIgnoreStart
+			// In practice this exception should never get thrown because create_groups() creates groups from a minimum of 0 to a maximum of PHP_INT_MAX.
 			throw new InvalidArgumentException(
 				esc_html(
 					sprintf(
@@ -304,6 +310,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 					)
 				)
 			);
+			// @codeCoverageIgnoreEnd
 		} )();
 
 		$this->result_cache[ __FUNCTION__ ][ $viewport_width ] = $result;

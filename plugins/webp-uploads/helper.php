@@ -7,9 +7,11 @@
  * @since 1.0.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Returns an array with the list of valid mime types that a specific mime type can be converted into it,

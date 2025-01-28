@@ -27,12 +27,12 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 						'viewport_width' => $viewport_width,
 						'elements'       => array(
 							array(
-								'xpath'             => '/HTML/BODY/DIV/*[2][self::MAIN]/*[2][self::ARTICLE]/*[2][self::FIGURE]/*[1][self::IMG]',
+								'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::MAIN]/*[2][self::ARTICLE]/*[2][self::FIGURE]/*[1][self::IMG]',
 								'isLCP'             => $viewport_width > 600,
 								'intersectionRatio' => $viewport_width > 600 ? 1.0 : 0.1,
 							),
 							array(
-								'xpath'              => '/HTML/BODY/DIV/*[2][self::MAIN]/*[4][self::DIV]',
+								'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::MAIN]/*[4][self::DIV]',
 								'isLCP'              => false,
 								'intersectionRatio'  => 0.0,
 								'intersectionRect'   => $outside_viewport_rect,

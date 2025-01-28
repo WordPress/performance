@@ -75,6 +75,8 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
 	 * @covers ::od_trigger_page_cache_invalidation
+	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
+	 * @covers OD_URL_Metric_Store_Request_Context::__construct
 	 */
 	public function test_rest_request_good_params( Closure $set_up ): void {
 		$stored_context = null;
@@ -115,6 +117,9 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		$this->assertCount( 1, $url_metrics, 'Expected number of URL Metrics stored.' );
 		$this->assertSame( $valid_params['elements'], $this->get_array_json_data( $url_metrics[0]->get( 'elements' ) ) );
 		$this->assertSame( $valid_params['viewport']['width'], $url_metrics[0]->get_viewport_width() );
+		$element = $url_metrics[0]->get( 'elements' )[0];
+		$this->assertStringStartsWith( '/HTML/BODY/DIV[@id=\'page\']/', $element->jsonSerialize()['xpath'] );
+		$this->assertStringStartsWith( '/HTML/BODY/DIV/', $element->get_xpath() ); // TODO: Remove once the XPath transitional period is over.
 
 		$expected_data = $valid_params;
 		unset( $expected_data['hmac'], $expected_data['slug'], $expected_data['current_etag'], $expected_data['cache_purge_post_id'] );
@@ -135,6 +140,28 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			$this->assertIsInt( $scheduled );
 			$this->assertGreaterThan( time(), $scheduled );
 		}
+	}
+
+	/**
+	 * Test good params.
+	 *
+	 * @dataProvider data_provider_to_test_rest_request_good_params
+	 *
+	 * @covers ::od_register_endpoint
+	 * @covers ::od_handle_rest_request
+	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
+	 */
+	public function test_rest_request_good_params_but_post_save_failed( Closure $set_up ): void {
+		$valid_params = $set_up();
+
+		add_filter( 'wp_insert_post_empty_content', '__return_true' ); // Cause wp_insert_post() to return WP_Error.
+
+		$request  = $this->create_request( $valid_params );
+		$response = rest_get_server()->dispatch( $request );
+
+		$error = $response->as_error();
+		$this->assertInstanceOf( WP_Error::class, $error );
+		$this->assertSame( 'unable_to_store_url_metric', $error->get_error_code() );
 	}
 
 	/**
@@ -271,6 +298,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_register_endpoint
 	 * @covers ::od_handle_rest_request
+	 * @covers OD_Strict_URL_Metric::set_additional_properties_to_false
 	 *
 	 * @dataProvider data_provider_invalid_params
 	 *
@@ -653,6 +681,22 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test od_trigger_page_cache_invalidation() for an invalid post.
+	 *
+	 * @covers ::od_trigger_page_cache_invalidation
+	 */
+	public function test_od_trigger_page_cache_invalidation_invalid_post_id(): void {
+		wp_delete_post( 1, true );
+		$before_clean_post_cache_count       = did_action( 'clean_post_cache' );
+		$before_transition_post_status_count = did_action( 'transition_post_status' );
+		$before_save_post_count              = did_action( 'save_post' );
+		od_trigger_page_cache_invalidation( 1 );
+		$this->assertSame( $before_clean_post_cache_count, did_action( 'clean_post_cache' ) );
+		$this->assertSame( $before_transition_post_status_count, did_action( 'transition_post_status' ) );
+		$this->assertSame( $before_save_post_count, did_action( 'save_post' ) );
+	}
+
+	/**
 	 * Populate URL Metrics.
 	 *
 	 * @param int                  $count  Count of URL Metrics to populate.
@@ -678,7 +722,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 			array(
 				'viewport_width' => 480,
 				'element'        => array(
-					'xpath' => '/HTML/BODY/DIV/*[2][self::MAIN]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::IMG]',
+					'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::MAIN]/*[1][self::DIV]/*[1][self::FIGURE]/*[1][self::IMG]',
 				),
 			)
 		)->jsonSerialize();

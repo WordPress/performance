@@ -145,37 +145,93 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test od_maybe_add_template_output_buffer_filter().
+	 * Data provider.
 	 *
-	 * @covers ::od_maybe_add_template_output_buffer_filter
+	 * @return array<string, mixed>
 	 */
-	public function test_od_maybe_add_template_output_buffer_filter(): void {
-		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
-
-		add_filter( 'od_can_optimize_response', '__return_false', 1 );
-		od_maybe_add_template_output_buffer_filter();
-		$this->assertFalse( od_can_optimize_response() );
-		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
-
-		add_filter( 'od_can_optimize_response', '__return_true', 2 );
-		$this->go_to( home_url( '/' ) );
-		$this->assertTrue( od_can_optimize_response() );
-		od_maybe_add_template_output_buffer_filter();
-		$this->assertTrue( has_filter( 'od_template_output_buffer' ) );
+	public function data_provider_test_od_maybe_add_template_output_buffer_filter(): array {
+		return array(
+			'home_enabled'                          => array(
+				'set_up'              => static function (): string {
+					return home_url( '/' );
+				},
+				'expected_has_filter' => true,
+			),
+			'home_disabled_by_filter'               => array(
+				'set_up'              => static function (): string {
+					add_filter( 'od_can_optimize_response', '__return_false' );
+					return home_url( '/' );
+				},
+				'expected_has_filter' => false,
+			),
+			'search_disabled'                       => array(
+				'set_up'              => static function (): string {
+					return home_url( '/?s=foo' );
+				},
+				'expected_has_filter' => false,
+			),
+			'search_enabled_by_filter'              => array(
+				'set_up'              => static function (): string {
+					add_filter( 'od_can_optimize_response', '__return_true' );
+					return home_url( '/?s=foo' );
+				},
+				'expected_has_filter' => true,
+			),
+			'home_disabled_by_get_param'            => array(
+				'set_up'              => static function (): string {
+					return home_url( '/?optimization_detective_disabled=1' );
+				},
+				'expected_has_filter' => false,
+			),
+			'home_disabled_by_rest_api_unavailable' => array(
+				'set_up'              => static function (): string {
+					update_option( 'od_rest_api_unavailable', '1' );
+					return home_url( '/' );
+				},
+				'expected_has_filter' => false,
+			),
+		);
 	}
+
 	/**
 	 * Test od_maybe_add_template_output_buffer_filter().
 	 *
+	 * @dataProvider data_provider_test_od_maybe_add_template_output_buffer_filter
+	 *
 	 * @covers ::od_maybe_add_template_output_buffer_filter
+	 * @covers ::od_can_optimize_response
+	 * @covers ::od_is_rest_api_unavailable
 	 */
-	public function test_od_maybe_add_template_output_buffer_filter_with_query_var_to_disable(): void {
-		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
+	public function test_od_maybe_add_template_output_buffer_filter( Closure $set_up, bool $expected_has_filter ): void {
+		// There needs to be a post so that there is a post in the loop so that od_get_cache_purge_post_id() returns a post ID.
+		// Otherwise, od_can_optimize_response() will return false unless forced by a filter.
+		self::factory()->post->create();
 
-		add_filter( 'od_can_optimize_response', '__return_true' );
-		$this->go_to( home_url( '/?optimization_detective_disabled=1' ) );
-		$this->assertTrue( od_can_optimize_response() );
+		$url = $set_up();
+		$this->go_to( $url );
+		remove_all_filters( 'od_template_output_buffer' ); // In case go_to() caused them to be added.
+
 		od_maybe_add_template_output_buffer_filter();
-		$this->assertFalse( has_filter( 'od_template_output_buffer' ) );
+		$this->assertSame( $expected_has_filter, has_filter( 'od_template_output_buffer' ) );
+	}
+
+	/**
+	 * Test od_print_disabled_reasons().
+	 *
+	 * @covers ::od_print_disabled_reasons
+	 */
+	public function test_od_print_disabled_reasons(): void {
+		$this->assertSame( '', get_echo( 'od_print_disabled_reasons', array( array() ) ) );
+		$foo_message = get_echo( 'od_print_disabled_reasons', array( array( 'Foo' ) ) );
+		$this->assertStringContainsString( '<script', $foo_message );
+		$this->assertStringContainsString( 'console.info(', $foo_message );
+		$this->assertStringContainsString( '[Optimization Detective] Foo', $foo_message );
+
+		$foo_and_bar_messages = get_echo( 'od_print_disabled_reasons', array( array( 'Foo', 'Bar' ) ) );
+		$this->assertStringContainsString( '<script', $foo_and_bar_messages );
+		$this->assertStringContainsString( 'console.info(', $foo_and_bar_messages );
+		$this->assertStringContainsString( '[Optimization Detective] Foo', $foo_and_bar_messages );
+		$this->assertStringContainsString( '[Optimization Detective] Bar', $foo_and_bar_messages );
 	}
 
 	/**
@@ -188,66 +244,78 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 			'home_as_anonymous'                    => array(
 				'set_up'   => function (): void {
 					$this->go_to( home_url( '/' ) );
+					$this->assertIsInt( od_get_cache_purge_post_id() );
 				},
 				'expected' => true,
 			),
-			'home_filtered_as_anonymous'           => array(
+			'home_but_no_posts'                    => array(
 				'set_up'   => function (): void {
+					$posts = get_posts();
+					foreach ( $posts as $post ) {
+						wp_delete_post( $post->ID, true );
+					}
 					$this->go_to( home_url( '/' ) );
+					$this->assertNull( od_get_cache_purge_post_id() );
+				},
+				'expected' => false, // This is because od_get_cache_purge_post_id() will return false.
+			),
+			'home_filtered_as_anonymous'           => array(
+				'set_up'   => static function (): string {
 					add_filter( 'od_can_optimize_response', '__return_false' );
+					return home_url( '/' );
 				},
 				'expected' => false,
 			),
 			'singular_as_anonymous'                => array(
-				'set_up'   => function (): void {
+				'set_up'   => function (): string {
 					$posts = get_posts();
 					$this->assertInstanceOf( WP_Post::class, $posts[0] );
-					$this->go_to( get_permalink( $posts[0] ) );
+					return get_permalink( $posts[0] );
 				},
 				'expected' => true,
 			),
 			'search_as_anonymous'                  => array(
-				'set_up'   => function (): void {
+				'set_up'   => static function (): string {
 					self::factory()->post->create( array( 'post_title' => 'Hello' ) );
-					$this->go_to( home_url( '?s=Hello' ) );
+					return home_url( '?s=Hello' );
 				},
 				'expected' => false,
 			),
 			'home_customizer_preview_as_anonymous' => array(
-				'set_up'   => function (): void {
-					$this->go_to( home_url( '/' ) );
+				'set_up'   => static function (): string {
 					global $wp_customize;
 					require_once ABSPATH . 'wp-includes/class-wp-customize-manager.php';
 					$wp_customize = new WP_Customize_Manager();
 					$wp_customize->start_previewing_theme();
+					return home_url( '/' );
 				},
 				'expected' => false,
 			),
 			'home_post_request_as_anonymous'       => array(
-				'set_up'   => function (): void {
-					$this->go_to( home_url( '/' ) );
+				'set_up'   => static function (): string {
 					$_SERVER['REQUEST_METHOD'] = 'POST';
+					return home_url( '/' );
 				},
 				'expected' => false,
 			),
 			'home_as_subscriber'                   => array(
-				'set_up'   => function (): void {
+				'set_up'   => static function (): string {
 					wp_set_current_user( self::factory()->user->create( array( 'role' => 'subscriber' ) ) );
-					$this->go_to( home_url( '/' ) );
+					return home_url( '/' );
 				},
 				'expected' => true,
 			),
 			'empty_author_page_as_anonymous'       => array(
-				'set_up'   => function (): void {
+				'set_up'   => static function (): string {
 					$user_id = self::factory()->user->create( array( 'role' => 'author' ) );
-					$this->go_to( get_author_posts_url( $user_id ) );
+					return get_author_posts_url( $user_id );
 				},
 				'expected' => false,
 			),
 			'home_as_admin'                        => array(
-				'set_up'   => function (): void {
+				'set_up'   => static function (): string {
 					wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-					$this->go_to( home_url( '/' ) );
+					return home_url( '/' );
 				},
 				'expected' => true,
 			),
@@ -263,8 +331,12 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 * @dataProvider data_provider_test_od_can_optimize_response
 	 */
 	public function test_od_can_optimize_response( Closure $set_up, bool $expected ): void {
-		self::factory()->post->create(); // Make sure there is at least one post in the DB.
-		$set_up();
+		// Make sure there is at least one post in the DB as otherwise od_get_cache_purge_post_id() will return false,
+		// causing od_can_optimize_response() to return false.
+		self::factory()->post->create();
+
+		$url = $set_up();
+		$this->go_to( $url );
 		$this->assertSame( $expected, od_can_optimize_response() );
 	}
 
@@ -282,6 +354,13 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 	 *
 	 * @covers ::od_optimize_template_output_buffer
 	 * @covers ::od_is_response_html_content_type
+	 * @covers OD_Tag_Visitor_Context::__construct
+	 * @covers OD_Tag_Visitor_Context::__get
+	 * @covers OD_Tag_Visitor_Context::track_tag
+	 * @covers OD_Visited_Tag_State::__construct
+	 * @covers OD_Visited_Tag_State::track_tag
+	 * @covers OD_Visited_Tag_State::is_tag_tracked
+	 * @covers OD_Visited_Tag_State::reset
 	 *
 	 * @dataProvider data_provider_test_od_optimize_template_output_buffer
 	 *
@@ -302,6 +381,16 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 						$this->assertInstanceOf( OD_HTML_Tag_Processor::class, $context->processor );
 						$this->assertInstanceOf( OD_Link_Collection::class, $context->link_collection );
 
+						$error = null;
+						$value = '';
+						try {
+							$value = $context->__get( 'invalid_param' );
+						} catch ( Error $e ) {
+							$error = $e;
+						}
+						$this->assertInstanceOf( Error::class, $error );
+						$this->assertSame( '', $value );
+
 						$this->assertFalse( $context->processor->is_tag_closer() );
 						return $context->processor->get_tag() === 'IMG';
 					}
@@ -314,9 +403,11 @@ class Test_OD_Optimization extends WP_UnitTestCase {
 			function ( OD_Tag_Visitor_Registry $tag_visitor_registry ): void {
 				$tag_visitor_registry->register(
 					'video',
-					function ( OD_Tag_Visitor_Context $context ): bool {
+					function ( OD_Tag_Visitor_Context $context ): void {
 						$this->assertFalse( $context->processor->is_tag_closer() );
-						return $context->processor->get_tag() === 'VIDEO';
+						if ( $context->processor->get_tag() === 'VIDEO' ) {
+							$context->track_tag();
+						}
 					}
 				);
 			}

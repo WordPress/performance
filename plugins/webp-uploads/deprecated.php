@@ -7,9 +7,11 @@
  * @since 1.1.1
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Returns the attachment sources array ordered by filesize.

@@ -118,6 +118,9 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::__construct
+	 * @covers ::get_current_etag
+	 * @covers ::create_groups
+	 * @covers ::count
 	 *
 	 * @dataProvider data_provider_test_construction
 	 *
@@ -134,6 +137,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		}
 		$group_collection = new OD_URL_Metric_Group_Collection( $url_metrics, $current_etag, $breakpoints, $sample_size, $freshness_ttl );
 		$this->assertCount( count( $breakpoints ) + 1, $group_collection );
+		$this->assertSame( $current_etag, $group_collection->get_current_etag() );
 	}
 
 	/**
@@ -237,6 +241,8 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 * Test add_url_metric().
 	 *
 	 * @covers ::add_url_metric
+	 * @covers OD_URL_Metric_Group::add_url_metric
+	 * @covers ::is_any_group_populated
 	 *
 	 * @param int             $sample_size     Sample size.
 	 * @param int[]           $breakpoints     Breakpoints.
@@ -248,11 +254,14 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	public function test_add_url_metric( int $sample_size, array $breakpoints, array $viewport_widths, array $expected_counts ): void {
 		$current_etag     = md5( '' );
 		$group_collection = new OD_URL_Metric_Group_Collection( array(), $current_etag, $breakpoints, $sample_size, HOUR_IN_SECONDS );
+		$this->assertFalse( $group_collection->is_any_group_populated() );
+		$this->assertFalse( $group_collection->is_any_group_populated() ); // To check the result cache.
 
 		// Over-populate the sample size for the breakpoints by a dozen.
 		foreach ( $viewport_widths as $viewport_width => $count ) {
 			for ( $i = 0; $i < $count; $i++ ) {
 				$group_collection->add_url_metric( $this->get_sample_url_metric( array( 'viewport_width' => $viewport_width ) ) );
+				$this->assertTrue( $group_collection->is_any_group_populated() );
 			}
 		}
 
@@ -629,8 +638,9 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test is_every_group_populated() and is_every_group_complete().
+	 * Test is_any_group_populated(), is_every_group_populated(), and is_every_group_complete().
 	 *
+	 * @covers ::is_any_group_populated
 	 * @covers ::is_every_group_populated
 	 * @covers ::is_every_group_complete
 	 */
@@ -645,8 +655,12 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 			$sample_size,
 			HOUR_IN_SECONDS
 		);
+		$this->assertFalse( $group_collection->is_any_group_populated() );
+		$this->assertFalse( $group_collection->is_any_group_populated() ); // Check cached value.
 		$this->assertFalse( $group_collection->is_every_group_populated() );
+		$this->assertFalse( $group_collection->is_every_group_populated() ); // Check cached value.
 		$this->assertFalse( $group_collection->is_every_group_complete() );
+		$this->assertFalse( $group_collection->is_every_group_complete() ); // Check cached value.
 		$group_collection->add_url_metric(
 			$this->get_sample_url_metric(
 				array(
@@ -655,6 +669,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				)
 			)
 		);
+		$this->assertTrue( $group_collection->is_any_group_populated() );
 		$this->assertFalse( $group_collection->is_every_group_populated() );
 		$this->assertFalse( $group_collection->is_every_group_complete() );
 		$group_collection->add_url_metric(
@@ -665,6 +680,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				)
 			)
 		);
+		$this->assertTrue( $group_collection->is_any_group_populated() );
 		$this->assertFalse( $group_collection->is_every_group_populated() );
 		$this->assertFalse( $group_collection->is_every_group_complete() );
 		$group_collection->add_url_metric(
@@ -675,6 +691,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 				)
 			)
 		);
+		$this->assertTrue( $group_collection->is_any_group_populated() );
 		$this->assertTrue( $group_collection->is_every_group_populated() );
 		$this->assertFalse( $group_collection->is_every_group_complete() );
 
@@ -862,6 +879,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		$this->assertCount( 3, $group_collection );
 
 		$common_lcp_element = $group_collection->get_common_lcp_element();
+		$this->assertSame( $common_lcp_element, $group_collection->get_common_lcp_element() ); // Check cached value.
 		if ( is_string( $expected ) ) {
 			$this->assertInstanceOf( OD_Element::class, $common_lcp_element );
 			$this->assertSame( $expected, $common_lcp_element->get_xpath() );
@@ -942,8 +960,11 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 	 * Test get_all_element_max_intersection_ratios(), get_element_max_intersection_ratio(), and get_all_denormalized_elements().
 	 *
 	 * @covers ::get_all_element_max_intersection_ratios
+	 * @covers OD_URL_Metric_Group::get_all_element_max_intersection_ratios
 	 * @covers ::get_element_max_intersection_ratio
+	 * @covers OD_URL_Metric_Group::get_element_max_intersection_ratio
 	 * @covers ::get_xpath_elements_map
+	 * @covers OD_URL_Metric_Group::get_xpath_elements_map
 	 *
 	 * @dataProvider data_provider_element_max_intersection_ratios
 	 *
@@ -966,6 +987,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 
 		// Check get_all_denormalized_elements.
 		$all_elements = $group_collection->get_xpath_elements_map();
+		$this->assertSame( $all_elements, $group_collection->get_xpath_elements_map() ); // Check cached value.
 		$xpath_counts = array();
 		foreach ( $url_metrics as $url_metric ) {
 			foreach ( $url_metric->get_elements() as $element ) {
@@ -979,8 +1001,7 @@ class Test_OD_URL_Metric_Group_Collection extends WP_UnitTestCase {
 		foreach ( $all_elements as $xpath => $elements ) {
 			foreach ( $elements as $element ) {
 				$this->assertSame( $element->get_url_metric()->get_group(), $element->get_url_metric_group() );
-				$this->assertInstanceOf( OD_Element::class, $element );
-				$this->assertSame( $xpath, $element['xpath'] );
+				$this->assertSame( $xpath, $element->get_xpath() );
 			}
 		}
 	}

@@ -12,7 +12,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 	$test_case->populate_url_metrics(
 		array(
 			array(
-				'xpath' => '/HTML/BODY/DIV/*[1][self::PICTURE]/*[2][self::IMG]',
+				'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::PICTURE]/*[2][self::IMG]',
 				'isLCP' => true,
 			),
 		)

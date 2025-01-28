@@ -6,9 +6,11 @@
  * @since 2.1.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Audit enqueued and printed scripts in is_front_page(). Ignore /wp-includes scripts.

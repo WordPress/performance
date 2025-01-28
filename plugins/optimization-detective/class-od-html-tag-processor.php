@@ -6,10 +6,11 @@
  * @since 0.1.1
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Extension to WP_HTML_Tag_Processor that supports injecting HTML and obtaining XPath for the current tag.
@@ -101,29 +102,30 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * The pattern for matching a tag /[a-zA-Z0-9:_-]+/ used here is informed by the characters found in tag names in
 	 * HTTP Archive as {@link https://docs.google.com/spreadsheets/d/1grkd2_1xSV3jvNK6ucRQ0OL1HmGTsScHuwA8GZuRLHU/edit?gid=2057119066#gid=2057119066 seen}
 	 * in Web Almanac 2022, with the only exception being the very malformed tag name `script="async"`. Note that XPaths
-	 * begin with `/HTML/BODY` followed by an index-free reference to an element which is a direct child of the BODY,
-	 * for example `/HTML/BODY/DIV`. Below this point, all tags must then have indices to disambiguate the XPaths among
-	 * siblings. For example: `/HTML/BODY/DIV/*[2][self::MAIN]/*[1][self::FIGURE]/*[2][self::IMG]`. There is little need
-	 * for there to be an index added to the `DIV` directly under the `BODY` because WordPress themes almost always use
-	 * a wrapper element: Block Themes always wrap the page in a `DIV.wp-site-blocks` element, and classic themes either
-	 * wrap the content in a `DIV#page` or else use `HEADER`, `MAIN`, and `FOOTER`.
+	 * begin with `/HTML/BODY` followed by an index-free reference to an element which is a direct child of the BODY but
+	 * with a disambiguating attribute predicate added, for example `/HTML/BODY/DIV[@id="page"]`. Below this point, all
+	 * tags must then have indices to disambiguate the XPaths among siblings. For example:
+	 * `/HTML/BODY/DIV[@id="page"]/*[2][self::MAIN]/*[1][self::FIGURE]/*[2][self::IMG]`.
 	 *
-	 * The benefit of omitting the node index from direct children of the BODY allows for variations in content output
+	 * The benefit of omitting the node index from direct children of the BODY allows for variation in the content output
 	 * at `wp_body_open()` without impacting the computed XPaths for subsequent tags. Omitting the node index at this
-	 * level, however, does incur a slight risk of duplicate XPaths being computed. For example, if a theme has a
+	 * level, however, does introduce the risk of duplicate XPaths being computed. For example, if a theme has a
 	 * `<div id="header" role="banner">` and a `<div id="footer" role="contentinfo">` which are both direct descendants
 	 * of `BODY`, then it is possible for an XPath like `/HTML/BODY/DIV/*[1][self::IMG]` to be duplicated if both of
-	 * these `DIV` elements has an `IMG` as the first child. The conflict could arise for any tags of the same name in
-	 * the same relative position, which does not seem likely. Additionally, as noted above, themes almost always wrap
-	 * the page content in an overall `DIV` or else they use semantic HTML tags like `HEADER` and `FOOTER`, so the risk
-	 * is low.
+	 * these `DIV` elements have an `IMG` as the first child. This is also an issue in sites using the Image block
+	 * because it outputs a `DIV.wp-lightbox-overlay.zoom` in `wp_footer`, resulting in there being a real possibility
+	 * for XPaths to not be unique in the page. This would similarly be an issue for any theme/plugin that prints a
+	 * `DIV` at the `wp_footer`, again to add a modal, for example. Therefore, en lieu of node index being added to
+	 * children of `BODY`, a disambiguating attribute predicate is added for the element's `id`, `role`, or `class`
+	 * attribute. These three attributes are the most stable across page loads, especially at the root of the document
+	 * (where there is no Post Loop using `post_class()`).
 	 *
 	 * @since 0.4.0
 	 * @see self::get_xpath()
 	 * @var string
 	 * @link https://github.com/WordPress/performance/issues/1787
 	 */
-	const XPATH_PATTERN = '^(/([a-zA-Z0-9:_-]+|\*\[\d+\]\[self::[a-zA-Z0-9:_-]+\]))+$';
+	const XPATH_PATTERN = '^(/([a-zA-Z0-9:_-]+|\*\[\d+\]\[self::[a-zA-Z0-9:_-]+\])(\[@(id|role|class)=\'[a-zA-Z0-9_.\s:-]*\'\])?)+$';
 
 	/**
 	 * Bookmark for the end of the HEAD.
@@ -152,6 +154,17 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	private $open_stack_tags = array();
 
 	/**
+	 * Stack of the attributes for open tags.
+	 *
+	 * Note that currently only the third item will currently be populated (index 2), as this corresponds to tags which
+	 * are children of the `BODY` tag. This is used in {@see self::get_xpath()}.
+	 *
+	 * @since 1.0.0
+	 * @var array<array<string, string>>
+	 */
+	private $open_stack_attributes = array();
+
+	/**
 	 * Open stack indices.
 	 *
 	 * @since 0.4.0
@@ -168,17 +181,30 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * populated back into `$this->open_stack_tags` and `$this->open_stack_indices`.
 	 *
 	 * @since 0.4.0
-	 * @var array<string, array{tags: string[], indices: int[]}>
+	 * @var array<string, array{tags: string[], attributes: array<array<string, string>>, indices: int[]}>
 	 */
 	private $bookmarked_open_stacks = array();
 
 	/**
-	 * XPath for the current tag.
+	 * Stored XPath for the current tag.
 	 *
-	 * This is used so that repeated calls to {@see self::get_xpath()} won't needlessly reconstruct the string. This
-	 * gets cleared whenever {@see self::open_tags()} iterates to the next tag.
+	 * This is used so that repeated calls to {@see self::get_stored_xpath()} won't needlessly reconstruct the string.
+	 * This gets cleared whenever {@see self::open_tags()} iterates to the next tag.
+	 *
+	 * @todo Remove this once the XPath transitional period is over.
 	 *
 	 * @since 0.4.0
+	 * @var string|null
+	 */
+	private $current_stored_xpath = null;
+
+	/**
+	 * (Transitional) XPath for the current tag.
+	 *
+	 * This is used to store the old XPath format in a transitional period until which new URL Metrics are expected to
+	 * have been collected to purge out references to the old format.
+	 *
+	 * @since 1.0.0
 	 * @var string|null
 	 */
 	private $current_xpath = null;
@@ -236,7 +262,12 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		if ( null !== $query ) {
 			throw new InvalidArgumentException( esc_html__( 'Processor subclass does not support queries.', 'optimization-detective' ) );
 		}
-		return parent::next_tag( array( 'tag_closers' => 'visit' ) );
+
+		// Elements in the Admin Bar are not relevant for optimization, so this loop ensures that no tags in the Admin Bar are visited.
+		do {
+			$matched = parent::next_tag( array( 'tag_closers' => 'visit' ) );
+		} while ( $matched && $this->is_admin_bar() );
+		return $matched;
 	}
 
 	/**
@@ -288,11 +319,13 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @return bool Whether a token was parsed.
 	 */
 	public function next_token(): bool {
-		$this->current_xpath = null; // Clear cache.
+		$this->current_stored_xpath = null; // Clear cache.
+		$this->current_xpath        = null; // Clear cache.
 		++$this->cursor_move_count;
 		if ( ! parent::next_token() ) {
-			$this->open_stack_tags    = array();
-			$this->open_stack_indices = array();
+			$this->open_stack_tags       = array();
+			$this->open_stack_attributes = array();
+			$this->open_stack_indices    = array();
 
 			// Mark that the end of the document was reached, meaning that get_modified_html() should now be able to append markup to the HEAD and the BODY.
 			$this->reached_end_of_document = true;
@@ -306,6 +339,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 
 		if ( $this->previous_tag_without_closer ) {
 			array_pop( $this->open_stack_tags );
+			array_pop( $this->open_stack_attributes );
 		}
 
 		if ( ! $this->is_tag_closer() ) {
@@ -317,12 +351,20 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 				$i = array_search( 'P', $this->open_stack_tags, true );
 				if ( false !== $i ) {
 					array_splice( $this->open_stack_tags, (int) $i );
+					array_splice( $this->open_stack_attributes, (int) $i );
 					array_splice( $this->open_stack_indices, count( $this->open_stack_tags ) + 1 );
 				}
 			}
 
 			$level                   = count( $this->open_stack_tags );
 			$this->open_stack_tags[] = $tag_name;
+
+			// For children of the BODY, capture disambiguating comments. See the get_xpath() method for where this data is used.
+			$attributes = array();
+			if ( isset( $this->open_stack_tags[1] ) && 'BODY' === $this->open_stack_tags[1] && 2 === $level ) {
+				$attributes = $this->get_disambiguating_attributes();
+			}
+			$this->open_stack_attributes[] = $attributes;
 
 			if ( ! isset( $this->open_stack_indices[ $level ] ) ) {
 				$this->open_stack_indices[ $level ] = 0;
@@ -347,6 +389,7 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			}
 
 			$popped_tag_name = array_pop( $this->open_stack_tags );
+			array_pop( $this->open_stack_attributes );
 			if ( $popped_tag_name !== $tag_name ) {
 				$this->warn(
 					__METHOD__,
@@ -464,8 +507,9 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	public function seek( $bookmark_name ): bool {
 		$result = parent::seek( $bookmark_name );
 		if ( $result ) {
-			$this->open_stack_tags    = $this->bookmarked_open_stacks[ $bookmark_name ]['tags'];
-			$this->open_stack_indices = $this->bookmarked_open_stacks[ $bookmark_name ]['indices'];
+			$this->open_stack_tags       = $this->bookmarked_open_stacks[ $bookmark_name ]['tags'];
+			$this->open_stack_attributes = $this->bookmarked_open_stacks[ $bookmark_name ]['attributes'];
+			$this->open_stack_indices    = $this->bookmarked_open_stacks[ $bookmark_name ]['indices'];
 		}
 		return $result;
 	}
@@ -483,8 +527,9 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 		$result = parent::set_bookmark( $name );
 		if ( $result ) {
 			$this->bookmarked_open_stacks[ $name ] = array(
-				'tags'    => $this->open_stack_tags,
-				'indices' => $this->open_stack_indices,
+				'tags'       => $this->open_stack_tags,
+				'attributes' => $this->open_stack_attributes,
+				'indices'    => $this->open_stack_indices,
 			);
 		}
 		return $result;
@@ -520,12 +565,47 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 * @since 0.4.0
 	 * @since 0.9.0 Renamed from get_breadcrumbs() to get_indexed_breadcrumbs().
 	 *
-	 * @return Generator<array{string, int}> Breadcrumb.
+	 * @return Generator<array{string, int, array<string, string>}> Breadcrumb.
 	 */
 	private function get_indexed_breadcrumbs(): Generator {
 		foreach ( $this->open_stack_tags as $i => $breadcrumb_tag_name ) {
-			yield array( $breadcrumb_tag_name, $this->open_stack_indices[ $i ] );
+			yield array( $breadcrumb_tag_name, $this->open_stack_indices[ $i ], $this->open_stack_attributes[ $i ] );
 		}
+	}
+
+	/**
+	 * Gets disambiguating attributes.
+	 *
+	 * This returns the most stable attribute which can be used to disambiguate an XPath expression when the node index
+	 * is not appropriate. This is used specifically for children of the `BODY`. The `id` and `role` attributes are most
+	 * stable followed by the `class` attribute (cf. <https://g.co/gemini/share/032edd9063c1>), although all Block
+	 * Themes utilize the 'wp-site-blocks' class name in the root `DIV`. Only one attribute is currently returned,
+	 * although potentially more could be returned if additional disambiguation is needed in the future.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array<string, string> Disambiguating attributes.
+	 */
+	private function get_disambiguating_attributes(): array {
+		$attributes = array();
+		foreach ( array( 'id', 'role', 'class' ) as $attribute_name ) {
+			$attribute_value = $this->get_attribute( $attribute_name );
+			if ( null === $attribute_value ) {
+				continue;
+			}
+			if ( true === $attribute_value ) {
+				// In XPath, a boolean attribute in HTML like `<video controls>` is the same as `<video controls="">`. Both are matched by `//video[@controls=""]`.
+				$attribute_value = '';
+			} elseif ( 1 !== preg_match( '/^[a-zA-Z0-9_.\s:-]*$/', $attribute_value ) ) {
+				// Skip attribute values which contain uncommon characters, especially single/double quote marks and
+				// brackets, which could cause headaches when constructing/deconstructing XPath attribute predicates.
+				continue;
+			}
+
+			$attributes[ $attribute_name ] = $attribute_value;
+			break; // Stop when we've found one.
+		}
+		return $attributes;
 	}
 
 	/**
@@ -564,17 +644,26 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 	 *
 	 * It would be nicer if this were like `.../DIV[1]/DIV[2]` but in XPath the position() here refers to the
 	 * index of the preceding node set. So it has to rather be written `.../*[1][self::DIV]/*[2][self::DIV]`.
-	 * Note that the first three levels lack any node index, for example `/HTML/BODY/DIV` for the reasons
-	 * explained in {@see self::XPATH_PATTERN}.
+	 * Note that the first three levels lack any node index whereas the third level includes a disambiguating
+	 * attribute predicate (e.g. `/HTML/BODY/DIV[@id="page"]`) for the reasons explained in {@see self::XPATH_PATTERN}.
+	 * This predicate will be included once the transitional period is over.
 	 *
 	 * @since 0.4.0
+	 * @todo Replace the logic herein with what is in get_stored_xpath() once the transitional period is over.
 	 *
 	 * @return string XPath.
 	 */
 	public function get_xpath(): string {
+		/*
+		 * This transitional format is used by default for all extensions. The non-transitional format is used only in
+		 * od_optimize_template_output_buffer() when setting the data-od-xpath attribute. This is so that the new format
+		 * will replace the old format as new URL Metrics are collected. After a month of the new format being live, the
+		 * transitional format can be eliminated. See the corresponding logic in OD_Element for normalizing both the
+		 * old and new XPath formats to use the transitional format.
+		 */
 		if ( null === $this->current_xpath ) {
 			$this->current_xpath = '';
-			foreach ( $this->get_indexed_breadcrumbs() as $i => list( $tag_name, $index ) ) {
+			foreach ( $this->get_indexed_breadcrumbs() as $i => list( $tag_name, $index, $attributes ) ) {
 				if ( $i < 2 || ( 2 === $i && '/HTML/BODY' === $this->current_xpath ) ) {
 					$this->current_xpath .= "/$tag_name";
 				} else {
@@ -583,6 +672,61 @@ final class OD_HTML_Tag_Processor extends WP_HTML_Tag_Processor {
 			}
 		}
 		return $this->current_xpath;
+	}
+
+	/**
+	 * Gets stored XPath for the current open tag.
+	 *
+	 * This method is temporary for a transition period while new URL Metrics are collected for active installs. Once
+	 * the transition period is over, the logic in this method can be moved to {@see self::get_xpath()} and this method
+	 * can simply be an alias for that one. See related logic in {@see OD_Element::get_xpath()}. This function is only
+	 * used internally by Optimization Detective in {@see od_optimize_template_output_buffer()}.
+	 *
+	 * @since 1.0.0
+	 * @todo Move the logic in this method to the get_xpath() method and let this be an alias for that method once the transitional period is over.
+	 * @access private
+	 *
+	 * @return string XPath.
+	 */
+	public function get_stored_xpath(): string {
+		if ( null === $this->current_stored_xpath ) {
+			$this->current_stored_xpath = '';
+			foreach ( $this->get_indexed_breadcrumbs() as $i => list( $tag_name, $index, $attributes ) ) {
+				if ( $i < 2 ) {
+					$this->current_stored_xpath .= "/$tag_name";
+				} elseif ( 2 === $i && '/HTML/BODY' === $this->current_stored_xpath ) {
+					$segment = "/$tag_name";
+					foreach ( $attributes as $attribute_name => $attribute_value ) {
+						$segment .= sprintf(
+							"[@%s='%s']",
+							$attribute_name,
+							$attribute_value // Note: $attribute_value has already been validated to only contain safe characters /^[a-zA-Z0-9_.\s:-]*/ which do not need escaping.
+						);
+					}
+					$this->current_stored_xpath .= $segment;
+				} else {
+					$this->current_stored_xpath .= sprintf( '/*[%d][self::%s]', $index + 1, $tag_name );
+				}
+			}
+		}
+		return $this->current_stored_xpath;
+	}
+
+	/**
+	 * Returns whether the processor is currently at or inside the admin bar.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool Whether at or inside the admin bar.
+	 */
+	private function is_admin_bar(): bool {
+		return (
+			isset( $this->open_stack_tags[2], $this->open_stack_attributes[2]['id'] )
+			&&
+			'DIV' === $this->open_stack_tags[2]
+			&&
+			'wpadminbar' === $this->open_stack_attributes[2]['id']
+		);
 	}
 
 	/**

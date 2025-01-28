@@ -54,7 +54,7 @@ function updateReadmeChangelog( readmeFile, changelog ) {
 	const fileContent = fs.readFileSync( readmeFile, 'utf-8' );
 
 	const stableTagVersionMatches = fileContent.match(
-		/^Stable tag:\s*(\d+\.\d+\.\d+)$/m
+		/^Stable tag:\s*(\d+\.\d+\.\d+(?:-[\w\.]+)?)$/m
 	);
 	if ( ! stableTagVersionMatches ) {
 		throw new Error( `Unable to locate stable tag in ${ readmeFile }` );
@@ -112,7 +112,7 @@ function getStableTag( readmeFilePath ) {
 	const readmeContents = fs.readFileSync( readmeFilePath, 'utf-8' );
 
 	const stableTagVersionMatches = readmeContents.match(
-		/^Stable tag:\s*(\d+\.\d+\.\d+)$/m
+		/^Stable tag:\s*(\d+\.\d+\.\d+(?:-[\w\.]+)?)$/m
 	);
 	if ( ! stableTagVersionMatches ) {
 		throw new Error( `Unable to locate stable tag in ${ readmeFilePath }` );
