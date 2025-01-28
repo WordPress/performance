@@ -26,6 +26,7 @@
 	let isProcessing = false;
 	let isNextBatchAvailable = true;
 	let cursor = {};
+	let isDebug = false;
 
 	/**
 	 * Handles the prime URL metrics control button click.
@@ -44,14 +45,21 @@
 
 		if ( ! isInitialized ) {
 			isInitialized = true;
-			iframe.style.display = 'block';
+			progressBar.max = 0;
 			while ( isProcessing && isNextBatchAvailable ) {
 				const batch = await getBatch( cursor );
-				cursor = batch.cursor;
-				progressBar.max += batch.urls.length;
 				if ( ! batch.urls.length ) {
 					isNextBatchAvailable = false;
 					break;
+				}
+				isDebug = batch.isDebug;
+				cursor = batch.cursor;
+
+				// As the progress bar max value is set to 1 initially, we need to update it to the actual value.
+				if ( 1 === progressBar.max ) {
+					progressBar.max = batch.urls.length;
+				} else {
+					progressBar.max += batch.urls.length;
 				}
 				await processBatch( batch.urls );
 			}
@@ -75,7 +83,8 @@
 	 *     page_number: number,
 	 *     offset_within_page: number,
 	 *     batch_size: number
-	 *   }
+	 *   },
+	 *   isDebug: boolean
 	 * }>} - The promise that resolves to the batch of URLs.
 	 */
 	async function getBatch( lastCursor ) {
@@ -93,6 +102,11 @@
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
 	async function processBatch( urls ) {
+		if ( isDebug ) {
+			iframe.style.position = 'unset';
+			iframe.style.transform = 'scale(0.5) translate(-50%, -50%)';
+			iframe.style.visibility = 'visible';
+		}
 		for ( const url of urls ) {
 			await new Promise( async ( urlResolve ) => {
 				for ( const breakpoint of url.breakpoints ) {

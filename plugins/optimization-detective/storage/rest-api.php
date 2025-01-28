@@ -313,7 +313,7 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 			'subtype_index'      => 0,
 			'page_number'        => 1,
 			'offset_within_page' => 0,
-			'batch_size'         => 1,
+			'batch_size'         => 10,
 		)
 	);
 
@@ -330,16 +330,28 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 	// Flag to indicate if we should stop collecting further URLs (i.e., we reached $cursor['batch_size']).
 	$done = false;
 
-	// Calculate breakpoints.
-	$widths   = od_get_breakpoint_max_widths();
-	$widths[] = (int) end( $widths ) + 300; // Add a large width.
+	$widths = od_get_breakpoint_max_widths();
+	sort( $widths );
+	$min_width = $widths[0];
+	$max_width = (int) end( $widths ) + 300; // For large screens.
+	$widths[]  = $max_width;
 
-	$calculated_breakpoints = array_map(
-		static function ( int $width ): array {
-			$aspect = max( 1, min( 2, $width / 1000 ) );
+	// We need to ensure min is 0.56 (1080/1920) else the height will become too small.
+	$min_ar = max( 0.56, od_get_minimum_viewport_aspect_ratio() );
+	// We also need to ensure max is 1.78 (1920/1080) else the height will become too large.
+	$max_ar = min( 1.78, od_get_maximum_viewport_aspect_ratio() );
+
+	$breakpoints = array_map(
+		static function ( $width ) use ( $min_width, $max_width, $min_ar, $max_ar ) {
+			// Linear interpolation between max_ar and min_ar based on width.
+			$ar = $max_ar - ( ( $max_ar - $min_ar ) * ( ( $width - $min_width ) / ( $max_width - $min_width ) ) );
+
+			// Clamp aspect ratio within bounds.
+			$ar = max( $min_ar, min( $max_ar, $ar ) );
+
 			return array(
 				'width'  => $width,
-				'height' => round( $width / $aspect ),
+				'height' => (int) round( $ar * $width ),
 			);
 		},
 		$widths
@@ -382,7 +394,7 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 				foreach ( $current_page_urls as $url ) {
 					$all_urls[] = array(
 						'url'         => $url,
-						'breakpoints' => $calculated_breakpoints,
+						'breakpoints' => $breakpoints,
 					);
 					++$collected_count;
 					++$consumed_in_this_page;
@@ -445,8 +457,9 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 
 	return new WP_REST_Response(
 		array(
-			'urls'   => $all_urls,
-			'cursor' => $new_cursor,
+			'urls'    => $all_urls,
+			'cursor'  => $new_cursor,
+			'isDebug' => defined( 'WP_DEBUG' ) && WP_DEBUG,
 		)
 	);
 }
