@@ -40,17 +40,13 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
 		_doing_it_wrong( __FUNCTION__, esc_html__( 'The minimum width cannot be greater than the maximum width.', 'optimization-detective' ), 'Optimization Detective 0.7.0' );
 		return null;
 	}
-	$media_attributes = array();
-	if ( null !== $minimum_viewport_width && $minimum_viewport_width > 0 ) {
-		$media_attributes[] = sprintf( '(min-width: %dpx)', $minimum_viewport_width );
-	}
-	if ( null !== $maximum_viewport_width && PHP_INT_MAX !== $maximum_viewport_width ) {
-		$media_attributes[] = sprintf( '(max-width: %dpx)', $maximum_viewport_width );
-	}
-	if ( count( $media_attributes ) === 0 ) {
+	$media_attributes = '';
+	if ( ( null !== $minimum_viewport_width && $minimum_viewport_width > 0 ) && ( null !== $maximum_viewport_width && PHP_INT_MAX !== $maximum_viewport_width ) ) {
+		$media_attributes = sprintf( '( %dpx < width <= %dpx )', $minimum_viewport_width, $maximum_viewport_width );
+	} else {
 		return null;
 	}
-	return join( ' and ', $media_attributes );
+	return $media_attributes;
 }
 
 /**
