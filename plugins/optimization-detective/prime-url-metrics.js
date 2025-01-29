@@ -22,50 +22,107 @@
 		'iframe#od-prime-url-metrics-iframe'
 	);
 
-	let isInitialized = false;
 	let isProcessing = false;
 	let isNextBatchAvailable = true;
 	let cursor = {};
 	let isDebug = false;
 	let verificationToken = '';
+	let currentBatch = null;
+	let currentTasks = [];
+	let currentTaskIndex = 0;
 
 	/**
 	 * Handles the prime URL metrics control button click.
 	 */
 	async function handleControlButtonClick() {
 		if ( isProcessing ) {
+			// Pause processing
+			isProcessing = false;
 			controlButton.textContent = __(
 				'Resume',
 				'optimization-detective'
 			);
-			isProcessing = false;
 		} else {
-			controlButton.textContent = __( 'Pause', 'optimization-detective' );
+			// Start/resume processing
 			isProcessing = true;
-		}
+			controlButton.textContent = __( 'Pause', 'optimization-detective' );
 
-		if ( ! isInitialized ) {
-			isInitialized = true;
-			progressBar.max = 0;
-			while ( isProcessing && isNextBatchAvailable ) {
-				const batch = await getBatch( cursor );
-				if ( ! batch.urls.length ) {
-					isNextBatchAvailable = false;
-					break;
-				}
-				verificationToken = batch.verificationToken;
-				cursor = batch.cursor;
-				isDebug = batch.isDebug;
+			try {
+				while ( isProcessing ) {
+					if ( ! currentBatch ) {
+						currentBatch = await getBatch( cursor );
+						if ( ! currentBatch.urls.length ) {
+							isNextBatchAvailable = false;
+							break;
+						}
 
-				// As the progress bar max value is set to 1 initially, we need to update it to the actual value.
-				if ( 1 === progressBar.max ) {
-					progressBar.max = batch.urls.length;
-				} else {
-					progressBar.max += batch.urls.length;
+						// Initialize batch state
+						verificationToken = currentBatch.verificationToken;
+						isDebug = currentBatch.isDebug;
+						currentTasks = flattenBatchToTasks( currentBatch );
+						currentTaskIndex = 0;
+						progressBar.max = currentTasks.length;
+						progressBar.value = 0;
+					}
+					// Process tasks in current batch
+					while (
+						isProcessing &&
+						currentTaskIndex < currentTasks.length
+					) {
+						await processTask( currentTasks[ currentTaskIndex ] );
+						currentTaskIndex++;
+						progressBar.value = currentTaskIndex;
+					}
+
+					if ( currentTaskIndex >= currentTasks.length ) {
+						// Complete current batch
+						cursor = currentBatch.cursor;
+						currentBatch = null;
+						currentTasks = [];
+						currentTaskIndex = 0;
+					}
 				}
-				await processBatch( batch.urls );
+			} catch ( error ) {
+				// TODO: Decide whether to skip the current task or stop processing.
+				isProcessing = false;
+				controlButton.textContent = __(
+					'Click to retry',
+					'optimization-detective'
+				);
+			} finally {
+				if ( ! isNextBatchAvailable ) {
+					isProcessing = false;
+					controlButton.textContent = __(
+						'Finished',
+						'optimization-detective'
+					);
+					controlButton.disabled = true;
+				}
 			}
 		}
+	}
+
+	/**
+	 * Flattens the batch to tasks.
+	 * @param {Object} batch - The batch to flatten.
+	 * @return {Array<{
+	 *   url: string,
+	 *   width: number,
+	 *   height: number
+	 * }>} - The flattened tasks.
+	 */
+	function flattenBatchToTasks( batch ) {
+		const tasks = [];
+		for ( const url of batch.urls ) {
+			for ( const breakpoint of url.breakpoints ) {
+				tasks.push( {
+					url: url.url,
+					width: breakpoint.width,
+					height: breakpoint.height,
+				} );
+			}
+		}
+		return tasks;
 	}
 
 	/**
@@ -100,47 +157,11 @@
 	}
 
 	/**
-	 * Processes the batch of URLs.
-	 * @param {Array} urls - The URLs to process
-	 * @return {Promise<void>} The promise that resolves to void.
-	 */
-	async function processBatch( urls ) {
-		if ( isDebug ) {
-			iframe.style.position = 'unset';
-			iframe.style.transform = 'scale(0.5) translate(-50%, -50%)';
-			iframe.style.visibility = 'visible';
-		}
-
-		for ( const url of urls ) {
-			if ( ! isProcessing ) {
-				break;
-			}
-
-			for ( const breakpoint of url.breakpoints ) {
-				if ( ! isProcessing ) {
-					break;
-				}
-
-				try {
-					iframe.dataset.odPrimeUrlMetricsVerificationToken =
-						verificationToken;
-					// Load iframe and wait for message
-					await loadIframeAndWaitForMessage( url.url, breakpoint );
-				} catch ( error ) {
-					// TODO: Decide whether to retry or skip the URL.
-				}
-			}
-			progressBar.value += 1;
-		}
-	}
-
-	/**
 	 * Loads the iframe and waits for the message.
-	 * @param {string}                          url        - The URL to load in the iframe.
-	 * @param {{width: number, height: number}} breakpoint - The breakpoint to set for the iframe.
+	 * @param {{url: string, width: number, height: number}} task - The breakpoint to set for the iframe.
 	 * @return {Promise<void>} The promise that resolves to void.
 	 */
-	function loadIframeAndWaitForMessage( url, breakpoint ) {
+	function processTask( task ) {
 		return new Promise( ( resolve, reject ) => {
 			const handleMessage = ( event ) => {
 				if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
@@ -173,9 +194,17 @@
 			};
 
 			// Load the iframe
-			iframe.src = url;
-			iframe.width = breakpoint.width.toString();
-			iframe.height = breakpoint.height.toString();
+			iframe.src = task.url;
+			iframe.width = task.width.toString();
+			iframe.height = task.height.toString();
+			iframe.dataset.odPrimeUrlMetricsVerificationToken =
+				verificationToken;
+
+			if ( isDebug ) {
+				iframe.style.position = 'unset';
+				iframe.style.transform = 'scale(0.5) translate(-50%, -50%)';
+				iframe.style.visibility = 'visible';
+			}
 		} );
 	}
 
