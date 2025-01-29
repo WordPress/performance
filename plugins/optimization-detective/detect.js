@@ -26,6 +26,8 @@ const consoleLogPrefix = '[Optimization Detective]';
 
 const storageLockTimeSessionKey = 'odStorageLockTime';
 
+let odPrimeUrlMetricsVerificationToken = '';
+
 /**
  * Checks whether storage is locked.
  *
@@ -34,6 +36,10 @@ const storageLockTimeSessionKey = 'odStorageLockTime';
  * @return {boolean} Whether storage is locked.
  */
 function isStorageLocked( currentTime, storageLockTTL ) {
+	if ( '' !== odPrimeUrlMetricsVerificationToken ) {
+		return false;
+	}
+
 	if ( storageLockTTL === 0 ) {
 		return false;
 	}
@@ -344,6 +350,18 @@ export default async function detect( {
 		} );
 	}
 
+	/** @type {HTMLIFrameElement|null} */
+	const urlPrimeIframeElement = win.parent.document.querySelector(
+		'iframe#od-prime-url-metrics-iframe'
+	);
+	if (
+		urlPrimeIframeElement &&
+		urlPrimeIframeElement.dataset.odPrimeUrlMetricsVerificationToken
+	) {
+		odPrimeUrlMetricsVerificationToken =
+			urlPrimeIframeElement.dataset.odPrimeUrlMetricsVerificationToken;
+	}
+
 	// TODO: Does this make sense here? Should it be moved up above the isViewportNeeded condition?
 	// As an alternative to this, the od_print_detection_script() function can short-circuit if the
 	// od_is_url_metric_storage_locked() function returns true. However, the downside with that is page caching could
@@ -578,6 +596,10 @@ export default async function detect( {
 
 	// Wait for the page to be hidden.
 	await new Promise( ( resolve ) => {
+		if ( '' !== odPrimeUrlMetricsVerificationToken ) {
+			resolve();
+		}
+
 		win.addEventListener( 'pagehide', resolve, { once: true } );
 		win.addEventListener( 'pageswap', resolve, { once: true } );
 		doc.addEventListener(
@@ -673,12 +695,45 @@ export default async function detect( {
 		);
 	}
 	url.searchParams.set( 'hmac', urlMetricHMAC );
-	navigator.sendBeacon(
-		url,
-		new Blob( [ JSON.stringify( urlMetric ) ], {
-			type: 'application/json',
+	if ( '' !== odPrimeUrlMetricsVerificationToken ) {
+		url.searchParams.set(
+			'prime_url_metrics_verification_token',
+			odPrimeUrlMetricsVerificationToken
+		);
+
+		fetch( url, {
+			method: 'POST',
+			body: JSON.stringify( urlMetric ),
+			headers: {
+				'Content-Type': 'application/json',
+			},
 		} )
-	);
+			.then( ( response ) => {
+				if ( ! response.ok ) {
+					throw new Error(
+						`Failed to send URL Metric: ${ response.statusText }`
+					);
+				}
+				window.parent.postMessage(
+					'OD_PRIME_URL_METRICS_REQUEST_SUCCESS',
+					'*'
+				);
+			} )
+			.catch( ( err ) => {
+				window.parent.postMessage(
+					'OD_PRIME_URL_METRICS_REQUEST_FAILURE',
+					'*'
+				);
+				error( 'Failed to send URL Metric:', err );
+			} );
+	} else {
+		navigator.sendBeacon(
+			url,
+			new Blob( [ JSON.stringify( urlMetric ) ], {
+				type: 'application/json',
+			} )
+		);
+	}
 
 	// Clean up.
 	breadcrumbedElementsMap.clear();

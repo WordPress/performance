@@ -27,6 +27,7 @@
 	let isNextBatchAvailable = true;
 	let cursor = {};
 	let isDebug = false;
+	let verificationToken = '';
 
 	/**
 	 * Handles the prime URL metrics control button click.
@@ -52,8 +53,9 @@
 					isNextBatchAvailable = false;
 					break;
 				}
-				isDebug = batch.isDebug;
+				verificationToken = batch.verificationToken;
 				cursor = batch.cursor;
+				isDebug = batch.isDebug;
 
 				// As the progress bar max value is set to 1 initially, we need to update it to the actual value.
 				if ( 1 === progressBar.max ) {
@@ -84,6 +86,7 @@
 	 *     offset_within_page: number,
 	 *     batch_size: number
 	 *   },
+	 *   verificationToken: string,
 	 *   isDebug: boolean
 	 * }>} - The promise that resolves to the batch of URLs.
 	 */
@@ -107,22 +110,73 @@
 			iframe.style.transform = 'scale(0.5) translate(-50%, -50%)';
 			iframe.style.visibility = 'visible';
 		}
+
 		for ( const url of urls ) {
-			await new Promise( async ( urlResolve ) => {
-				for ( const breakpoint of url.breakpoints ) {
-					await new Promise( ( breakpointResolve ) => {
-						iframe.src = url.url;
-						iframe.width = breakpoint.width;
-						iframe.height = breakpoint.height;
-						iframe.onload = () => {
-							breakpointResolve();
-						};
-					} );
+			if ( ! isProcessing ) {
+				break;
+			}
+
+			for ( const breakpoint of url.breakpoints ) {
+				if ( ! isProcessing ) {
+					break;
 				}
-				urlResolve();
-			} );
+
+				try {
+					iframe.dataset.odPrimeUrlMetricsVerificationToken =
+						verificationToken;
+					// Load iframe and wait for message
+					await loadIframeAndWaitForMessage( url.url, breakpoint );
+				} catch ( error ) {
+					// TODO: Decide whether to retry or skip the URL.
+				}
+			}
 			progressBar.value += 1;
 		}
+	}
+
+	/**
+	 * Loads the iframe and waits for the message.
+	 * @param {string}                          url        - The URL to load in the iframe.
+	 * @param {{width: number, height: number}} breakpoint - The breakpoint to set for the iframe.
+	 * @return {Promise<void>} The promise that resolves to void.
+	 */
+	function loadIframeAndWaitForMessage( url, breakpoint ) {
+		return new Promise( ( resolve, reject ) => {
+			const handleMessage = ( event ) => {
+				if ( event.data === 'OD_PRIME_URL_METRICS_REQUEST_SUCCESS' ) {
+					cleanup();
+					resolve();
+				} else if (
+					event.data === 'OD_PRIME_URL_METRICS_REQUEST_FAILURE'
+				) {
+					cleanup();
+					reject( new Error( 'Failed to send metrics' ) );
+				}
+			};
+
+			const cleanup = () => {
+				window.removeEventListener( 'message', handleMessage );
+				clearTimeout( timeoutId );
+				iframe.onerror = null;
+			};
+
+			const timeoutId = setTimeout( () => {
+				cleanup();
+				reject( new Error( 'Timeout waiting for message' ) );
+			}, 30000 ); // 30-second timeout
+
+			window.addEventListener( 'message', handleMessage );
+
+			iframe.onerror = () => {
+				cleanup();
+				reject( new Error( 'Iframe failed to load' ) );
+			};
+
+			// Load the iframe
+			iframe.src = url;
+			iframe.width = breakpoint.width.toString();
+			iframe.height = breakpoint.height.toString();
+		} );
 	}
 
 	controlButton.addEventListener( 'click', handleControlButtonClick );
