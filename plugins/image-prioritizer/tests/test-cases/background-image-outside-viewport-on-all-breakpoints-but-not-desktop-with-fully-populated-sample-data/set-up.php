@@ -26,7 +26,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 						'viewport_width' => $non_desktop_viewport_width,
 						'elements'       => array(
 							array(
-								'xpath'              => '/HTML/BODY/DIV/*[2][self::DIV]',
+								'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::DIV]',
 								'isLCP'              => false,
 								'intersectionRatio'  => 0.0,
 								'intersectionRect'   => $outside_viewport_rect,
@@ -47,7 +47,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 					'viewport_width' => 1000,
 					'elements'       => array(
 						array(
-							'xpath'             => '/HTML/BODY/DIV/*[2][self::DIV]',
+							'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::DIV]',
 							'isLCP'             => false,
 							'intersectionRatio' => 0.3,
 						),

@@ -6,9 +6,11 @@
  * @since 0.1.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Namespace for optimization-detective.
@@ -34,6 +36,8 @@ const OD_URL_METRICS_ROUTE = '/url-metrics:store';
  *
  * @since 0.1.0
  * @access private
+ *
+ * @see od_compose_site_health_result()
  */
 function od_register_endpoint(): void {
 
@@ -164,7 +168,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 		);
 	} catch ( InvalidArgumentException $exception ) {
 		// Note: This should never happen because an exception only occurs if a viewport width is less than zero, and the JSON Schema enforces that the viewport.width have a minimum of zero.
-		return new WP_Error( 'invalid_viewport_width', $exception->getMessage() );
+		return new WP_Error( 'invalid_viewport_width', $exception->getMessage() ); // @codeCoverageIgnore
 	}
 	if ( $url_metric_group->is_complete() ) {
 		return new WP_Error(
@@ -275,7 +279,7 @@ function od_handle_rest_request( WP_REST_Request $request ) {
  * @since 0.8.0
  * @access private
  *
- * @param int $cache_purge_post_id Cache purge post ID.
+ * @param positive-int $cache_purge_post_id Cache purge post ID.
  */
 function od_trigger_page_cache_invalidation( int $cache_purge_post_id ): void {
 	$post = get_post( $cache_purge_post_id );

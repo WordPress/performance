@@ -10,7 +10,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case, WP_UnitTest_F
 
 	$element = array(
 		'isLCP'              => false,
-		'xpath'              => '/HTML/BODY/DIV/*[1][self::VIDEO]',
+		'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::VIDEO]',
 		'boundingClientRect' => $test_case->get_sample_dom_rect(),
 		'intersectionRatio'  => 1.0,
 	);

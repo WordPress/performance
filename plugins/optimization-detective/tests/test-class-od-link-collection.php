@@ -233,6 +233,20 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_count'  => 0,
 				'error'           => 'A link with rel=preconnect must include an &quot;href&quot; attribute.',
 			),
+			'bad_rel'                                    => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'  => 123,
+							'href' => 'https://example.com/foo-400.jpg',
+						),
+					),
+				),
+				'expected_html'   => '',
+				'expected_header' => '',
+				'expected_count'  => 0,
+				'error'           => 'Link attributes must be strings.',
+			),
 			'bad_preload'                                => array(
 				'links_args'      => array(
 					array(
@@ -329,7 +343,10 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 	 *
 	 * @covers ::add_link
 	 * @covers ::get_html
+	 * @covers ::get_prepared_links
+	 * @covers ::merge_consecutive_links
 	 * @covers ::get_response_header
+	 * @covers ::count
 	 *
 	 * @dataProvider data_provider_to_test_add_link
 	 *
@@ -346,6 +363,9 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 		}
 
 		$collection = new OD_Link_Collection();
+
+		$this->assertNull( $collection->get_response_header() );
+
 		foreach ( $links_args as $link_args ) {
 			$collection->add_link( ...$link_args );
 		}

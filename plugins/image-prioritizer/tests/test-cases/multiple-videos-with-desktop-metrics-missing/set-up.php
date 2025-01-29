@@ -18,25 +18,25 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 					'elements'       => array(
 						array(
 							'isLCP'              => true,
-							'xpath'              => '/HTML/BODY/DIV/*[1][self::VIDEO]',
+							'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::VIDEO]',
 							'boundingClientRect' => $test_case->get_sample_dom_rect(),
 							'intersectionRatio'  => 1.0,
 						),
 						array(
 							'isLCP'              => false,
-							'xpath'              => '/HTML/BODY/DIV/*[2][self::VIDEO]',
+							'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::VIDEO]',
 							'boundingClientRect' => $test_case->get_sample_dom_rect(),
 							'intersectionRatio'  => 0.1,
 						),
 						array(
 							'isLCP'              => false,
-							'xpath'              => '/HTML/BODY/DIV/*[3][self::VIDEO]',
+							'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[3][self::VIDEO]',
 							'boundingClientRect' => $test_case->get_sample_dom_rect(),
 							'intersectionRatio'  => 0.0,
 						),
 						array(
 							'isLCP'              => false,
-							'xpath'              => '/HTML/BODY/DIV/*[4][self::VIDEO]',
+							'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[4][self::VIDEO]',
 							'boundingClientRect' => $test_case->get_sample_dom_rect(),
 							'intersectionRatio'  => 0.0,
 						),

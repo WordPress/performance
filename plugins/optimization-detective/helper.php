@@ -6,14 +6,17 @@
  * @since 0.1.0
  */
 
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Initializes extensions for Optimization Detective.
  *
  * @since 0.7.0
+ * @access private
  */
 function od_initialize_extensions(): void {
 	/**
@@ -28,6 +31,9 @@ function od_initialize_extensions(): void {
 
 /**
  * Generates a media query for the provided minimum and maximum viewport widths.
+ *
+ * This helper function is available for extensions to leverage when manually printing STYLE rules via
+ * {@see OD_HTML_Tag_Processor::append_head_html()} or {@see OD_HTML_Tag_Processor::append_body_html()}
  *
  * @since 0.7.0
  *
@@ -59,16 +65,25 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
  * See {@see 'wp_head'}.
  *
  * @since 0.1.0
+ * @access private
  */
 function od_render_generator_meta_tag(): void {
 	// Use the plugin slug as it is immutable.
-	echo '<meta name="generator" content="optimization-detective ' . esc_attr( OPTIMIZATION_DETECTIVE_VERSION ) . '">' . "\n";
+	$content = 'optimization-detective ' . OPTIMIZATION_DETECTIVE_VERSION;
+
+	// Indicate that the plugin will not be doing anything because the REST API is unavailable.
+	if ( od_is_rest_api_unavailable() ) {
+		$content .= '; rest_api_unavailable';
+	}
+
+	echo '<meta name="generator" content="' . esc_attr( $content ) . '">' . "\n";
 }
 
 /**
  * Gets the path to a script or stylesheet.
  *
  * @since 0.9.0
+ * @access private
  *
  * @param string      $src_path Source path, relative to plugin root.
  * @param string|null $min_path Minified path. If not supplied, then '.min' is injected before the file extension in the source path.

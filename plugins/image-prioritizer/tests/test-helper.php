@@ -113,7 +113,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 			// Note: The Image Prioritizer plugin removes the loading attribute, and so then Auto Sizes does not then add sizes=auto.
 			'wrongly_lazy_responsive_img'       => array(
 				'element_metrics' => array(
-					'xpath'             => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'             => false,
 					'intersectionRatio' => 1,
 				),
@@ -123,7 +123,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 
 			'non_responsive_image'              => array(
 				'element_metrics' => array(
-					'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'              => false,
 					'intersectionRatio'  => 0,
 					'intersectionRect'   => $outside_viewport_rect,
@@ -135,7 +135,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 
 			'auto_sizes_added'                  => array(
 				'element_metrics' => array(
-					'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'              => false,
 					'intersectionRatio'  => 0,
 					'intersectionRect'   => $outside_viewport_rect,
@@ -147,7 +147,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 
 			'auto_sizes_already_added'          => array(
 				'element_metrics' => array(
-					'xpath'              => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'              => false,
 					'intersectionRatio'  => 0,
 					'intersectionRect'   => $outside_viewport_rect,
@@ -160,7 +160,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 			// If Auto Sizes added the sizes=auto attribute but Image Prioritizer ended up removing it due to the image not being lazy-loaded, remove sizes=auto again.
 			'wrongly_auto_sized_responsive_img' => array(
 				'element_metrics' => array(
-					'xpath'             => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'             => false,
 					'intersectionRatio' => 1,
 				),
@@ -170,7 +170,7 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 
 			'wrongly_auto_sized_responsive_img_with_only_auto' => array(
 				'element_metrics' => array(
-					'xpath'             => '/HTML/BODY/DIV/*[1][self::IMG]',
+					'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 					'isLCP'             => false,
 					'intersectionRatio' => 1,
 				),

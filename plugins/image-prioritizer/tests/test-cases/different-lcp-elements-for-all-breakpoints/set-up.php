@@ -13,23 +13,23 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 		$elements                = array(
 			array(
 				'isLCP' => false,
-				'xpath' => '/HTML/BODY/DIV/*[1][self::IMG]',
+				'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 			),
 			array(
 				'isLCP' => false,
-				'xpath' => '/HTML/BODY/DIV/*[2][self::IMG]',
+				'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::IMG]',
 			),
 			array(
 				'isLCP' => false,
-				'xpath' => '/HTML/BODY/DIV/*[3][self::IMG]',
+				'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[3][self::IMG]',
 			),
 			array(
 				'isLCP' => false,
-				'xpath' => '/HTML/BODY/DIV/*[4][self::IMG]',
+				'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[4][self::IMG]',
 			),
 			array(
 				'isLCP' => false,
-				'xpath' => '/HTML/BODY/DIV/*[5][self::IMG]',
+				'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[5][self::IMG]',
 			),
 		);
 		$elements[ $i ]['isLCP'] = true;

@@ -73,6 +73,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 					new OD_URL_Metric(
 						array(
 							'url'       => home_url( '/' ),
+							'etag'      => md5( '' ),
 							'viewport'  => array(
 								'width'  => 1,
 								'height' => 2,
@@ -263,21 +264,6 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 				),
 				'expected_is_group_complete' => false,
 			),
-			// Note: The following test case will not be required once the ETag is mandatory in a future release.
-			'etag_missing'   => array(
-				'url_metric'                 => new OD_URL_Metric(
-					array(
-						'url'       => home_url( '/' ),
-						'viewport'  => array(
-							'width'  => 400,
-							'height' => 700,
-						),
-						'timestamp' => microtime( true ),
-						'elements'  => array(),
-					)
-				),
-				'expected_is_group_complete' => false,
-			),
 			'etag_mismatch'  => array(
 				'url_metric'                 => $this->get_sample_url_metric( array( 'etag' => md5( 'different_etag' ) ) ),
 				'expected_is_group_complete' => false,
@@ -415,6 +401,7 @@ class Test_OD_URL_Metric_Group extends WP_UnitTestCase {
 		$lcp_element_xpaths_by_minimum_viewport_widths = array();
 		foreach ( $group_collection as $group ) {
 			$lcp_element = $group->get_lcp_element();
+			$this->assertSame( $lcp_element, $group->get_lcp_element() ); // Check cached result.
 			$width_range = sprintf( '%d:', $group->get_minimum_viewport_width() );
 			if ( $group->get_maximum_viewport_width() !== PHP_INT_MAX ) {
 				$width_range .= $group->get_maximum_viewport_width();

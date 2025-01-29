@@ -3,7 +3,7 @@ return static function ( Test_Embed_Optimizer_Optimization_Detective $test_case 
 	foreach ( array_merge( od_get_breakpoint_max_widths(), array( 1000 ) ) as $i => $viewport_width ) {
 		$elements = array(
 			array(
-				'xpath'                     => '/HTML/BODY/DIV/*[1][self::FIGURE]/*[1][self::DIV]',
+				'xpath'                     => '/HTML/BODY/DIV[@class=\'wp-site-blocks\']/*[1][self::FIGURE]/*[1][self::DIV]',
 				'isLCP'                     => true,
 				'resizedBoundingClientRect' => array_merge( $test_case->get_sample_dom_rect(), array( 'height' => 500 + $i * 100 ) ),
 			),

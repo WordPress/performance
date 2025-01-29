@@ -12,7 +12,7 @@ return static function ( Test_Embed_Optimizer_Optimization_Detective $test_case 
 		$elements[] = array_merge(
 			$element_data,
 			array(
-				'xpath' => "/HTML/BODY/DIV/*[{$i}][self::FIGURE]/*[1][self::DIV]",
+				'xpath' => "/HTML/BODY/DIV[@class='wp-site-blocks']/*[{$i}][self::FIGURE]/*[1][self::DIV]",
 			)
 		);
 	}

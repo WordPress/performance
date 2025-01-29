@@ -5,7 +5,7 @@ return static function ( Test_Embed_Optimizer_Optimization_Detective $test_case 
 	$test_case->populate_url_metrics(
 		array(
 			array(
-				'xpath'             => '/HTML/BODY/DIV/*[1][self::BOGUS]',
+				'xpath'             => '/HTML/BODY/DIV[@class=\'wp-site-blocks\']/*[1][self::BOGUS]',
 				'isLCP'             => false,
 				'intersectionRatio' => 0.0,
 			),

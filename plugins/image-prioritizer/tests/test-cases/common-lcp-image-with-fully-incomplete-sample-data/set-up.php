@@ -12,11 +12,11 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 					'viewport_width' => 1000,
 					'elements'       => array(
 						array(
-							'xpath' => '/HTML/BODY/DIV/*[1][self::IMG]',
+							'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 							'isLCP' => true,
 						),
 						array(
-							'xpath' => '/HTML/BODY/DIV/*[2][self::IMG]',
+							'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[2][self::IMG]',
 							'isLCP' => false,
 						),
 					),

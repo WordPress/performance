@@ -16,7 +16,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 				'viewport_width' => 375,
 				'elements'       => array(
 					array(
-						'xpath' => '/HTML/BODY/DIV/*[1][self::IMG]',
+						'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 						'isLCP' => true,
 					),
 				),
@@ -31,7 +31,7 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 				'viewport_width' => 1000,
 				'elements'       => array(
 					array(
-						'xpath' => '/HTML/BODY/DIV/*[1][self::IMG]',
+						'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
 						'isLCP' => true,
 					),
 				),

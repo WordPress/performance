@@ -533,7 +533,7 @@ class Test_OD_Storage_Data extends WP_UnitTestCase {
 		$etag = $get_etag();
 		$this->assertMatchesRegularExpression( '/^[a-z0-9]{32}\z/', $etag );
 		$this->assertIsArray( $captured_etag_data );
-		$expected_keys = array( 'tag_visitors', 'queried_object', 'queried_posts', 'active_theme', 'current_template' );
+		$expected_keys = array( 'xpath_version', 'tag_visitors', 'queried_object', 'queried_posts', 'active_theme', 'current_template' );
 		foreach ( $expected_keys as $expected_key ) {
 			$this->assertArrayHasKey( $expected_key, $captured_etag_data );
 		}

@@ -53,6 +53,23 @@ The supplied context object includes these properties:
 
 ## Filters
 
+### Filter: `od_use_web_vitals_attribution_build` (default: `false`)
+
+Filters whether to use the web-vitals.js build with attribution.
+
+When using the attribution build of web-vitals, the metric object passed to report callbacks registered via
+`onTTFB`, `onFCP`, `onLCP`, `onCLS`, and `onINP` will include an additional [attribution property](https://github.com/GoogleChrome/web-vitals#attribution).
+For details, please refer to the [web-vitals documentation](https://github.com/GoogleChrome/web-vitals).
+
+For example, to opt in to using the attribution build:
+
+```php
+add_filter( 'od_use_web_vitals_attribution_build', '__return_true' );
+```
+
+Note that the attribution build is slightly larger than the standard build, so this is why it is not used by default.
+The additional attribution data is made available to client-side extension script modules registered via the `od_extension_module_urls` filter.
+
 ### Filter: `od_breakpoint_max_widths` (default: `array(480, 600, 782)`)
 
 Filters the breakpoint max widths to group URL Metrics for various viewports. Each number represents the maximum width (inclusive) for a given breakpoint. So if there is one number, 480, then this means there will be two viewport groupings, one for 0\<=480, and another \>480. If instead there are the two breakpoints defined, 480 and 782, then this means there will be three viewport groups of URL Metrics, one for 0\<=480 (i.e. mobile), another 481\<=782 (i.e. phablet/tablet), and another \>782 (i.e. desktop).

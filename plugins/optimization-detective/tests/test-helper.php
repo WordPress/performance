@@ -93,5 +93,22 @@ class Test_OD_Helper extends WP_UnitTestCase {
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
 		$this->assertStringContainsString( 'optimization-detective ' . OPTIMIZATION_DETECTIVE_VERSION, $tag );
+		$this->assertFalse( od_is_rest_api_unavailable() );
+		$this->assertStringNotContainsString( 'rest_api_unavailable', $tag );
+	}
+
+	/**
+	 * Test printing the meta generator tag when the REST API is not available.
+	 *
+	 * @covers ::od_render_generator_meta_tag
+	 */
+	public function test_od_render_generator_meta_tag_rest_api_unavailable(): void {
+		update_option( 'od_rest_api_unavailable', '1' );
+		$tag = get_echo( 'od_render_generator_meta_tag' );
+		$this->assertStringStartsWith( '<meta', $tag );
+		$this->assertStringContainsString( 'generator', $tag );
+		$this->assertStringContainsString( 'optimization-detective ' . OPTIMIZATION_DETECTIVE_VERSION, $tag );
+		$this->assertTrue( od_is_rest_api_unavailable() );
+		$this->assertStringContainsString( '; rest_api_unavailable', $tag );
 	}
 }

@@ -17,41 +17,41 @@ return static function ( Test_Image_Prioritizer_Helper $test_case ): void {
 						'viewport_width' => $viewport_width,
 						'elements'       => array(
 							array(
-								'xpath' => '/HTML/BODY/DIV/*[1][self::DIV]/*[1][self::IMG]',
+								'xpath' => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::DIV]/*[1][self::IMG]',
 								'isLCP' => true,
 							),
 							array(
-								'xpath'             => '/HTML/BODY/DIV/*[1][self::DIV]/*[2][self::IMG]',
+								'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::DIV]/*[2][self::IMG]',
 								'isLCP'             => false,
 								'intersectionRatio' => 0.0, // Subsequent carousel slide.
 							),
 							array(
-								'xpath'             => '/HTML/BODY/DIV/*[1][self::DIV]/*[3][self::IMG]',
+								'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::DIV]/*[3][self::IMG]',
 								'isLCP'             => false,
 								'intersectionRatio' => 0.0, // Subsequent carousel slide.
 							),
 							array(
-								'xpath'             => '/HTML/BODY/DIV/*[3][self::IMG]',
+								'xpath'             => '/HTML/BODY/DIV[@id=\'page\']/*[3][self::IMG]',
 								'isLCP'             => false,
 								'intersectionRatio' => 0 === $i ? 0.5 : 0.0, // Make sure that the _max_ intersection ratio is considered.
 							),
 							// All are outside all initial viewports.
 							array(
-								'xpath'              => '/HTML/BODY/DIV/*[5][self::IMG]',
+								'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[5][self::IMG]',
 								'isLCP'              => false,
 								'intersectionRatio'  => 0.0,
 								'intersectionRect'   => $outside_viewport_rect,
 								'boundingClientRect' => $outside_viewport_rect,
 							),
 							array(
-								'xpath'              => '/HTML/BODY/DIV/*[6][self::IMG]',
+								'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[6][self::IMG]',
 								'isLCP'              => false,
 								'intersectionRatio'  => 0.0,
 								'intersectionRect'   => $outside_viewport_rect,
 								'boundingClientRect' => $outside_viewport_rect,
 							),
 							array(
-								'xpath'              => '/HTML/BODY/DIV/*[7][self::IMG]',
+								'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[7][self::IMG]',
 								'isLCP'              => false,
 								'intersectionRatio'  => 0.0,
 								'intersectionRect'   => $outside_viewport_rect,

@@ -6,7 +6,7 @@
  * Requires at least: 6.6
  * Requires PHP: 7.2
  * Requires Plugins: optimization-detective
- * Version: 0.3.0
+ * Version: 0.3.1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -16,10 +16,11 @@
  * @package image-prioritizer
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 (
 	/**
@@ -71,7 +72,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'image_prioritizer_pending_plugin',
-	'0.3.0',
+	'0.3.1',
 	static function ( string $version ): void {
 		if ( defined( 'IMAGE_PRIORITIZER_VERSION' ) ) {
 			return;

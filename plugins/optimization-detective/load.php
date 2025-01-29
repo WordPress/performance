@@ -5,7 +5,7 @@
  * Description: Provides an API for leveraging real user metrics to detect optimizations to apply on the frontend to improve page performance.
  * Requires at least: 6.6
  * Requires PHP: 7.2
- * Version: 0.9.0
+ * Version: 1.0.0-beta1
  * Author: WordPress Performance Team
  * Author URI: https://make.wordpress.org/performance/
  * License: GPLv2 or later
@@ -15,10 +15,11 @@
  * @package optimization-detective
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 (
 	/**
@@ -70,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 )(
 	'optimization_detective_pending_plugin',
-	'0.9.0',
+	'1.0.0-beta1',
 	static function ( string $version ): void {
 		if ( defined( 'OPTIMIZATION_DETECTIVE_VERSION' ) ) {
 			return;
@@ -122,10 +123,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		// Optimization logic.
 		require_once __DIR__ . '/class-od-link-collection.php';
 		require_once __DIR__ . '/class-od-tag-visitor-registry.php';
+		require_once __DIR__ . '/class-od-visited-tag-state.php';
 		require_once __DIR__ . '/class-od-tag-visitor-context.php';
 		require_once __DIR__ . '/optimization.php';
 
 		// Add hooks for the above requires.
 		require_once __DIR__ . '/hooks.php';
+
+		// Load site health checks.
+		require_once __DIR__ . '/site-health.php';
 	}
 );

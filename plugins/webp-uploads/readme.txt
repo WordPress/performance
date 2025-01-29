@@ -2,7 +2,7 @@
 
 Contributors: wordpressdotorg
 Tested up to: 6.7
-Stable tag:   2.4.0
+Stable tag:   2.5.0
 License:      GPLv2 or later
 License URI:  https://www.gnu.org/licenses/gpl-2.0.html
 Tags:         performance, images, webp, avif, modern image formats
@@ -59,6 +59,12 @@ There are two primary reasons that a WebP image may not be generated:
 By default, the Modern Image Formats plugin will only generate WebP versions of the images that you upload. If you wish to have both WebP **and** JPEG versions generated, you can navigate to **Settings > Media** and enable the **Generate JPEG files in addition to WebP** option.
 
 == Changelog ==
+
+= 2.5.0 =
+
+**Enhancements**
+
+* Switch to `wp_content_img_tag` filter for improved image handling. ([1772](https://github.com/WordPress/performance/pull/1772))
 
 = 2.4.0 =
 

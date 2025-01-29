@@ -37,7 +37,7 @@ const getPluginVersion = ( pluginPath ) => {
 	const readmePath = path.resolve( pluginPath, 'readme.txt' );
 
 	const fileContent = fs.readFileSync( readmePath, 'utf-8' );
-	const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+)/i;
+	const versionRegex = /(?:Stable tag|v)\s*:\s*(\d+\.\d+\.\d+(?:-[\w\.]+)?)/i;
 	const match = versionRegex.exec( fileContent );
 
 	if ( match ) {

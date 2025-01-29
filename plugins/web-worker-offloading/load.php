@@ -15,10 +15,11 @@
  * @package web-worker-offloading
  */
 
-// Exit if accessed directly.
+// @codeCoverageIgnoreStart
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+	exit; // Exit if accessed directly.
 }
+// @codeCoverageIgnoreEnd
 
 // Define the constant.
 if ( defined( 'WEB_WORKER_OFFLOADING_VERSION' ) ) {
