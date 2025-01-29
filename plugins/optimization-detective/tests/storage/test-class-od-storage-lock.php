@@ -28,6 +28,12 @@ class Test_OD_Storage_Lock extends WP_UnitTestCase {
 				'set_up'   => static function (): void {},
 				'expected' => MINUTE_IN_SECONDS,
 			),
+			'unfiltered_admin'  => array(
+				'set_up'   => static function (): void {
+					wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+				},
+				'expected' => 0,
+			),
 			'filtered_hour'     => array(
 				'set_up'   => static function (): void {
 					add_filter(

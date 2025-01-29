@@ -26,25 +26,29 @@ final class OD_Storage_Lock {
 	 * @since 0.1.0
 	 * @access private
 	 *
-	 * @return int TTL in seconds, greater than or equal to zero. A value of zero means that the storage lock should be disabled and thus that transients must not be used.
+	 * @return int<0, max> TTL in seconds, greater than or equal to zero. A value of zero means that the storage lock should be disabled and thus that transients must not be used.
 	 */
 	public static function get_ttl(): int {
+		$ttl = current_user_can( 'manage_options' ) ? 0 : MINUTE_IN_SECONDS;
 
 		/**
-		 * Filters how long a given IP is locked from submitting another metric-storage REST API request.
+		 * Filters how long the current IP is locked from submitting another URL metric storage REST API request.
 		 *
-		 * Filtering the TTL to zero will disable any metric storage locking. This is useful, for example, to disable
+		 * Filtering the TTL to zero will disable any URL Metric storage locking. This is useful, for example, to disable
 		 * locking when a user is logged-in with code like the following:
 		 *
 		 *     add_filter( 'od_metrics_storage_lock_ttl', static function ( int $ttl ): int {
 		 *         return is_user_logged_in() ? 0 : $ttl;
 		 *     } );
 		 *
-		 * @since 0.1.0
+		 * By default, the TTL is zero (0) for administrator users and sixty (60) for everyone else.
 		 *
-		 * @param int $ttl TTL.
+		 * @since 0.1.0
+		 * @since 1.0.0 This now defaults to zero (0) for administrator users.
+		 *
+		 * @param int $ttl TTL. Defaults to 0 for administrators, and 60 for everyone else.
 		 */
-		$ttl = (int) apply_filters( 'od_url_metric_storage_lock_ttl', MINUTE_IN_SECONDS );
+		$ttl = (int) apply_filters( 'od_url_metric_storage_lock_ttl', $ttl );
 		return max( 0, $ttl );
 	}
 
