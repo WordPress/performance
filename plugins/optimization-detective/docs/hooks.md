@@ -114,7 +114,7 @@ add_filter( 'od_metrics_storage_lock_ttl', function ( int $ttl ): int {
 } );
 ```
 
-By default, the TTL is zero (0) for administrator users and sixty (60) for everyone else.
+By default, the TTL is zero (0) for administrator users and sixty (60) for everyone else. Whether the current user is an administrator is determined by whether the user has the `od_store_url_metric_now` capability. This meta capability by default maps to the `manage_options` capability via the `map_meta_cap` filter.
 
 During development this is useful to set to zero so you can quickly collect new URL Metrics by reloading the page without having to wait for the storage lock to release:
 

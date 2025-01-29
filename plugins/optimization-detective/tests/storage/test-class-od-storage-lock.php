@@ -18,6 +18,22 @@ class Test_OD_Storage_Lock extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test add_hooks().
+	 *
+	 * @covers ::add_hooks
+	 */
+	public function test_add_hooks(): void {
+		remove_all_filters( 'map_meta_cap' );
+
+		OD_Storage_Lock::add_hooks();
+
+		$this->assertSame(
+			10,
+			has_filter( 'map_meta_cap', array( OD_Storage_Lock::class, 'filter_map_meta_cap' ) )
+		);
+	}
+
+	/**
 	 * Data provider.
 	 *
 	 * @return array<string, array{set_up: Closure, expected: int}>
