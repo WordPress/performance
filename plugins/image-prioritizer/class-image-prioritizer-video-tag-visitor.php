@@ -138,6 +138,9 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 
 		$xpath = $processor->get_xpath();
 
+		// Construct CSS selector to assist with identifying the related tag.
+		$selector = $this->get_css_selector( $context->processor );
+
 		// If this element is the LCP (for a breakpoint group), add a preload link for the poster image.
 		foreach ( $context->url_metric_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
 			$link_attributes = array(
@@ -152,6 +155,9 @@ final class Image_Prioritizer_Video_Tag_Visitor extends Image_Prioritizer_Tag_Vi
 			if ( null !== $crossorigin ) {
 				$link_attributes['crossorigin'] = 'use-credentials' === $crossorigin ? 'use-credentials' : 'anonymous';
 			}
+
+			$link_attributes['data-od-related-tag-selector'] = $selector;
+			$context->processor->set_meta_attribute( 'preloaded', true );
 
 			$context->link_collection->add_link(
 				$link_attributes,

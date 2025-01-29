@@ -89,7 +89,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 
 		// If this element is the LCP (for a breakpoint group), add a preload link for it.
 		foreach ( $context->url_metric_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
-			$this->add_image_preload_link( $context->link_collection, $group, $background_image_url );
+			$this->add_image_preload_link( $context, $group, $background_image_url );
 		}
 
 		$this->lazy_load_bg_images( $context );
@@ -172,7 +172,7 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 				&&
 				$processor->get_attribute( 'class' ) === $common['class'] // May be checking equality with null.
 			) {
-				$this->add_image_preload_link( $context->link_collection, $group, $common['url'] );
+				$this->add_image_preload_link( $context, $group, $common['url'] );
 
 				// Now that the preload link has been added, eliminate the entry to stop looking for it while iterating over the rest of the document.
 				unset( $this->group_common_lcp_element_external_background_images[ $i ] );
@@ -185,22 +185,24 @@ final class Image_Prioritizer_Background_Image_Styled_Tag_Visitor extends Image_
 	 *
 	 * @since 0.3.0
 	 *
-	 * @param OD_Link_Collection  $link_collection Link collection.
-	 * @param OD_URL_Metric_Group $group           URL Metric group.
-	 * @param non-empty-string    $url             Image URL.
+	 * @param OD_Tag_Visitor_Context $context Context.
+	 * @param OD_URL_Metric_Group    $group   URL Metric group.
+	 * @param non-empty-string       $url     Image URL.
 	 */
-	private function add_image_preload_link( OD_Link_Collection $link_collection, OD_URL_Metric_Group $group, string $url ): void {
-		$link_collection->add_link(
+	private function add_image_preload_link( OD_Tag_Visitor_Context $context, OD_URL_Metric_Group $group, string $url ): void {
+		$context->link_collection->add_link(
 			array(
-				'rel'           => 'preload',
-				'fetchpriority' => 'high',
-				'as'            => 'image',
-				'href'          => $url,
-				'media'         => 'screen',
+				'rel'                          => 'preload',
+				'fetchpriority'                => 'high',
+				'as'                           => 'image',
+				'href'                         => $url,
+				'media'                        => 'screen',
+				'data-od-related-tag-selector' => $this->get_css_selector( $context->processor ),
 			),
 			$group->get_minimum_viewport_width(),
 			$group->get_maximum_viewport_width()
 		);
+		$context->processor->set_meta_attribute( 'preloaded', true );
 	}
 
 	/**

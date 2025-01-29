@@ -53,9 +53,9 @@ final class OD_Link_Collection implements Countable {
 	 *
 	 * @phpstan-param LinkAttributes $attributes
 	 *
-	 * @param array             $attributes             Attributes.
-	 * @param int<0, max>|null  $minimum_viewport_width Minimum width or null if not bounded or relevant.
-	 * @param positive-int|null $maximum_viewport_width Maximum width or null if not bounded (i.e. infinity) or relevant.
+	 * @param array<string, string> $attributes             Attributes.
+	 * @param int<0, max>|null      $minimum_viewport_width Minimum width or null if not bounded or relevant.
+	 * @param positive-int|null     $maximum_viewport_width Maximum width or null if not bounded (i.e. infinity) or relevant.
 	 *
 	 * @throws InvalidArgumentException When invalid arguments are provided.
 	 */

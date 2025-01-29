@@ -340,13 +340,20 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			)
 		);
 
+		// Construct CSS selector to assist with identifying the related tag.
+		$selector = $this->get_css_selector( $context->processor );
+
 		foreach ( $context->url_metric_group_collection->get_groups_by_lcp_element( $xpath ) as $group ) {
+			$attributes['data-od-related-tag-selector'] = $selector;
+
 			$context->link_collection->add_link(
 				$attributes,
 				$group->get_minimum_viewport_width(),
 				$group->get_maximum_viewport_width()
 			);
 		}
+
+		$context->processor->set_meta_attribute( 'preloaded', true );
 	}
 
 	/**

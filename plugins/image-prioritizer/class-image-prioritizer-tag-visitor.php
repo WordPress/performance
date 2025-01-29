@@ -67,4 +67,36 @@ abstract class Image_Prioritizer_Tag_Visitor {
 		}
 		return $value;
 	}
+
+	/**
+	 * Constructs a CSS selector for the current tag.
+	 *
+	 * @since n.e.x.t
+	 * @todo Move this into OD_HTML_Tag_Processor itself.
+	 *
+	 * @param OD_HTML_Tag_Processor $processor Processor.
+	 * @return string Selector.
+	 */
+	protected function get_css_selector( OD_HTML_Tag_Processor $processor ): string {
+		$selector = join( ' > ', $processor->get_breadcrumbs() );
+		$id       = $processor->get_attribute( 'id' );
+		if ( is_string( $id ) ) {
+			$selector .= '#' . $id;
+		}
+		$class_attr = $processor->get_attribute( 'class' );
+		if ( is_string( $class_attr ) ) {
+			$selector .= join(
+				'',
+				array_map(
+					static function ( string $class_name ): string {
+						return '.' . $class_name;
+					},
+					array_filter(
+						(array) preg_split( '/\s+/', trim( $class_attr ) )
+					)
+				)
+			);
+		}
+		return $selector;
+	}
 }
