@@ -42,7 +42,7 @@ class Test_Dominant_Color extends TestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers ::dominant_color_get_dominant_color
+	 * @covers helper::dominant_color_get_dominant_color
 	 *
 	 * @param string   $image_path Image path.
 	 * @param string[] $expected_color Expected color.
@@ -91,7 +91,7 @@ class Test_Dominant_Color extends TestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers ::dominant_color_get_dominant_color
+	 * @covers helper::dominant_color_get_dominant_color
 	 *
 	 * @param string   $image_path Image path.
 	 * @param string[] $expected_color Expected color.
@@ -113,7 +113,7 @@ class Test_Dominant_Color extends TestCase {
 	 *
 	 * @dataProvider provider_get_dominant_color
 	 *
-	 * @covers ::dominant_color_img_tag_add_dominant_color
+	 * @covers hooks::dominant_color_img_tag_add_dominant_color
 	 *
 	 * @param string   $image_path Image path.
 	 * @param string[] $expected_color Expected color.
@@ -199,7 +199,7 @@ class Test_Dominant_Color extends TestCase {
 	 *
 	 * @dataProvider data_provider_dominant_color_check_inline_style
 	 *
-	 * @covers ::dominant_color_img_tag_add_dominant_color
+	 * @covers hooks::dominant_color_img_tag_add_dominant_color
 	 *
 	 * @param string $filtered_image The filtered image markup.
 	 *                               Must include `src="%s" width="%d" height="%d"`.
@@ -407,5 +407,106 @@ class Test_Dominant_Color extends TestCase {
 		$this->assertStringStartsWith( '<meta', $tag );
 		$this->assertStringContainsString( 'generator', $tag );
 		$this->assertStringContainsString( 'dominant-color-images ' . DOMINANT_COLOR_IMAGES_VERSION, $tag );
+	}
+
+	/**
+	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
+	 */
+	public function test_invalid_image_type(): void {
+		$editor = new Dominant_Color_Image_Editor_GD( '/invalid/type' );
+		$result = $editor->get_dominant_color();
+		$this->assertWPError( $result );
+		$this->assertEquals( 'image_editor_dominant_color_error_no_image', $result->get_error_code() );
+	}
+
+	/**
+	 * @covers Dominant_Color_Image_Editor_GD::get_dominant_color
+	 */
+	public function test_corrupted_image_file(): void {
+		$editor = new Dominant_Color_Image_Editor_GD( 'path/to/corrupted/file.jpg' );
+		$result = $editor->get_dominant_color();
+		$this->assertWPError( $result );
+		$this->assertEquals( 'image_editor_dominant_color_error_no_image', $result->get_error_code() );
+	}
+
+	/**
+	 * @covers ::dominant_color_add_inline_style
+	 */
+	public function test_dominant_color_add_inline_style(): void {
+		dominant_color_add_inline_style();
+
+		// Verify the style was registered.
+		global $wp_styles;
+		$this->assertTrue( isset( $wp_styles->registered['dominant-color-styles'] ) );
+
+		// Verify the style was enqueued.
+		$this->assertTrue( wp_style_is( 'dominant-color-styles', 'enqueued' ) );
+
+		// Verify the inline style was added.
+		$inline_styles = $wp_styles->get_data( 'dominant-color-styles', 'after' );
+		$this->assertNotEmpty( $inline_styles );
+		$this->assertStringContainsString(
+			'img[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }',
+			implode( '', $inline_styles )
+		);
+	}
+
+	/**
+	 * @covers ::dominant_color_admin_inline_style
+	 */
+	public function test_dominant_color_admin_inline_style(): void {
+		dominant_color_admin_inline_style();
+
+		// Verify the style was registered.
+		global $wp_styles;
+		$this->assertTrue( isset( $wp_styles->registered['dominant-color-admin-styles'] ) );
+
+		// Verify the style was enqueued.
+		$this->assertTrue( wp_style_is( 'dominant-color-admin-styles', 'enqueued' ) );
+
+		// Verify the inline style was added.
+		$inline_styles = $wp_styles->get_data( 'dominant-color-admin-styles', 'after' );
+		$this->assertNotEmpty( $inline_styles );
+		$this->assertStringContainsString(
+			'.wp-core-ui .attachment-preview[data-dominant-color]:not(.has-transparency) { background-color: var(--dominant-color); }',
+			implode( '', $inline_styles )
+		);
+	}
+
+	/**
+	 * @covers ::dominant_color_admin_script
+	 */
+	public function test_dominant_color_admin_script(): void {
+		ob_start();
+		dominant_color_admin_script();
+		$output = ob_get_clean();
+
+		// Verify if script tag exists.
+		$this->assertStringEndsWith( '</script>', trim( $output ) );
+
+		// Verify the key elements of the script.
+		$this->assertStringContainsString( 'tmpl.textContent.replace', $output );
+		$this->assertStringContainsString( 'data-dominant-color', $output );
+		$this->assertStringContainsString( 'data-has-transparency', $output );
+		$this->assertStringContainsString( '--dominant-color', $output );
+	}
+
+	/**
+	 * @covers ::dominant_color_prepare_attachment_for_js
+	 */
+	public function test_dominant_color_prepare_attachment_for_js(): void {
+		$attachment = self::factory()->post->create_and_get( array( 'post_type' => 'attachment' ) );
+
+		$meta = array(
+			'dominant_color'   => 'ff0000',
+			'has_transparency' => true,
+		);
+
+		$response = dominant_color_prepare_attachment_for_js( array(), $attachment, $meta );
+
+		$this->assertArrayHasKey( 'dominantColor', $response );
+		$this->assertArrayHasKey( 'hasTransparency', $response );
+		$this->assertEquals( 'ff0000', $response['dominantColor'] );
+		$this->assertTrue( $response['hasTransparency'] );
 	}
 }

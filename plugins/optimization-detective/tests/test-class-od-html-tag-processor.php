@@ -451,7 +451,7 @@ class Test_OD_HTML_Tag_Processor extends WP_UnitTestCase {
 			$actual_xpath_breadcrumbs_mapping[ $xpath ] = $p->get_breadcrumbs();
 
 			$transitional_xpath = $p->get_xpath();
-			$this->assertRegExp(
+			$this->assertMatchesRegularExpression(
 				'#^/HTML(
 					/HEAD(/\*\[\d+]\[self::\w+])?
 					|
