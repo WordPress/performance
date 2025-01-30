@@ -330,11 +330,65 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 
 	$batch = od_get_batch_for_iframe_url_metrics_priming( $cursor );
 
+	$group_collections = od_get_metrics_by_post_title_using_wp_query( $batch['urls'] );
+
+	$widths = od_get_breakpoint_max_widths();
+	sort( $widths );
+	$min_width = $widths[0];
+	$max_width = (int) end( $widths ) + 300; // For large screens.
+	$widths[]  = $max_width;
+
+	// We need to ensure min is 0.56 (1080/1920) else the height will become too small.
+	$min_ar = max( 0.56, od_get_minimum_viewport_aspect_ratio() );
+	// We also need to ensure max is 1.78 (1920/1080) else the height will become too large.
+	$max_ar = min( 1.78, od_get_maximum_viewport_aspect_ratio() );
+
+	$breakpoints = array_map(
+		static function ( $width ) use ( $min_width, $max_width, $min_ar, $max_ar ) {
+			// Linear interpolation between max_ar and min_ar based on width.
+			$ar = $max_ar - ( ( $max_ar - $min_ar ) * ( ( $width - $min_width ) / ( $max_width - $min_width ) ) );
+
+			// Clamp aspect ratio within bounds.
+			$ar = max( $min_ar, min( $max_ar, $ar ) );
+
+			return array(
+				'width'  => $width,
+				'height' => (int) round( $ar * $width ),
+			);
+		},
+		$widths
+	);
+
+	// Filter out any URL Metrics that are already complete.
+	$batch['urls'] = array_filter(
+		$batch['urls'],
+		static function ( $url ) use ( $group_collections ) {
+			$group_collection = $group_collections[ $url ] ?? null;
+			if ( ! $group_collection instanceof OD_URL_Metric_Group_Collection ) {
+				return true;
+			}
+
+			return ! $group_collection->is_every_group_populated();
+		}
+	);
+
+	$batch_with_breakpoints = array_values(
+		array_map(
+			static function ( $url ) use ( $breakpoints ) {
+				return array(
+					'url'         => $url,
+					'breakpoints' => $breakpoints,
+				);
+			},
+			$batch['urls']
+		)
+	);
+
 	$verification_token = bin2hex( random_bytes( 16 ) );
 	set_transient( 'od_prime_url_metrics_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
 	return new WP_REST_Response(
 		array(
-			'urls'              => $batch['urls'],
+			'batch'             => $batch_with_breakpoints,
 			'cursor'            => $batch['cursor'],
 			'verificationToken' => $verification_token,
 			'isDebug'           => defined( 'WP_DEBUG' ) && WP_DEBUG,

@@ -51,7 +51,7 @@
 				while ( isProcessing ) {
 					if ( ! currentBatch ) {
 						currentBatch = await getBatch( cursor );
-						if ( ! currentBatch.urls.length ) {
+						if ( ! currentBatch.batch.length ) {
 							isNextBatchAvailable = false;
 							break;
 						}
@@ -113,7 +113,7 @@
 	 */
 	function flattenBatchToTasks( batch ) {
 		const tasks = [];
-		for ( const url of batch.urls ) {
+		for ( const url of batch.batch ) {
 			for ( const breakpoint of url.breakpoints ) {
 				tasks.push( {
 					url: url.url,
@@ -129,7 +129,7 @@
 	 * Fetches the next batch of URLs.
 	 * @param {Object} lastCursor - The cursor to fetch the next batch.
 	 * @return {Promise<{
-	 *   urls: Array<Array<{
+	 *   batch: Array<Array<{
 	 *     url: string,
 	 *     breakpoints: Array<{
 	 *       width: number,

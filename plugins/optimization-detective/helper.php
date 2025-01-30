@@ -162,33 +162,6 @@ function od_get_batch_for_iframe_url_metrics_priming( array $cursor ): array {
 	// Flag to indicate if we should stop collecting further URLs (i.e., we reached $cursor['batch_size']).
 	$done = false;
 
-	$widths = od_get_breakpoint_max_widths();
-	sort( $widths );
-	$min_width = $widths[0];
-	$max_width = (int) end( $widths ) + 300; // For large screens.
-	$widths[]  = $max_width;
-
-	// We need to ensure min is 0.56 (1080/1920) else the height will become too small.
-	$min_ar = max( 0.56, od_get_minimum_viewport_aspect_ratio() );
-	// We also need to ensure max is 1.78 (1920/1080) else the height will become too large.
-	$max_ar = min( 1.78, od_get_maximum_viewport_aspect_ratio() );
-
-	$breakpoints = array_map(
-		static function ( $width ) use ( $min_width, $max_width, $min_ar, $max_ar ) {
-			// Linear interpolation between max_ar and min_ar based on width.
-			$ar = $max_ar - ( ( $max_ar - $min_ar ) * ( ( $width - $min_width ) / ( $max_width - $min_width ) ) );
-
-			// Clamp aspect ratio within bounds.
-			$ar = max( $min_ar, min( $max_ar, $ar ) );
-
-			return array(
-				'width'  => $width,
-				'height' => (int) round( $ar * $width ),
-			);
-		},
-		$widths
-	);
-
 	// Start iterating from the current provider_index forward.
 	$providers_count = count( $providers );
 	for ( $p = $cursor['provider_index']; $p < $providers_count && ! $done; ) {
@@ -224,10 +197,7 @@ function od_get_batch_for_iframe_url_metrics_priming( array $cursor ): array {
 
 				// Now collect from current_page_urls until we reach $cursor['batch_size'].
 				foreach ( $current_page_urls as $url ) {
-					$all_urls[] = array(
-						'url'         => $url,
-						'breakpoints' => $breakpoints,
-					);
+					$all_urls[] = $url;
 					++$collected_count;
 					++$consumed_in_this_page;
 
@@ -291,4 +261,77 @@ function od_get_batch_for_iframe_url_metrics_priming( array $cursor ): array {
 		'urls'   => $all_urls,
 		'cursor' => $new_cursor,
 	);
+}
+
+/**
+ * Filter for WP_Query to allow specifying 'post_title__in' => array( 'title1', 'title2', ... ).
+ *
+ * @param string   $where The WHERE clause of the query.
+ * @param WP_Query $query The WP_Query instance.
+ */
+function od_filter_posts_where_for_titles( string $where, WP_Query $query ): string {
+	global $wpdb;
+
+	$titles = (array) $query->get( 'post_title__in', array() );
+	$titles = array_filter( $titles );
+
+	if ( 0 === count( $titles ) ) {
+		return $where;
+	}
+
+	// Safely prepare each title for IN() clause.
+	$placeholders = array();
+	foreach ( $titles as $title ) {
+		$placeholders[] = $wpdb->prepare( '%s', $title );
+	}
+	$list = implode( ',', $placeholders );
+
+	$where .= " AND {$wpdb->posts}.post_title IN ($list)";
+	return $where;
+}
+
+/**
+ * Fetches od_url_metrics posts of URLs in a single WP_Query.
+ *
+ * @param string[] $urls Array of exact URLs, as stored in post_title of od_url_metrics.
+ * @return array<string, OD_URL_Metric_Group_Collection> Map of URL to its OD_URL_Metric_Group_Collection.
+ */
+function od_get_metrics_by_post_title_using_wp_query( array $urls ): array {
+	$urls = array_unique( array_filter( $urls ) );
+	if ( 0 === count( $urls ) ) {
+		return array();
+	}
+
+	$results_map = array();
+
+	add_filter( 'posts_where', 'od_filter_posts_where_for_titles', 10, 2 );
+
+	$query = new WP_Query(
+		array(
+			'post_type'              => OD_URL_Metrics_Post_Type::SLUG,
+			'post_status'            => 'publish',
+			'post_title__in'         => $urls,
+			'posts_per_page'         => -1,
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+			'fields'                 => 'all',
+		)
+	);
+
+	remove_filter( 'posts_where', 'od_filter_posts_where_for_titles', 10 );
+
+	foreach ( $query->posts as $post ) {
+		if ( ! $post instanceof WP_Post ) {
+			continue;
+		}
+		$results_map[ $post->post_title ] = new OD_URL_Metric_Group_Collection(
+			OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post ),
+			md5( '' ), // This is a dummy hash.
+			od_get_breakpoint_max_widths(),
+			od_get_url_metrics_breakpoint_sample_size(),
+			od_get_url_metric_freshness_ttl()
+		);
+	}
+	return $results_map;
 }
