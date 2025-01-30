@@ -210,5 +210,10 @@ class Test_OD_Detection extends WP_UnitTestCase {
 		$this->assertStringContainsString( '"minimumViewportWidth":601', $script );
 		$this->assertStringContainsString( '"minimumViewportWidth":783', $script );
 		$this->assertStringContainsString( '"complete":false', $script );
+		if ( is_user_logged_in() ) {
+			$this->assertStringContainsString( '"restApiNonce":', $script );
+		} else {
+			$this->assertStringNotContainsString( '"restApiNonce":', $script );
+		}
 	}
 }

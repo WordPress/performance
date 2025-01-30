@@ -137,6 +137,9 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'storageLockTTL'         => OD_Storage_Lock::get_ttl(),
 		'webVitalsLibrarySrc'    => $web_vitals_lib_src,
 	);
+	if ( is_user_logged_in() ) {
+		$detect_args['restApiNonce'] = wp_create_nonce( 'wp_rest' );
+	}
 	if ( WP_DEBUG ) {
 		$detect_args['urlMetricGroupCollection'] = $group_collection;
 	}

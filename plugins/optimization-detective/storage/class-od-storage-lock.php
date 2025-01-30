@@ -84,9 +84,9 @@ final class OD_Storage_Lock {
 		 *         return is_user_logged_in() ? 0 : $ttl;
 		 *     } );
 		 *
-		 * By default, the TTL is zero (0) for administrator users and sixty (60) for everyone else. Whether the current
-		 * user is an administrator is determined by whether the user has the `od_store_url_metric_now` capability. This
-		 * meta capability by default maps to the `manage_options` capability via the `map_meta_cap` filter.
+		 * By default, the TTL is zero (0) for authorized users and sixty (60) for everyone else. Whether the current
+		 * user is authorized is determined by whether the user has the `od_store_url_metric_now` capability. This
+		 * meta capability by default maps to the `manage_options` primitive capability via the `map_meta_cap` filter.
 		 *
 		 * @since 0.1.0
 		 * @since 1.0.0 This now defaults to zero (0) for administrator users.
