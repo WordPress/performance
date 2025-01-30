@@ -255,24 +255,11 @@ final class OD_Link_Collection implements Countable {
 		$link_headers = array();
 
 		foreach ( $this->get_prepared_links() as $link ) {
-			// Encode only the filename part of the URL to ensure it contains only ASCII characters.
+			// Check if the href contains any non-ASCII characters.
 			if ( isset( $link['href'] ) ) {
-				$parsed_url = wp_parse_url( $link['href'] );
-				if ( isset( $parsed_url['path'] ) ) {
-					$path_segments        = explode( '/', $parsed_url['path'] );
-					$last_segment         = array_pop( $path_segments );
-					$encoded_last_segment = rawurlencode( $last_segment );
-
-					$encoded_path = implode( '/', $path_segments ) . '/' . $encoded_last_segment;
-
-					$scheme = isset( $parsed_url['scheme'] ) ? $parsed_url['scheme'] : '';
-					$host   = isset( $parsed_url['host'] ) ? $parsed_url['host'] : '';
-
-					$link['href'] = esc_url_raw( $scheme . '://' . $host . $encoded_path );
-
-					// Append query and fragment if they exist.
-					$link['href'] .= isset( $parsed_url['query'] ) ? '?' . $parsed_url['query'] : '';
-					$link['href'] .= isset( $parsed_url['fragment'] ) ? '#' . $parsed_url['fragment'] : '';
+				if ( 1 === preg_match( '/[^\x00-\x7F]/', $link['href'] ) ) {
+					// Decode and then encode the entire URL to handle non-ASCII characters.
+					$link['href'] = esc_url_raw( rawurlencode( urldecode( $link['href'] ) ) );
 				} else {
 					$link['href'] = esc_url_raw( $link['href'] );
 				}
