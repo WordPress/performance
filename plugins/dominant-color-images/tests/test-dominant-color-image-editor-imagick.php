@@ -63,7 +63,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 	public function test_get_dominant_color_exception(): void {
 		// Creating mock that will throw an exception.
 		$mock = $this->getMockBuilder( Dominant_Color_Image_Editor_Imagick::class )
-					->addMethods( array( '__construct' ) )
+					->onlyMethods( array( '__construct' ) )
 					->disableOriginalConstructor()
 					->getMock();
 
@@ -113,7 +113,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 	public function test_has_transparency_exception(): void {
 		// Creating mock that will throw an exception.
 		$mock = $this->getMockBuilder( Dominant_Color_Image_Editor_Imagick::class )
-					->addMethods( array( '__construct' ) )
+					->onlyMethods( array( '__construct' ) )
 					->disableOriginalConstructor()
 					->getMock();
 
