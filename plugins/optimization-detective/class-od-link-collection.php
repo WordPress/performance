@@ -255,17 +255,18 @@ final class OD_Link_Collection implements Countable {
 		$link_headers = array();
 
 		foreach ( $this->get_prepared_links() as $link ) {
-			// Check if the href contains any non-ASCII characters.
 			if ( isset( $link['href'] ) ) {
-				if ( 1 === preg_match( '/[^\x00-\x7F]/', $link['href'] ) ) {
-					$parsed_url  = wp_parse_url( $link['href'] );
-					$scheme      = isset( $parsed_url['scheme'] ) ? $parsed_url['scheme'] . '://' : '';
-					$rest_of_url = substr( $link['href'], strlen( $scheme ) );
+				$decoded_url = urldecode( $link['href'] );
 
-					$link['href'] = esc_url_raw( $scheme . rawurlencode( urldecode( $rest_of_url ) ) );
-				} else {
-					$link['href'] = esc_url_raw( $link['href'] );
-				}
+				// Encode only non-ASCII characters.
+				$encoded_url  = preg_replace_callback(
+					'/[^\x00-\x7F]/',
+					static function ( $matches ) {
+						return rawurlencode( $matches[0] );
+					},
+					$decoded_url
+				);
+				$link['href'] = esc_url_raw( $encoded_url ?? '' );
 			} else {
 				// The about:blank is present since a Link without a reference-uri is invalid so any imagesrcset would otherwise not get downloaded.
 				$link['href'] = 'about:blank';

@@ -348,7 +348,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '
 					<link data-od-added-tag rel="preload" href="https://xn--fsq.com/תמונה.jpg" as="image">
 				',
-				'expected_header' => 'Link: <https://xn--fsq.com%2F%D7%AA%D7%9E%D7%95%D7%A0%D7%94.jpg>; rel="preload"; as="image"',
+				'expected_header' => 'Link: <https://xn--fsq.com/%D7%AA%D7%9E%D7%95%D7%A0%D7%94.jpg>; rel="preload"; as="image"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
@@ -365,7 +365,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '
 					<link data-od-added-tag rel="preload" href="https://example.com/חנות/תמונה.jpg" as="image">
 				',
-				'expected_header' => 'Link: <https://example.com%2F%D7%97%D7%A0%D7%95%D7%AA%2F%D7%AA%D7%9E%D7%95%D7%A0%D7%94.jpg>; rel="preload"; as="image"',
+				'expected_header' => 'Link: <https://example.com/%D7%97%D7%A0%D7%95%D7%AA/%D7%AA%D7%9E%D7%95%D7%A0%D7%94.jpg>; rel="preload"; as="image"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
@@ -382,7 +382,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_html'   => '
 					<link data-od-added-tag rel="preload" href="https://example.com/חנות/wp-content/uploads/2025/01/example.jpg" as="image">
 				',
-				'expected_header' => 'Link: <https://example.com%2F%D7%97%D7%A0%D7%95%D7%AA%2Fwp-content%2Fuploads%2F2025%2F01%2Fexample.jpg>; rel="preload"; as="image"',
+				'expected_header' => 'Link: <https://example.com/%D7%97%D7%A0%D7%95%D7%AA/wp-content/uploads/2025/01/example.jpg>; rel="preload"; as="image"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
