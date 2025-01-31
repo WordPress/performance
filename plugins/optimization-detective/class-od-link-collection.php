@@ -258,8 +258,11 @@ final class OD_Link_Collection implements Countable {
 			// Check if the href contains any non-ASCII characters.
 			if ( isset( $link['href'] ) ) {
 				if ( 1 === preg_match( '/[^\x00-\x7F]/', $link['href'] ) ) {
-					// Decode and then encode the entire URL to handle non-ASCII characters.
-					$link['href'] = esc_url_raw( rawurlencode( urldecode( $link['href'] ) ) );
+					$parsed_url  = wp_parse_url( $link['href'] );
+					$scheme      = isset( $parsed_url['scheme'] ) ? $parsed_url['scheme'] . '://' : '';
+					$rest_of_url = substr( $link['href'], strlen( $scheme ) );
+
+					$link['href'] = esc_url_raw( $scheme . rawurlencode( urldecode( $rest_of_url ) ) );
 				} else {
 					$link['href'] = esc_url_raw( $link['href'] );
 				}
