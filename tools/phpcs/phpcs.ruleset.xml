@@ -53,12 +53,15 @@
 	</rule>
 	<rule ref="WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents">
 		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>tools/phpunit/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Security.EscapeOutput.OutputNotEscaped">
 		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>tools/phpunit/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.WP.AlternativeFunctions.unlink_unlink">
 		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>tools/phpunit/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.WP.GlobalVariablesOverride.Prohibited">
 		<exclude-pattern>tests/*</exclude-pattern>
