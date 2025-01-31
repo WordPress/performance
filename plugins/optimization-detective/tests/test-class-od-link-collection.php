@@ -79,9 +79,9 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					),
 				),
 				'expected_html'   => '
-					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" crossorigin="anonymous" fetchpriority="high" as="image" media="screen and (min-width: 100px) and (max-width: 200px)">
+					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" crossorigin="anonymous" fetchpriority="high" as="image" media="screen and ( 100px &lt; width &lt;= 200px )">
 				',
-				'expected_header' => 'Link: <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen and (min-width: 100px) and (max-width: 200px)"',
+				'expected_header' => 'Link: <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen and ( 100px < width <= 200px )"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
@@ -122,9 +122,9 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				),
 				'expected_html'   => '
 					<link data-od-added-tag rel="preload" href="https://example.com/bar.jpg" as="image" media="screen">
-					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" crossorigin="anonymous" fetchpriority="high" as="image" media="screen and (min-width: 100px) and (max-width: 300px)">
+					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" crossorigin="anonymous" fetchpriority="high" as="image" media="screen and ( 100px &lt; width &lt;= 300px )">
 				',
-				'expected_header' => 'Link: <https://example.com/bar.jpg>; rel="preload"; as="image"; media="screen", <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen and (min-width: 100px) and (max-width: 300px)"',
+				'expected_header' => 'Link: <https://example.com/bar.jpg>; rel="preload"; as="image"; media="screen", <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen and ( 100px < width <= 300px )"',
 				'expected_count'  => 3,
 				'error'           => '',
 			),
@@ -140,9 +140,9 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					),
 				),
 				'expected_html'   => '
-					<link data-od-added-tag rel="preconnect" href="https://youtube.com/" media="(min-width: 201px) and (max-width: 300px)">
+					<link data-od-added-tag rel="preconnect" href="https://youtube.com/" media="( 201px &lt; width &lt;= 300px )">
 				',
-				'expected_header' => 'Link: <https://youtube.com/>; rel="preconnect"; media="(min-width: 201px) and (max-width: 300px)"',
+				'expected_header' => 'Link: <https://youtube.com/>; rel="preconnect"; media="( 201px < width <= 300px )"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
@@ -159,9 +159,9 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					),
 				),
 				'expected_html'   => '
-					<link data-od-added-tag rel="preconnect" href="https://youtube.com/" media="tty and (min-width: 201px) and (max-width: 300px)">
+					<link data-od-added-tag rel="preconnect" href="https://youtube.com/" media="tty and ( 201px &lt; width &lt;= 300px )">
 				',
-				'expected_header' => 'Link: <https://youtube.com/>; rel="preconnect"; media="tty and (min-width: 201px) and (max-width: 300px)"',
+				'expected_header' => 'Link: <https://youtube.com/>; rel="preconnect"; media="tty and ( 201px < width <= 300px )"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),

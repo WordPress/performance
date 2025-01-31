@@ -44,7 +44,7 @@ class Test_OD_Helper extends WP_UnitTestCase {
 			'tablet'      => array(
 				'min_width' => 321,
 				'max_width' => 600,
-				'expected'  => '321px < width <= 600px)',
+				'expected'  => '( 321px < width <= 600px )',
 			),
 			'desktop'     => array(
 				'min_width' => 601,
