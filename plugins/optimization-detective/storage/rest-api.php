@@ -328,83 +328,14 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 		)
 	);
 
-	$batch = od_get_batch_for_iframe_url_metrics_priming( $cursor );
-
-	$group_collections = od_get_metrics_by_post_title_using_wp_query( $batch['urls'] );
-
-	$widths = od_get_breakpoint_max_widths();
-	sort( $widths );
-	$min_width = $widths[0];
-	$max_width = (int) end( $widths ) + 300; // For large screens.
-	$widths[]  = $max_width;
-
-	// We need to ensure min is 0.56 (1080/1920) else the height will become too small.
-	$min_ar = max( 0.56, od_get_minimum_viewport_aspect_ratio() );
-	// We also need to ensure max is 1.78 (1920/1080) else the height will become too large.
-	$max_ar = min( 1.78, od_get_maximum_viewport_aspect_ratio() );
-
-	$standard_breakpoints = array_map(
-		static function ( $width ) use ( $min_width, $max_width, $min_ar, $max_ar ) {
-			// Linear interpolation between max_ar and min_ar based on width.
-			$ar = $max_ar - ( ( $max_ar - $min_ar ) * ( ( $width - $min_width ) / ( $max_width - $min_width ) ) );
-
-			// Clamp aspect ratio within bounds.
-			$ar = max( $min_ar, min( $max_ar, $ar ) );
-
-			return array(
-				'width'  => $width,
-				'height' => (int) round( $ar * $width ),
-			);
-		},
-		$widths
-	);
-
-	$batch_with_breakpoints = array();
-
-	// Filter out any URL Metrics that are already complete.
-	foreach ( $batch['urls'] as $url ) {
-		$group_collection = $group_collections[ $url ] ?? null;
-		if ( ! $group_collection instanceof OD_URL_Metric_Group_Collection ) {
-			$batch_with_breakpoints[] = array(
-				'url'         => $url,
-				'breakpoints' => $standard_breakpoints,
-			);
-			continue;
-		}
-
-		if ( $group_collection->is_every_group_populated() ) {
-			continue;
-		}
-
-		$existing_widths = array();
-		foreach ( $group_collection as $group ) {
-			if ( ! $group->is_complete() ) {
-				foreach ( $group as $url_metric ) {
-					$existing_widths[] = $url_metric->get_viewport_width();
-				}
-			}
-		}
-
-		$missing_breakpoints = array();
-		foreach ( $standard_breakpoints as $breakpoint ) {
-			if ( ! in_array( $breakpoint['width'], $existing_widths, true ) ) {
-				$missing_breakpoints[] = $breakpoint;
-			}
-		}
-
-		if ( count( $missing_breakpoints ) > 0 ) {
-			$batch_with_breakpoints[] = array(
-				'url'         => $url,
-				'breakpoints' => $missing_breakpoints,
-			);
-		}
-	}
+	$batch               = od_get_batch_for_iframe_url_metrics_priming( $cursor );
+	$filtered_batch_urls = od_filter_batch_urls_for_iframe_url_metrics_priming( $batch['urls'] );
 
 	$verification_token = bin2hex( random_bytes( 16 ) );
 	set_transient( 'od_prime_url_metrics_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
 	return new WP_REST_Response(
 		array(
-			'batch'             => $batch_with_breakpoints,
+			'batch'             => $filtered_batch_urls,
 			'cursor'            => $batch['cursor'],
 			'verificationToken' => $verification_token,
 			'isDebug'           => defined( 'WP_DEBUG' ) && WP_DEBUG,

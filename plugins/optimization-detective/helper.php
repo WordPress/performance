@@ -296,7 +296,7 @@ function od_filter_posts_where_for_titles( string $where, WP_Query $query ): str
  * @param string[] $urls Array of exact URLs, as stored in post_title of od_url_metrics.
  * @return array<string, OD_URL_Metric_Group_Collection> Map of URL to its OD_URL_Metric_Group_Collection.
  */
-function od_get_metrics_by_post_title_using_wp_query( array $urls ): array {
+function od_get_metrics_by_post_title( array $urls ): array {
 	$urls = array_unique( array_filter( $urls ) );
 	if ( 0 === count( $urls ) ) {
 		return array();
@@ -334,4 +334,90 @@ function od_get_metrics_by_post_title_using_wp_query( array $urls ): array {
 		);
 	}
 	return $results_map;
+}
+
+/**
+ * Computes the standard array of breakpoints.
+ *
+ * @return array<int, array{width: int, height: int}> Array of breakpoints.
+ */
+function od_get_standard_breakpoints(): array {
+	$widths = od_get_breakpoint_max_widths();
+	sort( $widths );
+
+	$min_width = $widths[0];
+	$max_width = (int) end( $widths ) + 300; // For large screens.
+	$widths[]  = $max_width;
+
+	// We need to ensure min is 0.56 (1080/1920) else the height becomes too small.
+	$min_ar = max( 0.56, od_get_minimum_viewport_aspect_ratio() );
+	// Ensure max is 1.78 (1920/1080) else the height becomes too large.
+	$max_ar = min( 1.78, od_get_maximum_viewport_aspect_ratio() );
+
+	// Compute [width => height] for each breakpoint.
+	return array_map(
+		static function ( $width ) use ( $min_width, $max_width, $min_ar, $max_ar ) {
+			// Linear interpolation between max_ar and min_ar based on width.
+			$ar = $max_ar - ( ( $max_ar - $min_ar ) * ( ( $width - $min_width ) / ( $max_width - $min_width ) ) );
+			$ar = max( $min_ar, min( $max_ar, $ar ) );
+
+			return array(
+				'width'  => $width,
+				'height' => (int) round( $ar * $width ),
+			);
+		},
+		$widths
+	);
+}
+
+/**
+ * Filters the batch of URLs to only include those that need additional metrics.
+ *
+ * @param array<string> $urls Array of URLs to filter.
+ * @return array<int, array{url: string, breakpoints: array<int, array{width: int, height: int}>}> Filtered batch of URLs.
+ */
+function od_filter_batch_urls_for_iframe_url_metrics_priming( array $urls ): array {
+	$filtered_batch       = array();
+	$standard_breakpoints = od_get_standard_breakpoints();
+	$group_collections    = od_get_metrics_by_post_title( $urls );
+
+	foreach ( $urls as $url ) {
+		$group_collection = $group_collections[ $url ] ?? null;
+		if ( ! $group_collection instanceof OD_URL_Metric_Group_Collection ) {
+			$filtered_batch[] = array(
+				'url'         => $url,
+				'breakpoints' => $standard_breakpoints,
+			);
+			continue;
+		}
+
+		if ( $group_collection->is_every_group_populated() ) {
+			continue;
+		}
+
+		$existing_widths = array();
+		foreach ( $group_collection as $group ) {
+			if ( ! $group->is_complete() ) {
+				foreach ( $group as $url_metric ) {
+					$existing_widths[] = $url_metric->get_viewport_width();
+				}
+			}
+		}
+
+		$missing_breakpoints = array();
+		foreach ( $standard_breakpoints as $breakpoint ) {
+			if ( ! in_array( $breakpoint['width'], $existing_widths, true ) ) {
+				$missing_breakpoints[] = $breakpoint;
+			}
+		}
+
+		if ( count( $missing_breakpoints ) > 0 ) {
+			$filtered_batch[] = array(
+				'url'         => $url,
+				'breakpoints' => $missing_breakpoints,
+			);
+		}
+	}
+
+	return $filtered_batch;
 }
