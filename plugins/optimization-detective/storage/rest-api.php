@@ -328,8 +328,19 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 		)
 	);
 
-	$batch               = od_get_batch_for_iframe_url_metrics_priming( $cursor );
-	$filtered_batch_urls = od_filter_batch_urls_for_iframe_url_metrics_priming( $batch['urls'] );
+	$batch               = array();
+	$filtered_batch_urls = array();
+	$prevent_infinite    = 0;
+	while ( $prevent_infinite < 100 ) {
+		if ( count( $filtered_batch_urls ) > 0 ) {
+			break;
+		}
+
+		$batch               = od_get_batch_for_iframe_url_metrics_priming( $cursor );
+		$cursor              = $batch['cursor'];
+		$filtered_batch_urls = od_filter_batch_urls_for_iframe_url_metrics_priming( $batch['urls'] );
+		++$prevent_infinite;
+	}
 
 	$verification_token = bin2hex( random_bytes( 16 ) );
 	set_transient( 'od_prime_url_metrics_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
