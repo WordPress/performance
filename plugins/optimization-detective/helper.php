@@ -47,14 +47,14 @@ function od_generate_media_query( ?int $minimum_viewport_width, ?int $maximum_vi
 		return null;
 	}
 	$media_attributes = '';
-	$has_min_width = ( null !== $minimum_viewport_width && $minimum_viewport_width > 0 );
-	$has_max_width = ( null !== $maximum_viewport_width && PHP_INT_MAX !== $maximum_viewport_width );
+	$has_min_width    = ( null !== $minimum_viewport_width && $minimum_viewport_width > 0 );
+	$has_max_width    = ( null !== $maximum_viewport_width && PHP_INT_MAX !== $maximum_viewport_width );
 	if ( $has_min_width && $has_max_width ) {
 		$media_attributes = sprintf( '( %dpx < width <= %dpx )', $minimum_viewport_width, $maximum_viewport_width );
 	} elseif ( $has_min_width ) {
-		$media_attributes[] = sprintf( '(min-width: %dpx)', $minimum_viewport_width );
+		$media_attributes = sprintf( '(min-width: %dpx)', $minimum_viewport_width );
 	} elseif ( $has_max_width ) {
-		$media_attributes[] = sprintf( '(max-width: %dpx)', $maximum_viewport_width );
+		$media_attributes = sprintf( '(max-width: %dpx)', $maximum_viewport_width );
 	} else {
 		return null;
 	}
