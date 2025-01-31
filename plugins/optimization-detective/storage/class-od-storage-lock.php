@@ -45,10 +45,10 @@ final class OD_Storage_Lock {
 	 * @since n.e.x.t
 	 * @access private
 	 *
-	 * @param string[]|mixed $caps    Capabilities.
-	 * @param string         $cap     Capability.
-	 * @param int            $user_id User ID.
-	 * @return string[] Granted capabilities.
+	 * @param string[]|mixed $caps    Primitive capabilities required of the user.
+	 * @param string         $cap     Capability being checked.
+	 * @param int            $user_id The user ID.
+	 * @return string[] Primitive capabilities required of the user.
 	 */
 	public static function filter_map_meta_cap( $caps, string $cap, int $user_id ): array {
 		if ( ! is_array( $caps ) ) {
@@ -56,7 +56,7 @@ final class OD_Storage_Lock {
 		}
 
 		$primitive_cap = 'manage_options';
-		if ( 'od_store_url_metric_now' === $cap && user_can( $user_id, $primitive_cap ) ) {
+		if ( self::STORE_URL_METRIC_NOW_CAPABILITY === $cap && user_can( $user_id, $primitive_cap ) ) {
 			$caps = array( $primitive_cap );
 		}
 
