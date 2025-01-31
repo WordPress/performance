@@ -343,7 +343,7 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 	// We also need to ensure max is 1.78 (1920/1080) else the height will become too large.
 	$max_ar = min( 1.78, od_get_maximum_viewport_aspect_ratio() );
 
-	$breakpoints = array_map(
+	$standard_breakpoints = array_map(
 		static function ( $width ) use ( $min_width, $max_width, $min_ar, $max_ar ) {
 			// Linear interpolation between max_ar and min_ar based on width.
 			$ar = $max_ar - ( ( $max_ar - $min_ar ) * ( ( $width - $min_width ) / ( $max_width - $min_width ) ) );
@@ -359,30 +359,46 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 		$widths
 	);
 
+	$batch_with_breakpoints = array();
+
 	// Filter out any URL Metrics that are already complete.
-	$batch['urls'] = array_filter(
-		$batch['urls'],
-		static function ( $url ) use ( $group_collections ) {
-			$group_collection = $group_collections[ $url ] ?? null;
-			if ( ! $group_collection instanceof OD_URL_Metric_Group_Collection ) {
-				return true;
-			}
-
-			return ! $group_collection->is_every_group_populated();
+	foreach ( $batch['urls'] as $url ) {
+		$group_collection = $group_collections[ $url ] ?? null;
+		if ( ! $group_collection instanceof OD_URL_Metric_Group_Collection ) {
+			$batch_with_breakpoints[] = array(
+				'url'         => $url,
+				'breakpoints' => $standard_breakpoints,
+			);
+			continue;
 		}
-	);
 
-	$batch_with_breakpoints = array_values(
-		array_map(
-			static function ( $url ) use ( $breakpoints ) {
-				return array(
-					'url'         => $url,
-					'breakpoints' => $breakpoints,
-				);
-			},
-			$batch['urls']
-		)
-	);
+		if ( $group_collection->is_every_group_populated() ) {
+			continue;
+		}
+
+		$existing_widths = array();
+		foreach ( $group_collection as $group ) {
+			if ( ! $group->is_complete() ) {
+				foreach ( $group as $url_metric ) {
+					$existing_widths[] = $url_metric->get_viewport_width();
+				}
+			}
+		}
+
+		$missing_breakpoints = array();
+		foreach ( $standard_breakpoints as $breakpoint ) {
+			if ( ! in_array( $breakpoint['width'], $existing_widths, true ) ) {
+				$missing_breakpoints[] = $breakpoint;
+			}
+		}
+
+		if ( count( $missing_breakpoints ) > 0 ) {
+			$batch_with_breakpoints[] = array(
+				'url'         => $url,
+				'breakpoints' => $missing_breakpoints,
+			);
+		}
+	}
 
 	$verification_token = bin2hex( random_bytes( 16 ) );
 	set_transient( 'od_prime_url_metrics_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
