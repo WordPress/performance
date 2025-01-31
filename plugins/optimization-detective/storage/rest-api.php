@@ -316,17 +316,25 @@ function od_handle_rest_request( WP_REST_Request $request ) {
 function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_REST_Response {
 	$cursor = $request->get_param( 'cursor' );
 
-	// Initialize cursor with default values.
-	$cursor = wp_parse_args(
-		$cursor,
-		array(
-			'provider_index'     => 0,
-			'subtype_index'      => 0,
-			'page_number'        => 1,
-			'offset_within_page' => 0,
-			'batch_size'         => 10,
-		)
+	$default_cursor = array(
+		'provider_index'     => 0,
+		'subtype_index'      => 0,
+		'page_number'        => 1,
+		'offset_within_page' => 0,
+		'batch_size'         => 10,
 	);
+
+	// Initialize cursor with default values.
+	$cursor = wp_parse_args( $cursor, $default_cursor );
+
+	if ( $default_cursor === $cursor ) {
+		$last_cursor = get_option( 'od_prime_url_metrics_batch_cursor' );
+		if ( false !== $last_cursor ) {
+			$cursor = wp_parse_args( $last_cursor, $cursor );
+		}
+	} else {
+		update_option( 'od_prime_url_metrics_batch_cursor', $cursor );
+	}
 
 	$batch               = array();
 	$filtered_batch_urls = array();
@@ -337,8 +345,14 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 		}
 
 		$batch               = od_get_batch_for_iframe_url_metrics_priming( $cursor );
-		$cursor              = $batch['cursor'];
 		$filtered_batch_urls = od_filter_batch_urls_for_iframe_url_metrics_priming( $batch['urls'] );
+
+		if ( $cursor === $batch['cursor'] ) {
+			delete_option( 'od_prime_url_metrics_batch_cursor' );
+			break;
+		}
+		$cursor = $batch['cursor'];
+
 		++$prevent_infinite;
 	}
 
