@@ -573,7 +573,7 @@ class Test_OD_Storage_REST_API extends WP_UnitTestCase {
 		);
 		$url_metric_groups = iterator_to_array( $group_collection );
 		$this->assertSame(
-			array( 0, $breakpoint_width + 1 ),
+			array( 0, $breakpoint_width ),
 			array_map(
 				static function ( OD_URL_Metric_Group $group ) {
 					return $group->get_minimum_viewport_width();

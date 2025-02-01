@@ -79,9 +79,9 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 					),
 				),
 				'expected_html'   => '
-					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" crossorigin="anonymous" fetchpriority="high" as="image" media="screen and (min-width: 100px) and (max-width: 200px)">
+					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" crossorigin="anonymous" fetchpriority="high" as="image" media="screen and (min-width: 101px) and (max-width: 200px)">
 				',
-				'expected_header' => 'Link: <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen and (min-width: 100px) and (max-width: 200px)"',
+				'expected_header' => 'Link: <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen and (min-width: 101px) and (max-width: 200px)"',
 				'expected_count'  => 1,
 				'error'           => '',
 			),
@@ -116,15 +116,15 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 							'as'            => 'image',
 							'media'         => 'screen',
 						),
-						201,
+						200,
 						300,
 					),
 				),
 				'expected_html'   => '
 					<link data-od-added-tag rel="preload" href="https://example.com/bar.jpg" as="image" media="screen">
-					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" crossorigin="anonymous" fetchpriority="high" as="image" media="screen and (min-width: 100px) and (max-width: 300px)">
+					<link data-od-added-tag rel="preload" href="https://example.com/foo.jpg" crossorigin="anonymous" fetchpriority="high" as="image" media="screen and (min-width: 101px) and (max-width: 300px)">
 				',
-				'expected_header' => 'Link: <https://example.com/bar.jpg>; rel="preload"; as="image"; media="screen", <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen and (min-width: 100px) and (max-width: 300px)"',
+				'expected_header' => 'Link: <https://example.com/bar.jpg>; rel="preload"; as="image"; media="screen", <https://example.com/foo.jpg>; rel="preload"; crossorigin="anonymous"; fetchpriority="high"; as="image"; media="screen and (min-width: 101px) and (max-width: 300px)"',
 				'expected_count'  => 3,
 				'error'           => '',
 			),
@@ -135,7 +135,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 							'rel'  => 'preconnect',
 							'href' => 'https://youtube.com/',
 						),
-						201,
+						200,
 						300,
 					),
 				),
@@ -154,7 +154,7 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 							'href'  => 'https://youtube.com/',
 							'media' => 'tty',
 						),
-						201,
+						200,
 						300,
 					),
 				),

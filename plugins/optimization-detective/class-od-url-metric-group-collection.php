@@ -244,13 +244,13 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @return OD_URL_Metric_Group[] Groups.
 	 */
 	private function create_groups(): array {
-		$groups    = array();
-		$min_width = 0;
-		foreach ( $this->breakpoints as $max_width ) {
-			$groups[]  = new OD_URL_Metric_Group( array(), $min_width, $max_width, $this->sample_size, $this->freshness_ttl, $this );
-			$min_width = $max_width + 1;
+		$groups              = array();
+		$min_width_exclusive = 0;
+		foreach ( $this->breakpoints as $max_width_inclusive ) {
+			$groups[]            = new OD_URL_Metric_Group( array(), $min_width_exclusive, $max_width_inclusive, $this->sample_size, $this->freshness_ttl, $this );
+			$min_width_exclusive = $max_width_inclusive;
 		}
-		$groups[] = new OD_URL_Metric_Group( array(), $min_width, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl, $this );
+		$groups[] = new OD_URL_Metric_Group( array(), $min_width_exclusive, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl, $this );
 		return $groups;
 	}
 
@@ -285,7 +285,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * @since 0.1.0
 	 * @throws InvalidArgumentException When there is no group for the provided viewport width. This would only happen if a negative width is provided.
 	 *
-	 * @param int $viewport_width Viewport width.
+	 * @param positive-int $viewport_width Viewport width.
 	 * @return OD_URL_Metric_Group URL Metric group for the viewport width.
 	 */
 	public function get_group_for_viewport_width( int $viewport_width ): OD_URL_Metric_Group {

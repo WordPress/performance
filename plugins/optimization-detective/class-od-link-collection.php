@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @phpstan-type Link array{
  *                   attributes: LinkAttributes,
  *                   minimum_viewport_width: int<0, max>|null,
- *                   maximum_viewport_width: positive-int|null
+ *                   maximum_viewport_width: int<1, max>|null
  *               }
  *
  * @phpstan-type LinkAttributes array{
@@ -53,9 +53,9 @@ final class OD_Link_Collection implements Countable {
 	 *
 	 * @phpstan-param LinkAttributes $attributes
 	 *
-	 * @param array             $attributes             Attributes.
-	 * @param int<0, max>|null  $minimum_viewport_width Minimum width or null if not bounded or relevant.
-	 * @param positive-int|null $maximum_viewport_width Maximum width or null if not bounded (i.e. infinity) or relevant.
+	 * @param array            $attributes             Attributes.
+	 * @param int<0, max>|null $minimum_viewport_width Minimum width (exclusive) or null if not bounded or relevant.
+	 * @param int<1, max>|null $maximum_viewport_width Maximum width (inclusive) or null if not bounded (i.e. infinity) or relevant.
 	 *
 	 * @throws InvalidArgumentException When invalid arguments are provided.
 	 */
@@ -194,7 +194,7 @@ final class OD_Link_Collection implements Countable {
 					&&
 					is_int( $last_link['maximum_viewport_width'] )
 					&&
-					$last_link['maximum_viewport_width'] + 1 === $link['minimum_viewport_width']
+					$last_link['maximum_viewport_width'] === $link['minimum_viewport_width']
 				) {
 					$last_link['maximum_viewport_width'] = max( $last_link['maximum_viewport_width'], $link['maximum_viewport_width'] );
 

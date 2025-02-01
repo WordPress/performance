@@ -32,12 +32,11 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	private $url_metrics;
 
 	/**
-	 * Minimum possible viewport width for the group (inclusive).
+	 * Minimum possible viewport width for the group (exclusive).
 	 *
 	 * @since 0.1.0
 	 *
-	 * @var int
-	 * @phpstan-var 0|positive-int
+	 * @var int<0, max>
 	 */
 	private $minimum_viewport_width;
 
@@ -46,8 +45,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @since 0.1.0
 	 *
-	 * @var int
-	 * @phpstan-var positive-int
+	 * @var int<1, max>
 	 */
 	private $maximum_viewport_width;
 
@@ -103,8 +101,8 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @throws InvalidArgumentException If arguments are invalid.
 	 *
 	 * @param OD_URL_Metric[]                $url_metrics            URL Metrics to add to the group.
-	 * @param int                            $minimum_viewport_width Minimum possible viewport width for the group. Must be zero or greater.
-	 * @param int                            $maximum_viewport_width Maximum possible viewport width for the group. Must be greater than zero and the minimum viewport width.
+	 * @param int                            $minimum_viewport_width Minimum possible viewport width (exclusive) for the group. Must be zero or greater.
+	 * @param int                            $maximum_viewport_width Maximum possible viewport width (inclusive) for the group. Must be greater than zero and the minimum viewport width.
 	 * @param int                            $sample_size            Sample size for the maximum number of viewports in a group between breakpoints.
 	 * @param int                            $freshness_ttl          Freshness age (TTL) for a given URL Metric.
 	 * @param OD_URL_Metric_Group_Collection $collection             Collection that this instance belongs to.
@@ -158,12 +156,12 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	}
 
 	/**
-	 * Gets the minimum possible viewport width (inclusive).
+	 * Gets the minimum possible viewport width (exclusive).
 	 *
 	 * @since 0.1.0
 	 *
 	 * @todo Eliminate in favor of readonly public property.
-	 * @return int<0, max> Minimum viewport width.
+	 * @return int<0, max> Minimum viewport width (exclusive).
 	 */
 	public function get_minimum_viewport_width(): int {
 		return $this->minimum_viewport_width;
@@ -175,7 +173,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @since 0.1.0
 	 *
 	 * @todo Eliminate in favor of readonly public property.
-	 * @return int<1, max> Minimum viewport width.
+	 * @return int<1, max> Minimum viewport width (inclusive).
 	 */
 	public function get_maximum_viewport_width(): int {
 		return $this->maximum_viewport_width;
@@ -208,16 +206,18 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	}
 
 	/**
-	 * Checks whether the provided viewport width is within the minimum/maximum range for.
+	 * Checks whether the provided viewport width is between the minimum (exclusive) and maximum (inclusive).
 	 *
 	 * @since 0.1.0
+	 *
+	 * @phpstan-param int<1, max> $viewport_width
 	 *
 	 * @param int $viewport_width Viewport width.
 	 * @return bool Whether the viewport width is in range.
 	 */
 	public function is_viewport_width_in_range( int $viewport_width ): bool {
 		return (
-			$viewport_width >= $this->minimum_viewport_width &&
+			$viewport_width > $this->minimum_viewport_width &&
 			$viewport_width <= $this->maximum_viewport_width
 		);
 	}

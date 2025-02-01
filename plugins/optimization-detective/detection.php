@@ -128,7 +128,8 @@ function od_get_detection_script( string $slug, OD_URL_Metric_Group_Collection $
 		'urlMetricGroupStatuses' => array_map(
 			static function ( OD_URL_Metric_Group $group ): array {
 				return array(
-					'minimumViewportWidth' => $group->get_minimum_viewport_width(),
+					'minimumViewportWidth' => $group->get_minimum_viewport_width(), // Exclusive.
+					'maximumViewportWidth' => $group->get_maximum_viewport_width(), // Inclusive.
 					'complete'             => $group->is_complete(),
 				);
 			},

@@ -34,6 +34,7 @@ export type ExtendedRootData = ExcludeProps< URLMetric >;
 
 export interface URLMetricGroupStatus {
 	minimumViewportWidth: number;
+	maximumViewportWidth: number;
 	complete: boolean;
 }
 
