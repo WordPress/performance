@@ -11,6 +11,9 @@ use Dominant_Color_Images\Tests\TestCase;
 use Imagick;
 use ImagickPixel;
 
+/**
+ * @coversDefaultClass Dominant_Color_Image_Editor_Imagick
+ */
 class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 
 	/**
@@ -37,7 +40,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 	}
 
 	/**
-	 * @covers Dominant_Color_Image_Editor_Imagick::get_dominant_color
+	 * @covers ::get_dominant_color
 	 */
 	public function test_failure_handling(): void {
 		$editor = new Dominant_Color_Image_Editor_Imagick( '/image.jpg' );
@@ -47,7 +50,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 	}
 
 	/**
-	 * @covers Dominant_Color_Image_Editor_Imagick::get_dominant_color
+	 * @covers ::get_dominant_color
 	 */
 	public function test_get_dominant_color_no_image(): void {
 		$editor = new Dominant_Color_Image_Editor_Imagick( null );
@@ -58,7 +61,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 	}
 
 	/**
-	 * @covers Dominant_Color_Image_Editor_Imagick::get_dominant_color
+	 * @covers ::get_dominant_color
 	 */
 	public function test_get_dominant_color_exception(): void {
 		// Creating mock that will throw an exception.
@@ -79,7 +82,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 	}
 
 	/**
-	 * @covers Dominant_Color_Image_Editor_Imagick::has_transparency
+	 * @covers ::has_transparency
 	 */
 	public function test_has_transparency_no_image(): void {
 		$editor = new Dominant_Color_Image_Editor_Imagick( null );
@@ -90,7 +93,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 	}
 
 	/**
-	 * @covers Dominant_Color_Image_Editor_Imagick::has_transparency
+	 * @covers ::has_transparency
 	 */
 	public function test_has_no_transparency(): void {
 		$imagick = new Imagick();
@@ -108,7 +111,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 	}
 
 	/**
-	 * @covers Dominant_Color_Image_Editor_Imagick::has_transparency
+	 * @covers ::has_transparency
 	 */
 	public function test_has_transparency_exception(): void {
 		// Creating mock that will throw an exception.
@@ -129,7 +132,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 	}
 
 	/**
-	 * @covers Dominant_Color_Image_Editor_Imagick::get_dominant_color
+	 * @covers ::get_dominant_color
 	 */
 	public function test_get_dominant_color_success(): void {
 		// Create a red test image.
@@ -148,7 +151,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 	}
 
 	/**
-	 * @covers Dominant_Color_Image_Editor_Imagick::has_transparency
+	 * @covers ::has_transparency
 	 */
 	public function test_has_transparency_with_transparency(): void {
 		// Create an image with transparency.
@@ -167,7 +170,7 @@ class Test_Dominant_Color_Image_Editor_Imagick extends TestCase {
 	}
 
 	/**
-	 * @covers Dominant_Color_Image_Editor_Imagick::has_transparency
+	 * @covers ::has_transparency
 	 */
 	public function test_has_transparency_no_alpha_channel_method(): void {
 		// Mock the Imagick object to simulate when getImageAlphaChannel method doesn't exist.
