@@ -246,12 +246,12 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 */
 	private function create_groups(): array {
 		$groups              = array();
-		$min_width_exclusive = 0;
+		$min_width_exclusive = null;
 		foreach ( $this->breakpoints as $max_width_inclusive ) {
 			$groups[]            = new OD_URL_Metric_Group( array(), $min_width_exclusive, $max_width_inclusive, $this->sample_size, $this->freshness_ttl, $this );
 			$min_width_exclusive = $max_width_inclusive;
 		}
-		$groups[] = new OD_URL_Metric_Group( array(), $min_width_exclusive, PHP_INT_MAX, $this->sample_size, $this->freshness_ttl, $this );
+		$groups[] = new OD_URL_Metric_Group( array(), $min_width_exclusive, null, $this->sample_size, $this->freshness_ttl, $this );
 		return $groups;
 	}
 
@@ -668,8 +668,8 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *             every_group_populated: bool,
 	 *             groups: array<int, array{
 	 *                 lcp_element: ?OD_Element,
-	 *                 minimum_viewport_width: 0|positive-int,
-	 *                 maximum_viewport_width: positive-int,
+	 *                 minimum_viewport_width: positive-int|null,
+	 *                 maximum_viewport_width: positive-int|null,
 	 *                 complete: bool,
 	 *                 url_metrics: OD_URL_Metric[]
 	 *             }>
