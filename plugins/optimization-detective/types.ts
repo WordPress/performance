@@ -34,7 +34,7 @@ export type ExtendedRootData = ExcludeProps< URLMetric >;
 
 export interface URLMetricGroupStatus {
 	minimumViewportWidth: number;
-	maximumViewportWidth: number;
+	maximumViewportWidth: number | null; // Note that null is output to the frontend as opposed to PHP_INT_MAX.
 	complete: boolean;
 }
 
