@@ -249,7 +249,7 @@ final class OD_Link_Collection implements Countable {
 	/**
 	 * Constructs the Link HTTP response header.
 	 *
-	 * @return string|null Link HTTP response header, or null if there are none.
+	 * @return non-empty-string|null Link HTTP response header, or null if there are none.
 	 */
 	public function get_response_header(): ?string {
 		$link_headers = array();

@@ -54,8 +54,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @since 0.1.0
 	 *
-	 * @var int
-	 * @phpstan-var positive-int
+	 * @var int<1, max>
 	 */
 	private $sample_size;
 
@@ -64,8 +63,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @since 0.1.0
 	 *
-	 * @var int
-	 * @phpstan-var 0|positive-int
+	 * @var int<0, max>
 	 */
 	private $freshness_ttl;
 
@@ -99,6 +97,11 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 *
 	 * @access private
 	 * @throws InvalidArgumentException If arguments are invalid.
+	 *
+	 * @phpstan-param int<0, max> $minimum_viewport_width
+	 * @phpstan-param int<1, max> $maximum_viewport_width
+	 * @phpstan-param int<1, max> $sample_size
+	 * @phpstan-param int<0, max> $freshness_ttl
 	 *
 	 * @param OD_URL_Metric[]                $url_metrics            URL Metrics to add to the group.
 	 * @param int                            $minimum_viewport_width Minimum possible viewport width (exclusive) for the group. Must be zero or greater.
@@ -185,8 +188,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @since 0.9.0
 	 *
 	 * @todo Eliminate in favor of readonly public property.
-	 * @phpstan-return positive-int
-	 * @return int Sample size.
+	 * @return int<1, max> Sample size.
 	 */
 	public function get_sample_size(): int {
 		return $this->sample_size;
@@ -198,8 +200,7 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 	 * @since 0.9.0
 	 *
 	 * @todo Eliminate in favor of readonly public property.
-	 * @phpstan-return 0|positive-int
-	 * @return int Freshness age.
+	 * @return int<0, max> Freshness age.
 	 */
 	public function get_freshness_ttl(): int {
 		return $this->freshness_ttl;
@@ -324,14 +325,14 @@ final class OD_URL_Metric_Group implements IteratorAggregate, Countable, JsonSer
 			/**
 			 * Seen breadcrumbs counts.
 			 *
-			 * @var array<int, string> $seen_breadcrumbs
+			 * @var array<int, non-empty-string> $seen_breadcrumbs
 			 */
 			$seen_breadcrumbs = array();
 
 			/**
 			 * Breadcrumb counts.
 			 *
-			 * @var array<int, int> $breadcrumb_counts
+			 * @var array<int, non-negative-int> $breadcrumb_counts
 			 */
 			$breadcrumb_counts = array();
 

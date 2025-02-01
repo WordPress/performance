@@ -437,7 +437,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since 0.6.0
 	 *
-	 * @return string UUID.
+	 * @return non-empty-string UUID.
 	 */
 	public function get_uuid(): string {
 		return $this->data['uuid'];
@@ -460,7 +460,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string URL.
+	 * @return non-empty-string URL.
 	 */
 	public function get_url(): string {
 		return $this->data['url'];

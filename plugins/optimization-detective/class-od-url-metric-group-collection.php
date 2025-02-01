@@ -57,16 +57,14 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * This array may be empty in which case there are no responsive breakpoints and all URL Metrics are collected in a
 	 * single group.
 	 *
-	 * @var int[]
-	 * @phpstan-var positive-int[]
+	 * @var positive-int[]
 	 */
 	private $breakpoints;
 
 	/**
 	 * Sample size for URL Metrics for a given breakpoint.
 	 *
-	 * @var int
-	 * @phpstan-var positive-int
+	 * @var int<1, max>
 	 */
 	private $sample_size;
 
@@ -75,8 +73,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * A freshness age of zero means a URL Metric will always be considered stale.
 	 *
-	 * @var int
-	 * @phpstan-var 0|positive-int
+	 * @var int<0, max>
 	 */
 	private $freshness_ttl;
 
@@ -91,7 +88,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *          get_groups_by_lcp_element?: array<string, OD_URL_Metric_Group[]>,
 	 *          get_common_lcp_element?: OD_Element|null,
 	 *          get_all_element_max_intersection_ratios?: array<string, float>,
-	 *          get_xpath_elements_map?: array<string, non-empty-array<int, OD_Element>>,
+	 *          get_xpath_elements_map?: array<string, non-empty-array<non-negative-int, OD_Element>>,
 	 *          get_all_elements_positioned_in_any_initial_viewport?: array<string, bool>,
 	 *      }
 	 */
@@ -101,6 +98,10 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 * Constructor.
 	 *
 	 * @throws InvalidArgumentException When an invalid argument is supplied.
+	 *
+	 * @phpstan-param positive-int[] $breakpoints
+	 * @phpstan-param int<1, max>    $sample_size
+	 * @phpstan-param int<0, max>    $freshness_ttl
 	 *
 	 * @param OD_URL_Metric[]  $url_metrics   URL Metrics.
 	 * @param non-empty-string $current_etag  The current ETag.
@@ -495,7 +496,7 @@ final class OD_URL_Metric_Group_Collection implements Countable, IteratorAggrega
 	 *
 	 * @since 0.7.0
 	 *
-	 * @return array<string, non-empty-array<int, OD_Element>> Keys are XPaths and values are the element instances.
+	 * @return array<string, non-empty-array<non-negative-int, OD_Element>> Keys are XPaths and values are the element instances.
 	 */
 	public function get_xpath_elements_map(): array {
 		if ( array_key_exists( __FUNCTION__, $this->result_cache ) ) {
