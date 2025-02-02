@@ -243,13 +243,8 @@ class OD_URL_Metrics_Post_Type {
 		}
 
 		$post_data['post_content'] = wp_json_encode(
-			array_map(
-				static function ( OD_URL_Metric $url_metric ): array {
-					return $url_metric->jsonSerialize();
-				},
-				$group_collection->get_flattened_url_metrics()
-			),
-			JSON_UNESCAPED_SLASHES // No need for escaped slashes since not printed to frontend.
+			$group_collection->get_flattened_url_metrics(),
+			JSON_UNESCAPED_SLASHES // No need for escaping slashes since this JSON is not embedded in HTML.
 		);
 		if ( ! is_string( $post_data['post_content'] ) ) {
 			return new WP_Error( 'json_encode_error', json_last_error_msg() );

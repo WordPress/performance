@@ -190,7 +190,8 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 	public function test_store_url_metric(): void {
 		$slug = od_get_url_metrics_slug( array( 'p' => 1 ) );
 
-		$validated_url_metric = $this->get_sample_url_metric( array( 'url' => home_url( '/' ) ) );
+		$validated_url_metric         = $this->get_sample_url_metric( array( 'url' => home_url( '/' ) ) );
+		$another_validated_url_metric = $this->get_sample_url_metric( array( 'url' => home_url( '/sample-page/' ) ) );
 
 		$post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $validated_url_metric );
 		$this->assertIsInt( $post_id );
@@ -198,15 +199,22 @@ class Test_OD_Storage_Post_Type extends WP_UnitTestCase {
 		$post = OD_URL_Metrics_Post_Type::get_post( $slug );
 		$this->assertInstanceOf( WP_Post::class, $post );
 		$this->assertSame( $post_id, $post->ID );
+		$parsed_json = json_decode( $post->post_content, true );
+		$this->assertIsArray( $parsed_json );
+		$this->assertSame( array( $validated_url_metric->jsonSerialize() ), $parsed_json );
 
 		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
 		$this->assertCount( 1, $url_metrics );
 
-		$again_post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $validated_url_metric );
-		$post          = get_post( $again_post_id );
+		$again_post_id = OD_URL_Metrics_Post_Type::store_url_metric( $slug, $another_validated_url_metric );
+		$again_post    = get_post( $again_post_id );
+		$this->assertInstanceOf( WP_Post::class, $again_post );
 		$this->assertSame( $post_id, $again_post_id );
-		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $post );
+		$url_metrics = OD_URL_Metrics_Post_Type::get_url_metrics_from_post( $again_post );
 		$this->assertCount( 2, $url_metrics );
+		$parsed_json = json_decode( $again_post->post_content, true );
+		$this->assertIsArray( $parsed_json );
+		$this->assertSame( array( $validated_url_metric->jsonSerialize(), $another_validated_url_metric->jsonSerialize() ), $parsed_json );
 	}
 
 	/**
