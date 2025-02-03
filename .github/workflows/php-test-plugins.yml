@@ -72,6 +72,7 @@ jobs:
               - '**/package.json'
               - 'package-lock.json'
               - 'phpunit.xml.dist'
+              - 'tools/phpunit/bootstrap.php'
               - 'composer.json'
               - 'composer.lock'
       - name: Get changed plugins
