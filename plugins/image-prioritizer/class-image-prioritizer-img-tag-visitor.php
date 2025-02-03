@@ -194,7 +194,11 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$has_auto = $this->sizes_attribute_includes_valid_auto( $sizes );
 
 			if ( $is_lazy && ! $has_auto ) {
-				$sizes = "auto, $sizes";
+				$new_sizes = 'auto';
+				if ( '' !== trim( $sizes, " \t\f\r\n" ) ) {
+					$new_sizes .= ', ';
+				}
+				$sizes = $new_sizes . $sizes;
 			} elseif ( ! $is_lazy && $has_auto ) {
 				// Remove auto from the beginning of the list.
 				$sizes = (string) preg_replace( '/^[ \t\f\r\n]*auto[ \t\f\r\n]*(,[ \t\f\r\n]*)?/i', '', $sizes );

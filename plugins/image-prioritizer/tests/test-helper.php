@@ -136,6 +136,17 @@ class Test_Image_Prioritizer_Helper extends WP_UnitTestCase {
 				'expected'        => '<img data-od-replaced-sizes="(max-width: 600px) 480px, 800px" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w" sizes="auto, (max-width: 600px) 480px, 800px">',
 			),
 
+			'sizes_attribute_added'             => array(
+				'element_metrics' => array(
+					'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
+					'isLCP'              => false,
+					'intersectionRatio'  => 0,
+					'boundingClientRect' => array( 'top' => 100000 ),
+				),
+				'buffer'          => '<img src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w">',
+				'expected'        => '<img data-od-added-sizes sizes="auto" src="https://example.com/foo.jpg" alt="Foo" width="1200" height="800" loading="lazy" srcset="https://example.com/foo-480w.jpg 480w, https://example.com/foo-800w.jpg 800w">',
+			),
+
 			'auto_sizes_already_added'          => array(
 				'element_metrics' => array(
 					'xpath'              => '/HTML/BODY/DIV[@id=\'page\']/*[1][self::IMG]',
