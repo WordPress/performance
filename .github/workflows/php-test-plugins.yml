@@ -96,7 +96,7 @@ jobs:
           for PLUGIN in "${ALL_CHANGED_PLUGINS[@]}"; do
             if [[ -n "${PLUGIN_DEPENDENCIES[$PLUGIN]}" ]]; then
               for DEP in ${PLUGIN_DEPENDENCIES[$PLUGIN]}; do
-                if [[ ! " ${ALL_CHANGED_PLUGINS[@]} " =~ " ${DEP} " ]]; then
+                if [[ ! " ${ALL_CHANGED_PLUGINS[*]} " =~ " ${DEP} " ]]; then
                   ALL_CHANGED_PLUGINS+=("$DEP")
                 fi
               done
