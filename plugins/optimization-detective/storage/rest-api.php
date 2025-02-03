@@ -356,8 +356,13 @@ function od_handle_generate_batch_urls_request( WP_REST_Request $request ): WP_R
 		++$prevent_infinite;
 	}
 
-	$verification_token = bin2hex( random_bytes( 16 ) );
-	set_transient( 'od_prime_url_metrics_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
+	$verification_token = get_transient( 'od_prime_url_metrics_verification_token' );
+
+	if ( false === $verification_token ) {
+		$verification_token = wp_generate_uuid4();
+		set_transient( 'od_prime_url_metrics_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
+	}
+
 	return new WP_REST_Response(
 		array(
 			'batch'             => $filtered_batch_urls,
