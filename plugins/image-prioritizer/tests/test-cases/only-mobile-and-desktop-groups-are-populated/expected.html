@@ -5,7 +5,7 @@
 	<style>
 @media (scripting:enabled){.od-lazy-bg-image{background-image:none!important}}
 </style>
-<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/featured-image.jpg" imagesrcset="https://example.com/featured-image-1200.jpg 1200w, https://example.com/featured-image-600.jpg 600w, https://example.com/featured-image-300.jpg 300w" imagesizes="(max-width: 1200px) 100vw, 1200px" media="screen and (min-width: 783px)">
+<link data-od-added-tag rel="preload" fetchpriority="high" as="image" href="https://example.com/featured-image.jpg" imagesrcset="https://example.com/featured-image-1200.jpg 1200w, https://example.com/featured-image-600.jpg 600w, https://example.com/featured-image-300.jpg 300w" imagesizes="(max-width: 480px) 360px, (min-width: 783px) 720px, (max-width: 1200px) 100vw, 1200px" media="screen and (min-width: 783px)">
 </head>
 	<body>
 		<div id="page">
@@ -23,7 +23,7 @@
 				<article id="post-1">
 					<h2 class="entry-title">First Post</h2>
 					<figure class="featured-media">
-						<img data-od-removed-fetchpriority="high" data-od-xpath="/HTML/BODY/DIV[@id=&#039;page&#039;]/*[2][self::MAIN]/*[2][self::ARTICLE]/*[2][self::FIGURE]/*[1][self::IMG]" src="https://example.com/featured-image.jpg"  width="1200" height="600" alt="Featured Image" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" srcset="https://example.com/featured-image-1200.jpg 1200w, https://example.com/featured-image-600.jpg 600w, https://example.com/featured-image-300.jpg 300w" sizes="(max-width: 1200px) 100vw, 1200px">
+						<img data-od-removed-fetchpriority="high" data-od-replaced-sizes="(max-width: 1200px) 100vw, 1200px" data-od-xpath="/HTML/BODY/DIV[@id=&#039;page&#039;]/*[2][self::MAIN]/*[2][self::ARTICLE]/*[2][self::FIGURE]/*[1][self::IMG]" src="https://example.com/featured-image.jpg"  width="1200" height="600" alt="Featured Image" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" srcset="https://example.com/featured-image-1200.jpg 1200w, https://example.com/featured-image-600.jpg 600w, https://example.com/featured-image-300.jpg 300w" sizes="(max-width: 480px) 360px, (min-width: 783px) 720px, (max-width: 1200px) 100vw, 1200px">
 					</figure>
 					<div class="entry-content">
 						<p>This post does have a featured image, and the server-side heuristics in WordPress cause it to get fetchpriority=high, but it should not have this since it is out of the viewport on mobile.</p>
