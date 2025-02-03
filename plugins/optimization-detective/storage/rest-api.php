@@ -39,6 +39,20 @@ const OD_URL_METRICS_ROUTE = '/url-metrics:store';
 const OD_PRIME_URLS_ROUTE = '/prime-urls';
 
 /**
+ * Route for getting breakpoints for URL Metrics.
+ *
+ * @var string
+ */
+const OD_PRIME_URLS_BREAKPOINTS_ROUTE = '/prime-urls-breakpoints';
+
+/**
+ * Route for verifying the token for auto priming URLs.
+ *
+ * @var string
+ */
+const OD_PRIME_URLS_VERIFICATION_TOKEN_ROUTE = '/prime-urls-verification-token';
+
+/**
  * Registers endpoint for storage of URL Metric.
  *
  * @since 0.1.0
@@ -131,6 +145,39 @@ function od_register_endpoint(): void {
 			'methods'             => 'POST',
 			'callback'            => static function ( WP_REST_Request $request ) {
 				return od_handle_generate_batch_urls_request( $request );
+			},
+			'permission_callback' => static function () {
+				return current_user_can( 'manage_options' );
+			},
+		)
+	);
+
+	register_rest_route(
+		OD_REST_API_NAMESPACE,
+		OD_PRIME_URLS_BREAKPOINTS_ROUTE,
+		array(
+			'methods'             => 'GET',
+			'callback'            => static function () {
+				return new WP_REST_Response( od_get_standard_breakpoints() );
+			},
+			'permission_callback' => static function () {
+				return current_user_can( 'manage_options' );
+			},
+		)
+	);
+
+	register_rest_route(
+		OD_REST_API_NAMESPACE,
+		OD_PRIME_URLS_VERIFICATION_TOKEN_ROUTE,
+		array(
+			'methods'             => 'GET',
+			'callback'            => static function () {
+				$verification_token = get_transient( 'od_prime_url_metrics_verification_token' );
+				if ( false === $verification_token ) {
+					$verification_token = wp_generate_uuid4();
+					set_transient( 'od_prime_url_metrics_verification_token', $verification_token, 30 * MINUTE_IN_SECONDS );
+				}
+				return new WP_REST_Response( $verification_token );
 			},
 			'permission_callback' => static function () {
 				return current_user_can( 'manage_options' );
