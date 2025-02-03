@@ -1,7 +1,6 @@
 /**
  * Helper script for the Prime URL Metrics.
  */
-
 ( function () {
 	// @ts-ignore
 	const { i18n, apiFetch } = wp;
@@ -209,4 +208,13 @@
 	}
 
 	controlButton.addEventListener( 'click', handleControlButtonClick );
+
+	/**
+	 * Prevent the user from leaving the page while processing.
+	 */
+	window.addEventListener( 'beforeunload', function ( event ) {
+		if ( isProcessing ) {
+			event.preventDefault();
+		}
+	} );
 } )();
