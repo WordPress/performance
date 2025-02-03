@@ -388,6 +388,23 @@ class Test_OD_Link_Collection extends WP_UnitTestCase {
 				'expected_count'  => 1,
 				'error'           => '',
 			),
+			'percent-in-path'                            => array(
+				'links_args'      => array(
+					array(
+						array(
+							'rel'  => 'preload',
+							'href' => 'https://example.com/100%25-one-hundred-percent.png?a[1]=2',
+							'as'   => 'image',
+						),
+					),
+				),
+				'expected_html'   => '
+					<link data-od-added-tag rel="preload" href="https://example.com/100%25-one-hundred-percent.png?a[1]=2" as="image">
+				',
+				'expected_header' => 'Link: <https://example.com/100%25-one-hundred-percent.png?a%5B1%5D=2>; rel="preload"; as="image"',
+				'expected_count'  => 1,
+				'error'           => '',
+			),
 			'multisite_subdirectory_non_ascii'           => array(
 				'links_args'      => array(
 					array(
