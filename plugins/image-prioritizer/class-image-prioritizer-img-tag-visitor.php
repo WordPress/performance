@@ -45,6 +45,43 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 	}
 
 	/**
+	 * Computes responsive sizes for the current element based on its boundingClientRect width captured in URL Metrics.
+	 *
+	 * @since n.e.x.t
+	 *
+	 * @param OD_Tag_Visitor_Context $context Context.
+	 * @return non-empty-string[] Computed sizes.
+	 */
+	private function compute_sizes( OD_Tag_Visitor_Context $context ): array {
+		$sizes = array();
+
+		$xpath = $context->processor->get_xpath();
+		foreach ( $context->url_metric_group_collection as $group ) {
+			$element_max_width = 0;
+			foreach ( $group->get_xpath_elements_map()[ $xpath ] ?? array() as $element ) {
+				$element_max_width = max( $element_max_width, $element->get_bounding_client_rect()['width'] );
+			}
+
+			if ( $element_max_width > 0 ) {
+				// TODO: The min-width will need to be adjusted after <https://github.com/WordPress/performance/pull/1839>.
+				// TODO: Consider reusing od_generate_media_query() here but note the extra parentheses should be removed from its output.
+				$media_queries = array();
+				if ( $group->get_minimum_viewport_width() !== 0 ) {
+					$media_queries[] = sprintf( 'min-width: %dpx', $group->get_minimum_viewport_width() );
+				}
+				if ( $group->get_maximum_viewport_width() !== PHP_INT_MAX ) {
+					$media_queries[] = sprintf( 'max-width: %dpx', $group->get_maximum_viewport_width() );
+				}
+				if ( count( $media_queries ) > 0 ) {
+					$sizes[] = sprintf( '(%s) %dpx', join( ' and ', $media_queries ), round( $element_max_width ) );
+				}
+			}
+		}
+
+		return $sizes;
+	}
+
+	/**
 	 * Process an IMG element.
 	 *
 	 * @since 0.3.0
@@ -146,21 +183,36 @@ final class Image_Prioritizer_Img_Tag_Visitor extends Image_Prioritizer_Tag_Visi
 			$processor->remove_attribute( 'fetchpriority' );
 		}
 
-		// Ensure that sizes=auto is set properly.
-		$sizes = $processor->get_attribute( 'sizes' );
-		if ( is_string( $sizes ) ) {
+		// Ensure that sizes is set properly when it is a responsive image (it has a srcset attribute).
+		if ( is_string( $processor->get_attribute( 'srcset' ) ) ) {
+			$sizes = $processor->get_attribute( 'sizes' );
+			if ( ! is_string( $sizes ) ) {
+				$sizes = '';
+			}
+
 			$is_lazy  = 'lazy' === $this->get_attribute_value( $processor, 'loading' );
 			$has_auto = $this->sizes_attribute_includes_valid_auto( $sizes );
 
 			if ( $is_lazy && ! $has_auto ) {
-				$processor->set_attribute( 'sizes', "auto, $sizes" );
+				$sizes = "auto, $sizes";
 			} elseif ( ! $is_lazy && $has_auto ) {
 				// Remove auto from the beginning of the list.
-				$processor->set_attribute(
-					'sizes',
-					(string) preg_replace( '/^[ \t\f\r\n]*auto[ \t\f\r\n]*(,[ \t\f\r\n]*)?/i', '', $sizes )
-				);
+				$sizes = (string) preg_replace( '/^[ \t\f\r\n]*auto[ \t\f\r\n]*(,[ \t\f\r\n]*)?/i', '', $sizes );
 			}
+
+			// Compute more accurate sizes when it isn't lazy-loaded and sizes=auto isn't taking care of it.
+			if ( ! $is_lazy ) {
+				$computed_sizes = $this->compute_sizes( $context );
+				if ( count( $computed_sizes ) > 0 ) {
+					$new_sizes = join( ', ', $computed_sizes );
+					if ( '' !== $sizes ) {
+						$new_sizes .= ", $sizes";
+					}
+					$sizes = $new_sizes;
+				}
+			}
+
+			$processor->set_attribute( 'sizes', $sizes );
 		}
 
 		$parent_tag = $this->get_parent_tag_name( $context );
