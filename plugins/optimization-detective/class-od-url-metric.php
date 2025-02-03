@@ -16,8 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Representation of the measurements taken from a single client's visit to a specific URL.
  *
  * @phpstan-type ViewportRect array{
- *                                width: int,
- *                                height: int
+ *                                width: positive-int,
+ *                                height: positive-int
  *                            }
  * @phpstan-type DOMRect      array{
  *                                width: float,
@@ -249,12 +249,12 @@ class OD_URL_Metric implements JsonSerializable {
 						'width'  => array(
 							'type'     => 'integer',
 							'required' => true,
-							'minimum'  => 0,
+							'minimum'  => 1,
 						),
 						'height' => array(
 							'type'     => 'integer',
 							'required' => true,
-							'minimum'  => 0,
+							'minimum'  => 1,
 						),
 					),
 					'additionalProperties' => false,
@@ -437,7 +437,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since 0.6.0
 	 *
-	 * @return string UUID.
+	 * @return non-empty-string UUID.
 	 */
 	public function get_uuid(): string {
 		return $this->data['uuid'];
@@ -460,7 +460,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return string URL.
+	 * @return non-empty-string URL.
 	 */
 	public function get_url(): string {
 		return $this->data['url'];
@@ -482,7 +482,7 @@ class OD_URL_Metric implements JsonSerializable {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return int Viewport width.
+	 * @return positive-int Viewport width.
 	 */
 	public function get_viewport_width(): int {
 		return $this->data['viewport']['width'];

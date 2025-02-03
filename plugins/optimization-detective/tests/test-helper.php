@@ -42,17 +42,17 @@ class Test_OD_Helper extends WP_UnitTestCase {
 				'expected'  => '(max-width: 320px)',
 			),
 			'tablet'      => array(
-				'min_width' => 321,
+				'min_width' => 320,
 				'max_width' => 600,
 				'expected'  => '(min-width: 321px) and (max-width: 600px)',
 			),
 			'desktop'     => array(
-				'min_width' => 601,
+				'min_width' => 600,
 				'max_width' => PHP_INT_MAX,
 				'expected'  => '(min-width: 601px)',
 			),
 			'desktop_alt' => array(
-				'min_width' => 601,
+				'min_width' => 600,
 				'max_width' => null,
 				'expected'  => '(min-width: 601px)',
 			),
